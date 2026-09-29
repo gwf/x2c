@@ -2,8 +2,8 @@
 
     Converts among `Var`'s fifteen numeric families. Integer conversions keep
     the target width's low bits; floating-to-integer conversions truncate
-    toward zero and require a representable result. A nonnumeric
-    value converts only to its own tag.
+    toward zero and require a representable result. A nonnumeric value
+    converts only to its own tag.
 */
 
 #pragma once
@@ -74,13 +74,11 @@ meta native Var Var.convert(Var value, Symbol target) {
   }
   if (value is void) raise %(void-op (owner "Var.convert"));
   if (!target || !Var.known_tag(target) || target == <void> ||
-      target == <nan> || target == <-inf> || target == <+inf>)
+      _special_float(target))
     raise %(bad-target (target $target));
   Symbol source_tag = value.tag();
   if (source_tag == target) return value;
-  if ((source_tag == <nan> || source_tag == <-inf> ||
-       source_tag == <+inf>) && target == <f64>)
-    return value;
+  if (_special_float(source_tag) && target == <f64>) return value;
   X2CVarNumericInfo info;
   if (!Var.numeric_info(source_tag, info)) {
     List lower = %(bad-types (source $source_tag));
@@ -90,10 +88,13 @@ meta native Var Var.convert(Var value, Symbol target) {
   _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
     raise %(no-convert (source $source_tag) (target $target));
-  return info.floating
-       ? _convert_to_float(source, target)
-       : _convert_to_integer(source, target, info.unsigned_value, info.bits);
+  return info.floating ? _convert_to_float(source, target)
+                       : _convert_to_integer(source, info);
 }
+
+/* The discrete NaN and infinity tags belong to the `<f64>` family. */
+static int _special_float(Symbol tag) =>
+  tag == <nan> || tag == <-inf> || tag == <+inf>;
 
 /** Writes numeric-family metadata for `tag` and returns nonzero.
     The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
@@ -101,7 +102,7 @@ meta native Var Var.convert(Var value, Symbol target) {
 */
 int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out) {
   if (!out) return 0;
-  if (tag == <nan> || tag == <-inf> || tag == <+inf>) tag = <f64>;
+  if (_special_float(tag)) tag = <f64>;
   int row = x2c_var_numeric_tags.index(tag);
   if (row < 0) return 0;
   out = x2c_var_numerics[row];
@@ -132,72 +133,69 @@ void Var.numeric_decode(Var value, X2CVarNumeric &?out) {
    payload extraction; the public decoder still owns its argument checks. */
 static void _numeric_decode(
   Var value, X2CVarNumericInfo info, X2CVarNumeric &out) {
-  X2CVarNumeric decoded = { 0 };
-  with decoded {
-    _.tag = info.tag;
-    _.floating = info.floating;
-    _.unsigned_value = info.unsigned_value;
-    _.bits = info.bits;
-    _.rank = info.rank;
-    switch (info.tag) {
-      case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
-        _.raw = value.payload32() & Var.width_mask(_.bits); break;
-      case <i48>: case <u48>:
-        _.raw = value.u64 & Var.width_mask(48); break;
-      case <long>: _.raw = (unsigned long long) value.long_value();  break;
-      case <ulong>: _.raw = (unsigned long long) value.ulong_value();  break;
-      case <llong>:
-        _.raw = (unsigned long long) value.long_long_value(); break;
-      case <ullong>: _.raw = value.ulong_long_value(); break;
-      case <f32>:
-        _.floating_value = (long double) value.decode_f32(); break;
-      case <f64>:
-        _.floating_value = (long double) value.decode_f64(); break;
-      case <ldouble>: _.floating_value = value.long_double_value(); break;
-    }
-    out = _;
+  X2CVarNumeric decoded = {
+    .tag = info.tag, .floating = info.floating,
+    .unsigned_value = info.unsigned_value, .bits = info.bits,
+    .rank = info.rank};
+  if (info.floating)
+    decoded.floating_value = _floating_payload(value, info.tag);
+  else decoded.raw = _integer_payload(value, info.tag, info.bits);
+  out = decoded;
+}
+
+static unsigned long long _integer_payload(Var value, Symbol tag, int bits) {
+  switch (tag) {
+    case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
+      return value.payload32() & Var.width_mask(bits);
+    case <i48>: case <u48>: return value.u64 & Var.width_mask(48);
+    case <long>:   return (unsigned long long) value.long_value();
+    case <ulong>:  return (unsigned long long) value.ulong_value();
+    case <llong>:  return (unsigned long long) value.long_long_value();
+    case <ullong>: return value.ulong_long_value();
   }
+  return 0;
+}
+
+static long double _floating_payload(Var value, Symbol tag) {
+  switch (tag) {
+    case <f32>:     return (long double) value.decode_f32();
+    case <f64>:     return (long double) value.decode_f64();
+    case <ldouble>: return value.long_double_value();
+  }
+  return 0.0L;
 }
 
 // integer targets
 
-/* Conversion first decodes one source family. Integer-to-integer never passes
-   through floating point; it narrows modulo the target width. Only
-   floating-to-integer is range checked, and only after truncation. Float
-   results use host casts, so a wide target gets a new Scope box. */
+/* Integer-to-integer never passes through floating point; it narrows modulo
+   the target width. Only floating-to-integer is range checked, and only
+   after truncation. */
 static Var _convert_to_integer(
-  X2CVarNumeric &source, Symbol target, int unsigned_target, int bits) {
-  unsigned long long raw;
-  if (source.floating) {
-    long double truncated = truncl(source.floating_value);
-    if (!isfinite(source.floating_value)) {
-      Symbol source_tag = source.tag;
-      raise %(conv-range (source $source_tag) (target $target));
-    }
-    if (unsigned_target) {
-      long double upper = _integer_limit(bits);
-      if (truncated < 0.0L || truncated >= upper) {
-        Symbol source_tag = source.tag;
-        raise %(conv-range (source $source_tag) (target $target));
-      }
-      raw = (unsigned long long) truncated;
-    }
-    else {
-      long double limit = _integer_limit(bits - 1);
-      if (truncated < -limit || truncated >= limit) {
-        Symbol source_tag = source.tag;
-        raise %(conv-range (source $source_tag) (target $target));
-      }
-      long long signed_value = (long long) truncated;
-      raw = (unsigned long long) signed_value;
-    }
+  X2CVarNumeric &source, X2CVarNumericInfo &target) {
+  if (source.floating)
+    return Var.integer_box(target.tag, _truncated(source, target));
+  unsigned long long raw = source.unsigned_value ? source.raw
+                         : (unsigned long long)
+                           Var.signed_from_bits(source.raw, source.bits);
+  return Var.integer_box(target.tag, raw);
+}
+
+static unsigned long long _truncated(
+  X2CVarNumeric &source, X2CVarNumericInfo &target) {
+  long double truncated = truncl(source.floating_value);
+  if (!isfinite(source.floating_value) || !_representable(truncated, target)) {
+    Symbol source_tag = source.tag, target_tag = target.tag;
+    raise %(conv-range (source $source_tag) (target $target_tag));
   }
-  else
-    raw = source.unsigned_value
-        ? source.raw
-        : (unsigned long long)
-          Var.signed_from_bits(source.raw, source.bits);
-  return Var.integer_box(target, raw);
+  if (target.unsigned_value) return (unsigned long long) truncated;
+  return (unsigned long long) (long long) truncated;
+}
+
+static int _representable(long double truncated, X2CVarNumericInfo &target) {
+  if (target.unsigned_value)
+    return truncated >= 0.0L && truncated < _integer_limit(target.bits);
+  long double limit = _integer_limit(target.bits - 1);
+  return truncated >= -limit && truncated < limit;
 }
 
 static long double _integer_limit(int bits) {
@@ -218,23 +216,21 @@ Var Var.integer_box(Symbol target, unsigned long long raw) {
     raise %(bad-target (target $target));
   raw &= Var.width_mask(info.bits);
   long long signed_value = Var.signed_from_bits(raw, info.bits);
-  Var result;
   switch (target) {
-    case <i8>:  result = Var.box_i8((char) signed_value); break;
-    case <u8>:  result = Var.box_u8((uchar) raw); break;
-    case <i16>: result = Var.box_i16((short) signed_value); break;
-    case <u16>: result = Var.box_u16((ushort) raw); break;
-    case <i32>: result = Var.box_i32_bits((unsigned) raw); break;
-    case <u32>: result = Var.box_u32((unsigned) raw); break;
-    case <i48>: result = Var.new(<i48>, (long) signed_value); break;
-    case <u48>: result = Var.new(<u48>, (unsigned long) raw); break;
-    case <long>: result = Var.box_long((long) signed_value); break;
-    case <ulong>: result = Var.box_ulong((unsigned long) raw); break;
-    case <llong>: result = Var.box_long_long(signed_value); break;
-    case <ullong>: result = Var.box_ulong_long(raw); break;
-    default: raise %(bad-target (target $target));
+    case <i8>:     return Var.box_i8((char) signed_value);
+    case <u8>:     return Var.box_u8((uchar) raw);
+    case <i16>:    return Var.box_i16((short) signed_value);
+    case <u16>:    return Var.box_u16((ushort) raw);
+    case <i32>:    return Var.box_i32_bits((unsigned) raw);
+    case <u32>:    return Var.box_u32((unsigned) raw);
+    case <i48>:    return Var.new(<i48>, (long) signed_value);
+    case <u48>:    return Var.new(<u48>, (unsigned long) raw);
+    case <long>:   return Var.box_long((long) signed_value);
+    case <ulong>:  return Var.box_ulong((unsigned long) raw);
+    case <llong>:  return Var.box_long_long(signed_value);
+    case <ullong>: return Var.box_ulong_long(raw);
   }
-  return result;
+  raise %(bad-target (target $target));
 }
 
 /** Returns the integer tag selected by `rank` and signedness.
@@ -276,6 +272,7 @@ long long Var.signed_from_bits(unsigned long long raw, int bits) {
 
 // floating targets
 
+/* Floating results use host casts, so a wide target gets a new Scope box. */
 static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
   switch (target) {
     case <f32>: return Var.box_f32(_numeric_f32(source));
