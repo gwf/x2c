@@ -24,102 +24,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include <string.h>
 #include <unistd.h>
 
-/* A directive's `#` follows only whitespace and comments on its line. */
-static int _starts_line(Token first, Token token) {
-  while (token-- > first) {
-    if (token.type != <space> && token.type != <comment>) return 0;
-    if (token.text.contains("\n")) return 1;
-  }
-  return 1;
-}
-
-/* 1 for `#pragma private`, 0 for `#pragma public`, and -1 for any other
-   directive, matching Compiler.update_source_visibility. */
-static int _visibility_pragma(String directive) {
-  if (directive.contains("pragma private")) return 1;
-  return directive.contains("pragma public") ? 0 : -1;
-}
-
-/* Unresolvable paths retain the caller's spelling. */
-static String _canonical_path(String path) {
-  char buffer[PATH_MAX];
-  return realpath(path, buffer) ? buffer : path;
-}
-
-/* Canonical process-wide include roots. */
-static String _cached_canonical(char *cache, String dir) {
-  if (!*cache && !realpath(dir, cache))
-    snprintf(cache, PATH_MAX, "%s", (char *) dir);
-  return cache;
-}
-
-static String _canonical_lib(void) {
-  static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/lib");
-}
-
-static String _canonical_include(void) {
-  static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
-}
-
-static String _canonical_src(void) {
-  static char cache[PATH_MAX];
-  if (*cache) return cache;
-  return _cached_canonical(cache, %"${x2c_get_root()}/src");
-}
-
-static String _canonical_cwd(void) {
-  static char cache[PATH_MAX];
-  return _cached_canonical(cache, ".");
-}
-
-static String _resolve_include_dirs(
-  SourceView sources, List extra_dirs, String includer_dir, String target,
-  int angle, int &covered) {
-  covered = 0;
-  if (target.startswith("/"))
-    return sources.exists(target) ? target : NULL;
-  String lib_dir = _canonical_lib(), include_dir = _canonical_include();
-  Array dirs = [];
-  if (!angle && includer_dir) dirs.push(_canonical_path(includer_dir));
-  dirs.push(_canonical_cwd());
-  dirs.push(_canonical_src());
-  dirs.push(lib_dir);
-  foreach (Var value, extra_dirs) {
-    if (value is not <string>) continue;
-    String dir = value;
-    dirs.push(_canonical_path(dir));
-  }
-  String found = NULL;
-  foreach (String dir, dirs) {
-    String path = %"$dir/$target";
-    if (!sources.exists(path)) continue;
-    found = path;
-    covered = dir == lib_dir || dir == include_dir;
-    break;
-  }
-  dirs.free();
-  return found;
-}
-
-static String _resolve_include(
-  Compiler compiler, String includer_dir, String target, int angle,
-  int &covered) => _resolve_include_dirs(
-    compiler.sources, compiler.include_dirs, includer_dir, target, angle,
-    covered);
-
-/** The file the include of `target` from `includer_dir` names, searched as
-    collection searches `dirs`, or NULL. */
-String collect_resolve_include(
-  SourceView sources, List dirs, String includer_dir, String target,
-  int angle) {
-  int covered = 0;
-  return _resolve_include_dirs(
-    sources, dirs, includer_dir, target, angle, covered);
-}
+// the process cache
 
 /* Process cache: canonical path ->
    `(ordered-parts hash definitions dependencies)`. A part is a declaration
@@ -132,34 +37,6 @@ static Map process_cache = NULL, static Scope process_cache_scope = NULL;
    while the shared compile-time session was being filled. */
 static List preload_deferred = NULL;
 
-static void _cache_shutdown(void) {
-  process_cache_scope.destroy();
-  process_cache_scope = NULL;
-  process_cache = NULL;
-  preload_deferred = NULL;
-}
-
-/** Drops the entries collected without declaration defaults while the shared
-    compile-time session was filled. Call once that session is published. */
-void collect_forget_preload_entries(void) {
-  foreach (String path, preload_deferred) (void) _process_cache().del(path);
-  preload_deferred = NULL;
-}
-
-/** Returns the canonical paths collected so far. */
-List collect_cached_paths(void) => _process_cache().keys();
-
-/** Drops the entries collected since `before` returned by
-    `collect_cached_paths`. A cached entry replays declarations, not the
-    compile-time effects of the file's imports, which the unit that walked
-    it installed in its own session. */
-void collect_forget_entries_since(List before) {
-  Map kept = {};
-  foreach (String path, before) kept[path] = 1;
-  foreach (String path, _process_cache().keys())
-    if (!(path in kept)) (void) _process_cache().del(path);
-}
-
 static Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
   Scope.push(&process_cache_scope);
@@ -169,280 +46,17 @@ static Map _process_cache(void) {
   return process_cache;
 }
 
+static void _cache_shutdown(void) {
+  process_cache_scope.destroy();
+  process_cache_scope = NULL;
+  process_cache = NULL;
+  preload_deferred = NULL;
+}
+
 /* A file's entry: collected in this process, or read from its interface. */
 static List _entry(Compiler c, String canonical) {
   Var cached = _process_cache()[canonical];
   return cached is void ? _interface_read(c, canonical) : cached;
-}
-
-static void _cache_dependency(
-  Map dependencies, String path, Var content_hash) {
-  _require_retained(path.try_own());
-  if (content_hash is <string>)
-    _require_retained(content_hash.string().try_own());
-  dependencies.merge_translation_dependency(path, content_hash);
-}
-
-static void _cache_dependencies(Map dependencies, Map additions) {
-  foreach (Var (path, content_hash), additions)
-    _cache_dependency(dependencies, path, content_hash);
-}
-
-/* Replay declaration maps and includes in their recorded source order.
-   visited counts each included file's declarations, dependencies, and
-   function definitions once per translation unit. In-memory and interface
-   entries have the same shape and take this same path. */
-static void _replay_cached(
-  Compiler compiler, List entry, Map globs, Map visited) {
-  foreach (Var definition, entry.caddr()) compiler.fn_defs[definition] = 1;
-  /* Parsing this file read these macro and Lisp files. They are prerequisites
-     of every unit that reaches it, not only of the one that parsed it. */
-  compiler.merge_translation_dependencies(entry[3]);
-  foreach (Var part, entry.car()) {
-    if (part is <map>) {
-      globs.merge(part);
-      compiler.merge_source_declarations(globs, part);
-      compiler.replay_package_imports(globs, part, 0);
-      continue;
-    }
-    if (part is <symbol>) continue;
-    String dep_path = part;
-    compiler.add_translation_dependency(dep_path);
-    if (dep_path in visited) continue;
-    visited[dep_path] = 1;
-    List resolved = _entry(compiler, dep_path);
-    if (!resolved)
-      resolved = _walk_cold(compiler, dep_path, dep_path, globs, visited);
-    _replay_cached(compiler, resolved, globs, visited);
-  }
-}
-
-/* Read an include's text, reporting an unreadable target as a driver error. */
-static String _include_text(Compiler c, String target, String path) {
-  String text = NULL;
-  if (c.read_source(path, text)) return text;
-  c.report_error(
-    <driver>, "cannot read include", c.token,
-    %("stage: collect" "include: $target" "path: $path"));
-}
-
-/* Walk a file other than the unit cold, then restore the unit's binding
-   counter. The unit keeps only the file's entry and replays it as it would
-   the file's interface, so it numbers its own bindings the same either way. */
-static void _walk_apart(
-  Compiler c, String path, String text, Map globs, Map visited) {
-  int next_binding = c.names.next_binding;
-  _file(c, path, text, Path.dirname(path), globs, visited);
-  c.names.next_binding = next_binding;
-}
-
-/* Walk one included file cold and return its entry. The walk reads the
-   includer's names through copies, so its private rows and includes stay
-   there; the includer replays the entry as any later unit would. */
-static List _walk_cold(
-  Compiler c, String target, String canonical, Map globs, Map visited) {
-  String text = _include_text(c, target, canonical);
-  _walk_apart(c, canonical, text, globs.copy(), visited.copy());
-  return _process_cache()[canonical];
-}
-
-/* A package renames what it declares, not what it includes: only x2c source
-   under its root takes its prefix. A C header, a runtime module, or foreign
-   x2c source keeps its own spellings, as including that file directly gives
-   them, so the collected entry is the same whichever unit walks it first. */
-static int _package_owns(Compiler c, String path) {
-  if (!c.package) return 0;
-  Var root = c.package_roots[c.package];
-  return root is not void &&
-    path.startswith(%"${_canonical_path(root)}/");
-}
-
-/** Replays the import operations retained by this declaration contribution.
-   The shadow borrows the unit's macro state and shared package registries. */
-void Compiler.replay_package_imports(
-  Compiler c, Map globs, Map rows, int included_only) {
-  Array imports = NULL;
-  defer if (imports) imports.free();
-  foreach (Var (key, value), rows)
-    match (key)
-      case %("source-node" (package-import ?path ?position)):
-        if (!included_only || _canonical_path(home_absolute_path(path)) !=
-                              _canonical_path(c.filename)) {
-          if (!imports) imports = [];
-          imports.push(%($path $position $value));
-        }
-  if (!imports.len()) return;
-  imports.sort();
-  Compiler shadow = Compiler.new_shared(c);
-  defer c.close_child(shadow);
-  shadow.take_unit_state(c);
-  shadow.sym.reset(globs);
-  foreach (List entry, imports)
-    match (entry)
-      case %(?(String path) ?
-             (package-import ?(String name) ?(String alias) ?members)): {
-        shadow.filename = home_absolute_path(path);
-        shadow.collect_package(name, NULL);
-        shadow.register_package_alias(name, alias, NULL);
-        foreach (List member, members)
-          shadow.register_package_member(
-            name, member.car(), member.cadr(), NULL, NULL);
-        shadow.import_package_macros(name, NULL);
-      }
-  shadow.return_unit_state(c);
-  c.merge_translation_dependencies(shadow.deps);
-}
-
-/** Repeats included imports after full parsing resets macros, in the cache's
-   original include order. The unit's own imports stay at their source sites. */
-void Compiler.replay_included_package_imports(
-  Compiler c, Map globs, String path, Map visited) {
-  String canonical = _canonical_path(path);
-  if (canonical in visited) return;
-  visited[canonical] = 1;
-  List entry = _entry(c, canonical);
-  if (!entry) return; // An unresolved C include has no collection entry.
-  foreach (Var part, entry.car()) {
-    if (part is <map>) c.replay_package_imports(globs, part, 1);
-    else if (part is <string>)
-      c.replay_included_package_imports(globs, part, visited);
-  }
-}
-
-/* A segment resolves names through cumulative globs but writes declarations
-   only to overlay. shallow_parse_overlay expands applicable unit macros under
-   semantic transactions, so their committed declarations and protocol rows
-   are recorded at this segment's source position. Macro, Lisp, and keyword
-   state then returns to the enclosing compiler for the next segment. */
-static void _parse_segment(
-  Compiler c, String path, String source, String text, int start_line,
-  int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
-  int private, int &linkage) {
-  Compiler shadow = Compiler.new_shared(c);
-  defer c.close_child(shadow);
-  int unit = x2c_source_file(path);
-  if (!unit || !_package_owns(c, path)) shadow.package = NULL;
-  shadow.filename = path;
-  shadow.layout = c.layout;
-  shadow.source_private = private;
-  shadow.open_linkage = linkage;
-  shadow.take_unit_state(c);
-  shadow.tokenize(text);
-  shadow.text = source;
-  if (c.source_facts) c.source_texts[Path.absolute(path)] = source;
-  for (size_t i = 0; i < shadow.tokenizer.tokens.len(); i++) {
-    Token token = &((struct Token *) shadow.tokenizer.tokens)[i];
-    token.line += start_line - 1;
-    token.pos += start_pos;
-  }
-  shadow.shallow_parse_overlay(globs, overlay);
-  linkage = shadow.open_linkage;
-  shadow.return_unit_state(c);
-  if (unit) {
-    c.fn_defs.merge(shadow.fn_defs);
-    definitions.merge(shadow.fn_defs);
-  }
-  /* A segment's import collects the package once for the whole unit, so its
-     files are prerequisites of the unit rather than of this shadow, and they
-     go on this file's cache entry so a later replay of it records them too. */
-  _cache_dependencies(dependencies, shadow.deps);
-  c.merge_translation_dependencies(shadow.deps);
-  globs.merge(overlay);
-  c.merge_source_declarations(globs, overlay);
-  /* This file has taken every row; what remains in the overlay is what it
-     publishes to an including unit. */
-  if (private) _keep_published_rows(shadow.sym.file_statics(), overlay);
-  if (unit) _publish_unit_statics(shadow.sym.file_statics(), overlay, path);
-}
-
-/* A private function row names a function that an including unit may call
-   through the prototype x2c emits, unless it has internal linkage. */
-static int _external_function(Map statics, String name, Var type) =>
-  type is <list> && type.list().type().is_function() &&
-  !statics.contains(%(function $name));
-
-/* Below `#pragma private`, an including unit sees only functions with
-   external linkage and the protocol and declaration rows keyed by source
-   position. Types, enumerators, objects, and static functions stay in the
-   file, as they stay out of its generated header. */
-static void _keep_published_rows(Map statics, Map overlay) {
-  Array dropped = [];
-  foreach (Var (key, value), overlay) {
-    int crosses = 0;
-    match (%($key)) {
-      case %(("source-node" *)): crosses = 1;
-      case %((?(String name))):
-        crosses = _external_function(statics, name, value);
-      case %((self ?(String name))):
-        crosses = _external_function(statics, name, value);
-    }
-    if (!crosses) dropped.push(key);
-  }
-  foreach (Var key, dropped) overlay.del(key);
-  dropped.free();
-}
-
-/* A `static` function belongs to the file that defines it, above and below
-   `#pragma private` alike, so its declaration row never crosses an include.
-   The published marker names the defining file, which lets an including unit
-   report a reference to the name instead of emitting a prototype that no
-   object defines. The file is spelled home-portably, as interfaces spell
-   paths. Only `.x` units publish markers; a C header's static inline
-   functions belong to every file that includes it. */
-static void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %(${home_portable_path(path)});
-  foreach (Var key, statics.keys())
-    match (%($key)) case %((function ?(String name))): {
-      overlay.del(%($name));
-      overlay.del(%(self $name));
-      overlay[%("unit-static" $name)] = owner;
-    }
-}
-
-/* Append one segment's nonempty published rows before the following
-   include. */
-static void _flush_segment(
-  Compiler compiler, String path, String source, String text, int start_line,
-  int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
-  int private, int &linkage) {
-  if (!text || !*text) return;
-  Scope.push(&process_cache_scope);
-  Map overlay = {};
-  Scope.pop();
-  _parse_segment(
-    compiler, path, source, text, start_line, start_pos,
-    globs, overlay, definitions, dependencies, private, linkage);
-  if (!overlay.len()) return;
-  Var overlay_var = overlay;
-  parts.push(overlay_var);
-}
-
-/* Resolve and splice one include during a file walk, returning its canonical
-   path, or NULL when nothing is spliced. The included file's content hash
-   joins the including file's dependencies, so a replayed interface is
-   rejected when any file it spliced has changed. */
-static String _include(
-  Compiler c, String target, int angle, String dir, Map globs,
-  Map visited, Map dependencies) {
-  int covered = 0;
-  String path = _resolve_include(c, dir, target, angle, covered);
-  if (!path) return NULL;
-  if (covered && !x2c_source_file(path)) return NULL;
-  String canonical = _canonical_path(path);
-  List entry = _entry(c, canonical);
-  c.add_translation_dependency(canonical);
-  if (!visited.contains(canonical)) {
-    visited[canonical] = 1;
-    if (!entry) entry = _walk_cold(c, target, canonical, globs, visited);
-    _replay_cached(c, entry, globs, visited);
-  }
-  /* A file still being walked, as in an include cycle, has no entry yet. */
-  Var walked = _process_cache()[canonical];
-  String content_hash = walked is void
-    ? "%08x".printf(_include_text(c, target, canonical).hash())
-    : walked.list().cadr();
-  _cache_dependency(dependencies, canonical, content_hash);
-  return canonical;
 }
 
 static void _require_retained(int owned) {
@@ -451,28 +65,74 @@ static void _require_retained(int owned) {
   abort();
 }
 
-/** Records one generated public callable in the declaration map that the
-    current file's collected entry contributes, which is the map its
-    interface publishes. A file without a collected declaration map records
-    nothing. The cache retains `signature`.
+// collecting a unit
+
+/** Collects the current translation unit's declarations into `globs`.
+    The compiler must have its filename, text, and include paths prepared.
+    `globs` is the base symbol map and is mutated; a null value starts from an
+    empty map. A prelude unit first replays the runtime contribution, or
+    walks `lib/x2c.x` cold when it must not skip runtime headers. The source
+    and raw-include closure then merge in source order, and the returned map
+    is `globs`. Collection also updates dependencies, function definitions,
+    and macro state. Keyword alias maps and seen-name state are file-local
+    and restored when each file walk ends.
 */
-void Compiler.record_generated_symbol(
-  Compiler c, String name, Type signature) {
-  Var cached = _process_cache()[_canonical_path(c.filename)];
-  if (cached is void) return;
-  Map contribution = NULL;
-  foreach (Var part, cached.list().car())
-    if (part is <map>) contribution = part;
-  if (contribution == NULL) return;
-  List key = %($name), marker_key = %("generated-protocol" $name);
-  List marker = %(generated);
-  _require_retained(key.try_own());
-  _require_retained(marker_key.try_own());
-  _require_retained(marker.try_own());
-  _require_retained(signature.try_own());
-  contribution[key] = signature;
-  contribution[marker_key] = marker;
+Map Compiler.collect_symbols(Compiler c, Map globs) {
+  if (globs == NULL) globs = {};
+  c.kw_aliases = NULL;
+  c.kw_seen = NULL;
+  Map visited = {}, String canonical = _canonical_path(c.filename);
+  c.deps = {};
+  c.add_translation_dependency(canonical);
+  if (c.prelude) {
+    String runtime = %"${x2c_get_root()}/lib/x2c.x";
+    String runtime_canonical = _canonical_path(runtime);
+    visited[runtime_canonical] = 1;
+    c.add_translation_dependency(runtime_canonical);
+    if (c.runtime_hdrs)
+      _file(
+        c, runtime_canonical, _runtime_text(c, runtime),
+        Path.dirname(runtime), globs, visited);
+    else
+      _replay_cached(
+        c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
+  }
+  int covered = canonical in visited;
+  visited[canonical] = 1;
+  _file(
+    c, canonical, c.text,
+    Path.dirname(c.filename), globs, visited);
+  /* The prelude's replay already declared this unit's defaults, so its own
+     walk selects none of them. The first walk's declarations stay in force,
+     as they are for every other unit that reaches this file. */
+  if (covered)
+    foreach (Var part, _entry(c, canonical).car())
+      if (part is <map>) {
+        globs.merge(part);
+        c.merge_source_declarations(globs, part);
+      }
+  return globs;
 }
+
+/* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
+   read from `lib/x2c.xi` beside a stage build, or walked cold once. */
+static List _prelude_entry(Compiler c, String runtime, String canonical) {
+  List entry = _entry(c, canonical);
+  if (entry) return entry;
+  Map scratch = {}, visited = {};
+  visited[canonical] = 1;
+  _walk_apart(c, canonical, _runtime_text(c, runtime), scratch, visited);
+  return _process_cache()[canonical];
+}
+
+static String _runtime_text(Compiler c, String runtime) {
+  String text = NULL;
+  if (c.read_source(runtime, text)) return text;
+  c.report_error(
+    <driver>, "cannot read runtime source", c.token, %("path: $runtime"));
+}
+
+// file walks
 
 /* Record a cold walk under canonical path identity. Published segment rows,
    included canonical paths, and visibility pragmas enter parts in source
@@ -614,180 +274,403 @@ static void _file(
   }
 }
 
-static String _runtime_text(Compiler c, String runtime) {
-  String text = NULL;
-  if (c.read_source(runtime, text)) return text;
-  c.report_error(
-    <driver>, "cannot read runtime source", c.token, %("path: $runtime"));
+/* A directive's `#` follows only whitespace and comments on its line. */
+static int _starts_line(Token first, Token token) {
+  while (token-- > first) {
+    if (token.type != <space> && token.type != <comment>) return 0;
+    if (token.text.contains("\n")) return 1;
+  }
+  return 1;
 }
 
-/* The prelude contribution is `lib/x2c.x`'s entry: cached in this process,
-   read from `lib/x2c.xi` beside a stage build, or walked cold once. */
-static List _prelude_entry(Compiler c, String runtime, String canonical) {
+/* 1 for `#pragma private`, 0 for `#pragma public`, and -1 for any other
+   directive, matching Compiler.update_source_visibility. */
+static int _visibility_pragma(String directive) {
+  if (directive.contains("pragma private")) return 1;
+  return directive.contains("pragma public") ? 0 : -1;
+}
+
+// segments
+
+/* Append one segment's nonempty published rows before the following
+   include. */
+static void _flush_segment(
+  Compiler compiler, String path, String source, String text, int start_line,
+  int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
+  int private, int &linkage) {
+  if (!text || !*text) return;
+  Scope.push(&process_cache_scope);
+  Map overlay = {};
+  Scope.pop();
+  _parse_segment(
+    compiler, path, source, text, start_line, start_pos,
+    globs, overlay, definitions, dependencies, private, linkage);
+  if (!overlay.len()) return;
+  Var overlay_var = overlay;
+  parts.push(overlay_var);
+}
+
+/* A segment resolves names through cumulative globs but writes declarations
+   only to overlay. shallow_parse_overlay expands applicable unit macros under
+   semantic transactions, so their committed declarations and protocol rows
+   are recorded at this segment's source position. Macro, Lisp, and keyword
+   state then returns to the enclosing compiler for the next segment. */
+static void _parse_segment(
+  Compiler c, String path, String source, String text, int start_line,
+  int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
+  int private, int &linkage) {
+  Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
+  int unit = x2c_source_file(path);
+  if (!unit || !_package_owns(c, path)) shadow.package = NULL;
+  shadow.filename = path;
+  shadow.layout = c.layout;
+  shadow.source_private = private;
+  shadow.open_linkage = linkage;
+  shadow.take_unit_state(c);
+  shadow.tokenize(text);
+  shadow.text = source;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = source;
+  for (size_t i = 0; i < shadow.tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) shadow.tokenizer.tokens)[i];
+    token.line += start_line - 1;
+    token.pos += start_pos;
+  }
+  shadow.shallow_parse_overlay(globs, overlay);
+  linkage = shadow.open_linkage;
+  shadow.return_unit_state(c);
+  if (unit) {
+    c.fn_defs.merge(shadow.fn_defs);
+    definitions.merge(shadow.fn_defs);
+  }
+  /* A segment's import collects the package once for the whole unit, so its
+     files are prerequisites of the unit rather than of this shadow, and they
+     go on this file's cache entry so a later replay of it records them too. */
+  _cache_dependencies(dependencies, shadow.deps);
+  c.merge_translation_dependencies(shadow.deps);
+  globs.merge(overlay);
+  c.merge_source_declarations(globs, overlay);
+  /* This file has taken every row; what remains in the overlay is what it
+     publishes to an including unit. */
+  if (private) _keep_published_rows(shadow.sym.file_statics(), overlay);
+  if (unit) _publish_unit_statics(shadow.sym.file_statics(), overlay, path);
+}
+
+/* A package renames what it declares, not what it includes: only x2c source
+   under its root takes its prefix. A C header, a runtime module, or foreign
+   x2c source keeps its own spellings, as including that file directly gives
+   them, so the collected entry is the same whichever unit walks it first. */
+static int _package_owns(Compiler c, String path) {
+  if (!c.package) return 0;
+  Var root = c.package_roots[c.package];
+  return root is not void &&
+    path.startswith(%"${_canonical_path(root)}/");
+}
+
+/* Below `#pragma private`, an including unit sees only functions with
+   external linkage and the protocol and declaration rows keyed by source
+   position. Types, enumerators, objects, and static functions stay in the
+   file, as they stay out of its generated header. */
+static void _keep_published_rows(Map statics, Map overlay) {
+  Array dropped = [];
+  foreach (Var (key, value), overlay) {
+    int crosses = 0;
+    match (%($key)) {
+      case %(("source-node" *)): crosses = 1;
+      case %((?(String name))):
+        crosses = _external_function(statics, name, value);
+      case %((self ?(String name))):
+        crosses = _external_function(statics, name, value);
+    }
+    if (!crosses) dropped.push(key);
+  }
+  foreach (Var key, dropped) overlay.del(key);
+  dropped.free();
+}
+
+/* A private function row names a function that an including unit may call
+   through the prototype x2c emits, unless it has internal linkage. */
+static int _external_function(Map statics, String name, Var type) =>
+  type is <list> && type.list().type().is_function() &&
+  !statics.contains(%(function $name));
+
+/* A `static` function belongs to the file that defines it, above and below
+   `#pragma private` alike, so its declaration row never crosses an include.
+   The published marker names the defining file, which lets an including unit
+   report a reference to the name instead of emitting a prototype that no
+   object defines. The file is spelled home-portably, as interfaces spell
+   paths. Only `.x` units publish markers; a C header's static inline
+   functions belong to every file that includes it. */
+static void _publish_unit_statics(Map statics, Map overlay, String path) {
+  List owner = %(${home_portable_path(path)});
+  foreach (Var key, statics.keys())
+    match (%($key)) case %((function ?(String name))): {
+      overlay.del(%($name));
+      overlay.del(%(self $name));
+      overlay[%("unit-static" $name)] = owner;
+    }
+}
+
+// includes
+
+/* Resolve and splice one include during a file walk, returning its canonical
+   path, or NULL when nothing is spliced. The included file's content hash
+   joins the including file's dependencies, so a replayed interface is
+   rejected when any file it spliced has changed. */
+static String _include(
+  Compiler c, String target, int angle, String dir, Map globs,
+  Map visited, Map dependencies) {
+  int covered = 0;
+  String path = _resolve_include(c, dir, target, angle, covered);
+  if (!path) return NULL;
+  if (covered && !x2c_source_file(path)) return NULL;
+  String canonical = _canonical_path(path);
   List entry = _entry(c, canonical);
-  if (entry) return entry;
-  Map scratch = {}, visited = {};
-  visited[canonical] = 1;
-  _walk_apart(c, canonical, _runtime_text(c, runtime), scratch, visited);
+  c.add_translation_dependency(canonical);
+  if (!visited.contains(canonical)) {
+    visited[canonical] = 1;
+    if (!entry) entry = _walk_cold(c, target, canonical, globs, visited);
+    _replay_cached(c, entry, globs, visited);
+  }
+  /* A file still being walked, as in an include cycle, has no entry yet. */
+  Var walked = _process_cache()[canonical];
+  String content_hash = walked is void
+    ? "%08x".printf(_include_text(c, target, canonical).hash())
+    : walked.list().cadr();
+  _cache_dependency(dependencies, canonical, content_hash);
+  return canonical;
+}
+
+/* Read an include's text, reporting an unreadable target as a driver error. */
+static String _include_text(Compiler c, String target, String path) {
+  String text = NULL;
+  if (c.read_source(path, text)) return text;
+  c.report_error(
+    <driver>, "cannot read include", c.token,
+    %("stage: collect" "include: $target" "path: $path"));
+}
+
+/* Walk one included file cold and return its entry. The walk reads the
+   includer's names through copies, so its private rows and includes stay
+   there; the includer replays the entry as any later unit would. */
+static List _walk_cold(
+  Compiler c, String target, String canonical, Map globs, Map visited) {
+  String text = _include_text(c, target, canonical);
+  _walk_apart(c, canonical, text, globs.copy(), visited.copy());
   return _process_cache()[canonical];
 }
 
-/** Collects the current translation unit's declarations into `globs`.
-    The compiler must have its filename, text, and include paths prepared.
-    `globs` is the base symbol map and is mutated; a null value starts from an
-    empty map. A prelude unit first replays the runtime contribution, or
-    walks `lib/x2c.x` cold when it must not skip runtime headers. The source
-    and raw-include closure then merge in source order, and the returned map
-    is `globs`. Collection also updates dependencies, function definitions,
-    and macro state. Keyword alias maps and seen-name state are file-local
-    and restored when each file walk ends.
-*/
-Map Compiler.collect_symbols(Compiler c, Map globs) {
-  if (globs == NULL) globs = {};
-  c.kw_aliases = NULL;
-  c.kw_seen = NULL;
-  Map visited = {}, String canonical = _canonical_path(c.filename);
-  c.deps = {};
-  c.add_translation_dependency(canonical);
-  if (c.prelude) {
-    String runtime = %"${x2c_get_root()}/lib/x2c.x";
-    String runtime_canonical = _canonical_path(runtime);
-    visited[runtime_canonical] = 1;
-    c.add_translation_dependency(runtime_canonical);
-    if (c.runtime_hdrs)
-      _file(
-        c, runtime_canonical, _runtime_text(c, runtime),
-        Path.dirname(runtime), globs, visited);
-    else
-      _replay_cached(
-        c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
+/* Walk a file other than the unit cold, then restore the unit's binding
+   counter. The unit keeps only the file's entry and replays it as it would
+   the file's interface, so it numbers its own bindings the same either way. */
+static void _walk_apart(
+  Compiler c, String path, String text, Map globs, Map visited) {
+  int next_binding = c.names.next_binding;
+  _file(c, path, text, Path.dirname(path), globs, visited);
+  c.names.next_binding = next_binding;
+}
+
+static String _resolve_include(
+  Compiler compiler, String includer_dir, String target, int angle,
+  int &covered) => _resolve_include_dirs(
+    compiler.sources, compiler.include_dirs, includer_dir, target, angle,
+    covered);
+
+static String _resolve_include_dirs(
+  SourceView sources, List extra_dirs, String includer_dir, String target,
+  int angle, int &covered) {
+  covered = 0;
+  if (target.startswith("/"))
+    return sources.exists(target) ? target : NULL;
+  String lib_dir = _canonical_lib(), include_dir = _canonical_include();
+  Array dirs = [];
+  if (!angle && includer_dir) dirs.push(_canonical_path(includer_dir));
+  dirs.push(_canonical_cwd());
+  dirs.push(_canonical_src());
+  dirs.push(lib_dir);
+  foreach (Var value, extra_dirs) {
+    if (value is not <string>) continue;
+    String dir = value;
+    dirs.push(_canonical_path(dir));
   }
-  int covered = canonical in visited;
-  visited[canonical] = 1;
-  _file(
-    c, canonical, c.text,
-    Path.dirname(c.filename), globs, visited);
-  /* The prelude's replay already declared this unit's defaults, so its own
-     walk selects none of them. The first walk's declarations stay in force,
-     as they are for every other unit that reaches this file. */
-  if (covered)
-    foreach (Var part, _entry(c, canonical).car())
-      if (part is <map>) {
-        globs.merge(part);
-        c.merge_source_declarations(globs, part);
+  String found = NULL;
+  foreach (String dir, dirs) {
+    String path = %"$dir/$target";
+    if (!sources.exists(path)) continue;
+    found = path;
+    covered = dir == lib_dir || dir == include_dir;
+    break;
+  }
+  dirs.free();
+  return found;
+}
+
+/** The file the include of `target` from `includer_dir` names, searched as
+    collection searches `dirs`, or NULL. */
+String collect_resolve_include(
+  SourceView sources, List dirs, String includer_dir, String target,
+  int angle) {
+  int covered = 0;
+  return _resolve_include_dirs(
+    sources, dirs, includer_dir, target, angle, covered);
+}
+
+/* Unresolvable paths retain the caller's spelling. */
+static String _canonical_path(String path) {
+  char buffer[PATH_MAX];
+  return realpath(path, buffer) ? buffer : path;
+}
+
+/* Canonical process-wide include roots. */
+static String _cached_canonical(char *cache, String dir) {
+  if (!*cache && !realpath(dir, cache))
+    snprintf(cache, PATH_MAX, "%s", (char *) dir);
+  return cache;
+}
+
+static String _canonical_lib(void) {
+  static char cache[PATH_MAX];
+  if (*cache) return cache;
+  return _cached_canonical(cache, %"${x2c_get_root()}/lib");
+}
+
+static String _canonical_include(void) {
+  static char cache[PATH_MAX];
+  if (*cache) return cache;
+  return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
+}
+
+static String _canonical_src(void) {
+  static char cache[PATH_MAX];
+  if (*cache) return cache;
+  return _cached_canonical(cache, %"${x2c_get_root()}/src");
+}
+
+static String _canonical_cwd(void) {
+  static char cache[PATH_MAX];
+  return _cached_canonical(cache, ".");
+}
+
+// replay
+
+/* Replay declaration maps and includes in their recorded source order.
+   visited counts each included file's declarations, dependencies, and
+   function definitions once per translation unit. In-memory and interface
+   entries have the same shape and take this same path. */
+static void _replay_cached(
+  Compiler compiler, List entry, Map globs, Map visited) {
+  foreach (Var definition, entry.caddr()) compiler.fn_defs[definition] = 1;
+  /* Parsing this file read these macro and Lisp files. They are prerequisites
+     of every unit that reaches it, not only of the one that parsed it. */
+  compiler.merge_translation_dependencies(entry[3]);
+  foreach (Var part, entry.car()) {
+    if (part is <map>) {
+      globs.merge(part);
+      compiler.merge_source_declarations(globs, part);
+      compiler.replay_package_imports(globs, part, 0);
+      continue;
+    }
+    if (part is <symbol>) continue;
+    String dep_path = part;
+    compiler.add_translation_dependency(dep_path);
+    if (dep_path in visited) continue;
+    visited[dep_path] = 1;
+    List resolved = _entry(compiler, dep_path);
+    if (!resolved)
+      resolved = _walk_cold(compiler, dep_path, dep_path, globs, visited);
+    _replay_cached(compiler, resolved, globs, visited);
+  }
+}
+
+static void _cache_dependency(
+  Map dependencies, String path, Var content_hash) {
+  _require_retained(path.try_own());
+  if (content_hash is <string>)
+    _require_retained(content_hash.string().try_own());
+  dependencies.merge_translation_dependency(path, content_hash);
+}
+
+static void _cache_dependencies(Map dependencies, Map additions) {
+  foreach (Var (path, content_hash), additions)
+    _cache_dependency(dependencies, path, content_hash);
+}
+
+/** Replays the import operations retained by this declaration contribution.
+   The shadow borrows the unit's macro state and shared package registries. */
+void Compiler.replay_package_imports(
+  Compiler c, Map globs, Map rows, int included_only) {
+  Array imports = NULL;
+  defer if (imports) imports.free();
+  foreach (Var (key, value), rows)
+    match (key)
+      case %("source-node" (package-import ?path ?position)):
+        if (!included_only || _canonical_path(home_absolute_path(path)) !=
+                              _canonical_path(c.filename)) {
+          if (!imports) imports = [];
+          imports.push(%($path $position $value));
+        }
+  if (!imports.len()) return;
+  imports.sort();
+  Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
+  shadow.take_unit_state(c);
+  shadow.sym.reset(globs);
+  foreach (List entry, imports)
+    match (entry)
+      case %(?(String path) ?
+             (package-import ?(String name) ?(String alias) ?members)): {
+        shadow.filename = home_absolute_path(path);
+        shadow.collect_package(name, NULL);
+        shadow.register_package_alias(name, alias, NULL);
+        foreach (List member, members)
+          shadow.register_package_member(
+            name, member.car(), member.cadr(), NULL, NULL);
+        shadow.import_package_macros(name, NULL);
       }
-  return globs;
+  shadow.return_unit_state(c);
+  c.merge_translation_dependencies(shadow.deps);
+}
+
+/** Repeats included imports after full parsing resets macros, in the cache's
+   original include order. The unit's own imports stay at their source sites. */
+void Compiler.replay_included_package_imports(
+  Compiler c, Map globs, String path, Map visited) {
+  String canonical = _canonical_path(path);
+  if (canonical in visited) return;
+  visited[canonical] = 1;
+  List entry = _entry(c, canonical);
+  if (!entry) return; // An unresolved C include has no collection entry.
+  foreach (Var part, entry.car()) {
+    if (part is <map>) c.replay_package_imports(globs, part, 1);
+    else if (part is <string>)
+      c.replay_included_package_imports(globs, part, visited);
+  }
+}
+
+/** Records one generated public callable in the declaration map that the
+    current file's collected entry contributes, which is the map its
+    interface publishes. A file without a collected declaration map records
+    nothing. The cache retains `signature`.
+*/
+void Compiler.record_generated_symbol(
+  Compiler c, String name, Type signature) {
+  Var cached = _process_cache()[_canonical_path(c.filename)];
+  if (cached is void) return;
+  Map contribution = NULL;
+  foreach (Var part, cached.list().car())
+    if (part is <map>) contribution = part;
+  if (contribution == NULL) return;
+  List key = %($name), marker_key = %("generated-protocol" $name);
+  List marker = %(generated);
+  _require_retained(key.try_own());
+  _require_retained(marker_key.try_own());
+  _require_retained(marker.try_own());
+  _require_retained(signature.try_own());
+  contribution[key] = signature;
+  contribution[marker_key] = marker;
 }
 
 // package imports
-
-/* A declaration key is a plain name, or a typedef or aggregate name that a
-   member row may extend; the tag covers the whole family, so a member of a
-   prefixed aggregate crosses with it. Source-node and helper rows carry no C
-   spelling of their own. */
-static String _package_key_spelling(List key) {
-  Var (head, spelling_value) = key;
-  if (head is <string>) {
-    String spelling = head;
-    if (key.cdr() || spelling == "source-node") return NULL;
-    return spelling == "source-typedef" ? NULL : spelling;
-  }
-  if (head == <self>)
-    return key.cdr() && !key.cddr() && spelling_value is <string>
-         ? spelling_value : NULL;
-  if (head != <typedef> && head != <struct> &&
-      head != <union> && head != <enum>) return NULL;
-  return key.cdr() && spelling_value is <string>
-       ? spelling_value : NULL;
-}
-
-/* Protocol declarations and adoptions are keyed by source location instead
-   of by a spelling, and a package's rows already name its own prefixed
-   types, so they cross with the rest of its surface. */
-static int _package_protocol_row(List key, Var value) {
-  if (key.car() != "source-node" || value is not <list>) return 0;
-  List row = value;
-  return row && row.car() in
-    %(protocol adopt meta-protocol declaration-source native-meta
-      package-macro package-import);
-}
-
-/* The package's `name__` space is visible in the importing unit, and so does
-   a C header or runtime module it publishes: a package renames what it
-   declares, not what it includes, so those names cross as including that
-   file gives them. Inside the package root an unprefixed x2c key is a
-   static, which keeps C internal linkage and stays home; outside it the file
-   escaped the declare-time rewrite and its bare names would merge into the
-   consumer's one flat namespace. */
-static void _package_merge(
-  Compiler compiler, String name, String root, String path, Map part,
-  Map merged, Token token) {
-  String prefix = %"${name}__";
-  int header = !x2c_source_file(path) ||
-               path.startswith(%"${_canonical_lib()}/") ||
-               path.startswith(%"${_canonical_include()}/");
-  int foreign = !path.startswith(%"$root/");
-  foreach (Var (key, value), part) {
-    if (key is not <list> || key.is_nil()) continue;
-    if (_package_protocol_row(key, value)) {
-      merged[key] = value;
-      compiler.copy_source_declaration(merged, part, key);
-      continue;
-    }
-    String spelling = _package_key_spelling(key);
-    if (!spelling) continue;
-    if (header || spelling.startswith(prefix)) {
-      merged[key] = value;
-      compiler.copy_source_declaration(merged, part, key);
-      continue;
-    }
-    if (!foreign) continue;
-    String unit = path.split("/").last();
-    String fix = %"below #pragma private, or move it into '$name/src'";
-    compiler.report_error(
-      <driver>,
-      %"package '$name' exposes unprefixed top-level declaration '$spelling'",
-      token,
-      %( "'$unit' is x2c source outside the package; include it $fix" ));
-  }
-}
-
-/* Replay one cached entry for its declarations only, recording each package
-   file as a dependency of the importing unit. An include below the file's
-   private boundary is not part of the package surface. */
-static void _package_contributions(
-  Compiler compiler, String name, String root, String path, List entry,
-  Map merged, Map visited, Token token) {
-  compiler.merge_translation_dependencies(entry[3]);
-  int private = 0;
-  foreach (Var part, entry.car()) {
-    match (%($part)) {
-      case %(?(Map declarations)): {
-        _package_merge(
-          compiler, name, root, path, declarations, merged, token);
-        continue;
-      }
-      case %(private): {
-        private = 1;
-        continue;
-      }
-      case %(public): {
-        private = 0;
-        continue;
-      }
-      case %(?(String dependency)): {
-        compiler.add_translation_dependency(dependency);
-        if (private || dependency in visited) continue;
-        visited[dependency] = 1;
-        _package_contributions(
-          compiler, name, root, dependency,
-          _process_cache()[dependency], merged, visited, token);
-        continue;
-      }
-    }
-    __builtin_unreachable();
-  }
-}
 
 /** Collects a package once and installs its public surface in the current
     unit.
@@ -839,6 +722,114 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   }
 }
 
+/* Replay one cached entry for its declarations only, recording each package
+   file as a dependency of the importing unit. An include below the file's
+   private boundary is not part of the package surface. */
+static void _package_contributions(
+  Compiler compiler, String name, String root, String path, List entry,
+  Map merged, Map visited, Token token) {
+  compiler.merge_translation_dependencies(entry[3]);
+  int private = 0;
+  foreach (Var part, entry.car()) {
+    match (%($part)) {
+      case %(?(Map declarations)): {
+        _package_merge(
+          compiler, name, root, path, declarations, merged, token);
+        continue;
+      }
+      case %(private): {
+        private = 1;
+        continue;
+      }
+      case %(public): {
+        private = 0;
+        continue;
+      }
+      case %(?(String dependency)): {
+        compiler.add_translation_dependency(dependency);
+        if (private || dependency in visited) continue;
+        visited[dependency] = 1;
+        _package_contributions(
+          compiler, name, root, dependency,
+          _process_cache()[dependency], merged, visited, token);
+        continue;
+      }
+    }
+    __builtin_unreachable();
+  }
+}
+
+/* The package's `name__` space is visible in the importing unit, and so does
+   a C header or runtime module it publishes: a package renames what it
+   declares, not what it includes, so those names cross as including that
+   file gives them. Inside the package root an unprefixed x2c key is a
+   static, which keeps C internal linkage and stays home; outside it the file
+   escaped the declare-time rewrite and its bare names would merge into the
+   consumer's one flat namespace. */
+static void _package_merge(
+  Compiler compiler, String name, String root, String path, Map part,
+  Map merged, Token token) {
+  String prefix = %"${name}__";
+  int header = !x2c_source_file(path) ||
+               path.startswith(%"${_canonical_lib()}/") ||
+               path.startswith(%"${_canonical_include()}/");
+  int foreign = !path.startswith(%"$root/");
+  foreach (Var (key, value), part) {
+    if (key is not <list> || key.is_nil()) continue;
+    if (_package_protocol_row(key, value)) {
+      merged[key] = value;
+      compiler.copy_source_declaration(merged, part, key);
+      continue;
+    }
+    String spelling = _package_key_spelling(key);
+    if (!spelling) continue;
+    if (header || spelling.startswith(prefix)) {
+      merged[key] = value;
+      compiler.copy_source_declaration(merged, part, key);
+      continue;
+    }
+    if (!foreign) continue;
+    String unit = path.split("/").last();
+    String fix = %"below #pragma private, or move it into '$name/src'";
+    compiler.report_error(
+      <driver>,
+      %"package '$name' exposes unprefixed top-level declaration '$spelling'",
+      token,
+      %( "'$unit' is x2c source outside the package; include it $fix" ));
+  }
+}
+
+/* A declaration key is a plain name, or a typedef or aggregate name that a
+   member row may extend; the tag covers the whole family, so a member of a
+   prefixed aggregate crosses with it. Source-node and helper rows carry no C
+   spelling of their own. */
+static String _package_key_spelling(List key) {
+  Var (head, spelling_value) = key;
+  if (head is <string>) {
+    String spelling = head;
+    if (key.cdr() || spelling == "source-node") return NULL;
+    return spelling == "source-typedef" ? NULL : spelling;
+  }
+  if (head == <self>)
+    return key.cdr() && !key.cddr() && spelling_value is <string>
+         ? spelling_value : NULL;
+  if (head != <typedef> && head != <struct> &&
+      head != <union> && head != <enum>) return NULL;
+  return key.cdr() && spelling_value is <string>
+       ? spelling_value : NULL;
+}
+
+/* Protocol declarations and adoptions are keyed by source location instead
+   of by a spelling, and a package's rows already name its own prefixed
+   types, so they cross with the rest of its surface. */
+static int _package_protocol_row(List key, Var value) {
+  if (key.car() != "source-node" || value is not <list>) return 0;
+  List row = value;
+  return row && row.car() in
+    %(protocol adopt meta-protocol declaration-source native-meta
+      package-macro package-import);
+}
+
 // unit interfaces
 
 /* A `.xi` interface is one unit's cache entry written beside its generated
@@ -849,6 +840,10 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
    Paths inside an interface use `home_portable_path` spellings. */
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
+
+/* Interfaces name the same sources many times, so a process hashes each
+   source once. */
+static Map source_hashes = NULL, static Lisp interface_reader = NULL;
 
 /** Creates the process cache and names the directories searched for `.xi`
     interfaces. `out_dir` is the current translation output directory, or
@@ -862,6 +857,17 @@ void interface_configure(String out_dir, int cold) {
   interface_out_dir = out_dir;
   String stage = x2c_stage_dir();
   interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
+}
+
+/* Find and validate the interface of one canonical source path. A source
+   under inspection through a SourceView never reads interfaces. */
+static List _interface_read(Compiler c, String canonical) {
+  if (c.source_facts || !interface_mirror) return NULL;
+  foreach (String path, _interface_candidates(canonical)) {
+    List entry = _interface_load(c, canonical, path);
+    if (entry) return entry;
+  }
+  return NULL;
 }
 
 /* Candidate interface paths for one canonical source path: the output
@@ -879,63 +885,6 @@ static List _interface_candidates(String canonical) {
   paths.push(%"$dir/builds/$stem.xi");
   paths.push(%"$dir/../builds/$stem.xi");
   return paths.list_free();
-}
-
-/** Returns the path of the first prelude interface this compiler wrote, or
-    NULL when there is none or the compiler's identity is unknown. Its
-    source hashes are not checked.
-*/
-String interface_prelude(void) {
-  String identity = x2c_compiler_identity();
-  if (!identity) return NULL;
-  String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 4 \"$identity\" ";
-  foreach (String path, _interface_candidates(runtime)) {
-    String text = NULL;
-    try text = Path.read_text(path);
-    catch %((!or not-found io-fail) *): continue;
-    if (text.startswith(header)) return path;
-  }
-  return NULL;
-}
-
-/* Interfaces name the same sources many times, so a process hashes each
-   source once. */
-static Map source_hashes = NULL, static Lisp interface_reader = NULL;
-
-static void _interface_shutdown(void) {
-  Lisp.destroy(interface_reader);
-  interface_reader = NULL;
-  source_hashes = NULL;
-}
-
-static Lisp _interface_lisp(void) {
-  if (interface_reader) return interface_reader;
-  _process_cache();
-  Scope.push(&process_cache_scope);
-  interface_reader = Lisp.kernel();
-  source_hashes = {};
-  Scope.shutdown_hook(_interface_shutdown);
-  Scope.pop();
-  return interface_reader;
-}
-
-static int _hash_matches(Compiler compiler, String path, Var expected) {
-  if (expected is not <string>) return 0;
-  Var hash = source_hashes[path];
-  if (hash is void) {
-    String text = NULL;
-    try {
-      if (!compiler.read_source(path, text)) return 0;
-    }
-    catch %((!or io-fail bad-arg size-limit) *): return 0;
-    String value = "%08x".printf(text.hash());
-    _require_retained(path.try_own());
-    _require_retained(value.try_own());
-    source_hashes[path] = value;
-    hash = value;
-  }
-  return String.equal(hash, expected);
 }
 
 /* Materialize one interface file only after its compiler identity, source
@@ -967,6 +916,41 @@ static List _interface_load(Compiler c, String canonical, String path) {
         stored_dependencies);
     }
   return NULL;
+}
+
+static Lisp _interface_lisp(void) {
+  if (interface_reader) return interface_reader;
+  _process_cache();
+  Scope.push(&process_cache_scope);
+  interface_reader = Lisp.kernel();
+  source_hashes = {};
+  Scope.shutdown_hook(_interface_shutdown);
+  Scope.pop();
+  return interface_reader;
+}
+
+static void _interface_shutdown(void) {
+  Lisp.destroy(interface_reader);
+  interface_reader = NULL;
+  source_hashes = NULL;
+}
+
+static int _hash_matches(Compiler compiler, String path, Var expected) {
+  if (expected is not <string>) return 0;
+  Var hash = source_hashes[path];
+  if (hash is void) {
+    String text = NULL;
+    try {
+      if (!compiler.read_source(path, text)) return 0;
+    }
+    catch %((!or io-fail bad-arg size-limit) *): return 0;
+    String value = "%08x".printf(text.hash());
+    _require_retained(path.try_own());
+    _require_retained(value.try_own());
+    source_hashes[path] = value;
+    hash = value;
+  }
+  return String.equal(hash, expected);
 }
 
 /* Rebuild a validated interface's rows as a process cache entry, or return
@@ -1025,29 +1009,39 @@ static List _interface_entry(
   return entry;
 }
 
-/* Find and validate the interface of one canonical source path. A source
-   under inspection through a SourceView never reads interfaces. */
-static List _interface_read(Compiler c, String canonical) {
-  if (c.source_facts || !interface_mirror) return NULL;
-  foreach (String path, _interface_candidates(canonical)) {
-    List entry = _interface_load(c, canonical, path);
-    if (entry) return entry;
+/** Returns the path of the first prelude interface this compiler wrote, or
+    NULL when there is none or the compiler's identity is unknown. Its
+    source hashes are not checked.
+*/
+String interface_prelude(void) {
+  String identity = x2c_compiler_identity();
+  if (!identity) return NULL;
+  String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
+  String header = %"(interface 4 \"$identity\" ";
+  foreach (String path, _interface_candidates(runtime)) {
+    String text = NULL;
+    try text = Path.read_text(path);
+    catch %((!or not-found io-fail) *): continue;
+    if (text.startswith(header)) return path;
   }
   return NULL;
 }
 
-/* A cold walk numbers bindings from wherever the shared counter stands, which
-   depends on the files walked before it. An interface renumbers them in order
-   of first appearance, keeping equal bindings equal. */
-static List _renumber_bindings(List node, Map identities) {
-  String spelling = NULL;
-  if (binding_identity_try_parts(node, NULL, spelling)) {
-    Var identity = identities.setdefault(node, identities.len() + 1);
-    return binding_identity_new(identity, spelling);
-  }
-  Var child;
-  $ast.rewrite_children(
-    node, child, _renumber_bindings(child, identities));
+/** Returns the compiler's own collected contribution as interface text, or
+    NULL when the unit has not collected its symbols or the compiler's
+    identity is unknown, since no compiler could replay that interface. A
+    contribution that the interface grammar cannot spell is reported as an
+    `emit` diagnostic.
+*/
+String interface_text(Compiler compiler, List selected) {
+  if (!x2c_compiler_identity()) return NULL;
+  String canonical = _canonical_path(compiler.filename);
+  Var cached = _process_cache()[canonical];
+  if (cached is void) return NULL;
+  Buffer out = $auto(Buffer.new(0));
+  if (_write_interface_entry(out, canonical, cached, selected)) return out;
+  compiler.report_error(
+    <emit>, "failed to write interface file", NULL, NULL);
 }
 
 static int _write_interface_entry(
@@ -1086,19 +1080,39 @@ static int _write_interface_entry(
   return 1;
 }
 
-/** Returns the compiler's own collected contribution as interface text, or
-    NULL when the unit has not collected its symbols or the compiler's
-    identity is unknown, since no compiler could replay that interface. A
-    contribution that the interface grammar cannot spell is reported as an
-    `emit` diagnostic.
-*/
-String interface_text(Compiler compiler, List selected) {
-  if (!x2c_compiler_identity()) return NULL;
-  String canonical = _canonical_path(compiler.filename);
-  Var cached = _process_cache()[canonical];
-  if (cached is void) return NULL;
-  Buffer out = $auto(Buffer.new(0));
-  if (_write_interface_entry(out, canonical, cached, selected)) return out;
-  compiler.report_error(
-    <emit>, "failed to write interface file", NULL, NULL);
+/* A cold walk numbers bindings from wherever the shared counter stands, which
+   depends on the files walked before it. An interface renumbers them in order
+   of first appearance, keeping equal bindings equal. */
+static List _renumber_bindings(List node, Map identities) {
+  String spelling = NULL;
+  if (binding_identity_try_parts(node, NULL, spelling)) {
+    Var identity = identities.setdefault(node, identities.len() + 1);
+    return binding_identity_new(identity, spelling);
+  }
+  Var child;
+  $ast.rewrite_children(
+    node, child, _renumber_bindings(child, identities));
+}
+
+// cache lifecycle
+
+/** Drops the entries collected without declaration defaults while the shared
+    compile-time session was filled. Call once that session is published. */
+void collect_forget_preload_entries(void) {
+  foreach (String path, preload_deferred) (void) _process_cache().del(path);
+  preload_deferred = NULL;
+}
+
+/** Returns the canonical paths collected so far. */
+List collect_cached_paths(void) => _process_cache().keys();
+
+/** Drops the entries collected since `before` returned by
+    `collect_cached_paths`. A cached entry replays declarations, not the
+    compile-time effects of the file's imports, which the unit that walked
+    it installed in its own session. */
+void collect_forget_entries_since(List before) {
+  Map kept = {};
+  foreach (String path, before) kept[path] = 1;
+  foreach (String path, _process_cache().keys())
+    if (!(path in kept)) (void) _process_cache().del(path);
 }
