@@ -140,7 +140,6 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 Func _x2c_func_get_e915dee0_0(void){
   if(! _init_guard_) _file_init_();
   return _x2c_func_handle_0;
-  ;
 }
 
 const void * Func_context(Func);
@@ -164,7 +163,6 @@ Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long, long)){
     ;  _x2c_func_pointer_context_2._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_1, _12, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
   }
   );
-  ;
 }
 
 static Var _x2c_lambda_0(long value){
@@ -181,7 +179,6 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 Func _x2c_func_get_e915dee0_1(void){
   if(! _init_guard_) _file_init_();
   return _x2c_func_handle_1;
-  ;
 }
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){

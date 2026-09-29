@@ -621,6 +621,8 @@ macro open Expression $func_address(Expr $value) => &$value;
 
 macro open Expression $func_size(Expr $value) => sizeof $value;
 
+macro open Expression $func_aggregate(Expr $value) => { $value };
+
 macro open Expression $func_present(
     Expr $pointer, Expr $value, Expr $fallback) =>
   $pointer ? $value : $fallback;
@@ -634,6 +636,11 @@ static List _func_call(
   Compiler compiler, Type type, List callee, List arguments) {
   Macro shape = $called;
   return compiler.rebuild_expression(type, shape(callee, arguments));
+}
+
+static List _func_return_body(Compiler compiler, List value) {
+  Macro shape = $return_value;
+  return compiler.rebuild_statement(shape(value)).cdr();
 }
 
 static List _build_indirect_func_adapter(
@@ -768,7 +775,7 @@ static List _direct_func_value(
     bridge = _func_bridge_binding(compiler, "func_get");
     compiler.add_early(compiler.wrapper_function(
       %("Func"), bridge, parameters.cdr(),
-      %(block (stmnt (return $handle))).cdr()));
+      _func_return_body(compiler, handle)));
   }
   Type getter_type = %((func ((void))) "Func");
   return _func_bridge_call(
@@ -812,8 +819,9 @@ static List _indirect_func_value(
 
   List context = compiler.sym.introduce(
     compiler.fresh_name("func_pointer_context"));
-  List context_value = %(
-    expr $context_type (composite (commas $expression)));
+  Macro aggregate_shape = $func_aggregate;
+  List context_value = compiler.rebuild_expression(
+    context_type, aggregate_shape(expression));
   Macro storage_shape = $func_local;
   List declaration = compiler.rebuild_statement(
     storage_shape(context_type,
@@ -855,10 +863,10 @@ static List _indirect_func_lift(
       params ${pointer_type.parameter_ast(parameter)}
     );
     List value = _indirect_func_value(
-      compiler, %(expr $pointer_type (ident $parameter)), pointer_type);
+      compiler, _func_bound(pointer_type, parameter), pointer_type);
     compiler.add_early(compiler.wrapper_function(
       %("Func"), bridge, parameters.cdr(),
-      %(block (stmnt (return $value))).cdr()));
+      _func_return_body(compiler, value)));
   }
   List parameters = %(
     params ${pointer_type.parameter_ast(NULL)}
