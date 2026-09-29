@@ -88,13 +88,6 @@ static void _contains_in(Lint l):
     l.fix("contains-in", t.line, "write the membership test with `in`",
           start, close, %"${l.source(first, last)} in $receiver")
 
-/* A written `->`, which `.` reaches wherever x2c parsed the struct. */
-static void _member_arrows(Lint l):
-  for (int at = 1; at < l.count; at++):
-    if l.tokens[at].text == "->" && !l.quoted[at]:
-      l.fix("member-arrow", l.tokens[at].line, "reach the member with `.`",
-            at, at, ".")
-
 /* `%"text"` without interpolation or escapes, which a plain literal
    spells when its destination promotes it. */
 static void _plain_strings(Lint l):
@@ -143,12 +136,32 @@ static void _expression_bodies(Lint l):
     l.fix("expression-body", t.line, "write the one returned value with `=>`",
           head + 1, close, text)
 
-/** Runs the rules that respell code, each with a proposed fix. The
-    expression-body rule reads braces and skips the indentation syntax.
+/** Runs the rules that respell code from its tokens, each with a proposed
+    fix. The expression-body rule reads braces and skips the indentation
+    syntax.
 */
 void Lint.idiom_rules(Lint l):
-  _member_arrows(l)
   _contains_in(l)
   _plain_strings(l)
   if l.layout: return
   _expression_bodies(l)
+
+/** Reports each written `->` to a member that `.` reaches wherever the
+    compiler's parse `ast` of the unit writes `->` to it: `c` selects the
+    same field for `.`, even in a call. `->` stays where x2c never parsed
+    the struct, since `.` there is emitted verbatim, and where a method of
+    the member's name would take the call.
+*/
+void Lint.member_arrows(Lint l, Compiler c, List ast):
+  if !l.selected.contains("member-arrow"): return
+  Map reached = {}
+  foreach List hit in ast.search(%(op -> (expr ?type ?) (?name))):
+    Var name = hit.assoc(<?name>)
+    List dot = c.resolve_postfix_member(hit.assoc(<?type>), %($name), <.>, 1)
+    reached[name] = dot.match(%(field -> ?)) &&
+                    reached.getdefault(name, 1).int()
+  for (int at = 1; at < l.count; at++):
+    Token t = l.at(at)
+    if t.text == "->" && !l.quoted[at] &&
+       reached.getdefault(l.tokens[l.next(at)].text, 0).int():
+      l.fix("member-arrow", t.line, "reach the member with `.`", at, at, ".")
