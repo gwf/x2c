@@ -12,71 +12,8 @@
 
 #pragma private
 
-// whitespace rules
-
-static int _is_prefix_punct(char ch) =>
-  ch == '.' || ch == '[' || ch == '(' || ch == '{';
-
-static int _is_suffix_punct(char ch) =>
-  ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
-  ch == ';' || ch == ',' || ch == '{' || ch == '}';
-
-static int _need_space(String prev, String curr) {
-  if (!prev || !curr) return 0;
-  char p = prev[-1], c = curr[0];
-  if (c == '\n' || p == '\n' || c == ' ' || p == ' ' ||
-      c == '\t' || p == '\t') return 0;
-  if (_is_suffix_punct(c)) return 0;
-  if (_is_prefix_punct(p)) return 0;
-  return 1;
-}
-
-static int _token_is(String token, char ch) =>
-  token && token.len() == 1 && token[0] == ch;
-
-static int _is_preprocessor(String token) => token && token[0] == '#';
-
-static void _write_indent(Buffer buff, int indent) {
-  static const char spaces[] =
-    "                                                                ";
-  while (indent > 0) {
-    int chunk = indent;
-    if (chunk >= (int) sizeof(spaces)) chunk = sizeof(spaces) - 1;
-    buff.write_len(spaces, chunk);
-    indent -= chunk;
-  }
-}
-
-static void _write_newline(Buffer buff) {
-  while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
-  buff.newline();
-}
-
-static void _write_mapped_newline(Buffer buff, int source_line) {
-  _write_newline(buff);
-  if (source_line) buff.write(%"#line $source_line\n");
-}
-
-static void _write_token(Buffer buff, String token, int source_line) {
-  const char *start = token;
-  while (start && *start) {
-    const char *newline = strchr(start, '\n');
-    if (!newline) {
-      buff.write(start);
-      return;
-    }
-    buff.write_len(start, newline - start);
-    _write_mapped_newline(buff, source_line);
-    start = newline + 1;
-  }
-}
-
-static int _next_is_closing_brace(List rest) {
-  if (!rest) return 0;
-  return _token_is(rest.car().str(), '}');
-}
-
 // pretty print formatting
+
 
 /** Returns a canonical formatted C `String` for an emitted token `List`.
     Token order and `code` are unchanged. Braces indent by two spaces,
@@ -184,4 +121,69 @@ char *Compiler.code_pretty_string(Compiler cc, List code, String output_file) {
   }
 
   return buff.str_free();
+}
+
+// whitespace rules
+
+
+static int _is_prefix_punct(char ch) =>
+  ch == '.' || ch == '[' || ch == '(' || ch == '{';
+
+static int _is_suffix_punct(char ch) =>
+  ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
+  ch == ';' || ch == ',' || ch == '{' || ch == '}';
+
+static int _need_space(String prev, String curr) {
+  if (!prev || !curr) return 0;
+  char p = prev[-1], c = curr[0];
+  if (c == '\n' || p == '\n' || c == ' ' || p == ' ' ||
+      c == '\t' || p == '\t') return 0;
+  if (_is_suffix_punct(c)) return 0;
+  if (_is_prefix_punct(p)) return 0;
+  return 1;
+}
+
+static int _token_is(String token, char ch) =>
+  token && token.len() == 1 && token[0] == ch;
+
+static int _is_preprocessor(String token) => token && token[0] == '#';
+
+static void _write_indent(Buffer buff, int indent) {
+  static const char spaces[] =
+    "                                                                ";
+  while (indent > 0) {
+    int chunk = indent;
+    if (chunk >= (int) sizeof(spaces)) chunk = sizeof(spaces) - 1;
+    buff.write_len(spaces, chunk);
+    indent -= chunk;
+  }
+}
+
+static void _write_newline(Buffer buff) {
+  while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
+  buff.newline();
+}
+
+static void _write_mapped_newline(Buffer buff, int source_line) {
+  _write_newline(buff);
+  if (source_line) buff.write(%"#line $source_line\n");
+}
+
+static void _write_token(Buffer buff, String token, int source_line) {
+  const char *start = token;
+  while (start && *start) {
+    const char *newline = strchr(start, '\n');
+    if (!newline) {
+      buff.write(start);
+      return;
+    }
+    buff.write_len(start, newline - start);
+    _write_mapped_newline(buff, source_line);
+    start = newline + 1;
+  }
+}
+
+static int _next_is_closing_brace(List rest) {
+  if (!rest) return 0;
+  return _token_is(rest.car().str(), '}');
 }
