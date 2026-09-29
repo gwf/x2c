@@ -1,10 +1,9 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`. Waves
-> 4 and 5, the compiler front end, core, and semantics, are next; their
-> files are shared with the dual-macro migration, so each batch starts with
-> agreed file boundaries. The baseline measurements are from `dev`
-> `f6606dbf`. Track H waits for Gary's approval of its book text.
+> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`. Wave 4
+> is in progress and paused at a usage limit; "Wave 4 handoff" below says
+> how to resume it. Wave 5 follows. The baseline measurements are from
+> `dev` `f6606dbf`. Track H waits for Gary's approval of its book text.
 
 ## Progress
 
@@ -235,6 +234,48 @@ Candidates left for later:
   (`lib/json.x`).
 - `x2c lint` suggests `LispEnv &local` for `_bind_values`, which the
   compiler's region check then rejects.
+
+Wave 4 handoff, 2026-09-29. The batch started from `dev` `8466809c` and
+stopped at a weekly usage limit before its gate.
+
+- Integration branch `gwf/x2c-beautification-5d43e1`, in the worktree
+  `.claude/worktrees/x2c-pythonic-syntax-spike-07ba2e`, is not gated. It
+  holds the deletion of `MachineBuilder.view` (Gary approved it), the
+  finished and worker-verified rewrites of `statements.x`, `stage.x`,
+  `literals.x`, `type.x`, and `ast.x`, and a name fix in
+  `agents/replacing-manual-ast-walks-with-match.md`. `type-ledger.x` stays
+  as it is: it is written by hand and inside the bands.
+- Four worker branches, each in its own `.claude/worktrees/agent-*`
+  worktree, need their checks finished before integration:
+  - `beauty4-compiler`: eleven commits. The last planned group, shallow
+    collection through meta definitions, may be unfinished.
+  - `beauty4-parse`: five commits. The rewrite is done; the worker stopped
+    while running `make commands-check`.
+  - `beauty4-macros`: six commits through imports, then `30cb34a3`, an
+    unverified `wip:` checkpoint of the next group, which may not build.
+  - `beauty4-metagroup`: four commits that order both files and split the
+    main functions. The 9-parameter builtin may remain.
+- To resume: on each worker branch run the brief's checks (`make build`,
+  `make verify`, `make stage-1 && make stage-diff-1`,
+  `make commands && make commands-check`, lint, and the instruction check)
+  and finish its file. Then cherry-pick it onto the integration branch,
+  review the combined diff, merge `dev`, run `make build-safe`, compare
+  stage 1 with stage 0, and time translation against a `dev` baseline
+  built through stage 1. Run both compilers from paths of equal length and
+  compare retired instructions. Record Wave 4 here, run
+  `tools/land-dev "refresh bootstrap for beautification wave 4"`, post the
+  landing commit in the Claude chat for the Codex dual-macro session, and
+  remove the worker worktrees.
+- `.context/beautification/` in the integration worktree holds the Wave 2
+  to 4 worker briefs, `shape.py`, and the timing scripts; their paths name
+  the old session's scratchpad and need updating.
+- Candidates found so far: `statements.x` spells the `with`/`as` keyword
+  test inline three times, which an exported `_test_contextual` from
+  `parse.x` could own; the Symbol-set hash is written in both
+  `lib/symbolset.x` and `src/literals.x`; and `literals.x`'s lambda
+  sections, about 450 lines, could become their own unit.
+- The Codex dual-macro session reserved no files as of 2026-09-29 and will
+  announce any overlap in the Claude chat first.
 
 ## Context
 
