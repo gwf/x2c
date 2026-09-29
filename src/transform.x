@@ -152,9 +152,11 @@ static List _callback_function(
     arguments.push(
       compiler.convert_expression(argument, source_parameters.car()));
   }
-  List call = %(expr ${source_type.apply().canonicalize()}
-    (call (expr $source_type (ident $source_binding))
-          (args @{arguments.list_free()})));
+  Macro called = $called;
+  List source = %(expr $source_type (ident $source_binding));
+  List call = compiler.rebuild_expression(
+    source_type.apply().canonicalize(),
+    called(source, arguments.list_free()));
   List statement = result === %(void) ? call
     : %(return ${compiler.convert_expression(call, result)});
   return compiler.wrapper_function(
@@ -339,6 +341,25 @@ List Compiler.func_signature(Compiler compiler, Type type) {
 static List _func_signature_literal(Compiler compiler, Type type) =>
   compiler.cache_literal_list(compiler.func_signature(type));
 
+/* Call a resolved adapter reader without rebinding its typed arguments. */
+static List _adapter_reader_call(
+  Compiler compiler, Type result_type, List helper, Type helper_type,
+  List fn_binding, List argv_binding, int index, List details) {
+  List target = %(expr $helper_type (ident $helper));
+  List fn = %(expr ("Func") (ident $fn_binding));
+  List argv = %(expr (* const "FuncArg") (ident $argv_binding));
+  List arguments = %($fn $argv ${_integer_expression(index)} @details);
+  Macro called = $called;
+  return compiler.rebuild_expression(
+    result_type, called(target, arguments));
+}
+
+/* One ABI argument is read before the next reader runs. */
+macro open Statement $func_argument_local(
+    Type $type, DeclaratorRow $row) {
+  $type $row;
+}
+
 static List _checked_func_argument(
   Compiler compiler, List adapter_type, Type parameter_type,
   List value_helper, Type value_helper_type,
@@ -347,15 +368,11 @@ static List _checked_func_argument(
   if (parameter_type.car() == <&> ||
       parameter_type.car() == <opt-ref>) {
     Type target = parameter_type.cdr(), pointer = target.reference();
-    List picked = %(
-      expr (* void)
-        (call (expr $reference_helper_type (ident $reference_helper))
-              (args (expr ("Func") (ident $fn_binding))
-                    (expr (* const "FuncArg") (ident $argv_binding))
-                    ${_integer_expression(index)}
-                    ${compiler.cache_literal_list(target)}
-                    ${_type_literal(compiler, target)}))
-    );
+    List picked = _adapter_reader_call(
+      compiler, %(* void), reference_helper, reference_helper_type,
+      fn_binding, argv_binding, index,
+      %(${compiler.cache_literal_list(target)}
+        ${_type_literal(compiler, target)}));
     storage_type = pointer;
     return compiler.convert_expression(picked, pointer);
   }
@@ -368,13 +385,9 @@ static List _checked_func_argument(
     Type pointer_type = NULL;
     List pointer_helper = _adapter_helper(
       compiler, "x2c_func_pointer_argument", pointer_type);
-    List picked = %(
-      expr (* void)
-        (call (expr $pointer_type (ident $pointer_helper))
-              (args (expr ("Func") (ident $fn_binding))
-                    (expr (* const "FuncArg") (ident $argv_binding))
-                    ${_integer_expression(index)}))
-    );
+    List picked = _adapter_reader_call(
+      compiler, %(* void), pointer_helper, pointer_type,
+      fn_binding, argv_binding, index, NULL);
     storage_type = parameter_type;
     if (resolved.is_pointer())
       return compiler.convert_expression(picked, parameter_type);
@@ -389,14 +402,9 @@ static List _checked_func_argument(
       compiler,
       "native binding parameter type has no Var representation",
       adapter_type, parameter_type, NULL);
-  List picked = %(
-    expr ("Var")
-      (call (expr $value_helper_type (ident $value_helper))
-            (args (expr ("Func") (ident $fn_binding))
-                  (expr (* const "FuncArg") (ident $argv_binding))
-                  ${_integer_expression(index)}
-                  ${_adapter_symbol_literal(tag)}))
-  );
+  List picked = _adapter_reader_call(
+    compiler, %("Var"), value_helper, value_helper_type,
+    fn_binding, argv_binding, index, %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
   return compiler.convert_expression(picked, parameter_type);
 }
@@ -413,6 +421,7 @@ static List _func_argument_locals(
     compiler, "x2c_func_declared_reference_argument", reference_type);
   Array locals = [];
   int index = 0;
+  Macro local = $func_argument_local;
   foreach (Type type, types) {
     List binding = names.car();
     names = names.cdr();
@@ -422,8 +431,8 @@ static List _func_argument_locals(
       value_helper, value_type, reference_helper, reference_type,
       fn_binding, argv_binding, index++, storage_type);
     List (base, mods) = storage_type.declaration_parts();
-    locals.push(
-      %(declare $base (bindings (op = (bind $binding $mods) $value))));
+    List row = %(op = (bind $binding $mods) $value);
+    locals.push(compiler.rebuild_statement(local(base, row)).cadr());
   }
   return locals.list_free();
 }
@@ -439,6 +448,15 @@ static void _publish_func_adapter(
   compiler.add_early(compiler.wrapper_function(
     %(static "Var"), binding, parameters.cdr(),
     _helper_body(compiler, body, setup).cdr()));
+}
+
+/* A record result is copied into a Var after the native call completes. */
+macro open Statement $func_record_result(
+    Type $type, DeclaratorRow $row, Expr $boxed) {
+  {
+    $type $row;
+    return $boxed;
+  }
 }
 
 static List _build_func_adapter(
@@ -479,7 +497,9 @@ static List _build_func_adapter(
     c, diagnostic_type, params, names, fn_binding, argv_binding);
   List arguments = params.zip_with(
     names, %!(Type type, List binding) => %(expr $type (ident $binding)));
-  List call = %(expr $return_type (call $target (args @arguments)));
+  Macro called = $called;
+  List call = c.rebuild_expression(
+    return_type, called(target, arguments));
   Type resolved_result = c.sym.resolve_key(return_type);
   if (resolved_result && resolved_result.car() == <struct>) {
     /* A record result is returned as `<p48>` to a copy of its bytes. */
@@ -490,14 +510,14 @@ static List _build_func_adapter(
     List (base, mods) = return_type.declaration_parts();
     List address = %(expr ${return_type.reference()}
                          (op & (expr $return_type (ident $result))));
-    call = %(block
-      (declare $base (bindings (op = (bind $result $mods) $call)))
-      (stmnt (return
-        (expr ("Var")
-          (call (expr $result_type (ident $result_helper))
-                (args $address
-                      (expr (unsigned long)
-                        (sizeof (expr $return_type (ident $result))))))))));
+    List size = %(expr (unsigned long)
+      (sizeof (expr $return_type (ident $result))));
+    List helper = %(expr $result_type (ident $result_helper));
+    List boxed = c.rebuild_expression(
+      %("Var"), called(helper, %($address $size)));
+    Macro record = $func_record_result;
+    List row = %(op = (bind $result $mods) $call);
+    call = c.rebuild_statement(record(base, row, boxed)).cadr();
   }
   _publish_func_adapter(
     c, adapter_binding, fn_binding, argv_binding, call, %(@prefix @locals));
