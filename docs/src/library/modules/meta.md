@@ -29,7 +29,7 @@ The compiler surface a `meta` function calls.
 | [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
 | [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
 | [`Macro.subject`](#Macro.subject) | Returns the table `Macro.use_subject` last set, or void. |
-| [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows that give, for each spelling a compile-time call's syntax arguments reference as a global, the unit's base-scope binding. |
+| [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows for global references and the `(source-spelling BINDING SPELLING)` rows for renamed local bindings in a compile-time call's syntax arguments. |
 
 ### Functions
 
@@ -53,7 +53,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:679`
+Source: `lib/meta.x:693`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -63,7 +63,7 @@ Source: `lib/meta.x:679`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/meta.x:672`
+Source: `lib/meta.x:686`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -83,7 +83,7 @@ Source: `lib/meta.x:397`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/meta.x:460`
+Source: `lib/meta.x:461`
 
 #### type_base_suffix
 
@@ -221,13 +221,14 @@ Source: `lib/meta.x:433`
 
 `void Macro.use_subject(Var rows)`
 
-Sets the `(SPELLING BINDING)` rows that give, for each spelling a
-compile-time call's syntax arguments reference as a global, the unit's
-base-scope binding. A macro value's free reference then recognizes only
-that binding; with void it recognizes any binding of its spelling. The
-compiler sets this for the length of each `meta` call.
+Sets the `(SPELLING BINDING)` rows for global references and the
+`(source-spelling BINDING SPELLING)` rows for renamed local bindings in
+a compile-time call's syntax arguments. A macro value's free reference
+recognizes only the recorded global binding; with void it recognizes
+any binding of its spelling. The compiler sets these rows for each
+`meta` call and carries them through the helper.
 
-Source: `lib/meta.x:440`
+Source: `lib/meta.x:441`
 
 ## Public types
 
@@ -235,7 +236,7 @@ Source: `lib/meta.x:440`
 | --- | --- | --- |
 | [`Macro`](#Macro) | alias | A macro as a value: called to build code, or used in a Match `case` to recognize code and capture its parameters. |
 | [`MacroCaseSite`](#MacroCaseSite) | struct | Holds one macro-valued `case` site's prepared recognition for the process: the plan Match keeps, the slots of the macro's fixed locals, and where each binder reads its capture. |
-| [`MacroFixedSlots`](#MacroFixedSlots) | struct | Records the machine slots that hold a macro's fixed locals, so a repeated slot compares those locals by identity during recognition. |
+| [`MacroFixedSlots`](#MacroFixedSlots) | struct | Records fixed-local slots for distinct-identity checks and Name slots for member-spelling comparisons during recognition. |
 | [`MacroPublishing`](#MacroPublishing) | struct | Records where each of a `case`'s binders reads its capture: the slot of its internal binder in the pattern that captured, and its own slot in the `case`, which need not share the parameters' order. |
 | [`Source`](#Source) | alias | A `meta` parameter declared `Source` receives, at a `$` call, captured syntax with the source text it came from: `((text T) (file F) (syntax S))`. |
 | [`Type`](#Type) | alias | A `meta` parameter declared `Type` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F) (methods M))`. |
@@ -260,28 +261,28 @@ process: the plan Match keeps, the slots of the macro's fixed locals, and
 where each binder reads its capture. The compiler emits one
 zero-initialized static site per `case`.
 
-Source: `lib/meta.x:663`
+Source: `lib/meta.x:677`
 
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
 
-`typedef struct MacroFixedSlots { int count, slots[MACHINE_BINDER_MAX]; } MacroFixedSlots`
+`typedef struct MacroFixedSlots { int count, slots[MACHINE_BINDER_MAX]; int names, name_slots[MACHINE_BINDER_MAX]; } MacroFixedSlots`
 
-Records the machine slots that hold a macro's fixed locals, so a
-repeated slot compares those locals by identity during recognition.
+Records fixed-local slots for distinct-identity checks and Name slots
+for member-spelling comparisons during recognition.
 
-Source: `lib/meta.x:644`
+Source: `lib/meta.x:656`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
 
-`typedef struct MacroPublishing { int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX]; int count, binders, complete; unsigned long definite; } MacroPublishing`
+`typedef struct MacroPublishing { int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX]; int to[MACHINE_BINDER_MAX]; int count, binders, complete; unsigned long definite; } MacroPublishing`
 
 Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot
 in the `case`, which need not share the parameters' order.
 
-Source: `lib/meta.x:652`
+Source: `lib/meta.x:665`
 
 <a id="Source"></a>
 ### Source

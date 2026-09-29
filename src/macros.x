@@ -3919,28 +3919,36 @@ static Compiler _stub_compiler(String name, Token &site) {
   return c;
 }
 
-/* The `(spelling binding)` rows of the unit's globals the arguments hold,
-   which the call recognizes as its subject. */
+/* The caller's global bindings and source-name projections for bindings in
+   the arguments, carried through the existing helper subject context. */
 static List _subject_rows(Compiler c, Array values) {
-  Map globals = {};
-  foreach (Var value, values) _subject_globals(c, value, globals);
+  Map globals = {}, source_names = {};
+  foreach (Var value, values)
+    _subject_globals(c, value, globals, source_names);
   Array rows = [];
   foreach (Var (spelling, binding), globals) rows.push(%($spelling $binding));
+  foreach (Var (binding, spelling), source_names)
+    rows.push(%(source-spelling $binding $spelling));
   return rows.list_free();
 }
 
-/* Records each binding in `value` that is the unit's base-scope binding
-   of its spelling, for recognition in a compile-time call. */
-static void _subject_globals(Compiler c, Var value, Map globals) {
+/* Records global identities and source spellings from argument syntax. */
+static void _subject_globals(
+  Compiler c, Var value, Map globals, Map source_names) {
   if (value is not <list>) return;
   String spelling = NULL;
   if (binding_identity_try_parts(value, NULL, spelling)) {
+    Var source;
+    if (c.semantic_binding_facts().try_get(
+          %(source-spelling $value), source))
+      source_names[value] = source;
     List global = c.sym.resolve_global(%($spelling), NULL);
     if (global && List.compare(global, value) == 0)
       globals[spelling] = value;
     return;
   }
-  foreach (Var child, value.list()) _subject_globals(c, child, globals);
+  foreach (Var child, value.list())
+    _subject_globals(c, child, globals, source_names);
 }
 
 /* Calls the session value `function` with the evaluated `arguments`. */

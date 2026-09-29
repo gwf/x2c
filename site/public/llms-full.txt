@@ -2499,6 +2499,13 @@ as `case $sum(?left, ?right):` selects the macro directly. An anonymous
 `macro Kind(parameters) => body` or `macro Kind(parameters) { body }` is a
 value without a global name.
 
+When one `Name` hole appears in a declaration, a reference, and a member
+selection, its case checks that the declaration and reference use the same
+binding and that the member has the binding's source spelling. This also
+recognizes a local that another macro renamed for hygiene. A different
+same-spelled binding or a different member does not match. The case captures
+the original binding syntax.
+
 A template can call a `meta` function in a slot and pass it a sequence
 hole written without `...`; the function receives the captured items as
 one `List`. Applying a macro value with one `List` of syntax as the last

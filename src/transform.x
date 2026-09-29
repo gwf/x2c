@@ -23,6 +23,7 @@ $(import "../lib/error-macros.xmacro")
 
 $(import "../src/ast-rewrite.xmacro")
 $(import "../src/adapter-memo.xmacro")
+#include "meta.x"
 $(import "../src/grammar.xmacro")
 
 #include <stdio.h>
@@ -37,7 +38,6 @@ $(import "../src/grammar.xmacro")
 #include "list.x"
 #include "protocol.x"
 #include "regions.x"
-#include "meta.x"
 
 // Produce typed parameters from types and their binding identities.
 static List _named_decl_params(List types, List names) {
@@ -3218,9 +3218,9 @@ static List _lower_printf_vars(Compiler c, List ast) {
 }
 
 static List _typed_call(
-  Compiler compiler, List ast, List params, List args) {
+  Compiler compiler, List callee, List params, List args) {
   String callee_name = NULL;
-  match (ast.cadr()) {
+  match (callee) {
     case %(expr ? (ident ?binding)):
       callee_name = binding_identity_spelling(binding);
   }
@@ -3243,19 +3243,18 @@ static List _typed_call(
   List newargs = values.list_free();
   Macro called = $called;
   return compiler.rebuild_expression(
-    NULL, called(ast.cadr(), newargs)).caddr();
+    NULL, called(callee, newargs)).caddr();
 }
 
 static List _call(Compiler compiler, List ast) {
   ast = _lower_printf_vars(compiler, ast);
-  Macro called = $called;
-  match (%(expr () $ast))
-    case called(?callee, *arguments):
+  match (ast)
+    case $source_pattern($called, %(?callee *arguments)):
       match (callee.cadr()) {
         case %((func ?parameters) *):
-          return _typed_call(compiler, ast, parameters, arguments);
+          return _typed_call(compiler, callee, parameters, arguments);
         case %((!or (!quote *) & ^) (func ?parameters) *):
-          return _typed_call(compiler, ast, parameters, arguments);
+          return _typed_call(compiler, callee, parameters, arguments);
       }
   return ast;
 }
@@ -3342,8 +3341,8 @@ static List _declaration(Compiler compiler, List ast) {
 // A `Var` subscript of a native pointer or array reads as an integer.
 static List _index(Compiler compiler, List ast) {
   Macro indexed = $indexed;
-  match (%(expr () $ast))
-    case indexed(?base, ?selector):
+  match (ast)
+    case $source_pattern($indexed, %(?base ?selector)):
       match (selector)
         case %(expr ?type ?)
           if (compiler.sym.is_var_type(type)): {
