@@ -40,77 +40,7 @@ protocol Cleanup(Buffer);
 #include <stdlib.h>
 #include <string.h>
 
-static void _recompute_line_state(Buffer buf) {
-  size_t length = buf.content.length;
-  if (!length) {
-    buf.pos = 0;
-    buf._indent = 0;
-    return;
-  }
-  const char *text = buf.content.bytes, size_t start = length;
-  while (start && text[start - 1] != '\n') start--;
-  buf.pos = length - start;
-  buf._indent = 0;
-  while (buf._indent < buf.pos && text[start + buf._indent] == ' ')
-    buf._indent++;
-}
-
-/** Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
-    Raises: `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
-    backing `Block`s.
-*/
-meta native Buffer Buffer.new(size_t padding) {
-  Buffer buf = Scope.malloc(sizeof(struct Buffer));
-  buf.content = Block.new(sizeof(char));
-  /* Eager allocation keeps the indent Block in the Buffer's owning scope
-     rather than the scope active at the first push. */
-  buf.indents = Block.new(sizeof(size_t));
-  buf.padding = padding;
-  buf.pos = 0;
-  buf._indent = 0;
-  return buf;
-}
-
-/** Releases `buf` and both backing `Block`s, invalidating every alias. */
-void Buffer.free(Buffer buf) {
-  if (buf == NULL) return;
-  if (buf.content != NULL) buf.content.free();
-  if (buf.indents != NULL) buf.indents.free();
-  Scope.free(buf);
-}
-
-/** Moves `buf` and both owned `Block`s into `scope`, keeping their identities.
-    Their lifetime then ends with the destination `Scope` unless freed earlier.
-    For a nonnull `Buffer`, raises `<bad-arg>` for a null destination slot, or
-    `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
-    ownership unchanged.
-*/
-void Buffer.move_to(Buffer buf, Scope *scope) {
-  if (buf == NULL) return;
-  buf.content.move_to(scope);
-  buf.indents.move_to(scope);
-  Scope.move(buf, scope);
-}
-
-/** Reserves room for at least `minimum` output bytes in `buf`.
-    Growth may invalidate a borrowed `content.bytes` pointer but does not
-    change the `Buffer` or content `Block` identity.
-    Raises: `<size-limit>` or `<alloc-fail>` when the requested capacity
-    cannot be provided.
-*/
-meta native Self Buffer.reserve(Self buf, size_t minimum) {
-  buf.content.reserve(minimum);
-  return buf;
-}
-
-/** Empties `buf` and its indentation stack without releasing capacity. */
-meta native Self Buffer.clear(Self buf) {
-  buf.content.clear();
-  if (buf.indents) buf.indents.clear();
-  buf.pos = 0;
-  buf._indent = 0;
-  return buf;
-}
+// writing
 
 /** Appends `length` bytes from `text` to `buf`.
     `text` may be a live range inside `buf.content`, including across growth.
@@ -245,6 +175,25 @@ meta native Self Buffer.unwrite(Self buf, size_t count) {
   return buf;
 }
 
+// line state
+
+static void _recompute_line_state(Buffer buf) {
+  size_t length = buf.content.length;
+  if (!length) {
+    buf.pos = 0;
+    buf._indent = 0;
+    return;
+  }
+  const char *text = buf.content.bytes, size_t start = length;
+  while (start && text[start - 1] != '\n') start--;
+  buf.pos = length - start;
+  buf._indent = 0;
+  while (buf._indent < buf.pos && text[start + buf._indent] == ' ')
+    buf._indent++;
+}
+
+// indentation
+
 /** Appends the configured number of padding spaces. */
 meta native Self Buffer.pad(Self buf) => buf.write_repeat(' ', buf.padding);
 
@@ -279,6 +228,8 @@ size_t Buffer.tabstop(Buffer buf) {
   size_t *indents = buf.indents.bytes;
   return indents[buf.indents.length - 1];
 }
+
+// reading
 
 /** Writes the byte at normalized `index` to `out` when it exists.
     Negative indexes count from the end. Returns zero for a null `Buffer`, null
@@ -354,6 +305,65 @@ String Buffer.repr(Buffer buf) {
 
 /** Returns nonzero when `b` contains at least one byte. */
 int Buffer.truth(Buffer b) => b != NULL && b.content.length != 0;
+
+// lifecycle
+
+/** Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
+    Raises: `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
+    backing `Block`s.
+*/
+meta native Buffer Buffer.new(size_t padding) {
+  Buffer buf = Scope.malloc(sizeof(struct Buffer));
+  buf.content = Block.new(sizeof(char));
+  /* Eager allocation keeps the indent Block in the Buffer's owning scope
+     rather than the scope active at the first push. */
+  buf.indents = Block.new(sizeof(size_t));
+  buf.padding = padding;
+  buf.pos = 0;
+  buf._indent = 0;
+  return buf;
+}
+
+/** Reserves room for at least `minimum` output bytes in `buf`.
+    Growth may invalidate a borrowed `content.bytes` pointer but does not
+    change the `Buffer` or content `Block` identity.
+    Raises: `<size-limit>` or `<alloc-fail>` when the requested capacity
+    cannot be provided.
+*/
+meta native Self Buffer.reserve(Self buf, size_t minimum) {
+  buf.content.reserve(minimum);
+  return buf;
+}
+
+/** Empties `buf` and its indentation stack without releasing capacity. */
+meta native Self Buffer.clear(Self buf) {
+  buf.content.clear();
+  if (buf.indents) buf.indents.clear();
+  buf.pos = 0;
+  buf._indent = 0;
+  return buf;
+}
+
+/** Moves `buf` and both owned `Block`s into `scope`, keeping their identities.
+    Their lifetime then ends with the destination `Scope` unless freed earlier.
+    For a nonnull `Buffer`, raises `<bad-arg>` for a null destination slot, or
+    `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
+    ownership unchanged.
+*/
+void Buffer.move_to(Buffer buf, Scope *scope) {
+  if (buf == NULL) return;
+  buf.content.move_to(scope);
+  buf.indents.move_to(scope);
+  Scope.move(buf, scope);
+}
+
+/** Releases `buf` and both backing `Block`s, invalidating every alias. */
+void Buffer.free(Buffer buf) {
+  if (buf == NULL) return;
+  if (buf.content != NULL) buf.content.free();
+  if (buf.indents != NULL) buf.indents.free();
+  Scope.free(buf);
+}
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Buffer.cleanup(Buffer value) { value.free(); }
