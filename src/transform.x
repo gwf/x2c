@@ -1548,7 +1548,7 @@ static List _lower_captured_lambda(
         List row = %(op = (bind $temporary $mods) $value);
         capture_locals.push(compiler.rebuild_statement(
           local(base, row)).cadr());
-        field_values.push(%(expr $storage_type (ident $temporary)));
+        field_values.push(_func_bound(storage_type, temporary));
       }
   Macro environment = $capture_environment;
   compiler.add_early(compiler.bind_syntax(
@@ -1565,11 +1565,10 @@ static List _lower_captured_lambda(
   List names = entries.map(_entry_binding);
   List locals = _func_argument_locals(
     compiler, adapter_type, types, names, closure_binding, argv_binding);
-  Macro called = $called;
-  List context_call = compiler.rebuild_expression(
-    %(* const void),
-    called(%(expr $context_type (ident $context_helper)),
-           %((expr ("Func") (ident $closure_binding)))));
+  List context_call = _func_call(
+    compiler, %(* const void),
+    _func_bound(context_type, context_helper),
+    %(${_func_bound(%("Func"), closure_binding)}));
   List context_cast = %(expr $environment_pointer_type
     (cast $environment_pointer_type $context_call));
   List context_setup = compiler.rebuild_statement(
@@ -1583,6 +1582,7 @@ static List _lower_captured_lambda(
     %(@locals $context_setup));
 
   List signature = _signature(compiler, entries);
+  Macro statement_shape = $expression_statement;
   if (compiler.inline_header) {
     List bridge = _func_bridge_binding(compiler, "func_from_capture");
     Array parameters = [], factory_values = [];
@@ -1590,7 +1590,7 @@ static List _lower_captured_lambda(
       List parameter = compiler.sym.introduce(
         compiler.fresh_name("lambda_capture"));
       parameters.push(field_type.parameter_ast(parameter));
-      factory_values.push(%(expr $field_type (ident $parameter)));
+      factory_values.push(_func_bound(field_type, parameter));
     }
     List factory_context = compiler.sym.introduce(
       compiler.fresh_name("lambda_context"));
@@ -1613,10 +1613,12 @@ static List _lower_captured_lambda(
     List call = _func_bridge_call(
       compiler, bridge, declaration_params, factory_type,
       field_values.list_free());
+    List statement = compiler.rebuild_statement(
+      statement_shape(call)).cadr();
     return %(
       expr ("Func")
         (parens
-          (block @{capture_locals.list_free()} (stmnt $call)))
+          (block @{capture_locals.list_free()} $statement))
     );
   }
   List context_value = compiler.sym.introduce(
@@ -1629,11 +1631,13 @@ static List _lower_captured_lambda(
   List construction = _func_context_call(
     compiler, environment_value_type, context_value, lambda_binding,
     adapter_type, signature, constructor, constructor_type);
+  List statement = compiler.rebuild_statement(
+    statement_shape(construction)).cadr();
   return %(
     expr ("Func")
       (parens
         (block @{capture_locals.list_free()} $context_storage
-               (stmnt $construction)))
+               $statement))
   );
 }
 
