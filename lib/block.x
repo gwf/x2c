@@ -44,7 +44,7 @@ protocol Cleanup(Bytes);
 /* storage layout
 
    One allocation holds a back-pointer to the owning `Block` and then the
-   elements; `bytes` points just past the back-pointer. */
+   elements; `bytes` points at the first element. */
 
 /* The size of an allocation for `cap` elements, or zero when it cannot be
    represented. */

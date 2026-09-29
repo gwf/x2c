@@ -161,8 +161,7 @@ static _LineState _state_after(Buffer buf, const char *text, size_t length) {
   return (_LineState) {buf.pos + length, indent};
 }
 
-/* The offset just past the last newline in `text`, or SIZE_MAX without
-   one. */
+/* The offset after the last newline in `text`, or SIZE_MAX without one. */
 static size_t _last_line_start(const char *text, size_t length) {
   size_t start = SIZE_MAX;
   const char *newline = memchr(text, '\n', length);
