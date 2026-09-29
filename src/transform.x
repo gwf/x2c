@@ -1531,11 +1531,11 @@ static List _lower_captured_lambda(
   List names = entries.map(_entry_binding);
   List locals = _func_argument_locals(
     compiler, adapter_type, types, names, closure_binding, argv_binding);
-  List context_call = %(
-    expr (* const void)
-      (call (expr $context_type (ident $context_helper))
-            (args (expr ("Func") (ident $closure_binding))))
-  );
+  Macro called = $called;
+  List context_call = compiler.rebuild_expression(
+    %(* const void),
+    called(%(expr $context_type (ident $context_helper)),
+           %((expr ("Func") (ident $closure_binding)))));
   List context_cast = %(expr $environment_pointer_type
     (cast $environment_pointer_type $context_call));
   List context_setup = compiler.rebuild_statement(
