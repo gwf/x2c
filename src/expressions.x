@@ -858,6 +858,7 @@ static List _parse_unary_op(Compiler c) {
 static int _cast_operand_follows(Symbol s) {
   switch (s) {
     case <ident>:
+    case <in>:
     case <$>:
     case <"$(">:
     case <"(">:
@@ -898,10 +899,11 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   if (!hole) return 0;
   Symbol kind = hole.assoc(<kind>);
   if (kind && kind != <type>) return 0;
-  /* `($items)[0]` subscripts the hole's value; only a hole declared a type
-     casts an array literal. */
-  if (compiler.peek(3) == <[> && kind != <type>) return 0;
-  return _cast_operand_follows(compiler.peek(3));
+  /* `($items)[0]` subscripts the hole's value and `($key) in table` tests
+     it; only a hole declared a type casts an array literal or a name `in`. */
+  Symbol next = compiler.peek(3);
+  if ((next == <[> || next == <in>) && kind != <type>) return 0;
+  return _cast_operand_follows(next);
 }
 
 static int _parenthesized_cast_operand_follows(Compiler c) =>
@@ -2763,6 +2765,10 @@ List Compiler.parse_primary(Compiler compiler) {
       if (compiler.token.text == "_Generic") return _parse_generic(compiler);
       return compiler.parse_variable();
     }
+    /* The keyword pass keeps `in` between tokens that can end and begin
+       operands, as after a cast or a condition. An operand never begins
+       with the operator, so here `in` is a name. */
+    case <in>:        return compiler.parse_variable();
     case <"(">:       return _parse_parens(compiler);
     case <"{">:       return _parse_composite(compiler);
     case <[>:         return _parse_bracket_array(compiler);
