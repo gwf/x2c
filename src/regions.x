@@ -1282,7 +1282,3 @@ Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects,
 /** Reports whether the runtime table proves the lifetime effects of the
     native function `name`. */
 int Compiler.has_region_row(String name) => name in runtime;
-
-/** Reports a built-in call that neither creates nor retains tracked storage. */
-int Compiler.region_no_lifetime_effect(String name) =>
-  runtime[name] in %((summary 0 ()) (wrap));
