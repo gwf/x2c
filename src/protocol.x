@@ -1950,39 +1950,9 @@ List Compiler.protocol_discard_helper(
   return c.discard_helper(binding, signature, stem, which);
 }
 
-static List _parameter_declarations(
-  Compiler compiler, List types, Array bindings) {
-  Array declarations = [], int index = 0;
-  foreach (Type type, types) {
-    List binding = compiler.sym.introduce(%"a$index");
-    bindings.push(binding);
-    declarations.push(type.parameter_ast(binding));
-    index++;
-  }
-  return declarations.list_free();
-}
-
 static int _variable_is(Var template, Map variables, String name) {
   String variable = _type_variable(template, variables);
   return variable && variable == name;
-}
-
-static List _adapter_argument(
-  Compiler compiler, List expression, Type template, Type actual,
-  Map variables, String binder, String reverse) {
-  if (_variable_is(template, variables, binder))
-    return %(expr $actual (call $reverse (args $expression)));
-  if (_type_variable(template, variables))
-    return compiler.convert_expression(expression, actual);
-  return expression;
-}
-
-static List _adapter_result(
-  Compiler compiler, List expression, Type template, Type target,
-  Map variables) {
-  if (_type_variable(template, variables))
-    return compiler.convert_expression(expression, target);
-  return expression;
 }
 
 static List Compiler._generate_protocol_function(
@@ -1994,38 +1964,32 @@ static List Compiler._generate_protocol_function(
   List source_parameters = source_signature.car().list().cadr();
   Type source_result = source_signature.cdr();
   List template_parameters = template.car().list().cadr();
-  Type template_result = template.cdr();
-  Array parameter_bindings = [];
-  List declarations = _parameter_declarations(
-    compiler, target_parameters, parameter_bindings);
-  Array arguments = [];
+  Array declarations = [], arguments = [];
   List target_at = target_parameters, template_at = template_parameters;
   List source_at = source_parameters;
   for (int i = 0; target_at;
        i++, target_at = target_at.cdr(), template_at = template_at.cdr(),
        source_at = source_at.cdr()) {
-    List argument = %(expr ${target_at.car()}
-      (ident ${parameter_bindings[i]}));
-    arguments.push(
-      _adapter_argument(
-        compiler, argument, template_at.car(), source_at.car(),
-        variables, binder, reverse)
-    );
+    List binding = compiler.sym.introduce(%"a$i");
+    Type parameter = target_at.car();
+    declarations.push(parameter.parameter_ast(binding));
+    List argument = %(expr $parameter (ident $binding));
+    if (_variable_is(template_at.car(), variables, binder))
+      argument = %(expr ${source_at.car()}
+        (call $reverse (args $argument)));
+    arguments.push(argument);
   }
   List source_binding = compiler.sym.reference(%($source), NULL);
   List call = %(expr $source_result
     (call (expr $source_signature (ident $source_binding))
       (args @{arguments.list_free()})));
-  List result = _adapter_result(
-    compiler, call, template_result, target_result, variables);
   List function_binding = compiler.sym.reference(%($name), NULL);
   if (make_static) function_binding = compiler.sym.introduce(name);
   if (binding_out) binding_out = function_binding;
   List storage = make_static ? %(static inline @target_result) : target_result;
-  parameter_bindings.free();
   return compiler.wrapper_function(
-    storage, function_binding, declarations,
-    %((return $target_result $result)));
+    storage, function_binding, declarations.list_free(),
+    %((return $target_result $call)));
 }
 
 static int _defines_function(Compiler compiler, String name) {
