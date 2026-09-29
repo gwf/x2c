@@ -2960,6 +2960,21 @@ static List _call(Compiler compiler, List ast) {
   return ast;
 }
 
+/* A resolved bracket read is a semantic marker, distinct from the parsed
+   `$indexed` source form. Keep its one structural projection here. */
+static int _resolved_index_parts(
+  List expr, List &base, Type &base_type, List &selector) {
+  match (expr)
+    case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
+                            ?matched_selector)): {
+      base = matched_base;
+      base_type = type;
+      selector = matched_selector;
+      return 1;
+    }
+  return 0;
+}
+
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List _assignment(
   Compiler compiler, Symbol op, List lhs, List rhs) {
@@ -2967,27 +2982,26 @@ static List _assignment(
     compiler.report_error(
       <xform>, "slice expressions are not assignable",
       NULL, %("call the collection's setslice method explicitly"));
-  match (lhs) {
-    case %(expr ? (getindex (!set ?base (expr ?btype ?)) ?index)): {
-      List base_type = btype;
-      /* String is immutable and interned, so an in-place bracket write
-         would mutate shared storage and leave its cached header hash
-         stale. A raw write bypasses that invariant, while generic
-         setindex returns a copy that this assignment would discard. */
-      if (compiler.sym.is_string_type(base_type)) {
-        String note = "String is immutable: use the copy-producing " +
-                      "String.withindex, or bind a char * to write a " +
-                      "transient String.malloc buffer";
-        compiler.report_error(
-          <xform>, "String does not support bracket assignment", NULL,
-          %($note));
-      }
-      if (!compiler.resolve_protocol_member(base_type, "setindex"))
-        compiler.report_error(
-          <xform>, %"type $base_type does not support bracket assignment",
-          NULL, %("use an explicit copy-producing method where available"));
-      return %(setindex $base $index $rhs);
+  List base, index;
+  Type base_type;
+  if (_resolved_index_parts(lhs, base, base_type, index)) {
+    /* String is immutable and interned, so an in-place bracket write
+       would mutate shared storage and leave its cached header hash
+       stale. A raw write bypasses that invariant, while generic
+       setindex returns a copy that this assignment would discard. */
+    if (compiler.sym.is_string_type(base_type)) {
+      String note = "String is immutable: use the copy-producing " +
+                    "String.withindex, or bind a char * to write a " +
+                    "transient String.malloc buffer";
+      compiler.report_error(
+        <xform>, "String does not support bracket assignment", NULL,
+        %($note));
     }
+    if (!compiler.resolve_protocol_member(base_type, "setindex"))
+      compiler.report_error(
+        <xform>, %"type $base_type does not support bracket assignment",
+        NULL, %("use an explicit copy-producing method where available"));
+    return %(setindex $base $index $rhs);
   }
   rhs = compiler.convert_expression(rhs, lhs.cadr());
   return %(op $op $lhs $rhs);
@@ -3268,15 +3282,10 @@ static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
 // Helper-backed indexes bypass getindex lowering.
 static int _indexed_parts(
   Compiler compiler, List expr, Symbol &owner, List &base, List &selector) {
-  match (expr)
-    case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
-                            ?matched_selector)): {
-      owner = _indexed_builtin_helper(compiler, type);
-      base = matched_base;
-      selector = matched_selector;
-      return 1;
-    }
-  return 0;
+  Type base_type;
+  if (!_resolved_index_parts(expr, base, base_type, selector)) return 0;
+  owner = _indexed_builtin_helper(compiler, base_type);
+  return 1;
 }
 
 static void _convert_indexed_parts(
@@ -3330,20 +3339,25 @@ static List _sequenced_protocol_call(
   return %(parens (block @{declarations.list_free()} (stmnt $call)));
 }
 
-static List _indexed_update(
-  Compiler c, List lhs, Symbol op, List rhs) {
+/* Compound, prefix and postfix brackets share the same resolved element,
+   protocol lookup, and built-in conversion. A missing rhs means postfix. */
+static List _indexed_change(
+  Compiler c, List target, Symbol op, List rhs) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(c, lhs, owner, base, selector)) return NULL;
+  if (!_indexed_parts(c, target, owner, base, selector)) return NULL;
+  int postfix = !rhs;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
-  List resolved = c.resolve_protocol_member(base_type, "updateindex");
+  List resolved = c.resolve_protocol_member(
+    base_type, postfix ? "postfixindex" : "updateindex");
   if (!resolved) {
     String type = base_type.repr();
-    c.report_error(
-      <xform>, %"type $type does not support indexed compound assignment",
-      NULL, NULL);
+    String message = postfix
+      ? %"type $type does not support indexed increment or decrement"
+      : %"type $type does not support indexed compound assignment";
+    c.report_error(<xform>, message, NULL, NULL);
   }
-  if (owner && !_indexed_rhs_allowed(c, op, rhs)) {
+  if (owner && !postfix && !_indexed_rhs_allowed(c, op, rhs)) {
     (Var rhs_tag, Type rhs_type) = rhs;
     (void) rhs_tag;
     String details = %"right type: ${rhs_type.repr()}";
@@ -3353,45 +3367,20 @@ static List _indexed_update(
     c.report_error(<xform>, message, NULL, %($details));
   }
 
-  if (!owner)
-    return _sequenced_protocol_call(
-      c, resolved,
-      %($base $selector ${_symbol_expression(op)} $rhs));
-
+  List operation = _symbol_expression(op);
+  List arguments = postfix
+    ? %($base $selector $operation)
+    : %($base $selector $operation $rhs);
+  if (!owner) return _sequenced_protocol_call(c, resolved, arguments);
   _convert_indexed_parts(c, owner, base, selector);
-  rhs = c.convert_expression(rhs, %("Var"));
-  String helper = owner == <array> ? "Array_updateindex" : "Map_updateindex";
-  return %(
-    call $helper (args $base $selector ${_symbol_expression(op)} $rhs));
-}
-
-static List _indexed_postfix(
-  Compiler compiler, List arg, Symbol op) {
-  Symbol owner, List base, selector;
-  if (!_indexed_parts(compiler, arg, owner, base, selector)) return NULL;
-  (Var base_tag, Type base_type) = base;
-  (void) base_tag;
-  List resolved =
-    compiler.resolve_protocol_member(base_type, "postfixindex");
-  if (!resolved) {
-    String type = base_type.repr();
-    compiler.report_error(
-      <xform>, %"type $type does not support indexed increment or decrement",
-      NULL, NULL);
-  }
-  if (!owner)
-    return _sequenced_protocol_call(
-      compiler, resolved,
-      %($base $selector ${_symbol_expression(op)}));
-  _convert_indexed_parts(compiler, owner, base, selector);
-  String helper = owner == <array> ? "Array_postfixindex" : "Map_postfixindex";
-  return %(call $helper (args $base $selector ${_symbol_expression(op)}));
-}
-
-static List _indexed_prefix(Compiler compiler, List arg, Symbol op) {
-  List one = %(expr (int) (literal (int) "1"));
-  Symbol binary = op == <++> ? <+> : <->;
-  return _indexed_update(compiler, arg, binary, one);
+  String helper = owner == <array>
+    ? (postfix ? "Array_postfixindex" : "Array_updateindex")
+    : (postfix ? "Map_postfixindex" : "Map_updateindex");
+  if (!postfix) rhs = c.convert_expression(rhs, %("Var"));
+  arguments = postfix
+    ? %($base $selector $operation)
+    : %($base $selector $operation $rhs);
+  return %(call $helper (args @arguments));
 }
 
 static List _dynamic_binary(
@@ -3534,7 +3523,7 @@ static List _operator(Compiler c, List ast) {
              (!set ?rhs (expr ? ?))): {
       Symbol compound = Symbol.compound_operator(operator);
       if (compound) {
-        List indexed = _indexed_update(
+        List indexed = _indexed_change(
           c, lhs, compound, rhs);
         if (indexed) return indexed;
         return _dynamic_compound(
@@ -3565,18 +3554,16 @@ static List _operator(Compiler c, List ast) {
     case %(op (!set ?operator (!or ++ --))
              (!set ?argument (expr ?argument_type ?))): {
       Type type = argument_type, List arg = argument;
-      List indexed = _indexed_prefix(c, arg, operator);
+      Symbol binary = operator == <++> ? <+> : <->;
+      List one = %(expr (int) (literal (int) "1"));
+      List indexed = _indexed_change(c, arg, binary, one);
       if (indexed) return indexed;
       if (!c.sym.is_var_type(type)) {
-        Symbol binary = operator == <++> ? <+> : <->;
-        List one = %(expr (int) (literal (int) "1"));
         List updated = _protocol_update(c, type, binary, arg, one, binary);
         if (updated) return updated;
       }
       if (c.sym.is_var_type(type)) {
-        List one = %(expr (int) (literal (int) "1"));
         one = c.convert_expression(one, %("Var"));
-        Symbol binary = operator == <++> ? <+> : <->;
         return _update_call(
           arg, _symbol_expression(binary), one, "x2c_var_update_volatile");
       }
@@ -3592,7 +3579,7 @@ static List _postfix(Compiler compiler, List ast) {
                    (!set ?argument (expr ?argument_type ?))): {
       Symbol op = operator, List arg = argument;
       Type type = argument_type;
-      List indexed = _indexed_postfix(compiler, arg, op);
+      List indexed = _indexed_change(compiler, arg, op, NULL);
       if (indexed) return indexed;
       if (!compiler.sym.is_var_type(type)) {
         Symbol binary = op == <++> ? <+> : <->;
