@@ -9,10 +9,9 @@
     Each accumulated record owns an independent `Scope` and one canonical
     `List` and `String` pool. A handler watermark bounds those regions, so
     closing the handler reclaims its complete slice without touching
-    application pools.
-    Raising while the error path is itself failing uses the error floor,
-    which allocates nothing.
- */
+    application pools. Raising while the error path is itself failing
+    reaches the error floor, which allocates nothing.
+*/
 
 #pragma once
 
@@ -37,11 +36,10 @@ typedef struct ErrorHandler *ErrorHandler;
 
 /** Handles a borrowed oldest-first `List` of errors raised since registration.
     `Error` invokes callbacks synchronously from innermost registration
-    outward.
-    Return `<handled>`, `<declined>`, or `<fatal>`; `<unwind>` is reserved for
-    compiler-generated catches. Any other result behaves as `<declined>` and
-    continues outward or to policy. The `List` and its contents expire on
-    return.
+    outward. Return `<handled>`, `<declined>`, or `<fatal>`; `<unwind>` is
+    reserved for compiler-generated catches. Any other result behaves as
+    `<declined>` and continues outward or to policy. The `List` and its
+    contents expire on return.
 */
 typedef Symbol (*ErrorHandlerFn)(List errors, Var data);
 
@@ -55,12 +53,6 @@ typedef struct ErrorCatchSite {
   MatchCaptureSite *arms;
   int default_arm, arm_count, state, fenced_arm;
 } ErrorCatchSite;
-
-#pragma private
-$(import "error-macros.xmacro")
-$(import "error-private.xmacro")
-$error.private.types();
-#pragma public
 
 /* A site is bound on its first registration: `static` when `Match` retains a
    plan for every arm, `transient` when some pattern is built at run time and
@@ -83,7 +75,6 @@ $error.private.types();
 #include "exception.x"
 #include "list.x"
 #include "map.x"
-#include "match.x"
 #include "pool.x"
 #include "scope.x"
 #include "string.x"
@@ -91,11 +82,22 @@ $error.private.types();
 #include "symbolset.x"
 #include "var.x"
 
+$(import "error-macros.xmacro")
+$(import "error-private.xmacro")
+
 Atom Atom.intern(String spelling);
 String Atom.str(Atom atom);
 
-// thread state
+/* thread state
 
+   Each thread owns its handlers, records, and policies. A record pairs one
+   entry List with the region that owns its values; error-private.xmacro
+   declares the record and handler layouts, which a unit test shares. */
+
+$error.private.types();
+
+/* One `Context`'s overlay: the policies and bound it sets, and the handler
+   depth and record height its close returns to. */
 typedef struct ErrorContextState {
   struct ErrorContextState *prev, Map policy, int bound, handler_depth;
   int stack_height;
@@ -105,12 +107,15 @@ typedef struct ErrorContextState {
    a rendering or allocation handler that itself must raise. */
 #define ERROR_MAX_DEPTH 4
 
+/* `handler_top` heads the registered handlers and `running_top` the detached
+   catches whose arms run; during dispatch, `dispatch_saved` holds the
+   complete chain and `dispatch_running` the handler offered the error. A
+   raise reaches the floor while `floor_only` is nonzero, and
+   `rendered[depth]` marks a dispatch whose error Logger rendered. */
 typedef struct ErrorThreadState {
   Scope scope, Block stack, Map policy, int shutdown_done;
   ErrorHandler handler_top, dispatch_saved, dispatch_running, running_top;
-  int bound;
-  ErrorContextState context_top;
-  int depth, floor_only, rendered[5];
+  int bound, ErrorContextState context_top, int depth, floor_only, rendered[5];
 } *ErrorThreadState;
 
 static threaded struct ErrorThreadState error_thread;
@@ -121,19 +126,25 @@ static ErrorThreadState _thread(void) {
   return state;
 }
 
-// raising
+/* raising
+
+   A raise enters dispatch, records the error, and offers it to the
+   handlers. A zero code raises `<invariant>`. */
+
+/* One raise in progress: its cause, the record count before it, and its
+   dispatch depth. */
+typedef struct ErrorRaise { Symbol code, int raised_at, depth; } ErrorRaise;
 
 /** Raises one cause with optional structured detail.
     This functional entry records and dispatches like the `raise` statement
-    but has no source-location record. A handled resumable error
-    returns `<handled>`; a collected or policy-consumed resumable error
-    returns `<declined>`. Shared non-returning causes may transfer to a
-    matching filtered catch but never return from this call.
-    Detail is recursively restricted to null/`nil`, numeric values, enums,
-    `Symbol`s/`Atom`s, `String`s, and `List`s of those values. An invalid
-    dynamic
-    detail, unhandled abort-policy error, unavailable runtime, or reentrant
-    failure reaches the non-reentrant error floor.
+    but has no source-location record. A handled resumable error returns
+    `<handled>`; a collected or policy-consumed resumable error returns
+    `<declined>`. Shared non-returning causes may transfer to a matching
+    filtered catch but never return from this call. Detail is recursively
+    restricted to null/`nil`, numeric values, enums, `Symbol`s/`Atom`s,
+    `String`s, and `List`s of those values. An invalid dynamic detail,
+    unhandled abort-policy error, unavailable runtime, or reentrant failure
+    reaches the non-reentrant error floor.
 
     Prefer the `raise` statement in source so generated location detail is
     retained.
@@ -153,53 +164,47 @@ void x2c_error_raise(Symbol code, List detail) {
 
 /** Raises one compiler-generated error from native key-value arguments.
     `pair_count` controls the following alternating `Var` keys and values;
-    `site`
-    may be NULL. The runtime copies admissible values and preserves pair order.
-    Resumable causes may return after handling or policy; shared non-returning
-    causes may transfer to a filtered catch but never return here. Invalid
-    detail or unavailable, reentrant, or failed `Error` machinery reaches the
-    raw error floor.
+    `site` may be NULL. The runtime copies admissible values and preserves
+    pair order. Resumable causes may return after handling or policy; shared
+    non-returning causes may transfer to a filtered catch but never return
+    here. Invalid detail or unavailable, reentrant, or failed `Error`
+    machinery reaches the raw error floor.
 */
 void x2c_error_raise_n(
   const X2CErrorSite *site, Symbol code, unsigned pair_count, ...) {
-  Symbol effective = code ? code : <invariant>;
-  _raise_enter(effective);
-  ErrorThreadState state = _thread();
-  int raised_at = Error.count(), depth = state.depth;
-  state.rendered[depth] = 0;
+  ErrorRaise r = _raise_enter(code);
   va_list args;
   va_start(args, pair_count);
-  _record_n(site, effective, pair_count, args);
+  _record_n(site, r.code, pair_count, args);
   va_end(args);
-  _dispatch(effective, raised_at, depth);
+  _dispatch(r);
 }
 
-static Symbol _raise(
-  const X2CErrorSite *site, Symbol code, List detail) {
+static Symbol _raise(const X2CErrorSite *site, Symbol code, List detail) {
+  ErrorRaise r = _raise_enter(code);
+  _record(site, r.code, detail);
+  return _dispatch(r);
+}
+
+/* A raise reaches the floor while error state is being built, when dispatch
+   is nested too deeply or shut down, and before initialization. */
+static ErrorRaise _raise_enter(Symbol code) {
   Symbol effective = code ? code : <invariant>;
-  _raise_enter(effective);
   ErrorThreadState state = _thread();
-  int raised_at = Error.count(), depth = state.depth;
-  state.rendered[depth] = 0;
-  _record(site, effective, detail);
-  return _dispatch(effective, raised_at, depth);
-}
-
-static void _raise_enter(Symbol effective) {
-  if (_thread().floor_only)
-    _floor(effective, "raise while building error state");
-  if (!_enter())
-    _floor(effective, "raise re-entered or after shutdown");
+  if (state.floor_only) _floor(effective, "raise while building error state");
+  if (!_enter()) _floor(effective, "raise re-entered or after shutdown");
   if (!Error.ready()) {
     _leave();
     _floor(effective, "raise before initialization");
   }
+  ErrorRaise r = {effective, Error.count(), state.depth};
+  state.rendered[r.depth] = 0;
+  return r;
 }
 
 static int _enter(void) {
   ErrorThreadState state = _thread();
-  if (state.shutdown_done) return 0;
-  if (state.depth >= ERROR_MAX_DEPTH) return 0;
+  if (state.shutdown_done || state.depth >= ERROR_MAX_DEPTH) return 0;
   state.depth++;
   return 1;
 }
@@ -215,7 +220,11 @@ static void _leave(void) {
 */
 int Error.depth(void) => _thread().depth;
 
-// records
+/* records
+
+   A record's entry has the shape of a Diagnostics entry,
+   `((code C) (detail D) (location L))`, so a handler can match on it. Its
+   detail is copied into the record's own region. */
 
 static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   if (Error.count() >= Error.bound())
@@ -236,34 +245,35 @@ static void _record_n(
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  int pushed = _scope_push(
-    code, "could not enter error scope for counted detail");
-  Block pairs = Block.new(sizeof(ErrorPair));
-  for (unsigned i = 0; i < pair_count; i++) {
-    ErrorPair pair = {
-      .key = _copy_value(&record.region, va_arg(args, Var)),
-      .value = _copy_value(&record.region, va_arg(args, Var))
-    };
-    pairs.push(&pair);
-  }
-  ErrorPair *items = pairs.bytes;
-  List detail = NULL;
-  for (int i = (int) pair_count - 1; i >= 0; i--)
-    detail = _cons(
-      &record.region,
-      _pair(&record.region, items[i].key, items[i].value),
-      detail);
-  pairs.free();
-  if (pushed) Scope.pop();
+  List detail = _counted_detail(&record.region, code, pair_count, args);
   record.entry = _entry(&record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
 
-typedef struct ErrorPair {
-  Var key;
-  Var value;
-} ErrorPair;
+typedef struct ErrorPair { Var key, value; } ErrorPair;
+
+/* Copies `count` key-value arguments into `region` as a detail List in
+   argument order. The pairs wait in a Block because the List is built from
+   its end. */
+static List _counted_detail(
+  ErrorRegion *region, Symbol code, unsigned count, va_list args) {
+  int pushed = _scope_push(
+    code, "could not enter error scope for counted detail");
+  Block pairs = Block.new(sizeof(ErrorPair));
+  for (unsigned i = 0; i < count; i++) {
+    ErrorPair pair = { .key = _copy_value(region, va_arg(args, Var)) };
+    pair.value = _copy_value(region, va_arg(args, Var));
+    pairs.push(&pair);
+  }
+  ErrorPair *items = pairs.bytes;
+  List detail = NULL;
+  for (int i = (int) count - 1; i >= 0; i--)
+    detail = _field(region, items[i].key, items[i].value, detail);
+  pairs.free();
+  if (pushed) Scope.pop();
+  return detail;
+}
 
 static List _entry(
   ErrorRegion *region, const X2CErrorSite *site, Symbol code, List detail) {
@@ -274,23 +284,18 @@ static List _entry(
   return entry;
 }
 
-/* Builds one error record.
-    The shape matches Diagnostics entries so a handler can match on it.
-    Symbols are bound and interpolated, never written inside the form.
-*/
 static List _location(ErrorRegion *region, const X2CErrorSite *site) {
   if (!site) return NULL;
-  const char *file_source = site.file ? site.file : "<unknown>";
-  const char *function_source = site.function ? site.function : "<unknown>";
-  String file = String.new_in(
-    region.pool, file_source, strlen(file_source));
-  String function = String.new_in(
-    region.pool, function_source, strlen(function_source));
-  int line = site.line, List location = NULL;
-  location = _field(region, <function>, function, location);
-  location = _field(region, <line>, line, location);
-  location = _field(region, <file>, file, location);
-  return location;
+  String file = _site_text(region, site.file);
+  String function = _site_text(region, site.function);
+  List location = _field(region, <function>, function, NULL);
+  location = _field(region, <line>, site.line, location);
+  return _field(region, <file>, file, location);
+}
+
+static String _site_text(ErrorRegion *region, const char *text) {
+  if (!text) text = "<unknown>";
+  return String.new_in(region.pool, text, strlen(text));
 }
 
 static List _field(ErrorRegion *region, Var key, Var value, List tail) =>
@@ -323,45 +328,21 @@ static void _truncate(int mark) {
    into its pool instead. Both policies traverse the same immutable shape. */
 static Var _copy_value(ErrorRegion *region, Var value) {
   if (value is void)
-    _floor(<bad-types>, region
-      ? "void is not an admissible error detail"
-      : "void is not an admissible error snapshot");
+    _floor(
+      <bad-types>, region ? "void is not an admissible error detail"
+                          : "void is not an admissible error snapshot");
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
-  if (value.is_wide()) {
-    if (!region) return _snapshot_wide(value);
-    Scope.push(&region.values);
-    Var owned = value.clone_wide();
-    Scope.pop();
-    return owned;
-  }
+  if (value.is_wide()) return _copy_wide(region, value);
   if (value.is_integer() || value.is_floating()) return value;
-  if (value is <string> || value is <lsym>) {
-    String source = value is <lsym> ? value.str() : value.string();
-    String owned = region
-      ? String.new_in(region.pool, source, source.len())
-      : String.new_len(source, source.len());
-    if (region)
-      return value is <lsym> ? Var.new(<lsym>, owned) : owned;
-    if (value is <lsym>) {
-      Atom atom = Atom.intern(owned);
-      if (atom is <lsym>) String.try_own(atom.str());
-      return atom;
-    }
-    String.try_own(owned);
-    return owned;
-  }
-  if (value is <list>) {
-    List source = value;
-    Var head = _copy_value(region, source.car());
-    List tail = _copy_value(region, source.cdr());
-    List owned = region ? _cons(region, head, tail) : cons(head, tail);
-    if (!region) List.try_own(owned);
-    return owned;
-  }
-  _floor(<bad-types>, region
-    ? "error detail contains an identity-bearing value"
-    : "error snapshot contains an identity-bearing value");
+  if (value is <string> || value is <lsym>) return _copy_text(region, value);
+  if (value is <list>) return _copy_list(region, value);
+  _floor(
+    <bad-types>, region ? "error detail contains an identity-bearing value"
+                        : "error snapshot contains an identity-bearing value");
 }
+
+static Var _copy_wide(ErrorRegion *region, Var value) =>
+  region ? _clone_in(&region.values, value) : _snapshot_wide(value);
 
 /* A wide box belongs to the outermost `Scope` of the caller's active slot, so
    a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
@@ -371,10 +352,42 @@ static Var _snapshot_wide(Var v) {
   Scope owner = *Scope.top();
   if (!owner) return v.clone_wide();
   while (owner.down) owner = owner.down;
-  Scope.push(&owner);
+  return _clone_in(&owner, v);
+}
+
+static Var _clone_in(Scope *owner, Var v) {
+  Scope.push(owner);
   Var copy = v.clone_wide();
   Scope.pop();
   return copy;
+}
+
+static Var _copy_text(ErrorRegion *region, Var value) {
+  String source = value is <lsym> ? value.str() : value.string();
+  if (!region) return _snapshot_text(value, source);
+  String owned = String.new_in(region.pool, source, source.len());
+  return value is <lsym> ? Var.new(<lsym>, owned) : owned;
+}
+
+/* A snapshot promotes its copy, and an Atom's spelling is interned first. */
+static Var _snapshot_text(Var value, String source) {
+  String owned = String.new_len(source, source.len());
+  if (value is not <lsym>) {
+    String.try_own(owned);
+    return owned;
+  }
+  Atom atom = Atom.intern(owned);
+  if (atom is <lsym>) String.try_own(atom.str());
+  return atom;
+}
+
+static List _copy_list(ErrorRegion *region, List source) {
+  Var head = _copy_value(region, source.car());
+  List tail = _copy_value(region, source.cdr());
+  if (region) return _cons(region, head, tail);
+  List owned = cons(head, tail);
+  List.try_own(owned);
+  return owned;
 }
 
 static ErrorRegion _region_new(void) {
@@ -394,18 +407,17 @@ static void _region_destroy(ErrorRegion *region) {
   }
 }
 
-// dispatch
+/* dispatch
 
-/* Offers the newest record to each handler from innermost outward.
-    A handler runs on the live frame, before any transfer, and sees the errors
-    accrued since it was registered. `<handled>` consumes that slice and stops
-    the search. `<declined>` continues outward and leaves the errors
-    accumulated. `<fatal>` aborts. `<unwind>` is not available to an observing
-    registration and is a programmer error here. Hiding the current handler
-    before its callback makes a nested raise begin at the next outer handler;
-    the saved full chain is restored after dispatch or at a transfer landing.
-*/
-static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
+   A handler runs on the live frame, before any transfer, and sees the errors
+   accrued since it was registered. Dispatch hides each handler before
+   offering it the error, so a nested raise begins at the next outer handler;
+   the saved full chain is restored after dispatch or at a transfer landing. */
+
+/* Offers the newest record to the handlers, then restores the chain. An
+   error every handler declined follows its cause's policy, and a shared
+   non-returning cause that no catch took reaches the floor. */
+static Symbol _dispatch(ErrorRaise r) {
   ErrorThreadState state = _thread();
   ErrorHandler saved = state.handler_top, outer = state.dispatch_saved;
   ErrorHandler outer_running = state.dispatch_running;
@@ -414,57 +426,73 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
      transfer out of that nested dispatch must still hand every registration
      back to the cleanup that runs between the raise and the landing. */
   if (!outer) state.dispatch_saved = saved;
-  Symbol result = <declined>;
-  for (ErrorHandler h = saved; h; h = h.prev) {
-    state.dispatch_running = h;
-    state.handler_top = h.prev;
-    Symbol disposition = <declined>;
-    if (h.site) disposition = _catch_match(h);
-    else {
-      /* The view belongs to the handler, not to this frame: `exit()` from the
-         callback abandons the frame, and shutdown reclaims the handler. */
-      defer _region_destroy(&h.view);
-      state.floor_only++;
-      h.view = _region_new();
-      List slice = _view_since(&h.view, h.watermark);
-      state.floor_only--;
-      disposition = h.fn(slice, h.data);
-    }
-    if (disposition == <unwind> || disposition == <fatal>) {
-      state.handler_top = state.dispatch_saved;
-      state.dispatch_saved = state.dispatch_running = NULL;
-      _leave();
-      if (disposition == <unwind> && h.site) ExceptionFrame.unwind(h.target);
-      _floor(
-        effective, disposition == <fatal> ? "handler returned fatal"
-                 : "<unwind> from an observing registration");
-    }
-    if (disposition == <handled>) {
-      _truncate(h.watermark);
-      result = <handled>;
-      break;
-    }
-  }
+  Symbol disposition = _offer(state, saved, r.code);
   state.handler_top = saved;
   state.dispatch_saved = outer;
   state.dispatch_running = outer_running;
   _leave();
-
-  if (_never_returns(effective))
-    _floor(effective, "non-returning error was not caught");
-  if (result != <declined>) return result;
-  Symbol policy = Error.policy_get(effective);
-  if (policy == <abort>)
-    _floor(effective, "unhandled and policy is abort");
-  if (policy == <log>) {
-    if (!state.rendered[depth]) _report(effective);
-    _truncate(raised_at);
-  }
-  else if (policy == <ignore>) _truncate(raised_at);
-  return result;
+  if (_never_returns(r.code))
+    _floor(r.code, "non-returning error was not caught");
+  if (disposition == <declined>) _apply_policy(state, r);
+  return disposition;
 }
 
-// fallback when <log> has no active Logger renderer
+/* Offers the error to each handler from `h` outward. `<handled>` consumes
+   that handler's slice and stops the search; `<declined>` continues outward
+   and leaves the errors accumulated. */
+static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code) {
+  for (; h; h = h.prev) {
+    state.dispatch_running = h;
+    state.handler_top = h.prev;
+    Symbol disposition = h.site ? _catch_match(h) : _observe(state, h);
+    if (disposition == <unwind> || disposition == <fatal>)
+      _transfer(state, h, code, disposition);
+    if (disposition == <handled>) {
+      _truncate(h.watermark);
+      return <handled>;
+    }
+  }
+  return <declined>;
+}
+
+/* The view belongs to the handler, not to this frame: `exit()` from the
+   callback abandons the frame, and shutdown reclaims the handler. */
+static Symbol _observe(ErrorThreadState state, ErrorHandler h) {
+  defer _region_destroy(&h.view);
+  state.floor_only++;
+  h.view = _region_new();
+  List slice = _view_since(&h.view, h.watermark);
+  state.floor_only--;
+  return h.fn(slice, h.data);
+}
+
+/* Hands the complete chain back to the cleanup that runs before a landing,
+   then lands at the selected catch's frame. `<fatal>` aborts, and `<unwind>`
+   is not available to an observing registration, so both reach the floor. */
+static void _transfer(
+  ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition) {
+  state.handler_top = state.dispatch_saved;
+  state.dispatch_saved = state.dispatch_running = NULL;
+  _leave();
+  if (disposition == <unwind> && h.site) ExceptionFrame.unwind(h.target);
+  _floor(
+    code, disposition == <fatal> ? "handler returned fatal"
+        : "<unwind> from an observing registration");
+}
+
+/* `<log>` reports an error unless Logger rendered it, and both `<log>` and
+   `<ignore>` drop the records the raise added; `<collect>` keeps them. */
+static void _apply_policy(ErrorThreadState state, ErrorRaise r) {
+  Symbol policy = Error.policy_get(r.code);
+  if (policy == <abort>) _floor(r.code, "unhandled and policy is abort");
+  if (policy == <log>) {
+    if (!state.rendered[r.depth]) _report(r.code);
+    _truncate(r.raised_at);
+  }
+  else if (policy == <ignore>) _truncate(r.raised_at);
+}
+
+/* The fallback report of a `<log>` error that Logger did not render. */
 static void _report(Symbol code) {
   char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
   code.decode(spelling);
@@ -474,8 +502,7 @@ static void _report(Symbol code) {
 
 /** Marks the current nested error dispatch as already rendered by `Logger`.
     This suppresses only `Error`'s fallback report for a `<log>` policy.
-    Calling
-    outside dispatch has no effect.
+    Calling outside dispatch has no effect.
 */
 void Error.note_rendered(void) {
   ErrorThreadState state = _thread();
@@ -483,7 +510,11 @@ void Error.note_rendered(void) {
     state.rendered[state.depth] = 1;
 }
 
-// catch selection
+/* catch selection
+
+   A transferring catch selects the first arm whose pattern matches the
+   newest record's `(code @detail)`. The selected arm's captures and the
+   records above the watermark then belong to the handle. */
 
 static Symbol _catch_match(ErrorHandler h) {
   if (Error.count() <= h.watermark) return <declined>;
@@ -494,37 +525,46 @@ static Symbol _catch_match(ErrorHandler h) {
   state.floor_only++;
   List projection = _cons(&record.region, code, detail);
   Pool.open_named("Error catch bindings");
-  ErrorCatchSite *site = h.site;
-  MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
-  for (int i = 0; i < site.arm_count; i++) {
-    int is_default = i == site.default_arm;
-    MatchPlan plan = is_default ? NULL
-                   : plans ? plans[i] : site.arms[i].plan;
-    MatchCaptureLayout layout = plan ? plan.layout : NULL;
-    Var *values = layout && layout.binder_count
-                ? Scope.malloc(sizeof(Var) * layout.binder_count)
-                : NULL;
-    MatchCaptureBuffer captures = {
-      values, 0, layout ? layout.binder_count : 0
-    };
-    int matched = is_default ? 1 :
-      plan.status == MACHINE_PREPARED &&
-      plan.execute_capture(projection, captures, NULL) == 1;
-    if (!matched) {
-      if (values) Scope.free(values);
-      continue;
-    }
-    _catch_commit_captures(h, record, layout, &captures);
-    if (values) Scope.free(values);
-    h.selected = i;
-    Pool.close();
-    _catch_retain(h);
-    state.floor_only--;
-    return <unwind>;
-  }
+  int selected = _catch_select(h, record, projection);
   Pool.close();
+  if (selected) _catch_retain(h);
   state.floor_only--;
-  return <declined>;
+  return selected ? <unwind> : <declined>;
+}
+
+static int _catch_select(
+  ErrorHandler h, ErrorRecord *record, List projection) {
+  for (int i = 0; i < h.site.arm_count; i++)
+    if (_catch_arm(h, record, projection, i)) {
+      h.selected = i;
+      return 1;
+    }
+  return 0;
+}
+
+/* Tries arm `i` and, when it matches, copies its captures into the record's
+   region. The default arm matches without a plan. */
+static int _catch_arm(
+  ErrorHandler h, ErrorRecord *record, List projection, int i) {
+  MatchPlan plan = _arm_plan(h, i);
+  MatchCaptureLayout layout = plan ? plan.layout : NULL;
+  int binders = layout ? layout.binder_count : 0;
+  Var *values = binders ? Scope.malloc(sizeof(Var) * binders) : NULL;
+  MatchCaptureBuffer captures = {values, 0, binders};
+  int matched = i == h.site.default_arm ||
+    (plan.status == MACHINE_PREPARED &&
+     plan.execute_capture(projection, captures, NULL) == 1);
+  if (matched) _catch_commit_captures(h, record, layout, &captures);
+  if (values) Scope.free(values);
+  return matched;
+}
+
+/* A transient site's registration holds its own plans; a static site
+   retains one plan per arm. */
+static MatchPlan _arm_plan(ErrorHandler h, int i) {
+  if (i == h.site.default_arm) return NULL;
+  MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
+  return plans ? plans[i] : h.site.arms[i].plan;
 }
 
 static void _catch_commit_captures(
@@ -542,8 +582,8 @@ static void _catch_commit_captures(
   Var *values = handle.capture_values.bytes;
   for (int i = 0; i < layout.binder_count; i++) {
     values[i] = void;
-    if (!captures.has(i)) continue;
-    values[i] = _copy_value(&record.region, captures.values[i]);
+    if (captures.has(i))
+      values[i] = _copy_value(&record.region, captures.values[i]);
   }
   if (pushed) Scope.pop();
 }
@@ -577,7 +617,10 @@ static void _retained_destroy(Block retained) {
   retained.free();
 }
 
-// policy
+/* policy
+
+   A policy decides what happens to an error every handler declined. A
+   `Context` overlays its own policies and bound on the thread's. */
 
 /* This is the same shared cause table that drives compiler unreachable
    emission. Error locks every listed policy to abort: observing handlers may
@@ -586,8 +629,7 @@ static void _retained_destroy(Block retained) {
 static const SymbolSet error_nonreturning_causes =
   $error.nonreturning.causes();
 
-static int _never_returns(Symbol code) =>
-  code in error_nonreturning_causes;
+static int _never_returns(Symbol code) => code in error_nonreturning_causes;
 
 /** Sets the default disposition for `code`.
     Supported policy values are `<abort>`, `<collect>`, `<log>`, and
@@ -620,13 +662,12 @@ void Error.policy_set(Symbol code, Symbol disposition) {
 */
 Symbol Error.policy_get(Symbol code) {
   if (!Error.ready()) return <abort>;
-  ErrorThreadState thread = _thread();
-  for (ErrorContextState state = thread.context_top; state;
-       state = state.prev) {
-    Var found = state.policy[code];
+  ErrorThreadState state = _thread();
+  for (ErrorContextState at = state.context_top; at; at = at.prev) {
+    Var found = at.policy[code];
     if (found is not void) return found;
   }
-  Var found = thread.policy[code];
+  Var found = state.policy[code];
   if (found is void) return <abort>;
   return found;
 }
@@ -651,8 +692,7 @@ void Error.bound_set(int bound) {
    thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The
    pairs follow the header in the same block. */
 typedef struct ErrorPolicyCapture {
-  int count;
-  Symbol *pairs;
+  int count, Symbol *pairs;
 } *ErrorPolicyCapture;
 
 /** Captures the calling thread's `Error` policy for another thread to adopt.
@@ -674,22 +714,22 @@ void *Error.policy_capture(void) {
     sizeof(struct ErrorPolicyCapture) + (size_t) capacity * sizeof(Symbol));
   if (!capture) raise %(alloc-fail (owner "Error.policy_capture"));
   capture.pairs = (Symbol *) (capture + 1);
-  int written = _policy_fill(state.policy, capture.pairs, 0, capacity);
-  capture.count = _policy_fill_contexts(
+  int written = _fill_pairs(state.policy, capture.pairs, 0, capacity);
+  capture.count = _fill_contexts(
     state.context_top, capture.pairs, written, capacity);
   return capture;
 }
 
 /* Outermost context first, so replaying the pairs in order reproduces the
    overlays an inner context placed over an outer one. */
-static int _policy_fill_contexts(
-  ErrorContextState state, Symbol *pairs, int at, int capacity) {
-  if (!state) return at;
-  at = _policy_fill_contexts(state.prev, pairs, at, capacity);
-  return _policy_fill(state.policy, pairs, at, capacity);
+static int _fill_contexts(
+  ErrorContextState context, Symbol *pairs, int at, int capacity) {
+  if (!context) return at;
+  at = _fill_contexts(context.prev, pairs, at, capacity);
+  return _fill_pairs(context.policy, pairs, at, capacity);
 }
 
-static int _policy_fill(Map policy, Symbol *pairs, int at, int capacity) {
+static int _fill_pairs(Map policy, Symbol *pairs, int at, int capacity) {
   unsigned cursor = 0;
   Var key = void, value = void;
   while (policy.try_next(cursor, key, value)) {
@@ -727,9 +767,13 @@ void Error.policy_adopt(void *capture) {
 /** Releases a policy capture that no thread adopted. A NULL capture is
     accepted and does nothing.
 */
-void Error.policy_release(void *capture) { free(capture); }
+void Error.policy_release(void *capture) => free(capture);
 
-// the handler stack
+/* the handler stack
+
+   The newest registration is the innermost handler. A handler's watermark
+   is the record count at its registration, so the records above it are the
+   errors raised since. */
 
 /** Pushes an observing handler and returns its removal handle.
     The handler sees a borrowed view of errors raised after this registration;
@@ -754,8 +798,7 @@ static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data) {
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
     .prev = state.handler_top, .fn = fn, .data = data,
-    .watermark = Error.count(), .selected = -1
-  };
+    .watermark = Error.count(), .selected = -1};
   return h;
 }
 
@@ -779,18 +822,18 @@ static void _handler_free(ErrorHandler handle) {
   if (!handle) return;
   // a per-call site has no static arm storage and belongs to this handler
   if (handle.site && !handle.site.arms) Scope.free(handle.site);
-  if (handle.plans != NULL) {
-    MatchPlan *plans = handle.plans.bytes;
-    for (size_t i = 0; i < handle.plans.length; i++) {
-      MatchPlan plan = plans[i];
-      plan.free();
-    }
-    handle.plans.free();
-  }
+  _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
   _region_destroy(&handle.view);
   Scope.free(handle);
+}
+
+static void _plans_free(Block plans) {
+  if (plans == NULL) return;
+  MatchPlan *items = plans.bytes;
+  for (size_t i = 0; i < plans.length; i++) items[i].free();
+  plans.free();
 }
 
 /* Pops handlers down to `stop`, reclaiming each one. `truncate` also discards
@@ -810,8 +853,7 @@ static void _unwind_to(
 /* Returns the handler that leaves exactly `depth` registered, or the current
    head when the stack is already that shallow. The height is measured once
    here so an unwind does not re-measure it per cleanup record. */
-static ErrorHandler _handler_at_depth(
-  ErrorThreadState state, int depth) {
+static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth) {
   ErrorHandler stop = state.handler_top;
   for (int height = Error.handler_depth(); height > depth && stop; height--)
     stop = stop.prev;
@@ -837,7 +879,10 @@ int Error.handler_depth(void) {
 */
 void *Error.handler_head(void) => _thread().handler_top;
 
-// transferring catches
+/* transferring catches
+
+   A compiler-generated `try` registers a transferring catch through the
+   static site of its arms, and the first registration binds the site. */
 
 /** Registers one compiler-generated transferring catch through its site.
     `target` names the `ExceptionFrame` that the caller pushes immediately
@@ -866,15 +911,8 @@ ErrorHandler x2c_error_catch_site_push(
   ErrorHandler h = _handler_new(NULL, void);
   h.site = site;
   h.target = target;
-  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING)
-    _catch_site_bind(site, patterns);
-  const char *fenced = NULL, int fenced_arm = -1;
-  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) == ERROR_CATCH_TRANSIENT)
-    fenced = _catch_prepare_plans(h, patterns, &fenced_arm);
-  else if (site.fenced_arm >= 0) {
-    fenced_arm = site.fenced_arm;
-    fenced = site.arms[fenced_arm].plan.reason;
-  }
+  int arm = -1;
+  const char *fenced = _prepare_arms(h, patterns, arm);
   state.floor_only--;
   /* Report the fence here, where the unusable arm can be named. Reporting it
      from dispatch would re-enter the raise path that is already answering
@@ -882,37 +920,34 @@ ErrorHandler x2c_error_catch_site_push(
   if (fenced) {
     _handler_free(h);
     String fence = String.new(fenced);
-    raise %(size-limit (owner "catch") (arm $fenced_arm) (fence $fence));
+    raise %(size-limit (owner "catch") (arm $arm) (fence $fence));
   }
   state.handler_top = h;
   return h;
 }
 
-/* The mutex is recursive: an `<alloc-fail>` observer that registers another
-   pending site while a bind holds it must not deadlock. */
-static pthread_mutex_t catch_site_mutex;
-static pthread_once_t catch_site_mutex_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
+/* Binds a pending site, then returns why the first fenced arm this
+   registration can reach is unusable, or NULL. A transient site prepares
+   its plans for this registration alone. */
+static const char *_prepare_arms(ErrorHandler h, Var *patterns, int &arm) {
+  ErrorCatchSite *site = h.site;
+  if (_site_state(site) == ERROR_CATCH_PENDING)
+    _catch_site_bind(site, patterns);
+  if (_site_state(site) == ERROR_CATCH_TRANSIENT)
+    return _catch_prepare_plans(h, patterns, arm);
+  if (site.fenced_arm < 0) return NULL;
+  arm = site.fenced_arm;
+  return site.arms[arm].plan.reason;
+}
 
-static void _catch_site_mutex_initialize(void) =>
-  x2c_mutex_recursive_initialize(
-    &catch_site_mutex, "Error: could not initialize catch site mutex");
-
-static void _catch_site_lock(void) =>
-  x2c_mutex_recursive_lock(
-    &catch_site_mutex, &catch_site_mutex_once, _catch_site_mutex_initialize,
-    "Error: could not lock catch site");
-
-static void _catch_site_unlock(void) =>
-  x2c_mutex_recursive_unlock(
-    &catch_site_mutex, "Error: could not unlock catch site");
+static int _site_state(ErrorCatchSite *site) =>
+  __atomic_load_n(&site.state, __ATOMIC_ACQUIRE);
 
 static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
-  _catch_site_lock();
+  _site_lock();
   // promotion and preparation allocate, and a failure never returns here
-  defer _catch_site_unlock();
-  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) != ERROR_CATCH_PENDING)
-    return;
+  defer _site_unlock();
+  if (_site_state(site) != ERROR_CATCH_PENDING) return;
   int retainable = 1;
   for (int i = 0; retainable && i < site.arm_count; i++)
     if (i != site.default_arm)
@@ -930,9 +965,28 @@ static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
     __ATOMIC_RELEASE);
 }
 
+/* The mutex is recursive: an `<alloc-fail>` observer that registers another
+   pending site while a bind holds it must not deadlock. */
+static pthread_mutex_t catch_site_mutex;
+static pthread_once_t catch_site_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+
+static void _site_mutex_initialize(void) =>
+  x2c_mutex_recursive_initialize(
+    &catch_site_mutex, "Error: could not initialize catch site mutex");
+
+static void _site_lock(void) =>
+  x2c_mutex_recursive_lock(
+    &catch_site_mutex, &catch_site_mutex_once, _site_mutex_initialize,
+    "Error: could not lock catch site");
+
+static void _site_unlock(void) =>
+  x2c_mutex_recursive_unlock(
+    &catch_site_mutex, "Error: could not unlock catch site");
+
 /* Prepares one plan per arm for a registration of a transient site. */
 static const char *_catch_prepare_plans(
-  ErrorHandler h, Var *patterns, int *fenced_arm) {
+  ErrorHandler h, Var *patterns, int &fenced_arm) {
   ErrorCatchSite *site = h.site;
   const char *fenced = NULL;
   int pushed = _scope_push(
@@ -944,7 +998,7 @@ static const char *_catch_prepare_plans(
     h.plans.push(&plan);
     if (plan && plan.status == MACHINE_INELIGIBLE && !fenced) {
       fenced = plan.reason;
-      *fenced_arm = i;
+      fenced_arm = i;
     }
   }
   if (pushed) Scope.pop();
@@ -965,8 +1019,7 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
     &state.scope, sizeof(ErrorCatchSite) + sizeof(Var) * arm_count);
   Var *patterns = (void *) (site + 1);
   *site = (ErrorCatchSite) {
-      NULL, -1, (int) arm_count, ERROR_CATCH_TRANSIENT, -1
-  };
+    NULL, -1, (int) arm_count, ERROR_CATCH_TRANSIENT, -1};
   va_list args;
   va_start(args, arm_count);
   for (unsigned i = 0; i < arm_count; i++) {
@@ -982,8 +1035,7 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
     A bound static site answers 0, so its caller can skip constructing them.
 */
 int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
-  !site ||
-  __atomic_load_n(&site.state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
+  !site || _site_state(site) != ERROR_CATCH_STATIC;
 
 // running arms
 
@@ -1052,7 +1104,10 @@ void x2c_error_catch_close(ErrorHandler handle) {
   _handler_free(handle);
 }
 
-// frames and contexts
+/* frames and contexts
+
+   An exception frame and a `Context` note the handler and record heights
+   when they open and restore them when they leave. */
 
 /** Returns the handler head retained for the current `Error` transfer.
     During handler dispatch this is the head saved by the outermost dispatch,
@@ -1074,8 +1129,7 @@ void *Error.unwind_head(void) {
 void Error.restore_landing(void *saved_head, int saved_depth) {
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
-  if (_chain_contains(saved, state.handler_top))
-    state.handler_top = saved;
+  if (_chain_contains(saved, state.handler_top)) state.handler_top = saved;
   state.dispatch_saved = state.dispatch_running = NULL;
   state.depth = saved_depth;
 }
@@ -1088,8 +1142,7 @@ void Error.restore_landing(void *saved_head, int saved_depth) {
 void Error.trim(void *saved_head, int stack_height) {
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
-  if (_chain_contains(state.handler_top, saved))
-    _unwind_to(state, saved, 1);
+  if (_chain_contains(state.handler_top, saved)) _unwind_to(state, saved, 1);
   _truncate(stack_height);
 }
 
@@ -1108,19 +1161,18 @@ void Error.restore(int handler_depth, int stack_height) {
     Policy and bound changes become local overlays; handlers and accumulated
     records are restored by `Error.context_close`. The returned opaque token is
     allocated in the current `Scope`, which must remain live through the
-    matching
-    close. An unavailable `Error` runtime returns NULL.
+    matching close. An unavailable `Error` runtime returns NULL.
     Raises: `<alloc-fail>` when the overlay cannot be allocated.
 */
 void *Error.context_open(void) {
   if (!Error.ready()) return NULL;
-  ErrorThreadState thread = _thread();
-  ErrorContextState state = Scope.malloc(sizeof(struct ErrorContextState));
-  *state = (struct ErrorContextState) {
-    .prev = thread.context_top, .policy = {}, .bound = Error.bound(),
+  ErrorThreadState state = _thread();
+  ErrorContextState context = Scope.malloc(sizeof(struct ErrorContextState));
+  *context = (struct ErrorContextState) {
+    .prev = state.context_top, .policy = {}, .bound = Error.bound(),
     .handler_depth = Error.handler_depth(), .stack_height = Error.count()};
-  thread.context_top = state;
-  return state;
+  state.context_top = context;
+  return context;
 }
 
 /** Closes one `Context` `Error` overlay.
@@ -1131,19 +1183,22 @@ void *Error.context_open(void) {
     token does nothing and a closed token is invalid.
 */
 void Error.context_close(void *token, int preserve_records) {
-  ErrorContextState state = token;
-  if (!state) return;
-  ErrorThreadState thread = _thread();
-  if (thread.context_top != state)
+  ErrorContextState context = token;
+  if (!context) return;
+  ErrorThreadState state = _thread();
+  if (state.context_top != context)
     _floor(<invariant>, "Error Context close out of order");
-  _unwind_to(
-    thread, _handler_at_depth(thread, state.handler_depth),
-    !preserve_records);
-  if (!preserve_records) _truncate(state.stack_height);
-  thread.context_top = state.prev;
+  ErrorHandler stop = _handler_at_depth(state, context.handler_depth);
+  _unwind_to(state, stop, !preserve_records);
+  if (!preserve_records) _truncate(context.stack_height);
+  state.context_top = context.prev;
 }
 
-// accumulated errors
+/* accumulated errors
+
+   A handler's view and a catch's bindings are borrowed. A snapshot copies
+   errors or values into the caller's owners so they outlive their callback
+   or arm. */
 
 /** Returns the number of errors currently accumulated.
     Returns zero before `Error` initialization and after shutdown.
@@ -1158,10 +1213,9 @@ int Error.mark(void) => Error.count();
 /** Returns the accumulated errors at and after `mark`, oldest first.
     Each entry has `code`, `detail`, and `location` fields. An invalid mark or
     an unavailable `Error` runtime returns `nil`. The snapshot enters the
-    caller's
-    outermost `Scope` and canonical pools and remains live until those owners
-    are
-    released. Failure to materialize it reaches the non-reentrant error floor.
+    caller's outermost `Scope` and canonical pools and remains live until
+    those owners are released. Failure to materialize it reaches the
+    non-reentrant error floor.
 */
 List Error.since(int mark) {
   if (!Error.ready() || mark < 0) return NULL;
@@ -1186,26 +1240,27 @@ static List _view_since(ErrorRegion *region, int mark) {
 
 /** Copies errors at and after `mark` into explicit owners, oldest first.
     `String`s and `List`s are canonicalized through `pool`'s chain and remain
-    live
-    until their actual owning pool is released. Wide scalar boxes enter
+    live until their actual owning pool is released. Wide scalar boxes enter
     `*values`, whose possibly updated `Scope` head is written back, and remain
     live until that `Scope` is destroyed. An unavailable runtime or negative
-    mark
-    returns `nil`. `Null` owners or failures while copying reach the raw floor.
+    mark returns `nil`. `Null` owners or failures while copying reach the raw
+    floor.
 */
 List Error.since_in(int mark, Scope *values, Pool pool) {
   if (!Error.ready() || mark < 0) return NULL;
-  if (!values || !pool)
-    _floor(<bad-arg>, "error snapshot requires explicit owners");
-  ErrorRegion region = {
-    .values = *values, .pool = pool
-  };
+  ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
   List out = _view_since(&region, mark);
   state.floor_only--;
   *values = region.values;
   return out;
+}
+
+static ErrorRegion _owners(Scope *values, Pool pool) {
+  if (!values || !pool)
+    _floor(<bad-arg>, "error snapshot requires explicit owners");
+  return (ErrorRegion) { .values = *values, .pool = pool };
 }
 
 /** Copies one admissible error value into the caller's ordinary owners.
@@ -1219,49 +1274,46 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
 Var Error.snapshot(Var value) {
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var result = _copy_value(NULL, value);
+  Var copy = _copy_value(NULL, value);
   state.floor_only--;
-  return result;
+  return copy;
 }
 
 /** Copies one admissible error value into explicit runtime owners.
     `String`s and `List`s are canonicalized through `pool`'s chain and remain
-    live
-    until their actual owning pool is released. Wide scalar boxes enter
+    live until their actual owning pool is released. Wide scalar boxes enter
     `*values`, whose possibly updated `Scope` head is written back, and remain
     live until that `Scope` is destroyed. `Null` owners, invalid or
     identity-bearing values, and failures while copying reach the raw floor.
 */
 Var Error.snapshot_in(Var value, Scope *values, Pool pool) {
-  if (!values || !pool)
-    _floor(<bad-arg>, "error snapshot requires explicit owners");
-  ErrorRegion region = {
-    .values = *values, .pool = pool
-  };
+  ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var result = _copy_value(&region, value);
+  Var copy = _copy_value(&region, value);
   state.floor_only--;
   *values = region.values;
-  return result;
+  return copy;
 }
 
-// the error floor
+/* the error floor
 
-/* Reports a failure that the rich error path cannot handle and aborts.
-    Reachable before initialization, after shutdown, and when raising has
-    re-entered itself. Allocates nothing and calls nothing that can.
-*/
+   The floor reports a failure that the rich error path cannot handle and
+   aborts. It is reachable before initialization, after shutdown, and when
+   raising has re-entered itself, so it allocates nothing and calls nothing
+   that can. */
+
 static void _floor(Symbol code, const char *why) {
   char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
   code.decode(spelling);
   fprintf(
-    stderr, "x2c error floor: <%s>: %s\n",
-    spelling, why ? why : "unknown");
+    stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
   fflush(stderr);
   abort();
 }
 
+/* Pushes the thread's error scope unless it is already on top, and answers
+   whether the caller must pop it. */
 static int _scope_push(Symbol code, const char *message) {
   ErrorThreadState state = _thread();
   if (Scope.top() == &state.scope) return 0;
@@ -1273,12 +1325,10 @@ static int _scope_push(Symbol code, const char *message) {
 // lifecycle
 
 /** Initializes the current thread's `Error` runtime without lifecycle
-    insertion.
-    Repeated calls after successful initialization and calls after shutdown do
-    nothing. Initialization owns a private `Scope`, record stack, and policy
-    `Map`;
-    failure before the `Error` runtime becomes ready reaches the raw error
-    floor.
+    insertion. Repeated calls after successful initialization and calls after
+    shutdown do nothing. Initialization owns a private `Scope`, record stack,
+    and policy `Map`; failure before the `Error` runtime becomes ready
+    reaches the raw error floor.
 */
 void Error.initialize_raw(void) {
   ErrorThreadState state = _thread();
@@ -1289,10 +1339,6 @@ void Error.initialize_raw(void) {
   state.policy = {};
   Scope.pop();
   x2c_error_runtime_ready = 1;
-  _initialize_policies();
-}
-
-static void _initialize_policies(void) {
   foreach (Symbol code, error_nonreturning_causes)
     Error.policy_set(code, <abort>);
 }
