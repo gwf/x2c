@@ -3080,16 +3080,19 @@ static List _element_at(List source, int index) {
 static List _destructure_element(List temporary, int index) =>
   _element_at(%(expr ("List") (ident $temporary)), index);
 
-// Expand predeclared assignment targets into left-to-right statements.
+macro open Statement $destructure_write(Expr $target, Expr $value) {
+  $target = $value;
+}
+
+// The binder supplied typed targets; the enclosing template binds their
+// writes in source order.
 static List _destructure_assignments(List targets, List temporary) {
+  Macro write = $destructure_write;
   int index = 0;
   return targets.map(
     %!(List target) using &index => {
-      match (target)
-        case %(expr ?type ?): {
-          List value = _destructure_element(temporary, index++);
-          return %(stmnt (expr $type (op = $target $value)));
-        }
+      List value = _destructure_element(temporary, index++);
+      return write(target, value);
     });
 }
 
@@ -3099,6 +3102,14 @@ macro open Statement $destructure_statement(Name $temporary, Expr $source,
     List $temporary = $source;
     $assignments...
   }
+}
+
+macro open Statement $destructure_declarations(
+    Statement $targets, Name $temporary, Expr $source,
+    Statement $assignments...) {
+  $targets
+  List $temporary = $source;
+  $assignments...
 }
 
 // A discarded destructuring result retains its own block scope.
@@ -3134,24 +3145,20 @@ static List _destructure_declaration(Compiler compiler, List ast) {
       }
       List target_decl =
         %(declare $type (bindings @{declarations.list_free()}));
-      List temp_decl = %(declare ("List")
-        (bindings (op = (bind $temporary ())
-                      ${_destructure_source(
-                        compiler, source, source_type)})));
       List assignments =
-        _destructure_assignments(expressions.list_free(), temporary);
-      return %(seq $target_decl $temp_decl @assignments);
+        _destructure_assignments(
+          expressions.list_free(), temporary);
+      Macro shape = $destructure_declarations;
+      return compiler.bind_syntax(
+        shape(target_decl, temporary,
+              _destructure_source(compiler, source, source_type),
+              assignments), AST_BLOCK, compiler.return_type);
     }
     case %(dstrdecl (params *parameters)
                     (!set ?source (expr ?source_type ?))): {
       List temporary = compiler.sym.introduce(
         compiler.fresh_name("destructure"));
-      List temp_decl = %(declare ("List")
-        (bindings (op = (bind $temporary ())
-                      ${_destructure_source(
-                        compiler, source, source_type)})));
       Array declarations = [];
-      declarations.push(temp_decl);
       int index = 0;
       foreach (List parameter, parameters) match (parameter) {
         case %(param ?type ?bind): {
@@ -3159,7 +3166,12 @@ static List _destructure_declaration(Compiler compiler, List ast) {
           declarations.push(%( declare $type (bindings (op = $bind $value)) ));
         }
       }
-      return %(seq @{declarations.list_free()});
+      Macro shape = $destructure_declarations;
+      // The mixed form has no declaration before its List temporary.
+      return compiler.bind_syntax(
+        shape(%(seq), temporary,
+              _destructure_source(compiler, source, source_type),
+              declarations.list_free()), AST_BLOCK, compiler.return_type);
     }
   }
   return ast;
@@ -3179,13 +3191,23 @@ static List _lower_lambda_destructuring(Compiler compiler, List ast) {
     ast, %!(List child) => _lower_lambda_destructuring(compiler, child));
 }
 
-/* Keep the source's exact static type and value in one result temporary, then
-   convert that temporary to List once for the left-to-right assignments. */
+// Build a declaration from a bound value and its full declarator type.
 static List _value_declaration(Type type, List binding, List value) {
   (List base, List mods) = type.declaration_parts();
   return value
     ? %(declare $base (bindings (op = (bind $binding $mods) $value)))
     : %(declare $base (bindings (bind $binding $mods)));
+}
+
+/* Keep the source's exact static type and value in one result temporary,
+   then convert it to List once for the left-to-right assignments. */
+macro open Statement $destructure_value_block(
+    Type $type, Name $result, Expr $source, Name $temporary,
+    Expr $converted, Statement $assignments...) {
+  $type $result = $source;
+  List $temporary = $converted;
+  $assignments...
+  $result;
 }
 
 static List _destructure_value(Compiler compiler, List ast) {
@@ -3200,10 +3222,12 @@ static List _destructure_value(Compiler compiler, List ast) {
       List converted = _destructure_source(
         compiler, result_expr, type);
       List assignments = _destructure_assignments(targets, temporary);
-      return %(parens (block
-        ${_value_declaration(type, result, source)}
-        ${_value_declaration(%("List"), temporary, converted)}
-        @assignments (stmnt $result_expr)));
+      Macro shape = $destructure_value_block;
+      List body = compiler.bind_syntax(
+        shape(type, result, source, temporary, converted, assignments),
+        AST_BLOCK, compiler.return_type);
+      // x2c has no source spelling for this native statement expression.
+      return %(parens (block @{body.cdr()}));
     }
   }
   return ast;
