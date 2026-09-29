@@ -370,7 +370,10 @@ static Var Call_next_reply(Call * call){
 int Buffer_truth(Buffer);
 Buffer Buffer_clear(Buffer);
 static int _helper_start(void){
-  if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests) || pipe(replies)) return 0;  for(int i = 0;  i < 2;  i ++){
+  if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests)) return 0;  if(pipe(replies)){
+    close(requests[0]);  close(requests[1]);  return 0;
+  }
+  for(int i = 0;  i < 2;  i ++){
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);  fcntl(replies[i], F_SETFD, FD_CLOEXEC);
   }
   pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  if(pid < 0){
