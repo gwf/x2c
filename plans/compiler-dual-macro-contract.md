@@ -3113,7 +3113,7 @@ three fixtures' generated C/H pairs are byte-identical to pre-edit output
 from the same output paths. Their checked AST, transform, warning, stdout,
 and status artifacts, and the latter fixtures' diagnostics, remain unchanged.
 
-### E36. Destructuring construction adopter (local candidate)
+### E36. Destructuring construction adopter (published on dev)
 
 `transform.x` receives parser-bound targets. It preserves one source
 conversion to `List`, left-to-right indexed reads and typed writes, outer
@@ -3185,6 +3185,43 @@ limited to declared holes, preserving ordinary binding for Lisp-produced
 declarator names. The completed candidate's performance snapshot passed all
 four stage comparisons; its timing comparison uses an older baseline and
 does not establish the cost of this family.
+
+### E37. Func adapter construction family
+
+The Func adapter lowering now uses source-form templates for local
+declarations, record results, static handles, bridge prototypes, address,
+size, dereference, aggregate presence, and capture factories. It reuses the
+existing call, return, and expression-statement templates. The shared
+`$func_local` takes one canonical declarator row so a bound name is issued
+once and the complete declaration is rebuilt in its original scope.
+
+Against the pre-family dev tip, the bounded Func construction inventory
+falls from 45 raw emitted-AST sites to 13, counting nested constructions
+separately. Complete declarations/fields fall from 12 to 2, calls from 11
+to 0, block and statement-expression envelopes from 8 to 4, typed
+operators/composites from 13 to 7, and the callback return choice from 1
+to 0. `src/transform.x` is +214/-153 lines; the inline Func fixture loses
+four redundant generated semicolons. The displaced call, declaration,
+return, and statement builders are deleted rather than kept as parallel
+ways to construct the same forms.
+
+The remaining raw forms cross specific boundaries: the indirect file-scope
+typedef binds through the E8 path; four GNU statement-expression envelopes
+carry values and preserve inline bridge placement; typed casts must retain
+their canonical AST form because a source cast leaves a parser-only
+`macro-expr` shell in the final transform; member projections through a
+source template emit an unresolved `?__macro_member_field`; and multi-field
+aggregate insertion is illegal in an expression slot. Canonical field rows,
+typed identifier leaves, and argument carriers remain structural data for
+the rebuilt source forms, not competing complete-expression builders.
+
+The integrated local family passed `make build`, 13 focused compiler
+fixtures, `func_suite` (35 tests, 126 assertions), and inert by-value
+record argument/result probes. The final callback and dereference pass also
+passed its exact fixture and the record probe, with byte-identical final
+transform AST and C/H for that probe. Publication validation and the
+batch-level advisory performance attempt apply to the final integrated
+tree.
 
 ### F. Static-local initialization exception
 
