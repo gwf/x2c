@@ -12,6 +12,7 @@
     behavior. Stdin, Stdout, and Stderr are initialized as borrowed process
     streams.
  */
+
 #pragma once
 
 #include <sys/stat.h>
@@ -85,95 +86,77 @@ protocol Cleanup(File);
 #include <stdlib.h>
 #include <string.h>
 
-/** Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
-    with `operation`, `path`, and `errno` details.
+// reading text
+
+/** Reads the remaining stream into one canonical `String`.
+    Starts at the current position, advances through EOF, and returns NULL when
+    no bytes remain.
+    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
+    contain an embedded NUL, `<size-limit>` when the `String` cannot be
+    represented, or `<alloc-fail>` while constructing the result.
 */
-void File.path_error(Var operation, String path, int error) {
-  if (error == ENOENT)
-    raise %(not-found (operation $operation) (path $path) (errno $error));
-  raise %(io-fail (operation $operation) (path $path) (errno $error));
-}
-
-static void _io_error(Symbol operation, int error) {
-  raise %(io-fail (operation $operation) (errno $error));
-}
-
-static void _check_read(File file) {
-  if (!ferror(file)) return;
-  int error = errno;
-  _io_error(<read>, error);
-}
-
-static File _open_path(const char *path, const char *mode, Symbol op) {
-  if (!path || !mode) raise %(bad-arg (operation $op));
-  File file = fopen(path, mode);
-  if (file) return file;
-  int error = errno;
-  File.path_error(op, path, error);
-}
-
-static int _string_allocation(size_t length) {
-  if (length >= INT_MAX) raise %(size-limit (size $length));
-  return (int) length + 1;
-}
-
-static void _validate_text(const void *bytes, size_t length) {
-  if (!length) return;
-  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
-  if (memchr(bytes, '\0', length))
-    raise %(bad-arg (owner "File.text") (why "embedded NUL"));
-}
-
-/* Every text adapter ends here. Byte input then cannot produce a String
-   whose visible length differs from the consumed length. `intern_free`
-   consumes the temporary allocation and returns the canonical String. */
-static String _finish_text(String result, size_t length) {
-  _validate_text(result, length);
-  char *out = result;
-  out[length] = '\0';
-  return result.intern_free();
-}
-
-static String _text(const void *bytes, size_t length) {
-  if (!length) return NULL;
-  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
-  int allocation = _string_allocation(length);
-  String result = String.malloc(allocation);
-  memcpy(result, bytes, length);
-  return _finish_text(result, length);
-}
-
-static inline void _block_putc(Block block, unsigned char value) {
-  if (block.length == SIZE_MAX) raise %(size-limit);
-  size_t expected = block.length + 1;
-  if (block.length == block.cap) block.reserve(expected);
-  ((unsigned char *) block.bytes)[block.length] = value;
-  block.length = expected;
-}
-
-/* Writes every byte or raises. `written` accumulates the accepted bytes, so
-   a catch still sees the partial count a failed write left behind. */
-static void _write_bytes(
-  File file, const void *ptr, size_t size, size_t *written) {
-  const unsigned char *bytes = ptr, size_t offset = 0;
-  defer if (written) *written += offset;
-  while (offset < size) {
-    size_t count = fwrite(bytes + offset, 1, size - offset, file);
-    if (!count) {
-      int error = errno;
-      _io_error(<write>, error);
-    }
-    offset += count;
+String File.string(File file) {
+  struct stat statbuf = {0};
+  off_t position = file.tello();
+  if (position >= 0 && file.stat(&statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
+      statbuf.st_size > position) {
+    uintmax_t remaining = (uintmax_t) (statbuf.st_size - position);
+    _string_allocation(remaining);
+    return _regular_text(file, (size_t) remaining);
   }
+  Block content = $auto(Block.new(sizeof(char)));
+  unsigned char bytes[BUFSIZ], size_t count;
+  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
+    _append_text(content, bytes, count);
+  _check_read(file);
+  return _text(content.bytes, content.length);
 }
 
-static void _append_text(Block content, const void *bytes, size_t count) {
-  if (count >= INT_MAX - content.length) {
-    size_t size = content.length + count;
-    raise %(size-limit (size $size));
-  }
-  _validate_text(bytes, count);
-  content.append(bytes, count);
+/** Reads one raw line into a canonical `String`.
+    Includes the newline when present. Clean EOF and `FILE_READ_ERROR` both map
+    to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
+    bytes should remain separate.
+    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
+    are not valid `String` text, `<size-limit>` when the line cannot be
+    represented, or `<alloc-fail>` while constructing the result.
+*/
+String File.readline(File file) {
+  Block line = $auto(Block.new(sizeof(char)));
+  line.reserve(BUFSIZ);
+  FileReadStatus status = file.readline_into(line);
+  return status == FILE_READ_DATA ? _text(line.bytes, line.length) : NULL;
+}
+
+/** Reads up to `size` bytes into a canonical `String`.
+    Reading starts at the current stream position and returns NULL when no
+    bytes are read. Prefer `File.read_into` for raw bytes and explicit status.
+    Raises: `<bad-arg>` for a negative `size`, `<size-limit>` when the
+    requested `String` cannot be represented, `<bad-arg>` when the bytes
+    contain
+    an embedded NUL, `<io-fail>` on a stream read error, or `<alloc-fail>`
+    while constructing the result.
+*/
+String File.readblock(File file, long size) {
+  if (size < 0) raise %(bad-arg (owner "File.readblock") (size $size));
+  size_t requested = (size_t) size;
+  int allocation = _string_allocation(requested);
+  String result = String.malloc(allocation), owned = result;
+  defer if (owned != NULL) owned.free();
+  size_t count = file.read(result, 1, requested);
+  _check_read(file);
+  String output = _finish_text(result, count);
+  owned = NULL;
+  return output;
+}
+
+/** Reads the remaining text, then closes `file` on return or transfer.
+    The close result is discarded, so a close failure is not reported. The
+    stream and all of its aliases are invalid afterward.
+    Raises: the same causes as `File.string`.
+*/
+String File.string_close(File file) {
+  defer file.close();
+  return file.string();
 }
 
 /* A regular file's observed extent is a sizing hint. After reading that many
@@ -217,179 +200,47 @@ static String _regular_text(File file, size_t requested) {
   return result;
 }
 
-/** Reads the remaining text, then closes `file` on return or transfer.
-    The close result is discarded, so a close failure is not reported. The
-    stream and all of its aliases are invalid afterward.
-    Raises: the same causes as `File.string`.
-*/
-String File.string_close(File file) {
-  defer file.close();
-  return file.string();
+static int _string_allocation(size_t length) {
+  if (length >= INT_MAX) raise %(size-limit (size $length));
+  return (int) length + 1;
 }
 
-/** Opens the filesystem path named by `s`.
-    The caller owns a successful stream and must close it. A missing path
-    raises `<not-found>`; another host failure raises `<io-fail>`; and a null
-    path or mode raises `<bad-arg>`. Host failures carry the path, operation,
-    and captured errno.
-*/
-File String.open(String s, const char *mode) => _open_path(s, mode, <open>);
-
-/** Wraps an open file descriptor in a `File` stream.
-    On success the returned stream owns `fildes`, which must be closed through
-    the stream. On failure the caller still owns the descriptor. A host failure
-    raises `<io-fail>` with the operation and captured errno; a null mode
-    raises `<bad-arg>`.
-*/
-File File.fdopen(int fildes, const char *mode) {
-  if (!mode) {
-    Symbol operation = <fdopen>;
-    raise %(bad-arg (operation $operation));
+static void _append_text(Block content, const void *bytes, size_t count) {
+  if (count >= INT_MAX - content.length) {
+    size_t size = content.length + count;
+    raise %(size-limit (size $size));
   }
-  File file = fdopen(fildes, mode);
-  if (file) return file;
-  int error = errno;
-  _io_error(<fdopen>, error);
+  _validate_text(bytes, count);
+  content.append(bytes, count);
 }
 
-/** Opens `path` with the requested stdio mode.
-    The caller owns a successful stream and must close it. A missing path
-    raises `<not-found>`; another host failure raises `<io-fail>`; and a null
-    path or mode raises `<bad-arg>`. Host failures carry the path, operation,
-    and captured errno.
-*/
-File File.open(const char *path, const char *mode) =>
-  _open_path(path, mode, <open>);
-
-/** Opens a process pipe with the requested mode.
-    The caller owns a successful stream and must finish it with `File.pclose`
-    to close the pipe and collect the child status. A host failure raises
-    `<not-found>` for `ENOENT` or `<io-fail>` otherwise, with the command as
-    `path`, operation, and captured errno; a null command or mode raises
-    `<bad-arg>`.
-*/
-File File.popen(const char *cmd, const char *mode) {
-  if (!cmd || !mode) raise %(bad-arg (operation <popen>));
-  File file = popen(cmd, mode);
-  if (file) return file;
-  int error = errno;
-  File.path_error(<popen>, cmd, error);
+static String _text(const void *bytes, size_t length) {
+  if (!length) return NULL;
+  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
+  int allocation = _string_allocation(length);
+  String result = String.malloc(allocation);
+  memcpy(result, bytes, length);
+  return _finish_text(result, length);
 }
 
-/** Reuses `file` for a newly opened path and mode.
-    This consumes the original stream even when the native reopen fails; after
-    a transfer the caller must not close or reuse the old handle. A missing
-    path raises `<not-found>`; another host failure raises `<io-fail>`; and a
-    null stream, path, or mode raises `<bad-arg>`. Host failures carry the
-    path, operation, and captured errno.
-*/
-Self File.reopen(Self file, const char *path, const char *mode) {
-  if (!file || !path || !mode) raise %(bad-arg (operation <reopen>));
-  File opened = freopen(path, mode, file);
-  if (opened) return opened;
-  int error = errno;
-  File.path_error(<reopen>, path, error);
+/* Every text adapter ends here. Byte input then cannot produce a String
+   whose visible length differs from the consumed length. `intern_free`
+   consumes the temporary allocation and returns the canonical String. */
+static String _finish_text(String result, size_t length) {
+  _validate_text(result, length);
+  char *out = result;
+  out[length] = '\0';
+  return result.intern_free();
 }
 
-/** Reads a native line into `str` and returns `str`, or NULL at EOF or error.
-    At most `size - 1` bytes are stored followed by NUL, and a newline is kept
-    when it fits.
-*/
-inline char *File.gets(File f, char *str, int size) => fgets(str, size, f);
-
-/** Writes one byte and returns it as an unsigned char, or EOF on failure. */
-inline int File.putc(File file, int c) => fputc(c, file);
-
-/** Writes a NUL-terminated C string.
-    Returns a nonnegative value on success or EOF on failure.
-*/
-inline int File.puts(File file, const char *s) => fputs(s, file);
-
-/** Writes one native `int` and returns `w`, or EOF on a short write. */
-inline int File.putw(File file, int w) =>
-  fwrite(&w, sizeof(w), 1, file) == 1 ? w : EOF;
-
-/** Reads and returns one native `int`, or EOF when a full word is unavailable.
-    A stored value equal to EOF is indistinguishable from the sentinel without
-    inspecting the stream indicators.
-*/
-inline int File.getw(File file) {
-  int word;
-  return fread(&word, sizeof(word), 1, file) == 1 ? word : EOF;
+static void _validate_text(const void *bytes, size_t length) {
+  if (!length) return;
+  if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
+  if (memchr(bytes, '\0', length))
+    raise %(bad-arg (owner "File.text") (why "embedded NUL"));
 }
 
-/** Requests line buffering for `file` and returns zero.
-    The underlying `setvbuf` result is intentionally not exposed.
-*/
-inline int File.setlinebuf(File file) {
-  setvbuf(file, NULL, _IOLBF, 0);
-  return 0;
-}
-
-/** Pushes one byte back and returns it, or EOF when it cannot be pushed. */
-inline int File.ungetc(File file, int c) => ungetc(c, file);
-/** Reads up to `nitems` elements and returns the number read. */
-inline size_t File.read(File file, void *ptr, size_t size, size_t nitems) =>
-  fread(ptr, size, nitems, file);
-
-/** Writes up to `nitems` elements and returns the number written. */
-inline size_t File.write(
-  File file, const void *ptr, size_t size, size_t nitems) =>
-    fwrite(ptr, size, nitems, file);
-
-/** Installs caller-supplied buffering, or disables buffering for a null `buf`.
-    A nonnull buffer is borrowed until the stream closes or buffering changes.
-*/
-inline void File.setbuffer(File file, char *buf, int size) {
-  setbuffer(file, buf, size);
-}
-
-/** Writes metadata for `file` into `buf`.
-    Returns zero on success or -1 on a native error.
-*/
-inline int File.stat(File file, struct stat *buf) => fstat(file.fileno(), buf);
-
-/** Formats values into `file`.
-    Returns the character count or a negative value on failure.
-*/
-int File.printf(File file, const char *format, ...) {
-  va_list ap;
-  va_start(ap, format);
-  int result = file.va_printf(format, ap);
-  va_end(ap);
-  return result;
-}
-
-/** Scans values from `file`, returning the assignment count or EOF. */
-int File.scanf(File file, const char *format, ...) {
-  va_list ap;
-  va_start(ap, format);
-  int result = file.va_scanf(format, ap);
-  va_end(ap);
-  return result;
-}
-
-/** Reads up to `size` bytes into a canonical `String`.
-    Reading starts at the current stream position and returns NULL when no
-    bytes are read. Prefer `File.read_into` for raw bytes and explicit status.
-    Raises: `<bad-arg>` for a negative `size`, `<size-limit>` when the
-    requested `String` cannot be represented, `<bad-arg>` when the bytes
-    contain
-    an embedded NUL, `<io-fail>` on a stream read error, or `<alloc-fail>`
-    while constructing the result.
-*/
-String File.readblock(File file, long size) {
-  if (size < 0) raise %(bad-arg (owner "File.readblock") (size $size));
-  size_t requested = (size_t) size;
-  int allocation = _string_allocation(requested);
-  String result = String.malloc(allocation), owned = result;
-  defer if (owned != NULL) owned.free();
-  size_t count = file.read(result, 1, requested);
-  _check_read(file);
-  String output = _finish_text(result, count);
-  owned = NULL;
-  return output;
-}
+// raw reads
 
 /** Reads one raw line into caller-owned byte storage.
     Valid inputs clear `dest`, then include the newline when one is read.
@@ -441,6 +292,16 @@ FileReadStatus File.read_into(File file, Block dest) {
   return dest.length ? FILE_READ_DATA : FILE_READ_EOF;
 }
 
+static inline void _block_putc(Block block, unsigned char value) {
+  if (block.length == SIZE_MAX) raise %(size-limit);
+  size_t expected = block.length + 1;
+  if (block.length == block.cap) block.reserve(expected);
+  ((unsigned char *) block.bytes)[block.length] = value;
+  block.length = expected;
+}
+
+// writing
+
 /** Writes every requested byte unless the stream reports failure.
     A null stream or a null pointer with nonzero size returns zero without
     raising; every other outcome returns nonzero or transfers. A transfer may
@@ -471,62 +332,23 @@ int File.copy_to(File source, File output, size_t &?copied) {
   return 1;
 }
 
-/** Reads one raw line into a canonical `String`.
-    Includes the newline when present. Clean EOF and `FILE_READ_ERROR` both map
-    to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
-    bytes should remain separate.
-    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
-    are not valid `String` text, `<size-limit>` when the line cannot be
-    represented, or `<alloc-fail>` while constructing the result.
-*/
-String File.readline(File file) {
-  Block line = $auto(Block.new(sizeof(char)));
-  line.reserve(BUFSIZ);
-  FileReadStatus status = file.readline_into(line);
-  return status == FILE_READ_DATA ? _text(line.bytes, line.length) : NULL;
+/* Writes every byte or raises. `written` accumulates the accepted bytes, so
+   a catch still sees the partial count a failed write left behind. */
+static void _write_bytes(
+  File file, const void *ptr, size_t size, size_t *written) {
+  const unsigned char *bytes = ptr, size_t offset = 0;
+  defer if (written) *written += offset;
+  while (offset < size) {
+    size_t count = fwrite(bytes + offset, 1, size - offset, file);
+    if (!count) {
+      int error = errno;
+      _io_error(<write>, error);
+    }
+    offset += count;
+  }
 }
 
-/** Reads the remaining stream into one canonical `String`.
-    Starts at the current position, advances through EOF, and returns NULL when
-    no bytes remain.
-    Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
-    contain an embedded NUL, `<size-limit>` when the `String` cannot be
-    represented, or `<alloc-fail>` while constructing the result.
-*/
-String File.string(File file) {
-  struct stat statbuf = {0};
-  off_t position = file.tello();
-  if (position >= 0 && file.stat(&statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
-      statbuf.st_size > position) {
-    uintmax_t remaining = (uintmax_t) (statbuf.st_size - position);
-    _string_allocation(remaining);
-    return _regular_text(file, (size_t) remaining);
-  }
-  Block content = $auto(Block.new(sizeof(char)));
-  unsigned char bytes[BUFSIZ], size_t count;
-  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
-    _append_text(content, bytes, count);
-  _check_read(file);
-  return _text(content.bytes, content.length);
-}
-
-static int _next(Iter iter, Var *out) {
-  File file = iter.obj;
-  if (!file) return 0;
-  Block line = iter.state;
-  if (line == NULL) return 0;
-  int keep = 0;
-  defer if (!keep) {
-    line.free();
-    iter.state = void;
-  }
-  FileReadStatus status = file.readline_into(line);
-  if (status != FILE_READ_DATA) return 0;
-  String text = _text(line.bytes, line.length);
-  *out = text;
-  keep = 1;
-  return 1;
-}
+// line iteration
 
 /** Returns an iterator over `File`.
     The caller supplies `dest`; each pull yields one `String` under the
@@ -552,6 +374,107 @@ Iter File.iter(File file, Iter dest) {
   return dest;
 }
 
+static int _next(Iter iter, Var *out) {
+  File file = iter.obj;
+  if (!file) return 0;
+  Block line = iter.state;
+  if (line == NULL) return 0;
+  int keep = 0;
+  defer if (!keep) {
+    line.free();
+    iter.state = void;
+  }
+  FileReadStatus status = file.readline_into(line);
+  if (status != FILE_READ_DATA) return 0;
+  String text = _text(line.bytes, line.length);
+  *out = text;
+  keep = 1;
+  return 1;
+}
+
+// stdio wrappers
+
+/** Reads a native line into `str` and returns `str`, or NULL at EOF or error.
+    At most `size - 1` bytes are stored followed by NUL, and a newline is kept
+    when it fits.
+*/
+inline char *File.gets(File f, char *str, int size) => fgets(str, size, f);
+
+/** Writes one byte and returns it as an unsigned char, or EOF on failure. */
+inline int File.putc(File file, int c) => fputc(c, file);
+
+/** Writes a NUL-terminated C string.
+    Returns a nonnegative value on success or EOF on failure.
+*/
+inline int File.puts(File file, const char *s) => fputs(s, file);
+
+/** Writes one native `int` and returns `w`, or EOF on a short write. */
+inline int File.putw(File file, int w) =>
+  fwrite(&w, sizeof(w), 1, file) == 1 ? w : EOF;
+
+/** Reads and returns one native `int`, or EOF when a full word is unavailable.
+    A stored value equal to EOF is indistinguishable from the sentinel without
+    inspecting the stream indicators.
+*/
+inline int File.getw(File file) {
+  int word;
+  return fread(&word, sizeof(word), 1, file) == 1 ? word : EOF;
+}
+
+/** Requests line buffering for `file` and returns zero.
+    The underlying `setvbuf` result is intentionally not exposed.
+*/
+inline int File.setlinebuf(File file) {
+  setvbuf(file, NULL, _IOLBF, 0);
+  return 0;
+}
+
+/** Pushes one byte back and returns it, or EOF when it cannot be pushed. */
+inline int File.ungetc(File file, int c) => ungetc(c, file);
+
+/** Reads up to `nitems` elements and returns the number read. */
+inline size_t File.read(File file, void *ptr, size_t size, size_t nitems) =>
+  fread(ptr, size, nitems, file);
+
+/** Writes up to `nitems` elements and returns the number written. */
+inline size_t File.write(
+  File file, const void *ptr, size_t size, size_t nitems) =>
+    fwrite(ptr, size, nitems, file);
+
+/** Installs caller-supplied buffering, or disables buffering for a null `buf`.
+    A nonnull buffer is borrowed until the stream closes or buffering changes.
+*/
+inline void File.setbuffer(File file, char *buf, int size) {
+  setbuffer(file, buf, size);
+}
+
+/** Writes metadata for `file` into `buf`.
+    Returns zero on success or -1 on a native error.
+*/
+inline int File.stat(File file, struct stat *buf) => fstat(file.fileno(), buf);
+
+/** Formats values into `file`.
+    Returns the character count or a negative value on failure.
+*/
+int File.printf(File file, const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  int result = file.va_printf(format, ap);
+  va_end(ap);
+  return result;
+}
+
+/** Scans values from `file`, returning the assignment count or EOF. */
+int File.scanf(File file, const char *format, ...) {
+  va_list ap;
+  va_start(ap, format);
+  int result = file.va_scanf(format, ap);
+  va_end(ap);
+  return result;
+}
+
+// identity and rendering
+
 /** Returns a handle-identity hash consistent with `File.equal`. */
 unsigned File.hash(File file) => Var.new(<p48>, file).hash();
 
@@ -576,6 +499,101 @@ String File.str(File file) => file ? file.string() : Var.pointer_string(file);
 Buffer File.write_repr(File file, Buffer out) {
   if (!file) return Var.write_pointer_repr(file, out);
   return out.printf("<File:%p, fd:%d>", file, file.fileno());
+}
+
+// errors
+
+/** Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
+    with `operation`, `path`, and `errno` details.
+*/
+void File.path_error(Var operation, String path, int error) {
+  if (error == ENOENT)
+    raise %(not-found (operation $operation) (path $path) (errno $error));
+  raise %(io-fail (operation $operation) (path $path) (errno $error));
+}
+
+static void _io_error(Symbol operation, int error) {
+  raise %(io-fail (operation $operation) (errno $error));
+}
+
+static void _check_read(File file) {
+  if (!ferror(file)) return;
+  int error = errno;
+  _io_error(<read>, error);
+}
+
+// lifecycle
+
+/** Opens the filesystem path named by `s`.
+    The caller owns a successful stream and must close it. A missing path
+    raises `<not-found>`; another host failure raises `<io-fail>`; and a null
+    path or mode raises `<bad-arg>`. Host failures carry the path, operation,
+    and captured errno.
+*/
+File String.open(String s, const char *mode) => _open_path(s, mode, <open>);
+
+/** Opens `path` with the requested stdio mode.
+    The caller owns a successful stream and must close it. A missing path
+    raises `<not-found>`; another host failure raises `<io-fail>`; and a null
+    path or mode raises `<bad-arg>`. Host failures carry the path, operation,
+    and captured errno.
+*/
+File File.open(const char *path, const char *mode) =>
+  _open_path(path, mode, <open>);
+
+/** Wraps an open file descriptor in a `File` stream.
+    On success the returned stream owns `fildes`, which must be closed through
+    the stream. On failure the caller still owns the descriptor. A host failure
+    raises `<io-fail>` with the operation and captured errno; a null mode
+    raises `<bad-arg>`.
+*/
+File File.fdopen(int fildes, const char *mode) {
+  if (!mode) {
+    Symbol operation = <fdopen>;
+    raise %(bad-arg (operation $operation));
+  }
+  File file = fdopen(fildes, mode);
+  if (file) return file;
+  int error = errno;
+  _io_error(<fdopen>, error);
+}
+
+/** Opens a process pipe with the requested mode.
+    The caller owns a successful stream and must finish it with `File.pclose`
+    to close the pipe and collect the child status. A host failure raises
+    `<not-found>` for `ENOENT` or `<io-fail>` otherwise, with the command as
+    `path`, operation, and captured errno; a null command or mode raises
+    `<bad-arg>`.
+*/
+File File.popen(const char *cmd, const char *mode) {
+  if (!cmd || !mode) raise %(bad-arg (operation <popen>));
+  File file = popen(cmd, mode);
+  if (file) return file;
+  int error = errno;
+  File.path_error(<popen>, cmd, error);
+}
+
+/** Reuses `file` for a newly opened path and mode.
+    This consumes the original stream even when the native reopen fails; after
+    a transfer the caller must not close or reuse the old handle. A missing
+    path raises `<not-found>`; another host failure raises `<io-fail>`; and a
+    null stream, path, or mode raises `<bad-arg>`. Host failures carry the
+    path, operation, and captured errno.
+*/
+Self File.reopen(Self file, const char *path, const char *mode) {
+  if (!file || !path || !mode) raise %(bad-arg (operation <reopen>));
+  File opened = freopen(path, mode, file);
+  if (opened) return opened;
+  int error = errno;
+  File.path_error(<reopen>, path, error);
+}
+
+static File _open_path(const char *path, const char *mode, Symbol op) {
+  if (!path || !mode) raise %(bad-arg (operation $op));
+  File file = fopen(path, mode);
+  if (file) return file;
+  int error = errno;
+  File.path_error(op, path, error);
 }
 
 /** Publishes the process's borrowed standard streams as `File` globals.
