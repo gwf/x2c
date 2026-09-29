@@ -51,8 +51,8 @@ static Symbol _match_operator_head(Compiler compiler) {
   }
   if (compiler.peek(0) == <lit-symbol>) {
     Token token = compiler.token;
-    String spelling = _symbol_source_spelling(token.text, 1);
-    Symbol symbol = _exact_symbol_literal(compiler, token, spelling);
+    String spelling = _angle_spelling(token.text);
+    Symbol symbol = _exact_symbol(compiler, token, spelling);
     return symbol;
   }
   return 0;
@@ -368,7 +368,7 @@ static List _parse_error_symbol(
       <parse>, %"$owner $role must be a bare Symbol",
       token, %($hint));
   String text = token.text.unescape();
-  Symbol symbol = _exact_symbol_literal(compiler, token, text);
+  Symbol symbol = _exact_symbol(compiler, token, text);
   compiler.next();
   return %(expr ("Symbol") (literal ("Symbol") $text $symbol));
 }
@@ -446,9 +446,9 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
       c.report_error(
         <parse>, "symbol-set entries must be literal Symbols",
         token, %("use %<<foo bar>>"));
-    int angle = kind == <lit-symbol>;
-    String spelling = _symbol_source_spelling(token.text, angle);
-    Symbol symbol = _exact_symbol_literal(c, token, spelling);
+    String spelling = kind == <lit-symbol>
+      ? _angle_spelling(token.text) : _member_spelling(token.text);
+    Symbol symbol = _exact_symbol(c, token, spelling);
     symbols.push(symbol);
     tokens.push(token);
     c.next();
@@ -466,6 +466,13 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   symbols.free();
   tokens.free();
   return result;
+}
+
+/* A quoted member drops its quotes. */
+static String _member_spelling(String text) {
+  if (text && text[0] == '"')
+    return String.new_len(text + 1, text.len() - 2).unescape();
+  return text.unescape();
 }
 
 /** Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
@@ -1192,28 +1199,13 @@ static int _lambda_binding_is_outer(
 List Compiler.parse_atomic_literal(Compiler c) {
   String text = c.token.text, List literal = NULL;
   switch (c.peek(0)) {
-    case <void>:       literal = %(literal ("Var") "void");   break;
-    case <lit-char>:   literal = %(literal (char) $text);      break;
-    case <lit-int>:
-    case <lit-float>: {
-      int floating = c.peek(0) == <lit-float>;
-      Type type = Type.numeric_literal(text, floating);
-      if (!type && c.shallow) type = floating ? %(double) : %(int);
-      if (!type) c.report_error(
-        <type>, "numeric literal is outside the supported scalar range",
-        c.token, %( "literal:" $text ));
-      literal = %(literal $type $text);
-      break;
-    }
-    case <lit-char*>:  literal = %(literal (* char) $text);    break;
+    case <void>:       literal = %(literal ("Var") "void");  break;
+    case <lit-char>:   literal = %(literal (char) $text);     break;
+    case <lit-int>:    literal = _number_literal(c, text, 0); break;
+    case <lit-float>:  literal = _number_literal(c, text, 1); break;
+    case <lit-char*>:  literal = %(literal (* char) $text);   break;
     case <lit-atom>:   literal = _atom_literal(c, text);      break;
-    case <lit-symbol>: {
-      String spelling = _symbol_source_spelling(text, 1);
-      Symbol symbol = _exact_symbol_literal(c, c.token, spelling);
-      _validate_match_binder_atom(c, symbol);
-      literal = %(literal ("Symbol") $text $symbol);
-      break;
-    }
+    case <lit-symbol>: literal = _symbol_literal(c, text);    break;
   }
   if (literal) {
     c.next();
@@ -1221,68 +1213,80 @@ List Compiler.parse_atomic_literal(Compiler c) {
   }
   Symbol kind = c.peek(0);
   c.report_error(
-    <parse>, "expected atomic expression",
-    c.token,
+    <parse>, "expected atomic expression", c.token,
     %( "token:" ${c.token.text} "kind:" ${kind.str()} ));
+}
+
+/* Shallow declaration discovery gives a number outside every supported
+   scalar type a provisional type. */
+static List _number_literal(Compiler c, String text, int floating) {
+  Type type = Type.numeric_literal(text, floating);
+  if (!type && c.shallow) type = floating ? %(double) : %(int);
+  if (!type)
+    c.report_error(
+      <type>, "numeric literal is outside the supported scalar range",
+      c.token, %( "literal:" $text ));
+  return %(literal $type $text);
 }
 
 /* A bare spelling names an Atom, which is a compact Symbol when it fits. */
 static List _atom_literal(Compiler c, String text) {
   String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
-  _validate_match_binder_atom(c, atom);
-  /* The preprocessor never sees a literal, so a macro's name here is
-     data. The author who wanted its value must unquote it. */
-  if (spelling in c.object_macros) {
-    String unquoted = "${(long) " + spelling + "}";
-    c.report_warning(
-      <literal>,
-      %"'$spelling' is a Symbol here; unquote a typed value such as "
-        + %"$unquoted to insert the macro's value",
-      c.token, NULL);
-  }
+  _check_binder(c, atom);
+  if (spelling in c.object_macros) _warn_macro_name(c, spelling);
   if (atom is <symbol>)
     return %(literal ("Symbol") $text ${atom.symbol()});
-  Var value = c.macro_holes && atom.is_binder()
-            ? %(!quote $atom) : atom;
+  Var value = c.macro_holes && atom.is_binder() ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
 }
 
-static void _validate_match_binder_atom(Compiler compiler, Atom atom) {
-  if (!compiler.in_pattern || !atom.is_atom()) return;
+/* In a pattern, a spelling that starts with `?` or `*` must be a binder
+   name, except that `?binder?` and `*binder?` may end an `!is` form. */
+static void _check_binder(Compiler c, Atom atom) {
+  if (!c.in_pattern || !atom.is_atom()) return;
   char first = atom.first();
   if ((first != '?' && first != '*') || atom.is_binder()) return;
   int reserved = atom == <?binder?> || atom == <*binder?>;
-  if (reserved && compiler.match_is && compiler.peek(1) == <)>) return;
-  compiler.report_error(
+  if (reserved && c.match_is && c.peek(1) == <)>) return;
+  c.report_error(
     <parse>, "invalid match binder name",
-    compiler.token, %( "binder-name:" ${atom.str()} ));
+    c.token, %( "binder-name:" ${atom.str()} ));
 }
 
-/* Decode the source spelling of a compact Symbol literal. Angle literals
-   and quoted symbol-set entries carry delimiters that are not part of the
-   value; the other literal paths provide bare Atom text. */
-static String _symbol_source_spelling(String text, int angle) {
-  if (angle) {
-    int len = text.len();
-    if (len >= 4 && text[1] == '"')
-      return String.new_len(text + 2, len - 4).unescape();
-    return String.new_len(text + 1, len - 2);
-  }
-  if (text && text[0] == '"')
-    return String.new_len(text + 1, text.len() - 2).unescape();
-  return text.unescape();
+/* The preprocessor never sees a literal, so a macro's name here is data.
+   The author who wanted its value must unquote it. */
+static void _warn_macro_name(Compiler c, String spelling) {
+  String unquoted = "${(long) " + spelling + "}";
+  c.report_warning(
+    <literal>,
+    %"'$spelling' is a Symbol here; unquote a typed value such as "
+      + %"$unquoted to insert the macro's value",
+    c.token, NULL);
 }
 
-static Symbol _exact_symbol_literal(
-  Compiler compiler, Token token, String spelling) {
+/* A `<...>` literal is an exact Symbol, which a pattern may use as a
+   binder. */
+static List _symbol_literal(Compiler c, String text) {
+  Symbol symbol = _exact_symbol(c, c.token, _angle_spelling(text));
+  _check_binder(c, symbol);
+  return %(literal ("Symbol") $text $symbol);
+}
+
+/* The angle brackets are not part of a Symbol's value, nor are the quotes
+   of a quoted spelling such as `<"a b">`. */
+static String _angle_spelling(String text) {
+  int len = text.len();
+  if (len >= 4 && text[1] == '"')
+    return String.new_len(text + 2, len - 4).unescape();
+  return String.new_len(text + 1, len - 2);
+}
+
+/* A compact Symbol literal must decode to its source spelling. */
+static Symbol _exact_symbol(Compiler c, Token token, String spelling) {
   Symbol symbol;
-  if (!Symbol.try_new(spelling, &symbol)) {
-    Symbol lossy = spelling ? Symbol.new(spelling) : 0;
-    compiler.report_error(
-      <parse>, "Symbol literal does not round-trip", token,
-      %("source spelling: $spelling"
-        "encoded spelling: ${lossy}")
-    );
-  }
-  return symbol;
+  if (Symbol.try_new(spelling, &symbol)) return symbol;
+  Symbol lossy = spelling ? Symbol.new(spelling) : 0;
+  c.report_error(
+    <parse>, "Symbol literal does not round-trip", token,
+    %("source spelling: $spelling" "encoded spelling: ${lossy}"));
 }
