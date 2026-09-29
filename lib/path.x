@@ -267,6 +267,12 @@ static int _class_match(const char *&pattern, unsigned char value) {
 static int _hidden(const char *text, const char *origin) =>
   *text == '.' && (text == origin || text[-1] == '/');
 
+/* A pattern continues at a component's leading dot only where it spells
+   the dot, or where a `**` component matches no directories before it. */
+static int _passes_dot(const char *pattern) =>
+  *pattern == '.' || (pattern[0] == '\\' && pattern[1] == '.') ||
+  !strncmp(pattern, "**/", 3);
+
 /* Returns the pattern after a `?`, class, or literal that matches the
    character at `text`, or NULL. */
 static const char *_glob_step(const char *pattern, const char *text) {
@@ -281,6 +287,22 @@ static const char *_glob_step(const char *pattern, const char *text) {
   return *pattern == *text ? pattern + 1 : NULL;
 }
 
+/* A `**` matches any text up to a component's leading dot. A `**`
+   component matches whole components, and a run of them acts as one. */
+static int _globstar(
+  const char *pattern, const char *text, const char *origin) {
+  const char *rest = pattern + 2;
+  int components = *rest == '/';
+  while (components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/')
+    rest += 3;
+  for (const char *ch = text;; ch++) {
+    if ((!components || ch == text || ch[-1] == '/') &&
+        _glob_match(rest + components, ch, origin))
+      return 1;
+    if (!*ch || _hidden(ch, origin)) return 0;
+  }
+}
+
 /* A `*` cannot cross a slash, and each slash run in the pattern meets a
    slash run in the text, so only the latest `*` ever needs to consume more
    text. A name that begins with a dot matches only a pattern that spells the
@@ -293,33 +315,20 @@ static int _glob_match(
     if (!*pattern) {
       if (!*text) return 1;
     }
-    else if (_hidden(text, origin) && *pattern != '.' &&
-             !(pattern[0] == '\\' && pattern[1] == '.') &&
-             strncmp(pattern, "**/", 3)) {}
+    else if (_hidden(text, origin) && !_passes_dot(pattern)) {}
     else if (pattern[0] == '*' && pattern[1] == '*') {
-      const char *rest = pattern + 2;
-      int components = *rest == '/';
-      while (components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/')
-        rest += 3;
-      for (const char *ch = text;; ch++) {
-        if ((!components || ch == text || ch[-1] == '/') &&
-            _glob_match(rest + components, ch, origin))
-          return 1;
-        if (!*ch || _hidden(ch, origin)) break;
-      }
+      if (_globstar(pattern, text, origin)) return 1;
     }
     else if (*pattern == '*') {
       pattern = star = pattern + 1;
       resume = text;
       continue;
     }
-    else if (*pattern == '/') {
-      if (*text == '/') {
-        while (*pattern == '/') pattern++;
-        while (*text == '/') text++;
-        star = NULL;
-        continue;
-      }
+    else if (*pattern == '/' && *text == '/') {
+      while (*pattern == '/') pattern++;
+      while (*text == '/') text++;
+      star = NULL;
+      continue;
     }
     else if ((next = _glob_step(pattern, text))) {
       pattern = next;
@@ -339,6 +348,18 @@ static int _glob_match(
 int Path.glob_match(Path pattern, Path path) =>
   pattern && path && _glob_match(pattern, path, path);
 
+/* The depth a walk needs for `components`: one level per component, or -1
+   for any depth once a component is `**`. */
+static int _glob_depth(String components) {
+  int depth = 0;
+  foreach (String part, components.split("/")) {
+    if (!part) continue;
+    if (part == "**") return -1;
+    depth++;
+  }
+  return depth;
+}
+
 /** Returns the existing paths that match the glob `pattern`, sorted.
     The walk starts at the longest leading directory without a wildcard,
     spelled as the pattern spells it, and descends only as deep as the
@@ -354,17 +375,10 @@ List Path.glob(Path pattern) {
   int cut = wildcard - (const char *) text;
   while (cut && text[cut - 1] != '/') cut--;
   Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
-  int depth = 0, recursive = 0, directories = text.endswith("/");
-  foreach (String part, text[cut:].split("/")) {
-    if (!part) continue;
-    depth++;
-    if (part == "**") recursive = 1;
-  }
+  int directories = text.endswith("/"), depth = _glob_depth(text[cut:]);
+  int hidden = pattern.startswith(".") || "/." in pattern;
   Array paths = [], matches = [];
-  if (root.is_dir())
-    _walk(
-      root, recursive ? -1 : depth,
-      pattern.startswith(".") || pattern.contains("/."), paths);
+  if (root.is_dir()) _walk(root, depth, hidden, paths);
   foreach (String path, paths) {
     String candidate = base ? path : path[2:];
     if (directories) candidate = %"$candidate/";
@@ -397,6 +411,27 @@ void Path.remove_file(Path path) {
     File.path_error("Path.remove_file", path, errno);
 }
 
+/* Each entry's paths are released before the next, however large the
+   tree; only a reported failure's path is kept. */
+static void _remove_entries(Path path, String &failed, int &failure) {
+  DIR *directory = opendir(path);
+  if (!directory) return;
+  struct dirent *entry;
+  while ((entry = readdir(directory))) {
+    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
+    Context context = $auto(Context.open_isolated());
+    String child_failed = NULL;
+    int child_failure = 0;
+    _remove_tree(
+      path.join(String.new(entry->d_name)), child_failed, child_failure);
+    if (child_failed && !failed) {
+      failed = context.export(child_failed);
+      failure = child_failure;
+    }
+  }
+  closedir(directory);
+}
+
 static void _remove_tree(Path path, String &failed, int &failure) {
   struct stat info;
   if (lstat(path, &info)) {
@@ -404,27 +439,7 @@ static void _remove_tree(Path path, String &failed, int &failure) {
     return;
   }
   if (S_ISDIR(info.st_mode)) {
-    DIR *directory = opendir(path);
-    if (directory) {
-      struct dirent *entry;
-      while ((entry = readdir(directory))) {
-        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-          continue;
-        // Each entry's paths are released before the next, however large
-        // the tree; only a reported failure's path is kept.
-        Context context = $auto(Context.open_isolated());
-        String child_failed = NULL;
-        int child_failure = 0;
-        _remove_tree(
-          path.join(String.new(entry->d_name)), child_failed,
-          child_failure);
-        if (child_failed && !failed) {
-          failed = context.export(child_failed);
-          failure = child_failure;
-        }
-      }
-      closedir(directory);
-    }
+    _remove_entries(path, failed, failure);
     if (rmdir(path) && !failed) failed = path, failure = errno;
   }
   else if (unlink(path) && !failed) failed = path, failure = errno;
