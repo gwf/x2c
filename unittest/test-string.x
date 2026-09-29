@@ -101,6 +101,27 @@ static void string_empty_is_native_zero(void) {
   EXPECT_TRUE(literal.repr() == "\"\"");
 }
 
+/* A transient buffer that begins with NUL holds the same bytes as the empty
+   String. */
+static void string_empty_buffer_equals_the_empty_string(void) {
+  String first = String.malloc(4), second = String.malloc(4);
+  char *first_bytes = first, *second_bytes = second;
+  first_bytes[0] = '\0';
+  second_bytes[0] = '\0';
+
+  EXPECT_TRUE(first.equal(second));
+  EXPECT_TRUE(first.equal(NULL));
+  EXPECT_TRUE(String.equal(NULL, first));
+  EXPECT_FALSE(first.equal("a"));
+  EXPECT_INT_EQ(first.compare(second), 0);
+  EXPECT_INT_EQ(first.compare(NULL), 0);
+  EXPECT_INT_EQ(String.compare(NULL, first), 0);
+  EXPECT_INT_EQ(first.compare("a"), -1);
+  EXPECT_INT_EQ(String.compare("a", first), 1);
+  first.free();
+  second.free();
+}
+
 /* A C string literal receives String methods. */
 static void string_literal_receives_methods(void) {
   EXPECT_INT_EQ("hello".len(), 5);
@@ -307,6 +328,15 @@ static void string_escape_sequences(void) {
   EXPECT_INT_EQ(%"'\\400'".parse_char(), -1);
 }
 
+/* The String ends after its opening quote. The quote stored past the NUL
+   must not complete a character. */
+static void string_parse_char_rejects_lone_quote(void) {
+  String quote = String.malloc(4);
+  memcpy(quote, "'\0'", 4);
+  EXPECT_INT_EQ(quote.parse_char(), -1);
+  quote.free();
+}
+
 static void string_multiline_literals(void) {
   String with_newline = %"hello
 world";
@@ -396,6 +426,17 @@ static void string_constructor_invariants(void) {
   String finalized = oversized.intern_free();
   EXPECT_INT_EQ(finalized.len(), 5);
   EXPECT_TRUE(finalized == "short");
+}
+
+/* A transient buffer reports its writable bytes whatever it holds. */
+static void string_malloc_len_counts_writable_bytes(void) {
+  String buffer = String.malloc(6);
+  char *bytes = buffer;
+  bytes[0] = '\0';
+  EXPECT_INT_EQ(buffer.len(), 5);
+  bytes[0] = 'a';
+  EXPECT_INT_EQ(buffer.len(), 5);
+  buffer.free();
 }
 
 static void string_empty_search_contract(void) {
@@ -699,6 +740,7 @@ static void string_checked_format_failures(void) {
 void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
+  $test.run(string_empty_buffer_equals_the_empty_string);
   $test.run(string_add_and_len);
   $test.run(string_literal_receives_methods);
   $test.run(string_slice_and_contains);
@@ -708,10 +750,12 @@ void string_suite(void) {
   $test.run(string_invalid_input_transfer);
   $test.run(string_callback_transfer_releases_temporary);
   $test.run(string_escape_sequences);
+  $test.run(string_parse_char_rejects_lone_quote);
   $test.run(string_multiline_literals);
   $test.run(string_boundary_behavior);
   $test.run(string_high_bytes_read_unsigned);
   $test.run(string_constructor_invariants);
+  $test.run(string_malloc_len_counts_writable_bytes);
   $test.run(string_empty_search_contract);
   $test.run(string_search_and_replace);
   $test.run(string_foreach_bytes_as_int_and_char);
