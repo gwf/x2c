@@ -26,6 +26,8 @@
 
 #include "process.x"
 
+// reporter state
+
 /* One process-global state holds the transient line. The driver configures it
    before dispatch; diagnostics, tool output, and stable receipts suspend the
    line before writing to stderr. */
@@ -35,63 +37,7 @@ static struct ReportState {
   unsigned long start, update;
 } report;
 
-/** Returns monotonic time in microseconds, or zero when the clock read fails.
-    The value measures elapsed time; it is not a wall-clock timestamp.
-*/
-unsigned long report_now_us(void) {
-  struct timespec now;
-  if (clock_gettime(CLOCK_MONOTONIC, &now)) return 0;
-  return (unsigned long) now.tv_sec * 1000000ul +
-         (unsigned long) now.tv_nsec / 1000ul;
-}
-
-/** Returns the size of a regular file.
-    NULL, a failed `stat`, or a non-regular path returns zero.
-*/
-unsigned long long report_file_bytes(String path) {
-  struct stat info;
-  if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
-  return (unsigned long long) info.st_size;
-}
-
-/** Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
-    two decimal places.
-*/
-String report_duration(unsigned long microseconds) {
-  if (microseconds < 1000) return "%lu us".printf(microseconds);
-  if (microseconds < 1000000) return "%.0f ms".printf(microseconds / 1000.0);
-  return "%.2f s".printf(microseconds / 1000000.0);
-}
-
-/** Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
-    Byte counts are exact; larger units use one decimal place.
-*/
-String report_size(unsigned long long bytes) {
-  if (bytes < 1024) return "%llu B".printf(bytes);
-  if (bytes < 1024ull * 1024ull) return "%.1f KiB".printf(bytes / 1024.0);
-  return "%.1f MiB".printf(bytes / (1024.0 * 1024.0));
-}
-
-static int _terminal(void) =>
-  isatty(fileno(stderr)) && Env.get("TERM") != "dumb";
-
-/** Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
-    set to a positive count shows. Parallel recipes share one terminal and
-    one job budget without sharing reporter state.
-*/
-int report_make_owned(void) {
-  String level = Env.get("MAKELEVEL");
-  return level.is_digit() && atol(level) > 0;
-}
-
-static int _columns(void) {
-  struct winsize size;
-  if (ioctl(fileno(stderr), TIOCGWINSZ, &size) == 0 && size.ws_col > 0)
-    return size.ws_col;
-  String columns = Env.get("COLUMNS");
-  int parsed = columns.is_digit() ? atoi(columns) : 0;
-  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
-}
+// configuration
 
 /** Resets process reporting for one command.
     Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
@@ -113,85 +59,31 @@ void report_configure(
   else report.color = terminal && !Env.get("NO_COLOR");
 }
 
+static int _terminal(void) =>
+  isatty(fileno(stderr)) && Env.get("TERM") != "dumb";
+
+static int _columns(void) {
+  struct winsize size;
+  if (ioctl(fileno(stderr), TIOCGWINSZ, &size) == 0 && size.ws_col > 0)
+    return size.ws_col;
+  String columns = Env.get("COLUMNS");
+  int parsed = columns.is_digit() ? atoi(columns) : 0;
+  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
+}
+
 /** Returns whether stable completion receipts are currently enabled. */
 int report_receipts(void) => report.receipts;
 
-static const char *_color(Symbol tone) {
-  if (!report.color) return "";
-  switch (tone) {
-    case <success>: return "\033[32m";
-    case <failure>: return "\033[31m";
-    case <phase>:   return "\033[36m";
-    case <muted>:   return "\033[2m";
-    default:        return "";
-  }
-}
-
-static void _emit(
-  const char *prefix, int prefix_length, const char *color,
-  const char *line, int newline) {
-  /* Issue each display update through one writev call to limit interleaving
-     between Make children. Reporting is best effort. Retry only EINTR and
-     do not change command status for output failure. */
-  struct iovec parts[5], int count = 0;
-  if (prefix_length) {
-    parts[count].iov_base = (char *) prefix;
-    parts[count++].iov_len = (size_t) prefix_length;
-  }
-  if (*color) {
-    parts[count].iov_base = (char *) color;
-    parts[count++].iov_len = strlen(color);
-  }
-  parts[count].iov_base = (char *) line;
-  parts[count++].iov_len = strlen(line);
-  if (*color) {
-    parts[count].iov_base = "\033[0m";
-    parts[count++].iov_len = 4;
-  }
-  if (newline) {
-    parts[count].iov_base = "\n";
-    parts[count++].iov_len = 1;
-  }
-  while (writev(fileno(stderr), parts, count) < 0 && errno == EINTR) {}
-}
-
-static const char _clear[] = "\r\033[K";
-
-/* Takes the terminal's transient line, or reports that another process
-   holds it. The lock lives on a separate open of the terminal because
-   processes that inherit stderr share one lock owner. */
-static int _own_line(void) {
-  if (report.owner) return 1;
-  if (report.terminal == -1) {
-    char *path = ttyname(fileno(stderr));
-    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : -1;
-    report.terminal = fd >= 0 ? fd : -2;
-  }
-  report.owner =
-    report.terminal >= 0 && !flock(report.terminal, LOCK_EX | LOCK_NB);
-  return report.owner;
-}
-
-/** Clears the active transient line from stderr, if this process drew one.
-    Forked workers inherit the state but leave the line to their parent.
+/** Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
+    set to a positive count shows. Parallel recipes share one terminal and
+    one job budget without sharing reporter state.
 */
-void report_suspend(void) {
-  if (!report.width || getpid() != report.pid) return;
-  report.width = 0;
-  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
+int report_make_owned(void) {
+  String level = Env.get("MAKELEVEL");
+  return level.is_digit() && atol(level) > 0;
 }
 
-/** Writes one newline-terminated receipt to stderr when receipts are enabled.
-    In transient mode the receipt first clears the terminal line, which
-    another process may be drawing, and `line` must be non-NULL.
-*/
-void report_line(Symbol tone, String line) {
-  report.width = 0;
-  if (!report.receipts) return;
-  const char *color = _color(tone);
-  int clear = report.transient ? sizeof(_clear) - 1 : 0;
-  _emit(_clear, clear, color, line, 1);
-}
+// the progress line
 
 /** Updates the terminal's transient progress line when transient mode is
     active. Updates start after 125 ms and incomplete work is limited to one
@@ -229,6 +121,44 @@ void report_progress(Symbol phase, int done, int total, String detail) {
   report.width = length;
 }
 
+/* Takes the terminal's transient line, or reports that another process
+   holds it. The lock lives on a separate open of the terminal because
+   processes that inherit stderr share one lock owner. */
+static int _own_line(void) {
+  if (report.owner) return 1;
+  if (report.terminal == -1) {
+    char *path = ttyname(fileno(stderr));
+    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : -1;
+    report.terminal = fd >= 0 ? fd : -2;
+  }
+  report.owner =
+    report.terminal >= 0 && !flock(report.terminal, LOCK_EX | LOCK_NB);
+  return report.owner;
+}
+
+/** Clears the active transient line from stderr, if this process drew one.
+    Forked workers inherit the state but leave the line to their parent.
+*/
+void report_suspend(void) {
+  if (!report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
+}
+
+// receipts
+
+/** Writes one newline-terminated receipt to stderr when receipts are enabled.
+    In transient mode the receipt first clears the terminal line, which
+    another process may be drawing, and `line` must be non-NULL.
+*/
+void report_line(Symbol tone, String line) {
+  report.width = 0;
+  if (!report.receipts) return;
+  const char *color = _color(tone);
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, color, line, 1);
+}
+
 /** Writes a muted phase receipt when receipts are enabled.
     A fully cached nonempty phase is marked up to date; a partial cache reports
     its cached count, and every receipt includes the elapsed time.
@@ -242,4 +172,86 @@ void report_phase(
   String duration = report_duration(microseconds);
   String line = %"  $name $count $noun in $duration$cache";
   report_line(<muted>, line);
+}
+
+// terminal output
+
+static const char _clear[] = "\r\033[K";
+
+static void _emit(
+  const char *prefix, int prefix_length, const char *color,
+  const char *line, int newline) {
+  /* Issue each display update through one writev call to limit interleaving
+     between Make children. Reporting is best effort. Retry only EINTR and
+     do not change command status for output failure. */
+  struct iovec parts[5], int count = 0;
+  if (prefix_length) {
+    parts[count].iov_base = (char *) prefix;
+    parts[count++].iov_len = (size_t) prefix_length;
+  }
+  if (*color) {
+    parts[count].iov_base = (char *) color;
+    parts[count++].iov_len = strlen(color);
+  }
+  parts[count].iov_base = (char *) line;
+  parts[count++].iov_len = strlen(line);
+  if (*color) {
+    parts[count].iov_base = "\033[0m";
+    parts[count++].iov_len = 4;
+  }
+  if (newline) {
+    parts[count].iov_base = "\n";
+    parts[count++].iov_len = 1;
+  }
+  while (writev(fileno(stderr), parts, count) < 0 && errno == EINTR) {}
+}
+
+static const char *_color(Symbol tone) {
+  if (!report.color) return "";
+  switch (tone) {
+    case <success>: return "\033[32m";
+    case <failure>: return "\033[31m";
+    case <phase>:   return "\033[36m";
+    case <muted>:   return "\033[2m";
+    default:        return "";
+  }
+}
+
+// durations and sizes
+
+/** Returns monotonic time in microseconds, or zero when the clock read fails.
+    The value measures elapsed time; it is not a wall-clock timestamp.
+*/
+unsigned long report_now_us(void) {
+  struct timespec now;
+  if (clock_gettime(CLOCK_MONOTONIC, &now)) return 0;
+  return (unsigned long) now.tv_sec * 1000000ul +
+         (unsigned long) now.tv_nsec / 1000ul;
+}
+
+/** Returns the size of a regular file.
+    NULL, a failed `stat`, or a non-regular path returns zero.
+*/
+unsigned long long report_file_bytes(String path) {
+  struct stat info;
+  if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
+  return (unsigned long long) info.st_size;
+}
+
+/** Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
+    two decimal places.
+*/
+String report_duration(unsigned long microseconds) {
+  if (microseconds < 1000) return "%lu us".printf(microseconds);
+  if (microseconds < 1000000) return "%.0f ms".printf(microseconds / 1000.0);
+  return "%.2f s".printf(microseconds / 1000000.0);
+}
+
+/** Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
+    Byte counts are exact; larger units use one decimal place.
+*/
+String report_size(unsigned long long bytes) {
+  if (bytes < 1024) return "%llu B".printf(bytes);
+  if (bytes < 1024ull * 1024ull) return "%.1f KiB".printf(bytes / 1024.0);
+  return "%.1f MiB".printf(bytes / (1024.0 * 1024.0));
 }
