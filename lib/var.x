@@ -257,15 +257,18 @@ static VarDecoded _decode(Var value) {
   return (VarDecoded) { _f64_, -1, 0 };
 }
 
-/* Rotating the top left one bit puts 0x0000-0x000F on the even slots and
-   0x8000-0x800F on the odd slots below 32; every other top lands above. */
 static inline int _group_id(unsigned top, unsigned mid, unsigned btm) {
-  unsigned slot = ((top << 1) | (top >> 15)) & 0xFFFF;
+  unsigned slot = _group_slot(top);
   if (slot >= 32) return _invalid_;
   const VarDecodeGroup *group = &x2c_var_decode_groups[slot];
   unsigned selector = group.by_middle ? mid : btm & group.mask;
   return selector < 8 ? group.ids[selector] : _invalid_;
 }
+
+/* Rotating the top left one bit puts 0x0000-0x000F on the even slots and
+   0x8000-0x800F on the odd slots below 32; every other top lands above. */
+static inline unsigned _group_slot(unsigned top) =>
+  ((top << 1) | (top >> 15)) & 0xFFFF;
 
 /* Wide rows validate the family recorded inside their readable box. Array and
    Map are the only built-in pointer rows whose null payload is invalid: their
@@ -486,8 +489,7 @@ int x2c_var_tag_descriptor_index(Symbol tag) {
     `<conv-range>` when a scalar does not fit the tag's payload width,
     `<bad-arg>` when an `<array>` or `<map>` pointer is null, `<alloc-fail>`
     when a wide box cannot be allocated, and `<bad-enc>` when a box address
-    cannot be represented or a custom object pointer is not 8-byte
-    aligned.
+    cannot be represented or a pointer does not satisfy its tag's alignment.
 */
 Var Var.new(Symbol tag, ...) {
   va_list ap, TagId id = _tag2id(tag);
@@ -499,14 +501,24 @@ Var Var.new(Symbol tag, ...) {
   if (row >= 0) {
     void *pointer = va_arg(ap, void *);
     va_end(ap);
-    if ((uintptr_t) pointer & 0x7)
-      raise %(bad-enc (owner "Var.new") (target $tag));
+    _require_aligned(tag, pointer, 0x7);
     if (row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
     return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
   Var v = _new_builtin(id, tag, ap);
   va_end(ap);
   return v;
+}
+
+/* An address shares its low bits with the row selector, so the bits under
+   `mask` must be clear. Raising from `_misaligned` keeps this test small
+   enough for clang to inline at both callers. */
+static inline void _require_aligned(Symbol tag, void *address, unsigned mask) {
+  if ((uintptr_t) address & mask) _misaligned(tag);
+}
+
+static void _misaligned(Symbol tag) {
+  raise %(bad-enc (owner "Var.new") (target $tag));
 }
 
 /* The row's kind names the C type of the one variadic payload. */
@@ -523,15 +535,22 @@ static Var _new_builtin(TagId id, Symbol tag, va_list ap) {
 }
 
 /* Pointer families store only the low 48 address bits and reclaim the
-   alignment bits implied by their C type for the row subtype. Array and Map
-   are the only rows whose null payload is invalid. */
+   alignment bits implied by their C type for the row subtype. Their decode
+   group's mask covers exactly those bits, never more than three, so an
+   8-byte-aligned address skips the lookup. Array and Map are the only rows
+   whose null payload is invalid. */
 static Var _new_pointer(TagId id, void *ptr) {
+  unsigned long top = x2c_var_taginfo[id].top;
   if ((id == _array_ || id == _map_) && !ptr) {
     Symbol tag = x2c_var_taginfo[id].tag;
     raise %(bad-arg (owner "Var.new") (target $tag));
   }
+  if ((uintptr_t) ptr & 0x7) {
+    unsigned mask = x2c_var_decode_groups[_group_slot(top)].mask;
+    _require_aligned(x2c_var_taginfo[id].tag, ptr, mask);
+  }
   Var v = { .p64 = ptr };
-  v.u64 |= x2c_var_taginfo[id].top << 48;
+  v.u64 |= top << 48;
   v.u64 |= x2c_var_taginfo[id].bottom;
   return v;
 }
