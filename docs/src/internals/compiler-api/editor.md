@@ -25,9 +25,11 @@ Metadata precedes ordinary compiler arguments after `--`; source snapshots
 and the JSON response use separate files. Returns zero for a written
 response and two for a failed request or unsupported configuration.
 
-Source: `src/editor.x:161`
+Source: `src/editor.x:44`
 
 ## Design notes
 
 Uses the ordinary compiler frontend and a separate response file so
-macro output cannot corrupt editor results. Each process owns one request.
+macro output cannot corrupt editor results. A request passes its
+metadata in argv and its source snapshots in files, so no JSON input
+parser is needed. Each process owns one request.

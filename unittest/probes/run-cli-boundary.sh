@@ -469,6 +469,31 @@ for value in 1 2 3; do
   fi
 done
 
+# A dry run records no archive state, so after a failed archive step the next
+# build still archives the object compiled from the current source.
+archived="$BUILD/direct/retained-archive"
+mkdir -p "$archived"
+printf '#!/bin/sh\nexit 1\n' >"$archived/failing-ar"
+chmod +x "$archived/failing-ar"
+build_archive() {
+  "$X2C" build --kind static-library --build-dir "$archived/build" \
+    --output "$archived/libvalue.a" "$archived/value.c" "$@"
+}
+printf 'int library_value(void) { return 1; }\n' >"$archived/value.c"
+build_archive >"$archived/first.stdout" 2>"$archived/first.stderr"
+printf 'int library_value(void) { return 2; }\n' >"$archived/value.c"
+set +e
+build_archive --ar "$archived/failing-ar" >"$archived/failed.stdout" \
+  2>"$archived/failed.stderr"
+failed_archive_status=$?
+set -e
+[[ $failed_archive_status == 1 ]]
+build_archive -### >"$archived/dry.stdout" 2>"$archived/dry.stderr"
+build_archive -v >"$archived/last.stdout" 2>"$archived/last.stderr"
+"$host_cc" "$BUILD/direct/consumer.c" "$archived/libvalue.a" \
+  -o "$archived/consumer"
+[[ $("$archived/consumer") == 2 ]]
+
 # Binding groups belong to a translation unit, not the shared Lisp parent.
 bindings="$BUILD/binding-units"
 mkdir -p "$bindings"
@@ -1321,6 +1346,29 @@ spanning_status=$?
 set -e
 [[ $spanning_status == 2 ]]
 grep -Fq 'unterminated array' "$spanning/open.stderr"
+
+# A field without a value is an error at its line, and so is a second
+# [dependencies] section, even after an empty first one.
+invalid="$BUILD/invalid-manifest"
+mkdir -p "$invalid"
+printf 'int main(void) { return 0; }\n' >"$invalid/main.x"
+printf '[target.a]\nsources =\n' >"$invalid/empty.toml"
+printf '[dependencies]\n[dependencies]\n[target.a]\nsources = ["main.x"]\n' \
+  >"$invalid/repeated.toml"
+set +e
+"$X2C" build -### --manifest-path "$invalid/empty.toml" \
+  2>"$invalid/empty.stderr"
+invalid_empty=$?
+"$X2C" build -### --manifest-path "$invalid/repeated.toml" \
+  2>"$invalid/repeated.stderr"
+invalid_repeated=$?
+set -e
+[[ $invalid_empty == 2 ]]
+grep -Fq "empty.toml':2: expected an array of quoted strings" \
+  "$invalid/empty.stderr"
+[[ $invalid_repeated == 2 ]]
+grep -Fq "repeated.toml':2: duplicate dependencies section" \
+  "$invalid/repeated.stderr"
 
 # A profile reaches the dependency targets that define it.
 profiles="$BUILD/profiles"

@@ -2032,6 +2032,7 @@ These are the complete hole-kind annotations:
 | `Type` | type | `FILE *` |
 | `NamedType` | name followed by a complete type definition | `Point { int x; int y; };` |
 | `Decl` | non-function declaration | `static int value` |
+| `DeclaratorRow` | declarator with optional initializer | `second = first + 2` |
 | `Function` | function definition | `int f(int x) => x;` |
 | `Name` | identifier | `checksum` |
 | `Literal` | one literal | `42` or `<char>` |
@@ -2057,6 +2058,21 @@ comma or closing parenthesis belongs to the macro invocation. The declaration
 may have an initializer or use flat destructuring with two or more simple
 identifier targets, but it may not contain multiple comma-separated
 declarators.
+
+A `DeclaratorRow` argument has no leading type or trailing semicolon. A
+declaration template supplies the shared type, and a trailing
+`DeclaratorRow $rows...` hole forwards comma-separated declarators in order:
+
+```x2c
+macro Statement $group(Type $type, DeclaratorRow $rows...) {
+  $type $rows...;
+}
+
+int main(void) {
+  $group(int, first = 1, second = first + 2);
+  return second - 3;
+}
+```
 
 An expression hole may be the receiver of ordinary postfix syntax in the body,
 including `$value.field`, `$value.method()`, and `$value[index]`. The hole ends
@@ -2356,9 +2372,9 @@ parameter is a sequence, `ALIAS() TARGET` supplies an empty sequence; the
 parentheses distinguish the argument list from a parenthesized target.
 
 Aliases do not add a second argument grammar. Arguments remain comma-separated
-and are parsed by the macro's existing `Expr`, `Type`, `Decl`, `Function`,
-`Name`, `Literal`, `Param`, `Statement`, `Block`, `Field`, `Entry`,
-`Enumerator`, or `Unit` parameters.
+and are parsed by the macro's existing `Expr`, `Type`, `Decl`,
+`DeclaratorRow`, `Function`, `Name`, `Literal`, `Param`, `Statement`,
+`Block`, `Field`, `Entry`, `Enumerator`, or `Unit` parameters.
 An alias cannot introduce a semicolon-separated control header or capture
 arbitrary tokens.
 

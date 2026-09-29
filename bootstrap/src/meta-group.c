@@ -1233,7 +1233,7 @@ String script_cache_root(void);
 String String_sha256(String);
 String String_add(String, String);
 void Path_make_dirs(Path);
-Toolchain toolchain_new(String, String, List, List, List, int, int);
+Toolchain toolchain_meta(String);
 ToolAction Toolchain_module_action(Toolchain, String, List);
 void Path_move_to(Path, Path);
 static String _meta_group_module(Compiler c, String * failure){
@@ -1241,7 +1241,7 @@ static String _meta_group_module(Compiler c, String * failure){
     (* failure) = _415;  return NULL;
   }
   List code = _meta_group_code(c, stamp, _454, _455, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_3 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_string(List_getindex(_x2c_destructure_3, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_416), cons(String_var(source), cons(String_var(_416), cons(String_var(stamp), cons(String_var(_416), NULL))))))), String_join(NULL, cons(String_var(Compiler_meta_cc_identity(meta_cc)), cons(String_var(_416), cons(String_var(meta_include_dir), NULL))))));  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_417), cons(String_var(key), NULL))));  String module = String_join(NULL, cons(String_var(directory), cons(String_var(_418), NULL)));  if(Path_is_file(module)) return module;  String output = String_join(NULL, cons(String_var(module), cons(String_var(_419), cons(String_var(String_printf(_420, (long) getpid())), NULL))));  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(cfile), NULL)))), source);
-  Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
+  Toolchain linker = toolchain_meta(meta_cc);
   List arguments = Toolchain_module_action(linker, output, cons(_422, cons(_424, cons(_426, cons(_428, cons(String_var(directory), cons(_428, cons(String_var(meta_include_dir), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(cfile), NULL))))), NULL))))))))) -> arguments;
   (* failure) = Compiler_meta_cc_run(arguments, directory);
   if(String_truth((* failure))) return NULL;

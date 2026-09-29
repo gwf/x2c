@@ -651,7 +651,7 @@ static String _meta_group_module(Compiler c, String &failure) {
   Path.make_dirs(directory);
   Path.write_text(%"$directory/$hfile", header);
   Path.write_text(%"$directory/$cfile", source);
-  Toolchain linker = toolchain_new(meta_cc, NULL, NULL, NULL, NULL, 0, 0);
+  Toolchain linker = toolchain_meta(meta_cc);
   List arguments = linker.module_action(
     output,
     %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory

@@ -14,10 +14,8 @@ $(import "../lib/private-keywords.xmacro")
 /** Links native build requests in dependency-first order.
     `project_plan` returns the head. Each node and copied `CliRequest` struct
     is owned by the current `Scope` and needs no individual cleanup; its
-    `String`
-    and `List` fields retain their canonical pool lifetimes and may share
-    values
-    with the command request.
+    `String` and `List` fields retain their canonical pool lifetimes and may
+    share values with the command request.
 */
 typedef struct ProjectBuild {
   CliRequest request;
@@ -34,6 +32,11 @@ typedef struct ProjectBuild {
 #include "buffer.x"
 #include "install.x"
 
+// the manifest model
+
+/* A target or profile exists from its first mention. `declared` records
+   that its own section appeared, and `seen` holds the keys that section
+   set. */
 typedef struct ProjectProfile {
   String name, optimization, int debug, List defines, c_flags, link_flags;
   Map seen, int declared, struct ProjectProfile *next;
@@ -53,225 +56,287 @@ typedef struct ProjectDependency {
   struct ProjectDependency *next;
 } *ProjectDependency;
 
+/* A project holds its manifest's settings, the command request it serves,
+   and, while it plans, the selected target and the build list. */
 typedef struct Project {
   String path, root, text, default_target, build_dir, build_root, Map seen;
   ProjectDependency dependencies;
   Map dependency_seen;
-  int declared;
+  int declared, dependency_declared;
   SourceView sources;
   ProjectTarget targets;
+  CliRequest command, ProjectTarget selected;
   ProjectBuild head;
   ProjectBuild tail;
 } *Project;
 
-static void _error(Project p, int line, String message) {
-  String at = line ? ":%d".printf(line) : NULL;
-  if (p && p.path) message = %"manifest '${p.path}'$at: $message";
-  fprintf(stderr, "x2c: error: %s\n", message);
-  exit(2);
+// planning
+
+/** Parses a project manifest and returns its selected target's build plan.
+    `request` must be a build or run request with no explicit operands. The
+    result contains each dependency once before its consumer and lowers
+    manifest fields and command-line overrides to ordinary `CliRequest` values
+    without executing build actions. Manifest discovery, parsing, validation,
+    or target-selection failures print a diagnostic and exit with status 2.
+*/
+ProjectBuild project_plan(CliRequest request) {
+  Project p = _open_project(request);
+  _parse_manifest(p);
+  for (ProjectTarget target = p.targets; target; target = target.next)
+    _validate_target(p, target);
+  p.selected = _selected_target(p);
+  // Nothing outside the manifest changes until the request is known good.
+  _resolve_dependencies(p);
+  p.build_root = _build_root(p);
+  _plan_target(p, p.selected);
+  return p.head;
 }
 
-static void _error_name(Project p, int line, String message, String name) {
-  _error(p, line, %"$message '$name'");
+/* A project whose manifest text is read and not yet parsed. */
+static Project _open_project(CliRequest request) {
+  Project p = Scope.calloc(1, sizeof(struct Project));
+  *p = (struct Project) {
+    .seen = {}, .sources = request.sources, .command = request,
+    .path = project_manifest(request)};
+  if (!p.path) _error(NULL, 0, "no explicit inputs and no x2c.toml found");
+  p.path = Path.absolute(p.path);
+  if (!p.sources.read(p.path, p.text)) _error(p, 0, "cannot read manifest");
+  p.root = Path.dirname(p.path);
+  return p;
+}
+
+/** Returns the explicit or nearest readable project manifest, or NULL.
+    Discovery uses the same request view as project parsing.
+*/
+String project_manifest(CliRequest c) {
+  if (c.manifest) return c.manifest;
+  for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
+    String candidate = directory.join("x2c.toml");
+    if (c.sources.exists(candidate)) return candidate;
+    if (directory == "/") return NULL;
+  }
+}
+
+/* The target the command names, else the manifest's default, else the
+   manifest's only target. The command must be able to build it as asked. */
+static ProjectTarget _selected_target(Project p) {
+  CliRequest request = p.command;
+  String name = request.target ? request.target : p.default_target;
+  if (!name && p.targets.next)
+    _error(p, 0, "select --target or set project.default-target");
+  if (!name) name = p.targets.name;
+  ProjectTarget selected = _target(p, name);
+  if (!selected) _error_name(p, 0, "unknown target", name);
+  Symbol kind = request.kind_explicit ? request.kind : selected.kind;
+  if (request.command == <run> && kind != <executable>)
+    _error(p, 0, "run requires an executable target");
+  (void) _selected_profile(p, selected, request.profile);
+  return selected;
+}
+
+/* The command's build directory, relative to the working directory, else
+   the manifest's, relative to the project root. */
+static String _build_root(Project p) {
+  String dir = p.command.build_dir;
+  if (dir) return Path.absolute(".").join(dir);
+  if (p.build_dir) return Path.join(p.root, p.build_dir);
+  return %"${p.root}/.x2c-build";
+}
+
+// manifest lines
+
+typedef enum ManifestSection {
+  NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
+} ManifestSection;
+
+/* The parser's place in a manifest: the line it reads and the section that
+   line belongs to, with the section's target or profile. A field whose
+   array spans lines keeps its key, its value so far, and the line it starts
+   on until a bracket closes the array. */
+typedef struct Manifest {
+  Project project, int line, ManifestSection section;
+  ProjectTarget target, ProjectProfile profile;
+  String key, value, int start;
+} Manifest;
+
+/* Each line is a section header, a `key = value` field, or the next line of
+   a field whose array is open. A `#` outside a string starts a comment. */
+static void _parse_manifest(Project p) {
+  Manifest m = {.project = p};
+  foreach (String text, p.text.split_lines(0)) {
+    m.line++;
+    char *line = _content(text);
+    if (!*line) continue;
+    if (m.key) m.extend(line);
+    else if (*line == '[') m.header(line);
+    else m.field(line);
+  }
+  if (m.key) _error(p, m.start, "unterminated array");
+  if (!p.targets) _error(p, 0, "manifest defines no targets");
+}
+
+/* A copy of the line that the parser may write into, without its comment
+   and surrounding space. */
+static char *_content(String text) {
+  int length = text ? strlen(text) : 0;
+  char *line = Scope.malloc(length + 1);
+  if (length) memcpy(line, text, length);
+  line[length] = 0;
+  _strip_comment(line);
+  return _trim(line);
+}
+
+static void _strip_comment(char *line) {
+  int quoted = 0;
+  for (char *at = line; *at; at++) {
+    if (quoted && *at == '\\' && at[1]) at++;
+    else if (*at == '"') quoted = !quoted;
+    else if (!quoted && *at == '#') {
+      *at = 0;
+      return;
+    }
+  }
 }
 
 static char *_trim(char *text) {
-  while (isspace((unsigned char) *text)) text++;
+  text = _skip_space(text);
   char *end = text + strlen(text);
   while (end > text && isspace((unsigned char) end[-1])) end--;
   *end = 0;
   return text;
 }
 
-static void _strip_comment(char *line) {
-  int quoted = 0, escaped = 0;
-  for (char *ch = line; *ch; ch++) {
-    if (escaped) {
-      escaped = 0;
-      continue;
-    }
-    if (quoted && *ch == '\\') {
-      escaped = 1;
-      continue;
-    }
-    if (*ch == '"') {
-      quoted = !quoted;
-      continue;
-    }
-    if (!quoted && *ch == '#') {
-      *ch = 0;
-      return;
-    }
+// sections
+
+/* A header opens `[project]`, `[dependencies]`, `[target.<name>]`, or
+   `[target.<name>.profile.<name>]`, and each section appears once. */
+static void Manifest.header(Manifest *m, char *line) {
+  int length = strlen(line);
+  if (length < 3 || line[length - 1] != ']')
+    _error(m.project, m.line, "malformed section header");
+  line[length - 1] = 0;
+  String name = String.new(line + 1);
+  if (name == "project") m.enter_project();
+  else if (name == "dependencies") m.enter_dependencies();
+  else m.target_header(name);
+}
+
+static void Manifest.enter_project(Manifest *m) {
+  Project p = m.project;
+  if (p.declared) _error(p, m.line, "duplicate project section");
+  p.declared = 1;
+  m.section = PROJECT;
+}
+
+static void Manifest.enter_dependencies(Manifest *m) {
+  Project p = m.project;
+  if (p.dependency_declared)
+    _error(p, m.line, "duplicate dependencies section");
+  p.dependency_declared = 1;
+  p.dependency_seen = {};
+  m.section = DEPENDENCIES;
+}
+
+/* A profile header mentions its target too, so the target exists even
+   before its own section. */
+static void Manifest.target_header(Manifest *m, String header) {
+  Project p = m.project;
+  String name = header.remove_prefix("target."), profile = NULL;
+  int split = name.find(".profile.");
+  if (split >= 0) {
+    profile = name[split + 9:];
+    name = name[:split];
   }
+  if (!header.startswith("target.") || !_name_ok(name) ||
+      (split >= 0 && !_name_ok(profile)))
+    _error(p, m.line, "unknown manifest section");
+  ProjectTarget target = _target(p, name);
+  if (!target) target = _new_target(p, name);
+  if (split < 0) m.enter_target(target);
+  else m.enter_profile(target, profile);
 }
 
-static int _name_ok(String name) {
-  if (!name || !name[0]) return 0;
-  foreach (char raw, name) {
-    unsigned char ch = raw;
-    if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
-  }
-  return 1;
+static void Manifest.enter_target(Manifest *m, ProjectTarget target) {
+  if (target.declared)
+    _error_name(m.project, m.line, "duplicate target section", target.name);
+  target.declared = 1;
+  m.section = TARGET;
+  m.target = target;
 }
 
-static String _parse_string(Project project, int line, const char **cursor) {
-  const char *ch = *cursor ? *cursor : "";
-  while (isspace((unsigned char) *ch)) ch++;
-  if (*ch != '"') _error(project, line, "expected a quoted string");
-  ch++;
-  Buffer output = Buffer.new(0);
-  while (*ch && *ch != '"') {
-    if (*ch != '\\') {
-      output.write_char(*ch++);
-      continue;
-    }
-    ch++;
-    if (*ch == '"' || *ch == '\\') output.write_char(*ch++);
-    else if (*ch == 'n') {
-      output.write_char('\n');
-      ch++;
-    }
-    else if (*ch == 't') {
-      output.write_char('\t');
-      ch++;
-    }
-    else _error(project, line, "unsupported string escape");
-  }
-  if (*ch != '"') _error(project, line, "unterminated quoted string");
-  ch++;
-  String result = output.str_free();
-  *cursor = ch;
-  return result;
+static void Manifest.enter_profile(
+  Manifest *m, ProjectTarget target, String name) {
+  ProjectProfile profile = _profile(target, name);
+  if (!profile) profile = _new_profile(target, name);
+  if (profile.declared)
+    _error_name(m.project, m.line, "duplicate profile section", name);
+  profile.declared = 1;
+  m.section = PROFILE;
+  m.profile = profile;
 }
 
-static String _string_value(Project project, int line, String value) {
-  const char *cursor = value;
-  String result = _parse_string(project, line, &cursor);
-  while (isspace((unsigned char) *cursor)) cursor++;
-  if (*cursor) _error(project, line, "unexpected text after string");
-  return result;
+// fields
+
+/* A `key = value` field of the current section. */
+static void Manifest.field(Manifest *m, char *line) {
+  Project p = m.project;
+  if (m.section == NONE) _error(p, m.line, "field appears before a section");
+  char *equals = strchr(line, '=');
+  if (!equals) _error(p, m.line, "expected key = value");
+  *equals = 0;
+  String key = String.new(_trim(line)), value = String.new(_trim(equals + 1));
+  if (!_name_ok(key)) _error(p, m.line, "invalid field name");
+  m.claim(key);
+  m.key = key;
+  m.value = value;
+  m.start = m.line;
+  m.settle();
 }
 
-static List _string_array(Project project, int line, String value) {
-  const char *cursor = value ? value : "";
-  while (isspace((unsigned char) *cursor)) cursor++;
-  if (*cursor != '[')
-    _error(project, line, "expected an array of quoted strings");
-  cursor++;
-  Array values = [];
-  loop {
-    while (isspace((unsigned char) *cursor)) cursor++;
-    if (*cursor == ']') {
-      cursor++;
-      break;
-    }
-    values.push(_parse_string(project, line, &cursor));
-    while (isspace((unsigned char) *cursor)) cursor++;
-    if (*cursor == ',') {
-      cursor++;
-      continue;
-    }
-    if (*cursor != ']')
-      _error(project, line, "expected ',' or ']' in array");
-  }
-  while (isspace((unsigned char) *cursor)) cursor++;
-  if (*cursor) _error(project, line, "unexpected text after array");
-  return values.list_free();
+/* The next line of an open array continues its field's value. */
+static void Manifest.extend(Manifest *m, char *line) {
+  m.value = %"${m.value} ${String.new(line)}";
+  m.settle();
 }
 
-static int _bool_value(Project project, int line, String value) {
-  if (value && value == "true") return 1;
-  if (value && value == "false") return 0;
-  _error(project, line, "expected true or false");
+/* Each section takes a key once. */
+static void Manifest.claim(Manifest *m, String key) {
+  Map keys = m.keys();
+  if (key in keys) _error(m.project, m.line, "duplicate manifest field");
+  keys[key] = 1;
 }
 
-static ProjectTarget _target(Project project, String name, int create) {
-  for (ProjectTarget target = project.targets; target; target = target.next)
-    if (target.name == name) return target;
-  if (!create) return NULL;
-  ProjectTarget target = Scope.calloc(1, sizeof(struct ProjectTarget));
-  *target = (struct ProjectTarget) {
-    .name = name, .kind = <executable>, .seen = {}, .next = project.targets};
-  project.targets = target;
-  return target;
+static Map Manifest.keys(Manifest *m) {
+  if (m.section == PROJECT) return m.project.seen;
+  if (m.section == DEPENDENCIES) return m.project.dependency_seen;
+  return m.section == TARGET ? m.target.seen : m.profile.seen;
 }
 
-static ProjectProfile _profile(ProjectTarget target, String name, int create) {
-  for (ProjectProfile profile = target.profiles; profile;
-       profile = profile.next)
-    if (profile.name == name) return profile;
-  if (!create) return NULL;
-  ProjectProfile profile = Scope.calloc(1, sizeof(struct ProjectProfile));
-  *profile = (struct ProjectProfile) {
-    .name = name, .seen = {}, .next = target.profiles};
-  target.profiles = profile;
-  return profile;
+/* A field whose value leaves an array open waits for the line that closes
+   it; any other field is set now. */
+static void Manifest.settle(Manifest *m) {
+  if (_array_open(m.value)) return;
+  m.set();
+  m.key = NULL;
 }
 
-// Each section object records the keys it has taken. A repeated key is an
-// error, and `debug = false` stays distinguishable from an absent `debug`.
-static void _set_once(Project project, int line, Map seen, String key) {
-  if (key in seen)
-    _error(project, line, "duplicate manifest field");
-  seen[key] = 1;
+static void Manifest.set(Manifest *m) {
+  Project p = m.project;
+  int line = m.start;
+  String key = m.key, value = m.value;
+  if (m.section == PROJECT) _set_project_field(p, line, key, value);
+  else if (m.section == DEPENDENCIES) _set_dependency(p, line, key, value);
+  else if (m.section == TARGET)
+    _set_target_field(p, m.target, line, key, value);
+  else _set_profile_field(p, m.profile, line, key, value);
 }
 
-static void _set_project_field(
-  Project project, int line, String key, String value) {
-  if (key == "name") (void) _string_value(project, line, value);
+static void _set_project_field(Project p, int line, String key, String value) {
+  if (key == "name") (void) _string_value(p, line, value);
   else if (key == "default-target")
-    project.default_target = _string_value(project, line, value);
-  else if (key == "build-dir")
-    project.build_dir = _string_value(project, line, value);
-  else _error_name(project, line, "unknown project field", key);
-}
-
-static void _set_target_field(
-  Project p, ProjectTarget target, int line, String key, String value) {
-  if (key == "kind") {
-    String kind = _string_value(p, line, value);
-    if (kind == "executable") target.kind = <executable>;
-    else if (kind == "static-library") target.kind = <static-lib>;
-    else if (kind == "meta-module") target.kind = <module>;
-    else if (kind == "shared-library")
-      _error(p, line, "shared-library is not supported by this compiler");
-    else _error_name(p, line, "unknown target kind", kind);
-  }
-  else if (key == "sources") target.sources = _string_array(p, line, value);
-  else if (key == "exclude") target.exclude = _string_array(p, line, value);
-  else if (key == "dependencies")
-    target.dependencies = _string_array(p, line, value);
-  else if (key == "native-modules")
-    target.native_modules = _string_array(p, line, value);
-  else if (key == "include-dirs")
-    target.include_dirs = _string_array(p, line, value);
-  else if (key == "package-dirs")
-    target.package_dirs = _string_array(p, line, value);
-  else if (key == "defines") target.defines = _string_array(p, line, value);
-  else if (key == "c-flags") target.c_flags = _string_array(p, line, value);
-  else if (key == "library-dirs")
-    target.library_dirs = _string_array(p, line, value);
-  else if (key == "libraries")
-    target.libraries = _string_array(p, line, value);
-  else if (key == "link-flags")
-    target.link_flags = _string_array(p, line, value);
-  else if (key == "output") target.output = _string_value(p, line, value);
-  else _error_name(p, line, "unknown target field", key);
-}
-
-static void _set_profile_field(
-  Project project, ProjectProfile profile, int line, String key,
-  String value) {
-  if (key == "optimization")
-    profile.optimization = _string_value(project, line, value);
-  else if (key == "debug") profile.debug = _bool_value(project, line, value);
-  else if (key == "defines")
-    profile.defines = _string_array(project, line, value);
-  else if (key == "c-flags")
-    profile.c_flags = _string_array(project, line, value);
-  else if (key == "link-flags")
-    profile.link_flags = _string_array(project, line, value);
-  else _error_name(project, line, "unknown profile field", key);
+    p.default_target = _string_value(p, line, value);
+  else if (key == "build-dir") p.build_dir = _string_value(p, line, value);
+  else _error_name(p, line, "unknown project field", key);
 }
 
 /* One `[dependencies]` entry: an index package name and its exact version. */
@@ -284,209 +349,180 @@ static void _set_dependency(Project p, int line, String key, String value) {
   *link = entry;
 }
 
+static void _set_target_field(
+  Project p, ProjectTarget target, int line, String key, String value) {
+  List *list = _target_list(target, key);
+  if (list) *list = _string_array(p, line, value);
+  else if (key == "kind") _set_kind(p, target, line, value);
+  else if (key == "output") target.output = _string_value(p, line, value);
+  else _error_name(p, line, "unknown target field", key);
+}
+
+static List *_target_list(ProjectTarget target, String key) {
+  if (key == "sources") return &target.sources;
+  if (key == "exclude") return &target.exclude;
+  if (key == "dependencies") return &target.dependencies;
+  if (key == "native-modules") return &target.native_modules;
+  if (key == "include-dirs") return &target.include_dirs;
+  if (key == "package-dirs") return &target.package_dirs;
+  if (key == "defines") return &target.defines;
+  if (key == "c-flags") return &target.c_flags;
+  if (key == "library-dirs") return &target.library_dirs;
+  if (key == "libraries") return &target.libraries;
+  if (key == "link-flags") return &target.link_flags;
+  return NULL;
+}
+
+static void _set_kind(
+  Project p, ProjectTarget target, int line, String value) {
+  String kind = _string_value(p, line, value);
+  if (kind == "executable") target.kind = <executable>;
+  else if (kind == "static-library") target.kind = <static-lib>;
+  else if (kind == "meta-module") target.kind = <module>;
+  else if (kind == "shared-library")
+    _error(p, line, "shared-library is not supported by this compiler");
+  else _error_name(p, line, "unknown target kind", kind);
+}
+
+static void _set_profile_field(
+  Project p, ProjectProfile profile, int line, String key, String value) {
+  if (key == "optimization")
+    profile.optimization = _string_value(p, line, value);
+  else if (key == "debug") profile.debug = _bool_value(p, line, value);
+  else if (key == "defines") profile.defines = _string_array(p, line, value);
+  else if (key == "c-flags") profile.c_flags = _string_array(p, line, value);
+  else if (key == "link-flags")
+    profile.link_flags = _string_array(p, line, value);
+  else _error_name(p, line, "unknown profile field", key);
+}
+
+// values
+
+static String _string_value(Project p, int line, String value) {
+  char *at = value;
+  String text = _parse_string(p, line, &at);
+  if (*_skip_space(at)) _error(p, line, "unexpected text after string");
+  return text;
+}
+
+static List _string_array(Project p, int line, String value) {
+  char *at = _skip_space(value ? value : "");
+  if (*at != '[') _error(p, line, "expected an array of quoted strings");
+  at = _skip_space(at + 1);
+  Array values = [];
+  while (*at != ']') {
+    values.push(_parse_string(p, line, &at));
+    at = _skip_space(at);
+    if (*at == ',') at = _skip_space(at + 1);
+    else if (*at != ']') _error(p, line, "expected ',' or ']' in array");
+  }
+  if (*_skip_space(at + 1)) _error(p, line, "unexpected text after array");
+  return values.list_free();
+}
+
+/* Reads the quoted string at `*cursor` and moves the cursor past it. */
+static String _parse_string(Project p, int line, char **cursor) {
+  char *at = _skip_space(*cursor ? *cursor : "");
+  if (*at != '"') _error(p, line, "expected a quoted string");
+  Buffer out = Buffer.new(0);
+  for (at++; *at && *at != '"'; at++) {
+    char ch = *at;
+    if (ch == '\\') ch = _escape(p, line, *++at);
+    out.write_char(ch);
+  }
+  if (*at != '"') _error(p, line, "unterminated quoted string");
+  *cursor = at + 1;
+  return out.str_free();
+}
+
+/* The character that a backslash before `ch` stands for. */
+static char _escape(Project p, int line, char ch) {
+  if (ch == '"' || ch == '\\') return ch;
+  if (ch == 'n') return '\n';
+  if (ch == 't') return '\t';
+  _error(p, line, "unsupported string escape");
+}
+
+static int _bool_value(Project p, int line, String value) {
+  if (value && value == "true") return 1;
+  if (value && value == "false") return 0;
+  _error(p, line, "expected true or false");
+}
+
 /* Whether `value` opens an array that no later bracket closes, so the field
    continues on the next manifest line. A bracket inside a quoted string is
    part of the string. */
 static int _array_open(String value) {
   int depth = 0, quoted = 0;
-  for (const char *ch = value; *ch; ch++) {
+  for (const char *at = value ? value : ""; *at; at++) {
     if (quoted) {
-      if (*ch == '\\' && ch[1]) ch++;
-      else if (*ch == '"') quoted = 0;
+      if (*at == '\\' && at[1]) at++;
+      else if (*at == '"') quoted = 0;
     }
-    else if (*ch == '"') quoted = 1;
-    else if (*ch == '[') depth++;
-    else if (*ch == ']') depth--;
+    else if (*at == '"') quoted = 1;
+    else if (*at == '[') depth++;
+    else if (*at == ']') depth--;
   }
   return depth > 0;
 }
 
-typedef enum ManifestSection {
-  NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
-} ManifestSection;
-
-static void _set_field(
-  Project p, ManifestSection section, ProjectTarget target,
-  ProjectProfile profile, int line, String key, String value) {
-  if (section == PROJECT) _set_project_field(p, line, key, value);
-  else if (section == DEPENDENCIES) _set_dependency(p, line, key, value);
-  else if (section == TARGET) _set_target_field(p, target, line, key, value);
-  else _set_profile_field(p, profile, line, key, value);
+static int _name_ok(String name) {
+  if (!name || !name[0]) return 0;
+  foreach (char raw, name) {
+    unsigned char ch = raw;
+    if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
+  }
+  return 1;
 }
 
-static void _parse_manifest(Project p) {
-  ManifestSection section = NONE;
-  ProjectTarget target = NULL;
-  ProjectProfile profile = NULL;
-  String open_key = NULL, open_value = NULL, int open_line = 0;
-  List lines = p.text.split_lines(0), int line_number = 0;
-  foreach (String owned, lines) {
-    line_number++;
-    int owned_length = owned ? strlen(owned) : 0;
-    char *line_storage = Scope.malloc(owned_length + 1);
-    if (owned_length) memcpy(line_storage, owned, owned_length);
-    line_storage[owned_length] = 0;
-    char *line = line_storage;
-    _strip_comment(line);
-    line = _trim(line);
-    if (!*line) continue;
-    if (open_key) {
-      open_value = %"$open_value ${String.new(line)}";
-      if (_array_open(open_value)) continue;
-      _set_field(p, section, target, profile, open_line, open_key, open_value);
-      open_key = NULL;
-      continue;
-    }
-    if (*line == '[') {
-      int length = strlen(line);
-      if (length < 3 || line[length - 1] != ']')
-        _error(p, line_number, "malformed section header");
-      line[length - 1] = 0;
-      String name = String.new(line + 1);
-      if (name == "project") {
-        if (p.declared)
-          _error(p, line_number, "duplicate project section");
-        p.declared = 1;
-        section = PROJECT;
-        target = NULL;
-        profile = NULL;
-        continue;
-      }
-      if (name == "dependencies") {
-        if (p.dependency_seen)
-          _error(p, line_number, "duplicate dependencies section");
-        p.dependency_seen = {};
-        section = DEPENDENCIES;
-        target = NULL;
-        profile = NULL;
-        continue;
-      }
-      // `[target.<name>]` or `[target.<name>.profile.<profile>]`
-      String second = name.remove_prefix("target."), fourth = NULL;
-      int split = second.find(".profile.");
-      if (split >= 0) {
-        fourth = second[split + 9:];
-        second = second[:split];
-      }
-      if (!name.startswith("target.") || !_name_ok(second) ||
-          (split >= 0 && !_name_ok(fourth)))
-        _error(p, line_number, "unknown manifest section");
-      target = _target(p, second, 1);
-      if (split < 0) {
-        if (target.declared)
-          _error_name(p, line_number, "duplicate target section", second);
-        target.declared = 1;
-        section = TARGET;
-        profile = NULL;
-      }
-      else {
-        section = PROFILE;
-        profile = _profile(target, fourth, 1);
-        if (profile.declared)
-          _error_name(p, line_number, "duplicate profile section", fourth);
-        profile.declared = 1;
-      }
-      continue;
-    }
-    if (section == NONE)
-      _error(p, line_number, "field appears before a section");
-    char *equals = strchr(line, '=');
-    if (!equals) _error(p, line_number, "expected key = value");
-    *equals = 0;
-    String key = String.new(_trim(line));
-    String value = String.new(_trim(equals + 1));
-    if (!_name_ok(key)) _error(p, line_number, "invalid field name");
-    _set_once(
-      p, line_number,
-      section == PROJECT ? p.seen :
-      section == DEPENDENCIES ? p.dependency_seen :
-      section == TARGET ? target.seen : profile.seen,
-      key
-    );
-    if (_array_open(value)) {
-      open_key = key;
-      open_value = value;
-      open_line = line_number;
-      continue;
-    }
-    _set_field(p, section, target, profile, line_number, key, value);
-  }
-  if (open_key) _error(p, open_line, "unterminated array");
-  if (!p.targets) _error(p, 0, "manifest defines no targets");
+static char *_skip_space(char *at) {
+  while (isspace((unsigned char) *at)) at++;
+  return at;
 }
 
-static int _has_glob(String pattern) => pattern && strpbrk(pattern, "*?[");
+// targets
 
-/* A pattern matches the files, or the links to files, that its glob names
-   below the project root, outside the build root, and the overlay files
-   there too. A pattern without a wildcard names one file. */
-static Array _expand_pattern(Project p, String pattern, String owner) {
-  Array matches = [];
-  if (!_has_glob(pattern)) {
-    String path = Path.join(p.root, pattern);
-    if (p.sources.exists(path)) matches.push(path);
-  }
-  else {
-    String root = p.root.replace("\\", "\\\\").replace("*", "\\*")
-      .replace("?", "\\?").replace("[", "\\[");
-    String prefix = p.root == "/" ? "/" : %"${p.root}/";
-    List found = Path.glob(Path.join(root, pattern));
-    if (p.sources) found = found.append(p.sources.overlays.keys());
-    foreach (String path, found)
-      if (path.startswith(prefix) &&
-          Path.glob_match(pattern, path.remove_prefix(prefix)) &&
-          !(p.build_root && path.startswith(%"${p.build_root}/")) &&
-          p.sources.exists(path) && !matches.contains(path))
-        matches.push(path);
-  }
-  if (!matches.len())
-    _error_name(p, 0, %"unmatched $owner pattern", pattern);
-  return matches.sort();
+static ProjectTarget _target(Project p, String name) {
+  ProjectTarget target = p.targets;
+  while (target && target.name != name) target = target.next;
+  return target;
 }
 
-static Array _target_sources(
-  Project project, ProjectTarget target, int verbose) {
-  if (!target.sources)
-    _error_name(project, 0, "target has no sources", target.name);
-  Array sources = [];
-  foreach (String pattern, target.sources) {
-    Array expanded = _expand_pattern(project, pattern, "source");
-    foreach (Var value, expanded)
-      if (!sources.contains(value)) sources.push(value);
-    expanded.free();
-  }
-  Array excluded = [];
-  foreach (String pattern, target.exclude) {
-    Array expanded = _expand_pattern(project, pattern, "exclude");
-    foreach (Var value, expanded)
-      if (!excluded.contains(value)) excluded.push(value);
-    expanded.free();
-  }
-  Array kept = [];
-  foreach (Var value, sources) {
-    if (value in excluded) {
-      if (verbose)
-        fprintf(
-          stderr, "x2c: excluded %s from target %s\n",
-          value.string(), target.name);
-    }
-    else kept.push(value);
-  }
-  sources.free();
-  excluded.free();
-  kept.sort();
-  foreach (String path, kept)
-    if (!(x2c_source_file(path) || path.endswith(".c")))
-      _error_name(project, 0, "manifest source is not .x or .c", path);
-  return kept;
+static ProjectTarget _new_target(Project p, String name) {
+  ProjectTarget target = Scope.calloc(1, sizeof(struct ProjectTarget));
+  *target = (struct ProjectTarget) {
+    .name = name, .kind = <executable>, .seen = {}, .next = p.targets};
+  p.targets = target;
+  return target;
 }
 
-static ProjectProfile _selected_profile(
-  Project project, ProjectTarget target, String name) {
-  if (!name) return NULL;
-  ProjectProfile profile = _profile(target, name, 0);
-  if (!profile) _error_name(project, 0, "target has no profile", name);
+static ProjectProfile _profile(ProjectTarget target, String name) {
+  ProjectProfile profile = target.profiles;
+  while (profile && profile.name != name) profile = profile.next;
   return profile;
+}
+
+static ProjectProfile _new_profile(ProjectTarget target, String name) {
+  ProjectProfile profile = Scope.calloc(1, sizeof(struct ProjectProfile));
+  *profile = (struct ProjectProfile) {
+    .name = name, .seen = {}, .next = target.profiles};
+  target.profiles = profile;
+  return profile;
+}
+
+/* Every prerequisite names a target, and no target reaches itself. */
+static void _validate_target(Project p, ProjectTarget target) {
+  if (target.visited) return;
+  if (target.visiting)
+    _error_name(p, 0, "target dependency cycle reaches", target.name);
+  target.visiting = 1;
+  foreach (String name, _prerequisites(target)) {
+    ProjectTarget prerequisite = _target(p, name);
+    if (!prerequisite) _error_name(p, 0, "unknown target dependency", name);
+    _validate_target(p, prerequisite);
+  }
+  target.visiting = 0;
+  target.visited = 1;
 }
 
 /* The targets built before `target`: the libraries it links and the
@@ -494,19 +530,295 @@ static ProjectProfile _selected_profile(
 static List _prerequisites(ProjectTarget target) =>
   target.dependencies.append(target.native_modules);
 
-static void _validate_target(Project project, ProjectTarget target) {
-  if (target.visited) return;
-  if (target.visiting)
-    _error_name(project, 0, "target dependency cycle reaches", target.name);
-  target.visiting = 1;
-  foreach (String name, _prerequisites(target)) {
-    ProjectTarget dependency = _target(project, name, 0);
-    if (!dependency)
-      _error_name(project, 0, "unknown target dependency", name);
-    _validate_target(project, dependency);
+static ProjectProfile _selected_profile(
+  Project p, ProjectTarget target, String name) {
+  if (!name) return NULL;
+  ProjectProfile profile = _profile(target, name);
+  if (!profile) _error_name(p, 0, "target has no profile", name);
+  return profile;
+}
+
+// package dependencies
+
+/* Installs whatever the manifest pins that the home does not already hold,
+   then records what was resolved beside the manifest. A pin the lockfile
+   already covers is installed from the archive the lockfile recorded, which
+   is what makes a later build reproduce the same packages; only a pin the
+   lockfile does not cover reaches the index. A manifest with no pins has
+   nothing to reproduce, so a lockfile left from an earlier `[dependencies]`
+   section goes. The editor reads a source view and never installs, and a dry
+   run creates nothing. */
+static void _resolve_dependencies(Project p) {
+  CliRequest request = p.command;
+  if (p.sources || request.dry_run) return;
+  String path = %"${p.root}/x2c.lock";
+  if (!p.dependencies) {
+    try Path.remove_file(path);
+    catch %(io-fail *detail): x2c_host_error(detail);
+    return;
   }
-  target.visiting = 0;
-  target.visited = 1;
+  List locked = _read_lock(path);
+  if (_lock_satisfies(p, locked)) return;
+  Array rows = [];
+  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next)
+    rows.push(
+      install_require(
+        request, entry.name, entry.version, _locked_row(locked, entry)));
+  _write_lock(path, rows.list_free());
+}
+
+/* The lockfile's rows, or NULL when it is absent. */
+static List _read_lock(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): return NULL;
+  return install_rows(text);
+}
+
+/* Every dependency is locked at its pinned version and already installed at
+   that version, so the build needs no index and no network. */
+static int _lock_satisfies(Project p, List rows) {
+  if (!rows) return 0;
+  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
+    if (!_locked_row(rows, entry)) return 0;
+    if (install_version(entry.name) != entry.version) return 0;
+  }
+  return 1;
+}
+
+/* The lockfile row that pins `entry` at its version, or NULL when the
+   lockfile has none and the index has to resolve it. */
+static List _locked_row(List rows, ProjectDependency entry) {
+  List found = NULL;
+  foreach (List row, rows)
+    if (row.car() == entry.name && row.cadr() == entry.version) found = row;
+  return found;
+}
+
+static void _write_lock(String path, List rows) {
+  String text =
+    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
+    "# name version kind platform url sha256\n";
+  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
+  try file_publish(%($path $text));
+  catch %(io-fail *detail): x2c_host_error(detail);
+}
+
+// build plans
+
+/* A target plans after its prerequisites, and each target plans once. */
+static void _plan_target(Project p, ProjectTarget target) {
+  if (target.planned) return;
+  foreach (String name, _prerequisites(target))
+    _plan_target(p, _target(p, name));
+  _append_plan(p, _target_request(p, target));
+  target.planned = 1;
+}
+
+static void _append_plan(Project p, CliRequest request) {
+  ProjectBuild node = Scope.calloc(1, sizeof(struct ProjectBuild));
+  node.request = request;
+  if (p.tail) p.tail.next = node;
+  else p.head = node;
+  p.tail = node;
+}
+
+/* Each planned target receives a Scope-owned copy of the command request.
+   Target-specific Lists are rebuilt, dependencies become archive inputs, and
+   the per-target `.x2c` directory keeps artifacts and state separate. The
+   state seed identifies the manifest, target, and profile. Effective settings
+   enter fingerprints through the lowered request and action arguments. */
+static CliRequest _target_request(Project p, ProjectTarget target) {
+  CliRequest command = p.command;
+  CliRequest request = Scope.malloc(sizeof(struct CliRequest));
+  *request = *command;
+  _set_product(p, target, request);
+  request.inputs = _target_inputs(p, target, request.kind);
+  request.native_modules =
+    %(@{command.native_modules} @{_target_modules(p, target)});
+  request.include_dirs =
+    %(@{command.include_dirs} @{_paths(p.root, target.include_dirs)});
+  request.package_dirs =
+    %(@{command.package_dirs} @{_paths(p.root, target.package_dirs)});
+  _set_flags(p, target, request);
+  request.label = target.name;
+  request.state_seed =
+    %"${p.path}\ntarget=${target.name}\nprofile=${command.profile}";
+  return request;
+}
+
+/* The selected target builds or runs what the command asked for; every
+   other target is a plain build of its own kind. No planned build keeps
+   temporaries or stops at objects. */
+static void _set_product(Project p, ProjectTarget target, CliRequest request) {
+  CliRequest command = p.command;
+  int chosen = target == p.selected;
+  request.command = chosen ? command.command : <build>;
+  request.run_args = chosen ? command.run_args : NULL;
+  request.compile_only = 0;
+  request.kind = chosen && command.kind_explicit ? command.kind : target.kind;
+  request.output = chosen && command.output ?
+    command.output : _target_output(p, target, request.kind);
+  request.build_dir = %"${p.build_root}/.x2c/${target.name}";
+  request.save_temps = 0;
+  request.temps_dir = NULL;
+}
+
+static String _target_output(Project p, ProjectTarget target, Symbol kind) {
+  String root = p.build_root;
+  if (target.output) return Path.join(p.root, target.output);
+  if (kind == <static-lib>) return %"$root/lib${target.name}.a";
+  if (kind == <module>) return %"$root/${target.name}.so";
+  return %"$root/${target.name}";
+}
+
+/* A target's sources, then the archives of the libraries it links. */
+static List _target_inputs(Project p, ProjectTarget target, Symbol kind) {
+  if (kind == <static-lib> && target.dependencies)
+    _error_name(
+      p, 0, "static-library target cannot contain target dependencies",
+      target.name);
+  Array inputs = _target_sources(p, target);
+  foreach (String name, target.dependencies) {
+    ProjectTarget dependency = _target(p, name);
+    if (dependency.kind != <static-lib>)
+      _error_name(
+        p, 0, "dependency target is not a static library", dependency.name);
+    inputs.push(_target_output(p, dependency, dependency.kind));
+  }
+  return inputs.list_free();
+}
+
+/* The modules a target's translation loads, each a meta-module target's
+   output. */
+static List _target_modules(Project p, ProjectTarget target) {
+  Array modules = [];
+  foreach (String name, target.native_modules) {
+    ProjectTarget loaded = _target(p, name);
+    if (loaded.kind != <module>)
+      _error_name(p, 0, "native module target is not a meta-module", name);
+    modules.push(_target_output(p, loaded, <module>));
+  }
+  return modules.list_free();
+}
+
+// sources
+
+/* What the source patterns match, less what the exclude patterns match,
+   sorted. Every source is x2c or C. */
+static Array _target_sources(Project p, ProjectTarget target) {
+  if (!target.sources) _error_name(p, 0, "target has no sources", target.name);
+  Array sources = _expand_patterns(p, target.sources, "source");
+  Array excluded = _expand_patterns(p, target.exclude, "exclude");
+  Array kept = [];
+  foreach (Var path, sources) {
+    if (!(path in excluded)) kept.push(path);
+    else if (p.command.verbose)
+      fprintf(
+        stderr, "x2c: excluded %s from target %s\n", path.string(),
+        target.name);
+  }
+  sources.free();
+  excluded.free();
+  kept.sort();
+  foreach (String path, kept)
+    if (!(x2c_source_file(path) || path.endswith(".c")))
+      _error_name(p, 0, "manifest source is not .x or .c", path);
+  return kept;
+}
+
+/* The files the patterns match, each once, in the order they first match. */
+static Array _expand_patterns(Project p, List patterns, String owner) {
+  Array files = [];
+  foreach (String pattern, patterns) {
+    Array expanded = _expand_pattern(p, pattern, owner);
+    foreach (Var path, expanded) if (!(path in files)) files.push(path);
+    expanded.free();
+  }
+  return files;
+}
+
+static Array _expand_pattern(Project p, String pattern, String owner) {
+  Array matches =
+    _has_glob(pattern) ? _glob(p, pattern) : _named_file(p, pattern);
+  if (!matches.len()) _error_name(p, 0, %"unmatched $owner pattern", pattern);
+  return matches.sort();
+}
+
+static int _has_glob(String pattern) => pattern && strpbrk(pattern, "*?[");
+
+/* A pattern with a wildcard matches the files, or the links to files, that
+   its glob names below the project root, outside the build root, and the
+   overlay files there too. */
+static Array _glob(Project p, String pattern) {
+  String prefix = p.root == "/" ? "/" : %"${p.root}/";
+  List found = Path.glob(Path.join(_glob_literal(p.root), pattern));
+  if (p.sources) found = found.append(p.sources.overlays.keys());
+  Array matches = [];
+  foreach (String path, found)
+    if (path.startswith(prefix) &&
+        Path.glob_match(pattern, path.remove_prefix(prefix)) &&
+        !(p.build_root && path.startswith(%"${p.build_root}/")) &&
+        p.sources.exists(path) && !(path in matches))
+      matches.push(path);
+  return matches;
+}
+
+/* `text` with its glob wildcards escaped, so a glob matches it literally. */
+static String _glob_literal(String text) =>
+  text.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
+    .replace("[", "\\[");
+
+/* A pattern without a wildcard names one file. */
+static Array _named_file(Project p, String pattern) {
+  Array matches = [];
+  String path = Path.join(p.root, pattern);
+  if (p.sources.exists(path)) matches.push(path);
+  return matches;
+}
+
+// options
+
+/* A profile's defines and flags follow the target's own. */
+static void _set_flags(Project p, ProjectTarget target, CliRequest request) {
+  CliRequest command = p.command;
+  ProjectProfile profile = _target_profile(p, target);
+  List defines = _defines(target.defines), profile_defines = NULL;
+  List compile = NULL, link = NULL;
+  if (profile) {
+    profile_defines = _defines(profile.defines);
+    compile = _profile_flags(p, profile);
+    link = profile.link_flags;
+  }
+  request.cpp_args = %(@defines @profile_defines @{command.cpp_args});
+  request.cc_args = %(
+    @defines @{_c_flags(p, target.c_flags)} @profile_defines @compile
+    @{command.cc_args} @{_path_options(p.root, target.include_dirs, "-I")});
+  request.ld_args = %(
+    @{_path_options(p.root, target.library_dirs, "-L")}
+    @{target.libraries.map(%!(library) => %"-l$library")}
+    @{target.link_flags} @link @{command.ld_args});
+}
+
+/* A dependency target takes the profile when it defines one; only the
+   selected target must have the profile the command named. */
+static ProjectProfile _target_profile(Project p, ProjectTarget target) {
+  String name = p.command.profile;
+  if (target == p.selected) return _selected_profile(p, target, name);
+  return name ? _profile(target, name) : NULL;
+}
+
+/* A profile's C flags, optimization, and debug option. An -O or -g among
+   the command's own C flags takes the place of the profile's. */
+static List _profile_flags(Project p, ProjectProfile profile) {
+  List cc_args = p.command.cc_args;
+  int optimized = cc_args.any(%!(String flag) => flag.startswith("-O"));
+  int debug = profile.debug && !("-g" in cc_args);
+  return %(
+    @{_c_flags(p, profile.c_flags)}
+    @{profile.optimization && !optimized ?
+      %("-${profile.optimization}") : NULL}
+    @{debug ? %("-g") : NULL});
 }
 
 static List _c_flags(Project p, List values) {
@@ -524,252 +836,20 @@ static List _paths(String root, List values) =>
 static List _path_options(String root, List values, String option) =>
   _paths(root, values).map(%!(path) => %($option $path)).flatten();
 
-static String _target_output(
-  Project project, ProjectTarget target, String build_root, Symbol kind) {
-  if (target.output) return Path.join(project.root, target.output);
-  if (kind == <static-lib>) return %"$build_root/lib${target.name}.a";
-  if (kind == <module>) return %"$build_root/${target.name}.so";
-  return %"$build_root/${target.name}";
+// diagnostics
+
+static void _error(Project p, int line, String message) {
+  String at = line ? ":%d".printf(line) : NULL;
+  if (p && p.path) message = %"manifest '${p.path}'$at: $message";
+  fprintf(stderr, "x2c: error: %s\n", message);
+  exit(2);
 }
 
-/* Each planned target receives a Scope-owned copy of the command request.
-   Target-specific Lists are rebuilt, dependencies become archive inputs, and
-   the per-target `.x2c` directory keeps artifacts and state separate. The
-   state seed identifies the manifest, target, and profile. Effective settings
-   enter fingerprints through the lowered request and action arguments. */
-static CliRequest _target_request(
-  Project p, ProjectTarget target, CliRequest command,
-  ProjectTarget selected, String build_root) {
-  CliRequest request = Scope.malloc(sizeof(struct CliRequest));
-  *request = *command;
-  int chosen = target == selected;
-  request.command = chosen ? command.command : <build>;
-  request.run_args = chosen ? command.run_args : NULL;
-  request.compile_only = 0;
-  request.kind = chosen && command.kind_explicit ? command.kind : target.kind;
-  request.output = chosen && command.output ?
-    command.output : _target_output(p, target, build_root, request.kind);
-  request.build_dir = %"$build_root/.x2c/${target.name}";
-  request.save_temps = 0;
-  request.temps_dir = NULL;
-  if (request.kind == <static-lib> && target.dependencies)
-    _error_name(
-      p, 0,
-      "static-library target cannot contain target dependencies",
-      target.name);
-
-  Array inputs = _target_sources(p, target, command.verbose);
-  foreach (String name, target.dependencies) {
-    ProjectTarget dependency = _target(p, name, 0);
-    if (dependency.kind != <static-lib>)
-      _error_name(
-        p, 0, "dependency target is not a static library",
-        dependency.name);
-    inputs.push(_target_output(p, dependency, build_root, dependency.kind));
-  }
-  request.inputs = inputs.list_free();
-  Array modules = [];
-  foreach (String name, target.native_modules) {
-    ProjectTarget loaded = _target(p, name, 0);
-    if (loaded.kind != <module>)
-      _error_name(p, 0, "native module target is not a meta-module", name);
-    modules.push(_target_output(p, loaded, build_root, <module>));
-  }
-  request.native_modules =
-    %(@{command.native_modules} @{modules.list_free()});
-  request.include_dirs =
-    %(@{command.include_dirs} @{_paths(p.root, target.include_dirs)});
-  request.package_dirs =
-    %(@{command.package_dirs} @{_paths(p.root, target.package_dirs)});
-
-  // A dependency target takes the profile when it defines one; only the
-  // selected target must have the profile the command named.
-  ProjectProfile profile = chosen ?
-    _selected_profile(p, target, command.profile) :
-    command.profile ? _profile(target, command.profile, 0) : NULL;
-  List defines = _defines(target.defines), compile = NULL, link = NULL;
-  if (profile) {
-    List cc_args = command.cc_args;
-    int optimized = cc_args.any(%!(String flag) => flag.startswith("-O"));
-    int debug = "debug" in profile.seen && profile.debug &&
-                !cc_args.contains("-g");
-    defines = defines.append(_defines(profile.defines));
-    compile = %(
-      @{_c_flags(p, profile.c_flags)}
-      @{profile.optimization && !optimized ?
-        %("-${profile.optimization}") : NULL}
-      @{debug ? %("-g") : NULL});
-    link = profile.link_flags;
-  }
-  request.cpp_args = %(@defines @{command.cpp_args});
-  request.cc_args = %(
-    @{_defines(target.defines)} @{_c_flags(p, target.c_flags)}
-    @{profile ? _defines(profile.defines) : NULL} @compile @{command.cc_args}
-    @{_path_options(p.root, target.include_dirs, "-I")});
-  request.ld_args = %(
-    @{_path_options(p.root, target.library_dirs, "-L")}
-    @{target.libraries.map(%!(library) => %"-l$library")}
-    @{target.link_flags} @link @{command.ld_args});
-
-  request.label = target.name;
-  request.state_seed =
-    %"${p.path}\n" +
-    %"target=${target.name}\nprofile=${command.profile}";
-  return request;
+static void _error_name(Project p, int line, String message, String name) {
+  _error(p, line, %"$message '$name'");
 }
 
-static void _append_plan(Project project, CliRequest request) {
-  ProjectBuild node = Scope.calloc(1, sizeof(struct ProjectBuild));
-  node.request = request;
-  if (project.tail) project.tail.next = node;
-  else project.head = node;
-  project.tail = node;
-}
-
-static void _plan_target(
-  Project project, ProjectTarget target, CliRequest command,
-  ProjectTarget selected, String build_root) {
-  if (target.planned) return;
-  foreach (String dependency, _prerequisites(target))
-    _plan_target(
-      project, _target(project, dependency, 0),
-      command, selected, build_root);
-  _append_plan(
-    project,
-    _target_request(project, target, command, selected, build_root));
-  target.planned = 1;
-}
-
-// dependencies
-
-/* The lockfile's rows, or NULL when it is absent. */
-static List _read_lock(String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %(not-found *): return NULL;
-  return install_rows(text);
-}
-
-/* The lockfile row that pins `entry` at its version, or NULL when the
-   lockfile has none and the index has to resolve it. */
-static List _locked_row(List rows, ProjectDependency entry) {
-  List found = NULL;
-  foreach (List row, rows)
-    if (row.car() == entry.name && row.cdr().car() == entry.version)
-      found = row;
-  return found;
-}
-
-/* Every dependency is locked at its pinned version and already installed at
-   that version, so the build needs no index and no network. */
-static int _lock_satisfies(Project project, List rows) {
-  if (!rows) return 0;
-  for (ProjectDependency entry = project.dependencies; entry;
-       entry = entry.next) {
-    if (!_locked_row(rows, entry)) return 0;
-    if (install_version(entry.name) != entry.version) return 0;
-  }
-  return 1;
-}
-
-static void _write_lock(String path, List rows) {
-  String text =
-    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
-    "# name version kind platform url sha256\n";
-  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try file_publish(%($path $text));
-  catch %(io-fail *detail): x2c_host_error(detail);
-}
-
-/* Installs whatever the manifest pins that the home does not already hold,
-   then records what was resolved beside the manifest. A pin the lockfile
-   already covers is installed from the archive the lockfile recorded, which
-   is what makes a later build reproduce the same packages; only a pin the
-   lockfile does not cover reaches the index. A manifest with no pins has
-   nothing to reproduce, so a lockfile left from an earlier `[dependencies]`
-   section goes. The editor reads a source view and never installs, and a dry
-   run creates nothing. */
-static void _resolve_dependencies(Project project, CliRequest request) {
-  if (project.sources || request.dry_run) return;
-  String path = %"${project.root}/x2c.lock";
-  if (!project.dependencies) {
-    try Path.remove_file(path);
-    catch %(io-fail *detail): x2c_host_error(detail);
-    return;
-  }
-  List locked = _read_lock(path);
-  if (_lock_satisfies(project, locked)) return;
-  Array rows = [];
-  for (ProjectDependency entry = project.dependencies; entry;
-       entry = entry.next)
-    rows.push(
-      install_require(
-        request, entry.name, entry.version, _locked_row(locked, entry)));
-  _write_lock(path, rows.list_free());
-}
-
-/** Returns the explicit or nearest readable project manifest, or NULL.
-    Discovery uses the same request view as project parsing.
-*/
-String project_manifest(CliRequest c) {
-  if (c.manifest) return c.manifest;
-  for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
-    String candidate = directory.join("x2c.toml");
-    if (c.sources.exists(candidate)) return candidate;
-    if (directory == "/") return NULL;
-  }
-}
-
-/** Parses a project manifest and returns its selected target's build plan.
-    `request` must be a build or run request with no explicit operands. The
-    result contains each dependency once before its consumer and lowers
-    manifest fields and command-line overrides to ordinary `CliRequest` values
-    without executing build actions. Manifest discovery, parsing, validation,
-    or target-selection failures print a diagnostic and exit with status 2.
-*/
-ProjectBuild project_plan(CliRequest request) {
-  Project project = Scope.calloc(1, sizeof(struct Project));
-  project.seen = {};
-  project.sources = request.sources;
-  project.path = project_manifest(request);
-  if (!project.path)
-    _error(NULL, 0, "no explicit inputs and no x2c.toml found");
-  project.path = Path.absolute(project.path);
-  if (!project.sources.read(project.path, project.text))
-    _error(project, 0, "cannot read manifest");
-  project.root = Path.dirname(project.path);
-  _parse_manifest(project);
-  for (ProjectTarget target = project.targets; target; target = target.next)
-    _validate_target(project, target);
-
-  String selected_name = request.target ? request.target :
-                         project.default_target;
-  if (!selected_name) {
-    if (project.targets && !project.targets.next)
-      selected_name = project.targets.name;
-    else
-      _error(project, 0, "select --target or set project.default-target");
-  }
-  ProjectTarget selected = _target(project, selected_name, 0);
-  if (!selected)
-    _error_name(project, 0, "unknown target", selected_name);
-  Symbol selected_kind = request.kind_explicit ? request.kind : selected.kind;
-  if (request.command == <run> && selected_kind != <executable>)
-    _error(project, 0, "run requires an executable target");
-  (void) _selected_profile(project, selected, request.profile);
-  // Nothing outside the manifest changes until the request is known good.
-  _resolve_dependencies(project, request);
-
-  String build_root = request.build_dir;
-  if (build_root) build_root = Path.absolute(".").join(build_root);
-  else
-    build_root = project.build_dir ?
-                 Path.join(project.root, project.build_dir) :
-                 %"${project.root}/.x2c-build";
-  project.build_root = build_root;
-  _plan_target(project, selected, request, selected, build_root);
-  return project.head;
-}
+// new projects
 
 /** Creates the starter project for `x2c new` in the directory named by
     `request`'s one operand and returns 0. The directory may be missing or
@@ -780,24 +860,35 @@ ProjectBuild project_plan(CliRequest request) {
 int new_command(CliRequest request) {
   Path dir = request.inputs.car();
   if (!dir) x2c_driver_error("new: the directory operand is empty");
-  // The operand's own last component names the target, so a symbolic link
-  // is named for the link and not for what it points at.
+  String name = _starter_name(dir);
+  try _write_starter(dir, name);
+  catch %(io-fail *detail): x2c_host_error(detail);
+  if (!request.quiet) fprintf(stderr, "x2c: created %s\n", dir);
+  return 0;
+}
+
+/* The operand's own last component names the target, so a symbolic link
+   is named for the link and not for what it points at. */
+static String _starter_name(Path dir) {
   String name = dir.basename();
   if (name == "." || name == ".." || name == "/")
     name = Path.absolute(dir).basename();
   if (!_name_ok(name))
     x2c_driver_error(
       %"new: '$name' is not a target name; use letters, digits, '_', and '-'");
-  try {
-    if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
-      x2c_driver_error(%"new: $dir exists and is not an empty directory");
-    dir.join("src").make_dirs();
-    dir.join("x2c.toml").write_text(
-      %"[target.$name]
+  return name;
+}
+
+static void _write_starter(Path dir, String name) {
+  if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
+    x2c_driver_error(%"new: $dir exists and is not an empty directory");
+  dir.join("src").make_dirs();
+  dir.join("x2c.toml").write_text(
+    %"[target.$name]
 sources = [\"src/*.x\"]
 ");
-    dir.join("src/main.x").write_text(
-      %"/*  main.x -- greet the name given on the command line */
+  dir.join("src/main.x").write_text(
+    %"/*  main.x -- greet the name given on the command line */
 
 #include <stdio.h>
 
@@ -807,9 +898,5 @@ int main(int argc, char **argv) {
   return 0;
 }
 ");
-    dir.join(".gitignore").write_text(".x2c-build/\n");
-  }
-  catch %(io-fail *detail): x2c_host_error(detail);
-  if (!request.quiet) fprintf(stderr, "x2c: created %s\n", dir);
-  return 0;
+  dir.join(".gitignore").write_text(".x2c-build/\n");
 }

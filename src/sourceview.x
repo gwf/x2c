@@ -48,16 +48,14 @@ int SourceView.is_changed(SourceView sources, String path) =>
 int SourceView.exists(SourceView sources, String path) {
   if (sources && Path.absolute(path) in sources.overlays) return 1;
   struct stat info;
-  return !access(path, R_OK) && !stat(path, &info) &&
-         S_ISREG(info.st_mode);
+  return !access(path, R_OK) && !stat(path, &info) && S_ISREG(info.st_mode);
 }
 
 /** Reads through the request overlay, falling back to a regular disk file.
     The return value distinguishes an empty file from a failed read. Disk
     text belongs to the calling unit; configured snapshots remain borrowed.
 */
-int SourceView.read(
-  SourceView sources, String path, String volatile &text) {
+int SourceView.read(SourceView sources, String path, String volatile &text) {
   Var value;
   if (sources && sources.overlays.try_get(Path.absolute(path), value)) {
     text = value;
