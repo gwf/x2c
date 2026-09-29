@@ -52,15 +52,8 @@ Var Compiler.meta_argument(
           return meta_source_description(captured);
       }
   match (node) {
-    case %(expr ? (meta-cap ?captured)): {
-      value = captured;
-      if (want && !c.sym.is_var_type(want) &&
-          !c.sym.is_named_value_type(want, "List")) {
-        Var literal = captured is <list> ? _meta_constant_leaf(c, captured)
-                                         : void;
-        if (literal is not void && literal is not <list>) value = literal;
-      }
-    }
+    case %(expr ? (meta-cap ?captured)):
+      value = _captured_value(c, captured, want);
     case %(expr ? (parens ?inner)):
       return c.meta_argument(inner, want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
@@ -73,18 +66,36 @@ Var Compiler.meta_argument(
           operator, c.meta_argument(right, NULL, site, call));
     default: value = c.folded_constant(node);
   }
-  /* A name that is not a constant, such as a template's own local, passes
-     as its syntax. */
-  if (value is void)
-    match (node) case %(expr ? (ident ?)): value = node;
-  if (value is void)
-    c.report_error(
-      <macro>, "explicit meta call cannot be resolved", site,
-      %("an argument must be a constant, captured syntax, or a meta call"));
+  if (value is void) value = _name_syntax(c, node, site);
+  return _scalar_value(c, value, want);
+}
+
+/* Captured syntax passes as itself, except that a constant reaching a
+   parameter that is neither `Var` nor `List` passes as its value. */
+static Var _captured_value(Compiler c, Var captured, Type want) {
+  if (!want || c.sym.is_var_type(want) ||
+      c.sym.is_named_value_type(want, "List"))
+    return captured;
+  Var literal = captured is <list> ? _constant_leaf(c, captured) : void;
+  if (literal is void || literal is <list>) return captured;
+  return literal;
+}
+
+/* A name that is not a constant, such as a template's own local, passes as
+   its syntax. Anything else is reported at `site`. */
+static Var _name_syntax(Compiler c, List node, Token site) {
+  match (node) case %(expr ? (ident ?)): return node;
+  c.report_error(
+    <macro>, "explicit meta call cannot be resolved", site,
+    %("an argument must be a constant, captured syntax, or a meta call"));
+}
+
+/* A number passed to a numeric parameter takes the parameter's type. */
+static Var _scalar_value(Compiler c, Var value, Type want) {
   Type numeric = want ? c.sym.resolve_numeric_type(want) : NULL;
   Symbol tag = numeric ? numeric.scalar_tag() : 0;
   if (tag && (value.is_integer() || value.is_floating()))
-    value = value.convert(tag);
+    return value.convert(tag);
   return value;
 }
 
@@ -96,35 +107,31 @@ Var Compiler.meta_argument(
     `var` and `string` leaves. */
 Var Compiler.folded_constant(Compiler c, Var node) {
   match (node) {
-    case %(cache ?(int id)): {
-      List key = c.id_keys[id];
-      match (key) {
-        case %(cons ?head ?tail):
-          return cons(c.folded_constant(head), c.folded_constant(tail));
-        case %(var ?value):    return _meta_constant_leaf(c, value);
-        case %(string ?value): return _meta_constant_leaf(c, value);
-        case %(nil): return %();
-      }
-      return key;
-    }
+    case %(cache ?(int id)): return _cached_constant(c, c.id_keys[id]);
     case %(cons ?head ?tail):
       return cons(c.folded_constant(head), c.folded_constant(tail));
     case %(nil): return %();
   }
-  return _meta_constant_leaf(c, node);
+  return _constant_leaf(c, node);
+}
+
+static Var _cached_constant(Compiler c, List key) {
+  match (key) {
+    case %(cons ?head ?tail):
+      return cons(c.folded_constant(head), c.folded_constant(tail));
+    case %(var ?value):    return _constant_leaf(c, value);
+    case %(string ?value): return _constant_leaf(c, value);
+    case %(nil): return %();
+  }
+  return key;
 }
 
 /* The value of one folded leaf, or void when it is only known at run
    time. */
-static Var _meta_constant_leaf(Compiler c, List value) {
-  match (value) {
-    case %(expr ? (parens ?inner)): return _meta_constant_leaf(c, inner);
-    case %(expr ?type (cast ? ?inner)): {
-      Var constant = _meta_constant_leaf(c, inner);
-      if (constant is void) return void;
-      Symbol tag = ((Type) type).scalar_tag();
-      return tag ? constant.convert(tag) : constant;
-    }
+static Var _constant_leaf(Compiler c, List expr) {
+  match (expr) {
+    case %(expr ? (parens ?inner)): return _constant_leaf(c, inner);
+    case %(expr ?type (cast ? ?inner)): return _cast_constant(c, type, inner);
     case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return c.folded_constant(node);
@@ -133,24 +140,34 @@ static Var _meta_constant_leaf(Compiler c, List value) {
     case %(expr ? (literal ? ? ?symbol)):       return symbol;
     case %(expr ("String")
       (call (expr ? (ident (binding ? "String_add")))
-            (args ?left ?right))): {
-      Var a = c.folded_constant(left), b = c.folded_constant(right);
-      if (a is void || b is void) return void;
-      return a.string().add(b);
-    }
+            (args ?left ?right))):
+      return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
-      return _meta_constant_leaf(c, inner);
+      return _constant_leaf(c, inner);
     case %(expr ("Var")
       (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
-      return _meta_constant_leaf(c, inner);
+      return _constant_leaf(c, inner);
     case %(expr ("String") (literal ? ?(String text))): return text;
     case %(expr (* char) (literal ? ?(String text))):
       return literal_text_value(text);
     case %(expr ?type (literal ? ?(String text))):
       return ((Type) type).numeric_literal_value(text);
   }
-  if (value && value.car() == <expr>) return void;
-  return value;
+  if (expr && expr.car() == <expr>) return void;
+  return expr;
+}
+
+static Var _cast_constant(Compiler c, Var type, List inner) {
+  Var constant = _constant_leaf(c, inner);
+  if (constant is void) return void;
+  Symbol tag = ((Type) type).scalar_tag();
+  return tag ? constant.convert(tag) : constant;
+}
+
+static Var _joined_constant(Compiler c, Var left, Var right) {
+  Var a = c.folded_constant(left), b = c.folded_constant(right);
+  if (a is void || b is void) return void;
+  return a.string().add(b);
 }
 
 /** Returns the value of a String or character literal from its source
@@ -186,66 +203,23 @@ Var literal_text_value(String spelling) {
 */
 List Compiler.meta_value_expression(
   Compiler c, Type declared, Var value, Token site) {
-  if (value is not <list>) _meta_refuse(c, value, site);
-  Type type = declared ? declared : _meta_value_type(value);
+  if (value is not <list>) _refuse(c, value, site);
+  Type type = declared ? declared : _value_type(value);
   if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
     List expression = c.macro_value_literal(value);
     return %(expr ("Macro") ${expression.caddr()});
   }
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, type);
-  if ((value.is_integer() || value.is_floating()) &&
-      type !== %("Var")) {
-    type = c.sym.resolve_numeric_type(type);
-    Symbol tag = type ? type.scalar_tag() : 0;
-    if (!tag) return NULL;
-    value = value.convert(tag);
-    if (type.scalar() === %(int)) {
-      long n = value.integer();
-      Type result = declared ? declared : type;
-      List literal = %(expr $result (literal (int) ${value.str()}));
-      if (n == INT_MIN)
-        return %(expr $result (parens (expr $result (cast (int) $literal))));
-      return n < 0 ? %(expr $result (parens $literal)) : literal;
-    }
-    X2CVarNumeric number;
-    value.numeric_decode(number);
-    String text;
-    Type literal_type;
-    if (number.floating) {
-      literal_type = %(long double);
-      long double n = number.floating_value;
-      if (isnan(n)) text = "__builtin_nanl(\"\")";
-      else if (isinf(n))
-        text = n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
-      else text = _meta_hex_float(n);
-    }
-    else {
-      literal_type = %(unsigned long long);
-      text = "%lluULL".printf(number.raw);
-    }
-    List literal = %(expr $literal_type (literal $literal_type $text));
-    Type result = declared ? declared : type;
-    return %(expr $result (parens (expr $result (cast $type $literal))));
-  }
+  if ((value.is_integer() || value.is_floating()) && type !== %("Var"))
+    return _number_literal(c, declared, type, value);
   Type kind = value is <array> ? %("Array") : value is <map> ? %("Map")
     : value is <list> ? %("List") : NULL;
-  // Without a declared type, a List result is code rather than data.
+  // Without a declared type, a List result is code; an Array or Map is data.
   if (declared ? type === %("Var") || type === kind
-      : kind && kind !== %("List")) {
-    _meta_refuse(c, value, site);
-    List expression = _meta_data(c, value);
-    return expression && declared
-      ? c.convert_expression(expression, declared) : expression;
-  }
-  if (value is <string>) {
-    if (!declared || type === %(* char))
-      return %(expr (* char) (literal (* char) ${value.repr()}));
-    if (type === %("String")) {
-      List literal = %(expr ("String") (literal ("String") $value));
-      return %(expr $declared ${c.cache(%(string $literal))});
-    }
-  }
+      : kind && kind !== %("List"))
+    return _data_literal(c, declared, value, site);
+  if (value is <string>) return _string_literal(c, declared, type, value);
   if (value is <symbol> && (!declared || type === %("Symbol")))
     return %(expr ("Symbol") (literal ("Symbol")
                   ${value.symbol().str()} ${value.symbol()}));
@@ -253,14 +227,14 @@ List Compiler.meta_value_expression(
 }
 
 /* Reports at `site` a result that cannot become data in the program. */
-static void _meta_refuse(Compiler c, Var value, Token site) {
+static void _refuse(Compiler c, Var value, Token site) {
   Map marks = $auto({});
   List problem = datum_result_problem(value, marks);
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
 /* Untyped Lisp numbers retain their native Var family at the code boundary. */
-static Type _meta_value_type(Var value) {
+static Type _value_type(Var value) {
   switch (value.tag()) {
     case <i8>: return %(signed char);
     case <u8>: return %(unsigned char);
@@ -283,11 +257,60 @@ static Type _meta_value_type(Var value) {
   return NULL;
 }
 
+static List _string_literal(Compiler c, Type declared, Type type, Var value) {
+  if (!declared || type === %(* char))
+    return %(expr (* char) (literal (* char) ${value.repr()}));
+  if (type !== %("String")) return NULL;
+  List literal = %(expr ("String") (literal ("String") $value));
+  return %(expr $declared ${c.cache(%(string $literal))});
+}
+
 // number literals
+
+/* A number becomes a literal of its scalar type, or NULL when the type has
+   none. */
+static List _number_literal(Compiler c, Type declared, Type type, Var value) {
+  type = c.sym.resolve_numeric_type(type);
+  Symbol tag = type ? type.scalar_tag() : 0;
+  if (!tag) return NULL;
+  value = value.convert(tag);
+  Type result = declared ? declared : type;
+  if (type.scalar() === %(int)) return _int_literal(result, value);
+  List literal = _bits_literal(value);
+  return %(expr $result (parens (expr $result (cast $type $literal))));
+}
+
+/* C reads a negative literal as a negation, so it takes parentheses, and
+   INT_MIN's magnitude does not fit an int, so its literal is cast back. */
+static List _int_literal(Type result, Var value) {
+  long n = value.integer();
+  List literal = %(expr $result (literal (int) ${value.str()}));
+  if (n == INT_MIN)
+    return %(expr $result (parens (expr $result (cast (int) $literal))));
+  return n < 0 ? %(expr $result (parens $literal)) : literal;
+}
+
+/* The exact bits of a number that is not an int, as a long double or an
+   unsigned long long literal that the caller casts to the number's type. */
+static List _bits_literal(Var value) {
+  X2CVarNumeric number;
+  value.numeric_decode(number);
+  Type literal_type = number.floating ? %(long double) : %(unsigned long long);
+  String text = number.floating ? _float_text(number.floating_value)
+                                : "%lluULL".printf(number.raw);
+  return %(expr $literal_type (literal $literal_type $text));
+}
+
+/* NaN and the infinities have no literal, so they spell builtin calls. */
+static String _float_text(long double n) {
+  if (isnan(n)) return "__builtin_nanl(\"\")";
+  if (isinf(n)) return n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
+  return _hex_float(n);
+}
 
 /* Spells finite `n` exactly as a normalized hex literal. Printf's %La
    layout depends on the host's long double. */
-static String _meta_hex_float(long double n) {
+static String _hex_float(long double n) {
   const char *sign = signbit(n) ? "-" : "";
   if (n == 0) return "%s0x0p+0L".printf(sign);
   int exponent;
@@ -306,56 +329,71 @@ static String _meta_hex_float(long double n) {
 
 // data literals
 
+/* Data code for `value`, converted to `declared` when there is one. */
+static List _data_literal(Compiler c, Type declared, Var value, Token site) {
+  _refuse(c, value, site);
+  List expression = _data_form(c, value);
+  return expression && declared
+    ? c.convert_expression(expression, declared) : expression;
+}
+
 /* Builds the parser's form of one data value, which
    `datum_result_problem` accepted. Immutable values come from the literal
    cache; each Array or Map becomes a literal that builds a fresh
    collection every time it runs. */
-static List _meta_data(Compiler c, Var value) {
-  if (_meta_immutable(value)) {
+static List _data_form(Compiler c, Var value) {
+  if (_immutable(value)) {
     if (value is <list>) return c.cache_literal_list(value);
     return %(expr ("Var") ${c.cache_literal_var(value)});
   }
-  if (value is <list>) {
-    List result = %(nil);
-    foreach (Var item, value.list().reverse()) {
-      List head = _meta_data(c, item);
-      if (!head) return NULL;
-      result = %(expr ("List") (cons $head $result));
-    }
-    return result;
-  }
-  if (value is <array>) {
-    Array items = $auto([]);
-    foreach (Var item, value.array()) {
-      List code = _meta_data(c, item);
-      if (!code) return NULL;
-      items.push(code);
-    }
-    return %(expr ("Array") (array @{items.list()}));
-  }
+  if (value is <list>) return _list_form(c, value);
+  if (value is <array>) return _array_form(c, value);
   if (value is not <map>) return NULL;
+  return _map_form(c, value);
+}
+
+/* Strings, symbols, numbers, and Lists that hold only such values. */
+static int _immutable(Var value) {
+  if (value is <list>) {
+    foreach (Var item, value.list()) if (!_immutable(item)) return 0;
+    return 1;
+  }
+  return value is <string> || value is <symbol> ||
+    value.is_integer() || value.is_floating();
+}
+
+static List _list_form(Compiler c, Var value) {
+  List tail = %(nil);
+  foreach (Var item, value.list().reverse()) {
+    List head = _data_form(c, item);
+    if (!head) return NULL;
+    tail = %(expr ("List") (cons $head $tail));
+  }
+  return tail;
+}
+
+static List _array_form(Compiler c, Var value) {
+  Array items = $auto([]);
+  foreach (Var item, value.array()) {
+    List code = _data_form(c, item);
+    if (!code) return NULL;
+    items.push(code);
+  }
+  return %(expr ("Array") (array @{items.list()}));
+}
+
+static List _map_form(Compiler c, Var value) {
   Map map = value;
   Array keys = $auto([]), entries = $auto([]);
   foreach (Var (key, item), map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.
   foreach (Var key, keys.sort()) {
-    List key_code = _meta_data(c, key);
-    List value_code = key_code ? _meta_data(c, map[key]) : NULL;
+    List key_code = _data_form(c, key);
+    List value_code = key_code ? _data_form(c, map[key]) : NULL;
     if (!value_code) return NULL;
     entries.push(%(map-entry $key_code $value_code));
   }
   return %(expr ("Map") (map @{entries.sort().list()}));
-}
-
-/* Whether a value and everything it holds is immutable data. */
-static int _meta_immutable(Var value) {
-  if (value is <list>) {
-    foreach (Var item, value.list())
-      if (!_meta_immutable(item)) return 0;
-    return 1;
-  }
-  return value is <string> || value is <symbol> ||
-    value.is_integer() || value.is_floating();
 }
 
 // compile-time-only functions
