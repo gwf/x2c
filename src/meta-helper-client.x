@@ -87,8 +87,7 @@ static void Call.check(Call *call) {
   if (!helper_path) call.refuse("the project meta module was not built");
   if (helper_failures && helper_failures.try_get(helper_table, failure))
     call.refuse(failure);
-  String missing = call.compiler.meta_call_missing(call.name);
-  if (missing.startswith("a struct")) call.refuse(missing);
+  call.compiler.refuse_record_meta_call(call.name, call.site);
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
@@ -143,6 +142,11 @@ static int _helper_start(void) {
   if (!pid) _helper_exec(requests[0], replies[1]);
   close(requests[0]);
   close(replies[1]);
+  if (pid < 0) {
+    close(requests[1]);
+    close(replies[0]);
+    return 0;
+  }
   helper_pid = pid;
   helper_owner = getpid();
   helper_to = requests[1];

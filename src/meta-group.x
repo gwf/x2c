@@ -622,6 +622,14 @@ void Compiler.refuse_meta_call(
     %("function: $name" "reason: $why"));
 }
 
+/** Reports at `site` that the group function `name` cannot run at compile
+    time when its result is a struct or union, which its type alone
+    decides. */
+void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
+  String missing = c.meta_call_missing(name);
+  if (missing.startswith("a struct")) c.refuse_meta_call(name, site, missing);
+}
+
 /* --- a session group, staged in process -------------------------------- */
 
 /* Holds what staged `meta static` values allocate. */

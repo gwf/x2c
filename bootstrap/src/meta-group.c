@@ -26,7 +26,7 @@
 
 static List _435, _434, _433, _412, _411, _410, _408, _406, _405, _404, _403, _386, _377, _375, _373, _372, _370, _369, _368, _366, _365, _363, _362, _361, _359, _358, _356, _355, _353, _350, _348, _347, _345, _344, _340, _339, _338, _335, _334, _332, _330, _329, _327, _326, _325, _323, _322, _321, _319, _318, _298, _293, _290, _288, _287, _286, _284, _283, _282, _280, _279, _273, _268, _267, _265, _263, _260, _259, _255, _252, _251, _250, _249, _247, _246, _245, _244, _236, _234, _232, _231, _229, _223, _222, _220, _219, _218, _216, _215, _213, _212, _211, _209, _208, _207, _205, _204, _202, _201, _199, _198, _197, _195, _194, _193, _191, _190, _188, _187, _186, _185, _182, _181, _180, _178, _177, _176, _163, _161, _159, _158, _156, _155, _153, _152, _151, _149, _148, _147, _144, _139, _138, _137, _135, _134, _132, _131, _129, _127, _126, _125, _124, _123, _122, _111, _110, _104, _103, _101, _100, _94, _93, _89, _87, _86, _85, _78, _77, _76, _74, _73, _72, _70, _69, _67, _66, _65, _63, _62, _42, _41, _40, _38, _37, _35, _34, _33, _31, _29, _28, _26, _21, _17;
 
-static String _456, _455, _454, _453, _452, _451, _450, _449, _448, _447, _446, _445, _444, _443, _442, _441, _440, _439, _438, _437, _436, _429, _427, _425, _423, _421, _420, _419, _418, _417, _416, _415, _414, _413, _394, _393, _392, _391, _390, _389, _388, _387, _385, _384, _383, _382, _381, _380, _379, _378, _351, _343, _296, _291, _274, _271, _256, _253, _225, _203, _166, _136, _113, _112, _108, _106, _105, _4, _3, _2, _1, _0;
+static String _457, _456, _455, _454, _453, _452, _451, _450, _449, _448, _447, _446, _445, _444, _443, _442, _441, _440, _439, _438, _437, _436, _429, _427, _425, _423, _421, _420, _419, _418, _417, _416, _415, _414, _413, _394, _393, _392, _391, _390, _389, _388, _387, _385, _384, _383, _382, _381, _380, _379, _378, _351, _343, _296, _291, _274, _271, _256, _253, _225, _203, _166, _136, _113, _112, _108, _106, _105, _4, _3, _2, _1, _0;
 
 static Var _428, _426, _424, _422, _409, _407, _397, _395, _376, _374, _371, _367, _364, _360, _357, _354, _352, _349, _346, _342, _341, _333, _331, _328, _324, _320, _302, _300, _299, _297, _295, _294, _292, _289, _285, _281, _278, _277, _276, _275, _272, _270, _269, _266, _264, _262, _261, _258, _257, _254, _248, _243, _237, _235, _233, _230, _228, _227, _226, _224, _221, _217, _214, _210, _206, _200, _196, _192, _189, _184, _183, _179, _175, _174, _173, _172, _171, _170, _169, _168, _167, _165, _164, _162, _160, _157, _154, _150, _146, _145, _143, _142, _141, _140, _133, _130, _128, _121, _116, _114, _109, _107, _102, _96, _95, _90, _88, _84, _83, _82, _81, _80, _79, _75, _71, _68, _64, _46, _45, _44, _43, _39, _36, _32, _30, _27, _25, _16, _10, _9, _8, _7, _6, _5;
 
@@ -485,9 +485,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _451 = String_new("an address result has no compile-time value; return data built " "from the pointed-to values");
   _452 = String_new("a parameter or the result has no Var form, such as C's bool; use " "int, a String, a Symbol, or a List");
   _453 = String_new("this function cannot run at compile time");
-  _454 = String_new("group");
-  _455 = String_new("");
-  _456 = String_new("x2c_module_reset");
+  _454 = String_new("a struct");
+  _455 = String_new("group");
+  _456 = String_new("");
+  _457 = String_new("x2c_module_reset");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -1229,6 +1230,10 @@ void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why){
   if(! _init_guard_) _file_init_();  Compiler_report_error(c, 27335838, _453, site, cons(String_var(String_join(NULL, cons(String_var(_413), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_414), cons(String_var(why), NULL)))), NULL)));
 }
 
+void Compiler_refuse_record_meta_call(Compiler c, String name, Token site){
+  if(! _init_guard_) _file_init_();  String missing = Compiler_meta_call_missing(c, name);  if(String_startswith(missing, _454)) Compiler_refuse_meta_call(c, name, site, missing);
+}
+
 String script_cache_root(void);
 String String_sha256(String);
 String String_add(String, String);
@@ -1240,7 +1245,7 @@ static String _meta_group_module(Compiler c, String * failure){
   String root = script_cache_root(), stamp = build_module_stamp();  if(! String_truth(root) || ! String_truth(stamp)){
     (* failure) = _415;  return NULL;
   }
-  List code = _meta_group_code(c, stamp, _454, _455, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_3 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_string(List_getindex(_x2c_destructure_3, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_416), cons(String_var(source), cons(String_var(_416), cons(String_var(stamp), cons(String_var(_416), NULL))))))), String_join(NULL, cons(String_var(Compiler_meta_cc_identity(meta_cc)), cons(String_var(_416), cons(String_var(meta_include_dir), NULL))))));  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_417), cons(String_var(key), NULL))));  String module = String_join(NULL, cons(String_var(directory), cons(String_var(_418), NULL)));  if(Path_is_file(module)) return module;  String output = String_join(NULL, cons(String_var(module), cons(String_var(_419), cons(String_var(String_printf(_420, (long) getpid())), NULL))));  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(cfile), NULL)))), source);
+  List code = _meta_group_code(c, stamp, _455, _456, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_3 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_string(List_getindex(_x2c_destructure_3, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_416), cons(String_var(source), cons(String_var(_416), cons(String_var(stamp), cons(String_var(_416), NULL))))))), String_join(NULL, cons(String_var(Compiler_meta_cc_identity(meta_cc)), cons(String_var(_416), cons(String_var(meta_include_dir), NULL))))));  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_417), cons(String_var(key), NULL))));  String module = String_join(NULL, cons(String_var(directory), cons(String_var(_418), NULL)));  if(Path_is_file(module)) return module;  String output = String_join(NULL, cons(String_var(module), cons(String_var(_419), cons(String_var(String_printf(_420, (long) getpid())), NULL))));  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(cfile), NULL)))), source);
   Toolchain linker = toolchain_meta(meta_cc);
   List arguments = Toolchain_module_action(linker, output, cons(_422, cons(_424, cons(_426, cons(_428, cons(String_var(directory), cons(_428, cons(String_var(meta_include_dir), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_393), cons(String_var(cfile), NULL))))), NULL))))))))) -> arguments;
   (* failure) = Compiler_meta_cc_run(arguments, directory);
@@ -1276,7 +1281,7 @@ static String Compiler__stage_meta_group(Compiler c, String * failure){
   if(!(Map_contains(c -> meta_group_bound, String_var(module)))){
     Map_setindex(c -> meta_group_bound, String_var(module), int_var(1));
     Scope_push(& session_meta_scope);
-    Func_apply((Var_pointer(Map_getindex(targets, String_var(_456)))), 0, NULL);
+    Func_apply((Var_pointer(Map_getindex(targets, String_var(_457)))), 0, NULL);
     Scope_pop();
   }
   {

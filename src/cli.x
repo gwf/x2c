@@ -461,7 +461,7 @@ static void _help_command(Array args) {
   String name = args[1];
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
-  CliCommand *asked = _command_row(name);
+  CliCommand *asked = name ? _command_row(name) : NULL;
   if (!asked) x2c_driver_error(%"unknown help command '$name'");
   _help_exit(asked.name, 0);
 }
@@ -703,7 +703,7 @@ static void _expand_argument(Array out, String arg, List stack) {
     out.push(arg[1:]);
     return;
   }
-  if (!arg[1]) x2c_driver_error("empty response-file reference '@'");
+  if (arg.len() == 1) x2c_driver_error("empty response-file reference '@'");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);

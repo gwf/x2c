@@ -50,7 +50,7 @@
 
 static List _73, _64, _60, _59, _57, _56, _52, _50, _49, _47, _45, _44, _43, _42, _33, _30, _28, _27, _24, _23, _21, _19, _18, _17, _16, _14, _12, _11, _9;
 
-static String _81, _79, _78, _77, _76, _75, _74, _71, _70, _69, _68, _67, _66, _65;
+static String _80, _78, _77, _76, _75, _74, _71, _70, _69, _68, _67, _66, _65;
 
 static Var _72, _63, _62, _61, _58, _55, _54, _53, _51, _48, _46, _37, _35, _34, _31, _29, _26, _25, _22, _20, _15, _13, _10, _8, _3, _1, _0;
 
@@ -226,9 +226,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _75 = String_new("the compile-time helper did not start");
   _76 = String_new("the helper sent an unknown reply");
   _77 = String_new("the project meta module was not built");
-  _78 = String_new("a struct");
-  _79 = String_new("X2C_META_TIMEOUT");
-  _81 = String_new("this meta call stopped the compile-time helper");
+  _78 = String_new("X2C_META_TIMEOUT");
+  _80 = String_new("this meta call stopped the compile-time helper");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -341,9 +340,9 @@ int String_truth(String);
 int Map_truth(Map);
 int Map_try_get(Map, Var, Var *);
 Var int_var(int);
-int String_startswith(String, String);
+void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static void Call_check(Call * call){
-  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(call, Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(call, _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(call, Var_string(failure));  String missing = Compiler_meta_call_missing(call -> compiler, call -> name);  if(String_startswith(missing, _78)) Call_refuse(call, missing);
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(call, Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(call, _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(call, Var_string(failure));  Compiler_refuse_record_meta_call(call -> compiler, call -> name, call -> site);
 }
 
 Var Macro_subject(void);
@@ -357,7 +356,7 @@ static void Call_send(Call * call, List arguments){
 String Env_get(String);
 double atof(const char *);
 static void Call_set_deadline(Call * call){
-  String text = Env_get(_79);  call -> limit = String_truth(text) ? atof(text) : 60.0;  call -> deadline = call -> limit > 0 ? _now() + call -> limit : 0;
+  String text = Env_get(_78);  call -> limit = String_truth(text) ? atof(text) : 60.0;  call -> deadline = call -> limit > 0 ? _now() + call -> limit : 0;
 }
 
 static double _now(void){
@@ -374,7 +373,10 @@ static int _helper_start(void){
   if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests) || pipe(replies)) return 0;  for(int i = 0;  i < 2;  i ++){
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);  fcntl(replies[i], F_SETFD, FD_CLOEXEC);
   }
-  pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  helper_pid = pid;  helper_owner = getpid();  helper_to = requests[1];  helper_from = replies[0];  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  helper_reset = 1;  return 1;
+  pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  if(pid < 0){
+    close(requests[1]);  close(replies[0]);  return 0;
+  }
+  helper_pid = pid;  helper_owner = getpid();  helper_to = requests[1];  helper_from = replies[0];  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  helper_reset = 1;  return 1;
 }
 
 _Noreturn static void _helper_exec(int requests, int replies){
@@ -586,7 +588,7 @@ static void Call_overdue(Call * call){
 }
 
 static void Call_stopped(Call * call, String reason){
-  Compiler_report_error(call -> compiler, 27335838, _81, call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL)))), NULL)));
+  Compiler_report_error(call -> compiler, 27335838, _80, call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL)))), NULL)));
 }
 
 void Scope_shutdown_hook(void(*)(void));

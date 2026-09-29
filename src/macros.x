@@ -2468,8 +2468,12 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       if (!c.macro_lisp.try_get(name, function) &&
           c.bind_native_meta(name))
         c.macro_lisp.try_get(name, function);
-      if (function is void && c.meta_build)
+      if (function is void && c.meta_build) {
+        /* A call the translation refuses by its type is refused here too,
+           which keeps its declaration and placeholder out of the group. */
+        c.refuse_record_meta_call(name, site);
         raise %(meta-later (name $name));
+      }
       if (function is void)
         c.report_error(
           <macro>, "explicit meta call cannot be resolved", site,
