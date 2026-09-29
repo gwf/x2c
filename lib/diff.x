@@ -205,7 +205,12 @@ static Symbol _kind(Array edits, int at) => edits[at].list().car();
 static _Hunk _hunk(Array edits, int at, int old_line, int new_line) {
   int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
   _Hunk h = {_hunk_end(edits, at), old_line - lead, 0, new_line - lead, 0};
-  for (int i = start; i < h.end; i++) h.add(edits[i]);
+  for (int i = start; i < h.end; i++) {
+    (Symbol kind, String text) = edits[i].list();
+    h.lines = cons(%"${_mark(kind)}$text\n", h.lines);
+    if (kind != <insert>) h.old_count++;
+    if (kind != <delete>) h.new_count++;
+  }
   return h;
 }
 
@@ -218,13 +223,6 @@ static int _hunk_end(Array edits, int at) {
     quiet = _kind(edits, end++) == <same> ? quiet + 1 : 0;
   if (quiet > _CONTEXT) end -= quiet - _CONTEXT;
   return end;
-}
-
-static void _Hunk.add(_Hunk *h, List edit) {
-  (Symbol kind, String text) = edit;
-  h.lines = cons(%"${_mark(kind)}$text\n", h.lines);
-  if (kind != <insert>) h.old_count++;
-  if (kind != <delete>) h.new_count++;
 }
 
 static char _mark(Symbol kind) {
