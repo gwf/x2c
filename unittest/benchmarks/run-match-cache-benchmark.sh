@@ -19,16 +19,19 @@ SAMPLES="$DEBUG_DIR/match-cache-samples.csv"
 SUMMARY="$DEBUG_DIR/match-cache-summary.txt"
 mkdir -p "$BUILD" "$DEBUG_DIR"
 
-# The benchmark includes "../test-support.x", so the generated header
-# includes "../test-support.h". Mirror that layout in the output instead
-# of flattening both units into one directory.
+# The benchmark includes "../test-support.x", which includes
+# "match-recursive.x", so the generated headers include "../test-support.h"
+# and "match-recursive.h". Mirror that layout in the output instead of
+# flattening the units into one directory.
 mkdir -p "$BUILD/benchmarks"
-"$ROOT/builds/0/x2c" translate --out-dir "$BUILD" "$TEST_SUPPORT"
+"$ROOT/builds/0/x2c" translate --out-dir "$BUILD" "$TEST_SUPPORT" \
+  "$ROOT/unittest/match-recursive.x"
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD/benchmarks" "$SOURCE"
 
 CC=${CC:-cc}
 common=(-iquote "$ROOT/include/x2c" -iquote "$ROOT/builds/0/src"
-        "$BUILD/test-support.c" "$BUILD/benchmarks/match-cache-benchmark.c"
+        "$BUILD/test-support.c" "$BUILD/match-recursive.c"
+        "$BUILD/benchmarks/match-cache-benchmark.c"
         -L"$ROOT/builds/0" -lx2c -lm)
 "$CC" -g -O0 "${common[@]}" -o "$BUILD/mcb-debug"
 "$CC" -O2 "${common[@]}" -o "$BUILD/mcb"
