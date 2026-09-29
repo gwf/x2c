@@ -402,18 +402,6 @@ void MachineBuilder.patch(
   for (int i = 0; i < count; i++) b.set_target(sites[i], target);
 }
 
-/* Borrow the builder's current arrays and counts. Emission and constant or
-   binder additions make the counts stale, growth can invalidate pointers,
-   target patching changes the observed words, and free invalidates all
-   pointers. */
-MachineView MachineBuilder.view(MachineBuilder b) {
-  MachineView view = {
-    b.code, b.consts, b.binders,
-    b.length, b.const_count, b.binder_count, b.root
-  };
-  return view;
-}
-
 static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
   if (b.status == MACHINE_PREPARED) {
     b.status = MACHINE_INELIGIBLE;

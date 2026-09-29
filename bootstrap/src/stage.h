@@ -9,11 +9,11 @@
 #include "compiler.h"
 typedef Var(* MetaCall)(Compiler c, List expression, Token site);
 
-Var literal_text_value(String spelling);
+Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call);
 
 Var Compiler_folded_constant(Compiler c, Var node);
 
-Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call);
+Var literal_text_value(String spelling);
 
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site);
 

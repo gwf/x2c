@@ -1,10 +1,10 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`. Waves
-> 4 and 5, the compiler front end, core, and semantics, are next; their
-> files are shared with the dual-macro migration, so each batch starts with
-> agreed file boundaries. The baseline measurements are from `dev`
-> `f6606dbf`. Track H waits for Gary's approval of its book text.
+> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`, with
+> the first part of Wave 4. The rest of Wave 4 is on the GitHub branch
+> `beautification-wave4`; "Wave 4 handoff" below says how to finish it.
+> Wave 5 follows. The baseline measurements are from `dev` `f6606dbf`.
+> Track H waits for Gary's approval of its book text.
 
 ## Progress
 
@@ -235,6 +235,46 @@ Candidates left for later:
   (`lib/json.x`).
 - `x2c lint` suggests `LispEnv &local` for `_bind_values`, which the
   compiler's region check then rejects.
+
+Wave 4 handoff, 2026-09-29. The batch started from `dev` `8466809c`, and
+its workers stopped at a weekly usage limit.
+
+- On `dev`: the rewrites of `statements.x`, `stage.x`, `literals.x`,
+  `type.x`, and `ast.x`, each verified by its worker (`make verify`, stage
+  1 equal to stage 0, commands check, instructions within noise), and the
+  deletion of `MachineBuilder.view`, which Gary approved. `type-ledger.x`
+  stays as it is: it is written by hand and inside the bands. The batch's
+  translation timing did not run; each worker's instruction check came out
+  between -0.4% and +0.3%.
+- On the GitHub branch `beautification-wave4`, built on that `dev` commit,
+  one commit series per file, none verified after its last commit:
+  - `compiler.x`: eleven commits. The last planned group, shallow
+    collection through meta definitions, may be unfinished.
+  - `parse.x`: five commits. The rewrite is done; the worker stopped while
+    running `make commands-check`.
+  - `meta-group.x` and `builtins.x`: four commits that order both files and
+    split the main functions. The 9-parameter builtin may remain.
+  - `macros.x`: six commits through imports, then a `wip:` checkpoint of the
+    next group that may not build. It comes last on the branch.
+- To finish: on that branch, check each file's commits in turn (`make
+  build`, `make verify`, `make stage-1 && make stage-diff-1`,
+  `make commands && make commands-check`, lint, and the instruction check
+  of the Wave 4 brief), and complete the unfinished groups. Then time
+  translation against a `dev` baseline built through stage 1, running both
+  compilers from paths of equal length and comparing retired instructions.
+  Record Wave 4 here, run `tools/land-dev "refresh bootstrap for
+  beautification wave 4"`, and post the landing commit in the Claude chat
+  for the Codex dual-macro session.
+- The Wave 2 to 4 worker briefs, `shape.py`, and the timing scripts are in
+  `.context/beautification/` of the old integration worktree; their paths
+  name the old session's scratchpad.
+- Candidates found so far: `statements.x` spells the `with`/`as` keyword
+  test inline three times, which an exported `_test_contextual` from
+  `parse.x` could own; the Symbol-set hash is written in both
+  `lib/symbolset.x` and `src/literals.x`; and `literals.x`'s lambda
+  sections, about 450 lines, could become their own unit.
+- The Codex dual-macro session reserved no files as of 2026-09-29 and will
+  announce any overlap in the Claude chat first.
 
 ## Context
 
@@ -540,7 +580,7 @@ Rules for every file:
 | 1, pilot | `src/collect.x`, `lib/tokenizer.x` | medium size, quiet since 09-27, outside the macro campaign, most defect classes present | per-file stage-diff-1; batch gate; performance checkpoint |
 | 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, and the small files `editor.x`, `script.x`, `deps.x`, `sourceview.x`, `meta-helper-client.x` | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
 | 3 | runtime: `match-machine.x`, `machine.x`, `string.x`, `error.x`, `scan.x`, `match.x`, `meta.x`, `lisp.x`, `var.x`, `varops.x`, `varconvert.x`, `pool.x`, `buffer.x`, `block.x`, `list.x`, `dispatch.x`, `func.x`, `scope.x`, `iter.x`, `file.x`, `logger.x`, `process.x`, `thread.x`, `path.x`, `regex.x`, `diff.x`, `datum.x` | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
-| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `linked-meta.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
+| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x`; generated `linked-meta.x` excluded | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
 | 5 | semantics and output: `expressions.x`, `transform.x`, `protocol.x`, `emit.x`, `regions.x`, `cache.x`, `diagnostics.x`, `format.x` | files the dual-macro campaign changes now | as wave 4 |
 | H | unit directories | spec after the pilot; code before wave 4 | one fixture; gate |
 
