@@ -73,12 +73,12 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`collect_resolve_include`, `collect_forget_preload_entries`,
-`collect_cached_paths`, `collect_forget_entries_since`,
+`Compiler.collect_symbols`, `collect_resolve_include`,
+`Compiler.record_generated_symbol`, `Compiler.collect_package`,
 `Compiler.replay_package_imports`, `Compiler.replay_included_package_imports`,
-`Compiler.record_generated_symbol`, `Compiler.collect_symbols`,
-`Compiler.collect_package`, `interface_configure`, `interface_prelude`,
-`interface_text`
+`interface_configure`, `interface_prelude`, `interface_text`,
+`collect_forget_preload_entries`, `collect_cached_paths`,
+`collect_forget_entries_since`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -102,7 +102,8 @@ Public functions:
 `Compiler.optional_reference_test`, `reference_guard_exits`,
 `Compiler.macro_definition_locals`, `Compiler.fresh_name`,
 `Compiler.emitted_binding_name`, `preproc_never_active_arm`,
-`Compiler.tokenize`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`preproc_open_state`, `preproc_branch_state`, `Compiler.tokenize`,
+`Compiler.mark_completion`, `Compiler.at_completion`,
 `Compiler.__complete_here`, `Compiler.skip_trivia_from`, `Symbol.group_step`,
 `Token.group_close`, `Token.after_group`, `Compiler.peek`,
 `Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
@@ -1186,8 +1187,8 @@ shared tokenizer built on character-level scanners.
 Public functions:
 
 `Var.token`, `Token.var`, `Token.hash`, `Token.equal`, `Token.str`,
-`Token.repr`, `Tokenizer.init`, `Tokenizer.tokenize`, `Tokenizer.error`,
-`Tokenizer.do_scanner`, `Tokenizer.scan`, `Tokenizer.next`, `Tokenizer.status`
+`Token.repr`, `Tokenizer.scan`, `Tokenizer.tokenize`, `Tokenizer.do_scanner`,
+`Tokenizer.error`, `Tokenizer.init`, `Tokenizer.next`, `Tokenizer.status`
 
 ### [lib/typed-array.x](../lib/typed-array.x)
 
