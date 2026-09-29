@@ -3174,6 +3174,14 @@ List Compiler.rebuild_statement(Compiler c, List application) {
   return _rebuild_structural_template(c, application, 1, NULL);
 }
 
+/** Constructs a fresh function from a Unit template after lowering. The
+    caller supplies its bound name and lowered children; binding does not run. */
+List Compiler.rebuild_unit_function(Compiler c, List application) {
+  List function = _rebuild_structural_template(c, application, 1, NULL).cadr();
+  match (function) case %(api-source ? ? ?inner): return inner;
+  return function;
+}
+
 /** Rebuilds a bound function through a Function decorator without binding it
     again. The template keeps the target's return type and declarator. */
 List Compiler.rebuild_function(
