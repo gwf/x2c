@@ -1,12 +1,10 @@
 /*  literals.x -- x2c literal and lambda parsing
 
-    Parses `List`, `Array`, `Map`, interpolated `String`, and lambda literals.
-    Stable
-    `List` cells and `String` segments are cached only when they contain no
-    dynamic references. Lambda bodies are expressions or blocks;
-    parameters may use typed declarations or bare identifiers, and lexical
-    automatic values are recorded for captured `Func` lowering.
-  */
+    Each literal parses to a typed expression. A `List` cell or `String`
+    segment with no dynamic reference enters the compiler cache and is built
+    once; `runtime_literals` builds every one at run time instead. Lambda
+    literals and constructed lambdas share one capture resolution.
+*/
 #pragma once
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
@@ -96,7 +94,6 @@ static List _parse_list_head(Compiler c) {
   return _cache_if_stable(c, _parse_literal_element(c));
 }
 
-/* A nested literal without references is built once, in the cache. */
 static List _cache_if_stable(Compiler c, List elem) {
   Var matched;
   List bindings;
@@ -188,7 +185,7 @@ static List _cons_cell(Compiler c, List head, List tail) {
   /* A nested `List` that already folded enters the cache as its own key, the
      way a parsed element does, so the enclosing cell folds too. Converting it
      to `Var` first would leave a `List_var` call the cache cannot represent,
-     and a pattern that _typed_pattern rebuilds would not fold. */
+     and a typed-capture pattern that _typed_list rebuilds would not fold. */
   if (head.match(%(expr ("List") (expr ("List") (cache *)))))
     head = c.cache(%(var $head));
   head = c.convert_expression(head, %("Var"));
@@ -197,7 +194,6 @@ static List _cons_cell(Compiler c, List head, List tail) {
   return %(expr ("List") (cons $head $tail));
 }
 
-/* A splice appends the List its expression produces. */
 static List _append_splice(Compiler c, List head, List tail) {
   if (c.sym.is_var_type(head.cadr()))
     head = %(expr ("List") (call "Var_list" (args $head)));
@@ -205,7 +201,6 @@ static List _append_splice(Compiler c, List head, List tail) {
   return %(expr ("List") (append $head $tail));
 }
 
-/* The typed List of `elements` consed onto `tail`. */
 static List _cons_list(Compiler c, Array elements, List tail) {
   for (int i = (int) elements.len() - 1; i >= 0; i--)
     tail = _cons_cell(c, elements[i], tail);
@@ -351,11 +346,7 @@ static List _and_tag_test(Compiler c, List pattern, List tag) {
 List Compiler.parse_raise_literal(Compiler c) {
   c.expect(<"%(">);
   $let(c.runtime_literals, 1) {
-    List code = c.try_parse_macro_slot(<expression>);
-    if (!code) code = _parse_insertion(c);
-    if (!code)
-      code = _parse_bare_symbol(
-        c, "raise", "code", "use raise %(code (key value)...);");
+    List code = _parse_raise_code(c);
     Array args = [];
     while (c.peek(0) != <)>) {
       List slot = c.try_parse_macro_slot(<argument>);
@@ -369,7 +360,14 @@ List Compiler.parse_raise_literal(Compiler c) {
   }
 }
 
-/* A raise detail's key may also come from a macro slot. */
+static List _parse_raise_code(Compiler c) {
+  List code = c.try_parse_macro_slot(<expression>);
+  if (!code) code = _parse_insertion(c);
+  if (code) return code;
+  return _parse_bare_symbol(
+    c, "raise", "code", "use raise %(code (key value)...);");
+}
+
 static void _parse_raise_detail(Compiler c, Array args) {
   Token origin = c.token;
   c.expect(<(>);
@@ -396,7 +394,8 @@ static List _parse_bare_symbol(
   return %(expr ("Symbol") (literal ("Symbol") $text $symbol));
 }
 
-/* Each report locates the pair at its `(`. */
+/* The value or pattern after a detail key, and the pair's `)`. Each report
+   locates the pair at its `(`. */
 static List _parse_detail_value(
   Compiler c, Token origin, String arity, String spliced, List note) {
   if (c.peek(0) == <)>) c.report_error(<parse>, arity, origin, NULL);
@@ -490,7 +489,6 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   return set;
 }
 
-/* A member is an Atom spelling, bare or quoted, or a `<...>` Symbol. */
 static Symbol _member_symbol(Compiler c) {
   Token token = c.token;
   Symbol kind = c.peek(0);
@@ -768,7 +766,6 @@ static List _parse_quoted_entry(Compiler c) {
   return _entry_value(c, key, origin);
 }
 
-/* The `:` and the quoted value that follow a key. */
 static List _entry_value(Compiler c, List key, Token origin) {
   c.expect(<:>);
   List value = _parse_element(c);
@@ -918,8 +915,9 @@ static int _continuation(String raw, int i, int n) {
 /* lambda literals
 
    `%!(params) using &name, ... => body` parses its parameters in a scope
-   of their own, which the body reopens. A template keeps its type open and
-   takes captures and body from the holes that expansion fills. */
+   of their own, closes it while `using` names outer bindings, and reopens
+   it for the body. A template leaves its type, captures, and body open
+   for expansion. */
 
 /** Parses a `%!(...) => ...` literal and returns its typed lambda expression.
     Parameter bindings are in a new `Sym` scope, block bodies use `Var` as the
@@ -935,8 +933,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   c.expect(<)>);
   SymScope params = c.sym.pop_scope();
   Array references = [], prescribed = [];
-  if (c.peek(0) == <ident> && c.token.text == "using")
-    _parse_using(c, references, prescribed);
+  _parse_using(c, references, prescribed);
   c.expect(<"=">);
   c.expect(<">">);
   $let(c.lambda_scopes, c.lambda_scopes) {
@@ -1007,6 +1004,7 @@ static List _parse_bare_param(Compiler c) {
 /* `using` shares source bindings by reference. A template instead lists
    reference rows, or one captures hole, for expansion to complete. */
 static void _parse_using(Compiler c, Array references, Array prescribed) {
+  if (c.peek(0) != <ident> || c.token.text != "using") return;
   c.next();
   List hole = c.try_parse_macro_slot(<captures>);
   if (hole) prescribed.push(hole);
@@ -1048,7 +1046,6 @@ static List _shared_binding(Compiler c) {
   return binding;
 }
 
-/* A block body returns Var. */
 static List _parse_lambda_body(Compiler c) {
   if (!c.test(<"{">)) return c.parse_assignment();
   $let(c.return_type, %("Var")) return c.parse_callable_body();
@@ -1167,7 +1164,6 @@ static void _add_param(Compiler c, Array entries, List declaration) {
     }
 }
 
-/* A block body returns Var. */
 static List _bind_body(Compiler c, List body) {
   match (body) case %(block *): return c.bind_callable_body(body, %("Var"));
   return c.resolve_expression(body, c.token);
@@ -1301,8 +1297,9 @@ static List _prescribed_row(Var supplied, List binding, List original) {
   return prescribed;
 }
 
-/* A binding that an outer lambda captured belongs to that lambda's depth;
-   another automatic binding belongs to the scope that declared it. */
+/* A captured copy is outside every lambda deeper than the one that made
+   it; another automatic binding is outside when a scope below `depth`
+   declares it. */
 static int _declared_outside(Compiler c, List binding, int depth) {
   Var captured_depth;
   Map facts = c.semantic_binding_facts();
@@ -1413,8 +1410,7 @@ static List _atom_literal(Compiler c, String text) {
   String spelling = text.unescape(), Atom atom = Atom.intern(spelling);
   _check_binder(c, atom);
   if (spelling in c.object_macros) _warn_macro_name(c, spelling);
-  if (atom is <symbol>)
-    return %(literal ("Symbol") $text ${atom.symbol()});
+  if (atom is <symbol>) return %(literal ("Symbol") $text ${atom.symbol()});
   Var value = c.macro_holes && atom.is_binder() ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
 }
