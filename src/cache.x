@@ -196,95 +196,124 @@ static List _zero_static_initializer(Compiler compiler, List value) {
 /* Reuse ordinary indexed assignments, recursing only for explicit array
    braces. C can warn and ignore excess positional values, so writes use the
    native object's actual dimensions rather than the initializer count. */
+static List _static_array_slot(List target, List path, List &tests) {
+  List slot = target;
+  tests = %();
+  foreach (List frame, path.reverse()) {
+    (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+    List parent = slot;
+    if (kind == <index>) {
+      slot = %(expr $selected (index $parent $selector));
+      List length = %(expr (unsigned)
+        (op / (expr (unsigned) (sizeof (parens $parent)))
+              (expr (unsigned) (sizeof (parens $slot)))));
+      tests = cons(%(expr (int) (op < $selector $length)), tests);
+    }
+    else if (selector.truth())
+      slot = %(expr $selected (op . $parent ($selector)));
+  }
+  return slot;
+}
+
+static List _static_array_assignment(
+  Compiler compiler, List slot, Type type, List value, List condition) {
+  List inner = NULL, rhs = value;
+  match (value) {
+    case %(expr ? (!set ?body (composite *))): inner = body;
+    case %(!set ?body (composite *)): inner = body;
+  }
+  Type resolved = compiler.sym.resolve_key(type);
+  if (inner && resolved.is_array())
+    return _build_static_array_block(
+      compiler, slot, resolved, inner.cadr().cdr());
+  if (inner)
+    rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
+  if (condition) {
+    List zero = _build_static_initializer_rhs(
+      type, NULL, NULL, type,
+      %(composite (commas (expr (int) (literal (int) "0")))));
+    rhs = %(expr $type
+      (call "__builtin_choose_expr" (args $condition $rhs $zero)));
+  }
+  return %(stmnt (expr $type (op = $slot $rhs)));
+}
+
+static List _static_array_choice(
+  Compiler compiler, List target, List choice,
+  List &applicable, int &unconditional) {
+  (List condition, List path, Type type, List value) = choice;
+  if (!type) return NULL;
+  List tests = NULL;
+  List slot = _static_array_slot(target, path, tests);
+  List assignment = _static_array_assignment(
+    compiler, slot, type, value, condition);
+  if (condition) tests = cons(condition, tests);
+  List active = NULL;
+  foreach (List test, tests) {
+    active = active ? %(expr (int) (op && $active $test)) : test;
+    assignment = %(if $test $assignment);
+  }
+  if (!active) unconditional = 1;
+  else applicable = applicable
+    ? %(expr (int) (op || $applicable $active)) : active;
+  return assignment;
+}
+
+static List _static_array_input(
+  Compiler compiler, List code, List header, List source,
+  List applicable, int unconditional) {
+  Type type = source.cadr();
+  List binding = compiler.sym.introduce(
+    compiler.fresh_name("initializer_value"));
+  List local = %(expr $type (ident $binding));
+  List input = header.cadr();
+  List formal = %(expr $type ${input.car()});
+  code = code.search_replace(%(!quote $formal), local);
+  List initial = source;
+  if (!unconditional) {
+    List zero = _build_static_initializer_rhs(
+      type, NULL, NULL, type,
+      %(composite (commas (expr (int) (literal (int) "0")))));
+    initial = %(expr $type (op ? $applicable $source $zero));
+  }
+  List declaration = %(declare $type
+    (bindings (op = (bind $binding ()) $initial)));
+  return %($declaration @code);
+}
+
+static List _static_array_row(
+  Compiler compiler, List target, List original, List cases) {
+  List terminal = original, header = NULL, source = NULL;
+  while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
+    terminal = terminal.caddr();
+  List functions = NULL;
+  match (terminal)
+    case %(expr ? (!set ?body (initval *))): {
+      Ast.initializer_cases(body, header);
+      functions = Ast.initializer_functions(body, source);
+    }
+  Array assigned = [];
+  List applicable = NULL;
+  int unconditional = 0;
+  foreach (List choice, cases) {
+    List assignment = _static_array_choice(
+      compiler, target, choice, applicable, unconditional);
+    if (assignment) assigned.push(assignment);
+  }
+  List code = assigned.list_free();
+  if (functions && code)
+    code = _static_array_input(
+      compiler, code, header, source, applicable, unconditional);
+  else if (header) code = %(initcode $header $code);
+  return code;
+}
+
 static List _build_static_array_block(
   Compiler compiler, List target, Type array, List items) {
   Array statements = [];
   foreach (List row, compiler.initializer_rows(array, items, target)) {
     (List original, List cases) = row;
-    List terminal = original, header = NULL, source = NULL;
-    while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
-      terminal = terminal.caddr();
-    List functions = NULL;
-    match (terminal)
-      case %(expr ? (!set ?body (initval *))): {
-        Ast.initializer_cases(body, header);
-        functions = Ast.initializer_functions(body, source);
-      }
-    Array assigned = [];
-    List applicable = NULL;
-    int unconditional = 0;
-    foreach (List choice, cases) {
-      (List condition, List path, Type type, List value) = choice;
-      if (!type) continue;
-      List slot = target, tests = %();
-      foreach (List frame, path.reverse()) {
-        (Type owner, Symbol kind, Var selector, Type selected,
-         List rest) = frame;
-        List parent = slot;
-        if (kind == <index>) {
-          slot = %(expr $selected (index $parent $selector));
-          List length = %(expr (unsigned)
-            (op / (expr (unsigned) (sizeof (parens $parent)))
-                  (expr (unsigned) (sizeof (parens $slot)))));
-          tests = cons(%(expr (int) (op < $selector $length)), tests);
-        }
-        else if (selector.truth())
-          slot = %(expr $selected (op . $parent ($selector)));
-      }
-      List inner = NULL, rhs = value, assignment;
-      match (value) {
-        case %(expr ? (!set ?body (composite *))): inner = body;
-        case %(!set ?body (composite *)): inner = body;
-      }
-      Type resolved = compiler.sym.resolve_key(type);
-      if (inner && resolved.is_array())
-        assignment = _build_static_array_block(
-          compiler, slot, resolved, inner.cadr().cdr());
-      else {
-        if (inner)
-          rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
-        if (condition) {
-          List zero = _build_static_initializer_rhs(
-            type, NULL, NULL, type,
-            %(composite (commas (expr (int) (literal (int) "0")))));
-          rhs = %(expr $type
-            (call "__builtin_choose_expr" (args $condition $rhs $zero)));
-        }
-        assignment = %(stmnt (expr $type (op = $slot $rhs)));
-      }
-      if (condition) tests = cons(condition, tests);
-      List active = NULL;
-      foreach (List test, tests) {
-        active = active ? %(expr (int) (op && $active $test)) : test;
-        assignment = %(if $test $assignment);
-      }
-      if (!active) unconditional = 1;
-      else applicable = applicable
-        ? %(expr (int) (op || $applicable $active)) : active;
-      assigned.push(assignment);
-    }
-    List code = assigned.list_free();
-    if (functions && code) {
-      Type type = source.cadr();
-      List binding = compiler.sym.introduce(
-        compiler.fresh_name("initializer_value"));
-      List local = %(expr $type (ident $binding));
-      List input = header.cadr();
-      List formal = %(expr $type ${input.car()});
-      code = code.search_replace(%(!quote $formal), local);
-      List initial = source;
-      if (!unconditional) {
-        List zero = _build_static_initializer_rhs(
-          type, NULL, NULL, type,
-          %(composite (commas (expr (int) (literal (int) "0")))));
-        initial = %(expr $type (op ? $applicable $source $zero));
-      }
-      List declaration = %(declare $type
-        (bindings (op = (bind $binding ()) $initial)));
-      code = %($declaration @code);
-    }
-    else if (header) code = %(initcode $header $code);
-    statements.push(code);
+    statements.push(_static_array_row(compiler, target, original, cases));
   }
   return %(block @{statements.list_free()});
 }
@@ -395,43 +424,38 @@ static void _report_static_initializer_cycle(
     token, details);
 }
 
-static void _queue_one_static_initializer(
-  Compiler compiler, List binding, Map pending, Map state,
-  Map phases, Array initializers, Symbol deferred_kind) {
-  Var status;
-  if (state.try_get(binding, status)) {
-    if (status == 2) return;
-    _report_static_initializer_cycle(compiler, initializers, state);
-  }
-  state[binding] = 1;
-  Array definitions = pending[binding];
-  int late = 0;
-  Var stored;
-  if (compiler.static_init_deps.try_get(binding, stored)) {
-    List dependencies = stored;
-    foreach (List dependency, dependencies) {
-      if (dependency in pending) {
-        _queue_one_static_initializer(
-          compiler, dependency, pending, state, phases,
-          initializers, deferred_kind);
-        Var phase = phases[dependency];
-        if (phase is not void && phase) late = 1;
+struct StaticQueue {
+  Compiler compiler;
+  Map pending;
+  Map state;
+  Map phases;
+  Array initializers;
+  Symbol deferred_kind;
+};
+
+static int _has_deferred_cache(
+  struct StaticQueue queue, Array definitions) {
+  if (!queue.deferred_kind) return 0;
+  foreach (List initializer, definitions) {
+    Array dependencies = _cache_ids_in(
+      queue.compiler, initializer.cadr());
+    if (!dependencies) continue;
+    Array keys = queue.compiler.id_keys;
+    int late = 0;
+    for (int i = 0; i < keys.len(); i++)
+      if (!dependencies[i].is_null() &&
+          keys[i].car() == queue.deferred_kind) {
+        late = 1;
+        break;
       }
-    }
+    dependencies.free();
+    if (late) return 1;
   }
-  if (deferred_kind)
-    foreach (List initializer, definitions) {
-      Array dependencies = _cache_ids_in(compiler, initializer.cadr());
-      if (!dependencies) continue;
-      Array keys = compiler.id_keys;
-      for (int i = 0; i < keys.len(); i++)
-        if (!dependencies[i].is_null() &&
-            keys[i].car() == deferred_kind) {
-          late = 1;
-          break;
-        }
-      dependencies.free();
-    }
+  return 0;
+}
+
+static void _emit_static_initializer_calls(
+  struct StaticQueue queue, Array definitions, int late) {
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
@@ -440,10 +464,36 @@ static void _queue_one_static_initializer(
     List call = %(stmnt (expr (void)
       (call (expr ((func ((void))) void) (ident $helper)) (args))));
     foreach (List statement, preproc_within_arms(arms, %($call)))
-      compiler.add_init(late ? <late> : <mid>, statement);
+      queue.compiler.add_init(late ? <late> : <mid>, statement);
   }
-  phases[binding] = late;
-  state[binding] = 2;
+}
+
+static void _queue_one_static_initializer(
+  struct StaticQueue queue, List binding) {
+  Var status;
+  if (queue.state.try_get(binding, status)) {
+    if (status == 2) return;
+    _report_static_initializer_cycle(
+      queue.compiler, queue.initializers, queue.state);
+  }
+  queue.state[binding] = 1;
+  Array definitions = queue.pending[binding];
+  int late = 0;
+  Var stored;
+  if (queue.compiler.static_init_deps.try_get(binding, stored)) {
+    List dependencies = stored;
+    foreach (List dependency, dependencies) {
+      if (dependency in queue.pending) {
+        _queue_one_static_initializer(queue, dependency);
+        Var phase = queue.phases[dependency];
+        if (phase is not void && phase) late = 1;
+      }
+    }
+  }
+  if (_has_deferred_cache(queue, definitions)) late = 1;
+  _emit_static_initializer_calls(queue, definitions, late);
+  queue.phases[binding] = late;
+  queue.state[binding] = 2;
 }
 
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
@@ -458,10 +508,10 @@ static void _queue_static_initializers(
       pending[initializer.car()] = definitions = [];
     definitions.array().push(initializer);
   }
+  struct StaticQueue queue = {
+    compiler, pending, state, phases, initializers, deferred_kind};
   foreach (List initializer, initializers)
-    _queue_one_static_initializer(
-      compiler, initializer.car(), pending, state, phases,
-      initializers, deferred_kind);
+    _queue_one_static_initializer(queue, initializer.car());
 }
 
 /* Apply file-scope initializer rewrites across one generated region. Both
@@ -588,8 +638,8 @@ static List _make_header_cache_init(
   List type = %(("__attribute__((constructor))") static void);
   List protocol_call = %(stmnt
     (expr (void) (call "x2c_initialize_protocols" (args))));
-  List body = c.rebuild_statement(setup(
-    protocol_call, %(expr (int) (ident $guard)), statements)).cdr();
+  List body = c.rebuild_statement(
+    setup(protocol_call, %(expr (int) (ident $guard)), statements)).cdr();
   return c.rebuild_unit_function(
     shape(type, initializer, body));
 }
@@ -605,35 +655,50 @@ List _patch_initialized_entry(
 /* Add one translation-unit-local immutable cache to a generated header.
    The constructor eagerly establishes process-lifetime values; patched inline
    entries retain the same guard-based fallback as source-resident caches. */
-static List _setup_header_cache(
-  Compiler c, List header, Array ids, String prefix, String guard_name,
-  String initializer_name) {
-  if (!ids) return header;
+struct HeaderCache {
+  Compiler compiler;
+  String prefix;
+  List guard;
+  List initializer;
+};
+
+static List _header_cache_prelude(struct HeaderCache cache, Array ids) {
+  Compiler c = cache.compiler;
   List (list_ids, string_ids, var_ids) = _split_ids(c.id_keys, ids);
   Array declarations = [];
-  List declaration = _generate_cache_declare(list_ids, "List", c, prefix);
+  List declaration = _generate_cache_declare(
+    list_ids, "List", c, cache.prefix);
   if (declaration) declarations.push(declaration);
-  declaration = _generate_cache_declare(string_ids, "String", c, prefix);
+  declaration = _generate_cache_declare(
+    string_ids, "String", c, cache.prefix);
   if (declaration) declarations.push(declaration);
-  declaration = _generate_cache_declare(var_ids, "Var", c, prefix);
+  declaration = _generate_cache_declare(
+    var_ids, "Var", c, cache.prefix);
   if (declaration) declarations.push(declaration);
-  List guard = c.sym.reference(%($guard_name), NULL);
-  List initializer = c.sym.reference(%($initializer_name), NULL);
-  declarations.push(_initialization_guard(guard));
+  declarations.push(_initialization_guard(cache.guard));
   Array statements = [];
   for (int i = 0, n = c.id_keys.len(); i < n; i++) {
     if (ids[i].is_null()) continue;
-    List statement = _generate_cache_initializer(i, c, prefix);
-    statements.push(_rewrite_header_cache_refs(c, statement, prefix, NULL));
+    List statement = _generate_cache_initializer(i, c, cache.prefix);
+    List rewritten = _rewrite_header_cache_refs(
+      c, statement, cache.prefix, NULL);
+    statements.push(rewritten);
   }
   declarations.push(
-    _make_header_cache_init(c, guard, initializer, statements.list_free()));
+    _make_header_cache_init(
+      c, cache.guard, cache.initializer, statements.list_free()));
   ids.free();
-  List prelude = declarations.list_free(), Array output = [];
+  return declarations.list_free();
+}
+
+static List _header_cache_entries(
+  struct HeaderCache cache, List header, List prelude) {
+  Compiler c = cache.compiler;
+  Array output = [];
   int inserted = 0;
   foreach (List node, header) {
     int replaced = 0;
-    node = _rewrite_header_cache_refs(c, node, prefix, replaced);
+    node = _rewrite_header_cache_refs(c, node, cache.prefix, replaced);
     int captured = node.car() == <sourceinit>;
     List function = node;
     if (captured) function = node.cadr();
@@ -645,12 +710,23 @@ static List _setup_header_cache(
             inserted = 1;
           }
           function = _patch_initialized_entry(
-            c, function, statements, guard, initializer);
+            c, function, statements, cache.guard, cache.initializer);
           node = captured ? %(sourceinit $function) : function;
         }
     output.push(node);
   }
   return output.list_free();
+}
+
+static List _setup_header_cache(
+  Compiler c, List header, Array ids, String prefix, String guard_name,
+  String initializer_name) {
+  if (!ids) return header;
+  struct HeaderCache cache = {
+    c, prefix, c.sym.reference(%($guard_name), NULL),
+    c.sym.reference(%($initializer_name), NULL)};
+  List prelude = _header_cache_prelude(cache, ids);
+  return _header_cache_entries(cache, header, prelude);
 }
 
 /* Materialize source cache slots before ordinary file-static assignments.
