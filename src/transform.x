@@ -156,8 +156,10 @@ static List _callback_function(
   List call = _func_call(
     compiler, source_type.apply().canonicalize(),
     source, arguments.list_free());
+  Macro returned = $return_value;
   List statement = result === %(void) ? call
-    : %(return ${compiler.convert_expression(call, result)});
+    : compiler.rebuild_statement(returned(
+        compiler.convert_expression(call, result))).cadr();
   return compiler.wrapper_function(
     %(static @result), binding, declaration_params.cdr(),
     %((stmnt $statement)));
@@ -355,6 +357,8 @@ macro open Expression $func_address(Expr $value) => &$value;
 
 macro open Expression $func_size(Expr $value) => sizeof $value;
 
+macro open Expression $func_dereference(Expr $value) => *$value;
+
 /* Reuse an issued declarator row without binding it again. */
 macro open Statement $func_local(
     Type $type, DeclaratorRow $row) {
@@ -392,11 +396,12 @@ static List _checked_func_argument(
     storage_type = parameter_type;
     if (resolved.is_pointer())
       return compiler.convert_expression(picked, parameter_type);
-    Symbol star = <"*">;
     Type record_pointer = parameter_type.reference();
-    return %(expr $parameter_type
-               (op $star (expr $record_pointer
-                           (cast $record_pointer $picked))));
+    List pointer = %(expr $record_pointer
+      (cast $record_pointer $picked));
+    Macro dereference = $func_dereference;
+    return compiler.rebuild_expression(
+      parameter_type, dereference(pointer));
   }
   if (!tag)
     _typed_adapter_error(
