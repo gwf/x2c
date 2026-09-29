@@ -432,11 +432,12 @@ static threaded int macro_subject_used;
 /** Returns the table `Macro.use_subject` last set, or void. */
 Var Macro.subject(void) => macro_subject;
 
-/** Sets the `(SPELLING BINDING)` rows that give, for each spelling a
-    compile-time call's syntax arguments reference as a global, the unit's
-    base-scope binding. A macro value's free reference then recognizes only
-    that binding; with void it recognizes any binding of its spelling. The
-    compiler sets this for the length of each `meta` call. */
+/** Sets the `(SPELLING BINDING)` rows for global references and the
+    `(source-spelling BINDING SPELLING)` rows for renamed local bindings in
+    a compile-time call's syntax arguments. A macro value's free reference
+    recognizes only the recorded global binding; with void it recognizes
+    any binding of its spelling. The compiler sets these rows for each
+    `meta` call and carries them through the helper. */
 void Macro.use_subject(Var rows) { macro_subject = rows; }
 
 /* The pattern for a free reference to `spelling`: any binding of it, or
@@ -458,7 +459,12 @@ static Var _macro_free_reference(String spelling) {
 /** Derives the Match pattern that recognizes code this macro builds,
    capturing each parameter under the given binder. */
 List Macro_pattern(Macro t, List names) {
-  List rows = _macro_binder_rows(t, names), body = t.assoc(<template>);
+  return _macro_pattern(t, names, 0);
+}
+
+static List _macro_pattern(Macro t, List names, int case_pattern) {
+  List rows = _macro_binder_rows(t, names, case_pattern);
+  List body = t.assoc(<template>);
   List pattern =
     _macro_pattern_view(_macro_inline(t.assoc(<env>), body.replace(rows)));
   /* A one-statement block item also matches inside its `seq`. */
@@ -472,7 +478,7 @@ List Macro_pattern(Macro t, List names) {
    Type or captures parameter is a List splice, so its binder is a List
    binder. A name read as an expression is an identifier of its binding,
    as `_macro_value_rows` builds it. */
-static List _macro_binder_rows(Macro t, List names) {
+static List _macro_binder_rows(Macro t, List names, int case_pattern) {
   List rows = NULL;
   foreach (List hole, t.assoc(<parameters>).list()) {
     Var selected = names.car(), kind = hole.assoc(<kind>);
@@ -481,8 +487,10 @@ static List _macro_binder_rows(Macro t, List names) {
       selected = Atom.intern("*" + selected.str()[1:]);
     int sequence = hole.assoc(<sequence>);
     Var projected = sequence ? %($selected).var() : selected;
+    if (case_pattern && kind == <name>)
+      projected = %(!and $selected ${_macro_name_identity(hole)});
     Var expression = !sequence && kind == <name>
-                   ? %(expr ? (ident $selected)).var() : projected;
+                   ? %(expr ? (ident $projected)).var() : projected;
     rows = cons(%(${_macro_key(hole, "expression")} $expression), rows);
     rows = cons(%(${_macro_key(hole, "value")} $projected), rows);
     rows = cons(%(${_macro_key(hole, "source")} $projected), rows);
@@ -501,6 +509,11 @@ static Atom _macro_key(List hole, String projection) {
   else if (projection == "member") sequence = 0;
   return Atom.intern(%"${sequence ? "*" : "?"}__macro_${projection}_$name");
 }
+
+/* The second slot of a Name's declaration and reference projection keeps
+   exact binding identity when a member label reaches the first slot first. */
+static Atom _macro_name_identity(List hole) =>
+  Atom.intern(%"?__macro_identity_${hole.assoc(<binder>).str()[1:]}");
 
 static List _macro_instantiate(Macro t, List values);
 
@@ -638,11 +651,11 @@ static Var _macro_slot_binder(Var form) {
    matches the pattern derived from the body, which the case's site keeps
    unless it depends on the current call. */
 
-/** Records the machine slots that hold a macro's fixed locals, so a
-    repeated slot compares those locals by identity during recognition.
-*/
+/** Records fixed-local slots for distinct-identity checks and Name slots
+    for member-spelling comparisons during recognition. */
 typedef struct MacroFixedSlots {
   int count, slots[MACHINE_BINDER_MAX];
+  int names, name_slots[MACHINE_BINDER_MAX];
 } MacroFixedSlots;
 
 /** Records where each of a `case`'s binders reads its capture: the slot
@@ -650,7 +663,8 @@ typedef struct MacroFixedSlots {
     in the `case`, which need not share the parameters' order.
 */
 typedef struct MacroPublishing {
-  int from[MACHINE_BINDER_MAX], to[MACHINE_BINDER_MAX];
+  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
+  int to[MACHINE_BINDER_MAX];
   int count, binders, complete;
   unsigned long definite;
 } MacroPublishing;
@@ -734,7 +748,7 @@ static int _macro_pending_capture(
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
   List internal = _macro_internal_names(t, names, 1);
   if (!x2c_match_try_capture(grouped, internal, &captured)) return 0;
-  MacroPublishing route = _macro_publishing(internal, names, internal);
+  MacroPublishing route = _macro_publishing(t, internal, names, internal);
   return _macro_publish(&route, &captured, published);
 }
 
@@ -771,14 +785,14 @@ static int _macro_derived_capture(
   macro_subject_used = 0;
   List pattern = _macro_case_shape(t, names);
   MacroPublishing route = _macro_publishing(
-    pattern, names, _macro_internal_names(t, names, 0));
-  if (_macro_keep(site, t, pattern, route))
+    t, pattern, names, _macro_internal_names(t, names, 0));
+  if (_macro_keep(site, t, names, pattern, route))
     return _macro_site_capture(site, code, published);
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
   MatchPlan plan = MatchPlan.prepare(pattern);
   defer plan.free();
-  MacroFixedSlots policy = _macro_fixed_slots(t, plan);
+  MacroFixedSlots policy = _macro_fixed_slots(t, names, plan);
   return _macro_case_match(code, plan, &policy, &captured) &&
     _macro_publish(&route, &captured, published);
 }
@@ -787,11 +801,12 @@ static int _macro_derived_capture(
    retains its prepared plan, unless the pattern resolved a reference
    against the current call's subject. Returns whether `site` is ready. */
 static int _macro_keep(
-  MacroCaseSite *site, Macro t, List pattern, MacroPublishing &route) {
+  MacroCaseSite *site, Macro t, List names, List pattern,
+  MacroPublishing &route) {
   MatchPlan kept = site && !macro_subject_used && List.try_own(pattern)
                  ? x2c_match_site_prepare(&site.match, pattern) : NULL;
   if (!kept || kept.status != MACHINE_PREPARED) return 0;
-  site.policy = _macro_fixed_slots(t, kept);
+  site.policy = _macro_fixed_slots(t, names, kept);
   site.route = route;
   __atomic_store_n(&site.ready, 1, __ATOMIC_RELEASE);
   return 1;
@@ -809,7 +824,7 @@ static int _macro_keep(
    identity, a statement sequence that also matches as a block, and no
    source wrappers. */
 static List _macro_case_shape(Macro t, List names) {
-  List pattern = Macro_pattern(t, names), replacements = NULL;
+  List pattern = _macro_pattern(t, names, 1), replacements = NULL;
   int ordinal = 0;
   foreach (List fresh, t.assoc(<fresh>).list()) {
     Atom identity = _macro_fixed(ordinal++);
@@ -842,14 +857,22 @@ static Var _macro_view(Var value) {
 }
 
 /* The slots of a prepared plan that hold the macro's fixed locals. */
-static MacroFixedSlots _macro_fixed_slots(Macro t, MatchPlan plan) {
+static MacroFixedSlots _macro_fixed_slots(
+  Macro t, List names, MatchPlan plan) {
   MacroFixedSlots policy;
-  policy.count = 0;
+  policy.count = policy.names = 0;
   if (plan.status != MACHINE_PREPARED) return policy;
   int ordinal = 0;
   foreach (List fresh, t.assoc(<fresh>).list()) {
     int slot = plan.layout.index(_macro_fixed(ordinal++));
     if (slot >= 0) policy.slots[policy.count++] = slot;
+  }
+  foreach (List hole, t.assoc(<parameters>).list()) {
+    if (hole.assoc(<kind>) == <name>) {
+      int slot = plan.layout.index(names.car());
+      if (slot >= 0) policy.name_slots[policy.names++] = slot;
+    }
+    names = names.cdr();
   }
   return policy;
 }
@@ -895,11 +918,39 @@ static int _macro_take_slots(
    distinct declarations capture distinct identities. */
 static int _macro_identity_equal(
   void *raw_machine, int slot, Var left, Var right, void *raw_policy) {
-  if (_macro_unwrap(left) != _macro_unwrap(right)) return 0;
   MatchMachine machine = raw_machine;
   MacroFixedSlots *policy = raw_policy;
+  left = _macro_unwrap(left);
+  right = _macro_unwrap(right);
+  if (_macro_is_name(policy, slot)) {
+    String spelling = NULL;
+    if (left is <string> && right is <list>)
+      spelling = _macro_source_spelling(right);
+    else if (right is <string> && left is <list>)
+      spelling = _macro_source_spelling(left);
+    if (spelling) return spelling == (left is <string> ? left : right);
+  }
+  if (left != right) return 0;
   if (!_macro_is_fixed(policy, slot)) return 1;
   return !_macro_held_elsewhere(machine, policy, slot, right);
+}
+
+static int _macro_is_name(MacroFixedSlots *policy, int slot) {
+  for (int i = 0; i < policy.names; i++)
+    if (policy.name_slots[i] == slot) return 1;
+  return 0;
+}
+
+/* The caller's source spelling survives helper transport in the existing
+   subject rows; ordinary bindings use the spelling they already carry. */
+static String _macro_source_spelling(Var value) {
+  if (value is not <list>) return NULL;
+  foreach (List row, macro_subject is <list> ? macro_subject.list() : NULL)
+    match (row)
+      case %(source-spelling ?binding ?(String spelling)):
+        if (List.compare(binding, value) == 0) return spelling;
+  match (value) case %(binding ? ?(String spelling)): return spelling;
+  return NULL;
 }
 
 static int _macro_is_fixed(MacroFixedSlots *policy, int slot) {
@@ -944,16 +995,23 @@ static Var _macro_unwrap(Var value) {
    internal binder in `pattern` and its own slot among `names`. A binder
    either side lacks leaves the route incomplete. */
 static MacroPublishing _macro_publishing(
-  Var pattern, List names, List internal) {
+  Macro t, Var pattern, List names, List internal) {
   MacroPublishing route;
   memset(&route, 0, sizeof(route));
   MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
   MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
   route.complete = 1;
-  for (; names; names = names.cdr(), internal = internal.cdr()) {
-    int from = actual.index(internal.car()), to = logical.index(names.car());
+  List holes = t.assoc(<parameters>);
+  for (; names; names = names.cdr(), internal = internal.cdr(),
+                  holes = holes.cdr()) {
+    int fallback = actual.index(internal.car());
+    int from = holes.car().list().assoc(<kind>) == <name>
+             ? actual.index(_macro_name_identity(holes.car())) : -1;
+    if (from < 0) from = fallback;
+    int to = logical.index(names.car());
     if (from < 0 || to < 0) route.complete = 0;
     route.from[route.count] = from;
+    route.fallback[route.count] = fallback;
     route.to[route.count++] = to;
   }
   route.binders = logical.binder_count;
@@ -971,8 +1029,10 @@ static int _macro_publish(
   if (!route.complete) return 0;
   Var ordered[MACHINE_BINDER_MAX];
   for (int i = 0; i < route.count; i++) {
-    if (!captured.has(route.from[i])) return 0;
-    ordered[route.to[i]] = captured.values[route.from[i]];
+    int from = captured.has(route.from[i])
+             ? route.from[i] : route.fallback[i];
+    if (from < 0 || !captured.has(from)) return 0;
+    ordered[route.to[i]] = captured.values[from];
   }
   for (int i = 0; i < route.binders; i++) published.values[i] = ordered[i];
   published.present = route.definite;
