@@ -572,7 +572,7 @@ static int _token_ends_operand(Token token) {
   switch (token.type) {
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char*>:
     case <lit-char>: case <lit-atom>: case <lit-symbol>:
-    case <")">: case <"]">: case <"}">:
+    case <")">: case <"]">: case <"}">: case <"\"">:
     case <++>: case <-->:
       return 1;
   }

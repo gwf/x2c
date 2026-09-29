@@ -42,6 +42,8 @@ String Compiler_meta_call_missing(Compiler c, String name);
 
 void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
 
+void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
+
 void Compiler_bind_meta_group(Compiler c, String name, Token site);
 
 

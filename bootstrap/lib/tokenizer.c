@@ -1014,7 +1014,7 @@ static Token _before_group(Tokenizer tokenizer, Token close, Symbol opener){
 static int _token_ends_operand(Token token){
   if(! token) return 0;
   switch(token -> type){
-    case 19147688 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368475748 : case 845368370138 : case 865658429314008 : case 83 : case 187 : case 251 : case 1848 : case 2046 : return 1;
+    case 19147688 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368475748 : case 845368370138 : case 865658429314008 : case 83 : case 187 : case 251 : case 69 : case 1848 : case 2046 : return 1;
   }
   return 0;
 }
