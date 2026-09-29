@@ -112,11 +112,14 @@ int scan_preprocessor(char *s) {
    or `<float>`; otherwise it is unchanged. */
 int scan_number_typed(char *s, Symbol *type) {
   if (!s) return 0;
-  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign;
+  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign, int n;
   Symbol found = <int>;
-  int n = _prefixed_number(number, &found);
-  if (n < 0) return -1;
-  if (!n) n = _decimal_number(number, &found);
+  if (number[0] != '0' || _decimal_zero(number))
+    n = _decimal_number(number, &found);
+  else {
+    n = _prefixed_number(number, &found);
+    if (n < 0) return -1;
+  }
   if (n <= 0) return sign ? 0 : n;
   if (type) *type = found;
   return sign + n;
@@ -125,23 +128,30 @@ int scan_number_typed(char *s, Symbol *type) {
 /* Returns the same result as `scan_number_typed` without its type. */
 int scan_number(char *s) => scan_number_typed(s, NULL);
 
-/* Scans a hexadecimal, binary, or octal number with its `0` prefix, and
-   returns its length, -1 when it is malformed, or zero for another spelling.
-   As in C, a point or exponent makes octal-looking digits decimal floating. */
+/* A leading `0` starts a decimal number unless `x`, `b`, `o`, or an octal
+   digit follows it. As in C, a point or exponent after octal-looking digits
+   makes them decimal floating. */
+static int _decimal_zero(char *s) {
+  switch (s[1]) {
+    case 'x': case 'X': case 'b': case 'B': case 'o': case 'O': return 0;
+    case '1': case '2': case '3': case '4': case '5': case '6': case '7': {
+      char after = s[_digits(s, 10)];
+      return after == '.' || after == 'e' || after == 'E';
+    }
+  }
+  return 1;
+}
+
+/* Scans a hexadecimal, binary, or octal number with its `0` prefix, or
+   returns -1 when it is malformed. An octal digit after the `0` begins an
+   octal number. */
 static int _prefixed_number(char *s, Symbol *type) {
-  if (s[0] != '0') return 0;
   int n;
   switch (s[1]) {
     case 'x': case 'X': n = _hex_number(s + 2, type); break;
     case 'b': case 'B': n = _radix_integer(s + 2, 2, 0); break;
     case 'o': case 'O': n = _radix_integer(s + 2, 8, 0); break;
-    case '1': case '2': case '3': case '4': case '5': case '6': case '7': {
-      char after = s[_digits(s, 10)];
-      if (after == '.' || after == 'e' || after == 'E') return 0;
-      n = _radix_integer(s + 2, 8, 1);
-      break;
-    }
-    default: return 0;
+    default: n = _radix_integer(s + 2, 8, 1); break;
   }
   return n < 0 ? -1 : n + 2;
 }
@@ -149,21 +159,34 @@ static int _prefixed_number(char *s, Symbol *type) {
 /* Hexadecimal digits with an optional fraction. A `p` exponent makes the
    number floating, and a fraction requires one. */
 static int _hex_number(char *s, Symbol *type) {
-  int n = _digits(s, 16), digits = n, point = s[n] == '.';
-  if (point) {
-    int fraction = _digits(s + n + 1, 16);
+  int n = 0;
+  while (_ascii_hex((unsigned char) s[n])) n++;
+  int digits = n, has_point = 0;
+  if (s[n] == '.') {
+    has_point = 1;
+    n++;
+    int fraction = _digits(s + n, 16);
     digits += fraction;
-    n += 1 + fraction;
+    n += fraction;
   }
   if (!digits) return -1;
-  if (s[n] == 'p' || s[n] == 'P') return _exponent_tail(s, n, type);
-  if (point) return -1;
-  return _integer_tail(s, n, type);
+  if (s[n] == 'p' || s[n] == 'P') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + exponent;
+  }
+  if (has_point) return -1;
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  if (type) *type = <int>;
+  return n + suffix;
 }
 
 /* Decimal digits, then a fraction, an exponent, or an integer suffix. */
 static int _decimal_number(char *s, Symbol *type) {
-  int n = _digits(s, 10);
+  int n = 0;
+  while (scan_ascii_digit((unsigned char) s[n])) n++;
   if (s[n] == '.') {
     int fraction = _float_tail(s + n + 1, n > 0);
     if (fraction < 0) return -1;
@@ -171,8 +194,16 @@ static int _decimal_number(char *s, Symbol *type) {
     return n + 1 + fraction;
   }
   if (!n) return 0;
-  if (s[n] == 'e' || s[n] == 'E') return _exponent_tail(s, n, type);
-  return _integer_tail(s, n, type);
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    if (exponent < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + exponent;
+  }
+  int suffix = _int_suffix(s + n);
+  if (suffix < 0) return -1;
+  if (type) *type = <int>;
+  return n + suffix;
 }
 
 /* Classifies an already validated `n`-byte numeric token as integer or
@@ -220,25 +251,11 @@ static int _digits(char *s, int base) {
 static inline int _digit(int c, int base) =>
   base == 16 ? _ascii_hex(c) : (unsigned) (c - '0') < (unsigned) base;
 
-/* An exponent after the mantissa's `n` bytes makes a number floating. */
-static int _exponent_tail(char *s, int n, Symbol *type) {
-  int exponent = _exponent(s + n + 1);
-  if (exponent < 0) return -1;
-  if (type) *type = <float>;
-  return n + 1 + exponent;
-}
-
-static int _integer_tail(char *s, int n, Symbol *type) {
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  if (type) *type = <int>;
-  return n + suffix;
-}
-
 static int _radix_integer(char *s, int base, int digit_before) {
   int n = _digits(s, base);
   if (!digit_before && !n) return -1;
-  return _integer_tail(s, n, NULL);
+  int suffix = _int_suffix(s + n);
+  return suffix < 0 ? -1 : n + suffix;
 }
 
 /* `digit_before` says a digit was consumed before the decimal point, which
@@ -246,7 +263,10 @@ static int _radix_integer(char *s, int base, int digit_before) {
 static int _float_tail(char *s, int digit_before) {
   int n = _digits(s, 10);
   if (!digit_before && !n) return -1;
-  if (s[n] == 'e' || s[n] == 'E') return _exponent_tail(s, n, NULL);
+  if (s[n] == 'e' || s[n] == 'E') {
+    int exponent = _exponent(s + n + 1);
+    return exponent < 0 ? -1 : n + 1 + exponent;
+  }
   int suffix = _float_suffix(s + n);
   return suffix < 0 ? -1 : n + suffix;
 }
@@ -266,19 +286,17 @@ static int _exponent(char *s) {
    `u` after them, each letter in either case. */
 static int _int_suffix(char *s) {
   int n = 0;
-  if (_is_u(s[0])) n = 1 + _longs(s + 1);
-  else if (_is_l(s[0])) {
-    n = _longs(s);
-    if (_is_u(s[n])) n++;
+  switch (s[0]) {
+    case 'u': case 'U': n = 1 + _longs(s + 1); break;
+    case 'l': case 'L':
+      n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
+      break;
   }
   return _token_break(s[n]) ? n : -1;
 }
 
 /* The length of an `l` or `ll` at `s`, or zero. */
-static int _longs(char *s) {
-  if (!_is_l(s[0])) return 0;
-  return _is_l(s[1]) ? 2 : 1;
-}
+static int _longs(char *s) => _is_l(s[0]) ? 1 + _is_l(s[1]) : 0;
 
 static inline int _is_l(int c) => c == 'l' || c == 'L';
 static inline int _is_u(int c) => c == 'u' || c == 'U';
@@ -313,70 +331,80 @@ int scan_keyword(char *s) {
 
 /* Returns the keyword Symbol for exactly `n` borrowed bytes, or zero.
    The C spellings `thread_local` and `_Thread_local` normalize to `threaded`;
-   matching is otherwise case-sensitive. */
+   matching is otherwise case-sensitive. Each length tests its spellings in
+   order. With constant lengths the C compiler expands every `memcmp` into
+   inline word compares, and each result is an immediate. */
 Symbol scan_keyword_type(const char *s, int n) {
   if (!s) return 0;
   switch (n) {
-    case 2:  return _keyword(s, 2, keywords2);
-    case 3:  return _keyword(s, 3, keywords3);
-    case 4:  return _keyword(s, 4, keywords4);
-    case 5:  return _keyword(s, 5, keywords5);
-    case 6:  return _keyword(s, 6, keywords6);
-    case 7:  return _keyword(s, 7, keywords7);
-    case 8:  return _keyword(s, 8, keywords8);
-    case 10: return _keyword(s, 10, keywords10);
-    case 12: return _keyword(s, 12, keywords12);
-    case 13: return _keyword(s, 13, keywords13);
+    case 2: if (!memcmp(s, "do", 2)) return <do>;
+      if (!memcmp(s, "if", 2)) return <if>;
+      if (!memcmp(s, "in", 2)) return <in>;
+      break;
+    case 3: if (!memcmp(s, "for", 3)) return <for>;
+      if (!memcmp(s, "int", 3)) return <int>;
+      if (!memcmp(s, "try", 3)) return <try>;
+      break;
+    case 4: if (!memcmp(s, "auto", 4)) return <auto>;
+      if (!memcmp(s, "case", 4)) return <case>;
+      if (!memcmp(s, "char", 4)) return <char>;
+      if (!memcmp(s, "else", 4)) return <else>;
+      if (!memcmp(s, "enum", 4)) return <enum>;
+      if (!memcmp(s, "goto", 4)) return <goto>;
+      if (!memcmp(s, "long", 4)) return <long>;
+      if (!memcmp(s, "void", 4)) return <void>;
+      break;
+    case 5: if (!memcmp(s, "break", 5)) return <break>;
+      if (!memcmp(s, "catch", 5)) return <catch>;
+      if (!memcmp(s, "const", 5)) return <const>;
+      if (!memcmp(s, "defer", 5)) return <defer>;
+      if (!memcmp(s, "float", 5)) return <float>;
+      if (!memcmp(s, "match", 5)) return <match>;
+      if (!memcmp(s, "raise", 5)) return <raise>;
+      if (!memcmp(s, "short", 5)) return <short>;
+      if (!memcmp(s, "union", 5)) return <union>;
+      if (!memcmp(s, "while", 5)) return <while>;
+      break;
+    case 6: if (!memcmp(s, "double", 6)) return <double>;
+      if (!memcmp(s, "extern", 6)) return <extern>;
+      if (!memcmp(s, "import", 6)) return <import>;
+      if (!memcmp(s, "inline", 6)) return <inline>;
+      if (!memcmp(s, "return", 6)) return <return>;
+      if (!memcmp(s, "signed", 6)) return <signed>;
+      if (!memcmp(s, "sizeof", 6)) return <sizeof>;
+      if (!memcmp(s, "static", 6)) return <static>;
+      if (!memcmp(s, "struct", 6)) return <struct>;
+      if (!memcmp(s, "switch", 6)) return <switch>;
+      break;
+    case 7: if (!memcmp(s, "default", 7)) return <default>;
+      if (!memcmp(s, "finally", 7)) return <finally>;
+      if (!memcmp(s, "typedef", 7)) return <typedef>;
+      break;
+    case 8: if (!memcmp(s, "delegate", 8)) return <delegate>;
+      if (!memcmp(s, "protocol", 8)) return <protocol>;
+      if (!memcmp(s, "continue", 8)) return <continue>;
+      if (!memcmp(s, "register", 8)) return <register>;
+      if (!memcmp(s, "restrict", 8)) return <restrict>;
+      if (!memcmp(s, "threaded", 8)) return <threaded>;
+      if (!memcmp(s, "unsigned", 8)) return <unsigned>;
+      if (!memcmp(s, "volatile", 8)) return <volatile>;
+      if (!memcmp(s, "__inline", 8)) return <inline>;
+      break;
+    /* GNU C spells `inline` and `restrict` with underscores, and C spells
+       thread-local storage two other ways. Each means the standard keyword,
+       so C that already uses any of them passes through unchanged. */
+    case 10: if (!memcmp(s, "associated", 10)) return <associated>;
+      if (!memcmp(s, "__inline__", 10)) return <inline>;
+      if (!memcmp(s, "__restrict", 10)) return <restrict>;
+      break;
+    case 12: if (!memcmp(s, "thread_local", 12)) return <threaded>;
+      if (!memcmp(s, "__restrict__", 12)) return <restrict>;
+      break;
+    case 13: if (!memcmp(s, "_Thread_local", 13)) return <threaded>;
+      break;
   }
   return 0;
 }
-
-typedef struct _Keyword { const char *text, Symbol type; } _Keyword;
-
-/* Returns the type of the first row whose `n`-byte spelling matches `s`, or
-   zero. A constant `n` lets the C compiler compare each spelling inline. */
-static inline Symbol _keyword(const char *s, int n, const _Keyword *rows) {
-  for (; rows.text; rows++) if (!memcmp(s, rows.text, n)) return rows.type;
-  return 0;
-}
-
-/* Keyword spellings by length, in the order a lookup tries them. GNU C
-   spells `inline` and `restrict` with underscores, and C spells
-   thread-local storage two other ways. Each means the standard keyword, so
-   C that already uses any of them passes through unchanged. */
-static const _Keyword keywords2[] = {
-  {"do", <do>}, {"if", <if>}, {"in", <in>}, {NULL}};
-static const _Keyword keywords3[] = {
-  {"for", <for>}, {"int", <int>}, {"try", <try>}, {NULL}};
-static const _Keyword keywords4[] = {
-  {"auto", <auto>}, {"case", <case>}, {"char", <char>}, {"else", <else>},
-  {"enum", <enum>}, {"goto", <goto>}, {"long", <long>}, {"void", <void>},
-  {NULL}};
-static const _Keyword keywords5[] = {
-  {"break", <break>}, {"catch", <catch>}, {"const", <const>},
-  {"defer", <defer>}, {"float", <float>}, {"match", <match>},
-  {"raise", <raise>}, {"short", <short>}, {"union", <union>},
-  {"while", <while>}, {NULL}};
-static const _Keyword keywords6[] = {
-  {"double", <double>}, {"extern", <extern>}, {"import", <import>},
-  {"inline", <inline>}, {"return", <return>}, {"signed", <signed>},
-  {"sizeof", <sizeof>}, {"static", <static>}, {"struct", <struct>},
-  {"switch", <switch>}, {NULL}};
-static const _Keyword keywords7[] = {
-  {"default", <default>}, {"finally", <finally>}, {"typedef", <typedef>},
-  {NULL}};
-static const _Keyword keywords8[] = {
-  {"delegate", <delegate>}, {"protocol", <protocol>},
-  {"continue", <continue>}, {"register", <register>},
-  {"restrict", <restrict>}, {"threaded", <threaded>},
-  {"unsigned", <unsigned>}, {"volatile", <volatile>},
-  {"__inline", <inline>}, {NULL}};
-static const _Keyword keywords10[] = {
-  {"associated", <associated>}, {"__inline__", <inline>},
-  {"__restrict", <restrict>}, {NULL}};
-static const _Keyword keywords12[] = {
-  {"thread_local", <threaded>}, {"__restrict__", <restrict>}, {NULL}};
-static const _Keyword keywords13[] = {{"_Thread_local", <threaded>}, {NULL}};
 
 /* Returns the longest supported C or x2c operator prefix, or -1. x2c adds
    `===`, `!==`, `@`, and `@=` to the C operators. The caller supplies a
@@ -457,14 +485,19 @@ int scan_c_character(char *s) {
 int scan_string_segment(char *s) {
   int n = 0;
   while (s[n]) {
-    if (s[n] == '\\') {
-      int m = s[n + 1] == '$' ? 2 : scan_escape_sequence(s + n);
-      if (m < 0) return -1;
-      n += m;
+    switch (s[n]) {
+      case '\\': {
+        int m = s[n + 1] == '$' ? 2 : scan_escape_sequence(s + n);
+        if (m < 0) return -1;
+        n += m;
+        break;
+      }
+      case '$': if (s[n + 1] != '$') return n;
+        n += 2;
+        break;
+      case '"': return n;
+      default: n++;
     }
-    else if (s[n] == '$' && s[n + 1] == '$') n += 2;
-    else if (s[n] == '$' || s[n] == '"') return n;
-    else n++;
   }
   return -1;
 }
