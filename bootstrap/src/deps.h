@@ -9,9 +9,9 @@
 #include "cli.h"
 #include "compiler.h"
 #include "utils.h"
-List translation_depfile_parse(String text);
-
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir);
+
+List translation_depfile_parse(String text);
 
 
 #endif /* __GUARD_0x0F07AB79__ */
