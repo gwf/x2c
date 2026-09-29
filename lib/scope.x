@@ -2,20 +2,16 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `Scope` owns groups of individually managed allocations. Callers may use
+    A `Scope` owns a group of individually managed allocations. Callers use
     the active scope, target an explicit scope slot, or retain and release a
-    nested lifetime. Explicit free and realloc remain valid for allocations
-    returned by `Scope.malloc`, `Scope.calloc`, and `Scope.memdup`, and
-    `Scope.move`
-    relinks one allocation onto another scope without copying it.
+    nested lifetime. Any block can still be freed, resized, or relinked onto
+    another scope without copying.
 
-    `Scope.initialize` owns runtime initialization, while public operations
-    also
-    initialize safely when called before the runtime aggregator. Shutdown
-    hooks run in reverse registration order, after which the module enters a
-    terminal state.  `Scope.stats` remains available after shutdown so callers
-    and tests can inspect the final state.
- */
+    Public operations initialize the module on first use, so they are safe
+    before the runtime calls `Scope.initialize`. Shutdown runs its hooks
+    newest first and leaves the module terminal; `Scope.stats` still reports
+    the final counts.
+*/
 
 #pragma once
 $(import "error-macros.xmacro")
@@ -95,7 +91,11 @@ _Static_assert(
 macro Expression $scope.alloc_meta(Expr $a) =>
   (((ScopeMetadata *) ($a)) - 1);
 
-// scope records
+/* scope records
+
+   Each thread owns its root scope, the slot that allocation charges, the
+   stack of pushed slots, and one record per open retain. Named scopes share
+   one process-wide registry. */
 
 typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
@@ -177,18 +177,17 @@ void *Scope.malloc_in(Scope *slot, size_t size) {
   return _malloc_in(slot, size, NULL);
 }
 
-/** Allocates `size` bytes with finalizer `drop` in the scope held by `slot`.
+/** Allocates `size` bytes with finalizer `drop` in the scope held by `s`.
     The slot-targeted form of `Scope.malloc_finalized`, with the same lazy
     scope creation as `Scope.malloc_in`; the active scope is left alone.
-    Raises: `<bad-arg>` when `slot` or `drop` is NULL, `<size-limit>` when
+    Raises: `<bad-arg>` when `s` or `drop` is NULL, `<size-limit>` when
     the size overflows, or `<alloc-fail>` when allocation fails. Before
     `Error` initialization they terminate at the error floor.
 */
-void *Scope.malloc_finalized_in(
-  Scope *slot, size_t size, void (*drop)(void *)) {
+void *Scope.malloc_finalized_in(Scope *s, size_t size, void (*drop)(void *)) {
   _require_running();
   if (!drop) raise %(bad-arg);
-  return _malloc_in(slot, size, drop);
+  return _malloc_in(s, size, drop);
 }
 
 static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
@@ -198,28 +197,29 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
     _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
-  Scope scope = *slot;
   ScopeMetadata *meta = _data_malloc(
     sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
   meta.requested_size = size;
   meta.drop = drop;
   ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
+  _attach(*slot, alloc);
+  _record_allocation(size);
+  return $scope.alloc_ptr(alloc);
+}
+
+/* New blocks go first, so destruction reclaims the newest block first. */
+static void _attach(Scope scope, ScopeAlloc alloc) {
   alloc.next = scope.first;
   alloc.prev = $scope.tag_pointer(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
-  atomic_fetch_add(&scope_allocation_calls, 1);
-  _record_request(size);
-  _record_live_add(size);
-  return $scope.alloc_ptr(alloc);
 }
 
 // zeroed and copied allocation
 
 /** Allocates `count` objects of `size` bytes each, zeroed, in the active
-    scope.
-    The product is checked for overflow before anything is allocated, and the
-    bytes are set to zero; in every other respect this behaves like
+    scope. The product is checked for overflow before anything is allocated,
+    and the bytes are set to zero; in every other respect this behaves like
     `Scope.malloc`. A request that multiplies out to zero still returns a
     distinct pointer the scope owns, so it is not a failure signal.
     Raises: `<size-limit>` when the object count overflows, or `<alloc-fail>`
@@ -315,11 +315,9 @@ meta native void Scope.free(void *ptr) {
 
 /** Returns the `Scope` that currently owns `ptr`.
     `ptr` must be a live pointer returned by a `Scope` allocator. `Context`
-    uses
-    this to leave ancestor-owned objects where they are while moving results
-    out of its own `Scope` chain. Passing any other nonnull pointer is
-    undefined
-    behavior, matching `Scope.free` and `Scope.move`.
+    uses this to leave ancestor-owned objects where they are while moving
+    results out of its own `Scope` chain. Passing any other nonnull pointer is
+    undefined behavior, matching `Scope.free` and `Scope.move`.
 */
 Scope Scope.owner(void *ptr) {
   _require_running();
@@ -360,19 +358,9 @@ meta native void Scope.move(void *ptr, Scope *slot) {
   if (!ptr) return;
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
-  Scope scope = *slot;
   ScopeAlloc alloc = $scope.ptr_alloc(ptr);
-  ScopeAlloc next = alloc.next, prev = alloc.prev;
-  if ($scope.is_tagged(prev)) {
-    Scope owner = $scope.untag_pointer(prev);
-    owner.first = next;
-  }
-  else prev.next = next;
-  if (next) next.prev = prev;
-  alloc.next = scope.first;
-  alloc.prev = $scope.tag_pointer(scope);
-  if (scope.first) scope.first.prev = alloc;
-  scope.first = alloc;
+  _detach(alloc);
+  _attach(*slot, alloc);
 }
 
 /** Resizes one scope-owned allocation and returns the new pointer.
@@ -403,40 +391,46 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
     old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
   meta.requested_size = size;
   ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
-  replacement.next = next;
-  replacement.prev = prev;
-  if (next) next.prev = replacement;
-  if ($scope.is_tagged(prev)) {
-    Scope scope = $scope.untag_pointer(prev);
-    scope.first = replacement;
-  }
-  else prev.next = replacement;
-  atomic_fetch_add(&scope_reallocation_calls, 1);
-  _record_request(size);
-  if (size >= old_size) _record_live_add(size - old_size);
-  else _record_live_remove(old_size - size);
+  _relink(replacement, prev, next);
+  _record_resize(old_size, size);
   return $scope.alloc_ptr(replacement);
 }
 
-static void _free_alloc(ScopeAlloc old) {
-  ScopeAlloc next = old.next, prev = old.prev;
+static void _free_alloc(ScopeAlloc alloc) {
+  _detach(alloc);
+  _release_alloc(alloc);
+}
+
+static void _detach(ScopeAlloc alloc) {
+  ScopeAlloc next = alloc.next, prev = alloc.prev;
+  _point_to(prev, next);
+  if (next) next.prev = prev;
+}
+
+/* Puts `alloc` where a block between `prev` and `next` was. */
+static void _relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
+  alloc.next = next;
+  alloc.prev = prev;
+  if (next) next.prev = alloc;
+  _point_to(prev, alloc);
+}
+
+/* The link before a block is its owner's head when `prev` is the tagged
+   owner, and the preceding block's `next` otherwise. */
+static void _point_to(ScopeAlloc prev, ScopeAlloc alloc) {
   if ($scope.is_tagged(prev)) {
     Scope scope = $scope.untag_pointer(prev);
-    scope.first = next;
+    scope.first = alloc;
   }
-  else if (prev) prev.next = next;
-  if (next) next.prev = prev;
-  _release_alloc(old);
+  else prev.next = alloc;
 }
 
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
 static void _release_alloc(ScopeAlloc alloc) {
   ScopeMetadata *meta = $scope.alloc_meta(alloc);
-  size_t size = meta.requested_size;
   void (*drop)(void *) = meta.drop;
-  atomic_fetch_add(&scope_free_calls, 1);
-  _record_live_remove(size);
+  _record_free(meta.requested_size);
   if (drop) drop($scope.alloc_ptr(alloc));
   free(meta);
 }
@@ -739,7 +733,11 @@ static void _forget_chain_retains(Scope scope) {
         state.retains[i] = state.retains[--state.retain_count];
 }
 
-// scope names
+/* scope names
+
+   Named scopes share one registry, guarded by the metadata mutex. The
+   exit-time leak report lists each registered name with its allocation
+   count. */
 
 static ScopeName scope_names;
 
@@ -763,28 +761,21 @@ static void _register_name(Scope scope, const char *name) {
 
 static ScopeName _find_name(Scope scope) {
   _metadata_lock();
-  for (ScopeName node = scope_names; node; node = node.next)
-    if (node.scope == scope) {
-      _metadata_unlock();
-      return node;
-    }
+  ScopeName node = scope_names;
+  while (node && node.scope != scope) node = node.next;
   _metadata_unlock();
-  return NULL;
+  return node;
 }
 
 static void _unregister_name(Scope scope) {
   _metadata_lock();
   ScopeName *link = &scope_names;
-  while (*link) {
-    ScopeName node = *link;
-    if (node.scope == scope) {
-      *link = node.next;
-      _raw_free(node.name);
-      _raw_free(node);
-      _metadata_unlock();
-      return;
-    }
-    link = &node.next;
+  while (*link && (*link).scope != scope) link = &(*link).next;
+  ScopeName node = *link;
+  if (node) {
+    *link = node.next;
+    _raw_free(node.name);
+    _raw_free(node);
   }
   _metadata_unlock();
 }
@@ -831,7 +822,7 @@ static atomic_size_t scope_peak_live_requested_bytes;
     ```
 */
 ScopeStats Scope.stats(void) {
-  ScopeStats result = {
+  ScopeStats stats = {
     .reallocation_calls = atomic_load(&scope_reallocation_calls),
     .requested_bytes = atomic_load(&scope_requested_bytes),
     .largest_request = atomic_load(&scope_largest_request),
@@ -840,32 +831,50 @@ ScopeStats Scope.stats(void) {
       atomic_load(&scope_peak_live_requested_bytes)
   };
   do {
-    result.allocation_calls = atomic_load(&scope_allocation_calls);
-    result.free_calls = atomic_load(&scope_free_calls);
-  } while (result.free_calls > result.allocation_calls);
+    stats.allocation_calls = atomic_load(&scope_allocation_calls);
+    stats.free_calls = atomic_load(&scope_free_calls);
+  } while (stats.free_calls > stats.allocation_calls);
   do {
-    result.scope_creations = atomic_load(&scope_creations);
-    result.scope_destructions = atomic_load(&scope_destructions);
-  } while (result.scope_destructions > result.scope_creations);
-  result.live_allocations = result.allocation_calls - result.free_calls;
-  result.live_scopes = result.scope_creations - result.scope_destructions;
-  return result;
+    stats.scope_creations = atomic_load(&scope_creations);
+    stats.scope_destructions = atomic_load(&scope_destructions);
+  } while (stats.scope_destructions > stats.scope_creations);
+  stats.live_allocations = stats.allocation_calls - stats.free_calls;
+  stats.live_scopes = stats.scope_creations - stats.scope_destructions;
+  return stats;
+}
+
+static void _record_allocation(size_t size) {
+  atomic_fetch_add(&scope_allocation_calls, 1);
+  _record_request(size);
+  _record_live_add(size);
+}
+
+static void _record_resize(size_t old_size, size_t size) {
+  atomic_fetch_add(&scope_reallocation_calls, 1);
+  _record_request(size);
+  if (size >= old_size) _record_live_add(size - old_size);
+  else _record_live_remove(old_size - size);
+}
+
+static void _record_free(size_t size) {
+  atomic_fetch_add(&scope_free_calls, 1);
+  _record_live_remove(size);
 }
 
 static void _record_request(size_t size) {
   atomic_fetch_add_explicit(
     &scope_requested_bytes, size, memory_order_relaxed);
-  size_t old = atomic_load(&scope_largest_request);
-  while (size > old && !atomic_compare_exchange_weak(
-    &scope_largest_request, &old, size)) {}
+  size_t largest = atomic_load(&scope_largest_request);
+  while (size > largest && !atomic_compare_exchange_weak(
+    &scope_largest_request, &largest, size)) {}
 }
 
 static void _record_live_add(size_t size) {
   size_t live = atomic_fetch_add_explicit(
     &scope_live_requested_bytes, size, memory_order_relaxed) + size;
-  size_t old = atomic_load(&scope_peak_live_requested_bytes);
-  while (live > old && !atomic_compare_exchange_weak(
-    &scope_peak_live_requested_bytes, &old, live)) {}
+  size_t peak = atomic_load(&scope_peak_live_requested_bytes);
+  while (live > peak && !atomic_compare_exchange_weak(
+    &scope_peak_live_requested_bytes, &peak, live)) {}
 }
 
 static void _record_live_remove(size_t size) {
@@ -977,9 +986,8 @@ void Scope.shutdown_hook(void (*hook)(void)) {
 }
 
 /** Releases resources owned by `Scope`.
-    `Scope` groups managed allocations by lifetime; balanced
-    retain/release and push/pop boundaries remain caller
-    responsibilities.
+    `Scope` groups managed allocations by lifetime; balanced retain/release
+    and push/pop boundaries remain caller responsibilities.
 */
 void Scope_shutdown(void) {
   if (scope_state == <shutdown> || scope_state == <shutting>) return;
@@ -989,16 +997,9 @@ void Scope_shutdown(void) {
   }
   scope_state = <shutting>;
   /* Hooks close higher-level owners in reverse dependency order while Scope
-     allocations still work; one that registers another runs it next, still
-     newest first. Thread-local regions then disappear before leak reporting
-     reads the name registry, and shared thread state goes last. */
-  while (hook_count) {
-    void (*hook)(void) = hooks[--hook_count];
-    hook();
-  }
-  _raw_free(hooks);
-  hooks = NULL;
-  hook_count = hook_capacity = 0;
+     allocations still work. Thread-local regions then disappear before leak
+     reporting reads the name registry, and shared thread state goes last. */
+  _run_hooks();
   x2c_static_shutdown();
   x2c_scope_thread_release();
   _report_leaks();
@@ -1007,10 +1008,20 @@ void Scope_shutdown(void) {
   x2c_thread_state_release();
 }
 
-/** Destroys this thread's `Scope` chain and its push and retain stacks. It
-    runs
-    last in `x2c_thread_state_release` and repeats harmlessly; a thread that
-    never created a `Scope` has nothing to destroy.
+/* A hook that registers another runs it next, still newest first. */
+static void _run_hooks(void) {
+  while (hook_count) {
+    void (*hook)(void) = hooks[--hook_count];
+    hook();
+  }
+  _raw_free(hooks);
+  hooks = NULL;
+  hook_count = hook_capacity = 0;
+}
+
+/** Destroys this thread's `Scope` chain and its push and retain stacks.
+    It runs last in `x2c_thread_state_release` and repeats harmlessly; a
+    thread that never created a `Scope` has nothing to destroy.
 */
 void x2c_scope_thread_release(void) {
   ScopeThreadState state = &scope_thread;
