@@ -775,7 +775,7 @@ List Compiler_parse_match_row_argument(Compiler c){
 }
 
 static List _match_case(Compiler c){
-  Symbol peek = Compiler_peek(c, 0);  Token start = c -> token;  List pattern = NULL, types = NULL;  Compiler_next(c);  if(peek == 199882) pattern = _case_pattern(c, start, &(types));  else if(peek == 8938171176) pattern = _89;  else Compiler_report_error(c, 33658058, _189, c -> token, cons(_91, cons(String_var(c -> token -> text), NULL)));  Compiler_begin_match_arm(c, pattern, start, peek == 199882);  List body = _case_body(c, types);  return cons(List_var(pattern), cons(List_var(body), NULL));
+  Symbol peek = Compiler_peek(c, 0);  Token start = c -> token;  List pattern = NULL, types = NULL;  if(Compiler_test(c, 199882)) pattern = _case_pattern(c, start, &(types));  else if(Compiler_test(c, 8938171176)) pattern = _89;  else Compiler_report_error(c, 33658058, _189, c -> token, cons(_91, cons(String_var(c -> token -> text), NULL)));  Compiler_begin_match_arm(c, pattern, start, peek == 199882);  List body = _case_body(c, types);  return cons(List_var(pattern), cons(List_var(body), NULL));
 }
 
 List Compiler_typed_match_pattern(Compiler, List, List);
