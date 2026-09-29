@@ -206,7 +206,10 @@ int scan_float(char *s) => _float_tail(s, 1);
    or -1 when the required decimal exponent is malformed. */
 int scan_hexponent(char *s) => _exponent(s);
 
-// digits, exponents, and suffixes
+/* digits, exponents, and suffixes
+
+   The scanners of the parts after the digits return a part's length, or
+   -1 when it is malformed. A suffix must end at a token break. */
 
 static int _digits(char *s, int base) {
   int n = 0;

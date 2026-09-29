@@ -492,7 +492,7 @@ static void _apply_policy(ErrorThreadState state, ErrorRaise r) {
   else if (policy == <ignore>) _truncate(r.raised_at);
 }
 
-/* The fallback report of a `<log>` error that Logger did not render. */
+/* The `<log>` fallback when Logger did not render the error. */
 static void _report(Symbol code) {
   char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
   code.decode(spelling);
