@@ -43,11 +43,17 @@ int Iter_try_next(Iter iter, Var * out);
 
 Var Iter_next(Iter iter);
 
+Iter Iter_iter(Iter x, Iter dest);
+
 Iter range(int start, int end, int step, Iter iter);
+
+Iter Iter_map(Iter iter, Func func, Iter dest);
 
 Iter Iter_filter(Iter iter, Func func, Iter dest);
 
-Iter Iter_map(Iter iter, Func func, Iter dest);
+Iter Iter_scan(Iter iter, Var seed, Func fn, Iter dest);
+
+Iter Iter_accumulate(Iter iter, Var initial, Iter dest);
 
 Iter Iter_zip(Iter left, Iter right, Iter dest);
 
@@ -55,17 +61,13 @@ Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest);
 
 Iter Iter_map2(Iter left, Iter right, Func fn, Iter dest);
 
-Iter Iter_chain(Iter first, Iter second, Iter dest);
-
 Iter Iter_enumerate(Iter iter, int start, Iter dest);
 
-Iter Iter_repeat(Var value, int count, Iter dest);
+Iter Iter_chain(Iter first, Iter second, Iter dest);
 
 Iter Iter_head(Iter iter, int count, Iter dest);
 
-Iter Iter_accumulate(Iter iter, Var initial, Iter dest);
-
-Iter Iter_scan(Iter iter, Var seed, Func fn, Iter dest);
+Iter Iter_repeat(Var value, int count, Iter dest);
 
 Iter Iter_unique(Iter iter, Iter dest);
 
@@ -88,8 +90,6 @@ Var Iter_product(Iter iter);
 Var Iter_max(Iter iter);
 
 Var Iter_min(Iter iter);
-
-Iter Iter_iter(Iter x, Iter dest);
 
 
 #endif /* __GUARD_0xCC13178C__ */

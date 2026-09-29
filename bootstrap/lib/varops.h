@@ -36,9 +36,7 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs);
 
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs);
 
-int Var_fallback_truth(Var value);
-
-int Var_truth(Var value);
+Var Var_binary(Var lhs, Symbol op, Var rhs);
 
 Var Var_add(Var lhs, Var rhs);
 
@@ -54,7 +52,9 @@ Var Var_mod(Var lhs, Var rhs);
 
 Var Var_neg(Var value);
 
-Var Var_binary(Var lhs, Symbol op, Var rhs);
+int Var_truth(Var value);
+
+int Var_fallback_truth(Var value);
 
 Var Var_update(Var * lhs, Symbol op, Var rhs);
 

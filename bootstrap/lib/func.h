@@ -23,6 +23,8 @@ FuncArg;
 
 typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 
+Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
+
 static inline FuncArg FuncArg_value(Var value){
   return(FuncArg){
     .data.value = value
@@ -37,19 +39,19 @@ static inline FuncArg FuncArg_reference(const void * reference, List type){
   ;
 }
 
-List x2c_func_reference_type(Func function, unsigned argc, unsigned index);
+List x2c_func_reference_type(Func fn, unsigned argc, unsigned index);
 
 Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol want);
+
+void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i);
+
+_Noreturn FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source);
+
+Var x2c_func_record_result(const void * bytes, size_t size);
 
 void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want);
 
 void * x2c_func_declared_reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
-
-void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i);
-
-Var x2c_func_record_result(const void * bytes, size_t size);
-
-_Noreturn FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source);
 
 Func Func_new(FuncAdapter adapter, List signature);
 
@@ -60,8 +62,6 @@ Func Func_new_context(FuncAdapter adapter, List signature, const void * context,
 List Func_signature(Func function);
 
 const void * Func_context(Func function);
-
-Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
 
 Var Func_var(Func function);
 

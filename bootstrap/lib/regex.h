@@ -85,7 +85,7 @@ int RegexCapture_start(RegexCapture capture);
 
 int RegexCapture_end(RegexCapture capture);
 
-RegexCapture Var_regexcapture(Var value);
+RegexCapture Var_regexcapture(Var v);
 
 RegexMatch Var_regexmatch(Var value);
 

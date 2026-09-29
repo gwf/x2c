@@ -20,19 +20,19 @@ typedef struct X2CVarNumeric{
 }
 X2CVarNumeric;
 
-Symbol Var_integer_tag(int rank, int unsigned_value);
+Var Var_convert(Var value, Symbol target);
 
-unsigned long long Var_width_mask(int bits);
-
-long long Var_signed_from_bits(unsigned long long raw, int bits);
+int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
 
 void Var_numeric_decode(Var value, X2CVarNumeric * out);
 
 Var Var_integer_box(Symbol target, unsigned long long raw);
 
-int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
+Symbol Var_integer_tag(int rank, int unsigned_value);
 
-Var Var_convert(Var value, Symbol target);
+unsigned long long Var_width_mask(int bits);
+
+long long Var_signed_from_bits(unsigned long long raw, int bits);
 
 
 #endif /* __GUARD_0xFC215CA0__ */

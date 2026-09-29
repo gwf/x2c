@@ -10,11 +10,10 @@ static Var _2, _1, _0;
 
 static const int _LIMIT = 2000;
 
-static const int _CONTEXT = 3;
-
-typedef struct{
+typedef struct _Diff{
   Array old, new;
   List edits;
+  int lo, n, m;
 }
 _Diff;
 
@@ -22,17 +21,49 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void _emit(_Diff * d, Symbol kind, String line);
+static void _Diff_trim(_Diff * d);
 
-static int _same(_Diff * d, int i, int j);
+static void _Diff_replace(_Diff * d);
 
-static int _myers(_Diff * d, int lo, int old_hi, int new_hi);
+static void _Diff_emit(_Diff * d, Symbol kind, String line);
 
-static void _replace(_Diff * d, int lo, int old_hi, int new_hi);
+static int _Diff_same(_Diff * d, int i, int j);
+
+typedef int * _Trace;
+
+static int _Diff_myers(_Diff * d);
+
+static int _Diff_forward(_Diff * d, _Trace trace, int max);
+
+static int _Diff_snake(_Diff * d, int x, int k);
+
+static int _Trace_entry(_Trace trace, int step, int k);
+
+static int _Trace_at(_Trace trace, int step, int k);
+
+static int _inserted(int step, int k, int left, int right);
+
+static List _Trace_path(_Trace trace, int found, int n, int m);
+
+static List _diagonal(List path, int x, int y, int to_x, int to_y);
+
+static const int _CONTEXT = 3;
+
+typedef struct _Hunk{
+  int end, old_start, old_count, new_start, new_count;
+  List lines;
+}
+_Hunk;
 
 static Symbol _kind(Array edits, int at);
 
-static void _hunk(Buffer out, List lines, int old_start, int old_count, int new_start, int new_count);
+static _Hunk _hunk(Array edits, int at, int old_line, int new_line);
+
+static int _hunk_end(Array edits, int at);
+
+static char _mark(Symbol kind);
+
+static void _Hunk_write(_Hunk * h, Buffer out);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -61,10 +92,44 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(1248074);
-  _1 = Symbol_var(634596520);
-  _2 = Symbol_var(279719178);
+  _0 = Symbol_var(634596520);
+  _1 = Symbol_var(279719178);
+  _2 = Symbol_var(1248074);
   _3 = String_new("\n");
+}
+
+Array List_array(List);
+
+List String_split_lines(String, int);
+
+String Var_string(Var);
+
+Var Array_getindex(Array, int);
+
+List List_reverse(List);
+
+List Diff_lines(String old, String new){
+  if(! _init_guard_) _file_init_();
+  _Diff d ={
+    List_array(String_split_lines(old, 0)), List_array(String_split_lines(new, 0))
+  }
+  ;
+  _Diff_trim(&(d));
+  if(_Diff_myers(&(d)) < 0) _Diff_replace(&(d));
+  for(int i = d.lo + d.n;  i < Array_len(d.old);  i ++) _Diff_emit(&(d), 1248074, Var_string(Array_getindex(d.old, i)));
+  return List_reverse(d.edits);
+}
+
+static void _Diff_trim(_Diff * d){
+  int lo = 0, old_hi = Array_len(d -> old), new_hi = Array_len(d -> new);
+  for(;  lo < old_hi && lo < new_hi && _Diff_same(d, lo, lo);  lo ++) _Diff_emit(d, 1248074, Var_string(Array_getindex(d -> old, lo)));
+  while(old_hi > lo && new_hi > lo && _Diff_same(d, old_hi - 1, new_hi - 1)) old_hi --, new_hi --;
+  d -> lo = lo, d -> n = old_hi - lo, d -> m = new_hi - lo;
+}
+
+static void _Diff_replace(_Diff * d){
+  for(int i = d -> lo;  i < d -> lo + d -> n;  i ++) _Diff_emit(d, 279719178, Var_string(Array_getindex(d -> old, i)));
+  for(int j = d -> lo;  j < d -> lo + d -> m;  j ++) _Diff_emit(d, 634596520, Var_string(Array_getindex(d -> new, j)));
 }
 
 List cons(Var, List);
@@ -73,18 +138,14 @@ Var List_var(List);
 
 Var String_var(String);
 
-static void _emit(_Diff * d, Symbol kind, String line){
-  (* d).edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), (* d).edits);
+static void _Diff_emit(_Diff * d, Symbol kind, String line){
+  d -> edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), d -> edits);
 }
 
 int String_equal(String, String);
 
-String Var_string(Var);
-
-Var Array_getindex(Array, int);
-
-static int _same(_Diff * d, int i, int j){
-  return String_equal(Var_string(Array_getindex((* d).old, i)), Var_string(Array_getindex((* d).new, j)));
+static int _Diff_same(_Diff * d, int i, int j){
+  return String_equal(Var_string(Array_getindex(d -> old, i)), Var_string(Array_getindex(d -> new, j)));
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -93,18 +154,15 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-Var int_var(int);
-
 int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
 Var List_getindex(List, int);
 
-static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
-  int n = old_hi - lo, m = new_hi - lo;
-  int max = n + m < _LIMIT ? n + m : _LIMIT, found = - 1;
-  int * trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
+static int _Diff_myers(_Diff * d){
+  int max = d -> n + d -> m < _LIMIT ? d -> n + d -> m : _LIMIT;
+  _Trace trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -117,26 +175,7 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      for(int step = 0;  step <= max && found < 0;  step ++){
-        int * frontier = trace + step * step, * previous = frontier - 2 * step + 1;
-        for(int k = - step;  k <= step;  k += 2){
-          int x = 0;
-          if(step > 0){
-            int left = k > - step ? previous[k - 1 + step - 1] : - 1;
-            int right = k < step ? previous[k + 1 + step - 1] : - 1;
-            x = k == - step ||(k != step && left < right) ? right : left + 1;
-          }
-          int y = x - k;
-          while(x < n && y < m && _same(&((* d)), lo + x, lo + y)) x ++, y ++;
-          frontier[k + step] = x;
-          if(x >= n && y >= m){
-            found = step;
-            break;
-          }
-
-        }
-
-      }
+      int found = _Diff_forward(d, trace, max);
       if(found < 0){
         int _x2c_return_value_0 = - 1;
         {
@@ -145,31 +184,9 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
         }
 
       }
-      List path = NULL;
-      int x = n, y = m;
-      for(int step = found;  step > 0;  step --){
-        int * previous = trace +(step - 1) *(step - 1), k = x - y;
-        int left = k > - step ? previous[k - 1 + step - 1] : - 1;
-        int right = k < step ? previous[k + 1 + step - 1] : - 1;
-        int inserted = k == - step ||(k != step && left < right);
-        int prev_k = inserted ? k + 1 : k - 1;
-        int prev_x = inserted ? right : left, prev_y = prev_x - prev_k;
-        int mid_x = inserted ? prev_x : prev_x + 1;
-        int mid_y = inserted ? prev_y + 1 : prev_y;
-        while(x > mid_x && y > mid_y){
-          path = cons(List_var(cons(_0, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
-          x --, y --;
-        }
-        path = cons(List_var(inserted ? cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_2, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
-        x = prev_x, y = prev_y;
-      }
-      while(x > 0 && y > 0){
-        path = cons(List_var(cons(_0, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
-        x --, y --;
-      }
       {
         List step;
-        List _x2c_macro_object_0 = path;
+        List _x2c_macro_object_0 = _Trace_path(trace, found, d -> n, d -> m);
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -179,7 +196,7 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
             Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
             int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
             int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
-            _emit(&((* d)), kind, Var_string(kind == 634596520 ? Array_getindex((* d).new, lo + j) : Array_getindex((* d).old, lo + i)));
+            _Diff_emit(d, kind, Var_string(kind == 634596520 ? Array_getindex(d -> new, d -> lo + j) : Array_getindex(d -> old, d -> lo + i)));
           }
 
         }
@@ -200,66 +217,65 @@ static int _myers(_Diff * d, int lo, int old_hi, int new_hi){
 
 }
 
-static void _replace(_Diff * d, int lo, int old_hi, int new_hi){
-  for(int i = lo;  i < old_hi;  i ++) _emit(&((* d)), 279719178, Var_string(Array_getindex((* d).old, i)));
-  for(int j = lo;  j < new_hi;  j ++) _emit(&((* d)), 634596520, Var_string(Array_getindex((* d).new, j)));
+static int _Diff_forward(_Diff * d, _Trace trace, int max){
+  for(int step = 0;  step <= max;  step ++) for(int k = - step;  k <= step;  k += 2){
+    int x = _Diff_snake(d, _Trace_entry(trace, step, k), k);
+    trace[step * step + k + step] = x;
+    if(x >= d -> n && x - k >= d -> m) return step;
+  }
+  return - 1;
 }
 
-Var List_car(List);
-
-static Symbol _kind(Array edits, int at){
-  return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));
+static int _Diff_snake(_Diff * d, int x, int k){
+  int y = x - k;
+  while(x < d -> n && y < d -> m && _Diff_same(d, d -> lo + x, d -> lo + y)) x ++, y ++;
+  return x;
 }
 
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-Buffer Buffer_write(Buffer, const char *);
-
-static void _hunk(Buffer out, List lines, int old_start, int old_count, int new_start, int new_count){
-  Buffer_printf(out, "@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start, old_count, new_count ? new_start + 1 : new_start, new_count);
-  {
-    String line;
-    List _x2c_macro_object_1 = lines;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      line = Var_string(_x2c_macro_cursor_output_1);
-      Buffer_write(out, line);
-    }
-
-  }
-
+static int _Trace_entry(_Trace trace, int step, int k){
+  if(! step) return 0;
+  int left = _Trace_at(trace, step - 1, k - 1), right = _Trace_at(trace, step - 1, k + 1);
+  return _inserted(step, k, left, right) ? right : left + 1;
 }
 
-Array List_array(List);
+static int _Trace_at(_Trace trace, int step, int k){
+  return k < - step || k > step ? - 1 : trace[step * step + k + step];
+}
 
-List String_split_lines(String, int);
+static int _inserted(int step, int k, int left, int right){
+  return k == - step ||(k != step && left < right);
+}
 
-List List_reverse(List);
+Var int_var(int);
 
-List Diff_lines(String old, String new){
-  if(! _init_guard_) _file_init_();
-  _Diff d ={
-    List_array(String_split_lines(old, 0)), List_array(String_split_lines(new, 0))
+static List _Trace_path(_Trace trace, int found, int n, int m){
+  List path = NULL;
+  int x = n, y = m;
+  for(int step = found;  step > 0;  step --){
+    int k = x - y;
+    int left = _Trace_at(trace, step - 1, k - 1), right = _Trace_at(trace, step - 1, k + 1);
+    int inserted = _inserted(step, k, left, right);
+    int prev_k = inserted ? k + 1 : k - 1, prev_x = inserted ? right : left;
+    int prev_y = prev_x - prev_k;
+    int mid_x = inserted ? prev_x : prev_x + 1;
+    int mid_y = inserted ? prev_y + 1 : prev_y;
+    path = _diagonal(path, x, y, mid_x, mid_y);
+    path = cons(List_var(inserted ? cons(_0, cons(int_var(prev_x), cons(int_var(prev_y), NULL))) : cons(_1, cons(int_var(prev_x), cons(int_var(prev_y), NULL)))), path);
+    x = prev_x, y = prev_y;
   }
-  ;
-  int lo = 0, old_hi = Array_len(d.old), new_hi = Array_len(d.new);
-  while(lo < old_hi && lo < new_hi && _same(&(d), lo, lo)){
-    _emit(&(d), 1248074, Var_string(Array_getindex(d.old, lo)));
-    lo ++;
-  }
-  int tail = 0;
-  while(old_hi > lo && new_hi > lo && _same(&(d), old_hi - 1, new_hi - 1)) old_hi --, new_hi --, tail ++;
-  if(_myers(&(d), lo, old_hi, new_hi) < 0) _replace(&(d), lo, old_hi, new_hi);
-  for(int i = old_hi;  i < old_hi + tail;  i ++) _emit(&(d), 1248074, Var_string(Array_getindex(d.old, i)));
-  return List_reverse(d.edits);
+  return _diagonal(path, x, y, 0, 0);
+}
+
+static List _diagonal(List path, int x, int y, int to_x, int to_y){
+  for(;  x > to_x && y > to_y;  x --, y --) path = cons(List_var(cons(_2, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
+  return path;
 }
 
 Buffer Buffer_new(size_t);
 
 size_t Buffer_len(Buffer);
 
-String char_str(char);
+Buffer Buffer_printf(Buffer, const char *, ...);
 
 String Buffer_str(Buffer);
 
@@ -298,26 +314,11 @@ String Diff_unified(String old, String new, String old_name, String new_name){
               continue;
             }
             if(! Buffer_len(out)) Buffer_printf(out, "--- %s\n+++ %s\n", old_name, new_name);
-            int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
-            int old_start = old_line - lead, new_start = new_line - lead;
-            int end = at, quiet = 0;
-            while(end < count && quiet <= 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
-            if(quiet > _CONTEXT) end -= quiet - _CONTEXT;
-            List lines = NULL;
-            int old_count = 0, new_count = 0;
-            for(int i = start;  i < end;  i ++){
-              List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
-              Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
-              String text = Var_string(List_getindex(_x2c_destructure_1, 1));
-              char mark = kind == 1248074 ? ' ' : kind == 279719178 ? '-' : '+';
-              lines = cons(String_var(String_join(NULL, cons(String_var(char_str(mark)), cons(String_var(text), cons(String_var(_3), NULL))))), lines);
-              if(kind != 634596520) old_count ++;
-              if(kind != 279719178) new_count ++;
-            }
-            _hunk(out, List_reverse(lines), old_start, old_count, new_start, new_count);
-            old_line = old_start + old_count;
-            new_line = new_start + new_count;
-            at = end;
+            _Hunk h = _hunk(edits, at, old_line, new_line);
+            _Hunk_write(&(h), out);
+            at = h.end;
+            old_line = h.old_start + h.old_count;
+            new_line = h.new_start + h.new_count;
           }
           {
             String _x2c_return_value_2 = Buffer_str(out);
@@ -339,11 +340,69 @@ String Diff_unified(String old, String new, String old_name, String new_name){
 
 }
 
+Var List_car(List);
+
+static Symbol _kind(Array edits, int at){
+  return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));
+}
+
+String char_str(char);
+
+static _Hunk _hunk(Array edits, int at, int old_line, int new_line){
+  int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
+  _Hunk h ={
+    _hunk_end(edits, at), old_line - lead, 0, new_line - lead, 0
+  }
+  ;
+  for(int i = start;  i < h.end;  i ++){
+    List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
+    Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
+    String text = Var_string(List_getindex(_x2c_destructure_1, 1));
+    h.lines = cons(String_var(String_join(NULL, cons(String_var(char_str(_mark(kind))), cons(String_var(text), cons(String_var(_3), NULL))))), h.lines);
+    if(kind != 634596520) h.old_count ++;
+    if(kind != 279719178) h.new_count ++;
+  }
+  return h;
+}
+
+static int _hunk_end(Array edits, int at){
+  int count = Array_len(edits), end = at, quiet = 0;
+  while(end < count && quiet <= 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
+  if(quiet > _CONTEXT) end -= quiet - _CONTEXT;
+  return end;
+}
+
+static char _mark(Symbol kind){
+  switch(kind){
+    case 1248074 : return ' ';
+    case 279719178 : return '-';
+  }
+  return '+';
+}
+
+Buffer Buffer_write(Buffer, const char *);
+
+static void _Hunk_write(_Hunk * h, Buffer out){
+  Buffer_printf(out, "@@ -%d,%d +%d,%d @@\n", h -> old_count ? h -> old_start + 1 : h -> old_start, h -> old_count, h -> new_count ? h -> new_start + 1 : h -> new_start, h -> new_count);
+  {
+    String line;
+    List _x2c_macro_object_1 = List_reverse(h -> lines);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      line = Var_string(_x2c_macro_cursor_output_1);
+      Buffer_write(out, line);
+    }
+
+  }
+
+}
+
 void Scope_free(void *);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Scope_free((*(int * *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Scope_free((*(_Trace *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 void Buffer_cleanup(Buffer);

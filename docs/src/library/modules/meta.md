@@ -10,9 +10,8 @@ The compiler surface a `meta` function calls.
 | Function | Summary |
 | --- | --- |
 | [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
-| [`Macro_case_capture`](#Macro_case_capture) | Recognizes code built by `t` without a site; see `Macro_case_capture_at`. |
 | [`Macro_case_capture_at`](#Macro_case_capture_at) | Recognizes code built by `t` for the `case` whose site is `site`, which may be NULL, and publishes the captures under `names`. |
-| [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture` over the match subject. |
+| [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
 | [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
 | [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
 | [`type_base_suffix`](#type_base_suffix) | Returns the suffix of `type` that begins at its typedef name or base keyword, sharing `type`, or `NULL` when it has none. |
@@ -42,17 +41,7 @@ The compiler surface a `meta` function calls.
 Applies a macro value to code values. The result is a pending
 invocation; inserting it into a program expands and binds it there.
 
-Source: `lib/meta.x:175`
-
-<a id="Macro_case_capture"></a>
-#### Macro_case_capture
-
-`int Macro_case_capture( List code, Macro t, List names, MatchCaptureBuffer *published)`
-
-Recognizes code built by `t` without a site; see
-`Macro_case_capture_at`.
-
-Source: `lib/meta.x:609`
+Source: `lib/meta.x:402`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -64,7 +53,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:572`
+Source: `lib/meta.x:679`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -72,9 +61,9 @@ Source: `lib/meta.x:572`
 `List Macro_case_pattern(Macro t, List names)`
 
 The pattern a macro-valued `case` compiles to; the compiler lowers a
-call of this to `Macro_case_capture` over the match subject.
+call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/meta.x:615`
+Source: `lib/meta.x:672`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -84,7 +73,7 @@ Source: `lib/meta.x:615`
 Records the Macro values an anonymous macro captured where it was
 created, so applying it later applies the same children.
 
-Source: `lib/meta.x:150`
+Source: `lib/meta.x:397`
 
 <a id="Macro_pattern"></a>
 #### Macro_pattern
@@ -94,7 +83,7 @@ Source: `lib/meta.x:150`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/meta.x:312`
+Source: `lib/meta.x:460`
 
 #### type_base_suffix
 
@@ -103,7 +92,7 @@ Source: `lib/meta.x:312`
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:66`
+Source: `lib/meta.x:342`
 
 #### type_declaration_parts
 
@@ -113,7 +102,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:78`
+Source: `lib/meta.x:354`
 
 #### x2c_block_make
 
@@ -121,7 +110,7 @@ Source: `lib/meta.x:78`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:665`
+Source: `lib/meta.x:121`
 
 #### x2c_expr_call
 
@@ -130,7 +119,7 @@ Source: `lib/meta.x:665`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:639`
+Source: `lib/meta.x:95`
 
 #### x2c_expr_composite
 
@@ -139,7 +128,7 @@ Source: `lib/meta.x:639`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:644`
+Source: `lib/meta.x:100`
 
 #### x2c_expr_ident
 
@@ -148,7 +137,7 @@ Source: `lib/meta.x:644`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:625`
+Source: `lib/meta.x:81`
 
 #### x2c_expr_index
 
@@ -156,7 +145,7 @@ Source: `lib/meta.x:625`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:628`
+Source: `lib/meta.x:84`
 
 #### x2c_function_body
 
@@ -164,7 +153,7 @@ Source: `lib/meta.x:628`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:719`
+Source: `lib/meta.x:175`
 
 #### x2c_literal_int
 
@@ -172,7 +161,7 @@ Source: `lib/meta.x:719`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:122`
+Source: `lib/meta.x:65`
 
 #### x2c_literal_string
 
@@ -180,7 +169,7 @@ Source: `lib/meta.x:122`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:117`
+Source: `lib/meta.x:60`
 
 #### x2c_literal_symbol
 
@@ -188,7 +177,7 @@ Source: `lib/meta.x:117`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:126`
+Source: `lib/meta.x:69`
 
 #### x2c_parameters_arguments
 
@@ -198,7 +187,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:727`
+Source: `lib/meta.x:183`
 
 #### x2c_stmnt_make
 
@@ -206,7 +195,7 @@ Source: `lib/meta.x:727`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:659`
+Source: `lib/meta.x:115`
 
 #### x2c_stmnt_return
 
@@ -214,7 +203,7 @@ Source: `lib/meta.x:659`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:662`
+Source: `lib/meta.x:118`
 
 ### `Macro`
 
@@ -225,7 +214,7 @@ Source: `lib/meta.x:662`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/meta.x:238`
+Source: `lib/meta.x:433`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -238,7 +227,7 @@ base-scope binding. A macro value's free reference then recognizes only
 that binding; with void it recognizes any binding of its spelling. The
 compiler sets this for the length of each `meta` call.
 
-Source: `lib/meta.x:245`
+Source: `lib/meta.x:440`
 
 ## Public types
 
@@ -259,7 +248,7 @@ Source: `lib/meta.x:245`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:138`
+Source: `lib/meta.x:393`
 
 <a id="MacroCaseSite"></a>
 ### MacroCaseSite
@@ -271,7 +260,7 @@ process: the plan Match keeps, the slots of the macro's fixed locals, and
 where each binder reads its capture. The compiler emits one
 zero-initialized static site per `case`.
 
-Source: `lib/meta.x:560`
+Source: `lib/meta.x:663`
 
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
@@ -281,7 +270,7 @@ Source: `lib/meta.x:560`
 Records the machine slots that hold a macro's fixed locals, so a
 repeated slot compares those locals by identity during recognition.
 
-Source: `lib/meta.x:383`
+Source: `lib/meta.x:644`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
@@ -292,7 +281,7 @@ Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot
 in the `case`, which need not share the parameters' order.
 
-Source: `lib/meta.x:425`
+Source: `lib/meta.x:652`
 
 <a id="Source"></a>
 ### Source
@@ -303,7 +292,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:53`
+Source: `lib/meta.x:45`
 
 <a id="Type"></a>
 ### Type
@@ -314,37 +303,27 @@ A `meta` parameter declared `Type` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:48`
+Source: `lib/meta.x:40`
 
 ## Design notes
 
 A `meta` function runs inside the compiler, so it can ask the compiler
-questions and build syntax for it to bind. Those operations were
-reachable only from compile-time Lisp, under names like `x2c.ident` and
-`x2c.type.fields`, which made Lisp the authoring language for any macro
-whose implementation needed them. The declarations below name the same
-operations from x2c, so a macro's implementation is x2c. The compiler
-derives each Lisp name from the x2c one: `_` becomes `.`, a predicate
-`x2c_type_is_X` is `x2c.type.X?`, and `x2c_type_tag_name` and
-`x2c_type_reverse_name` keep the hyphen of `x2c.type.tag-name` and
-`x2c.type.reverse-name`.
+questions and build syntax for it to bind. This module declares those
+operations in x2c and implements the macro values a `meta` function
+applies and recognizes. Each operation's semantics and Lisp name are
+specified under "Compile-time Lisp and imports" in the language
+reference.
 
-Syntax builders have `meta` bodies shared by compile time and runtime.
-A `meta` prototype with no body names a compiler operation, which the
-compiler supplies from these declarations. A `meta` function that reaches
-one, directly or through another `meta` function, is therefore
-compile-time only, the compiler derives that and emits no runtime form
-for it, and a run-time call to it is diagnosed where it is written.
+A syntax builder's `meta` body is shared by compile time and run time.
+A bodyless `meta` prototype names an operation the compiler supplies
+from its declaration here. A `meta` function that reaches one, directly
+or through another `meta` function, is compile-time only: the compiler
+emits no run-time form for it and diagnoses a run-time call where it is
+written.
 
 This module is not part of the implicit prelude. Include it where the
 `meta` functions are parsed: a `.xmacro` borrows the consuming unit's
 symbol table, so the unit that imports it includes this file.
-
-The declarations below are the signatures. Each operation's semantics are
-those of the compile-time Lisp operation of the same name, specified under
-"Compile-time Lisp and imports" in the language reference, which also gives
-the naming rule and the answers whose shape differs.
-See `plans/archive/meta-functions.md`.
 
 ## Tests and examples
 

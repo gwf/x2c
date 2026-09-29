@@ -14,30 +14,10 @@ typedef struct Block{
 }
 * Block;
 
-Block Block_new(size_t width);
-
-Bytes Bytes_new(size_t width);
-
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;
   unsigned char * data = bytes;
   return *((Block *)(data - sizeof(Block)));
-}
-
-void Block_reserve(Block block, size_t minimum);
-
-static inline Bytes Bytes_reserve(Bytes bytes, size_t minimum){
-  Block block = Bytes_block(bytes);
-  Block_reserve(block, minimum);
-  return block -> bytes;
-}
-
-static inline void Block_truncate(Block block, size_t length){
-  if(block != NULL && length < block -> length) block -> length = length;
-}
-
-static inline void Block_clear(Block block){
-  if(block != NULL) block -> length = 0;
 }
 
 void Block_append(Block b, const void * source, size_t count);
@@ -56,6 +36,40 @@ static inline Bytes Bytes_append_fill(Bytes bytes, const void * element, size_t 
   return block -> bytes;
 }
 
+static inline void Block_push(Block block, const void * source){
+  Block_append(block, source, 1);
+}
+
+static inline Bytes Bytes_push(Bytes bytes, const void * source){
+  return Bytes_append(bytes, source, 1);
+}
+
+void Block_reserve(Block block, size_t minimum);
+
+static inline Bytes Bytes_reserve(Bytes bytes, size_t minimum){
+  Block block = Bytes_block(bytes);
+  Block_reserve(block, minimum);
+  return block -> bytes;
+}
+
+static inline size_t Block_len(Block b){
+  return b != NULL ? b -> length : 0;
+}
+
+static inline size_t Block_capacity(Block b){
+  return b != NULL ? b -> cap : 0;
+}
+
+int Block_truth(Block block);
+
+static inline void Block_truncate(Block block, size_t length){
+  if(block != NULL && length < block -> length) block -> length = length;
+}
+
+static inline void Block_clear(Block block){
+  if(block != NULL) block -> length = 0;
+}
+
 static inline int Block_try_pop(Block b, void * out){
   if(b == NULL || ! b -> length) return 0;
   size_t index = b -> length - 1;
@@ -68,31 +82,17 @@ static inline int Bytes_try_pop(Bytes bytes, void * out){
   return Block_try_pop(Bytes_block(bytes), out);
 }
 
-static inline void Block_push(Block block, const void * source){
-  Block_append(block, source, 1);
-}
-
-static inline Bytes Bytes_push(Bytes bytes, const void * source){
-  return Bytes_append(bytes, source, 1);
-}
-
 static inline void Block_pop(Block block){
   Block_try_pop(block, NULL);
 }
 
-void Block_free(Block block);
+Block Block_new(size_t width);
+
+Bytes Bytes_new(size_t width);
+
+void Block_free(Block b);
 
 void Block_move_to(Block block, Scope * scope);
-
-static inline size_t Block_len(Block b){
-  return b != NULL ? b -> length : 0;
-}
-
-int Block_truth(Block block);
-
-static inline size_t Block_capacity(Block b){
-  return b != NULL ? b -> cap : 0;
-}
 
 void Block_cleanup(Block value);
 

@@ -21,7 +21,7 @@ Regular expressions over the bytes of a String.
 | [`Regex.replace_all`](#Regex.replace_all) | Returns `subject` with every match of `regex` replaced, expanding `replacement` as `replace` does. |
 | [`Regex.replace_fn`](#Regex.replace_fn) | Returns `subject` with every match of `regex` replaced by what `fn` returns for its `RegexMatch`, inserted as is. |
 | [`Regex.split`](#Regex.split) | Returns the text of `subject` between the matches of `regex`, keeping an empty field where two matches touch or a match sits at either end. |
-| [`RegexCapture.end`](#RegexCapture.end) | Returns the byte offset just past the capture, or -1. |
+| [`RegexCapture.end`](#RegexCapture.end) | Returns the byte offset after the capture, or -1. |
 | [`RegexCapture.index`](#RegexCapture.index) | Returns the capture number, with 0 for the whole match. |
 | [`RegexCapture.matched`](#RegexCapture.matched) | Reports whether the capture took part in the match. |
 | [`RegexCapture.name`](#RegexCapture.name) | Returns the capture's name, or NULL. |
@@ -41,7 +41,7 @@ Regular expressions over the bytes of a String.
 
 Returns the number of capturing groups in `regex`.
 
-Source: `lib/regex.x:627`
+Source: `lib/regex.x:701`
 
 <a id="Regex.capture_names"></a>
 #### Regex.capture_names
@@ -51,7 +51,7 @@ Source: `lib/regex.x:627`
 Returns the names of the capturing groups of `regex` in capture order,
 with NULL for a group without a name.
 
-Source: `lib/regex.x:632`
+Source: `lib/regex.x:706`
 
 <a id="Regex.compile"></a>
 #### Regex.compile
@@ -63,7 +63,7 @@ Compiles `pattern` and returns the `Regex`, owned by the current scope.
 **Raises:** `<bad-arg>` with `why`, the `pattern`, and the byte `offset`
 of the problem when the pattern does not parse.
 
-Source: `lib/regex.x:621`
+Source: `lib/regex.x:695`
 
 <a id="Regex.escape"></a>
 #### Regex.escape
@@ -73,7 +73,7 @@ Source: `lib/regex.x:621`
 Returns `literal` with every ASCII byte that is not a letter, digit, or
 underscore escaped, so that it matches itself inside a pattern.
 
-Source: `lib/regex.x:637`
+Source: `lib/regex.x:711`
 
 <a id="Regex.find_all"></a>
 #### Regex.find_all
@@ -83,7 +83,7 @@ Source: `lib/regex.x:637`
 Returns every non-overlapping match of `r` in `subject`, in order.
 An empty match advances one byte. No match returns an empty `List`.
 
-Source: `lib/regex.x:660`
+Source: `lib/regex.x:736`
 
 <a id="Regex.match"></a>
 #### Regex.match
@@ -92,7 +92,7 @@ Source: `lib/regex.x:660`
 
 Returns the first match of `r` in `subject`, or NULL.
 
-Source: `lib/regex.x:655`
+Source: `lib/regex.x:731`
 
 <a id="Regex.match_from"></a>
 #### Regex.match_from
@@ -102,7 +102,7 @@ Source: `lib/regex.x:655`
 Returns the first match of `r` in `subject` at or after the byte
 `offset`, or NULL. An offset beyond the end of `subject` finds nothing.
 
-Source: `lib/regex.x:651`
+Source: `lib/regex.x:727`
 
 <a id="Regex.pattern"></a>
 #### Regex.pattern
@@ -111,7 +111,7 @@ Source: `lib/regex.x:651`
 
 Returns the text `regex` was compiled from.
 
-Source: `lib/regex.x:624`
+Source: `lib/regex.x:698`
 
 <a id="Regex.replace"></a>
 #### Regex.replace
@@ -122,7 +122,7 @@ Returns `subject` with the first match of `regex` replaced. In
 `replacement`, `$0` through `$9` and `${name}` insert a capture and `$$`
 is a dollar sign.
 
-Source: `lib/regex.x:686`
+Source: `lib/regex.x:762`
 
 <a id="Regex.replace_all"></a>
 #### Regex.replace_all
@@ -132,7 +132,7 @@ Source: `lib/regex.x:686`
 Returns `subject` with every match of `regex` replaced, expanding
 `replacement` as `replace` does.
 
-Source: `lib/regex.x:692`
+Source: `lib/regex.x:768`
 
 <a id="Regex.replace_fn"></a>
 #### Regex.replace_fn
@@ -144,7 +144,7 @@ returns for its `RegexMatch`, inserted as is.
 
 **Raises:** whatever `fn` raises.
 
-Source: `lib/regex.x:699`
+Source: `lib/regex.x:775`
 
 <a id="Regex.split"></a>
 #### Regex.split
@@ -154,7 +154,7 @@ Source: `lib/regex.x:699`
 Returns the text of `subject` between the matches of `regex`, keeping
 an empty field where two matches touch or a match sits at either end.
 
-Source: `lib/regex.x:671`
+Source: `lib/regex.x:747`
 
 ### `RegexCapture`
 
@@ -163,9 +163,9 @@ Source: `lib/regex.x:671`
 
 `int RegexCapture.end(RegexCapture capture)`
 
-Returns the byte offset just past the capture, or -1.
+Returns the byte offset after the capture, or -1.
 
-Source: `lib/regex.x:739`
+Source: `lib/regex.x:817`
 
 <a id="RegexCapture.index"></a>
 #### RegexCapture.index
@@ -174,7 +174,7 @@ Source: `lib/regex.x:739`
 
 Returns the capture number, with 0 for the whole match.
 
-Source: `lib/regex.x:724`
+Source: `lib/regex.x:802`
 
 <a id="RegexCapture.matched"></a>
 #### RegexCapture.matched
@@ -183,7 +183,7 @@ Source: `lib/regex.x:724`
 
 Reports whether the capture took part in the match.
 
-Source: `lib/regex.x:730`
+Source: `lib/regex.x:808`
 
 <a id="RegexCapture.name"></a>
 #### RegexCapture.name
@@ -192,7 +192,7 @@ Source: `lib/regex.x:730`
 
 Returns the capture's name, or NULL.
 
-Source: `lib/regex.x:727`
+Source: `lib/regex.x:805`
 
 <a id="RegexCapture.start"></a>
 #### RegexCapture.start
@@ -201,7 +201,7 @@ Source: `lib/regex.x:727`
 
 Returns the byte offset where the capture starts, or -1.
 
-Source: `lib/regex.x:736`
+Source: `lib/regex.x:814`
 
 <a id="RegexCapture.text"></a>
 #### RegexCapture.text
@@ -210,7 +210,7 @@ Source: `lib/regex.x:736`
 
 Returns the matched text, or NULL for a capture that did not take part.
 
-Source: `lib/regex.x:733`
+Source: `lib/regex.x:811`
 
 ### `RegexMatch`
 
@@ -222,7 +222,7 @@ Source: `lib/regex.x:733`
 Returns the capture of `found` selected by `key`: a capture number, or
 a name as a `Symbol` or `String`. NULL when there is no such capture.
 
-Source: `lib/regex.x:705`
+Source: `lib/regex.x:783`
 
 <a id="RegexMatch.getindex"></a>
 #### RegexMatch.getindex
@@ -232,18 +232,18 @@ Source: `lib/regex.x:705`
 Returns the text of the capture selected by `key`, or NULL when the
 capture does not exist or did not take part in the match.
 
-Source: `lib/regex.x:718`
+Source: `lib/regex.x:796`
 
 ### `Var`
 
 <a id="Var.regexcapture"></a>
 #### Var.regexcapture
 
-`meta native RegexCapture Var.regexcapture(Var value)`
+`meta native RegexCapture Var.regexcapture(Var v)`
 
 Reads a `RegexCapture` back out of a `Var`, as `foreach` does.
 
-Source: `lib/regex.x:742`
+Source: `lib/regex.x:820`
 
 <a id="Var.regexmatch"></a>
 #### Var.regexmatch
@@ -252,7 +252,7 @@ Source: `lib/regex.x:742`
 
 Reads a `RegexMatch` back out of a `Var`, as `foreach` does.
 
-Source: `lib/regex.x:746`
+Source: `lib/regex.x:823`
 
 ## Public types
 
@@ -272,7 +272,7 @@ frees it. A `RegexMatch` is the `List` of `RegexCapture`s of one match,
 indexed by capture number or name; each capture is the `List` of its
 index, name, whether it took part, text, start, and end.
 
-Source: `lib/regex.x:27`
+Source: `lib/regex.x:23`
 
 <a id="RegexCapture"></a>
 ### RegexCapture
@@ -281,7 +281,7 @@ Source: `lib/regex.x:27`
 
 One capture of a match: index, name, matched, text, start, end.
 
-Source: `lib/regex.x:38`
+Source: `lib/regex.x:34`
 
 <a id="RegexMatch"></a>
 ### RegexMatch
@@ -290,7 +290,7 @@ Source: `lib/regex.x:38`
 
 The captures of one match, with the whole match at index 0.
 
-Source: `lib/regex.x:41`
+Source: `lib/regex.x:37`
 
 ## Design notes
 
@@ -298,12 +298,8 @@ A Regex is a compiled pattern, owned by the scope that compiled it. A
 RegexMatch and a RegexCapture are immutable Lists, so their Strings and
 offsets stay valid after the next match. Matching backtracks over a
 small node tree; a repeated single byte class runs as a loop, so the
-common `.*` and `\w+` forms do not recurse per byte.
-
-The syntax is the byte-oriented subset described in the book's
-"Patterns" section: sets, `.`, anchors, word boundaries, greedy and
-lazy repetition, alternation, numbered and named captures, and the
-leading `(?i)`, `(?m)`, and `(?s)` flags.
+common `.*` and `\w+` forms do not recurse per byte. The syntax is the
+byte-oriented subset in the book's "Patterns" section.
 
 ## Tests and examples
 

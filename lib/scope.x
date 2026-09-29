@@ -2,20 +2,16 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `Scope` owns groups of individually managed allocations. Callers may use
+    A `Scope` owns a group of individually managed allocations. Callers use
     the active scope, target an explicit scope slot, or retain and release a
-    nested lifetime. Explicit free and realloc remain valid for allocations
-    returned by `Scope.malloc`, `Scope.calloc`, and `Scope.memdup`, and
-    `Scope.move`
-    relinks one allocation onto another scope without copying it.
+    nested lifetime. Any block can still be freed, resized, or relinked onto
+    another scope without copying.
 
-    `Scope.initialize` owns runtime initialization, while public operations
-    also
-    initialize safely when called before the runtime aggregator. Shutdown
-    hooks run in reverse registration order, after which the module enters a
-    terminal state.  `Scope.stats` remains available after shutdown so callers
-    and tests can inspect the final state.
- */
+    Public operations initialize the module on first use, so they are safe
+    before the runtime calls `Scope.initialize`. Shutdown runs its hooks
+    newest first and leaves the module terminal; `Scope.stats` still reports
+    the final counts.
+*/
 
 #pragma once
 $(import "error-macros.xmacro")
@@ -62,6 +58,8 @@ protocol Cleanup(Scope);
 #include <stdio.h>
 #include <string.h>
 
+// block layout
+
 /* Native allocation alignment leaves the low pointer bit clear. At a list
    head, `prev` stores the owning Scope with that bit set; every other `prev`
    is the untagged preceding ScopeAlloc. Free, move, realloc, and owner lookup
@@ -93,6 +91,12 @@ _Static_assert(
 macro Expression $scope.alloc_meta(Expr $a) =>
   (((ScopeMetadata *) ($a)) - 1);
 
+/* scope records
+
+   Each thread owns its root scope, the slot that allocation charges, the
+   stack of pushed slots, and one record per open retain. Named scopes share
+   one process-wide registry. */
+
 typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
 } *ScopeName;
@@ -115,200 +119,75 @@ static ScopeThreadState _thread(void) {
   return state;
 }
 
-static Symbol scope_state = <uninit>;
-static void(**hooks)(void);
-static int hook_count, hook_capacity;
-static ScopeName scope_names;
-static atomic_size_t scope_allocation_calls, scope_reallocation_calls;
-static atomic_size_t scope_free_calls, scope_creations, scope_destructions;
-static atomic_size_t scope_requested_bytes, scope_largest_request;
-static atomic_size_t scope_live_requested_bytes;
-static atomic_size_t scope_peak_live_requested_bytes;
-static atomic_size_t raw_alloc_count, raw_free_count;
-static pthread_mutex_t scope_metadata_mutex =
-  (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
+// allocation
 
-static void _metadata_lock(void) {
-  if (pthread_mutex_lock(&scope_metadata_mutex))
-    _raw_fatal("could not lock metadata");
+/** Allocates `size` uninitialized bytes in the active scope.
+    The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
+    ends its life early, `Scope.move` reassigns its owner, and
+    `Scope.release` or `Scope.destroy` reclaims whatever is left. The active
+    scope at the time of allocation owns the result; a later retain or push
+    does not move it.
+    Raises: `<size-limit>` when the size would overflow the allocation header,
+    or `<alloc-fail>` when the underlying allocation fails. Before `Error`
+    initialization they terminate at the error floor.
+*/
+meta native void *Scope.malloc(size_t size) {
+  _require_running();
+  return _malloc_in(_thread().active, size, NULL);
 }
 
-static void _metadata_unlock(void) {
-  if (pthread_mutex_unlock(&scope_metadata_mutex))
-    _raw_fatal("could not unlock metadata");
+/** Allocates `size` uninitialized bytes in the active scope with a finalizer.
+    `drop` runs exactly once with the block's pointer when the block is
+    reclaimed: by `Scope.free`, by `Scope.realloc` to size zero, by the
+    release or destruction of its scope, or by thread and process shutdown.
+    The finalizer follows the block through `Scope.move` and survives
+    `Scope.realloc`, which passes `drop` the resized pointer. Blocks are
+    reclaimed most recent first, so a finalizer sees older blocks still live.
+
+    A wrapper for a native handle allocates its record this way and releases
+    the handle from `drop`; an explicit early release that clears the field
+    leaves nothing for the finalizer to do. `drop` runs on the thread that
+    reclaims the block, with the block already unlinked, so it must not free
+    or move the block itself. It must not raise. It may allocate into other
+    scopes, and into the dying scope only for scratch the same destruction
+    reclaims.
+    Raises: `<bad-arg>` when `drop` is NULL, `<size-limit>` when the size
+    would overflow the allocation header, or `<alloc-fail>` when the
+    underlying allocation fails. Before `Error` initialization they
+    terminate at the error floor.
+*/
+void *Scope.malloc_finalized(size_t size, void (*drop)(void *)) {
+  _require_running();
+  if (!drop) raise %(bad-arg);
+  return _malloc_in(_thread().active, size, drop);
 }
 
-static void _record_request(size_t size) {
-  atomic_fetch_add_explicit(
-    &scope_requested_bytes, size, memory_order_relaxed);
-  size_t old = atomic_load(&scope_largest_request);
-  while (size > old && !atomic_compare_exchange_weak(
-    &scope_largest_request, &old, size)) {}
+/** Allocates `size` uninitialized bytes in the scope held by `slot`.
+    `slot` is the address of a `Scope` variable; if it holds NULL, a fresh
+    unnamed scope is created and stored there. Targeting a slot does not
+    touch the active-scope stack, so an intervening `Scope.retain` or
+    `Scope.push` cannot redirect the allocation. Pass `Scope.top()` to name
+    the active slot explicitly.
+    Raises: `<bad-arg>` when `slot` is NULL, `<size-limit>` when the size
+    overflows, or `<alloc-fail>` when allocation fails. Before `Error`
+    initialization they terminate at the error floor.
+*/
+void *Scope.malloc_in(Scope *slot, size_t size) {
+  _require_running();
+  return _malloc_in(slot, size, NULL);
 }
 
-static void _record_live_add(size_t size) {
-  size_t live = atomic_fetch_add_explicit(
-    &scope_live_requested_bytes, size, memory_order_relaxed) + size;
-  size_t old = atomic_load(&scope_peak_live_requested_bytes);
-  while (live > old && !atomic_compare_exchange_weak(
-    &scope_peak_live_requested_bytes, &old, live)) {}
-}
-
-static void _record_live_remove(size_t size) {
-  atomic_fetch_sub_explicit(
-    &scope_live_requested_bytes, size, memory_order_relaxed);
-}
-
-static void _raw_fatal(const char *message) {
-  fprintf(stderr, "Scope: %s\n", message);
-  abort();
-}
-
-static void *_raw_malloc(size_t size) {
-  void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
-  atomic_fetch_add(&raw_alloc_count, 1);
-  return ptr;
-}
-
-static void _raw_free(void *ptr) {
-  if (!ptr) return;
-  atomic_fetch_add(&raw_free_count, 1);
-  free(ptr);
-}
-
-static void *_raw_realloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
-  return result;
-}
-
-/* Returns `items` with room for one element past `count`, starting at 16 and
-   doubling `capacity` when full. */
-static void *_raw_grow(void *items, int count, int &capacity, size_t size) {
-  if (!items) {
-    items = _raw_malloc(16 * size);
-    capacity = 16;
-  }
-  else if (count == capacity) {
-    if (capacity > INT_MAX / 2) raise %(size-limit);
-    items = _raw_realloc(items, capacity * 2 * size);
-    capacity *= 2;
-  }
-  return items;
-}
-
-static void _initialize(void) {
-  if (scope_state == <running> || scope_state == <shutting>) return;
-  if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
-  ScopeThreadState state = _thread();
-  state.active = &state.root;
-  scope_state = <running>;
-  if (atexit(Scope_shutdown))
-    _raw_fatal("could not register shutdown handler");
-}
-
-static void _ensure_running(void) {
-  if (scope_state == <uninit>) _initialize();
-  else if (scope_state == <shutdown>)
-    _raw_fatal("operation attempted after shutdown");
-}
-
-static void _require_running(void) {
-  if (scope_state != <running>) _ensure_running();
-}
-
-static void *_data_malloc(size_t size) {
-  void *ptr = malloc(size);
-  if (!ptr) raise %(alloc-fail);
-  return ptr;
-}
-
-static void *_data_realloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
-  return result;
-}
-
-static ScopeName _find_name(Scope scope) {
-  _metadata_lock();
-  for (ScopeName node = scope_names; node; node = node.next)
-    if (node.scope == scope) {
-      _metadata_unlock();
-      return node;
-    }
-  _metadata_unlock();
-  return NULL;
-}
-
-static void _register_name(Scope scope, const char *name) {
-  if (!name) return;
-  size_t length = strlen(name);
-  if (length == SIZE_MAX) raise %(size-limit);
-  ScopeName node = _raw_malloc(sizeof(struct ScopeName));
-  char *copy = _raw_malloc(length + 1);
-  memcpy(copy, name, length + 1);
-  node.scope = scope;
-  node.name = copy;
-  _metadata_lock();
-  node.next = scope_names;
-  scope_names = node;
-  _metadata_unlock();
-}
-
-static void _unregister_name(Scope scope) {
-  _metadata_lock();
-  ScopeName *link = &scope_names;
-  while (*link) {
-    ScopeName node = *link;
-    if (node.scope == scope) {
-      *link = node.next;
-      _raw_free(node.name);
-      _raw_free(node);
-      _metadata_unlock();
-      return;
-    }
-    link = &node.next;
-  }
-  _metadata_unlock();
-}
-
-static void _record_retain(Scope scope, Scope *slot) {
-  ScopeThreadState state = _thread();
-  state.retains = _raw_grow(
-    state.retains, state.retain_count, state.retain_capacity,
-    sizeof(*state.retains));
-  state.retains[state.retain_count++] =
-    (ScopeRetain) { .scope = scope, .slot = slot };
-}
-
-static int _forget_retain(Scope scope, Scope *slot) {
-  ScopeThreadState state = _thread();
-  for (int i = state.retain_count - 1; i >= 0; i--) {
-    if (state.retains[i].scope != scope ||
-        state.retains[i].slot != slot) continue;
-    state.retains[i] = state.retains[--state.retain_count];
-    return 1;
-  }
-  return 0;
-}
-
-static void _forget_chain_retains(Scope scope) {
-  ScopeThreadState state = _thread();
-  for (Scope cur = scope; cur; cur = cur.down)
-    for (int i = state.retain_count - 1; i >= 0; i--)
-      if (state.retains[i].scope == cur)
-        state.retains[i] = state.retains[--state.retain_count];
-}
-
-static Scope _new_scope(const char *name) {
-  Scope scope = _data_malloc(sizeof(struct Scope));
-  scope.up = scope.down = NULL;
-  scope.first = NULL;
-  _register_name(scope, name);
-  atomic_fetch_add(&scope_creations, 1);
-  return scope;
+/** Allocates `size` bytes with finalizer `drop` in the scope held by `s`.
+    The slot-targeted form of `Scope.malloc_finalized`, with the same lazy
+    scope creation as `Scope.malloc_in`; the active scope is left alone.
+    Raises: `<bad-arg>` when `s` or `drop` is NULL, `<size-limit>` when
+    the size overflows, or `<alloc-fail>` when allocation fails. Before
+    `Error` initialization they terminate at the error floor.
+*/
+void *Scope.malloc_finalized_in(Scope *s, size_t size, void (*drop)(void *)) {
+  _require_running();
+  if (!drop) raise %(bad-arg);
+  return _malloc_in(s, size, drop);
 }
 
 static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
@@ -318,20 +197,82 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
     _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
-  Scope scope = *slot;
   ScopeMetadata *meta = _data_malloc(
     sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
   meta.requested_size = size;
   meta.drop = drop;
   ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
+  _attach(*slot, alloc);
+  _record_allocation(size);
+  return $scope.alloc_ptr(alloc);
+}
+
+/* New blocks go first, so destruction reclaims the newest block first. */
+static void _attach(Scope scope, ScopeAlloc alloc) {
   alloc.next = scope.first;
   alloc.prev = $scope.tag_pointer(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
-  atomic_fetch_add(&scope_allocation_calls, 1);
-  _record_request(size);
-  _record_live_add(size);
-  return $scope.alloc_ptr(alloc);
+}
+
+// zeroed and copied allocation
+
+/** Allocates `count` objects of `size` bytes each, zeroed, in the active
+    scope. The product is checked for overflow before anything is allocated,
+    and the bytes are set to zero; in every other respect this behaves like
+    `Scope.malloc`. A request that multiplies out to zero still returns a
+    distinct pointer the scope owns, so it is not a failure signal.
+    Raises: `<size-limit>` when the object count overflows, or `<alloc-fail>`
+    when allocation fails. Before `Error` initialization they terminate at the
+    error floor.
+*/
+meta native void *Scope.calloc(size_t count, size_t size) {
+  _require_running();
+  return _calloc_in(_thread().active, count, size);
+}
+
+/** Allocates `count` zeroed objects of `size` bytes in the scope in `slot`.
+    The slot-targeted form of `Scope.calloc`, with the same overflow check and
+    the same lazy scope creation as `Scope.malloc_in`; the active scope is left
+    alone.
+    Raises: `<bad-arg>` when `slot` is NULL, `<size-limit>` when the object
+    count overflows, or `<alloc-fail>` when allocation fails. Before `Error`
+    initialization they terminate at the error floor.
+*/
+void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
+  _require_running();
+  return _calloc_in(slot, count, size);
+}
+
+/** Copies `size` bytes from `ptr` into a new allocation in the active scope.
+    The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
+    release that ends the region. Nothing about the source is remembered, so
+    duplicating a C string means copying its terminator too:
+    `Scope.memdup(text, strlen(text) + 1)`.
+
+    A NULL `ptr` or a zero `size` returns NULL rather than an empty
+    allocation, so a duplicate of nothing is indistinguishable from failure;
+    check the arguments yourself when that distinction matters.
+    Raises: `<size-limit>` or `<alloc-fail>` from the underlying allocation.
+    A NULL `ptr` or zero `size` returns NULL without raising.
+*/
+meta native void *Scope.memdup(const void *ptr, size_t size) {
+  _require_running();
+  return _memdup_in(_thread().active, ptr, size);
+}
+
+/** Copies `size` bytes from `ptr` into the scope held by `slot`.
+    The slot-targeted form of `Scope.memdup`, with the same NULL-for-nothing
+    rule and the same lazy scope creation as `Scope.malloc_in`. It is the
+    usual way to hand a snapshot of caller data to a scope that outlives the
+    current region.
+    Raises: `<bad-arg>` when `slot` is NULL, or `<size-limit>` or
+    `<alloc-fail>` from the underlying allocation. A NULL `ptr` or zero
+    `size` returns NULL without raising.
+*/
+void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
+  _require_running();
+  return _memdup_in(slot, ptr, size);
 }
 
 static void *_calloc_in(Scope *slot, size_t count, size_t size) {
@@ -351,245 +292,150 @@ static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
   return copy;
 }
 
+// freeing, moving, and resizing
+
+/** Frees one scope-owned allocation before its scope ends.
+    `ptr` must be a pointer returned by `Scope.malloc`, `Scope.calloc`,
+    `Scope.memdup`, one of their `_in` forms, or `Scope.realloc`. It is
+    unlinked from whichever scope owns it now, which after a `Scope.move` may
+    not be the active one.
+
+    Shortening a lifetime this way is normal. Freeing anything else, such as a
+    stack address, an interned `String`, or a plain `malloc` result, is
+    undefined, as is freeing the same pointer twice. Nothing diagnoses
+    either.
+
+    A NULL `ptr` does nothing.
+*/
+meta native void Scope.free(void *ptr) {
+  _require_running();
+  if (!ptr) return;
+  _free_alloc($scope.ptr_alloc(ptr));
+}
+
+/** Returns the `Scope` that currently owns `ptr`.
+    `ptr` must be a live pointer returned by a `Scope` allocator. `Context`
+    uses this to leave ancestor-owned objects where they are while moving
+    results out of its own `Scope` chain. Passing any other nonnull pointer is
+    undefined behavior, matching `Scope.free` and `Scope.move`.
+*/
+Scope Scope.owner(void *ptr) {
+  _require_running();
+  if (!ptr) return NULL;
+  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  while (alloc && !$scope.is_tagged(alloc.prev)) alloc = alloc.prev;
+  return alloc ? $scope.untag_pointer(alloc.prev) : NULL;
+}
+
+/** Relinks one allocation onto the scope held by `slot`.
+    The bytes are not copied and the pointer does not change; only ownership
+    moves, so a temporary region can compute one result that outlives it. If
+    `slot` holds NULL a fresh unnamed scope is created there, as the `_in`
+    allocators do.
+
+    ```x2c
+    ~int main(void) {
+    Scope keep = Scope.new_named("results");
+    Scope.retain();
+    char *text = Scope.memdup("survivor", 9);
+    Scope.move(text, &keep);
+    Scope.release();
+    puts(text);
+    Scope.destroy(keep);
+    ~  return 0;
+    ~}
+    ```
+
+    You do not need this for a `String`, a `List`, or a `Symbol`. Canonical
+    values already outlive the scope that was active when they were built.
+    Raises: `<bad-arg>` when `slot` is NULL, or `<alloc-fail>` when a new
+    destination scope cannot be allocated. These failures leave ownership
+    unchanged. A NULL `ptr` does nothing. Before `Error` initialization they
+    terminate at the error floor.
+*/
+meta native void Scope.move(void *ptr, Scope *slot) {
+  _require_running();
+  if (!ptr) return;
+  if (!slot) raise %(bad-arg);
+  if (!*slot) *slot = _new_scope(NULL);
+  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  _detach(alloc);
+  _attach(*slot, alloc);
+}
+
+/** Resizes one scope-owned allocation and returns the new pointer.
+    Ownership does not change: the allocation stays with the scope that
+    already held it, even if that is not the active one. Two edge cases follow
+    C's `realloc`: a NULL `ptr` allocates `size` bytes in the active scope, and
+    a `size` of zero frees the allocation and returns NULL. A NULL result is
+    not by itself a failure.
+
+    As with C, the old pointer must be treated as dead once a resize succeeds.
+    Raises: `<size-limit>` when the size overflows, or `<alloc-fail>` when
+    allocation fails. Before `Error` initialization these failures terminate at
+    the error floor.
+*/
+meta native void *Scope.realloc(void *ptr, size_t size) {
+  _require_running();
+  if (!ptr) return _malloc_in(_thread().active, size, NULL);
+  if (!size) {
+    _free_alloc($scope.ptr_alloc(ptr));
+    return NULL;
+  }
+  ScopeAlloc old = $scope.ptr_alloc(ptr), next = old.next, prev = old.prev;
+  ScopeMetadata *old_meta = $scope.alloc_meta(old);
+  size_t old_size = old_meta.requested_size;
+  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
+    raise %(size-limit);
+  ScopeMetadata *meta = _data_realloc(
+    old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
+  meta.requested_size = size;
+  ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
+  _relink(replacement, prev, next);
+  _record_resize(old_size, size);
+  return $scope.alloc_ptr(replacement);
+}
+
+static void _free_alloc(ScopeAlloc alloc) {
+  _detach(alloc);
+  _release_alloc(alloc);
+}
+
+static void _detach(ScopeAlloc alloc) {
+  ScopeAlloc next = alloc.next, prev = alloc.prev;
+  _point_to(prev, next);
+  if (next) next.prev = prev;
+}
+
+/* Puts `alloc` where a block between `prev` and `next` was. */
+static void _relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
+  alloc.next = next;
+  alloc.prev = prev;
+  if (next) next.prev = alloc;
+  _point_to(prev, alloc);
+}
+
+/* The link before a block is its owner's head when `prev` is the tagged
+   owner, and the preceding block's `next` otherwise. */
+static void _point_to(ScopeAlloc prev, ScopeAlloc alloc) {
+  if ($scope.is_tagged(prev)) {
+    Scope scope = $scope.untag_pointer(prev);
+    scope.first = alloc;
+  }
+  else prev.next = alloc;
+}
+
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
 static void _release_alloc(ScopeAlloc alloc) {
   ScopeMetadata *meta = $scope.alloc_meta(alloc);
-  size_t size = meta.requested_size;
   void (*drop)(void *) = meta.drop;
-  atomic_fetch_add(&scope_free_calls, 1);
-  _record_live_remove(size);
+  _record_free(meta.requested_size);
   if (drop) drop($scope.alloc_ptr(alloc));
   free(meta);
 }
 
-static void _free_alloc(ScopeAlloc old) {
-  ScopeAlloc next = old.next, prev = old.prev;
-  if ($scope.is_tagged(prev)) {
-    Scope scope = $scope.untag_pointer(prev);
-    scope.first = next;
-  }
-  else if (prev) prev.next = next;
-  if (next) next.prev = prev;
-  _release_alloc(old);
-}
-
-/* Popping the head keeps the list valid while a finalizer runs, so scratch
-   it allocates into the dying scope is reclaimed by the same loop. */
-static void _destroy_chain(Scope scope) {
-  while (scope) {
-    Scope down = scope.down;
-    ScopeAlloc alloc;
-    while ((alloc = scope.first)) {
-      scope.first = alloc.next;
-      if (scope.first) scope.first.prev = $scope.tag_pointer(scope);
-      _release_alloc(alloc);
-    }
-    _unregister_name(scope);
-    atomic_fetch_add(&scope_destructions, 1);
-    free(scope);
-    scope = down;
-  }
-}
-
-/** Destroys this thread's `Scope` chain and its push and retain stacks. It
-    runs
-    last in `x2c_thread_state_release` and repeats harmlessly; a thread that
-    never created a `Scope` has nothing to destroy.
-*/
-void x2c_scope_thread_release(void) {
-  ScopeThreadState state = &scope_thread;
-  if (state.root) _destroy_chain(state.root);
-  state.root = NULL;
-  _raw_free(state.stack);
-  state.stack = NULL;
-  state.stack_size = state.stack_capacity = 0;
-  _raw_free(state.retains);
-  state.retains = NULL;
-  state.retain_count = state.retain_capacity = 0;
-  state.active = &state.root;
-}
-
-static size_t _allocation_count(Scope scope) {
-  size_t count = 0;
-  for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
-       alloc = alloc.next)
-    count++;
-  return count;
-}
-
-static void _report_leaks(void) {
-  ScopeStats stats = Scope.stats();
-  if (!stats.live_scopes && !stats.live_allocations &&
-      atomic_load(&raw_alloc_count) == atomic_load(&raw_free_count))
-    return;
-  fprintf(stderr, "Scope leak detected:\n");
-  fprintf(stderr, "\tlive_scopes: %zu\n", stats.live_scopes);
-  fprintf(stderr, "\tlive_allocations: %zu\n", stats.live_allocations);
-  for (ScopeName node = scope_names; node; node = node.next)
-    fprintf(
-      stderr, "\tscope \"%s\": %zu allocations\n", node.name,
-      _allocation_count(node.scope));
-  size_t raw_allocs = atomic_load(&raw_alloc_count);
-  size_t raw_frees = atomic_load(&raw_free_count);
-  if (raw_allocs != raw_frees)
-    fprintf(
-      stderr, "\tlive_backing_allocations: %zu\n", raw_allocs - raw_frees);
-}
-
-static void _free_name_registry(void) {
-  while (scope_names) {
-    ScopeName next = scope_names.next;
-    _raw_free(scope_names.name);
-    _raw_free(scope_names);
-    scope_names = next;
-  }
-}
-
-/** Initializes the process-wide `Scope` runtime owner. */
-void Scope.initialize(void) {
-  _initialize();
-}
-
-/** Creates a detached, unnamed scope and returns it.
-    A detached scope sits in no slot and is not active, so nothing is charged
-    to it until you allocate through `Scope.malloc_in` and friends or make it
-    active with `Scope.push`. End it with `Scope.destroy`. Prefer
-    `Scope.new_named` for anything long-lived; the name appears in the
-    exit-time leak report.
-    Raises: `<alloc-fail>` when the scope cannot be allocated. Before `Error`
-    initialization it terminates at the error floor.
-*/
-meta native Scope Scope.new(void) {
-  _require_running();
-  return _new_scope(NULL);
-}
-
-/** Creates a detached scope carrying a copy of `name` for diagnostics.
-    The name is copied, so a temporary buffer is fine. `Scope.name` reports
-    it, and the allocator prints it at exit if anything the scope owns is
-    still alive, as a line like `scope "request": 3 allocations`. A NULL
-    `name` behaves like `Scope.new`.
-
-    ```x2c
-    ~int main(void) {
-    Scope work = Scope.new_named("request");
-    char *copy = Scope.memdup_in(&work, "payload", 8);
-    puts(copy);
-    Scope.destroy(work);
-    ~  return 0;
-    ~}
-    ```
-    Raises: `<alloc-fail>` when the scope or name copy cannot be allocated,
-    or `<size-limit>` when the name is too large. Before `Error`
-    initialization these failures terminate the process.
-*/
-meta native Scope Scope.new_named(const char *name) {
-  _require_running();
-  return _new_scope(name);
-}
-
-/** Returns the diagnostic name of `scope`, or NULL if it has none.
-    The string belongs to the allocator's name registry and stays valid until
-    the scope is destroyed; do not free it. A scope from `Scope.new`, and one
-    the runtime created implicitly for the first allocation into an empty
-    slot, both have no name.
-*/
-const char *Scope.name(Scope scope) {
-  _require_running();
-  ScopeName node = _find_name(scope);
-  return node ? node.name : NULL;
-}
-
-/** Returns a snapshot of the allocator's counters.
-    `live_allocations` and `live_scopes` are derived from the call counts, so
-    read them before and after a routine to check that it leaves nothing
-    behind. The snapshot also carries
-    `allocation_calls`, `reallocation_calls`, `free_calls`,
-    `scope_creations`, `scope_destructions`, `requested_bytes`,
-    `largest_request`, `live_requested_bytes`, and
-    `peak_live_requested_bytes`. Requested bytes are cumulative traffic;
-    live requested bytes are the exact current managed payload total. Stats
-    remain valid after shutdown.
-
-    ```x2c
-    ~int main(void) {
-    size_t before = Scope.stats().live_allocations;
-    Scope.retain();
-    char *scratch = Scope.malloc(128);
-    scratch[0] = 0;
-    Scope.release();
-    printf("reclaimed = %d\n", Scope.stats().live_allocations == before);
-    ~  return 0;
-    ~}
-    ```
-*/
-ScopeStats Scope.stats(void) {
-  ScopeStats result = {
-    .reallocation_calls = atomic_load(&scope_reallocation_calls),
-    .requested_bytes = atomic_load(&scope_requested_bytes),
-    .largest_request = atomic_load(&scope_largest_request),
-    .live_requested_bytes = atomic_load(&scope_live_requested_bytes),
-    .peak_live_requested_bytes =
-      atomic_load(&scope_peak_live_requested_bytes)
-  };
-  do {
-    result.allocation_calls = atomic_load(&scope_allocation_calls);
-    result.free_calls = atomic_load(&scope_free_calls);
-  } while (result.free_calls > result.allocation_calls);
-  do {
-    result.scope_creations = atomic_load(&scope_creations);
-    result.scope_destructions = atomic_load(&scope_destructions);
-  } while (result.scope_destructions > result.scope_creations);
-  result.live_allocations = result.allocation_calls - result.free_calls;
-  result.live_scopes = result.scope_creations - result.scope_destructions;
-  return result;
-}
-
-/** Destroys a detached scope and frees every allocation it owns.
-    This ends a scope you hold in a variable, and is the counterpart to
-    `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
-    discards its name; pointers into it are dangling afterwards, and nothing
-    diagnoses their use. Any regions still linked below it, from retains that
-    were never released, are destroyed with it.
-
-    `Scope.destroy` refuses a scope that is still in use, so a double destroy
-    or a mismatched push and pop raises instead of corrupting the allocation
-    lists. The three refused cases are the active root scope, a slot still on
-    the pushed stack (pop it first), and a scope that a later `Scope.retain`
-    layered another region on top of, which the runtime reports as an attached
-    lower scope.
-    Raises: `<bad-state>` for the active root, a pushed slot, or an attached
-    lower scope. The failure leaves the scope intact. A NULL `scope` does
-    nothing. Before `Error` initialization it terminates at the error floor.
-*/
-meta native void Scope.destroy(Scope scope) {
-  if (!scope) return;
-  _require_running();
-  ScopeThreadState state = _thread();
-  if (scope == state.root) raise %(bad-state);
-  for (int i = 0; i < state.stack_size; i++)
-    if (scope == *state.stack[i]) raise %(bad-state);
-  if (scope.up) raise %(bad-state);
-  _forget_chain_retains(scope);
-  _destroy_chain(scope);
-}
-
-/** Registers `hook` to run during process-wide `Scope` shutdown.
-    The function pointer is retained without being invoked. Shutdown invokes
-    registrations once in reverse order while `Scope` storage is still
-    available, including one registered by a hook that shutdown is already
-    running.
-
-    Raises: `<bad-arg>` for a null hook, `<size-limit>` when the registry
-    cannot grow, or `<alloc-fail>` when its storage cannot be allocated.
-*/
-void Scope.shutdown_hook(void (*hook)(void)) {
-  _require_running();
-  if (!hook) raise %(bad-arg);
-  hooks = _raw_grow(hooks, hook_count, hook_capacity, sizeof(*hooks));
-  hooks[hook_count++] = hook;
-}
+// the active slot
 
 /** Makes the scope in `scope` active until a matching `Scope.pop`.
     `scope` is the address of a caller-owned `Scope` variable, and it may hold
@@ -659,6 +505,8 @@ meta native void Scope.pop(void) {
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
                                  : &state.root;
 }
+
+// retained regions
 
 /** Opens a new scope in the active slot and makes it the current one.
     Allocations that follow are charged to the new scope. The scope that was
@@ -746,262 +594,400 @@ meta native void Scope.release(void) {
   }
 }
 
-/** Allocates `size` uninitialized bytes in the active scope.
-    The result is managed memory. `Scope.realloc` resizes it, `Scope.free`
-    ends its life early, `Scope.move` reassigns its owner, and
-    `Scope.release` or `Scope.destroy` reclaims whatever is left. The active
-    scope at the time of allocation owns the result; a later retain or push
-    does not move it.
-    Raises: `<size-limit>` when the size would overflow the allocation header,
-    or `<alloc-fail>` when the underlying allocation fails. Before `Error`
-    initialization they terminate at the error floor.
-*/
-meta native void *Scope.malloc(size_t size) {
-  _require_running();
-  return _malloc_in(_thread().active, size, NULL);
+static void _record_retain(Scope scope, Scope *slot) {
+  ScopeThreadState state = _thread();
+  state.retains = _raw_grow(
+    state.retains, state.retain_count, state.retain_capacity,
+    sizeof(*state.retains));
+  state.retains[state.retain_count++] =
+    (ScopeRetain) { .scope = scope, .slot = slot };
 }
 
-/** Allocates `size` uninitialized bytes in the active scope with a finalizer.
-    `drop` runs exactly once with the block's pointer when the block is
-    reclaimed: by `Scope.free`, by `Scope.realloc` to size zero, by the
-    release or destruction of its scope, or by thread and process shutdown.
-    The finalizer follows the block through `Scope.move` and survives
-    `Scope.realloc`, which passes `drop` the resized pointer. Blocks are
-    reclaimed most recent first, so a finalizer sees older blocks still live.
-
-    A wrapper for a native handle allocates its record this way and releases
-    the handle from `drop`; an explicit early release that clears the field
-    leaves nothing for the finalizer to do. `drop` runs on the thread that
-    reclaims the block, with the block already unlinked, so it must not free
-    or move the block itself. It must not raise. It may allocate into other
-    scopes, and into the dying scope only for scratch the same destruction
-    reclaims.
-    Raises: `<bad-arg>` when `drop` is NULL, `<size-limit>` when the size
-    would overflow the allocation header, or `<alloc-fail>` when the
-    underlying allocation fails. Before `Error` initialization they
-    terminate at the error floor.
-*/
-void *Scope.malloc_finalized(size_t size, void (*drop)(void *)) {
-  _require_running();
-  if (!drop) raise %(bad-arg);
-  return _malloc_in(_thread().active, size, drop);
+static int _forget_retain(Scope scope, Scope *slot) {
+  ScopeThreadState state = _thread();
+  for (int i = state.retain_count - 1; i >= 0; i--) {
+    if (state.retains[i].scope != scope ||
+        state.retains[i].slot != slot) continue;
+    state.retains[i] = state.retains[--state.retain_count];
+    return 1;
+  }
+  return 0;
 }
 
-/** Allocates `size` uninitialized bytes in the scope held by `slot`.
-    `slot` is the address of a `Scope` variable; if it holds NULL, a fresh
-    unnamed scope is created and stored there. Targeting a slot does not
-    touch the active-scope stack, so an intervening `Scope.retain` or
-    `Scope.push` cannot redirect the allocation. Pass `Scope.top()` to name
-    the active slot explicitly.
-    Raises: `<bad-arg>` when `slot` is NULL, `<size-limit>` when the size
-    overflows, or `<alloc-fail>` when allocation fails. Before `Error`
-    initialization they terminate at the error floor.
-*/
-void *Scope.malloc_in(Scope *slot, size_t size) {
-  _require_running();
-  return _malloc_in(slot, size, NULL);
+/* Popping the head keeps the list valid while a finalizer runs, so scratch
+   it allocates into the dying scope is reclaimed by the same loop. */
+static void _destroy_chain(Scope scope) {
+  while (scope) {
+    Scope down = scope.down;
+    ScopeAlloc alloc;
+    while ((alloc = scope.first)) {
+      scope.first = alloc.next;
+      if (scope.first) scope.first.prev = $scope.tag_pointer(scope);
+      _release_alloc(alloc);
+    }
+    _unregister_name(scope);
+    atomic_fetch_add(&scope_destructions, 1);
+    free(scope);
+    scope = down;
+  }
 }
 
-/** Allocates `size` bytes with finalizer `drop` in the scope held by `slot`.
-    The slot-targeted form of `Scope.malloc_finalized`, with the same lazy
-    scope creation as `Scope.malloc_in`; the active scope is left alone.
-    Raises: `<bad-arg>` when `slot` or `drop` is NULL, `<size-limit>` when
-    the size overflows, or `<alloc-fail>` when allocation fails. Before
-    `Error` initialization they terminate at the error floor.
+// detached scopes
+
+/** Creates a detached, unnamed scope and returns it.
+    A detached scope sits in no slot and is not active, so nothing is charged
+    to it until you allocate through `Scope.malloc_in` and friends or make it
+    active with `Scope.push`. End it with `Scope.destroy`. Prefer
+    `Scope.new_named` for anything long-lived; the name appears in the
+    exit-time leak report.
+    Raises: `<alloc-fail>` when the scope cannot be allocated. Before `Error`
+    initialization it terminates at the error floor.
 */
-void *Scope.malloc_finalized_in(
-  Scope *slot, size_t size, void (*drop)(void *)) {
+meta native Scope Scope.new(void) {
   _require_running();
-  if (!drop) raise %(bad-arg);
-  return _malloc_in(slot, size, drop);
+  return _new_scope(NULL);
 }
 
-/** Allocates `count` objects of `size` bytes each, zeroed, in the active
-    scope.
-    The product is checked for overflow before anything is allocated, and the
-    bytes are set to zero; in every other respect this behaves like
-    `Scope.malloc`. A request that multiplies out to zero still returns a
-    distinct pointer the scope owns, so it is not a failure signal.
-    Raises: `<size-limit>` when the object count overflows, or `<alloc-fail>`
-    when allocation fails. Before `Error` initialization they terminate at the
-    error floor.
-*/
-meta native void *Scope.calloc(size_t count, size_t size) {
-  _require_running();
-  return _calloc_in(_thread().active, count, size);
-}
-
-/** Allocates `count` zeroed objects of `size` bytes in the scope in `slot`.
-    The slot-targeted form of `Scope.calloc`, with the same overflow check and
-    the same lazy scope creation as `Scope.malloc_in`; the active scope is left
-    alone.
-    Raises: `<bad-arg>` when `slot` is NULL, `<size-limit>` when the object
-    count overflows, or `<alloc-fail>` when allocation fails. Before `Error`
-    initialization they terminate at the error floor.
-*/
-void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
-  _require_running();
-  return _calloc_in(slot, count, size);
-}
-
-/** Copies `size` bytes from `ptr` into a new allocation in the active scope.
-    The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
-    release that ends the region. Nothing about the source is remembered, so
-    duplicating a C string means copying its terminator too:
-    `Scope.memdup(text, strlen(text) + 1)`.
-
-    A NULL `ptr` or a zero `size` returns NULL rather than an empty
-    allocation, so a duplicate of nothing is indistinguishable from failure;
-    check the arguments yourself when that distinction matters.
-    Raises: `<size-limit>` or `<alloc-fail>` from the underlying allocation.
-    A NULL `ptr` or zero `size` returns NULL without raising.
-*/
-meta native void *Scope.memdup(const void *ptr, size_t size) {
-  _require_running();
-  return _memdup_in(_thread().active, ptr, size);
-}
-
-/** Copies `size` bytes from `ptr` into the scope held by `slot`.
-    The slot-targeted form of `Scope.memdup`, with the same NULL-for-nothing
-    rule and the same lazy scope creation as `Scope.malloc_in`. It is the
-    usual way to hand a snapshot of caller data to a scope that outlives the
-    current region.
-    Raises: `<bad-arg>` when `slot` is NULL, or `<size-limit>` or
-    `<alloc-fail>` from the underlying allocation. A NULL `ptr` or zero
-    `size` returns NULL without raising.
-*/
-void *Scope.memdup_in(Scope *slot, const void *ptr, size_t size) {
-  _require_running();
-  return _memdup_in(slot, ptr, size);
-}
-
-/** Frees one scope-owned allocation before its scope ends.
-    `ptr` must be a pointer returned by `Scope.malloc`, `Scope.calloc`,
-    `Scope.memdup`, one of their `_in` forms, or `Scope.realloc`. It is
-    unlinked from whichever scope owns it now, which after a `Scope.move` may
-    not be the active one.
-
-    Shortening a lifetime this way is normal. Freeing anything else, such as a
-    stack address, an interned `String`, or a plain `malloc` result, is
-    undefined, as is freeing the same pointer twice. Nothing diagnoses
-    either.
-
-    A NULL `ptr` does nothing.
-*/
-meta native void Scope.free(void *ptr) {
-  _require_running();
-  if (!ptr) return;
-  _free_alloc($scope.ptr_alloc(ptr));
-}
-
-/** Returns the `Scope` that currently owns `ptr`.
-    `ptr` must be a live pointer returned by a `Scope` allocator. `Context`
-    uses
-    this to leave ancestor-owned objects where they are while moving results
-    out of its own `Scope` chain. Passing any other nonnull pointer is
-    undefined
-    behavior, matching `Scope.free` and `Scope.move`.
-*/
-Scope Scope.owner(void *ptr) {
-  _require_running();
-  if (!ptr) return NULL;
-  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
-  while (alloc && !$scope.is_tagged(alloc.prev)) alloc = alloc.prev;
-  return alloc ? $scope.untag_pointer(alloc.prev) : NULL;
-}
-
-/** Relinks one allocation onto the scope held by `slot`.
-    The bytes are not copied and the pointer does not change; only ownership
-    moves, so a temporary region can compute one result that outlives it. If
-    `slot` holds NULL a fresh unnamed scope is created there, as the `_in`
-    allocators do.
+/** Creates a detached scope carrying a copy of `name` for diagnostics.
+    The name is copied, so a temporary buffer is fine. `Scope.name` reports
+    it, and the allocator prints it at exit if anything the scope owns is
+    still alive, as a line like `scope "request": 3 allocations`. A NULL
+    `name` behaves like `Scope.new`.
 
     ```x2c
     ~int main(void) {
-    Scope keep = Scope.new_named("results");
-    Scope.retain();
-    char *text = Scope.memdup("survivor", 9);
-    Scope.move(text, &keep);
-    Scope.release();
-    puts(text);
-    Scope.destroy(keep);
+    Scope work = Scope.new_named("request");
+    char *copy = Scope.memdup_in(&work, "payload", 8);
+    puts(copy);
+    Scope.destroy(work);
     ~  return 0;
     ~}
     ```
-
-    You do not need this for a `String`, a `List`, or a `Symbol`. Canonical
-    values already outlive the scope that was active when they were built.
-    Raises: `<bad-arg>` when `slot` is NULL, or `<alloc-fail>` when a new
-    destination scope cannot be allocated. These failures leave ownership
-    unchanged. A NULL `ptr` does nothing. Before `Error` initialization they
-    terminate at the error floor.
+    Raises: `<alloc-fail>` when the scope or name copy cannot be allocated,
+    or `<size-limit>` when the name is too large. Before `Error`
+    initialization these failures terminate the process.
 */
-meta native void Scope.move(void *ptr, Scope *slot) {
+meta native Scope Scope.new_named(const char *name) {
   _require_running();
-  if (!ptr) return;
-  if (!slot) raise %(bad-arg);
-  if (!*slot) *slot = _new_scope(NULL);
-  Scope scope = *slot;
-  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
-  ScopeAlloc next = alloc.next, prev = alloc.prev;
-  if ($scope.is_tagged(prev)) {
-    Scope owner = $scope.untag_pointer(prev);
-    owner.first = next;
-  }
-  else prev.next = next;
-  if (next) next.prev = prev;
-  alloc.next = scope.first;
-  alloc.prev = $scope.tag_pointer(scope);
-  if (scope.first) scope.first.prev = alloc;
-  scope.first = alloc;
+  return _new_scope(name);
 }
 
-/** Resizes one scope-owned allocation and returns the new pointer.
-    Ownership does not change: the allocation stays with the scope that
-    already held it, even if that is not the active one. Two edge cases follow
-    C's `realloc`: a NULL `ptr` allocates `size` bytes in the active scope, and
-    a `size` of zero frees the allocation and returns NULL. A NULL result is
-    not by itself a failure.
-
-    As with C, the old pointer must be treated as dead once a resize succeeds.
-    Raises: `<size-limit>` when the size overflows, or `<alloc-fail>` when
-    allocation fails. Before `Error` initialization these failures terminate at
-    the error floor.
+/** Returns the diagnostic name of `scope`, or NULL if it has none.
+    The string belongs to the allocator's name registry and stays valid until
+    the scope is destroyed; do not free it. A scope from `Scope.new`, and one
+    the runtime created implicitly for the first allocation into an empty
+    slot, both have no name.
 */
-meta native void *Scope.realloc(void *ptr, size_t size) {
+const char *Scope.name(Scope scope) {
   _require_running();
-  if (!ptr) return _malloc_in(_thread().active, size, NULL);
-  if (!size) {
-    _free_alloc($scope.ptr_alloc(ptr));
-    return NULL;
+  ScopeName node = _find_name(scope);
+  return node ? node.name : NULL;
+}
+
+/** Destroys a detached scope and frees every allocation it owns.
+    This ends a scope you hold in a variable, and is the counterpart to
+    `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
+    discards its name; pointers into it are dangling afterwards, and nothing
+    diagnoses their use. Any regions still linked below it, from retains that
+    were never released, are destroyed with it.
+
+    `Scope.destroy` refuses a scope that is still in use, so a double destroy
+    or a mismatched push and pop raises instead of corrupting the allocation
+    lists. The three refused cases are the active root scope, a slot still on
+    the pushed stack (pop it first), and a scope that a later `Scope.retain`
+    layered another region on top of, which the runtime reports as an attached
+    lower scope.
+    Raises: `<bad-state>` for the active root, a pushed slot, or an attached
+    lower scope. The failure leaves the scope intact. A NULL `scope` does
+    nothing. Before `Error` initialization it terminates at the error floor.
+*/
+meta native void Scope.destroy(Scope scope) {
+  if (!scope) return;
+  _require_running();
+  ScopeThreadState state = _thread();
+  if (scope == state.root) raise %(bad-state);
+  for (int i = 0; i < state.stack_size; i++)
+    if (scope == *state.stack[i]) raise %(bad-state);
+  if (scope.up) raise %(bad-state);
+  _forget_chain_retains(scope);
+  _destroy_chain(scope);
+}
+
+/** Ends the owned lifetime when a managed local leaves its block. */
+meta native void Scope.cleanup(Scope value) { value.destroy(); }
+
+static Scope _new_scope(const char *name) {
+  Scope scope = _data_malloc(sizeof(struct Scope));
+  scope.up = scope.down = NULL;
+  scope.first = NULL;
+  _register_name(scope, name);
+  atomic_fetch_add(&scope_creations, 1);
+  return scope;
+}
+
+static void _forget_chain_retains(Scope scope) {
+  ScopeThreadState state = _thread();
+  for (Scope cur = scope; cur; cur = cur.down)
+    for (int i = state.retain_count - 1; i >= 0; i--)
+      if (state.retains[i].scope == cur)
+        state.retains[i] = state.retains[--state.retain_count];
+}
+
+/* scope names
+
+   Named scopes share one registry, guarded by the metadata mutex. The
+   exit-time leak report lists each registered name with its allocation
+   count. */
+
+static ScopeName scope_names;
+
+static pthread_mutex_t scope_metadata_mutex =
+  (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
+
+static void _register_name(Scope scope, const char *name) {
+  if (!name) return;
+  size_t length = strlen(name);
+  if (length == SIZE_MAX) raise %(size-limit);
+  ScopeName node = _raw_malloc(sizeof(struct ScopeName));
+  char *copy = _raw_malloc(length + 1);
+  memcpy(copy, name, length + 1);
+  node.scope = scope;
+  node.name = copy;
+  _metadata_lock();
+  node.next = scope_names;
+  scope_names = node;
+  _metadata_unlock();
+}
+
+static ScopeName _find_name(Scope scope) {
+  _metadata_lock();
+  ScopeName node = scope_names;
+  while (node && node.scope != scope) node = node.next;
+  _metadata_unlock();
+  return node;
+}
+
+static void _unregister_name(Scope scope) {
+  _metadata_lock();
+  ScopeName *link = &scope_names;
+  while (*link && (*link).scope != scope) link = &(*link).next;
+  ScopeName node = *link;
+  if (node) {
+    *link = node.next;
+    _raw_free(node.name);
+    _raw_free(node);
   }
-  ScopeAlloc old = $scope.ptr_alloc(ptr), next = old.next, prev = old.prev;
-  ScopeMetadata *old_meta = $scope.alloc_meta(old);
-  size_t old_size = old_meta.requested_size;
-  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
-    raise %(size-limit);
-  ScopeMetadata *meta = _data_realloc(
-    old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
-  meta.requested_size = size;
-  ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
-  replacement.next = next;
-  replacement.prev = prev;
-  if (next) next.prev = replacement;
-  if ($scope.is_tagged(prev)) {
-    Scope scope = $scope.untag_pointer(prev);
-    scope.first = replacement;
-  }
-  else prev.next = replacement;
+  _metadata_unlock();
+}
+
+static void _metadata_lock(void) {
+  if (pthread_mutex_lock(&scope_metadata_mutex))
+    _raw_fatal("could not lock metadata");
+}
+
+static void _metadata_unlock(void) {
+  if (pthread_mutex_unlock(&scope_metadata_mutex))
+    _raw_fatal("could not unlock metadata");
+}
+
+// statistics
+
+static atomic_size_t scope_allocation_calls, scope_reallocation_calls;
+static atomic_size_t scope_free_calls, scope_creations, scope_destructions;
+static atomic_size_t scope_requested_bytes, scope_largest_request;
+static atomic_size_t scope_live_requested_bytes;
+static atomic_size_t scope_peak_live_requested_bytes;
+
+/** Returns a snapshot of the allocator's counters.
+    `live_allocations` and `live_scopes` are derived from the call counts, so
+    read them before and after a routine to check that it leaves nothing
+    behind. The snapshot also carries
+    `allocation_calls`, `reallocation_calls`, `free_calls`,
+    `scope_creations`, `scope_destructions`, `requested_bytes`,
+    `largest_request`, `live_requested_bytes`, and
+    `peak_live_requested_bytes`. Requested bytes are cumulative traffic;
+    live requested bytes are the exact current managed payload total. Stats
+    remain valid after shutdown.
+
+    ```x2c
+    ~int main(void) {
+    size_t before = Scope.stats().live_allocations;
+    Scope.retain();
+    char *scratch = Scope.malloc(128);
+    scratch[0] = 0;
+    Scope.release();
+    printf("reclaimed = %d\n", Scope.stats().live_allocations == before);
+    ~  return 0;
+    ~}
+    ```
+*/
+ScopeStats Scope.stats(void) {
+  ScopeStats stats = {
+    .reallocation_calls = atomic_load(&scope_reallocation_calls),
+    .requested_bytes = atomic_load(&scope_requested_bytes),
+    .largest_request = atomic_load(&scope_largest_request),
+    .live_requested_bytes = atomic_load(&scope_live_requested_bytes),
+    .peak_live_requested_bytes =
+      atomic_load(&scope_peak_live_requested_bytes)
+  };
+  do {
+    stats.allocation_calls = atomic_load(&scope_allocation_calls);
+    stats.free_calls = atomic_load(&scope_free_calls);
+  } while (stats.free_calls > stats.allocation_calls);
+  do {
+    stats.scope_creations = atomic_load(&scope_creations);
+    stats.scope_destructions = atomic_load(&scope_destructions);
+  } while (stats.scope_destructions > stats.scope_creations);
+  stats.live_allocations = stats.allocation_calls - stats.free_calls;
+  stats.live_scopes = stats.scope_creations - stats.scope_destructions;
+  return stats;
+}
+
+static void _record_allocation(size_t size) {
+  atomic_fetch_add(&scope_allocation_calls, 1);
+  _record_request(size);
+  _record_live_add(size);
+}
+
+static void _record_resize(size_t old_size, size_t size) {
   atomic_fetch_add(&scope_reallocation_calls, 1);
   _record_request(size);
   if (size >= old_size) _record_live_add(size - old_size);
   else _record_live_remove(old_size - size);
-  return $scope.alloc_ptr(replacement);
 }
+
+static void _record_free(size_t size) {
+  atomic_fetch_add(&scope_free_calls, 1);
+  _record_live_remove(size);
+}
+
+static void _record_request(size_t size) {
+  atomic_fetch_add_explicit(
+    &scope_requested_bytes, size, memory_order_relaxed);
+  size_t largest = atomic_load(&scope_largest_request);
+  while (size > largest && !atomic_compare_exchange_weak(
+    &scope_largest_request, &largest, size)) {}
+}
+
+static void _record_live_add(size_t size) {
+  size_t live = atomic_fetch_add_explicit(
+    &scope_live_requested_bytes, size, memory_order_relaxed) + size;
+  size_t peak = atomic_load(&scope_peak_live_requested_bytes);
+  while (live > peak && !atomic_compare_exchange_weak(
+    &scope_peak_live_requested_bytes, &peak, live)) {}
+}
+
+static void _record_live_remove(size_t size) {
+  atomic_fetch_sub_explicit(
+    &scope_live_requested_bytes, size, memory_order_relaxed);
+}
+
+// backing storage
+
+static atomic_size_t raw_alloc_count, raw_free_count;
+
+static void *_data_malloc(size_t size) {
+  void *ptr = malloc(size);
+  if (!ptr) raise %(alloc-fail);
+  return ptr;
+}
+
+static void *_data_realloc(void *ptr, size_t size) {
+  void *result = realloc(ptr, size);
+  if (!result) raise %(alloc-fail);
+  return result;
+}
+
+static void *_raw_malloc(size_t size) {
+  void *ptr = malloc(size);
+  if (!ptr) raise %(alloc-fail);
+  atomic_fetch_add(&raw_alloc_count, 1);
+  return ptr;
+}
+
+static void *_raw_realloc(void *ptr, size_t size) {
+  void *result = realloc(ptr, size);
+  if (!result) raise %(alloc-fail);
+  return result;
+}
+
+static void _raw_free(void *ptr) {
+  if (!ptr) return;
+  atomic_fetch_add(&raw_free_count, 1);
+  free(ptr);
+}
+
+/* Returns `items` with room for one element past `count`, starting at 16 and
+   doubling `capacity` when full. */
+static void *_raw_grow(void *items, int count, int &capacity, size_t size) {
+  if (!items) {
+    items = _raw_malloc(16 * size);
+    capacity = 16;
+  }
+  else if (count == capacity) {
+    if (capacity > INT_MAX / 2) raise %(size-limit);
+    items = _raw_realloc(items, capacity * 2 * size);
+    capacity *= 2;
+  }
+  return items;
+}
+
+static void _raw_fatal(const char *message) {
+  fprintf(stderr, "Scope: %s\n", message);
+  abort();
+}
+
+// lifecycle
+
+static Symbol scope_state = <uninit>;
+static void(**hooks)(void);
+static int hook_count, hook_capacity;
+
+/** Initializes the process-wide `Scope` runtime owner. */
+void Scope.initialize(void) {
+  _initialize();
+}
+
+static void _initialize(void) {
+  if (scope_state == <running> || scope_state == <shutting>) return;
+  if (scope_state == <shutdown>)
+    _raw_fatal("operation attempted after shutdown");
+  ScopeThreadState state = _thread();
+  state.active = &state.root;
+  scope_state = <running>;
+  if (atexit(Scope_shutdown))
+    _raw_fatal("could not register shutdown handler");
+}
+
+static void _require_running(void) {
+  if (scope_state != <running>) _ensure_running();
+}
+
+static void _ensure_running(void) {
+  if (scope_state == <uninit>) _initialize();
+  else if (scope_state == <shutdown>)
+    _raw_fatal("operation attempted after shutdown");
+}
+
+/** Registers `hook` to run during process-wide `Scope` shutdown.
+    The function pointer is retained without being invoked. Shutdown invokes
+    registrations once in reverse order while `Scope` storage is still
+    available, including one registered by a hook that shutdown is already
+    running.
+
+    Raises: `<bad-arg>` for a null hook, `<size-limit>` when the registry
+    cannot grow, or `<alloc-fail>` when its storage cannot be allocated.
+*/
+void Scope.shutdown_hook(void (*hook)(void)) {
+  _require_running();
+  if (!hook) raise %(bad-arg);
+  hooks = _raw_grow(hooks, hook_count, hook_capacity, sizeof(*hooks));
+  hooks[hook_count++] = hook;
+}
+
 /** Releases resources owned by `Scope`.
-    `Scope` groups managed allocations by lifetime; balanced
-    retain/release and push/pop boundaries remain caller
-    responsibilities.
+    `Scope` groups managed allocations by lifetime; balanced retain/release
+    and push/pop boundaries remain caller responsibilities.
 */
 void Scope_shutdown(void) {
   if (scope_state == <shutdown> || scope_state == <shutting>) return;
@@ -1011,16 +997,9 @@ void Scope_shutdown(void) {
   }
   scope_state = <shutting>;
   /* Hooks close higher-level owners in reverse dependency order while Scope
-     allocations still work; one that registers another runs it next, still
-     newest first. Thread-local regions then disappear before leak reporting
-     reads the name registry, and shared thread state goes last. */
-  while (hook_count) {
-    void (*hook)(void) = hooks[--hook_count];
-    hook();
-  }
-  _raw_free(hooks);
-  hooks = NULL;
-  hook_count = hook_capacity = 0;
+     allocations still work. Thread-local regions then disappear before leak
+     reporting reads the name registry, and shared thread state goes last. */
+  _run_hooks();
   x2c_static_shutdown();
   x2c_scope_thread_release();
   _report_leaks();
@@ -1029,5 +1008,66 @@ void Scope_shutdown(void) {
   x2c_thread_state_release();
 }
 
-/** Ends the owned lifetime when a managed local leaves its block. */
-meta native void Scope.cleanup(Scope value) { value.destroy(); }
+/* A hook that registers another runs it next, still newest first. */
+static void _run_hooks(void) {
+  while (hook_count) {
+    void (*hook)(void) = hooks[--hook_count];
+    hook();
+  }
+  _raw_free(hooks);
+  hooks = NULL;
+  hook_count = hook_capacity = 0;
+}
+
+/** Destroys this thread's `Scope` chain and its push and retain stacks.
+    It runs last in `x2c_thread_state_release` and repeats harmlessly; a
+    thread that never created a `Scope` has nothing to destroy.
+*/
+void x2c_scope_thread_release(void) {
+  ScopeThreadState state = &scope_thread;
+  if (state.root) _destroy_chain(state.root);
+  state.root = NULL;
+  _raw_free(state.stack);
+  state.stack = NULL;
+  state.stack_size = state.stack_capacity = 0;
+  _raw_free(state.retains);
+  state.retains = NULL;
+  state.retain_count = state.retain_capacity = 0;
+  state.active = &state.root;
+}
+
+static void _report_leaks(void) {
+  ScopeStats stats = Scope.stats();
+  if (!stats.live_scopes && !stats.live_allocations &&
+      atomic_load(&raw_alloc_count) == atomic_load(&raw_free_count))
+    return;
+  fprintf(stderr, "Scope leak detected:\n");
+  fprintf(stderr, "\tlive_scopes: %zu\n", stats.live_scopes);
+  fprintf(stderr, "\tlive_allocations: %zu\n", stats.live_allocations);
+  for (ScopeName node = scope_names; node; node = node.next)
+    fprintf(
+      stderr, "\tscope \"%s\": %zu allocations\n", node.name,
+      _allocation_count(node.scope));
+  size_t raw_allocs = atomic_load(&raw_alloc_count);
+  size_t raw_frees = atomic_load(&raw_free_count);
+  if (raw_allocs != raw_frees)
+    fprintf(
+      stderr, "\tlive_backing_allocations: %zu\n", raw_allocs - raw_frees);
+}
+
+static size_t _allocation_count(Scope scope) {
+  size_t count = 0;
+  for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
+       alloc = alloc.next)
+    count++;
+  return count;
+}
+
+static void _free_name_registry(void) {
+  while (scope_names) {
+    ScopeName next = scope_names.next;
+    _raw_free(scope_names.name);
+    _raw_free(scope_names);
+    scope_names = next;
+  }
+}

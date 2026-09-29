@@ -128,6 +128,16 @@ static void var_floating_construction(void) {
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
 }
 
+/* A custom class may be named after a C floating type; it is still an
+   object, so the floating payload reader answers 0.0. */
+static void var_floating_ignores_custom_float_names(void) {
+  long cell = 1;
+  EXPECT_INT_EQ(Var.register_object_tag(<double>), 0);
+  EXPECT_INT_EQ(Var.register_object_tag(<float>), 0);
+  EXPECT_TRUE(Var.new(<double>, &cell).floating() == 0.0);
+  EXPECT_TRUE(Var.new(<float>, &cell).floating() == 0.0);
+}
+
 static void var_terminal_and_f64_escape(void) {
   Var negative_max = Var.new(<f64>, -DBL_MAX);
   Var positive_max = Var.new(<f64>, DBL_MAX);
@@ -614,6 +624,33 @@ static void var_byte_pointer_roundtrips(void) {
     EXPECT_TRUE(vunsigned is <u8*>);
     EXPECT_PTR_EQ(vunsigned.pointer(), unsigned_bytes);
   }
+}
+
+/* Each pointer family reserves the low address bits it selects its row
+   with; an address that sets one of them cannot be encoded. */
+static void var_new_rejects_misaligned_pointers(void) {
+  double words[2];
+  char *base = (char *) words;
+  int caught = 0;
+
+  try Var.new(<f64*>, base + 4);
+  catch %(bad-enc *): caught++;
+  try Var.new(<u32*>, base + 2);
+  catch %(bad-enc *): caught++;
+  try Var.new(<i16*>, base + 1);
+  catch %(bad-enc *): caught++;
+  try Var.new(<string>, base + 4);
+  catch %(bad-enc *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+
+  Var word = Var.new(<u32*>, base + 4), half = Var.new(<i16*>, base + 2);
+  Var byte = Var.new(<u8*>, base + 1);
+  EXPECT_TRUE(word is <u32*>);
+  EXPECT_PTR_EQ(word.pointer(), base + 4);
+  EXPECT_TRUE(half is <i16*>);
+  EXPECT_PTR_EQ(half.pointer(), base + 2);
+  EXPECT_TRUE(byte is <u8*>);
+  EXPECT_PTR_EQ(byte.pointer(), base + 1);
 }
 
 static void var_catalog_tag_roundtrips(void) {
@@ -1424,6 +1461,7 @@ void var_suite(void) {
   $test.run(var_symbol_atom_stream_without_allocating);
   $test.run(var_integer_construction);
   $test.run(var_floating_construction);
+  $test.run(var_floating_ignores_custom_float_names);
   $test.run(var_terminal_and_f64_escape);
   $test.run(var_construction_and_void_dispatch_transfer);
   $test.run(var_void_equality_and_rendering);
@@ -1444,6 +1482,7 @@ void var_suite(void) {
   $test.run(var_unsigned_char_accessor);
   $test.run(var_source_conversion_matrix);
   $test.run(var_byte_pointer_roundtrips);
+  $test.run(var_new_rejects_misaligned_pointers);
   $test.run(var_catalog_tag_roundtrips);
   $test.run(var_explicit_i48_boundaries);
   $test.run(var_numeric_parse_is_exact);

@@ -48,11 +48,11 @@ Env;
 
 Job List_job(List command);
 
+Job Job_pipe(Job job, List command);
+
 Job Job_options(Job job, Map options);
 
 Job Job_live(Job job);
-
-Job Job_pipe(Job job, List command);
 
 Job Job_start(Job job);
 

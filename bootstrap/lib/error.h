@@ -24,11 +24,43 @@ ErrorCatchSite;
 #define ERROR_CATCH_PENDING 0
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
-int x2c_error_catch_site_pending(ErrorCatchSite * site);
+Symbol Error_raise(Symbol code, List detail);
+
+void x2c_error_raise(Symbol code, List detail);
+
+void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
+
+int Error_depth(void);
+
+void Error_note_rendered(void);
+
+void Error_policy_set(Symbol code, Symbol disposition);
+
+Symbol Error_policy_get(Symbol code);
+
+int Error_bound(void);
+
+void Error_bound_set(int bound);
+
+void * Error_policy_capture(void);
+
+void Error_policy_adopt(void * capture);
+
+void Error_policy_release(void * capture);
+
+ErrorHandler Error_push(ErrorHandlerFn fn, Var data);
+
+void Error_pop(ErrorHandler handle);
+
+int Error_handler_depth(void);
+
+void * Error_handler_head(void);
 
 ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...);
+
+int x2c_error_catch_site_pending(ErrorCatchSite * site);
 
 int x2c_error_catch_selected(ErrorHandler handle);
 
@@ -38,16 +70,6 @@ void x2c_error_catch_detach(ErrorHandler handle);
 
 void x2c_error_catch_close(ErrorHandler handle);
 
-void x2c_error_raise(Symbol code, List detail);
-
-void Error_note_rendered(void);
-
-void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...);
-
-int Error_handler_depth(void);
-
-void * Error_handler_head(void);
-
 void * Error_unwind_head(void);
 
 void Error_restore_landing(void * saved_head, int saved_depth);
@@ -56,47 +78,25 @@ void Error_trim(void * saved_head, int stack_height);
 
 void Error_restore(int handler_depth, int stack_height);
 
-void Error_initialize_raw(void);
+void * Error_context_open(void);
 
-void Error_shutdown_raw(void);
-
-int Error_depth(void);
+void Error_context_close(void * token, int preserve_records);
 
 int Error_count(void);
 
 int Error_mark(void);
 
+List Error_since(int mark);
+
+List Error_since_in(int mark, Scope * values, Pool pool);
+
 Var Error_snapshot(Var value);
 
 Var Error_snapshot_in(Var value, Scope * values, Pool pool);
 
-List Error_since_in(int mark, Scope * values, Pool pool);
+void Error_initialize_raw(void);
 
-List Error_since(int mark);
-
-void Error_policy_set(Symbol code, Symbol disposition);
-
-Symbol Error_policy_get(Symbol code);
-
-void * Error_policy_capture(void);
-
-void Error_policy_adopt(void * capture);
-
-void Error_policy_release(void * capture);
-
-int Error_bound(void);
-
-void Error_bound_set(int bound);
-
-ErrorHandler Error_push(ErrorHandlerFn fn, Var data);
-
-void Error_pop(ErrorHandler handle);
-
-void * Error_context_open(void);
-
-void Error_context_close(void * token, int preserve_records);
-
-Symbol Error_raise(Symbol code, List detail);
+void Error_shutdown_raw(void);
 
 int Error_ready(void);
 

@@ -18,15 +18,27 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static int _datum_tagged(Var value);
+static int _tag_headed(List list);
 
-static void _datum_number(Buffer out, Var value);
+static int _write_list(Buffer out, List list, int tagged);
 
-static Var _datum_decode_number(String tag, String text);
+static int _write_atom(Buffer out, Var value, int tagged);
 
-static List _datum_decode_list(List list);
+static void _write_number(Buffer out, Var value);
 
-static Var _datum_decode(Var value);
+static int _write_array(Buffer out, Array array);
+
+static int _write_map(Buffer out, Map map);
+
+static Var _decode(Var value);
+
+static List _decode_list(List list);
+
+static Var _decode_number(String tag, String text);
+
+static Map _decode_map(List entries);
+
+static List _items_problem(Var value, Map marks);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -72,15 +84,15 @@ __attribute__((constructor)) static void _file_init_(void){
   _24 = cons(_5, _23);
   _25 = cons(_3, _24);
   _26 = cons(_1, _25);
-  _27 = String_new("ldouble");
-  _28 = String_new("x2c.void");
-  _29 = String_new("x2c.symbol0");
-  _30 = String_new("x2c.atom");
-  _31 = String_new("x2c.symbol");
-  _32 = String_new("x2c.number");
-  _33 = String_new("x2c.token");
-  _34 = String_new("x2c.quote");
-  _35 = String_new("x2c.array");
+  _27 = String_new("x2c.void");
+  _28 = String_new("x2c.symbol0");
+  _29 = String_new("x2c.atom");
+  _30 = String_new("x2c.symbol");
+  _31 = String_new("x2c.number");
+  _32 = String_new("x2c.token");
+  _33 = String_new("x2c.quote");
+  _34 = String_new("x2c.array");
+  _35 = String_new("ldouble");
   _36 = String_new("\n");
   _37 = String_new("compile-time result is a compiler address");
   _38 = String_var(_37);
@@ -103,11 +115,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _55 = String_new("\n");
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+int List_truth(List);
 
-int Var_is_nil(Var);
-
-Var Var_car(Var);
+Var List_car(List);
 
 int Var_is_atom(Var);
 
@@ -121,9 +131,9 @@ String Var_string(Var);
 
 int String_equal(String, String);
 
-static int _datum_tagged(Var value){
-  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return 0;
-  Var head = Var_car(value);
+static int _tag_headed(List list){
+  if(! List_truth(list)) return 0;
+  Var head = List_car(list);
   if(! Var_is_atom(head)) return 0;
   String text = Var_str(head);
   if(! String_startswith(text, _52)) return 0;
@@ -141,19 +151,86 @@ static int _datum_tagged(Var value){
   return 0;
 }
 
-void Var_numeric_decode(Var, X2CVarNumeric *);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+List Var_list(Var);
+
+int Var_is_void(Var);
+
+Buffer Buffer_write(Buffer, const char *);
+
+int Var_is(Var, Symbol);
+
+Symbol Var_symbol(Var);
+
+String Var_repr(Var);
+
+int Var_is_floating(Var);
+
+int Var_is_integer(Var);
 
 Buffer Buffer_printf(Buffer, const char *, ...);
+
+long Var_integer(Var);
+
+double Var_floating(Var);
+
+Array Var_array(Var);
+
+Map Var_map(Var);
+
+int datum_write(Buffer out, Var value, int tagged){
+  if(! _init_guard_) _file_init_();
+  if(Var_is_row(value, 9, 7, 4)) return _write_list(out, Var_list(value), tagged);
+  if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
+  else if(tagged && Var_is(value, 1328354264) && ! Var_symbol(value)) Buffer_write(out, "(x2c.symbol0)");
+  else if(Var_is_atom(value)) return _write_atom(out, value, tagged);
+  else if(Var_is_row(value, 11, 7, 1)) Buffer_write(out, Var_repr(value));
+  else if(tagged &&(Var_is_floating(value) ||(Var_is_integer(value) && ! Var_is(value, 3453797)))) _write_number(out, value);
+  else if(Var_is_integer(value)) Buffer_printf(out, "%ld", Var_integer(value));
+  else if(Var_is_floating(value)) Buffer_printf(out, "%.17g", Var_floating(value));
+  else if(tagged && Var_is(value, 3313778)) return _write_array(out, Var_array(value));
+  else if(tagged && Var_is(value, 26720)) return _write_map(out, Var_map(value));
+  else if(tagged && Var_is_row(value, 11, 7, 5)) Buffer_printf(out, "(x2c.token %llu)", (unsigned long long) value.u64);
+  else return 0;
+  return 1;
+}
+
+List List_cdr(List);
+
+Buffer Buffer_write_char(Buffer, char);
+
+static int _write_list(Buffer out, List list, int tagged){
+  int quoted = tagged && _tag_headed(list);
+  Buffer_write(out, quoted ? "(x2c.quote (" : "(");
+  for(List p = list;  List_truth(p);  p = List_cdr(p)){
+    if(! datum_write(out, List_car(p), tagged)) return 0;
+    if(List_truth(List_cdr(p))) Buffer_write_char(out, ' ');
+  }
+  Buffer_write(out, quoted ? "))" : ")");
+  return 1;
+}
+
+int Atom_bare_spelling(String);
+
+String String_repr(String);
+
+static int _write_atom(Buffer out, Var value, int tagged){
+  String text = Var_str(value);
+  if(Atom_bare_spelling(text)) Buffer_write(out, text);
+  else if(tagged) Buffer_printf(out, "(%s %s)", Var_is(value, 1328354264) ? "x2c.symbol" : "x2c.atom", (char *) String_repr(text));
+  else if(Var_is(value, 1328354264)) Buffer_write(out, Var_repr(value));
+  else return 0;
+  return 1;
+}
+
+void Var_numeric_decode(Var, X2CVarNumeric *);
 
 String Symbol_str(Symbol);
 
 Symbol Var_tag(Var);
 
-long Var_integer(Var);
-
-Buffer Buffer_write(Buffer, const char *);
-
-static void _datum_number(Buffer out, Var value){
+static void _write_number(Buffer out, Var value){
   X2CVarNumeric number;
   Var_numeric_decode(value, &(number));
   Buffer_printf(out, "(x2c.number %s \"", (char *) Symbol_str(Var_tag(value)));
@@ -163,124 +240,130 @@ static void _datum_number(Buffer out, Var value){
   Buffer_write(out, "\")");
 }
 
-List Var_list(Var);
-
-int List_truth(List);
-
-List List_cdr(List);
-
-int List_equal(List, List);
-
-Buffer Buffer_write_char(Buffer, char);
-
-Var List_car(List);
-
-int Var_is_void(Var);
-
-int Var_is(Var, Symbol);
-
-Symbol Var_symbol(Var);
-
-int Atom_bare_spelling(String);
-
-String String_repr(String);
-
-String Var_repr(Var);
-
-int Var_is_floating(Var);
-
-int Var_is_integer(Var);
-
-double Var_floating(Var);
-
-Array Var_array(Var);
-
 int Array_try_next(Array, int *, Var *);
 
-Map Var_map(Var);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-int datum_write(Buffer out, Var value, int tagged){
-  if(! _init_guard_) _file_init_();
-  if(Var_is_row(value, 9, 7, 4)){
-    int quoted = tagged && _datum_tagged(value);
-    List list = Var_list(value);
-    Buffer_write(out, quoted ? "(x2c.quote (" : "(");
-    for(List p = list;  List_truth(p);  p = List_cdr(p)){
-      if(! List_equal(p, list)) Buffer_write_char(out, ' ');
-      if(! datum_write(out, List_car(p), tagged)) return 0;
-    }
-    Buffer_write(out, quoted ? "))" : ")");
-  }
-  else if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
-  else if(tagged && Var_is(value, 1328354264) && ! Var_symbol(value)) Buffer_write(out, "(x2c.symbol0)");
-  else if(Var_is_atom(value)){
-    String text = Var_str(value);
-    if(Atom_bare_spelling(text)) Buffer_write(out, text);
-    else if(tagged) Buffer_printf(out, "(%s %s)", Var_is(value, 1328354264) ? "x2c.symbol" : "x2c.atom", (char *) String_repr(text));
-    else if(Var_is(value, 1328354264)) Buffer_write(out, Var_repr(value));
-    else return 0;
-  }
-  else if(Var_is_row(value, 11, 7, 1)) Buffer_write(out, Var_repr(value));
-  else if(tagged &&(Var_is_floating(value) ||(Var_is_integer(value) && ! Var_is(value, 3453797)))) _datum_number(out, value);
-  else if(Var_is_integer(value)) Buffer_printf(out, "%ld", Var_integer(value));
-  else if(Var_is_floating(value)) Buffer_printf(out, "%.17g", Var_floating(value));
-  else if(tagged && Var_is(value, 3313778)){
-    Buffer_write(out, "(x2c.array");
-    {
-      Var item;
-      Array _x2c_macro_object_1 = Var_array(value);
-      int _x2c_macro_cursor_1 = 0;
-      Var _x2c_macro_cursor_output_1;
-      while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-        item = _x2c_macro_cursor_output_1;
-        {
-          Buffer_write_char(out, ' ');
-          if(! datum_write(out, item, tagged)) return 0;
-        }
-
+static int _write_array(Buffer out, Array array){
+  Buffer_write(out, "(x2c.array");
+  {
+    Var item;
+    Array _x2c_macro_object_1 = array;
+    int _x2c_macro_cursor_1 = 0;
+    Var _x2c_macro_cursor_output_1;
+    while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      item = _x2c_macro_cursor_output_1;
+      {
+        Buffer_write_char(out, ' ');
+        if(! datum_write(out, item, 1)) return 0;
       }
 
     }
-    Buffer_write_char(out, ')');
-  }
-  else if(tagged && Var_is(value, 26720)){
-    Buffer_write(out, "(x2c.map");
-    {
-      Var key, item;
-      Map _x2c_macro_object_2 = Var_map(value);
-      unsigned _x2c_macro_cursor_2 = 0;
-      Var _x2c_macro_cursor_output_2;
-      Var _x2c_macro_cursor_output_3;
-      while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
-        key = _x2c_macro_cursor_output_2;
-        item = _x2c_macro_cursor_output_3;
-        {
-          Buffer_write(out, " (");
-          if(! datum_write(out, key, tagged)) return 0;
-          Buffer_write_char(out, ' ');
-          if(! datum_write(out, item, tagged)) return 0;
-          Buffer_write_char(out, ')');
-        }
 
-      }
-
-    }
-    Buffer_write_char(out, ')');
   }
-  else if(tagged && Var_is_row(value, 11, 7, 5)) Buffer_printf(out, "(x2c.token %llu)", (unsigned long long) value.u64);
-  else return 0;
+  Buffer_write_char(out, ')');
   return 1;
 }
 
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+static int _write_map(Buffer out, Map map){
+  Buffer_write(out, "(x2c.map");
+  {
+    Var key, item;
+    Map _x2c_macro_object_2 = map;
+    unsigned _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_2;
+    Var _x2c_macro_cursor_output_3;
+    while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
+      key = _x2c_macro_cursor_output_2;
+      item = _x2c_macro_cursor_output_3;
+      {
+        Buffer_write(out, " (");
+        if(! datum_write(out, key, 1)) return 0;
+        Buffer_write_char(out, ' ');
+        if(! datum_write(out, item, 1)) return 0;
+        Buffer_write_char(out, ')');
+      }
+
+    }
+
+  }
+  Buffer_write_char(out, ')');
+  return 1;
+}
+
+Symbol Lisp_read(Lisp, String, unsigned *, Var *);
+
+int datum_read(String text, unsigned * cursor, Var * out){
+  if(! _init_guard_) _file_init_();
+  Var value =((void) 0, Void);
+  if(Lisp_read(NULL, text, &((* cursor)), &(value)) != 46228810) return 0;
+  (* out) = _decode(value);
+  return 1;
+}
+
+int Var_is_nil(Var);
+
+Var Symbol_var(Symbol);
+
+Atom Atom_intern(String);
+
+Var List_cadr(List);
+
 Symbol Symbol_new(const char *);
+
+Var List_caddr(List);
+
+Var Var_new(Symbol, ...);
+
+Var Array_var(Array);
+
+Array List_array(List);
+
+Var Map_var(Map);
+
+static Var _decode(Var value){
+  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;
+  if(! _tag_headed(Var_list(value))) return List_var(_decode_list(Var_list(value)));
+  List list = Var_list(value);
+  String tag = Var_str(List_car(list));
+  if(String_equal(tag, _27)) return((void) 0, Void);
+  if(String_equal(tag, _28)) return Symbol_var((Symbol) 0);
+  if(String_equal(tag, _29)) return Atom_intern(Var_str(List_cadr(list)));
+  if(String_equal(tag, _30)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
+  if(String_equal(tag, _31)) return _decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
+  if(String_equal(tag, _32)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
+  if(String_equal(tag, _33)) return List_var(_decode_list(Var_list(List_cadr(list))));
+  if(String_equal(tag, _34)) return Array_var(List_array(_decode_list(List_cdr(list))));
+  return Map_var(_decode_map(List_cdr(list)));
+}
+
+Array Array_new(void);
+
+Var Array_push(Array, Var);
+
+List Array_list_free(Array);
+
+static List _decode_list(List list){
+  Array items = Array_new();
+  {
+    Var item;
+    List _x2c_macro_object_3 = list;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
+      item = _x2c_macro_cursor_output_4;
+      Array_push(items, _decode(item));
+    }
+
+  }
+  return Array_list_free(items);
+}
 
 Var Var_convert(Var, Symbol);
 
-static Var _datum_decode_number(String tag, String text){
+static Var _decode_number(String tag, String text){
   Symbol target = Symbol_new(tag);
-  if(String_startswith(tag, _53) || String_equal(tag, _27)){
+  if(String_startswith(tag, _53) || String_equal(tag, _35)){
     long double value = strtold(text, NULL);
     return Var_convert(Var_box_long_double(value), target);
   }
@@ -292,84 +375,24 @@ static Var _datum_decode_number(String tag, String text){
   return Var_convert(Var_box_long_long(value), target);
 }
 
-Array Array_new(void);
-
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
-
-static List _datum_decode_list(List list){
-  Array items = Array_new();
-  {
-    Var item;
-    List _x2c_macro_object_3 = list;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-      item = _x2c_macro_cursor_output_4;
-      Array_push(items, _datum_decode(item));
-    }
-
-  }
-  return Array_list_free(items);
-}
-
-Var Symbol_var(Symbol);
-
-Atom Atom_intern(String);
-
-Var List_cadr(List);
-
-Var List_caddr(List);
-
-Var Var_new(Symbol, ...);
-
-Var Array_var(Array);
-
-Array List_array(List);
-
 Map Map_new(void);
 
 Var Map_setindex(Map, Var, Var);
 
-Var Map_var(Map);
-
-static Var _datum_decode(Var value){
-  if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;
-  if(! _datum_tagged(value)) return List_var(_datum_decode_list(Var_list(value)));
-  List list = Var_list(value);
-  String tag = Var_str(List_car(list));
-  if(String_equal(tag, _28)) return((void) 0, Void);
-  if(String_equal(tag, _29)) return Symbol_var((Symbol) 0);
-  if(String_equal(tag, _30)) return Atom_intern(Var_str(List_cadr(list)));
-  if(String_equal(tag, _31)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
-  if(String_equal(tag, _32)) return _datum_decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
-  if(String_equal(tag, _33)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
-  if(String_equal(tag, _34)) return List_var(_datum_decode_list(Var_list(List_cadr(list))));
-  if(String_equal(tag, _35)) return Array_var(List_array(_datum_decode_list(List_cdr(list))));
+static Map _decode_map(List entries){
   Map map = Map_new();
   {
     List entry;
-    List _x2c_macro_object_4 = List_cdr(list);
+    List _x2c_macro_object_4 = entries;
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
       entry = Var_list(_x2c_macro_cursor_output_5);
-      Map_setindex(map, _datum_decode(List_car(entry)), _datum_decode(List_cadr(entry)));
+      Map_setindex(map, _decode(List_car(entry)), _decode(List_cadr(entry)));
     }
 
   }
-  return Map_var(map);
-}
-
-Symbol Lisp_read(Lisp, String, unsigned *, Var *);
-
-int datum_read(String text, unsigned * cursor, Var * out){
-  if(! _init_guard_) _file_init_();
-  Var value =((void) 0, Void);
-  if(Lisp_read(NULL, text, &((* cursor)), &(value)) != 46228810) return 0;
-  (* out) = _datum_decode(value);
-  return 1;
+  return map;
 }
 
 Buffer Buffer_new(size_t);
@@ -437,7 +460,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 188};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 216};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }
@@ -458,29 +481,33 @@ Var int_var(int);
 List datum_result_problem(Var value, Map marks){
   if(! _init_guard_) _file_init_();
   if(Var_is_pointer(value) && value.u64) return _44;
-  if(Var_is_row(value, 9, 7, 4)){
-    {
-      Var item;
-      List _x2c_macro_object_5 = Var_list(value);
-      List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-      Var _x2c_macro_cursor_output_6;
-      while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
-        item = _x2c_macro_cursor_output_6;
-        {
-          List problem = datum_result_problem(item, marks);
-          if(List_truth(problem)) return problem;
-        }
-
-      }
-
-    }
-    return NULL;
-  }
+  if(Var_is_row(value, 9, 7, 4)) return _items_problem(value, marks);
   if(! Var_is(value, 3313778) && ! Var_is(value, 26720)) return NULL;
   ulong address =(ulong) value.u64;
   if(Map_contains(marks, ulong_var(address))) return cons(String_var(Var_equal(Map_getindex(marks, ulong_var(address)), int_var(1)) ? _50 : _51), _49);
   Map_setindex(marks, ulong_var(address), int_var(1));
-  if(Var_is(value, 3313778)){
+  List problem = _items_problem(value, marks);
+  if(! List_truth(problem)) Map_setindex(marks, ulong_var(address), int_var(2));
+  return problem;
+}
+
+static List _items_problem(Var value, Map marks){
+  if(Var_is_row(value, 9, 7, 4)){
+    Var item;
+    List _x2c_macro_object_5 = Var_list(value);
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
+      item = _x2c_macro_cursor_output_6;
+      {
+        List problem = datum_result_problem(item, marks);
+        if(List_truth(problem)) return problem;
+      }
+
+    }
+
+  }
+  else if(Var_is(value, 3313778)){
     Var item;
     Array _x2c_macro_object_6 = Var_array(value);
     int _x2c_macro_cursor_6 = 0;
@@ -513,7 +540,6 @@ List datum_result_problem(Var value, Map marks){
     }
 
   }
-  Map_setindex(marks, ulong_var(address), int_var(2));
   return NULL;
 }
 
