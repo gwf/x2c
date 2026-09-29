@@ -182,9 +182,9 @@ Each one shipped a plausible-looking result before it was found. Match the
 arity the production really has, then compare the operator or type by value
 in the case body: match `%(op ?operator ?operand)` and ask whether
 `operator` is `<"*">`. Where a pattern cannot separate two forms at all, the
-comparison moves one level down: `_meta_text` in `src/stage.x` reads the
-literal's opening quote to decide whether the spelling is a string or a
-character code.
+comparison moves one level down: `literal_text_value` in `src/stage.x`
+reads the literal's opening quote to decide whether the spelling is a string
+or a character code.
 
 ### 3. Which matching form fits each job
 
