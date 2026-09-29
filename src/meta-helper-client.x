@@ -87,8 +87,7 @@ static void Call.check(Call *call) {
   if (!helper_path) call.refuse("the project meta module was not built");
   if (helper_failures && helper_failures.try_get(helper_table, failure))
     call.refuse(failure);
-  String missing = call.compiler.meta_call_missing(call.name);
-  if (missing.startswith("a struct")) call.refuse(missing);
+  call.compiler.refuse_record_meta_call(call.name, call.site);
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */

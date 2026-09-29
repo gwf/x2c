@@ -103,8 +103,8 @@ Public functions:
 `Compiler.optional_reference_test`, `reference_guard_exits`,
 `Compiler.macro_definition_locals`, `Compiler.fresh_name`,
 `Compiler.emitted_binding_name`, `preproc_never_active_arm`,
-`preproc_open_state`, `preproc_branch_state`, `Compiler.tokenize`,
-`Compiler.mark_completion`, `Compiler.at_completion`,
+`preproc_open_state`, `preproc_branch_state`, `preproc_visibility`,
+`Compiler.tokenize`, `Compiler.mark_completion`, `Compiler.at_completion`,
 `Compiler.__complete_here`, `Compiler.skip_trivia_from`, `Symbol.group_step`,
 `Token.group_close`, `Token.after_group`, `Compiler.peek`,
 `Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
@@ -343,7 +343,8 @@ Public functions:
 `Compiler.meta_reaches_compile_time`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.use_meta_build_directory`,
 `Compiler.write_meta_build`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.bind_meta_group`
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.bind_meta_group`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 

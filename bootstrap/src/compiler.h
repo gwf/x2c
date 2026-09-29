@@ -178,6 +178,8 @@ int preproc_open_state(String text);
 
 int preproc_branch_state(int state);
 
+int preproc_visibility(String text);
+
 void Compiler_tokenize(Compiler c, char * text);
 
 void Compiler_mark_completion(Compiler compiler, int position);

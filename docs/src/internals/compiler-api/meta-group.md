@@ -22,6 +22,7 @@ A unit's meta group, emitted as C.
 | [`Compiler.meta_reaches_compile_time`](#Compiler.meta_reaches_compile_time) | Answers whether a `meta` body reaches the compiler itself: it names a compile-time-only function or a compiler operation, or constructs a template. |
 | [`Compiler.record_meta_import`](#Compiler.record_meta_import) | Records that a compile-time import has just added its `meta` definitions to the unit, so the group places them where the import stands. |
 | [`Compiler.refuse_meta_call`](#Compiler.refuse_meta_call) | Reports at `site` that the `meta` function `name` cannot run at compile time, and `why`. |
+| [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, which its type alone decides. |
 | [`Compiler.stage_meta_in_process`](#Compiler.stage_meta_in_process) | Enables in-process staging of `meta` groups for compiler sessions. |
 | [`Compiler.use_meta_build_directory`](#Compiler.use_meta_build_directory) | Directs the group of each unit the project meta build parses into `directory`, or stops that when it is NULL. |
 | [`Compiler.use_meta_toolchain`](#Compiler.use_meta_toolchain) | Selects the C compiler `cc` that builds the `meta` code of the units this process translates, with the runtime headers this compiler was built with, found from its installed headers in `include_dir`. |
@@ -37,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:694`
+Source: `src/meta-group.x:702`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -131,6 +132,17 @@ Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
 Source: `src/meta-group.x:618`
+
+<a id="Compiler.refuse_record_meta_call"></a>
+#### Compiler.refuse_record_meta_call
+
+`void Compiler.refuse_record_meta_call(Compiler c, String name, Token site)`
+
+Reports at `site` that the group function `name` cannot run at compile
+time when its result is a struct or union, which its type alone
+decides.
+
+Source: `src/meta-group.x:628`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
