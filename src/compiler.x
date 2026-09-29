@@ -3088,7 +3088,11 @@ static String _declaration_path(String path, int thaw) {
   return thaw ? home_absolute_path(path) : home_portable_path(path);
 }
 
-// declaration production
+/* declaration production
+
+   A declaration producer's source effects wait until production needs
+   their state. Collection retains the bundle a producer returns with its
+   token span, and the full parse replays that bundle. */
 
 /** Queues a source Lisp form until declaration production needs its state.
     Files without declaration producers keep ordinary full-parse evaluation. */
@@ -3825,7 +3829,10 @@ static List Compiler._finish_parse(Compiler c, Array nodes) {
   return ast;
 }
 
-// script units
+/* script units
+
+   A script unit that defines `main` rejects top-level statements; one that
+   does not runs them, in source order, inside a generated `main`. */
 
 /** Skips a collected script statement, or diagnoses one beside `main`.
     Called after top-level directives establish source visibility.
