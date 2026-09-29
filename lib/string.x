@@ -1717,7 +1717,7 @@ static inline int _named_escape(int esc) {
 meta native int String.parse_char(String str) {
   if (!str || !*str) return -1;
   const char *at = str;
-  if (*at++ != '\'') return -1;
+  if (*at++ != '\'' || !*at) return -1;
   int byte = *at++;
   if (byte == '\\') {
     if (!*at) return -1;

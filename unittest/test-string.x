@@ -307,6 +307,15 @@ static void string_escape_sequences(void) {
   EXPECT_INT_EQ(%"'\\400'".parse_char(), -1);
 }
 
+/* The String ends after its opening quote. The quote stored past the NUL
+   must not complete a character. */
+static void string_parse_char_rejects_lone_quote(void) {
+  String quote = String.malloc(4);
+  memcpy(quote, "'\0'", 4);
+  EXPECT_INT_EQ(quote.parse_char(), -1);
+  quote.free();
+}
+
 static void string_multiline_literals(void) {
   String with_newline = %"hello
 world";
@@ -708,6 +717,7 @@ void string_suite(void) {
   $test.run(string_invalid_input_transfer);
   $test.run(string_callback_transfer_releases_temporary);
   $test.run(string_escape_sequences);
+  $test.run(string_parse_char_rejects_lone_quote);
   $test.run(string_multiline_literals);
   $test.run(string_boundary_behavior);
   $test.run(string_high_bytes_read_unsigned);
