@@ -246,82 +246,97 @@ Compiler Compiler.new_shared(Compiler owner) {
 
 // Zero finalizer-visible state before any fallible initialization.
 static Compiler _new(Compiler owner) {
-  Compiler compiler =
+  Compiler c =
     Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
-  memset(compiler, 0, sizeof(struct Compiler));
-  with compiler {
-    _.id_keys = [];
-    _.key_ids = {};
-    _.deps = {};
-    _.macros = {};
-    _.kw_aliases = {};
-    _.kw_seen = {};
-    _.object_macros = {};
-    _.proto_cache = {};
-    _.imports = {};
-    _.init_tokens = {};
-    _.static_init_deps = {};
-    _.fn_defs = {};
-    _.meta_comptime = {};
-    _.meta_regions = {};
-    _.meta_hashes = {};
-    _.meta_calls = {};
-    _.native_meta = {};
-    if (!owner) _.inherit_library_comptime();
-    if (owner) {
-      /* A child compiler owns its tokens, symbols, and diagnostics. Package
-         registries and generated-name state belong to the whole translation
-         unit, so every child must mutate the owner's exact objects. */
-      _.package = owner.package;
-      _.package_dirs = owner.package_dirs;
-      _.package_roots = owner.package_roots;
-      _.package_aliases = owner.package_aliases;
-      _.package_members = owner.package_members;
-      _.names = owner.names;
-      _.source_map = owner.source_map;
-      _.recovery_depth = owner.recovery_depth;
-      _.sources = owner.sources;
-      _.declaration_produced = owner.declaration_produced;
-      _.source_facts = owner.source_facts;
-      _.source_occurrences = owner.source_occurrences;
-      _.source_definitions = owner.source_definitions;
-      _.source_declarations = owner.source_declarations;
-      _.source_texts = owner.source_texts;
-      _.unit_script = owner.unit_script;
-      _.include_dirs = owner.include_dirs;
-      _.meta_build = owner.meta_build;
-    }
-    else {
-      _.package_roots = {};
-      _.package_aliases = {};
-      _.package_members = {};
-      _.names = Scope.calloc(1, sizeof(struct GenNames));
-      _.names.counters = {};
-      _.names.adapters = {};
-      _.names.file_scope_owners = {};
-    }
-    _.sym = Scope.calloc(1, sizeof(struct Sym));
-    with _.sym {
-      _.compiler = compiler;
-      _.binding_facts = {};
-      _.scopes = Block.new(sizeof(SymScope));
-      _.statics = {};
-    }
-    _.inits = [];
-    _.early_decls = [];
-    _.meta_defs = [];
-    _.meta_group = [];
-    _.meta_group_bound = {};
-    _.collect_protocols = 1;
-    _.diagnostics = Diagnostics.new(
-      owner && owner.diagnostics.printer ? _ : NULL,
-      owner ? owner.diagnostics.limit : 1);
-    _.braces = [];
-    _.import_stack = [];
-    _.origins = [];
-    _.root_dir = x2c_get_root();
-    return _;
-  }
+  memset(c, 0, sizeof(struct Compiler));
+  c._init_tables();
+  if (owner) c._share_unit(owner);
+  else c._own_unit();
+  c.sym = _new_sym(c);
+  c._init_queues();
+  c.collect_protocols = 1;
+  c.diagnostics = Diagnostics.new(
+    owner && owner.diagnostics.printer ? c : NULL,
+    owner ? owner.diagnostics.limit : 1);
+  c.braces = [];
+  c.import_stack = [];
+  c.origins = [];
+  c.root_dir = x2c_get_root();
+  return c;
+}
+
+static void Compiler._init_tables(Compiler c) {
+  c.id_keys = [];
+  c.key_ids = {};
+  c.deps = {};
+  c.macros = {};
+  c.kw_aliases = {};
+  c.kw_seen = {};
+  c.object_macros = {};
+  c.proto_cache = {};
+  c.imports = {};
+  c.init_tokens = {};
+  c.static_init_deps = {};
+  c.fn_defs = {};
+  c.meta_comptime = {};
+  c.meta_regions = {};
+  c.meta_hashes = {};
+  c.meta_calls = {};
+  c.native_meta = {};
+}
+
+/* A child compiler owns its tokens, symbols, and diagnostics. Package
+   registries and generated-name state belong to the whole translation
+   unit, so every child must mutate the owner's exact objects. */
+static void Compiler._share_unit(Compiler c, Compiler owner) {
+  c.package = owner.package;
+  c.package_dirs = owner.package_dirs;
+  c.package_roots = owner.package_roots;
+  c.package_aliases = owner.package_aliases;
+  c.package_members = owner.package_members;
+  c.names = owner.names;
+  c.source_map = owner.source_map;
+  c.recovery_depth = owner.recovery_depth;
+  c.sources = owner.sources;
+  c.declaration_produced = owner.declaration_produced;
+  c.source_facts = owner.source_facts;
+  c.source_occurrences = owner.source_occurrences;
+  c.source_definitions = owner.source_definitions;
+  c.source_declarations = owner.source_declarations;
+  c.source_texts = owner.source_texts;
+  c.unit_script = owner.unit_script;
+  c.include_dirs = owner.include_dirs;
+  c.meta_build = owner.meta_build;
+}
+
+/* The first compiler of a unit creates the state its children share and
+   starts from the shared session's compile-time-only definitions. */
+static void Compiler._own_unit(Compiler c) {
+  c.inherit_library_comptime();
+  c.package_roots = {};
+  c.package_aliases = {};
+  c.package_members = {};
+  c.names = Scope.calloc(1, sizeof(struct GenNames));
+  c.names.counters = {};
+  c.names.adapters = {};
+  c.names.file_scope_owners = {};
+}
+
+static Sym _new_sym(Compiler c) {
+  Sym s = Scope.calloc(1, sizeof(struct Sym));
+  s.compiler = c;
+  s.binding_facts = {};
+  s.scopes = Block.new(sizeof(SymScope));
+  s.statics = {};
+  return s;
+}
+
+static void Compiler._init_queues(Compiler c) {
+  c.inits = [];
+  c.early_decls = [];
+  c.meta_defs = [];
+  c.meta_group = [];
+  c.meta_group_bound = {};
 }
 
 /** Destroys a compiler's owned `Lisp` session, if any.
@@ -343,8 +358,8 @@ void Compiler.free_lisp(Compiler c) {
 
 // Lisp calls must have returned before the compiler's Scope is reclaimed.
 static void _drop_compiler(void *ptr) {
-  Compiler compiler = ptr;
-  compiler.free_lisp();
+  Compiler c = ptr;
+  c.free_lisp();
 }
 
 // related compilers
@@ -358,29 +373,29 @@ static void _drop_compiler(void *ptr) {
     they also read one record of which `meta` functions reach file-scope
     state.
 */
-void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
-  compiler.sym = owner.sym;
-  compiler.fn_defs = owner.fn_defs;
-  compiler.id_keys = owner.id_keys;
-  compiler.key_ids = owner.key_ids;
-  compiler.protocols = owner.protocols;
-  compiler.adoptions = owner.adoptions;
-  compiler.conforms = owner.conforms;
-  compiler.protocol_helpers = owner.protocol_helpers;
-  compiler.proto_cache = owner.proto_cache;
-  compiler.meta_comptime = owner.meta_comptime;
-  compiler.meta_regions = owner.meta_regions;
-  compiler.meta_hashes = owner.meta_hashes;
-  compiler.meta_calls = owner.meta_calls;
-  compiler.native_meta = owner.native_meta;
+void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
+  c.sym = owner.sym;
+  c.fn_defs = owner.fn_defs;
+  c.id_keys = owner.id_keys;
+  c.key_ids = owner.key_ids;
+  c.protocols = owner.protocols;
+  c.adoptions = owner.adoptions;
+  c.conforms = owner.conforms;
+  c.protocol_helpers = owner.protocol_helpers;
+  c.proto_cache = owner.proto_cache;
+  c.meta_comptime = owner.meta_comptime;
+  c.meta_regions = owner.meta_regions;
+  c.meta_hashes = owner.meta_hashes;
+  c.meta_calls = owner.meta_calls;
+  c.native_meta = owner.native_meta;
 }
 
 /** Shares `owner`'s pending `meta` group and the definitions it reads, which
     belong with the Lisp session that holds the group's stubs. */
-void Compiler.share_meta_group(Compiler compiler, Compiler owner) {
-  compiler.meta_group = owner.meta_group;
-  compiler.meta_group_bound = owner.meta_group_bound;
-  compiler.meta_defs = owner.meta_defs;
+void Compiler.share_meta_group(Compiler c, Compiler owner) {
+  c.meta_group = owner.meta_group;
+  c.meta_group_bound = owner.meta_group_bound;
+  c.meta_defs = owner.meta_defs;
 }
 
 /** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
@@ -388,32 +403,32 @@ void Compiler.share_meta_group(Compiler compiler, Compiler owner) {
     translation unit, so a shadow uses the unit's Lisp environment rather
     than its own.
 */
-void Compiler.take_unit_state(Compiler compiler, Compiler owner) {
-  compiler.macros = owner.macros;
-  compiler.object_macros = owner.object_macros;
-  compiler.imports = owner.imports;
-  compiler.kw_aliases = owner.kw_aliases;
-  compiler.kw_seen = owner.kw_seen;
-  compiler.macro_lisp = owner.macro_lisp;
-  compiler.declaration_effects = owner.declaration_effects;
-  compiler.borrowed_lisp = compiler.macro_lisp != NULL;
-  compiler.share_meta_group(owner);
+void Compiler.take_unit_state(Compiler c, Compiler owner) {
+  c.macros = owner.macros;
+  c.object_macros = owner.object_macros;
+  c.imports = owner.imports;
+  c.kw_aliases = owner.kw_aliases;
+  c.kw_seen = owner.kw_seen;
+  c.macro_lisp = owner.macro_lisp;
+  c.declaration_effects = owner.declaration_effects;
+  c.borrowed_lisp = c.macro_lisp != NULL;
+  c.share_meta_group(owner);
 }
 
 /** Returns that state to `owner`, so the next segment starts where this one
     finished and any Lisp environment this segment created stays alive after
     the shadow is released.
 */
-void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
-  owner.macros = compiler.macros;
-  owner.object_macros = compiler.object_macros;
-  owner.imports = compiler.imports;
-  owner.kw_aliases = compiler.kw_aliases;
-  owner.kw_seen = compiler.kw_seen;
-  owner.macro_lisp = compiler.macro_lisp;
-  owner.declaration_effects = compiler.declaration_effects;
-  owner.declaration_produced |= compiler.declaration_produced;
-  compiler.borrowed_lisp = compiler.macro_lisp != NULL;
+void Compiler.return_unit_state(Compiler c, Compiler owner) {
+  owner.macros = c.macros;
+  owner.object_macros = c.object_macros;
+  owner.imports = c.imports;
+  owner.kw_aliases = c.kw_aliases;
+  owner.kw_seen = c.kw_seen;
+  owner.macro_lisp = c.macro_lisp;
+  owner.declaration_effects = c.declaration_effects;
+  owner.declaration_produced |= c.declaration_produced;
+  c.borrowed_lisp = c.macro_lisp != NULL;
 }
 
 // source files and dependencies
@@ -461,8 +476,8 @@ void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
 }
 
 /** Records a path dependency not embedded in generated C. */
-void Compiler.add_translation_dependency(Compiler compiler, String path) {
-  compiler.deps.merge_translation_dependency(path, 1);
+void Compiler.add_translation_dependency(Compiler c, String path) {
+  c.deps.merge_translation_dependency(path, 1);
 }
 
 /** Merges another translation's dependency rows into this compiler. */
@@ -2804,35 +2819,34 @@ List Compiler.catch_binder_declarations(
     Compilers that share a store call this when taking the diagnostic stream
     back from another compiler.
 */
-void Compiler.own_diagnostics(Compiler compiler) {
-  compiler.diagnostics.printer = compiler;
+void Compiler.own_diagnostics(Compiler c) {
+  c.diagnostics.printer = c;
 }
 
 /** Shares a caller's diagnostic stream while preserving its emission policy.
     The caller restores the saved printer after this child finishes.
 */
-void Compiler.borrow_diagnostics(Compiler compiler, Compiler owner) {
-  compiler.diagnostics = owner.diagnostics;
-  if (compiler.diagnostics.printer) compiler.own_diagnostics();
+void Compiler.borrow_diagnostics(Compiler c, Compiler owner) {
+  c.diagnostics = owner.diagnostics;
+  if (c.diagnostics.printer) c.own_diagnostics();
 }
 
 /** Moves collected child reports into the caller's store without re-emitting.
     Shared stores already contain their entries. The child's separate store
     remains configured and empty after its reports have been transferred.
 */
-void Compiler.take_diagnostics(Compiler compiler, Compiler child) {
-  Diagnostics target = compiler.diagnostics, source = child.diagnostics;
-  if (target != source) {
-    foreach (Var entry, source.entries) target.entries.push(entry);
-    target.count += source.count;
-    target.limit_notified |= source.limit_notified;
-    source.reset();
-  }
+void Compiler.take_diagnostics(Compiler c, Compiler child) {
+  Diagnostics target = c.diagnostics, source = child.diagnostics;
+  if (target == source) return;
+  foreach (Var entry, source.entries) target.entries.push(entry);
+  target.count += source.count;
+  target.limit_notified |= source.limit_notified;
+  source.reset();
 }
 
 /** Retains a child's final diagnostics and closes its owned Lisp session. */
-void Compiler.close_child(Compiler compiler, Compiler child) {
-  compiler.take_diagnostics(child);
+void Compiler.close_child(Compiler c, Compiler child) {
+  c.take_diagnostics(child);
   child.free_lisp();
 }
 
