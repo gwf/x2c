@@ -50,57 +50,140 @@ typedef struct ParsedUnit {
 #include "deps.x"
 #include "utils.x"
 
-static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
+// source units
 
-static int _source_lines(String text) {
-  if (!text) return 0;
-  int lines = text[text.len() - 1] == '\n' ? 0 : 1;
-  for (char *ch = text; *ch; ch++)
-    if (*ch == '\n') lines++;
-  return lines;
-}
-
-static Token _first_preprocessor_token(Compiler compiler) {
-  for (Token token = compiler.tokenizer.tokens; token.type != <eof>; token++)
-    if (token.type == <preproc>) return token;
-  return compiler.token;
-}
-
-/** Loads process-owned collection support and the native modules `request`
-    names before units, and selects those modules, in order, for its
-    compile-time calls.
+/** Runs the source stages. On either result, the caller must close the
+    unit.
 */
-void Frontend.load_support(CliRequest request) {
-  interface_configure(request.out_dir, request.no_interfaces);
-  Compiler.select_native_modules(
-    request.native_modules.map(
-      %!(String path) => Compiler.load_native_module(path)));
-}
+int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
+  f.start(filename, unit) && unit.collect(f) && unit.parse();
 
-/** Borrows a configured request for sequential units. The request and this
-    session must outlive its units. Initialize process support above any
-    temporary command Context before creating a session inside that Context.
+/** Opens an empty submission unit with the ordinary runtime prelude.
+    Preload macro libraries first. The caller must close the unit on either
+    result; submissions and inspection results borrow its Context. */
+int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
+  (Compiler.stage_meta_in_process(), 1) && _start(
+    frontend, NULL, unit, 0, "$(begin)\n"
+    "void print(String text);\n"
+    "void println(String text);\n") &&
+  unit.collect(frontend) && unit.parse();
+
+/** Tokenizes one input into a fresh unit with its own isolated `Context`.
+    The caller must close the unit on either result.
 */
-Frontend Frontend.new(CliRequest request) {
-  Frontend.load_support(request);
-  Frontend frontend = Scope.calloc(1, sizeof(struct Frontend));
-  frontend.request = request;
-  frontend.include_dirs =
-    request.include_dirs.append(x2c_default_include_dirs());
-  frontend.toolchain = toolchain_new(
-    request.cc, request.ar, request.cpp_args, request.cc_args,
-    request.ld_args, request.verbose, request.dry_run);
-  Compiler.use_meta_toolchain(
-    toolchain_meta_cc(request.meta_cc), frontend.toolchain.include_dir);
-  return frontend;
+int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
+  _start(frontend, filename, unit, 0, NULL);
+
+/** Collects symbols and retains preprocessor outputs for adapter
+    inspection.
+*/
+int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
+  Compiler compiler = unit.compiler;
+  try {
+    unit.globals = _preprocess_input(frontend, unit);
+    if (unit.preprocessor)
+      compiler.take_diagnostics(unit.preprocessor);
+    compiler.sym.seed_var_tags(unit.globals);
+  }
+  catch %(malformed *): {
+    if (unit.preprocessor) {
+      compiler.close_child(unit.preprocessor);
+      unit.preprocessor = NULL;
+    }
+    return 0;
+  }
+  return !compiler.error_count();
 }
 
-/* A `#!` first line makes the file a script unit, and that line reads as an
-   include of `scripting.x`. Only the first line changes, so every later
-   line number stays in place. */
-static String _script_text(String text) {
-  int end = text.find("\n");
-  return %"#include \"scripting.x\"${end < 0 ? "" : text[end:]}";
+/** Parses a collected unit, retaining both its AST and unsuccessful
+    reports.
+*/
+int ParsedUnit.parse(ParsedUnit &p) {
+  Compiler compiler = p.compiler;
+  if (compiler.error_count()) return 0;
+  try p.ast = compiler.full_parse(p.globals, p.generated_symbols);
+  catch %(malformed *): return 0;
+  return !compiler.error_count();
+}
+
+/** Releases the unit after its caller has inspected or exported its
+    results.
+*/
+void ParsedUnit.close(ParsedUnit &unit) {
+  if (!unit.context) return;
+  Compiler compiler = unit.compiler;
+  if (unit.preprocessor) compiler.close_child(unit.preprocessor);
+  compiler.free_lisp();
+  Type.end_unit();
+  unit.context.close();
+  unit = (ParsedUnit) { 0 };
+}
+
+// starting a unit
+
+/* Opens and tokenizes an isolated source unit without printing diagnostics.
+    A failed unit remains open so its diagnostics can be inspected. Close
+    it before opening the next unit; Type and collection caches are
+    process-global.
+*/
+static int _start(
+  Frontend frontend, String filename, ParsedUnit &unit, int shared_values,
+  String session_source) {
+  unit = (ParsedUnit) { 0 };
+  unit.generated_symbols = !frontend.request.no_cpp &&
+    (!frontend.request.dump || frontend.request.dump == <dump-defs>);
+  unit.context = shared_values
+    ? Context.open_named("shared translation unit")
+    : Context.open_isolated_named("translation unit");
+  Type.begin_unit();
+  unit.compiler = Compiler.new();
+  Compiler compiler = unit.compiler;
+  compiler.diagnostics.limit = frontend.request.max_errors;
+  compiler.source_map = frontend.request.source_map;
+  compiler.sources = frontend.request.sources;
+  compiler.source_facts = frontend.request.source_facts;
+  compiler.source_primary = 1;
+  if (compiler.source_facts) {
+    compiler.source_occurrences = [];
+    compiler.source_definitions = {};
+    compiler.source_declarations = {};
+    compiler.source_texts = {};
+  }
+  compiler.recovery_depth++;
+  try {
+    if (filename) {
+      _configure_package(compiler, frontend.request, filename);
+      _tokenize_input(frontend, unit, filename);
+      compiler.inherited_lisp =
+        Compiler.inherits_import(Path.absolute(filename));
+      Compiler.begin_meta_unit(compiler.filename);
+    }
+    else {
+      compiler.filename = "<repl>";
+      compiler.prelude = compiler.runtime_inc = 1;
+      compiler.include_dirs = frontend.include_dirs;
+      compiler.tokenize(session_source ? session_source : "$(begin)");
+    }
+  }
+  catch %(malformed *): return 0;
+  return !compiler.error_count();
+}
+
+/* A unit compiles in package mode only when it is one of that package's own
+   files below `<root>/<name>/src/` or the single-file `<root>/<name>/<name>.x`
+   under a registered --package-dir root. The comparison uses the canonical
+   path, so symlinked or relative spellings of one file agree; a test or
+   example elsewhere in the package directory is a consumer and reaches the
+   package through `import`. */
+static void _configure_package(
+  Compiler c, CliRequest request, String filename) {
+  c.package_dirs = request.package_roots();
+  String source = Path.absolute(filename);
+  String package = x2c_package_directory(c.package_dirs, source);
+  if (!package || !x2c_package_source(package, source)) return;
+  String name = Path.basename(package);
+  c.package = name;
+  c.package_roots[name] = package;
 }
 
 static void _tokenize_input(
@@ -147,36 +230,25 @@ static void _tokenize_input(
   if (c.script) c.script.defines_main = c.defines_main();
 }
 
-/* A unit compiles in package mode only when it is one of that package's own
-   files below `<root>/<name>/src/` or the single-file `<root>/<name>/<name>.x`
-   under a registered --package-dir root. The comparison uses the canonical
-   path, so symlinked or relative spellings of one file agree; a test or
-   example elsewhere in the package directory is a consumer and reaches the
-   package through `import`. */
-static void _configure_package(
-  Compiler c, CliRequest request, String filename) {
-  c.package_dirs = request.package_roots();
-  String source = Path.absolute(filename);
-  String package = x2c_package_directory(c.package_dirs, source);
-  if (!package || !x2c_package_source(package, source)) return;
-  String name = Path.basename(package);
-  c.package = name;
-  c.package_roots[name] = package;
+/* A `#!` first line makes the file a script unit, and that line reads as an
+   include of `scripting.x`. Only the first line changes, so every later
+   line number stays in place. */
+static String _script_text(String text) {
+  int end = text.find("\n");
+  return %"#include \"scripting.x\"${end < 0 ? "" : text[end:]}";
 }
 
-static Map _collect_input(Frontend frontend, Compiler c, Map globs) {
-  String package = c.package;
-  defer c.package = package;
-  Map packages = frontend.request.collection_packages;
-  if (packages != NULL) {
-    Var root = packages[Path.absolute(c.filename)];
-    if (root is not void) {
-      c.package = Path.basename(root);
-      c.package_roots[c.package] = root;
-    }
-  }
-  return c.collect_symbols(globs);
+static int _source_lines(String text) {
+  if (!text) return 0;
+  int lines = text[text.len() - 1] == '\n' ? 0 : 1;
+  for (char *ch = text; *ch; ch++)
+    if (*ch == '\n') lines++;
+  return lines;
 }
+
+// symbol collection
+
+static const SymbolSet cpp_dumps = %<<dump-cpp cpp-tokens dump-csym>>;
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   Compiler c = unit.compiler;
@@ -247,59 +319,46 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   return globs;
 }
 
-/* Opens and tokenizes an isolated source unit without printing diagnostics.
-    A failed unit remains open so its diagnostics can be inspected. Close
-    it before opening the next unit; Type and collection caches are
-    process-global.
-*/
-static int _start(
-  Frontend frontend, String filename, ParsedUnit &unit, int shared_values,
-  String session_source) {
-  unit = (ParsedUnit) { 0 };
-  unit.generated_symbols = !frontend.request.no_cpp &&
-    (!frontend.request.dump || frontend.request.dump == <dump-defs>);
-  unit.context = shared_values
-    ? Context.open_named("shared translation unit")
-    : Context.open_isolated_named("translation unit");
-  Type.begin_unit();
-  unit.compiler = Compiler.new();
-  Compiler compiler = unit.compiler;
-  compiler.diagnostics.limit = frontend.request.max_errors;
-  compiler.source_map = frontend.request.source_map;
-  compiler.sources = frontend.request.sources;
-  compiler.source_facts = frontend.request.source_facts;
-  compiler.source_primary = 1;
-  if (compiler.source_facts) {
-    compiler.source_occurrences = [];
-    compiler.source_definitions = {};
-    compiler.source_declarations = {};
-    compiler.source_texts = {};
-  }
-  compiler.recovery_depth++;
-  try {
-    if (filename) {
-      _configure_package(compiler, frontend.request, filename);
-      _tokenize_input(frontend, unit, filename);
-      compiler.inherited_lisp =
-        Compiler.inherits_import(Path.absolute(filename));
-      Compiler.begin_meta_unit(compiler.filename);
-    }
-    else {
-      compiler.filename = "<repl>";
-      compiler.prelude = compiler.runtime_inc = 1;
-      compiler.include_dirs = frontend.include_dirs;
-      compiler.tokenize(session_source ? session_source : "$(begin)");
+static Map _collect_input(Frontend frontend, Compiler c, Map globs) {
+  String package = c.package;
+  defer c.package = package;
+  Map packages = frontend.request.collection_packages;
+  if (packages != NULL) {
+    Var root = packages[Path.absolute(c.filename)];
+    if (root is not void) {
+      c.package = Path.basename(root);
+      c.package_roots[c.package] = root;
     }
   }
-  catch %(malformed *): return 0;
-  return !compiler.error_count();
+  return c.collect_symbols(globs);
 }
 
-/** Tokenizes one input into a fresh unit with its own isolated `Context`.
-    The caller must close the unit on either result.
+static Token _first_preprocessor_token(Compiler compiler) {
+  for (Token token = compiler.tokenizer.tokens; token.type != <eof>; token++)
+    if (token.type == <preproc>) return token;
+  return compiler.token;
+}
+
+// compile-time libraries
+
+/** Evaluates the compile-time libraries and installs the compiler surface's
+    own definitions, once for the active build or translation target. Returns
+    zero after reporting a failed preload, without publishing a partial
+    session.
 */
-int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
-  _start(frontend, filename, unit, 0, NULL);
+int Frontend.preload_macro_libraries(Frontend frontend) {
+  Compiler compiler = Compiler.new();
+  Lisp shared = compiler.open_macro_library();
+  if (shared && !_preload_meta_surface(frontend, shared)) {
+    shared.destroy();
+    compiler.publish_macro_library(NULL);
+    collect_forget_preload_entries();
+    return 0;
+  }
+  compiler.publish_macro_library(shared);
+  collect_forget_preload_entries();
+  return 1;
+}
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
    session, each also under its Lisp name. Its values belong to the build
@@ -339,82 +398,33 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   return 1;
 }
 
-/** Evaluates the compile-time libraries and installs the compiler surface's
-    own definitions, once for the active build or translation target. Returns
-    zero after reporting a failed preload, without publishing a partial
-    session.
+// lifecycle
+
+/** Loads process-owned collection support and the native modules `request`
+    names before units, and selects those modules, in order, for its
+    compile-time calls.
 */
-int Frontend.preload_macro_libraries(Frontend frontend) {
-  Compiler compiler = Compiler.new();
-  Lisp shared = compiler.open_macro_library();
-  if (shared && !_preload_meta_surface(frontend, shared)) {
-    shared.destroy();
-    compiler.publish_macro_library(NULL);
-    collect_forget_preload_entries();
-    return 0;
-  }
-  compiler.publish_macro_library(shared);
-  collect_forget_preload_entries();
-  return 1;
+void Frontend.load_support(CliRequest request) {
+  interface_configure(request.out_dir, request.no_interfaces);
+  Compiler.select_native_modules(
+    request.native_modules.map(
+      %!(String path) => Compiler.load_native_module(path)));
 }
 
-/** Collects symbols and retains preprocessor outputs for adapter
-    inspection.
+/** Borrows a configured request for sequential units. The request and this
+    session must outlive its units. Initialize process support above any
+    temporary command Context before creating a session inside that Context.
 */
-int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
-  Compiler compiler = unit.compiler;
-  try {
-    unit.globals = _preprocess_input(frontend, unit);
-    if (unit.preprocessor)
-      compiler.take_diagnostics(unit.preprocessor);
-    compiler.sym.seed_var_tags(unit.globals);
-  }
-  catch %(malformed *): {
-    if (unit.preprocessor) {
-      compiler.close_child(unit.preprocessor);
-      unit.preprocessor = NULL;
-    }
-    return 0;
-  }
-  return !compiler.error_count();
-}
-
-/** Parses a collected unit, retaining both its AST and unsuccessful
-    reports.
-*/
-int ParsedUnit.parse(ParsedUnit &p) {
-  Compiler compiler = p.compiler;
-  if (compiler.error_count()) return 0;
-  try p.ast = compiler.full_parse(p.globals, p.generated_symbols);
-  catch %(malformed *): return 0;
-  return !compiler.error_count();
-}
-
-/** Runs the source stages. On either result, the caller must close the
-    unit.
-*/
-int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
-  f.start(filename, unit) && unit.collect(f) && unit.parse();
-
-/** Opens an empty submission unit with the ordinary runtime prelude.
-    Preload macro libraries first. The caller must close the unit on either
-    result; submissions and inspection results borrow its Context. */
-int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
-  (Compiler.stage_meta_in_process(), 1) && _start(
-    frontend, NULL, unit, 0, "$(begin)\n"
-    "void print(String text);\n"
-    "void println(String text);\n") &&
-  unit.collect(frontend) && unit.parse();
-
-/** Releases the unit after its caller has inspected or exported its
-    results.
-*/
-void ParsedUnit.close(ParsedUnit &unit) {
-  if (!unit.context) return;
-  Compiler compiler = unit.compiler;
-  if (unit.preprocessor) compiler.close_child(unit.preprocessor);
-  compiler.free_lisp();
-  Type.end_unit();
-  unit.context.close();
-  unit = (ParsedUnit) { 0 };
+Frontend Frontend.new(CliRequest request) {
+  Frontend.load_support(request);
+  Frontend frontend = Scope.calloc(1, sizeof(struct Frontend));
+  frontend.request = request;
+  frontend.include_dirs =
+    request.include_dirs.append(x2c_default_include_dirs());
+  frontend.toolchain = toolchain_new(
+    request.cc, request.ar, request.cpp_args, request.cc_args,
+    request.ld_args, request.verbose, request.dry_run);
+  Compiler.use_meta_toolchain(
+    toolchain_meta_cc(request.meta_cc), frontend.toolchain.include_dir);
+  return frontend;
 }
