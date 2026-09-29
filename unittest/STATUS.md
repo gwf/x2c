@@ -182,6 +182,13 @@ rules; tags hidden inside an opaque native macro retain native scope. Pass
 lowered local objects explicitly to native macros. The language reference
 describes these native boundaries.
 
+A Job that meta code starts still outlives the translation on two routes
+that a call's own Scope does not cover. A call that passes the deadline or
+crashes ends the helper by a signal before any cleanup runs. A Job that a
+`meta static` initializer starts belongs to the helper's process Scope,
+which the helper's `_exit` never ends. On macOS, both leave `sleep 30`
+running in the translator's process group after it exits.
+
 ## Retired maintenance notes
 
 - The compiler preserves discarded assignments,
