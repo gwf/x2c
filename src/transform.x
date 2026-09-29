@@ -354,7 +354,7 @@ static List _adapter_reader_call(
     result_type, called(target, arguments));
 }
 
-/* One ABI argument is read before the next reader runs. */
+/* Reuse an issued declarator row without binding it again. */
 macro open Statement $func_local(
     Type $type, DeclaratorRow $row) {
   $type $row;
@@ -612,10 +612,6 @@ macro open Statement $func_static_handle(Name $handle, Expr $value) {
 macro open Statement $func_bridge_prototype(
     Name $bridge, Param $parameters...) {
   extern Func $bridge($parameters...);
-}
-
-macro open Statement $func_local(Type $type, DeclaratorRow $row) {
-  $type $row;
 }
 
 macro open Expression $func_cast(Type $type, Expr $value) =>
