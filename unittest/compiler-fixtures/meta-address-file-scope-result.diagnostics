@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-address-file-scope-result.x:20:9: macro: this function cannot run at compile time
+  int v = $make_node(3)->value;
+          ^
+  note: function: make_node reason: an address result has no compile-time value; return data built from the pointed-to values
+
