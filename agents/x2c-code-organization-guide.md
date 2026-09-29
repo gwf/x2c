@@ -50,15 +50,19 @@ real public operation.
 
 The compiler is consolidated by phase rather than filename prefixes:
 
-- entry and shared state: `main.x`, `cli.x`, `compiler.x`, `diagnostics.x`,
-  `collect.x`, `report.x`, `deps.x`, `utils.x`;
+- entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`,
+  `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`, `deps.x`,
+  `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `parse.x`, `expressions.x`, `statements.x`, `literals.x`, `macros.x`,
-  `ast.x`;
-- semantic representation and lowering: `type.x`, `protocol.x`,
-  `transform.x`, `lambda.x`;
+  `grammar.xmacro`, `ast.x`;
+- compile-time code: `stage.x`, `builtins.x`, `linked-meta.x`,
+  `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
+- semantic representation and lowering: `type.x`, `type-ledger.x`,
+  `protocol.x`, `transform.x`, `regions.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
-- native and project driver: `build.x`, `project.x`, `toolchain.x`.
+- native and project driver: `build.x`, `project.x`, `toolchain.x`,
+  `install.x`, `script.x`, `editor.x`.
 
 Runtime modules never depend on compiler modules. Parser modules produce the
 annotated AST consumed by transforms; transforms produce the normalized AST

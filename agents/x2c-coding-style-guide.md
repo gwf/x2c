@@ -49,6 +49,92 @@ representation unnecessary. Formatting a redundant path leaves the redundancy
 in place. [The bloat test](x2c-philosophy.md#the-bloat-test) describes what a
 deletion must preserve and how to measure its result.
 
+## Shape
+
+A reader has a limited budget on each axis: function height, line width,
+name length, nesting depth, and parameter count. Keep every axis inside its
+band, and keep adjacent functions, names, and lines at similar sizes. An
+element much larger or smaller than its neighbors is a defect whatever its
+absolute size: a 300-line function among 10-line ones, a 45-character name
+among 8-character ones, or a side effect inside a condition.
+
+| Axis | Too little | Band | Too much |
+| --- | --- | --- | --- |
+| Line | a call split although it fits | one idea, up to 79 columns | two ideas; nested ternaries |
+| Name | an abbreviation outside the glossary | subject letter; 1-2 word locals; 2-3 word helpers | 25 or more characters |
+| Function | a one-use wrapper that owns nothing | 3-25 lines | over 40 lines |
+| Depth, counting the body as 1 | - | 3 or less | 5 or more |
+| Parameters | - | 4 or fewer | 7 or more |
+| Section | a label over one function | 3-12 functions | over 400 lines, or two concepts |
+| File | a file for one helper | one subject, 200-1,200 lines | several owners; over 1,500 lines |
+
+A table, or a dispatcher whose arms are one line each, may run past 40
+lines. Compress routine work into guards on one line, tables, `=>` bodies,
+and system macros. Expand the algorithm into one named step per idea.
+
+### Functions
+
+- A function does one job at one level of abstraction, and its body reads
+  as a sequence of named steps. If its one-sentence purpose needs "and",
+  split it.
+- A dispatcher only dispatches. Each `match` or `switch` arm is one line
+  that calls a named helper; an arm longer than three lines moves into one.
+- Guards come first and the main path follows. An early return replaces a
+  flag variable or an `else` ladder.
+- A parameter or local that steers later control flow becomes two functions
+  or an early return.
+- Shared context is one value. Seven or more parameters, or one group of
+  parameters passed through several helpers, becomes a record or the
+  receiver of `Type._helper` methods.
+
+Prefer:
+
+```x2c
+switch (id) {
+  case LISP_QUOTE: return _special_quote(args);
+  case LISP_DEF:   return _special_def(lisp, args, env);
+  case LISP_COND:  return _special_cond(lisp, args, env);
+}
+```
+
+Avoid arms that each carry their own checks and error construction:
+
+```x2c
+switch (id) {
+  case LISP_QUOTE: {
+    if (args.len() != 1) {
+      int actual = args.len();
+      raise %(bad-arity (operation "quote") (expected 1) (actual $actual));
+    }
+    return args.car();
+  }
+  // ...
+}
+```
+
+### Incidental work
+
+Validation, diagnostics, scope switching, save and restore, conversions,
+and bookkeeping are incidental when they are not the point of the function.
+Give each kind one place: a helper, a system macro, or a section.
+
+- Reuse before writing. Code that repeats work an existing helper, macro,
+  or runtime operation already does calls that owner. When the owner is
+  static in another unit, move it to the unit that owns the concept.
+- A stanza of three or more lines that repeats three or more times gets one
+  owner: a helper, a macro, or a table.
+- Delete unreachable branches, uncalled functions, and checks of facts a
+  producer established before reshaping what remains.
+
+Prefer operations that stay one line because two helpers own the failure
+spelling:
+
+```x2c
+int Path.is_dir(Path p) => S_ISDIR(_mode(p));
+int Path.is_file(Path p) => S_ISREG(_mode(p));
+long Path.size(Path path) => (long) _stat("Path.size", path).st_size;
+```
+
 ## Prose
 
 Write comments, guides, plans, diagnostics, and commit messages as literal
@@ -165,28 +251,33 @@ tidy; visibility is a contract, while alphabetical order is not.
 example, package, or program starts at step 3; see
 `agents/x2c-code-organization-guide.md` for why.
 
-### Top-level order
+### Reading order
 
-Order a module for a reader, not for the compiler:
+Order a module so it reads top to bottom as an explanation of its subject:
 
 1. representation and owner state;
-2. small private foundations;
-3. operations grouped by concept;
-4. lifecycle or public entry points at the natural boundary.
+2. the central operation, which is the reason a reader opens the file;
+3. the concepts it uses, in the order it uses them, one section each;
+4. incidental work, such as error construction and bookkeeping;
+5. lifecycle and public entry points.
 
-Keep a private helper near the operations it supports when moving it to a
-global "private helpers" block would make the reader jump around.
+Inside a section, put the main function first and its helpers after it, in
+the order it calls them. Generated C declares every function before the
+definitions, so function order is free; macros and types still precede
+their first use. Keep functions of one family together, in the order of the
+dispatcher that calls them, with the same parameter order and layout. A
+family of one-line functions forms an aligned table.
 
 Prefer:
 
 ```x2c
 // slice normalization
 
-static int _normalize_bound(int length, int *bound) {
+Array Array.getslice(Array a, int start, int stop, int step) {
   // ...
 }
 
-Array Array.getslice(Array a, int start, int stop, int step) {
+static int _normalize_bound(int length, int *bound) {
   // ...
 }
 ```
@@ -200,15 +291,23 @@ Avoid a table of contents made from comments:
 // SLICE METHODS ============================================================
 ```
 
-Use a plain, lower-case section label only when it makes a real transition in
-a long file:
+Open each section with a plain, lower-case label and one blank line. A
+concept that needs it gets up to three sentences in the same block comment:
 
 ```x2c
 // immutable programs
 ```
 
+```x2c
+/* file walks
+
+   A cold walk splits a file at its includes and visibility pragmas and
+   records each segment's declarations in source order. */
+```
+
 Do not decorate labels with repeated hyphens, equals signs, or multiple
-capitalization schemes.
+capitalization schemes. A file with two subjects splits into units by
+owner, as the [organization guide](x2c-code-organization-guide.md) states.
 
 ### Vertical space
 
@@ -897,6 +996,28 @@ for (List p = values; p; p = p.cdr())
 Do not use `tmp`, `data`, `result`, or `value` when the role remains ambiguous
 across a nontrivial function.
 
+A name's length follows its scope. A helper name is two or three words and
+omits what its file or section already says: in `protocol.x`,
+`_generate_ordinary_protocol_adapters` is `_ordinary_adapters`. A name of 25
+or more characters needs a public contract that fixes it.
+
+One concept has one name across the compiler and runtime. Shared roles use
+these names, and these are the only abbreviations:
+
+| Role | Name |
+| --- | --- |
+| subject: Compiler, Emitter, Tokenizer, Build, Frontend, Sym | `c`, `e`, `t`, `b`, `f`, `s` |
+| AST List under inspection | `node` |
+| expression, statement, declaration node | `expr`, `stmt`, `decl` |
+| a node's type; a conversion's destination | `type`, `target` |
+| call arguments; declared parameters | `args`, `params` |
+| operator; signature; callable value | `op`, `sig`, `fn` |
+| count; indexes; cursor pointer; output | `n`; `i`, `j`; `at`; `out` |
+| Token where a construct starts; origin table index | `origin`; `occurrence` |
+
+Saved-value locals such as `old_`, `saved_`, and `previous_` disappear with
+`$let`.
+
 ### Public C names
 
 Use an `x2c_*` name only for the C interface described in
@@ -1341,17 +1462,25 @@ native handle whose lifetime belongs to its library. See
 
 Run [`x2c lint --all`](../commands/lint/x2c-lint.x) for width,
 whitespace, wrapping, braces, deferred initialization, forward declarations,
-negated `is` tests, narration, stock prose, and receiver subject names whose
-length wraps lines; `--fix` applies its idiom respellings that leave the
-generated C unchanged. Then check what it cannot:
+negated `is` tests, narration, stock prose, receiver subject names whose
+length wraps lines, and function shape outside the bands; `--fix` applies
+its idiom respellings that leave the generated C unchanged. Then check what
+it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?
+- Does the header state one subject, and do the sections follow reading
+  order, each opened by a label?
+- Does each function do one job at one level, guards first, with dispatch
+  arms of one line?
+- Does each kind of incidental work have one place, and does the code call
+  existing owners instead of repeating their work?
+- Do names follow the glossary, with no file subject repeated in helper
+  names?
 - Does every comment add a fact the code does not already say, with each
   shared invariant explained once at its owner?
 - Is the module header about ownership, and are public `/**` comments
   proportional to their callables?
-- Are section labels sparse and structurally meaningful?
 - Are declarations named for their roles and combined into rows where the
   complete row fits?
 - Are one-use pure temporaries and hand-expanded standard predicates gone?

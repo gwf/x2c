@@ -22,7 +22,8 @@ Read nearest instructions, the complete target source, relevant style-guide
 sections, and the tests, public declarations, and book pages that explain its
 behavior. Preserve unrelated edits and generated-file rules. Use the
 [philosophy](../../x2c-philosophy.md) when implementation responsibilities are
-unclear. Structural redesign belongs in `simplify-x2c-source` when authorized.
+unclear. Reshaping functions and file order belongs in `beautify-x2c-source`,
+and structural redesign in `simplify-x2c-source`, when authorized.
 
 Optional discovery commands, from the repository root:
 

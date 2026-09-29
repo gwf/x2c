@@ -1,0 +1,4 @@
+interface:
+  display_name: "Beautify x2c Source"
+  short_description: "Reshape one file to the house standard"
+  default_prompt: "Use $beautify-x2c-source to rewrite this x2c source file to the Shape standard while keeping its behavior, algorithms, and data structures."

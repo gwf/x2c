@@ -37,6 +37,9 @@ are needed rather than maintaining another copy.
   repository area and report reproduced findings; edit only when authorized.
 - [simplify-x2c-source](skills/simplify-x2c-source/SKILL.md) - remove connected
   architectural redundancy while preserving behavior.
+- [beautify-x2c-source](skills/beautify-x2c-source/SKILL.md) - rewrite one
+  file to the shape standard: short functions, one-line dispatch arms,
+  reused owners, glossary names, and reading order, with behavior unchanged.
 - [clean-x2c-source](skills/clean-x2c-source/SKILL.md) - improve local source
   style after structural choices are settled, or audit comments.
 - [find-redundant-validation](skills/find-redundant-validation/SKILL.md) -

@@ -44,6 +44,9 @@ execution.
 
 ### Current work
 
+- [Beautification](x2c-beautification.md): active; the house standard for
+  function and file shape, then file-by-file rewrites that keep behavior.
+  Wave 0 and the pilot (`src/collect.x`, `lib/tokenizer.x`) are in progress.
 - [Compiler dual-macro campaign](compiler-dual-macro-contract.md#current-campaign-handoff):
   active; core lowerings and capture holes are landed, lambda adoption is
   incomplete. The [architecture survey](compiler-dual-macro-architecture.md)

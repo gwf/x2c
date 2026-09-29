@@ -942,6 +942,12 @@ Exemplars endorse a property, not every line in a file:
   the surrounding code manages placement and cached storage.
 - `lib/symbolset.x` - a closed vocabulary compiled once into static
   perfect-hash storage; the literal owns membership, index, and order.
+- `lib/path.x` - a file in reading order; `_stat` and `_open` own every
+  failure spelling, so each operation stays one line.
+- `lib/split.x` - one strategy record serves eager and lazy splitting, and
+  every strategy is a short named function.
+- `src/deps.x` - a header that states ownership, four short functions with
+  one idea each, and decision comments at the point of use.
 - `lib/array-generics.xmacro` - one imported implementation shared by ordinary
   `Array` and six explicitly instantiated packed numeric families; `%[...]`
   remains the ordinary `Var` Array path.
