@@ -2,28 +2,73 @@
 
 #include "editor.h"
 
+#include "exception.h"
+
 static String _1, _0;
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+typedef struct Query{
+  String response, source, kind;
+  int offset;
+  SourceView sources;
+  Compiler compiler;
+  Map reply, needed;
+}
+Query;
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static Map _location(String path, int start, int end);
+static SourceView _snapshots(char * * argv, int count);
 
-static Array _diagnostics(Compiler compiler, Map needed);
+static const char * unsaved_cpp = "x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n";
 
-static List _occurrence(Compiler compiler, String path, int offset);
+static CliRequest Query_configure(Query * q, int argc, char * * argv);
 
-static void _query(Map reply, Compiler compiler, String path, String kind, int offset, Map needed);
+static CliRequest _project_target(CliRequest request, String source);
 
-static Array _sources(Compiler compiler, Map needed);
+_Noreturn static void _fail(const char * message);
 
-static CliRequest _configure(int argc, char * * argv, SourceView sources, String source);
+static int _native_cpp(CliRequest request);
 
-static int _changed_dependency(Compiler compiler, SourceView sources);
+static int Query_serve(Query * q, CliRequest request);
+
+static int _changed_dependency(Compiler c, SourceView sources);
+
+static int Query_write(Query * q, int parsed);
+
+static Array Query_diagnostics(Query * q);
+
+static Map Query_diagnostic(Query * q, List entry);
+
+static Map Query_location(Query * q, String path, int start, int end);
+
+static void Query_answer(Query * q);
+
+static List _occurrence(Compiler c, String path, int offset);
+
+static void Query_definition(Query * q, List row);
+
+static void Query_hover(Query * q, List row);
+
+static Array Query_texts(Query * q);
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -33,95 +78,329 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new("hover");
 }
 
-Map Map_update_n(Map, unsigned, ...);
+String String_new(const char *);
 
-Map Map_new(void);
+Path Path_absolute(Path);
 
-Var Symbol_var(Symbol);
+int atoi(const char *);
+
+int strcmp(const char *, const char *);
+
+int editor_request(int argc, char * * argv){
+  if(! _init_guard_) _file_init_();
+  if(argc < 7) return 2;
+  Query q ={
+    .response = String_new(argv[1]), .source = Path_absolute(String_new(argv[2])), .kind = String_new(argv[3]), .offset = atoi(argv[4])
+  }
+  ;
+  int count = atoi(argv[5]);
+  if(count < 0 || count >(argc - 7) / 3) return 2;
+  int boundary = 6 + count * 3;
+  if(strcmp(argv[boundary], "--")) return 2;
+  q.sources = _snapshots(argv + 6, count);
+  if(q.sources == NULL) return 2;
+  argv[boundary] = argv[0];
+  return Query_serve(&(q), Query_configure(&(q), argc - boundary, argv + boundary));
+}
+
+SourceView SourceView_new();
+
+int SourceView_read(SourceView, String, volatile String *);
+
+void SourceView_set(SourceView, String, String, int);
+
+static SourceView _snapshots(char * * argv, int count){
+  SourceView sources = SourceView_new();
+  for(int i = 0;  i < count;  i ++){
+    char * * row = argv + 3 * i;
+    String logical = String_new(row[0]);
+    String snapshot = String_new(row[1]), text;
+    if(! SourceView_read(NULL, snapshot, &(text))) return NULL;
+    SourceView_set(sources, logical, text, ! strcmp(row[2], "1"));
+  }
+  return sources;
+}
+
+CliRequest cli_parse(int, char * *);
+
+int List_truth(List);
+
+int SourceView_is_changed(SourceView, String);
+
+static CliRequest Query_configure(Query * q, int argc, char * * argv){
+  char * defaults[] ={
+    argv[0], "build", NULL
+  }
+  ;
+  CliRequest request = argc == 1 ? cli_parse(2, defaults) : cli_parse(argc, argv);
+  request -> sources = q -> sources;
+  if(request -> command != 5589768 && request -> command != 45220543335690) _fail("x2c editor: use a build or translate configuration\n");
+  if(! List_truth(request -> inputs) && request -> command == 5589768) request = _project_target(request, q -> source);
+  request -> sources = q -> sources;
+  if(SourceView_is_changed(q -> sources, q -> source) && _native_cpp(request)) _fail(unsaved_cpp);
+  request -> source_facts = 1;
+  return request;
+}
+
+String project_manifest(CliRequest);
+
+int String_truth(String);
+
+ProjectBuild project_plan(CliRequest);
+
+int List_try_next(List, List *, Var *);
+
+String Var_string(Var);
+
+int String_equal(String, String);
+
+static CliRequest _project_target(CliRequest request, String source){
+  String manifest = project_manifest(request);
+  if(! String_truth(manifest)) return request;
+  request -> manifest = manifest;
+  CliRequest selected = NULL;
+  for(ProjectBuild node = project_plan(request);  node;  node = node -> next){
+    String input;
+    List _x2c_macro_object_0 = node -> request -> inputs;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      input = Var_string(_x2c_macro_cursor_output_0);
+      {
+        if(! String_equal(Path_absolute(input), source)) continue;
+        if(selected && selected != node -> request) _fail("x2c editor: source belongs to multiple selected targets\n");
+        selected = node -> request;
+      }
+
+    }
+
+  }
+  if(! selected) _fail("x2c editor: this document is not a selected target input; " "open its owning source for semantic results or configure " "a direct translate command\n");
+  return selected;
+}
+
+_Noreturn static void _fail(const char * message){
+  fputs(message, stderr);
+  exit(2);
+}
+
+static int _native_cpp(CliRequest request){
+  return request -> live_symbols || request -> cpp_symbols;
+}
+
+Frontend Frontend_new(CliRequest);
+
+int Frontend_preload_macro_libraries(Frontend);
+
+void Frontend_prepare_meta(Frontend, List);
 
 Var String_var(String);
 
+Context Context_open_isolated_named(const char *);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+int Frontend_open(Frontend, String, ParsedUnit *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+static int Query_serve(Query * q, CliRequest request){
+  Frontend frontend = Frontend_new(request);
+  if(! Frontend_preload_macro_libraries(frontend)) return 2;
+  Frontend_prepare_meta(frontend, cons(String_var(q -> source), NULL));
+  Context command = Context_open_isolated_named("editor request");
+  {
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & command;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      ParsedUnit unit;
+      int parsed = Frontend_open(frontend, q -> source, &(unit));
+      {
+        _x2c_defer_env_0 _x2c_macro_environment_0 ={
+          0
+        }
+        ;
+        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & unit;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          q -> compiler = unit.compiler;
+          if(_native_cpp(request) && _changed_dependency(q -> compiler, q -> sources)){
+            fputs(unsaved_cpp, stderr);
+            {
+              int _x2c_return_value_0 = 2;
+              {
+                x2c_cleanup_leave(& _x2c_defer_record_1);
+                x2c_cleanup_leave(& _x2c_defer_record_0);
+                return _x2c_return_value_0;
+              }
+
+            }
+
+          }
+          {
+            int _x2c_return_value_1 = Query_write(q, parsed);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_1);
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_1;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+Iter Map_keys(Map, Iter);
+
 Var int_var(int);
 
-static Map _location(String path, int start, int end){
-  return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
+int Iter_try_next(Iter, Var *);
+
+static int _changed_dependency(Compiler c, SourceView sources){
+  {
+    Var path;
+    Iter _x2c_macro_iterator_1 = Map_keys(c -> deps, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_1;
+    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
+      path = _x2c_macro_item_1;
+      if(SourceView_is_changed(sources, Var_string(path))) return 1;
+    }
+
+  }
+  {
+    Var path;
+    Iter _x2c_macro_iterator_2 = Map_keys(c -> source_texts, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_2;
+    while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
+      path = _x2c_macro_item_2;
+      if(SourceView_is_changed(sources, Var_string(path))) return 1;
+    }
+
+  }
+  return 0;
+}
+
+Map Map_new(void);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Var Symbol_var(Symbol);
+
+Var Array_var(Array);
+
+Var Map_setindex(Map, Var, Var);
+
+String Var_json(Var);
+
+Var Map_var(Map);
+
+static int Query_write(Query * q, int parsed){
+  File out = fopen(q -> response, "w");
+  if(! out) return 2;
+  q -> needed = Map_new();
+  q -> reply = Map_update_n(Map_new(), 2, Symbol_var(412426), String_var(q -> source), Atom_intern(String_new("diagnostics")), Array_var(Query_diagnostics(q)));
+  if(parsed) Query_answer(q);
+  Map_setindex(q -> reply, Symbol_var(41854048614), Array_var(Query_texts(q)));
+  fprintf(out, "%s\n", Var_json(Map_var(q -> reply)));
+  return fclose(out) ? 2 : 0;
 }
 
 Array Array_new(void);
 
 List Compiler_diagnostics(Compiler);
 
-int List_try_next(List, List *, Var *);
-
 List Var_list(Var);
-
-Var List_assoc(List, Var);
-
-String Var_string(Var);
-
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int Var_is_void(Var);
-
-Path Path_absolute(Path);
-
-Var Map_setindex(Map, Var, Var);
 
 Var Array_push(Array, Var);
 
-Var Map_var(Map);
-
-static Array _diagnostics(Compiler compiler, Map needed){
+static Array Query_diagnostics(Query * q){
   Array diagnostics = Array_new();
   {
     List entry;
-    List _x2c_macro_object_0 = Compiler_diagnostics(compiler);
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      entry = Var_list(_x2c_macro_cursor_output_0);
-      {
-        List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
-        Var source = List_assoc(location, Symbol_var(412426));
-        String path = Var_string(Var_is_row(source, 11, 7, 1) ? source : String_var(compiler -> filename));
-        Var position = List_assoc(location, Symbol_var(1133019155420));
-        Var width = List_assoc(location, Symbol_var(816725264));
-        int start = Var_int(Var_convert(Var_is_void(position) ? int_var(0) : position, 3453797));
-        int length = Var_int(Var_convert(Var_is_void(width) ? int_var(0) : width, 3453797));
-        path = Path_absolute(path);
-        Map_setindex(needed, String_var(path), int_var(1));
-        Map diagnostic = _location(path, start, start + length);
-        Map_setindex(diagnostic, Symbol_var(28293925322), List_assoc(entry, Symbol_var(28293925322)));
-        Map_setindex(diagnostic, Symbol_var(227594), List_assoc(entry, Symbol_var(227594)));
-        Map_setindex(diagnostic, Symbol_var(1317895556402), List_assoc(entry, Symbol_var(1317895556402)));
-        Array_push(diagnostics, Map_var(diagnostic));
-      }
-
+    List _x2c_macro_object_3 = Compiler_diagnostics(q -> compiler);
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_1))){
+      entry = Var_list(_x2c_macro_cursor_output_1);
+      Array_push(diagnostics, Map_var(Query_diagnostic(q, entry)));
     }
 
   }
   return diagnostics;
 }
 
+Var List_assoc(List, Var);
+
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+int Var_is_void(Var);
+
+static Map Query_diagnostic(Query * q, List entry){
+  List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
+  Var file = List_assoc(location, Symbol_var(412426)), position = List_assoc(location, Symbol_var(1133019155420));
+  Var width = List_assoc(location, Symbol_var(816725264));
+  String path = Var_string(Var_is_row(file, 11, 7, 1) ? file : String_var(q -> compiler -> filename));
+  int start = Var_int(Var_convert(Var_is_void(position) ? int_var(0) : position, 3453797));
+  int length = Var_int(Var_convert(Var_is_void(width) ? int_var(0) : width, 3453797));
+  Map diagnostic = Query_location(q, Path_absolute(path), start, start + length);
+  Map_setindex(diagnostic, Symbol_var(28293925322), List_assoc(entry, Symbol_var(28293925322)));
+  Map_setindex(diagnostic, Symbol_var(227594), List_assoc(entry, Symbol_var(227594)));
+  Map_setindex(diagnostic, Symbol_var(1317895556402), List_assoc(entry, Symbol_var(1317895556402)));
+  return diagnostic;
+}
+
+static Map Query_location(Query * q, String path, int start, int end){
+  Map_setindex(q -> needed, String_var(path), int_var(1));
+  return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
+}
+
+static void Query_answer(Query * q){
+  List row = _occurrence(q -> compiler, q -> source, q -> offset);
+  if(! List_truth(row)) return;
+  if(String_equal(q -> kind, _0)) Query_definition(q, row);
+  else if(String_equal(q -> kind, _1)) Query_hover(q, row);
+}
+
 int Array_try_next(Array, int *, Var *);
 
 Var List_getindex(List, int);
 
-int String_equal(String, String);
-
-int List_truth(List);
-
 int Var_int(Var);
 
-static List _occurrence(Compiler compiler, String path, int offset){
+static List _occurrence(Compiler c, String path, int offset){
   List found = NULL;
   {
     List row;
-    Array _x2c_macro_object_1 = compiler -> source_occurrences;
-    int _x2c_macro_cursor_1 = 0;
-    Var _x2c_macro_cursor_output_1;
-    while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      row = Var_list(_x2c_macro_cursor_output_1);
+    Array _x2c_macro_object_4 = c -> source_occurrences;
+    int _x2c_macro_cursor_4 = 0;
+    Var _x2c_macro_cursor_output_2;
+    while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
+      row = Var_list(_x2c_macro_cursor_output_2);
       {
         String file = Var_string(List_getindex(row, 0));
         int start = Var_int(Var_convert(List_getindex(row, 1), 3453797)), end = Var_int(Var_convert(List_getindex(row, 2), 3453797));
@@ -135,242 +414,73 @@ static List _occurrence(Compiler compiler, String path, int offset){
   return found;
 }
 
-Type Var_type(Var);
-
 Var Map_getindex(Map, Var);
 
 Var List_var(List);
+
+static void Query_definition(Query * q, List row){
+  List binding = Var_list(List_getindex(row, 3));
+  Var value = Map_getindex(q -> compiler -> source_definitions, List_var(binding));
+  if(! Var_is_row(value, 9, 7, 4)) return;
+  List target = Var_list(value);
+  Map_setindex(q -> reply, Symbol_var(292902696930268), Map_var(Query_location(q, Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
+}
+
+Type Var_type(Var);
 
 List Type_list(Type);
 
 List Type_declaration_ast(Type, List);
 
-String String_new(const char *);
-
 char * Compiler_code_pretty_string(Compiler, List, String);
 
 List Compiler_emit(Compiler, List);
 
-static void _query(Map reply, Compiler compiler, String path, String kind, int offset, Map needed){
-  List row = _occurrence(compiler, path, offset);
-  if(! List_truth(row)) return;
-  List binding = Var_list(List_getindex(row, 3));
+static void Query_hover(Query * q, List row){
   Type type = Var_type(List_getindex(row, 4));
-  if(String_equal(kind, _0)){
-    Var value = Map_getindex(compiler -> source_definitions, List_var(binding));
-    if(! Var_is_row(value, 9, 7, 4)) return;
-    List target = Var_list(value);
-    Map_setindex(needed, List_getindex(target, 0), int_var(1));
-    Map_setindex(reply, Symbol_var(292902696930268), Map_var(_location(Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
-  }
-  else if(String_equal(kind, _1) && List_truth(Type_list(type))){
-    Map_setindex(needed, List_getindex(row, 0), int_var(1));
-    List declaration = Type_declaration_ast(type, binding);
-    Map hover = _location(Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
-    Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL))));
-    Map_setindex(reply, Symbol_var(17805668), Map_var(hover));
-  }
-
+  if(! List_truth(Type_list(type))) return;
+  Compiler c = q -> compiler;
+  List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));
+  Map hover = Query_location(q, Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+  Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL)), NULL))));
+  Map_setindex(q -> reply, Symbol_var(17805668), Map_var(hover));
 }
-
-Iter Map_keys(Map, Iter);
-
-int Iter_try_next(Iter, Var *);
 
 int Map_try_get(Map, Var, Var *);
 
-static Array _sources(Compiler compiler, Map needed){
-  Array sources = Array_new();
-  {
-    Var key;
-    Iter _x2c_macro_iterator_2 = Map_keys(needed, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
-      key = _x2c_macro_item_2;
-      {
-        Var text;
-        if(Map_try_get(compiler -> source_texts, key, &(text))) Array_push(sources, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), key, Symbol_var(1322536), text)));
-      }
-
-    }
-
-  }
-  return sources;
-}
-
-CliRequest cli_parse(int, char * *);
-
-String project_manifest(CliRequest);
-
-int String_truth(String);
-
-ProjectBuild project_plan(CliRequest);
-
-int SourceView_is_changed(SourceView, String);
-
-static CliRequest _configure(int argc, char * * argv, SourceView sources, String source){
-  char * defaults[] ={
-    argv[0], "build", NULL
-  }
-  ;
-  CliRequest request = argc == 1 ? cli_parse(2, defaults) : cli_parse(argc, argv);
-  request -> sources = sources;
-  if(request -> command != 5589768 && request -> command != 45220543335690){
-    fputs("x2c editor: use a build or translate configuration\n", stderr);
-    exit(2);
-  }
-  if(! List_truth(request -> inputs) && request -> command == 5589768){
-    String manifest = project_manifest(request);
-    if(String_truth(manifest)){
-      request -> manifest = manifest;
-      CliRequest selected = NULL;
-      ProjectBuild plan = project_plan(request);
-      for(ProjectBuild node = plan;  node;  node = node -> next){
-        {
-          String input;
-          List _x2c_macro_object_3 = node -> request -> inputs;
-          List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-          Var _x2c_macro_cursor_output_2;
-          while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_2))){
-            input = Var_string(_x2c_macro_cursor_output_2);
-            {
-              if(! String_equal(Path_absolute(input), source)) continue;
-              if(selected && selected != node -> request){
-                fputs("x2c editor: source belongs to multiple selected targets\n", stderr);
-                exit(2);
-              }
-              selected = node -> request;
-            }
-
-          }
-
-        }
-
-      }
-      if(! selected){
-        fputs("x2c editor: this document is not a selected target input; " "open its owning source for semantic results or configure " "a direct translate command\n", stderr);
-        exit(2);
-      }
-      request = selected;
-    }
-
-  }
-  request -> sources = sources;
-  if(SourceView_is_changed(sources, source) &&(request -> live_symbols || request -> cpp_symbols)){
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
-    exit(2);
-  }
-  request -> source_facts = 1;
-  return request;
-}
-
-static int _changed_dependency(Compiler compiler, SourceView sources){
+static Array Query_texts(Query * q){
+  Array texts = Array_new();
   {
     Var path;
-    Iter _x2c_macro_iterator_4 = Map_keys(compiler -> deps, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
-      path = _x2c_macro_item_4;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
-    }
-
-  }
-  {
-    Var path;
-    Iter _x2c_macro_iterator_5 = Map_keys(compiler -> source_texts, &(struct Iter){
+    Iter _x2c_macro_iterator_5 = Map_keys(q -> needed, &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_macro_item_5;
     while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
       path = _x2c_macro_item_5;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
+      {
+        Var text;
+        if(Map_try_get(q -> compiler -> source_texts, path, &(text))) Array_push(texts, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), path, Symbol_var(1322536), text)));
+      }
+
     }
 
   }
-  return 0;
+  return texts;
 }
-
-int atoi(const char *);
-
-int strcmp(const char *, const char *);
-
-SourceView SourceView_new();
-
-int SourceView_read(SourceView, String, volatile String *);
-
-void SourceView_set(SourceView, String, String, int);
-
-Frontend Frontend_new(CliRequest);
-
-int Frontend_preload_macro_libraries(Frontend);
-
-void Frontend_prepare_meta(Frontend, List);
-
-Context Context_open_isolated_named(const char *);
-
-int Frontend_open(Frontend, String, ParsedUnit *);
 
 void ParsedUnit_close(ParsedUnit *);
 
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
+}
+
 void Context_close(Context);
 
-Var Array_var(Array);
-
-String Var_json(Var);
-
-int editor_request(int argc, char * * argv){
-  if(! _init_guard_) _file_init_();
-  if(argc < 7) return 2;
-  String response = String_new(argv[1]);
-  String source = Path_absolute(String_new(argv[2]));
-  String kind = String_new(argv[3]);
-  int offset = atoi(argv[4]), count = atoi(argv[5]);
-  if(count < 0 || count >(argc - 7) / 3) return 2;
-  int boundary = 6 + count * 3;
-  if(strcmp(argv[boundary], "--")) return 2;
-  SourceView sources = SourceView_new();
-  for(int index = 0;  index < count;  index ++){
-    int arg = 6 + index * 3;
-    String logical = String_new(argv[arg]);
-    String snapshot = String_new(argv[arg + 1]), text;
-    if(! SourceView_read(NULL, snapshot, &(text))) return 2;
-    SourceView_set(sources, logical, text, ! strcmp(argv[arg + 2], "1"));
-  }
-  argv[boundary] = argv[0];
-  CliRequest request = _configure(argc - boundary, argv + boundary, sources, source);
-  Frontend frontend = Frontend_new(request);
-  if(! Frontend_preload_macro_libraries(frontend)) return 2;
-  Frontend_prepare_meta(frontend, cons(String_var(source), NULL));
-  Context command = Context_open_isolated_named("editor request");
-  ParsedUnit unit;
-  int parsed = Frontend_open(frontend, source, &(unit));
-  if((request -> live_symbols || request -> cpp_symbols) && _changed_dependency(unit.compiler, sources)){
-    fputs("x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n", stderr);
-    ParsedUnit_close(&(unit));
-    Context_close(command);
-    return 2;
-  }
-  File result = fopen(response, "w");
-  if(! result){
-    ParsedUnit_close(&(unit));
-    Context_close(command);
-    return 2;
-  }
-  Map needed = Map_new();
-  Map reply = Map_update_n(Map_new(), 2, Symbol_var(412426), String_var(source), Atom_intern(String_new("diagnostics")), Array_var(_diagnostics(unit.compiler, needed)));
-  if(parsed) _query(reply, unit.compiler, source, kind, offset, needed);
-  Map_setindex(reply, Symbol_var(41854048614), Array_var(_sources(unit.compiler, needed)));
-  fprintf(result, "%s\n", Var_json(Map_var(reply)));
-  int failed = fclose(result);
-  ParsedUnit_close(&(unit));
-  Context_close(command);
-  return failed ? 2 : 0;
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Context_close((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

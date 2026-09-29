@@ -6,6 +6,7 @@
 #define __GUARD_0x242786A8__
 
 #include "x2c.h"
+#include "cli.h"
 #include "path.h"
 #include "process.h"
 typedef struct Toolchain{
@@ -29,9 +30,15 @@ typedef struct ToolRun{
 }
 * ToolRun;
 
-Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run);
+Toolchain toolchain_new(CliRequest request);
+
+Toolchain toolchain_meta(String cc);
 
 String toolchain_meta_cc(String explicit);
+
+ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
+
+void ToolAction_as_program(ToolAction action);
 
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs);
 
@@ -43,13 +50,7 @@ ToolAction Toolchain_link_action(Toolchain t, String output, List inputs);
 
 ToolAction Toolchain_module_action(Toolchain t, String output, List inputs);
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
-
-void ToolAction_as_program(ToolAction action);
-
-int tool_capture(List arguments, String * output, String * errors);
-
-List Toolchain_search_directories(Toolchain t);
+int ToolAction_run(ToolAction action);
 
 ToolRun ToolAction_start(ToolAction action);
 
@@ -57,9 +58,11 @@ int ToolRun_ready(ToolRun t);
 
 int ToolRun_wait(ToolRun execution);
 
-int ToolAction_run(ToolAction action);
+int tool_capture(List arguments, String * output, String * errors);
 
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
+
+List Toolchain_search_directories(Toolchain t);
 
 
 #endif /* __GUARD_0x242786A8__ */

@@ -3,9 +3,10 @@
     Copyright (c) 2025 Gary William Flake
 
     Owns the environment the driver modules share: where the executable,
-    home, stage, and packages are, how a file is locked or replaced, the
-    driver's fatal error line, and translation workers. Host tools run
-    through `lib/process.x`.
+    home, stage, and packages are, which files are x2c source, the
+    compiler's identity, how a file is locked or replaced, translation
+    workers, and the driver's fatal error line. Host tools run through
+    `lib/process.x`.
 */
 
 #pragma once
@@ -14,20 +15,29 @@ $(import "../lib/private-keywords.xmacro")
 #include "process.x"
 #include "sourceview.x"
 
-/* Initializes ordinary and external command paths with the chosen identity. */
-static void _initialize_environment(
-  const char *argv0, String embedded_identity) {
-  if (x2c_root_path) return;
-  x2c_executable_path = _executable(argv0);
-  x2c_identity = embedded_identity ? embedded_identity : _identity();
-  String home = Env.get("X2C_HOME");
-  if (home && !home[0]) home = NULL;
-  String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
-  if (!root) root = _locate_home(Path.absolute("."));
-  x2c_root_found = root != NULL;
-  x2c_root_path = Path.absolute(root ? root : ".");
-  _prepare_repo_defaults();
-}
+#pragma private
+
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/file.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+// environment state
+
+/* Environment setup fills these once per process, and `x2c_set_root` may
+   replace the root and its include `List`s. The root is the home when
+   `root_found` is set and the current directory otherwise. */
+static String executable_path = NULL, root_path = NULL;
+static String compiler_identity = NULL;
+static int root_found = 0;
+static List default_include_dirs = NULL, cpp_include_dirs = NULL;
+
+// environment setup
 
 /** Initializes compiler paths and default include `List`s once.
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
@@ -46,7 +56,8 @@ void x2c_initialize_environment(const char *argv0) {
 }
 
 /** Initializes an external command with the compiler identity embedded when
-    it was built. A driver-supplied identity must match that compiler. */
+    it was built. A driver-supplied identity must match that compiler.
+*/
 void x2c_initialize_command_environment(
   const char *argv0, String embedded_identity) {
   String supplied = Env.get("X2C_IDENTITY");
@@ -57,59 +68,135 @@ void x2c_initialize_command_environment(
   _initialize_environment(argv0, embedded_identity);
 }
 
+/* Initializes ordinary and external command paths with the chosen identity. */
+static void _initialize_environment(
+  const char *argv0, String embedded_identity) {
+  if (root_path) return;
+  executable_path = _executable(argv0);
+  compiler_identity = embedded_identity ? embedded_identity : _identity();
+  String home = Env.get("X2C_HOME");
+  if (home && !home[0]) home = NULL;
+  String root = home ? home.rstrip("/") : _locate_home(executable_path);
+  if (!root) root = _locate_home(Path.absolute("."));
+  root_found = root != NULL;
+  root_path = Path.absolute(root ? root : ".");
+  _prepare_include_dirs();
+}
+
+static String _executable(const char *argv0) {
+  char buffer[PATH_MAX];
+  ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+  if (length >= 0) {
+    buffer[length] = 0;
+    return String.new(buffer);
+  }
+  String name = String.new(argv0);
+  // A bare name came from PATH; only a path resolves against the cwd.
+  if (name && !name.contains("/")) name = x2c_find_program(name);
+  return Path.exists(name) ? Path.absolute(name) : NULL;
+}
+
+/* Linux names the running image itself, which stays the same file even if
+   the executable's path is replaced while the process runs. */
+static String _identity(void) =>
+  x2c_file_identity(
+    Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
+
+static String _locate_home(Path p) {
+  if (!p) return NULL;
+  Path directory = p.is_dir() ? p : p.dirname();
+  while (!_is_home(directory)) {
+    if (directory == "/") return NULL;
+    directory = directory.dirname();
+  }
+  return directory;
+}
+
+static int _is_home(Path p) =>
+  p.join("include").is_dir() && p.join("etc/compiler-sdk.xlisp").is_file();
+
+static void _prepare_include_dirs(void) {
+  if (!root_path) return;
+  String include_dir = %"$root_path/include/x2c";
+  String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
+  default_include_dirs = cons(include_dir, NULL);
+  cpp_include_dirs = Path.is_dir(src_dir) ? %($src_dir $lib_dir) : %($lib_dir);
+}
+
 /** Overrides the repository root and rebuilds its default include `List`s.
     The root is resolved as environment setup resolves it. The rebuilt values
     must remain valid until the next override or the process no longer uses
     them.
 */
 void x2c_set_root(String root) {
-  x2c_root_path = Path.absolute(root);
-  x2c_root_found = 1;
-  x2c_base_include_dirs = NULL;
-  x2c_repo_cpp_include_dirs = NULL;
-  _prepare_repo_defaults();
+  root_path = Path.absolute(root);
+  root_found = 1;
+  default_include_dirs = NULL;
+  cpp_include_dirs = NULL;
+  _prepare_include_dirs();
 }
+
+// environment queries
 
 /** Returns the borrowed repository root, or NULL before it is configured.
     The root is absolute with symbolic links resolved, the one spelling
     paths below the home are compared in.
 */
-String x2c_get_root(void) => x2c_root_path;
+String x2c_get_root(void) => root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
-String x2c_get_executable(void) => x2c_executable_path;
+String x2c_get_executable(void) => executable_path;
 
-/** Returns the package directory that holds `path` below one of `roots`:
-    the root's child on the way to `path`, compared by canonical path, when
-    that child's name is an identifier. Returns NULL for any other path.
+/** Returns the discovered or configured home, or NULL when there is none. */
+String x2c_home(void) => root_found ? root_path : NULL;
+
+/** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
+    or NULL for any other compiler.
 */
-String x2c_package_directory(List roots, String path) {
-  String source = Path.absolute(path);
-  foreach (String root, roots) {
-    String prefix = %"${Path.absolute(root)}/";
-    if (!source.startswith(prefix)) continue;
-    String name = source.remove_prefix(prefix).split("/").car();
-    if (name.is_identifier() && source != %"$prefix$name")
-      return %"$prefix$name";
+String x2c_stage_dir(void) {
+  if (!executable_path) return NULL;
+  String stage = Path.dirname(executable_path);
+  return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
+}
+
+/** Returns `<home>/packages`, which may not exist, or NULL without a home. */
+String x2c_home_packages(void) {
+  String home = x2c_home();
+  return home ? %"$home/packages" : NULL;
+}
+
+/** Returns the command directory for this checkout or installed home. */
+String x2c_home_libexec(void) {
+  String stage = x2c_stage_dir();
+  if (stage) return %"$stage/libexec";
+  String home = x2c_home();
+  return home ? %"$home/libexec/x2c" : NULL;
+}
+
+/** Returns the borrowed default include `List` containing `<root>/include`.
+    Returns NULL before environment setup.
+*/
+List x2c_default_include_dirs(void) => default_include_dirs;
+
+/** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
+    `<root>/src` is present only when the home has that directory. Returns
+    NULL before environment setup.
+*/
+List x2c_cpp_include_dirs(void) => cpp_include_dirs;
+
+/** Returns the spelling of the first `PATH` candidate for the program `name`
+    that this process may execute, searched as `execvp` searches, or NULL.
+    An empty entry names the current directory.
+*/
+String x2c_find_program(String name) {
+  foreach (String directory, Env.get("PATH").split(":")) {
+    Path candidate = Path.join(directory, name);
+    if (candidate.is_executable()) return candidate;
   }
   return NULL;
 }
 
-/** Resolves the first readable package entry under `roots`, using the same
-    source view as the importing compiler. Returns its canonical directory
-    through `directory`, or NULL when the package does not exist. */
-String x2c_package_entry(
-  SourceView sources, List roots, String name, String &directory) {
-  foreach (String package_dir, roots) {
-    String root = %"${Path.absolute(package_dir)}/$name";
-    String nested = %"$root/src/$name.x";
-    String entry = sources.exists(nested) ? nested : %"$root/$name.x";
-    if (!sources.exists(entry)) continue;
-    directory = root;
-    return Path.absolute(entry);
-  }
-  return NULL;
-}
+// source files and packages
 
 /** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
     of any other name whose first line is a shebang, which is a script.
@@ -131,6 +218,39 @@ int x2c_source_file(String path) {
 int x2c_layout_file(String path) =>
   path && (path.endswith(".xp") || path.endswith(".xpmacro"));
 
+/** Returns the package directory that holds `path` below one of `roots`:
+    the root's child on the way to `path`, compared by canonical path, when
+    that child's name is an identifier. Returns NULL for any other path.
+*/
+String x2c_package_directory(List roots, String path) {
+  String source = Path.absolute(path);
+  foreach (String root, roots) {
+    String prefix = %"${Path.absolute(root)}/";
+    if (!source.startswith(prefix)) continue;
+    String name = source.remove_prefix(prefix).split("/").car();
+    if (name.is_identifier() && source != %"$prefix$name")
+      return %"$prefix$name";
+  }
+  return NULL;
+}
+
+/** Resolves the first readable package entry under `roots`, using the same
+    source view as the importing compiler. Returns its canonical directory
+    through `directory`, or NULL when the package does not exist.
+*/
+String x2c_package_entry(
+  SourceView sources, List roots, String name, String &directory) {
+  foreach (String package_dir, roots) {
+    String root = %"${Path.absolute(package_dir)}/$name";
+    String nested = %"$root/src/$name.x";
+    String entry = sources.exists(nested) ? nested : %"$root/$name.x";
+    if (!sources.exists(entry)) continue;
+    directory = root;
+    return Path.absolute(entry);
+  }
+  return NULL;
+}
+
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.
 */
@@ -140,77 +260,69 @@ int x2c_package_source(String directory, String path) {
   return path == %"$directory/$name.x";
 }
 
-/** Returns the borrowed default include `List` containing `<root>/include`.
-    Returns NULL before environment setup.
+// identity
+
+/** Returns the active compiler's identity in 16 hexadecimal digits.
+    Ordinary compiler startup hashes its executable with FNV-1a; an external
+    command uses the identity embedded from the compiler that built it.
+    Returns NULL if ordinary startup could not read its executable.
 */
-List x2c_default_include_dirs(void) => x2c_base_include_dirs;
+String x2c_compiler_identity(void) => compiler_identity;
 
-/** Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
-    `<root>/src` is present only when the home has that directory. Returns
-    NULL before environment setup.
+/** Returns the stamp a native module records: `x2c-module-stamp:` and the
+    running compiler's identity. Returns NULL when the executable cannot be
+    read. Only the compiler that built a module loads it.
 */
-List x2c_cpp_include_dirs(void) => x2c_repo_cpp_include_dirs;
-
-/** Returns the discovered or configured home, or NULL when there is none. */
-String x2c_home(void) => x2c_root_found ? x2c_root_path : NULL;
-
-/** Returns `<home>/packages`, which may not exist, or NULL without a home. */
-String x2c_home_packages(void) {
-  String home = x2c_home();
-  return home ? %"$home/packages" : NULL;
+String build_module_stamp(void) {
+  String identity = x2c_compiler_identity();
+  return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 
-/** Returns the command directory for this checkout or installed home. */
-String x2c_home_libexec(void) {
-  String stage = x2c_stage_dir();
-  if (stage) return %"$stage/libexec";
-  String home = x2c_home();
-  return home ? %"$home/libexec/x2c" : NULL;
+/** Returns the identity a compiler executable at `path` has when it runs:
+    the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
+*/
+String x2c_file_identity(String path) {
+  int ok = path != NULL;
+  uint64_t hash = UINT64_C(1469598103934665603);
+  if (ok) hash = x2c_fnv_file(hash, path, ok);
+  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
 }
 
-/** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
-    or NULL for any other compiler.
+/** Returns `hash` extended with the contents of the file at `path`.
+    A missing or unreadable file clears `ok`.
 */
-String x2c_stage_dir(void) {
-  if (!x2c_executable_path) return NULL;
-  String stage = Path.dirname(x2c_executable_path);
-  return Path.dirname(stage) == %"$x2c_root_path/builds" ? stage : NULL;
-}
-
-/** Returns the spelling of the first `PATH` candidate for the program `name`
-    that this process may execute, searched as `execvp` searches, or NULL.
-    An empty entry names the current directory.
-*/
-String x2c_find_program(String name) {
-  foreach (String directory, Env.get("PATH").split(":")) {
-    Path candidate = Path.join(directory, name);
-    if (candidate.is_executable()) return candidate;
+uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok) {
+  File input = fopen(path, "rb");
+  if (!input) {
+    ok = 0;
+    return hash;
   }
-  return NULL;
+  unsigned char buffer[16384], size_t length;
+  while ((length = fread(buffer, 1, sizeof(buffer), input)))
+    hash = x2c_fnv_bytes(hash, buffer, length);
+  if (ferror(input)) ok = 0;
+  input.close();
+  return hash;
 }
 
-/** Prints `x2c: error: <message>` to stderr and exits with status 2.
-    The streams are flushed and `atexit` handlers do not run, so the call is
-    safe inside a `try` body or a catch arm, whose records those handlers
-    would otherwise find still live.
-*/
-void x2c_driver_error(const char *message) {
-  fprintf(stderr, "x2c: error: %s\n", message);
-  fflush(NULL);
-  _exit(2);
+/** Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. */
+uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
+  const unsigned char *data = bytes;
+  for (size_t i = 0; i < length; i++) {
+    hash ^= data[i];
+    hash *= UINT64_C(1099511628211);
+  }
+  return hash;
 }
 
-/** Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
-    as its operation, path or program, and system reason.
-*/
-void x2c_host_error(List detail) {
-  Var subject = detail.assoc(<path>);
-  if (subject is void) subject = detail.assoc(<program>);
-  // Quoted, the key survives a host preprocessor that expands `errno`.
-  long error = detail.assoc(<"errno">);
-  x2c_driver_error(
-    %"${detail.assoc(<operation>)} $subject: ${String.new(strerror(error))}");
+/** Hashes unit filename spelling for stable generated C identifiers. */
+String x2c_filename_hash(String filename) {
+  unsigned hash = 0;
+  foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
+  return "%08X".printf(hash);
 }
+
+// locked and replaced files
 
 /** Locks the file `p`, creating it, and returns a descriptor that holds the
     lock until it is closed or the process exits. Returns -1 when `wait` is
@@ -249,123 +361,6 @@ void file_publish(List outputs) {
   }
 }
 
-#pragma private
-
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/file.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-// module state
-
-static String x2c_executable_path = NULL, x2c_root_path = NULL;
-static String x2c_identity = NULL;
-static int x2c_root_found = 0;
-static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
-
-// environment discovery
-
-static String _executable(const char *argv0) {
-  char buffer[PATH_MAX];
-  ssize_t length = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-  if (length >= 0) {
-    buffer[length] = 0;
-    return String.new(buffer);
-  }
-  String name = String.new(argv0);
-  // A bare name came from PATH; only a path resolves against the cwd.
-  if (name && !name.contains("/")) name = x2c_find_program(name);
-  return Path.exists(name) ? Path.absolute(name) : NULL;
-}
-
-/* Linux names the running image itself, which stays the same file even if
-   the executable's path is replaced while the process runs. */
-static String _identity(void) =>
-  x2c_file_identity(Path.exists("/proc/self/exe") ? %"/proc/self/exe"
-                                                   : x2c_executable_path);
-
-static int _is_home(Path p) =>
-  p.join("include").is_dir() && p.join("etc/compiler-sdk.xlisp").is_file();
-
-static String _locate_home(Path p) {
-  if (!p) return NULL;
-  Path directory = p.is_dir() ? p : p.dirname();
-  while (!_is_home(directory)) {
-    if (directory == "/") return NULL;
-    directory = directory.dirname();
-  }
-  return directory;
-}
-
-static void _prepare_repo_defaults(void) {
-  if (!x2c_root_path) return;
-  String include_dir = %"$x2c_root_path/include/x2c";
-  String src_dir = %"$x2c_root_path/src", lib_dir = %"$x2c_root_path/lib";
-  x2c_base_include_dirs = cons(include_dir, NULL);
-  x2c_repo_cpp_include_dirs = Path.is_dir(src_dir)
-    ? %( $src_dir $lib_dir ) : %( $lib_dir );
-}
-
-// content identity
-
-/** Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. */
-uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
-  const unsigned char *data = bytes;
-  for (size_t i = 0; i < length; i++) {
-    hash ^= data[i];
-    hash *= UINT64_C(1099511628211);
-  }
-  return hash;
-}
-
-/** Returns `hash` extended with the contents of the file at `path`.
-    A missing or unreadable file clears `ok`.
-*/
-uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok) {
-  File input = fopen(path, "rb");
-  if (!input) {
-    ok = 0;
-    return hash;
-  }
-  unsigned char buffer[16384], size_t length;
-  while ((length = fread(buffer, 1, sizeof(buffer), input)))
-    hash = x2c_fnv_bytes(hash, buffer, length);
-  if (ferror(input)) ok = 0;
-  input.close();
-  return hash;
-}
-
-/** Returns the active compiler's identity in 16 hexadecimal digits.
-    Ordinary compiler startup hashes its executable with FNV-1a; an external
-    command uses the identity embedded from the compiler that built it.
-    Returns NULL if ordinary startup could not read its executable.
-*/
-String x2c_compiler_identity(void) => x2c_identity;
-
-/** Returns the identity a compiler executable at `path` has when it runs:
-    the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
-*/
-String x2c_file_identity(String path) {
-  int ok = path != NULL;
-  uint64_t hash = UINT64_C(1469598103934665603);
-  if (ok) hash = x2c_fnv_file(hash, path, ok);
-  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
-}
-
-/** Returns the stamp a native module records: `x2c-module-stamp:` and the
-    running compiler's identity. Returns NULL when the executable cannot be
-    read. Only the compiler that built a module loads it.
-*/
-String build_module_stamp(void) {
-  String identity = x2c_compiler_identity();
-  return identity ? %"x2c-module-stamp:$identity" : NULL;
-}
-
 // workers
 
 /** Forks a worker that continues the current program with inherited state.
@@ -401,17 +396,39 @@ int worker_wait_any(long *pids, int count, int &status) {
       int raw;
       pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
       if (!done || (done < 0 && errno == EINTR)) continue;
-      status = done < 0 ? -1 : WIFEXITED(raw) ? WEXITSTATUS(raw) :
-                WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
+      status = done < 0 ? -1 : _shell_status(raw);
       return i;
     }
     usleep(1000);
   }
 }
 
-/** Hashes unit filename spelling for stable generated C identifiers. */
-String x2c_filename_hash(String filename) {
-  unsigned hash = 0;
-  foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
-  return "%08X".printf(hash);
+static int _shell_status(int raw) {
+  if (WIFEXITED(raw)) return WEXITSTATUS(raw);
+  return WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
+}
+
+// driver errors
+
+/** Prints `x2c: error: <message>` to stderr and exits with status 2.
+    The streams are flushed and `atexit` handlers do not run, so the call is
+    safe inside a `try` body or a catch arm, whose records those handlers
+    would otherwise find still live.
+*/
+void x2c_driver_error(const char *message) {
+  fprintf(stderr, "x2c: error: %s\n", message);
+  fflush(NULL);
+  _exit(2);
+}
+
+/** Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
+    as its operation, path or program, and system reason.
+*/
+void x2c_host_error(List detail) {
+  Var subject = detail.assoc(<path>);
+  if (subject is void) subject = detail.assoc(<program>);
+  // Quoted, the key survives a host preprocessor that expands `errno`.
+  long error = detail.assoc(<"errno">);
+  x2c_driver_error(
+    %"${detail.assoc(<operation>)} $subject: ${String.new(strerror(error))}");
 }

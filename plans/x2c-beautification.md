@@ -1,8 +1,8 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0 and the pilot are complete and wait for Gary's
-> review of the pilot files before Wave 2. The baseline measurements are
-> from `dev` `f6606dbf`. Track H waits for Gary's approval of its book text.
+> Status: active. Wave 0, the pilot, and Wave 2 are on `dev`. Wave 3, the
+> runtime, is next. The baseline measurements are from `dev` `f6606dbf`.
+> Track H waits for Gary's approval of its book text.
 
 ## Progress
 
@@ -42,6 +42,82 @@ depending on allocation addresses; `meta-import-included` then failed from
 a cold cache. It is fixed on its own commit. `.xi` interfaces still write
 selected definition rows that no reader has used since `30615669`; the
 loader no longer passes them along, and the format is unchanged.
+
+Wave 2, delivered 2026-09-28: the driver files. Each file's columns show
+the measure before and after, as `before / after`.
+
+| File | Lines | Functions | Longest | Over 40 | Most parameters |
+| --- | --- | --- | --- | --- | --- |
+| src/build.x | 1,179 / 1,270 | 52 / 92 | 104 / 25 | 4 / 0 | 4 / 4 |
+| src/cli.x | 1,209 / 1,237 | 41 / 66 | 80 / 35 | 5 / 0 | 9 / 3 |
+| src/main.x | 627 / 700 | 21 / 47 | 73 / 28 | 5 / 0 | 5 / 4 |
+| src/project.x | 815 / 900 | 41 / 73 | 100 / 20 | 3 / 0 | 7 / 5 |
+| src/frontend.x | 420 / 472 | 18 / 31 | 68 / 26 | 3 / 0 | 5 / 5 |
+| src/meta-project.x | 483 / 607 | 17 / 40 | 89 / 21 | 3 / 0 | 10 / 4 |
+| src/install.x | 424 / 479 | 29 / 38 | 44 / 21 | 1 / 0 | 8 / 4 |
+| src/toolchain.x | 428 / 464 | 25 / 36 | 37 / 19 | 0 / 0 | 7 / 7 |
+| src/utils.x | 417 / 434 | 36 / 37 | 19 / 13 | 0 / 0 | 4 / 4 |
+| src/report.x | 245 / 281 | 16 / 24 | 30 / 12 | 0 / 0 | 6 / 6 |
+| src/editor.x | 212 / 256 | 8 / 17 | 52 / 19 | 2 / 0 | 6 / 4 |
+| src/script.x | 113 / 148 | 5 / 11 | 33 / 25 | 0 / 0 | 1 / 2 |
+| src/deps.x | 139 / 137 | 4 / 7 | 34 / 20 | 0 / 0 | 4 / 4 |
+| src/sourceview.x | 76 / 74 | 5 / 5 | 18 / 17 | 0 / 0 | 4 / 4 |
+| src/meta-helper-client.x | 263 / 324 | 11 / 21 | 55 / 24 | 1 / 0 | 4 / 4 |
+| src/generate.x | 1,288 / 1,390 | 66 / 105 | 92 / 28 | 3 / 0 | 6 / 5 |
+
+Together the sixteen files went from 8,338 to 9,173 lines: 6,482 `.x`
+lines added and 5,647 deleted. No function over 40 lines remains, down from
+30. The files grew for the pilot's reasons: record definitions, helper
+signatures, and section labels. After the whole batch, stage 1 translated
+`src/` and `lib/` byte-identically to stage 0. Five alternating timing pairs
+of six compiler sources gave a median candidate-to-base ratio of 0.99 with
+interfaces and 1.01 without them, inside the run-to-run noise of a loaded
+host.
+
+The workers kept every public name and signature. Integration then gave
+two repeated jobs one owner each. `toolchain_new` takes the `CliRequest`
+whose seven fields three callers copied out, and `toolchain_meta` serves
+the two callers that pass only a meta compiler. `report_generated` prints
+the "Generated N C files and N headers" receipt that `main.x` and
+`build.x` both spelled out.
+
+The workers found these defects, which predate the wave. Each reproduces
+on the original code and has its own fix task, so the wave keeps the
+behavior. Two fixes are merged into this batch, and the others land
+separately:
+
+- `x2c build -###` recorded the final archive fingerprint, so a later
+  build kept an archive built from older objects. Fixed by `a4fdb9f0`.
+- A manifest field with an empty value, such as `output =`, crashed
+  `x2c build`, and a second `[dependencies]` section was accepted when the
+  first one was empty. Fixed by `99d6e8f3`.
+- `in` after an interpolated String literal does not parse.
+- `x2c help ''` crashes, and `x2c @` reports `response file '(null)'`
+  where it means `empty response-file reference '@'`.
+- When `fork` fails, a meta call reports "the body exited with status 0"
+  instead of "the compile-time helper did not start", and two pipe ends
+  leak.
+- A unit's own `meta` function with a struct result, called as
+  `$twin(1).a`, reports a C compiler error from the generated group
+  instead of the struct-result reason.
+- `#pragma private /* not pragma public */` publishes the declarations
+  after it in the header. `generate.x` tests `pragma public` first, while
+  `collect.x` and `compiler.x` test `pragma private` first; the three copies
+  of that test need one owner.
+- Generated C embedded checkout paths through macro definition files. This
+  one is fixed on `dev` as `4d251b35`.
+
+Candidates left for later waves:
+
+- `Toolchain.preprocess` takes its receiver, three inputs, and three
+  out-parameters. A result record would bring it to four parameters.
+- `_shell_status` in `src/utils.x` repeats `_decoded_status` in
+  `lib/process.x`, and `_valid_utf8` in `src/cli.x` accepts the same input
+  as `_utf8_length` in `lib/json.x`. Both owners are runtime files, so
+  Wave 3 decides them.
+- `src/utils.x` holds several subjects: environment discovery, source
+  files and packages, compiler identity, file locks, translation workers,
+  and the driver's error line.
 
 ## Context
 
@@ -345,9 +421,9 @@ Rules for every file:
 | --- | --- | --- | --- |
 | 0 | standard, skill, lint shape candidates, coverage probe | the waves use them | `make commands-check`; `doc-check` |
 | 1, pilot | `src/collect.x`, `lib/tokenizer.x` | medium size, quiet since 09-27, outside the macro campaign, most defect classes present | per-file stage-diff-1; batch gate; performance checkpoint |
-| 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, small files | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
+| 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, and the small files `editor.x`, `script.x`, `deps.x`, `sourceview.x`, `meta-helper-client.x` | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
 | 3 | runtime: `match-machine.x`, `string.x`, `error.x`, `match.x`, `scan.x`, `scope.x`, the `var.x`/`common.x` duplicates, `dispatch.x`, `pool.x`, `file.x`, `iter.x`, `list.x`, `logger.x`, `meta.x`; `lisp.x` last | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
-| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `type.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
+| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `linked-meta.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
 | 5 | semantics and output: `expressions.x`, `transform.x`, `protocol.x`, `emit.x`, `regions.x`, `cache.x`, `diagnostics.x`, `format.x` | files the dual-macro campaign changes now | as wave 4 |
 | H | unit directories | spec after the pilot; code before wave 4 | one fixture; gate |
 

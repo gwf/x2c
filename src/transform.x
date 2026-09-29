@@ -3075,25 +3075,51 @@ static List _destructure_source(
   return converted;
 }
 
-// Build the List index expression used by each lowered target.
-static List _element_at(List source, int index) {
+// Read one element from the issued List temporary.
+static List _destructure_element(List temporary, int index) {
   String text = %"$index";
-  return %(expr ("Var") (getindex $source (literal (int) $text)));
+  return %(expr ("Var")
+           (getindex (expr ("List") (ident $temporary))
+                     (literal (int) $text)));
 }
 
-static List _destructure_element(List temporary, int index) =>
-  _element_at(%(expr ("List") (ident $temporary)), index);
+macro open Expression $destructure_write(
+    Expr $target, Expr $value) => $target = $value;
+
+macro open Statement $destructure_targets(
+    Type $type, DeclaratorRow $rows...) {
+  $type $rows...;
+}
+
+macro open Statement $destructure_typed_target(
+    Type $type, DeclaratorRow $row, Expr $value) {
+  $type $row = $value;
+}
+
+macro open Statement $destructure_sequence(Statement $items...) {
+  $items...
+}
+
+static List _destructure_expression_statement(
+  Compiler compiler, List expression) {
+  Macro shape = $expression_statement;
+  return compiler.rebuild_statement(shape(expression)).cadr();
+}
 
 // Preserve typed targets, including the indirection of mutable lambda
 // captures, while constructing their writes in source order.
-static List _destructure_assignments(List targets, List temporary) {
+static List _destructure_assignments(
+  Compiler compiler, List targets, List temporary) {
   int index = 0;
+  Macro shape = $destructure_write;
   return targets.map(
     %!(List target) using &index => {
       match (target)
         case %(expr ?type ?): {
           List value = _destructure_element(temporary, index++);
-          return %(stmnt (expr $type (op = $target $value)));
+          List expression = compiler.rebuild_expression(
+            type, shape(target, value));
+          return _destructure_expression_statement(compiler, expression);
         }
     });
 }
@@ -3123,7 +3149,7 @@ static List _destructure_statement(Compiler compiler, List ast) {
       Macro shape = $destructure_statement;
       return compiler.bind_syntax(
         shape(temporary, _destructure_source(compiler, source, source_type),
-              _destructure_assignments(targets, temporary)),
+              _destructure_assignments(compiler, targets, temporary)),
         AST_BLOCK, compiler.return_type);
     }
   }
@@ -3144,17 +3170,20 @@ static List _destructure_declaration(Compiler compiler, List ast) {
         declarations.push(%(bind $ident ()));
         expressions.push(%(expr $type (ident $ident)));
       }
-      List target_decl =
-        %(declare $type (bindings @{declarations.list_free()}));
+      Macro target_shape = $destructure_targets;
+      List target_decl = compiler.rebuild_statement(
+        target_shape(type, declarations.list_free())).cadr();
       List assignments =
         _destructure_assignments(
-          expressions.list_free(), temporary);
+          compiler, expressions.list_free(), temporary);
       Macro shape = $destructure_declarations;
       List tail = compiler.bind_syntax(
         shape(temporary,
               _destructure_source(compiler, source, source_type),
               assignments), AST_BLOCK, compiler.return_type);
-      return %(seq $target_decl @{tail.cdr()});
+      Macro sequence = $destructure_sequence;
+      return compiler.rebuild_statement(
+        sequence(cons(target_decl, tail.cdr())));
     }
     case %(dstrdecl (params *parameters)
                     (!set ?source (expr ?source_type ?))): {
@@ -3162,21 +3191,22 @@ static List _destructure_declaration(Compiler compiler, List ast) {
         compiler.fresh_name("destructure"));
       Array declarations = [];
       int index = 0;
+      Macro target_shape = $destructure_typed_target;
       foreach (List parameter, parameters) match (parameter) {
         case %(param ?type ?bind): {
           List value = _destructure_element(temporary, index++);
-          declarations.push(%( declare $type (bindings (op = $bind $value)) ));
+          declarations.push(compiler.rebuild_statement(
+            target_shape(type, bind, value)).cadr());
         }
       }
-      Macro shape = macro Statement(
-          Name $temporary, Expr $source) {
-        List $temporary = $source;
-      };
+      Macro shape = $destructure_declarations;
       List temp = compiler.bind_syntax(
         shape(temporary,
               _destructure_source(compiler, source, source_type)),
         AST_BLOCK, compiler.return_type);
-      return %(seq $temp @{declarations.list_free()});
+      Macro sequence = $destructure_sequence;
+      return compiler.rebuild_statement(
+        sequence(cons(temp, declarations.list_free())));
     }
   }
   return ast;
@@ -3217,7 +3247,8 @@ static List _destructure_value(Compiler compiler, List ast) {
       List result_expr = %(expr $type (ident $result));
       List converted = _destructure_source(
         compiler, result_expr, type);
-      List assignments = _destructure_assignments(targets, temporary);
+      List assignments = _destructure_assignments(
+        compiler, targets, temporary);
       Macro shape = macro Statement(
           Type $type, Name $result, Expr $source, Name $temporary,
           Expr $converted) {
@@ -3229,7 +3260,8 @@ static List _destructure_value(Compiler compiler, List ast) {
         AST_BLOCK, compiler.return_type);
       // x2c has no source spelling for this native statement expression.
       return %(parens (block @{bindings.cdr()} @assignments
-                             (stmnt $result_expr)));
+                             ${_destructure_expression_statement(
+                               compiler, result_expr)}));
     }
   }
   return ast;

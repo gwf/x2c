@@ -7,13 +7,13 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void Compiler_stop_meta_helper(void);
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments);
 
 void Compiler_use_meta_helper(String path, Map failures, Map units);
 
 void Compiler_begin_meta_unit(String filename);
 
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments);
+void Compiler_stop_meta_helper(void);
 
 
 #endif /* __GUARD_0xB1CED777__ */

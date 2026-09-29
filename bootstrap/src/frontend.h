@@ -29,23 +29,23 @@ typedef struct ParsedUnit{
 }
 ParsedUnit;
 
-void Frontend_load_support(CliRequest request);
+int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
 
-Frontend Frontend_new(CliRequest request);
+int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
-
-int Frontend_preload_macro_libraries(Frontend frontend);
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
 
 int ParsedUnit_parse(ParsedUnit * p);
 
-int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
-
-int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
-
 void ParsedUnit_close(ParsedUnit * unit);
+
+int Frontend_preload_macro_libraries(Frontend frontend);
+
+void Frontend_load_support(CliRequest request);
+
+Frontend Frontend_new(CliRequest request);
 
 
 #endif /* __GUARD_0x1A2A7247__ */

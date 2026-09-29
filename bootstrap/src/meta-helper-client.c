@@ -48,11 +48,11 @@
 
 #include "exception.h"
 
-static List _78, _75, _74, _72, _71, _67, _65, _64, _62, _60, _59, _58, _57, _48, _45, _43, _42, _39, _38, _36, _34, _33, _32, _31, _29, _27, _26, _24, _13, _1;
+static List _73, _64, _60, _59, _57, _56, _52, _50, _49, _47, _45, _44, _43, _42, _33, _30, _28, _27, _24, _23, _21, _19, _18, _17, _16, _14, _12, _11, _9;
 
-static String _83, _81, _80, _79, _76, _14, _11, _10, _9, _6, _5, _4, _3, _2;
+static String _81, _79, _78, _77, _76, _75, _74, _71, _70, _69, _68, _67, _66, _65;
 
-static Var _77, _73, _70, _69, _68, _66, _63, _61, _52, _50, _49, _46, _44, _41, _40, _37, _35, _30, _28, _25, _23, _18, _16, _15, _12, _8, _7, _0;
+static Var _72, _63, _62, _61, _58, _55, _54, _53, _51, _48, _46, _37, _35, _34, _31, _29, _26, _25, _22, _20, _15, _13, _10, _8, _3, _1, _0;
 
 #include "meta-group.h"
 #include "datum.h"
@@ -90,25 +90,53 @@ _x2c_initializer_choice_B1CED777_9((helper_reset = 0))
 static Buffer helper_input;
 
 _x2c_initializer_choice_B1CED777_10((helper_input = NULL))
+typedef struct Call{
+  Compiler compiler;
+  String name;
+  Token site;
+  double limit, deadline;
+}
+Call;
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void _helper_shutdown(void);
+static void Call_check(Call * call);
 
-static int _helper_stop(int signal);
+static void Call_send(Call * call, List arguments);
+
+static void Call_set_deadline(Call * call);
+
+static double _now(void);
+
+static Var Call_next_reply(Call * call);
 
 static int _helper_start(void);
 
+_Noreturn static void _helper_exec(int requests, int replies);
+
+static int _helper_running(void);
+
+static int _helper_stop(int signal);
+
+static String _helper_ending(void);
+
 static int _helper_send(List message);
-
-static double _helper_limit(void);
-
-static double _helper_now(void);
 
 static int _helper_receive(double deadline, Var * reply);
 
-static String _helper_ending(void);
+static int _take_frame(Var * reply);
+
+static int _read_input(double deadline);
+
+static void Call_refuse(Call * call, String why);
+
+static void Call_overdue(Call * call);
+
+static void Call_stopped(Call * call, String reason);
+
+static void _helper_shutdown(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -117,90 +145,90 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-Var String_var(String);
-
 Var List_var(List);
+
+Var String_var(String);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(1157736);
-  _1 = cons(_0, NULL);
-  _2 = String_new("the body exited with status ");
-  _3 = String_new("the body crashed or overflowed the stack (signal ");
-  _4 = String_new(": ");
-  _5 = String_new(")");
-  _6 = String_new("the project meta module was not built");
-  _7 = Symbol_var(38115688);
-  _8 = Symbol_var(199448);
-  _9 = String_new("%s%g s");
-  _10 = String_new("function: ");
-  _11 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _12 = String_var(_11);
-  _13 = cons(_12, NULL);
-  _14 = String_new("reason: ");
-  _15 = Symbol_var(49497918350);
-  _16 = Symbol_var(2021158750666);
-  _18 = Symbol_var(1976541542);
-  _23 = Symbol_var(1318210446);
-  _24 = cons(_23, NULL);
-  _25 = Symbol_var(1362954);
-  _26 = cons(_25, _24);
-  _27 = cons(_16, _26);
-  _28 = Symbol_var(62054);
-  _29 = cons(_28, _27);
-  _30 = Symbol_var(806120);
-  _31 = cons(_30, NULL);
-  _32 = cons(_25, _31);
-  _33 = cons(_18, _32);
-  _34 = cons(_28, _33);
-  _35 = List_var(_34);
-  _36 = cons(_35, NULL);
-  _37 = List_var(_29);
-  _38 = cons(_37, _36);
-  _39 = cons(_15, _38);
-  _40 = Symbol_var(46228810);
-  _41 = Symbol_var(1992385866);
-  _42 = cons(_41, NULL);
-  _43 = cons(_40, _42);
-  _44 = Symbol_var(1473096);
-  _45 = cons(_44, NULL);
-  _46 = Symbol_var(11703268);
-  _48 = cons(_46, _38);
-  _49 = Symbol_var(293581290303730);
-  _50 = Symbol_var(61869328);
-  _52 = Symbol_var(61344976);
-  _57 = cons(_50, _26);
-  _58 = cons(_28, _57);
-  _59 = cons(_52, _26);
-  _60 = cons(_28, _59);
-  _61 = List_var(_60);
-  _62 = cons(_61, NULL);
-  _63 = List_var(_58);
-  _64 = cons(_63, _62);
-  _65 = cons(_49, _64);
-  _66 = Symbol_var(28562377614);
-  _67 = cons(_66, NULL);
-  _68 = Symbol_var(12971715722);
-  _69 = Symbol_var(61045002);
-  _70 = Symbol_var(58262293080);
-  _71 = cons(_70, NULL);
-  _72 = cons(_69, _71);
-  _73 = List_var(_72);
-  _74 = cons(_73, NULL);
-  _75 = cons(_68, _74);
-  _76 = String_new("reason: the helper sent an unknown reply");
-  _77 = String_var(_76);
-  _78 = cons(_77, NULL);
+  _0 = Symbol_var(49497918350);
+  _1 = Symbol_var(2021158750666);
+  _3 = Symbol_var(1976541542);
+  _8 = Symbol_var(1318210446);
+  _9 = cons(_8, NULL);
+  _10 = Symbol_var(1362954);
+  _11 = cons(_10, _9);
+  _12 = cons(_1, _11);
+  _13 = Symbol_var(62054);
+  _14 = cons(_13, _12);
+  _15 = Symbol_var(806120);
+  _16 = cons(_15, NULL);
+  _17 = cons(_10, _16);
+  _18 = cons(_3, _17);
+  _19 = cons(_13, _18);
+  _20 = List_var(_19);
+  _21 = cons(_20, NULL);
+  _22 = List_var(_14);
+  _23 = cons(_22, _21);
+  _24 = cons(_0, _23);
+  _25 = Symbol_var(46228810);
+  _26 = Symbol_var(1992385866);
+  _27 = cons(_26, NULL);
+  _28 = cons(_25, _27);
+  _29 = Symbol_var(1473096);
+  _30 = cons(_29, NULL);
+  _31 = Symbol_var(11703268);
+  _33 = cons(_31, _23);
+  _34 = Symbol_var(293581290303730);
+  _35 = Symbol_var(61869328);
+  _37 = Symbol_var(61344976);
+  _42 = cons(_35, _11);
+  _43 = cons(_13, _42);
+  _44 = cons(_37, _11);
+  _45 = cons(_13, _44);
+  _46 = List_var(_45);
+  _47 = cons(_46, NULL);
+  _48 = List_var(_43);
+  _49 = cons(_48, _47);
+  _50 = cons(_34, _49);
+  _51 = Symbol_var(28562377614);
+  _52 = cons(_51, NULL);
+  _53 = Symbol_var(12971715722);
+  _54 = Symbol_var(61045002);
+  _55 = Symbol_var(58262293080);
+  _56 = cons(_55, NULL);
+  _57 = cons(_54, _56);
+  _58 = List_var(_57);
+  _59 = cons(_58, NULL);
+  _60 = cons(_53, _59);
+  _61 = Symbol_var(38115688);
+  _62 = Symbol_var(199448);
+  _63 = Symbol_var(1157736);
+  _64 = cons(_63, NULL);
+  _65 = String_new("the body exited with status ");
+  _66 = String_new("the body crashed or overflowed the stack (signal ");
+  _67 = String_new(": ");
+  _68 = String_new(")");
+  _69 = String_new("%s%g s");
+  _70 = String_new("function: ");
+  _71 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
+  _72 = String_var(_71);
+  _73 = cons(_72, NULL);
+  _74 = String_new("reason: ");
+  _75 = String_new("the compile-time helper did not start");
+  _76 = String_new("the helper sent an unknown reply");
+  _77 = String_new("the project meta module was not built");
+  _78 = String_new("a struct");
   _79 = String_new("X2C_META_TIMEOUT");
-  _80 = String_new("a struct");
-  _81 = String_new("the compile-time helper did not start");
-  _83 = String_new("this meta call stopped the compile-time helper");
+  _81 = String_new("this meta call stopped the compile-time helper");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -214,347 +242,32 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_10();
 }
 
-void Compiler_stop_meta_helper(void){
-  if(! _init_guard_) _file_init_();
-  _helper_stop(0);
-}
-
-void Scope_destroy(Scope);
-
-static void _helper_shutdown(void){
-  _helper_stop(0);
-  Scope_destroy(helper_scope);
-  helper_scope = NULL;
-  helper_path = NULL;
-  helper_failures = helper_units = NULL;
-  helper_input = NULL;
-}
-
-int String_truth(String);
-
-int Map_truth(Map);
-
-void Scope_shutdown_hook(void(*)(void));
-
-void Scope_push(Scope *);
-
-String String_new(const char *);
-
-Map Map_copy(Map);
-
-Buffer Buffer_new(size_t);
-
-void Scope_pop(void);
-
-void Compiler_use_meta_helper(String path, Map failures, Map units){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(path) && ! Map_truth(failures)) return;
-  if(! helper_scope) Scope_shutdown_hook(_helper_shutdown);
-  Scope_push(& helper_scope);
-  helper_path = String_truth(path) ? String_new(path) : NULL;
-  helper_failures = Map_truth(failures) ? Map_copy(failures) : NULL;
-  helper_units = Map_truth(units) ? Map_copy(units) : NULL;
-  helper_input = Buffer_new(0);
-  Scope_pop();
-}
-
-int Map_try_get(Map, Var, Var *);
-
-Path Path_absolute(Path);
-
-long Var_integer(Var);
-
-void Compiler_begin_meta_unit(String filename){
-  if(! _init_guard_) _file_init_();
-  Var table;
-  helper_table = Map_truth(helper_units) && String_truth(filename) && Map_try_get(helper_units, String_var(Path_absolute(filename)), &(table)) ? Var_integer(table) : 0;
-  helper_reset = 1;
-}
-
-int Buffer_truth(Buffer);
-
-Buffer Buffer_clear(Buffer);
-
-static int _helper_stop(int signal){
-  int status = 0;
-  if(helper_pid > 0 && helper_owner == getpid()){
-    if(signal) kill(helper_pid, signal);
-    else _helper_send(_1);
-    close(helper_to);
-    close(helper_from);
-    waitpid(helper_pid, & status, 0);
-  }
-  helper_pid = 0;
-  helper_to = helper_from = - 1;
-  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);
-  return status;
-}
-
-static int _helper_start(void){
-  if(helper_pid > 0 && helper_owner == getpid()) return 1;
-  helper_pid = 0;
-  int requests[2], replies[2];
-  if(pipe(requests) || pipe(replies)) return 0;
-  for(int i = 0;  i < 2;  i ++){
-    fcntl(requests[i], F_SETFD, FD_CLOEXEC);
-    fcntl(replies[i], F_SETFD, FD_CLOEXEC);
-  }
-  pid_t pid = fork();
-  if(! pid){
-    int in = fcntl(requests[0], F_DUPFD_CLOEXEC, 10);
-    int out = fcntl(replies[1], F_DUPFD_CLOEXEC, 10);
-    dup2(in, 3);
-    dup2(out, 4);
-    execl(helper_path, helper_path, (char *) NULL);
-    _exit(127);
-  }
-  close(requests[0]);
-  close(replies[1]);
-  helper_pid = pid;
-  helper_owner = getpid();
-  helper_to = requests[1];
-  helper_from = replies[0];
-  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);
-  helper_reset = 1;
-  return 1;
-}
-
-void x2c_cleanup_push(X2CCleanup *);
-
-int datum_frame(Buffer, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-String Buffer_str(Buffer);
-
-int String_len(String);
-
-static int _helper_send(List message){
-  Buffer out = Buffer_new(0);
-  {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
-    {
-      if(! datum_frame(out, List_var(message))){
-        int _x2c_return_value_0 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
-        }
-
-      }
-      String frame = String_join(NULL, cons(String_var(Buffer_str(out)), NULL));
-      void(* previous)(int) = signal(SIGPIPE, SIG_IGN);
-      size_t done = 0, size = String_len(frame);
-      while(done < size){
-        ssize_t n = write(helper_to, (char *) frame + done, size - done);
-        if(n < 0 && errno == EINTR) continue;
-        if(n <= 0) break;
-        done += n;
-      }
-      signal(SIGPIPE, previous);
-      {
-        int _x2c_return_value_1 = done == size;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
-  }
-
-}
-
-String Env_get(String);
-
-double atof(const char *);
-
-static double _helper_limit(void){
-  String text = Env_get(_79);
-  return String_truth(text) ? atof(text) : 60.0;
-}
-
-static double _helper_now(void){
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, & now);
-  return now.tv_sec + now.tv_nsec / 1e9;
-}
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-int datum_unframe(String, size_t *, Var *);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-Buffer Buffer_write(Buffer, const char *);
-
-String String_new_len(const char *, int);
-
-static int _helper_receive(double deadline, Var * reply){
-  for(; ; ){
-    String input = Buffer_str(helper_input);
-    size_t used = 0;
-    int volatile framed = 0;
-    {
-      ExceptionFrame _x2c_exception_frame_0;
-      static MatchCaptureSite _x2c_macro_arms_0[1];
-      Var _x2c_macro_patterns_0[1];
-      static ErrorCatchSite _x2c_macro_site_0 ={
-        _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-      }
-      ;
-      if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-        _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
-      }
-      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-      x2c_exception_push(& _x2c_exception_frame_0);
-      if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) framed = datum_unframe(input, &(used), &((* reply)));
-      else{
-        x2c_exception_landed(& _x2c_exception_frame_0);
-        if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-          int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-          x2c_error_catch_detach(_x2c_error_handler_0);
-          x2c_exception_mark_handled(& _x2c_exception_frame_0);
-          if(_x2c_macro_selected_0 == 0){
-            {
-              int _x2c_return_value_2 = 0;
-              {
-                x2c_error_catch_close(_x2c_error_handler_0);
-                _x2c_error_handler_0 = NULL;
-                x2c_exception_leave(& _x2c_exception_frame_0);
-                return _x2c_return_value_2;
-              }
-
-            }
-
-          }
-
-        }
-        else{
-          x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_0);
-          __builtin_unreachable();
-        }
-
-      }
-      x2c_error_catch_close(_x2c_error_handler_0);
-      _x2c_error_handler_0 = NULL;
-      x2c_exception_leave(& _x2c_exception_frame_0);
-    }
-    if(framed){
-      String rest = String_getslice(input, used, -2147483648, 1);
-      Buffer_clear(helper_input);
-      if(String_truth(rest)) Buffer_write(helper_input, rest);
-      return 1;
-    }
-    int wait = - 1;
-    if(deadline > 0){
-      double left = deadline - _helper_now();
-      if(left <= 0) return - 1;
-      wait =(int)(left * 1000) + 1;
-    }
-    struct pollfd ready ={
-      .fd = helper_from, .events = POLLIN
-    }
-    ;
-    int polled = poll(& ready, 1, wait);
-    if(polled < 0 && errno == EINTR) continue;
-    if(polled == 0) return - 1;
-    char bytes[65536];
-    ssize_t n = read(helper_from, bytes, sizeof bytes);
-    if(n < 0 && errno == EINTR) continue;
-    if(n <= 0) return 0;
-    Buffer_write(helper_input, String_new_len(bytes, n));
-  }
-
-}
-
-String int_str(int);
-
-static String _helper_ending(void){
-  int status = _helper_stop(0);
-  int code = WEXITSTATUS(status);
-  if(! WIFSIGNALED(status)) return String_join(NULL, cons(String_var(_2), cons(String_var(int_str(code)), NULL)));
-  int signal = WTERMSIG(status);
-  String name = String_new(strsignal(signal));
-  return String_join(NULL, cons(String_var(_3), cons(String_var(int_str(signal)), cons(String_var(_4), cons(String_var(name), cons(String_var(_5), NULL))))));
-}
-
-void Compiler_refuse_meta_call(Compiler, String, Token, String);
+List Var_list(Var);
 
 String Var_string(Var);
 
-Var int_var(int);
-
-String Compiler_meta_call_missing(Compiler, String);
-
-int String_startswith(String, String);
-
-Var Macro_subject(void);
+void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-String String_printf(String, ...);
-
-List Var_list(Var);
-
-void Compiler_report_warning(Compiler, Symbol, String, Token, List);
-
 void Map_merge_translation_dependency(Map, String, Var);
+
+String Compiler_meta_call_missing(Compiler, String);
 
 Symbol Error_raise(Symbol, List);
 
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments){
   if(! _init_guard_) _file_init_();
-  Var failure;
-  if(! String_truth(helper_path)) Compiler_refuse_meta_call(c, name, site, Var_string(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure)) ? failure : String_var(_6)));
-  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Compiler_refuse_meta_call(c, name, site, Var_string(failure));
-  String missing = Compiler_meta_call_missing(c, name);
-  if(String_startswith(missing, _80)) Compiler_refuse_meta_call(c, name, site, missing);
-  if(! _helper_start()) Compiler_refuse_meta_call(c, name, site, _81);
-  if(helper_reset){
-    _helper_send(cons(_7, cons(int_var(helper_table), NULL)));
-    helper_reset = 0;
+  Call call ={
+    .compiler = c, .name = name, .site = site
   }
-  _helper_send(cons(_8, cons(String_var(name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
-  double limit = _helper_limit();
-  double deadline = limit > 0 ? _helper_now() + limit : 0;
+  ;
+  Call_check(&(call));
+  if(! _helper_start()) Call_refuse(&(call), _75);
+  Call_send(&(call), arguments);
+  Call_set_deadline(&(call));
   for(; ; ){
-    Var reply;
-    int status = _helper_receive(deadline, &(reply));
-    if(status < 0){
-      _helper_stop(SIGKILL);
-      Compiler_report_error(c, 27335838, String_printf(_9, "this meta call ran longer than ", limit), site, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(name), NULL)))), _13));
-    }
-    if(! status) Compiler_report_error(c, 27335838, _83, site, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_14), cons(String_var(_helper_ending()), NULL)))), NULL)));
+    Var reply = Call_next_reply(&(call));
 
   {
     List _x2c_match_expr = Var_list(reply);
@@ -613,20 +326,344 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     }
     break; } } case 28562377614: ;
     { List _x2c_match_cursor;
-    if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Compiler_refuse_meta_call(c, name, site, Compiler_meta_call_missing(c, name));
+    if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
     break; } } case 12971715722: ;
     static MatchCaptureSite _x2c_match_site_0;
-    if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_75), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
+    if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_60), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
   }
-  default: ;  Compiler_report_error(c, 27335838, _83, site, cons(String_var(String_join(NULL, cons(String_var(_10), cons(String_var(name), NULL)))), _78));  break;
+  default: ;  Call_stopped(&(call), _76);  break;
     }
   }
 }
 }
 
+int String_truth(String);
+int Map_truth(Map);
+int Map_try_get(Map, Var, Var *);
+Var int_var(int);
+int String_startswith(String, String);
+static void Call_check(Call * call){
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(call, Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(call, _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(call, Var_string(failure));  String missing = Compiler_meta_call_missing(call -> compiler, call -> name);  if(String_startswith(missing, _78)) Call_refuse(call, missing);
+}
+
+Var Macro_subject(void);
+static void Call_send(Call * call, List arguments){
+  if(helper_reset){
+    _helper_send(cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
+  }
+  _helper_send(cons(_62, cons(String_var(call -> name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
+}
+
+String Env_get(String);
+double atof(const char *);
+static void Call_set_deadline(Call * call){
+  String text = Env_get(_79);  call -> limit = String_truth(text) ? atof(text) : 60.0;  call -> deadline = call -> limit > 0 ? _now() + call -> limit : 0;
+}
+
+static double _now(void){
+  struct timespec now;  clock_gettime(CLOCK_MONOTONIC, & now);  return now.tv_sec + now.tv_nsec / 1e9;
+}
+
+static Var Call_next_reply(Call * call){
+  Var reply;  int status = _helper_receive(call -> deadline, &(reply));  if(status < 0) Call_overdue(call);  if(! status) Call_stopped(call, _helper_ending());  return reply;
+}
+
+int Buffer_truth(Buffer);
+Buffer Buffer_clear(Buffer);
+static int _helper_start(void){
+  if(_helper_running()) return 1;  helper_pid = 0;  int requests[2], replies[2];  if(pipe(requests) || pipe(replies)) return 0;  for(int i = 0;  i < 2;  i ++){
+    fcntl(requests[i], F_SETFD, FD_CLOEXEC);  fcntl(replies[i], F_SETFD, FD_CLOEXEC);
+  }
+  pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  helper_pid = pid;  helper_owner = getpid();  helper_to = requests[1];  helper_from = replies[0];  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  helper_reset = 1;  return 1;
+}
+
+_Noreturn static void _helper_exec(int requests, int replies){
+  int in = fcntl(requests, F_DUPFD_CLOEXEC, 10);  int out = fcntl(replies, F_DUPFD_CLOEXEC, 10);  dup2(in, 3);  dup2(out, 4);  execl(helper_path, helper_path, (char *) NULL);  _exit(127);
+}
+
+static int _helper_running(void){
+  return helper_pid > 0 && helper_owner == getpid();
+}
+
+static int _helper_stop(int signal){
+  int status = 0;  if(_helper_running()){
+    if(signal) kill(helper_pid, signal);  else _helper_send(_64);  close(helper_to);  close(helper_from);  waitpid(helper_pid, & status, 0);
+  }
+  helper_pid = 0;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
+}
+
+String int_str(int);
+String String_new(const char *);
+static String _helper_ending(void){
+  int status = _helper_stop(0), code = WEXITSTATUS(status);  if(! WIFSIGNALED(status)) return String_join(NULL, cons(String_var(_65), cons(String_var(int_str(code)), NULL)));  int signal = WTERMSIG(status);  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_66), cons(String_var(int_str(signal)), cons(String_var(_67), cons(String_var(name), cons(String_var(_68), NULL))))));
+}
+
+Buffer Buffer_new(size_t);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+int datum_frame(Buffer, Var);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+String Buffer_str(Buffer);
+
+int String_len(String);
+
+static int _helper_send(List message){
+  Buffer out = Buffer_new(0);
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      if(! datum_frame(out, List_var(message))){
+        int _x2c_return_value_0 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
+      }
+      String frame = String_join(NULL, cons(String_var(Buffer_str(out)), NULL));
+      void(* previous)(int) = signal(SIGPIPE, SIG_IGN);
+      size_t done = 0, size = String_len(frame);
+      while(done < size){
+        ssize_t n = write(helper_to, (char *) frame + done, size - done);
+        if(n < 0 && errno == EINTR) continue;
+        if(n <= 0) break;
+        done += n;
+      }
+      signal(SIGPIPE, previous);
+      {
+        int _x2c_return_value_1 = done == size;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+int x2c_error_catch_site_pending(ErrorCatchSite *);
+
+ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
+
+void x2c_exception_push(ExceptionFrame *);
+
+void x2c_exception_landed(ExceptionFrame *);
+
+int x2c_exception_is_error_target(ExceptionFrame *);
+
+int x2c_error_catch_selected(ErrorHandler);
+
+void x2c_error_catch_detach(ErrorHandler);
+
+void x2c_exception_mark_handled(ExceptionFrame *);
+
+void x2c_error_catch_close(ErrorHandler);
+
+void x2c_exception_leave(ExceptionFrame *);
+
+static int _helper_receive(double deadline, Var * reply){
+  for(; ; ){
+    int volatile framed = 0;
+    {
+      ExceptionFrame _x2c_exception_frame_0;
+      static MatchCaptureSite _x2c_macro_arms_0[1];
+      Var _x2c_macro_patterns_0[1];
+      static ErrorCatchSite _x2c_macro_site_0 ={
+        _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+      }
+      ;
+      if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
+        _x2c_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(664344300629258), cons(Symbol_var(28682226919752), NULL)))), cons(Symbol_var(54), NULL)));
+      }
+      volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
+      x2c_exception_push(& _x2c_exception_frame_0);
+      if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) framed = _take_frame(&((* reply)));
+      else{
+        x2c_exception_landed(& _x2c_exception_frame_0);
+        if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
+          int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
+          x2c_error_catch_detach(_x2c_error_handler_0);
+          x2c_exception_mark_handled(& _x2c_exception_frame_0);
+          if(_x2c_macro_selected_0 == 0){
+            {
+              int _x2c_return_value_2 = 0;
+              {
+                x2c_error_catch_close(_x2c_error_handler_0);
+                _x2c_error_handler_0 = NULL;
+                x2c_exception_leave(& _x2c_exception_frame_0);
+                return _x2c_return_value_2;
+              }
+
+            }
+
+          }
+
+        }
+        else{
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          __builtin_unreachable();
+        }
+
+      }
+      x2c_error_catch_close(_x2c_error_handler_0);
+      _x2c_error_handler_0 = NULL;
+      x2c_exception_leave(& _x2c_exception_frame_0);
+    }
+    if(framed) return 1;
+    int more = _read_input(deadline);
+    if(more <= 0) return more;
+  }
+
+}
+
+int datum_unframe(String, size_t *, Var *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+static int _take_frame(Var * reply){
+  String input = Buffer_str(helper_input);
+  size_t used = 0;
+  if(! datum_unframe(input, &(used), &((* reply)))) return 0;
+  String rest = String_getslice(input, used, -2147483648, 1);
+  Buffer_clear(helper_input);
+  if(String_truth(rest)) Buffer_write(helper_input, rest);
+  return 1;
+}
+
+String String_new_len(const char *, int);
+
+static int _read_input(double deadline){
+  int wait = - 1;
+  if(deadline > 0){
+    double left = deadline - _now();
+    if(left <= 0) return - 1;
+    wait =(int)(left * 1000) + 1;
+  }
+  struct pollfd ready ={
+    .fd = helper_from, .events = POLLIN
+  }
+  ;
+  int polled = poll(& ready, 1, wait);
+  if(polled < 0 && errno == EINTR) return 1;
+  if(polled == 0) return - 1;
+  char bytes[65536];
+  ssize_t n = read(helper_from, bytes, sizeof bytes);
+  if(n < 0 && errno == EINTR) return 1;
+  if(n <= 0) return 0;
+  Buffer_write(helper_input, String_new_len(bytes, n));
+  return 1;
+}
+
+void Compiler_refuse_meta_call(Compiler, String, Token, String);
+
+static void Call_refuse(Call * call, String why){
+  Compiler_refuse_meta_call(call -> compiler, call -> name, call -> site, why);
+}
+
+String String_printf(String, ...);
+
+static void Call_overdue(Call * call){
+  _helper_stop(SIGKILL);
+  Compiler_report_error(call -> compiler, 27335838, String_printf(_69, "this meta call ran longer than ", call -> limit), call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), _73));
+}
+
+static void Call_stopped(Call * call, String reason){
+  Compiler_report_error(call -> compiler, 27335838, _81, call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL)))), NULL)));
+}
+
+void Scope_shutdown_hook(void(*)(void));
+
+void Scope_push(Scope *);
+
+Map Map_copy(Map);
+
+void Compiler_use_meta_helper(String path, Map failures, Map units){
+  if(! _init_guard_) _file_init_();
+  if(! String_truth(path) && ! Map_truth(failures)) return;
+  if(! helper_scope) Scope_shutdown_hook(_helper_shutdown);
+  {
+    Scope_push(& helper_scope);
+    {
+      {
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_1, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          {
+            helper_path = String_truth(path) ? String_new(path) : NULL;
+            helper_failures = Map_truth(failures) ? Map_copy(failures) : NULL;
+            helper_units = Map_truth(units) ? Map_copy(units) : NULL;
+            helper_input = Buffer_new(0);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+      }
+
+    }
+
+  }
+
+}
+
+Path Path_absolute(Path);
+
+long Var_integer(Var);
+
+void Compiler_begin_meta_unit(String filename){
+  if(! _init_guard_) _file_init_();
+  Var table;
+  helper_table = Map_truth(helper_units) && String_truth(filename) && Map_try_get(helper_units, String_var(Path_absolute(filename)), &(table)) ? Var_integer(table) : 0;
+  helper_reset = 1;
+}
+
+void Compiler_stop_meta_helper(void){
+  if(! _init_guard_) _file_init_();
+  _helper_stop(0);
+}
+
+void Scope_destroy(Scope);
+
+static void _helper_shutdown(void){
+  _helper_stop(0);
+  Scope_destroy(helper_scope);
+  helper_scope = NULL;
+  helper_path = NULL;
+  helper_failures = helper_units = NULL;
+  helper_input = NULL;
+}
+
 void Buffer_cleanup(Buffer);
+
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+void Scope_pop(void);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  Scope_pop();
 }
 
 #undef _x2c_initializer_choice_B1CED777_0_expanded

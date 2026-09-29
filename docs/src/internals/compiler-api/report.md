@@ -15,6 +15,7 @@ Command progress and completion receipts.
 | [`report_configure`](#report_configure) | Resets process reporting for one command. |
 | [`report_duration`](#report_duration) | Formats microseconds as integer `us`, rounded whole `ms`, or seconds with two decimal places. |
 | [`report_file_bytes`](#report_file_bytes) | Returns the size of a regular file. |
+| [`report_generated`](#report_generated) | Writes the muted receipt for `n` generated C files and as many headers, `bytes` in all, when receipts are enabled. |
 | [`report_line`](#report_line) | Writes one newline-terminated receipt to stderr when receipts are enabled. |
 | [`report_make_owned`](#report_make_owned) | Reports whether a parent Make recipe runs this process, which `MAKELEVEL` set to a positive count shows. |
 | [`report_now_us`](#report_now_us) | Returns monotonic time in microseconds, or zero when the clock read fails. |
@@ -32,10 +33,11 @@ Command progress and completion receipts.
 
 Resets process reporting for one command.
 Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
-progress additionally requires terminal stderr and non-plain output. Plain output disables color; automatic color respects
-terminal capability and `NO_COLOR`.
+progress additionally requires terminal stderr and non-plain output.
+Plain output disables color; automatic color respects terminal capability
+and `NO_COLOR`.
 
-Source: `src/report.x:101`
+Source: `src/report.x:49`
 
 #### report_duration
 
@@ -44,7 +46,7 @@ Source: `src/report.x:101`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:60`
+Source: `src/report.x:268`
 
 #### report_file_bytes
 
@@ -53,7 +55,16 @@ Source: `src/report.x:60`
 Returns the size of a regular file.
 NULL, a failed `stat`, or a non-regular path returns zero.
 
-Source: `src/report.x:51`
+Source: `src/report.x:259`
+
+#### report_generated
+
+`void report_generated(int n, unsigned long long bytes)`
+
+Writes the muted receipt for `n` generated C files and as many headers,
+`bytes` in all, when receipts are enabled.
+
+Source: `src/report.x:203`
 
 #### report_line
 
@@ -63,7 +74,7 @@ Writes one newline-terminated receipt to stderr when receipts are enabled.
 In transient mode the receipt first clears the terminal line, which
 another process may be drawing, and `line` must be non-NULL.
 
-Source: `src/report.x:188`
+Source: `src/report.x:175`
 
 #### report_make_owned
 
@@ -73,7 +84,7 @@ Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
 set to a positive count shows. Parallel recipes share one terminal and
 one job budget without sharing reporter state.
 
-Source: `src/report.x:82`
+Source: `src/report.x:87`
 
 #### report_now_us
 
@@ -82,7 +93,7 @@ Source: `src/report.x:82`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:41`
+Source: `src/report.x:249`
 
 #### report_phase
 
@@ -92,7 +103,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:236`
+Source: `src/report.x:186`
 
 #### report_progress
 
@@ -103,7 +114,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:201`
+Source: `src/report.x:101`
 
 #### report_receipts
 
@@ -111,7 +122,7 @@ Source: `src/report.x:201`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:117`
+Source: `src/report.x:81`
 
 #### report_size
 
@@ -120,7 +131,7 @@ Source: `src/report.x:117`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:69`
+Source: `src/report.x:277`
 
 #### report_suspend
 
@@ -129,7 +140,7 @@ Source: `src/report.x:69`
 Clears the active transient line from stderr, if this process drew one.
 Forked workers inherit the state but leave the line to their parent.
 
-Source: `src/report.x:178`
+Source: `src/report.x:163`
 
 ## Design notes
 
