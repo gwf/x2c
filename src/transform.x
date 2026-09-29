@@ -355,7 +355,7 @@ static List _adapter_reader_call(
 }
 
 /* One ABI argument is read before the next reader runs. */
-macro open Statement $func_argument_local(
+macro open Statement $func_local(
     Type $type, DeclaratorRow $row) {
   $type $row;
 }
@@ -421,7 +421,7 @@ static List _func_argument_locals(
     compiler, "x2c_func_declared_reference_argument", reference_type);
   Array locals = [];
   int index = 0;
-  Macro local = $func_argument_local;
+  Macro local = $func_local;
   foreach (Type type, types) {
     List binding = names.car();
     names = names.cdr();
@@ -1457,10 +1457,6 @@ macro open Unit $capture_environment(Name $name, Field $fields...) {
   typedef struct $name { $fields... } $name;
 }
 
-macro open Statement $capture_local(Type $type, DeclaratorRow $row) {
-  $type $row;
-}
-
 macro open Statement $capture_factory(Statement $storage, Expr $value) {
   $storage
   return $value;
@@ -1494,7 +1490,7 @@ static List _lower_captured_lambda(
   Map slots = {};
   Array fields = [], field_types = [];
   Array capture_locals = [], field_values = [];
-  Macro local = $capture_local;
+  Macro local = $func_local;
   foreach (List capture, captures)
     match (capture)
       case %(capture ?binding ?captured_type ?expression): {
