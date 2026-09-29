@@ -11,6 +11,7 @@
 #pragma once
 #include "ast.x"
 #include "meta.x"
+
 /** Represents a semantic type as a canonical `List` of declarator modifiers
     followed by its base type. `NULL` denotes no type, and nonempty values have
     the canonical `List`-pool lifetime.
@@ -36,7 +37,10 @@ inline List Type.list(Type x) => (List) x;
 /** Views `x` as a `Type` without validating its type shape. */
 inline Type List.type(List x) => (void *) x;
 
-// types from declarations
+/* types from declarations
+
+   `_from_ast` converts any node inside a declaration AST. `context` is the
+   base Type that a declarator's modifiers apply to. */
 
 /** Returns the semantic `Type` represented by a complete `(declare ...)` AST.
     A declaration with one binding is unwrapped to that binding's `Type`;
@@ -48,9 +52,9 @@ Type List.type_from_ast(List ast) {
   return type;
 }
 
-/* Private version can take any internal node of a declaration AST.  It
-   will also apply modifications to inline sub-types (i.e., a struct field
-   that's a pointer). */
+/* Each declaration form has its own step; any other node is a modifier
+   chain or converts its children. A nested declaration, such as a struct
+   field that is a pointer, converts the same way. */
 static List _from_ast(List ast, List context) {
   if (!ast) return ast;
   // Initializers do not contribute to the declared Type.
@@ -59,92 +63,37 @@ static List _from_ast(List ast, List context) {
       return _from_ast(binding, context);
   Var head = ast.car();
   switch (head.symbol()) {
-    // (declare ?type ?bindings)
-    case <declare>: {
-      (List source_type, List bindings) = ast.cdr();
-      List type = _from_ast(_without_leading_text(source_type), NULL);
-      return _from_ast(bindings, type);
-    }
-    // (bind ?ident ?mods)
-    case <bind>: {
-      // A declarator modifier is never a named type, so all of its source
-      // attribute text, `("__attribute__((unused))")`, drops.
-      Array typed = [];
-      foreach (Var item, ast.caddr())
-        if (!_is_source_text(item)) typed.push(item);
-      List mods = _from_ast(typed.list_free(), context);
-      return context.type()._modify(mods);
-    }
-    // (params ?params), (bindings ?bindings), (fields ?fields)
+    case <declare>:  return _from_declare(ast);
+    case <bind>:     return _from_bind(ast, context);
     case <params>:
-    case <bindings>:
-      return _from_ast_items(ast.cdr(), context);
-    case <fields>: {
-      Array types = [];
-      foreach (List field, ast.cdr()) {
-        List declaration = field;
-        while (declaration.car() == <at>) declaration = declaration.caddr();
-        if (declaration.car() != <c-assert>)
-          types.push(_from_ast(field, context));
-      }
-      return types.list_free();
-    }
-    // (typedef ?type (bindings ?bindings))
-    case <typedef>: {
-      (List source_type, List bindings) = ast.cdr();
-      List type = _from_ast(source_type, NULL);
-      return _from_ast(bindings, type);
-    }
-    // (fnmod ?params)
-    case <fnmod>: {
-      List params = _from_ast(ast.cdr(), NULL);
-      return %( func @params );
-    }
-    // (param ?type ?mods)
-    case <param>: {
-      (Type parameter_type, List mods) = ast.cdr();
-      return _from_ast(mods, parameter_type);
-    }
+    case <bindings>: return _from_items(ast.cdr(), context);
+    case <fields>:   return _from_fields(ast, context);
+    case <typedef>:  return _from_typedef(ast);
+    case <fnmod>:    return _from_fnmod(ast);
+    case <param>:    return _from_param(ast);
     // Binding identity is AST metadata; semantic Types retain the spelling.
-    case <binding>:
-      return %(${ast.caddr()});
-    case <struct>: case <union>: {
-      // (struct tag), (union tag) -> as is
-      if (ast.type().is_aggregate_tag()) return ast;
-      List fields = NULL;
-      if (ast.type()._is_aggregate_body()) {
-        // (struct body), (union body) -> canonicalize the body
-        fields = ast.cadr();
-        fields = _from_ast(fields, NULL);
-        fields = fields.flatten();
-        return %( $head  $fields );
-      }
-      // (struct ?tag ?body) or (union ?tag ?body) -> drop the body
-      return %( $head ${ast.cadr()} );
-    }
-    case <expr>: {
-      match (ast)
-        case %(expr (int) (literal ? ?value)): return %($value);
-      break;
-    }
+    case <binding>:  return %(${ast.caddr()});
+    case <struct>:
+    case <union>:    return _from_aggregate(ast, head);
+    case <expr>:     return _from_expr(ast, context);
   }
+  return _from_modifiers(ast, context);
+}
 
+/* A modifier chain in source order: pointer marks, qualifiers, storage
+   classes, `inline`, and nested pointer, array, function, and bitfield
+   declarators, then the Type they modify. A node that starts with no
+   modifier converts its children. */
+static List _from_modifiers(List ast, List context) {
   Array modifiers = NULL;
   List rest = ast;
   while (rest) {
     Var modifier = rest.car();
     if (modifier is <symbol>) {
-      Symbol prefix = modifier;
-      if (prefix != <*> && prefix != <&> &&
-          prefix != <opt-ref> && prefix != <^> &&
-          !prefix.is_type_qualifier() && !prefix.is_storage_class() &&
-          !prefix.is_inline()) break;
+      if (!_modifier_symbol(modifier)) break;
     }
     else if (modifier is <list>) {
-      Type nested = modifier;
-      if (!nested.is_pointer() && !nested.is_array() &&
-          !nested.is_function() && !nested.is_bitfield())
-        break;
+      if (!_nested_declarator(modifier)) break;
       modifier = _from_ast(modifier, context);
     }
     else break;
@@ -152,15 +101,87 @@ static List _from_ast(List ast, List context) {
     modifiers.push(modifier);
     rest = rest.cdr();
   }
-  if (modifiers)
-    return modifiers.list_free().append(_from_ast(rest, context));
-
-  return _from_ast_items(ast, context);
+  if (modifiers) return modifiers.list_free().append(_from_ast(rest, context));
+  return _from_items(ast, context);
 }
 
-static List _from_ast_items(List items, List context) {
+static int _modifier_symbol(Symbol prefix) =>
+  prefix == <*> || prefix == <&> || prefix == <opt-ref> || prefix == <^> ||
+  prefix.is_type_qualifier() || prefix.is_storage_class() ||
+  prefix.is_inline();
+
+static int _nested_declarator(Type nested) =>
+  nested.is_pointer() || nested.is_array() || nested.is_function() ||
+  nested.is_bitfield();
+
+/* Converts each List child of `items`; a node with no changed child returns
+   itself. */
+static List _from_items(List items, List context) {
   List child;
   $ast.rewrite_children(items, child, _from_ast(child, context));
+}
+
+// declaration forms
+
+static List _from_declare(List ast) {
+  (List source_type, List bindings) = ast.cdr();
+  List type = _from_ast(_without_leading_text(source_type), NULL);
+  return _from_ast(bindings, type);
+}
+
+/* (bind ?ident ?mods): a declarator modifier is never a named type, so all
+   of its source attribute text, `("__attribute__((unused))")`, drops. */
+static List _from_bind(List ast, List context) {
+  Array typed = [];
+  foreach (Var item, ast.caddr()) if (!_is_source_text(item)) typed.push(item);
+  List mods = _from_ast(typed.list_free(), context);
+  return context.type()._modify(mods);
+}
+
+/* A static assertion among the fields, under any origin wrappers, declares
+   no field. */
+static List _from_fields(List ast, List context) {
+  Array types = [];
+  foreach (List field, ast.cdr()) {
+    List declaration = field;
+    while (declaration.car() == <at>) declaration = declaration.caddr();
+    if (declaration.car() != <c-assert>) types.push(_from_ast(field, context));
+  }
+  return types.list_free();
+}
+
+static List _from_typedef(List ast) {
+  (List source_type, List bindings) = ast.cdr();
+  List type = _from_ast(source_type, NULL);
+  return _from_ast(bindings, type);
+}
+
+static List _from_fnmod(List ast) {
+  List params = _from_ast(ast.cdr(), NULL);
+  return %( func @params );
+}
+
+static List _from_param(List ast) {
+  (Type parameter_type, List mods) = ast.cdr();
+  return _from_ast(mods, parameter_type);
+}
+
+/* (struct tag) stays as written, (struct (fields)) converts its fields, and
+   (struct tag (fields)) drops its body; a union converts the same way. */
+static List _from_aggregate(List ast, Var head) {
+  if (ast.type().is_aggregate_tag()) return ast;
+  if (ast.type()._is_aggregate_body()) {
+    List fields = _from_ast(ast.cadr(), NULL).flatten();
+    return %( $head $fields );
+  }
+  return %( $head ${ast.cadr()} );
+}
+
+/* An integer literal, such as an array bound, keeps only its spelling; any
+   other expression converts its children. */
+static List _from_expr(List ast, List context) {
+  match (ast) case %(expr (int) (literal ? ?value)): return %($value);
+  return _from_items(ast, context);
 }
 
 /* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,
@@ -183,11 +204,10 @@ static int _is_source_text(Var item) =>
 
 static Type Type._modify(Type type, List mods) => %( @mods @type );
 
-// declarations from types
+/* declarations from types
 
-// Build declaration-shaped AST from a canonical semantic type. Synthesized
-// compiler declarations go through here so pointer, array, qualifier, and
-// function-pointer precedence matches parsed source.
+   Synthesized compiler declarations go through here so pointer, array,
+   qualifier, and function-pointer precedence matches parsed source. */
 
 /** Returns `(base modifiers)` for reconstructing a declaration of `type`,
     through `type_declaration_parts` in `lib/meta.x`, which a project's
@@ -220,20 +240,8 @@ List ast_prototype_declarator(List declarator) {
   Array modifiers = [], int changed = 0;
   foreach (Var modifier, declarator.caddr()) {
     match (modifier)
-      case %(fnmod (params *parameters)): {
-        Array rebuilt = [];
-        foreach (List parameter, parameters) {
-          match (parameter)
-            case %(param ?type (bind ?name (volatile *rest))): {
-              rebuilt.push(%(param $type (bind $name (@rest))));
-              changed = 1;
-              continue;
-            }
-          rebuilt.push(parameter);
-        }
-        modifiers.push(%(fnmod (params @{rebuilt.list_free()})));
-        continue;
-      }
+      case %(fnmod (params *parameters)):
+        modifier = _prototype_params(parameters, changed);
     modifiers.push(modifier);
   }
   if (!changed) {
@@ -241,6 +249,21 @@ List ast_prototype_declarator(List declarator) {
     return declarator;
   }
   return %(bind ${declarator.cadr()} ${modifiers.list_free()});
+}
+
+/* The function modifier for `parameters`, each without its outermost
+   `volatile`; `changed` becomes 1 when one had it. */
+static List _prototype_params(List parameters, int &changed) {
+  Array rebuilt = [];
+  foreach (List parameter, parameters) {
+    match (parameter)
+      case %(param ?type (bind ?name (volatile *rest))): {
+        parameter = %(param $type (bind $name (@rest)));
+        changed = 1;
+      }
+    rebuilt.push(parameter);
+  }
+  return %(fnmod (params @{rebuilt.list_free()}));
 }
 
 // specifier symbols
@@ -323,9 +346,8 @@ List Type.body(Type t) {
 
 // declarators
 
-/** Returns whether `type` begins with a pointer-like modifier. */
-int Type.is_pointer(Type type) =>
-  !!type.match(%((!or (!quote *) & opt-ref ^) *));
+/** Returns whether `t` begins with a pointer-like modifier. */
+int Type.is_pointer(Type t) => !!t.match(%((!or (!quote *) & opt-ref ^) *));
 
 /** Returns whether the outer declarator represented by `type` is an array. */
 int Type.is_array(Type type) => _declarator_kind(type) == <dim>;
@@ -372,18 +394,18 @@ Type Type.apply(Type type) {
 
 /** Returns whether `type` carries the `static` storage class. */
 int Type.is_static(Type type) => !!type.match(%(* static *));
+
 /** Returns whether `type` carries the `inline` function specifier. */
 int Type.is_inline(Type type) => !!type.match(%(* inline *));
+
 /** Returns whether `type` carries the `extern` storage class. */
 int Type.is_extern(Type type) => !!type.match(%(* extern *));
+
 /** Returns whether `type` carries the `threaded` storage class. */
 int Type.is_threaded(Type type) => !!type.match(%(* threaded *));
 
 /** Returns whether `type` begins with the `typedef` storage class. */
-int Type.is_typedef(Type type) {
-  if (!type) return 0;
-  return type.car() == <typedef>;
-}
+int Type.is_typedef(Type type) => type && type.car() == <typedef>;
 
 // canonical forms
 
@@ -404,22 +426,18 @@ Type Type.canonicalize(Type type) => _canonical(type, 0);
 */
 Type Type.declared(Type type) => _canonical(type, 1);
 
+/* A type that omits nothing returns itself without a copy. */
 static Type _canonical(Type type, int keep_qualifiers) {
   List rest = type;
-  while (rest && (rest.car() is not <symbol> ||
-                 !_omit_specifier(rest.car(), keep_qualifiers)))
-    rest = rest.cdr();
+  while (rest && _kept(rest.car(), keep_qualifiers)) rest = rest.cdr();
   if (!rest) return type;
-  Array result = [];
-  foreach (Var head, type) {
-    if (head is <symbol>) {
-      Symbol first = head;
-      if (_omit_specifier(first, keep_qualifiers)) continue;
-    }
-    result.push(head);
-  }
-  return result.list_free();
+  Array out = [];
+  foreach (Var item, type) if (_kept(item, keep_qualifiers)) out.push(item);
+  return out.list_free();
 }
+
+static int _kept(Var item, int keep_qualifiers) =>
+  item is not <symbol> || !_omit_specifier(item, keep_qualifiers);
 
 static int _omit_specifier(Symbol first, int keep_qualifiers) =>
   (first.is_storage_class() ||
@@ -501,53 +519,67 @@ int Type.is_integral(Type type) {
 
 // scalars
 
-/** Returns the normalized builtin scalar spelling, or `NULL` when `type` is
-    not one valid scalar combination. Storage classes and qualifiers do not
+/* The count of each scalar specifier in one type. `sign` is -1 after
+   `signed` and 1 after `unsigned`, and `signs` counts both. */
+typedef struct Specifiers {
+  int sign, signs, shorts, longs, ints, chars, floats, doubles, voids, count;
+} Specifiers;
+
+/** Returns the normalized builtin scalar spelling, or `NULL` when `t` is not
+    one valid scalar combination. Storage classes and qualifiers do not
     affect the result.
 */
-Type Type.scalar(Type type) {
-  int sign = 0, sign_count = 0, shorts = 0, longs = 0, ints = 0, chars = 0;
-  int floats = 0, doubles = 0, voids = 0, count = 0;
-  foreach (Var value, type) {
-    if (value is not <symbol>) return NULL;
-    Symbol symbol = value;
-    if (_omit_specifier(symbol, 0)) continue;
-    count++;
-    switch (symbol) {
-      case <signed>:   sign = -1; sign_count++; break;
-      case <unsigned>: sign = 1;  sign_count++; break;
-      case <short>:    shorts++;  break;
-      case <long>:     longs++;   break;
-      case <int>:      ints++;    break;
-      case <char>:     chars++;   break;
-      case <float>:    floats++;  break;
-      case <double>:   doubles++; break;
-      case <void>:     voids++;   break;
-      default: return NULL;
-    }
+Type Type.scalar(Type t) {
+  Specifiers s = { 0 };
+  foreach (Var item, t) if (item is not <symbol> || !s.add(item)) return NULL;
+  return s.spelling();
+}
+
+/* Counts one specifier; storage classes, qualifiers, and `inline` count as
+   nothing. Any other symbol means the type is no scalar. */
+static int Specifiers.add(Specifiers *s, Symbol symbol) {
+  if (_omit_specifier(symbol, 0)) return 1;
+  s.count++;
+  switch (symbol) {
+    case <signed>:   s.sign = -1; s.signs++; break;
+    case <unsigned>: s.sign = 1;  s.signs++; break;
+    case <short>:    s.shorts++;  break;
+    case <long>:     s.longs++;   break;
+    case <int>:      s.ints++;    break;
+    case <char>:     s.chars++;   break;
+    case <float>:    s.floats++;  break;
+    case <double>:   s.doubles++; break;
+    case <void>:     s.voids++;   break;
+    default: return 0;
   }
-  if (!count || sign_count > 1 || shorts > 1 || longs > 2 || ints > 1 ||
-      chars > 1 || floats > 1 || doubles > 1 || voids > 1)
+  return 1;
+}
+
+/* The one spelling C gives a valid combination of counts, or `NULL`. */
+static Type Specifiers.spelling(Specifiers *s) {
+  if (!s.count || s.signs > 1 || s.shorts > 1 || s.longs > 2 || s.ints > 1 ||
+      s.chars > 1 || s.floats > 1 || s.doubles > 1 || s.voids > 1)
     return NULL;
-  if (voids) return count == 1 ? %(void) : NULL;
-  if (floats) return count == 1 ? %(float) : NULL;
-  if (doubles) {
-    if (doubles == 1 && longs <= 1 && count == doubles + longs)
-      return longs ? %(long double) : %(double);
+  if (s.voids) return s.count == 1 ? %(void) : NULL;
+  if (s.floats) return s.count == 1 ? %(float) : NULL;
+  if (s.doubles) {
+    if (s.longs <= 1 && s.count == s.doubles + s.longs)
+      return s.longs ? %(long double) : %(double);
     return NULL;
   }
-  if (chars) {
-    if (shorts || longs || ints || count != chars + sign_count) return NULL;
-    if (sign > 0) return %(unsigned char);
-    if (sign < 0) return %(signed char);
+  if (s.chars) {
+    if (s.shorts || s.longs || s.ints || s.count != s.chars + s.signs)
+      return NULL;
+    if (s.sign > 0) return %(unsigned char);
+    if (s.sign < 0) return %(signed char);
     return %(char);
   }
-  if (shorts && longs) return NULL;
-  if (count != sign_count + shorts + longs + ints) return NULL;
-  if (shorts) return sign > 0 ? %(unsigned short) : %(short);
-  if (longs == 1) return sign > 0 ? %(unsigned long) : %(long);
-  if (longs == 2) return sign > 0 ? %(unsigned long long) : %(long long);
-  return sign > 0 ? %(unsigned) : %(int);
+  if (s.shorts && s.longs) return NULL;
+  if (s.count != s.signs + s.shorts + s.longs + s.ints) return NULL;
+  if (s.shorts) return s.sign > 0 ? %(unsigned short) : %(short);
+  if (s.longs == 1) return s.sign > 0 ? %(unsigned long) : %(long);
+  if (s.longs == 2) return s.sign > 0 ? %(unsigned long long) : %(long long);
+  return s.sign > 0 ? %(unsigned) : %(int);
 }
 
 /* Process-lifetime scalar table. Its keys are the spellings Type.scalar
@@ -565,8 +597,7 @@ static List _scalar_row(Type type) {
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo &info) {
   Var row = scalartypes[type];
-  return row is <list> &&
-         Var.numeric_info(row.list().car(), info);
+  return row is <list> && Var.numeric_info(row.list().car(), info);
 }
 
 /** Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
@@ -604,8 +635,7 @@ Type Type.promote(Type type) {
   type = type.scalar();
   if (!type) return NULL;
   X2CVarNumericInfo info;
-  if (_scalar_numeric_info(type, info) &&
-      !info.floating && info.rank < 3)
+  if (_scalar_numeric_info(type, info) && !info.floating && info.rank < 3)
     return %(int);
   return type;
 }
@@ -624,10 +654,10 @@ Type Type.widest(Type a, Type b) {
   if (ai.floating || bi.floating) return ai.rank >= bi.rank ? a : b;
   int ua = ai.unsigned_value, ub = bi.unsigned_value;
   int ra = ai.rank, rb = bi.rank;
-  if (ua == ub)         return (ra >= rb) ? a : b;
-  if (ua && ra >= rb)   return a;
-  if (ub && rb >= ra)   return b;
-  Type signed_type = ua ? b : a, unsigned_type = ua ? a : b;
+  if (ua == ub) return ra >= rb ? a : b;
+  if (ua && ra >= rb) return a;
+  if (ub && rb >= ra) return b;
+  Type signed_type = ua ? b : a;
   int signed_bits = ua ? bi.bits : ai.bits;
   int unsigned_bits = ua ? ai.bits : bi.bits;
   if (signed_bits > unsigned_bits) return signed_type;
@@ -636,9 +666,9 @@ Type Type.widest(Type a, Type b) {
 
 static Type _unsigned_scalar(Type type) {
   switch (type.scalar_tag()) {
-    case <i8>:   return %(unsigned char);
-    case <i16>:  return %(unsigned short);
-    case <i32>:  return %(unsigned);
+    case <i8>:    return %(unsigned char);
+    case <i16>:   return %(unsigned short);
+    case <i32>:   return %(unsigned);
     case <long>:  return %(unsigned long);
     case <llong>: return %(unsigned long long);
   }
@@ -685,10 +715,10 @@ Var Type.numeric_literal_value(Type type, String text) {
   }
   int negative = text[0] == '-';
   if (negative || text[0] == '+') text = text[1:];
+  int end = _integer_literal_end(text);
   unsigned long long magnitude;
   int decimal;
-  if (!_literal_magnitude(
-    text, _integer_literal_end(text), magnitude, decimal)) return void;
+  if (!_literal_magnitude(text, end, magnitude, decimal)) return void;
   Var value = negative ? 0ULL - magnitude : magnitude;
   return value.convert(tag);
 }
@@ -703,37 +733,39 @@ static int _integer_literal_end(String text) {
   return end;
 }
 
-// Read a validated integer token's unsigned magnitude and radix.
+/* Reads a validated integer token's unsigned magnitude. `decimal` is 1 when
+   the token has no radix prefix and no octal leading zero. */
 static int _literal_magnitude(
   String text, int end, unsigned long long &value, int &decimal) {
-  int pos = 0, base = 10;
-  decimal = 1;
-  if (pos + 1 < end && text[pos] == '0') {
-    switch (text[pos + 1]) {
-      case 'x': case 'X': base = 16; pos += 2; decimal = 0; break;
-      case 'b': case 'B': base = 2;  pos += 2; decimal = 0; break;
-      case 'o': case 'O': base = 8;  pos += 2; decimal = 0; break;
-      default:
-        if (text[pos + 1] >= '0' && text[pos + 1] <= '7') {
-          base = 8;
-          decimal = 0;
-        }
-    }
-  }
+  int pos = 0, base = _radix(text, end, pos);
+  decimal = base == 10;
   unsigned long long result = 0;
-  while (pos < end) {
+  for (; pos < end; pos++) {
     unsigned digit = _literal_digit((unsigned char) text[pos]);
     if (result > (ULLONG_MAX - digit) / (unsigned) base) return 0;
     result = result * (unsigned) base + digit;
-    pos++;
   }
   value = result;
   return 1;
 }
 
-static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')
-                   : (unsigned) ((ch | 32) - 'a' + 10);
+/* The radix of an integer token, with `pos` advanced past a `0x`, `0b`, or
+   `0o` prefix. A leading zero before an octal digit selects radix 8. */
+static int _radix(String text, int end, int &pos) {
+  if (end < 2 || text[0] != '0') return 10;
+  switch (text[1]) {
+    case 'x': case 'X': pos = 2; return 16;
+    case 'b': case 'B': pos = 2; return 2;
+    case 'o': case 'O': pos = 2; return 8;
+  }
+  return text[1] >= '0' && text[1] <= '7' ? 8 : 10;
+}
 
+static unsigned _literal_digit(int ch) =>
+  ch <= '9' ? (unsigned) (ch - '0') : (unsigned) ((ch | 32) - 'a' + 10);
+
+/* C gives an integer literal the first type of its suffix's list that holds
+   the value; a decimal literal without `u` skips the unsigned types. */
 static Type _integer_literal_type(
   unsigned long long value, int decimal, int is_unsigned, int longs) {
   if (!is_unsigned && !longs) {
@@ -822,30 +854,31 @@ String ast_indirect_identifier(Var value) {
 static Var _designated(Var value) {
   while (value is <list>) {
     List ast = value;
-    match (ast) {
-      case %(!or (expr ? ?inner) (parens ?inner)): {
-        value = inner;
-        continue;
-      }
-      case %(index (!set ?base (expr ?base_type ?)) ?): {
-        Type type = base_type;
-        if (!type.is_array()) return ast;
-        value = base;
-        continue;
-      }
-      case %(op . ?base *): {
-        value = base;
-        continue;
-      }
-    }
-    return ast;
+    Var inner = _same_object(ast);
+    if (inner is void) return ast;
+    value = inner;
   }
   return NULL;
 }
 
+/* One step inward through an `expr` wrapper, parentheses, a member, or an
+   array index; `void` when `ast` is none of them. */
+static Var _same_object(List ast) {
+  match (ast) {
+    case %(!or (expr ? ?inner) (parens ?inner)): return inner;
+    case %(index (!set ?base (expr ?base_type ?)) ?): {
+      Type type = base_type;
+      if (type.is_array()) return base;
+    }
+    case %(op . ?base *): return base;
+  }
+  return void;
+}
+
 // var tags
 
-/* `src/type-ledger.x` projects both tables from the Var tag ledger. */
+/* Only the leaf unit `src/type-ledger.x` imports the Var tag ledger, so it
+   defines these two tables' accessors and includes this unit. */
 Map Type.builtin_var_tags(void);
 Map Type.var_tag_rows(void);
 
@@ -890,8 +923,7 @@ String Type.var_converter(Type type) {
     clause, an immediate width, or a user registration has no constant row.
 */
 int Type.var_tag_row(
-  Symbol tag, unsigned long &top, unsigned long &mask,
-  unsigned long &bottom) {
+  Symbol tag, unsigned long &top, unsigned long &mask, unsigned long &bottom) {
   Var row = Type.var_tag_rows()[tag];
   if (row is void) return 0;
   List fields = row;
@@ -902,10 +934,8 @@ int Type.var_tag_row(
 }
 
 /** Registers one named type's unit-local `Var` tag and exact forward
-    converter.
-    The first row for a canonical `Type` wins. A `NULL` type, name, or
-    converter,
-    or no active unit, leaves the table unchanged.
+    converter. The first row for a canonical `Type` wins. A `NULL` type,
+    name, or converter, or no active unit, leaves the table unchanged.
 */
 void Type.register_var_tag(Type t, String name, String converter) {
   if (declared_typetags == NULL || !t || !name || !converter) return;
@@ -919,8 +949,7 @@ void Type.register_var_tag(Type t, String name, String converter) {
     fixed tag of `representation` when `tag` is zero. Missing rows and
     untagged representations leave the table unchanged.
 */
-void Type.register_var_adoption(
-  Type type, Type representation, Symbol tag) {
+void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
   if (declared_typetags == NULL || !type) return;
   Type key = type.canonicalize();
   Var row = declared_typetags[key];
