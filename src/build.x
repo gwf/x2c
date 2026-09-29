@@ -50,6 +50,8 @@ typedef struct Build {
 #include "json.x"
 #include "report.x"
 
+// artifact paths
+
 /* Artifact directories and object, dependency, and state paths all use this
    spelling-derived key. The input path is not canonicalized, so its spelling
    is part of incremental cache identity. */
@@ -59,147 +61,12 @@ static String _key(String path) {
   return %"$stem-$digest";
 }
 
-/* Wall-clock seconds in the scale `Path.modified_time` reports, so a build
-   can tell whether a file it read has been written since it started. */
-static double _wall_seconds(void) {
-  struct timespec now;
-  if (clock_gettime(CLOCK_REALTIME, &now)) return 0;
-  return (double) now.tv_sec + (double) now.tv_nsec / 1e9;
-}
-
 /* Names one process's private sibling of a shared artifact path. Concurrent
    builds in one project write through these and publish with rename, so no
    destination is ever absent or half written. */
 static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
 
-/* Every incremental fingerprint starts with the state format, project or
-   direct-build seed, and compiler and selected tool contents. Translation
-   adds its request modes and depfile inputs; native actions add arguments and
-   their input contents. C compilation uses the current native preprocessor
-   output, so changed include resolution and conditional availability count.
-   A missing or unreadable input clears `ok`; state writes are best effort and
-   use a temporary followed by rename. */
-
-/* Null text uses 0xff, present text ends with NUL, and each List ends with
-   0xfe. These separators distinguish adjacent ordered fingerprint fields. */
-static uint64_t _state_text(uint64_t hash, String text) {
-  if (!text) return x2c_fnv_bytes(hash, "\xff", 1);
-  hash = x2c_fnv_bytes(hash, text, strlen(text));
-  return x2c_fnv_bytes(hash, "\0", 1);
-}
-
-static uint64_t _state_list(uint64_t hash, List values) {
-  foreach (String value, values) hash = _state_text(hash, value);
-  return x2c_fnv_bytes(hash, "\xfe", 1);
-}
-
-static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
-  x2c_fnv_file(_state_text(hash, path), path, ok);
-
-static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
-  if (!tool) {
-    ok = 0;
-    return hash;
-  }
-  String path = tool.contains("/") ? tool : x2c_find_program(tool);
-  if (path) return _state_file(hash, path, ok);
-  ok = 0;
-  return _state_text(hash, tool);
-}
-
-static uint64_t _state_base(CliRequest request, String tool, int &ok) {
-  uint64_t hash = UINT64_C(1469598103934665603);
-  hash = _state_text(hash, "x2c-state-v1");
-  hash = _state_text(hash, request.state_seed);
-  String compiler = x2c_compiler_identity();
-  if (!compiler) ok = 0;
-  hash = _state_text(hash, compiler);
-  hash = _state_tool(hash, tool, ok);
-  return hash;
-}
-
-static List _state_dep_inputs(String depfile) {
-  File input = fopen(depfile, "r");
-  if (!input) return NULL;
-  String text = NULL;
-  try text = input.string_close();
-  catch %(io-fail *): return NULL;
-  return translation_depfile_parse(text);
-}
-
-static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
-  List inputs = _state_dep_inputs(depfile);
-  if (!inputs) {
-    ok = 0;
-    return hash;
-  }
-  foreach (String input, inputs) hash = _state_file(hash, input, ok);
-  return hash;
-}
-
-static String _state_line(uint64_t hash) =>
-  "x2c-state-v1 %016llx".printf((unsigned long long) hash);
-
-static int _state_matches(String path, uint64_t hash) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return 0;
-  List lines = text.split_lines(0);
-  if (!lines) return 0;
-  String first = lines.car();
-  return first == _state_line(hash);
-}
-
-/* Lines after the fingerprint name the files it covers, for a reader that
-   must check it without rebuilding the list. */
-static void _state_write_lines(String path, uint64_t hash, List lines) {
-  String text = %"${_state_line(hash)}\n";
-  foreach (String line, lines) text = %"$text$line\n";
-  try file_publish(%($path $text));
-  catch %((!or not-found io-fail) *): {}
-}
-
-static void _state_write(String path, uint64_t hash) {
-  _state_write_lines(path, hash, NULL);
-}
-
-/* Whether every file the build read still carries the contents it read. A
-   fingerprint is taken after the work it describes, so a file written while
-   the build ran would record contents the artifact was not built from.
-   Recording nothing leaves the artifact in place and rebuilds it next time.
-   Every caller asks after hashing, never before: a write that reached the
-   hash has already moved the modification time this reads. The build's own
-   output under the work directory is not one of those files. */
-static int _files_unchanged(Build b, List files) {
-  String work = %"${Path.absolute(b.work_dir)}/";
-  foreach (String path, files) {
-    if (Path.absolute(path).startswith(work)) continue;
-    if (Path.is_file(path) && Path.modified_time(path) >= b.started_wall)
-      return 0;
-  }
-  return 1;
-}
-
-/** Exits with a driver error unless `input` names a regular file.
-    A wildcard or directory operand adds a note on what to pass instead.
-*/
-void build_check_input(String input) {
-  if (!input) x2c_driver_error("input path is empty");
-  if (Path.is_file(input)) return;
-  if (Path.is_dir(input)) {
-    fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
-    fputs(
-      "note: pass source files, use a shell wildcard, or define a "
-      "manifest target\n", stderr);
-    exit(2);
-  }
-  if (Path.exists(input))
-    x2c_driver_error(%"input is not a regular file: $input");
-  fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
-  if (strpbrk(input, "*?["))
-    fputs("note: x2c does not expand wildcard operands\n", stderr);
-  exit(2);
-}
+// preparing a build
 
 /** Validates a native build request and returns its `Scope`-owned build state.
     It writes the default state seed and selected compiler and archiver back
@@ -302,6 +169,29 @@ Build CliRequest.prepare(CliRequest c) {
   return state;
 }
 
+/** Exits with a driver error unless `input` names a regular file.
+    A wildcard or directory operand adds a note on what to pass instead.
+*/
+void build_check_input(String input) {
+  if (!input) x2c_driver_error("input path is empty");
+  if (Path.is_file(input)) return;
+  if (Path.is_dir(input)) {
+    fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
+    fputs(
+      "note: pass source files, use a shell wildcard, or define a "
+      "manifest target\n", stderr);
+    exit(2);
+  }
+  if (Path.exists(input))
+    x2c_driver_error(%"input is not a regular file: $input");
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
+  if (strpbrk(input, "*?["))
+    fputs("note: x2c does not expand wildcard operands\n", stderr);
+  exit(2);
+}
+
+// translated units
+
 /** Returns the generated-file directory for `input`.
     The directory is derived from the input path and created unless this is
     a dry run. Native registration belongs to `Build.add_generated`.
@@ -310,6 +200,25 @@ String Build.generated_dir(Build state, String input) {
   String directory = %"${state.gen_root}/${_key(input)}";
   if (!state.request.dry_run) Path.make_dirs(directory);
   return directory;
+}
+
+/** Reports whether translated C and header artifacts match current inputs.
+    Returns zero without retained state, during a dry run, when either output
+    is absent, or when any compiler, tool, option, depfile, or dependency
+    fingerprint cannot be read or differs.
+*/
+int Build.translation_current(Build state, String input, String directory) {
+  if (!state.state_root || state.request.dry_run) return 0;
+  String stem = Path.stem(input);
+  foreach (String suffix, %(".c" ".h" ".xi"))
+    if (!Path.is_file(%"$directory/$stem$suffix")) return 0;
+  int ok = 1;
+  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
+  String path = %"${state.state_root}/x-${_key(input)}";
+  int current = ok && _state_matches(path, hash);
+  if (current && state.request.verbose)
+    fprintf(stderr, "x2c: up-to-date translate %s\n", input);
+  return current;
 }
 
 static uint64_t _translation_fingerprint(
@@ -336,23 +245,27 @@ static uint64_t _translation_fingerprint(
   return _state_dependencies(hash, depfile, ok);
 }
 
-/** Reports whether translated C and header artifacts match current inputs.
-    Returns zero without retained state, during a dry run, when either output
-    is absent, or when any compiler, tool, option, depfile, or dependency
-    fingerprint cannot be read or differs.
+/** Starts translation reporting for `input` and initializes timing when unset.
 */
-int Build.translation_current(Build state, String input, String directory) {
-  if (!state.state_root || state.request.dry_run) return 0;
-  String stem = Path.stem(input);
-  foreach (String suffix, %(".c" ".h" ".xi"))
-    if (!Path.is_file(%"$directory/$stem$suffix")) return 0;
-  int ok = 1;
-  uint64_t hash = _translation_fingerprint(state, input, directory, ok);
-  String path = %"${state.state_root}/x-${_key(input)}";
-  int current = ok && _state_matches(path, hash);
-  if (current && state.request.verbose)
-    fprintf(stderr, "x2c: up-to-date translate %s\n", input);
-  return current;
+void Build.begin_translation(Build state, String input) {
+  if (!state.xlat_start) state.xlat_start = report_now_us();
+  report_progress(<translate>, state.xlat_done, state.xlat_n, input);
+}
+
+/** Records one completed translation and reports the phase when all finish.
+    A nonzero `cached` value also increments the cached-translation count.
+*/
+void Build.end_translation(Build state, String input, int cached) {
+  state.xlat_done++;
+  if (cached) state.xlat_cached++;
+  report_progress(<translate>, state.xlat_done, state.xlat_n, input);
+  if (state.xlat_done == state.xlat_n) {
+    unsigned long elapsed = report_now_us() - state.xlat_start;
+    report_phase(
+      <translate>, state.xlat_n,
+      state.xlat_n == 1 ? "x2c file" : "x2c files",
+      state.xlat_cached, elapsed);
+  }
 }
 
 /** Records the successful translation fingerprint when retained state exists.
@@ -371,17 +284,21 @@ void Build.record_translation(Build state, String input, String directory) {
     _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
 
-/* Whether one of the request's inputs is a source of `package`. A package's
-   own sources, and a module built from them, link no archive of their own;
-   a test or example inside the package directory imports the package like
-   any consumer. */
-static int _package_built_here(Build state, List roots, String package) {
-  foreach (String input, state.request.inputs) {
-    String source = Path.absolute(input);
-    if (x2c_package_directory(roots, source) == package &&
-        x2c_package_source(package, source)) return 1;
-  }
-  return 0;
+/** Registers generated artifacts for native compilation.
+    Counts the C and header bytes, appends the C source, and adds include
+    directories and native compile options for imported packages. Programs
+    also add ordered package archives and link flags; an absent archive prints
+    a diagnostic and exits with status 2. Static libraries skip link inputs.
+*/
+void Build.add_generated(Build state, String input, String directory) {
+  String stem = Path.stem(input), source = %"$directory/$stem.c";
+  String header = %"$directory/$stem.h";
+  state.gen_bytes += report_file_bytes(source);
+  state.gen_bytes += report_file_bytes(header);
+  state.c_sources.push(source);
+  state.units.push(input);
+  if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
+  state._link_packages(input, directory);
 }
 
 /* Imported packages reach the build through the unit's recorded
@@ -425,58 +342,20 @@ static void Build._link_packages(Build state, String input, String directory) {
   }
 }
 
-/** Registers generated artifacts for native compilation.
-    Counts the C and header bytes, appends the C source, and adds include
-    directories and native compile options for imported packages. Programs
-    also add ordered package archives and link flags; an absent archive prints
-    a diagnostic and exits with status 2. Static libraries skip link inputs.
-*/
-void Build.add_generated(Build state, String input, String directory) {
-  String stem = Path.stem(input), source = %"$directory/$stem.c";
-  String header = %"$directory/$stem.h";
-  state.gen_bytes += report_file_bytes(source);
-  state.gen_bytes += report_file_bytes(header);
-  state.c_sources.push(source);
-  state.units.push(input);
-  if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
-  state._link_packages(input, directory);
+/* Whether one of the request's inputs is a source of `package`. A package's
+   own sources, and a module built from them, link no archive of their own;
+   a test or example inside the package directory imports the package like
+   any consumer. */
+static int _package_built_here(Build state, List roots, String package) {
+  foreach (String input, state.request.inputs) {
+    String source = Path.absolute(input);
+    if (x2c_package_directory(roots, source) == package &&
+        x2c_package_source(package, source)) return 1;
+  }
+  return 0;
 }
 
-/* Writes the entry unit `entry`, which includes each of `units`, defines
-   `$module.targets()`, a Map from the name of each native `meta` prototype
-   they declare to a `Func` that calls it, and ends with `exports`. Units
-   that declare no such prototype fail to translate. Each source is included
-   by its absolute path through a link to the filesystem root beside the
-   entry, so distinct sources with one name stay distinct and each unit's
-   generated header is placed inside the entry's own generated directory.
-   No include directory reaches the root. */
-static void _write_entry(Path entry, List units, String exports) {
-  String includes = "", Array sources = [];
-  foreach (String unit, units) {
-    String source = Path.absolute(unit);
-    includes = %"$includes#include \"x2c-root$source\"\n";
-    sources.push(source);
-  }
-  String declared = sources.list_free().repr(), root = x2c_get_root();
-  Path link = entry.dirname().join("x2c-root");
-  try {
-    entry.dirname().make_dirs();
-    if (!Path.exists(link)) link.symlink_to("/");
-    entry.write_text(
-      %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
-macro Expression \$module.targets() =>
-  \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
-$exports");
-  }
-  catch %(io-fail *detail): x2c_host_error(detail);
-}
-
-static CliRequest Build._entry_request(Build b, List entries) {
-  CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
-  request.inputs = entries;
-  b.xlat_n += entries.len();
-  return request;
-}
+// entry units
 
 /** Writes the entry unit of a native module and returns the request that
     translates it. The entry defines `x2c_module_targets`, which returns the
@@ -524,318 +403,43 @@ __attribute__((constructor)) static void _register(void) {
   return request;
 }
 
-/** Starts translation reporting for `input` and initializes timing when unset.
-*/
-void Build.begin_translation(Build state, String input) {
-  if (!state.xlat_start) state.xlat_start = report_now_us();
-  report_progress(<translate>, state.xlat_done, state.xlat_n, input);
+static CliRequest Build._entry_request(Build b, List entries) {
+  CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
+  request.inputs = entries;
+  b.xlat_n += entries.len();
+  return request;
 }
 
-/** Records one completed translation and reports the phase when all finish.
-    A nonzero `cached` value also increments the cached-translation count.
-*/
-void Build.end_translation(Build state, String input, int cached) {
-  state.xlat_done++;
-  if (cached) state.xlat_cached++;
-  report_progress(<translate>, state.xlat_done, state.xlat_n, input);
-  if (state.xlat_done == state.xlat_n) {
-    unsigned long elapsed = report_now_us() - state.xlat_start;
-    report_phase(
-      <translate>, state.xlat_n,
-      state.xlat_n == 1 ? "x2c file" : "x2c files",
-      state.xlat_cached, elapsed);
+/* Writes the entry unit `entry`, which includes each of `units`, defines
+   `$module.targets()`, a Map from the name of each native `meta` prototype
+   they declare to a `Func` that calls it, and ends with `exports`. Units
+   that declare no such prototype fail to translate. Each source is included
+   by its absolute path through a link to the filesystem root beside the
+   entry, so distinct sources with one name stay distinct and each unit's
+   generated header is placed inside the entry's own generated directory.
+   No include directory reaches the root. */
+static void _write_entry(Path entry, List units, String exports) {
+  String includes = "", Array sources = [];
+  foreach (String unit, units) {
+    String source = Path.absolute(unit);
+    includes = %"$includes#include \"x2c-root$source\"\n";
+    sources.push(source);
   }
-}
-
-typedef struct CcJob {
-  ToolRun execution;
-  ToolAction action;
-  String source, object, depfile, state_path, preprocessed;
-  uint64_t fingerprint;
-  int fingerprinted;
-} CcJob;
-
-static uint64_t _action_fingerprint(
-  Build state, ToolAction action, List inputs, int &ok) {
-  String tool = action.arguments ? action.arguments.car() : NULL;
-  uint64_t hash = _state_base(state.request, tool, ok);
-  hash = _state_text(hash, action.phase);
-  hash = _state_list(hash, action.arguments);
-  foreach (String input, inputs) hash = _state_file(hash, input, ok);
-  return hash;
-}
-
-/* A module relinks even when its named operands are unchanged: -L/-l can
-   select an archive whose bytes changed. Keep the published file when the
-   relink produces the same bytes so consumers can reuse their translations. */
-static int _same_file_bytes(String first, String second) {
-  FILE *left = fopen(first.str(), "rb");
-  if (!left) return 0;
-  defer fclose(left);
-  FILE *right = fopen(second.str(), "rb");
-  if (!right) return 0;
-  defer fclose(right);
-  unsigned char a[16384], b[16384];
-  for (;;) {
-    size_t na = fread(a, 1, sizeof(a), left);
-    size_t nb = fread(b, 1, sizeof(b), right);
-    if (na != nb || memcmp(a, b, na)) return 0;
-    if (na < sizeof(a)) return !ferror(left) && !ferror(right);
-  }
-}
-
-/* The preprocessed text is scratch named for this process, so only what it
-   says extends the compile fingerprint. */
-static uint64_t _compile_fingerprint(
-  Build state, ToolAction action, String preprocessed, int &ok) {
-  return x2c_fnv_file(
-    _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
-}
-
-/* Returns -1 when preprocessing starts a compile in the same job slot. A
-   fingerprint this run cannot read is a cache miss: the source compiles and
-   records nothing. Only the preprocessing command itself failing is an
-   error, and the C compiler has already said why. */
-static int _finish_compile(Build state, CcJob *pending) {
-  int status = pending.execution.wait();
-  if (pending.preprocessed) {
-    int ok = 1;
-    String preprocessed = pending.preprocessed;
-    if (!status)
-      pending.fingerprint = _compile_fingerprint(
-        state, pending.action, preprocessed, ok);
-    unlink(pending.preprocessed);
-    pending.preprocessed = NULL;
-    if (status) return 1;
-    pending.fingerprinted = ok;
-    if (ok && !access(pending.object, R_OK) &&
-        !access(pending.depfile, R_OK) &&
-        _state_matches(pending.state_path, pending.fingerprint)) {
-      if (state.request.verbose)
-        fprintf(stderr, "x2c: up-to-date compile %s\n", pending.source);
-      state.cc_cached++;
-    }
-    else {
-      pending.execution = pending.action.start();
-      return -1;
-    }
-  }
-  else if (!status && pending.fingerprinted && !state.request.dry_run)
-    _state_write(pending.state_path, pending.fingerprint);
-  if (!status) {
-    state.cc_done++;
-    report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
-  }
-  return status != 0;
-}
-
-static String _compile_command(
-  Build b, ToolAction action, String source, String object) {
-  Map entry = {
-    directory: b.compile_directory, file: source, output: object,
-    arguments: action.arguments
-  };
-  return %"  ${Var.json(entry)}";
-}
-
-/** Publishes collected native compilation entries as one JSON database.
-    `commands` holds serialized entries from each completed build target.
-    The destination's parent must exist. A failed write preserves the
-    existing database, reports a diagnostic, and returns zero.
-*/
-int compile_commands_write(String path, Array commands) {
-  String text = %"[\n${",\n".join(commands)}\n]\n";
+  String declared = sources.list_free().repr(), root = x2c_get_root();
+  Path link = entry.dirname().join("x2c-root");
   try {
-    file_publish(%($path $text));
-    report_line(<muted>, %"  Compilation database $path");
-    return 1;
+    entry.dirname().make_dirs();
+    if (!Path.exists(link)) link.symlink_to("/");
+    entry.write_text(
+      %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
+macro Expression \$module.targets() =>
+  \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
+$exports");
   }
-  catch %((!or not-found io-fail) *): {}
-  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
-  return 0;
+  catch %(io-fail *detail): x2c_host_error(detail);
 }
 
-/* Finish ready owned jobs, optionally waiting for at least one. A lone job
-   uses the ordinary blocking wait; parallel jobs retain their own statuses
-   and captures. The short idle delay bounds polling without a global child
-   signal handler or consuming another owner's child status. */
-static int _finish_compiles(
-  Build state, CcJob *running, int &count, int wait) {
-  int failed = 0;
-  for (;;) {
-    for (int i = 0; i < count;) {
-      if ((wait && count == 1) || running[i].execution.ready()) {
-        int status = _finish_compile(state, running + i);
-        if (status < 0) {
-          i++;
-          continue;
-        }
-        if (status) failed = 1;
-        count--;
-        memmove(running + i, running + i + 1, (count - i) * sizeof(CcJob));
-        wait = 0;
-      }
-      else i++;
-    }
-    if (!wait) return failed;
-    usleep(1000);
-  }
-}
-
-static int _compile_sources(Build b) {
-  if (b.compile_commands != NULL)
-    b.compile_directory = Path.absolute(".");
-  CcJob *running = Scope.calloc(b.request.jobs, sizeof(CcJob));
-  int running_count = 0, failed = 0;
-  b.cc_n = b.c_sources.len();
-  b.cc_start = report_now_us();
-  foreach (String source, b.c_sources) {
-    report_progress(<compile>, b.cc_done, b.cc_n, source);
-    String key = _key(source), object = %"${b.obj_root}/$key.o";
-    if (b.request.compile_only && !b.request.inputs.cdr() && b.output)
-      object = b.output;
-    String depfile = %"${b.dep_root}/$key.d", Array include_dirs = [];
-    if (source.startswith(b.gen_root))
-      include_dirs.push(Path.dirname(source));
-    foreach (Var directory, b.gen_dirs)
-      if (!include_dirs.contains(directory)) include_dirs.push(directory);
-    List directories = include_dirs.list_free();
-    ToolAction action = b.toolchain.compile_action(
-      source, object, depfile, directories);
-    b.objects.push(object);
-    if (b.compile_commands != NULL)
-      b.compile_commands.push(_compile_command(b, action, source, object));
-    String state_path =
-      b.state_root ? %"${b.state_root}/c-${_key(source)}" : NULL;
-    if (_finish_compiles(b, running, running_count, 0)) {
-      failed = 1;
-      break;
-    }
-    CcJob pending = {
-      .action = action, .source = source, .object = object,
-      .depfile = depfile, .state_path = state_path
-    };
-    if (state_path && !b.request.dry_run) {
-      // Per process: concurrent builds of one project share `dep_root`.
-      pending.preprocessed = %"${b.dep_root}/$key.${_process_suffix()}.i";
-      pending.execution = b.toolchain.preprocess_action(
-        source, pending.preprocessed, directories).start();
-    }
-    else pending.execution = action.start();
-    running[running_count++] = pending;
-    if (running_count >= b.request.jobs &&
-        _finish_compiles(b, running, running_count, 1)) {
-      failed = 1;
-      break;
-    }
-  }
-  while (running_count)
-    if (_finish_compiles(b, running, running_count, 1)) failed = 1;
-  Scope.free(running);
-  if (!failed && b.cc_n) {
-    unsigned long elapsed = report_now_us() - b.cc_start;
-    report_phase(
-      <compile>, b.cc_n,
-      b.cc_n == 1 ? "C file" : "C files",
-      b.cc_cached, elapsed);
-  }
-  return failed;
-}
-
-static List _native_action_inputs(Build state) {
-  Array inputs = [];
-  foreach (Var value, state.objects) inputs.push(value);
-  foreach (Var value, state.native_inputs) inputs.push(value);
-  return inputs.list_free();
-}
-
-// Native flags are ordered: an explicit -g0 can override a profile's -g.
-static int _mapped_debug(Build state) {
-#ifdef __APPLE__
-  if (!state.request.source_map || state.request.kind == <static-lib>)
-    return 0;
-  int enabled = 0;
-  foreach (String flag, state.toolchain.cc_args) {
-    if (flag == "-g0" || flag == "-ggdb0") enabled = 0;
-    else if (flag == "-g" || flag == "-g1" || flag == "-g2" ||
-             flag == "-g3" || flag == "-ggdb" || flag == "-ggdb1" ||
-             flag == "-ggdb2" || flag == "-ggdb3" ||
-             flag == "-gline-tables-only" || flag == "-gmlt" ||
-             flag.startswith("-gdwarf")) enabled = 1;
-  }
-  return enabled;
-#else
-  return 0;
-#endif
-}
-
-/* A unit that includes another unit through a directory, as in
-   `#include "lib/inner.x"`, names that unit's generated header by the same
-   path from its own generated directory. Copying the header to that path
-   lets the include resolve as it does beside the sources. */
-static void Build._place_unit_headers(Build b) {
-  if (b.request.dry_run || b.units.len() < 2) return;
-  Map headers = {};
-  foreach (String unit, b.units)
-    headers[Path.absolute(unit)] =
-      %"${b.gen_root}/${_key(unit)}/${Path.stem(unit)}.h";
-  foreach (String unit, b.units) {
-    String directory = %"${b.gen_root}/${_key(unit)}";
-    String stem = Path.stem(unit);
-    List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
-    List outputs = %("$directory/$stem.h" "$directory/$stem.c");
-    foreach (String generated, outputs)
-      foreach (String line, Path.read_text(generated).split_lines(0)) {
-        String text = line.strip(" \t");
-        if (!text.startswith("#include \"") || !text.endswith(".h\""))
-          continue;
-        String target = text[10:text.len() - 1];
-        if (!target.contains("/")) continue;
-        String source = %"${target[:target.len() - 2]}.x";
-        foreach (String dir, searched) {
-          Var header;
-          if (!headers.try_get(Path.join(dir, source).absolute(), header))
-            continue;
-          Path placed = Path.join(directory, target);
-          placed.dirname().make_dirs();
-          Path.copy_file(header, placed);
-          break;
-        }
-      }
-  }
-}
-
-/* A compiler that links packages in keeps their objects beside it, in an
-   archive named by its identity, and their headers, for the project meta
-   helper to compile and link against. */
-static int _archive_extensions(Build b) {
-  String directory = %"${b.output}.extensions";
-  if (Path.exists(directory)) Path.remove_tree(directory);
-  Path.make_dirs(%"$directory/include");
-  Map sources = {};
-  foreach (String package, b.request.extensions) {
-    String root = %"${Path.absolute(package)}/src/";
-    foreach (String input, b.request.inputs) {
-      if (!input.startswith(root)) continue;
-      if (input.endswith(".c")) {
-        sources[input] = 1;
-        continue;
-      }
-      String stem = %"${b.generated_dir(input)}/${Path.stem(input)}";
-      sources[%"$stem.c"] = 1;
-      Path.write_text(%"$directory/include/${Path.stem(input)}.h",
-                      Path.read_text(%"$stem.h"));
-    }
-  }
-  Array objects = [];
-  int index = 0;
-  foreach (String source, b.c_sources)
-    if (source in sources) objects.push(b.objects[index++]);
-    else index++;
-  String identity = x2c_file_identity(b.output);
-  return b.toolchain.archive_action(
-    %"$directory/$identity.a", objects.list_free()).run();
-}
+// finishing a build
 
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
@@ -954,12 +558,291 @@ int Build.finish(Build b) {
   return 0;
 }
 
-static int _all_cached(Build state) {
-  if (state.xlat_n && state.xlat_cached != state.xlat_n) return 0;
-  if (state.cc_n && state.cc_cached != state.cc_n) return 0;
-  if (!state.request.compile_only && !state.final_cached) return 0;
-  return state.xlat_n || state.cc_n || state.final_cached;
+/* A unit that includes another unit through a directory, as in
+   `#include "lib/inner.x"`, names that unit's generated header by the same
+   path from its own generated directory. Copying the header to that path
+   lets the include resolve as it does beside the sources. */
+static void Build._place_unit_headers(Build b) {
+  if (b.request.dry_run || b.units.len() < 2) return;
+  Map headers = {};
+  foreach (String unit, b.units)
+    headers[Path.absolute(unit)] =
+      %"${b.gen_root}/${_key(unit)}/${Path.stem(unit)}.h";
+  foreach (String unit, b.units) {
+    String directory = %"${b.gen_root}/${_key(unit)}";
+    String stem = Path.stem(unit);
+    List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
+    List outputs = %("$directory/$stem.h" "$directory/$stem.c");
+    foreach (String generated, outputs)
+      foreach (String line, Path.read_text(generated).split_lines(0)) {
+        String text = line.strip(" \t");
+        if (!text.startswith("#include \"") || !text.endswith(".h\""))
+          continue;
+        String target = text[10:text.len() - 1];
+        if (!target.contains("/")) continue;
+        String source = %"${target[:target.len() - 2]}.x";
+        foreach (String dir, searched) {
+          Var header;
+          if (!headers.try_get(Path.join(dir, source).absolute(), header))
+            continue;
+          Path placed = Path.join(directory, target);
+          placed.dirname().make_dirs();
+          Path.copy_file(header, placed);
+          break;
+        }
+      }
+  }
 }
+
+// native compilation
+
+typedef struct CcJob {
+  ToolRun execution;
+  ToolAction action;
+  String source, object, depfile, state_path, preprocessed;
+  uint64_t fingerprint;
+  int fingerprinted;
+} CcJob;
+
+static int _compile_sources(Build b) {
+  if (b.compile_commands != NULL)
+    b.compile_directory = Path.absolute(".");
+  CcJob *running = Scope.calloc(b.request.jobs, sizeof(CcJob));
+  int running_count = 0, failed = 0;
+  b.cc_n = b.c_sources.len();
+  b.cc_start = report_now_us();
+  foreach (String source, b.c_sources) {
+    report_progress(<compile>, b.cc_done, b.cc_n, source);
+    String key = _key(source), object = %"${b.obj_root}/$key.o";
+    if (b.request.compile_only && !b.request.inputs.cdr() && b.output)
+      object = b.output;
+    String depfile = %"${b.dep_root}/$key.d", Array include_dirs = [];
+    if (source.startswith(b.gen_root))
+      include_dirs.push(Path.dirname(source));
+    foreach (Var directory, b.gen_dirs)
+      if (!include_dirs.contains(directory)) include_dirs.push(directory);
+    List directories = include_dirs.list_free();
+    ToolAction action = b.toolchain.compile_action(
+      source, object, depfile, directories);
+    b.objects.push(object);
+    if (b.compile_commands != NULL)
+      b.compile_commands.push(_compile_command(b, action, source, object));
+    String state_path =
+      b.state_root ? %"${b.state_root}/c-${_key(source)}" : NULL;
+    if (_finish_compiles(b, running, running_count, 0)) {
+      failed = 1;
+      break;
+    }
+    CcJob pending = {
+      .action = action, .source = source, .object = object,
+      .depfile = depfile, .state_path = state_path
+    };
+    if (state_path && !b.request.dry_run) {
+      // Per process: concurrent builds of one project share `dep_root`.
+      pending.preprocessed = %"${b.dep_root}/$key.${_process_suffix()}.i";
+      pending.execution = b.toolchain.preprocess_action(
+        source, pending.preprocessed, directories).start();
+    }
+    else pending.execution = action.start();
+    running[running_count++] = pending;
+    if (running_count >= b.request.jobs &&
+        _finish_compiles(b, running, running_count, 1)) {
+      failed = 1;
+      break;
+    }
+  }
+  while (running_count)
+    if (_finish_compiles(b, running, running_count, 1)) failed = 1;
+  Scope.free(running);
+  if (!failed && b.cc_n) {
+    unsigned long elapsed = report_now_us() - b.cc_start;
+    report_phase(
+      <compile>, b.cc_n,
+      b.cc_n == 1 ? "C file" : "C files",
+      b.cc_cached, elapsed);
+  }
+  return failed;
+}
+
+/* Finish ready owned jobs, optionally waiting for at least one. A lone job
+   uses the ordinary blocking wait; parallel jobs retain their own statuses
+   and captures. The short idle delay bounds polling without a global child
+   signal handler or consuming another owner's child status. */
+static int _finish_compiles(
+  Build state, CcJob *running, int &count, int wait) {
+  int failed = 0;
+  for (;;) {
+    for (int i = 0; i < count;) {
+      if ((wait && count == 1) || running[i].execution.ready()) {
+        int status = _finish_compile(state, running + i);
+        if (status < 0) {
+          i++;
+          continue;
+        }
+        if (status) failed = 1;
+        count--;
+        memmove(running + i, running + i + 1, (count - i) * sizeof(CcJob));
+        wait = 0;
+      }
+      else i++;
+    }
+    if (!wait) return failed;
+    usleep(1000);
+  }
+}
+
+/* Returns -1 when preprocessing starts a compile in the same job slot. A
+   fingerprint this run cannot read is a cache miss: the source compiles and
+   records nothing. Only the preprocessing command itself failing is an
+   error, and the C compiler has already said why. */
+static int _finish_compile(Build state, CcJob *pending) {
+  int status = pending.execution.wait();
+  if (pending.preprocessed) {
+    int ok = 1;
+    String preprocessed = pending.preprocessed;
+    if (!status)
+      pending.fingerprint = _compile_fingerprint(
+        state, pending.action, preprocessed, ok);
+    unlink(pending.preprocessed);
+    pending.preprocessed = NULL;
+    if (status) return 1;
+    pending.fingerprinted = ok;
+    if (ok && !access(pending.object, R_OK) &&
+        !access(pending.depfile, R_OK) &&
+        _state_matches(pending.state_path, pending.fingerprint)) {
+      if (state.request.verbose)
+        fprintf(stderr, "x2c: up-to-date compile %s\n", pending.source);
+      state.cc_cached++;
+    }
+    else {
+      pending.execution = pending.action.start();
+      return -1;
+    }
+  }
+  else if (!status && pending.fingerprinted && !state.request.dry_run)
+    _state_write(pending.state_path, pending.fingerprint);
+  if (!status) {
+    state.cc_done++;
+    report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
+  }
+  return status != 0;
+}
+
+/* The preprocessed text is scratch named for this process, so only what it
+   says extends the compile fingerprint. */
+static uint64_t _compile_fingerprint(
+  Build state, ToolAction action, String preprocessed, int &ok) {
+  return x2c_fnv_file(
+    _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
+}
+
+static String _compile_command(
+  Build b, ToolAction action, String source, String object) {
+  Map entry = {
+    directory: b.compile_directory, file: source, output: object,
+    arguments: action.arguments
+  };
+  return %"  ${Var.json(entry)}";
+}
+
+/** Publishes collected native compilation entries as one JSON database.
+    `commands` holds serialized entries from each completed build target.
+    The destination's parent must exist. A failed write preserves the
+    existing database, reports a diagnostic, and returns zero.
+*/
+int compile_commands_write(String path, Array commands) {
+  String text = %"[\n${",\n".join(commands)}\n]\n";
+  try {
+    file_publish(%($path $text));
+    report_line(<muted>, %"  Compilation database $path");
+    return 1;
+  }
+  catch %((!or not-found io-fail) *): {}
+  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n", path);
+  return 0;
+}
+
+// the final action
+
+static List _native_action_inputs(Build state) {
+  Array inputs = [];
+  foreach (Var value, state.objects) inputs.push(value);
+  foreach (Var value, state.native_inputs) inputs.push(value);
+  return inputs.list_free();
+}
+
+/* A module relinks even when its named operands are unchanged: -L/-l can
+   select an archive whose bytes changed. Keep the published file when the
+   relink produces the same bytes so consumers can reuse their translations. */
+static int _same_file_bytes(String first, String second) {
+  FILE *left = fopen(first.str(), "rb");
+  if (!left) return 0;
+  defer fclose(left);
+  FILE *right = fopen(second.str(), "rb");
+  if (!right) return 0;
+  defer fclose(right);
+  unsigned char a[16384], b[16384];
+  for (;;) {
+    size_t na = fread(a, 1, sizeof(a), left);
+    size_t nb = fread(b, 1, sizeof(b), right);
+    if (na != nb || memcmp(a, b, na)) return 0;
+    if (na < sizeof(a)) return !ferror(left) && !ferror(right);
+  }
+}
+
+// Native flags are ordered: an explicit -g0 can override a profile's -g.
+static int _mapped_debug(Build state) {
+#ifdef __APPLE__
+  if (!state.request.source_map || state.request.kind == <static-lib>)
+    return 0;
+  int enabled = 0;
+  foreach (String flag, state.toolchain.cc_args) {
+    if (flag == "-g0" || flag == "-ggdb0") enabled = 0;
+    else if (flag == "-g" || flag == "-g1" || flag == "-g2" ||
+             flag == "-g3" || flag == "-ggdb" || flag == "-ggdb1" ||
+             flag == "-ggdb2" || flag == "-ggdb3" ||
+             flag == "-gline-tables-only" || flag == "-gmlt" ||
+             flag.startswith("-gdwarf")) enabled = 1;
+  }
+  return enabled;
+#else
+  return 0;
+#endif
+}
+
+/* A compiler that links packages in keeps their objects beside it, in an
+   archive named by its identity, and their headers, for the project meta
+   helper to compile and link against. */
+static int _archive_extensions(Build b) {
+  String directory = %"${b.output}.extensions";
+  if (Path.exists(directory)) Path.remove_tree(directory);
+  Path.make_dirs(%"$directory/include");
+  Map sources = {};
+  foreach (String package, b.request.extensions) {
+    String root = %"${Path.absolute(package)}/src/";
+    foreach (String input, b.request.inputs) {
+      if (!input.startswith(root)) continue;
+      if (input.endswith(".c")) {
+        sources[input] = 1;
+        continue;
+      }
+      String stem = %"${b.generated_dir(input)}/${Path.stem(input)}";
+      sources[%"$stem.c"] = 1;
+      Path.write_text(%"$directory/include/${Path.stem(input)}.h",
+                      Path.read_text(%"$stem.h"));
+    }
+  }
+  Array objects = [];
+  int index = 0;
+  foreach (String source, b.c_sources)
+    if (source in sources) objects.push(b.objects[index++]);
+    else index++;
+  String identity = x2c_file_identity(b.output);
+  return b.toolchain.archive_action(
+    %"$directory/$identity.a", objects.list_free()).run();
+}
+
+// receipts
 
 /** Prints the completed build receipt and artifact details when enabled. */
 void Build.report_success(Build b) {
@@ -1015,6 +898,15 @@ void Build.report_success(Build b) {
   }
 }
 
+static int _all_cached(Build state) {
+  if (state.xlat_n && state.xlat_cached != state.xlat_n) return 0;
+  if (state.cc_n && state.cc_cached != state.cc_n) return 0;
+  if (!state.request.compile_only && !state.final_cached) return 0;
+  return state.xlat_n || state.cc_n || state.final_cached;
+}
+
+// running and cleanup
+
 /** Runs the built output with the request's arguments and returns its status.
     A dry run prints the action without launching the program.
 */
@@ -1042,70 +934,7 @@ void Build.cleanup(Build b, int success) {
       b.work_dir);
 }
 
-/* A script's executable is reused without translating, preprocessing, or
-   linking, so its fingerprint names everything those steps would read: the
-   request's options, the environment the C compiler and linker consult, the
-   contents of every recorded file, and the modification time of every
-   recorded directory. A directory entry ends in `/`; a header or library
-   added where a search would now find it changes that time. */
-static uint64_t _script_fingerprint(
-  CliRequest c, String cc, List prerequisites, int &ok) {
-  uint64_t hash = _state_base(c, cc, ok);
-  hash = _state_text(hash, "script");
-  hash = _state_list(hash, c.inputs);
-  hash = _state_list(hash, c.include_dirs);
-  hash = _state_list(hash, c.package_roots());
-  hash = _state_list(hash, c.cpp_args);
-  hash = _state_list(hash, c.cc_args);
-  hash = _state_list(hash, c.ld_args);
-  hash = _state_text(hash, c.source_map ? "source-map" : "generated-lines");
-  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT"))
-    hash = _state_text(hash, Env.get(name));
-  foreach (String path, prerequisites) {
-    if (!path.endswith("/")) {
-      hash = _state_file(hash, path, ok);
-      continue;
-    }
-    hash = _state_text(hash, path);
-    hash = _state_text(
-      hash, Path.is_dir(path)
-      ? "%.9f".printf(Path.modified_time(path)) : "absent");
-  }
-  return hash;
-}
-
-/* Every directory a compile or link of the script searches: explicit include
-   and library options, the compiler's own search lists, and the directory of
-   each prerequisite, where quoted includes look first. */
-static List Build._script_directories(Build b, List prerequisites) {
-  Array directories = [];
-  foreach (Var directory, b.request.include_dirs) directories.push(directory);
-  directories.push(b.toolchain.include_dir);
-  foreach (List args, %(${b.toolchain.cc_args} ${b.toolchain.ld_args})) {
-    for (List p = args; p; p = p.cdr()) {
-      String arg = p.car();
-      foreach (Var flag, %("-I" "-iquote" "-isystem" "-idirafter" "-L")) {
-        String spelling = flag;
-        if (!arg.startswith(spelling)) continue;
-        if (arg.len() > spelling.len()) directories.push(arg[spelling.len():]);
-        else if (p.cdr()) directories.push(p.cadr());
-        break;
-      }
-    }
-  }
-  foreach (String path, prerequisites)
-    directories.push(Path.dirname(path));
-  foreach (Var directory, b.toolchain.search_directories())
-    directories.push(directory);
-  Array unique = [];
-  foreach (Var value, directories) {
-    String directory = Path.absolute(value);
-    if (directory.startswith(Path.absolute(b.work_dir))) continue;
-    String entry = directory.endswith("/") ? directory : %"$directory/";
-    if (!unique.contains(entry)) unique.push(entry);
-  }
-  return unique.list_free();
-}
+// scripts
 
 /** Returns the local `.x` files a script unit includes, which the script's
     program must translate and link. The script's translation depfile already
@@ -1162,6 +991,39 @@ void Build.publish_script(Build b, String executable) {
     _state_write_lines(%"${b.state_root}/script", hash, paths);
 }
 
+/* Every directory a compile or link of the script searches: explicit include
+   and library options, the compiler's own search lists, and the directory of
+   each prerequisite, where quoted includes look first. */
+static List Build._script_directories(Build b, List prerequisites) {
+  Array directories = [];
+  foreach (Var directory, b.request.include_dirs) directories.push(directory);
+  directories.push(b.toolchain.include_dir);
+  foreach (List args, %(${b.toolchain.cc_args} ${b.toolchain.ld_args})) {
+    for (List p = args; p; p = p.cdr()) {
+      String arg = p.car();
+      foreach (Var flag, %("-I" "-iquote" "-isystem" "-idirafter" "-L")) {
+        String spelling = flag;
+        if (!arg.startswith(spelling)) continue;
+        if (arg.len() > spelling.len()) directories.push(arg[spelling.len():]);
+        else if (p.cdr()) directories.push(p.cadr());
+        break;
+      }
+    }
+  }
+  foreach (String path, prerequisites)
+    directories.push(Path.dirname(path));
+  foreach (Var directory, b.toolchain.search_directories())
+    directories.push(directory);
+  Array unique = [];
+  foreach (Var value, directories) {
+    String directory = Path.absolute(value);
+    if (directory.startswith(Path.absolute(b.work_dir))) continue;
+    String entry = directory.endswith("/") ? directory : %"$directory/";
+    if (!unique.contains(entry)) unique.push(entry);
+  }
+  return unique.list_free();
+}
+
 /** Reports whether the script executable under `directory` still matches
     everything recorded when it was built.
 */
@@ -1176,4 +1038,164 @@ int CliRequest.script_current(CliRequest c, String directory) {
   int ok = 1;
   uint64_t hash = _script_fingerprint(c, toolchain.cc, lines.cdr(), ok);
   return ok && _state_matches(record, hash);
+}
+
+/* A script's executable is reused without translating, preprocessing, or
+   linking, so its fingerprint names everything those steps would read: the
+   request's options, the environment the C compiler and linker consult, the
+   contents of every recorded file, and the modification time of every
+   recorded directory. A directory entry ends in `/`; a header or library
+   added where a search would now find it changes that time. */
+static uint64_t _script_fingerprint(
+  CliRequest c, String cc, List prerequisites, int &ok) {
+  uint64_t hash = _state_base(c, cc, ok);
+  hash = _state_text(hash, "script");
+  hash = _state_list(hash, c.inputs);
+  hash = _state_list(hash, c.include_dirs);
+  hash = _state_list(hash, c.package_roots());
+  hash = _state_list(hash, c.cpp_args);
+  hash = _state_list(hash, c.cc_args);
+  hash = _state_list(hash, c.ld_args);
+  hash = _state_text(hash, c.source_map ? "source-map" : "generated-lines");
+  foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT"))
+    hash = _state_text(hash, Env.get(name));
+  foreach (String path, prerequisites) {
+    if (!path.endswith("/")) {
+      hash = _state_file(hash, path, ok);
+      continue;
+    }
+    hash = _state_text(hash, path);
+    hash = _state_text(
+      hash, Path.is_dir(path)
+      ? "%.9f".printf(Path.modified_time(path)) : "absent");
+  }
+  return hash;
+}
+
+// incremental state
+
+/* Every incremental fingerprint starts with the state format, project or
+   direct-build seed, and compiler and selected tool contents. Translation
+   adds its request modes and depfile inputs; native actions add arguments and
+   their input contents. C compilation uses the current native preprocessor
+   output, so changed include resolution and conditional availability count.
+   A missing or unreadable input clears `ok`; state writes are best effort and
+   use a temporary followed by rename. */
+
+static uint64_t _state_base(CliRequest request, String tool, int &ok) {
+  uint64_t hash = UINT64_C(1469598103934665603);
+  hash = _state_text(hash, "x2c-state-v1");
+  hash = _state_text(hash, request.state_seed);
+  String compiler = x2c_compiler_identity();
+  if (!compiler) ok = 0;
+  hash = _state_text(hash, compiler);
+  hash = _state_tool(hash, tool, ok);
+  return hash;
+}
+
+static uint64_t _action_fingerprint(
+  Build state, ToolAction action, List inputs, int &ok) {
+  String tool = action.arguments ? action.arguments.car() : NULL;
+  uint64_t hash = _state_base(state.request, tool, ok);
+  hash = _state_text(hash, action.phase);
+  hash = _state_list(hash, action.arguments);
+  foreach (String input, inputs) hash = _state_file(hash, input, ok);
+  return hash;
+}
+
+/* Null text uses 0xff, present text ends with NUL, and each List ends with
+   0xfe. These separators distinguish adjacent ordered fingerprint fields. */
+static uint64_t _state_text(uint64_t hash, String text) {
+  if (!text) return x2c_fnv_bytes(hash, "\xff", 1);
+  hash = x2c_fnv_bytes(hash, text, strlen(text));
+  return x2c_fnv_bytes(hash, "\0", 1);
+}
+
+static uint64_t _state_list(uint64_t hash, List values) {
+  foreach (String value, values) hash = _state_text(hash, value);
+  return x2c_fnv_bytes(hash, "\xfe", 1);
+}
+
+static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
+  x2c_fnv_file(_state_text(hash, path), path, ok);
+
+static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
+  if (!tool) {
+    ok = 0;
+    return hash;
+  }
+  String path = tool.contains("/") ? tool : x2c_find_program(tool);
+  if (path) return _state_file(hash, path, ok);
+  ok = 0;
+  return _state_text(hash, tool);
+}
+
+static uint64_t _state_dependencies(uint64_t hash, String depfile, int &ok) {
+  List inputs = _state_dep_inputs(depfile);
+  if (!inputs) {
+    ok = 0;
+    return hash;
+  }
+  foreach (String input, inputs) hash = _state_file(hash, input, ok);
+  return hash;
+}
+
+static List _state_dep_inputs(String depfile) {
+  File input = fopen(depfile, "r");
+  if (!input) return NULL;
+  String text = NULL;
+  try text = input.string_close();
+  catch %(io-fail *): return NULL;
+  return translation_depfile_parse(text);
+}
+
+static int _state_matches(String path, uint64_t hash) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %((!or not-found io-fail) *): return 0;
+  List lines = text.split_lines(0);
+  if (!lines) return 0;
+  String first = lines.car();
+  return first == _state_line(hash);
+}
+
+static String _state_line(uint64_t hash) =>
+  "x2c-state-v1 %016llx".printf((unsigned long long) hash);
+
+static void _state_write(String path, uint64_t hash) {
+  _state_write_lines(path, hash, NULL);
+}
+
+/* Lines after the fingerprint name the files it covers, for a reader that
+   must check it without rebuilding the list. */
+static void _state_write_lines(String path, uint64_t hash, List lines) {
+  String text = %"${_state_line(hash)}\n";
+  foreach (String line, lines) text = %"$text$line\n";
+  try file_publish(%($path $text));
+  catch %((!or not-found io-fail) *): {}
+}
+
+/* Whether every file the build read still carries the contents it read. A
+   fingerprint is taken after the work it describes, so a file written while
+   the build ran would record contents the artifact was not built from.
+   Recording nothing leaves the artifact in place and rebuilds it next time.
+   Every caller asks after hashing, never before: a write that reached the
+   hash has already moved the modification time this reads. The build's own
+   output under the work directory is not one of those files. */
+static int _files_unchanged(Build b, List files) {
+  String work = %"${Path.absolute(b.work_dir)}/";
+  foreach (String path, files) {
+    if (Path.absolute(path).startswith(work)) continue;
+    if (Path.is_file(path) && Path.modified_time(path) >= b.started_wall)
+      return 0;
+  }
+  return 1;
+}
+
+/* Wall-clock seconds in the scale `Path.modified_time` reports, so a build
+   can tell whether a file it read has been written since it started. */
+static double _wall_seconds(void) {
+  struct timespec now;
+  if (clock_gettime(CLOCK_REALTIME, &now)) return 0;
+  return (double) now.tv_sec + (double) now.tv_nsec / 1e9;
 }
