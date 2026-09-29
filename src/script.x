@@ -18,6 +18,8 @@
 #include <string.h>
 #include <unistd.h>
 
+// cache entries
+
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
     or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 */
@@ -26,38 +28,6 @@ String script_cache_root(void) {
   String home = Env.get("HOME");
   return explicit ? explicit : xdg ? %"$xdg/x2c" :
          home ? %"$home/.cache/x2c" : NULL;
-}
-
-static void _exec(CliRequest c) {
-  String executable = %"${c.build_dir}/run";
-  if (c.verbose)
-    tool_action_new(<run>, %($executable @{c.run_args}), 1, 1).start();
-  char **argv = Scope.calloc(c.run_args.len() + 2, sizeof(char *));
-  int index = 0;
-  argv[index++] = c.inputs.car().str();
-  // An empty word is a NULL String, which would end the vector early.
-  foreach (String argument, c.run_args)
-    argv[index++] = argument ? argument : "";
-  fflush(NULL);
-  execv(executable, argv);
-  x2c_driver_error(
-    %"cannot run $executable: ${String.new(strerror(errno))}");
-}
-
-/* Removes each cache entry under `scripts` whose recorded script no longer
-   exists and that no other run holds.
-*/
-static void _prune(String scripts) {
-  foreach (String name, Path.list_dir(scripts)) {
-    String directory = Path.join(scripts, name);
-    Path source = %"$directory/source";
-    if (!source.is_file() || Path.is_file(source.read_text())) continue;
-    int lock = file_lock(%"$directory/lock", 0);
-    if (lock < 0) continue;
-    try Path.remove_tree(directory);
-    catch %(io-fail *): {}
-    close(lock);
-  }
 }
 
 /** Points `request` at its script's cache directory and executes the cached
@@ -101,6 +71,24 @@ int script_prepare(CliRequest c) {
   return 0;
 }
 
+/* Removes each cache entry under `scripts` whose recorded script no longer
+   exists and that no other run holds.
+*/
+static void _prune(String scripts) {
+  foreach (String name, Path.list_dir(scripts)) {
+    String directory = Path.join(scripts, name);
+    Path source = %"$directory/source";
+    if (!source.is_file() || Path.is_file(source.read_text())) continue;
+    int lock = file_lock(%"$directory/lock", 0);
+    if (lock < 0) continue;
+    try Path.remove_tree(directory);
+    catch %(io-fail *): {}
+    close(lock);
+  }
+}
+
+// running a script
+
 /** Executes a script that `script_prepare` pointed at the cache and the
     caller built; that path does not return. A dry run prints the action and
     returns zero.
@@ -110,4 +98,20 @@ int script_run(CliRequest c) {
   String executable = %"${c.build_dir}/run";
   tool_action_new(<run>, %($executable @{c.run_args}), 0, 1).start();
   return 0;
+}
+
+static void _exec(CliRequest c) {
+  String executable = %"${c.build_dir}/run";
+  if (c.verbose)
+    tool_action_new(<run>, %($executable @{c.run_args}), 1, 1).start();
+  char **argv = Scope.calloc(c.run_args.len() + 2, sizeof(char *));
+  int index = 0;
+  argv[index++] = c.inputs.car().str();
+  // An empty word is a NULL String, which would end the vector early.
+  foreach (String argument, c.run_args)
+    argv[index++] = argument ? argument : "";
+  fflush(NULL);
+  execv(executable, argv);
+  x2c_driver_error(
+    %"cannot run $executable: ${String.new(strerror(errno))}");
 }
