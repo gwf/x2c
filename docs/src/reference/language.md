@@ -36,6 +36,12 @@ file that includes it. An
 `#include` below `#pragma private` still splices, because the including file
 may call the functions it declares.
 
+`#pragma public` ends implementation-only content. Until the next
+`#pragma private`, what follows it is handled like the top of the file.
+Declarations there may be emitted to the generated header, and files that
+include this one or import its package can use them. A file can use the two
+pragmas to place a private include or type between public declarations.
+
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
 a source-level `#pragma once` only when its own `.x` includes form a cycle.
