@@ -28,7 +28,7 @@ empty, and its last component names the target. Any other directory, an
 unusable name, or a failed write prints a diagnostic and exits with
 status 2.
 
-Source: `src/project.x:780`
+Source: `src/project.x:860`
 
 #### project_manifest
 
@@ -37,7 +37,7 @@ Source: `src/project.x:780`
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:714`
+Source: `src/project.x:111`
 
 #### project_plan
 
@@ -50,7 +50,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:730`
+Source: `src/project.x:82`
 
 ## Public types
 
@@ -66,12 +66,10 @@ Source: `src/project.x:730`
 Links native build requests in dependency-first order.
 `project_plan` returns the head. Each node and copied `CliRequest` struct
 is owned by the current `Scope` and needs no individual cleanup; its
-`String`
-and `List` fields retain their canonical pool lifetimes and may share
-values
-with the command request.
+`String` and `List` fields retain their canonical pool lifetimes and may
+share values with the command request.
 
-Source: `src/project.x:22`
+Source: `src/project.x:20`
 
 ## Design notes
 
