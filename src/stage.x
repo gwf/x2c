@@ -352,13 +352,13 @@ static List _data_form(Compiler c, Var value) {
   return _map_form(c, value);
 }
 
-/* Strings, symbols, numbers, and Lists that hold only such values. */
+/* Strings, atoms, numbers, and Lists that hold only such values. */
 static int _immutable(Var value) {
   if (value is <list>) {
     foreach (Var item, value.list()) if (!_immutable(item)) return 0;
     return 1;
   }
-  return value is <string> || value is <symbol> ||
+  return value is <string> || value.is_atom() ||
     value.is_integer() || value.is_floating();
 }
 

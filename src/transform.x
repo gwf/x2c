@@ -1297,7 +1297,8 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
       case %(postfix ? ?target): _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
         foreach (List target, targets) _require_capture_lvalue(c, target);
-      case %(call (expr ?callee_type ?) (args *arguments)): {
+      case $source_call_content($called,
+          %(expr ?callee_type ?), %(*arguments)): {
         List parameters = NULL;
         if (_typed_function_parts(callee_type, parameters, NULL))
           for (; parameters && arguments;

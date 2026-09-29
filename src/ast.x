@@ -27,6 +27,7 @@ typedef enum AstPos {
 
 $(import "../lib/error-macros.xmacro")
 $(import "../src/ast-rewrite.xmacro")
+$(import "../src/grammar.xmacro")
 #include "symbolset.x"
 
 /* binding nodes
@@ -141,7 +142,8 @@ static int _raise_never_returns(Ast node) {
 
 static int _call_never_returns(Ast node) {
   match (node)
-    case %(stmnt (expr ? (call (expr () (ident ?binding)) (args *)))): {
+    case %(stmnt (expr ? ${$source_call_content($called,
+        %(expr () (ident ?binding)), %(*))})): {
       String name = binding_identity_spelling(binding);
       return name == "abort" || name == "exit" || name == "_Exit" ||
              name == "_exit" || name == "quick_exit";
@@ -228,10 +230,10 @@ List Ast.initializer_functions(Ast ast, List &source) {
 static List _arm_function(List choice, List argument) {
   (List condition, List path, List destination, List expression) = choice;
   match (expression)
-    case %(expr ? (call (!set ?callee (expr ? ?)) (args ?actual))): {
+    case %(expr ? ${$source_call_content($called,
+        %(!set ?callee (expr ?callee_type ?)), %(?actual))}): {
       if (actual !== argument) return NULL;
-      List function = callee;
-      return %($condition $path ${function.cadr()} $function);
+      return %($condition $path $callee_type $callee);
     }
   return NULL;
 }
