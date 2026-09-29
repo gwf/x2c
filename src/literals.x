@@ -457,33 +457,27 @@ static void _parse_catch_detail(Compiler c, Array elements) {
   pair.free();
 }
 
-// Symbol sets
+/* Symbol sets
+
+   `%<<...>>` builds an immutable SymbolSet, one C string that holds a
+   header, a hash table, and the Symbols in source order. `lib/symbolset.x`
+   reads the same layout. */
 
 /** Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
     Entries must be literal compact `Symbol`s; source order defines dense
-    indexes
-    and an equal encoded `Symbol` reports a duplicate diagnostic.
+    indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
 */
 List Compiler.parse_symbol_set_literal(Compiler c) {
   c.expect(<"%<<">);
   Array symbols = [], tokens = [];
   while (c.peek(0) != <">>">) {
-    Token token = c.token;
-    Symbol kind = c.peek(0);
-    if (kind != <lit-atom> && kind != <lit-symbol>)
-      c.report_error(
-        <parse>, "symbol-set entries must be literal Symbols",
-        token, %("use %<<foo bar>>"));
-    String spelling = kind == <lit-symbol>
-      ? _angle_spelling(token.text) : _member_spelling(token.text);
-    Symbol symbol = _exact_symbol(c, token, spelling);
-    symbols.push(symbol);
-    tokens.push(token);
+    symbols.push(_member_symbol(c));
+    tokens.push(c.token);
     c.next();
   }
   c.expect(<">>">);
   int duplicate = -1;
-  List result = c.symbol_set_expression(symbols, duplicate);
+  List set = c.symbol_set_expression(symbols, duplicate);
   if (duplicate >= 0) {
     Token token = tokens[duplicate];
     Symbol symbol = symbols[duplicate];
@@ -493,7 +487,20 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   }
   symbols.free();
   tokens.free();
-  return result;
+  return set;
+}
+
+/* A member is an Atom spelling, bare or quoted, or a `<...>` Symbol. */
+static Symbol _member_symbol(Compiler c) {
+  Token token = c.token;
+  Symbol kind = c.peek(0);
+  if (kind != <lit-atom> && kind != <lit-symbol>)
+    c.report_error(
+      <parse>, "symbol-set entries must be literal Symbols",
+      token, %("use %<<foo bar>>"));
+  String spelling = kind == <lit-symbol>
+    ? _angle_spelling(token.text) : _member_spelling(token.text);
+  return _exact_symbol(c, token, spelling);
 }
 
 /* A quoted member drops its quotes. */
@@ -508,16 +515,15 @@ static String _member_spelling(String text) {
     returns NULL.
 */
 List Compiler.symbol_set_expression(Compiler c, List values, int &duplicate) {
-  int repeated = _symbol_set_duplicate(values);
-  duplicate = repeated;
-  if (repeated >= 0) return NULL;
+  duplicate = _duplicate_index(values);
+  if (duplicate >= 0) return NULL;
   Array symbols = values;
-  List result = _symbol_set_literal_expression(symbols);
+  List set = _set_expression(symbols);
   symbols.free();
-  return result;
+  return set;
 }
 
-static int _symbol_set_duplicate(List values) {
+static int _duplicate_index(List values) {
   Map seen = {};
   int index = 0;
   foreach (Symbol value, values) {
@@ -528,120 +534,170 @@ static int _symbol_set_duplicate(List values) {
   return -1;
 }
 
-static List _symbol_set_literal_expression(Array symbols) {
-  int count = (int) symbols.len(), uint32_t span = 1;
-  while ((uint64_t) span * 3 < (uint64_t) count * 3 / 2) span <<= 1;
-  int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4, vertices = 0;
-  uint32_t *table = NULL, uint64_t seed = 0, int built = count == 0;
-  while (!built) {
-    vertices = (int) span * 3;
-    table = Scope.calloc(vertices, sizeof(uint32_t));
-    for (uint64_t attempt = 0; !built && attempt < 4096; attempt++) {
-      memset(table, 0, (size_t) vertices * sizeof(uint32_t));
-      seed = UINT64_C(0x9e3779b97f4a7c15) +
-             attempt * UINT64_C(0xd1b54a32d192ed03);
-      built = _build_symbol_set_hash(symbols, span, seed, table);
-    }
-    if (!built) span <<= 1;
-  }
-  Buffer output = Buffer.new(0);
-  output.write("\"");
-  _write_symbol_set_word(output, width, 1);
-  _write_symbol_set_word(output, 0, 3);
-  _write_symbol_set_word(output, count, 4);
-  _write_symbol_set_word(output, span - 1, 4);
-  _write_symbol_set_word(output, seed, 8);
-  for (int vertex = 0; vertex < vertices; vertex++)
-    _write_symbol_set_word(output, table[vertex], width);
-  for (int index = 0; index < count; index++)
-    _write_symbol_set_word(output, symbols[index].symbol(), 8);
-  output.write("\"");
-  String text = output.str_free();
+/* A seeded table of `3 * span` vertex values. An empty set has none. */
+typedef struct SymbolSetHash {
+  uint32_t span, *table;
+  uint64_t seed;
+  int vertices;
+} SymbolSetHash;
+
+static List _set_expression(Array symbols) {
+  String text = _encode(symbols, _hash(symbols));
   List bytes = %(expr (* char) (literal (* char) $text));
   List decl = %(decl ("SymbolSet") (bindings (bind () ())));
   return %(expr ("SymbolSet") (cast $decl $bytes));
 }
 
-static Buffer _write_symbol_set_word(
-  Buffer output, uint64_t value, int bytes) {
+/* The header holds the table's entry width, the count, the span's mask,
+   and the seed. The bytes are octal escapes in one C string literal. */
+static String _encode(Array symbols, SymbolSetHash h) {
+  int count = (int) symbols.len();
+  int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4;
+  Buffer output = Buffer.new(0);
+  output.write("\"");
+  _write_word(output, width, 1);
+  _write_word(output, 0, 3);
+  _write_word(output, count, 4);
+  _write_word(output, h.span - 1, 4);
+  _write_word(output, h.seed, 8);
+  for (int vertex = 0; vertex < h.vertices; vertex++)
+    _write_word(output, h.table[vertex], width);
+  for (int index = 0; index < count; index++)
+    _write_word(output, symbols[index].symbol(), 8);
+  output.write("\"");
+  return output.str_free();
+}
+
+/* Writes the low `bytes` bytes of `value`, least significant first. */
+static void _write_word(Buffer output, uint64_t value, int bytes) {
   for (int byte = 0; byte < bytes; byte++) {
     output.printf("\\%03o", (unsigned) (value & 0xff));
     value >>= 8;
   }
-  return output;
 }
 
-// Symbol-set tables
+/* Symbol-set tables
+
+   Each Symbol is an edge on three vertices, one in each third of the
+   table. A seed works when peeling, which removes an edge at a vertex of
+   degree one, removes every edge; the values at an edge's vertices then
+   XOR to its index. */
 
 typedef struct SymbolSetEdge {
   uint32_t vertices[3];
 } SymbolSetEdge;
 
-static int _build_symbol_set_hash(
+/* One seed's graph and its peeling order: each removed edge and the vertex
+   that freed it. */
+typedef struct SymbolSetGraph {
+  SymbolSetEdge *edges;
+  int count, vertices, *degree, *edge_xor, *queue;
+  int *order_edges, *order_vertices;
+  unsigned char *removed;
+} SymbolSetGraph;
+
+/* The smallest power-of-two span, from about half the count, that some
+   seed peels within 4096 tries. */
+static SymbolSetHash _hash(Array symbols) {
+  int count = (int) symbols.len(), built = count == 0;
+  SymbolSetHash h = {.span = 1};
+  while ((uint64_t) h.span * 3 < (uint64_t) count * 3 / 2) h.span <<= 1;
+  while (!built) {
+    h.vertices = (int) h.span * 3;
+    h.table = Scope.calloc(h.vertices, sizeof(uint32_t));
+    for (uint64_t attempt = 0; !built && attempt < 4096; attempt++) {
+      memset(h.table, 0, (size_t) h.vertices * sizeof(uint32_t));
+      h.seed = UINT64_C(0x9e3779b97f4a7c15) +
+               attempt * UINT64_C(0xd1b54a32d192ed03);
+      built = _try_seed(symbols, h.span, h.seed, h.table);
+    }
+    if (!built) h.span <<= 1;
+  }
+  return h;
+}
+
+static int _try_seed(
   Array symbols, uint32_t span, uint64_t seed, uint32_t *table) {
-  int count = (int) symbols.len(), vertices = (int) span * 3;
-  SymbolSetEdge *edges = Scope.calloc(count, sizeof(SymbolSetEdge));
-  int *degree = Scope.calloc(vertices, sizeof(int));
-  int *edge_xor = Scope.calloc(vertices, sizeof(int));
-  int *queue = Scope.calloc(vertices, sizeof(int));
-  int *order_edges = Scope.calloc(count, sizeof(int));
-  int *order_vertices = Scope.calloc(count, sizeof(int));
-  unsigned char *removed = Scope.calloc(count, 1);
-  for (int edge = 0; edge < count; edge++) {
-    _symbol_set_vertices(edges + edge, symbols[edge], seed, span);
-    for (int part = 0; part < 3; part++) {
-      uint32_t vertex = edges[edge].vertices[part];
-      degree[vertex]++;
-      edge_xor[vertex] ^= edge;
-    }
-  }
-  int head = 0, tail = 0;
-  for (int vertex = 0; vertex < vertices; vertex++)
-    if (degree[vertex] == 1) queue[tail++] = vertex;
-  int ordered = 0;
-  while (head < tail) {
-    int vertex = queue[head++];
-    if (degree[vertex] != 1) continue;
-    int edge = edge_xor[vertex];
-    if (removed[edge]) continue;
-    removed[edge] = 1;
-    order_edges[ordered] = edge;
-    order_vertices[ordered++] = vertex;
-    for (int part = 0; part < 3; part++) {
-      uint32_t adjacent = edges[edge].vertices[part];
-      degree[adjacent]--;
-      edge_xor[adjacent] ^= edge;
-      if (degree[adjacent] == 1) queue[tail++] = adjacent;
-    }
-  }
-  if (ordered != count) return 0;
-  for (int position = count - 1; position >= 0; position--) {
-    int edge = order_edges[position], vertex = order_vertices[position];
-    uint32_t value = (uint32_t) edge;
-    for (int part = 0; part < 3; part++) {
-      uint32_t adjacent = edges[edge].vertices[part];
-      if ((int) adjacent != vertex) value ^= table[adjacent];
-    }
-    table[vertex] = value;
-  }
+  SymbolSetGraph g = _graph(symbols, span, seed);
+  if (!g.peel()) return 0;
+  g.assign(table);
   return 1;
 }
 
-static void _symbol_set_vertices(
+static SymbolSetGraph _graph(Array symbols, uint32_t span, uint64_t seed) {
+  int count = (int) symbols.len(), vertices = (int) span * 3;
+  SymbolSetGraph g = {.count = count, .vertices = vertices};
+  g.edges = Scope.calloc(count, sizeof(SymbolSetEdge));
+  g.degree = Scope.calloc(vertices, sizeof(int));
+  g.edge_xor = Scope.calloc(vertices, sizeof(int));
+  g.queue = Scope.calloc(vertices, sizeof(int));
+  g.order_edges = Scope.calloc(count, sizeof(int));
+  g.order_vertices = Scope.calloc(count, sizeof(int));
+  g.removed = Scope.calloc(count, 1);
+  for (int edge = 0; edge < count; edge++) {
+    _place_edge(g.edges + edge, symbols[edge], seed, span);
+    for (int part = 0; part < 3; part++) {
+      uint32_t vertex = g.edges[edge].vertices[part];
+      g.degree[vertex]++;
+      g.edge_xor[vertex] ^= edge;
+    }
+  }
+  return g;
+}
+
+static void _place_edge(
   SymbolSetEdge *edge, Symbol symbol, uint64_t seed, uint32_t span) {
-  uint64_t hash = _symbol_set_literal_mix((uint64_t) symbol ^ seed);
+  uint64_t hash = _mix((uint64_t) symbol ^ seed);
   uint32_t mask = span - 1;
   edge.vertices[0] = (uint32_t) hash & mask;
   edge.vertices[1] = span + ((uint32_t) (hash >> 21) & mask);
   edge.vertices[2] = span * 2 + ((uint32_t) (hash >> 42) & mask);
 }
 
-static uint64_t _symbol_set_literal_mix(uint64_t value) {
+/* The splitmix64 finalizer, which `SymbolSet.index` applies too. */
+static uint64_t _mix(uint64_t value) {
   value ^= value >> 30;
   value *= UINT64_C(0xbf58476d1ce4e5b9);
   value ^= value >> 27;
   value *= UINT64_C(0x94d049bb133111eb);
   return value ^ (value >> 31);
+}
+
+/* Returns whether peeling removed every edge. */
+static int SymbolSetGraph.peel(SymbolSetGraph *g) {
+  int head = 0, tail = 0, ordered = 0;
+  for (int vertex = 0; vertex < g.vertices; vertex++)
+    if (g.degree[vertex] == 1) g.queue[tail++] = vertex;
+  while (head < tail) {
+    int vertex = g.queue[head++];
+    if (g.degree[vertex] != 1) continue;
+    int edge = g.edge_xor[vertex];
+    if (g.removed[edge]) continue;
+    g.removed[edge] = 1;
+    g.order_edges[ordered] = edge;
+    g.order_vertices[ordered++] = vertex;
+    for (int part = 0; part < 3; part++) {
+      uint32_t adjacent = g.edges[edge].vertices[part];
+      g.degree[adjacent]--;
+      g.edge_xor[adjacent] ^= edge;
+      if (g.degree[adjacent] == 1) g.queue[tail++] = adjacent;
+    }
+  }
+  return ordered == g.count;
+}
+
+/* In reverse peeling order, the vertex that freed each edge takes the
+   value that makes the edge's three values XOR to its index. */
+static void SymbolSetGraph.assign(SymbolSetGraph *g, uint32_t *table) {
+  for (int position = g.count - 1; position >= 0; position--) {
+    int edge = g.order_edges[position], vertex = g.order_vertices[position];
+    uint32_t value = (uint32_t) edge;
+    for (int part = 0; part < 3; part++) {
+      uint32_t adjacent = g.edges[edge].vertices[part];
+      if ((int) adjacent != vertex) value ^= table[adjacent];
+    }
+    table[vertex] = value;
+  }
 }
 
 // Arrays and Maps
