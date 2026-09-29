@@ -888,51 +888,37 @@ static void _scan_conditionals(Compiler c) {
   }
 }
 
-/* Returns the token that opens the group `close` ends, or `close` itself
-   when no token from `first` on opens it. */
-static Token _group_open(Token close, Token first) {
-  int depth = 0;
-  for (Token t = close;; t--) {
-    if (!(depth -= t.type.group_step())) return t;
-    if (t == first) return close;
-  }
-}
-
-/* The `"` that closes a `%"..."` literal ends an operand, and a `}` ends
-   one only when it closes a `%{` literal: after a block, the next
-   statement may begin with the name `in`. */
-static int _ends_operand(Token token, Token first) {
-  switch (token.type)
+static int _ends_operand(Symbol type) {
+  switch (type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
     case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <)>: case <]>:
-    case <"\"">:
       return 1;
-  return token.type == <"}"> && _group_open(token, first).type == <"%{">;
+  return 0;
 }
 
 static int _starts_operand(Symbol type) {
   switch (type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
     case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <(>:
-    case <"%(">: case <"%[">: case <"%{">: case <"%\"">: case <"%<<">:
-    case <"$(">: case <"${">: case <$>: case <!>: case <->: case <*>:
-    case <&>: case <~>: case <++>: case <-->:
+    case <"%(">: case <"%[">: case <"%{">: case <"$(">: case <"${">:
+    case <$>: case <!>: case <->: case <*>: case <&>: case <~>: case <++>:
+    case <-->:
       return 1;
   return 0;
 }
 
-/* `in` and `match` are C identifiers as often as x2c keywords. `in` is the
-   operator only between two operands; `match` is the statement only as
-   `match (...)` followed by `case` or `{`. Every other occurrence is a
-   name, so C that uses them keeps compiling. */
+/* `in` and `match` are C identifiers as often as x2c keywords. `in` stays
+   the operator where its neighbors plainly end and begin operands, and the
+   parser reads it by position everywhere else; `match` is the statement
+   only as `match (...)` followed by `case` or `{`. Every other occurrence
+   is a name, so C that uses them keeps compiling. */
 static void _retag_contextual_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
        token = _skip_forward(token + 1)) {
     if (token.type == <in>) {
       Token next = _skip_forward(token + 1);
-      if (!(prev && _ends_operand(prev, tokenizer.tokens) &&
-            _starts_operand(next.type)))
+      if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))
         token.type = <ident>;
     }
     else if (token.type == <match>) {

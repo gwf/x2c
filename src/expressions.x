@@ -892,7 +892,7 @@ static int _cast_operand_follows(Symbol s) {
   return 0;
 }
 
-static int _macro_hole_starts_cast_type(Compiler compiler) {
+static int _macro_hole_starts_cast_type(Compiler compiler, Token after) {
   if (!compiler.macro_holes || compiler.peek(0) != <$> ||
       compiler.peek(2) != <)>) return 0;
   List hole = compiler.peek_macro_hole();
@@ -901,9 +901,8 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   if (kind && kind != <type>) return 0;
   /* `($items)[0]` subscripts the hole's value and `($key) in table` tests
      it; only a hole declared a type casts an array literal or a name `in`. */
-  Symbol next = compiler.peek(3);
-  if ((next == <[> || next == <in>) && kind != <type>) return 0;
-  return _cast_operand_follows(next);
+  if ((after.type == <[> || after.text == "in") && kind != <type>) return 0;
+  return _cast_operand_follows(after.type);
 }
 
 static int _parenthesized_cast_operand_follows(Compiler c) =>
@@ -942,7 +941,8 @@ static int _casts_to_template_typedef(Compiler c, List declaration) {
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_parenthesized_cast_operand_follows(c) && c.test(<(>)) {
-    if (c.test_declaration() || _macro_hole_starts_cast_type(c)) {
+    if (c.test_declaration() ||
+        _macro_hole_starts_cast_type(c, head.after_group())) {
       List decl = c.parse_simple_declaration(), type = decl.type_from_ast();
       decl = %(decl @{decl.cdr()});
       c.expect(<)>);
@@ -985,6 +985,12 @@ static inline int _precedence(Symbol op) {
     default:                   return 0;   // not a binary operator
   }
 }
+
+/* The keyword pass leaves `in` a name where a neighbor could also be C, as
+   before a bare `[` literal. No name follows a complete operand, so there
+   it is the membership operator. */
+static inline Symbol _binary_operator(Compiler c) =>
+  c.peek(0) == <ident> && c.token.text == "in" ? <in> : c.peek(0);
 
 static inline int _is_type_operator(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
@@ -2483,7 +2489,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
    deferred expression nodes. */
 static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
   int first = 1;
-  while (_precedence(c.peek(0)) == level ||
+  while (_precedence(_binary_operator(c)) == level ||
          (level == 7 && _is_type_operator(c))) {
     if (_is_type_operator(c)) {
       Token origin = c.token;
@@ -2507,7 +2513,7 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
         : test;
       continue;
     }
-    Symbol op = c.peek(0);
+    Symbol op = _binary_operator(c);
     Token origin = c.token;
     c.next();
     List rhs = _parse_binary_level(c, level + 1);
@@ -2701,9 +2707,9 @@ List Compiler.parse_assignment(Compiler compiler) =>
 
 /* A name adjacent to a C string literal is a preprocessor word: a macro this
    unit defines to a string literal, or a name it cannot resolve, as a
-   header's `PRId64` is. */
+   header's `PRId64` is. `in` there is the membership operator. */
 static int _string_word_follows(Compiler c) {
-  if (c.peek(0) != <ident>) return 0;
+  if (c.peek(0) != <ident> || c.token.text == "in") return 0;
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition))
     return definition.equal(<string>);

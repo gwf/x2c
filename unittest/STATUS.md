@@ -182,14 +182,6 @@ rules; tags hidden inside an opaque native macro retain native scope. Pass
 lowered local objects explicitly to native macros. The language reference
 describes these native boundaries.
 
-The contextual `in` is decided from its neighboring tokens before parsing.
-A bare `[...]` or `{...}` literal directly after `in`, or a bare `{...}` or
-`%<<...>>` literal directly before it, still leaves `in` a name; those
-delimiters also begin array declarators and blocks or close blocks and
-shifts. A parenthesized operand works. The `operator-in-literals` fixture
-covers the literal operands that count, and `in-identifier` covers `in`
-after a `)`.
-
 ## Retired maintenance notes
 
 - The compiler preserves discarded assignments,
