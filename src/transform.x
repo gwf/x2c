@@ -152,11 +152,10 @@ static List _callback_function(
     arguments.push(
       compiler.convert_expression(argument, source_parameters.car()));
   }
-  Macro called = $called;
   List source = %(expr $source_type (ident $source_binding));
-  List call = compiler.rebuild_expression(
-    source_type.apply().canonicalize(),
-    called(source, arguments.list_free()));
+  List call = _func_call(
+    compiler, source_type.apply().canonicalize(),
+    source, arguments.list_free());
   List statement = result === %(void) ? call
     : %(return ${compiler.convert_expression(call, result)});
   return compiler.wrapper_function(
@@ -349,10 +348,15 @@ static List _adapter_reader_call(
   List fn = %(expr ("Func") (ident $fn_binding));
   List argv = %(expr (* const "FuncArg") (ident $argv_binding));
   List arguments = %($fn $argv ${_integer_expression(index)} @details);
-  Macro called = $called;
-  return compiler.rebuild_expression(
-    result_type, called(target, arguments));
+  return _func_call(compiler, result_type, target, arguments);
 }
+
+macro open Expression $func_cast(Type $type, Expr $value) =>
+  ($type)($value);
+
+macro open Expression $func_address(Expr $value) => &$value;
+
+macro open Expression $func_size(Expr $value) => sizeof $value;
 
 /* Reuse an issued declarator row without binding it again. */
 macro open Statement $func_local(
@@ -497,9 +501,7 @@ static List _build_func_adapter(
     c, diagnostic_type, params, names, fn_binding, argv_binding);
   List arguments = params.zip_with(
     names, %!(Type type, List binding) => %(expr $type (ident $binding)));
-  Macro called = $called;
-  List call = c.rebuild_expression(
-    return_type, called(target, arguments));
+  List call = _func_call(c, return_type, target, arguments);
   Type resolved_result = c.sym.resolve_key(return_type);
   if (resolved_result && resolved_result.car() == <struct>) {
     /* A record result is returned as `<p48>` to a copy of its bytes. */
@@ -508,13 +510,14 @@ static List _build_func_adapter(
       c, "x2c_func_record_result", result_type);
     List result = c.sym.introduce(c.fresh_name("func_record"));
     List (base, mods) = return_type.declaration_parts();
-    List address = %(expr ${return_type.reference()}
-                         (op & (expr $return_type (ident $result))));
-    List size = %(expr (unsigned long)
-      (sizeof (expr $return_type (ident $result))));
+    List value = _func_bound(return_type, result);
+    Macro address_shape = $func_address, size_shape = $func_size;
+    List address = c.rebuild_expression(
+      return_type.reference(), address_shape(value));
+    List size = c.rebuild_expression(
+      %(unsigned long), size_shape(value));
     List helper = %(expr $result_type (ident $result_helper));
-    List boxed = c.rebuild_expression(
-      %("Var"), called(helper, %($address $size)));
+    List boxed = _func_call(c, %("Var"), helper, %($address $size));
     Macro record = $func_record_result;
     List row = %(op = (bind $result $mods) $call);
     call = c.rebuild_statement(record(base, row, boxed)).cadr();
@@ -613,13 +616,6 @@ macro open Statement $func_bridge_prototype(
     Name $bridge, Param $parameters...) {
   extern Func $bridge($parameters...);
 }
-
-macro open Expression $func_cast(Type $type, Expr $value) =>
-  ($type)($value);
-
-macro open Expression $func_address(Expr $value) => &$value;
-
-macro open Expression $func_size(Expr $value) => sizeof $value;
 
 macro open Expression $func_aggregate(Expr $value) => { $value };
 
