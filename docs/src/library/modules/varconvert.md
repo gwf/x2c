@@ -34,7 +34,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/varconvert.x:272`
+Source: `lib/varconvert.x:70`
 
 ## Advanced and interop API
 
@@ -62,7 +62,7 @@ active `Scope`.
 **Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
 `<bad-enc>` while boxing a wide result.
 
-Source: `lib/varconvert.x:98`
+Source: `lib/varconvert.x:201`
 
 <a id="Var.integer_tag"></a>
 #### Var.integer_tag
@@ -75,7 +75,7 @@ callers applying integer promotion must first select its resulting
 signedness. Ranks four through six select the 48-bit, `long`, and
 `long long` families. A rank above six returns the null `Symbol`.
 
-Source: `lib/varconvert.x:40`
+Source: `lib/varconvert.x:230`
 
 <a id="Var.numeric_decode"></a>
 #### Var.numeric_decode
@@ -90,7 +90,7 @@ use the members described by `X2CVarNumeric`.
 `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
 failures leave `out` unchanged.
 
-Source: `lib/varconvert.x:78`
+Source: `lib/varconvert.x:118`
 
 <a id="Var.numeric_info"></a>
 #### Var.numeric_info
@@ -101,7 +101,7 @@ Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
-Source: `lib/varconvert.x:146`
+Source: `lib/varconvert.x:102`
 
 <a id="Var.signed_from_bits"></a>
 #### Var.signed_from_bits
@@ -111,7 +111,7 @@ Source: `lib/varconvert.x:146`
 Interprets the low `bits` of `raw` as a two's-complement signed value.
 `bits` must be between one and the width of `unsigned long long`.
 
-Source: `lib/varconvert.x:59`
+Source: `lib/varconvert.x:249`
 
 <a id="Var.width_mask"></a>
 #### Var.width_mask
@@ -122,7 +122,7 @@ Returns a mask containing the low `bits` bits.
 Zero yields zero and a width at least `unsigned long long` yields
 `ULLONG_MAX`; `bits` must not be negative.
 
-Source: `lib/varconvert.x:52`
+Source: `lib/varconvert.x:242`
 
 ## Public types
 
@@ -159,8 +159,8 @@ Source: `lib/varconvert.x:19`
 
 Converts among `Var`'s fifteen numeric families. Integer conversions keep
 the target width's low bits; floating-to-integer conversions truncate
-toward zero and require a representable result. A nonnumeric
-value converts only to its own tag.
+toward zero and require a representable result. A nonnumeric value
+converts only to its own tag.
 
 ## Tests and examples
 

@@ -32,7 +32,7 @@ pool are reclaimed unless promoted; ancestor-owned values remain live.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool.x:620`
+Source: `lib/pool.x:968`
 
 <a id="Pool.current"></a>
 #### Pool.current
@@ -43,7 +43,7 @@ Returns the borrowed canonical-value pool active on this thread.
 The process root is installed lazily on first use, so the result is never
 NULL. The pool is borrowed: do not release it with `Pool.release`.
 
-Source: `lib/pool.x:550`
+Source: `lib/pool.x:901`
 
 <a id="Pool.detach"></a>
 #### Pool.detach
@@ -58,7 +58,7 @@ explicit `Pool.release`.
 **Raises:** `<bad-state>` when no bracket is open. The failure leaves the
 active pool unchanged.
 
-Source: `lib/pool.x:632`
+Source: `lib/pool.x:980`
 
 <a id="Pool.epoch"></a>
 #### Pool.epoch
@@ -71,7 +71,7 @@ entry: a released level's addresses can be reused, so identities admitted
 under an earlier value prove nothing. The counter only advances, so a
 reader needs no lock to tell that something was released.
 
-Source: `lib/pool.x:651`
+Source: `lib/pool.x:999`
 
 <a id="Pool.intern_new"></a>
 #### Pool.intern_new
@@ -88,7 +88,7 @@ worker interns the same value first.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
 causes propagate and leave the object unregistered.
 
-Source: `lib/pool.x:720`
+Source: `lib/pool.x:230`
 
 <a id="Pool.open"></a>
 #### Pool.open
@@ -107,7 +107,7 @@ this with one `Pool.close` or detach it for transfer.
 **See:** [`Pool.close`](#Pool.close), [`Pool.open_named`](#Pool.open_named),
 [`List.promote`](list.md#List.promote)
 
-Source: `lib/pool.x:612`
+Source: `lib/pool.x:960`
 
 <a id="Pool.open_named"></a>
 #### Pool.open_named
@@ -124,7 +124,7 @@ diagnostics.
 
 **See:** [`Pool.open`](#Pool.open), [`Pool.close`](#Pool.close)
 
-Source: `lib/pool.x:597`
+Source: `lib/pool.x:945`
 
 <a id="Pool.stats"></a>
 #### Pool.stats
@@ -135,7 +135,7 @@ Returns this level's canonical counts plus process-wide storage counters.
 A null pool reports depth and per-level counts as zero. The counters are a
 snapshot; nothing in the result stays live with the pool.
 
-Source: `lib/pool.x:942`
+Source: `lib/pool.x:753`
 
 ## Advanced and interop API
 
@@ -159,7 +159,7 @@ invalid. Children must already be released, and no caller may use `inner`
 afterward. Use `Pool.close` instead to end a bracket opened with
 `Pool.open`.
 
-Source: `lib/pool.x:522`
+Source: `lib/pool.x:847`
 
 <a id="Pool.retain"></a>
 #### Pool.retain
@@ -170,7 +170,7 @@ Returns an unnamed child of `inner`, without making it thread-active.
 Ownership, failures, and the comparison with `Pool.open` follow
 `Pool.retain_named`.
 
-Source: `lib/pool.x:513`
+Source: `lib/pool.x:838`
 
 <a id="Pool.retain_named"></a>
 #### Pool.retain_named
@@ -186,7 +186,7 @@ canonical `String` and `List` operations allocate into.
 partial child resources and leaves `inner` unchanged; native mutex
 initialization failure aborts.
 
-Source: `lib/pool.x:462`
+Source: `lib/pool.x:784`
 
 ## Runtime-internal callables
 
@@ -223,7 +223,7 @@ freed this way. A null allocation does nothing.
 
 **Raises:** `<bad-arg>` when `inner` is NULL and `alloc` is not.
 
-Source: `lib/pool.x:823`
+Source: `lib/pool.x:374`
 
 <a id="Pool.initialize"></a>
 #### Pool.initialize
@@ -236,7 +236,7 @@ Creates the process-wide canonical-value root and makes it active here.
 **Raises:** `<alloc-fail>` if the root cannot be constructed. Native mutex
 initialization failure aborts.
 
-Source: `lib/pool.x:560`
+Source: `lib/pool.x:911`
 
 <a id="Pool.insert"></a>
 #### Pool.insert
@@ -251,7 +251,7 @@ object storage.
 **Raises:** `<bad-arg>` when `inner` is NULL. Map insertion causes propagate
 and leave the object unregistered.
 
-Source: `lib/pool.x:693`
+Source: `lib/pool.x:252`
 
 <a id="Pool.intern"></a>
 #### Pool.intern
@@ -272,7 +272,7 @@ A caller that has already searched the chain uses `Pool.intern_new`.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
 insertion causes propagate.
 
-Source: `lib/pool.x:749`
+Source: `lib/pool.x:191`
 
 <a id="Pool.is_permanent"></a>
 #### Pool.is_permanent
@@ -283,7 +283,7 @@ Reports whether the process root owns `value` as its canonical identity.
 Nothing is promoted, and no open bracket can reclaim a value that answers
 one.
 
-Source: `lib/pool.x:643`
+Source: `lib/pool.x:991`
 
 <a id="Pool.lookup"></a>
 #### Pool.lookup
@@ -293,7 +293,7 @@ Source: `lib/pool.x:643`
 Returns the first value equal to `key` from `inner` outward, or `void`.
 The returned identity remains owned by the level where it was found.
 
-Source: `lib/pool.x:657`
+Source: `lib/pool.x:154`
 
 <a id="Pool.malloc"></a>
 #### Pool.malloc
@@ -308,7 +308,7 @@ ordinary `Scope` ownership.
 request overflows `Scope` storage, or `<alloc-fail>` when storage cannot
 be allocated.
 
-Source: `lib/pool.x:776`
+Source: `lib/pool.x:290`
 
 <a id="Pool.own"></a>
 #### Pool.own
@@ -327,7 +327,7 @@ one, though `Pool.is_permanent` answers zero for its surviving copy.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/pool.x:923`
+Source: `lib/pool.x:597`
 
 <a id="Pool.owns"></a>
 #### Pool.owns
@@ -337,7 +337,7 @@ Source: `lib/pool.x:923`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool.x:847`
+Source: `lib/pool.x:268`
 
 <a id="Pool.promote"></a>
 #### Pool.promote
@@ -353,7 +353,7 @@ null allocation.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion; that transfer may happen before storage is marked or moved.
 
-Source: `lib/pool.x:906`
+Source: `lib/pool.x:580`
 
 <a id="Pool.shutdown"></a>
 #### Pool.shutdown
@@ -364,7 +364,7 @@ Releases this thread's open brackets and then the process root.
 Call it only after every worker has stopped and no canonical value is
 still in use. A repeat call after the root is gone does nothing.
 
-Source: `lib/pool.x:582`
+Source: `lib/pool.x:930`
 
 <a id="Pool.thread_initialize"></a>
 #### Pool.thread_initialize
@@ -374,7 +374,7 @@ Source: `lib/pool.x:582`
 Installs the existing process root in a newly created worker thread.
 The root must already exist; otherwise the process aborts.
 
-Source: `lib/pool.x:569`
+Source: `lib/pool.x:920`
 
 <a id="Pool.thread_start"></a>
 #### Pool.thread_start
@@ -384,7 +384,7 @@ Source: `lib/pool.x:569`
 Makes `Pool` lock from here on, for a process about to start a worker.
 `Thread.start` calls this before `pthread_create`. It never clears.
 
-Source: `lib/pool.x:149`
+Source: `lib/pool.x:709`
 
 ## Public types
 
@@ -403,7 +403,7 @@ Pools are released from child to parent. Their handles and unpromoted
 allocations become invalid at release; promoted identities retain their
 pointers under the parent.
 
-Source: `lib/pool.x:38`
+Source: `lib/pool.x:39`
 
 <a id="PoolStats"></a>
 ### PoolStats
@@ -411,8 +411,7 @@ Source: `lib/pool.x:38`
 `typedef struct PoolStats { int depth, size_t interned, promoted, allocation_calls, free_calls; size_t requested_bytes, block_allocations, block_reuses, slot_reuses; size_t backing_bytes, active_blocks, active_bytes, depot_blocks, depot_bytes; } PoolStats`
 
 Reports one pool level's activity and process-wide storage counters.
-The snapshot owns no storage; `requested_bytes` saturates rather than
-wraps.
+The snapshot owns no storage; `requested_bytes` saturates at `SIZE_MAX`.
 
 Source: `lib/pool.x:48`
 
@@ -425,8 +424,9 @@ blocks from one process-wide depot; large objects retain `Scope` ownership.
 Lookup walks outward. An ancestor hit retains that ancestor's ownership;
 only a new identity lands in the requested pool. Release returns empty
 blocks to the depot and transfers promoted survivors to the parent without
-changing object pointers. Pools form a stack rather than a tree, preserving
-one canonical pointer per equal value across the active chain.
+changing object pointers. Pools nest as a stack with no sibling branches,
+which preserves one canonical pointer per equal value across the active
+chain.
 
 `String` and `List` allocate into one such stack per thread.
 `Pool.open` and `Pool.close` bracket a level of it, so temporary canonical

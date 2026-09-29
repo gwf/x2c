@@ -50,8 +50,8 @@ prefix.
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
-| [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func.x` | `List x2c_func_reference_type( Func function, unsigned argc, unsigned index)` |
-| [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument( Func fn, unsigned i, List source)` |
+| [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func.x` | `List x2c_func_reference_type(Func fn, unsigned argc, unsigned index)` |
+| [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
 | [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
 | [`x2c_function_body`](meta.md#x2c_function_body) | `lib/meta.x` | `meta List x2c_function_body(List function)` |
 | `x2c_get_executable` | `src/utils.x` | `String x2c_get_executable(void)` |
