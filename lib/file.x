@@ -2,16 +2,16 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    Wraps native FILE streams while preserving stream-handle identity for hash,
-    equality, and ordering. Raw read and copy operations report status
-    separately from bytes written. `String` adapters canonicalize through the
-    active pool chain. A returned identity may already belong to an ancestor
-    and lives until its actual owning pool is released; NULL is the empty
-    `String`. Other return values, stream position, buffering, and error
-    indicators follow stdio unless an operation documents different status
-    behavior. Stdin, Stdout, and Stderr are initialized as borrowed process
-    streams.
- */
+    A `File` is a native stdio stream whose handle identity serves hashing,
+    equality, and ordering. Raw reads and copies report status separately
+    from the bytes they move. Other results, stream position, buffering, and
+    error indicators follow stdio unless an operation documents otherwise.
+    The standard streams are borrowed from the process.
+
+    `String` adapters canonicalize through the active pool chain. A returned
+    identity may already belong to an ancestor and lives until its actual
+    owning pool is released; NULL is the empty `String`.
+*/
 
 #pragma once
 
@@ -105,10 +105,7 @@ String File.string(File file) {
     return _regular_text(file, (size_t) remaining);
   }
   Block content = $auto(Block.new(sizeof(char)));
-  unsigned char bytes[BUFSIZ], size_t count;
-  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
-    _append_text(content, bytes, count);
-  _check_read(file);
+  _append_rest(content, file);
   return _text(content.bytes, content.length);
 }
 
@@ -132,21 +129,19 @@ String File.readline(File file) {
     bytes are read. Prefer `File.read_into` for raw bytes and explicit status.
     Raises: `<bad-arg>` for a negative `size`, `<size-limit>` when the
     requested `String` cannot be represented, `<bad-arg>` when the bytes
-    contain
-    an embedded NUL, `<io-fail>` on a stream read error, or `<alloc-fail>`
-    while constructing the result.
+    contain an embedded NUL, `<io-fail>` on a stream read error, or
+    `<alloc-fail>` while constructing the result.
 */
 String File.readblock(File file, long size) {
   if (size < 0) raise %(bad-arg (owner "File.readblock") (size $size));
   size_t requested = (size_t) size;
-  int allocation = _string_allocation(requested);
-  String result = String.malloc(allocation), owned = result;
-  defer if (owned != NULL) owned.free();
-  size_t count = file.read(result, 1, requested);
+  String buffer = String.malloc(_string_allocation(requested));
+  defer if (buffer != NULL) buffer.free();
+  size_t count = file.read(buffer, 1, requested);
   _check_read(file);
-  String output = _finish_text(result, count);
-  owned = NULL;
-  return output;
+  String text = _finish_text(buffer, count);
+  buffer = NULL;
+  return text;
 }
 
 /** Reads the remaining text, then closes `file` on return or transfer.
@@ -170,34 +165,33 @@ static String _regular_text(File file, size_t requested) {
   }
   size_t count = fread(first, 1, requested, file);
   _check_read(file);
-  if (count < requested) {
-    String result = _finish_text(first, count);
-    first = NULL;
-    return result;
-  }
-  int next = fgetc(file);
+  int next = count < requested ? EOF : _probe(file);
   if (next == EOF) {
-    _check_read(file);
-    String result = _finish_text(first, count);
+    String text = _finish_text(first, count);
     first = NULL;
-    return result;
+    return text;
   }
   content = Block.new(sizeof(char));
   if (count >= INT_MAX - 1) raise %(size-limit (size $count));
   _append_text(content, first, count);
-  char *head = first;
-  head[count] = '\0';
   first.free();
   first = NULL;
   _block_putc(content, (unsigned char) next);
-  unsigned char bytes[BUFSIZ];
+  _append_rest(content, file);
+  return _text(content.bytes, content.length);
+}
+
+static int _probe(File file) {
+  int next = fgetc(file);
+  if (next == EOF) _check_read(file);
+  return next;
+}
+
+static void _append_rest(Block content, File file) {
+  unsigned char bytes[BUFSIZ], size_t count;
   while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
     _append_text(content, bytes, count);
   _check_read(file);
-  String result = _text(content.bytes, content.length);
-  content.free();
-  content = NULL;
-  return result;
 }
 
 static int _string_allocation(size_t length) {
@@ -218,19 +212,19 @@ static String _text(const void *bytes, size_t length) {
   if (!length) return NULL;
   if (!bytes) raise %(bad-arg (owner "File.text") (why "null bytes"));
   int allocation = _string_allocation(length);
-  String result = String.malloc(allocation);
-  memcpy(result, bytes, length);
-  return _finish_text(result, length);
+  String copy = String.malloc(allocation);
+  memcpy(copy, bytes, length);
+  return _finish_text(copy, length);
 }
 
 /* Every text adapter ends here. Byte input then cannot produce a String
    whose visible length differs from the consumed length. `intern_free`
    consumes the temporary allocation and returns the canonical String. */
-static String _finish_text(String result, size_t length) {
-  _validate_text(result, length);
-  char *out = result;
+static String _finish_text(String text, size_t length) {
+  _validate_text(text, length);
+  char *out = text;
   out[length] = '\0';
-  return result.intern_free();
+  return text.intern_free();
 }
 
 static void _validate_text(const void *bytes, size_t length) {
@@ -244,29 +238,27 @@ static void _validate_text(const void *bytes, size_t length) {
 
 /** Reads one raw line into caller-owned byte storage.
     Valid inputs clear `dest`, then include the newline when one is read.
-    `Null`
-    inputs or a `Block` width other than one report ERROR without raising and
-    leave a nonnull `dest` unchanged; a read failure transfers instead, leaving
-    its partial bytes in `dest`.
+    `Null` inputs or a `Block` width other than one report ERROR without
+    raising and leave a nonnull `dest` unchanged; a read failure transfers
+    instead, leaving its partial bytes in `dest`.
     Raises: `<io-fail>` on a stream read error, or `<size-limit>` or
     `<alloc-fail>` when the destination cannot grow.
 */
-FileReadStatus File.readline_into(File file, Block dest) {
-  if (!file || dest == NULL || dest.width != sizeof(char))
-    return FILE_READ_ERROR;
+FileReadStatus File.readline_into(File f, Block dest) {
+  if (!f || dest == NULL || dest.width != sizeof(char)) return FILE_READ_ERROR;
   dest.clear();
   int failed, error;
   {
     /* One logical line is one locked operation. The defer also unlocks before
        a read or allocation cause transfers out of this function. */
-    flockfile(file);
-    defer funlockfile(file);
+    flockfile(f);
+    defer funlockfile(f);
     int c;
-    while ((c = getc_unlocked(file)) != EOF) {
+    while ((c = getc_unlocked(f)) != EOF) {
       _block_putc(dest, (unsigned char) c);
       if (c == '\n') break;
     }
-    failed = ferror(file);
+    failed = ferror(f);
     error = failed ? errno : 0;
   }
   if (failed) _io_error(<read>, error);
@@ -275,20 +267,19 @@ FileReadStatus File.readline_into(File file, Block dest) {
 
 /** Reads the remaining stream bytes into caller-owned storage.
     Valid inputs clear `dest` first. `Null` inputs or a `Block` width other
-    than
-    one report ERROR without raising and leave a nonnull `dest` unchanged; a
-    read failure transfers instead, leaving its partial bytes in `dest`.
+    than one report ERROR without raising and leave a nonnull `dest`
+    unchanged; a read failure transfers instead, leaving its partial bytes in
+    `dest`.
     Raises: `<io-fail>` on a stream read error, or the cause reported by
     `Block.append` when the destination cannot grow.
 */
-FileReadStatus File.read_into(File file, Block dest) {
-  if (!file || dest == NULL || dest.width != sizeof(char))
-    return FILE_READ_ERROR;
+FileReadStatus File.read_into(File f, Block dest) {
+  if (!f || dest == NULL || dest.width != sizeof(char)) return FILE_READ_ERROR;
   dest.clear();
   unsigned char bytes[BUFSIZ], size_t count;
-  while ((count = fread(bytes, 1, sizeof(bytes), file)) > 0)
+  while ((count = fread(bytes, 1, sizeof(bytes), f)) > 0)
     dest.append(bytes, count);
-  _check_read(file);
+  _check_read(f);
   return dest.length ? FILE_READ_DATA : FILE_READ_EOF;
 }
 
@@ -352,8 +343,8 @@ static void _write_bytes(
 
 /** Returns an iterator over `File`.
     The caller supplies `dest`; each pull yields one `String` under the
-    canonical
-    pool-chain lifetime described above, including its newline when present.
+    canonical pool-chain lifetime described above, including its newline when
+    present.
     The iterator borrows `file`, which must remain open through every pull.
     Clean EOF exhausts the iterator and releases its line storage. Abandoning
     it before exhaustion leaves that `Scope`-owned `Block` until its `Scope` is
@@ -369,12 +360,12 @@ Iter File.iter(File file, Iter dest) {
   Block line = Block.new(sizeof(char)), int keep = 0;
   defer if (!keep) line.free();
   line.reserve(BUFSIZ);
-  dest.init(file, _next, line);
+  dest.init(file, _next_line, line);
   keep = 1;
   return dest;
 }
 
-static int _next(Iter iter, Var *out) {
+static int _next_line(Iter iter, Var *out) {
   File file = iter.obj;
   if (!file) return 0;
   Block line = iter.state;
@@ -386,8 +377,7 @@ static int _next(Iter iter, Var *out) {
   }
   FileReadStatus status = file.readline_into(line);
   if (status != FILE_READ_DATA) return 0;
-  String text = _text(line.bytes, line.length);
-  *out = text;
+  *out = _text(line.bytes, line.length);
   keep = 1;
   return 1;
 }
@@ -548,10 +538,7 @@ File File.open(const char *path, const char *mode) =>
     raises `<bad-arg>`.
 */
 File File.fdopen(int fildes, const char *mode) {
-  if (!mode) {
-    Symbol operation = <fdopen>;
-    raise %(bad-arg (operation $operation));
-  }
+  if (!mode) raise %(bad-arg (operation <fdopen>));
   File file = fdopen(fildes, mode);
   if (file) return file;
   int error = errno;
