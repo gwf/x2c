@@ -4836,23 +4836,22 @@ static Ast _step(Compiler c, Ast ast) {
              (expr (!set ?matched_type (*)) ?))
            ?start ?stop ?step):
       return _slice_node(c, expression, matched_type, start, stop, step);
-    case %(raise *): return _raise_node(c, ast);
   }
   Symbol tag = head;
-  if (tag == <protocol> || tag == <adopt> || tag == <macrodef> ||
-      tag == <literal>) return ast;
-  if (tag == <expr>) {
-    Ast expression = c.lower_typed_adapter_expr(ast);
-    expression = c.lower_lambda_expr(expression);
-    match (expression)
-      case %(expr ? (op ? ?(List first) *))
-        if (first.match(%(expr ? (op *)))):
-          return _op_chain(c, expression);
-    if (expression != ast) return _node(c, expression);
-    return _finish(c, expression);
-  }
   Ast next = ast;
   switch (tag) {
+    case <protocol>: case <adopt>: case <macrodef>: case <literal>:
+      return ast;
+    case <expr>: {
+      Ast expression = c.lower_typed_adapter_expr(ast);
+      expression = c.lower_lambda_expr(expression);
+      match (expression)
+        case %(expr ? (op ? ?(List first) *))
+          if (first.match(%(expr ? (op *)))):
+            return _op_chain(c, expression);
+      if (expression != ast) return _node(c, expression);
+      return _finish(c, expression);
+    }
     case <array>: case <varray>: next = transform_array_literal(c, ast); break;
     case <map>: case <vmap>: next = transform_map_literal(c, ast); break;
     case <cast>: next = _cast(c, ast); break;
@@ -4869,6 +4868,7 @@ static Ast _step(Compiler c, Ast ast) {
     case <defer>: next = _defer_node(c, ast); break;
     case <block>: next = _block_node(c, ast); break;
     case <return>: next = _return(c, ast); break;
+    case <raise>: return _raise_node(c, ast);
     case <if>: case <while>: case <do>: case <for>:
       next = _truthy(c, ast); break;
     case <call>: next = _call(c, ast); break;
