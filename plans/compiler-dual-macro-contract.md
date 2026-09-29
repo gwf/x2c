@@ -22,7 +22,7 @@
 > construction families, Func shape pass, and ordinary-call source-form
 > family are on dev at `e4942f7e`. Region call and assignment families are
 > on dev at `bfcc3cb4`. Retained Function initialization and try-binder
-> families are locally integrated for one publication batch.
+> families form one publication batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -3336,8 +3336,8 @@ The raw try recognizer and constructor in `bind_syntax` are deleted; no raw
 try recognition or construction remains in that owner. The authored try diff
 is +28/-10 across `grammar.xmacro` and `parse.x`. Focused catch and defer
 fixtures, a constructed bare-try execution/C/H comparison, and stage 2
-passed in the isolated worker checkout. These two families are integrated
-locally; the final combined publication gate remains pending.
+passed in the isolated worker checkout. These two families form one
+publication batch with a single combined gate.
 
 The remaining transform survey found no next source-spellable family whose
 templates would remove meaningful competing builders. String segments need

@@ -61,7 +61,7 @@ X2c recursive-descent parser core.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:2996`
+Source: `src/parse.x:3007`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -74,7 +74,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2479`
+Source: `src/parse.x:2493`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local

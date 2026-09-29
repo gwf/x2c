@@ -479,7 +479,7 @@ static List _template_arguments(Compiler c, List definition, List values, Token 
 
 static List _sdk_template_call(Var stored, List values);
 
-static List _rebuild_structural_template(Compiler c, List application, int statement);
+static List _rebuild_structural_template(Compiler c, List application, int statement, List target);
 
 static List _lisp_bindings(List bindings);
 
@@ -5641,8 +5641,8 @@ List x2c_template_call(Var stored, List values){
 
 List List_match(List, Var);
 List List_replace(List, List);
-static List _rebuild_structural_template(Compiler c, List application, int statement){
-  List _x2c_destructure_6 = application;  Var marker = List_getindex(_x2c_destructure_6, 0);  List definition = Var_list(List_getindex(_x2c_destructure_6, 1));  List values = Var_list(List_getindex(_x2c_destructure_6, 2)); (void) marker;  List arguments = _template_arguments(c, definition, values, c -> token, 1);  List bindings = List_match(arguments, List_assoc(definition, Symbol_var(34470112412)));  List template = Var_list(List_assoc(definition, Symbol_var(1386033712394))); {
+static List _rebuild_structural_template(Compiler c, List application, int statement, List target){
+  List _x2c_destructure_6 = application;  Var marker = List_getindex(_x2c_destructure_6, 0);  List definition = Var_list(List_getindex(_x2c_destructure_6, 1));  List values = Var_list(List_getindex(_x2c_destructure_6, 2)); (void) marker;  List arguments = _template_arguments(c, definition, values, c -> token, 1);  List input = List_truth(target) ? cons(_899, cons(List_var(arguments), cons(List_var(_capture_row_project(c, Var_list(List_assoc(definition, Symbol_var(43055000864))), cons(List_var(target), NULL), 1)), NULL))) : arguments;  List bindings = List_match(input, List_assoc(definition, Symbol_var(34470112412)));  List template = Var_list(List_assoc(definition, Symbol_var(1386033712394))); {
     List hole;  List _x2c_macro_object_59 = Var_list(List_assoc(definition, Symbol_var(1129338912386214)));  List _x2c_macro_cursor_59 = _x2c_macro_object_59;  Var _x2c_macro_cursor_output_67;  while(List_try_next(_x2c_macro_object_59, &(_x2c_macro_cursor_59), &(_x2c_macro_cursor_output_67))){
       hole = Var_list(_x2c_macro_cursor_output_67);  if(Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(377892))){
         Var binder = _hole_key(hole, _1456);  template = List_search_replace(template, List_var(cons(_19, cons(_804, cons(List_var(cons(_749, cons(binder, NULL))), NULL)))), binder);
@@ -5656,11 +5656,15 @@ static List _rebuild_structural_template(Compiler c, List application, int state
 
 List List_cddr(List);
 List Compiler_rebuild_expression(Compiler c, Type type, List application){
-  if(! _init_guard_) _file_init_();  List rebuilt = _rebuild_structural_template(c, application, 0);  return cons(_19, cons(List_var(type), List_append(List_cddr(rebuilt), NULL)));
+  if(! _init_guard_) _file_init_();  List rebuilt = _rebuild_structural_template(c, application, 0, NULL);  return cons(_19, cons(List_var(type), List_append(List_cddr(rebuilt), NULL)));
 }
 
 List Compiler_rebuild_statement(Compiler c, List application){
-  if(! _init_guard_) _file_init_();  return _rebuild_structural_template(c, application, 1);
+  if(! _init_guard_) _file_init_();  return _rebuild_structural_template(c, application, 1, NULL);
+}
+
+List Compiler_rebuild_function(Compiler c, List target, List application){
+  if(! _init_guard_) _file_init_();  return Var_list(List_cadr(_rebuild_structural_template(c, application, 1, target)));
 }
 
 static List _lisp_bindings(List bindings){
