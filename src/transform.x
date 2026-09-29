@@ -1457,6 +1457,15 @@ macro open Unit $capture_environment(Name $name, Field $fields...) {
   typedef struct $name { $fields... } $name;
 }
 
+macro open Statement $capture_local(Type $type, DeclaratorRow $row) {
+  $type $row;
+}
+
+macro open Statement $capture_factory(Statement $storage, Expr $value) {
+  $storage
+  return $value;
+}
+
 /* Capture rows arrive resolved and in first-use order from `literals.x`.
    Materialize one local per row before the
    context aggregate so conversion effects run left to right. `Var` fields are
@@ -1485,6 +1494,7 @@ static List _lower_captured_lambda(
   Map slots = {};
   Array fields = [], field_types = [];
   Array capture_locals = [], field_values = [];
+  Macro local = $capture_local;
   foreach (List capture, captures)
     match (capture)
       case %(capture ?binding ?captured_type ?expression): {
@@ -1505,11 +1515,9 @@ static List _lower_captured_lambda(
         List value = compiler.convert_expression(
           expression, storage_type);
         List (base, mods) = storage_type.declaration_parts();
-        capture_locals.push(
-          %(
-          declare $base
-            (bindings (op = (bind $temporary $mods) $value))
-        ));
+        List row = %(op = (bind $temporary $mods) $value);
+        capture_locals.push(compiler.rebuild_statement(
+          local(base, row)).cadr());
         field_values.push(%(expr $storage_type (ident $temporary)));
       }
   Macro environment = $capture_environment;
@@ -1532,13 +1540,11 @@ static List _lower_captured_lambda(
       (call (expr $context_type (ident $context_helper))
             (args (expr ("Func") (ident $closure_binding))))
   );
-  List context_setup = %(
-    declare (const $environment_name)
-      (bindings
-        (op = (bind $environment_local (*))
-              (expr $environment_pointer_type
-                (cast $environment_pointer_type $context_call))))
-  );
+  List context_cast = %(expr $environment_pointer_type
+    (cast $environment_pointer_type $context_call));
+  List context_setup = compiler.rebuild_statement(
+    local(%(const $environment_name),
+          %(op = (bind $environment_local (*)) $context_cast))).cadr();
   List rewritten = _rewrite_lambda_captures(
     compiler, body, slots, environment_local, environment_pointer_type);
   rewritten = _node(compiler, rewritten);
@@ -1558,26 +1564,24 @@ static List _lower_captured_lambda(
     }
     List factory_context = compiler.sym.introduce(
       compiler.fresh_name("lambda_context"));
-    List factory_storage = %(
-      declare $environment_value_type
-        (bindings
-          (op = (bind $factory_context ())
-                (expr $environment_value_type
-                  (composite
-                    (commas @{factory_values.list_free()})))))
-    );
+    List factory_initializer = %(expr $environment_value_type
+      (composite (commas @{factory_values.list_free()})));
+    List factory_storage = compiler.rebuild_statement(
+      local(environment_value_type,
+            %(op = (bind $factory_context ()) $factory_initializer))).cadr();
     List factory_construction = _func_context_call(
-      environment_value_type, factory_context, lambda_binding,
+      compiler, environment_value_type, factory_context, lambda_binding,
       adapter_type, signature, constructor, constructor_type);
     List declaration_params = %(params @{parameters.list_free()});
-    List factory_body = %(block $factory_storage
-      (stmnt (return $factory_construction)));
+    Macro factory = $capture_factory;
+    List factory_body = compiler.rebuild_statement(
+      factory(factory_storage, factory_construction));
     compiler.add_early(compiler.wrapper_function(
       %("Func"), bridge, declaration_params.cdr(), factory_body.cdr()));
     List parameter_types = field_types.list_free();
     Type factory_type = %((func $parameter_types) "Func");
     List call = _func_bridge_call(
-      bridge, declaration_params, factory_type,
+      compiler, bridge, declaration_params, factory_type,
       field_values.list_free());
     return %(
       expr ("Func")
@@ -1587,15 +1591,13 @@ static List _lower_captured_lambda(
   }
   List context_value = compiler.sym.introduce(
     compiler.fresh_name("lambda_context"));
-  List context_storage = %(
-    declare $environment_value_type
-      (bindings
-        (op = (bind $context_value ())
-              (expr $environment_value_type
-                (composite (commas @{field_values.list_free()})))))
-  );
+  List context_initializer = %(expr $environment_value_type
+    (composite (commas @{field_values.list_free()})));
+  List context_storage = compiler.rebuild_statement(
+    local(environment_value_type,
+          %(op = (bind $context_value ()) $context_initializer))).cadr();
   List construction = _func_context_call(
-    environment_value_type, context_value, lambda_binding,
+    compiler, environment_value_type, context_value, lambda_binding,
     adapter_type, signature, constructor, constructor_type);
   return %(
     expr ("Func")

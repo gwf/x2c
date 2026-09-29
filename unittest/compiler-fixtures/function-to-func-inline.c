@@ -198,7 +198,6 @@ Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1){
   }
   ;
   return Func_new_context(_x2c_lambda_1, _20, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
-  ;
 }
 
 #undef _x2c_initializer_choice_EB5855FF_0_expanded
