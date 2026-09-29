@@ -2,14 +2,16 @@
 
     Copyright (c) 2025 Gary William Flake.
 
-    Coordinates tokenization, shallow declaration discovery, full parsing,
-    symbol scopes, diagnostics, and generated initialization. Shallow parsing
-    skips function bodies; full parsing produces the AST of the source.
+    A `Compiler` holds the translation state of one unit: its token cursor,
+    symbol table, and declaration state. Collection parses the unit
+    shallowly, skipping function bodies; the full parse produces its AST.
+    The related compilers of one unit share its package registries,
+    generated names, and binding numbers.
 
     `Symbol` lookup walks the scope stack from inner to outer. Diagnostics may
     exit immediately or raise `<malformed>` while a recovery boundary is
     active.
-  */
+*/
 #pragma once
 $(import "../lib/private-keywords.xmacro")
 #include "tokenizer.x"
@@ -226,6 +228,8 @@ protocol Var(Compiler) as void *;
 
 // translation state and lifecycle
 
+/* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
+   hold file-scope declarations. */
 typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
@@ -739,7 +743,11 @@ void Compiler.__complete_here(Compiler c, Symbol role, List keywords) {
   raise %(replcomp (kind $role) (rows $rows) (keywords $keywords));
 }
 
-// source locations
+/* source locations
+
+   An origin row locates a parsed node for later diagnostics. With source
+   facts on, as for the editor adapter, declarations and references also
+   record their source ranges. */
 
 /** Records a token's location and returns its one-based occurrence.
 
@@ -828,7 +836,11 @@ void Compiler.merge_source_declarations(Compiler c, Map target, Map source) {
     if (key is <list>) c.copy_source_declaration(target, source, key);
 }
 
-// preprocessor directives
+/* preprocessor directives
+
+   Each operation classifies one directive line. The tokenizer's
+   conditional scan, collection, and generation read directives through
+   them. */
 
 /** Classifies an opening conditional directive by which of its arms C can
     never reach: `<first>` when the condition requires a never-defined name
@@ -1064,7 +1076,10 @@ static int _attribute_layout(Token token) {
   return packed ? 2 : 1;
 }
 
-// leading directives
+/* leading directives
+
+   The directives before a form set source visibility and record the unit's
+   `#define` names, which literals and declaration prefixes read. */
 
 /** Returns source-ordered preprocessor nodes in the preceding trivia.
 
@@ -1240,7 +1255,7 @@ static int _prefix_rank(Var v) {
       symbol table entries: one for an anonymous struct definition, and the
       other for x, which references the named anonymous struct definition.
 */
-static SymScope *_semantic_scope(Sym s, int index) {
+static SymScope *_scope_at(Sym s, int index) {
   int count = s.scopes.len();
   if (index < 0) index += count;
   if (index < 0 || index >= count) return NULL;
@@ -1314,13 +1329,13 @@ Map Sym.global_symbols(Sym s) => s.globals;
 Map Sym.base_symbols(Sym s) {
   Map seed = {};
   for (int i = 0; i < s.base_scopes; i++)
-    seed.merge(_semantic_scope(s, i).symbols);
+    seed.merge(_scope_at(s, i).symbols);
   return seed;
 }
 
 /** Returns the current scope's mutable symbol map, or `NULL`. */
 Map Sym.current_symbols(Sym s) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   return scope ? scope.symbols : NULL;
 }
 
@@ -1341,7 +1356,7 @@ List Sym.visible_symbols(Sym s) {
   Map seen = {};
   Array rows = [];
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--) {
-    SymScope *scope = _semantic_scope(s, i);
+    SymScope *scope = _scope_at(s, i);
     foreach (Var (key, value), scope.symbols)
       match (key)
         case %(?(String name)):
@@ -1369,7 +1384,7 @@ static Symbol _macro_kind(Var definition) {
 
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym s, List key, List type) {
-  SymScope *current = _semantic_scope(s, -1);
+  SymScope *current = _scope_at(s, -1);
   Map scope = current.symbols;
   if (log_should_log(<debug>, <symtab>))
     log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
@@ -1382,10 +1397,10 @@ static int _retained_member(List key) =>
 
 /** Defines `key` and returns its stable binding in the active scope. */
 List Sym.define(Sym s, List key, List type) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   s.set(key, type);
   _seed_var_tag(key, type);
-  return _semantic_scope_binding(s, scope, key);
+  return _scope_binding(s, scope, key);
 }
 
 static void _seed_var_tag(List key, List type) {
@@ -1424,25 +1439,25 @@ void Sym.seed_var_tags(Sym s, Map symbols) {
     the row here or replayed it from an interface.
 */
 void Sym.define_global(Sym s, List key, List type) {
-  SymScope *scope = _semantic_scope(s, s.base_scopes - 1);
+  SymScope *scope = _scope_at(s, s.base_scopes - 1);
   scope.symbols[key] = type;
   _seed_var_tag(key, type);
 }
 
 /** Associates an enumerator key with its owner in the active scope. */
 void Sym.declare_enumerator(Sym s, List key, Symbol owner) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   if (scope) scope.enumerators[key] = owner;
 }
 
 // bindings
 
-static List _semantic_scope_binding(Sym s, SymScope *scope, List key) {
+static List _scope_binding(Sym s, SymScope *scope, List key) {
   Var found;
   List binding;
   if (scope.bindings.try_get(key, found)) binding = found;
   else {
-    binding = _semantic_new_binding(s, key);
+    binding = _new_binding(s, key);
     scope.bindings[key] = binding;
   }
   (Var binding_tag, int identity, String spelling) = binding;
@@ -1471,7 +1486,7 @@ static void _note_source_key(Sym s, SymScope *scope, List key, List binding) {
     c.source_definitions[binding] = declaration;
 }
 
-static List _semantic_new_binding(Sym s, List key) {
+static List _new_binding(Sym s, List key) {
   int identity = ++s.compiler.names.next_binding;
   Var name = key.last();
   List binding = binding_identity_new(identity, name);
@@ -1480,19 +1495,18 @@ static List _semantic_new_binding(Sym s, List key) {
 }
 
 /** Allocates a fresh binding identity for a compiler-introduced spelling. */
-List Sym.introduce(Sym s, String spelling) =>
-  _semantic_new_binding(s, %($spelling));
+List Sym.introduce(Sym s, String spelling) => _new_binding(s, %($spelling));
 
 /** Returns `key`'s binding in the current scope, or `NULL`. */
 List Sym.current_binding(Sym s, List key) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   Var binding;
   return scope && scope.bindings.try_get(key, binding) ? binding : NULL;
 }
 
 /** Returns the current scope's enum owner for `key`, or zero. */
 Symbol Sym.enumerator_owner(Sym s, List key) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   Var owner;
   return scope && scope.enumerators.try_get(key, owner) ? owner : 0;
 }
@@ -1508,7 +1522,7 @@ int Sym.binding_is_local(Sym s, List binding) =>
 int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
   if (scope_count > (int) s.scopes.len()) scope_count = s.scopes.len();
   for (int i = scope_count - 1; i >= s.base_scopes; i--)
-    foreach (Var (_, candidate), _semantic_scope(s, i).bindings)
+    foreach (Var (_, candidate), _scope_at(s, i).bindings)
       if (List.equal(candidate, binding)) return 1;
   return 0;
 }
@@ -1527,7 +1541,7 @@ List Sym.get(Sym s, List key) {
 List Sym.get_exact(Sym s, List key) {
   Var val;
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--) {
-    Map scope = _semantic_scope(s, i).symbols;
+    Map scope = _scope_at(s, i).symbols;
     if (scope.try_get(key, val)) return val;
   }
   if (_retained_member(key) &&
@@ -1552,39 +1566,39 @@ static List _package_retry_key(Sym s, List key) {
     miss returns `NULL` and stores `NULL` through `type` when provided.
 */
 List Sym.lookup(Sym s, List key, Type &?type) =>
-  _semantic_lookup(s, key, type, (int) s.scopes.len() - 1, 0);
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 0);
 
 /** Resolves `key` or creates a forward binding in the current scope.
 
     Stores `NULL` through `type` when no declaration supplies a type.
 */
 List Sym.reference(Sym s, List key, Type &?type) =>
-  _semantic_lookup(s, key, type, (int) s.scopes.len() - 1, 1);
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 1);
 
 /** Resolves a binding through base scopes and optionally stores its type.
 
     Returns `NULL` when no base scope contains the key.
 */
 List Sym.resolve_global(Sym s, List key, Type &?type) =>
-  _semantic_lookup(s, key, type, s.base_scopes - 1, 0);
+  _lookup_from(s, key, type, s.base_scopes - 1, 0);
 
 /** Resolves a global name or creates its forward binding in the base scope.
     Local declarations cannot capture a retained macro's global reference.
 */
 List Sym.reference_global(Sym s, List key) {
   List binding = s.resolve_global(key, NULL);
-  return binding ? binding : _semantic_scope_binding(
-    s, _semantic_scope(s, s.base_scopes - 1), key);
+  if (binding) return binding;
+  return _scope_binding(s, _scope_at(s, s.base_scopes - 1), key);
 }
 
-static List _semantic_lookup(
+static List _lookup_from(
   Sym s, List key, Type &?type, int first, int forward) {
   Var found;
   for (int i = first; i >= 0; i--) {
-    SymScope *scope = _semantic_scope(s, i);
+    SymScope *scope = _scope_at(s, i);
     if (scope.symbols.try_get(key, found)) {
       if (type) type = found;
-      return _semantic_scope_binding(s, scope, key);
+      return _scope_binding(s, scope, key);
     }
     if (scope.bindings.try_get(key, found)) {
       if (type) type = NULL;
@@ -1593,11 +1607,9 @@ static List _semantic_lookup(
   }
   List retry = _package_retry_key(s, key);
   if (retry && (!forward || s.get_exact(retry)))
-    return _semantic_lookup(s, retry, type, first, forward);
+    return _lookup_from(s, retry, type, first, forward);
   if (type) type = NULL;
-  return forward
-       ? _semantic_scope_binding(s, _semantic_scope(s, -1), key)
-       : NULL;
+  return forward ? _scope_binding(s, _scope_at(s, -1), key) : NULL;
 }
 
 // declarations
@@ -1647,9 +1659,9 @@ static List _package_declared_key(Sym s, List context, List key, List ast) {
   return key;
 }
 
-// The declared spelling, when the key names one.  Aggregate keys carry the
-// tag in their second slot; anonymous aggregates carry a gensym list there
-// and are not source spellings.
+/* The declared spelling, when the key names one. Aggregate keys carry the
+   tag in their second slot; anonymous aggregates carry a gensym list there
+   and are not source spellings. */
 static String _declared_spelling(List key) {
   Var (head, tag) = key;
   if (head is <string>) return head;
@@ -1674,8 +1686,7 @@ static void _check_spelling(Compiler c, String spelling) {
       c.token, NULL);
 }
 
-// A source declaration may not enter the compiler's generated-name space.
-// Checked once per declaration; no prepass over the token stream.
+// Checked once per declaration, with no prepass over the token stream.
 static int _is_reserved_spelling(String s) {
   if (!s) return 0;
   if (s.startswith("_x2c_")) return 1;
@@ -1746,7 +1757,7 @@ static void _mark_automatic(Sym s, List binding, Type type) {
 List Sym.bind_identity(Sym s, List context, List binding, List ast) {
   String spelling = binding_identity_spelling(binding);
   List key = context ? %(@context $spelling) : %($spelling);
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   Type annotation = ast.type_from_ast();
   scope.symbols[key] = annotation.declared();
   if (context === %(typedef)) {
@@ -1903,7 +1914,7 @@ String Compiler.imported_spelling(Compiler c, String name) {
     count.
 */
 void Sym.define_macro(Sym s, Atom name, List definition) {
-  SymScope *scope = _semantic_scope(s, -1);
+  SymScope *scope = _scope_at(s, -1);
   if (scope.macros == NULL) scope.macros = {};
   if (!scope.macros.contains(name)) s.local_macro_names++;
   scope.macros[name] = definition;
@@ -1920,7 +1931,7 @@ int Sym.has_local_macros(Sym s) => s.local_macro_names != 0;
 List Sym.lookup_macro(Sym s, Atom name) {
   Var definition;
   for (int i = (int) s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    SymScope *scope = _semantic_scope(s, i);
+    SymScope *scope = _scope_at(s, i);
     if (scope.macros != NULL && scope.macros.try_get(name, definition))
       return definition;
   }
@@ -1933,7 +1944,10 @@ Map Compiler.macro_definition_locals(Compiler c) {
   return stored is <map> ? stored : NULL;
 }
 
-// semantic transactions
+/* semantic transactions
+
+   Binding a macro's syntax stages its rows in a transaction, so a failed
+   expansion leaves the symbol table as it was. */
 
 typedef struct SymTxn {
   Compiler compiler;
@@ -1962,7 +1976,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
   transaction.compiler = c;
   transaction.scope_index = c.sym.scopes.len() - 1;
-  SymScope *scope = _semantic_scope(c.sym, transaction.scope_index);
+  SymScope *scope = _scope_at(c.sym, transaction.scope_index);
   transaction._save(*scope);
   if (transaction.extended) transaction._save_effects();
   if (c.source_facts && c.source_primary) transaction._save_sources();
@@ -1998,7 +2012,7 @@ static void SymTxn._save_effects(SymTxn s) {
   c.names.adapters = c.names.adapters.copy();
   for (int i = 0; i < c.sym.base_scopes; i++) {
     if (i == s.scope_index) continue;
-    SymScope *base = _semantic_scope(c.sym, i);
+    SymScope *base = _scope_at(c.sym, i);
     s.base_bindings.push(%($i ${base.bindings}));
     base.bindings = base.bindings.copy();
   }
@@ -2026,7 +2040,7 @@ static void SymTxn._stage(SymTxn s, SymScope *scope) {
 
 /** Returns whether the transaction's active scope changed its macro map. */
 int SymTxn.local_macros_changed(SymTxn s) {
-  SymScope *scope = _semantic_scope(s.compiler.sym, s.scope_index);
+  SymScope *scope = _scope_at(s.compiler.sym, s.scope_index);
   Map before = s.scope.macros, after = scope.macros;
   if (before == NULL || after == NULL)
     return (void *) before != (void *) after;
@@ -2039,7 +2053,7 @@ int SymTxn.local_macros_changed(SymTxn s) {
 void SymTxn.commit(SymTxn s) {
   if (!s || !s.active) return;
   Compiler c = s.compiler;
-  SymScope *scope = _semantic_scope(c.sym, s.scope_index);
+  SymScope *scope = _scope_at(c.sym, s.scope_index);
   SymScope staged = *scope;
   /* Restore the original map identities before merging staged rows. Code
      holding a borrowed scope map must observe a committed expansion. */
@@ -2065,7 +2079,7 @@ static void SymTxn._commit_effects(SymTxn s) {
   c.names.adapters = s.adapters;
   s.adapters.merge(adapters);
   foreach (List row, s.base_bindings.list()) {
-    SymScope *base = _semantic_scope(c.sym, row.car());
+    SymScope *base = _scope_at(c.sym, row.car());
     Map staged = base.bindings, original = row.cadr();
     base.bindings = original;
     original.merge(staged);
@@ -2110,7 +2124,7 @@ void SymTxn.rollback(SymTxn s) {
 
 static void SymTxn._restore(SymTxn s) {
   Compiler c = s.compiler;
-  SymScope *scope = _semantic_scope(c.sym, s.scope_index);
+  SymScope *scope = _scope_at(c.sym, s.scope_index);
   *scope = s.scope;
   c.sym.statics = s.statics;
   c.sym.binding_facts = s.binding_facts;
@@ -2125,7 +2139,7 @@ static void SymTxn._restore_effects(SymTxn s) {
   Compiler c = s.compiler;
   c.names.adapters = s.adapters;
   foreach (List row, s.base_bindings.list())
-    _semantic_scope(c.sym, row.car()).bindings = row.cadr();
+    _scope_at(c.sym, row.car()).bindings = row.cadr();
   c.early_decls.resize(s.early_count);
   c.inits.resize(s.init_count);
   c.origins.resize(s.origin_count);
@@ -2161,19 +2175,18 @@ static void SymTxn._restore_sources(SymTxn s) {
 Type Sym.resolve_key(Sym s, Type key) {
   if (!key) return key;
   key = key.canonicalize();
-  return _resolve_key_helper(s, key, NULL, key, 0);
+  return _resolve_chain(s, key, NULL, key, 0);
 }
 
 /* Resolve a typedef chain, optionally stopping at a semantic type
    identity. origin is the type the caller asked about, kept only so an
    over-budget walk can name it instead of some mid-chain link. */
-static Type _resolve_key_helper(
-  Sym s, Type key, Type stop, Type origin, int hops) {
+static Type _resolve_chain(Sym s, Type key, Type stop, Type origin, int hops) {
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
   if (stop && key == stop) return key;
   if (key.is_typedef_name() || key.is_typedef()) {
     Type type = _typedef_target(s, key);
-    if (type) return _resolve_key_helper(s, type, stop, origin, hops + 1);
+    if (type) return _resolve_chain(s, type, stop, origin, hops + 1);
   }
   match (key) case %((!set ?kind (!or struct union))
       (binding ? ?spelling)):
@@ -2196,7 +2209,7 @@ static void _typedef_budget_error(Sym s, Type origin) {
 static Type _typedef_target(Sym s, Type key) {
   for (int i = s.base_scopes - 1; i >= 0; i--) {
     Var target;
-    if (_semantic_scope(s, i).symbols.try_get(key, target)) return target;
+    if (_scope_at(s, i).symbols.try_get(key, target)) return target;
   }
   return NULL;
 }
@@ -2230,14 +2243,13 @@ Type Sym.resolve_base_type(Sym s, Type key) {
 
 /** Resolves typedef bases while retaining every declarator qualifier. */
 Type Sym.normalize_declared_type(Sym s, Type type) =>
-  type ? _normalize_declared_type(s, type, type, 0) : NULL;
+  type ? _normalize_chain(s, type, type, 0) : NULL;
 
-static Type _normalize_declared_type(
-  Sym s, Type type, Type origin, int hops) {
+static Type _normalize_chain(Sym s, Type type, Type origin, int hops) {
   type = type.declared();
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
   Type next = _typedef_base_step(s, type);
-  return next ? _normalize_declared_type(s, next, origin, hops + 1) : type;
+  return next ? _normalize_chain(s, next, origin, hops + 1) : type;
 }
 
 static Type _typedef_base_step(Sym s, Type type) {
@@ -2271,7 +2283,7 @@ Type Sym.local_type(Sym s, Type type) {
 // A local tag resolves to the binding of its nearest declaration.
 static Type _local_tag(Sym s, Type type, Type base) {
   for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    SymScope *scope = _semantic_scope(s, i);
+    SymScope *scope = _scope_at(s, i);
     Var binding;
     if (scope.bindings.try_get(base, binding))
       return _replace_type_base(type, base, %(${base.car()} $binding));
@@ -2282,7 +2294,7 @@ static Type _local_tag(Sym s, Type type, Type base) {
 // A local typedef name resolves to the target saved beside its marker.
 static Type _local_alias(Sym s, Type type, Type base) {
   for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    Map symbols = _semantic_scope(s, i).symbols;
+    Map symbols = _scope_at(s, i).symbols;
     Var marker;
     if (!symbols.try_get(base, marker)) continue;
     Type declared = marker;
@@ -2363,10 +2375,10 @@ Symbol Sym.var_tag_for_type(Sym s, Type type, Type &?resolved) {
     return 0;
   }
   Type origin = type.canonicalize();
-  return _var_tag_for_type_helper(s, origin, origin, resolved, 0);
+  return _var_tag_chain(s, origin, origin, resolved, 0);
 }
 
-static Symbol _var_tag_for_type_helper(
+static Symbol _var_tag_chain(
   Sym s, Type type, Type origin, Type &?resolved, int hops) {
   type = type.canonicalize();
   Symbol tag = type.var_tag();
@@ -2376,8 +2388,7 @@ static Symbol _var_tag_for_type_helper(
   }
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
   Type next = _typedef_base_step(s, type);
-  if (next)
-    return _var_tag_for_type_helper(s, next, origin, resolved, hops + 1);
+  if (next) return _var_tag_chain(s, next, origin, resolved, hops + 1);
   if (resolved) resolved = type;
   return 0;
 }
@@ -2401,7 +2412,7 @@ int Sym.is_named_value_type(Sym s, Type type, String name) {
   // Stop at the named type instead of resolving through its typedef.
   if (!type || !name) return 0;
   Type wanted = %($name), origin = type.canonicalize();
-  type = _resolve_key_helper(s, origin, wanted, origin, 0);
+  type = _resolve_chain(s, origin, wanted, origin, 0);
   return type == wanted;
 }
 
@@ -2697,12 +2708,12 @@ static List _cache_boxed(Compiler c, List literal) {
 static List _cache_literal_list(Compiler c, List values) {
   Array heads = $auto([]);
   foreach (Var value, values) heads.push(c.cache_literal_var(value));
-  List result = %(nil);
+  List cached = %(nil);
   for (int i = (int) heads.len() - 1; i >= 0; i--) {
     List head = heads[i];
-    result = c.cache(%(cons $head $result));
+    cached = c.cache(%(cons $head $cached));
   }
-  return result;
+  return cached;
 }
 
 /** Returns a runtime `List` expression for cached compiler-owned syntax.
@@ -2896,7 +2907,10 @@ List Compiler.catch_binder_declarations(
   return declarations.list_free();
 }
 
-// diagnostics routing
+/* diagnostics routing
+
+   A child compiler either shares its owner's diagnostic store or keeps its
+   own, whose reports the owner takes when the child closes. */
 
 /** Routes this compiler's diagnostic store through its own printer.
 
@@ -3046,17 +3060,16 @@ static List _thaw_origin(Compiler c, List source, Var node) {
 
 static List _declaration_macro(Compiler c, List rows, int thaw) {
   Array out = [];
-  foreach (List row, rows) {
-    match (row) {
-      case %(origin ?location):
-        row = %(origin ${_declaration_location(location, thaw)});
-      default:
-        row = thaw ? c.thaw_declaration_syntax(row)
-                   : c.freeze_declaration_syntax(row);
-    }
-    out.push(row);
-  }
+  foreach (List row, rows) out.push(_macro_row(c, row, thaw));
   return %(macrodef @{out.list_free()});
+}
+
+static List _macro_row(Compiler c, List row, int thaw) {
+  match (row)
+    case %(origin ?location):
+      return %(origin ${_declaration_location(location, thaw)});
+  return thaw ? c.thaw_declaration_syntax(row)
+              : c.freeze_declaration_syntax(row);
 }
 
 static List _declaration_location(List location, int thaw) {
@@ -3118,9 +3131,10 @@ static String _effect_file(Compiler c, List key) {
   return c.filename;
 }
 
-/** Expands a file-scope unit macro and retains its declarations for collection.
-    Its private helpers remain available to later invocations. Generated-name
-    counters are restored when the full parse must expand it again.
+/** Expands a file-scope unit macro and retains its declarations for
+    collection. Its private helpers remain available to later invocations.
+    Generated-name counters are restored when the full parse must expand it
+    again.
 */
 void Compiler.collect_unit_macro(Compiler c) {
   Map counters = c.names.counters;
@@ -4300,5 +4314,6 @@ void ast_collect_binding_references(Var node, Map referenced) {
     referenced[identity] = 1;
     return;
   }
-  foreach (Var child, syntax) ast_collect_binding_references(child, referenced);
+  foreach (Var child, syntax)
+    ast_collect_binding_references(child, referenced);
 }
