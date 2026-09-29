@@ -36,52 +36,7 @@
 #include "format.x"
 #include "protocol.x"
 
-// logging & diagnostics
-
-/* Only --debug logs. Without it there is no sink, so log_should_log is
-   false and nothing is rendered or written. */
-static void _configure_logging(int debugging) {
-  Logger logger = log_get_global_logger();
-  if (!logger) return;
-  logger.clear_sinks();
-  if (!debugging) return;
-  logger.set_min_level(<debug>);
-  logger.add_stderr_sink();
-}
-
-// Emit collected diagnostics when the compiler has not already logged them.
-static void _report_diagnostics(Compiler compiler) {
-  Diagnostics diag = compiler ? compiler.diagnostics : NULL;
-  if (!diag || diag.printer) return;
-  List entries = compiler.diagnostics();
-  if (entries) report_suspend();
-  foreach (Var entry, entries) compiler.print_diagnostic(entry);
-}
-
-static void _preprocessor_errors(String text) {
-  Stderr.printf("%s", text);
-}
-
-// pipeline utilities
-
-static String _ast_inspection_repr(List node) {
-  match (node)
-    case %(macrodef (name ?name) *):
-      return %"(macrodef <macro $name>)";
-  return node.repr();
-}
-
-static List _transform_ast(Compiler compiler, List ast) {
-  List Compiler.transform(Compiler compiler, List ast);
-  ast = compiler.transform(ast);
-  if (compiler.error_count()) {
-    _report_diagnostics(compiler);
-    exit(1);
-  }
-  return ast;
-}
-
-// public entry point
+// translating a unit
 
 /* Compile one translation unit through the pipeline. An inspection prints
    its stage and returns, so every input is inspected and a failing later
@@ -160,172 +115,33 @@ static void _translate_unit(
   if (request.fatal_warnings && compiler.diagnostics()) exit(1);
 }
 
-static void _preflight_translation(CliRequest c, Map unit_dirs) {
-  String out_dir = c.out_dir;
-  int checked = !c.inspects() && !unit_dirs, Map stems = {};
-  if (!c.inspects()) {
-    if (!Path.exists(out_dir))
-      x2c_driver_error(%"output directory does not exist: $out_dir");
-    if (!Path.is_dir(out_dir))
-      x2c_driver_error(%"output is not a directory: $out_dir");
-    if (access(out_dir, W_OK | X_OK))
-      x2c_driver_error(%"output directory is not writable: $out_dir");
-  }
-  foreach (String input, c.inputs) {
-    build_check_input(input);
-    if (!x2c_source_file(input))
-      x2c_driver_error(%"translation input is not an .x file: $input");
-    String stem = Path.stem(input);
-    if (checked && stem in stems) {
-      String first = stems[stem];
-      fprintf(
-        stderr, "x2c: error: inputs produce the same output stem '%s'\n"
-        "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
-        stem, first, input, out_dir, stem);
-      exit(2);
-    }
-    stems[stem] = input;
-  }
+// Emit collected diagnostics when the compiler has not already logged them.
+static void _report_diagnostics(Compiler compiler) {
+  Diagnostics diag = compiler ? compiler.diagnostics : NULL;
+  if (!diag || diag.printer) return;
+  List entries = compiler.diagnostics();
+  if (entries) report_suspend();
+  foreach (Var entry, entries) compiler.print_diagnostic(entry);
 }
 
-/* Where one unit's generated C, header, and depfile are written. A build
-   gives each unit its own directory so units sharing an output stem cannot
-   collide; `x2c translate` writes them all to the shared `--out-dir`. */
-static String _unit_output_dir(CliRequest c, Map unit_dirs, String input) {
-  if (!unit_dirs) return c.out_dir;
-  String directory = unit_dirs[input];
-  return directory;
+static String _ast_inspection_repr(List node) {
+  match (node)
+    case %(macrodef (name ?name) *):
+      return %"(macrodef <macro $name>)";
+  return node.repr();
 }
 
-/* Translate `inputs` in forked workers, at most `jobs` at a time.
-   A worker inherits the process collection cache rather than filling it
-   again, and keeps its slice of the input list to the end, so
-   the only shared state is the output directory, where no two units write
-   the same file. The parent reports progress as workers finish. Returns the
-   number that failed. */
-static int _translate_workers(
-  Frontend frontend, Array chunks, Map unit_dirs, int total, Build build) {
-  CliRequest request = frontend.request;
-  int jobs = request.jobs, slices = chunks.len();
-  if (jobs > slices) jobs = slices;
-  if (request.verbose)
-    fprintf(
-      stderr, "x2c: translate with %d workers over %d files\n", jobs, total);
-  // Each live worker retains its input slice for completion reporting.
-  long *running = Scope.calloc(jobs, sizeof(long));
-  List *carried = Scope.calloc(jobs, sizeof(List));
-  int running_count = 0, failed = 0, done = 0, next = 0;
-  while (next < slices || running_count) {
-    while (next < slices && running_count < jobs) {
-      List slice = chunks[next];
-      next++;
-      if (build) build.begin_translation(slice.car());
-      long pid = worker_fork();
-      if (!pid) {
-        foreach (String input, slice)
-          _translate_unit(
-            frontend, input, _unit_output_dir(request, unit_dirs, input));
-        Compiler.stop_meta_helper();
-        worker_exit(0);
-      }
-      if (pid < 0) {
-        report_line(<error>, "could not start a translation worker");
-        failed++;
-        continue;
-      }
-      carried[running_count] = slice;
-      running[running_count++] = pid;
-    }
-    if (!running_count) continue;
-    int status, slot = worker_wait_any(running, running_count, status);
-    if (status) failed++;
-    List slice = carried[slot];
-    if (build && !status) build.end_translation(slice.car(), 0);
-    done += slice.len();
-    running_count--;
-    running[slot] = running[running_count];
-    carried[slot] = carried[running_count];
-    if (!build) report_progress(<translate>, done, total, NULL);
+static List _transform_ast(Compiler compiler, List ast) {
+  List Compiler.transform(Compiler compiler, List ast);
+  ast = compiler.transform(ast);
+  if (compiler.error_count()) {
+    _report_diagnostics(compiler);
+    exit(1);
   }
-  Scope.free(carried);
-  Scope.free(running);
-  return failed;
+  return ast;
 }
 
-/* The packages the top-level `import` declarations of the file at `path`
-   name. A token scan suffices: an import is legal only at file scope. */
-static List _imported_packages(String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %((!or not-found io-fail) *): return NULL;
-  Tokenizer tokens = Tokenizer.new(text, <x2c>);
-  tokens.scan();
-  Array names = [];
-  int depth = 0;
-  for (Token token = tokens.next(); token.type != <eof>;
-       token = tokens.next()) {
-    if (token.text == "{") depth++;
-    else if (token.text == "}") depth--;
-    else if (!depth && token.text == "import") {
-      token = tokens.next();
-      if (token.type == <lit-char*>) names.push(token.text[1:-1]);
-    }
-  }
-  return names.list_free();
-}
-
-/* Loads the native modules of the packages the inputs import before the
-   workers fork, so each worker inherits them: the packages a unit's own
-   imports name, and those its previous depfile records, which include
-   imports reached through a header. A worker loads a module this misses
-   itself when its import needs it. */
-static void _preload_package_modules(CliRequest c, Map unit_dirs) {
-  List roots = c.package_roots();
-  if (!roots) return;
-  Map names = {};
-  foreach (String input, c.inputs) {
-    foreach (String name, _imported_packages(input)) names[name] = 1;
-    String directory = _unit_output_dir(c, unit_dirs, input);
-    String depfile = %"$directory/${Path.stem(input)}.d", text = NULL;
-    try text = Path.read_text(depfile);
-    catch %((!or not-found io-fail) *): continue;
-    foreach (String dependency, translation_depfile_parse(text)) {
-      String package = x2c_package_directory(roots, dependency);
-      if (package) names[Path.basename(package)] = 1;
-    }
-  }
-  foreach (String name, names.keys()) {
-    String root = NULL;
-    if (!x2c_package_entry(c.sources, roots, name, root) ||
-        Compiler.links_extension(name)) continue;
-    String module = %"$root/builds/$name.module";
-    if (Path.is_file(module)) Compiler.preload_native_module(module);
-  }
-}
-
-/* One slice per worker. Fewer, larger slices measured better than more,
-   smaller ones. The fork and the copy-on-write faults behind it cost more
-   than the imbalance a long unit at the tail of a slice can cause.
-
-   A build passes `slices == total`. Each of its units then translates in a
-   worker that has translated nothing else, so a unit records the headers its
-   own parse reads rather than inheriting what an earlier unit in the same
-   worker already put in the process cache. Build reuse is decided from those
-   recorded prerequisites, so they must not depend on how units were
-   grouped. */
-static Array _translation_chunks(List inputs, int total, int slices) {
-  if (slices > total) slices = total;
-  if (slices < 1) slices = 1;
-  int size = (total + slices - 1) / slices, Array chunks = [];
-  List cur = inputs;
-  while (cur) {
-    Array slice = [];
-    for (int n = 0; n < size && cur; n++, cur = cur.cdr())
-      slice.push(cur.car());
-    chunks.push(slice.list_free());
-  }
-  return chunks;
-}
+// translation requests
 
 /* `unit_dirs` maps each input to its own output directory on the build path
    and is absent for `x2c translate`. */
@@ -391,46 +207,208 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   return 0;
 }
 
-/* Translates the stale `units` and registers every unit's generated files.
-   Current units are skipped; the rest translate together, so one request
-   can fill every job. Each unit keeps its own generated directory,
-   so no two workers write the same file. */
-static int _translate_units(CliRequest c, Build state, List units) {
-  Array stale = [];
-  Map stale_dirs = {};
-  foreach (String input, units) {
-    if (!x2c_source_file(input)) continue;
-    String directory = state.generated_dir(input);
-    if (state.translation_current(input, directory)) {
-      state.begin_translation(input);
-      state.end_translation(input, 1);
-      continue;
+static void _preflight_translation(CliRequest c, Map unit_dirs) {
+  String out_dir = c.out_dir;
+  int checked = !c.inspects() && !unit_dirs, Map stems = {};
+  if (!c.inspects()) {
+    if (!Path.exists(out_dir))
+      x2c_driver_error(%"output directory does not exist: $out_dir");
+    if (!Path.is_dir(out_dir))
+      x2c_driver_error(%"output is not a directory: $out_dir");
+    if (access(out_dir, W_OK | X_OK))
+      x2c_driver_error(%"output directory is not writable: $out_dir");
+  }
+  foreach (String input, c.inputs) {
+    build_check_input(input);
+    if (!x2c_source_file(input))
+      x2c_driver_error(%"translation input is not an .x file: $input");
+    String stem = Path.stem(input);
+    if (checked && stem in stems) {
+      String first = stems[stem];
+      fprintf(
+        stderr, "x2c: error: inputs produce the same output stem '%s'\n"
+        "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
+        stem, first, input, out_dir, stem);
+      exit(2);
     }
-    stale_dirs[input] = directory;
-    stale.push(input);
+    stems[stem] = input;
   }
-  List inputs = stale.list_free();
-  if (!c.dry_run && inputs) {
-    CliRequest translation = Scope.memdup(c, sizeof(struct CliRequest));
-    translation.inputs = inputs;
-    translation.out_dir = state.gen_root;
-    if (_run_translation(translation, stale_dirs, state)) return 1;
-  }
-  /* Restore input order, including package directories inserted between
-     generated directories, before native compilation and linking. */
-  foreach (String input, units) {
-    if (!x2c_source_file(input)) continue;
-    int cached = !stale_dirs.contains(input);
-    String directory = state.generated_dir(input);
-    if (c.dry_run && !cached) {
-      state.begin_translation(input);
-      fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
-      state.end_translation(input, 0);
+}
+
+static void _preprocessor_errors(String text) {
+  Stderr.printf("%s", text);
+}
+
+/* Where one unit's generated C, header, and depfile are written. A build
+   gives each unit its own directory so units sharing an output stem cannot
+   collide; `x2c translate` writes them all to the shared `--out-dir`. */
+static String _unit_output_dir(CliRequest c, Map unit_dirs, String input) {
+  if (!unit_dirs) return c.out_dir;
+  String directory = unit_dirs[input];
+  return directory;
+}
+
+// translation workers
+
+/* Translate `inputs` in forked workers, at most `jobs` at a time.
+   A worker inherits the process collection cache rather than filling it
+   again, and keeps its slice of the input list to the end, so
+   the only shared state is the output directory, where no two units write
+   the same file. The parent reports progress as workers finish. Returns the
+   number that failed. */
+static int _translate_workers(
+  Frontend frontend, Array chunks, Map unit_dirs, int total, Build build) {
+  CliRequest request = frontend.request;
+  int jobs = request.jobs, slices = chunks.len();
+  if (jobs > slices) jobs = slices;
+  if (request.verbose)
+    fprintf(
+      stderr, "x2c: translate with %d workers over %d files\n", jobs, total);
+  // Each live worker retains its input slice for completion reporting.
+  long *running = Scope.calloc(jobs, sizeof(long));
+  List *carried = Scope.calloc(jobs, sizeof(List));
+  int running_count = 0, failed = 0, done = 0, next = 0;
+  while (next < slices || running_count) {
+    while (next < slices && running_count < jobs) {
+      List slice = chunks[next];
+      next++;
+      if (build) build.begin_translation(slice.car());
+      long pid = worker_fork();
+      if (!pid) {
+        foreach (String input, slice)
+          _translate_unit(
+            frontend, input, _unit_output_dir(request, unit_dirs, input));
+        Compiler.stop_meta_helper();
+        worker_exit(0);
+      }
+      if (pid < 0) {
+        report_line(<error>, "could not start a translation worker");
+        failed++;
+        continue;
+      }
+      carried[running_count] = slice;
+      running[running_count++] = pid;
     }
-    if (!c.dry_run && !cached)
-      state.record_translation(input, directory);
-    state.add_generated(input, directory);
+    if (!running_count) continue;
+    int status, slot = worker_wait_any(running, running_count, status);
+    if (status) failed++;
+    List slice = carried[slot];
+    if (build && !status) build.end_translation(slice.car(), 0);
+    done += slice.len();
+    running_count--;
+    running[slot] = running[running_count];
+    carried[slot] = carried[running_count];
+    if (!build) report_progress(<translate>, done, total, NULL);
   }
+  Scope.free(carried);
+  Scope.free(running);
+  return failed;
+}
+
+/* Loads the native modules of the packages the inputs import before the
+   workers fork, so each worker inherits them: the packages a unit's own
+   imports name, and those its previous depfile records, which include
+   imports reached through a header. A worker loads a module this misses
+   itself when its import needs it. */
+static void _preload_package_modules(CliRequest c, Map unit_dirs) {
+  List roots = c.package_roots();
+  if (!roots) return;
+  Map names = {};
+  foreach (String input, c.inputs) {
+    foreach (String name, _imported_packages(input)) names[name] = 1;
+    String directory = _unit_output_dir(c, unit_dirs, input);
+    String depfile = %"$directory/${Path.stem(input)}.d", text = NULL;
+    try text = Path.read_text(depfile);
+    catch %((!or not-found io-fail) *): continue;
+    foreach (String dependency, translation_depfile_parse(text)) {
+      String package = x2c_package_directory(roots, dependency);
+      if (package) names[Path.basename(package)] = 1;
+    }
+  }
+  foreach (String name, names.keys()) {
+    String root = NULL;
+    if (!x2c_package_entry(c.sources, roots, name, root) ||
+        Compiler.links_extension(name)) continue;
+    String module = %"$root/builds/$name.module";
+    if (Path.is_file(module)) Compiler.preload_native_module(module);
+  }
+}
+
+/* The packages the top-level `import` declarations of the file at `path`
+   name. A token scan suffices: an import is legal only at file scope. */
+static List _imported_packages(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %((!or not-found io-fail) *): return NULL;
+  Tokenizer tokens = Tokenizer.new(text, <x2c>);
+  tokens.scan();
+  Array names = [];
+  int depth = 0;
+  for (Token token = tokens.next(); token.type != <eof>;
+       token = tokens.next()) {
+    if (token.text == "{") depth++;
+    else if (token.text == "}") depth--;
+    else if (!depth && token.text == "import") {
+      token = tokens.next();
+      if (token.type == <lit-char*>) names.push(token.text[1:-1]);
+    }
+  }
+  return names.list_free();
+}
+
+/* One slice per worker. Fewer, larger slices measured better than more,
+   smaller ones. The fork and the copy-on-write faults behind it cost more
+   than the imbalance a long unit at the tail of a slice can cause.
+
+   A build passes `slices == total`. Each of its units then translates in a
+   worker that has translated nothing else, so a unit records the headers its
+   own parse reads rather than inheriting what an earlier unit in the same
+   worker already put in the process cache. Build reuse is decided from those
+   recorded prerequisites, so they must not depend on how units were
+   grouped. */
+static Array _translation_chunks(List inputs, int total, int slices) {
+  if (slices > total) slices = total;
+  if (slices < 1) slices = 1;
+  int size = (total + slices - 1) / slices, Array chunks = [];
+  List cur = inputs;
+  while (cur) {
+    Array slice = [];
+    for (int n = 0; n < size && cur; n++, cur = cur.cdr())
+      slice.push(cur.car());
+    chunks.push(slice.list_free());
+  }
+  return chunks;
+}
+
+// builds
+
+static int _run_build(CliRequest request) {
+  Array commands =
+    request.compile_commands && !request.dry_run ? [] : NULL;
+  if (request.inputs) {
+    // Manifest options have no meaning without a manifest, so say so rather
+    // than building something the command did not describe.
+    if (request.manifest)
+      x2c_driver_error("--manifest-path conflicts with explicit inputs");
+    if (request.target)
+      x2c_driver_error("--target conflicts with explicit inputs");
+    if (request.profile)
+      x2c_driver_error("--profile conflicts with explicit inputs");
+    int result = _run_build_request(request, commands);
+    if (result) return result;
+  }
+  else {
+    if (request.compile_only)
+      x2c_driver_error("--compile-only needs input operands, not a manifest");
+    ProjectBuild plan = project_plan(request);
+    for (ProjectBuild node = plan; node; node = node.next) {
+      int result = _run_build_request(node.request, commands);
+      if (result) return result;
+    }
+  }
+  if (commands != NULL && request.command != <run> &&
+      !compile_commands_write(request.compile_commands, commands))
+    return 1;
   return 0;
 }
 
@@ -479,35 +457,50 @@ static int _run_build_request(CliRequest c, Array commands) {
   return result;
 }
 
-static int _run_build(CliRequest request) {
-  Array commands =
-    request.compile_commands && !request.dry_run ? [] : NULL;
-  if (request.inputs) {
-    // Manifest options have no meaning without a manifest, so say so rather
-    // than building something the command did not describe.
-    if (request.manifest)
-      x2c_driver_error("--manifest-path conflicts with explicit inputs");
-    if (request.target)
-      x2c_driver_error("--target conflicts with explicit inputs");
-    if (request.profile)
-      x2c_driver_error("--profile conflicts with explicit inputs");
-    int result = _run_build_request(request, commands);
-    if (result) return result;
-  }
-  else {
-    if (request.compile_only)
-      x2c_driver_error("--compile-only needs input operands, not a manifest");
-    ProjectBuild plan = project_plan(request);
-    for (ProjectBuild node = plan; node; node = node.next) {
-      int result = _run_build_request(node.request, commands);
-      if (result) return result;
+/* Translates the stale `units` and registers every unit's generated files.
+   Current units are skipped; the rest translate together, so one request
+   can fill every job. Each unit keeps its own generated directory,
+   so no two workers write the same file. */
+static int _translate_units(CliRequest c, Build state, List units) {
+  Array stale = [];
+  Map stale_dirs = {};
+  foreach (String input, units) {
+    if (!x2c_source_file(input)) continue;
+    String directory = state.generated_dir(input);
+    if (state.translation_current(input, directory)) {
+      state.begin_translation(input);
+      state.end_translation(input, 1);
+      continue;
     }
+    stale_dirs[input] = directory;
+    stale.push(input);
   }
-  if (commands != NULL && request.command != <run> &&
-      !compile_commands_write(request.compile_commands, commands))
-    return 1;
+  List inputs = stale.list_free();
+  if (!c.dry_run && inputs) {
+    CliRequest translation = Scope.memdup(c, sizeof(struct CliRequest));
+    translation.inputs = inputs;
+    translation.out_dir = state.gen_root;
+    if (_run_translation(translation, stale_dirs, state)) return 1;
+  }
+  /* Restore input order, including package directories inserted between
+     generated directories, before native compilation and linking. */
+  foreach (String input, units) {
+    if (!x2c_source_file(input)) continue;
+    int cached = !stale_dirs.contains(input);
+    String directory = state.generated_dir(input);
+    if (c.dry_run && !cached) {
+      state.begin_translation(input);
+      fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
+      state.end_translation(input, 0);
+    }
+    if (!c.dry_run && !cached)
+      state.record_translation(input, directory);
+    state.add_generated(input, directory);
+  }
   return 0;
 }
+
+// environment
 
 /* `x2c env` prints every resolved value as `name = value`, or one bare value
    when a name is given. Package roots join with `:` like `PATH`. */
@@ -546,14 +539,7 @@ static int _run_env(CliRequest request) {
   return 0;
 }
 
-static int _external_name(const char *name) {
-  if (!name || !((*name >= 'a' && *name <= 'z') ||
-                 (*name >= 'A' && *name <= 'Z'))) return 0;
-  for (const char *p = name + 1; *p; p++)
-    if (!( (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
-           (*p >= '0' && *p <= '9') || *p == '-' || *p == '_')) return 0;
-  return 1;
-}
+// external commands
 
 static String _external_path(const char *name) {
   if (!_external_name(name) || cli_builtin_command(name)) return NULL;
@@ -561,6 +547,15 @@ static String _external_path(const char *name) {
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
   return Path.is_executable(path) ? path : NULL;
+}
+
+static int _external_name(const char *name) {
+  if (!name || !((*name >= 'a' && *name <= 'z') ||
+                 (*name >= 'A' && *name <= 'Z'))) return 0;
+  for (const char *p = name + 1; *p; p++)
+    if (!( (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+           (*p >= '0' && *p <= '9') || *p == '-' || *p == '_')) return 0;
+  return 1;
 }
 
 static void _run_external(String path, char **args) {
@@ -574,6 +569,8 @@ static void _run_external(String path, char **args) {
   x2c_driver_error(
     %"cannot run external command '$path': ${String.new(strerror(errno))}");
 }
+
+// entry point
 
 /** Initializes x2c and dispatches one command from `argv`.
     `argv[0]` locates the installation. The process status is zero for a
@@ -624,4 +621,15 @@ int main(int argc, char **argv) {
   command.close();
   if (request.command == <script> && !result) result = script_run(request);
   return result;
+}
+
+/* Only --debug logs. Without it there is no sink, so log_should_log is
+   false and nothing is rendered or written. */
+static void _configure_logging(int debugging) {
+  Logger logger = log_get_global_logger();
+  if (!logger) return;
+  logger.clear_sinks();
+  if (!debugging) return;
+  logger.set_min_level(<debug>);
+  logger.add_stderr_sink();
 }
