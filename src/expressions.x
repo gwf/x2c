@@ -491,39 +491,39 @@ typedef struct DelegateSearch {
 } DelegateSearch;
 
 static void DelegateSearch._find(
-  DelegateSearch *search, Type receiver, List reverse_path, List seen) {
-  Type aggregate = search.compiler.sym.delegate_aggregate(receiver);
+  DelegateSearch *d, Type receiver, List reverse_path, List seen) {
+  Type aggregate = d.compiler.sym.delegate_aggregate(receiver);
   if (!aggregate) return;
   if (aggregate in seen) {
-    if (!search.first_cycle)
-      search.first_cycle = cons(<path>, reverse_path.reverse());
+    if (!d.first_cycle)
+      d.first_cycle = cons(<path>, reverse_path.reverse());
     return;
   }
   seen = cons(aggregate, seen);
-  List order = search.compiler.sym.field_order(aggregate);
+  List order = d.compiler.sym.field_order(aggregate);
   foreach (List row, order ? order.cdr() : NULL) {
     String name = row.car();
     if (!name) continue;
-    if (!search.compiler.sym.get(%(@aggregate delegate $name))) continue;
-    List step = _delegate_step(search.compiler, receiver, name);
+    if (!d.compiler.sym.get(%(@aggregate delegate $name))) continue;
+    List step = _delegate_step(d.compiler, receiver, name);
     Type field_type = step.cddr().cadr();
     List next_path = cons(step, reverse_path);
-    List resolution = search.compiler.resolve_postfix_member(
-      field_type, %(${search.member}), <.>, 1);
+    List resolution = d.compiler.resolve_postfix_member(
+      field_type, %(${d.member}), <.>, 1);
     if (resolution && resolution.car() == <method>) {
       List binding = resolution.cadr(), Type signature = resolution.caddr();
       List path = cons(<path>, next_path.reverse());
-      search.candidates.push(%( delegate $binding $signature $path ));
+      d.candidates.push(%( delegate $binding $signature $path ));
     }
     else if (resolution && resolution.car() == <ambiguous>) {
       String path = _delegate_path_string(
-        search.outer, cons(<path>, next_path.reverse()), NULL);
+        d.outer, cons(<path>, next_path.reverse()), NULL);
       _report_method_ambiguity(
-        search.compiler, field_type, search.member,
-        resolution.cdr(), path, search.origin);
+        d.compiler, field_type, d.member,
+        resolution.cdr(), path, d.origin);
     }
     else if (!resolution)
-      search._find(field_type, next_path, seen);
+      d._find(field_type, next_path, seen);
   }
 }
 
@@ -1012,7 +1012,7 @@ static inline int _precedence(Symbol op) {
     case <+>:    case <->:     return 9;   // additive
     case <*>:    case </>:
     case <%>:    case <@>:     return 10;  // multiplicative
-    default:                   return 0;   // not a binary operator
+    default:                   return 0;
   }
 }
 
@@ -1670,23 +1670,6 @@ static List _finish_call(
     result_type, called(callee, arguments));
 }
 
-/* A dynamic Func call stores its callee once, prepares each argument into
-   an array from left to right, and applies the callee. Func_apply validates
-   arity and dispatches; the selected adapter checks carrier, type and
-   conversion. The call is the value of a statement expression around this
-   block. */
-List x2c_func_call_arguments(List function, List storage, List arguments);
-
-macro open Statement $func_call(Expr $callee, Expr $count,
-    Expr $arguments...) {
-  {
-    Func function = $callee;
-    FuncArg storage[$count];
-    $x2c_func_call_arguments(function, storage, $arguments)...
-    Func_apply(function, $count, storage);
-  }
-}
-
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
 macro open Statement $func_argument(Expr $function, Expr $storage,
@@ -1758,6 +1741,21 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
   return prepared.list_free();
 }
 
+/* A dynamic Func call stores its callee once, prepares each argument into
+   an array from left to right, and applies the callee. Func_apply validates
+   arity and dispatches; the selected adapter checks carrier, type and
+   conversion. The call is the value of a statement expression around this
+   block. */
+macro open Statement $func_call(Expr $callee, Expr $count,
+    Expr $arguments...) {
+  {
+    Func function = $callee;
+    FuncArg storage[$count];
+    $x2c_func_call_arguments(function, storage, $arguments)...
+    Func_apply(function, $count, storage);
+  }
+}
+
 static List _resolve_func_call(
   Compiler compiler, List callee, List supplied, Token origin) {
   List arguments = _resolve_call_arguments(compiler, NULL, supplied, origin);
@@ -1772,12 +1770,13 @@ static List _resolve_func_call(
     call(callee, arguments.len(), arguments), AST_BLOCK, NULL)}));
 }
 
-/* The statements a slot built, with its statement groups opened. */
+/* Open statement groups in a slot. */
 static List _slot_statements(List items) {
   Array opened = $auto([]);
   foreach (List item, items)
     match (item) {
-      case %(seq *group): foreach (List statement, group) opened.push(statement);
+      case %(seq *group):
+        foreach (List statement, group) opened.push(statement);
       default: opened.push(item);
     }
   return opened;
@@ -1802,8 +1801,9 @@ List Compiler.func_call_parts(Compiler compiler, Var content) {
       foreach (List argument, _slot_statements(arguments)) {
         Var value = %(no-value), address = NULL, source = NULL;
         match (argument) {
-          case prepare(?function, ?storage, ?count, ?index, ?pointer,
-                       ?type, ?alternative): {
+          case prepare(
+            ?function, ?storage, ?count, ?index, ?pointer,
+            ?type, ?alternative): {
             match (alternative) case boxed(?boxed_value): value = boxed_value;
             address = pointer;
             source = type;
@@ -1903,68 +1903,68 @@ typedef struct MemberCall {
   String method;
 } MemberCall;
 
-static List MemberCall._lookup(MemberCall *call) {
-  call.receiver = call.compiler.resolve_expression(call.receiver, call.origin);
-  call.type = call.receiver.cadr();
-  call.method = call.field.car().str();
-  List resolution = call.compiler.resolve_postfix_member(
-    call.type, call.field, <.>, 1);
-  if (!resolution && _expr_is_raw_string_literal(call.receiver)) {
-    call.receiver = call.compiler.promote_string_literal(call.receiver);
-    call.type = call.receiver.cadr();
-    resolution = call.compiler.resolve_postfix_member(
-      call.type, call.field, <.>, 1);
+static List MemberCall._lookup(MemberCall *m) {
+  m.receiver = m.compiler.resolve_expression(m.receiver, m.origin);
+  m.type = m.receiver.cadr();
+  m.method = m.field.car().str();
+  List resolution = m.compiler.resolve_postfix_member(
+    m.type, m.field, <.>, 1);
+  if (!resolution && _expr_is_raw_string_literal(m.receiver)) {
+    m.receiver = m.compiler.promote_string_literal(m.receiver);
+    m.type = m.receiver.cadr();
+    resolution = m.compiler.resolve_postfix_member(
+      m.type, m.field, <.>, 1);
   }
   return resolution ? resolution : _resolve_delegate_method(
-    call.compiler, call.type, call.method, call.origin);
+    m.compiler, m.type, m.method, m.origin);
 }
 
 static List MemberCall._bound(
-  MemberCall *call, List binding, Type signature, List declared,
+  MemberCall *m, List binding, Type signature, List declared,
   List parameters, List returns) {
-  call.receiver = _method_bind(
-    call.compiler, call.receiver, call.type, declared, call.origin);
+  m.receiver = _method_bind(
+    m.compiler, m.receiver, m.type, declared, m.origin);
   List callee = %(expr ((func $parameters) $returns) (ident $binding));
   return _finish_call(
-    call.compiler, signature.apply(), callee,
-    signature, call.receiver, call.supplied, call.origin);
+    m.compiler, signature.apply(), callee,
+    signature, m.receiver, m.supplied, m.origin);
 }
 
-static List MemberCall._invoke(MemberCall *call) {
-  List resolution = call._lookup();
-  if (!resolution && _deferred_receiver(call.receiver)) {
-    List callee = %(expr (<macro-expr>) (op . ${call.receiver} ${call.field}));
+static List MemberCall._invoke(MemberCall *m) {
+  List resolution = m._lookup();
+  if (!resolution && _deferred_receiver(m.receiver)) {
+    List callee = %(expr (<macro-expr>) (op . ${m.receiver} ${m.field}));
     return _finish_call(
-      call.compiler, call.result_type, callee, NULL,
-      NULL, call.supplied, call.origin);
+      m.compiler, m.result_type, callee, NULL,
+      NULL, m.supplied, m.origin);
   }
   if (!resolution) {
-    Var name = call.field.car();
-    call.compiler.report_error(
-      <type>, %"type ${call.type.repr()} has no method $name",
-      call.origin, NULL);
+    Var name = m.field.car();
+    m.compiler.report_error(
+      <type>, %"type ${m.type.repr()} has no method $name",
+      m.origin, NULL);
   }
   match (resolution) {
     case %(ambiguous *packages):
       _report_method_ambiguity(
-        call.compiler, call.type, call.method, packages,
-        NULL, call.origin);
+        m.compiler, m.type, m.method, packages,
+        NULL, m.origin);
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
-      return call._bound(binding, signature, declared, parameters, returns);
+      return m._bound(binding, signature, declared, parameters, returns);
     case %(delegate ?binding (!set ?signature
            ((func (!set ?parameters (?declared *))) *returns))
            ?path): {
-      call.receiver = _materialize_delegate_receiver(call.receiver, path);
-      call.type = call.receiver.cadr();
-      return call._bound(binding, signature, declared, parameters, returns);
+      m.receiver = _materialize_delegate_receiver(m.receiver, path);
+      m.type = m.receiver.cadr();
+      return m._bound(binding, signature, declared, parameters, returns);
     }
     case %(field ?access ?field_type): {
       List callee = %(expr $field_type
-        (op $access ${call.receiver} ${call.field}));
+        (op $access ${m.receiver} ${m.field}));
       return _finish_call(
-        call.compiler, call.result_type, callee,
-        field_type, NULL, call.supplied, call.origin);
+        m.compiler, m.result_type, callee,
+        field_type, NULL, m.supplied, m.origin);
     }
   }
   return NULL;
@@ -2162,7 +2162,6 @@ static List _resolve_initializer(Compiler c, List node, Token origin) {
   return c.resolve_expression(node, origin);
 }
 
-/* Resolve each interpolation once, then convert values whose types are known. */
 static List _resolve_segments(
   Compiler c, List items, Token origin) {
   Array resolved = [];
@@ -2225,8 +2224,8 @@ static List _resolve_is_type(
   if (direct) return direct;
   String tagsym = %"${(unsigned long) vartag}";
   List callee = _resolve_identifier(c, "Var_is", NULL, origin);
-  return c.rebuild_expression(%(int), called(
-    callee, %($lhs (expr ("Symbol") $tagsym))));
+  return c.rebuild_expression(
+    %(int), called(callee, %($lhs (expr ("Symbol") $tagsym))));
 }
 
 static List _resolve_is_symbol(
@@ -4382,9 +4381,10 @@ static List _convert_composite(
       row_condition = _initializer_and(parent_condition, excess_check);
       excess_check = NULL;
     }
-    elements.push(_convert_composite_row(
+    List converted = _convert_composite_row(
       compiler, row, native_target, row_condition,
-      parent_condition, native_used));
+      parent_condition, native_used);
+    elements.push(converted);
   }
   return %(expr $target (composite (commas @{elements.list_free()})));
 }
@@ -4505,11 +4505,10 @@ static List _read_var(
   if (reader) return reader;
   /* A Var reaching `Var *` almost always meant its address; unboxing a
      stored Var pointer must be spelled. */
-  if (target.is_pointer() && c.sym.is_var_type(target.dereference())) {
+  if (target.is_pointer() && c.sym.is_var_type(target.dereference()))
     c.report_error(
       <type>, %"cannot convert Var to ${target.repr()}", NULL,
       %("write &value for its address, or value.pointer() to unbox a stored pointer"));
-  }
   if (target.is_pointer())
     return %(expr $target (call "Var_pointer" (args $expr)));
   if (target.is_typedef_name()) {
