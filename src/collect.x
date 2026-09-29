@@ -1113,6 +1113,8 @@ List collect_cached_paths(void) => _process_cache().keys();
 void collect_forget_entries_since(List before) {
   Map kept = {};
   foreach (String path, before) kept[path] = 1;
-  foreach (String path, _process_cache().keys())
+  // A deletion moves later slots, so an open key iterator would skip some.
+  List paths = _process_cache().keys();
+  foreach (String path, paths)
     if (!(path in kept)) (void) _process_cache().del(path);
 }
