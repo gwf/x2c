@@ -30,7 +30,8 @@
 
 /* One process-global state holds the transient line. The driver configures it
    before dispatch; diagnostics, tool output, and stable receipts suspend the
-   line before writing to stderr. */
+   line before writing to stderr. `width` is the length of the drawn line, and
+   zero when none is drawn. */
 static struct ReportState {
   int receipts, transient, color, columns, width, terminal, owner;
   pid_t pid;
@@ -41,8 +42,9 @@ static struct ReportState {
 
 /** Resets process reporting for one command.
     Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
-    progress additionally requires terminal stderr and non-plain output. Plain output disables color; automatic color respects
-    terminal capability and `NO_COLOR`.
+    progress additionally requires terminal stderr and non-plain output.
+    Plain output disables color; automatic color respects terminal capability
+    and `NO_COLOR`.
 */
 void report_configure(
   int quiet, int plain, Symbol color_mode, int verbose, int dry_run,
@@ -54,9 +56,7 @@ void report_configure(
   report.transient = report.receipts && terminal && !plain;
   report.columns = _columns();
   report.start = report_now_us();
-  if (plain || color_mode == <never>) report.color = 0;
-  else if (color_mode == <always>) report.color = 1;
-  else report.color = terminal && !Env.get("NO_COLOR");
+  report.color = _use_color(plain, color_mode, terminal);
 }
 
 static int _terminal(void) =>
@@ -69,6 +69,12 @@ static int _columns(void) {
   String columns = Env.get("COLUMNS");
   int parsed = columns.is_digit() ? atoi(columns) : 0;
   return parsed >= 20 && parsed <= 1000 ? parsed : 80;
+}
+
+static int _use_color(int plain, Symbol mode, int terminal) {
+  if (plain || mode == <never>) return 0;
+  if (mode == <always>) return 1;
+  return terminal && !Env.get("NO_COLOR");
 }
 
 /** Returns whether stable completion receipts are currently enabled. */
@@ -85,6 +91,8 @@ int report_make_owned(void) {
 
 // the progress line
 
+enum { BAR_WIDTH = 14 };
+
 /** Updates the terminal's transient progress line when transient mode is
     active. Updates start after 125 ms and incomplete work is limited to one
     update per 50 ms. `detail` may be NULL; output is clipped to the configured
@@ -93,32 +101,17 @@ int report_make_owned(void) {
 void report_progress(Symbol phase, int done, int total, String detail) {
   if (!report.transient) return;
   unsigned long now = report_now_us();
-  if (now - report.start < 125000ul) return;
-  if (done >= total && !report.width) return;
-  if (report.update && now - report.update < 50000ul && done < total) return;
+  if (!_update_due(now, done, total)) return;
   report.update = now;
-  if (!_own_line()) return;
+  if (_own_line()) _draw(phase, done, total, detail);
+}
 
-  enum { bar_width = 14 };
-  char bar[bar_width + 1];
-  int filled = total > 0 ? done * bar_width / total : 0;
-  if (filled < 0) filled = 0;
-  if (filled > bar_width) filled = bar_width;
-  for (int i = 0; i < bar_width; i++) bar[i] = i < filled ? '#' : '-';
-  bar[bar_width] = 0;
-
-  char line[2048], String name = phase.str().capitalize();
-  snprintf(
-    line, sizeof(line), "%s [%s] %d/%d  %s",
-    name, bar, done, total, detail ? detail : "");
-  int limit = report.columns > 1 ? report.columns - 1 : 79;
-  int length = (int) strlen(line);
-  if (length > limit) {
-    line[limit] = 0;
-    length = limit;
-  }
-  _emit(_clear, sizeof(_clear) - 1, _color(<phase>), line, 0);
-  report.width = length;
+/* Finished work redraws only a line this process drew. */
+static int _update_due(unsigned long now, int done, int total) {
+  if (now - report.start < 125000ul) return 0;
+  if (done >= total && !report.width) return 0;
+  if (report.update && now - report.update < 50000ul && done < total) return 0;
+  return 1;
 }
 
 /* Takes the terminal's transient line, or reports that another process
@@ -134,6 +127,34 @@ static int _own_line(void) {
   report.owner =
     report.terminal >= 0 && !flock(report.terminal, LOCK_EX | LOCK_NB);
   return report.owner;
+}
+
+static void _draw(Symbol phase, int done, int total, String detail) {
+  char bar[BAR_WIDTH + 1];
+  _fill_bar(bar, done, total);
+  char line[2048], String name = phase.str().capitalize();
+  snprintf(
+    line, sizeof(line), "%s [%s] %d/%d  %s",
+    name, bar, done, total, detail ? detail : "");
+  int length = _clip(line, report.columns > 1 ? report.columns - 1 : 79);
+  _emit(_clear, sizeof(_clear) - 1, _color(<phase>), line, 0);
+  report.width = length;
+}
+
+static void _fill_bar(char *bar, int done, int total) {
+  int filled = total > 0 ? done * BAR_WIDTH / total : 0;
+  if (filled < 0) filled = 0;
+  if (filled > BAR_WIDTH) filled = BAR_WIDTH;
+  for (int i = 0; i < BAR_WIDTH; i++) bar[i] = i < filled ? '#' : '-';
+  bar[BAR_WIDTH] = 0;
+}
+
+/* Cuts `line` to at most `limit` bytes and returns its length. */
+static int _clip(char *line, int limit) {
+  int length = (int) strlen(line);
+  if (length <= limit) return length;
+  line[limit] = 0;
+  return limit;
 }
 
 /** Clears the active transient line from stderr, if this process drew one.
@@ -154,9 +175,8 @@ void report_suspend(void) {
 void report_line(Symbol tone, String line) {
   report.width = 0;
   if (!report.receipts) return;
-  const char *color = _color(tone);
   int clear = report.transient ? sizeof(_clear) - 1 : 0;
-  _emit(_clear, clear, color, line, 1);
+  _emit(_clear, clear, _color(tone), line, 1);
 }
 
 /** Writes a muted phase receipt when receipts are enabled.
@@ -166,45 +186,39 @@ void report_line(Symbol tone, String line) {
 void report_phase(
   Symbol phase, int count, String noun, int cached,
   unsigned long microseconds) {
-  String cache = cached == count && count ? " (up to date)" :
-                 cached ? %", $cached cached" : "";
+  String cache = _cache_note(count, cached);
   String name = phase.str().capitalize();
   String duration = report_duration(microseconds);
-  String line = %"  $name $count $noun in $duration$cache";
-  report_line(<muted>, line);
+  report_line(<muted>, %"  $name $count $noun in $duration$cache");
+}
+
+static String _cache_note(int count, int cached) {
+  if (cached == count && count) return " (up to date)";
+  return cached ? %", $cached cached" : "";
 }
 
 // terminal output
 
+// A carriage return, then an erase to the end of the line.
 static const char _clear[] = "\r\033[K";
 
+/* Each display update is one writev call, which limits interleaving between
+   Make children. Reporting is best effort: it retries only EINTR and never
+   changes command status for output failure. */
 static void _emit(
   const char *prefix, int prefix_length, const char *color,
   const char *line, int newline) {
-  /* Issue each display update through one writev call to limit interleaving
-     between Make children. Reporting is best effort. Retry only EINTR and
-     do not change command status for output failure. */
   struct iovec parts[5], int count = 0;
-  if (prefix_length) {
-    parts[count].iov_base = (char *) prefix;
-    parts[count++].iov_len = (size_t) prefix_length;
-  }
-  if (*color) {
-    parts[count].iov_base = (char *) color;
-    parts[count++].iov_len = strlen(color);
-  }
-  parts[count].iov_base = (char *) line;
-  parts[count++].iov_len = strlen(line);
-  if (*color) {
-    parts[count].iov_base = "\033[0m";
-    parts[count++].iov_len = 4;
-  }
-  if (newline) {
-    parts[count].iov_base = "\n";
-    parts[count++].iov_len = 1;
-  }
+  if (prefix_length) parts[count++] = _part(prefix, prefix_length);
+  if (*color) parts[count++] = _part(color, strlen(color));
+  parts[count++] = _part(line, strlen(line));
+  if (*color) parts[count++] = _part("\033[0m", 4);
+  if (newline) parts[count++] = _part("\n", 1);
   while (writev(fileno(stderr), parts, count) < 0 && errno == EINTR) {}
 }
+
+static struct iovec _part(const char *text, size_t length) =>
+  (struct iovec) {.iov_base = (char *) text, .iov_len = length};
 
 static const char *_color(Symbol tone) {
   if (!report.color) return "";
