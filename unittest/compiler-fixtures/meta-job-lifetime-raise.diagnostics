@@ -1,8 +1,8 @@
-unittest/compiler-fixtures/meta-job-lifetime-raise.x:20:20: macro: failed with a job running
+unittest/compiler-fixtures/meta-job-lifetime-raise.x:29:20: macro: failed with a job running
   void first(void) { $starts(); }
                      ^
 
-unittest/compiler-fixtures/meta-job-lifetime-raise.x:21:21: macro: translation continued
+unittest/compiler-fixtures/meta-job-lifetime-raise.x:30:21: macro: translation continued with the job gone
   void second(void) { $after(); }
                       ^
 

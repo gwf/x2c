@@ -50,6 +50,13 @@ int x2c_meta_helper_count(void);
 static FILE *helper_out = NULL;
 static Array helper_notices = NULL;
 
+/* The handle of each native module loaded, by path, which `main` makes,
+   and the Scope of what a module's constructors allocate. A module's code
+   stays loaded for the helper's lifetime, so both outlast the call that
+   loaded it. */
+static Map helper_modules = NULL;
+static Scope helper_module_scope = NULL;
+
 /* Raises the failure a body reports, which the call replies with. */
 static void _fail(String message, List notes) {
   raise %(meta-fail (message $message) (notes $notes));
@@ -65,17 +72,16 @@ static void _unavailable(String name) {
 /* The compiler checked and selected this module before building the group.
    Its code remains loaded for the helper's lifetime. */
 void *x2c_meta_native_symbol(String path, String name) {
-  static Map modules = {};
   Var loaded;
   void *handle;
-  if (modules.try_get(path, loaded)) handle = loaded.pointer();
+  if (helper_modules.try_get(path, loaded)) handle = loaded.pointer();
   else {
-    handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+    $scope(&helper_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     if (!handle)
       _fail(
         "cannot load native module in project meta helper",
         %("module: $path" "reason: ${String.new(dlerror())}"));
-    modules[path] = handle;
+    helper_modules[path] = handle;
   }
   void *target = dlsym(handle, name);
   if (!target)
@@ -271,10 +277,14 @@ static int _reply(List message) {
 static void _call(Map table, String name, List arguments) {
   helper_notices = [];
   Var target;
-  if (!table || !table.try_get(name, target)) {
-    _reply(%(missing));
-    return;
-  }
+  if (!table || !table.try_get(name, target)) _reply(%(missing));
+  else _apply(target, name, arguments);
+}
+
+/* Calls `target` and writes its replies. The call has a Scope of its own
+   that ends after them, so what the body allocates ends with the call when
+   it returns or raises, and a Job it started is terminated and reaped. */
+$scope() static void _apply(Var target, String name, List arguments) {
   unsigned count = arguments.len(), i = 0;
   FuncArg *argv = Scope.calloc(count ? count : 1, sizeof(FuncArg));
   foreach (Var argument, arguments) argv[i++] = FuncArg.value(argument);
@@ -311,6 +321,7 @@ int main(void) {
   Lisp.kernel();
   helper_out = fdopen(4, "wb");
   if (!helper_out) _exit(2);
+  helper_modules = {};
   Buffer input = Buffer.new(0);
   Map tables = {};
   for (int i = 0; i < x2c_meta_helper_count(); i++) {
