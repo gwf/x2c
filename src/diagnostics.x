@@ -1,14 +1,7 @@
-/*  diagnostics.x -- structured compiler diagnostics collection
+/*  diagnostics.x -- compiler diagnostic storage and rendering
 
-    Maintains a bounded, ordered collection of compiler diagnostics with
-    optional streaming to one compiler's printer.
-
-    Entries are stored chronologically and exposed as immutable `List`
-    snapshots.
-    A zero limit disables the stopping threshold without disabling collection.
-    The store and its mutable `Array` belong to the caller's active `Scope`;
-    entry
-    `List`s and `String`s belong to their producing canonical-value pools.
+    Each report has one ordered entry. The store borrows its printer, while
+    canonical entry values retain their producing-pool lifetimes.
  */
 
 #pragma once
@@ -128,7 +121,7 @@ int Diagnostics.reached_limit(Diagnostics diag) {
    their actual producing-pool lifetime. Message, location, and notes remain
    shared with their producers and retain those pool lifetimes, which must
    outlive every store or snapshot use. A missing location or notes value
-   remains a typed empty List rather than an omitted row. */
+   stays a typed empty List in its row. */
 static List _build_entry(
   Symbol code, Symbol severity, String message, List location, List notes) {
   Symbol effective_code = code ? code : <driver>;
@@ -411,40 +404,53 @@ static void Compiler._show_source_context(Compiler compiler, List location) {
   Var len_var = location.assoc(<length>);
   int line = line_var is void ? 0 : line_var;
   int column = col_var is void ? 0 : col_var;
-  int length = len_var is void ? 1 : len_var, char *text = compiler.text;
-  int current_line = 1, char *line_start = text, *line_end = text;
+  int length = len_var is void ? 1 : len_var;
+  char *line_start, *line_end;
+  if (_context_line(compiler, line, line_start, line_end))
+    _context_caret(line_start, line_end, column, length);
+}
+
+/* Find the physical line, including a script's shebang at line one. */
+static int _context_line(
+  Compiler c, int line, char *&line_start, char *&line_end) {
+  int current_line = 1;
+  char *text = c.text;
+  line_start = line_end = text;
   // A script's first line reads as an include, but the reader wrote it.
-  if (line <= 1 && compiler.script) {
-    line_start = compiler.script.shebang;
-    line_end = line_start + strlen(line_start);
-  }
-  else if (line <= 1) while (*line_end && *line_end != '\n') line_end++;
-  else {
-    for (char *p = text; *p; p++) {
-      if (*p == '\n') {
-        current_line++;
-        if (current_line == line) {
-          line_start = p + 1;
-          line_end = line_start;
-          while (*line_end && *line_end != '\n') line_end++;
-          break;
-        }
-      }
+  if (line <= 1) {
+    if (c.script) {
+      line_start = c.script.shebang;
+      line_end = line_start + strlen(line_start);
     }
+    else while (*line_end && *line_end != '\n') line_end++;
+    return line == 1;
   }
-  if (current_line == line) {
-    int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
-    if (start > line_len) start = line_len;
-    int width = length > 0 ? length : 1;
-    if (start < line_len && width > line_len - start) width = line_len - start;
-    if (width < 1) width = 1;
-    fprintf(stderr, "  %.*s\n", line_len, line_start);
-    fprintf(stderr, "  ");
-    for (int i = 0; i < start; i++)
-      putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
-    for (int i = 0; i < width; i++) putc('^', stderr);
-    fprintf(stderr, "\n");
+  for (char *p = text; *p; p++) {
+    if (*p != '\n') continue;
+    current_line++;
+    if (current_line != line) continue;
+    line_start = p + 1;
+    line_end = line_start;
+    while (*line_end && *line_end != '\n') line_end++;
+    return 1;
   }
+  return 0;
+}
+
+/* Clamp the caret to the line while retaining tabs before the token. */
+static void _context_caret(
+  char *line_start, char *line_end, int column, int length) {
+  int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
+  if (start > line_len) start = line_len;
+  int width = length > 0 ? length : 1;
+  if (start < line_len && width > line_len - start) width = line_len - start;
+  if (width < 1) width = 1;
+  fprintf(stderr, "  %.*s\n", line_len, line_start);
+  fprintf(stderr, "  ");
+  for (int i = 0; i < start; i++)
+    putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
+  for (int i = 0; i < width; i++) putc('^', stderr);
+  fprintf(stderr, "\n");
 }
 
 /** Returns the number of counted diagnostics accepted since the last reset.
