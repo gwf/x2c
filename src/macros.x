@@ -1090,7 +1090,7 @@ static List _capture_layout(
   sequence ? %(capture $source $value @trailing)
            : %(capture $source $value $expression $splice @trailing);
 
-/* definition forms and keyword aliases */
+// definition forms and keyword aliases
 
 /** Publishes a canonical `macrodef` in source order and returns `node`.
     A later definition with the same name affects only later invocations.
@@ -1169,7 +1169,11 @@ static int _fixed_alias(Compiler c, Atom alias) {
 static const SymbolSet alias_kinds =
   %<<expression block-item field enumerator map-entry unit decorator>>;
 
-// invocation recognition
+/* invocation recognition
+
+   At each syntax position the parser asks whether the tokens start an
+   invocation it should claim. Recognition consumes nothing; a claimed
+   invocation's name is consumed once its definition is known. */
 
 /** Returns whether the parser claims the macro invocation at the cursor for
     `position`. A bare keyword alias is claimed only where its result fits.
@@ -1291,12 +1295,8 @@ static List _take_invocation(Compiler c, AstPos position) {
   Atom name = _name(c);
   Var existing;
   if (c.macro_holes && c.peek(0) != <(> &&
-      !_try_definition(c, name, 1, existing)) {
-    String spelling = name.str();
-    c.report_error(
-      <parse>, %"unbound replacement variable '$spelling'",
-      invocation, NULL);
-  }
+      !_try_definition(c, name, 1, existing))
+    _unbound(c, name.str(), invocation);
   return _lookup(c, name, invocation);
 }
 
@@ -1323,6 +1323,8 @@ static List _lookup(Compiler compiler, Atom name, Token invocation) {
   return stored;
 }
 
+/* With `install_lisp`, a `lisp.` name records the Lisp binding macros as a
+   dependency and installs them when the name is not yet defined. */
 static int _try_definition(
   Compiler compiler, Atom name, int install_lisp, Var &stored) {
   int found = compiler.macros.try_get(name, stored);
@@ -1340,9 +1342,9 @@ static int _try_definition(
     collection must retain.
 */
 int Compiler.macro_invocation_needs_shallow_expansion(Compiler c) =>
-  _definition_needs_shallow_expansion(_peek_invocation(c));
+  _needs_shallow(_peek_invocation(c));
 
-static int _definition_needs_shallow_expansion(List definition) {
+static int _needs_shallow(List definition) {
   if (!definition) return 0;
   if (definition.assoc(<kind>) == <decl-unit> ||
       definition.assoc(<target>) == <named-type>) return 1;
@@ -1388,12 +1390,16 @@ int Compiler.macro_targets_unit(Compiler c) {
   return kind == <unit> || kind == <decl-unit>;
 }
 
-// invocation arguments
+/* invocation arguments
+
+   Each parameter hole captures its arguments into one capture row, and a
+   captured argument records the source span it was parsed from. */
 
 static List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
   if (_bare(invocation, definition)) return %(args);
   Array arguments = [];
+  // The first Param hole opens one scope for the rest of the arguments.
   int parameter_scope = 0;
   defer { if (parameter_scope) c.sym.pop_scope(); }
   c.expect(<(>);
@@ -1405,39 +1411,8 @@ static List _invocation_arguments(
       c.sym.push_new_scope();
       parameter_scope = 1;
     }
-    int sequence = hole.assoc(<sequence>);
-    Array captured = [];
-    if (c.peek(0) == <)> && !sequence)
-      c.report_error(
-        <parse>, "macro invocation has too few arguments",
-        c.token, NULL);
-    if (c.peek(0) != <)>) {
-      loop {
-        if (kind == <match-row> && c.token != c.directives_taken)
-          foreach (List directive, c.leading_preproc())
-            captured.push(directive);
-        Token first = c.token;
-        Var argument = _parse_argument(c, kind);
-        if (kind != <name>)
-          argument = _capture_source(c, argument, first, c.token);
-        captured.push(argument);
-        if (!sequence || !c.test(<,>)) break;
-      }
-    }
-    if (kind == <match-row> && c.token != c.directives_taken)
-      foreach (List directive, c.leading_preproc())
-        captured.push(directive);
-    List capture = _capture_row(c, hole, captured.list_free());
-    arguments.push(capture);
-    /* `in` may separate a declaration from what follows, as in
-       `foreach (String line in lines)`. Before a literal it scans as a
-       name, which cannot follow a declaration either. */
-    if (nodes.cdr() && c.peek(0) != <)>) {
-      if (kind == <decl> && (c.peek(0) == <in> || c.token.text == "in"))
-        c.next();
-      else
-        c.expect(<,>);
-    }
+    arguments.push(_argument_row(c, hole, kind));
+    if (nodes.cdr() && c.peek(0) != <)>) _argument_separator(c, kind);
   }
   if (c.peek(0) != <)>) {
     if (c.peek(0) == <,>) c.next();
@@ -1449,45 +1424,84 @@ static List _invocation_arguments(
   return %(args @{arguments.list_free()});
 }
 
+/* The arguments one hole captures: one, or a comma-separated sequence. A
+   MatchRow hole also takes the directives around its rows. */
+static List _argument_row(Compiler c, List hole, Symbol kind) {
+  int sequence = hole.assoc(<sequence>);
+  Array captured = [];
+  if (c.peek(0) == <)> && !sequence)
+    c.report_error(
+      <parse>, "macro invocation has too few arguments",
+      c.token, NULL);
+  if (c.peek(0) != <)>) loop {
+    _row_directives(c, kind, captured);
+    Token first = c.token;
+    Var argument = _parse_argument(c, kind);
+    if (kind != <name>)
+      argument = _capture_source(c, argument, first, c.token);
+    captured.push(argument);
+    if (!sequence || !c.test(<,>)) break;
+  }
+  _row_directives(c, kind, captured);
+  return _capture_row(c, hole, captured.list_free());
+}
+
+static void _row_directives(Compiler c, Symbol kind, Array captured) {
+  if (kind == <match-row> && c.token != c.directives_taken)
+    foreach (List directive, c.leading_preproc()) captured.push(directive);
+}
+
+/* `in` may separate a declaration from what follows, as in
+   `foreach (String line in lines)`. Before a literal it scans as a name,
+   which cannot follow a declaration either. */
+static void _argument_separator(Compiler c, Symbol kind) {
+  if (kind == <decl> && (c.peek(0) == <in> || c.token.text == "in")) c.next();
+  else c.expect(<,>);
+}
+
 static Var _parse_argument(Compiler c, Symbol kind) {
   if (!kind) return c.parse_assignment();
   switch (kind) {
-    case <expr>: return c.parse_assignment();
-    case <type>: return c.parse_type_name();
+    case <expr>:       return c.parse_assignment();
+    case <type>:       return c.parse_type_name();
     case <named-type>: return c.parse_named_type();
-    case <decl>: return c.parse_declaration_argument();
-    case <decl-row>: return c.parse_declarator_argument();
-    case <function>: return c.parse_function_definition();
-    case <param>: return c.parse_parameter();
-    case <block>: return c.parse_block_item();
-    case <field>: return c.parse_field(%(struct ()));
+    case <decl>:       return c.parse_declaration_argument();
+    case <decl-row>:   return c.parse_declarator_argument();
+    case <function>:   return c.parse_function_definition();
+    case <param>:      return c.parse_parameter();
+    case <block>:      return c.parse_block_item();
+    case <field>:      return c.parse_field(%(struct ()));
     case <enumerator>: return c.parse_enumerator(c.aggregate_type);
-    case <map-entry>: return c.parse_map_entry();
-    case <match-row>: return c.parse_match_row_argument();
-    case <unit>: return c.parse_top_level();
-    case <name>: {
-      if (c.macro_holes && c.peek(0) == <$>)
-        return _parse_hole(c, <name>);
-      if (c.peek(0) != <ident>)
-        c.report_error(
-          <parse>, "Name macro argument requires an identifier",
-          c.token, NULL);
-      String spelling = c.token.text;
-      c.next();
-      // A visible template local passes its identity, which each expansion
-      // renames.
-      Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
-      List local = locals != NULL
-                 ? c.sym.lookup(%($spelling), NULL) : NULL;
-      return local && local in locals ? local : spelling;
-    }
-    case <literal>:
-      if (c.macro_holes && c.peek(0) == <$>) return c.parse_assignment();
-      return c.parse_atomic_literal();
+    case <map-entry>:  return c.parse_map_entry();
+    case <match-row>:  return c.parse_match_row_argument();
+    case <unit>:       return c.parse_top_level();
+    case <name>:       return _name_argument(c);
+    case <literal>:    return _literal_argument(c);
   }
   c.report_error(
     <macro>, "macro argument has no parsing contract",
     c.token, NULL);
+}
+
+static Var _name_argument(Compiler c) {
+  if (c.macro_holes && c.peek(0) == <$>) return _parse_hole(c, <name>);
+  if (c.peek(0) != <ident>)
+    c.report_error(
+      <parse>, "Name macro argument requires an identifier",
+      c.token, NULL);
+  String spelling = c.token.text;
+  c.next();
+  // A visible template local passes its identity, which each expansion
+  // renames.
+  Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
+  List local = locals != NULL
+             ? c.sym.lookup(%($spelling), NULL) : NULL;
+  return local && local in locals ? local : spelling;
+}
+
+static Var _literal_argument(Compiler c) {
+  if (c.macro_holes && c.peek(0) == <$>) return c.parse_assignment();
+  return c.parse_atomic_literal();
 }
 
 static Var _capture_source(
@@ -1513,6 +1527,8 @@ static Token _previous_source_token(Compiler compiler, Token after) {
   return token;
 }
 
+/* A Block decorator's Name arguments are referenced in the block's scope,
+   which opens before the arguments are read. */
 static void _bind_name_arguments(
   Compiler compiler, List definition, List arguments) {
   List parameters = definition.assoc(<parameters>);
@@ -1523,69 +1539,101 @@ static void _bind_name_arguments(
       Var names = captures.car().list().assoc(<value>);
       List values = parameter.assoc(<sequence>).int()
                   ? names : %($names);
-      foreach (String name, values)
-        compiler.sym.reference(%($name), NULL);
+      foreach (String name, values) compiler.sym.reference(%($name), NULL);
     }
     parameters = parameters.cdr();
     captures = captures.cdr();
   }
 }
 
-// capture rows
+/* capture rows
+
+   A capture row keeps an argument's exact source apart from its syntax
+   projections. Forwarding a template's own projection rebuilds the row it
+   came from, with its Unit construction requirements, and assigns no
+   source text to generated syntax. */
 
 static List _capture_row(Compiler compiler, List hole, List sources) =>
   _capture_row_project(compiler, hole, sources, 0);
 
-/* Capture rows keep exact source apart from syntax projections. Forwarding a
-   macro projection reconstructs its original row instead of assigning source
-   text to generated syntax; Unit construction requirements travel with it. */
+/* `retain` keeps each source as the syntax it is and forwards nothing. */
 static List _capture_row_project(
-  Compiler compiler, List hole, List sources, int retain_syntax) {
-  int sequence = hole.assoc(<sequence>);
-  int singular = !sequence && sources && !sources.cdr();
+  Compiler compiler, List hole, List sources, int retain) =>
+  hole.assoc(<sequence>).int()
+    ? _sequence_row(compiler, sources, retain)
+    : _scalar_row(compiler, sources, retain);
+
+/* A forwarded projection contributes its own sources, values, and
+   construction requirements. */
+static List _sequence_row(Compiler compiler, List sources, int retain) {
+  Array captured_sources = [], values = [], construction = [];
+  foreach (Var captured, sources) {
+    List forwarded = retain ? NULL : _forwarded_capture(compiler, captured);
+    match (forwarded)
+      case %(capture (source *forwarded_sources)
+                     (value *forwarded_values) ? ? *required): {
+        foreach (Var item, forwarded_sources) captured_sources.push(item);
+        foreach (Var item, forwarded_values) values.push(item);
+        foreach (Var item, required) construction.push(item);
+        continue;
+      }
+    captured_sources.push(captured);
+    values.push(retain ? captured : _source_unwrap(captured));
+  }
+  return _capture_layout(
+    1, %(source @{captured_sources.list_free()}),
+    %(value @{values.list_free()}), NULL, NULL, construction.list_free());
+}
+
+/* One source may be a forwarded projection. Any other number of sources
+   keeps the sequence layout. */
+static List _scalar_row(Compiler compiler, List sources, int retain) {
+  int singular = sources && !sources.cdr();
   Var source = singular ? sources.car() : sources;
-  if (singular && !retain_syntax) {
+  if (singular && !retain) {
     List forwarded = _forwarded_capture(compiler, source);
     if (forwarded) return forwarded;
   }
-  if (sequence) {
-    Array captured_sources = [], values = [], construction = [];
-    foreach (Var captured, sources) {
-      List forwarded = retain_syntax ? NULL
-        : _forwarded_capture(compiler, captured);
-      match (forwarded)
-        case %(capture (source *forwarded_sources)
-                       (value *forwarded_values) ? ? *required): {
-          foreach (Var item, forwarded_sources) captured_sources.push(item);
-          foreach (Var item, forwarded_values) values.push(item);
-          foreach (Var item, required) construction.push(item);
-          continue;
-        }
-      captured_sources.push(captured);
-      values.push(retain_syntax ? captured : _source_unwrap(captured));
-    }
-    return _capture_layout(
-      1, %(source @{captured_sources.list_free()}),
-      %(value @{values.list_free()}), NULL, NULL, construction.list_free());
-  }
-  Var value = retain_syntax ? source : _source_unwrap(source);
-  Var expression = value;
-  if (singular) {
-    if (value is <string>) expression = %(expr () (ident $value));
-    else if (value is <list> && !value.is_nil() &&
-             binding_identity_try_parts(value, NULL, NULL))
-      expression = %(expr () (ident $value));
-  }
+  Var value = retain ? source : _source_unwrap(source);
   List values = value is <list> ? value : NULL;
   if (!singular)
     return _capture_layout(
       1, %(source @sources), %(value @values), NULL, NULL, NULL);
+  Var expression = _identifier_expression(value);
   return _capture_layout(
     0, %(source $source), %(value $value), %(expression $expression),
     %(splice @values), NULL);
 }
 
+static Var _identifier_expression(Var value) {
+  if (value is <string>) return %(expr () (ident $value));
+  if (value is <list> && !value.is_nil() &&
+      binding_identity_try_parts(value, NULL, NULL))
+    return %(expr () (ident $value));
+  return value;
+}
+
+/* The row of a projection a template forwards as an argument. A Unit
+   hole's source stands for each of its projections. */
 static List _forwarded_capture(Compiler compiler, Var captured) {
+  List hole = _forwarded_hole(compiler, captured);
+  if (!hole) return NULL;
+  Var source = _hole_key(hole, "source");
+  Symbol kind = hole.assoc(<kind>);
+  if (kind == <unit>)
+    return _capture_layout(
+      0, %(source $source), %(value $source), %(expression $source),
+      %(splice), %(${_hole_key(hole, "construction")}));
+  if (kind != <expr> && kind != <name>) return NULL;
+  return _capture_layout(
+    0, %(source $source), %(value ${_hole_key(hole, "value")}),
+    %(expression ${_hole_key(hole, "expression")}),
+    %(splice ${_hole_key(hole, "splice")}), NULL);
+}
+
+/* The hole whose projection binder `captured` is, when a template passes
+   one of its own projections as an argument. */
+static List _forwarded_hole(Compiler compiler, Var captured) {
   if (!compiler.macro_holes || captured is not <list> || captured.is_nil())
     return NULL;
   Var direct;
@@ -1595,27 +1643,15 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
     case %(macro-bind ?): direct = captured.list().cadr();
   }
   if (direct is void) return NULL;
-  String spelling = direct.str(), prefix = NULL;
-  foreach (String candidate, forwarded_prefixes)
-    if (spelling.startswith(candidate)) {
-      prefix = candidate;
-      break;
-    }
+  String spelling = direct.str(), prefix = _forwarded_prefix(spelling);
   if (!prefix) return NULL;
-  List hole = _hole_record(
-    compiler, Atom.intern(spelling[prefix.len():]));
-  if (!hole) return NULL;
-  Var source = _hole_key(hole, "source");
-  if (hole.assoc(<kind>) == <unit>)
-    return _capture_layout(
-      0, %(source $source), %(value $source), %(expression $source),
-      %(splice), %(${_hole_key(hole, "construction")}));
-  if (hole.assoc(<kind>) != <expr> && hole.assoc(<kind>) != <name>)
-    return NULL;
-  return _capture_layout(
-    0, %(source $source), %(value ${_hole_key(hole, "value")}),
-    %(expression ${_hole_key(hole, "expression")}),
-    %(splice ${_hole_key(hole, "splice")}), NULL);
+  return _hole_record(compiler, Atom.intern(spelling[prefix.len():]));
+}
+
+static String _forwarded_prefix(String spelling) {
+  foreach (String prefix, forwarded_prefixes)
+    if (spelling.startswith(prefix)) return prefix;
+  return NULL;
 }
 
 /* Forwarding recognizes the projection binders _capture_pattern creates, so
@@ -1627,7 +1663,7 @@ static List _forwarded_prefix_list(void) {
   foreach (String projection, %("expression" "value" "source" "splice"))
     for (int sequence = 0; sequence <= 1; sequence++) {
       String prefix = _replacement_binder(<?>, projection, sequence).str();
-      if (seen.contains(prefix)) continue;
+      if (prefix in seen) continue;
       seen[prefix] = 1;
       prefixes.push(prefix);
     }
@@ -1655,7 +1691,11 @@ static Var _source_unwrap(Var value) {
   return value.list().search_replace(%(src ? ?syntax), <?syntax>);
 }
 
-// invocations at syntax positions
+/* invocations at syntax positions
+
+   A claimed invocation at file, block, statement, field, enumerator, or
+   map-entry position parses its arguments; a decorator also parses the
+   target that follows it. */
 
 /** Parses a direct or keyword-alias macro at the requested syntax position.
     Returns NULL without consuming a macro hole or an invocation that
@@ -1667,142 +1707,31 @@ List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) {
   if (c.macro_holes && c.peek_macro_hole()) return NULL;
   Token invocation = c.token;
   List definition = _take_invocation(c, position);
-  return definition
-    ? _parse_target_definition(c, definition, invocation, position) : NULL;
+  return definition ? _invoke_at(c, definition, invocation, position) : NULL;
 }
 
-static List _parse_target_definition(
+static List _invoke_at(
   Compiler c, List definition, Token invocation, AstPos position) {
-  int deferred = !!c.macro_holes;
-  Atom name = definition.assoc(<name>);
+  if (definition.assoc(<kind>) == <decorator>)
+    return _decorate(c, definition, invocation, position);
+  _check_position(c, definition, invocation, position);
+  return _invoke_definition(c, definition, invocation, position);
+}
+
+/* A macro's result must fit where it is invoked; a Declaration result also
+   fits at file scope. */
+static void _check_position(
+  Compiler c, List definition, Token invocation, AstPos position) {
   Symbol kind = definition.assoc(<kind>);
-  Symbol target_kind = definition.assoc(<target>);
   const MacroPos *place = _position(position);
-  /* A block decorator standing before a file-scope function decorates that
-     function's body, so one spelling covers a statement and a whole
-     function. */
-  int body_target =
-    kind == <decorator> && target_kind == <block> && position == AST_UNIT;
-  if (kind != <decorator>) {
-    if (kind != place.kind &&
-        !(kind == <decl-unit> && position == AST_UNIT)) {
-      String spelling = name.str();
-      String result_kind = _kind_spelling(kind);
-      String message =
-        %"macro '$spelling' has result kind $result_kind and cannot be " +
-        %"invoked at ${place.description}";
-      c.report_error(<macro>, message, invocation, NULL);
-    }
-    return _invoke_definition(c, definition, invocation, position);
-  }
-  if (!body_target && _result_kind(definition) != place.kind) {
-    String spelling = name.str();
-    c.report_error(
-      <macro>,
-      %"decorator '$spelling' targets ${
-        _kind_spelling(target_kind)} syntax and cannot be used here",
-      invocation, NULL
-    );
-  }
-  /* Parsing the decorator target can publish symbols before replacement is
-     known. Stage the target and expansion together so rejection rolls both
-     back. */
-  SymTxn transaction = c.begin_semantic_transaction();
-  defer transaction.rollback();
-  {
-    List arguments = NULL, target = NULL;
-    Token target_start = NULL;
-    int block_scope = !c.macro_holes && target_kind == <block>;
-    if (block_scope) c.sym.push_new_scope();
-    defer if (block_scope) c.sym.pop_scope();
-    arguments = _invocation_arguments(c, definition, invocation);
-    if (block_scope) _bind_name_arguments(c, definition, arguments);
-    if (c.peek(0) == <;>)
-      c.report_error(
-        <macro>, "decorator application must not end with ';'",
-        invocation, %(${_definition_note(definition)}));
-    if (c.peek(0) == <eof>) {
-      String spelling = name.str();
-      c.report_error(
-        <macro>,
-        %"decorator '$spelling' requires a following target",
-        invocation, %(${_definition_note(definition)}));
-    }
-    target_start = c.token;
-    List decorated = NULL;
-    if (body_target) {
-      decorated = c.parse_function_definition();
-      match (decorated) case %(function ? ? ?body): target = body;
-    }
-    else if (target_kind == <function>) target = c.parse_function_target();
-    else if (target_kind == <named-type>) target = c.parse_named_type();
-    else switch (position) {
-      case AST_UNIT:       target = c.parse_top_level(); break;
-      case AST_BLOCK: case AST_STATEMENT:
-        target = c.parse_governed(position); break;
-      case AST_FIELD:      target = c.parse_field(c.aggregate_type); break;
-      case AST_ENUMERATOR:
-        target = c.parse_enumerator(c.aggregate_type); break;
-      case AST_MAP_ENTRY:  target = c.parse_map_entry(); break;
-      default: __builtin_unreachable();
-    }
-    if (position == AST_STATEMENT)
-      target = c.anchor_origin(target, target_start);
-    List targets = target.car() == <seq> ? target.cdr() : %($target);
-    Array captured_targets = [];
-    foreach (Var item, targets)
-      captured_targets.push(
-        _capture_source(c, item, target_start, c.token));
-    List captured = captured_targets.list_free();
-    List target_capture = _capture_row(
-      c, definition.assoc(<targetp>), captured);
-    int private_target = c.source_private > 0;
-    List visibility_target = target;
-    match (visibility_target)
-      case %(seq ?only): visibility_target = only;
-    match (visibility_target)
-      case %(falias ?declaration ?): visibility_target = declaration;
-    match (visibility_target)
-      case %((!or function declare typedef) ?type *):
-        private_target |= type.type().is_static();
-    if (target_kind == <unit> && !private_target &&
-        captured && !captured.cdr())
-      target_capture = target_capture.append(
-        %((construct ${captured.car()})));
-    List input = %(
-      target $arguments
-      $target_capture
-    );
-    List node = _invocation_node(c, definition, input, invocation);
-    if (deferred) {
-      transaction.commit();
-      return %(seq $node);
-    }
-    List result = NULL;
-    if (body_target) {
-      /* The body was bound with the function's own result type; bind the
-         produced items with it too, so a `return` that needs a conversion
-         still gets one. */
-      Type declared = NULL;
-      match (decorated) case %(function ?rtype ?declarator ?): {
-        List declaration = %(declare $rtype (bindings $declarator));
-        match (declaration.type_from_ast())
-          case %((func *) *result_type):
-            declared = result_type.type().declared();
-      }
-      $let(c.return_type, declared) {
-        result = c.bind_syntax(node, AST_BLOCK, c.return_type);
-      }
-      List items = result.car() == <seq> ? result.cdr() : %($result);
-      match (decorated) case %(function ?rtype ?declarator ?):
-        result = %(seq (function $rtype $declarator (block @items)));
-    }
-    else result = c.bind_syntax(node, position, c.return_type);
-    $let(c.token, invocation) {
-      transaction.commit();
-    }
-    return result;
-  }
+  if (kind == place.kind || (kind == <decl-unit> && position == AST_UNIT))
+    return;
+  Atom name = definition.assoc(<name>);
+  String spelling = name.str(), result_kind = _kind_spelling(kind);
+  String message =
+    %"macro '$spelling' has result kind $result_kind and cannot be " +
+    %"invoked at ${place.description}";
+  c.report_error(<macro>, message, invocation, NULL);
 }
 
 /* Invocation parsing and expansion share one semantic transaction. Empty
@@ -1823,22 +1752,206 @@ static List _invoke_definition(
   return result;
 }
 
+/* Inside a template the node names its definition as the expansion will
+   find it: a definition that is itself template syntax by value, a local
+   macro by its local name, and any other macro by name. */
 static List _invocation_node(
   Compiler compiler, List definition, List input, Token invocation) {
   Var stored = definition;
   Var site = invocation;
   if (compiler.macro_holes) {
-    stored = definition.assoc(<template>)
-      ? %(!quote $definition)
-      : definition.assoc(<local>).int()
-        ? %(local-macro ${definition.assoc(<name>)})
-        : definition.assoc(<name>);
+    stored = _stored_reference(definition);
     site = <m-invoke>;
   }
   return %(macro-invoke $stored $input $site);
 }
 
-// expression invocations
+static Var _stored_reference(List definition) {
+  if (definition.assoc(<template>)) return %(!quote $definition);
+  if (definition.assoc(<local>).int())
+    return %(local-macro ${definition.assoc(<name>)});
+  return definition.assoc(<name>);
+}
+
+/* decorators
+
+   A decorator application parses the decorator's arguments and then its
+   target. Parsing the target can publish symbols before the replacement is
+   known, so one semantic transaction stages the target and the expansion
+   and a rejection rolls both back. */
+
+/* One decorator application. A Block decorator standing before a
+   file-scope function decorates that function's body, so one spelling
+   covers a statement and a whole function; `function` holds the function
+   then. */
+typedef struct Decoration {
+  Compiler c, List definition, function, Token invocation, start;
+  AstPos position, Symbol kind;
+} Decoration;
+
+static List _decorate(
+  Compiler c, List definition, Token invocation, AstPos position) {
+  Decoration d = {
+    .c = c, .definition = definition, .invocation = invocation,
+    .position = position, .kind = definition.assoc(<target>)};
+  int deferred = !!c.macro_holes;
+  if (!d.on_body() && _result_kind(definition) != _position(position).kind)
+    d.misplaced();
+  SymTxn transaction = c.begin_semantic_transaction();
+  defer transaction.rollback();
+  int block_scope = !c.macro_holes && d.kind == <block>;
+  if (block_scope) c.sym.push_new_scope();
+  defer if (block_scope) c.sym.pop_scope();
+  List node = d.node(d.arguments(block_scope));
+  if (deferred) {
+    transaction.commit();
+    return %(seq $node);
+  }
+  List result = d.bind(node);
+  $let(c.token, invocation) {
+    transaction.commit();
+  }
+  return result;
+}
+
+static int Decoration.on_body(Decoration *d) =>
+  d.kind == <block> && d.position == AST_UNIT;
+
+static void Decoration.misplaced(Decoration *d) {
+  Atom name = d.definition.assoc(<name>);
+  String spelling = name.str(), target = _kind_spelling(d.kind);
+  d.c.report_error(
+    <macro>,
+    %"decorator '$spelling' targets $target syntax and cannot be used here",
+    d.invocation, NULL);
+}
+
+static List Decoration.arguments(Decoration *d, int block_scope) {
+  Compiler c = d.c;
+  List definition = d.definition;
+  List arguments = _invocation_arguments(c, definition, d.invocation);
+  if (block_scope) _bind_name_arguments(c, definition, arguments);
+  if (c.peek(0) == <;>)
+    c.report_error(
+      <macro>, "decorator application must not end with ';'",
+      d.invocation, %(${_definition_note(definition)}));
+  if (c.peek(0) == <eof>) {
+    Atom name = definition.assoc(<name>);
+    String spelling = name.str();
+    c.report_error(
+      <macro>,
+      %"decorator '$spelling' requires a following target",
+      d.invocation, %(${_definition_note(definition)}));
+  }
+  return arguments;
+}
+
+static List Decoration.node(Decoration *d, List arguments) {
+  Compiler c = d.c;
+  d.start = c.token;
+  List target = d.target();
+  if (d.position == AST_STATEMENT) target = c.anchor_origin(target, d.start);
+  List target_capture = d.capture(target);
+  List input = %(
+    target $arguments
+    $target_capture
+  );
+  return _invocation_node(c, d.definition, input, d.invocation);
+}
+
+static List Decoration.target(Decoration *d) {
+  Compiler c = d.c;
+  if (d.on_body()) {
+    d.function = c.parse_function_definition();
+    match (d.function) case %(function ? ? ?body): return body;
+    return NULL;
+  }
+  if (d.kind == <function>) return c.parse_function_target();
+  if (d.kind == <named-type>) return c.parse_named_type();
+  return _positional_target(c, d.position);
+}
+
+static List _positional_target(Compiler c, AstPos position) {
+  switch (position) {
+    case AST_UNIT:       return c.parse_top_level();
+    case AST_BLOCK: case AST_STATEMENT:
+      return c.parse_governed(position);
+    case AST_FIELD:      return c.parse_field(c.aggregate_type);
+    case AST_ENUMERATOR: return c.parse_enumerator(c.aggregate_type);
+    case AST_MAP_ENTRY:  return c.parse_map_entry();
+    default: __builtin_unreachable();
+  }
+}
+
+/* The target's capture row. A public Unit target of one item also carries
+   that item as the construction the template requires. */
+static List Decoration.capture(Decoration *d, List target) {
+  Compiler c = d.c;
+  List targets = target.car() == <seq> ? target.cdr() : %($target);
+  Array captured_targets = [];
+  foreach (Var item, targets)
+    captured_targets.push(_capture_source(c, item, d.start, c.token));
+  List captured = captured_targets.list_free();
+  List target_capture = _capture_row(
+    c, d.definition.assoc(<targetp>), captured);
+  if (d.kind == <unit> && !_private_target(c, target) &&
+      captured && !captured.cdr())
+    target_capture = target_capture.append(%((construct ${captured.car()})));
+  return target_capture;
+}
+
+/* Visibility comes from a private section or from a static declaration,
+   seen through a lone `seq` and a foreign alias. */
+static int _private_target(Compiler c, List target) {
+  int private_target = c.source_private > 0;
+  List visibility_target = target;
+  match (visibility_target)
+    case %(seq ?only): visibility_target = only;
+  match (visibility_target)
+    case %(falias ?declaration ?): visibility_target = declaration;
+  match (visibility_target)
+    case %((!or function declare typedef) ?type *):
+      private_target |= type.type().is_static();
+  return private_target;
+}
+
+static List Decoration.bind(Decoration *d, List node) {
+  Compiler c = d.c;
+  if (!d.on_body()) return c.bind_syntax(node, d.position, c.return_type);
+  return _bind_body(c, node, d.function);
+}
+
+/* The body was bound with the function's own result type; bind the
+   produced items with it too, so a `return` that needs a conversion still
+   gets one. */
+static List _bind_body(Compiler c, List node, List decorated) {
+  Type declared = _declared_result(decorated);
+  List result = NULL;
+  $let(c.return_type, declared) {
+    result = c.bind_syntax(node, AST_BLOCK, c.return_type);
+  }
+  List items = result.car() == <seq> ? result.cdr() : %($result);
+  match (decorated) case %(function ?rtype ?declarator ?):
+    result = %(seq (function $rtype $declarator (block @items)));
+  return result;
+}
+
+static Type _declared_result(List decorated) {
+  Type declared = NULL;
+  match (decorated) case %(function ?rtype ?declarator ?): {
+    List declaration = %(declare $rtype (bindings $declarator));
+    match (declaration.type_from_ast())
+      case %((func *) *result_type):
+        declared = result_type.type().declared();
+  }
+  return declared;
+}
+
+/* expression invocations
+
+   In an expression, a `$` name without arguments is a Macro value, and a
+   `$` call of a function is an explicit meta call. An Expression macro or
+   decorator becomes a `macro-invoke` node that binding expands. */
 
 /** Parses and resolves a direct or keyword-alias expression macro.
     Returns NULL without consuming an identifier that is not an applicable
@@ -1847,102 +1960,131 @@ static List _invocation_node(
 List Compiler.try_parse_macro_expression(Compiler c) {
   Token invocation = c.token;
   if (c.peek(0) == <$>) {
-    Atom name = _name(c);
-    if (c.peek(0) != <(>) {
-      List value = _macro_value(c, name);
-      if (value) return value;
-    }
-    c.token = invocation;
+    List value = _named_macro_value(c, invocation);
+    if (value) return value;
   }
-  if (c.peek(0) == <$> && !_peek_invocation(c)) {
-    c.next();
-    List callee = c.parse_variable();
-    Type signature = callee.cadr();
-    if (!signature.is_function()) {
-      c.token = invocation;
-      Atom name = _name(c);
-      (void) _lookup(c, name, invocation);
-    }
-    List parameters = signature.car().list().cadr();
-    Array arguments = [];
-    c.expect(<(>);
-    if (c.peek(0) != <)>) loop {
-      List hole = c.peek_macro_hole();
-      int direct = hole && (c.peek(2) == <,> || c.peek(2) == <)>);
-      Symbol kind = hole ? hole.assoc(<kind>) : 0;
-      List argument = NULL;
-      /* A sequence hole passes its captured items as one List. */
-      if (direct && hole.assoc(<sequence>).int()) {
-        c.expect(<$>);
-        c.next();
-        argument = %(expr ("List") (meta-cap (${_hole_key(hole, "value")})));
-      }
-      else argument = direct
-        ? %(expr (<macro-expr>) ${_parse_hole(c, kind ? kind : <argument>)})
-        : c.parse_assignment();
-      if (hole && argument.match(%(expr ? (macro-bind ?)))) {
-        Atom projection = _replacement_binder(
-          hole.assoc(<binder>), "value", 0);
-        argument = %(expr ("List") (meta-cap $projection));
-      }
-      if (parameters && !c.macro_holes)
-        argument = c.convert_expression(argument, parameters.car());
-      parameters = parameters.cdr();
-      arguments.push(argument);
-      if (!c.test(<,>)) break;
-    }
-    c.expect(<)>);
-    Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
-    /* Inside a `meta` body the whole body runs at compile time, so a `$`
-       call there is an ordinary call. */
-    Symbol head = c.meta_body && !c.macro_holes ? <call> : <meta-call>;
-    List call = %(expr $result ($head $callee
-      (args @{arguments.list_free()})));
-    return c.resolve_expression(call, invocation);
-  }
+  if (c.peek(0) == <$> && !_peek_invocation(c))
+    return _parse_meta_call(c, invocation);
   List definition = _take_invocation(c, AST_EXPRESSION);
   if (!definition) return NULL;
   return c.resolve_expression(
-    _parse_expression_definition(c, definition, invocation), invocation);
+    _expression_invocation(c, definition, invocation), invocation);
 }
 
-static List _parse_expression_definition(
+/* Returns the Macro value a `$` name without arguments names. Otherwise the
+   cursor returns to the `$`. */
+static List _named_macro_value(Compiler c, Token invocation) {
+  Atom name = _name(c);
+  if (c.peek(0) != <(>) {
+    List value = _macro_value(c, name);
+    if (value) return value;
+  }
+  c.token = invocation;
+  return NULL;
+}
+
+static List _parse_meta_call(Compiler c, Token invocation) {
+  c.next();
+  List callee = c.parse_variable();
+  Type signature = callee.cadr();
+  if (!signature.is_function()) {
+    c.token = invocation;
+    Atom name = _name(c);
+    (void) _lookup(c, name, invocation);
+  }
+  Array arguments = _meta_arguments(c, signature.car().list().cadr());
+  Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
+  /* Inside a `meta` body the whole body runs at compile time, so a `$`
+     call there is an ordinary call. */
+  Symbol head = c.meta_body && !c.macro_holes ? <call> : <meta-call>;
+  List call = %(expr $result ($head $callee
+    (args @{arguments.list_free()})));
+  return c.resolve_expression(call, invocation);
+}
+
+/* Each argument converts to its parameter's type, except in a template. */
+static Array _meta_arguments(Compiler c, List parameters) {
+  Array arguments = [];
+  c.expect(<(>);
+  if (c.peek(0) != <)>) loop {
+    List argument = _meta_argument(c);
+    if (parameters && !c.macro_holes)
+      argument = c.convert_expression(argument, parameters.car());
+    parameters = parameters.cdr();
+    arguments.push(argument);
+    if (!c.test(<,>)) break;
+  }
+  c.expect(<)>);
+  return arguments;
+}
+
+/* A hole passed alone passes the value it captures, and a sequence hole
+   passes its captured items as one List. */
+static List _meta_argument(Compiler c) {
+  List hole = c.peek_macro_hole();
+  int direct = hole && (c.peek(2) == <,> || c.peek(2) == <)>);
+  if (direct && hole.assoc(<sequence>).int()) {
+    c.expect(<$>);
+    c.next();
+    return %(expr ("List") (meta-cap (${_hole_key(hole, "value")})));
+  }
+  Symbol kind = hole ? hole.assoc(<kind>) : 0;
+  List argument = direct
+    ? %(expr (<macro-expr>) ${_parse_hole(c, kind ? kind : <argument>)})
+    : c.parse_assignment();
+  if (hole && argument.match(%(expr ? (macro-bind ?)))) {
+    Atom projection = _replacement_binder(hole.assoc(<binder>), "value", 0);
+    argument = %(expr ("List") (meta-cap $projection));
+  }
+  return argument;
+}
+
+static List _expression_invocation(
   Compiler compiler, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   if (kind == <decorator> && definition.assoc(<target>) == <expr>)
-    return _parse_expression_decorator(compiler, definition, invocation);
-  if (compiler.meta_body && (kind == <unit> || kind == <block-item>)) {
-    Array arguments = [];
-    compiler.expect(<(>);
-    foreach (List hole, definition.assoc(<parameters>).list()) {
-      if (arguments.len()) compiler.expect(<,>);
-      arguments.push(compiler.parse_assignment());
-    }
-    compiler.expect(<)>);
-    Var stored = definition.assoc(<local>).int()
-      ? definition : definition.assoc(<name>);
-    return %(expr ("List") (tpl-call $stored
-      (args @{arguments.list_free()})));
-  }
+    return _expression_decorator(compiler, definition, invocation);
+  if (compiler.meta_body && (kind == <unit> || kind == <block-item>))
+    return _template_call(compiler, definition);
   List arguments = _invocation_arguments(compiler, definition, invocation);
-  if (kind != <expression>) {
-    String spelling = definition.assoc(<name>).str();
-    String subject = kind == <decorator>
-      ? %"decorator '$spelling'"
-      : %"macro '$spelling'";
-    compiler.report_error(
-      <macro>, %"$subject cannot be invoked in an expression",
-      invocation,
-      kind == <decorator>
-        ? %(${_definition_note(definition)})
-        : NULL
-    );
-  }
+  if (kind != <expression>) _not_expression(compiler, definition, invocation);
   List node = _invocation_node(compiler, definition, arguments, invocation);
   return %(expr (<macro-expr>) $node);
 }
 
-static List _parse_expression_decorator(
+/* In a `meta` body, invoking a Unit or Statement macro is a template call,
+   whose syntax the meta function builds when it runs. */
+static List _template_call(Compiler compiler, List definition) {
+  Array arguments = [];
+  compiler.expect(<(>);
+  foreach (List hole, definition.assoc(<parameters>).list()) {
+    if (arguments.len()) compiler.expect(<,>);
+    arguments.push(compiler.parse_assignment());
+  }
+  compiler.expect(<)>);
+  Var stored = definition.assoc(<local>).int()
+    ? definition : definition.assoc(<name>);
+  return %(expr ("List") (tpl-call $stored
+    (args @{arguments.list_free()})));
+}
+
+static void _not_expression(
+  Compiler compiler, List definition, Token invocation) {
+  Symbol kind = definition.assoc(<kind>);
+  String spelling = definition.assoc(<name>).str();
+  String subject = kind == <decorator>
+    ? %"decorator '$spelling'"
+    : %"macro '$spelling'";
+  compiler.report_error(
+    <macro>, %"$subject cannot be invoked in an expression",
+    invocation,
+    kind == <decorator>
+      ? %(${_definition_note(definition)})
+      : NULL
+  );
+}
+
+static List _expression_decorator(
   Compiler c, List definition, Token invocation) {
   List arguments = _invocation_arguments(c, definition, invocation);
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
