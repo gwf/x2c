@@ -347,9 +347,9 @@ Rules for every file:
 | --- | --- | --- | --- |
 | 0 | standard, skill, lint shape candidates, coverage probe | the waves use them | `make commands-check`; `doc-check` |
 | 1, pilot | `src/collect.x`, `lib/tokenizer.x` | medium size, quiet since 09-27, outside the macro campaign, most defect classes present | per-file stage-diff-1; batch gate; performance checkpoint |
-| 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, small files | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
+| 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, and the small files `editor.x`, `script.x`, `deps.x`, `sourceview.x`, `meta-helper-client.x` | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
 | 3 | runtime: `match-machine.x`, `string.x`, `error.x`, `match.x`, `scan.x`, `scope.x`, the `var.x`/`common.x` duplicates, `dispatch.x`, `pool.x`, `file.x`, `iter.x`, `list.x`, `logger.x`, `meta.x`; `lisp.x` last | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
-| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `type.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
+| 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `linked-meta.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
 | 5 | semantics and output: `expressions.x`, `transform.x`, `protocol.x`, `emit.x`, `regions.x`, `cache.x`, `diagnostics.x`, `format.x` | files the dual-macro campaign changes now | as wave 4 |
 | H | unit directories | spec after the pilot; code before wave 4 | one fixture; gate |
 
