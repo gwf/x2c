@@ -198,7 +198,8 @@ batch:
 
 - `String.parse_char` on a lone `'` reads the byte after the NUL, and
   `String.len` on a fresh `String.malloc` buffer contradicts its
-  documentation.
+  documentation. Fixed by `685021e1` and `395809f0`; `d51552cb` also
+  fixes `String.equal` and `String.compare` on an empty buffer.
 - `x2c lint` offers `.` for every `->`, which breaks `struct dirent` on
   macOS, where x2c cannot see the layout.
 - The fixture supervisor can crash with `PermissionError` from
