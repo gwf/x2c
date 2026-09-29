@@ -69,6 +69,10 @@ macro Expression $lambda_expression(Expr $body, Param $params...) =>
 macro Expression $lambda_captured(Expr $body, Captures $captures,
     Param $params...) => %!($params...) using $captures => $body;
 
+/* The parsed bracket index, before receiver-specific lowering. */
+macro Expression $indexed(Expr $receiver, Expr $selector) =>
+  $receiver[$selector];
+
 /* The source expression beneath casts and parentheses, retaining its type. */
 meta static Var source_expression(Var value) {
   while (1) {

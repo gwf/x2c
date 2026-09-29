@@ -3041,6 +3041,68 @@ the one-case edit, require byte-identical checked C/H, transform, stdout,
 status, and diagnostics for those fixtures. Review the two-file authored
 source diff before committing. This batch does not lower or emit match arms.
 
+### E35. Parsed bracket index recognition after origin preflight
+
+`_parse_postfix_index` produces `(expr () (index receiver selector))` and
+immediately calls `resolve_expression`. The E33 preflight handles outer
+`at`/`src` markers and nested expression shells before the following
+full-input source match. The shared form and complete resolver client are:
+
+```x2c
+macro Expression $indexed(Expr $receiver, Expr $selector) =>
+  $receiver[$selector];
+
+/* After the existing lambda cases and E33 preflight, before match(content). */
+Macro indexed = $indexed;
+match (input) case indexed(?receiver, ?selector): {
+  receiver = c.resolve_expression(receiver, origin);
+  selector = c.resolve_expression(selector, origin);
+  if (receiver.cadr().car() == <opt-ref>)
+    c.report_error(
+      <type>, "check optional reference before indexing its value",
+      origin, NULL);
+  if (_deferred_receiver(receiver) ||
+      _deferred_receiver(selector))
+    return %(expr (<macro-expr>) (index $receiver $selector));
+  List resolved = c._postfix_index_expression(receiver, selector);
+  if (resolved) return resolved;
+  Type receiver_type = receiver.cadr();
+  // A field of a foreign struct has no x2c type; C indexes it alone.
+  if (!receiver_type &&
+      List.match(receiver, %(expr () (op (!or . ->) * *))))
+    return %(expr () (index $receiver $selector));
+  c.report_error(
+    <parse>, receiver_type.is_typedef_name()
+      ? %"type $receiver_type does not support getindex"
+      : %"type $receiver_type does not support indexing",
+    origin, %());
+}
+```
+
+The raw-content index case is removed; this client keeps its body unchanged.
+The parser retains token order and immediate resolution. The resolver retains
+operand order, optional-reference rejection, deferred syntax, protocol lookup,
+native pointer and foreign-field fallbacks, and diagnostics. The template owns
+only the parsed index skeleton. Constructed syntax remains legal and enters
+the same resolver. Compare direct `m-origin`, numeric `at`, `src`, and nested
+expression index nodes under all source-map/macro-hole states against the
+pre-edit compiler; compare bare index output and focused fixture C/H, AST,
+transform, diagnostics and native behavior exactly. A marker mismatch stops
+the migration, with no raw fallback or additional validator.
+
+The pre-edit compiler and the rebuilt candidate gave byte-identical output
+from a temporary direct resolver probe. It exercised a typed native-pointer
+index bare and under direct `at m-origin`, numbered `at`, `src`, and nested
+`expr` wrappers in all four `source_map`/`macro_holes` combinations. The
+bare index resolves through the new sole index case; no raw case remains.
+`make build` and seven focused fixtures pass: `macro-generated-index`,
+`index-slice-lowering`, `protocol-operator-index-matrix`,
+`macro-deferred-free-index`, `string-typedef-bracket-assignment`,
+`bracket-index-incompatible`, and `typed-alias-own-getindex`. The first
+three fixtures' generated C/H pairs are byte-identical to pre-edit output
+from the same output paths. Their checked AST, transform, warning, stdout,
+and status artifacts, and the latter fixtures' diagnostics, remain unchanged.
+
 ### F. Static-local initialization exception
 
 The survey traced this shape to `Emitter._local_static` and `_static_copy`

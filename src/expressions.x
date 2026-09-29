@@ -2057,6 +2057,30 @@ static List _resolve_content(
   if (content && content.car() == <expr>)
     match (content) case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
+  Macro indexed = $indexed;
+  match (input) case indexed(?receiver, ?selector): {
+    receiver = c.resolve_expression(receiver, origin);
+    selector = c.resolve_expression(selector, origin);
+    if (receiver.cadr().car() == <opt-ref>)
+      c.report_error(
+        <type>, "check optional reference before indexing its value",
+        origin, NULL);
+    if (_deferred_receiver(receiver) ||
+        _deferred_receiver(selector))
+      return %(expr (<macro-expr>) (index $receiver $selector));
+    List resolved = c._postfix_index_expression(receiver, selector);
+    if (resolved) return resolved;
+    Type receiver_type = receiver.cadr();
+    // A field of a foreign struct has no x2c type; C indexes it alone.
+    if (!receiver_type &&
+        List.match(receiver, %(expr () (op (!or . ->) * *))))
+      return %(expr () (index $receiver $selector));
+    c.report_error(
+      <parse>, receiver_type.is_typedef_name()
+        ? %"type $receiver_type does not support getindex"
+        : %"type $receiver_type does not support indexing",
+      origin, %());
+  }
   match (content) {
     case %(managed-init ?initializer): {
       initializer = c.resolve_expression(initializer, origin);
@@ -2286,29 +2310,6 @@ static List _resolve_content(
         }
       List callee = _resolve_identifier(c, "Var_is", NULL, origin);
       return %(expr (int) (call $callee (args $lhs $selector)));
-    }
-    case %(index ?receiver ?selector): {
-      receiver = c.resolve_expression(receiver, origin);
-      selector = c.resolve_expression(selector, origin);
-      if (receiver.cadr().car() == <opt-ref>)
-        c.report_error(
-          <type>, "check optional reference before indexing its value",
-          origin, NULL);
-      if (_deferred_receiver(receiver) ||
-          _deferred_receiver(selector))
-        return %(expr (<macro-expr>) (index $receiver $selector));
-      List resolved = c._postfix_index_expression(receiver, selector);
-      if (resolved) return resolved;
-      Type receiver_type = receiver.cadr();
-      // A field of a foreign struct has no x2c type; C indexes it alone.
-      if (!receiver_type &&
-          List.match(receiver, %(expr () (op (!or . ->) * *))))
-        return %(expr () (index $receiver $selector));
-      c.report_error(
-        <parse>, receiver_type.is_typedef_name()
-          ? %"type $receiver_type does not support getindex"
-          : %"type $receiver_type does not support indexing",
-        origin, %());
     }
     case %(call ?(String callee) (args *supplied)): {
       List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
