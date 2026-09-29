@@ -1,15 +1,13 @@
-/*  parse.x -- x2c recursive-descent parser core
+/*  parse.x -- x2c top-level forms, declarations, and constructed syntax
 
     Copyright (c) 2025 Gary William Flake.
 
-    Converts token streams into AST nodes for declarations and top-level
-    constructs. Expression, statement, and literal parsing are in their
-    own modules and are invoked via the Compiler.* entry points.
-
-    Declaration parsing recognizes initializers and finds the function
-    body. Type resolution and lexical scopes use the Compiler's current
-    symbol environment; failures retain positioned diagnostic context.
-  */
+    One classifier reads each top-level form in collection and in the full
+    parse. Each declarator installs its name in the current Sym before its
+    initializer resolves, and syntax that macros and compile-time Lisp
+    construct binds through the same declaration operations. Expression,
+    statement, and literal parsing are in their own modules.
+*/
 
 #pragma once
 $(import "../lib/private-keywords.xmacro")
@@ -414,26 +412,7 @@ static int _test_contextual(Compiler compiler, String word) {
 List Compiler.parse_import_declaration(Compiler c) {
   Token start = c.token;
   c.expect(<import>);
-  if (c.peek(0) != <lit-char*>)
-    c.report_error(
-      <parse>, "expected a quoted package name after 'import'",
-      c.token, NULL);
-  Token name_token = c.token;
-  String name = String.new_len(
-    c.token.text + 1, c.token.len - 2).unescape();
-  if (!name.is_identifier())
-    c.report_error(
-      <parse>, "package name must be a C identifier", name_token, NULL);
-  c.next();
-  String alias = name;
-  if (_test_contextual(c, "as")) {
-    if (c.peek(0) != <ident>)
-      c.report_error(
-        <parse>, "expected an alias identifier after 'as'",
-        c.token, NULL);
-    alias = c.token.text;
-    c.next();
-  }
+  String name = _package_name(c), alias = _import_alias(c, name);
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
   List members = _test_contextual(c, "with")
@@ -446,6 +425,34 @@ List Compiler.parse_import_declaration(Compiler c) {
         ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
       %(package-import $name $alias $members));
   return %(import $name $alias);
+}
+
+// The quoted package name after `import` spells a C identifier.
+static String _package_name(Compiler c) {
+  if (c.peek(0) != <lit-char*>)
+    c.report_error(
+      <parse>, "expected a quoted package name after 'import'",
+      c.token, NULL);
+  Token name_token = c.token;
+  String name = String.new_len(
+    c.token.text + 1, c.token.len - 2).unescape();
+  if (!name.is_identifier())
+    c.report_error(
+      <parse>, "package name must be a C identifier", name_token, NULL);
+  c.next();
+  return name;
+}
+
+// `as ALIAS` names the package locally; the alias defaults to its name.
+static String _import_alias(Compiler c, String name) {
+  if (!_test_contextual(c, "as")) return name;
+  if (c.peek(0) != <ident>)
+    c.report_error(
+      <parse>, "expected an alias identifier after 'as'",
+      c.token, NULL);
+  String alias = c.token.text;
+  c.next();
+  return alias;
 }
 
 /* with Name [as Local] {, Name [as Local]}
@@ -517,7 +524,7 @@ int Compiler.script_statement_starts(Compiler c) {
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
-  return !c.test_declaration() || !_script_declaration_stays(c);
+  return !c.test_declaration() || !_declaration_stays(c);
 }
 
 /* A declaration in a script unit stays at file scope when a body follows
@@ -525,7 +532,7 @@ int Compiler.script_statement_starts(Compiler c) {
    expression-bodied function, or when it ends right after a parameter list
    as a prototype does. An initialized or plain object declaration belongs
    to `main`. */
-static int _script_declaration_stays(Compiler c) {
+static int _declaration_stays(Compiler c) {
   Symbol previous = 0;
   for (Token token = c.token; token.type != <eof>;
        previous = token.type, token = token.after_group()) {
@@ -561,7 +568,7 @@ static List _declaration_rows(Compiler compiler) {
   Array declarations = [];
   loop {
     declarations.push(_declaration_group(compiler, 1));
-    if (!_test_declaration_group_comma(compiler)) break;
+    if (!_group_comma(compiler)) break;
     compiler.next();
   }
   return declarations.list_free();
@@ -577,78 +584,10 @@ static List _declaration_group(Compiler c, int row) {
   List storage = _storage_class(c);
   if (storage === %(typedef)) return _typedef(c, storage, row);
   List (type, binding_type) = _declaration_types(c, storage);
-  if (_test_destructure_declaration(c))
+  if (_destructure_starts(c))
     return _destructure_declaration(c, type, binding_type, 0);
   List bindings = _declarator_list(c, binding_type, NULL, row);
   return _finish_declaration(c, <declare>, type, bindings, 0);
-}
-
-/** Tests whether the current token can begin a declaration without consuming.
-    Typedefs, package aliases, and macro-hole kinds are resolved through the
-    current compiler state.
-*/
-int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
-
-/* Recognize the declaration prefix shared by statement, expression, and row
-   parsing. A row can additionally require an identifier type to be followed
-   by a declarator, which resolves the one C-compatible comma ambiguity. */
-static int _test_declaration_start(Compiler c, int require_declarator) {
-  Symbol sym = c.peek(0);
-  if (c.macro_holes && sym == <"$(">)
-    return c.macro_lisp_starts_declaration();
-  if (c.macro_holes && sym == <$>) {
-    List hole = c.peek_macro_hole();
-    if (hole) {
-      Symbol kind = hole.assoc(<kind>);
-      if (kind) return kind == <type>;
-      Symbol next = c.peek(2);
-      return next == <ident> || next == <$> || next == <"$(">;
-    }
-    return c.macro_lisp_starts_declaration();
-  }
-  if (sym.is_storage_class() || sym.is_type_qualifier() ||
-      sym.is_builtin_type() || sym == <inline>) return 1;
-  if (sym != <ident>) return 0;
-  // A leading attribute belongs to a declaration in every position.
-  if (c.token.text == "__attribute__" && _attribute_starts(c)) return 1;
-  /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
-     is a declaration wherever it is written. */
-  Var definition;
-  if (c.object_macros.try_get(c.token.text, definition) &&
-      (definition is <list> || definition.equal(<wrapper>)))
-    return 1;
-
-  Token head = c.token;
-  String alias = c.package_alias_spelling();
-  String name = alias ? alias
-              : c.package_member_spelling(c.token.text);
-  Type lookup = c.sym.get(%(${name ? name : c.token.text}));
-  if (lookup && !lookup.is_typedef()) return 0;
-  c.next();
-  if (alias) { c.next(); c.next(); }
-  Symbol next = c.peek(0);
-  int is_operator = next == <ident> && c.token.text == "is";
-  // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
-  int attribute = _attribute_starts(c);
-  c.token = head;
-  if (c.macro_holes && is_operator) return 0;
-  if (lookup.is_typedef() && !require_declarator) return next != <.>;
-  return next == <*> || next == <&> || (next == <ident> && !attribute) ||
-         (!require_declarator && next == <)>) ||
-         (require_declarator && (next == <^> || next.is_type_qualifier()));
-}
-
-/* A typedef name after a comma is ambiguous: `int i, T;` declares another
-   int, while `int i, T value;` begins a fresh declaration. Ask the same
-   declaration recognizer used by every other parser entry, but require a
-   declarator after an identifier type in this one ambiguous position. */
-static int _test_declaration_group_comma(Compiler compiler) {
-  if (compiler.peek(0) != <,>) return 0;
-  Token comma = compiler.token;
-  compiler.next();
-  int result = _test_declaration_start(compiler, 1);
-  compiler.token = comma;
-  return result;
 }
 
 static List _typedef(Compiler compiler, List context, int row) {
@@ -711,7 +650,7 @@ List Compiler.parse_declaration_argument(Compiler c) {
       <parse>, "Decl macro argument cannot be a typedef",
       c.token, NULL);
   List (type, binding_type) = _declaration_types(c, storage);
-  if (_test_destructure_declaration(c))
+  if (_destructure_starts(c))
     return _destructure_declaration(c, type, binding_type, 1);
   List binding = _declarator_init(c, binding_type, NULL);
   List declaration = _finish_declaration(
@@ -746,8 +685,89 @@ List Compiler.parse_static_assert(Compiler compiler) {
   return %(c-assert $condition $message);
 }
 
+/* declaration starts
+
+   Statement, expression, and row parsing share one recognizer of the
+   declaration prefix. A row can additionally require an identifier type to
+   be followed by a declarator, which resolves the one C-compatible comma
+   ambiguity. */
+
+/** Tests whether the current token can begin a declaration without consuming.
+    Typedefs, package aliases, and macro-hole kinds are resolved through the
+    current compiler state.
+*/
+int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
+
+static int _test_declaration_start(Compiler c, int require_declarator) {
+  Symbol sym = c.peek(0);
+  if (c.macro_holes && sym == <"$(">)
+    return c.macro_lisp_starts_declaration();
+  if (c.macro_holes && sym == <$>) return _hole_starts(c);
+  if (sym.is_storage_class() || sym.is_type_qualifier() ||
+      sym.is_builtin_type() || sym == <inline>) return 1;
+  if (sym != <ident>) return 0;
+  // A leading attribute belongs to a declaration in every position.
+  if (c.token.text == "__attribute__" && _attribute_starts(c)) return 1;
+  /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
+     is a declaration wherever it is written. */
+  Var definition;
+  if (c.object_macros.try_get(c.token.text, definition) &&
+      (definition is <list> || definition.equal(<wrapper>)))
+    return 1;
+  return _type_name_starts(c, require_declarator);
+}
+
+/* A type hole starts a declaration, and so does a hole of no declared kind
+   that a name follows. */
+static int _hole_starts(Compiler c) {
+  List hole = c.peek_macro_hole();
+  if (!hole) return c.macro_lisp_starts_declaration();
+  Symbol kind = hole.assoc(<kind>);
+  if (kind) return kind == <type>;
+  Symbol next = c.peek(2);
+  return next == <ident> || next == <$> || next == <"$(">;
+}
+
+/* An identifier that names no object starts a declaration when the token
+   after it, or after a package alias's member, can follow a type name. */
+static int _type_name_starts(Compiler c, int require_declarator) {
+  Token head = c.token;
+  String alias = c.package_alias_spelling();
+  String name = alias ? alias
+              : c.package_member_spelling(c.token.text);
+  Type lookup = c.sym.get(%(${name ? name : c.token.text}));
+  if (lookup && !lookup.is_typedef()) return 0;
+  c.next();
+  if (alias) { c.next(); c.next(); }
+  Symbol next = c.peek(0);
+  int is_operator = next == <ident> && c.token.text == "is";
+  // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
+  int attribute = _attribute_starts(c);
+  c.token = head;
+  if (c.macro_holes && is_operator) return 0;
+  if (lookup.is_typedef() && !require_declarator) return next != <.>;
+  return next == <*> || next == <&> || (next == <ident> && !attribute) ||
+         (!require_declarator && next == <)>) ||
+         (require_declarator && (next == <^> || next.is_type_qualifier()));
+}
+
+/* A typedef name after a comma is ambiguous: `int i, T;` declares another
+   int, while `int i, T value;` begins a fresh declaration. Ask the same
+   declaration recognizer used by every other parser entry, but require a
+   declarator after an identifier type in this one ambiguous position. */
+static int _group_comma(Compiler compiler) {
+  if (compiler.peek(0) != <,>) return 0;
+  Token comma = compiler.token;
+  compiler.next();
+  int result = _test_declaration_start(compiler, 1);
+  compiler.token = comma;
+  return result;
+}
+
+// destructuring declarations
+
 // Distinguish '(ident, ...)' from an ordinary parenthesized declarator.
-static int _test_destructure_declaration(Compiler compiler) {
+static int _destructure_starts(Compiler compiler) {
   Token token = compiler.token;
   if (token.type != <(>) return 0;
   token = compiler.skip_trivia_from(token + 1);
@@ -758,22 +778,8 @@ static int _test_destructure_declaration(Compiler compiler) {
 
 static List _destructure_declaration(
   Compiler c, List type, List binding_type, int allow_uninitialized) {
-  Array targets = [];
   Token origin_token = c.token;
-  c.expect(<(>);
-  loop {
-    if (c.peek(0) != <ident>)
-      c.report_error(
-        <parse>, "expected identifier in destructuring declaration",
-        c.token, %("destructuring targets must be simple identifiers"));
-    List ident = c.parse_basic_identifier();
-    List binding = c.macro_holes
-      ? ident : c.sym.declare(NULL, ident, binding_type);
-    targets.push(binding);
-    if (!c.test(<,>)) break;
-  }
-  c.expect(<)>);
-  List bindings = targets.list_free();
+  List bindings = _destructure_targets(c, binding_type);
   /* A foreach destructures each element rather than an initializer, so the
      same `(a, b)` spelling stands without `=`. It reduces to the
      multi-binding declaration `_for_statement` already knows how to
@@ -787,6 +793,25 @@ static List _destructure_declaration(
   List source = c.parse_assignment();
   List result = %(dstrdecl $type (targets @bindings) $source);
   return c.anchor_origin(result, origin_token);
+}
+
+// ( ident, ident, ... ), each declared with the destructured type.
+static List _destructure_targets(Compiler c, List binding_type) {
+  Array targets = [];
+  c.expect(<(>);
+  loop {
+    if (c.peek(0) != <ident>)
+      c.report_error(
+        <parse>, "expected identifier in destructuring declaration",
+        c.token, %("destructuring targets must be simple identifiers"));
+    List ident = c.parse_basic_identifier();
+    List binding = c.macro_holes
+      ? ident : c.sym.declare(NULL, ident, binding_type);
+    targets.push(binding);
+    if (!c.test(<,>)) break;
+  }
+  c.expect(<)>);
+  return targets.list_free();
 }
 
 /* Wraps destructuring targets as the binding forms a declaration carries,
@@ -808,7 +833,7 @@ static List _finish_declaration(
   if (modifiers) {
     Array bound = [];
     foreach (List declarator, declarators)
-      bound.push(_append_declarator_modifiers(declarator, modifiers));
+      bound.push(_append_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
   List declaration = %($tag $base (bindings @declarators));
@@ -837,13 +862,13 @@ static List _declaration_base(Type t, List &modifiers) {
   return %( @{storage.list()} @{text.list()} @base );
 }
 
-static List _append_declarator_modifiers(List declarator, List modifiers) {
+static List _append_modifiers(List declarator, List modifiers) {
   if (!modifiers) return declarator;
   match (declarator) {
     case %(bind ?binding ?mods):
       return %(bind $binding (@{mods} @modifiers));
     case %(op = ?binding ?initializer):
-      return %(op = ${_append_declarator_modifiers(binding, modifiers)}
+      return %(op = ${_append_modifiers(binding, modifiers)}
                $initializer);
   }
   return declarator;
@@ -1014,7 +1039,7 @@ static int _unseen_prefix(Compiler c) {
 static List _type_qualifiers(Compiler c) {
   Array quals = $auto([]);
   loop {
-    c.__complete_here(<type>, _type_completion_keywords());
+    c.__complete_here(<type>, _type_keywords());
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);
@@ -1025,11 +1050,24 @@ static List _type_qualifiers(Compiler c) {
   return quals;
 }
 
-static List _type_completion_keywords(void) => %(
+static List _type_keywords(void) => %(
   "void" "char" "short" "int" "long" "float" "double"
   "signed" "unsigned" "struct" "union" "enum"
   "const" "restrict" "volatile"
 );
+
+// type specifiers
+
+/** Parses a type specifier with qualifiers and pointer/reference modifiers.
+    Returns its flat `Type` AST and leaves the first following token current.
+*/
+Type Compiler.parse_type_name(Compiler compiler) {
+  List qualifiers = _type_qualifiers(compiler);
+  List specifier = _type_specifier(compiler);
+  List pointers = _pointer(compiler);
+  Type type = %( @pointers @qualifiers @specifier );
+  return compiler.sym.local_type(type);
+}
 
 static List _type_specifier(Compiler c) {
   c.require_input();
@@ -1107,24 +1145,13 @@ static String _package_type_reference(
   return compiler.sym.get_exact(hit) ? prefixed : name;
 }
 
-/** Parses a type specifier with qualifiers and pointer/reference modifiers.
-    Returns its flat `Type` AST and leaves the first following token current.
-*/
-Type Compiler.parse_type_name(Compiler compiler) {
-  List qualifiers = _type_qualifiers(compiler);
-  List specifier = _type_specifier(compiler);
-  List pointers = _pointer(compiler);
-  Type type = %( @pointers @qualifiers @specifier );
-  return compiler.sym.local_type(type);
-}
-
 // aggregates
 
 static List _struct_or_union(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
-  _skip_aggregate_attributes(c);
+  _skip_attributes(c);
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
@@ -1134,7 +1161,7 @@ static List _struct_or_union(Compiler c) {
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
-    _skip_aggregate_attributes(c);
+    _skip_attributes(c);
     if (!c.macro_holes)
       return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
@@ -1146,7 +1173,7 @@ static List _struct_or_union(Compiler c) {
    closing brace, written out or through a macro whose body is attributes.
    Collection skips them: attribute text is no part of a collected type, and
    the layout marks hold any layout they change (see Compiler.tokenize). */
-static void _skip_aggregate_attributes(Compiler c) {
+static void _skip_attributes(Compiler c) {
   if (!c.shallow) return;
   loop {
     Var definition;
@@ -1176,87 +1203,6 @@ static List _package_aggregate_name(Compiler compiler, Symbol tag, List name) {
   if (compiler.peek(0) == <"{">)
     return %(${compiler.package_spelling(spelling)});
   return %(${_package_type_reference(compiler, tag, spelling)});
-}
-
-/** Parses aggregate fields in source order up to the current closing brace.
-    Returns a flat field `List`, publishes delegate-field metadata, and leaves
-    the closing brace unconsumed.
-*/
-List Compiler.parse_fields(Compiler c, List context) {
-  Array fields = [];
-  loop {
-    int delegated = c.test(<delegate>);
-    List field = delegated
-      ? _field(c, context, 1) : c.parse_field(context);
-    match (field) {
-      case %(seq *rows):
-        foreach (Var row, rows) fields.push(row);
-      default: fields.push(field);
-    }
-    if (c.peek(0) == <"}">) return fields.list_free();
-  }
-}
-
-/** Parses one field for aggregate type `context` and returns its AST.
-    Ordinary fields publish their binding in the aggregate's field scope and
-    consume their terminating semicolon; macro forms follow their own syntax.
-*/
-List Compiler.parse_field(Compiler compiler, List context) {
-  if (compiler.test_static_assert()) return compiler.parse_static_assert();
-  List slot = compiler.try_parse_macro_slot(<field>);
-  if (slot) return slot;
-  List macro = NULL;
-  if (compiler.peek(0) == <$> || compiler.peek(0) == <ident>) {
-    $let(compiler.aggregate_type, context) {
-      macro = compiler.try_parse_macro_target_at(AST_FIELD);
-    }
-  }
-  if (macro) return macro;
-  return _field(compiler, context, 0);
-}
-
-static List _field(Compiler compiler, List context, int delegated) {
-  List rows = _field_declaration_row(compiler, context);
-  if (delegated) {
-    foreach (List declaration, rows) match (declaration) {
-      case %(declare ? (bindings *declarators)): {
-        if (!declarators)
-          compiler.report_error(
-            <parse>, "delegate field requires a name", compiler.token, NULL);
-        foreach (List declarator, declarators) match (declarator) {
-          case %(bind ?binding ?): {
-            String name = binding_identity_spelling(binding);
-            if (!name)
-              compiler.report_error(
-                <parse>, "delegate field requires a name",
-                compiler.token, NULL);
-            if (!compiler.macro_holes)
-              compiler.sym.declare_delegate_field(context, name);
-          }
-        }
-      }
-    }
-  }
-  compiler.expect(<;>);
-  match (rows) case %(?only): return only;
-  return %(seq @rows);
-}
-
-static List _field_declaration_row(Compiler compiler, List context) {
-  Array declarations = [];
-  loop {
-    declarations.push(_decl_context_group(compiler, context));
-    if (!_test_declaration_group_comma(compiler)) break;
-    compiler.next();
-  }
-  return declarations.list_free();
-}
-
-static List _decl_context_group(Compiler c, List context) {
-  List storage = _storage_class(c);
-  List (type, binding_type) = _declaration_types(c, storage);
-  List binds = _declarator_list(c, binding_type, context, 1);
-  return _finish_declaration(c, <declare>, type, binds, 0);
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
@@ -1309,6 +1255,97 @@ static int _attribute_since(Compiler c, Token first, Array marks) {
          (before < count && (long) marks[before] < c.token - base);
 }
 
+// fields
+
+/** Parses aggregate fields in source order up to the current closing brace.
+    Returns a flat field `List`, publishes delegate-field metadata, and leaves
+    the closing brace unconsumed.
+*/
+List Compiler.parse_fields(Compiler c, List context) {
+  Array fields = [];
+  loop {
+    int delegated = c.test(<delegate>);
+    List field = delegated
+      ? _field(c, context, 1) : c.parse_field(context);
+    match (field) {
+      case %(seq *rows):
+        foreach (Var row, rows) fields.push(row);
+      default: fields.push(field);
+    }
+    if (c.peek(0) == <"}">) return fields.list_free();
+  }
+}
+
+/** Parses one field for aggregate type `context` and returns its AST.
+    Ordinary fields publish their binding in the aggregate's field scope and
+    consume their terminating semicolon; macro forms follow their own syntax.
+*/
+List Compiler.parse_field(Compiler compiler, List context) {
+  if (compiler.test_static_assert()) return compiler.parse_static_assert();
+  List slot = compiler.try_parse_macro_slot(<field>);
+  if (slot) return slot;
+  List macro = _member_macro(compiler, context, AST_FIELD);
+  if (macro) return macro;
+  return _field(compiler, context, 0);
+}
+
+/* A macro invocation may stand for an aggregate member. It expands with
+   the aggregate as the current aggregate type. */
+static List _member_macro(Compiler c, List context, AstPos position) {
+  if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
+  $let(c.aggregate_type, context)
+    return c.try_parse_macro_target_at(position);
+}
+
+static List _field(Compiler compiler, List context, int delegated) {
+  List rows = _field_row(compiler, context);
+  if (delegated) _declare_delegates(compiler, context, rows);
+  compiler.expect(<;>);
+  match (rows) case %(?only): return only;
+  return %(seq @rows);
+}
+
+// A delegate field forwards members, so each of its declarators names one.
+static void _declare_delegates(Compiler c, List context, List rows) {
+  foreach (List declaration, rows)
+    match (declaration)
+      case %(declare ? (bindings *declarators)): {
+        if (!declarators)
+          c.report_error(
+            <parse>, "delegate field requires a name", c.token, NULL);
+        foreach (List declarator, declarators)
+          match (declarator)
+            case %(bind ?binding ?): _declare_delegate(c, context, binding);
+      }
+}
+
+static void _declare_delegate(Compiler c, List context, Var binding) {
+  String name = binding_identity_spelling(binding);
+  if (!name)
+    c.report_error(
+      <parse>, "delegate field requires a name", c.token, NULL);
+  if (!c.macro_holes) c.sym.declare_delegate_field(context, name);
+}
+
+static List _field_row(Compiler compiler, List context) {
+  Array declarations = [];
+  loop {
+    declarations.push(_field_group(compiler, context));
+    if (!_group_comma(compiler)) break;
+    compiler.next();
+  }
+  return declarations.list_free();
+}
+
+static List _field_group(Compiler c, List context) {
+  List storage = _storage_class(c);
+  List (type, binding_type) = _declaration_types(c, storage);
+  List binds = _declarator_list(c, binding_type, context, 1);
+  return _finish_declaration(c, <declare>, type, binds, 0);
+}
+
+// named types
+
 /** Captures a name followed by an ordinary complete type and semicolon.
     The reserved typedef identity permits fields to refer to their enclosing
     named type before its pointer or value representation is complete.
@@ -1322,21 +1359,34 @@ List Compiler.parse_named_type(Compiler c) {
   List key = %($name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
   if (c.test(<;>)) return %(named-type $name ());
-  List qualifiers = _type_qualifiers(c), base = NULL;
-  if (c.peek(0) == <"{"> ||
-      ((c.peek(0) == <struct> || c.peek(0) == <union>) &&
-       c.peek(1) == <"{">)) {
-    Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
-    if (c.peek(0) != <"{">) c.next();
-    c.expect(<"{">);
-    List fields = c.peek(0) == <"}">
-                ? NULL : c.parse_fields(%($tag $name));
-    c.expect(<"}">);
-    base = c.macro_holes ? %($tag $name (fields @fields))
-                        : _publish_aggregate_type(c, tag, name, fields, start);
-  }
-  else base = _type_specifier(c);
-  base = qualifiers.append(base);
+  List qualifiers = _type_qualifiers(c);
+  List base = qualifiers.append(
+    _record_follows(c) ? _record_body(c, name, start) : _type_specifier(c));
+  Type type = _declare_named_type(c, key, base, start);
+  return %(named-type $name $type);
+}
+
+/* A named type may define its record in place, with or without `struct`
+   or `union` before the brace. */
+static int _record_follows(Compiler c) =>
+  c.peek(0) == <"{"> ||
+  ((c.peek(0) == <struct> || c.peek(0) == <union>) && c.peek(1) == <"{">);
+
+static List _record_body(Compiler c, String name, Token start) {
+  Symbol tag = c.peek(0) == <union> ? <union> : <struct>;
+  if (c.peek(0) != <"{">) c.next();
+  c.expect(<"{">);
+  List fields = c.peek(0) == <"}">
+              ? NULL : c.parse_fields(%($tag $name));
+  c.expect(<"}">);
+  return c.macro_holes ? %($tag $name (fields @fields))
+                       : _publish_aggregate_type(c, tag, name, fields, start);
+}
+
+/* The abstract declarator after the base completes the named type, which
+   keeps an aggregate's body in place of its tag. */
+static Type _declare_named_type(
+  Compiler c, List key, List base, Token start) {
   List method = NULL;
   Token first = NULL, after = NULL;
   List declarator = _declarator(c, base, NULL, method, first, after);
@@ -1355,7 +1405,7 @@ List Compiler.parse_named_type(Compiler c) {
   if (specifier.is_aggregate_tag_body())
     type = type.list()[:type.len() - type.base_type().len()]
       .append(specifier);
-  return %(named-type $name $type);
+  return type;
 }
 
 // enumerations
@@ -1363,7 +1413,7 @@ List Compiler.parse_named_type(Compiler c) {
 static List _enum(Compiler c) {
   Token first = c.token;
   c.expect(<enum>);
-  _skip_aggregate_attributes(c);
+  _skip_attributes(c);
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   if (name && c.macro_holes)
@@ -1374,7 +1424,7 @@ static List _enum(Compiler c) {
   if (c.test(<"{">)) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
-    _skip_aggregate_attributes(c);
+    _skip_attributes(c);
     if (!c.macro_holes)
       return _publish_aggregate_type(c, <enum>, usedname.car(), enums, first);
   }
@@ -1410,33 +1460,9 @@ static void _push_items(Array out, List node) {
 List Compiler.parse_enumerator(Compiler c, Type context) {
   List slot = c.try_parse_macro_slot(<enumerator>);
   if (slot) return slot;
-  List macro = NULL;
-  if (c.peek(0) == <$> || c.peek(0) == <ident>) {
-    $let(c.aggregate_type, context) {
-      macro = c.try_parse_macro_target_at(AST_ENUMERATOR);
-    }
-  }
+  List macro = _member_macro(c, context, AST_ENUMERATOR);
   if (macro) return macro;
-  if (c.macro_holes) {
-    List name = NULL;
-    switch (c.peek(0)) {
-      case <"$(">: case <$>: name = c.try_parse_macro_slot(<name>); break;
-      case <ident>: {
-        String spelling = c.token.text;
-        c.next();
-        name = c.macro_introduced_name(spelling);
-        c.sym.bind_identity(NULL, name, context.declaration_ast(name));
-        break;
-      }
-      default:
-        c.report_error(
-          <parse>, "expected enumerator identifier",
-          c.token, NULL);
-    }
-    List target = %(bind $name ());
-    if (c.test(<=>)) return %(op = $target ${c.parse_conditional()});
-    return target;
-  }
+  if (c.macro_holes) return _template_enumerator(c, context);
   if (c.peek(0) != <ident>)
     c.report_error(
       <parse>, "expected enumerator identifier",
@@ -1450,6 +1476,32 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
     syntax = %(op = $binding $value);
   }
   return _publish_enumerator(c, syntax, context, origin);
+}
+
+/* A template's enumerator is named by a hole, a Lisp slot, or a name each
+   expansion introduces. */
+static List _template_enumerator(Compiler c, Type context) {
+  List name = _enumerator_name(c, context);
+  List target = %(bind $name ());
+  if (c.test(<=>)) return %(op = $target ${c.parse_conditional()});
+  return target;
+}
+
+static List _enumerator_name(Compiler c, Type context) {
+  switch (c.peek(0)) {
+    case <"$(">: case <$>: return c.try_parse_macro_slot(<name>);
+    case <ident>: {
+      String spelling = c.token.text;
+      c.next();
+      List name = c.macro_introduced_name(spelling);
+      c.sym.bind_identity(NULL, name, context.declaration_ast(name));
+      return name;
+    }
+    default:
+      c.report_error(
+        <parse>, "expected enumerator identifier",
+        c.token, NULL);
+  }
 }
 
 static List _publish_enumerator(
@@ -1499,17 +1551,19 @@ static int _enum_fits_int(List type, List members) {
   foreach (List member, members) {
     match (member) {
       case %(binding *): continue;
-      case %(op = ? (expr ?(Type value) *)): {
-        if (value.equal(type)) continue;
-        X2CVarNumericInfo info;
-        if (Var.numeric_info(value.scalar_tag(), info) && !info.floating &&
-            (info.bits < 32 || (info.bits == 32 && !info.unsigned_value)))
-          continue;
-      }
+      case %(op = ? (expr ?(Type value) *)):
+        if (_fits_int(value, type)) continue;
     }
     return 0;
   }
   return 1;
+}
+
+static int _fits_int(Type value, List type) {
+  if (value.equal(type)) return 1;
+  X2CVarNumericInfo info;
+  return Var.numeric_info(value.scalar_tag(), info) && !info.floating &&
+         (info.bits < 32 || (info.bits == 32 && !info.unsigned_value));
 }
 
 /* Records how meta code computes each enumerator's value: its initializer,
@@ -1535,7 +1589,7 @@ static List _declarator_list(
   Array bindings = $auto([]);
   loop {
     bindings.push(_declarator_init(compiler, type, context));
-    if ((row && _test_declaration_group_comma(compiler)) ||
+    if ((row && _group_comma(compiler)) ||
         !compiler.test(<,>))
       return bindings;
   }
@@ -1543,8 +1597,7 @@ static List _declarator_list(
 
 /* Install each declaration binding before resolving its initializer so later
    declarators and source-order dependency analysis share the same identity.
-   `init_tokens` records the declarator's first token, not the token where
-   expression parsing finishes. */
+*/
 static List _declarator_init(
   Compiler c, List type, List context) {
   // A Lisp-produced declarator name still needs ordinary binding.
@@ -1564,22 +1617,27 @@ static List _declarator_init(
   c.record_source_declaration(bind.cadr(), first, after);
   int function_arrow = !c.in_proto && c._at_function_arrow() &&
     %(declare $type (bindings $bind)).type_from_ast().is_function();
-  if (!c.in_proto && !function_arrow && c.test(<=>)) {
-    if (c.shallow) {
-      c._skip_shallow_expression(1);
-      return bind;
-    }
-    List init = c.parse_assignment(), binding = bind.cadr();
-    c.check_explicit_converter(
-      init, %(declare $type (bindings $bind)).type_from_ast(), 0);
-    if (binding_identity_try_parts(binding, NULL, NULL)) {
-      Token tokens = c.tokenizer.tokens;
-      int token_index = origin - tokens;
-      c.init_tokens[binding] = token_index;
-    }
-    return %( op = $bind $init );
-  }
+  if (!c.in_proto && !function_arrow && c.test(<=>))
+    return _initialized(c, type, bind, origin);
   return bind;
+}
+
+/* Collection skips an initializer. `init_tokens` records the declarator's
+   first token, not the token where expression parsing finishes. */
+static List _initialized(Compiler c, List type, List bind, Token origin) {
+  if (c.shallow) {
+    c._skip_shallow_expression(1);
+    return bind;
+  }
+  List init = c.parse_assignment(), binding = bind.cadr();
+  c.check_explicit_converter(
+    init, %(declare $type (bindings $bind)).type_from_ast(), 0);
+  if (binding_identity_try_parts(binding, NULL, NULL)) {
+    Token tokens = c.tokenizer.tokens;
+    int token_index = origin - tokens;
+    c.init_tokens[binding] = token_index;
+  }
+  return %( op = $bind $init );
 }
 
 static List _declarator(
@@ -1608,11 +1666,9 @@ static List _pointer(Compiler c) {
     if (symbol == <*> || symbol == <^> || symbol == <&> ||
         symbol.is_type_qualifier()) {
       c.next();
-      if (symbol == <&> && c.peek(0) == <?>) {
-        ptr = cons(<opt-ref>, ptr);
-        c.next();
-      }
-      else ptr = cons(symbol, ptr);
+      int optional = symbol == <&> && c.peek(0) == <?>;
+      ptr = cons(optional ? <opt-ref> : symbol, ptr);
+      if (optional) c.next();
       continue;
     }
     Array quals = [];
@@ -1626,86 +1682,13 @@ static List _direct_declarator(
   Token &source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
   int member = context.is_aggregate();
-  // Parenthesized declarator: ( declarator )
-  if (c.peek(0) == <(>) {
-    c.next();
-    Token first = c.token;
-    List decl = _declarator(
-      c, NULL, member ? context : NULL, method_identity, source_first,
+  if (c.peek(0) == <(>)
+    return _parenthesized(
+      c, member ? context : NULL, method_identity, source_first,
       source_after);
-    if (c.peek(0) != <)>) {
-      c.require_input();
-      /* One identifier followed by another is a parameter list whose type
-         this unit cannot see, such as a package type named without its
-         import alias, not a parenthesized declarator. */
-      if (first.type == <ident> && c.peek(0) == <ident>)
-        c.report_error(
-          <parse>, %"unknown type name '${first.text}'", first,
-          %("name an imported package type through its alias"));
-      else
-        c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
-    }
-    c.next();
-    return decl;
-  }
   if (c.macro_holes) {
-    Symbol owner_token = c.peek(0), String owner_spelling = c.token.text;
-    Type owner_type =
-      owner_spelling ? c.sym.get(%($owner_spelling)) : NULL;
-    int literal_owner =
-      owner_token.is_builtin_type() ||
-      owner_token.is_type_modifier() ||
-      (owner_token == <ident> &&
-       (owner_type.is_typedef() || c.peek(1) == <.>));
-    if (literal_owner && c.peek(1) == <.> &&
-        (c.peek(2) == <$> || c.peek(2) == <ident>)) {
-      c.next();
-      c.expect(<.>);
-      Var member;
-      if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
-      else {
-        if (!c.token.text.is_identifier())
-          c.report_error(<parse>, "expected method name", c.token, NULL);
-        member = c.token.text;
-        c.next();
-      }
-      return %(bind (($owner_spelling) $member) ());
-    }
-    List owner_hole = c.peek_macro_hole();
-    if (owner_hole && owner_hole.assoc(<kind>) == <type> &&
-        c.peek(2) == <.>) {
-      List owner = c.try_parse_macro_slot(<type>);
-      c.expect(<.>);
-      Var member;
-      if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
-      else if (c.token.text.is_identifier()) {
-        member = c.token.text;
-        c.next();
-      }
-      else
-        c.report_error(
-          <parse>,
-          "macro method declaration requires a member name",
-          c.token, NULL);
-      return %(bind (($owner) $member) ());
-    }
-    switch (c.peek(0)) {
-      case <"$(">: {
-        List slot = c.try_parse_macro_slot(<name>);
-        return %(bind $slot ());
-      }
-      case <$>:
-        return %(bind ${member ? c.try_parse_macro_member()
-                               : c.try_parse_macro_slot(<name>)} ());
-      case <ident>: {
-        String spelling = c.token.text;
-        int shadows_with = !!c.with_binding();
-        c.next();
-        if (member) return %(bind ($spelling) ());
-        if (shadows_with) c.sym.define(%($spelling), NULL);
-        return %(bind ${c.macro_introduced_name(spelling)} ());
-      }
-    }
+    List bind = _template_declarator(c, member);
+    if (bind) return bind;
   }
   if (!c.token.text.is_identifier()) return %(bind () ());
   // Identifier or typedef name or method-sugar target
@@ -1714,6 +1697,30 @@ static List _direct_declarator(
   source_first = first;
   source_after = c.token;
   return %(bind $ident ());
+}
+
+// Parenthesized declarator: ( declarator )
+static List _parenthesized(
+  Compiler c, List context, List &method_identity, Token &source_first,
+  Token &source_after) {
+  c.next();
+  Token first = c.token;
+  List decl = _declarator(
+    c, NULL, context, method_identity, source_first, source_after);
+  if (c.peek(0) != <)>) {
+    c.require_input();
+    /* One identifier followed by another is a parameter list whose type
+       this unit cannot see, such as a package type named without its
+       import alias, not a parenthesized declarator. */
+    if (first.type == <ident> && c.peek(0) == <ident>)
+      c.report_error(
+        <parse>, %"unknown type name '${first.text}'", first,
+        %("name an imported package type through its alias"));
+    else
+      c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
+  }
+  c.next();
+  return decl;
 }
 
 static List _declarator_suffix(Compiler compiler) {
@@ -1759,6 +1766,97 @@ static List _array_suffix(Compiler c) {
   return %((dim $expr));
 }
 
+/** Parses one declarator row for a macro argument without installing it.
+    Its enclosing declaration supplies the base type when expanded. */
+List Compiler.parse_declarator_argument(Compiler c) {
+  List slot = c.try_parse_macro_slot(<decl-row>);
+  if (slot) return slot;
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List bind = _declarator(c, NULL, NULL, method, first, after);
+  if (c.test(<=>)) return %(op = $bind ${c.parse_assignment()});
+  return bind;
+}
+
+/* template declarators
+
+   In a macro template a declarator may name its binding through a Lisp
+   slot, a Name hole, a member hole, or a name each expansion introduces. A
+   method's owner may be a literal type or a type hole. */
+
+// Other tokens take the ordinary identifier path, which this reports as NULL.
+static List _template_declarator(Compiler c, int member) {
+  List method = _literal_method(c);
+  if (!method) method = _hole_method(c);
+  if (method) return method;
+  switch (c.peek(0)) {
+    case <"$(">: {
+      List slot = c.try_parse_macro_slot(<name>);
+      return %(bind $slot ());
+    }
+    case <$>:
+      return %(bind ${member ? c.try_parse_macro_member()
+                             : c.try_parse_macro_slot(<name>)} ());
+    case <ident>: {
+      String spelling = c.token.text;
+      int shadows_with = !!c.with_binding();
+      c.next();
+      if (member) return %(bind ($spelling) ());
+      if (shadows_with) c.sym.define(%($spelling), NULL);
+      return %(bind ${c.macro_introduced_name(spelling)} ());
+    }
+  }
+  return NULL;
+}
+
+// `Type.member`, where the member may be a Name hole.
+static List _literal_method(Compiler c) {
+  Symbol owner_token = c.peek(0), String owner_spelling = c.token.text;
+  Type owner_type =
+    owner_spelling ? c.sym.get(%($owner_spelling)) : NULL;
+  int literal_owner =
+    owner_token.is_builtin_type() ||
+    owner_token.is_type_modifier() ||
+    (owner_token == <ident> &&
+     (owner_type.is_typedef() || c.peek(1) == <.>));
+  if (!literal_owner || c.peek(1) != <.> ||
+      (c.peek(2) != <$> && c.peek(2) != <ident>))
+    return NULL;
+  c.next();
+  c.expect(<.>);
+  Var member;
+  if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
+  else {
+    if (!c.token.text.is_identifier())
+      c.report_error(<parse>, "expected method name", c.token, NULL);
+    member = c.token.text;
+    c.next();
+  }
+  return %(bind (($owner_spelling) $member) ());
+}
+
+// `$T.member`, where `$T` is a type hole.
+static List _hole_method(Compiler c) {
+  List owner_hole = c.peek_macro_hole();
+  if (!owner_hole || owner_hole.assoc(<kind>) != <type> ||
+      c.peek(2) != <.>)
+    return NULL;
+  List owner = c.try_parse_macro_slot(<type>);
+  c.expect(<.>);
+  Var member;
+  if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
+  else if (c.token.text.is_identifier()) {
+    member = c.token.text;
+    c.next();
+  }
+  else
+    c.report_error(
+      <parse>,
+      "macro method declaration requires a member name",
+      c.token, NULL);
+  return %(bind (($owner) $member) ());
+}
+
 /** Installs a definition-local template binding or typedef provisionally.
     Later template types name a local typedef by its identity, so each
     expansion refers to that expansion's private typedef.
@@ -1778,37 +1876,59 @@ void Compiler.bind_template_local(
   }
 }
 
+/* declarator installation
+
+   A declarator's name is an exact spelling, a constructed binding identity,
+   or a method's owner and member. Installation binds it in the current
+   scope, records the method it declares, and resolves its initializer. */
+
 static List _install_declarator(
-  Compiler compiler, List base, List declaration_context,
-  List declarator, List method_identity, int &preserved_self) {
-  if (compiler.macro_holes) return declarator;
+  Compiler c, List base, List context, List declarator,
+  List method_identity, int &preserved_self) {
+  if (c.macro_holes) return declarator;
   Var name = void;
   List mods = NULL, initializer = NULL;
   match (declarator) {
-    case %(op = (bind ?captured_name ?captured_mods) ?value): {
-      name = captured_name;
-      mods = captured_mods;
-      initializer = value;
-    }
-    case %(bind ?captured_name ?captured_mods): {
-      name = captured_name;
-      mods = captured_mods;
-    }
+    case %(op = (bind ?captured_name ?captured_mods) ?value):
+      name = captured_name, mods = captured_mods, initializer = value;
+    case %(bind ?captured_name ?captured_mods):
+      name = captured_name, mods = captured_mods;
   }
-  name = compiler.evaluate_macro_slot(name);
   int exact_name = 0;
+  name = _declared_name(c, name, exact_name);
+  List declaration = %(declare $base (bindings (bind () $mods)));
+  List prior = name is <list> ? name : NULL;
+  List method = method_identity ? method_identity
+              : prior ? _method_identity(c, prior) : NULL;
+  List self_signature = prior ? _method_self_signature(c, prior) : NULL;
+  Type declared_type = mods.append(base);
+  name = _method_spelling(c, name, declared_type, method, exact_name);
+  String exact = _syntax_exact_name(name);
+  _check_rebinding(c, exact, exact_name, declaration);
+  List binding = exact ? c.sym.declare(context, %($exact), declared_type)
+               : name is <list> ? name.list() : NULL;
+  if (binding && !exact) _bind_identity(c, context, binding, declaration);
+  if (binding)
+    _method_facts(c, binding, method, self_signature, preserved_self);
+  List bound = %(bind $binding $mods);
+  if (initializer) initializer = c.resolve_expression(initializer, c.token);
+  return initializer ? %(op = $bound $initializer) : bound;
+}
+
+// A name after its macro slot; `("x2c.ident" NAME)` is an exact spelling.
+static Var _declared_name(Compiler c, Var name, int &exact_name) {
+  name = c.evaluate_macro_slot(name);
   match (name)
     case %("x2c.ident" ?(String exact)):
       name = exact, exact_name = 1;
-  List declaration = %(declare $base (bindings (bind () $mods)));
-  List prior_binding = name is <list> ? name : NULL;
-  List method = method_identity ? method_identity
-              : prior_binding
-                ? _method_identity(compiler, prior_binding) : NULL;
-  List self_signature = prior_binding
-                      ? _method_self_signature(compiler, prior_binding)
-                      : NULL;
-  Type declared_type = mods.append(base);
+  return name;
+}
+
+/* A literal owner folds with its member into the C spelling and names the
+   method. A constructed source owner is no concrete owner, so only a static
+   method declares its member as an exact spelling. */
+static Var _method_spelling(
+  Compiler c, Var name, Type declared_type, List &method, int &exact_name) {
   match (name) {
     case %(((!or (!is ?owner type string)
                   (!is ?owner type symbol)
@@ -1828,61 +1948,54 @@ static List _install_declarator(
         name = member;
         exact_name = 1;
       }
-      else compiler.report_error(
+      else c.report_error(
         <type>, "method name has no concrete owner",
-        compiler.token, NULL);
+        c.token, NULL);
     case %((!is ? type list) (!is ? type string)):
-      compiler.report_error(
+      c.report_error(
         <type>, "method name has no concrete owner",
-        compiler.token, NULL);
+        c.token, NULL);
   }
-  String exact = _syntax_exact_name(name);
-  List existing = exact ? compiler.sym.current_binding(%($exact)) : NULL;
+  return name;
+}
+
+/* An exact spelling, or a name a parameter holds, may be declared again only
+   as another prototype of a function. */
+static void _check_rebinding(
+  Compiler c, String exact, int exact_name, List declaration) {
+  List existing = exact ? c.sym.current_binding(%($exact)) : NULL;
   if (exact_name || (existing &&
-      compiler.semantic_binding_facts().contains(%(parameter $existing)))) {
+      c.semantic_binding_facts().contains(%(parameter $existing)))) {
     Var prior = existing
-              ? compiler.sym.current_symbols()[%($exact)] : void;
+              ? c.sym.current_symbols()[%($exact)] : void;
     if (prior is <list>) {
       Type prior_type = prior;
       Type candidate = declaration.type_from_ast();
       if (!candidate.is_function() || !prior_type.is_function())
-        compiler.report_error(
+        c.report_error(
           <parse>, %"declaration '$exact' is already bound",
-          compiler.token, %("prior binding: '$exact'"));
+          c.token, %("prior binding: '$exact'"));
     }
   }
-  List binding = exact
-    ? compiler.sym.declare(declaration_context, %($exact), declared_type)
-    : name is <list> ? name.list() : NULL;
-  if (binding && !exact) {
-    String spelling = binding_identity_spelling(binding);
-    List visible = compiler.sym.lookup(%($spelling), NULL);
-    if (visible != binding)
-      compiler.sym.bind_identity(declaration_context, binding, declaration);
-  }
-  if (binding && method)
-    compiler.semantic_binding_facts()[%(method $binding)] = method;
-  else if (binding) compiler.semantic_binding_facts().del(%(method $binding));
-  if (binding && self_signature) {
-    compiler.semantic_binding_facts()[%(self $binding)] = self_signature;
-    preserved_self = 1;
-  }
-  List bound = %(bind $binding $mods);
-  if (initializer)
-    initializer = compiler.resolve_expression(initializer, compiler.token);
-  return initializer ? %(op = $bound $initializer) : bound;
 }
 
-/** Parses one declarator row for a macro argument without installing it.
-    Its enclosing declaration supplies the base type when expanded. */
-List Compiler.parse_declarator_argument(Compiler c) {
-  List slot = c.try_parse_macro_slot(<decl-row>);
-  if (slot) return slot;
-  List method = NULL;
-  Token first = NULL, after = NULL;
-  List bind = _declarator(c, NULL, NULL, method, first, after);
-  if (c.test(<=>)) return %(op = $bind ${c.parse_assignment()});
-  return bind;
+// A constructed identity binds unless it is already its spelling's binding.
+static void _bind_identity(
+  Compiler c, List context, List binding, List declaration) {
+  String spelling = binding_identity_spelling(binding);
+  List visible = c.sym.lookup(%($spelling), NULL);
+  if (visible != binding) c.sym.bind_identity(context, binding, declaration);
+}
+
+/* Records the method a binding declares, or drops a stale one, and keeps
+   the Self signature an earlier declaration recorded. */
+static void _method_facts(
+  Compiler c, List binding, List method, List self, int &preserved_self) {
+  if (method) c.semantic_binding_facts()[%(method $binding)] = method;
+  else c.semantic_binding_facts().del(%(method $binding));
+  if (!self) return;
+  c.semantic_binding_facts()[%(self $binding)] = self;
+  preserved_self = 1;
 }
 
 // parameters
@@ -1893,7 +2006,7 @@ List Compiler.parse_declarator_argument(Compiler c) {
    the captured scope. */
 static List _function_parameters(Compiler c) {
   c.next();
-  c.__complete_here(<type>, _type_completion_keywords());
+  c.__complete_here(<type>, _type_keywords());
   if (c.peek(0) == <)>)
     c.report_error(
       <parse>, "empty parameter list; use (void)", c.token, NULL);
@@ -1927,7 +2040,7 @@ static List _function_parameters(Compiler c) {
 List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = $auto([]);
   while (1) {
-    c.__complete_here(<type>, _type_completion_keywords());
+    c.__complete_here(<type>, _type_keywords());
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
     parameters.push(parameter);
@@ -1964,22 +2077,23 @@ static List _finish_parameter(
     declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
   base = _declaration_base(base, modifiers);
-  declarator = _append_declarator_modifiers(declarator, modifiers);
+  declarator = _append_modifiers(declarator, modifiers);
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):
-      if (!compiler.macro_holes) {
-        if (binding)
-          compiler.semantic_binding_facts()[%(parameter $binding)] = 1;
-        Symbol kind = parameter.type_from_ast().car();
-        if (kind == <&> || kind == <opt-ref>)
-          compiler.semantic_binding_facts()[
-            %(reference-param $binding)] = 1;
-        if (kind == <opt-ref>)
-          compiler.semantic_binding_facts()[
-            %(optional-reference-param $binding)] = 1;
-      }
+      if (!compiler.macro_holes)
+        _parameter_facts(compiler, binding, parameter);
   return parameter;
+}
+
+// Records a parameter binding and whether it is a reference, or optional.
+static void _parameter_facts(Compiler c, Var binding, List parameter) {
+  if (binding) c.semantic_binding_facts()[%(parameter $binding)] = 1;
+  Symbol kind = parameter.type_from_ast().car();
+  if (kind == <&> || kind == <opt-ref>)
+    c.semantic_binding_facts()[%(reference-param $binding)] = 1;
+  if (kind == <opt-ref>)
+    c.semantic_binding_facts()[%(optional-reference-param $binding)] = 1;
 }
 
 // identifiers
@@ -2006,31 +2120,31 @@ static List _complex_identifier(
   if (!ident) ident = c.token.text;
   Type idtype = c.sym.get(%( $ident ));
   c.next();
-  if (toktype.is_builtin_type() || toktype.is_type_modifier() ||
-      (toktype == <ident> && idtype.is_typedef())) {
-    if (c.test(<.>)) {
-      // a weaker test that accepts anything that looks like an identifier
-      if (c.token.text.is_identifier()) {
-        String owner = ident, member = c.token.text;
-        ident = %"${owner}_$member";
-        if (method_identity) method_identity = %($owner $member);
-        /* `Type.member` where an imported package declared that method on
-           one of its own header's types: the header spells the type, the
-           package spells the method. A declarator never folds. */
-        if (!method_identity && !c.sym.get_exact(%($ident))) {
-          String imported = c.imported_spelling(ident);
-          if (imported) ident = imported;
-        }
-        c.next();
-        return %( $ident );
-      }
-      else c.report_error(
-        <parse>, "expected method name after dot",
-        c.token,
-        %( "typedef:" $ident "token:" ${c.token.text}  ));
-    }
-  }
+  if ((toktype.is_builtin_type() || toktype.is_type_modifier() ||
+       (toktype == <ident> && idtype.is_typedef())) && c.test(<.>))
+    return _member_name(c, ident, method_identity);
   return %($ident);
+}
+
+/* The member after `TYPE.` spells a method, which a declarator records as
+   its owner and member. Elsewhere an imported package may have declared
+   the method on one of its own header's types: the header spells the type,
+   and the package spells the method. */
+static List _member_name(Compiler c, String owner, List &?method_identity) {
+  // a weaker test that accepts anything that looks like an identifier
+  if (!c.token.text.is_identifier())
+    c.report_error(
+      <parse>, "expected method name after dot",
+      c.token,
+      %( "typedef:" $owner "token:" ${c.token.text}  ));
+  String member = c.token.text, ident = %"${owner}_$member";
+  if (method_identity) method_identity = %($owner $member);
+  if (!method_identity && !c.sym.get_exact(%($ident))) {
+    String imported = c.imported_spelling(ident);
+    if (imported) ident = imported;
+  }
+  c.next();
+  return %( $ident );
 }
 
 /* Consume `alias .` and return the folded spelling. The member token stays
@@ -2148,9 +2262,17 @@ static List _finish_function_parts(
      A caller's `SymTxn` can still roll those names back if a later generated
      sibling fails. */
   String initializer_owner = NULL, shutdown_owner = NULL;
-  String name = _prepare_function_lifecycle(
-    c, declaration, binding,
-    initializer_owner, shutdown_owner);
+  String name = _prepare_lifecycle(
+    c, declaration, binding, initializer_owner, shutdown_owner);
+  List body = _function_body(c, declaration, name, syntax);
+  _publish_lifecycle(c, name, initializer_owner, shutdown_owner);
+  return %(function $rtype $declarator $body);
+}
+
+/* The body parses, or a constructed body binds, in the parameter scope with
+   the function's return type and name current. */
+static List _function_body(
+  Compiler c, List declaration, String name, List syntax) {
   int expression_body = !syntax && c._at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
   Type old_return = c.return_type, declared_return = NULL;
@@ -2168,14 +2290,13 @@ static List _finish_function_parts(
       c.fn_name = old_fn;
     }
     if (syntax) body = c.bind_callable_body(syntax, c.return_type);
-    else if (expression_body) body = _parse_expression_function_body(c);
+    else if (expression_body) body = _expression_body(c);
     else body = c.parse_callable_body();
   }
-  _publish_function_lifecycle(c, name, initializer_owner, shutdown_owner);
-  return %(function $rtype $declarator $body);
+  return body;
 }
 
-static String _prepare_function_lifecycle(
+static String _prepare_lifecycle(
   Compiler c, List declaration, List binding, String &initializer_owner,
   String &shutdown_owner) {
   String name = binding_identity_spelling(binding);
@@ -2184,14 +2305,14 @@ static String _prepare_function_lifecycle(
   shutdown_owner = name
     ? _lifecycle_owner(c, binding, "shutdown") : NULL;
   if (initializer_owner) {
-    _require_lifecycle_signature(c, declaration, name, "initializer");
+    _require_signature(c, declaration, name, "initializer");
     if (c.init_fn && c.init_fn != name)
       c.report_error(
         <parse>, "translation unit has more than one type initializer",
         c.token, %( "initializer:" $name ));
   }
   if (shutdown_owner) {
-    _require_lifecycle_signature(c, declaration, name, "shutdown");
+    _require_signature(c, declaration, name, "shutdown");
     if (c.fini_fn && c.fini_fn != name)
       c.report_error(
         <parse>, "translation unit has more than one type shutdown",
@@ -2212,7 +2333,7 @@ static String _lifecycle_owner(
   return NULL;
 }
 
-static void _require_lifecycle_signature(
+static void _require_signature(
   Compiler compiler, List decl, String name, String role) {
   match (decl)
     case %(declare (void)
@@ -2227,14 +2348,14 @@ static void _require_lifecycle_signature(
     <parse>, message, compiler.token, %("$role: $name"));
 }
 
-static void _publish_function_lifecycle(
+static void _publish_lifecycle(
   Compiler compiler, String name, String initializer_owner,
   String shutdown_owner) {
   if (initializer_owner) compiler.init_fn = name;
   if (shutdown_owner) compiler.fini_fn = name;
 }
 
-static List _parse_expression_function_body(Compiler compiler) {
+static List _expression_body(Compiler compiler) {
   with compiler {
     _.expect(<=>);
     _.expect(<">">);
@@ -2261,18 +2382,18 @@ static List _parse_expression_function_body(Compiler compiler) {
 */
 List Compiler.finish_managed_declaration(
   Compiler c, List declaration, Token origin) {
-  if (c.macro_holes || !_has_managed_declaration(declaration))
+  if (c.macro_holes || !_has_managed(declaration))
     return declaration;
   Array output = [];
-  _append_managed_declaration(c, declaration, output, origin);
+  _append_managed(c, declaration, output, origin);
   return %(seq @{output.list_free()});
 }
 
-static int _has_managed_declaration(List declaration) {
+static int _has_managed(List declaration) {
   match (declaration) {
     case %(seq *rows):
       foreach (List row, rows)
-        if (_has_managed_declaration(row)) return 1;
+        if (_has_managed(row)) return 1;
     case %(declare ? (bindings *declarators)):
       foreach (List declarator, declarators)
         match (declarator)
@@ -2298,56 +2419,70 @@ macro open Statement $managed_cleanup(Expr $receiver) {
   defer $receiver.cleanup();
 }
 
-static void _append_managed_declaration(
+static void _append_managed(
   Compiler c, List declaration, Array output, Token origin) {
   match (declaration) {
     case %(seq *rows): {
       foreach (List row, rows)
-        _append_managed_declaration(c, row, output, origin);
+        _append_managed(c, row, output, origin);
       return;
     }
     case %(declare ?base (bindings *declarators)): {
-      Array ordinary = $auto([]);
-      foreach (List declarator, declarators) {
-        List initializer = NULL, binding = NULL, modifiers = NULL;
-        match (declarator)
-          case %(op = (bind ?name ?mods) ?value): {
-            initializer = _managed_initializer(value);
-            binding = name;
-            modifiers = mods;
-          }
-        if (!initializer) {
-          ordinary.push(declarator);
-          continue;
-        }
-        Type type = modifiers.append(base).type().declared();
-        match (base)
-          case %(* (!or static extern threaded) *):
-            c.report_error(
-              <parse>, "managed initializer requires automatic local storage",
-              origin, NULL);
-        if (!c.protocol_members_for(type, %("Cleanup")))
-          c.report_error(
-            <protocol>, "managed initializer requires Cleanup participation",
-            origin, %("type: ${type.repr()}"));
-        if (ordinary.len()) {
-          output.push(%(declare $base (bindings @{ordinary})));
-          ordinary.clear();
-        }
-        output.push(
-          %(declare $base
-            (bindings (op = (bind $binding $modifiers) $initializer))));
-        List receiver = %(expr $type (ident $binding));
-        Macro cleanup = $managed_cleanup;
-        output.push(c.bind_syntax(
-          cleanup(receiver), AST_STATEMENT, c.return_type));
-      }
-      if (ordinary.len())
-        output.push(%(declare $base (bindings @{ordinary})));
+      _append_managed_rows(c, base, declarators, output, origin);
       return;
     }
   }
   output.push(declaration);
+}
+
+/* A managed declarator ends the declaration of the ordinary declarators
+   before it and is followed by its deferred cleanup. */
+static void _append_managed_rows(
+  Compiler c, Var base, List declarators, Array output, Token origin) {
+  Array ordinary = $auto([]);
+  foreach (List declarator, declarators) {
+    List initializer = NULL, binding = NULL, modifiers = NULL;
+    match (declarator)
+      case %(op = (bind ?name ?mods) ?value): {
+        initializer = _managed_initializer(value);
+        binding = name;
+        modifiers = mods;
+      }
+    if (!initializer) {
+      ordinary.push(declarator);
+      continue;
+    }
+    Type type = modifiers.append(base).type().declared();
+    _require_cleanup(c, base, type, origin);
+    if (ordinary.len()) {
+      output.push(%(declare $base (bindings @{ordinary})));
+      ordinary.clear();
+    }
+    output.push(
+      %(declare $base
+        (bindings (op = (bind $binding $modifiers) $initializer))));
+    output.push(_cleanup_statement(c, type, binding));
+  }
+  if (ordinary.len())
+    output.push(%(declare $base (bindings @{ordinary})));
+}
+
+static void _require_cleanup(Compiler c, Var base, Type type, Token origin) {
+  match (base)
+    case %(* (!or static extern threaded) *):
+      c.report_error(
+        <parse>, "managed initializer requires automatic local storage",
+        origin, NULL);
+  if (!c.protocol_members_for(type, %("Cleanup")))
+    c.report_error(
+      <protocol>, "managed initializer requires Cleanup participation",
+      origin, %("type: ${type.repr()}"));
+}
+
+static List _cleanup_statement(Compiler c, Type type, List binding) {
+  List receiver = %(expr $type (ident $binding));
+  Macro cleanup = $managed_cleanup;
+  return c.bind_syntax(cleanup(receiver), AST_STATEMENT, c.return_type);
 }
 
 /* constructed syntax
