@@ -82,7 +82,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2346`
+Source: `src/protocol.x:2310`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -116,7 +116,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol.x:2479`
+Source: `src/protocol.x:2443`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
