@@ -21,7 +21,8 @@
 > shapes and source coverage remain. The complete destructuring and Func
 > construction families, Func shape pass, and ordinary-call source-form
 > family are on dev at `e4942f7e`. Region call and assignment families are
-> locally integrated for the next batch.
+> on dev at `bfcc3cb4`. Retained Function initialization and try-binder
+> families are locally integrated for one publication batch.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -3290,7 +3291,8 @@ family, not an assignment exception hidden by a fallback.
 The authored region diff is +40/-38 lines across the two adopters. Nine
 focused region and cleanup fixtures and stage 2 passed on the worker tree;
 the integrated tree passed `make build` and the same nine fixtures. The
-generated `src/linked-meta.x` refresh is pending publication validation.
+generated `src/linked-meta.x` refresh and the family were published at
+`bfcc3cb4` after the integrated gate passed.
 
 ### E41. Current family boundaries
 
@@ -3311,6 +3313,38 @@ The standalone raw-symbol sweep is already repaired and passed as recorded
 in `raw-symbol-macros-translation.md`. The synthetic expansion-depth probe
 reported a normal 64-level diagnostic; it did not reproduce a null-site
 crash, so no speculative diagnostic change was made.
+
+### E42. Retained Function initialization and try binder
+
+`Compiler.rebuild_function` now substitutes a Function decorator around an
+already-bound target. The target supplies its existing return type and
+declarator, and the caller supplies the body. The shared `$initialized_entry`
+source form in `cache.x` spells the guard and initializer call. Cache and
+generate retain their own placement, source-init wrapper, and conditional
+initializer decisions. The duplicated function patcher, guard declaration,
+and initializer-call builder are deleted. The authored Function-family diff
+is +40/-31 across `macros.x`, `cache.x`, and `generate.x`. Focused cache and
+conditional-initializer fixtures passed; the worker compared their complete
+C/H output against the starting compiler byte for byte.
+
+`parse.x` now recognizes all canonical try shapes with the existing `$caught`
+and `$tried` source patterns, including constructed bare try. `_bind_try`
+preserves the original catch, cleanup, then body binding order and rebuilds
+without rebinding. The private `retain_catch_handle` helper restores the
+already-bound handler identity, which has no source hole in the catch form.
+The raw try recognizer and constructor in `bind_syntax` are deleted; no raw
+try recognition or construction remains in that owner. The authored try diff
+is +28/-10 across `grammar.xmacro` and `parse.x`. Focused catch and defer
+fixtures, a constructed bare-try execution/C/H comparison, and stage 2
+passed in the isolated worker checkout. These two families are integrated
+locally; the final combined publication gate remains pending.
+
+The remaining transform survey found no next source-spellable family whose
+templates would remove meaningful competing builders. String segments need
+variadic expression splicing into a List literal to preserve the short-path
+cons representation; truth conversion would add several macros while retaining
+semantic selection; indexed sequencing uses a native block-expression stage.
+These are concrete boundaries, not migrated families.
 
 ### F. Static-local initialization exception
 
