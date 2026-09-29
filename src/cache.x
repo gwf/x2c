@@ -32,13 +32,9 @@ macro Decorator $initialized_entry(
   $body...
 }
 
-macro Unit $cache_static_helper(Name $helper, Statement $assignment) {
-  static void $helper(void) { $assignment }
-}
-
-macro Unit $header_cache_initializer(Type $type, Name $initializer,
+macro Unit $cache_function(Type $type, Name $name,
     Statement $body...) {
-  $type $initializer(void) {
+  $type $name(void) {
     $body...
   }
 }
@@ -487,9 +483,9 @@ static List _rewrite_file_scope_statics(
       List helper = compiler.sym.introduce(
         compiler.fresh_name("static_initialize"));
       initializers[i] = %($binding $assignment $helper $arms);
-      Macro shape = $cache_static_helper;
+      Macro shape = $cache_function;
       List function = compiler.rebuild_unit_function(
-        shape(helper, assignment));
+        shape(%(static void), helper, %($assignment)));
       output.push(%(sourceinit $function));
     }
   }
@@ -588,7 +584,7 @@ List _initialization_guard(List guard) => %(declare (static int)
 static List _make_header_cache_init(
   Compiler c, List guard, List initializer, List statements) {
   Macro setup = $header_cache_setup;
-  Macro shape = $header_cache_initializer;
+  Macro shape = $cache_function;
   List type = %(("__attribute__((constructor))") static void);
   List protocol_call = %(stmnt
     (expr (void) (call "x2c_initialize_protocols" (args))));
