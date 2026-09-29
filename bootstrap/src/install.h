@@ -7,13 +7,13 @@
 
 #include "x2c.h"
 #include "build.h"
-List install_rows(String text);
-
 int install_command(CliRequest request);
+
+List install_require(CliRequest request, String name, String version, List locked);
 
 String install_version(String name);
 
-List install_require(CliRequest request, String name, String version, List locked);
+List install_rows(String text);
 
 int remove_command(CliRequest request);
 

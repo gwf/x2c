@@ -2,7 +2,7 @@
 
 #include "report.h"
 
-static String _18, _17, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
 #include <fcntl.h>
@@ -31,94 +31,63 @@ static int _terminal(void);
 
 static int _columns(void);
 
-static const char * _color(Symbol tone);
+static int _use_color(int plain, Symbol mode, int terminal);
 
-static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline);
+enum{
+  BAR_WIDTH = 14
+}
+;
+
+static int _update_due(unsigned long now, int done, int total);
+
+static int _own_line(void);
+
+static void _draw(Symbol phase, int done, int total, String detail);
+
+static void _fill_bar(char * bar, int done, int total);
+
+static int _clip(char * line, int limit);
+
+static String _cache_note(int count, int cached);
 
 static const char _clear[] = "\r\033[K";
 
-static int _own_line(void);
+static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline);
+
+static struct iovec _part(const char * text, size_t length);
+
+static const char * _color(Symbol tone);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("%lu us");
-  _1 = String_new("%.0f ms");
-  _2 = String_new("%.2f s");
-  _3 = String_new("%llu B");
-  _4 = String_new("%.1f KiB");
-  _5 = String_new("%.1f MiB");
-  _6 = String_new("dumb");
-  _7 = String_new(", ");
-  _8 = String_new(" cached");
-  _9 = String_new("  ");
-  _10 = String_new(" ");
-  _11 = String_new(" in ");
-  _12 = String_new("TERM");
-  _13 = String_new("MAKELEVEL");
-  _14 = String_new("COLUMNS");
-  _15 = String_new("NO_COLOR");
-  _17 = String_new(" (up to date)");
-  _18 = String_new("");
-}
-
-unsigned long report_now_us(void){
-  struct timespec now;
-  if(clock_gettime(CLOCK_MONOTONIC, & now)) return 0;
-  return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
-}
-
-int String_truth(String);
-
-unsigned long long report_file_bytes(String path){
-  struct stat info;
-  if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
-  return(unsigned long long) info.st_size;
-}
-
-String String_printf(String, ...);
-
-String report_duration(unsigned long microseconds){
-  if(! _init_guard_) _file_init_();
-  if(microseconds < 1000) return String_printf(_0, microseconds);
-  if(microseconds < 1000000) return String_printf(_1, microseconds / 1000.0);
-  return String_printf(_2, microseconds / 1000000.0);
-}
-
-String report_size(unsigned long long bytes){
-  if(! _init_guard_) _file_init_();
-  if(bytes < 1024) return String_printf(_3, bytes);
-  if(bytes < 1024ull * 1024ull) return String_printf(_4, bytes / 1024.0);
-  return String_printf(_5, bytes /(1024.0 * 1024.0));
-}
-
-int String_equal(String, String);
-
-String Env_get(String);
-
-static int _terminal(void){
-  return isatty(fileno(stderr)) && ! String_equal(Env_get(_12), _6);
-}
-
-int String_is_digit(String);
-
-long atol(const char *);
-
-int report_make_owned(void){
-  if(! _init_guard_) _file_init_();
-  String level = Env_get(_13);
-  return String_is_digit(level) && atol(level) > 0;
-}
-
-int atoi(const char *);
-
-static int _columns(void){
-  struct winsize size;
-  if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
-  String columns = Env_get(_14);
-  int parsed = String_is_digit(columns) ? atoi(columns) : 0;
-  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
+  _0 = String_new("dumb");
+  _1 = String_new("  ");
+  _2 = String_new(" ");
+  _3 = String_new(" in ");
+  _4 = String_new(", ");
+  _5 = String_new(" cached");
+  _6 = String_new("  Generated ");
+  _7 = String_new(" and ");
+  _8 = String_new(" (");
+  _9 = String_new(")");
+  _10 = String_new("%lu us");
+  _11 = String_new("%.0f ms");
+  _12 = String_new("%.2f s");
+  _13 = String_new("%llu B");
+  _14 = String_new("%.1f KiB");
+  _15 = String_new("%.1f MiB");
+  _16 = String_new("TERM");
+  _17 = String_new("COLUMNS");
+  _18 = String_new("NO_COLOR");
+  _19 = String_new("MAKELEVEL");
+  _20 = String_new(" (up to date)");
+  _21 = String_new("");
+  _22 = String_new("C file");
+  _23 = String_new("C files");
+  _24 = String_new("header");
+  _25 = String_new("headers");
 }
 
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
@@ -133,13 +102,162 @@ void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int 
   report.transient = report.receipts && terminal && ! plain;
   report.columns = _columns();
   report.start = report_now_us();
-  if(plain || color_mode == 29733220) report.color = 0;
-  else if(color_mode == 93785702) report.color = 1;
-  else report.color = terminal && ! String_truth(Env_get(_15));
+  report.color = _use_color(plain, color_mode, terminal);
+}
+
+int String_equal(String, String);
+
+String Env_get(String);
+
+static int _terminal(void){
+  return isatty(fileno(stderr)) && ! String_equal(Env_get(_16), _0);
+}
+
+int String_is_digit(String);
+
+int atoi(const char *);
+
+static int _columns(void){
+  struct winsize size;
+  if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
+  String columns = Env_get(_17);
+  int parsed = String_is_digit(columns) ? atoi(columns) : 0;
+  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
+}
+
+int String_truth(String);
+
+static int _use_color(int plain, Symbol mode, int terminal){
+  if(plain || mode == 29733220) return 0;
+  if(mode == 93785702) return 1;
+  return terminal && ! String_truth(Env_get(_18));
 }
 
 int report_receipts(void){
   return report.receipts;
+}
+
+long atol(const char *);
+
+int report_make_owned(void){
+  if(! _init_guard_) _file_init_();
+  String level = Env_get(_19);
+  return String_is_digit(level) && atol(level) > 0;
+}
+
+void report_progress(Symbol phase, int done, int total, String detail){
+  if(! report.transient) return;
+  unsigned long now = report_now_us();
+  if(! _update_due(now, done, total)) return;
+  report.update = now;
+  if(_own_line()) _draw(phase, done, total, detail);
+}
+
+static int _update_due(unsigned long now, int done, int total){
+  if(now - report.start < 125000ul) return 0;
+  if(done >= total && ! report.width) return 0;
+  if(report.update && now - report.update < 50000ul && done < total) return 0;
+  return 1;
+}
+
+static int _own_line(void){
+  if(report.owner) return 1;
+  if(report.terminal == - 1){
+    char * path = ttyname(fileno(stderr));
+    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : - 1;
+    report.terminal = fd >= 0 ? fd : - 2;
+  }
+  report.owner = report.terminal >= 0 && ! flock(report.terminal, LOCK_EX | LOCK_NB);
+  return report.owner;
+}
+
+String String_capitalize(String);
+
+String Symbol_str(Symbol);
+
+static void _draw(Symbol phase, int done, int total, String detail){
+  char bar[BAR_WIDTH + 1];
+  _fill_bar(bar, done, total);
+  char line[2048];
+  String name = String_capitalize(Symbol_str(phase));
+  snprintf(line, sizeof(line), "%s [%s] %d/%d  %s", name, bar, done, total, String_truth(detail) ? detail : "");
+  int length = _clip(line, report.columns > 1 ? report.columns - 1 : 79);
+  _emit(_clear, sizeof(_clear) - 1, _color(34081994), line, 0);
+  report.width = length;
+}
+
+static void _fill_bar(char * bar, int done, int total){
+  int filled = total > 0 ? done * BAR_WIDTH / total : 0;
+  if(filled < 0) filled = 0;
+  if(filled > BAR_WIDTH) filled = BAR_WIDTH;
+  for(int i = 0;  i < BAR_WIDTH;  i ++) bar[i] = i < filled ? '#' : '-';
+  bar[BAR_WIDTH] = 0;
+}
+
+static int _clip(char * line, int limit){
+  int length =(int) strlen(line);
+  if(length <= limit) return length;
+  line[limit] = 0;
+  return limit;
+}
+
+void report_suspend(void){
+  if(! report.width || getpid() != report.pid) return;
+  report.width = 0;
+  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
+}
+
+void report_line(Symbol tone, String line){
+  report.width = 0;
+  if(! report.receipts) return;
+  int clear = report.transient ? sizeof(_clear) - 1 : 0;
+  _emit(_clear, clear, _color(tone), line, 1);
+}
+
+Var String_var(String);
+
+String int_str(int);
+
+void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
+  if(! _init_guard_) _file_init_();
+  String cache = _cache_note(count, cached);
+  String name = String_capitalize(Symbol_str(phase));
+  String duration = report_duration(microseconds);
+  report_line(28680520, String_join(NULL, cons(String_var(_1), cons(String_var(name), cons(String_var(_2), cons(String_var(int_str(count)), cons(String_var(_2), cons(String_var(noun), cons(String_var(_3), cons(String_var(duration), cons(String_var(cache), NULL)))))))))));
+}
+
+static String _cache_note(int count, int cached){
+  if(cached == count && count) return _20;
+  return cached ? String_join(NULL, cons(String_var(_4), cons(String_var(int_str(cached)), cons(String_var(_5), NULL)))) : _21;
+}
+
+void report_generated(int n, unsigned long long bytes){
+  if(! _init_guard_) _file_init_();
+  String size = report_size(bytes);
+  String c_noun = n == 1 ? _22 : _23;
+  String h_noun = n == 1 ? _24 : _25;
+  report_line(28680520, String_join(NULL, cons(String_var(_6), cons(String_var(int_str(n)), cons(String_var(_2), cons(String_var(c_noun), cons(String_var(_7), cons(String_var(int_str(n)), cons(String_var(_2), cons(String_var(h_noun), cons(String_var(_8), cons(String_var(size), cons(String_var(_9), NULL)))))))))))));
+}
+
+static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline){
+  struct iovec parts[5];
+  int count = 0;
+  if(prefix_length) parts[count ++] = _part(prefix, prefix_length);
+  if(* color) parts[count ++] = _part(color, strlen(color));
+  parts[count ++] = _part(line, strlen(line));
+  if(* color) parts[count ++] = _part("\033[0m", 4);
+  if(newline) parts[count ++] = _part("\n", 1);
+  while(writev(fileno(stderr), parts, count) < 0 && errno == EINTR){
+
+  }
+
+}
+
+static struct iovec _part(const char * text, size_t length){
+  return(struct iovec){
+    .iov_base =(char *) text, .iov_len = length
+  }
+  ;
 }
 
 static const char * _color(Symbol tone){
@@ -154,103 +272,31 @@ static const char * _color(Symbol tone){
 
 }
 
-static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline){
-  struct iovec parts[5];
-  int count = 0;
-  if(prefix_length){
-    parts[count].iov_base =(char *) prefix;
-    parts[count ++].iov_len =(size_t) prefix_length;
-  }
-  if(* color){
-    parts[count].iov_base =(char *) color;
-    parts[count ++].iov_len = strlen(color);
-  }
-  parts[count].iov_base =(char *) line;
-  parts[count ++].iov_len = strlen(line);
-  if(* color){
-    parts[count].iov_base = "\033[0m";
-    parts[count ++].iov_len = 4;
-  }
-  if(newline){
-    parts[count].iov_base = "\n";
-    parts[count ++].iov_len = 1;
-  }
-  while(writev(fileno(stderr), parts, count) < 0 && errno == EINTR){
-
-  }
-
+unsigned long report_now_us(void){
+  struct timespec now;
+  if(clock_gettime(CLOCK_MONOTONIC, & now)) return 0;
+  return(unsigned long) now.tv_sec * 1000000ul +(unsigned long) now.tv_nsec / 1000ul;
 }
 
-static int _own_line(void){
-  if(report.owner) return 1;
-  if(report.terminal == - 1){
-    char * path = ttyname(fileno(stderr));
-    int fd = path ? open(path, O_RDONLY | O_NOCTTY | O_CLOEXEC) : - 1;
-    report.terminal = fd >= 0 ? fd : - 2;
-  }
-  report.owner = report.terminal >= 0 && ! flock(report.terminal, LOCK_EX | LOCK_NB);
-  return report.owner;
+unsigned long long report_file_bytes(String path){
+  struct stat info;
+  if(! String_truth(path) || stat(path, & info) || ! S_ISREG(info.st_mode)) return 0;
+  return(unsigned long long) info.st_size;
 }
 
-void report_suspend(void){
-  if(! report.width || getpid() != report.pid) return;
-  report.width = 0;
-  _emit(_clear, sizeof(_clear) - 1, "", "", 0);
-}
+String String_printf(String, ...);
 
-void report_line(Symbol tone, String line){
-  report.width = 0;
-  if(! report.receipts) return;
-  const char * color = _color(tone);
-  int clear = report.transient ? sizeof(_clear) - 1 : 0;
-  _emit(_clear, clear, color, line, 1);
-}
-
-String String_capitalize(String);
-
-String Symbol_str(Symbol);
-
-void report_progress(Symbol phase, int done, int total, String detail){
-  if(! report.transient) return;
-  unsigned long now = report_now_us();
-  if(now - report.start < 125000ul) return;
-  if(done >= total && ! report.width) return;
-  if(report.update && now - report.update < 50000ul && done < total) return;
-  report.update = now;
-  if(! _own_line()) return;
-  enum{
-    bar_width = 14
-  }
-  ;
-  char bar[bar_width + 1];
-  int filled = total > 0 ? done * bar_width / total : 0;
-  if(filled < 0) filled = 0;
-  if(filled > bar_width) filled = bar_width;
-  for(int i = 0;  i < bar_width;  i ++) bar[i] = i < filled ? '#' : '-';
-  bar[bar_width] = 0;
-  char line[2048];
-  String name = String_capitalize(Symbol_str(phase));
-  snprintf(line, sizeof(line), "%s [%s] %d/%d  %s", name, bar, done, total, String_truth(detail) ? detail : "");
-  int limit = report.columns > 1 ? report.columns - 1 : 79;
-  int length =(int) strlen(line);
-  if(length > limit){
-    line[limit] = 0;
-    length = limit;
-  }
-  _emit(_clear, sizeof(_clear) - 1, _color(34081994), line, 0);
-  report.width = length;
-}
-
-Var String_var(String);
-
-String int_str(int);
-
-void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
+String report_duration(unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  String cache = cached == count && count ? _17 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : _18;
-  String name = String_capitalize(Symbol_str(phase));
-  String duration = report_duration(microseconds);
-  String line = String_join(NULL, cons(String_var(_9), cons(String_var(name), cons(String_var(_10), cons(String_var(int_str(count)), cons(String_var(_10), cons(String_var(noun), cons(String_var(_11), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
-  report_line(28680520, line);
+  if(microseconds < 1000) return String_printf(_10, microseconds);
+  if(microseconds < 1000000) return String_printf(_11, microseconds / 1000.0);
+  return String_printf(_12, microseconds / 1000000.0);
+}
+
+String report_size(unsigned long long bytes){
+  if(! _init_guard_) _file_init_();
+  if(bytes < 1024) return String_printf(_13, bytes);
+  if(bytes < 1024ull * 1024ull) return String_printf(_14, bytes / 1024.0);
+  return String_printf(_15, bytes /(1024.0 * 1024.0));
 }
 

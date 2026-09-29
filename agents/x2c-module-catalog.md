@@ -34,12 +34,13 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`build_check_input`, `CliRequest.prepare`, `Build.generated_dir`,
-`Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
-`Build.module_entry`, `Build.extension_entries`, `Build.begin_translation`,
-`Build.end_translation`, `compile_commands_write`, `Build.finish`,
-`Build.report_success`, `Build.run_program`, `Build.cleanup`,
-`Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
+`CliRequest.prepare`, `build_check_input`, `Build.generated_dir`,
+`Build.translation_current`, `Build.begin_translation`,
+`Build.end_translation`, `Build.record_translation`, `Build.add_generated`,
+`Build.module_entry`, `Build.extension_entries`, `Build.finish`,
+`compile_commands_write`, `Build.report_success`, `Build.run_program`,
+`Build.cleanup`, `Build.script_helpers`, `Build.publish_script`,
+`CliRequest.script_current`
 
 ### [src/builtins.x](../src/builtins.x)
 
@@ -63,8 +64,8 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`cli_builtin_command`, `cli_response_arguments`, `cli_dependency_pass_through`,
-`cli_package_options`, `cli_request`, `cli_parse`, `cli_version`,
+`cli_parse`, `cli_dependency_pass_through`, `cli_package_options`,
+`cli_response_arguments`, `cli_request`, `cli_builtin_command`, `cli_version`,
 `CliRequest.inspects`, `CliRequest.package_roots`
 
 ### [src/collect.x](../src/collect.x)
@@ -152,7 +153,7 @@ Make dependency output for x2c translation units.
 
 Public functions:
 
-`translation_depfile_parse`, `translation_depfile_write`
+`translation_depfile_write`, `translation_depfile_parse`
 
 ### [src/diagnostics.x](../src/diagnostics.x)
 
@@ -220,9 +221,9 @@ configured compiler sessions and sequential source units.
 
 Public functions:
 
-`Frontend.load_support`, `Frontend.new`, `Frontend.start`,
-`Frontend.preload_macro_libraries`, `ParsedUnit.collect`, `ParsedUnit.parse`,
-`Frontend.open`, `Frontend.open_session`, `ParsedUnit.close`
+`Frontend.open`, `Frontend.open_session`, `Frontend.start`,
+`ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
+`Frontend.preload_macro_libraries`, `Frontend.load_support`, `Frontend.new`
 
 ### [src/generate.x](../src/generate.x)
 
@@ -230,8 +231,8 @@ generate C headers and source files.
 
 Public functions:
 
-`Compiler.definition_rows`, `Compiler.dump_definitions`, `generate_code_text`,
-`generate_code`, `Compiler.init_statements`
+`generate_code`, `generate_code_text`, `Compiler.init_statements`,
+`Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/install.x](../src/install.x)
 
@@ -239,7 +240,7 @@ Package installation into the x2c home.
 
 Public functions:
 
-`install_rows`, `install_command`, `install_version`, `install_require`,
+`install_command`, `install_require`, `install_version`, `install_rows`,
 `remove_command`, `list_command`
 
 ### [src/linked-meta.x](../src/linked-meta.x)
@@ -350,8 +351,8 @@ the compiler's side of the project meta helper.
 
 Public functions:
 
-`Compiler.stop_meta_helper`, `Compiler.use_meta_helper`,
-`Compiler.begin_meta_unit`, `Compiler.meta_helper_call`
+`Compiler.meta_helper_call`, `Compiler.use_meta_helper`,
+`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -393,7 +394,7 @@ x2c project manifests.
 
 Public functions:
 
-`project_manifest`, `project_plan`, `new_command`
+`project_plan`, `project_manifest`, `new_command`
 
 ### [src/protocol.x](../src/protocol.x)
 
@@ -428,9 +429,9 @@ Command progress and completion receipts.
 
 Public functions:
 
-`report_now_us`, `report_file_bytes`, `report_duration`, `report_size`,
-`report_make_owned`, `report_configure`, `report_receipts`, `report_suspend`,
-`report_line`, `report_progress`, `report_phase`
+`report_configure`, `report_receipts`, `report_make_owned`, `report_progress`,
+`report_suspend`, `report_line`, `report_phase`, `report_generated`,
+`report_now_us`, `report_file_bytes`, `report_duration`, `report_size`
 
 ### [src/script.x](../src/script.x)
 
@@ -478,12 +479,12 @@ Host preprocessing, compilation, archive, and link actions.
 
 Public functions:
 
-`toolchain_new`, `toolchain_meta_cc`, `Toolchain.compile_action`,
+`toolchain_new`, `toolchain_meta`, `toolchain_meta_cc`, `tool_action_new`,
+`ToolAction.as_program`, `Toolchain.compile_action`,
 `Toolchain.preprocess_action`, `Toolchain.archive_action`,
-`Toolchain.link_action`, `Toolchain.module_action`, `tool_action_new`,
-`ToolAction.as_program`, `tool_capture`, `Toolchain.search_directories`,
-`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
-`Toolchain.preprocess`
+`Toolchain.link_action`, `Toolchain.module_action`, `ToolAction.run`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `tool_capture`,
+`Toolchain.preprocess`, `Toolchain.search_directories`
 
 ### [src/transform.x](../src/transform.x)
 
@@ -541,14 +542,14 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
-`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `x2c_package_directory`,
-`x2c_package_entry`, `x2c_source_file`, `x2c_layout_file`,
-`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_home`, `x2c_home_packages`, `x2c_home_libexec`, `x2c_stage_dir`,
-`x2c_find_program`, `x2c_driver_error`, `x2c_host_error`, `file_lock`,
-`file_publish`, `x2c_fnv_bytes`, `x2c_fnv_file`, `x2c_compiler_identity`,
-`x2c_file_identity`, `build_module_stamp`, `worker_fork`, `worker_exit`,
-`worker_wait_any`, `x2c_filename_hash`
+`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `x2c_home`,
+`x2c_stage_dir`, `x2c_home_packages`, `x2c_home_libexec`,
+`x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_find_program`,
+`x2c_source_file`, `x2c_layout_file`, `x2c_package_directory`,
+`x2c_package_entry`, `x2c_package_source`, `x2c_compiler_identity`,
+`build_module_stamp`, `x2c_file_identity`, `x2c_fnv_file`, `x2c_fnv_bytes`,
+`x2c_filename_hash`, `file_lock`, `file_publish`, `worker_fork`, `worker_exit`,
+`worker_wait_any`, `x2c_driver_error`, `x2c_host_error`
 
 ## Runtime modules
 

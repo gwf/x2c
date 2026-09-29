@@ -14,9 +14,15 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
+static String _contents(CliRequest request, Compiler compiler, String input, String output_dir);
+
+static void _write_targets(Buffer out, CliRequest request, String input, String output_dir);
+
+static void _write_phony(Buffer out, Array paths, String primary);
+
 static void _write_word(Buffer out, String word);
 
-static String _contents(CliRequest request, Compiler compiler, String input, String output_dir);
+static void _push_word(Array paths, Buffer word);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -37,216 +43,20 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("/");
-  _1 = String_new(".c");
-  _2 = String_new(".h");
-  _3 = String_new(".d");
+  _1 = String_new(".d");
+  _2 = String_new(".c");
+  _3 = String_new(".h");
 }
+
+int CliRequest_inspects(CliRequest);
 
 int String_truth(String);
 
-Array Array_new(void);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_char(Buffer, char);
-
-size_t Buffer_len(Buffer);
-
-Var Array_push(Array, Var);
-
 Var String_var(String);
-
-String Buffer_str(Buffer);
-
-Buffer Buffer_clear(Buffer);
-
-void Buffer_free(Buffer);
-
-List Array_list_free(Array);
-
-List translation_depfile_parse(String text){
-  if(! String_truth(text)) return NULL;
-  Array paths = Array_new();
-  Buffer word = Buffer_new(0);
-  int prerequisites = 0;
-  for(const char * ch = text;  * ch;  ch ++){
-    if(! prerequisites){
-      if(* ch == ':') prerequisites = 1;
-      continue;
-    }
-    if(* ch == '\\' && ch[1]){
-      ch ++;
-      if(* ch == '\n') continue;
-      Buffer_write_char(word, * ch);
-      continue;
-    }
-    if(* ch == '$' && ch[1] == '$'){
-      Buffer_write_char(word, '$');
-      ch ++;
-      continue;
-    }
-    if(* ch == '\n') break;
-    if(* ch == ' ' || * ch == '\t' || * ch == '\r'){
-      if(Buffer_len(word)){
-        Array_push(paths, String_var(Buffer_str(word)));
-        Buffer_clear(word);
-      }
-      continue;
-    }
-    Buffer_write_char(word, * ch);
-  }
-  if(Buffer_len(word)) Array_push(paths, String_var(Buffer_str(word)));
-  Buffer_free(word);
-  return Array_list_free(paths);
-}
-
-Buffer Buffer_write(Buffer, const char *);
-
-int String_try_next(String, int *, int *);
-
-static void _write_word(Buffer out, String word){
-  if(! String_truth(word)) Buffer_write(out, "\\ ");
-  {
-    char ch;
-    String _x2c_macro_object_0 = word;
-    int _x2c_macro_cursor_0 = 0;
-    int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      ch = _x2c_macro_cursor_output_0;
-      {
-        if(ch == '$') Buffer_write_char(out, '$');
-        else if(ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\') Buffer_write_char(out, '\\');
-        Buffer_write_char(out, ch);
-      }
-
-    }
-
-  }
-
-}
-
-void x2c_cleanup_push(X2CCleanup *);
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-Array Array_sort(Array);
 
 String String_rstrip(String, char *);
 
 String Path_stem(Path);
-
-int Array_try_next(Array, int *, Var *);
-
-String Var_string(Var);
-
-Path Path_absolute(Path);
-
-int String_equal(String, String);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
-  Array paths = Array_new();
-  {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & paths;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
-    {
-      {
-        Var path, content_hash;
-        Map _x2c_macro_object_1 = compiler -> deps;
-        unsigned _x2c_macro_cursor_1 = 0;
-        Var _x2c_macro_cursor_output_1;
-        Var _x2c_macro_cursor_output_2;
-        while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
-          path = _x2c_macro_cursor_output_1;
-          content_hash = _x2c_macro_cursor_output_2;
-          Array_push(paths, path);
-        }
-
-      }
-      if(! Array_len(paths)) Array_push(paths, String_var(input));
-      Array_sort(paths);
-      Buffer out = Buffer_new(0);
-      {
-        _x2c_defer_env_0 _x2c_macro_environment_0 ={
-          0
-        }
-        ;
-        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
-        X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_1);
-        {
-          String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
-          _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))));
-          if(! String_truth(request -> dep_target)){
-            Buffer_write_char(out, ' ');
-            _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
-          }
-          Buffer_write_char(out, ':');
-          {
-            String path;
-            Array _x2c_macro_object_2 = paths;
-            int _x2c_macro_cursor_2 = 0;
-            Var _x2c_macro_cursor_output_3;
-            while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
-              path = Var_string(_x2c_macro_cursor_output_3);
-              {
-                Buffer_write_char(out, ' ');
-                _write_word(out, path);
-              }
-
-            }
-
-          }
-          Buffer_write_char(out, '\n');
-          String primary = Path_absolute(input);
-          if(! request -> no_phony_deps){
-            String path;
-            Array _x2c_macro_object_3 = paths;
-            int _x2c_macro_cursor_3 = 0;
-            Var _x2c_macro_cursor_output_4;
-            while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-              path = Var_string(_x2c_macro_cursor_output_4);
-              if(! String_equal(path, primary)){
-                _write_word(out, path);
-                Buffer_write(out, ":\n");
-              }
-
-            }
-
-          }
-          {
-            String _x2c_return_value_0 = Buffer_str(out);
-            {
-              x2c_cleanup_leave(& _x2c_defer_record_1);
-              x2c_cleanup_leave(& _x2c_defer_record_0);
-              return _x2c_return_value_0;
-            }
-
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
-  }
-
-}
-
-int CliRequest_inspects(CliRequest);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
@@ -279,7 +89,7 @@ Var List_assoc(List, Var);
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
-  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), cons(String_var(_3), NULL)))));
+  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), cons(String_var(_1), NULL)))));
   long volatile error = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -297,12 +107,12 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       file_publish(cons(String_var(path), cons(String_var(_contents(request, compiler, input, output_dir)), NULL)));
       {
-        int _x2c_return_value_1 = 1;
+        int _x2c_return_value_0 = 1;
         {
           x2c_error_catch_close(_x2c_error_handler_0);
           _x2c_error_handler_0 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_1;
+          return _x2c_return_value_0;
         }
 
       }
@@ -335,6 +145,199 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
   }
   fprintf(stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path, strerror(error));
   return 0;
+}
+
+Array Array_new(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+Var Array_push(Array, Var);
+
+Array Array_sort(Array);
+
+Buffer Buffer_new(size_t);
+
+Buffer Buffer_write_char(Buffer, char);
+
+int Array_try_next(Array, int *, Var *);
+
+String Var_string(Var);
+
+Path Path_absolute(Path);
+
+String Buffer_str(Buffer);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
+  Array paths = Array_new();
+  {
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & paths;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      {
+        Var path, content_hash;
+        Map _x2c_macro_object_0 = compiler -> deps;
+        unsigned _x2c_macro_cursor_0 = 0;
+        Var _x2c_macro_cursor_output_0;
+        Var _x2c_macro_cursor_output_1;
+        while(Map_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
+          path = _x2c_macro_cursor_output_0;
+          content_hash = _x2c_macro_cursor_output_1;
+          Array_push(paths, path);
+        }
+
+      }
+      if(! Array_len(paths)) Array_push(paths, String_var(input));
+      Array_sort(paths);
+      Buffer out = Buffer_new(0);
+      {
+        _x2c_defer_env_0 _x2c_macro_environment_0 ={
+          0
+        }
+        ;
+        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          _write_targets(out, request, input, output_dir);
+          Buffer_write_char(out, ':');
+          {
+            String path;
+            Array _x2c_macro_object_1 = paths;
+            int _x2c_macro_cursor_1 = 0;
+            Var _x2c_macro_cursor_output_2;
+            while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_2))){
+              path = Var_string(_x2c_macro_cursor_output_2);
+              {
+                Buffer_write_char(out, ' ');
+                _write_word(out, path);
+              }
+
+            }
+
+          }
+          Buffer_write_char(out, '\n');
+          if(! request -> no_phony_deps) _write_phony(out, paths, Path_absolute(input));
+          {
+            String _x2c_return_value_1 = Buffer_str(out);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_1);
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_1;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+static void _write_targets(Buffer out, CliRequest request, String input, String output_dir){
+  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
+  _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
+  if(String_truth(request -> dep_target)) return;
+  Buffer_write_char(out, ' ');
+  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_3), NULL))));
+}
+
+int String_equal(String, String);
+
+Buffer Buffer_write(Buffer, const char *);
+
+static void _write_phony(Buffer out, Array paths, String primary){
+  {
+    String path;
+    Array _x2c_macro_object_2 = paths;
+    int _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_3;
+    while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
+      path = Var_string(_x2c_macro_cursor_output_3);
+      if(! String_equal(path, primary)){
+        _write_word(out, path);
+        Buffer_write(out, ":\n");
+      }
+
+    }
+
+  }
+
+}
+
+int String_try_next(String, int *, int *);
+
+static void _write_word(Buffer out, String word){
+  if(! String_truth(word)) Buffer_write(out, "\\ ");
+  {
+    char ch;
+    String _x2c_macro_object_3 = word;
+    int _x2c_macro_cursor_3 = 0;
+    int _x2c_macro_cursor_output_4;
+    while(String_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
+      ch = _x2c_macro_cursor_output_4;
+      {
+        if(ch == '$') Buffer_write_char(out, '$');
+        else if(ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\') Buffer_write_char(out, '\\');
+        Buffer_write_char(out, ch);
+      }
+
+    }
+
+  }
+
+}
+
+void Buffer_free(Buffer);
+
+List Array_list_free(Array);
+
+List translation_depfile_parse(String text){
+  const char * ch = String_truth(text) ? strchr(text, ':') : NULL;
+  if(! ch) return NULL;
+  Array paths = Array_new();
+  Buffer word = Buffer_new(0);
+  for(ch ++;  * ch && * ch != '\n';  ch ++){
+    if(* ch == '\\' && ch[1]){
+      ch ++;
+      if(* ch != '\n') Buffer_write_char(word, * ch);
+      continue;
+    }
+    if(* ch == '$' && ch[1] == '$') ch ++;
+    if(* ch == ' ' || * ch == '\t' || * ch == '\r') _push_word(paths, word);
+    else Buffer_write_char(word, * ch);
+  }
+  _push_word(paths, word);
+  Buffer_free(word);
+  return Array_list_free(paths);
+}
+
+size_t Buffer_len(Buffer);
+
+Buffer Buffer_clear(Buffer);
+
+static void _push_word(Array paths, Buffer word){
+  if(! Buffer_len(word)) return;
+  Array_push(paths, String_var(Buffer_str(word)));
+  Buffer_clear(word);
 }
 
 void Buffer_cleanup(Buffer);

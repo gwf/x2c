@@ -19,47 +19,45 @@ String x2c_get_root(void);
 
 String x2c_get_executable(void);
 
-String x2c_package_directory(List roots, String path);
-
-String x2c_package_entry(SourceView sources, List roots, String name, String * directory);
-
-int x2c_source_file(String path);
-
-int x2c_layout_file(String path);
-
-int x2c_package_source(String directory, String path);
-
-List x2c_default_include_dirs(void);
-
-List x2c_cpp_include_dirs(void);
-
 String x2c_home(void);
+
+String x2c_stage_dir(void);
 
 String x2c_home_packages(void);
 
 String x2c_home_libexec(void);
 
-String x2c_stage_dir(void);
+List x2c_default_include_dirs(void);
+
+List x2c_cpp_include_dirs(void);
 
 String x2c_find_program(String name);
 
-_Noreturn void x2c_driver_error(const char * message);
+int x2c_source_file(String path);
 
-void x2c_host_error(List detail);
+int x2c_layout_file(String path);
+
+String x2c_package_directory(List roots, String path);
+
+String x2c_package_entry(SourceView sources, List roots, String name, String * directory);
+
+int x2c_package_source(String directory, String path);
+
+String x2c_compiler_identity(void);
+
+String build_module_stamp(void);
+
+String x2c_file_identity(String path);
+
+uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok);
+
+uint64_t x2c_fnv_bytes(uint64_t hash, const void * bytes, size_t length);
+
+String x2c_filename_hash(String filename);
 
 int file_lock(Path p, int wait);
 
 void file_publish(List outputs);
-
-uint64_t x2c_fnv_bytes(uint64_t hash, const void * bytes, size_t length);
-
-uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok);
-
-String x2c_compiler_identity(void);
-
-String x2c_file_identity(String path);
-
-String build_module_stamp(void);
 
 long worker_fork(void);
 
@@ -67,7 +65,9 @@ _Noreturn void worker_exit(int status);
 
 int worker_wait_any(long * pids, int count, int * status);
 
-String x2c_filename_hash(String filename);
+_Noreturn void x2c_driver_error(const char * message);
+
+void x2c_host_error(List detail);
 
 
 #endif /* __GUARD_0x6E6B8BB0__ */

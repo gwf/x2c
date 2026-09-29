@@ -14,8 +14,9 @@ Host preprocessing, compilation, archive, and link actions.
 | --- | --- |
 | [`tool_action_new`](#tool_action_new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`tool_capture`](#tool_capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
+| [`toolchain_meta`](#toolchain_meta) | Creates the toolchain that builds meta code with `cc`. |
 | [`toolchain_meta_cc`](#toolchain_meta_cc) | Returns the host C compiler that builds meta code, which runs in this process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never the target compiler. |
-| [`toolchain_new`](#toolchain_new) | Creates a `Scope`-owned host toolchain and resolves its native layout. |
+| [`toolchain_new`](#toolchain_new) | Creates a `Scope`-owned host toolchain with the tools, native options, and verbose and dry-run modes of `request`, and resolves its native layout. |
 | [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
@@ -40,7 +41,7 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:200`
+Source: `src/toolchain.x:137`
 
 #### tool_capture
 
@@ -50,7 +51,16 @@ Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127
 and leaves the reason in `errors`.
 
-Source: `src/toolchain.x:267`
+Source: `src/toolchain.x:293`
+
+#### toolchain_meta
+
+`Toolchain toolchain_meta(String cc)`
+
+Creates the toolchain that builds meta code with `cc`. It selects the
+archiver as `toolchain_new` does and has no native options.
+
+Source: `src/toolchain.x:76`
 
 #### toolchain_meta_cc
 
@@ -60,21 +70,23 @@ Returns the host C compiler that builds meta code, which runs in this
 process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
 the target compiler.
 
-Source: `src/toolchain.x:118`
+Source: `src/toolchain.x:128`
 
 #### toolchain_new
 
-`Toolchain toolchain_new( String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run)`
+`Toolchain toolchain_new(CliRequest request)`
 
-Creates a `Scope`-owned host toolchain and resolves its native layout.
-Tool selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
+Creates a `Scope`-owned host toolchain with the tools, native options,
+and verbose and dry-run modes of `request`, and resolves its native
+layout. Tool
+selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
 installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
 option `List`s are borrowed.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
 or its canonical layout.
 
-Source: `src/toolchain.x:100`
+Source: `src/toolchain.x:65`
 
 ### `ToolAction`
 
@@ -85,7 +97,7 @@ Source: `src/toolchain.x:100`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:211`
+Source: `src/toolchain.x:147`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -97,7 +109,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:372`
+Source: `src/toolchain.x:236`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -111,7 +123,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:322`
+Source: `src/toolchain.x:245`
 
 ### `ToolRun`
 
@@ -123,7 +135,7 @@ Source: `src/toolchain.x:322`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:340`
+Source: `src/toolchain.x:263`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -138,7 +150,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:350`
+Source: `src/toolchain.x:273`
 
 ### `Toolchain`
 
@@ -153,7 +165,7 @@ membership must unlink `output` before it runs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:159`
+Source: `src/toolchain.x:193`
 
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
@@ -167,7 +179,7 @@ configured compiler arguments. The action requests dependency output at
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:132`
+Source: `src/toolchain.x:163`
 
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
@@ -180,7 +192,7 @@ runtime archive, and `-lm` follow the inputs.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:170`
+Source: `src/toolchain.x:203`
 
 <a id="Toolchain.module_action"></a>
 #### Toolchain.module_action
@@ -196,7 +208,7 @@ a missing runtime function fails when the compiler loads it.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:185`
+Source: `src/toolchain.x:217`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -218,7 +230,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:392`
+Source: `src/toolchain.x:338`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -231,7 +243,7 @@ markers, so source locations belong to the identity.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:146`
+Source: `src/toolchain.x:176`
 
 <a id="Toolchain.search_directories"></a>
 #### Toolchain.search_directories
@@ -243,7 +255,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:283`
+Source: `src/toolchain.x:391`
 
 ## Public types
 
@@ -267,7 +279,7 @@ Source: `src/toolchain.x:28`
 <a id="ToolRun"></a>
 ### ToolRun
 
-`typedef struct ToolRun { ToolAction action; Job job; String start_error; } *ToolRun`
+`typedef struct ToolRun { ToolAction action, Job job, String start_error; } *ToolRun`
 
 Tracks one `Scope`-owned started action and its job.
 A tool that could not start has no job and keeps the message its
@@ -283,8 +295,7 @@ Source: `src/toolchain.x:37`
 
 Holds resolved host tools, native layout, and borrowed option `List`s.
 The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
-follow
-their owning canonical pools, which may be ancestors; `cpp_args`,
+follow their owning canonical pools, which may be ancestors; `cpp_args`,
 `cc_args`, and `ld_args` are retained without copying.
 
 Source: `src/toolchain.x:19`

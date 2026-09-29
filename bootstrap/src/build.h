@@ -19,37 +19,35 @@ typedef struct Build{
   Array compile_commands;
   unsigned long started_at;
   double started_wall;
-  unsigned long xlat_start;
-  unsigned long cc_start;
-  unsigned long final_at;
+  unsigned long xlat_start, cc_start, final_at;
   unsigned long long gen_bytes;
   int xlat_n, xlat_done, xlat_cached, cc_n, cc_done, cc_cached, final_cached;
 }
 * Build;
 
+Build CliRequest_prepare(CliRequest request);
+
 void build_check_input(String input);
 
-Build CliRequest_prepare(CliRequest c);
+String Build_generated_dir(Build b, String input);
 
-String Build_generated_dir(Build state, String input);
+int Build_translation_current(Build b, String input, String directory);
 
-int Build_translation_current(Build state, String input, String directory);
+void Build_begin_translation(Build b, String input);
 
-void Build_record_translation(Build state, String input, String directory);
+void Build_end_translation(Build b, String input, int cached);
 
-void Build_add_generated(Build state, String input, String directory);
+void Build_record_translation(Build b, String input, String directory);
+
+void Build_add_generated(Build b, String input, String directory);
 
 CliRequest Build_module_entry(Build b);
 
 CliRequest Build_extension_entries(Build b);
 
-void Build_begin_translation(Build state, String input);
-
-void Build_end_translation(Build state, String input, int cached);
+int Build_finish(Build b);
 
 int compile_commands_write(String path, Array commands);
-
-int Build_finish(Build b);
 
 void Build_report_success(Build b);
 
@@ -61,7 +59,7 @@ List Build_script_helpers(Build b);
 
 void Build_publish_script(Build b, String executable);
 
-int CliRequest_script_current(CliRequest c, String directory);
+int CliRequest_script_current(CliRequest request, String directory);
 
 
 #endif /* __GUARD_0x8309C62D__ */
