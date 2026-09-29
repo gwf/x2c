@@ -89,9 +89,22 @@ static List _type_literal(Compiler compiler, Type type);
 
 static List _func_signature_literal(Compiler compiler, Type type);
 
-static List _adapter_reader_call(Compiler compiler, Type result_type, List helper, Type helper_type, List fn_binding, List argv_binding, int index, List details);
+typedef struct FuncReaders{
+  Compiler compiler;
+  Type diagnostic_type;
+  List value, reference, fn, argv;
+}
+FuncReaders;
 
-static List _checked_func_argument(Compiler compiler, List adapter_type, Type parameter_type, List value_helper, Type value_helper_type, List reference_helper, Type reference_helper_type, List fn_binding, List argv_binding, int index, Type * storage_type);
+static List _adapter_reader_call(FuncReaders readers, Type result_type, List target, int index, List details);
+
+static List _read_reference_arg(FuncReaders readers, Type parameter_type, int index, Type * storage_type);
+
+static List _read_pointer_arg(FuncReaders readers, Type parameter_type, Type resolved, int index, Type * storage_type);
+
+static List _read_value_arg(FuncReaders readers, Type parameter_type, Symbol tag, int index, Type * storage_type);
+
+static List _checked_func_argument(FuncReaders readers, Type parameter_type, int index, Type * storage_type);
 
 static List _func_argument_locals(Compiler compiler, Type diagnostic_type, List types, List names, List fn_binding, List argv_binding);
 
@@ -113,7 +126,7 @@ static List _func_call(Compiler compiler, Type type, List callee, List arguments
 
 static List _func_return_body(Compiler compiler, List value);
 
-static List _build_indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type, List key);
+static List _build_indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type);
 
 static List _indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type, Type * out_context_type, List * out_context_field);
 
@@ -173,7 +186,34 @@ static List _block_returns(List ast);
 
 static List _helper_body(Compiler compiler, List body, List setup);
 
-static List _lower_captured_lambda(Compiler compiler, List entries, List captures, List body);
+typedef struct CaptureBuild{
+  Compiler compiler;
+  List entries, body, adapter, closure, argv, environment_type_binding;
+  List environment_local, constructor, signature;
+  String environment_name;
+  Type value_type, pointer_type, adapter_type, constructor_type;
+  Map slots;
+  Array fields, field_types, locals, values;
+}
+CaptureBuild;
+
+static void _capture_field(CaptureBuild * build, List capture);
+
+static void _capture_environment(CaptureBuild * build, List captures);
+
+static void _capture_adapter(CaptureBuild * build);
+
+static List _capture_construct(CaptureBuild * build, List context);
+
+static List _capture_storage(CaptureBuild * build, List context, List values);
+
+static List _capture_result(CaptureBuild * build, List storage, List value);
+
+static List _capture_inline(CaptureBuild * build);
+
+static List _capture_plain(CaptureBuild * build);
+
+static List _lower_captured_lambda(Compiler c, List entries, List captures, List body);
 
 static String _frame_type;
 
@@ -1032,11 +1072,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _352 = cons(_351, NULL);
   _353 = cons(_199, _352);
   _354 = List_var(_353);
-  _355 = int_var(360);
+  _355 = int_var(365);
   _356 = cons(_355, NULL);
   _357 = cons(_205, _356);
   _358 = List_var(_357);
-  _359 = int_var(12933);
+  _359 = int_var(12964);
   _360 = cons(_359, NULL);
   _361 = cons(_220, _360);
   _362 = List_var(_361);
@@ -1161,11 +1201,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _481 = cons(_480, NULL);
   _482 = cons(_179, _481);
   _483 = List_var(_482);
-  _484 = int_var(363);
+  _484 = int_var(368);
   _485 = cons(_484, NULL);
   _486 = cons(_205, _485);
   _487 = List_var(_486);
-  _488 = int_var(13062);
+  _488 = int_var(13093);
   _489 = cons(_488, NULL);
   _490 = cons(_220, _489);
   _491 = List_var(_490);
@@ -1213,11 +1253,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _533 = cons(_532, NULL);
   _534 = cons(_179, _533);
   _535 = List_var(_534);
-  _536 = int_var(356);
+  _536 = int_var(361);
   _537 = cons(_536, NULL);
   _538 = cons(_205, _537);
   _539 = List_var(_538);
-  _540 = int_var(12806);
+  _540 = int_var(12837);
   _541 = cons(_540, NULL);
   _542 = cons(_220, _541);
   _543 = List_var(_542);
@@ -1258,11 +1298,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _578 = cons(_577, NULL);
   _579 = cons(_179, _578);
   _580 = List_var(_579);
-  _581 = int_var(358);
+  _581 = int_var(363);
   _582 = cons(_581, NULL);
   _583 = cons(_205, _582);
   _584 = List_var(_583);
-  _585 = int_var(12868);
+  _585 = int_var(12899);
   _586 = cons(_585, NULL);
   _587 = cons(_220, _586);
   _588 = List_var(_587);
@@ -1356,11 +1396,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _676 = cons(_675, NULL);
   _677 = cons(_179, _676);
   _678 = List_var(_677);
-  _679 = int_var(460);
+  _679 = int_var(487);
   _680 = cons(_679, NULL);
   _681 = cons(_205, _680);
   _682 = List_var(_681);
-  _683 = int_var(17147);
+  _683 = int_var(17785);
   _684 = cons(_683, NULL);
   _685 = cons(_220, _684);
   _686 = List_var(_685);
@@ -1576,11 +1616,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _896 = cons(_895, NULL);
   _897 = cons(_179, _896);
   _898 = List_var(_897);
-  _899 = int_var(613);
+  _899 = int_var(640);
   _900 = cons(_899, NULL);
   _901 = cons(_205, _900);
   _902 = List_var(_901);
-  _903 = int_var(23269);
+  _903 = int_var(23907);
   _904 = cons(_903, NULL);
   _905 = cons(_220, _904);
   _906 = List_var(_905);
@@ -1698,11 +1738,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1018 = cons(_1017, NULL);
   _1019 = cons(_179, _1018);
   _1020 = List_var(_1019);
-  _1021 = int_var(617);
+  _1021 = int_var(644);
   _1022 = cons(_1021, NULL);
   _1023 = cons(_205, _1022);
   _1024 = List_var(_1023);
-  _1025 = int_var(23374);
+  _1025 = int_var(24012);
   _1026 = cons(_1025, NULL);
   _1027 = cons(_220, _1026);
   _1028 = List_var(_1027);
@@ -1792,11 +1832,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1112 = cons(_1111, NULL);
   _1113 = cons(_179, _1112);
   _1114 = List_var(_1113);
-  _1115 = int_var(622);
+  _1115 = int_var(649);
   _1116 = cons(_1115, NULL);
   _1117 = cons(_205, _1116);
   _1118 = List_var(_1117);
-  _1119 = int_var(23503);
+  _1119 = int_var(24141);
   _1120 = cons(_1119, NULL);
   _1121 = cons(_220, _1120);
   _1122 = List_var(_1121);
@@ -1904,11 +1944,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1224 = cons(_1223, NULL);
   _1225 = cons(_179, _1224);
   _1226 = List_var(_1225);
-  _1227 = int_var(624);
+  _1227 = int_var(651);
   _1228 = cons(_1227, NULL);
   _1229 = cons(_205, _1228);
   _1230 = List_var(_1229);
-  _1231 = int_var(23570);
+  _1231 = int_var(24208);
   _1232 = cons(_1231, NULL);
   _1233 = cons(_220, _1232);
   _1234 = List_var(_1233);
@@ -2398,11 +2438,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1718 = cons(_1717, NULL);
   _1719 = cons(_179, _1718);
   _1720 = List_var(_1719);
-  _1721 = int_var(1202);
+  _1721 = int_var(1228);
   _1722 = cons(_1721, NULL);
   _1723 = cons(_205, _1722);
   _1724 = List_var(_1723);
-  _1725 = int_var(44756);
+  _1725 = int_var(45377);
   _1726 = cons(_1725, NULL);
   _1727 = cons(_220, _1726);
   _1728 = List_var(_1727);
@@ -2490,11 +2530,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1810 = cons(_1809, NULL);
   _1811 = cons(_179, _1810);
   _1812 = List_var(_1811);
-  _1813 = int_var(1206);
+  _1813 = int_var(1232);
   _1814 = cons(_1813, NULL);
   _1815 = cons(_205, _1814);
   _1816 = List_var(_1815);
-  _1817 = int_var(44910);
+  _1817 = int_var(45531);
   _1818 = cons(_1817, NULL);
   _1819 = cons(_220, _1818);
   _1820 = List_var(_1819);
@@ -2582,11 +2622,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1902 = cons(_1901, NULL);
   _1903 = cons(_179, _1902);
   _1904 = List_var(_1903);
-  _1905 = int_var(1210);
+  _1905 = int_var(1236);
   _1906 = cons(_1905, NULL);
   _1907 = cons(_205, _1906);
   _1908 = List_var(_1907);
-  _1909 = int_var(45027);
+  _1909 = int_var(45648);
   _1910 = cons(_1909, NULL);
   _1911 = cons(_220, _1910);
   _1912 = List_var(_1911);
@@ -2770,11 +2810,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2090 = cons(_2089, NULL);
   _2091 = cons(_179, _2090);
   _2092 = List_var(_2091);
-  _2093 = int_var(1495);
+  _2093 = int_var(1521);
   _2094 = cons(_2093, NULL);
   _2095 = cons(_205, _2094);
   _2096 = List_var(_2095);
-  _2097 = int_var(55299);
+  _2097 = int_var(55920);
   _2098 = cons(_2097, NULL);
   _2099 = cons(_220, _2098);
   _2100 = List_var(_2099);
@@ -2843,11 +2883,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2163 = cons(_2162, NULL);
   _2164 = cons(_179, _2163);
   _2165 = List_var(_2164);
-  _2166 = int_var(1499);
+  _2166 = int_var(1525);
   _2167 = cons(_2166, NULL);
   _2168 = cons(_205, _2167);
   _2169 = List_var(_2168);
-  _2170 = int_var(55416);
+  _2170 = int_var(56037);
   _2171 = cons(_2170, NULL);
   _2172 = cons(_220, _2171);
   _2173 = List_var(_2172);
@@ -2956,11 +2996,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2276 = cons(_2275, NULL);
   _2277 = cons(_179, _2276);
   _2278 = List_var(_2277);
-  _2279 = int_var(1738);
+  _2279 = int_var(1782);
   _2280 = cons(_2279, NULL);
   _2281 = cons(_205, _2280);
   _2282 = List_var(_2281);
-  _2283 = int_var(65947);
+  _2283 = int_var(66825);
   _2284 = cons(_2283, NULL);
   _2285 = cons(_220, _2284);
   _2286 = List_var(_2285);
@@ -3097,11 +3137,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2420 = cons(_2419, NULL);
   _2421 = cons(_179, _2420);
   _2422 = List_var(_2421);
-  _2423 = int_var(1780);
+  _2423 = int_var(1824);
   _2424 = cons(_2423, NULL);
   _2425 = cons(_205, _2424);
   _2426 = List_var(_2425);
-  _2427 = int_var(67186);
+  _2427 = int_var(68064);
   _2428 = cons(_2427, NULL);
   _2429 = cons(_220, _2428);
   _2430 = List_var(_2429);
@@ -3288,11 +3328,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2611 = cons(_2610, NULL);
   _2612 = cons(_179, _2611);
   _2613 = List_var(_2612);
-  _2614 = int_var(1791);
+  _2614 = int_var(1835);
   _2615 = cons(_2614, NULL);
   _2616 = cons(_205, _2615);
   _2617 = List_var(_2616);
-  _2618 = int_var(67425);
+  _2618 = int_var(68303);
   _2619 = cons(_2618, NULL);
   _2620 = cons(_220, _2619);
   _2621 = List_var(_2620);
@@ -3337,11 +3377,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _2660 = cons(_2659, NULL);
   _2661 = cons(_179, _2660);
   _2662 = List_var(_2661);
-  _2663 = int_var(1785);
+  _2663 = int_var(1829);
   _2664 = cons(_2663, NULL);
   _2665 = cons(_205, _2664);
   _2666 = List_var(_2665);
-  _2667 = int_var(67297);
+  _2667 = int_var(68175);
   _2668 = cons(_2667, NULL);
   _2669 = cons(_220, _2668);
   _2670 = List_var(_2669);
@@ -3985,11 +4025,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3313 = cons(_3312, NULL);
   _3314 = cons(_179, _3313);
   _3315 = List_var(_3314);
-  _3316 = int_var(2395);
+  _3316 = int_var(2439);
   _3317 = cons(_3316, NULL);
   _3318 = cons(_205, _3317);
   _3319 = List_var(_3318);
-  _3320 = int_var(90277);
+  _3320 = int_var(91155);
   _3321 = cons(_3320, NULL);
   _3322 = cons(_220, _3321);
   _3323 = List_var(_3322);
@@ -4138,11 +4178,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3471 = cons(_3470, NULL);
   _3472 = cons(_179, _3471);
   _3473 = List_var(_3472);
-  _3474 = int_var(2408);
+  _3474 = int_var(2452);
   _3475 = cons(_3474, NULL);
   _3476 = cons(_205, _3475);
   _3477 = List_var(_3476);
-  _3478 = int_var(90782);
+  _3478 = int_var(91660);
   _3479 = cons(_3478, NULL);
   _3480 = cons(_220, _3479);
   _3481 = List_var(_3480);
@@ -4244,11 +4284,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3577 = cons(_3576, NULL);
   _3578 = cons(_179, _3577);
   _3579 = List_var(_3578);
-  _3580 = int_var(2435);
+  _3580 = int_var(2479);
   _3581 = cons(_3580, NULL);
   _3582 = cons(_205, _3581);
   _3583 = List_var(_3582);
-  _3584 = int_var(91761);
+  _3584 = int_var(92639);
   _3585 = cons(_3584, NULL);
   _3586 = cons(_220, _3585);
   _3587 = List_var(_3586);
@@ -4513,11 +4553,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3846 = cons(_3845, NULL);
   _3847 = cons(_179, _3846);
   _3848 = List_var(_3847);
-  _3849 = int_var(2414);
+  _3849 = int_var(2458);
   _3850 = cons(_3849, NULL);
   _3851 = cons(_205, _3850);
   _3852 = List_var(_3851);
-  _3853 = int_var(90978);
+  _3853 = int_var(91856);
   _3854 = cons(_3853, NULL);
   _3855 = cons(_220, _3854);
   _3856 = List_var(_3855);
@@ -4625,11 +4665,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _3958 = cons(_3957, NULL);
   _3959 = cons(_179, _3958);
   _3960 = List_var(_3959);
-  _3961 = int_var(2428);
+  _3961 = int_var(2472);
   _3962 = cons(_3961, NULL);
   _3963 = cons(_205, _3962);
   _3964 = List_var(_3963);
-  _3965 = int_var(91545);
+  _3965 = int_var(92423);
   _3966 = cons(_3965, NULL);
   _3967 = cons(_220, _3966);
   _3968 = List_var(_3967);
@@ -4978,11 +5018,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4311 = cons(_4310, NULL);
   _4312 = cons(_179, _4311);
   _4313 = List_var(_4312);
-  _4314 = int_var(2378);
+  _4314 = int_var(2422);
   _4315 = cons(_4314, NULL);
   _4316 = cons(_205, _4315);
   _4317 = List_var(_4316);
-  _4318 = int_var(89770);
+  _4318 = int_var(90648);
   _4319 = cons(_4318, NULL);
   _4320 = cons(_220, _4319);
   _4321 = List_var(_4320);
@@ -5103,11 +5143,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4436 = cons(_4435, NULL);
   _4437 = cons(_179, _4436);
   _4438 = List_var(_4437);
-  _4439 = int_var(2558);
+  _4439 = int_var(2602);
   _4440 = cons(_4439, NULL);
   _4441 = cons(_205, _4440);
   _4442 = List_var(_4441);
-  _4443 = int_var(96523);
+  _4443 = int_var(97401);
   _4444 = cons(_4443, NULL);
   _4445 = cons(_220, _4444);
   _4446 = List_var(_4445);
@@ -5279,11 +5319,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4612 = cons(_4611, NULL);
   _4613 = cons(_179, _4612);
   _4614 = List_var(_4613);
-  _4615 = int_var(2562);
+  _4615 = int_var(2606);
   _4616 = cons(_4615, NULL);
   _4617 = cons(_205, _4616);
   _4618 = List_var(_4617);
-  _4619 = int_var(96644);
+  _4619 = int_var(97522);
   _4620 = cons(_4619, NULL);
   _4621 = cons(_220, _4620);
   _4622 = List_var(_4621);
@@ -5434,11 +5474,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4767 = cons(_4766, NULL);
   _4768 = cons(_179, _4767);
   _4769 = List_var(_4768);
-  _4770 = int_var(2569);
+  _4770 = int_var(2613);
   _4771 = cons(_4770, NULL);
   _4772 = cons(_205, _4771);
   _4773 = List_var(_4772);
-  _4774 = int_var(96889);
+  _4774 = int_var(97767);
   _4775 = cons(_4774, NULL);
   _4776 = cons(_220, _4775);
   _4777 = List_var(_4776);
@@ -5612,11 +5652,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _4945 = cons(_4944, NULL);
   _4946 = cons(_179, _4945);
   _4947 = List_var(_4946);
-  _4948 = int_var(2548);
+  _4948 = int_var(2592);
   _4949 = cons(_4948, NULL);
   _4950 = cons(_205, _4949);
   _4951 = List_var(_4950);
-  _4952 = int_var(96205);
+  _4952 = int_var(97083);
   _4953 = cons(_4952, NULL);
   _4954 = cons(_220, _4953);
   _4955 = List_var(_4954);
@@ -6304,11 +6344,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5640 = cons(_5639, NULL);
   _5641 = cons(_179, _5640);
   _5642 = List_var(_5641);
-  _5643 = int_var(3147);
+  _5643 = int_var(3191);
   _5644 = cons(_5643, NULL);
   _5645 = cons(_205, _5644);
   _5646 = List_var(_5645);
-  _5647 = int_var(118786);
+  _5647 = int_var(119664);
   _5648 = cons(_5647, NULL);
   _5649 = cons(_220, _5648);
   _5650 = List_var(_5649);
@@ -6440,11 +6480,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5776 = cons(_5775, NULL);
   _5777 = cons(_179, _5776);
   _5778 = List_var(_5777);
-  _5779 = int_var(3188);
+  _5779 = int_var(3232);
   _5780 = cons(_5779, NULL);
   _5781 = cons(_205, _5780);
   _5782 = List_var(_5781);
-  _5783 = int_var(120033);
+  _5783 = int_var(120911);
   _5784 = cons(_5783, NULL);
   _5785 = cons(_220, _5784);
   _5786 = List_var(_5785);
@@ -6526,11 +6566,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5862 = cons(_5861, NULL);
   _5863 = cons(_179, _5862);
   _5864 = List_var(_5863);
-  _5865 = int_var(3150);
+  _5865 = int_var(3194);
   _5866 = cons(_5865, NULL);
   _5867 = cons(_205, _5866);
   _5868 = List_var(_5867);
-  _5869 = int_var(118881);
+  _5869 = int_var(119759);
   _5870 = cons(_5869, NULL);
   _5871 = cons(_220, _5870);
   _5872 = List_var(_5871);
@@ -6564,11 +6604,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5900 = cons(_5899, NULL);
   _5901 = cons(_179, _5900);
   _5902 = List_var(_5901);
-  _5903 = int_var(3196);
+  _5903 = int_var(3240);
   _5904 = cons(_5903, NULL);
   _5905 = cons(_205, _5904);
   _5906 = List_var(_5905);
-  _5907 = int_var(120203);
+  _5907 = int_var(121081);
   _5908 = cons(_5907, NULL);
   _5909 = cons(_220, _5908);
   _5910 = List_var(_5909);
@@ -6635,11 +6675,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _5971 = cons(_5970, NULL);
   _5972 = cons(_179, _5971);
   _5973 = List_var(_5972);
-  _5974 = int_var(3160);
+  _5974 = int_var(3204);
   _5975 = cons(_5974, NULL);
   _5976 = cons(_205, _5975);
   _5977 = List_var(_5976);
-  _5978 = int_var(119112);
+  _5978 = int_var(119990);
   _5979 = cons(_5978, NULL);
   _5980 = cons(_220, _5979);
   _5981 = List_var(_5980);
@@ -6699,11 +6739,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _6035 = cons(_6034, NULL);
   _6036 = cons(_179, _6035);
   _6037 = List_var(_6036);
-  _6038 = int_var(3155);
+  _6038 = int_var(3199);
   _6039 = cons(_6038, NULL);
   _6040 = cons(_205, _6039);
   _6041 = List_var(_6040);
-  _6042 = int_var(118987);
+  _6042 = int_var(119865);
   _6043 = cons(_6042, NULL);
   _6044 = cons(_220, _6043);
   _6045 = List_var(_6044);
@@ -6834,7 +6874,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _6170 = cons(_6169, NULL);
   _6171 = cons(_179, _6170);
   _6172 = List_var(_6171);
-  _6173 = int_var(3313);
+  _6173 = int_var(3357);
   _6174 = cons(_6173, NULL);
   _6175 = cons(_205, _6174);
   _6176 = List_var(_6175);
@@ -6842,7 +6882,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _6178 = cons(_6177, NULL);
   _6179 = cons(_210, _6178);
   _6180 = List_var(_6179);
-  _6181 = int_var(124969);
+  _6181 = int_var(125847);
   _6182 = cons(_6181, NULL);
   _6183 = cons(_220, _6182);
   _6184 = List_var(_6183);
@@ -7191,11 +7231,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _6527 = cons(_6526, NULL);
   _6528 = cons(_179, _6527);
   _6529 = List_var(_6528);
-  _6530 = int_var(3764);
+  _6530 = int_var(3808);
   _6531 = cons(_6530, NULL);
   _6532 = cons(_205, _6531);
   _6533 = List_var(_6532);
-  _6534 = int_var(142263);
+  _6534 = int_var(143141);
   _6535 = cons(_6534, NULL);
   _6536 = cons(_220, _6535);
   _6537 = List_var(_6536);
@@ -7298,11 +7338,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _6634 = cons(_6633, NULL);
   _6635 = cons(_179, _6634);
   _6636 = List_var(_6635);
-  _6637 = int_var(3761);
+  _6637 = int_var(3805);
   _6638 = cons(_6637, NULL);
   _6639 = cons(_205, _6638);
   _6640 = List_var(_6639);
-  _6641 = int_var(142145);
+  _6641 = int_var(143023);
   _6642 = cons(_6641, NULL);
   _6643 = cons(_220, _6642);
   _6644 = List_var(_6643);
@@ -7355,11 +7395,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _6691 = cons(_6690, NULL);
   _6692 = cons(_179, _6691);
   _6693 = List_var(_6692);
-  _6694 = int_var(3769);
+  _6694 = int_var(3813);
   _6695 = cons(_6694, NULL);
   _6696 = cons(_205, _6695);
   _6697 = List_var(_6696);
-  _6698 = int_var(142435);
+  _6698 = int_var(143313);
   _6699 = cons(_6698, NULL);
   _6700 = cons(_220, _6699);
   _6701 = List_var(_6700);
@@ -7457,11 +7497,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _6793 = cons(_6792, NULL);
   _6794 = cons(_179, _6793);
   _6795 = List_var(_6794);
-  _6796 = int_var(3766);
+  _6796 = int_var(3810);
   _6797 = cons(_6796, NULL);
   _6798 = cons(_205, _6797);
   _6799 = List_var(_6798);
-  _6800 = int_var(142321);
+  _6800 = int_var(143199);
   _6801 = cons(_6800, NULL);
   _6802 = cons(_220, _6801);
   _6803 = List_var(_6802);
@@ -7633,7 +7673,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _6969 = cons(_141, _6968);
   _6970 = List_var(_6969);
   _6971 = Symbol_var(106239471489226);
-  _6972 = int_var(4049);
+  _6972 = int_var(4093);
   _6973 = String_new("");
   _6974 = String_var(_6973);
   _6975 = cons(_258, _32);
@@ -7709,11 +7749,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _7045 = cons(_7044, NULL);
   _7046 = cons(_179, _7045);
   _7047 = List_var(_7046);
-  _7048 = int_var(4047);
+  _7048 = int_var(4091);
   _7049 = cons(_7048, NULL);
   _7050 = cons(_205, _7049);
   _7051 = List_var(_7050);
-  _7052 = int_var(152476);
+  _7052 = int_var(153354);
   _7053 = cons(_7052, NULL);
   _7054 = cons(_220, _7053);
   _7055 = List_var(_7054);
@@ -7758,7 +7798,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _7094 = cons(_7093, NULL);
   _7095 = cons(_141, _7094);
   _7096 = List_var(_7095);
-  _7097 = int_var(4044);
+  _7097 = int_var(4088);
   _7098 = cons(_652, _4035);
   _7099 = List_var(_7098);
   _7100 = cons(_7099, NULL);
@@ -7777,11 +7817,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _7113 = cons(_7112, NULL);
   _7114 = cons(_179, _7113);
   _7115 = List_var(_7114);
-  _7116 = int_var(4042);
+  _7116 = int_var(4086);
   _7117 = cons(_7116, NULL);
   _7118 = cons(_205, _7117);
   _7119 = List_var(_7118);
-  _7120 = int_var(152339);
+  _7120 = int_var(153217);
   _7121 = cons(_7120, NULL);
   _7122 = cons(_220, _7121);
   _7123 = List_var(_7122);
@@ -8084,14 +8124,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _7441 = cons(_7440, _57);
   _7442 = String_new("lambda_cell");
   _7443 = cons(_7440, _3187);
-  _7444 = String_new("lambda");
-  _7445 = String_new("lambda_closure");
-  _7446 = String_new("lambda_argv");
+  _7444 = String_new("lambda_capture");
+  _7445 = String_new("lambda_capture_value");
+  _7446 = String_new("func_from_capture");
   _7447 = String_new("lambda_context");
-  _7448 = String_new("lambda_context_value");
-  _7449 = String_new("lambda_capture");
-  _7450 = String_new("lambda_capture_value");
-  _7451 = String_new("func_from_capture");
+  _7448 = String_new("lambda");
+  _7449 = String_new("lambda_closure");
+  _7450 = String_new("lambda_argv");
+  _7451 = String_new("lambda_context_value");
   _7452 = String_new("ExceptionFrame");
   _7453 = String_new("X2CCleanup");
   _7454 = String_new("ErrorHandler");
@@ -8534,23 +8574,35 @@ static List _func_signature_literal(Compiler compiler, Type type){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-static List _adapter_reader_call(Compiler compiler, Type result_type, List helper, Type helper_type, List fn_binding, List argv_binding, int index, List details){
-  List target = cons(_0, cons(List_var(helper_type), cons(List_var(cons(_88, cons(List_var(helper), NULL))), NULL)));  List fn = cons(_0, cons(_324, cons(List_var(cons(_88, cons(List_var(fn_binding), NULL))), NULL)));  List argv = cons(_0, cons(_331, cons(List_var(cons(_88, cons(List_var(argv_binding), NULL))), NULL)));  List arguments = cons(List_var(fn), cons(List_var(argv), cons(List_var(_integer_expression(index)), List_append(details, NULL))));  return _func_call(compiler, result_type, target, arguments);
+static List _adapter_reader_call(FuncReaders readers, Type result_type, List target, int index, List details){
+  List fn = cons(_0, cons(_324, cons(List_var(cons(_88, cons(List_var(readers.fn), NULL))), NULL)));  List argv = cons(_0, cons(_331, cons(List_var(cons(_88, cons(List_var(readers.argv), NULL))), NULL)));  List arguments = cons(List_var(fn), cons(List_var(argv), cons(List_var(_integer_expression(index)), List_append(details, NULL))));  return _func_call(readers.compiler, result_type, target, arguments);
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 Type Type_reference(Type);
-Symbol Sym_var_tag_for_type(Sym, Type, Type *);
+static List _read_reference_arg(FuncReaders readers, Type parameter_type, int index, Type * storage_type){
+  Compiler compiler = readers.compiler;  Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = _adapter_reader_call(readers, List_type(_332), readers.reference, index, cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))); (* storage_type) = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
 List Compiler_rebuild_expression(Compiler, Type, List);
-static List _checked_func_argument(Compiler compiler, List adapter_type, Type parameter_type, List value_helper, Type value_helper_type, List reference_helper, Type reference_helper_type, List fn_binding, List argv_binding, int index, Type * storage_type){
-  if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77)) || Var_equal(List_car(Type_list(parameter_type)), Symbol_var(33330008396))){
-    Type target = List_cdr(parameter_type), pointer = Type_reference(target);  List picked = _adapter_reader_call(compiler, List_type(_332), reference_helper, reference_helper_type, fn_binding, argv_binding, index, cons(List_var(Compiler_cache_literal_list(compiler, Type_list(target))), cons(List_var(_type_literal(compiler, target)), NULL))); (* storage_type) = pointer;  return Compiler_convert_expression(compiler, picked, pointer);
-  }
-  Symbol tag = Sym_var_tag_for_type(compiler -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key(compiler -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))){
-    Type pointer_type = NULL;  List pointer_helper = _adapter_helper(compiler, _7411, &(pointer_type));  List picked = _adapter_reader_call(compiler, List_type(_332), pointer_helper, pointer_type, fn_binding, argv_binding, index, NULL); (* storage_type) = parameter_type;  if(Type_is_pointer(resolved)) return Compiler_convert_expression(compiler, picked, parameter_type);  Type record_pointer = Type_reference(parameter_type);  List pointer = cons(_0, cons(List_var(record_pointer), cons(List_var(cons(_10, cons(List_var(record_pointer), cons(List_var(picked), NULL)))), NULL)));  Macro dereference = _397;  return Compiler_rebuild_expression(compiler, parameter_type, Macro_apply(dereference, cons(List_var(pointer), NULL)));
-  }
-  if(! tag) _typed_adapter_error(compiler, _7412, List_type(adapter_type), parameter_type, NULL);  List picked = _adapter_reader_call(compiler, List_type(_57), value_helper, value_helper_type, fn_binding, argv_binding, index, cons(List_var(_adapter_symbol_literal(tag)), NULL)); (* storage_type) = parameter_type;  return Compiler_convert_expression(compiler, picked, parameter_type);
+static List _read_pointer_arg(FuncReaders readers, Type parameter_type, Type resolved, int index, Type * storage_type){
+  Compiler compiler = readers.compiler;  Type pointer_type = NULL;  List pointer_helper = _adapter_helper(compiler, _7411, &(pointer_type));  List picked = _adapter_reader_call(readers, List_type(_332), _func_bound(pointer_type, pointer_helper), index, NULL); (* storage_type) = parameter_type;  if(Type_is_pointer(resolved)) return Compiler_convert_expression(compiler, picked, parameter_type);  Type record_pointer = Type_reference(parameter_type);  List pointer = cons(_0, cons(List_var(record_pointer), cons(List_var(cons(_10, cons(List_var(record_pointer), cons(List_var(picked), NULL)))), NULL)));  Macro dereference = _397;  return Compiler_rebuild_expression(compiler, parameter_type, Macro_apply(dereference, cons(List_var(pointer), NULL)));
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _read_value_arg(FuncReaders readers, Type parameter_type, Symbol tag, int index, Type * storage_type){
+  Compiler compiler = readers.compiler;  if(! tag) _typed_adapter_error(compiler, _7412, readers.diagnostic_type, parameter_type, NULL);  List picked = _adapter_reader_call(readers, List_type(_57), readers.value, index, cons(List_var(_adapter_symbol_literal(tag)), NULL)); (* storage_type) = parameter_type;  return Compiler_convert_expression(compiler, picked, parameter_type);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+Symbol Sym_var_tag_for_type(Sym, Type, Type *);
+static List _checked_func_argument(FuncReaders readers, Type parameter_type, int index, Type * storage_type){
+  if(Var_equal(List_car(Type_list(parameter_type)), Symbol_var(77)) || Var_equal(List_car(Type_list(parameter_type)), Symbol_var(33330008396))) return _read_reference_arg(readers, parameter_type, index, &((* storage_type)));  Compiler compiler = readers.compiler;  Symbol tag = Sym_var_tag_for_type(compiler -> sym, parameter_type, NULL);  Type resolved = Sym_resolve_key(compiler -> sym, parameter_type);  if(! tag && List_truth(Type_list(resolved)) &&(Type_is_pointer(resolved) || Var_equal(List_car(Type_list(resolved)), Symbol_var(1318234344)))) return _read_pointer_arg(readers, parameter_type, resolved, index, &((* storage_type)));  return _read_value_arg(readers, parameter_type, tag, index, &((* storage_type)));
 }
 
 #endif
@@ -8558,10 +8610,13 @@ static List _checked_func_argument(Compiler compiler, List adapter_type, Type pa
 List Type_declaration_parts(Type);
 Var List_getindex(List, int);
 static List _func_argument_locals(Compiler compiler, Type diagnostic_type, List types, List names, List fn_binding, List argv_binding){
-  Type value_type = NULL, reference_type = NULL;  List value_helper = _adapter_helper(compiler, _7413, &(value_type));  List reference_helper = _adapter_helper(compiler, _7414, &(reference_type));  Array locals = Array_new();  int index = 0;  Macro local = _511; {
+  Type value_type = NULL, reference_type = NULL;  List value_helper = _adapter_helper(compiler, _7413, &(value_type));  List reference_helper = _adapter_helper(compiler, _7414, &(reference_type));  FuncReaders readers ={
+    .compiler = compiler, .diagnostic_type = diagnostic_type, .value = _func_bound(value_type, value_helper), .reference = _func_bound(reference_type, reference_helper), .fn = fn_binding, .argv = argv_binding
+  }
+  ;  Array locals = Array_new();  int index = 0;  Macro local = _511; {
     Type type;  List _x2c_macro_object_4 = types;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       type = Var_type(_x2c_macro_cursor_output_4); {
-        List binding = Var_list(List_car(names));  names = List_cdr(names);  Type storage_type = NULL;  List value = _checked_func_argument(compiler, Type_list(diagnostic_type), type, value_helper, value_type, reference_helper, reference_type, fn_binding, argv_binding, index ++, &(storage_type));  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List row = cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(binding), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))));  Array_push(locals, List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(base), cons(List_var(row), NULL))))));
+        List binding = Var_list(List_car(names));  names = List_cdr(names);  Type storage_type = NULL;  List value = _checked_func_argument(readers, type, index ++, &(storage_type));  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List row = cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(binding), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))));  Array_push(locals, List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(base), cons(List_var(row), NULL))))));
       }
 
     }
@@ -8684,7 +8739,7 @@ static List _func_return_body(Compiler compiler, List value){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 String binding_identity_spelling(List);
-static List _build_indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type, List key){
+static List _build_indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type){
   String context_name = Compiler_fresh_name(compiler, _7424);  List context_binding = Sym_introduce(compiler -> sym, context_name);  List field_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7425));  List field_base, field_mods;  List _x2c_destructure_2 = Type_declaration_parts(pointer_type);  field_base = Var_list(List_getindex(_x2c_destructure_2, 0));  field_mods = Var_list(List_getindex(_x2c_destructure_2, 1));  Compiler_add_early(compiler, cons(_829, cons(List_var(cons(_830, cons(String_var(context_name), cons(List_var(cons(_831, cons(List_var(cons(_469, cons(List_var(field_base), cons(List_var(cons(_471, cons(List_var(cons(_34, cons(List_var(field_binding), cons(List_var(field_mods), NULL)))), NULL))), NULL)))), NULL))), NULL)))), cons(List_var(cons(_471, cons(List_var(cons(_34, cons(List_var(context_binding), _36))), NULL))), NULL))));  Type context_type = List_type(cons(String_var(context_name), NULL));  Type context_pointer = List_type(cons(_163, cons(_325, cons(String_var(context_name), NULL))));  Type context_helper_type = NULL;  List context_helper = _adapter_helper(compiler, _7426, &(context_helper_type));  if(! List_truth(context_helper) || ! List_truth(Type_list(context_helper_type))) _typed_adapter_error(compiler, _7427, diagnostic_type, pointer_type, NULL);  List fn_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7419));  List context_value = _func_call(compiler, List_type(_833), _func_bound(context_helper_type, context_helper), cons(List_var(_func_bound(List_type(_323), fn_binding)), NULL));  List context_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7424));  List cast = cons(_0, cons(List_var(context_pointer), cons(List_var(cons(_10, cons(List_var(context_pointer), cons(List_var(context_value), NULL)))), NULL)));  Macro storage_shape = _511;  List context_declaration = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(storage_shape, cons(List_var(cons(_325, cons(String_var(context_name), NULL))), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(context_local), _835))), cons(List_var(cast), NULL))))), NULL))))));  String field_name = binding_identity_spelling(field_binding);  List context = _func_bound(context_pointer, context_local);  List target = cons(_0, cons(List_var(pointer_type), cons(List_var(cons(_305, cons(_836, cons(List_var(context), cons(List_var(cons(String_var(field_name), NULL)), NULL))))), NULL)));  List adapter = _build_func_adapter(compiler, diagnostic_type, pointer_type, target, fn_binding, cons(List_var(context_declaration), NULL));  return cons(_837, cons(List_var(adapter), cons(List_var(context_type), cons(List_var(field_binding), NULL))));
 }
 
@@ -8693,7 +8748,7 @@ static List _build_indirect_func_adapter(Compiler compiler, Type diagnostic_type
 static List _indirect_func_adapter(Compiler compiler, Type diagnostic_type, Type pointer_type, Type * out_context_type, List * out_context_field){
   List key = cons(_838, cons(List_var(pointer_type), NULL)), result = NULL;  Var _x2c_macro_cached_2;  if(Map_try_get(compiler -> names -> adapters, List_var(key), &(_x2c_macro_cached_2))) result = Var_list(_x2c_macro_cached_2);  else{
     {
-      result = _build_indirect_func_adapter(compiler, diagnostic_type, pointer_type, key);
+      result = _build_indirect_func_adapter(compiler, diagnostic_type, pointer_type);
     }
     ;  Map_setindex(compiler -> names -> adapters, List_var(key), List_var(result));
   }
@@ -9467,43 +9522,91 @@ List result = Compiler_convert_expression(compiler, body, List_type(_57));  retu
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List List_map(List, Func);
-static List _lower_captured_lambda(Compiler compiler, List entries, List captures, List body){
-  String lname = Compiler_fresh_name(compiler, _7444);  List lambda_binding = Sym_introduce(compiler -> sym, lname);  List closure_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7445));  List argv_binding = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7446));  String environment_name = Compiler_fresh_name(compiler, _7447);  List environment_typedef = Sym_introduce(compiler -> sym, environment_name);  Type environment_value_type = List_type(cons(String_var(environment_name), NULL));  Type environment_pointer_type = List_type(cons(_163, cons(_325, cons(String_var(environment_name), NULL))));  List environment_local = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7448));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_1411, cons(List_var(environment_local), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(compiler), List_var(cons(_77, cons(List_var(environment_local), NULL))), List_var(environment_pointer_type));  Map slots = Map_new();  Array fields = Array_new(), field_types = Array_new();  Array capture_locals = Array_new(), field_values = Array_new();  Macro local = _511; {
-    List capture;  List _x2c_macro_object_15 = captures;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
-      capture = Var_list(_x2c_macro_cursor_output_15);
+static void _capture_field(CaptureBuild * build, List capture){
+
   {
     List _x2c_match_expr = capture;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6544469130: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497943306087562ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  Var captured_type = _x2c_match_values[1];  Var expression = _x2c_match_values[2]; {
-        Type source_type = Var_type(captured_type);  Type storage_type = Var_equal(List_car(Type_list(source_type)), Symbol_var(77)) ? Type_reference(List_type(Type_list(List_cdr(source_type)))) : List_type(_57);  List field = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7449));  List field_base, field_mods;  List _x2c_destructure_4 = Type_declaration_parts(storage_type);  field_base = Var_list(List_getindex(_x2c_destructure_4, 0));  field_mods = Var_list(List_getindex(_x2c_destructure_4, 1));  Array_push(fields, List_var(cons(_469, cons(List_var(field_base), cons(List_var(cons(_471, cons(List_var(cons(_34, cons(List_var(field), cons(List_var(field_mods), NULL)))), NULL))), NULL)))));  Array_push(field_types, List_var(storage_type));  Map_setindex(slots, binding, List_var(cons(_1968, cons(List_var(field), cons(List_var(storage_type), NULL)))));  List temporary = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7450));  List value = Compiler_convert_expression(compiler, Var_list(expression), storage_type);  List base, mods;  List _x2c_destructure_5 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_5, 0));  mods = Var_list(List_getindex(_x2c_destructure_5, 1));  List row = cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(temporary), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))));  Array_push(capture_locals, List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(base), cons(List_var(row), NULL))))));  Array_push(field_values, List_var(_func_bound(storage_type, temporary)));
-      }
-      break; } } default: break;
+    Compiler c =(* build).compiler;  Type source_type = Var_type(captured_type);  Type storage_type = Var_equal(List_car(Type_list(source_type)), Symbol_var(77)) ? Type_reference(List_type(Type_list(List_cdr(source_type)))) : List_type(_57);  List field = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7444));  List field_base, field_mods;  List _x2c_destructure_4 = Type_declaration_parts(storage_type);  field_base = Var_list(List_getindex(_x2c_destructure_4, 0));  field_mods = Var_list(List_getindex(_x2c_destructure_4, 1));  Array_push((* build).fields, List_var(cons(_469, cons(List_var(field_base), cons(List_var(cons(_471, cons(List_var(cons(_34, cons(List_var(field), cons(List_var(field_mods), NULL)))), NULL))), NULL)))));  Array_push((* build).field_types, List_var(storage_type));  Map_setindex((* build).slots, binding, List_var(cons(_1968, cons(List_var(field), cons(List_var(storage_type), NULL)))));  List temporary = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7445));  List value = Compiler_convert_expression(c, Var_list(expression), storage_type);  List base, mods;  List _x2c_destructure_5 = Type_declaration_parts(storage_type);  base = Var_list(List_getindex(_x2c_destructure_5, 0));  mods = Var_list(List_getindex(_x2c_destructure_5, 1));  Macro local = _511;  List row = cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(temporary), cons(List_var(mods), NULL)))), cons(List_var(value), NULL))));  Array_push((* build).locals, List_cadr(Compiler_rebuild_statement(c, Macro_apply(local, cons(List_var(base), cons(List_var(row), NULL))))));  Array_push((* build).values, List_var(_func_bound(storage_type, temporary)));
+  }
+  break; } } default: break;
     }
   }
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static void _capture_environment(CaptureBuild * build, List captures){
+  Compiler c =(* build).compiler; {
+    List capture;  List _x2c_macro_object_15 = captures;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
+      capture = Var_list(_x2c_macro_cursor_output_15);  _capture_field(&((* build)), capture);
     }
 
   }
-  Macro environment = _2120;  Compiler_add_early(compiler, Compiler_bind_syntax(compiler, List_var(Macro_apply(environment, cons(List_var(environment_typedef), cons(List_var(Array_list_free(fields)), NULL)))), AST_UNIT, NULL));  Type context_type = NULL, constructor_type = NULL;  List context_helper = _adapter_helper(compiler, _7426, &(context_type));  List constructor = _adapter_helper(compiler, _7432, &(constructor_type));  Type adapter_type = Sym_resolve_key(compiler -> sym, List_type(_311));  List types = List_map(entries, ({
-    Var _x2c_lambda_capture_value_11 = Compiler_var(compiler);  _x2c_lambda_context_8 _x2c_lambda_context_9 ={
+  Macro environment = _2120;  Compiler_add_early(c, Compiler_bind_syntax(c, List_var(Macro_apply(environment, cons(List_var((* build).environment_type_binding), cons(List_var(Array_list_free((* build).fields)), NULL)))), AST_UNIT, NULL));
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+List List_map(List, Func);
+static void _capture_adapter(CaptureBuild * build){
+  Compiler c =(* build).compiler;  Type context_type = NULL;  List context_helper = _adapter_helper(c, _7426, &(context_type)); (* build).constructor = _adapter_helper(c, _7432, &((* build).constructor_type)); (* build).adapter_type = Sym_resolve_key(c -> sym, List_type(_311));  List types = List_map((* build).entries, ({
+    Var _x2c_lambda_capture_value_11 = Compiler_var(c);  _x2c_lambda_context_8 _x2c_lambda_context_9 ={
       _x2c_lambda_capture_value_11
     }
     ;  Func_new_context(_x2c_lambda_6, _7441, & _x2c_lambda_context_9, sizeof _x2c_lambda_context_9);
   }
-  ));  List names = List_map(entries, _x2c_func_handle_3);  List locals = _func_argument_locals(compiler, adapter_type, types, names, closure_binding, argv_binding);  List context_call = _func_call(compiler, List_type(_833), _func_bound(context_type, context_helper), cons(List_var(_func_bound(List_type(_323), closure_binding)), NULL));  List context_cast = cons(_0, cons(List_var(environment_pointer_type), cons(List_var(cons(_10, cons(List_var(environment_pointer_type), cons(List_var(context_call), NULL)))), NULL)));  List context_setup = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(cons(_325, cons(String_var(environment_name), NULL))), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(environment_local), _835))), cons(List_var(context_cast), NULL))))), NULL))))));  List rewritten = _rewrite_lambda_captures(compiler, body, slots, environment_local, environment_pointer_type);  rewritten = _node(compiler, rewritten);  _publish_func_adapter(compiler, lambda_binding, closure_binding, argv_binding, rewritten, List_append(locals, cons(List_var(context_setup), NULL)));  List signature = _signature(compiler, entries);  Macro statement_shape = _1088;  if(compiler -> inline_header){
-    List bridge = _func_bridge_binding(compiler, _7451);  Array parameters = Array_new(), factory_values = Array_new(); {
-      Type field_type;  Array _x2c_macro_object_16 = field_types;  int _x2c_macro_cursor_16 = 0;  Var _x2c_macro_cursor_output_16;  while(Array_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
-        field_type = Var_type(_x2c_macro_cursor_output_16); {
-          List parameter = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7449));  Array_push(parameters, List_var(Type_parameter_ast(field_type, parameter)));  Array_push(factory_values, List_var(_func_bound(field_type, parameter)));
-        }
+  ));  List names = List_map((* build).entries, _x2c_func_handle_3);  List locals = _func_argument_locals(c, (* build).adapter_type, types, names, (* build).closure, (* build).argv);  List context_call = _func_call(c, List_type(_833), _func_bound(context_type, context_helper), cons(List_var(_func_bound(List_type(_323), (* build).closure)), NULL));  List context_cast = cons(_0, cons(List_var((* build).pointer_type), cons(List_var(cons(_10, cons(List_var((* build).pointer_type), cons(List_var(context_call), NULL)))), NULL)));  Macro local = _511;  List context_setup = Var_list(List_cadr(Compiler_rebuild_statement(c, Macro_apply(local, cons(List_var(cons(_325, cons(String_var((* build).environment_name), NULL))), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var((* build).environment_local), _835))), cons(List_var(context_cast), NULL))))), NULL))))));  List rewritten = _rewrite_lambda_captures(c, (* build).body, (* build).slots, (* build).environment_local, (* build).pointer_type);  rewritten = _node(c, rewritten);  _publish_func_adapter(c, (* build).adapter, (* build).closure, (* build).argv, rewritten, List_append(locals, cons(List_var(context_setup), NULL))); (* build).signature = _signature(c, (* build).entries);
+}
 
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _capture_construct(CaptureBuild * build, List context){
+  return _func_context_call((* build).compiler, (* build).value_type, context, (* build).adapter, (* build).adapter_type, (* build).signature, (* build).constructor, (* build).constructor_type);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _capture_storage(CaptureBuild * build, List context, List values){
+  List initializer = cons(_0, cons(List_var((* build).value_type), cons(List_var(cons(_1101, cons(List_var(cons(_1102, List_append(values, NULL))), NULL))), NULL)));  Macro local = _511;  return Var_list(List_cadr(Compiler_rebuild_statement((* build).compiler, Macro_apply(local, cons(List_var((* build).value_type), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(context), _36))), cons(List_var(initializer), NULL))))), NULL))))));
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _capture_result(CaptureBuild * build, List storage, List value){
+  Macro statement_shape = _1088;  List statement = Var_list(List_cadr(Compiler_rebuild_statement((* build).compiler, Macro_apply(statement_shape, cons(List_var(value), NULL)))));  List setup = List_truth(storage) ? cons(List_var(storage), NULL) : NULL;  return cons(_0, cons(_324, cons(List_var(cons(_2, cons(List_var(cons(_652, List_append(Array_list_free((* build).locals), List_append(setup, cons(List_var(statement), NULL))))), NULL))), NULL)));
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _capture_inline(CaptureBuild * build){
+  Compiler c =(* build).compiler;  List bridge = _func_bridge_binding(c, _7446);  Array parameters = Array_new(), factory_values = Array_new(); {
+    Type field_type;  Array _x2c_macro_object_16 =(* build).field_types;  int _x2c_macro_cursor_16 = 0;  Var _x2c_macro_cursor_output_16;  while(Array_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
+      field_type = Var_type(_x2c_macro_cursor_output_16); {
+        List parameter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7444));  Array_push(parameters, List_var(Type_parameter_ast(field_type, parameter)));  Array_push(factory_values, List_var(_func_bound(field_type, parameter)));
       }
 
     }
-    List factory_context = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7447));  List factory_initializer = cons(_0, cons(List_var(environment_value_type), cons(List_var(cons(_1101, cons(List_var(cons(_1102, List_append(Array_list_free(factory_values), NULL))), NULL))), NULL)));  List factory_storage = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(environment_value_type), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(factory_context), _36))), cons(List_var(factory_initializer), NULL))))), NULL))))));  List factory_construction = _func_context_call(compiler, environment_value_type, factory_context, lambda_binding, adapter_type, signature, constructor, constructor_type);  List declaration_params = cons(_28, List_append(Array_list_free(parameters), NULL));  Macro factory = _2193;  List factory_body = Compiler_rebuild_statement(compiler, Macro_apply(factory, cons(List_var(factory_storage), cons(List_var(factory_construction), NULL))));  Compiler_add_early(compiler, Compiler_wrapper_function(compiler, List_type(_323), bridge, List_cdr(declaration_params), List_cdr(factory_body)));  List parameter_types = Array_list_free(field_types);  Type factory_type = List_type(cons(List_var(cons(_60, cons(List_var(parameter_types), NULL))), _323));  List call = _func_bridge_call(compiler, bridge, declaration_params, factory_type, Array_list_free(field_values));  List statement = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(statement_shape, cons(List_var(call), NULL)))));  return cons(_0, cons(_324, cons(List_var(cons(_2, cons(List_var(cons(_652, List_append(Array_list_free(capture_locals), cons(List_var(statement), NULL)))), NULL))), NULL)));
+
   }
-  List context_value = Sym_introduce(compiler -> sym, Compiler_fresh_name(compiler, _7447));  List context_initializer = cons(_0, cons(List_var(environment_value_type), cons(List_var(cons(_1101, cons(List_var(cons(_1102, List_append(Array_list_free(field_values), NULL))), NULL))), NULL)));  List context_storage = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(local, cons(List_var(environment_value_type), cons(List_var(cons(_305, cons(_512, cons(List_var(cons(_34, cons(List_var(context_value), _36))), cons(List_var(context_initializer), NULL))))), NULL))))));  List construction = _func_context_call(compiler, environment_value_type, context_value, lambda_binding, adapter_type, signature, constructor, constructor_type);  List statement = Var_list(List_cadr(Compiler_rebuild_statement(compiler, Macro_apply(statement_shape, cons(List_var(construction), NULL)))));  return cons(_0, cons(_324, cons(List_var(cons(_2, cons(List_var(cons(_652, List_append(Array_list_free(capture_locals), cons(List_var(context_storage), cons(List_var(statement), NULL))))), NULL))), NULL)));
+  List context = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7447));  List storage = _capture_storage(&((* build)), context, Array_list_free(factory_values));  Macro factory = _2193;  List factory_body = Compiler_rebuild_statement(c, Macro_apply(factory, cons(List_var(storage), cons(List_var(_capture_construct(&((* build)), context)), NULL))));  List declaration_params = cons(_28, List_append(Array_list_free(parameters), NULL));  Compiler_add_early(c, Compiler_wrapper_function(c, List_type(_323), bridge, List_cdr(declaration_params), List_cdr(factory_body)));  List parameter_types = Array_list_free((* build).field_types);  Type factory_type = List_type(cons(List_var(cons(_60, cons(List_var(parameter_types), NULL))), _323));  List call = _func_bridge_call(c, bridge, declaration_params, factory_type, Array_list_free((* build).values));  return _capture_result(&((* build)), NULL, call);
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _capture_plain(CaptureBuild * build){
+  Compiler c =(* build).compiler;  List context = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7447));  List storage = _capture_storage(&((* build)), context, Array_list_free((* build).values));  return _capture_result(&((* build)), storage, _capture_construct(&((* build)), context));
+}
+
+#endif
+#ifndef X2C_TRANSFORM_SOURCE
+static List _lower_captured_lambda(Compiler c, List entries, List captures, List body){
+  CaptureBuild build ={
+    .compiler = c, .entries = entries, .body = body, .slots = Map_new(), .fields = Array_new(), .field_types = Array_new(), .locals = Array_new(), .values = Array_new()
+  }
+  ;  build.adapter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7448));  build.closure = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7449));  build.argv = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7450));  build.environment_name = Compiler_fresh_name(c, _7447);  build.environment_type_binding = Sym_introduce(c -> sym, build.environment_name);  build.value_type = List_type(cons(String_var(build.environment_name), NULL));  build.pointer_type = List_type(cons(_163, cons(_325, cons(String_var(build.environment_name), NULL))));  build.environment_local = Sym_introduce(c -> sym, Compiler_fresh_name(c, _7451));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_1411, cons(List_var(build.environment_local), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_77, cons(List_var(build.environment_local), NULL))), List_var(build.pointer_type));  _capture_environment(&(build), captures);  _capture_adapter(&(build));  return c -> inline_header ? _capture_inline(&(build)) : _capture_plain(&(build));
 }
 
 #endif
@@ -9556,7 +9659,7 @@ static MacroCaseSite _x2c_macro_site_12;  if (Macro_case_capture_at(& _x2c_macro
   Type type = Var_type(List_cadr(expression));  if(List_truth(({ static MatchCaptureSite _x2c_match_site_54;  x2c_match_site_match(& _x2c_match_site_54, Type_list(type), List_var(_323)); }))){
     Type signature = List_type(cons(List_var(cons(_60, cons(List_var(Compiler_lambda_param_types(compiler, params)), NULL))), _57));  return Compiler_lift_func_expression(compiler, Compiler_rebuild_expression(compiler, signature, Macro_apply(lambda, cons(body, cons(List_var(params), NULL)))));
   }
-  String lname = Compiler_fresh_name(compiler, _7444);  List lambda_binding = Sym_introduce(compiler -> sym, lname);  List decl_params = _params_to_decl_params(params);  Compiler_add_early(compiler, Compiler_wrapper_function(compiler, List_type(_515), lambda_binding, List_cdr(decl_params), List_cdr(_helper_body(compiler, Var_list(body), NULL))));  return cons(_0, cons(List_var(type), cons(List_var(cons(_88, cons(List_var(lambda_binding), NULL))), NULL)));
+  String lname = Compiler_fresh_name(compiler, _7448);  List lambda_binding = Sym_introduce(compiler -> sym, lname);  List decl_params = _params_to_decl_params(params);  Compiler_add_early(compiler, Compiler_wrapper_function(compiler, List_type(_515), lambda_binding, List_cdr(decl_params), List_cdr(_helper_body(compiler, Var_list(body), NULL))));  return cons(_0, cons(List_var(type), cons(List_var(cons(_88, cons(List_var(lambda_binding), NULL))), NULL)));
 }
 break;
 }
