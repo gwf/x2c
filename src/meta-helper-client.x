@@ -133,7 +133,12 @@ static int _helper_start(void) {
   if (_helper_running()) return 1;
   helper_pid = 0;
   int requests[2], replies[2];
-  if (pipe(requests) || pipe(replies)) return 0;
+  if (pipe(requests)) return 0;
+  if (pipe(replies)) {
+    close(requests[0]);
+    close(requests[1]);
+    return 0;
+  }
   for (int i = 0; i < 2; i++) {
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);
     fcntl(replies[i], F_SETFD, FD_CLOEXEC);
