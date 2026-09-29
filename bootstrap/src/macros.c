@@ -287,6 +287,8 @@ static String _source_file(Compiler c, String file);
 
 static String _embed_path(Compiler c, String source_file, String requested);
 
+static String _definition_file(List definition);
+
 static String _canonical_path(Compiler c, String path);
 
 static int _literal_string(Var syntax, String * value);
@@ -3413,6 +3415,10 @@ static String _embed_path(Compiler c, String source_file, String requested){
   if(String_getindex(requested, 0) == '/') return Compiler_canonical_path(c, requested);  String base = Path_dirname(_source_file(c, source_file));  return Compiler_canonical_path(c, String_join(NULL, cons(String_var(base), cons(String_var(_347), cons(String_var(requested), NULL)))));
 }
 
+static String _definition_file(List definition){
+  String file = Var_string(List_assoc(definition, Symbol_var(412426)));  return ! String_truth(file) || String_startswith(file, _1353) ? file : home_absolute_path(file);
+}
+
 static String _canonical_path(Compiler c, String path){
   if(! String_truth(path) || String_getindex(path, 0) == '/') return Compiler_canonical_path(c, path);  String local = String_join(NULL, cons(String_var(_source_dir(c)), cons(String_var(_347), cons(String_var(path), NULL))));  String system = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_348), cons(String_var(path), NULL))));  int use_system = ! SourceView_exists(c -> sources, local) && SourceView_exists(c -> sources, system);  return Compiler_canonical_path(c, use_system ? system : local);
 }
@@ -4815,7 +4821,7 @@ Array values = Array_new(); {
 
       }
       Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2465};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_meta_call_value",.line = 2471};  x2c_error_raise_n(& _x2c_error_site_4, 927167433253220, 1, Symbol_var(920394), String_var(name));
       }
       if(Var_is_void(function)) Compiler_report_error(c, 27335838, _1447, site, cons(String_var(String_join(NULL, cons(String_var(_864), cons(String_var(name), NULL)))), NULL));  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(name), applied));  String_try_own(meta_call_form);  return _meta_apply(c, function, applied);
     }
@@ -4832,7 +4838,7 @@ Compiler_report_error(c, 27335838, _1447, site, _867);
 }
 
 static Var _evaluate_meta_value(Compiler c, List expression, Token site, int slot){
-  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  _ensure_lisp(c);  List active = List_truth(c -> macro_stack) ? Var_list(List_car(c -> macro_stack)) : NULL;  List bindings = List_truth(active) ? Var_list(List_caddr(active)) : NULL;  String source_file = Var_string(List_truth(active) ? List_assoc(Var_list(List_car(active)), Symbol_var(412426)) : String_var(c -> filename));  Var volatile value; {
+  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  _ensure_lisp(c);  List active = List_truth(c -> macro_stack) ? Var_list(List_car(c -> macro_stack)) : NULL;  List bindings = List_truth(active) ? Var_list(List_caddr(active)) : NULL;  String source_file = List_truth(active) ? _definition_file(Var_list(List_car(active))) : c -> filename;  Var volatile value; {
     int * _x2c_macro_address_11 = & macro_sdk_has_references;  int _x2c_macro_previous_11 = * _x2c_macro_address_11; {
       _x2c_defer_env_11 _x2c_macro_environment_16 ={
         0
@@ -4928,7 +4934,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site, int slo
                                                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
                                                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_6, 0); {
-                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2499};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                                                              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2505};  x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                                                             }
 
                                                           }
@@ -5260,7 +5266,7 @@ static Var _decorator_target_replaced(Var produced, Var target, Var required){
 }
 
 Var Compiler_evaluate_macro_slot(Compiler c, Var value){
-  if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) return value;  List slot = Var_list(value);  if(Var_equal(List_car(slot), String_var(_1452))) return _helper_result(c, value);  if(! Var_equal(List_car(slot), Symbol_var(917238583616488))) return value;  if(Map_truth(c -> macro_holes) || ! List_truth(c -> macro_stack)) return value;  int splice = Var_int(Var_convert(List_cadr(slot), 3453797));  Var form = List_caddr(slot);  List active = Var_list(List_car(c -> macro_stack));  List _x2c_destructure_4 = active;  List definition = Var_list(List_getindex(_x2c_destructure_4, 0));  Var input = List_getindex(_x2c_destructure_4, 1);  List bindings = Var_list(List_getindex(_x2c_destructure_4, 2));  Token invocation = Var_token(List_getindex(_x2c_destructure_4, 3)); (void) input;  String source_file = Var_string(List_assoc(definition, Symbol_var(412426)));  Var required = List_assoc(slot, Symbol_var(7659244923112));  Var result = Var_is_row(form, 9, 7, 4) ? _evaluate_meta_value(c, Var_list(form), invocation, 1) : _eval_template_form(c, Var_string(form), bindings, invocation, source_file, required);  result = _helper_result(c, result);  Var construction = List_assoc(slot, Symbol_var(1345468776));  if(! Var_is_void(required) && splice){
+  if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) return value;  List slot = Var_list(value);  if(Var_equal(List_car(slot), String_var(_1452))) return _helper_result(c, value);  if(! Var_equal(List_car(slot), Symbol_var(917238583616488))) return value;  if(Map_truth(c -> macro_holes) || ! List_truth(c -> macro_stack)) return value;  int splice = Var_int(Var_convert(List_cadr(slot), 3453797));  Var form = List_caddr(slot);  List active = Var_list(List_car(c -> macro_stack));  List _x2c_destructure_4 = active;  List definition = Var_list(List_getindex(_x2c_destructure_4, 0));  Var input = List_getindex(_x2c_destructure_4, 1);  List bindings = Var_list(List_getindex(_x2c_destructure_4, 2));  Token invocation = Var_token(List_getindex(_x2c_destructure_4, 3)); (void) input;  String source_file = _definition_file(definition);  Var required = List_assoc(slot, Symbol_var(7659244923112));  Var result = Var_is_row(form, 9, 7, 4) ? _evaluate_meta_value(c, Var_list(form), invocation, 1) : _eval_template_form(c, Var_string(form), bindings, invocation, source_file, required);  result = _helper_result(c, result);  Var construction = List_assoc(slot, Symbol_var(1345468776));  if(! Var_is_void(required) && splice){
     construction = required;  result = _decorator_target_replaced(result, _source_unwrap(required), required);
   }
   if(! Var_is_void(construction)){
@@ -5864,7 +5870,7 @@ List Compiler_parse_macro_definition(Compiler c){
         }
         if(Compiler_peek(c, 0) == 81) Compiler_report_error(c, 33658058, _1474, c -> token, NULL);  if(Compiler_peek(c, 0) != 247) Compiler_report_error(c, 33658058, _1112, c -> token, NULL);
       }
-      List parameters = Array_list_free(parameter_holes); (void) Compiler_record_origin(c, start);  List origin = Compiler_token_location(c, start);  String source_file = _source_file(c, c -> filename);  int imported = c -> import_src != NULL, builtin = c -> builtin_defs;  List definition = _definition(name, result_kind, target_kind, target_hole, parameters, NULL, NULL, NULL, NULL, origin, source_file, imported, builtin, local);  if(open) definition = List_append(definition, _1117);  if(local && ! anonymous) Sym_define_macro(c -> sym, name, definition);  else if(! local && ! Map_truth(old_holes)) Map_setindex(c -> macros, name, List_var(definition));  Map old_local_macro_captures = c -> local_macro_captures;  int old_local_macro_capture_scopes = c -> local_macro_capture_scopes;  c -> local_macro_captures = local ? Map_new() : NULL;  Map definition_captures = c -> local_macro_captures;  c -> local_macro_capture_scopes = Sym_scope_count(c -> sym);  Sym_push_new_scope(c -> sym);  List replacement = NULL, local_names = NULL; {
+      List parameters = Array_list_free(parameter_holes); (void) Compiler_record_origin(c, start);  List origin = Compiler_token_location(c, start);  String source_file = home_portable_path(_source_file(c, c -> filename));  int imported = c -> import_src != NULL, builtin = c -> builtin_defs;  List definition = _definition(name, result_kind, target_kind, target_hole, parameters, NULL, NULL, NULL, NULL, origin, source_file, imported, builtin, local);  if(open) definition = List_append(definition, _1117);  if(local && ! anonymous) Sym_define_macro(c -> sym, name, definition);  else if(! local && ! Map_truth(old_holes)) Map_setindex(c -> macros, name, List_var(definition));  Map old_local_macro_captures = c -> local_macro_captures;  int old_local_macro_capture_scopes = c -> local_macro_capture_scopes;  c -> local_macro_captures = local ? Map_new() : NULL;  Map definition_captures = c -> local_macro_captures;  c -> local_macro_capture_scopes = Sym_scope_count(c -> sym);  Sym_push_new_scope(c -> sym);  List replacement = NULL, local_names = NULL; {
         {
           _x2c_defer_env_25 _x2c_macro_environment_24 ={
             0
