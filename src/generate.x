@@ -655,7 +655,7 @@ static List Init.patch(Init *init, List item) {
         return _protocol_initializer(init.compiler, item, body);
       if (init.initializer && name == init.initializer)
         return _replace_initializer_body(
-          init.compiler, item, init.block(NULL, body));
+          init.compiler, item, init.statements(NULL, body));
       if (init.patches(type, spelling)) {
         List entry = init.compiler.sym.reference(%(${init.entry}), NULL);
         return _patch_initialized_entry(
@@ -688,6 +688,11 @@ macro Decorator $initializer_body(Function $function,
   $body...
 }
 
+macro Statement $initializer_run_once(Expr $guard) {
+  if ($guard) return;
+  $guard = 1;
+}
+
 /* The synthetic initializer runs `entry` before its guard. Without a type
    initializer it is a constructor that runs protocol setup; as a
    constructor it runs in the root epoch, before main. Literal statics last
@@ -705,10 +710,10 @@ static List Init.synthesize(Init *init, List arms) {
     entry = init.initializer;
   }
   List call = %((stmnt (expr (void) (call $entry (args)))));
-  List block = init.block(_within_definitions(arms, call), NULL);
+  List statements = init.statements(_within_definitions(arms, call), NULL);
   Macro shape = $file_initializer_function;
   return init.compiler.rebuild_unit_function(
-    shape(type, binding, block.cdr()));
+    shape(type, binding, statements));
 }
 
 /* An initializer runs `entry`, returns when its guard is set and sets it
@@ -716,36 +721,32 @@ static List Init.synthesize(Init *init, List arms) {
    late queue, and the shutdown registration. Cache graphs that require the
    initializer's own String/List canonicalizer are queued late; all other
    cache and static setup keeps its pre-body order. */
-static List Init.block(Init *init, List entry, List body) {
+static List Init.statements(Init *init, List entry, List body) {
   Compiler c = init.compiler;
-  return %(
-    block @entry @{_run_once(init.guard)}
-      @{c.init_statements(<early>)} @{c.init_statements(<mid>)} @body
-      @{c.init_statements(<late>)} @{init.shutdown}
-  );
+  return List.concat_n(7, entry, _run_once(c, init.guard),
+    c.init_statements(<early>), c.init_statements(<mid>), body,
+    c.init_statements(<late>), init.shutdown);
 }
 
 static List _replace_initializer_body(
-  Compiler c, List function, List block) {
+  Compiler c, List function, List statements) {
   Macro shape = $initializer_body;
-  return c.rebuild_function(function, shape(block.cdr()));
+  return c.rebuild_function(function, shape(statements));
 }
 
-static List _run_once(List guard) => %(
-    (if (expr (int) (ident $guard)) (return))
-    (stmnt
-      (expr (int) (op = (expr (int) (ident $guard))
-                        (expr (int) (literal (int) "1")))))
-  );
+static List _run_once(Compiler c, List guard) {
+  Macro shape = $initializer_run_once;
+  return c.rebuild_statement(shape(%(expr (int) (ident $guard)))).cdr();
+}
 
 /* Install generated built-in protocol methods before any ordinary file
    constructor can create a String- or List-backed cache. */
 static List _protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
-  List block = %(block ${_initialization_guard(guard)}
-    @{_run_once(guard)} @{c.init_statements(<protocol>)} @body);
-  return _replace_initializer_body(c, function, block);
+  List statements = List.concat_n(4, %(${_initialization_guard(guard)}),
+    _run_once(c, guard), c.init_statements(<protocol>), body);
+  return _replace_initializer_body(c, function, statements);
 }
 
 /* The registration of the unit's shutdown function, under the arms that

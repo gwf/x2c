@@ -43,6 +43,14 @@ macro Unit $header_cache_initializer(Type $type, Name $initializer,
   }
 }
 
+macro Statement $header_cache_setup(Statement $protocol, Expr $guard,
+    Statement $body...) {
+  $protocol
+  if ($guard) return;
+  $guard = 1;
+  $body...
+}
+
 /* Cache ids keep the identity assigned by `Compiler.cache`. Source slots use
    compact `_id` names; the generated-header prefix qualifies private slots
    with the source filename hash. */
@@ -579,16 +587,15 @@ List _initialization_guard(List guard) => %(declare (static int)
 
 static List _make_header_cache_init(
   Compiler c, List guard, List initializer, List statements) {
-  List setup = %(
-    (stmnt (expr (void) (call "x2c_initialize_protocols" (args))))
-    (if (expr (int) (ident $guard)) (return))
-    (stmnt
-      (expr (int) (op = (expr (int) (ident $guard))
-        (expr (int) (literal (int) "1"))))));
+  Macro setup = $header_cache_setup;
   Macro shape = $header_cache_initializer;
   List type = %(("__attribute__((constructor))") static void);
+  List protocol_call = %(stmnt
+    (expr (void) (call "x2c_initialize_protocols" (args))));
+  List body = c.rebuild_statement(setup(
+    protocol_call, %(expr (int) (ident $guard)), statements)).cdr();
   return c.rebuild_unit_function(
-    shape(type, initializer, setup.append(statements)));
+    shape(type, initializer, body));
 }
 
 List _patch_initialized_entry(
