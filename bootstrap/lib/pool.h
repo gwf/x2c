@@ -29,7 +29,27 @@ typedef struct PoolStats{
 }
 PoolStats;
 
+Var Pool_lookup(Pool inner, Var key);
+
+Var Pool_intern(Pool inner, Var object, void * alloc);
+
+Var Pool_intern_new(Pool inner, Var object, void * alloc);
+
+void Pool_insert(Pool inner, Var object);
+
+int Pool_owns(Pool pool, Var key);
+
+void * Pool_malloc(Pool inner, size_t size);
+
+void Pool_free(Pool inner, void * alloc);
+
+int Pool_promote(Pool inner, Var object, void * alloc);
+
+int Pool_own(Pool inner, Var object, void * alloc);
+
 void Pool_thread_start(void);
+
+PoolStats Pool_stats(Pool inner);
 
 Pool Pool_retain_named(Pool inner, const char * name);
 
@@ -56,26 +76,6 @@ Pool Pool_detach(void);
 int Pool_is_permanent(Var value);
 
 unsigned long Pool_epoch(void);
-
-Var Pool_lookup(Pool inner, Var key);
-
-void Pool_insert(Pool inner, Var object);
-
-Var Pool_intern_new(Pool inner, Var object, void * alloc);
-
-Var Pool_intern(Pool inner, Var object, void * alloc);
-
-void * Pool_malloc(Pool inner, size_t size);
-
-void Pool_free(Pool inner, void * alloc);
-
-int Pool_owns(Pool pool, Var key);
-
-int Pool_promote(Pool inner, Var object, void * alloc);
-
-int Pool_own(Pool inner, Var object, void * alloc);
-
-PoolStats Pool_stats(Pool inner);
 
 
 #endif /* __GUARD_0xD7C30390__ */

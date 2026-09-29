@@ -22,17 +22,9 @@ NativeScalarAccess native_scalar_access(List exact_type);
 
 typedef struct Lisp * Lisp;
 
-Lisp Lisp_kernel(void);
+void Lisp_call_budget(Lisp lisp, long budget);
 
-Lisp Lisp_new(void);
-
-void Lisp_destroy(Lisp lisp);
-
-void Lisp_adopt(Lisp lisp, Lisp parent);
-
-void Lisp_freeze(Lisp lisp);
-
-Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
+void Lisp_set_interrupted(Lisp lisp, int interrupted);
 
 Var lisp_truth(Var value);
 
@@ -56,9 +48,9 @@ Var lisp_symbol(Var value);
 
 Var lisp_procedure(Var value);
 
-Var lisp_compare(Var a, Var b);
-
 Symbol lisp_type(Var value);
+
+Var lisp_compare(Var a, Var b);
 
 Var lisp_add(Var a, Var b);
 
@@ -102,9 +94,19 @@ Var lisp_read_file(String path);
 
 Var lisp_write_file(String path, String text);
 
-void Lisp_call_budget(Lisp lisp, long budget);
+Lisp Lisp_kernel(void);
 
-void Lisp_set_interrupted(Lisp lisp, int interrupted);
+Lisp Lisp_new(void);
+
+void Lisp_destroy(Lisp lisp);
+
+void Lisp_adopt(Lisp lisp, Lisp parent);
+
+void Lisp_freeze(Lisp lisp);
+
+void Lisp_cleanup(Lisp value);
+
+Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var Lisp_eval(Lisp lisp, Var expression);
 
@@ -129,8 +131,6 @@ Scope * Lisp_automatic_storage(Lisp lisp);
 Scope * Lisp_result_storage(Lisp lisp);
 
 Var lisp_source_function(Var callable);
-
-void Lisp_cleanup(Lisp value);
 
 
 #endif /* __GUARD_0xD09CF48E__ */

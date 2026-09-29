@@ -97,13 +97,15 @@ _Static_assert(_Generic(& rewind, void(*)(File) : 1, default: 0), "native alias 
 _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "native alias File_setbuf does not match setbuf");
 #endif
 #define File_setbuf setbuf
-_Noreturn void File_path_error(Var operation, String path, int error);
+String File_string(File file);
+String File_readline(File file);
+String File_readblock(File file, long size);
 String File_string_close(File file);
-File String_open(String s, const char * mode);
-File File_fdopen(int fildes, const char * mode);
-File File_open(const char * path, const char * mode);
-File File_popen(const char * cmd, const char * mode);
-File File_reopen(File file, const char * path, const char * mode);
+FileReadStatus File_readline_into(File f, Block dest);
+FileReadStatus File_read_into(File f, Block dest);
+int File_write_all(File file, const void * ptr, size_t size);
+int File_copy_to(File source, File output, size_t * copied);
+Iter File_iter(File file, Iter dest);
 static inline char * File_gets(File f, char * str, int size){
   return fgets(str, size, f);
 }
@@ -150,19 +152,17 @@ static inline int File_stat(File file, struct stat * buf){
 
 int File_printf(File file, const char * format, ...);
 int File_scanf(File file, const char * format, ...);
-String File_readblock(File file, long size);
-FileReadStatus File_readline_into(File file, Block dest);
-FileReadStatus File_read_into(File file, Block dest);
-int File_write_all(File file, const void * ptr, size_t size);
-int File_copy_to(File source, File output, size_t * copied);
-String File_readline(File file);
-String File_string(File file);
-Iter File_iter(File file, Iter dest);
 unsigned File_hash(File file);
 int File_equal(File x, File y);
 String File_repr(File file);
 String File_str(File file);
 Buffer File_write_repr(File file, Buffer out);
+_Noreturn void File_path_error(Var operation, String path, int error);
+File String_open(String s, const char * mode);
+File File_open(const char * path, const char * mode);
+File File_fdopen(int fildes, const char * mode);
+File File_popen(const char * cmd, const char * mode);
+File File_reopen(File file, const char * path, const char * mode);
 void File_initialize(void);
 void File_cleanup(File value);
 

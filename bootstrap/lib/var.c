@@ -35,13 +35,8 @@ static inline unsigned _middle_bits(Var v);
 
 static inline unsigned _bottom_bits(Var v);
 
-#define VAR_CUSTOM_TAG_TOP     0x800C
-#define VAR_CUSTOM_TAG_COUNT   32
-#define VAR_DIRECT_ROWS        30
-#define VAR_CELL_ROW           30
-#define VAR_RECORD_ROW         31
-#define VAR_CELL_MASK          0xFFFF000000000007ul
-#define VAR_CELL_BITS          0x800F000000000006ul
+static void * _address(Var value);
+
 typedef union VarWideValue{
   long long_value;
   unsigned long ulong_value;
@@ -57,6 +52,15 @@ typedef struct VarWideBox{
 }
 * VarWideBox;
 
+static VarWideBox _wide_box(Var v);
+
+#define VAR_CUSTOM_TAG_TOP     0x800C
+#define VAR_CUSTOM_TAG_COUNT   32
+#define VAR_DIRECT_ROWS        30
+#define VAR_CELL_ROW           30
+#define VAR_RECORD_ROW         31
+#define VAR_CELL_MASK          0xFFFF000000000007ul
+#define VAR_CELL_BITS          0x800F000000000006ul
 static Scope class_scope;
 
 static Map declared;
@@ -75,43 +79,63 @@ VarCell;
 static Map cells;
 
 #define RECORD_PREFIX sizeof(max_align_t)
-static VarWideBox _wide_box(Var v);
-
 static VarDescriptor * _declared(Symbol tag);
 
 static unsigned _row_count(void);
 
-static void * _address(Var value);
-
 static VarDescriptor * _row_descriptor(int id, Var value);
 
-static int _wide_encoding_valid(Var value, Symbol tag);
+static inline int _custom_top(unsigned top);
 
-static VarDecoded _decode_builtin(TagId id, Var value);
+static inline int _custom_id(unsigned top, unsigned bottom);
+
+static inline int _custom_valid(int id, Var value);
 
 static VarDecoded _decode(Var value);
 
-static void _classes_shutdown(void);
+static inline int _group_id(unsigned top, unsigned mid, unsigned btm);
+
+static VarDecoded _decode_builtin(TagId id, Var value);
+
+static int _wide_encoding_valid(Var value, Symbol tag);
+
+static Var _new_builtin(TagId id, Symbol tag, va_list ap);
+
+static Var _new_pointer(TagId id, void * ptr);
+
+static Var _floating_arg(TagId id, Symbol tag, va_list ap);
+
+static Var _new_floating(TagId id, double d);
+
+static unsigned long _prefix(TagId id);
+
+static Var _integer_arg(TagId id, Symbol tag, va_list ap);
+
+static Var _new_integer(TagId id, long value);
+
+static unsigned _integer_width(TagId id);
+
+static int _integer_fits(TagId id, long value, unsigned bits);
+
+static Var _new_symbol(unsigned long u);
+
+static int _custom_row(Symbol tag, VarDescriptor * * descriptor);
 
 static int _assign_row(VarDescriptor * descriptor);
 
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer);
 
-static int _custom_row(Symbol tag, VarDescriptor * * descriptor);
-
-static Var _new_floating(TagId id, double d);
-
-static Var _new_pointer(TagId id, void * ptr);
+static Var _new_custom_pointer(int id, void * ptr);
 
 static Var _new_wide(TagId id, VarWideValue value);
 
-static Var _new_custom_pointer(int id, void * ptr);
+static double _f64_floating(Var v);
 
-static Var _new_integer(TagId id, long value);
+static long _i48_integer(Var v);
 
-static Var _new_symbol(TagId id, unsigned long u);
+static long _wide_integer(Var v);
 
-static unsigned _hash_bytes(unsigned hash, void * ptr, int width);
+static unsigned _hash_wide(Symbol tag, VarWideValue * value, size_t width);
 
 typedef struct VarIntegerParts{
   int negative;
@@ -119,11 +143,17 @@ typedef struct VarIntegerParts{
 }
 VarIntegerParts;
 
-static unsigned long long _signed_magnitude(long long value);
-
 static VarIntegerParts _integer_parts(Var v);
 
-static int _magnitude_floating_compare(unsigned long long integer, long double floating);
+static VarIntegerParts _unsigned_parts(unsigned long long magnitude);
+
+static VarIntegerParts _signed_parts(long long value);
+
+static unsigned long long _signed_magnitude(long long value);
+
+static int _magnitude_compare(unsigned long long integer, long double floating);
+
+static void _classes_shutdown(void);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
@@ -145,6 +175,26 @@ static TagId _tag2id(Symbol tag){
   return(TagId) SymbolSet_index(x2c_var_tags, tag);
 }
 
+static inline unsigned long _bitmask(unsigned n){
+  return(1ul << n) - 1;
+}
+
+static inline unsigned _top_bits(Var v){
+  return v.u64 >> 48;
+}
+
+static inline unsigned _middle_bits(Var v){
+  return(v.u64 >> 32) & _bitmask(16);
+}
+
+static inline unsigned _bottom_bits(Var v){
+  return v.u64 & _bitmask(3);
+}
+
+static void * _address(Var value){
+  return(void *)(value.u64 &(_bitmask(48) - 0x7));
+}
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -152,7 +202,7 @@ Var String_var(String);
 unsigned long Var_tag_top(Symbol tag){
   TagId id = _tag2id(tag);
   if(id == _invalid_){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_tag_top",.line = 126};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_tag_top",.line = 137};
     x2c_error_raise_n(& _x2c_error_site_0, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.tag_top")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -162,35 +212,15 @@ unsigned long Var_tag_top(Symbol tag){
 unsigned long Var_tag_bottom(Symbol tag){
   TagId id = _tag2id(tag);
   if(id == _invalid_){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "Var_tag_bottom",.line = 134};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "Var_tag_bottom",.line = 144};
     x2c_error_raise_n(& _x2c_error_site_1, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.tag_bottom")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
     __builtin_unreachable();
   }
   return x2c_var_taginfo[id].bottom;
 }
 
-static inline unsigned long _bitmask(unsigned n){
-  return(1ul << n) - 1;
-}
-
-static inline unsigned _top_bits(Var v){
-  const unsigned long mask = _bitmask(16) << 48;
-  return(v.u64 & mask) >> 48;
-}
-
-static inline unsigned _middle_bits(Var v){
-  const unsigned long mask = _bitmask(16) << 32;
-  return(v.u64 & mask) >> 32;
-}
-
-static inline unsigned _bottom_bits(Var v){
-  const unsigned long mask = _bitmask(3);
-  return v.u64 & mask;
-}
-
 static VarWideBox _wide_box(Var v){
-  uintptr_t raw = v.u64 &(_bitmask(48) - 0x7);
-  return(VarWideBox) raw;
+  return(VarWideBox) _address(v);
 }
 
 Var Map_getindex(Map, Var);
@@ -205,19 +235,63 @@ static unsigned _row_count(void){
   return __atomic_load_n(& row_count, __ATOMIC_ACQUIRE);
 }
 
-static void * _address(Var value){
-  return(void *)(value.u64 &(_bitmask(48) - 0x7));
-}
-
 static VarDescriptor * _row_descriptor(int id, Var value){
   if(id == VAR_CELL_ROW) return((VarCell *) _address(value)) -> descriptor;
   if(id == VAR_RECORD_ROW) return *(VarDescriptor * *)((char *) _address(value) - RECORD_PREFIX);
   return rows[id];
 }
 
-static int _wide_encoding_valid(Var value, Symbol tag){
-  VarWideBox box = _wide_box(value);
-  return box && box -> tag == tag;
+static inline int _custom_top(unsigned top){
+  return top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8;
+}
+
+static inline int _custom_id(unsigned top, unsigned bottom){
+  return(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + bottom);
+}
+
+static inline int _custom_valid(int id, Var value){
+  return id < VAR_DIRECT_ROWS ? id <(int) _row_count() : _address(value) != NULL;
+}
+
+static VarDecoded _decode(Var value){
+  unsigned top = _top_bits(value), btm = _bottom_bits(value);
+  if(value.u64 == VAR_VOID_BITS) return(VarDecoded){
+    _void_, - 1, 1
+  }
+  ;
+  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(VarDecoded){
+    _f64_, - 1, 1
+  }
+  ;
+  int id = _group_id(top, _middle_bits(value), btm);
+  if(id != _invalid_) return _decode_builtin((TagId) id, value);
+  if(top >= 0x8004 && top <= 0x800B) return(VarDecoded){
+    _symbol_, - 1, 1
+  }
+  ;
+  if(_custom_top(top)){
+    int custom = _custom_id(top, btm);
+    return(VarDecoded){
+      _invalid_, custom, _custom_valid(custom, value)
+    }
+    ;
+  }
+  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(VarDecoded){
+    _f64_, - 1, 1
+  }
+  ;
+  return(VarDecoded){
+    _f64_, - 1, 0
+  }
+  ;
+}
+
+static inline int _group_id(unsigned top, unsigned mid, unsigned btm){
+  unsigned slot =((top << 1) |(top >> 15)) & 0xFFFF;
+  if(slot >= 32) return _invalid_;
+  const VarDecodeGroup * group = & x2c_var_decode_groups[slot];
+  unsigned selector = group -> by_middle ? mid : btm & group -> mask;
+  return selector < 8 ? group -> ids[selector] : _invalid_;
 }
 
 static VarDecoded _decode_builtin(TagId id, Var value){
@@ -226,7 +300,7 @@ static VarDecoded _decode_builtin(TagId id, Var value){
   switch(id){
     case _long_ : case _ulong_ : case _llong_ : case _ullong_ : case _ldouble_ : valid = _wide_encoding_valid(value, x2c_var_taginfo[id].tag);
     break;
-    case _array_ : case _map_ : valid =(value.u64 &(_bitmask(48) - 0x7)) != 0;
+    case _array_ : case _map_ : valid = _address(value) != NULL;
     break;
     case _u8_ : case _i8_ : valid =(payload & ~ 0xffu) == 0;
     break;
@@ -242,295 +316,9 @@ static VarDecoded _decode_builtin(TagId id, Var value){
   ;
 }
 
-static VarDecoded _decode(Var value){
-  unsigned top = _top_bits(value), mid = _middle_bits(value);
-  unsigned btm = _bottom_bits(value);
-  if(value.u64 == VAR_VOID_BITS) return(VarDecoded){
-    _void_, - 1, 1
-  }
-  ;
-  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(VarDecoded){
-    _f64_, - 1, 1
-  }
-  ;
-  unsigned slot =((top << 1) |(top >> 15)) & 0xFFFF;
-  if(slot < 32){
-    const VarDecodeGroup * group = & x2c_var_decode_groups[slot];
-    unsigned selector = group -> by_middle ? mid : btm & group -> mask;
-    int id = selector < 8 ? group -> ids[selector] : _invalid_;
-    if(id != _invalid_) return _decode_builtin((TagId) id, value);
-  }
-  if(top >= 0x8004 && top <= 0x800B) return(VarDecoded){
-    _symbol_, - 1, 1
-  }
-  ;
-  if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8){
-    int id =(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + btm);
-    int valid = id < VAR_DIRECT_ROWS ? id <(int) _row_count() : _address(value) != NULL;
-    return(VarDecoded){
-      _invalid_, id, valid
-    }
-    ;
-  }
-  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(VarDecoded){
-    _f64_, - 1, 1
-  }
-  ;
-  return(VarDecoded){
-    _f64_, - 1, 0
-  }
-  ;
-}
-
-int x2c_var_descriptor_index(Var value){
-  VarDecoded decoded = _decode(value);
-  if(! decoded.valid || decoded.id < _array_ || decoded.id > _var_) return - 1;
-  return decoded.id - _array_;
-}
-
-int Var_custom_descriptor_index(Var value){
-  VarDecoded decoded = _decode(value);
-  return decoded.valid ? decoded.custom_id : - 1;
-}
-
-VarDescriptor * x2c_var_custom_descriptor(Var value){
-  unsigned top = _top_bits(value);
-  if(top < VAR_CUSTOM_TAG_TOP || top >= VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) return NULL;
-  int id =(int)((top - VAR_CUSTOM_TAG_TOP) * 8 + _bottom_bits(value));
-  if(id < VAR_DIRECT_ROWS) return id <(int) _row_count() ? rows[id] : NULL;
-  return _address(value) ? _row_descriptor(id, value) : NULL;
-}
-
-void Scope_destroy(Scope);
-
-static void _classes_shutdown(void){
-  Scope_destroy(class_scope);
-  class_scope = NULL;
-  declared = cells = NULL;
-  row_count = 0;
-}
-
-Scope Scope_new_named(const char *);
-
-void Scope_shutdown_hook(void(*)(void));
-
-void Scope_push(Scope *);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Map Map_new(void);
-
-void * Scope_calloc(size_t, size_t);
-
-Var Map_setindex(Map, Var, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-VarDescriptor * x2c_var_declare(Symbol tag){
-  VarDescriptor * descriptor = _declared(tag);
-  if(descriptor) return descriptor;
-  if(! class_scope){
-    class_scope = Scope_new_named("Var classes");
-    Scope_shutdown_hook(_classes_shutdown);
-  }
-  {
-    Scope_push(& class_scope);
-    {
-      {
-        X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_0);
-        {
-          {
-            if(declared == NULL) declared = Map_new();
-            descriptor = Scope_calloc(1, sizeof(VarDescriptor));
-            descriptor -> tag = tag;
-            descriptor -> row = - 1;
-            Map_setindex(declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_0);
-      }
-
-    }
-
-  }
-  return descriptor;
-}
-
-int x2c_var_tag_descriptor_index(Symbol tag){
-  TagId id = _tag2id(tag);
-  return id >= _array_ && id <= _var_ ? id - _array_ : - 1;
-}
-
-int Var_encoding_valid(Var value){
-  return _decode(value).valid;
-}
-
-void x2c_descriptor_thread_start_begin(void);
-
-int x2c_descriptor_registration_frozen(void);
-
-int Var_register_object_tag(Symbol tag){
-  x2c_descriptor_thread_start_begin();
-  {
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
-    {
-      if(x2c_descriptor_registration_frozen()){
-        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 374};
-        x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
-        __builtin_unreachable();
-      }
-      if(! tag){
-        int _x2c_return_value_0 = - 1;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_0;
-        }
-
-      }
-      if(_tag2id(tag) != _invalid_){
-        int _x2c_return_value_1 = - 1;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
-        }
-
-      }
-      x2c_var_declare(tag);
-      {
-        int _x2c_return_value_2 = 0;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
-  }
-
-}
-
-static int _assign_row(VarDescriptor * descriptor){
-  int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
-  if(row >= 0) return row;
-  x2c_descriptor_thread_start_begin();
-  {
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
-    {
-      row = descriptor -> row;
-      if(row >= 0){
-        int _x2c_return_value_3 = row;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_3;
-        }
-
-      }
-      unsigned count = row_count;
-      row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
-      if(count < VAR_DIRECT_ROWS){
-        rows[count] = descriptor;
-        __atomic_store_n(& row_count, count + 1, __ATOMIC_RELEASE);
-      }
-      __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
-      {
-        int _x2c_return_value_4 = row;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_4;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
-  }
-
-}
-
-void * Scope_malloc(size_t);
-
-static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
-  x2c_descriptor_thread_start_begin();
-  {
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = 0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
-    {
-      Var key ={
-        .p64 = pointer
-      }
-      ;
-      VarCell * cell = NULL;
-      {
-        Scope_push(& class_scope);
-        {
-          {
-            X2CCleanup _x2c_defer_record_4 ={
-              .fn = _x2c_defer_cleanup_4, .env = 0
-            }
-            ;
-            x2c_cleanup_push(& _x2c_defer_record_4);
-            {
-              {
-                if(cells == NULL) cells = Map_new();
-                Var head = Map_getindex(cells, key);
-                cell = Var_is_void(head) ? NULL : Var_pointer(head);
-                while(cell && cell -> descriptor != descriptor) cell = cell -> next;
-                if(! cell){
-                  cell = Scope_malloc(sizeof(VarCell));
-                  * cell =(VarCell){
-                    descriptor, pointer, Var_is_void(head) ? NULL : Var_pointer(head)
-                  }
-                  ;
-                  Map_setindex(cells, key, Var_new(3683441, (void *) cell));
-                }
-
-              }
-
-            }
-            x2c_cleanup_leave(& _x2c_defer_record_4);
-          }
-
-        }
-
-      }
-      {
-        VarCell * _x2c_return_value_5 = cell;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
-  }
-
-}
-
-static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
-  unsigned count = _row_count();
-  for(unsigned i = 0;  i < count;  i ++) if(rows[i] -> tag == tag) return(int) i;
-  (* descriptor) = _declared(tag);
-  return(* descriptor) ? _assign_row((* descriptor)) : - 1;
+static int _wide_encoding_valid(Var value, Symbol tag){
+  VarWideBox box = _wide_box(value);
+  return box && box -> tag == tag;
 }
 
 Symbol Var_tag(Var v){
@@ -578,56 +366,375 @@ int Var_is_null(Var v){
 }
 
 Var Var_null(void){
-  Var v;
-  v.u64 = VAR_NULL_BITS;
-  return v;
+  return(Var){
+    .u64 = VAR_NULL_BITS
+  }
+  ;
 }
 
 int Var_is_nil(Var v){
   return v.u64 == VAR_LIST_PREFIX;
 }
 
-static Var _new_floating(TagId id, double d){
-  Var v;
-  if(id == _f32_){
-    float f =(float) d;
-    unsigned u;
-    memcpy(& u, & f, sizeof u);
-    v.u64 = u;
-    v.u64 |= x2c_var_taginfo[id].top << 48;
-    v.u64 |= x2c_var_taginfo[id].middle << 32;
-  }
-  else{
-    if(d != d){
-      v.u64 = x2c_var_taginfo[_nan_].top << 48;
-      v.u64 |= x2c_var_taginfo[_nan_].middle << 32;
-    }
-    else if(d > 0 && d == 1.0 / 0.0){
-      v.u64 = x2c_var_taginfo[_posinf_].top << 48;
-      v.u64 |= x2c_var_taginfo[_posinf_].middle << 32;
-    }
-    else if(d < 0 && d == - 1.0 / 0.0){
-      v.u64 = x2c_var_taginfo[_neginf_].top << 48;
-      v.u64 |= x2c_var_taginfo[_neginf_].middle << 32;
-    }
-    else{
-      unsigned long u;
-      memcpy(& u, & d, sizeof u);
-      if(u == VAR_F64_NEG_MAX_RAW) v.u64 = VAR_F64_NEG_MAX_ESCAPE;
-      else v.u64 = u + VAR_F64_SHIFT;
-    }
+int Var_encoding_valid(Var value){
+  return _decode(value).valid;
+}
 
+int x2c_var_descriptor_index(Var value){
+  VarDecoded decoded = _decode(value);
+  if(! decoded.valid || decoded.id < _array_ || decoded.id > _var_) return - 1;
+  return decoded.id - _array_;
+}
+
+int Var_custom_descriptor_index(Var value){
+  VarDecoded decoded = _decode(value);
+  return decoded.valid ? decoded.custom_id : - 1;
+}
+
+VarDescriptor * x2c_var_custom_descriptor(Var value){
+  unsigned top = _top_bits(value);
+  if(! _custom_top(top)) return NULL;
+  int id = _custom_id(top, _bottom_bits(value));
+  if(id < VAR_DIRECT_ROWS) return id <(int) _row_count() ? rows[id] : NULL;
+  return _address(value) ? _row_descriptor(id, value) : NULL;
+}
+
+int x2c_var_tag_descriptor_index(Symbol tag){
+  TagId id = _tag2id(tag);
+  return id >= _array_ && id <= _var_ ? id - _array_ : - 1;
+}
+
+Var Var_new(Symbol tag, ...){
+  va_list ap;
+  TagId id = _tag2id(tag);
+  VarDescriptor * descriptor = NULL;
+  int row = id == _invalid_ ? _custom_row(tag, &(descriptor)) : - 1;
+  if(id == _invalid_ && row < 0){
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_new",.line = 496};
+    x2c_error_raise_n(& _x2c_error_site_2, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
   }
+  va_start(ap, tag);
+  if(row >= 0){
+    void * pointer = va_arg(ap, void *);
+    va_end(ap);
+    if((uintptr_t) pointer & 0x7){
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "Var_new",.line = 502};
+      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+    if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
+    return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
+  }
+  Var v = _new_builtin(id, tag, ap);
+  va_end(ap);
   return v;
 }
 
+static Var _new_builtin(TagId id, Symbol tag, va_list ap){
+  switch(x2c_var_taginfo[id].kind){
+    case 35386204516 : case 39939274535114 : case 1011493096 : return _new_pointer(id, va_arg(ap, void *));
+    case 439096724366 : return _floating_arg(id, tag, ap);
+    case 20309162340 : return _integer_arg(id, tag, ap);
+    case 1328354264 : return _new_symbol(va_arg(ap, unsigned long));
+    case 1473096 : return((void) 0, Void);
+  }
+  {
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_builtin",.line = 522};
+    x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+
+}
+
 static Var _new_pointer(TagId id, void * ptr){
+  if((id == _array_ || id == _map_) && ! ptr){
+    Symbol tag = x2c_var_taginfo[id].tag;
+    {
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_pointer",.line = 531};
+      x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+
+  }
   Var v ={
     .p64 = ptr
   }
   ;
   v.u64 |= x2c_var_taginfo[id].top << 48;
   v.u64 |= x2c_var_taginfo[id].bottom;
+  return v;
+}
+
+static Var _floating_arg(TagId id, Symbol tag, va_list ap){
+  if(tag == 26071077642) return Var_box_long_double(va_arg(ap, long double));
+  return _new_floating(id, va_arg(ap, double));
+}
+
+static Var _new_floating(TagId id, double d){
+  if(id == _f32_){
+    float f =(float) d;
+    unsigned u;
+    memcpy(& u, & f, sizeof u);
+    return(Var){
+      .u64 = u | _prefix(_f32_)
+    }
+    ;
+  }
+  if(d != d) return(Var){
+    .u64 = _prefix(_nan_)
+  }
+  ;
+  if(d > 0 && d == 1.0 / 0.0) return(Var){
+    .u64 = _prefix(_posinf_)
+  }
+  ;
+  if(d < 0 && d == - 1.0 / 0.0) return(Var){
+    .u64 = _prefix(_neginf_)
+  }
+  ;
+  unsigned long u;
+  memcpy(& u, & d, sizeof u);
+  if(u == VAR_F64_NEG_MAX_RAW) return(Var){
+    .u64 = VAR_F64_NEG_MAX_ESCAPE
+  }
+  ;
+  return(Var){
+    .u64 = u + VAR_F64_SHIFT
+  }
+  ;
+}
+
+static unsigned long _prefix(TagId id){
+  return x2c_var_taginfo[id].top << 48 | x2c_var_taginfo[id].middle << 32;
+}
+
+static Var _integer_arg(TagId id, Symbol tag, va_list ap){
+  switch(tag){
+    case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : return _new_integer(id, va_arg(ap, int));
+    case 3847013 : return _new_integer(id, (long) va_arg(ap, unsigned));
+    case 3847281 : return _new_integer(id, (long) va_arg(ap, unsigned long));
+    case 3454065 : return _new_integer(id, va_arg(ap, long));
+    case 818062 : return Var_box_long(va_arg(ap, long));
+    case 44858254 : return Var_box_ulong(va_arg(ap, unsigned long));
+    case 25983886 : return Var_box_long_long(va_arg(ap, long long));
+    case 1435270030 : return Var_box_ulong_long(va_arg(ap, unsigned long long));
+  }
+  {
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_integer_arg",.line = 583};
+    x2c_error_raise_n(& _x2c_error_site_6, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+
+}
+
+static Var _new_integer(TagId id, long value){
+  unsigned bits = _integer_width(id);
+  if(! _integer_fits(id, value, bits)){
+    Symbol target = x2c_var_taginfo[id].tag;
+    {
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 592};
+      x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
+      __builtin_unreachable();
+    }
+
+  }
+  Var v ={
+    .u64 =(unsigned long) value & _bitmask(bits)
+  }
+  ;
+  v.u64 |= x2c_var_taginfo[id].top << 48;
+  if(bits != 48) v.u64 |= x2c_var_taginfo[id].middle << 32;
+  return v;
+}
+
+static unsigned _integer_width(TagId id){
+  switch(id){
+    case _u8_ : case _i8_ : return 8;
+    case _u16_ : case _i16_ : return 16;
+    case _u32_ : case _i32_ : return 32;
+    case _u48_ : case _i48_ : return 48;
+    default:{
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "_integer_width",.line = 606};
+      x2c_error_raise_n(& _x2c_error_site_8, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
+      __builtin_unreachable();
+    }
+
+  }
+
+}
+
+static int _integer_fits(TagId id, long value, unsigned bits){
+  if(id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_){
+    long long bound = 1ll <<(bits - 1);
+    return value >= - bound && value < bound;
+  }
+  return value >= 0 &&(unsigned long) value <= _bitmask(bits);
+}
+
+static Var _new_symbol(unsigned long u){
+  if(u >=(1ul << 51)){
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 619};
+    x2c_error_raise_n(& _x2c_error_site_9, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
+    __builtin_unreachable();
+  }
+  return(Var){
+    .u64 = u + VAR_SYMBOL_OFFSET
+  }
+  ;
+}
+
+void * Scope_memdup(const void *, size_t);
+
+void * Scope_malloc(size_t);
+
+Var Var_box_record(Symbol tag, const void * record, size_t size){
+  VarDescriptor * descriptor = NULL;
+  int row = _custom_row(tag, &(descriptor));
+  if(row < 0){
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 634};
+    x2c_error_raise_n(& _x2c_error_site_10, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
+    __builtin_unreachable();
+  }
+  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, Scope_memdup(record, size));
+  char * copy = Scope_malloc(RECORD_PREFIX + size);
+  *(VarDescriptor * *) copy = descriptor;
+  memcpy(copy + RECORD_PREFIX, record, size);
+  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
+}
+
+static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
+  unsigned count = _row_count();
+  for(unsigned i = 0;  i < count;  i ++) if(rows[i] -> tag == tag) return(int) i;
+  (* descriptor) = _declared(tag);
+  return(* descriptor) ? _assign_row((* descriptor)) : - 1;
+}
+
+void x2c_descriptor_thread_start_begin(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+static int _assign_row(VarDescriptor * descriptor){
+  int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
+  if(row >= 0) return row;
+  x2c_descriptor_thread_start_begin();
+  {
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      row = descriptor -> row;
+      if(row >= 0){
+        int _x2c_return_value_0 = row;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
+      }
+      unsigned count = row_count;
+      row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
+      if(count < VAR_DIRECT_ROWS){
+        rows[count] = descriptor;
+        __atomic_store_n(& row_count, count + 1, __ATOMIC_RELEASE);
+      }
+      __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
+      {
+        int _x2c_return_value_1 = row;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+void Scope_push(Scope *);
+
+Map Map_new(void);
+
+Var Map_setindex(Map, Var, Var);
+
+static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
+  x2c_descriptor_thread_start_begin();
+  {
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
+    {
+      Var key ={
+        .p64 = pointer
+      }
+      ;
+      VarCell * cell = NULL;
+      {
+        Scope_push(& class_scope);
+        {
+          {
+            X2CCleanup _x2c_defer_record_2 ={
+              .fn = _x2c_defer_cleanup_2, .env = 0
+            }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_2);
+            {
+              {
+                if(cells == NULL) cells = Map_new();
+                Var head = Map_getindex(cells, key);
+                VarCell * first = Var_is_void(head) ? NULL : Var_pointer(head);
+                cell = first;
+                while(cell && cell -> descriptor != descriptor) cell = cell -> next;
+                if(! cell){
+                  cell = Scope_malloc(sizeof(VarCell));
+                  * cell =(VarCell){
+                    descriptor, pointer, first
+                  }
+                  ;
+                  Map_setindex(cells, key, Var_new(3683441, (void *) cell));
+                }
+
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+          }
+
+        }
+
+      }
+      {
+        VarCell * _x2c_return_value_2 = cell;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_2;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
+  }
+
+}
+
+static Var _new_custom_pointer(int id, void * ptr){
+  uintptr_t raw =(uintptr_t) ptr;
+  Var v ={
+    .u64 = raw & _bitmask(48)
+  }
+  ;
+  v.u64 |=(unsigned long)(VAR_CUSTOM_TAG_TOP + id / 8) << 48;
+  v.u64 |= id % 8;
   return v;
 }
 
@@ -641,8 +748,8 @@ static Var _new_wide(TagId id, VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 616};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 709};
+      x2c_error_raise_n(& _x2c_error_site_11, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
 
@@ -712,8 +819,8 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 717};
-      x2c_error_raise_n(& _x2c_error_site_4, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 810};
+      x2c_error_raise_n(& _x2c_error_site_12, 4372507526, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
 
@@ -738,194 +845,12 @@ Scope Var_wide_owner(Var v){
   return Var_is_wide(v) ? Scope_owner(_wide_box(v)) : NULL;
 }
 
-static Var _new_custom_pointer(int id, void * ptr){
-  uintptr_t raw =(uintptr_t) ptr;
-  Var v ={
-    .u64 = raw & _bitmask(48)
-  }
-  ;
-  v.u64 |=(unsigned long)(VAR_CUSTOM_TAG_TOP + id / 8) << 48;
-  v.u64 |= id % 8;
-  return v;
-}
-
-static Var _new_integer(TagId id, long value){
-  unsigned bits = 0;
-  int is_signed = 0;
-  switch(id){
-    case _u8_ : case _i8_ : bits = 8;
-    break;
-    case _u16_ : case _i16_ : bits = 16;
-    break;
-    case _u32_ : case _i32_ : bits = 32;
-    break;
-    case _u48_ : case _i48_ : bits = 48;
-    break;
-    default:{
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 759};
-      x2c_error_raise_n(& _x2c_error_site_5, 20800632064936, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
-      __builtin_unreachable();
-    }
-
-  }
-  is_signed =(id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_);
-  unsigned long long mask =(bits == 64) ? ~ 0ull :((1ull << bits) - 1ull);
-  if(is_signed){
-    long long min = -(1ll <<(bits - 1)), max =(1ll <<(bits - 1)) - 1ll;
-    if((long long) value < min ||(long long) value > max){
-      Symbol target = x2c_var_taginfo[id].tag;
-      {
-        static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 767};
-        x2c_error_raise_n(& _x2c_error_site_6, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
-        __builtin_unreachable();
-      }
-
-    }
-
-  }
-  else{
-    if(value < 0 ||(unsigned long long) value > mask){
-      Symbol target = x2c_var_taginfo[id].tag;
-      {
-        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 773};
-        x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(target));
-        __builtin_unreachable();
-      }
-
-    }
-
-  }
-  unsigned long payload =((unsigned long) value) &(unsigned long) mask;
-  Var v ={
-    .u64 = payload
-  }
-  ;
-  v.u64 |= x2c_var_taginfo[id].top << 48;
-  if(bits != 48) v.u64 |= x2c_var_taginfo[id].middle << 32;
-  return v;
-}
-
-static Var _new_symbol(TagId id, unsigned long u){
-  unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
-  if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 785};
-    x2c_error_raise_n(& _x2c_error_site_8, 245103016899018, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
-    __builtin_unreachable();
-  }
-  Var v ={
-    .u64 = u + offset
-  }
-  ;
-  return v;
-}
-
-Var Var_new(Symbol tag, ...){
-  va_list ap;
-  TagId id = _tag2id(tag);
-  VarDescriptor * descriptor = NULL;
-  int row = id == _invalid_ ? _custom_row(tag, &(descriptor)) : - 1;
-  if(id == _invalid_ && row < 0){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "Var_new",.line = 818};
-    x2c_error_raise_n(& _x2c_error_site_9, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
-    __builtin_unreachable();
-  }
-  va_start(ap, tag);
-  if(row >= 0){
-    void * pointer = va_arg(ap, void *);
-    va_end(ap);
-    if((uintptr_t) pointer & 0x7){
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_new",.line = 824};
-      x2c_error_raise_n(& _x2c_error_site_10, 4372507526, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
-      __builtin_unreachable();
-    }
-    if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
-    return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
-  }
-  Var v;
-  switch(x2c_var_taginfo[id].kind){
-    case 35386204516 : case 39939274535114 : case 1011493096 :{
-      void * pointer = va_arg(ap, void *);
-      if((id == _array_ || id == _map_) && ! pointer){
-        va_end(ap);
-        {
-          static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "Var_new",.line = 835};
-          x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
-          __builtin_unreachable();
-        }
-
-      }
-      v = _new_pointer(id, pointer);
-      break;
-    }
-    case 439096724366 : if(tag == 26071077642) v = Var_box_long_double(va_arg(ap, long double));
-    else v = _new_floating(id, va_arg(ap, double));
-    break;
-    case 20309162340 : switch(tag){
-      case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : v = _new_integer(id, va_arg(ap, int));
-      break;
-      case 3847013 : v = _new_integer(id, (long) va_arg(ap, unsigned));
-      break;
-      case 3847281 : v = _new_integer(id, (long) va_arg(ap, unsigned long));
-      break;
-      case 3454065 : v = _new_integer(id, va_arg(ap, long));
-      break;
-      case 818062 : v = Var_box_long(va_arg(ap, long));
-      break;
-      case 44858254 : v = Var_box_ulong(va_arg(ap, unsigned long));
-      break;
-      case 25983886 : v = Var_box_long_long(va_arg(ap, long long));
-      break;
-      case 1435270030 : v = Var_box_ulong_long(va_arg(ap, unsigned long long));
-      break;
-    }
-    break;
-    case 1328354264 : v = _new_symbol(id, va_arg(ap, unsigned long));
-    break;
-    case 1473096 : v =((void) 0, Void);
-    break;
-    default: va_end(ap);
-    {
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_new",.line = 863};
-      x2c_error_raise_n(& _x2c_error_site_12, 20800632064936, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
-      __builtin_unreachable();
-    }
-
-  }
-  va_end(ap);
-  return v;
-}
-
-void * Scope_memdup(const void *, size_t);
-
-Var Var_box_record(Symbol tag, const void * record, size_t size){
-  VarDescriptor * descriptor = NULL;
-  int row = _custom_row(tag, &(descriptor));
-  if(row < 0){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 878};
-    x2c_error_raise_n(& _x2c_error_site_13, 143279306979688, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL))), Symbol_var(1345468776), Symbol_var(tag));
-    __builtin_unreachable();
-  }
-  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, Scope_memdup(record, size));
-  char * copy = Scope_malloc(RECORD_PREFIX + size);
-  *(VarDescriptor * *) copy = descriptor;
-  memcpy(copy + RECORD_PREFIX, record, size);
-  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
-}
+float Var_decode_f32(Var);
 
 double Var_floating(Var v){
   switch(Var_tag(v)){
-    case 3355493 : case 13400168 :{
-      unsigned u = v.u64 & _bitmask(32);
-      float f;
-      memcpy(& f, & u, sizeof f);
-      return f;
-    }
-    case 3356265 : case 301273866 :{
-      unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
-      double d;
-      memcpy(& d, & u, sizeof d);
-      return d;
-    }
+    case 3355493 : case 13400168 : return Var_decode_f32(v);
+    case 3356265 : case 301273866 : return _f64_floating(v);
     case 28764 : return 0.0 / 0.0;
     case 2050956 : return - 1.0 / 0.0;
     case 1854348 : return 1.0 / 0.0;
@@ -934,14 +859,17 @@ double Var_floating(Var v){
   return 0.0;
 }
 
+static double _f64_floating(Var v){
+  unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
+  double d;
+  memcpy(& d, & u, sizeof d);
+  return d;
+}
+
 long Var_integer(Var v){
   unsigned top = _top_bits(v);
   if(top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
-  if(top == x2c_var_taginfo[_i48_].top){
-    unsigned long mask = _bitmask(48), raw = v.u64 & mask;
-    if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
-    return(long) raw;
-  }
+  if(top == x2c_var_taginfo[_i48_].top) return _i48_integer(v);
   if(top == x2c_var_taginfo[_u8_].top){
     switch(_middle_bits(v)){
       case 0x1 : return(unsigned char)(v.u64 & _bitmask(8));
@@ -953,21 +881,26 @@ long Var_integer(Var v){
     }
 
   }
-  if(top == 0x0005){
-    switch(_bottom_bits(v)){
-      case 0x5 : return _wide_box(v) -> value.long_value;
-      case 0x6 : return(long) _wide_box(v) -> value.ulong_value;
-      case 0x7 : return(long) _wide_box(v) -> value.long_long_value;
-    }
-
-  }
-  if(top == 0x0007){
-    unsigned bottom = _bottom_bits(v);
-    if(bottom == 0x6) return(long) _wide_box(v) -> value.ulong_long_value;
-  }
+  if(top == 0x0005) return _wide_integer(v);
+  if(top == 0x0007 && _bottom_bits(v) == 0x6) return(long) _wide_box(v) -> value.ulong_long_value;
   if(top >= 0x8004 && top <= 0x800B){
     unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
     return(Symbol)(v.u64 - offset);
+  }
+  return 0;
+}
+
+static long _i48_integer(Var v){
+  unsigned long mask = _bitmask(48), raw = v.u64 & mask;
+  if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
+  return(long) raw;
+}
+
+static long _wide_integer(Var v){
+  switch(_bottom_bits(v)){
+    case 0x5 : return _wide_box(v) -> value.long_value;
+    case 0x6 : return(long) _wide_box(v) -> value.ulong_value;
+    case 0x7 : return(long) _wide_box(v) -> value.long_long_value;
   }
   return 0;
 }
@@ -992,27 +925,39 @@ long double Var_long_double_value(Var v){
   return Var_is(v, 26071077642) ? _wide_box(v) -> value.long_double_value : 0.0L;
 }
 
-unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
-
-static unsigned _hash_bytes(unsigned hash, void * ptr, int width){
-  return x2c_hash_bytes(hash, ptr, (size_t) width);
+void * Var_pointer(Var v){
+  unsigned top = _top_bits(v), btm = _bottom_bits(v);
+  if(top <= 0x0002) return(void *)(v.u64 & _bitmask(48));
+  if(top == 0x0003) return(void *)(v.u64 &(_bitmask(48) - 0x1));
+  if(top == 0x0004) return(void *)(v.u64 &(_bitmask(48) - 0x3));
+  if(top == 0x0005 && btm > 0x4) return NULL;
+  if(top == 0x0007 && btm > 0x5) return NULL;
+  if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
+  if(top == 0x000F && btm > 0x6) return NULL;
+  if(top >= 0x0005 && top <= 0x000F) return _address(v);
+  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
+  if(_custom_top(top)) return _address(v);
+  return NULL;
 }
 
 unsigned Var_wide_hash(Var v){
   if(! Var_is_wide(v)) return 0;
-  VarWideBox box = _wide_box(v);
+  VarWideValue * value = & _wide_box(v) -> value;
   Symbol tag = Var_tag(v);
-  {
-    switch(tag){
-      case 818062 : return _hash_bytes((unsigned) tag, &(box -> value).long_value, sizeof((box -> value).long_value));
-      case 44858254 : return _hash_bytes((unsigned) tag, &(box -> value).ulong_value, sizeof((box -> value).ulong_value));
-      case 25983886 : return _hash_bytes((unsigned) tag, &(box -> value).long_long_value, sizeof((box -> value).long_long_value));
-      case 1435270030 : return _hash_bytes((unsigned) tag, &(box -> value).ulong_long_value, sizeof((box -> value).ulong_long_value));
-      case 26071077642 : return _hash_bytes((unsigned) tag, &(box -> value).long_double_value, sizeof((box -> value).long_double_value));
-    }
-
+  switch(tag){
+    case 818062 : return _hash_wide(tag, value, sizeof(long));
+    case 44858254 : return _hash_wide(tag, value, sizeof(unsigned long));
+    case 25983886 : return _hash_wide(tag, value, sizeof(long long));
+    case 1435270030 : return _hash_wide(tag, value, sizeof(unsigned long long));
+    case 26071077642 : return _hash_wide(tag, value, sizeof(long double));
   }
   return 0;
+}
+
+unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
+
+static unsigned _hash_wide(Symbol tag, VarWideValue * value, size_t width){
+  return x2c_hash_bytes((unsigned) tag, value, width);
 }
 
 int Var_wide_equal(Var a, Var b){
@@ -1030,41 +975,6 @@ int Var_wide_equal(Var a, Var b){
   return 0;
 }
 
-static unsigned long long _signed_magnitude(long long value){
-  if(value >= 0) return(unsigned long long) value;
-  return(unsigned long long)(-(value + 1)) + 1;
-}
-
-static VarIntegerParts _integer_parts(Var v){
-  VarIntegerParts parts ={
-    0
-  }
-  ;
-  Symbol tag = Var_tag(v);
-  switch(tag){
-    case 30065 : case 3846509 : case 3847013 : case 3847281 : parts.magnitude =(unsigned long long) Var_integer(v);
-    return parts;
-    case 44858254 : parts.magnitude = Var_ulong_value(v);
-    return parts;
-    case 1435270030 : parts.magnitude = Var_ulong_long_value(v);
-    return parts;
-    case 818062 : parts.negative = Var_long_value(v) < 0;
-    parts.magnitude = _signed_magnitude(Var_long_value(v));
-    return parts;
-    case 25983886 : parts.negative = Var_long_long_value(v) < 0;
-    parts.magnitude = _signed_magnitude(Var_long_long_value(v));
-    return parts;
-    default:{
-      long value = Var_integer(v);
-      parts.negative = value < 0;
-      parts.magnitude = _signed_magnitude(value);
-      return parts;
-    }
-
-  }
-
-}
-
 int Var_integer_compare(Var a, Var b){
   VarIntegerParts ap = _integer_parts(a), bp = _integer_parts(b);
   if(ap.negative != bp.negative) return ap.negative ? - 1 : 1;
@@ -1073,13 +983,34 @@ int Var_integer_compare(Var a, Var b){
   return ap.magnitude < bp.magnitude ? - 1 : 1;
 }
 
-static int _magnitude_floating_compare(unsigned long long integer, long double floating){
-  long double limit =(long double)(1ull << 63) * 2.0L;
-  if(floating >= limit) return - 1;
-  unsigned long long floating_integer =(unsigned long long) floating;
-  if(integer < floating_integer) return - 1;
-  if(integer > floating_integer) return 1;
-  return floating ==(long double) floating_integer ? 0 : - 1;
+static VarIntegerParts _integer_parts(Var v){
+  switch(Var_tag(v)){
+    case 30065 : case 3846509 : case 3847013 : case 3847281 : return _unsigned_parts((unsigned long long) Var_integer(v));
+    case 44858254 : return _unsigned_parts(Var_ulong_value(v));
+    case 1435270030 : return _unsigned_parts(Var_ulong_long_value(v));
+    case 818062 : return _signed_parts(Var_long_value(v));
+    case 25983886 : return _signed_parts(Var_long_long_value(v));
+  }
+  return _signed_parts(Var_integer(v));
+}
+
+static VarIntegerParts _unsigned_parts(unsigned long long magnitude){
+  return(VarIntegerParts){
+    0, magnitude
+  }
+  ;
+}
+
+static VarIntegerParts _signed_parts(long long value){
+  return(VarIntegerParts){
+    value < 0, _signed_magnitude(value)
+  }
+  ;
+}
+
+static unsigned long long _signed_magnitude(long long value){
+  if(value >= 0) return(unsigned long long) value;
+  return(unsigned long long)(-(value + 1)) + 1;
 }
 
 int Var_integer_floating_compare(Var integer, Var floating){
@@ -1089,10 +1020,19 @@ int Var_integer_floating_compare(Var integer, Var floating){
   if(value == - 1.0L / 0.0L) return 1;
   if(parts.negative){
     if(value >= 0.0L) return - 1;
-    return - _magnitude_floating_compare(parts.magnitude, - value);
+    return - _magnitude_compare(parts.magnitude, - value);
   }
   if(value < 0.0L) return 1;
-  return _magnitude_floating_compare(parts.magnitude, value);
+  return _magnitude_compare(parts.magnitude, value);
+}
+
+static int _magnitude_compare(unsigned long long integer, long double floating){
+  long double limit =(long double)(1ull << 63) * 2.0L;
+  if(floating >= limit) return - 1;
+  unsigned long long floating_integer =(unsigned long long) floating;
+  if(integer < floating_integer) return - 1;
+  if(integer > floating_integer) return 1;
+  return floating ==(long double) floating_integer ? 0 : - 1;
 }
 
 int Var_wide_compare(Var a, Var b){
@@ -1105,21 +1045,6 @@ int Var_wide_compare(Var a, Var b){
   if(av > bv) return 1;
   int cmp = memcmp(& _wide_box(a) -> value.long_double_value, & _wide_box(b) -> value.long_double_value, sizeof(av));
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
-}
-
-void * Var_pointer(Var v){
-  unsigned top = _top_bits(v), btm = _bottom_bits(v);
-  if(top <= 0x0002) return(void *)(v.u64 & _bitmask(48));
-  if(top == 0x0003) return(void *)(v.u64 &(_bitmask(48) - 0x1));
-  if(top == 0x0004) return(void *)(v.u64 &(_bitmask(48) - 0x3));
-  if(top == 0x0005 && btm > 0x4) return NULL;
-  if(top == 0x0007 && btm > 0x5) return NULL;
-  if(top == 0x000B &&(btm == 0x2 || btm > 0x6)) return NULL;
-  if(top == 0x000F && btm > 0x6) return NULL;
-  if(top >= 0x0005 && top <= 0x000F) return(void *)(v.u64 &(_bitmask(48) - 0x7));
-  if((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS) return((VarCell *) _address(v)) -> pointer;
-  if(top >= VAR_CUSTOM_TAG_TOP && top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) return _address(v);
-  return NULL;
 }
 
 int String_try_long(String, long *);
@@ -1156,20 +1081,118 @@ Var Var_parse(String str, Symbol kind){
 
 }
 
-void Scope_pop(void);
+int x2c_descriptor_registration_frozen(void);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  Scope_pop();
+int Var_register_object_tag(Symbol tag){
+  x2c_descriptor_thread_start_begin();
+  {
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = 0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
+    {
+      if(x2c_descriptor_registration_frozen()){
+        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 1238};
+        x2c_error_raise_n(& _x2c_error_site_13, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
+        __builtin_unreachable();
+      }
+      if(! tag){
+        int _x2c_return_value_3 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_3;
+        }
+
+      }
+      if(_tag2id(tag) != _invalid_){
+        int _x2c_return_value_4 = - 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_4;
+        }
+
+      }
+      x2c_var_declare(tag);
+      {
+        int _x2c_return_value_5 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_5;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
+  }
+
+}
+
+Scope Scope_new_named(const char *);
+
+void Scope_shutdown_hook(void(*)(void));
+
+void * Scope_calloc(size_t, size_t);
+
+VarDescriptor * x2c_var_declare(Symbol tag){
+  VarDescriptor * descriptor = _declared(tag);
+  if(descriptor) return descriptor;
+  if(! class_scope){
+    class_scope = Scope_new_named("Var classes");
+    Scope_shutdown_hook(_classes_shutdown);
+  }
+  {
+    Scope_push(& class_scope);
+    {
+      {
+        X2CCleanup _x2c_defer_record_4 ={
+          .fn = _x2c_defer_cleanup_4, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_4);
+        {
+          {
+            if(declared == NULL) declared = Map_new();
+            descriptor = Scope_calloc(1, sizeof(VarDescriptor));
+            descriptor -> tag = tag;
+            descriptor -> row = - 1;
+            Map_setindex(declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_4);
+      }
+
+    }
+
+  }
+  return descriptor;
+}
+
+void Scope_destroy(Scope);
+
+static void _classes_shutdown(void){
+  Scope_destroy(class_scope);
+  class_scope = NULL;
+  declared = cells = NULL;
+  row_count = 0;
 }
 
 void x2c_descriptor_thread_start_end(int);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  x2c_descriptor_thread_start_end(0);
+}
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   x2c_descriptor_thread_start_end(0);
 }
 
+void Scope_pop(void);
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  x2c_descriptor_thread_start_end(0);
+  Scope_pop();
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){

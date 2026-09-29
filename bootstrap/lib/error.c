@@ -10,6 +10,24 @@
 
 #include "exception.h"
 
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "array.h"
+#include "block.h"
+#include "exception.h"
+#include "list.h"
+#include "map.h"
+#include "pool.h"
+#include "scope.h"
+#include "string.h"
+#include "symbol.h"
+#include "symbolset.h"
+#include "var.h"
+Atom Atom_intern(String spelling);
+
+String Atom_str(Atom atom);
+
 typedef struct ErrorRegion{
   Scope values;
   Pool pool;
@@ -39,44 +57,6 @@ struct ErrorHandler{
 }
 ;
 
-static pthread_mutex_t catch_site_mutex;
-
-static pthread_once_t catch_site_mutex_once;
-
-_x2c_initializer_choice_E00406E8_0((catch_site_mutex_once =(pthread_once_t) PTHREAD_ONCE_INIT))
-static int _init_guard_ = 0;
-
-__attribute__((constructor)) static void _file_init_(void);
-
-static void _catch_site_mutex_initialize(void);
-
-static void _catch_site_lock(void);
-
-static void _catch_site_unlock(void);
-
-static void _catch_site_bind(ErrorCatchSite * site, Var * patterns);
-
-static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm);
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "array.h"
-#include "block.h"
-#include "exception.h"
-#include "list.h"
-#include "map.h"
-#include "match.h"
-#include "pool.h"
-#include "scope.h"
-#include "string.h"
-#include "symbol.h"
-#include "symbolset.h"
-#include "var.h"
-Atom Atom_intern(String spelling);
-
-String Atom_str(Atom atom);
-
 typedef struct ErrorContextState{
   struct ErrorContextState * prev;
   Map policy;
@@ -100,57 +80,100 @@ typedef struct ErrorThreadState{
 
 static _Thread_local struct ErrorThreadState error_thread;
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
 static ErrorThreadState _thread(void);
 
-static const SymbolSet error_nonreturning_causes =(SymbolSet) "\001\000\000\000\035\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\022\000\000\024\036\034\000\000\030\026\000\014\000\015\012\000\000\000\012\030\035\000\000\005\007\000\011\000\000\006\031\017\000\014\015\005\005\000\000\000\010\002\020\017\032\015\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\130\012\346\223\066\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
+typedef struct ErrorRaise{
+  Symbol code;
+  int raised_at, depth;
+}
+ErrorRaise;
 
-static int _never_returns(Symbol code);
+static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail);
 
-static void _initialize_policies(void);
-
-_Noreturn static void _floor(Symbol code, const char * why);
-
-static void _report(Symbol code);
+static ErrorRaise _raise_enter(Symbol code);
 
 static int _enter(void);
 
 static void _leave(void);
 
-static int _scope_push(Symbol code, const char * message);
-
-static ErrorRecord * _record_at(int index);
-
-static void _region_destroy(ErrorRegion * region);
-
-static ErrorRegion _region_new(void);
-
-static List _cons(ErrorRegion * region, Var head, List tail);
-
-static Var _snapshot_wide(Var v);
-
-static Var _copy_value(ErrorRegion * region, Var value);
-
-static List _pair(ErrorRegion * region, Var key, Var value);
-
-static List _field(ErrorRegion * region, Var key, Var value, List tail);
-
-static List _location(ErrorRegion * region, const X2CErrorSite * site);
-
-static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
-
 static void _record(const X2CErrorSite * site, Symbol code, List detail);
-
-typedef struct ErrorPair{
-  Var key;
-  Var value;
-}
-ErrorPair;
 
 static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, va_list args);
 
+typedef struct ErrorPair{
+  Var key, value;
+}
+ErrorPair;
+
+static List _counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args);
+
+static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
+
+static List _location(ErrorRegion * region, const X2CErrorSite * site);
+
+static String _site_text(ErrorRegion * region, const char * text);
+
+static List _field(ErrorRegion * region, Var key, Var value, List tail);
+
+static List _pair(ErrorRegion * region, Var key, Var value);
+
+static List _cons(ErrorRegion * region, Var head, List tail);
+
+static ErrorRecord * _record_at(int index);
+
 static void _truncate(int mark);
 
-static List _view_since(ErrorRegion * region, int mark);
+static Var _copy_value(ErrorRegion * region, Var value);
+
+static Var _copy_wide(ErrorRegion * region, Var value);
+
+static Var _snapshot_wide(Var v);
+
+static Var _clone_in(Scope * owner, Var v);
+
+static Var _copy_text(ErrorRegion * region, Var value);
+
+static Var _snapshot_text(Var value, String source);
+
+static List _copy_list(ErrorRegion * region, List source);
+
+static ErrorRegion _region_new(void);
+
+static void _region_destroy(ErrorRegion * region);
+
+static Symbol _dispatch(ErrorRaise r);
+
+static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code);
+
+static Symbol _observe(ErrorThreadState state, ErrorHandler h);
+
+static void _transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition);
+
+static void _apply_policy(ErrorThreadState state, ErrorRaise r);
+
+static void _report(Symbol code);
+
+static Symbol _catch_match(ErrorHandler h);
+
+static int _catch_select(ErrorHandler h, ErrorRecord * record, List projection);
+
+static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i);
+
+static MatchPlan _arm_plan(ErrorHandler h, int i);
+
+static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
+
+static void _catch_retain(ErrorHandler handle);
+
+static void _retained_destroy(Block retained);
+
+static const SymbolSet error_nonreturning_causes =(SymbolSet) "\001\000\000\000\035\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\021\022\000\000\024\036\034\000\000\030\026\000\014\000\015\012\000\000\000\012\030\035\000\000\005\007\000\011\000\000\006\031\017\000\014\015\005\005\000\000\000\010\002\020\017\032\015\000\130\012\346\217\307\130\000\000\150\152\211\375\242\323\004\000\250\013\111\006\353\022\000\000\012\015\164\176\022\004\000\000\130\012\346\323\344\022\000\000\216\014\237\004\001\000\000\000\206\053\237\004\001\000\000\000\340\373\044\075\013\000\000\000\146\201\231\176\022\004\000\000\150\071\062\320\117\202\000\000\250\054\326\275\361\237\003\000\312\161\101\176\353\336\000\000\340\373\044\010\000\000\000\000\236\054\372\333\104\000\000\000\250\111\150\176\022\004\000\000\144\021\255\264\377\034\000\000\150\150\362\031\000\000\000\000\210\253\317\174\372\034\000\000\130\012\346\277\004\000\000\000\130\012\346\223\066\000\000\000\116\232\237\004\001\000\000\000\062\115\062\174\022\004\000\000\330\023\055\317\377\034\000\000\050\253\263\310\117\202\000\000\030\013\343\323\347\000\000\000\210\253\117\270\012\000\000\000\110\151\362\031\026\032\000\000\012\055\014\266\067\134\002\000\130\012\346\273\364\024\000\000";
+
+static int _never_returns(Symbol code);
 
 typedef struct ErrorPolicyCapture{
   int count;
@@ -158,42 +181,57 @@ typedef struct ErrorPolicyCapture{
 }
 * ErrorPolicyCapture;
 
-static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity);
+static int _fill_contexts(ErrorContextState context, Symbol * pairs, int at, int capacity);
 
-static int _policy_fill_contexts(ErrorContextState state, Symbol * pairs, int at, int capacity);
+static int _fill_pairs(Map policy, Symbol * pairs, int at, int capacity);
 
 static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data);
 
-static void _retained_destroy(Block retained);
+static void _handler_free(ErrorHandler handle);
+
+static void _plans_free(Block plans);
 
 static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate);
 
-static void _reclaim_hidden(ErrorThreadState state);
-
 static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth);
-
-static void _handler_free(ErrorHandler handle);
-
-static void _catch_retain(ErrorHandler handle);
-
-static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
-
-static Symbol _catch_match(ErrorHandler h);
-
-static Symbol _dispatch(Symbol effective, int raised_at, int depth);
-
-static void _raise_enter(Symbol effective);
-
-static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail);
 
 static int _chain_contains(ErrorHandler head, ErrorHandler wanted);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static const char * _prepare_arms(ErrorHandler h, Var * patterns, int * arm);
+
+static int _site_state(ErrorCatchSite * site);
+
+static void _catch_site_bind(ErrorCatchSite * site, Var * patterns);
+
+static pthread_mutex_t catch_site_mutex;
+
+static pthread_once_t catch_site_mutex_once;
+
+_x2c_initializer_choice_E00406E8_0((catch_site_mutex_once =(pthread_once_t) PTHREAD_ONCE_INIT))
+static void _site_mutex_initialize(void);
+
+static void _site_lock(void);
+
+static void _site_unlock(void);
+
+static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm);
+
+static List _view_since(ErrorRegion * region, int mark);
+
+static ErrorRegion _owners(Scope * values, Pool pool);
+
+_Noreturn static void _floor(Symbol code, const char * why);
+
+static int _scope_push(Symbol code, const char * message);
+
+static void _reclaim_hidden(ErrorThreadState state);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
 _x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
@@ -204,52 +242,778 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
-
-static void _catch_site_mutex_initialize(void){
-  x2c_mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
+static ErrorThreadState _thread(void){
+  ErrorThreadState state = & error_thread;
+  if(! state -> bound) state -> bound = ERROR_DEFAULT_BOUND;
+  return state;
 }
 
-void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
-
-static void _catch_site_lock(void){
-  x2c_mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _catch_site_mutex_initialize, "Error: could not lock catch site");
-}
-
-void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
-
-static void _catch_site_unlock(void){
-  x2c_mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
-}
-
-int x2c_error_catch_site_pending(ErrorCatchSite * site){
+Symbol Error_raise(Symbol code, List detail){
   if(! _init_guard_) _file_init_();
-  return ! site || __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
+  return _raise(NULL, code, detail);
+}
+
+void x2c_error_raise(Symbol code, List detail){
+  if(! _init_guard_) _file_init_();
+  Error_raise(code, detail);
+}
+
+void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...){
+  if(! _init_guard_) _file_init_();
+  ErrorRaise r = _raise_enter(code);
+  va_list args;
+  va_start(args, pair_count);
+  _record_n(site, r.code, pair_count, args);
+  va_end(args);
+  _dispatch(r);
+}
+
+static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail){
+  ErrorRaise r = _raise_enter(code);
+  _record(site, r.code, detail);
+  return _dispatch(r);
+}
+
+static ErrorRaise _raise_enter(Symbol code){
+  Symbol effective = code ? code : 20800632064936;
+  ErrorThreadState state = _thread();
+  if(state -> floor_only) _floor(effective, "raise while building error state");
+  if(! _enter()) _floor(effective, "raise re-entered or after shutdown");
+  if(! Error_ready()){
+    _leave();
+    _floor(effective, "raise before initialization");
+  }
+  ErrorRaise r ={
+    effective, Error_count(), state -> depth
+  }
+  ;
+  state -> rendered[r.depth] = 0;
+  return r;
+}
+
+static int _enter(void){
+  ErrorThreadState state = _thread();
+  if(state -> shutdown_done || state -> depth >= ERROR_MAX_DEPTH) return 0;
+  state -> depth ++;
+  return 1;
+}
+
+static void _leave(void){
+  ErrorThreadState state = _thread();
+  if(state -> depth > 0) state -> depth --;
+}
+
+int Error_depth(void){
+  if(! _init_guard_) _file_init_();
+  return _thread() -> depth;
+}
+
+List Var_list(Var);
+
+Var List_var(List);
+
+void Block_push(Block, const void *);
+
+static void _record(const X2CErrorSite * site, Symbol code, List detail){
+  if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  ErrorRecord record ={
+    .region = _region_new()
+  }
+  ;
+  detail = Var_list(_copy_value(& record.region, List_var(detail)));
+  record.entry = _entry(& record.region, site, code, detail);
+  Block_push(state -> stack, & record);
+  state -> floor_only --;
+}
+
+static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, va_list args){
+  if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  ErrorRecord record ={
+    .region = _region_new()
+  }
+  ;
+  List detail = _counted_detail(& record.region, code, pair_count, args);
+  record.entry = _entry(& record.region, site, code, detail);
+  Block_push(state -> stack, & record);
+  state -> floor_only --;
+}
+
+Block Block_new(size_t);
+
+void Block_free(Block);
+
+void Scope_pop(void);
+
+static List _counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args){
+  int pushed = _scope_push(code, "could not enter error scope for counted detail");
+  Block pairs = Block_new(sizeof(ErrorPair));
+  for(unsigned i = 0;  i < count;  i ++){
+    ErrorPair pair ={
+      .key = _copy_value(region, va_arg(args, Var))
+    }
+    ;
+    pair.value = _copy_value(region, va_arg(args, Var));
+    Block_push(pairs, & pair);
+  }
+  ErrorPair * items = pairs -> bytes;
+  List detail = NULL;
+  for(int i =(int) count - 1;  i >= 0;  i --) detail = _field(region, items[i].key, items[i].value, detail);
+  Block_free(pairs);
+  if(pushed) Scope_pop();
+  return detail;
+}
+
+Var Symbol_var(Symbol);
+
+static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
+  List location = _location(region, site), entry = NULL;
+  entry = _field(region, Symbol_var(857050729436), List_var(location), entry);
+  entry = _field(region, Symbol_var(280234584), List_var(detail), entry);
+  entry = _field(region, Symbol_var(227594), Symbol_var(code), entry);
+  return entry;
+}
+
+Var String_var(String);
+
+Var int_var(int);
+
+static List _location(ErrorRegion * region, const X2CErrorSite * site){
+  if(! site) return NULL;
+  String file = _site_text(region, site -> file);
+  String function = _site_text(region, site -> function);
+  List location = _field(region, Symbol_var(458361162716), String_var(function), NULL);
+  location = _field(region, Symbol_var(805770), int_var(site -> line), location);
+  return _field(region, Symbol_var(412426), String_var(file), location);
+}
+
+String String_new_in(Pool, const char *, int);
+
+static String _site_text(ErrorRegion * region, const char * text){
+  if(! text) text = "<unknown>";
+  return String_new_in(region -> pool, text, strlen(text));
+}
+
+static List _field(ErrorRegion * region, Var key, Var value, List tail){
+  return _cons(region, List_var(_pair(region, key, value)), tail);
+}
+
+static List _pair(ErrorRegion * region, Var key, Var value){
+  return _cons(region, key, _cons(region, value, NULL));
+}
+
+List List_cons_in(Pool, Var, List);
+
+static List _cons(ErrorRegion * region, Var head, List tail){
+  return List_cons_in(region -> pool, head, tail);
+}
+
+static ErrorRecord * _record_at(int index){
+  ErrorRecord * records = _thread() -> stack -> bytes;
+  return & records[index];
+}
+
+void Block_pop(Block);
+
+static void _truncate(int mark){
+  if(! Error_ready() || mark < 0) return;
+  while(Error_count() > mark){
+    ErrorRecord * record = _record_at(Error_count() - 1);
+    _region_destroy(& record -> region);
+    Block_pop(_thread() -> stack);
+  }
+
+}
+
+int Var_is_void(Var);
+
+int Var_is_null(Var);
+
+int Var_is_nil(Var);
+
+int Var_is(Var, Symbol);
+
+int Var_is_wide(Var);
+
+int Var_is_integer(Var);
+
+int Var_is_floating(Var);
+
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+static Var _copy_value(ErrorRegion * region, Var value){
+  if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
+  if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
+  if(Var_is_wide(value)) return _copy_wide(region, value);
+  if(Var_is_integer(value) || Var_is_floating(value)) return value;
+  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)) return _copy_text(region, value);
+  if(Var_is_row(value, 9, 7, 4)) return List_var(_copy_list(region, Var_list(value)));
+  _floor(4477479911782, region ? "error detail contains an identity-bearing value" : "error snapshot contains an identity-bearing value");
+}
+
+static Var _copy_wide(ErrorRegion * region, Var value){
+  return region ? _clone_in(& region -> values, value) : _snapshot_wide(value);
+}
+
+Scope * Scope_top(void);
+
+Var Var_clone_wide(Var);
+
+static Var _snapshot_wide(Var v){
+  Scope owner = * Scope_top();
+  if(! owner) return Var_clone_wide(v);
+  while(owner -> down) owner = owner -> down;
+  return _clone_in(& owner, v);
+}
+
+void Scope_push(Scope *);
+
+static Var _clone_in(Scope * owner, Var v){
+  Scope_push(owner);
+  Var copy = Var_clone_wide(v);
+  Scope_pop();
+  return copy;
+}
+
+String Var_str(Var);
+
+String Var_string(Var);
+
+int String_len(String);
+
+Var Var_new(Symbol, ...);
+
+static Var _copy_text(ErrorRegion * region, Var value){
+  String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
+  if(! region) return _snapshot_text(value, source);
+  String owned = String_new_in(region -> pool, source, String_len(source));
+  return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);
+}
+
+String String_new_len(const char *, int);
+
+int String_try_own(String);
+
+static Var _snapshot_text(Var value, String source){
+  String owned = String_new_len(source, String_len(source));
+  if(! Var_is(value, 826970)){
+    String_try_own(owned);
+    return String_var(owned);
+  }
+  Atom atom = Atom_intern(owned);
+  if(Var_is(atom, 826970)) String_try_own(Atom_str(atom));
+  return atom;
+}
+
+Var List_car(List);
+
+List List_cdr(List);
+
+List cons(Var, List);
+
+int List_try_own(List);
+
+static List _copy_list(ErrorRegion * region, List source){
+  Var head = _copy_value(region, List_car(source));
+  List tail = Var_list(_copy_value(region, List_var(List_cdr(source))));
+  if(region) return _cons(region, head, tail);
+  List owned = cons(head, tail);
+  List_try_own(owned);
+  return owned;
+}
+
+Scope Scope_new_named(const char *);
+
+Pool Pool_retain_named(Pool, const char *);
+
+static ErrorRegion _region_new(void){
+  ErrorRegion region ={
+    0
+  }
+  ;
+  region.values = Scope_new_named("Error record values");
+  region.pool = Pool_retain_named(NULL, "Error record canonical values");
+  return region;
+}
+
+Pool Pool_release(Pool);
+
+void Scope_destroy(Scope);
+
+static void _region_destroy(ErrorRegion * region){
+  if(region -> pool) region -> pool = Pool_release(region -> pool);
+  if(region -> values){
+    Scope_destroy(region -> values);
+    region -> values = NULL;
+  }
+
+}
+
+static Symbol _dispatch(ErrorRaise r){
+  ErrorThreadState state = _thread();
+  ErrorHandler saved = state -> handler_top, outer = state -> dispatch_saved;
+  ErrorHandler outer_running = state -> dispatch_running;
+  if(! outer) state -> dispatch_saved = saved;
+  Symbol disposition = _offer(state, saved, r.code);
+  state -> handler_top = saved;
+  state -> dispatch_saved = outer;
+  state -> dispatch_running = outer_running;
+  _leave();
+  if(_never_returns(r.code)) _floor(r.code, "non-returning error was not caught");
+  if(disposition == 285842436424) _apply_policy(state, r);
+  return disposition;
+}
+
+static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code){
+  for(;  h;  h = h -> prev){
+    state -> dispatch_running = h;
+    state -> handler_top = h -> prev;
+    Symbol disposition = h -> site ? _catch_match(h) : _observe(state, h);
+    if(disposition == 1440172936 || disposition == 12689496) _transfer(state, h, code, disposition);
+    if(disposition == 17276625224){
+      _truncate(h -> watermark);
+      return 17276625224;
+    }
+
+  }
+  return 285842436424;
 }
 
 void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-int List_try_own(List);
+static Symbol _observe(ErrorThreadState state, ErrorHandler h){
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & h;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      state -> floor_only ++;
+      h -> view = _region_new();
+      List slice = _view_since(& h -> view, h -> watermark);
+      state -> floor_only --;
+      {
+        Symbol _x2c_return_value_0 = h -> fn(slice, h -> data);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
 
-List Var_list(Var);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+void ExceptionFrame_unwind(void *);
+
+static void _transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition){
+  state -> handler_top = state -> dispatch_saved;
+  state -> dispatch_saved = state -> dispatch_running = NULL;
+  _leave();
+  if(disposition == 1440172936 && h -> site) ExceptionFrame_unwind(h -> target);
+  _floor(code, disposition == 12689496 ? "handler returned fatal" : "<unwind> from an observing registration");
+}
+
+static void _apply_policy(ErrorThreadState state, ErrorRaise r){
+  Symbol policy = Error_policy_get(r.code);
+  if(policy == 2260136) _floor(r.code, "unhandled and policy is abort");
+  if(policy == 25550){
+    if(! state -> rendered[r.depth]) _report(r.code);
+    _truncate(r.raised_at);
+  }
+  else if(policy == 619609226) _truncate(r.raised_at);
+}
+
+void Symbol_decode(Symbol, char *);
+
+static void _report(Symbol code){
+  char spelling[SYMBOL_MAX_5BIT + 1] ={
+    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
+      0
+    }
+    )
+  }
+  ;
+  Symbol_decode(code, spelling);
+  fprintf(stderr, "x2c error: <%s>\n", spelling);
+  fflush(stderr);
+}
+
+void Error_note_rendered(void){
+  if(! _init_guard_) _file_init_();
+  ErrorThreadState state = _thread();
+  if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
+}
+
+Var List_cadr(List);
+
+Pool Pool_open_named(const char *);
+
+void Pool_close(void);
+
+static Symbol _catch_match(ErrorHandler h){
+  if(Error_count() <= h -> watermark) return 285842436424;
+  ErrorRecord * record = _record_at(Error_count() - 1);
+  Symbol code = Var_symbol(List_cadr(Var_list(List_car(record -> entry))));
+  List detail = Var_list(List_cadr(Var_list(List_cadr(record -> entry))));
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  List projection = _cons(& record -> region, Symbol_var(code), detail);
+  Pool_open_named("Error catch bindings");
+  int selected = _catch_select(h, record, projection);
+  Pool_close();
+  if(selected) _catch_retain(h);
+  state -> floor_only --;
+  return selected ? 1440172936 : 285842436424;
+}
+
+static int _catch_select(ErrorHandler h, ErrorRecord * record, List projection){
+  for(int i = 0;  i < h -> site -> arm_count;  i ++) if(_catch_arm(h, record, projection, i)){
+    h -> selected = i;
+    return 1;
+  }
+  return 0;
+}
+
+void * Scope_malloc(size_t);
+
+int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
+
+void Scope_free(void *);
+
+static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i){
+  MatchPlan plan = _arm_plan(h, i);
+  MatchCaptureLayout layout = plan ? plan -> layout : NULL;
+  int binders = layout ? layout -> binder_count : 0;
+  Var * values = binders ? Scope_malloc(sizeof(Var) * binders) : NULL;
+  MatchCaptureBuffer captures ={
+    values, 0, binders
+  }
+  ;
+  int matched = i == h -> site -> default_arm ||(plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
+  if(matched) _catch_commit_captures(h, record, layout, & captures);
+  if(values) Scope_free(values);
+  return matched;
+}
+
+static MatchPlan _arm_plan(ErrorHandler h, int i){
+  if(i == h -> site -> default_arm) return NULL;
+  MatchPlan * plans = h -> plans != NULL ? h -> plans -> bytes : NULL;
+  return plans ? plans[i] : h -> site -> arms[i].plan;
+}
+
+void Block_append(Block, const void *, size_t);
+
+int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
+
+static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
+  if(handle -> capture_values != NULL){
+    Block_free(handle -> capture_values);
+    handle -> capture_values = NULL;
+  }
+  if(! layout || ! layout -> binder_count) return;
+  int pushed = _scope_push(97614135954008, "could not enter error scope for catch captures");
+  handle -> capture_values = Block_new(sizeof(Var));
+  Block_append(handle -> capture_values, NULL, layout -> binder_count);
+  Var * values = handle -> capture_values -> bytes;
+  for(int i = 0;  i < layout -> binder_count;  i ++){
+    values[i] =((void) 0, Void);
+    if(MatchCaptureBuffer_has(captures, i)) values[i] = _copy_value(& record -> region, captures -> values[i]);
+  }
+  if(pushed) Scope_pop();
+}
+
+static void _catch_retain(ErrorHandler handle){
+  int pushed = _scope_push(97614135954008, "could not enter error scope for retained catch records");
+  _retained_destroy(handle -> retained);
+  handle -> retained = Block_new(sizeof(ErrorRecord));
+  while(Error_count() > handle -> watermark){
+    ErrorRecord record = * _record_at(Error_count() - 1);
+    Block_push(handle -> retained, & record);
+    Block_pop(_thread() -> stack);
+  }
+  if(pushed) Scope_pop();
+}
+
+static void _retained_destroy(Block retained){
+  if(retained == NULL) return;
+  ErrorRecord * records = retained -> bytes;
+  for(size_t i = 0;  i < retained -> length;  i ++) _region_destroy(& records[i].region);
+  Block_free(retained);
+}
+
+int SymbolSet_contains(SymbolSet, Symbol);
+
+static int _never_returns(Symbol code){
+  return SymbolSet_contains(error_nonreturning_causes, code);
+}
+
+Var Map_setindex(Map, Var, Var);
+
+void Error_policy_set(Symbol code, Symbol disposition){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready()) return;
+  if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 644};
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
+    __builtin_unreachable();
+  }
+  if(_never_returns(code) && disposition != 2260136){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 647};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
+    __builtin_unreachable();
+  }
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  int pushed = _scope_push(code, "could not enter error scope while setting policy");
+  Map policy = state -> context_top ? state -> context_top -> policy : state -> policy;
+  Map_setindex(policy, Symbol_var(code), Symbol_var(disposition));
+  if(pushed) Scope_pop();
+  state -> floor_only --;
+}
+
+Var Map_getindex(Map, Var);
+
+Symbol Error_policy_get(Symbol code){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready()) return 2260136;
+  ErrorThreadState state = _thread();
+  for(ErrorContextState at = state -> context_top;  at;  at = at -> prev){
+    Var found = Map_getindex(at -> policy, Symbol_var(code));
+    if(! Var_is_void(found)) return Var_symbol(found);
+  }
+  Var found = Map_getindex(state -> policy, Symbol_var(code));
+  if(Var_is_void(found)) return 2260136;
+  return Var_symbol(found);
+}
+
+int Error_bound(void){
+  if(! _init_guard_) _file_init_();
+  ErrorThreadState state = _thread();
+  return state -> context_top ? state -> context_top -> bound : state -> bound;
+}
+
+void Error_bound_set(int bound){
+  if(! _init_guard_) _file_init_();
+  if(bound <= 0) return;
+  ErrorThreadState state = _thread();
+  if(state -> context_top) state -> context_top -> bound = bound;
+  else state -> bound = bound;
+}
+
+unsigned Map_len(Map);
+
+void * Error_policy_capture(void){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready()) return NULL;
+  ErrorThreadState state = _thread();
+  int capacity = Map_len(state -> policy);
+  for(ErrorContextState at = state -> context_top;  at;  at = at -> prev) capacity += Map_len(at -> policy);
+  capacity *= 2;
+  ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
+  if(! capture){
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 715};
+    x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
+    __builtin_unreachable();
+  }
+  capture -> pairs =(Symbol *)(capture + 1);
+  int written = _fill_pairs(state -> policy, capture -> pairs, 0, capacity);
+  capture -> count = _fill_contexts(state -> context_top, capture -> pairs, written, capacity);
+  return capture;
+}
+
+static int _fill_contexts(ErrorContextState context, Symbol * pairs, int at, int capacity){
+  if(! context) return at;
+  at = _fill_contexts(context -> prev, pairs, at, capacity);
+  return _fill_pairs(context -> policy, pairs, at, capacity);
+}
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+static int _fill_pairs(Map policy, Symbol * pairs, int at, int capacity){
+  unsigned cursor = 0;
+  Var key =((void) 0, Void), value =((void) 0, Void);
+  while(Map_try_next(policy, &(cursor), &(key), &(value))){
+    if(at + 2 > capacity) break;
+    pairs[at ++] = Var_symbol(key);
+    pairs[at ++] = Var_symbol(value);
+  }
+  return at;
+}
+
+void Error_policy_adopt(void * capture){
+  if(! _init_guard_) _file_init_();
+  ErrorPolicyCapture adopted = capture;
+  if(! adopted) return;
+  if(Error_ready()){
+    ErrorThreadState state = _thread();
+    Map policy = state -> context_top ? state -> context_top -> policy : state -> policy;
+    state -> floor_only ++;
+    int pushed = _scope_push(20800632064936, "could not enter error scope while adopting policy");
+    for(int i = 0;  i + 1 < adopted -> count;  i += 2) Map_setindex(policy, Symbol_var(adopted -> pairs[i]), Symbol_var(adopted -> pairs[i + 1]));
+    if(pushed) Scope_pop();
+    state -> floor_only --;
+  }
+  free(adopted);
+}
+
+void Error_policy_release(void * capture){
+  if(! _init_guard_) _file_init_();
+  free(capture);
+}
+
+ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready() || ! fn) return NULL;
+  ErrorHandler h = _handler_new(fn, data);
+  _thread() -> handler_top = h;
+  return h;
+}
+
+void * Scope_malloc_in(Scope *, size_t);
+
+static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data){
+  ErrorThreadState state = _thread();
+  ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
+  * h =(struct ErrorHandler){
+    .prev = state -> handler_top, .fn = fn, .data = data, .watermark = Error_count(), .selected = - 1
+  }
+  ;
+  return h;
+}
+
+void Error_pop(ErrorHandler handle){
+  if(! _init_guard_) _file_init_();
+  if(! handle) return;
+  ErrorThreadState state = _thread();
+  if(state -> handler_top != handle) _floor(20800632064936, "Error.pop out of order");
+  _truncate(handle -> watermark);
+  state -> handler_top = handle -> prev;
+  _handler_free(handle);
+}
+
+static void _handler_free(ErrorHandler handle){
+  if(! handle) return;
+  if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
+  _plans_free(handle -> plans);
+  if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
+  _retained_destroy(handle -> retained);
+  _region_destroy(& handle -> view);
+  Scope_free(handle);
+}
+
+void MatchPlan_free(MatchPlan);
+
+static void _plans_free(Block plans){
+  if(plans == NULL) return;
+  MatchPlan * items = plans -> bytes;
+  for(size_t i = 0;  i < plans -> length;  i ++) MatchPlan_free(items[i]);
+  Block_free(plans);
+}
+
+static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate){
+  while(state -> handler_top && state -> handler_top != stop){
+    ErrorHandler removed = state -> handler_top;
+    state -> handler_top = removed -> prev;
+    if(truncate) _truncate(removed -> watermark);
+    _handler_free(removed);
+  }
+
+}
+
+static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth){
+  ErrorHandler stop = state -> handler_top;
+  for(int height = Error_handler_depth();  height > depth && stop;  height --) stop = stop -> prev;
+  return stop;
+}
+
+static int _chain_contains(ErrorHandler head, ErrorHandler wanted){
+  if(! wanted) return 1;
+  for(ErrorHandler h = head;  h;  h = h -> prev) if(h == wanted) return 1;
+  return 0;
+}
+
+int Error_handler_depth(void){
+  if(! _init_guard_) _file_init_();
+  int depth = 0;
+  for(ErrorHandler h = _thread() -> handler_top;  h;  h = h -> prev) depth ++;
+  return depth;
+}
+
+void * Error_handler_head(void){
+  if(! _init_guard_) _file_init_();
+  return _thread() -> handler_top;
+}
+
+String String_new(const char *);
+
+ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready() || ! target || ! site || ! site -> arm_count) _floor(20800632064936, "could not register transferring catch");
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  ErrorHandler h = _handler_new(NULL, ((void) 0, Void));
+  h -> site = site;
+  h -> target = target;
+  int arm = - 1;
+  const char * fenced = _prepare_arms(h, patterns, &(arm));
+  state -> floor_only --;
+  if(fenced){
+    _handler_free(h);
+    String fence = String_new(fenced);
+    {
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 923};
+      x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
+      __builtin_unreachable();
+    }
+
+  }
+  state -> handler_top = h;
+  return h;
+}
+
+static const char * _prepare_arms(ErrorHandler h, Var * patterns, int * arm){
+  ErrorCatchSite * site = h -> site;
+  if(_site_state(site) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
+  if(_site_state(site) == ERROR_CATCH_TRANSIENT) return _catch_prepare_plans(h, patterns, &((* arm)));
+  if(site -> fenced_arm < 0) return NULL;
+  (* arm) = site -> fenced_arm;
+  return site -> arms[(* arm)].plan -> reason;
+}
+
+static int _site_state(ErrorCatchSite * site){
+  return __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE);
+}
 
 int x2c_match_pattern_retainable(Var);
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 
 static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
-  _catch_site_lock();
+  _site_lock();
   {
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = 0
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_PENDING){
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+      if(_site_state(site) != ERROR_CATCH_PENDING){
+        x2c_cleanup_leave(& _x2c_defer_record_1);
         return;
       }
       int retainable = 1;
@@ -261,20 +1025,30 @@ static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
       }
       __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
 
 }
 
-Block Block_new(size_t);
+void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
-Var Symbol_var(Symbol);
+static void _site_mutex_initialize(void){
+  x2c_mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
+}
+
+void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
+
+static void _site_lock(void){
+  x2c_mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _site_mutex_initialize, "Error: could not lock catch site");
+}
+
+void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
+
+static void _site_unlock(void){
+  x2c_mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
+}
 
 MatchPlan MatchPlan_prepare(Var);
-
-void Block_push(Block, const void *);
-
-void Scope_pop(void);
 
 static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm){
   ErrorCatchSite * site = h -> site;
@@ -286,52 +1060,13 @@ static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * f
     Block_push(h -> plans, & plan);
     if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
       fenced = plan -> reason;
-      * fenced_arm = i;
+      (* fenced_arm) = i;
     }
 
   }
   if(pushed) Scope_pop();
   return fenced;
 }
-
-String String_new(const char *);
-
-Var String_var(String);
-
-Var int_var(int);
-
-ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var * patterns){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready() || ! target || ! site || ! site -> arm_count) _floor(20800632064936, "could not register transferring catch");
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  ErrorHandler h = _handler_new(NULL, ((void) 0, Void));
-  h -> site = site;
-  h -> target = target;
-  if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
-  const char * fenced = NULL;
-  int fenced_arm = - 1;
-  if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_TRANSIENT) fenced = _catch_prepare_plans(h, patterns, & fenced_arm);
-  else if(site -> fenced_arm >= 0){
-    fenced_arm = site -> fenced_arm;
-    fenced = site -> arms[fenced_arm].plan -> reason;
-  }
-  state -> floor_only --;
-  if(fenced){
-    _handler_free(h);
-    String fence = String_new(fenced);
-    {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 188};
-      x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(fenced_arm), Symbol_var(12939466), String_var(fence));
-      __builtin_unreachable();
-    }
-
-  }
-  state -> handler_top = h;
-  return h;
-}
-
-void * Scope_malloc_in(Scope *, size_t);
 
 ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   if(! _init_guard_) _file_init_();
@@ -351,6 +1086,11 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
   }
   va_end(args);
   return x2c_error_catch_site_push(target, site, patterns);
+}
+
+int x2c_error_catch_site_pending(ErrorCatchSite * site){
+  if(! _init_guard_) _file_init_();
+  return ! site || _site_state(site) != ERROR_CATCH_STATIC;
 }
 
 int x2c_error_catch_selected(ErrorHandler handle){
@@ -394,43 +1134,6 @@ void x2c_error_catch_close(ErrorHandler handle){
   _handler_free(handle);
 }
 
-void x2c_error_raise(Symbol code, List detail){
-  if(! _init_guard_) _file_init_();
-  Error_raise(code, detail);
-}
-
-void Error_note_rendered(void){
-  if(! _init_guard_) _file_init_();
-  ErrorThreadState state = _thread();
-  if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
-}
-
-void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, ...){
-  if(! _init_guard_) _file_init_();
-  Symbol effective = code ? code : 20800632064936;
-  _raise_enter(effective);
-  ErrorThreadState state = _thread();
-  int raised_at = Error_count(), depth = state -> depth;
-  state -> rendered[depth] = 0;
-  va_list args;
-  va_start(args, pair_count);
-  _record_n(site, effective, pair_count, args);
-  va_end(args);
-  _dispatch(effective, raised_at, depth);
-}
-
-int Error_handler_depth(void){
-  if(! _init_guard_) _file_init_();
-  int depth = 0;
-  for(ErrorHandler h = _thread() -> handler_top;  h;  h = h -> prev) depth ++;
-  return depth;
-}
-
-void * Error_handler_head(void){
-  if(! _init_guard_) _file_init_();
-  return _thread() -> handler_top;
-}
-
 void * Error_unwind_head(void){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
@@ -461,11 +1164,129 @@ void Error_restore(int handler_depth, int stack_height){
   _truncate(stack_height);
 }
 
-Scope Scope_new_named(const char *);
-
-void Scope_push(Scope *);
-
 Map Map_new(void);
+
+void * Error_context_open(void){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready()) return NULL;
+  ErrorThreadState state = _thread();
+  ErrorContextState context = Scope_malloc(sizeof(struct ErrorContextState));
+  * context =(struct ErrorContextState){
+    .prev = state -> context_top, .policy = Map_new(), .bound = Error_bound(), .handler_depth = Error_handler_depth(), .stack_height = Error_count()
+  }
+  ;
+  state -> context_top = context;
+  return context;
+}
+
+void Error_context_close(void * token, int preserve_records){
+  if(! _init_guard_) _file_init_();
+  ErrorContextState context = token;
+  if(! context) return;
+  ErrorThreadState state = _thread();
+  if(state -> context_top != context) _floor(20800632064936, "Error Context close out of order");
+  ErrorHandler stop = _handler_at_depth(state, context -> handler_depth);
+  _unwind_to(state, stop, ! preserve_records);
+  if(! preserve_records) _truncate(context -> stack_height);
+  state -> context_top = context -> prev;
+}
+
+int Error_count(void){
+  if(! _init_guard_) _file_init_();
+  return Error_ready() ?(int) _thread() -> stack -> length : 0;
+}
+
+int Error_mark(void){
+  if(! _init_guard_) _file_init_();
+  return Error_count();
+}
+
+List Error_since(int mark){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready() || mark < 0) return NULL;
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  List out = _view_since(NULL, mark);
+  List_try_own(out);
+  state -> floor_only --;
+  return out;
+}
+
+static List _view_since(ErrorRegion * region, int mark){
+  List out = NULL;
+  for(int i = Error_count() - 1;  i >= mark;  i --){
+    ErrorRecord * record = _record_at(i);
+    Var entry = _copy_value(region, List_var(record -> entry));
+    out = region ? _cons(region, entry, out) : cons(entry, out);
+  }
+  return out;
+}
+
+List Error_since_in(int mark, Scope * values, Pool pool){
+  if(! _init_guard_) _file_init_();
+  if(! Error_ready() || mark < 0) return NULL;
+  ErrorRegion region = _owners(values, pool);
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  List out = _view_since(& region, mark);
+  state -> floor_only --;
+  * values = region.values;
+  return out;
+}
+
+static ErrorRegion _owners(Scope * values, Pool pool){
+  if(! values || ! pool) _floor(4372499598, "error snapshot requires explicit owners");
+  return(ErrorRegion){
+    .values = * values, .pool = pool
+  }
+  ;
+}
+
+Var Error_snapshot(Var value){
+  if(! _init_guard_) _file_init_();
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  Var copy = _copy_value(NULL, value);
+  state -> floor_only --;
+  return copy;
+}
+
+Var Error_snapshot_in(Var value, Scope * values, Pool pool){
+  if(! _init_guard_) _file_init_();
+  ErrorRegion region = _owners(values, pool);
+  ErrorThreadState state = _thread();
+  state -> floor_only ++;
+  Var copy = _copy_value(& region, value);
+  state -> floor_only --;
+  * values = region.values;
+  return copy;
+}
+
+_Noreturn static void _floor(Symbol code, const char * why){
+  char spelling[SYMBOL_MAX_5BIT + 1] ={
+    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
+      0
+    }
+    )
+  }
+  ;
+  Symbol_decode(code, spelling);
+  fprintf(stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
+  fflush(stderr);
+  abort();
+}
+
+static int _scope_push(Symbol code, const char * message){
+  ErrorThreadState state = _thread();
+  if(Scope_top() == & state -> scope) return 0;
+  Scope_push(& state -> scope);
+  if(Scope_top() != & state -> scope) _floor(code, message);
+  return 1;
+}
+
+Iter SymbolSet_iter(SymbolSet, Iter);
+
+int Iter_try_next(Iter, Var *);
 
 void Error_initialize_raw(void){
   if(! _init_guard_) _file_init_();
@@ -477,12 +1298,21 @@ void Error_initialize_raw(void){
   state -> policy = Map_new();
   Scope_pop();
   x2c_error_runtime_ready = 1;
-  _initialize_policies();
+  {
+    Symbol code;
+    Iter _x2c_macro_iterator_0 = SymbolSet_iter(error_nonreturning_causes, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_0;
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
+      code = Var_symbol(_x2c_macro_item_0);
+      Error_policy_set(code, 2260136);
+    }
+
+  }
+
 }
-
-void Block_free(Block);
-
-void Scope_destroy(Scope);
 
 void Error_shutdown_raw(void){
   if(! _init_guard_) _file_init_();
@@ -505,517 +1335,6 @@ void Error_shutdown_raw(void){
 
 }
 
-static ErrorThreadState _thread(void){
-  ErrorThreadState state = & error_thread;
-  if(! state -> bound) state -> bound = ERROR_DEFAULT_BOUND;
-  return state;
-}
-
-int SymbolSet_contains(SymbolSet, Symbol);
-
-static int _never_returns(Symbol code){
-  return SymbolSet_contains(error_nonreturning_causes, code);
-}
-
-Iter SymbolSet_iter(SymbolSet, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-static void _initialize_policies(void){
-  {
-    Symbol code;
-    Iter _x2c_macro_iterator_0 = SymbolSet_iter(error_nonreturning_causes, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      code = Var_symbol(_x2c_macro_item_0);
-      Error_policy_set(code, 2260136);
-    }
-
-  }
-
-}
-
-void Symbol_decode(Symbol, char *);
-
-_Noreturn static void _floor(Symbol code, const char * why){
-  char spelling[SYMBOL_MAX_5BIT + 1] ={
-    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
-      0
-    }
-    )
-  }
-  ;
-  Symbol_decode(code, spelling);
-  fprintf(stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
-  fflush(stderr);
-  abort();
-}
-
-static void _report(Symbol code){
-  char spelling[SYMBOL_MAX_5BIT + 1] ={
-    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
-      0
-    }
-    )
-  }
-  ;
-  Symbol_decode(code, spelling);
-  fprintf(stderr, "x2c error: <%s>\n", spelling);
-  fflush(stderr);
-}
-
-static int _enter(void){
-  ErrorThreadState state = _thread();
-  if(state -> shutdown_done) return 0;
-  if(state -> depth >= ERROR_MAX_DEPTH) return 0;
-  state -> depth ++;
-  return 1;
-}
-
-static void _leave(void){
-  ErrorThreadState state = _thread();
-  if(state -> depth > 0) state -> depth --;
-}
-
-Scope * Scope_top(void);
-
-static int _scope_push(Symbol code, const char * message){
-  ErrorThreadState state = _thread();
-  if(Scope_top() == & state -> scope) return 0;
-  Scope_push(& state -> scope);
-  if(Scope_top() != & state -> scope) _floor(code, message);
-  return 1;
-}
-
-static ErrorRecord * _record_at(int index){
-  ErrorRecord * records = _thread() -> stack -> bytes;
-  return & records[index];
-}
-
-Pool Pool_release(Pool);
-
-static void _region_destroy(ErrorRegion * region){
-  if(region -> pool) region -> pool = Pool_release(region -> pool);
-  if(region -> values){
-    Scope_destroy(region -> values);
-    region -> values = NULL;
-  }
-
-}
-
-Pool Pool_retain_named(Pool, const char *);
-
-static ErrorRegion _region_new(void){
-  ErrorRegion region ={
-    0
-  }
-  ;
-  region.values = Scope_new_named("Error record values");
-  region.pool = Pool_retain_named(NULL, "Error record canonical values");
-  return region;
-}
-
-List List_cons_in(Pool, Var, List);
-
-static List _cons(ErrorRegion * region, Var head, List tail){
-  return List_cons_in(region -> pool, head, tail);
-}
-
-Var Var_clone_wide(Var);
-
-static Var _snapshot_wide(Var v){
-  Scope owner = * Scope_top();
-  if(! owner) return Var_clone_wide(v);
-  while(owner -> down) owner = owner -> down;
-  Scope_push(& owner);
-  Var copy = Var_clone_wide(v);
-  Scope_pop();
-  return copy;
-}
-
-int Var_is_void(Var);
-
-int Var_is_null(Var);
-
-int Var_is_nil(Var);
-
-int Var_is(Var, Symbol);
-
-int Var_is_wide(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-String Var_str(Var);
-
-String Var_string(Var);
-
-String String_new_in(Pool, const char *, int);
-
-int String_len(String);
-
-String String_new_len(const char *, int);
-
-Var Var_new(Symbol, ...);
-
-int String_try_own(String);
-
-Var List_car(List);
-
-Var List_var(List);
-
-List List_cdr(List);
-
-List cons(Var, List);
-
-static Var _copy_value(ErrorRegion * region, Var value){
-  if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
-  if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
-  if(Var_is_wide(value)){
-    if(! region) return _snapshot_wide(value);
-    Scope_push(& region -> values);
-    Var owned = Var_clone_wide(value);
-    Scope_pop();
-    return owned;
-  }
-  if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)){
-    String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
-    String owned = region ? String_new_in(region -> pool, source, String_len(source)) : String_new_len(source, String_len(source));
-    if(region) return Var_is(value, 826970) ? Var_new(826970, owned) : String_var(owned);
-    if(Var_is(value, 826970)){
-      Atom atom = Atom_intern(owned);
-      if(Var_is(atom, 826970)) String_try_own(Atom_str(atom));
-      return atom;
-    }
-    String_try_own(owned);
-    return String_var(owned);
-  }
-  if(Var_is_row(value, 9, 7, 4)){
-    List source = Var_list(value);
-    Var head = _copy_value(region, List_car(source));
-    List tail = Var_list(_copy_value(region, List_var(List_cdr(source))));
-    List owned = region ? _cons(region, head, tail) : cons(head, tail);
-    if(! region) List_try_own(owned);
-    return List_var(owned);
-  }
-  _floor(4477479911782, region ? "error detail contains an identity-bearing value" : "error snapshot contains an identity-bearing value");
-}
-
-static List _pair(ErrorRegion * region, Var key, Var value){
-  return _cons(region, key, _cons(region, value, NULL));
-}
-
-static List _field(ErrorRegion * region, Var key, Var value, List tail){
-  return _cons(region, List_var(_pair(region, key, value)), tail);
-}
-
-static List _location(ErrorRegion * region, const X2CErrorSite * site){
-  if(! site) return NULL;
-  const char * file_source = site -> file ? site -> file : "<unknown>";
-  const char * function_source = site -> function ? site -> function : "<unknown>";
-  String file = String_new_in(region -> pool, file_source, strlen(file_source));
-  String function = String_new_in(region -> pool, function_source, strlen(function_source));
-  int line = site -> line;
-  List location = NULL;
-  location = _field(region, Symbol_var(458361162716), String_var(function), location);
-  location = _field(region, Symbol_var(805770), int_var(line), location);
-  location = _field(region, Symbol_var(412426), String_var(file), location);
-  return location;
-}
-
-static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
-  List location = _location(region, site), entry = NULL;
-  entry = _field(region, Symbol_var(857050729436), List_var(location), entry);
-  entry = _field(region, Symbol_var(280234584), List_var(detail), entry);
-  entry = _field(region, Symbol_var(227594), Symbol_var(code), entry);
-  return entry;
-}
-
-static void _record(const X2CErrorSite * site, Symbol code, List detail){
-  if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  ErrorRecord record ={
-    .region = _region_new()
-  }
-  ;
-  detail = Var_list(_copy_value(& record.region, List_var(detail)));
-  record.entry = _entry(& record.region, site, code, detail);
-  Block_push(state -> stack, & record);
-  state -> floor_only --;
-}
-
-static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_count, va_list args){
-  if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  ErrorRecord record ={
-    .region = _region_new()
-  }
-  ;
-  int pushed = _scope_push(code, "could not enter error scope for counted detail");
-  Block pairs = Block_new(sizeof(ErrorPair));
-  for(unsigned i = 0;  i < pair_count;  i ++){
-    ErrorPair pair ={
-      .key = _copy_value(& record.region, va_arg(args, Var)), .value = _copy_value(& record.region, va_arg(args, Var))
-    }
-    ;
-    Block_push(pairs, & pair);
-  }
-  ErrorPair * items = pairs -> bytes;
-  List detail = NULL;
-  for(int i =(int) pair_count - 1;  i >= 0;  i --) detail = _cons(& record.region, List_var(_pair(& record.region, items[i].key, items[i].value)), detail);
-  Block_free(pairs);
-  if(pushed) Scope_pop();
-  record.entry = _entry(& record.region, site, code, detail);
-  Block_push(state -> stack, & record);
-  state -> floor_only --;
-}
-
-void Block_pop(Block);
-
-static void _truncate(int mark){
-  if(! Error_ready() || mark < 0) return;
-  while(Error_count() > mark){
-    ErrorRecord * record = _record_at(Error_count() - 1);
-    _region_destroy(& record -> region);
-    Block_pop(_thread() -> stack);
-  }
-
-}
-
-int Error_depth(void){
-  if(! _init_guard_) _file_init_();
-  return _thread() -> depth;
-}
-
-int Error_count(void){
-  if(! _init_guard_) _file_init_();
-  return Error_ready() ?(int) _thread() -> stack -> length : 0;
-}
-
-int Error_mark(void){
-  if(! _init_guard_) _file_init_();
-  return Error_count();
-}
-
-Var Error_snapshot(Var value){
-  if(! _init_guard_) _file_init_();
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  Var result = _copy_value(NULL, value);
-  state -> floor_only --;
-  return result;
-}
-
-Var Error_snapshot_in(Var value, Scope * values, Pool pool){
-  if(! _init_guard_) _file_init_();
-  if(! values || ! pool) _floor(4372499598, "error snapshot requires explicit owners");
-  ErrorRegion region ={
-    .values = * values, .pool = pool
-  }
-  ;
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  Var result = _copy_value(& region, value);
-  state -> floor_only --;
-  * values = region.values;
-  return result;
-}
-
-List Error_since_in(int mark, Scope * values, Pool pool){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready() || mark < 0) return NULL;
-  if(! values || ! pool) _floor(4372499598, "error snapshot requires explicit owners");
-  ErrorRegion region ={
-    .values = * values, .pool = pool
-  }
-  ;
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  List out = _view_since(& region, mark);
-  state -> floor_only --;
-  * values = region.values;
-  return out;
-}
-
-static List _view_since(ErrorRegion * region, int mark){
-  List out = NULL;
-  for(int i = Error_count() - 1;  i >= mark;  i --){
-    ErrorRecord * record = _record_at(i);
-    Var entry = _copy_value(region, List_var(record -> entry));
-    out = region ? _cons(region, entry, out) : cons(entry, out);
-  }
-  return out;
-}
-
-List Error_since(int mark){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready() || mark < 0) return NULL;
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  List out = _view_since(NULL, mark);
-  List_try_own(out);
-  state -> floor_only --;
-  return out;
-}
-
-Var Map_setindex(Map, Var, Var);
-
-void Error_policy_set(Symbol code, Symbol disposition){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready()) return;
-  if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 838};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
-    __builtin_unreachable();
-  }
-  if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 841};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
-    __builtin_unreachable();
-  }
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  int pushed = _scope_push(code, "could not enter error scope while setting policy");
-  Map policy = state -> context_top ? state -> context_top -> policy : state -> policy;
-  Map_setindex(policy, Symbol_var(code), Symbol_var(disposition));
-  if(pushed) Scope_pop();
-  state -> floor_only --;
-}
-
-Var Map_getindex(Map, Var);
-
-Symbol Error_policy_get(Symbol code){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready()) return 2260136;
-  ErrorThreadState thread = _thread();
-  for(ErrorContextState state = thread -> context_top;  state;  state = state -> prev){
-    Var found = Map_getindex(state -> policy, Symbol_var(code));
-    if(! Var_is_void(found)) return Var_symbol(found);
-  }
-  Var found = Map_getindex(thread -> policy, Symbol_var(code));
-  if(Var_is_void(found)) return 2260136;
-  return Var_symbol(found);
-}
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity){
-  unsigned cursor = 0;
-  Var key =((void) 0, Void), value =((void) 0, Void);
-  while(Map_try_next(policy, &(cursor), &(key), &(value))){
-    if(at + 2 > capacity) break;
-    pairs[at ++] = Var_symbol(key);
-    pairs[at ++] = Var_symbol(value);
-  }
-  return at;
-}
-
-static int _policy_fill_contexts(ErrorContextState state, Symbol * pairs, int at, int capacity){
-  if(! state) return at;
-  at = _policy_fill_contexts(state -> prev, pairs, at, capacity);
-  return _policy_fill(state -> policy, pairs, at, capacity);
-}
-
-unsigned Map_len(Map);
-
-void * Error_policy_capture(void){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready()) return NULL;
-  ErrorThreadState state = _thread();
-  int capacity = Map_len(state -> policy);
-  for(ErrorContextState at = state -> context_top;  at;  at = at -> prev) capacity += Map_len(at -> policy);
-  capacity *= 2;
-  ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
-  if(! capture){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 915};
-    x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
-    __builtin_unreachable();
-  }
-  capture -> pairs =(Symbol *)(capture + 1);
-  int written = _policy_fill(state -> policy, capture -> pairs, 0, capacity);
-  capture -> count = _policy_fill_contexts(state -> context_top, capture -> pairs, written, capacity);
-  return capture;
-}
-
-void Error_policy_adopt(void * capture){
-  if(! _init_guard_) _file_init_();
-  ErrorPolicyCapture adopted = capture;
-  if(! adopted) return;
-  if(Error_ready()){
-    ErrorThreadState state = _thread();
-    Map policy = state -> context_top ? state -> context_top -> policy : state -> policy;
-    state -> floor_only ++;
-    int pushed = _scope_push(20800632064936, "could not enter error scope while adopting policy");
-    for(int i = 0;  i + 1 < adopted -> count;  i += 2) Map_setindex(policy, Symbol_var(adopted -> pairs[i]), Symbol_var(adopted -> pairs[i + 1]));
-    if(pushed) Scope_pop();
-    state -> floor_only --;
-  }
-  free(adopted);
-}
-
-void Error_policy_release(void * capture){
-  if(! _init_guard_) _file_init_();
-  free(capture);
-}
-
-int Error_bound(void){
-  if(! _init_guard_) _file_init_();
-  ErrorThreadState state = _thread();
-  return state -> context_top ? state -> context_top -> bound : state -> bound;
-}
-
-void Error_bound_set(int bound){
-  if(! _init_guard_) _file_init_();
-  if(bound <= 0) return;
-  ErrorThreadState state = _thread();
-  if(state -> context_top) state -> context_top -> bound = bound;
-  else state -> bound = bound;
-}
-
-ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready() || ! fn) return NULL;
-  ErrorHandler h = _handler_new(fn, data);
-  _thread() -> handler_top = h;
-  return h;
-}
-
-static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data){
-  ErrorThreadState state = _thread();
-  ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
-  * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .fn = fn, .data = data, .watermark = Error_count(), .selected = - 1
-  }
-  ;
-  return h;
-}
-
-static void _retained_destroy(Block retained){
-  if(retained == NULL) return;
-  ErrorRecord * records = retained -> bytes;
-  for(size_t i = 0;  i < retained -> length;  i ++) _region_destroy(& records[i].region);
-  Block_free(retained);
-}
-
-static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate){
-  while(state -> handler_top && state -> handler_top != stop){
-    ErrorHandler removed = state -> handler_top;
-    state -> handler_top = removed -> prev;
-    if(truncate) _truncate(removed -> watermark);
-    _handler_free(removed);
-  }
-
-}
-
 static void _reclaim_hidden(ErrorThreadState state){
   ErrorHandler stop = state -> dispatch_running;
   for(ErrorHandler h = stop ? state -> dispatch_saved : NULL;  h; ){
@@ -1034,258 +1353,18 @@ static void _reclaim_hidden(ErrorThreadState state){
 
 }
 
-static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth){
-  ErrorHandler stop = state -> handler_top;
-  for(int height = Error_handler_depth();  height > depth && stop;  height --) stop = stop -> prev;
-  return stop;
-}
-
-void Scope_free(void *);
-
-void MatchPlan_free(MatchPlan);
-
-static void _handler_free(ErrorHandler handle){
-  if(! handle) return;
-  if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
-  if(handle -> plans != NULL){
-    MatchPlan * plans = handle -> plans -> bytes;
-    for(size_t i = 0;  i < handle -> plans -> length;  i ++){
-      MatchPlan plan = plans[i];
-      MatchPlan_free(plan);
-    }
-    Block_free(handle -> plans);
-  }
-  if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
-  _retained_destroy(handle -> retained);
-  _region_destroy(& handle -> view);
-  Scope_free(handle);
-}
-
-void Error_pop(ErrorHandler handle){
-  if(! _init_guard_) _file_init_();
-  if(! handle) return;
-  ErrorThreadState state = _thread();
-  if(state -> handler_top != handle) _floor(20800632064936, "Error.pop out of order");
-  _truncate(handle -> watermark);
-  state -> handler_top = handle -> prev;
-  _handler_free(handle);
-}
-
-void * Scope_malloc(size_t);
-
-void * Error_context_open(void){
-  if(! _init_guard_) _file_init_();
-  if(! Error_ready()) return NULL;
-  ErrorThreadState thread = _thread();
-  ErrorContextState state = Scope_malloc(sizeof(struct ErrorContextState));
-  * state =(struct ErrorContextState){
-    .prev = thread -> context_top, .policy = Map_new(), .bound = Error_bound(), .handler_depth = Error_handler_depth(), .stack_height = Error_count()
-  }
-  ;
-  thread -> context_top = state;
-  return state;
-}
-
-void Error_context_close(void * token, int preserve_records){
-  if(! _init_guard_) _file_init_();
-  ErrorContextState state = token;
-  if(! state) return;
-  ErrorThreadState thread = _thread();
-  if(thread -> context_top != state) _floor(20800632064936, "Error Context close out of order");
-  _unwind_to(thread, _handler_at_depth(thread, state -> handler_depth), ! preserve_records);
-  if(! preserve_records) _truncate(state -> stack_height);
-  thread -> context_top = state -> prev;
-}
-
-static void _catch_retain(ErrorHandler handle){
-  int pushed = _scope_push(97614135954008, "could not enter error scope for retained catch records");
-  _retained_destroy(handle -> retained);
-  handle -> retained = Block_new(sizeof(ErrorRecord));
-  while(Error_count() > handle -> watermark){
-    ErrorRecord record = * _record_at(Error_count() - 1);
-    Block_push(handle -> retained, & record);
-    Block_pop(_thread() -> stack);
-  }
-  if(pushed) Scope_pop();
-}
-
-void Block_append(Block, const void *, size_t);
-
-int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
-
-static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
-  if(handle -> capture_values != NULL){
-    Block_free(handle -> capture_values);
-    handle -> capture_values = NULL;
-  }
-  if(! layout || ! layout -> binder_count) return;
-  int pushed = _scope_push(97614135954008, "could not enter error scope for catch captures");
-  handle -> capture_values = Block_new(sizeof(Var));
-  Block_append(handle -> capture_values, NULL, layout -> binder_count);
-  Var * values = handle -> capture_values -> bytes;
-  for(int i = 0;  i < layout -> binder_count;  i ++){
-    values[i] =((void) 0, Void);
-    if(! MatchCaptureBuffer_has(captures, i)) continue;
-    values[i] = _copy_value(& record -> region, captures -> values[i]);
-  }
-  if(pushed) Scope_pop();
-}
-
-Var List_cadr(List);
-
-Pool Pool_open_named(const char *);
-
-int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
-
-void Pool_close(void);
-
-static Symbol _catch_match(ErrorHandler h){
-  if(Error_count() <= h -> watermark) return 285842436424;
-  ErrorRecord * record = _record_at(Error_count() - 1);
-  Symbol code = Var_symbol(List_cadr(Var_list(List_car(record -> entry))));
-  List detail = Var_list(List_cadr(Var_list(List_cadr(record -> entry))));
-  ErrorThreadState state = _thread();
-  state -> floor_only ++;
-  List projection = _cons(& record -> region, Symbol_var(code), detail);
-  Pool_open_named("Error catch bindings");
-  ErrorCatchSite * site = h -> site;
-  MatchPlan * plans = h -> plans != NULL ? h -> plans -> bytes : NULL;
-  for(int i = 0;  i < site -> arm_count;  i ++){
-    int is_default = i == site -> default_arm;
-    MatchPlan plan = is_default ? NULL : plans ? plans[i] : site -> arms[i].plan;
-    MatchCaptureLayout layout = plan ? plan -> layout : NULL;
-    Var * values = layout && layout -> binder_count ? Scope_malloc(sizeof(Var) * layout -> binder_count) : NULL;
-    MatchCaptureBuffer captures ={
-      values, 0, layout ? layout -> binder_count : 0
-    }
-    ;
-    int matched = is_default ? 1 : plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1;
-    if(! matched){
-      if(values) Scope_free(values);
-      continue;
-    }
-    _catch_commit_captures(h, record, layout, & captures);
-    if(values) Scope_free(values);
-    h -> selected = i;
-    Pool_close();
-    _catch_retain(h);
-    state -> floor_only --;
-    return 1440172936;
-  }
-  Pool_close();
-  state -> floor_only --;
-  return 285842436424;
-}
-
-void ExceptionFrame_unwind(void *);
-
-static Symbol _dispatch(Symbol effective, int raised_at, int depth){
-  ErrorThreadState state = _thread();
-  ErrorHandler saved = state -> handler_top, outer = state -> dispatch_saved;
-  ErrorHandler outer_running = state -> dispatch_running;
-  if(! outer) state -> dispatch_saved = saved;
-  Symbol result = 285842436424;
-  for(ErrorHandler h = saved;  h;  h = h -> prev){
-    state -> dispatch_running = h;
-    state -> handler_top = h -> prev;
-    Symbol disposition = 285842436424;
-    if(h -> site) disposition = _catch_match(h);
-    else{
-      {
-        _x2c_defer_env_0 _x2c_macro_environment_0 ={
-          0
-        }
-        ;
-        _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & h;
-        X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_1);
-        {
-          state -> floor_only ++;
-          h -> view = _region_new();
-          List slice = _view_since(& h -> view, h -> watermark);
-          state -> floor_only --;
-          disposition = h -> fn(slice, h -> data);
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-      }
-
-    }
-    if(disposition == 1440172936 || disposition == 12689496){
-      state -> handler_top = state -> dispatch_saved;
-      state -> dispatch_saved = state -> dispatch_running = NULL;
-      _leave();
-      if(disposition == 1440172936 && h -> site) ExceptionFrame_unwind(h -> target);
-      _floor(effective, disposition == 12689496 ? "handler returned fatal" : "<unwind> from an observing registration");
-    }
-    if(disposition == 17276625224){
-      _truncate(h -> watermark);
-      result = 17276625224;
-      break;
-    }
-
-  }
-  state -> handler_top = saved;
-  state -> dispatch_saved = outer;
-  state -> dispatch_running = outer_running;
-  _leave();
-  if(_never_returns(effective)) _floor(effective, "non-returning error was not caught");
-  if(result != 285842436424) return result;
-  Symbol policy = Error_policy_get(effective);
-  if(policy == 2260136) _floor(effective, "unhandled and policy is abort");
-  if(policy == 25550){
-    if(! state -> rendered[depth]) _report(effective);
-    _truncate(raised_at);
-  }
-  else if(policy == 619609226) _truncate(raised_at);
-  return result;
-}
-
-static void _raise_enter(Symbol effective){
-  if(_thread() -> floor_only) _floor(effective, "raise while building error state");
-  if(! _enter()) _floor(effective, "raise re-entered or after shutdown");
-  if(! Error_ready()){
-    _leave();
-    _floor(effective, "raise before initialization");
-  }
-
-}
-
-static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail){
-  Symbol effective = code ? code : 20800632064936;
-  _raise_enter(effective);
-  ErrorThreadState state = _thread();
-  int raised_at = Error_count(), depth = state -> depth;
-  state -> rendered[depth] = 0;
-  _record(site, effective, detail);
-  return _dispatch(effective, raised_at, depth);
-}
-
-Symbol Error_raise(Symbol code, List detail){
-  if(! _init_guard_) _file_init_();
-  return _raise(NULL, code, detail);
-}
-
-static int _chain_contains(ErrorHandler head, ErrorHandler wanted){
-  if(! wanted) return 1;
-  for(ErrorHandler h = head;  h;  h = h -> prev) if(h == wanted) return 1;
-  return 0;
-}
-
 int Error_ready(void){
   if(! _init_guard_) _file_init_();
   return x2c_error_runtime_ready;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _catch_site_unlock();
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  _region_destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_1;
-  _region_destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
+  _site_unlock();
 }
 
 #undef _x2c_initializer_choice_E00406E8_0_expanded

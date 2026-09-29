@@ -15,9 +15,11 @@ __attribute__((constructor)) static void _file_init_(void);
 #include <string.h>
 #include "scope.h"
 #include "exception.h"
-static int MachineBuilder__fail(MachineBuilder b, const char * reason);
-
 static int MachineBuilder__grow_code(MachineBuilder b);
+
+static int MachineBuilder__grow_consts(MachineBuilder b);
+
+static int MachineBuilder__fail(MachineBuilder b, const char * reason);
 
 static size_t _program_bytes(int length, int const_count, int binder_count);
 
@@ -471,62 +473,46 @@ String MachineBuilder_repr(MachineBuilder value){
 
 }
 
-static int MachineBuilder__fail(MachineBuilder b, const char * reason){
-  if(b -> status == MACHINE_PREPARED){
-    b -> status = MACHINE_INELIGIBLE;
-    b -> reason = reason;
+int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target){
+  if(b -> status != MACHINE_PREPARED || MachineBuilder__grow_code(b) < 0) return - 1;
+  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "instruction-range");
+  b -> code[b -> length] =(MachineWord){
+    .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target
   }
-  return - 1;
-}
-
-void MachineBuilder_init(MachineBuilder b){
-  b -> status = MACHINE_PREPARED;
-  b -> reason = "prepared";
-  b -> root = - 1;
-}
-
-void MachineBuilder_drop(MachineBuilder b){
-  Scope_free(b -> code);
-  Scope_free(b -> consts);
+  ;
+  return b -> length ++;
 }
 
 void * Scope_realloc(void *, size_t);
 
 static int MachineBuilder__grow_code(MachineBuilder b){
-  if(b -> length < b -> code_capacity) return 1;
-  if(b -> code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "code-capacity") + 1;
+  if(b -> length < b -> code_capacity) return 0;
+  if(b -> code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "code-capacity");
   int capacity = b -> code_capacity ? b -> code_capacity * 2 : 64;
   if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
   MachineWord * grown = Scope_realloc(b -> code, sizeof(MachineWord) * capacity);
   b -> code = grown;
   b -> code_capacity = capacity;
-  return 1;
-}
-
-int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target){
-  if(b -> status != MACHINE_PREPARED || ! MachineBuilder__grow_code(b)) return - 1;
-  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "instruction-range");
-  MachineWord word ={
-    .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target
-  }
-  ;
-  b -> code[b -> length] = word;
-  return b -> length ++;
+  return 0;
 }
 
 int MachineBuilder_constant(MachineBuilder b, Var value){
   if(b -> status != MACHINE_PREPARED) return - 1;
   for(int i = 0;  i < b -> const_count;  i ++) if(b -> consts[i].u64 == value.u64) return i;
-  if(b -> const_count >= b -> const_capacity){
-    if(b -> const_capacity >= MACHINE_CONST_MAX) return MachineBuilder__fail(b, "constant-capacity");
-    int capacity = b -> const_capacity ? b -> const_capacity * 2 : 16;
-    if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-    Var * grown = Scope_realloc(b -> consts, sizeof(Var) * capacity);
-    b -> consts = grown;
-    b -> const_capacity = capacity;
-  }
+  if(MachineBuilder__grow_consts(b) < 0) return - 1;
   b -> consts[b -> const_count] = value;
   return b -> const_count ++;
+}
+
+static int MachineBuilder__grow_consts(MachineBuilder b){
+  if(b -> const_count < b -> const_capacity) return 0;
+  if(b -> const_capacity >= MACHINE_CONST_MAX) return MachineBuilder__fail(b, "constant-capacity");
+  int capacity = b -> const_capacity ? b -> const_capacity * 2 : 16;
+  if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
+  Var * grown = Scope_realloc(b -> consts, sizeof(Var) * capacity);
+  b -> consts = grown;
+  b -> const_capacity = capacity;
+  return 0;
 }
 
 int MachineBuilder_binder(MachineBuilder b, Atom binder){
@@ -543,7 +529,7 @@ Var String_var(String);
 
 void MachineBuilder_set_target(MachineBuilder b, int site, int target){
   if(target < 0 || target >= MACHINE_CODE_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 412};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 387};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL))), Symbol_var(1345468776), int_var(target));
     __builtin_unreachable();
   }
@@ -561,6 +547,33 @@ MachineView MachineBuilder_view(MachineBuilder b){
   }
   ;
   return view;
+}
+
+static int MachineBuilder__fail(MachineBuilder b, const char * reason){
+  if(b -> status == MACHINE_PREPARED){
+    b -> status = MACHINE_INELIGIBLE;
+    b -> reason = reason;
+  }
+  return - 1;
+}
+
+void * Scope_malloc(size_t);
+
+MachineProgram MachineBuilder_freeze(MachineBuilder b){
+  if(b -> status != MACHINE_PREPARED || b -> root < 0) return NULL;
+  size_t bytes = _program_bytes(b -> length, b -> const_count, b -> binder_count);
+  MachineProgram program = Scope_malloc(bytes);
+  * program =(struct MachineProgram){
+    .length = b -> length, .const_count = b -> const_count, .binder_count = b -> binder_count, .root = b -> root
+  }
+  ;
+  MachineWord * code =(MachineWord *)(program + 1);
+  Var * consts =(Var *)(code + b -> length);
+  Atom * binders =(Atom *)(consts + b -> const_count);
+  if(b -> length) memcpy(code, b -> code, sizeof(MachineWord) * b -> length);
+  if(b -> const_count) memcpy(consts, b -> consts, sizeof(Var) * b -> const_count);
+  if(b -> binder_count) memcpy(binders, b -> binders, sizeof(Atom) * b -> binder_count);
+  return program;
 }
 
 static size_t _program_bytes(int length, int const_count, int binder_count){
@@ -582,23 +595,15 @@ size_t MachineProgram_bytes(MachineProgram program){
   return _program_bytes(program -> length, program -> const_count, program -> binder_count);
 }
 
-void * Scope_malloc(size_t);
+void MachineBuilder_init(MachineBuilder b){
+  b -> status = MACHINE_PREPARED;
+  b -> reason = "prepared";
+  b -> root = - 1;
+}
 
-MachineProgram MachineBuilder_freeze(MachineBuilder b){
-  if(b -> status != MACHINE_PREPARED || b -> root < 0) return NULL;
-  size_t bytes = _program_bytes(b -> length, b -> const_count, b -> binder_count);
-  MachineProgram program = Scope_malloc(bytes);
-  * program =(struct MachineProgram){
-    .length = b -> length, .const_count = b -> const_count, .binder_count = b -> binder_count, .root = b -> root
-  }
-  ;
-  MachineWord * code =(MachineWord *)(program + 1);
-  Var * consts =(Var *)(code + b -> length);
-  Atom * binders =(Atom *)(consts + b -> const_count);
-  if(b -> length) memcpy(code, b -> code, sizeof(MachineWord) * b -> length);
-  if(b -> const_count) memcpy(consts, b -> consts, sizeof(Var) * b -> const_count);
-  if(b -> binder_count) memcpy(binders, b -> binders, sizeof(Atom) * b -> binder_count);
-  return program;
+void MachineBuilder_drop(MachineBuilder b){
+  Scope_free(b -> code);
+  Scope_free(b -> consts);
 }
 
 static inline String _x2c_proto_machinebuilder_str_0(Var a0){

@@ -15,15 +15,21 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
-List List_promote(List lst);
-
-int List_try_own(List lst);
-
 List cons(Var head, List tail);
 
 List List_cons(Var head, List tail);
 
 List Var_cons(Var head, List tail);
+
+unsigned List_hash(List lst);
+
+int List_equal(List a, List b);
+
+int List_compare(List a, List b);
+
+List List_promote(List lst);
+
+int List_try_own(List lst);
 
 static inline Var car(List x){
   return List_truth(x) ? x -> car :((void) 0, Void);
@@ -77,6 +83,20 @@ static inline Var Var_caddr(Var var){
   return car(cdr(cdr(Var_list(var))));
 }
 
+int List_try_next(List lst, List * cursor, Var * out);
+
+Iter List_iter(List lst, Iter dest);
+
+List Array_list(Array arr);
+
+List Array_list_free(Array arr);
+
+Array List_array(List lst);
+
+List Map_list(Map map);
+
+List Iter_list(Iter iter);
+
 List List_append(List a, List b);
 
 List List_concat_n(unsigned list_count, ...);
@@ -85,15 +105,33 @@ List List_list_n(unsigned element_count, ...);
 
 List List_reverse(List lst);
 
+int List_len(List lst);
+
 Var List_last(List lst);
 
 int List_index(List l, Var key);
 
 int List_contains(List lst, Var key);
 
-int List_len(List lst);
+List List_nth_cdr(List list, int n);
+
+Var List_getindex(List list, int index);
+
+Var List_get(List list, Var key);
+
+Var List_assoc(List list, Var key);
+
+List List_head(List list, unsigned count);
+
+List List_tail(List list, unsigned count);
+
+List List_subseq(List list, int start, int stop, int step);
+
+List List_getslice(List list, int start, int stop, int step);
 
 List List_map(List lst, Func fn);
+
+List List_filter(List lst, Func pred);
 
 Var List_foldl(List lst, Var seed, Func fn);
 
@@ -103,57 +141,27 @@ int List_any(List lst, Func pred);
 
 int List_all(List lst, Func pred);
 
+List List_zip_with(List a, List b, Func fn);
+
+List List_map2(List a, List b, Func fn);
+
 List List_sort(List lst);
 
 List List_sort_with(List lst, Func compare);
 
 List List_sort_by(List lst, Func key);
 
-List Array_list(Array arr);
-
-List Array_list_free(Array arr);
-
-List Map_list(Map map);
-
-Array List_array(List lst);
-
 List List_unique(List lst);
-
-List List_zip_with(List a, List b, Func fn);
-
-List List_map2(List a, List b, Func fn);
-
-List List_sublis(List alist, List tree);
 
 List List_flatten(List lst);
 
 List List_flatten_all(List lst);
 
-List List_nth_cdr(List list, int n);
-
-Var List_getindex(List list, int index);
-
-Var List_assoc(List list, Var key);
-
-Var List_get(List list, Var key);
-
-List List_tail(List list, unsigned count);
-
-List List_head(List list, unsigned count);
-
-List List_subseq(List list, int start, int stop, int step);
-
-List List_getslice(List list, int start, int stop, int step);
+List List_sublis(List alist, List tree);
 
 int List_unpack_n(List src, unsigned destination_count, ...);
 
 int List_unpack_vars_n(List src, unsigned destination_count, ...);
-
-unsigned List_hash(List lst);
-
-int List_equal(List a, List b);
-
-int List_compare(List a, List b);
 
 String List_str(List lst);
 
@@ -162,14 +170,6 @@ Buffer List_write_str(List lst, Buffer out);
 String List_repr(List lst);
 
 Buffer List_write_repr(List lst, Buffer out);
-
-int List_try_next(List lst, List * cursor, Var * out);
-
-Iter List_iter(List lst, Iter dest);
-
-List Iter_list(Iter iter);
-
-List List_filter(List lst, Func pred);
 
 
 #endif /* __GUARD_0xD09D0392__ */

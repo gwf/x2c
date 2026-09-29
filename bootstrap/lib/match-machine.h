@@ -6,13 +6,13 @@
 #define __GUARD_0x491AB95F__
 
 #include "machine.h"
-void MatchMachine_begin(MatchMachine m, MachineView program, Var input);
+void MatchMachine_run(MatchMachine m);
 
 int MatchMachine_step(MatchMachine m);
 
-void MatchMachine_run(MatchMachine m);
-
 List MatchMachine_materialize_span(MatchMachine m, MachineSpan span);
+
+void MatchMachine_begin(MatchMachine m, MachineView program, Var input);
 
 void MatchMachine_finish(MatchMachine m);
 

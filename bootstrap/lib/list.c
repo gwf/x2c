@@ -27,29 +27,51 @@ static void _promote_node(Var node);
 
 static int _try_own_node(Var node);
 
-static int _is_active_canonical(List list);
+static int _next(Iter iter, Var * out);
 
 static List _prepend_array(Array values, List tail);
 
+static List _concat_va(unsigned n, va_list ap);
+
 static List _concat_lists(Array lists);
 
-static List _concat_n_va(unsigned list_count, va_list ap);
-
-static List _n_va(unsigned element_count, va_list ap);
-
-static Var _sublis_node(List alist, Var node);
-
-static void _flatten_all_collect(Array values, List lst);
+static List _list_va(unsigned n, va_list ap);
 
 static List _collect_subseq(List list, int start, int step, int span);
 
-static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs);
+static int _is_active_canonical(List list);
 
-static void _serialize_list_line(Var elem, Buffer buf, Symbol mode);
+static Var _apply1(Func fn, Var arg);
 
-static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode);
+static Var _apply2(Func fn, Var left, Var right);
 
-static int _next(Iter iter, Var * out);
+static void _flatten_into(Array values, List lst);
+
+static Var _sublis_node(List alist, Var node);
+
+static int _unpack_va(List src, unsigned n, va_list ap, int lists);
+
+static const int _WIDTH = 80;
+
+static void _render(Var elem, Buffer buf, Symbol mode);
+
+static void _render_leaf(Var elem, Buffer buf, Symbol mode);
+
+static void _render_nil(Buffer buf);
+
+static int _render_flat(Var elem, Buffer buf, Symbol mode);
+
+static void _render_items(Var elem, Buffer buf, Symbol mode);
+
+static void _flat(Var elem, Buffer buf, Symbol mode);
+
+static void _flat_items(Var elem, Buffer buf, Symbol mode);
+
+static void _leaf(Var elem, Buffer buf, Symbol mode);
+
+static void _open(List lst, Buffer buf);
+
+static void _close(Buffer buf);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -107,54 +129,54 @@ _x2c_defer_env_7;
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
 
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
-
 typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_8;
 }
 _x2c_defer_env_8;
 
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 
 typedef struct _x2c_defer_env_9{
   const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_9;
 
-static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 
 typedef struct _x2c_defer_env_10{
   const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_10;
 
-static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
+static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 
 typedef struct _x2c_defer_env_11{
   const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_11;
 
-static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
+static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
 
 typedef struct _x2c_defer_env_12{
   const void * _x2c_defer_capture_12;
 }
 _x2c_defer_env_12;
 
-static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 
 typedef struct _x2c_defer_env_13{
   const void * _x2c_defer_capture_13;
 }
 _x2c_defer_env_13;
 
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 
 typedef struct _x2c_defer_env_14{
   const void * _x2c_defer_capture_14;
 }
 _x2c_defer_env_14;
+
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14);
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15);
 
@@ -240,81 +262,19 @@ List List_cons_in(Pool pool, Var head, List tail){
   return Var_list(Pool_intern_new(pool, List_var(cell), cell));
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-String String_promote(String);
-
-String Var_string(Var);
-
-int Var_is(Var, Symbol);
-
-Atom Atom_promote(Atom);
-
-int List_truth(List);
-
-int Pool_promote(Pool, Var, void *);
-
-Pool Pool_current(void);
-
-static void _promote_node(Var node){
-  if(Var_is_row(node, 11, 7, 1)){
-    String_promote(Var_string(node));
-    return;
-  }
-  if(Var_is(node, 826970)){
-    Atom_promote(node);
-    return;
-  }
-  if(! Var_is_row(node, 9, 7, 4)) return;
-  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
-    if(! Pool_promote(Pool_current(), List_var(cur), cur)) break;
-    _promote_node(cur -> car);
-  }
-
-}
-
-List List_promote(List lst){
-  if(! List_truth(lst)) return lst;
-  _promote_node(List_var(lst));
-  return lst;
-}
-
-int String_try_own(String);
-
-String Var_str(Var);
-
-int Pool_own(Pool, Var, void *);
-
-static int _try_own_node(Var node){
-  if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
-  if(Var_is(node, 826970)) return String_try_own(Var_str(node));
-  if(! Var_is_row(node, 9, 7, 4)) return 1;
-  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
-    if(! Pool_own(Pool_current(), List_var(cur), cur)) return 0;
-    if(! _try_own_node(cur -> car)) return 0;
-  }
-  return 1;
-}
-
-int List_try_own(List lst){
-  return ! List_truth(lst) || _try_own_node(List_var(lst));
-}
-
 Var Symbol_var(Symbol);
 
 Var String_var(String);
 
+Pool Pool_current(void);
+
 List cons(Var head, List tail){
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 162};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 92};
     x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
   return List_cons_in(Pool_current(), head, tail);
-}
-
-static int _is_active_canonical(List list){
-  return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
 List List_cons(Var head, List tail){
@@ -325,1072 +285,7 @@ List Var_cons(Var head, List tail){
   return cons(head, tail);
 }
 
-void * Var_pointer(Var);
-
-Var Var_car(Var var){
-  return car(Var_pointer(var));
-}
-
-List Var_cdr(Var var){
-  return cdr(Var_pointer(var));
-}
-
-static List _prepend_array(Array values, List tail){
-  Var * data = values -> bytes;
-  for(size_t i = Array_len(values);  i;  i --) tail = cons(data[i - 1], tail);
-  return tail;
-}
-
-Array Array_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
-Var Array_push(Array, Var);
-
-void x2c_cleanup_leave(X2CCleanup *);
-
-List List_append(List a, List b){
-  if(! List_truth(a)) return b;
-  if(! List_truth(b)) return a;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
-    {
-      {
-        Var value;
-        List _x2c_macro_object_0 = a;
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          value = _x2c_macro_cursor_output_0;
-          Array_push(values, value);
-        }
-
-      }
-      {
-        List _x2c_return_value_0 = _prepend_array(values, b);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
-  }
-
-}
-
-Var Array_getindex(Array, int);
-
-static List _concat_lists(Array lists){
-  List result = NULL;
-  for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
-    List current = Var_list(Array_getindex(lists, i));
-    result = List_append(current, result);
-  }
-  return result;
-}
-
-Var unsigned_var(unsigned);
-
-static List _concat_n_va(unsigned list_count, va_list ap){
-  if(list_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 244};
-    x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
-    __builtin_unreachable();
-  }
-  Array lists = Array_new();
-  {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & lists;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
-    {
-      for(unsigned i = 0;  i < list_count;  i ++) Array_push(lists, List_var(va_arg(ap, List)));
-      {
-        List _x2c_return_value_1 = _concat_lists(lists);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
-  }
-
-}
-
-List List_concat_n(unsigned list_count, ...){
-  va_list ap;
-  va_start(ap, list_count);
-  List result = _concat_n_va(list_count, ap);
-  va_end(ap);
-  return result;
-}
-
-static List _n_va(unsigned element_count, va_list ap){
-  Array values = Array_new();
-  {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
-    {
-      for(unsigned i = 0;  i < element_count;  i ++){
-        Var value = va_arg(ap, Var);
-        if(Var_is_void(value)){
-          static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_n_va",.line = 270};
-          x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
-          __builtin_unreachable();
-        }
-        Array_push(values, value);
-      }
-      {
-        List _x2c_return_value_2 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
-  }
-
-}
-
-List List_list_n(unsigned element_count, ...){
-  va_list ap;
-  va_start(ap, element_count);
-  List result = _n_va(element_count, ap);
-  va_end(ap);
-  return result;
-}
-
-List List_reverse(List lst){
-  List rev = NULL;
-  {
-    Var value;
-    List _x2c_macro_object_1 = lst;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      value = _x2c_macro_cursor_output_1;
-      rev = cons(value, rev);
-    }
-
-  }
-  return rev;
-}
-
-Var List_last(List lst){
-  if(! List_truth(lst)) return((void) 0, Void);
-  List tail;
-  while(List_truth((tail = List_cdr(lst)))) lst = tail;
-  return List_car(lst);
-}
-
-int Var_equal(Var, Var);
-
-int List_index(List l, Var key){
-  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(Var_equal(l -> car, key)) return index;
-  return - 1;
-}
-
-int List_contains(List lst, Var key){
-  return List_index(lst, key) != - 1;
-}
-
-int List_len(List lst){
-  int len = 0;
-  for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
-  return len;
-}
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-List List_map(List lst, Func fn){
-  if(! List_truth(lst)) return NULL;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_3 _x2c_macro_environment_3 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
-    {
-      {
-        Var value;
-        List _x2c_macro_object_2 = lst;
-        List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-        Var _x2c_macro_cursor_output_2;
-        while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-          value = _x2c_macro_cursor_output_2;
-          {
-            FuncArg arguments[1] ={
-              FuncArg_value(value)
-            }
-            ;
-            Array_push(values, Func_apply(fn, 1, arguments));
-          }
-
-        }
-
-      }
-      {
-        List _x2c_return_value_3 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_3;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
-  }
-
-}
-
-Var List_foldl(List lst, Var seed, Func fn){
-  Var acc = seed;
-  List cur = lst;
-  if(Var_is_void(acc)){
-    if(! List_truth(cur)) return((void) 0, Void);
-    acc = cur -> car;
-    cur = List_cdr(cur);
-  }
-  if(! fn) return acc;
-  {
-    Var value;
-    List _x2c_macro_object_3 = cur;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      value = _x2c_macro_cursor_output_3;
-      {
-        FuncArg arguments[2] ={
-          FuncArg_value(acc), FuncArg_value(value)
-        }
-        ;
-        acc = Func_apply(fn, 2, arguments);
-      }
-
-    }
-
-  }
-  return acc;
-}
-
-int Var_truth(Var);
-
-Var List_find(List lst, Func pred){
-  if(! pred) return((void) 0, Void);
-  {
-    Var value;
-    List _x2c_macro_object_4 = lst;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      value = _x2c_macro_cursor_output_4;
-      {
-        FuncArg arguments[1] ={
-          FuncArg_value(value)
-        }
-        ;
-        if(Var_truth(Func_apply(pred, 1, arguments))) return value;
-      }
-
-    }
-
-  }
-  return((void) 0, Void);
-}
-
-int List_any(List lst, Func pred){
-  if(! pred) return 0;
-  {
-    Var value;
-    List _x2c_macro_object_5 = lst;
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      value = _x2c_macro_cursor_output_5;
-      {
-        FuncArg arguments[1] ={
-          FuncArg_value(value)
-        }
-        ;
-        if(Var_truth(Func_apply(pred, 1, arguments))) return 1;
-      }
-
-    }
-
-  }
-  return 0;
-}
-
-int List_all(List lst, Func pred){
-  if(! List_truth(lst)) return 1;
-  if(! pred) return 0;
-  {
-    Var value;
-    List _x2c_macro_object_6 = lst;
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      value = _x2c_macro_cursor_output_6;
-      {
-        FuncArg arguments[1] ={
-          FuncArg_value(value)
-        }
-        ;
-        if(! Var_truth(Func_apply(pred, 1, arguments))) return 0;
-      }
-
-    }
-
-  }
-  return 1;
-}
-
-Array Array_sort(Array);
-
-List List_sort(List lst){
-  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_4 _x2c_macro_environment_4 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_4._x2c_defer_capture_4 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_4 ={
-      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_4);
-    {
-      {
-        Var value;
-        List _x2c_macro_object_7 = lst;
-        List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-        Var _x2c_macro_cursor_output_7;
-        while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-          value = _x2c_macro_cursor_output_7;
-          Array_push(values, value);
-        }
-
-      }
-      Array_sort(values);
-      {
-        List _x2c_return_value_4 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_4);
-          return _x2c_return_value_4;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_4);
-  }
-
-}
-
-Array Array_sort_with(Array, Func);
-
-List List_sort_with(List lst, Func compare){
-  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_5 _x2c_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_5._x2c_defer_capture_5 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_5 ={
-      .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_5);
-    {
-      {
-        Var value;
-        List _x2c_macro_object_8 = lst;
-        List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-        Var _x2c_macro_cursor_output_8;
-        while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-          value = _x2c_macro_cursor_output_8;
-          Array_push(values, value);
-        }
-
-      }
-      Array_sort_with(values, compare);
-      {
-        List _x2c_return_value_5 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_5);
-          return _x2c_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_5);
-  }
-
-}
-
-Array Array_sort_by(Array, Func);
-
-List List_sort_by(List lst, Func key){
-  if(! List_truth(lst)) return lst;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_6 _x2c_macro_environment_6 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_6._x2c_defer_capture_6 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_6 ={
-      .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_6);
-    {
-      {
-        Var value;
-        List _x2c_macro_object_9 = lst;
-        List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-        Var _x2c_macro_cursor_output_9;
-        while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-          value = _x2c_macro_cursor_output_9;
-          Array_push(values, value);
-        }
-
-      }
-      Array_sort_by(values, key);
-      {
-        List _x2c_return_value_6 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_6);
-          return _x2c_return_value_6;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_6);
-  }
-
-}
-
-List Array_list(Array arr){
-  return _prepend_array(arr, NULL);
-}
-
-List Array_list_free(Array arr){
-  {
-    _x2c_defer_env_7 _x2c_macro_environment_7 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_7._x2c_defer_capture_7 =(const void *) & arr;
-    X2CCleanup _x2c_defer_record_7 ={
-      .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_7
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_7);
-    {
-      {
-        List _x2c_return_value_7 = Array_list(arr);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_7);
-          return _x2c_return_value_7;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_7);
-  }
-
-}
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-List Map_list(Map map){
-  Array pairs = Array_new();
-  {
-    Var key, value;
-    Map _x2c_macro_object_10 = map;
-    unsigned _x2c_macro_cursor_10 = 0;
-    Var _x2c_macro_cursor_output_10;
-    Var _x2c_macro_cursor_output_11;
-    while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10), &(_x2c_macro_cursor_output_11))){
-      key = _x2c_macro_cursor_output_10;
-      value = _x2c_macro_cursor_output_11;
-      Array_push(pairs, List_var(cons(key, cons(value, NULL))));
-    }
-
-  }
-  return Array_list_free(pairs);
-}
-
-Array List_array(List lst){
-  Array array = Array_new();
-  {
-    Var value;
-    List _x2c_macro_object_11 = lst;
-    List _x2c_macro_cursor_11 = _x2c_macro_object_11;
-    Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_12))){
-      value = _x2c_macro_cursor_output_12;
-      Array_push(array, value);
-    }
-
-  }
-  return array;
-}
-
-void Scope_retain(void);
-
-Iter Iter_unique(Iter, Iter);
-
-List List_unique(List lst){
-  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
-  {
-    Scope_retain();
-    {
-      {
-        X2CCleanup _x2c_defer_record_8 ={
-          .fn = _x2c_defer_cleanup_8, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_8);
-        {
-          {
-            struct Iter iter_storage, unique_storage;
-            Iter iter = List_iter(lst, & iter_storage);
-            Iter unique = Iter_unique(iter, & unique_storage);
-            {
-              List _x2c_return_value_8 = Iter_list(unique);
-              {
-                x2c_cleanup_leave(& _x2c_defer_record_8);
-                return _x2c_return_value_8;
-              }
-
-            }
-
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_8);
-      }
-
-    }
-
-  }
-
-}
-
-List List_zip_with(List a, List b, Func fn){
-  Array values = Array_new();
-  {
-    _x2c_defer_env_8 _x2c_macro_environment_8 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_8._x2c_defer_capture_8 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_9 ={
-      .fn = _x2c_defer_cleanup_9, .env = & _x2c_macro_environment_8
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_9);
-    {
-      for(;  List_truth(a) && List_truth(b);  a = List_cdr(a), b = List_cdr(b)){
-        Var left = a -> car, right = b -> car, item;
-        if(fn){
-          FuncArg arguments[2] ={
-            FuncArg_value(left), FuncArg_value(right)
-          }
-          ;
-          item = Func_apply(fn, 2, arguments);
-        }
-        else item = List_var(cons(left, cons(right, NULL)));
-        Array_push(values, item);
-      }
-      {
-        List _x2c_return_value_9 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_9);
-          return _x2c_return_value_9;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_9);
-  }
-
-}
-
-List List_map2(List a, List b, Func fn){
-  if(! fn) return NULL;
-  return List_zip_with(a, b, fn);
-}
-
-static Var _sublis_node(List alist, Var node){
-  if(! Var_is_row(node, 9, 7, 4)){
-    Var replacement = List_assoc(alist, node);
-    return Var_is_void(replacement) ? node : replacement;
-  }
-  List list = Var_list(node);
-  if(! List_truth(list)) return List_var(list);
-  Array items = Array_new();
-  {
-    _x2c_defer_env_9 _x2c_macro_environment_9 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_9._x2c_defer_capture_9 =(const void *) & items;
-    X2CCleanup _x2c_defer_record_10 ={
-      .fn = _x2c_defer_cleanup_10, .env = & _x2c_macro_environment_9
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_10);
-    {
-      {
-        Var source;
-        List _x2c_macro_object_12 = list;
-        List _x2c_macro_cursor_12 = _x2c_macro_object_12;
-        Var _x2c_macro_cursor_output_13;
-        while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_13))){
-          source = _x2c_macro_cursor_output_13;
-          Array_push(items, _sublis_node(alist, source));
-        }
-
-      }
-      {
-        Var _x2c_return_value_10 = List_var(Array_list(items));
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_10);
-          return _x2c_return_value_10;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_10);
-  }
-
-}
-
-List List_sublis(List alist, List tree){
-  if(! List_truth(tree)) return NULL;
-  return Var_list(_sublis_node(alist, List_var(tree)));
-}
-
-List List_flatten(List lst){
-  if(! List_truth(lst)) return lst;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_10 _x2c_macro_environment_10 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_10._x2c_defer_capture_10 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_11 ={
-      .fn = _x2c_defer_cleanup_11, .env = & _x2c_macro_environment_10
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_11);
-    {
-      {
-        Var head;
-        List _x2c_macro_object_14 = lst;
-        List _x2c_macro_cursor_14 = _x2c_macro_object_14;
-        Var _x2c_macro_cursor_output_15;
-        while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_15))){
-          head = _x2c_macro_cursor_output_15;
-          {
-            if(Var_is_row(head, 9, 7, 4)){
-              List inner = Var_list(head);
-              {
-                Var item;
-                List _x2c_macro_object_13 = inner;
-                List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-                Var _x2c_macro_cursor_output_14;
-                while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_14))){
-                  item = _x2c_macro_cursor_output_14;
-                  Array_push(values, item);
-                }
-
-              }
-
-            }
-            else Array_push(values, head);
-          }
-
-        }
-
-      }
-      {
-        List _x2c_return_value_11 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_11);
-          return _x2c_return_value_11;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_11);
-  }
-
-}
-
-static void _flatten_all_collect(Array values, List lst){
-  {
-    Var head;
-    List _x2c_macro_object_15 = lst;
-    List _x2c_macro_cursor_15 = _x2c_macro_object_15;
-    Var _x2c_macro_cursor_output_16;
-    while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_16))){
-      head = _x2c_macro_cursor_output_16;
-      {
-        if(Var_is_row(head, 9, 7, 4)) _flatten_all_collect(values, Var_list(head));
-        else Array_push(values, head);
-      }
-
-    }
-
-  }
-
-}
-
-List List_flatten_all(List lst){
-  if(! List_truth(lst)) return lst;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_11 _x2c_macro_environment_11 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_11._x2c_defer_capture_11 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_12 ={
-      .fn = _x2c_defer_cleanup_12, .env = & _x2c_macro_environment_11
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_12);
-    {
-      _flatten_all_collect(values, lst);
-      {
-        List _x2c_return_value_12 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_12);
-          return _x2c_return_value_12;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_12);
-  }
-
-}
-
-List List_nth_cdr(List list, int n){
-  while(n -- > 0 && List_truth(list)) list = List_cdr(list);
-  return list;
-}
-
-Var List_getindex(List list, int index){
-  if(index < 0){
-    unsigned distance =(unsigned) -(long) index;
-    List lead = list;
-    while(distance --){
-      if(! List_truth(lead)) return((void) 0, Void);
-      lead = List_cdr(lead);
-    }
-    List lag = list;
-    while(List_truth(lead)){
-      lead = List_cdr(lead);
-      lag = List_cdr(lag);
-    }
-    return List_truth(lag) ? lag -> car :((void) 0, Void);
-  }
-  List nth = List_nth_cdr(list, index);
-  return List_truth(nth) ? nth -> car :((void) 0, Void);
-}
-
-Var List_assoc(List list, Var key){
-  {
-    List pair;
-    List _x2c_macro_object_16 = list;
-    List _x2c_macro_cursor_16 = _x2c_macro_object_16;
-    Var _x2c_macro_cursor_output_17;
-    while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_17))){
-      pair = Var_list(_x2c_macro_cursor_output_17);
-      {
-        if(! List_truth(pair)) continue;
-        Var pair_key, value;
-        List _x2c_destructure_0 = pair;
-        pair_key = List_getindex(_x2c_destructure_0, 0);
-        value = List_getindex(_x2c_destructure_0, 1);
-        if(Var_equal(pair_key, key)) return value;
-      }
-
-    }
-
-  }
-  return((void) 0, Void);
-}
-
-Symbol Var_kind(Var);
-
-long long Var_long_long(Var);
-
-Var List_get(List list, Var key){
-  if(Var_kind(key) != 20309162340) return List_assoc(list, key);
-  long long index = Var_long_long(key);
-  if(index !=(int) index) return((void) 0, Void);
-  return List_getindex(list, (int) index);
-}
-
-List List_tail(List list, unsigned count){
-  List lead = list;
-  for(unsigned i = 0;  i < count;  i ++){
-    if(! List_truth(lead)) return list;
-    lead = List_cdr(lead);
-  }
-  List lag = list;
-  while(List_truth(lead)){
-    lead = List_cdr(lead);
-    lag = List_cdr(lag);
-  }
-  return lag;
-}
-
-List List_head(List list, unsigned count){
-  List original = list;
-  Array values = Array_new();
-  {
-    _x2c_defer_env_12 _x2c_macro_environment_12 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_12._x2c_defer_capture_12 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_13 ={
-      .fn = _x2c_defer_cleanup_13, .env = & _x2c_macro_environment_12
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_13);
-    {
-      while(List_truth(list) && count --){
-        Array_push(values, list -> car);
-        list = List_cdr(list);
-      }
-      if(! List_truth(list)){
-        List _x2c_return_value_13 = original;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_13);
-          return _x2c_return_value_13;
-        }
-
-      }
-      {
-        List _x2c_return_value_14 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_13);
-          return _x2c_return_value_14;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_13);
-  }
-
-}
-
-static List _collect_subseq(List list, int start, int step, int span){
-  if(span <= 0) return NULL;
-  for(int i = 0;  List_truth(list) && i < start;  i ++) list = List_cdr(list);
-  Array values = Array_new();
-  {
-    _x2c_defer_env_13 _x2c_macro_environment_13 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_13._x2c_defer_capture_13 =(const void *) & values;
-    X2CCleanup _x2c_defer_record_14 ={
-      .fn = _x2c_defer_cleanup_14, .env = & _x2c_macro_environment_13
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_14);
-    {
-      while(List_truth(list) && span --){
-        Array_push(values, list -> car);
-        for(int i = 0;  List_truth(list) && i < step;  i ++) list = List_cdr(list);
-      }
-      {
-        List _x2c_return_value_15 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_14);
-          return _x2c_return_value_15;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_14);
-  }
-
-}
-
-Var int_var(int);
-
-int x2c_normalize_slice(int *, int *, int, int);
-
-List List_subseq(List list, int start, int stop, int step){
-  if(step < 1){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 725};
-    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
-    __builtin_unreachable();
-  }
-  int span = x2c_normalize_slice(& start, & stop, step, List_len(list));
-  return _collect_subseq(list, start, step, span);
-}
-
-List List_getslice(List list, int start, int stop, int step){
-  if(! step){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 739};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
-    __builtin_unreachable();
-  }
-  int len = List_len(list), span = x2c_normalize_slice(& start, & stop, step, len);
-  if(step == 1 && start == 0 && span == len &&(! List_truth(list) || _is_active_canonical(list))) return list;
-  if(step > 0) return _collect_subseq(list, start, step, span);
-  if(span <= 0) return NULL;
-  Array source = List_array(list);
-  {
-    _x2c_defer_env_15 _x2c_macro_environment_15 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_15._x2c_defer_capture_15 =(const void *) & source;
-    X2CCleanup _x2c_defer_record_15 ={
-      .fn = _x2c_defer_cleanup_16, .env = & _x2c_macro_environment_15
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_15);
-    {
-      Array values = Array_new();
-      {
-        _x2c_defer_env_14 _x2c_macro_environment_14 ={
-          0
-        }
-        ;
-        _x2c_macro_environment_14._x2c_defer_capture_14 =(const void *) & values;
-        X2CCleanup _x2c_defer_record_16 ={
-          .fn = _x2c_defer_cleanup_15, .env = & _x2c_macro_environment_14
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_16);
-        {
-          for(int i = 0;  i < span;  i ++) Array_push(values, Array_getindex(source, start + i * step));
-          {
-            List _x2c_return_value_16 = Array_list(values);
-            {
-              x2c_cleanup_leave(& _x2c_defer_record_16);
-              x2c_cleanup_leave(& _x2c_defer_record_15);
-              return _x2c_return_value_16;
-            }
-
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_16);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_15);
-  }
-
-}
-
-static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
-  if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 754};
-    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
-    __builtin_unreachable();
-  }
-  int count = 0;
-  while(List_truth(src) && count < destination_count){
-    if(list_outputs){
-      List * dst = va_arg(ap, List *);
-      if(dst) * dst = Var_list(List_car(src));
-    }
-    else{
-      Var * dst = va_arg(ap, Var *);
-      if(dst) * dst = List_car(src);
-    }
-    src = List_cdr(src);
-    count ++;
-  }
-  return count;
-}
-
-int List_unpack_n(List src, unsigned destination_count, ...){
-  va_list ap;
-  va_start(ap, destination_count);
-  int count = _unpack_n_va(src, destination_count, ap, 1);
-  va_end(ap);
-  return count;
-}
-
-int List_unpack_vars_n(List src, unsigned destination_count, ...){
-  va_list ap;
-  va_start(ap, destination_count);
-  int count = _unpack_n_va(src, destination_count, ap, 0);
-  va_end(ap);
-  return count;
-}
+int List_truth(List);
 
 unsigned List_hash(List lst){
   if(! List_truth(lst)) return 0;
@@ -1421,184 +316,1239 @@ int List_compare(List a, List b){
   return List_truth(a) ? 1 : - 1;
 }
 
-Buffer Var_write_str(Var, Buffer);
+List List_promote(List lst){
+  if(! List_truth(lst)) return lst;
+  _promote_node(List_var(lst));
+  return lst;
+}
 
-Buffer Atom_write_repr(Atom, Buffer);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-Buffer Var_write_repr(Var, Buffer);
+String String_promote(String);
 
-Buffer Buffer_write(Buffer, const char *);
+String Var_string(Var);
 
-int RenderPath_enter(RenderPath *, const void *);
+int Var_is(Var, Symbol);
 
-Buffer Var_write_pointer_repr(Var, Buffer);
+Atom Atom_promote(Atom);
 
-Buffer Buffer_pad(Buffer);
+int Pool_promote(Pool, Var, void *);
 
-Buffer Buffer_push(Buffer);
-
-char Buffer_get(Buffer, ptrdiff_t);
-
-Buffer Buffer_pop(Buffer);
-
-static void _serialize_list_line(Var elem, Buffer buf, Symbol mode){
-  if(! Var_is_row(elem, 9, 7, 4)){
-    if(mode == 40228) Var_write_str(elem, buf);
-    else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, buf);
-    else Var_write_repr(elem, buf);
-    return;
+static void _promote_node(Var node){
+  if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_string(node));
+  if(Var_is(node, 826970)) return(void) Atom_promote(node);
+  if(! Var_is_row(node, 9, 7, 4)) return;
+  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
+    if(! Pool_promote(Pool_current(), List_var(cur), cur)) break;
+    _promote_node(cur -> car);
   }
-  List lst = Var_list(elem);
-  if(! List_truth(lst)) return(void) Buffer_write(buf, "()");
-  RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
+
+}
+
+int List_try_own(List lst){
+  return ! List_truth(lst) || _try_own_node(List_var(lst));
+}
+
+int String_try_own(String);
+
+String Var_str(Var);
+
+int Pool_own(Pool, Var, void *);
+
+static int _try_own_node(Var node){
+  if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
+  if(Var_is(node, 826970)) return String_try_own(Var_str(node));
+  if(! Var_is_row(node, 9, 7, 4)) return 1;
+  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
+    if(! Pool_own(Pool_current(), List_var(cur), cur)) return 0;
+    if(! _try_own_node(cur -> car)) return 0;
+  }
+  return 1;
+}
+
+void * Var_pointer(Var);
+
+Var Var_car(Var var){
+  return car(Var_pointer(var));
+}
+
+List Var_cdr(Var var){
+  return cdr(Var_pointer(var));
+}
+
+int List_try_next(List lst, List * cursor, Var * out){
+  if(! cursor) return 0;
+  if(! out) return 0;
+  List rest =(* cursor);
+  if(! List_truth(rest)) return 0;
+  (* out) = List_car(rest);
+  (* cursor) = rest -> cdr;
+  return 1;
+}
+
+int Iter_truth(Iter);
+
+Iter Iter_init(Iter, Var, IterNextFn, Var);
+
+Iter List_iter(List lst, Iter dest){
+  if(! Iter_truth(dest)) return NULL;
+  return Iter_init(dest, List_var(lst), _next, List_var(lst));
+}
+
+static int _next(Iter iter, Var * out){
+  List lst = Var_list(iter -> state);
+  if(! List_truth(lst)) return 0;
+  * out = List_car(lst);
+  lst = lst -> cdr;
+  iter -> state = List_var(lst);
+  return 1;
+}
+
+List Array_list(Array arr){
+  return _prepend_array(arr, NULL);
+}
+
+static List _prepend_array(Array values, List tail){
+  Var * items = values -> bytes;
+  for(size_t i = Array_len(values);  i;  i --) tail = cons(items[i - 1], tail);
+  return tail;
+}
+
+void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+List Array_list_free(Array arr){
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & arr;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      {
+        List _x2c_return_value_0 = Array_list(arr);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+Array Array_new(void);
+
+Var Array_push(Array, Var);
+
+Array List_array(List lst){
+  Array array = Array_new();
+  {
+    Var value;
+    List _x2c_macro_object_0 = lst;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      value = _x2c_macro_cursor_output_0;
+      Array_push(array, value);
+    }
+
+  }
+  return array;
+}
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+List Map_list(Map map){
+  Array pairs = Array_new();
+  {
+    Var key, value;
+    Map _x2c_macro_object_1 = map;
+    unsigned _x2c_macro_cursor_1 = 0;
+    Var _x2c_macro_cursor_output_1;
+    Var _x2c_macro_cursor_output_2;
+    while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
+      key = _x2c_macro_cursor_output_1;
+      value = _x2c_macro_cursor_output_2;
+      Array_push(pairs, List_var(cons(key, cons(value, NULL))));
+    }
+
+  }
+  return Array_list_free(pairs);
+}
+
+int Iter_try_next(Iter, Var *);
+
+List Iter_list(Iter iter){
+  Array values = Array_new();
+  {
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
+    {
+      {
+        Var item;
+        Iter _x2c_macro_iterator_2 = iter;
+        Var _x2c_macro_item_2;
+        while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
+          item = _x2c_macro_item_2;
+          Array_push(values, item);
+        }
+
+      }
+      {
+        List _x2c_return_value_1 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
+  }
+
+}
+
+List List_append(List a, List b){
+  if(! List_truth(a)) return b;
+  if(! List_truth(b)) return a;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_3 = a;
+        List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+        Var _x2c_macro_cursor_output_3;
+        while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+          value = _x2c_macro_cursor_output_3;
+          Array_push(values, value);
+        }
+
+      }
+      {
+        List _x2c_return_value_2 = _prepend_array(values, b);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_2);
+  }
+
+}
+
+List List_concat_n(unsigned list_count, ...){
+  va_list ap;
+  va_start(ap, list_count);
+  List out = _concat_va(list_count, ap);
+  va_end(ap);
+  return out;
+}
+
+Var unsigned_var(unsigned);
+
+static List _concat_va(unsigned n, va_list ap){
+  if(n > INT_MAX){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_va",.line = 385};
+    x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
+    __builtin_unreachable();
+  }
+  Array lists = Array_new();
+  {
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & lists;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_3);
+    {
+      for(unsigned i = 0;  i < n;  i ++) Array_push(lists, List_var(va_arg(ap, List)));
+      {
+        List _x2c_return_value_3 = _concat_lists(lists);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_3;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_3);
+  }
+
+}
+
+Var Array_getindex(Array, int);
+
+static List _concat_lists(Array lists){
+  List tail = NULL;
+  for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
+    List current = Var_list(Array_getindex(lists, i));
+    tail = List_append(current, tail);
+  }
+  return tail;
+}
+
+List List_list_n(unsigned element_count, ...){
+  va_list ap;
+  va_start(ap, element_count);
+  List out = _list_va(element_count, ap);
+  va_end(ap);
+  return out;
+}
+
+static List _list_va(unsigned n, va_list ap){
+  Array values = Array_new();
+  {
+    _x2c_defer_env_4 _x2c_macro_environment_4 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_4._x2c_defer_capture_4 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_4);
+    {
+      for(unsigned i = 0;  i < n;  i ++){
+        Var value = va_arg(ap, Var);
+        if(Var_is_void(value)){
+          static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_list_va",.line = 419};
+          x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
+          __builtin_unreachable();
+        }
+        Array_push(values, value);
+      }
+      {
+        List _x2c_return_value_4 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_4);
+          return _x2c_return_value_4;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_4);
+  }
+
+}
+
+List List_reverse(List lst){
+  List rev = NULL;
+  {
+    Var value;
+    List _x2c_macro_object_4 = lst;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+      value = _x2c_macro_cursor_output_4;
+      rev = cons(value, rev);
+    }
+
+  }
+  return rev;
+}
+
+int List_len(List lst){
+  int len = 0;
+  for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
+  return len;
+}
+
+Var List_last(List lst){
+  if(! List_truth(lst)) return((void) 0, Void);
+  List tail;
+  while(List_truth((tail = List_cdr(lst)))) lst = tail;
+  return List_car(lst);
+}
+
+int Var_equal(Var, Var);
+
+int List_index(List l, Var key){
+  for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(Var_equal(l -> car, key)) return index;
+  return - 1;
+}
+
+int List_contains(List lst, Var key){
+  return List_index(lst, key) != - 1;
+}
+
+List List_nth_cdr(List list, int n){
+  while(n -- > 0 && List_truth(list)) list = List_cdr(list);
+  return list;
+}
+
+Var List_getindex(List list, int index){
+  if(index < 0){
+    unsigned distance =(unsigned) -(long) index;
+    List lead = list;
+    while(distance --){
+      if(! List_truth(lead)) return((void) 0, Void);
+      lead = List_cdr(lead);
+    }
+    List lag = list;
+    while(List_truth(lead)){
+      lead = List_cdr(lead);
+      lag = List_cdr(lag);
+    }
+    return List_truth(lag) ? lag -> car :((void) 0, Void);
+  }
+  List nth = List_nth_cdr(list, index);
+  return List_truth(nth) ? nth -> car :((void) 0, Void);
+}
+
+Symbol Var_kind(Var);
+
+long long Var_long_long(Var);
+
+Var List_get(List list, Var key){
+  if(Var_kind(key) != 20309162340) return List_assoc(list, key);
+  long long index = Var_long_long(key);
+  if(index !=(int) index) return((void) 0, Void);
+  return List_getindex(list, (int) index);
+}
+
+Var List_assoc(List list, Var key){
+  {
+    List pair;
+    List _x2c_macro_object_5 = list;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
+      pair = Var_list(_x2c_macro_cursor_output_5);
+      {
+        if(! List_truth(pair)) continue;
+        Var pair_key, value;
+        List _x2c_destructure_0 = pair;
+        pair_key = List_getindex(_x2c_destructure_0, 0);
+        value = List_getindex(_x2c_destructure_0, 1);
+        if(Var_equal(pair_key, key)) return value;
+      }
+
+    }
+
+  }
+  return((void) 0, Void);
+}
+
+List List_head(List list, unsigned count){
+  List original = list;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_5 _x2c_macro_environment_5 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_5._x2c_defer_capture_5 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_5 ={
+      .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_5);
+    {
+      while(List_truth(list) && count --){
+        Array_push(values, list -> car);
+        list = List_cdr(list);
+      }
+      if(! List_truth(list)){
+        List _x2c_return_value_5 = original;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          return _x2c_return_value_5;
+        }
+
+      }
+      {
+        List _x2c_return_value_6 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_5);
+          return _x2c_return_value_6;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_5);
+  }
+
+}
+
+List List_tail(List list, unsigned count){
+  List lead = list;
+  for(unsigned i = 0;  i < count;  i ++){
+    if(! List_truth(lead)) return list;
+    lead = List_cdr(lead);
+  }
+  List lag = list;
+  while(List_truth(lead)){
+    lead = List_cdr(lead);
+    lag = List_cdr(lag);
+  }
+  return lag;
+}
+
+Var int_var(int);
+
+int x2c_normalize_slice(int *, int *, int, int);
+
+List List_subseq(List list, int start, int stop, int step){
+  if(step < 1){
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 559};
+    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
+    __builtin_unreachable();
+  }
+  int span = x2c_normalize_slice(& start, & stop, step, List_len(list));
+  return _collect_subseq(list, start, step, span);
+}
+
+static List _collect_subseq(List list, int start, int step, int span){
+  if(span <= 0) return NULL;
+  for(int i = 0;  List_truth(list) && i < start;  i ++) list = List_cdr(list);
+  Array values = Array_new();
+  {
+    _x2c_defer_env_6 _x2c_macro_environment_6 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_6._x2c_defer_capture_6 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_6 ={
+      .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_6);
+    {
+      while(List_truth(list) && span --){
+        Array_push(values, list -> car);
+        for(int i = 0;  List_truth(list) && i < step;  i ++) list = List_cdr(list);
+      }
+      {
+        List _x2c_return_value_7 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_6);
+          return _x2c_return_value_7;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_6);
+  }
+
+}
+
+List List_getslice(List list, int start, int stop, int step){
+  if(! step){
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 584};
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
+    __builtin_unreachable();
+  }
+  int len = List_len(list), span = x2c_normalize_slice(& start, & stop, step, len);
+  if(step == 1 && start == 0 && span == len &&(! List_truth(list) || _is_active_canonical(list))) return list;
+  if(step > 0) return _collect_subseq(list, start, step, span);
+  if(span <= 0) return NULL;
+  Array source = List_array(list);
+  {
+    _x2c_defer_env_8 _x2c_macro_environment_8 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_8._x2c_defer_capture_8 =(const void *) & source;
+    X2CCleanup _x2c_defer_record_7 ={
+      .fn = _x2c_defer_cleanup_8, .env = & _x2c_macro_environment_8
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_7);
+    {
+      Array values = Array_new();
+      {
+        _x2c_defer_env_7 _x2c_macro_environment_7 ={
+          0
+        }
+        ;
+        _x2c_macro_environment_7._x2c_defer_capture_7 =(const void *) & values;
+        X2CCleanup _x2c_defer_record_8 ={
+          .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_7
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_8);
+        {
+          for(int i = 0;  i < span;  i ++) Array_push(values, Array_getindex(source, start + i * step));
+          {
+            List _x2c_return_value_8 = Array_list(values);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_8);
+              x2c_cleanup_leave(& _x2c_defer_record_7);
+              return _x2c_return_value_8;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_8);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_7);
+  }
+
+}
+
+static int _is_active_canonical(List list){
+  return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
+}
+
+List List_map(List lst, Func fn){
+  if(! List_truth(lst)) return NULL;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_9 _x2c_macro_environment_9 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_9._x2c_defer_capture_9 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_9 ={
+      .fn = _x2c_defer_cleanup_9, .env = & _x2c_macro_environment_9
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_9);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_6 = lst;
+        List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+        Var _x2c_macro_cursor_output_6;
+        while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
+          value = _x2c_macro_cursor_output_6;
+          Array_push(values, _apply1(fn, value));
+        }
+
+      }
+      {
+        List _x2c_return_value_9 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_9);
+          return _x2c_return_value_9;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_9);
+  }
+
+}
+
+int Var_truth(Var);
+
+List List_filter(List lst, Func pred){
+  if(! List_truth(lst)) return NULL;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_10 _x2c_macro_environment_10 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_10._x2c_defer_capture_10 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_10 ={
+      .fn = _x2c_defer_cleanup_10, .env = & _x2c_macro_environment_10
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_10);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_7 = lst;
+        List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+        Var _x2c_macro_cursor_output_7;
+        while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
+          value = _x2c_macro_cursor_output_7;
+          if(Var_truth(_apply1(pred, value))) Array_push(values, value);
+        }
+
+      }
+      {
+        List _x2c_return_value_10 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_10);
+          return _x2c_return_value_10;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_10);
+  }
+
+}
+
+Var List_foldl(List lst, Var seed, Func fn){
+  Var acc = seed;
+  if(Var_is_void(acc)){
+    if(! List_truth(lst)) return((void) 0, Void);
+    acc = lst -> car;
+    lst = List_cdr(lst);
+  }
+  if(! fn) return acc;
+  {
+    Var value;
+    List _x2c_macro_object_8 = lst;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
+      value = _x2c_macro_cursor_output_8;
+      acc = _apply2(fn, acc, value);
+    }
+
+  }
+  return acc;
+}
+
+Var List_find(List lst, Func pred){
+  if(! pred) return((void) 0, Void);
+  {
+    Var value;
+    List _x2c_macro_object_9 = lst;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
+      value = _x2c_macro_cursor_output_9;
+      if(Var_truth(_apply1(pred, value))) return value;
+    }
+
+  }
+  return((void) 0, Void);
+}
+
+int List_any(List lst, Func pred){
+  if(! pred) return 0;
+  {
+    Var value;
+    List _x2c_macro_object_10 = lst;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
+      value = _x2c_macro_cursor_output_10;
+      if(Var_truth(_apply1(pred, value))) return 1;
+    }
+
+  }
+  return 0;
+}
+
+int List_all(List lst, Func pred){
+  if(! List_truth(lst)) return 1;
+  if(! pred) return 0;
+  {
+    Var value;
+    List _x2c_macro_object_11 = lst;
+    List _x2c_macro_cursor_11 = _x2c_macro_object_11;
+    Var _x2c_macro_cursor_output_11;
+    while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
+      value = _x2c_macro_cursor_output_11;
+      if(! Var_truth(_apply1(pred, value))) return 0;
+    }
+
+  }
+  return 1;
+}
+
+List List_zip_with(List a, List b, Func fn){
+  Array values = Array_new();
+  {
+    _x2c_defer_env_11 _x2c_macro_environment_11 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_11._x2c_defer_capture_11 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_11 ={
+      .fn = _x2c_defer_cleanup_11, .env = & _x2c_macro_environment_11
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_11);
+    {
+      for(;  List_truth(a) && List_truth(b);  a = List_cdr(a), b = List_cdr(b)){
+        Var left = a -> car, right = b -> car;
+        if(fn) Array_push(values, _apply2(fn, left, right));
+        else Array_push(values, List_var(cons(left, cons(right, NULL))));
+      }
+      {
+        List _x2c_return_value_11 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_11);
+          return _x2c_return_value_11;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_11);
+  }
+
+}
+
+List List_map2(List a, List b, Func fn){
+  if(! fn) return NULL;
+  return List_zip_with(a, b, fn);
+}
+
+FuncArg FuncArg_value(Var);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
+static Var _apply1(Func fn, Var arg){
+  FuncArg args[1] ={
+    FuncArg_value(arg)
+  }
+  ;
+  return Func_apply(fn, 1, args);
+}
+
+static Var _apply2(Func fn, Var left, Var right){
+  FuncArg args[2] ={
+    FuncArg_value(left), FuncArg_value(right)
+  }
+  ;
+  return Func_apply(fn, 2, args);
+}
+
+Array Array_sort(Array);
+
+List List_sort(List lst){
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_12 _x2c_macro_environment_12 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_12._x2c_defer_capture_12 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_12 ={
+      .fn = _x2c_defer_cleanup_12, .env = & _x2c_macro_environment_12
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_12);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_12 = lst;
+        List _x2c_macro_cursor_12 = _x2c_macro_object_12;
+        Var _x2c_macro_cursor_output_12;
+        while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
+          value = _x2c_macro_cursor_output_12;
+          Array_push(values, value);
+        }
+
+      }
+      Array_sort(values);
+      {
+        List _x2c_return_value_12 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_12);
+          return _x2c_return_value_12;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_12);
+  }
+
+}
+
+Array Array_sort_with(Array, Func);
+
+List List_sort_with(List lst, Func compare){
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_13 _x2c_macro_environment_13 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_13._x2c_defer_capture_13 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_13 ={
+      .fn = _x2c_defer_cleanup_13, .env = & _x2c_macro_environment_13
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_13);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_13 = lst;
+        List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+        Var _x2c_macro_cursor_output_13;
+        while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
+          value = _x2c_macro_cursor_output_13;
+          Array_push(values, value);
+        }
+
+      }
+      Array_sort_with(values, compare);
+      {
+        List _x2c_return_value_13 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_13);
+          return _x2c_return_value_13;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_13);
+  }
+
+}
+
+Array Array_sort_by(Array, Func);
+
+List List_sort_by(List lst, Func key){
+  if(! List_truth(lst)) return lst;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_14 _x2c_macro_environment_14 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_14._x2c_defer_capture_14 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_14 ={
+      .fn = _x2c_defer_cleanup_14, .env = & _x2c_macro_environment_14
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_14);
+    {
+      {
+        Var value;
+        List _x2c_macro_object_14 = lst;
+        List _x2c_macro_cursor_14 = _x2c_macro_object_14;
+        Var _x2c_macro_cursor_output_14;
+        while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
+          value = _x2c_macro_cursor_output_14;
+          Array_push(values, value);
+        }
+
+      }
+      Array_sort_by(values, key);
+      {
+        List _x2c_return_value_14 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_14);
+          return _x2c_return_value_14;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_14);
+  }
+
+}
+
+void Scope_retain(void);
+
+Iter Iter_unique(Iter, Iter);
+
+List List_unique(List lst){
+  if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
+  {
+    Scope_retain();
+    {
+      {
+        X2CCleanup _x2c_defer_record_15 ={
+          .fn = _x2c_defer_cleanup_15, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_15);
+        {
+          {
+            struct Iter iter_storage, unique_storage;
+            Iter iter = List_iter(lst, & iter_storage);
+            Iter unique = Iter_unique(iter, & unique_storage);
+            {
+              List _x2c_return_value_15 = Iter_list(unique);
+              {
+                x2c_cleanup_leave(& _x2c_defer_record_15);
+                return _x2c_return_value_15;
+              }
+
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_15);
+      }
+
+    }
+
+  }
+
+}
+
+List List_flatten(List lst){
+  if(! List_truth(lst)) return lst;
+  Array values = Array_new();
+  {
+    _x2c_defer_env_15 _x2c_macro_environment_15 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_15._x2c_defer_capture_15 =(const void *) & values;
+    X2CCleanup _x2c_defer_record_16 ={
+      .fn = _x2c_defer_cleanup_16, .env = & _x2c_macro_environment_15
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_16);
+    {
+      {
+        Var head;
+        List _x2c_macro_object_16 = lst;
+        List _x2c_macro_cursor_16 = _x2c_macro_object_16;
+        Var _x2c_macro_cursor_output_16;
+        while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_16))){
+          head = _x2c_macro_cursor_output_16;
+          {
+            if(Var_is_row(head, 9, 7, 4)){
+              List inner = Var_list(head);
+              {
+                Var item;
+                List _x2c_macro_object_15 = inner;
+                List _x2c_macro_cursor_15 = _x2c_macro_object_15;
+                Var _x2c_macro_cursor_output_15;
+                while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_15))){
+                  item = _x2c_macro_cursor_output_15;
+                  Array_push(values, item);
+                }
+
+              }
+
+            }
+            else Array_push(values, head);
+          }
+
+        }
+
+      }
+      {
+        List _x2c_return_value_16 = Array_list(values);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_16);
+          return _x2c_return_value_16;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_16);
+  }
+
+}
+
+List List_flatten_all(List lst){
+  if(! List_truth(lst)) return lst;
+  Array values = Array_new();
   {
     _x2c_defer_env_16 _x2c_macro_environment_16 ={
       0
     }
     ;
-    _x2c_macro_environment_16._x2c_defer_capture_16 =(const void *) & path;
+    _x2c_macro_environment_16._x2c_defer_capture_16 =(const void *) & values;
     X2CCleanup _x2c_defer_record_17 ={
       .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_16
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_17);
     {
-      Buffer_write(buf, "(");
-      if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
-      Buffer_push(buf);
-      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        _serialize_list_line(List_car(l), buf, mode);
-        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
-      }
-      if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
-      Buffer_write(buf, ")");
-      Buffer_pop(buf);
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_17);
-  }
-
-}
-
-Buffer Buffer_newline_indent(Buffer);
-
-Buffer Buffer_unwrite(Buffer, size_t);
-
-Buffer Buffer_new(size_t);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-size_t Buffer_tabstop(Buffer);
-
-static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
-  const int maxwidth = 80;
-  if(buf -> pos >= maxwidth - 1) Buffer_newline_indent(buf);
-  else if(buf -> pos - buf -> _indent > 40) Buffer_newline_indent(buf);
-  if(! Var_is_row(elem, 9, 7, 4)){
-    size_t before = buf -> content -> length, position = buf -> pos;
-    _serialize_list_line(elem, buf, mode);
-    size_t length = buf -> content -> length - before;
-    if(position + length > maxwidth){
-      Buffer_unwrite(buf, length);
-      Buffer_newline_indent(buf);
-      _serialize_list_line(elem, buf, mode);
-    }
-    return;
-  }
-  List lst = Var_list(elem);
-  if(! List_truth(lst)){
-    if(buf -> pos + 2 > maxwidth) Buffer_newline_indent(buf);
-    Buffer_write(buf, "()");
-    return;
-  }
-  {
-    Buffer line = Buffer_new(buf -> padding);
-    {
-      _x2c_defer_env_18 _x2c_macro_environment_17 ={
-        0
-      }
-      ;
-      _x2c_macro_environment_17._x2c_defer_capture_18 =(const void *) & line;
-      X2CCleanup _x2c_defer_record_18 ={
-        .fn = _x2c_defer_cleanup_19, .env = & _x2c_macro_environment_17
-      }
-      ;
-      x2c_cleanup_push(& _x2c_defer_record_18);
+      _flatten_into(values, lst);
       {
-        _serialize_list_line(List_var(lst), line, mode);
-        if(buf -> pos + line -> content -> length <= maxwidth){
-          Buffer_write_len(buf, line -> content -> bytes, line -> content -> length);
-          {
-            x2c_cleanup_leave(& _x2c_defer_record_18);
-            return;
-          }
-
-        }
-
-      }
-      x2c_cleanup_leave(& _x2c_defer_record_18);
-    }
-
-  }
-  RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
-  {
-    _x2c_defer_env_17 _x2c_macro_environment_18 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_18._x2c_defer_capture_17 =(const void *) & path;
-    X2CCleanup _x2c_defer_record_19 ={
-      .fn = _x2c_defer_cleanup_18, .env = & _x2c_macro_environment_18
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_19);
-    {
-      if(buf -> pos - Buffer_tabstop(buf) > 5) Buffer_newline_indent(buf);
-      Buffer_write(buf, "(");
-      if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
-      Buffer_push(buf);
-      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        _serialize_nested_list(List_car(l), buf, mode);
-        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
-      }
-      if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
-      Buffer_write(buf, ")");
-      Buffer_pop(buf);
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_19);
-  }
-
-}
-
-String Buffer_str(Buffer);
-
-String List_str(List lst){
-  Buffer buf = Buffer_new(0);
-  {
-    _x2c_defer_env_19 _x2c_macro_environment_19 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_19._x2c_defer_capture_19 =(const void *) & buf;
-    X2CCleanup _x2c_defer_record_20 ={
-      .fn = _x2c_defer_cleanup_20, .env = & _x2c_macro_environment_19
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_20);
-    {
-      List_write_str(lst, buf);
-      {
-        String _x2c_return_value_17 = Buffer_str(buf);
+        List _x2c_return_value_17 = Array_list(values);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_20);
+          x2c_cleanup_leave(& _x2c_defer_record_17);
           return _x2c_return_value_17;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_20);
+    x2c_cleanup_leave(& _x2c_defer_record_17);
+  }
+
+}
+
+static void _flatten_into(Array values, List lst){
+  {
+    Var head;
+    List _x2c_macro_object_17 = lst;
+    List _x2c_macro_cursor_17 = _x2c_macro_object_17;
+    Var _x2c_macro_cursor_output_17;
+    while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
+      head = _x2c_macro_cursor_output_17;
+      {
+        if(Var_is_row(head, 9, 7, 4)) _flatten_into(values, Var_list(head));
+        else Array_push(values, head);
+      }
+
+    }
+
+  }
+
+}
+
+List List_sublis(List alist, List tree){
+  if(! List_truth(tree)) return NULL;
+  return Var_list(_sublis_node(alist, List_var(tree)));
+}
+
+static Var _sublis_node(List alist, Var node){
+  if(! Var_is_row(node, 9, 7, 4)){
+    Var replacement = List_assoc(alist, node);
+    return Var_is_void(replacement) ? node : replacement;
+  }
+  List list = Var_list(node);
+  if(! List_truth(list)) return List_var(list);
+  Array items = Array_new();
+  {
+    _x2c_defer_env_17 _x2c_macro_environment_17 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_17._x2c_defer_capture_17 =(const void *) & items;
+    X2CCleanup _x2c_defer_record_18 ={
+      .fn = _x2c_defer_cleanup_18, .env = & _x2c_macro_environment_17
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_18);
+    {
+      {
+        Var source;
+        List _x2c_macro_object_18 = list;
+        List _x2c_macro_cursor_18 = _x2c_macro_object_18;
+        Var _x2c_macro_cursor_output_18;
+        while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_18))){
+          source = _x2c_macro_cursor_output_18;
+          Array_push(items, _sublis_node(alist, source));
+        }
+
+      }
+      {
+        Var _x2c_return_value_18 = List_var(Array_list(items));
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_18);
+          return _x2c_return_value_18;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_18);
+  }
+
+}
+
+int List_unpack_n(List src, unsigned destination_count, ...){
+  va_list ap;
+  va_start(ap, destination_count);
+  int count = _unpack_va(src, destination_count, ap, 1);
+  va_end(ap);
+  return count;
+}
+
+int List_unpack_vars_n(List src, unsigned destination_count, ...){
+  va_list ap;
+  va_start(ap, destination_count);
+  int count = _unpack_va(src, destination_count, ap, 0);
+  va_end(ap);
+  return count;
+}
+
+static int _unpack_va(List src, unsigned n, va_list ap, int lists){
+  if(n > INT_MAX){
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 879};
+    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
+    __builtin_unreachable();
+  }
+  int count = 0;
+  for(;  List_truth(src) && count < n;  src = List_cdr(src), count ++){
+    if(lists){
+      List * dst = va_arg(ap, List *);
+      if(dst) * dst = Var_list(List_car(src));
+    }
+    else{
+      Var * dst = va_arg(ap, Var *);
+      if(dst) * dst = List_car(src);
+    }
+
+  }
+  return count;
+}
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str(Buffer);
+
+String List_str(List lst){
+  Buffer buf = Buffer_new(0);
+  {
+    _x2c_defer_env_18 _x2c_macro_environment_18 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_18._x2c_defer_capture_18 =(const void *) & buf;
+    X2CCleanup _x2c_defer_record_19 ={
+      .fn = _x2c_defer_cleanup_19, .env = & _x2c_macro_environment_18
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_19);
+    {
+      List_write_str(lst, buf);
+      {
+        String _x2c_return_value_19 = Buffer_str(buf);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_19);
+          return _x2c_return_value_19;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_19);
   }
 
 }
@@ -1620,10 +1570,7 @@ Buffer List_write_str(List lst, Buffer out){
       x2c_exception_push(& _x2c_exception_frame_0);
       if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
         * _x2c_macro_address_0 = 1;
-        {
-          _serialize_nested_list(List_var(lst), out, 40228);
-        }
-
+        _render(List_var(lst), out, 40228);
       }
       else{
         x2c_exception_landed(& _x2c_exception_frame_0);
@@ -1649,23 +1596,97 @@ Buffer List_write_str(List lst, Buffer out){
 String List_repr(List lst){
   Buffer buf = Buffer_new(0);
   {
+    _x2c_defer_env_19 _x2c_macro_environment_19 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_19._x2c_defer_capture_19 =(const void *) & buf;
+    X2CCleanup _x2c_defer_record_20 ={
+      .fn = _x2c_defer_cleanup_20, .env = & _x2c_macro_environment_19
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_20);
+    {
+      List_write_repr(lst, buf);
+      {
+        String _x2c_return_value_20 = Buffer_str(buf);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_20);
+          return _x2c_return_value_20;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_20);
+  }
+
+}
+
+Buffer List_write_repr(List lst, Buffer out){
+  _render(List_var(lst), out, 1190948);
+  return out;
+}
+
+Buffer Buffer_newline_indent(Buffer);
+
+static void _render(Var elem, Buffer buf, Symbol mode){
+  if(buf -> pos >= _WIDTH - 1 || buf -> pos - buf -> _indent > 40) Buffer_newline_indent(buf);
+  if(! Var_is_row(elem, 9, 7, 4)) _render_leaf(elem, buf, mode);
+  else if(! List_truth(Var_list(elem))) _render_nil(buf);
+  else if(! _render_flat(elem, buf, mode)) _render_items(elem, buf, mode);
+}
+
+Buffer Buffer_unwrite(Buffer, size_t);
+
+static void _render_leaf(Var elem, Buffer buf, Symbol mode){
+  size_t before = buf -> content -> length, position = buf -> pos;
+  _leaf(elem, buf, mode);
+  size_t length = buf -> content -> length - before;
+  if(position + length <= _WIDTH) return;
+  Buffer_unwrite(buf, length);
+  Buffer_newline_indent(buf);
+  _leaf(elem, buf, mode);
+}
+
+Buffer Buffer_write(Buffer, const char *);
+
+static void _render_nil(Buffer buf){
+  if(buf -> pos + 2 > _WIDTH) Buffer_newline_indent(buf);
+  Buffer_write(buf, "()");
+}
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
+
+static int _render_flat(Var elem, Buffer buf, Symbol mode){
+  Buffer line = Buffer_new(buf -> padding);
+  {
     _x2c_defer_env_20 _x2c_macro_environment_20 ={
       0
     }
     ;
-    _x2c_macro_environment_20._x2c_defer_capture_20 =(const void *) & buf;
+    _x2c_macro_environment_20._x2c_defer_capture_20 =(const void *) & line;
     X2CCleanup _x2c_defer_record_21 ={
       .fn = _x2c_defer_cleanup_21, .env = & _x2c_macro_environment_20
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_21);
     {
-      List_write_repr(lst, buf);
-      {
-        String _x2c_return_value_18 = Buffer_str(buf);
+      _flat(elem, line, mode);
+      if(buf -> pos + line -> content -> length > _WIDTH){
+        int _x2c_return_value_21 = 0;
         {
           x2c_cleanup_leave(& _x2c_defer_record_21);
-          return _x2c_return_value_18;
+          return _x2c_return_value_21;
+        }
+
+      }
+      Buffer_write_len(buf, line -> content -> bytes, line -> content -> length);
+      {
+        int _x2c_return_value_22 = 1;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_21);
+          return _x2c_return_value_22;
         }
 
       }
@@ -1676,134 +1697,113 @@ String List_repr(List lst){
 
 }
 
-Buffer List_write_repr(List lst, Buffer out){
-  _serialize_nested_list(List_var(lst), out, 1190948);
-  return out;
-}
+int RenderPath_enter(RenderPath *, const void *);
 
-static int _next(Iter iter, Var * out){
-  List lst = Var_list(iter -> state);
-  if(! List_truth(lst)) return 0;
-  * out = List_car(lst);
-  lst = lst -> cdr;
-  iter -> state = List_var(lst);
-  return 1;
-}
+Buffer Var_write_pointer_repr(Var, Buffer);
 
-int List_try_next(List lst, List * cursor, Var * out){
-  if(! cursor) return 0;
-  if(! out) return 0;
-  List rest =(* cursor);
-  if(! List_truth(rest)) return 0;
-  (* out) = List_car(rest);
-  (* cursor) = rest -> cdr;
-  return 1;
-}
+size_t Buffer_tabstop(Buffer);
 
-int Iter_truth(Iter);
-
-Iter Iter_init(Iter, Var, IterNextFn, Var);
-
-Iter List_iter(List lst, Iter dest){
-  if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, List_var(lst), _next, List_var(lst));
-}
-
-int Iter_try_next(Iter, Var *);
-
-List Iter_list(Iter iter){
-  Array values = Array_new();
+static void _render_items(Var elem, Buffer buf, Symbol mode){
+  List lst = Var_list(elem);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
   {
     _x2c_defer_env_21 _x2c_macro_environment_21 ={
       0
     }
     ;
-    _x2c_macro_environment_21._x2c_defer_capture_21 =(const void *) & values;
+    _x2c_macro_environment_21._x2c_defer_capture_21 =(const void *) & path;
     X2CCleanup _x2c_defer_record_22 ={
       .fn = _x2c_defer_cleanup_22, .env = & _x2c_macro_environment_21
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_22);
     {
-      {
-        Var item;
-        Iter _x2c_macro_iterator_17 = iter;
-        Var _x2c_macro_item_17;
-        while(Iter_try_next(_x2c_macro_iterator_17, &(_x2c_macro_item_17))){
-          item = _x2c_macro_item_17;
-          Array_push(values, item);
-        }
-
+      if(buf -> pos - Buffer_tabstop(buf) > 5) Buffer_newline_indent(buf);
+      _open(lst, buf);
+      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+        _render(List_car(l), buf, mode);
+        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
       }
-      {
-        List _x2c_return_value_19 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_22);
-          return _x2c_return_value_19;
-        }
-
-      }
-
+      _close(buf);
     }
     x2c_cleanup_leave(& _x2c_defer_record_22);
   }
 
 }
 
-List List_filter(List lst, Func pred){
-  if(! List_truth(lst)) return NULL;
-  Array values = Array_new();
+static void _flat(Var elem, Buffer buf, Symbol mode){
+  if(! Var_is_row(elem, 9, 7, 4)) _leaf(elem, buf, mode);
+  else if(! List_truth(Var_list(elem))) Buffer_write(buf, "()");
+  else _flat_items(elem, buf, mode);
+}
+
+static void _flat_items(Var elem, Buffer buf, Symbol mode){
+  List lst = Var_list(elem);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
   {
     _x2c_defer_env_22 _x2c_macro_environment_22 ={
       0
     }
     ;
-    _x2c_macro_environment_22._x2c_defer_capture_22 =(const void *) & values;
+    _x2c_macro_environment_22._x2c_defer_capture_22 =(const void *) & path;
     X2CCleanup _x2c_defer_record_23 ={
       .fn = _x2c_defer_cleanup_23, .env = & _x2c_macro_environment_22
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_23);
     {
-      {
-        Var value;
-        List _x2c_macro_object_18 = lst;
-        List _x2c_macro_cursor_18 = _x2c_macro_object_18;
-        Var _x2c_macro_cursor_output_18;
-        while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_18))){
-          value = _x2c_macro_cursor_output_18;
-          {
-            FuncArg arguments[1] ={
-              FuncArg_value(value)
-            }
-            ;
-            if(Var_truth(Func_apply(pred, 1, arguments))) Array_push(values, value);
-          }
-
-        }
-
+      _open(lst, buf);
+      for(List l = lst;  List_truth(l);  l = List_cdr(l)){
+        _flat(List_car(l), buf, mode);
+        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
       }
-      {
-        List _x2c_return_value_20 = Array_list(values);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_23);
-          return _x2c_return_value_20;
-        }
-
-      }
-
+      _close(buf);
     }
     x2c_cleanup_leave(& _x2c_defer_record_23);
   }
 
 }
 
-void Array_cleanup(Array);
+Buffer Var_write_str(Var, Buffer);
+
+Buffer Atom_write_repr(Atom, Buffer);
+
+Buffer Var_write_repr(Var, Buffer);
+
+static void _leaf(Var elem, Buffer buf, Symbol mode){
+  if(mode == 40228) Var_write_str(elem, buf);
+  else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, buf);
+  else Var_write_repr(elem, buf);
+}
+
+Buffer Buffer_pad(Buffer);
+
+Buffer Buffer_push(Buffer);
+
+static void _open(List lst, Buffer buf){
+  Buffer_write(buf, "(");
+  if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
+  Buffer_push(buf);
+}
+
+char Buffer_get(Buffer, ptrdiff_t);
+
+Buffer Buffer_pop(Buffer);
+
+static void _close(Buffer buf){
+  if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
+  Buffer_write(buf, ")");
+  Buffer_pop(buf);
+}
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
+
+void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
@@ -1837,48 +1837,48 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  Array_free((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_7));
+  Array_cleanup((*(Array *) _x2c_defer_data_7->_x2c_defer_capture_7));
+}
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;
+  Array_cleanup((*(Array *) _x2c_defer_data_8->_x2c_defer_capture_8));
+}
+
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
+  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_9;
+  Array_cleanup((*(Array *) _x2c_defer_data_9->_x2c_defer_capture_9));
+}
+
+static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
+  _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_10;
+  Array_cleanup((*(Array *) _x2c_defer_data_10->_x2c_defer_capture_10));
+}
+
+static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
+  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_11;
+  Array_cleanup((*(Array *) _x2c_defer_data_11->_x2c_defer_capture_11));
+}
+
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
+  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_12;
+  Array_cleanup((*(Array *) _x2c_defer_data_12->_x2c_defer_capture_12));
+}
+
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;
+  Array_cleanup((*(Array *) _x2c_defer_data_13->_x2c_defer_capture_13));
+}
+
+static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
+  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_14;
+  Array_cleanup((*(Array *) _x2c_defer_data_14->_x2c_defer_capture_14));
 }
 
 void Scope_release(void);
 
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  Scope_release();
-}
-
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
-  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_9;
-  Array_cleanup((*(Array *) _x2c_defer_data_8->_x2c_defer_capture_8));
-}
-
-static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
-  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_10;
-  Array_cleanup((*(Array *) _x2c_defer_data_9->_x2c_defer_capture_9));
-}
-
-static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
-  _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_11;
-  Array_cleanup((*(Array *) _x2c_defer_data_10->_x2c_defer_capture_10));
-}
-
-static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
-  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_12;
-  Array_cleanup((*(Array *) _x2c_defer_data_11->_x2c_defer_capture_11));
-}
-
-static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
-  _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_13;
-  Array_cleanup((*(Array *) _x2c_defer_data_12->_x2c_defer_capture_12));
-}
-
-static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
-  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_14;
-  Array_cleanup((*(Array *) _x2c_defer_data_13->_x2c_defer_capture_13));
-}
-
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
-  _x2c_defer_env_14 * _x2c_defer_data_14 =(_x2c_defer_env_14 *) _x2c_defer_opaque_15;
-  Array_cleanup((*(Array *) _x2c_defer_data_14->_x2c_defer_capture_14));
+  Scope_release();
 }
 
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
@@ -1886,16 +1886,14 @@ static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
   Array_cleanup((*(Array *) _x2c_defer_data_15->_x2c_defer_capture_15));
 }
 
-void RenderPath_leave(RenderPath *);
-
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){
   _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_17;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_16->_x2c_defer_capture_16)));
+  Array_cleanup((*(Array *) _x2c_defer_data_16->_x2c_defer_capture_16));
 }
 
 static void _x2c_defer_cleanup_18(void * _x2c_defer_opaque_18){
   _x2c_defer_env_17 * _x2c_defer_data_17 =(_x2c_defer_env_17 *) _x2c_defer_opaque_18;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_17->_x2c_defer_capture_17)));
+  Array_cleanup((*(Array *) _x2c_defer_data_17->_x2c_defer_capture_17));
 }
 
 void Buffer_cleanup(Buffer);
@@ -1915,13 +1913,15 @@ static void _x2c_defer_cleanup_21(void * _x2c_defer_opaque_21){
   Buffer_cleanup((*(Buffer *) _x2c_defer_data_20->_x2c_defer_capture_20));
 }
 
+void RenderPath_leave(RenderPath *);
+
 static void _x2c_defer_cleanup_22(void * _x2c_defer_opaque_22){
   _x2c_defer_env_21 * _x2c_defer_data_21 =(_x2c_defer_env_21 *) _x2c_defer_opaque_22;
-  Array_cleanup((*(Array *) _x2c_defer_data_21->_x2c_defer_capture_21));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_21->_x2c_defer_capture_21)));
 }
 
 static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23){
   _x2c_defer_env_22 * _x2c_defer_data_22 =(_x2c_defer_env_22 *) _x2c_defer_opaque_23;
-  Array_cleanup((*(Array *) _x2c_defer_data_22->_x2c_defer_capture_22));
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_22->_x2c_defer_capture_22)));
 }
 

@@ -27,39 +27,13 @@ typedef struct ScopeStats{
 ScopeStats;
 
 #include <stdlib.h>
-void x2c_scope_thread_release(void);
-
-void Scope_initialize(void);
-
-Scope Scope_new(void);
-
-Scope Scope_new_named(const char * name);
-
-const char * Scope_name(Scope scope);
-
-ScopeStats Scope_stats(void);
-
-void Scope_destroy(Scope scope);
-
-void Scope_shutdown_hook(void(* hook)(void));
-
-void Scope_push(Scope * scope);
-
-Scope * Scope_top(void);
-
-void Scope_pop(void);
-
-void Scope_retain(void);
-
-void Scope_release(void);
-
 void * Scope_malloc(size_t size);
 
 void * Scope_malloc_finalized(size_t size, void(* drop)(void *));
 
 void * Scope_malloc_in(Scope * slot, size_t size);
 
-void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *));
+void * Scope_malloc_finalized_in(Scope * s, size_t size, void(* drop)(void *));
 
 void * Scope_calloc(size_t count, size_t size);
 
@@ -77,9 +51,35 @@ void Scope_move(void * ptr, Scope * slot);
 
 void * Scope_realloc(void * ptr, size_t size);
 
-void Scope_shutdown(void);
+void Scope_push(Scope * scope);
+
+Scope * Scope_top(void);
+
+void Scope_pop(void);
+
+void Scope_retain(void);
+
+void Scope_release(void);
+
+Scope Scope_new(void);
+
+Scope Scope_new_named(const char * name);
+
+const char * Scope_name(Scope scope);
+
+void Scope_destroy(Scope scope);
 
 void Scope_cleanup(Scope value);
+
+ScopeStats Scope_stats(void);
+
+void Scope_initialize(void);
+
+void Scope_shutdown_hook(void(* hook)(void));
+
+void Scope_shutdown(void);
+
+void x2c_scope_thread_release(void);
 
 
 #endif /* __GUARD_0xAAD89034__ */

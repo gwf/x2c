@@ -49,7 +49,75 @@ typedef struct MatchLease{
 }
 MatchLease;
 
-int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
+int Var_is_atom_binder(Var atom);
+
+int Var_is_list_binder(Var atom);
+
+int Var_is_binder(Var atom);
+
+int Var_is_match_op(Var atom);
+
+MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
+
+void MatchCaptureLayout_free(MatchCaptureLayout layout);
+
+List MatchCaptureLayout_definite_list(MatchCaptureLayout layout);
+
+List MatchCaptureLayout_possible_list(MatchCaptureLayout layout);
+
+int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder);
+
+int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index);
+
+MatchPlan MatchPlan_prepare(Var pattern);
+
+void MatchPlan_free(MatchPlan plan);
+
+int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
+
+int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
+
+int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
+
+int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
+
+int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings);
+
+int MatchPlan_search(MatchPlan plan, List input, List * out_results);
+
+int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
+
+int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
+
+List List_replace(List template, List bindings);
+
+int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
+
+MatchCache MatchCache_new(int capacity);
+
+void MatchCache_dispose(MatchCache cache);
+
+void MatchLease_release(MatchLease * lease);
+
+int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
+
+int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);
+
+int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner);
+
+int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner);
+
+int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner);
+
+int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner);
+
+void MatchCache_flush_default(void);
+
+void * MatchCache_context_open(void);
+
+void MatchCache_context_close(void * token);
+
+void x2c_match_thread_release(void);
 
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures);
 
@@ -71,31 +139,11 @@ List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, 
 
 List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template);
 
-int Var_is_atom_binder(Var atom);
-
-int Var_is_list_binder(Var atom);
-
-int Var_is_binder(Var atom);
-
-int Var_is_match_op(Var atom);
-
-MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern);
-
-void MatchCaptureLayout_free(MatchCaptureLayout layout);
-
-List MatchCaptureLayout_definite_list(MatchCaptureLayout layout);
-
-List MatchCaptureLayout_possible_list(MatchCaptureLayout layout);
-
-int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder);
-
-int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index);
+int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
 
 int List_try_match(List input, Var pat, List * out_bindings);
 
 List List_match(List input, Var pat);
-
-List List_replace(List template, List bindings);
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out);
 
@@ -106,54 +154,6 @@ List List_search(List input, Var pat);
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
 
 List List_search_replace(List input, Var pat, Var template);
-
-MatchPlan MatchPlan_prepare(Var pattern);
-
-void MatchPlan_free(MatchPlan plan);
-
-int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
-
-int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
-
-int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
-
-int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
-
-int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings);
-
-int MatchPlan_search(MatchPlan plan, List input, List * out_results);
-
-int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
-
-int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
-
-MatchCache MatchCache_new(int capacity);
-
-int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
-
-void MatchLease_release(MatchLease * lease);
-
-void MatchCache_dispose(MatchCache cache);
-
-int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner);
-
-int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner);
-
-int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner);
-
-int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner);
-
-int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner);
-
-int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner);
-
-void x2c_match_thread_release(void);
-
-void * MatchCache_context_open(void);
-
-void MatchCache_context_close(void * token);
-
-void MatchCache_flush_default(void);
 
 void x2c_match_initialize(void);
 

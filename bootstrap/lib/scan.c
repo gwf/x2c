@@ -9,29 +9,55 @@ static inline int _ascii_hex(int c);
 
 static inline int _token_break(int c);
 
-static int _escape_sequence_status(char * s, Symbol * status);
+static inline int _fail(Symbol * status, Symbol why);
 
-static int _c_escape_sequence_status(char * s, Symbol * status);
+static int _decimal_zero(char * s);
 
-static int _c_escape_sequence(char * s);
-
-static int _int_suffix(char * s);
-
-static int _float_suffix(char * s);
-
-static int _digits(char * s, int base);
-
-static int _exponent(char * s);
-
-static int _float_tail(char * s, int digit_before);
-
-static int _radix_integer(char * s, int base, int digit_before);
+static int _prefixed_number(char * s, Symbol * type);
 
 static int _hex_number(char * s, Symbol * type);
 
 static int _decimal_number(char * s, Symbol * type);
 
-static int _quoted_symbol_status(char * s, Symbol * status);
+static int _digits(char * s, int base);
+
+static inline int _digit(int c, int base);
+
+static int _radix_integer(char * s, int base, int digit_before);
+
+static int _float_tail(char * s, int digit_before);
+
+static int _exponent(char * s);
+
+static int _int_suffix(char * s);
+
+static int _longs(char * s);
+
+static inline int _is_l(int c);
+
+static inline int _is_u(int c);
+
+static int _float_suffix(char * s);
+
+static int _quoted_literal(char * s, Symbol * status);
+
+static int _simple_literal(char * s, Symbol * status);
+
+static int _quoted_spelling(char * s, Symbol * status);
+
+static int _escape_status(char * s, Symbol * status);
+
+static int _c_escape_status(char * s, Symbol * status);
+
+static int _crlf_escape(char * s, Symbol * status);
+
+static int _octal_escape(char * s, Symbol * status);
+
+static int _byte_escape(char * s, Symbol * status);
+
+static int _hex_escape(char * s, Symbol * status);
+
+static int _universal_escape(char * s, int count, Symbol * status);
 
 static inline int _ascii_hex(int c){
   return scan_ascii_digit(c) ||(c >= 'a' && c <= 'f') ||(c >= 'A' && c <= 'F');
@@ -39,6 +65,161 @@ static inline int _ascii_hex(int c){
 
 static inline int _token_break(int c){
   return !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
+}
+
+static inline int _fail(Symbol * status, Symbol why){
+  if(status) * status = why;
+  return - 1;
+}
+
+int scan_white_space(char * s){
+  int n = 0;
+  while(s[n]) switch(s[n]){
+    case ' ' : case '\t' : case '\r' : case '\v' : case '\f' : case '\n' : n ++;
+    break;
+    default: return n;
+  }
+  return n > 0 ? n : - 1;
+}
+
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+int scan_line_comment(char * s){
+  if(! s || s[0] != '/' || s[1] != '/'){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/scan.x",.function = "scan_line_comment",.line = 64};
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("scan_line_comment")), NULL))));
+    __builtin_unreachable();
+  }
+  int n = 2;
+  while(s[n] && s[n] != '\n') n ++;
+  return n;
+}
+
+int scan_block_comment_status(char * s, Symbol * status){
+  if(! s || s[0] != '/' || s[1] != '*'){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/scan.x",.function = "scan_block_comment_status",.line = 75};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("scan_block_comment_status")), NULL))));
+    __builtin_unreachable();
+  }
+  if(status) * status = 982;
+  int n = 2;
+  while(s[n]){
+    if(s[n] == '*' && s[n + 1] == '/') return n + 2;
+    n ++;
+  }
+  return _fail(status, 664344300629258);
+}
+
+int scan_block_comment(char * s){
+  return scan_block_comment_status(s, NULL);
+}
+
+int scan_preprocessor(char * s){
+  int n = 0;
+  while(s[n]){
+    if(s[n] == '\\' && s[n + 1] == '\n') n += 2;
+    else if(s[n] == '\\' && s[n + 1] == '\r' && s[n + 2] == '\n') n += 3;
+    else if(s[n] == '\\' && ! s[n + 1]) return - 1;
+    else if(s[n] == '\n') return n;
+    else n ++;
+  }
+  return n;
+}
+
+int scan_number_typed(char * s, Symbol * type){
+  if(! s) return 0;
+  int sign = s[0] == '-' || s[0] == '+';
+  char * number = s + sign;
+  int n;
+  Symbol found = 19368;
+  if(number[0] != '0' || _decimal_zero(number)) n = _decimal_number(number, & found);
+  else{
+    n = _prefixed_number(number, & found);
+    if(n < 0) return - 1;
+  }
+  if(n <= 0) return sign ? 0 : n;
+  if(type) * type = found;
+  return sign + n;
+}
+
+int scan_number(char * s){
+  return scan_number_typed(s, NULL);
+}
+
+static int _decimal_zero(char * s){
+  switch(s[1]){
+    case 'x' : case 'X' : case 'b' : case 'B' : case 'o' : case 'O' : return 0;
+    case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' :{
+      char after = s[_digits(s, 10)];
+      return after == '.' || after == 'e' || after == 'E';
+    }
+
+  }
+  return 1;
+}
+
+static int _prefixed_number(char * s, Symbol * type){
+  int n;
+  switch(s[1]){
+    case 'x' : case 'X' : n = _hex_number(s + 2, type);
+    break;
+    case 'b' : case 'B' : n = _radix_integer(s + 2, 2, 0);
+    break;
+    case 'o' : case 'O' : n = _radix_integer(s + 2, 8, 0);
+    break;
+    default: n = _radix_integer(s + 2, 8, 1);
+    break;
+  }
+  return n < 0 ? - 1 : n + 2;
+}
+
+static int _hex_number(char * s, Symbol * type){
+  int n = 0;
+  while(_ascii_hex((unsigned char) s[n])) n ++;
+  int digits = n, has_point = 0;
+  if(s[n] == '.'){
+    has_point = 1;
+    n ++;
+    int fraction = _digits(s + n, 16);
+    digits += fraction;
+    n += fraction;
+  }
+  if(! digits) return - 1;
+  if(s[n] == 'p' || s[n] == 'P'){
+    int exponent = _exponent(s + n + 1);
+    if(exponent < 0) return - 1;
+    if(type) * type = 13400168;
+    return n + 1 + exponent;
+  }
+  if(has_point) return - 1;
+  int suffix = _int_suffix(s + n);
+  if(suffix < 0) return - 1;
+  if(type) * type = 19368;
+  return n + suffix;
+}
+
+static int _decimal_number(char * s, Symbol * type){
+  int n = 0;
+  while(scan_ascii_digit((unsigned char) s[n])) n ++;
+  if(s[n] == '.'){
+    int fraction = _float_tail(s + n + 1, n > 0);
+    if(fraction < 0) return - 1;
+    if(type) * type = 13400168;
+    return n + 1 + fraction;
+  }
+  if(! n) return 0;
+  if(s[n] == 'e' || s[n] == 'E'){
+    int exponent = _exponent(s + n + 1);
+    if(exponent < 0) return - 1;
+    if(type) * type = 13400168;
+    return n + 1 + exponent;
+  }
+  int suffix = _int_suffix(s + n);
+  if(suffix < 0) return - 1;
+  if(type) * type = 19368;
+  return n + suffix;
 }
 
 Symbol scan_number_type(char * s, int n){
@@ -55,91 +236,102 @@ Symbol scan_number_type(char * s, int n){
   return 19368;
 }
 
-void scan_next_line_col(char * s, int n, int * l, int * c){
-  int line = * l, col = * c;
-  char * next = s, * end = s + n, * newline;
-  int found = 0;
-  while(next < end &&(newline = memchr(next, '\n', end - next))){
-    found = 1;
-    line ++;
-    col = 1;
-    next = newline + 1;
-  }
-  if(found) col += end - next;
-  else col += n;
-  * l = line;
-  * c = col;
+int scan_digital(char * s){
+  return _decimal_number(s, NULL);
 }
 
-int scan_preprocessor(char * s){
+int scan_float(char * s){
+  return _float_tail(s, 1);
+}
+
+int scan_hexponent(char * s){
+  return _exponent(s);
+}
+
+static int _digits(char * s, int base){
   int n = 0;
-  while(s[n]){
-    if(s[n] == '\\' && s[n + 1] == '\n') n += 2;
-    else if(s[n] == '\\' && s[n + 1] == '\r' && s[n + 2] == '\n') n += 3;
-    else if(s[n] == '\\' && ! s[n + 1]) return - 1;
-    else if(s[n] == '\n') return n;
-    else n ++;
-  }
+  while(_digit((unsigned char) s[n], base)) n ++;
   return n;
 }
 
-int scan_white_space(char * s){
+static inline int _digit(int c, int base){
+  return base == 16 ? _ascii_hex(c) :(unsigned)(c - '0') <(unsigned) base;
+}
+
+static int _radix_integer(char * s, int base, int digit_before){
+  int n = _digits(s, base);
+  if(! digit_before && ! n) return - 1;
+  int suffix = _int_suffix(s + n);
+  return suffix < 0 ? - 1 : n + suffix;
+}
+
+static int _float_tail(char * s, int digit_before){
+  int n = _digits(s, 10);
+  if(! digit_before && ! n) return - 1;
+  if(s[n] == 'e' || s[n] == 'E'){
+    int exponent = _exponent(s + n + 1);
+    return exponent < 0 ? - 1 : n + 1 + exponent;
+  }
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? - 1 : n + suffix;
+}
+
+static int _exponent(char * s){
   int n = 0;
-  while(s[n]) switch(s[n]){
-    case ' ' : case '\t' : case '\r' : case '\v' : case '\f' : case '\n' : n ++;
+  if(s[n] == '+' || s[n] == '-') n ++;
+  int digits = _digits(s + n, 10);
+  if(! digits) return - 1;
+  n += digits;
+  int suffix = _float_suffix(s + n);
+  return suffix < 0 ? - 1 : n + suffix;
+}
+
+static int _int_suffix(char * s){
+  int n = 0;
+  switch(s[0]){
+    case 'u' : case 'U' : n = 1 + _longs(s + 1);
     break;
-    default: return n;
+    case 'l' : case 'L' : n = _is_l(s[1]) ? 2 + _is_u(s[2]) : 1 + _is_u(s[1]);
+    break;
   }
-  return(n > 0) ? n : - 1;
+  return _token_break(s[n]) ? n : - 1;
 }
 
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-int scan_line_comment(char * s){
-  if(! s || s[0] != '/' || s[1] != '/'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/scan.x",.function = "scan_line_comment",.line = 112};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("scan_line_comment")), NULL))));
-    __builtin_unreachable();
-  }
-  int n = 2;
-  while(s[n]){
-    if(s[n] == '\n') return n;
-    n ++;
-  }
-  return n;
+static int _longs(char * s){
+  return _is_l(s[0]) ? 1 + _is_l(s[1]) : 0;
 }
 
-int scan_block_comment_status(char * s, Symbol * status){
-  if(! s || s[0] != '/' || s[1] != '*'){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/scan.x",.function = "scan_block_comment_status",.line = 126};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("scan_block_comment_status")), NULL))));
-    __builtin_unreachable();
-  }
-  if(status) * status = 982;
-  int n = 2;
-  while(s[n]){
-    if(s[n] == '*' && s[n + 1] == '/') return n + 2;
-    n ++;
-  }
-  if(status) * status = 664344300629258;
-  return - 1;
+static inline int _is_l(int c){
+  return c == 'l' || c == 'L';
 }
 
-int scan_block_comment(char * s){
-  return scan_block_comment_status(s, NULL);
+static inline int _is_u(int c){
+  return c == 'u' || c == 'U';
+}
+
+static int _float_suffix(char * s){
+  int n = 0;
+  switch(s[n]){
+    case 'f' : case 'F' : case 'l' : case 'L' : n ++;
+    break;
+  }
+  return _token_break(s[n]) ? n : - 1;
 }
 
 int scan_identifier(char * s){
   if(! s ||(! scan_ascii_alpha((unsigned char) s[0]) && s[0] != '_')){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/scan.x",.function = "scan_identifier",.line = 144};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/scan.x",.function = "scan_identifier",.line = 318};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("scan_identifier")), NULL))));
     __builtin_unreachable();
   }
   int n = 1;
   while(! _token_break((unsigned char) s[n])) n ++;
   return n;
+}
+
+int scan_keyword(char * s){
+  int n = scan_identifier(s);
+  return scan_keyword_type(s, n) ? n : - 1;
 }
 
 Symbol scan_keyword_type(const char * s, int n){
@@ -211,142 +403,37 @@ Symbol scan_keyword_type(const char * s, int n){
   return 0;
 }
 
-int scan_keyword(char * s){
-  int n = scan_identifier(s);
-  return scan_keyword_type(s, n) ? n : - 1;
-}
-
 int scan_c_operator(char * s){
-  switch(* s){
-    case '.' : return(s[1] == '.' && s[2] == '.') ? 3 : 1;
-    case '>' : return(s[1] == '>') ?((s[2] == '=') ? 3 : 2) :(s[1] == '=') ? 2 : 1;
-    case '<' : return(s[1] == '<') ?((s[2] == '=') ? 3 : 2) :(s[1] == '=') ? 2 : 1;
-    case '+' : return(s[1] == '=') ? 2 :(s[1] == '+') ? 2 : 1;
-    case '-' : return(s[1] == '=') ? 2 :(s[1] == '-') ? 2 :(s[1] == '>') ? 2 : 1;
-    case '*' : return(s[1] == '=') ? 2 : 1;
-    case '/' : return(s[1] == '=') ? 2 : 1;
-    case '%' : return(s[1] == '=') ? 2 : 1;
-    case '&' : return(s[1] == '=') ? 2 :(s[1] == '&') ? 2 : 1;
-    case '^' : return(s[1] == '=') ? 2 : 1;
-    case '|' : return(s[1] == '=') ? 2 :(s[1] == '|') ? 2 : 1;
-    case '=' : return(s[1] == '=') ?((s[2] == '=') ? 3 : 2) : 1;
-    case '!' : return(s[1] == '=') ?((s[2] == '=') ? 3 : 2) : 1;
-    case '@' : return(s[1] == '=') ? 2 : 1;
+  switch(s[0]){
+    case '.' : return s[1] == '.' && s[2] == '.' ? 3 : 1;
+    case '>' : return s[1] == '>' ? 2 +(s[2] == '=') : 1 +(s[1] == '=');
+    case '<' : return s[1] == '<' ? 2 +(s[2] == '=') : 1 +(s[1] == '=');
+    case '+' : return s[1] == '=' || s[1] == '+' ? 2 : 1;
+    case '-' : return s[1] == '=' || s[1] == '-' || s[1] == '>' ? 2 : 1;
+    case '&' : return s[1] == '=' || s[1] == '&' ? 2 : 1;
+    case '|' : return s[1] == '=' || s[1] == '|' ? 2 : 1;
+    case '=' : return s[1] == '=' ? 2 +(s[2] == '=') : 1;
+    case '!' : return s[1] == '=' ? 2 +(s[2] == '=') : 1;
+    case '*' : case '/' : case '%' : case '^' : case '@' : return s[1] == '=' ? 2 : 1;
     case '~' : case ';' : case ',' : case ':' : case '(' : case ')' : case '[' : case ']' : case '{' : case '}' : case '?' : return 1;
-    default: return - 1;
   }
-
-}
-
-static int _escape_sequence_status(char * s, Symbol * status){
-  int n = 1;
-  if(! s[n]){
-    if(status) * status = 664344300629258;
-    return - 1;
-  }
-  switch(s[n]){
-    case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return n + 1;
-    case '\r' : if(! s[n + 1]){
-      if(status) * status = 664344300629258;
-      return - 1;
-    }
-    if(s[n + 1] == '\n') return n + 2;
-    break;
-    case 'x' : case 'X' : case 'u' : case 'U' : n ++;
-    int start = n;
-    if(! s[n]){
-      if(status) * status = 664344300629258;
-      return - 1;
-    }
-    if(_ascii_hex((unsigned char) s[n])) n ++;
-    if(_ascii_hex((unsigned char) s[n])) n ++;
-    if(n == start) break;
-    return n;
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : n ++;
-    if(s[n] >= '0' && s[n] <= '7') n ++;
-    if(s[n] >= '0' && s[n] <= '7') n ++;
-    if(n < 4 || s[1] <= '3') return n;
-    break;
-  }
-  if(status) * status = 28682226919752;
   return - 1;
-}
-
-int scan_escape_sequence(char * s){
-  return _escape_sequence_status(s, NULL);
-}
-
-static int _c_escape_sequence_status(char * s, Symbol * status){
-  int n = 1;
-  if(! s[n]){
-    if(status) * status = 664344300629258;
-    return - 1;
-  }
-  switch(s[n]){
-    case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return n + 1;
-    case '\r' : if(! s[n + 1]){
-      if(status) * status = 664344300629258;
-      return - 1;
-    }
-    if(s[n + 1] == '\n') return n + 2;
-    break;
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : n ++;
-    if(s[n] >= '0' && s[n] <= '7') n ++;
-    if(s[n] >= '0' && s[n] <= '7') n ++;
-    if(n < 4 || s[1] <= '3') return n;
-    break;
-    case 'x' : case 'X' : n ++;
-    if(! s[n]){
-      if(status) * status = 664344300629258;
-      return - 1;
-    }
-    if(! _ascii_hex((unsigned char) s[n])) break;
-    while(_ascii_hex((unsigned char) s[n])) n ++;
-    return n;
-    case 'u' : n ++;
-    for(int i = 0;  i < 4;  i ++){
-      if(! s[n]){
-        if(status) * status = 664344300629258;
-        return - 1;
-      }
-      if(! _ascii_hex((unsigned char) s[n ++])) goto malformed;
-    }
-    return n;
-    case 'U' : n ++;
-    for(int i = 0;  i < 8;  i ++){
-      if(! s[n]){
-        if(status) * status = 664344300629258;
-        return - 1;
-      }
-      if(! _ascii_hex((unsigned char) s[n ++])) goto malformed;
-    }
-    return n;
-  }
-  malformed : if(status) * status = 28682226919752;
-  return - 1;
-}
-
-static int _c_escape_sequence(char * s){
-  return _c_escape_sequence_status(s, NULL);
 }
 
 int scan_c_string_status(char * s, Symbol * status){
   if(status) * status = 982;
-  int m, n = 1;
+  int n = 1;
   while(s[n]){
     if(s[n] == '\\'){
-      if((m = _c_escape_sequence_status(s + n, status)) < 0) return - 1;
+      int m = _c_escape_status(s + n, status);
+      if(m < 0) return - 1;
       n += m;
     }
     else if(s[n] == '"') return n + 1;
-    else if(s[n] == '\n' || s[n] == '\r'){
-      if(status) * status = 28682226919752;
-      return - 1;
-    }
+    else if(s[n] == '\n' || s[n] == '\r') return _fail(status, 28682226919752);
     else n ++;
   }
-  if(status) * status = 664344300629258;
-  return - 1;
+  return _fail(status, 664344300629258);
 }
 
 int scan_c_string(char * s){
@@ -354,247 +441,104 @@ int scan_c_string(char * s){
 }
 
 int scan_c_character(char * s){
-  int m, n = 1;
+  int n = 1;
   if(s[n] == '\\'){
-    if((m = _c_escape_sequence(s + n)) < 0) return - 1;
+    int m = _c_escape_status(s + n, NULL);
+    if(m < 0) return - 1;
     n += m;
   }
-  else{
-    if(! s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return - 1;
-    n ++;
-  }
+  else if(! s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return - 1;
+  else n ++;
   return s[n] == '\'' ? n + 1 : - 1;
-}
-
-static int _int_suffix(char * s){
-  int n = 0;
-  switch(s[n]){
-    case 'u' : case 'U' : n ++;
-    switch(s[n]){
-      case 'l' : case 'L' : n ++;
-      switch(s[n]){
-        case 'l' : case 'L' : n ++;
-        break;
-        default: break;
-      }
-      break;
-      default: break;
-    }
-    break;
-    case 'l' : case 'L' : n ++;
-    switch(s[n]){
-      case 'l' : case 'L' : n ++;
-      switch(s[n]){
-        case 'u' : case 'U' : n ++;
-        break;
-        default: break;
-      }
-      break;
-      case 'u' : case 'U' : n ++;
-      break;
-      default: break;
-    }
-    break;
-    default: break;
-  }
-  if(! _token_break(s[n])) return - 1;
-  return n;
-}
-
-static int _float_suffix(char * s){
-  int n = 0;
-  switch(s[n]){
-    case 'f' : case 'F' : case 'l' : case 'L' : n ++;
-    break;
-  }
-  if(! _token_break(s[n])) return - 1;
-  return n;
-}
-
-static int _digits(char * s, int base){
-  int n = 0;
-  while(1){
-    int c =(unsigned char) s[n];
-    unsigned digit =(unsigned)(c - '0');
-    int valid = digit < 10 && digit <(unsigned) base;
-    if(base == 16) valid = valid ||(c >= 'a' && c <= 'f') ||(c >= 'A' && c <= 'F');
-    if(! valid) return n;
-    n ++;
-  }
-
-}
-
-static int _exponent(char * s){
-  int n = 0;
-  if(s[n] == '+' || s[n] == '-') n ++;
-  int digits = _digits(s + n, 10);
-  if(! digits) return - 1;
-  n += digits;
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? - 1 : n + suffix;
-}
-
-static int _float_tail(char * s, int digit_before){
-  int n = _digits(s, 10);
-  if(! digit_before && ! n) return - 1;
-  if(s[n] == 'e' || s[n] == 'E'){
-    int exponent = _exponent(s + n + 1);
-    return exponent < 0 ? - 1 : n + 1 + exponent;
-  }
-  int suffix = _float_suffix(s + n);
-  return suffix < 0 ? - 1 : n + suffix;
-}
-
-int scan_float(char * s){
-  return _float_tail(s, 1);
-}
-
-int scan_hexponent(char * s){
-  return _exponent(s);
-}
-
-static int _radix_integer(char * s, int base, int digit_before){
-  int n = _digits(s, base);
-  if(! digit_before && ! n) return - 1;
-  int suffix = _int_suffix(s + n);
-  return suffix < 0 ? - 1 : n + suffix;
-}
-
-static int _hex_number(char * s, Symbol * type){
-  int n = 0;
-  while(_ascii_hex((unsigned char) s[n])) n ++;
-  int digits = n, has_point = 0;
-  if(s[n] == '.'){
-    has_point = 1;
-    n ++;
-    int fraction = _digits(s + n, 16);
-    digits += fraction;
-    n += fraction;
-  }
-  if(! digits) return - 1;
-  if(s[n] == 'p' || s[n] == 'P'){
-    int exponent = _exponent(s + n + 1);
-    if(exponent < 0) return - 1;
-    if(type) * type = 13400168;
-    return n + 1 + exponent;
-  }
-  if(has_point) return - 1;
-  int suffix = _int_suffix(s + n);
-  if(suffix < 0) return - 1;
-  if(type) * type = 19368;
-  return n + suffix;
-}
-
-static int _decimal_number(char * s, Symbol * type){
-  int n = 0;
-  while(scan_ascii_digit((unsigned char) s[n])) n ++;
-  if(s[n] == '.'){
-    int fraction = _float_tail(s + n + 1, n > 0);
-    if(fraction < 0) return - 1;
-    if(type) * type = 13400168;
-    return n + 1 + fraction;
-  }
-  if(! n) return 0;
-  if(s[n] == 'e' || s[n] == 'E'){
-    int exponent = _exponent(s + n + 1);
-    if(exponent < 0) return - 1;
-    if(type) * type = 13400168;
-    return n + 1 + exponent;
-  }
-  int suffix = _int_suffix(s + n);
-  if(suffix < 0) return - 1;
-  if(type) * type = 19368;
-  return n + suffix;
-}
-
-int scan_digital(char * s){
-  return _decimal_number(s, NULL);
-}
-
-int scan_number_typed(char * s, Symbol * type){
-  if(! s) return 0;
-  int sign = s[0] == '-' || s[0] == '+';
-  char * number = s + sign;
-  int n;
-  Symbol found = 19368;
-  if(number[0] == '0'){
-    switch(number[1]){
-      case 'x' : case 'X' : n = _hex_number(number + 2, & found);
-      if(n < 0) return - 1;
-      n += 2;
-      break;
-      case 'b' : case 'B' : n = _radix_integer(number + 2, 2, 0);
-      if(n < 0) return - 1;
-      n += 2;
-      break;
-      case 'o' : case 'O' : n = _radix_integer(number + 2, 8, 0);
-      if(n < 0) return - 1;
-      n += 2;
-      break;
-      case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' :{
-        char after = number[_digits(number, 10)];
-        if(after == '.' || after == 'e' || after == 'E'){
-          n = _decimal_number(number, & found);
-          break;
-        }
-        n = _radix_integer(number + 2, 8, 1);
-        if(n < 0) return - 1;
-        n += 2;
-        break;
-      }
-      default: n = _decimal_number(number, & found);
-      break;
-    }
-
-  }
-  else n = _decimal_number(number, & found);
-  if(n <= 0) return sign ? 0 : n;
-  if(type) * type = found;
-  return sign + n;
-}
-
-int scan_number(char * s){
-  return scan_number_typed(s, NULL);
 }
 
 int scan_string_segment(char * s){
   int n = 0;
   while(s[n]){
-    if(s[n] == '\\'){
-      if(s[n + 1] == '$') n += 2;
-      else{
-        int m = scan_escape_sequence(s + n);
+    switch(s[n]){
+      case '\\' :{
+        int m = s[n + 1] == '$' ? 2 : scan_escape_sequence(s + n);
         if(m < 0) return - 1;
         n += m;
+        break;
       }
-
+      case '$' : if(s[n + 1] != '$') return n;
+      n += 2;
+      break;
+      case '"' : return n;
+      default: n ++;
     }
-    else if(s[n] == '$' && s[n + 1] == '$') n += 2;
-    else if(s[n] == '$' || s[n] == '"') return n;
-    else n ++;
+
   }
   return - 1;
+}
+
+int scan_symbol_literal_status(char * s, Symbol * status){
+  if(status) * status = 982;
+  if(s[0] != '<') return 0;
+  if(s[1] == '"') return _quoted_literal(s, status);
+  return _simple_literal(s, status);
+}
+
+int scan_symbol_literal(char * s){
+  return scan_symbol_literal_status(s, NULL);
+}
+
+static int _quoted_literal(char * s, Symbol * status){
+  int m = _quoted_spelling(s + 1, status);
+  if(m < 0) return - 1;
+  int n = 1 + m;
+  if(s[n] == '>') return n + 1;
+  return _fail(status, s[n] ? 28682226919752 : 664344300629258);
+}
+
+static int _simple_literal(char * s, Symbol * status){
+  int n = 1;
+  while(s[n]){
+    if(s[n] == '>') return n > 1 ? n + 1 : _fail(status, 28682226919752);
+    if(s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' || s[n] == '\v' || s[n] == '\f') return _fail(status, 28682226919752);
+    n ++;
+  }
+  return _fail(status, 664344300629258);
+}
+
+static int _quoted_spelling(char * s, Symbol * status){
+  int n = 1;
+  while(s[n]){
+    if(s[n] == '\\'){
+      int m = _escape_status(s + n, status);
+      if(m < 0) return - 1;
+      n += m;
+    }
+    else if(s[n] == '"') return n + 1;
+    else n ++;
+  }
+  return _fail(status, 664344300629258);
+}
+
+int scan_symbol_set_atom(char * s){
+  if(! s || ! * s) return 0;
+  if(s[0] == '"') return _quoted_spelling(s, NULL);
+  int n = 0;
+  while(s[n]){
+    if(s[n] == '>' && s[n + 1] == '>') return n;
+    if(strchr(" \n\t\v\f\r$@", s[n])) return n;
+    if(s[n] == '\\' && ! s[n + 1]) return - 1;
+    n += s[n] == '\\' ? 2 : 1;
+  }
+  return n;
 }
 
 int scan_atom_status(char * s, Symbol * status){
   if(status) * status = 982;
   if(! s || ! * s || strchr("()'`,\"$@{[", * s)) return 0;
-  if(s[0] == '\\' && ! s[1]){
-    if(status) * status = 664344300629258;
-    return - 1;
-  }
+  if(s[0] == '\\' && ! s[1]) return _fail(status, 664344300629258);
   int n = s[0] == '\\' ? 2 : 1;
   while(s[n]){
     if(strchr("()'`,\"$@{[", s[n]) || strchr(" \n\t\v\f\r", s[n])) return n;
     if(s[n] == '/' &&(s[n + 1] == '/' || s[n + 1] == '*')) return n;
-    if(s[n] == '\\'){
-      if(! s[n + 1]){
-        if(status) * status = 664344300629258;
-        return - 1;
-      }
-      n += 2;
-    }
-    else n ++;
+    if(s[n] == '\\' && ! s[n + 1]) return _fail(status, 664344300629258);
+    n += s[n] == '\\' ? 2 : 1;
   }
   return n;
 }
@@ -603,67 +547,79 @@ int scan_atom(char * s){
   return scan_atom_status(s, NULL);
 }
 
-static int _quoted_symbol_status(char * s, Symbol * status){
-  int n = 1;
-  while(s[n]){
-    if(s[n] == '\\'){
-      int m = _escape_sequence_status(s + n, status);
-      if(m < 0) return - 1;
-      n += m;
-    }
-    else if(s[n] == '"') return n + 1;
-    else n ++;
-  }
-  if(status) * status = 664344300629258;
-  return - 1;
+int scan_escape_sequence(char * s){
+  return _escape_status(s, NULL);
 }
 
-int scan_symbol_set_atom(char * s){
-  if(! s || ! * s) return 0;
-  if(s[0] == '"') return _quoted_symbol_status(s, NULL);
-  int n = 0;
-  while(s[n]){
-    if(s[n] == '>' && s[n + 1] == '>') break;
-    if(strchr(" \n\t\v\f\r$@", s[n])) break;
-    if(s[n] == '\\'){
-      if(! s[n + 1]) return - 1;
-      n += 2;
-    }
-    else n ++;
+static int _escape_status(char * s, Symbol * status){
+  switch(s[1]){
+    case '\0' : return _fail(status, 664344300629258);
+    case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return 2;
+    case '\r' : return _crlf_escape(s, status);
+    case 'x' : case 'X' : case 'u' : case 'U' : return _byte_escape(s, status);
+    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status);
   }
-  return n;
+  return _fail(status, 28682226919752);
 }
 
-int scan_symbol_literal_status(char * s, Symbol * status){
-  if(status) * status = 982;
-  if(s[0] != '<') return 0;
-  int n = 1;
-  if(s[n] == '"'){
-    int m = _quoted_symbol_status(s + n, status);
-    if(m < 0) return - 1;
-    n += m;
-    if(s[n] == '>') return n + 1;
-    if(status) * status = s[n] ? 28682226919752 : 664344300629258;
-    return - 1;
+static int _c_escape_status(char * s, Symbol * status){
+  switch(s[1]){
+    case '\0' : return _fail(status, 664344300629258);
+    case 'a' : case 'b' : case 'f' : case 'n' : case 'r' : case 't' : case 'v' : case '\n' : case '\'' : case '"' : case '?' : case '\\' : return 2;
+    case '\r' : return _crlf_escape(s, status);
+    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(s, status);
+    case 'x' : case 'X' : return _hex_escape(s, status);
+    case 'u' : return _universal_escape(s, 4, status);
+    case 'U' : return _universal_escape(s, 8, status);
   }
-  int start = n;
-  while(s[n]){
-    if(s[n] == '>'){
-      if(n > start) return n + 1;
-      if(status) * status = 28682226919752;
-      return - 1;
-    }
-    if(s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' || s[n] == '\v' || s[n] == '\f'){
-      if(status) * status = 28682226919752;
-      return - 1;
-    }
-    n ++;
-  }
-  if(status) * status = 664344300629258;
-  return - 1;
+  return _fail(status, 28682226919752);
 }
 
-int scan_symbol_literal(char * s){
-  return scan_symbol_literal_status(s, NULL);
+static int _crlf_escape(char * s, Symbol * status){
+  if(! s[2]) return _fail(status, 664344300629258);
+  return s[2] == '\n' ? 3 : _fail(status, 28682226919752);
+}
+
+static int _octal_escape(char * s, Symbol * status){
+  int n = 2;
+  if(s[n] >= '0' && s[n] <= '7') n ++;
+  if(s[n] >= '0' && s[n] <= '7') n ++;
+  return n < 4 || s[1] <= '3' ? n : _fail(status, 28682226919752);
+}
+
+static int _byte_escape(char * s, Symbol * status){
+  if(! s[2]) return _fail(status, 664344300629258);
+  int n = 2;
+  if(_ascii_hex((unsigned char) s[n])) n ++;
+  if(_ascii_hex((unsigned char) s[n])) n ++;
+  return n > 2 ? n : _fail(status, 28682226919752);
+}
+
+static int _hex_escape(char * s, Symbol * status){
+  if(! s[2]) return _fail(status, 664344300629258);
+  if(! _ascii_hex((unsigned char) s[2])) return _fail(status, 28682226919752);
+  return 2 + _digits(s + 2, 16);
+}
+
+static int _universal_escape(char * s, int count, Symbol * status){
+  for(int n = 2;  n < 2 + count;  n ++){
+    if(! s[n]) return _fail(status, 664344300629258);
+    if(! _ascii_hex((unsigned char) s[n])) return _fail(status, 28682226919752);
+  }
+  return 2 + count;
+}
+
+void scan_next_line_col(char * s, int n, int * l, int * c){
+  int line = * l, col = * c;
+  char * next = s, * end = s + n;
+  while(next < end){
+    char * newline = memchr(next, '\n', end - next);
+    if(! newline) break;
+    line ++;
+    col = 1;
+    next = newline + 1;
+  }
+  * l = line;
+  * c = col +(end - next);
 }
 

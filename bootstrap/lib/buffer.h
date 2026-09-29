@@ -14,16 +14,6 @@ typedef struct Buffer{
 }
 * Buffer;
 
-Buffer Buffer_new(size_t padding);
-
-void Buffer_free(Buffer buf);
-
-void Buffer_move_to(Buffer buf, Scope * scope);
-
-Buffer Buffer_reserve(Buffer buf, size_t minimum);
-
-Buffer Buffer_clear(Buffer buf);
-
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 Buffer Buffer_write(Buffer buf, const char * text);
@@ -65,6 +55,16 @@ String Buffer_str_free(Buffer buf);
 String Buffer_repr(Buffer buf);
 
 int Buffer_truth(Buffer b);
+
+Buffer Buffer_new(size_t padding);
+
+Buffer Buffer_reserve(Buffer buf, size_t minimum);
+
+Buffer Buffer_clear(Buffer buf);
+
+void Buffer_move_to(Buffer buf, Scope * scope);
+
+void Buffer_free(Buffer buf);
 
 void Buffer_cleanup(Buffer value);
 

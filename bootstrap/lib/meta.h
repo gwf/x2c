@@ -17,15 +17,35 @@ typedef List Type;
 
 typedef List Source;
 
-List type_base_suffix(List type);
-
-List type_declaration_parts(List type);
+List x2c_ident(String spelling);
 
 List x2c_literal_string(String value);
 
 List x2c_literal_int(int value);
 
 List x2c_literal_symbol(Symbol value);
+
+List x2c_expr_ident(List name);
+
+List x2c_expr_index(List base, List subscript);
+
+List x2c_expr_call(List callee, List arguments);
+
+List x2c_expr_composite(List items);
+
+List x2c_stmnt_make(List expression);
+
+List x2c_stmnt_return(List expression);
+
+List x2c_block_make(List items);
+
+List x2c_function_body(List function);
+
+List x2c_parameters_arguments(List value);
+
+List type_base_suffix(List type);
+
+List type_declaration_parts(List type);
 
 typedef List Macro;
 
@@ -59,29 +79,9 @@ typedef struct MacroCaseSite{
 }
 MacroCaseSite;
 
-int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
-
-int Macro_case_capture(List code, Macro t, List names, MatchCaptureBuffer * published);
-
 List Macro_case_pattern(Macro t, List names);
 
-List x2c_expr_ident(List name);
-
-List x2c_expr_index(List base, List subscript);
-
-List x2c_expr_call(List callee, List arguments);
-
-List x2c_expr_composite(List items);
-
-List x2c_stmnt_make(List expression);
-
-List x2c_stmnt_return(List expression);
-
-List x2c_block_make(List items);
-
-List x2c_function_body(List function);
-
-List x2c_parameters_arguments(List value);
+int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
 
 
 #endif /* __GUARD_0xD219AB39__ */

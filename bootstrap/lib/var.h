@@ -36,20 +36,6 @@ unsigned long Var_tag_top(Symbol tag);
 
 unsigned long Var_tag_bottom(Symbol tag);
 
-int x2c_var_descriptor_index(Var value);
-
-int Var_custom_descriptor_index(Var value);
-
-VarDescriptor * x2c_var_custom_descriptor(Var value);
-
-VarDescriptor * x2c_var_declare(Symbol tag);
-
-int x2c_var_tag_descriptor_index(Symbol tag);
-
-int Var_encoding_valid(Var value);
-
-int Var_register_object_tag(Symbol tag);
-
 Symbol Var_tag(Var v);
 
 int Var_is(Var var, Symbol tag);
@@ -74,6 +60,20 @@ Var Var_null(void);
 
 int Var_is_nil(Var v);
 
+int Var_encoding_valid(Var value);
+
+int x2c_var_descriptor_index(Var value);
+
+int Var_custom_descriptor_index(Var value);
+
+VarDescriptor * x2c_var_custom_descriptor(Var value);
+
+int x2c_var_tag_descriptor_index(Symbol tag);
+
+Var Var_new(Symbol tag, ...);
+
+Var Var_box_record(Symbol tag, const void * record, size_t size);
+
 Var Var_box_long(long value);
 
 Var Var_box_ulong(unsigned long value);
@@ -90,10 +90,6 @@ Var Var_move_wide_to(Var value, Scope * scope);
 
 Scope Var_wide_owner(Var v);
 
-Var Var_new(Symbol tag, ...);
-
-Var Var_box_record(Symbol tag, const void * record, size_t size);
-
 double Var_floating(Var v);
 
 long Var_integer(Var v);
@@ -108,6 +104,8 @@ unsigned long long Var_ulong_long_value(Var v);
 
 long double Var_long_double_value(Var v);
 
+void * Var_pointer(Var v);
+
 unsigned Var_wide_hash(Var v);
 
 int Var_wide_equal(Var a, Var b);
@@ -118,9 +116,11 @@ int Var_integer_floating_compare(Var integer, Var floating);
 
 int Var_wide_compare(Var a, Var b);
 
-void * Var_pointer(Var v);
-
 Var Var_parse(String str, Symbol kind);
+
+int Var_register_object_tag(Symbol tag);
+
+VarDescriptor * x2c_var_declare(Symbol tag);
 
 
 #endif /* __GUARD_0x41126DC7__ */
