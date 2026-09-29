@@ -5,15 +5,7 @@
     Allocation-free scanners return a positive matched length, zero when
     their token class does not start at the input, and -1 for malformed input.
     Prefix-dispatched scanners report a missing required prefix through
-    `Error`;
-    that failure does not return.
-
-    One forward-only typed scanner does all numeric scanning. Its entry points
-    never inspect bytes before the supplied pointer. C literals use C escape
-    widths and reject raw newlines; x2c percent strings and quoted symbols
-    retain byte-oriented escapes and multiline behavior. Line comments and
-    complete preprocessor lines may end at either newline or NUL, and a present
-    newline is not part of the returned token.
+    `Error`; that failure does not return.
 
     Inputs are borrowed only for a call and are never mutated. Except for the
     explicitly bounded helpers, they are NUL-terminated; every length is a byte
@@ -23,7 +15,6 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "private-keywords.xmacro")
 
 #include "symbol.x"
 
@@ -37,13 +28,22 @@ inline int scan_ascii_digit(int c) => (unsigned) (c - '0') < 10;
 
 #include <string.h>
 
-static inline int _ascii_hex(int c) => scan_ascii_digit(c) ||
-         (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+static inline int _ascii_hex(int c) =>
+  scan_ascii_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 
 static inline int _token_break(int c) =>
   !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 
-// white space and comments
+/* Reports `why` through a nonnull `status` and returns -1. */
+static inline int _fail(Symbol *status, Symbol why) {
+  if (status) *status = why;
+  return -1;
+}
+
+/* white space and comments
+
+   Line comments and complete preprocessor lines may end at either newline
+   or NUL, and a present newline is not part of the returned token. */
 
 /* Returns the leading C-whitespace byte count, zero for another first byte,
    and -1 for an empty input. */
@@ -55,7 +55,7 @@ int scan_white_space(char *s) {
         n++; break;
       default: return n;
     }
-  return (n > 0) ? n : -1;
+  return n > 0 ? n : -1;
 }
 
 /* Returns a `//` comment's bytes without its final newline, or through NUL.
@@ -64,10 +64,7 @@ int scan_line_comment(char *s) {
   if (!s || s[0] != '/' || s[1] != '/')
     raise %(bad-arg (owner "scan_line_comment"));
   int n = 2;
-  while (s[n]) {
-    if (s[n] == '\n') return n;
-    n++;
-  }
+  while (s[n] && s[n] != '\n') n++;
   return n;
 }
 
@@ -80,11 +77,10 @@ int scan_block_comment_status(char *s, Symbol *status) {
   if (status) *status = <ok>;
   int n = 2;
   while (s[n]) {
-    if (s[n] == '*' && s[n+1] == '/') return n+2;
+    if (s[n] == '*' && s[n + 1] == '/') return n + 2;
     n++;
   }
-  if (status) *status = <incomplete>;
-  return -1;
+  return _fail(status, <incomplete>);
 }
 
 /* Returns the same length as `scan_block_comment_status` without a status. */
@@ -96,16 +92,19 @@ int scan_block_comment(char *s) => scan_block_comment_status(s, NULL);
 int scan_preprocessor(char *s) {
   int n = 0;
   while (s[n]) {
-    if (s[n] == '\\' && s[n+1] == '\n') n += 2;
-    else if (s[n] == '\\' && s[n+1] == '\r' && s[n+2] == '\n') n += 3;
-    else if (s[n] == '\\' && !s[n+1]) return -1;
+    if (s[n] == '\\' && s[n + 1] == '\n') n += 2;
+    else if (s[n] == '\\' && s[n + 1] == '\r' && s[n + 2] == '\n') n += 3;
+    else if (s[n] == '\\' && !s[n + 1]) return -1;
     else if (s[n] == '\n') return n;
     else n++;
   }
   return n;
 }
 
-// numbers
+/* numbers
+
+   One forward-only typed scanner does all numeric scanning. Its entry
+   points never inspect bytes before the supplied pointer. */
 
 /* Scans a signed or unsigned C/x2c numeric token from borrowed NUL-terminated
    input. Returns a positive byte count, zero when no number starts here, or -1
@@ -113,40 +112,11 @@ int scan_preprocessor(char *s) {
    or `<float>`; otherwise it is unchanged. */
 int scan_number_typed(char *s, Symbol *type) {
   if (!s) return 0;
-  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign, int n;
+  int sign = s[0] == '-' || s[0] == '+', char *number = s + sign;
   Symbol found = <int>;
-  if (number[0] == '0') {
-    switch (number[1]) {
-      case 'x': case 'X': n = _hex_number(number + 2, &found);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case 'b': case 'B': n = _radix_integer(number + 2, 2, 0);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case 'o': case 'O': n = _radix_integer(number + 2, 8, 0);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      case '1': case '2': case '3': case '4': case '5':
-      case '6': case '7': {
-        // As in C, a point or exponent makes the digits decimal floating.
-        char after = number[_digits(number, 10)];
-        if (after == '.' || after == 'e' || after == 'E') {
-          n = _decimal_number(number, &found);
-          break;
-        }
-        n = _radix_integer(number + 2, 8, 1);
-        if (n < 0) return -1;
-        n += 2;
-        break;
-      }
-      default: n = _decimal_number(number, &found);
-        break;
-    }
-  }
-  else n = _decimal_number(number, &found);
+  int n = _prefixed_number(number, &found);
+  if (n < 0) return -1;
+  if (!n) n = _decimal_number(number, &found);
   if (n <= 0) return sign ? 0 : n;
   if (type) *type = found;
   return sign + n;
@@ -154,6 +124,56 @@ int scan_number_typed(char *s, Symbol *type) {
 
 /* Returns the same result as `scan_number_typed` without its type. */
 int scan_number(char *s) => scan_number_typed(s, NULL);
+
+/* Scans a hexadecimal, binary, or octal number with its `0` prefix, and
+   returns its length, -1 when it is malformed, or zero for another spelling.
+   As in C, a point or exponent makes octal-looking digits decimal floating. */
+static int _prefixed_number(char *s, Symbol *type) {
+  if (s[0] != '0') return 0;
+  int n;
+  switch (s[1]) {
+    case 'x': case 'X': n = _hex_number(s + 2, type); break;
+    case 'b': case 'B': n = _radix_integer(s + 2, 2, 0); break;
+    case 'o': case 'O': n = _radix_integer(s + 2, 8, 0); break;
+    case '1': case '2': case '3': case '4': case '5': case '6': case '7': {
+      char after = s[_digits(s, 10)];
+      if (after == '.' || after == 'e' || after == 'E') return 0;
+      n = _radix_integer(s + 2, 8, 1);
+      break;
+    }
+    default: return 0;
+  }
+  return n < 0 ? -1 : n + 2;
+}
+
+/* Hexadecimal digits with an optional fraction. A `p` exponent makes the
+   number floating, and a fraction requires one. */
+static int _hex_number(char *s, Symbol *type) {
+  int n = _digits(s, 16), digits = n, point = s[n] == '.';
+  if (point) {
+    int fraction = _digits(s + n + 1, 16);
+    digits += fraction;
+    n += 1 + fraction;
+  }
+  if (!digits) return -1;
+  if (s[n] == 'p' || s[n] == 'P') return _exponent_tail(s, n, type);
+  if (point) return -1;
+  return _integer_tail(s, n, type);
+}
+
+/* Decimal digits, then a fraction, an exponent, or an integer suffix. */
+static int _decimal_number(char *s, Symbol *type) {
+  int n = _digits(s, 10);
+  if (s[n] == '.') {
+    int fraction = _float_tail(s + n + 1, n > 0);
+    if (fraction < 0) return -1;
+    if (type) *type = <float>;
+    return n + 1 + fraction;
+  }
+  if (!n) return 0;
+  if (s[n] == 'e' || s[n] == 'E') return _exponent_tail(s, n, type);
+  return _integer_tail(s, n, type);
+}
 
 /* Classifies an already validated `n`-byte numeric token as integer or
    floating. A leading `+` is not skipped, so `e` or `E` in a plus-prefixed
@@ -186,47 +206,26 @@ int scan_float(char *s) => _float_tail(s, 1);
    or -1 when the required decimal exponent is malformed. */
 int scan_hexponent(char *s) => _exponent(s);
 
-static int _hex_number(char *s, Symbol *type) {
+// digits, exponents, and suffixes
+
+static int _digits(char *s, int base) {
   int n = 0;
-  while (_ascii_hex((unsigned char) s[n])) n++;
-  int digits = n, has_point = 0;
-  if (s[n] == '.') {
-    has_point = 1;
-    n++;
-    int fraction = _digits(s + n, 16);
-    digits += fraction;
-    n += fraction;
-  }
-  if (!digits) return -1;
-  if (s[n] == 'p' || s[n] == 'P') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + exponent;
-  }
-  if (has_point) return -1;
-  int suffix = _int_suffix(s + n);
-  if (suffix < 0) return -1;
-  if (type) *type = <int>;
-  return n + suffix;
+  while (_digit((unsigned char) s[n], base)) n++;
+  return n;
 }
 
-static int _decimal_number(char *s, Symbol *type) {
-  int n = 0;
-  while (scan_ascii_digit((unsigned char) s[n])) n++;
-  if (s[n] == '.') {
-    int fraction = _float_tail(s + n + 1, n > 0);
-    if (fraction < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + fraction;
-  }
-  if (!n) return 0;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    if (exponent < 0) return -1;
-    if (type) *type = <float>;
-    return n + 1 + exponent;
-  }
+static inline int _digit(int c, int base) =>
+  base == 16 ? _ascii_hex(c) : (unsigned) (c - '0') < (unsigned) base;
+
+/* An exponent after the mantissa's `n` bytes makes a number floating. */
+static int _exponent_tail(char *s, int n, Symbol *type) {
+  int exponent = _exponent(s + n + 1);
+  if (exponent < 0) return -1;
+  if (type) *type = <float>;
+  return n + 1 + exponent;
+}
+
+static int _integer_tail(char *s, int n, Symbol *type) {
   int suffix = _int_suffix(s + n);
   if (suffix < 0) return -1;
   if (type) *type = <int>;
@@ -236,8 +235,7 @@ static int _decimal_number(char *s, Symbol *type) {
 static int _radix_integer(char *s, int base, int digit_before) {
   int n = _digits(s, base);
   if (!digit_before && !n) return -1;
-  int suffix = _int_suffix(s + n);
-  return suffix < 0 ? -1 : n + suffix;
+  return _integer_tail(s, n, NULL);
 }
 
 /* `digit_before` says a digit was consumed before the decimal point, which
@@ -245,10 +243,7 @@ static int _radix_integer(char *s, int base, int digit_before) {
 static int _float_tail(char *s, int digit_before) {
   int n = _digits(s, 10);
   if (!digit_before && !n) return -1;
-  if (s[n] == 'e' || s[n] == 'E') {
-    int exponent = _exponent(s + n + 1);
-    return exponent < 0 ? -1 : n + 1 + exponent;
-  }
+  if (s[n] == 'e' || s[n] == 'E') return _exponent_tail(s, n, NULL);
   int suffix = _float_suffix(s + n);
   return suffix < 0 ? -1 : n + suffix;
 }
@@ -263,52 +258,27 @@ static int _exponent(char *s) {
   return suffix < 0 ? -1 : n + suffix;
 }
 
-static int _digits(char *s, int base) {
-  int n = 0;
-  loop {
-    int c = (unsigned char) s[n];
-    unsigned digit = (unsigned) (c - '0');
-    int valid = digit < 10 && digit < (unsigned) base;
-    if (base == 16)
-      valid = valid || (c >= 'a' && c <= 'f') ||
-              (c >= 'A' && c <= 'F');
-    if (!valid) return n;
-    n++;
-  }
-}
-
-/* Precondition: the integer digits have already been scanned. */
+/* Precondition: the integer digits have already been scanned. The suffix
+   is `u` with up to two `l`s after it, or one or two `l`s with an optional
+   `u` after them, each letter in either case. */
 static int _int_suffix(char *s) {
   int n = 0;
-  switch (s[n]) {
-    case 'u': case 'U':  n++;
-      switch (s[n]) {
-        case 'l': case 'L':  n++;
-          switch (s[n]) {
-            case 'l': case 'L':  n++; break;
-            default: break;
-          }
-          break;
-        default: break;
-      }
-      break;
-    case 'l': case 'L': n++;
-      switch (s[n]) {
-        case 'l': case 'L': n++;
-          switch (s[n]) {
-            case 'u': case 'U': n++; break;
-            default: break;
-          }
-          break;
-        case 'u': case 'U': n++; break;
-        default: break;
-      }
-      break;
-    default: break;
+  if (_is_u(s[0])) n = 1 + _longs(s + 1);
+  else if (_is_l(s[0])) {
+    n = _longs(s);
+    if (_is_u(s[n])) n++;
   }
-  if (!_token_break(s[n])) return -1;
-  return n;
+  return _token_break(s[n]) ? n : -1;
 }
+
+/* The length of an `l` or `ll` at `s`, or zero. */
+static int _longs(char *s) {
+  if (!_is_l(s[0])) return 0;
+  return _is_l(s[1]) ? 2 : 1;
+}
+
+static inline int _is_l(int c) => c == 'l' || c == 'L';
+static inline int _is_u(int c) => c == 'u' || c == 'U';
 
 /* Precondition: the floating digits have already been scanned. */
 static int _float_suffix(char *s) {
@@ -316,8 +286,7 @@ static int _float_suffix(char *s) {
   switch (s[n]) {
     case 'f': case 'F': case 'l': case 'L': n++; break;
   }
-  if (!_token_break(s[n])) return -1;
-  return n;
+  return _token_break(s[n]) ? n : -1;
 }
 
 // identifiers, keywords, and operators
@@ -345,113 +314,88 @@ int scan_keyword(char *s) {
 Symbol scan_keyword_type(const char *s, int n) {
   if (!s) return 0;
   switch (n) {
-    case 2: if (!memcmp(s, "do", 2)) return <do>;
-      if (!memcmp(s, "if", 2)) return <if>;
-      if (!memcmp(s, "in", 2)) return <in>;
-      break;
-    case 3: if (!memcmp(s, "for", 3)) return <for>;
-      if (!memcmp(s, "int", 3)) return <int>;
-      if (!memcmp(s, "try", 3)) return <try>;
-      break;
-    case 4: if (!memcmp(s, "auto", 4)) return <auto>;
-      if (!memcmp(s, "case", 4)) return <case>;
-      if (!memcmp(s, "char", 4)) return <char>;
-      if (!memcmp(s, "else", 4)) return <else>;
-      if (!memcmp(s, "enum", 4)) return <enum>;
-      if (!memcmp(s, "goto", 4)) return <goto>;
-      if (!memcmp(s, "long", 4)) return <long>;
-      if (!memcmp(s, "void", 4)) return <void>;
-      break;
-    case 5: if (!memcmp(s, "break", 5)) return <break>;
-      if (!memcmp(s, "catch", 5)) return <catch>;
-      if (!memcmp(s, "const", 5)) return <const>;
-      if (!memcmp(s, "defer", 5)) return <defer>;
-      if (!memcmp(s, "float", 5)) return <float>;
-      if (!memcmp(s, "match", 5)) return <match>;
-      if (!memcmp(s, "raise", 5)) return <raise>;
-      if (!memcmp(s, "short", 5)) return <short>;
-      if (!memcmp(s, "union", 5)) return <union>;
-      if (!memcmp(s, "while", 5)) return <while>;
-      break;
-    case 6: if (!memcmp(s, "double", 6)) return <double>;
-      if (!memcmp(s, "extern", 6)) return <extern>;
-      if (!memcmp(s, "import", 6)) return <import>;
-      if (!memcmp(s, "inline", 6)) return <inline>;
-      if (!memcmp(s, "return", 6)) return <return>;
-      if (!memcmp(s, "signed", 6)) return <signed>;
-      if (!memcmp(s, "sizeof", 6)) return <sizeof>;
-      if (!memcmp(s, "static", 6)) return <static>;
-      if (!memcmp(s, "struct", 6)) return <struct>;
-      if (!memcmp(s, "switch", 6)) return <switch>;
-      break;
-    case 7: if (!memcmp(s, "default", 7)) return <default>;
-      if (!memcmp(s, "finally", 7)) return <finally>;
-      if (!memcmp(s, "typedef", 7)) return <typedef>;
-      break;
-    case 8: if (!memcmp(s, "delegate", 8)) return <delegate>;
-      if (!memcmp(s, "protocol", 8)) return <protocol>;
-      if (!memcmp(s, "continue", 8)) return <continue>;
-      if (!memcmp(s, "register", 8)) return <register>;
-      if (!memcmp(s, "restrict", 8)) return <restrict>;
-      if (!memcmp(s, "threaded", 8)) return <threaded>;
-      if (!memcmp(s, "unsigned", 8)) return <unsigned>;
-      if (!memcmp(s, "volatile", 8)) return <volatile>;
-      if (!memcmp(s, "__inline", 8)) return <inline>;
-      break;
-    /* GNU C spells `inline` and `restrict` with underscores, and C spells
-       thread-local storage two other ways. Each means the standard keyword,
-       so C that already uses any of them passes through unchanged. */
-    case 10: if (!memcmp(s, "associated", 10)) return <associated>;
-      if (!memcmp(s, "__inline__", 10)) return <inline>;
-      if (!memcmp(s, "__restrict", 10)) return <restrict>;
-      break;
-    case 12: if (!memcmp(s, "thread_local", 12)) return <threaded>;
-      if (!memcmp(s, "__restrict__", 12)) return <restrict>;
-      break;
-    case 13: if (!memcmp(s, "_Thread_local", 13)) return <threaded>;
-      break;
+    case 2:  return _keyword(s, 2, keywords2);
+    case 3:  return _keyword(s, 3, keywords3);
+    case 4:  return _keyword(s, 4, keywords4);
+    case 5:  return _keyword(s, 5, keywords5);
+    case 6:  return _keyword(s, 6, keywords6);
+    case 7:  return _keyword(s, 7, keywords7);
+    case 8:  return _keyword(s, 8, keywords8);
+    case 10: return _keyword(s, 10, keywords10);
+    case 12: return _keyword(s, 12, keywords12);
+    case 13: return _keyword(s, 13, keywords13);
   }
   return 0;
 }
 
-/* Returns the longest supported C or x2c operator prefix, or -1.
-   The caller supplies a nonnull NUL-terminated input. */
+typedef struct _Keyword { const char *text, Symbol type; } _Keyword;
+
+/* Returns the type of the first row whose `n`-byte spelling matches `s`, or
+   zero. A constant `n` lets the C compiler compare each spelling inline. */
+static inline Symbol _keyword(const char *s, int n, const _Keyword *rows) {
+  for (; rows.text; rows++) if (!memcmp(s, rows.text, n)) return rows.type;
+  return 0;
+}
+
+/* Keyword spellings by length, in the order a lookup tries them. GNU C
+   spells `inline` and `restrict` with underscores, and C spells
+   thread-local storage two other ways. Each means the standard keyword, so
+   C that already uses any of them passes through unchanged. */
+static const _Keyword keywords2[] = {
+  {"do", <do>}, {"if", <if>}, {"in", <in>}, {NULL}};
+static const _Keyword keywords3[] = {
+  {"for", <for>}, {"int", <int>}, {"try", <try>}, {NULL}};
+static const _Keyword keywords4[] = {
+  {"auto", <auto>}, {"case", <case>}, {"char", <char>}, {"else", <else>},
+  {"enum", <enum>}, {"goto", <goto>}, {"long", <long>}, {"void", <void>},
+  {NULL}};
+static const _Keyword keywords5[] = {
+  {"break", <break>}, {"catch", <catch>}, {"const", <const>},
+  {"defer", <defer>}, {"float", <float>}, {"match", <match>},
+  {"raise", <raise>}, {"short", <short>}, {"union", <union>},
+  {"while", <while>}, {NULL}};
+static const _Keyword keywords6[] = {
+  {"double", <double>}, {"extern", <extern>}, {"import", <import>},
+  {"inline", <inline>}, {"return", <return>}, {"signed", <signed>},
+  {"sizeof", <sizeof>}, {"static", <static>}, {"struct", <struct>},
+  {"switch", <switch>}, {NULL}};
+static const _Keyword keywords7[] = {
+  {"default", <default>}, {"finally", <finally>}, {"typedef", <typedef>},
+  {NULL}};
+static const _Keyword keywords8[] = {
+  {"delegate", <delegate>}, {"protocol", <protocol>},
+  {"continue", <continue>}, {"register", <register>},
+  {"restrict", <restrict>}, {"threaded", <threaded>},
+  {"unsigned", <unsigned>}, {"volatile", <volatile>},
+  {"__inline", <inline>}, {NULL}};
+static const _Keyword keywords10[] = {
+  {"associated", <associated>}, {"__inline__", <inline>},
+  {"__restrict", <restrict>}, {NULL}};
+static const _Keyword keywords12[] = {
+  {"thread_local", <threaded>}, {"__restrict__", <restrict>}, {NULL}};
+static const _Keyword keywords13[] = {{"_Thread_local", <threaded>}, {NULL}};
+
+/* Returns the longest supported C or x2c operator prefix, or -1. x2c adds
+   `===`, `!==`, `@`, and `@=` to the C operators. The caller supplies a
+   nonnull NUL-terminated input. */
 int scan_c_operator(char *s) {
-  switch (*s) {
-    case '.':  // ..., .
-      return (s[1] == '.' && s[2] == '.') ? 3 : 1;
-    case '>': // >>=, >>, >=, >
-      return (s[1] == '>') ? ((s[2] == '=') ? 3 : 2) : (s[1] == '=') ? 2 : 1;
-    case '<': // <<=, <<, <=, <
-      return (s[1] == '<') ? ((s[2] == '=') ? 3 : 2) : (s[1] == '=') ? 2 : 1;
-    case '+': // +=, ++, +
-      return (s[1] == '=') ? 2 : (s[1] == '+') ? 2 : 1;
-    case '-': // -=, --, ->
-      return (s[1] == '=') ? 2 : (s[1] == '-') ? 2 : (s[1] == '>') ? 2 : 1;
-    case '*': // *=, *
-      return (s[1] == '=') ? 2 : 1;
-    case '/': // /=, /
-      return (s[1] == '=') ? 2 : 1;
-    case '%': // %=, %
-      return (s[1] == '=') ? 2 : 1;
-    case '&': // &=, &&
-      return (s[1] == '=') ? 2 : (s[1] == '&') ? 2 : 1;
-    case '^': // ^=, ^
-      return (s[1] == '=') ? 2 : 1;
-    case '|': // |=, ||
-      return (s[1] == '=') ? 2 : (s[1] == '|') ? 2 : 1;
-    case '=': // ===, ==, =
-      return (s[1] == '=') ? ((s[2] == '=') ? 3 : 2) : 1;
-    case '!': // !==, !=, !
-      return (s[1] == '=') ? ((s[2] == '=') ? 3 : 2) : 1;
-    case '@': // @=, @
-      return (s[1] == '=') ? 2 : 1;
-    // ~, ;, , :, (, ), [, ], {, }, ?
+  switch (s[0]) {
+    case '.': return s[1] == '.' && s[2] == '.' ? 3 : 1;
+    case '>': return s[1] == '>' ? 2 + (s[2] == '=') : 1 + (s[1] == '=');
+    case '<': return s[1] == '<' ? 2 + (s[2] == '=') : 1 + (s[1] == '=');
+    case '+': return s[1] == '=' || s[1] == '+' ? 2 : 1;
+    case '-': return s[1] == '=' || s[1] == '-' || s[1] == '>' ? 2 : 1;
+    case '&': return s[1] == '=' || s[1] == '&' ? 2 : 1;
+    case '|': return s[1] == '=' || s[1] == '|' ? 2 : 1;
+    case '=': return s[1] == '=' ? 2 + (s[2] == '=') : 1;
+    case '!': return s[1] == '=' ? 2 + (s[2] == '=') : 1;
+    case '*': case '/': case '%': case '^': case '@':
+      return s[1] == '=' ? 2 : 1;
     case '~': case ';': case ',': case ':': case '(': case ')':
     case '[': case ']': case '{': case '}': case '?':
       return 1;
-    default: return -1;
   }
+  return -1;
 }
 
 // strings and characters
@@ -461,21 +405,18 @@ int scan_c_operator(char *s) {
    nonnull, distinguishes `<malformed>` from `<incomplete>`. */
 int scan_c_string_status(char *s, Symbol *status) {
   if (status) *status = <ok>;
-  int m, n = 1;
+  int n = 1;
   while (s[n]) {
     if (s[n] == '\\') {
-      if ((m = _c_escape_sequence_status(s + n, status)) < 0) return -1;
+      int m = _c_escape_status(s + n, status);
+      if (m < 0) return -1;
       n += m;
     }
     else if (s[n] == '"') return n + 1;
-    else if (s[n] == '\n' || s[n] == '\r') {
-      if (status) *status = <malformed>;
-      return -1;
-    }
+    else if (s[n] == '\n' || s[n] == '\r') return _fail(status, <malformed>);
     else n++;
   }
-  if (status) *status = <incomplete>;
-  return -1;
+  return _fail(status, <incomplete>);
 }
 
 /* Returns the same result as `scan_c_string_status` without a status. */
@@ -485,15 +426,14 @@ int scan_c_string(char *s) => scan_c_string_status(s, NULL);
    The caller supplies the opening quote; raw newlines and empty or multi-byte
    unescaped contents are malformed. */
 int scan_c_character(char *s) {
-  int m, n = 1;
+  int n = 1;
   if (s[n] == '\\') {
-    if ((m = _c_escape_sequence(s + n)) < 0) return -1;
+    int m = _c_escape_status(s + n, NULL);
+    if (m < 0) return -1;
     n += m;
   }
-  else {
-    if (!s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return -1;
-    n++;
-  }
+  else if (!s[n] || s[n] == '\n' || s[n] == '\r' || s[n] == '\'') return -1;
+  else n++;
   return s[n] == '\'' ? n + 1 : -1;
 }
 
@@ -515,14 +455,11 @@ int scan_string_segment(char *s) {
   int n = 0;
   while (s[n]) {
     if (s[n] == '\\') {
-      if (s[n+1] == '$') n += 2;
-      else {
-        int m = scan_escape_sequence(s + n);
-        if (m < 0) return -1;
-        n += m;
-      }
+      int m = s[n + 1] == '$' ? 2 : scan_escape_sequence(s + n);
+      if (m < 0) return -1;
+      n += m;
     }
-    else if (s[n] == '$' && s[n+1] == '$') n += 2;
+    else if (s[n] == '$' && s[n + 1] == '$') n += 2;
     else if (s[n] == '$' || s[n] == '"') return n;
     else n++;
   }
@@ -536,51 +473,48 @@ int scan_string_segment(char *s) {
 int scan_symbol_literal_status(char *s, Symbol *status) {
   if (status) *status = <ok>;
   if (s[0] != '<') return 0;
-  int n = 1;
-  if (s[n] == '"') {
-    int m = _quoted_symbol_status(s + n, status);
-    if (m < 0) return -1;
-    n += m;
-    if (s[n] == '>') return n + 1;
-    if (status) *status = s[n] ? <malformed> : <incomplete>;
-    return -1;
-  }
-  int start = n;
-  while (s[n]) {
-    if (s[n] == '>') {
-      if (n > start) return n + 1;
-      if (status) *status = <malformed>;
-      return -1;
-    }
-    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
-        s[n] == '\v' || s[n] == '\f') {
-      if (status) *status = <malformed>;
-      return -1;
-    }
-    n++;
-  }
-  if (status) *status = <incomplete>;
-  return -1;
+  if (s[1] == '"') return _quoted_literal(s, status);
+  return _simple_literal(s, status);
 }
 
 /* Returns the same result as `scan_symbol_literal_status` without a status. */
 int scan_symbol_literal(char *s) => scan_symbol_literal_status(s, NULL);
 
+static int _quoted_literal(char *s, Symbol *status) {
+  int m = _quoted_spelling(s + 1, status);
+  if (m < 0) return -1;
+  int n = 1 + m;
+  if (s[n] == '>') return n + 1;
+  return _fail(status, s[n] ? <malformed> : <incomplete>);
+}
+
+/* A simple spelling is nonempty and has no white space. */
+static int _simple_literal(char *s, Symbol *status) {
+  int n = 1;
+  while (s[n]) {
+    if (s[n] == '>') return n > 1 ? n + 1 : _fail(status, <malformed>);
+    if (s[n] == ' ' || s[n] == '\t' || s[n] == '\r' || s[n] == '\n' ||
+        s[n] == '\v' || s[n] == '\f')
+      return _fail(status, <malformed>);
+    n++;
+  }
+  return _fail(status, <incomplete>);
+}
+
 /* Scans a quoted Symbol spelling from its opening quote through its closing
    quote, using x2c byte escapes. A raw newline is ordinary text. */
-static int _quoted_symbol_status(char *s, Symbol *status) {
+static int _quoted_spelling(char *s, Symbol *status) {
   int n = 1;
   while (s[n]) {
     if (s[n] == '\\') {
-      int m = _escape_sequence_status(s + n, status);
+      int m = _escape_status(s + n, status);
       if (m < 0) return -1;
       n += m;
     }
     else if (s[n] == '"') return n + 1;
     else n++;
   }
-  if (status) *status = <incomplete>;
-  return -1;
+  return _fail(status, <incomplete>);
 }
 
 /* One atom spelling inside `%<<...>>`. A leading quote reads the quoted
@@ -592,16 +526,13 @@ static int _quoted_symbol_status(char *s, Symbol *status) {
    malformed quoted spelling or trailing backslash. */
 int scan_symbol_set_atom(char *s) {
   if (!s || !*s) return 0;
-  if (s[0] == '"') return _quoted_symbol_status(s, NULL);
+  if (s[0] == '"') return _quoted_spelling(s, NULL);
   int n = 0;
   while (s[n]) {
-    if (s[n] == '>' && s[n + 1] == '>') break;
-    if (strchr(" \n\t\v\f\r$@", s[n])) break;
-    if (s[n] == '\\') {
-      if (!s[n + 1]) return -1;
-      n += 2;
-    }
-    else n++;
+    if (s[n] == '>' && s[n + 1] == '>') return n;
+    if (strchr(" \n\t\v\f\r$@", s[n])) return n;
+    if (s[n] == '\\' && !s[n + 1]) return -1;
+    n += s[n] == '\\' ? 2 : 1;
   }
   return n;
 }
@@ -614,22 +545,13 @@ int scan_symbol_set_atom(char *s) {
 int scan_atom_status(char *s, Symbol *status) {
   if (status) *status = <ok>;
   if (!s || !*s || strchr("()'`,\"$@{[", *s)) return 0;
-  if (s[0] == '\\' && !s[1]) {
-    if (status) *status = <incomplete>;
-    return -1;
-  }
+  if (s[0] == '\\' && !s[1]) return _fail(status, <incomplete>);
   int n = s[0] == '\\' ? 2 : 1;
   while (s[n]) {
     if (strchr("()'`,\"$@{[", s[n]) || strchr(" \n\t\v\f\r", s[n])) return n;
     if (s[n] == '/' && (s[n + 1] == '/' || s[n + 1] == '*')) return n;
-    if (s[n] == '\\') {
-      if (!s[n + 1]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      n += 2;
-    }
-    else n++;
+    if (s[n] == '\\' && !s[n + 1]) return _fail(status, <incomplete>);
+    n += s[n] == '\\' ? 2 : 1;
   }
   return n;
 }
@@ -637,111 +559,85 @@ int scan_atom_status(char *s, Symbol *status) {
 /* Returns the same result as `scan_atom_status` without a status. */
 int scan_atom(char *s) => scan_atom_status(s, NULL);
 
-// escapes
+/* escapes
+
+   An escape starts at its backslash. C literals use C escape widths and
+   reject raw newlines; percent strings and quoted Symbols keep x2c's
+   byte-oriented escapes and multiline behavior. */
 
 /* Returns one x2c byte-oriented escape's length or -1 for malformed or
    truncated input. The caller has already recognized the backslash. */
-int scan_escape_sequence(char *s) => _escape_sequence_status(s, NULL);
+int scan_escape_sequence(char *s) => _escape_status(s, NULL);
 
 /* Scans x2c byte escapes and classifies truncation separately. */
-static int _escape_sequence_status(char *s, Symbol *status) {
-  int n = 1;
-  if (!s[n]) {
-    if (status) *status = <incomplete>;
-    return -1;
-  }
-  switch (s[n]) {
+static int _escape_status(char *s, Symbol *status) {
+  switch (s[1]) {
+    case '\0': return _fail(status, <incomplete>);
     case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
-    case '\n': case '\'': case '"': case '?': case '\\':
-      return n + 1;
-    case '\r':
-      if (!s[n + 1]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      if (s[n + 1] == '\n') return n + 2;
-      break;
-    case 'x': case 'X': case 'u': case 'U': n++;
-      int start = n;
-      if (!s[n]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      if (_ascii_hex((unsigned char) s[n])) n++;
-      if (_ascii_hex((unsigned char) s[n])) n++;
-      if (n == start) break;
-      return n;
-    case '0': case '1': case '2': case '3': case '4': case '5':
-    case '6': case '7':
-      n++;
-      if (s[n] >= '0' && s[n] <= '7') n++;
-      if (s[n] >= '0' && s[n] <= '7') n++;
-      // Three digits from \400 up exceed the byte C requires.
-      if (n < 4 || s[1] <= '3') return n;
-      break;
+    case '\n': case '\'': case '"': case '?': case '\\': return 2;
+    case '\r': return _crlf_escape(s, status);
+    case 'x': case 'X': case 'u': case 'U': return _byte_escape(s, status);
+    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
+    case '7': return _octal_escape(s, status);
   }
-  if (status) *status = <malformed>;
-  return -1;
+  return _fail(status, <malformed>);
 }
 
 /* Scans a C escape and classifies truncation separately. */
-static int _c_escape_sequence_status(char *s, Symbol *status) {
-  int n = 1;
-  if (!s[n]) {
-    if (status) *status = <incomplete>;
-    return -1;
-  }
-  switch (s[n]) {
+static int _c_escape_status(char *s, Symbol *status) {
+  switch (s[1]) {
+    case '\0': return _fail(status, <incomplete>);
     case 'a': case 'b': case 'f': case 'n': case 'r': case 't': case 'v':
-    case '\n': case '\'': case '"': case '?': case '\\':
-      return n + 1;
-    case '\r':
-      if (!s[n + 1]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      if (s[n + 1] == '\n') return n + 2;
-      break;
-    case '0': case '1': case '2': case '3': case '4': case '5':
-    case '6': case '7':
-      n++;
-      if (s[n] >= '0' && s[n] <= '7') n++;
-      if (s[n] >= '0' && s[n] <= '7') n++;
-      if (n < 4 || s[1] <= '3') return n;
-      break;
-    case 'x': case 'X': n++;
-      if (!s[n]) {
-        if (status) *status = <incomplete>;
-        return -1;
-      }
-      if (!_ascii_hex((unsigned char) s[n])) break;
-      while (_ascii_hex((unsigned char) s[n])) n++;
-      return n;
-    case 'u': n++;
-      for (int i = 0; i < 4; i++) {
-        if (!s[n]) {
-          if (status) *status = <incomplete>;
-          return -1;
-        }
-        if (!_ascii_hex((unsigned char) s[n++])) goto malformed;
-      }
-      return n;
-    case 'U': n++;
-      for (int i = 0; i < 8; i++) {
-        if (!s[n]) {
-          if (status) *status = <incomplete>;
-          return -1;
-        }
-        if (!_ascii_hex((unsigned char) s[n++])) goto malformed;
-      }
-      return n;
+    case '\n': case '\'': case '"': case '?': case '\\': return 2;
+    case '\r': return _crlf_escape(s, status);
+    case '0': case '1': case '2': case '3': case '4': case '5': case '6':
+    case '7': return _octal_escape(s, status);
+    case 'x': case 'X': return _hex_escape(s, status);
+    case 'u': return _universal_escape(s, 4, status);
+    case 'U': return _universal_escape(s, 8, status);
   }
-malformed: if (status) *status = <malformed>;
-  return -1;
+  return _fail(status, <malformed>);
 }
 
-/* Decodes one escape for C character literals and string scanners. */
-static int _c_escape_sequence(char *s) => _c_escape_sequence_status(s, NULL);
+/* A backslash before CRLF continues the line; a lone CR is malformed. */
+static int _crlf_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  return s[2] == '\n' ? 3 : _fail(status, <malformed>);
+}
+
+/* One to three octal digits. Three from `\400` up exceed the byte C
+   requires. */
+static int _octal_escape(char *s, Symbol *status) {
+  int n = 2;
+  if (s[n] >= '0' && s[n] <= '7') n++;
+  if (s[n] >= '0' && s[n] <= '7') n++;
+  return n < 4 || s[1] <= '3' ? n : _fail(status, <malformed>);
+}
+
+/* x2c's `\x`, `\X`, `\u`, and `\U` take one or two hex digits: one byte. */
+static int _byte_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  int n = 2;
+  if (_ascii_hex((unsigned char) s[n])) n++;
+  if (_ascii_hex((unsigned char) s[n])) n++;
+  return n > 2 ? n : _fail(status, <malformed>);
+}
+
+/* C's `\x` takes every hex digit that follows it. */
+static int _hex_escape(char *s, Symbol *status) {
+  if (!s[2]) return _fail(status, <incomplete>);
+  if (!_ascii_hex((unsigned char) s[2])) return _fail(status, <malformed>);
+  return 2 + _digits(s + 2, 16);
+}
+
+/* C's `\u` and `\U` take exactly `count` hex digits. */
+static int _universal_escape(char *s, int count, Symbol *status) {
+  for (int n = 2; n < 2 + count; n++) {
+    if (!s[n]) return _fail(status, <incomplete>);
+    if (!_ascii_hex((unsigned char) s[n])) return _fail(status, <malformed>);
+  }
+  return 2 + count;
+}
 
 // source positions
 
@@ -749,15 +645,13 @@ static int _c_escape_sequence(char *s) => _c_escape_sequence_status(s, NULL);
    Each newline increments the line and resets the next byte to column one.
    `n` is nonnegative and all pointers are valid; columns count bytes. */
 void scan_next_line_col(char *s, int n, int *l, int *c) {
-  int line = *l, col = *c, char *next = s, *end = s + n, *newline;
-  int found = 0;
-  while (next < end && (newline = memchr(next, '\n', end - next))) {
-    found = 1;
+  int line = *l, col = *c, char *next = s, *end = s + n;
+  while (next < end) {
+    char *newline = memchr(next, '\n', end - next);
+    if (!newline) break;
     line++;
     col = 1;
     next = newline + 1;
   }
-  if (found) col += end - next;
-  else col += n;
-  *l = line; *c = col;
+  *l = line; *c = col + (end - next);
 }
