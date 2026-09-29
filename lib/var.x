@@ -869,8 +869,8 @@ Scope Var.wide_owner(Var v) => v.is_wide() ? Scope.owner(_wide_box(v)) : NULL;
 */
 meta native double Var.floating(Var v) {
   switch (v.tag()) {
-    case <f32>: case <float>:  return v.decode_f32();
-    case <f64>: case <double>: return _f64_floating(v);
+    case <f32>:     return v.decode_f32();
+    case <f64>:     return _f64_floating(v);
     case <"nan">:   return  0.0 / 0.0;
     case <"-inf">:  return -1.0 / 0.0;
     case <"+inf">:  return  1.0 / 0.0;

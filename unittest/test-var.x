@@ -128,6 +128,16 @@ static void var_floating_construction(void) {
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
 }
 
+/* A custom class may be named after a C floating type; it is still an
+   object, so the floating payload reader answers 0.0. */
+static void var_floating_ignores_custom_float_names(void) {
+  long cell = 1;
+  EXPECT_INT_EQ(Var.register_object_tag(<double>), 0);
+  EXPECT_INT_EQ(Var.register_object_tag(<float>), 0);
+  EXPECT_TRUE(Var.new(<double>, &cell).floating() == 0.0);
+  EXPECT_TRUE(Var.new(<float>, &cell).floating() == 0.0);
+}
+
 static void var_terminal_and_f64_escape(void) {
   Var negative_max = Var.new(<f64>, -DBL_MAX);
   Var positive_max = Var.new(<f64>, DBL_MAX);
@@ -1451,6 +1461,7 @@ void var_suite(void) {
   $test.run(var_symbol_atom_stream_without_allocating);
   $test.run(var_integer_construction);
   $test.run(var_floating_construction);
+  $test.run(var_floating_ignores_custom_float_names);
   $test.run(var_terminal_and_f64_escape);
   $test.run(var_construction_and_void_dispatch_transfer);
   $test.run(var_void_equality_and_rendering);
