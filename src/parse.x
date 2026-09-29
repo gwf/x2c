@@ -1174,6 +1174,11 @@ static List _declarator(
    expression parsing finishes. */
 static List _declarator_init(
   Compiler c, List type, List context) {
+  List slot = c.try_parse_macro_slot(<decl-row>);
+  if (slot) {
+    if (c.test(<=>)) return %(op = $slot ${c.parse_assignment()});
+    return slot;
+  }
   Token origin = c.token;
   List method = NULL;
   Token first = NULL, after = NULL;
@@ -1199,6 +1204,18 @@ static List _declarator_init(
     }
     return %( op = $bind $init );
   }
+  return bind;
+}
+
+/** Parses one declarator row for a macro argument without installing it.
+    Its enclosing declaration supplies the base type when expanded. */
+List Compiler.parse_declarator_argument(Compiler c) {
+  List slot = c.try_parse_macro_slot(<decl-row>);
+  if (slot) return slot;
+  List method = NULL;
+  Token first = NULL, after = NULL;
+  List bind = _declarator(c, NULL, NULL, method, first, after);
+  if (c.test(<=>)) return %(op = $bind ${c.parse_assignment()});
   return bind;
 }
 

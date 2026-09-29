@@ -3130,17 +3130,11 @@ List x2c_template_call(Var stored, List values) =>
   _sdk_template_call(
     stored is <string> ? Atom.intern(stored.str()) : stored, values);
 
-/** Rebuilds an expression from a pending Macro value application, preserving
-    its established root `type`, child stage, and source wrappers. An `Expr`
-    hole replaces its parser-only type shell with the already typed child.
-    The caller supplies bound syntax or parser-template holes and a purely
-    structural Expression template: no introduced names, unresolved free
-    references, computed slots, or child template calls. Capture rows and
-    parameter sequences are Lists. Binding, capture collection, hygiene, and
-    effects do not run; the returned AST is for the compiler, not ordinary
-    source insertion.
-*/
-List Compiler.rebuild_expression(Compiler c, Type type, List application) {
+/* Substitute bound syntax into a structural template without binding it.
+   The caller supplies complete children and a template with no free names,
+   computed slots, or nested applications. */
+static List _rebuild_structural_template(
+  Compiler c, List application, int statement) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = _template_arguments(c, definition, values, c.token, 1);
@@ -3152,8 +3146,24 @@ List Compiler.rebuild_expression(Compiler c, Type type, List application) {
       template = template.search_replace(
         %(expr (<macro-expr>) (!quote $binder)), binder);
     }
-  List rebuilt = template.replace(bindings);
+  if (statement)
+    template = template.search_replace(%(at m-origin ?node), <?node>);
+  return template.replace(bindings);
+}
+
+/** Rebuilds an expression from a pending Macro value application, preserving
+    its established root `type`, child stage, and source wrappers. Binding,
+    capture collection, hygiene, and effects do not run. */
+List Compiler.rebuild_expression(Compiler c, Type type, List application) {
+  List rebuilt = _rebuild_structural_template(c, application, 0);
   return %(expr $type @{rebuilt.cddr()});
+}
+
+/** Rebuilds a statement template as a canonical unbraced `seq`. Bound
+    children keep their identities and origins; template-origin wrappers
+    are omitted because this path does not open an invocation. */
+List Compiler.rebuild_statement(Compiler c, List application) {
+  return _rebuild_structural_template(c, application, 1);
 }
 
 static List _lisp_bindings(List bindings) {
@@ -3170,6 +3180,7 @@ static List _lisp_bindings(List bindings) {
 
 static String _kind_spelling(Symbol kind) {
   if (kind == <block-item>) return "Statement";
+  if (kind == <decl-row>) return "DeclaratorRow";
   if (kind == <map-entry>) return "Entry";
   if (kind == <match-row>) return "MatchRow";
   if (kind == <named-type>) return "NamedType";
@@ -3179,9 +3190,10 @@ static String _kind_spelling(Symbol kind) {
 
 static const SymbolSet author_kinds =
   %<<expr type decl function name literal param block field enumerator
-     map-entry unit named-type catch captures match-row>>;
+     map-entry unit named-type catch captures match-row decl-row>>;
 
 static Symbol _author_kind(String spelling) {
+  if (spelling.lower() == "declaratorrow") return <decl-row>;
   Symbol kind = Symbol.new(spelling);
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
@@ -3333,7 +3345,8 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
 static const SymbolSet declaration_roles =
   %<<field enumerator map-entry unit>>;
 static const SymbolSet sequence_roles =
-  %<<argument block field enumerator map-entry param unit catch match-row>>;
+  %<<argument block field enumerator map-entry param unit catch match-row
+     decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 
 /** Parses a macro hole or Lisp slot for `role` while reading a template.
@@ -4068,6 +4081,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
     case <type>: return c.parse_type_name();
     case <named-type>: return c.parse_named_type();
     case <decl>: return c.parse_declaration_argument();
+    case <decl-row>: return c.parse_declarator_argument();
     case <function>: return c.parse_function_definition();
     case <param>: return c.parse_parameter();
     case <block>: return c.parse_block_item();
