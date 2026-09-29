@@ -14,6 +14,16 @@
 
 // pretty print formatting
 
+/* State for one formatting pass. `scanned` tracks the last byte counted in
+   `output_line`; source markers need that physical line after prior writes. */
+typedef struct Pretty {
+  Compiler c;
+  Buffer buff;
+  String output_file, prev_token;
+  int indent, paren_depth, directive_break;
+  int output_line, scanned, source_line;
+} Pretty;
+
 
 /** Returns a canonical formatted C `String` for an emitted token `List`.
     Token order and `code` are unchanged. Braces indent by two spaces,
@@ -24,103 +34,117 @@
 
     Raises: `<size-limit>` or `<alloc-fail>` while materializing the result.
 */
-char *Compiler.code_pretty_string(Compiler cc, List code, String output_file) {
-  Buffer buff = Buffer.new(0);
-  int indent = 0, paren_depth = 0, directive_break = 0;
-  int output_line = 1, scanned = 0, source_line = 0;
-  String prev_token = NULL;
-
+char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
+  Pretty p = {
+    .c = c, .buff = Buffer.new(0), .output_file = output_file,
+    .output_line = 1
+  };
   for (List lst = code; lst; lst = lst.cdr()) {
     if (lst.car() == <src-at>) {
       lst = lst.cdr();
-      List location = cc.origin_location(lst.car());
-      while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
-      if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
-      while (scanned < buff.len())
-        if (buff.get(scanned++) == '\n') output_line++;
-      String file = location ? location.assoc(<file>) : output_file;
-      if (!file) file = "<generated>";
-      int line = location ? location.assoc(<line>)
-                          : output_line + 1;
-      source_line = location ? line : 0;
-      String escaped = file.escape().replace("$$", "$");
-      buff.write(%"#line $line \"$escaped\"");
-      _write_newline(buff);
-      if (indent > 0) _write_indent(buff, indent);
-      directive_break = 1;
-      prev_token = NULL;
+      p.source_marker(lst.car());
       continue;
     }
     String token = lst.car().str();
-    char last = token ? token[-1] : '\0';
-
     /* A directive writes its own newline. The emitter may follow it with a
        space token beginning with another newline; consume that byte so no
        blank line appears that the intended C does not have. */
-    if (directive_break) {
-      directive_break = 0;
+    if (p.directive_break) {
+      p.directive_break = 0;
       if (token && token[0] == '\n') {
-        _write_token(buff, token + 1, source_line);
-        prev_token = NULL;
+        _write_token(p.buff, token + 1, p.source_line);
+        p.prev_token = NULL;
         continue;
       }
     }
-
     if (_is_preprocessor(token)) {
-      while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
-      if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
-      _write_token(buff, token, 0);
-      _write_newline(buff);
-      if (indent > 0) _write_indent(buff, indent);
-      directive_break = 1;
-      prev_token = NULL;
+      p.directive(token);
       continue;
     }
-
-    if (last == '(') paren_depth++;
-    else if (last == ')') {
-      paren_depth--;
-      if (paren_depth < 0) paren_depth = 0;
-    }
-
-    if (_token_is(token, '}')) {
-      if (indent >= 2) indent -= 2;
-      if (buff.len() > 0 && buff.get(-1) != '\n')
-        _write_mapped_newline(buff, source_line);
-      if (indent > 0) _write_indent(buff, indent);
-      prev_token = NULL;
-    }
-    else if (_need_space(prev_token, token)) buff.write(" ");
-
-    _write_token(buff, token, source_line);
-
-    if (_token_is(token, '{')) {
-      indent += 2;
-      _write_mapped_newline(buff, source_line);
-      if (indent > 0) _write_indent(buff, indent);
-      prev_token = NULL;
-    }
-    else if (last == ';') {
-      if (paren_depth == 0) {
-        _write_mapped_newline(buff, source_line);
-        if (!_next_is_closing_brace(lst.cdr()) && indent > 0)
-          _write_indent(buff, indent);
-        prev_token = NULL;
-      }
-      else {
-        buff.write(" ");
-        prev_token = token;
-      }
-    }
-    else if (_token_is(token, '}')) {
-      _write_mapped_newline(buff, source_line);
-      if (indent > 0) _write_indent(buff, indent);
-      prev_token = NULL;
-    }
-    else prev_token = token;
+    p.ordinary(token, lst.cdr());
   }
+  return p.buff.str_free();
+}
 
-  return buff.str_free();
+/* Emit a source position after flushing the preceding physical line. */
+static void Pretty.source_marker(Pretty *p, Var value) {
+  List location = p.c.origin_location(value);
+  while (p.buff.len() > 0 && p.buff.get(-1) == ' ') p.buff.unwrite(1);
+  if (p.buff.len() > 0 && p.buff.get(-1) != '\n') _write_newline(p.buff);
+  while (p.scanned < p.buff.len())
+    if (p.buff.get(p.scanned++) == '\n') p.output_line++;
+  String file = location ? location.assoc(<file>) : p.output_file;
+  if (!file) file = "<generated>";
+  int line = location ? location.assoc(<line>) : p.output_line + 1;
+  p.source_line = location ? line : 0;
+  String escaped = file.escape().replace("$$", "$");
+  p.buff.write(%"#line $line \"$escaped\"");
+  _write_newline(p.buff);
+  if (p.indent > 0) _write_indent(p.buff, p.indent);
+  p.directive_break = 1;
+  p.prev_token = NULL;
+}
+
+/* A preprocessor token occupies its own line. */
+static void Pretty.directive(Pretty *p, String token) {
+  while (p.buff.len() > 0 && p.buff.get(-1) == ' ') p.buff.unwrite(1);
+  if (p.buff.len() > 0 && p.buff.get(-1) != '\n') _write_newline(p.buff);
+  _write_token(p.buff, token, 0);
+  _write_newline(p.buff);
+  if (p.indent > 0) _write_indent(p.buff, p.indent);
+  p.directive_break = 1;
+  p.prev_token = NULL;
+}
+
+/* Write one ordinary token between its leading and trailing layout. */
+static void Pretty.ordinary(Pretty *p, String token, List rest) {
+  char last = token ? token[-1] : '\0';
+  if (last == '(') p.paren_depth++;
+  else if (last == ')') {
+    p.paren_depth--;
+    if (p.paren_depth < 0) p.paren_depth = 0;
+  }
+  p.before(token);
+  _write_token(p.buff, token, p.source_line);
+  p.after(token, last, rest);
+}
+
+static void Pretty.before(Pretty *p, String token) {
+  if (_token_is(token, '}')) {
+    if (p.indent >= 2) p.indent -= 2;
+    if (p.buff.len() > 0 && p.buff.get(-1) != '\n')
+      _write_mapped_newline(p.buff, p.source_line);
+    if (p.indent > 0) _write_indent(p.buff, p.indent);
+    p.prev_token = NULL;
+  }
+  else if (_need_space(p.prev_token, token)) p.buff.write(" ");
+}
+
+static void Pretty.after(Pretty *p, String token, char last, List rest) {
+  if (_token_is(token, '{')) {
+    p.indent += 2;
+    _write_mapped_newline(p.buff, p.source_line);
+    if (p.indent > 0) _write_indent(p.buff, p.indent);
+    p.prev_token = NULL;
+  }
+  else if (last == ';') {
+    if (p.paren_depth == 0) {
+      _write_mapped_newline(p.buff, p.source_line);
+      if (!_next_is_closing_brace(rest) && p.indent > 0)
+        _write_indent(p.buff, p.indent);
+      p.prev_token = NULL;
+    }
+    else {
+      p.buff.write(" ");
+      p.prev_token = token;
+    }
+  }
+  else if (_token_is(token, '}')) {
+    _write_mapped_newline(p.buff, p.source_line);
+    if (p.indent > 0) _write_indent(p.buff, p.indent);
+    p.prev_token = NULL;
+  }
+  else p.prev_token = token;
 }
 
 // whitespace rules
