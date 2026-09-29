@@ -379,15 +379,18 @@ int MachineBuilder.binder(MachineBuilder b, Atom binder) {
 }
 
 /* Set a nonnegative instruction site's branch target; a negative site is a
-   no-op placeholder. The site must name emitted code.
+   no-op placeholder. The site must name emitted code. A target at the word
+   after full code fails the builder with `code-capacity` instead.
 
-   Raises: `<bad-arg>` when target is outside the code domain. The failure
-   leaves the patch site unchanged. */
+   Raises: `<bad-arg>` when target is otherwise outside the code domain. A
+   failure leaves the patch site unchanged. */
 void MachineBuilder.set_target(MachineBuilder b, int site, int target) {
-  if (target < 0 || target >= MACHINE_CODE_MAX)
+  if (target == b.length && b.length == MACHINE_CODE_MAX)
+    b._fail("code-capacity");
+  else if (target < 0 || target >= MACHINE_CODE_MAX)
     raise %(bad-arg (owner "MachineBuilder.set_target") (target $target));
-
-  if (site >= 0) b.code[site].target = target;
+  else if (site >= 0)
+    b.code[site].target = target;
 }
 
 /* Apply one validated target to the listed patch sites in order. Negative
