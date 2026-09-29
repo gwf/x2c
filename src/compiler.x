@@ -489,9 +489,9 @@ String Compiler.canonical_path(Compiler c, String path) {
 }
 
 /** Returns `path` relative to the canonical x2c home when it lies below the
-    home, otherwise `path`. Interfaces, retained declarations, and generated
-    identities spell paths this way, so they do not depend on where the home
-    is installed.
+    home, otherwise `path`. Interfaces, macro definitions, retained
+    declarations, and generated identities spell paths this way, so they do
+    not depend on where the home is installed.
 */
 String home_portable_path(String path) {
   String prefix = %"${x2c_get_root()}/";
@@ -1303,8 +1303,6 @@ static List _declaration_macro(Compiler compiler, List rows, int thaw) {
   Array result = [];
   foreach (List row, rows) {
     match (row) {
-      case %(file ?path):
-        row = %(file ${_declaration_path(path, thaw)});
       case %(origin ?location):
         row = %(origin ${_declaration_location(compiler, location, thaw)});
       default:

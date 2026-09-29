@@ -4,7 +4,7 @@
 
 static List _25, _20, _15, _6;
 
-static String _284, _13, _1;
+static String _279, _13, _1;
 
 static Var _24, _23, _22, _21, _19, _18, _17, _16, _14, _12, _11, _10, _9, _8, _7, _5, _4, _3, _2, _0;
 
@@ -58,7 +58,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _23 = Symbol_var(150408);
   _24 = List_var(NULL);
   _25 = cons(_24, NULL);
-  _284 = String_new("?__early_tally");
+  _279 = String_new("?__early_tally");
 }
 
 Atom Atom_intern(String);
@@ -66,7 +66,7 @@ Atom Atom_intern(String);
 String int_str(int);
 
 static List tally(String key, int amount){
-  Atom token = Atom_intern(_284);
+  Atom token = Atom_intern(_279);
   String digits = String_join(NULL, cons(String_var(int_str(amount)), NULL));
   return cons(_0, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_9, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_10, cons(token, NULL))), NULL)))), cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_11, cons(_7, cons(String_var(digits), NULL)))), NULL)))), NULL))))), NULL)))), NULL))), cons(List_var(cons(List_var(cons(_12, cons(token, _15))), cons(List_var(cons(_16, cons(List_var(cons(_17, cons(String_var(key), NULL))), cons(token, cons(List_var(cons(_18, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_23, cons(token, _25))), NULL))), NULL)))), NULL))))), NULL))), NULL))));
 }
