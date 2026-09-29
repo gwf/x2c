@@ -102,14 +102,14 @@ spacing.x: 4 lines to format
 exit 1
 exit 0
 # idiom fixes proven by the generated C
-idioms.x:4: candidate internal-type: struct Point has 1 members and no use outside its file
-idioms.x:10: candidate member-arrow: reach the member with `.`
-idioms.x:14: candidate contains-in: write the membership test with `in`
-idioms.x:19: candidate contains-in: write the membership test with `in`
-idioms.x:22: candidate plain-string: a plain literal needs no interpolation
-idioms.x:24: candidate plain-string: a plain literal needs no interpolation
-idioms.x:27: candidate expression-body: write the one returned value with `=>`
-idioms.x:37: violation negated-is: spell the test `is not`
-idioms.x:37: candidate silent-shape-guard: impossible shape can silently return 0 in negated
+idioms.x:5: candidate internal-type: struct Point has 1 members and no use outside its file
+idioms.x:11: candidate member-arrow: reach the member with `.`
+idioms.x:20: candidate contains-in: write the membership test with `in`
+idioms.x:25: candidate contains-in: write the membership test with `in`
+idioms.x:28: candidate plain-string: a plain literal needs no interpolation
+idioms.x:30: candidate plain-string: a plain literal needs no interpolation
+idioms.x:33: candidate expression-body: write the one returned value with `=>`
+idioms.x:43: violation negated-is: spell the test `is not`
+idioms.x:43: candidate silent-shape-guard: impossible shape can silently return 0 in negated
 idioms.x: fixed 5 of 6
 exit 0

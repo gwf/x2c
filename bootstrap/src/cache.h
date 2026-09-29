@@ -7,6 +7,10 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List _initialization_guard(List guard);
+
+List _patch_initialized_entry(Compiler c, List function, List body, List guard, List entry);
+
 List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name);
 
 

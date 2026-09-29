@@ -9,9 +9,10 @@
     order. The language rules run unless `--all` or `--rule` selects rules;
     `--rules` prints the table of codes, families, kinds, and style-guide
     sections. Each file is scanned for the token rules and parsed by the
-    compiler for the declaration rules. The compiler's diagnostics go to
-    standard error; a file that does not parse gets the token rules only and
-    makes the exit status 1. Findings alone leave the exit status 0.
+    compiler for the declaration and member-arrow rules. The compiler's
+    diagnostics go to standard error; a file that does not parse gets the
+    token rules only and makes the exit status 1. Findings alone leave the
+    exit status 0.
 
     `--fix` rewrites each file with the proposed fixes of the selected
     rules that leave its generated C and header byte-identical, and prints
@@ -49,8 +50,8 @@ static void _usage(void):
 static void _preprocessor_errors(String text):
   fputs(text, stderr)
 
-/* Parses `path` and runs the declaration rules. Returns 0 and prints the
-   compiler's diagnostics when the unit does not parse. */
+/* Parses `path` and runs the rules that read its parse. Returns 0 and
+   prints the compiler's diagnostics when the unit does not parse. */
 static int _parse(Lint l, Frontend frontend, String path):
   ParsedUnit parsed
   int ok = frontend.start(path, parsed)
@@ -59,7 +60,9 @@ static int _parse(Lint l, Frontend frontend, String path):
     ok = parsed.collect(frontend) && parsed.parse()
   if ok:
     l.declaration_rules(parsed.compiler, parsed.ast)
+    l.member_arrows(parsed.compiler, parsed.ast)
     foreach List finding in l.findings: finding.promote()
+    foreach List edit in l.edits: edit.promote()
     foreach List function in l.functions: function.promote()
   else if !parsed.compiler.diagnostics.printer:
     foreach Var entry in parsed.compiler.diagnostics():

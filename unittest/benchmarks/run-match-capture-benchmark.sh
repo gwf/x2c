@@ -8,7 +8,7 @@ MODE=${MATCH_CAPTURE_BENCH_MODE:-$(cat "$ROOT/etc/build-mode.local" \
   2>/dev/null || cat "$ROOT/etc/build-mode" 2>/dev/null || echo debug)}
 ITERATIONS=${MATCH_CAPTURE_BENCH_ITERATIONS:-100000}
 SAMPLES=${MATCH_CAPTURE_BENCH_SAMPLES:-15}
-mkdir -p "$BUILD"
+mkdir -p "$BUILD/benchmarks"
 
 case "$MODE" in
   debug) flags=(-g) ;;
@@ -23,11 +23,14 @@ case "$MODE" in
     ;;
 esac
 
+# The benchmark includes "../match-recursive.x", so the generated header
+# includes "../match-recursive.h". Mirror that layout in the output.
 "$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD" \
-  "$ROOT/unittest/benchmarks/match-capture-benchmark.x" \
   "$ROOT/unittest/match-recursive.x"
+"$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD/benchmarks" \
+  "$ROOT/unittest/benchmarks/match-capture-benchmark.x"
 "${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
-  -iquote "$ROOT/builds/0/src" "$BUILD/match-capture-benchmark.c" \
+  -iquote "$ROOT/builds/0/src" "$BUILD/benchmarks/match-capture-benchmark.c" \
   "$BUILD/match-recursive.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 

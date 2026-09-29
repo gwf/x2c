@@ -639,7 +639,7 @@ static int _prelude_position(List source) {
    `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
 static List Init.prelude(Init *init, List out) {
-  out = cons(_declare_guard(init.guard), out);
+  out = cons(_initialization_guard(init.guard), out);
   return init.synthetic ? cons(init.synthetic, out) : out;
 }
 
@@ -655,8 +655,11 @@ static List Init.patch(Init *init, List item) {
         return _protocol_initializer(init.compiler, type, declarator, body);
       if (init.initializer && name == init.initializer)
         return %(function $type $declarator ${init.block(NULL, body)});
-      if (init.patches(type, spelling))
-        return %(function $type $declarator (block ${init.call()} @body));
+      if (init.patches(type, spelling)) {
+        List entry = init.compiler.sym.reference(%(${init.entry}), NULL);
+        return _patch_initialized_entry(
+          init.compiler, item, body, init.guard, entry);
+      }
     }
   return item;
 }
@@ -719,17 +722,6 @@ static List _run_once(List guard) => %(
                         (expr (int) (literal (int) "1")))))
   );
 
-static List _declare_guard(List guard) => %(
-    declare (static int)
-      (bindings (op = (bind $guard ()) (expr (int) (literal (int) "0"))))
-  );
-
-/* A patched entry calls the file initializer while the guard is unset. */
-static List Init.call(Init *init) => %(
-    if (expr (int) (op ! (expr (int) (ident ${init.guard}))))
-       (stmnt (expr (void) (call ${init.entry} (args))))
-  );
-
 /* Install generated built-in protocol methods before any ordinary file
    constructor can create a String- or List-backed cache. */
 static List _protocol_initializer(
@@ -737,7 +729,7 @@ static List _protocol_initializer(
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   return %(
     function $type $declarator
-      (block ${_declare_guard(guard)} @{_run_once(guard)}
+      (block ${_initialization_guard(guard)} @{_run_once(guard)}
         @{c.init_statements(<protocol>)} @body)
   );
 }

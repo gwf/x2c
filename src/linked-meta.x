@@ -121,6 +121,11 @@ static List catch_handle(List node) {
   return NULL;
 }
 
+static List retain_catch_handle(List rebuilt, List handle) {
+  Var marker = rebuilt.caddr().caddr();
+  return rebuilt.search_replace(%(!quote $marker), handle);
+}
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -663,6 +668,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_assignment", source_assignment);
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
+  $linked.row(rows, "retain_catch_handle", retain_catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_dedent_width", _dedent_width);
   $linked.row(rows, "_dedent_blank", _dedent_blank);

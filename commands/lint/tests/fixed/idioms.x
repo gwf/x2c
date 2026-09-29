@@ -1,4 +1,5 @@
 /* idioms.x -- respellings that --fix proves by the generated C. */
+#include <dirent.h>
 #include <stdio.h>
 
 typedef struct Point { int x, y; } Point;
@@ -8,6 +9,11 @@ typedef struct Point { int x, y; } Point;
 int arrow(Point *p) {
   List quoted = %(a -> b);
   return p.x + POINT_X(p);
+}
+
+int system_arrow(struct dirent *entry) {
+  puts(entry->d_name);
+  return 0;
 }
 
 int member(Map m, String s) {

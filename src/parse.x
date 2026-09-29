@@ -2470,6 +2470,20 @@ static List _bind_optional_reference_arm(
   return bound;
 }
 
+static List _bind_try(Compiler c, List body, List catches, List cleanup) {
+  if (catches) catches = c.bind_syntax(
+    catches, AST_STATEMENT, c.return_type);
+  if (cleanup) cleanup = c.bind_syntax(
+    cleanup, AST_STATEMENT, c.return_type);
+  body = c.bind_syntax(body, AST_STATEMENT, c.return_type);
+  Macro tried = $tried, caught = $caught;
+  List rebuilt = c.rebuild_statement(catches
+    ? caught(body, cleanup, catches.cadr())
+    : tried(body, cleanup)).cadr();
+  return catches
+    ? retain_catch_handle(rebuilt, catches.caddr()) : rebuilt;
+}
+
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
     `AstPos`. Bindings, types, scopes, and expressions are resolved in source
@@ -2499,6 +2513,7 @@ List Compiler.bind_syntax(
   Macro return_empty = $return_empty, return_value = $return_value;
   Macro deferred = $deferred;
   Macro matched = $matched;
+  Macro tried = $tried, caught = $caught;
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
@@ -2929,17 +2944,13 @@ List Compiler.bind_syntax(
         }
         return %(catchcases ${bound.list_free()} $handle);
       }
-      case %(try ?body ?catches ?cleanup): {
+      case caught(?body, ?cleanup, *arms): {
         if (!statement_position) goto construction_error;
-        if (catches is <list> && catches.list())
-          catches = _.bind_syntax(
-            catches, AST_STATEMENT, _.return_type);
-        if (cleanup is <list> && cleanup.list())
-          cleanup = _.bind_syntax(
-            cleanup, AST_STATEMENT, _.return_type);
-        return %(try
-          ${_.bind_syntax(body, AST_STATEMENT, _.return_type)}
-          $catches $cleanup);
+        return _bind_try(_, body, input.caddr(), cleanup);
+      }
+      case tried(?body, ?cleanup): {
+        if (!statement_position) goto construction_error;
+        return _bind_try(_, body, NULL, cleanup);
       }
       case matched(?subject, *cases): {
         if (!statement_position) goto construction_error;
