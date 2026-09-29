@@ -3109,9 +3109,7 @@ macro open Statement $destructure_statement(Name $temporary, Expr $source,
 }
 
 macro open Statement $destructure_declarations(
-    Statement $targets, Name $temporary, Expr $source,
-    Statement $assignments...) {
-  $targets
+    Name $temporary, Expr $source, Statement $assignments...) {
   List $temporary = $source;
   $assignments...
 }
@@ -3134,7 +3132,8 @@ static List _destructure_statement(Compiler compiler, List ast) {
   return ast;
 }
 
-// Lower declarations without a containing block so names retain outer scope.
+// Keep parser-bound targets out of rebinding so their names retain scope and
+// emitted identity; bind only the new temporary and unbound writes.
 static List _destructure_declaration(Compiler compiler, List ast) {
   match (ast) {
     case %(dstrdecl ?type (targets *targets)
@@ -3153,10 +3152,11 @@ static List _destructure_declaration(Compiler compiler, List ast) {
         _destructure_assignments(
           expressions.list_free(), temporary);
       Macro shape = $destructure_declarations;
-      return compiler.bind_syntax(
-        shape(target_decl, temporary,
+      List tail = compiler.bind_syntax(
+        shape(temporary,
               _destructure_source(compiler, source, source_type),
               assignments), AST_BLOCK, compiler.return_type);
+      return %(seq $target_decl @{tail.cdr()});
     }
     case %(dstrdecl (params *parameters)
                     (!set ?source (expr ?source_type ?))): {
@@ -3170,12 +3170,15 @@ static List _destructure_declaration(Compiler compiler, List ast) {
           declarations.push(%( declare $type (bindings (op = $bind $value)) ));
         }
       }
-      Macro shape = $destructure_declarations;
-      // The mixed form has no declaration before its List temporary.
-      return compiler.bind_syntax(
-        shape(%(seq), temporary,
-              _destructure_source(compiler, source, source_type),
-              declarations.list_free()), AST_BLOCK, compiler.return_type);
+      Macro shape = macro Statement(
+          Name $temporary, Expr $source) {
+        List $temporary = $source;
+      };
+      List temp = compiler.bind_syntax(
+        shape(temporary,
+              _destructure_source(compiler, source, source_type)),
+        AST_BLOCK, compiler.return_type);
+      return %(seq $temp @{declarations.list_free()});
     }
   }
   return ast;
