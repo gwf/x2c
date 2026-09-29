@@ -351,9 +351,6 @@ static List _adapter_reader_call(
   return _func_call(compiler, result_type, target, arguments);
 }
 
-macro open Expression $func_cast(Type $type, Expr $value) =>
-  ($type)($value);
-
 macro open Expression $func_address(Expr $value) => &$value;
 
 macro open Expression $func_size(Expr $value) => sizeof $value;
@@ -674,9 +671,8 @@ static List _build_indirect_func_adapter(
     %(${_func_bound(%("Func"), fn_binding)}));
   List context_local = compiler.sym.introduce(
     compiler.fresh_name("func_pointer_context"));
-  Macro cast_shape = $func_cast;
-  List cast = compiler.rebuild_expression(
-    context_pointer, cast_shape(context_pointer, context_value));
+  List cast = %(expr $context_pointer
+    (cast $context_pointer $context_value));
   Macro storage_shape = $func_local;
   List context_declaration = compiler.rebuild_statement(
     storage_shape(%(const $context_name),

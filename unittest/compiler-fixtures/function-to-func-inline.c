@@ -145,7 +145,7 @@ Func _x2c_func_get_e915dee0_0(void){
 const void * Func_context(Func);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *)(Func_context(_x2c_func_binding_1));
+  const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *) Func_context(_x2c_func_binding_1);
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 818062), 818062));
   long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 818062), 818062));
   return long_var(_x2c_func_pointer_context_1 -> _x2c_func_pointer_1(a0, a1));

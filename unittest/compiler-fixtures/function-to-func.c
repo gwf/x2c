@@ -439,7 +439,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 const void * Func_context(Func);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *)(Func_context(_x2c_func_binding_1));
+  const _x2c_func_pointer_context_0 * _x2c_func_pointer_context_1 =(const _x2c_func_pointer_context_0 *) Func_context(_x2c_func_binding_1);
   long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 818062), 818062));
   long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 818062), 818062));
   return long_var(_x2c_func_pointer_context_1 -> _x2c_func_pointer_0(a0, a1));
@@ -489,7 +489,7 @@ static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func
 void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
-  const _x2c_func_pointer_context_14 * _x2c_func_pointer_context_15 =(const _x2c_func_pointer_context_14 *)(Func_context(_x2c_func_binding_6));
+  const _x2c_func_pointer_context_14 * _x2c_func_pointer_context_15 =(const _x2c_func_pointer_context_14 *) Func_context(_x2c_func_binding_6);
   int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, _12, _12);
   return _x2c_func_pointer_context_15 -> _x2c_func_pointer_1(a0);
   ;
