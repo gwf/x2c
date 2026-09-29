@@ -1,8 +1,10 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0, the pilot, and Wave 2 are on `dev`. Wave 3, the
-> runtime, is next. The baseline measurements are from `dev` `f6606dbf`.
-> Track H waits for Gary's approval of its book text.
+> Status: active. Wave 0, the pilot, and Waves 2 and 3 are on `dev`. Waves
+> 4 and 5, the compiler front end, core, and semantics, are next; their
+> files are shared with the dual-macro migration, so each batch starts with
+> agreed file boundaries. The baseline measurements are from `dev`
+> `f6606dbf`. Track H waits for Gary's approval of its book text.
 
 ## Progress
 
@@ -113,11 +115,123 @@ Candidates left for later waves:
   out-parameters. A result record would bring it to four parameters.
 - `_shell_status` in `src/utils.x` repeats `_decoded_status` in
   `lib/process.x`, and `_valid_utf8` in `src/cli.x` accepts the same input
-  as `_utf8_length` in `lib/json.x`. Both owners are runtime files, so
-  Wave 3 decides them.
+  as `_utf8_length` in `lib/json.x`. Each needs a new public runtime
+  owner; Wave 3 left both in place.
 - `src/utils.x` holds several subjects: environment discovery, source
   files and packages, compiler identity, file locks, translation workers,
   and the driver's error line.
+
+Wave 3, delivered 2026-09-29: 27 runtime files. Each file's columns show
+the measure before and after, as `before / after`.
+
+| File | Lines | Functions | Longest | Over 40 | Most parameters |
+| --- | --- | --- | --- | --- | --- |
+| lib/string.x | 1,773 / 1,841 | 88 / 120 | 119 / 28 | 3 / 0 | 5 / 4 |
+| lib/var.x | 1,281 / 1,272 | 73 / 88 | 54 / 28 | 1 / 0 | 3 / 3 |
+| lib/varops.x | 601 / 583 | 28 / 41 | 45 / 30 | 2 / 0 | 5 / 4 |
+| lib/varconvert.x | 298 / 289 | 15 / 16 | 34 / 27 | 0 / 0 | 4 / 4 |
+| lib/match-machine.x | 571 / 526 | 23 / 46 | 270 / 54 | 1 / 1 | 5 / 5 |
+| lib/machine.x | 484 / 480 | 16 / 17 | 25 / 25 | 0 / 0 | 7 / 7 |
+| lib/pool.x | 965 / 1,000 | 57 / 72 | 46 / 24 | 1 / 0 | 4 / 4 |
+| lib/buffer.x | 359 / 357 | 27 / 32 | 46 / 17 | 1 / 0 | 3 / 3 |
+| lib/block.x | 322 / 331 | 22 / 30 | 43 / 17 | 1 / 0 | 3 / 3 |
+| lib/list.x | 1,036 / 1,037 | 81 / 91 | 44 / 18 | 1 / 0 | 4 / 4 |
+| lib/error.x | 1,327 / 1,401 | 79 / 97 | 58 / 23 | 3 / 0 | 4 / 4 |
+| lib/scan.x | 749 / 693 | 44 / 56 | 71 / 71 | 2 / 1 | 4 / 4 |
+| lib/process.x | 578 / 618 | 39 / 51 | 58 / 20 | 1 / 0 | 6 / 4 |
+| lib/thread.x | 309 / 338 | 13 / 17 | 43 / 24 | 2 / 0 | 3 / 3 |
+| lib/path.x | 544 / 559 | 41 / 45 | 45 / 32 | 1 / 0 | 4 / 4 |
+| lib/regex.x | 746 / 813 | 56 / 75 | 57 / 21 | 2 / 0 | 6 / 6 |
+| lib/diff.x | 171 / 243 | 8 / 19 | 55 / 19 | 1 / 0 | 6 / 5 |
+| lib/datum.x | 229 / 264 | 10 / 16 | 56 / 21 | 1 / 0 | 3 / 3 |
+| lib/dispatch.x | 920 / 942 | 64 / 72 | 30 / 25 | 0 / 0 | 6 / 6 |
+| lib/func.x | 443 / 426 | 25 / 25 | 32 / 28 | 0 / 0 | 5 / 5 |
+| lib/scope.x | 1,033 / 1,073 | 58 / 66 | 30 / 21 | 0 / 0 | 4 / 4 |
+| lib/iter.x | 879 / 890 | 54 / 54 | 18 / 18 | 0 / 0 | 4 / 4 |
+| lib/file.x | 591 / 596 | 46 / 48 | 38 / 24 | 0 / 0 | 4 / 4 |
+| lib/logger.x | 847 / 860 | 48 / 58 | 35 / 20 | 0 / 0 | 5 / 5 |
+| lib/lisp.x | 2,072 / 2,160 | 159 / 191 | 104 / 23 | 2 / 0 | 7 / 5 |
+| lib/meta.x | 872 / 980 | 48 / 64 | 35 / 21 | 0 / 0 | 5 / 5 |
+| lib/match.x | 2,686 / 2,776 | 159 / 192 | 82 / 30 | 7 / 0 | 7 / 6 |
+
+Together the 27 files went from 22,686 to 23,348 lines: 13,767 `.x`
+lines added and 13,105 deleted. Functions over 40 lines fell from 33 to 2:
+`_execute`, the match machine's dispatcher of one- to three-line arms, and
+`scan_keyword_type`, whose compare chain stays because a table cost a load
+per lookup. After the whole batch, stage 1 translated `src/` and `lib/`
+byte-identically to stage 0. The other runtime files were already inside
+the bands; they get a review-card pass later.
+
+The checkpoint ran each benchmark in both trees through paths of equal
+length, because a path one character longer moves the first heap cells and
+shifts small benchmarks. The first run found real instruction costs in
+`lib/scan.x` (number and string-segment scanning, keyword tables) and
+`lib/var.x` (integer reads and float boxing, where one helper made clang
+compute every arm). Both workers restored the base code shape at those
+spots and marked each with a comment. After the fixes, the whole benchmark
+binaries retire 0.5% fewer instructions for scan and stay within 0.2% of
+base for Var and String. Translating six compiler sources took the same
+median wall time over seven cold pairs, with 0.6% fewer instructions, and
+2% fewer instructions with interfaces. Single tight loops still move by
+about 10% in wall time with code layout; their instruction counts show no
+extra work.
+
+Coordination: the dual-macro migration released `lib/lisp.x`,
+`lib/meta.x`, and `lib/match.x` for this batch and kept `src/transform.x`.
+The two sessions exchange exact file boundaries before either starts
+another shared file.
+
+Behavior-adjacent changes, each listed in its commit message:
+
+- `Macro_case_capture` is deleted: it had no caller, and the compiler
+  emits `Macro_case_capture_at`.
+- Lisp evaluation frames are smaller, so non-tail recursion reaches the
+  unchanged byte limit about 17% deeper before `<call-stack>`.
+- A raise moved into a static helper records that helper as its location.
+  The locations that fixtures and the varops probe pin are unchanged.
+- `_record_n` in `lib/error.x` reads a key and its value in two statements;
+  one struct initializer left their order unspecified.
+
+The workers found these defects, which predate the wave. Each reproduces
+on the original code, and each has its own fix task that waits for this
+batch:
+
+- `String.parse_char` on a lone `'` reads the byte after the NUL, and
+  `String.len` on a fresh `String.malloc` buffer contradicts its
+  documentation.
+- `x2c lint` offers `.` for every `->`, which breaks `struct dirent` on
+  macOS, where x2c cannot see the layout.
+- The fixture supervisor can crash with `PermissionError` from
+  `os.killpg` after a timeout.
+- `make bm-match-cache` does not build: its runner never translates
+  `unittest/match-recursive.x`.
+- `MatchPlan.prepare` raises `<bad-arg>` instead of reporting
+  `code-capacity` when an `!or` arm ends at the 4,096-word limit.
+- `Var.new` with a built-in aligned pointer tag and a misaligned pointer
+  builds a box whose `.tag()` crashes.
+- Regex repetition counts past `INT_MAX` wrap: `a{2147483648}` acts like
+  `a*`.
+- Lisp `apply` with more than eight values leaks its argument array, 144
+  bytes per call.
+
+Candidates left for later:
+
+- `MachineBuilder.view` has no callers, and `MachineBuilder.emit` takes 7
+  positional parameters at 109 call sites; both are public, so Gary decides.
+- `MatchMachine.open` and `dispose` belong in `lib/match-machine.x`, but
+  `lib/match.x` calls them and `match-machine.x` includes `match.x`.
+- `lib/string.x` stays over 1,500 lines; its formatting code (about 350
+  lines) uses nothing private and could be its own unit, like
+  `string-number.x`. `lib/meta.x` holds the meta surface and about 600
+  lines of macro-value machinery, which could also be its own unit.
+- Repeated jobs that need a new public owner: the one-argument `FuncArg`
+  stanza (nine times across list, iter, array, and string), `_hex_digit`
+  (json and string), the invalid-bits raise (varconvert and dispatch),
+  `_shell_status` (`src/utils.x`) against `_decoded_status`
+  (`lib/process.x`), and `_valid_utf8` (`src/cli.x`) against `_utf8_length`
+  (`lib/json.x`).
+- `x2c lint` suggests `LispEnv &local` for `_bind_values`, which the
+  compiler's region check then rejects.
 
 ## Context
 
@@ -422,7 +536,7 @@ Rules for every file:
 | 0 | standard, skill, lint shape candidates, coverage probe | the waves use them | `make commands-check`; `doc-check` |
 | 1, pilot | `src/collect.x`, `lib/tokenizer.x` | medium size, quiet since 09-27, outside the macro campaign, most defect classes present | per-file stage-diff-1; batch gate; performance checkpoint |
 | 2 | driver: `build.x`, `cli.x`, `main.x`, `project.x`, `frontend.x`, `meta-project.x`, `generate.x`, `toolchain.x`, `install.x`, `utils.x`, `report.x`, and the small files `editor.x`, `script.x`, `deps.x`, `sourceview.x`, `meta-helper-client.x` | independent, low churn, parallel workers | per-file stage-diff-1; batch gate; checkpoint if `generate.x` changes |
-| 3 | runtime: `match-machine.x`, `string.x`, `error.x`, `match.x`, `scan.x`, `scope.x`, the `var.x`/`common.x` duplicates, `dispatch.x`, `pool.x`, `file.x`, `iter.x`, `list.x`, `logger.x`, `meta.x`; `lisp.x` last | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
+| 3 | runtime: `match-machine.x`, `machine.x`, `string.x`, `error.x`, `scan.x`, `match.x`, `meta.x`, `lisp.x`, `var.x`, `varops.x`, `varconvert.x`, `pool.x`, `buffer.x`, `block.x`, `list.x`, `dispatch.x`, `func.x`, `scope.x`, `iter.x`, `file.x`, `logger.x`, `process.x`, `thread.x`, `path.x`, `regex.x`, `diff.x`, `datum.x` | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
 | 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `linked-meta.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x` | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
 | 5 | semantics and output: `expressions.x`, `transform.x`, `protocol.x`, `emit.x`, `regions.x`, `cache.x`, `diagnostics.x`, `format.x` | files the dual-macro campaign changes now | as wave 4 |
 | H | unit directories | spec after the pilot; code before wave 4 | one fixture; gate |
