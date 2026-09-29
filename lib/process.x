@@ -68,151 +68,7 @@ typedef struct _Launch {
 
 enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
 
-static int _decoded_status(int status) {
-  if (WIFEXITED(status)) return WEXITSTATUS(status);
-  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
-  return -1;
-}
-
-static char **_environment(Map env) {
-  Map names = {};
-  foreach (Var name, env.keys()) names[name.str()] = 1;
-  Array entries = [];
-  for (char **entry = environ; *entry; entry++) {
-    String text = String.new(*entry);
-    int equals = text.find("=");
-    if (!names.contains(equals < 0 ? text : text[:equals]))
-      entries.push(text);
-  }
-  foreach (Var (name, value), env)
-    entries.push(%"$name=$value");
-  char **result = Scope.calloc(entries.len() + 1, sizeof(char *));
-  int index = 0;
-  foreach (String entry, entries) result[index++] = entry;
-  return result;
-}
-
-// A command whose first element is a List is a pipeline of those commands.
-static List _stages(List command) =>
-  command && command.car() is List ? command : %($command);
-
-static int _is(Var value, Symbol name) =>
-  value is Symbol && value == name;
-
-static void _close_on_exec(int fd) {
-  fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
-}
-
-static void _pipe(int fds[2]) {
-  if (pipe(fds)) {
-    int error = errno;
-    raise %(io-fail (operation "Job.start") (errno $error));
-  }
-  _close_on_exec(fds[0]);
-  _close_on_exec(fds[1]);
-}
-
-static int _open_output(String path) {
-  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-  if (fd < 0) {
-    int error = errno;
-    raise %(io-fail (operation "Job.start") (path $path) (errno $error));
-  }
-  _close_on_exec(fd);
-  return fd;
-}
-
-static File _capture_file(void) {
-  File file = tmpfile();
-  if (!file) {
-    int error = errno;
-    raise %(io-fail (operation "Job.start") (errno $error));
-  }
-  _close_on_exec(file.fileno());
-  return file;
-}
-
-static void _close(int fd) {
-  if (fd >= 0) close(fd);
-}
-
-static char **_argv(List stage) {
-  if (!stage)
-    raise %(bad-arg (operation "Job.start") (why "empty command"));
-  char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
-  int index = 0;
-  // An empty word is a NULL String, which would end the vector early.
-  foreach (Var word, stage) {
-    String text = word.str();
-    argv[index++] = text ? text : "";
-  }
-  return argv;
-}
-
-/* A parent with its standard streams closed can hold a launch descriptor at
-   0, 1, or 2, where an earlier `dup2` would overwrite it and a `dup2` onto
-   its own number would leave it close-on-exec. The copy closes on exec. */
-static int _above_stdio(int fd) =>
-  fd >= 0 && fd <= STDERR_FILENO ?
-    fcntl(fd, F_DUPFD_CLOEXEC, STDERR_FILENO + 1) : fd;
-
-/* The report pipe is close-on-exec: a successful `execvp` closes it without
-   writing, and a failed step writes which step failed and its errno. */
-static void _child(
-  char **argv, _Launch *launch, int stdin_fd, int stdout_fd, int stderr_fd,
-  int report) {
-  stdin_fd = _above_stdio(stdin_fd);
-  stdout_fd = _above_stdio(stdout_fd);
-  stderr_fd = _above_stdio(stderr_fd);
-  report = _above_stdio(report);
-  if (stdin_fd >= 0) dup2(stdin_fd, STDIN_FILENO);
-  if (stdout_fd >= 0) dup2(stdout_fd, STDOUT_FILENO);
-  if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
-  else if (stderr_fd >= 0) dup2(stderr_fd, STDERR_FILENO);
-  int failure[2] = { _STEP_DIR, 0 };
-  if (!launch.dir || chdir(launch.dir) == 0) {
-    if (launch.environment) environ = launch.environment;
-    execvp(argv[0], argv);
-    failure[0] = _STEP_EXEC;
-  }
-  failure[1] = errno;
-  ssize_t written = write(report, failure, sizeof(failure));
-  (void) written;
-  _exit(127);
-}
-
-static void Job._spawn(
-  Job job, int index, List stage, int stdin_fd, int stdout_fd,
-  int stderr_fd) {
-  _Launch *launch = job.launch;
-  char **argv = _argv(stage);
-  int report[2];
-  _pipe(report);
-  pid_t pid = fork();
-  if (pid == 0)
-    _child(argv, launch, stdin_fd, stdout_fd, stderr_fd, report[1]);
-  int fork_error = errno, failure[2] = {0};
-  close(report[1]);
-  ssize_t count = 0;
-  if (pid > 0) {
-    do count = read(report[0], failure, sizeof(failure));
-    while (count < 0 && errno == EINTR);
-  }
-  close(report[0]);
-  if (pid < 0)
-    raise %(io-fail (operation "Job.start") (errno $fork_error));
-  job.pids[index] = pid;
-  if (count != sizeof(failure)) return;
-  int error = failure[1];
-  if (failure[0] == _STEP_DIR)
-    File.path_error("Job.start", launch.dir, error);
-  String program = argv[0];
-  if (error == ENOENT)
-    raise %(not-found (operation "Job.start") (program $program)
-            (errno $error));
-  raise %(io-fail (operation "Job.start") (program $program)
-          (errno $error));
-}
+// launching
 
 /* The one launch of a job. The job counts as started before the first
    fork, so a launch that fails part way records its partial run: the stages
@@ -277,6 +133,127 @@ static void Job._start(Job job) {
   launched = 1;
 }
 
+// spawning a stage
+
+static void Job._spawn(
+  Job job, int index, List stage, int stdin_fd, int stdout_fd,
+  int stderr_fd) {
+  _Launch *launch = job.launch;
+  char **argv = _argv(stage);
+  int report[2];
+  _pipe(report);
+  pid_t pid = fork();
+  if (pid == 0)
+    _child(argv, launch, stdin_fd, stdout_fd, stderr_fd, report[1]);
+  int fork_error = errno, failure[2] = {0};
+  close(report[1]);
+  ssize_t count = 0;
+  if (pid > 0) {
+    do count = read(report[0], failure, sizeof(failure));
+    while (count < 0 && errno == EINTR);
+  }
+  close(report[0]);
+  if (pid < 0)
+    raise %(io-fail (operation "Job.start") (errno $fork_error));
+  job.pids[index] = pid;
+  if (count != sizeof(failure)) return;
+  int error = failure[1];
+  if (failure[0] == _STEP_DIR)
+    File.path_error("Job.start", launch.dir, error);
+  String program = argv[0];
+  if (error == ENOENT)
+    raise %(not-found (operation "Job.start") (program $program)
+            (errno $error));
+  raise %(io-fail (operation "Job.start") (program $program)
+          (errno $error));
+}
+
+static char **_argv(List stage) {
+  if (!stage)
+    raise %(bad-arg (operation "Job.start") (why "empty command"));
+  char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
+  int index = 0;
+  // An empty word is a NULL String, which would end the vector early.
+  foreach (Var word, stage) {
+    String text = word.str();
+    argv[index++] = text ? text : "";
+  }
+  return argv;
+}
+
+/* The report pipe is close-on-exec: a successful `execvp` closes it without
+   writing, and a failed step writes which step failed and its errno. */
+static void _child(
+  char **argv, _Launch *launch, int stdin_fd, int stdout_fd, int stderr_fd,
+  int report) {
+  stdin_fd = _above_stdio(stdin_fd);
+  stdout_fd = _above_stdio(stdout_fd);
+  stderr_fd = _above_stdio(stderr_fd);
+  report = _above_stdio(report);
+  if (stdin_fd >= 0) dup2(stdin_fd, STDIN_FILENO);
+  if (stdout_fd >= 0) dup2(stdout_fd, STDOUT_FILENO);
+  if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
+  else if (stderr_fd >= 0) dup2(stderr_fd, STDERR_FILENO);
+  int failure[2] = { _STEP_DIR, 0 };
+  if (!launch.dir || chdir(launch.dir) == 0) {
+    if (launch.environment) environ = launch.environment;
+    execvp(argv[0], argv);
+    failure[0] = _STEP_EXEC;
+  }
+  failure[1] = errno;
+  ssize_t written = write(report, failure, sizeof(failure));
+  (void) written;
+  _exit(127);
+}
+
+/* A parent with its standard streams closed can hold a launch descriptor at
+   0, 1, or 2, where an earlier `dup2` would overwrite it and a `dup2` onto
+   its own number would leave it close-on-exec. The copy closes on exec. */
+static int _above_stdio(int fd) =>
+  fd >= 0 && fd <= STDERR_FILENO ?
+    fcntl(fd, F_DUPFD_CLOEXEC, STDERR_FILENO + 1) : fd;
+
+// descriptors
+
+static File _capture_file(void) {
+  File file = tmpfile();
+  if (!file) {
+    int error = errno;
+    raise %(io-fail (operation "Job.start") (errno $error));
+  }
+  _close_on_exec(file.fileno());
+  return file;
+}
+
+static void _close_on_exec(int fd) {
+  fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+}
+
+static int _open_output(String path) {
+  int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  if (fd < 0) {
+    int error = errno;
+    raise %(io-fail (operation "Job.start") (path $path) (errno $error));
+  }
+  _close_on_exec(fd);
+  return fd;
+}
+
+static void _pipe(int fds[2]) {
+  if (pipe(fds)) {
+    int error = errno;
+    raise %(io-fail (operation "Job.start") (errno $error));
+  }
+  _close_on_exec(fds[0]);
+  _close_on_exec(fds[1]);
+}
+
+static void _close(int fd) {
+  if (fd >= 0) close(fd);
+}
+
+// waiting
+
 static void Job._reap(Job job, int index, int flags) {
   int status;
   pid_t pid;
@@ -287,16 +264,10 @@ static void Job._reap(Job job, int index, int flags) {
   job.pids[index] = 0;
 }
 
-/* Reads and closes a capture file. Text with a NUL byte cannot be a
-   `String`, so it is recorded in `nul` for `output` or `errors` to raise and
-   the status stays readable. */
-static String _captured(File file, int &nul) {
-  if (!file) return NULL;
-  file.rewind();
-  String text = NULL;
-  try text = file.string_close();
-  catch %(bad-arg *): nul = 1;
-  return text;
+static int _decoded_status(int status) {
+  if (WIFEXITED(status)) return WEXITSTATUS(status);
+  if (WIFSIGNALED(status)) return 128 + WTERMSIG(status);
+  return -1;
 }
 
 static int Job._running(Job job) {
@@ -318,9 +289,15 @@ static void Job._finish(Job job) {
   job.output_file = job.errors_file = NULL;
 }
 
-static String _text(String text, int nul, String operation) {
-  if (nul)
-    raise %(bad-arg (operation $operation) (why "embedded NUL"));
+/* Reads and closes a capture file. Text with a NUL byte cannot be a
+   `String`, so it is recorded in `nul` for `output` or `errors` to raise and
+   the status stays readable. */
+static String _captured(File file, int &nul) {
+  if (!file) return NULL;
+  file.rewind();
+  String text = NULL;
+  try text = file.string_close();
+  catch %(bad-arg *): nul = 1;
   return text;
 }
 
@@ -335,26 +312,7 @@ static void Job._terminate(Job job) {
     if (job.pids[i]) job._reap(i, 0);
 }
 
-static void _drop_job(void *ptr) {
-  Job job = ptr;
-  if (job.started && !job.finished) job._terminate();
-  free(job.pids);
-}
-
-static Job Job.new(List command) {
-  Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
-  memset(job, 0, sizeof(struct Job));
-  job.stages = _stages(command);
-  job.launch = Scope.calloc(1, sizeof(_Launch));
-  job.launch.capture_output = 1;
-  return job;
-}
-
-static Job Job._unstarted(Job job, String operation) {
-  if (job.started)
-    raise %(bad-arg (operation $operation) (why "the job has started"));
-  return job;
-}
+// jobs
 
 /** Returns a `Job` for `command`, a command or pipeline, without starting
     it. The job captures standard output and passes standard error through.
@@ -370,6 +328,44 @@ static Job Job._unstarted(Job job, String operation) {
     ```
 */
 meta native Job List.job(List command) => Job.new(command);
+
+static Job Job.new(List command) {
+  Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
+  memset(job, 0, sizeof(struct Job));
+  job.stages = _stages(command);
+  job.launch = Scope.calloc(1, sizeof(_Launch));
+  job.launch.capture_output = 1;
+  return job;
+}
+
+static void _drop_job(void *ptr) {
+  Job job = ptr;
+  if (job.started && !job.finished) job._terminate();
+  free(job.pids);
+}
+
+// A command whose first element is a List is a pipeline of those commands.
+static List _stages(List command) =>
+  command && command.car() is List ? command : %($command);
+
+/** Adds `command` after the last stage of `job`, reading that stage's
+    output, and returns the job. A pipeline `command` adds each of its
+    stages.
+    Raises: `<bad-arg>` for a job that has started.
+*/
+Job Job.pipe(Job job, List command) {
+  job._unstarted("Job.pipe");
+  job.stages = job.stages.append(_stages(command));
+  return job;
+}
+
+static Job Job._unstarted(Job job, String operation) {
+  if (job.started)
+    raise %(bad-arg (operation $operation) (why "the job has started"));
+  return job;
+}
+
+// options
 
 /** Sets `options` on `job` and returns it.
     The keys are atoms: `dir` names the working directory, `env` is a `Map`
@@ -426,22 +422,34 @@ Job Job.options(Job job, Map options) {
   return job;
 }
 
+static char **_environment(Map env) {
+  Map names = {};
+  foreach (Var name, env.keys()) names[name.str()] = 1;
+  Array entries = [];
+  for (char **entry = environ; *entry; entry++) {
+    String text = String.new(*entry);
+    int equals = text.find("=");
+    if (!names.contains(equals < 0 ? text : text[:equals]))
+      entries.push(text);
+  }
+  foreach (Var (name, value), env)
+    entries.push(%"$name=$value");
+  char **result = Scope.calloc(entries.len() + 1, sizeof(char *));
+  int index = 0;
+  foreach (String entry, entries) result[index++] = entry;
+  return result;
+}
+
+static int _is(Var value, Symbol name) =>
+  value is Symbol && value == name;
+
 /** Makes `job` pass standard output through instead of capturing it, the
     same as `options({stdout: <inherit>})`, and returns it.
     Raises: `<bad-arg>` for a job that has started.
 */
 Job Job.live(Job job) => job.options({stdout: <inherit>});
 
-/** Adds `command` after the last stage of `job`, reading that stage's
-    output, and returns the job. A pipeline `command` adds each of its
-    stages.
-    Raises: `<bad-arg>` for a job that has started.
-*/
-Job Job.pipe(Job job, List command) {
-  job._unstarted("Job.pipe");
-  job.stages = job.stages.append(_stages(command));
-  return job;
-}
+// running jobs
 
 /** Starts `job` without waiting and returns it. A job that has started is
     returned unchanged.
@@ -507,6 +515,12 @@ String Job.output(Job job) {
   return _text(job.output_text, job.nul_output, "Job.output");
 }
 
+static String _text(String text, int nul, String operation) {
+  if (nul)
+    raise %(bad-arg (operation $operation) (why "embedded NUL"));
+  return text;
+}
+
 /** Returns the captured standard output of `job` as lines without their
     endings.
     Raises: the causes of `Job.output`.
@@ -567,6 +581,8 @@ Job Job.wait_any(Array jobs) {
   }
   return NULL;
 }
+
+// the calling process
 
 /** Returns the value of this process's environment variable `name`, or
     NULL when it is unset. The `env` option sets variables for a child
