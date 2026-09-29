@@ -69,18 +69,19 @@ typedef struct MatchCaptureSite {
   int refused;
 } MatchCaptureSite;
 
-/* Cache pressure is the acquire status beyond MachinePrepare: every slot is
-   leased, so none can be recycled. */
+/** Cache pressure is the acquire status beyond MachinePrepare: every slot is
+    leased, so none can be recycled.
+*/
 #define MATCH_CACHE_PRESSURE 3
 
-/* Names an explicit cache of immutable prepared Match plans.
+/** Names an explicit cache of immutable prepared Match plans.
     A cache is not synchronized. Its caller must serialize access, keep every
     admitted pattern value alive until disposal, and dispose it when no lease
     remains active.
 */
 typedef struct MatchCache *MatchCache;
 
-/* Represents one acquired use of a cached or transient Match plan.
+/** Represents one acquired use of a cached or transient Match plan.
     A cached lease pins its entry; a transient lease owns its plan. Initialize
     it only through `MatchCache.acquire` and call `MatchLease.release` on every
     non-transferring path, including a pressure result.
