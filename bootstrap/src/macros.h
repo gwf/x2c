@@ -7,11 +7,151 @@
 
 #include "x2c.h"
 #include "compiler.h"
+Compiler Compiler_expanding(void);
+
+List Compiler_parse_macro_definition(Compiler c);
+
+List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
+
+List Compiler_peek_macro_hole(Compiler compiler);
+
+int Compiler_macro_lisp_starts_declaration(Compiler c);
+
+List Compiler_try_parse_macro_member(Compiler c);
+
+List Compiler_macro_introduced_name(Compiler compiler, String spelling);
+
+List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
+
+List Compiler_publish_macro_definition_node(Compiler compiler, List node);
+
+int Compiler_macro_form_is_definition(Compiler compiler);
+
+int Compiler_local_macro_form_is_definition(Compiler c);
+
+int Compiler_keyword_form_is_definition(Compiler c);
+
+void Compiler_parse_keyword_definition(Compiler c);
+
+int Compiler_macro_starts_target_at(Compiler c, AstPos position);
+
+int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
+
+void Compiler_skip_macro_invocation(Compiler c);
+
+int Compiler_skip_named_type_declaration(Compiler c);
+
+int Compiler_macro_targets_unit(Compiler c);
+
+List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
+
+List Compiler_try_parse_macro_expression(Compiler c);
+
+List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
+
+Token Compiler_macro_invocation_site(Compiler compiler, Var site);
+
+Var Compiler_evaluate_macro_slot(Compiler c, Var value);
+
+List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
+
+Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
+
+List x2c_template_call(Var stored, List values);
+
+List Compiler_rebuild_expression(Compiler c, Type type, List application);
+
+List Compiler_rebuild_statement(Compiler c, List application);
+
+List Compiler_rebuild_unit_function(Compiler c, List application);
+
+List Compiler_rebuild_function(Compiler c, List target, List application);
+
+List Compiler_macro_value_literal(Compiler c, List value);
+
+List Compiler_try_parse_macro_pattern(Compiler c);
+
+List Compiler_capture_macro_value(Compiler c, List definition);
+
+int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
+
+List Compiler_parse_macro_lisp_top_level(Compiler compiler);
+
+void Compiler_parse_macro_lisp_shallow(Compiler compiler);
+
+void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
+
+List Compiler_parse_macro_lisp_expression(Compiler compiler);
+
+List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
+
+void Compiler_import_package_macros(Compiler c, String name, Token invocation);
+
+Lisp Compiler_open_macro_library(Compiler compiler);
+
+void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
+
+int Compiler_inherits_import(String path);
+
+void Compiler_inherit_library_comptime(Compiler c);
+
+int macro_library_filling(void);
+
+Map Compiler_shared_definitions(Compiler compiler);
+
 void Compiler_install_builtin_macros(Compiler compiler);
+
+void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
+
+void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
+
+void Compiler_install_meta_function(Compiler c, List fn, Token marker);
+
+List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
+
+void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
+
+void Compiler_install_native_meta_effects(Compiler c, Map globs);
+
+int Compiler_bind_native_meta(Compiler c, String name);
+
+void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
+
+int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
+
+String Compiler_native_meta_module(Compiler c, String name, Type * type);
+
+int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
+
+Map x2c_meta_definition_hashes(void);
+
+void Compiler_select_native_modules(List paths);
+
+void Compiler_select_package_module(Compiler c, String name, String root, Token token);
+
+String Compiler_load_native_module(String path);
+
+void Compiler_preload_native_module(String path);
+
+void Compiler_add_native_module(String path, Map(* entry)(void));
+
+int Compiler_native_module_loaded(String path);
+
+Map Compiler_native_module_targets(String path);
+
+int Compiler_supplies_native_meta(String name);
+
+void x2c_register_extension(const char * name, Map(* targets)(void));
+
+int Compiler_links_extension(String name);
+
+String Compiler_extension_archive(void);
 
 List x2c_syntax_type(List value);
 
 List x2c_protocol_member(List participant, List base, String member);
+
+List x2c_method_resolve(List type_value, String name);
 
 int x2c_type_is_integral(List value);
 
@@ -37,17 +177,19 @@ Symbol x2c_type_tag_name(String name);
 
 List x2c_type_fields(List value);
 
-List meta_type_description(Var value);
-
 String x2c_binding_spelling(Var syntax);
 
-List meta_source_description(Var value);
+List x2c_ident(String spelling);
+
+String x2c_function_name(List function);
+
+List x2c_function_parameter(List function, String wanted);
 
 String x2c_source_text(Var syntax);
 
-void x2c_diagnostic_fail(String message, List notes);
+String x2c_embed_text(Var path);
 
-List x2c_ident(String spelling);
+Var x2c_literal_value(Var syntax);
 
 String x2c_invocation_file(void);
 
@@ -55,9 +197,13 @@ int x2c_invocation_line(void);
 
 int x2c_invocation_column(void);
 
-List x2c_method_resolve(List type_value, String name);
+void x2c_diagnostic_fail(String message, List notes);
 
-String x2c_function_name(List function);
+void x2c_diagnostic_warn(String message, List notes);
+
+List meta_type_description(Var value);
+
+List meta_source_description(Var value);
 
 List builtin_foreach_reference(String name);
 
@@ -75,155 +221,7 @@ List binding_native_type(List function);
 
 List binding_literal_list(List values);
 
-List x2c_function_parameter(List function, String wanted);
-
-int Compiler_macro_form_is_definition(Compiler compiler);
-
-int Compiler_local_macro_form_is_definition(Compiler c);
-
-int Compiler_keyword_form_is_definition(Compiler c);
-
-void Compiler_skip_macro_invocation(Compiler c);
-
-int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
-
-int Compiler_macro_starts_target_at(Compiler c, AstPos position);
-
-String x2c_embed_text(Var path);
-
-Var x2c_literal_value(Var syntax);
-
-void x2c_diagnostic_warn(String message, List notes);
-
-int Compiler_inherits_import(String path);
-
 void macro_library_reset(void);
-
-void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
-
-Lisp Compiler_open_macro_library(Compiler compiler);
-
-void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
-
-int Compiler_shared_definition(Compiler compiler, String key);
-
-void Compiler_inherit_library_comptime(Compiler c);
-
-int macro_library_filling(void);
-
-Map Compiler_shared_definitions(Compiler compiler);
-
-void Compiler_import_package_macros(Compiler c, String name, Token invocation);
-
-List Compiler_parse_macro_lisp_top_level(Compiler compiler);
-
-void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
-
-void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
-
-void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
-
-int Compiler_native_module_loaded(String path);
-
-Map Compiler_native_module_targets(String path);
-
-void Compiler_add_native_module(String path, Map(* entry)(void));
-
-String Compiler_load_native_module(String path);
-
-void Compiler_preload_native_module(String path);
-
-void x2c_register_extension(const char * name, Map(* targets)(void));
-
-int Compiler_links_extension(String name);
-
-String Compiler_extension_archive(void);
-
-void Compiler_select_package_module(Compiler c, String name, String root, Token token);
-
-void Compiler_select_native_modules(List paths);
-
-int Compiler_supplies_native_meta(String name);
-
-Map x2c_meta_definition_hashes(void);
-
-int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
-
-String Compiler_native_meta_module(Compiler c, String name, Type * type);
-
-int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
-
-void Compiler_install_native_meta_effects(Compiler c, Map globs);
-
-int Compiler_bind_native_meta(Compiler c, String name);
-
-void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
-
-void Compiler_install_meta_function(Compiler c, List fn, Token marker);
-
-void Compiler_parse_macro_lisp_shallow(Compiler compiler);
-
-List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation);
-
-List Compiler_parse_macro_lisp_expression(Compiler compiler);
-
-List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
-
-Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
-
-Var Compiler_evaluate_macro_slot(Compiler c, Var value);
-
-List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
-
-List Compiler_macro_introduced_name(Compiler compiler, String spelling);
-
-List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
-
-List x2c_template_call(Var stored, List values);
-
-List Compiler_rebuild_expression(Compiler c, Type type, List application);
-
-List Compiler_rebuild_statement(Compiler c, List application);
-
-List Compiler_rebuild_unit_function(Compiler c, List application);
-
-List Compiler_rebuild_function(Compiler c, List target, List application);
-
-List Compiler_peek_macro_hole(Compiler compiler);
-
-int Compiler_macro_lisp_starts_declaration(Compiler c);
-
-List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
-
-List Compiler_parse_macro_definition(Compiler c);
-
-List Compiler_macro_value_literal(Compiler c, List value);
-
-Compiler Compiler_expanding(void);
-
-List Compiler_try_parse_macro_pattern(Compiler c);
-
-List Compiler_capture_macro_value(Compiler c, List definition);
-
-List Compiler_publish_macro_definition_node(Compiler compiler, List node);
-
-void Compiler_parse_keyword_definition(Compiler c);
-
-int Compiler_macro_targets_unit(Compiler c);
-
-int Compiler_skip_named_type_declaration(Compiler c);
-
-List Compiler_try_parse_macro_member(Compiler c);
-
-Token Compiler_macro_invocation_site(Compiler compiler, Var site);
-
-int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
-
-List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
-
-List Compiler_try_parse_macro_expression(Compiler c);
-
-List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
 
 
 #endif /* __GUARD_0x28FCBFDC__ */
