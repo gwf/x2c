@@ -700,27 +700,29 @@ static void SymbolSetGraph.assign(SymbolSetGraph *g, uint32_t *table) {
   }
 }
 
-// Arrays and Maps
+/* Arrays and Maps
+
+   `%[...]` and `%{...}` read quoted elements. A Map entry, quoted or
+   evaluated, may come from an entry-position macro, whose `(seq ...)` rows
+   join the entries in source order. */
 
 /** Parses a quoted Array literal into a typed, source-ordered `(array ...)`
     node and consumes its closing `]`.
 */
 List Compiler.parse_array_literal(Compiler compiler) {
   compiler.expect(<"%[">);
-  List elems = _parse_quoted_array_elements(compiler);
+  List elems = _parse_array_elements(compiler);
   compiler.expect(<"]">);
   return %(expr ("Array") (array @elems));
 }
 
-static List _parse_quoted_array_elements(Compiler compiler) {
-  if (compiler.peek(0) == <]>) return NULL;
-  Array values = [];
-  values.push(_parse_element(compiler));
-  while (compiler.test(<,>)) {
-    if (compiler.peek(0) == <]>) break;
-    values.push(_parse_element(compiler));
-  }
-  return values.list_free();
+/* A comma may follow the last element. */
+static List _parse_array_elements(Compiler c) {
+  if (c.peek(0) == <]>) return NULL;
+  Array elements = [];
+  elements.push(_parse_element(c));
+  while (c.test(<,>) && c.peek(0) != <]>) elements.push(_parse_element(c));
+  return elements.list_free();
 }
 
 /** Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
@@ -728,41 +730,46 @@ static List _parse_quoted_array_elements(Compiler compiler) {
 */
 List Compiler.parse_map_literal(Compiler compiler) {
   compiler.expect(<"%{">);
-  List elems = _parse_quoted_map_entries(compiler);
+  List elems = _parse_quoted_entries(compiler);
   compiler.expect(<"}">);
   return %(expr ("Map") (map @elems));
 }
 
-static List _parse_quoted_map_entries(Compiler c) {
-  Array values = [];
+static List _parse_quoted_entries(Compiler c) {
+  Array entries = [];
   while (c.peek(0) != <"}">) {
-    Ast insertion = _parse_quoted_map_entry(c);
-    if (insertion && insertion.car() == <seq>)
-      foreach (Var row, insertion.cdr()) values.push(row);
-    else if (insertion) values.push(insertion);
+    _push_entry(entries, _parse_quoted_entry(c));
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
-  return values.list_free();
+  return entries.list_free();
 }
 
-static List _parse_quoted_map_entry(Compiler c) {
+static void _push_entry(Array entries, Ast entry) {
+  if (entry && entry.car() == <seq>)
+    foreach (Var row, entry.cdr()) entries.push(row);
+  else if (entry) entries.push(entry);
+}
+
+/* `${...}` holds a macro-produced entry or an expression key. */
+static List _parse_quoted_entry(Compiler c) {
   Token origin = c.token;
-  if (c.peek(0) == <"${"> && c.token.len == 2) {
-    c.next();
-    List insertion = c.try_parse_macro_slot(<map-entry>);
-    if (!insertion) insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
-    if (insertion) {
-      c.expect(<"}">);
-      return insertion;
-    }
-    List key = c.parse_expression();
+  if (c.peek(0) != <"${"> || c.token.len != 2)
+    return _entry_value(c, _parse_element(c), origin);
+  c.next();
+  List entry = c.try_parse_macro_slot(<map-entry>);
+  if (!entry) entry = c.try_parse_macro_target_at(AST_MAP_ENTRY);
+  if (entry) {
     c.expect(<"}">);
-    c.expect(<:>);
-    List value = _parse_element(c);
-    return c.resolve_map_entry(%(map-entry $key $value), origin);
+    return entry;
   }
-  List key = _parse_element(c);
+  List key = c.parse_expression();
+  c.expect(<"}">);
+  return _entry_value(c, key, origin);
+}
+
+/* The `:` and the quoted value that follow a key. */
+static List _entry_value(Compiler c, List key, Token origin) {
   c.expect(<:>);
   List value = _parse_element(c);
   return c.resolve_map_entry(%(map-entry $key $value), origin);
@@ -772,16 +779,13 @@ static List _parse_quoted_map_entry(Compiler c) {
     `Entry`-position macro sequences are flattened in source order.
 */
 List Compiler.parse_map_entries(Compiler c) {
-  Array values = [];
+  Array entries = [];
   while (c.peek(0) != <"}">) {
-    Ast insertion = c.parse_map_entry();
-    if (insertion && insertion.car() == <seq>)
-      foreach (Var row, insertion.cdr()) values.push(row);
-    else if (insertion) values.push(insertion);
+    _push_entry(entries, c.parse_map_entry());
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
-  return values.list_free();
+  return entries.list_free();
 }
 
 /** Parses one `Map` entry without consuming its following comma or `}`.
@@ -807,11 +811,14 @@ List Compiler.parse_map_entry(Compiler compiler) {
   return compiler.resolve_map_entry(%(map-entry $key $value), origin);
 }
 
-// strings
+/* strings
 
-/** Parses a percent `String` literal and returns its typed
-    expression after the
-    closing quote. Static segments enter the compiler cache unless
+   `%"..."` reads text segments and `$` insertions in source order. A text
+   segment drops its line continuations, turns CR and CRLF into LF, and
+   decodes escapes and `$$`. */
+
+/** Parses a percent `String` literal and returns its typed expression after
+    the closing quote. Static segments enter the compiler cache unless
     `runtime_literals` is set; interpolated segments remain source ordered.
 */
 List Compiler.parse_string_literal(Compiler compiler) {
@@ -824,90 +831,88 @@ List Compiler.parse_string_literal(Compiler compiler) {
   return %(expr ("String") (segments @segments));
 }
 
-static List _parse_string_segments(Compiler compiler) {
+static List _parse_string_segments(Compiler c) {
   Array segments = [];
-  while (compiler.peek(0) != <"\"">)
-    segments.push(_parse_string_segment(compiler));
+  while (c.peek(0) != <"\"">) segments.push(_parse_string_segment(c));
   return segments.list_free();
 }
 
 static List _parse_string_segment(Compiler c) {
-  List sgmnt, expr, String str = NULL;
   switch (c.peek(0)) {
-    case <segment>: str = _decode_string_segment_text(c.token.text);
-      if (c.runtime_literals) {
-        c.next();
-        return %(segexp (expr ("String") (literal ("String") $str)));
-      }
-      sgmnt = %(string (expr ("String") (literal ("String") $str)));
-      sgmnt = c.cache(sgmnt);
-      c.next();
-      return sgmnt;
-    case <$>:
-      expr = _parse_named_reference(
-        c, <$>, "use '${...}' to insert an expression");
-      expr = c.convert_segment_to_string(expr);
-      return %(segvar $expr);
-    case <"${">:
-      c.next();
-      expr = c.parse_expression();
-      c.check_explicit_converter(expr, %("String"), 1);
-      expr = c.convert_segment_to_string(expr);
-      c.expect(<"}">);
-      return %(segexp $expr);
+    case <segment>: return _parse_text_segment(c);
+    case <$>:       return _parse_named_segment(c);
+    case <"${">:    return _parse_braced_segment(c);
     default:
       c.report_error(<parse>, "expected string segment", c.token, NULL);
   }
 }
 
-static String _decode_string_segment_text(String raw) {
-  if (!raw) return "";
-  return _normalize_multiline_string(raw).unescape().replace("$$", "$");
+static List _parse_text_segment(Compiler c) {
+  String text = _decode_segment(c.token.text);
+  if (c.runtime_literals) {
+    c.next();
+    return %(segexp (expr ("String") (literal ("String") $text)));
+  }
+  List cached =
+    c.cache(%(string (expr ("String") (literal ("String") $text))));
+  c.next();
+  return cached;
 }
 
-// Normalize embedded newlines so they survive parsing and remove
-// line-continuation backslash-newline pairs (including CRLF).
-static String _normalize_multiline_string(String raw) {
+static List _parse_named_segment(Compiler c) {
+  List expr = _parse_named_reference(
+    c, <$>, "use '${...}' to insert an expression");
+  expr = c.convert_segment_to_string(expr);
+  return %(segvar $expr);
+}
+
+static List _parse_braced_segment(Compiler c) {
+  c.next();
+  List expr = c.parse_expression();
+  c.check_explicit_converter(expr, %("String"), 1);
+  expr = c.convert_segment_to_string(expr);
+  c.expect(<"}">);
+  return %(segexp $expr);
+}
+
+static String _decode_segment(String raw) {
   if (!raw) return "";
+  return _normalize_newlines(raw).unescape().replace("$$", "$");
+}
+
+/* Text with no line continuation and no CR returns unchanged. */
+static String _normalize_newlines(String raw) {
   int n = raw.len(), char *buf = Scope.malloc(n + 1);
   int dst = 0, changed = 0, i = 0;
   while (i < n) {
     char ch = raw[i];
-    if (ch == '\\' && i + 1 < n) {
-      if (raw[i + 1] == '\n') {
-        changed = 1;
-        i += 2;
-        continue;
-      }
-      if (raw[i + 1] == '\r' && i + 2 < n && raw[i + 2] == '\n') {
-        changed = 1;
-        i += 3;
-        continue;
-      }
-    }
-    if (ch == '\r') {
+    int skip = ch == '\\' ? _continuation(raw, i, n) : 0;
+    if (skip) {
       changed = 1;
-      if (i + 1 < n && raw[i + 1] == '\n') i += 2;
-      else i++;
-      buf[dst++] = '\n';
-      continue;
+      i += skip;
     }
-    if (ch == '\n') {
+    else if (ch == '\r') {
+      changed = 1;
       buf[dst++] = '\n';
       i++;
-      continue;
+      if (i < n && raw[i] == '\n') i++;
     }
-    buf[dst++] = ch;
-    i++;
+    else {
+      buf[dst++] = ch;
+      i++;
+    }
   }
-  if (!changed) {
-    Scope.free(buf);
-    return raw;
-  }
-  buf[dst] = '\0';
-  String normalized = String.new_len(buf, dst);
+  String normalized = changed ? String.new_len(buf, dst) : raw;
   Scope.free(buf);
   return normalized;
+}
+
+/* The length of the line continuation at the backslash at `i`: 2 before
+   LF, 3 before CRLF, and 0 otherwise. */
+static int _continuation(String raw, int i, int n) {
+  if (i + 1 >= n) return 0;
+  if (raw[i + 1] == '\n') return 2;
+  return raw[i + 1] == '\r' && i + 2 < n && raw[i + 2] == '\n' ? 3 : 0;
 }
 
 // lambda literals
