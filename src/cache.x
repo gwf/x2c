@@ -26,6 +26,12 @@ $(import "../src/ast-rewrite.xmacro")
 #include <stdint.h>
 #include <assert.h>
 
+macro Decorator $initialized_entry(
+  Function $function, Expr $guard, Expr $entry, Statement $body...) {
+  if (!$guard) $entry();
+  $body...
+}
+
 /* Cache ids keep the identity assigned by `Compiler.cache`. Source slots use
    compact `_id` names; the generated-header prefix qualifies private slots
    with the source filename hash. */
@@ -557,7 +563,7 @@ static List _rewrite_header_cache_refs(
     _rewrite_header_cache_refs(compiler, child, prefix, replaced));
 }
 
-static List _make_header_cache_guard(List guard) => %(declare (static int)
+List _initialization_guard(List guard) => %(declare (static int)
     (bindings (op = (bind $guard ()) (expr (int) (literal (int) "0")))));
 
 static List _make_header_cache_init(
@@ -573,14 +579,13 @@ static List _make_header_cache_init(
         @statements)
   );
 
-static List _patch_header_cache_function(
-  List type, List bind, List statements, List guard, String initializer) => %(
-    function $type $bind
-      (block
-        (if (expr (int) (op ! (expr (int) (ident $guard))))
-          (stmnt (expr (void) (call $initializer (args)))))
-        @statements)
-  );
+List _patch_initialized_entry(
+  Compiler c, List function, List body, List guard, List entry) {
+  Macro shape = $initialized_entry;
+  List condition = %(expr (int) (ident $guard));
+  List callee = %(expr ((func ((void))) void) (ident $entry));
+  return c.rebuild_function(function, shape(condition, callee, body));
+}
 
 /* Add one translation-unit-local immutable cache to a generated header.
    The constructor eagerly establishes process-lifetime values; patched inline
@@ -599,7 +604,7 @@ static List _setup_header_cache(
   if (declaration) declarations.push(declaration);
   List guard = c.sym.reference(%($guard_name), NULL);
   List initializer = c.sym.reference(%($initializer_name), NULL);
-  declarations.push(_make_header_cache_guard(guard));
+  declarations.push(_initialization_guard(guard));
   Array statements = [];
   for (int i = 0, n = c.id_keys.len(); i < n; i++) {
     if (ids[i].is_null()) continue;
@@ -624,8 +629,8 @@ static List _setup_header_cache(
             foreach (Var item, prelude) output.push(item);
             inserted = 1;
           }
-          function = _patch_header_cache_function(
-            type, bind, statements, guard, initializer_name);
+          function = _patch_initialized_entry(
+            c, function, statements, guard, initializer);
           node = captured ? %(sourceinit $function) : function;
         }
     output.push(node);

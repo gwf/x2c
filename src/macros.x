@@ -3137,11 +3137,16 @@ List x2c_template_call(Var stored, List values) =>
    The caller supplies complete children and a template with no free names,
    computed slots, or nested applications. */
 static List _rebuild_structural_template(
-  Compiler c, List application, int statement) {
+  Compiler c, List application, int statement, List target) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = _template_arguments(c, definition, values, c.token, 1);
-  List bindings = arguments.match(definition.assoc(<pattern>));
+  List input = target
+    ? %(target $arguments
+        ${_capture_row_project(c, definition.assoc(<targetp>),
+                               %($target), 1)})
+    : arguments;
+  List bindings = input.match(definition.assoc(<pattern>));
   List template = definition.assoc(<template>);
   foreach (List hole, definition.assoc(<parameters>).list())
     if (hole.assoc(<kind>) == <expr>) {
@@ -3158,7 +3163,7 @@ static List _rebuild_structural_template(
     its established root `type`, child stage, and source wrappers. Binding,
     capture collection, hygiene, and effects do not run. */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
-  List rebuilt = _rebuild_structural_template(c, application, 0);
+  List rebuilt = _rebuild_structural_template(c, application, 0, NULL);
   return %(expr $type @{rebuilt.cddr()});
 }
 
@@ -3166,7 +3171,14 @@ List Compiler.rebuild_expression(Compiler c, Type type, List application) {
     children keep their identities and origins; template-origin wrappers
     are omitted because this path does not open an invocation. */
 List Compiler.rebuild_statement(Compiler c, List application) {
-  return _rebuild_structural_template(c, application, 1);
+  return _rebuild_structural_template(c, application, 1, NULL);
+}
+
+/** Rebuilds a bound function through a Function decorator without binding it
+    again. The template keeps the target's return type and declarator. */
+List Compiler.rebuild_function(
+  Compiler c, List target, List application) {
+  return _rebuild_structural_template(c, application, 1, target).cadr();
 }
 
 static List _lisp_bindings(List bindings) {
