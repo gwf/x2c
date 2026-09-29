@@ -342,15 +342,20 @@ List Compiler.func_signature(Compiler compiler, Type type) {
 static List _func_signature_literal(Compiler compiler, Type type) =>
   compiler.cache_literal_list(compiler.func_signature(type));
 
+typedef struct FuncReaders {
+  Compiler compiler;
+  Type diagnostic_type;
+  List value, reference, fn, argv;
+} FuncReaders;
+
 /* Call a resolved adapter reader without rebinding its typed arguments. */
 static List _adapter_reader_call(
-  Compiler compiler, Type result_type, List helper, Type helper_type,
-  List fn_binding, List argv_binding, int index, List details) {
-  List target = %(expr $helper_type (ident $helper));
-  List fn = %(expr ("Func") (ident $fn_binding));
-  List argv = %(expr (* const "FuncArg") (ident $argv_binding));
+  FuncReaders readers, Type result_type, List target, int index,
+  List details) {
+  List fn = %(expr ("Func") (ident ${readers.fn}));
+  List argv = %(expr (* const "FuncArg") (ident ${readers.argv}));
   List arguments = %($fn $argv ${_integer_expression(index)} @details);
-  return _func_call(compiler, result_type, target, arguments);
+  return _func_call(readers.compiler, result_type, target, arguments);
 }
 
 macro open Expression $func_address(Expr $value) => &$value;
@@ -365,21 +370,13 @@ macro open Statement $func_local(
   $type $row;
 }
 
-typedef struct FuncReaders {
-  Compiler compiler;
-  Type diagnostic_type;
-  List value, reference, fn, argv;
-  Type value_type, reference_type;
-} FuncReaders;
-
 static List _read_reference_arg(
   FuncReaders readers, Type parameter_type, int index,
   Type &storage_type) {
   Compiler compiler = readers.compiler;
   Type target = parameter_type.cdr(), pointer = target.reference();
   List picked = _adapter_reader_call(
-    compiler, %(* void), readers.reference, readers.reference_type,
-    readers.fn, readers.argv, index,
+    readers, %(* void), readers.reference, index,
     %(${compiler.cache_literal_list(target)}
       ${_type_literal(compiler, target)}));
   storage_type = pointer;
@@ -396,8 +393,8 @@ static List _read_pointer_arg(
   List pointer_helper = _adapter_helper(
     compiler, "x2c_func_pointer_argument", pointer_type);
   List picked = _adapter_reader_call(
-    compiler, %(* void), pointer_helper, pointer_type,
-    readers.fn, readers.argv, index, NULL);
+    readers, %(* void), _func_bound(pointer_type, pointer_helper),
+    index, NULL);
   storage_type = parameter_type;
   if (resolved.is_pointer())
     return compiler.convert_expression(picked, parameter_type);
@@ -418,8 +415,8 @@ static List _read_value_arg(
       "native binding parameter type has no Var representation",
       readers.diagnostic_type, parameter_type, NULL);
   List picked = _adapter_reader_call(
-    compiler, %("Var"), readers.value, readers.value_type,
-    readers.fn, readers.argv, index, %(${_adapter_symbol_literal(tag)}));
+    readers, %("Var"), readers.value, index,
+    %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
   return compiler.convert_expression(picked, parameter_type);
 }
@@ -453,9 +450,9 @@ static List _func_argument_locals(
     compiler, "x2c_func_declared_reference_argument", reference_type);
   FuncReaders readers = {
     .compiler = compiler, .diagnostic_type = diagnostic_type,
-    .value = value_helper, .reference = reference_helper,
-    .fn = fn_binding, .argv = argv_binding,
-    .value_type = value_type, .reference_type = reference_type
+    .value = _func_bound(value_type, value_helper),
+    .reference = _func_bound(reference_type, reference_helper),
+    .fn = fn_binding, .argv = argv_binding
   };
   Array locals = [];
   int index = 0;
