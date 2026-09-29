@@ -1383,70 +1383,81 @@ static void _check_unit_static(Compiler c, String spelling, Token origin) {
    identities before resolution. A visible local replaces a stale local
    identity; global shadow handling instead gives the visible declaration an
    emitted alias so the original identity keeps its meaning. */
+static List _identifier_binding(
+  Compiler c, Var value, Type &type, Token origin, int &require_type) {
+  require_type = value is <string>;
+  if (value is <string>) return c.sym.reference(%($value), type);
+  if (value is not <list>) return NULL;
+  List name = value;
+  int identity = 0;
+  String spelling = NULL;
+  if (binding_identity_try_parts(name, identity, spelling)) {
+    Var issued;
+    if (!c.semantic_binding_facts().try_get(
+      %(known $identity), issued) ||
+        issued is not <string> || !issued.string().equal(spelling))
+      c.report_error(
+        <type>, "identifier has an unknown binding identity",
+        origin, %("binding: ${name.repr()}"));
+    return name;
+  }
+  match (name) {
+    case %("x2c.ident" ?(String spelling)): {
+      require_type = 1;
+      return c.sym.reference(%($spelling), type);
+    }
+    case %((!is ? type string)):
+      return c.sym.reference(name, type);
+  }
+  return NULL;
+}
+
+static void _capture_identifier(Compiler c, List binding) {
+  if (c.local_macro_captures == NULL || !binding ||
+      !c.sym.binding_is_local_before(
+        binding, c.local_macro_capture_scopes) ||
+      c.local_macro_captures.contains(binding)) return;
+  Var order = c.local_macro_captures[<order>];
+  c.local_macro_captures[<order>] = cons(
+    binding, order is <list> ? order : NULL);
+  c.local_macro_captures[binding] = 1;
+}
+
+static void _shadow_identifier(
+  Compiler c, List &binding, Type type, String spelling,
+  Map binding_facts) {
+  if (!spelling) return;
+  Type visible_type = NULL;
+  List visible = c.sym.lookup(%($spelling), visible_type);
+  if (!visible || visible == binding) return;
+  if (%(local-macro-capture $binding) in binding_facts) {
+    if (!binding_facts.contains(%(emitted $visible)))
+      binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+  }
+  else if (c.sym.binding_is_local(binding) &&
+           !binding_facts.contains(%(lambda-depth $binding)))
+    binding = visible;
+  else if (visible_type &&
+           (!type || c.sym.resolve_global(%($spelling), NULL)) &&
+           !binding_facts.contains(%(emitted $visible)))
+    binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+}
+
 static List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
   int deferred = type === %(<macro-expr>);
   if (deferred) type = NULL;
   int read_reference = !type;
-  List binding = NULL, int require_type = value is <string>;
-  if (value is <string>) binding = c.sym.reference(%($value), type);
-  else if (value is <list>) {
-    List name = value;
-    int identity = 0;
-    String spelling = NULL;
-    if (binding_identity_try_parts(name, identity, spelling)) {
-      Var issued;
-      if (!c.semantic_binding_facts().try_get(
-        %(known $identity), issued) ||
-          issued is not <string> || !issued.string().equal(spelling))
-        c.report_error(
-          <type>, "identifier has an unknown binding identity",
-          origin, %("binding: ${name.repr()}"));
-      binding = name;
-    }
-    else match (name) {
-      case %("x2c.ident" ?(String spelling)): {
-        require_type = 1;
-        binding = c.sym.reference(%($spelling), type);
-      }
-      case %((!is ? type string)):
-        binding = c.sym.reference(name, type);
-    }
-  }
+  int require_type = 0;
+  List binding = _identifier_binding(c, value, type, origin, require_type);
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
      value.car() == <macro-bind>);
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
-  if (c.local_macro_captures != NULL && binding &&
-      c.sym.binding_is_local_before(
-        binding, c.local_macro_capture_scopes) &&
-      !c.local_macro_captures.contains(binding)) {
-    Var order = c.local_macro_captures[<order>];
-    c.local_macro_captures[<order>] = cons(
-      binding, order is <list> ? order : NULL);
-    c.local_macro_captures[binding] = 1;
-  }
-  if (spelling) {
-    Type visible_type = NULL;
-    List visible = c.sym.lookup(%($spelling), visible_type);
-    if (visible && visible != binding) {
-      if (%(local-macro-capture $binding) in binding_facts) {
-        if (!binding_facts.contains(%(emitted $visible)))
-          binding_facts[%(emitted $visible)] =
-            c.fresh_name("binding_shadow");
-      }
-      else if (c.sym.binding_is_local(binding) &&
-               !binding_facts.contains(%(lambda-depth $binding)))
-        binding = visible;
-      else if (visible_type &&
-               (!type || c.sym.resolve_global(%($spelling), NULL)) &&
-               !binding_facts.contains(%(emitted $visible)))
-        binding_facts[%(emitted $visible)] =
-          c.fresh_name("binding_shadow");
-    }
-  }
+  _capture_identifier(c, binding);
+  _shadow_identifier(c, binding, type, spelling, binding_facts);
   if (!type) {
     Var stored;
     if (binding_facts.try_get(%(type $binding), stored) && stored is <list>)
@@ -2053,6 +2064,296 @@ static List _resolve_initializer(Compiler c, List node, Token origin) {
   return c.resolve_expression(node, origin);
 }
 
+/* Resolve each interpolation once, then convert values whose types are known. */
+static List _resolve_segments(
+  Compiler c, List items, Token origin) {
+  Array resolved = [];
+  Type type = %("String");
+  foreach (List item, items) match (item) {
+    case %((!set ?tag (!or segvar segexp)) ?value): {
+      List expression = c.resolve_expression(value, origin);
+      if (_deferred_receiver(expression)) {
+        type = %(<macro-expr>);
+        resolved.push(%($tag $expression));
+        continue;
+      }
+      resolved.push(%($tag ${c.convert_segment_to_string(expression)}));
+      continue;
+    }
+    default: resolved.push(item);
+  }
+  return %(expr $type (segments @{resolved.list_free()}));
+}
+
+static List _resolve_initval(
+  Compiler c, Type input_type, List content, Token origin) {
+  List header = NULL;
+  List cases = Ast.initializer_cases(content, header);
+  Array resolved = [];
+  if (header) {
+    Array inputs = [];
+    foreach (List argument, header.cdr()) {
+      List value = c.resolve_expression(argument.cadr(), origin);
+      inputs.push(%(${argument.car()} $value));
+    }
+    resolved.push(%(input @{inputs.list_free()}));
+  }
+  foreach (List choice, cases) {
+    (List condition, List path, Type destination, List value) = choice;
+    if (condition) condition = c.resolve_expression(condition, origin);
+    value = c.resolve_expression(value, origin);
+    resolved.push(%($condition $path $destination $value));
+  }
+  return %(expr $input_type (initval @{resolved.list_free()}));
+}
+
+static List _resolve_is_type(
+  Compiler c, List operand, Type target, Token origin) {
+  List lhs = c.resolve_expression(operand, origin);
+  Type lhs_type = lhs.cadr();
+  if (_deferred_receiver(lhs) || _deferred_type_test(target))
+    return %(expr (<macro-expr>) (is-type $lhs $target));
+  if (!c.sym.is_var_type(lhs_type))
+    c.report_error(
+      <type>, "operator 'is' requires Var on the left",
+      origin, %("operand type: ${lhs_type.repr()}"));
+  Macro called = $called;
+  if (target === %(void) || target === %("Void")) {
+    List callee = _resolve_identifier(c, "Var_is_void", NULL, origin);
+    return c.rebuild_expression(%(int), called(callee, %($lhs)));
+  }
+  Symbol vartag = c.require_var_tag(target, origin);
+  List direct = _constant_row_test(c, lhs, vartag, origin);
+  if (direct) return direct;
+  String tagsym = %"${(unsigned long) vartag}";
+  List callee = _resolve_identifier(c, "Var_is", NULL, origin);
+  return c.rebuild_expression(%(int), called(
+    callee, %($lhs (expr ("Symbol") $tagsym))));
+}
+
+static List _resolve_is_symbol(
+  Compiler c, List operand, List selector, Token origin) {
+  List lhs = c.resolve_expression(operand, origin);
+  selector = c.resolve_expression(selector, origin);
+  Type lhs_type = lhs.cadr(), selector_type = selector.cadr();
+  if (_deferred_receiver(lhs) || _deferred_receiver(selector))
+    return %(expr (<macro-expr>) (is-symbol $lhs $selector));
+  if (!c.sym.is_var_type(lhs_type))
+    c.report_error(
+      <type>, "operator 'is' requires Var on the left",
+      origin, %("operand type: ${lhs_type.repr()}"));
+  if (!c.sym.is_named_value_type(selector_type, "Symbol"))
+    c.report_error(
+      <type>, "operator 'is' requires a type or Symbol on the right",
+      origin, %("operand type: ${selector_type.repr()}"));
+  match (selector)
+    case %(expr ("Symbol") (literal ("Symbol") ? ?(Symbol tag))): {
+      List direct = _constant_row_test(c, lhs, tag, origin);
+      if (direct) return direct;
+    }
+  List callee = _resolve_identifier(c, "Var_is", NULL, origin);
+  Macro called = $called;
+  return c.rebuild_expression(%(int), called(callee, %($lhs $selector)));
+}
+
+static List _resolve_cons(
+  Compiler c, Type input_type, List head, List tail, Token origin) {
+  head = c.resolve_expression(head, origin);
+  tail = c.resolve_expression(tail, origin);
+  Type type = input_type ? input_type : %("List");
+  if (_deferred_receiver(head) || _deferred_receiver(tail))
+    return %(expr $type (cons $head $tail));
+  head = c.convert_expression(head, %("Var"));
+  List cached = c.cache_cons_cell(head, tail);
+  if (cached) return cached;
+  return %(expr $type (cons $head $tail));
+}
+
+static List _resolve_append(
+  Compiler c, Type input_type, List head, List tail, Token origin) {
+  head = c.resolve_expression(head, origin);
+  tail = c.resolve_expression(tail, origin);
+  head = c.sym.is_var_type(head.cadr())
+       ? %(expr ("List") (call "Var_list" (args $head)))
+       : c.convert_expression(head, %("List"));
+  return %(expr ${input_type ? input_type : %("List")}
+           (append $head $tail));
+}
+
+static List _resolve_slice(
+  Compiler c, Type input_type, List receiver, List start, List stop,
+  List step, Token origin) {
+  receiver = c.resolve_expression(receiver, origin);
+  if (start) start = c.resolve_expression(start, origin);
+  if (stop) stop = c.resolve_expression(stop, origin);
+  if (step) step = c.resolve_expression(step, origin);
+  List operation = %(slice $receiver $start $stop $step);
+  if (input_type === %(<macro-expr>))
+    operation = c.anchor_origin(operation, origin);
+  return %(expr ${receiver.cadr()} $operation);
+}
+
+static List _resolve_generic(
+  Compiler c, List control, List associations, Token origin) {
+  control = c.resolve_expression(control, origin);
+  Array resolved = [];
+  foreach (List association, associations) match (association)
+    case %(association ?selector ?value):
+      resolved.push(
+        %(association $selector ${c.resolve_expression(value, origin)}));
+  Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
+  return %(expr $type (generic $control @{resolved.list_free()}));
+}
+
+static List _resolve_cast(
+  Compiler c, List declaration, List operand, Token origin) {
+  operand = c.resolve_expression(operand, origin);
+  declaration = c.bind_syntax(declaration, AST_BLOCK, c.return_type);
+  List typed = %(declare @{declaration.cdr()});
+  Type type = operand.cadr() === %(<macro-expr>) ||
+              _casts_to_template_typedef(c, declaration)
+            ? %(<macro-expr>) : typed.type_from_ast();
+  return %(expr $type (cast $declaration $operand));
+}
+
+static List _resolve_unary(
+  Compiler c, Var operator, List operand, Token origin) {
+  List lhs = c.resolve_expression(operand, origin);
+  Type lhs_type = lhs.cadr();
+  if (lhs_type.car() == <opt-ref> && operator != <!>)
+    c.report_error(
+      <type>, "check optional reference before using its value",
+      origin, NULL);
+  if (operator == <*> && operand.cadr().car() == <&> &&
+      lhs_type.car() != <&>) return lhs;
+  if (lhs_type === %(<macro-expr>))
+    return %(expr (<macro-expr>) (op $operator $lhs));
+  List lowered = operator == <->
+    ? c._protocol_operator_expression(operator, lhs, NULL) : NULL;
+  if (lowered) return lowered;
+  Type type = lhs_type;
+  switch (operator.symbol()) {
+    case <!>: type = %(int); break;
+    case <*>: {
+      Type pointee = type.dereference();
+      type = pointee ? pointee : c.sym.resolve_key(type).dereference();
+      break;
+    }
+    case <&>: type = type.reference(); break;
+    case <~>: case <+>: case <->: {
+      type = c.sym.resolve_numeric_type(type);
+      if (type && type.is_integral()) type = type.promote();
+      if (!type && lhs_type && operator == <->)
+        c.report_error(
+          <type>,
+          "unary '-' requires a numeric type or implemented neg",
+          origin, %("operand type: ${lhs_type.repr()}"));
+      if (!type) type = lhs_type;
+      break;
+    }
+  }
+  return %(expr $type (op $operator $lhs));
+}
+
+static List _resolve_conditional(
+  Compiler c, Var operator, List condition, List ontrue,
+  List onfalse, Token origin) {
+  condition = c.resolve_expression(condition, origin);
+  ontrue = c.resolve_expression(ontrue, origin);
+  onfalse = c.resolve_expression(onfalse, origin);
+  Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
+  if (condition.cadr() === %(<macro-expr>) ||
+      true_type === %(<macro-expr>) ||
+      false_type === %(<macro-expr>))
+    return %(expr (<macro-expr>)
+             (op $operator $condition $ontrue $onfalse));
+  /* Arms of one declared type keep it, so a `Symbol` conditional stays a
+     `Symbol` rather than the integer that represents it. */
+  Type type = true_type;
+  if (true_type.declared() != false_type.declared()) {
+    Type left = c.sym.resolve_numeric_type(type);
+    Type right = c.sym.resolve_numeric_type(false_type);
+    if (left && right) type = left.widest(right);
+    else if (_conditional_joins(c, false_type, true_type)) {
+      type = false_type;
+      ontrue = c.convert_expression(ontrue, type);
+    }
+    else if (_conditional_joins(c, true_type, false_type))
+      onfalse = c.convert_expression(onfalse, type);
+  }
+  return %(expr $type (op $operator $condition $ontrue $onfalse));
+}
+
+static List _resolve_tadapt(
+  Compiler c, List target, List source, Token origin) {
+  target = c.resolve_expression(target, origin);
+  source = c.resolve_expression(source, origin);
+  match (target)
+    case %(expr (!set ?syntax (typedef ?target_type)) ?): {
+      Type type = c.sym.resolve_key(syntax);
+      if (!type || !type.is_pointer() ||
+          !type.dereference().is_function())
+        c.report_error(
+          <macro>,
+          "typed callback adapter target must name a function pointer",
+          origin, type ? %("target type: ${type.repr()}") : NULL);
+      return %(expr ($target_type) (tadapt ${c.origin} $source));
+    }
+  c.report_error(
+    <macro>, "typed callback adapter target must be a typedef name",
+    origin, NULL);
+}
+
+static List _resolve_indexed(
+  Compiler c, List receiver, List selector, Token origin) {
+  receiver = c.resolve_expression(receiver, origin);
+  selector = c.resolve_expression(selector, origin);
+  if (receiver.cadr().car() == <opt-ref>)
+    c.report_error(
+      <type>, "check optional reference before indexing its value",
+      origin, NULL);
+  if (_deferred_receiver(receiver) || _deferred_receiver(selector))
+    return %(expr (<macro-expr>) (index $receiver $selector));
+  List resolved = c._postfix_index_expression(receiver, selector);
+  if (resolved) return resolved;
+  Type receiver_type = receiver.cadr();
+  // A field of a foreign struct has no x2c type; C indexes it alone.
+  if (!receiver_type &&
+      List.match(receiver, %(expr () (op (!or . ->) * *))))
+    return %(expr () (index $receiver $selector));
+  c.report_error(
+    <parse>, receiver_type.is_typedef_name()
+      ? %"type $receiver_type does not support getindex"
+      : %"type $receiver_type does not support indexing",
+    origin, %());
+}
+
+static List _resolve_member(
+  Compiler c, Var operator, List receiver, List field, Token origin) {
+  receiver = c.resolve_expression(receiver, origin);
+  Type receiver_type = receiver.cadr();
+  List resolution = c.resolve_postfix_member(
+    receiver_type, field, operator, 0);
+  match (resolution)
+    case %(field ?access ?field_type):
+      return %(expr $field_type (op $access $receiver $field));
+  Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
+  return %(expr $type (op $operator $receiver $field));
+}
+
+static List _resolve_postfix_op(
+  Compiler c, Var operator, List operand, Token origin) {
+  operand = c.resolve_expression(operand, origin);
+  Type operand_type = operand.cadr();
+  if (operand_type.car() == <opt-ref>)
+    c.report_error(
+      <type>, "check optional reference before using its value",
+      origin, NULL);
+  if (operand_type === %(<macro-expr>))
+    return %(expr (<macro-expr>) (postfix $operator $operand));
+  return %(expr $operand_type (postfix $operator $operand));
+}
+
 static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
@@ -2081,29 +2382,8 @@ static List _resolve_content(
     match (content) case %(!set ?inner (expr ? ?)):
       return c.resolve_expression(inner, origin);
   Macro indexed = $indexed;
-  match (input) case indexed(?receiver, ?selector): {
-    receiver = c.resolve_expression(receiver, origin);
-    selector = c.resolve_expression(selector, origin);
-    if (receiver.cadr().car() == <opt-ref>)
-      c.report_error(
-        <type>, "check optional reference before indexing its value",
-        origin, NULL);
-    if (_deferred_receiver(receiver) ||
-        _deferred_receiver(selector))
-      return %(expr (<macro-expr>) (index $receiver $selector));
-    List resolved = c._postfix_index_expression(receiver, selector);
-    if (resolved) return resolved;
-    Type receiver_type = receiver.cadr();
-    // A field of a foreign struct has no x2c type; C indexes it alone.
-    if (!receiver_type &&
-        List.match(receiver, %(expr () (op (!or . ->) * *))))
-      return %(expr () (index $receiver $selector));
-    c.report_error(
-      <parse>, receiver_type.is_typedef_name()
-        ? %"type $receiver_type does not support getindex"
-        : %"type $receiver_type does not support indexing",
-      origin, %());
-  }
+  match (input) case indexed(?receiver, ?selector):
+    return _resolve_indexed(c, receiver, selector, origin);
   match (content) case %(call ?(String callee) (args *supplied)): {
     List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
     return %(expr $input_type (call $callee (args @arguments)));
@@ -2151,57 +2431,14 @@ static List _resolve_content(
           resolved.push(c.resolve_map_entry(row, origin));
       return %(expr $input_type (map @{resolved.list_free()}));
     }
-    case %(segments *items): {
-      Array resolved = [];
-      Type type = %("String");
-      foreach (List item, items) match (item) {
-        case %((!set ?tag (!or segvar segexp)) ?value): {
-          List expression = c.resolve_expression(value, origin);
-          if (_deferred_receiver(expression)) {
-            type = %(<macro-expr>);
-            resolved.push(%($tag $expression));
-            continue;
-          }
-          resolved.push(
-            %($tag ${c.convert_segment_to_string(expression)}));
-          continue;
-        }
-        default: resolved.push(item);
-      }
-      return %(expr $type
-               (segments @{resolved.list_free()}));
-    }
-    case %(cons ?head ?tail): {
-      head = c.resolve_expression(head, origin);
-      tail = c.resolve_expression(tail, origin);
-      if (_deferred_receiver(head) || _deferred_receiver(tail))
-        return %(expr ${input_type ? input_type : %("List")}
-                 (cons $head $tail));
-      head = c.convert_expression(head, %("Var"));
-      List cached = c.cache_cons_cell(head, tail);
-      if (cached) return cached;
-      return %(expr ${input_type ? input_type : %("List")}
-               (cons $head $tail));
-    }
-    case %(append ?head ?tail): {
-      head = c.resolve_expression(head, origin);
-      tail = c.resolve_expression(tail, origin);
-      head = c.sym.is_var_type(head.cadr())
-           ? %(expr ("List") (call "Var_list" (args $head)))
-           : c.convert_expression(head, %("List"));
-      return %(expr ${input_type ? input_type : %("List")}
-               (append $head $tail));
-    }
-    case %(slice ?receiver ?start ?stop ?step): {
-      receiver = c.resolve_expression(receiver, origin);
-      if (start) start = c.resolve_expression(start, origin);
-      if (stop) stop = c.resolve_expression(stop, origin);
-      if (step) step = c.resolve_expression(step, origin);
-      List operation = %(slice $receiver $start $stop $step);
-      if (input_type === %(<macro-expr>))
-        operation = c.anchor_origin(operation, origin);
-      return %(expr ${receiver.cadr()} $operation);
-    }
+    case %(segments *items): return _resolve_segments(c, items, origin);
+    case %(cons ?head ?tail):
+      return _resolve_cons(c, input_type, head, tail, origin);
+    case %(append ?head ?tail):
+      return _resolve_append(c, input_type, head, tail, origin);
+    case %(slice ?receiver ?start ?stop ?step):
+      return _resolve_slice(
+        c, input_type, receiver, start, stop, step, origin);
     case %(getindex ?receiver ?selector):
       return %(expr $input_type
                (getindex ${c.resolve_expression(receiver, origin)}
@@ -2220,16 +2457,8 @@ static List _resolve_content(
     case %(sizeof ?(List argument)):
       return %(expr $input_type
                (sizeof ${c.resolve_expression(argument, origin)}));
-    case %(generic ?control *associations): {
-      control = c.resolve_expression(control, origin);
-      Array resolved = [];
-      foreach (List association, associations) match (association)
-        case %(association ?selector ?value):
-          resolved.push(
-            %(association $selector ${c.resolve_expression(value, origin)}));
-      Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
-      return %(expr $type (generic $control @{resolved.list_free()}));
-    }
+    case %(generic ?control *associations):
+      return _resolve_generic(c, control, associations, origin);
     case %(va-arg ?argument ?declaration):
       return %(expr $input_type
                (va-arg ${c.resolve_expression(argument, origin)}
@@ -2258,26 +2487,8 @@ static List _resolve_content(
       Type inner_type = inner.cadr();
       return %(expr $inner_type (parens $inner));
     }
-    case %(initval *choices): {
-      List header = NULL;
-      List cases = Ast.initializer_cases(content, header);
-      Array resolved = [];
-      if (header) {
-        Array inputs = [];
-        foreach (List argument, header.cdr()) {
-          List value = c.resolve_expression(argument.cadr(), origin);
-          inputs.push(%(${argument.car()} $value));
-        }
-        resolved.push(%(input @{inputs.list_free()}));
-      }
-      foreach (List choice, cases) {
-        (List condition, List path, Type destination, List value) = choice;
-        if (condition) condition = c.resolve_expression(condition, origin);
-        value = c.resolve_expression(value, origin);
-        resolved.push(%($condition $path $destination $value));
-      }
-      return %(expr $input_type (initval @{resolved.list_free()}));
-    }
+    case %(initval *choices):
+      return _resolve_initval(c, input_type, content, origin);
     case %(composite (commas *elements)): {
       Array values = [];
       foreach (List element, elements)
@@ -2285,177 +2496,31 @@ static List _resolve_content(
       return %(expr $input_type
                (composite (commas @{values.list_free()})));
     }
-    case %(cast (!set ?declaration (decl *)) ?operand): {
-      operand = c.resolve_expression(operand, origin);
-      declaration = c.bind_syntax(declaration, AST_BLOCK, c.return_type);
-      List typed = %(declare @{declaration.cdr()});
-      Type type = operand.cadr() === %(<macro-expr>) ||
-                  _casts_to_template_typedef(c, declaration)
-                ? %(<macro-expr>) : typed.type_from_ast();
-      return %(expr $type (cast $declaration $operand));
-    }
+    case %(cast (!set ?declaration (decl *)) ?operand):
+      return _resolve_cast(c, declaration, operand, origin);
     case %(type-tag ?target):
       return c.var_tag_expression(target, origin);
-    case %(is-type ?operand ?target_syntax): {
-      List lhs = c.resolve_expression(operand, origin);
-      Type lhs_type = lhs.cadr();
-      Type target = target_syntax;
-      if (_deferred_receiver(lhs) || _deferred_type_test(target))
-        return %(expr (<macro-expr>) (is-type $lhs $target));
-      if (!c.sym.is_var_type(lhs_type))
-        c.report_error(
-          <type>, "operator 'is' requires Var on the left",
-          origin, %("operand type: ${lhs_type.repr()}"));
-      if (target === %(void) || target === %("Void")) {
-        List callee = _resolve_identifier(c, "Var_is_void", NULL, origin);
-        return c.rebuild_expression(%(int), called(callee, %($lhs)));
-      }
-      Symbol vartag = c.require_var_tag(target, origin);
-      List direct = _constant_row_test(c, lhs, vartag, origin);
-      if (direct) return direct;
-      String tagsym = %"${(unsigned long) vartag}";
-      List callee = _resolve_identifier(c, "Var_is", NULL, origin);
-      return c.rebuild_expression(%(int), called(
-        callee, %($lhs (expr ("Symbol") $tagsym))));
-    }
-    case %(is-symbol ?operand ?selector): {
-      List lhs = c.resolve_expression(operand, origin);
-      selector = c.resolve_expression(selector, origin);
-      Type lhs_type = lhs.cadr(), selector_type = selector.cadr();
-      if (_deferred_receiver(lhs) ||
-          _deferred_receiver(selector))
-        return %(expr (<macro-expr>) (is-symbol $lhs $selector));
-      if (!c.sym.is_var_type(lhs_type))
-        c.report_error(
-          <type>, "operator 'is' requires Var on the left",
-          origin, %("operand type: ${lhs_type.repr()}"));
-      if (!c.sym.is_named_value_type(selector_type, "Symbol"))
-        c.report_error(
-          <type>, "operator 'is' requires a type or Symbol on the right",
-          origin, %("operand type: ${selector_type.repr()}"));
-      match (selector)
-        case %(expr ("Symbol") (literal ("Symbol") ? ?(Symbol tag))): {
-          List direct = _constant_row_test(c, lhs, tag, origin);
-          if (direct) return direct;
-        }
-      List callee = _resolve_identifier(c, "Var_is", NULL, origin);
-      return c.rebuild_expression(
-        %(int), called(callee, %($lhs $selector)));
-    }
+    case %(is-type ?operand ?target_syntax):
+      return _resolve_is_type(c, operand, target_syntax, origin);
+    case %(is-symbol ?operand ?selector):
+      return _resolve_is_symbol(c, operand, selector, origin);
     case %(op (!or (!set ?operator .) (!set ?operator (!quote ->)))
-              ?receiver (!set ?field (*))): {
-      receiver = c.resolve_expression(receiver, origin);
-      Type receiver_type = receiver.cadr();
-      List resolution = c.resolve_postfix_member(
-        receiver_type, field, operator, 0);
-      match (resolution)
-        case %(field ?access ?field_type):
-          return %(expr $field_type (op $access $receiver $field));
-      Type type = _deferred_receiver(receiver)
-                ? %(<macro-expr>) : NULL;
-      return %(expr $type (op $operator $receiver $field));
-    }
-    case %(op ?operator ?operand): {
-      List lhs = c.resolve_expression(operand, origin);
-      Type lhs_type = lhs.cadr();
-      if (lhs_type.car() == <opt-ref> && operator != <!>)
-        c.report_error(
-          <type>, "check optional reference before using its value",
-          origin, NULL);
-      if (operator == <*> && operand.cadr().car() == <&> &&
-          lhs_type.car() != <&>) return lhs;
-      if (lhs_type === %(<macro-expr>))
-        return %(expr (<macro-expr>) (op $operator $lhs));
-      List lowered = operator == <->
-        ? c._protocol_operator_expression(operator, lhs, NULL) : NULL;
-      if (lowered) return lowered;
-      Type type = lhs_type;
-      switch (operator.symbol()) {
-        case <!>: type = %(int);                 break;
-        case <*>: {
-          Type pointee = type.dereference();
-          type = pointee ? pointee : c.sym.resolve_key(type).dereference();
-          break;
-        }
-        case <&>: type = type.reference();   break;
-        case <~>: case <+>: case <->: {
-          type = c.sym.resolve_numeric_type(type);
-          if (type && type.is_integral()) type = type.promote();
-          if (!type && lhs_type && operator == <->)
-            c.report_error(
-              <type>,
-              "unary '-' requires a numeric type or implemented neg",
-              origin, %("operand type: ${lhs_type.repr()}"));
-          if (!type) type = lhs_type;
-          break;
-        }
-      }
-      return %(expr $type (op $operator $lhs));
-    }
-    case %(op ?operator ?condition ?ontrue ?onfalse): {
-      condition = c.resolve_expression(condition, origin);
-      ontrue = c.resolve_expression(ontrue, origin);
-      onfalse = c.resolve_expression(onfalse, origin);
-      Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
-      if (condition.cadr() === %(<macro-expr>) ||
-          true_type === %(<macro-expr>) ||
-          false_type === %(<macro-expr>))
-        return %(
-          expr (<macro-expr>)
-            (op $operator $condition $ontrue $onfalse)
-        );
-      /* Arms of one declared type keep it, so a `Symbol` conditional stays a
-         `Symbol` rather than the integer that represents it. */
-      Type type = true_type;
-      if (true_type.declared() != false_type.declared()) {
-        Type left = c.sym.resolve_numeric_type(type);
-        Type right = c.sym.resolve_numeric_type(false_type);
-        if (left && right) type = left.widest(right);
-        else if (_conditional_joins(c, false_type, true_type)) {
-          type = false_type;
-          ontrue = c.convert_expression(ontrue, type);
-        }
-        else if (_conditional_joins(c, true_type, false_type))
-          onfalse = c.convert_expression(onfalse, type);
-      }
-      return %(expr $type (op $operator $condition $ontrue $onfalse));
-    }
+              ?receiver (!set ?field (*))):
+      return _resolve_member(c, operator, receiver, field, origin);
+    case %(op ?operator ?operand):
+      return _resolve_unary(c, operator, operand, origin);
+    case %(op ?operator ?condition ?ontrue ?onfalse):
+      return _resolve_conditional(
+        c, operator, condition, ontrue, onfalse, origin);
     case %(op ?operator ?left ?right): {
       List lhs = c.resolve_expression(left, origin);
       List rhs = c.resolve_expression(right, origin);
       return c._binary_expression(operator, lhs, rhs, origin);
     }
-    case %(postfix ?operator ?operand): {
-      operand = c.resolve_expression(operand, origin);
-      Type operand_type = operand.cadr();
-      if (operand_type.car() == <opt-ref>)
-        c.report_error(
-          <type>, "check optional reference before using its value",
-          origin, NULL);
-      if (operand_type === %(<macro-expr>))
-        return %(expr (<macro-expr>) (postfix $operator $operand));
-      return %(expr $operand_type (postfix $operator $operand));
-    }
-    case %(tadapt ?target ?source): {
-      target = c.resolve_expression(target, origin);
-      source = c.resolve_expression(source, origin);
-      match (target)
-        case %(expr (!set ?syntax (typedef ?target_type)) ?): {
-          Type type = c.sym.resolve_key(syntax);
-          if (!type || !type.is_pointer() ||
-              !type.dereference().is_function())
-            c.report_error(
-              <macro>,
-              "typed callback adapter target must name a function pointer",
-              origin,
-              type ? %("target type: ${type.repr()}") : NULL);
-          return %(expr ($target_type)
-                   (tadapt ${c.origin} $source));
-        }
-      c.report_error(
-        <macro>, "typed callback adapter target must be a typedef name",
-        origin, NULL);
-    }
+    case %(postfix ?operator ?operand):
+      return _resolve_postfix_op(c, operator, operand, origin);
+    case %(tadapt ?target ?source):
+      return _resolve_tadapt(c, target, source, origin);
   }
   return input;
 }
@@ -3890,6 +3955,177 @@ static List _empty_collection(Compiler c, Type target) {
   return NULL;
 }
 
+static List _composite_rows(
+  Compiler compiler, Type target, List items, List native_target,
+  List parent_condition, int &discarded) {
+  Array rows = [];
+  int initialized = 0;
+  foreach (List row, compiler.initializer_rows(target, items, native_target)) {
+    List cases = row.cadr();
+    int available = 0;
+    foreach (List choice, cases)
+      if (choice.caddr().truth()) { available = 1; break; }
+    if (parent_condition && initialized && !available) {
+      discarded = 1;
+      continue;
+    }
+    if (available) initialized = 1;
+    rows.push(row);
+  }
+  return rows.list_free();
+}
+
+/* Keep C's excess warning on one retained value of this alternative. */
+static List _composite_excess_check(List parent_condition) {
+  List zero = %(expr (int) (literal (int) "0"));
+  List one = %(expr (int) (literal (int) "1"));
+  List size = %(expr (int) (op ? $parent_condition $zero $one));
+  Type array = %((dim $size) char);
+  List probe = %(expr $array (cast $array
+    (expr $array (composite (commas $zero)))));
+  List count = %(expr (unsigned) (sizeof (parens $probe)));
+  return %(expr (int) (op + $one (expr (int) (op * $zero $count))));
+}
+
+static List _mixed_initializer_row(
+  Compiler compiler, List row, List source, List native_target,
+  List row_condition, List parent_condition, int &?native_used) {
+  (List original, List cases) = row;
+  Array converted = [], captured = [];
+  List prepared = source;
+  if (source.match(%(expr ? (composite *))))
+    prepared = _initializer_capture_leaves(compiler, source, captured);
+  int native_identity = !parent_condition;
+  foreach (List choice, cases) {
+    (List condition, List path, Type destination, List input) = choice;
+    input = prepared;
+    List slot = native_target
+      ? compiler.initializer_slot(native_target, path) : NULL;
+    List effective = _initializer_and(row_condition, condition);
+    List result = destination
+      ? _initializer_conversion(
+        compiler, input, destination, effective, slot, native_used)
+      : input;
+    int identity = result === input;
+    match (result)
+      case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
+        if (yes === input) identity = 1;
+    if (!identity) native_identity = 0;
+    converted.push(%($condition $path $destination $result));
+  }
+  if (native_identity) {
+    converted.free();
+    captured.free();
+    return original;
+  }
+  String formal = compiler.fresh_name("initializer_value");
+  List placeholder = %(expr ${source.cadr()} $formal);
+  List values = converted.list_free();
+  List adapted = _initializer_adapters(
+    compiler, source, values, placeholder);
+  if (adapted) values = adapted;
+  Array replaced = [];
+  List inputs = captured.list_free();
+  int uses_input = !!adapted;
+  foreach (List choice, values) {
+    (List condition, List path, Type destination, List result) = choice;
+    List substituted =
+      !destination && source.match(%(expr ? (composite *)))
+        ? result : result.search_replace(%(!quote $source), placeholder);
+    if (substituted !== result) uses_input = 1;
+    replaced.push(%($condition $path $destination $substituted));
+  }
+  List choices = replaced.list_free();
+  if (uses_input) inputs = cons(%($formal $source), inputs);
+  if (inputs) choices = cons(%(input @inputs), choices);
+  List result = %(expr () (initval @choices));
+  return _initializer_replace(original, result);
+}
+
+typedef struct RowSelection {
+  Type type;
+  List value, path, applicable;
+  int homogeneous, excess;
+} RowSelection;
+
+static RowSelection _select_row(List cases) {
+  RowSelection selected = { .homogeneous = 1 };
+  int applicable_seen = 0;
+  foreach (List choice, cases) {
+    (List condition, List path, Type destination, List input) = choice;
+    selected.value = input;
+    if (!destination) { selected.excess = 1; continue; }
+    if (!applicable_seen) {
+      selected.applicable = condition;
+      applicable_seen = 1;
+    }
+    else if (!selected.applicable || !condition) selected.applicable = NULL;
+    else if (selected.applicable !== condition)
+      selected.applicable = %(expr (int)
+        (op || (expr (int) (parens ${selected.applicable}))
+               (expr (int) (parens $condition))));
+    if (!selected.type) { selected.type = destination; selected.path = path; }
+    else if (destination !== selected.type) selected.homogeneous = 0;
+  }
+  return selected;
+}
+
+static List _convert_initval_row(
+  Compiler compiler, List row, List terminal, List native_target,
+  List row_condition, int &?native_used) {
+  (List original, List cases) = row;
+  Array checked = [];
+  foreach (List choice, cases) {
+    (List condition, List path, Type destination, List input) = choice;
+    List slot = compiler.initializer_slot(native_target, path);
+    List effective = _initializer_and(row_condition, condition);
+    List value = !destination ? input
+      : _initializer_conversion(
+        compiler, input, destination, effective, slot, native_used);
+    checked.push(%($condition $path $destination $value));
+  }
+  List header = NULL;
+  Ast.initializer_cases(terminal.caddr(), header);
+  List choices = checked.list_free();
+  if (header) choices = cons(header, choices);
+  List value = %(expr () (initval @choices));
+  return _initializer_replace(original, value);
+}
+
+static List _convert_homogeneous_row(
+  Compiler compiler, List original, RowSelection selected,
+  List native_target, List row_condition, int &?native_used) {
+  List slot = native_target
+    ? compiler.initializer_slot(native_target, selected.path) : NULL;
+  List condition = _initializer_and(
+    row_condition, selected.excess ? selected.applicable : NULL);
+  List converted = !selected.type ? selected.value
+    : _initializer_conversion(
+      compiler, selected.value, selected.type, condition, slot, native_used);
+  return _initializer_replace(original, converted);
+}
+
+static List _convert_composite_row(
+  Compiler compiler, List row, List native_target, List row_condition,
+  List parent_condition, int &?native_used) {
+  (List original, List cases) = row;
+  RowSelection selected = _select_row(cases);
+  List terminal = original;
+  while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
+    terminal = terminal.caddr();
+  if (terminal.match(%(expr ? (initval *))))
+    return row_condition === parent_condition ? original
+      : _convert_initval_row(
+        compiler, row, terminal, native_target, row_condition, native_used);
+  if (selected.homogeneous)
+    return _convert_homogeneous_row(
+      compiler, original, selected, native_target, row_condition,
+      native_used);
+  return _mixed_initializer_row(
+    compiler, row, selected.value, native_target, row_condition,
+    parent_condition, native_used);
+}
+
 static List _convert_composite(
   Compiler compiler, List expr, Type target, List native_target,
   List parent_condition, int &?native_used) {
@@ -3903,146 +4139,24 @@ static List _convert_composite(
     native_target = %(expr $target (parens (expr $target
       (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
   }
-  Array rows = [], elements = [];
+  Array elements = [];
   List items = expr.caddr().cadr().cdr();
-  int initialized = 0, discarded = 0;
-  foreach (List row, compiler.initializer_rows(target, items, native_target)) {
-    List cases = row.cadr();
-    int available = 0;
-    foreach (List choice, cases)
-      if (choice.caddr().truth()) { available = 1; break; }
-    if (parent_condition && initialized && !available) {
-      discarded = 1;
-      continue;
-    }
-    if (available) initialized = 1;
-    rows.push(row);
-  }
+  int discarded = 0;
+  List rows = _composite_rows(
+    compiler, target, items, native_target, parent_condition, discarded);
   // Preserve C's excess warning only when this synthetic alternative applies.
   // The always-true ICE stays on a retained value, so braces remain braces.
-  List excess_check = NULL;
-  if (discarded) {
-    List zero = %(expr (int) (literal (int) "0"));
-    List one = %(expr (int) (literal (int) "1"));
-    List size = %(expr (int) (op ? $parent_condition $zero $one));
-    Type array = %((dim $size) char);
-    List probe = %(expr $array (cast $array
-      (expr $array (composite (commas $zero)))));
-    List count = %(expr (unsigned) (sizeof (parens $probe)));
-    excess_check = %(expr (int)
-      (op + $one (expr (int) (op * $zero $count))));
-  }
-  foreach (List row, rows.list_free()) {
-    (List original, List cases) = row;
+  List excess_check = discarded
+    ? _composite_excess_check(parent_condition) : NULL;
+  foreach (List row, rows) {
     List row_condition = parent_condition;
     if (excess_check) {
       row_condition = _initializer_and(parent_condition, excess_check);
       excess_check = NULL;
     }
-    Type type = NULL;
-    List value = NULL;
-    int homogeneous = 1, excess = 0, applicable_seen = 0;
-    List applicable = NULL, selected_path = NULL;
-    foreach (List choice, cases) {
-      (List condition, List path, Type destination, List input) = choice;
-      value = input;
-      if (!destination) { excess = 1; continue; }
-      if (!applicable_seen) { applicable = condition; applicable_seen = 1; }
-      else if (!applicable || !condition) applicable = NULL;
-      else if (applicable !== condition)
-        applicable = %(expr (int)
-          (op || (expr (int) (parens $applicable))
-                 (expr (int) (parens $condition))));
-      if (!type) { type = destination; selected_path = path; }
-      else if (destination !== type) homogeneous = 0;
-    }
-    List terminal = original;
-    while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
-      terminal = terminal.caddr();
-    if (terminal.match(%(expr ? (initval *)))) {
-      if (row_condition === parent_condition) elements.push(original);
-      else {
-        Array checked = [];
-        foreach (List choice, cases) {
-          (List condition, List path, Type destination, List input) = choice;
-          List slot = compiler.initializer_slot(native_target, path);
-          List effective = _initializer_and(row_condition, condition);
-          List value = !destination ? input
-            : _initializer_conversion(
-              compiler, input, destination, effective, slot, native_used);
-          checked.push(%($condition $path $destination $value));
-        }
-        List header = NULL;
-        Ast.initializer_cases(terminal.caddr(), header);
-        List choices = checked.list_free();
-        if (header) choices = cons(header, choices);
-        List value = %(expr () (initval @choices));
-        elements.push(_initializer_replace(original, value));
-      }
-      continue;
-    }
-    if (homogeneous) {
-      List slot = native_target
-        ? compiler.initializer_slot(native_target, selected_path) : NULL;
-      List condition =
-        _initializer_and(row_condition, excess ? applicable : NULL);
-      List converted = !type ? value
-        : _initializer_conversion(
-          compiler, value, type, condition, slot, native_used);
-      elements.push(_initializer_replace(original, converted));
-    }
-    else {
-      Array converted = [], captured = [];
-      List source = value, prepared = value;
-      if (value.match(%(expr ? (composite *))))
-        prepared = _initializer_capture_leaves(compiler, value, captured);
-      int native_identity = !parent_condition;
-      foreach (List choice, cases) {
-        (List condition, List path, Type destination, List input) = choice;
-        input = prepared;
-        List slot = native_target
-          ? compiler.initializer_slot(native_target, path) : NULL;
-        List effective = _initializer_and(row_condition, condition);
-        List result = destination
-          ? _initializer_conversion(
-            compiler, input, destination, effective, slot, native_used)
-          : input;
-        int identity = result === input;
-        match (result)
-          case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
-            if (yes === input) identity = 1;
-        if (!identity) native_identity = 0;
-        converted.push(%($condition $path $destination $result));
-      }
-      if (native_identity) {
-        converted.free();
-        captured.free();
-        elements.push(original);
-        continue;
-      }
-      String formal = compiler.fresh_name("initializer_value");
-      List placeholder = %(expr ${source.cadr()} $formal);
-      List values = converted.list_free();
-      List adapted = _initializer_adapters(
-        compiler, source, values, placeholder);
-      if (adapted) values = adapted;
-      Array replaced = [];
-      List inputs = captured.list_free();
-      int uses_input = !!adapted;
-      foreach (List choice, values) {
-        (List condition, List path, Type destination, List result) = choice;
-        List substituted =
-          !destination && source.match(%(expr ? (composite *)))
-            ? result : result.search_replace(%(!quote $source), placeholder);
-        if (substituted !== result) uses_input = 1;
-        replaced.push(%($condition $path $destination $substituted));
-      }
-      List choices = replaced.list_free();
-      if (uses_input) inputs = cons(%($formal $source), inputs);
-      if (inputs) choices = cons(%(input @inputs), choices);
-      List result = %(expr () (initval @choices));
-      elements.push(_initializer_replace(original, result));
-    }
+    elements.push(_convert_composite_row(
+      compiler, row, native_target, row_condition,
+      parent_condition, native_used));
   }
   return %(expr $target (composite (commas @{elements.list_free()})));
 }
@@ -4099,6 +4213,133 @@ static List _compound_literal(Compiler c, List composite, Type target) {
   return converted;
 }
 
+/* Only one conditional arm runs; convert each arm when C cannot convert
+   the result as a whole. */
+static List _convert_conditional_arms(
+  Compiler c, List expr, Type declared_target) {
+  match (expr) case %(expr ? (op ?operator ?condition ?ontrue ?onfalse)): {
+    Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
+    if (ontrue.list().match(%(expr ? (composite *))) ||
+        onfalse.list().match(%(expr ? (composite *))) ||
+        (!true_type.equal(false_type) &&
+         !(c.sym.resolve_numeric_type(true_type) &&
+           c.sym.resolve_numeric_type(false_type)))) {
+      List converted_true = c.convert_expression(ontrue, declared_target);
+      List converted_false = c.convert_expression(onfalse, declared_target);
+      if (converted_true != ontrue || converted_false != onfalse)
+        return %(expr $declared_target
+          (op $operator $condition $converted_true $converted_false));
+    }
+  }
+  return NULL;
+}
+
+/* A generic selection has no x2c type; each association owns its
+   destination conversion because only one association runs. */
+static List _convert_generic_arms(
+  Compiler c, List expr, Type declared_target) {
+  match (expr) case %(expr () (generic ?control *associations)): {
+    Array converted = [];
+    int changed = 0;
+    foreach (List association, associations) match (association)
+      case %(association ?selector ?value): {
+        List result = c.convert_expression(value, declared_target);
+        if (result != value) changed = 1;
+        converted.push(%(association $selector $result));
+      }
+    if (changed)
+      return %(expr $declared_target
+        (generic $control @{converted.list_free()}));
+    converted.free();
+  }
+  return NULL;
+}
+
+static List _read_var(
+  Compiler c, List expr, Type type, Type target) {
+  if (target === %("Symbol"))
+    return %(expr $target (call "Var_symbol" (args $expr)));
+  Type scalar_target = c.sym.resolve_numeric_type(target);
+  if (scalar_target) {
+    Symbol tag = scalar_target.scalar_tag();
+    if (!tag && scalar_target.is_enum()) tag = <i32>;
+    String extractor = scalar_target.var_numeric_extractor();
+    if (extractor) {
+      String tagsym = %"${(unsigned long) tag}";
+      List converted = %(expr ("Var") (call "Var_convert" (args
+        $expr (expr ("Symbol") $tagsym))));
+      return %(expr $target (call $extractor (args $converted)));
+    }
+  }
+  List reader = _var_checked_reader(c, expr, type, target);
+  if (reader) return reader;
+  /* A Var reaching `Var *` almost always meant its address; unboxing a
+     stored Var pointer must be spelled. */
+  if (target.is_pointer() && c.sym.is_var_type(target.dereference())) {
+    c.report_error(
+      <type>, %"cannot convert Var to ${target.repr()}", NULL,
+      %("write &value for its address, or value.pointer() to unbox a stored pointer"));
+    return expr;
+  }
+  if (target.is_pointer())
+    return %(expr $target (call "Var_pointer" (args $expr)));
+  if (target.is_typedef_name()) {
+    // Unknown system typedefs have no proven pointer payload reader.
+    Type resolved = c.sym.resolve_key(target);
+    if (resolved.is_pointer())
+      return %(expr $target (call "Var_pointer" (args $expr)));
+    String message = %"cannot convert Var to type ${target.repr()}";
+    c.report_error(<type>, message, NULL, NULL);
+  }
+  return NULL;
+}
+
+/* A declared T.var converter owns custom boxing before tag based boxing. */
+static List _declared_var_converter(
+  Compiler c, List expr, Type type) {
+  Type converter_type = type;
+  String converter = converter_type.var_converter();
+  if (!converter) {
+    c.sym.var_tag_for_type(type, converter_type);
+    converter = converter_type.var_converter();
+  }
+  if (!converter) return NULL;
+  String typename = converter_type.car().str(), Type cvrtrtype = NULL;
+  List converter_binding = c.sym.resolve_global(%($converter), cvrtrtype);
+  if (cvrtrtype === %((func (($typename))) "Var")) {
+    List argument = type == converter_type
+      ? expr : %(expr $converter_type $expr);
+    List callee = %(expr $cvrtrtype (ident $converter_binding));
+    Macro called = $called;
+    return c.rebuild_expression(%("Var"), called(callee, %($argument)));
+  }
+  String message = %"cannot convert ${type.repr()} to Var without loss";
+  c.report_error(<type>, message, NULL, NULL);
+}
+
+static List _box_var(Compiler c, List expr, Type type) {
+  Type tagged_type = NULL;
+  Symbol tag = c.sym.var_tag_for_type(type, tagged_type);
+  if (!tag && tagged_type && tagged_type.is_enum()) tag = <i32>;
+  if (tag) {
+    String box = NULL;
+    switch (tag) {
+      case <long>: box = "Var_box_long"; break;
+      case <ulong>: box = "Var_box_ulong"; break;
+      case <llong>: box = "Var_box_long_long"; break;
+      case <ullong>: box = "Var_box_ulong_long"; break;
+      case <ldouble>: box = "Var_box_long_double"; break;
+    }
+    if (box) return %(expr ("Var") (call $box (args $expr)));
+    String tagsymnumstr = %"${(unsigned long) tag}";
+    return %(expr ("Var") (call "Var_new" (args
+                (expr ("Symbol") $tagsymnumstr) $expr)));
+  }
+  String message = %"cannot convert ${type.repr()} to Var without loss";
+  // Conversion runs after parsing; a NULL token anchors the statement.
+  c.report_error(<type>, message, NULL, NULL);
+}
+
 /** Adds operations to convert a resolved expression AST to `target`.
     The result may contain converter, boxing, unboxing, `Func`, reference, or
     composite-literal operations. Returns the original expression when C
@@ -4139,24 +4380,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   }
   if (expr.match(%(expr ? (composite ?))))
     return _compound_literal(c, expr, target);
-  /* Arms of different kinds, such as a null pointer beside a C string, each
-     convert: only one runs, so that converts the result. A brace arm always
-     converts, because C has no braced conditional operand. Numeric arms and
-     arms of one type keep converting as a whole. */
-  match (expr) case %(expr ? (op ?operator ?condition ?ontrue ?onfalse)): {
-    Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
-    if (ontrue.list().match(%(expr ? (composite *))) ||
-        onfalse.list().match(%(expr ? (composite *))) ||
-        (!true_type.equal(false_type) &&
-         !(c.sym.resolve_numeric_type(true_type) &&
-           c.sym.resolve_numeric_type(false_type)))) {
-      List converted_true = c.convert_expression(ontrue, declared_target);
-      List converted_false = c.convert_expression(onfalse, declared_target);
-      if (converted_true != ontrue || converted_false != onfalse)
-        return %(expr $declared_target
-          (op $operator $condition $converted_true $converted_false));
-    }
-  }
+  List conditional = _convert_conditional_arms(c, expr, declared_target);
+  if (conditional) return conditional;
   /* A reference names an object, so null never reaches one. */
   if (target.car() == <&> &&
       (_integer_literal_kind(expr, NULL) == <zero> ||
@@ -4166,23 +4391,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       <type>, %"cannot pass a null pointer where ${target.repr()} is expected",
       NULL, %("a reference argument must name an object"));
   if (!type) {
-    /* A generic selection has no x2c type of its own, and only one
-       association runs, so each one converts to the destination the way
-       conditional arms above do. */
-    match (expr) case %(expr () (generic ?control *associations)): {
-      Array converted = [];
-      int changed = 0;
-      foreach (List association, associations) match (association)
-        case %(association ?selector ?value): {
-          List result = c.convert_expression(value, declared_target);
-          if (result != value) changed = 1;
-          converted.push(%(association $selector $result));
-        }
-      if (changed)
-        return %(expr $declared_target
-          (generic $control @{converted.list_free()}));
-      converted.free();
-    }
+    List generic = _convert_generic_arms(c, expr, declared_target);
+    if (generic) return generic;
     if (target_is_var &&
         expr.match(%(expr () (ident (binding ? ?))))) {
       List binding = expr.caddr().cadr();
@@ -4284,102 +4494,19 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     if (target_is_var)
       return %(expr ("Var") (call "String_var" (args $string)));
   }
-  // Var -> non-Var
   if (type_is_var && !target_is_var) {
-    if (target === %("Symbol"))
-      return %(expr $target (call "Var_symbol" (args $expr)));
-    Type scalar_target = c.sym.resolve_numeric_type(target);
-    if (scalar_target) {
-      Symbol tag = scalar_target.scalar_tag();
-      if (!tag && scalar_target.is_enum()) tag = <i32>;
-      String extractor = scalar_target.var_numeric_extractor();
-      if (extractor) {
-        String tagsym = %"${(unsigned long) tag}";
-        List converted = %(expr ("Var") (call "Var_convert" (args
-          $expr (expr ("Symbol") $tagsym))));
-        return %(expr $target (call $extractor (args $converted)));
-      }
-    }
-    List reader = _var_checked_reader(c, expr, type, target);
+    List reader = _read_var(c, expr, type, target);
     if (reader) return reader;
-    /* A Var reaching `Var *` almost always meant its address; unboxing a
-       stored Var pointer must be spelled. */
-    if (target.is_pointer() && c.sym.is_var_type(target.dereference())) {
-      c.report_error(
-        <type>, %"cannot convert Var to ${target.repr()}", NULL,
-        %("write &value for its address, or value.pointer() to unbox a stored pointer"));
-      return expr;
-    }
-    if (target.is_pointer())
-      return %(expr $target (call "Var_pointer" (args $expr)));
-    if (target.is_typedef_name()) {
-      // A typedef may take the pointer payload only once it is known to
-      // name a pointer, and only because no exact reader or declared
-      // converter claimed it above: that leaves a raw native pointer with no
-      // typed Var reader. A name that resolution leaves
-      // untouched has no known representation, since system headers
-      // are never collected, so extracting a pointer there is invalid
-      // C at best and a silently wrong value at worst.
-      Type resolved = c.sym.resolve_key(target);
-      if (resolved.is_pointer())
-        return %(expr $target (call "Var_pointer" (args $expr)));
-      String message = %"cannot convert Var to type ${target.repr()}";
-      c.report_error(<type>, message, NULL, NULL);
-    }
   }
-  // A source-declared T.var converter does the custom boxing. Its unit-local
-  // tag row may never authorize direct Var_new emission.
   if (!type_is_var && target_is_var) {
-    Type converter_type = type;
-    String converter = converter_type.var_converter();
-    if (!converter) {
-      c.sym.var_tag_for_type(type, converter_type);
-      converter = converter_type.var_converter();
-    }
-    if (converter) {
-      String typename = converter_type.car().str(), Type cvrtrtype = NULL;
-      List converter_binding = c.sym.resolve_global(
-        %($converter), cvrtrtype);
-      if (cvrtrtype === %((func (($typename))) "Var")) {
-        List argument = type == converter_type
-          ? expr : %(expr $converter_type $expr);
-        List callee = %(expr $cvrtrtype (ident $converter_binding));
-        Macro called = $called;
-        return c.rebuild_expression(
-          %("Var"), called(callee, %($argument)));
-      }
-      String message = %"cannot convert ${type.repr()} to Var without loss";
-      c.report_error(<type>, message, NULL, NULL);
-    }
+    List converted = _declared_var_converter(c, expr, type);
+    if (converted) return converted;
   }
   // A -> B where both A and B
   List converted = _converter_call(c, expr, type, target);
   if (converted) return converted;
-  // non-Var -> Var
   if (!type_is_var && target_is_var) {
-    Type tagged_type = NULL;
-    Symbol tag = c.sym.var_tag_for_type(type, tagged_type);
-    if (!tag && tagged_type && tagged_type.is_enum()) tag = <i32>;
-    if (tag) {
-      String box = NULL;
-      switch (tag) {
-        case <long>:  box = "Var_box_long"; break;
-        case <ulong>:  box = "Var_box_ulong"; break;
-        case <llong>: box = "Var_box_long_long"; break;
-        case <ullong>: box = "Var_box_ulong_long"; break;
-        case <ldouble>: box = "Var_box_long_double"; break;
-      }
-      if (box) return %(expr ("Var") (call $box (args $expr)));
-      String tagsymnumstr = %"${(unsigned long) tag}";
-      return %(expr ("Var") (call "Var_new" (args
-                  (expr ("Symbol") $tagsymnumstr) $expr)));
-    }
-    String message = %"cannot convert ${type.repr()} to Var without loss";
-    // No token: conversion runs after the parse, where compiler.token is
-    // the end-of-file token and would point past the last source line.
-    // NULL lets the report resolve the anchor of the statement being
-    // transformed instead.
-    c.report_error(<type>, message, NULL, NULL);
+    return _box_var(c, expr, type);
   }
   if (c.sym.resolve_numeric_type(type) &&
       c.sym.resolve_numeric_type(target))
