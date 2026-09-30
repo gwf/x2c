@@ -91,7 +91,7 @@
    (declare (int) 
     (bindings 
      (op = (bind (binding 19 "nested") ()) (expr (int) (literal (int) "0")))))) 
-  (at 13 
+  (at 15 
    (block (declare (int) (bindings (bind (binding 20 "left") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -117,75 +117,78 @@
                    (expr () 
                     (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 22 "_x2c_macro_item_1") ()))) 
-    (while 
-     (expr (int) 
-      (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
-             (ident (binding 23 "Iter_try_next"))) 
-       (args (expr ("Iter") (ident (binding 21 "_x2c_macro_iterator_1"))) 
-        (expr ("Var") (ident (binding 22 "_x2c_macro_item_1")))))) 
-     (block 
-      (stmnt 
-       (expr (int) 
-        (op = (expr (int) (ident (binding 20 "left"))) 
-         (expr (int) 
-          (call "Var_int" 
-           (args (expr ("Var") 
-                  (call "Var_convert" 
-                   (args (expr ("Var") (ident (binding 22 "_x2c_macro_item_1"))) 
-                    (expr ("Symbol") "3453797")))))))))) 
-      (block (declare (int) (bindings (bind (binding 24 "right") ()))) 
-       (declare ("Iter") 
-        (bindings 
-         (op = (bind (binding 25 "_x2c_macro_iterator_0") ()) 
-          (expr ("Iter") 
-           (call (expr ((func (("Iter") (int) ("Iter"))) ("Iter")) 
-                  (ident (binding 26 "Iter_head"))) 
-            (args (expr ("Iter") 
-                   (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                          (ident (binding 15 "range"))) 
-                    (args (expr (int) (literal (int) "10")) 
-                     (expr (int) (literal (int) "11")) 
-                     (expr (int) (literal (int) "1")) 
-                     (expr (* struct "Iter") 
-                      (op & (expr (struct "Iter") 
-                             (cast (decl (struct "Iter") (bindings (bind () ()))) 
-                              (expr () 
-                               (composite 
-                                (commas (expr (int) (literal (int) "0")))))))))))) 
-             (expr (int) (literal (int) "1")) 
-             (expr (* struct "Iter") 
-              (op & (expr (struct "Iter") 
-                     (cast (decl (struct "Iter") (bindings (bind () ()))) 
-                      (expr () 
-                       (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
-       (declare ("Var") (bindings (bind (binding 27 "_x2c_macro_item_0") ()))) 
-       (while 
+    (at 14 
+     (while 
+      (expr (int) 
+       (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
+              (ident (binding 23 "Iter_try_next"))) 
+        (args (expr ("Iter") (ident (binding 21 "_x2c_macro_iterator_1"))) 
+         (expr ("Var") (ident (binding 22 "_x2c_macro_item_1")))))) 
+      (block 
+       (stmnt 
         (expr (int) 
-         (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
-                (ident (binding 23 "Iter_try_next"))) 
-          (args (expr ("Iter") (ident (binding 25 "_x2c_macro_iterator_0"))) 
-           (expr ("Var") (ident (binding 27 "_x2c_macro_item_0")))))) 
-        (block 
-         (stmnt 
+         (op = (expr (int) (ident (binding 20 "left"))) 
           (expr (int) 
-           (op = (expr (int) (ident (binding 24 "right"))) 
-            (expr (int) 
-             (call "Var_int" 
-              (args (expr ("Var") 
-                     (call "Var_convert" 
-                      (args (expr ("Var") 
-                             (ident (binding 27 "_x2c_macro_item_0"))) 
-                       (expr ("Symbol") "3453797")))))))))) 
-         (stmnt 
+           (call "Var_int" 
+            (args (expr ("Var") 
+                   (call "Var_convert" 
+                    (args (expr ("Var") (ident (binding 22 "_x2c_macro_item_1"))) 
+                     (expr ("Symbol") "3453797")))))))))) 
+       (block (declare (int) (bindings (bind (binding 24 "right") ()))) 
+        (declare ("Iter") 
+         (bindings 
+          (op = (bind (binding 25 "_x2c_macro_iterator_0") ()) 
+           (expr ("Iter") 
+            (call (expr ((func (("Iter") (int) ("Iter"))) ("Iter")) 
+                   (ident (binding 26 "Iter_head"))) 
+             (args (expr ("Iter") 
+                    (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                           (ident (binding 15 "range"))) 
+                     (args (expr (int) (literal (int) "10")) 
+                      (expr (int) (literal (int) "11")) 
+                      (expr (int) (literal (int) "1")) 
+                      (expr (* struct "Iter") 
+                       (op & (expr (struct "Iter") 
+                              (cast (decl (struct "Iter") 
+                                     (bindings (bind () ()))) 
+                               (expr () 
+                                (composite 
+                                 (commas (expr (int) (literal (int) "0")))))))))))) 
+              (expr (int) (literal (int) "1")) 
+              (expr (* struct "Iter") 
+               (op & (expr (struct "Iter") 
+                      (cast (decl (struct "Iter") (bindings (bind () ()))) 
+                       (expr () 
+                        (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
+        (declare ("Var") (bindings (bind (binding 27 "_x2c_macro_item_0") ()))) 
+        (at 12 
+         (while 
           (expr (int) 
-           (op += (expr (int) (ident (binding 19 "nested"))) 
+           (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
+                  (ident (binding 23 "Iter_try_next"))) 
+            (args (expr ("Iter") (ident (binding 25 "_x2c_macro_iterator_0"))) 
+             (expr ("Var") (ident (binding 27 "_x2c_macro_item_0")))))) 
+          (block 
+           (stmnt 
             (expr (int) 
-             (op + (expr (int) (ident (binding 20 "left"))) 
-              (expr (int) (ident (binding 24 "right"))))))))))))))) 
-  (at 14 
+             (op = (expr (int) (ident (binding 24 "right"))) 
+              (expr (int) 
+               (call "Var_int" 
+                (args (expr ("Var") 
+                       (call "Var_convert" 
+                        (args (expr ("Var") 
+                               (ident (binding 27 "_x2c_macro_item_0"))) 
+                         (expr ("Symbol") "3453797")))))))))) 
+           (stmnt 
+            (expr (int) 
+             (op += (expr (int) (ident (binding 19 "nested"))) 
+              (expr (int) 
+               (op + (expr (int) (ident (binding 20 "left"))) 
+                (expr (int) (ident (binding 24 "right"))))))))))))))))) 
+  (at 16 
    (declare (struct "Iter") 
     (bindings (bind (binding 28 "mixed_source_storage") ())))) 
-  (at 15 
+  (at 17 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 29 "mixed") ()) 
@@ -206,12 +209,12 @@
                                  (ident (binding 28 "mixed_source_storage")))))))) 
                  (expr ((func (("Var"))) "Var") 
                   (ident (binding 1 "double_value"))))))))))))) 
-  (at 16 
+  (at 18 
    (declare (struct "Iter") 
     (bindings (bind (binding 30 "source_storage") ()) 
      (bind (binding 31 "map_storage") ()) 
      (bind (binding 32 "filter_storage") ())))) 
-  (at 17 
+  (at 19 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 33 "source") ()) 
@@ -222,7 +225,7 @@
          (expr (int) (literal (int) "1")) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 30 "source_storage")))))))))))) 
-  (at 18 
+  (at 20 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 34 "mapped") ()) 
@@ -233,7 +236,7 @@
          (expr ((func (("Var"))) "Var") (ident (binding 1 "double_value"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 31 "map_storage")))))))))))) 
-  (at 19 
+  (at 21 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 35 "filtered") ()) 
@@ -244,7 +247,7 @@
          (expr ((func (("Var"))) int) (ident (binding 3 "is_even"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 32 "filter_storage")))))))))))) 
-  (at 20 
+  (at 22 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 36 "explicit") ()) 
@@ -252,7 +255,7 @@
        (call (expr ((func (("Iter"))) ("List")) 
               (ident (binding 12 "Iter_list"))) 
         (args (expr ("Iter") (ident (binding 35 "filtered")))))))))) 
-  (at 21 
+  (at 23 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 37 "printf"))) 
@@ -270,9 +273,9 @@
        (expr (int) 
         (call (expr ((func (("List"))) (int)) (ident (binding 38 "List_len"))) 
          (args (expr ("List") (ident (binding 36 "explicit"))))))))))) 
-  (at 22 
+  (at 24 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 40 "Scope_release"))) 
       (args (expr (void) ())))))) 
-  (at 23 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 25 (return (int) (expr (int) (literal (int) "0"))))))
