@@ -4002,13 +4002,17 @@ static List _truthy(Compiler compiler, List ast) {
   Macro while_loop = $while_loop, do_loop = $do_loop;
   match (ast) {
     case if_then(?condition, ?yes):
-      return %(if ${_truthy_expression(compiler, condition)} $yes);
+      return compiler.rebuild_statement(
+        if_then(_truthy_expression(compiler, condition), yes)).cadr();
     case if_else(?condition, ?yes, ?no):
-      return %(if ${_truthy_expression(compiler, condition)} $yes $no);
+      return compiler.rebuild_statement(
+        if_else(_truthy_expression(compiler, condition), yes, no)).cadr();
     case while_loop(?condition, ?body):
-      return %(while ${_truthy_expression(compiler, condition)} $body);
+      return compiler.rebuild_statement(
+        while_loop(_truthy_expression(compiler, condition), body)).cadr();
     case do_loop(?body, ?condition):
-      return %(do $body ${_truthy_expression(compiler, condition)});
+      return compiler.rebuild_statement(
+        do_loop(body, _truthy_expression(compiler, condition))).cadr();
     case %(for ?init ?condition ?increment ?body):
       return %(for $init ${_truthy_expression(compiler, condition)}
                    $increment $body);

@@ -10,6 +10,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
+$(import "../src/grammar.xmacro")
 
 #include <limits.h>
 #include <stdlib.h>
@@ -2267,6 +2268,11 @@ macro open Statement $protocol_methods_value(Name $methods, Expr $value) {
   $methods = $value;
 }
 
+macro open Statement $protocol_registration_fallback(
+    Expr $registered, Expr $fallback) {
+  if (!$registered) { $fallback; }
+}
+
 static List _descriptor_fields(List thunks) {
   Array fields = [];
   foreach (List row, thunks) {
@@ -2295,15 +2301,12 @@ static List _tagged_registration(
 
 static List _fallback_registration(
   Compiler c, List methods, String name, List early_call) {
-  List fallback = %(
-    stmnt
-      (expr (void)
-        (call "x2c_register_descriptor"
-          (args
-            ${_string_literal(c, name)}
-            (expr ("VarMethods") (ident $methods)))))
-  );
-  return %(if (expr (int) (op ! $early_call)) (block $fallback));
+  List fallback = %(expr (void)
+    (call "x2c_register_descriptor"
+      (args ${_string_literal(c, name)}
+            (expr ("VarMethods") (ident $methods)))));
+  Macro shape = $protocol_registration_fallback;
+  return c.rebuild_statement(shape(early_call, fallback)).cadr();
 }
 
 static void Compiler._generate_descriptor_registration(
@@ -2336,9 +2339,10 @@ static void Compiler._generate_descriptor_registration(
     c.add_init(queue, assignment);
   }
   List call = explicit_tag ? explicit_call : early_call;
+  Macro statement_shape = $expression_statement;
   c.add_init(
     queue, central_initializer || explicit_tag
-      ? %(stmnt $call) : registration);
+      ? c.rebuild_statement(statement_shape(call)).cadr() : registration);
 }
 
 static void _report_requirement(

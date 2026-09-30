@@ -38,6 +38,13 @@ int main(void) {
   int not_one = !one;
   int selected = zero ? 7 : 9;
   int disjunction = zero || one;
-  return not_zero == 1 && not_one == 0 && selected == 9 &&
-         disjunction == 1 && side_effects == 5 ? 0 : 1;
+  int expressions_pass = not_zero == 1 && not_one == 0 &&
+    selected == 9 && disjunction == 1 && side_effects == 5;
+  int visits = 0;
+  if (zero) visits = 100;
+  else visits = 1;
+  if (one) visits += 2;
+  while (one) { visits += 4; one.x = 0; }
+  do { visits += 8; } while (zero);
+  return expressions_pass && visits == 15 ? 0 : 1;
 }

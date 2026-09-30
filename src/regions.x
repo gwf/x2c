@@ -1211,11 +1211,12 @@ static void _walk_rows(Walk w, List rows) {
 
 static void _walk(Walk w, Var node) {
   Macro statement = $expression_statement;
+  Macro deferred = $deferred;
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
     case %(block *statements): _walk_block(w, statements);
     case %(seq *statements): _walk_sequence(w, statements);
-    case %(defer ?body *): _walk_defer(w, body);
+    case deferred(?body): _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
     case %(return ?type ?result): _walk_return(w, type, result);
