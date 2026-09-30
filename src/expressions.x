@@ -2620,14 +2620,18 @@ static List _resolve_content(
                          ${c.resolve_expression(selector, origin)}));
     case %(dstrasgn (targets *targets) ?source):
       return _resolve_destructure(c, targets, source, origin);
-    case $source_content_pattern_with($sizeof_grouped, %(?argument),
-        %((?argument ?(List argument)))):
-      return c.rebuild_expression(input_type, grouped_sizeof(
-        c.resolve_expression(argument, origin)));
-    case $source_content_pattern_with($sizeof_expression, %(?argument),
-        %((?argument ?(List argument)))):
-      return c.rebuild_expression(input_type, expression_sizeof(
-        c.resolve_expression(argument, origin)));
+    case $source_content_pattern($sizeof_grouped, %(?argument)):
+      if (argument is <list>) {
+        List source_argument = argument;
+        return c.rebuild_expression(input_type, grouped_sizeof(
+          c.resolve_expression(source_argument, origin)));
+      }
+    case $source_content_pattern($sizeof_expression, %(?argument)):
+      if (argument is <list>) {
+        List source_argument = argument;
+        return c.rebuild_expression(input_type, expression_sizeof(
+          c.resolve_expression(source_argument, origin)));
+      }
     case %(generic ?control *associations):
       return _resolve_generic(c, control, associations, origin);
     case %(va-arg ?argument ?declaration):
