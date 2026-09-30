@@ -2088,10 +2088,11 @@ static void _check_matmul(
 
 /* Operands have been resolved in the caller's current semantic scope. */
 static List _native_binary_expression(
-  Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
+  Compiler c, Symbol operator, List lhs, List rhs,
+  Type lhs_type, Type rhs_type, Token origin) {
   Type type = c._binary_op_type(operator, lhs, rhs);
   List operation = %(op $operator $lhs $rhs);
-  if (c.sym.is_var_type(lhs.cadr()) || c.sym.is_var_type(rhs.cadr()))
+  if (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type))
     operation = c.anchor_origin(operation, origin);
   return %(expr $type $operation);
 }
@@ -2130,7 +2131,8 @@ static List Compiler._binary_expression(
       c, operator, lhs_type ? lhs_type : rhs_type,
       lhs_type ? rhs : lhs, origin);
   _check_matmul(c, operator, lhs_type, rhs_type, origin);
-  return _native_binary_expression(c, operator, lhs, rhs, origin);
+  return _native_binary_expression(
+    c, operator, lhs, rhs, lhs_type, rhs_type, origin);
 }
 
 /* A statically known tag whose encoding row the decoder discriminates on
