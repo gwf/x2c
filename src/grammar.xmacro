@@ -166,6 +166,11 @@ meta static List source_pattern_with(
   return pattern;
 }
 
+/* Keep a consumer's exact child constraints in a bare source content case. */
+meta static List source_content_pattern_with(
+    Macro shape, List names, List replacements) =>
+  source_content_pattern(shape, names).replace(replacements);
+
 meta static List source_pattern(Macro shape, List names) {
   List pattern = shape.pattern(names);
   match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
