@@ -711,7 +711,8 @@ static List _parse_postfix_decinc(Compiler compiler, List expr) {
   Token origin = compiler.token;
   Symbol op = compiler.peek(0);
   compiler.next();
-  return compiler.resolve_expression(%(expr () (postfix $op $expr)), origin);
+  return compiler.resolve_expression(
+    source_postfix_expression(NULL, %($op $expr)), origin);
 }
 
 /* The operators that apply to the expression written before them. */
@@ -2454,8 +2455,10 @@ static List _resolve_postfix_op(
       <type>, "check optional reference before using its value",
       origin, NULL);
   if (operand_type === %(<macro-expr>))
-    return %(expr (<macro-expr>) (postfix $operator $operand));
-  return %(expr $operand_type (postfix $operator $operand));
+    return source_postfix_expression(
+      %(<macro-expr>), %($operator $operand));
+  return source_postfix_expression(
+    operand_type, %($operator $operand));
 }
 
 static List _resolve_macro_slot(
@@ -2653,7 +2656,7 @@ static List _resolve_content(
         c, operator, condition, ontrue, onfalse, origin);
     case $source_operator_content(%(?operator ?left ?right)):
       return _resolve_binary(c, operator, left, right, origin);
-    case %(postfix ?operator ?operand):
+    case $source_postfix_content(%(?operator ?operand)):
       return _resolve_postfix_op(c, operator, operand, origin);
     case %(tadapt ?target ?source):
       return _resolve_tadapt(c, target, source, origin);
