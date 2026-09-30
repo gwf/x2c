@@ -1483,7 +1483,8 @@ static List _parameter_setup(
 static List _prepend_setup(List body, List setup) {
   if (!setup) return body;
   match (body) {
-    case %(block *items): return %(block @setup @items);
+    case $source_block_content(%(*items)):
+      return source_block_content(%(@setup @items));
     case %(!set ?expression (expr ?type ?)):
       return %(
         expr $type
@@ -1655,15 +1656,17 @@ static List _block_returns(List ast) {
 static List _helper_body(
   Compiler compiler, List body, List setup) {
   match (body) {
-    case %(block *items): {
+    case $source_block_content(%(*items)): {
       List normalized = _block_returns(items);
-      return %(block @setup @normalized ${_no_value_return()});
+      return source_block_content(
+        %(@setup @normalized ${_no_value_return()}));
     }
     case %(expr (void) ?):
-      return %(block @setup (stmnt $body) ${_no_value_return()});
+      return source_block_content(
+        %(@setup (stmnt $body) ${_no_value_return()}));
   }
   List result = compiler.convert_expression(body, %("Var"));
-  return %(block @setup (stmnt (return $result)));
+  return source_block_content(%(@setup (stmnt (return $result))));
 }
 
 /* File-static context storage shared by captured lambdas and callable
@@ -2044,7 +2047,7 @@ static List _unwind(Walk walk, int stop) {
    region keeps its own shape. */
 static List _transfer(Walk walk, int stop, List statement) {
   List cleanup = _unwind(walk, stop);
-  return cleanup ? %(block @cleanup $statement) : statement;
+  return cleanup ? source_block_content(%(@cleanup $statement)) : statement;
 }
 
 /* The open regions, innermost first. A label's ancestry is this list, and a
@@ -2332,19 +2335,19 @@ static int _runtime_static_declaration(
 static List _static_regions(Compiler c, List ast, Map runtime) {
   match (ast) {
     case %((!or function localinit expr declare typedef) *): return ast;
-    case %(block *statements): {
+    case $source_block_content(%(*statements)): {
       Array before = [];
       foreach (List statement, statements) {
         if (_runtime_static_declaration(c, statement, runtime)) {
           List rest = statements;
           for (int i = 0; i <= before.len(); i++) rest = rest.cdr();
-          List body = _static_regions(c, %(block @rest), runtime);
+          List body = _static_regions(c, source_block_content(rest), runtime);
           before.push(%(localinit $statement $body));
-          return %(block @{before.list_free()});
+          return source_block_content(before.list_free());
         }
         before.push(_static_regions(c, statement, runtime));
       }
-      return %(block @{before.list_free()});
+      return source_block_content(before.list_free());
     }
   }
   Var child;
@@ -2535,7 +2538,7 @@ static List _preserve_block(List statements, Map names, Map pointers) {
         }
     output.push(_preserve(statement, names, pointers));
   }
-  return %(block @{output.list_free()});
+  return source_block_content(output.list_free());
 }
 
 static List _preserve_declaration(
@@ -2564,7 +2567,7 @@ static Var _preserve(Var value, Map names, Map pointers) {
   match (node) {
     case %(param ?type ?bind):
       return %(param $type ${_preserve_binding(bind, names)});
-    case %(block *statements):
+    case $source_block_content(%(*statements)):
       return _preserve_block(statements, names, pointers);
     case %(!set ?declaration
            ((!or declare decl) ?type (!set ?bindings (bindings *)))):
@@ -2587,7 +2590,7 @@ static List _return_value(Walk walk, List expression) {
     (bindings (op = (bind $binding $mods) $expression)));
   List statement = _transfer(walk, 0,
     source_return_content(%((expr $type (ident $binding)))));
-  return %(block $declaration $statement);
+  return source_block_content(%($declaration $statement));
 }
 
 /* A try region's body or catch arm, lowered inside the region `cleanup`
@@ -4478,7 +4481,7 @@ static List _rewrite_defer_list(Compiler compiler, List stmts) {
     List tail = tail_changed ? result : suffix.cdr();
     List head = _without_origin(anchored);
     match (head) case deferred(?final_stmt): {
-      List body = %(block @tail), finalizer = final_stmt;
+      List body = source_block_content(tail), finalizer = final_stmt;
       if (compiler.source_map)
         finalizer = _rewrap_origin(anchored, finalizer);
       List region = _lower_defer_region(compiler, body, finalizer);
@@ -4689,11 +4692,11 @@ static Ast _finish(Compiler compiler, Ast ast) {
       List new_records = _match_records(compiler, records);
       return %(matchcases $new_subject $new_records);
     }
-    case %(block *body): {
+    case $source_block_content(%(*body)): {
       List lowered = _sequence(compiler, body);
       List deferred = _rewrite_defer_list(compiler, lowered);
       if (deferred != lowered) lowered = _sequence(compiler, deferred);
-      return %(block @lowered);
+      return source_block_content(lowered);
     }
   }
   return _children(compiler, ast);
@@ -4704,16 +4707,28 @@ static Ast _finish(Compiler compiler, Ast ast) {
    the spine while each level survives its operator rewrites unchanged,
    transform the deepest term, and rebuild upward. Entered only for chain
    heads, with expression rewrites already applied. */
+static List _op_chain_first(List ast) {
+  match (ast)
+    case %(expr ? ?content):
+      match (content)
+        case $source_operator_content(%(? ?first *rest)):
+          if (first is <list>) {
+            List operand = first;
+            match (operand)
+              case %(expr ? ?inner):
+                match (inner)
+                  case $source_operator_content(%(*parts)):
+                    return operand;
+          }
+  return NULL;
+}
+
 static Ast _op_chain(Compiler compiler, Ast ast) {
   Array levels = $auto([]);
   Array types = $auto([]);
   Ast rebuilt = NULL;
   for (;;) {
-    List first = NULL;
-    match (ast)
-      case %(expr ? (op ? ?(List matched) *))
-        if (matched.match(%(expr ? (op *)))):
-          first = matched;
+    List first = _op_chain_first(ast);
     if (!first) {
       rebuilt = _finish(compiler, ast);
       break;
@@ -4732,8 +4747,8 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
     ast = compiler.lower_lambda_expr(ast);
   }
   for (int i = (int) levels.len() - 1; i >= 0; i--)
-    match (levels[i])
-      case %(expr ? (op ?operator ? *rest)): {
+    match (levels[i].caddr())
+      case $source_operator_content(%(?operator ? *rest)): {
         Array parts = [];
         if (operator is <list>) parts.push(_node(compiler, operator));
         else parts.push(operator);
@@ -4742,7 +4757,7 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
           if (operand is <list>) parts.push(_node(compiler, operand));
           else parts.push(operand);
         }
-        rebuilt = %(expr ${types[i]} (op @{parts.list_free()}));
+        rebuilt = source_operator_expression(types[i], parts.list_free());
       }
   return rebuilt;
 }
@@ -4822,7 +4837,7 @@ static Ast _slice_node(
 static Ast _defer_node(Compiler c, Ast ast) {
   match (ast)
     case %(defer ?finalizer):
-      return _lower_defer_region(c, %(block), finalizer);
+      return _lower_defer_region(c, source_block_content(%()), finalizer);
   return ast;
 }
 
@@ -4841,7 +4856,7 @@ static Ast _raise_node(Compiler c, Ast ast) {
 static Ast _block_node(Compiler c, Ast ast) {
   List statements = ast.cdr();
   List body = _rewrite_defer_list(c, statements);
-  return body !== statements ? %(block @body) : ast;
+  return body !== statements ? source_block_content(body) : ast;
 }
 
 static Ast _step(Compiler c, Ast ast) {
@@ -4889,10 +4904,7 @@ static Ast _step(Compiler c, Ast ast) {
     case <expr>: {
       Ast expression = c.lower_typed_adapter_expr(ast);
       expression = c.lower_lambda_expr(expression);
-      match (expression)
-        case %(expr ? (op ? ?(List first) *))
-          if (first.match(%(expr ? (op *)))):
-            return _op_chain(c, expression);
+      if (_op_chain_first(expression)) return _op_chain(c, expression);
       if (expression != ast) return _node(c, expression);
       return _finish(c, expression);
     }
