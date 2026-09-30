@@ -1,4 +1,5 @@
-> Status: active -- architectural survey and proposal, 2026-09-28.
+> Status: reference -- historical architectural survey with current delivery
+> overlay, 2026-09-29.
 > Source baseline: 87f6c5c1, including the private lambda consumer draft.
 > The campaign contract owns sequencing, delivery rules and the cost ledger.
 > This document distinguishes observed owners from proposed organization;
@@ -6,12 +7,12 @@
 
 The baseline survey predates the `0bccd679` support-owner reconciliation in
 the contract's E44. In particular, `builtins.x` contains native macro
-algorithms that construct user-program syntax before binding. They must be
-classified as source producers rather than omitted as backend formatting.
-The `$scope` family has a private one-template candidate; the `foreach`
-trial was reverted after its origin-wrapper changes, and the `class` family
-has no proved complete source-template replacement. None of those results
-establishes campaign completion or changes the semantic ownership below.
+algorithms that construct user-program syntax before binding. Their scope,
+foreach, and selected class control skeletons now use source templates;
+native protocol, ownership, type, and method decisions remain in their
+existing owners. E44 records the focused checks and origin sidecar changes.
+This overlay updates the baseline findings without recasting semantic records
+as parsed source forms.
 
 # Compiler architecture with shared grammar macros
 

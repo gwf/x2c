@@ -2482,6 +2482,10 @@ and `managed-init-runtime` checks compiler-produced deferred cleanup.
 
 ### E22. Aggregate descriptor rendering guard: binding exception
 
+Historical probe only: the current `_guard_value_rendering` uses
+`rebuild_function` and `$guard_value_rendering`. The rejected trial below
+does not describe a live unimplemented guard or a remaining campaign gap.
+
 The `class-private` executable probe generates all four aggregate `Var`
 rendering thunks. Their current bodies each declare a `RenderPath`, fall back
 on recursive entry, defer leaving the path, then run the original member
@@ -3355,7 +3359,12 @@ cons representation; truth conversion would add several macros while retaining
 semantic selection; indexed sequencing uses a native block-expression stage.
 These are concrete boundaries, not migrated families.
 
-### E43. Remaining-source audit at `2445be7e`
+### E43. Historical remaining-source audit at `2445be7e`
+
+This deletion-first snapshot predates the E44 built-in/support reconciliation
+and the subsequent grammar adopters. Its claims about `parse.x` switch,
+expression statements, and for, and its claim that no further source family
+qualified, are superseded by E44 and the final integrated inventory.
 
 Three isolated read-only audits partitioned the hand-authored compiler
 source: parsing/expression/type/stage owners; transform/protocol/region/
@@ -3413,22 +3422,26 @@ Lisp entry points are in `etc/builtin-core.xlisp` and
 
 | Family | Current source boundary | Disposition |
 | --- | --- | --- |
-| `$scope` | `_scope_expand` chooses retain/release or push/pop and preserves a nested cleanup scope. | One adjacent Statement template for the complete block/defer shape composes with the native selector. A private candidate built and passed scope, class-lifetime, and region fixtures; publication remains pending. |
-| `foreach` | `Foreach.with_cursor` and `with_iter` choose protocol/cursor calls, output declarations, assignment conversion, and loop body. | One shared loop template compiled, and the broad fixture's generated C was byte identical. It changed AST/transform sidecars throughout the expansion through additional origin wrappers. The trial was reverted; its small outer skeleton did not justify that change. Cursor and Iter semantics stay in their native owner. |
-| `class` | `Shape` chooses representation, ownership, methods, signatures, and adoptees. `_function` and `_default` already centralize its generated function layout. | Still an authored syntax producer, not a claimed migration. A source template needs a stage-preserving way to express its dynamic parameter and body sequences and default declaration result; no such complete replacement was proved here. |
+| `$scope` | `_scope_expand` chooses retain/release or push/pop and preserves a nested cleanup scope. | One adjacent Statement template spells the complete block/defer shape while the native selector prepares calls. Focused scope, class-lifetime, and region fixtures pass. |
+| `foreach` | `Foreach.with_cursor` and `with_iter` choose protocol/cursor calls, output declarations, assignment conversion, and loop body. | One shared Statement template spells the outer block and loop for both paths. The captured body remains a nested block. Generated C and runtime output in the broad fixture are unchanged; AST/transform sidecars record additional origin wrappers. Cursor and Iter decisions remain native. |
+| `class` | `Shape` chooses representation, ownership, methods, signatures, and adoptees. `_function` and `_default` already centralize its generated function layout. | Three source templates now spell drop, failed-init cleanup, and repr guard control bodies. Class lifetime and runtime fixtures pass with unchanged generated C and output. Dynamic signatures, default declarations, and method selection remain in their existing native owners. |
 | `$lisp.bind` | The rows are registry data; `_binding_statement` builds calls from runtime names and signatures. | The registered `$builtin.row` already spells the repeated row assignment. Remaining records and call selection are native binding metadata and generated calls, respectively. |
 
-Source-like recognition in other support owners needs a separate coverage
-decision from their semantic work. `parse.x` retains raw expression-statement
-and `switch` binder cases even though `grammar.xmacro` defines those source
-forms; `for` also has absent fields and declaration-init scope. These are
-parser-owned cases, but they are not evidence that downstream recognition is
-complete. `compiler.x:optional_reference_test` reads typed condition operators
-and null/reference identities; `macros.x:_open_natives` reads a typed call
-while deciding global/native resolution. Shared expression forms could own
-their syntax portions without replacing those decisions. Their source-form
-coverage remains pending a complete projection, not a blanket semantic
-exception.
+Source-like recognition in support owners was also addressed. `parse.x` now
+uses the shared expression-statement, switch, and for forms in constructed
+binding. The for form preserves absent clauses and declaration-init scope;
+focused fixtures pass. `macros.x:_open_natives` uses `$called` to recognize
+the exact typed call while preserving its previous root-shell guard and
+callee binding constraint. In `compiler.x:optional_reference_test`, the
+grouping form and shared operator content recognize syntax; the native
+operation still decides optional-reference presence from bound identities.
+The adjacent guard-exit summary uses shared complete return and block
+contents, retaining bound and normalized return arities. Null literals and
+opt-ref markers retain their typed semantic records. Optional-reference,
+constructed-statement, and loop-boundary fixtures pass; the loop-boundary
+transform sidecar records the foreach template's retained origin wrappers.
+The support adopter depends on the shared grammar supplied by the expression
+and lowering owners; integration and publication validation are separate.
 
 The Function/declaration uses in `compiler.x`, `macros.x`, `cache.x`, and
 `generate.x` mostly consume already-bound identities, types, modifiers,
