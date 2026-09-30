@@ -99,6 +99,11 @@ static List source_va_arg_content(List parts) => cons(<va-arg>, parts);
 
 static List source_commas_content(List rows) => cons(<commas>, rows);
 
+static List source_slice_content(List parts) => cons(<slice>, parts);
+
+static List source_composite_content(List rows) =>
+  %(composite ${source_commas_content(rows)});
+
 static List source_string_content(List rows) => cons(<segments>, rows);
 
 static List source_operator_content(List parts) => cons(<op>, parts);
@@ -716,6 +721,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_generic_content", source_generic_content);
   $linked.row(rows, "source_va_arg_content", source_va_arg_content);
   $linked.row(rows, "source_commas_content", source_commas_content);
+  $linked.row(rows, "source_slice_content", source_slice_content);
+  $linked.row(rows, "source_composite_content", source_composite_content);
   $linked.row(rows, "source_string_content", source_string_content);
   $linked.row(rows, "source_operator_content", source_operator_content);
   $linked.row(rows, "source_operator_expression", source_operator_expression);
