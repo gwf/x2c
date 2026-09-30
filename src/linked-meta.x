@@ -98,6 +98,11 @@ static List source_operator_content(List parts) => cons(<op>, parts);
 static List source_operator_expression(List type, List parts) =>
   %(expr $type ${source_operator_content(parts)});
 
+static List source_postfix_content(List parts) => cons(<postfix>, parts);
+
+static List source_postfix_expression(List type, List parts) =>
+  %(expr $type ${source_postfix_content(parts)});
+
 static List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -687,6 +692,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_string_content", source_string_content);
   $linked.row(rows, "source_operator_content", source_operator_content);
   $linked.row(rows, "source_operator_expression", source_operator_expression);
+  $linked.row(rows, "source_postfix_content", source_postfix_content);
+  $linked.row(rows, "source_postfix_expression", source_postfix_expression);
   $linked.row(rows, "source_call_content", source_call_content);
   $linked.row(rows, "source_pattern_with", source_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);

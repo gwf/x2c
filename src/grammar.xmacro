@@ -117,6 +117,12 @@ meta static List source_operator_content(List parts) => cons(<op>, parts);
 meta static List source_operator_expression(List type, List parts) =>
   %(expr $type ${source_operator_content(parts)});
 
+/* Postfix updates share their token and operand without choosing ++ or --. */
+meta static List source_postfix_content(List parts) => cons(<postfix>, parts);
+
+meta static List source_postfix_expression(List type, List parts) =>
+  %(expr $type ${source_postfix_content(parts)});
+
 /* Derive bare $called content, then insert the consumer's callee and
    argument patterns without normalizing their constraints. */
 meta static List source_call_content(
