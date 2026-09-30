@@ -306,7 +306,8 @@ static List _binding_of(Var value) {
 
 /* The place `&place` names, or void. */
 static Var _address_of(Var value) {
-  match (_unwrap(value)) case %(op (!quote &) ?place): return place;
+  match (_unwrap(value))
+    case $source_operator_content(%((!quote &) ?place)): return place;
   return void;
 }
 
@@ -438,8 +439,9 @@ static Fact _fact_of(Walk w, Var expression, List &?named) {
       Var found = w.facts[binding];
       return found is void ? NULL : found;
     }
-    case %(op (!quote &) ?place): return _borrow(w, place, named);
-    case %(op (!quote ?) ? ?yes ?no): {
+    case $source_operator_content(%((!quote &) ?place)):
+      return _borrow(w, place, named);
+    case $source_operator_content(%((!quote ?) ? ?yes ?no)): {
       List yes_name = NULL, no_name = NULL;
       Fact fact = _fact_of(w, yes, yes_name);
       Fact other = _fact_of(w, no, no_name);
@@ -680,9 +682,10 @@ static int _flow_owners(
 }
 
 static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
-  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
-    return _flow(w, yes, type, sink, target) ||
-           _flow(w, no, type, sink, target);
+  match (_unwrap(value))
+    case $source_operator_content(%((!quote ?) ? ?yes ?no)):
+      return _flow(w, yes, type, sink, target) ||
+             _flow(w, no, type, sink, target);
   List named = NULL;
   Fact fact = _value_fact(w, value, named);
   if (!fact) fact = _returned_argument(w, value, named);
@@ -729,14 +732,16 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
 static Fact _base(Walk w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
-    case %(op (!quote ->) ?base ?): {
+    case $source_operator_content(%((!quote ->) ?base ?)): {
       Fact fact = _fact_of(w, base, NULL);
       if (!fact) fact = _base(w, base, through);
       through = 1;
       return fact;
     }
-    case %(op (!quote .) ?base ?): return _base(w, base, through);
-    case %(op (!quote *) ?base): return _fact_of(w, base, NULL);
+    case $source_operator_content(%((!quote .) ?base ?)):
+      return _base(w, base, through);
+    case $source_operator_content(%((!quote *) ?base)):
+      return _fact_of(w, base, NULL);
     case %((!or getindex index) (!set ?base (expr ?type ?)) ?): {
       Fact fact = _fact_of(w, base, NULL);
       if (!fact) return _base(w, base, through);
@@ -784,7 +789,7 @@ static List _root(Var place) {
   while (1)
     match (_unwrap(place)) {
       case %(ident (!set ?binding (binding ? ?))): return binding;
-      case %(op ? ?base *): place = base;
+      case $source_operator_content(%(? ?base *)): place = base;
       case %((!or getindex index) ?base ?): place = base;
       default: return NULL;
     }
@@ -1012,10 +1017,11 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
    `*address` and the place `address` was taken from are one storage. */
 static Var _target_place(Walk w, Var target) {
   Var inner = _unwrap(target);
-  match (inner) case %(op (!quote *) ?pointer): {
-    Fact fact = _fact_of(w, pointer, NULL);
-    if (fact && fact.place) return fact.place;
-  }
+  match (inner)
+    case $source_operator_content(%((!quote *) ?pointer)): {
+      Fact fact = _fact_of(w, pointer, NULL);
+      if (fact && fact.place) return fact.place;
+    }
   return inner;
 }
 
