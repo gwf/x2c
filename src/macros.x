@@ -2970,9 +2970,12 @@ static Var _carrier_binder(Var value) {
   if (value.is_binder()) return value.str().len() > 1 ? value : NULL;
   if (value is not <list>) return NULL;
   match (value) {
-    case %((!or ident bind) ?name *):
+    case $source_identifier_content(%(?name *)):
       if (name.is_binder() && name.str().len() > 1) return name;
-    case %((!or "x2c.template" macro-invoke macrodef literal) *):
+    case %(bind ?name *):
+      if (name.is_binder() && name.str().len() > 1) return name;
+    case $source_literal_content(%(*)): return NULL;
+    case %((!or "x2c.template" macro-invoke macrodef) *):
       return NULL;
   }
   foreach (Var child, value.list())
@@ -4856,7 +4859,9 @@ List x2c_syntax_type(List value) {
   if (binding_identity_try_parts(value, NULL, NULL)) binding = value;
   else
     match (value)
-      case %((!or ident bind) (*) *): binding = value.cadr();
+      case $source_identifier_content(%((*) *)):
+        binding = value.cadr();
+      case %(bind (*) *): binding = value.cadr();
   if (binding) {
     Type type = _sdk_binding_type(binding);
     return type.canonicalize();

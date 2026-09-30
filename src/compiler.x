@@ -3989,7 +3989,8 @@ static void _check_script_locals(Compiler c, List ast) {
 static Map _script_locals(List ast) {
   Map locals = {};
   foreach (List node, ast) match (node)
-    case %(function ? (bind (binding ? "x2c_script") ?) (block *items)):
+    case %(function ? (bind (binding ? "x2c_script") ?)
+        ${$source_block_content(%(*items))}):
       foreach (List item, items) match (item)
         case %(at ? (declare ? (bindings *bindings))):
           foreach (List binding, bindings) match (binding)
