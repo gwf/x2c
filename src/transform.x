@@ -2257,7 +2257,7 @@ static int _runtime_value(
           (native.is_pointer() || !native.contains(<const>))) return 1;
       return 0;
     }
-    case $source_operator_expression(%(?), %(& ?inner)): {
+    case %(expr ? ${$source_operator_content(%(& ?inner))}): {
       pending.push(inner);
       modes.push(1);
       return 0;
