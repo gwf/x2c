@@ -21,9 +21,11 @@ records the architectural survey, remaining work and coordination agreement.
 
 Each rule is a property a reviewer can check by reading the code.
 
-1. A lowering recognizes its input with a source-form macro from
-   `src/grammar.xmacro` and builds its output with a template. No `%()`
-   pattern examines a parsed form outside `src/grammar.xmacro`.
+1. A lowering recognizes its input with a source-form macro or metafunction
+   from `src/grammar.xmacro` and builds its output with a template. Primitive
+   parsers produce canonical nodes; downstream source recognition shares
+   their grammar owner. Bound semantic facts and normalized backend forms
+   retain their documented stage-specific operations.
 2. Every loop and every choice among C shapes is in a slot function the
    template calls, not in the client. A slot function takes the facts it
    needs as arguments and applies one macro per element.
@@ -31,9 +33,9 @@ Each rule is a property a reviewer can check by reading the code.
 4. No `code-value` literal appears outside a producer. A typed expression
    is bound already and passes to a hole as it is; lowered code is marked
    by the operation that lowered it.
-5. Templates sit beside the lowering that applies them. `src/builtins.x`
-   only registers the slot functions, so any unit the template is applied
-   in can call them by name.
+5. Templates sit beside the lowering that applies them. Shared input forms
+   live in `src/grammar.xmacro`; native builtin producers keep their output
+   templates beside their scope, loop, and class algorithms.
 
 The callable-defer environment is a narrow exception to the second rule's
 slot placement: its producer supplies canonical `const void *` field rows to
@@ -260,6 +262,27 @@ List builtin_catch_cases(List selected, List arms) {
   a hole, as in the Func call template.
 
 ## Rebuilding a bound source expression
+
+### Canonical composition with metafunctions
+
+Use an existing List metafunction when a family carries canonical rows that
+an expression hole would reinterpret. String's `source_string_content`
+owns the `segments` envelope while preserving cache, `segvar`, `segexp`, and
+constructed `segraw` rows. Its callers retain conversion and resolution
+order. This needs no new Segment parameter kind.
+
+Derive a source pattern with simple named holes before inserting a consumer's
+exact constraints. `source_pattern_with` does this for indexed designation;
+passing a nested wildcard through ordinary hole projection instead quoted it
+and lost the `volatile` designation. Preserve the original root and wrapper
+dispatch: a macro case can look through origins that a raw case did not.
+
+New native metafunctions must be available in the seed before their pattern
+callers are compiled. Introduce the helper, regenerate linked meta, build a
+capable seed, and then compile its adopters. Keep this transition local to the
+batch; the final gate rebuilds from the shipped bootstrap.
+
+### Retained template construction
 
 The lambda parser and binder have already established capture identities,
 parameter bindings and the result type. Applying an ordinary lambda template
