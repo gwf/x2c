@@ -3473,16 +3473,25 @@ uses canonical String segment content; the public Segment proposal was
 withdrawn. The [architecture reference](compiler-dual-macro-architecture.md)
 retains the original responsibility survey as historical context.
 
-The deliberate raw List boundaries carry stage facts rather than competing
-parsed-source definitions. Parser primitives first create canonical forms;
-shared AST traversal and normalization inspect nodes independent of one
-source spelling; binding, type, identity, origin, pending macro and
-declaration records carry established semantic facts; cache and generated
-Function/declaration records carry placement and initialization order; and
-`emit.x` prints canonical C, including precedence and native static
-initialization. Those owners may keep List operations while source-like
-recognition in their clients uses grammar projections. This is an owner
-classification, not a claim that `%(` or every literal has disappeared.
+The remaining raw List heads have concrete stage owners:
+
+| Owner and retained form | Why the List remains |
+| --- | --- |
+| Parser primitives and `ast.x` shared traversal | The parser first creates canonical nodes; shared walks and normalization inspect them without choosing one source spelling. |
+| `compiler.x`, `macros.x`, `meta-group.x`, `generate.x`: bound Function/declaration, binder, and modifier records | They carry resolved identity, type, signature, scope, and header/source placement, not a competing syntax producer. |
+| `expressions.x`, `cache.x`, `emit.x`: `getindex`/`setindex`, `initval`/`dotinit`/`indexinit` | These are resolved access and initializer records with target type, conversion, cache placement, or native C output responsibilities. |
+| `stage.x`: native `String_new`, cache, `cons`, and `nil` leaves | Compile-time folding reads generated calls and cached values after source resolution. |
+| `regions.x`: lowered `defer` with environment, callback, capture, and written fields | The tail is lowering state; the source `defer` body uses its shared Statement form. |
+| `expressions.x`: native `parens(block...)` | The nested block expression is a native C extension boundary with existing scope and value handling. |
+| `macros.x`, `stage.x`: stored templates, `meta-call`, capture, and pending invocation records | These carry compile-time application state and are not parsed user-program source spellings. |
+| `emit.x`, `cache.x`, `generate.x`: C printing, precedence, static initialization, interfaces, and generated Function records | Backend output, storage identity, and ordering remain native owners. |
+
+The integrated review also corrected three specific preservation cases:
+`94e54fcc` keeps protocol adoption's fallback for a non-Symbol tag,
+`54e7fa30` keeps the normalized defer tail and source block walk, and
+`26255941` groups the SDK binding-type cases so they stay inside the match.
+These are code corrections, not publication evidence. This accounting does
+not claim that `%(` or every literal has disappeared.
 
 The final integrated tree and its generated artifacts still require review,
 the repository gate, performance evidence where applicable, and an explicit
