@@ -287,18 +287,15 @@ static void _install_stored_adoption(Compiler compiler, List value) {
       draft.install();
     }
     case %(adopt ?base ?participant ?storage
-             (tag (!set ?tag_expression (expr ("Symbol") ?content)))
-             ?location): {
-      match (content)
-        case $source_literal_content(%(("Symbol") ? ?candidate)):
-          if (candidate is <symbol>) {
-            Symbol tag = candidate;
-            AdoptionDraft draft = {
-              .c = compiler, .base = base, .participant = participant,
-              .storage = storage, .tag = tag,
-              .tag_expression = tag_expression, .location = location};
-            draft.install();
-          }
+             (tag (!set ?tag_expression (expr ("Symbol")
+               ${$source_literal_content(%(("Symbol") ? ?candidate))})))
+             ?location) if (candidate is <symbol>): {
+      Symbol tag = candidate;
+      AdoptionDraft draft = {
+        .c = compiler, .base = base, .participant = participant,
+        .storage = storage, .tag = tag,
+        .tag_expression = tag_expression, .location = location};
+      draft.install();
     }
     case %(adopt ?base ?participant ?storage ?representation ?location): {
       AdoptionDraft draft = {
