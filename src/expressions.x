@@ -687,7 +687,7 @@ static List _parse_postfix_dot(Compiler compiler, List expr) {
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
   List field = _parse_field_name(compiler, <.>, expr);
-  List result = %(expr () (op . $expr $field));
+  List result = source_operator_expression(NULL, %(. $expr $field));
   if (compiler.peek(0) != <(>)
     return compiler.resolve_expression(result, origin);
   // Allocate a method identity before parsing its arguments.
@@ -703,7 +703,8 @@ static List _parse_postfix_arrow(Compiler compiler, List expr) {
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
   List field = _parse_field_name(compiler, <"->">, expr);
-  return compiler.resolve_expression(%(expr () (op -> $expr $field)), origin);
+  return compiler.resolve_expression(
+    source_operator_expression(NULL, %(-> $expr $field)), origin);
 }
 
 static List _parse_postfix_decinc(Compiler compiler, List expr) {
@@ -882,7 +883,8 @@ static List _parse_unary_op(Compiler c) {
   c.next();
   List operand = op == <++> || op == <--> || op == <~>
                ? _parse_unary_op(c) : _parse_cast(c);
-  return c.resolve_expression(%(expr () (op $op $operand)), origin);
+  return c.resolve_expression(
+    source_operator_expression(NULL, %($op $operand)), origin);
 }
 
 static int _cast_operand_follows(Symbol s) {
@@ -2091,7 +2093,7 @@ static List _native_binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs,
   Type lhs_type, Type rhs_type, Token origin) {
   Type type = c._binary_op_type(operator, lhs, rhs);
-  List operation = %(op $operator $lhs $rhs);
+  List operation = source_operator_content(%($operator $lhs $rhs));
   if (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type))
     operation = c.anchor_origin(operation, origin);
   return %(expr $type $operation);
@@ -2102,7 +2104,8 @@ static List Compiler._binary_expression(
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
-    return %(expr (<macro-expr>) (op $operator $lhs $rhs));
+    return source_operator_expression(
+      %(<macro-expr>), %($operator $lhs $rhs));
   if (operator.is_assignment_op()) {
     Type type = lhs_type;
     /* Meta lowering adapts a callable stored to a Func itself; converting
@@ -2110,7 +2113,7 @@ static List Compiler._binary_expression(
     if (operator == <=> &&
         !(c.meta_body && c.sym.is_named_value_type(type, "Func")))
       rhs = c.convert_expression(rhs, type);
-    return %(expr $type (op $operator $lhs $rhs));
+    return source_operator_expression(type, %($operator $lhs $rhs));
   }
   _convert_string_comparison(c, operator, lhs, rhs);
   int constant_string = _convert_string_addition(c, operator, lhs, rhs);
@@ -2181,7 +2184,7 @@ static List _resolve_segments(
     }
     default: resolved.push(item);
   }
-  return %(expr $type (segments @{resolved.list_free()}));
+  return %(expr $type ${source_string_content(resolved.list_free())});
 }
 
 static List _resolve_initval(
@@ -2326,7 +2329,7 @@ static List _resolve_unary(
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
   if (lhs_type === %(<macro-expr>))
-    return %(expr (<macro-expr>) (op $operator $lhs));
+    return source_operator_expression(%(<macro-expr>), %($operator $lhs));
   List lowered = operator == <->
     ? c._protocol_operator_expression(operator, lhs, NULL) : NULL;
   if (lowered) return lowered;
@@ -2351,7 +2354,7 @@ static List _resolve_unary(
       break;
     }
   }
-  return %(expr $type (op $operator $lhs));
+  return source_operator_expression(type, %($operator $lhs));
 }
 
 static List _resolve_conditional(
@@ -2364,8 +2367,8 @@ static List _resolve_conditional(
   if (condition.cadr() === %(<macro-expr>) ||
       true_type === %(<macro-expr>) ||
       false_type === %(<macro-expr>))
-    return %(expr (<macro-expr>)
-             (op $operator $condition $ontrue $onfalse));
+    return source_operator_expression(
+      %(<macro-expr>), %($operator $condition $ontrue $onfalse));
   /* Arms of one declared type keep it, so a `Symbol` conditional stays a
      `Symbol` rather than the integer that represents it. */
   Type type = true_type;
@@ -2380,7 +2383,8 @@ static List _resolve_conditional(
     else if (_conditional_joins(c, true_type, false_type))
       onfalse = c.convert_expression(onfalse, type);
   }
-  return %(expr $type (op $operator $condition $ontrue $onfalse));
+  return source_operator_expression(
+    type, %($operator $condition $ontrue $onfalse));
 }
 
 static List _resolve_tadapt(
@@ -2435,9 +2439,10 @@ static List _resolve_member(
     receiver_type, field, operator, 0);
   match (resolution)
     case %(field ?access ?field_type):
-      return %(expr $field_type (op $access $receiver $field));
+      return source_operator_expression(
+        field_type, %($access $receiver $field));
   Type type = _deferred_receiver(receiver) ? %(<macro-expr>) : NULL;
-  return %(expr $type (op $operator $receiver $field));
+  return source_operator_expression(type, %($operator $receiver $field));
 }
 
 static List _resolve_postfix_op(
@@ -2590,7 +2595,8 @@ static List _resolve_content(
       return _resolve_invocation(c, input, definition, arguments, invocation);
     case %(macro-slot ? ? *):
       return _resolve_macro_slot(c, input, content, origin);
-    case %(segments *items): return _resolve_segments(c, items, origin);
+    case $source_string_content(%(*items)):
+      return _resolve_segments(c, items, origin);
     case %(cons ?head ?tail):
       return _resolve_cons(c, input_type, head, tail, origin);
     case %(append ?head ?tail):
@@ -2635,15 +2641,17 @@ static List _resolve_content(
       return _resolve_is_type(c, operand, target_syntax, origin);
     case %(is-symbol ?operand ?selector):
       return _resolve_is_symbol(c, operand, selector, origin);
-    case %(op (!or (!set ?operator .) (!set ?operator (!quote ->)))
-              ?receiver (!set ?field (*))):
+    case $source_operator_content(
+        %((!or (!set ?operator .) (!set ?operator (!quote ->)))
+          ?receiver (!set ?field (*)))):
       return _resolve_member(c, operator, receiver, field, origin);
-    case %(op ?operator ?operand):
+    case $source_operator_content(%(?operator ?operand)):
       return _resolve_unary(c, operator, operand, origin);
-    case %(op ?operator ?condition ?ontrue ?onfalse):
+    case $source_operator_content(
+        %(?operator ?condition ?ontrue ?onfalse)):
       return _resolve_conditional(
         c, operator, condition, ontrue, onfalse, origin);
-    case %(op ?operator ?left ?right):
+    case $source_operator_content(%(?operator ?left ?right)):
       return _resolve_binary(c, operator, left, right, origin);
     case %(postfix ?operator ?operand):
       return _resolve_postfix_op(c, operator, operand, origin);
@@ -2901,9 +2909,8 @@ static List _parse_conditional_tail(Compiler compiler, List condition) {
   if (!compiler.test(<?>)) return condition;
   List ontrue = compiler.parse_expression();
   compiler.expect(<:>);
-  return compiler.resolve_expression(
-    %(expr () (op ? $condition $ontrue ${compiler.parse_conditional()})),
-    origin);
+  return compiler.resolve_expression(source_operator_expression(
+    NULL, %(? $condition $ontrue ${compiler.parse_conditional()})), origin);
 }
 
 /** Parses a binary expression and its optional conditional tail.
@@ -2927,7 +2934,8 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
   if (targets) match (rhs)
     case %(expr ?type ?): return %(expr $type (dstrasgn $targets $rhs));
   if (op == <=>) compiler.check_explicit_converter(rhs, lhs.cadr(), 0);
-  return compiler.resolve_expression(%(expr () (op $op $lhs $rhs)), origin);
+  return compiler.resolve_expression(
+    source_operator_expression(NULL, %($op $lhs $rhs)), origin);
 }
 
 /** Parses one right-associative assignment expression.

@@ -19,6 +19,7 @@
 typedef List Type;
 
 #pragma private
+$(import "../src/grammar.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 $(import "../lib/native-scalar-types.xmacro")
 #include <limits.h>
@@ -808,7 +809,8 @@ String ast_addressed_identifier(Var value) {
   match (ast) {
     case %(expr ? ?inner): return ast_addressed_identifier(inner);
     case %(parens ?inner): return ast_addressed_identifier(inner);
-    case %(op & ?inner):   return ast_direct_identifier(inner);
+    case $source_pattern($addressed, %(?inner)):
+      return ast_direct_identifier(inner);
   }
   return NULL;
 }
@@ -825,8 +827,10 @@ String ast_direct_identifier(Var value) {
   List ast = designated;
   match (ast) {
     case %(ident ?binding): return binding_identity_spelling(binding);
-    case %(op (!quote ->) ?base *): return ast_addressed_identifier(base);
-    case %(op (!quote *) ?base): return ast_addressed_identifier(base);
+    case $source_operator_content(%((!quote ->) ?base *)):
+      return ast_addressed_identifier(base);
+    case $source_pattern($dereferenced, %(?base)):
+      return ast_addressed_identifier(base);
   }
   return NULL;
 }
@@ -841,10 +845,13 @@ String ast_indirect_identifier(Var value) {
   if (designated is not <list>) return NULL;
   List ast = designated;
   match (ast) {
-    case %(index (!set ?base (expr ? ?)) ?):
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+        %((?receiver (!set ?base (expr ? ?))) (?selector ?))):
       return ast_direct_identifier(base);
-    case %(op (!quote ->) ?base *): return ast_direct_identifier(base);
-    case %(op (!quote *) ?base): return ast_direct_identifier(base);
+    case $source_operator_content(%((!quote ->) ?base *)):
+      return ast_direct_identifier(base);
+    case $source_pattern($dereferenced, %(?base)):
+      return ast_direct_identifier(base);
   }
   return NULL;
 }
@@ -867,11 +874,12 @@ static Var _designated(Var value) {
 static Var _same_object(List node) {
   match (node) {
     case %(!or (expr ? ?inner) (parens ?inner)): return inner;
-    case %(index (!set ?base (expr ?base_type ?)) ?): {
-      Type type = base_type;
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+        %((?receiver (!set ?base (expr ? ?))) (?selector ?))): {
+      Type type = base.cadr();
       if (type.is_array()) return base;
     }
-    case %(op . ?base *): return base;
+    case $source_operator_content(%(. ?base *)): return base;
   }
   return void;
 }

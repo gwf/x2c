@@ -832,7 +832,7 @@ List Compiler.parse_string_literal(Compiler compiler) {
   compiler.expect(<"\"">);
   if (segments.match(%((cache *))))
     return %(expr ("String") ${segments.car()});
-  return %(expr ("String") (segments @segments));
+  return %(expr ("String") ${source_string_content(segments)});
 }
 
 static List _parse_string_segments(Compiler c) {
