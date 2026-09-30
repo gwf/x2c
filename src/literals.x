@@ -542,10 +542,12 @@ typedef struct SymbolSetHash {
 } SymbolSetHash;
 
 static List _set_expression(Array symbols) {
-  String text = _encode(symbols, _hash(symbols));
-  List bytes = %(expr (* char) (literal (* char) $text));
-  List decl = %(decl ("SymbolSet") (bindings (bind () ())));
-  return %(expr ("SymbolSet") (cast $decl $bytes));
+  $scope() {
+    String text = _encode(symbols, _hash(symbols));
+    List bytes = %(expr (* char) (literal (* char) $text));
+    List decl = %(decl ("SymbolSet") (bindings (bind () ())));
+    return %(expr ("SymbolSet") (cast $decl $bytes));
+  }
 }
 
 /* The header holds the table's entry width, the count, the span's mask,
@@ -611,17 +613,22 @@ static SymbolSetHash _hash(Array symbols) {
                attempt * UINT64_C(0xd1b54a32d192ed03);
       built = _try_seed(symbols, h.span, h.seed, h.table);
     }
-    if (!built) h.span <<= 1;
+    if (!built) {
+      Scope.free(h.table);
+      h.span <<= 1;
+    }
   }
   return h;
 }
 
 static int _try_seed(
   Array symbols, uint32_t span, uint64_t seed, uint32_t *table) {
-  SymbolSetGraph g = _graph(symbols, span, seed);
-  if (!g.peel()) return 0;
-  g.assign(table);
-  return 1;
+  $scope() {
+    SymbolSetGraph g = _graph(symbols, span, seed);
+    if (!g.peel()) return 0;
+    g.assign(table);
+    return 1;
+  }
 }
 
 static SymbolSetGraph _graph(Array symbols, uint32_t span, uint64_t seed) {

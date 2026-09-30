@@ -2710,11 +2710,10 @@ static Var _helper_result(Compiler c, Var value) {
     case %(macrodef *): return value;
     case $source_literal_content(%(*)): return value;
   }
-  Array parts = [];
-  foreach (Var part, (List) value) parts.push(_helper_result(c, part));
-  List resolved = parts.list_free();
-  match (resolved) {
+  match (value) {
     case %("x2c.template" ?stored ?(List values)): {
+      stored = _helper_result(c, stored);
+      values = _helper_result(c, values);
       Token site = c.macro_invocation_site(<m-invoke>);
       if (!site) site = c.token;
       $let(sdk_compiler, c)
@@ -2723,7 +2722,8 @@ static Var _helper_result(Compiler c, Var value) {
           stored is <string> ? Atom.intern(stored.str()) : stored, values);
     }
   }
-  return resolved;
+  List child;
+  $ast.rewrite_children(value.list(), child, _helper_result(c, child));
 }
 
 /** Rebuilds an expression from a pending Macro value application, preserving
@@ -2799,14 +2799,8 @@ static Var _macro_value_names(Var value) {
   String spelling = NULL;
   if (binding_identity_try_parts(value, NULL, spelling))
     return %(binding-name $spelling);
-  Array parts = $auto([]);
-  int changed = 0;
-  foreach (Var child, value.list()) {
-    Var part = _macro_value_names(child);
-    changed |= part != child;
-    parts.push(part);
-  }
-  return changed ? parts.list().var() : value;
+  List child;
+  $ast.rewrite_children(value.list(), child, _macro_value_names(child));
 }
 
 /* An applied Macro value binds each named reference in the applying unit's
@@ -2819,14 +2813,8 @@ static Var _macro_value_bindings(Compiler c, Var value) {
       return c.sym.reference_global(%($spelling));
     case %(tpl-call *): return value;
   }
-  Array parts = $auto([]);
-  int changed = 0;
-  foreach (Var child, value.list()) {
-    Var part = _macro_value_bindings(c, child);
-    changed |= part != child;
-    parts.push(part);
-  }
-  return changed ? parts.list().var() : value;
+  List child;
+  $ast.rewrite_children(value.list(), child, _macro_value_bindings(c, child));
 }
 
 /* NULL for a template's hole of that name or for an unknown macro. */

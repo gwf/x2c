@@ -968,8 +968,13 @@ static void _scan_cons(Walk w, Var node, Var head, Var tail) {
 }
 
 static void _scan_children(Walk w, List children) {
-  for (int i = children.len() - 1; i >= 0; i--)
-    w.pending.push(children[i]);
+  int start = w.pending.len();
+  foreach (Var child, children) w.pending.push(child);
+  for (int end = w.pending.len() - 1; start < end; start++, end--) {
+    Var first = w.pending[start];
+    w.pending[start] = w.pending[end];
+    w.pending[end] = first;
+  }
 }
 
 static void _scan_node(Walk w, Var node) {
