@@ -860,7 +860,7 @@ static List _parse_generic(Compiler c) {
    differently. */
 static int _c_type_known(Compiler c, List operand) {
   match (operand) {
-    case %(expr ? (parens ?inner)): return _c_type_known(c, inner);
+    case $grouped.pattern(%(?inner)): return _c_type_known(c, inner);
     case %(expr ? (!or (literal (char) *) (sizeof *) (offsetof *))): return 0;
     case %(expr ? (op - (expr ?left *) (expr ?right *))): {
       Type l = left, r = right;
@@ -1131,7 +1131,7 @@ static inline int _expr_is_string_like(Compiler compiler, List expr) {
 
 static int _expr_is_raw_string_literal(List expr) {
   match (expr) {
-    case %(expr ? (parens ?inner)):
+    case $grouped.pattern(%(?inner)):
       return _expr_is_raw_string_literal(inner);
     case %(expr ? (literal ?type ?)):
       return _type_is_char_pointer_like(type);
@@ -1267,7 +1267,8 @@ static void _note_fresh_callee(Compiler compiler, List binding) {
 
 static int _is_operator_temporary(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? (parens ?inner)): return _is_operator_temporary(c, inner);
+    case $grouped.pattern(%(?inner)):
+      return _is_operator_temporary(c, inner);
   }
   Macro called = $called;
   match (expression) case called(?callee, *arguments):
@@ -1796,7 +1797,7 @@ List Compiler.func_call_parts(Compiler compiler, Var content) {
         absent = $func_null_argument, boxed = $func_value;
   match (%(expr () $content)) case apply(?callee): return %($callee);
   List block = NULL;
-  match (content) case %(parens ?inner): block = inner;
+  match (content) case $grouped.pattern(%(?inner)).caddr(): block = inner;
   if (!block) return NULL;
   match (block)
     case call(?callee, ?count, *arguments): {
@@ -2613,10 +2614,12 @@ static List _resolve_content(
                          ${c.resolve_expression(selector, origin)}));
     case %(dstrasgn (targets *targets) ?source):
       return _resolve_destructure(c, targets, source, origin);
-    case %(sizeof (parens ?(List argument))):
+    case $source_pattern_with($sizeof_grouped, %(?argument),
+        %((?argument ?(List argument)))):
       return %(expr $input_type
                (sizeof (parens ${c.resolve_expression(argument, origin)})));
-    case %(sizeof ?(List argument)):
+    case $source_pattern_with($sizeof_expression, %(?argument),
+        %((?argument ?(List argument)))):
       return %(expr $input_type
                (sizeof ${c.resolve_expression(argument, origin)}));
     case %(generic ?control *associations):
@@ -2631,12 +2634,14 @@ static List _resolve_content(
       return %(expr $input_type
                (splice ${c.resolve_expression(expression, origin)}));
     case %((!or offsetof nil cache macro-bind) *): return input;
-    case %(parens ?inner): return _resolve_parens(c, inner, origin);
+    case $source_pattern($grouped, %(?inner)):
+      return _resolve_parens(c, inner, origin);
     case %(initval *choices):
       return _resolve_initval(c, input_type, content, origin);
     case %(composite (commas *elements)):
       return _resolve_composite(c, input_type, elements, origin);
-    case %(cast (!set ?declaration (decl *)) ?operand):
+    case $source_cast_content(
+        %((!set ?declaration (decl *)) ?operand)):
       return _resolve_cast(c, declaration, operand, origin);
     case %(type-tag ?target):
       return c.var_tag_expression(target, origin);
@@ -2792,7 +2797,7 @@ static int _destructure_identifier(List expression) =>
 
 static List _destructure_targets(Compiler compiler, List lhs) {
   match (lhs)
-    case %(expr ? (parens ?target)): {
+    case $grouped.pattern(%(?target)): {
       if (_destructure_identifier(target)) return %(targets $target);
       match (target)
         case %(expr ? (commas *targets)): {
@@ -3110,7 +3115,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
    when it cannot decide. */
 static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
-    case %(expr ? (parens ?inner)):
+    case $grouped.pattern(%(?inner)):
       return _integer_literal_kind(inner, out_text);
     case %(expr ? (literal ?ltype ?text)): {
       String spelling = text, Type type = ltype;
@@ -3165,7 +3170,7 @@ static int _unrelated_pointers(Compiler compiler, Type source, Type target) {
    only syntactically decidable forms. A wrong guess would reject legal C. */
 static String _not_null_pointer_constant(Compiler compiler, List expr) {
   match (expr) {
-    case %(expr ? (parens ?inner)):
+    case $grouped.pattern(%(?inner)):
       return _not_null_pointer_constant(compiler, inner);
     // sizeof is an integer constant expression, but never a zero-valued
     // one: no type in C has size zero.

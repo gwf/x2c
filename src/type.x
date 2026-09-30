@@ -808,7 +808,8 @@ String ast_addressed_identifier(Var value) {
   List ast = value;
   match (ast) {
     case %(expr ? ?inner): return ast_addressed_identifier(inner);
-    case %(parens ?inner): return ast_addressed_identifier(inner);
+    case $source_pattern($grouped, %(?inner)):
+      return ast_addressed_identifier(inner);
     case $source_pattern($addressed, %(?inner)):
       return ast_direct_identifier(inner);
   }
@@ -873,7 +874,8 @@ static Var _designated(Var value) {
    array index; `void` when `node` is none of them. */
 static Var _same_object(List node) {
   match (node) {
-    case %(!or (expr ? ?inner) (parens ?inner)): return inner;
+    case %(expr ? ?inner): return inner;
+    case $source_pattern($grouped, %(?inner)): return inner;
     case $source_pattern_with($indexed, %(?receiver ?selector),
         %((?receiver (!set ?base (expr ? ?))) (?selector ?))): {
       Type type = base.cadr();
