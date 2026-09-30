@@ -906,7 +906,7 @@ macro Unit $map.typed.box(Type $map, Type $key, Type $value,
   Map $map.map($map map) {
     if (map == NULL) return NULL;
     Map boxed = {}, finished = NULL;
-    defer if (finished == NULL) boxed.cleanup();
+    defer if ((void *) finished == 0) boxed.cleanup();
     unsigned cursor = 0;
     $key key;
     $value value;
