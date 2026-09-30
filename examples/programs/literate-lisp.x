@@ -351,9 +351,9 @@ static Var Interp.invoke(Interp *self, Fn closure, List values) {
      (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)                                    v   v
                                                                                            (a   7   8 9)
    There are two result shapes here. quasiquote produces one value;
-   quoted_item produces the sequence of elements contributed by an item. An            ,x: one value
+   quoted_elements builds the containing sequence of values.                         ,x: one value
    ordinary item contributes one element; a splice may contribute many. The            ,@xs: List elements
-   containing List is constructed by concatenating these item sequences.
+   containing List is built by walking its actual elements once.
 
    The depth tracks nested quasiquotes. Processing a nested quasiquote
    increments it; processing a nested unquote decrements it. An unquote is
@@ -366,28 +366,34 @@ static Var Interp.quasiquote(Interp *self, LispEnv *env, Var form, int depth) {
   Var (head, argument) = expr;                                                  // Positional List destructuring.
   Var (quote, unquote, splice) = %(quasiquote unquote unquote-splicing);        // Literal names unpack into Vars.
   if (head == quote)                                                            // Var equality with a Symbol value.
-    return cons(head, self.quasiquote(env, expr.cdr(), depth + 1));             // Construct List; result boxes as Var.
+    return cons(head, self.quoted_elements(env, expr.cdr(), depth + 1));      // Canonical nested quotation form.
   if (head == unquote || head == splice) {                                      // Compare Symbols held in Vars.
     if (expr.len() != 2) $fail(<bad-arity>, "quasiquote", <value>, form);      // Receiver-style length query.
-    if (depth) return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));  // C condition with List construction.
+    if (depth)                                                                // Inactive unquote stays in the form.
+      return cons(head, self.quoted_elements(env, expr.cdr(), depth - 1));
     Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
     if (head == splice)                                                         // Var equality against a Symbol.
       $fail(<bad-types>, "quasiquote-splice", <actual>, form.kind());          // Runtime kind in macro-built error.
     return value;
   }
-  List first = self.quoted_item(env, head, depth);                              // Receiver call returns a typed List.
-  List rest = self.quasiquote(env, expr.cdr(), depth);                          // Returned Var converts to List.
-  return first.append(rest);                                                    // Result List implicitly boxes as Var.
+  return self.quoted_elements(env, expr, depth);                               // Siblings remain ordinary elements.
 }
 
-static List Interp.quoted_item(Interp *self, LispEnv *env, Var form, int depth) {
-  match (form) case %(unquote-splicing ?argument) if (!depth): {                // Pattern plus guard.
-    Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
-    if (value is not <list>)                                                    // Runtime type inspection.
-      $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());         // Macro emits runtime error creation.
-    return value;                                                               // Implicit Var -> List conversion.
+static List Interp.quoted_elements(
+  Interp *self, LispEnv *env, List items, int depth) {
+  Array values = $auto([]);                                                     // One operation-owned mutable builder.
+  foreach (Var item, items) {                                                   // Only actual nested forms recurse.
+    match (item) {
+      case %(unquote-splicing ?argument) if (!depth): {
+        Var value = self.eval(env, argument);                                   // Evaluate each splice once, in order.
+        if (value is not <list>)
+          $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());
+        foreach (Var part, value.list()) values.push(part);                    // Splice the contributed elements.
+      }
+      default: values.push(self.quasiquote(env, item, depth));                  // Ordinary elements contribute one value.
+    }
   }
-  return %(${self.quasiquote(env, form, depth)});                               // ${...} inserts a whole expression.
+  return values;                                                               // Canonical List survives builder cleanup.
 }
 
 /* Errors are part of the language's observable behavior --------------------------------------------------------------

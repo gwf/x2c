@@ -1,6 +1,7 @@
 /*  test-lisp.x -- unit tests for the Lisp runtime */
 
 #include "test-support.x"
+$(import "test-macros.xmacro")
 
 // reader - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -716,6 +717,72 @@ static void lisp_eval_quasiquote(void) {
   lisp.destroy();
 }
 
+
+static void lisp_quasiquote_elements_stay_data(void) {
+  Lisp lisp = _session();
+  EXPECT_VAR_EQ(_ev(lisp, "`(a unquote (add 1 2))"),
+                _ev(lisp, "'(a unquote (add 1 2))"));
+  EXPECT_VAR_EQ(_ev(lisp, "`(a unquote-splicing (add 1 2))"),
+                _ev(lisp, "'(a unquote-splicing (add 1 2))"));
+  EXPECT_VAR_EQ(_ev(lisp, "`(a quasiquote ,(add 1 2))"), %(a quasiquote 3).var());
+  EXPECT_VAR_EQ(_ev(lisp, "`(a ,@'() b ,@'(1 2) c)"), %(a b 1 2 c).var());
+  EXPECT_VAR_EQ(_ev(lisp, "((lambda (x) `(a ,x ,@(quote (2 3)))) 1)"),
+                %(a 1 2 3).var());
+  EXPECT_VAR_EQ(_ev(lisp, "``(unquote ,(add 1 2))"),
+                _ev(lisp, "'(quasiquote (unquote 3))"));
+  EXPECT_VAR_EQ(_ev(lisp, "``(quasiquote ,,(add 1 2))"),
+                _ev(lisp, "'(quasiquote (quasiquote (unquote (unquote "
+                          "(add 1 2)))))"));
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote))"), <bad-arity>);
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote 1 2))"), <bad-arity>);
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote-splicing))"), <bad-arity>);
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a (unquote-splicing 1 2))"), <bad-arity>);
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a ,@1)"), <bad-types>);
+  order_log[0] = 0;
+  EXPECT_VAR_EQ(_ev(lisp, "`(,(log! 1) ,@(log! '(2 3)) ,(log! 4))"),
+                %(1 2 3 4).var());
+  EXPECT_STR_EQ(String.new(order_log), "1( 2 3 )4");
+  order_log[0] = 0;
+  EXPECT_INT_EQ(_raised_code(lisp, "`(,(log! 1) ,@2 ,(log! 3))"), <bad-types>);
+  EXPECT_STR_EQ(String.new(order_log), "1");
+  order_log[0] = 0;
+  EXPECT_INT_EQ(_raised_code(lisp, "`,@(log! 1)"), <bad-types>);
+  EXPECT_STR_EQ(String.new(order_log), "1");
+  order_log[0] = 0;
+  EXPECT_INT_EQ(_raised_code(lisp,
+    "`(,(log! 1) (unquote-splicing (log! 2) (log! 3)))"), <bad-arity>);
+  EXPECT_STR_EQ(String.new(order_log), "1");
+  EXPECT_INT_EQ(_raised_code(lisp, "``(a (unquote))"), <bad-arity>);
+  _install(lisp, "no-value", _native_void, %((func ((void))) "Var"));
+  List nil_result = _ev(lisp, "`(a ,'() b)");
+  EXPECT_TRUE(nil_result == %(a () b));
+  EXPECT_TRUE(_ev(lisp, "`,(no-value)") is void);
+  EXPECT_INT_EQ(_raised_code(lisp, "`(a ,(no-value) b)"), <void-op>);
+  lisp.destroy();
+}
+
+static void lisp_quasiquote_width_releases_scratch(void) {
+  $test.scoped();
+  Lisp lisp = Lisp.kernel();
+  Array values = [];
+  for (int i = 0; i < 100000; i++) values.push(i);
+  List expected = values.list_free();
+  List expression = %(quasiquote $expected);
+  lisp.eval(%(quasiquote (warm)));
+  ScopeStats before = Scope.stats();
+  EXPECT_TRUE(lisp.eval(expression) == expected);
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(Scope.stats().live_requested_bytes, before.live_requested_bytes);
+  _raised_code(lisp, "`(a ,@1)");
+  before = Scope.stats();
+  for (int i = 0; i < 3; i++) {
+    EXPECT_INT_EQ(_raised_code(lisp, "`(a ,@1)"), <bad-types>);
+    EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+    EXPECT_INT_EQ(
+      Scope.stats().live_requested_bytes, before.live_requested_bytes);
+  }
+  lisp.destroy();
+}
 
 static void lisp_eval_list_literal_reader_prefixes(void) {
   Lisp lisp = Lisp.new();
@@ -1708,7 +1775,6 @@ static void lisp_tail_calls_stay_flat(void) {
   lisp.destroy();
 }
 
-$(import "test-macros.xmacro")
 
 void lisp_suite(void) {
   $test.run(lisp_canonical_names_outlive_initial_context);
@@ -1749,6 +1815,8 @@ void lisp_suite(void) {
   $test.run(lisp_eval_multiple_forms_share_one_stream);
   $test.run(lisp_eval_macro_semantics);
   $test.run(lisp_eval_quasiquote);
+  $test.run(lisp_quasiquote_elements_stay_data);
+  $test.run(lisp_quasiquote_width_releases_scratch);
   $test.run(lisp_eval_list_literal_reader_prefixes);
   $test.run(lisp_eval_strips_locals);
   $test.run(lisp_eval_bind_native);

@@ -108,6 +108,20 @@ static void _cases(void) {
         "(defmacro twice (e) `(+ ,e ,e)) (twice (twice 3))");
   _case("quasiquote",
         "(list `(1 ,(+ 1 1) ,@'(3 4)) ``(a ,(b ,(+ 1 2))) `,(+ 1 2))");
+  _case("quasiquote-bare-vocabulary",
+        "(list `(a unquote (+ 1 2)) `(a unquote-splicing (+ 1 2)) "
+        "`(a quasiquote ,(+ 1 2)))");
+  _case("quasiquote-nested-splices",
+        "(list `(a ,@'() b ,@'(1 2) c) ``(unquote ,(+ 1 2)) "
+        "``(quasiquote ,,(+ 1 2)))");
+  _case("quasiquote-effect-order",
+        "(def n 0) (list `(,(def n (+ n 1)) "
+        ",@(list (def n (+ n 1))) ,(def n (+ n 1))) n)");
+  foreach (String form,
+           %("`(a (unquote))" "`(a (unquote 1 2))"
+             "`(a (unquote-splicing))" "`(a (unquote-splicing 1 2))"
+             "`(a ,@1)"))
+    _case(%"quasiquote-malformed-$form", form);
   _case("apply",
         "(list (apply + '(10 20 12)) (apply (lambda (. x) x) '(a b)) (apply "
         "apply (list + '(1 2 3))))");
