@@ -311,8 +311,16 @@ void Buffer_free(Buffer);
 List Array_list_free(Array);
 
 List translation_depfile_parse(String text){
-  const char * ch = String_truth(text) ? strchr(text, ':') : NULL;
-  if(! ch) return NULL;
+  const char * ch = text;
+  while(ch && * ch && * ch != '\n'){
+    if(* ch == '\\' && ch[1]){
+      ch += 2;
+      continue;
+    }
+    if(* ch == ':') break;
+    ch ++;
+  }
+  if(! ch || * ch != ':') return NULL;
   Array paths = Array_new();
   Buffer word = Buffer_new(0);
   for(ch ++;  * ch && * ch != '\n';  ch ++){

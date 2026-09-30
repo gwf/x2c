@@ -22,6 +22,8 @@ static Var _627, _624, _620, _604, _603, _599, _597, _595, _588, _585, _581, _58
 #include <string.h>
 static const SymbolSet meta_operators =(SymbolSet) "\001\000\000\000\020\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\000\000\005\010\016\014\000\010\017\014\012\000\005\014\006\015\000\012\001\011\002\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\137\000\000\000\000\000\000\000\113\000\000\000\000\000\000\000\171\074\000\000\000\000\000\000\175\076\000\000\000\000\000\000\115\000\000\000\000\000\000\000\371\000\000\000\000\000\000\000\275\000\000\000\000\000\000\000\171\000\000\000\000\000\000\000\175\000\000\000\000\000\000\000\173\074\000\000\000\000\000\000\173\076\000\000\000\000\000\000\173\075\000\000\000\000\000\000\173\041\000\000\000\000\000\000";
 
+static const SymbolSet meta_comparisons =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\000\001\002\006\002\004\000\002\000\000\000\000\171\000\000\000\000\000\000\000\175\000\000\000\000\000\000\000\173\074\000\000\000\000\000\000\173\076\000\000\000\000\000\000\173\075\000\000\000\000\000\000\173\041\000\000\000\000\000\000";
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -434,6 +436,12 @@ Var int_var(int);
 
 int SymbolSet_contains(SymbolSet, Symbol);
 
+Type Sym_resolve_numeric_type(Sym, Type);
+
+Var List_cadr(List);
+
+Type Type_widest(Type, Type);
+
 int Var_is_void(Var);
 
 Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCall call){
@@ -469,7 +477,13 @@ static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2
 }
 static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_254), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var operand = _x2c_match_values[1];  value = Var_binary(Compiler_meta_argument(c, Var_list(operand), Var_type(type), site, call), 54, int_var(- 1));  break;
 }
-static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_265), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var operator = _x2c_match_values[1];  Var left = _x2c_match_values[2];  Var right = _x2c_match_values[3];  if(SymbolSet_contains(meta_operators, Var_symbol(operator))) value = Var_binary(Compiler_meta_argument(c, Var_list(left), NULL, site, call), Var_symbol(operator), Compiler_meta_argument(c, Var_list(right), NULL, site, call));  break;
+static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_265), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var operator = _x2c_match_values[1];  Var left = _x2c_match_values[2];  Var right = _x2c_match_values[3];  if(SymbolSet_contains(meta_operators, Var_symbol(operator))){
+  Type common = NULL;  if(SymbolSet_contains(meta_comparisons, Var_symbol(operator))){
+    Type a = Sym_resolve_numeric_type(c -> sym, Var_type(List_cadr(Var_list(left))));  Type b = Sym_resolve_numeric_type(c -> sym, Var_type(List_cadr(Var_list(right))));  if(List_truth(Type_list(a)) && List_truth(Type_list(b))) common = Type_widest(a, b);
+  }
+  value = Var_binary(Compiler_meta_argument(c, Var_list(left), common, site, call), Var_symbol(operator), Compiler_meta_argument(c, Var_list(right), common, site, call));
+}
+break;
 }
 default: ;  value = Compiler_folded_constant(c, List_var(node));  break;
     }
@@ -498,7 +512,6 @@ default: break;
 Compiler_report_error(c, 27335838, _634, site, _274);
 }
 
-Type Sym_resolve_numeric_type(Sym, Type);
 Symbol Type_scalar_tag(Type);
 int Var_is_integer(Var);
 int Var_is_floating(Var);
@@ -629,7 +642,6 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
 Map Map_new(void);
 void x2c_cleanup_push(X2CCleanup *);
 List datum_result_problem(Var, Map);
-Var List_cadr(List);
 void x2c_cleanup_leave(X2CCleanup *);
 static void _refuse(Compiler c, Var value, Token site){
   Map marks = Map_new(); {
