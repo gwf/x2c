@@ -12,7 +12,7 @@ Make dependency output for x2c translation units.
 
 | Function | Summary |
 | --- | --- |
-| [`translation_depfile_parse`](#translation_depfile_parse) | Parses prerequisite words after the first literal colon in `text`. |
+| [`translation_depfile_parse`](#translation_depfile_parse) | Parses prerequisite words after the first unescaped colon in `text`. |
 | [`translation_depfile_write`](#translation_depfile_write) | Publishes the Make depfile for one completed translation. |
 
 ### Functions
@@ -21,11 +21,11 @@ Make dependency output for x2c translation units.
 
 `List translation_depfile_parse(String text)`
 
-Parses prerequisite words after the first literal colon in `text`.
+Parses prerequisite words after the first unescaped colon in `text`.
 Backslash escapes and doubled dollars are decoded in that region. A
 backslash-newline continues the rule; an ordinary newline ends it before
-any phony rules. It reads only internally generated rules, whose targets
-contain no colon. A NULL input or no parsed prerequisites returns NULL.
+any phony rules. Escaped target colons remain part of their words.
+A NULL input or no parsed prerequisites returns NULL.
 Returned cells and path `String`s follow the current canonical `List` and
 `String` pool lifetimes.
 

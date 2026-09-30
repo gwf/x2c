@@ -22,8 +22,9 @@ Map/Array values. Their broader applications, clients, tests, and READMEs
 show how the same integration handles substantial work while keeping native
 allocation, buffer growth, status dispatch, and cleanup out of common tasks.
 
-`make packages-check` includes the eight library packages other than SQLite.
-SQLite is checked separately with `make -C packages/sqlite test run run-lisp`.
+`make packages-check` includes the external library packages other than SQLite
+and the dependency-free autodiff package. SQLite is checked separately with
+`make -C packages/sqlite test run run-lisp`.
 
 A package supplies both an ordinary x2c surface and the complete pinned raw C
 API for its admitted build profile. Preserve upstream types, constants,
@@ -187,9 +188,9 @@ package clients. Follow the root instructions for repository-wide validation.
 The package `test` target builds only `tests/test-*.x`, so each package also
 has `run` for applications. Packages with Lisp installers add `run-lisp`;
 those without them do not. The current combined check runs all three for
-pcre2, yyjson, and libcurl, `test run` for termbox2, blis, and libuv, and
+pcre2, yyjson, and libcurl, `test run` for termbox2, blis, and libuv,
 raylib's `verify` target for headers, application, tests, and rendered PNGs,
-and `test run` for torch.
+`test run` for torch, and `check` for autodiff.
 
 A supported release additionally supplies the small public interface,
 complete pinned raw header, importable archive and generated header, link
@@ -202,9 +203,10 @@ remain on the x2c/raw path. Record the upstream version/URL, source archive
 and public-header hashes, compile-time options/disabled features, linkage,
 dependencies/frameworks, licenses/notices, and foreign-declaration limitations.
 
-Accepted packages currently claim macOS; `make packages-check` on macOS
-supplies that platform evidence. Additional platforms and the packages chosen
-for a release are separate decisions.
+Each package's dependency manifests and profile record its supported platforms
+and linkage. Running `make packages-check` supplies evidence for that host's
+profile; it does not verify the other recorded platforms. Release bundles
+select their own package and platform set.
 
 ## Dependencies and generated files
 

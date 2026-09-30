@@ -1,6 +1,8 @@
 # Meta-integration mitigation
 
-> Status: active - 2026-09-27. The review findings R1-R12 and the
+> Status: reference -- integration repairs are present on verified dev
+> cfd8324c (2026-09-30). The original 2026-09-27 results follow.
+> The review findings R1-R12 and the
 > documentation items are repaired on `origin/meta-integration` at 4bb59cc3.
 > `agent-pr-check` is green there, and CI `check.yml` with release
 > validation and the Windows probe passes all 12 jobs (run 36342464030).
@@ -9,10 +11,10 @@
 > also failed on `dev` were repaired; see "Optional checks" below. Opacity
 > enforcement of project-meta results is withdrawn by Gary.
 >
-> Open before merging into `dev`: Gary's decision on the stage 3 build
+> Original pre-merge discussion: Gary's decision on the stage 3 build
 > time (about 15% slower than `dev` on a loaded host; already present at
 > 1b23aaa7, and the mitigation adds no measurable build cost). The
-> follow-ups listed below do not block the merge.
+> follow-ups listed below remain recorded; this is not a current merge block.
 
 ## Goal
 

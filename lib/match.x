@@ -195,14 +195,27 @@ static List _normalize_pattern(List pattern) {
   return %(!set $binder ${_normalize_pattern(%($op @rest))});
 }
 
-/* Normalizes each nested pattern, keeping `elements` when none changes. */
+typedef struct NormalizedCell {
+  List original;
+  Var head;
+} NormalizedCell;
+
+/* Normalizes siblings iteratively and retains every unchanged suffix. */
 static List _normalize_elements(List elements) {
-  if (!elements) return NULL;
-  Var head = elements.car(), normalized_head = head;
-  if (head is <list>) normalized_head = _normalize_pattern(head);
-  List tail = elements.cdr(), normalized_tail = _normalize_elements(tail);
-  if (normalized_head == head && normalized_tail == tail) return elements;
-  return %($normalized_head @normalized_tail);
+  Block spine = $auto(Block.new(sizeof(NormalizedCell)));
+  for (List cell = elements; cell; cell = cell.cdr()) {
+    Var head = cell.car();
+    NormalizedCell row = {
+      cell, head is <list> ? (Var) _normalize_pattern(head) : head};
+    spine.push(&row);
+  }
+  List out = NULL;
+  for (size_t i = spine.length; i > 0; i--) {
+    NormalizedCell row = ((NormalizedCell *) spine.bytes)[i - 1];
+    out = row.head == row.original.car() && out == row.original.cdr()
+      ? row.original : cons(row.head, out);
+  }
+  return out;
 }
 
 /* capture layouts

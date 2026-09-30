@@ -34,6 +34,8 @@ typedef Var (*MetaCall)(Compiler c, List expression, Token site);
 static const SymbolSet meta_operators = %<<"+" "-" "*" "/" "%" "<<" ">>"
   "&" "|" "^" "<" ">" "<=" ">=" "==" "!=">>;
 
+static const SymbolSet meta_comparisons = %<<"<" ">" "<=" ">=" "==" "!=">>;
+
 /** Returns the value the argument expression `node` of a `$` call passes to
     a parameter of type `want`, or of no declared type when `want` is NULL:
     a constant, captured syntax, or the result of another `$` call, which
@@ -63,9 +65,16 @@ Var Compiler.meta_argument(
       value = c.meta_argument(operand, type, site, call).binary(<*>, -1);
     case %(expr ?type
         ${$source_operator_content(%(?operator ?left ?right))}):
-      if (operator in meta_operators)
-        value = c.meta_argument(left, NULL, site, call).binary(
-          operator, c.meta_argument(right, NULL, site, call));
+      if (operator in meta_operators) {
+        Type common = NULL;
+        if (operator in meta_comparisons) {
+          Type a = c.sym.resolve_numeric_type(left.list().cadr());
+          Type b = c.sym.resolve_numeric_type(right.list().cadr());
+          if (a && b) common = a.widest(b);
+        }
+        value = c.meta_argument(left, common, site, call).binary(
+          operator, c.meta_argument(right, common, site, call));
+      }
     default: value = c.folded_constant(node);
   }
   if (value is void) value = _name_syntax(c, node, site);

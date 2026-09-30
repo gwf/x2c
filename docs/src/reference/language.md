@@ -1363,14 +1363,33 @@ decorators work without an extra prototype.
 ### Macro values
 
 A macro is also a compile-time value of type `Macro`, available to `meta`
-functions. The same value builds code and recognizes it. There are four
-forms:
+functions. The same value builds code and recognizes it:
 
 ```x2c
-Macro sum = $sum;
-List result = sum(left, right);
-match (result) { case sum(?left, ?right): consume(left, right); }
-Macro twice = macro Expression(Expr $value) => $value + $value;
+#include "meta.x"
+macro Expression $sum(Expr $left, Expr $right) => $left + $right;
+
+meta static List build_left_twice(List left, List right) {
+  Macro sum = $sum;
+  List result = sum(left, right);
+  Macro twice = macro Expression(Expr $value) => $value + $value;
+  match (result) {
+    case sum(?a, ?b): return twice(a);
+  }
+  return result;
+}
+
+macro Expression $left_twice(Expr $left, Expr $right) =>
+  $build_left_twice($left, $right);
+
+int main(void) {
+  printf("%d\n", $left_twice(21, 99));
+  return 0;
+}
+```
+
+```text
+42
 ```
 
 `$name` written without an argument list selects the macro as a value.

@@ -2,15 +2,9 @@
 
 import "blis" with Blis, BlisObject;
 
-static List numerical_rows(List batches, List features) {
-  List rows = NULL;
-  foreach(List batch, batches) {
-    List values = NULL;
-    foreach(Var feature, features) values = cons(batch.get(feature), values);
-    rows = cons(values.reverse(), rows);
-  }
-  return rows.reverse();
-}
+static List numerical_rows(List batches, List features) =>
+  batches.map(%!(List batch) =>
+    features.map(%!(Var feature) => batch.get(feature)));
 
 int main(void) {
   List batches = %(

@@ -32,8 +32,6 @@ protocol Cleanup(BlisObject);
 struct BlisObject {
   obj_t native;
   BlisObject owner;
-  ulong generation;
-  ulong owner_generation;
   int owns_buffer;
   int released;
   int transposed;
@@ -96,8 +94,7 @@ static void _blis_live(BlisObject object, String operation) {
   if (!object) {
     _blis_bad_state(operation, "null BlisObject");
   }
-  BlisObject owner = object.owner ? object.owner : object;
-  if (owner.released || object.owner_generation != owner.generation) {
+  if (object.owner.released) {
     _blis_bad_state(operation, "released owner or invalidated view");
   }
 }
@@ -114,8 +111,6 @@ static BlisObject _blis_owned(
   BlisObject object = Scope.calloc(1, sizeof(struct BlisObject));
   bli_obj_create(storage, (dim_t) rows, (dim_t) columns, 0, 0, &object.native);
   object.owner = object;
-  object.generation = 1;
-  object.owner_generation = 1;
   object.owns_buffer = 1;
   return object;
 }
@@ -138,8 +133,6 @@ static BlisObject _blis_scoped(
     1, (inc_t) rows, &object.native
   );
   object.owner = object;
-  object.generation = 1;
-  object.owner_generation = 1;
   object.owns_buffer = 1;
   return object;
 }
@@ -147,7 +140,6 @@ static BlisObject _blis_scoped(
 static BlisObject _blis_view(BlisObject source) {
   BlisObject view = Scope.calloc(1, sizeof(struct BlisObject));
   view.owner = source.owner;
-  view.owner_generation = source.owner.generation;
   view.transposed = source.transposed;
   view.row_offset = source.row_offset;
   view.column_offset = source.column_offset;
@@ -311,7 +303,6 @@ BlisObject BlisObject.free(BlisObject object) {
   }
   memset(&object.native, 0, sizeof(object.native));
   object.released = 1;
-  object.generation++;
   return NULL;
 }
 

@@ -840,6 +840,25 @@ static void capture_layout_refuses_past_the_binder_limit(void) {
   input_values.free();
 }
 
+static void capture_layout_normalization_keeps_unchanged_cells(void) {
+  List unchanged = %(ordinary ?x ?x tail);
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(unchanged);
+  EXPECT_TRUE(layout.normalized.pointer() == (void *) unchanged);
+  layout.free();
+
+  List pattern = %((!is ?x <string>) tail literal);
+  layout = MatchCaptureLayout.analyze(pattern);
+  List normalized = layout.normalized;
+  EXPECT_TRUE(normalized == %((!set ?x (!is <string>)) tail literal));
+  EXPECT_TRUE((void *) normalized.cdr() == (void *) pattern.cdr());
+  layout.free();
+
+  List quoted = %(!quote (!is ?x <string>));
+  layout = MatchCaptureLayout.analyze(quoted);
+  EXPECT_TRUE(layout.normalized.pointer() == (void *) quoted);
+  layout.free();
+}
+
 static void capture_presence_is_separate_from_void(void) {
   Var binder = Atom.intern("?captured_void");
   MatchPlan plan = MatchPlan.prepare(binder);
@@ -1059,6 +1078,7 @@ void match_plan_suite(void) {
   $test.run(capture_layout_owns_canonical_order);
   $test.run(prepared_capture_is_atomic_and_positional);
   $test.run(capture_layout_refuses_past_the_binder_limit);
+  $test.run(capture_layout_normalization_keeps_unchanged_cells);
   $test.run(capture_presence_is_separate_from_void);
   $test.run(source_site_owns_only_its_static_plan);
   $test.run(source_site_keeps_its_normalized_pattern);

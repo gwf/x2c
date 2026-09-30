@@ -259,6 +259,7 @@ static Symbol _raised_code(Lisp lisp, const char *text) {
   catch %(bad-sig *): code = <bad-sig>;
   catch %(bad-state *): code = <bad-state>;
   catch %(call-stack *): code = <call-stack>;
+  catch %(interrupt *): code = <interrupt>;
   catch %(bad-types *): code = <bad-types>;
   catch %(malformed *): code = <malformed>;
   catch %(no-symbol *): code = <no-symbol>;
@@ -537,6 +538,90 @@ static void lisp_eval_capture_semantics(void) {
   _ev(lisp, "(def mkq (lambda (a) (lambda () `(quote ,a))))");
   EXPECT_VAR_EQ(_ev(lisp, "((mkq 5))"), _ev(lisp, "(quote (quote 5))"));
   lisp.destroy();
+}
+
+static void lisp_captures_reserved_spelled_local_values(void) {
+  Lisp lisp = $auto(Lisp.kernel());
+  lisp.set_global("make", _ev(lisp, "lambda"));
+  const char *names[] = {
+    "quote", "quasiquote", "lambda", "macro", "cond", "def", "bind",
+    "eval", "import", "apply"};
+  for (int i = 0; i < (int) (sizeof(names) / sizeof(names[0])); i++) {
+    String name = String.new(names[i]);
+    EXPECT_TRUE(_ev(lisp, %"(((make ($name) (make () $name)) 42))") == 42);
+  }
+}
+
+static void lisp_reader_releases_scratch_after_failure(void) {
+  Lisp lisp = $auto(Lisp.kernel());
+  String source = "(a (b \"\\z\"))";
+  int caught = 0, mark = Error.mark(), depth = Error.handler_depth();
+  ScopeStats before = {0};
+  for (int i = 0; i < 21; i++) {
+    unsigned cursor = 0;
+    Var out = void;
+    try lisp.read(source, cursor, out);
+    catch %(malformed *): caught++;
+    Error.restore(depth, mark);
+    if (!i) before = Scope.stats();
+  }
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(caught, 21);
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
+}
+
+static void lisp_retains_reads_after_global_special_rebinding(void) {
+  const char *names[] = {"quote", "quasiquote"};
+  for (int i = 0; i < 2; i++) {
+    Lisp lisp = $auto(Lisp.kernel());
+    lisp.set_global("make", _ev(lisp, "lambda"));
+    String name = String.new(names[i]);
+    _ev(lisp, %"(def saved ((make (x) (make () ($name x))) 42))");
+    EXPECT_TRUE(_ev(lisp, "(saved)") == Atom.intern("x"));
+    _ev(lisp, %"(def $name (make (v) v))");
+    EXPECT_TRUE(_ev(lisp, "(saved)") == 42);
+  }
+  const char *makers[] = {"lambda", "macro"};
+  for (int i = 0; i < 2; i++) {
+    Lisp lisp = $auto(Lisp.kernel());
+    lisp.set_global("make", _ev(lisp, "lambda"));
+    String name = String.new(makers[i]);
+    _ev(lisp, %"(def saved ((make (x) (make () ($name () x))) 42))");
+    EXPECT_TRUE(_ev(lisp, "(saved)") is <lambda>);
+    _ev(lisp, %"(def $name (make (params body) body))");
+    EXPECT_TRUE(_ev(lisp, "(saved)") == 42);
+  }
+}
+
+static void lisp_capture_follows_local_callable_identity(void) {
+  Lisp lisp = $auto(Lisp.kernel());
+  lisp.set_global("make", _ev(lisp, "lambda"));
+  EXPECT_TRUE(_ev(lisp,
+    "(((make (quote) (make () (quote 9))) (make (x) 42)))") == 42);
+  EXPECT_TRUE(_ev(lisp,
+    "(((make (q x) (make () (q x))) quote 42))") == Atom.intern("x"));
+  EXPECT_TRUE(_ev(lisp,
+    "(((make (qq x) (make () (qq ((unquote x))))) quasiquote 42))") == %(42));
+  EXPECT_TRUE(_ev(lisp,
+    "((((make (mk x) (mk (x) (mk () x))) make 1) 2))") == 2);
+  EXPECT_TRUE(_ev(lisp,
+    "(((make (mk x) (mk (x x) x)) make 1) 2 3)") == 3);
+  _ev(lisp, "(def saved ((make (x) (make (head) (head x))) 42))");
+  EXPECT_TRUE(_ev(lisp, "(saved quote)") == Atom.intern("x"));
+  EXPECT_TRUE(_ev(lisp, "(saved (make (v) v))") == 42);
+  EXPECT_TRUE(_ev(lisp,
+    "(((make (x) ((macro () (make () x)))) 42))") == 42);
+}
+
+static void lisp_interrupt_transfers_until_owner_clears_it(void) {
+  Lisp lisp = $auto(Lisp.kernel());
+  lisp.set_interrupted(1);
+  defer lisp.set_interrupted(0);
+  EXPECT_INT_EQ(_raised_code(lisp, "((lambda (x) x) 9)"), <interrupt>);
+  EXPECT_INT_EQ(_raised_code(lisp, "((lambda (x) x) 9)"), <interrupt>);
+  lisp.set_interrupted(0);
+  EXPECT_TRUE(_ev(lisp, "((lambda (x) x) 9)") == 9);
 }
 
 static void lisp_eval_globals_shadow_reserved(void) {
@@ -1193,6 +1278,12 @@ static void lisp_generated_algorithms(void) {
     EXPECT_VAR_EQ(_ev(lisp, "(_binder-lets 'subject '(?a *b ?a))"),
       _ev(lisp, "'((?a (bound subject '?a)) (*b (bound subject '*b)) "
                 "(?a (bound subject '?a)))"));
+    EXPECT_VAR_EQ(_ev(lisp, "(_binders '?a)"), _ev(lisp, "'(?a)"));
+    EXPECT_TRUE(_ev(lisp, "(_binders 42)").is_nil());
+    EXPECT_TRUE(_ev(lisp, "(_binders nil)").is_nil());
+    EXPECT_TRUE(_ev(lisp, "(_binder-lets 'subject nil)").is_nil());
+    EXPECT_INT_EQ(_raised_code(lisp, "(_binder-lets 'subject 42)"),
+                  <bad-types>);
   }
 }
 
@@ -1647,6 +1738,11 @@ void lisp_suite(void) {
   $test.run(lisp_call_budget_stays_exhausted);
   $test.run(lisp_eval_rest_parameters);
   $test.run(lisp_eval_capture_semantics);
+  $test.run(lisp_captures_reserved_spelled_local_values);
+  $test.run(lisp_reader_releases_scratch_after_failure);
+  $test.run(lisp_retains_reads_after_global_special_rebinding);
+  $test.run(lisp_capture_follows_local_callable_identity);
+  $test.run(lisp_interrupt_transfers_until_owner_clears_it);
   $test.run(lisp_eval_globals_shadow_reserved);
   $test.run(lisp_eval_alias_chains);
   $test.run(lisp_eval_left_to_right_arguments);
@@ -1695,4 +1791,3 @@ void lisp_suite(void) {
   $test.run(lisp_rebound_specials_take_effect);
   $test.run(lisp_tail_calls_stay_flat);
 }
-

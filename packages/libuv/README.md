@@ -220,6 +220,10 @@ and watch callbacks invoke user x2c handlers, so they catch and copy the
 first Error, stop the affected operation and the current loop run, and
 re-raise the original cause and detail after `uv_run` returns to
 `UvLoop.run`. The caller may run the loop again after catching it.
+An asynchronous terminal watch failure follows the same path with operation
+`watch`, closes that watcher, and leaves `watch.entry` raising the same
+native error. Create a new watch to resume watching; other loop handles
+remain owned by the loop.
 Allocation, process, send, stream write, shutdown, deadline, and handle close
 callbacks only update native state or report a native failure through that
 same stopped-loop path.

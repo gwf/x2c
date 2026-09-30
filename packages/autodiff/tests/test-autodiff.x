@@ -175,6 +175,41 @@ static void autodiff_tape_matches_finite_difference(void) {
   EXPECT_TRUE(fabs(y_grad - _central(_taped_in_y, 2.0)) < 1e-5);
 }
 
+static void autodiff_tape_rejects_foreign_nodes_without_mutation(void) {
+  $test.scoped();
+  AdTape tape = AdTape.new(), other = AdTape.new();
+  AdNode x = tape.input(2.0), y = other.input(3.0);
+  Array nodes = tape->nodes, other_nodes = other->nodes;
+  for (int operation = 0; operation < 4; operation++) {
+    int caught = 0;
+    try {
+      switch (operation) {
+        case 0: (void) (x + y); break;
+        case 1: (void) (x - y); break;
+        case 2: (void) (x * y); break;
+        case 3: (void) (x / y); break;
+      }
+    }
+    catch %(bad-arg (library "autodiff") *): caught = 1;
+    EXPECT_TRUE(caught);
+    EXPECT_INT_EQ(nodes.len(), 1);
+    EXPECT_INT_EQ(other_nodes.len(), 1);
+  }
+  AdNode result = x * x;
+  tape.backward(result);
+  EXPECT_TRUE(_near(x.adjoint, 4.0));
+  y.adjoint = 7.0;
+  int caught = 0;
+  try tape.backward(y);
+  catch %(bad-arg (library "autodiff") *): caught = 1;
+  EXPECT_TRUE(caught);
+  EXPECT_TRUE(_near(x.adjoint, 4.0));
+  EXPECT_TRUE(_near(result.adjoint, 1.0));
+  EXPECT_TRUE(_near(y.adjoint, 7.0));
+  tape.backward(result);
+  EXPECT_TRUE(_near(x.adjoint, 4.0));
+}
+
 $ad.reverse()
 static double _control(double x, double y, int n) {
   double s = 0.0;
@@ -378,6 +413,7 @@ static void autodiff_suite(void) {
   $test.run(autodiff_reverse_transform_matches_finite_difference);
   $test.run(autodiff_forward_and_reverse_agree);
   $test.run(autodiff_tape_matches_finite_difference);
+  $test.run(autodiff_tape_rejects_foreign_nodes_without_mutation);
   $test.run(autodiff_reverse_replays_break_continue_and_return);
   $test.run(autodiff_checkpoint_agrees_with_full_recording);
   $test.run(autodiff_dual_mixed_operands_and_pow);

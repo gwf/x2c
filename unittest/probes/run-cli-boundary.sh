@@ -331,6 +331,30 @@ rm -f "$BUILD/deps/out/root.d"
 grep -Fq "custom\\ target:" "$BUILD/deps/custom.d"
 [[ $(wc -l <"$BUILD/deps/custom.d" | tr -d ' ') == 1 ]]
 
+# Escaped target colons must preserve translation reuse on an unchanged build.
+python3 - "$X2C" "$BUILD/deps/reuse" <<'PY_DEP_REUSE'
+from pathlib import Path
+import subprocess
+import sys
+
+compiler, directory = sys.argv[1:]
+root = Path(directory)
+root.mkdir(parents=True)
+source = root / 'main.x'
+source.write_text('int main(void) { return 0; }\n')
+for name in ('plain', 'with:colon'):
+    args = [compiler, 'build', '-v', '--build-dir', str(root / name),
+            '--output', str(root / (name + '-app')), str(source)]
+    for attempt in (1, 2):
+        result = subprocess.run(args, text=True, capture_output=True)
+        (root / f'{name}-{attempt}.stderr').write_text(result.stderr)
+        assert result.returncode == 0, result.stderr
+        translated = any(line.startswith('x2c: translate ')
+                         for line in result.stderr.splitlines())
+        assert translated == (attempt == 1), result.stderr
+    subprocess.run([args[args.index('--output') + 1]], check=True)
+PY_DEP_REUSE
+
 set +e
 "$X2C" translate --dep-file "$BUILD/deps/ambiguous.d" \
   --out-dir "$BUILD/deps/out" "$BUILD/deps/src/root.x" \

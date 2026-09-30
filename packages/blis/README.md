@@ -109,9 +109,7 @@ available and is the right call for a handful of elements.
 return a mutable non-owning BLIS descriptor. A view records its root owner and
 observes mutations made through either the owner or another view. A view must
 not be freed: `free` rejects it, while freeing the owner invalidates every
-view. The current slice does not resize or reallocate an owned object. Any
-future operation that replaces a buffer must advance the owner's generation
-before replacement so existing views become invalid.
+view. The current slice does not resize or reallocate an owned object.
 
 `at(row, column)` copies one real element to `double`; it is not a mutable
 alias. Negative scalar indexes and negative column indexes use x2c's shared

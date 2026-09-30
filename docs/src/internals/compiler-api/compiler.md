@@ -169,7 +169,7 @@ Core x2c compiler state and operations.
 
 Records in `referenced` the identity of every binding `node` names.
 
-Source: `src/compiler.x:4331`
+Source: `src/compiler.x:4324`
 
 #### home_absolute_path
 
@@ -200,7 +200,7 @@ Each element after the head is a unique named `?` binder or a typed
 capture of one. When `tags` is non-null, stores one entry per binder
 in order: the capture's tag Symbol, or integer zero when untyped.
 
-Source: `src/compiler.x:2825`
+Source: `src/compiler.x:2823`
 
 #### match_value_head
 
@@ -212,7 +212,7 @@ A binder, guard, non-list value, or computed head has no fixed symbol.
 Other pattern elements may remain dynamic because a literal head alone
 constrains the first input element.
 
-Source: `src/compiler.x:2810`
+Source: `src/compiler.x:2808`
 
 #### match_value_is_static
 
@@ -220,7 +220,7 @@ Source: `src/compiler.x:2810`
 
 Reports whether a recovered pattern value graph is fully static.
 
-Source: `src/compiler.x:2793`
+Source: `src/compiler.x:2791`
 
 #### preproc_branch_state
 
@@ -279,7 +279,7 @@ Source: `src/compiler.x:2585`
 
 Reports whether the current two tokens are `=>`.
 
-Source: `src/compiler.x:3611`
+Source: `src/compiler.x:3604`
 
 <a id="Compiler._skip_shallow_expression"></a>
 #### Compiler._skip_shallow_expression
@@ -290,7 +290,7 @@ Skips a balanced shallow expression without consuming its terminator.
 A top-level comma also terminates the expression when `stop_at_comma` is
 nonzero.
 
-Source: `src/compiler.x:3618`
+Source: `src/compiler.x:3611`
 
 <a id="Compiler.add_early"></a>
 #### Compiler.add_early
@@ -376,7 +376,7 @@ Source: `src/compiler.x:1974`
 Shares a caller's diagnostic stream while preserving its emission policy.
 The caller restores the saved printer after this child finishes.
 
-Source: `src/compiler.x:2938`
+Source: `src/compiler.x:2931`
 
 <a id="Compiler.borrow_unit_semantics"></a>
 #### Compiler.borrow_unit_semantics
@@ -457,7 +457,7 @@ Source: `src/compiler.x:455`
 
 Builds ordinary declarations from a catch scope's issued bindings.
 
-Source: `src/compiler.x:2902`
+Source: `src/compiler.x:2895`
 
 <a id="Compiler.close_child"></a>
 #### Compiler.close_child
@@ -466,7 +466,7 @@ Source: `src/compiler.x:2902`
 
 Retains a child's final diagnostics and closes its owned Lisp session.
 
-Source: `src/compiler.x:2957`
+Source: `src/compiler.x:2950`
 
 <a id="Compiler.collect_compile_time_definition"></a>
 #### Compiler.collect_compile_time_definition
@@ -477,7 +477,7 @@ Collects a macro or keyword definition while deferring its diagnostics.
 Returns one on success; malformed syntax skips to end of file and returns
 zero so the full parse can report it.
 
-Source: `src/compiler.x:3550`
+Source: `src/compiler.x:3543`
 
 <a id="Compiler.collect_unit_macro"></a>
 #### Compiler.collect_unit_macro
@@ -489,7 +489,7 @@ collection. Its private helpers remain available to later invocations.
 Generated-name counters are restored when the full parse must expand it
 again.
 
-Source: `src/compiler.x:3153`
+Source: `src/compiler.x:3146`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -507,7 +507,7 @@ Source: `src/compiler.x:823`
 
 Defines catch binders and returns their capture-token/binding pairs.
 
-Source: `src/compiler.x:2888`
+Source: `src/compiler.x:2881`
 
 <a id="Compiler.define_match_binders"></a>
 #### Compiler.define_match_binders
@@ -516,7 +516,7 @@ Source: `src/compiler.x:2888`
 
 Defines a typed `Match` pattern's definite binders in the current scope.
 
-Source: `src/compiler.x:2880`
+Source: `src/compiler.x:2873`
 
 <a id="Compiler.emitted_binding_name"></a>
 #### Compiler.emitted_binding_name
@@ -549,7 +549,7 @@ Source: `src/compiler.x:641`
 Records declaration visibility and meta facts, then skips its body.
 The declaration is already bound by the shared top-level parser.
 
-Source: `src/compiler.x:3568`
+Source: `src/compiler.x:3561`
 
 <a id="Compiler.free_lisp"></a>
 #### Compiler.free_lisp
@@ -575,7 +575,7 @@ Retains declaration syntax across source segments and cached interfaces.
 Tokens and origin indices become portable source data; marker-shaped user
 Lists are escaped so thawing preserves their values.
 
-Source: `src/compiler.x:2972`
+Source: `src/compiler.x:2965`
 
 <a id="Compiler.freeze_macro_stack"></a>
 #### Compiler.freeze_macro_stack
@@ -584,7 +584,7 @@ Source: `src/compiler.x:2972`
 
 Returns `freeze_declaration_syntax` of the active macro stack.
 
-Source: `src/compiler.x:3017`
+Source: `src/compiler.x:3010`
 
 <a id="Compiler.fresh_name"></a>
 #### Compiler.fresh_name
@@ -613,7 +613,7 @@ The result is a source-ordered top-level AST. This resets per-parse
 origins, macro state, and protocol resolution.
 `generated_symbols` publishes external adapter signatures before parsing.
 
-Source: `src/compiler.x:3660`
+Source: `src/compiler.x:3653`
 
 <a id="Compiler.gensym"></a>
 #### Compiler.gensym
@@ -696,7 +696,7 @@ Returns definite binders from a typed `Match` pattern AST.
 
 When `possible` is non-null, stores every binder appearing on any path.
 
-Source: `src/compiler.x:2869`
+Source: `src/compiler.x:2862`
 
 <a id="Compiler.match_pattern_is_static"></a>
 #### Compiler.match_pattern_is_static
@@ -705,7 +705,7 @@ Source: `src/compiler.x:2869`
 
 Reports whether a typed `Match` pattern has a fully static value graph.
 
-Source: `src/compiler.x:2801`
+Source: `src/compiler.x:2799`
 
 <a id="Compiler.match_pattern_value"></a>
 #### Compiler.match_pattern_value
@@ -785,7 +785,7 @@ Routes this compiler's diagnostic store through its own printer.
 Compilers that share a store call this when taking the diagnostic stream
 back from another compiler.
 
-Source: `src/compiler.x:2931`
+Source: `src/compiler.x:2924`
 
 <a id="Compiler.package_member_spelling"></a>
 #### Compiler.package_member_spelling
@@ -838,7 +838,7 @@ Source: `src/compiler.x:2515`
 Queues a source Lisp form until declaration production needs its state.
 Files without declaration producers keep ordinary full-parse evaluation.
 
-Source: `src/compiler.x:3110`
+Source: `src/compiler.x:3103`
 
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
@@ -945,7 +945,7 @@ Source: `src/compiler.x:427`
 
 Runs pending effects for declaration production or CPP macro evaluation.
 
-Source: `src/compiler.x:3125`
+Source: `src/compiler.x:3118`
 
 <a id="Compiler.select_declaration_defaults"></a>
 #### Compiler.select_declaration_defaults
@@ -957,7 +957,7 @@ The selected signatures join ordinary declarations before protocol and
 body binding; discarded candidates never bind their bodies. Returns added
 signatures for the caller to retain in the header-cache lifetime.
 
-Source: `src/compiler.x:3217`
+Source: `src/compiler.x:3210`
 
 <a id="Compiler.semantic_binding_facts"></a>
 #### Compiler.semantic_binding_facts
@@ -977,7 +977,7 @@ Source: `src/compiler.x:2495`
 
 Collects file-scope declarations into `globals` without parsing bodies.
 
-Source: `src/compiler.x:3481`
+Source: `src/compiler.x:3474`
 
 <a id="Compiler.shallow_parse_overlay"></a>
 #### Compiler.shallow_parse_overlay
@@ -989,7 +989,7 @@ Collects declarations with reads over `base` then `overlay`.
 Writes go to `overlay`, which captures exactly what this translation
 contributes above `base`.
 
-Source: `src/compiler.x:3497`
+Source: `src/compiler.x:3490`
 
 <a id="Compiler.share_meta_group"></a>
 #### Compiler.share_meta_group
@@ -1009,7 +1009,7 @@ Source: `src/compiler.x:400`
 Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
-Source: `src/compiler.x:3849`
+Source: `src/compiler.x:3842`
 
 <a id="Compiler.skip_script_statement"></a>
 #### Compiler.skip_script_statement
@@ -1020,7 +1020,7 @@ Moves past one run of a script unit's statement tokens, through a `;` or
 a closing `}` outside every bracket. A statement that ends early this
 way leaves its remainder as the next run, and runs are rejoined in order.
 
-Source: `src/compiler.x:3863`
+Source: `src/compiler.x:3856`
 
 <a id="Compiler.skip_trivia_from"></a>
 #### Compiler.skip_trivia_from
@@ -1040,7 +1040,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/compiler.x:2947`
+Source: `src/compiler.x:2940`
 
 <a id="Compiler.take_unit_state"></a>
 #### Compiler.take_unit_state
@@ -1070,7 +1070,7 @@ Source: `src/compiler.x:679`
 
 Restores a retained declaration recipe in the current parsing lifetime.
 
-Source: `src/compiler.x:3029`
+Source: `src/compiler.x:3022`
 
 <a id="Compiler.tokenize"></a>
 #### Compiler.tokenize

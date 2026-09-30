@@ -30,7 +30,9 @@ typedef struct AdNode {
 } *AdNode;
 
 /** Records nodes in creation order so `AdTape.backward` can replay them in
-    reverse. The tape and its nodes belong to the active `Scope`.
+    reverse. A computation uses one tape; binary arithmetic operands and the
+    backward result must belong to it. The tape and its nodes belong to the active
+    `Scope`; callers must not change a recorded node's tape.
 */
 struct AdTape {
   Array nodes;
@@ -61,11 +63,18 @@ static AdNode _record(AdTape tape, double value, Func back) {
 AdNode AdTape.input(AdTape tape, double value) =>
   _record(tape, value, NULL);
 
+static void _require_tape(AdTape tape, AdNode node) {
+  if (node.tape != tape)
+    raise %(bad-arg (library "autodiff")
+            (reason "nodes must belong to one tape"));
+}
+
 /** Seeds `result` with adjoint 1 and propagates active adjoints to its
     operands. Zero adjoints do not invoke reverse callbacks. Earlier adjoints
     on the tape are cleared first, so repeated calls do not accumulate.
 */
 void AdTape.backward(AdTape tape, AdNode result) {
+  _require_tape(tape, result);
   for (int i = 0; i < tape.nodes.len(); i++) {
     AdNode node = tape.nodes[i];
     node.adjoint = 0.0;
@@ -79,6 +88,7 @@ void AdTape.backward(AdTape tape, AdNode result) {
 
 /** Sum. */
 AdNode AdNode.add(AdNode a, AdNode b) {
+  _require_tape(a.tape, b);
   AdNode node = _record(a.tape, a.value + b.value, NULL);
   node.back = %!() => {
     a.adjoint += node.adjoint;
@@ -89,6 +99,7 @@ AdNode AdNode.add(AdNode a, AdNode b) {
 
 /** Difference. */
 AdNode AdNode.sub(AdNode a, AdNode b) {
+  _require_tape(a.tape, b);
   AdNode node = _record(a.tape, a.value - b.value, NULL);
   node.back = %!() => {
     a.adjoint += node.adjoint;
@@ -99,6 +110,7 @@ AdNode AdNode.sub(AdNode a, AdNode b) {
 
 /** Product. */
 AdNode AdNode.mul(AdNode a, AdNode b) {
+  _require_tape(a.tape, b);
   AdNode node = _record(a.tape, a.value * b.value, NULL);
   node.back = %!() => {
     a.adjoint += node.adjoint * b.value;
@@ -109,6 +121,7 @@ AdNode AdNode.mul(AdNode a, AdNode b) {
 
 /** Quotient. */
 AdNode AdNode.div(AdNode a, AdNode b) {
+  _require_tape(a.tape, b);
   AdNode node = _record(a.tape, a.value / b.value, NULL);
   node.back = %!() => {
     a.adjoint += node.adjoint / b.value;

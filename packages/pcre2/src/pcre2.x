@@ -196,10 +196,7 @@ pcre2_match_context *Regexp.native_match_context(Regexp regexp) {
     empty List. A name declared twice under (?J) appears once per group.
 */
 List Regexp.capture_names(Regexp regexp) {
-  if (!regexp || !regexp.code) {
-    raise %(bad-state (library "PCRE2") (operation "capture_names")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "capture_names");
   List names = NULL;
   if (!regexp.capture_names) return NULL;
   for (uint32_t i = 0; i <= regexp.capture_count; i++)
@@ -231,10 +228,7 @@ static Regexp _regexp_limit_result(
 }
 
 Regexp Regexp.set_match_limit(Regexp regexp, uint32_t limit) {
-  if (!regexp || !regexp.match_context) {
-    raise %(bad-state (library "PCRE2") (operation "set_match_limit")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "set_match_limit");
   return _regexp_limit_result(
     regexp, "set_match_limit",
     pcre2_set_match_limit(regexp.match_context, limit)
@@ -242,10 +236,7 @@ Regexp Regexp.set_match_limit(Regexp regexp, uint32_t limit) {
 }
 
 Regexp Regexp.set_depth_limit(Regexp regexp, uint32_t limit) {
-  if (!regexp || !regexp.match_context) {
-    raise %(bad-state (library "PCRE2") (operation "set_depth_limit")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "set_depth_limit");
   return _regexp_limit_result(
     regexp, "set_depth_limit",
     pcre2_set_depth_limit(regexp.match_context, limit)
@@ -253,10 +244,7 @@ Regexp Regexp.set_depth_limit(Regexp regexp, uint32_t limit) {
 }
 
 Regexp Regexp.set_heap_limit(Regexp regexp, uint32_t limit) {
-  if (!regexp || !regexp.match_context) {
-    raise %(bad-state (library "PCRE2") (operation "set_heap_limit")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "set_heap_limit");
   return _regexp_limit_result(
     regexp, "set_heap_limit",
     pcre2_set_heap_limit(regexp.match_context, limit)
@@ -264,10 +252,7 @@ Regexp Regexp.set_heap_limit(Regexp regexp, uint32_t limit) {
 }
 
 Regexp Regexp.set_offset_limit(Regexp regexp, ulong limit) {
-  if (!regexp || !regexp.match_context) {
-    raise %(bad-state (library "PCRE2") (operation "set_offset_limit")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "set_offset_limit");
   return _regexp_limit_result(
     regexp, "set_offset_limit",
     pcre2_set_offset_limit(regexp.match_context, (PCRE2_SIZE) limit)
@@ -275,10 +260,7 @@ Regexp Regexp.set_offset_limit(Regexp regexp, ulong limit) {
 }
 
 Regexp Regexp.jit_compile(Regexp regexp, uint32_t options) {
-  if (!regexp || !regexp.code) {
-    raise %(bad-state (library "PCRE2") (operation "jit_compile")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "jit_compile");
   int result = pcre2_jit_compile(regexp.code, options);
   if (result < 0) {
     _pcre2_match_error("jit_compile", result);
@@ -360,10 +342,7 @@ static RegexpMatch _regexp_match_at(
 
 RegexpMatch Regexp.match_from(
   Regexp regexp, String subject, ulong offset, uint32_t options) {
-  if (!regexp || !regexp.code || !regexp.match_data) {
-    raise %(bad-state (library "PCRE2") (operation "match_from")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "match_from");
   if (offset > (ulong) subject.len()) {
     raise %(bad-arg (library "PCRE2") (operation "match_from")
             (offset $offset) (length ${subject.len()}));
@@ -380,10 +359,7 @@ RegexpMatch Regexp.match(Regexp regexp, String subject) {
 
 List Regexp.find_all_from(
   Regexp regexp, String subject, ulong start, uint32_t match_options) {
-  if (!regexp || !regexp.code || !regexp.match_data) {
-    raise %(bad-state (library "PCRE2") (operation "find_all_from")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "find_all_from");
   if (start > (ulong) subject.len()) {
     raise %(bad-arg (library "PCRE2") (operation "find_all_from")
             (offset $start) (length ${subject.len()}));
@@ -410,10 +386,7 @@ List Regexp.find_all(Regexp regexp, String subject) {
 
 String Regexp.substitute(
   Regexp regexp, String subject, String replacement, uint32_t options) {
-  if (!regexp || !regexp.code || !regexp.match_data) {
-    raise %(bad-state (library "PCRE2") (operation "substitute")
-            (reason "freed or null Regexp"));
-  }
+  _regexp_live(regexp, "substitute");
 
   PCRE2_SIZE length = 0;
   options |= PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;

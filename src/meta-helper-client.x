@@ -42,8 +42,8 @@ static Buffer helper_input = NULL;
 // calls
 
 /* One call of a project `meta` function, whose failures are reported at
-   `site`. Its reply is due by `deadline`, `limit` seconds after the
-   request, or at any time when `deadline` is 0. */
+   `site`. Starting the helper, sending the request and receiving its reply
+   take at most `limit` seconds, or any time when `deadline` is 0. */
 typedef struct Call {
   Compiler compiler, String name, Token site, double limit, deadline;
 } Call;
@@ -58,9 +58,9 @@ Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments) {
   Call call = {.compiler = c, .name = name, .site = site};
   call.check();
+  call.set_deadline();
   if (!_helper_start()) call.refuse("the compile-time helper did not start");
   call.send(arguments);
-  call.set_deadline();
   for (;;) {
     Var reply = call.next_reply();
     match (reply) {
@@ -94,10 +94,16 @@ static void Call.check(Call *call) {
 /* Sends the call, after the unit's reset when that is still to be sent. */
 static void Call.send(Call *call, List arguments) {
   if (helper_reset) {
-    _helper_send(%(reset $helper_table));
+    call.send_frame(%(reset $helper_table));
     helper_reset = 0;
   }
-  _helper_send(%(call ${call.name} $arguments ${Macro.subject()}));
+  call.send_frame(%(call ${call.name} $arguments ${Macro.subject()}));
+}
+
+static void Call.send_frame(Call *call, List message) {
+  int status = _helper_send(message, call.deadline);
+  if (status < 0) call.overdue();
+  if (!status) call.stopped(_helper_ending());
 }
 
 /* The limit is `X2C_META_TIMEOUT` in seconds, 60 by default; zero or less
@@ -145,6 +151,14 @@ static int _helper_start(void) {
   for (int i = 0; i < 2; i++) {
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);
     fcntl(replies[i], F_SETFD, FD_CLOEXEC);
+  }
+  int flags = fcntl(requests[1], F_GETFL);
+  if (flags < 0 || fcntl(requests[1], F_SETFL, flags | O_NONBLOCK) < 0) {
+    close(requests[0]);
+    close(requests[1]);
+    close(replies[0]);
+    close(replies[1]);
+    return 0;
   }
   pid_t pid = fork();
   if (!pid) _helper_exec(requests[0], replies[1]);
@@ -202,7 +216,7 @@ static int _helper_stop(int signal) {
   int status = 0;
   if (_helper_running()) {
     if (signal) killpg(helper_pid, signal);
-    else _helper_send(%(quit));
+    else _helper_send(%(quit), 0);
     close(helper_to);
     close(helper_from);
     if (helper_status < 0) waitpid(helper_pid, &helper_status, 0);
@@ -229,22 +243,41 @@ static String _helper_ending(void) {
 
 // frames
 
-/* Sends one frame, or returns 0 when the helper has gone. A write to a
-   helper that has exited must not end the compiler with SIGPIPE. */
-static int _helper_send(List message) {
+/* Sends one frame, returning 1, 0 when the helper has gone, or -1 when
+   `deadline` passes. A helper that has exited must not end the compiler
+   with SIGPIPE; a helper not reading must not block its deadline. */
+static int _helper_send(List message, double deadline) {
   Buffer out = $auto(Buffer.new(0));
   if (!datum_frame(out, message)) return 0;
   String frame = %"$out";
   void (*previous)(int) = signal(SIGPIPE, SIG_IGN);
   size_t done = 0, size = frame.len();
+  int status = 1;
   while (done < size) {
+    int wait = 100;
+    if (deadline > 0) {
+      double left = deadline - _now();
+      if (left <= 0) { status = -1; break; }
+      if (left < 0.1) wait = (int) (left * 1000) + 1;
+    }
     ssize_t n = write(helper_to, (char *) frame + done, size - done);
+    if (n > 0) { done += n; continue; }
     if (n < 0 && errno == EINTR) continue;
-    if (n <= 0) break;
-    done += n;
+    if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+      struct pollfd ready = { .fd = helper_to, .events = POLLOUT };
+      int polled = poll(&ready, 1, wait);
+      if ((polled < 0 && errno != EINTR) || _helper_reaped() ||
+          (ready.revents & (POLLERR | POLLHUP | POLLNVAL))) {
+        status = 0;
+        break;
+      }
+      continue;
+    }
+    status = 0;
+    break;
   }
   signal(SIGPIPE, previous);
-  return done == size;
+  return status;
 }
 
 /* Reads the next reply frame into `reply`. Returns 1, 0 when the helper

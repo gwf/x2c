@@ -1,7 +1,8 @@
 # Native meta execution: staging user meta code and removing the Lisp lowering
 
-> Status: implemented on `meta-integration` (1b23aaa7); landing on `dev`
-> waits for [meta-integration mitigation](meta-integration-mitigation.md).
+> Status: reference -- implementation and integration repairs are present
+> on verified dev cfd8324c (2026-09-30). The dated progress below records
+> the earlier `meta-integration` campaign, rather than a pending dev merge.
 > Every bodied `meta` function runs natively. A project's meta functions
 > build once into a cached helper program that serves each `$` call; the
 > REPL stages each submission in process. The Lisp lowering,
