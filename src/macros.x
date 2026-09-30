@@ -4858,10 +4858,11 @@ List x2c_syntax_type(List value) {
   List binding = NULL;
   if (binding_identity_try_parts(value, NULL, NULL)) binding = value;
   else
-    match (value)
+    match (value) {
       case $source_identifier_content(%((*) *)):
         binding = value.cadr();
       case %(bind (*) *): binding = value.cadr();
+    }
   if (binding) {
     Type type = _sdk_binding_type(binding);
     return type.canonicalize();
