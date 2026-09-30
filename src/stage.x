@@ -13,6 +13,7 @@
 #include "compiler.x"
 
 #pragma private
+$(import "../src/grammar.xmacro")
 #include "type.x"
 #include "var.x"
 #include "string.x"
@@ -54,13 +55,14 @@ Var Compiler.meta_argument(
   match (node) {
     case %(expr ? (meta-cap ?captured)):
       value = _captured_value(c, captured, want);
-    case %(expr ? (parens ?inner)):
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return c.meta_argument(inner, want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
     /* Negation multiplies, so a negated zero keeps its sign. */
-    case %(expr ?type (op - ?operand)):
+    case %(expr ?type ${$source_operator_content(%(- ?operand))}):
       value = c.meta_argument(operand, type, site, call).binary(<*>, -1);
-    case %(expr ?type (op ?operator ?left ?right)):
+    case %(expr ?type
+        ${$source_operator_content(%(?operator ?left ?right))}):
       if (operator in meta_operators)
         value = c.meta_argument(left, NULL, site, call).binary(
           operator, c.meta_argument(right, NULL, site, call));
@@ -130,22 +132,23 @@ static Var _cached_constant(Compiler c, List key) {
    time. */
 static Var _constant_leaf(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? (parens ?inner)): return _constant_leaf(c, inner);
-    case %(expr ?type (cast ? ?inner)): return _cast_constant(c, type, inner);
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+      return _constant_leaf(c, inner);
+    case %(expr ?type ${$source_cast_content(%(? ?inner))}):
+      return _cast_constant(c, type, inner);
     case %(expr ? (!set ?node (cache ?))): return c.folded_constant(node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return c.folded_constant(node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
     case %(expr ? (literal ? ? ?symbol)):       return symbol;
-    case %(expr ("String")
-      (call (expr ? (ident (binding ? "String_add")))
-            (args ?left ?right))):
+    case %(expr ("String") ${$source_call_content($called,
+        %(expr ? (ident (binding ? "String_add"))), %(?left ?right))}):
       return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
       return _constant_leaf(c, inner);
-    case %(expr ("Var")
-      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
+    case %(expr ("Var") ${$source_call_content($called,
+        %(expr ? (ident (binding ? "int_var"))), %(?inner))}):
       return _constant_leaf(c, inner);
     case %(expr ("String") (literal ? ?(String text))): return text;
     case %(expr (* char) (literal ? ?(String text))):
