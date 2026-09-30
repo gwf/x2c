@@ -71,6 +71,11 @@ meta static List source_return_type(List node) {
   return NULL;
 }
 
+/* Control children run at a conditional depth. With is normally parsed
+   away; foreach and finally remain accepted canonical compatibility heads. */
+meta static List source_conditional_statement(void) =>
+  %((!or if while do for switch try match with foreach finally) *);
+
 /* One expression used as a statement, retaining its bound expression. */
 macro Statement $expression_statement(Expr $value) { $value; }
 
