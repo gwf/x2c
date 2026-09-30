@@ -718,6 +718,7 @@ static List _data_form(Compiler c, Var value){
 }
 
 int List_try_next(List, List *, Var *);
+int Var_is_atom(Var);
 static int _immutable(Var value){
   if(Var_is_row(value, 9, 7, 4)){
     {
@@ -728,7 +729,7 @@ static int _immutable(Var value){
     }
     return 1;
   }
-  return Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264) || Var_is_integer(value) || Var_is_floating(value);
+  return Var_is_row(value, 11, 7, 1) || Var_is_atom(value) || Var_is_integer(value) || Var_is_floating(value);
 }
 
 List List_reverse(List);

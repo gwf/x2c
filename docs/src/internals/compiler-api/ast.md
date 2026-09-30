@@ -38,7 +38,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:189`
+Source: `src/ast.x:191`
 
 #### ast_contains_head
 
@@ -47,7 +47,7 @@ Source: `src/ast.x:189`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:81`
+Source: `src/ast.x:82`
 
 #### binding_identity_new
 
@@ -56,7 +56,7 @@ Source: `src/ast.x:81`
 Constructs a `(binding identity spelling)` node.
 The caller must supply a positive compiler-issued identity.
 
-Source: `src/ast.x:42`
+Source: `src/ast.x:43`
 
 #### binding_identity_spelling
 
@@ -64,7 +64,7 @@ Source: `src/ast.x:42`
 
 Returns a valid binding node's source spelling, or `NULL`.
 
-Source: `src/ast.x:62`
+Source: `src/ast.x:63`
 
 #### binding_identity_try_parts
 
@@ -74,7 +74,7 @@ Extracts a valid `(binding positive-integer string)` node.
 Returns one on success and writes only non-`NULL` outputs; failure returns
 zero without changing either output.
 
-Source: `src/ast.x:49`
+Source: `src/ast.x:50`
 
 #### preproc_conditional_kind
 
@@ -84,7 +84,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/ast.x:245`
+Source: `src/ast.x:247`
 
 #### preproc_directive
 
@@ -93,7 +93,7 @@ Source: `src/ast.x:245`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/ast.x:255`
+Source: `src/ast.x:257`
 
 #### preproc_include_target
 
@@ -103,7 +103,7 @@ Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/ast.x:262`
+Source: `src/ast.x:264`
 
 #### preproc_track_arms
 
@@ -113,7 +113,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/ast.x:277`
+Source: `src/ast.x:279`
 
 #### preproc_within_arms
 
@@ -123,7 +123,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/ast.x:290`
+Source: `src/ast.x:292`
 
 ### `Ast`
 
@@ -134,7 +134,7 @@ Source: `src/ast.x:290`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:195`
+Source: `src/ast.x:197`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -145,7 +145,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:209`
+Source: `src/ast.x:211`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -158,7 +158,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:103`
+Source: `src/ast.x:104`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -170,7 +170,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:74`
+Source: `src/ast.x:75`
 
 ### `Symbol`
 
@@ -181,7 +181,7 @@ Source: `src/ast.x:74`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:179`
+Source: `src/ast.x:181`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -190,7 +190,7 @@ Source: `src/ast.x:179`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:173`
+Source: `src/ast.x:175`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -199,7 +199,7 @@ Source: `src/ast.x:173`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:185`
+Source: `src/ast.x:187`
 
 ## Public types
 
