@@ -737,17 +737,26 @@ static List _field_write(List field) {
 }
 
 /* `str` or `repr` renders `write_str` or `write_repr` into a Buffer. */
+macro open Statement $class_string_body(
+    Decl $declaration, Expr $free, Expr $write, Expr $result) {
+  $declaration
+  defer $free;
+  $write;
+  return $result;
+}
+
 static List _string_method(String owner, String member) {
   List out = _ref("out");
   List write = _method(_ref("value"), %"write_${member}", %($out));
+  List declaration = x2c_decl_make(
+    %("Buffer"), "out", _call("Buffer_new", %(${x2c_literal_int(0)})));
+  List free = _method(out, "free", %());
+  List result = _method(out, "str", %());
+  Macro shape = $class_string_body;
   return _default(
     owner, member, %("String"),
     %(${x2c_param_make(%($owner), "value")}),
-    %(${x2c_decl_make(
-      %("Buffer"), "out", _call("Buffer_new", %(${x2c_literal_int(0)})))}
-      (defer ${x2c_stmnt_make(_method(out, "free", %()))})
-      ${x2c_stmnt_make(write)}
-      ${x2c_stmnt_return(_method(out, "str", %()))}));
+    %(${shape(declaration, free, write, result)}));
 }
 
 static List _pointer_output(String owner, List value, List out) =>
@@ -875,7 +884,7 @@ static List _binding_statement(List lisp, List row) {
       %(${x2c_expr_ident(x2c_ident(function))} ${binding_literal_list(type)}));
     List bind = _binding_call(
       "Lisp_bind", %($lisp ${x2c_literal_string(name)} $func));
-    return %(stmnt $bind);
+    return x2c_stmnt_make(bind);
   }
   return %();
 }
