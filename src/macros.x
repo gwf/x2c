@@ -2293,7 +2293,7 @@ static void _open_references(
   Compiler c, Var value, Map replacements, Map natives) {
   if (value is not <list> || value.is_nil()) return;
   match (value)
-    case %(expr ?(List type) (ident ?binding)): {
+    case %(expr ?(List type) ${$source_identifier_content(%(?binding))}): {
       String spelling = NULL;
       if (!binding_identity_try_parts(binding, NULL, spelling)) return;
       List target = c.sym.resolve_global(%($spelling), NULL);
@@ -2314,7 +2314,8 @@ static Var _open_natives(Compiler c, Var value, Map natives) {
   match (value) {
     case called(?callee, *arguments):
       if (value.list().car() == <expr>)
-        match (callee) case %(expr ? (ident ?binding)): {
+        match (callee) case %(expr ?
+            ${$source_identifier_content(%(?binding))}): {
           Var native;
           if (natives.try_get(binding, native))
             return _native_call(c, native, arguments, natives);
@@ -2707,7 +2708,7 @@ static Var _helper_result(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   match (value) {
     case %(macrodef *): return value;
-    case %(literal *): return value;
+    case $source_literal_content(%(*)): return value;
   }
   Array parts = [];
   foreach (Var part, (List) value) parts.push(_helper_result(c, part));
@@ -3402,7 +3403,7 @@ static Var _rebind_imported(Compiler compiler, Var stored) {
 static void _reference_bindings(
   Compiler compiler, List syntax, Map replacements) {
   match (syntax)
-    case %(expr ? (ident ?binding)): {
+    case %(expr ? ${$source_identifier_content(%(?binding))}): {
       String spelling = NULL;
       if (binding_identity_try_parts(binding, NULL, spelling))
         replacements[binding] = compiler.sym.reference_global(%($spelling));
@@ -4049,14 +4050,20 @@ static String meta_call_form = NULL;
    arguments. */
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
-    case %(expr ? (meta-call (expr ?callee (ident (binding ? ?(String name))))
-                             (args *arguments))): {
-      Array values = _meta_values(c, callee, arguments, site);
-      Var function = _meta_function(c, name, site);
-      List applied = values.list_free();
-      meta_call_form = cons(Atom.intern(name), applied).repr();
-      meta_call_form.try_own();
-      return _meta_apply(c, function, applied);
+    case %(expr ? (meta-call ?(List target) (args *arguments))): {
+      List call_target = target;
+      match (call_target)
+        case %(expr ?callee ${$source_identifier_content(
+            %((binding ? ?name)))}): {
+          if (name is not <string>) break;
+          String spelling = name;
+          Array values = _meta_values(c, callee, arguments, site);
+          Var function = _meta_function(c, spelling, site);
+          List applied = values.list_free();
+          meta_call_form = cons(Atom.intern(spelling), applied).repr();
+          meta_call_form.try_own();
+          return _meta_apply(c, function, applied);
+        }
     }
   c.report_error(
     <macro>, "explicit meta call cannot be resolved", site,
@@ -5067,7 +5074,8 @@ String x2c_binding_spelling(Var syntax) {
   match (value)
     case %(expr ? (? *)): value = value.caddr();
   match (value) {
-    case %(ident (*)):     value = value.cadr();
+    case $source_identifier_content(%((*))):
+      value = value.cadr();
     case %(bind (*) ?):    value = value.cadr();
   }
   match (value)
@@ -5298,15 +5306,20 @@ static String _read_embed_file(Compiler compiler, String path, File file) {
 
 static int _literal_string(Var syntax, String &value) {
   match (syntax)
-    case %(expr ? (literal ? ?(String source))): {
-      int quoted = source.len() >= 2 && source[0] == '"' &&
-        source[source.len() - 1] == '"';
-      int percent_quoted = source.len() >= 3 && source[0] == '%' &&
-        source[1] == '"' && source[source.len() - 1] == '"';
-      if (quoted || percent_quoted) {
-        value = source.parse();
-        return 1;
-      }
+    case %(expr ? ?content): {
+      match (content)
+        case $source_literal_content(%(? ?source)): {
+          if (source is not <string>) break;
+          String text = source;
+          int quoted = text.len() >= 2 && text[0] == '"' &&
+            text[text.len() - 1] == '"';
+          int percent_quoted = text.len() >= 3 && text[0] == '%' &&
+            text[1] == '"' && text[text.len() - 1] == '"';
+          if (quoted || percent_quoted) {
+            value = text.parse();
+            return 1;
+          }
+        }
     }
   return 0;
 }
@@ -5316,11 +5329,16 @@ Var x2c_literal_value(Var syntax) {
   _sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, value)) return value;
-  match (syntax) case %(expr ? (literal (int) ?(String digits))): {
+  match (syntax) case %(expr ? ${$source_literal_content(
+      %((int) ?digits))}): {
+    if (digits is not <string>) break;
+    String text = digits;
     long parsed = 0;
-    if (digits.try_long(&parsed)) return parsed;
+    if (text.try_long(&parsed)) return parsed;
   }
-  match (syntax) case %(expr ? (literal ("Symbol") ? ?(Symbol tag))): {
+  match (syntax) case %(expr ? ${$source_literal_content(
+      %(("Symbol") ? ?tag))}): {
+    if (tag is not <symbol>) break;
     Symbol found = tag;
     return found;
   }

@@ -2551,7 +2551,7 @@ List Compiler.optional_reference_test(
     }
   }
   match (condition)
-    case %(expr (opt-ref *) (ident ?binding)):
+    case %(expr (opt-ref *) ${$source_identifier_content(%(?binding))}):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
   return NULL;
@@ -2574,8 +2574,9 @@ static int _null_literal(List expr) {
   match (expr) {
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _null_literal(inner);
-    case %(expr ? (ident (binding ? "NULL"))): return 1;
-    case %(expr ? (literal ? "0")): return 1;
+    case %(expr ? ${$source_identifier_content(
+        %((binding ? "NULL")))}): return 1;
+    case %(expr ? ${$source_literal_content(%(? "0"))}): return 1;
   }
   return 0;
 }
@@ -2781,7 +2782,8 @@ static Var _cons_value(Compiler c, Var head, Var tail) {
 static String _converter_name(Var node) {
   if (node is <string>) return node;
   if (node is not <list>) return NULL;
-  List matched = node.list().match(%(expr ? (ident ?binding)));
+  List matched = node.list().match(
+    %(expr ? ${source_identifier_content(%(?binding))}));
   if (!matched) return NULL;
   List binding = matched.assoc(<?binding>);
   return binding_identity_spelling(binding);
@@ -4003,7 +4005,8 @@ static void _check_local_uses(Compiler c, List items, Map locals) {
       Var found;
       List bindings;
       int present = statement.list().try_search(
-        %(expr () (ident (binding ? $name))), found, bindings);
+        %(expr () ${source_identifier_content(%((binding ? $name)))}),
+        found, bindings);
       if (!present) continue;
       c.origin = origin;
       c.report_error(
@@ -4244,8 +4247,8 @@ static void _collect_references(Var value, Map references, Array ordered) {
       return;
     }
   match (node)
-    case %(expr (!set ?type (*))
-           (ident (!set ?binding (binding ? ?)))): {
+    case %(expr (!set ?type (*)) ${$source_identifier_content(
+        %((!set ?binding (binding ? ?))))}): {
       if (!type.type().is_function()) {
         if (!references.contains(binding)) ordered.push(binding);
         references[binding] = 1;
@@ -4328,7 +4331,8 @@ void ast_collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;
   List syntax = node;
   // A definition's own binder is a `bind`, so a function does not name itself.
-  match (syntax) case %(ident (binding ?identity ?)): {
+  match (syntax) case $source_identifier_content(
+      %((binding ?identity ?))): {
     referenced[identity] = 1;
     return;
   }
