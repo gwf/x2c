@@ -150,9 +150,10 @@ static List _protocol_tag_syntax(List expression) {
 
 static Symbol _protocol_tag_value(List expression) {
   match (expression)
-    case %(expr ("Symbol")
-           (literal ("Symbol") ? ?(Symbol tag))):
-      return tag;
+    case %(expr ("Symbol") ?content):
+      match (content)
+        case $source_literal_content(%(("Symbol") ? ?tag)):
+          if (tag is <symbol>) return tag;
   return 0;
 }
 
@@ -286,15 +287,18 @@ static void _install_stored_adoption(Compiler compiler, List value) {
       draft.install();
     }
     case %(adopt ?base ?participant ?storage
-             (tag (!set ?tag_expression
-               (expr ("Symbol")
-                 (literal ("Symbol") ? ?(Symbol tag)))))
+             (tag (!set ?tag_expression (expr ("Symbol") ?content)))
              ?location): {
-      AdoptionDraft draft = {
-        .c = compiler, .base = base, .participant = participant,
-        .storage = storage, .tag = tag,
-        .tag_expression = tag_expression, .location = location};
-      draft.install();
+      match (content)
+        case $source_literal_content(%(("Symbol") ? ?candidate)):
+          if (candidate is <symbol>) {
+            Symbol tag = candidate;
+            AdoptionDraft draft = {
+              .c = compiler, .base = base, .participant = participant,
+              .storage = storage, .tag = tag,
+              .tag_expression = tag_expression, .location = location};
+            draft.install();
+          }
     }
     case %(adopt ?base ?participant ?storage ?representation ?location): {
       AdoptionDraft draft = {

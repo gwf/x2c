@@ -1419,7 +1419,8 @@ static List _rewrite_lambda_cells(
         compiler, target, bindings, cells);
       if (declaration) return declaration;
     }
-    case %(expr ?source_type (ident ?binding)): {
+    case %(expr ?source_type
+        ${$source_identifier_content(%(?binding))}): {
       List cell = NULL;
       Type type = NULL;
       if (_cell_parts(cells, binding, cell, type)) {
@@ -1617,7 +1618,8 @@ static List _rewrite_lambda_captures(
                ast.cadr(), captured(body, rewritten, params));
       }
       case lambda(?body, *params): return ast;
-      case %(expr ?source_type (ident ?bound)): {
+      case %(expr ?source_type
+          ${$source_identifier_content(%(?bound))}): {
         CaptureRewrite context = {
           .compiler = compiler, .slots = slots,
           .environment_binding = environment_binding,
@@ -1645,7 +1647,7 @@ static List _block_returns(List ast) {
   match (ast) {
     case lambda(?body, *params): return ast;
     case captured(?body, *captures, *params): return ast;
-    case %(return): return _no_value_return();
+    case $source_return_content(%()): return _no_value_return();
   }
   return Ast.rewrite_children(ast, _block_returns);
 }
@@ -3252,7 +3254,7 @@ static List _typed_call(
   Compiler compiler, List callee, List params, List args) {
   String callee_name = NULL;
   match (callee) {
-    case %(expr ? (ident ?binding)):
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
       callee_name = binding_identity_spelling(binding);
   }
   int list_varargs = callee_name == "List_list_n";
@@ -4197,7 +4199,8 @@ static List _string_segments(Compiler compiler, List ast) {
      excluded: their cache slots would fill inside _file_init_ constructors,
      where re-entrant string-pool bootstrap can hand back NULL Strings. */
   match (ast) {
-    case %(segments (segexp (expr ("String") (literal ("String") ?text)))):
+    case $source_string_content(
+        %((segexp (expr ("String") (literal ("String") ?text))))):
       if (!compiler.runtime_literals)
         return compiler.cache(
           %(string (expr ("String") (literal ("String") $text))));
