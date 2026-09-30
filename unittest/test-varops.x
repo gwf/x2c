@@ -1,6 +1,7 @@
 /*  test-varops.x -- Var conversion, operation, and truth contracts */
 
 #include <float.h>
+#include <fenv.h>
 #include <limits.h>
 #include <math.h>
 
@@ -289,6 +290,67 @@ static void var_numeric_exact_floating_boundaries(void) {
   EXPECT_TRUE(upper > lower);
 }
 
+
+/* Compare arithmetic's decoded target casts with the public conversion
+   contract under every native rounding mode, including nonfinite inputs. */
+static void var_floating_rounding_matrix(void) {
+  $test.scoped();
+  int saved = fegetround();
+  defer fesetround(saved);
+  int modes[] = {FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO};
+  Symbol targets[] = {<f32>, <f64>, <ldouble>};
+  Var sources[] = {
+    numeric_value_for_tag(<i8>, 3), numeric_value_for_tag(<u8>, 3),
+    numeric_value_for_tag(<i16>, 3), numeric_value_for_tag(<u16>, 3),
+    numeric_value_for_tag(<i32>, 3), numeric_value_for_tag(<u32>, 3),
+    numeric_value_for_tag(<i48>, 3), numeric_value_for_tag(<u48>, 3),
+    numeric_value_for_tag(<long>, 3), numeric_value_for_tag(<ulong>, 3),
+    numeric_value_for_tag(<llong>, 3), numeric_value_for_tag(<ullong>, 3),
+    numeric_value_for_tag(<f32>, 3), numeric_value_for_tag(<f64>, 3),
+    numeric_value_for_tag(<ldouble>, 3),
+    Var.box_ulong_long((1ull << 63) + (1ull << 39) + 1ull),
+    Var.box_long_long(-((1ll << 53) + 3ll)),
+    Var.box_long_double(1.0L + 0x1p-24L),
+    Var.box_long_double(-0.0L), Var.box_long_double(INFINITY),
+    Var.box_long_double(-INFINITY), Var.box_long_double(NAN),
+    Var.box_long_double(LDBL_MIN), Var.box_long_double(LDBL_MAX)
+  };
+  for (int m = 0; m < 4; m++) {
+    EXPECT_INT_EQ(fesetround(modes[m]), 0);
+    for (int t = 0; t < 3; t++) {
+      Var zero = numeric_value_for_tag(targets[t], 0);
+      for (int i = 0; i < sizeof(sources) / sizeof(sources[0]); i++) {
+        Var source = sources[i];
+        X2CVarNumeric decoded;
+        source.numeric_decode(decoded);
+        Var casted = targets[t] == <f32>
+          ? Var.box_f32(x2c_numeric_f32(decoded))
+          : targets[t] == <f64> ? Var.box_f64(x2c_numeric_f64(decoded))
+          : Var.box_long_double(x2c_numeric_ldouble(decoded));
+        long double cast_value = converted_test_value(casted);
+        long double public_value = converted_test_value(
+          source.convert(targets[t]));
+        EXPECT_TRUE(cast_value == public_value ||
+          (isnan(cast_value) && isnan(public_value)));
+        EXPECT_INT_EQ(signbit(cast_value), signbit(public_value));
+        Symbol winner = expected_numeric_tag(source.tag(), targets[t]);
+        Var promoted = source.convert(winner);
+        Var actual = source.binary(<+>, zero);
+        long double a = converted_test_value(actual);
+        long double b = converted_test_value(promoted.binary(<+>, zero));
+        EXPECT_TRUE(a == b || (isnan(a) && isnan(b)));
+        EXPECT_INT_EQ(signbit(a), signbit(b));
+      }
+    }
+  }
+  fesetround(saved);
+  Var left = Var.box_long(2), right = Var.box_long_double(0.5L);
+  ScopeStats before = Scope.stats();
+  Var result = left.binary(<+>, right);
+  EXPECT_TRUE(result is <ldouble>);
+  EXPECT_TRUE(result.long_double_value() == 2.5L);
+  EXPECT_INT_EQ(Scope.stats().allocation_calls, before.allocation_calls + 1);
+}
 
 static void var_arithmetic_pair_matrix(void) {
   Symbol ops[] = { <+>, <->, <*>, </> };
@@ -739,6 +801,7 @@ void varops_suite(void) {
   $test.run(var_numeric_conversion_matrix);
   $test.run(var_numeric_conversion_boundaries);
   $test.run(var_numeric_exact_floating_boundaries);
+  $test.run(var_floating_rounding_matrix);
   $test.run(var_arithmetic_pair_matrix);
   $test.run(var_integral_pair_matrix);
   $test.run(var_all_family_arithmetic_matrix);

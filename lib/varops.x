@@ -339,7 +339,7 @@ static Var _general_numeric_binary(Symbol op, Var lhs, Var rhs) {
     case <+>: case <->: case <*>: case </>: break;
   }
   if (left.floating || right.floating)
-    return _floating_binary(op, lhs, rhs, _floating_tag(left, right));
+    return _floating_binary(op, left, right, _floating_tag(left, right));
   return _integer_binary(op, left, right);
 }
 
@@ -413,17 +413,17 @@ static Symbol _floating_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
 }
 
 /* Both operands convert to the result family before the step. */
-static Var _floating_binary(Symbol op, Var lhs, Var rhs, Symbol tag) {
-  Var left = lhs.convert(tag), right = rhs.convert(tag);
+static Var _floating_binary(
+  Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag) {
   if (tag == <f32>) {
-    float a = left.float(), b = right.float();
+    float a = x2c_numeric_f32(lhs), b = x2c_numeric_f32(rhs);
     return Var.box_f32(_f32_step(op, a, b));
   }
   if (tag == <f64>) {
-    double a = left.floating(), b = right.floating();
+    double a = x2c_numeric_f64(lhs), b = x2c_numeric_f64(rhs);
     return Var.box_f64(_f64_step(op, a, b));
   }
-  long double a = left.long_double_value(), b = right.long_double_value();
+  long double a = x2c_numeric_ldouble(lhs), b = x2c_numeric_ldouble(rhs);
   return Var.box_long_double(_ldouble_step(op, a, b));
 }
 
