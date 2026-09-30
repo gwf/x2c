@@ -2273,8 +2273,15 @@ macro open Statement $protocol_registration_fallback(
   if (!$registered) { $fallback; }
 }
 
-macro open Expression $protocol_registration_call(
+macro open Expression $protocol_helper_call(
     Name $callee, Expr $arguments...) => $callee($arguments...);
+
+static List _protocol_helper_call(
+  Compiler c, Type result, String callee, List arguments) {
+  Macro shape = $protocol_helper_call;
+  return c.rebuild_expression(
+    result, shape(%($callee), arguments));
+}
 
 static List _descriptor_fields(List thunks) {
   Array fields = [];
@@ -2287,31 +2294,27 @@ static List _descriptor_fields(List thunks) {
 
 static List _builtin_registration(
   Compiler c, List methods, String name, Symbol tag) {
-  Macro shape = $protocol_registration_call;
-  List callee = %("x2c_register_builtin_descriptor");
   List symbol = %(expr ("Symbol") (literal ("Symbol") $name $tag));
   List table = %(expr ("VarMethods") (ident $methods));
-  return c.rebuild_expression(%(int), shape(callee, %($symbol $table)));
+  return _protocol_helper_call(
+    c, %(int), "x2c_register_builtin_descriptor", %($symbol $table));
 }
 
 static List _tagged_registration(
   Compiler c, List methods, String name, Symbol tag) {
-  Macro shape = $protocol_registration_call;
-  List callee = %("x2c_register_tagged_descriptor");
   List symbol = %(
     expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag));
   List table = %(expr ("VarMethods") (ident $methods));
-  return c.rebuild_expression(
-    %(void), shape(callee, %($symbol ${_string_literal(c, name)} $table)));
+  return _protocol_helper_call(c, %(void),
+    "x2c_register_tagged_descriptor",
+    %($symbol ${_string_literal(c, name)} $table));
 }
 
 static List _fallback_registration(
   Compiler c, List methods, String name, List early_call) {
-  Macro register_shape = $protocol_registration_call;
-  List callee = %("x2c_register_descriptor");
   List table = %(expr ("VarMethods") (ident $methods));
-  List fallback = c.rebuild_expression(
-    %(void), register_shape(callee, %(${_string_literal(c, name)} $table)));
+  List fallback = _protocol_helper_call(c, %(void),
+    "x2c_register_descriptor", %(${_string_literal(c, name)} $table));
   Macro shape = $protocol_registration_fallback;
   return c.rebuild_statement(shape(early_call, fallback)).cadr();
 }
@@ -2379,22 +2382,26 @@ static List _guard_value_rendering(
       List value = %(expr ("Var") (ident $boxed));
       List fallback = NULL;
       if (member == "str" || member == "repr")
-        fallback = %(expr ("String")
-          (call "Var_pointer_string" (args $value)));
+        fallback = _protocol_helper_call(
+          compiler, %("String"), "Var_pointer_string", %($value));
       else match (remaining)
         case %((param ? (bind ?output ?))):
-          fallback = %(expr ("Buffer")
-            (call "Var_write_pointer_repr"
-              (args $value (expr ("Buffer") (ident $output)))));
+          fallback = _protocol_helper_call(compiler, %("Buffer"),
+            "Var_write_pointer_repr",
+            %($value (expr ("Buffer") (ident $output))));
       List path = compiler.sym.introduce("render_path");
       compiler.semantic_binding_facts()[%(automatic $path)] = 1;
       compiler.semantic_binding_facts()[%(type $path)] = %("RenderPath");
-      List address = %(expr (* "RenderPath")
-        (op & (expr ("RenderPath") (ident $path))));
-      List enter = %(expr (int)
-        (call "RenderPath_enter" (args $address
-          (expr (* void) (call "Var_pointer" (args $value))))));
-      List leave = %(expr (void) (call "RenderPath_leave" (args $address)));
+      Macro addressed = $addressed;
+      List address = compiler.rebuild_expression(
+        %(* "RenderPath"),
+        addressed(%(expr ("RenderPath") (ident $path))));
+      List pointer = _protocol_helper_call(
+        compiler, %(* void), "Var_pointer", %($value));
+      List enter = _protocol_helper_call(compiler, %(int),
+        "RenderPath_enter", %($address $pointer));
+      List leave = _protocol_helper_call(
+        compiler, %(void), "RenderPath_leave", %($address));
       Macro shape = $guard_value_rendering;
       return compiler.rebuild_function(
         function, shape(path, enter, fallback, leave, body));
