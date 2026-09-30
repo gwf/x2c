@@ -287,8 +287,9 @@ static List _source_assignment(Var value) {
 static Var _unwrap(Var value) {
   while (1)
     match (value) {
-      case %((!or expr cast) ? ?inner): value = inner;
-      case %(parens ?inner): value = inner;
+      case %(expr ? ?inner): value = inner;
+      case $source_cast_content(%(? ?inner)): value = inner;
+      case $source_content_pattern($grouped, %(?inner)): value = inner;
       default: return value;
     }
 }
@@ -299,7 +300,8 @@ static List _expression_type(Var value) {
 }
 
 static List _binding_of(Var value) {
-  match (_unwrap(value)) case %(ident (!set ?binding (binding ? ?))):
+  match (_unwrap(value)) case $source_identifier_content(
+      %((!set ?binding (binding ? ?)))):
     return binding;
   return NULL;
 }
@@ -434,7 +436,8 @@ static List _summary(Walk w, String callee) {
 static Fact _fact_of(Walk w, Var expression, List &?named) {
   Var inner = _unwrap(expression);
   match (inner) {
-    case %(ident (!set ?binding (binding ? ?))): {
+    case $source_identifier_content(
+        %((!set ?binding (binding ? ?)))): {
       if (named) named = binding;
       Var found = w.facts[binding];
       return found is void ? NULL : found;
@@ -469,7 +472,8 @@ static Fact _value_fact(Walk w, Var value, List &?named) {
   Fact fact = _fact_of(w, value, named);
   Type type = _expression_type(value);
   if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
-  match (_unwrap(value)) case %(ident *): return _borrow(w, value, named);
+  match (_unwrap(value)) case $source_identifier_content(%(*fields)):
+    return _borrow(w, value, named);
   return fact;
 }
 
@@ -724,7 +728,8 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
   if (_callee_of(value, arguments)) return %"an address from $name";
-  match (fact ? fact.place : NULL) case %(ident *):
+  match (fact ? fact.place : NULL)
+    case $source_identifier_content(%(*fields)):
     return %"the address of $name";
   return %"an address inside $name";
 }
@@ -759,7 +764,7 @@ static Fact _base(Walk w, Var place, int &through) {
       return _indexed_base(w, base, type, through);
     case %(getindex (!set ?base (expr ?type ?)) ?):
       return _indexed_base(w, base, type, through);
-    case %(ident ?): {
+    case $source_identifier_content(%(?binding)): {
       through = 0;
       return _fact_of(w, place, NULL);
     }
@@ -797,7 +802,8 @@ static Fact _borrow(Walk w, Var place, List &?named) {
 static List _root(Var place) {
   while (1)
     match (_unwrap(place)) {
-      case %(ident (!set ?binding (binding ? ?))): return binding;
+      case $source_identifier_content(
+          %((!set ?binding (binding ? ?)))): return binding;
       case $source_operator_content(%(? ?base *)): place = base;
       case $source_pattern($indexed, %(?base ?selector)): place = base;
       case %(getindex ?base ?): place = base;
@@ -864,7 +870,8 @@ static void _end(Walk w, Var argument, String op, Symbol how) {
   List named = NULL;
   Fact storage = _value_fact(w, argument, named);
   int literal = 0;
-  match (_unwrap(argument)) case %(literal *): literal = 1;
+  match (_unwrap(argument)) case $source_literal_content(%(*fields)):
+    literal = 1;
   if (op && (literal || (storage &&
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
@@ -968,7 +975,9 @@ static void _scan_children(Walk w, List children) {
 static void _scan_node(Walk w, Var node) {
   match (node) {
     case %(expr ? ?inner): w.pending.push(inner);
-    case %(ident (!set ?binding (binding ? ?))): _scan_ident(w, binding);
+    case $source_identifier_content(
+        %((!set ?binding (binding ? ?)))):
+      _scan_ident(w, binding);
     /* A statement expression declares locals of its own. */
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
@@ -1248,7 +1257,9 @@ static void _walk(Walk w, Var node) {
     case $source_conditional_statement():
       _walk_conditional(w, node.cdr());
     case %(catchcases ?rows): _walk(w, rows);
-    case %((!or expr parens case) *): _scan(w, node, 0);
+    case %((!or expr case) *): _scan(w, node, 0);
+    case $source_content_pattern($grouped, %(?inner)):
+      _scan(w, node, 0);
     /* Match and catch arms are bare `(PATTERN STATEMENT ...)` rows. */
     case %((*) *): _walk_rows(w, node);
   }
