@@ -105,6 +105,11 @@ macro Expression $dereferenced(Expr $value) => *$value;
    The parser and resolver share this shape without inventing a segment form. */
 meta static List source_string_content(List rows) => cons(<segments>, rows);
 
+/* Preserve the chosen operator token and source-ordered operands at every
+   parser and resolver stage, including constructed nonstandard operators. */
+meta static List source_operator_content(Var operator, List operands) =>
+  cons(<op>, cons(operator, operands));
+
 /* Derive bare $called content, then insert the consumer's callee and
    argument patterns without normalizing their constraints. */
 meta static List source_call_content(

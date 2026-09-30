@@ -90,6 +90,9 @@ static List source_return_type(List node) {
 
 static List source_string_content(List rows) => cons(<segments>, rows);
 
+static List source_operator_content(Var operator, List operands) =>
+  cons(<op>, cons(operator, operands));
+
 static List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -676,6 +679,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_string_content", source_string_content);
+  $linked.row(rows, "source_operator_content", source_operator_content);
   $linked.row(rows, "source_call_content", source_call_content);
   $linked.row(rows, "source_pattern_with", source_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);
