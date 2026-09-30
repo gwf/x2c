@@ -862,7 +862,12 @@ static int _c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _c_type_known(c, inner);
-    case %(expr ? (!or (literal (char) *) (sizeof *) (offsetof *))): return 0;
+    case %(expr ? (literal (char) *)): return 0;
+    case %(expr ? ${$source_content_pattern(
+        $sizeof_grouped, %(?operand))}): return 0;
+    case %(expr ? ${$source_content_pattern(
+        $sizeof_expression, %(?operand))}): return 0;
+    case %(expr ? (offsetof *)): return 0;
     case %(expr ? (op - (expr ?left *) (expr ?right *))): {
       Type l = left, r = right;
       if ((l.is_pointer() || l.is_array()) && (r.is_pointer() || r.is_array()))
@@ -2800,10 +2805,17 @@ static List _parse_binary_levels_from(Compiler compiler, List lhs) {
 static List _parse_binary_ops(Compiler compiler) =>
   _parse_binary_level(compiler, 1);
 
-static int _destructure_identifier(List expression) =>
-  !!expression.match(
-    %(!or (expr ? (ident ?))
-          (expr ? (parens (expr ? (op * (expr (& *) (ident ?))))))));
+static int _destructure_identifier(List expression) {
+  match (expression) {
+    case %(expr ? (ident ?)): return 1;
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+      match (inner)
+        case %(expr ? ${$source_content_pattern(
+          $dereferenced, %(?address))}):
+          match (address) case %(expr (& *) (ident ?)): return 1;
+  }
+  return 0;
+}
 
 static List _destructure_targets(Compiler compiler, List lhs) {
   match (lhs)
@@ -3184,7 +3196,11 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
       return _not_null_pointer_constant(compiler, inner);
     // sizeof is an integer constant expression, but never a zero-valued
     // one: no type in C has size zero.
-    case %(expr ? (sizeof *)):
+    case %(expr ? ${$source_content_pattern(
+        $sizeof_grouped, %(?operand))}):
+      return "sizeof";
+    case %(expr ? ${$source_content_pattern(
+        $sizeof_expression, %(?operand))}):
       return "sizeof";
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
@@ -3446,14 +3462,16 @@ static Var _native_modifier(Compiler c, Var modifier, Var &reused) {
       unsigned long long count;
       int captured = 0;
       match (bound)
-        case %(expr ? (sizeof (parens
-          (struct ?name (fields
-            (declare (char) (bindings (bind ? ((dim ?)))))))))): {
-          List prior = %(expr (unsigned long)
-            (sizeof (parens (struct $name))));
-          reused = %(dim $prior);
-          captured = 1;
-        }
+        case %(expr ? ${$source_content_pattern(
+          $sizeof_grouped, %(?argument))}):
+          match (argument)
+            case %(struct ?name (fields
+              (declare (char) (bindings (bind ? ((dim ?))))))): {
+              List prior = %(expr (unsigned long)
+                (sizeof (parens (struct $name))));
+              reused = %(dim $prior);
+              captured = 1;
+            }
       if (bound && !captured && !_initializer_integer(bound, count)) {
         String name = c.fresh_name("initializer_bound");
         Type bytes = %((dim $bound) char);
@@ -3504,8 +3522,9 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
    designator occurred. Its ordinary cast shape survives normalization. */
 static List _initializer_index(Compiler c, List index, List &reference) {
   match (index)
-    case %(expr ? (cast (enum ((op = ?binding ?original)))
-                       (!set ?value (expr ? (ident ?binding))))): {
+    case %(expr ? ${$source_cast_content(
+        %((enum ((op = ?binding ?original)))
+          (!set ?value (expr ? (ident ?binding)))))}): {
       reference = value;
       return index;
     }
