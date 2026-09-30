@@ -312,20 +312,21 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
 static int _func_adapter_source(
   Type type, List payload, Type &source_type, List &source_binding) {
   match (payload) {
-    case %(ident ?binding): {
+    case $source_identifier_content(%(?binding)): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
       source_type = type;
       source_binding = binding;
       return 1;
     }
-    case %(cast ? (expr ?inner_type ?inner_payload)):
+    case $source_cast_content(%(? (expr ?inner_type ?inner_payload))):
       return _func_adapter_source(
         inner_type, inner_payload,
         source_type, source_binding);
-    case %(parens (expr ?inner_type ?inner_payload)):
-      return _func_adapter_source(
-        inner_type, inner_payload,
-        source_type, source_binding);
+    case $source_content_pattern($grouped, %(?inner)):
+      match (inner)
+        case %(expr ?inner_type ?inner_payload):
+          return _func_adapter_source(
+            inner_type, inner_payload, source_type, source_binding);
     case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
       return _func_adapter_source(
         inner_type, inner_payload,
@@ -622,15 +623,17 @@ static List _direct_func_adapter(
 static int _direct_func_source(
   Type type, List payload, Type &source_type, List &source_binding) {
   match (payload) {
-    case %(ident ?binding): {
+    case $source_identifier_content(%(?binding)): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
       source_type = type;
       source_binding = binding;
       return 1;
     }
-    case %(parens (expr ?inner_type ?inner_payload)):
-      return _direct_func_source(
-        inner_type, inner_payload, source_type, source_binding);
+    case $source_content_pattern($grouped, %(?inner)):
+      match (inner)
+        case %(expr ?inner_type ?inner_payload):
+          return _direct_func_source(
+            inner_type, inner_payload, source_type, source_binding);
     case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
       return _direct_func_source(
         inner_type, inner_payload, source_type, source_binding);
@@ -989,10 +992,12 @@ static List _deref_func_lift(
   while (unwrapped) {
     unwrapped = 0;
     match (probe) {
-      case %(parens (expr ? ?inner_payload)): {
-        probe = inner_payload;
-        unwrapped = 1;
-      }
+      case $source_content_pattern($grouped, %(?inner)):
+        match (inner)
+          case %(expr ? ?inner_payload): {
+            probe = inner_payload;
+            unwrapped = 1;
+          }
       case $source_operator_content(%(& (expr ? ?inner_payload))): {
         probe = inner_payload;
         unwrapped = 1;
@@ -1116,12 +1121,13 @@ static List _publish_lambda_adapter(LambdaAdapter *adapter) {
 List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   Type orig_type = NULL, List orig_binding = NULL;
   match (argument) {
-    case %(expr ? (parens ?inner)): {
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}): {
       List adapted = c.adapt_lambda_arg(inner, expected_type);
       if (adapted == inner) return argument;
-      return %(expr $expected_type (parens $adapted));
+      Macro grouped = $grouped;
+      return c.rebuild_expression(expected_type, grouped(adapted));
     }
-    case %(expr ?type (ident ?binding)): {
+    case %(expr ?type ${$source_identifier_content(%(?binding))}): {
       orig_type = type;
       orig_binding = binding;
     }
@@ -1252,14 +1258,18 @@ static void _collect_region_bindings(
 static List _lvalue_binding(List ast) {
   if (!ast) return NULL;
   match (ast) {
-    case %(expr ? (ident ?binding)): return binding;
-    case %(expr ? (parens ?inner)):
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding;
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _lvalue_binding(inner);
-    case %(parens ?inner): return _lvalue_binding(inner);
-    case %(expr ? (op . ?base *)):
+    case $source_content_pattern($grouped, %(?inner)):
+      return _lvalue_binding(inner);
+    case %(expr ? ${$source_operator_content(%(. ?base *))}):
       return _lvalue_binding(base);
-    case %(op . ?base *): return _lvalue_binding(base);
-    case %(expr ? (index (expr ((dim *) *) ?base) ?)):
+    case $source_operator_content(%(. ?base *)):
+      return _lvalue_binding(base);
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+        %((?receiver (expr ((dim *) *) ?base)) (?selector ?))):
       return _lvalue_binding(base);
   }
   return NULL;
@@ -1871,10 +1881,11 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       expression, %!(List child) => c.lower_lambda_expr(child));
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (expression) {
-    case %(expr ?type (parens ?inner)): {
+    case %(expr ?type ${$source_content_pattern($grouped, %(?inner))}): {
       List lowered = c.lower_lambda_expr(inner);
       if (lowered == inner) return expression;
-      return %(expr $type (parens $lowered));
+      Macro grouped = $grouped;
+      return c.rebuild_expression(type, grouped(lowered));
     }
     case captured(?body, *captures, *entries):
       return _lower_captured_lambda(c, entries, captures, body);
@@ -2049,8 +2060,11 @@ static String _label_spelling(Var label) {
   if (label is not <list>) return NULL;
   List node = label;
   match (node) {
-    case %(ident ?binding): return binding_identity_spelling(binding);
-    case %(!or (expr ? ?inner) (parens ?inner)): return _label_spelling(inner);
+    case $source_identifier_content(%(?binding)):
+      return binding_identity_spelling(binding);
+    case %(expr ? ?inner): return _label_spelling(inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _label_spelling(inner);
     case %(?(String name)): return name;
   }
   return binding_identity_spelling(node);
@@ -2194,16 +2208,19 @@ static int _runtime_sizeof_dimensions(Compiler c, List operand, Map runtime) {
 static int _runtime_address(
   Compiler c, List node, Map runtime, Array pending, Array modes) {
   match (node) {
-    case %(!or (expr ? ?inner) (parens ?inner)
-               (op . ?inner ?)): {
+    case %(!or (expr ? ?inner)
+        ${$source_content_pattern($grouped, %(?inner))}
+        ${$source_operator_content(%(. ?inner ?))}): {
       pending.push(inner);
       modes.push(1);
       return 0;
     }
-    case %(ident ?binding):
+    case $source_identifier_content(%(?binding)):
       return (runtime && binding in runtime) ||
              _automatic_static_input(c, binding);
-    case %(index (!set ?base (expr ?type ?)) ?index): {
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+        %((?receiver (!set ?base (expr ?type ?)))
+          (?selector ?index))): {
       pending.push(index);
       modes.push(0);
       pending.push(base);
@@ -2225,7 +2242,7 @@ static int _runtime_value(
   match (node) {
     case %((!or cache call var array map varray vmap initval cons append) *):
       return 1;
-    case %(expr ?type (ident ?binding)): {
+    case %(expr ?type ${$source_identifier_content(%(?binding))}): {
       if ((runtime && binding in runtime) ||
           _automatic_static_input(c, binding)) return 1;
       if (%(function $binding) in c.semantic_binding_facts()) return 0;
@@ -2240,7 +2257,8 @@ static int _runtime_value(
       modes.push(1);
       return 0;
     }
-    case %(expr ?type (!set ?content (index *))): {
+    case %(expr ?type (!set ?content
+        ${$source_content_pattern($indexed, %(?receiver ?selector))})): {
       Type native = type;
       if (native.is_array()) {
         pending.push(content);
@@ -2250,7 +2268,8 @@ static int _runtime_value(
       if (native.is_pointer() || !native.contains(<const>)) return 1;
       break;
     }
-    case %(expr ? (sizeof ?operand)):
+    case %(expr ? ${$source_content_pattern(
+        $sizeof_expression, %(?operand))}):
       return _runtime_sizeof_dimensions(c, operand, runtime);
   }
   return -1;
@@ -2564,7 +2583,8 @@ static List _return_value(Walk walk, List expression) {
   List (base, mods) = type.declaration_parts();
   List declaration = %(declare $base
     (bindings (op = (bind $binding $mods) $expression)));
-  List statement = _transfer(walk, 0, %(return (expr $type (ident $binding))));
+  List statement = _transfer(walk, 0,
+    source_return_content(%((expr $type (ident $binding)))));
   return %(block $declaration $statement);
 }
 
@@ -2883,8 +2903,8 @@ static Var _rewrite(Walk walk, Var value) {
       return _lower_try(walk, node, body, NULL, finalizer);
     case %(localinit ?guard ?body):
       return _rewrite_localinit(walk, node, guard, body);
-    case %(return): return _transfer(walk, 0, node);
-    case %(return (!set ?expression (expr ? ?))):
+    case $source_return_content(%()): return _transfer(walk, 0, node);
+    case $source_return_content(%((!set ?expression (expr ? ?)))):
       return _lower_return(walk, node, expression);
     case %(break): return _transfer(walk, walk.break_stop, node);
     case %(continue): return _transfer(walk, walk.continue_stop, node);
@@ -2893,7 +2913,8 @@ static Var _rewrite(Walk walk, Var value) {
       return _rewrite_while(walk, condition, body);
     case do_loop(?body, ?condition):
       return _rewrite_do(walk, body, condition);
-    case %(for ?initial ?condition ?increment ?body):
+    case $source_pattern($for_loop,
+        %(?initial ?condition ?increment ?body)):
       return _rewrite_for(walk, initial, condition, increment, body);
     case switched(?subject, ?body):
       return _rewrite_switch(walk, subject, body);
@@ -3588,8 +3609,8 @@ static List _return(Compiler compiler, List ast) {
   Macro returned = $return_value;
   match (ast)
     case returned(?expression):
-      return %(return ${compiler.convert_expression(
-        expression, source_return_type(ast))});
+      return source_return_content(%(${compiler.convert_expression(
+        expression, source_return_type(ast))}));
   return ast;
 }
 
@@ -4242,9 +4263,10 @@ static List _defer_direct_binding(Var value) {
   if (value is not <list>) return NULL;
   List ast = value;
   match (ast) {
-    case %(ident ?binding): return binding;
+    case $source_identifier_content(%(?binding)): return binding;
     case %(expr ? ?inner):  return _defer_direct_binding(inner);
-    case %(parens ?inner):  return _defer_direct_binding(inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _defer_direct_binding(inner);
     case $source_operator_content(%(. ?inner *)):
       return _defer_direct_binding(inner);
   }
@@ -4284,7 +4306,7 @@ static void _defer_collect_captures(DeferCaptures *state, List ast) {
       if (!known.contains(binding)) state.declared = cons(binding, known);
     }
   match (ast)
-    case %(expr ? (ident ?bound)): {
+    case %(expr ? ${$source_identifier_content(%(?bound))}): {
       _defer_capture_ident(state, bound);
       return;
     }
@@ -4312,7 +4334,8 @@ static List _defer_rewrite_captures(
   List ast, Map captures, List written, String env_name) {
   if (!ast) return ast;
   match (ast)
-    case %(expr ?captured_type (ident ?bound)): {
+    case %(expr ?captured_type
+        ${$source_identifier_content(%(?bound))}): {
       List binding = bound;
       Var field_var;
       if (captures.try_get(binding, field_var)) {
@@ -4561,8 +4584,9 @@ static List _nominal_getindex(Compiler compiler, Type type) {
 
 static List _cast(Compiler compiler, List ast) {
   match (ast)
-    case %(cast (!set ?declarator (decl *parts))
-                (!set ?expression (expr ?source_type ?))): {
+    case $source_cast_content(
+        %((!set ?declarator (decl *parts))
+          (!set ?expression (expr ?source_type ?)))): {
     List declaration = %(declare @parts);
     Type type = declaration.type_from_ast();
     List operand = expression;
@@ -4577,7 +4601,8 @@ static List _cast(Compiler compiler, List ast) {
     int target_var = compiler.sym.is_var_type(type);
     int unresolved = 0;
     match (expression)
-      case %(expr () (ident ?)): unresolved = 1;
+      case %(expr () ${$source_identifier_content(%(?name))}):
+        unresolved = 1;
     int target_func = source_type &&
       compiler.sym.resolve_key(type) === compiler.sym.resolve_key(%("Func"));
     if (type !== %(void) &&
@@ -4587,7 +4612,8 @@ static List _cast(Compiler compiler, List ast) {
     return %(cast $type $expression);
   }
   match (ast)
-    case %(cast ?target (!set ?value (expr ? (composite *)))):
+    case $source_cast_content(
+        %(?target (!set ?value (expr ? (composite *))))):
       return compiler.convert_compound_literal(value, target, target);
   return ast;
 }

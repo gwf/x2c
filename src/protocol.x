@@ -1940,6 +1940,12 @@ typedef struct ProtocolUpdate {
   int postfix;
 } ProtocolUpdate;
 
+static List _bound_protocol_call(
+  Compiler c, Type result, List callee, List arguments) {
+  Macro shape = $called;
+  return c.rebuild_expression(result, shape(callee, arguments));
+}
+
 static void ProtocolUpdate.arguments(ProtocolUpdate *u) {
   List lhs_binding = u.c.sym.introduce("lhs");
   List op_binding = u.c.sym.introduce("op");
@@ -1963,9 +1969,9 @@ static void ProtocolUpdate.arguments(ProtocolUpdate *u) {
 }
 
 static void ProtocolUpdate.emit(ProtocolUpdate *u) {
-  List call = %(expr ${u.result}
-    (call (expr ${u.source_type} (ident ${u.source_binding}))
-      (args ${u.current} ${u.call_rhs})));
+  List call = _bound_protocol_call(u.c, u.result,
+    %(expr ${u.source_type} (ident ${u.source_binding})),
+    %(${u.current} ${u.call_rhs}));
   Macro ordinary = $protocol_update_body;
   Macro saved = $protocol_postfix_body;
   List shape = u.postfix
@@ -2170,9 +2176,9 @@ static List AdapterFunction.generate(AdapterFunction *a) {
     arguments.push(argument);
   }
   List source_binding = a.c.sym.reference(%(${a.source}), NULL);
-  List call = %(expr $source_result
-    (call (expr ${a.signature} (ident $source_binding))
-      (args @{arguments.list_free()})));
+  List call = _bound_protocol_call(a.c, source_result,
+    %(expr ${a.signature} (ident $source_binding)),
+    arguments.list_free());
   a.binding = a.c.sym.reference(%(${a.name}), NULL);
   if (a.make_static) a.binding = a.c.sym.introduce(a.name);
   List storage = a.make_static
