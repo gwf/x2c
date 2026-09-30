@@ -1240,9 +1240,13 @@ static void _walk(Walk w, Var node) {
   Macro returned = $return_value;
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
-    case %(block *statements): _walk_block(w, statements);
+    case $source_block_content(%(*statements)):
+      _walk_block(w, statements);
     case %(seq *statements): _walk_sequence(w, statements);
     case deferred(?body): _walk_defer(w, body);
+    /* A lowered defer keeps its environment and capture records. */
+    case %(defer ?body ?environment ?callback ?records ?written):
+      _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
     case returned(?result):
