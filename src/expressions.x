@@ -2144,13 +2144,6 @@ static List _resolve_content(
       return c.resolve_expression(
         c.lift_macro_lisp_expression(value, origin), origin);
     }
-    case %(map *entries): {
-      Array resolved = [];
-      foreach (Var entry, entries)
-        foreach (Var row, c.evaluate_macro_rows(entry))
-          resolved.push(c.resolve_map_entry(row, origin));
-      return %(expr $input_type (map @{resolved.list_free()}));
-    }
     case %(segments *items): {
       Array resolved = [];
       Type type = %("String");
@@ -2246,12 +2239,6 @@ static List _resolve_content(
     case %(splice ?expression):
       return %(expr $input_type
                (splice ${c.resolve_expression(expression, origin)}));
-    case %(array *elements): {
-      Array resolved = [];
-      foreach (List element, elements)
-        resolved.push(c.resolve_expression(element, origin));
-      return %(expr $input_type (array @{resolved.list_free()}));
-    }
     case %((!or offsetof nil cache macro-bind) *): return input;
     case %(parens ?inner): {
       inner = c.resolve_expression(inner, origin);
@@ -2455,6 +2442,27 @@ static List _resolve_content(
       c.report_error(
         <macro>, "typed callback adapter target must be a typedef name",
         origin, NULL);
+    }
+  }
+  if (content && content.car() == <array>) {
+    Macro array_value = $array_value;
+    match (input) case array_value(*elements): {
+      Array resolved = [];
+      foreach (List element, elements)
+        resolved.push(c.resolve_expression(element, origin));
+      return c.rebuild_expression(
+        input_type, array_value(resolved.list_free()));
+    }
+  }
+  if (content && content.car() == <map>) {
+    Macro map_value = $map_value;
+    match (input) case map_value(*entries): {
+      Array resolved = [];
+      foreach (Var entry, entries)
+        foreach (Var row, c.evaluate_macro_rows(entry))
+          resolved.push(c.resolve_map_entry(row, origin));
+      return c.rebuild_expression(
+        input_type, map_value(resolved.list_free()));
     }
   }
   return input;
@@ -3878,10 +3886,12 @@ static List _initializer_adapters(
 /* An empty initializer for a Map or Array, or for a type that converts from
    one, is a fresh empty collection. A Var holds a fresh empty Map. */
 static List _empty_collection(Compiler c, Type target) {
-  if (c.sym.is_var_type(target))
-    return c.convert_expression(%(expr ("Map") (map)), target);
-  foreach (List literal, %((expr ("Map") (map)) (expr ("Array") (array)))) {
-    Type source = literal.cadr();
+  for (int kind = 0; kind < 2; kind++) {
+    Macro shape = kind ? $array_value : $map_value;
+    Type source = kind ? %("Array") : %("Map");
+    List literal = c.rebuild_expression(source, shape(%()));
+    if (!kind && c.sym.is_var_type(target))
+      return c.convert_expression(literal, target);
     if (c.sym.resolve_key(target).equal(c.sym.resolve_key(source)))
       return c.convert_expression(literal, target);
     List converted = _converter_call(c, literal, source, target);

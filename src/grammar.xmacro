@@ -77,6 +77,10 @@ macro Expression $indexed(Expr $receiver, Expr $selector) =>
 macro Expression $called(Expr $callee, Expr $arguments...) =>
   $callee($arguments...);
 
+/* Complete, source-ordered collection members before semantic resolution. */
+macro Expression $array_value(Expr $items...) => %[$items...];
+macro Expression $map_value(Entry $rows...) => %{${$rows...}};
+
 /* Assignment syntax, before receiver-specific lowering. */
 macro Expression $assigned(Expr $target, Expr $stored) => $target = $stored;
 

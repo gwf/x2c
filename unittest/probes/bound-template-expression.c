@@ -155,6 +155,134 @@ static void check_bound_expr_holes(Compiler c, Lisp reader) {
     "bound call lost captured expression identities");
 }
 
+static void check_array_source_form(Compiler c, Lisp reader) {
+  Macro array = definition(c,
+    "macro Expression $array_value(Expr $items...) => %[$items...];");
+  List names = read_list(reader, "(*items)");
+  const char *sources[] = {"%[]", "%[1, 2, 3]"};
+  const int counts[] = {0, 3};
+  for (int i = 0; i < 2; i++) {
+    Compiler_tokenize(c, (char *) sources[i]);
+    List parsed = Compiler_parse_assignment(c);
+    List bindings = List_match(parsed, List_var(Macro_pattern(array, names)));
+    require(bindings != NULL, "array source form did not match");
+    List items = Var_list(List_assoc(bindings, List_car(names)));
+    require(List_len(items) == counts[i], "array member count changed");
+    Type type = Var_list(List_cadr(parsed));
+    List rebuilt = Compiler_rebuild_expression(c, type,
+      Macro_apply(array, List_list_n(1, List_var(items))));
+    require(Var_list(List_cadr(rebuilt)) == type,
+      "array root type changed");
+    require(List_equal(rebuilt, parsed), "array source rebuild changed syntax");
+    if (items)
+      require(Var_list(List_cadr(Var_list(List_caddr(rebuilt)))) ==
+        Var_list(List_car(items)),
+        "array rebuild lost child identity");
+  }
+
+  List wrapped = read_list(reader,
+    "(src (source \"input.x\" 4 12) "
+    "(expr (int) (literal (int) \"7\")))");
+  List rebuilt = Compiler_rebuild_expression(c, read_list(reader, "(\"Array\")"),
+    Macro_apply(array, List_list_n(1,
+      List_var(List_list_n(1, List_var(wrapped))))));
+  require(Var_list(List_cadr(Var_list(List_caddr(rebuilt)))) == wrapped,
+    "array rebuild lost a source wrapper");
+
+  List raw = read_list(reader,
+    "(expr (\"Array\") (array (expr (<macro-expr>) (ident \"snapshot\")) "
+    "(src (source \"input.x\" 5 9) "
+    "(expr (int) (literal (int) \"3\")))))");
+  List resolved = Compiler_resolve_expression(c, raw, c->token);
+  require(List_equal(Var_list(List_cadr(resolved)),
+    read_list(reader, "(\"Array\")")), "resolved array root type changed");
+  List members = List_cdr(Var_list(List_caddr(resolved)));
+  List first = Var_list(List_car(members));
+  require(List_equal(Var_list(List_cadr(first)), read_list(reader, "(int)")),
+    "array member was not resolved");
+  require(Var_list(List_cadr(members)) ==
+    Var_list(List_caddr(Var_list(List_caddr(raw)))),
+    "array rebuild changed an established member");
+  require(List_match(resolved, List_var(Macro_pattern(array, names))) != NULL,
+    "resolved array lost its source form");
+  require(Compiler_error_count(c) == 0, "array source form reported an error");
+}
+
+static void check_map_source_form(Compiler c, Lisp reader) {
+  Macro map = definition(c,
+    "macro Expression $map_value(Entry $rows...) => %{${$rows...}};");
+  List names = read_list(reader, "(*rows)");
+  const char *sources[] = {"%{}", "%{\"a\": 1, \"b\": 2}"};
+  const int counts[] = {0, 2};
+  for (int i = 0; i < 2; i++) {
+    Compiler_tokenize(c, (char *) sources[i]);
+    List parsed = Compiler_parse_assignment(c);
+    List bindings = List_match(parsed, List_var(Macro_pattern(map, names)));
+    require(bindings != NULL, "map source form did not match");
+    List rows = Var_list(List_assoc(bindings, List_car(names)));
+    require(List_len(rows) == counts[i], "map row count changed");
+    Type type = Var_list(List_cadr(parsed));
+    List rebuilt = Compiler_rebuild_expression(c, type,
+      Macro_apply(map, List_list_n(1, List_var(rows))));
+    require(Var_list(List_cadr(rebuilt)) == type,
+      "map root type changed");
+    require(List_equal(rebuilt, parsed), "map rebuild changed syntax");
+    List before = rows, after = List_cdr(Var_list(List_caddr(rebuilt)));
+    for (int row = 0; row < counts[i]; row++) {
+      List old_row = Var_list(List_car(before));
+      List new_row = Var_list(List_car(after));
+      require(old_row == new_row, "map rebuild changed row identity");
+      require(Var_list(List_cadr(old_row)) == Var_list(List_cadr(new_row)) &&
+        Var_list(List_caddr(old_row)) == Var_list(List_caddr(new_row)),
+        "map rebuild changed key or value identity");
+      before = List_cdr(before);
+      after = List_cdr(after);
+    }
+  }
+
+  List raw = read_list(reader,
+    "(expr (\"Map\") (map "
+    "(map-entry (expr (<macro-expr>) (ident \"snapshot\")) "
+    "(expr (int) (literal (int) \"3\"))) "
+    "(map-entry (src (source \"input.x\" 6 10) "
+    "(expr (int) (literal (int) \"4\"))) "
+    "(expr (<macro-expr>) (ident \"shared\")))))");
+  List original = List_cdr(Var_list(List_caddr(raw)));
+  List first = Var_list(List_car(original));
+  List second = Var_list(List_cadr(original));
+  List resolved = Compiler_resolve_expression(c, raw, c->token);
+  require(Var_list(List_cadr(resolved)) == Var_list(List_cadr(raw)),
+    "resolved map root type changed");
+  List output = List_cdr(Var_list(List_caddr(resolved)));
+  require(List_len(output) == 2, "resolved map row count changed");
+  List first_out = Var_list(List_car(output));
+  List second_out = Var_list(List_cadr(output));
+  require(List_equal(Var_list(List_cadr(Var_list(List_cadr(first_out)))),
+    read_list(reader, "(int)")), "map key was not resolved");
+  require(List_equal(Var_list(List_cadr(Var_list(List_caddr(second_out)))),
+    read_list(reader, "(int)")), "map value was not resolved");
+  require(Var_list(List_caddr(first_out)) == Var_list(List_caddr(first)) &&
+    Var_list(List_cadr(second_out)) == Var_list(List_cadr(second)),
+    "resolved map changed an established child");
+
+  List computed = read_list(reader,
+    "(expr (\"Map\") (map (seq "
+    "(map-entry (expr (<macro-expr>) (ident \"snapshot\")) "
+    "(expr (int) (literal (int) \"2\"))) "
+    "(map-entry (expr (int) (literal (int) \"3\")) "
+    "(expr (int) (literal (int) \"4\"))))))");
+  resolved = Compiler_resolve_expression(c, computed, c->token);
+  output = List_cdr(Var_list(List_caddr(resolved)));
+  require(List_len(output) == 2, "computed Map rows did not expand");
+  require(List_equal(Var_list(List_cadr(Var_list(
+      List_cadr(Var_list(List_car(output)))))),
+    read_list(reader, "(int)")) &&
+    List_equal(Var_list(List_cadr(Var_list(List_cadr(output)))),
+    read_list(reader, "(expr (int) (literal (int) \"3\"))")),
+    "computed Map row order changed");
+  require(Compiler_error_count(c) == 0, "map source form reported an error");
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize();
@@ -173,6 +301,8 @@ int main(int argc, char **argv) {
   Compiler_tokenize(c, "int snapshot, shared, unused");
   Compiler_parse_simple_declaration(c);
   Lisp reader = Lisp_new();
+  check_array_source_form(c, reader);
+  check_map_source_form(c, reader);
   check(c, reader, plain, captured,
     "%!(int n) using &shared => snapshot + shared + n", NULL, 0);
   check(c, reader, plain, captured,
