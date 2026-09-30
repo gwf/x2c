@@ -2557,6 +2557,7 @@ static List _bind_form(
   Compiler c, List input, AstPos context, int pending) {
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop, for_loop = $for_loop;
+  Macro switched = $switched, expression_statement = $expression_statement;
   Macro return_empty = $return_empty, return_value = $return_value;
   Macro deferred = $deferred;
   Macro matched = $matched;
@@ -2634,7 +2635,7 @@ static List _bind_form(
       if (statement) return %(case ${_resolve(c, expression)});
     case %((!set ?tag (!or goto label)) ?name):
       if (statement) return %($tag $name);
-    case %(stmnt ?expression):
+    case expression_statement(?expression):
       if (statement) return %(stmnt ${_resolve(c, expression)});
     case deferred(?body):
       if (statement) return %(defer ${_bind_statement(c, body)});
@@ -2642,7 +2643,7 @@ static List _bind_form(
       if (statement) return _bind_do(c, body, condition);
     case while_loop(?condition, ?body):
       if (statement) return _bind_while(c, condition, body);
-    case %(switch ?expression ?body):
+    case switched(?expression, ?body):
       if (statement) return _bind_switch(c, expression, body);
     case if_then(?condition, ?ontrue):
       if (statement) return _bind_if(c, condition, ontrue);

@@ -213,6 +213,7 @@ Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler) as void *;
 #pragma private
+$(import "../src/grammar.xmacro")
 
 #include "utils.x"
 #include "parse.x"
@@ -2534,15 +2535,21 @@ void Compiler.restore_reference_presence(Compiler c, List before) {
 */
 List Compiler.optional_reference_test(
   Compiler c, List condition, int &truth) {
+  Macro grouped = $grouped;
   match (condition) {
-    case %(expr ? (parens ?inner)):
+    case grouped(?inner):
       return c.optional_reference_test(inner, truth);
-    case %(expr ? (op ! ?operand)): {
-      truth = !truth;
-      return c.optional_reference_test(operand, truth);
+    case %(expr ? ?content): {
+      match (content) {
+        case $source_operator_content(%(! ?operand)): {
+          truth = !truth;
+          return c.optional_reference_test(operand, truth);
+        }
+        case $source_operator_content(
+            %((!set ?op (!or == !=)) ?left ?right)):
+          return _null_comparison(c, op, left, right, truth);
+      }
     }
-    case %(expr ? (op (!set ?op (!or == !=)) ?left ?right)):
-      return _null_comparison(c, op, left, right, truth);
   }
   match (condition)
     case %(expr (opt-ref *) (ident ?binding)):
@@ -2565,8 +2572,9 @@ static List _null_comparison(
 }
 
 static int _null_literal(List expr) {
+  Macro grouped = $grouped;
   match (expr) {
-    case %(expr ? (parens ?inner)): return _null_literal(inner);
+    case grouped(?inner): return _null_literal(inner);
     case %(expr ? (ident (binding ? "NULL"))): return 1;
     case %(expr ? (literal ? "0")): return 1;
   }
@@ -2577,9 +2585,9 @@ static int _null_literal(List expr) {
 int reference_guard_exits(List arm) {
   if (Ast.never_returns(arm)) return 1;
   match (arm) {
-    case %(return *): return 1;
+    case $source_return_content(%(*)): return 1;
     case %(at ? ?body): return reference_guard_exits(body);
-    case %(block *items):
+    case $source_block_content(%(*items)):
       return items && reference_guard_exits(items.last());
   }
   return 0;
