@@ -74,6 +74,26 @@ static void _cases(void) {
         "(def x 1) (def f (lambda () (+ x 1))) (def x 9) (f)");
   _case("capture-quote",
         "(def f ((lambda (x) (lambda () (eval 'x))) 8)) (def x 3) (f)");
+  _case("reserved-local-capture",
+        "(def f ((lambda (quote) (lambda () quote)) 7)) (f)");
+  _case("stable-quote-alias-capture",
+        "(((lambda (q x) (lambda () (q x))) quote 42))");
+  _case("stable-quasiquote-alias-capture",
+        "(((lambda (qq x) (lambda () (qq ((unquote x))))) quasiquote 42))");
+  _case("parameter-callable-capture",
+        "(def f ((lambda (x) (lambda (head) (head x))) 42)) "
+        "(f (lambda (v) v))");
+  _case("raw-macro-operand-capture",
+        "(def m (macro (form) form)) "
+        "(def f ((lambda (x) (lambda () (m x))) 42)) (f)");
+  foreach (String name, %("quote" "quasiquote"))
+    _case(%"future-$name-capture",
+          %"(def make lambda) (def f ((make (x) (make () ($name x))) 42)) " +
+          %"(def $name (make (v) v)) (f)");
+  foreach (String name, %("lambda" "macro"))
+    _case(%"future-$name-capture",
+          %"(def make lambda) (def f ((make (x) (make () ($name () x))) 42)) " +
+          %"(def $name (make (params body) body)) (f)");
   _case("special-alias",
         "(def q quote) (def quote (lambda (x) (+ x 1))) (list (q hello) "
         "(quote 4))");

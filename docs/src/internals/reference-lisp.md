@@ -4,7 +4,7 @@
 implements x2c Lisp in one source file. It owns its reader, environments,
 closures, special forms, native registry, and standard vocabulary. Evaluation
 recurses over ordinary values; it never constructs a Lisp session, calls the
-production evaluator, or prepares or executes word code.
+production evaluator, or uses its call-frame machinery.
 
 Build it from the repository root:
 
@@ -122,9 +122,11 @@ Production closures also retain local names that mutable global or unknown
 callables may later read from current data. Captured local special identities
 keep quote opacity, quasiquote depth and nested parameter binding. Captures
 belong to the session; borrowed values keep their original owners and must
-remain live. The reference still analyzes captures by structural form and
-does not cover all reads made possible by later callable rebinding. The
-comparison corpus does not establish parity for that case.
+remain live. The reference uses the same conservative capture rule: stable
+local special identities control quotation and binding, while global,
+parameter and computed callables retain possible local reads from their data.
+This can retain local values and their referents longer than their immediate
+use would require; it does not copy or promote borrowed objects.
 
 The reference targets language behavior, not the embedding APIs or native
 stack capacity of the production runtime. Calls consume native stack: sufficiently deep recursion

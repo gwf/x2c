@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake                                             #####                 #####
                                                                                       ########           ########
     A recursive Lisp, generously commented in 1,000 lines.                           ##########         ##########
-    It is functionally equivalent to the x2c runtime's word-code machine.                 #######     #######
+    It follows the production Lisp's value and capture rules.                 #######     #######
     Block comments explain how Lisp is implemented. Right-margin                           ######     ######
     comments show how x2c combines native C with a dynamic runtime.                         ######   ######
                                                                                              #####   #####
@@ -21,7 +21,7 @@
                                                                                              ######
     x2c supplies values, collections, tokenization, and native function                         ####
     calls. This file implements Lisp evaluation independently of the                             ####
-    production Lisp object and word-code machine. Evaluation uses native                          ####
+    production Lisp object. Evaluation uses native                          ####
     recursive calls.                                                                             ######
                                                                                                 ########
     Two distinct macro systems appear here. The x2c macros $fail and $rest                     ####  ####
@@ -238,43 +238,73 @@ static Var Interp.apply(Interp *self, Var fn, List values) {
 */
 
 static Var Interp.lookup(Interp *self, LispEnv *env, Var name) {
-  for (; env; env = env.parent)                                                 // C pointer walk with x2c dot access.
-    if (name in env.bindings) return env.bindings[name];                        // Map membership and indexing.
+  Var local;
+  if (_local_value(env, name, local)) return local;                              // Nearest local frame supplies the value.
   if (name in self.globals) return self.globals[name];                          // Global Map: test key, fetch value.
   if (name in self.reserved) return self.reserved[name];                        // Reserved Map: same key operations.
   raise %(unbound (name $name));                                                // $name interpolates one named value.
 }
 
-/* Capture free locals where the closure is defined. Quote is data; unquote
-   adjusts quotation depth, and nested parameters bind their own names.
-   Globals remain looked up at call time. Caller locals never participate.
+/* A local lookup shared by evaluation and capture. */
+static int _local_value(LispEnv *env, Var name, Var &value) {
+  for (; env; env = env.parent)
+    if (env.bindings.try_get(name, value)) return 1;
+  return 0;
+}
+
+/* Capture possible local reads, preserving stable local callable identity.
+   Global, parameter and computed heads may later evaluate their data.
+   Negative depth keeps those reads; positive depth marks quasiquote data.
+   Globals remain lookup-time names, and borrowed referents must outlive
+   every closure that may read them.
 */
 static void Interp.capture(
   Interp *self, LispEnv *env, Var form, List bound, int depth, Map captures) {
   if (form.is_atom()) {
-    if (!depth && !(form in self.reserved) && !(form in bound))                // Names in data or introduced by a binder are not free.
-      for (; env; env = env.parent)                                            // Only the defining local frames supply snapshots.
-        if (form in env.bindings) {
-          captures[form] = env.bindings[form];                                 // Save the Var; objects retain their ordinary identity.
-          break;
-        }
+    Var value;
+    if (depth <= 0 && !(form in bound) &&
+        _local_value(env, form, value) && !(form in captures))
+      captures[form] = value;
     return;
   }
-  if (form is not <list>) return;
-  List parts = form;                                                           // Each pattern selects the children to inspect.
-  match (form) {
-    case %(quote *) if (!depth): return;                                       // Quoted code reads no names outside quasiquote.
-    case %((!set ?head (!or quasiquote unquote unquote-splicing)) *body): {
-      depth = head == <quasiquote>.var() ? depth + 1 : depth - 1;
-      if (depth < 0) depth = 0;                                                // An unquote outside quasiquote stays at zero.
-      parts = body;
-    }
-    case %((!or lambda macro) ?params *body) if (!depth): {
-      if (params is <list>) bound = ((List) params).append(bound);             // Nested binders extend only this recursive branch.
-      parts = body;
-    }
+  if (form is not <list> || form.is_nil()) return;
+  List items = form;
+  Var head = items.car();
+  if (depth < 0) {
+    foreach (Var part, items) self.capture(env, part, bound, depth, captures);
+    return;
   }
-  foreach (Var part, parts) self.capture(env, part, bound, depth, captures);
+  if (depth > 0) {
+    int inner = depth;
+    List parts = items;
+    if (head == <quasiquote>) { inner++; parts = items.cdr(); }
+    if (head == <unquote> || head == Atom.intern("unquote-splicing")) {
+      inner--; parts = items.cdr();
+    }
+    foreach (Var part, parts) self.capture(env, part, bound, inner, captures);
+    return;
+  }
+  self.capture(env, head, bound, 0, captures);
+  Var callable;
+  if (!head.is_atom() || head in bound ||
+      !_local_value(env, head, callable)) {
+    foreach (Var part, items.cdr())
+      self.capture(env, part, bound, -1, captures);
+    return;
+  }
+  Symbol special = callable is <func> && callable in self.specials
+    ? self.specials[callable].symbol() : 0;
+  if (special == <quote>) return;
+  if (special == <lambda> || special == <macro>) {
+    List rest = items.cdr();
+    if (rest && rest.car() is <list>)
+      foreach (Var name, rest.car().list()) bound = cons(name, bound);
+    foreach (Var part, rest.cdr()) self.capture(env, part, bound, 0, captures);
+    return;
+  }
+  int inner = special == <quasiquote> ? 1 :
+    callable is <lambda> && ((Fn) callable.pointer()).macro ? -1 : 0;
+  foreach (Var part, items.cdr()) self.capture(env, part, bound, inner, captures);
 }
 
 static Var Interp.closure(
