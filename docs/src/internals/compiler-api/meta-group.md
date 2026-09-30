@@ -38,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:780`
+Source: `src/meta-group.x:791`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -47,7 +47,7 @@ Source: `src/meta-group.x:780`
 
 Records the bodied `meta` function `fn` in the unit's group.
 
-Source: `src/meta-group.x:130`
+Source: `src/meta-group.x:131`
 
 <a id="Compiler.groups_meta"></a>
 #### Compiler.groups_meta
@@ -59,7 +59,7 @@ a parse meets it outside a macro definition while the project meta build
 parses the unit or a session stages it. A `.xmacro` import, and each
 compiler that collects a segment of the unit, shares the unit's group.
 
-Source: `src/meta-group.x:125`
+Source: `src/meta-group.x:126`
 
 <a id="Compiler.meta_call_missing"></a>
 #### Compiler.meta_call_missing
@@ -69,7 +69,7 @@ Source: `src/meta-group.x:125`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:674`
+Source: `src/meta-group.x:682`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -79,7 +79,7 @@ Source: `src/meta-group.x:674`
 Returns the C compiler and the runtime header directory that build
 `meta` code, or NULL before `Compiler.use_meta_toolchain`.
 
-Source: `src/meta-group.x:65`
+Source: `src/meta-group.x:66`
 
 <a id="Compiler.meta_cc_identity"></a>
 #### Compiler.meta_cc_identity
@@ -89,7 +89,7 @@ Source: `src/meta-group.x:65`
 Returns the identity of the C compiler at `cc`: its path and content
 hash.
 
-Source: `src/meta-group.x:72`
+Source: `src/meta-group.x:73`
 
 <a id="Compiler.meta_cc_run"></a>
 #### Compiler.meta_cc_run
@@ -100,7 +100,7 @@ Runs `arguments`, a C compiler command building the group C in
 `directory`, and returns NULL, or else its first error, which names
 `directory` when a group's C is the cause.
 
-Source: `src/meta-group.x:83`
+Source: `src/meta-group.x:84`
 
 <a id="Compiler.meta_reaches_compile_time"></a>
 #### Compiler.meta_reaches_compile_time
@@ -111,7 +111,7 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/meta-group.x:152`
+Source: `src/meta-group.x:153`
 
 <a id="Compiler.record_meta_import"></a>
 #### Compiler.record_meta_import
@@ -122,7 +122,7 @@ Records the point where a compile-time import added its `meta`
 definitions to the unit, so the group places them where the import
 stands.
 
-Source: `src/meta-group.x:143`
+Source: `src/meta-group.x:144`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -132,7 +132,7 @@ Source: `src/meta-group.x:143`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:693`
+Source: `src/meta-group.x:701`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -143,7 +143,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:703`
+Source: `src/meta-group.x:711`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -152,7 +152,7 @@ Source: `src/meta-group.x:703`
 
 Enables in-process staging of `meta` groups for compiler sessions.
 
-Source: `src/meta-group.x:119`
+Source: `src/meta-group.x:120`
 
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
@@ -162,7 +162,7 @@ Source: `src/meta-group.x:119`
 Directs the group of each unit the project meta build parses into
 `directory`, or stops that when it is NULL.
 
-Source: `src/meta-group.x:744`
+Source: `src/meta-group.x:755`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -173,7 +173,7 @@ Selects the C compiler `cc` that builds the `meta` code of the units
 this process translates, with the runtime headers this compiler was
 built with, found from its installed headers in `include_dir`.
 
-Source: `src/meta-group.x:43`
+Source: `src/meta-group.x:44`
 
 <a id="Compiler.write_meta_build"></a>
 #### Compiler.write_meta_build
@@ -185,7 +185,7 @@ directory as `group-K.c` and `group-K.h`, K being its table, with the
 x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. A unit without `meta` functions writes nothing.
 
-Source: `src/meta-group.x:752`
+Source: `src/meta-group.x:763`
 
 ## Design notes
 

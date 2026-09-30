@@ -38,7 +38,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:191`
+Source: `src/ast.x:192`
 
 #### ast_contains_head
 
@@ -84,7 +84,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/ast.x:247`
+Source: `src/ast.x:248`
 
 #### preproc_directive
 
@@ -93,7 +93,7 @@ Source: `src/ast.x:247`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/ast.x:257`
+Source: `src/ast.x:258`
 
 #### preproc_include_target
 
@@ -103,7 +103,7 @@ Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/ast.x:264`
+Source: `src/ast.x:265`
 
 #### preproc_track_arms
 
@@ -113,7 +113,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/ast.x:279`
+Source: `src/ast.x:280`
 
 #### preproc_within_arms
 
@@ -123,7 +123,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/ast.x:292`
+Source: `src/ast.x:293`
 
 ### `Ast`
 
@@ -134,7 +134,7 @@ Source: `src/ast.x:292`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:197`
+Source: `src/ast.x:198`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -145,7 +145,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:211`
+Source: `src/ast.x:212`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -181,7 +181,7 @@ Source: `src/ast.x:75`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:181`
+Source: `src/ast.x:182`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -190,7 +190,7 @@ Source: `src/ast.x:181`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:175`
+Source: `src/ast.x:176`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -199,7 +199,7 @@ Source: `src/ast.x:175`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:187`
+Source: `src/ast.x:188`
 
 ## Public types
 
