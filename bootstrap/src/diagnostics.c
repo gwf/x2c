@@ -52,6 +52,10 @@ static List _compiler_location(Compiler compiler, Token token);
 
 static void Compiler__show_source_context(Compiler compiler, List location);
 
+static int _context_line(Compiler c, int line, char * * line_start, char * * line_end);
+
+static void _context_caret(char * line_start, char * line_end, int column, int length);
+
 static void _pprint(char * text, int len);
 
 static Var _x2c_lambda_0(Var entry);
@@ -500,7 +504,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 373};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 366};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
@@ -539,43 +543,45 @@ static void Compiler__show_source_context(Compiler compiler, List location){
   int line = Var_int(Var_convert(Var_is_void(line_var) ? int_var(0) : line_var, 3453797));
   int column = Var_int(Var_convert(Var_is_void(col_var) ? int_var(0) : col_var, 3453797));
   int length = Var_int(Var_convert(Var_is_void(len_var) ? int_var(1) : len_var, 3453797));
-  char * text = compiler -> text;
+  char * line_start, * line_end;
+  if(_context_line(compiler, line, &(line_start), &(line_end))) _context_caret(line_start, line_end, column, length);
+}
+
+static int _context_line(Compiler c, int line, char * * line_start, char * * line_end){
   int current_line = 1;
-  char * line_start = text, * line_end = text;
-  if(line <= 1 && compiler -> script){
-    line_start = compiler -> script -> shebang;
-    line_end = line_start + strlen(line_start);
-  }
-  else if(line <= 1) while(* line_end && * line_end != '\n') line_end ++;
-  else{
-    for(char * p = text;  * p;  p ++){
-      if(* p == '\n'){
-        current_line ++;
-        if(current_line == line){
-          line_start = p + 1;
-          line_end = line_start;
-          while(* line_end && * line_end != '\n') line_end ++;
-          break;
-        }
-
-      }
-
+  char * text = c -> text;
+  (* line_start) =(* line_end) = text;
+  if(line <= 1){
+    if(c -> script){
+      (* line_start) = c -> script -> shebang;
+      (* line_end) =(* line_start) + strlen((* line_start));
     }
-
+    else while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
+    return line == 1;
   }
-  if(current_line == line){
-    int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
-    if(start > line_len) start = line_len;
-    int width = length > 0 ? length : 1;
-    if(start < line_len && width > line_len - start) width = line_len - start;
-    if(width < 1) width = 1;
-    fprintf(stderr, "  %.*s\n", line_len, line_start);
-    fprintf(stderr, "  ");
-    for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
-    for(int i = 0;  i < width;  i ++) putc('^', stderr);
-    fprintf(stderr, "\n");
+  for(char * p = text;  * p;  p ++){
+    if(* p != '\n') continue;
+    current_line ++;
+    if(current_line != line) continue;
+    (* line_start) = p + 1;
+    (* line_end) =(* line_start);
+    while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
+    return 1;
   }
+  return 0;
+}
 
+static void _context_caret(char * line_start, char * line_end, int column, int length){
+  int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;
+  if(start > line_len) start = line_len;
+  int width = length > 0 ? length : 1;
+  if(start < line_len && width > line_len - start) width = line_len - start;
+  if(width < 1) width = 1;
+  fprintf(stderr, "  %.*s\n", line_len, line_start);
+  fprintf(stderr, "  ");
+  for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
+  for(int i = 0;  i < width;  i ++) putc('^', stderr);
+  fprintf(stderr, "\n");
 }
 
 int Compiler_error_count(Compiler compiler){

@@ -18,10 +18,10 @@ Functions and types exposed by each compiler module.
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
-| [`src/diagnostics.x`](diagnostics.md) | structured compiler diagnostics collection. |
+| [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
 | [`src/emit.x`](emit.md) | emit C tokens from x2c ASTs. |
-| [`src/expressions.x`](expressions.md) | x2c expression parsing. |
+| [`src/expressions.x`](expressions.md) | expression syntax, resolution, and conversion. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | generate C headers and source files. |

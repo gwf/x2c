@@ -32,12 +32,13 @@ temporaries. Returned canonical `List`s and `String`s are owned by pools
 active during emission; promote them before releasing those pools if the
 tokens must survive.
 
-Source: `src/emit.x:1247`
+Source: `src/emit.x:1411`
 
 ## Design notes
 
 Translates normalized ASTs into token `List`s for downstream flattening and
 formatting. One stack-local Emitter holds the current function's name,
 static objects, and native aliases, so emission is reentrant and a failed
-translation cannot contaminate later units. `transform.x` has already placed
+translation cannot contaminate later units. `transform.x` has already
+placed
 each cleanup region's statements on the exits that leave it.

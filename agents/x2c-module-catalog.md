@@ -157,7 +157,7 @@ Public functions:
 
 ### [src/diagnostics.x](../src/diagnostics.x)
 
-structured compiler diagnostics collection.
+compiler diagnostic storage and rendering.
 
 Public functions:
 
@@ -187,7 +187,7 @@ Public functions:
 
 ### [src/expressions.x](../src/expressions.x)
 
-x2c expression parsing.
+expression syntax, resolution, and conversion.
 
 Public functions:
 
@@ -423,7 +423,7 @@ Public functions:
 
 `Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.check_regions`,
 `Compiler.check_meta_regions`, `Compiler.audit_regions`,
-`Compiler.has_region_row`, `Compiler.region_no_lifetime_effect`
+`Compiler.has_region_row`
 
 ### [src/report.x](../src/report.x)
 

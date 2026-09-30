@@ -42,7 +42,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`; `$catch_landing` calls this in a
 slot.
 
-Source: `src/transform.x:2525`
+Source: `src/transform.x:2690`
 
 #### builtin_catch_patterns
 
@@ -51,7 +51,7 @@ Source: `src/transform.x:2525`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/transform.x:2501`
+Source: `src/transform.x:2666`
 
 #### builtin_defer_captures
 
@@ -59,16 +59,16 @@ Source: `src/transform.x:2501`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/transform.x:2630`
+Source: `src/transform.x:2795`
 
 #### builtin_defer_record
 
-`List builtin_defer_record(List record, List callback, List environment, List records)`
+`List builtin_defer_record( List record, List callback, List environment, List records)`
 
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/transform.x:2621`
+Source: `src/transform.x:2786`
 
 #### builtin_try_catch_site
 
@@ -78,7 +78,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2487`
+Source: `src/transform.x:2651`
 
 #### builtin_try_landing
 
@@ -88,7 +88,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2513`
+Source: `src/transform.x:2678`
 
 #### transform_array_literal
 
@@ -97,7 +97,7 @@ Source: `src/transform.x:2513`
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:3859`
+Source: `src/transform.x:4087`
 
 #### transform_map_literal
 
@@ -106,7 +106,7 @@ Source: `src/transform.x:3859`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:3868`
+Source: `src/transform.x:4096`
 
 ### `Compiler`
 
@@ -125,7 +125,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/transform.x:991`
+Source: `src/transform.x:1116`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -136,7 +136,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/transform.x:1171`
+Source: `src/transform.x:1281`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -145,17 +145,17 @@ Source: `src/transform.x:1171`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/transform.x:329`
+Source: `src/transform.x:368`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
 
-`List Compiler.lambda_param_types(Compiler compiler, List entries)`
+`List Compiler.lambda_param_types(Compiler c, List entries)`
 
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/transform.x:1696`
+Source: `src/transform.x:1839`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -170,12 +170,12 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/transform.x:941`
+Source: `src/transform.x:1021`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
 
-`List Compiler.lower_lambda_expr(Compiler compiler, List expression)`
+`List Compiler.lower_lambda_expr(Compiler c, List expression)`
 
 Lowers a resolved lambda expression to emitter-ready helper references.
 `expression` must retain the resolved `expr`, `lambda`, `params`, and
@@ -187,7 +187,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/transform.x:1723`
+Source: `src/transform.x:1866`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -201,7 +201,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/transform.x:175`
+Source: `src/transform.x:278`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -215,7 +215,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/transform.x:599`
+Source: `src/transform.x:648`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -230,7 +230,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/transform.x:1418`
+Source: `src/transform.x:1528`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -242,7 +242,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:2054`
+Source: `src/transform.x:2262`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -256,7 +256,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4651`
+Source: `src/transform.x:4893`
 
 ## Design notes
 
