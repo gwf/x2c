@@ -86,7 +86,8 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 /* A name that is not a constant, such as a template's own local, passes as
    its syntax. Anything else is reported at `site`. */
 static Var _name_syntax(Compiler c, List node, Token site) {
-  match (node) case %(expr ? (ident ?)): return node;
+  match (node)
+    case %(expr ? ${$source_identifier_content(%(?))}): return node;
   c.report_error(
     <macro>, "explicit meta call cannot be resolved", site,
     %("an argument must be a constant, captured syntax, or a meta call"));
@@ -141,19 +142,24 @@ static Var _constant_leaf(Compiler c, List expr) {
       return c.folded_constant(node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? (literal ? ? ?symbol)):       return symbol;
+    case %(expr ? ${$source_literal_content(%(? ? ?symbol))}): return symbol;
     case %(expr ("String") ${$source_call_content($called,
-        %(expr ? (ident (binding ? "String_add"))), %(?left ?right))}):
+        %(expr ? ${$source_identifier_content(%((binding ? "String_add")))}),
+        %(?left ?right))}):
       return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
       return _constant_leaf(c, inner);
     case %(expr ("Var") ${$source_call_content($called,
-        %(expr ? (ident (binding ? "int_var"))), %(?inner))}):
+        %(expr ? ${$source_identifier_content(%((binding ? "int_var")))}),
+        %(?inner))}):
       return _constant_leaf(c, inner);
-    case %(expr ("String") (literal ? ?(String text))): return text;
-    case %(expr (* char) (literal ? ?(String text))):
+    case %(expr ("String") ${$source_literal_content(%(? ?text))})
+      if (text is <string>): return text;
+    case %(expr (* char) ${$source_literal_content(%(? ?text))})
+      if (text is <string>):
       return literal_text_value(text);
-    case %(expr ?type (literal ? ?(String text))):
+    case %(expr ?type ${$source_literal_content(%(? ?text))})
+      if (text is <string>):
       return ((Type) type).numeric_literal_value(text);
   }
   if (expr && expr.car() == <expr>) return void;
