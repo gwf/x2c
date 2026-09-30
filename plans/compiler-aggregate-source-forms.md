@@ -1,8 +1,9 @@
 > Status: active
 > Settled Array/Map adoption, sequence capture repair, Array sequence syntax,
 > and constructed String repair landed on dev at `7699e277` on 2026-09-29.
-> Full publication gate passed. New public Segment syntax remains a proposal
-> awaiting Gary's decision; it is not implemented or shipped.
+> Full publication gate passed. Segment syntax is withdrawn: existing
+> metafunctions handle String composition. String owner consolidation is
+> part of the authorized final campaign batch.
 
 # Aggregate source forms
 
@@ -371,3 +372,23 @@ argument syntax, and String source-template adoption remain unimplemented;
 this plan stays active for that explicit remaining decision and work.
 
 Wave 5 resumes after this batch's release and must integrate the landing tip.
+
+## String decision and campaign completion
+
+Gary identified ordinary metafunctions as the appropriate tool. A native
+probe using existing `Expr` parameters and meta List composition accepts whole
+interpolated String literals, handles empty and static forms, and preserves
+mixed text, named interpolation and numeric conversion. It printed
+`Result: Hello Gary - 3` and passed its runtime checks. The proposed Segment
+kind and one-row argument contract are withdrawn; no public syntax decision
+is pending. The remaining String implementation uses existing metafunctions
+and canonical row semantics.
+
+Gary authorized this orchestrator to finish the entire campaign, with Sol
+medium workers. Current baseline is Wave 5's released `0bccd679`. Independent
+coverage surveys found expression, truth-conversion/return, region, and
+native builtin builder families that earlier E43 did not close. These are
+being implemented in isolated owner groups; the campaign handoff and inventory
+will be reconciled against the final source. Completion requires delivered
+work and explicit evidenced parser/semantic/backend boundaries, not treating
+a prior no-candidate survey as proof.
