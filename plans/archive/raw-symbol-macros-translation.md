@@ -1,7 +1,8 @@
 # Raw-symbol translation of macros.x
 
-> Status: both repairs verified; the standalone sweep passed on the
-> integrated pre-publication tree after the import correction.
+> Status: done -- both repairs verified; the standalone sweep passed after
+> the import correction. Recorded with the completed dual-macro campaign on
+> `dev` at `82d686e27b365a2f446903adb9497b195f1122e9`, 2026-09-29.
 > The explicit raw-symbol sweep remains optional; this record adds no gate.
 
 ## Observed behavior

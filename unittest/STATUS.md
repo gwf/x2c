@@ -2,11 +2,11 @@
 
 ## Dual-macro migration follow-ups
 
-The [migration tasks](../plans/compiler-dual-macro-contract.md#migration-defect-tasks)
-track the reported synthetic-expansion depth crash, parameter redeclaration,
-and standalone raw-symbol translation failure in macros.x. The depth fixture
-checks the 64-level diagnostic; reproducing the synthetic-origin crash remains
-open. The capture-clause fixture checks reconstruction of value and reference
+The [migration tasks](../plans/archive/compiler-dual-macro-contract.md#migration-defect-tasks)
+record the completed parameter-redeclaration and standalone raw-symbol
+repairs. The depth fixture reaches a normal 64-level diagnostic; a truly
+null-site invocation remains an unverified coverage gap, not a reproduced
+crash. The capture-clause fixture checks reconstruction of value and reference
 captures, expression and block bodies, and typed parameter sequences.
 
 ## Coverage

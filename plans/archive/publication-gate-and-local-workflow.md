@@ -42,7 +42,7 @@ invocations failed in raw mode with both relative and absolute source paths;
 CPP mode succeeded. The failure is therefore still reproducible, and path
 spelling does not explain this run. Its cause and relationship to the earlier
 successful compiler remain unproved. The open work is recorded in
-[Raw-symbol macros translation](../raw-symbol-macros-translation.md).
+[Raw-symbol macros translation](raw-symbol-macros-translation.md).
 Logs remain in `debug/raw-symbol-followup.log` and
 `debug/raw-symbol-{relative,absolute,cpp}.log` in the d40d worktree.
 The fixture deadline remains 60 seconds; no nightly requirement was added.

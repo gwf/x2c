@@ -1,4 +1,5 @@
-> Status: active -- final dual-macro integration pending, 2026-09-29.
+> Status: done -- final dual-macro integration delivered to `dev` at
+> `82d686e27b365a2f446903adb9497b195f1122e9`, 2026-09-29.
 > Settled Array/Map adoption, sequence capture repair, Array sequence syntax,
 > and constructed String repair landed on dev at `7699e277`. The earlier
 > public Segment proposal was withdrawn; mixed String rows now use a shared
@@ -7,7 +8,7 @@
 
 # Aggregate source forms
 
-## Final campaign overlay (publication pending)
+## Final campaign overlay
 
 Array and Map source macros own their complete outer forms; the repaired
 sequence capture path admits the Array Expr sequence position. Map Entry
@@ -22,7 +23,11 @@ This overlay is part of the [compiler dual-macro campaign](compiler-dual-macro-c
 and its [architecture reference](compiler-dual-macro-architecture.md). The
 historical Segment proposal and publication record below remain as evidence
 of the earlier decision path. Final integrated-tree validation and delivery
-are recorded in the campaign contract after publication.
+are recorded in the campaign contract's E45.
+
+The sections below describe the earlier `7699e277` batch and its then-open
+Segment decision. They are historical; the final String decision and campaign
+closeout are recorded at the end of this plan.
 
 ## Result and scope
 
@@ -366,7 +371,7 @@ in `debug/aggregate-performance*.json` and corresponding logs. A speculative
 dispatch rewrite was not built and is excluded. Final publication validation
 must still establish rebuildability from the shipped bootstrap.
 
-## Delivered result
+## Prior batch delivered result (historical)
 
 Verified `origin/dev` at `7699e2772cb293481ea0b3bd554d304cb1067a3a`.
 The publication gate is valid for that unchanged tree: 904 compiler fixtures
@@ -376,30 +381,22 @@ was refreshed with the documented target using a capable seed, then the gate
 rebuilt from the shipped bootstrap. The initial publication build stopped on
 the old seed's Array syntax; that transition was repaired before publication.
 
-Array and Map use the shared source templates. Map Entry reconstruction and
-primitive parsers remain documented boundaries. The sole-sequence capture
-repair and constructed `segraw` native repair are shipped. Segment signature,
-argument syntax, and String source-template adoption remain unimplemented;
-this plan stays active for that explicit remaining decision and work.
+Array and Map used the shared source templates. Map Entry reconstruction and
+primitive parsers remained documented boundaries. The sole-sequence capture
+repair and constructed `segraw` native repair shipped. Segment signature,
+argument syntax, and String source-template adoption remained unimplemented
+at this checkpoint, so the plan stayed active then. Wave 5 later integrated
+the batch.
 
-Wave 5 resumes after this batch's release and must integrate the landing tip.
+## Final String decision and campaign closeout
 
-## String decision and campaign completion
-
-Gary identified ordinary metafunctions as the appropriate tool. A native
-probe using existing `Expr` parameters and meta List composition accepts whole
-interpolated String literals, handles empty and static forms, and preserves
-mixed text, named interpolation and numeric conversion. It printed
-`Result: Hello Gary - 3` and passed its runtime checks. The proposed Segment
-kind and one-row argument contract are withdrawn; no public syntax decision
-is pending. The remaining String implementation uses existing metafunctions
-and canonical row semantics.
-
-Gary authorized this orchestrator to finish the entire campaign, with Sol
-medium workers. Current baseline is Wave 5's released `0bccd679`. Independent
-coverage surveys found expression, truth-conversion/return, region, and
-native builtin builder families that earlier E43 did not close. These are
-being implemented in isolated owner groups; the campaign handoff and inventory
-will be reconciled against the final source. Completion requires delivered
-work and explicit evidenced parser/semantic/backend boundaries, not treating
-a prior no-candidate survey as proof.
+The public Segment signature and argument syntax were withdrawn. Existing
+String rows now share the canonical `source_string_content` projection in
+literal production and expression resolution, with no new syntax role.
+Array and Map remain on shared source templates; Map Entry reconstruction
+and primitive parsers remain their concrete native boundaries. This finishes
+the aggregate source-family scope delivered to `dev` at
+`82d686e27b365a2f446903adb9497b195f1122e9`. The
+[campaign closeout](compiler-dual-macro-contract.md#e45-final-source-family-accounting)
+records the final gate, old-corpus generated-code comparison, and measured
+compile-time cost.

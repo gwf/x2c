@@ -6,7 +6,7 @@ Written with macros, the lowering reads like its input and its output: a
 template whose body is the C builds the output. This page shows the try
 lowering, which every later lowering copies, and states the rules a
 lowering meets. The
-[dual-macro contract](../plans/compiler-dual-macro-contract.md) uses these
+[dual-macro contract](../plans/archive/compiler-dual-macro-contract.md) uses these
 rules as its acceptance test for later migrations.
 
 The campaign also reviews ownership across the compiler. Shared grammar
@@ -14,8 +14,9 @@ macros remove repeated knowledge of source structure; recognition-only use
 is sufficient reason for a macro. Group related transformations and their
 templates coherently while preserving shared semantic services. Individual
 case conversions must serve that architecture, not determine it accidentally.
-The contract's [current handoff](../plans/compiler-dual-macro-contract.md#current-campaign-handoff)
-records the architectural survey, remaining work and coordination agreement.
+The contract's [historical handoff](../plans/archive/compiler-dual-macro-contract.md#current-campaign-handoff)
+records the architectural survey and coordination agreement; E45 records the
+delivered source-family coverage and retained boundaries.
 
 ## The rules
 

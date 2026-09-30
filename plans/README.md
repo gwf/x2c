@@ -47,12 +47,6 @@ execution.
 - [Beautification](x2c-beautification.md): Waves 0-5 delivered; a closing
   before/after source audit is queued. The unit-directory option was
   retired after Wave 5.
-- [Compiler dual-macro campaign](compiler-dual-macro-contract.md#e45-final-source-family-accounting-integration-draft):
-  final source-family integration and publication validation are pending.
-  The [architecture reference](compiler-dual-macro-architecture.md) records
-  shared ownership and backend boundaries; the
-  [aggregate result](compiler-aggregate-source-forms.md) covers Array, Map,
-  and String forms.
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
   not yet started; waits for meta-integration to land on dev.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
@@ -80,7 +74,6 @@ execution.
 
 | Record | What remains |
 | --- | --- |
-| [Raw-symbol macros translation](raw-symbol-macros-translation.md) | Fresh stage-0 raw translation of src/macros.x fails with missing Compiler methods while CPP mode succeeds; diagnose and repair the existing owner. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
@@ -105,6 +98,14 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Compiler dual-macro campaign](archive/compiler-dual-macro-contract.md#e45-final-source-family-accounting):
+  done 2026-09-29 at `82d686e2`; shared grammar projections cover parsed
+  source families. The [architecture reference](archive/compiler-dual-macro-architecture.md)
+  records retained stage and backend owners, and the
+  [aggregate result](archive/compiler-aggregate-source-forms.md) covers Array,
+  Map, and String forms.
+- [Raw-symbol macros translation](archive/raw-symbol-macros-translation.md):
+  done; both repairs and the optional standalone sweep were verified.
 - [Publication gate and local workflow](archive/publication-gate-and-local-workflow.md):
   implemented 2026-09-28; private checkpoints and local feature adoption,
   bounded parallel fixtures, and a smaller final publication gate.

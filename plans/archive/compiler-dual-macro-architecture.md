@@ -1,5 +1,5 @@
-> Status: reference -- historical architectural survey with current delivery
-> overlay, 2026-09-29.
+> Status: done -- historical architectural survey with the delivered campaign
+> overlay, `82d686e27b365a2f446903adb9497b195f1122e9`, 2026-09-29.
 > Source baseline: 87f6c5c1, including the private lambda consumer draft.
 > The campaign contract owns sequencing, delivery rules and the cost ledger.
 > This document distinguishes observed owners from proposed organization;
@@ -12,9 +12,9 @@ foreach, and selected class control skeletons now use source templates;
 native protocol, ownership, type, and method decisions remain in their
 existing owners. E44 records the focused checks and origin sidecar changes.
 This overlay updates the baseline findings without recasting semantic records
-as parsed source forms. The [final family inventory](compiler-dual-macro-contract.md#e45-final-source-family-accounting-integration-draft)
-and [aggregate result](compiler-aggregate-source-forms.md#final-campaign-overlay-publication-pending)
-record current implementation scope; publication evidence is pending.
+as parsed source forms. The [final family inventory](compiler-dual-macro-contract.md#e45-final-source-family-accounting)
+and [aggregate result](compiler-aggregate-source-forms.md#final-campaign-overlay)
+record delivered implementation scope and validation.
 
 # Compiler architecture with shared grammar macros
 

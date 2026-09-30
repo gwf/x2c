@@ -1,7 +1,6 @@
-> Status: active -- final integrated delivery pending, 2026-09-29.
-> The progress record in this header and E1-E43 is historical. E44-E45
-> supersede its old remaining-work conclusions; publication evidence is
-> inserted only after the final integrated tree passes its required gate.
+> Status: done -- delivered to `dev` at `82d686e27b365a2f446903adb9497b195f1122e9`,
+> 2026-09-29. The progress record below and E1-E43 is historical. E44-E45
+> supersede its old remaining-work conclusions and record the final coverage.
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
 > support landed at b59b8ade; reconstruction and parameter-scope fixes
 > landed at 799875a8. Lambda source recognition and construction are
@@ -1254,7 +1253,7 @@ performance checkpoint.
 ## Readable form
 
 The acceptance test for every later migration is
-[lowering with macros](../agents/lowering-with-macros.md): its rules, and
+[lowering with macros](../../agents/lowering-with-macros.md): its rules, and
 the try lowering it shows, are the standard a migrated lowering meets.
 
 A migrated site is done when a reader sees the generated C in the template
@@ -3460,7 +3459,7 @@ architecture. These classifications do not imply that every raw source-like
 header is already migrated. Closeout must identify the final parsed-source
 families separately from the C-producing and metadata exceptions.
 
-### E45. Final source-family accounting (integration draft)
+### E45. Final source-family accounting
 
 The campaign now projects parsed statement control, expression operators and
 grouping, calls, indexing, `sizeof`, casts, aggregates, literals, and names
@@ -3490,14 +3489,33 @@ The integrated review also corrected three specific preservation cases:
 `94e54fcc` keeps protocol adoption's fallback for a non-Symbol tag,
 `54e7fa30` keeps the normalized defer tail and source block walk, and
 `26255941` groups the SDK binding-type cases so they stay inside the match.
-These are code corrections, not publication evidence. This accounting does
-not claim that `%(` or every literal has disappeared.
+The final review also caught a source-operator wildcard regression in
+`transform.x`; `96408d4a` restored exact content matching, and `78697c92`
+kept initializer typed-callee recognition and its native fallback. The
+initial gate found seven AST/transform fixture deltas. Independent structural
+reviews found each expected/actual S-expression identical after removing
+only `(at origin node)` wrappers; four focused fixtures passed after those
+origin sidecars were updated. This accounting does not claim that `%(` or
+every literal has disappeared.
 
-The final integrated tree and its generated artifacts still require review,
-the repository gate, performance evidence where applicable, and an explicit
-`dev` landing SHA. Closeout placeholders: `CODE_LANDING_SHA_PENDING` and
-`PUBLICATION_EVIDENCE_PENDING`. Replace both with verified facts before
-marking the campaign done.
+The final code and fixture tree landed on `dev` at
+`82d686e27b365a2f446903adb9497b195f1122e9`. Its
+`tools/gate-state.py check agent-pr-check` result is valid: the bootstrap and
+stages 0-2 each produced 192 C/H files; cold collection produced 288
+C/H/`.xi` files; 904 compiler fixtures checked 2,068 artifacts; and 912
+unit tests passed 20,373 assertions. The documentation, CLI, build, package,
+meta, cache, protocol, command, and REPL checks also passed. An independent
+comparison of the old 96-file source corpus found all 192 generated C/H files
+byte-identical to baseline `0bccd679`.
+
+On the final source candidate `28696dd4`, a fixed seven-file compile corpus
+with equal-length binary and output paths used five paired samples in each
+run, discarding the first pair as warm-up. The four-pair medians measured
+retired instructions at +3.998% and elapsed time at +2.303%; the repeat
+measured +3.153% instructions and +3.204% elapsed time. This is a modest
+positive compile-time cost; generated-code identity gives no claim about a
+runtime slowdown. The candidate's source is the code landed above; the
+landing also includes reviewed origin sidecars.
 
 ### F. Static-local initialization exception
 

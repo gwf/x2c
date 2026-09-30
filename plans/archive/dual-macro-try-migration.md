@@ -19,7 +19,7 @@ migration after core support and its bootstrap refresh. Core support follows
 capture-role consolidation.
 
 The authoritative contract is
-[compiler-dual-macro-contract.md](../compiler-dual-macro-contract.md). Evidence:
+[compiler-dual-macro-contract.md](compiler-dual-macro-contract.md). Evidence:
 [phase3](https://github.com/gwf/x2c/tree/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase3/),
 [phase4 combined proof](https://github.com/gwf/x2c/blob/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase4/combined/README.md), and
 [phase5 open-body proof](https://github.com/gwf/x2c/blob/1e2d5607be514c7205507d3f6e39c889e0cff7ec/.context/dual-macro-phase5/README.md). Phase4 tracks

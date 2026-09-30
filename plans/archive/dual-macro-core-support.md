@@ -33,7 +33,7 @@ it does not replace `_try_block` or any other lowering. Capture-role
 consolidation is the required preceding behavior-preserving change.
 
 The detailed representation and grammar remain owned by
-[the compiler contract](../compiler-dual-macro-contract.md). This plan records
+[the compiler contract](compiler-dual-macro-contract.md). This plan records
 implementation ownership and the proof required for core delivery, not a
 second language specification.
 
