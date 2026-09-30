@@ -125,8 +125,11 @@ meta static List source_pattern_with(
   return pattern;
 }
 
-meta static List source_pattern(Macro shape, List names) =>
-  source_pattern_with(shape, names, NULL);
+meta static List source_pattern(Macro shape, List names) {
+  List pattern = shape.pattern(names);
+  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
+  return pattern;
+}
 
 /* The source expression beneath casts and parentheses, retaining its type. */
 meta static Var source_expression(Var value) {

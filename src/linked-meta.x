@@ -105,8 +105,11 @@ static List source_pattern_with(
   return pattern;
 }
 
-static List source_pattern(Macro shape, List names) =>
-  source_pattern_with(shape, names, NULL);
+static List source_pattern(Macro shape, List names) {
+  List pattern = shape.pattern(names);
+  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
+  return pattern;
+}
 
 static Var source_expression(Var value) {
   while (1) {
