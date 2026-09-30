@@ -1,8 +1,7 @@
 # x2c Beautification Project
 
-> Status: active. Wave 0, the pilot, and Waves 2 through 4 are on `dev`.
-> Wave 5 is integrated locally and awaits final verification and delivery.
-> Its eight file boundaries were agreed with the dual-macro session. The
+> Status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
+> boundaries were agreed with the dual-macro session. The initial campaign
 > baseline measurements are from `dev` `f6606dbf`. Track H awaits Gary's
 > approval of its book text.
 
@@ -280,10 +279,9 @@ defect. Wave 4 kept that behavior outside the rewrite. Candidates left for
 later: `statements.x` repeats the `with`/`as` contextual-keyword test three
 times; `lib/symbolset.x` and `literals.x` both spell the Symbol-set hash;
 and `literals.x`'s lambda sections could become their own unit. The
-dual-macro session owns its active `protocol.x` work; Wave 5 boundaries
-were agreed before editing and its changes are integrated locally.
+dual-macro session's separate changes were integrated before Wave 5 landed.
 
-Wave 5, in progress 2026-09-29: eight compiler files. The shape baseline is
+Wave 5, delivered 2026-09-29: eight compiler files. The shape baseline is
 the Wave 4 landing `cfecdd67`. Each column shows before / after on the
 integrated tree; the latter includes the separately landed aggregate source
 forms and call-projection changes where they touch these files.
@@ -302,8 +300,11 @@ forms and call-projection changes where they touch these files.
 Across these files, lines grew from 15,676 to 16,888 and functions over 40
 lines fell from 69 to 4. The 126-line `expressions.x` function is the
 structural dispatcher, with one-line case arms. `transform.x` retains its
-78-line stack-sensitive `_step` loop. Each file's own commit series passed
-`make build`, `make verify`, stage 1 equality across 192 C/H files,
+78-line stack-sensitive `_step` loop. The rewrite gives dispatch cases
+short, named steps; keeps related work together; and moves shared context
+into records where that makes the call sites easier to follow. Each file's
+own commit series passed `make build`, `make verify`, and stage 1 equality
+across 192 C/H files, plus
 `make commands && make commands-check`, and lint review. The integrated
 tree passed `make build-safe`, `make verify` (904 compiler fixtures and 912
 unit tests), stage 1 equality, and command checks after merging current
@@ -318,8 +319,9 @@ this six-file batch. The candidate retired about 0.55 billion more
 instructions per batch; a three-pair `dev`-against-`dev` control varied by
 up to about 0.24 billion instructions and 0.04 seconds between positions.
 This measures x2c source translation only, not C compilation, a full build,
-or third-party benchmark performance. A small instruction increase remains
-under investigation before delivery.
+or third-party benchmark performance. Gary accepted this small measured
+translation difference for Wave 5; no source change was justified by the
+bounded investigation. The final `agent-pr-check` publication gate passed.
 
 ## Context
 
