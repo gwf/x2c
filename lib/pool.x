@@ -60,6 +60,7 @@ typedef struct PoolStats {
 #include <string.h>
 
 #include "exception.x"
+#include "mutex.x"
 
 /* storage
 
@@ -792,7 +793,8 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   }
   pool = Scope.malloc_in(&scope, sizeof(struct Pool));
   *pool = (struct Pool) {.scope = scope, .up = inner, .child_capacity = 2};
-  _init_mutex(&pool.mutex);
+  x2c_mutex_recursive_initialize(
+    &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
   $scope(&pool.scope) pool.table = Map.new_capacity(capacity);
   finished = 1;
@@ -815,20 +817,6 @@ static unsigned _child_capacity(Pool inner) {
   unsigned capacity = inner.child_capacity;
   _unlock(inner);
   return capacity;
-}
-
-/* The branch mutex must stay recursive. Pool.lookup holds it across a Map
-   probe, whose Var hash and equality reach the descriptor dispatch, which
-   builds Strings, which re-enter Pool.lookup on this same pool. Re-entry
-   arrives through arbitrary callbacks, so this file cannot enumerate the
-   paths. */
-static void _init_mutex(pthread_mutex_t *mutex) {
-  pthread_mutexattr_t attributes;
-  if (pthread_mutexattr_init(&attributes) ||
-      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
-      pthread_mutex_init(mutex, &attributes))
-    _fatal("could not initialize branch mutex");
-  pthread_mutexattr_destroy(&attributes);
 }
 
 /** Returns an unnamed child of `inner`, without making it thread-active.

@@ -287,14 +287,14 @@ static void _JsonReader._escape(_JsonReader j, Buffer out) {
 static String _JsonReader._string(_JsonReader j) {
   int run = ++j.at;
   Buffer decoded = NULL;
+  defer decoded.free();
   loop {
     int byte = j._peek();
     if (byte == '"') {
-      String text = decoded == NULL
-        ? String.new_len(j.text + run, j.at - run)
-        : decoded.write_len(j.text + run, j.at - run).str_free();
-      j.at++;
-      return text;
+      int end = j.at++;
+      if (decoded == NULL) return String.new_len(j.text + run, end - run);
+      decoded.write_len(j.text + run, end - run);
+      return decoded;
     }
     if (byte == '\\') {
       if (decoded == NULL) decoded = Buffer.new(0);
