@@ -729,7 +729,8 @@ The current sketch adds one convention. A directory whose name ends in
 `.x` is one translation unit. `src/macros.x/` holds its head `macros.x`
 and any number of other `.x` parts. The unit is the head followed by the
 other parts in bytewise name order, exactly as if they were one file, so
-every part sees every private declaration. Nothing else changes:
+the parts share one unit's scope under the ordinary source-order rules.
+Nothing else changes:
 `#include "macros.x"` names the unit; generated `macros.c`, `macros.h`, and
 `macros.xi` keep their names; the `src/*.x` wildcard in `builds/stage.mk`
 already matches the directory; `bootstrap/` keeps its file names; packages
@@ -738,6 +739,16 @@ This sketch is flat and uses no sub-build; neither rule has Gary's approval.
 Nested parts would need a traversal order and path identity. A sub-build
 would instead need separate part interfaces and linking rules, so it is a
 different design rather than a small implementation detail.
+
+This adds physical organization, not a new encapsulation boundary. A
+`static` helper is private to the whole unit and usable across its parts
+where an ordinary single-file declaration would be usable. A non-static
+function defined below `#pragma private` can still be visible to an
+including unit under current x2c rules. No part has its own private scope.
+The benefit therefore depends on a concrete large file becoming easier to
+navigate, not on a reduction in its public API. The Wave 5 section and
+function rewrites may already provide enough structure; demonstrate a
+remaining navigation problem before implementing this feature.
 
 For example, an illustrative split would be:
 
@@ -755,11 +766,10 @@ sketch the compiler translates the entire directory once and emits one
 
 Reasons:
 
-- A beautiful file has one subject. Today a coherent unit splits only by
-  exporting its shared helpers, which puts them in the generated header and
-  the provisional compiler API. `src/` exports about 680 functions against
-  about 1,460 static ones, and a rough count finds about 370 exported
-  functions used by exactly one other compiler file.
+- A coherent but very large unit could put its existing sections in
+  separate editor files without turning shared `static` helpers into
+  exported functions. This would not change the unit's current public
+  surface or give the parts separate ownership.
 - Three of the four largest files (`macros.x`, `transform.x`,
   `compiler.x`) hold 12-13 concepts each. As unit directories they become
   one part per section, each a few hundred lines.
