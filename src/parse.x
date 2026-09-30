@@ -290,10 +290,12 @@ static void _referenced_names(Var node, Map seen, Array names) {
   if (node is not <list>) return;
   List syntax = node;
   match (syntax)
-    case %(ident (binding ? ?(String name))): {
-      if (!(name in seen)) {
-        seen[name] = 1;
-        names.push(name);
+    case $source_identifier_content(%((binding ? ?name))): {
+      if (name is not <string>) break;
+      String spelling = name;
+      if (!(spelling in seen)) {
+        seen[spelling] = 1;
+        names.push(spelling);
       }
       return;
     }
@@ -2404,7 +2406,8 @@ static List _managed_initializer(List syntax) {
     case %(managed-init ?value): return value;
     case %(expr ? ?inner):
       return _managed_initializer(inner);
-    case %(parens ?inner): return _managed_initializer(inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _managed_initializer(inner);
   }
   return NULL;
 }
@@ -2661,7 +2664,8 @@ static List _bind_form(
       if (statement) return _bind_try(c, body, NULL, cleanup);
     case matched(?subject, *cases):
       if (statement) return _bind_match(c, subject, cases);
-    case %(block *children): if (statement) return _bind_block(c, input);
+    case $source_block_content(%(*children)):
+      if (statement) return _bind_block(c, input);
     case %(group *children): if (statement) return _bind_group(c, children);
   }
   return _construction_error(c);
@@ -3139,7 +3143,7 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
   match (syntax) {
     case %(at ?origin ?body):
       return _anchor(c, origin, c.bind_callable_body(body, return_type));
-    case %(block *children): {
+    case $source_block_content(%(*children)): {
       Array stmts = [];
       List present_before = c.present_references();
       defer c.restore_reference_presence(present_before);
@@ -3315,8 +3319,8 @@ static List _alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {
   List native = c.resolve_expression(native_syntax, c.token);
   match (native)
-    case %(expr (!set ?native_type (*))
-           (ident ?native_binding)): {
+    case %(expr (!set ?native_type (*)) ${$source_identifier_content(
+        %(?native_binding))}): {
       if (native_type && !native_type.type().is_function())
         c.report_error(
           <type>, "foreign alias native target is not a function",

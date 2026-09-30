@@ -2783,7 +2783,7 @@ static String _converter_name(Var node) {
   if (node is <string>) return node;
   if (node is not <list>) return NULL;
   List matched = node.list().match(
-    %(expr ? ${source_identifier_content(%(?binding))}));
+    %(expr ? ${$source_identifier_content(%(?binding))}));
   if (!matched) return NULL;
   List binding = matched.assoc(<?binding>);
   return binding_identity_spelling(binding);
