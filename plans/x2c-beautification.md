@@ -1,9 +1,10 @@
 # x2c Beautification Project
 
 > Status: active. Wave 0, the pilot, and Waves 2 through 4 are on `dev`.
-> Wave 5 needs Gary's go-ahead and exact file boundaries agreed with the
-> dual-macro session. The baseline measurements are from `dev` `f6606dbf`.
-> Track H waits for Gary's approval of its book text.
+> Wave 5 is integrated locally and awaits final verification and delivery.
+> Its eight file boundaries were agreed with the dual-macro session. The
+> baseline measurements are from `dev` `f6606dbf`. Track H awaits Gary's
+> approval of its book text.
 
 ## Progress
 
@@ -279,8 +280,46 @@ defect. Wave 4 kept that behavior outside the rewrite. Candidates left for
 later: `statements.x` repeats the `with`/`as` contextual-keyword test three
 times; `lib/symbolset.x` and `literals.x` both spell the Symbol-set hash;
 and `literals.x`'s lambda sections could become their own unit. The
-dual-macro session owns its active `protocol.x` work; Wave 5 files require
-new exact boundaries before editing.
+dual-macro session owns its active `protocol.x` work; Wave 5 boundaries
+were agreed before editing and its changes are integrated locally.
+
+Wave 5, in progress 2026-09-29: eight compiler files. The shape baseline is
+the Wave 4 landing `cfecdd67`. Each column shows before / after on the
+integrated tree; the latter includes the separately landed aggregate source
+forms and call-projection changes where they touch these files.
+
+| File | Lines | Functions | Longest | Over 40 | Most parameters |
+| --- | --- | --- | --- | --- | --- |
+| src/expressions.x | 4,466 / 4,828 | 175 / 260 | 406 / 126 | 21 / 2 | 9 / 7 |
+| src/transform.x | 4,668 / 4,910 | 208 / 255 | 168 / 78 | 19 / 2 | 8 / 6 |
+| src/protocol.x | 2,573 / 2,835 | 117 / 159 | 131 / 40 | 15 / 0 | 11 / 6 |
+| src/emit.x | 1,267 / 1,431 | 52 / 94 | 246 / 38 | 4 / 0 | 5 / 6 |
+| src/regions.x | 1,288 / 1,364 | 57 / 75 | 76 / 38 | 5 / 0 | 10 / 5 |
+| src/cache.x | 729 / 805 | 29 / 38 | 92 / 40 | 3 / 0 | 7 / 6 |
+| src/diagnostics.x | 498 / 504 | 31 / 33 | 42 / 29 | 1 / 0 | 5 / 5 |
+| src/format.x | 187 / 211 | 11 / 16 | 98 / 31 | 1 / 0 | 3 / 4 |
+
+Across these files, lines grew from 15,676 to 16,888 and functions over 40
+lines fell from 69 to 4. The 126-line `expressions.x` function is the
+structural dispatcher, with one-line case arms. `transform.x` retains its
+78-line stack-sensitive `_step` loop. Each file's own commit series passed
+`make build`, `make verify`, stage 1 equality across 192 C/H files,
+`make commands && make commands-check`, and lint review. The integrated
+tree passed `make build-safe`, `make verify` (904 compiler fixtures and 912
+unit tests), stage 1 equality, and command checks after merging current
+`dev`.
+
+Five alternating timing pairs translated six unchanged compiler sources
+(`generate`, `type`, `build`, `cli`, `deps`, and `collect`) to C/H without
+interfaces, using stage-1 compilers from equal-length paths and swapping
+output and cache paths between sides. Median elapsed time was 5.23 seconds
+on `dev` `ea7137cb` and 5.32 seconds on Wave 5, a 0.09-second increase for
+this six-file batch. The candidate retired about 0.55 billion more
+instructions per batch; a three-pair `dev`-against-`dev` control varied by
+up to about 0.24 billion instructions and 0.04 seconds between positions.
+This measures x2c source translation only, not C compilation, a full build,
+or third-party benchmark performance. A small instruction increase remains
+under investigation before delivery.
 
 ## Context
 
