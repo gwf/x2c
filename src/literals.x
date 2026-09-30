@@ -280,7 +280,8 @@ static List _pattern_content(Compiler c, List node) {
     case %(expr ? ?value): return _pattern_content(c, value);
     case %(cache ?id): return _pattern_content(c, c.id_keys[id]);
     case %(var ?value): return _pattern_content(c, value);
-    case %(call (expr ? (ident ?binding)) (args ?value)):
+    case %(call (expr ? ${$source_identifier_content(%(?binding))})
+        (args ?value)):
       if (binding_identity_spelling(binding) == "List_var")
         return _pattern_content(c, value);
   }
@@ -1382,11 +1383,14 @@ static List Capture.record(
 List Compiler.parse_atomic_literal(Compiler c) {
   String text = c.token.text, List literal = NULL;
   switch (c.peek(0)) {
-    case <void>:       literal = %(literal ("Var") "void");  break;
-    case <lit-char>:   literal = %(literal (char) $text);     break;
+    case <void>:       literal = source_literal_content(%(("Var") "void"));
+                       break;
+    case <lit-char>:   literal = source_literal_content(%((char) $text));
+                       break;
     case <lit-int>:    literal = _number_literal(c, text, 0); break;
     case <lit-float>:  literal = _number_literal(c, text, 1); break;
-    case <lit-char*>:  literal = %(literal (* char) $text);   break;
+    case <lit-char*>:  literal = source_literal_content(%((* char) $text));
+                       break;
     case <lit-atom>:   literal = _atom_literal(c, text);      break;
     case <lit-symbol>: literal = _symbol_literal(c, text);    break;
   }

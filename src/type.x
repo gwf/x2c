@@ -182,7 +182,8 @@ static List _from_aggregate(List node, Var head) {
 /* An integer literal, such as an array bound, keeps only its spelling; any
    other expression converts its children. */
 static List _from_expr(List node, List context) {
-  match (node) case %(expr (int) (literal ? ?value)): return %($value);
+  match (node) case %(expr (int)
+      ${$source_literal_content(%(? ?value))}): return %($value);
   return _from_items(node, context);
 }
 
@@ -827,7 +828,8 @@ String ast_direct_identifier(Var value) {
   if (designated is not <list>) return NULL;
   List ast = designated;
   match (ast) {
-    case %(ident ?binding): return binding_identity_spelling(binding);
+    case $source_identifier_content(%(?binding)):
+      return binding_identity_spelling(binding);
     case $source_operator_content(%((!quote ->) ?base *)):
       return ast_addressed_identifier(base);
     case $source_pattern($dereferenced, %(?base)):

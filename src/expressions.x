@@ -27,11 +27,13 @@ $(import "../src/grammar.xmacro")
 
 /* postfix calls, indexing, and member lookup */
 
-static List _iter_destination(void) => %(expr (* struct "Iter")
+static List _iter_destination(void) {
+  List values = source_commas_content(%((expr (int) (literal (int) "0"))));
+  return %(expr (* struct "Iter")
     (op & (expr (struct "Iter")
       (cast (decl (struct "Iter") (bindings (bind () ())))
-        (expr () (composite
-          (commas (expr (int) (literal (int) "0")))))))));
+        (expr () (composite $values))))));
+}
 
 static int _parameters_variadic(List parameters) {
   foreach (Var parameter, parameters)
@@ -121,7 +123,8 @@ static List _parse_slice(Compiler c, List expr, List start) {
   if (step && step.match(%(expr ? (literal ? "0"))))
     c.report_error(<parse>, "slice step cannot be zero", c.token, %());
   c.expect(<]>);
-  return %(expr $type (slice $expr $start $stop $step));
+  return %(expr $type ${source_slice_content(
+    %($expr $start $stop $step))});
 }
 
 static List _typedef_index(
@@ -219,7 +222,7 @@ static const PrintfFn printf_family_info[] = {
     user function that happens to use a libc spelling is not one. */
 const PrintfFn *List.printf_family(List l) {
   match (l)
-    case %(expr ?type (ident ?binding)): {
+    case %(expr ?type ${$source_identifier_content(%(?binding))}): {
       String name = binding_identity_spelling(binding);
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
@@ -242,7 +245,8 @@ const PrintfFn *List.printf_family(List l) {
 String Compiler.printf_static_format(
   Compiler compiler, Var format, int &raw) {
   match (format) {
-    case %(expr (* char) (literal (* char) ?spelled)): {
+    case %(expr (* char) ${$source_literal_content(
+        %((* char) ?spelled))}): {
       String spelling = spelled;
       int length = spelling ? spelling.len() : 0;
       if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
@@ -253,7 +257,8 @@ String Compiler.printf_static_format(
     case %(expr ("String") (cache ?id)): {
       List key = compiler.id_keys[id];
       match (key)
-        case %(string (expr ("String") (literal ("String") ?text))): {
+        case %(string (expr ("String") ${$source_literal_content(
+            %(("String") ?text))})): {
           raw = 0;
           return text;
         }
@@ -830,7 +835,7 @@ static List _parse_va_arg(Compiler compiler) {
   List decl = compiler.parse_simple_declaration(), type = decl.type_from_ast();
   decl = %( decl @{ decl.cdr() } );
   compiler.expect(<)>);
-  expr = %( va-arg $expr $decl );
+  expr = source_va_arg_content(%($expr $decl));
   return %( expr $type $expr );
 }
 
@@ -849,7 +854,8 @@ static List _parse_generic(Compiler c) {
     associations.push(%(association $type ${c.parse_assignment()}));
   }
   c.expect(<)>);
-  List selection = %(generic $control @{associations.list_free()});
+  List selection = source_generic_content(
+    %($control @{associations.list_free()}));
   return c.resolve_expression(%(expr () $selection), origin);
 }
 
@@ -862,7 +868,7 @@ static int _c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _c_type_known(c, inner);
-    case %(expr ? (literal (char) *)): return 0;
+    case %(expr ? ${$source_literal_content(%((char) *))}): return 0;
     case %(expr ? ${$source_content_pattern(
         $sizeof_grouped, %(?operand))}): return 0;
     case %(expr ? ${$source_content_pattern(
@@ -1109,9 +1115,12 @@ static int _needs_resolution(Compiler compiler, Var value) {
       case %(at m-origin ?):
         if (compiler.source_map && !compiler.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot meta-call) *): return 1;
-      case %(ident ?(List binding)):
-        if (_identifier_needs_resolution(compiler, binding)) return 1;
-      case %(ident ?): return 1;
+      case $source_identifier_content(%(?name)):
+        if (name is <list>) {
+          List binding = name;
+          if (_identifier_needs_resolution(compiler, binding)) return 1;
+        }
+        else return 1;
       // A Type hole can supply declarators with the base they bind to.
       case %(decl ?(List base) *):
         if (base.type().declaration_parts().cadr()) return 1;
@@ -1139,7 +1148,7 @@ static int _expr_is_raw_string_literal(List expr) {
   match (expr) {
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _expr_is_raw_string_literal(inner);
-    case %(expr ? (literal ?type ?)):
+    case %(expr ? ${$source_literal_content(%(?type ?))}):
       return _type_is_char_pointer_like(type);
     case %(expr ? (op ? ? ?ontrue ?onfalse)):
       return _expr_is_raw_string_literal(ontrue) &&
@@ -1278,7 +1287,8 @@ static int _is_operator_temporary(Compiler c, List expression) {
   }
   Macro called = $called;
   match (expression) case called(?callee, *arguments):
-    match (callee) case %(expr ? (ident (!set ?binding (*)))):
+    match (callee) case %(expr ? ${$source_identifier_content(
+        %((!set ?binding (*))))}):
       return c.protocol_helpers.contains(
         %"fresh-callee ${(long) binding.list()}");
   return 0;
@@ -1536,7 +1546,8 @@ static List _resolve_identifier(
   if (c.lambda_scopes && !c.macro_holes) {
     result = c.capture_lambda_identifier(binding, type);
     match (result)
-      case %(expr ?captured_type (ident ?captured)): {
+      case %(expr ?captured_type ${$source_identifier_content(
+          %(?captured))}): {
         if (type.car() != <&> && captured_type.car() == <&>)
           read_reference = 1;
         type = captured_type;
@@ -1549,7 +1560,7 @@ static List _resolve_identifier(
 
 static int _expression_is_addressable(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? (ident ?binding)):
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
       return !c.semantic_binding_facts().contains(%(lambda-snapshot $binding));
     case %(expr ? (!or (index ? ?)
                        (op (!quote *) ?) (op (!quote ->) ? ?))): return 1;
@@ -1624,7 +1635,8 @@ static List _resolve_call_arguments(
 static List _discarding_callee(
   Compiler c, List callee, Type callee_type, List arguments) {
   List binding = NULL;
-  match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
+  match (callee) case %(expr ? ${$source_identifier_content(
+      %((!set ?bound (*))))}): binding = bound;
   if (!binding || !callee_type.match(%((func *) *)) ||
       c.protocol_helpers.contains(
         %"discard-helper ${(long) binding}"))
@@ -2224,8 +2236,10 @@ static List _resolve_is_type(
   Compiler c, List operand, Type target, Token origin) {
   List lhs = c.resolve_expression(operand, origin);
   Type lhs_type = lhs.cadr();
-  if (_deferred_receiver(lhs) || _deferred_type_test(target))
-    return %(expr (<macro-expr>) (is-type $lhs $target));
+  if (_deferred_receiver(lhs) || _deferred_type_test(target)) {
+    Macro has_type = $has_type;
+    return c.rebuild_expression(%(<macro-expr>), has_type(lhs, target));
+  }
   if (!c.sym.is_var_type(lhs_type))
     c.report_error(
       <type>, "operator 'is' requires Var on the left",
@@ -2249,8 +2263,11 @@ static List _resolve_is_symbol(
   List lhs = c.resolve_expression(operand, origin);
   selector = c.resolve_expression(selector, origin);
   Type lhs_type = lhs.cadr(), selector_type = selector.cadr();
-  if (_deferred_receiver(lhs) || _deferred_receiver(selector))
-    return %(expr (<macro-expr>) (is-symbol $lhs $selector));
+  if (_deferred_receiver(lhs) || _deferred_receiver(selector)) {
+    Macro has_symbol = $has_symbol;
+    return c.rebuild_expression(
+      %(<macro-expr>), has_symbol(lhs, selector));
+  }
   if (!c.sym.is_var_type(lhs_type))
     c.report_error(
       <type>, "operator 'is' requires Var on the left",
@@ -2260,9 +2277,13 @@ static List _resolve_is_symbol(
       <type>, "operator 'is' requires a type or Symbol on the right",
       origin, %("operand type: ${selector_type.repr()}"));
   match (selector)
-    case %(expr ("Symbol") (literal ("Symbol") ? ?(Symbol tag))): {
-      List direct = _constant_row_test(c, lhs, tag, origin);
-      if (direct) return direct;
+    case %(expr ("Symbol") ${$source_literal_content(
+        %(("Symbol") ? ?tag_value))}): {
+      if (tag_value is <symbol>) {
+        Symbol tag = tag_value;
+        List direct = _constant_row_test(c, lhs, tag, origin);
+        if (direct) return direct;
+      }
     }
   List callee = _resolve_identifier(c, "Var_is", NULL, origin);
   Macro called = $called;
@@ -2300,7 +2321,7 @@ static List _resolve_slice(
   if (start) start = c.resolve_expression(start, origin);
   if (stop) stop = c.resolve_expression(stop, origin);
   if (step) step = c.resolve_expression(step, origin);
-  List operation = %(slice $receiver $start $stop $step);
+  List operation = source_slice_content(%($receiver $start $stop $step));
   if (input_type === %(<macro-expr>))
     operation = c.anchor_origin(operation, origin);
   return %(expr ${receiver.cadr()} $operation);
@@ -2315,7 +2336,8 @@ static List _resolve_generic(
       resolved.push(
         %(association $selector ${c.resolve_expression(value, origin)}));
   Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
-  return %(expr $type (generic $control @{resolved.list_free()}));
+  return %(expr $type ${source_generic_content(
+    %($control @{resolved.list_free()}))});
 }
 
 static List _resolve_cast(
@@ -2500,7 +2522,7 @@ static List _resolve_commas(
   List values = resolved.list_free();
   Type type = input_type;
   if (values) type = values.last().cadr();
-  return %(expr $type (commas @values));
+  return %(expr $type ${source_commas_content(values)});
 }
 
 static List _resolve_composite(
@@ -2508,7 +2530,8 @@ static List _resolve_composite(
   Array values = [];
   foreach (List element, elements)
     values.push(_resolve_initializer(c, element, origin));
-  return %(expr $input_type (composite (commas @{values.list_free()})));
+  return %(expr $input_type ${source_composite_content(
+    values.list_free())});
 }
 
 static List _resolve_managed_init(
@@ -2594,12 +2617,12 @@ static List _resolve_content(
   match (content) {
     case %(managed-init ?initializer):
       return _resolve_managed_init(c, initializer, origin);
-    case %(ident ?value):
+    case $source_identifier_content(%(?value)):
       return _resolve_identifier(c, value, input_type, origin);
     case %(!set ?binding (binding ? ?)):
       if (binding_identity_try_parts(binding, NULL, NULL))
         return _resolve_identifier(c, binding, input_type, origin);
-    case %(literal *): return input;
+    case $source_literal_content(%(*)): return input;
     case %(tpl-call *): return input;
     case %(meta-call ?callee (args *arguments)): {
       if (c.meta_body || c.macro_holes) return input;
@@ -2616,7 +2639,7 @@ static List _resolve_content(
       return _resolve_cons(c, input_type, head, tail, origin);
     case %(append ?head ?tail):
       return _resolve_append(c, input_type, head, tail, origin);
-    case %(slice ?receiver ?start ?stop ?step):
+    case $source_slice_content(%(?receiver ?start ?stop ?step)):
       return _resolve_slice(
         c, input_type, receiver, start, stop, step, origin);
     case %(getindex ?receiver ?selector):
@@ -2637,13 +2660,14 @@ static List _resolve_content(
         return c.rebuild_expression(input_type, expression_sizeof(
           c.resolve_expression(source_argument, origin)));
       }
-    case %(generic ?control *associations):
+    case $source_generic_content(%(?control *associations)):
       return _resolve_generic(c, control, associations, origin);
-    case %(va-arg ?argument ?declaration):
+    case $source_va_arg_content(%(?argument ?declaration)):
       return %(expr $input_type
-               (va-arg ${c.resolve_expression(argument, origin)}
-                       ${c.resolve_expression(declaration, origin)}));
-    case %(commas *expressions):
+               ${source_va_arg_content(%(
+                 ${c.resolve_expression(argument, origin)}
+                 ${c.resolve_expression(declaration, origin)}))});
+    case $source_commas_content(%(*expressions)):
       return _resolve_commas(c, input_type, expressions, origin);
     case %(splice ?expression):
       return %(expr $input_type
@@ -2653,16 +2677,16 @@ static List _resolve_content(
       return _resolve_parens(c, inner, origin);
     case %(initval *choices):
       return _resolve_initval(c, input_type, content, origin);
-    case %(composite (commas *elements)):
+    case $source_composite_content(%(*elements)):
       return _resolve_composite(c, input_type, elements, origin);
     case $source_cast_content(
         %((!set ?declaration (decl *)) ?operand)):
       return _resolve_cast(c, declaration, operand, origin);
     case %(type-tag ?target):
       return c.var_tag_expression(target, origin);
-    case %(is-type ?operand ?target_syntax):
+    case $source_content_pattern($has_type, %(?operand ?target_syntax)):
       return _resolve_is_type(c, operand, target_syntax, origin);
-    case %(is-symbol ?operand ?selector):
+    case $source_content_pattern($has_symbol, %(?operand ?selector)):
       return _resolve_is_symbol(c, operand, selector, origin);
     case $source_operator_content(
         %((!or (!set ?operator .) (!set ?operator (!quote ->)))
@@ -2763,13 +2787,15 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
       List test;
       if (_is_type_selector_start(c)) {
         Type target = _parse_is_type(c, origin);
+        Macro has_type = $has_type;
         test = c.resolve_expression(
-          %(expr () (is-type $lhs $target)), origin);
+          c.rebuild_expression(NULL, has_type(lhs, target)), origin);
       }
       else {
         List selector = _parse_cast(c);
+        Macro has_symbol = $has_symbol;
         test = c.resolve_expression(
-          %(expr () (is-symbol $lhs $selector)), origin);
+          c.rebuild_expression(NULL, has_symbol(lhs, selector)), origin);
       }
       lhs = negate
         ? c.resolve_expression(%(expr () (op ! $test)), origin)
@@ -2807,12 +2833,13 @@ static List _parse_binary_ops(Compiler compiler) =>
 
 static int _destructure_identifier(List expression) {
   match (expression) {
-    case %(expr ? (ident ?)): return 1;
+    case %(expr ? ${$source_identifier_content(%(?))}): return 1;
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       match (inner)
         case %(expr ? ${$source_content_pattern(
           $dereferenced, %(?address))}):
-          match (address) case %(expr (& *) (ident ?)): return 1;
+          match (address) case %(expr (& *) ${$source_identifier_content(
+              %(?))}): return 1;
   }
   return 0;
 }
@@ -2822,7 +2849,7 @@ static List _destructure_targets(Compiler compiler, List lhs) {
     case %(expr ? ${$source_content_pattern($grouped, %(?target))}): {
       if (_destructure_identifier(target)) return %(targets $target);
       match (target)
-        case %(expr ? (commas *targets)): {
+        case %(expr ? ${$source_commas_content(%(*targets))}): {
           foreach (List entry, targets) {
             if (_destructure_identifier(entry)) continue;
             compiler.report_error(
@@ -2925,7 +2952,7 @@ List Compiler.parse_variable(Compiler c) {
   Token after = c.token;
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
   if (c.source_facts) match (result)
-    case %(expr ?type (ident ?binding)):
+    case %(expr ?type ${$source_identifier_content(%(?binding))}):
       c.record_source_reference(binding, type, origin, after);
   if (c.source_map &&
       (origin.text == "__FILE__" || origin.text == "__LINE__"))
@@ -3064,7 +3091,7 @@ static List _parse_expression_tail(Compiler compiler, List expr) {
   if (compiler.peek(0) == <,>) {
     expr = cons(expr, _parse_comma_list(compiler));
     List last = expr.last(), type = last.cadr();
-    return %(expr $type (commas @expr));
+    return %(expr $type ${source_commas_content(expr)});
   }
   return expr;
 }
@@ -3139,7 +3166,7 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _integer_literal_kind(inner, out_text);
-    case %(expr ? (literal ?ltype ?text)): {
+    case %(expr ? ${$source_literal_content(%(?ltype ?text))}): {
       String spelling = text, Type type = ltype;
       if (!spelling || !type.is_integral()) return <unknown>;
       char *s = spelling;
@@ -3218,7 +3245,8 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     // because an enum constant and a variable of enum type are spelled
     // identically here, and a zero-valued enum constant *is* a null pointer
     // constant.
-    case %(expr ?type (ident (binding ? ?name))): {
+    case %(expr ?type ${$source_identifier_content(
+        %((binding ? ?name)))}): {
       Type vartype = compiler.sym.resolve_numeric_type(type);
       if (!vartype || vartype.is_enum() || !vartype.is_integral()) return NULL;
       return name;
@@ -3268,7 +3296,8 @@ static List _converted_temporary(
       compiler.resolve_protocol_member(target, "discard")) {
     Macro called = $called;
     match (call) case called(?callee, *arguments):
-      match (callee) case %(expr ? (ident (!set ?binding (*)))):
+      match (callee) case %(expr ? ${$source_identifier_content(
+          %((!set ?binding (*))))}):
         _note_fresh_callee(compiler, binding);
   }
   return call;
@@ -3438,7 +3467,8 @@ static List _initializer_first(
 static int _initializer_integer(List expression, unsigned long long &value) {
   String text = NULL;
   match (expression) {
-    case %(expr ? (literal ? ?spelling)): text = spelling;
+    case %(expr ? ${$source_literal_content(%(? ?spelling))}):
+      text = spelling;
     case %(?(String spelling)): text = spelling;
   }
   if (!text || text[0] < '0' || text[0] > '9') return 0;
@@ -3549,7 +3579,9 @@ static void _initializer_position(
   base = NULL;
   if (_initializer_integer(index, offset)) return;
   match (index)
-    case %(expr ? (op + (expr ? (parens ?origin)) ?amount)):
+    case %(expr ? ${$source_operator_content(
+        %(+ (expr ? ${$source_content_pattern(
+          $grouped, %(?origin))}) ?amount))}):
       if (_initializer_integer(amount, offset)) {
         base = origin;
         return;
@@ -3561,13 +3593,15 @@ static void _initializer_position(
 static List _initializer_drop_bound(
   List condition, List bound, List base, unsigned long long minimum) {
   match (condition) {
-    case %(expr ? (op && (expr ? (parens ?left))
-                         (expr ? (parens ?right)))):
+    case %(expr ? ${$source_operator_content(
+        %(&& (expr ? ${$source_content_pattern($grouped, %(?left))})
+             (expr ? ${$source_content_pattern($grouped, %(?right))})))}):
       return _initializer_and(
         _initializer_drop_bound(left, bound, base, minimum),
         _initializer_drop_bound(right, bound, base, minimum));
-    case %(expr ? (op < (expr ? (parens ?index))
-                        (expr ? (parens ?length)))): {
+    case %(expr ? ${$source_operator_content(
+        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
+            (expr ? ${$source_content_pattern($grouped, %(?length))})))}): {
       unsigned long long at;
       List origin;
       _initializer_position(index, origin, at);
@@ -3581,8 +3615,9 @@ static List _initializer_and(List first, List second) {
   if (!first) return second;
   if (!second) return first;
   match (second)
-    case %(expr ? (op < (expr ? (parens ?index))
-                        (expr ? (parens ?bound)))): {
+    case %(expr ? ${$source_operator_content(
+        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
+            (expr ? ${$source_content_pattern($grouped, %(?bound))})))}): {
       unsigned long long at;
       List base;
       _initializer_position(index, base, at);
@@ -3909,7 +3944,8 @@ static void _initializer_ordinal(
 static int _scalar_inputs(Compiler c, List items, List &string) {
   foreach (List value, items) {
     match (value) {
-      case %(expr ? (!or (composite *) (initval *))): return 0;
+      case %(expr ? ${$source_composite_content(%(*rows))}): return 0;
+      case %(expr ? (initval *)): return 0;
       case %(expr ?type ?): {
         Type source = c.sym.resolve_key(type);
         if (!c.sym.is_var_type(type) &&
@@ -4115,7 +4151,7 @@ static List _initializer_conversion(
 // Keep literal construction/cache facts while capturing native value leaves.
 static int _initializer_literal(List value) {
   match (value) {
-    case %(expr ? (literal *)): return 1;
+    case %(expr ? ${$source_literal_content(%(*))}): return 1;
     case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
       return _initializer_literal(inner);
     case %(expr ? ${$source_cast_content(%(? ?inner))}):
@@ -4129,11 +4165,12 @@ static List _initializer_capture_leaves(
   match (value) {
     case %((!set ?kind (!or dotinit indexinit)) ?key ?inner):
       return %($kind $key ${_initializer_capture_leaves(c, inner, inputs)});
-    case %(expr ?type (composite (commas *items))): {
+    case %(expr ?type ${$source_composite_content(%(*items))}): {
       Array captured = [];
       foreach (List item, items)
         captured.push(_initializer_capture_leaves(c, item, inputs));
-      return %(expr $type (composite (commas @{captured.list_free()})));
+      return %(expr $type ${source_composite_content(
+        captured.list_free())});
     }
     case %(expr ?type ((!or ident call op cast parens) *)): {
       if (!c.sym.is_var_type(type) && !c.sym.resolve_key(type).scalar())
@@ -4484,7 +4521,7 @@ static int _conditional_joins(Compiler c, Type type, Type other) =>
 static List _compound_literal(Compiler c, List composite, Type target) {
   List converted = _convert_composite(c, composite, target, NULL, NULL, NULL);
   match (converted)
-    case %(expr ?type (composite *)): {
+    case %(expr ?type ${$source_composite_content(%(*rows))}): {
       if (Type.tag(type).match(%((gensym *))))
         c.report_error(
           <type>,
@@ -4520,7 +4557,8 @@ static List _convert_conditional_arms(
    destination conversion because only one association runs. */
 static List _convert_generic_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr () (generic ?control *associations)): {
+  match (expr) case %(expr () ${$source_generic_content(
+      %(?control *associations))}): {
     Array converted = [];
     int changed = 0;
     foreach (List association, associations) match (association)
@@ -4530,8 +4568,8 @@ static List _convert_generic_arms(
         converted.push(%(association $selector $result));
       }
     if (changed)
-      return %(expr $declared_target
-        (generic $control @{converted.list_free()}));
+      return %(expr $declared_target ${source_generic_content(
+        %($control @{converted.list_free()}))});
     converted.free();
   }
   return NULL;

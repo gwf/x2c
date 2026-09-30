@@ -135,7 +135,8 @@ static int _raise_never_returns(Ast node) {
   Var code_ast = node.cadr();
   if (code_ast is not <list>) return 0;
   match (code_ast)
-    case %(expr ("Symbol") (literal ("Symbol") ? ?code)):
+    case %(expr ("Symbol") ${$source_literal_content(
+        %(("Symbol") ? ?code))}):
       return code in nonreturning_error_causes;
   return 0;
 }
