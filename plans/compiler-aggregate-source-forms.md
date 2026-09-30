@@ -2,7 +2,8 @@
 > Plan prepared 2026-09-29. Array capability and adoption are private
 > checkpoints; capture repair is checked in an isolated worktree. Map adoption
 > is in progress; String public syntax remains under design.
-> No aggregate changes have been published. Wave 5 publishes first.
+> No aggregate changes have been published. Wave 5 explicitly yielded the
+> next publication slot to this batch after its performance investigation.
 
 # Aggregate source forms
 
@@ -331,3 +332,25 @@ probe produced `aN2b`; new-kind roundtrip and performance are still unproved.
   remain outstanding. Independent authored-diff review found no concrete regression; it inspected
   wrapper boundaries, Map row order, and lazy converter precedence and reran
   the native probe. Whole-corpus output and performance remain integration work.
+
+## Integration and publication candidate
+
+Wave 5 explicitly yielded its slot: aggregate now integrates on `7aac075e`
+and publishes first; Wave 5 will merge this result afterward. Its measurements
+are paused for this build/gate window. The new public Segment proposal remains
+awaiting Gary's decision and is not included in this settled batch.
+
+The integration safe build and capability-seeded adopter build passed.
+The native identity/resolution probe and six focused capture, collection,
+converter-order, and constructed-String fixtures passed on the integrated tree.
+The book documents the implemented quoted Array sequence position.
+
+Performance used the same seven-source baseline corpus and interleaved compiler
+runs. Initial unequal executable paths measured +0.89% and +1.38% instruction
+medians. A crossover with equal-length executable paths and alternating output
+locations measured -0.086%, with paired differences of both signs. These data
+show no robust increase under the corrected setup and do not establish an
+improvement. All generated C/H matched for the corpus. Raw observations remain
+in `debug/aggregate-performance*.json` and corresponding logs. A speculative
+dispatch rewrite was not built and is excluded. Final publication validation
+must still establish rebuildability from the shipped bootstrap.
