@@ -2,8 +2,8 @@
 
 > Status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
 > boundaries were agreed with the dual-macro session. The initial campaign
-> baseline measurements are from `dev` `f6606dbf`. Track H awaits Gary's
-> approval of its book text.
+> baseline measurements are from `dev` `f6606dbf`. The closing audit is
+> queued; Track H awaits a design conversation before book text or code.
 
 ## Progress
 
@@ -322,6 +322,41 @@ This measures x2c source translation only, not C compilation, a full build,
 or third-party benchmark performance. Gary accepted this small measured
 translation difference for Wave 5; no source change was justified by the
 bounded investigation. The final `agent-pr-check` publication gate passed.
+
+## Follow-ups after Wave 5
+
+### Whole-source before and after audit
+
+Redo the initial read-only audit with the same method on the pre-campaign
+`dev` snapshot `f6606dbf` and the Wave 5 landing `0bccd679`. Use the same
+analyzer and file selection for both trees, covering hand-authored `src/`
+and `lib/` `.x` files and excluding generated `lib/x2c.x` and
+`src/linked-meta.x`. Report the distribution by file of long functions,
+nesting, parameter lists, and names, with `x2c lint --all` candidates and
+the plan's completion criteria.
+Lead with concrete before/after examples of reading order, named steps,
+and shared owners; counts support the account rather than decide whether
+the source is readable. Record remaining outliers and review-card findings
+without automatically turning every lint candidate into a change request.
+
+Repeat the original coverage workload only if its inputs and instrumentation
+can be held comparable; label coverage as workload-specific. The original
+campaign record names shape measures, lint, and coverage, but no whole-tree
+`x2c graph` baseline. Use graph for specific suspected dead or repeated
+work, rather than inventing a paired graph count; a graph edge alone does
+not establish equivalence. This follow-up ends in a report and separately
+scoped proposals, not a gate or an automatic rewrite.
+
+### Unit-directory design conversation
+
+Track H below is a candidate design, not an approved implementation plan.
+First discuss one concrete split, such as `src/macros.x` becoming a unit
+directory, and settle the layout, ordering, inclusion and public surface,
+diagnostic paths, and dependency behavior. In particular, decide whether
+parts may be nested and whether they form one translation unit by strict
+concatenation or require a sub-build. Then write book text and an
+implementation plan from those decisions. Do not start H2 or H3 before
+that design review.
 
 ## Context
 
@@ -688,9 +723,9 @@ campaign's handoff releases it.
   `llvm-cov` (both present under Xcode). It runs once per wave. Its output
   lists candidates; each deletion still needs a caller check.
 
-## Track H: unit directories
+## Track H: unit directories (candidate design)
 
-Recommendation: yes. Add one convention. A directory whose name ends in
+The current sketch adds one convention. A directory whose name ends in
 `.x` is one translation unit. `src/macros.x/` holds its head `macros.x`
 and any number of other `.x` parts. The unit is the head followed by the
 other parts in bytewise name order, exactly as if they were one file, so
@@ -699,6 +734,24 @@ every part sees every private declaration. Nothing else changes:
 `macros.xi` keep their names; the `src/*.x` wildcard in `builds/stage.mk`
 already matches the directory; `bootstrap/` keeps its file names; packages
 and `import` are untouched. The directory name is the whole convention.
+This sketch is flat and uses no sub-build; neither rule has Gary's approval.
+Nested parts would need a traversal order and path identity. A sub-build
+would instead need separate part interfaces and linking rules, so it is a
+different design rather than a small implementation detail.
+
+For example, an illustrative split would be:
+
+```text
+src/macros.x/
+  macros.x          head: public declarations and shared private types
+  10-syntax.x       first body section
+  20-expansion.x    second body section
+  30-binding.x      third body section
+```
+
+The numbered names preserve source order under bytewise sorting. In this
+sketch the compiler translates the entire directory once and emits one
+`macros.c`, `macros.h`, and `macros.xi`, with no per-part object files.
 
 Reasons:
 
@@ -741,12 +794,12 @@ manifest glob matching; `builds/stage.mk` prerequisites; `x2c lint`,
 `x2c graph`, `tools/gen-api-reference`, and `tools/repo-metrics.py`. The
 estimate is a few hundred lines.
 
-Sequence:
+Possible sequence after the design conversation:
 
-1. H1: write the book text, a "Unit directories" subsection under "Source
-   files and pragmas" in `docs/src/reference/language.md` and the input
-   rules in `docs/src/reference/cli.md`. Gary approves the text before any
-   code.
+1. H1: record the chosen structure and write the book text, a "Unit
+   directories" subsection under "Source files and pragmas" in
+   `docs/src/reference/language.md` and the input rules in
+   `docs/src/reference/cli.md`. Gary reviews the text before code.
 2. H2: implement it with one compiler fixture: a diagnostic located in a
    part, a static helper shared across parts, and an includer that sees
    only the head's public declarations.
