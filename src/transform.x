@@ -4705,17 +4705,6 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
    the normalized shapes consumed by the emitter. A helper rewrites only its
    current node: this dispatcher recurses into returned children, while
    _sequence alone splices `(seq ...)` results into a sequence. */
-static Ast _origin_node(Compiler c, Ast ast, int occurrence, List inner) {
-  List transformed = NULL;
-  $let(c.origin, occurrence) {
-    transformed = _node(c, inner);
-  }
-  if (transformed == inner) return ast;
-  c.origins.push(%(generated $occurrence xform));
-  int generated = c.origins.len();
-  return %(at $generated $transformed);
-}
-
 static Ast _function_node(
   Compiler c, List return_type, List declarator, List binding, List body) {
   String owner = binding_identity_spelling(binding);
@@ -4820,8 +4809,17 @@ static Ast _step(Compiler c, Ast ast) {
   Var head = ast.car();
   if (head is not <symbol>) return _children(c, ast);
   match (ast) {
-    case %(at ?origin ?inner):
-      return _origin_node(c, ast, origin, inner);
+    case %(at ?origin ?inner): {
+      int occurrence = origin;
+      List transformed = NULL;
+      $let(c.origin, occurrence) {
+        transformed = _node(c, inner);
+      }
+      if (transformed == inner) return ast;
+      c.origins.push(%(generated $occurrence xform));
+      int generated = c.origins.len();
+      return %(at $generated $transformed);
+    }
     case %(function ?return_type
            (!set ?declarator (bind ?binding ?)) ?body):
       return _function_node(c, return_type, declarator, binding, body);
