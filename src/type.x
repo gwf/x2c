@@ -60,7 +60,7 @@ static List _from_ast(List node, List context) {
   if (!node) return node;
   // Initializers do not contribute to the declared Type.
   match (node)
-    case %(op = (!set ?binding (bind *)) ?):
+    case $source_operator_content(%(= (!set ?binding (bind *)) ?)):
       return _from_ast(binding, context);
   Var head = node.car();
   switch (head.symbol()) {

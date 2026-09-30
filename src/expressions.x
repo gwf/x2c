@@ -120,7 +120,8 @@ static List _parse_slice(Compiler c, List expr, List start) {
     stop = c.parse_expression();
     if (c.test(<:>) && c.peek(0) != <]>) step = c.parse_expression();
   }
-  if (step && step.match(%(expr ? (literal ? "0"))))
+  if (step && step.match(%(expr ?
+      ${$source_literal_content(%(? "0"))})))
     c.report_error(<parse>, "slice step cannot be zero", c.token, %());
   c.expect(<]>);
   return %(expr $type ${source_slice_content(
@@ -347,10 +348,12 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Macro called = $called;
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
-  int method = !!expr.match(%(expr () (op . ? (?))));
+  int method = !!expr.match(%(expr () ${$source_operator_content(
+    %(. ? (?)))}));
   _check_converter_args(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
-    match (expr) case %(expr () (op . ? (?name))):
+    match (expr) case %(expr () ${$source_operator_content(
+        %(. ? (?name)))}):
       _note_explicit_converter(c, result, name.str(), origin);
   return result;
 }
@@ -874,7 +877,8 @@ static int _c_type_known(Compiler c, List operand) {
     case %(expr ? ${$source_content_pattern(
         $sizeof_expression, %(?operand))}): return 0;
     case %(expr ? (offsetof *)): return 0;
-    case %(expr ? (op - (expr ?left *) (expr ?right *))): {
+    case %(expr ? ${$source_operator_content(
+        %(- (expr ?left *) (expr ?right *)))}): {
       Type l = left, r = right;
       if ((l.is_pointer() || l.is_array()) && (r.is_pointer() || r.is_array()))
         return 0;
@@ -1150,7 +1154,8 @@ static int _expr_is_raw_string_literal(List expr) {
       return _expr_is_raw_string_literal(inner);
     case %(expr ? ${$source_literal_content(%(?type ?))}):
       return _type_is_char_pointer_like(type);
-    case %(expr ? (op ? ? ?ontrue ?onfalse)):
+    case %(expr ? ${$source_operator_content(
+        %(? ? ?ontrue ?onfalse))}):
       return _expr_is_raw_string_literal(ontrue) &&
              _expr_is_raw_string_literal(onfalse);
   }
@@ -1562,11 +1567,15 @@ static int _expression_is_addressable(Compiler c, List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?binding))}):
       return !c.semantic_binding_facts().contains(%(lambda-snapshot $binding));
-    case %(expr ? (!or (index ? ?)
-                       (op (!quote *) ?) (op (!quote ->) ? ?))): return 1;
+    case %(expr ? ${$source_content_pattern(
+        $indexed, %(?receiver ?selector))}): return 1;
+    case %(expr ? ${$source_operator_content(
+        %((!quote *) ?operand))}): return 1;
+    case %(expr ? ${$source_operator_content(
+        %((!quote ->) ?receiver ?field))}): return 1;
     case %(expr ? ${$source_content_pattern($grouped, %(?base))}):
       return _expression_is_addressable(c, base);
-    case %(expr ? (op . ?base ?)):
+    case %(expr ? ${$source_operator_content(%(. ?base ?))}):
       return _expression_is_addressable(c, base);
   }
   return 0;
@@ -2009,7 +2018,8 @@ static List _resolve_call(
   Compiler c, Type result_type, List function, List supplied,
   Token origin) {
   match (function)
-    case %(expr ? (op . ?receiver (!set ?field (?name)))):
+    case %(expr ? ${$source_operator_content(
+        %(. ?receiver (!set ?field (?name))))}):
       return _resolve_member_call(
         c, result_type, receiver, field, supplied, origin);
   List resolved = c.resolve_expression(function, origin);
@@ -3232,7 +3242,7 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
     // which would need folding, does not match it.
-    case %(expr ? (op ?oper ?operand)): {
+    case %(expr ? ${$source_operator_content(%(?oper ?operand))}): {
       Symbol op = oper;
       if (op != <-> && op != <+>) return NULL;
       String inner = NULL;
@@ -3398,7 +3408,8 @@ static List _var_checked_reader(
 static List _raw_string_to_string(Compiler compiler, List expr) {
   match (expr) {
     case %(expr (!or (* char) ((dim *) char))
-        (literal (!or (* char) ((dim *) char)) ?)): {
+        ${$source_literal_content(
+          %((!or (* char) ((dim *) char)) ?))}): {
       List value = %(expr ("String") (call "String_new" (args $expr)));
       return %(expr ("String") ${compiler.cache(%(string $value))});
     }
@@ -3408,7 +3419,8 @@ static List _raw_string_to_string(Compiler compiler, List expr) {
       return %(expr ("String") (parens $converted));
     }
     case %(expr (!or (* char) ((dim *) char))
-        (op ? ?condition ?ontrue ?onfalse)): {
+        ${$source_operator_content(
+          %(? ?condition ?ontrue ?onfalse))}): {
       List converted_true = _raw_string_to_string(compiler, ontrue);
       List converted_false = _raw_string_to_string(compiler, onfalse);
       return %(expr ("String")
@@ -3944,7 +3956,7 @@ static void _initializer_ordinal(
 static int _scalar_inputs(Compiler c, List items, List &string) {
   foreach (List value, items) {
     match (value) {
-      case %(expr ? ${$source_composite_content(%(*rows))}): return 0;
+      case %(expr ? (composite *)): return 0;
       case %(expr ? (initval *)): return 0;
       case %(expr ?type ?): {
         Type source = c.sym.resolve_key(type);
@@ -4160,6 +4172,16 @@ static int _initializer_literal(List value) {
   return 0;
 }
 
+static List _capture_initializer_value(
+  Compiler c, List value, Type type, Array inputs) {
+  if (!c.sym.is_var_type(type) && !c.sym.resolve_key(type).scalar())
+    return value;
+  if (_initializer_literal(value)) return value;
+  String formal = c.fresh_name("initializer_value");
+  inputs.push(%($formal $value));
+  return %(expr $type $formal);
+}
+
 static List _initializer_capture_leaves(
   Compiler c, List value, Array inputs) {
   match (value) {
@@ -4172,14 +4194,19 @@ static List _initializer_capture_leaves(
       return %(expr $type ${source_composite_content(
         captured.list_free())});
     }
-    case %(expr ?type ((!or ident call op cast parens) *)): {
-      if (!c.sym.is_var_type(type) && !c.sym.resolve_key(type).scalar())
-        return value;
-      if (_initializer_literal(value)) return value;
-      String formal = c.fresh_name("initializer_value");
-      inputs.push(%($formal $value));
-      return %(expr $type $formal);
-    }
+    case %(expr ?type ${$source_identifier_content(%(*))}):
+      return _capture_initializer_value(c, value, type, inputs);
+    case %(expr ?type ${$source_call_content($called, %(?), %(*))}):
+      return _capture_initializer_value(c, value, type, inputs);
+    case %(expr ?type ${$source_operator_content(%(*))}):
+      return _capture_initializer_value(c, value, type, inputs);
+    case %(expr ?type ${$source_cast_content(%(*))}):
+      return _capture_initializer_value(c, value, type, inputs);
+    case %(expr ?type ${$source_content_pattern($grouped, %(?))}):
+      return _capture_initializer_value(c, value, type, inputs);
+    /* Internally constructed native calls may have a bare string callee. */
+    case %(expr ?type (call *)):
+      return _capture_initializer_value(c, value, type, inputs);
   }
   return value;
 }
@@ -4521,7 +4548,7 @@ static int _conditional_joins(Compiler c, Type type, Type other) =>
 static List _compound_literal(Compiler c, List composite, Type target) {
   List converted = _convert_composite(c, composite, target, NULL, NULL, NULL);
   match (converted)
-    case %(expr ?type ${$source_composite_content(%(*rows))}): {
+    case %(expr ?type (composite *)): {
       if (Type.tag(type).match(%((gensym *))))
         c.report_error(
           <type>,
@@ -4536,7 +4563,8 @@ static List _compound_literal(Compiler c, List composite, Type target) {
    the result as a whole. */
 static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
-  match (expr) case %(expr ? (op ?operator ?condition ?ontrue ?onfalse)): {
+  match (expr) case %(expr ? ${$source_operator_content(
+      %(?operator ?condition ?ontrue ?onfalse))}): {
     Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
     if (ontrue.list().match(%(expr ? (composite *))) ||
         onfalse.list().match(%(expr ? (composite *))) ||
