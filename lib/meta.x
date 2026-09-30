@@ -999,7 +999,7 @@ static MacroPublishing _macro_publishing(
   MacroPublishing route;
   memset(&route, 0, sizeof(route));
   MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
-  MatchCaptureLayout logical = MatchCaptureLayout.analyze(%(!and @names));
+  MatchCaptureLayout logical = MatchCaptureLayout.analyze(names);
   route.complete = 1;
   List holes = t.assoc(<parameters>);
   for (; names; names = names.cdr(), internal = internal.cdr(),

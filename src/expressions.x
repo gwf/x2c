@@ -2464,15 +2464,6 @@ static List _resolve_macro_slot(
     c.lift_macro_lisp_expression(value, origin), origin);
 }
 
-static List _resolve_map(
-  Compiler c, Type input_type, List entries, Token origin) {
-  Array resolved = [];
-  foreach (Var entry, entries)
-    foreach (Var row, c.evaluate_macro_rows(entry))
-      resolved.push(c.resolve_map_entry(row, origin));
-  return %(expr $input_type (map @{resolved.list_free()}));
-}
-
 static List _resolve_destructure(
   Compiler c, List targets, List source, Token origin) {
   Array resolved = [];
@@ -2492,14 +2483,6 @@ static List _resolve_commas(
   Type type = input_type;
   if (values) type = values.last().cadr();
   return %(expr $type (commas @values));
-}
-
-static List _resolve_array(
-  Compiler c, Type input_type, List elements, Token origin) {
-  Array resolved = [];
-  foreach (List element, elements)
-    resolved.push(c.resolve_expression(element, origin));
-  return %(expr $input_type (array @{resolved.list_free()}));
 }
 
 static List _resolve_composite(
@@ -2607,8 +2590,6 @@ static List _resolve_content(
       return _resolve_invocation(c, input, definition, arguments, invocation);
     case %(macro-slot ? ? *):
       return _resolve_macro_slot(c, input, content, origin);
-    case %(map *entries):
-      return _resolve_map(c, input_type, entries, origin);
     case %(segments *items): return _resolve_segments(c, items, origin);
     case %(cons ?head ?tail):
       return _resolve_cons(c, input_type, head, tail, origin);
@@ -2640,8 +2621,6 @@ static List _resolve_content(
     case %(splice ?expression):
       return %(expr $input_type
                (splice ${c.resolve_expression(expression, origin)}));
-    case %(array *elements):
-      return _resolve_array(c, input_type, elements, origin);
     case %((!or offsetof nil cache macro-bind) *): return input;
     case %(parens ?inner): return _resolve_parens(c, inner, origin);
     case %(initval *choices):
@@ -2670,6 +2649,27 @@ static List _resolve_content(
       return _resolve_postfix_op(c, operator, operand, origin);
     case %(tadapt ?target ?source):
       return _resolve_tadapt(c, target, source, origin);
+  }
+  if (content && content.car() == <array>) {
+    Macro array_value = $array_value;
+    match (input) case array_value(*elements): {
+      Array resolved = [];
+      foreach (List element, elements)
+        resolved.push(c.resolve_expression(element, origin));
+      return c.rebuild_expression(
+        input_type, array_value(resolved.list_free()));
+    }
+  }
+  if (content && content.car() == <map>) {
+    Macro map_value = $map_value;
+    match (input) case map_value(*entries): {
+      Array resolved = [];
+      foreach (Var entry, entries)
+        foreach (Var row, c.evaluate_macro_rows(entry))
+          resolved.push(c.resolve_map_entry(row, origin));
+      return c.rebuild_expression(
+        input_type, map_value(resolved.list_free()));
+    }
   }
   return input;
 }
@@ -4165,10 +4165,12 @@ static List _initializer_adapters(
 /* An empty initializer for a Map or Array, or for a type that converts from
    one, is a fresh empty collection. A Var holds a fresh empty Map. */
 static List _empty_collection(Compiler c, Type target) {
-  if (c.sym.is_var_type(target))
-    return c.convert_expression(%(expr ("Map") (map)), target);
-  foreach (List literal, %((expr ("Map") (map)) (expr ("Array") (array)))) {
-    Type source = literal.cadr();
+  for (int kind = 0; kind < 2; kind++) {
+    Macro shape = kind ? $array_value : $map_value;
+    Type source = kind ? %("Array") : %("Map");
+    List literal = c.rebuild_expression(source, shape(%()));
+    if (!kind && c.sym.is_var_type(target))
+      return c.convert_expression(literal, target);
     if (c.sym.resolve_key(target).equal(c.sym.resolve_key(source)))
       return c.convert_expression(literal, target);
     List converted = _converter_call(c, literal, source, target);

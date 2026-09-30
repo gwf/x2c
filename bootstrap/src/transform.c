@@ -7769,7 +7769,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _7067 = cons(_7066, NULL);
   _7068 = cons(_215, _7067);
   _7069 = List_var(_7068);
-  _7070 = int_var(153376);
+  _7070 = int_var(153385);
   _7071 = cons(_7070, NULL);
   _7072 = cons(_230, _7071);
   _7073 = List_var(_7072);
@@ -7837,7 +7837,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _7135 = cons(_7134, NULL);
   _7136 = cons(_215, _7135);
   _7137 = List_var(_7136);
-  _7138 = int_var(153239);
+  _7138 = int_var(153248);
   _7139 = cons(_7138, NULL);
   _7140 = cons(_230, _7139);
   _7141 = List_var(_7140);
@@ -11733,7 +11733,7 @@ static List _append(Compiler compiler, List ast){
 #ifndef X2C_TRANSFORM_SOURCE
 String String_escape(String);
 static List _process_raw_segment(Compiler compiler, List seg){
-  String raw = Var_string(List_cadr(seg)), literal = String_join(NULL, cons(String_var(_6857), cons(String_var(String_escape(raw)), cons(String_var(_6857), NULL))));  List constructor = Sym_reference(compiler -> sym, _6860, NULL);  return cons(_4, cons(_5411, cons(List_var(cons(_791, cons(List_var(cons(_4, cons(_6869, cons(List_var(cons(_98, cons(List_var(constructor), NULL))), NULL)))), cons(List_var(cons(_152, cons(List_var(cons(_4, cons(_6862, cons(List_var(cons(_329, cons(String_var(literal), NULL))), NULL)))), NULL))), NULL)))), NULL)));
+  String raw = Var_string(List_cadr(seg)), literal = String_join(NULL, cons(String_var(_6857), cons(String_var(String_escape(raw)), cons(String_var(_6857), NULL))));  List constructor = Sym_reference(compiler -> sym, _6860, NULL);  return cons(_4, cons(_5411, cons(List_var(cons(_791, cons(List_var(cons(_4, cons(_6869, cons(List_var(cons(_98, cons(List_var(constructor), NULL))), NULL)))), cons(List_var(cons(_152, cons(List_var(cons(_4, cons(_6862, cons(List_var(cons(_329, cons(_6862, cons(String_var(literal), NULL)))), NULL)))), NULL))), NULL)))), NULL)));
 }
 
 #endif

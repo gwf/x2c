@@ -714,12 +714,19 @@ List Compiler.parse_array_literal(Compiler compiler) {
   return %(expr ("Array") (array @elems));
 }
 
+/* An Expr sequence hole fills one quoted Array argument position. */
+static List _parse_array_element(Compiler c) {
+  List slot = c.try_parse_macro_slot(<argument>);
+  return slot ? slot : _parse_element(c);
+}
+
 /* A comma may follow the last element. */
 static List _parse_array_elements(Compiler c) {
   if (c.peek(0) == <]>) return NULL;
   Array elements = [];
-  elements.push(_parse_element(c));
-  while (c.test(<,>) && c.peek(0) != <]>) elements.push(_parse_element(c));
+  elements.push(_parse_array_element(c));
+  while (c.test(<,>) && c.peek(0) != <]>)
+    elements.push(_parse_array_element(c));
   return elements.list_free();
 }
 
