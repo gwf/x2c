@@ -113,9 +113,19 @@ macro Expression $grouped(Expr $value) => ($value);
 macro Expression $sizeof_expression(Expr $value) => sizeof $value;
 macro Expression $sizeof_grouped(Expr $value) => sizeof($value);
 
+/* The two `is` source forms select a Type or a Symbol expression. */
+macro Expression $has_type(Expr $value, Type $target) => $value is $target;
+macro Expression $has_symbol(Expr $value, Expr $tag) => $value is $tag;
+
 /* Cast's first child is a declaration or a semantic type at different
    stages, so its canonical content keeps both children unchanged. */
 meta static List source_cast_content(List parts) => cons(<cast>, parts);
+
+/* These source forms carry declaration or ordered row children that an
+   expression hole cannot represent without changing their canonical AST. */
+meta static List source_generic_content(List parts) => cons(<generic>, parts);
+meta static List source_va_arg_content(List parts) => cons(<va-arg>, parts);
+meta static List source_commas_content(List rows) => cons(<commas>, rows);
 
 /* String source content retains its ordered text, expression, and cache rows.
    The parser and resolver share this shape without inventing a segment form. */
