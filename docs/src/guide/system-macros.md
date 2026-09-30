@@ -461,8 +461,8 @@ nesting an ordinary `switch`.
 
 `$dedent` removes the indentation a block of text was written with. The prefix
 is the run of spaces and tabs opening the first content line, after one leading
-newline is dropped, so indentation past that prefix survives and the block
-renormalizes as a unit:
+LF or CRLF newline is dropped, so indentation past that prefix survives and
+the block renormalizes as a unit:
 
 ```x2c
 ~$(import "system-macros.xmacro")

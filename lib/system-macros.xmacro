@@ -1,35 +1,6 @@
 // System macros that remove boilerplate C leaves to every caller.
 // Import this file to use them: $(import "system-macros.xmacro")
 
-/* The width of the leading spaces and tabs `line` was written with. */
-meta static int _dedent_width(String line) {
-  int length = line.len(), width = 0;
-  while (width < length && (line[width] == ' ' || line[width] == '\t'))
-    width++;
-  return width;
-}
-
-meta static int _dedent_blank(String line) =>
-  _dedent_width(line) == line.len();
-
-/* Removes the indentation the first line carries from the front of every
-   line. An opening blank line belongs to the quote rather than the text, and
-   so does the content of a trailing whitespace-only line, which carries the
-   closing quote's own indentation. */
-meta static String _dedent_apply(String text) {
-  int width = _dedent_width(text);
-  if (width < text.len() && text[width] == '\n') {
-    text = text.getslice(width + 1, text.len(), 1);
-    width = _dedent_width(text);
-  }
-  String prefix = text.getslice(0, width, 1);
-  Array lines = [];
-  foreach (Var line, text.split("\n"))
-    lines.push(String.remove_prefix(line, prefix));
-  if (lines.len() > 1 && _dedent_blank(lines[-1])) lines[-1] = "";
-  return lines.join("\n");
-}
-
 /* Dedents the literal `node` was written as when its spelling is exact.
    Escaped, interpolated and computed values keep their meaning by calling
    String.dedent at run time. */
@@ -44,7 +15,7 @@ meta static List _dedent_expand(List node) {
       source.contains("$"))
     return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
   String body = source.getslice(open, length - 1, 1);
-  return x2c_literal_string(_dedent_apply(body));
+  return x2c_literal_string(body.dedent());
 }
 
 /* Normalizes the indentation a block of text was written with. The literal
