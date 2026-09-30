@@ -3,7 +3,7 @@
 > Status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
 > boundaries were agreed with the dual-macro session. The initial campaign
 > baseline measurements are from `dev` `f6606dbf`. The closing audit is
-> queued; Track H awaits a design conversation before book text or code.
+> queued. Track H (unit directories) was retired after Wave 5.
 
 ## Progress
 
@@ -347,17 +347,6 @@ work, rather than inventing a paired graph count; a graph edge alone does
 not establish equivalence. This follow-up ends in a report and separately
 scoped proposals, not a gate or an automatic rewrite.
 
-### Unit-directory design conversation
-
-Track H below is a candidate design, not an approved implementation plan.
-First discuss one concrete split, such as `src/macros.x` becoming a unit
-directory, and settle the layout, ordering, inclusion and public surface,
-diagnostic paths, and dependency behavior. In particular, decide whether
-parts may be nested and whether they form one translation unit by strict
-concatenation or require a sub-build. Then write book text and an
-implementation plan from those decisions. Do not start H2 or H3 before
-that design review.
-
 ## Context
 
 Gary asked for a campaign that makes x2c's own source beautiful. The
@@ -368,8 +357,8 @@ stay the same, except small tweaks that are neutral or better and make the
 code easier to read. Gary named four targets: shorter functions, more code
 reuse, names that are neither cryptic nor verbose, and files organized for
 a reader. Work starts at the level of the file: its order, its sections,
-and the functions inside it. The plan also answers Gary's question about a
-built-in source hierarchy (Track H).
+and the functions inside it. The unit-directory proposal was reviewed and
+retired after Wave 5.
 
 The gap is measurable. `src/` has three times `lib/`'s share of lines in
 long functions, names 60% longer, and nine times as many functions with
@@ -390,7 +379,7 @@ algorithm is expanded: one named step per idea. Each job has one owner, and
 every caller reuses it. Work that is not the point of a function or file
 gets one named place. A file reads top to bottom as an explanation of one
 subject. The same rules apply at every level: line, function, section,
-file, and directory (Track H).
+and file.
 
 ### Bands
 
@@ -461,9 +450,8 @@ Files
 17. Functions of one family look alike and sit together: the same
     parameter order, the same layout, and the order of the dispatcher that
     calls them. A family of one-line functions forms an aligned table.
-18. A file with two subjects splits: into a new unit when the parts have
-    different owners, or into parts of a unit directory (Track H) when they
-    share one owner.
+18. A file with two subjects splits into new units when the parts have
+    distinct owners. A large unit with one owner uses sections.
 
 The line rules in `agents/x2c-coding-style-guide.md` stay as they are.
 
@@ -664,7 +652,6 @@ Rules for every file:
 | 3 | runtime: `match-machine.x`, `machine.x`, `string.x`, `error.x`, `scan.x`, `match.x`, `meta.x`, `lisp.x`, `var.x`, `varops.x`, `varconvert.x`, `pool.x`, `buffer.x`, `block.x`, `list.x`, `dispatch.x`, `func.x`, `scope.x`, `iter.x`, `file.x`, `logger.x`, `process.x`, `thread.x`, `path.x`, `regex.x`, `diff.x`, `datum.x` | hot paths need measured batches | unit suites; stage-diff-1; checkpoint per batch |
 | 4 | front end and core: `compiler.x`, `parse.x`, `macros.x`, `stage.x`, `meta-group.x`, `builtins.x`, `ast.x`, `type.x`, `type-ledger.x`, `literals.x`, `statements.x`; generated `linked-meta.x` excluded | shared with the dual-macro campaign | as wave 2; checkpoint per batch |
 | 5 | semantics and output: `expressions.x`, `transform.x`, `protocol.x`, `emit.x`, `regions.x`, `cache.x`, `diagnostics.x`, `format.x` | files the dual-macro campaign changes now | as wave 4 |
-| H | unit directories | spec after the pilot; code before wave 4 | one fixture; gate |
 
 The pilot delivers the two rewritten files with before-and-after measures.
 Gary reads them and says whether they meet the standard. The standard and
@@ -703,8 +690,7 @@ campaign's handoff releases it.
   glossary, and review card. Change the slice example under "Top-level
   order" to top-down order.
 - Organization guide: remove the nonexistent `lambda.x` from the compiler
-  module list. After Track H lands, allow unit-directory parts that share
-  one owner.
+  module list.
 - Philosophy exemplars: add `lib/path.x`, `lib/split.x`, and `src/deps.x`
   for reading order and one owner per failure spelling.
 - Skill: `agents/skills/beautify-x2c-source/SKILL.md` with the procedure
@@ -723,95 +709,17 @@ campaign's handoff releases it.
   `llvm-cov` (both present under Xcode). It runs once per wave. Its output
   lists candidates; each deletion still needs a caller check.
 
-## Track H: unit directories (candidate design)
+## Retired option: unit directories (Track H)
 
-The current sketch adds one convention. A directory whose name ends in
-`.x` is one translation unit. `src/macros.x/` holds its head `macros.x`
-and any number of other `.x` parts. The unit is the head followed by the
-other parts in bytewise name order, exactly as if they were one file, so
-every part sees every private declaration. Nothing else changes:
-`#include "macros.x"` names the unit; generated `macros.c`, `macros.h`, and
-`macros.xi` keep their names; the `src/*.x` wildcard in `builds/stage.mk`
-already matches the directory; `bootstrap/` keeps its file names; packages
-and `import` are untouched. The directory name is the whole convention.
-This sketch is flat and uses no sub-build; neither rule has Gary's approval.
-Nested parts would need a traversal order and path identity. A sub-build
-would instead need separate part interfaces and linking rules, so it is a
-different design rather than a small implementation detail.
-
-For example, an illustrative split would be:
-
-```text
-src/macros.x/
-  macros.x          head: public declarations and shared private types
-  10-syntax.x       first body section
-  20-expansion.x    second body section
-  30-binding.x      third body section
-```
-
-The numbered names preserve source order under bytewise sorting. In this
-sketch the compiler translates the entire directory once and emits one
-`macros.c`, `macros.h`, and `macros.xi`, with no per-part object files.
-
-Reasons:
-
-- A beautiful file has one subject. Today a coherent unit splits only by
-  exporting its shared helpers, which puts them in the generated header and
-  the provisional compiler API. `src/` exports about 680 functions against
-  about 1,460 static ones, and a rough count finds about 370 exported
-  functions used by exactly one other compiler file.
-- Three of the four largest files (`macros.x`, `transform.x`,
-  `compiler.x`) hold 12-13 concepts each. As unit directories they become
-  one part per section, each a few hundred lines.
-- A split is provable. Generated C carries no source positions unless
-  `--source-map` is on, so splitting a file at section boundaries, with
-  part names in the original order, yields byte-identical C.
-- Only macros and types must precede their use, and they belong in the
-  head.
-
-Semantics to specify:
-
-- The head is the part named after the directory. It holds the module
-  header, public declarations, `#pragma private`, shared private types, and
-  macros.
-- The other parts follow in bytewise name order. An include in a part
-  resolves as it would in the head, relative to the directory that holds
-  the unit.
-- Every part uses the head's syntax: `.x` parts in a `.x` unit and `.xp`
-  parts in a `.xp` unit. Other files in the directory are not part of the
-  unit.
-- Diagnostics, `--source-map` line markers, `--dump-definitions`, and the
-  editor adapter report the part file and its own line numbers.
-- The unit's `.d` depfile and `.xi` interface list every part.
-
-Implementation owners, each narrow: `x2c_source_file` and input
-validation (`src/utils.x`, `src/main.x`, `src/build.x`); `read_source`
-through `SourceView`, which returns the head and parts as one text with a
-part table; `Compiler.token_location` and the origin rows, which map a
-byte position to its part; the line-marker writer in `src/format.x`;
-include search in `src/collect.x`; depfile and interface dependencies;
-manifest glob matching; `builds/stage.mk` prerequisites; `x2c lint`,
-`x2c graph`, `tools/gen-api-reference`, and `tools/repo-metrics.py`. The
-estimate is a few hundred lines.
-
-Possible sequence after the design conversation:
-
-1. H1: record the chosen structure and write the book text, a "Unit
-   directories" subsection under "Source files and pragmas" in
-   `docs/src/reference/language.md` and the input rules in
-   `docs/src/reference/cli.md`. Gary reviews the text before code.
-2. H2: implement it with one compiler fixture: a diagnostic located in a
-   part, a static helper shared across parts, and an includer that sees
-   only the head's public declarations.
-3. H3: after a large file's wave reorders it into sections, split it into
-   parts, first with order-preserving names to prove byte-identical C,
-   then with plain names.
-
-Not recommended: subsystem directories of ordinary units, such as
-`src/front/parse.x`. They change every include line and every path in the
-docs and tools, the flat `--out-dir` rejects duplicate basenames, and
-shared helpers still have to be exported. Unit directories give smaller
-files without those costs.
+Gary retired this proposal after Wave 5. Its flat, ordered-parts sketch
+would have translated a directory as one unit. Parts would share the unit's
+scope, including `static` helpers; they would not gain privacy from each
+other. A sub-build with separate part interfaces would be a different
+feature. The expected benefit was navigation within a large coherent unit,
+while implementation would have touched source locations, includes,
+dependencies, build rules, and tools. The Wave 5 rewrites made the remaining
+benefit too uncertain to justify that cost. Do not implement Track H as part
+of this campaign. The earlier sketch is preserved in Git history.
 
 ## Verification and delivery
 
@@ -836,8 +744,6 @@ files without those costs.
   7 or more parameters, and no function name of 30 or more characters
   except fixed public names.
 - Every `src/` and `lib/` file passes the review card.
-- If Track H is approved, no source file over 1,500 lines remains outside
-  a unit directory.
 
 ## Out of scope
 
@@ -857,14 +763,11 @@ files without those costs.
   `simplify-x2c-source`, `find-redundant-validation`, the lint function
   table, the stage targets, `tools/land-dev`, and the performance
   snapshot. It deletes dead code and repeated stanzas as it goes. The new
-  lasting pieces are one style-guide chapter, one skill, four lint
-  candidates, and, if approved, unit directories. They answer, in order:
-  no written shape standard, no procedure between local cleanup and
-  deletion, no measure of function shape, and no way to split a coherent
-  unit without exporting its helpers.
+  lasting pieces are one style-guide chapter, one skill, and four lint
+  candidates. They answer, in order: no written shape standard, no
+  procedure between local cleanup and deletion, and no measure of
+  function shape.
 - Idiom. The rewrites use current x2c: `match` dispatch to receiver
-  helpers, records, `$scope`, `$let`, tables, and `=>` bodies. Unit
-  directories are one naming convention over the existing unit model.
+  helpers, records, `$scope`, `$let`, tables, and `=>` bodies.
 - Validators, diagnostics, and negative fixtures: none in the
-  beautification. Track H adds one positive fixture for its public
-  semantics.
+  beautification.

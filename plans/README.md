@@ -45,8 +45,8 @@ execution.
 ### Current work
 
 - [Beautification](x2c-beautification.md): Waves 0-5 delivered; a closing
-  before/after source audit is queued. Unit directories remain a design
-  conversation, with no implementation approval yet.
+  before/after source audit is queued. The unit-directory option was
+  retired after Wave 5.
 - [Compiler dual-macro campaign](compiler-dual-macro-contract.md#current-campaign-handoff):
   active; core lowerings, lambda adoption, retained Function rebuilding, and
   the try binder are landed. The [architecture survey](compiler-dual-macro-architecture.md)
