@@ -169,12 +169,10 @@ the source parser does not produce it. Show
 its current parsed, deferred, resolved, and runtime-literal forms. Include
 empty String and the single cached-segment fast path.
 
-An Expr sequence is insufficient: cache rows and the `segvar`/`segexp`
-distinction must survive. Prototype a Segment capture role using the existing
-role/parser/template machinery, with one segment or a sequence of complete
-canonical segment rows. The source position is inside a percent String, not
-an unrestricted Lisp splice. Define and test its spelling before documenting
-it as supported; it must not reinterpret existing interpolation syntax.
+Cache rows and the `segvar`/`segexp` distinction must survive. Use an existing
+List metafunction to own the canonical `segments` envelope and compose its
+pattern and construction at the current callers. No Segment parameter role
+or new interpolation spelling is required.
 
 Match and reconstruct complete segment rows, preserving their tags, cached
 identities, and established children. Keep segment conversion in
@@ -184,17 +182,11 @@ the row capability is proven. Keep parsing, cache creation, empty `(0)`, and
 single-cache representation selection in their current primitive owners.
 Do not normalize every String to `segments` just to simplify matching.
 
-This step has an explicit design checkpoint: demonstrate the mixed literal
-round trip and unambiguous spelling with a temporary probe before committing
-new public syntax. If existing role composition suffices, use it. If a new
-public role/spelling is required, record the exact grammar and compatibility
-result here and present them to Gary for the public-semantics decision. Stop
-before implementing that new public surface until that decision is made;
-continue the already-settled Array/Map work independently. An unresolved spelling is unfinished work,
-not a reason to report the String family as rejected or complete. If this
-requires materially more machinery or changes public semantics, present the
-concrete design and cost to Gary under the existing scope ceiling before
-implementing that expansion.
+The existing-syntax mixed literal probe establishes feasibility. Verify
+canonical row and child identity at the adopted owners, then exercise the
+existing String conversion fixtures. Stage the metafunction in the linked
+meta seed before compiling its pattern callers; an old seed's fallback
+diagnostic does not reject native List metafunctions.
 
 ### 5. Integrate, review, and correct the authored diff
 
@@ -248,14 +240,13 @@ A source-count reduction alone is not evidence of preserved behavior.
 Reuse: source templates, MatchCaptureLayout, ordinary child resolution,
 macro-row evaluation, stage-preserving rebuild, conversion, and cache owners.
 Deletion: raw semantic outer constructors, duplicated structural recognition,
-and the temporary direct-pattern Array path. Entry rebuild and Segment capture
+and the temporary direct-pattern Array path. Entry rebuild and String ownership
 must earn their scope with the concrete adopters above. No origin tracking,
 parallel semantic validator, new recurring gate, or broad cache redesign.
 
-Remaining feasibility decisions are the exact Entry rebuild boundary and the
-String segment spelling/role. Resolve them with focused proofs before coding
-their public surface; preserve existing semantics throughout. The current
-Array/Map evidence supports continuing, not claiming all work is already done.
+Entry remains the documented primitive row boundary. String uses existing
+metafunctions; no public spelling or role decision remains. Verify the final
+adoption while preserving existing semantics throughout.
 
 Independent review: Sol reviewed capture ownership and aggregate coverage;
 the pinned dual-macro coordinator reviewed campaign alignment and schedule.
@@ -285,7 +276,10 @@ and publication remain future implementation work.
   spelling inside a String template. Do not present the template spelling as
   a complete public design. The design worker is resolving that contract.
 
-### Proposed String public contract (awaiting Gary's decision)
+### Withdrawn String public contract (historical proposal)
+
+The following proposal was withdrawn in favor of existing metafunctions.
+It is retained only as the history of the superseded design.
 
 `Segment` represents one complete String row. An ordinary argument is a
 percent String fragment containing exactly one row: `%"text"`, `%"$name"`, or
