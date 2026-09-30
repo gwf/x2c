@@ -25,6 +25,7 @@ List generate_code_text(Compiler c, List ast, String basename);
 #endif
 
 #pragma private
+$(import "../src/grammar.xmacro")
 #include "type.x"
 #include "macros.x"
 #include "script.x"
@@ -154,10 +155,13 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
   List syntax = node;
   match (syntax) {
     case %((!or tpl-call meta-call) *): return 1;
-    case %(ident (binding ? ?(String name))): {
+    case $source_identifier_content(%((binding ? ?name))): {
+      if (name is not <string>) break;
+      String spelling = name;
       /* Expansion can insert a call typed by its macro definition. */
-      if (name in c.native_meta) c.bind_native_meta(name);
-      return name in c.meta_comptime || Compiler.supplies_native_meta(name);
+      if (spelling in c.native_meta) c.bind_native_meta(spelling);
+      return spelling in c.meta_comptime ||
+             Compiler.supplies_native_meta(spelling);
     }
   }
   foreach (Var child, syntax) if (c.meta_reaches_compile_time(child)) return 1;
@@ -477,15 +481,19 @@ static Var _template_calls(Compiler c, Var node, List callee) {
 static Var _native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
-    case %(expr ?(Type result)
-           (call (!set ?callee
-             (expr ? (ident (binding ? ?(String name)))))
-             (args *arguments))): {
-      List call = _native_call(c, callee, name, arguments, lookup);
+    case %(expr ?(Type result) ${$source_call_content($called,
+        %((!set ?callee (expr ? ${$source_identifier_content(
+            %((binding ? ?name)))}))), %(*arguments))}): {
+      if (name is not <string>) break;
+      String spelling = name;
+      List call = _native_call(c, callee, spelling, arguments, lookup);
       if (call) return c.convert_expression(call, result);
     }
-    case %(expr ?(Type type) (ident (binding ? ?(String name)))): {
-      List symbol = _native_symbol(c, type, name, lookup);
+    case %(expr ?(Type type) ${$source_identifier_content(
+        %((binding ? ?name)))}): {
+      if (name is not <string>) break;
+      String spelling = name;
+      List symbol = _native_symbol(c, type, spelling, lookup);
       if (symbol) return symbol;
     }
   }
@@ -721,11 +729,14 @@ static String _unbound(Compiler c) {
 static String _unbound_callee(Compiler c, Var node) {
   if (node is not <list>) return NULL;
   Var bound;
-  match (node) case %(ident (binding ? ?(String name))): {
-    String unbound = %"<unbound $name>";
+  match (node) case $source_identifier_content(%((binding ? ?name))): {
+    if (name is not <string>) break;
+    String spelling = name;
+    String unbound = %"<unbound $spelling>";
     return unbound in c.meta_group_bound ||
-           (name in c.native_meta && !c.macro_lisp.try_get(name, bound) &&
-            !c.bind_native_meta(name)) ? name : NULL;
+           (spelling in c.native_meta &&
+            !c.macro_lisp.try_get(spelling, bound) &&
+            !c.bind_native_meta(spelling)) ? spelling : NULL;
   }
   foreach (Var child, (List) node) {
     String name = _unbound_callee(c, child);
