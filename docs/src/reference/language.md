@@ -1002,6 +1002,24 @@ static int answer(void) {
 The element kind is inferred in the same way as a singular hole and may be
 overridden, for example `Field $members...`. Argument-hole names must be
 unique, and a name cannot be both singular and sequence-valued.
+In a quoted `Array` template, an `Expr` sequence hole occupies an element
+position and inserts its captured expressions in order. It may be empty:
+
+```x2c
+~#include "x2c.x"
+macro Expression $values(Expr $items...) =>
+  %[${10}, $items..., ${40}];
+
+int main(void) {
+  Array values = $values(20, 30);
+  Array empty = $values();
+  return values.len() == 4 && empty.len() == 2 ? 0 : 1;
+}
+```
+
+The `$items...` position is part of the macro template; `${expression}`
+inside an ordinary quoted `Array` still inserts one value.
+
 `Entry` holes capture one `key: value` row; `Entry $rows...` captures and
 forwards zero or more complete rows.
 
