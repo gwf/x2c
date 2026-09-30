@@ -11,6 +11,7 @@
 #include "x2c.x"
 #include "meta.x"
 #pragma private
+$(import "../src/grammar.xmacro")
 #include "lisp.x"
 #include "macros.x"
 #include "transform.x"
@@ -234,9 +235,11 @@ static List _pair_assignments(List targets, List item, Var pair) {
     ${_assign(targets[1], x2c_expr_index(expression, x2c_literal_int(1)))});
 }
 
-static List _expr(List type, Var binding) => %(expr $type (ident $binding));
+static List _expr(List type, Var binding) =>
+  %(expr $type ${source_identifier_content(%($binding))});
 
-static List _address(List value) => %(expr () (op & $value));
+static List _address(List value) =>
+  source_operator_expression(NULL, %(& $value));
 
 static List _declare(List type, Var binding, List initializer) {
   List value = %(bind $binding ());
@@ -245,7 +248,7 @@ static List _declare(List type, Var binding, List initializer) {
 }
 
 static List _assign(List target, List value) =>
-  %(stmnt (expr () (op = $target $value)));
+  x2c_stmnt_make(source_operator_expression(NULL, %(= $target $value)));
 
 /* class declarations
 
@@ -798,9 +801,10 @@ static List _field_on(List field, List receiver) {
 
 static List _field_value(List field) => _field_on(field, _ref("value"));
 
-static List _ref(String name) => %(expr () (ident ($name)));
+static List _ref(String name) => x2c_expr_ident(%($name));
 
-static List _op(Symbol op, List operands) => %(expr () (op $op @operands));
+static List _op(Symbol op, List operands) =>
+  source_operator_expression(NULL, %($op @operands));
 
 static List _call(String name, List arguments) =>
   x2c_expr_call(_ref(name), arguments);
