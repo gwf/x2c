@@ -326,7 +326,7 @@ static int _func_adapter_source(
       return _func_adapter_source(
         inner_type, inner_payload,
         source_type, source_binding);
-    case %(op & (expr ?inner_type ?inner_payload)):
+    case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
       return _func_adapter_source(
         inner_type, inner_payload,
         source_type, source_binding);
@@ -631,7 +631,7 @@ static int _direct_func_source(
     case %(parens (expr ?inner_type ?inner_payload)):
       return _direct_func_source(
         inner_type, inner_payload, source_type, source_binding);
-    case %(op & (expr ?inner_type ?inner_payload)):
+    case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
       return _direct_func_source(
         inner_type, inner_payload, source_type, source_binding);
   }
@@ -993,14 +993,14 @@ static List _deref_func_lift(
         probe = inner_payload;
         unwrapped = 1;
       }
-      case %(op & (expr ? ?inner_payload)): {
+      case $source_operator_content(%(& (expr ? ?inner_payload))): {
         probe = inner_payload;
         unwrapped = 1;
       }
     }
   }
   match (probe)
-    case %(op * (expr ?operand_type ?)): {
+    case $source_operator_content(%(* (expr ?operand_type ?))): {
       Type resolved = compiler.sym.resolve_key(operand_type);
       if (resolved && resolved.is_pointer() &&
           resolved.dereference().is_function())
@@ -1290,11 +1290,13 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     match (node) {
       case lambda(?body, *params): continue;
       case captured(?body, *captures, *params): continue;
-      case %(op & ?target): _require_capture_lvalue(c, target);
-      case %(op ?operator ?target *):
+      case $source_operator_content(%(& ?target)):
+        _require_capture_lvalue(c, target);
+      case $source_operator_content(%(?operator ?target *)):
         if (operator is <symbol> && ast_changes_left_operand(operator))
           _require_capture_lvalue(c, target);
-      case %(postfix ? ?target): _require_capture_lvalue(c, target);
+      case $source_postfix_content(%(? ?target)):
+        _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
         foreach (List target, targets) _require_capture_lvalue(c, target);
       case $source_call_content($called,
@@ -2137,12 +2139,12 @@ static int _goto_stop(Walk walk, Var label) {
    the operand names the object directly, or names a pointer that holds it. */
 static Var _changed_operand(Compiler c, List node) {
   match (node) {
-    case %(op ?operator ?target *): {
+    case $source_operator_content(%(?operator ?target *)): {
       if (operator is <symbol> && ast_changes_left_operand(operator))
         return target;
       return NULL;
     }
-    case %(postfix ? ?target): return target;
+    case $source_postfix_content(%(? ?target)): return target;
     case %(call ?(String helper)
                 (args (expr ? (op & (parens ?target))) *)): {
       if (helper == "x2c_var_update_volatile"
@@ -2208,7 +2210,7 @@ static int _runtime_address(
       modes.push(type.list().type().is_array());
       return 0;
     }
-    case %(op (!quote *) ?inner): {
+    case $source_operator_content(%((!quote *) ?inner)): {
       pending.push(inner);
       modes.push(0);
       return 0;
@@ -2233,7 +2235,7 @@ static int _runtime_value(
           (native.is_pointer() || !native.contains(<const>))) return 1;
       return 0;
     }
-    case %(expr ? (op & ?inner)): {
+    case $source_operator_expression(%(?), %(& ?inner)): {
       pending.push(inner);
       modes.push(1);
       return 0;
@@ -3957,19 +3959,21 @@ static List _operator(Compiler c, List ast) {
   List truthy = _truthy(c, ast);
   if (truthy != ast) return truthy;
   match (ast) {
-    case %(op ?operator (!set ?lhs (expr ? ?))
-             (!set ?rhs (expr ? ?))):
+    case $source_operator_content(%(?operator
+             (!set ?lhs (expr ? ?)) (!set ?rhs (expr ? ?)))):
       return _binary_operator(c, ast, operator, lhs, rhs);
-    case %(op (!set ?operator (!or + - ~))
-             (!set ?argument (expr ?argument_type ?))): {
+    case $source_operator_content(%(
+             (!set ?operator (!or + - ~))
+             (!set ?argument (expr ?argument_type ?)))): {
       if (c.sym.is_var_type(argument_type))
         c.report_error(
           <xform>, "dynamic unary numeric operators are not supported",
           NULL, %("use Var.binary with an explicit numeric operand"));
       return ast;
     }
-    case %(op (!set ?operator (!or ++ --))
-             (!set ?argument (expr ?argument_type ?))):
+    case $source_operator_content(%(
+             (!set ?operator (!or ++ --))
+             (!set ?argument (expr ?argument_type ?)))):
       return _unary_change(c, ast, operator, argument, argument_type);
   }
   return ast;
@@ -3977,8 +3981,8 @@ static List _operator(Compiler c, List ast) {
 
 static List _postfix(Compiler compiler, List ast) {
   match (ast)
-    case %(postfix ?operator
-                   (!set ?argument (expr ?argument_type ?))): {
+    case $source_postfix_content(%(?operator
+           (!set ?argument (expr ?argument_type ?)))): {
       Symbol op = operator, List arg = argument;
       Type type = argument_type;
       List indexed = _indexed_change(compiler, arg, op, NULL);
@@ -4021,16 +4025,18 @@ static List _truthy(Compiler compiler, List ast) {
         for_loop(
           init, _truthy_expression(compiler, condition), increment,
           body)).cadr();
-    case %(op (!set ?operator (!or && ||)) ?lhs ?rhs): {
+    case $source_operator_content(%(
+           (!set ?operator (!or && ||)) ?lhs ?rhs)): {
       List left = _truthy_expression(compiler, lhs);
       List right = _truthy_expression(compiler, rhs);
-      return %(op $operator $left $right);
+      return source_operator_content(%($operator $left $right));
     }
-    case %(op ? ?condition ?ontrue ?onfalse):
-      return %(op ? ${_truthy_expression(compiler, condition)}
-                   $ontrue $onfalse);
-    case %(op ! ?condition):
-      return %(op ! ${_truthy_expression(compiler, condition)});
+    case $source_operator_content(%(? ?condition ?ontrue ?onfalse)):
+      return source_operator_content(%(
+        ? ${_truthy_expression(compiler, condition)} $ontrue $onfalse));
+    case $source_operator_content(%(! ?condition)):
+      return source_operator_content(%(
+        ! ${_truthy_expression(compiler, condition)}));
   }
   return ast;
 }
@@ -4239,7 +4245,8 @@ static List _defer_direct_binding(Var value) {
     case %(ident ?binding): return binding;
     case %(expr ? ?inner):  return _defer_direct_binding(inner);
     case %(parens ?inner):  return _defer_direct_binding(inner);
-    case %(op . ?inner *):  return _defer_direct_binding(inner);
+    case $source_operator_content(%(. ?inner *)):
+      return _defer_direct_binding(inner);
   }
   return NULL;
 }
@@ -4283,10 +4290,11 @@ static void _defer_collect_captures(DeferCaptures *state, List ast) {
     }
   List modified = NULL;
   match (ast) {
-    case %(op ?operator ?target *):
+    case $source_operator_content(%(?operator ?target *)):
       if (operator is <symbol> && ast_changes_left_operand(operator))
         modified = _defer_direct_binding(target);
-    case %(postfix ? ?target): modified = _defer_direct_binding(target);
+    case $source_postfix_content(%(? ?target)):
+      modified = _defer_direct_binding(target);
   }
   foreach (Var child, ast)
     if (child is <list>)
