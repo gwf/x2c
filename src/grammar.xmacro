@@ -147,6 +147,14 @@ meta static List source_call_content(
     %((?callee $callee) (*arguments $arguments)));
 }
 
+/* Preserve all bound and normalized return fields in control summaries. */
+meta static List source_return_content(List fields) =>
+  cons(<return>, fields);
+
+/* A block keeps its complete source-ordered statement sequence. */
+meta static List source_block_content(List fields) =>
+  cons(<block>, fields);
+
 /* Derive a source grammar case for a typed expression or its bare content.
    Only the outer expression shell is optional; captured children retain
    their bindings and types, and semantic markers remain distinct. */

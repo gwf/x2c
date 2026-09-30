@@ -115,6 +115,12 @@ static List source_call_content(
     %((?callee $callee) (*arguments $arguments)));
 }
 
+static List source_return_content(List fields) =>
+  cons(<return>, fields);
+
+static List source_block_content(List fields) =>
+  cons(<block>, fields);
+
 static List source_pattern_with(
     Macro shape, List names, List replacements) {
   List pattern = shape.pattern(names);
@@ -702,6 +708,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_postfix_expression", source_postfix_expression);
   $linked.row(rows, "source_content_pattern", source_content_pattern);
   $linked.row(rows, "source_call_content", source_call_content);
+  $linked.row(rows, "source_return_content", source_return_content);
+  $linked.row(rows, "source_block_content", source_block_content);
   $linked.row(rows, "source_pattern_with", source_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);
