@@ -100,7 +100,8 @@ static List _cache_if_stable(Compiler c, List elem) {
   /* A reference is `(ident <binding-list>)`. The binding sublist has to be
      part of the search: `%(ident *)` also matches the final cell of a
      literal node ending in the Symbol <ident>. */
-  if (elem.try_search(%(ident (*)), matched, bindings)) return elem;
+  if (elem.try_search($source_identifier_content(%((*))),
+      matched, bindings)) return elem;
   if (c.runtime_literals) return elem;
   /* Each evaluation builds a fresh Array or Map, so a List that holds one,
      at any depth, is built at runtime too. */

@@ -1384,9 +1384,11 @@ static List Compiler._binary_op_type(
   if (ltype.car() == <opt-ref> || rtype.car() == <opt-ref>) {
     int null_test =
       (_integer_literal_kind(lhs, NULL) == <zero> ||
-       lhs.match(%(expr ? (ident (binding ? "NULL"))))) ||
+       lhs.match(%(expr ? ${$source_identifier_content(
+         %((binding ? "NULL")))}))) ||
       (_integer_literal_kind(rhs, NULL) == <zero> ||
-       rhs.match(%(expr ? (ident (binding ? "NULL")))));
+       rhs.match(%(expr ? ${$source_identifier_content(
+         %((binding ? "NULL")))})));
     if (!((op == <==> || op == <!=>) && null_test) &&
         op != <&&> && op != <||>)
       compiler.report_error(
@@ -1734,7 +1736,8 @@ macro open Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 
 static int _null_argument(List argument) =>
   _integer_literal_kind(argument, NULL) == <zero> ||
-  argument.match(%(expr ? (ident (binding ? "NULL"))));
+  argument.match(%(expr ? ${$source_identifier_content(
+    %((binding ? "NULL")))}));
 
 /** Returns one `$func_argument` or `$func_null_argument` application for
     each of `arguments`, preparing it into `storage` for the call through
@@ -2090,8 +2093,10 @@ static int _convert_string_addition(
   List bindings;
   /* Bare `%(ident *)` also matches literal data ending in <ident>. */
   int constant =
-    !lhs.try_search(%(ident (*)), matched, bindings) &&
-    !rhs.try_search(%(ident (*)), matched, bindings);
+    !lhs.try_search($source_identifier_content(%((*))),
+      matched, bindings) &&
+    !rhs.try_search($source_identifier_content(%((*))),
+      matched, bindings);
   lhs = c.convert_expression(lhs, %("String"));
   rhs = c.convert_expression(rhs, %("String"));
   return constant;
@@ -2104,7 +2109,7 @@ static void _check_untyped_operand(
   if (!member || operator == <==> || operator == <!=>) return;
   if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
-      other.match(%(expr ? (ident ?))))
+      other.match(%(expr ? ${$source_identifier_content(%(?))})))
     c.report_error(
       <type>, "operand has no x2c type beside a protocol participant",
       origin, %("a preprocessor macro has no type here: cast it, or bind its value to a local"));
@@ -2465,7 +2470,8 @@ static List _resolve_indexed(
   Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
   if (!receiver_type &&
-      List.match(receiver, %(expr () (op (!or . ->) * *))))
+      List.match(receiver, %(expr () ${$source_operator_content(
+        %((!or . ->) * *))})))
     return %(expr () (index $receiver $selector));
   c.report_error(
     <parse>, receiver_type.is_typedef_name()
@@ -3798,7 +3804,8 @@ static List _initializer_designated(
 }
 
 static int _initializer_string_array(Compiler c, Type type, List value) {
-  if (!value.match(%(expr (* char) (literal (* char) ?)))) return 0;
+  if (!value.match(%(expr (* char) ${$source_literal_content(
+      %((* char) ?))}))) return 0;
   Type array = c.sym.resolve_key(type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
@@ -3965,7 +3972,8 @@ static int _scalar_inputs(Compiler c, List items, List &string) {
       }
       default: return 0;
     }
-    if (value.match(%(expr (* char) (literal (* char) ?)))) string = value;
+    if (value.match(%(expr (* char) ${$source_literal_content(
+        %((* char) ?))}))) string = value;
   }
   return 1;
 }
@@ -4767,7 +4775,8 @@ static List _convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
   List generic = _convert_generic_arms(c, expr, declared_target);
   if (generic) return generic;
-  if (target_is_var && expr.match(%(expr () (ident (binding ? ?))))) {
+  if (target_is_var && expr.match(%(expr () ${$source_identifier_content(
+      %((binding ? ?)))}))) {
     List binding = expr.caddr().cadr();
     if (binding_identity_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
@@ -4863,7 +4872,8 @@ static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> ||
-      (expr.match(%(expr () (ident (binding ? ?)))) &&
+      (expr.match(%(expr () ${$source_identifier_content(
+        %((binding ? ?)))})) &&
        binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
     c.report_error(
       <type>, %"cannot pass a null pointer where ${target.repr()} is expected",
