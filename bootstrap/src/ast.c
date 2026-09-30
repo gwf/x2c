@@ -8,7 +8,7 @@ static List _382, _381, _377, _376, _375, _373, _372, _371, _369, _367, _365, _3
 
 static String _389, _388, _387, _386, _385, _384, _383, _379, _344, _343, _342, _341, _340, _100;
 
-static Var _380, _378, _374, _370, _368, _366, _362, _359, _355, _354, _350, _348, _347, _346, _345, _337, _333, _329, _327, _321, _318, _317, _241, _179, _132, _114, _110, _105, _104, _103, _101, _96, _92, _91, _90, _80, _78, _75, _73, _68, _67, _66, _36, _32, _29, _2;
+static Var _380, _378, _374, _370, _368, _366, _362, _359, _355, _354, _350, _348, _347, _346, _345, _337, _333, _329, _327, _321, _318, _317, _241, _179, _132, _114, _110, _105, _104, _103, _101, _96, _92, _91, _90, _80, _78, _75, _73, _68, _67, _66, _33, _32, _29, _2;
 
 #include "symbolset.h"
 static int _init_guard_ = 0;
@@ -61,8 +61,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = cons(_2, NULL);
   _29 = Symbol_var(54);
   _30 = cons(_29, NULL);
-  _32 = Symbol_var(62481260874);
-  _36 = Symbol_var(377892);
+  _32 = Symbol_var(377892);
+  _33 = Symbol_var(62481260874);
   _66 = Symbol_var(4928588686);
   _67 = Symbol_var(59976);
   _68 = Symbol_var(61737802);
@@ -100,7 +100,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _110 = List_var(_109);
   _111 = cons(_110, NULL);
   _112 = cons(_103, _111);
-  _113 = cons(_36, _112);
+  _113 = cons(_32, _112);
   _114 = Symbol_var(41184168);
   _132 = List_var(NULL);
   _179 = Symbol_var(102886);
@@ -112,7 +112,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _321 = List_var(_320);
   _322 = cons(_321, NULL);
   _325 = cons(_132, _322);
-  _326 = cons(_36, _325);
+  _326 = cons(_32, _325);
   _327 = List_var(_326);
   _328 = cons(_179, _30);
   _329 = List_var(_328);
@@ -122,7 +122,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _333 = List_var(_332);
   _334 = cons(_333, NULL);
   _335 = cons(_2, _334);
-  _336 = cons(_36, _335);
+  _336 = cons(_32, _335);
   _337 = List_var(_336);
   _338 = cons(_337, NULL);
   _339 = cons(_114, _338);
@@ -147,10 +147,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _358 = cons(_345, _357);
   _359 = Atom_intern(String_new("?callee_type"));
   _360 = cons(_359, _3);
-  _361 = cons(_36, _360);
+  _361 = cons(_32, _360);
   _362 = List_var(_361);
   _363 = cons(_362, NULL);
-  _364 = cons(_32, _363);
+  _364 = cons(_33, _363);
   _365 = cons(_346, _364);
   _366 = Symbol_var(62351779928);
   _367 = cons(_366, NULL);
@@ -163,7 +163,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _374 = List_var(_373);
   _375 = cons(_374, NULL);
   _376 = cons(_2, _375);
-  _377 = cons(_36, _376);
+  _377 = cons(_32, _376);
   _378 = Symbol_var(35579270086);
   _379 = String_new("#endif");
   _380 = String_var(_379);
@@ -471,7 +471,7 @@ int List_len(List);
 int List_try_next(List, List *, Var *);
 List Array_list(Array);
 List Ast_initializer_functions(Ast ast, List * source){
-  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_36, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
+  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_32, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
