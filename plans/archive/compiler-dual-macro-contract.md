@@ -3500,7 +3500,8 @@ every literal has disappeared.
 
 The final code and fixture tree landed on `dev` at
 `82d686e27b365a2f446903adb9497b195f1122e9`. Its
-`tools/gate-state.py check agent-pr-check` result is valid: the bootstrap and
+`tools/gate-state.py check agent-pr-check` result was valid at publication:
+the bootstrap and
 stages 0-2 each produced 192 C/H files; cold collection produced 288
 C/H/`.xi` files; 904 compiler fixtures checked 2,068 artifacts; and 912
 unit tests passed 20,373 assertions. The documentation, CLI, build, package,
