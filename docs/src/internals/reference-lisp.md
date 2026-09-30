@@ -64,9 +64,9 @@ the parameter tail needed to bind a dotted rest argument.
 Quasiquotation has two operations with distinct results: `quasiquote` returns
 one value; `quoted_elements` builds a containing List from the values
 contributed by its actual elements. An active `,@` can contribute several
-elements. The nesting depth determines when an unquote becomes active. `quoted_elements` walks
-siblings once, recursing only into nested forms. A bare `unquote`,
-`unquote-splicing`, or `quasiquote` atom inside an element sequence remains
+elements. The nesting depth determines when an unquote becomes active.
+`quoted_elements` walks siblings once, recursing only into nested forms. A bare
+`unquote`, `unquote-splicing`, or `quasiquote` atom inside an element sequence remains
 data; only a List headed by that name has quotation syntax. For example,
 `` `(a unquote (+ 1 2)) `` returns `(a unquote (+ 1 2))`, and
 `` `(a quasiquote ,(+ 1 2)) `` returns `(a quasiquote 3)`.
