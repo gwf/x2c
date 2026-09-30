@@ -97,11 +97,16 @@ static List source_call_content(
     %((?callee $callee) (*arguments $arguments)));
 }
 
-static List source_pattern(Macro shape, List names) {
+static List source_pattern_with(
+    Macro shape, List names, List replacements) {
   List pattern = shape.pattern(names);
+  if (replacements) pattern = pattern.replace(replacements);
   match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
   return pattern;
 }
+
+static List source_pattern(Macro shape, List names) =>
+  source_pattern_with(shape, names, NULL);
 
 static Var source_expression(Var value) {
   while (1) {
@@ -669,6 +674,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_string_content", source_string_content);
   $linked.row(rows, "source_call_content", source_call_content);
+  $linked.row(rows, "source_pattern_with", source_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
