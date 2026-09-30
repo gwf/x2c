@@ -83,6 +83,8 @@ List x2c_type_members(List type) {
 
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
+static List source_string_content(List rows) => cons(<segments>, rows);
+
 static List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -659,6 +661,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "source_string_content", source_string_content);
   $linked.row(rows, "source_call_content", source_call_content);
   $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);

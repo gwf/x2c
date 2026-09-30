@@ -84,6 +84,10 @@ macro Expression $map_value(Entry $rows...) => %{${$rows...}};
 /* Assignment syntax, before receiver-specific lowering. */
 macro Expression $assigned(Expr $target, Expr $stored) => $target = $stored;
 
+/* String source content retains its ordered text, expression, and cache rows.
+   The parser and resolver share this shape without inventing a segment form. */
+meta static List source_string_content(List rows) => cons(<segments>, rows);
+
 /* Derive bare $called content, then insert the consumer's callee and
    argument patterns without normalizing their constraints. */
 meta static List source_call_content(
