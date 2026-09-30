@@ -421,8 +421,7 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   if (c.meta_body || !c.meta_comptime.len()) return;
   match (callee)
     case %(expr ? ${$source_identifier_content(%((binding ? ?name)))})
-      if (name is <string>):
-      if (name in c.meta_comptime)
+      if (name is <string> && name in c.meta_comptime):
         c.report_error(
           <macro>, %"'$name' can only be called at compile time", origin,
           %("reason: it reaches a compiler operation, so no unit emits a"
