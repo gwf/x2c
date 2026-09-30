@@ -129,10 +129,6 @@ static List source_pattern_with(
   return pattern;
 }
 
-static List source_content_pattern_with(
-    Macro shape, List names, List replacements) =>
-  source_content_pattern(shape, names).replace(replacements);
-
 static List source_pattern(Macro shape, List names) {
   List pattern = shape.pattern(names);
   match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
@@ -715,7 +711,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_return_content", source_return_content);
   $linked.row(rows, "source_block_content", source_block_content);
   $linked.row(rows, "source_pattern_with", source_pattern_with);
-  $linked.row(rows, "source_content_pattern_with", source_content_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
