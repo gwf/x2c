@@ -1,9 +1,8 @@
 > Status: active
-> Plan prepared 2026-09-29. Array capability and adoption are private
-> checkpoints; capture repair is checked in an isolated worktree. Map adoption
-> is in progress; String public syntax remains under design.
-> No aggregate changes have been published. Wave 5 explicitly yielded the
-> next publication slot to this batch after its performance investigation.
+> Settled Array/Map adoption, sequence capture repair, Array sequence syntax,
+> and constructed String repair landed on dev at `7699e277` on 2026-09-29.
+> Full publication gate passed. New public Segment syntax remains a proposal
+> awaiting Gary's decision; it is not implemented or shipped.
 
 # Aggregate source forms
 
@@ -46,7 +45,7 @@ The Array adopter and Map probe contradict it. String needs its own segment
 representation proof; the limitations of Expr sequence holes do not reject
 String source forms in general.
 
-## Ownership and shared publication schedule
+## Ownership and publication coordination history
 
 Confirmed with both pinned chats on 2026-09-29:
 
@@ -354,3 +353,21 @@ improvement. All generated C/H matched for the corpus. Raw observations remain
 in `debug/aggregate-performance*.json` and corresponding logs. A speculative
 dispatch rewrite was not built and is excluded. Final publication validation
 must still establish rebuildability from the shipped bootstrap.
+
+## Delivered result
+
+Verified `origin/dev` at `7699e2772cb293481ea0b3bd554d304cb1067a3a`.
+The publication gate is valid for that unchanged tree: 904 compiler fixtures
+(2068 artifacts), 912 unit tests (20373 assertions), documentation, CLI/state,
+stage comparisons, and remaining command checks passed. Generated bootstrap
+was refreshed with the documented target using a capable seed, then the gate
+rebuilt from the shipped bootstrap. The initial publication build stopped on
+the old seed's Array syntax; that transition was repaired before publication.
+
+Array and Map use the shared source templates. Map Entry reconstruction and
+primitive parsers remain documented boundaries. The sole-sequence capture
+repair and constructed `segraw` native repair are shipped. Segment signature,
+argument syntax, and String source-template adoption remain unimplemented;
+this plan stays active for that explicit remaining decision and work.
+
+Wave 5 resumes after this batch's release and must integrate the landing tip.
