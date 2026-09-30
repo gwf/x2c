@@ -13,6 +13,7 @@
 
 #pragma once
 $(import "../lib/private-keywords.xmacro")
+$(import "../src/grammar.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
@@ -2309,12 +2310,15 @@ static void _open_references(
 
 static Var _open_natives(Compiler c, Var value, Map natives) {
   if (value is not <list> || value.is_nil()) return value;
+  Macro called = $called;
   match (value) {
-    case %(expr ? (call (expr ? (ident ?binding)) (args *arguments))): {
-      Var native;
-      if (natives.try_get(binding, native))
-        return _native_call(c, native, arguments, natives);
-    }
+    case called(?callee, *arguments):
+      if (value.list().car() == <expr>)
+        match (callee) case %(expr ? (ident ?binding)): {
+          Var native;
+          if (natives.try_get(binding, native))
+            return _native_call(c, native, arguments, natives);
+        }
     case %(decl ?base ?declarators): {
       Type resolved = base is <list> && base.type().is_bare_typedef_name()
         ? c.sym.resolve_base_type(base) : NULL;

@@ -2556,7 +2556,7 @@ static List _bind_enumerator(Compiler c, List input) {
 static List _bind_form(
   Compiler c, List input, AstPos context, int pending) {
   Macro if_then = $if_then, if_else = $if_else;
-  Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro while_loop = $while_loop, do_loop = $do_loop, for_loop = $for_loop;
   Macro return_empty = $return_empty, return_value = $return_value;
   Macro deferred = $deferred;
   Macro matched = $matched;
@@ -2648,7 +2648,7 @@ static List _bind_form(
       if (statement) return _bind_if(c, condition, ontrue);
     case if_else(?condition, ?ontrue, ?onfalse):
       if (statement) return _bind_if_else(c, condition, ontrue, onfalse);
-    case %(for ?init ?condition ?increment ?body):
+    case for_loop(?init, ?condition, ?increment, ?body):
       if (statement) return _bind_for(c, init, condition, increment, body);
     case %(raise ?code (args *details)):
       if (statement) return _bind_raise(c, code, details);

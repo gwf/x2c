@@ -57,6 +57,16 @@ typedef struct Foreach {
   Var iterator, item, pair, object, cursor;
 } Foreach;
 
+macro Statement $builtin_foreach_loop(
+    Decl $declaration, Expr $condition, Statement $body,
+    Statement $setup...) {
+  {
+    $declaration
+    $setup...
+    while ($condition) $body
+  }
+}
+
 static List _foreach_expand(
   List declaration, List collection, List body, Var iterator, Var item,
   Var pair, Var object, Var cursor) {
@@ -159,10 +169,11 @@ static List Foreach.with_cursor(Foreach *f, List spec) {
   List loop_body = %(block @assignments ${f.body});
   List initial = cursor_type.equal(f.type)
     ? object_expression : x2c_literal_int(0);
-  return %((block ${f.declaration}
+  List setup = %(
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}
-    @declarations (while $condition $loop_body)));
+    @declarations);
+  return f.loop(condition, loop_body, setup);
 }
 
 static List _cursor_assignments(List targets, List outputs) {
@@ -188,10 +199,16 @@ static List Foreach.with_iter(Foreach *f, List converter) {
     ? %(${_assign(f.targets[0], item_expression)})
     : _pair_assignments(f.targets, item_expression, f.pair);
   List loop_body = %(block @assignments ${f.body});
-  return %((block ${f.declaration}
+  List setup = %(
     ${_declare(%("Iter"), f.iterator, initializer)}
-    ${_declare(%("Var"), f.item, %())}
-    (while $condition $loop_body)));
+    ${_declare(%("Var"), f.item, %())});
+  return f.loop(condition, loop_body, setup);
+}
+
+static List Foreach.loop(
+  Foreach *f, List condition, List body, List setup) {
+  Macro shape = $builtin_foreach_loop;
+  return shape(f.declaration, condition, body, setup);
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
@@ -335,13 +352,18 @@ static List Shape.constructor(Shape *s) {
 
 /* What `free` runs: the class's own `drop` on a set value, then the
    release of the value's storage. */
+macro Statement $class_drop(Expr $value, Expr $call) {
+  if ($value) $call;
+}
+
 static List Shape.release(Shape *s) {
   List value = s.value;
   List drop = _own_method(s.owner, "drop");
   List release = %(${x2c_stmnt_make(_call("Scope_free", %($value)))});
   if (!drop) return release;
   List dropped = _call(x2c_binding_spelling(drop), %($value));
-  return cons(%(if $value ${x2c_stmnt_make(dropped)}), release);
+  Macro shape = $class_drop;
+  return cons(shape(value, dropped), release);
 }
 
 /* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
@@ -538,10 +560,17 @@ static List _init_call(List method, List parameters, List object) {
   return _call(x2c_binding_spelling(method), arguments.reverse());
 }
 
-static List _refusal(List call, List value) =>
-  %(if ${_op(<!>, %($call))} (block
-    ${x2c_stmnt_make(_call("Scope_free", %($value)))}
-    ${x2c_stmnt_return(x2c_literal_int(0))}));
+macro open Statement $class_refusal(Expr $call, Expr $value) {
+  if (!$call) {
+    Scope_free($value);
+    return 0;
+  }
+}
+
+static List _refusal(List call, List value) {
+  Macro shape = $class_refusal;
+  return shape(call, value);
+}
 
 static List _allocate_copy(List value) =>
   _call("Scope_memdup", %(${_op(<&>, %($value))} ${_size(value)}));
@@ -652,15 +681,24 @@ static List _writer(
 
 /* A heap class writes a NULL value, or one the rendering path has already
    entered, as its address. */
+macro open Statement $class_repr_guard(
+    Expr $null_test, Decl $path_declaration, Expr $entered,
+    Expr $leave, Statement $fallback) {
+  if ($null_test) $fallback
+  $path_declaration
+  if (!$entered) $fallback
+  defer $leave;
+}
+
 static List _repr_guard(String owner, List value, List out) {
   List null_test = _same_address(value, x2c_literal_int(0));
   List fallback = x2c_stmnt_return(_pointer_output(owner, value, out));
   List path = _ref("path");
   List entered = _method(path, "enter", %($value));
-  return %((if $null_test $fallback)
-    ${x2c_decl_make(%("RenderPath"), "path", %())}
-    (if ${_op(<!>, %($entered))} $fallback)
-    (defer ${x2c_stmnt_make(_method(path, "leave", %()))}));
+  List declaration = x2c_decl_make(%("RenderPath"), "path", %());
+  List leave = _method(path, "leave", %());
+  Macro shape = $class_repr_guard;
+  return %(${shape(null_test, declaration, entered, leave, fallback)});
 }
 
 /* The deferred body of `write_repr`: `Owner { a: ..., b: ... }`. */
