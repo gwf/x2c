@@ -155,6 +155,13 @@ meta static List source_return_content(List fields) =>
 meta static List source_block_content(List fields) =>
   cons(<block>, fields);
 
+/* Source names and literals keep their bound and typed child records. */
+meta static List source_identifier_content(List fields) =>
+  cons(<ident>, fields);
+
+meta static List source_literal_content(List fields) =>
+  cons(<literal>, fields);
+
 /* Derive a source grammar case for a typed expression or its bare content.
    Only the outer expression shell is optional; captured children retain
    their bindings and types, and semantic markers remain distinct. */
