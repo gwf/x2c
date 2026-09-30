@@ -122,6 +122,8 @@ static int SymbolSetGraph_peel(SymbolSetGraph * g);
 
 static void SymbolSetGraph_assign(SymbolSetGraph * g, uint32_t * table);
 
+static List _parse_array_element(Compiler c);
+
 static List _parse_array_elements(Compiler c);
 
 static List _parse_quoted_entries(Compiler c);
@@ -1653,9 +1655,13 @@ List Compiler_parse_array_literal(Compiler compiler){
   if(! _init_guard_) _file_init_();  Compiler_expect(compiler, 9655);  List elems = _parse_array_elements(compiler);  Compiler_expect(compiler, 187);  return cons(_4, cons(_71, cons(List_var(cons(_217, List_append(elems, NULL))), NULL)));
 }
 
+static List _parse_array_element(Compiler c){
+  List slot = Compiler_try_parse_macro_slot(c, 107888847784);  return List_truth(slot) ? slot : _parse_element(c);
+}
+
 List Array_list_free(Array);
 static List _parse_array_elements(Compiler c){
-  if(Compiler_peek(c, 0) == 187) return NULL;  Array elements = Array_new();  Array_push(elements, List_var(_parse_element(c)));  while(Compiler_test(c, 89) && Compiler_peek(c, 0) != 187) Array_push(elements, List_var(_parse_element(c)));  return Array_list_free(elements);
+  if(Compiler_peek(c, 0) == 187) return NULL;  Array elements = Array_new();  Array_push(elements, List_var(_parse_array_element(c)));  while(Compiler_test(c, 89) && Compiler_peek(c, 0) != 187) Array_push(elements, List_var(_parse_array_element(c)));  return Array_list_free(elements);
 }
 
 List Compiler_parse_map_literal(Compiler compiler){

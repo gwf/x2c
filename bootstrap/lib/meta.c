@@ -1108,7 +1108,7 @@ default: ;  return value;  break;
 MatchCaptureLayout MatchCaptureLayout_analyze(Var);
 void MatchCaptureLayout_free(MatchCaptureLayout);
 static MacroPublishing _macro_publishing(Macro t, Var pattern, List names, List internal){
-  MacroPublishing route;  memset(& route, 0, sizeof(route));  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(cons(_111, List_append(names, NULL))));  route.complete = 1;  List holes = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){
+  MacroPublishing route;  memset(& route, 0, sizeof(route));  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(names));  route.complete = 1;  List holes = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){
     int fallback = MatchCaptureLayout_index(actual, List_car(internal));  int from = Var_equal(List_assoc(Var_list(List_car(holes)), Symbol_var(740232)), Symbol_var(920394)) ? MatchCaptureLayout_index(actual, _macro_name_identity(Var_list(List_car(holes)))) : - 1;  if(from < 0) from = fallback;  int to = MatchCaptureLayout_index(logical, List_car(names));  if(from < 0 || to < 0) route.complete = 0;  route.from[route.count] = from;  route.fallback[route.count] = fallback;  route.to[route.count ++] = to;
   }
   route.binders = logical -> binder_count;  route.definite = logical -> definite;  MatchCaptureLayout_free(actual);  MatchCaptureLayout_free(logical);  return route;
