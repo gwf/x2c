@@ -33,7 +33,9 @@ but it is never tried. If no arm matches and there is no
 `default`, the whole statement does nothing.
 
 An arm's body is a single statement, so use braces when you want several.
-A pattern is always a `%(...)` `List` literal.
+Ordinary structural patterns use `%(...)` `List` literals. Compile-time
+matching can also use [Macro values](../reference/language.md#macro-values)
+to recognize the code a macro constructs.
 
 For a single arm you may drop the outer braces, the same way you can
 with `if`:

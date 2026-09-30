@@ -28,6 +28,8 @@ $(def error.nonreturning.causes '(
   malformed
   incomplete
   join-fail
+  call-stack
+  interrupt
 ))
 
 macro Expression $error.nonreturning.causes() =>

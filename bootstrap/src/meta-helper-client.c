@@ -111,6 +111,8 @@ static void Call_check(Call * call);
 
 static void Call_send(Call * call, List arguments);
 
+static void Call_send_frame(Call * call, List message);
+
 static void Call_set_deadline(Call * call);
 
 static double _now(void);
@@ -129,7 +131,7 @@ static int _helper_stop(int signal);
 
 static String _helper_ending(void);
 
-static int _helper_send(List message);
+static int _helper_send(List message, double deadline);
 
 static int _helper_receive(double deadline, Var * reply);
 
@@ -270,9 +272,9 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
   }
   ;
   Call_check(&(call));
+  Call_set_deadline(&(call));
   if(! _helper_start()) Call_refuse(&(call), _75);
   Call_send(&(call), arguments);
-  Call_set_deadline(&(call));
   for(; ; ){
     Var reply = Call_next_reply(&(call));
 
@@ -356,9 +358,13 @@ static void Call_check(Call * call){
 Var Macro_subject(void);
 static void Call_send(Call * call, List arguments){
   if(helper_reset){
-    _helper_send(cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
+    Call_send_frame(call, cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
   }
-  _helper_send(cons(_62, cons(String_var(call -> name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
+  Call_send_frame(call, cons(_62, cons(String_var(call -> name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
+}
+
+static void Call_send_frame(Call * call, List message){
+  int status = _helper_send(message, call -> deadline);  if(status < 0) Call_overdue(call);  if(! status) Call_stopped(call, _helper_ending());
 }
 
 String Env_get(String);
@@ -384,6 +390,9 @@ static int _helper_start(void){
   for(int i = 0;  i < 2;  i ++){
     fcntl(requests[i], F_SETFD, FD_CLOEXEC);  fcntl(replies[i], F_SETFD, FD_CLOEXEC);
   }
+  int flags = fcntl(requests[1], F_GETFL);  if(flags < 0 || fcntl(requests[1], F_SETFL, flags | O_NONBLOCK) < 0){
+    close(requests[0]);  close(requests[1]);  close(replies[0]);  close(replies[1]);  return 0;
+  }
   pid_t pid = fork();  if(! pid) _helper_exec(requests[0], replies[1]);  close(requests[0]);  close(replies[1]);  if(pid < 0){
     close(requests[1]);  close(replies[0]);  return 0;
   }
@@ -404,7 +413,7 @@ static int _helper_reaped(void){
 
 static int _helper_stop(int signal){
   int status = 0;  if(_helper_running()){
-    if(signal) killpg(helper_pid, signal);  else _helper_send(_64);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
+    if(signal) killpg(helper_pid, signal);  else _helper_send(_64, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
   }
   helper_pid = 0;  helper_status = - 1;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
 }
@@ -427,7 +436,7 @@ String Buffer_str(Buffer);
 
 int String_len(String);
 
-static int _helper_send(List message){
+static int _helper_send(List message, double deadline){
   Buffer out = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -452,15 +461,41 @@ static int _helper_send(List message){
       String frame = String_join(NULL, cons(String_var(Buffer_str(out)), NULL));
       void(* previous)(int) = signal(SIGPIPE, SIG_IGN);
       size_t done = 0, size = String_len(frame);
+      int status = 1;
       while(done < size){
+        int wait = 100;
+        if(deadline > 0){
+          double left = deadline - _now();
+          if(left <= 0){
+            status = - 1;
+            break;
+          }
+          if(left < 0.1) wait =(int)(left * 1000) + 1;
+        }
         ssize_t n = write(helper_to, (char *) frame + done, size - done);
+        if(n > 0){
+          done += n;
+          continue;
+        }
         if(n < 0 && errno == EINTR) continue;
-        if(n <= 0) break;
-        done += n;
+        if(n < 0 &&(errno == EAGAIN || errno == EWOULDBLOCK)){
+          struct pollfd ready ={
+            .fd = helper_to, .events = POLLOUT
+          }
+          ;
+          int polled = poll(& ready, 1, wait);
+          if((polled < 0 && errno != EINTR) || _helper_reaped() ||(ready.revents &(POLLERR | POLLHUP | POLLNVAL))){
+            status = 0;
+            break;
+          }
+          continue;
+        }
+        status = 0;
+        break;
       }
       signal(SIGPIPE, previous);
       {
-        int _x2c_return_value_1 = done == size;
+        int _x2c_return_value_1 = status;
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
           return _x2c_return_value_1;

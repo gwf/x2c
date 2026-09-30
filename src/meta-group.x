@@ -26,6 +26,7 @@ List generate_code_text(Compiler c, List ast, String basename);
 
 #pragma private
 $(import "../src/grammar.xmacro")
+$(import "../src/ast-rewrite.xmacro")
 #include "type.x"
 #include "macros.x"
 #include "script.x"
@@ -470,9 +471,8 @@ static Var _template_calls(Compiler c, Var node, List callee) {
         : %(expr ("Var") ${c.cache_literal_var(stored.str())});
       return %(expr $type (call $callee (args $template $values)));
     }
-  Array parts = [];
-  foreach (Var part, (List) node) parts.push(_template_calls(c, part, callee));
-  return parts.list_free();
+  List child;
+  $ast.rewrite_children(node, child, _template_calls(c, child, callee));
 }
 
 /* `node` with each use of a native module's function made through the
@@ -482,8 +482,8 @@ static Var _native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
     case %(expr ?(Type result) ${$source_call_content($called,
-        %((!set ?callee (expr ? ${$source_identifier_content(
-            %((binding ? ?name)))}))), %(*arguments))}): {
+        %(!set ?callee (expr ? ${$source_identifier_content(
+            %((binding ? ?name)))})), %(*arguments))}): {
       if (name is not <string>) break;
       String spelling = name;
       List call = _native_call(c, callee, spelling, arguments, lookup);
@@ -497,9 +497,8 @@ static Var _native_targets(Compiler c, Var node, List lookup) {
       if (symbol) return symbol;
     }
   }
-  Array parts = [];
-  foreach (Var part, (List) node) parts.push(_native_targets(c, part, lookup));
-  return parts.list_free();
+  List child;
+  $ast.rewrite_children(node, child, _native_targets(c, child, lookup));
 }
 
 /* A call of the native function `callee`, or NULL when no native module

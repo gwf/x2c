@@ -46,6 +46,19 @@ static void diff_lines_replaces_unrelated_texts_past_the_limit(void) {
   EXPECT_STR_EQ(edits[5999].list().cadr().string(), "new 2999");
 }
 
+static void diff_lines_releases_scratch(void) {
+  $test.scoped();
+  String old = "alpha\nbeta\n", new = "alpha\ngamma\n";
+  List expected = %((same "alpha") (delete "beta") (insert "gamma"));
+  List edits = Diff.lines(old, new);
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 20; i++) edits = Diff.lines(old, new);
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
+  EXPECT_TRUE(edits == expected);
+}
+
 static void diff_unified_prints_hunks_with_context(void) {
   $test.scoped();
   EXPECT_NULL(Diff.unified("a\nb\n", "a\nb\n", "x", "y"));
@@ -84,5 +97,6 @@ static void diff_unified_prints_hunks_with_context(void) {
 void diff_suite(void) {
   $test.run(diff_lines_finds_a_shortest_script);
   $test.run(diff_lines_replaces_unrelated_texts_past_the_limit);
+  $test.run(diff_lines_releases_scratch);
   $test.run(diff_unified_prints_hunks_with_context);
 }

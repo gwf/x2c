@@ -105,10 +105,8 @@ The reference follows x2c Lisp, including behavior that differs from Scheme:
 - Only the empty List is false; zero and the empty String are true.
 - Ordinary arguments run left to right. Macros receive unevaluated forms.
 - Special forms are callable identities, so aliases and shadowing work.
-- Closures capture free local names in evaluated positions, including scalar
-  bodies and nested expressions. Quoted data contributes no names; quasiquote
-  captures through unquote. Nested function parameters bind their own names.
-  Calls resolve parameters, captures, globals, and reserved names, without
+- Closures capture local values where they are made. Calls resolve parameters,
+  captures, globals, and reserved names, without
   searching caller locals. Globals remain visible after rebinding.
 - `def` writes globals. `eval` evaluates its supplied expression globally.
 - `apply` consumes evaluated values and rejects macros and special forms,
@@ -119,6 +117,14 @@ The reference follows x2c Lisp, including behavior that differs from Scheme:
 Native calls use x2c's existing checked `Func` boundary. Deliberate Lisp
 signature and form errors remain in the evaluator. No additional syntax
 validation or compiler-specific protection of `x2c.*` names is introduced.
+
+Production closures also retain local names that mutable global or unknown
+callables may later read from current data. Captured local special identities
+keep quote opacity, quasiquote depth and nested parameter binding. Captures
+belong to the session; borrowed values keep their original owners and must
+remain live. The reference still analyzes captures by structural form and
+does not cover all reads made possible by later callable rebinding. The
+comparison corpus does not establish parity for that case.
 
 The reference targets language behavior, not the embedding APIs or native
 stack capacity of the production runtime. Calls consume native stack: sufficiently deep recursion
@@ -134,6 +140,10 @@ written in tail position therefore runs in constant native stack. Other
 recursion consumes native stack, and the evaluator reports `<call-stack>`
 before it runs out. Free names resolve through the Lambda's captures and
 then the session globals and reserved names, never through caller locals.
+The production step budget and interruption flag stop evaluation through
+`<call-stack>` and `<interrupt>`. These shared Error causes allow catches,
+but reject returning `ignore`, `log`, or `collect` policies. A later public
+entry opens a fresh budget; the session owner clears its interruption flag.
 
 ## The showcase and comparison
 

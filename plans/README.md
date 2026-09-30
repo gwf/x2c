@@ -37,25 +37,29 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed against the stabilization candidate on 2026-09-23. A historical
+Reviewed against dev cfd8324c on 2026-09-30. A historical
 plan's original branch, baseline and authorization notes are evidence for
 that work; its opening status and this index distinguish them from current
 execution.
 
 ### Current work
 
+- [Next compiler/library beautification](compiler-library-beautification-next.md):
+  independent 111-file review and ranked plan complete on verified dev;
+  larger source implementation is separately scoped and not started.
 - [Beautification](x2c-beautification.md): Waves 0-5 delivered; a closing
   before/after source audit is queued. The unit-directory option was
   retired after Wave 5.
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
-  not yet started; waits for meta-integration to land on dev.
+  shared projection keys and row layout are on dev at 0e2f1359. Further
+  cleanup must start with the current consumers rather than repeat that work.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
-  function runs natively through a cached project helper; implemented on
-  `meta-integration` and not yet on `dev`.
+  function runs natively through a cached project helper; present on the
+  verified dev baseline. The plan retains its dated design and progress.
 - [Meta-integration mitigation](meta-integration-mitigation.md): the
-  reviewed defects are repaired and every gate passes on
-  `meta-integration`; the merge into `dev` waits on the stage 3 build-time
-  decision. It lists the follow-ups from that work.
+  integration repairs are present on dev. Its recorded gate/CI results and
+  build-time discussion belong to that integration campaign; the remaining
+  follow-ups are listed in the plan.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.

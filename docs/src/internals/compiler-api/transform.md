@@ -97,7 +97,7 @@ Source: `src/transform.x:2705`
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:4128`
+Source: `src/transform.x:4129`
 
 #### transform_map_literal
 
@@ -106,7 +106,7 @@ Source: `src/transform.x:4128`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:4137`
+Source: `src/transform.x:4138`
 
 ### `Compiler`
 
@@ -256,7 +256,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4951`
+Source: `src/transform.x:4952`
 
 ## Design notes
 

@@ -12,11 +12,11 @@
 
 #include "exception.h"
 
-static List _128, _126, _125, _123, _121, _115, _113, _112, _110, _108, _95, _56, _55, _54, _40, _39, _19, _18, _17;
+static List _130, _128, _127, _125, _123, _117, _115, _114, _112, _110, _95, _56, _55, _54, _40, _39, _19, _18, _17;
 
-static String _130, _129, _119, _118, _117, _116, _106, _104, _103, _102, _101, _99, _93, _91, _90, _89, _88, _87, _86, _85, _83, _81, _80, _79, _78, _77, _76, _75, _73, _72, _70, _68, _67, _66, _64, _62, _61, _59, _57, _52, _50, _48, _47, _46, _45, _44, _42, _41, _37, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _22, _20, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _132, _131, _121, _120, _119, _118, _108, _106, _105, _104, _103, _102, _101, _99, _93, _91, _90, _89, _88, _87, _86, _85, _83, _81, _80, _79, _78, _77, _76, _75, _73, _72, _70, _68, _67, _66, _64, _62, _61, _59, _57, _52, _50, _48, _47, _46, _45, _44, _42, _41, _37, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _22, _20, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _127, _124, _122, _120, _114, _111, _109, _107, _105, _100, _98, _97, _96, _94, _92, _84, _82, _74, _71, _69, _65, _63, _60, _58, _53, _51, _49, _43, _38, _36, _23, _21, _16, _14, _12;
+static Var _129, _126, _124, _122, _116, _113, _111, _109, _107, _100, _98, _97, _96, _94, _92, _84, _82, _74, _71, _69, _65, _63, _60, _58, _53, _51, _49, _43, _38, _36, _23, _21, _16, _14, _12;
 
 #include "datum.h"
 #include "digest.h"
@@ -144,14 +144,14 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_D04FB246_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _115)))
+_x2c_initializer_choice_D04FB246_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _117)))
 static Var _x2c_lambda_1(String path);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_D04FB246_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _128)))
+_x2c_initializer_choice_D04FB246_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _130)))
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
@@ -295,34 +295,36 @@ __attribute__((constructor)) static void _file_init_(void){
   _100 = Symbol_var(273446);
   _101 = String_new("/manifest");
   _102 = String_new(".xmacro");
-  _103 = String_new(".x");
-  _104 = String_new("/");
-  _105 = Symbol_var(437126);
-  _106 = String_new("Var");
-  _107 = String_var(_106);
-  _108 = cons(_107, NULL);
-  _109 = List_var(_108);
+  _103 = String_new(".xpmacro");
+  _104 = String_new(".x");
+  _105 = String_new(".xp");
+  _106 = String_new("/");
+  _107 = Symbol_var(437126);
+  _108 = String_new("Var");
+  _109 = String_var(_108);
   _110 = cons(_109, NULL);
   _111 = List_var(_110);
   _112 = cons(_111, NULL);
-  _113 = cons(_105, _112);
-  _114 = List_var(_113);
-  _115 = cons(_114, _108);
-  _116 = String_new("--target=");
-  _117 = String_new("--sysroot=");
-  _118 = String_new("-m");
-  _119 = String_new("String");
-  _120 = String_var(_119);
-  _121 = cons(_120, NULL);
-  _122 = List_var(_121);
+  _113 = List_var(_112);
+  _114 = cons(_113, NULL);
+  _115 = cons(_107, _114);
+  _116 = List_var(_115);
+  _117 = cons(_116, _110);
+  _118 = String_new("--target=");
+  _119 = String_new("--sysroot=");
+  _120 = String_new("-m");
+  _121 = String_new("String");
+  _122 = String_var(_121);
   _123 = cons(_122, NULL);
   _124 = List_var(_123);
   _125 = cons(_124, NULL);
-  _126 = cons(_105, _125);
-  _127 = List_var(_126);
-  _128 = cons(_127, _108);
-  _129 = String_new("the unit has no group");
-  _130 = String_new(")");
+  _126 = List_var(_125);
+  _127 = cons(_126, NULL);
+  _128 = cons(_107, _127);
+  _129 = List_var(_128);
+  _130 = cons(_129, _110);
+  _131 = String_new("the unit has no group");
+  _132 = String_new(")");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -572,6 +574,8 @@ void x2c_exception_leave(ExceptionFrame *);
 
 Tokenizer Tokenizer_new(char *, Symbol);
 
+int x2c_layout_file(String);
+
 void Tokenizer_scan(Tokenizer);
 
 Path Path_dirname(Path);
@@ -628,6 +632,7 @@ static int Scan_file(Scan * s, String path){
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
   Tokenizer tokens = Tokenizer_new(text, 3945159);
+  tokens -> layout = x2c_layout_file(path);
   Tokenizer_scan(tokens);
   return Scan_file_scope(s, tokens, Path_dirname(path));
 }
@@ -663,7 +668,7 @@ static void Scan_macro_import(Scan * s, Tokenizer tokens, String directory){
   if(! String_equal(Tokenizer_next(tokens) -> text, _6)) return;
   String spelling = _quoted(Tokenizer_next(tokens));
   String file = String_truth(spelling) ? _resolve(directory, spelling) : NULL;
-  if(String_truth(file) && String_endswith(file, _102) && ! _compiler_owns(file) && Scan_file(s, file)) Array_push(s -> imports, String_var(file));
+  if(String_truth(file) &&(String_endswith(file, _102) || String_endswith(file, _103)) && ! _compiler_owns(file) && Scan_file(s, file)) Array_push(s -> imports, String_var(file));
 }
 
 String x2c_package_entry(SourceView, List, String, String *);
@@ -685,7 +690,7 @@ String collect_resolve_include(SourceView, List, String, String, int);
 static void Scan_include(Scan * s, String directive, String directory){
   int angle = 0;
   String target = preproc_include_target(directive, &(angle));
-  if(! String_truth(target) || ! String_endswith(target, _103)) return;
+  if(! String_truth(target) || !(String_endswith(target, _104) || String_endswith(target, _105))) return;
   String file = collect_resolve_include(s -> request -> sources, s -> request -> include_dirs, directory, target, angle);
   if(! String_truth(file)) return;
   String path = Path_absolute(file);
@@ -709,7 +714,7 @@ int Path_is_file(Path);
 String x2c_get_root(void);
 
 static String _resolve(String directory, String spelling){
-  String local = String_startswith(spelling, _104) ? spelling : String_join(NULL, cons(String_var(directory), cons(String_var(_9), cons(String_var(spelling), NULL))));
+  String local = String_startswith(spelling, _106) ? spelling : String_join(NULL, cons(String_var(directory), cons(String_var(_9), cons(String_var(spelling), NULL))));
   if(Path_is_file(local)) return Path_absolute(local);
   String system = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_10), cons(String_var(spelling), NULL))));
   return Path_is_file(system) ? system : NULL;
@@ -769,7 +774,7 @@ static List _host_args(List cc_args){
     if(String_equal(arg, _27) || String_equal(arg, _28) || String_equal(arg, _29) || String_equal(arg, _30) || String_equal(arg, _31)){
       if(List_truth(List_cdr(rest))) rest = List_cdr(rest);
     }
-    else if(! String_startswith(arg, _116) && ! String_startswith(arg, _117) && ! String_startswith(arg, _118)) Array_push(kept, String_var(arg));
+    else if(! String_startswith(arg, _118) && ! String_startswith(arg, _119) && ! String_startswith(arg, _120)) Array_push(kept, String_var(arg));
   }
   return Array_list(kept);
 }
@@ -970,7 +975,7 @@ String Compiler_meta_cc_run(List, String);
 
 static String Helper_compile(Helper * h, int index, String unit){
   String base = Helper_base(h, index);
-  if(! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_50), NULL))))) return _129;
+  if(! Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_50), NULL))))) return _131;
   {
     String path;
     List _x2c_macro_object_12 = String_split(Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_50), NULL)))), _45);
@@ -1040,7 +1045,7 @@ static String _imports_unit(String base, List reached){
     Var _x2c_macro_cursor_output_14;
     while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_14))){
       path = Var_string(_x2c_macro_cursor_output_14);
-      Array_push(lines, String_var(String_add(String_add(String_new("$(import "), String_repr(path)), _130)));
+      Array_push(lines, String_var(String_add(String_add(String_new("$(import "), String_repr(path)), _132)));
     }
 
   }

@@ -148,6 +148,7 @@ static int Scan.file(Scan *s, String path) {
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
+  tokens.layout = x2c_layout_file(path);
   tokens.scan();
   return s.file_scope(tokens, Path.dirname(path));
 }
@@ -179,14 +180,14 @@ static int _marker(Tokenizer tokens) {
   return tokens.next().text == "(";
 }
 
-/* A project `.xmacro` file that `$(import` names joins `imports` after the
-   files it imports, when it holds meta code. */
+/* A project `.xmacro` or `.xpmacro` file that `$(import` names joins
+   `imports` after the files it imports, when it holds meta code. */
 static void Scan.macro_import(Scan *s, Tokenizer tokens, String directory) {
   if (tokens.next().text != "import") return;
   String spelling = _quoted(tokens.next());
   String file = spelling ? _resolve(directory, spelling) : NULL;
-  if (file && file.endswith(".xmacro") && !_compiler_owns(file) &&
-      s.file(file))
+  if (file && (file.endswith(".xmacro") || file.endswith(".xpmacro")) &&
+      !_compiler_owns(file) && s.file(file))
     s.imports.push(file);
 }
 
@@ -200,11 +201,11 @@ static void Scan.package(Scan *s, Tokenizer tokens) {
   s.file(entry);
 }
 
-/* An included project `.x` file is read for imports too. */
+/* An included project `.x` or `.xp` file is read for imports too. */
 static void Scan.include(Scan *s, String directive, String directory) {
   int angle = 0;
   String target = preproc_include_target(directive, angle);
-  if (!target || !target.endswith(".x")) return;
+  if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return;
   String file = collect_resolve_include(
     s.request.sources, s.request.include_dirs, directory, target, angle);
   if (!file) return;

@@ -2781,12 +2781,10 @@ static Var _cons_value(Compiler c, Var head, Var tail) {
 
 static String _converter_name(Var node) {
   if (node is <string>) return node;
-  if (node is not <list>) return NULL;
-  List matched = node.list().match(
-    %(expr ? ${$source_identifier_content(%(?binding))}));
-  if (!matched) return NULL;
-  List binding = matched.assoc(<?binding>);
-  return binding_identity_spelling(binding);
+  match (node)
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding_identity_spelling(binding);
+  return NULL;
 }
 
 /** Reports whether a recovered pattern value graph is fully static. */
@@ -2826,7 +2824,7 @@ Symbol match_value_flat_head(Var value, List binders, List &?tags) {
   Symbol head = match_value_head(value);
   if (!head) return 0;
   List elements = value.list().cdr();
-  Array typed = [];
+  Array typed = $auto([]);
   for (List cursor = binders; cursor && elements;
        cursor = cursor.cdr(), elements = elements.cdr()) {
     Var binder = cursor.car(), element = elements.car();
@@ -2837,8 +2835,7 @@ Symbol match_value_flat_head(Var value, List binders, List &?tags) {
     typed.push(tag ? (Var) tag : (Var) 0);
   }
   if (binders.len() != typed.len() || elements) return 0;
-  if (tags) tags = typed.list_free();
-  else typed.free();
+  if (tags) tags = typed;
   return head;
 }
 
@@ -2846,15 +2843,11 @@ Symbol match_value_flat_head(Var value, List binders, List &?tags) {
    The runtime matcher canonicalizes `varray` and `vmap`; those spellings
    keep the runtime path rather than repeating that rule here. */
 static Symbol _flat_capture_tag(Var element, Var binder) {
-  if (element is not <list>) return 0;
-  List predicate = element;
-  if (predicate.len() != 4) return 0;
-  Var (op, named, keyword, tag) = predicate;
-  if (op != <!is> || named != binder || keyword != <type>) return 0;
-  if (tag is not <symbol> || tag == <x2c-dyn> ||
-      tag == <varray> || tag == <vmap>)
-    return 0;
-  return tag;
+  match (element)
+    case %((!quote !is) ?name type ?(Symbol tag)):
+      if (name == binder && tag != <x2c-dyn> &&
+          tag != <varray> && tag != <vmap>) return tag;
+  return 0;
 }
 
 /* match binders

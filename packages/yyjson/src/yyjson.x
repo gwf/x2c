@@ -409,12 +409,14 @@ static yyjson_mut_doc *_json_document(Var value, String operation) {
   if (!document) {
     raise %(alloc-fail (library "yyjson") (operation $operation));
   }
+  int transferred = 0;
+  defer if (!transferred) yyjson_mut_doc_free(document);
   yyjson_mut_val *root = _json_to_value(document, value, 0);
   if (!root) {
-    yyjson_mut_doc_free(document);
     raise %(alloc-fail (library "yyjson") (operation $operation));
   }
   yyjson_mut_doc_set_root(document, root);
+  transferred = 1;
   return document;
 }
 

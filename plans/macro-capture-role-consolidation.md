@@ -1,6 +1,7 @@
-> Status: active -- not yet started.
-> Prerequisite: meta-integration must land on dev first.
-> This refactor precedes core support and is independent of try migration.
+> Status: reference -- shared projection keys and row layout were delivered
+> on dev at 0e2f1359 and remain in the verified cfd8324c baseline.
+> The implementation below records that scope. Any further consolidation
+> must inspect the current pattern, row and forwarding consumers first.
 
 # Share the macro capture projection schema
 

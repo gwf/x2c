@@ -18,11 +18,13 @@ if [[ $(uname -s) == Linux ]]; then
   linker_flags+=(-rdynamic)
 fi
 read -r -a build_linker_flags <<<"${BUILD_LDFLAGS:-}"
-linker_flags+=("${build_linker_flags[@]}")
+if ((${#build_linker_flags[@]})); then
+  linker_flags+=("${build_linker_flags[@]}")
+fi
 
 mkdir -p "$build"
 
-declare -A seen
+seen=$'\n'
 failures=0
 classified=0
 checked=0
@@ -33,6 +35,12 @@ artifact_count=0
 # An example is a .x source, or a .xp source in the indentation syntax.
 source_of() {
   if [[ -f "$example_dir/$1.xp" ]]; then echo "$1.xp"; else echo "$1.x"; fi
+}
+
+list_sources() {
+  find "$example_dir" -maxdepth 1 -type f \( -name '*.x' -o -name '*.xp' \)
+  find "$example_dir"/{love,power,magic,programs,scripts,tours} \
+    -type f \( -name '*.x' -o -name '*.xp' \)
 }
 
 record_failure() {
@@ -109,7 +117,8 @@ check_example() {
       record_failure "$name did not translate"
       return 0
     fi
-    if ! "$cc" "${linker_flags[@]}" -iquote "$root/include/x2c" \
+    if ! "$cc" ${linker_flags[@]+"${linker_flags[@]}"} \
+        -iquote "$root/include/x2c" \
         "$output/${name##*/}.c" -L"$root/builds/0" -lx2c -lm -o "$program" \
         >"$case_build/cc.stdout" 2>"$case_build/cc.stderr"; then
       cat "$case_build/cc.stderr" >&2
@@ -132,7 +141,7 @@ check_example() {
   run_args=()
   [[ -n "$arguments" ]] && read -r -a run_args <<<"$arguments"
   set +e
-  (cd "$case_build" && "$program" "${run_args[@]}") \
+  (cd "$case_build" && "$program" ${run_args[@]+"${run_args[@]}"}) \
     >"$case_build/stdout.actual" 2>"$case_build/stderr.actual"
   run_status=$?
   set -e
@@ -175,11 +184,11 @@ while IFS= read -r row || [[ -n "$row" ]]; do
   IFS='|' read -r name category action arguments stdout note <<<"$row"
   classified=$((classified + 1))
 
-  if [[ -n ${seen[$name]+present} ]]; then
+  if [[ $seen == *$'\n'"$name"$'\n'* ]]; then
     record_failure "$name appears more than once in the manifest"
     continue
   fi
-  seen[$name]=1
+  seen+="$name"$'\n'
 
   source="$example_dir/$(source_of "$name")"
   [[ -f "$source" ]] || record_failure "$name has no .x or .xp source"
@@ -220,7 +229,7 @@ if ((${#work[@]})); then
       "$example_dir/check.sh" "$mode" --one || true
 fi
 
-for name in "${work[@]}"; do
+for name in ${work[@]+"${work[@]}"}; do
   tally="$build/${name//\//-}/tally"
   if [[ ! -f "$tally" ]]; then
     record_failure "$name did not report a result"
@@ -239,14 +248,10 @@ while IFS= read -r source; do
   name=${source#"$example_dir/"}
   name=${name%.x}
   name=${name%.xp}
-  if [[ -z ${seen[$name]+present} ]]; then
+  if [[ $seen != *$'\n'"$name"$'\n'* ]]; then
     record_failure "$source is not classified"
   fi
-done < <({
-  find "$example_dir" -maxdepth 1 -type f \( -name '*.x' -o -name '*.xp' \)
-  find "$example_dir"/{love,power,magic,programs,scripts,tours} \
-    -type f \( -name '*.x' -o -name '*.xp' \)
-} | sort)
+done < <(list_sources | sort)
 
 if ((failures)); then
   printf 'Examples: %d failure(s), %d classified, %d checked\n' \

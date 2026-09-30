@@ -14,8 +14,6 @@ static Var _truth(int x);
 
 static Var _append2(Var left, Var right);
 
-static Var _binder_parts(Var parts);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -233,28 +231,42 @@ Var lisp_binder(Var value){
   return _truth(String_len(name) > 1 &&(String_getindex(name, 0) == '?' || String_getindex(name, 0) == '*'));
 }
 
-static Var _binder_parts(Var parts){
-  if(_nil(parts)) return parts;
-  return _append2(lisp_binders(lisp_car(parts)), _binder_parts(lisp_cdr(parts)));
-}
-
 Var lisp_binders(Var pat){
   if(! Var_is_row(pat, 9, 7, 4)){
     if(_nil(lisp_binder(pat))) return List_var(NULL);
     return List_var(Var_cons(pat, NULL));
   }
-  return _binder_parts(pat);
+  List reversed = NULL;
+  for(Var parts = pat;  ! _nil(parts);  parts = lisp_cdr(parts)){
+    List binders = Var_list(lisp_binders(lisp_car(parts)));
+    {
+      Var binder;
+      List _x2c_macro_object_2 = binders;
+      List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+      Var _x2c_macro_cursor_output_2;
+      while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+        binder = _x2c_macro_cursor_output_2;
+        reversed = cons(binder, reversed);
+      }
+
+    }
+
+  }
+  return List_var(List_reverse(reversed));
 }
 
 Atom Atom_intern(String);
 
 Var lisp_binder_lets(Var bindings, Var binders){
   if(! _init_guard_) _file_init_();
-  if(_nil(binders)) return binders;
-  Var name = lisp_car(binders);
-  List quoted = cons(Atom_intern(_0), cons(name, NULL));
-  List bound = cons(Atom_intern(_1), cons(bindings, cons(List_var(quoted), NULL)));
-  return List_var(Var_cons(List_var(cons(name, cons(List_var(bound), NULL))), Var_list(lisp_binder_lets(bindings, lisp_cdr(binders)))));
+  List reversed = NULL;
+  for(;  ! _nil(binders);  binders = lisp_cdr(binders)){
+    Var name = lisp_car(binders);
+    List quoted = cons(Atom_intern(_0), cons(name, NULL));
+    List bound = cons(Atom_intern(_1), cons(bindings, cons(List_var(quoted), NULL)));
+    reversed = cons(List_var(cons(name, cons(List_var(bound), NULL))), reversed);
+  }
+  return List_var(List_reverse(reversed));
 }
 
 Var String_var(String);
@@ -267,11 +279,11 @@ Var lisp_string_append_all(List strings){
   Var text = String_var(0);
   {
     Var s;
-    List _x2c_macro_object_2 = strings;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      s = _x2c_macro_cursor_output_2;
+    List _x2c_macro_object_3 = strings;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      s = _x2c_macro_cursor_output_3;
       text = lisp_string_append(Var_string(text), Var_string(s));
     }
 

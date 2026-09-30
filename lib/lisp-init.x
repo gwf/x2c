@@ -125,34 +125,33 @@ Var lisp_binder(Var value) {
   return _truth(name.len() > 1 && (name[0] == '?' || name[0] == '*'));
 }
 
-Var lisp_binders(Var pat);
-
-static Var _binder_parts(Var parts) {
-  if (_nil(parts)) return parts;
-  return _append2(
-    lisp_binders(lisp_car(parts)), _binder_parts(lisp_cdr(parts)));
-}
-
 /* Returns the binders of `pat` in order, repeats included. */
 Var lisp_binders(Var pat) {
   if (pat is not <list>) {
     if (_nil(lisp_binder(pat))) return %();
     return Var.cons(pat, NULL);
   }
-  return _binder_parts(pat);
+  List reversed = NULL;
+  for (Var parts = pat; !_nil(parts); parts = lisp_cdr(parts)) {
+    List binders = lisp_binders(lisp_car(parts));
+    foreach (Var binder, binders) reversed = cons(binder, reversed);
+  }
+  return reversed.reverse();
 }
 
 /* Returns `let` rows binding each of `binders` to its value in the match
     bindings named by `bindings`.
 */
 Var lisp_binder_lets(Var bindings, Var binders) {
-  if (_nil(binders)) return binders;
-  Var name = lisp_car(binders);
-  List quoted = cons(Atom.intern("quote"), cons(name, NULL));
-  List bound = cons(Atom.intern("bound"), cons(bindings, cons(quoted, NULL)));
-  return Var.cons(
-    cons(name, cons(bound, NULL)),
-    lisp_binder_lets(bindings, lisp_cdr(binders)));
+  List reversed = NULL;
+  for (; !_nil(binders); binders = lisp_cdr(binders)) {
+    Var name = lisp_car(binders);
+    List quoted = cons(Atom.intern("quote"), cons(name, NULL));
+    List bound =
+      cons(Atom.intern("bound"), cons(bindings, cons(quoted, NULL)));
+    reversed = cons(cons(name, cons(bound, NULL)), reversed);
+  }
+  return reversed.reverse();
 }
 
 /* Concatenates its `String` arguments; no arguments gives "". */

@@ -37,7 +37,9 @@ typedef struct _Diff {
     by one run of insertions.
 */
 meta native List Diff.lines(String old, String new) {
-  _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
+  Array old_lines = $auto(old.split_lines(0).array());
+  Array new_lines = $auto(new.split_lines(0).array());
+  _Diff d = {old_lines, new_lines};
   d.trim();
   if (d.myers() < 0) d.replace();
   for (int i = d.lo + d.n; i < d.old.len(); i++) d.emit(<same>, d.old[i]);

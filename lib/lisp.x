@@ -117,8 +117,8 @@ struct Lisp {
   Scope *automatic_owner, *result_owner;
   /* A session may read a parent's globals, reserved names and special
      forms. The parent holds definitions built once, before any child
-     exists, and a child holds only its own, so a name the child defines
-     shadows the parent's and nothing a child writes reaches another child.
+     exists. A child may define new names but cannot replace inherited
+     names, and nothing a child writes reaches another child.
      A parent outlives every child that names it. */
   Lisp parent;
   /* Set once the parent is complete. Nothing a child does may produce a
@@ -509,9 +509,10 @@ static List _splice(Lisp lisp, Var expr, LispEnv *env) {
 
 /* closures
 
-   A Lambda captures, when it is made, the value of each free name its body
-   reads from the environment that defines it. A free name bound nowhere in
-   that environment is read from the session globals at each call. */
+   A Lambda captures, when it is made, local values its body may read.
+   Mutable global or unknown callables may later evaluate current data, so
+   those forms retain possible reads too. A name bound nowhere in the
+   defining environment is read from the session globals at each call. */
 
 static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   if (args.len() != 2 || args.car() is not <list>) {
@@ -530,7 +531,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
 
 static void _capture(Lisp lisp, LispEnv *env, Lambda lambda) {
   Array names = $auto([]);
-  _free_names(lisp, lambda.body, lambda.params, 0, names);
+  _free_names(lisp, env, lambda.body, lambda.params, 0, names);
   foreach (Var name, names) {
     Var value;
     if (name in lambda.captures) continue;
@@ -539,39 +540,53 @@ static void _capture(Lisp lisp, LispEnv *env, Lambda lambda) {
   }
 }
 
-/* The names a body reads from the environment that defines it.
-
-   Only an evaluated position contributes one. Outside a `quasiquote` a
-   `quote`d subform is data; inside one the data is the default and a
-   `quote`d subform may still hold an unquote. `depth` counts the
-   quasiquote nesting, an unquote lowers it, and a name is read only where it
-   reaches zero again. An inner `lambda` or `macro` binds its parameters for
-   its own body, so a name it rebinds is not free below it.
-
-   `bound` grows as the walk descends, so it holds only the binders that
-   enclose the form in hand. */
+/* A captured local callable keeps its identity. Global, parameter and
+   computed heads may change which operands evaluate, so their operands
+   retain all possible local reads. Negative depth marks that possibility;
+   zero is an evaluated position and positive depth is quasiquote data.
+   Stable special identities preserve quote opacity and inner binders. */
 static void _free_names(
-  Lisp lisp, Var form, List bound, int depth, Array out) {
+  Lisp lisp, LispEnv *env, Var form, List bound, int depth, Array out) {
   if (form.is_atom()) {
-    if (depth == 0 && !(form in lisp.reserved) && !_param_has(bound, form))
-      out.push(form);
+    if (depth <= 0 && !_param_has(bound, form)) out.push(form);
     return;
   }
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
   Var head = items.car();
-  /* Quoted data reads nothing on its own, but inside a quasiquote an
-     unquote below it is still evaluated, so the walk continues there. */
-  if (head == lsym_quote && depth == 0) return;
-  int inner = _quote_depth(head, depth);
-  if (inner >= 0)
-    foreach (Var part, items.cdr()) _free_names(lisp, part, bound, inner, out);
-  else if (depth == 0 && (head == lsym_lambda || head == lsym_macro)) {
-    List rest = items.cdr(), params = _with_params(bound, rest);
-    foreach (Var part, rest.cdr()) _free_names(lisp, part, params, 0, out);
+  if (depth < 0) {
+    foreach (Var part, items) _free_names(lisp, env, part, bound, depth, out);
+    return;
   }
-  else foreach (Var part, items) _free_names(lisp, part, bound, depth, out);
+  if (depth > 0) {
+    int inner = _quote_depth(head, depth);
+    List parts = inner >= 0 ? items.cdr() : items;
+    foreach (Var part, parts)
+      _free_names(lisp, env, part, bound, inner >= 0 ? inner : depth, out);
+    return;
+  }
+  _free_names(lisp, env, head, bound, 0, out);
+  Var callable;
+  if (!head.is_atom() || _param_has(bound, head) ||
+      !_env_lookup(env, head, callable)) {
+    foreach (Var part, items.cdr())
+      _free_names(lisp, env, part, bound, -1, out);
+    return;
+  }
+  int special = callable is <func>
+    ? _special_id(lisp, (Func) callable.pointer()) : -1;
+  if (special == LISP_QUOTE) return;
+  if (special == LISP_LAMBDA || special == LISP_MACRO) {
+    List rest = items.cdr(), params = _with_params(bound, rest);
+    foreach (Var part, rest.cdr())
+      _free_names(lisp, env, part, params, 0, out);
+    return;
+  }
+  int inner = special == LISP_QUASIQUOTE ? 1 :
+    callable is <lambda> && ((Lambda) callable).macro ? -1 : 0;
+  foreach (Var part, items.cdr())
+    _free_names(lisp, env, part, bound, inner, out);
 }
 
 /* The quasiquote depth below a form headed by `head`, or -1 when `head`
@@ -807,9 +822,7 @@ static int _reserved_lookup(Lisp lisp, Var name, Var &out) {
   return 0;
 }
 
-/* A session inherits its parent's definitions and cannot replace one. The
-   parent outlives every child and is shared by all of them, so a child that
-   rebound an inherited name would change what its siblings read. */
+/* A child may define new names but cannot replace inherited definitions. */
 static int _inherited(Lisp lisp, Var name) {
   for (Lisp s = lisp.parent; s; s = s.parent)
     if (name in s.globals || name in s.reserved) return 1;
@@ -1016,7 +1029,7 @@ static Var LispReader.prefixed(LispReader *r, Var prefix, int depth) {
 static Var LispReader.list(LispReader *r, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
-  Array elements = [];
+  Array elements = $auto([]);
   Var out = void;
   loop {
     Token token = r.tokenizer.next();
@@ -1030,7 +1043,6 @@ static Var LispReader.list(LispReader *r, int depth) {
     if (element is void) break;
     elements.push(element);
   }
-  elements.free();
   return out;
 }
 
@@ -1935,8 +1947,8 @@ void Lisp.destroy(Lisp lisp) {
 
 /** Makes `lisp` read `parent`'s definitions for names it does not bind.
 
-    A name the child defines shadows the parent's, and a write always lands
-    in the child, so one child never observes another's definitions. The
+    A child may define new names but cannot replace names supplied by an
+    ancestor. Writes to child-owned names remain in that child. The
     child also takes the parent's special forms in place of its own, because
     the evaluator recognizes a special form by the identity of the `Func` a
     name resolves to, and the child resolves reserved names in the parent.
@@ -2045,6 +2057,9 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) {
     Forms run in source order and the return value is the last result, or Lisp
     `nil` for a null, empty, or comment-only source. Globals and other effects
     completed before a later reader or evaluator failure remain installed.
+    Lambdas retain local values that may become reads after a global callable
+    changes, including names in current data. These captures belong to the
+    session; borrowed referents keep their original lifetimes.
     Raises: `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
     while reading, or any cause from `Lisp.eval`.
 */

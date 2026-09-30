@@ -298,6 +298,12 @@ operation therefore does not contaminate the requested gradient. Repeating
 Values box through `Var` and each operation allocates a node in
 the active `Scope`, so this is the slow path.
 
+Use one tape for a computation, creating constants with that tape's `input`
+as well. Binary arithmetic operations reject nodes from different tapes with
+`bad-arg` before recording anything. `backward` rejects a result from another tape
+before clearing or seeding adjoints. Keep the tape and its nodes alive
+together; do not change a recorded node's `tape` field.
+
 ## Choosing
 
 Use dual numbers for a few derivatives of small functions, or for

@@ -799,8 +799,7 @@ static void _uv_watch_event(
   if (!watch) return;
   if (status < 0) {
     watch.status = status;
-    _uv_watch_release(watch);
-    return;
+    _uv_raise("watch", status);
   }
   watch.entry = entry ? String.new((char *) entry) : NULL;
   watch.kind = (events & UV_RENAME) ? <rename> : <change>;

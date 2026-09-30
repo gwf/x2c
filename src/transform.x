@@ -3407,7 +3407,7 @@ static List _destructure_source(
     compiler.report_error(
       <type>, "destructuring requires a List source", NULL,
       %(("source type" $source_type)));
-  return converted;
+  return %(code-value "bound" $converted ());
 }
 
 // Read one element from the issued List temporary.
@@ -3600,7 +3600,8 @@ static List _destructure_value(Compiler compiler, List ast) {
         List $temporary = $converted;
       };
       List bindings = compiler.bind_syntax(
-        shape(type, result, source, temporary, converted),
+        shape(type, result, %(code-value "bound" $source ()),
+          temporary, converted),
         AST_BLOCK, compiler.return_type);
       // x2c has no source spelling for this native statement expression.
       return %(parens (block @{bindings.cdr()} @assignments

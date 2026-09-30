@@ -15,6 +15,11 @@ has no native dependency.
   for code whose shape the decorators reject. A unit reaches it through
   `import "autodiff" with AdTape, AdNode;`.
 
+Each runtime computation uses one tape, including its constants. Binary
+arithmetic operations and `backward` reject foreign nodes with `bad-arg` before changing
+either tape. Keep the tape and its nodes alive together, and do not change a
+recorded node's `tape` field.
+
 ## Checks
 
 ```sh
