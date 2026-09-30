@@ -106,6 +106,17 @@ macro Expression $assigned(Expr $target, Expr $stored) => $target = $stored;
 macro Expression $addressed(Expr $value) => &$value;
 macro Expression $dereferenced(Expr $value) => *$value;
 
+/* Grouping preserves its operand as parsed, without unwrapping a cast. */
+macro Expression $grouped(Expr $value) => ($value);
+
+/* Sizeof has distinct source forms with and without grouping. */
+macro Expression $sizeof_expression(Expr $value) => sizeof $value;
+macro Expression $sizeof_grouped(Expr $value) => sizeof($value);
+
+/* Cast's first child is a declaration or a semantic type at different
+   stages, so its canonical content keeps both children unchanged. */
+meta static List source_cast_content(List parts) => cons(<cast>, parts);
+
 /* String source content retains its ordered text, expression, and cache rows.
    The parser and resolver share this shape without inventing a segment form. */
 meta static List source_string_content(List rows) => cons(<segments>, rows);

@@ -91,6 +91,8 @@ static List source_return_type(List node) {
 static List source_conditional_statement(void) =>
   %((!or if while do for switch try match with foreach finally) *);
 
+static List source_cast_content(List parts) => cons(<cast>, parts);
+
 static List source_string_content(List rows) => cons(<segments>, rows);
 
 static List source_operator_content(List parts) => cons(<op>, parts);
@@ -689,6 +691,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
+  $linked.row(rows, "source_cast_content", source_cast_content);
   $linked.row(rows, "source_string_content", source_string_content);
   $linked.row(rows, "source_operator_content", source_operator_content);
   $linked.row(rows, "source_operator_expression", source_operator_expression);
