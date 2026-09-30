@@ -90,8 +90,7 @@ static List source_return_type(List node) {
 
 static List source_string_content(List rows) => cons(<segments>, rows);
 
-static List source_operator_content(Var operator, List operands) =>
-  cons(<op>, cons(operator, operands));
+static List source_operator_content(List parts) => cons(<op>, parts);
 
 static List source_call_content(
   Macro call, List callee, List arguments) {
