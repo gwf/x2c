@@ -4204,7 +4204,7 @@ static List _initializer_capture_leaves(
     }
     case %(expr ?type ${$source_identifier_content(%(*))}):
       return _capture_initializer_value(c, value, type, inputs);
-    case %(expr ?type ${$source_call_content($called, %(?), %(*))}):
+    case %(expr ?type ${$source_call_content($called, %(expr ? ?), %(*))}):
       return _capture_initializer_value(c, value, type, inputs);
     case %(expr ?type ${$source_operator_content(%(*))}):
       return _capture_initializer_value(c, value, type, inputs);
