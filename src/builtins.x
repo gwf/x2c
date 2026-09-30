@@ -812,8 +812,11 @@ static List _call(String name, List arguments) =>
 static List _method(List receiver, String member, List arguments) =>
   x2c_expr_call(x2c_expr_field(receiver, member), arguments);
 
-static List _size(List expression) =>
-  %(expr (unsigned) (sizeof (parens $expression)));
+static List _size(List expression) {
+  Macro shape = $sizeof_grouped;
+  return Compiler.expanding().rebuild_expression(
+    %(unsigned), shape(expression));
+}
 
 static List _function(String name, List result, List parameters, List body) {
   List parts = x2c_type_parts(result);
