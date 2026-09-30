@@ -1212,6 +1212,11 @@ static void _walk_rows(Walk w, List rows) {
 static void _walk(Walk w, Var node) {
   Macro statement = $expression_statement;
   Macro deferred = $deferred;
+  Macro returned = $return_value;
+  Macro if_then = $if_then, if_else = $if_else;
+  Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro for_loop = $for_loop, switched = $switched;
+  Macro tried = $tried, caught = $caught, matched = $matched;
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
     case %(block *statements): _walk_block(w, statements);
@@ -1219,7 +1224,8 @@ static void _walk(Walk w, Var node) {
     case deferred(?body): _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
-    case %(return ?type ?result): _walk_return(w, type, result);
+    case returned(?result):
+      _walk_return(w, source_return_type(node), result);
     /* A jump leaves the statements after it to another path, and a label is
        where that path arrives, so neither carries forward what the path
        before it freed. */
@@ -1227,8 +1233,20 @@ static void _walk(Walk w, Var node) {
     case statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
-    case %((!or if while do for switch try with match foreach finally)
-           *children): _walk_conditional(w, children);
+    case if_then(?condition, ?yes): _walk_conditional(w, node.cdr());
+    case if_else(?condition, ?yes, ?no):
+      _walk_conditional(w, node.cdr());
+    case while_loop(?condition, ?body): _walk_conditional(w, node.cdr());
+    case do_loop(?body, ?condition): _walk_conditional(w, node.cdr());
+    case for_loop(?init, ?condition, ?advance, ?body):
+      _walk_conditional(w, node.cdr());
+    case switched(?subject, ?body): _walk_conditional(w, node.cdr());
+    case tried(?body, ?finalizer): _walk_conditional(w, node.cdr());
+    case caught(?body, ?finalizer, *arms):
+      _walk_conditional(w, node.cdr());
+    case matched(?subject, *rows): _walk_conditional(w, node.cdr());
+    case %((!or with foreach finally) *children):
+      _walk_conditional(w, children);
     case %(catchcases ?rows): _walk(w, rows);
     case %((!or expr parens case) *): _scan(w, node, 0);
     /* Match and catch arms are bare `(PATTERN STATEMENT ...)` rows. */

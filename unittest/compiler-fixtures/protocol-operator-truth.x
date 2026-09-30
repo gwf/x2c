@@ -46,5 +46,9 @@ int main(void) {
   if (one) visits += 2;
   while (one) { visits += 4; one.x = 0; }
   do { visits += 8; } while (zero);
-  return expressions_pass && visits == 15 ? 0 : 1;
+  one.x = 1;
+  for (int i = 0; one; i++) { visits += 16; one.x = 0; }
+  for (; zero; ) visits = 1000;
+  for (int i = 0; ; i++) { visits += 32; break; }
+  return expressions_pass && visits == 63 ? 0 : 1;
 }

@@ -2273,6 +2273,9 @@ macro open Statement $protocol_registration_fallback(
   if (!$registered) { $fallback; }
 }
 
+macro open Expression $protocol_registration_call(
+    Name $callee, Expr $arguments...) => $callee($arguments...);
+
 static List _descriptor_fields(List thunks) {
   Array fields = [];
   foreach (List row, thunks) {
@@ -2283,28 +2286,32 @@ static List _descriptor_fields(List thunks) {
 }
 
 static List _builtin_registration(
-  List methods, String name, Symbol tag) =>
-  %(expr (int)
-    (call "x2c_register_builtin_descriptor"
-      (args
-        (expr ("Symbol") (literal ("Symbol") $name $tag))
-        (expr ("VarMethods") (ident $methods)))));
+  Compiler c, List methods, String name, Symbol tag) {
+  Macro shape = $protocol_registration_call;
+  List callee = %("x2c_register_builtin_descriptor");
+  List symbol = %(expr ("Symbol") (literal ("Symbol") $name $tag));
+  List table = %(expr ("VarMethods") (ident $methods));
+  return c.rebuild_expression(%(int), shape(callee, %($symbol $table)));
+}
 
 static List _tagged_registration(
-  Compiler c, List methods, String name, Symbol tag) =>
-  %(expr (void)
-    (call "x2c_register_tagged_descriptor"
-      (args
-        (expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag))
-        ${_string_literal(c, name)}
-        (expr ("VarMethods") (ident $methods)))));
+  Compiler c, List methods, String name, Symbol tag) {
+  Macro shape = $protocol_registration_call;
+  List callee = %("x2c_register_tagged_descriptor");
+  List symbol = %(
+    expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag));
+  List table = %(expr ("VarMethods") (ident $methods));
+  return c.rebuild_expression(
+    %(void), shape(callee, %($symbol ${_string_literal(c, name)} $table)));
+}
 
 static List _fallback_registration(
   Compiler c, List methods, String name, List early_call) {
-  List fallback = %(expr (void)
-    (call "x2c_register_descriptor"
-      (args ${_string_literal(c, name)}
-            (expr ("VarMethods") (ident $methods)))));
+  Macro register_shape = $protocol_registration_call;
+  List callee = %("x2c_register_descriptor");
+  List table = %(expr ("VarMethods") (ident $methods));
+  List fallback = c.rebuild_expression(
+    %(void), register_shape(callee, %(${_string_literal(c, name)} $table)));
   Macro shape = $protocol_registration_fallback;
   return c.rebuild_statement(shape(early_call, fallback)).cadr();
 }
@@ -2324,7 +2331,7 @@ static void Compiler._generate_descriptor_registration(
      file-scope table is already zero, so skip the assignment rather than
      emit an empty initializer, which C only accepts from C23 on. */
   Symbol tag_symbol = participant.var_tag();
-  List early_call = _builtin_registration(methods, name, tag_symbol);
+  List early_call = _builtin_registration(c, methods, name, tag_symbol);
   List registration = _fallback_registration(
     c, methods, name, early_call);
   List explicit_call = explicit_tag

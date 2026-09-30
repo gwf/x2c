@@ -49,6 +49,13 @@ macro Statement $do_loop(Statement $body, Expr $condition) {
   do $body while ($condition)
 }
 
+/* Optional header clauses retain the parser's absent fields; the first
+   clause can also be a declaration in its own for scope. */
+macro Statement $for_loop(Expr $init, Expr $condition, Expr $advance,
+    Statement $body) {
+  for ($init; $condition; $advance) $body
+}
+
 /* A switch whose body owns its cases. */
 macro Statement $switched(Expr $subject, Statement $body) {
   switch ($subject) $body
@@ -57,6 +64,12 @@ macro Statement $switched(Expr $subject, Statement $body) {
 /* Return's result type is binder context, not source syntax. */
 macro Statement $return_empty() { return; }
 macro Statement $return_value(Expr $value) { return $value; }
+
+/* A return's target type is supplied by its binder, not its source form. */
+meta static List source_return_type(List node) {
+  match (node) case %(return ?type ?): return type;
+  return NULL;
+}
 
 /* One expression used as a statement, retaining its bound expression. */
 macro Statement $expression_statement(Expr $value) { $value; }

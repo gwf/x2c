@@ -3583,9 +3583,11 @@ static List _destructure_value(Compiler compiler, List ast) {
   return ast;
 }
 static List _return(Compiler compiler, List ast) {
+  Macro returned = $return_value;
   match (ast)
-    case %(return ?rtype ?expression):
-      return %(return ${compiler.convert_expression(expression, rtype)});
+    case returned(?expression):
+      return %(return ${compiler.convert_expression(
+        expression, source_return_type(ast))});
   return ast;
 }
 
@@ -4000,6 +4002,7 @@ static List _postfix(Compiler compiler, List ast) {
 static List _truthy(Compiler compiler, List ast) {
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop;
+  Macro for_loop = $for_loop;
   match (ast) {
     case if_then(?condition, ?yes):
       return compiler.rebuild_statement(
@@ -4013,9 +4016,11 @@ static List _truthy(Compiler compiler, List ast) {
     case do_loop(?body, ?condition):
       return compiler.rebuild_statement(
         do_loop(body, _truthy_expression(compiler, condition))).cadr();
-    case %(for ?init ?condition ?increment ?body):
-      return %(for $init ${_truthy_expression(compiler, condition)}
-                   $increment $body);
+    case for_loop(?init, ?condition, ?increment, ?body):
+      return compiler.rebuild_statement(
+        for_loop(
+          init, _truthy_expression(compiler, condition), increment,
+          body)).cadr();
     case %(op (!set ?operator (!or && ||)) ?lhs ?rhs): {
       List left = _truthy_expression(compiler, lhs);
       List right = _truthy_expression(compiler, rhs);
