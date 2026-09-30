@@ -1080,7 +1080,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _747 = cons(_746, NULL);
   _748 = cons(_262, _747);
   _749 = List_var(_748);
-  _750 = int_var(21990);
+  _750 = int_var(21978);
   _751 = cons(_750, NULL);
   _752 = cons(_277, _751);
   _753 = List_var(_752);
@@ -1263,7 +1263,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _930 = cons(_929, NULL);
   _931 = cons(_262, _930);
   _932 = List_var(_931);
-  _933 = int_var(26121);
+  _933 = int_var(26109);
   _934 = cons(_933, NULL);
   _935 = cons(_277, _934);
   _936 = List_var(_935);
@@ -1412,7 +1412,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1079 = cons(_1078, NULL);
   _1080 = cons(_262, _1079);
   _1081 = List_var(_1080);
-  _1082 = int_var(28339);
+  _1082 = int_var(28327);
   _1083 = cons(_1082, NULL);
   _1084 = cons(_277, _1083);
   _1085 = List_var(_1084);
@@ -2346,12 +2346,10 @@ static List _class_initializer(String owner, Var heap_value){
   return NULL;
 }
 
-String int_str(int);
-
-List List_reverse(List);
+Array Array_update_n(Array, unsigned, ...);
 
 static List _init_call(List method, List parameters, List object){
-  List arguments = cons(List_var(object), NULL);
+  Array arguments = Array_update_n(Array_new(), 1, List_var(object));
   {
     List parameter;
     List _x2c_macro_object_6 = List_cdr(parameters);
@@ -2359,11 +2357,11 @@ static List _init_call(List method, List parameters, List object){
     Var _x2c_macro_cursor_output_6;
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       parameter = Var_list(_x2c_macro_cursor_output_6);
-      arguments = cons(List_var(_ref(String_join(NULL, cons(String_var(_639), cons(String_var(int_str(List_len(arguments) - 1)), NULL))))), arguments);
+      Array_push(arguments, List_var(_ref(String_join(NULL, cons(String_var(_639), cons(String_var(Var_str(Var_box_ulong(Array_len(arguments) - 1))), NULL))))));
     }
 
   }
-  return _call(x2c_binding_spelling(List_var(method)), List_reverse(arguments));
+  return _call(x2c_binding_spelling(List_var(method)), Array_list_free(arguments));
 }
 
 static List _refusal(List call, List value){
@@ -2428,8 +2426,6 @@ static List _address_hash(List value){
   List hashed = _call(_1417, cons(List_var(x2c_expr_cast(_787, value)), NULL));
   return cons(List_var(x2c_stmnt_return(hashed)), NULL);
 }
-
-Array Array_update_n(Array, unsigned, ...);
 
 static List _fields_hash(List fields){
   List hash = _ref(_1406);
@@ -2668,6 +2664,8 @@ static List _binding_rows_for(String group, List rows){
   }
   return Array_list_free(selected);
 }
+
+List List_reverse(List);
 
 static List _binding_install_rows(String group, List all_rows){
   List rows = List_reverse(_binding_rows_for(group, all_rows));

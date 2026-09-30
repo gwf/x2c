@@ -115,6 +115,13 @@ static inline int _x2c_proto_jsonbool_truth_0(Var a0);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
 static Var _x2c_lambda_0(Var name);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
@@ -124,19 +131,19 @@ static Func _x2c_func_handle_0;
 Func Func_new(FuncAdapter, List);
 
 _x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26)))
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 Var Symbol_var(Symbol);
 
@@ -456,36 +463,72 @@ static void _JsonReader__escape(_JsonReader j, Buffer out){
   _write_code_point(out, point);
 }
 
+void x2c_cleanup_push(X2CCleanup *);
+
 String String_new_len(const char *, int);
 
-String Buffer_str_free(Buffer);
+void x2c_cleanup_leave(X2CCleanup *);
+
+String Buffer_str(Buffer);
 
 Buffer Buffer_new(size_t);
 
 static String _JsonReader__string(_JsonReader j){
   int run = ++ j -> at;
   Buffer decoded = NULL;
-  while(1){
-    int byte = _JsonReader__peek(j);
-    if(byte == '"'){
-      String text = decoded == NULL ? String_new_len(j -> text + run, j -> at - run) : Buffer_str_free(Buffer_write_len(decoded, j -> text + run, j -> at - run));
-      j -> at ++;
-      return text;
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
     }
-    if(byte == '\\'){
-      if(decoded == NULL) decoded = Buffer_new(0);
-      Buffer_write_len(decoded, j -> text + run, j -> at - run);
-      _JsonReader__escape(j, decoded);
-      run = j -> at;
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & decoded;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
-    else if(! byte) _JsonReader__fail(j, _9);
-    else if(byte < 0x20) _JsonReader__fail(j, _10);
-    else{
-      int length = _utf8_length((const unsigned char *) j -> text + j -> at);
-      if(length < 0) _JsonReader__fail(j, _11);
-      j -> at += length;
-    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      while(1){
+        int byte = _JsonReader__peek(j);
+        if(byte == '"'){
+          int end = j -> at ++;
+          if(decoded == NULL){
+            String _x2c_return_value_0 = String_new_len(j -> text + run, end - run);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_0;
+            }
 
+          }
+          Buffer_write_len(decoded, j -> text + run, end - run);
+          {
+            String _x2c_return_value_1 = Buffer_str(decoded);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_1;
+            }
+
+          }
+
+        }
+        if(byte == '\\'){
+          if(decoded == NULL) decoded = Buffer_new(0);
+          Buffer_write_len(decoded, j -> text + run, j -> at - run);
+          _JsonReader__escape(j, decoded);
+          run = j -> at;
+        }
+        else if(! byte) _JsonReader__fail(j, _9);
+        else if(byte < 0x20) _JsonReader__fail(j, _10);
+        else{
+          int length = _utf8_length((const unsigned char *) j -> text + j -> at);
+          if(length < 0) _JsonReader__fail(j, _11);
+          j -> at += length;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
 
 }
@@ -713,8 +756,6 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth){
   Buffer_write_char(out, ']');
 }
 
-void x2c_cleanup_push(X2CCleanup *);
-
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -731,21 +772,19 @@ int String_equal(String, String);
 
 Var Map_getindex(Map, Var);
 
-void x2c_cleanup_leave(X2CCleanup *);
-
 static void _write_members(Buffer out, Map object, int pretty, int depth){
   Array names = Array_new();
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & names;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & names;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
       {
         Var name, member;
@@ -804,7 +843,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
       if(count) _write_line(out, pretty, depth);
       Buffer_write_char(out, '}');
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
 
 }
@@ -844,34 +883,32 @@ static void _write(Buffer out, Var value, int pretty, int depth){
 
 }
 
-String Buffer_str(Buffer);
-
 static String _json(Var value, int pretty){
   Buffer out = Buffer_new(0);
   {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & out;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
       _write(out, value, pretty, 0);
       {
-        String _x2c_return_value_0 = Buffer_str(out);
+        String _x2c_return_value_2 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
 
 }
@@ -905,6 +942,13 @@ static inline int _x2c_proto_jsonbool_truth_0(Var a0){
   return JsonBool_truth(Var_jsonbool(a0));
 }
 
+void Buffer_free(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
 static Var _x2c_lambda_0(Var name){
   return String_var(Var_str(name));
   ;
@@ -920,16 +964,16 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 void Array_cleanup(Array);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 void Buffer_cleanup(Buffer);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 #undef _x2c_initializer_choice_CDBE555C_0_expanded

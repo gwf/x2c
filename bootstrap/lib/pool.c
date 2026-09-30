@@ -52,6 +52,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "exception.h"
+#include "mutex.h"
 enum PoolStorageConstant{
   POOL_CLASS_COUNT = 10, POOL_DEPOT_COUNT = 5, POOL_KEEP_WORDS = 1
 }
@@ -287,7 +288,6 @@ _Noreturn static void _fatal(const char * message);
 static void _record_request(size_t size);
 static void _storage_initialize(void);
 static unsigned _child_capacity(Pool inner);
-static void _init_mutex(pthread_mutex_t * mutex);
 static void _storage_shutdown(void);
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -407,7 +407,7 @@ Var String_var(String);
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 192};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 193};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
@@ -457,7 +457,7 @@ static Var _intern_locked(Pool inner, Var object, int * discard){
 Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_intern_new",.line = 231};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_intern_new",.line = 232};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
@@ -490,7 +490,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 253};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 254};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
@@ -564,7 +564,7 @@ void * Scope_malloc_in(Scope *, size_t);
 void * Pool_malloc(Pool inner, size_t size){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 291};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 292};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
@@ -657,7 +657,7 @@ static PoolBlock _fresh_block(Pool inner, int class_index){
   PoolBlock fresh = malloc(_block_bytes(inner, class_index));
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "_fresh_block",.line = 363};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "_fresh_block",.line = 364};
     x2c_error_raise_n(& _x2c_error_site_4, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
@@ -670,7 +670,7 @@ void Pool_free(Pool inner, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! alloc) return;
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 376};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 377};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }
@@ -1104,6 +1104,8 @@ PoolStats Pool_stats(Pool inner){
 
 Scope Scope_new_named(const char *);
 
+void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+
 void Scope_push(Scope *);
 
 Map Map_new_capacity(unsigned);
@@ -1135,7 +1137,7 @@ Pool Pool_retain_named(Pool inner, const char * name){
         .scope = scope, .up = inner, .child_capacity = 2
       }
       ;
-      _init_mutex(& pool -> mutex);
+      x2c_mutex_recursive_initialize(& pool -> mutex, "Pool: could not initialize branch mutex");
       mutex_ready = 1;
       {
         Scope_push(& pool -> scope);
@@ -1200,12 +1202,6 @@ static unsigned _child_capacity(Pool inner){
   unsigned capacity = inner -> child_capacity;
   _unlock(inner);
   return capacity;
-}
-
-static void _init_mutex(pthread_mutex_t * mutex){
-  pthread_mutexattr_t attributes;
-  if(pthread_mutexattr_init(& attributes) || pthread_mutexattr_settype(& attributes, PTHREAD_MUTEX_RECURSIVE) || pthread_mutex_init(mutex, & attributes)) _fatal("could not initialize branch mutex");
-  pthread_mutexattr_destroy(& attributes);
 }
 
 Pool Pool_retain(Pool inner){
@@ -1302,7 +1298,7 @@ Pool Pool_open(void){
 void Pool_close(void){
   if(! _init_guard_) Pool_initialize();
   if(! Pool_current() -> up){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 969};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 957};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
@@ -1313,7 +1309,7 @@ Pool Pool_detach(void){
   if(! _init_guard_) Pool_initialize();
   Pool detached = Pool_current();
   if(! detached -> up){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 982};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 970};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }

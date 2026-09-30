@@ -11,7 +11,8 @@ static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8
 typedef struct _Option{
   String spelling, spellings, name, value, help;
   Var fallback;
-  int operand, defaulted, required, repeated, given;
+  Array collected;
+  int operand, defaulted, required, repeated, given, shared_name;
 }
 _Option;
 
@@ -36,6 +37,8 @@ static void _read_property(_Option * option, List property);
 
 static void _read_row(_Option * option, List row, Map index, int position);
 
+static void _free_spec(_Spec * spec);
+
 static _Spec _read_spec(List spec);
 
 static _Option * _find(_Spec * spec, String spelling);
@@ -56,31 +59,68 @@ static void _write_row(Buffer out, String label, String help);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
+  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+  const void * _x2c_defer_capture_4;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+
+typedef struct _x2c_defer_env_4{
+  const void * _x2c_defer_capture_6;
+}
+_x2c_defer_env_4;
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+
+typedef struct _x2c_defer_env_5{
+  const void * _x2c_defer_capture_7;
+}
+_x2c_defer_env_5;
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
+
+typedef struct _x2c_defer_env_6{
+  const void * _x2c_defer_capture_8;
+}
+_x2c_defer_env_6;
+
+static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
+
+typedef struct _x2c_defer_env_7{
+  const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_7;
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+
+typedef struct _x2c_defer_env_8{
+  const void * _x2c_defer_capture_10;
+}
+_x2c_defer_env_8;
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -116,7 +156,7 @@ Var String_var(String);
 
 _Noreturn static void _bad_option(String why, String option){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 42};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 43};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
     __builtin_unreachable();
   }
@@ -125,7 +165,7 @@ _Noreturn static void _bad_option(String why, String option){
 
 _Noreturn static void _bad_operand(String why, String operand){
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 46};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 47};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
     __builtin_unreachable();
   }
@@ -134,7 +174,7 @@ _Noreturn static void _bad_operand(String why, String operand){
 
 _Noreturn static void _bad_spec(String why, Var entry){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 51};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 52};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
     __builtin_unreachable();
   }
@@ -223,40 +263,88 @@ static void _read_row(_Option * option, List row, Map index, int position){
   else option -> fallback = int_var(0);
 }
 
+void Scope_free(void *);
+
+void Map_cleanup(Map);
+
+static void _free_spec(_Spec * spec){
+  if(spec -> options) for(int i = 0;  i < spec -> count;  i ++) Array_free(spec -> options[i].collected);
+  Scope_free(spec -> options);
+  Map_cleanup(spec -> index);
+}
+
 int List_len(List);
 
 Map Map_new(void);
 
+void x2c_cleanup_push(X2CCleanup *);
+
 void * Scope_calloc(size_t, size_t);
+
+int Map_try_get(Map, Var, Var *);
+
+long Var_integer(Var);
+
+void x2c_cleanup_leave(X2CCleanup *);
 
 static _Spec _read_spec(List spec){
   _Spec result ={
     .count = List_len(spec), .index = Map_new()
   }
   ;
-  result.options = Scope_calloc(result.count, sizeof(_Option));
-  int position = 0;
+  int complete = 0;
   {
-    List row;
-    List _x2c_macro_object_1 = spec;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      row = Var_list(_x2c_macro_cursor_output_1);
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & complete;
+    _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & result;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      result.options = Scope_calloc(result.count, sizeof(_Option));
+      int position = 0;
       {
-        _read_row(& result.options[position], row, result.index, position);
-        position ++;
+        List row;
+        List _x2c_macro_object_1 = spec;
+        List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+        Var _x2c_macro_cursor_output_1;
+        while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+          row = Var_list(_x2c_macro_cursor_output_1);
+          {
+            _Option * option = & result.options[position];
+            _read_row(option, row, result.index, position);
+            Var earlier;
+            if(Map_try_get(result.index, String_var(option -> name), &(earlier))){
+              result.options[Var_integer(earlier)].shared_name = 1;
+              option -> shared_name = 1;
+            }
+            Map_setindex(result.index, String_var(option -> name), int_var(position));
+            position ++;
+          }
+
+        }
+
+      }
+      complete = 1;
+      {
+        _Spec _x2c_return_value_0 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  return result;
+
 }
-
-int Map_try_get(Map, Var, Var *);
-
-long Var_integer(Var);
 
 static _Option * _find(_Spec * spec, String spelling){
   Var position;
@@ -268,11 +356,18 @@ Var Map_getindex(Map, Var);
 
 List List_append(List, List);
 
+Array Array_new(void);
+
+Var Array_push(Array, Var);
+
 static void _store(_Option * option, Map result, Var value){
-  if(option -> repeated){
-    List earlier = NULL;
-    if(option -> given) earlier = Var_list(Map_getindex(result, String_var(option -> name)));
+  if(option -> repeated && option -> shared_name){
+    List earlier = option -> given ? Var_list(Map_getindex(result, String_var(option -> name))) : NULL;
     Map_setindex(result, String_var(option -> name), List_var(List_append(earlier, cons(value, NULL))));
+  }
+  else if(option -> repeated){
+    if(! option -> given) option -> collected = Array_new();
+    Array_push(option -> collected, value);
   }
   else if(String_truth(option -> value) || option -> operand) Map_setindex(result, String_var(option -> name), value);
   else Map_setindex(result, String_var(option -> name), int_var(option -> given + 1));
@@ -334,37 +429,97 @@ static void _assign_operands(_Spec * spec, Map result, List operands){
   if(List_truth(operands)) _bad_operand(_19, Var_str(List_car(operands)));
 }
 
-Array Array_new(void);
-
 int String_getindex(String, int);
 
-Var Array_push(Array, Var);
-
-List Array_list_free(Array);
+List Array_list(Array);
 
 Map Args_parse(List args, List spec){
   if(! _init_guard_) _file_init_();
   _Spec parsed = _read_spec(spec);
-  Map result = Map_new();
-  for(int i = 0;  i < parsed.count;  i ++) Map_setindex(result, String_var(parsed.options[i].name), parsed.options[i].fallback);
-  Array operands = Array_new();
-  int options_ended = 0;
-  for(List rest = args;  List_truth(rest);  rest = List_cdr(rest)){
-    String word = Var_str(List_car(rest));
-    if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
-    else if(String_equal(word, _4)) options_ended = 1;
-    else if(String_getindex(word, 1) == '-') _parse_long(& parsed, result, &(rest), word);
-    else _parse_short(& parsed, result, &(rest), word);
+  {
+    _x2c_defer_env_2 _x2c_macro_environment_3 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_3._x2c_defer_capture_4 =(const void *) & parsed;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_3
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_1);
+    {
+      Map result = Map_new(), complete = NULL;
+      {
+        _x2c_defer_env_1 _x2c_macro_environment_2 ={
+          0
+        }
+        ;
+        _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & complete;
+        _x2c_macro_environment_2._x2c_defer_capture_3 =(const void *) & result;
+        X2CCleanup _x2c_defer_record_2 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_2
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_2);
+        {
+          for(int i = 0;  i < parsed.count;  i ++) Map_setindex(result, String_var(parsed.options[i].name), parsed.options[i].fallback);
+          Array operands = Array_new();
+          {
+            _x2c_defer_env_3 _x2c_macro_environment_1 ={
+              0
+            }
+            ;
+            _x2c_macro_environment_1._x2c_defer_capture_5 =(const void *) & operands;
+            X2CCleanup _x2c_defer_record_3 ={
+              .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_1
+            }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_3);
+            {
+              int options_ended = 0;
+              for(List rest = args;  List_truth(rest);  rest = List_cdr(rest)){
+                String word = Var_str(List_car(rest));
+                if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
+                else if(String_equal(word, _4)) options_ended = 1;
+                else if(String_getindex(word, 1) == '-') _parse_long(& parsed, result, &(rest), word);
+                else _parse_short(& parsed, result, &(rest), word);
+              }
+              List remaining = Array_list(operands);
+              _assign_operands(& parsed, result, remaining);
+              for(int i = 0;  i < parsed.count;  i ++){
+                _Option * option = & parsed.options[i];
+                if(option -> repeated && option -> given && ! option -> shared_name){
+                  List collected = Array_list(option -> collected);
+                  Map_setindex(result, String_var(option -> name), List_var(collected));
+                }
+                if(! option -> required || option -> given) continue;
+                String name = option -> name, spelling = option -> spelling;
+                if(option -> operand) _bad_operand(_20, name);
+                _bad_option(_21, spelling);
+              }
+              {
+                Map _x2c_return_value_1 = complete = result;
+                {
+                  x2c_cleanup_leave(& _x2c_defer_record_3);
+                  x2c_cleanup_leave(& _x2c_defer_record_2);
+                  x2c_cleanup_leave(& _x2c_defer_record_1);
+                  return _x2c_return_value_1;
+                }
+
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_3);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
-  _assign_operands(& parsed, result, Array_list_free(operands));
-  for(int i = 0;  i < parsed.count;  i ++){
-    _Option * option = & parsed.options[i];
-    if(! option -> required || option -> given) continue;
-    String name = option -> name, spelling = option -> spelling;
-    if(option -> operand) _bad_operand(_20, name);
-    _bad_option(_21, spelling);
-  }
-  return result;
+
 }
 
 static String _label(_Option * option){
@@ -389,108 +544,121 @@ static void _write_row(Buffer out, String label, String help){
 
 Buffer Buffer_new(size_t);
 
-void x2c_cleanup_push(X2CCleanup *);
-
 String Buffer_str(Buffer);
-
-void x2c_cleanup_leave(X2CCleanup *);
 
 String Args_usage(String program, List spec){
   if(! _init_guard_) _file_init_();
   _Spec parsed = _read_spec(spec);
-  Buffer synopsis = Buffer_new(0);
   {
-    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+    _x2c_defer_env_4 _x2c_macro_environment_8 ={
       0
     }
     ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & synopsis;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
+    _x2c_macro_environment_8._x2c_defer_capture_6 =(const void *) & parsed;
+    X2CCleanup _x2c_defer_record_4 ={
+      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_8
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_4);
     {
-      Buffer options = Buffer_new(0);
+      Buffer synopsis = Buffer_new(0);
       {
-        _x2c_defer_env_2 _x2c_macro_environment_2 ={
+        _x2c_defer_env_8 _x2c_macro_environment_7 ={
           0
         }
         ;
-        _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & options;
-        X2CCleanup _x2c_defer_record_1 ={
-          .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+        _x2c_macro_environment_7._x2c_defer_capture_10 =(const void *) & synopsis;
+        X2CCleanup _x2c_defer_record_5 ={
+          .fn = _x2c_defer_cleanup_8, .env = & _x2c_macro_environment_7
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_1);
+        x2c_cleanup_push(& _x2c_defer_record_5);
         {
-          Buffer operands = Buffer_new(0);
+          Buffer options = Buffer_new(0);
           {
-            _x2c_defer_env_1 _x2c_macro_environment_1 ={
+            _x2c_defer_env_7 _x2c_macro_environment_6 ={
               0
             }
             ;
-            _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & operands;
-            X2CCleanup _x2c_defer_record_2 ={
-              .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+            _x2c_macro_environment_6._x2c_defer_capture_9 =(const void *) & options;
+            X2CCleanup _x2c_defer_record_6 ={
+              .fn = _x2c_defer_cleanup_7, .env = & _x2c_macro_environment_6
             }
             ;
-            x2c_cleanup_push(& _x2c_defer_record_2);
+            x2c_cleanup_push(& _x2c_defer_record_6);
             {
-              Buffer out = Buffer_new(0);
+              Buffer operands = Buffer_new(0);
               {
-                _x2c_defer_env_0 _x2c_macro_environment_0 ={
+                _x2c_defer_env_6 _x2c_macro_environment_5 ={
                   0
                 }
                 ;
-                _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
-                X2CCleanup _x2c_defer_record_3 ={
-                  .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+                _x2c_macro_environment_5._x2c_defer_capture_8 =(const void *) & operands;
+                X2CCleanup _x2c_defer_record_7 ={
+                  .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_5
                 }
                 ;
-                x2c_cleanup_push(& _x2c_defer_record_3);
+                x2c_cleanup_push(& _x2c_defer_record_7);
                 {
-                  for(int i = 0;  i < parsed.count;  i ++){
-                    _Option * option = & parsed.options[i];
-                    String label = _label(option);
-                    if(! option -> operand) _write_row(options, label, option -> help);
-                    else{
-                      Buffer_printf(synopsis, " %s", label);
-                      if(String_truth(option -> help)) _write_row(operands, label, option -> help);
-                    }
-
-                  }
-                  String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
-                  String words = Buffer_str(synopsis);
-                  Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
-                  if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
-                  if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+                  Buffer out = Buffer_new(0);
                   {
-                    String _x2c_return_value_0 = Buffer_str(out);
-                    {
-                      x2c_cleanup_leave(& _x2c_defer_record_3);
-                      x2c_cleanup_leave(& _x2c_defer_record_2);
-                      x2c_cleanup_leave(& _x2c_defer_record_1);
-                      x2c_cleanup_leave(& _x2c_defer_record_0);
-                      return _x2c_return_value_0;
+                    _x2c_defer_env_5 _x2c_macro_environment_4 ={
+                      0
                     }
+                    ;
+                    _x2c_macro_environment_4._x2c_defer_capture_7 =(const void *) & out;
+                    X2CCleanup _x2c_defer_record_8 ={
+                      .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_4
+                    }
+                    ;
+                    x2c_cleanup_push(& _x2c_defer_record_8);
+                    {
+                      for(int i = 0;  i < parsed.count;  i ++){
+                        _Option * option = & parsed.options[i];
+                        String label = _label(option);
+                        if(! option -> operand) _write_row(options, label, option -> help);
+                        else{
+                          Buffer_printf(synopsis, " %s", label);
+                          if(String_truth(option -> help)) _write_row(operands, label, option -> help);
+                        }
 
+                      }
+                      String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
+                      String words = Buffer_str(synopsis);
+                      Buffer_printf(out, "Usage:\n  %s%s%s\n", program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
+                      if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
+                      if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+                      {
+                        String _x2c_return_value_2 = Buffer_str(out);
+                        {
+                          x2c_cleanup_leave(& _x2c_defer_record_8);
+                          x2c_cleanup_leave(& _x2c_defer_record_7);
+                          x2c_cleanup_leave(& _x2c_defer_record_6);
+                          x2c_cleanup_leave(& _x2c_defer_record_5);
+                          x2c_cleanup_leave(& _x2c_defer_record_4);
+                          return _x2c_return_value_2;
+                        }
+
+                      }
+
+                    }
+                    x2c_cleanup_leave(& _x2c_defer_record_8);
                   }
 
                 }
-                x2c_cleanup_leave(& _x2c_defer_record_3);
+                x2c_cleanup_leave(& _x2c_defer_record_7);
               }
 
             }
-            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_6);
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_5);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_4);
   }
 
 }
@@ -503,25 +671,52 @@ List Args_from_argv(int argc, char * * argv){
   return result;
 }
 
-void Buffer_cleanup(Buffer);
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)) _free_spec(&(*(_Spec *) _x2c_defer_data_0->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  if((void *)(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_2) == 0) Map_cleanup((*(Map *) _x2c_defer_data_1->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+  _free_spec(&(*(_Spec *) _x2c_defer_data_2->_x2c_defer_capture_4));
 }
+
+void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_3->_x2c_defer_capture_3));
+  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
+}
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  _free_spec(&(*(_Spec *) _x2c_defer_data_4->_x2c_defer_capture_6));
+}
+
+void Buffer_cleanup(Buffer);
+
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_7));
+}
+
+static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_6->_x2c_defer_capture_8));
+}
+
+static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_7->_x2c_defer_capture_9));
+}
+
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_8->_x2c_defer_capture_10));
 }
 

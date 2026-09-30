@@ -1191,8 +1191,6 @@ List Regex_find_all(Regex r, String subject){
 
 }
 
-int List_try_next(List, List *, Var *);
-
 List Regex_split(Regex regex, String subject){
   Array parts = Array_new();
   {
@@ -1208,20 +1206,9 @@ List Regex_split(Regex regex, String subject){
     x2c_cleanup_push(& _x2c_defer_record_7);
     {
       int cursor = 0;
-      {
-        RegexMatch found;
-        List _x2c_macro_object_0 = Regex_find_all(regex, subject);
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          found = Var_regexmatch(_x2c_macro_cursor_output_0);
-          {
-            Array_push(parts, String_var(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1)));
-            cursor = RegexCapture_end(_whole(found));
-          }
-
-        }
-
+      for(RegexMatch found = _search(regex, subject, 0);  List_truth(found);  found = _next(regex, subject, found)){
+        Array_push(parts, String_var(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1)));
+        cursor = RegexCapture_end(_whole(found));
       }
       Array_push(parts, String_var(String_getslice(subject, cursor, -2147483648, 1)));
       {
@@ -1267,13 +1254,13 @@ RegexCapture RegexMatch_capture(RegexMatch found, Var key){
   String name = numbered ? NULL : Var_str(key);
   {
     RegexCapture capture;
-    Iter _x2c_macro_iterator_1 = List_iter(found, &(struct Iter){
+    Iter _x2c_macro_iterator_0 = List_iter(found, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
-      capture = Var_regexcapture(_x2c_macro_item_1);
+    Var _x2c_macro_item_0;
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
+      capture = Var_regexcapture(_x2c_macro_item_0);
       {
         if(numbered && RegexCapture_index(capture) == number) return capture;
         if(! numbered && String_equal(RegexCapture_name(capture), name)) return capture;

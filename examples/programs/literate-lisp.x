@@ -908,7 +908,7 @@ static Interp _interpreter(void) {
                                                                                           +-------------------+
    Each function call uses the native stack. There is no tail-call
    guarantee, so sufficiently deep Lisp recursion can exhaust that stack.
-   The production word machine uses a different execution strategy.
+   Production Lisp reuses tail-call frames and checks native stack capacity.
 */
 typedef struct Repl {
   Buffer source;                                                                // Mutable input buffer.
