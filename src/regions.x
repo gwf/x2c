@@ -531,7 +531,10 @@ static Region _birth(
   }
   match (_unwrap(value)) {
     case %(cons *): return _pooled(w, born);
-    case %((!or array map) *): return _active(w);
+    case $source_pattern($array_value, %(*items)):
+      return _active(w);
+    case $source_pattern($map_value, %(*rows)):
+      return _active(w);
     case %(composite *)
       if (_class(w, type ? type : _expression_type(value)) == <container>):
       return _active(w);
@@ -729,6 +732,15 @@ static String _subject(Walk w, Var value, List named, Fact fact) {
 /* The local a store target's storage belongs to. `through` is zero when
    the store writes the local itself and one when it writes storage the
    local reaches. */
+static Fact _indexed_base(
+  Walk w, List base, Type type, int &through) {
+  Fact fact = _fact_of(w, base, NULL);
+  if (!fact) return _base(w, base, through);
+  /* A C array local owns its elements; a parameter is a pointer. */
+  through = !type.is_array() || fact.param >= 0;
+  return fact;
+}
+
 static Fact _base(Walk w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
@@ -742,14 +754,11 @@ static Fact _base(Walk w, Var place, int &through) {
       return _base(w, base, through);
     case $source_operator_content(%((!quote *) ?base)):
       return _fact_of(w, base, NULL);
-    case %((!or getindex index) (!set ?base (expr ?type ?)) ?): {
-      Fact fact = _fact_of(w, base, NULL);
-      if (!fact) return _base(w, base, through);
-      /* A C array local owns its elements; a parameter is a pointer. */
-      Type declared = type;
-      through = !declared.is_array() || fact.param >= 0;
-      return fact;
-    }
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+           %((?receiver (!set ?base (expr ?type ?))) (?selector ?))):
+      return _indexed_base(w, base, type, through);
+    case %(getindex (!set ?base (expr ?type ?)) ?):
+      return _indexed_base(w, base, type, through);
     case %(ident ?): {
       through = 0;
       return _fact_of(w, place, NULL);
@@ -790,7 +799,8 @@ static List _root(Var place) {
     match (_unwrap(place)) {
       case %(ident (!set ?binding (binding ? ?))): return binding;
       case $source_operator_content(%(? ?base *)): place = base;
-      case %((!or getindex index) ?base ?): place = base;
+      case $source_pattern($indexed, %(?base ?selector)): place = base;
+      case %(getindex ?base ?): place = base;
       default: return NULL;
     }
 }
