@@ -146,7 +146,40 @@ static void args_from_argv_skips_the_program(void) {
   EXPECT_NULL(Args.from_argv(1, argv));
 }
 
+static void args_repeated_values_finish_once(void) {
+  $test.scoped();
+  Array words = $auto([]);
+  for (int i = 0; i < 200; i++) words.push(%"$i");
+  List input = words;
+  List spec = %((items repeated (default (fallback))));
+  Map warm = Args.parse(input, spec);
+  warm.cleanup();
+  _why(%(--unknown), spec, <option>);
+  ScopeStats before = Scope.stats();
+  Map parsed = Args.parse(input, spec);
+  EXPECT_TRUE(parsed["items"].list() == input);
+  parsed.cleanup();
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_STR_EQ(_why(%(--unknown), spec, <option>).str(),
+                "unknown option: --unknown");
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_LIST_EQ(Args.parse(NULL, spec)["items"].list(), %(fallback));
+}
+
+static void args_duplicate_names_keep_store_order(void) {
+  $test.scoped();
+  List repeated = %(
+    (-a --same repeated (value x)) (-b --same repeated (value x)));
+  EXPECT_LIST_EQ(Args.parse(%(-a 1 -b 2 -a 3), repeated)["same"].list(),
+                 %("2" "3"));
+  List mixed = %(
+    (-a --same repeated (value x)) (-b --same (value x)));
+  EXPECT_TRUE(Args.parse(%(-a 1 -a 2 -b 3), mixed)["same"] == "3");
+}
+
 void args_suite(void) {
+  $test.run(args_duplicate_names_keep_store_order);
+  $test.run(args_repeated_values_finish_once);
   $test.run(args_long_and_short_spellings);
   $test.run(args_defaults_fill_every_name);
   $test.run(args_operands_and_double_dash);

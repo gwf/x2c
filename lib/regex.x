@@ -747,7 +747,8 @@ List Regex.find_all(Regex r, String subject) {
 List Regex.split(Regex regex, String subject) {
   Array parts = $auto([]);
   int cursor = 0;
-  foreach (RegexMatch found, regex.find_all(subject)) {
+  for (RegexMatch found = _search(regex, subject, 0); found;
+       found = _next(regex, subject, found)) {
     parts.push(subject[cursor:_whole(found).start()]);
     cursor = _whole(found).end();
   }

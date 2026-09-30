@@ -563,7 +563,20 @@ static void match_rejects_malformed_binder_names(void) {
 
 $(import "test-macros.xmacro")
 
+static void replace_flat_width_and_quote_suffix(void) {
+  $test.scoped();
+  Array values = $auto([]);
+  for (int i = 0; i < 500000; i++) values.push(i);
+  List wide = values;
+  EXPECT_TRUE(wide.replace(%((?unused unused))) == wide);
+  EXPECT_TRUE(%(x).match_replace(%(?value), wide) == wide);
+  EXPECT_LIST_EQ(%(a !quote (b c)).replace(%((?unused unused))), %(a b c));
+  EXPECT_LIST_EQ(%(a ?x *tail).replace(%((?x 7) (*tail (b c)))),
+                 %(a 7 b c));
+}
+
 void match_suite(void) {
+  $test.run(replace_flat_width_and_quote_suffix);
   $test.run(match_binds_variables);
   $test.run(match_star_binder_splices);
   $test.run(match_typed_empty_list);

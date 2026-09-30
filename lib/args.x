@@ -29,7 +29,8 @@ typedef enum Args {
 typedef struct _Option {
   String spelling, spellings, name, value, help;
   Var fallback;
-  int operand, defaulted, required, repeated, given;
+  Array collected;
+  int operand, defaulted, required, repeated, given, shared_name;
 } _Option;
 
 typedef struct _Spec {
@@ -105,14 +106,31 @@ static void _read_row(_Option *option, List row, Map index, int position) {
   else option.fallback = 0;
 }
 
+static void _free_spec(_Spec *spec) {
+  if (spec.options)
+    for (int i = 0; i < spec.count; i++) spec.options[i].collected.free();
+  Scope.free(spec.options);
+  spec.index.cleanup();
+}
+
 static _Spec _read_spec(List spec) {
   _Spec result = { .count = spec.len(), .index = {} };
+  int complete = 0;
+  defer if (!complete) _free_spec(&result);
   result.options = Scope.calloc(result.count, sizeof(_Option));
   int position = 0;
   foreach (List row, spec) {
-    _read_row(&result.options[position], row, result.index, position);
+    _Option *option = &result.options[position];
+    _read_row(option, row, result.index, position);
+    Var earlier;
+    if (result.index.try_get(option.name, earlier)) {
+      result.options[earlier.integer()].shared_name = 1;
+      option.shared_name = 1;
+    }
+    result.index[option.name] = position;
     position++;
   }
+  complete = 1;
   return result;
 }
 
@@ -127,10 +145,13 @@ static _Option *_find(_Spec *spec, String spelling) {
    the first occurrence; a flag counts its occurrences; any other value
    replaces an earlier one. */
 static void _store(_Option *option, Map result, Var value) {
-  if (option.repeated) {
-    List earlier = NULL;
-    if (option.given) earlier = result[option.name];
+  if (option.repeated && option.shared_name) {
+    List earlier = option.given ? result[option.name] : NULL;
     result[option.name] = earlier.append(%($value));
+  }
+  else if (option.repeated) {
+    if (!option.given) option.collected = [];
+    option.collected.push(value);
   }
   else if (option.value || option.operand) result[option.name] = value;
   else result[option.name] = option.given + 1;
@@ -231,10 +252,12 @@ static void _assign_operands(_Spec *spec, Map result, List operands) {
 */
 Map Args.parse(List args, List spec) {
   _Spec parsed = _read_spec(spec);
-  Map result = {};
+  defer _free_spec(&parsed);
+  Map result = {}, complete = NULL;
+  defer if ((void *) complete == 0) result.cleanup();
   for (int i = 0; i < parsed.count; i++)
     result[parsed.options[i].name] = parsed.options[i].fallback;
-  Array operands = [];
+  Array operands = $auto([]);
   int options_ended = 0;
   for (List rest = args; rest; rest = rest.cdr()) {
     String word = rest.car().str();
@@ -244,15 +267,20 @@ Map Args.parse(List args, List spec) {
     else if (word[1] == '-') _parse_long(&parsed, result, rest, word);
     else _parse_short(&parsed, result, rest, word);
   }
-  _assign_operands(&parsed, result, operands.list_free());
+  List remaining = operands;
+  _assign_operands(&parsed, result, remaining);
   for (int i = 0; i < parsed.count; i++) {
     _Option *option = &parsed.options[i];
+    if (option.repeated && option.given && !option.shared_name) {
+      List collected = option.collected;
+      result[option.name] = collected;
+    }
     if (!option.required || option.given) continue;
     String name = option.name, spelling = option.spelling;
     if (option.operand) _bad_operand("missing operand", name);
     _bad_option("missing option", spelling);
   }
-  return result;
+  return complete = result;
 }
 
 // usage text
@@ -282,6 +310,7 @@ static void _write_row(Buffer out, String label, String help) {
 */
 String Args.usage(String program, List spec) {
   _Spec parsed = _read_spec(spec);
+  defer _free_spec(&parsed);
   Buffer synopsis = $auto(Buffer.new(0)), options = $auto(Buffer.new(0));
   Buffer operands = $auto(Buffer.new(0)), out = $auto(Buffer.new(0));
   for (int i = 0; i < parsed.count; i++) {
