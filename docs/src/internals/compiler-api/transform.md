@@ -42,7 +42,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`; `$catch_landing` calls this in a
 slot.
 
-Source: `src/transform.x:2717`
+Source: `src/transform.x:2713`
 
 #### builtin_catch_patterns
 
@@ -51,7 +51,7 @@ Source: `src/transform.x:2717`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/transform.x:2693`
+Source: `src/transform.x:2689`
 
 #### builtin_defer_captures
 
@@ -59,7 +59,7 @@ Source: `src/transform.x:2693`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/transform.x:2822`
+Source: `src/transform.x:2818`
 
 #### builtin_defer_record
 
@@ -68,7 +68,7 @@ Source: `src/transform.x:2822`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/transform.x:2813`
+Source: `src/transform.x:2809`
 
 #### builtin_try_catch_site
 
@@ -78,7 +78,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2678`
+Source: `src/transform.x:2674`
 
 #### builtin_try_landing
 
@@ -88,7 +88,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2705`
+Source: `src/transform.x:2701`
 
 #### transform_array_literal
 
@@ -97,7 +97,7 @@ Source: `src/transform.x:2705`
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:4129`
+Source: `src/transform.x:4125`
 
 #### transform_map_literal
 
@@ -106,7 +106,7 @@ Source: `src/transform.x:4129`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:4138`
+Source: `src/transform.x:4134`
 
 ### `Compiler`
 
@@ -136,7 +136,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/transform.x:1291`
+Source: `src/transform.x:1287`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -155,7 +155,7 @@ Source: `src/transform.x:369`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/transform.x:1856`
+Source: `src/transform.x:1852`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -187,7 +187,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/transform.x:1883`
+Source: `src/transform.x:1879`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -230,7 +230,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/transform.x:1542`
+Source: `src/transform.x:1538`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -242,7 +242,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/transform.x:2288`
+Source: `src/transform.x:2284`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -256,7 +256,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4952`
+Source: `src/transform.x:4948`
 
 ## Design notes
 

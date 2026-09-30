@@ -274,18 +274,27 @@ static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
   }
 }
 
+/** Converts a decoded numeric value to native `float` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
 float x2c_numeric_f32(X2CVarNumeric &value) {
   if (value.floating) return (float) value.floating_value;
   if (value.unsigned_value) return (float) value.raw;
   return (float) Var.signed_from_bits(value.raw, value.bits);
 }
 
+/** Converts a decoded numeric value to native `double` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
 double x2c_numeric_f64(X2CVarNumeric &value) {
   if (value.floating) return (double) value.floating_value;
   if (value.unsigned_value) return (double) value.raw;
   return (double) Var.signed_from_bits(value.raw, value.bits);
 }
 
+/** Converts a decoded numeric value to native `long double` without boxing.
+    Uses the target host cast, preserving its rounding behavior.
+*/
 long double x2c_numeric_ldouble(X2CVarNumeric &value) {
   if (value.floating) return value.floating_value;
   if (value.unsigned_value) return (long double) value.raw;

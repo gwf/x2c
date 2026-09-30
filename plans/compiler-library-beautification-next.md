@@ -1,10 +1,16 @@
 # Compiler and library: the next beautification pass
 
-> Status: active. Independent review and ranked plan complete, 2026-09-30.
-> Implementation of this larger pass is separately scoped and not started.
-> The accompanying mitigation is implemented and locally verified; its PR
-> targets dev. Larger beautification source work has not started.
-> Reviewed source: origin/dev cfd8324c2a1db623a738d409b18fe3a5f7e0cbea.
+> Status: implementation campaign active, 2026-09-30.
+> The merged mitigation is PR 71, origin/dev b56a9ac2.
+> Packets 1-7, 9-11 and the capture companion are implemented in a staged
+> campaign batch; combined publication validation is in progress.
+> Packet 8's CRLF behavior and packet 12's quasiquote repair await Gary's
+> explicit decisions. Neither dependent semantic edit has been applied.
+> Packet 13 completed bounded state/construction review and implemented
+> source rendering and operation-local metadata/initializer reuse; no state
+> representation redesign or allocation-failure certification is claimed.
+> The designs below retain their original evidence boundaries. Current
+> execution evidence and remaining scope are recorded with the campaign PR.
 
 ## Goal and current architecture
 
