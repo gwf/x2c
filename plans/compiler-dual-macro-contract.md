@@ -25,7 +25,9 @@
 > on dev at `bfcc3cb4`. Retained Function initialization and try-binder
 > families are on dev at `2445be7e`. The remaining-source audit in E43
 > found no complete family that removes competing builders with current
-> source-form capabilities. Broader syntax capabilities remain undecided.
+> source-form capabilities at its `2445be7e` baseline. E44 reconciles
+> built-in macro producers and support clients against `0bccd679`; E43 alone
+> is not a completion proof. Broader syntax capabilities remain undecided.
 > The current campaign handoff
 > below supersedes historical sequencing and authorization in this record.
 
@@ -108,9 +110,10 @@ in the source/refresh commits. The single five-pair cost run is complete:
 +2.30% versus `799875a8`. Do not repeat either timing run. At this checkpoint
 no jobs or workers remained active.
 
-Next work, in order: the other surveyed transform shapes, protocol helper
-synthesis, and complete source-form
-coverage across the compiler. Static-local initialization is skipped for
+The historical next-work order was the other surveyed transform shapes,
+protocol helper synthesis, and source-form coverage across the compiler.
+The first two have since received the deliveries recorded above; current
+closeout follows E43 and E44. Static-local initialization is skipped for
 the concrete native `__typeof__`/preprocessor/type-alias boundary recorded
 below. Before each next edit, write its complete readable client/template;
 keep capability changes separate from adopters. No parser/library repair
@@ -127,7 +130,7 @@ worker or use Gary as the wakeup mechanism.
 
 ## Verified checkpoint and remaining sequence
 
-- Last verified publication: `f99136f8` on dev, defer registration gate green.
+- Historical verified publication: `f99136f8` on dev, defer registration gate green.
   Capture-clause holes, safer expansion-depth diagnostics, retained template
   reconstruction and parameter/local redeclaration repairs are landed.
 - Lambda adoption is implemented at private checkpoint `f3b86a1d`, including
@@ -146,8 +149,8 @@ After the architectural proposal, retain the requested dependency order:
    Captured-lambda C helper synthesis remains in the later transform survey.
 2. Defer registration is complete at `f99136f8`; static-local initialization
    is skipped for its recorded native-type limitation. Callable-defer
-   environment/helper synthesis landed at `308709aa`. Next are Var array/map
-   literals landed at `aaba3ca4`; other surveyed shapes remain. Gary approved
+   environment/helper synthesis landed at `308709aa`, and Var array/map
+   literals landed at `aaba3ca4`. Gary approved
    combining independently checked, disjoint shapes in one publication batch.
 3. Protocol helper synthesis beyond the already migrated wrapper.
 4. Complete source-form coverage for parsed statements and expressions:
@@ -814,7 +817,10 @@ row: do not count successive versions of try twice. The current entry is:
 | MatchRow and expression origin preflight (2026-09-28) | 89da87d0 / dev f6606dbf, same staged path and cleared output dir | raw -61.51%, cause unassigned | raw -53.83%, cause unassigned | Not counted | Not counted | Not measured |
 | Match binder and cold raw-symbol repair (2026-09-28) | 65344a45 / dev 89da87d0, same staged path and cleared output dir | raw -61.21%, cause unassigned | raw -53.28%, cause unassigned | Not counted | Not counted | Not measured |
 | Index source form and grammar import (2026-09-28) | 473406af / dev 65344a45, same staged path and cleared output dir | raw -60.85%, cause unassigned | raw -53.43%, cause unassigned | Not counted | Not counted | Not measured |
-| Later lowerings | Not migrated | Not measured | Not measured | Not measured | Not measured | Not measured |
+| Destructuring, Func, and ordinary-call families | published at e4942f7e | not recorded in this ledger | not recorded in this ledger | Not counted | Not counted | Not measured |
+| Region call and assignment families | published at bfcc3cb4 | not recorded in this ledger | not recorded in this ledger | Not counted | Not counted | Not measured |
+| Retained Function and try-binder families | published at 2445be7e | not recorded in this ledger | not recorded in this ledger | Not counted | Not counted | Not measured |
+| Later closeout work | pending integration | Not measured | Not measured | Not counted | Not counted | Not measured |
 
 The six rows from callable-defer through Func bridge factories are raw
 timing records, not valid migration cost estimates. Their baseline binary
@@ -3395,6 +3401,44 @@ derived state or a stage boundary. The source-form campaign can resume only
 with a concrete capability that deletes one of these complete owners while
 preserving its semantic facts, or with an explicit new objective that values
 additional macro expressiveness despite a near-term source increase.
+
+### E44. Built-in and support-owner reconciliation at `0bccd679`
+
+The E43 deletion test did not fully classify the native macro producers in
+`builtins.x`. These functions emit user-program syntax before ordinary macro
+binding, so they are source-form candidates, not backend exceptions. Their
+Lisp entry points are in `etc/builtin-core.xlisp` and
+`etc/lisp-bindings.xlisp`; `etc/builtin-macros.xmacro` calls `$scope` and
+`foreach` expansion. A bounded worker trial established these distinctions:
+
+| Family | Current source boundary | Disposition |
+| --- | --- | --- |
+| `$scope` | `_scope_expand` chooses retain/release or push/pop and preserves a nested cleanup scope. | One adjacent Statement template for the complete block/defer shape composes with the native selector. A private candidate built and passed scope, class-lifetime, and region fixtures; publication remains pending. |
+| `foreach` | `Foreach.with_cursor` and `with_iter` choose protocol/cursor calls, output declarations, assignment conversion, and loop body. | One shared loop template compiled, and the broad fixture's generated C was byte identical. It changed AST/transform sidecars throughout the expansion through additional origin wrappers. The trial was reverted; its small outer skeleton did not justify that change. Cursor and Iter semantics stay in their native owner. |
+| `class` | `Shape` chooses representation, ownership, methods, signatures, and adoptees. `_function` and `_default` already centralize its generated function layout. | Still an authored syntax producer, not a claimed migration. A source template needs a stage-preserving way to express its dynamic parameter and body sequences and default declaration result; no such complete replacement was proved here. |
+| `$lisp.bind` | The rows are registry data; `_binding_statement` builds calls from runtime names and signatures. | The registered `$builtin.row` already spells the repeated row assignment. Remaining records and call selection are native binding metadata and generated calls, respectively. |
+
+Source-like recognition in other support owners needs a separate coverage
+decision from their semantic work. `parse.x` retains raw expression-statement
+and `switch` binder cases even though `grammar.xmacro` defines those source
+forms; `for` also has absent fields and declaration-init scope. These are
+parser-owned cases, but they are not evidence that downstream recognition is
+complete. `compiler.x:optional_reference_test` reads typed condition operators
+and null/reference identities; `macros.x:_open_natives` reads a typed call
+while deciding global/native resolution. Shared expression forms could own
+their syntax portions without replacing those decisions. Their source-form
+coverage remains pending a complete projection, not a blanket semantic
+exception.
+
+The Function/declaration uses in `compiler.x`, `macros.x`, `cache.x`, and
+`generate.x` mostly consume already-bound identities, types, modifiers,
+file/header placement, and initializer order. `collect.x` reads interface
+identity and wire records. `deps.x` and `sourceview.x` have no parsed AST
+owner. `emit.x` retains C printing and precedence dispatch, plus native
+static-initializer and match-control transformations recorded in the
+architecture. These classifications do not imply that every raw source-like
+header is already migrated. Closeout must identify the final parsed-source
+families separately from the C-producing and metadata exceptions.
 
 ### F. Static-local initialization exception
 

@@ -21,19 +21,27 @@ List x2c_expr_field(List receiver, String name);
 List x2c_expr_cast(List type, List expression);
 List x2c_decl_make(List type, Var name, List initializer);
 List x2c_param_make(List type, Var name);
+static List _call(String name, List arguments);
 
 // $scope
+
+macro Statement $builtin_scope(Expr $enter, Expr $leave, Block $body) {
+  {
+    $enter;
+    {
+      defer $leave;
+      $body
+    }
+  }
+}
 
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
-  String push = destinations ? "Scope_push" : "Scope_retain";
-  String pop = destinations ? "Scope_pop" : "Scope_release";
-  return %((block
-    (stmnt (expr () (call (expr () (ident $push)) (args @destinations))))
-    (block
-      (defer (stmnt (expr () (call (expr () (ident $pop)) (args)))))
-      $body)));
+  String enter = destinations ? "Scope_push" : "Scope_retain";
+  String leave = destinations ? "Scope_pop" : "Scope_release";
+  Macro shape = $builtin_scope;
+  return shape(_call(enter, destinations), _call(leave, %()), body);
 }
 
 /* foreach

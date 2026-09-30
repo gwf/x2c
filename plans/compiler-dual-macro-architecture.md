@@ -4,6 +4,15 @@
 > This document distinguishes observed owners from proposed organization;
 > illustrative target code is not a compiled capability claim.
 
+The baseline survey predates the `0bccd679` support-owner reconciliation in
+the contract's E44. In particular, `builtins.x` contains native macro
+algorithms that construct user-program syntax before binding. They must be
+classified as source producers rather than omitted as backend formatting.
+The `$scope` family has a private one-template candidate; the `foreach`
+trial was reverted after its origin-wrapper changes, and the `class` family
+has no proved complete source-template replacement. None of those results
+establishes campaign completion or changes the semantic ownership below.
+
 # Compiler architecture with shared grammar macros
 
 The desired compiler reads in language forms and transformations rather than

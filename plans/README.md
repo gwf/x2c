@@ -48,10 +48,10 @@ execution.
   before/after source audit is queued. Unit directories remain a design
   conversation, with no implementation approval yet.
 - [Compiler dual-macro campaign](compiler-dual-macro-contract.md#current-campaign-handoff):
-  active; core lowerings and capture holes are landed, lambda adoption is
-  incomplete. The [architecture survey](compiler-dual-macro-architecture.md)
-  records shared ownership and deletion opportunities; stage-preserving
-  construction remains the next design boundary. The handoff owns delivery.
+  active; core lowerings, lambda adoption, retained Function rebuilding, and
+  the try binder are landed. The [architecture survey](compiler-dual-macro-architecture.md)
+  records shared ownership and backend boundaries. Current source-form
+  coverage and explicit exceptions are being reconciled in the handoff.
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
   not yet started; waits for meta-integration to land on dev.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
