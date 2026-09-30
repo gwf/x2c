@@ -47,11 +47,12 @@ execution.
 - [Beautification](x2c-beautification.md): Waves 0-5 delivered; a closing
   before/after source audit is queued. The unit-directory option was
   retired after Wave 5.
-- [Compiler dual-macro campaign](compiler-dual-macro-contract.md#current-campaign-handoff):
-  active; core lowerings, lambda adoption, retained Function rebuilding, and
-  the try binder are landed. The [architecture survey](compiler-dual-macro-architecture.md)
-  records shared ownership and backend boundaries. Current source-form
-  coverage and explicit exceptions are being reconciled in the handoff.
+- [Compiler dual-macro campaign](compiler-dual-macro-contract.md#e45-final-source-family-accounting-integration-draft):
+  final source-family integration and publication validation are pending.
+  The [architecture reference](compiler-dual-macro-architecture.md) records
+  shared ownership and backend boundaries; the
+  [aggregate result](compiler-aggregate-source-forms.md) covers Array, Map,
+  and String forms.
 - [Macro capture-role consolidation](macro-capture-role-consolidation.md):
   not yet started; waits for meta-integration to land on dev.
 - [Native meta execution](native-meta-execution.md): every bodied `meta`
@@ -92,10 +93,6 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Reference audits
 
-- [Compiler dual-macro contract](compiler-dual-macro-contract.md): reference;
-  completed research on `codex/compiler-dual-macro-spike` at `1e2d5607`.
-  Evidence remains on that branch; the production work plans above are the
-  hand-off. Never merge the research branch's compiler snapshots.
 - [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
   cleanup candidates with paired source ranges and deletion boundaries.
 - [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,

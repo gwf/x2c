@@ -1,11 +1,28 @@
-> Status: active
+> Status: active -- final dual-macro integration pending, 2026-09-29.
 > Settled Array/Map adoption, sequence capture repair, Array sequence syntax,
-> and constructed String repair landed on dev at `7699e277` on 2026-09-29.
-> Full publication gate passed. Segment syntax is withdrawn: existing
-> metafunctions handle String composition. String owner consolidation is
-> part of the authorized final campaign batch.
+> and constructed String repair landed on dev at `7699e277`. The earlier
+> public Segment proposal was withdrawn; mixed String rows now use a shared
+> canonical `source_string_content` projection without a new syntax role.
+> Historical proposals and earlier gate results below describe their own trees.
 
 # Aggregate source forms
+
+## Final campaign overlay (publication pending)
+
+Array and Map source macros own their complete outer forms; the repaired
+sequence capture path admits the Array Expr sequence position. Map Entry
+reconstruction retains its existing resolved key/value owner. Mixed String
+text, expression, and cached rows share `source_string_content` between
+literal production and expression resolution. This preserves the established
+segment representation and avoids a public Segment parameter kind. Parser
+primitives still create canonical AST, and all ordinary binding, conversion,
+cache, and emission work stays in its existing owner.
+
+This overlay is part of the [compiler dual-macro campaign](compiler-dual-macro-contract.md)
+and its [architecture reference](compiler-dual-macro-architecture.md). The
+historical Segment proposal and publication record below remain as evidence
+of the earlier decision path. Final integrated-tree validation and delivery
+are recorded in the campaign contract after publication.
 
 ## Result and scope
 

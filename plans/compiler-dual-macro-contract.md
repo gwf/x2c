@@ -1,4 +1,7 @@
-> Status: active -- dual-macro compiler migration, updated 2026-09-29.
+> Status: active -- final integrated delivery pending, 2026-09-29.
+> The progress record in this header and E1-E43 is historical. E44-E45
+> supersede its old remaining-work conclusions; publication evidence is
+> inserted only after the final integrated tree passes its required gate.
 > Core support and try/wrapper/cell/Func migrations are on dev. Capture-hole
 > support landed at b59b8ade; reconstruction and parameter-scope fixes
 > landed at 799875a8. Lambda source recognition and construction are
@@ -3424,7 +3427,7 @@ Lisp entry points are in `etc/builtin-core.xlisp` and
 | --- | --- | --- |
 | `$scope` | `_scope_expand` chooses retain/release or push/pop and preserves a nested cleanup scope. | One adjacent Statement template spells the complete block/defer shape while the native selector prepares calls. Focused scope, class-lifetime, and region fixtures pass. |
 | `foreach` | `Foreach.with_cursor` and `with_iter` choose protocol/cursor calls, output declarations, assignment conversion, and loop body. | One shared Statement template spells the outer block and loop for both paths. The captured body remains a nested block. Generated C and runtime output in the broad fixture are unchanged; AST/transform sidecars record additional origin wrappers. Cursor and Iter decisions remain native. |
-| `class` | `Shape` chooses representation, ownership, methods, signatures, and adoptees. `_function` and `_default` already centralize its generated function layout. | Three source templates now spell drop, failed-init cleanup, and repr guard control bodies. Class lifetime and runtime fixtures pass with unchanged generated C and output. Dynamic signatures, default declarations, and method selection remain in their existing native owners. |
+| `class` | `Shape` chooses representation, ownership, methods, signatures, and adoptees. `_function` and `_default` already centralize its generated function layout. | Four source templates now spell drop, failed-init cleanup, repr guard, and String writer control bodies. Class lifetime and runtime fixtures pass with unchanged generated C and output. Dynamic signatures, default declarations, and method selection remain in their existing native owners. |
 | `$lisp.bind` | The rows are registry data; `_binding_statement` builds calls from runtime names and signatures. | The registered `$builtin.row` already spells the repeated row assignment. Remaining records and call selection are native binding metadata and generated calls, respectively. |
 
 Source-like recognition in support owners was also addressed. `parse.x` now
@@ -3436,8 +3439,12 @@ callee binding constraint. In `compiler.x:optional_reference_test`, the
 grouping form and shared operator content recognize syntax; the native
 operation still decides optional-reference presence from bound identities.
 The adjacent guard-exit summary uses shared complete return and block
-contents, retaining bound and normalized return arities. Null literals and
-opt-ref markers retain their typed semantic records. Optional-reference,
+contents, retaining bound and normalized return arities. Identifier and
+literal source heads now have shared exact content projections; their typed
+children and binding identities remain with the semantic reader. The native
+`sizeof` producer in `builtins.x` uses the existing `$sizeof_grouped` source
+template through `Compiler.rebuild_expression`, which supplies its established
+unsigned result type without leaving a pending invocation. Optional-reference,
 constructed-statement, and loop-boundary fixtures pass; the loop-boundary
 transform sidecar records the foreach template's retained origin wrappers.
 The support adopter depends on the shared grammar supplied by the expression
@@ -3452,6 +3459,36 @@ static-initializer and match-control transformations recorded in the
 architecture. These classifications do not imply that every raw source-like
 header is already migrated. Closeout must identify the final parsed-source
 families separately from the C-producing and metadata exceptions.
+
+### E45. Final source-family accounting (integration draft)
+
+The campaign now projects parsed statement control, expression operators and
+grouping, calls, indexing, `sizeof`, casts, aggregates, literals, and names
+through shared grammar forms or exact canonical content helpers. Support
+owners reuse these projections for constructed binding, optional-reference
+facts, macro references, literal values, and the meta group. Native `$scope`,
+`foreach`, and class producers spell repeated control bodies with adjacent
+source templates. The related [aggregate result](compiler-aggregate-source-forms.md)
+uses canonical String segment content; the public Segment proposal was
+withdrawn. The [architecture reference](compiler-dual-macro-architecture.md)
+retains the original responsibility survey as historical context.
+
+The deliberate raw List boundaries carry stage facts rather than competing
+parsed-source definitions. Parser primitives first create canonical forms;
+shared AST traversal and normalization inspect nodes independent of one
+source spelling; binding, type, identity, origin, pending macro and
+declaration records carry established semantic facts; cache and generated
+Function/declaration records carry placement and initialization order; and
+`emit.x` prints canonical C, including precedence and native static
+initialization. Those owners may keep List operations while source-like
+recognition in their clients uses grammar projections. This is an owner
+classification, not a claim that `%(` or every literal has disappeared.
+
+The final integrated tree and its generated artifacts still require review,
+the repository gate, performance evidence where applicable, and an explicit
+`dev` landing SHA. Closeout placeholders: `CODE_LANDING_SHA_PENDING` and
+`PUBLICATION_EVIDENCE_PENDING`. Replace both with verified facts before
+marking the campaign done.
 
 ### F. Static-local initialization exception
 

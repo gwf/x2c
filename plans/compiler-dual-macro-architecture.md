@@ -12,7 +12,9 @@ foreach, and selected class control skeletons now use source templates;
 native protocol, ownership, type, and method decisions remain in their
 existing owners. E44 records the focused checks and origin sidecar changes.
 This overlay updates the baseline findings without recasting semantic records
-as parsed source forms.
+as parsed source forms. The [final family inventory](compiler-dual-macro-contract.md#e45-final-source-family-accounting-integration-draft)
+and [aggregate result](compiler-aggregate-source-forms.md#final-campaign-overlay-publication-pending)
+record current implementation scope; publication evidence is pending.
 
 # Compiler architecture with shared grammar macros
 
@@ -77,26 +79,20 @@ Examples showing why the classification matters:
   `toolchain.x:120-191` uses them for process arguments. Neither is program
   AST, so neither should move into the language grammar.
 
-The current `stage.x` and `meta-group.x` clients do not offer a bounded
-source-form migration. `_meta_constant_leaf` reads typed, folded values and
-cache/meta carriers; a cast source macro would replace only one case header
-while still needing the bound result type and conversion. `meta-group.x`
-rebuilds declarations from bound functions and compiler-created static
-records with binding identities and exact modifier layout. A source
-declaration template would discard those facts. Retain these current raw
-cases as stage-specific consumers; revisit them only with a projection that
-deletes their structural work while preserving identity and stage.
+At the surveyed baseline, `stage.x` and `meta-group.x` did not have a
+bounded source-form migration. Shared grouping, cast, operator, call,
+identifier, and literal projections now cover their source-expression
+readers. Their folded values, bound Function/declaration modifiers, cache
+carriers, and compiler-created static records still have stage and identity
+owners. Those semantic records are not a reason to keep a competing parsed
+source recognizer.
 
-Two later inert probes narrow other source-form candidates. In `type.x`,
-designation queries receive both typed expressions and bare operator
-children. Five `macro Expression` candidates failed to match every bare
-child because their patterns require an `expr` root; replacing the repeated
-raw arms would need a justified projection of that mixed input. In
-`expressions.x`, dot and arrow macros captured the member spelling as a
-String while the compact combined resolver case uses a one-item field List.
-Two templates, two dispatch arms and reconstruction would add machinery
-without removing the existing semantic body. These are scoped exceptions
-for the probed clients, not claims about all operator templates.
+The inert `type.x` and `expressions.x` probes below remain historical
+evidence about their attempted templates. Shared exact content projections
+now handle the typed and bare designation inputs; operator and member
+construction use grammar-owned helpers while their type and field choices
+remain semantic work. The failed probes reject their own implementations,
+not the later projections that passed focused checks.
 
 ## Proposed ownership
 
@@ -428,10 +424,8 @@ Final authored review precedes publication validation.
 
 ## Execution map
 
-The bounded probe supports the construction proposal. Implement the narrow
-capability, then retain the campaign's lambda, transform shapes, protocol,
-and final source-vocabulary sequence. The ownership proposal guides where
-each batch lives; it does not authorize mixing capability and cleanup work.
+This execution map records the original proposal. The completed campaign
+sequence and final evidence belong to the contract's E44 and later entries.
 
 The first implementation batch after that investigation is either the
 separate construction capability (if justified) or the explicitly agreed
