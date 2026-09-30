@@ -69,7 +69,7 @@ result uses ordinary `Var` truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null `pred`
 answers 1 for an empty iterator and 0 for any other.
 
-Source: `lib/iter.x:800`
+Source: `lib/iter.x:799`
 
 <a id="Iter.any"></a>
 #### Iter.any
@@ -85,7 +85,7 @@ truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null
 `pred` answers 0.
 
-Source: `lib/iter.x:786`
+Source: `lib/iter.x:785`
 
 <a id="Iter.chain"></a>
 #### Iter.chain
@@ -114,7 +114,7 @@ fit in `int`.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause raised by that callback.
 
-Source: `lib/iter.x:831`
+Source: `lib/iter.x:830`
 
 <a id="Iter.enumerate"></a>
 #### Iter.enumerate
@@ -164,7 +164,7 @@ matched", which is unambiguous because no iterator may yield `void`.
 Elements are passed as values. Raises: whatever the source, `Func.apply`,
 or `pred` raises. A null `pred` returns `void`.
 
-Source: `lib/iter.x:817`
+Source: `lib/iter.x:816`
 
 <a id="Iter.foldl"></a>
 #### Iter.foldl
@@ -181,7 +181,7 @@ element with a `void` seed, does not invoke or check `fn`.
 
 **Raises:** whatever the source, `Func.apply`, or `fn` raises.
 
-Source: `lib/iter.x:759`
+Source: `lib/iter.x:758`
 
 <a id="Iter.head"></a>
 #### Iter.head
@@ -270,7 +270,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:871`
+Source: `lib/iter.x:870`
 
 <a id="Iter.min"></a>
 #### Iter.min
@@ -285,7 +285,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:885`
+Source: `lib/iter.x:884`
 
 <a id="Iter.new"></a>
 #### Iter.new
@@ -319,7 +319,7 @@ an expression. Integer results wrap to `Var.binary`'s promoted type width.
 **Raises:** any cause from the source or `Var.binary` while multiplying an
 element into the running product.
 
-Source: `lib/iter.x:858`
+Source: `lib/iter.x:857`
 
 <a id="Iter.repeat"></a>
 #### Iter.repeat
@@ -381,7 +381,7 @@ iterator sums to 0. Use `Iter.accumulate` for the running totals.
 **Raises:** any cause from the source or `Var.binary` while adding an element
 to the running total.
 
-Source: `lib/iter.x:845`
+Source: `lib/iter.x:844`
 
 <a id="Iter.try_next"></a>
 #### Iter.try_next

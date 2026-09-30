@@ -79,6 +79,15 @@ static void system_macro_dedent_folds_and_defers(void) {
 
   String escaped = $dedent("  first\n  second");
   EXPECT_TRUE(escaped == "first\nsecond");
+  String plain = $dedent("plain");
+  String empty = $dedent("");
+  String tabs = $dedent(%"
+	keyed
+		deeper
+");
+  EXPECT_TRUE(plain == "plain");
+  EXPECT_TRUE(empty == "");
+  EXPECT_TRUE(tabs == "keyed\n\tdeeper\n");
   String input = "  left\n  right";
   String computed = $dedent(input);
   EXPECT_TRUE(computed == "left\nright");

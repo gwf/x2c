@@ -299,7 +299,23 @@ static void json_files_read_and_write(void) {
   root.remove_tree();
 }
 
+static void json_failed_string_releases_decoder(void) {
+  $test.scoped();
+  for (int i = 0; i < 6; i++) {
+    ScopeStats before = Scope.stats();
+    try Json.parse("\"a\\nb\\q\"");
+    catch %(bad-arg *): {}
+    if (i) {
+      EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+      EXPECT_INT_EQ(
+        Scope.stats().live_requested_bytes, before.live_requested_bytes);
+    }
+  }
+  EXPECT_STR_EQ(Json.parse("\"a\\nb\"").string(), "a\nb");
+}
+
 void json_suite(void) {
+  $test.run(json_failed_string_releases_decoder);
   $test.run(json_parse_builds_ordinary_values);
   $test.run(json_booleans_stay_distinct_from_numbers);
   $test.run(json_numbers_follow_the_grammar);

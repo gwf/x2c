@@ -319,17 +319,18 @@ static void Job._finish(Job job) {
     if (job.statuses[i]) job.status = job.statuses[i];
   job.output_text = _captured(job.output_file, job.nul_output);
   job.errors_text = _captured(job.errors_file, job.nul_errors);
-  job.output_file = job.errors_file = NULL;
 }
 
 /* Reads and closes a capture file. Text with a NUL byte cannot be a
    `String`, so it is recorded in `nul` for `output` or `errors` to raise and
    the status stays readable. */
-static String _captured(File file, int &nul) {
-  if (!file) return NULL;
-  file.rewind();
+static String _captured(File &file, int &nul) {
+  File owned = file;
+  file = NULL;
+  if (!owned) return NULL;
+  owned.rewind();
   String text = NULL;
-  try text = file.string_close();
+  try text = owned.string_close();
   catch %(bad-arg *): nul = 1;
   return text;
 }
@@ -372,6 +373,9 @@ static Job Job.new(List command) {
 static void _drop_job(void *ptr) {
   Job job = ptr;
   if (job.started && !job.finished) job._terminate();
+  if (job.output_file) job.output_file.close();
+  if (job.errors_file) job.errors_file.close();
+  job.output_file = job.errors_file = NULL;
   free(job.pids);
 }
 

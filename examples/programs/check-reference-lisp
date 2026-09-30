@@ -74,6 +74,26 @@ static void _cases(void) {
         "(def x 1) (def f (lambda () (+ x 1))) (def x 9) (f)");
   _case("capture-quote",
         "(def f ((lambda (x) (lambda () (eval 'x))) 8)) (def x 3) (f)");
+  _case("reserved-local-capture",
+        "(def f ((lambda (quote) (lambda () quote)) 7)) (f)");
+  _case("stable-quote-alias-capture",
+        "(((lambda (q x) (lambda () (q x))) quote 42))");
+  _case("stable-quasiquote-alias-capture",
+        "(((lambda (qq x) (lambda () (qq ((unquote x))))) quasiquote 42))");
+  _case("parameter-callable-capture",
+        "(def f ((lambda (x) (lambda (head) (head x))) 42)) "
+        "(f (lambda (v) v))");
+  _case("raw-macro-operand-capture",
+        "(def m (macro (form) form)) "
+        "(def f ((lambda (x) (lambda () (m x))) 42)) (f)");
+  foreach (String name, %("quote" "quasiquote"))
+    _case(%"future-$name-capture",
+          %"(def make lambda) (def f ((make (x) (make () ($name x))) 42)) " +
+          %"(def $name (make (v) v)) (f)");
+  foreach (String name, %("lambda" "macro"))
+    _case(%"future-$name-capture",
+          %"(def make lambda) (def f ((make (x) (make () ($name () x))) 42)) " +
+          %"(def $name (make (params body) body)) (f)");
   _case("special-alias",
         "(def q quote) (def quote (lambda (x) (+ x 1))) (list (q hello) "
         "(quote 4))");
@@ -88,6 +108,20 @@ static void _cases(void) {
         "(defmacro twice (e) `(+ ,e ,e)) (twice (twice 3))");
   _case("quasiquote",
         "(list `(1 ,(+ 1 1) ,@'(3 4)) ``(a ,(b ,(+ 1 2))) `,(+ 1 2))");
+  _case("quasiquote-bare-vocabulary",
+        "(list `(a unquote (+ 1 2)) `(a unquote-splicing (+ 1 2)) "
+        "`(a quasiquote ,(+ 1 2)))");
+  _case("quasiquote-nested-splices",
+        "(list `(a ,@'() b ,@'(1 2) c) ``(unquote ,(+ 1 2)) "
+        "``(quasiquote ,,(+ 1 2)))");
+  _case("quasiquote-effect-order",
+        "(def n 0) (list `(,(def n (+ n 1)) "
+        ",@(list (def n (+ n 1))) ,(def n (+ n 1))) n)");
+  foreach (String form,
+           %("`(a (unquote))" "`(a (unquote 1 2))"
+             "`(a (unquote-splicing))" "`(a (unquote-splicing 1 2))"
+             "`(a ,@1)"))
+    _case(%"quasiquote-malformed-$form", form);
   _case("apply",
         "(list (apply + '(10 20 12)) (apply (lambda (. x) x) '(a b)) (apply "
         "apply (list + '(1 2 3))))");

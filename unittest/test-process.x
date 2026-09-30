@@ -411,8 +411,11 @@ static void process_scope_end_reaps_an_abandoned_job(void) {
   long pid = 0;
   time_t start = time(NULL);
   Scope.retain();
-  Job abandoned = %(sleep 30).job().start();
+  Job abandoned = %(sleep 30).job()
+    .options({stderr: <capture>}).start();
   pid = abandoned.pids[0];
+  int output_fd = fileno(abandoned.output_file);
+  int errors_fd = fileno(abandoned.errors_file);
   Job done = %(true).job().start();
   EXPECT_INT_EQ(done.status(), 0);
   Job cleaned = %(sleep 30).job().start();
@@ -421,8 +424,28 @@ static void process_scope_end_reaps_an_abandoned_job(void) {
   cleaned.cleanup();
   %(sleep 30).job();
   Scope.release();
+  EXPECT_TRUE(fcntl(output_fd, F_GETFD) == -1 && errno == EBADF);
+  EXPECT_TRUE(fcntl(errors_fd, F_GETFD) == -1 && errno == EBADF);
   EXPECT_TRUE(time(NULL) - start < 5);
   EXPECT_TRUE(pid > 0 && kill((pid_t) pid, 0) == -1 && errno == ESRCH);
+}
+
+static void process_capture_transfer_clears_owned_field(void) {
+  $test.scoped();
+  Scope.retain();
+  Job job = %(true).job().options({stderr: <capture>}).start();
+  job.output_file.close();
+  job.output_file = fopen("/dev/null", "w");
+  int output_fd = fileno(job.output_file);
+  int errors_fd = fileno(job.errors_file), caught = 0;
+  try job.status();
+  catch %(io-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_NULL(job.output_file);
+  EXPECT_TRUE(fcntl(output_fd, F_GETFD) == -1 && errno == EBADF);
+  EXPECT_TRUE(fcntl(errors_fd, F_GETFD) != -1);
+  Scope.release();
+  EXPECT_TRUE(fcntl(errors_fd, F_GETFD) == -1 && errno == EBADF);
 }
 
 static void process_jobs_wait_kill_and_clean_up(void) {
@@ -501,6 +524,7 @@ void process_suite(void) {
   $test.run(process_options_write_files_and_merge);
   $test.run(process_changes_after_start_raise);
   $test.run(process_start_failures_raise);
+  $test.run(process_capture_transfer_clears_owned_field);
   $test.run(process_jobs_wait_kill_and_clean_up);
   $test.run(process_empty_input_is_empty_stdin);
   $test.run(process_nul_capture_keeps_the_record);

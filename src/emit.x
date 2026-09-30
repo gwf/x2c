@@ -45,63 +45,64 @@ static List Emitter._commas(Emitter emitter, List lst) {
 // Wrap declarators in parentheses when pointer precedence requires it.
 static List _parens(List decl) => %("(" @decl ")");
 static List Emitter._function_declarator(
-  Emitter emitter, List decl, List func, List mods) {
+  Emitter e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
-  List params = func.cadr();
-  params = emitter._emit(params);
-  return emitter._declarator(%( @decl "(" @params ")"), mods);
-}
-
-static List Emitter._bitfield_declarator(
-  Emitter emitter, List decl, List bits_list, List mods) {
-  List size = emitter._emit(bits_list.cadr());
-  decl = %( @decl ":" @size );
-  return emitter._declarator(decl, mods);
+  return %(@decl "(" @{e._emit(parameters)} ")");
 }
 
 static List Emitter._array_declarator(
-  Emitter emitter, List decl, List array_list, List mods) {
+  Emitter e, List decl, List dimension) {
   if (decl.type().is_pointer()) decl = _parens(decl);
-  List size = array_list ? emitter._emit(array_list.cadr()) : NULL;
-  decl = size ? %( @decl "[" @size "]") : %( @decl "[]");
-  return emitter._declarator(decl, mods);
+  List size = e._emit(dimension);
+  return size ? %(@decl "[" @size "]") : %(@decl "[]");
 }
 
-/* Lower each x2c `&` modifier to C `*` only as its declarator layer is
-   folded. Do not recursively rewrite `mods`: nested `fnmod` parameter trees
-   may be flat and must not consume one C stack frame per parameter. */
-static List Emitter._pointer_declarator(Emitter e, List decl, List mods) {
-  Var first = mods.car();
-  if (first == <&> || first == <opt-ref>)
-    return e._declarator(cons(<*>, decl), mods.cdr());
-  if (first == <*> || Symbol.is_type_qualifier(first))
-    return e._declarator(cons(first, decl), mods.cdr());
-  return %( @mods @decl );
-}
-
+/* Fold one layer at a time; typedef prefixes surround the final result. */
 static List Emitter._declarator(Emitter e, List decl, List mods) {
-  if (!mods) return decl;
-  Var first = mods.car();
-  if (first is <list>) {
-    Type mod = first;
-    if (mod.car() is <string>)
-      return e._declarator(%( @decl @mod ), mods.cdr());
-    if (mod.car() == <fnmod>)
-      return e._function_declarator(decl, mod, mods.cdr());
-    if (mod.is_array()) return e._array_declarator(decl, mod, mods.cdr());
-    return e._bitfield_declarator(decl, mod, mods.cdr());
+  int typedefs = 0;
+  while (mods) {
+    match (mods) {
+      case %((fnmod ?parameters *) *remaining): {
+        decl = e._function_declarator(decl, parameters);
+        mods = remaining;
+        continue;
+      }
+      case %((fnmod) *remaining): {
+        decl = e._function_declarator(decl, NULL);
+        mods = remaining;
+        continue;
+      }
+    }
+    Var first = mods.car();
+    if (first is <list>) {
+      Type mod = first;
+      if (mod.car() is <string>) decl = %(@decl @mod);
+      else if (mod.is_array())
+        decl = e._array_declarator(decl, mod.cadr());
+      else
+        decl = %(@decl ":" @{e._emit(mod.cadr())});
+      mods = mods.cdr();
+      continue;
+    }
+    Symbol sym = first;
+    switch (sym) {
+      case <dim>: decl = e._array_declarator(decl, NULL); break;
+      case <&>: case <opt-ref>: decl = cons(<*>, decl); break;
+      case <*>: decl = cons(first, decl); break;
+      case <typedef>: typedefs++; break;
+      case <bitfield>: decl = e._emit(mods.cdr()); mods = NULL; continue;
+      default:
+        if (sym.is_type_qualifier()) decl = cons(first, decl);
+        else {
+          decl = %(@mods @decl);
+          mods = NULL;
+          continue;
+        }
+    }
+    mods = mods.cdr();
   }
-  Symbol sym = first;
-  switch (sym) {
-    case <dim>: return e._array_declarator(decl, NULL, mods.cdr());
-    case <*>: case <&>: case <opt-ref>:
-      return e._pointer_declarator(decl, mods);
-    case <bitfield>:   return e._emit(mods.cdr());
-    case <typedef>:
-      return cons(<typedef>, e._declarator(decl, mods.cdr()));
-  }
-  if (sym.is_type_qualifier()) return e._pointer_declarator(decl, mods);
-  return %( @mods @decl );
+  while (typedefs--) decl = cons(<typedef>, decl);
+  return decl;
 }
 
 static List Emitter._bind(Emitter emitter, Ast ast) {

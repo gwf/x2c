@@ -53,7 +53,7 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs);
 
 static Symbol _floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs);
 
-static Var _floating_binary(Symbol op, Var lhs, Var rhs, Symbol tag);
+static Var _floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag);
 
 static int _numeric_truth(Var value);
 
@@ -643,7 +643,7 @@ static Var _general_numeric_binary(Symbol op, Var lhs, Var rhs){
     }
     case 56 : case 62 : case 54 : case 95 : break;
   }
-  if(left.floating || right.floating) return _floating_binary(op, lhs, rhs, _floating_tag(&(left), &(right)));
+  if(left.floating || right.floating) return _floating_binary(op, left, right, _floating_tag(&(left), &(right)));
   return _integer_binary(op, left, right);
 }
 
@@ -720,23 +720,22 @@ static Symbol _floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   return(* lhs).rank >=(* rhs).rank ?(* lhs).tag :(* rhs).tag;
 }
 
-Var Var_convert(Var, Symbol);
+float x2c_numeric_f32(X2CVarNumeric *);
 
-float Var_float(Var);
+double x2c_numeric_f64(X2CVarNumeric *);
 
-double Var_floating(Var);
+long double x2c_numeric_ldouble(X2CVarNumeric *);
 
-static Var _floating_binary(Symbol op, Var lhs, Var rhs, Symbol tag){
-  Var left = Var_convert(lhs, tag), right = Var_convert(rhs, tag);
+static Var _floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag){
   if(tag == 3355493){
-    float a = Var_float(left), b = Var_float(right);
+    float a = x2c_numeric_f32(&(lhs)), b = x2c_numeric_f32(&(rhs));
     return Var_box_f32(_f32_step(op, a, b));
   }
   if(tag == 3356265){
-    double a = Var_floating(left), b = Var_floating(right);
+    double a = x2c_numeric_f64(&(lhs)), b = x2c_numeric_f64(&(rhs));
     return Var_box_f64(_f64_step(op, a, b));
   }
-  long double a = Var_long_double_value(left), b = Var_long_double_value(right);
+  long double a = x2c_numeric_ldouble(&(lhs)), b = x2c_numeric_ldouble(&(rhs));
   return Var_box_long_double(_ldouble_step(op, a, b));
 }
 
@@ -784,6 +783,8 @@ static int _numeric_truth(Var value){
 Var Var_update(Var * lhs, Symbol op, Var rhs){
   return x2c_var_update_volatile(lhs, op, rhs);
 }
+
+Var Var_convert(Var, Symbol);
 
 Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
   if(! lhs){

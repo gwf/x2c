@@ -84,7 +84,7 @@ typedef struct MatchCache *MatchCache;
 /** Represents one acquired use of a cached or transient Match plan.
     A cached lease pins its entry; a transient lease owns its plan. Initialize
     it only through `MatchCache.acquire` and call `MatchLease.release` on every
-    non-transferring path, including a pressure result.
+    exit after acquisition returns, including a pressure result.
 */
 typedef struct MatchLease {
   MatchCache cache;
@@ -612,11 +612,11 @@ static int MatchLower._emit_leaf_value(MatchLower l, Var pattern) {
 
 /* A List with no binder and no guard at any depth. */
 static int _is_list_literal(List pat) {
-  if (!pat) return 1;
-  Var head = pat.car();
-  if (head.is_binder() || head.is_match_op()) return 0;
-  if (head is not <list>) return _is_list_literal(pat.cdr());
-  return _is_list_literal(head) && _is_list_literal(pat.cdr());
+  foreach (Var head, pat) {
+    if (head.is_binder() || head.is_match_op()) return 0;
+    if (head is <list> && !_is_list_literal(head)) return 0;
+  }
+  return 1;
 }
 
 /* A binder-free literal list compares by canonical identity first and falls
@@ -1723,6 +1723,11 @@ static int MatchPlan._replace(
   return 1;
 }
 
+typedef struct ReplacementCell {
+  Var value;
+  int splice;
+} ReplacementCell;
+
 /* Instantiates `input` from committed captures. */
 static Var _capture_replace(
   Var input, MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
@@ -1730,17 +1735,28 @@ static Var _capture_replace(
   if (input is not <list>) return input;
   List list = input;
   if (!list) return input;
-  Var head = list.car();
-  List tail = list.cdr();
-  if (head == <!quote>) return tail.car();
-  int splice = head.is_list_binder() && head != <*> && head != <?>;
-  Var replaced_head = _capture_replace(head, layout, captures);
-  List replaced_tail = _capture_replace(tail, layout, captures);
-  if (splice && replaced_head is <list>) {
-    List spliced = replaced_head;
-    return %(@spliced @replaced_tail);
+  if (list.car() == <!quote>) return list.cadr();
+  Block spine = $auto(Block.new(sizeof(ReplacementCell)));
+  Var tail = (List) NULL;
+  for (; list; list = list.cdr()) {
+    Var head = list.car();
+    if (head == <!quote>) {
+      tail = list.cadr();
+      break;
+    }
+    ReplacementCell row = {
+      _capture_replace(head, layout, captures),
+      head.is_list_binder() && head != <*> && head != <?>
+    };
+    spine.push(&row);
   }
-  return %($replaced_head @replaced_tail);
+  for (size_t i = spine.length; i > 0; i--) {
+    ReplacementCell row = ((ReplacementCell *) spine.bytes)[i - 1];
+    Var head = row.value;
+    if (row.splice && head is <list>) tail = %(@head @tail);
+    else tail = %($head @tail);
+  }
+  return tail;
 }
 
 /* The value captured for `binder`, or the binder when the match left it
@@ -1773,16 +1789,30 @@ static Var _replace(Var input, List bindings) {
     return bound is void ? input : bound;
   }
   if (input is not <list>) return input;
-  List lst = input;
-  if (!lst) return input;
-  Var head = lst.car();
-  List tail = lst.cdr();
-  if (head == <!quote>) return tail.car();
-  int splice = head.is_list_binder() && head != <*> && head != <?>;
-  head = _replace(head, bindings);
-  tail = _replace(tail, bindings);
-  if (splice && head is <list>) return %(@head @tail);
-  return %($head @tail);
+  List list = input;
+  if (!list) return input;
+  if (list.car() == <!quote>) return list.cadr();
+  Block spine = $auto(Block.new(sizeof(ReplacementCell)));
+  Var tail = (List) NULL;
+  for (; list; list = list.cdr()) {
+    Var head = list.car();
+    if (head == <!quote>) {
+      tail = list.cadr();
+      break;
+    }
+    ReplacementCell row = {
+      _replace(head, bindings),
+      head.is_list_binder() && head != <*> && head != <?>
+    };
+    spine.push(&row);
+  }
+  for (size_t i = spine.length; i > 0; i--) {
+    ReplacementCell row = ((ReplacementCell *) spine.bytes)[i - 1];
+    Var head = row.value;
+    if (row.splice && head is <list>) tail = %(@head @tail);
+    else tail = %($head @tail);
+  }
+  return tail;
 }
 
 // borrowed patterns
@@ -2195,6 +2225,7 @@ macro Statement $match.lease(
   MatchLease storage;
   MatchLease *$lease = &storage;
   int $status = $cache.acquire($pattern, *$lease, $owner);
+  defer $lease.release();
 }
 
 /** Matches through `cache` into caller-owned positional storage.
@@ -2211,7 +2242,6 @@ int MatchCache.try_capture(
   int result = 0;
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED) result = plan.try_capture(input, captures);
-  lease.release();
   return result == 1;
 }
 
@@ -2229,7 +2259,6 @@ int MatchCache.try_match(
   int result = 0;
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED) result = plan.try_match(input, out_bindings);
-  lease.release();
   return result == 1;
 }
 
@@ -2248,7 +2277,6 @@ int MatchCache.try_search(
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED)
     result = plan.try_search(input, out_match, out_bindings);
-  lease.release();
   return result == 1;
 }
 
@@ -2267,7 +2295,6 @@ int MatchCache.search(
   List results = NULL;
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED) plan.search(input, results);
-  lease.release();
   out_results = results;
   return results != NULL;
 }
@@ -2287,7 +2314,6 @@ int MatchCache.try_match_replace(
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED)
     result = plan.try_match_replace(input, template, out);
-  lease.release();
   return result == 1;
 }
 
@@ -2306,7 +2332,6 @@ int MatchCache.search_replace(
   MatchPlan plan = lease._plan();
   if (status == MACHINE_PREPARED)
     answered = plan.search_replace(input, template, result) >= 0;
-  lease.release();
   out = result;
   return status == MACHINE_PREPARED && answered;
 }

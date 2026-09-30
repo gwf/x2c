@@ -476,21 +476,30 @@ static Var _qq(Lisp lisp, Var expr, LispEnv *env, int depth) {
   List form = expr;
   Var head = form.car();
   if (head == lsym_quasiquote)
-    return head.cons(_qq(lisp, form.cdr(), env, depth + 1));
-  if (head != lsym_unquote && head != lsym_splicing) {
-    List first = !depth && _is_splice(head)
-      ? _splice(lisp, head, env) : %(${_qq(lisp, head, env, depth)});
-    List rest = _qq(lisp, form.cdr(), env, depth);
-    return first.append(rest);
-  }
+    return head.cons(_qq_elements(lisp, form.cdr(), env, depth + 1));
+  if (head != lsym_unquote && head != lsym_splicing)
+    return _qq_elements(lisp, form, env, depth);
   if (form.len() != 2)
     raise %(bad-arity (operation "quasiquote") (value $expr));
-  if (depth > 0) return head.cons(_qq(lisp, form.cdr(), env, depth - 1));
+  if (depth > 0)
+    return head.cons(_qq_elements(lisp, form.cdr(), env, depth - 1));
   Var value = _eval(lisp, form.cadr(), env);
   if (head == lsym_splicing)
     raise %(bad-types (operation "quasiquote-splice")
                        (actual ${expr.kind()}));
   return value;
+}
+
+/* Walk siblings as elements, never as another headed quoted form. */
+static List _qq_elements(Lisp lisp, List items, LispEnv *env, int depth) {
+  Array values = $auto([]);
+  foreach (Var item, items) {
+    if (!depth && _is_splice(item)) {
+      foreach (Var value, _splice(lisp, item, env)) values.push(value);
+    }
+    else values.push(_qq(lisp, item, env, depth));
+  }
+  return values;
 }
 
 static int _is_splice(Var expr) =>

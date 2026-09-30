@@ -200,30 +200,6 @@ static Map native_scalar_types(void) => {
 
 /* --- lib/system-macros.xmacro -------------------------------------------- */
 
-static int _dedent_width(String line) {
-  int length = line.len(), width = 0;
-  while (width < length && (line[width] == ' ' || line[width] == '\t'))
-    width++;
-  return width;
-}
-
-static int _dedent_blank(String line) =>
-  _dedent_width(line) == line.len();
-
-static String _dedent_apply(String text) {
-  int width = _dedent_width(text);
-  if (width < text.len() && text[width] == '\n') {
-    text = text.getslice(width + 1, text.len(), 1);
-    width = _dedent_width(text);
-  }
-  String prefix = text.getslice(0, width, 1);
-  Array lines = [];
-  foreach (Var line, text.split("\n"))
-    lines.push(String.remove_prefix(line, prefix));
-  if (lines.len() > 1 && _dedent_blank(lines[-1])) lines[-1] = "";
-  return lines.join("\n");
-}
-
 static List _dedent_expand(List node) {
   String source = x2c_source_text(node);
   int length = source.len(), open = 0;
@@ -235,7 +211,7 @@ static List _dedent_expand(List node) {
       source.contains("$"))
     return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
   String body = source.getslice(open, length - 1, 1);
-  return x2c_literal_string(_dedent_apply(body));
+  return x2c_literal_string(body.dedent());
 }
 
 static int _cases_label(List item) {
@@ -740,9 +716,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
-  $linked.row(rows, "_dedent_width", _dedent_width);
-  $linked.row(rows, "_dedent_blank", _dedent_blank);
-  $linked.row(rows, "_dedent_apply", _dedent_apply);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_cases_label", _cases_label);
   $linked.row(rows, "_cases_transfers", _cases_transfers);

@@ -510,7 +510,33 @@ static void default_cache_releases_with_native_thread_state(void) {
 
 $(import "test-macros.xmacro")
 
+static unsigned _raising_hash(Var value) => 7;
+
+static int _raising_equal(Var lhs, Var rhs) {
+  raise %(bad-op (operation cache-eq));
+}
+
+static void cache_invocation_releases_on_transfer(void) {
+  $test.scoped();
+  x2c_register_descriptor("cacheobj", (VarMethods) {
+    .hash = _raising_hash, .equal = _raising_equal
+  });
+  long first = 1, second = 2;
+  Var pattern = Var.new(<cacheobj>, &first);
+  List input = %(${Var.new(<cacheobj>, &second)});
+  MatchCache cache = MatchCache.new(2);
+  List bindings = %(unchanged);
+  int caught = 0;
+  try _try_match(cache, input, %($pattern), bindings);
+  catch %(bad-op (operation cache-eq)): caught = 1;
+  EXPECT_TRUE(caught);
+  EXPECT_LIST_EQ(bindings, %(unchanged));
+  cache.dispose();
+}
+
+
 void match_cache_suite(void) {
+  $test.run(cache_invocation_releases_on_transfer);
   $test.run(cache_lifecycle_failures_transfer);
   $test.run(cache_admission_and_bypass);
   $test.run(cache_retires_a_nested_pool_pattern_with_its_level);

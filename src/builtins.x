@@ -557,10 +557,10 @@ static List _class_initializer(String owner, Var heap_value) {
 /* The call of `method` on `object` and one argument for each of the rest
    of its `parameters`. */
 static List _init_call(List method, List parameters, List object) {
-  List arguments = %($object);
+  Array arguments = [object];
   foreach (List parameter, parameters.cdr())
-    arguments = cons(_ref(%"argument_${arguments.len() - 1}"), arguments);
-  return _call(x2c_binding_spelling(method), arguments.reverse());
+    arguments.push(_ref(%"argument_${arguments.len() - 1}"));
+  return _call(x2c_binding_spelling(method), arguments.list_free());
 }
 
 macro open Statement $class_refusal(Expr $call, Expr $value) {

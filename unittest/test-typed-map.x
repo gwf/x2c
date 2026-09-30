@@ -586,7 +586,37 @@ static void typed_map_iterates_values_keys_and_pairs(void) {
   EXPECT_INT_EQ(total, 8);
 }
 
+static void typed_map_failed_conversion_releases_result(void) {
+  $test.scoped();
+  Map empty = {};
+  MapIntInt packed = empty;
+  Map boxed = packed;
+  EXPECT_TRUE((void *) packed != 0);
+  EXPECT_TRUE((void *) boxed != 0);
+  EXPECT_INT_EQ(packed.len(), 0);
+  EXPECT_INT_EQ(boxed.len(), 0);
+  packed[1] = 2;
+  boxed[3] = 4;
+  EXPECT_INT_EQ(packed[1], 2);
+  EXPECT_INT_EQ(boxed[3].integer(), 4);
+  Map source = {1: "not numeric"};
+  for (int i = 0; i < 6; i++) {
+    ScopeStats before = Scope.stats();
+    int caught = 0;
+    try { MapIntInt result = source; }
+    catch %(no-convert *): caught++;
+    EXPECT_INT_EQ(caught, 1);
+    if (i) {
+      EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+      EXPECT_INT_EQ(
+        Scope.stats().live_requested_bytes, before.live_requested_bytes);
+    }
+  }
+  EXPECT_STR_EQ(source[1].string(), "not numeric");
+}
+
 void typed_map_suite(void) {
+  $test.run(typed_map_failed_conversion_releases_result);
   $test.run(typed_map_iterates_values_keys_and_pairs);
   $test.run(typed_map_empty_brace_is_fresh);
   $test.run(typed_map_common_capabilities_cover_every_family);

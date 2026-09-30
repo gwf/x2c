@@ -740,8 +740,7 @@ static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
 static void _unzip_compact(UnzipShared *shared, int column) {
   int consumed = shared.heads[column];
   if (consumed < UNZIP_COMPACT_THRESHOLD) return;
-  Array removed = shared.buffers[column].remslice(0, consumed);
-  removed.free();
+  shared.buffers[column].setslice(0, consumed, NULL);
   shared.heads[column] = 0;
 }
 

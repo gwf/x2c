@@ -885,9 +885,12 @@ macro Unit $map.typed.convert(Type $map, Name $unbox) {
     if ((void *) entries == 0) return 0;
     $map packed = 0;
     packed = packed._core_new_capacity(2);
+    $map finished = 0;
+    defer if ((void *) finished == 0) packed._core_free();
     unsigned cursor = 0;
     Var key, val;
     while (entries.try_next(cursor, key, val)) packed.set(key, val);
+    finished = packed;
     return packed;
   }
 
@@ -902,12 +905,14 @@ macro Unit $map.typed.box(Type $map, Type $key, Type $value,
   */
   Map $map.map($map map) {
     if (map == NULL) return NULL;
-    Map boxed = {};
+    Map boxed = {}, finished = NULL;
+    defer if ((void *) finished == 0) boxed.cleanup();
     unsigned cursor = 0;
     $key key;
     $value value;
     while (map.try_next(cursor, key, value))
       boxed.setindex($box_key(key), $box_value(value));
+    finished = boxed;
     return boxed;
   }
 

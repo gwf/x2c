@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake                                             #####                 #####
                                                                                       ########           ########
     A recursive Lisp, generously commented in 1,000 lines.                           ##########         ##########
-    It is functionally equivalent to the x2c runtime's word-code machine.                 #######     #######
+    It follows the production Lisp's value and capture rules.                 #######     #######
     Block comments explain how Lisp is implemented. Right-margin                           ######     ######
     comments show how x2c combines native C with a dynamic runtime.                         ######   ######
                                                                                              #####   #####
@@ -21,7 +21,7 @@
                                                                                              ######
     x2c supplies values, collections, tokenization, and native function                         ####
     calls. This file implements Lisp evaluation independently of the                             ####
-    production Lisp object and word-code machine. Evaluation uses native                          ####
+    production Lisp object. Evaluation uses native                          ####
     recursive calls.                                                                             ######
                                                                                                 ########
     Two distinct macro systems appear here. The x2c macros $fail and $rest                     ####  ####
@@ -238,43 +238,73 @@ static Var Interp.apply(Interp *self, Var fn, List values) {
 */
 
 static Var Interp.lookup(Interp *self, LispEnv *env, Var name) {
-  for (; env; env = env.parent)                                                 // C pointer walk with x2c dot access.
-    if (name in env.bindings) return env.bindings[name];                        // Map membership and indexing.
+  Var local;
+  if (_local_value(env, name, local)) return local;                              // Nearest local frame supplies the value.
   if (name in self.globals) return self.globals[name];                          // Global Map: test key, fetch value.
   if (name in self.reserved) return self.reserved[name];                        // Reserved Map: same key operations.
   raise %(unbound (name $name));                                                // $name interpolates one named value.
 }
 
-/* Capture free locals where the closure is defined. Quote is data; unquote
-   adjusts quotation depth, and nested parameters bind their own names.
-   Globals remain looked up at call time. Caller locals never participate.
+/* A local lookup shared by evaluation and capture. */
+static int _local_value(LispEnv *env, Var name, Var &value) {
+  for (; env; env = env.parent)
+    if (env.bindings.try_get(name, value)) return 1;
+  return 0;
+}
+
+/* Capture possible local reads, preserving stable local callable identity.
+   Global, parameter and computed heads may later evaluate their data.
+   Negative depth keeps those reads; positive depth marks quasiquote data.
+   Globals remain lookup-time names, and borrowed referents must outlive
+   every closure that may read them.
 */
 static void Interp.capture(
   Interp *self, LispEnv *env, Var form, List bound, int depth, Map captures) {
   if (form.is_atom()) {
-    if (!depth && !(form in self.reserved) && !(form in bound))                // Names in data or introduced by a binder are not free.
-      for (; env; env = env.parent)                                            // Only the defining local frames supply snapshots.
-        if (form in env.bindings) {
-          captures[form] = env.bindings[form];                                 // Save the Var; objects retain their ordinary identity.
-          break;
-        }
+    Var value;
+    if (depth <= 0 && !(form in bound) &&
+        _local_value(env, form, value) && !(form in captures))
+      captures[form] = value;
     return;
   }
-  if (form is not <list>) return;
-  List parts = form;                                                           // Each pattern selects the children to inspect.
-  match (form) {
-    case %(quote *) if (!depth): return;                                       // Quoted code reads no names outside quasiquote.
-    case %((!set ?head (!or quasiquote unquote unquote-splicing)) *body): {
-      depth = head == <quasiquote>.var() ? depth + 1 : depth - 1;
-      if (depth < 0) depth = 0;                                                // An unquote outside quasiquote stays at zero.
-      parts = body;
-    }
-    case %((!or lambda macro) ?params *body) if (!depth): {
-      if (params is <list>) bound = ((List) params).append(bound);             // Nested binders extend only this recursive branch.
-      parts = body;
-    }
+  if (form is not <list> || form.is_nil()) return;
+  List items = form;
+  Var head = items.car();
+  if (depth < 0) {
+    foreach (Var part, items) self.capture(env, part, bound, depth, captures);
+    return;
   }
-  foreach (Var part, parts) self.capture(env, part, bound, depth, captures);
+  if (depth > 0) {
+    int inner = depth;
+    List parts = items;
+    if (head == <quasiquote>) { inner++; parts = items.cdr(); }
+    if (head == <unquote> || head == Atom.intern("unquote-splicing")) {
+      inner--; parts = items.cdr();
+    }
+    foreach (Var part, parts) self.capture(env, part, bound, inner, captures);
+    return;
+  }
+  self.capture(env, head, bound, 0, captures);
+  Var callable;
+  if (!head.is_atom() || head in bound ||
+      !_local_value(env, head, callable)) {
+    foreach (Var part, items.cdr())
+      self.capture(env, part, bound, -1, captures);
+    return;
+  }
+  Symbol special = callable is <func> && callable in self.specials
+    ? self.specials[callable].symbol() : 0;
+  if (special == <quote>) return;
+  if (special == <lambda> || special == <macro>) {
+    List rest = items.cdr();
+    if (rest && rest.car() is <list>)
+      foreach (Var name, rest.car().list()) bound = cons(name, bound);
+    foreach (Var part, rest.cdr()) self.capture(env, part, bound, 0, captures);
+    return;
+  }
+  int inner = special == <quasiquote> ? 1 :
+    callable is <lambda> && ((Fn) callable.pointer()).macro ? -1 : 0;
+  foreach (Var part, items.cdr()) self.capture(env, part, bound, inner, captures);
 }
 
 static Var Interp.closure(
@@ -321,9 +351,9 @@ static Var Interp.invoke(Interp *self, Fn closure, List values) {
      (let ((x 7) (xs '(8 9))) `(a ,x ,@xs))     // (a 7 8 9)                                    v   v
                                                                                            (a   7   8 9)
    There are two result shapes here. quasiquote produces one value;
-   quoted_item produces the sequence of elements contributed by an item. An            ,x: one value
+   quoted_elements builds the containing sequence of values.                         ,x: one value
    ordinary item contributes one element; a splice may contribute many. The            ,@xs: List elements
-   containing List is constructed by concatenating these item sequences.
+   containing List is built by walking its actual elements once.
 
    The depth tracks nested quasiquotes. Processing a nested quasiquote
    increments it; processing a nested unquote decrements it. An unquote is
@@ -336,28 +366,34 @@ static Var Interp.quasiquote(Interp *self, LispEnv *env, Var form, int depth) {
   Var (head, argument) = expr;                                                  // Positional List destructuring.
   Var (quote, unquote, splice) = %(quasiquote unquote unquote-splicing);        // Literal names unpack into Vars.
   if (head == quote)                                                            // Var equality with a Symbol value.
-    return cons(head, self.quasiquote(env, expr.cdr(), depth + 1));             // Construct List; result boxes as Var.
+    return cons(head, self.quoted_elements(env, expr.cdr(), depth + 1));      // Canonical nested quotation form.
   if (head == unquote || head == splice) {                                      // Compare Symbols held in Vars.
     if (expr.len() != 2) $fail(<bad-arity>, "quasiquote", <value>, form);      // Receiver-style length query.
-    if (depth) return cons(head, self.quasiquote(env, expr.cdr(), depth - 1));  // C condition with List construction.
+    if (depth)                                                                // Inactive unquote stays in the form.
+      return cons(head, self.quoted_elements(env, expr.cdr(), depth - 1));
     Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
     if (head == splice)                                                         // Var equality against a Symbol.
       $fail(<bad-types>, "quasiquote-splice", <actual>, form.kind());          // Runtime kind in macro-built error.
     return value;
   }
-  List first = self.quoted_item(env, head, depth);                              // Receiver call returns a typed List.
-  List rest = self.quasiquote(env, expr.cdr(), depth);                          // Returned Var converts to List.
-  return first.append(rest);                                                    // Result List implicitly boxes as Var.
+  return self.quoted_elements(env, expr, depth);                               // Siblings remain ordinary elements.
 }
 
-static List Interp.quoted_item(Interp *self, LispEnv *env, Var form, int depth) {
-  match (form) case %(unquote-splicing ?argument) if (!depth): {                // Pattern plus guard.
-    Var value = self.eval(env, argument);                                       // Recursive receiver-style call.
-    if (value is not <list>)                                                    // Runtime type inspection.
-      $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());         // Macro emits runtime error creation.
-    return value;                                                               // Implicit Var -> List conversion.
+static List Interp.quoted_elements(
+  Interp *self, LispEnv *env, List items, int depth) {
+  Array values = $auto([]);                                                     // One operation-owned mutable builder.
+  foreach (Var item, items) {                                                   // Only actual nested forms recurse.
+    match (item) {
+      case %(unquote-splicing ?argument) if (!depth): {
+        Var value = self.eval(env, argument);                                   // Evaluate each splice once, in order.
+        if (value is not <list>)
+          $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());
+        foreach (Var part, value.list()) values.push(part);                    // Splice the contributed elements.
+      }
+      default: values.push(self.quasiquote(env, item, depth));                  // Ordinary elements contribute one value.
+    }
   }
-  return %(${self.quasiquote(env, form, depth)});                               // ${...} inserts a whole expression.
+  return values;                                                               // Canonical List survives builder cleanup.
 }
 
 /* Errors are part of the language's observable behavior --------------------------------------------------------------
@@ -878,7 +914,7 @@ static Interp _interpreter(void) {
                                                                                           +-------------------+
    Each function call uses the native stack. There is no tail-call
    guarantee, so sufficiently deep Lisp recursion can exhaust that stack.
-   The production word machine uses a different execution strategy.
+   Production Lisp reuses tail-call frames and checks native stack capacity.
 */
 typedef struct Repl {
   Buffer source;                                                                // Mutable input buffer.

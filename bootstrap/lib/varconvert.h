@@ -34,5 +34,11 @@ unsigned long long Var_width_mask(int bits);
 
 long long Var_signed_from_bits(unsigned long long raw, int bits);
 
+float x2c_numeric_f32(X2CVarNumeric * value);
+
+double x2c_numeric_f64(X2CVarNumeric * value);
+
+long double x2c_numeric_ldouble(X2CVarNumeric * value);
+
 
 #endif /* __GUARD_0xFC215CA0__ */

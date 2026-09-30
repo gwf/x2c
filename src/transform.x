@@ -1180,12 +1180,8 @@ static List _entry_binding(List entry) {
 }
 
 static List _signature(Compiler compiler, List entries) {
-  Array types = [];
-  foreach (List entry, entries)
-    types.push(_entry_type(compiler, entry));
-  List parameter_types = entries ? types.list_free() : %((void));
-  List signature = %((func $parameter_types) "Var");
-  return compiler.cache_literal_list(signature);
+  List parameters = compiler.lambda_param_types(entries);
+  return compiler.cache_literal_list(%((func $parameters) "Var"));
 }
 
 static int _cell_parts(
@@ -2580,7 +2576,7 @@ static Var _preserve(Var value, Map names, Map pointers) {
 
 /* Save the returned value before cleanup runs, since cleanup may change the
    state the expression read. */
-static List _return_value(Walk walk, List expression) {
+static List _return_value(Walk walk, List expression, List cleanup) {
   List binding = _region_binding(walk.compiler, "return_value");
   Type type = walk.return_type;
   /* The declarator carries the type's pointer and array modifiers, so the
@@ -2588,8 +2584,8 @@ static List _return_value(Walk walk, List expression) {
   List (base, mods) = type.declaration_parts();
   List declaration = %(declare $base
     (bindings (op = (bind $binding $mods) $expression)));
-  List statement = _transfer(walk, 0,
-    source_return_content(%((expr $type (ident $binding)))));
+  List returned = source_return_content(%((expr $type (ident $binding))));
+  List statement = source_block_content(%(@cleanup $returned));
   return source_block_content(%($declaration $statement));
 }
 
@@ -2860,8 +2856,8 @@ static Var _lower_at(Walk walk, int origin, Var inner) {
    change what the expression read, so a static-local region alone leaves
    the return as it is. */
 static List _lower_return(Walk walk, List node, List expression) {
-  if (!_unwind(walk, 0)) return node;
-  return _return_value(walk, expression);
+  List cleanup = _unwind(walk, 0);
+  return cleanup ? _return_value(walk, expression, cleanup) : node;
 }
 
 /* A function-static initializer remains in ancestry for label checks,

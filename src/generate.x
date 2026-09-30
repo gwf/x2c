@@ -1175,19 +1175,14 @@ static List _include_directive(String fname) =>
 /* `main` calls the runtime initializer before anything else. */
 static List _patch_main(Compiler c, List source) {
   List initializer = c.sym.reference(%("x2c_initialize"), NULL);
-  return source.map(
-    %!(List node) => {
+  List setup = %((stmnt (expr (void) (call
+    (expr ((func ((void))) void) (ident $initializer))
+    (args (expr (void) ()))))));
+  return source.map(%!(List node) => {
     match (node)
-      case %(function ?type (bind (!set ?binding (*)) ?params) (block *body)):
+      case %(function ? (bind (!set ?binding (*)) ?) (block *body)):
         if (binding_identity_spelling(binding) == "main")
-          return %(
-            function $type (bind $binding $params)
-            (block
-              (stmnt (expr (void) (call
-                (expr ((func ((void))) void) (ident $initializer))
-                (args (expr (void) ())))))
-              @body)
-          );
+          return _replace_initializer_body(c, node, setup.append(body));
     return node;
   });
 }
@@ -1362,17 +1357,17 @@ static void _print_type(Compiler c, Token tokens, List row) {
 /* Source text between two tokens with comments removed and each run of
    whitespace written as one space. */
 static String _source_text(Token first, Token last) {
-  Array parts = [];
+  Buffer output = $auto(Buffer.new(0));
   int gap = 0;
   for (Token token = first; token < last; token++) {
     if (token.type == <space> || token.type == <comment>) gap = 1;
     else if (token.len) {
-      if (gap && parts.len()) parts.push(" ");
-      parts.push(token.text);
+      if (gap && output.len()) output.write_char(' ');
+      output.write(token.text);
       gap = 0;
     }
   }
-  return "".join(parts.list_free());
+  return output;
 }
 
 /* The one-based line and byte range of a token range. */

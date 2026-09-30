@@ -2,12 +2,12 @@
 // definition runs as written: the copy has the shipped callee frozen in.
 #include "x2c.x"
 
-meta static int _dedent_width(String line) { return 123; }
-meta static int _dedent_blank(String line) =>
-  _dedent_width(line) == line.len();
+meta static Symbol _tag_kind(List row) => <integer>;
+meta static int _tag_floating(List row) => _tag_kind(row) == <floating>;
 
 int main(void) {
-  printf("%d %d %d\n", $_dedent_width("abc"), $_dedent_blank("   "),
-         _dedent_blank("   "));
+  printf("%s %d %d\n", $_tag_kind(%(unused unused floating)).str(),
+         $_tag_floating(%(unused unused floating)),
+         _tag_floating(%(unused unused floating)));
   return 0;
 }
