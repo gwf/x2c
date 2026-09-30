@@ -901,6 +901,7 @@ typedef struct NativeResolution {
 static List NativeResolution.rows(
   NativeResolution *r, List templates, List &failure) {
   Array members = [];
+  Map native_bindings = NULL;
   foreach (List template, templates) {
     (String member, Type type, String native) = template;
     List requirement = _native_requirement(
@@ -912,12 +913,12 @@ static List NativeResolution.rows(
     }
     Type expected = _substitute_signature(
       type, r.variables, r.bindings);
-    Map native_bindings = r.bindings.copy();
-    native_bindings[r.binder] = r.base;
-    Type native_signature = _substitute_signature(
-      type, r.variables, native_bindings);
-    Type alias_signature = r.definition == r.base
-      ? expected : native_signature;
+    if (r.definition != r.base && native_bindings == NULL) {
+      native_bindings = r.bindings.copy();
+      native_bindings[r.binder] = r.base;
+    }
+    Type alias_signature = r.definition == r.base ? expected
+      : _substitute_signature(type, r.variables, native_bindings);
     members.push(
       %($member native $native $expected none $alias_signature));
   }
