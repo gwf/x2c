@@ -2,8 +2,8 @@
 
 > Status: active. Independent review and ranked plan complete, 2026-09-30.
 > Implementation of this larger pass is separately scoped and not started.
-> The authorized mitigation is implemented and verified locally; no commits,
-> pushes or PRs were made.
+> The accompanying mitigation is implemented and locally verified; its PR
+> targets dev. Larger beautification source work has not started.
 > Reviewed source: origin/dev cfd8324c2a1db623a738d409b18fe3a5f7e0cbea.
 
 ## Goal and current architecture
@@ -59,16 +59,10 @@ of unresolved public or representation choices.
 | 12 | Quasiquote and literate capture | Public/companion semantics; bare middle unquote atom incorrectly acts as suffix head; companion capture still uses spelling | Separate whole quoted form from element sequence; align companion with settled production capture/global-rebinding contract, preserving its own execution model |
 | 13 | Compiler state, rendering and allocation construction | Bounded architectural investigations, not approved redesign | Preserve distinct identity/transaction/overlay owners until a complete candidate proves deletion; audit partial constructor rollback and format cost/contract separately |
 
-Detailed current/proposed operations and per-file evidence:
-
-- Compiler: [40-file consolidation](../.context/compiler-beauty-consolidated.md),
-  [driver/macros/native meta](../.context/compiler-beauty-review.md),
-  [semantic lowering](../.context/beautification-compiler-semantics-design.md),
-  [parser/backend](../.context/beautification-compiler-parse-codegen-design.md).
-- Library: [values, Lisp and Match](../.context/beautification-library-design.md),
-  [lifetimes, IO and threads](../.context/beautification-lifetimes-design.md).
-- [Complete file accounting](../.context/beautification-coverage-final.json)
-  distinguishes body reads from operation-based review and generated source.
+[The checked-in coverage companion](compiler-library-review-coverage.md)
+records all 111 files, their reviewed operations and explicit gaps. Consequential
+focused evidence and complete current/proposed snippets are recorded below.
+Full local logs and probe versions remain preserved in the isolated worktree.
 
 The implementation candidates below are not all ready on the same evidence.
 The named focused checks are finite integration checks for each packet,
@@ -502,6 +496,7 @@ identity and compiler snapshot/carry/transaction differences remain explicit.
 Positive libuv directory delivery remains unverified: raw native start works
 but callback reports EMFILE; repaired propagation is separately tested.
 
-Publication is unauthorized. Preserve the isolated worktrees, generated
+The accompanying mitigation PR is authorized for dev; larger pass delivery
+remains separately scoped. Preserve the isolated worktrees, generated
 artifacts, complete logs and probe evidence. This plan adds no source edits to
 the larger beautification pass.
