@@ -786,6 +786,8 @@ static List Compiler._parse_parens(Compiler c) {
   c.expect(<(>);
   List expr = c.parse_expression();
   c.expect(<)>);
+  // C has no parenthesized brace; the brace converts at its destination.
+  if (expr.match(%(expr ? (composite ?)))) return expr;
   List type = expr.cadr();
   return %(expr $type (parens $expr));
 }
