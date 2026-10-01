@@ -3,17 +3,11 @@
     Copyright (c) 2025 Gary William Flake
 
     `Map` uses Robin Hood hashing split across two scope-owned `Block`s. The
-    hash
-    `Block` holds one 32-bit hash per bucket; the entry `Block` holds the `Var`
-    key
-    and value at the same bucket index. Lookups probe the compact hash `Block`
-    and touch an entry only when its hash matches. Capacity is always a power
-    of two and probe distances are computed as needed.
-
-    Bucket state   hash
-    ------------   ----
-    empty          0
-    occupied       >0
+    hash `Block` holds one 32-bit hash per bucket, zero for an empty bucket;
+    the entry `Block` holds the `Var` key and value at the same bucket
+    index. Lookups probe the compact hash `Block` and touch an entry only
+    when its hash matches. Capacity is always a power of two and probe
+    distances are computed as needed.
 
     Deletion back-shifts hashes and entries together to close holes.
     Structural mutation invalidates traversal state. Keys and values are
@@ -28,14 +22,11 @@ $(import "private-keywords.xmacro")
 #include "iter.x"
 
 /** `Scope`-backed mutable hash table from `Var` keys to `Var` values.
-    The `Map` records the `Scope` used for its two backing `Block`s. `Context`
-    moves
-    the `Map` allocation itself before recursively exporting those `Block`s.
-    Stored `Var` bits are shallow and retain no pointee; those values must
-    remain
-    valid while the `Map` can read, compare, hash, or return them. A valid
-    empty
-    `Map` is allocated and distinct from NULL.
+    The `Map` records the `Scope` used for its two backing `Block`s.
+    `Context` moves the `Map` allocation itself before recursively exporting
+    those `Block`s. Stored `Var` bits are shallow and retain no pointee;
+    those values must remain valid while the `Map` can read, compare, hash,
+    or return them. A valid empty `Map` is allocated and distinct from NULL.
 */
 typedef struct Map {
   Scope scope, Bytes hashes, entries;
@@ -60,7 +51,8 @@ protocol Cleanup(Map);
 #include "varconvert.x"
 $(import "map-generics.xmacro")
 
-// core data structures
+// buckets
+
 /* A record and its parallel nonzero hash occupy the same bucket. Both Vars are
    shallow copies; insertion never adopts storage reachable through them. */
 struct MapRecord {  Var key, val; };
@@ -123,7 +115,6 @@ meta native void Map.set(Map, Var, Var);
 meta native Self Map.copy(Self);
 meta native Self Map.merge(Self, Self);
 
-
 /** Returns the value stored under `key`, or `void` when absent, probing with
     the caller's precomputed `key_hash`.
     `key_hash` must be `Var.hash` of `key`; another value reports the key as
@@ -141,10 +132,9 @@ meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
 
 /** Adds exactly `pair_count` key/value pairs to `map` in argument order.
     Arguments alternate `Var` keys and values. A null `Map` returns NULL
-    without
-    reading them. Each completed pair remains if a later pair fails. Inserting
-    a new key invalidates active traversal; replacing an existing value does
-    not.
+    without reading them. Each completed pair remains if a later pair fails.
+    Inserting a new key invalidates active traversal; replacing an existing
+    value does not.
     Raises: the same causes as `Map.set`.
 */
 Self Map.update_n(Self map, unsigned pair_count, ...) {
@@ -168,10 +158,8 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
     to break cycles.
 
     A failure while staging leaves the `Map`'s original records, backing
-    storage,
-    and recorded `Scope` unchanged. Effects of callbacks that already
-    completed,
-    including nested exports, are not rolled back. Any failure while moving the
+    storage, and recorded `Scope` unchanged. Effects of callbacks that
+    already completed, including nested exports, are not rolled back. Any failure while moving the
     rebuilt `Block`s occurs after the table has replaced the original. A null
     `Map`, callback, or `Scope` pointer does nothing. Raises: `<alloc-fail>`,
     `<size-limit>`, or `<invariant>` while rebuilding, or any cause from
