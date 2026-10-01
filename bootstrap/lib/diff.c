@@ -182,15 +182,15 @@ List Diff_lines(String old, String new){
 }
 
 static void Script_trim(Script * s){
-  int lo = 0, old_hi = Array_len(s -> old), new_hi = Array_len(s -> new);
-  for(;  lo < old_hi && lo < new_hi && Script_same(s, lo, lo);  lo ++) Script_emit(s, 1248074, Var_string(Array_getindex(s -> old, lo)));
-  while(old_hi > lo && new_hi > lo && Script_same(s, old_hi - 1, new_hi - 1)) old_hi --, new_hi --;
-  s -> lo = lo, s -> n = old_hi - lo, s -> m = new_hi - lo;
+  int lo = 0, old_hi = Array_len((* s).old), new_hi = Array_len((* s).new);
+  for(;  lo < old_hi && lo < new_hi && Script_same(&((* s)), lo, lo);  lo ++) Script_emit(&((* s)), 1248074, Var_string(Array_getindex((* s).old, lo)));
+  while(old_hi > lo && new_hi > lo && Script_same(&((* s)), old_hi - 1, new_hi - 1)) old_hi --, new_hi --;
+  (* s).lo = lo, (* s).n = old_hi - lo, (* s).m = new_hi - lo;
 }
 
 static void Script_replace(Script * s){
-  for(int i = s -> lo;  i < s -> lo + s -> n;  i ++) Script_emit(s, 279719178, Var_string(Array_getindex(s -> old, i)));
-  for(int j = s -> lo;  j < s -> lo + s -> m;  j ++) Script_emit(s, 634596520, Var_string(Array_getindex(s -> new, j)));
+  for(int i =(* s).lo;  i <(* s).lo +(* s).n;  i ++) Script_emit(&((* s)), 279719178, Var_string(Array_getindex((* s).old, i)));
+  for(int j =(* s).lo;  j <(* s).lo +(* s).m;  j ++) Script_emit(&((* s)), 634596520, Var_string(Array_getindex((* s).new, j)));
 }
 
 List cons(Var, List);
@@ -200,13 +200,13 @@ Var List_var(List);
 Var String_var(String);
 
 static void Script_emit(Script * s, Symbol kind, String line){
-  s -> edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), s -> edits);
+  (* s).edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), (* s).edits);
 }
 
 int String_equal(String, String);
 
 static int Script_same(Script * s, int i, int j){
-  return String_equal(Var_string(Array_getindex(s -> old, i)), Var_string(Array_getindex(s -> new, j)));
+  return String_equal(Var_string(Array_getindex((* s).old, i)), Var_string(Array_getindex((* s).new, j)));
 }
 
 void * Scope_calloc(size_t, size_t);
@@ -218,7 +218,7 @@ List Var_list(Var);
 Var List_getindex(List, int);
 
 static int Script_myers(Script * s){
-  int max = s -> n + s -> m < _LIMIT ? s -> n + s -> m : _LIMIT;
+  int max =(* s).n +(* s).m < _LIMIT ?(* s).n +(* s).m : _LIMIT;
   Trace trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
@@ -232,7 +232,7 @@ static int Script_myers(Script * s){
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      int found = Script_forward(s, trace, max);
+      int found = Script_forward(&((* s)), trace, max);
       if(found < 0){
         int _x2c_return_value_1 = - 1;
         {
@@ -243,7 +243,7 @@ static int Script_myers(Script * s){
       }
       {
         List step;
-        List _x2c_macro_object_0 = Trace_path(trace, found, s -> n, s -> m);
+        List _x2c_macro_object_0 = Trace_path(trace, found, (* s).n, (* s).m);
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -253,7 +253,7 @@ static int Script_myers(Script * s){
             Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
             int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
             int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
-            Script_emit(s, kind, Var_string(kind == 634596520 ? Array_getindex(s -> new, s -> lo + j) : Array_getindex(s -> old, s -> lo + i)));
+            Script_emit(&((* s)), kind, Var_string(kind == 634596520 ? Array_getindex((* s).new, (* s).lo + j) : Array_getindex((* s).old, (* s).lo + i)));
           }
 
         }
@@ -276,16 +276,16 @@ static int Script_myers(Script * s){
 
 static int Script_forward(Script * s, Trace trace, int max){
   for(int step = 0;  step <= max;  step ++) for(int k = - step;  k <= step;  k += 2){
-    int x = Script_snake(s, Trace_entry(trace, step, k), k);
+    int x = Script_snake(&((* s)), Trace_entry(trace, step, k), k);
     trace[step * step + k + step] = x;
-    if(x >= s -> n && x - k >= s -> m) return step;
+    if(x >=(* s).n && x - k >=(* s).m) return step;
   }
   return - 1;
 }
 
 static int Script_snake(Script * s, int x, int k){
   int y = x - k;
-  while(x < s -> n && y < s -> m && Script_same(s, s -> lo + x, s -> lo + y)) x ++, y ++;
+  while(x <(* s).n && y <(* s).m && Script_same(&((* s)), (* s).lo + x, (* s).lo + y)) x ++, y ++;
   return x;
 }
 
@@ -440,10 +440,10 @@ static char _mark(Symbol kind){
 Buffer Buffer_write(Buffer, const char *);
 
 static void Hunk_write(Hunk * h, Buffer out){
-  Buffer_printf(out, "@@ -%d,%d +%d,%d @@\n", h -> old_count ? h -> old_start + 1 : h -> old_start, h -> old_count, h -> new_count ? h -> new_start + 1 : h -> new_start, h -> new_count);
+  Buffer_printf(out, "@@ -%d,%d +%d,%d @@\n", (* h).old_count ?(* h).old_start + 1 :(* h).old_start, (* h).old_count, (* h).new_count ?(* h).new_start + 1 :(* h).new_start, (* h).new_count);
   {
     String line;
-    List _x2c_macro_object_1 = List_reverse(h -> lines);
+    List _x2c_macro_object_1 = List_reverse((* h).lines);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){

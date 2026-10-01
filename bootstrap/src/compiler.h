@@ -11,7 +11,6 @@
 #include "type.h"
 #include "logger.h"
 #include "sourceview.h"
-#include "meta.h"
 typedef struct Diagnostics * Diagnostics;
 
 typedef struct ScriptUnit{
@@ -129,7 +128,7 @@ void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Tok
 
 void Compiler_run_declaration_effects(Compiler c);
 
-void Compiler_collect_unit_macro(Compiler c);
+int Compiler_collect_unit_macro(Compiler c);
 
 Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
 
