@@ -10,7 +10,6 @@
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,7 +86,10 @@ static void Compiler._publish(Compiler c, List outputs) {
   try file_publish(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
-  $report(c, "emit.file.write", failure);
+  String reason = String.new(strerror((int) failure.assoc(<"errno">)));
+  c.report_error(
+    <emit>, "failed to write generated file", c.token,
+    %("file: ${failure.assoc(<path>)}" "reason: $reason"));
 }
 
 // header and source

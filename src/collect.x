@@ -12,7 +12,6 @@
 #include "compiler.x"
 
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "buffer.x"
 #include "datum.x"
@@ -154,7 +153,8 @@ static List Compiler._prelude_entry(
 static String Compiler._runtime_text(Compiler c, String runtime) {
   String text = NULL;
   if (c.read_source(runtime, text)) return text;
-  $report(c, "driver.runtime.read", runtime);
+  c.report_error(
+    <driver>, "cannot read runtime source", c.token, %("path: $runtime"));
 }
 
 /* Rows enter the unit's symbols and its source declarations together. */
@@ -412,7 +412,9 @@ static String Compiler._walked_hash(
 static String Compiler._include_text(Compiler c, String target, String path) {
   String text = NULL;
   if (c.read_source(path, text)) return text;
-  $report(c, "driver.include.read", target, path);
+  c.report_error(
+    <driver>, "cannot read include", c.token,
+    %("stage: collect" "include: $target" "path: $path"));
 }
 
 /* Walk one included file cold and return its entry. The walk reads the
@@ -711,7 +713,9 @@ static String Compiler._find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = package_entry(c.sources, c.package_dirs, name, root);
   if (entry) return entry;
-  $report(c, "driver.package.unknown", token, name);
+  c.report_error(
+    <driver>, %"unknown package '$name'", token,
+    %( "searched: <root>/$name/src/$name.x, <root>/$name/$name.x" ));
 }
 
 /* The package's files enter the cache from their entries, or from one cold
@@ -727,7 +731,9 @@ static void Compiler._walk_package(
   }
   String text = NULL;
   if (!package.read_source(entry, text))
-    $report(c, "driver.package.read", token, package, entry);
+    c.report_error(
+      <driver>, %"cannot read package '${package.package}'", token,
+      %( "path: $entry" ));
   package._walk_apart(entry, text, globs, visited);
 }
 
@@ -783,7 +789,11 @@ static void Surface.take(Surface &s, Map rows, List key, Var value) {
 static void Surface.reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
   String fix = %"below #pragma private, or move it into '$name/src'";
-  $report(s.c, "driver.package.prefix", s.token, name, spelling, unit, fix);
+  s.c.report_error(
+    <driver>,
+    %"package '$name' exposes unprefixed top-level declaration '$spelling'",
+    s.token,
+    %( "'$unit' is x2c source outside the package; include it $fix" ));
 }
 
 /* The merged rows enter the importing unit's symbols. */
@@ -1139,7 +1149,7 @@ String interface_text(Compiler c, List selected) {
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
   if (_write_interface_entry(out, canonical, cached, selected)) return out;
-  $report(c, "emit.interface.write");
+  c.report_error(<emit>, "failed to write interface file", NULL, NULL);
 }
 
 static int _write_interface_entry(

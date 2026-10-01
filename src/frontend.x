@@ -40,7 +40,6 @@ typedef struct ParsedUnit {
 } ParsedUnit;
 
 #pragma private
-$(import "../src/error-reports.xmacro")
 
 #include <limits.h>
 #include <stdio.h>
@@ -240,7 +239,9 @@ static int _inside(const char *path, const char *dir) {
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
   if (c.read_source(filename, text)) return text;
-  $report(c, "driver.input.read", filename);
+  c.report_error(
+    <driver>, "cannot read input file", NULL,
+    %("stage: driver" "file: $filename" "reason: cannot open"));
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an
@@ -316,9 +317,18 @@ static void _enter_package(Frontend frontend, Compiler c) {
    line. */
 static void _check_cpp_unit(Compiler c) {
   if (c.layout)
-    $report(c, "driver.indent.symbols", _first_directive(c));
+    c.report_error(
+      <driver>, "indented units use the default symbol collection",
+      _first_directive(c),
+      %("the host preprocessor does not keep the indentation, so"
+        "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
+        "an indented unit"));
   if (c.script)
-    $report(c, "driver.script.symbols", _first_directive(c));
+    c.report_error(
+      <driver>, "script units use the default symbol collection",
+      _first_directive(c),
+      %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
+        "--live-symbols, and the --dump-cpp modes cannot read a script"));
 }
 
 static Token _first_directive(Compiler c) {
@@ -344,7 +354,9 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   if (errors && frontend.preprocessor_errors)
     frontend.preprocessor_errors(errors);
   if (status)
-    $report(c, "driver.cpp.failed", _first_directive(c), status);
+    c.report_error(
+      <driver>, "failed to run C preprocessor", _first_directive(c),
+      %("stage: preprocess" "status: $status"));
   foreach (String dependency, translation_depfile_parse(dependency_text))
     c.add_translation_dependency(dependency);
   return cpp;

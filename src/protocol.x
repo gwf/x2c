@@ -12,7 +12,6 @@
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 
 #include <limits.h>
@@ -267,17 +266,23 @@ static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
     c.next();
     p.representation = c.parse_type_name().canonicalize();
     if (!p.generated_base && p.base !== %("Var"))
-      $report(c, "protocol.as.var", p.modifier_token);
+      c.report_error(
+        <protocol>, "'as' applies only to a Var adoption",
+        p.modifier_token, NULL);
   }
   if (c.at_word("tag")) {
     p.modifier_token = c.token;
     c.next();
     if (p.representation)
-      $report(c, "protocol.modifier.conflict", p.modifier_token);
+      c.report_error(
+        <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
+        p.modifier_token, NULL);
     p.tag = c.try_parse_macro_slot(<expression>);
     if (!p.tag) p.tag = c.parse_atomic_literal();
     if (!p.generated_base && p.base !== %("Var"))
-      $report(c, "protocol.tag.var", p.modifier_token);
+      c.report_error(
+        <protocol>, "'tag' applies only to a Var adoption",
+        p.modifier_token, NULL);
   }
 }
 
@@ -305,16 +310,28 @@ static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
 static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (p.meta)
-    $report(c, "protocol.meta.adoption", p.meta);
+    c.report_error(
+      <protocol>, "'meta' applies only to a concrete protocol adoption",
+      p.meta, %("mark each adoption: meta protocol BASE(TYPE);"));
 
   if (p.representation || p.tag)
-    $report(c, "protocol.modifier.adoption", p.representation, p.start);
+    c.report_error(
+      <protocol>, p.representation
+        ? "'as' applies only to a concrete protocol adoption"
+        : "'tag' applies only to a concrete protocol adoption",
+      p.start, NULL);
 
   if (!p.participant)
-    $report(c, "protocol.participant.expected", p.participant_token);
+    c.report_error(
+      <protocol>, "expected protocol participant name",
+      p.participant_token, NULL);
 
   if (p.storage == <static>)
-    $report(c, "protocol.static.adoption", p.start);
+    c.report_error(
+      <protocol>,
+      "'static' applies only to a concrete protocol adoption",
+      p.start,
+      %("remove 'static' from the reusable protocol body"));
   c.expect(<"{">);
 }
 
@@ -345,7 +362,9 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
   while (c.peek(0) != <"}"> && c.peek(0) != <eof>) {
     if (c.peek(0) == <associated>) {
       if (saw_member)
-        $report(c, "protocol.assoc.order");
+        c.report_error(
+          <protocol>, "associated types must precede protocol members",
+          c.token, NULL);
       associations.push(c._parse_associated(type_names));
       continue;
     }
@@ -369,11 +388,13 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
 static List Compiler._parse_associated(Compiler c, Map names) {
   c.expect(<associated>);
   if (c.peek(0) != <ident>)
-    $report(c, "protocol.assoc.expected");
+    c.report_error(<protocol>, "expected associated type name", c.token, NULL);
   String name = c.token.text;
   c.next();
   if (name in names)
-    $report(c, "protocol.type.duplicate", name);
+    c.report_error(
+      <protocol>, %"duplicate protocol type variable '$name'",
+      c.token, NULL);
   c.expect(<=>);
   Type type = c.parse_type_name().canonicalize();
   c.expect(<;>);
@@ -395,15 +416,23 @@ static List Compiler._parse_member(
       identity = name;
     }
   if (!binding)
-    $report(c, "protocol.member.single");
+    c.report_error(
+      <protocol>, "protocol member must declare one function",
+      c.token, NULL);
   String name = _member_name(identity, participant);
   if (!name)
-    $report(c, "protocol.member.owner", participant);
+    c.report_error(
+      <protocol>, "protocol member must be owned by its participant",
+      c.token, %("expected receiver:" $participant));
   Type signature = declaration.type_from_ast().canonicalize();
   if (!signature.is_function())
-    $report(c, "protocol.member.function", name);
+    c.report_error(
+      <protocol>, "protocol member must be a function",
+      c.token, %("member:" $name));
   if (name in members)
-    $report(c, "protocol.member.duplicate", name);
+    c.report_error(
+      <protocol>, %"duplicate protocol member '$name'",
+      c.token, NULL);
   String native = c._native_member();
   c.expect(<;>);
   members[name] = 1;
@@ -427,7 +456,9 @@ static String _member_name(List identity, String participant) {
 static String Compiler._native_member(Compiler c) {
   if (!c.test(<=>)) return NULL;
   if (c.peek(0) != <ident>)
-    $report(c, "protocol.native.ident");
+    c.report_error(
+      <protocol>, "native protocol member requires an identifier",
+      c.token, NULL);
   String native = c.token.text;
   c.next();
   return native;
@@ -511,7 +542,9 @@ static List Compiler._publish_var_adoption(
       return draft.publish();
     }
   }
-  $report(c, "macro.protocol.invalid");
+  c.report_error(
+    <macro>, "constructed protocol syntax is invalid",
+    c.token, NULL);
 }
 
 static List Compiler._publish_record(
@@ -578,7 +611,11 @@ static void Compiler._install_occurrence(
     first_location = second_location;
     second_location = swap;
   }
-  $report(c, "protocol.decl.conflict", base, first_location, second_location);
+  String first = %"first: $first_location";
+  String second = %"second: $second_location";
+  c.report_error(
+    <protocol>, %"conflicting protocol declarations for ${base.repr()}",
+    c.token, %($first $second));
 }
 
 // adoption drafts
@@ -589,8 +626,10 @@ static List AdoptionDraft.publish(AdoptionDraft &a) {
   String spelling = a.participant.car().str();
   List declared = c.sym.get(%($spelling));
   if ((!declared || !declared.type().is_typedef()) && !c.shallow)
-    $report(c, "protocol.type.undeclared", spelling,
-      a.participant_token);
+    c.report_error(
+      <protocol>,
+      %"adoption participant '$spelling' does not name a declared type",
+      a.participant_token, NULL);
   a.tag = a.check_modifiers();
   a.storage = a.published_storage(spelling);
   a.check_previous();
@@ -727,7 +766,11 @@ static void AdoptionDraft.install(AdoptionDraft &a) {
   if (existing == row) return;
   List first_location = _adoption_location(existing);
   if (c._canonical_file(first_location) == path) return;
-  $report(c, "protocol.adoption.conflict", a, first_location);
+  String first = %"first: ${_location_string(first_location)}";
+  String second = %"second: ${_location_string(a.location)}";
+  c.report_error(
+    <protocol>, %"conflicting adoption declarations for ${a.spelling()}",
+    c.token, %($first $second));
 }
 
 // resolution

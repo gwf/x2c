@@ -5434,7 +5434,7 @@ static List Compiler__binary_expression(Compiler c, Symbol operator, List lhs, L
     Type type = lhs_type;  if(operator == 123 && !(c -> meta_body && Sym_is_named_value_type(c -> sym, type, _3124))) rhs = Compiler_convert_expression(c, rhs, type);  return source_operator_expression(Type_list(type), cons(Symbol_var(operator), cons(List_var(lhs), cons(List_var(rhs), NULL))));
   }
   Compiler__convert_string_comparison(c, operator, &(lhs), &(rhs));  int constant_string = Compiler__convert_string_addition(c, operator, &(lhs), &(rhs));  List lowered = Compiler__protocol_operator_expression(c, operator, lhs, rhs);  if(List_truth(lowered)){
-    if(! constant_string) return lowered;  List cached = Compiler_cache(c, cons(_1270, cons(List_var(lowered), NULL)));  return cons(_33, cons(_2641, cons(List_var(cached), NULL)));
+    if(! constant_string || c -> runtime_literals) return lowered;  List cached = Compiler_cache(c, cons(_1270, cons(List_var(lowered), NULL)));  return cons(_33, cons(_2641, cons(List_var(cached), NULL)));
   }
   if(operator == 604) Compiler_report_error(c, 1362954, _3125, origin, cons(String_var(String_join(NULL, cons(String_var(_2642), cons(String_var(List_repr(Type_list(rhs_type))), NULL)))), NULL));  if((lhs_type != NULL) !=(rhs_type != NULL)) Compiler__check_untyped_operand(c, operator, List_truth(Type_list(lhs_type)) ? lhs_type : rhs_type, List_truth(Type_list(lhs_type)) ? rhs : lhs, origin);  Compiler__check_matmul(c, operator, lhs_type, rhs_type, origin);  return Compiler__native_binary_expression(c, operator, lhs, rhs, origin);
 }
@@ -6083,7 +6083,7 @@ static List Compiler__raw_string_to_string(Compiler c, List expr){
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_102;  if (x2c_match_site_try_capture(& _x2c_match_site_102, _x2c_match_expr, List_var(_2975), &_x2c_match_capture)) {{
-    List value = cons(_33, cons(_2641, cons(List_var(cons(_753, cons(_2928, cons(List_var(cons(_122, cons(List_var(expr), NULL))), NULL)))), NULL)));  return cons(_33, cons(_2641, cons(List_var(Compiler_cache(c, cons(_1270, cons(List_var(value), NULL)))), NULL)));
+    List value = cons(_33, cons(_2641, cons(List_var(cons(_753, cons(_2928, cons(List_var(cons(_122, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(c -> runtime_literals) return value;  return cons(_33, cons(_2641, cons(List_var(Compiler_cache(c, cons(_1270, cons(List_var(value), NULL)))), NULL)));
   }
   break;
 }

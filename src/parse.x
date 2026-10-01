@@ -15,7 +15,6 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #include "type.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "statements.x"
 #include "expressions.x"
@@ -146,7 +145,9 @@ static List Compiler._top_level_lisp(Compiler c, int skip_body) {
 }
 
 static List Compiler._top_level_decorator(Compiler c) {
-  $report(c, "parse.decorator.top");
+  c.report_error(
+    <parse>, "top-level decorators are not supported", c.token,
+    %( "module initialization: void TYPE.initialize(void)" ));
 }
 
 /* A declaration row after any `meta` marker. Collection records it; the
@@ -162,13 +163,17 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     return NULL;
   }
   if (native && !decl.type_from_ast().is_function())
-    $report(c, "parse.meta.function", meta);
+    c.report_error(
+      <parse>, "a native meta declaration must be a function", meta, NULL);
   if (c.test(<;>)) return c._declared(decl, meta);
   if (c.peek(0) == <"{"> || c._at_function_arrow())
     return c._defined(decl, meta, native, first);
   c.require_input();
   Symbol unexpected = c.peek(0);
-  $report(c, "parse.body.expected", unexpected);
+  c.report_error(
+    <parse>, "expected ';', '{', or '=>'",
+    c.token,
+    %("token:" ${c.token.text} "symbol:" ${unexpected.str()}));
 }
 
 /** Parses one full top-level form through the shared classifier. */
@@ -194,7 +199,8 @@ List Compiler.parse_submission(Compiler c, int end_position) {
   c.input_boundary = token;
   List result = c.parse_top_level();
   if (c.peek(0) != <eof>)
-    $report(c, "parse.unit.single");
+    c.report_error(
+      <parse>, "submit one top-level item at a time", c.token, NULL);
   return result;
 }
 
@@ -333,12 +339,15 @@ List Compiler.parse_import_declaration(Compiler c) {
 // Rejects unquoted package names before parsing their identifier.
 static String Compiler._package_name(Compiler c) {
   if (c.peek(0) != <lit-char*>)
-    $report(c, "parse.import.name");
+    c.report_error(
+      <parse>, "expected a quoted package name after 'import'",
+      c.token, NULL);
   Token name_token = c.token;
   String name = String.new_len(
     c.token.text + 1, c.token.len - 2).unescape();
   if (!name.is_identifier())
-    $report(c, "parse.package.identifier", name_token);
+    c.report_error(
+      <parse>, "package name must be a C identifier", name_token, NULL);
   c.next();
   return name;
 }
@@ -346,7 +355,9 @@ static String Compiler._package_name(Compiler c) {
 static String Compiler._import_alias(Compiler c, String name) {
   if (!c.take_word("as")) return name;
   if (c.peek(0) != <ident>)
-    $report(c, "parse.alias.name");
+    c.report_error(
+      <parse>, "expected an alias identifier after 'as'",
+      c.token, NULL);
   String alias = c.token.text;
   c.next();
   return alias;
@@ -360,13 +371,16 @@ static List Compiler._import_members(Compiler c, String name) {
   Array members = [];
   do {
     if (c.peek(0) != <ident>)
-      $report(c, "parse.import.member");
+      c.report_error(
+        <parse>, "expected a package member name after 'with'",
+        c.token, NULL);
     Token member_token = c.token, local_token = member_token;
     String member = c.token.text, local = member;
     c.next();
     if (c.take_word("as")) {
       if (c.peek(0) != <ident>)
-        $report(c, "parse.import.local");
+        c.report_error(
+          <parse>, "expected a local name after 'as'", c.token, NULL);
       local_token = c.token;
       local = c.token.text;
       c.next();
@@ -403,7 +417,9 @@ static List Compiler._declared(Compiler c, List decl, Token meta) {
 static List Compiler._defined(
   Compiler c, List decl, Token meta, int native, Token first) {
   match (decl) case %(seq *):
-    $report(c, "parse.function.row");
+    c.report_error(
+      <parse>, "a function definition cannot share a declaration row",
+      c.token, NULL);
   List function;
   Token tokens = c.tokenizer.tokens;
   int start = (meta ? meta : first) - tokens;
@@ -429,7 +445,9 @@ static void Compiler._reject_expanded_meta(Compiler c, List decl, Token meta) {
   match (decl)
     case %(declare ? (bindings (bind (binding ? ?(String own)) *))):
       name = own;
-  $report(c, "parse.meta.constructed", name, meta);
+  c.report_error(
+    <parse>, %"meta function '$name' cannot be produced by a macro",
+    meta, %( "move it to a source file and call it from the macro" ));
 }
 
 /* Records the hash of a function definition's code tokens, from its first
@@ -615,14 +633,18 @@ static List Compiler._declaration_types(Compiler c, List storage) {
 List Compiler.parse_declaration_argument(Compiler c) {
   List storage = c._storage_class();
   if (storage === %(typedef))
-    $report(c, "parse.decl.typedef");
+    c.report_error(
+      <parse>, "Decl macro argument cannot be a typedef",
+      c.token, NULL);
   List (type, binding_type) = c._declaration_types(storage);
   if (c._destructure_starts())
     return c._destructure_declaration(type, binding_type, 1);
   List binding = c._declarator_init(binding_type, NULL);
   List declaration = c._finish_declaration(<declare>, type, %($binding), 0);
   if (declaration.type_from_ast().is_function())
-    $report(c, "parse.decl.function");
+    c.report_error(
+      <parse>, "Decl macro argument cannot be a function declaration",
+      c.token, NULL);
   return declaration;
 }
 
@@ -751,7 +773,9 @@ static List Compiler._destructure_declaration(
   if (allow_uninitialized || c.peek(0) == <in>)
     return %(declare $type (bindings @{_destructure_binds(bindings)}));
   if (!c.test(<=>))
-    $report(c, "parse.destructure.init");
+    c.report_error(
+      <parse>, "destructuring declaration requires an initializer",
+      c.token, NULL);
   List source = c.parse_assignment();
   List result = %(dstrdecl $type (targets @bindings) $source);
   return c.anchor_origin(result, origin_token);
@@ -763,7 +787,9 @@ static List Compiler._destructure_targets(Compiler c, List binding_type) {
   c.expect(<(>);
   loop {
     if (c.peek(0) != <ident>)
-      $report(c, "parse.destructure.name");
+      c.report_error(
+        <parse>, "expected identifier in destructuring declaration",
+        c.token, %("destructuring targets must be simple identifiers"));
     List ident = c.parse_basic_identifier();
     if (c.macro_holes) {
       List local = c.macro_introduced_name(ident.car());
@@ -1067,7 +1093,11 @@ static List Compiler._primitive_type(Compiler c) {
   // The preprocessed shallow pass only contributes declarations. The full
   // pass over the original source reports source-level type diagnostics.
   if (c.shallow) return source;
-  $report(c, "type.scalar.invalid", source, start);
+  c.report_error(
+    <type>, source ? %"invalid scalar type ${source}"
+                   : "expected scalar type",
+    start, NULL
+  );
 }
 
 static int _is_scalar_specifier(Symbol symbol) {
@@ -1169,7 +1199,7 @@ static List Compiler._publish_aggregate_type(
   int layout = c._layout_attribute_since(first);
   int packed = c._attribute_since(first, c.packed_marks);
   if (tag == <struct> && packed && c.source_private >= 0)
-    $report(c, "parse.attribute.packed", first);
+    c.report_error(<parse>, "packed attributes are unsupported", first, NULL);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -1265,7 +1295,8 @@ static void Compiler._declare_delegates(Compiler c, List context, List rows) {
     match (declaration)
       case %(declare ? (bindings *declarators)): {
         if (!declarators)
-          $report(c, "parse.delegate.name");
+          c.report_error(
+            <parse>, "delegate field requires a name", c.token, NULL);
         foreach (List declarator, declarators)
           match (declarator)
             case %(bind ?binding ?): c._declare_delegate(context, binding);
@@ -1275,7 +1306,8 @@ static void Compiler._declare_delegates(Compiler c, List context, List rows) {
 static void Compiler._declare_delegate(Compiler c, List context, Var binding) {
   String name = binding_identity_spelling(binding);
   if (!name)
-    $report(c, "parse.delegate.name");
+    c.report_error(
+      <parse>, "delegate field requires a name", c.token, NULL);
   if (!c.macro_holes) c.sym.declare_delegate_field(context, name);
 }
 
@@ -1345,7 +1377,9 @@ static Type Compiler._declare_named_type(
   List modifiers = NULL;
   match (declarator) {
     case %(bind () ?captured): modifiers = captured;
-    default: $report(c, "parse.named-type.abstract", start);
+    default: c.report_error(
+      <parse>, "named type requires an abstract type after its name",
+      start, NULL);
   }
   c.expect(<;>);
   Type type = %(declare $base (bindings (bind () $modifiers)))
@@ -1414,7 +1448,9 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
   if (macro) return macro;
   if (c.macro_holes) return c._template_enumerator(context);
   if (c.peek(0) != <ident>)
-    $report(c, "parse.enum.name");
+    c.report_error(
+      <parse>, "expected enumerator identifier",
+      c.token, NULL);
   String spelling = c.token.text;
   Token origin = c.token;
   c.next();
@@ -1446,7 +1482,9 @@ static List Compiler._enumerator_name(Compiler c, Type context) {
       return name;
     }
     default:
-      $report(c, "parse.enum.name");
+      c.report_error(
+        <parse>, "expected enumerator identifier",
+        c.token, NULL);
   }
 }
 
@@ -1467,7 +1505,9 @@ static List Compiler._publish_enumerator(
   List binding = exact ? NULL : name is <list> ? name.list() : NULL;
   String spelling = exact ? exact : binding_identity_spelling(binding);
   if (!spelling)
-    $report(c, "parse.syntax.position", origin);
+    c.report_error(
+      <parse>, "syntax cannot be constructed at this position",
+      origin, NULL);
   List key = %($spelling);
   Symbol prior = c.sym.enumerator_owner(key);
   if (prior && binding) {
@@ -1475,7 +1515,10 @@ static List Compiler._publish_enumerator(
     if (existing && existing.equal(binding)) return input;
   }
   if (prior)
-    $report(c, "parse.enum.bound", spelling, origin);
+    c.report_error(
+      <parse>,
+      %"enumerator '$spelling' is already bound in this scope",
+      origin, %("prior binding: '$spelling'"));
   if (exact) binding = c.sym.declare(NULL, key, context);
   else
     c.sym.bind_identity(NULL, binding, context.declaration_ast(binding));
@@ -1652,9 +1695,11 @@ static List Compiler._parenthesized(
        this unit cannot see, such as a package type named without its
        import alias, not a parenthesized declarator. */
     if (first.type == <ident> && c.peek(0) == <ident>)
-      $report(c, "parse.type.unknown", first);
+      c.report_error(
+        <parse>, %"unknown type name '${first.text}'", first,
+        %("name an imported package type through its alias"));
     else
-      $report(c, "parse.paren.unclosed");
+      c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
   }
   c.next();
   return decl;
@@ -1694,7 +1739,10 @@ static List Compiler._array_suffix(Compiler c) {
   if (c.peek(0) != <]>) {
     c.require_input();
     Symbol unexpected = c.peek(0);
-    $report(c, "parse.dimension.close", expr, unexpected);
+    c.report_error(
+      <parse>, "expected ']'",
+      c.token,
+      %("dimension:" ${expr.str()} "symbol:" ${unexpected.str()}));
   }
   c.next();
   return %((dim $expr));
@@ -1762,7 +1810,7 @@ static List Compiler._literal_method(Compiler c) {
   if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
   else {
     if (!c.token.text.is_identifier())
-      $report(c, "parse.method.name");
+      c.report_error(<parse>, "expected method name", c.token, NULL);
     member = c.token.text;
     c.next();
   }
@@ -1784,7 +1832,10 @@ static List Compiler._hole_method(Compiler c) {
     c.next();
   }
   else
-    $report(c, "parse.macro.member");
+    c.report_error(
+      <parse>,
+      "macro method declaration requires a member name",
+      c.token, NULL);
   return %(bind (($owner) $member) ());
 }
 
@@ -1879,9 +1930,13 @@ static Var Compiler._method_spelling(
         name = member;
         exact_name = 1;
       }
-      else $report(c, "type.method.owner");
+      else c.report_error(
+        <type>, "method name has no concrete owner",
+        c.token, NULL);
     case %((!is ? type list) (!is ? type string)):
-      $report(c, "type.method.owner");
+      c.report_error(
+        <type>, "method name has no concrete owner",
+        c.token, NULL);
   }
   return name;
 }
@@ -1899,7 +1954,9 @@ static void Compiler._check_rebinding(
       Type prior_type = prior;
       Type candidate = declaration.type_from_ast();
       if (!candidate.is_function() || !prior_type.is_function())
-        $report(c, "parse.decl.bound", exact);
+        c.report_error(
+          <parse>, %"declaration '$exact' is already bound",
+          c.token, %("prior binding: '$exact'"));
     }
   }
 }
@@ -1933,7 +1990,8 @@ static List Compiler._function_parameters(Compiler c) {
   c.next();
   c.__complete_here(<type>, _type_keywords());
   if (c.peek(0) == <)>)
-    $report(c, "parse.params.empty");
+    c.report_error(
+      <parse>, "empty parameter list; use (void)", c.token, NULL);
   SymScope saved = c.params, parsed;
   int complete = 0;
   defer { if (!complete) c.params = saved; }
@@ -1946,7 +2004,10 @@ static List Compiler._function_parameters(Compiler c) {
   if (c.peek(0) != <)>) {
     c.require_input();
     Symbol unexpected = c.peek(0);
-    $report(c, "parse.params.close", params, unexpected);
+    c.report_error(
+      <parse>, "expected ')'",
+      c.token,
+      %("parameters:" ${params.str()} "symbol:" ${unexpected.str()}));
   }
   else c.next();
   c.params = parsed;
@@ -2053,7 +2114,10 @@ static List Compiler._member_name(
   Compiler c, String owner, List &?method_identity) {
   // a weaker test that accepts anything that looks like an identifier
   if (!c.token.text.is_identifier())
-    $report(c, "parse.method.member", owner);
+    c.report_error(
+      <parse>, "expected method name after dot",
+      c.token,
+      %( "typedef:" $owner "token:" ${c.token.text}  ));
   String member = c.token.text, ident = %"${owner}_$member";
   if (method_identity) method_identity = %($owner $member);
   if (!method_identity && !c.sym.get_exact(%($ident))) {
@@ -2073,7 +2137,10 @@ static String Compiler._package_alias_member(Compiler c) {
   c.next();
   c.next();
   if (!c.sym.get_exact(%($spelling)))
-    $report(c, "parse.package.member", c.token, package, c.token.text);
+    c.report_error(
+      <parse>,
+      %"package '$package' has no public name '${c.token.text}'",
+      c.token, NULL);
   return spelling;
 }
 
@@ -2128,7 +2195,9 @@ List Compiler.parse_function_definition(Compiler c) {
   Token tokens = c.tokenizer.tokens, start = c.token;
   List declaration = c.parse_simple_declaration();
   if (c.peek(0) != <"{"> && !c._at_function_arrow())
-    $report(c, "parse.function.body");
+    c.report_error(
+      <parse>, "Function macro argument requires a function body",
+      c.token, NULL);
   int first = start - tokens, body = c.token - tokens;
   List function = c._finish_function(declaration, NULL);
   if (!c.macro_holes)
@@ -2219,12 +2288,16 @@ static String Compiler._prepare_lifecycle(
   if (initializer_owner) {
     c._require_signature(declaration, name, "initializer");
     if (c.init_fn && c.init_fn != name)
-      $report(c, "parse.init.duplicate", name);
+      c.report_error(
+        <parse>, "translation unit has more than one type initializer",
+        c.token, %( "initializer:" $name ));
   }
   if (shutdown_owner) {
     c._require_signature(declaration, name, "shutdown");
     if (c.fini_fn && c.fini_fn != name)
-      $report(c, "parse.shutdown.duplicate", name);
+      c.report_error(
+        <parse>, "translation unit has more than one type shutdown",
+        c.token, %( "shutdown:" $name ));
   }
   return name;
 }
@@ -2249,7 +2322,10 @@ static void Compiler._require_signature(
              (bind ?
                ((fnmod (params (param (void) (bind () ())))))))):
       return;
-  $report(c, "parse.lifecycle.signature", role, name);
+  String message = role == "initializer"
+    ? "type initializer must have signature void TYPE.initialize(void)"
+    : "type shutdown must have signature void TYPE.shutdown(void)";
+  c.report_error(<parse>, message, c.token, %("$role: $name"));
 }
 
 static void Compiler._publish_lifecycle(
@@ -2376,9 +2452,13 @@ static void Compiler._require_cleanup(
   Compiler c, Var base, Type type, Token origin) {
   match (base)
     case %(* (!or static extern threaded) *):
-      $report(c, "parse.managed.storage", origin);
+      c.report_error(
+        <parse>, "managed initializer requires automatic local storage",
+        origin, NULL);
   if (!c.protocol_members_for(type, %("Cleanup")))
-    $report(c, "protocol.managed.cleanup", origin, type);
+    c.report_error(
+      <protocol>, "managed initializer requires Cleanup participation",
+      origin, %("type: ${type.repr()}"));
 }
 
 static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
@@ -2402,9 +2482,9 @@ List Compiler.bind_syntax(
   syntax = c.evaluate_macro_slot(syntax);
   if (c._take_staged(syntax)) return syntax;
   if (syntax is not <list>)
-    $report(c, "parse.syntax.expected");
+    c.report_error(<parse>, "expected syntax", c.token, NULL);
   List input = syntax;
-  if (!input) $report(c, "parse.syntax.expected");
+  if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
   List enumerator =
     context == AST_ENUMERATOR ? c._bind_enumerator(input) : NULL;
   if (enumerator) return enumerator;
@@ -2579,7 +2659,8 @@ static List Compiler._bind_form(
 /* Reports a constructed form at a position that does not admit it.
    `report_error` never returns, so a caller may return this call. */
 static List Compiler._construction_error(Compiler c) {
-  $report(c, "parse.syntax.position", c.token);
+  c.report_error(
+    <parse>, "syntax cannot be constructed at this position", c.token, NULL);
 }
 
 static List Compiler._resolve(Compiler c, List expr) =>
@@ -2795,7 +2876,7 @@ static List Compiler._bind_items(Compiler c, List items, AstPos context) {
   if (context == AST_STATEMENT) {
     match (items) case %(?only):
       return c.bind_syntax(only, context, c.return_type);
-    $report(c, "parse.statement.single");
+    c.report_error(<parse>, "expected one statement", c.token, NULL);
   }
   Array bound = [];
   foreach (Var item, items)
@@ -3188,7 +3269,9 @@ List Compiler.finish_foreign_alias(
   Compiler c, List declaration, List native_syntax) {
   match (declaration) {
     case %(function *):
-      $report(c, "parse.alias.body");
+      c.report_error(
+        <parse>, "foreign alias declaration cannot have a body",
+        c.token, NULL);
     /* A function returning a pointer puts its pointer modifiers after the
        fnmod. The trailing modifiers are the return type's pointer depth; the
        declaration is still one direct function. */
@@ -3200,7 +3283,9 @@ List Compiler.finish_foreign_alias(
       return c._alias_target(declaration, binding, native_syntax);
     }
   }
-  $report(c, "parse.alias.target");
+  c.report_error(
+    <parse>, "foreign alias target must be one direct function declaration",
+    c.token, NULL);
 }
 
 static void Compiler._alias_storage(Compiler c, Var base) {
@@ -3208,14 +3293,18 @@ static void Compiler._alias_storage(Compiler c, Var base) {
     if (part is not <symbol>) continue;
     Symbol specifier = part;
     if (specifier.is_storage_class() && specifier != <static>)
-      $report(c, "parse.alias.storage");
+      c.report_error(
+        <parse>, "foreign alias has invalid storage class",
+        c.token, %("allowed storage: static or inline"));
   }
 }
 
 static void Compiler._alias_parameters(Compiler c, List parameters) {
   foreach (Var parameter, parameters)
     match (parameter) case %(...):
-      $report(c, "parse.alias.variadic");
+      c.report_error(
+        <parse>, "foreign alias cannot be variadic",
+        c.token, NULL);
 }
 
 static List Compiler._alias_target(
@@ -3225,10 +3314,16 @@ static List Compiler._alias_target(
     case %(expr (!set ?native_type (*)) ${$source_identifier_content(
         %(?native_binding))}): {
       if (native_type && !native_type.type().is_function())
-        $report(c, "type.alias.function", native_type);
+        c.report_error(
+          <type>, "foreign alias native target is not a function",
+          c.token, %("type: ${native_type.repr()}"));
       if (List.equal(binding, native_binding))
-        $report(c, "parse.alias.self");
+        c.report_error(
+          <parse>, "foreign alias cannot name itself",
+          c.token, NULL);
       return %(falias $declaration $native_binding);
     }
-  $report(c, "parse.alias.identifier");
+  c.report_error(
+    <parse>, "foreign alias native target must be a direct identifier",
+    c.token, NULL);
 }

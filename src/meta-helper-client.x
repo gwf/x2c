@@ -11,7 +11,6 @@
 #include "compiler.x"
 
 #pragma private
-$(import "../src/error-reports.xmacro")
 #include "meta-group.x"
 #include "datum.x"
 #include <errno.h>
@@ -339,13 +338,17 @@ static void Call.refuse(Call &call, String why) =>
    call. */
 static void Call.overdue(Call &call) {
   _helper_stop(SIGKILL);
-  $report(
-    call.compiler, "macro.helper.timeout",
-    call.site, call.limit, call.name);
+  call.compiler.report_error(
+    <macro>, "%s%g s".printf("this meta call ran longer than ", call.limit),
+    call.site,
+    %("function: ${call.name}"
+      "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
 static void Call.stopped(Call &call, String reason) {
-  $report(call.compiler, "macro.helper.stopped", call.site, call.name, reason);
+  call.compiler.report_error(
+    <macro>, "this meta call stopped the compile-time helper", call.site,
+    %("function: ${call.name}" "reason: $reason"));
 }
 
 // lifecycle

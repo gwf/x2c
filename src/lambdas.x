@@ -11,7 +11,6 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
@@ -93,7 +92,8 @@ static List Compiler._parse_bare_params(Compiler c) {
 /* A bare parameter is an automatic Var. */
 static List Compiler._parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
-    $report(c, "parse.param.ident");
+    c.report_error(
+      <parse>, "expected identifier in parameter list", c.token, NULL);
   String name = c.token.text;
   List binding = c.sym.define(%($name), %("Var"));
   Map facts = c.semantic_binding_facts();
@@ -146,7 +146,8 @@ static List Compiler._shared_binding(Compiler c) {
   Type type = NULL;
   List binding = c.sym.lookup(%($spelling), type);
   if (!type)
-    $report(c, "type.ident.untyped", spelling, origin);
+    c.report_error(
+      <type>, %"identifier '$spelling' has no semantic type", origin, NULL);
   return binding;
 }
 
@@ -437,7 +438,9 @@ static List Capture.add(Capture &k) {
   else if (type.car() == <&>)
     expression = %(expr $captured_type (op * $expression));
   if (reference && %(lambda-snapshot $binding) in k.facts)
-    $report(k.c, "type.capture.enclosing", k.original);
+    k.c.report_error(
+      <type>, "reference capture requires an enclosing reference capture",
+      k.c.token, %("binding: ${binding_identity_spelling(k.original)}"));
   return k.record(captured_type, expression, reference);
 }
 
@@ -506,7 +509,9 @@ static void Compiler._require_capture_lvalue(Compiler c, List target) {
   List binding = Ast.lvalue_binding(target);
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
-    $report(c, "type.capture.ref", binding);
+    c.report_error(
+      <type>, "captured value requires 'using &name' for reference access",
+      c.token, %("binding: ${binding_identity_spelling(binding)}"));
 }
 
 /* An argument bound to a reference parameter is reference access. */
