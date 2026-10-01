@@ -806,6 +806,8 @@ static int _package_protocol_row(List key, Var value) {
       package-macro package-import);
 }
 
+// import replay
+
 /** Replays the import operations retained by this declaration contribution.
     The shadow borrows the unit's macro state and shared package registries.
 */
@@ -1093,6 +1095,8 @@ String interface_prelude(void) {
   }
   return NULL;
 }
+
+// writing interfaces
 
 /** Returns the compiler's own collected contribution as interface text, or
     NULL when the unit has not collected its symbols or the compiler's

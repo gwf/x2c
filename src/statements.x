@@ -159,7 +159,7 @@ List Compiler.with_binding(Compiler c) {
   return binding.equal(candidate) ? binding : NULL;
 }
 
-// control flow
+// conditionals and loops
 
 static List Compiler._if_statement(Compiler c) {
   List cond = c._keyword_paren_expr(<if>);
@@ -240,6 +240,8 @@ static List Compiler._do_statement(Compiler c) {
   List cond = c._keyword_paren_expr(<while>);
   return %(do $body $cond);
 }
+
+// keyword statements
 
 static List Compiler._return_statement(Compiler c) {
   c.expect(<return>);
