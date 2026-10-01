@@ -26,20 +26,20 @@
 
 // representation
 
-/* One conversion specification: the flag bits, the width and precision with
-   their presence, a length modifier, and the conversion byte. */
+/* One conversion specification: the flag bits, the width or zero for
+   none, the precision or a negative value for none, a length modifier, and
+   the conversion byte. */
 typedef struct Spec {
-  int flags, width, precision, has_width, has_precision, modifier;
+  int flags, width, precision, modifier;
   char conversion;
 } Spec;
 
-// The flag bits of `-+ #0`, in that order.
-enum {
-  FORMAT_LEFT = 1, FORMAT_PLUS = 2, FORMAT_SPACE = 4, FORMAT_ALT = 8,
-  FORMAT_ZERO = 16
-};
+// A flag's bit is its position here, so `-` is `FORMAT_LEFT`.
+static const char _format_flags[] = "-+ #0";
+enum { FORMAT_LEFT = 1 };
 
-// The length modifiers `hh h l ll L`; zero is none.
+// The length modifiers, spelled at their values; zero is none.
+static const char *const _format_modifiers[] = {"", "hh", "h", "l", "ll", "L"};
 enum {
   FORMAT_HH = 1, FORMAT_H = 2, FORMAT_L = 3, FORMAT_LL = 4, FORMAT_CAP_L = 5
 };
@@ -72,10 +72,6 @@ typedef struct Format {
     transfer while staging or canonicalizing the result.
 */
 String String.format(String fmt, List values) {
-  if (!fmt || !*fmt) {
-    if (values) _format_error(0, "excess values");
-    return NULL;
-  }
   Buffer out = $auto(Buffer.new(0));
   Format f = {.fmt = fmt, .length = fmt.len(), .args = values, .out = out};
   while (f.cursor < f.length)
@@ -117,7 +113,7 @@ static void Format.need_byte(Format *f) {
 /* Parses the flags, width, precision, length modifier, and conversion
    after `%`, then rejects what the checked subset leaves out. */
 static Spec Format.spec(Format *f) {
-  Spec spec = {.flags = f.flags()};
+  Spec spec = {.flags = f.flags(), .precision = -1};
   f.width(spec);
   f.precision(spec);
   f.need_byte();
@@ -130,18 +126,12 @@ static Spec Format.spec(Format *f) {
 
 static int Format.flags(Format *f) {
   int flags = 0;
-  for (;;) {
-    switch (f.byte()) {
-      case '-': flags |= FORMAT_LEFT; break;
-      case '+': flags |= FORMAT_PLUS; break;
-      case ' ': flags |= FORMAT_SPACE; break;
-      case '#': flags |= FORMAT_ALT; break;
-      case '0': flags |= FORMAT_ZERO; break;
-      default: return flags;
-    }
+  for (const char *flag; (flag = strchr(_format_flags, f.byte()));) {
+    flags |= 1 << (flag - _format_flags);
     f.cursor++;
     f.need_byte();
   }
+  return flags;
 }
 
 /* A `*` width takes the next value, and a negative one also sets `-`. */
@@ -149,18 +139,11 @@ static void Format.width(Format *f, Spec &spec) {
   if (f.byte() == '*') {
     int width = f.star();
     if (width == INT_MIN) f.fail("width exceeds int range");
-    if (width < 0) {
-      spec.flags |= FORMAT_LEFT;
-      width = -width;
-    }
-    spec.has_width = 1;
-    spec.width = width;
+    if (width < 0) spec.flags |= FORMAT_LEFT;
+    spec.width = abs(width);
     f.cursor++;
   }
-  else if (f.digit()) {
-    spec.has_width = 1;
-    spec.width = f.decimal("width");
-  }
+  else spec.width = f.decimal("width");
 }
 
 /* A `*` width or precision is the next value as an int. */
@@ -169,24 +152,21 @@ static int Format.star(Format *f) =>
 
 /* A `*` precision takes the next value, and a negative one means none. */
 static void Format.precision(Format *f, Spec &spec) {
-  if (f.cursor >= f.length || f.byte() != '.') return;
-  spec.has_precision = 1;
+  if (f.byte() != '.') return;
   f.cursor++;
   f.need_byte();
   if (f.byte() == '*') {
-    int precision = f.star();
-    if (precision < 0) spec.has_precision = 0;
-    else spec.precision = precision;
+    spec.precision = f.star();
     f.cursor++;
   }
-  else if (f.digit()) spec.precision = f.decimal("precision");
+  else spec.precision = f.decimal("precision");
 }
 
 /* Reads the digits at the cursor. An overflow reports the offset of the
    first digit and names the field with `label`. */
 static int Format.decimal(Format *f, String label) {
   int number = 0, start = f.cursor;
-  while (f.cursor < f.length && f.digit()) {
+  while (f.digit()) {
     int digit = f.byte() - '0';
     if (number > (INT_MAX - digit) / 10)
       _format_error(start, %"$label exceeds int range");
@@ -213,7 +193,7 @@ static int Format.modifier(Format *f) {
 /* `h` or `hh`, and `l` or `ll`. */
 static int Format.doubled(Format *f, char letter, int once, int twice) {
   f.cursor++;
-  if (f.cursor >= f.length || f.byte() != letter) return once;
+  if (f.byte() != letter) return once;
   f.cursor++;
   return twice;
 }
@@ -235,7 +215,7 @@ static void Format.check(Format *f, Spec spec) {
     f.fail("wide strings and characters are unsupported");
   if (text && (spec.flags & ~FORMAT_LEFT))
     f.fail("unsupported flag for conversion");
-  if (ch == 'c' && spec.has_precision) f.fail("unsupported precision for %c");
+  if (ch == 'c' && spec.precision >= 0) f.fail("unsupported precision for %c");
 }
 
 // conversion arguments
@@ -251,12 +231,10 @@ static Var Format.take(Format *f, String reason) {
 /* Prints `arg` through the C spelling of `spec`. The check leaves only
    these conversions, so the floating ones are the rest. */
 static Buffer Format.print(Format *f, Spec spec, Var arg) {
+  if (strchr("diouxX", spec.conversion)) return f.integer(spec, arg);
   char text[48];
   spec.spell(text);
   switch (spec.conversion) {
-    case 'd': case 'i': return f.signed_int(text, spec.modifier, arg);
-    case 'o': case 'u': case 'x': case 'X':
-      return f.unsigned_int(text, spec.modifier, arg);
     case 'c': return f.character(text, arg);
     case 's': return f.string(text, arg);
   }
@@ -267,65 +245,29 @@ static Buffer Format.print(Format *f, Spec spec, Var arg) {
 static void Spec.spell(Spec s, char *out) {
   int n = 0;
   out[n++] = '%';
-  if (s.flags & FORMAT_LEFT) out[n++] = '-';
-  if (s.flags & FORMAT_PLUS) out[n++] = '+';
-  if (s.flags & FORMAT_SPACE) out[n++] = ' ';
-  if (s.flags & FORMAT_ALT) out[n++] = '#';
-  if (s.flags & FORMAT_ZERO) out[n++] = '0';
-  if (s.has_width && s.width) n += snprintf(out + n, 16, "%d", s.width);
-  if (s.has_precision) {
-    out[n++] = '.';
-    n += snprintf(out + n, 16, "%d", s.precision);
-  }
-  switch (s.modifier) {
-    case FORMAT_HH: out[n++] = 'h'; out[n++] = 'h'; break;
-    case FORMAT_H: out[n++] = 'h'; break;
-    case FORMAT_L: out[n++] = 'l'; break;
-    case FORMAT_LL: out[n++] = 'l'; out[n++] = 'l'; break;
-    case FORMAT_CAP_L: out[n++] = 'L'; break;
-  }
-  out[n++] = s.conversion;
-  out[n] = '\0';
+  for (int bit = 0; _format_flags[bit]; bit++)
+    if (s.flags & 1 << bit) out[n++] = _format_flags[bit];
+  if (s.width) n += snprintf(out + n, 16, "%d", s.width);
+  if (s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);
+  snprintf(out + n, 8, "%s%c", _format_modifiers[s.modifier], s.conversion);
 }
 
-/* Integer conversions print a long or a long long for `l` and `ll`, and
-   otherwise an int or unsigned holding the value at the modifier's width. */
-static Buffer Format.signed_int(
-  Format *f, const char *text, int modifier, Var arg) {
-  switch (modifier) {
-    case FORMAT_L:
-      return f.out.printf(text, f.number(arg, <long>).long_value());
-    case FORMAT_LL:
-      return f.out.printf(text, f.number(arg, <llong>).long_long_value());
-  }
-  return f.out.printf(text, f.narrow_signed(arg, modifier));
-}
+// The type each modifier converts an integer to, signed then unsigned.
+static const Symbol _integer_targets[][2] = {
+  {<i32>, <u32>}, {<i8>, <u8>}, {<i16>, <u16>}, {<long>, <ulong>},
+  {<llong>, <ullong>}
+};
 
-static int Format.narrow_signed(Format *f, Var arg, int modifier) {
-  switch (modifier) {
-    case FORMAT_HH: return (signed char) f.number(arg, <i8>).integer();
-    case FORMAT_H: return (short) f.number(arg, <i16>).integer();
-  }
-  return (int) f.number(arg, <i32>).integer();
-}
-
-static Buffer Format.unsigned_int(
-  Format *f, const char *text, int modifier, Var arg) {
-  switch (modifier) {
-    case FORMAT_L:
-      return f.out.printf(text, f.number(arg, <ulong>).ulong_value());
-    case FORMAT_LL:
-      return f.out.printf(text, f.number(arg, <ullong>).ulong_long_value());
-  }
-  return f.out.printf(text, f.narrow_unsigned(arg, modifier));
-}
-
-static unsigned Format.narrow_unsigned(Format *f, Var arg, int modifier) {
-  switch (modifier) {
-    case FORMAT_HH: return (unsigned char) f.number(arg, <u8>).integer();
-    case FORMAT_H: return (unsigned short) f.number(arg, <u16>).integer();
-  }
-  return (unsigned int) f.number(arg, <u32>).integer();
+/* An integer is converted to its modifier's type, then printed as a long
+   long, which prints every narrower value as its own modifier would. */
+static Buffer Format.integer(Format *f, Spec spec, Var arg) {
+  int is_unsigned = strchr("ouxX", spec.conversion) != NULL;
+  Var value = f.number(arg, _integer_targets[spec.modifier][is_unsigned]);
+  char text[48];
+  spec.modifier = FORMAT_LL;
+  spec.spell(text);
+  if (is_unsigned) return f.out.printf(text, value.ulong_long());
+  return f.out.printf(text, value.long_long());
 }
 
 /* `L` prints a long double, and the other modifiers a double. */
@@ -342,8 +284,11 @@ static Buffer Format.character(Format *f, const char *text, Var arg) {
   return f.out.printf(text, byte);
 }
 
+/* Prints the display text of `arg`, nesting a failure's cause. */
 static Buffer Format.string(Format *f, const char *text, Var arg) {
-  String string = f.text(arg);
+  String string = NULL;
+  try string = arg.str();
+  catch %(?code *details): f.nested("string conversion failed", code, details);
   return f.out.printf(text, string ? string : "");
 }
 
@@ -352,14 +297,6 @@ static Var Format.number(Format *f, Var arg, Symbol target) {
   Var converted = void;
   try converted = arg.convert(target);
   catch %(?code *details): f.nested("value conversion failed", code, details);
-  return converted;
-}
-
-/* The display text of `arg`, nesting a failure's cause. */
-static String Format.text(Format *f, Var arg) {
-  String converted = NULL;
-  try converted = arg.str();
-  catch %(?code *details): f.nested("string conversion failed", code, details);
   return converted;
 }
 
