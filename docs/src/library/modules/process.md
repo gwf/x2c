@@ -37,7 +37,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:600`
+Source: `lib/process.x:599`
 
 ### `Job`
 
@@ -51,7 +51,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:492`
+Source: `lib/process.x:493`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -107,7 +107,7 @@ same as `options({stdout: <inherit>})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:461`
+Source: `lib/process.x:462`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -132,7 +132,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:420`
+Source: `lib/process.x:422`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -158,7 +158,7 @@ stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:388`
+Source: `lib/process.x:390`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -194,7 +194,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:471`
+Source: `lib/process.x:472`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -207,7 +207,7 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:481`
+Source: `lib/process.x:482`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -241,7 +241,7 @@ Job job = %(printf "a\nb\n");
 ~}
 ```
 
-Source: `lib/process.x:360`
+Source: `lib/process.x:362`
 
 ## Public types
 
