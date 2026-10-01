@@ -497,6 +497,8 @@ The modules under `src/` divide ownership as follows:
   the directives before each form;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
+- `src/lambdas.x` -- lambda parsing and the capture resolution shared by
+  source and constructed lambdas;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
 - `src/stage.x` -- the arguments and results that cross between meta code
@@ -513,9 +515,11 @@ The modules under `src/` divide ownership as follows:
 - `src/collect.x` -- global environment discovery and unit interfaces;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
-- `src/transform.x` -- lowering to
-  emitter-ready AST, including which exits leave a cleanup region and which
-  locals an error transfer preserves;
+- `src/transform.x` -- lowering to emitter-ready AST;
+- `src/callables.x` -- lambdas, typed callback adapters, and `Func`
+  conversions lowered to C helpers;
+- `src/cleanup.x` -- which exits leave a cleanup region and which locals an
+  error transfer preserves;
 - `src/regions.x` -- per-function region summaries and the warnings for a
   value that can outlive the region that allocated it;
 - `src/cache.x` -- cached constants and their generated initialization;
