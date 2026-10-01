@@ -221,9 +221,10 @@ Unit macros may generate protocol adoptions after the methods and converters
 that satisfy them. Successful expansion retains those rows for conformance and
 unit interfaces. Repeated applications retain distinct rows by combining the
 generated declaration location with the macro invocation location. Shallow
-collection transactionally expands file-scope unit macros that contain
-protocol rows, so importing units receive them and the expansion's public
-declarations too. Public definitions may complete prototypes earlier in the
+collection transactionally expands every file-scope unit macro, so importing
+units receive its protocol rows and public declarations. Imported macros and
+macros with protocol rows must expand; a failed attempt at any other local
+macro keeps nothing. Public definitions may complete prototypes earlier in the
 same expansion. Keep each private alias literal. The iterator family keeps
 its adoption rows direct because those relationships are useful source
 documentation:

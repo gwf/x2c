@@ -964,12 +964,18 @@ definitions. There is no runtime type argument, erased element representation,
 or parameterized type spelling such as `Box<T>`. A macro generates named
 concrete families such as `IntValue` and `DoubleValue`.
 
-During shallow symbol collection, the compiler expands file-scope unit macros
-that contain protocol declarations or adoptions. If expansion succeeds, it
-retains those and public declarations, then discards private declarations and
-function bodies. A public function definition may therefore follow its
-prototype inside the same expansion; importing translation units discover the
-retained signature.
+During shallow symbol collection, the compiler expands every file-scope unit
+macro. An imported macro, or one whose template contains protocol
+declarations or adoptions, must expand there, and its errors stop the
+translation. Any other unit macro the source file defines is tried; a failed
+attempt keeps nothing, and the full parse expands the invocation and reports
+its errors. Collection does not evaluate the unit's own top-level Lisp, so an
+expansion that reads a `$(def ...)` value from the same file fails this
+attempt. If expansion succeeds, collection retains protocol rows and public
+declarations, then discards private declarations and function bodies. A
+public function definition may therefore follow its prototype inside the same
+expansion; earlier code in the unit and importing translation units discover
+the retained signature.
 
 Protocol declarations and adoption rows are collection-time compiler
 declarations rather than C declarations. A unit macro may emit them, and
@@ -1354,8 +1360,9 @@ public binding and contract and cannot gain new public siblings. Private
 targets and hygienically private siblings may be rewritten freely.
 
 Shallow declaration collection loads macro imports so imported unit macros can
-publish their declarations and protocol rows. It does not execute other
-top-level Lisp forms. `Decorator`-shaped adjacency still collects the unchanged
+publish their declarations and protocol rows; unit macros the source file
+defines publish theirs when collection can expand them. It does not execute
+other top-level Lisp forms. `Decorator`-shaped adjacency still collects the unchanged
 source target. A public target's captured source must participate in the
 decorator's `Match` replacement, and dropping it makes the match fail. Imported
 decorators work without an extra prototype.

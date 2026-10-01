@@ -437,12 +437,40 @@ static String Compiler._effect_file(Compiler c, List key) {
   return c.filename;
 }
 
-/** Expands a file-scope unit macro and retains its declarations for
-    collection. Its private helpers remain available to later invocations.
-    Generated-name counters are restored when the full parse must expand it
-    again.
+/** Expands the file-scope unit macro at the cursor for collection and
+    reports whether it did. A required expansion reports its errors. A tried
+    expansion that fails keeps nothing and leaves the cursor at the
+    invocation, so collection skips it and the full parse reports it.
 */
-void Compiler.collect_unit_macro(Compiler c) {
+int Compiler.collect_unit_macro(Compiler c) {
+  Symbol collection = c.macro_invocation_collection();
+  if (collection == <tried>) return c._try_unit_macro();
+  if (collection == <required>) c._expand_unit_macro();
+  return collection == <required>;
+}
+
+static int Compiler._try_unit_macro(Compiler c) {
+  Token first = c.token;
+  int failed = 0;
+  SymTxn transaction = c.begin_semantic_transaction();
+  DiagnosticsHold hold = c.diagnostics.hold();
+  $let(c.recovery_depth, c.recovery_depth + 1) {
+    try c._expand_unit_macro();
+    catch %(malformed *): failed = 1;
+  }
+  c.diagnostics.release(hold, 0);
+  if (!failed) transaction.commit();
+  else {
+    transaction.rollback();
+    c.token = first;
+  }
+  return !failed;
+}
+
+/* The expansion retains its declarations for collection, and its private
+   helpers remain available to later invocations. Generated-name counters
+   are restored when the full parse must expand it again. */
+static void Compiler._expand_unit_macro(Compiler c) {
   Map counters = c.names.counters;
   c.names.counters = counters.copy();
   SymTxn transaction = c.begin_semantic_transaction();

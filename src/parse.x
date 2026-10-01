@@ -122,10 +122,7 @@ static int Compiler._skip_collected_form(Compiler c) {
   }
   if (!c.collect_protocols && c.skip_named_type_declaration()) return 1;
   if (!c.macro_starts_target_at(AST_UNIT)) return 0;
-  if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion()) {
-    c.collect_unit_macro();
-    return 1;
-  }
+  if (c.collect_protocols && c.collect_unit_macro()) return 1;
   do {
     c.skip_macro_invocation();
     if (c.test(<;>)) return 1;

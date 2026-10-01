@@ -1689,24 +1689,26 @@ static int Compiler._try_definition(
 
 // shallow collection
 
-/** Returns whether the macro invocation at the cursor needs shallow
-    expansion. Every imported `Unit` macro qualifies. A local `Unit` macro
-    qualifies only when its template contains protocol or adoption rows that
-    collection must retain.
+/** Returns how collection treats the macro invocation at the cursor.
+    `<required>` covers every imported `Unit` macro, declaration-unit macro,
+    named-type decorator, and local `Unit` macro whose template contains
+    protocol or adoption rows. `<tried>` covers any other local `Unit`
+    macro. Other invocations return zero.
 */
-int Compiler.macro_invocation_needs_shallow_expansion(Compiler c) =>
-  _needs_shallow(c._peek_invocation());
+Symbol Compiler.macro_invocation_collection(Compiler c) =>
+  _collection(c._peek_invocation());
 
-static int _needs_shallow(List definition) {
+static Symbol _collection(List definition) {
   if (!definition) return 0;
   if (definition.assoc(<kind>) == <decl-unit> ||
-      definition.assoc(<target>) == <named-type>) return 1;
+      definition.assoc(<target>) == <named-type>) return <required>;
   if (definition.assoc(<kind>) != <unit>) return 0;
-  if (definition.assoc(<imported>).int()) return 1;
+  if (definition.assoc(<imported>).int()) return <required>;
   List template = definition.assoc(<template>), bindings;
   Var matched;
-  return template.try_search(
-    %(!or (protocol *) (adopt *)), matched, bindings);
+  if (template.try_search(%(!or (protocol *) (adopt *)), matched, bindings))
+    return <required>;
+  return <tried>;
 }
 
 /** Consumes a macro invocation name and its balanced argument list.
