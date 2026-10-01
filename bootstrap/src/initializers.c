@@ -10,13 +10,17 @@ static String _1001, _1000, _999, _998, _997, _996, _993, _881, _777, _765, _512
 
 static Var _994, _992, _987, _984, _980, _977, _973, _971, _969, _968, _967, _963, _960, _957, _912, _908, _905, _901, _899, _898, _895, _892, _891, _887, _883, _882, _879, _877, _874, _872, _866, _862, _858, _853, _852, _848, _845, _841, _836, _832, _829, _825, _820, _816, _813, _812, _808, _805, _804, _800, _795, _791, _788, _787, _783, _780, _778, _776, _775, _774, _773, _772, _771, _770, _769, _768, _766, _753, _750, _744, _741, _740, _737, _736, _733, _729, _725, _723, _720, _717, _713, _709, _704, _701, _700, _697, _695, _690, _687, _686, _683, _681, _678, _675, _672, _670, _667, _664, _661, _660, _656, _651, _648, _646, _644, _642, _640, _596, _594, _581, _579, _574, _568, _554, _539, _536, _533, _530, _526, _522, _518, _516, _513, _511, _509, _507, _503, _502, _498, _494, _491, _488, _486, _481, _477, _472, _471, _470, _469, _467, _466, _463, _462, _458, _454, _451, _450, _445, _442, _441, _440, _438, _437, _436, _432, _428, _425, _421, _418, _413, _408, _404, _400, _396, _393, _392, _391, _388, _386, _381, _380, _379, _378, _377, _374, _373, _371, _368, _367, _363, _359, _357, _356, _354, _353, _352, _351, _350, _348, _346, _345, _341, _337, _335, _331, _327, _325, _324, _322, _310, _307, _301, _298, _297, _294, _293, _290, _286, _284, _283, _281, _279, _276, _273, _269, _264, _261, _260, _257, _255, _252, _250, _246, _243, _242, _239, _238, _235, _219, _217, _216, _213, _212, _211, _209, _208, _205, _199, _196, _195, _194, _191, _190, _189, _187, _186, _183, _182, _181, _178, _176, _175, _174, _171, _167, _165, _164, _162, _160, _159, _156, _153, _149, _144, _141, _140, _138, _137, _133, _131, _129, _128, _127, _126, _125, _124, _122, _121, _119, _118, _115, _113, _108, _105, _104, _103, _100, _97, _96, _95, _94, _93, _90, _89, _88, _85, _84, _83, _80, _79, _78, _75, _74, _73, _72, _68, _66, _53, _50, _46, _43, _42, _38, _35, _34, _33, _32, _29, _6, _2, _1, _0;
 
-#include "ast.h"
-#include "expressions.h"
-#include "macros.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
+#include "ast.h"
+#include "expressions.h"
+#include "macros.h"
 static List Compiler__convert_initializer(Compiler c, List value, Type type, List target, int * native_used);
 
 static List Compiler__convert_composite(Compiler c, List expr, Type target, List native_target, List parent_condition, int * native_used);
@@ -170,6 +174,14 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+}
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -180,10 +192,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(1219800220);
   _1 = Symbol_var(62180362);
   _2 = Symbol_var(58);
@@ -696,6 +705,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _545 = cons(_50, _30);
   _553 = cons(_104, _214);
   _554 = List_var(_553);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _555 = cons(_554, NULL);
   _556 = cons(_103, _555);
   _567 = cons(_129, _3);
