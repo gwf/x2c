@@ -1055,14 +1055,15 @@ character-level token scanners for x2c.
 
 Public functions:
 
-`scan_ascii_alpha`, `scan_ascii_digit`, `scan_white_space`,
-`scan_line_comment`, `scan_block_comment_status`, `scan_block_comment`,
-`scan_preprocessor`, `scan_number_typed`, `scan_number`, `scan_number_type`,
-`scan_digital`, `scan_float`, `scan_hexponent`, `scan_identifier`,
-`scan_keyword`, `scan_keyword_type`, `scan_c_operator`, `scan_c_string_status`,
-`scan_c_string`, `scan_c_character`, `scan_string_segment`,
-`scan_symbol_literal_status`, `scan_symbol_literal`, `scan_symbol_set_atom`,
-`scan_atom_status`, `scan_atom`, `scan_escape_sequence`, `scan_next_line_col`
+`scan_ascii_alpha`, `scan_ascii_digit`, `scan_ascii_hex_value`,
+`scan_white_space`, `scan_line_comment`, `scan_block_comment_status`,
+`scan_block_comment`, `scan_preprocessor`, `scan_number_typed`, `scan_number`,
+`scan_number_type`, `scan_digital`, `scan_float`, `scan_hexponent`,
+`scan_identifier`, `scan_keyword`, `scan_keyword_type`, `scan_c_operator`,
+`scan_c_string_status`, `scan_c_string`, `scan_c_character`,
+`scan_string_segment`, `scan_symbol_literal_status`, `scan_symbol_literal`,
+`scan_symbol_set_atom`, `scan_atom_status`, `scan_atom`,
+`scan_escape_sequence`, `scan_next_line_col`
 
 ### [lib/scope.x](../lib/scope.x)
 

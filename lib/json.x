@@ -183,16 +183,10 @@ static Var _JsonReader._number(_JsonReader j) {
   return number;
 }
 
-static int _hex_digit(int byte) {
-  if (scan_ascii_digit(byte)) return byte - '0';
-  byte |= 32;
-  return byte >= 'a' && byte <= 'f' ? byte - 'a' + 10 : -1;
-}
-
 static long _JsonReader._hex4(_JsonReader j) {
   long unit = 0;
   for (int i = 0; i < 4; i++) {
-    int digit = _hex_digit(j._peek());
+    int digit = scan_ascii_hex_value(j._peek());
     if (digit < 0) j._fail("invalid \\u escape");
     unit = unit * 16 + digit;
     j.at++;

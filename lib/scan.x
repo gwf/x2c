@@ -24,12 +24,18 @@ inline int scan_ascii_alpha(int c) => (unsigned) ((c | 32) - 'a') < 26;
 /* Reports an ASCII decimal digit without consulting the process locale. */
 inline int scan_ascii_digit(int c) => (unsigned) (c - '0') < 10;
 
+/* Returns an ASCII hexadecimal digit's value, or -1 for another byte. */
+inline int scan_ascii_hex_value(int c) {
+  if (scan_ascii_digit(c)) return c - '0';
+  c |= 32;
+  return (unsigned) (c - 'a') < 6 ? c - 'a' + 10 : -1;
+}
+
 #pragma private
 
 #include <string.h>
 
-static inline int _ascii_hex(int c) =>
-  scan_ascii_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+static inline int _ascii_hex(int c) => scan_ascii_hex_value(c) >= 0;
 
 static inline int _token_break(int c) =>
   !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');

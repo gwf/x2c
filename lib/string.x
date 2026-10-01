@@ -57,6 +57,7 @@ protocol const char *(String);
 #include "exception.x"
 #include "func.x"
 #include "symbol.x"
+#include "scan.x"
 #include "pool.x"
 
 // representation
@@ -1669,18 +1670,11 @@ static inline int _decode_escape(const char *&at) {
 static inline int _hex_escape(const char *&at, int esc) {
   int byte = 0, digits = 0;
   for (; *at && digits < 2; at++, digits++) {
-    int hex = _hex_digit(*at);
+    int hex = scan_ascii_hex_value(*at);
     if (hex < 0) break;
     byte = (byte << 4) | hex;
   }
   return digits ? byte : esc;
-}
-
-static inline int _hex_digit(int ch) {
-  if (ch >= '0' && ch <= '9') return ch - '0';
-  if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
-  if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
-  return -1;
 }
 
 /* Up to three octal digits, the first of them `esc`. */

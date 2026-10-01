@@ -744,7 +744,7 @@ static int _literal_magnitude(
   decimal = base == 10;
   unsigned long long sum = 0;
   for (; pos < end; pos++) {
-    unsigned digit = _literal_digit((unsigned char) text[pos]);
+    unsigned digit = scan_ascii_hex_value((unsigned char) text[pos]);
     if (sum > (ULLONG_MAX - digit) / (unsigned) base) return 0;
     sum = sum * (unsigned) base + digit;
   }
@@ -763,9 +763,6 @@ static int _radix(String text, int end, int &pos) {
   }
   return text[1] >= '0' && text[1] <= '7' ? 8 : 10;
 }
-
-static unsigned _literal_digit(int ch) =>
-  ch <= '9' ? (unsigned) (ch - '0') : (unsigned) ((ch | 32) - 'a' + 10);
 
 /* C gives an integer literal the first type of its suffix's list that holds
    the value; a decimal literal without `u` skips the unsigned types. */
