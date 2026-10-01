@@ -30,11 +30,6 @@ static const List trust_boundaries = %(
   "_transform_defer_stmt" "_transform_return"
 )
 
-static int _among(String word, List words):
-  foreach String each in words:
-    if each == word: return 1
-  return 0
-
 static int _is(Lint l, int at, String text) =>
   at >= 0 && at < l.count && l.tokens[at].text == text
 
@@ -280,8 +275,8 @@ static void _frameworks(Lint l, Map reasons):
     String name = lint_name(function)
     foreach List row in _rows(reasons, name):
       Var code = row.cadr()
-      if _among(code, %("shape-diagnostics" "validator-diagnostics"
-                        "validator-shape" "recursive-validator")):
+      if code in %("shape-diagnostics" "validator-diagnostics"
+                    "validator-shape" "recursive-validator"):
         member[name] = function
     if name in member: names.push(name)
   Map component = {}
@@ -349,7 +344,7 @@ static String _action(Lint l, int from, int to):
 static int _partial(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
     Token t = l.at(at)
-    if _is(l, at - 1, ".") && _among(t.text, %("push" "append" "insert")) &&
+    if _is(l, at - 1, ".") && t.text in %("push" "append" "insert") &&
        _is(l, l.next(at), "("):
       return 1
     if t.text == "]" && l.tokens[l.next(at)].text[0] == '=' &&
@@ -363,7 +358,7 @@ static void _silent_guards(Lint l, List function):
   Var (key, start, body, end) = function
   String name = lint_name(function)
   String text = name
-  if _among(text, trust_boundaries) || text.startswith("_macro_sdk_") ||
+  if text in trust_boundaries || text.startswith("_macro_sdk_") ||
      l.path.endswith("src/collect.x") && text.contains("artifact"):
     return
   int to = end.int()

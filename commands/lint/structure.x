@@ -35,11 +35,6 @@ static const List route_words = %(
 
 static const List branch_words = %("if" "for" "while" "switch" "match")
 
-static int _among(String word, List words):
-  foreach String each in words:
-    if each == word: return 1
-  return 0
-
 static int _among_folded(String word, List words):
   foreach String each in words:
     if !strcasecmp(each, word): return 1
@@ -87,7 +82,7 @@ static void _bookkeeping(Lint l, List function):
   for (int at = body.int(); at < end.int(); at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
-    if _among(t.text, cleanup_words) && _is(l, l.next(at), "("): cleanup++
+    if t.text in cleanup_words && _is(l, l.next(at), "("): cleanup++
     if !_among_folded(t.text, stat_words): continue
     int last = -1
     for (int k = l.next(at); k < end.int() && l.tokens[k].type != <;> &&
@@ -164,8 +159,8 @@ static Array _route(Lint l, List function, Map ids):
   for (int at = body.int(); at < end.int(); at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
-    if _among(t.text, route_words): controls.push(_id(ids, t.text))
-    if _is(l, l.next(at), "(") && !_among(t.text, branch_words):
+    if t.text in route_words: controls.push(_id(ids, t.text))
+    if _is(l, l.next(at), "(") && !(t.text in branch_words):
       calls.push(_id(ids, t.text))
   foreach Var call in calls:
     controls.push(call)
