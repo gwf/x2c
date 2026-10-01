@@ -74,6 +74,14 @@ them a publication gate. Establish regression thresholds only after at least
 one to two weeks of fixed-host observations. Confirm a suspected regression
 with a same-host rerun before treating it as real.
 
+Compare only converged trees. After an incremental `make build`, the
+compiler's identity no longer matches the prelude interface stage 0 wrote,
+so every translation walks the prelude source; on 2026-09-30 that made two
+good changes look 32% and 50% slower. Run `make bootstrap-refresh && make
+build-safe` in each tree and check that `builds/0/x2c env` prints a
+non-empty `prelude`. Then compare instruction counts from alternating runs
+of the same inputs.
+
 Specialized full Map campaigns and the Match-cache acceptance benchmarks
 remain change-triggered. They are not part of the nightly snapshot.
 
