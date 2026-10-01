@@ -318,11 +318,13 @@ List Array.list_free(Array arr) {
     the elements are shared, since they are only `Var`s. Convert when you need
     indexed access or in-place mutation.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
+    The partial result is freed.
 */
 Array List.array(List lst) {
-  Array array = [];
-  foreach (Var value, lst) array.push(value);
-  return array;
+  Array output = [], result = NULL;
+  defer if (result == NULL) output.free();
+  foreach (Var value, lst) output.push(value);
+  return result = output;
 }
 
 /** Returns the entries of `map` as a `List` of two-element `(key value)`
@@ -362,8 +364,7 @@ meta native List Iter.list(Iter iter) {
 Self List.append(Self a, Self b) {
   if (!a) return b;
   if (!b) return a;
-  Array values = $auto([]);
-  foreach (Var value, a) values.push(value);
+  Array values = $auto(a.array());
   return _prepend_array(values, b);
 }
 
@@ -731,8 +732,7 @@ static Var _apply2(Func fn, Var left, Var right) {
 */
 Self List.sort(Self lst) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto([]);
-  foreach (Var value, lst) values.push(value);
+  Array values = $auto(lst.array());
   values.sort();
   return values;
 }
@@ -743,8 +743,7 @@ Self List.sort(Self lst) {
 */
 Self List.sort_with(Self lst, Func compare) {
   if (!lst || !lst.cdr()) return lst;
-  Array values = $auto([]);
-  foreach (Var value, lst) values.push(value);
+  Array values = $auto(lst.array());
   values.sort_with(compare);
   return values;
 }
@@ -756,8 +755,7 @@ Self List.sort_with(Self lst, Func compare) {
 */
 Self List.sort_by(Self lst, Func key) {
   if (!lst) return lst;
-  Array values = $auto([]);
-  foreach (Var value, lst) values.push(value);
+  Array values = $auto(lst.array());
   values.sort_by(key);
   return values;
 }
