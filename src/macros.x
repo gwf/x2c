@@ -2274,9 +2274,7 @@ static List _template(Compiler c, List definition) {
   if (definition.assoc(<open>) is void) return template;
   Map replacements = {}, natives = {};
   _open_references(c, template, replacements, natives);
-  template = _replace_bindings(template, replacements);
-  template = _open_natives(c, template, natives);
-  return template.search_replace(%(at m-origin ?node), <?node>);
+  return _open_template(c, template, replacements, natives);
 }
 
 /* An open definition binds its free references in the unit that applies
@@ -2303,35 +2301,40 @@ static void _open_references(
     _open_references(c, child, replacements, natives);
 }
 
-static Var _open_natives(Compiler c, Var value, Map natives) {
+/* Rebuilds the template once with what `_open_references` found and without
+   origin markers. A replaced reference is not revisited, and a callee finds
+   its native under its replacement. */
+static Var _open_template(
+  Compiler c, Var value, Map replacements, Map natives) {
+  Var found;
   if (value is not <list> || value.is_nil()) return value;
+  if (replacements.try_get(value, found)) return found;
   Macro called = $called;
   match (value) {
+    case %(at m-origin ?node):
+      return _open_template(c, node, replacements, natives);
     case called(?callee, *arguments):
       if (value.list().car() == <expr>)
         match (callee) case %(expr ?
             ${$source_identifier_content(%(?binding))}): {
-          Var native;
-          if (natives.try_get(binding, native))
-            return _native_call(c, native, arguments, natives);
+          Var bound = replacements.getdefault(binding, binding);
+          if (natives.try_get(bound, found)) {
+            Var (spelling, result) = found;
+            List args = _open_template(c, arguments, replacements, natives);
+            return %(expr $result (call $spelling (args @args)));
+          }
         }
     case %(decl ?base ?declarators): {
       Type resolved = base is <list> && base.type().is_bare_typedef_name()
         ? c.sym.resolve_base_type(base) : NULL;
       if (resolved)
-        return %(decl $resolved ${_open_natives(c, declarators, natives)});
+        return %(decl $resolved
+                 ${_open_template(c, declarators, replacements, natives)});
     }
   }
-  Array items = $auto([]);
-  foreach (Var child, value.list())
-    items.push(_open_natives(c, child, natives));
-  return items.list();
-}
-
-static List _native_call(Compiler c, Var native, List arguments, Map natives) {
-  Var (callee, result) = native;
-  List args = _open_natives(c, arguments, natives);
-  return %(expr $result (call $callee (args @args)));
+  Var child;
+  $ast.rewrite_children(
+    value, child, _open_template(c, child, replacements, natives));
 }
 
 /* A Name hole in a member position supplies the captured spelling, so a
