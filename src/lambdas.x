@@ -487,16 +487,12 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
       case captured(?body, *captures, *params): continue;
       case $source_operator_content(%(& ?target)):
         c._require_capture_lvalue(target);
-      case $source_operator_content(%(?operator ?target *)):
-        if (operator is <symbol> && ast_changes_left_operand(operator))
-          c._require_capture_lvalue(target);
-      case $source_postfix_content(%(? ?target)):
-        c._require_capture_lvalue(target);
       case %(dstrasgn (targets *targets) ?):
         foreach (List target, targets) c._require_capture_lvalue(target);
       case $source_call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         c._require_reference_arguments(callee_type, arguments);
+      default: c._require_capture_lvalue(Ast.written_operand(node));
     }
     foreach (Var child, node) pending.push(child);
   }
