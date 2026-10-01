@@ -203,7 +203,9 @@ field, so an early release leaves the finalizer nothing to do. See
 [attaching a finalizer](memory.md#attaching-a-finalizer).
 
 Adopt `Cleanup(T)` beside the type so a caller can write `$auto`. Without it
-the managed initializer is refused and every caller repeats the release:
+the managed initializer is refused and every caller repeats the release.
+When one method releases the handle, `$cleanup.by` from `cleanup.xmacro`
+defines `Feed.cleanup` to call it and adopts the protocol:
 
 ```x2c
 ~typedef struct feed_parser feed_parser;
@@ -211,17 +213,15 @@ the managed initializer is refused and every caller repeats the release:
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; String source; };
 ~Feed Feed.close(Feed feed) { return NULL; }
-void Feed.cleanup(Feed feed);
-protocol Cleanup(Feed);
-
-void Feed.cleanup(Feed feed) {
-  feed.close();
-}
+$(import "cleanup.xmacro")
+$cleanup.by(Feed, close);
 ```
 
-The declaration and the protocol row belong above `#pragma private` so the
-package exports them; the body may sit with the other private definitions.
-A borrowed view over storage another handle owns adopts nothing.
+Put the adoption above `#pragma private` so the package exports it; the
+release method may be defined later with the other private definitions. A
+cleanup that does more than one call is written as `void Feed.cleanup(Feed)`
+with `protocol Cleanup(Feed);`. A borrowed view over storage another handle
+owns adopts nothing.
 
 The caller then names the lifetime at the acquisition:
 

@@ -14,6 +14,7 @@
  */
 
 #include "yyjson-0.12.h"
+$(import "cleanup.xmacro")
 
 typedef enum Json {
   JSON_NAMESPACE
@@ -62,8 +63,7 @@ protocol JsonObjectIndex(JsonObject);
 protocol Iter(JsonArray);
 protocol Iter(JsonObject);
 
-void JsonDocument.cleanup(JsonDocument);
-protocol Cleanup(JsonDocument);
+$cleanup.by(JsonDocument, free);
 
 #pragma private
 
@@ -615,10 +615,6 @@ JsonDocument JsonDocument.free(JsonDocument document) {
     document.native = NULL;
   }
   return NULL;
-}
-
-void JsonDocument.cleanup(JsonDocument json_document) {
-  json_document.free();
 }
 
 yyjson_doc *JsonDocument.native(JsonDocument document) {

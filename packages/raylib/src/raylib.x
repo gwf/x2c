@@ -16,6 +16,7 @@
  */
 
 #include "raylib-6.0.h"
+$(import "cleanup.xmacro")
 #include <math.h>
 
 typedef enum RaylibText {
@@ -388,14 +389,9 @@ RaylibWindow RaylibWindow.close(RaylibWindow window);
 
 protocol ImagePixelIndex(ImagePixels);
 
-void ImagePixels.cleanup(ImagePixels);
-protocol Cleanup(ImagePixels);
-
-void RaylibWindow.cleanup(RaylibWindow);
-protocol Cleanup(RaylibWindow);
-
-void Image.cleanup(Image);
-protocol Cleanup(Image);
+$cleanup.by(ImagePixels, free);
+$cleanup.by(RaylibWindow, close);
+$cleanup.by(Image, free);
 
 #pragma private
 
@@ -554,10 +550,6 @@ RaylibWindow RaylibWindow.close(RaylibWindow window) {
   if (IsWindowReady()) CloseWindow();
   _raylib_renderer_started = 0;
   return NULL;
-}
-
-void RaylibWindow.cleanup(RaylibWindow raylib_window) {
-  raylib_window.close();
 }
 
 static Image _raylib_generated(
@@ -789,14 +781,6 @@ ImagePixels ImagePixels.free(ImagePixels pixels) {
   UnloadImageColors(pixels.data);
   pixels.data = NULL;
   return NULL;
-}
-
-void Image.cleanup(Image image) {
-  image.free();
-}
-
-void ImagePixels.cleanup(ImagePixels image_pixels) {
-  image_pixels.free();
 }
 
 int RaylibText.width(String text, int size) {

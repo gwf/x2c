@@ -7,6 +7,7 @@
  */
 
 #include "pcre2-8.h"
+$(import "cleanup.xmacro")
 
 typedef struct Regexp *Regexp;
 typedef List RegexpCapture;
@@ -25,8 +26,7 @@ typedef enum RegexpLisp {
   REGEXPLISP_NAMESPACE
 } RegexpLisp;
 
-void Regexp.cleanup(Regexp);
-protocol Cleanup(Regexp);
+$cleanup.by(Regexp, free);
 
 #pragma private
 
@@ -158,10 +158,6 @@ Regexp Regexp.free(Regexp regexp) {
     regexp.code = NULL;
   }
   return NULL;
-}
-
-void Regexp.cleanup(Regexp regexp) {
-  regexp.free();
 }
 
 String Regexp.pattern(Regexp regexp) {

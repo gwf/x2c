@@ -10,6 +10,7 @@
 
 #pragma once
 $(import "error-macros.xmacro")
+$(import "cleanup.xmacro")
 #include "common.x"
 #include "block.x"
 
@@ -26,7 +27,7 @@ typedef struct Buffer {
   Block content, indents, size_t padding, pos, _indent;
 } *Buffer;
 
-protocol Cleanup(Buffer);
+$cleanup.by(Buffer, free);
 
 #pragma private
 
@@ -352,6 +353,3 @@ void Buffer.free(Buffer buf) {
   if (buf.indents != NULL) buf.indents.free();
   Scope.free(buf);
 }
-
-/** Ends the owned lifetime when a managed local leaves its block. */
-void Buffer.cleanup(Buffer value) { value.free(); }
