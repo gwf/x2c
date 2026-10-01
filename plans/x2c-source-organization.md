@@ -407,6 +407,11 @@ plans index.
   facts (`_rewrite_lambda_cells`, `Compiler_begin_semantic_transaction`).
   40 functions with lambdas nested 10 deep take 16-39 seconds and 9.1 GB to
   translate. Found during Phase 3; it needs its own performance fix.
+- Generated C guards every public entry with
+  `if(!_init_guard_) _file_init_();`. When a unit's `_file_init_` is small,
+  clang inlines it into each entry; the `match.x` split made that happen in
+  `match.c` and cost 0.4% instructions on the capture benchmark. Emitting
+  `_file_init_` as `noinline` and cold would remove it everywhere.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
