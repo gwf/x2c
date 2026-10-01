@@ -495,11 +495,10 @@ with byte-identical C.
   maps. `CellRegion` now binds each cell's read once. 40 functions with
   lambdas nested 10 deep went from 167G instructions and 7.9 GB to 50G and
   1.5 GB, with byte-identical C. Transactions still copy per expansion.
-- Generated C guards every public entry with
-  `if(!_init_guard_) _file_init_();`. When a unit's `_file_init_` is small,
-  clang inlines it into each entry; the `match.x` split made that happen in
-  `match.c` and cost 0.4% instructions on the capture benchmark. Emitting
-  `_file_init_` as `noinline` and cold would remove it everywhere.
+- Fixed 2026-10-01: the synthetic `_file_init_` is now
+  `noinline, cold`, so clang no longer inlines it into every guarded entry.
+  The Match capture benchmark retires 1.4% fewer instructions than before
+  the fix, and translation 0.6% fewer.
 - No current source, fixture, or unit test fills the open-template
   natives map or changes a tree by value replacement in `_template`
   (`src/macros.x`); only origin removal and one typedef base ever change a
