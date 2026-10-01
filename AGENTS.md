@@ -109,8 +109,9 @@ commits need not rebuild from their own bootstrap.
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
   `frontend` (configured source units) -> `meta-project` (project meta
   helper build) and `meta-helper-client` (its calls) -> `compiler`
-  (translation state) ->
-  shared runtime `lib/tokenizer.x` ->
+  (translation state, + `symbols`, its symbol table) ->
+  shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
+  directives) ->
   `parse`/`expressions`/`statements`/`macros` (+ `meta-group`, which emits
   a unit's meta group, `stage`, which carries values across the
   compile-time boundary, and `builtins` and `linked-meta`,
