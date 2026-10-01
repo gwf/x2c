@@ -202,7 +202,8 @@ typedef struct Compiler {
 /** Holds one reversible semantic transaction in caller storage.
     The zero value is inactive. Keep an active transaction in one object;
     copying it does not copy the staged maps or coordinate completion.
-    Its saved maps belong to the Scope used to begin the transaction.
+    Borrowed compiler maps keep their owners; staged maps and snapshots live
+    in the Scope used to begin the transaction.
 */
 typedef struct SymTxn {
   Compiler c;

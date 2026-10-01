@@ -1,7 +1,7 @@
 > Status: active
 > The private-context batch merged into dev in PR #76.
 > Public follow-ups are underway on `codex/value-reference-public`, based on
-> dev `cbea8c089`. Delivery is another PR targeting `dev`; integration belongs
+> dev `32ab98cb`. Delivery is another PR targeting `dev`; integration belongs
 > to the integration agent.
 
 # Value declarations and reference parameters
@@ -94,12 +94,13 @@ rendering and rejection. Its `--emit` path failed before Adapter with unbound
 `x2c.function.body`, including on the original tool. The follow-up found the
 missing `Frontend.preload_macro_libraries` call used by the other compiler
 clients. Restoring that call makes `--emit` and the absolute-value proof pass;
-the package's full verification is being checked.
+the package's full verification passes, including expected failing proofs.
 
 ## Public follow-up batch
 
-- SymTxn becomes a value returned by `begin_semantic_transaction`; its saved
-  maps retain their Scope lifetime. Required references mutate that one
+- SymTxn becomes a value returned by `begin_semantic_transaction`; borrowed
+  compiler maps retain their owners and new snapshots use the current Scope.
+  Required references mutate that one
   transaction. Optional commit/rollback references preserve absent-input
   no-ops, and the zero value is inactive. REPL rollback, completion, map
   identity, and transient-Scope teardown pass the existing command API test.
@@ -115,9 +116,9 @@ the package's full verification is being checked.
   protocol requires a value receiver; its inline adapter releases only the
   two backing pointers and avoids copying the binder array.
 - MatchMachine's existing stack state becomes a value typedef with reference
-  receivers. MatchLower and MatchWalk retain real parent borrows, and native
-  callbacks still receive addresses. MachineProgram keeps its immutable shared
-  allocation and handle representation.
+  receivers. Native callbacks still receive addresses. MatchLower embeds its
+  one builder and MatchWalk retains the borrowed outer machine. MachineProgram
+  keeps its immutable shared allocation and handle representation.
 - All 23 raylib Image mutator aliases use required references. They remain
   direct aliases of the original Image-pointer C functions; pointer callers
   supply `*image`. Package tests cover every mutator and preserve PNG hashes.
