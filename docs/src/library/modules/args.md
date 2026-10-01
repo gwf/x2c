@@ -22,7 +22,7 @@ Parse program arguments against a declarative spec.
 
 Returns the program arguments that follow `argv[0]` as `String`s.
 
-Source: `lib/args.x:337`
+Source: `lib/args.x:341`
 
 <a id="Args.parse"></a>
 #### Args.parse
@@ -73,7 +73,7 @@ for an unknown option, a missing or unexpected value, an unexpected
 operand, or a `required` row that was not given; and with `why` and the
 offending `spec` entry for a property or word it cannot read.
 
-Source: `lib/args.x:254`
+Source: `lib/args.x:87`
 
 <a id="Args.usage"></a>
 #### Args.usage
@@ -84,7 +84,7 @@ Returns usage text for `spec` as `Args.parse` reads it: a synopsis
 for `program`, then each option, then each operand that has help, in
 spec order. Help text starts at column 30, as in `x2c help`.
 
-Source: `lib/args.x:312`
+Source: `lib/args.x:297`
 
 ## Public types
 
@@ -100,16 +100,15 @@ Source: `lib/args.x:312`
 The receiverless owner of `Args.parse` and the other argument
 operations.
 
-Source: `lib/args.x:19`
+Source: `lib/args.x:18`
 
 ## Design notes
 
-A spec is an ordinary `List` with one row per option or operand, and the
-parse result is a `Map` from each row's name to its value, so a script
-describes its command line as data and reads the answer by name. Words
-are `String`s throughout; converting a value to a number is the caller's
-choice. Bad input raises `<bad-arg>` instead of exiting, so the caller
-decides whether to print `Args.usage` and which status to return.
+Args owns the reading of a command line against a spec: an ordinary
+List with one row per option or operand. The result is a Map from each
+row's name to its value, words stay Strings, and bad input raises
+`<bad-arg>` so the caller decides whether to print `Args.usage` and which
+status to return.
 
 ## Tests and examples
 

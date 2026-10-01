@@ -32,7 +32,7 @@ JSON text to and from ordinary x2c values.
 
 Returns the JSON boolean for the truth of `value`.
 
-Source: `lib/json.x:69`
+Source: `lib/json.x:65`
 
 <a id="Json.boolean"></a>
 #### Json.boolean
@@ -43,7 +43,7 @@ Returns 1 for JSON `true` and 0 for JSON `false`.
 
 **Raises:** `<bad-types>` when `value` is not a JSON boolean.
 
-Source: `lib/json.x:77`
+Source: `lib/json.x:73`
 
 <a id="Json.is_bool"></a>
 #### Json.is_bool
@@ -52,7 +52,7 @@ Source: `lib/json.x:77`
 
 Reports whether `value` is a JSON boolean.
 
-Source: `lib/json.x:72`
+Source: `lib/json.x:68`
 
 <a id="Json.parse"></a>
 #### Json.parse
@@ -71,7 +71,7 @@ when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
 
-Source: `lib/json.x:391`
+Source: `lib/json.x:112`
 
 <a id="Json.read_file"></a>
 #### Json.read_file
@@ -83,7 +83,7 @@ Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 **Raises:** the causes of `Path.read_text`, or `<bad-arg>` as
 `Json.parse` does, with a `path` detail added.
 
-Source: `lib/json.x:397`
+Source: `lib/json.x:118`
 
 <a id="Json.write_file"></a>
 #### Json.write_file
@@ -94,7 +94,7 @@ Replaces the file at `path` with `value` as compact JSON text.
 
 **Raises:** the causes of `Var.json` and `Path.write_text`.
 
-Source: `lib/json.x:562`
+Source: `lib/json.x:394`
 
 ### `JsonBool`
 
@@ -105,7 +105,7 @@ Source: `lib/json.x:562`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:63`
+Source: `lib/json.x:59`
 
 <a id="JsonBool.str"></a>
 #### JsonBool.str
@@ -114,7 +114,7 @@ Source: `lib/json.x:63`
 
 Returns `true` or `false`.
 
-Source: `lib/json.x:60`
+Source: `lib/json.x:56`
 
 <a id="JsonBool.truth"></a>
 #### JsonBool.truth
@@ -123,7 +123,7 @@ Source: `lib/json.x:60`
 
 Returns nonzero for `true`.
 
-Source: `lib/json.x:66`
+Source: `lib/json.x:62`
 
 <a id="JsonBool.var"></a>
 #### JsonBool.var
@@ -132,7 +132,7 @@ Source: `lib/json.x:66`
 
 Boxes a JSON boolean.
 
-Source: `lib/json.x:54`
+Source: `lib/json.x:50`
 
 ### `Var`
 
@@ -154,7 +154,7 @@ for a `String` and a `Symbol` name with the same spelling,
 `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
 deeper than 512 levels.
 
-Source: `lib/json.x:552`
+Source: `lib/json.x:384`
 
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
@@ -163,7 +163,7 @@ Source: `lib/json.x:552`
 
 Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`.
 
-Source: `lib/json.x:57`
+Source: `lib/json.x:53`
 
 <a id="Var.pretty_json"></a>
 #### Var.pretty_json
@@ -174,7 +174,7 @@ Returns `value` as JSON text indented two spaces per level.
 
 **Raises:** the causes of `Var.json`.
 
-Source: `lib/json.x:557`
+Source: `lib/json.x:389`
 
 ## Public types
 
@@ -190,7 +190,7 @@ Source: `lib/json.x:557`
 
 The receiverless owner of `Json.parse` and the other JSON operations.
 
-Source: `lib/json.x:23`
+Source: `lib/json.x:19`
 
 <a id="JsonBool"></a>
 ### JsonBool
@@ -200,20 +200,16 @@ Source: `lib/json.x:23`
 A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
 The two values are process-lifetime singletons made by `Json.bool`.
 
-Source: `lib/json.x:30`
+Source: `lib/json.x:26`
 
 ## Design notes
 
-A JSON object becomes a `Map` with `String` keys, an array an `Array`, a
-string a `String`, a number an integer or `double` `Var`, null the
-all-zero `Var`, and true or false a `JsonBool`. The names match the
-converting surface of `packages/yyjson`, which a program can use instead
-when it needs object order, duplicate names, or numeric intent. A `Map`
-has none of those: a repeated name keeps its last value, and output lists
-names in byte order so the same value always writes the same text.
-
-Input follows the RFC 8259 grammar. Rejected text raises `<bad-arg>` with
-the byte `offset`, one-based `line` and byte `column`, and a `why`.
+Json owns the crossing between JSON text and ordinary x2c values: an
+object is a Map with String keys, an array an Array, null the all-zero
+Var, and true or false a `JsonBool`. A Map keeps neither member order nor
+duplicate names, so a repeated name keeps its last value and output
+writes names in byte order; `packages/yyjson` serves a program that
+needs either.
 
 ## Tests and examples
 

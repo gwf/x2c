@@ -72,9 +72,9 @@ compiler-generated adapters establish both facts.
 `Symbol` argument does not carry `want` or the carrier holds a reference,
 and `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
 `<no-convert>` from a numeric conversion. The result has tag `want`.
-A detail names the argument's tag rather than the argument: any tag may
-arrive here, and an identity-bearing detail value terminates at the error
-floor instead of reaching the handler that would report it.
+A detail names the argument's tag, since any tag may arrive here and an
+identity-bearing detail value terminates at the error floor before it
+reaches the handler that would report it.
 
 Source: `lib/func.x:193`
 
@@ -113,7 +113,7 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:410`
+Source: `lib/func.x:411`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -178,7 +178,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:419`
+Source: `lib/func.x:420`
 
 ### `FuncArg`
 
@@ -217,7 +217,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func.x:423`
+Source: `lib/func.x:424`
 
 ## Runtime-internal callables
 
@@ -279,7 +279,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func.x:400`
+Source: `lib/func.x:401`
 
 ## Public types
 
@@ -329,7 +329,7 @@ Source: `lib/func.x:24`
 
 ## Design notes
 
-`Func` binds a synchronous native call. It stores a typed signature and
-adapter, checks boxed value and typed-reference arguments, and boxes the
-adapter result. A bound context is copied into the same `Scope` allocation
-as the `Func`.
+`Func` owns the binding of one synchronous native call: a canonical
+signature, an adapter, and optional context bytes copied into the same
+`Scope` allocation. Arguments reach native code only through the checked
+value and reference readers that generated adapters call.

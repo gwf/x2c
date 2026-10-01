@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:365`
+Source: `lib/context.x:356`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -43,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:342`
+Source: `lib/context.x:333`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -52,7 +52,7 @@ Source: `lib/context.x:342`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:175`
+Source: `lib/context.x:323`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -76,7 +76,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:303`
+Source: `lib/context.x:74`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -91,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:146`
+Source: `lib/context.x:260`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:163`
+Source: `lib/context.x:277`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:172`
+Source: `lib/context.x:286`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:155`
+Source: `lib/context.x:269`
 
 ## Advanced and interop API
 
@@ -155,7 +155,7 @@ Moves one custom-exporter-owned allocation to the destination `Context`.
 A null allocation or one outside `c`'s `Scope` chain is unchanged.
 Application code exports its value with `Context.export` instead.
 
-Source: `lib/context.x:101`
+Source: `lib/context.x:247`
 
 <a id="Context.owns"></a>
 #### Context.owns
@@ -166,7 +166,7 @@ Reports whether `allocation` belongs to `context`'s `Scope` chain.
 The nonnull pointer must come from a `Scope` allocator. Registered custom
 exporters call this before moving their own storage.
 
-Source: `lib/context.x:88`
+Source: `lib/context.x:227`
 
 ## Runtime-internal callables
 
@@ -191,7 +191,7 @@ Returns the borrowed `Scope` slot that receives exports from `c`.
 The slot remains valid only while the `Context`'s destination state lives;
 a null `Context` returns NULL.
 
-Source: `lib/context.x:95`
+Source: `lib/context.x:241`
 
 <a id="Context.export_nested"></a>
 #### Context.export_nested
@@ -213,7 +213,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:192`
+Source: `lib/context.x:221`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -235,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:324`
+Source: `lib/context.x:95`
 
 <a id="Context.initialize"></a>
 #### Context.initialize
@@ -244,17 +244,15 @@ Source: `lib/context.x:324`
 
 Registers `Context` cleanup before workers can start.
 
-Source: `lib/context.x:70`
+Source: `lib/context.x:359`
 
 ## Design notes
 
-`Context` combines one `Scope` lifetime with `Error` and `Match` state. An
-isolated `Context` also owns a nested canonical-value pool. Export moves
-built-in movable storage owned by the source `Scope`. For built-in
-immutable
-values, it recanonicalizes only those owned by the source's private pool;
-inherited or borrowed values are returned unchanged. Closing reclaims
-everything else.
+Context owns one bounded unit of runtime work: a `Scope` lifetime with its
+`Error` and `Match` state and, when isolated, a nested canonical-value
+pool. Export carries a value out before close reclaims the rest: it moves
+built-in storage the source `Scope` owns and recanonicalizes immutable
+values only when the source's private pool owns them.
 
 ## Tests and examples
 

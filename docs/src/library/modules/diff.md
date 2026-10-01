@@ -25,7 +25,7 @@ each line's ending removed. Two equal texts give only `same` forms.
 Past 2,000 edits the differing middle is one run of deletions followed
 by one run of insertions.
 
-Source: `lib/diff.x:39`
+Source: `lib/diff.x:38`
 
 <a id="Diff.unified"></a>
 #### Diff.unified
@@ -36,7 +36,7 @@ Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:183`
+Source: `lib/diff.x:182`
 
 ## Public types
 
@@ -51,16 +51,15 @@ Source: `lib/diff.x:183`
 
 The receiverless owner of the difference operations.
 
-Source: `lib/diff.x:17`
+Source: `lib/diff.x:16`
 
 ## Design notes
 
-`Diff.lines` finds a shortest edit script between two texts with the
-Myers algorithm after trimming the lines the texts share at both ends.
-Each step keeps only the frontier it reached, so the search costs the
-square of the edit distance. An edit distance past `_LIMIT` becomes one
-deletion of the old middle and one insertion of the new, which is what a
-reader wants of two unrelated texts.
+Diff owns line differences: a shortest edit script between two texts,
+found with the Myers algorithm after trimming the lines both share at
+each end, and its unified spelling. Each search step keeps only its
+frontier, so the cost is the square of the edit distance; past `_LIMIT`
+edits the middle becomes one deletion run and one insertion run.
 
 ## Tests and examples
 

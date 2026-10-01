@@ -731,11 +731,11 @@ bounded runtime state and value export.
 
 Public functions:
 
-`Context.initialize`, `Context.owns`, `Context.export_destination`,
-`Context.move_allocation`, `Context.open`, `Context.open_named`,
-`Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
-`Context.export_nested`, `Context.export`, `Context.export_scope`,
-`Context.close`, `Context.cleanup`
+`Context.export`, `Context.export_scope`, `Context.export_nested`,
+`Context.owns`, `Context.export_destination`, `Context.move_allocation`,
+`Context.open`, `Context.open_named`, `Context.open_isolated`,
+`Context.open_isolated_named`, `Context.current`, `Context.close`,
+`Context.cleanup`, `Context.initialize`
 
 ### [lib/datum.x](../lib/datum.x)
 
@@ -1247,11 +1247,11 @@ Public functions:
 `String.endswith`, `String.replace`, `String.replace_n`, `String.getindex`,
 `String.getslice`, `String.withindex`, `String.add`, `String.repeat`,
 `String.new_fill`, `String.join`, `String.pad_left`, `String.pad_right`,
-`String.pad_center`, `String.strip`, `String.lstrip`, `String.rstrip`,
-`String.dedent`, `String.remove_prefix`, `String.remove_suffix`,
-`String.partition`, `String.rpartition`, `String.lower`, `String.upper`,
-`String.capitalize`, `String.filter`, `String.map`, `String.keep`,
-`String.reject`, `String.squeeze`, `String.printf`, `String.str`,
+`String.pad_center`, `String.printf`, `String.strip`, `String.lstrip`,
+`String.rstrip`, `String.dedent`, `String.remove_prefix`,
+`String.remove_suffix`, `String.partition`, `String.rpartition`,
+`String.lower`, `String.upper`, `String.capitalize`, `String.filter`,
+`String.map`, `String.keep`, `String.reject`, `String.squeeze`, `String.str`,
 `String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
 
 ### [lib/symbol.x](../lib/symbol.x)
@@ -1479,14 +1479,14 @@ Public functions:
 `Var.is_reference`, `Var.is_object`, `Var.is_void`, `Var.is_null`, `Var.null`,
 `Var.is_nil`, `Var.encoding_valid`, `x2c_var_descriptor_index`,
 `Var.custom_descriptor_index`, `x2c_var_custom_descriptor`,
-`x2c_var_tag_descriptor_index`, `Var.new`, `Var.box_record`, `Var.box_long`,
-`Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
+`x2c_var_tag_descriptor_index`, `Var.new`, `Var.parse`, `Var.box_record`,
+`Var.box_long`, `Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
 `Var.box_long_double`, `Var.clone_wide`, `Var.move_wide_to`, `Var.wide_owner`,
 `Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
 `Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
 `Var.pointer`, `Var.wide_hash`, `Var.wide_equal`, `Var.integer_compare`,
-`Var.integer_floating_compare`, `Var.wide_compare`, `Var.parse`,
-`Var.register_object_tag`, `x2c_var_declare`
+`Var.integer_floating_compare`, `Var.wide_compare`, `Var.register_object_tag`,
+`x2c_var_declare`
 
 ### [lib/varconvert.x](../lib/varconvert.x)
 
