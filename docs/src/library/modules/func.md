@@ -15,7 +15,6 @@ Generic native function binding.
 | [`x2c_func_value_argument`](#x2c_func_value_argument) | Checks and converts value argument `i`, reporting its position. |
 | [`Func.apply`](#Func.apply) | Invokes a bound native function synchronously and returns its boxed result. |
 | [`Func.context`](#Func.context) | Returns borrowed read-only access to a `Func`'s copied context. |
-| [`Func.move`](#Func.move) | Transfers `function`'s storage to the `Scope` held by `slot`. |
 | [`Func.new`](#Func.new) | Builds a fixed-arity native-function binding in the current `Scope`. |
 | [`Func.new_context`](#Func.new_context) | Builds a fixed-arity binding with copied context in the current `Scope`. |
 | [`Func.new_rest`](#Func.new_rest) | Builds a native-function binding that takes any number of value arguments. |
@@ -115,20 +114,6 @@ NULL when the binding has no context.
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
 Source: `lib/func.x:425`
-
-<a id="Func.move"></a>
-#### Func.move
-
-`void Func.move(Func function, Scope *slot)`
-
-Transfers `function`'s storage to the `Scope` held by `slot`.
-The shared handle of a direct function or noncapturing lambda lives for
-the program and stays where it is, so a caller may hand any `Func` to an
-operation that takes ownership. A NULL `function` does nothing.
-
-**Raises:** the causes of `Scope.move`, which leave ownership unchanged.
-
-Source: `lib/func.x:436`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -245,6 +230,7 @@ for source readers but are not supported as user API.
 | [`x2c_func_reference_type`](#x2c_func_reference_type) | Returns the borrowed pointee type for reference parameter `index`. |
 | [`x2c_func_shared`](#x2c_func_shared) | Builds the shared handle for a direct function or noncapturing lambda. |
 | [`x2c_func_unrepresentable_argument`](#x2c_func_unrepresentable_argument) | Rejects a value argument whose source type has no `Var` representation. |
+| [`Func.move`](#Func.move) | Transfers `function`'s storage to the `Scope` held by `slot`. |
 | [`Func.signature`](#Func.signature) | Returns a native binding's borrowed canonical signature. |
 
 ### Functions
@@ -298,6 +284,20 @@ conversion. Raises: `<bad-types>`.
 Source: `lib/func.x:246`
 
 ### `Func`
+
+<a id="Func.move"></a>
+#### Func.move
+
+`void Func.move(Func function, Scope *slot)`
+
+Transfers `function`'s storage to the `Scope` held by `slot`.
+The shared handle of a direct function or noncapturing lambda lives for
+the program and stays where it is, so a caller may hand any `Func` to an
+operation that takes ownership. A NULL `function` does nothing.
+
+**Raises:** the causes of `Scope.move`, which leave ownership unchanged.
+
+Source: `lib/func.x:436`
 
 <a id="Func.signature"></a>
 #### Func.signature
