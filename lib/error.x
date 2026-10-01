@@ -972,16 +972,16 @@ static pthread_once_t catch_site_mutex_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
 static void _site_mutex_initialize(void) =>
-  x2c_mutex_recursive_initialize(
+  Mutex.recursive_initialize(
     &catch_site_mutex, "Error: could not initialize catch site mutex");
 
 static void _site_lock(void) =>
-  x2c_mutex_recursive_lock(
+  Mutex.recursive_lock(
     &catch_site_mutex, &catch_site_mutex_once, _site_mutex_initialize,
     "Error: could not lock catch site");
 
 static void _site_unlock(void) =>
-  x2c_mutex_recursive_unlock(
+  Mutex.recursive_unlock(
     &catch_site_mutex, "Error: could not unlock catch site");
 
 /* Prepares one plan per arm for a registration of a transient site. */

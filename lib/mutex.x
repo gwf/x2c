@@ -33,8 +33,7 @@ protocol Cleanup(Mutex);
     On pthread failure, prints `failure` to native stderr and aborts without
     allocating. This boundary can run while Error or Scope is failing.
 */
-void x2c_mutex_recursive_initialize(
-  pthread_mutex_t *mutex, const char *failure) {
+void Mutex.recursive_initialize(pthread_mutex_t *mutex, const char *failure) {
   pthread_mutexattr_t attributes;
   if (pthread_mutexattr_init(&attributes) ||
       pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
@@ -48,7 +47,7 @@ void x2c_mutex_recursive_initialize(
 /** Initializes through `once`, then locks the recursive mutex.
     On pthread failure, prints `failure` to native stderr and aborts.
 */
-void x2c_mutex_recursive_lock(
+void Mutex.recursive_lock(
   pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void),
   const char *failure) {
   if (pthread_once(once, initialize) || pthread_mutex_lock(mutex)) {
@@ -60,7 +59,7 @@ void x2c_mutex_recursive_lock(
 /** Unlocks the recursive mutex.
     On pthread failure, prints `failure` to native stderr and aborts.
 */
-void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure) {
+void Mutex.recursive_unlock(pthread_mutex_t *mutex, const char *failure) {
   if (pthread_mutex_unlock(mutex)) {
     fprintf(stderr, "%s\n", failure);
     abort();

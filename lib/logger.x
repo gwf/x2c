@@ -114,17 +114,16 @@ static pthread_once_t logger_mutex_once =
 // synchronization
 
 static void _mutex_initialize(void) =>
-  x2c_mutex_recursive_initialize(
+  Mutex.recursive_initialize(
     &logger_mutex, "Logger: could not initialize mutex");
 
 static void _lock(void) =>
-  x2c_mutex_recursive_lock(
+  Mutex.recursive_lock(
     &logger_mutex, &logger_mutex_once, _mutex_initialize,
     "Logger: could not lock mutex");
 
 static void _unlock(void) =>
-  x2c_mutex_recursive_unlock(
-    &logger_mutex, "Logger: could not unlock mutex");
+  Mutex.recursive_unlock(&logger_mutex, "Logger: could not unlock mutex");
 
 macro Decorator $logger.synchronized(Function $function) {
   _lock();

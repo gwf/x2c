@@ -202,4 +202,4 @@ lib/pool.x|internal|Pool.thread_start,Pool.is_permanent,Pool.owns
 lib/pool.x|internal|Pool.lookup,Pool.insert,Pool.intern,Pool.malloc
 lib/pool.x|internal|Pool.free,Pool.promote,Pool.own
 lib/var.x|internal|Var.move_wide_to,Var.wide_owner
-lib/mutex.x|internal|x2c_mutex_recursive_initialize,x2c_mutex_recursive_lock,x2c_mutex_recursive_unlock
+lib/mutex.x|internal|Mutex.recursive_initialize,Mutex.recursive_lock,Mutex.recursive_unlock

@@ -793,7 +793,7 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   }
   pool = Scope.malloc_in(&scope, sizeof(struct Pool));
   *pool = (struct Pool) {.scope = scope, .up = inner, .child_capacity = 2};
-  x2c_mutex_recursive_initialize(
+  Mutex.recursive_initialize(
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
   $scope(&pool.scope) pool.table = Map.new_capacity(capacity);

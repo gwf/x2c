@@ -904,16 +904,16 @@ static pthread_once_t descriptor_mutex_once =
 static int descriptor_registration_frozen;
 
 static void _lock(void) =>
-  x2c_mutex_recursive_lock(
+  Mutex.recursive_lock(
     &descriptor_mutex, &descriptor_mutex_once, _mutex_initialize,
     "Var descriptor: could not lock mutex");
 
 static void _unlock(void) =>
-  x2c_mutex_recursive_unlock(
+  Mutex.recursive_unlock(
     &descriptor_mutex, "Var descriptor: could not unlock mutex");
 
 static void _mutex_initialize(void) =>
-  x2c_mutex_recursive_initialize(
+  Mutex.recursive_initialize(
     &descriptor_mutex, "Var descriptor: could not initialize mutex");
 
 /** Locks descriptor registration while a native worker starts.

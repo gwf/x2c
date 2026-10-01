@@ -987,9 +987,9 @@ shared mutable-state coordination.
 
 Public functions:
 
-`x2c_mutex_recursive_initialize`, `x2c_mutex_recursive_lock`,
-`x2c_mutex_recursive_unlock`, `Mutex.new`, `Mutex.lock`, `Mutex.try_lock`,
-`Mutex.unlock`, `Mutex.free`, `Mutex.cleanup`
+`Mutex.recursive_initialize`, `Mutex.recursive_lock`, `Mutex.recursive_unlock`,
+`Mutex.new`, `Mutex.lock`, `Mutex.try_lock`, `Mutex.unlock`, `Mutex.free`,
+`Mutex.cleanup`
 
 ### [lib/path.x](../lib/path.x)
 
