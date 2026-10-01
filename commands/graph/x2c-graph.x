@@ -803,18 +803,6 @@ static void _site_collect_parameters(List modifiers, Map parameters) {
             parameters[binding] = 1;
 }
 
-static List _site_direct_binding(Var value) {
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(ident (!set ?binding (binding ? ?))): return binding;
-    case %(expr ? ?inner): return _site_direct_binding(inner);
-    case %(parens ?inner): return _site_direct_binding(inner);
-    case %(at ? ?inner): return _site_direct_binding(inner);
-  }
-  return NULL;
-}
-
 static void _collect_sites(
   Compiler compiler, Var value, String path, String caller, Symbol visibility,
   String wanted, Map parameters, Map prior_writes, Map sites) {
@@ -841,7 +829,7 @@ static void _collect_sites(
           _collect_sites(
             compiler, child, path, caller, visibility, wanted,
             parameters, prior_writes, sites);
-        List binding = _site_direct_binding(left);
+        List binding = project_direct_binding(left);
         if (binding) {
           List summary = operator == <=> && right
                        ? _site_value_summary(compiler, right.car(), {}, {})
@@ -854,7 +842,7 @@ static void _collect_sites(
       _collect_sites(
         compiler, target, path, caller, visibility, wanted,
         parameters, prior_writes, sites);
-      List binding = _site_direct_binding(target);
+      List binding = project_direct_binding(target);
       if (binding)
         _site_add_prior_write(
           prior_writes, binding, %(operator $operator));
@@ -940,17 +928,6 @@ static int _field_whole_target(
   return 0;
 }
 
-static Var _field_site_value_type(Var value) {
-  if (value is not <list>) return %();
-  List node = value;
-  match (node) {
-    case %(expr ?type ?): return type;
-    case %(parens ?inner): return _field_site_value_type(inner);
-    case %(at ? ?inner): return _field_site_value_type(inner);
-  }
-  return %();
-}
-
 static void _collect_field_sites(
   Compiler compiler, Var value, String path, String caller, Symbol visibility,
   String receiver_name, String field_name, Map parameters, Symbol access,
@@ -960,7 +937,7 @@ static void _collect_field_sites(
   if (_field_access_matches(node, receiver_name, field_name)) {
     List detail;
     if (access == <replace>) {
-      Var type = _field_site_value_type(replacement);
+      Var type = project_expression_type(replacement);
       List summary = _site_value_summary(
         compiler, replacement, parameters, {});
       detail = %(access replace (value $type $summary));

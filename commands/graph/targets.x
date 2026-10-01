@@ -110,3 +110,30 @@ List project_location(Compiler compiler, String path, int origin) {
   int column = location.assoc(<column>).integer();
   return %(location $source $line $column);
 }
+
+/** The binding a direct identifier names beneath expression, parenthesis,
+    and location wrappers, or NULL. */
+List project_direct_binding(Var value) {
+  if (value is not <list>) return NULL;
+  List node = value;
+  match (node) {
+    case %(expr ? ?inner): return project_direct_binding(inner);
+    case %(parens ?inner): return project_direct_binding(inner);
+    case %(at ? ?inner): return project_direct_binding(inner);
+    case %(ident (!set ?binding (binding ? ?))): return binding;
+  }
+  return NULL;
+}
+
+/** The type of an expression beneath parenthesis and location wrappers, or
+    NULL. */
+Type project_expression_type(Var value) {
+  if (value is not <list>) return NULL;
+  List node = value;
+  match (node) {
+    case %(expr ?type ?): return type;
+    case %(parens ?inner): return project_expression_type(inner);
+    case %(at ? ?inner): return project_expression_type(inner);
+  }
+  return NULL;
+}
