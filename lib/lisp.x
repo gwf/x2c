@@ -425,34 +425,6 @@ static Var Lisp._special_import(Lisp lisp, List args, LispEnv *env) {
   return lisp.eval_file(source);
 }
 
-// form errors
-
-/* Raises `<bad-arity>` unless `args` holds `expected` forms. */
-static void _arity(List args, int expected, String operation) {
-  int actual = args.len();
-  if (actual != expected)
-    raise %(bad-arity (operation $operation) (expected $expected)
-                       (actual $actual));
-}
-
-static void _string_argument(Var value, String operation) {
-  if (value is not <string>)
-    raise %(bad-types (operation $operation) (actual ${value.kind()})
-                       (want "String"));
-}
-
-/* `apply` takes its values as one List. */
-static List _list_argument(Var values) {
-  if (values is not <list>)
-    raise %(bad-types (operation "apply") (actual ${values.kind()})
-                       (want "List"));
-  return values;
-}
-
-static void _not_procedure(Var callable) {
-  raise %(not-call (operation "apply") (actual ${callable.kind()}));
-}
-
 /* quasiquote
 
    A quasiquoted form is data except where an unquote reaches depth zero.
@@ -961,6 +933,34 @@ static void Lisp._open_call_budget(Lisp lisp) {
   if (lisp.call_depth) return;
   lisp.call_steps = 0;
   lisp.call_exhausted = lisp.interrupted;
+}
+
+// form errors
+
+/* Raises `<bad-arity>` unless `args` holds `expected` forms. */
+static void _arity(List args, int expected, String operation) {
+  int actual = args.len();
+  if (actual != expected)
+    raise %(bad-arity (operation $operation) (expected $expected)
+                       (actual $actual));
+}
+
+static void _string_argument(Var value, String operation) {
+  if (value is not <string>)
+    raise %(bad-types (operation $operation) (actual ${value.kind()})
+                       (want "String"));
+}
+
+/* `apply` takes its values as one List. */
+static List _list_argument(Var values) {
+  if (values is not <list>)
+    raise %(bad-types (operation "apply") (actual ${values.kind()})
+                       (want "List"));
+  return values;
+}
+
+static void _not_procedure(Var callable) {
+  raise %(not-call (operation "apply") (actual ${callable.kind()}));
 }
 
 /* reader
