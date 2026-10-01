@@ -12,7 +12,7 @@ Cleanup regions and the transfers that leave them.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`; `$catch_landing` calls this in a slot. |
+| [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`, then `$catch_none` when no arm can fall out; `$catch_landing` calls this in a slot. |
 | [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns one `$catch_pattern` for each of `items`, prepared into the catch site's `patterns`; `$catch_site` calls this in a slot. |
 | [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
 | [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
@@ -30,10 +30,10 @@ Cleanup regions and the transfers that leave them.
 `List builtin_catch_cases(List selected, List arms)`
 
 Returns one `$catch_case` for each lowered arm of `arms`, numbered in
-order and tested against `selected`; `$catch_landing` calls this in a
-slot.
+order and tested against `selected`, then `$catch_none` when no arm can
+fall out; `$catch_landing` calls this in a slot.
 
-Source: `src/cleanup.x:759`
+Source: `src/cleanup.x:774`
 
 #### builtin_catch_patterns
 
@@ -42,7 +42,7 @@ Source: `src/cleanup.x:759`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/cleanup.x:735`
+Source: `src/cleanup.x:742`
 
 #### builtin_defer_captures
 
@@ -50,7 +50,7 @@ Source: `src/cleanup.x:735`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:842`
+Source: `src/cleanup.x:860`
 
 #### builtin_defer_record
 
@@ -59,7 +59,7 @@ Source: `src/cleanup.x:842`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:833`
+Source: `src/cleanup.x:851`
 
 #### builtin_try_catch_site
 
@@ -69,7 +69,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:720`
+Source: `src/cleanup.x:727`
 
 #### builtin_try_landing
 
@@ -79,7 +79,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:747`
+Source: `src/cleanup.x:754`
 
 ### `Compiler`
 
@@ -104,7 +104,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1216`
+Source: `src/cleanup.x:1234`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -114,7 +114,7 @@ Source: `src/cleanup.x:1216`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1191`
+Source: `src/cleanup.x:1209`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
