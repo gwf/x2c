@@ -210,7 +210,7 @@ Each was reproduced at 2685655f.
 | Emitter recognition | `Emitter._emit` head switch plus six `_emit_*` groups that match again and return `matched` (`src/emit.x:1194-1399`, b796f4e1) | one `match` in `_emit` with one-line arms; delete the groups and the flag |
 | List to Array copy | the copy loop in `List.array`, `append`, `sort`, `sort_with`, `sort_by` (`lib/list.x:322, 365, 734, 746, 759`) | `List.array`, after it cleans up a partial Array on failure; keep `append`'s shared tail and `sort_by`'s one key call for a one-element List |
 | Nested-lambda presence | `ast_contains_head` at region entry and again on every child (`src/transform.x:1437-1528`) | kept: the repeated search was 5 of 16,729 profile samples on a deep-lambda source; a one-visit rewrite added a mode parameter and seven lines, and a whole-tree visit overflowed the C stack on long operator chains |
-| Open-template rebuild | `_template` discovers, then `_replace_bindings`, `_open_natives`, and origin `search_replace` each rebuild (`src/macros.x:2277-2338`) | one coordinated rewrite after discovery, if fixtures and stage equality prove it equal; otherwise record why the passes stay |
+| Open-template rebuild | `_template` discovered, then `_replace_bindings`, `_open_natives`, and origin `search_replace` each rebuilt (`src/macros.x:2277-2338`) | done: one `_open_template` walk after discovery; 6,467 real and 134,916 synthetic comparisons matched the three-pass result |
 | Typed zero-pointer target | the same initializer-target template at `src/expressions.x:4490, 4536` | one constructor |
 | Args repeated values | shared-name rows still append prefixes (`lib/args.x:147-150`); 200 values make 19,910 allocations against 201 | one accumulator per result name, keeping first-occurrence reset, defaults, mixed-row overwrite, and store order |
 
@@ -412,6 +412,11 @@ plans index.
   clang inlines it into each entry; the `match.x` split made that happen in
   `match.c` and cost 0.4% instructions on the capture benchmark. Emitting
   `_file_init_` as `noinline` and cold would remove it everywhere.
+- No current source, fixture, or unit test fills the open-template
+  natives map or changes a tree by value replacement in `_template`
+  (`src/macros.x`); only origin removal and one typedef base ever change a
+  template. The native-call and replacement paths are candidates for an
+  `investigate-x2c-overengineering` pass before anything is deleted.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
