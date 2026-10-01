@@ -38,7 +38,7 @@ lib/machine.x|internal|`Match` wordcode, builder, and execution-state definition
 lib/map.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match.x|api|
-lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Explicitly include `meta.x` where the functions are parsed.
+lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
 lib/mutex.x|api|
 lib/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.

@@ -41,7 +41,7 @@ The compiler surface a `meta` function calls.
 Applies a macro value to code values. The result is a pending
 invocation; inserting it into a program expands and binds it there.
 
-Source: `lib/meta.x:402`
+Source: `lib/meta.x:404`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -53,7 +53,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/meta.x:693`
+Source: `lib/meta.x:695`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -63,7 +63,7 @@ Source: `lib/meta.x:693`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/meta.x:686`
+Source: `lib/meta.x:688`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -73,7 +73,7 @@ Source: `lib/meta.x:686`
 Records the Macro values an anonymous macro captured where it was
 created, so applying it later applies the same children.
 
-Source: `lib/meta.x:397`
+Source: `lib/meta.x:399`
 
 <a id="Macro_pattern"></a>
 #### Macro_pattern
@@ -83,7 +83,7 @@ Source: `lib/meta.x:397`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/meta.x:461`
+Source: `lib/meta.x:463`
 
 #### type_base_suffix
 
@@ -92,7 +92,7 @@ Source: `lib/meta.x:461`
 Returns the suffix of `type` that begins at its typedef name or base
 keyword, sharing `type`, or `NULL` when it has none.
 
-Source: `lib/meta.x:342`
+Source: `lib/meta.x:344`
 
 #### type_declaration_parts
 
@@ -102,7 +102,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`.
 Function modifiers hold parameter syntax, and modifier order retains C
 declarator precedence.
 
-Source: `lib/meta.x:354`
+Source: `lib/meta.x:356`
 
 #### x2c_block_make
 
@@ -110,7 +110,7 @@ Source: `lib/meta.x:354`
 
 Returns a block containing `items` in order.
 
-Source: `lib/meta.x:121`
+Source: `lib/meta.x:123`
 
 #### x2c_expr_call
 
@@ -119,7 +119,7 @@ Source: `lib/meta.x:121`
 Returns the expression calling `callee` with `arguments`, a `List` of
 expressions.
 
-Source: `lib/meta.x:95`
+Source: `lib/meta.x:97`
 
 #### x2c_expr_composite
 
@@ -128,7 +128,7 @@ Source: `lib/meta.x:95`
 Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
-Source: `lib/meta.x:100`
+Source: `lib/meta.x:102`
 
 #### x2c_expr_ident
 
@@ -137,7 +137,7 @@ Source: `lib/meta.x:100`
 Returns an expression reading the identifier `name`, which is the syntax
 `x2c_ident` returned or a binding the compiler resolved.
 
-Source: `lib/meta.x:81`
+Source: `lib/meta.x:83`
 
 #### x2c_expr_index
 
@@ -145,7 +145,7 @@ Source: `lib/meta.x:81`
 
 Returns the expression `base[subscript]`.
 
-Source: `lib/meta.x:84`
+Source: `lib/meta.x:86`
 
 #### x2c_function_body
 
@@ -153,7 +153,7 @@ Source: `lib/meta.x:84`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:175`
+Source: `lib/meta.x:177`
 
 #### x2c_literal_int
 
@@ -161,7 +161,7 @@ Source: `lib/meta.x:175`
 
 Returns an `int` expression holding `value`.
 
-Source: `lib/meta.x:65`
+Source: `lib/meta.x:67`
 
 #### x2c_literal_string
 
@@ -169,7 +169,7 @@ Source: `lib/meta.x:65`
 
 Returns a `String` expression holding `value`.
 
-Source: `lib/meta.x:60`
+Source: `lib/meta.x:62`
 
 #### x2c_literal_symbol
 
@@ -177,7 +177,7 @@ Source: `lib/meta.x:60`
 
 Returns a `Symbol` expression holding `value`.
 
-Source: `lib/meta.x:69`
+Source: `lib/meta.x:71`
 
 #### x2c_parameters_arguments
 
@@ -187,7 +187,7 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:183`
+Source: `lib/meta.x:185`
 
 #### x2c_stmnt_make
 
@@ -195,7 +195,7 @@ Source: `lib/meta.x:183`
 
 Returns an expression statement.
 
-Source: `lib/meta.x:115`
+Source: `lib/meta.x:117`
 
 #### x2c_stmnt_return
 
@@ -203,7 +203,7 @@ Source: `lib/meta.x:115`
 
 Returns a return statement carrying `expression`.
 
-Source: `lib/meta.x:118`
+Source: `lib/meta.x:120`
 
 ### `Macro`
 
@@ -214,7 +214,7 @@ Source: `lib/meta.x:118`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/meta.x:433`
+Source: `lib/meta.x:435`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -228,7 +228,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/meta.x:441`
+Source: `lib/meta.x:443`
 
 ## Public types
 
@@ -249,7 +249,7 @@ Source: `lib/meta.x:441`
 A macro as a value: called to build code, or used in a Match `case` to
 recognize code and capture its parameters.
 
-Source: `lib/meta.x:393`
+Source: `lib/meta.x:395`
 
 <a id="MacroCaseSite"></a>
 ### MacroCaseSite
@@ -261,7 +261,7 @@ process: the plan Match keeps, the slots of the macro's fixed locals, and
 where each binder reads its capture. The compiler emits one
 zero-initialized static site per `case`.
 
-Source: `lib/meta.x:677`
+Source: `lib/meta.x:679`
 
 <a id="MacroFixedSlots"></a>
 ### MacroFixedSlots
@@ -271,7 +271,7 @@ Source: `lib/meta.x:677`
 Records fixed-local slots for distinct-identity checks and Name slots
 for member-spelling comparisons during recognition.
 
-Source: `lib/meta.x:656`
+Source: `lib/meta.x:658`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing
@@ -282,7 +282,7 @@ Records where each of a `case`'s binders reads its capture: the slot
 of its internal binder in the pattern that captured, and its own slot
 in the `case`, which need not share the parameters' order.
 
-Source: `lib/meta.x:665`
+Source: `lib/meta.x:667`
 
 <a id="Source"></a>
 ### Source
@@ -293,7 +293,7 @@ A `meta` parameter declared `Source` receives, at a `$` call, captured
 syntax with the source text it came from: `((text T) (file F) (syntax
 S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
-Source: `lib/meta.x:45`
+Source: `lib/meta.x:47`
 
 <a id="Type"></a>
 ### Type
@@ -304,7 +304,7 @@ A `meta` parameter declared `Type` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 
-Source: `lib/meta.x:40`
+Source: `lib/meta.x:42`
 
 ## Design notes
 
@@ -322,9 +322,11 @@ or through another `meta` function, is compile-time only: the compiler
 emits no run-time form for it and diagnoses a run-time call where it is
 written.
 
-This module is not part of the implicit prelude. Include it where the
-`meta` functions are parsed: a `.xmacro` borrows the consuming unit's
-symbol table, so the unit that imports it includes this file.
+The library builds it as an optional module, but the prelude's
+`varops.x` includes it for its own `meta` rows, so every unit sees its
+declarations; the one-line import of `system-macros.xmacro` relies on
+that. Include it explicitly where `meta` functions are written: a
+`.xmacro` borrows the consuming unit's symbol table.
 
 ## Tests and examples
 

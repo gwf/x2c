@@ -16,9 +16,11 @@
     emits no run-time form for it and diagnoses a run-time call where it is
     written.
 
-    This module is not part of the implicit prelude. Include it where the
-    `meta` functions are parsed: a `.xmacro` borrows the consuming unit's
-    symbol table, so the unit that imports it includes this file.
+    The library builds it as an optional module, but the prelude's
+    `varops.x` includes it for its own `meta` rows, so every unit sees its
+    declarations; the one-line import of `system-macros.xmacro` relies on
+    that. Include it explicitly where `meta` functions are written: a
+    `.xmacro` borrows the consuming unit's symbol table.
 */
 
 #pragma once

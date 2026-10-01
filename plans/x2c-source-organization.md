@@ -112,7 +112,7 @@ Phase 4. `string-format.x`, `string-escape.x`, `match-plan.x`,
 `match-cache.x`, and `macro-value.x` join the prelude because the
 operations in them are prelude operations today or are called from
 generated code; `docs/library-manifest.txt` gets a row for each.
-`lib/meta.x` keeps the compile-time surface and leaves the prelude.
+`lib/meta.x` keeps the compile-time surface.
 `MatchMachine.open` and `dispose` move from `lib/match.x:2789-2815` to
 `lib/match-machine.x`, which `match.x` already includes.
 
@@ -134,21 +134,25 @@ subject each: `macros.x` (~3,900), `expressions.x` (~3,850), `parse.x`,
 
 Each was reproduced at 2685655f.
 
-1. Private includes leak. A unit that includes another sees the types of
-   that unit's private includes; x2c accepts the program and clang fails
-   with `unknown type name`. `docs/src/reference/language.md:28-34` makes
-   naming a private type of an included file an error. Reproduced with a
-   three-file program and through the prelude (`Regex`, `Job`, `ArrayInt`,
-   from `lib/lisp.x:84-87`). Fix the visibility in the compiler so the
-   documented error is reported. No working program can depend on the leak,
-   because each case fails in clang. If the fix finds that the replay of
-   private includes serves a deliberate behavior, stop and report it; the
-   fallback moves those four includes into `lib/lisp-targets.x`, the way
-   Json, Diff, and Path are kept out today.
-2. `varops.x:14` includes `meta.x` above `#pragma private` so that
-   `varops.xmacro` can run `meta` functions. That places the whole meta
-   surface in every program, against `meta.x`'s header and its manifest
-   row. Move the include below the pragma.
+1. Optional runtime modules leak into the prelude. `lib/lisp.x:84-87`
+   includes `process.x`, `regex.x`, `typed-array.x`, and `typed-map.x`
+   below its pragma, so a program with no include can name `Regex`, `Job`,
+   or `ArrayInt`; x2c accepts it and clang fails with `unknown type name`.
+   The compiler replays an included file's private includes on purpose
+   (`src/collect.x:179-183`): a unit may call the functions they declare,
+   and 17 compiler units depend on it. A type reached that way fails in
+   clang instead of x2c, which is a later error, not wrong output, so the
+   replay stays. The runtime fix moves `lisp.x`'s bindings of those four
+   modules (the Job adapters near `lisp.x:1654-1665` and the target rows)
+   into `lib/lisp-targets.x`, the way Json, Diff, and Path are kept out.
+   That is the `lisp.x` split in Phase 4, so it lands there.
+2. `lib/meta.x`'s header and its manifest row say it is outside the
+   prelude, but every unit reaches it through `varops.x:14`, and the
+   documented one-line import of `system-macros.xmacro`
+   (`docs/src/guide/system-macros.md:416-423`) depends on that, because its
+   `meta` functions call `x2c_literal_string` and its neighbors. Correct
+   the header and the manifest row to say how the module is reached. No
+   code changes.
 3. Lisp standard operations lost their argument check. `cbb357f8`
    (2026-09-26) moved them to `lib/lisp-init.x`, which calls typed
    operations directly instead of through the Func adapter.
@@ -260,9 +264,8 @@ Phase 2, which edits the fixtures.
 
 ### Phase 2: defects
 
-One commit per defect, using `fix-x2c-bug`. Defect 1 lands before Phase 4
-because the `lisp.x` and `meta.x` splits depend on correct private
-visibility. Strengthen the fixtures that accept any failure where the
+One commit per defect, using `fix-x2c-bug`. Defect 1 lands with the
+`lisp.x` split in Phase 4. Strengthen the fixtures that accept any failure where the
 expected diagnostic is now known: `self-annotation-mismatch` (defect 7),
 `macro-body-type-hole-ambiguous-pointer`, `meta-header-packed`,
 `preprocess-missing-include`, and the three that accept any abort
@@ -334,6 +337,11 @@ plans index.
 
 ## Outside this plan
 
+- A public function below `#pragma private` that returns a type from a
+  private include puts its prototype in the generated header without that
+  type's header, so any unit including the header fails in clang. Found
+  during defect 1; it needs its own `fix-x2c-bug` pass.
+
 - The unwired tests other than those Phase 2 wires
   (`bound-template-expression.c`, `source-call-projection.x`,
   `tools/test-examples.py`, `tools/test-performance-snapshot.py`) stay
@@ -346,9 +354,7 @@ plans index.
 
 ## Plan review
 
-- Established facts and rechecks: private visibility is established by the
-  includee's header; defect 1 restores that rule at the compiler's lookup
-  and adds no second check. Lisp argument tags are established by the Func
+- Established facts and rechecks: Lisp argument tags are established by the Func
   adapter for bound operations; defect 3 adds the same check only where
   `lisp-init.x` bypasses that adapter, matching what `lisp_car` already
   does. No other phase adds a check.
@@ -364,9 +370,8 @@ plans index.
 - Idiom: the result uses existing x2c units, receivers, `match`
   dispatchers, and the prelude. It adds no registry, framework, or
   generated layer.
-- Validators and fixtures: defect 1's error is the documented
-  `language.md` behavior; it prevents a C compile failure from reaching the
-  user as raw clang output. Defect 3's `bad-types` restores the documented
+- Validators and fixtures: defect 1 adds no check; the leaked types still
+  fail in clang, and the runtime move removes the leak. Defect 3's `bad-types` restores the documented
   contract of `lisp-init.x` and prevents wrong values. Defect 4 prevents an
   unsafe native crossing. The new `.diagnostics` expectations pin existing
   diagnostics; they add no diagnostic.
