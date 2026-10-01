@@ -222,23 +222,32 @@ static String Compiler._json_path(Compiler compiler, String path) {
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
-static void Compiler._write_json(Compiler c, List entry) {
-  Symbol code = entry.assoc(<code>);
-  List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
+static void Compiler._write_json(
+  Compiler c, Symbol code, Symbol severity, String message, List location,
+  String note) {
   Buffer out = $auto(Buffer.new(0));
   out.write(%"{\"code\":${Var.json(code)}");
-  out.write(%",\"message\":${Var.json(entry.assoc(<message>))}");
-  out.write(%",\"severity\":${Var.json(entry.assoc(<severity>))}");
-  foreach (Symbol key, %(file line column length position)) {
-    Var value = location.assoc(key);
-    if (value is void) value = NULL;
-    else if (value is <string>) value = c._json_path(value);
-    out.write(%",${Var.json(key)}:${Var.json(value)}");
-  }
-  String note = _note_line(notes);
+  out.write(%",\"message\":${Var.json(message)}");
+  out.write(%",\"severity\":${Var.json(severity)}");
+  c._write_json_location(out, location);
   out.write(%",\"notes\":${Var.json(note ? [note] : [])}}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
          errno == EINTR) {}
+}
+
+/* An entry without a location writes null for each location key. */
+static void Compiler._write_json_location(
+  Compiler c, Buffer out, List location) {
+  match (location)
+    case %((file ?file) (line ?line) (column ?column) (length ?length)
+           (position ?position)): {
+      out.write(%",\"file\":${Var.json(c._json_path(file))}");
+      out.write(%",\"line\":$line,\"column\":$column");
+      out.write(%",\"length\":$length,\"position\":$position");
+      return;
+    }
+  out.write(",\"file\":null,\"line\":null,\"column\":null");
+  out.write(",\"length\":null,\"position\":null");
 }
 
 /** Writes one structured diagnostic entry and source context to stderr, or
@@ -247,33 +256,32 @@ static void Compiler._write_json(Compiler c, List entry) {
     `column`, and token `length`; `String` notes are joined into one note line.
 */
 void Compiler.print_diagnostic(Compiler compiler, List entry) {
-  if (!entry) return;
-  if (diagnostics_json >= 0) {
-    compiler._write_json(entry);
-    return;
-  }
-  Var v;
-  Symbol code = entry.assoc(<code>), String message = entry.assoc(<message>);
-  v = entry.assoc(<location>);
-  List location = v is <list> ? v : NULL;
-  v = entry.assoc(<notes>);
-  List notes = v is <list> ? v : NULL;
-  if (location) {
-    String text = "<input>";
-    v = location.assoc(<file>);
-    if (v is <string>) text = v;
-    int line = location.assoc(<line>);
-    int column = location.assoc(<column>);
-    fprintf(
-      stderr, "%s:%d:%d: %s: %s\n",
-      text, line, column, code.str(), message);
-    compiler._show_source_context(location);
-  }
-  else fprintf(stderr, "%s: %s\n", code.str(), message);
-  String note = _note_line(notes);
-  if (note) fprintf(stderr, "  note: %s\n", note);
-  fprintf(stderr, "\n");
-  fflush(stderr);
+  match (entry)
+    case %((code ?code) (severity ?severity) (message ?message)
+           (location ?location) (notes ?notes)): {
+      String note = _note_line(notes);
+      if (diagnostics_json >= 0) {
+        compiler._write_json(code, severity, message, location, note);
+        return;
+      }
+      compiler._write_heading(code, message, location);
+      if (note) fprintf(stderr, "  note: %s\n", note);
+      fprintf(stderr, "\n");
+      fflush(stderr);
+    }
+}
+
+/* A located heading names its source position and shows that line. */
+static void Compiler._write_heading(
+  Compiler c, Symbol code, String message, List location) {
+  match (location)
+    case %((file ?file) (line ?line) (column ?column) (length ?length) ?): {
+      String place = %"$file:$line:$column";
+      fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
+      c._show_source_context(line, column, length);
+      return;
+    }
+  fprintf(stderr, "%s: %s\n", code.str(), message);
 }
 
 /** Resolves a recorded occurrence through generated ancestry to its source.
@@ -397,14 +405,9 @@ void Compiler.report_warning_at(
 /* Locations use one-based coordinates while source indexing is zero-based.
    Clamp a stale column or width to the current line, retain tabs before the
    token, and render at least one caret. */
-static void Compiler._show_source_context(Compiler compiler, List location) {
-  if (!location || !compiler.text) return;
-  Var line_var = location.assoc(<line>);
-  Var col_var = location.assoc(<column>);
-  Var len_var = location.assoc(<length>);
-  int line = line_var is void ? 0 : line_var;
-  int column = col_var is void ? 0 : col_var;
-  int length = len_var is void ? 1 : len_var;
+static void Compiler._show_source_context(
+  Compiler compiler, int line, int column, int length) {
+  if (!compiler.text) return;
   char *line_start, *line_end;
   if (_context_line(compiler, line, line_start, line_end))
     _context_caret(line_start, line_end, column, length);
