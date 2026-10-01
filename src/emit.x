@@ -260,8 +260,7 @@ static List Emitter._initializer_macro(Emitter e, List input, List body) {
   String expanded = %"${name}_expanded";
   String definition = %"#define $expanded($formal) $replacement";
   e.native_macros.push(%($expanded $definition));
-  e.native_macros.push(
-    %($name "#define $name($formal) $expanded($formal)"));
+  e.native_macros.push(%($name "#define $name($formal) $expanded($formal)"));
   Array arguments = [];
   foreach (List argument, input.cdr()) {
     List emitted = e._emit(argument.cadr());
@@ -783,8 +782,7 @@ static List Emitter._emit_call(Emitter e, Var function, Var arguments) {
    keeps the ordinary entry, which prepares one plan per call. Only a direct
    global function binding identifies a runtime operation. Returns NULL
    when the call is not one of those operations or its pattern is computed. */
-static List Emitter._match_site_call(
-  Emitter e, Var function, Var arguments) {
+static List Emitter._match_site_call(Emitter e, Var function, Var arguments) {
   List binding = NULL;
   while (!binding && function is <list>) match (function) {
     case %(expr ? (parens ?inner)): function = inner;
@@ -1112,8 +1110,7 @@ static List Emitter._declarator(Emitter e, List decl, List mods) {
   return decl;
 }
 
-static List Emitter._array_declarator(
-  Emitter e, List decl, List dimension) {
+static List Emitter._array_declarator(Emitter e, List decl, List dimension) {
   if (decl.type().is_pointer()) decl = _parens(decl);
   List size = e._emit(dimension);
   return size ? %(@decl "[" @size "]") : %(@decl "[]");
@@ -1132,8 +1129,7 @@ static List Emitter._semantic_type(Emitter e, Type type) {
   return e._declare(declaration);
 }
 
-static List Emitter._semantic_name(
-  Emitter e, Type type, String name) {
+static List Emitter._semantic_name(Emitter e, Type type, String name) {
   List (base, mods) = type.declaration_parts();
   List declarator = e._declarator(%($name), mods);
   return %(${e._emit(base)} @declarator);
