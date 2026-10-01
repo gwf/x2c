@@ -391,9 +391,8 @@ static void PoolBlock._push_free(PoolBlock block, void *slot) {
 
 /* Called with storage and pool locked. `fresh` is a block `Pool._fresh_block`
    allocated for an earlier attempt, or NULL. */
-static PoolBlock Pool._block_lease(
-  Pool pool, int class_index, PoolBlock fresh) {
-  unsigned bytes = pool._block_bytes(class_index);
+static PoolBlock Pool._block_lease(Pool p, int class_index, PoolBlock fresh) {
+  unsigned bytes = p._block_bytes(class_index);
   PoolBlock block = _depot_pop(bytes);
   if (!block) {
     if (!fresh) return NULL;
@@ -401,10 +400,10 @@ static PoolBlock Pool._block_lease(
   }
   pool_active_blocks++;
   pool_active_bytes += bytes;
-  block._reset(pool);
+  block._reset(p);
   block.class_index = class_index;
   block.bytes = bytes;
-  block._link(pool);
+  block._link(p);
   return block;
 }
 
