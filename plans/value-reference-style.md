@@ -1,7 +1,7 @@
-> Status: implemented; delivery and integration pending
+> Status: implemented
 > The private-context batch merged into dev in PR #76.
 > Public follow-ups are implemented on `codex/value-reference-public`, based on
-> dev `32ab98cb`. Delivery is another PR targeting `dev`; integration belongs
+> dev `da1b8767`. Delivery is another PR targeting `dev`; integration belongs
 > to the integration agent.
 
 # Value declarations and reference parameters
