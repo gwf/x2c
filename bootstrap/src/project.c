@@ -239,23 +239,23 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_05ED52D8_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _125)))
+_x2c_initializer_choice_05ED52D8_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _125)))
 static Var _x2c_lambda_1(String flag);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_05ED52D8_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _135)))
+_x2c_initializer_choice_05ED52D8_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _135)))
 static Var _x2c_lambda_2(Var value);
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_05ED52D8_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _125)))
+_x2c_initializer_choice_05ED52D8_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _125)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }

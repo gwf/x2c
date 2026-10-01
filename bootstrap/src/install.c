@@ -129,9 +129,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _115)))
+_x2c_initializer_choice_3CFE94DA_2((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _115)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -145,7 +145,7 @@ static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _115)))
+_x2c_initializer_choice_3CFE94DA_3((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _115)))
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 Var String_var(String);

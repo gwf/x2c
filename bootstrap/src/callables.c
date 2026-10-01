@@ -247,14 +247,14 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_B4B5E4BA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _2195)))
+_x2c_initializer_choice_B4B5E4BA_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2195)))
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_B4B5E4BA_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _2195)))
+_x2c_initializer_choice_B4B5E4BA_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _2195)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -275,14 +275,14 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_B4B5E4BA_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _2230)))
+_x2c_initializer_choice_B4B5E4BA_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _2230)))
 static Var _x2c_lambda_2(Type type, List name);
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
 
 static Func _x2c_func_handle_3;
 
-_x2c_initializer_choice_B4B5E4BA_3((_x2c_func_handle_3 = Func_new(_x2c_func_adapt_3, _2230)))
+_x2c_initializer_choice_B4B5E4BA_3((_x2c_func_handle_3 = x2c_func_shared(_x2c_func_adapt_3, _2230)))
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
   const void * _x2c_defer_capture_3;

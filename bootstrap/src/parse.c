@@ -385,9 +385,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_46021D32_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _2179)))
+_x2c_initializer_choice_46021D32_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2179)))
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_6;
   const void * _x2c_defer_capture_7;
