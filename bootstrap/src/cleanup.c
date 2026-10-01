@@ -4291,7 +4291,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_7(void){
   _4327 = cons(_4326, NULL);
   _4328 = cons(_303, _4327);
   _4329 = List_var(_4328);
-  _4330 = int_var(46220);
+  _4330 = int_var(46198);
   _4331 = cons(_4330, NULL);
   _4332 = cons(_318, _4331);
   _4333 = List_var(_4332);
@@ -4359,7 +4359,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_7(void){
   _4395 = cons(_4394, NULL);
   _4396 = cons(_303, _4395);
   _4397 = List_var(_4396);
-  _4398 = int_var(46083);
+  _4398 = int_var(46061);
   _4399 = cons(_4398, NULL);
   _4400 = cons(_318, _4399);
   _4401 = List_var(_4400);
