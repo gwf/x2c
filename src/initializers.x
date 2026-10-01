@@ -514,10 +514,7 @@ static List Compiler._array_layout(
     (op / (expr (unsigned long long) (sizeof (parens $target)))
           (expr (unsigned long long) (parens $divisor))));
   List units = child.cadr();
-  if (units !== one)
-    count = %(expr (unsigned long long)
-      (op * (expr (unsigned long long) (parens $count))
-            (expr (unsigned long long) (parens $units))));
+  if (units !== one) count = _ull_op(<*>, count, units);
   return %($type $count ((${path.car()} $child)));
 }
 
@@ -535,9 +532,7 @@ static List Compiler._record_layout(
     List child = c._initializer_layout(member, slot, string, symbolic);
     if (!child) return NULL;
     List units = child.cadr();
-    count = count ? %(expr (unsigned long long)
-      (op + (expr (unsigned long long) (parens $count))
-            (expr (unsigned long long) (parens $units)))) : units;
+    count = count ? _ull_op(<+>, count, units) : units;
     children.push(%(${path.car()} $child));
     fields = rest;
   }
@@ -576,12 +571,8 @@ static List _ordinal_index(
     // Empty native subarrays leave these selectors well-formed.
     List divisor = %(expr (unsigned long long)
       (op ? $units $units $one));
-    index = %(expr (unsigned long long)
-      (op / (expr (unsigned long long) (parens $ordinal))
-            (expr (unsigned long long) (parens $divisor))));
-    position = %(expr (unsigned long long)
-      (op % (expr (unsigned long long) (parens $ordinal))
-            (expr (unsigned long long) (parens $divisor))));
+    index = _ull_op(</>, ordinal, divisor);
+    position = _ull_op(<%>, ordinal, divisor);
   }
   return %($owner index $index $selected ());
 }
@@ -590,9 +581,7 @@ static void _ordinal_field(
   List ordinal, List units, List one, List &start,
   List &position, List &active) {
   if (start) {
-    position = %(expr (unsigned long long)
-      (op - (expr (unsigned long long) (parens $ordinal))
-            (expr (unsigned long long) (parens $start))));
+    position = _ull_op(<->, ordinal, start);
     if (units !== one)
       active = _initializer_and(
         active,
@@ -607,9 +596,7 @@ static void _ordinal_field(
         (op < (expr (unsigned long long) (parens $position))
               (expr (unsigned long long) (parens $units))));
   active = _initializer_and(active, test);
-  start = start ? %(expr (unsigned long long)
-    (op + (expr (unsigned long long) (parens $start))
-          (expr (unsigned long long) (parens $units)))) : units;
+  start = start ? _ull_op(<+>, start, units) : units;
 }
 
 // row conversion
@@ -1050,6 +1037,12 @@ static List _ull_literal(unsigned long long value) {
   return %(expr (unsigned long long)
     (literal (unsigned long long) $spelling));
 }
+
+/* `left operator right` in unsigned long long, operands parenthesized. */
+static List _ull_op(Symbol operator, List left, List right) =>
+  %(expr (unsigned long long)
+    (op $operator (expr (unsigned long long) (parens $left))
+                  (expr (unsigned long long) (parens $right))));
 
 // compound literals
 
