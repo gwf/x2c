@@ -709,7 +709,8 @@ static Var Lisp._run_source(Lisp lisp, Var body, LispEnv *env, Scope *frame) {
 
    A call to an evaluator lambda in tail position does not nest. Its
    arguments are evaluated and the call is left on the session for
-   _call_lambda_slots, which runs it in place of the frame that made it. */
+   `Lisp._call_lambda_slots`, which runs it in place of the frame that made
+   it. */
 
 /* Evaluates `expr` as the last act of the running frame. A macro's
    expansion and a `cond`'s selected form stay in tail position. */

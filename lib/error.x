@@ -594,7 +594,7 @@ static void ErrorHandler._commit_captures(
 /* Move the selected slice off the public record stack without destroying its
    private regions. Capture values were copied into the newest record's region,
    so the detached catch handle owns both them and the selected Error until
-   `_handler_free` destroys `retained`. Records are stored newest first here;
+   `ErrorHandler._free` destroys `retained`. Records are stored newest first;
    their order is immaterial because the catch exposes only captures. A second
    transfer can select the same handle before its landing runs, as when a
    `finally` raises while carrying an Error; the abandoned selection is

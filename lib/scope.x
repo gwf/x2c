@@ -587,8 +587,8 @@ meta native void Scope.release(void) {
     if (!*active || !(*active)._forget_retain(active)) raise %(bad-state);
     Scope top = *active;
     /* Restore and detach the surviving lower region before destruction, so
-       the active slot never names freed storage and `_destroy_chain` cannot
-       follow `down` into the surrounding lifetime. */
+       the active slot never names freed storage and `Scope._destroy_chain`
+       cannot follow `down` into the surrounding lifetime. */
     if ((*active = top.down)) (*active).up = NULL;
     top.down = NULL;
     top._destroy_chain();
