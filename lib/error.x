@@ -232,8 +232,8 @@ static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  detail = ErrorRegion._copy_value(&record.region, detail);
-  record.entry = ErrorRegion._entry(&record.region, site, code, detail);
+  detail = record.region._copy_value(detail);
+  record.entry = record.region._entry(site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -245,9 +245,8 @@ static void _record_n(
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  List detail =
-    ErrorRegion._counted_detail(&record.region, code, pair_count, args);
-  record.entry = ErrorRegion._entry(&record.region, site, code, detail);
+  List detail = record.region._counted_detail(code, pair_count, args);
+  record.entry = record.region._entry(site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -318,7 +317,7 @@ static void _truncate(int mark) {
   if (!Error.ready() || mark < 0) return;
   while (Error.count() > mark) {
     ErrorRecord *record = _record_at(Error.count() - 1);
-    ErrorRegion._destroy(&record.region);
+    record.region._destroy();
     _thread().stack.pop();
   }
 }
@@ -461,10 +460,10 @@ static Symbol ErrorThreadState._offer(
 /* The view belongs to the handler, not to this frame: `exit()` from the
    callback abandons the frame, and shutdown reclaims the handler. */
 static Symbol ErrorThreadState._observe(ErrorThreadState e, ErrorHandler h) {
-  defer ErrorRegion._destroy(&h.view);
+  defer h.view._destroy();
   e.floor_only++;
   h.view = _region_new();
-  List slice = ErrorRegion._view_since(&h.view, h.watermark);
+  List slice = h.view._view_since(h.watermark);
   e.floor_only--;
   return h.fn(slice, h.data);
 }
@@ -526,7 +525,7 @@ static Symbol ErrorHandler._catch_match(ErrorHandler h) {
   List detail = record.entry.cadr().list().cadr();
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List projection = ErrorRegion._cons(&record.region, code, detail);
+  List projection = record.region._cons(code, detail);
   Pool.open_named("Error catch bindings");
   int selected = h._catch_select(record, projection);
   Pool.close();
@@ -586,7 +585,7 @@ static void ErrorHandler._commit_captures(
   for (int i = 0; i < layout.binder_count; i++) {
     values[i] = void;
     if (captures.has(i))
-      values[i] = ErrorRegion._copy_value(&record.region, captures.values[i]);
+      values[i] = record.region._copy_value(captures.values[i]);
   }
   if (pushed) Scope.pop();
 }
@@ -616,7 +615,7 @@ static void _retained_destroy(Block retained) {
   if (retained == NULL) return;
   ErrorRecord *records = retained.bytes;
   for (size_t i = 0; i < retained.length; i++)
-    ErrorRegion._destroy(&records[i].region);
+    records[i].region._destroy();
   retained.free();
 }
 
@@ -828,7 +827,7 @@ static void ErrorHandler._free(ErrorHandler handle) {
   _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
-  ErrorRegion._destroy(&handle.view);
+  handle.view._destroy();
   Scope.free(handle);
 }
 

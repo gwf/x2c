@@ -485,11 +485,11 @@ with byte-identical C.
 - Fixed 2026-10-01: when every catch arm returns or raises, the landing
   ends in `__builtin_unreachable()`, so `try return f(); catch ...: return
   g();` no longer draws clang's `-Wreturn-type`; fixture `try-return-arms`.
-- Nesting one Statement macro invocation inside another's Statement hole
-  re-expands it at every enclosing level: a chain of 8 nested `if`/`else`
-  invocations translated in 0.37 s and 12 took 73 s. Found while fixing the
-  `try return` warning, which avoided the nesting; the macro-value capture
-  forms are the likely cause.
+- Fixed 2026-10-01: nesting Statement macro applications through Macro
+  values re-expanded each level: a chain of 8 translated in 0.37 s and 12
+  in 73 s. `_source_unwrap` now stops at a macro invocation; fixture
+  `macro-value-nested-chain` (PR #77). Direct source nesting was already
+  linear: 24 levels translate in 26 ms.
 - Defect 6 ends a timed-out sample's own process, not its process group:
   Job runs children in the caller's group, and a per-job group would be a
   new `process.x` option that also stops Ctrl-C reaching samples.
@@ -517,8 +517,8 @@ with byte-identical C.
   methods of the typedef naming that aggregate, whether the typedef is `T`
   or the only differently named one, and keeps its qualifiers; fixtures
   `struct-tag-methods` and `struct-tag-const-receiver` (PRs #80 and #82).
-  Callers such as `ErrorRegion._m(&record.region, ...)` in `lib/error.x`
-  can now use method syntax.
+  `lib/error.x` now calls its `struct ErrorRegion` fields with method
+  syntax.
 - Fixed 2026-10-01: the two `test-uv` watch tests waited on FSEvents, which
   fseventsd delivers seconds late on a busy macOS machine. One now watches
   a file through kqueue; the other repeats its touch until the watch
