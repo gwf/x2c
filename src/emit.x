@@ -1191,111 +1191,11 @@ static List Emitter._emit_label(Emitter e, Var name) {
   return %(@c_name ":");
 }
 
-static List Emitter._emit_construct(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(at ?origin ?inner): return e._emit_at(origin, inner);
-    case %(cons ?item ?tail): return e._emit_cons(item, tail);
-    case %(append ?head_list ?tail): return e._emit_append(head_list, tail);
-    case %(c-assert ?condition ?message):
-      return e._emit_assert(condition, message);
-  }
-  matched = 0;
-  return NULL;
-}
-
-static List Emitter._emit_initial(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(initcode ?input ?body):
-      return %(@{e._initializer_macro(input, body)} ";");
-    case %(localinit ? ?): return e._local_static(ast);
-    case %(sourceinit ?function):
-      return e._source_initializer(function);
-    case %(initval *): return e._initializer_value(ast);
-    case %(indexinit ?index ?value): return e._emit_index_init(index, value);
-    case %(dotinit ?field ?value): return e._emit_dot_init(field, value);
-  }
-  matched = 0;
-  return NULL;
-}
-
-static List Emitter._emit_value(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(cast ?type ?expression): return e._emit_cast(type, expression);
-    case %(cache ?id): return %("_$id");
-    case %(expr ? ?content): return e._emit(%($content));
-    case %(postfix ?operator ?argument):
-      return e._emit_postfix(operator, argument);
-    case %(generic ?control *associations):
-      return e._emit_generic(control, associations);
-    case %(va-arg ?expression ?declaration):
-      return e._emit_va_arg(expression, declaration);
-  }
-  matched = 0;
-  return NULL;
-}
-
-static List Emitter._emit_operator(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(call ?function ?arguments):
-      return e._emit_call(function, arguments);
-    case %(index ?array ?index): return e._emit_index(array, index);
-    case %(op ?operator ?argument): return e._emit_unary(operator, argument);
-    case %(op ?operator ?left ?right):
-      return e._emit_binary(operator, left, right);
-    /* Between `?` and `:` C accepts a complete expression, so only the
-       condition and the false arm can regroup. */
-    case %(op ?operator ?condition ?ontrue ?onfalse):
-      return e._emit_conditional(condition, ontrue, onfalse);
-  }
-  matched = 0;
-  return NULL;
-}
-
-static List Emitter._emit_control(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(break): return %("break;");
-    case %(continue): return %("continue;");
-    case %(if ?condition ?ontrue): return e._emit_if(condition, ontrue);
-    case %(if ?condition ?ontrue ?onfalse):
-      return e._emit_if_else(condition, ontrue, onfalse);
-    case %(while ?condition ?body): return e._emit_while(condition, body);
-    case %(do ?body ?condition): return e._emit_do(body, condition);
-  }
-  matched = 0;
-  return NULL;
-}
-
 static List Emitter._emit_ident(Emitter e, Var binding) {
   Var pointer;
   if (e.static_objects && e.static_objects.try_get(binding, pointer))
     return %("(*" $pointer ")");
   return e._emit(%($binding));
-}
-
-static List Emitter._emit_flow(Emitter e, List ast, int &matched) {
-  matched = 1;
-  match (ast) {
-    case %(for ?initial ?condition ?increment ?body):
-      return e._emit_for(initial, condition, increment, body);
-    case %(switch ?expression ?body): return e._emit_switch(expression, body);
-    case %(return): return %("return;");
-    case %(return (!set ?expression (expr ? ?))):
-      return e._emit_return(expression);
-    case %(goto ?label): return %("goto" @{e._emit(%($label))} ";");
-    case %(raise ?cause (args *arguments)):
-      return e._raise(ast, cause, arguments);
-    case %((!or fnmod func) ?parameters):
-      return e._emit_parameters(parameters);
-    case %(label ?name): return e._emit_label(name);
-    case %(ident ?binding): return e._emit_ident(binding);
-  }
-  matched = 0;
-  return NULL;
 }
 
 static List Emitter._emit_leaf(Emitter e, List ast) {
@@ -1375,26 +1275,60 @@ static List Emitter._emit(Emitter e, List ast) {
        head.symbol().is_inline())) {
     return e._emit_prefix(ast);
   }
-  int matched = 0;
-  List result = NULL;
-  switch (head.symbol()) {
-    case <at>: case <cons>: case <append>: case <c-assert>:
-      result = e._emit_construct(ast, matched); break;
-    case <initcode>: case <localinit>: case <sourceinit>:
-    case <initval>: case <indexinit>: case <dotinit>:
-      result = e._emit_initial(ast, matched); break;
-    case <cast>: case <cache>: case <expr>: case <postfix>:
-    case <generic>: case <va-arg>:
-      result = e._emit_value(ast, matched); break;
-    case <call>: case <index>: case <op>:
-      result = e._emit_operator(ast, matched); break;
-    case <break>: case <continue>: case <if>: case <while>: case <do>:
-      result = e._emit_control(ast, matched); break;
-    case <for>: case <switch>: case <return>: case <goto>:
-    case <raise>: case <fnmod>: case <func>: case <label>: case <ident>:
-      result = e._emit_flow(ast, matched); break;
+  match (ast) {
+    case %(at ?origin ?inner): return e._emit_at(origin, inner);
+    case %(cons ?item ?tail): return e._emit_cons(item, tail);
+    case %(append ?head_list ?tail): return e._emit_append(head_list, tail);
+    case %(c-assert ?condition ?message):
+      return e._emit_assert(condition, message);
+    case %(initcode ?input ?body):
+      return %(@{e._initializer_macro(input, body)} ";");
+    case %(localinit ? ?): return e._local_static(ast);
+    case %(sourceinit ?function):
+      return e._source_initializer(function);
+    case %(initval *): return e._initializer_value(ast);
+    case %(indexinit ?index ?value): return e._emit_index_init(index, value);
+    case %(dotinit ?field ?value): return e._emit_dot_init(field, value);
+    case %(cast ?type ?expression): return e._emit_cast(type, expression);
+    case %(cache ?id): return %("_$id");
+    case %(expr ? ?content): return e._emit(%($content));
+    case %(postfix ?operator ?argument):
+      return e._emit_postfix(operator, argument);
+    case %(generic ?control *associations):
+      return e._emit_generic(control, associations);
+    case %(va-arg ?expression ?declaration):
+      return e._emit_va_arg(expression, declaration);
+    case %(call ?function ?arguments):
+      return e._emit_call(function, arguments);
+    case %(index ?array ?index): return e._emit_index(array, index);
+    case %(op ?operator ?argument): return e._emit_unary(operator, argument);
+    case %(op ?operator ?left ?right):
+      return e._emit_binary(operator, left, right);
+    /* Between `?` and `:` C accepts a complete expression, so only the
+       condition and the false arm can regroup. */
+    case %(op ?operator ?condition ?ontrue ?onfalse):
+      return e._emit_conditional(condition, ontrue, onfalse);
+    case %(break): return %("break;");
+    case %(continue): return %("continue;");
+    case %(if ?condition ?ontrue): return e._emit_if(condition, ontrue);
+    case %(if ?condition ?ontrue ?onfalse):
+      return e._emit_if_else(condition, ontrue, onfalse);
+    case %(while ?condition ?body): return e._emit_while(condition, body);
+    case %(do ?body ?condition): return e._emit_do(body, condition);
+    case %(for ?initial ?condition ?increment ?body):
+      return e._emit_for(initial, condition, increment, body);
+    case %(switch ?expression ?body): return e._emit_switch(expression, body);
+    case %(return): return %("return;");
+    case %(return (!set ?expression (expr ? ?))):
+      return e._emit_return(expression);
+    case %(goto ?label): return %("goto" @{e._emit(%($label))} ";");
+    case %(raise ?cause (args *arguments)):
+      return e._raise(ast, cause, arguments);
+    case %((!or fnmod func) ?parameters):
+      return e._emit_parameters(parameters);
+    case %(label ?name): return e._emit_label(name);
+    case %(ident ?binding): return e._emit_ident(binding);
   }
-  if (matched) return result;
   return e._emit_leaf(ast);
 }
 
