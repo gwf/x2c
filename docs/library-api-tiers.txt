@@ -113,7 +113,6 @@ lib/match.x|advanced|Var.is_binder,Var.is_list_binder,Var.is_match_op
 lib/match.x|internal|MatchCaptureBuffer.has,MatchCaptureLayout.analyze
 lib/match.x|internal|MatchCaptureLayout.definite_list,MatchCaptureLayout.free
 lib/match.x|internal|MatchCaptureLayout.index,MatchCaptureLayout.possible_list
-lib/match.x|internal|MatchMachine.dispose,MatchMachine.open
 lib/match.x|internal|MatchPlan.borrowable,MatchPlan.execute
 lib/match.x|internal|MatchPlan.execute_capture,MatchPlan.raise_ineligible
 lib/match.x|internal|MatchPlan.search,MatchPlan.search_replace

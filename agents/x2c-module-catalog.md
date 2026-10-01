@@ -951,7 +951,8 @@ Public functions:
 Public functions:
 
 `MatchMachine.run`, `MatchMachine.step`, `MatchMachine.materialize_span`,
-`MatchMachine.begin`, `MatchMachine.finish`, `MatchMachine.clean`
+`MatchMachine.open`, `MatchMachine.begin`, `MatchMachine.finish`,
+`MatchMachine.clean`, `MatchMachine.dispose`
 
 ### [lib/match-plan.x](../lib/match-plan.x)
 
@@ -981,8 +982,7 @@ Public functions:
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
 `x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,
 `List.match`, `List.try_match_replace`, `List.match_replace`, `List.search`,
-`List.try_search`, `List.search_replace`, `x2c_match_initialize`,
-`MatchMachine.open`, `MatchMachine.dispose`
+`List.try_search`, `List.search_replace`, `x2c_match_initialize`
 
 ### [lib/meta.x](../lib/meta.x)
 

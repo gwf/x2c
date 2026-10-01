@@ -463,6 +463,27 @@ static void MatchMachine._count_share(MatchMachine m) {
 
 // lifecycle
 
+/* Initialize fresh caller-owned storage without touching unused fixed
+   arrays. The caller must eventually dispose any materialization scratch. */
+void MatchMachine.open(MatchMachine m) {
+  memset(&m.program, 0, sizeof(MachineView));
+  m.pc = 0;
+  m.status = <idle>;
+  m.running = 0;
+  m.value = void;
+  m.error = void;
+  m.fp = 0;
+  m.current_entry_undo = 0;
+  m.undo_count = 0;
+  m.slot_count = 0;
+  m.stats = NULL;
+  m.relation = NULL;
+  m.relation_context = NULL;
+  m.view = NULL;
+  m.scratch = NULL;
+  m.scratch_capacity = 0;
+}
+
 /* Begin execution of a valid Match program in opened, completed storage and
    borrow its view and input Lists until finish. Zero undo entries prove every
    slot of the previous program was restored, so only the new program's binder
@@ -510,6 +531,14 @@ int MatchMachine.clean(MatchMachine m) {
   if (m.running || m.program.code || m.fp || m.undo_count || m.slot_count)
     return 0;
   return m.status == <idle> && m.error is void;
+}
+
+/* Free reusable materialization scratch. Finish active execution first;
+   this does not clear invocation state. */
+void MatchMachine.dispose(MatchMachine m) {
+  if (m.scratch) Scope.free(m.scratch);
+  m.scratch = NULL;
+  m.scratch_capacity = 0;
 }
 
 static void MatchMachine._clear_slots(MatchMachine m) {

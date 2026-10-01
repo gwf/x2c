@@ -356,8 +356,6 @@ for source readers but are not supported as user API.
 | [`MatchCaptureLayout.free`](#MatchCaptureLayout.free) | Releases one canonical `Match` capture layout. |
 | [`MatchCaptureLayout.index`](#MatchCaptureLayout.index) | Returns the canonical slot for `binder`, or -1 when it is absent. |
 | [`MatchCaptureLayout.possible_list`](#MatchCaptureLayout.possible_list) | Returns possible binders in canonical positional order. |
-| [`MatchMachine.dispose`](#MatchMachine.dispose) | Frees reusable materialization scratch. |
-| [`MatchMachine.open`](#MatchMachine.open) | Initializes fresh caller-owned storage without touching unused fixed arrays. |
 | [`MatchPlan.borrowable`](#MatchPlan.borrowable) | Reports whether a plan may borrow `pattern` by its canonical identity. |
 | [`MatchPlan.execute`](#MatchPlan.execute) | Executes `plan` against `input` and publishes association bindings. |
 | [`MatchPlan.execute_capture`](#MatchPlan.execute_capture) | Executes a prepared plan into caller-owned positional storage. |
@@ -444,28 +442,6 @@ follows the module pool-chain lifetime above.
 **Raises:** `<alloc-fail>` while constructing the `List`.
 
 Source: `lib/match.x:403`
-
-### `MatchMachine`
-
-<a id="MatchMachine.dispose"></a>
-#### MatchMachine.dispose
-
-`void MatchMachine.dispose(MatchMachine m)`
-
-Frees reusable materialization scratch. Finish active execution first;
-this does not clear invocation state.
-
-Source: `lib/match.x:1398`
-
-<a id="MatchMachine.open"></a>
-#### MatchMachine.open
-
-`void MatchMachine.open(MatchMachine m)`
-
-Initializes fresh caller-owned storage without touching unused fixed
-arrays. The caller must eventually dispose any materialization scratch.
-
-Source: `lib/match.x:1376`
 
 ### `MatchPlan`
 

@@ -1369,34 +1369,3 @@ static void _sites_shutdown(void) {
   match_capture_site_scope.destroy();
   match_capture_site_scope = NULL;
 }
-
-/** Initializes fresh caller-owned storage without touching unused fixed
-    arrays. The caller must eventually dispose any materialization scratch.
-*/
-void MatchMachine.open(MatchMachine m) {
-  memset(&m.program, 0, sizeof(MachineView));
-  m.pc = 0;
-  m.status = <idle>;
-  m.running = 0;
-  m.value = void;
-  m.error = void;
-  m.fp = 0;
-  m.current_entry_undo = 0;
-  m.undo_count = 0;
-  m.slot_count = 0;
-  m.stats = NULL;
-  m.relation = NULL;
-  m.relation_context = NULL;
-  m.view = NULL;
-  m.scratch = NULL;
-  m.scratch_capacity = 0;
-}
-
-/** Frees reusable materialization scratch. Finish active execution first;
-    this does not clear invocation state.
-*/
-void MatchMachine.dispose(MatchMachine m) {
-  if (m.scratch) Scope.free(m.scratch);
-  m.scratch = NULL;
-  m.scratch_capacity = 0;
-}
