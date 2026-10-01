@@ -11,6 +11,7 @@
 #include "type.h"
 #include "logger.h"
 #include "sourceview.h"
+#include "meta.h"
 typedef struct Diagnostics * Diagnostics;
 
 typedef struct ScriptUnit{
