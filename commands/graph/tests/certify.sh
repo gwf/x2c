@@ -110,6 +110,11 @@ cp "$tmp/certify-certify_from_b" "$tmp/certify-static-order"
 certify_check 0 certify_from_b "$fixtures/certify-static-b.x" \
   "$fixtures/certify-static-a.x"
 cmp "$tmp/certify-static-order" "$tmp/certify-certify_from_b"
+# Both file scopes reach the shared call; the first in target order wins.
+certify_check 3 certify_tie_root "$fixtures/certify-tie-b.x" \
+  "$fixtures/certify-tie-a.x"
+tie_path='tie-a.x" "<top-level>") (target "[^"]*tie-b.x" "certify_tie_shared")'
+grep -q "$tie_path" "$tmp/certify-certify_tie_root-line"
 
 cat >"$tmp/certify-invalid.effects" <<'EOF'
 (native "Scope_malloc" (summary 0 ()))

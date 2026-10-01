@@ -2443,6 +2443,9 @@ static void _certify_reach(List graph, Array roots, Map nodes,
         reached[target] = 1;
         queue.push(target);
       }
+  /* Seeds come from hash order. Sorted seeds and sorted calls make each
+     parent the first shortest-path caller by target order. */
+  queue.sort();
   for (int i = 0; i < queue.len(); i++) {
     List caller = queue[i];
     List function = nodes[caller];
@@ -2819,7 +2822,8 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
         (location "<project>" 0 0) "selected root is unresolved" $reason));
   if (changed) {
     List target = NULL;
-    foreach (List current, reached.keys()) { target = current; break; }
+    foreach (List current, reached.keys())
+      if (!target || List.compare(current, target) < 0) target = current;
     obstacles.push(%(obstacle $target (location "<project>" 0 0)
       "project summary did not settle"));
   }
