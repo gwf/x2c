@@ -2,20 +2,13 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    A command is an ordinary `List`. Each element's `str` becomes one
-    argument and no shell reads the words, so `%(grep $pattern $file)` passes
-    a pattern containing spaces or quotes as a single argument. A `List`
-    whose first element is itself a `List` is a pipeline, one command per
-    element. `List.job` turns a command into a `Job`, which holds its stages
-    and stream options until the first result requested starts it. That run
-    is recorded, so a job runs exactly once however many results are read
-    from it.
-
-    A pipeline's status is the status of its last failing stage, or zero
-    when every stage succeeds. A signalled stage reports 128 plus the signal.
-
-    This module also owns the calling process's own environment, which a
-    script reads to decide what to run.
+    Job owns running a command or pipeline without a shell. A command is an
+    ordinary `List` whose elements' `str`s become its arguments, and a `List`
+    of commands is a pipeline. A job runs once, when its first result is
+    requested, and records that run; its status is the last failing stage's
+    status, with 128 plus the signal for a signalled stage. The calling
+    process's own environment is read here too, beside the `env` option that
+    sets a child's.
 */
 
 #pragma once
@@ -64,15 +57,15 @@ typedef struct _Launch {
   String dir, input, stdout_path, stderr_path;
   int has_input, capture_output, capture_errors, errors_to_output;
   char **environment;
-} _Launch;
+} Launch;
 
 /* The descriptors a stage reads and writes as its standard streams. -1
    leaves a stream inherited from the parent. */
-typedef struct _Stdio { int input, output, errors; } _Stdio;
+typedef struct Stdio { int input, output, errors; } Stdio;
 
 /* What a child writes to its report pipe when a step fails: the step and
    its errno. */
-typedef struct _Failure { int step, error; } _Failure;
+typedef struct Failure { int step, error; } Failure;
 
 enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
 
@@ -86,7 +79,7 @@ enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
 static void Job._start(Job j) {
   j.started = 1;
   j._open_table();
-  _Stdio stdio = { -1, -1, -1 }, int launched = 0;
+  Stdio stdio = { -1, -1, -1 }, int launched = 0;
   defer if (!launched) j.cleanup();
   defer j._close_streams(stdio);
   j._open_streams(stdio);
@@ -109,7 +102,7 @@ static void Job._open_table(Job job) {
 }
 
 /* A capture file's descriptor closes with the file, when the job reads it. */
-static void Job._close_streams(Job job, _Stdio stdio) {
+static void Job._close_streams(Job job, Stdio stdio) {
   _close(stdio.input);
   if (!job.output_file) _close(stdio.output);
   if (!job.errors_file) _close(stdio.errors);
@@ -118,8 +111,8 @@ static void Job._close_streams(Job job, _Stdio stdio) {
 /* The first stage reads the `input` text, the last writes the `stdout`
    stream, and every stage writes the `stderr` stream. Each descriptor
    reaches `stdio` as it opens, so the launch closes it on every exit. */
-static void Job._open_streams(Job job, _Stdio &stdio) {
-  _Launch *launch = job.launch;
+static void Job._open_streams(Job job, Stdio &stdio) {
+  Launch *launch = job.launch;
   if (launch.has_input) stdio.input = _input(launch.input);
   stdio.output =
     _stream(job.output_file, launch.capture_output, launch.stdout_path);
@@ -151,7 +144,7 @@ static int _stream(File &file, int capture, String path) {
    `spawned` flag disarms the cleanup, since a write into `link` would put
    the array in the transfer-preserved set, whose qualifier `_pipe` would
    then discard. */
-static int Job._stage(Job job, int index, List stage, _Stdio stdio) {
+static int Job._stage(Job job, int index, List stage, Stdio stdio) {
   int link[2] = { -1, -1 };
   if (index < job.count - 1) {
     _pipe(link);
@@ -170,7 +163,7 @@ static int Job._stage(Job job, int index, List stage, _Stdio stdio) {
 
 // spawning a stage
 
-static void Job._spawn(Job job, int index, List stage, _Stdio stdio) {
+static void Job._spawn(Job job, int index, List stage, Stdio stdio) {
   char **argv = _argv(stage);
   int report[2];
   _pipe(report);
@@ -178,7 +171,7 @@ static void Job._spawn(Job job, int index, List stage, _Stdio stdio) {
   if (pid == 0) _child(argv, job.launch, stdio, report[1]);
   int fork_error = errno;
   close(report[1]);
-  _Failure failure = {0};
+  Failure failure = {0};
   if (pid > 0) failure = _read_report(report[0]);
   close(report[0]);
   if (pid < 0) _io_fail(fork_error);
@@ -200,7 +193,7 @@ static char **_argv(List stage) {
 
 /* The report pipe is close-on-exec: a successful `execvp` closes it without
    writing, and a failed step writes which step failed and its errno. */
-static void _child(char **argv, _Launch *launch, _Stdio stdio, int report) {
+static void _child(char **argv, Launch *launch, Stdio stdio, int report) {
   stdio.input = _above_stdio(stdio.input);
   stdio.output = _above_stdio(stdio.output);
   stdio.errors = _above_stdio(stdio.errors);
@@ -209,7 +202,7 @@ static void _child(char **argv, _Launch *launch, _Stdio stdio, int report) {
   if (stdio.output >= 0) dup2(stdio.output, STDOUT_FILENO);
   if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
   else if (stdio.errors >= 0) dup2(stdio.errors, STDERR_FILENO);
-  _Failure failure = { _STEP_DIR, 0 };
+  Failure failure = { _STEP_DIR, 0 };
   if (!launch.dir || chdir(launch.dir) == 0) {
     if (launch.environment) environ = launch.environment;
     execvp(argv[0], argv);
@@ -230,15 +223,15 @@ static int _above_stdio(int fd) =>
 
 /* The child's report, or a zero step when `execvp` closed the pipe without
    one. */
-static _Failure _read_report(int fd) {
-  _Failure failure = {0};
+static Failure _read_report(int fd) {
+  Failure failure = {0};
   ssize_t count;
   do count = read(fd, &failure, sizeof(failure));
   while (count < 0 && errno == EINTR);
-  return count == sizeof(failure) ? failure : (_Failure) {0};
+  return count == sizeof(failure) ? failure : (Failure) {0};
 }
 
-static void _child_failed(_Failure failure, String dir, char **argv) {
+static void _child_failed(Failure failure, String dir, char **argv) {
   int error = failure.error;
   if (failure.step == _STEP_DIR) File.path_error("Job.start", dir, error);
   String program = argv[0];
@@ -365,7 +358,7 @@ static Job Job.new(List command) {
   Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
   memset(job, 0, sizeof(struct Job));
   job.stages = _stages(command);
-  job.launch = Scope.calloc(1, sizeof(_Launch));
+  job.launch = Scope.calloc(1, sizeof(Launch));
   job.launch.capture_output = 1;
   return job;
 }
@@ -421,7 +414,7 @@ static Job Job._unstarted(Job job, String operation) {
     Raises: `<bad-arg>` for an unknown key or a job that has started.
 */
 Job Job.options(Job job, Map options) {
-  _Launch *launch = job._unstarted("Job.options").launch;
+  Launch *launch = job._unstarted("Job.options").launch;
   foreach (Var (key, value), options) {
     if (key is not Symbol)
       raise %(bad-arg (operation "Job.options")
@@ -431,7 +424,7 @@ Job Job.options(Job job, Map options) {
   return job;
 }
 
-static void _Launch.set(_Launch *l, Symbol name, Var value) {
+static void Launch.set(Launch *l, Symbol name, Var value) {
   switch (name) {
     case <dir>:    l.dir = value; break;
     case <env>:    l.environment = _environment(value); break;
@@ -442,28 +435,12 @@ static void _Launch.set(_Launch *l, Symbol name, Var value) {
   }
 }
 
-static char **_environment(Map env) {
-  Map names = {};
-  foreach (Var name, env.keys()) names[name.str()] = 1;
-  Array entries = [];
-  for (char **entry = environ; *entry; entry++) {
-    String text = String.new(*entry);
-    int equals = text.find("=");
-    if (!names.contains(equals < 0 ? text : text[:equals])) entries.push(text);
-  }
-  foreach (Var (name, value), env) entries.push(%"$name=$value");
-  char **out = Scope.calloc(entries.len() + 1, sizeof(char *));
-  int index = 0;
-  foreach (String entry, entries) out[index++] = entry;
-  return out;
-}
-
-static void _Launch.route_output(_Launch *l, Var value) {
+static void Launch.route_output(Launch *l, Var value) {
   l.capture_output = _is(value, <capture>);
   l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
 }
 
-static void _Launch.route_errors(_Launch *l, Var value) {
+static void Launch.route_errors(Launch *l, Var value) {
   l.capture_errors = _is(value, <capture>);
   l.errors_to_output = _is(value, <stdout>);
   l.stderr_path = l.capture_errors || l.errors_to_output ||
@@ -610,7 +587,7 @@ Job Job.wait_any(Array jobs) {
   return NULL;
 }
 
-// the calling process
+// the environment
 
 /** Returns the value of this process's environment variable `name`, or
     NULL when it is unset. The `env` option sets variables for a child
@@ -619,4 +596,20 @@ Job Job.wait_any(Array jobs) {
 String Env.get(String name) {
   const char *value = getenv(name);
   return value ? String.new(value) : NULL;
+}
+
+static char **_environment(Map env) {
+  Map names = {};
+  foreach (Var name, env.keys()) names[name.str()] = 1;
+  Array entries = [];
+  for (char **entry = environ; *entry; entry++) {
+    String text = String.new(*entry);
+    int equals = text.find("=");
+    if (!names.contains(equals < 0 ? text : text[:equals])) entries.push(text);
+  }
+  foreach (Var (name, value), env) entries.push(%"$name=$value");
+  char **out = Scope.calloc(entries.len() + 1, sizeof(char *));
+  int index = 0;
+  foreach (String entry, entries) out[index++] = entry;
+  return out;
 }
