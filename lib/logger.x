@@ -593,17 +593,18 @@ LogSink Logger.add_memory_sink(Logger logger, List *destination) {
 static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
   (void) logger;
   LogMemorySink l = data.pointer();
-  List entry = _cons_retained(l, event.fields, NULL);
+  List entry = l._cons_retained(event.fields, NULL);
   entry = List.cons_in(l.pool, event.category, entry);
   entry = List.cons_in(l.pool, event.level, entry);
-  entry = _cons_retained(l, Var.box_long_long(event.elapsed_us), entry);
-  entry = _cons_retained(l, Var.box_long_long(event.wall_time_us), entry);
-  entry = _cons_retained(l, Var.box_ulong(event.sequence), entry);
+  entry = l._cons_retained(Var.box_long_long(event.elapsed_us), entry);
+  entry = l._cons_retained(Var.box_long_long(event.wall_time_us), entry);
+  entry = l._cons_retained(Var.box_ulong(event.sequence), entry);
   *l.destination = List.cons_in(l.pool, entry, *l.destination);
 }
 
-static List _cons_retained(LogMemorySink l, Var value, List tail) =>
-  List.cons_in(l.pool, _retain(l, value), tail);
+static List LogMemorySink._cons_retained(
+  LogMemorySink l, Var value, List tail) =>
+  List.cons_in(l.pool, l._retain(value), tail);
 
 static void _destroy_memory(Var data) {
   LogMemorySink context = data.pointer();
@@ -615,43 +616,51 @@ static void _destroy_memory(Var data) {
   Scope.free(context);
 }
 
-static Var _retain(LogMemorySink l, Var value) {
+static Var LogMemorySink._retain(LogMemorySink l, Var value) {
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
-  if (value.is_wide()) return _retain_wide(l, value);
+  if (value.is_wide()) return l._retain_wide(value);
   if (value.is_integer() || value.is_floating()) return value;
-  if (value is <string>) return _retain_string(l, value);
-  if (value is <lsym>) return _retain_lisp_symbol(l, value);
-  if (value is <list>) return _retain_list(l, value);
+  if (value is <string>) return l._retain_string(value);
+  if (value is <lsym>) return l._retain_lisp_symbol(value);
+  if (value is <list>) return l._retain_list(value);
   return value;
 }
 
-static Var _retain_wide(LogMemorySink l, Var value) {
+static Var LogMemorySink._retain_wide(LogMemorySink l, Var value) {
   Var copy;
   $scope(&l.values) { copy = value.clone_wide(); }
   l.wide_values.push(&copy);
   return copy;
 }
 
-static Var _retain_string(LogMemorySink l, Var value) {
+static Var LogMemorySink._retain_string(LogMemorySink l, Var value) {
   if (_pool_chain_owns(l.pool, value)) return value;
   String string = value;
   return String.new_in(l.pool, string, string.len());
 }
 
-static Var _retain_lisp_symbol(LogMemorySink l, Var value) {
+static Var LogMemorySink._retain_lisp_symbol(LogMemorySink l, Var value) {
   String spelling = value.str();
   if (_pool_chain_owns(l.pool, spelling)) return value;
   String copy = String.new_in(l.pool, spelling, spelling.len());
   return Var.new(<lsym>, copy);
 }
 
-static Var _retain_list(LogMemorySink l, Var value) {
-  List list = value;
-  if (!list || _pool_chain_owns(l.pool, value)) return value;
-  Var head = _retain(l, list.car);
-  List source_tail = list.cdr;
-  List tail = _retain(l, source_tail);
-  return List.cons_in(l.pool, head, tail);
+/* Stage retained heads and rebuild the spine backwards, so a flat List uses
+   constant native stack; only nesting recurses. A retained tail is shared. */
+static List LogMemorySink._retain_list(LogMemorySink l, List list) {
+  if (!list || _pool_chain_owns(l.pool, list)) return list;
+  Block heads = $auto(Block.new(sizeof(Var)));
+  List tail = list;
+  while (tail && !_pool_chain_owns(l.pool, tail)) {
+    Var head = l._retain(tail.car);
+    heads.push(&head);
+    tail = tail.cdr;
+  }
+  Var *items = heads.bytes;
+  for (size_t i = heads.length; i; i--)
+    tail = List.cons_in(l.pool, items[i - 1], tail);
+  return tail;
 }
 
 static int _pool_chain_owns(Pool pool, Var value) {

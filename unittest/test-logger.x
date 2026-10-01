@@ -383,6 +383,31 @@ static void logger_memory_sink_outlives_registration_context(void) {
   EXPECT_TRUE(after.live_scopes == before.live_scopes);
 }
 
+static void logger_memory_sink_retains_long_flat_list(void) {
+  $test.scoped();
+  enum { CELLS = 500000 };
+  List entries = nil;
+  Logger logger = Logger.new(<trace>);
+  logger.add_memory_sink(&entries);
+  List shared = %(shared tail);
+  Context context = Context.open_isolated_named("long list");
+  List fields = shared;
+  for (long i = 0; i < CELLS; i++) fields = List.cons(i, fields);
+  logger.info(<memory>, fields);
+  context.close();
+
+  List cell = entries.car()[5];
+  long matched = 0;
+  while (cell && cell != shared &&
+         cell.car.integer() == CELLS - 1 - matched) {
+    cell = cell.cdr;
+    matched++;
+  }
+  EXPECT_INT_EQ(matched, CELLS);
+  EXPECT_PTR_EQ(cell, shared);
+  logger.free();
+}
+
 
 static List _logger_error_entry(Symbol code) {
   return %((code $code));
@@ -479,6 +504,7 @@ void logger_suite(void) {
   $test.run(logger_stderr_uses_color_on_a_tty);
   $test.run(logger_memory_sink_shape);
   $test.run(logger_memory_sink_outlives_registration_context);
+  $test.run(logger_memory_sink_retains_long_flat_list);
   $test.run(logger_error_handler_renders_only_selected_newest);
   $test.run(logger_rejected_and_warmed_paths_allocate_nothing);
   $test.run(logger_global_replacement_and_shutdown);
