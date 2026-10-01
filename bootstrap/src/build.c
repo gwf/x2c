@@ -2070,7 +2070,7 @@ int CliRequest_script_current(CliRequest request, String directory){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_4);
@@ -2260,7 +2260,7 @@ static List _depfile_inputs(String depfile){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_5);
@@ -2312,7 +2312,7 @@ static int _state_matches(String path, uint64_t hash){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_6);

@@ -566,7 +566,7 @@ static int _helper_receive(double deadline, Var * reply){
             }
 
           }
-
+          __builtin_unreachable();
         }
         else{
           x2c_error_catch_close(_x2c_error_handler_0);

@@ -5129,7 +5129,7 @@ static Lisp Compiler__fill_library(Compiler c, Lisp shared){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();

@@ -488,7 +488,11 @@
                (at 13 
                 (raise 
                  (expr ("Symbol") (literal ("Symbol") "bad-state" bad-state)) 
-                 (args))))))) 
+                 (args)))))) 
+            (stmnt 
+             (expr () 
+              (call (expr () (ident (binding 27 "__builtin_unreachable"))) 
+               (args (expr (void) ())))))) 
            (block 
             (stmnt 
              (expr (void) 

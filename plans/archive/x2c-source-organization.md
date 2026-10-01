@@ -482,9 +482,14 @@ with byte-identical C.
   generated header when a later public prototype names a typedef it
   declares, as a private typedef already did; fixture
   `private-include-header`.
-- `try return f(); catch ...: return g();` generates C that clang flags
-  with `-Wreturn-type` (seen in `tools/check-doc-examples` `_stdout`); every
-  path returns at run time. Found during defect 6.
+- Fixed 2026-10-01: when every catch arm returns or raises, the landing
+  ends in `__builtin_unreachable()`, so `try return f(); catch ...: return
+  g();` no longer draws clang's `-Wreturn-type`; fixture `try-return-arms`.
+- Nesting one Statement macro invocation inside another's Statement hole
+  re-expands it at every enclosing level: a chain of 8 nested `if`/`else`
+  invocations translated in 0.37 s and 12 took 73 s. Found while fixing the
+  `try return` warning, which avoided the nesting; the macro-value capture
+  forms are the likely cause.
 - Defect 6 ends a timed-out sample's own process, not its process group:
   Job runs children in the caller's group, and a per-job group would be a
   new `process.x` option that also stops Ctrl-C reaching samples.

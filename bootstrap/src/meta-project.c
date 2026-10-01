@@ -617,7 +617,7 @@ static int Scan_file(Scan * s, String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_0);
@@ -1316,7 +1316,7 @@ static List _current(String directory){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);

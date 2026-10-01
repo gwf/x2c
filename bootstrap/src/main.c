@@ -837,7 +837,7 @@ static List _imported_packages(String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);

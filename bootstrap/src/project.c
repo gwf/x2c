@@ -1038,7 +1038,7 @@ static List _read_lock(String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);
