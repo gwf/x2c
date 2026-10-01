@@ -1341,11 +1341,9 @@ static Var _passed(List types, List arguments, int index, Type &type) {
   Var argument = arguments[index];
   Var declared = index < types.len() ? types[index] : void;
   type = declared is <list> ? declared.list() : NULL;
-  if (!type || (type.car() != <&> && type.car() != <opt-ref>))
-    return argument;
+  if (!type.is_reference()) return argument;
   Type given = _expression_type(argument);
-  if (given && (given.car() == <&> || given.car() == <opt-ref>))
-    return argument;
+  if (given.is_reference()) return argument;
   Type object = cdr(type);
   type = object.reference();
   return %(expr $type (op & $argument));

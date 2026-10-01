@@ -3434,8 +3434,7 @@ static List Compiler._convert_known_value(
 static List Compiler._convert_reference(
   Compiler c, List expr, Type type, Type target) {
   // T -> &T: pass the address of an addressable value.
-  if (type === cdr(target) &&
-      (target.car() == <&> || target.car() == <opt-ref>)) {
+  if (type === cdr(target) && target.is_reference()) {
     if (!c._expression_is_addressable(expr))
       $report(c, "type.ref.address");
     return %(expr $target (op & (parens $expr)));
@@ -3678,9 +3677,7 @@ static void Compiler._check_null_reference(
 /* Same-address conversions must keep qualifiers, including void pointers. */
 static void Compiler._check_qualifiers(
   Compiler c, Type type, Type target, Type source, Type destination) {
-  int take_reference =
-    (target.car() == <&> || target.car() == <opt-ref>) &&
-    type === cdr(target);
+  int take_reference = target.is_reference() && type === cdr(target);
   Type qualified = take_reference ? source.reference() : source;
   if ((take_reference || type == target || cdr(type) == cdr(target) ||
        (type.is_pointer() && target.is_pointer() &&
@@ -3694,12 +3691,11 @@ static void Compiler._check_qualifiers(
 static void Compiler._check_reference_value(
   Compiler c, Type type, Type target) {
   /* An optional reference forwards only to another address type. */
-  if (type.car() == <opt-ref> && target.car() != <&> &&
-      target.car() != <opt-ref> && !c.sym.resolve_key(target).is_pointer())
+  if (type.car() == <opt-ref> && !target.is_reference() &&
+      !c.sym.resolve_key(target).is_pointer())
     $report(c, "type.optional-ref.unchecked", NULL);
   /* A reference takes an lvalue of its referenced type. */
-  if ((target.car() == <&> || target.car() == <opt-ref>) &&
-      type.car() != <&> && type.car() != <opt-ref> &&
+  if (target.is_reference() && !type.is_reference() &&
       type !== cdr(target))
     $report(c, "type.ref.lvalue", type, target);
 }

@@ -362,8 +362,7 @@ static void _lower_scan_call(Lowering &l, List form) {
     case %(call (expr ((func ?params) *) ?) (args *args)):
       for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
         Type type = _lower_param_type(p);
-        if ((type.car() == <&> || type.car() == <opt-ref>) &&
-            !_lower_null_constant(a.car()))
+        if (type.is_reference() && !_lower_null_constant(a.car()))
           _lower_scan_op(l, %(op & ${a.car()}));
       }
   match (form) {
@@ -708,7 +707,7 @@ static List _lower_args(
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
     Type parameter = _lower_param_type(p);
-    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
+    if (parameter.is_reference()) {
       Var place = parameter.car() == <opt-ref> &&
                   _lower_null_constant(argument)
                 ? 0 : argument.cadr().car() == <opt-ref>
@@ -758,7 +757,7 @@ static Var _lower_native_call(
   int references = 0;
   for (List p = params; p; p = p.cdr()) {
     Type parameter = _lower_param_type(p);
-    references |= parameter.car() == <&> || parameter.car() == <opt-ref>;
+    references |= parameter.is_reference();
   }
   if (!references) return _lower_call(l, callee, name, args);
   List values = _lower_args(l, params, args, name);
@@ -771,7 +770,7 @@ static Var _lower_native_call(
     Type parameter = _lower_param_type(p);
     p = p.cdr();
     prepare.push(
-      parameter.car() == <&> || parameter.car() == <opt-ref>
+      parameter.is_reference()
       ? %(C.func.reference $argv $index $value (quote ${parameter.cdr()}))
       : %(C.func.value $argv $index $value));
     index++;
@@ -839,7 +838,7 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
     Var value;
-    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
+    if (parameter.is_reference()) {
       Type target = parameter.cdr();
       Type resolved = l.compiler.sym.normalize_declared_type(target);
       value = %(C.func.declared-reference-argument $fn $argv $index

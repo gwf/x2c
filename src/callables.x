@@ -1176,8 +1176,7 @@ static List Compiler._func_argument_locals(
 
 static List FuncReaders.read(
   FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
-  if (parameter_type.car() == <&> ||
-      parameter_type.car() == <opt-ref>)
+  if (parameter_type.is_reference())
     return r._reference(parameter_type, index, storage_type);
   Symbol tag = r.c.sym.var_tag_for_type(parameter_type, NULL);
   Type resolved = r.c.sym.resolve_key(parameter_type);
