@@ -382,7 +382,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     .cc_args = [], .ld_args = []};
   for (int i = 1; i < args.len(); i++) p.word(i);
   p.finish();
-  _check_request(p.request, p.mask);
+  p.request._check(p.mask);
   return p.request;
 }
 
@@ -434,7 +434,7 @@ static void Parse.finish(Parse *p) {
 }
 
 /* Operand counts and option conflicts, once every word is read. */
-static void _check_request(CliRequest r, int mask) {
+static void CliRequest._check(CliRequest r, int mask) {
   Symbol name = r.command, List inputs = r.inputs;
   if (mask == CLI_TRANSLATE && !inputs)
     driver_error("translate requires at least one input");
@@ -480,7 +480,7 @@ typedef struct Given {
 static void Parse.option(Parse *p, String arg, int &i) {
   if (arg == "-o") _removed_output();
   if ((p.mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
-    _save_temps_dir(p.request, arg);
+    p.request._save_temps_dir(arg);
     return;
   }
   Given given = _take_option(p.args, i, p.mask);
@@ -490,7 +490,7 @@ static void Parse.option(Parse *p, String arg, int &i) {
 
 /* build and run take `--save-temps=<dir>`, although the table's
    `--save-temps` takes no value. */
-static void _save_temps_dir(CliRequest r, String arg) {
+static void CliRequest._save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
   r.temps_dir = arg.remove_prefix("--save-temps=");
   if (!r.temps_dir) driver_error("--save-temps= requires a directory");
@@ -571,7 +571,7 @@ static void Parse.apply(Parse *p, Given given) {
     case <pthread>: p.cc_args.push(spelling); p.ld_args.push(spelling);
     case <framework>: case <xlinker>: _push_pair(p.ld_args, spelling, value);
     case <wl>: p.ld_args.push(spelling);
-    default: _set_field(r, given.option, value);
+    default: r._set_field(given.option, value);
   }
 }
 
@@ -638,7 +638,8 @@ int cli_dependency_pass_through(String s) {
   );
 }
 
-static void _set_field(CliRequest r, CliOption *option, String value) {
+static void CliRequest._set_field(
+  CliRequest r, CliOption *option, String value) {
   char *field = (char *) r + option.offset;
   $switch(option.apply)
   {
