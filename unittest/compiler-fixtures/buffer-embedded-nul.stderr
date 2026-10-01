@@ -1,0 +1,4 @@
+<elapsed> error/err-report start_time="<wall-time>" code=<bad-arg> detail=
+((value 0)) location=
+((file "../../lib/buffer.x") (line <line>) (function "Buffer_write_len"))
+x2c error floor: <bad-arg>: non-returning error was not caught

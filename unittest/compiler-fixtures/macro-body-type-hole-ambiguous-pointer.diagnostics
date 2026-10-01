@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-body-type-hole-ambiguous-pointer.x:9:20: parse: expected atomic expression
+  $ambiguous_pointer(long);
+                     ^^^^
+  note: token: long kind: long
+

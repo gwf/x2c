@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/meta-header-packed/packed.h:1:1: parse: packed attributes are unsupported
+  struct HeaderPacked { char tag; short value; }
+  ^^^^^^
+

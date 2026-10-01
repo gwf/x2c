@@ -1,0 +1,5 @@
+<elapsed> error/err-report start_time="<wall-time>" code=<fin-raise> detail=
+() location=
+((file "unittest/compiler-fixtures/raise-in-finally-unhandled.x") 
+ (line 10) (function "main"))
+x2c error floor: <fin-raise>: unhandled and policy is abort
