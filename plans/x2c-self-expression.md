@@ -3,8 +3,8 @@
 > Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
 > `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
 > second bootstrap round. L1-L4 are decided (5-10 below). L1, L3, the
-> `({1})` fix, and template destructuring hygiene landed together; the
-> forward-name hygiene case waits on Gary. L2 and L4 are next. Five further defects found while scoping L1-L4 are
+> `({1})` fix, and template destructuring hygiene landed together; L2 and
+> forward-name hygiene (decision 11) are in progress; L4 is next. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
@@ -57,6 +57,12 @@ Recorded 2026-10-01 from Gary, after the L1-L4 scoping:
 9. L4: a `defer` or managed declaration directly inside a statement
    expression is an error.
 10. Fix `({1})` and the two template hygiene defects.
+11. Forward names in templates (Gary, 2026-10-01): a name that nothing
+    declares where a closed macro was defined binds a declaration the same
+    expansion introduces, including one a nested macro makes from a literal
+    `Name` in this body. A later global keeps working as today. A caller's
+    local never captures it; with no such declaration, x2c reports the name
+    instead of emitting C.
 
 Order: L1 and L3 with the three defects first, then L2, then L4.
 
