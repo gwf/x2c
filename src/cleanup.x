@@ -1124,7 +1124,7 @@ static List Preserve._binding(Preserve &p, List bind, Map escaped) {
 static int Preserve._declares_name(Preserve &p, List bindings) {
   foreach (List binding, bindings.cdr())
     match (binding)
-      case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
+      case $source_declarator_row(%(?name ?)): {
         String spelling = binding_identity_spelling(name);
         if (spelling && spelling in p.names) return 1;
       }
@@ -1182,7 +1182,7 @@ static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
   Macro escape = $escape_local;
   foreach (List bind, binds)
     match (bind)
-      case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
+      case $source_declarator_row(%(?name ?)): {
         String spelling = binding_identity_spelling(name);
         if (spelling && spelling in p.escaped) {
           Type type = c.semantic_binding_facts()[%(type $name)];

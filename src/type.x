@@ -327,6 +327,9 @@ List Type.body(Type t) {
 /** Returns whether `t` begins with a pointer-like modifier. */
 int Type.is_pointer(Type t) => !!t.match(%((!or (!quote *) & opt-ref ^) *));
 
+/** Returns whether `t` is a reference or an optional reference. */
+int Type.is_reference(Type t) => t.car() == <&> || t.car() == <opt-ref>;
+
 /** Returns whether the outer declarator represented by `type` is an array. */
 int Type.is_array(Type type) => _declarator_kind(type) == <dim>;
 

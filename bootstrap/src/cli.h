@@ -29,7 +29,17 @@ typedef struct CliRequest{
 }
 * CliRequest;
 
+typedef struct TargetKind{
+  Symbol kind;
+  String spelling, noun, prefix, suffix;
+}
+TargetKind;
+
 CliRequest cli_parse(int argc, char * * argv);
+
+Symbol TargetKind_named(String spelling, String * refusal);
+
+TargetKind * TargetKind_of(Symbol kind);
 
 int cli_dependency_pass_through(String s);
 

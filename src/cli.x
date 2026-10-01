@@ -37,6 +37,14 @@ typedef struct CliRequest {
   SourceView sources;
 } *CliRequest;
 
+/** Describes one target kind: its spelling on the command line and in a
+    manifest, the noun a report uses, and the default output file name
+    around the target's name.
+*/
+typedef struct TargetKind {
+  Symbol kind, String spelling, noun, prefix, suffix;
+} TargetKind;
+
 #pragma private
 
 $(import "../lib/system-macros.xmacro")
@@ -105,6 +113,22 @@ typedef struct CliOption {
 } CliOption;
 
 enum { FIELD_FLAG = 1, FIELD_TEXT, FIELD_LIST };
+
+/* A command's help lists its option groups in this order. */
+typedef struct CliGroup { Symbol group, const char *title; } CliGroup;
+
+static CliGroup cli_groups[] = {
+  { <global>,     "Global options:" },
+  { <target>,     "Target options:" },
+  { <output>,     "Output options:" },
+  { <source>,     "Translation options:" },
+  { <package>,    "Package options:" },
+  { <c-compiler>, "C compiler options:" },
+  { <linker>,     "Linker options:" },
+  { <inspection>, "Inspection options:" },
+  { <general>,    "General options:" },
+  { 0 }
+};
 
 #define CLI_FIELD_FLAG(field) .apply = FIELD_FLAG, \
   .offset = offsetof(struct CliRequest, field)
@@ -584,12 +608,39 @@ static Symbol _color_mode(String value) {
 }
 
 static Symbol _target_kind(String value) {
-  if (value == "executable") return <executable>;
-  if (value == "static-library") return <static-lib>;
-  if (value == "meta-module") return <module>;
-  if (value == "shared-library")
-    driver_error("shared-library is not supported by this compiler");
-  driver_error(%"unknown target kind '$value'");
+  String refusal = NULL;
+  Symbol kind = TargetKind.named(value, refusal);
+  if (refusal) driver_error(refusal);
+  if (!kind) driver_error(%"unknown target kind '$value'");
+  return kind;
+}
+
+// target kinds
+
+static TargetKind target_kinds[] = {
+  { <executable>, "executable",     "executable",     "",    ""    },
+  { <static-lib>, "static-library", "static library", "lib", ".a"  },
+  { <module>,     "meta-module",    "native module",  "",    ".so" },
+  { 0 }
+};
+
+/** Returns the target kind spelled `spelling`, or 0 when no kind has that
+    spelling. `refusal` says why this compiler refuses a known spelling, and
+    is NULL otherwise. */
+Symbol TargetKind.named(String spelling, String &refusal) {
+  refusal = spelling == "shared-library" ?
+    "shared-library is not supported by this compiler" : NULL;
+  for (TargetKind *row = target_kinds; row.kind; row++)
+    if (spelling == row.spelling) return row.kind;
+  return 0;
+}
+
+/** Returns the row of target kind `kind`; any other kind reads as an
+    executable. */
+TargetKind *TargetKind.of(Symbol kind) {
+  for (TargetKind *row = target_kinds; row.kind; row++)
+    if (row.kind == kind) return row;
+  return target_kinds;
 }
 
 static int _count(String value, int minimum, String noun) {
@@ -1060,22 +1111,21 @@ static void _print_options(Symbol command) {
       if (_listed(*option, mask)) _print_option(*option);
     return;
   }
-  Symbol groups[] = {
-    <global>, <target>, <output>, <source>, <package>, <c-compiler>,
-    <linker>, <inspection>, <general>, 0
-  };
-  for (Symbol *group = groups; *group; group++)
+  for (CliGroup *group = cli_groups; group.group; group++)
     _print_group(command, mask, *group);
 }
 
-/* A group's title prints only above options the command lists. */
-static void _print_group(Symbol command, int mask, Symbol group) {
+/* A group's title prints only above options the command lists. Translate
+   names its source group for what it reads. */
+static void _print_group(Symbol command, int mask, CliGroup &group) {
   CliOption *option = cli_options;
-  while (option.spelling && !_in_group(*option, mask, group)) option++;
+  while (option.spelling && !_in_group(*option, mask, group.group)) option++;
   if (!option.spelling) return;
-  printf("\n%s\n", _group_title(command, group));
+  const char *title = command == <translate> && group.group == <source> ?
+                      "Source options:" : group.title;
+  printf("\n%s\n", title);
   for (; option.spelling; option++)
-    if (_in_group(*option, mask, group)) _print_option(*option);
+    if (_in_group(*option, mask, group.group)) _print_option(*option);
 }
 
 static int _listed(CliOption &option, int mask) =>
@@ -1083,22 +1133,6 @@ static int _listed(CliOption &option, int mask) =>
 
 static int _in_group(CliOption &option, int mask, Symbol group) =>
   _listed(option, mask) && option.group == group;
-
-static const char *_group_title(Symbol command, Symbol group) {
-  switch (group) {
-    case <target>:     return "Target options:";
-    case <output>:     return "Output options:";
-    case <source>:
-      return command == <translate> ?
-             "Source options:" : "Translation options:";
-    case <package>:    return "Package options:";
-    case <c-compiler>: return "C compiler options:";
-    case <linker>:     return "Linker options:";
-    case <inspection>: return "Inspection options:";
-    case <general>:    return "General options:";
-  }
-  return "Global options:";
-}
 
 static void _print_option(const CliOption &option) {
   String spelled = option.label ? option.label :

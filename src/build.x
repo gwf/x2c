@@ -945,7 +945,7 @@ static String Build._headline(Build b) {
   String label = b.request.label ? %" target '${b.request.label}'" : "";
   String built = %"Built$label", tail = %"in $duration$cache";
   if (!b.request.compile_only)
-    return %"$built ${_kind_name(b.request.kind)} ${b.output} $tail";
+    return %"$built ${TargetKind.of(b.request.kind).noun} ${b.output} $tail";
   int objects = b.objects.len();
   if (objects == 1) return %"$built object ${b.output} $tail";
   return %"$built $objects object files in ${b.obj_root} $tail";
@@ -956,12 +956,6 @@ static int Build._all_cached(Build b) {
   if (b.cc_n && b.cc_cached != b.cc_n) return 0;
   if (!b.request.compile_only && !b.final_cached) return 0;
   return b.xlat_n || b.cc_n || b.final_cached;
-}
-
-static String _kind_name(Symbol kind) {
-  if (kind == <static-lib>) return "static library";
-  if (kind == <module>) return "native module";
-  return "executable";
 }
 
 static String Build._final_tool(Build b) =>

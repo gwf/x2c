@@ -363,8 +363,7 @@ static void _lower_scan_call(Lowering &l, List form) {
     case %(call (expr ((func ?params) *) ?) (args *args)):
       for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
         Type type = _lower_param_type(p);
-        if ((type.car() == <&> || type.car() == <opt-ref>) &&
-            !_lower_null_constant(a.car()))
+        if (type.is_reference() && !_lower_null_constant(a.car()))
           _lower_scan_op(l, %(op & ${a.car()}));
       }
   match (form) {
@@ -708,7 +707,7 @@ static List _lower_args(
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
     Type parameter = _lower_param_type(p);
-    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
+    if (parameter.is_reference()) {
       Var place = parameter.car() == <opt-ref> &&
                   _lower_null_constant(argument)
                 ? 0 : argument.cadr().car() == <opt-ref>
@@ -758,7 +757,7 @@ static Var _lower_native_call(
   int references = 0;
   for (List p = params; p; p = p.cdr()) {
     Type parameter = _lower_param_type(p);
-    references |= parameter.car() == <&> || parameter.car() == <opt-ref>;
+    references |= parameter.is_reference();
   }
   if (!references) return _lower_call(l, callee, name, args);
   List values = _lower_args(l, params, args, name);
@@ -771,7 +770,7 @@ static Var _lower_native_call(
     Type parameter = _lower_param_type(p);
     p = p.cdr();
     prepare.push(
-      parameter.car() == <&> || parameter.car() == <opt-ref>
+      parameter.is_reference()
       ? %(C.func.reference $argv $index $value (quote ${parameter.cdr()}))
       : %(C.func.value $argv $index $value));
     index++;
@@ -839,7 +838,7 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   foreach (Type parameter, params) {
     if (parameter.equal(%(void))) continue;
     Var value;
-    if (parameter.car() == <&> || parameter.car() == <opt-ref>) {
+    if (parameter.is_reference()) {
       Type target = parameter.cdr();
       Type resolved = l.compiler.sym.normalize_declared_type(target);
       value = %(C.func.declared-reference-argument $fn $argv $index
@@ -1505,26 +1504,6 @@ static Var _lower_returned(Lowering &l, Var value) {
 
 /* --- match -------------------------------------------------------------- */
 
-/* A binder is an atom spelled `?name` or `*name`; a bare `?` or `*` is a
-   wildcard and names nothing. */
-static int _lower_binder(Var value, String &?name) {
-  if (!value.is_atom()) return 0;
-  String spelling = value.str();
-  if (!spelling || spelling.len() < 2) return 0;
-  if (spelling[0] != '?' && spelling[0] != '*') return 0;
-  if (name) name = String.new_len(spelling + 1, spelling.len() - 1);
-  return 1;
-}
-
-static void _lower_binders(Var pattern, Array found) {
-  if (pattern is <list>) {
-    List items = pattern;
-    foreach (Var part, items) _lower_binders(part, found);
-    return;
-  }
-  if (_lower_binder(pattern, NULL)) found.push(pattern);
-}
-
 /* The compiler bound each `?name` to an ordinary local, so the arm's body
    refers to it by binding id. Those ids are what the environment needs. */
 static void _lower_arm_ids(Var form, String name, Array found) {
@@ -1552,12 +1531,9 @@ static Var _lower_arms(
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
-  Array binders = $auto([]);
-  _lower_binders(pattern, binders);
   Map saved = _lower_env_copy(l);
-  foreach (Var binder, binders) {
-    String name = NULL;
-    _lower_binder(binder, name);
+  foreach (Var binder, l.compiler.match_pattern_binders(arm.car(), NULL)) {
+    String name = binder.str()[1:];
     Array ids = $auto([]);
     _lower_arm_ids(arm.cadr(), name, ids);
     foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));

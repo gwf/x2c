@@ -117,10 +117,8 @@ static List Compiler._helper_body(Compiler c, List body, List setup) {
    fallthrough. Nested lambdas normalize their own returns when lowered. */
 static List _block_returns(List ast) {
   if (!ast) return ast;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (ast) {
-    case lambda(?body, *params): return ast;
-    case captured(?body, *captures, *params): return ast;
+    case $source_any_lambda(): return ast;
     case $source_return_content(%()): return _no_value_return();
   }
   return Ast.rewrite_children(ast, _block_returns);
@@ -464,12 +462,10 @@ static void CellRegion.own(CellRegion &r, List binding) {
 static void CellRegion.collect(CellRegion &r, List ast) {
   if (!ast) return;
   Array resume = $auto([]);
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   for (;;) {
     int pruned = 0;
     match (ast) {
-      case lambda(?body, *params): pruned = 1;
-      case captured(?body, *captures, *params): pruned = 1;
+      case $source_any_lambda(): pruned = 1;
       case %(bind ?binding *): {
         r.own(binding);
         pruned = 1;
@@ -556,7 +552,7 @@ static List CellRegion._declaration(
   CellRegion &r, List target, List bindings) {
   int has_cell = 0;
   foreach (List item, bindings)
-    match (item) case %(!or (bind ?binding *) (op = (bind ?binding *) ?)):
+    match (item) case $source_declarator_row(%(?binding *)):
       has_cell |= binding && binding in r.cells;
   if (!has_cell) return NULL;
 
@@ -1170,8 +1166,7 @@ static List Compiler._func_argument_locals(
 
 static List FuncReaders.read(
   FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
-  if (parameter_type.car() == <&> ||
-      parameter_type.car() == <opt-ref>)
+  if (parameter_type.is_reference())
     return r._reference(parameter_type, index, storage_type);
   Symbol tag = r.c.sym.var_tag_for_type(parameter_type, NULL);
   Type resolved = r.c.sym.resolve_key(parameter_type);

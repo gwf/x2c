@@ -643,23 +643,17 @@ static List Compiler._named(Compiler c, List reset) {
    A function whose values have no Var form, such as C's `bool` or a
    record pointer, is called only from other group code. */
 static List Compiler._targets(Compiler c, List named) {
-  Array targets = [];
-  int count = 0;
+  Array entries = [];
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
     List function = NULL;
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));
     catch %(malformed *): continue;
-    targets.push(_call("String_var", %(${x2c_literal_string(name)})));
-    targets.push(_call("Func_var", %($function)));
-    count++;
+    entries.push(%(map-entry ${x2c_literal_string(name)} $function));
   }
-  List update = _call(
-    "Map_update_n",
-    %(${_call("Map_new", %())} ${x2c_literal_int(count)}
-      @{targets.list_free()}));
-  return c.bind_syntax(update, AST_EXPRESSION, NULL);
+  Macro shape = $map_value;
+  return c.rebuild_expression(%("Map"), shape(entries.list_free()));
 }
 
 /* A function definition with no parameters. */
@@ -669,9 +663,6 @@ static List Compiler._entry_function(
       (bind ${c.sym.introduce(name)}
         ((fnmod (params (param (void) (bind () ()))))))
       $body);
-
-static List _call(String name, List arguments) =>
-  %(expr () (call (expr () (ident ("x2c.ident" $name))) (args @arguments)));
 
 // refusing a call
 

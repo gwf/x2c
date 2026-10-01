@@ -1246,11 +1246,8 @@ static List Walk.opened(Walk &w, Region region) {
    address by the local it borrows from. A callee may hand back the address
    it was given or one inside it. */
 static String Walk.subject(Walk &w, Var value, List named, Fact fact) {
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
-  match (source_expression(value)) {
-    case lambda(?body, *params): return "a closure";
-    case captured(?body, *captures, *params): return "a closure";
-  }
+  match (source_expression(value)) case $source_any_lambda():
+    return "a closure";
   if (!named) return "a fresh allocation";
   String name = %"'${binding_identity_spelling(named)}'";
   Var own = w.facts[named];
@@ -1341,11 +1338,9 @@ static Var _passed(List types, List arguments, int index, Type &type) {
   Var argument = arguments[index];
   Var declared = index < types.len() ? types[index] : void;
   type = declared is <list> ? declared.list() : NULL;
-  if (!type || (type.car() != <&> && type.car() != <opt-ref>))
-    return argument;
+  if (!type.is_reference()) return argument;
   Type given = _expression_type(argument);
-  if (given && (given.car() == <&> || given.car() == <opt-ref>))
-    return argument;
+  if (given.is_reference()) return argument;
   Type object = cdr(type);
   type = object.reference();
   return %(expr $type (op & $argument));

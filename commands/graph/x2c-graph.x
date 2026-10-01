@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 static void _record_call(
   Compiler compiler, Map definitions, List callee, Map calls) {
@@ -804,18 +803,6 @@ static void _site_collect_parameters(List modifiers, Map parameters) {
             parameters[binding] = 1;
 }
 
-static List _site_direct_binding(Var value) {
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(ident (!set ?binding (binding ? ?))): return binding;
-    case %(expr ? ?inner): return _site_direct_binding(inner);
-    case %(parens ?inner): return _site_direct_binding(inner);
-    case %(at ? ?inner): return _site_direct_binding(inner);
-  }
-  return NULL;
-}
-
 static void _collect_sites(
   Compiler compiler, Var value, String path, String caller, Symbol visibility,
   String wanted, Map parameters, Map prior_writes, Map sites) {
@@ -842,7 +829,7 @@ static void _collect_sites(
           _collect_sites(
             compiler, child, path, caller, visibility, wanted,
             parameters, prior_writes, sites);
-        List binding = _site_direct_binding(left);
+        List binding = project_direct_binding(left);
         if (binding) {
           List summary = operator == <=> && right
                        ? _site_value_summary(compiler, right.car(), {}, {})
@@ -855,7 +842,7 @@ static void _collect_sites(
       _collect_sites(
         compiler, target, path, caller, visibility, wanted,
         parameters, prior_writes, sites);
-      List binding = _site_direct_binding(target);
+      List binding = project_direct_binding(target);
       if (binding)
         _site_add_prior_write(
           prior_writes, binding, %(operator $operator));
@@ -941,17 +928,6 @@ static int _field_whole_target(
   return 0;
 }
 
-static Var _field_site_value_type(Var value) {
-  if (value is not <list>) return %();
-  List node = value;
-  match (node) {
-    case %(expr ?type ?): return type;
-    case %(parens ?inner): return _field_site_value_type(inner);
-    case %(at ? ?inner): return _field_site_value_type(inner);
-  }
-  return %();
-}
-
 static void _collect_field_sites(
   Compiler compiler, Var value, String path, String caller, Symbol visibility,
   String receiver_name, String field_name, Map parameters, Symbol access,
@@ -961,7 +937,7 @@ static void _collect_field_sites(
   if (_field_access_matches(node, receiver_name, field_name)) {
     List detail;
     if (access == <replace>) {
-      Var type = _field_site_value_type(replacement);
+      Var type = project_expression_type(replacement);
       List summary = _site_value_summary(
         compiler, replacement, parameters, {});
       detail = %(access replace (value $type $summary));
@@ -2181,26 +2157,6 @@ static String _dataset_function_id(String path, String name) {
   return %"$path::$name";
 }
 
-static void _dataset_mkdirs(String path) {
-  char buffer[PATH_MAX];
-  if (!path || !path[0] || strlen(path) >= sizeof(buffer))
-    raise %(io-fail (operation mkdir) (path $path));
-  strcpy(buffer, path);
-  for (char *ch = buffer + 1; *ch; ch++) {
-    if (*ch != '/') continue;
-    *ch = 0;
-    if (mkdir(buffer, 0777) && errno != EEXIST) {
-      int error = errno;
-      raise %(io-fail (operation mkdir) (path $path) (errno $error));
-    }
-    *ch = '/';
-  }
-  if (mkdir(buffer, 0777) && errno != EEXIST) {
-    int error = errno;
-    raise %(io-fail (operation mkdir) (path $path) (errno $error));
-  }
-}
-
 static void _dataset_write_rows(
   String path, String header, Array rows) {
   File output = $auto(path.open("w"));
@@ -2272,7 +2228,7 @@ static void _write_datasets(
   functions.sort();
   src_calls.sort();
   lib_calls.sort();
-  _dataset_mkdirs(output);
+  Path.make_dirs(output);
   String function_header = "".join(
     %("function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
       "source_name\temitted_name\tvisibility\texternal_calls\t"
@@ -2659,9 +2615,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
         obstacles.push(%(obstacle $caller $location
           "Scope object destruction is outside the proof subset" $callee));
       if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
-        List key = %(open $caller $callee);
-        Var prior = scope_counts[key];
-        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        project_count(scope_counts, %(open $caller $callee), 1);
         if (conditional)
           obstacles.push(%(obstacle $caller $location
             "conditional region opening is outside the proof subset"
@@ -2670,9 +2624,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
         String open = callee == "Scope_release" ? "Scope_retain"
                     : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
-        List key = %(close $caller $open);
-        Var prior = scope_counts[key];
-        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        project_count(scope_counts, %(close $caller $open), 1);
         if (!deferred || conditional)
           obstacles.push(%(obstacle $caller $location
             "region closing is not an unconditional lexical defer"
@@ -2763,10 +2715,8 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
           name, 0, reached, contracts, assumptions, scope_counts,
           obligations, obstacles, 0, 0);
         foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
-          Var opening = scope_counts[%(open $target $open)];
-          Var closing = scope_counts[%(close $target $open)];
-          if ((opening is void ? 0 : opening.int()) !=
-              (closing is void ? 0 : closing.int()))
+          if (scope_counts.getdefault(%(open $target $open), 0).int() !=
+              scope_counts.getdefault(%(close $target $open), 0).int())
             obstacles.push(%(obstacle $target (location $path 0 0)
               "region opening and lexical closing do not match" $open));
         }

@@ -11,6 +11,7 @@
 #include "compiler.x"
 #pragma private
 $(import "../src/error-reports.xmacro")
+$(import "../src/grammar.xmacro")
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -692,19 +693,9 @@ static int _protocol_bootstrap(String name) =>
 
 // initializers
 
-macro Unit $file_initializer_function(Type $type, Name $name,
-    Statement $body...) {
-  $type $name(void) { $body... }
-}
-
 macro Decorator $initializer_body(Function $function,
     Statement $body...) {
   $body...
-}
-
-macro Statement $initializer_run_once(Expr $guard) {
-  if ($guard) return;
-  $guard = 1;
 }
 
 /* The synthetic initializer runs `entry` before its guard. Without a type
@@ -727,10 +718,9 @@ static List Init.synthesize(Init &i, List arms) {
     type = %(("__attribute__((noinline, cold))") static void);
     entry = i.initializer;
   }
-  List call = %((stmnt (expr (void) (call $entry (args)))));
-  List statements = i.statements(_within_definitions(arms, call), NULL);
-  Macro shape = $file_initializer_function;
-  return i.c.rebuild_unit_function(shape(type, binding, statements));
+  List statements =
+    i.statements(_within_definitions(arms, _entry_call(entry)), NULL);
+  return _initializer_function(i.c, type, binding, statements);
 }
 
 /* An initializer runs `entry`, returns when its guard is set and sets it
@@ -741,7 +731,7 @@ static List Init.synthesize(Init &i, List arms) {
 static List Init.statements(Init &i, List entry, List body) {
   Compiler c = i.c;
   return List.concat_n(
-    7, entry, c._run_once(i.guard), c.init_statements(<early>),
+    7, entry, _run_once(c, i.guard), c.init_statements(<early>),
     c.init_statements(<mid>), body, c.init_statements(<late>), i.shutdown);
 }
 
@@ -751,18 +741,13 @@ static List Compiler._replace_body(
   return c.rebuild_function(function, shape(statements));
 }
 
-static List Compiler._run_once(Compiler c, List guard) {
-  Macro shape = $initializer_run_once;
-  return c.rebuild_statement(shape(%(expr (int) (ident $guard)))).cdr();
-}
-
 /* Install generated built-in protocol methods before any ordinary file
    constructor can create a String- or List-backed cache. */
 static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   List statements = List.concat_n(
-    4, %(${_initialization_guard(guard)}), c._run_once(guard),
+    4, %(${_initialization_guard(guard)}), _run_once(c, guard),
     c.init_statements(<protocol>), body);
   return c._replace_body(function, statements);
 }
@@ -994,10 +979,9 @@ static void _set_declared(Map available, List node, List declarator) {
 }
 
 static List _declaration_binding(List declarator) {
-  match (declarator) {
-    case %(bind (!set ?binding (binding ? ?)) ?): return binding;
-    case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): return binding;
-  }
+  match (declarator)
+    case $source_declarator_row(%((!set ?binding (binding ? ?)) ?)):
+      return binding;
   return NULL;
 }
 

@@ -446,7 +446,7 @@ static List Compiler._native_signature_type(Compiler c, List signature) {
 }
 
 static List Compiler._native_parameter(Compiler c, Type parameter) {
-  if (parameter.car() == <&> || parameter.car() == <opt-ref>)
+  if (parameter.is_reference())
     return cons(
       parameter.car(), c.sym.normalize_declared_type(parameter.cdr()));
   return c.sym.normalize_declared_type(parameter);

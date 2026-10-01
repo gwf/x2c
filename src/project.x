@@ -375,13 +375,10 @@ static List *_target_list(ProjectTarget target, String key) {
 
 static void _set_kind(
   Project p, ProjectTarget target, int line, String value) {
-  String kind = _string_value(p, line, value);
-  if (kind == "executable") target.kind = <executable>;
-  else if (kind == "static-library") target.kind = <static-lib>;
-  else if (kind == "meta-module") target.kind = <module>;
-  else if (kind == "shared-library")
-    _error(p, line, "shared-library is not supported by this compiler");
-  else _error_name(p, line, "unknown target kind", kind);
+  String kind = _string_value(p, line, value), refusal = NULL;
+  target.kind = TargetKind.named(kind, refusal);
+  if (refusal) _error(p, line, refusal);
+  if (!target.kind) _error_name(p, line, "unknown target kind", kind);
 }
 
 static void _set_profile_field(
@@ -665,11 +662,9 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request) {
 }
 
 static String _target_output(Project p, ProjectTarget target, Symbol kind) {
-  String root = p.build_root;
   if (target.output) return Path.join(p.root, target.output);
-  if (kind == <static-lib>) return %"$root/lib${target.name}.a";
-  if (kind == <module>) return %"$root/${target.name}.so";
-  return %"$root/${target.name}";
+  TargetKind *row = TargetKind.of(kind);
+  return %"${p.build_root}/${row.prefix}${target.name}${row.suffix}";
 }
 
 /* A target's sources, then the archives of the libraries it links. */

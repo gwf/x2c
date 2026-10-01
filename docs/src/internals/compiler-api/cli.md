@@ -21,6 +21,8 @@ X2c command-line parsing and presentation.
 | [`cli_version`](#cli_version) | Returns the version line `--version` prints, without a newline. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
 | [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
+| [`TargetKind.named`](#TargetKind.named) | Returns the target kind spelled `spelling`, or 0 when no kind has that spelling. |
+| [`TargetKind.of`](#TargetKind.of) | Returns the row of target kind `kind`; any other kind reads as an executable. |
 
 ### Functions
 
@@ -30,7 +32,7 @@ X2c command-line parsing and presentation.
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1192`
+Source: `src/cli.x:1226`
 
 #### cli_dependency_pass_through
 
@@ -40,7 +42,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:633`
+Source: `src/cli.x:684`
 
 #### cli_package_options
 
@@ -53,7 +55,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:661`
+Source: `src/cli.x:712`
 
 #### cli_parse
 
@@ -68,7 +70,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:339`
+Source: `src/cli.x:363`
 
 #### cli_request
 
@@ -76,7 +78,7 @@ Source: `src/cli.x:339`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1174`
+Source: `src/cli.x:1208`
 
 #### cli_response_arguments
 
@@ -86,7 +88,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:720`
+Source: `src/cli.x:771`
 
 #### cli_version
 
@@ -94,7 +96,7 @@ Source: `src/cli.x:720`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1196`
+Source: `src/cli.x:1230`
 
 ### `CliRequest`
 
@@ -105,7 +107,7 @@ Source: `src/cli.x:1196`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1199`
+Source: `src/cli.x:1233`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -118,13 +120,37 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1207`
+Source: `src/cli.x:1241`
+
+### `TargetKind`
+
+<a id="TargetKind.named"></a>
+#### TargetKind.named
+
+`Symbol TargetKind.named(String spelling, String &refusal)`
+
+Returns the target kind spelled `spelling`, or 0 when no kind has that
+spelling. `refusal` says why this compiler refuses a known spelling, and
+is NULL otherwise.
+
+Source: `src/cli.x:630`
+
+<a id="TargetKind.of"></a>
+#### TargetKind.of
+
+`TargetKind *TargetKind.of(Symbol kind)`
+
+Returns the row of target kind `kind`; any other kind reads as an
+executable.
+
+Source: `src/cli.x:640`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`CliRequest`](#CliRequest) | struct | Holds one compiler command and its command-specific inputs and options. |
+| [`TargetKind`](#TargetKind) | struct | Describes one target kind: its spelling on the command line and in a manifest, the noun a report uses, and the default output file name around the target's name. |
 
 <a id="CliRequest"></a>
 ### CliRequest
@@ -137,6 +163,17 @@ request storage and referenced canonical values keep their producing
 `Scope` and pool lifetimes.
 
 Source: `src/cli.x:18`
+
+<a id="TargetKind"></a>
+### TargetKind
+
+`typedef struct TargetKind { Symbol kind, String spelling, noun, prefix, suffix; } TargetKind`
+
+Describes one target kind: its spelling on the command line and in a
+manifest, the noun a report uses, and the default output file name
+around the target's name.
+
+Source: `src/cli.x:44`
 
 ## Design notes
 

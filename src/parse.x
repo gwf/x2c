@@ -2008,10 +2008,10 @@ static List Compiler._finish_parameter(
 static void Compiler._parameter_facts(
   Compiler c, Var binding, List parameter) {
   if (binding) c.semantic_binding_facts()[%(parameter $binding)] = 1;
-  Symbol kind = parameter.type_from_ast().car();
-  if (kind == <&> || kind == <opt-ref>)
+  Type type = parameter.type_from_ast();
+  if (type.is_reference())
     c.semantic_binding_facts()[%(reference-param $binding)] = 1;
-  if (kind == <opt-ref>)
+  if (type.car() == <opt-ref>)
     c.semantic_binding_facts()[%(optional-reference-param $binding)] = 1;
 }
 

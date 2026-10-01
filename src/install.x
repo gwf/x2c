@@ -251,13 +251,15 @@ static void _build_source(String package, String name, String spec) {
     %("--x-include-dir" $src "--package-dir" ${Path.dirname(package)});
   _run(%($x2c "translate" "--out-dir" $builds @paths @units), "translate");
   _run(
-    %($x2c "build" "--kind" "static-library" "--output" "$builds/lib$name.a"
+    %($x2c "build" "--kind" ${TargetKind.of(<static-lib>).spelling}
+      "--output" "$builds/lib$name.a"
       "--build-dir" "$builds/cc" @{_files_with(builds, ".c")}
       @{_files_with(src, ".c")}),
     "build");
   if (_native_meta(builds, name))
     _run(
-      %($x2c "build" "--kind" "meta-module" "--output" "$builds/$name.module"
+      %($x2c "build" "--kind" ${TargetKind.of(<module>).spelling}
+        "--output" "$builds/$name.module"
         "--build-dir" "$builds/module" @paths @units
         @{_files_with(src, ".c")}),
       "module build");

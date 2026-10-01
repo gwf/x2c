@@ -8,11 +8,11 @@
 
 #include "exception.h"
 
-static List _221, _219, _218, _216, _214, _211, _209, _208, _206, _204, _156, _155, _154, _153, _143, _142, _141, _140, _139, _103, _102, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _52, _51, _30, _29, _28;
+static List _218, _216, _215, _213, _211, _208, _206, _205, _203, _201, _156, _155, _154, _153, _143, _142, _141, _140, _139, _103, _102, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _52, _51, _30, _29, _28;
 
-static String _224, _223, _222, _212, _202, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _183, _182, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _151, _149, _147, _145, _144, _137, _135, _133, _131, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _100, _98, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _66, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _221, _220, _219, _209, _199, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _183, _182, _181, _180, _179, _178, _177, _176, _175, _174, _173, _172, _171, _170, _169, _168, _167, _166, _165, _164, _163, _162, _161, _160, _159, _158, _157, _151, _149, _147, _145, _144, _137, _135, _133, _131, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _100, _98, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _66, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _220, _217, _215, _213, _210, _207, _205, _203, _201, _152, _150, _148, _146, _138, _136, _134, _132, _130, _101, _99, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _65, _27, _25, _23, _11;
+static Var _217, _214, _212, _210, _207, _204, _202, _200, _198, _152, _150, _148, _146, _138, _136, _134, _132, _130, _101, _99, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _65, _27, _25, _23, _11;
 
 #include <errno.h>
 #include <stdio.h>
@@ -145,8 +145,6 @@ static String Build__headline(Build b);
 
 static int Build__all_cached(Build b);
 
-static String _kind_name(Symbol kind);
-
 static String Build__final_tool(Build b);
 
 static String Build__retention(Build b);
@@ -199,7 +197,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _211)))
+_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _208)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -414,36 +412,33 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _192 = String_new("-gdwarf");
   _193 = String_new("1 job");
   _194 = String_new(" (up to date)");
-  _195 = String_new("static library");
-  _196 = String_new("native module");
-  _197 = String_new("executable");
-  _198 = String_new("retained");
-  _199 = String_new("temporary; removed after run");
-  _200 = String_new("temporary; removed after build");
-  _201 = Symbol_var(437126);
-  _202 = String_new("Var");
-  _203 = String_var(_202);
-  _204 = cons(_203, NULL);
-  _205 = List_var(_204);
-  _206 = cons(_205, NULL);
+  _195 = String_new("retained");
+  _196 = String_new("temporary; removed after run");
+  _197 = String_new("temporary; removed after build");
+  _198 = Symbol_var(437126);
+  _199 = String_new("Var");
+  _200 = String_var(_199);
+  _201 = cons(_200, NULL);
+  _202 = List_var(_201);
+  _203 = cons(_202, NULL);
+  _204 = List_var(_203);
+  _205 = cons(_204, NULL);
+  _206 = cons(_198, _205);
   _207 = List_var(_206);
-  _208 = cons(_207, NULL);
-  _209 = cons(_201, _208);
-  _210 = List_var(_209);
-  _211 = cons(_210, _204);
-  _212 = String_new("String");
-  _213 = String_var(_212);
-  _214 = cons(_213, NULL);
-  _215 = List_var(_214);
-  _216 = cons(_215, NULL);
+  _208 = cons(_207, _201);
+  _209 = String_new("String");
+  _210 = String_var(_209);
+  _211 = cons(_210, NULL);
+  _212 = List_var(_211);
+  _213 = cons(_212, NULL);
+  _214 = List_var(_213);
+  _215 = cons(_214, NULL);
+  _216 = cons(_198, _215);
   _217 = List_var(_216);
-  _218 = cons(_217, NULL);
-  _219 = cons(_201, _218);
-  _220 = List_var(_219);
-  _221 = cons(_220, _204);
-  _222 = String_new("script");
-  _223 = String_new("absent");
-  _224 = String_new("x2c-state-v1");
+  _218 = cons(_217, _201);
+  _219 = String_new("script");
+  _220 = String_new("absent");
+  _221 = String_new("x2c-state-v1");
   _x2c_static_initialize_0();
 }
 
@@ -1766,13 +1761,15 @@ void Build_report_success(Build b){
 
 String report_duration(unsigned long);
 
+TargetKind * TargetKind_of(Symbol);
+
 static String Build__headline(Build b){
   String duration = report_duration(report_now_us() - b -> started_at);
   String cache = Build__all_cached(b) ? _194 : _179;
   String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_115), cons(String_var(b -> request -> label), cons(String_var(_116), NULL)))) : _179;
   String built = String_join(NULL, cons(String_var(_117), cons(String_var(label), NULL))), tail = String_join(NULL, cons(String_var(_118), cons(String_var(duration), cons(String_var(cache), NULL))));
   if(! b -> request -> compile_only) return({
-    Var _x2c_literal_part_16 = String_var(built);  Var _x2c_literal_part_17 = String_var(_kind_name(b -> request -> kind));  String_join(NULL, cons(_x2c_literal_part_16, cons(String_var(_119), cons(_x2c_literal_part_17, cons(String_var(_119), cons(String_var(b -> output), cons(String_var(_119), cons(String_var(tail), NULL))))))));
+    Var _x2c_literal_part_16 = String_var(built);  Var _x2c_literal_part_17 = String_var(TargetKind_of(b -> request -> kind) -> noun);  String_join(NULL, cons(_x2c_literal_part_16, cons(String_var(_119), cons(_x2c_literal_part_17, cons(String_var(_119), cons(String_var(b -> output), cons(String_var(_119), cons(String_var(tail), NULL))))))));
   }
   );
   int objects = Array_len(b -> objects);
@@ -1787,20 +1784,14 @@ static int Build__all_cached(Build b){
   return b -> xlat_n || b -> cc_n || b -> final_cached;
 }
 
-static String _kind_name(Symbol kind){
-  if(kind == 1381098885964356) return _195;
-  if(kind == 904178442) return _196;
-  return _197;
-}
-
 static String Build__final_tool(Build b){
   return b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(_122), cons(String_var(b -> toolchain -> ar), NULL))) : String_join(NULL, cons(String_var(_123), cons(String_var(b -> toolchain -> cc), NULL)));
 }
 
 static String Build__retention(Build b){
-  if(! b -> temporary) return _198;
-  if(b -> request -> command == 38236) return _199;
-  return _200;
+  if(! b -> temporary) return _195;
+  if(b -> request -> command == 38236) return _196;
+  return _197;
 }
 
 void ToolAction_as_program(ToolAction);
@@ -1886,7 +1877,7 @@ List Build_script_helpers(Build b){
           Var _x2c_lambda_capture_value_0 = String_var(path);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
             _x2c_lambda_capture_value_0
           }
-          ;  Func_new_context(_x2c_lambda_1, _221, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+          ;  Func_new_context(_x2c_lambda_1, _218, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
         }
         ))) continue;
         Array_push(helpers, String_var(path));
@@ -2126,7 +2117,7 @@ String Env_get(String);
 
 static uint64_t _script_fingerprint(CliRequest request, String cc, List prerequisites, int * ok){
   uint64_t hash = _state_base(request, cc, &((* ok)));
-  hash = _state_text(hash, _222);
+  hash = _state_text(hash, _219);
   hash = _state_list(hash, request -> inputs);
   hash = _state_list(hash, request -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(request));
@@ -2163,7 +2154,7 @@ double Path_modified_time(Path);
 
 static uint64_t _state_entry(uint64_t hash, String path, int * ok){
   if(! String_endswith(path, _53)) return _state_file(hash, path, &((* ok)));
-  String time = Path_is_dir(path) ? String_printf(_157, Path_modified_time(path)) : _223;
+  String time = Path_is_dir(path) ? String_printf(_157, Path_modified_time(path)) : _220;
   return _state_text(_state_text(hash, path), time);
 }
 
@@ -2171,7 +2162,7 @@ String compiler_identity(void);
 
 static uint64_t _state_base(CliRequest request, String tool, int * ok){
   uint64_t hash = FNV_OFFSET_BASIS;
-  hash = _state_text(hash, _224);
+  hash = _state_text(hash, _221);
   hash = _state_text(hash, request -> state_seed);
   String compiler = compiler_identity();
   if(! String_truth(compiler))(* ok) = 0;

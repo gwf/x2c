@@ -2211,6 +2211,8 @@ static List source_return_type(List node) {
 static List source_conditional_statement(void) =>
   %((!or if while do for switch try match with foreach finally) *);
 
+static List source_any_lambda(void) => %(expr ? (lambda *));
+
 static List source_cast_content(List parts) => cons(<cast>, parts);
 
 static List source_generic_content(List parts) => cons(<generic>, parts);
@@ -2257,6 +2259,9 @@ static List source_identifier_content(List fields) =>
 
 static List source_literal_content(List fields) =>
   cons(<literal>, fields);
+
+static List source_declarator_row(List fields) =>
+  %(!or (bind @fields) (op = (bind @fields) ?));
 
 static List source_pattern_with(
     Macro shape, List names, List replacements) {
@@ -2971,6 +2976,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_func_error_expand", _func_error_expand);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
+  $linked.row(rows, "source_any_lambda", source_any_lambda);
   $linked.row(rows, "source_cast_content", source_cast_content);
   $linked.row(rows, "source_generic_content", source_generic_content);
   $linked.row(rows, "source_va_arg_content", source_va_arg_content);
@@ -2988,6 +2994,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_block_content", source_block_content);
   $linked.row(rows, "source_identifier_content", source_identifier_content);
   $linked.row(rows, "source_literal_content", source_literal_content);
+  $linked.row(rows, "source_declarator_row", source_declarator_row);
   $linked.row(rows, "source_pattern_with", source_pattern_with);
   $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);

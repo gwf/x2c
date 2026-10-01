@@ -56,8 +56,8 @@ cached literal slots and deferred file-static initializers.
 
 Public functions:
 
-`Compiler.setup_cache_init`, `_initialization_guard`,
-`_patch_initialized_entry`
+`Compiler.setup_cache_init`, `_initializer_function`, `_run_once`,
+`_entry_call`, `_initialization_guard`, `_patch_initialized_entry`
 
 ### [src/callables.x](../src/callables.x)
 
@@ -87,9 +87,10 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`cli_parse`, `cli_dependency_pass_through`, `cli_package_options`,
-`cli_response_arguments`, `cli_request`, `cli_builtin_command`, `cli_version`,
-`CliRequest.inspects`, `CliRequest.package_roots`
+`cli_parse`, `TargetKind.named`, `TargetKind.of`,
+`cli_dependency_pass_through`, `cli_package_options`, `cli_response_arguments`,
+`cli_request`, `cli_builtin_command`, `cli_version`, `CliRequest.inspects`,
+`CliRequest.package_roots`
 
 ### [src/collect.x](../src/collect.x)
 
@@ -593,10 +594,10 @@ Public functions:
 `Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
 `Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
 `Type.is_enum_tag_body`, `Type.tag`, `Type.body`, `Type.is_pointer`,
-`Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.dereference`,
-`Type.reference`, `Type.apply`, `Type.function_parts`, `Type.is_static`,
-`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `Type.is_typedef`,
-`Type.base_type`, `Type.canonicalize`, `Type.declared`,
+`Type.is_reference`, `Type.is_array`, `Type.is_function`, `Type.is_bitfield`,
+`Type.dereference`, `Type.reference`, `Type.apply`, `Type.function_parts`,
+`Type.is_static`, `Type.is_inline`, `Type.is_extern`, `Type.is_threaded`,
+`Type.is_typedef`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
 `Type.is_bare_typedef_name`, `Type.is_number`, `Type.is_integral`,
 `Type.scalar`, `Type.scalar_tag`, `Type.var_numeric_extractor`,

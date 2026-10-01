@@ -165,7 +165,7 @@ List Compiler.lambda_param_types(Compiler c, List entries) {
       case %(binding ? ?): types.push(%("Var"));
       case %(param ? ?): {
         Type type = entry.type_from_ast().declared();
-        if (type.car() == <&> || type.car() == <opt-ref>)
+        if (type.is_reference())
           type = cons(
             type.car(), c.sym.normalize_declared_type(type.cdr()));
         types.push(type);
@@ -475,7 +475,6 @@ static List Capture.record(
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   Array pending = $auto([]);
   pending.push(ast);
   while (pending.len()) {
@@ -483,8 +482,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     match (node) {
-      case lambda(?body, *params): continue;
-      case captured(?body, *captures, *params): continue;
+      case $source_any_lambda(): continue;
       case $source_operator_content(%(& ?target)):
         c._require_capture_lvalue(target);
       case $source_operator_content(%(?operator ?target *)):
@@ -517,7 +515,7 @@ static void Compiler._require_reference_arguments(
   for (; parameters && arguments;
        parameters = parameters.cdr(), arguments = arguments.cdr()) {
     Type parameter = parameters.car();
-    if (parameter.car() == <&> || parameter.car() == <opt-ref>)
+    if (parameter.is_reference())
       c._require_capture_lvalue(arguments.car());
   }
 }

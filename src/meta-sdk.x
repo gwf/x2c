@@ -648,8 +648,5 @@ void Compiler.bind_sdk_primitives(Lisp lisp) {
   $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);
   $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);
   $lisp.bind(lisp, "_x2c.native-meta.declared", _sdk_meta_declared);
-  $lisp.bind(lisp, "_x2c.source.text", x2c_source_text);
-  $lisp.bind(lisp, "_x2c.embed.text", x2c_embed_text);
-  $lisp.bind(lisp, "_x2c.invocation.location", builtin_class_location);
   $lisp.bind(lisp, "_x2c.symbol-set", _sdk_symbol_set);
 }

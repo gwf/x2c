@@ -836,7 +836,8 @@ static Var MatchWalk._replace_node(MatchWalk &walk, Var node) {
     return node;
   }
   if (status == 0) return node;
-  return _capture_replace(walk.template, walk.plan.layout, walk.captures);
+  ReplacementSource source = { walk.plan.layout, walk.captures, NULL };
+  return _replace(walk.template, source);
 }
 
 /* templates
@@ -859,50 +860,30 @@ int MatchPlan.try_match_replace(
   return plan._replace(input, template, out);
 }
 
+/* Where a named binder finds its value: the committed `captures` of a plan,
+   or the association List `bindings` when `captures` is null. */
+typedef struct ReplacementSource {
+  MatchCaptureLayout layout;
+  MatchCaptureBuffer *captures;
+  List bindings;
+} ReplacementSource;
+
 static int MatchPlan._replace(
   MatchPlan plan, List input, Var template, Var *out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = plan._capture(input, &captures, NULL);
   if (result != 1) return result;
-  *out = _capture_replace(template, plan.layout, &captures);
+  ReplacementSource source = { plan.layout, &captures, NULL };
+  *out = _replace(template, source);
   return 1;
 }
 
-typedef struct ReplacementCell {
-  Var value;
-  int splice;
-} ReplacementCell;
-
-/* Instantiates `input` from committed captures. */
-static Var _capture_replace(
-  Var input, MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
-  if (_named_binder(input)) return layout._captured(captures, input);
-  if (input is not <list>) return input;
-  List list = input;
-  if (!list) return input;
-  if (list.car() == <!quote>) return list.cadr();
-  Block spine = $auto(Block.new(sizeof(ReplacementCell)));
-  Var tail = (List) NULL;
-  for (; list; list = list.cdr()) {
-    Var head = list.car();
-    if (head == <!quote>) {
-      tail = list.cadr();
-      break;
-    }
-    ReplacementCell row = {
-      _capture_replace(head, layout, captures),
-      head.is_list_binder() && head != <*> && head != <?>
-    };
-    spine.push(&row);
-  }
-  for (size_t i = spine.length; i > 0; i--) {
-    ReplacementCell row = ((ReplacementCell *) spine.bytes)[i - 1];
-    Var head = row.value;
-    if (row.splice && head is <list>) tail = %(@head @tail);
-    else tail = %($head @tail);
-  }
-  return tail;
+/* The value for `binder`, or the binder itself when it has none. */
+static Var ReplacementSource._value(ReplacementSource &source, Var binder) {
+  if (source.captures) return source.layout._captured(source.captures, binder);
+  Var bound = source.bindings.assoc(binder);
+  return bound is void ? binder : bound;
 }
 
 /* The value captured for `binder`, or the binder when the match left it
@@ -925,15 +906,18 @@ static Var MatchCaptureLayout._captured(
 meta native List List.replace(List template, List bindings) {
   if (!template) return NULL;
   if (!bindings) return template;
-  return _replace(template, bindings);
+  ReplacementSource source = { NULL, NULL, bindings };
+  return _replace(template, source);
 }
 
-/* Instantiates `input` from an association List. */
-static Var _replace(Var input, List bindings) {
-  if (input.is_binder() && input != <*> && input != <?>) {
-    Var bound = bindings.assoc(input);
-    return bound is void ? input : bound;
-  }
+typedef struct ReplacementCell {
+  Var value;
+  int splice;
+} ReplacementCell;
+
+/* Instantiates `input`, taking each named binder's value from `source`. */
+static Var _replace(Var input, ReplacementSource &source) {
+  if (_named_binder(input)) return source._value(input);
   if (input is not <list>) return input;
   List list = input;
   if (!list) return input;
@@ -947,7 +931,7 @@ static Var _replace(Var input, List bindings) {
       break;
     }
     ReplacementCell row = {
-      _replace(head, bindings),
+      _replace(head, source),
       head.is_list_binder() && head != <*> && head != <?>
     };
     spine.push(&row);

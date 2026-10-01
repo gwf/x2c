@@ -30,14 +30,6 @@ static const List trust_boundaries = %(
   "_transform_defer_stmt" "_transform_return"
 )
 
-static int _among(String word, List words):
-  foreach String each in words:
-    if each == word: return 1
-  return 0
-
-static int _is(Lint l, int at, String text) =>
-  at >= 0 && at < l.count && l.tokens[at].text == text
-
 /* The causes `lib/error-macros.xmacro` lists as never returning when this
    command is built. */
 static const SymbolSet shared_causes = $error.nonreturning.causes()
@@ -58,13 +50,13 @@ static int _semicolon(Lint l, int at, int end):
 /* Whether the statement that holds `at` is followed by `return`. */
 static int _then_return(Lint l, int at, int end):
   int semi = _semicolon(l, at, end)
-  return semi < end && _is(l, l.next(semi), "return")
+  return semi < end && l.token_is(l.next(semi), "return")
 
 /* Whether a `raise` at `at` names a shared cause. */
 static int _raised(Lint l, int at):
   int open = l.next(at)
   Symbol cause
-  return _is(l, at, "raise") && _is(l, open, "%(") &&
+  return l.token_is(at, "raise") && l.token_is(open, "%(") &&
     Symbol.try_new(_cause(l, open), &cause) && cause in shared_causes
 
 /* Whether the tokens at `at` start a manual shape test: `.car(`, `.cdr(`,
@@ -74,30 +66,30 @@ static int _shape(Lint l, int at):
   Token t = l.at(at)
   int open = l.next(at)
   if t.type != <ident>: return 0
-  if at && l.tokens[at - 1].text == "." && _is(l, open, "("):
+  if at && l.tokens[at - 1].text == "." && l.token_is(open, "("):
     String name = t.text
     int n = name.len(), letters = n >= 3 && n <= 6 && name[0] == 'c' &&
       name[n - 1] == 'r'
     for (int k = 1; letters && k < n - 1; k++):
       letters = name[k] == 'a' || name[k] == 'd'
     if letters || name == "len": return 1
-    if name == "is": return _is(l, l.next(open), "<list>")
+    if name == "is": return l.token_is(l.next(open), "<list>")
   if t.text == "is" && !(at && l.tokens[at - 1].text == "."):
-    int next = _is(l, open, "not") ? l.next(open) : open
-    return _is(l, next, "<list>") || _is(l, next, "List")
+    int next = l.token_is(open, "not") ? l.next(open) : open
+    return l.token_is(next, "<list>") || l.token_is(next, "List")
   return t.text.startswith("try_") && t.text.endswith("parts") &&
-    _is(l, open, "(")
+    l.token_is(open, "(")
 
 /* Whether the tokens at `at` test a List's head tag: `.car()` then `==`,
    `!=`, `is`, or `is not`, then a Symbol literal. */
 static int _tag_check(Lint l, int at):
-  if !_is(l, at, "car") || !_is(l, at - 1, ".") ||
-     !_is(l, l.next(at), "(") || !_is(l, l.next(l.next(at)), ")"):
+  if !l.token_is(at, "car") || !l.token_is(at - 1, ".") ||
+     !l.token_is(l.next(at), "(") || !l.token_is(l.next(l.next(at)), ")"):
     return 0
   int op = l.next(l.next(l.next(at)))
-  if _is(l, op, "is") && _is(l, l.next(op), "not"): op = l.next(op)
-  if !_is(l, op, "==") && !_is(l, op, "!=") && !_is(l, op, "is") &&
-     !_is(l, op, "not"):
+  if l.token_is(op, "is") && l.token_is(l.next(op), "not"): op = l.next(op)
+  if !l.token_is(op, "==") && !l.token_is(op, "!=") && !l.token_is(op, "is") &&
+     !l.token_is(op, "not"):
     return 0
   return l.tokens[l.next(op)].type == <lit-symbol>
 
@@ -105,7 +97,7 @@ static int _tag_check(Lint l, int at):
    its first letter. */
 static int _report(Lint l, int at):
   Token t = l.at(at)
-  if !lint_word(t) || !_is(l, l.next(at), "("): return 0
+  if !lint_word(t) || !l.token_is(l.next(at), "("): return 0
   char *rest = t.text
   rest++
   return strcasestr(rest, "fail") || strcasestr(rest, "error")
@@ -115,10 +107,10 @@ static int _report(Lint l, int at):
 static int _spells(Lint l, int at, String name):
   List parts = name.split(".")
   foreach String part in parts:
-    if !_is(l, at, part): return -1
+    if !l.token_is(at, part): return -1
     at = l.next(at)
     if part != parts.last().string():
-      if !_is(l, at, "."): return -1
+      if !l.token_is(at, "."): return -1
       at = l.next(at)
   return at
 
@@ -128,7 +120,7 @@ static int _calls(Lint l, int from, int to, String name):
     if at && (l.tokens[at - 1].text == "." || l.tokens[at - 1].text == "->"):
       continue
     int after = _spells(l, at, name)
-    if after > 0 && _is(l, after, "("): return 1
+    if after > 0 && l.token_is(after, "("): return 1
   return 0
 
 /* A word counts only between `.`, `_`, or the ends of `name`. */
@@ -153,9 +145,9 @@ static String _compact(Lint l, int from, int to):
 static int _growth_check(Lint l, int from, int to):
   String code = _compact(l, from, l.prev(to))
   for (int at = from; at < to; at = l.next(at)):
-    if !_is(l, at, "if") || !_is(l, l.next(at), "("): continue
+    if !l.token_is(at, "if") || !l.token_is(l.next(at), "("): continue
     int close = l.partner[l.next(at)]
-    if close < 0 || !_is(l, l.next(close), "return"): continue
+    if close < 0 || !l.token_is(l.next(close), "return"): continue
     String test = _compact(l, l.next(at), close)
     foreach String size in %("len()" "length"):
       int op = test.find(%".$size!=")
@@ -180,16 +172,16 @@ static int _growth_check(Lint l, int from, int to):
 static int _fresh_null_guard(Lint l, int from, int to):
   for (int at = from; at < to; at++):
     Token t = l.at(at)
-    if t.type != <ident> || !_is(l, l.next(at), "="): continue
+    if t.type != <ident> || !l.token_is(l.next(at), "="): continue
     int open = l.next(l.next(at))
     String text = l.tokens[open].text
     if text != "[" && text != "{" && text != "%[" && text != "%{": continue
     int close = l.partner[open]
-    if close < 0 || l.next(open) != close || !_is(l, l.next(close), ";"):
+    if close < 0 || l.next(open) != close || !l.token_is(l.next(close), ";"):
       continue
     String guard = %"if((void*)${t.text}==NULL)"
     for (int k = close; k < to; k = l.next(k)):
-      if _is(l, k, "if") && _is(l, l.next(k), "(") &&
+      if l.token_is(k, "if") && l.token_is(l.next(k), "(") &&
          _compact(l, k, l.partner[l.next(k)]) == guard:
         return 1
   return 0
@@ -212,20 +204,21 @@ static List _reasons(Lint l, List function):
     Token t = l.at(at)
     shapes += _shape(l, at)
     reports += _report(l, at)
-    if t.text == "if" && _is(l, l.next(at), "("): branches++
-    if t.text == "report_error" && _is(l, at - 1, ".") &&
-       _is(l, l.next(at), "("):
+    if t.text == "if" && l.token_is(l.next(at), "("): branches++
+    if t.text == "report_error" && l.token_is(at - 1, ".") &&
+       l.token_is(l.next(at), "("):
       int receiver = at
-      while _is(l, l.prev(receiver), "."):
+      while l.token_is(l.prev(receiver), "."):
         receiver = l.prev(l.prev(receiver))
       int semi = _semicolon(l, at, to)
-      report_return |= _is(l, l.prev(semi), ")") &&
-        _is(l, l.next(semi), "return") && _statement_start(l, receiver)
+      report_return |= l.token_is(l.prev(semi), ")") &&
+        l.token_is(l.next(semi), "return") && _statement_start(l, receiver)
     if _raised(l, at) && _then_return(l, at, to) && _statement_start(l, at):
       raise_return = 1
-    if t.text == "fallback" && _is(l, at - 1, ".") && _is(l, at - 2, "error"):
+    if t.text == "fallback" && l.token_is(at - 1, ".") &&
+       l.token_is(at - 2, "error"):
       int open = l.next(at)
-      if _is(l, open, "(") && l.partner[open] > 0 &&
+      if l.token_is(open, "(") && l.partner[open] > 0 &&
          _raised(l, l.next(l.partner[open])):
         fallback = 1
   if report_return:
@@ -262,10 +255,6 @@ static List _reasons(Lint l, List function):
                 "diagnostic validator recursively walks its input"))
   return rows.list_free()
 
-static int _line(Lint l, Var at) => l.tokens[at.int()].line
-
-static int _last_line(Lint l, Var end) => l.end_line(l.prev(end.int()))
-
 static List _rows(Map reasons, String name):
   Var rows
   return reasons.try_get(name, rows) ? rows : NULL
@@ -280,8 +269,8 @@ static void _frameworks(Lint l, Map reasons):
     String name = lint_name(function)
     foreach List row in _rows(reasons, name):
       Var code = row.cadr()
-      if _among(code, %("shape-diagnostics" "validator-diagnostics"
-                        "validator-shape" "recursive-validator")):
+      if code in %("shape-diagnostics" "validator-diagnostics"
+                    "validator-shape" "recursive-validator"):
         member[name] = function
     if name in member: names.push(name)
   Map component = {}
@@ -307,8 +296,8 @@ static void _frameworks(Lint l, Map reasons):
       if component[other].string() != root: continue
       List function = member[other]
       Var (name2, start, body, end) = function
-      int line = _line(l, start)
-      lines += _last_line(l, end) - line + 1
+      int line = l.at(start).line
+      lines += l.end_line(l.prev(end)) - line + 1
       if !first || line < first: first = line
       validator |= _validator_name(other)
       foreach List row in _rows(reasons, other):
@@ -321,16 +310,17 @@ static void _frameworks(Lint l, Map reasons):
 /* The action a silent guard's consequence takes, or NULL. */
 static String _action(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
-    if _is(l, at, "continue") && _is(l, l.next(at), ";"): return "continue"
+    if l.token_is(at, "continue") && l.token_is(l.next(at), ";"):
+      return "continue"
   foreach String constant in %("NULL" "0"):
     for (int at = from; at < to; at = l.next(at)):
       int value = l.next(at)
-      if _is(l, at, "return") && _is(l, value, constant) &&
-         _is(l, l.next(value), ";"):
+      if l.token_is(at, "return") && l.token_is(value, constant) &&
+         l.token_is(l.next(value), ";"):
         return %"return $constant"
   for (int at = from; at < to; at = l.next(at)):
     int value = l.next(at), semi = _semicolon(l, at, to)
-    if !_is(l, at, "return") || semi >= to || value == semi: continue
+    if !l.token_is(at, "return") || semi >= to || value == semi: continue
     // A returned failure report is not silent.
     int reports = 0
     for (int k = value; k < semi; k = l.next(k)): reports |= _report(l, k)
@@ -340,8 +330,8 @@ static String _action(Lint l, int from, int to):
     return "return fallback"
   for (int at = from; at < to; at = l.next(at)):
     int next = l.next(at)
-    if l.tokens[at].type == <ident> && _is(l, next, "=") &&
-       !_is(l, l.next(next), "=") && _semicolon(l, next, to) < to:
+    if l.tokens[at].type == <ident> && l.token_is(next, "=") &&
+       !l.token_is(l.next(next), "=") && _semicolon(l, next, to) < to:
       return "use default"
   return NULL
 
@@ -349,8 +339,8 @@ static String _action(Lint l, int from, int to):
 static int _partial(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
     Token t = l.at(at)
-    if _is(l, at - 1, ".") && _among(t.text, %("push" "append" "insert")) &&
-       _is(l, l.next(at), "("):
+    if l.token_is(at - 1, ".") && t.text in %("push" "append" "insert") &&
+       l.token_is(l.next(at), "("):
       return 1
     if t.text == "]" && l.tokens[l.next(at)].text[0] == '=' &&
        l.partner[at] >= 0 && l.partner[at] + 1 < at:
@@ -363,19 +353,19 @@ static void _silent_guards(Lint l, List function):
   Var (key, start, body, end) = function
   String name = lint_name(function)
   String text = name
-  if _among(text, trust_boundaries) || text.startswith("_macro_sdk_") ||
+  if text in trust_boundaries || text.startswith("_macro_sdk_") ||
      l.path.endswith("src/collect.x") && text.contains("artifact"):
     return
   int to = end.int()
   for (int at = start.int(); at < to; at = l.next(at)):
-    if !_is(l, at, "if") || !_is(l, l.next(at), "("): continue
+    if !l.token_is(at, "if") || !l.token_is(l.next(at), "("): continue
     int open = l.next(at), close = l.partner[open], shape = 0
     if close < 0: continue
     for (int k = open; k < close; k = l.next(k)):
       shape |= _shape(l, k) || _tag_check(l, k)
     if !shape: continue
     int first = l.next(close), last = _semicolon(l, first, to) + 1
-    if _is(l, first, "{"): last = l.partner[first]
+    if l.token_is(first, "{"): last = l.partner[first]
     String action = _action(l, first, last < 0 ? to : last)
     if !action: continue
     if action == "continue" && _partial(l, start.int(), to):
@@ -391,30 +381,31 @@ static void _static_match_captures(Lint l, List function):
   int from = start.int(), to = end.int(), reads = 0, line = 0
   Map seen = {}
   for (int at = from; at < to; at = l.next(at)):
-    if !_is(l, at, "match") || !_is(l, at - 1, ".") ||
-       !_is(l, l.next(at), "(") || !_is(l, l.next(l.next(at)), "%("):
+    if !l.token_is(at, "match") || !l.token_is(at - 1, ".") ||
+       !l.token_is(l.next(at), "(") || !l.token_is(l.next(l.next(at)), "%("):
       continue
     int assign = at
-    while assign > from && !_is(l, assign, "=") &&
-          l.tokens[assign].type != <;> && !_is(l, assign, "{") &&
-          !_is(l, assign, "}"):
+    while assign > from && !l.token_is(assign, "=") &&
+          l.tokens[assign].type != <;> && !l.token_is(assign, "{") &&
+          !l.token_is(assign, "}"):
       assign = l.prev(assign)
     int bind = l.prev(assign)
-    if !_is(l, assign, "=") || l.tokens[bind].type != <ident>: continue
+    if !l.token_is(assign, "=") || l.tokens[bind].type != <ident>: continue
     String binding = l.tokens[bind].text
     if binding in seen: continue
     seen[binding] = 1
     int count = 0, escapes = 0
     for (int k = at; k < to; k = l.next(k)):
-      if !_is(l, k, binding) || _is(l, k - 1, "."): continue
+      if !l.token_is(k, binding) || l.token_is(k - 1, "."): continue
       int before = l.prev(k), after = l.next(k)
-      if _is(l, after, ".") && _is(l, l.next(after), "assoc") &&
+      if l.token_is(after, ".") && l.token_is(l.next(after), "assoc") &&
          l.tokens[l.next(l.next(l.next(after)))].text.startswith("<?"):
         count++
-      if _is(l, before, "return") || _is(l, before, "=") && _is(l, after, ";"):
+      if l.token_is(before, "return") ||
+         l.token_is(before, "=") && l.token_is(after, ";"):
         escapes = 1
-      if (_is(l, before, "(") || _is(l, before, ",")) &&
-         (_is(l, after, ")") || _is(l, after, ",")):
+      if (l.token_is(before, "(") || l.token_is(before, ",")) &&
+         (l.token_is(after, ")") || l.token_is(after, ",")):
         escapes = 1
     if !count || escapes: continue
     reads += count
@@ -438,7 +429,7 @@ void Lint.validation_rules(Lint l):
     if score >= 3:
       foreach List row in rows:
         Var (score, code, message) = row
-        l.add(code, _line(l, start), %"$message in $name")
+        l.add(code, l.at(start).line, %"$message in $name")
     _silent_guards(l, function)
     _static_match_captures(l, function)
   _frameworks(l, reasons)

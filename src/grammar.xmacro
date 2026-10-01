@@ -79,6 +79,9 @@ meta static List source_conditional_statement(void) =>
 /* One expression used as a statement, retaining its bound expression. */
 macro Statement $expression_statement(Expr $value) { $value; }
 
+/* A lambda of either form, with or without capture rows. */
+meta static List source_any_lambda(void) => %(expr ? (lambda *));
+
 /* A noncapturing lambda expression: its parameters and body. */
 macro Expression $lambda_expression(Expr $body, Param $params...) =>
   %!($params...) => $body;
@@ -177,6 +180,10 @@ meta static List source_identifier_content(List fields) =>
 
 meta static List source_literal_content(List fields) =>
   cons(<literal>, fields);
+
+/* A declarator row, bare or with its initializer. */
+meta static List source_declarator_row(List fields) =>
+  %(!or (bind @fields) (op = (bind @fields) ?));
 
 /* Derive a source grammar case for a typed expression or its bare content.
    Only the outer expression shell is optional; captured children retain

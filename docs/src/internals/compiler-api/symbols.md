@@ -94,7 +94,7 @@ A reference reuses the nearest visible tag; a definition or standalone
 forward declaration introduces the tag in the current lexical scope. A
 macro template names its tags as template locals.
 
-Source: `src/symbols.x:606`
+Source: `src/symbols.x:607`
 
 <a id="Compiler.begin_semantic_transaction"></a>
 #### Compiler.begin_semantic_transaction
@@ -108,7 +108,7 @@ facts, compile-time struct layouts, binding and generated-name
 counters, and initializer names. It does not snapshot parser position or
 other compiler state.
 
-Source: `src/symbols.x:1163`
+Source: `src/symbols.x:1160`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -121,7 +121,7 @@ Package-owned methods use `<package>__<Type>_<member>` internally while
 consumers retain the spelling from the package header. Sorting keeps
 ambiguity diagnostics deterministic.
 
-Source: `src/symbols.x:758`
+Source: `src/symbols.x:755`
 
 <a id="Compiler.imported_spelling"></a>
 #### Compiler.imported_spelling
@@ -130,7 +130,7 @@ Source: `src/symbols.x:758`
 
 Returns an unambiguous imported spelling for `name`, or `NULL`.
 
-Source: `src/symbols.x:770`
+Source: `src/symbols.x:767`
 
 <a id="Compiler.macro_definition_locals"></a>
 #### Compiler.macro_definition_locals
@@ -139,7 +139,7 @@ Source: `src/symbols.x:770`
 
 Returns the active macro definition's borrowed local map, or `NULL`.
 
-Source: `src/symbols.x:810`
+Source: `src/symbols.x:807`
 
 <a id="Compiler.package_member_spelling"></a>
 #### Compiler.package_member_spelling
@@ -150,7 +150,7 @@ Returns a visible `with` name's package-prefixed spelling, or `NULL`.
 
 An ordinary declaration of the local spelling shadows the `with` name.
 
-Source: `src/symbols.x:743`
+Source: `src/symbols.x:740`
 
 <a id="Compiler.package_spelling"></a>
 #### Compiler.package_spelling
@@ -161,7 +161,7 @@ Returns a name in the current package namespace, preserving prefixes.
 
 Idempotence lets parsing and declaration rewrites share this operation.
 
-Source: `src/symbols.x:680`
+Source: `src/symbols.x:677`
 
 <a id="Compiler.record_declaration_visibility"></a>
 #### Compiler.record_declaration_visibility
@@ -172,7 +172,7 @@ Records the visibility of one parsed top-level declaration.
 Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
 retained for placing generated protocol declarations at the same boundary.
 
-Source: `src/symbols.x:633`
+Source: `src/symbols.x:634`
 
 <a id="Compiler.register_package_alias"></a>
 #### Compiler.register_package_alias
@@ -185,7 +185,7 @@ Shallow collection and full parsing both see an import, so repeating the
 same package and alias is a no-op. Another binding of the local spelling
 is a parse error.
 
-Source: `src/symbols.x:692`
+Source: `src/symbols.x:689`
 
 <a id="Compiler.register_package_member"></a>
 #### Compiler.register_package_member
@@ -197,7 +197,7 @@ Registers one package member under a bare local spelling.
 The package member must already exist in the symbol table. Repeating the
 same binding is a no-op; any conflicting local binding is an error.
 
-Source: `src/symbols.x:705`
+Source: `src/symbols.x:702`
 
 <a id="Compiler.semantic_binding_facts"></a>
 #### Compiler.semantic_binding_facts
@@ -208,7 +208,7 @@ Returns the current borrowed semantic-facts map indexed by binding.
 
 A semantic transaction may replace this map, so reacquire it afterwards.
 
-Source: `src/symbols.x:360`
+Source: `src/symbols.x:361`
 
 ### `Sym`
 
@@ -219,7 +219,7 @@ Source: `src/symbols.x:360`
 
 Returns whether declarations currently bind at file scope.
 
-Source: `src/symbols.x:139`
+Source: `src/symbols.x:140`
 
 <a id="Sym.base_symbols"></a>
 #### Sym.base_symbols
@@ -231,7 +231,7 @@ Copies all base-scope symbols into a fresh map in source order.
 Package collection uses this so it resolves against the prelude and the
 importing unit's already-visible includes without mutating either.
 
-Source: `src/symbols.x:151`
+Source: `src/symbols.x:152`
 
 <a id="Sym.bind_identity"></a>
 #### Sym.bind_identity
@@ -240,7 +240,7 @@ Source: `src/symbols.x:151`
 
 Installs an existing binding with `ast`'s qualifier-preserving type.
 
-Source: `src/symbols.x:585`
+Source: `src/symbols.x:586`
 
 <a id="Sym.binding_is_local"></a>
 #### Sym.binding_is_local
@@ -249,7 +249,7 @@ Source: `src/symbols.x:585`
 
 Reports whether `binding` belongs to a scope inside the base scopes.
 
-Source: `src/symbols.x:341`
+Source: `src/symbols.x:342`
 
 <a id="Sym.binding_is_local_before"></a>
 #### Sym.binding_is_local_before
@@ -260,7 +260,7 @@ Reports whether `binding` belongs to a local scope below `scope_count`.
 
 Counts beyond the current scope depth are clamped to that depth.
 
-Source: `src/symbols.x:348`
+Source: `src/symbols.x:349`
 
 <a id="Sym.current_binding"></a>
 #### Sym.current_binding
@@ -269,7 +269,7 @@ Source: `src/symbols.x:348`
 
 Returns `key`'s binding in the current scope, or `NULL`.
 
-Source: `src/symbols.x:327`
+Source: `src/symbols.x:328`
 
 <a id="Sym.current_symbols"></a>
 #### Sym.current_symbols
@@ -278,7 +278,7 @@ Source: `src/symbols.x:327`
 
 Returns the current scope's mutable symbol map, or `NULL`.
 
-Source: `src/symbols.x:158`
+Source: `src/symbols.x:159`
 
 <a id="Sym.declare"></a>
 #### Sym.declare
@@ -292,7 +292,7 @@ visibility; local declarations record automatic-storage and declared-type
 facts. Stored types discard storage and `inline` while retaining `const`,
 `restrict`, and `volatile`.
 
-Source: `src/symbols.x:456`
+Source: `src/symbols.x:457`
 
 <a id="Sym.declare_delegate_field"></a>
 #### Sym.declare_delegate_field
@@ -301,7 +301,7 @@ Source: `src/symbols.x:456`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/symbols.x:1133`
+Source: `src/symbols.x:1130`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -310,7 +310,7 @@ Source: `src/symbols.x:1133`
 
 Associates an enumerator key with its owner in the active scope.
 
-Source: `src/symbols.x:273`
+Source: `src/symbols.x:274`
 
 <a id="Sym.declare_field_order"></a>
 #### Sym.declare_field_order
@@ -322,7 +322,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/symbols.x:1108`
+Source: `src/symbols.x:1105`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -331,7 +331,7 @@ Source: `src/symbols.x:1108`
 
 Defines `key` and returns its stable binding in the active scope.
 
-Source: `src/symbols.x:226`
+Source: `src/symbols.x:227`
 
 <a id="Sym.define_global"></a>
 #### Sym.define_global
@@ -345,7 +345,7 @@ binding is issued at the first reference, as for a row an included file
 contributes, so the unit numbers its bindings the same whether it defined
 the row here or replayed it from an interface.
 
-Source: `src/symbols.x:266`
+Source: `src/symbols.x:267`
 
 <a id="Sym.define_macro"></a>
 #### Sym.define_macro
@@ -358,7 +358,7 @@ Captured bindings are recorded for later shadow handling. Replacing a
 name already defined in this scope does not increase the local macro
 count.
 
-Source: `src/symbols.x:784`
+Source: `src/symbols.x:781`
 
 <a id="Sym.delegate_aggregate"></a>
 #### Sym.delegate_aggregate
@@ -367,7 +367,7 @@ Source: `src/symbols.x:784`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symbols.x:1138`
+Source: `src/symbols.x:1135`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -376,7 +376,7 @@ Source: `src/symbols.x:1138`
 
 Returns the current scope's enum owner for `key`, or zero.
 
-Source: `src/symbols.x:334`
+Source: `src/symbols.x:335`
 
 <a id="Sym.field_order"></a>
 #### Sym.field_order
@@ -385,7 +385,7 @@ Source: `src/symbols.x:334`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symbols.x:1130`
+Source: `src/symbols.x:1127`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -396,7 +396,7 @@ Returns the current borrowed set of file-static declaration keys.
 
 A semantic transaction may replace this map, so reacquire it afterwards.
 
-Source: `src/symbols.x:176`
+Source: `src/symbols.x:177`
 
 <a id="Sym.get"></a>
 #### Sym.get
@@ -405,7 +405,7 @@ Source: `src/symbols.x:176`
 
 Returns `key`'s type, retrying a bare key in package space, or `NULL`.
 
-Source: `src/symbols.x:365`
+Source: `src/symbols.x:366`
 
 <a id="Sym.get_exact"></a>
 #### Sym.get_exact
@@ -414,7 +414,7 @@ Source: `src/symbols.x:365`
 
 Returns `key`'s type without package fallback, or `NULL`.
 
-Source: `src/symbols.x:373`
+Source: `src/symbols.x:374`
 
 <a id="Sym.global_symbols"></a>
 #### Sym.global_symbols
@@ -423,7 +423,7 @@ Source: `src/symbols.x:373`
 
 Returns the mutable global symbol map supplied to the latest reset.
 
-Source: `src/symbols.x:144`
+Source: `src/symbols.x:145`
 
 <a id="Sym.has_local_macros"></a>
 #### Sym.has_local_macros
@@ -432,7 +432,7 @@ Source: `src/symbols.x:144`
 
 Returns whether any lexical scope contains a local macro definition.
 
-Source: `src/symbols.x:796`
+Source: `src/symbols.x:793`
 
 <a id="Sym.introduce"></a>
 #### Sym.introduce
@@ -441,7 +441,7 @@ Source: `src/symbols.x:796`
 
 Allocates a fresh binding identity for a compiler-introduced spelling.
 
-Source: `src/symbols.x:324`
+Source: `src/symbols.x:325`
 
 <a id="Sym.is_array_type"></a>
 #### Sym.is_array_type
@@ -450,7 +450,7 @@ Source: `src/symbols.x:324`
 
 Reports whether `type` reaches the named `Array` value type.
 
-Source: `src/symbols.x:1067`
+Source: `src/symbols.x:1064`
 
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
@@ -459,7 +459,7 @@ Source: `src/symbols.x:1067`
 
 Reports whether `type` reaches the named `Map` value type.
 
-Source: `src/symbols.x:1071`
+Source: `src/symbols.x:1068`
 
 <a id="Sym.is_named_value_type"></a>
 #### Sym.is_named_value_type
@@ -468,7 +468,7 @@ Source: `src/symbols.x:1071`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/symbols.x:1074`
+Source: `src/symbols.x:1071`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -477,7 +477,7 @@ Source: `src/symbols.x:1074`
 
 Reports whether `type` reaches the named `String` value type.
 
-Source: `src/symbols.x:1063`
+Source: `src/symbols.x:1060`
 
 <a id="Sym.is_var_type"></a>
 #### Sym.is_var_type
@@ -486,7 +486,7 @@ Source: `src/symbols.x:1063`
 
 Reports whether `type` reaches the named `Var` value type.
 
-Source: `src/symbols.x:1060`
+Source: `src/symbols.x:1057`
 
 <a id="Sym.local_type"></a>
 #### Sym.local_type
@@ -498,7 +498,7 @@ File-scope names retain their semantic identity. Local alias definitions
 are resolved before they are installed, so one lookup crosses the whole
 local chain without consulting names shadowed since its declaration.
 
-Source: `src/symbols.x:943`
+Source: `src/symbols.x:940`
 
 <a id="Sym.lookup"></a>
 #### Sym.lookup
@@ -510,7 +510,7 @@ Resolves an existing key and optionally stores its semantic type.
 A symbol row without a binding receives a stable binding identity. A total
 miss returns `NULL` and stores `NULL` through `type` when provided.
 
-Source: `src/symbols.x:400`
+Source: `src/symbols.x:401`
 
 <a id="Sym.lookup_field"></a>
 #### Sym.lookup_field
@@ -522,7 +522,7 @@ A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
 initializer already reaches them.
 
-Source: `src/symbols.x:1089`
+Source: `src/symbols.x:1086`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -531,7 +531,7 @@ Source: `src/symbols.x:1089`
 
 Returns the innermost visible local macro named `name`, or `NULL`.
 
-Source: `src/symbols.x:799`
+Source: `src/symbols.x:796`
 
 <a id="Sym.mark_static"></a>
 #### Sym.mark_static
@@ -540,7 +540,7 @@ Source: `src/symbols.x:799`
 
 Marks a declaration key as file-static.
 
-Source: `src/symbols.x:179`
+Source: `src/symbols.x:180`
 
 <a id="Sym.new"></a>
 #### Sym.new
@@ -549,7 +549,7 @@ Source: `src/symbols.x:179`
 
 Creates the empty symbol table that compiler `c` owns.
 
-Source: `src/symbols.x:70`
+Source: `src/symbols.x:71`
 
 <a id="Sym.next_typedef"></a>
 #### Sym.next_typedef
@@ -562,7 +562,7 @@ Resolves one typedef hop and counts against the shared cycle budget.
 Returns `NULL` for an unresolved link. The shared budget turns a cycle
 into the same diagnostic as full-chain resolution.
 
-Source: `src/symbols.x:879`
+Source: `src/symbols.x:876`
 
 <a id="Sym.normalize_declared_type"></a>
 #### Sym.normalize_declared_type
@@ -571,7 +571,7 @@ Source: `src/symbols.x:879`
 
 Resolves typedef bases while retaining every declarator qualifier.
 
-Source: `src/symbols.x:912`
+Source: `src/symbols.x:909`
 
 <a id="Sym.pop_scope"></a>
 #### Sym.pop_scope
@@ -580,7 +580,7 @@ Source: `src/symbols.x:912`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/symbols.x:128`
+Source: `src/symbols.x:129`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -589,7 +589,7 @@ Source: `src/symbols.x:128`
 
 Pushes a new empty lexical scope.
 
-Source: `src/symbols.x:122`
+Source: `src/symbols.x:123`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -598,7 +598,7 @@ Source: `src/symbols.x:122`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/symbols.x:125`
+Source: `src/symbols.x:126`
 
 <a id="Sym.reference"></a>
 #### Sym.reference
@@ -609,7 +609,7 @@ Resolves `key` or creates a forward binding in the current scope.
 
 Stores `NULL` through `type` when no declaration supplies a type.
 
-Source: `src/symbols.x:407`
+Source: `src/symbols.x:408`
 
 <a id="Sym.reference_global"></a>
 #### Sym.reference_global
@@ -619,7 +619,7 @@ Source: `src/symbols.x:407`
 Resolves a global name or creates its forward binding in the base scope.
 Local declarations cannot capture a retained macro's global reference.
 
-Source: `src/symbols.x:420`
+Source: `src/symbols.x:421`
 
 <a id="Sym.reset"></a>
 #### Sym.reset
@@ -630,7 +630,7 @@ Resets symbol state to one base scope backed by `globals`.
 
 Later definitions mutate that caller-supplied map.
 
-Source: `src/symbols.x:91`
+Source: `src/symbols.x:92`
 
 <a id="Sym.reset_overlay"></a>
 #### Sym.reset_overlay
@@ -641,7 +641,7 @@ Resets symbol state to read `base` below the writable scope `overlay`.
 
 Later definitions mutate `overlay`; `base` is only read.
 
-Source: `src/symbols.x:100`
+Source: `src/symbols.x:101`
 
 <a id="Sym.resolve_base_type"></a>
 #### Sym.resolve_base_type
@@ -651,7 +651,7 @@ Source: `src/symbols.x:100`
 Resolves a typedef name through the base scopes only, ignoring local
 typedefs, or returns NULL when the base scopes do not declare it.
 
-Source: `src/symbols.x:887`
+Source: `src/symbols.x:884`
 
 <a id="Sym.resolve_global"></a>
 #### Sym.resolve_global
@@ -662,7 +662,7 @@ Resolves a binding through base scopes and optionally stores its type.
 
 Returns `NULL` when no base scope contains the key.
 
-Source: `src/symbols.x:414`
+Source: `src/symbols.x:415`
 
 <a id="Sym.resolve_key"></a>
 #### Sym.resolve_key
@@ -671,7 +671,7 @@ Source: `src/symbols.x:414`
 
 Resolves a canonical typedef key to the end of its declared chain.
 
-Source: `src/symbols.x:832`
+Source: `src/symbols.x:829`
 
 <a id="Sym.resolve_numeric_type"></a>
 #### Sym.resolve_numeric_type
@@ -683,7 +683,7 @@ Resolves a numeric typedef without reducing semantic object types.
 Returns `NULL` when resolution yields neither a numeric type nor a
 recognized builtin numeric typedef.
 
-Source: `src/symbols.x:981`
+Source: `src/symbols.x:978`
 
 <a id="Sym.scope_count"></a>
 #### Sym.scope_count
@@ -692,7 +692,7 @@ Source: `src/symbols.x:981`
 
 Returns the number of semantic scopes, including base scopes.
 
-Source: `src/symbols.x:136`
+Source: `src/symbols.x:137`
 
 <a id="Sym.seed_var_tags"></a>
 #### Sym.seed_var_tags
@@ -701,7 +701,7 @@ Source: `src/symbols.x:136`
 
 Registers declared `T_var` converters in the active `Type` unit.
 
-Source: `src/symbols.x:253`
+Source: `src/symbols.x:254`
 
 <a id="Sym.set"></a>
 #### Sym.set
@@ -710,7 +710,7 @@ Source: `src/symbols.x:253`
 
 Sets a semantic type for `key` in the required active scope.
 
-Source: `src/symbols.x:214`
+Source: `src/symbols.x:215`
 
 <a id="Sym.sole_typedef"></a>
 #### Sym.sole_typedef
@@ -720,7 +720,7 @@ Source: `src/symbols.x:214`
 Returns the name of the one file-scope typedef declared directly as
 `type`, or NULL when no typedef or several typedefs are.
 
-Source: `src/symbols.x:899`
+Source: `src/symbols.x:896`
 
 <a id="Sym.unit_symbols"></a>
 #### Sym.unit_symbols
@@ -730,7 +730,7 @@ Source: `src/symbols.x:899`
 Returns a fresh map of the base symbols with the current scope's rows
 merged in.
 
-Source: `src/symbols.x:165`
+Source: `src/symbols.x:166`
 
 <a id="Sym.var_tag_for_type"></a>
 #### Sym.var_tag_for_type
@@ -742,7 +742,7 @@ Returns a type's `Var` tag and optionally stores its resolved type.
 `resolved` receives the final type even when the result is zero because no
 `Var` tag is registered. A null input stores `NULL` and returns zero.
 
-Source: `src/symbols.x:1039`
+Source: `src/symbols.x:1036`
 
 <a id="Sym.visible_symbols"></a>
 #### Sym.visible_symbols
@@ -752,7 +752,7 @@ Source: `src/symbols.x:1039`
 Returns the visible one-part source names and their semantic types.
 Inner scopes win. The result is a fresh List; types remain borrowed.
 
-Source: `src/symbols.x:183`
+Source: `src/symbols.x:184`
 
 ### `SymTxn`
 
@@ -764,7 +764,7 @@ Source: `src/symbols.x:183`
 Publishes an active semantic transaction and makes rollback a no-op.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1242`
+Source: `src/symbols.x:1239`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -776,7 +776,7 @@ The caller may then release the transaction's construction scope.
 Source-fact collection must be disabled: its records retain staged maps.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1285`
+Source: `src/symbols.x:1282`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -785,7 +785,7 @@ Source: `src/symbols.x:1285`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1229`
+Source: `src/symbols.x:1226`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -795,7 +795,7 @@ Source: `src/symbols.x:1229`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1310`
+Source: `src/symbols.x:1307`
 
 ## Design notes
 
