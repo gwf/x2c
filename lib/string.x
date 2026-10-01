@@ -57,7 +57,6 @@ protocol const char *(String);
 #include "exception.x"
 #include "func.x"
 #include "symbol.x"
-#include "scan.x"
 #include "pool.x"
 
 // representation
