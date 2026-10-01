@@ -177,13 +177,13 @@ void x2c_error_raise_n(
   va_start(args, pair_count);
   _record_n(site, r.code, pair_count, args);
   va_end(args);
-  _dispatch(r);
+  r._dispatch();
 }
 
 static Symbol _raise(const X2CErrorSite *site, Symbol code, List detail) {
   ErrorRaise r = _raise_enter(code);
   _record(site, r.code, detail);
-  return _dispatch(r);
+  return r._dispatch();
 }
 
 /* A raise reaches the floor while error state is being built, when dispatch
@@ -232,8 +232,8 @@ static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  detail = _copy_value(&record.region, detail);
-  record.entry = _entry(&record.region, site, code, detail);
+  detail = ErrorRegion._copy_value(&record.region, detail);
+  record.entry = ErrorRegion._entry(&record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -245,8 +245,9 @@ static void _record_n(
   ErrorThreadState state = _thread();
   state.floor_only++;
   ErrorRecord record = { .region = _region_new() };
-  List detail = _counted_detail(&record.region, code, pair_count, args);
-  record.entry = _entry(&record.region, site, code, detail);
+  List detail =
+    ErrorRegion._counted_detail(&record.region, code, pair_count, args);
+  record.entry = ErrorRegion._entry(&record.region, site, code, detail);
   state.stack.push(&record);
   state.floor_only--;
 }
@@ -256,55 +257,57 @@ typedef struct ErrorPair { Var key, value; } ErrorPair;
 /* Copies `count` key-value arguments into `region` as a detail List in
    argument order. The pairs wait in a Block because the List is built from
    its end. */
-static List _counted_detail(
+static List ErrorRegion._counted_detail(
   ErrorRegion *region, Symbol code, unsigned count, va_list args) {
   int pushed = _scope_push(
     code, "could not enter error scope for counted detail");
   Block pairs = Block.new(sizeof(ErrorPair));
   for (unsigned i = 0; i < count; i++) {
-    ErrorPair pair = { .key = _copy_value(region, va_arg(args, Var)) };
-    pair.value = _copy_value(region, va_arg(args, Var));
+    ErrorPair pair = { .key = region._copy_value(va_arg(args, Var)) };
+    pair.value = region._copy_value(va_arg(args, Var));
     pairs.push(&pair);
   }
   ErrorPair *items = pairs.bytes;
   List detail = NULL;
   for (int i = (int) count - 1; i >= 0; i--)
-    detail = _field(region, items[i].key, items[i].value, detail);
+    detail = region._field(items[i].key, items[i].value, detail);
   pairs.free();
   if (pushed) Scope.pop();
   return detail;
 }
 
-static List _entry(
+static List ErrorRegion._entry(
   ErrorRegion *region, const X2CErrorSite *site, Symbol code, List detail) {
-  List location = _location(region, site), entry = NULL;
-  entry = _field(region, <location>, location, entry);
-  entry = _field(region, <detail>, detail, entry);
-  entry = _field(region, <code>, code, entry);
+  List location = region._location(site), entry = NULL;
+  entry = region._field(<location>, location, entry);
+  entry = region._field(<detail>, detail, entry);
+  entry = region._field(<code>, code, entry);
   return entry;
 }
 
-static List _location(ErrorRegion *region, const X2CErrorSite *site) {
+static List ErrorRegion._location(
+  ErrorRegion *region, const X2CErrorSite *site) {
   if (!site) return NULL;
-  String file = _site_text(region, site.file);
-  String function = _site_text(region, site.function);
-  List location = _field(region, <function>, function, NULL);
-  location = _field(region, <line>, site.line, location);
-  return _field(region, <file>, file, location);
+  String file = region._site_text(site.file);
+  String function = region._site_text(site.function);
+  List location = region._field(<function>, function, NULL);
+  location = region._field(<line>, site.line, location);
+  return region._field(<file>, file, location);
 }
 
-static String _site_text(ErrorRegion *region, const char *text) {
+static String ErrorRegion._site_text(ErrorRegion *region, const char *text) {
   if (!text) text = "<unknown>";
   return String.new_in(region.pool, text, strlen(text));
 }
 
-static List _field(ErrorRegion *region, Var key, Var value, List tail) =>
-  _cons(region, _pair(region, key, value), tail);
+static List ErrorRegion._field(
+  ErrorRegion *region, Var key, Var value, List tail) =>
+  region._cons(region._pair(key, value), tail);
 
-static List _pair(ErrorRegion *region, Var key, Var value) =>
-  _cons(region, key, _cons(region, value, NULL));
+static List ErrorRegion._pair(ErrorRegion *region, Var key, Var value) =>
+  region._cons(key, region._cons(value, NULL));
 
-static List _cons(ErrorRegion *region, Var head, List tail) =>
+static List ErrorRegion._cons(ErrorRegion *region, Var head, List tail) =>
   List.cons_in(region.pool, head, tail);
 
 static ErrorRecord *_record_at(int index) {
@@ -316,7 +319,7 @@ static void _truncate(int mark) {
   if (!Error.ready() || mark < 0) return;
   while (Error.count() > mark) {
     ErrorRecord *record = _record_at(Error.count() - 1);
-    _region_destroy(&record.region);
+    ErrorRegion._destroy(&record.region);
     _thread().stack.pop();
   }
 }
@@ -326,22 +329,22 @@ static void _truncate(int mark) {
 /* A NULL region requests an ordinary snapshot: construct in the active
    canonical pool, then promote that same object. An explicit region copies
    into its pool instead. Both policies traverse the same immutable shape. */
-static Var _copy_value(ErrorRegion *region, Var value) {
+static Var ErrorRegion._copy_value(ErrorRegion *region, Var value) {
   if (value is void)
     _floor(
       <bad-types>, region ? "void is not an admissible error detail"
                           : "void is not an admissible error snapshot");
   if (value.is_null() || value.is_nil() || value is <symbol>) return value;
-  if (value.is_wide()) return _copy_wide(region, value);
+  if (value.is_wide()) return region._copy_wide(value);
   if (value.is_integer() || value.is_floating()) return value;
-  if (value is <string> || value is <lsym>) return _copy_text(region, value);
-  if (value is <list>) return _copy_list(region, value);
+  if (value is <string> || value is <lsym>) return region._copy_text(value);
+  if (value is <list>) return region._copy_list(value);
   _floor(
     <bad-types>, region ? "error detail contains an identity-bearing value"
                         : "error snapshot contains an identity-bearing value");
 }
 
-static Var _copy_wide(ErrorRegion *region, Var value) =>
+static Var ErrorRegion._copy_wide(ErrorRegion *region, Var value) =>
   region ? _clone_in(&region.values, value) : _snapshot_wide(value);
 
 /* A wide box belongs to the outermost `Scope` of the caller's active slot, so
@@ -362,7 +365,7 @@ static Var _clone_in(Scope *owner, Var v) {
   return copy;
 }
 
-static Var _copy_text(ErrorRegion *region, Var value) {
+static Var ErrorRegion._copy_text(ErrorRegion *region, Var value) {
   String source = value is <lsym> ? value.str() : value.string();
   if (!region) return _snapshot_text(value, source);
   String owned = String.new_in(region.pool, source, source.len());
@@ -381,10 +384,10 @@ static Var _snapshot_text(Var value, String source) {
   return atom;
 }
 
-static List _copy_list(ErrorRegion *region, List source) {
-  Var head = _copy_value(region, source.car());
-  List tail = _copy_value(region, source.cdr());
-  if (region) return _cons(region, head, tail);
+static List ErrorRegion._copy_list(ErrorRegion *region, List source) {
+  Var head = region._copy_value(source.car());
+  List tail = region._copy_value(source.cdr());
+  if (region) return region._cons(head, tail);
   List owned = cons(head, tail);
   List.try_own(owned);
   return owned;
@@ -399,7 +402,7 @@ static ErrorRegion _region_new(void) {
 
 /* Release canonical values before their borrowed wide scalar boxes.
    No region value survives this operation. */
-static void _region_destroy(ErrorRegion *region) {
+static void ErrorRegion._destroy(ErrorRegion *region) {
   if (region.pool) region.pool = Pool.release(region.pool);
   if (region.values) {
     Scope.destroy(region.values);
@@ -417,7 +420,7 @@ static void _region_destroy(ErrorRegion *region) {
 /* Offers the newest record to the handlers, then restores the chain. An
    error every handler declined follows its cause's policy, and a shared
    non-returning cause that no catch took reaches the floor. */
-static Symbol _dispatch(ErrorRaise r) {
+static Symbol ErrorRaise._dispatch(ErrorRaise r) {
   ErrorThreadState state = _thread();
   ErrorHandler saved = state.handler_top, outer = state.dispatch_saved;
   ErrorHandler outer_running = state.dispatch_running;
@@ -426,27 +429,28 @@ static Symbol _dispatch(ErrorRaise r) {
      transfer out of that nested dispatch must still hand every registration
      back to the cleanup that runs between the raise and the landing. */
   if (!outer) state.dispatch_saved = saved;
-  Symbol disposition = _offer(state, saved, r.code);
+  Symbol disposition = state._offer(saved, r.code);
   state.handler_top = saved;
   state.dispatch_saved = outer;
   state.dispatch_running = outer_running;
   _leave();
   if (_never_returns(r.code))
     _floor(r.code, "non-returning error was not caught");
-  if (disposition == <declined>) _apply_policy(state, r);
+  if (disposition == <declined>) state._apply_policy(r);
   return disposition;
 }
 
 /* Offers the error to each handler from `h` outward. `<handled>` consumes
    that handler's slice and stops the search; `<declined>` continues outward
    and leaves the errors accumulated. */
-static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code) {
+static Symbol ErrorThreadState._offer(
+  ErrorThreadState state, ErrorHandler h, Symbol code) {
   for (; h; h = h.prev) {
     state.dispatch_running = h;
     state.handler_top = h.prev;
-    Symbol disposition = h.site ? _catch_match(h) : _observe(state, h);
+    Symbol disposition = h.site ? h._catch_match() : state._observe(h);
     if (disposition == <unwind> || disposition == <fatal>)
-      _transfer(state, h, code, disposition);
+      state._transfer(h, code, disposition);
     if (disposition == <handled>) {
       _truncate(h.watermark);
       return <handled>;
@@ -457,11 +461,12 @@ static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code) {
 
 /* The view belongs to the handler, not to this frame: `exit()` from the
    callback abandons the frame, and shutdown reclaims the handler. */
-static Symbol _observe(ErrorThreadState state, ErrorHandler h) {
-  defer _region_destroy(&h.view);
+static Symbol ErrorThreadState._observe(
+  ErrorThreadState state, ErrorHandler h) {
+  defer ErrorRegion._destroy(&h.view);
   state.floor_only++;
   h.view = _region_new();
-  List slice = _view_since(&h.view, h.watermark);
+  List slice = ErrorRegion._view_since(&h.view, h.watermark);
   state.floor_only--;
   return h.fn(slice, h.data);
 }
@@ -469,7 +474,7 @@ static Symbol _observe(ErrorThreadState state, ErrorHandler h) {
 /* Hands the complete chain back to the cleanup that runs before a landing,
    then lands at the selected catch's frame. `<fatal>` aborts, and `<unwind>`
    is not available to an observing registration, so both reach the floor. */
-static void _transfer(
+static void ErrorThreadState._transfer(
   ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition) {
   state.handler_top = state.dispatch_saved;
   state.dispatch_saved = state.dispatch_running = NULL;
@@ -482,7 +487,8 @@ static void _transfer(
 
 /* `<log>` reports an error unless Logger rendered it, and both `<log>` and
    `<ignore>` drop the records the raise added; `<collect>` keeps them. */
-static void _apply_policy(ErrorThreadState state, ErrorRaise r) {
+static void ErrorThreadState._apply_policy(
+  ErrorThreadState state, ErrorRaise r) {
   Symbol policy = Error.policy_get(r.code);
   if (policy == <abort>) _floor(r.code, "unhandled and policy is abort");
   if (policy == <log>) {
@@ -516,26 +522,26 @@ void Error.note_rendered(void) {
    newest record's `(code @detail)`. The selected arm's captures and the
    records above the watermark then belong to the handle. */
 
-static Symbol _catch_match(ErrorHandler h) {
+static Symbol ErrorHandler._catch_match(ErrorHandler h) {
   if (Error.count() <= h.watermark) return <declined>;
   ErrorRecord *record = _record_at(Error.count() - 1);
   Symbol code = record.entry.car().list().cadr();
   List detail = record.entry.cadr().list().cadr();
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List projection = _cons(&record.region, code, detail);
+  List projection = ErrorRegion._cons(&record.region, code, detail);
   Pool.open_named("Error catch bindings");
-  int selected = _catch_select(h, record, projection);
+  int selected = h._catch_select(record, projection);
   Pool.close();
-  if (selected) _catch_retain(h);
+  if (selected) h._catch_retain();
   state.floor_only--;
   return selected ? <unwind> : <declined>;
 }
 
-static int _catch_select(
+static int ErrorHandler._catch_select(
   ErrorHandler h, ErrorRecord *record, List projection) {
   for (int i = 0; i < h.site.arm_count; i++)
-    if (_catch_arm(h, record, projection, i)) {
+    if (h._catch_arm(record, projection, i)) {
       h.selected = i;
       return 1;
     }
@@ -544,9 +550,9 @@ static int _catch_select(
 
 /* Tries arm `i` and, when it matches, copies its captures into the record's
    region. The default arm matches without a plan. */
-static int _catch_arm(
+static int ErrorHandler._catch_arm(
   ErrorHandler h, ErrorRecord *record, List projection, int i) {
-  MatchPlan plan = _arm_plan(h, i);
+  MatchPlan plan = h._arm_plan(i);
   MatchCaptureLayout layout = plan ? plan.layout : NULL;
   int binders = layout ? layout.binder_count : 0;
   Var *values = binders ? Scope.malloc(sizeof(Var) * binders) : NULL;
@@ -554,20 +560,20 @@ static int _catch_arm(
   int matched = i == h.site.default_arm ||
     (plan.status == MACHINE_PREPARED &&
      plan.execute_capture(projection, captures, NULL) == 1);
-  if (matched) _catch_commit_captures(h, record, layout, &captures);
+  if (matched) h._commit_captures(record, layout, &captures);
   if (values) Scope.free(values);
   return matched;
 }
 
 /* A transient site's registration holds its own plans; a static site
    retains one plan per arm. */
-static MatchPlan _arm_plan(ErrorHandler h, int i) {
+static MatchPlan ErrorHandler._arm_plan(ErrorHandler h, int i) {
   if (i == h.site.default_arm) return NULL;
   MatchPlan *plans = h.plans != NULL ? h.plans.bytes : NULL;
   return plans ? plans[i] : h.site.arms[i].plan;
 }
 
-static void _catch_commit_captures(
+static void ErrorHandler._commit_captures(
   ErrorHandler handle, ErrorRecord *record, MatchCaptureLayout layout,
   MatchCaptureBuffer *captures) {
   if (handle.capture_values != NULL) {
@@ -583,7 +589,7 @@ static void _catch_commit_captures(
   for (int i = 0; i < layout.binder_count; i++) {
     values[i] = void;
     if (captures.has(i))
-      values[i] = _copy_value(&record.region, captures.values[i]);
+      values[i] = ErrorRegion._copy_value(&record.region, captures.values[i]);
   }
   if (pushed) Scope.pop();
 }
@@ -596,7 +602,7 @@ static void _catch_commit_captures(
    transfer can select the same handle before its landing runs, as when a
    `finally` raises while carrying an Error; the abandoned selection is
    destroyed here because the replacement transfer owns the handle. */
-static void _catch_retain(ErrorHandler handle) {
+static void ErrorHandler._catch_retain(ErrorHandler handle) {
   int pushed = _scope_push(
     <alloc-fail>, "could not enter error scope for retained catch records");
   _retained_destroy(handle.retained);
@@ -613,7 +619,7 @@ static void _retained_destroy(Block retained) {
   if (retained == NULL) return;
   ErrorRecord *records = retained.bytes;
   for (size_t i = 0; i < retained.length; i++)
-    _region_destroy(&records[i].region);
+    ErrorRegion._destroy(&records[i].region);
   retained.free();
 }
 
@@ -715,8 +721,8 @@ void *Error.policy_capture(void) {
   if (!capture) raise %(alloc-fail (owner "Error.policy_capture"));
   capture.pairs = (Symbol *) (capture + 1);
   int written = _fill_pairs(state.policy, capture.pairs, 0, capacity);
-  capture.count = _fill_contexts(
-    state.context_top, capture.pairs, written, capacity);
+  capture.count =
+    _fill_contexts(state.context_top, capture.pairs, written, capacity);
   return capture;
 }
 
@@ -815,17 +821,17 @@ void Error.pop(ErrorHandler handle) {
     _floor(<invariant>, "Error.pop out of order");
   _truncate(handle.watermark);
   state.handler_top = handle.prev;
-  _handler_free(handle);
+  handle._free();
 }
 
-static void _handler_free(ErrorHandler handle) {
+static void ErrorHandler._free(ErrorHandler handle) {
   if (!handle) return;
   // a per-call site has no static arm storage and belongs to this handler
   if (handle.site && !handle.site.arms) Scope.free(handle.site);
   _plans_free(handle.plans);
   if (handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
-  _region_destroy(&handle.view);
+  ErrorRegion._destroy(&handle.view);
   Scope.free(handle);
 }
 
@@ -840,20 +846,21 @@ static void _plans_free(Block plans) {
    the records above every popped handler's watermark; a Context closed by an
    unwinding exception keeps those for its outer handler and is the one caller
    that passes zero. */
-static void _unwind_to(
+static void ErrorThreadState._unwind_to(
   ErrorThreadState state, ErrorHandler stop, int truncate) {
   while (state.handler_top && state.handler_top != stop) {
     ErrorHandler removed = state.handler_top;
     state.handler_top = removed.prev;
     if (truncate) _truncate(removed.watermark);
-    _handler_free(removed);
+    removed._free();
   }
 }
 
 /* Returns the handler that leaves exactly `depth` registered, or the current
    head when the stack is already that shallow. The height is measured once
    here so an unwind does not re-measure it per cleanup record. */
-static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth) {
+static ErrorHandler ErrorThreadState._handler_at_depth(
+  ErrorThreadState state, int depth) {
   ErrorHandler stop = state.handler_top;
   for (int height = Error.handler_depth(); height > depth && stop; height--)
     stop = stop.prev;
@@ -912,13 +919,13 @@ ErrorHandler x2c_error_catch_site_push(
   h.site = site;
   h.target = target;
   int arm = -1;
-  const char *fenced = _prepare_arms(h, patterns, arm);
+  const char *fenced = h._prepare_arms(patterns, arm);
   state.floor_only--;
   /* Report the fence here, where the unusable arm can be named. Reporting it
      from dispatch would re-enter the raise path that is already answering
      one error. */
   if (fenced) {
-    _handler_free(h);
+    h._free();
     String fence = String.new(fenced);
     raise %(size-limit (owner "catch") (arm $arm) (fence $fence));
   }
@@ -929,25 +936,26 @@ ErrorHandler x2c_error_catch_site_push(
 /* Binds a pending site, then returns why the first fenced arm this
    registration can reach is unusable, or NULL. A transient site prepares
    its plans for this registration alone. */
-static const char *_prepare_arms(ErrorHandler h, Var *patterns, int &arm) {
+static const char *ErrorHandler._prepare_arms(
+  ErrorHandler h, Var *patterns, int &arm) {
   ErrorCatchSite *site = h.site;
-  if (_site_state(site) == ERROR_CATCH_PENDING)
-    _catch_site_bind(site, patterns);
-  if (_site_state(site) == ERROR_CATCH_TRANSIENT)
-    return _catch_prepare_plans(h, patterns, arm);
+  if (site._state() == ERROR_CATCH_PENDING)
+    site._bind(patterns);
+  if (site._state() == ERROR_CATCH_TRANSIENT)
+    return h._prepare_plans(patterns, arm);
   if (site.fenced_arm < 0) return NULL;
   arm = site.fenced_arm;
   return site.arms[arm].plan.reason;
 }
 
-static int _site_state(ErrorCatchSite *site) =>
+static int ErrorCatchSite._state(ErrorCatchSite *site) =>
   __atomic_load_n(&site.state, __ATOMIC_ACQUIRE);
 
-static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
+static void ErrorCatchSite._bind(ErrorCatchSite *site, Var *patterns) {
   _site_lock();
   // promotion and preparation allocate, and a failure never returns here
   defer _site_unlock();
-  if (_site_state(site) != ERROR_CATCH_PENDING) return;
+  if (site._state() != ERROR_CATCH_PENDING) return;
   int retainable = 1;
   for (int i = 0; retainable && i < site.arm_count; i++)
     if (i != site.default_arm)
@@ -985,7 +993,7 @@ static void _site_unlock(void) =>
     &catch_site_mutex, "Error: could not unlock catch site");
 
 /* Prepares one plan per arm for a registration of a transient site. */
-static const char *_catch_prepare_plans(
+static const char *ErrorHandler._prepare_plans(
   ErrorHandler h, Var *patterns, int &fenced_arm) {
   ErrorCatchSite *site = h.site;
   const char *fenced = NULL;
@@ -1035,7 +1043,7 @@ ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...) {
     A bound static site answers 0, so its caller can skip constructing them.
 */
 int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
-  !site || _site_state(site) != ERROR_CATCH_STATIC;
+  !site || site._state() != ERROR_CATCH_STATIC;
 
 // running arms
 
@@ -1101,7 +1109,7 @@ void x2c_error_catch_close(ErrorHandler handle) {
     _truncate(handle.watermark);
     state.handler_top = handle.prev;
   }
-  _handler_free(handle);
+  handle._free();
 }
 
 /* frames and contexts
@@ -1142,7 +1150,7 @@ void Error.restore_landing(void *saved_head, int saved_depth) {
 void Error.trim(void *saved_head, int stack_height) {
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
-  if (_chain_contains(state.handler_top, saved)) _unwind_to(state, saved, 1);
+  if (_chain_contains(state.handler_top, saved)) state._unwind_to(saved, 1);
   _truncate(stack_height);
 }
 
@@ -1153,7 +1161,7 @@ void Error.trim(void *saved_head, int stack_height) {
 */
 void Error.restore(int handler_depth, int stack_height) {
   ErrorThreadState state = _thread();
-  _unwind_to(state, _handler_at_depth(state, handler_depth), 1);
+  state._unwind_to(state._handler_at_depth(handler_depth), 1);
   _truncate(stack_height);
 }
 
@@ -1188,8 +1196,8 @@ void Error.context_close(void *token, int preserve_records) {
   ErrorThreadState state = _thread();
   if (state.context_top != context)
     _floor(<invariant>, "Error Context close out of order");
-  ErrorHandler stop = _handler_at_depth(state, context.handler_depth);
-  _unwind_to(state, stop, !preserve_records);
+  ErrorHandler stop = state._handler_at_depth(context.handler_depth);
+  state._unwind_to(stop, !preserve_records);
   if (!preserve_records) _truncate(context.stack_height);
   state.context_top = context.prev;
 }
@@ -1221,19 +1229,19 @@ List Error.since(int mark) {
   if (!Error.ready() || mark < 0) return NULL;
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List out = _view_since(NULL, mark);
+  List out = ErrorRegion._view_since(NULL, mark);
   List.try_own(out);
   state.floor_only--;
   return out;
 }
 
 /* Copies errors oldest first, using an explicit region or active pools. */
-static List _view_since(ErrorRegion *region, int mark) {
+static List ErrorRegion._view_since(ErrorRegion *region, int mark) {
   List out = NULL;
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
-    Var entry = _copy_value(region, record.entry);
-    out = region ? _cons(region, entry, out) : cons(entry, out);
+    Var entry = region._copy_value(record.entry);
+    out = region ? region._cons(entry, out) : cons(entry, out);
   }
   return out;
 }
@@ -1251,7 +1259,7 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List out = _view_since(&region, mark);
+  List out = ErrorRegion._view_since(&region, mark);
   state.floor_only--;
   *values = region.values;
   return out;
@@ -1274,7 +1282,7 @@ static ErrorRegion _owners(Scope *values, Pool pool) {
 Var Error.snapshot(Var value) {
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var copy = _copy_value(NULL, value);
+  Var copy = ErrorRegion._copy_value(NULL, value);
   state.floor_only--;
   return copy;
 }
@@ -1290,7 +1298,7 @@ Var Error.snapshot_in(Var value, Scope *values, Pool pool) {
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state.floor_only++;
-  Var copy = _copy_value(&region, value);
+  Var copy = ErrorRegion._copy_value(&region, value);
   state.floor_only--;
   *values = region.values;
   return copy;
@@ -1354,8 +1362,8 @@ void Error.initialize_raw(void) {
 void Error.shutdown_raw(void) {
   ErrorThreadState state = _thread();
   if (state.shutdown_done) return;
-  _reclaim_hidden(state);
-  _unwind_to(state, NULL, 1);
+  state._reclaim_hidden();
+  state._unwind_to(NULL, 1);
   _truncate(0);
   if (state.stack != NULL) {
     state.stack.free();
@@ -1377,12 +1385,12 @@ void Error.shutdown_raw(void) {
    Dispatch hides exactly the span from its saved head through the handler
    whose callback is running, so both chains stay disjoint from the visible
    one and nothing is reclaimed twice. */
-static void _reclaim_hidden(ErrorThreadState state) {
+static void ErrorThreadState._reclaim_hidden(ErrorThreadState state) {
   ErrorHandler stop = state.dispatch_running;
   for (ErrorHandler h = stop ? state.dispatch_saved : NULL; h;) {
     ErrorHandler prev = h.prev;
     int last = h == stop;
-    _handler_free(h);
+    h._free();
     if (last) break;
     h = prev;
   }
@@ -1390,7 +1398,7 @@ static void _reclaim_hidden(ErrorThreadState state) {
   while (state.running_top) {
     ErrorHandler running = state.running_top;
     state.running_top = running.running;
-    _handler_free(running);
+    running._free();
   }
 }
 
