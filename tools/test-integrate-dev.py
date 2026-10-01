@@ -7,6 +7,7 @@ is disposable or stubbed. Git's real merges, ancestry and pushes are retained.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 from pathlib import Path
@@ -278,6 +279,50 @@ class IntegrationProbe(unittest.TestCase):
         add=max(i for i,c in enumerate(calls) if 'POST' in c)
         self.assertLess(delete,patch); self.assertLess(patch,add)
         self.assertEqual(state.get('gates',[]),[])
+
+    def test_malformed_metadata_does_not_block_good_ready_work(self):
+        self.pr(1); bad_evidence_head=self.pr(2); self.pr(3)
+        state=self.state()
+        invalid=[[], {'version':1,'base':self.base,'head':bad_evidence_head,
+                      'dependencies':[],'evidence':['invalid evidence'],'notes':''}]
+        for number,value in zip(('1','2'),invalid):
+            state['pulls'][number]['body']=(
+                '<!-- x2c-integration:start -->\n```json\n'+json.dumps(value)+
+                '\n```\n<!-- x2c-integration:end -->')
+        self.state_path.write_text(json.dumps(state))
+        status=json.loads(self.cli('status').stdout)
+        self.assertEqual([p['number'] for p in status['ready']],[3])
+        self.assertEqual({p['number'] for p in status['pending']},{1,2})
+        batch=self.prepare()
+        self.assertEqual([p['number'] for p in self.record(batch)['prs']],[3])
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_explicit_selection_fails_atomically_for_missing_or_held_pr(self):
+        self.pr(1); self.pr(2)
+        state=self.state(); state['pulls']['2']['draft']=True
+        self.state_path.write_text(json.dumps(state))
+        for unavailable in ('99','2'):
+            with self.subTest(unavailable=unavailable):
+                result=self.cli('prepare','--flush','--prs','1',unavailable,ok=False)
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('explicit batch cannot be assembled',result.stderr)
+                status=json.loads(self.cli('status').stdout)
+                self.assertIsNone(status['active'])
+                self.assertEqual(status['batches'],[])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_collection_uses_oldest_submission_before_dependency_ordering(self):
+        dependency=self.pr(1)
+        self.pr(2,base=dependency,depends=[(1,dependency)])
+        state=self.state()
+        state['pulls']['1']['events'][0]['created_at']=(
+            dt.datetime.now(dt.timezone.utc).isoformat())
+        self.state_path.write_text(json.dumps(state))
+        result=json.loads(self.cli('prepare','--window','300').stdout)
+        self.assertEqual(result.get('state'),'review',result)
+        self.assertEqual([p['number'] for p in result['prs']],[1,2])
+        self.assertEqual(self.state().get('gates',[]),[])
 
     def test_missing_dependency_waits_without_creating_candidate(self):
         self.pr(1,depends=[(99,'0'*40)])
