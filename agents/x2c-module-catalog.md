@@ -106,45 +106,45 @@ Public functions:
 
 ### [src/compiler.x](../src/compiler.x)
 
-core x2c compiler state and operations.
+one x2c unit's translation state and its two parses.
 
 Public functions:
 
-`Compiler.var`, `Var.compiler`, `Compiler.new`, `Compiler.new_shared`,
-`Compiler.free_lisp`, `Compiler.borrow_unit_semantics`,
+`Compiler.var`, `Var.compiler`, `Compiler.shallow_parse`,
+`Compiler.shallow_parse_overlay`, `Compiler.collect_compile_time_definition`,
+`Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
+`Compiler._skip_shallow_expression`, `Compiler.queue_declaration_effect`,
+`Compiler.run_declaration_effects`, `Compiler.collect_unit_macro`,
+`Compiler.freeze_declaration_syntax`, `Compiler.freeze_macro_stack`,
+`Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
+`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
+`Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
+`Token.skip_trivia`, `Compiler.skip_trivia_from`, `Compiler.require_input`,
+`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.at_word`,
+`Compiler.take_word`, `Symbol.group_step`, `Token.group_close`,
+`Token.after_group`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`Compiler.emitted_binding_name`, `Compiler.present_references`,
+`Compiler.mark_reference_present`, `Compiler.restore_reference_presence`,
+`Compiler.optional_reference_test`, `reference_guard_exits`,
+`Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
+`Compiler.add_init`, `Compiler.cache`, `Compiler.cache_cons_cell`,
+`Compiler.cache_literal_var`, `Compiler.cache_literal_list`,
+`Compiler.match_pattern_value`, `match_value_is_static`,
+`Compiler.match_pattern_is_static`, `match_value_head`,
+`match_value_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.define_match_binders`, `Compiler.define_catch_binders`,
+`Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
+`Compiler.borrow_diagnostics`, `Compiler.take_diagnostics`,
+`Compiler.close_child`, `Compiler.borrow_unit_semantics`,
 `Compiler.share_meta_group`, `Compiler.take_unit_state`,
 `Compiler.return_unit_state`, `Compiler.read_source`,
 `Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
-`Compiler.merge_translation_dependencies`, `Compiler.tokenize`,
-`Compiler.peek`, `Token.skip_trivia`, `Compiler.skip_trivia_from`,
-`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
-`Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
-`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
-`Compiler.at_completion`, `Compiler.__complete_here`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `Compiler.emitted_binding_name`,
-`Compiler.present_references`, `Compiler.mark_reference_present`,
-`Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
-`reference_guard_exits`, `Compiler.fresh_name`, `Compiler.gensym`,
-`Compiler.add_early`, `Compiler.add_init`, `Compiler.cache`,
-`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
-`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`match_value_is_static`, `Compiler.match_pattern_is_static`,
-`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.define_catch_binders`,
-`Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
-`Compiler.borrow_diagnostics`, `Compiler.take_diagnostics`,
-`Compiler.close_child`, `Compiler.freeze_declaration_syntax`,
-`Compiler.freeze_macro_stack`, `Compiler.thaw_declaration_syntax`,
-`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
-`Compiler.collect_unit_macro`, `Compiler.select_declaration_defaults`,
-`Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
-`Compiler.collect_compile_time_definition`,
-`Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.full_parse`,
-`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`
+`Compiler.merge_translation_dependencies`, `Compiler.new`,
+`Compiler.new_shared`, `Compiler.free_lisp`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -399,16 +399,16 @@ Public functions:
 
 ### [src/parse.x](../src/parse.x)
 
-x2c top-level forms, declarations, and constructed syntax.
+x2c declarations, parsed from source or constructed.
 
 Public functions:
 
 `Compiler.parse_top_level_mode`, `Compiler.skip_linkage_brace`,
 `Compiler.parse_top_level`, `Compiler.parse_submission`,
-`Compiler.definition_doc`, `Compiler.protocol_form_starts`,
+`Compiler.defines_main`, `Compiler.script_statement_starts`,
+`Compiler.script_statement_executes`, `Compiler.protocol_form_starts`,
 `Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
-`Compiler.parse_import_declaration`, `Compiler.defines_main`,
-`Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
+`Compiler.parse_import_declaration`, `Compiler.definition_doc`,
 `Compiler.parse_declaration_row`, `Compiler.parse_simple_declaration`,
 `Compiler.parse_declaration_argument`, `Compiler.test_static_assert`,
 `Compiler.parse_static_assert`, `Compiler.test_declaration`,

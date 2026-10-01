@@ -18,7 +18,7 @@ Functions and types exposed by each compiler module.
 | [`src/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
-| [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
+| [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
@@ -39,7 +39,7 @@ Functions and types exposed by each compiler module.
 | [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
-| [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |
+| [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
