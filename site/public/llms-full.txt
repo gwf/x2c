@@ -3370,6 +3370,9 @@ literal. Both literals build a fresh object at each evaluation, as `%[]` and
 representation. Nested `[...]` and `{...}` are evaluated literals of the same
 kinds; nested `List` data is written `%(...)`.
 
+Elements, keys, and values are evaluated once each, left to right in source
+order, as in the percent forms below.
+
 `[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
 when its destination is a `Map`, a `Var`, an alias of either, or a type that
 converts from `Map`, and likewise for `Array`; for any other destination it
@@ -3458,11 +3461,14 @@ if collection construction tries to store it.
 `$name` inserts one identifier expression into a quoted collection.
 `${expression}` inserts one arbitrary x2c expression, including calls, member
 and index expressions, operators, casts, compound literals, `NULL`, enum
-constants, and comma expressions. Each expression is evaluated once. `@name`
-and `@{expression}` splice a `List` into a surrounding `List`; Arrays and Maps
-have no splice form. The identifier forms are the short versions of the braced
-expression forms. The [collections](https://x2c-lang.dev/docs/guide/collections.html) chapter walks
-through building and using each one.
+constants, and comma expressions. `@name` and `@{expression}` splice a `List`
+into a surrounding `List`; Arrays and Maps have no splice form. The inserted
+and spliced expressions of one `%()`, `%[]`, `%{}`, or `%""` literal are
+evaluated once each, left to right in source order. The arguments of an
+ordinary function call keep C's unspecified order. The identifier forms are
+the short versions of the braced expression forms. The
+[collections](https://x2c-lang.dev/docs/guide/collections.html) chapter walks through building and
+using each one.
 
 For `List`s that will be evaluated as Lisp, `'`, `` ` ``, `,`, and `,@` are the
 short forms of `quote`, `quasiquote`, `unquote`, and `unquote-splicing`. Each

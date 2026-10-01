@@ -3826,6 +3826,30 @@ static String _converter_name(Type owner, Type target) {
     : %"$prefix${typename}_${targetedname.lower()}";
 }
 
+/** Returns whether `expr` calls the converter that its one argument's type
+    names for the call's type, as `converter_call` or a declared `Var`
+    converter builds it. */
+int Compiler.is_converter_call(Compiler c, List expr) {
+  match (expr)
+    case %(expr ?result (call ?callee (args ?argument))): {
+      Type target = result, source = argument.cadr();
+      if (!source || !source.match(%(?)) || !target.match(%(?))) return 0;
+      String spelled = _callee_spelling(callee);
+      return spelled && (spelled == _converter_name(source, target) ||
+        (c.sym.is_var_type(target) && spelled == source.var_converter()));
+    }
+  return 0;
+}
+
+static String _callee_spelling(Var callee) {
+  if (callee is <string>) return callee.str();
+  List function = callee;
+  match (function)
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding_identity_spelling(binding);
+  return NULL;
+}
+
 /* A converter's result exists only for the operator that asked for it.
    Only a conversion from a number is known to be fresh; a converter from a
    handle type may return storage its source still owns. */

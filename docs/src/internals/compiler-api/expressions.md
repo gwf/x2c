@@ -19,6 +19,7 @@ Expression syntax and its resolution.
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
 | [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
 | [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
+| [`Compiler.is_converter_call`](#Compiler.is_converter_call) | Returns whether `expr` calls the converter that its one argument's type names for the call's type, as `converter_call` or a declared `Var` converter builds it. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
 | [`Compiler.parse_conditional`](#Compiler.parse_conditional) | Parses a binary expression and its optional conditional tail. |
 | [`Compiler.parse_expression`](#Compiler.parse_expression) | Parses an assignment expression and any following comma expressions. |
@@ -137,6 +138,17 @@ type, which is `(expr ("List") (ident reference))` for a null argument
 that takes the callee's own type.
 
 Source: `src/expressions.x:2117`
+
+<a id="Compiler.is_converter_call"></a>
+#### Compiler.is_converter_call
+
+`int Compiler.is_converter_call(Compiler c, List expr)`
+
+Returns whether `expr` calls the converter that its one argument's type
+names for the call's type, as `converter_call` or a declared `Var`
+converter builds it.
+
+Source: `src/expressions.x:3725`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
