@@ -107,7 +107,7 @@ Returns the name of the pointer an expression designates through, or
 `pointer[index]`, and `pointer->member` all change the object the pointer
 holds, which `ast_direct_identifier` reports as no name at all.
 
-Source: `src/type.x:842`
+Source: `src/type.x:840`
 
 #### ast_prototype_declarator
 
@@ -221,7 +221,7 @@ Source: `src/type.x:418`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:973`
+Source: `src/type.x:940`
 
 <a id="Type.body"></a>
 #### Type.body
@@ -306,7 +306,7 @@ Source: `src/type.x:456`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:980`
+Source: `src/type.x:947`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -315,7 +315,7 @@ Source: `src/type.x:980`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:912`
+Source: `src/type.x:879`
 
 <a id="Type.function_parts"></a>
 #### Type.function_parts
@@ -588,7 +588,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:961`
+Source: `src/type.x:928`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -599,7 +599,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:949`
+Source: `src/type.x:916`
 
 <a id="Type.scalar"></a>
 #### Type.scalar
@@ -640,7 +640,7 @@ Source: `src/type.x:309`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:923`
+Source: `src/type.x:890`
 
 <a id="Type.var_numeric_extractor"></a>
 #### Type.var_numeric_extractor
@@ -670,7 +670,7 @@ Source: `src/type.x:624`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:902`
+Source: `src/type.x:869`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -681,7 +681,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:934`
+Source: `src/type.x:901`
 
 <a id="Type.widest"></a>
 #### Type.widest

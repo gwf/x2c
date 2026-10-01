@@ -21,10 +21,11 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `Ast.lvalue_binding`, `Ast.rewrite_children`,
-`ast_contains_head`, `ast_collect_binding_references`, `Ast.without_origin`,
-`Ast.rewrap_origin`, `Ast.never_returns`, `Symbol.compound_operator`,
-`Symbol.compound_assignment`, `Symbol.is_assignment_op`,
+`binding_identity_spelling`, `Ast.designated`, `Ast.lvalue_binding`,
+`Ast.written_operand`, `Ast.rewrite_children`, `ast_contains_head`,
+`ast_collect_binding_references`, `Ast.without_origin`, `Ast.rewrap_origin`,
+`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
+`Symbol.binary_precedence`, `Symbol.is_assignment_op`,
 `ast_changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
 
@@ -128,14 +129,14 @@ Public functions:
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
 `Compiler.emitted_binding_name`, `Compiler.present_references`,
-`Compiler.mark_reference_present`, `Compiler.restore_reference_presence`,
-`Compiler.optional_reference_test`, `reference_guard_exits`,
-`Compiler.fresh_name`, `Compiler.gensym`, `Compiler.add_early`,
-`Compiler.add_init`, `Compiler.cache`, `Compiler.cache_cons_cell`,
-`Compiler.cache_literal_var`, `Compiler.cache_literal_list`,
-`Compiler.match_pattern_value`, `match_value_is_static`,
-`Compiler.match_pattern_is_static`, `match_value_head`,
-`match_value_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.mark_reference_present`, `Compiler.settle_reference`,
+`Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
+`reference_guard_exits`, `Compiler.fresh_name`, `Compiler.gensym`,
+`Compiler.add_early`, `Compiler.add_init`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
+`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
+`match_value_is_static`, `Compiler.match_pattern_is_static`,
+`match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.define_catch_binders`,
 `Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
 `Compiler.borrow_diagnostics`, `Compiler.take_diagnostics`,
@@ -842,12 +843,13 @@ generic native function binding.
 
 Public functions:
 
-`Func.apply`, `FuncArg.value`, `FuncArg.reference`, `x2c_func_reference_type`,
-`x2c_func_value_argument`, `x2c_func_pointer_argument`,
-`x2c_func_unrepresentable_argument`, `x2c_func_record_result`,
-`x2c_func_reference_argument`, `x2c_func_declared_reference_argument`,
-`Func.new`, `Func.new_rest`, `Func.new_context`, `x2c_func_shared`,
-`Func.signature`, `Func.context`, `Func.move`, `Func.var`, `Var.func`
+`Func.apply`, `FuncArg.value`, `FuncArg.reference`, `Func.apply_value`,
+`Func.apply_values`, `x2c_func_reference_type`, `x2c_func_value_argument`,
+`x2c_func_pointer_argument`, `x2c_func_unrepresentable_argument`,
+`x2c_func_record_result`, `x2c_func_reference_argument`,
+`x2c_func_declared_reference_argument`, `Func.new`, `Func.new_rest`,
+`Func.new_context`, `x2c_func_shared`, `Func.signature`, `Func.context`,
+`Func.move`, `Func.var`, `Var.func`
 
 ### [lib/iter.x](../lib/iter.x)
 

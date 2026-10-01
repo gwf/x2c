@@ -122,7 +122,7 @@ freezes it with `Lisp.freeze` before the first child runs: a child's
 values belong to a narrower `Context` than the parent's, so nothing a
 child produces may become reachable from the parent.
 
-Source: `lib/lisp.x:1711`
+Source: `lib/lisp.x:1707`
 
 <a id="Lisp.apply"></a>
 #### Lisp.apply
@@ -141,7 +141,7 @@ responsibility for `callable`, `values`, and their referents.
 or evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp.x:1801`
+Source: `lib/lisp.x:1797`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -158,7 +158,7 @@ noncapturing lambda converts to a shared handle that lives for the
 program; the session only borrows it. Values inside the `Func`,
 including its signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:1901`
+Source: `lib/lisp.x:1897`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -189,7 +189,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp.x:1784`
+Source: `lib/lisp.x:1780`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -207,7 +207,7 @@ the stream has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp.x:1842`
+Source: `lib/lisp.x:1838`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -225,7 +225,7 @@ session; borrowed referents keep their original lifetimes.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp.x:1817`
+Source: `lib/lisp.x:1813`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -238,7 +238,7 @@ A frozen session rejects `def` and `Lisp.set_global`: a value produced
 while a narrower `Context` is current would leave the session holding
 values that die with that `Context`.
 
-Source: `lib/lisp.x:1725`
+Source: `lib/lisp.x:1721`
 
 <a id="Lisp.kernel"></a>
 #### Lisp.kernel
@@ -254,7 +254,7 @@ aborts the process.
 **Raises:** `<alloc-fail>` or `<size-limit>` while creating session storage, or
 `<bad-enc>` while interning shared or special-form names.
 
-Source: `lib/lisp.x:1644`
+Source: `lib/lisp.x:1640`
 
 <a id="Lisp.new"></a>
 #### Lisp.new
@@ -267,7 +267,7 @@ If standard-source evaluation transfers, no handle is returned and the
 constructed session remains allocated.
 Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
 
-Source: `lib/lisp.x:1680`
+Source: `lib/lisp.x:1676`
 
 <a id="Lisp.set_interrupted"></a>
 #### Lisp.set_interrupted
@@ -293,7 +293,7 @@ output, or an absent name returns 0 and leaves `out` unchanged. Raises
 `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
 canonicalized.
 
-Source: `lib/lisp.x:1865`
+Source: `lib/lisp.x:1861`
 
 ## Advanced and interop API
 
@@ -313,7 +313,7 @@ Source: `lib/lisp.x:1865`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp.x:1728`
+Source: `lib/lisp.x:1724`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -326,7 +326,7 @@ This includes its global and reserved `Map`s, Lambdas, and transferred
 no evaluation may remain active.
 Destroying its still-active `Scope` raises `<bad-state>`.
 
-Source: `lib/lisp.x:1692`
+Source: `lib/lisp.x:1688`
 
 <a id="Lisp.read"></a>
 #### Lisp.read
@@ -349,7 +349,7 @@ construction must first initialize the shared reader names; afterward
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
-Source: `lib/lisp.x:1766`
+Source: `lib/lisp.x:1762`
 
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
@@ -367,7 +367,7 @@ binding.
 **Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
 `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 
-Source: `lib/lisp.x:1878`
+Source: `lib/lisp.x:1874`
 
 ## Runtime-internal callables
 
@@ -577,7 +577,7 @@ Source: `lib/lisp.x:1320`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp.x:1921`
+Source: `lib/lisp.x:1917`
 
 #### lisp_str
 
@@ -664,7 +664,7 @@ Source: `lib/lisp.x:1371`
 
 Borrows the session executing the current native Lisp callback.
 
-Source: `lib/lisp.x:1910`
+Source: `lib/lisp.x:1906`
 
 <a id="Lisp.automatic_storage"></a>
 #### Lisp.automatic_storage
@@ -673,7 +673,7 @@ Source: `lib/lisp.x:1910`
 
 Borrows the current lowered source activation's automatic storage.
 
-Source: `lib/lisp.x:1914`
+Source: `lib/lisp.x:1910`
 
 <a id="Lisp.result_storage"></a>
 #### Lisp.result_storage
@@ -682,7 +682,7 @@ Source: `lib/lisp.x:1914`
 
 Borrows the caller's storage for a lowered record result.
 
-Source: `lib/lisp.x:1917`
+Source: `lib/lisp.x:1913`
 
 <a id="Lisp.storage"></a>
 #### Lisp.storage
@@ -691,7 +691,7 @@ Source: `lib/lisp.x:1917`
 
 Borrows the storage owner for callback state retained by this session.
 
-Source: `lib/lisp.x:1912`
+Source: `lib/lisp.x:1908`
 
 ## Public types
 

@@ -125,7 +125,7 @@ then the next element and is not retained. It must not structurally mutate
 `array` during the walk. Any cause from `Func.apply` or `fn` propagates
 without changing `array`.
 
-Source: `lib/array.x:210`
+Source: `lib/array.x:202`
 
 <a id="Array.free"></a>
 #### Array.free
@@ -202,7 +202,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/array.x:232`
+Source: `lib/array.x:215`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -220,7 +220,7 @@ receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
 `<size-limit>` while rendering or canonicalizing the result, or a cause
 from an element's `write_str`.
 
-Source: `lib/array.x:434`
+Source: `lib/array.x:414`
 
 <a id="Array.map"></a>
 #### Array.map
@@ -252,7 +252,7 @@ structurally mutated during the walk.
 **Raises:** whatever `Func.apply` or `func` raises, or an allocation cause
 while constructing the result. The partial result is freed.
 
-Source: `lib/array.x:188`
+Source: `lib/array.x:185`
 
 <a id="Array.new"></a>
 #### Array.new
@@ -393,7 +393,7 @@ printf("%s %d\n", numbers.repr(), sorted == numbers);
 partially
 reordered when a catch receives the cause.
 
-Source: `lib/array.x:253`
+Source: `lib/array.x:236`
 
 <a id="Array.sort_by"></a>
 #### Array.sort_by
@@ -408,7 +408,7 @@ the callback is valid. Raises: allocation, key comparison, `Func.apply`,
 or callback causes. Failure leaves the original Array unchanged;
 callback side effects are not undone.
 
-Source: `lib/array.x:319`
+Source: `lib/array.x:300`
 
 <a id="Array.sort_with"></a>
 #### Array.sort_with
@@ -426,7 +426,7 @@ Null and fewer than two elements return unchanged without a callback.
 leaves the original Array unchanged; temporary storage is released.
 Callback side effects are not undone.
 
-Source: `lib/array.x:274`
+Source: `lib/array.x:255`
 
 <a id="Array.splice"></a>
 #### Array.splice
@@ -506,7 +506,7 @@ Source: `lib/array.x:132`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/array.x:229`
+Source: `lib/array.x:214`
 
 ### `Block`
 
@@ -528,7 +528,7 @@ Source: `lib/array.x:89`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:447`
+Source: `lib/array.x:427`
 
 ## Advanced and interop API
 
@@ -555,7 +555,7 @@ Source: `lib/array.x:447`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:455`
+Source: `lib/array.x:435`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -565,7 +565,7 @@ Source: `lib/array.x:455`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/array.x:229`
+Source: `lib/array.x:214`
 
 <a id="Array.equal"></a>
 #### Array.equal
@@ -593,7 +593,7 @@ error. Call `Array.heapify` first if it was not built with
 **Raises:** any cause reported by element comparison while restoring the heap.
 The heap may already have removed its root when a catch receives the error.
 
-Source: `lib/array.x:400`
+Source: `lib/array.x:380`
 
 <a id="Array.heap_push"></a>
 #### Array.heap_push
@@ -625,7 +625,7 @@ cannot grow, or a cause from element comparison. A value or earlier swap
 may remain when comparison fails; pre-insertion failures leave the heap
 unchanged.
 
-Source: `lib/array.x:385`
+Source: `lib/array.x:365`
 
 <a id="Array.heapify"></a>
 #### Array.heapify
@@ -642,7 +642,7 @@ time.
 `Array.getindex` describes, or a cause from element comparison. Comparison
 failure may leave a partially rearranged `Array`.
 
-Source: `lib/array.x:419`
+Source: `lib/array.x:399`
 
 <a id="Array.remslice"></a>
 #### Array.remslice
@@ -665,7 +665,7 @@ Source: `lib/array.x:72`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/array.x:229`
+Source: `lib/array.x:214`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -674,7 +674,7 @@ Source: `lib/array.x:229`
 
 Returns the packed-Array display String.
 
-Source: `lib/array.x:229`
+Source: `lib/array.x:214`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -695,7 +695,7 @@ Source: `lib/array.x:120`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/array.x:229`
+Source: `lib/array.x:214`
 
 ## Runtime-internal callables
 

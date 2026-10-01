@@ -40,7 +40,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:215`
+Source: `lib/map.x:201`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -49,7 +49,7 @@ Source: `lib/map.x:215`
 
 Returns one when `key` is present, or zero for a null map.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.copy"></a>
 #### Map.copy
@@ -62,7 +62,7 @@ fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.enumerate"></a>
 #### Map.enumerate
@@ -85,7 +85,7 @@ retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/map.x:210`
+Source: `lib/map.x:196`
 
 <a id="Map.get_hashed"></a>
 #### Map.get_hashed
@@ -102,7 +102,7 @@ respect. A null `Map` reports absence.
 **Raises:** a cause raised by custom key equality. Hashing happens in the
 caller, so a `void` key raises there instead.
 
-Source: `lib/map.x:127`
+Source: `lib/map.x:113`
 
 <a id="Map.getdefault"></a>
 #### Map.getdefault
@@ -112,7 +112,7 @@ Source: `lib/map.x:127`
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.iter"></a>
 #### Map.iter
@@ -125,7 +125,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/map.x:210`
+Source: `lib/map.x:196`
 
 <a id="Map.keys"></a>
 #### Map.keys
@@ -146,7 +146,7 @@ not outlive that
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/map.x:210`
+Source: `lib/map.x:196`
 
 <a id="Map.len"></a>
 #### Map.len
@@ -155,7 +155,7 @@ Source: `lib/map.x:210`
 
 Returns the number of entries, or zero for a null map.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.merge"></a>
 #### Map.merge
@@ -169,7 +169,7 @@ entries already copied remain; a newly created destination is discarded.
 
 **Raises:** an allocation, size, or invariant cause while inserting.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.new"></a>
 #### Map.new
@@ -181,7 +181,7 @@ The initial table has two buckets and grows automatically.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` when storage cannot be created.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.postfixindex"></a>
 #### Map.postfixindex
@@ -195,7 +195,7 @@ these operations.
 **Raises:** `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
 unsupported operation. These failures leave the value unchanged.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.set"></a>
 #### Map.set
@@ -209,7 +209,7 @@ Insertion invalidates live cursors and iterators; replacement does not.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.setdefault"></a>
 #### Map.setdefault
@@ -224,7 +224,7 @@ cursors and iterators; an existing-key read does not mutate the table.
 cause while inserting. Allocation and size failures leave the table
 unchanged.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.setindex"></a>
 #### Map.setindex
@@ -235,7 +235,7 @@ Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `$map.set`, with the same cursor
 invalidation and failure behavior.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.truth"></a>
 #### Map.truth
@@ -244,7 +244,7 @@ Source: `lib/map.x:107`
 
 Returns one when `map` contains an entry.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.try_del"></a>
 #### Map.try_del
@@ -255,7 +255,7 @@ Removes `key`, writes its value to `out`, and returns one when present.
 A null map, null `out`, or absent key returns zero without writing or
 mutation. Successful removal invalidates live cursors and iterators.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.try_get"></a>
 #### Map.try_get
@@ -265,7 +265,7 @@ Source: `lib/map.x:107`
 Writes the value for `key` to `out` and returns one when present.
 A null map, null `out`, or absent key returns zero without writing.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.try_next"></a>
 #### Map.try_next
@@ -278,7 +278,7 @@ exhaustion returns zero without changing `key` or `val`. Traversal
 follows bucket order, not insertion order, and structural mutation
 invalidates the cursor.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.updateindex"></a>
 #### Map.updateindex
@@ -294,7 +294,7 @@ the generated value operation, or an allocation, size, or invariant cause
 while inserting. Invalid operations leave an existing value unchanged.
 Allocation and size failures leave the table unchanged.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.write_str"></a>
 #### Map.write_str
@@ -303,7 +303,7 @@ Source: `lib/map.x:107`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/map.x:209`
+Source: `lib/map.x:195`
 
 ## Advanced and interop API
 
@@ -328,7 +328,7 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Raises: `<alloc-fail>` while creating temporary storage, or any
 cause from key or value comparison.
 
-Source: `lib/map.x:209`
+Source: `lib/map.x:195`
 
 <a id="Map.equal"></a>
 #### Map.equal
@@ -338,7 +338,7 @@ Source: `lib/map.x:209`
 Reports key/value equality independent of bucket and insertion order.
 Two null maps compare equal; a null and a nonnull map compare unequal.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.repr"></a>
 #### Map.repr
@@ -347,7 +347,7 @@ Source: `lib/map.x:107`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/map.x:209`
+Source: `lib/map.x:195`
 
 <a id="Map.str"></a>
 #### Map.str
@@ -356,7 +356,7 @@ Source: `lib/map.x:209`
 
 Returns the typed-Map display String.
 
-Source: `lib/map.x:209`
+Source: `lib/map.x:195`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -371,7 +371,7 @@ value does not.
 
 **Raises:** the same causes as `Map.set`.
 
-Source: `lib/map.x:140`
+Source: `lib/map.x:126`
 
 <a id="Map.write_repr"></a>
 #### Map.write_repr
@@ -380,7 +380,7 @@ Source: `lib/map.x:140`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/map.x:209`
+Source: `lib/map.x:195`
 
 ## Convenience API
 
@@ -402,7 +402,7 @@ Successful removal invalidates live cursors and iterators.
 Prefer `try_del` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.get"></a>
 #### Map.get
@@ -413,7 +413,7 @@ Returns the value for `key`.
 Prefer `try_get` when absence is an ordinary outcome. Boxed families
 return `void` for absence; native families raise `<bad-arg>`.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 <a id="Map.getindex"></a>
 #### Map.getindex
@@ -424,7 +424,7 @@ Returns the value selected by bracket indexing.
 This is the bracket-facing form of `$map.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 ## Runtime-internal callables
 
@@ -460,7 +460,7 @@ nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
 rebuilding, or any cause from export, key hashing, or moving the rebuilt
 `Block`s.
 
-Source: `lib/map.x:168`
+Source: `lib/map.x:154`
 
 <a id="Map.new_capacity"></a>
 #### Map.new_capacity
@@ -475,7 +475,7 @@ must be a power of two of at least two.
 **Raises:** `<bad-arg>` for another capacity, or `<alloc-fail>` /
 `<size-limit>` when storage cannot be created.
 
-Source: `lib/map.x:107`
+Source: `lib/map.x:93`
 
 ## Public types
 
