@@ -17,6 +17,7 @@
 #include "list.x"
 #include "symbol.x"
 #include "func.x"
+#include "scope.x"
 
 // capacity fences
 
@@ -148,14 +149,17 @@ class MachineProgram struct {
 /* Accumulates a mutable program in the active Scope.
 
     The first ineligibility reason is sticky. Constants and binders are
-    shallow values whose pointees must outlive any frozen program. */
-class MachineBuilder struct {
+    shallow values whose pointees must outlive any frozen program. Copying
+    a builder shares its mutable arrays; release them through one owner. */
+typedef struct MachineBuilder {
   MachineWord *code;
   Var *consts;
   Atom binders[MACHINE_BINDER_MAX];
   int length, code_capacity, const_count, const_capacity, binder_count, root;
   MachinePrepare status, const char *reason;
-} *;
+} MachineBuilder;
+
+protocol Cleanup(MachineBuilder);
 
 // execution state
 
@@ -218,11 +222,10 @@ typedef struct MachineStats {
 
 /* Holds one caller-owned Match-machine invocation.
 
-    Callers may stack-allocate the storage:
+    Callers declare the storage as a value:
 
-     struct MatchMachine storage;
-     MatchMachine m = &storage;
-     MatchMachine.open(m);
+     MatchMachine m;
+     m.open();
 
     `open` initializes fresh storage cheaply; `begin` binds a program and
     initializes only its binder slots. Count fields guard every array, so
@@ -248,7 +251,7 @@ typedef struct MatchMachine {
   MachineRegs regs[MACHINE_FRAME_MAX];
   MachineSlot slots[MACHINE_BINDER_MAX];
   MachineUndo undo[MACHINE_UNDO_MAX];
-} *MatchMachine;
+} MatchMachine;
 
 /* Compares a captured value or span with an exact List prefix.
 
@@ -309,7 +312,6 @@ inline int MachineSlot.final_equal(
 #pragma private
 
 #include <string.h>
-#include "scope.x"
 #include "exception.x"
 
 // builder
@@ -319,7 +321,7 @@ inline int MachineSlot.final_equal(
    may be -1, the patch placeholder. A failed builder keeps its first reason
    and all later emissions return -1. Allocation can raise. */
 int MachineBuilder.emit(
-  MachineBuilder b, int op, int a, int operand_b, int c, int d, int target) {
+  MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target) {
   if (b.status != MACHINE_PREPARED || b._grow_code() < 0) return -1;
   if (op < 0 || op > 255 || operand_b < 0 || operand_b > 255 ||
       c < 0 || c > 255 || d < 0 || d > 255 ||
@@ -332,7 +334,7 @@ int MachineBuilder.emit(
 }
 
 /* Makes room for one more word, or fails the builder at MACHINE_CODE_MAX. */
-static int MachineBuilder._grow_code(MachineBuilder b) {
+static int MachineBuilder._grow_code(MachineBuilder &b) {
   if (b.length < b.code_capacity) return 0;
   if (b.code_capacity >= MACHINE_CODE_MAX) return b._fail("code-capacity");
   int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
@@ -345,7 +347,7 @@ static int MachineBuilder._grow_code(MachineBuilder b) {
 
 /* Intern a constant by raw Var bits and return its byte-sized index. The
    stored value is shallow; capacity failure makes the builder ineligible. */
-int MachineBuilder.constant(MachineBuilder b, Var value) {
+int MachineBuilder.constant(MachineBuilder &b, Var value) {
   if (b.status != MACHINE_PREPARED) return -1;
   for (int i = 0; i < b.const_count; i++)
     if (b.consts[i].u64 == value.u64) return i;
@@ -356,7 +358,7 @@ int MachineBuilder.constant(MachineBuilder b, Var value) {
 
 /* Makes room for one more constant, or fails the builder at
    MACHINE_CONST_MAX. */
-static int MachineBuilder._grow_consts(MachineBuilder b) {
+static int MachineBuilder._grow_consts(MachineBuilder &b) {
   if (b.const_count < b.const_capacity) return 0;
   if (b.const_capacity >= MACHINE_CONST_MAX)
     return b._fail("constant-capacity");
@@ -369,7 +371,7 @@ static int MachineBuilder._grow_consts(MachineBuilder b) {
 }
 
 /* Intern a binder by raw Atom bits and return its fixed-table index. */
-int MachineBuilder.binder(MachineBuilder b, Atom binder) {
+int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
   if (b.status != MACHINE_PREPARED) return -1;
   for (int i = 0; i < b.binder_count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
@@ -384,7 +386,7 @@ int MachineBuilder.binder(MachineBuilder b, Atom binder) {
 
    Raises: `<bad-arg>` when target is otherwise outside the code domain. A
    failure leaves the patch site unchanged. */
-void MachineBuilder.set_target(MachineBuilder b, int site, int target) {
+void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
   if (target == b.length && b.length == MACHINE_CODE_MAX)
     b._fail("code-capacity");
   else if (target < 0 || target >= MACHINE_CODE_MAX)
@@ -397,12 +399,12 @@ void MachineBuilder.set_target(MachineBuilder b, int site, int target) {
    sites are ignored; each nonnegative site must name emitted code. An
    invalid target raises even when `count` is zero. */
 void MachineBuilder.patch(
-  MachineBuilder b, int *sites, int count, int target) {
+  MachineBuilder &b, int *sites, int count, int target) {
   if (target < 0 || target >= MACHINE_CODE_MAX) b.set_target(-1, target);
   for (int i = 0; i < count; i++) b.set_target(sites[i], target);
 }
 
-static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
+static int MachineBuilder._fail(MachineBuilder &b, const char *reason) {
   if (b.status == MACHINE_PREPARED) {
     b.status = MACHINE_INELIGIBLE;
     b.reason = reason;
@@ -416,7 +418,7 @@ static int MachineBuilder._fail(MachineBuilder b, const char *reason) {
    allocation. Return null for an ineligible or rootless builder. The producer
    must make root name emitted code; freeze only checks that it is
    nonnegative. */
-MachineProgram MachineBuilder.freeze(MachineBuilder b) {
+MachineProgram MachineBuilder.freeze(MachineBuilder &b) {
   if (b.status != MACHINE_PREPARED || b.root < 0) return NULL;
   size_t bytes = _program_bytes(b.length, b.const_count, b.binder_count);
   MachineProgram program = Scope.malloc(bytes);
@@ -456,16 +458,32 @@ size_t MachineProgram.bytes(MachineProgram program) => _program_bytes(
 
 // lifecycle
 
-/* Prepare a builder in the active Scope with no root selected. */
-void MachineBuilder.init(MachineBuilder b) {
-  b.status = MACHINE_PREPARED;
-  b.reason = "prepared";
-  b.root = -1;
+/* Return an empty builder with no root selected. */
+MachineBuilder MachineBuilder.new(void) {
+  MachineBuilder b;
+  b.init();
+  return b;
 }
 
-/* Free the builder's mutable arrays when the builder is freed. Any builder
-   view becomes invalid; constant and binder pointees are not freed. */
-void MachineBuilder.drop(MachineBuilder b) {
+/* Prepare fresh builder storage with no root selected. */
+void MachineBuilder.init(MachineBuilder &b) {
+  b = (MachineBuilder) {
+    .root = -1, .status = MACHINE_PREPARED, .reason = "prepared"};
+}
+
+/* Free the mutable arrays. Any builder view becomes invalid; constant and
+   binder pointees are not freed. */
+void MachineBuilder.drop(MachineBuilder &b) {
+  Scope.free(b.code);
+  Scope.free(b.consts);
+}
+
+/* Release the owned mutable arrays, invalidating this builder and its copies.
+   Assign a new builder before reusing its storage. */
+void MachineBuilder.free(MachineBuilder &b) => b.drop();
+
+/* Cleanup's value receiver releases the same shallow backing arrays. */
+inline void MachineBuilder.cleanup(MachineBuilder b) {
   Scope.free(b.code);
   Scope.free(b.consts);
 }

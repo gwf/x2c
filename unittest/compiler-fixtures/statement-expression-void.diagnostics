@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/statement-expression-void.x:4:3: type: cannot convert (void) to Var without loss
+    Var value = ({ int unused = 1; });
+    ^^^
+

@@ -162,6 +162,7 @@ static List _render(Options &options) {
   request.include_dirs = options.include_dirs;
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
+  if (!frontend.preload_macro_libraries()) return NULL;
   frontend.prepare_meta(%(${options.input}));
   ParsedUnit parsed;
   if (!_open_input(frontend, options.input, parsed)) return NULL;

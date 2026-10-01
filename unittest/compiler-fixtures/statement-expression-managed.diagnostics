@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/statement-expression-managed.x:4:12: parse: a statement expression cannot directly contain a defer or managed declaration
+    int n = ({ Array items = $auto([1, 2]); items.len(); });
+             ^
+  note: move it into a nested block
+

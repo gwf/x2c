@@ -568,7 +568,10 @@ void Path_copy_tree(Path, Path);
 static void Install_run(Install * i){
   String package = Install_unpacked(&((* i))), name = Path_basename(package);
   if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), NULL)))));
-  String staged = String_join(NULL, cons(String_var((* i).work), cons(String_var(_1), cons(String_var(name), NULL))));
+  String staged =({
+    Var _x2c_literal_part_0 = String_var((* i).work);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_1), cons(String_var(name), NULL))));
+  }
+  );
   {
     ExceptionFrame _x2c_exception_frame_2;
     static MatchCaptureSite _x2c_macro_arms_2[1];
@@ -629,13 +632,13 @@ static String Install_unpacked(Install * i){
   return Path_is_dir(source) ? source : _unpack(source, (* i).work);
 }
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
 Path Path_absolute(Path);
 
 String cli_version(void);
+
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
 
 Var Map_setindex(Map, Var, Var);
 
@@ -647,8 +650,14 @@ Var Map_var(Map);
 
 static void Install_mark_source(Install * i, String staged, String name){
   String version =(* i).version;
-  if(! String_truth(version)) version = _installed_version(String_join(NULL, cons(String_var((* i).packages), cons(String_var(_1), cons(String_var(name), NULL)))));
-  Map record = Map_update_n(Map_new(), 3, String_var(_87), String_var(name), String_var(_56), String_truth((* i).url) ? String_var((* i).url) : String_var(Path_absolute((* i).spec)), String_var(_88), String_var(cli_version()));
+  if(! String_truth(version)) version = _installed_version(({
+    Var _x2c_literal_part_1 = String_var((* i).packages);  String_join(NULL, cons(_x2c_literal_part_1, cons(String_var(_1), cons(String_var(name), NULL))));
+  }
+  ));
+  Map record =({
+    Var _x2c_literal_part_2 = String_var(_87);  Var _x2c_literal_part_3 = String_var(name);  Var _x2c_literal_part_4 = String_var(_56);  Var _x2c_literal_part_5 = String_truth((* i).url) ? String_var((* i).url) : String_var(Path_absolute((* i).spec));  Var _x2c_literal_part_6 = String_var(_88);  Var _x2c_literal_part_7 = String_var(cli_version());  Map_update_n(Map_new(), 3, _x2c_literal_part_2, _x2c_literal_part_3, _x2c_literal_part_4, _x2c_literal_part_5, _x2c_literal_part_6, _x2c_literal_part_7);
+  }
+  );
   if(String_truth(version)) Map_setindex(record, String_var(_89), String_var(version));
   if(String_truth((* i).sha256)) Map_setindex(record, String_var(_90), String_var((* i).sha256));
   Path_write_text(String_join(NULL, cons(String_var(staged), cons(String_var(_11), NULL))), String_join(NULL, cons(String_var(Var_pretty_json(Map_var(record))), cons(String_var(_12), NULL))));
@@ -686,10 +695,26 @@ static void _build_source(String package, String name, String spec){
   List units = _source_units(src, name, spec);
   _refuse_native(package, name);
   Path builds = _empty_builds(package);
-  List paths = cons(_25, cons(String_var(src), cons(_27, cons(String_var(Path_dirname(package)), NULL))));
+  List paths =({
+    Var _x2c_literal_part_8 = String_var(src);  Var _x2c_literal_part_9 = String_var(Path_dirname(package));  cons(_25, cons(_x2c_literal_part_8, cons(_27, cons(_x2c_literal_part_9, NULL))));
+  }
+  );
   _run(cons(String_var(x2c), cons(_29, cons(_31, cons(String_var(builds), List_append(paths, List_append(units, NULL)))))), "translate");
-  _run(cons(String_var(x2c), cons(_33, cons(_35, cons(String_var(TargetKind_of(1381098885964356) -> spelling), cons(_37, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_38), cons(String_var(name), cons(String_var(_21), NULL)))))), cons(_40, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_41), NULL)))), List_append(_files_with(builds, _91), List_append(_files_with(src, _91), NULL)))))))))), "build");
-  if(_native_meta(builds, name)) _run(cons(String_var(x2c), cons(_33, cons(_35, cons(String_var(TargetKind_of(904178442) -> spelling), cons(_37, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_1), cons(String_var(name), cons(String_var(_42), NULL)))))), cons(_40, cons(String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_43), NULL)))), List_append(paths, List_append(units, List_append(_files_with(src, _91), NULL))))))))))), "module build");
+  _run(({
+    Var _x2c_literal_part_10 = String_var(x2c);  Var _x2c_literal_part_11 = String_var(TargetKind_of(1381098885964356) -> spelling);  Var _x2c_literal_part_12 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_38), cons(String_var(name), cons(String_var(_21), NULL))))));  Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_41), NULL))));
+    List _x2c_literal_part_14 = _files_with(builds, _91);
+    List _x2c_literal_part_15 = _files_with(src, _91);
+    cons(_x2c_literal_part_10, cons(_33, cons(_35, cons(_x2c_literal_part_11, cons(_37, cons(_x2c_literal_part_12, cons(_40, cons(_x2c_literal_part_13, List_append(_x2c_literal_part_14, List_append(_x2c_literal_part_15, NULL))))))))));
+  }
+  ), "build");
+  if(_native_meta(builds, name)) _run(({
+    Var _x2c_literal_part_16 = String_var(x2c);  Var _x2c_literal_part_17 = String_var(TargetKind_of(904178442) -> spelling);  Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_1), cons(String_var(name), cons(String_var(_42), NULL))))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(builds), cons(String_var(_43), NULL))));
+    List _x2c_literal_part_20 = paths;
+    List _x2c_literal_part_21 = units;
+    List _x2c_literal_part_22 = _files_with(src, _91);
+    cons(_x2c_literal_part_16, cons(_33, cons(_35, cons(_x2c_literal_part_17, cons(_37, cons(_x2c_literal_part_18, cons(_40, cons(_x2c_literal_part_19, List_append(_x2c_literal_part_20, List_append(_x2c_literal_part_21, List_append(_x2c_literal_part_22, NULL)))))))))));
+  }
+  ), "module build");
   Path_write_text(String_join(NULL, cons(String_var(builds), cons(String_var(_1), cons(String_var(name), cons(String_var(_44), NULL))))), NULL);
 }
 
@@ -824,7 +849,10 @@ static int _native_meta(String builds, String name){
 
 String install_version(String name){
   if(! _init_guard_) _file_init_();
-  return _installed_version(String_join(NULL, cons(String_var(_home_packages(_85)), cons(String_var(_1), cons(String_var(name), NULL)))));
+  return _installed_version(({
+    Var _x2c_literal_part_23 = String_var(_home_packages(_85));  String_join(NULL, cons(_x2c_literal_part_23, cons(String_var(_1), cons(String_var(name), NULL))));
+  }
+  ));
 }
 
 String String_upper(String);
@@ -832,7 +860,10 @@ String String_upper(String);
 static String _installed_version(String package){
   String kind = _installed_kind(package);
   if(! String_truth(kind)) return NULL;
-  return _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_1), cons(String_var(String_upper(kind)), cons(String_var(_53), NULL))))), String_equal(kind, _54) ? _112 : _89);
+  return _marker_string(({
+    Var _x2c_literal_part_24 = String_var(package);  Var _x2c_literal_part_25 = String_var(String_upper(kind));  String_join(NULL, cons(_x2c_literal_part_24, cons(String_var(_1), cons(_x2c_literal_part_25, cons(String_var(_53), NULL)))));
+  }
+  ), String_equal(kind, _54) ? _112 : _89);
 }
 
 static String _installed_kind(String package){
@@ -1021,7 +1052,10 @@ String String_new(const char *);
 static String _platform(void){
   struct utsname host;
   if(uname(& host)) _error("cannot identify the host platform");
-  return String_join(NULL, cons(String_var(String_lower(String_new(host.sysname))), cons(String_var(_61), cons(String_var(String_new(host.machine)), NULL))));
+  return({
+    Var _x2c_literal_part_26 = String_var(String_lower(String_new(host.sysname)));  Var _x2c_literal_part_27 = String_var(String_new(host.machine));  String_join(NULL, cons(_x2c_literal_part_26, cons(String_var(_61), cons(_x2c_literal_part_27, NULL))));
+  }
+  );
 }
 
 int tool_capture(List, String *, String *);
@@ -1030,7 +1064,10 @@ String String_strip(String, char *);
 
 static void _run(List arguments, const char * what){
   String output = NULL, errors = NULL;
-  if(tool_capture(arguments, &(output), &(errors))) _error(String_join(NULL, cons(String_var(String_new(what)), cons(String_var(_62), cons(String_var(Var_str(List_car(arguments))), cons(String_var(_63), cons(String_var(String_strip(errors, " \n")), NULL)))))));
+  if(tool_capture(arguments, &(output), &(errors))) _error(({
+    Var _x2c_literal_part_28 = String_var(String_new(what));  Var _x2c_literal_part_29 = String_var(Var_str(List_car(arguments)));  Var _x2c_literal_part_30 = String_var(String_strip(errors, " \n"));  String_join(NULL, cons(_x2c_literal_part_28, cons(String_var(_62), cons(_x2c_literal_part_29, cons(String_var(_63), cons(_x2c_literal_part_30, NULL))))));
+  }
+  ));
 }
 
 static int _remote(String spec){
@@ -1076,8 +1113,14 @@ static String _unpack(String tarball, String work){
   Path_make_dirs(extracted);
   _run(cons(_75, cons(_77, cons(String_var(tarball), cons(_79, cons(String_var(extracted), NULL))))), "extract");
   List top = _entries(extracted);
-  if(! List_truth(top) || List_truth(List_cdr(top)) || ! Path_is_dir(String_join(NULL, cons(String_var(extracted), cons(String_var(_1), cons(String_var(Var_str(List_car(top))), NULL)))))) _error(String_join(NULL, cons(String_var(tarball), cons(String_var(_80), NULL))));
-  return String_join(NULL, cons(String_var(extracted), cons(String_var(_1), cons(String_var(Var_str(List_car(top))), NULL))));
+  if(! List_truth(top) || List_truth(List_cdr(top)) || ! Path_is_dir(({
+    Var _x2c_literal_part_31 = String_var(extracted);  Var _x2c_literal_part_32 = String_var(Var_str(List_car(top)));  String_join(NULL, cons(_x2c_literal_part_31, cons(String_var(_1), cons(_x2c_literal_part_32, NULL))));
+  }
+  ))) _error(String_join(NULL, cons(String_var(tarball), cons(String_var(_80), NULL))));
+  return({
+    Var _x2c_literal_part_33 = String_var(extracted);  Var _x2c_literal_part_34 = String_var(Var_str(List_car(top)));  String_join(NULL, cons(_x2c_literal_part_33, cons(String_var(_1), cons(_x2c_literal_part_34, NULL))));
+  }
+  );
 }
 
 static List _entries(String directory){
@@ -1103,7 +1146,10 @@ static List _files_with(String directory, String suffix){
 int remove_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   String name = Var_string(List_car(request -> inputs));
-  String target = String_join(NULL, cons(String_var(_home_packages(_120)), cons(String_var(_1), cons(String_var(name), NULL))));
+  String target =({
+    Var _x2c_literal_part_35 = String_var(_home_packages(_120));  String_join(NULL, cons(_x2c_literal_part_35, cons(String_var(_1), cons(String_var(name), NULL))));
+  }
+  );
   if(! String_is_identifier(name)) driver_error(String_join(NULL, cons(String_var(_81), cons(String_var(name), cons(String_var(_8), NULL)))));
   _check_removable(target, name);
   _locked_packages(_120, request -> quiet);

@@ -75,6 +75,11 @@ static void _completion_range(ReplSession session) {
 }
 
 static void _transaction_deletion(Compiler c) {
+  SymTxn inactive = {0};
+  inactive.commit();
+  inactive.rollback();
+  SymTxn.commit(NULL);
+  SymTxn.rollback(NULL);
   List key = %("__repl_probe");
   Map original = c.sym.file_statics();
   original[key] = 1;
@@ -89,7 +94,7 @@ static void _transaction_deletion(Compiler c) {
   transaction.commit_transient();
   transaction.rollback();
   scratch.destroy();
-  if (original.contains(key) ||
+  if (transaction.active || original.contains(key) ||
       (void *) original != (void *) c.sym.file_statics()) {
     fputs("transient commit lost deletion or original map identity\n", stderr);
     failures++;

@@ -461,8 +461,7 @@ static int MatchCaptureLayout._buffer_valid(
 
 /* Declares `$instance`, an open machine in stack storage. */
 macro Statement $match.machine(Name $instance, Expr $stats) {
-  struct MatchMachine storage;
-  MatchMachine $instance = &storage;
+  MatchMachine $instance;
   $instance.open();
   $instance.stats = $stats;
 }
@@ -503,7 +502,7 @@ static int MatchPlan._capture(
 /* Runs one prepared execution and commits positional values only after the
    machine and every lazy-span materialization have succeeded. */
 static int _run_capture(
-  MachineView view, MatchMachine m, Var input, MatchCaptureBuffer *captures) {
+  MachineView view, MatchMachine &m, Var input, MatchCaptureBuffer *captures) {
   if (!captures || captures.capacity < view.binder_count ||
       (view.binder_count && !captures.values))
     return -1;
@@ -519,7 +518,7 @@ static int _run_capture(
 /* Materializes each captured span, then commits every present value at
    once; a failed materialization leaves the buffer unchanged. */
 static int _commit(
-  MachineView view, MatchMachine m, MatchCaptureBuffer *captures) {
+  MachineView view, MatchMachine &m, MatchCaptureBuffer *captures) {
   Var values[MACHINE_BINDER_MAX];
   unsigned long present = 0;
   for (int i = 0; i < view.binder_count; i++) {
@@ -567,7 +566,8 @@ int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
 
 /* Publication reads committed positional state, never speculative matcher
    state. */
-static int MatchPlan._run(MatchPlan mm, MatchMachine m, Var input, List &out) {
+static int MatchPlan._run(
+  MatchPlan mm, MatchMachine &m, Var input, List &out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = _run_capture(mm.program.view(), m, input, &captures);
@@ -593,9 +593,9 @@ static List MatchCaptureLayout._publish(
    explicit `nil` element is a node, but a proper List's terminal cdr is
    traversal structure and is never tested. */
 
-/* One prepared walk owns a layout, machine, capture buffer, and the cell
-   stack its cdr loops share. Each level takes the region above the length
-   it found and restores that length before returning, so one growing
+/* One prepared walk borrows a plan, machine, and capture buffer, and owns
+   the cell stack its cdr loops share. Each level takes the region above the
+   length it found and restores that length before returning, so one growing
    allocation serves the whole traversal. The first-match walk writes
    `found` and `bindings`, the search walk `results`, and the replacing walk
    reads `template` and sets `error`. */
@@ -603,7 +603,7 @@ typedef struct MatchWalk {
   MatchPlan plan;
   MachineView view;
   MatchCaptureBuffer *captures;
-  MatchMachine m;
+  MatchMachine *m;
   Block spine;
   Var found, template;
   List bindings, results;
@@ -616,7 +616,7 @@ macro Statement $match.walk(Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   MatchWalk $walk = {
-    $plan, ($plan).program.view(), &captures, $machine,
+    $plan, ($plan).program.view(), &captures, &($machine),
     Block.new(sizeof(Var))
   };
 }
@@ -708,7 +708,7 @@ static int MatchPlan._replace_all(
    one capture buffer, and one cell stack. */
 
 static int MatchWalk._test(MatchWalk &walk, Var node) =>
-  _run_capture(walk.view, walk.m, node, walk.captures);
+  _run_capture(walk.view, *walk.m, node, walk.captures);
 
 /* One search result: `(* node)` followed by the node's bindings. */
 static List MatchWalk._hit(MatchWalk &walk, Var node) =>

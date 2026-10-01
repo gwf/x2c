@@ -626,7 +626,10 @@ List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token 
   if(! _init_guard_) _file_init_();  if(! Var_is_row(value, 9, 7, 4)) _refuse(c, value, site);  Type type = List_truth(Type_list(declared)) ? declared : _value_type(value);  if(Var_is_row(value, 9, 7, 4) && Sym_is_named_value_type(c -> sym, declared, _30678)){
     List expression = Compiler_macro_value_literal(c, Var_list(value));  return cons(_28, cons(_30609, cons(List_caddr(expression), NULL)));
   }
-  if(Sym_is_var_type(c -> sym, type)) type = List_type(_379);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _379) return _number_literal(c, declared, type, value);  Type kind = List_type(Var_is(value, 3313778) ? _5901 : Var_is(value, 26720) ? _30612 : Var_is_row(value, 9, 7, 4) ? _374 : NULL);  if(List_truth(Type_list(declared)) ? type == _379 || type == kind : List_truth(Type_list(kind)) && kind != _374) return _data_literal(c, declared, value, site);  if(Var_is_row(value, 11, 7, 1)) return _string_literal(c, declared, type, value);  if(Var_is(value, 1328354264) &&(! List_truth(Type_list(declared)) || type == _166)) return cons(_28, cons(_167, cons(List_var(cons(_168, cons(_167, cons(String_var(Symbol_str(Var_symbol(value))), cons(Symbol_var(Var_symbol(value)), NULL))))), NULL)));  return NULL;
+  if(Sym_is_var_type(c -> sym, type)) type = List_type(_379);  else Sym_var_tag_for_type(c -> sym, type, &(type));  if((Var_is_integer(value) || Var_is_floating(value)) && type != _379) return _number_literal(c, declared, type, value);  Type kind = List_type(Var_is(value, 3313778) ? _5901 : Var_is(value, 26720) ? _30612 : Var_is_row(value, 9, 7, 4) ? _374 : NULL);  if(List_truth(Type_list(declared)) ? type == _379 || type == kind : List_truth(Type_list(kind)) && kind != _374) return _data_literal(c, declared, value, site);  if(Var_is_row(value, 11, 7, 1)) return _string_literal(c, declared, type, value);  if(Var_is(value, 1328354264) &&(! List_truth(Type_list(declared)) || type == _166)) return cons(_28, cons(_167, cons(List_var(({
+    Var _x2c_literal_part_0 = String_var(Symbol_str(Var_symbol(value)));  Var _x2c_literal_part_1 = Symbol_var(Var_symbol(value));  cons(_168, cons(_167, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+  }
+  )), NULL)));  return NULL;
 }
 
 Map Map_new(void);
@@ -664,23 +667,47 @@ static Type _value_type(Var value){
 String Var_repr(Var);
 List Compiler_cache(Compiler, List);
 static List _string_literal(Compiler c, Type declared, Type type, Var value){
-  if(! List_truth(Type_list(declared)) || type == _183) return cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _384) return NULL;  List literal = cons(_28, cons(_385, cons(List_var(cons(_168, cons(_385, cons(value, NULL)))), NULL)));  return cons(_28, cons(List_var(declared), cons(List_var(Compiler_cache(c, cons(_30401, cons(List_var(literal), NULL)))), NULL)));
+  if(! List_truth(Type_list(declared)) || type == _183) return cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _384) return NULL;  List literal = cons(_28, cons(_385, cons(List_var(cons(_168, cons(_385, cons(value, NULL)))), NULL)));  return({
+    Var _x2c_literal_part_2 = List_var(declared);  Var _x2c_literal_part_3 = List_var(Compiler_cache(c, cons(_30401, cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+  }
+  );
 }
 
 Type Type_scalar(Type);
 static List _number_literal(Compiler c, Type declared, Type type, Var value){
-  type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  Type result = List_truth(Type_list(declared)) ? declared : type;  if(Type_scalar(type) == _2533) return _int_literal(result, value);  List literal = _bits_literal(value);  return cons(_28, cons(List_var(result), cons(List_var(cons(_30252, cons(List_var(cons(_28, cons(List_var(result), cons(List_var(cons(_2530, cons(List_var(type), cons(List_var(literal), NULL)))), NULL)))), NULL))), NULL)));
+  type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  Type result = List_truth(Type_list(declared)) ? declared : type;  if(Type_scalar(type) == _2533) return _int_literal(result, value);  List literal = _bits_literal(value);  return({
+    Var _x2c_literal_part_4 = List_var(result);  Var _x2c_literal_part_5 = List_var(cons(_30252, cons(List_var(({
+      Var _x2c_literal_part_6 = List_var(result);  Var _x2c_literal_part_7 = List_var(cons(_2530, cons(List_var(type), cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+    }
+    )), NULL)));  cons(_28, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+  }
+  );
 }
 
 String Var_str(Var);
 static List _int_literal(Type result, Var value){
-  long n = Var_integer(value);  List literal = cons(_28, cons(List_var(result), cons(List_var(cons(_168, cons(_2534, cons(String_var(Var_str(value)), NULL)))), NULL)));  if(n == INT_MIN) return cons(_28, cons(List_var(result), cons(List_var(cons(_30252, cons(List_var(cons(_28, cons(List_var(result), cons(List_var(cons(_2530, cons(_2534, cons(List_var(literal), NULL)))), NULL)))), NULL))), NULL)));  return n < 0 ? cons(_28, cons(List_var(result), cons(List_var(cons(_30252, cons(List_var(literal), NULL))), NULL))) : literal;
+  long n = Var_integer(value);  List literal =({
+    Var _x2c_literal_part_8 = List_var(result);  Var _x2c_literal_part_9 = List_var(cons(_168, cons(_2534, cons(String_var(Var_str(value)), NULL))));  cons(_28, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
+  }
+  );  if(n == INT_MIN) return({
+    Var _x2c_literal_part_10 = List_var(result);  Var _x2c_literal_part_11 = List_var(cons(_30252, cons(List_var(({
+      Var _x2c_literal_part_12 = List_var(result);  Var _x2c_literal_part_13 = List_var(cons(_2530, cons(_2534, cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+    }
+    )), NULL)));  cons(_28, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+  }
+  );  return n < 0 ?({
+    Var _x2c_literal_part_14 = List_var(result);  Var _x2c_literal_part_15 = List_var(cons(_30252, cons(List_var(literal), NULL)));  cons(_28, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
+  }
+  ) : literal;
 }
 
 void Var_numeric_decode(Var, X2CVarNumeric *);
 String String_printf(String, ...);
 static List _bits_literal(Var value){
-  X2CVarNumeric number;  Var_numeric_decode(value, &(number));  Type literal_type = List_type(number.floating ? _30630 : _30625);  String text = number.floating ? _float_text(number.floating_value) : String_printf(_30631, number.raw);  return cons(_28, cons(List_var(literal_type), cons(List_var(cons(_168, cons(List_var(literal_type), cons(String_var(text), NULL)))), NULL)));
+  X2CVarNumeric number;  Var_numeric_decode(value, &(number));  Type literal_type = List_type(number.floating ? _30630 : _30625);  String text = number.floating ? _float_text(number.floating_value) : String_printf(_30631, number.raw);  return({
+    Var _x2c_literal_part_16 = List_var(literal_type);  Var _x2c_literal_part_17 = List_var(cons(_168, cons(List_var(literal_type), cons(String_var(text), NULL))));  cons(_28, cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, NULL)));
+  }
+  );
 }
 
 static String _float_text(long double n){
@@ -847,7 +874,10 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_30645), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
-    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(String_new("\'")), cons(String_var(Var_str(name)), cons(String_var(String_new("\' can only be called at compile time")), NULL)))), origin, cons(String_var(_4946), cons(String_var(_4977), cons(String_var(_5008), NULL))));  break;
+    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(String_new("\'")), cons(String_var(Var_str(name)), cons(String_var(String_new("\' can only be called at compile time")), NULL)))), origin, ({
+      Var _x2c_literal_part_18 = String_var(_4946);  Var _x2c_literal_part_19 = String_var(_4977);  Var _x2c_literal_part_20 = String_var(_5008);  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
+    }
+    ));  break;
   }
 
 }

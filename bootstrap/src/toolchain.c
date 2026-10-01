@@ -412,12 +412,18 @@ static ToolAction Toolchain__action(Toolchain t, Symbol phase, List arguments){
 
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs){
   if(! _init_guard_) _file_init_();
-  return Toolchain__action(t, 7477414666, List_append(Toolchain__compile_arguments(t, gen_dirs), cons(_8, cons(_10, cons(_12, cons(String_var(depfile), cons(_14, cons(String_var(object), cons(_16, cons(String_var(source), cons(_18, cons(String_var(object), NULL))))))))))));
+  return Toolchain__action(t, 7477414666, ({
+    List _x2c_literal_part_0 = Toolchain__compile_arguments(t, gen_dirs);  List_append(_x2c_literal_part_0, cons(_8, cons(_10, cons(_12, cons(String_var(depfile), cons(_14, cons(String_var(object), cons(_16, cons(String_var(source), cons(_18, cons(String_var(object), NULL)))))))))));
+  }
+  ));
 }
 
 ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output, List gen_dirs){
   if(! _init_guard_) _file_init_();
-  return Toolchain__action(t, 1165861522189542, List_append(Toolchain__compile_arguments(t, gen_dirs), cons(_20, cons(String_var(source), cons(_18, cons(String_var(output), NULL))))));
+  return Toolchain__action(t, 1165861522189542, ({
+    List _x2c_literal_part_1 = Toolchain__compile_arguments(t, gen_dirs);  List_append(_x2c_literal_part_1, cons(_20, cons(String_var(source), cons(_18, cons(String_var(output), NULL)))));
+  }
+  ));
 }
 
 List List_flatten(List);
@@ -425,7 +431,10 @@ List List_flatten(List);
 List List_map(List, Func);
 
 static List Toolchain__compile_arguments(Toolchain t, List gen_dirs){
-  return cons(String_var(t -> cc), cons(_22, List_append(List_flatten(List_map(gen_dirs, _x2c_func_handle_0)), cons(_24, cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
+  return({
+    Var _x2c_literal_part_2 = String_var(t -> cc);  List _x2c_literal_part_3 = List_flatten(List_map(gen_dirs, _x2c_func_handle_0));  cons(_x2c_literal_part_2, cons(_22, List_append(_x2c_literal_part_3, cons(_24, cons(String_var(t -> include_dir), List_append(t -> cc_args, NULL))))));
+  }
+  );
 }
 
 ToolAction Toolchain_archive_action(Toolchain t, String output, List objects){
@@ -440,7 +449,10 @@ ToolAction Toolchain_link_action(Toolchain t, String output, List inputs){
 
 ToolAction Toolchain_module_action(Toolchain t, String output, List inputs){
   if(! _init_guard_) _file_init_();
-  return Toolchain__action(t, 805782, cons(String_var(t -> cc), List_append(inputs, List_append(t -> ld_args, List_append(_module_shape(), cons(_18, cons(String_var(output), NULL)))))));
+  return Toolchain__action(t, 805782, ({
+    Var _x2c_literal_part_4 = String_var(t -> cc);  List _x2c_literal_part_5 = inputs;  List _x2c_literal_part_6 = t -> ld_args;  List _x2c_literal_part_7 = _module_shape();  cons(_x2c_literal_part_4, List_append(_x2c_literal_part_5, List_append(_x2c_literal_part_6, List_append(_x2c_literal_part_7, cons(_18, cons(String_var(output), NULL))))));
+  }
+  ));
 }
 
 static List _module_shape(void){
@@ -655,7 +667,10 @@ static int _keeps_system_includes(String cc){
 List cpp_include_dirs(void);
 
 static List Toolchain__cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source){
-  return cons(String_var(t -> cc), cons(_20, cons(_57, cons(_44, cons(_46, cons(_59, cons(_61, cons(_63, cons(_65, cons(_67, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, List_append(t -> keep_system_includes > 0 ? _86 : NULL, cons(_88, cons(_90, List_append(_includes(cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_92, cons(String_var(macros), NULL)) : NULL, cons(_8, cons(_12, cons(String_var(depfile), cons(_14, cons(_94, cons(_96, cons(String_var(source), _99)))))))))))))))))))))))))))))))));
+  return({
+    Var _x2c_literal_part_8 = String_var(t -> cc);  List _x2c_literal_part_9 = t -> keep_system_includes > 0 ? _86 : NULL;  List _x2c_literal_part_10 = _includes(cpp_include_dirs());  List _x2c_literal_part_11 = _includes(include_dirs);  List _x2c_literal_part_12 = t -> cpp_args;  List _x2c_literal_part_13 = String_truth(macros) ? cons(_92, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_literal_part_8, cons(_20, cons(_57, cons(_44, cons(_46, cons(_59, cons(_61, cons(_63, cons(_65, cons(_67, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, List_append(_x2c_literal_part_9, cons(_88, cons(_90, List_append(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, cons(_8, cons(_12, cons(String_var(depfile), cons(_14, cons(_94, cons(_96, cons(String_var(source), _99)))))))))))))))))))))))))))))))));
+  }
+  );
 }
 
 static List _includes(List directories){

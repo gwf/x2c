@@ -202,7 +202,7 @@ Public functions:
 `Compiler.check_explicit_converter`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
 `Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/format.x](../src/format.x)
 
@@ -984,8 +984,9 @@ Public functions:
 `MachineSlot.prefix_equal`, `MachineSlot.final_equal`, `MachineBuilder.emit`,
 `MachineBuilder.constant`, `MachineBuilder.binder`,
 `MachineBuilder.set_target`, `MachineBuilder.patch`, `MachineBuilder.freeze`,
-`MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.init`,
-`MachineBuilder.drop`
+`MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.new`,
+`MachineBuilder.init`, `MachineBuilder.drop`, `MachineBuilder.free`,
+`MachineBuilder.cleanup`
 
 ### [lib/macro-value.x](../lib/macro-value.x)
 

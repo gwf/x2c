@@ -395,21 +395,30 @@ macro open Expression $empty_var_map() => Map.new();
 /** Converts an array literal to source-ordered Var arguments for its
     counted constructor. */
 List transform_array_literal(Compiler c, List ast) {
-  Array values = [];
-  foreach (List elem, ast.cdr()) values.push(c._literal_element(elem));
-  return c._var_array_literal(values.list_free());
+  Array values = [], orders = $auto([]);
+  foreach (List elem, ast.cdr()) {
+    List value = c._literal_element(elem);
+    values.push(value);
+    orders.push(c._part_order(value));
+  }
+  List declarations = c._ordered_parts(values, orders);
+  List literal = c._var_array_literal(values.list_free());
+  return _ordered(declarations, %("Array"), literal);
 }
 
 /** Converts a map literal to alternating Var key/value arguments for its
     counted constructor. */
 List transform_map_literal(Compiler c, List ast) {
-  List elems = ast.cdr(), Array values = [];
-  foreach (List entry, elems) {
-    List (key, val) = entry.cdr();
-    values.push(c._literal_element(key));
-    values.push(c._literal_element(val));
-  }
-  return c._var_map_literal(values.list_free());
+  Array values = [], orders = $auto([]);
+  foreach (List entry, ast.cdr())
+    foreach (List part, entry.cdr()) {
+      List value = c._literal_element(part);
+      values.push(value);
+      orders.push(c._part_order(value));
+    }
+  List declarations = c._ordered_parts(values, orders);
+  List literal = c._var_map_literal(values.list_free());
+  return _ordered(declarations, %("Map"), literal);
 }
 
 /* The containing typed expression already fixes the result type. */
@@ -446,19 +455,108 @@ static List Compiler._literal_element(Compiler c, List element) {
 }
 
 // Normalize cons nodes so head and tail carry expected runtime types.
-static List Compiler._cons(Compiler c, List ast) {
-  List (head, tail) = ast.cdr();
-  head = c.convert_expression(head, %("Var"));
-  tail = c.convert_expression(tail, %("List"));
-  return %(cons $head $tail);
+static List Compiler._cons(Compiler c, List ast) => c._ordered_list(ast);
+
+static List Compiler._append(Compiler c, List ast) => c._ordered_list(ast);
+
+static List Compiler._to_list(Compiler c, List expr) =>
+  c.convert_expression(expr, %("List"));
+
+static List Compiler._spliced(Compiler c, List expr) {
+  if (c.sym.is_var_type(expr.cadr()))
+    return %(expr ("List") (call "Var_list" (args $expr)));
+  return c._to_list(expr);
 }
 
-static List Compiler._append(Compiler c, List ast) {
-  List (lhs, rhs) = ast.cdr();
-  if (c.sym.is_var_type(lhs.cadr()))
-    lhs = %(expr ("List") (call "Var_list" (args $lhs)));
-  else lhs = c.convert_expression(lhs, %("List"));
-  return %(append $lhs $rhs);
+/* literal order
+
+   A literal evaluates its parts once each, left to right, though C leaves
+   the order of its constructor's arguments unspecified. Once two or more
+   parts read state, each part that reads state, through the last one that
+   may change state, moves into a temporary. A part's order is 0 when it is
+   constant, 1 when it only reads state, and 2 when it may change state. A
+   builtin boxer or scalar formatter reads what its argument reads. Custom
+   converters and uncached nested literal construction may change state. */
+static int Compiler._part_order(Compiler c, Var part) {
+  if (part is not <list>) return 0;
+  List node = part;
+  match (node) {
+    case %(!or (cache ?) (literal *) (nil) (segraw ?)): return 0;
+    case $source_identifier_content(%(?)): return 1;
+    case %(expr ? (call ? (args ?argument))):
+      return c.is_builtin_converter_call(node)
+        ? c._part_order(argument) : 2;
+    case %(!or (expr ? ?inner) (cast ? ?inner) ((!or segvar segexp) ?inner)
+        ${$source_content_pattern($grouped, %(?inner))}):
+      return c._part_order(inner);
+    case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
+      int order = c._part_order(inner);
+      return order > 1 ? order : 1;
+    }
+  }
+  return 2;
+}
+
+/* The number of leading parts that move, or zero. */
+static int _ordered_count(Array orders) {
+  int reads = 0, count = 0;
+  for (int i = 0; i < orders.len(); i++) {
+    int order = orders[i];
+    if (order) reads++;
+    if (order > 1) count = i + 1;
+  }
+  return reads < 2 ? 0 : count;
+}
+
+/* Moves the parts that need it into temporaries and returns their
+   declarations, or NULL when the parts stay in place. */
+static List Compiler._ordered_parts(Compiler c, Array values, Array orders) {
+  int count = _ordered_count(orders);
+  if (!count) return NULL;
+  Array declarations = [];
+  for (int i = 0; i < count; i++)
+    if ((int) orders[i])
+      values[i] = c._sequenced(
+        _passed_as(values[i], %("Var")), "literal_part", declarations);
+  return declarations.list_free();
+}
+
+static List _ordered(List declarations, Type type, List content) =>
+  declarations ? _statement_expression(declarations, %(expr $type $content))
+               : content;
+
+/* A List chain's parts are its cons heads and spliced Lists in source
+   order, then its final tail. Convert before classifying each part, so an
+   implicit custom converter participates in the same ordering as a call. */
+static List Compiler._ordered_list(Compiler c, List chain) {
+  Array kinds = $auto([]), values = $auto([]), orders = $auto([]);
+  List node = chain;
+  for (List cell = _list_cell(node); cell; cell = _list_cell(node)) {
+    (Symbol kind, List part, List rest) = cell;
+    List value = kind == <cons> ? c._to_var(part)
+      : _passed_as(c._spliced(part), %("List"));
+    kinds.push(kind);
+    values.push(value);
+    orders.push(c._part_order(value));
+    node = rest;
+  }
+  node = _passed_as(c._to_list(node), %("List"));
+  kinds.push(<nil>);
+  values.push(node);
+  orders.push(c._part_order(node));
+  List declarations = c._ordered_parts(values, orders);
+  List rebuilt = values.take_last();
+  for (int i = (int) values.len() - 1; i >= 0; i--)
+    rebuilt = %(expr ("List") (${kinds[i]} ${values[i]} $rebuilt));
+  return _ordered(declarations, %("List"), rebuilt.caddr());
+}
+
+static List _list_cell(List node) {
+  match (node) {
+    case %((!or cons append) ? ?): return node;
+    case %(expr ? (!set ?cell ((!or cons append) ? ?))): return cell;
+  }
+  return NULL;
 }
 
 // casts and bracket reads
@@ -542,11 +640,16 @@ static List Compiler._string_segments(Compiler c, List ast) {
       if (!c.runtime_literals)
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
   }
-  Array values = [];
-  foreach (List seg, ast.cdr()) values.push(c._segment_value(seg));
+  Array values = [], orders = $auto([]);
+  foreach (List seg, ast.cdr()) {
+    List value = c._segment_value(seg);
+    values.push(value);
+    orders.push(c._part_order(value));
+  }
+  List declarations = c._ordered_parts(values, orders);
   int segment_count = values.len();
-  List segments = values.list_free();
-  return c._join_segments(segments, segment_count);
+  List joined = c._join_segments(values.list_free(), segment_count);
+  return _ordered(declarations, %("String"), joined);
 }
 
 static List Compiler._join_segments(
@@ -1605,7 +1708,30 @@ static List Compiler._indexed_call_expr(
   return c.rebuild_expression(signature.cdr(), called(callee, arguments));
 }
 
-// Preserve x2c source order across C's unspecified call-argument order.
+/* evaluation order
+
+   C leaves the order of call arguments unspecified. A value that x2c
+   evaluates in source order moves into a temporary, declared ahead of the
+   expression that uses it inside a statement expression. */
+static List Compiler._sequenced(
+  Compiler c, List value, String stem, Array declarations) {
+  Type type = value.cadr();
+  List temporary = c.sym.introduce(c.fresh_name(stem));
+  declarations.push(_value_declaration(type, temporary, value));
+  return %(expr $type (ident $temporary));
+}
+
+/* A C macro such as raylib's WHITE expands to an expression x2c has no
+   type for, and a temporary still has to declare one: the type the value is
+   about to be passed as. */
+static List _passed_as(List value, Type type) {
+  match (value) case %(expr () ?body): return %(expr $type $body);
+  return value;
+}
+
+static List _statement_expression(List declarations, List expression) =>
+  %(parens (block @declarations (stmnt $expression)));
+
 static List Compiler._sequenced_protocol_call(
   Compiler c, List resolved, List arguments) {
   Type signature = resolved.cadr();
@@ -1615,24 +1741,14 @@ static List Compiler._sequenced_protocol_call(
        actual && expected;
        actual = actual.cdr(), expected = expected.cdr()) {
     List value = c.convert_expression(actual.car(), expected.car());
-    /* A C macro such as raylib's WHITE expands to an expression x2c has no
-       type for, and the sequencing temporary still has to declare one. The
-       parameter's type is the type the value is about to be passed as. */
-    (Var expr_tag, Type value_type, Var body) = value;
-    (void) expr_tag;
-    if (!value_type) value = %(expr ${expected.car()} $body);
-    converted.push(value);
+    converted.push(_passed_as(value, expected.car()));
   }
   Array declarations = [], arguments_out = [];
-  foreach (List value, converted) {
-    Type type = value.cadr();
-    List temporary = c.sym.introduce(c.fresh_name("protocol_arg"));
-    declarations.push(_value_declaration(type, temporary, value));
-    arguments_out.push(%(expr $type (ident $temporary)));
-  }
+  foreach (List value, converted)
+    arguments_out.push(c._sequenced(value, "protocol_arg", declarations));
   converted.free();
   List call = c._indexed_call_expr(resolved, arguments_out.list_free());
-  return %(parens (block @{declarations.list_free()} (stmnt $call)));
+  return _statement_expression(declarations.list_free(), call);
 }
 
 static List Compiler._protocol_update(

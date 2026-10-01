@@ -3,8 +3,9 @@
 > Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
 > `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
 > second bootstrap round. L1-L4 are decided (5-10 below). L1, L3, the
-> `({1})` fix, and template destructuring hygiene landed together; the
-> forward-name hygiene case waits on Gary. L2 and L4 are next. Five further defects found while scoping L1-L4 are
+> `({1})` fix, and template destructuring hygiene landed together; L2, L4, and
+> forward-name hygiene (decision 11) are submitted together to the shared
+> integrator. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
@@ -57,6 +58,12 @@ Recorded 2026-10-01 from Gary, after the L1-L4 scoping:
 9. L4: a `defer` or managed declaration directly inside a statement
    expression is an error.
 10. Fix `({1})` and the two template hygiene defects.
+11. Forward names in templates (Gary, 2026-10-01): a name that nothing
+    declares where a closed macro was defined binds a declaration the same
+    expansion introduces, including one a nested macro makes from a literal
+    `Name` in this body. A later global keeps working as today. A caller's
+    local never captures it; with no such declaration, x2c reports the name
+    instead of emitting C.
 
 Order: L1 and L3 with the three defects first, then L2, then L4.
 
@@ -104,11 +111,16 @@ in a body resolve where the macro was defined". It needs Gary's choice
 between that rule, a narrower rule that binds only declarations the same
 expansion introduces, and a diagnostic.
 
+Decision 11 is implemented: `$repeat(k, 3, k * 2, total)` binds the
+expansion's own `k`, and a free name that only a caller declaration would
+supply is reported. A name nothing declares anywhere (`errno`, `EOF`) is
+still left to C, so header names keep working. Still open and needing a
+semantics decision: with `int k = 0; $outer(k);` the caller's `k` passed
+through a `Name` hole is captured by the nested macro's loop variable `k`,
+because a `Name` argument travels as a bare spelling.
+
 Also found, not yet fixed: a brace with no destination type, such as a
-variadic argument (`printf("%d\n", {10})`), emits invalid C; and with
-`int k = 0; $outer(k);` the nested macro's public loop variable `k`
-captures the caller's `k` (prints 0), through the stale-local branch of
-`_shadow_identifier`.
+variadic argument (`printf("%d\n", {10})`), emits invalid C.
 
 ## Wave 1: direct substitutions
 
@@ -237,6 +249,23 @@ Scoped 2026-10-01; Gary's decisions go here before any work starts.
   bind the block in `_resolve_parens` (also fixes the Lisp-built defect);
   reject a top-level `defer` or managed declaration inside one. About 45
   lines; deletes about 20, or about 45 with a measured callables rewrite.
+
+Results of the L2/L4 batch:
+
+- L2 hoists literal parts into `literal_part` temporaries through one
+  sequencing owner in src/transform.x that `_sequenced_protocol_call` now
+  shares. The compiler's own C gains 509 statement expressions; translation
+  instructions are unchanged (src +0.02%, lib -0.1%, seven alternating runs
+  on converged trees). Fifteen emitter helpers folded into one-line arms.
+- L4 accepts `({ ... })` and binds Lisp-built statement expressions. The
+  cleanup walk now enters statement expressions, so a `return` inside one
+  runs the function's `defer` and a nested `defer` or `try` lowers; a
+  `try` inside one marks that function's statement-expression locals
+  volatile. `CaptureBuild._result`, `_prepend_setup`, `_func_bridge_call`,
+  and `$func_call` are templates now.
+- Follow-up: src/transform.x `_destructure_value` and the protocol call
+  path can use `$statement_value`; `_indirect_func_value` (Route 3) needs a
+  measured prototype.
 
 Backlog signals, not scheduled: L5 grammar macros as static constructors;
 L6 string-to-atom in compile-time Lisp; L7 Lisp callables crossing a

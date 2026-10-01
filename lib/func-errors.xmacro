@@ -1,0 +1,103 @@
+/* Func binding and adapter error conditions. Captures keep their original
+   payload order and types; each selected raise expands at its call site. */
+
+meta static Map _func_error_rows(void) => {
+
+  "apply.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.apply"));
+  },
+
+  "apply.arity" :
+  macro Statement(Expr $sig, Expr $expected, Expr $actual) {
+    raise %(bad-arity (sig ${$sig}) (expected ${$expected}) (actual ${$actual}));
+  },
+
+  "arg.value" :
+  macro Statement(Expr $sig, Expr $index) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (want value));
+  },
+
+  "arg.void" :
+  macro Statement(Expr $sig, Expr $index) {
+    raise %(void-op (sig ${$sig}) (index ${$index}));
+  },
+
+  "apply.index" :
+  macro Statement(Expr $index) {
+    raise %(bad-arg (operation "Func.apply") (index ${$index}));
+  },
+
+  "arg.convert" :
+  macro Statement(Expr $code, Expr $sig, Expr $index, Expr $want, Expr $lower) {
+    raise %(${$code} (sig ${$sig}) (index ${$index}) (want ${$want})
+            (cause ${$lower}));
+  },
+
+  "arg.type" :
+  macro Statement(Expr $sig, Expr $index, Expr $actual, Expr $want) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
+            (want ${$want}));
+  },
+
+  "arg.pointer" :
+  macro Statement(Expr $sig, Expr $index, Expr $actual) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
+            (want pointer));
+  },
+
+  "arg.unboxed" :
+  macro Statement(Expr $sig, Expr $index, Expr $source) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
+            (want value));
+  },
+
+  "arg.ref" :
+  macro Statement(Expr $sig, Expr $index, Expr $source, Expr $want) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
+            (want ${$want}));
+  },
+
+  "bind.sig" :
+  macro Statement(Expr $sig) {
+    raise %(bad-sig (sig ${$sig}));
+  },
+
+  "context.source" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.new_context"));
+  },
+
+  "context.size" :
+  macro Statement(Expr $size) {
+    raise %(size-limit (operation "Func.new_context") (size ${$size}));
+  },
+
+  "signature.null" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.signature"));
+  },
+
+  "context.null" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.context"));
+  },
+
+  "box.type" :
+  macro Statement(Expr $actual) {
+    raise %(bad-types (want func) (actual ${$actual}));
+  }
+};
+
+meta static List _func_error_expand(String key, List arguments) {
+  Map rows = _func_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Func error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $func.error(Literal $key, Expr $arguments...) {
+  $(_func_error_expand (x2c.literal.value $key) $arguments)...
+}

@@ -33,8 +33,6 @@ SymScope;
 
 typedef struct Sym * Sym;
 
-typedef struct SymTxn * SymTxn;
-
 typedef struct Compiler{
   String filename, text, root_dir;
   String package;
@@ -50,6 +48,7 @@ typedef struct Compiler{
   List frozen_stack_key;
   Var frozen_stack;
   unsigned long frozen_stack_epoch;
+  int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
   Map object_macros;
@@ -105,6 +104,24 @@ typedef struct Compiler{
   Map source_definitions, source_declarations, source_texts;
 }
 * Compiler;
+
+typedef struct SymTxn{
+  Compiler c;
+  int scope_index, next_binding, active;
+  String initializer_name;
+  String shutdown_name;
+  Map counters;
+  int local_macro_names;
+  SymScope scope;
+  Map statics, binding_facts;
+  Map source_definitions;
+  int source_occurrences;
+  int extended;
+  Map adapters;
+  Array base_bindings;
+  int early_count, init_count, origin_count, origin, needs_exception;
+}
+SymTxn;
 
 #include "diagnostics.h"
 #include "symbols.h"

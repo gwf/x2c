@@ -396,6 +396,45 @@ An expression is required; `=>;` is invalid. The rules for writing `return` in
 a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
+### Statement expressions
+
+x2c accepts the GNU statement expression, which generated C already requires
+a GNU-compatible compiler to compile. `(` followed by `{` begins one when a
+`;` stands at the top level of the braces, outside any nested parentheses,
+brackets, or braces; otherwise the brace keeps its meaning as a braced
+initializer or a Map literal, so `({})`, `({1})`, and `({a: 1})` are
+unchanged:
+
+```x2c
+int main(void) {
+  int area = ({ int width = 6; width * 7; });
+  String name = ({ String first = "Ada"; first + " Lovelace"; });
+  printf("%d %s\n", area, name);
+  return 0;
+}
+```
+
+```text
+42 Ada Lovelace
+```
+
+Its value and type are those of its final expression statement; a statement
+expression that ends any other way is `void`. Declarations inside it belong
+to its block. A template may contain one, and its locals are renamed like any
+other template local:
+
+```x2c
+macro Expression $plus_one(Expr $value) => ({ int t = $value; t + 1; });
+```
+
+A `defer`, or a managed declaration, directly inside a statement expression
+is an error: its cleanup region would enclose the final statement, and C
+would lose the value. Either may stand in a block nested inside the
+statement expression. A `return`, `break`, `continue`, or `goto` that leaves
+a statement expression runs the cleanup of each region it leaves, as it does
+from any other statement. `sizeof` takes its own parentheses, so a statement
+expression operand needs a second pair: `sizeof(({ ...; }))`.
+
 ### Reference parameters
 
 A function parameter declared `T &name` aliases an addressable `T` supplied by
@@ -1440,9 +1479,7 @@ macro open Expression $bump(Expr $value) => target((Width) $value);
 
 A caller's local of the same spelling does not capture them. A free type
 name resolves through the base scopes to its target type, so the generated C
-spells the target type rather than the typedef name. A free callee that the
-applying unit does not declare is emitted as a native call with the result
-type recorded where the macro was defined.
+spells the target type rather than the typedef name.
 
 ### Hygiene and generated names
 
@@ -1456,6 +1493,40 @@ invocation, so units that include one another can expand the same macro. A field
 aggregate, and an anonymous aggregate is a distinct type in each expansion. A
 visible body local passed to a nested macro's `Name` hole is that expansion's
 binding, so the nested macro can read and assign it.
+
+A free name that nothing declares where the macro is defined binds a
+declaration that the same expansion introduces. This includes a declaration
+that a nested macro makes from a literal `Name` written in the body. Without
+one, the name binds a global, including a global declared after the
+definition. A caller's local never captures a free name. When only a caller's
+declaration of that spelling is in view, x2c reports the name and the macro
+instead of emitting C. A name that nothing declares anywhere is left to C,
+as a native macro such as `errno` is.
+
+```x2c
+macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+  for (int $i = 0; $i < $count; $i++) $sum += $value;
+}
+
+macro Statement $print_doubles() {
+  int total = 0;
+  $repeat(k, 3, k * 2, total);
+  printf("%d\n", total);
+}
+
+int main(void) {
+  int k = 100;
+  $print_doubles();
+  return k != 100;
+}
+```
+
+```text
+6
+```
+
+In `$print_doubles`, `k * 2` reads the loop variable that `$repeat` declares
+from the literal `k`. The caller's `k` is not involved.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
@@ -2237,6 +2308,9 @@ literal. Both literals build a fresh object at each evaluation, as `%[]` and
 representation. Nested `[...]` and `{...}` are evaluated literals of the same
 kinds; nested `List` data is written `%(...)`.
 
+Elements, keys, and values are evaluated once each, left to right in source
+order, as in the percent forms below.
+
 `[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
 when its destination is a `Map`, a `Var`, an alias of either, or a type that
 converts from `Map`, and likewise for `Array`; for any other destination it
@@ -2325,11 +2399,14 @@ if collection construction tries to store it.
 `$name` inserts one identifier expression into a quoted collection.
 `${expression}` inserts one arbitrary x2c expression, including calls, member
 and index expressions, operators, casts, compound literals, `NULL`, enum
-constants, and comma expressions. Each expression is evaluated once. `@name`
-and `@{expression}` splice a `List` into a surrounding `List`; Arrays and Maps
-have no splice form. The identifier forms are the short versions of the braced
-expression forms. The [collections](../guide/collections.md) chapter walks
-through building and using each one.
+constants, and comma expressions. `@name` and `@{expression}` splice a `List`
+into a surrounding `List`; Arrays and Maps have no splice form. The inserted
+and spliced expressions of one `%()`, `%[]`, `%{}`, or `%""` literal are
+evaluated once each, left to right in source order. The arguments of an
+ordinary function call keep C's unspecified order. The identifier forms are
+the short versions of the braced expression forms. The
+[collections](../guide/collections.md) chapter walks through building and
+using each one.
 
 For `List`s that will be evaluated as Lisp, `'`, `` ` ``, `,`, and `,@` are the
 short forms of `quote`, `quasiquote`, `unquote`, and `unquote-splicing`. Each

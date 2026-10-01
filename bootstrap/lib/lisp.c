@@ -238,15 +238,18 @@ _x2c_initializer_choice_D09CF48E_13((_native_scalar_access_long_double =(struct 
 ))
 static Map native_scalars;
 
-Map Map_update_n(Map, unsigned, ...);
-
-Map Map_new(void);
-
 Var List_var(List);
 
 Var Symbol_var(Symbol);
 
-_x2c_initializer_choice_D09CF48E_14((native_scalars = Map_update_n(Map_new(), 14, List_var(cons(Symbol_var(213092), NULL)), Var_new(3683441, (void *) & _native_scalar_access_char), List_var(cons(Symbol_var(301273866), NULL)), Var_new(3683441, (void *) & _native_scalar_access_double), List_var(cons(Symbol_var(13400168), NULL)), Var_new(3683441, (void *) & _native_scalar_access_float), List_var(cons(Symbol_var(19368), NULL)), Var_new(3683441, (void *) & _native_scalar_access_int), List_var(cons(Symbol_var(818062), NULL)), Var_new(3683441, (void *) & _native_scalar_access_long), List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), NULL))), Var_new(3683441, (void *) & _native_scalar_access_long_double), List_var(cons(Symbol_var(818062), cons(Symbol_var(818062), NULL))), Var_new(3683441, (void *) & _native_scalar_access_long_long), List_var(cons(Symbol_var(40402088), NULL)), Var_new(3683441, (void *) & _native_scalar_access_short), List_var(cons(Symbol_var(1294430536), cons(Symbol_var(213092), NULL))), Var_new(3683441, (void *) & _native_scalar_access_signed_char), List_var(cons(Symbol_var(1474468213064), NULL)), Var_new(3683441, (void *) & _native_scalar_access_unsigned), List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(213092), NULL))), Var_new(3683441, (void *) & _native_scalar_access_unsigned_char), List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), NULL))), Var_new(3683441, (void *) & _native_scalar_access_unsigned_long), List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), cons(Symbol_var(818062), NULL)))), Var_new(3683441, (void *) & _native_scalar_access_unsigned_long_long), List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(40402088), NULL))), Var_new(3683441, (void *) & _native_scalar_access_unsigned_short))))
+Map Map_update_n(Map, unsigned, ...);
+
+Map Map_new(void);
+
+_x2c_initializer_choice_D09CF48E_14((native_scalars =({
+  Var _x2c_literal_part_0 = List_var(cons(Symbol_var(213092), NULL));  Var _x2c_literal_part_1 = Var_new(3683441, (void *) & _native_scalar_access_char);  Var _x2c_literal_part_2 = List_var(cons(Symbol_var(301273866), NULL));  Var _x2c_literal_part_3 = Var_new(3683441, (void *) & _native_scalar_access_double);  Var _x2c_literal_part_4 = List_var(cons(Symbol_var(13400168), NULL));  Var _x2c_literal_part_5 = Var_new(3683441, (void *) & _native_scalar_access_float);  Var _x2c_literal_part_6 = List_var(cons(Symbol_var(19368), NULL));  Var _x2c_literal_part_7 = Var_new(3683441, (void *) & _native_scalar_access_int);  Var _x2c_literal_part_8 = List_var(cons(Symbol_var(818062), NULL));  Var _x2c_literal_part_9 = Var_new(3683441, (void *) & _native_scalar_access_long);  Var _x2c_literal_part_10 = List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), NULL)));  Var _x2c_literal_part_11 = Var_new(3683441, (void *) & _native_scalar_access_long_double);  Var _x2c_literal_part_12 = List_var(cons(Symbol_var(818062), cons(Symbol_var(818062), NULL)));  Var _x2c_literal_part_13 = Var_new(3683441, (void *) & _native_scalar_access_long_long);  Var _x2c_literal_part_14 = List_var(cons(Symbol_var(40402088), NULL));  Var _x2c_literal_part_15 = Var_new(3683441, (void *) & _native_scalar_access_short);  Var _x2c_literal_part_16 = List_var(cons(Symbol_var(1294430536), cons(Symbol_var(213092), NULL)));  Var _x2c_literal_part_17 = Var_new(3683441, (void *) & _native_scalar_access_signed_char);  Var _x2c_literal_part_18 = List_var(cons(Symbol_var(1474468213064), NULL));  Var _x2c_literal_part_19 = Var_new(3683441, (void *) & _native_scalar_access_unsigned);  Var _x2c_literal_part_20 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(213092), NULL)));  Var _x2c_literal_part_21 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_char);  Var _x2c_literal_part_22 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), NULL)));  Var _x2c_literal_part_23 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long);  Var _x2c_literal_part_24 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), cons(Symbol_var(818062), NULL))));  Var _x2c_literal_part_25 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long_long);  Var _x2c_literal_part_26 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(40402088), NULL)));  Var _x2c_literal_part_27 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_short);  Map_update_n(Map_new(), 14, _x2c_literal_part_0, _x2c_literal_part_1, _x2c_literal_part_2, _x2c_literal_part_3, _x2c_literal_part_4, _x2c_literal_part_5, _x2c_literal_part_6, _x2c_literal_part_7, _x2c_literal_part_8, _x2c_literal_part_9, _x2c_literal_part_10, _x2c_literal_part_11, _x2c_literal_part_12, _x2c_literal_part_13, _x2c_literal_part_14, _x2c_literal_part_15, _x2c_literal_part_16, _x2c_literal_part_17, _x2c_literal_part_18, _x2c_literal_part_19, _x2c_literal_part_20, _x2c_literal_part_21, _x2c_literal_part_22, _x2c_literal_part_23, _x2c_literal_part_24, _x2c_literal_part_25, _x2c_literal_part_26, _x2c_literal_part_27);
+}
+)))
 #include <signal.h>
 enum LispSpecial{
   LISP_BIND, LISP_EVAL, LISP_QUOTE, LISP_COND, LISP_DEF, LISP_LAMBDA, LISP_MACRO, LISP_QUASIQUOTE, LISP_IMPORT, LISP_APPLY, LISP_SPECIAL_COUNT
@@ -2886,7 +2889,10 @@ Var Var_binary(Var, Symbol, Var);
 
 Var lisp_add(Var a, Var b){
   if(! _init_guard_) _file_init_();
-  if(Var_is_row(a, 11, 7, 1) || Var_is_row(b, 11, 7, 1)) return String_var(String_join(NULL, cons(String_var(Var_str(a)), cons(String_var(Var_str(b)), NULL))));
+  if(Var_is_row(a, 11, 7, 1) || Var_is_row(b, 11, 7, 1)) return String_var(({
+    Var _x2c_literal_part_28 = String_var(Var_str(a));  Var _x2c_literal_part_29 = String_var(Var_str(b));  String_join(NULL, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
+  }
+  ));
   return Var_binary(a, 56, b);
 }
 

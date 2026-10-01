@@ -295,7 +295,10 @@ Array Array_sort(Array);
 
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();
-  for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(cons(int_var(set -> size[i]), cons(int_var(i), NULL))));
+  for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(({
+    Var _x2c_literal_part_0 = int_var(set -> size[i]);  cons(_x2c_literal_part_0, cons(int_var(i), NULL));
+  }
+  )));
   return Array_list_free(Array_sort(sizes));
 }
 

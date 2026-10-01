@@ -316,11 +316,11 @@ static int _changed_dependency(Compiler c, SourceView sources){
 
 Map Map_new(void);
 
+Var Array_var(Array);
+
 Map Map_update_n(Map, unsigned, ...);
 
 Var Symbol_var(Symbol);
-
-Var Array_var(Array);
 
 Var Map_setindex(Map, Var, Var);
 
@@ -332,7 +332,10 @@ static int Query_write(Query * q, int parsed){
   File out = fopen((* q).response, "w");
   if(! out) return 2;
   (* q).needed = Map_new();
-  (* q).reply = Map_update_n(Map_new(), 2, Symbol_var(412426), String_var((* q).source), Atom_intern(String_new("diagnostics")), Array_var(Query_diagnostics(&((* q)))));
+  (* q).reply =({
+    Var _x2c_literal_part_0 = String_var((* q).source);  Var _x2c_literal_part_1 = Array_var(Query_diagnostics(&((* q))));  Map_update_n(Map_new(), 2, Symbol_var(412426), _x2c_literal_part_0, Atom_intern(String_new("diagnostics")), _x2c_literal_part_1);
+  }
+  );
   if(parsed) Query_answer(&((* q)));
   Map_setindex((* q).reply, Symbol_var(41854048614), Array_var(Query_texts(&((* q)))));
   fprintf(out, "%s\n", Var_json(Map_var((* q).reply)));

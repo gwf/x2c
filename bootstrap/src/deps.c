@@ -89,7 +89,10 @@ Var List_assoc(List, Var);
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
-  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), cons(String_var(_1), NULL)))));
+  String path = String_truth(request -> dep_file) ? request -> dep_file :({
+    Var _x2c_literal_part_0 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_0), cons(_x2c_literal_part_1, cons(String_var(_1), NULL)))));
+  }
+  );
   long volatile error = 0;
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -105,7 +108,10 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
     volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
     x2c_exception_push(& _x2c_exception_frame_0);
     if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      file_publish(cons(String_var(path), cons(String_var(_contents(request, compiler, input, output_dir)), NULL)));
+      file_publish(({
+        Var _x2c_literal_part_2 = String_var(path);  Var _x2c_literal_part_3 = String_var(_contents(request, compiler, input, output_dir));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
+      }
+      ));
       {
         int _x2c_return_value_0 = 1;
         {
@@ -253,7 +259,10 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
 }
 
 static void _write_targets(Buffer out, CliRequest request, String input, String output_dir){
-  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
+  String base =({
+    Var _x2c_literal_part_4 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_literal_part_5 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_0), cons(_x2c_literal_part_5, NULL))));
+  }
+  );
   _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
   if(String_truth(request -> dep_target)) return;
   Buffer_write_char(out, ' ');

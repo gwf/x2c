@@ -508,7 +508,10 @@ String int_str(int);
 
 String Token_repr(Token token){
   if(! _init_guard_) _file_init_();
-  String head = String_join(NULL, cons(String_var(_0), cons(String_var(Token_str(token)), cons(String_var(_1), cons(String_var(Symbol_str(token -> type)), NULL)))));
+  String head =({
+    Var _x2c_literal_part_0 = String_var(Token_str(token));  Var _x2c_literal_part_1 = String_var(Symbol_str(token -> type));  String_join(NULL, cons(String_var(_0), cons(_x2c_literal_part_0, cons(String_var(_1), cons(_x2c_literal_part_1, NULL)))));
+  }
+  );
   String location = String_join(NULL, cons(String_var(_2), cons(String_var(int_str(token -> line)), cons(String_var(_3), cons(String_var(int_str(token -> col)), NULL)))));
   String extent = String_join(NULL, cons(String_var(_4), cons(String_var(int_str(token -> len)), cons(String_var(_5), cons(String_var(int_str(token -> pos)), NULL)))));
   return String_join(NULL, cons(String_var(head), cons(String_var(_6), cons(String_var(location), cons(String_var(_6), cons(String_var(extent), cons(String_var(_7), NULL)))))));
@@ -1147,7 +1150,10 @@ static void _Layout_edit_line(_Layout * l, int i){
   String suffix = NULL;
   if(String_equal((* l).sig[line.last] -> text, _13) && !(* l).ternary[line.last] && next > line.indent) _Layout_open_block(&((* l)), line, j, next);
   else suffix = _Layout_end_statement(&((* l)), line);
-  while((* l).top && next <(* l).indents[(* l).top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var((* l).closers[(* l).top --]), NULL)));
+  while((* l).top && next <(* l).indents[(* l).top]) suffix =({
+    Var _x2c_literal_part_2 = String_var(suffix);  Var _x2c_literal_part_3 = String_var((* l).closers[(* l).top --]);  String_join(NULL, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+  }
+  );
   if(next !=(* l).indents[(* l).top] && !(* l).error_at && j <(* l).nlines)(* l).error_at =(* l).sig[(* l).lines[j].first];
   _LayoutEdit * tail = _Layout_edit(&((* l)), line.last);
   if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;

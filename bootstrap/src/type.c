@@ -637,7 +637,10 @@ static List _from_aggregate(List node, Var head){
   if(Type_is_aggregate_tag(List_type(node))) return node;  if(Type__is_aggregate_body(List_type(node))){
     List fields = List_flatten(_from_ast(Var_list(List_cadr(node)), NULL));  return cons(head, cons(List_var(fields), NULL));
   }
-  return cons(head, cons(List_cadr(node), NULL));
+  return({
+    Var _x2c_literal_part_0 = head;  Var _x2c_literal_part_1 = List_cadr(node);  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+  }
+  );
 }
 
 int List_len(List);
@@ -657,7 +660,10 @@ static int _is_source_text(Var item){
 }
 
 static Type Type__modify(Type type, List mods){
-  return List_type(List_append(mods, List_append(Type_list(type), NULL)));
+  return List_type(({
+    List _x2c_literal_part_2 = mods;  List _x2c_literal_part_3 = Type_list(type);  List_append(_x2c_literal_part_2, List_append(_x2c_literal_part_3, NULL));
+  }
+  ));
 }
 
 List type_declaration_parts(List);
@@ -667,11 +673,17 @@ List Type_declaration_parts(Type type){
 
 Var List_getindex(List, int);
 List Type_declaration_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  return cons(_219, cons(List_var(base), cons(List_var(cons(_235, cons(List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL))), NULL)));
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  return({
+    Var _x2c_literal_part_4 = List_var(base);  Var _x2c_literal_part_5 = List_var(cons(_235, cons(List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_219, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+  }
+  );
 }
 
 List Type_parameter_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return cons(_246, cons(List_var(base), cons(List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return({
+    Var _x2c_literal_part_6 = List_var(base);  Var _x2c_literal_part_7 = List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_246, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+  }
+  );
 }
 
 Iter Var_iter(Var, Iter);
@@ -703,7 +715,10 @@ Array_push(modifiers, modifier);
 if(! changed){
   Array_free(modifiers);  return declarator;
 }
-return cons(_44, cons(List_cadr(declarator), cons(List_var(Array_list_free(modifiers)), NULL)));
+return({
+  Var _x2c_literal_part_8 = List_cadr(declarator);  Var _x2c_literal_part_9 = List_var(Array_list_free(modifiers));  cons(_44, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
+}
+);
 }
 
 static List _prototype_params(List parameters, int * changed){
@@ -716,7 +731,13 @@ static List _prototype_params(List parameters, int * changed){
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_287), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var name = _x2c_match_values[1];  List rest = Var_list(_x2c_match_values[2]); {
-          parameter = cons(_246, cons(type, cons(List_var(cons(_44, cons(name, cons(List_var(List_append(rest, NULL)), NULL)))), NULL))); (* changed) = 1;
+          parameter =({
+            Var _x2c_literal_part_10 = type;  Var _x2c_literal_part_11 = List_var(({
+              Var _x2c_literal_part_12 = name;  Var _x2c_literal_part_13 = List_var(List_append(rest, NULL));  cons(_44, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+            }
+            ));  cons(_246, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+          }
+          ); (* changed) = 1;
         }
         break;
       }
@@ -1224,11 +1245,17 @@ Var Map_setindex(Map, Var, Var);
 Symbol String_symbol(String);
 String String_lower(String);
 void Type_register_var_tag(Type t, String name, String converter){
-  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(({
+    Var _x2c_literal_part_14 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_literal_part_14, cons(String_var(converter), NULL));
+  }
+  )));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){
-  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(tag), cons(List_cadr(Var_list(row)), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(({
+    Var _x2c_literal_part_15 = Symbol_var(tag);  Var _x2c_literal_part_16 = List_cadr(Var_list(row));  cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL));
+  }
+  )));
 }
 
 void Type_begin_unit(void){

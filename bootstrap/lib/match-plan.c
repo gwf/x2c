@@ -2,6 +2,8 @@
 
 #include "match-plan.h"
 
+#include "exception.h"
+
 static List _9, _7, _5, _4, _1;
 
 static Var _8, _6, _3, _2, _0;
@@ -158,6 +160,13 @@ static int MatchLower__star_tail(MatchLower * l, MatchStar * star);
 
 static int MatchLower__star_retry(MatchLower * l, MatchStar * star, int loop);
 
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -193,30 +202,46 @@ MatchPlan MatchPlan_prepare(Var pattern){
   return plan;
 }
 
-MachineBuilder MachineBuilder_new();
+MachineBuilder MachineBuilder_new(void);
 
-int MachineBuilder_binder(MachineBuilder, Atom);
+void x2c_cleanup_push(X2CCleanup *);
 
-MachineProgram MachineBuilder_freeze(MachineBuilder);
+int MachineBuilder_binder(MachineBuilder *, Atom);
+
+MachineProgram MachineBuilder_freeze(MachineBuilder *);
 
 void Scope_free(void *);
 
-void MachineBuilder_free(MachineBuilder);
+void x2c_cleanup_leave(X2CCleanup *);
 
 static void MatchPlan__lower(MatchPlan plan, Var pattern){
-  MachineBuilder b = MachineBuilder_new();
   MatchLower l ={
-    .b = b, .depth = 1
+    .b = MachineBuilder_new(), .depth = 1
   }
   ;
-  for(int i = 0;  i < plan -> layout -> binder_count;  i ++) if(MachineBuilder_binder(b, plan -> layout -> binders[i]) != i) break;
-  b -> root = b -> status == MACHINE_PREPARED ? MatchLower__compile_value(&(l), pattern) : - 1;
-  if(b -> root < 0) MatchLower__fail(&(l), "lowering");
-  plan -> status = b -> status;
-  plan -> reason = b -> reason;
-  if(plan -> status == MACHINE_PREPARED) plan -> program = MachineBuilder_freeze(b);
-  if(l.sites) Scope_free(l.sites);
-  MachineBuilder_free(b);
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & l;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      for(int i = 0;  i < plan -> layout -> binder_count;  i ++) if(MachineBuilder_binder(&(l.b), plan -> layout -> binders[i]) != i) break;
+      l.b.root = l.b.status == MACHINE_PREPARED ? MatchLower__compile_value(&(l), pattern) : - 1;
+      if(l.b.root < 0) MatchLower__fail(&(l), "lowering");
+      plan -> status = l.b.status;
+      plan -> reason = l.b.reason;
+      if(plan -> status == MACHINE_PREPARED) plan -> program = MachineBuilder_freeze(&(l.b));
+      if(l.sites) Scope_free(l.sites);
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
 }
 
 void MachineProgram_free(MachineProgram);
@@ -253,38 +278,37 @@ static int MatchLower__compile_value(MatchLower * l, Var pattern){
   return MatchLower__compile_segment(&((* l)), list);
 }
 
-int MachineBuilder_emit(MachineBuilder, int, int, int, int, int, int);
+int MachineBuilder_emit(MachineBuilder *, int, int, int, int, int, int);
 
 static int MatchLower__compile_binder(MatchLower * l, Var binder){
-  int entry =(* l).b -> length;
+  int entry =(* l).b.length;
   if(Var_equal(binder, Symbol_var(58))){
-    MachineBuilder_emit((* l).b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     return MatchLower__stopped(&((* l))) ? - 1 : entry;
   }
   int base =(* l).site_count;
   return MatchLower__emit_binder(&((* l)), binder) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
-void MachineBuilder_set_target(MachineBuilder, int, int);
+void MachineBuilder_set_target(MachineBuilder *, int, int);
 
 static int MatchLower__emit_binder(MatchLower * l, Var binder){
   if(Var_equal(binder, Symbol_var(58))) return 1;
-  MachineBuilder b =(* l).b;
-  int slot = MachineBuilder_binder(b, binder);
+  int slot = MachineBuilder_binder(&((* l).b), binder);
   if(slot < 0) return 0;
-  int valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
-  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int done = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
+  int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int done = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
   if(valid < 0 || done < 0) return 0;
-  int compare = b -> length;
+  int compare =(* l).b.length;
   if(! MatchLower__fail_site(&((* l)), MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  MachineBuilder_set_target(b, valid, compare);
-  MachineBuilder_set_target(b, done, b -> length);
+  MachineBuilder_set_target(&((* l).b), valid, compare);
+  MachineBuilder_set_target(&((* l).b), done, (* l).b.length);
   return 1;
 }
 
 static int MatchLower__compile_literal(MatchLower * l, Var pattern){
-  int entry =(* l).b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   return MatchLower__emit_literal(&((* l)), pattern) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
@@ -325,10 +349,10 @@ static int MatchLower__emit_leaf_value(MatchLower * l, Var pattern){
   return MatchLower__emit_literal(&((* l)), pattern);
 }
 
-int MachineBuilder_constant(MachineBuilder, Var);
+int MachineBuilder_constant(MachineBuilder *, Var);
 
 static int MatchLower__emit_literal(MatchLower * l, Var pattern){
-  int constant = MachineBuilder_constant((* l).b, pattern);
+  int constant = MachineBuilder_constant(&((* l).b), pattern);
   return constant >= 0 && MatchLower__fail_site(&((* l)), MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
 }
 
@@ -356,14 +380,14 @@ static int _is_list_literal(List pat){
 Var List_var(List);
 
 static int MatchLower__compile_literal_list(MatchLower * l, List pattern){
-  MachineBuilder b =(* l).b;
-  int constant = MachineBuilder_constant(b, List_var(pattern));
+  int constant = MachineBuilder_constant(&((* l).b), List_var(pattern));
   if(constant < 0) return - 1;
-  int entry = b -> length, miss = MachineBuilder_emit(b, MW_EQ_VALUE_BITS, constant, 0, 0, 0, - 1);
-  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int entry =(* l).b.length;
+  int miss = MachineBuilder_emit(&((* l).b), MW_EQ_VALUE_BITS, constant, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   int segment = MatchLower__compile_segment(&((* l)), pattern);
   if(segment < 0) return - 1;
-  MachineBuilder_set_target(b, miss, segment);
+  MachineBuilder_set_target(&((* l).b), miss, segment);
   return entry;
 }
 
@@ -378,7 +402,7 @@ static int MatchLower__compile_child(MatchLower * l, Var pattern){
 void * Scope_realloc(void *, size_t);
 
 static int MatchLower__fail_site(MatchLower * l, int op, int a, int b, int c, int d){
-  int site = MachineBuilder_emit((* l).b, op, a, b, c, d, - 1);
+  int site = MachineBuilder_emit(&((* l).b), op, a, b, c, d, - 1);
   if(site < 0) return 0;
   if((* l).site_count >=(* l).site_capacity){
     int capacity =(* l).site_capacity ?(* l).site_capacity * 2 : 64;
@@ -390,38 +414,37 @@ static int MatchLower__fail_site(MatchLower * l, int op, int a, int b, int c, in
 }
 
 static void MatchLower__patch_sites(MatchLower * l, int base, int target){
-  for(int i = base;  i <(* l).site_count;  i ++) MachineBuilder_set_target((* l).b, (* l).sites[i], target);
+  for(int i = base;  i <(* l).site_count;  i ++) MachineBuilder_set_target(&((* l).b), (* l).sites[i], target);
   (* l).site_count = base;
 }
 
 static int MatchLower__finish(MatchLower * l, int entry, int base){
-  MachineBuilder_emit((* l).b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   return MatchLower__finish_failure(&((* l)), entry, base);
 }
 
 static int MatchLower__finish_failure(MatchLower * l, int entry, int base){
-  int failure = MachineBuilder_emit((* l).b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
+  int failure = MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if(failure < 0) return - 1;
   MatchLower__patch_sites(&((* l)), base, failure);
   return entry;
 }
 
 static int MatchLower__emit_call(MatchLower * l, int child, int mode, int reg){
-  if(MachineBuilder_emit((* l).b, MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
+  if(MachineBuilder_emit(&((* l).b), MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
   return MatchLower__fail_site(&((* l)), MW_BR_FAIL, 0, 0, 0, 0);
 }
 
 static int MatchLower__fail(MatchLower * l, const char * reason){
-  MachineBuilder b =(* l).b;
-  if(b -> status == MACHINE_PREPARED){
-    b -> status = MACHINE_INELIGIBLE;
-    b -> reason = reason;
+  if((* l).b.status == MACHINE_PREPARED){
+    (* l).b.status = MACHINE_INELIGIBLE;
+    (* l).b.reason = reason;
   }
   return - 1;
 }
 
 static int MatchLower__stopped(MatchLower * l){
-  return(* l).b -> status != MACHINE_PREPARED;
+  return(* l).b.status != MACHINE_PREPARED;
 }
 
 static int MatchLower__compile_guard(MatchLower * l, Var op, List args){
@@ -470,41 +493,39 @@ static int MatchLower__emit_test(MatchLower * l, Var test, int child){
 }
 
 static int MatchLower__compile_or(MatchLower * l, List args){
-  MachineBuilder b =(* l).b;
   MatchParts operands;
   if(! MatchLower__guard_parts(&((* l)), args, &(operands))) return - 1;
-  int entry = b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   for(int i = 0;  i < operands.count;  i ++){
-    MatchLower__patch_sites(&((* l)), base, b -> length);
+    MatchLower__patch_sites(&((* l)), base, (* l).b.length);
     if(! MatchLower__emit_operand(&((* l)), &(operands), i)) return - 1;
-    if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
+    if(MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
   }
   return MatchLower__finish_failure(&((* l)), entry, base);
 }
 
-void MachineBuilder_patch(MachineBuilder, int *, int, int);
+void MachineBuilder_patch(MachineBuilder *, int *, int, int);
 
 static int MatchLower__compile_not(MatchLower * l, List args){
-  MachineBuilder b =(* l).b;
   MatchParts operands;
   if(! MatchLower__guard_parts(&((* l)), args, &(operands))) return - 1;
-  int entry = b -> length, base =(* l).site_count;
-  MachineBuilder_emit(b, MW_MARK, 0, 0, 0, 0, 0);
+  int entry =(* l).b.length, base =(* l).site_count;
+  MachineBuilder_emit(&((* l).b), MW_MARK, 0, 0, 0, 0, 0);
   int successes[MATCH_SEGMENT_MAX];
   for(int i = 0;  i < operands.count;  i ++){
-    MatchLower__patch_sites(&((* l)), base, b -> length);
+    MatchLower__patch_sites(&((* l)), base, (* l).b.length);
     if(! MatchLower__emit_operand(&((* l)), &(operands), i)) return - 1;
-    successes[i] = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
+    successes[i] = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
     if(successes[i] < 0) return - 1;
   }
-  int all_failed = b -> length;
+  int all_failed =(* l).b.length;
   MatchLower__patch_sites(&((* l)), base, all_failed);
-  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
-  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int rejected = b -> length;
-  MachineBuilder_patch(b, successes, operands.count, rejected);
-  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
-  if(MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return - 1;
+  MachineBuilder_emit(&((* l).b), MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int rejected =(* l).b.length;
+  MachineBuilder_patch(&((* l).b), successes, operands.count, rejected);
+  MachineBuilder_emit(&((* l).b), MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  if(MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return - 1;
   return entry;
 }
 
@@ -520,14 +541,14 @@ static int MatchLower__compile_set(MatchLower * l, List args){
   test = List_getindex(_x2c_destructure_0, 1);
   int child = Var_is_row(test, 9, 7, 4) ? MatchLower__compile_child(&((* l)), test) : - 1;
   if(Var_is_row(test, 9, 7, 4) && child < 0) return - 1;
-  int entry =(* l).b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   return MatchLower__emit_binder(&((* l)), binder) && MatchLower__emit_test(&((* l)), test, child) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
 static int MatchLower__compile_and(MatchLower * l, List args){
   MatchParts operands;
   if(! MatchLower__guard_parts(&((* l)), args, &(operands))) return - 1;
-  int entry =(* l).b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   for(int i = 0;  i < operands.count;  i ++) if(! MatchLower__emit_operand(&((* l)), &(operands), i)) return - 1;
   return MatchLower__finish(&((* l)), entry, base);
 }
@@ -558,23 +579,22 @@ static int _match_kind(List args){
 }
 
 static int MatchLower__is_kind(MatchLower * l, int kind){
-  int entry =(* l).b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   return MatchLower__fail_site(&((* l)), MW_MATCH_KIND, 0, kind, 0, 0) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
 static int MatchLower__is_atom(MatchLower * l){
-  MachineBuilder b =(* l).b;
-  int entry = b -> length, constant = MachineBuilder_constant(b, Symbol_var(806120));
+  int entry =(* l).b.length, constant = MachineBuilder_constant(&((* l).b), Symbol_var(806120));
   if(constant < 0) return - 1;
-  int hit = MachineBuilder_emit(b, MW_TAG, constant, 0, 0, 0, - 1);
-  int is_list = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
+  int hit = MachineBuilder_emit(&((* l).b), MW_TAG, constant, 0, 0, 0, - 1);
+  int is_list = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
   if(hit < 0 || is_list < 0) return - 1;
-  int success = b -> length;
-  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
+  int success =(* l).b.length;
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int failure = MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if(failure < 0) return - 1;
-  MachineBuilder_set_target(b, hit, success);
-  MachineBuilder_set_target(b, is_list, failure);
+  MachineBuilder_set_target(&((* l).b), hit, success);
+  MachineBuilder_set_target(&((* l).b), is_list, failure);
   return entry;
 }
 
@@ -585,7 +605,7 @@ Symbol Var_symbol(Var);
 static int MatchLower__is_type(MatchLower * l, Var type){
   Symbol tag = _canonical_type_tag(Var_is(type, 1328354264) ? Var_symbol(type) : 0);
   if(! tag) return MatchLower__never(&((* l)));
-  int entry =(* l).b -> length, base =(* l).site_count, constant = MachineBuilder_constant((* l).b, Symbol_var(tag));
+  int entry =(* l).b.length, base =(* l).site_count, constant = MachineBuilder_constant(&((* l).b), Symbol_var(tag));
   return constant >= 0 && MatchLower__fail_site(&((* l)), MW_TAG, constant, 0, 0, 0) ? MatchLower__finish(&((* l)), entry, base) : - 1;
 }
 
@@ -596,15 +616,15 @@ static inline Symbol _canonical_type_tag(Symbol tag){
 }
 
 static int MatchLower__never(MatchLower * l){
-  int entry =(* l).b -> length;
-  return MachineBuilder_emit((* l).b, MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0 ? - 1 : entry;
+  int entry =(* l).b.length;
+  return MachineBuilder_emit(&((* l).b), MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0 ? - 1 : entry;
 }
 
 static int MatchLower__compile_segment(MatchLower * l, List pattern){
   MatchSegment s;
   s.nested.count = s.nested.used = 0;
   if(! MatchLower__segment_prefix(&((* l)), &(s), pattern) || ! MatchLower__segment_star(&((* l)), &(s.star))) return - 1;
-  int entry =(* l).b -> length, base =(* l).site_count;
+  int entry =(* l).b.length, base =(* l).site_count;
   if(! MatchLower__fail_site(&((* l)), MW_INPUT_LIST, 0, 0, 0, 0) || ! MatchLower__emit_prefix(&((* l)), &(s)) || ! MatchLower__segment_end(&((* l)), &(s.star))) return - 1;
   return MatchLower__finish_failure(&((* l)), entry, base);
 }
@@ -686,7 +706,7 @@ static int MatchLower__segment_star(MatchLower * l, MatchStar * star){
   Var binder = List_car(cell);
   (* star).tail = List_cdr(cell);
   if(! Var_equal(binder, Symbol_var(54))){
-    (* star).slot = MachineBuilder_binder((* l).b, binder);
+    (* star).slot = MachineBuilder_binder(&((* l).b), binder);
     if((* star).slot < 0) return 0;
     (* star).delayed = List_truth((* star).tail) && ! _pattern_contains_binder((* star).tail, binder);
   }
@@ -768,25 +788,24 @@ static int MatchLower__emit_part(MatchLower * l, MatchSegment * s, int i){
 }
 
 static int MatchLower__emit_head_leaf(MatchLower * l, Var part, int reg){
-  MachineBuilder b =(* l).b;
   if(Var_equal(part, Symbol_var(58))) return MatchLower__fail_site(&((* l)), MW_SKIP_HEAD, 0, reg, 0, 0);
   if(Var_is_atom_binder(part)){
-    int slot = MachineBuilder_binder(b, part);
+    int slot = MachineBuilder_binder(&((* l).b), part);
     if(slot < 0) return 0;
     return MatchLower__fail_site(&((* l)), MW_BIND_HEAD, slot, reg, 0, 0);
   }
-  int constant = MachineBuilder_constant(b, part);
+  int constant = MachineBuilder_constant(&((* l).b), part);
   if(constant < 0) return 0;
   int mode = _compare_mode(part);
   return MatchLower__fail_site(&((* l)), MW_EQ_HEAD_CONST, constant, reg, 0, mode);
 }
 
 static int MatchLower__emit_descend(MatchLower * l, List child, int reg, MatchInlinePlan * nested){
-  return MatchLower__fail_site(&((* l)), MW_DESCEND, 0, reg, reg + 1, 0) && MatchLower__emit_inline_segment(&((* l)), child, reg + 1, &((* nested))) && MachineBuilder_emit((* l).b, MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
+  return MatchLower__fail_site(&((* l)), MW_DESCEND, 0, reg, reg + 1, 0) && MatchLower__emit_inline_segment(&((* l)), child, reg + 1, &((* nested))) && MachineBuilder_emit(&((* l).b), MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 }
 
 static int MatchLower__emit_framed(MatchLower * l, int entry, int reg){
-  return MatchLower__fail_site(&((* l)), MW_NONNIL, reg, 0, 0, 0) && MatchLower__emit_call(&((* l)), entry, MACHINE_CALL_HEAD, reg) && MachineBuilder_emit((* l).b, MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
+  return MatchLower__fail_site(&((* l)), MW_NONNIL, reg, 0, 0, 0) && MatchLower__emit_call(&((* l)), entry, MACHINE_CALL_HEAD, reg) && MachineBuilder_emit(&((* l).b), MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 }
 
 static int MatchLower__emit_inline_segment(MatchLower * l, List pattern, int reg, MatchInlinePlan * nested){
@@ -820,7 +839,7 @@ static int MatchLower__emit_inline_segment(MatchLower * l, List pattern, int reg
 static int MatchLower__segment_end(MatchLower * l, MatchStar * star){
   if(! List_truth((* star).cell)){
     if(! MatchLower__fail_site(&((* l)), MW_NIL, 0, 0, 0, 0)) return 0;
-    MachineBuilder_emit((* l).b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
     return 1;
   }
   if(! List_truth((* star).tail)) return MatchLower__final_star(&((* l)), (* star).slot);
@@ -828,98 +847,100 @@ static int MatchLower__segment_end(MatchLower * l, MatchStar * star){
 }
 
 static int MatchLower__final_star(MatchLower * l, int slot){
-  MachineBuilder b =(* l).b;
-  if(slot < 0) return MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) >= 0;
-  int valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
-  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
-  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int fresh = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
+  if(slot < 0) return MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0) >= 0;
+  int valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int fresh = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
   if(valid < 0 || fresh < 0) return 0;
-  int existing = b -> length;
-  int is_span = MachineBuilder_emit(b, MW_SLOT_IS_SPAN, slot, 0, 0, 0, - 1);
-  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 0, 0, 0, 0);
+  int existing =(* l).b.length;
+  int is_span = MachineBuilder_emit(&((* l).b), MW_SLOT_IS_SPAN, slot, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_CURSOR_VALUE, 0, 0, 0, 0, 0);
   if(! MatchLower__fail_site(&((* l)), MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  int value_done = MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, - 1);
+  int value_done = MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, - 1);
   if(is_span < 0 || value_done < 0) return 0;
-  int compare_span = b -> length;
+  int compare_span =(* l).b.length;
   if(! MatchLower__fail_site(&((* l)), MW_SLOT_EQ_FINAL_IDENTITY, slot, 0, 1, 0)) return 0;
-  MachineBuilder_emit(b, MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
-  MachineBuilder_emit(b, MW_SLOT_SET_VALUE, slot, 1, 0, 0, 0);
-  int success = b -> length;
-  if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return 0;
-  MachineBuilder_set_target(b, valid, existing);
-  MachineBuilder_set_target(b, is_span, compare_span);
-  MachineBuilder_set_target(b, fresh, success);
-  MachineBuilder_set_target(b, value_done, success);
+  MachineBuilder_emit(&((* l).b), MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_SLOT_SET_VALUE, slot, 1, 0, 0, 0);
+  int success =(* l).b.length;
+  if(MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return 0;
+  MachineBuilder_set_target(&((* l).b), valid, existing);
+  MachineBuilder_set_target(&((* l).b), is_span, compare_span);
+  MachineBuilder_set_target(&((* l).b), fresh, success);
+  MachineBuilder_set_target(&((* l).b), value_done, success);
   return 1;
 }
 
 static int MatchLower__search_star(MatchLower * l, MatchStar * star){
-  MachineBuilder b =(* l).b;
   int slot =(* star).slot, loop = MatchLower__star_loop(&((* l)), &((* star)));
   if(loop < 0) return 0;
   int valid = - 1;
-  if(slot >= 0) valid = MachineBuilder_emit(b, MW_SLOT_VALID, slot, 0, 0, 0, - 1);
+  if(slot >= 0) valid = MachineBuilder_emit(&((* l).b), MW_SLOT_VALID, slot, 0, 0, 0, - 1);
   int fresh_failed = MatchLower__star_fresh(&((* l)), &((* star)));
   if(fresh_failed < 0) return 0;
   int mismatch = - 1, existing_failed = - 1;
   if(slot >= 0){
-    int compare = b -> length;
-    mismatch = MachineBuilder_emit(b, MW_SLOT_EQ_PREFIX, slot, 0, 1, 0, - 1);
+    int compare =(* l).b.length;
+    mismatch = MachineBuilder_emit(&((* l).b), MW_SLOT_EQ_PREFIX, slot, 0, 1, 0, - 1);
     existing_failed = MatchLower__star_tail(&((* l)), &((* star)));
     if(mismatch < 0 || existing_failed < 0) return 0;
-    MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-    MachineBuilder_set_target(b, valid, compare);
+    MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    MachineBuilder_set_target(&((* l).b), valid, compare);
   }
-  int retry = b -> length;
-  MachineBuilder_set_target(b, mismatch, retry);
-  MachineBuilder_set_target(b, fresh_failed, retry);
-  MachineBuilder_set_target(b, existing_failed, retry);
+  int retry =(* l).b.length;
+  MachineBuilder_set_target(&((* l).b), mismatch, retry);
+  MachineBuilder_set_target(&((* l).b), fresh_failed, retry);
+  MachineBuilder_set_target(&((* l).b), existing_failed, retry);
   return MatchLower__star_retry(&((* l)), &((* star)), loop);
 }
 
 static int MatchLower__star_loop(MatchLower * l, MatchStar * star){
-  MachineBuilder b =(* l).b;
   int anchored =(* star).anchored;
-  int constant = anchored ? MachineBuilder_constant(b, (* star).anchor) : - 1;
+  int constant = anchored ? MachineBuilder_constant(&((* l).b), (* star).anchor) : - 1;
   if(anchored && constant < 0) return - 1;
   int mode = anchored ? _compare_mode((* star).anchor) : MACHINE_COMPARE_BITS;
-  MachineBuilder_emit(b, MW_MARK, 0, 0, 0, 0, 0);
-  MachineBuilder_emit(b, MW_MOVE, 1, 0, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_MARK, 0, 0, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_MOVE, 1, 0, 0, 0, 0);
   if(anchored){
-    MachineBuilder_emit(b, MW_MOVE, 2, 1, 0, 0, 0);
-    MachineBuilder_emit(b, MW_OFFSET, 2, (* star).offset, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_MOVE, 2, 1, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_OFFSET, 2, (* star).offset, 0, 0, 0);
   }
-  else MachineBuilder_emit(b, MW_SET_ACTIVE, 0, 1, 0, 0, 0);
-  int loop = b -> length;
+  else MachineBuilder_emit(&((* l).b), MW_SET_ACTIVE, 0, 1, 0, 0, 0);
+  int loop =(* l).b.length;
   int emitted = anchored ? MatchLower__fail_site(&((* l)), MW_SCAN, 1, 2, constant, mode) : MatchLower__fail_site(&((* l)), MW_REQUIRE_ACTIVE, 0, 0, 0, 0);
   return emitted ? loop : - 1;
 }
 
 static int MatchLower__star_fresh(MatchLower * l, MatchStar * star){
-  MachineBuilder b =(* l).b;
   int slot =(* star).slot;
-  if(slot >= 0 && !(* star).delayed) MachineBuilder_emit(b, MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  if(slot >= 0 && !(* star).delayed) MachineBuilder_emit(&((* l).b), MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
   int failed = MatchLower__star_tail(&((* l)), &((* star)));
   if(failed < 0) return - 1;
-  if(slot >= 0 &&(* star).delayed) MachineBuilder_emit(b, MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
-  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  if(slot >= 0 &&(* star).delayed) MachineBuilder_emit(&((* l).b), MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   return failed;
 }
 
 static int MatchLower__star_tail(MatchLower * l, MatchStar * star){
-  MachineBuilder_emit((* l).b, MW_CALL, (* star).entry, MACHINE_CALL_CURSOR, 1, 0, 0);
-  return MachineBuilder_emit((* l).b, MW_BR_FAIL, 0, 0, 0, 0, - 1);
+  MachineBuilder_emit(&((* l).b), MW_CALL, (* star).entry, MACHINE_CALL_CURSOR, 1, 0, 0);
+  return MachineBuilder_emit(&((* l).b), MW_BR_FAIL, 0, 0, 0, 0, - 1);
 }
 
 static int MatchLower__star_retry(MatchLower * l, MatchStar * star, int loop){
-  MachineBuilder b =(* l).b;
-  MachineBuilder_emit(b, MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
+  MachineBuilder_emit(&((* l).b), MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
   if((* star).anchored){
-    MachineBuilder_emit(b, MW_ADVANCE, 1, 0, 0, 0, 0);
-    MachineBuilder_emit(b, MW_ADVANCE, 2, 0, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_ADVANCE, 1, 0, 0, 0, 0);
+    MachineBuilder_emit(&((* l).b), MW_ADVANCE, 2, 0, 0, 0, 0);
   }
-  else MachineBuilder_emit(b, MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
-  return MachineBuilder_emit(b, MW_JUMP, 0, 0, 0, 0, loop) >= 0 && ! MatchLower__stopped(&((* l)));
+  else MachineBuilder_emit(&((* l).b), MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
+  return MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, loop) >= 0 && ! MatchLower__stopped(&((* l)));
+}
+
+void MachineBuilder_free(MachineBuilder *);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  MachineBuilder_free(&((*(MatchLower *) _x2c_defer_data_0->_x2c_defer_capture_0).b));
 }
 

@@ -81,6 +81,89 @@ List x2c_type_members(List type) {
   return rows.reverse();
 }
 
+/* --- src/builtin-errors.xmacro ------------------------------------------- */
+
+static Map _builtin_error_rows(void) => {
+  "scope.arity" :
+  macro Statement() {
+    x2c_diagnostic_fail("$scope accepts zero or one destination", %());
+  },
+  "foreach.bindings" :
+  macro Statement() {
+    x2c_diagnostic_fail(
+      "foreach requires one binding or a two-name destructuring declaration",
+      %());
+  },
+  "foreach.type" :
+  macro Statement(Expr $printable) {
+    x2c_diagnostic_fail(
+      "type " + $printable.repr() + " is not iterable",
+      %("declare an Iter protocol adoption or iterate an Iter directly"));
+  },
+  "class.enum" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} cannot take an enum value " +
+      "representation: Var has no fixed tag for an enum",
+      %("give the enum a typedef and name that typedef instead"));
+  },
+  "class.ctor" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} requires an explicit constructor", %());
+  },
+  "class.comparison" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"value class ${$owner} requires compatible equal " +
+      "and hash methods", %());
+  },
+  "class.init" :
+  macro Statement(Expr $owner, Expr $suffix) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} requires void ${$owner}.init(${$owner}${$suffix}",
+      %());
+  },
+  "binding.sealed" :
+  macro Statement(Expr $group) {
+    x2c_diagnostic_fail(
+      "native Lisp binding appears after its group was installed",
+      %("group: ${$group}"));
+  },
+  "binding.duplicate" :
+  macro Statement(Expr $group, Expr $name) {
+    x2c_diagnostic_fail(
+      "duplicate native Lisp binding name",
+      %("group: ${$group}" "name: ${$name}"));
+  },
+  "binding.name" :
+  macro Statement(Expr $node) {
+    x2c_diagnostic_fail(
+      "native Lisp binding name requires a String literal",
+      %("value: ${$node.repr()}"));
+  },
+  "binding.group" :
+  macro Statement(Expr $group) {
+    x2c_diagnostic_fail(
+      "unknown native Lisp binding group", %("group: ${$group}"));
+  },
+  "try.cleanup" :
+  macro Statement() {
+    x2c_diagnostic_fail("try cleanup must be lowered statements", %());
+  },
+};
+
+static List _builtin_error_expand(String key, List arguments) {
+  Map rows = _builtin_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown builtin error '$key'", %());
+  Macro selected = row;
+  if (arguments.len() != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for builtin error '$key'", %());
+  return %(${Macro_apply(selected, arguments)});
+}
+
 /* --- src/error-reports.xmacro -------------------------------------------- */
 
 static Map _error_report_rows(void) => {
@@ -2019,6 +2102,105 @@ static List _error_report_expand(
   return %(${Macro_apply(selected, %($compiler @arguments))});
 }
 
+/* --- lib/func-errors.xmacro ---------------------------------------------- */
+
+static Map _func_error_rows(void) => {
+
+  "apply.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.apply"));
+  },
+
+  "apply.arity" :
+  macro Statement(Expr $sig, Expr $expected, Expr $actual) {
+    raise %(bad-arity (sig ${$sig}) (expected ${$expected}) (actual ${$actual}));
+  },
+
+  "arg.value" :
+  macro Statement(Expr $sig, Expr $index) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (want value));
+  },
+
+  "arg.void" :
+  macro Statement(Expr $sig, Expr $index) {
+    raise %(void-op (sig ${$sig}) (index ${$index}));
+  },
+
+  "apply.index" :
+  macro Statement(Expr $index) {
+    raise %(bad-arg (operation "Func.apply") (index ${$index}));
+  },
+
+  "arg.convert" :
+  macro Statement(Expr $code, Expr $sig, Expr $index, Expr $want, Expr $lower) {
+    raise %(${$code} (sig ${$sig}) (index ${$index}) (want ${$want})
+            (cause ${$lower}));
+  },
+
+  "arg.type" :
+  macro Statement(Expr $sig, Expr $index, Expr $actual, Expr $want) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
+            (want ${$want}));
+  },
+
+  "arg.pointer" :
+  macro Statement(Expr $sig, Expr $index, Expr $actual) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
+            (want pointer));
+  },
+
+  "arg.unboxed" :
+  macro Statement(Expr $sig, Expr $index, Expr $source) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
+            (want value));
+  },
+
+  "arg.ref" :
+  macro Statement(Expr $sig, Expr $index, Expr $source, Expr $want) {
+    raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
+            (want ${$want}));
+  },
+
+  "bind.sig" :
+  macro Statement(Expr $sig) {
+    raise %(bad-sig (sig ${$sig}));
+  },
+
+  "context.source" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.new_context"));
+  },
+
+  "context.size" :
+  macro Statement(Expr $size) {
+    raise %(size-limit (operation "Func.new_context") (size ${$size}));
+  },
+
+  "signature.null" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.signature"));
+  },
+
+  "context.null" :
+  macro Statement() {
+    raise %(bad-arg (operation "Func.context"));
+  },
+
+  "box.type" :
+  macro Statement(Expr $actual) {
+    raise %(bad-types (want func) (actual ${$actual}));
+  }
+};
+
+static List _func_error_expand(String key, List arguments) {
+  Map rows = _func_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Func error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
 static List source_return_type(List node) {
@@ -2140,6 +2322,158 @@ static Map native_scalar_types(void) => {
   %(long double):
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
+
+/* --- src/sdk-errors.xmacro ----------------------------------------------- */
+
+static Map _sdk_error_rows(void) => {
+  "method.name" :
+  macro Statement(Expr $name) {
+    _sdk_reject_value(
+      "x2c.method.resolve requires an identifier String", $name);
+  },
+  "method.ambiguous" :
+  macro Statement(Expr $owner, Expr $name, Expr $notes) {
+    MetaContext_reject(
+      %"method '${$owner}.${$name}' is provided by multiple imported packages",
+      $notes.list_free());
+  },
+  "fields.type" :
+  macro Statement(Expr $value) {
+    _sdk_reject_value(
+      "x2c.type.fields requires a struct or union Type", $value);
+  },
+  "fields.incomplete" :
+  macro Statement(Expr $value) {
+    _sdk_reject_value(
+      "x2c.type.fields requires a complete struct or union Type", $value);
+  },
+  "binding.spelling" :
+  macro Statement(Expr $syntax) {
+    _sdk_reject_value(
+      "x2c.binding.spelling requires an identifier spelling", $syntax);
+  },
+  "binding.syntax" :
+  macro Statement(Expr $syntax) {
+    _sdk_reject_value("x2c.binding.spelling requires binding syntax", $syntax);
+  },
+  "binding.unknown" :
+  macro Statement(Expr $value) {
+    MetaContext_reject(
+      "x2c.binding.spelling requires a known binding",
+      %("binding: ${$value.repr()}"));
+  },
+  "binding.identifier" :
+  macro Statement(Expr $syntax) {
+    _sdk_reject_value(
+      "x2c.binding.spelling requires an identifier or binding", $syntax);
+  },
+  "ident.spelling" :
+  macro Statement(Expr $spelling) {
+    _sdk_reject_value("x2c.ident requires an identifier spelling", $spelling);
+  },
+  "name.stem" :
+  macro Statement(Expr $stem) {
+    _sdk_reject_value("_x2c.name.unique requires an identifier stem", $stem);
+  },
+  "param.missing" :
+  macro Statement(Expr $wanted, Expr $function) {
+    MetaContext_reject(
+      %"x2c.function.parameter cannot find '${$wanted}'",
+      %("function: ${x2c_function_name($function).repr()}"));
+  },
+  "symbols.type" :
+  macro Statement(Expr $value) {
+    MetaContext_reject(
+      "_x2c.symbol-set requires Symbols",
+      %("value:" ${$value.repr()}));
+  },
+  "symbols.duplicate" :
+  macro Statement(Expr $values, Expr $duplicate) {
+    MetaContext_reject(
+      "_x2c.symbol-set requires distinct Symbols",
+      %("symbol:" ${$values.getindex($duplicate).repr()}));
+  },
+  "module.empty" :
+  macro Statement() {
+    MetaContext_reject(
+      "native module sources declare no meta function",
+      %("declare each exported function with a bodyless meta prototype"));
+  },
+  "source.capture" :
+  macro Statement(Expr $bound, Expr $value) {
+    MetaContext_reject(
+      "x2c.source.text requires complete captured syntax",
+      $bound ? NULL : %("value: ${$value.repr()}"));
+  },
+  "embed.empty" :
+  macro Statement() {
+    MetaContext_reject("x2c.embed.text requires a non-empty path", NULL);
+  },
+  "embed.literal" :
+  macro Statement(Expr $requested) {
+    _sdk_reject_value(
+      "x2c.embed.text requires a String or captured String literal",
+      $requested);
+  },
+  "embed.read" :
+  macro Statement(Expr $c, Expr $path) {
+    $c._embed_reject("cannot read embedded text", $path);
+  },
+  "embed.nul" :
+  macro Statement(Expr $c, Expr $path) {
+    $c._embed_reject("embedded text contains an embedded NUL", $path);
+  },
+  "embed.limit" :
+  macro Statement(Expr $c, Expr $path) {
+    $c._embed_reject("embedded text exceeds the String size limit", $path);
+  },
+  "embed.file" :
+  macro Statement(Expr $c, Expr $path) {
+    $c._embed_reject("embedded text is not a regular file", $path);
+  },
+  "embed.open" :
+  macro Statement(Expr $c, Expr $path) {
+    $c._embed_reject("cannot open embedded text", $path);
+  },
+  "literal.type" :
+  macro Statement(Expr $syntax) {
+    MetaContext_reject(
+      "x2c.literal.value requires a String, int, or Symbol literal",
+      %("value: ${$syntax.repr()}"));
+  },
+  "location.inactive" :
+  macro Statement() {
+    MetaContext_reject(
+      "x2c invocation location used outside macro expansion", NULL);
+  },
+  "notes.type" :
+  macro Statement(Expr $operation, Expr $note) {
+    _sdk_reject_value(%"${$operation} notes must be Strings", $note);
+  },
+  "expansion.inactive" :
+  macro Statement(Expr $operation) {
+    MetaContext_reject(%"${$operation} used outside macro expansion", NULL);
+  },
+  "reference.inactive" :
+  macro Statement() {
+    raise %(bad-state (operation "_x2c.function.reference"));
+  },
+  "reject.inactive" :
+  macro Statement(Expr $message) {
+    raise %(bad-state (operation "x2c SDK rejection") (why ${$message}));
+  },
+};
+
+static List _sdk_error_expand(String key, List arguments) {
+  Map rows = _sdk_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown sdk error '$key'", %());
+  Macro selected = row;
+  if (arguments.len() != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for sdk error '$key'", %());
+  return %(${Macro_apply(selected, arguments)});
+}
 
 /* --- lib/system-macros.xmacro -------------------------------------------- */
 
@@ -2634,8 +2968,12 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "_builtin_error_rows", _builtin_error_rows);
+  $linked.row(rows, "_builtin_error_expand", _builtin_error_expand);
   $linked.row(rows, "_error_report_rows", _error_report_rows);
   $linked.row(rows, "_error_report_expand", _error_report_expand);
+  $linked.row(rows, "_func_error_rows", _func_error_rows);
+  $linked.row(rows, "_func_error_expand", _func_error_expand);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
@@ -2663,6 +3001,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_sdk_error_rows", _sdk_error_rows);
+  $linked.row(rows, "_sdk_error_expand", _sdk_error_expand);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_cases_label", _cases_label);
   $linked.row(rows, "_cases_transfers", _cases_transfers);

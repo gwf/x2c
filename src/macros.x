@@ -73,6 +73,8 @@ List Compiler.expand_macro_invocation_node(
     x.check();
     c.macro_count++;
     List result = NULL;
+    $let(c.expansion_floor,
+         c.macro_stack ? c.expansion_floor : c.names.next_binding)
     $let(c.macro_stack, c.macro_stack) {
       result = x.bind(position);
     }
@@ -158,69 +160,25 @@ static List Expansion.bind(Expansion &x, AstPos position) {
 static List Compiler._template(Compiler c, List definition) {
   List template = definition.assoc(<template>);
   if (definition.assoc(<open>) is void) return template;
-  Map replacements = {}, natives = {};
-  c._open_references(template, replacements, natives);
-  return c._open_template(template, replacements, natives);
+  return c._open_template(template);
 }
 
-/* An open definition binds its free references in the unit that applies
-   it. A value resolves to the unit's global declaration; a callee the unit
-   does not declare becomes a native call with the result type recorded
-   where the macro was defined; a typedef base resolves in the base scope.
-   Hole binders and introduced locals are not references. */
-static void Compiler._open_references(
-  Compiler c, Var value, Map replacements, Map natives) {
-  if (value is not <list> || value.is_nil()) return;
-  match (value)
-    case %(expr ?(List type) ${$source_identifier_content(%(?binding))}): {
-      String spelling = NULL;
-      if (!binding_identity_try_parts(binding, NULL, spelling)) return;
-      List target = c.sym.resolve_global(%($spelling), NULL);
-      if (target) replacements[binding] = target;
-      else if (type && type.type().is_function())
-        natives[binding] =
-          %($spelling ${type.type().apply().canonicalize()});
-      else replacements[binding] = c.sym.reference_global(%($spelling));
-      return;
-    }
-  foreach (Var child, value.list())
-    c._open_references(child, replacements, natives);
-}
-
-/* Rebuilds the template once with what `_open_references` found and
-   without origin markers. A replaced reference is not revisited, and a
-   callee finds its native under its replacement. */
-static Var Compiler._open_template(
-  Compiler c, Var value, Map replacements, Map natives) {
-  Var found;
+/* Rebuilds an open template without origin markers, with each typedef base
+   resolved in the base scope of the unit that applies it. Its free values
+   already name that unit's global bindings: a definition binds them at file
+   scope, and an applied Macro value or replayed import rebinds them there. */
+static Var Compiler._open_template(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
-  if (replacements.try_get(value, found)) return found;
-  Macro called = $called;
   match (value) {
-    case %(at m-origin ?node):
-      return c._open_template(node, replacements, natives);
-    case called(?callee, *arguments):
-      if (value.list().car() == <expr>)
-        match (callee) case %(expr ?
-            ${$source_identifier_content(%(?binding))}): {
-          Var bound = replacements.getdefault(binding, binding);
-          if (natives.try_get(bound, found)) {
-            Var (spelling, result) = found;
-            List args = c._open_template(arguments, replacements, natives);
-            return %(expr $result (call $spelling (args @args)));
-          }
-        }
+    case %(at m-origin ?node): return c._open_template(node);
     case %(decl ?base ?declarators): {
       Type resolved = base is <list> && base.type().is_bare_typedef_name()
         ? c.sym.resolve_base_type(base) : NULL;
-      if (resolved)
-        return %(decl $resolved
-                 ${c._open_template(declarators, replacements, natives)});
+      if (resolved) return %(decl $resolved ${c._open_template(declarators)});
     }
   }
   Var child;
-  $ast.rewrite_children(
-    value, child, c._open_template(child, replacements, natives));
+  $ast.rewrite_children(value, child, c._open_template(child));
 }
 
 /* Allocates each fresh name of the definition. A name compile-time Lisp
@@ -2678,9 +2636,10 @@ static Var Compiler._helper_result(Compiler c, Var value) {
 
 /** Rebuilds an expression from a pending Macro value application, preserving
     its established root `type`, child stage, and source wrappers. Binding,
-    capture collection, hygiene, and effects do not run. */
+    capture collection, hygiene, and effects do not run, and a statement
+    expression's template-origin wrappers are omitted. */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
-  List rebuilt = c._rebuild(application, 0, NULL);
+  List rebuilt = c._rebuild(application, NULL);
   return %(expr $type @{rebuilt.cddr()});
 }
 
@@ -2688,13 +2647,13 @@ List Compiler.rebuild_expression(Compiler c, Type type, List application) {
     children keep their identities and origins; template-origin wrappers
     are omitted because this path does not open an invocation. */
 List Compiler.rebuild_statement(Compiler c, List application) =>
-  c._rebuild(application, 1, NULL);
+  c._rebuild(application, NULL);
 
 /** Constructs a fresh function from a Unit template after lowering. The
     caller supplies its bound name and lowered children; binding does not
     run. */
 List Compiler.rebuild_unit_function(Compiler c, List application) {
-  List function = c._rebuild(application, 1, NULL).cadr();
+  List function = c._rebuild(application, NULL).cadr();
   match (function) case %(api-source ? ? ?inner): return inner;
   return function;
 }
@@ -2702,13 +2661,13 @@ List Compiler.rebuild_unit_function(Compiler c, List application) {
 /** Rebuilds a bound function through a Function decorator without binding it
     again. The template keeps the target's return type and declarator. */
 List Compiler.rebuild_function(Compiler c, List target, List application) =>
-  c._rebuild(application, 1, target).cadr();
+  c._rebuild(application, target).cadr();
 
 /* Substitute bound syntax into a structural template without binding it.
    The caller supplies complete children and a template with no free names,
    computed slots, or nested applications. */
 static List Compiler._rebuild(
-  Compiler c, List application, int statement, List target) {
+  Compiler c, List application, List target) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = c._template_arguments(definition, values, c.token, 1);
@@ -2726,8 +2685,8 @@ static List Compiler._rebuild(
       template = template.search_replace(
         %(expr (<macro-expr>) (!quote $binder)), binder);
     }
-  if (statement)
-    template = template.search_replace(%(at m-origin ?node), <?node>);
+  // This path opens no invocation, so template-origin wrappers are omitted.
+  template = template.search_replace(%(at m-origin ?node), <?node>);
   return template.replace(bindings);
 }
 

@@ -15,6 +15,8 @@ int main(void) {
     File input = $auto(File.open("/dev/null", "r"));
     Lisp lisp = $auto(Lisp.kernel());
     MachineBuilder builder = $auto(MachineBuilder.new());
+    builder.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    builder.constant(1);
     ArrayInt ints = $auto(ArrayInt.new());
     MapStringInt counts = $auto(MapStringInt.new());
     array.push(1);

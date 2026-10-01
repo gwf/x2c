@@ -324,7 +324,10 @@ static List Trace_path(Trace trace, int found, int n, int m){
 }
 
 static List _diagonal(List path, int x, int y, int to_x, int to_y){
-  for(;  x > to_x && y > to_y;  x --, y --) path = cons(List_var(cons(_2, cons(int_var(x - 1), cons(int_var(y - 1), NULL)))), path);
+  for(;  x > to_x && y > to_y;  x --, y --) path = cons(List_var(({
+    Var _x2c_literal_part_0 = int_var(x - 1);  Var _x2c_literal_part_1 = int_var(y - 1);  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+  }
+  )), path);
   return path;
 }
 
@@ -415,7 +418,10 @@ static Hunk _hunk(Array edits, int at, int old_line, int new_line){
     List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
     Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
     String text = Var_string(List_getindex(_x2c_destructure_1, 1));
-    h.lines = cons(String_var(String_join(NULL, cons(String_var(char_str(_mark(kind))), cons(String_var(text), cons(String_var(_3), NULL))))), h.lines);
+    h.lines = cons(String_var(({
+      Var _x2c_literal_part_2 = String_var(char_str(_mark(kind)));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(text), cons(String_var(_3), NULL))));
+    }
+    )), h.lines);
     if(kind != 634596520) h.old_count ++;
     if(kind != 279719178) h.new_count ++;
   }

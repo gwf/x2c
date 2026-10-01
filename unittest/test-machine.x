@@ -37,7 +37,7 @@ static MachineProgram _freeze_binder(Symbol binder) {
   return program;
 }
 
-static Symbol _run(MatchMachine m, MachineProgram program, Var input) {
+static Symbol _run(MatchMachine &m, MachineProgram program, Var input) {
   m.begin(program.view(), input);
   m.run();
   return m.status;
@@ -65,8 +65,7 @@ static void machine_program_is_exact_sized_and_immutable(void) {
   EXPECT_INT_EQ((int) ((char *) view.consts - (char *) program),
                 (int) consts);
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <hello>)) == <ok>);
   m.finish();
@@ -75,6 +74,32 @@ static void machine_program_is_exact_sized_and_immutable(void) {
   EXPECT_TRUE(m.clean());
   m.dispose();
   program.free();
+}
+
+static void machine_builder_value_cleanup_releases_shared_arrays(void) {
+  ScopeStats before = Scope.stats();
+  {
+    MachineBuilder b = $auto(MachineBuilder.new());
+    ScopeStats empty = Scope.stats();
+    EXPECT_INT_EQ(empty.live_allocations, before.live_allocations);
+    EXPECT_NULL(b.code);
+    EXPECT_NULL(b.consts);
+    EXPECT_INT_EQ(b.root, -1);
+    EXPECT_INT_EQ(b.length, 0);
+    EXPECT_INT_EQ(b.const_count, 0);
+    EXPECT_INT_EQ(b.binder_count, 0);
+    EXPECT_INT_EQ(b.status, MACHINE_PREPARED);
+    EXPECT_INT_EQ(b.emit(MW_JUMP, 0, 0, 0, 0, -1), 0);
+    EXPECT_INT_EQ(b.constant(Var.new(<i32>, 7)), 0);
+    MachineBuilder copy = b;
+    EXPECT_TRUE(copy.code == b.code && copy.consts == b.consts);
+    copy.set_target(0, 1);
+    EXPECT_INT_EQ(b.code[0].target, 1);
+    ScopeStats populated = Scope.stats();
+    EXPECT_INT_EQ(populated.live_allocations, before.live_allocations + 2);
+  }
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 }
 
 static void machine_builder_exhaustion_is_categorized(void) {
@@ -117,8 +142,7 @@ static void machine_public_preconditions_transfer(void) {
   EXPECT_INT_EQ(b.code[site].target, -1);
   b.free();
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   MachineProgram program = _freeze_eq(1, MACHINE_COMPARE_BITS);
   if (EXPECT_NOT_NULL(program)) {
@@ -169,8 +193,7 @@ static void machine_nested_calls_return_and_rollback(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
@@ -204,8 +227,7 @@ static void machine_error_unwinds_to_clean_state(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<list>, NULL)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <advance>));
@@ -231,8 +253,7 @@ static void machine_error_codes_are_distinct(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<list>, NULL)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <call-head>));
@@ -264,8 +285,7 @@ static void machine_frame_capacity_is_checked(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <loop>)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <frame-max>));
@@ -290,8 +310,7 @@ static void machine_slot_state_errors_are_checked(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <value>)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <slot-state>));
@@ -307,8 +326,7 @@ static void machine_instances_interleave_independently(void) {
   MachineProgram binder = _freeze_binder(<?x>);
   if (!EXPECT_NOT_NULL(eq) || !EXPECT_NOT_NULL(binder)) return;
 
-  struct MatchMachine storage_a, storage_b;
-  MatchMachine a = &storage_a, b = &storage_b;
+  MatchMachine a, b;
   a.open();
   b.open();
   a.begin(eq.view(), Var.new(<symbol>, <alpha>));
@@ -351,8 +369,7 @@ static void machine_scan_binds_lazy_spans_only_on_success(void) {
   b.free();
   if (!EXPECT_NOT_NULL(program)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
@@ -391,8 +408,7 @@ static void machine_compare_modes_respect_boxed_values(void) {
   MachineProgram bits = _freeze_eq(boxed, MACHINE_COMPARE_BITS);
   if (!EXPECT_NOT_NULL(equal) || !EXPECT_NOT_NULL(bits)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   Var twin = Var.box_long(3);
   EXPECT_TRUE(twin.u64 != boxed.u64);
@@ -412,8 +428,7 @@ static void machine_storage_reuse_and_dirty_begin(void) {
   MachineProgram binder = _freeze_binder(<?y>);
   if (!EXPECT_NOT_NULL(eq) || !EXPECT_NOT_NULL(binder)) return;
 
-  struct MatchMachine storage;
-  MatchMachine m = &storage;
+  MatchMachine m;
   m.open();
   EXPECT_TRUE(_run(m, eq, Var.new(<symbol>, <alpha>)) == <ok>);
   m.finish();
@@ -439,6 +454,7 @@ $(import "test-macros.xmacro")
 
 void machine_suite(void) {
   $test.run(machine_program_is_exact_sized_and_immutable);
+  $test.run(machine_builder_value_cleanup_releases_shared_arrays);
   $test.run(machine_builder_exhaustion_is_categorized);
   $test.run(machine_public_preconditions_transfer);
   $test.run(machine_nested_calls_return_and_rollback);

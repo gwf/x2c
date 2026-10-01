@@ -1,8 +1,8 @@
-> Status: active
-> Authored conversions and guidance are complete on
-> `codex/value-reference-campaign`, rebased onto dev `00536cc8`. Delivery is a
-> draft PR targeting `dev`, as Gary requested. Integration belongs to the
-> integration agent; this branch does not advance dev.
+> Status: implemented
+> The private-context batch merged into dev in PR #76.
+> Public follow-ups are implemented on `codex/value-reference-public`, including
+> dev's published build repair `943a5e50`. Delivery is another PR targeting
+> `dev`; integration belongs to the integration agent.
 
 # Value declarations and reference parameters
 
@@ -40,13 +40,13 @@ does not dictate storage location; value construction needs no allocation for
 the record; reference methods borrow caller storage; copying a record does not
 deep-copy owned fields. Omit redundant `struct` in class record declarations.
 
-Public lifetime/API redesigns need separately reviewed caller migrations:
-SymTxn's nullable commit/rollback and allocation, Job's embedded Launch,
-MachineBuilder and MatchMachine, and raylib's foreign aliases. Keep these as
-explicit follow-ups rather than silently changing established client contracts.
+The follow-up batch traces and migrates SymTxn's nullable commit/rollback and
+allocation, Job's embedded Launch, MachineBuilder and MatchMachine, and
+raylib's foreign aliases. It preserves actual shared identity and documents
+the source and generated-header migrations below.
 Intentional pointer fixtures and native ABI declarations are not style targets.
 
-## Completed authored batch
+## Private-context batch (merged in PR #76)
 
 - Compiler: 55 private context owners, 488 receiver definitions, and 17
   single-record helper parameters. Emitter and region Walk now declare values;
@@ -89,24 +89,61 @@ libcurl and termbox native tests and applications pass on this macOS host.
 The class initializer probes cover zeroing, construction, boxing, arrays,
 pointer compatibility, and unchanged heap refusal without leaked allocation.
 
-Cstar's archive and tool build, and old/new Adapter rendering and rejection
-produce identical output. The tool's `--emit` path fails before Adapter with
-unbound `x2c.function.body`; the original tool reproduces the same failure.
-End-to-end proof execution is therefore not established by this campaign.
-That embedded compiler-SDK issue remains a separate defect investigation.
+Cstar's first batch built its archive and tool and compared old/new Adapter
+rendering and rejection. Its `--emit` path failed before Adapter with unbound
+`x2c.function.body`, including on the original tool. The follow-up found the
+missing `Frontend.preload_macro_libraries` call used by the other compiler
+clients. Restoring that call makes `--emit` and the absolute-value proof pass;
+the package's full verification passes, including expected failing proofs.
+
+## Public follow-up batch
+
+- SymTxn becomes a value returned by `begin_semantic_transaction`; borrowed
+  compiler maps retain their owners and new snapshots use the current Scope.
+  Required references mutate that one transaction. Optional commit/rollback
+  references preserve absent-input
+  no-ops, and the zero value is inactive. REPL rollback, completion, map
+  identity, and transient-Scope teardown pass the existing command API test.
+- Job retains its shared pointer representation, boxing, and Scope finalizer.
+  Launch becomes an embedded value, removing its separate allocation; launch
+  helpers borrow it through references. Rebuild clients against the changed
+  generated Job layout; direct pointer access to `job.launch` becomes value
+  access.
+- MachineBuilder becomes a plain value typedef with reference operations.
+  Its new/free calls and lexical `$auto` remain. Generated class boxing,
+  equality, and hashing are removed because no caller uses them. Copies share
+  buffer ownership, so use references for an active builder. The Cleanup
+  protocol requires a value receiver; its inline adapter releases only the
+  two backing pointers and avoids copying the binder array.
+- MatchMachine's existing stack state becomes a value typedef with reference
+  receivers. Native callbacks still receive addresses. MatchLower embeds its
+  one builder and MatchWalk retains the borrowed outer machine. MachineProgram
+  keeps its immutable shared allocation and handle representation.
+- All 23 raylib Image mutator aliases use required references. They remain
+  direct aliases of the original Image-pointer C functions; pointer callers
+  supply `*image`. Package tests cover every mutator and preserve PNG hashes.
+
+These are source-facing x2c representation migrations. SymTxn's return ABI,
+MachineBuilder's record construction, and Job's field layout change; compiled
+clients must rebuild with their matching generated headers and runtime. The
+pinned foreign C interfaces do not change.
 
 ## Verification and delivery
 
 Workers use isolated worktrees rooted at the same checkpoint. Each builds a
 fresh compiler and exercises its changed contexts with focused checks. The
 orchestrator reviews and combines authored patches, compiles the new book
-samples, runs command integration checks and the existing final
-`tools/gate-state.py ensure agent-pr-check`, and reviews generated artifacts.
+samples, runs command integration checks, and reviews generated artifacts.
+The complete authored tree passed `agent-pr-check` before incorporating dev's
+build repair. The repaired tree builds from its bootstrap; its submission
+includes that evidence and focused performance measurements. The shared
+integrator owns final combined-tree regeneration and publication validation.
 No recurring check or gate is added by this campaign.
 
-Publish the validated branch and open a draft PR targeting `dev`, as Gary
-authorized. Integration belongs to the integration agent, not this campaign
-worker.
+Push the work branch and submit a ready PR targeting `dev` with its recorded
+starting revision and focused evidence. Keep it open for the integration agent.
+Its separate pause remains in effect until Gary resumes it; this campaign does
+not publish `dev` or merge the PR.
 
 ## Plan review
 

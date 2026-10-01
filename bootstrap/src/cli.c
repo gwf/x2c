@@ -1838,8 +1838,14 @@ static int _in_group(CliOption * option, int mask, Symbol group){
 }
 
 static void _print_option(const CliOption * option){
-  String spelled = String_truth((* option).label) ?(* option).label : String_truth((* option).alias) ? String_join(NULL, cons(String_var((* option).spelling), cons(String_var(_100), cons(String_var((* option).alias), NULL)))) :(* option).spelling;
-  String label =(* option).value ? String_join(NULL, cons(String_var(spelled), cons(String_var(_101), cons(String_var(String_new((* option).value)), NULL)))) : spelled;
+  String spelled = String_truth((* option).label) ?(* option).label : String_truth((* option).alias) ?({
+    Var _x2c_literal_part_0 = String_var((* option).spelling);  Var _x2c_literal_part_1 = String_var((* option).alias);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_100), cons(_x2c_literal_part_1, NULL))));
+  }
+  ) :(* option).spelling;
+  String label =(* option).value ?({
+    Var _x2c_literal_part_2 = String_var(spelled);  Var _x2c_literal_part_3 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(_101), cons(_x2c_literal_part_3, NULL))));
+  }
+  ) : spelled;
   _print_help_row(label, (* option).description, String_startswith(label, _58) ? 6 : 2);
 }
 

@@ -107,7 +107,10 @@ that returns, conversions, and prototypes use.
 An attribute after a declarator or parameter,
 `int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator. The GNU spellings `__inline`, `__inline__`, `__restrict`, and
-`__restrict__` mean the standard keywords.
+`__restrict__` mean the standard keywords. A GNU statement expression,
+`({ int t = f(); t * 2; })`, is written as in C; the
+[language reference](../reference/language.md#statement-expressions) gives
+its rules.
 
 `in` and `match` are x2c keywords, and they are C identifiers as well. `in`
 is the x2c operator only between two operands, and `match` is the statement

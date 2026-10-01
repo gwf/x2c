@@ -297,7 +297,13 @@ Var lisp_binder_lets(Var bindings, Var binders){
   List reversed = NULL;
   for(;  ! _nil(binders);  binders = lisp_cdr(binders)){
     Var name = lisp_car(binders);
-    reversed = cons(List_var(cons(name, cons(List_var(cons(_0, cons(bindings, cons(List_var(cons(_1, cons(name, NULL))), NULL)))), NULL))), reversed);
+    reversed = cons(List_var(({
+      Var _x2c_literal_part_0 = name;  Var _x2c_literal_part_1 = List_var(({
+        Var _x2c_literal_part_2 = bindings;  Var _x2c_literal_part_3 = List_var(cons(_1, cons(name, NULL)));  cons(_0, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+      }
+      ));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+    }
+    )), reversed);
   }
   return List_var(List_reverse(reversed));
 }

@@ -523,8 +523,7 @@ static int _macro_case_match(
   MatchCaptureBuffer *captured) {
   if (plan.status != MACHINE_PREPARED)
     return plan.execute_capture(code, *captured, NULL) == 1;
-  struct MatchMachine storage;
-  MatchMachine machine = &storage;
+  MatchMachine machine;
   machine.open();
   machine.relation = _macro_identity_equal;
   machine.relation_context = policy;
@@ -540,7 +539,7 @@ static int _macro_case_match(
 /* Copies each slot the machine filled, materializing spans, and returns
    whether the machine is still ok. */
 static int _macro_take_slots(
-  MatchMachine machine, MatchCaptureBuffer *captured) {
+  MatchMachine &machine, MatchCaptureBuffer *captured) {
   for (int i = 0; i < machine.slot_count; i++) {
     MachineSlot *slot = &machine.slots[i];
     if (slot.kind == MACHINE_SLOT_INVALID) continue;
@@ -556,7 +555,7 @@ static int _macro_take_slots(
    distinct declarations capture distinct identities. */
 static int _macro_identity_equal(
   void *raw_machine, int slot, Var left, Var right, void *raw_policy) {
-  MatchMachine machine = raw_machine;
+  MatchMachine *machine = raw_machine;
   MacroFixedSlots *policy = raw_policy;
   left = _macro_unwrap(left);
   right = _macro_unwrap(right);
@@ -570,7 +569,7 @@ static int _macro_identity_equal(
   }
   if (left != right) return 0;
   if (!_macro_has_slot(policy.slots, policy.count, slot)) return 1;
-  return !_macro_held_elsewhere(machine, policy, slot, right);
+  return !_macro_held_elsewhere(*machine, policy, slot, right);
 }
 
 static int _macro_has_slot(const int *slots, int count, int slot) {
@@ -592,7 +591,7 @@ static String _macro_source_spelling(Var value) {
 
 /* Whether a fixed local's slot other than `slot` holds `value`. */
 static int _macro_held_elsewhere(
-  MatchMachine machine, MacroFixedSlots *policy, int slot, Var value) {
+  MatchMachine &machine, MacroFixedSlots *policy, int slot, Var value) {
   for (int i = 0; i < policy.count; i++) {
     int other = policy.slots[i];
     if (other != slot && machine.slots[other].kind == MACHINE_SLOT_VALUE &&

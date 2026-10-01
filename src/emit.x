@@ -60,10 +60,11 @@ List Compiler.emit(Compiler c, List ast) {
   return before.list_free().append(code).append(after.list_free());
 }
 
-/* Generic sequence emission visits sibling nodes from left to right because
-   generated names and origins change during the walk. Specialized forms
-   choose their required construction order. This orders tokens, not C
-   operand evaluation; only producer-marked forms such as statement-expression
+/* Emission visits sibling nodes from left to right because generated names
+   and origins change during the walk. Generic sequences walk their items in
+   order; a specialized form builds its tokens in one literal, whose parts
+   x2c evaluates left to right. This orders tokens, not C operand
+   evaluation; only producer-marked forms such as statement-expression
    blocks introduce runtime sequencing. Parser, transform, and generation
    produce every recognized AST shape, so the fallback handles only already
    C-shaped nodes. */
@@ -80,10 +81,14 @@ static List Emitter._emit(Emitter &e, List ast) {
   }
   match (ast) {
     case %(at ?origin ?inner): return e._emit_at(origin, inner);
-    case %(cons ?item ?tail): return e._emit_cons(item, tail);
-    case %(append ?head_list ?tail): return e._emit_append(head_list, tail);
+    case %(cons ?item ?tail):
+      return %("cons(" @{e._emit(%($item))} ", " @{e._emit(%($tail))} ")");
+    case %(append ?head_list ?tail):
+      return %("List_append(" @{e._emit(%($head_list))} ", "
+               @{e._emit(%($tail))} ")");
     case %(c-assert ?condition ?message):
-      return e._emit_assert(condition, message);
+      return %("_Static_assert(" @{e._emit(%($condition))} ","
+               @{e._emit(%($message))} ");");
     case %(initcode ?input ?body):
       return %(@{e._initializer_macro(input, body)} ";");
     case %(localinit ? ?): return e._local_static(ast);
@@ -92,7 +97,9 @@ static List Emitter._emit(Emitter &e, List ast) {
     case %(initval *): return e._initializer_value(ast);
     case %(indexinit ?index ?value): return e._emit_index_init(index, value);
     case %(dotinit ?field ?value): return e._emit_dot_init(field, value);
-    case %(cast ?type ?expression): return e._emit_cast(type, expression);
+    case %(cast ?type ?expression):
+      return %("(" @{e._semantic_type(type)} ")"
+               @{e._operand(expression, EMIT_UNARY)});
     case %(cache ?id): return %("_$id");
     case %(expr ? ?content): return e._emit(%($content));
     case %(postfix ?operator ?argument):
@@ -100,28 +107,45 @@ static List Emitter._emit(Emitter &e, List ast) {
     case %(generic ?control *associations):
       return e._emit_generic(control, associations);
     case %(va-arg ?expression ?declaration):
-      return e._emit_va_arg(expression, declaration);
-    case %(offsetof ?type ?member): return e._emit_offsetof(type, member);
+      return %("va_arg(" @{e._emit(%($expression))} ", "
+               @{e._emit(%($declaration))} ")");
+    case %(offsetof ?type ?member):
+      return %("offsetof(" @{e._semantic_type(type)} ", " @{e._emit(member)}
+               ")");
     case %(call ?function ?arguments):
       return e._emit_call(function, arguments);
-    case %(index ?array ?index): return e._emit_index(array, index);
+    case %(index ?array ?index):
+      return %(@{e._operand(array, EMIT_POSTFIX)} "[" @{e._emit(%($index))}
+               "]");
     case %(op ?operator ?argument): return e._emit_unary(operator, argument);
     case %(op ?operator ?left ?right):
       return e._emit_binary(operator, left, right);
     /* Between `?` and `:` C accepts a complete expression, so only the
        condition and the false arm can regroup. */
-    case %(op ?operator ?condition ?ontrue ?onfalse):
-      return e._emit_conditional(condition, ontrue, onfalse);
+    case %(op ? ?condition ?ontrue ?onfalse):
+      return %(@{e._operand(condition, EMIT_CONDITIONAL + 1)} "?"
+               @{e._emit(%($ontrue))} ":"
+               @{e._operand(onfalse, EMIT_CONDITIONAL)});
     case %(break): return %("break;");
     case %(continue): return %("continue;");
-    case %(if ?condition ?ontrue): return e._emit_if(condition, ontrue);
+    case %(if ?condition ?ontrue):
+      return %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))});
     case %(if ?condition ?ontrue ?onfalse):
-      return e._emit_if_else(condition, ontrue, onfalse);
-    case %(while ?condition ?body): return e._emit_while(condition, body);
-    case %(do ?body ?condition): return e._emit_do(body, condition);
+      return %("if" "(" @{e._emit(%($condition))} ")" @{e._emit(%($ontrue))}
+               "else" @{e._emit(%($onfalse))});
+    case %(while ?condition ?body):
+      return %("while" "(" @{e._emit(%($condition))} ")"
+               @{e._emit(%($body))});
+    case %(do ?body ?condition):
+      return %("do" @{e._emit(%($body))} "while"
+               "(" @{e._emit(%($condition))} ")" ";");
     case %(for ?initial ?condition ?increment ?body):
-      return e._emit_for(initial, condition, increment, body);
-    case %(switch ?expression ?body): return e._emit_switch(expression, body);
+      return %("for" "(" @{e._emit(%($initial))} ";"
+               @{e._emit(%($condition))} ";" @{e._emit(%($increment))} ")"
+               @{e._emit(%($body))});
+    case %(switch ?expression ?body):
+      return %("switch" "(" @{e._emit(%($expression))} ")"
+               @{e._emit(%($body))});
     case %(return): return %("return;");
     case %(return (!set ?expression (expr ? ?))):
       return e._emit_return(expression);
@@ -214,24 +238,6 @@ static List Emitter._emit_at(Emitter &e, int origin, List inner) {
   return result;
 }
 
-static List Emitter._emit_cons(Emitter &e, Var item, Var tail) {
-  List c_item = e._emit(%($item));
-  List c_tail = e._emit(%($tail));
-  return %("cons(" @c_item ", " @c_tail ")");
-}
-
-static List Emitter._emit_append(Emitter &e, Var head_list, Var tail) {
-  List c_head = e._emit(%($head_list));
-  List c_tail = e._emit(%($tail));
-  return %("List_append(" @c_head ", " @c_tail ")");
-}
-
-static List Emitter._emit_assert(Emitter &e, Var condition, Var message) {
-  List c_condition = e._emit(%($condition));
-  List c_message = e._emit(%($message));
-  return %("_Static_assert(" @c_condition "," @c_message ");");
-}
-
 /* initializer choices
 
    A native macro selects an initializer's conversion when C sees the
@@ -295,19 +301,15 @@ static List Emitter._initializer_value(Emitter &e, List ast) {
 }
 
 static List Emitter._emit_index_init(Emitter &e, Var index, List value) {
-  List c_index = e._emit(%($index));
-  List c_value = e._emit(%($value));
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : " =";
-  return %("[" @c_index "]" $assign @c_value);
+  return %("[" @{e._emit(%($index))} "]" $assign @{e._emit(%($value))});
 }
 
 static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
-  List c_field = e._emit(%($field));
-  List c_value = e._emit(%($value));
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : "=";
-  return %("." @c_field $assign @c_value);
+  return %("." @{e._emit(%($field))} $assign @{e._emit(%($value))});
 }
 
 // local statics
@@ -688,12 +690,6 @@ static List Emitter._op_spine(Emitter &e, Var operator, Var left, Var right) {
 
 // expressions
 
-static List Emitter._emit_cast(Emitter &e, Type type, Var expression) {
-  List c_type = e._semantic_type(type);
-  List c_expr = e._operand(expression, EMIT_UNARY);
-  return %("(" @c_type ")" @c_expr);
-}
-
 static List Emitter._emit_postfix(Emitter &e, Symbol operator, Var argument) {
   List c_arg = e._operand(argument, EMIT_POSTFIX);
   return %(@c_arg $operator);
@@ -706,34 +702,10 @@ static List Emitter._emit_generic(Emitter &e, Var control, List associations) {
     case %(association default ?value):
       rows.push(%("default" ":" @{e._emit(%($value))}));
     case %(association ?type ?value):
-      rows.push(e._generic_typed(type, value));
+      rows.push(%(@{e._semantic_type(type)} ":" @{e._emit(%($value))}));
   }
   List c_rows = _commas(rows.list_free());
   return %("_Generic(" @c_control ", " @c_rows ")");
-}
-
-static List Emitter._generic_typed(Emitter &e, Type type, Var value) {
-  List c_type = e._semantic_type(type);
-  List c_value = e._emit(%($value));
-  return %(@c_type ":" @c_value);
-}
-
-static List Emitter._emit_va_arg(Emitter &e, Var expression, Var declaration) {
-  List c_expr = e._emit(%($expression));
-  List c_decl = e._emit(%($declaration));
-  return %("va_arg(" @c_expr ", " @c_decl ")");
-}
-
-static List Emitter._emit_offsetof(Emitter &e, Type type, List member) {
-  List c_type = e._semantic_type(type);
-  List c_member = e._emit(member);
-  return %("offsetof(" @c_type ", " @c_member ")");
-}
-
-static List Emitter._emit_index(Emitter &e, Var array, Var index) {
-  List c_array = e._operand(array, EMIT_POSTFIX);
-  List c_index = e._emit(%($index));
-  return %(@c_array "[" @c_index "]");
 }
 
 static List Emitter._emit_unary(Emitter &e, Symbol operator, Var argument) {
@@ -746,17 +718,8 @@ static List Emitter._emit_binary(
   if (left is <list> && left.list().match(%(expr ? (op *))))
     return e._op_spine(operator, left, right);
   Symbol binary = operator;
-  List c_left = e._operand(left, _left_operand_level(binary));
-  List c_right = e._operand(right, _right_operand_level(binary));
-  return %(@c_left $operator @c_right);
-}
-
-static List Emitter._emit_conditional(
-  Emitter &e, Var condition, Var ontrue, Var onfalse) {
-  List c_cond = e._operand(condition, EMIT_CONDITIONAL + 1);
-  List c_then = e._emit(%($ontrue));
-  List c_else = e._operand(onfalse, EMIT_CONDITIONAL);
-  return %(@c_cond "?" @c_then ":" @c_else);
+  return %(@{e._operand(left, _left_operand_level(binary))} $operator
+           @{e._operand(right, _right_operand_level(binary))});
 }
 
 static List Emitter._emit_ident(Emitter &e, Var binding) {
@@ -771,9 +734,8 @@ static List Emitter._emit_ident(Emitter &e, Var binding) {
 static List Emitter._emit_call(Emitter &e, Var function, Var arguments) {
   List site_call = e._match_site_call(function, arguments);
   if (site_call) return site_call;
-  List c_fn = e._operand(function, EMIT_POSTFIX);
-  List c_args = e._emit(%($arguments));
-  return %(@c_fn "(" @c_args ")");
+  return %(@{e._operand(function, EMIT_POSTFIX)} "("
+           @{e._emit(%($arguments))} ")");
 }
 
 /* A source-literal pattern is the same value on every call, so the call gets
@@ -817,50 +779,6 @@ static String _match_site_entry(String name) =>
     ? "x2c_match_site_" + name[5:] : NULL;
 
 // statements
-
-static List Emitter._emit_if(Emitter &e, Var condition, Var ontrue) {
-  List c_cond = e._emit(%($condition));
-  List c_then = e._emit(%($ontrue));
-  return %("if" "(" @c_cond ")" @c_then);
-}
-
-static List Emitter._emit_if_else(
-  Emitter &e, Var condition, Var ontrue, Var onfalse) {
-  List c_cond = e._emit(%($condition));
-  List c_then = e._emit(%($ontrue));
-  List c_else = e._emit(%($onfalse));
-  return %("if" "(" @c_cond ")" @c_then
-           "else" @c_else);
-}
-
-static List Emitter._emit_while(Emitter &e, Var condition, Var body) {
-  List c_cond = e._emit(%($condition));
-  List c_body = e._emit(%($body));
-  return %("while" "(" @c_cond ")" @c_body);
-}
-
-static List Emitter._emit_do(Emitter &e, Var body, Var condition) {
-  List c_body = e._emit(%($body));
-  List c_cond = e._emit(%($condition));
-  return %("do" @c_body "while"
-           "(" @c_cond ")" ";");
-}
-
-static List Emitter._emit_for(
-  Emitter &e, Var initial, Var condition, Var increment, Var body) {
-  List c_init = e._emit(%($initial));
-  List c_cond = e._emit(%($condition));
-  List c_inc = e._emit(%($increment));
-  List c_body = e._emit(%($body));
-  return %("for" "(" @c_init ";" @c_cond ";"
-           @c_inc ")" @c_body);
-}
-
-static List Emitter._emit_switch(Emitter &e, Var expression, Var body) {
-  List c_expr = e._emit(%($expression));
-  List c_body = e._emit(%($body));
-  return %("switch" "(" @c_expr ")" @c_body);
-}
 
 static List Emitter._emit_return(Emitter &e, Var expression) {
   List value = e._emit(%($expression));
