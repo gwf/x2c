@@ -88,10 +88,12 @@ static List Compiler._atom_element(Compiler c, String spelling) {
 }
 
 static List Compiler._parse_list_head(Compiler c) {
-  List elem = NULL;
-  if ((elem = c._parse_reader_prefix())) return elem;
-  if ((elem = c._parse_splice())) return %(expr ("List") $elem);
-  if ((elem = c._parse_insertion())) return elem;
+  List reader_form = c._parse_reader_prefix();
+  if (reader_form) return reader_form;
+  List splice = c._parse_splice();
+  if (splice) return %(expr ("List") $splice);
+  List inserted = c._parse_insertion();
+  if (inserted) return inserted;
   return c._cache_if_stable(c._parse_literal_element());
 }
 
