@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1483`
+Source: `src/callables.x:1477`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -58,7 +58,7 @@ Source: `src/callables.x:188`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:1279`
+Source: `src/callables.x:1273`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -73,7 +73,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:669`
+Source: `src/callables.x:668`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -104,7 +104,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1354`
+Source: `src/callables.x:1348`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -118,7 +118,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:1041`
+Source: `src/callables.x:1035`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -133,7 +133,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/callables.x:391`
+Source: `src/callables.x:392`
 
 ## Design notes
 

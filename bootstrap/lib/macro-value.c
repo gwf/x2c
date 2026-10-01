@@ -377,7 +377,10 @@ static List _macro_pattern(Macro t, List names, int case_pattern){
   List rows = _macro_binder_rows(t, names, case_pattern);
   List body = Var_list(List_assoc(t, Symbol_var(1386033712394)));
   List pattern = Var_list(_macro_pattern_view(_macro_inline(Var_list(List_assoc(t, Symbol_var(11180))), List_var(List_replace(body, rows)))));
-  if(Var_equal(List_assoc(t, Symbol_var(740232)), Symbol_var(168163805864282)) && Var_equal(List_car(body), Symbol_var(39266)) && List_len(List_cdr(body)) == 1) return cons(_6, cons(List_var(pattern), cons(List_var(cons(_7, cons(List_var(pattern), NULL))), NULL)));
+  if(Var_equal(List_assoc(t, Symbol_var(740232)), Symbol_var(168163805864282)) && Var_equal(List_car(body), Symbol_var(39266)) && List_len(List_cdr(body)) == 1) return({
+    Var _x2c_literal_part_2 = List_var(pattern);  Var _x2c_literal_part_3 = List_var(cons(_7, cons(List_var(pattern), NULL)));  cons(_6, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+  }
+  );
   return pattern;
 }
 
@@ -403,28 +406,28 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern){
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
         Var projected = sequence ? List_var(cons(selected, NULL)) : selected;
         if(case_pattern && Var_equal(kind, Symbol_var(920394))) projected = List_var(({
-          Var _x2c_literal_part_2 = selected;  Atom _x2c_literal_part_3 = _macro_name_identity(hole);  cons(_9, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+          Var _x2c_literal_part_4 = selected;  Atom _x2c_literal_part_5 = _macro_name_identity(hole);  cons(_9, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
         }
         ));
         Var expression = ! sequence && Var_equal(kind, Symbol_var(920394)) ? List_var(cons(_10, cons(_4, cons(List_var(cons(_11, cons(projected, NULL))), NULL)))) : projected;
         rows = cons(List_var(({
-          Atom _x2c_literal_part_4 = _macro_key(hole, _155);  cons(_x2c_literal_part_4, cons(expression, NULL));
+          Atom _x2c_literal_part_6 = _macro_key(hole, _155);  cons(_x2c_literal_part_6, cons(expression, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_5 = _macro_key(hole, _156);  cons(_x2c_literal_part_5, cons(projected, NULL));
+          Atom _x2c_literal_part_7 = _macro_key(hole, _156);  cons(_x2c_literal_part_7, cons(projected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_6 = _macro_key(hole, _157);  cons(_x2c_literal_part_6, cons(projected, NULL));
+          Atom _x2c_literal_part_8 = _macro_key(hole, _157);  cons(_x2c_literal_part_8, cons(projected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_7 = _macro_key(hole, _13);  cons(_x2c_literal_part_7, cons(selected, NULL));
+          Atom _x2c_literal_part_9 = _macro_key(hole, _13);  cons(_x2c_literal_part_9, cons(selected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_8 = _macro_key(hole, _12);  cons(_x2c_literal_part_8, cons(List_var(cons(selected, NULL)), NULL));
+          Atom _x2c_literal_part_10 = _macro_key(hole, _12);  Var _x2c_literal_part_11 = List_var(cons(selected, NULL));  cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL));
         }
         )), rows);
       }
@@ -443,7 +446,7 @@ static Atom _macro_key(List hole, String projection){
   if(String_equal(projection, _12)) sequence = 1;
   else if(String_equal(projection, _13)) sequence = 0;
   return Atom_intern(({
-    Var _x2c_literal_part_9 = String_var(sequence ? _8 : _14);  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_15), cons(String_var(projection), cons(String_var(_16), cons(String_var(name), NULL))))));
+    Var _x2c_literal_part_12 = String_var(sequence ? _8 : _14);  String_join(NULL, cons(_x2c_literal_part_12, cons(String_var(_15), cons(String_var(projection), cons(String_var(_16), cons(String_var(name), NULL))))));
   }
   ));
 }
@@ -501,19 +504,19 @@ static List _macro_value_rows(Macro t, List values){
     List hole;  List _x2c_macro_object_5 = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
       hole = Var_list(_x2c_macro_cursor_output_5); {
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));  Var kind = List_assoc(hole, Symbol_var(740232));  Var value = sequence ? List_var(values) : List_car(values);  if(Var_equal(kind, Symbol_var(377892))) value = sequence ? List_var(_macro_expr_values(values)) : _macro_expr_value(value);  Var expression = ! sequence && Var_equal(kind, Symbol_var(920394)) ? List_var(cons(_10, cons(_51, cons(List_var(cons(_11, cons(value, NULL))), NULL)))) : value;  rows = cons(List_var(({
-          Atom _x2c_literal_part_10 = _macro_key(hole, _155);  cons(_x2c_literal_part_10, cons(expression, NULL));
+          Atom _x2c_literal_part_13 = _macro_key(hole, _155);  cons(_x2c_literal_part_13, cons(expression, NULL));
         }
         )), rows);  rows = cons(List_var(({
-          Atom _x2c_literal_part_11 = _macro_key(hole, _156);  cons(_x2c_literal_part_11, cons(value, NULL));
+          Atom _x2c_literal_part_14 = _macro_key(hole, _156);  cons(_x2c_literal_part_14, cons(value, NULL));
         }
         )), rows);  rows = cons(List_var(({
-          Atom _x2c_literal_part_12 = _macro_key(hole, _157);  cons(_x2c_literal_part_12, cons(value, NULL));
+          Atom _x2c_literal_part_15 = _macro_key(hole, _157);  cons(_x2c_literal_part_15, cons(value, NULL));
         }
         )), rows);  if(Var_equal(kind, Symbol_var(920394))) rows = cons(List_var(({
-          Atom _x2c_literal_part_13 = _macro_key(hole, _13);  cons(_x2c_literal_part_13, cons(value, NULL));
+          Atom _x2c_literal_part_16 = _macro_key(hole, _13);  cons(_x2c_literal_part_16, cons(value, NULL));
         }
         )), rows);  rows = cons(List_var(({
-          Atom _x2c_literal_part_14 = _macro_key(hole, _12);  cons(_x2c_literal_part_14, cons(value, NULL));
+          Atom _x2c_literal_part_17 = _macro_key(hole, _12);  cons(_x2c_literal_part_17, cons(value, NULL));
         }
         )), rows);  values = sequence ? NULL : List_cdr(values);
       }
@@ -559,7 +562,7 @@ default: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_c
 break;
 }
 static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_72), &_x2c_match_capture)) {Var operator = _x2c_match_values[0];  List operands = Var_list(_x2c_match_values[1]);  return List_var(({
-  Var _x2c_literal_part_15 = List_var(cons(_52, cons(operator, NULL)));  List _x2c_literal_part_16 = _macro_pattern_views(operands);  cons(_67, cons(_x2c_literal_part_15, List_append(_x2c_literal_part_16, NULL)));
+  Var _x2c_literal_part_18 = List_var(cons(_52, cons(operator, NULL)));  List _x2c_literal_part_19 = _macro_pattern_views(operands);  cons(_67, cons(_x2c_literal_part_18, List_append(_x2c_literal_part_19, NULL)));
 }
 ));  break;
 }
@@ -734,7 +737,7 @@ static List _macro_case_shape(Macro t, List names){
     List fresh;  List _x2c_macro_object_11 = Var_list(List_assoc(t, Symbol_var(13774032)));  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
       fresh = Var_list(_x2c_macro_cursor_output_11); {
         Atom identity = _macro_fixed(ordinal ++);  replacements = cons(List_var(({
-          Var _x2c_literal_part_17 = List_car(fresh);  cons(_x2c_literal_part_17, cons(List_var(cons(_3, cons(List_var(cons(_9, cons(identity, cons(identity, NULL)))), _104))), NULL));
+          Var _x2c_literal_part_20 = List_car(fresh);  Var _x2c_literal_part_21 = List_var(cons(_3, cons(List_var(cons(_9, cons(identity, cons(identity, NULL)))), _104)));  cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL));
         }
         )), replacements);
       }
@@ -747,7 +750,10 @@ static List _macro_case_shape(Macro t, List names){
     List _x2c_match_expr = pattern;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 39266: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_119), &_x2c_match_capture)) {List parts = Var_list(_x2c_match_values[0]);  pattern = cons(_6, cons(List_var(cons(_7, List_append(parts, NULL))), cons(List_var(cons(_120, List_append(parts, NULL))), NULL)));  break;
+      case 39266: ;  static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_119), &_x2c_match_capture)) {List parts = Var_list(_x2c_match_values[0]);  pattern =({
+    Var _x2c_literal_part_22 = List_var(cons(_7, List_append(parts, NULL)));  Var _x2c_literal_part_23 = List_var(cons(_120, List_append(parts, NULL)));  cons(_6, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL)));
+  }
+  );  break;
 }
 default: break;
     }

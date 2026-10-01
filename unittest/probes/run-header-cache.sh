@@ -1141,4 +1141,51 @@ grep -q 'has no method sum' "$root/tamper.err" ||
   fail "tampered package alias produced the wrong diagnostic"
 mv "$root/warm/z-first.good" "$root/warm/z-first.xi"
 
+# Large literal graphs stay in bounded native functions. Two public inline
+# owners also exercise private helper names in one including translation unit.
+literal="$BUILD/literal-batches"
+mkdir -p "$literal/out"
+python3 - "$literal" <<'PY_LITERAL_INPUT'
+from pathlib import Path
+import sys
+
+directory = Path(sys.argv[1])
+for name, start in (("first", 0), ("second", 2000)):
+    values = " ".join(str(start + i) for i in range(1200))
+    (directory / (name + ".x")).write_text(
+        '#include "x2c.x"\ninline List ' + name + '(void) { return %(' +
+        values + '); }\n')
+values = " ".join(str(4000 + i) for i in range(1200))
+(directory / "use.x").write_text('''#include "first.x"
+#include "second.x"
+#pragma private
+static List source_values(void) { return %(''' + values + '''); }
+int main(void) {
+  List a = first(), b = second(), c = source_values();
+  printf("%d %d %d %ld %ld %ld\\n", a.len(), b.len(), c.len(),
+    a[1199].integer(), b[1199].integer(), c[1199].integer());
+  return 0;
+}
+''')
+PY_LITERAL_INPUT
+"$X2C" translate --quiet --out-dir "$literal/out" \
+  "$literal/first.x" "$literal/second.x" "$literal/use.x"
+python3 - "$literal/out" <<'PY_LITERAL_BOUNDS'
+from pathlib import Path
+import re
+import sys
+
+directory = Path(sys.argv[1])
+for name in ("first.h", "second.h", "use.c"):
+    code = (directory / name).read_text()
+    bodies = re.findall(r'static void \w+\(void\)\s*\{([^}]*)\}', code)
+    counts = [body.count("cons(") for body in bodies]
+    assert sum(counts) >= 1200, (name, "missing literal graph")
+    assert max(counts) <= 512, (name, "unbounded literal initializer")
+PY_LITERAL_BOUNDS
+"$X2C" build --quiet --output "$literal/run" \
+  -Xcc -Werror -Xcc -iquote -Xcc "$ROOT/include/x2c" "$literal/out/"*.c
+[[ $("$literal/run") == '1200 1200 1200 1199 3199 5199' ]] ||
+  fail "literal initialization lost dependencies across helper batches"
+
 echo "header cache probes passed"

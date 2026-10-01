@@ -605,7 +605,7 @@ List preproc_track_arms(List arms, String text){
   if(kind == 1016156) return cons(List_var(cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_literal_part_5 = Var_list(List_car(arms));  List_append(_x2c_literal_part_5, cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL));
+    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_20, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;

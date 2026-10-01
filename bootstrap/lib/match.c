@@ -1029,8 +1029,14 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
       for(size_t i = spine -> length;  i > 0;  i --){
         ReplacementCell row =((ReplacementCell *) spine -> bytes)[i - 1];
         Var head = row.value;
-        if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(List_append(Var_list(head), List_append(Var_list(tail), NULL)));
-        else tail = List_var(cons(head, List_append(Var_list(tail), NULL)));
+        if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(({
+          List _x2c_literal_part_4 = Var_list(head);  List _x2c_literal_part_5 = Var_list(tail);  List_append(_x2c_literal_part_4, List_append(_x2c_literal_part_5, NULL));
+        }
+        ));
+        else tail = List_var(({
+          Var _x2c_literal_part_6 = head;  List _x2c_literal_part_7 = Var_list(tail);  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
+        }
+        ));
       }
       {
         Var _x2c_return_value_1 = tail;
@@ -1102,8 +1108,14 @@ static Var _replace(Var input, List bindings){
       for(size_t i = spine -> length;  i > 0;  i --){
         ReplacementCell row =((ReplacementCell *) spine -> bytes)[i - 1];
         Var head = row.value;
-        if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(List_append(Var_list(head), List_append(Var_list(tail), NULL)));
-        else tail = List_var(cons(head, List_append(Var_list(tail), NULL)));
+        if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(({
+          List _x2c_literal_part_8 = Var_list(head);  List _x2c_literal_part_9 = Var_list(tail);  List_append(_x2c_literal_part_8, List_append(_x2c_literal_part_9, NULL));
+        }
+        ));
+        else tail = List_var(({
+          Var _x2c_literal_part_10 = head;  List _x2c_literal_part_11 = Var_list(tail);  cons(_x2c_literal_part_10, List_append(_x2c_literal_part_11, NULL));
+        }
+        ));
       }
       {
         Var _x2c_return_value_2 = tail;

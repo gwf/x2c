@@ -1182,7 +1182,10 @@ static char * * _environment(Map env){
     while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
       name = _x2c_macro_cursor_output_5;
       value = _x2c_macro_cursor_output_6;
-      Array_push(entries, String_var(String_join(NULL, cons(String_var(Var_str(name)), cons(String_var(_0), cons(String_var(Var_str(value)), NULL))))));
+      Array_push(entries, String_var(({
+        Var _x2c_literal_part_0 = String_var(Var_str(name));  Var _x2c_literal_part_1 = String_var(Var_str(value));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_0), cons(_x2c_literal_part_1, NULL))));
+      }
+      )));
     }
 
   }

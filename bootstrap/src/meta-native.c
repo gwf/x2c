@@ -1256,7 +1256,10 @@ static void NativeBinding_check(NativeBinding * n, Var function){
 
 static void NativeBinding_install(NativeBinding * n, Var function){
   Compiler c =(* n).c;  if((* n).iterator){
-    int arity = List_len(Var_list(List_cadr(Var_list(List_car((* n).signature))))) - 1;  function = Lisp_eval(c -> macro_lisp, List_var(cons(_30415, cons(List_var(cons(_30303, cons(function, NULL))), cons(int_var(arity), NULL)))));
+    int arity = List_len(Var_list(List_cadr(Var_list(List_car((* n).signature))))) - 1;  function = Lisp_eval(c -> macro_lisp, List_var(({
+      Var _x2c_literal_part_9 = List_var(cons(_30303, cons(function, NULL)));  cons(_30415, cons(_x2c_literal_part_9, cons(int_var(arity), NULL)));
+    }
+    )));
   }
   Lisp_set_global(c -> macro_lisp, (* n).name, function);
 }
@@ -1272,7 +1275,10 @@ int Compiler_native_meta_accepts(Compiler c, Var function, List signature){
       default: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_30429), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  List result = Var_list(_x2c_match_values[1]); {
     Var _x2c_match_value_4 = parameters; {
       List parameters = Var_list(_x2c_match_value_4); {
-        List boxed =({ static MatchCaptureSite _x2c_match_site_7;  x2c_match_site_search_replace(& _x2c_match_site_7, parameters, List_var(_30432), List_var(_379)); });  return List_equal(target, Compiler__native_signature_type(c, signature)) || List_equal(target, Compiler__native_signature_type(c, cons(List_var(cons(_381, cons(List_var(boxed), NULL))), List_append(result, NULL))));
+        List boxed =({ static MatchCaptureSite _x2c_match_site_7;  x2c_match_site_search_replace(& _x2c_match_site_7, parameters, List_var(_30432), List_var(_379)); });  return List_equal(target, Compiler__native_signature_type(c, signature)) || List_equal(target, Compiler__native_signature_type(c, ({
+          Var _x2c_literal_part_10 = List_var(cons(_381, cons(List_var(boxed), NULL)));  cons(_x2c_literal_part_10, List_append(result, NULL));
+        }
+        )));
       }
 
     }
@@ -1304,7 +1310,7 @@ static List Compiler__native_signature_type(Compiler c, List signature){
 
         }
         Type native = Sym_normalize_declared_type(c -> sym, List_type(result));  return({
-          Var _x2c_literal_part_9 = List_var(cons(_381, cons(List_var(Array_list_free(resolved)), NULL)));  cons(_x2c_literal_part_9, List_append(Type_list(native), NULL));
+          Var _x2c_literal_part_11 = List_var(cons(_381, cons(List_var(Array_list_free(resolved)), NULL)));  List _x2c_literal_part_12 = Type_list(native);  cons(_x2c_literal_part_11, List_append(_x2c_literal_part_12, NULL));
         }
         );
       }
@@ -1346,7 +1352,7 @@ static void Compiler__certify_native_meta(Compiler c, String name, List signatur
     Map_setindex(c -> meta_regions, String_var(name), List_var(summary));  return;
   }
   if(marker) Compiler_report_error(c, 1362954, _30617, marker, ({
-    Var _x2c_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("name: ")), cons(String_var(name), NULL))));  Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("signature: ")), cons(String_var(List_repr(signature)), NULL))));  cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(String_var(_24633), NULL)));
+    Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(String_new("name: ")), cons(String_var(name), NULL))));  Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("signature: ")), cons(String_var(List_repr(signature)), NULL))));  Var _x2c_literal_part_15 = String_var(_24633);  cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
   }
   ));
 }
@@ -1440,7 +1446,10 @@ List Compiler_native_meta_targets(List paths){
         if(List_truth(paths) && ! _declared_in(key, paths)) continue; {
           List row;  List _x2c_macro_object_11 = Compiler__native_meta_rows(c, value);  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_14))){
             row = Var_list(_x2c_macro_cursor_output_14); {
-              List _x2c_destructure_1 = row;  String name = Var_string(List_getindex(_x2c_destructure_1, 0));  List signature = Var_list(List_getindex(_x2c_destructure_1, 1));  if(_takes_callback(signature)) continue;  String into = String_join(NULL, cons(String_var(name), cons(String_var(_30409), NULL)));  Map_setindex(selected, String_var(name), List_var(_iterator_operation(signature) ? cons(String_var(name), cons(List_var(cons(_30470, cons(String_var(into), NULL))), NULL)) : cons(String_var(name), NULL)));
+              List _x2c_destructure_1 = row;  String name = Var_string(List_getindex(_x2c_destructure_1, 0));  List signature = Var_list(List_getindex(_x2c_destructure_1, 1));  if(_takes_callback(signature)) continue;  String into = String_join(NULL, cons(String_var(name), cons(String_var(_30409), NULL)));  Map_setindex(selected, String_var(name), List_var(_iterator_operation(signature) ?({
+                Var _x2c_literal_part_16 = String_var(name);  Var _x2c_literal_part_17 = List_var(cons(_30470, cons(String_var(into), NULL)));  cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, NULL));
+              }
+              ) : cons(String_var(name), NULL)));
             }
 
           }
@@ -1519,7 +1528,7 @@ static List Compiler__witness_rows(Compiler c, Type base, Type participant){
       default: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_30514), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  Var type = _x2c_match_values[1]; {
         Var _x2c_match_value_11 = name;  Var _x2c_match_value_12 = type; {
           String name = Var_string(_x2c_match_value_11);  Type type = Var_type(_x2c_match_value_12);  rows = cons(List_var(({
-            Var _x2c_literal_part_12 = String_var(name);  Var _x2c_literal_part_13 = List_var(Compiler_func_signature(c, type));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL));
+            Var _x2c_literal_part_18 = String_var(name);  Var _x2c_literal_part_19 = List_var(Compiler_func_signature(c, type));  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, NULL));
           }
           )), rows);
         }
@@ -1531,10 +1540,10 @@ static List Compiler__witness_rows(Compiler c, Type base, Type participant){
       Var _x2c_match_value_13 = name;  Var _x2c_match_value_14 = type; {
         String name = Var_string(_x2c_match_value_13);  Type type = Var_type(_x2c_match_value_14); {
           String forward =({
-            Var _x2c_literal_part_14 = String_var(Var_str(List_car(Type_list(participant))));  String_join(NULL, cons(_x2c_literal_part_14, cons(String_var(_27633), cons(String_var(name), NULL))));
+            Var _x2c_literal_part_20 = String_var(Var_str(List_car(Type_list(participant))));  String_join(NULL, cons(_x2c_literal_part_20, cons(String_var(_27633), cons(String_var(name), NULL))));
           }
           );  rows = cons(List_var(({
-            Var _x2c_literal_part_15 = String_var(forward);  Var _x2c_literal_part_16 = List_var(Compiler_func_signature(c, type));  cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL));
+            Var _x2c_literal_part_21 = String_var(forward);  Var _x2c_literal_part_22 = List_var(Compiler_func_signature(c, type));  cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, NULL));
           }
           )), rows);
         }
@@ -1677,7 +1686,7 @@ void Compiler_select_native_modules(List paths){
     String key = String_join(NULL, cons(String_var(_30595), cons(String_var(String_new(e -> name)), cons(String_var(_30411), NULL))));  if(! Compiler_native_module_loaded(key)) Compiler_add_native_module(key, e -> targets);  Array_push(linked, String_var(key));
   }
   paths =({
-    Var _x2c_literal_part_17 = String_var(compiler_supplier);  List _x2c_literal_part_18 = paths;  List _x2c_literal_part_19 = Array_list_free(linked);  cons(_x2c_literal_part_17, List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, NULL)));
+    Var _x2c_literal_part_23 = String_var(compiler_supplier);  List _x2c_literal_part_24 = paths;  List _x2c_literal_part_25 = Array_list_free(linked);  cons(_x2c_literal_part_23, List_append(_x2c_literal_part_24, List_append(_x2c_literal_part_25, NULL)));
   }
   );  List_try_own(paths);  native_module_order = paths;
 }
@@ -1686,7 +1695,10 @@ int Path_is_file(Path);
 void Compiler_add_translation_dependency(Compiler, String);
 List List_append(List, List);
 void Compiler_select_package_module(Compiler c, String name, String root, Token token){
-  if(! _init_guard_) _file_init_();  String module = String_join(NULL, cons(String_var(root), cons(String_var(_30596), cons(String_var(name), cons(String_var(_30597), NULL)))));  if(Compiler_links_extension(name) || ! Path_is_file(module)) return;  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _30648, token, cons(String_var(String_join(NULL, cons(String_var(String_new("package: ")), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(String_new("module: ")), cons(String_var(module), NULL)))), NULL)));  Compiler_add_translation_dependency(c, module);  if(! Compiler_native_module_loaded(module)) Compiler__load_package_module(c, name, module, token);  if(List_contains(native_module_order, String_var(module))) return; {
+  if(! _init_guard_) _file_init_();  String module = String_join(NULL, cons(String_var(root), cons(String_var(_30596), cons(String_var(name), cons(String_var(_30597), NULL)))));  if(Compiler_links_extension(name) || ! Path_is_file(module)) return;  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _30648, token, ({
+    Var _x2c_literal_part_26 = String_var(String_join(NULL, cons(String_var(String_new("package: ")), cons(String_var(name), NULL))));  Var _x2c_literal_part_27 = String_var(String_join(NULL, cons(String_var(String_new("module: ")), cons(String_var(module), NULL))));  cons(_x2c_literal_part_26, cons(_x2c_literal_part_27, NULL));
+  }
+  ));  Compiler_add_translation_dependency(c, module);  if(! Compiler_native_module_loaded(module)) Compiler__load_package_module(c, name, module, token);  if(List_contains(native_module_order, String_var(module))) return; {
     Scope_push(& native_module_scope); {
       {
         X2CCleanup _x2c_defer_record_2 ={
@@ -1725,7 +1737,7 @@ void * Scope_malloc(size_t);
 void Scope_free(void *);
 static int _module_stamp(String path){
   String expected = build_module_stamp();  if(! String_truth(expected)) driver_error(String_join(NULL, cons(String_var(_30600), cons(String_var(path), cons(String_var(_1656), NULL)))));  File input = fopen(path, "rb");  if(! input) driver_error(({
-    Var _x2c_literal_part_20 = String_var(path);  Var _x2c_literal_part_21 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_30601), cons(_x2c_literal_part_20, cons(String_var(_30602), cons(_x2c_literal_part_21, NULL)))));
+    Var _x2c_literal_part_28 = String_var(path);  Var _x2c_literal_part_29 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_30601), cons(_x2c_literal_part_28, cons(String_var(_30602), cons(_x2c_literal_part_29, NULL)))));
   }
   ));  fseek(input, 0, SEEK_END);  long end = ftell(input);  rewind(input);  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;  File_close(input);  int stamp = _stamp_in(data, size, expected);  Scope_free(data);  return stamp;
 }
@@ -1754,7 +1766,7 @@ static void _open_native_module(String path){
 
   }
   if(! handle) driver_error(({
-    Var _x2c_literal_part_22 = String_var(path);  Var _x2c_literal_part_23 = String_var(String_new(dlerror()));  String_join(NULL, cons(String_var(_30603), cons(_x2c_literal_part_22, cons(String_var(_30602), cons(_x2c_literal_part_23, NULL)))));
+    Var _x2c_literal_part_30 = String_var(path);  Var _x2c_literal_part_31 = String_var(String_new(dlerror()));  String_join(NULL, cons(String_var(_30603), cons(_x2c_literal_part_30, cons(String_var(_30602), cons(_x2c_literal_part_31, NULL)))));
   }
   ));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) driver_error(String_join(NULL, cons(String_var(_30598), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
 }

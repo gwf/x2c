@@ -18,6 +18,16 @@ static String _1816, _1815, _1814, _1813, _1812, _1811, _1810, _1809, _1808, _18
 
 static Var _1799, _1796, _1792, _1790, _1773, _1770, _1769, _1765, _1763, _1758, _1754, _1753, _1752, _1750, _1747, _1745, _1742, _1741, _1739, _1735, _1731, _1634, _1622, _1617, _1613, _1609, _1562, _1486, _1483, _1477, _1474, _1473, _1470, _1469, _1466, _1462, _1459, _1456, _1453, _1450, _1448, _1445, _1439, _1438, _1435, _1431, _1430, _1427, _1424, _1422, _1419, _1409, _1406, _1402, _1363, _1313, _1309, _1270, _1229, _1221, _1209, _1206, _1200, _1197, _1196, _1193, _1192, _1189, _1185, _1181, _1179, _1177, _1176, _1173, _1168, _1164, _1159, _1156, _1155, _1153, _1149, _1147, _1145, _1139, _1136, _1135, _1132, _1130, _1125, _1122, _1121, _1118, _1114, _1109, _1107, _1104, _1101, _1100, _1096, _1093, _1090, _1089, _1086, _1083, _1079, _1075, _1065, _1062, _1058, _1048, _1044, _996, _948, _931, _928, _924, _923, _920, _917, _908, _907, _906, _901, _898, _895, _892, _888, _885, _883, _880, _879, _871, _870, _869, _867, _865, _861, _858, _857, _853, _850, _848, _843, _841, _839, _830, _828, _826, _788, _780, _776, _773, _771, _769, _765, _764, _762, _758, _755, _754, _753, _752, _748, _747, _740, _739, _738, _737, _733, _730, _729, _717, _714, _708, _705, _704, _701, _700, _697, _694, _691, _688, _676, _673, _667, _664, _663, _660, _659, _656, _653, _651, _650, _647, _644, _639, _637, _634, _633, _630, _628, _625, _623, _619, _616, _615, _613, _610, _594, _592, _591, _589, _588, _586, _585, _582, _576, _573, _572, _571, _568, _567, _566, _563, _562, _561, _558, _557, _556, _553, _551, _550, _549, _546, _543, _540, _537, _535, _534, _533, _532, _531, _528, _525, _519, _517, _516, _513, _512, _511, _509, _508, _504, _502, _500, _499, _498, _497, _496, _495, _493, _492, _490, _489, _486, _484, _479, _476, _475, _474, _471, _468, _467, _466, _465, _464, _461, _460, _459, _456, _455, _454, _451, _450, _449, _446, _445, _444, _442, _438, _435, _431, _427, _425, _422, _419, _418, _417, _416, _412, _411, _410, _409, _397, _393, _391, _389, _386, _374, _364, _360, _358, _356, _353, _346, _344, _342, _331, _329, _326, _323, _288, _283, _280, _273, _271, _268, _263, _221, _218, _207, _204, _200, _196, _183, _165, _162, _160, _153, _147, _145, _116, _115, _114, _110, _100, _90, _78, _74, _68, _66, _57, _53, _50, _46, _43, _42, _38, _34, _33, _32, _29, _28, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _2, _1, _0;
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
+
 #include "meta.h"
 #include "ast.h"
 #include "stage.h"
@@ -38,10 +48,6 @@ typedef struct Region{
   struct Region * outer;
 }
 * Region;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var Fact_var(Fact fact);
 
@@ -244,14 +250,22 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+  _x2c_cache_initialize_2();
+  _x2c_static_initialize_0();
+  _x2c_static_initialize_1();
+}
+
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(1219800220);
   _1 = Symbol_var(62180362);
   _2 = Symbol_var(58);
@@ -764,6 +778,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _522 = cons(_511, _521);
   _523 = cons(_508, _522);
   _524 = cons(_498, _523);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _525 = List_var(_524);
   _526 = cons(_525, NULL);
   _527 = cons(_497, _526);
@@ -1276,6 +1293,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1185 = List_var(_1184);
   _1186 = cons(_1185, NULL);
   _1187 = cons(_537, _1186);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1188 = cons(_33, _1187);
   _1189 = List_var(_1188);
   _1190 = cons(_1189, NULL);
@@ -1523,8 +1543,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1814 = String_new("stored into an object of an outer region");
   _1815 = String_new("a closure");
   _1816 = String_new("a fresh allocation");
-  _x2c_static_initialize_0();
-  _x2c_static_initialize_1();
 }
 
 Var Var_new(Symbol, ...);
@@ -2682,7 +2700,7 @@ List cdr(List);
 Type Type_reference(Type);
 static Var _passed(List types, List arguments, int index, Type * type){
   Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! List_truth(Type_list((* type))) ||(! Var_equal(List_car(Type_list((* type))), Symbol_var(77)) && ! Var_equal(List_car(Type_list((* type))), Symbol_var(33330008396)))) return argument;  Type given = List_type(_expression_type(argument));  if(List_truth(Type_list(given)) &&(Var_equal(List_car(Type_list(given)), Symbol_var(77)) || Var_equal(List_car(Type_list(given)), Symbol_var(33330008396)))) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
-    Var _x2c_literal_part_5 = List_var((* type));  cons(_33, cons(_x2c_literal_part_5, cons(List_var(cons(_883, cons(_1435, cons(argument, NULL)))), NULL)));
+    Var _x2c_literal_part_5 = List_var((* type));  Var _x2c_literal_part_6 = List_var(cons(_883, cons(_1435, cons(argument, NULL))));  cons(_33, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
   }
   ));
 }
