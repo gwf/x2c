@@ -25,7 +25,7 @@ Shared mutable-state coordination.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/mutex.x:138`
+Source: `lib/mutex.x:22`
 
 <a id="Mutex.free"></a>
 #### Mutex.free
@@ -39,7 +39,7 @@ intact. No thread may retain the handle or be waiting on it.
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native destruction
 fails.
 
-Source: `lib/mutex.x:130`
+Source: `lib/mutex.x:131`
 
 <a id="Mutex.lock"></a>
 #### Mutex.lock
@@ -51,7 +51,7 @@ The `Mutex` is non-recursive; the caller must not already hold it.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native locking fails.
 
-Source: `lib/mutex.x:97`
+Source: `lib/mutex.x:98`
 
 <a id="Mutex.new"></a>
 #### Mutex.new
@@ -64,7 +64,7 @@ Creates an unlocked `Mutex` owned by the active `Scope`.
 when native mutex initialization fails. An initialization failure releases
 the allocated storage.
 
-Source: `lib/mutex.x:83`
+Source: `lib/mutex.x:84`
 
 <a id="Mutex.try_lock"></a>
 #### Mutex.try_lock
@@ -76,7 +76,7 @@ Returns one when acquired or zero when busy.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` for another native failure.
 
-Source: `lib/mutex.x:107`
+Source: `lib/mutex.x:108`
 
 <a id="Mutex.unlock"></a>
 #### Mutex.unlock
@@ -87,7 +87,7 @@ Unlocks a `Mutex` held by the calling thread.
 
 **Raises:** `<bad-state>` for NULL, or `<io-fail>` when native unlocking fails.
 
-Source: `lib/mutex.x:118`
+Source: `lib/mutex.x:119`
 
 ## Runtime-internal callables
 
@@ -111,7 +111,7 @@ Initializes a process-lifetime recursive lock.
 On pthread failure, prints `failure` to native stderr and aborts without
 allocating. This boundary can run while Error or Scope is failing.
 
-Source: `lib/mutex.x:36`
+Source: `lib/mutex.x:37`
 
 <a id="Mutex.recursive_lock"></a>
 #### Mutex.recursive_lock
@@ -121,7 +121,7 @@ Source: `lib/mutex.x:36`
 Initializes through `once`, then locks the recursive mutex.
 On pthread failure, prints `failure` to native stderr and aborts.
 
-Source: `lib/mutex.x:50`
+Source: `lib/mutex.x:51`
 
 <a id="Mutex.recursive_unlock"></a>
 #### Mutex.recursive_unlock
@@ -131,7 +131,7 @@ Source: `lib/mutex.x:50`
 Unlocks the recursive mutex.
 On pthread failure, prints `failure` to native stderr and aborts.
 
-Source: `lib/mutex.x:62`
+Source: `lib/mutex.x:63`
 
 ## Public types
 
@@ -148,7 +148,7 @@ A native mutex allocated in the active `Scope` without recursive locking.
 Its `Scope` and handle must outlive every user and waiter. Destroy it only
 while unlocked, and do not use the handle or its storage after that.
 
-Source: `lib/mutex.x:19`
+Source: `lib/mutex.x:20`
 
 ## Design notes
 
