@@ -4,9 +4,110 @@ Use this page for current commands and repository orientation. The root
 `AGENTS.md` owns workflow and publication rules.
 
 Everyday integration and requested PR bases target `dev`; fetch and integrate
-`origin/dev` before delivery. `main` advances only through Gary-authorized
-release promotion. Existing checkouts keep their work; use an explicit
-`HEAD:refs/heads/dev` push destination rather than relying on an old upstream.
+`origin/dev` before direct publication. `main` advances only through
+Gary-authorized release promotion. Existing checkouts keep their work; use an
+explicit `HEAD:refs/heads/dev` push destination rather than relying on an old
+upstream.
+
+## Choose delivery
+
+An individual session normally integrates and publishes its own change.
+`orchestrate-x2c-work` normally integrates and publishes its workers' combined
+work. To use shared integration, Gary starts `integrate-x2c-prs` in a
+persistent checkout and tells selected individual sessions or orchestrators to
+use the integrator. Those sessions submit ready PRs; other sessions keep their
+chosen mode. A running integrator is not a global switch.
+
+Agents establish the selected worktree context, for example:
+
+```sh
+tools/integrate-dev.py context --role individual --delivery direct
+tools/integrate-dev.py context --role individual --delivery pr
+tools/integrate-dev.py context --role orchestrator --delivery pr
+tools/integrate-dev.py context --role worker --delivery private
+tools/integrate-dev.py context --role integrator --delivery direct
+```
+
+These are alternatives, not a sequence. The explicit session instruction
+persists until changed. Set subordinate worker context in its actual worktree
+before it starts. Worker handoffs stay private even when the parent uses PR
+delivery. An independent working session uses `individual`; `worker` is only
+for subordinate private handoffs. Context is ignored worktree-local state in
+`debug/agent-context.json`; the common Git hook protects shared branches for
+both providers. Setup checks the effective hook path and executable hook and
+reports incompatible existing configuration instead of overwriting it.
+Canonical instructions and skills are shared through the existing discovery
+links.
+
+### Submit to the shared integrator
+
+Record the exact starting commit before editing, including a capability commit
+when dependent work starts from one. Finish and review the authored change,
+run the relevant focused checks, and commit it on a branch based on `dev` or
+the recorded dependency revision. An orchestrator first collects and checks
+its workers' private handoffs into one or more coherent changes.
+
+Write its reviewed description in `.context/submission/pr-body.md`, then
+create a ready, same-repository PR targeting `dev`:
+
+```sh
+branch="$(git branch --show-current)"
+git push -u origin "HEAD:refs/heads/$branch"
+gh pr create --base dev --head "$branch" \
+  --body-file .context/submission/pr-body.md
+```
+
+Write a JSON list of focused-check commands and results, for example:
+
+```json
+[
+  {"command": "git diff --check", "result": "passed"},
+  {"command": "focused compiler fixture", "result": "passed; fixture NAME"}
+]
+```
+
+Replace the example with the commands actually run. A result may explain why
+no runtime check applies. Save it in `.context/submission/evidence.json`,
+outside `unittest/build/`, which a gate clears. Enroll the PR with the
+coordinator; the arguments below are
+placeholders for the PR number, recorded full commit IDs, and evidence path:
+
+```sh
+tools/integrate-dev.py submit --pr N --base STARTING_SHA \
+  --evidence-file .context/submission/evidence.json
+```
+
+Add `--depends-on N:HEAD_SHA` for each required PR revision and `--notes TEXT`
+for bootstrap transition or interaction notes. The submitting checkout's
+clean `HEAD` must match the PR head. The coordinator preserves PR prose,
+writes the pinned submission metadata, and applies `integration-ready` last.
+Re-run `submit` after changing the head; old metadata does not enroll a new
+revision. Attach the PR in the app when supported, without making that feature
+part of the common protocol.
+
+This is a work submission. Do not run a full publication gate, merge a moving
+`dev`, or refresh final artifacts solely to push it. Local development builds,
+meaningful focused tests, and necessary intermediate bootstrap refreshes
+remain available. The integrator owns the final combined review, generated
+artifacts, gate, and `dev` push. Report the PR and focused evidence as
+submitted; the integrator records actual publication. If it is absent, the
+PR waits.
+
+For a requested review stop, switch the submitting parent to
+`individual`/`direct` or `orchestrator`/`direct` context, use normal publication
+validation, and push only a draft PR branch. Leave it unenrolled and do not
+publish to `dev`. Subordinate workers remain `worker`/`private`. Here `direct`
+keeps validation with the session; the requested review stop chooses the
+destination. A PR alone is never automatic permission
+to integrate. Local-only work stays local. Integration readiness requests
+landing the pinned revision; removing it cancels only if observed before push.
+
+Queue commands are agent responsibilities. The standing skill uses `status`,
+`wait --timeout 60`, `prepare`, `land <batch-id>`, `land <batch-id> --publish`,
+and `park <batch-id>`; Gary need only start the integrator and select it for
+submitting sessions. Records and preserved candidates live under the
+integration checkout's ignored `debug/integration/` directory and survive
+session restarts.
 
 ## Build and validate
 

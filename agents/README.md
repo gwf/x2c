@@ -30,7 +30,10 @@ are needed rather than maintaining another copy.
 - [fix-x2c-bug](skills/fix-x2c-bug/SKILL.md) - reproduce a defect, repair its
   cause, and verify the observable behavior.
 - [orchestrate-x2c-work](skills/orchestrate-x2c-work/SKILL.md) - run
-  independent changes in parallel worktrees and integrate them in batches.
+  independent changes in parallel worktrees and deliver their combined work
+  directly or through the shared integrator.
+- [integrate-x2c-prs](skills/integrate-x2c-prs/SKILL.md) - run the standing
+  shared integrator, collecting and publishing ready PR batches on `dev`.
 - [integrate-x2c-package](skills/integrate-x2c-package/SKILL.md) - integrate a
   C library or judge whether its x2c package is complete.
 - [review-x2c-repo](skills/review-x2c-repo/SKILL.md) - investigate the requested
