@@ -26,7 +26,7 @@ static Var _869, _866, _863, _861, _859, _856, _852, _851, _850, _848, _845, _84
 #include <assert.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Array Compiler__cache_ids(Compiler c, List code);
 
@@ -143,7 +143,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

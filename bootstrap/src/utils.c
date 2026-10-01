@@ -55,7 +55,7 @@ _x2c_initializer_choice_6E6B8BB0_4((default_includes = NULL))
 _x2c_initializer_choice_6E6B8BB0_5((cpp_includes = NULL))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _initialize_environment(const char * argv0, String embedded_identity);
 
@@ -77,7 +77,7 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

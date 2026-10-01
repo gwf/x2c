@@ -21,7 +21,7 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out);
 
@@ -35,7 +35,7 @@ static Var _convert_to_float(X2CVarNumeric * source, Symbol target);
 
 Var Symbol_var(Symbol);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

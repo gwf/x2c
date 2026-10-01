@@ -52,7 +52,7 @@ static pthread_once_t thread_shutdown_once;
 _x2c_initializer_choice_251C437E_0((thread_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static size_t _input_offset(void);
 
@@ -105,7 +105,7 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

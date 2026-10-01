@@ -21,7 +21,7 @@ static Var _3100, _3097, _3093, _3090, _3084, _3081, _3077, _3074, _3069, _3066,
 #include "macros.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List Compiler__parse_expression_tail(Compiler c, List expr);
 
@@ -516,7 +516,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

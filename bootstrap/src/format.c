@@ -15,7 +15,7 @@ Pretty;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void Pretty_source_marker(Pretty * p, Var value);
 
@@ -47,7 +47,7 @@ static void _write_token(Buffer buff, String token, int source_line);
 
 static int _next_is_closing_brace(List rest);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

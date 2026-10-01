@@ -10,7 +10,7 @@ static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 _Noreturn static void _int_reinsert_error(unsigned _x2c_macro_capacity_0, int _x2c_macro_probe_0);
 
@@ -700,7 +700,7 @@ _x2c_defer_env_37;
 
 static void _x2c_defer_cleanup_37(void * _x2c_defer_opaque_37);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

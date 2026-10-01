@@ -10,7 +10,7 @@ static Var _6, _5, _2, _1;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static inline Var Row_var(Row value);
 
@@ -39,7 +39,7 @@ Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

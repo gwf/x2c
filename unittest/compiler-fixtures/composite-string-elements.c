@@ -77,7 +77,7 @@ List public_list;
 _x2c_initializer_choice_F58507E7_4((public_list = _2))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int width(String s);
 
@@ -85,7 +85,7 @@ Var String_var(String);
 
 List cons(Var, List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

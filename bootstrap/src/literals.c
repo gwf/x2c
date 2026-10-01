@@ -19,7 +19,7 @@ static Var _276, _274, _271, _269, _268, _266, _264, _261, _259, _258, _257, _25
 #include <string.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Symbol Compiler__match_operator_head(Compiler c);
 
@@ -192,7 +192,7 @@ Var List_var(List);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

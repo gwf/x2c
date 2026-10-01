@@ -12,7 +12,7 @@ static Var _176, _175, _173, _169, _167, _162, _160, _156, _154, _151, _150, _14
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static SymScope * Sym__scope_at(Sym s, int index);
 
@@ -125,7 +125,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

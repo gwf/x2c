@@ -15,7 +15,7 @@ static Var _994, _992, _987, _984, _980, _977, _973, _971, _969, _968, _967, _96
 #include "macros.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List Compiler__convert_initializer(Compiler c, List value, Type type, List target, int * native_used);
 
@@ -180,7 +180,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

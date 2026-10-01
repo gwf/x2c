@@ -94,7 +94,7 @@ static Var _257, _254, _252, _250, _246, _243, _240, _237, _234, _231, _227, _22
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _x2c_macro_load_0(const void * _x2c_macro_bytes_0, Scope * _x2c_macro_owner_0);
 
@@ -847,7 +847,7 @@ _x2c_defer_env_19;
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
 List cons(Var, List);
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

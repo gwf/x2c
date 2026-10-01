@@ -44,7 +44,7 @@ _x2c_initializer_choice_BF7298EC_0((meta_cc = NULL))
 _x2c_initializer_choice_BF7298EC_1((meta_include_dir = NULL))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String _runtime_headers(String include_dir);
 
@@ -137,7 +137,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

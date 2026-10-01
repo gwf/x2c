@@ -12,7 +12,7 @@ static String _2, _1, _0;
 #include "scan.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static inline int _escape_byte(unsigned char ch, char * out);
 
@@ -28,7 +28,7 @@ static inline int _octal_escape(const char * * at, int esc);
 
 static inline int _named_escape(int esc);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

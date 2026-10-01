@@ -30,7 +30,7 @@ static int diagnostics_json;
 _x2c_initializer_choice_B8F5462B_0((diagnostics_json = - 1))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _emit_entry(Diagnostics diag, List entry);
 
@@ -84,7 +84,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

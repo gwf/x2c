@@ -34,7 +34,7 @@ static pthread_cond_t static_changed;
 _x2c_initializer_choice_A509A3AF_1((static_changed =(pthread_cond_t) PTHREAD_COND_INITIALIZER))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _native_error(int error);
 
@@ -46,7 +46,7 @@ static int _cycle(X2CStatic * guard, StaticThread * self);
 
 static void _release(X2CStatic * * values);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

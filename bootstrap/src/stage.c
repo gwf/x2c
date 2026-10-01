@@ -26,7 +26,7 @@ static const SymbolSet meta_comparisons =(SymbolSet) "\001\000\000\000\006\000\0
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _captured_value(Compiler c, Var captured, Type want);
 
@@ -106,7 +106,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

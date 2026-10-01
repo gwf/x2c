@@ -18,7 +18,7 @@ static Var _27, _25, _22, _20, _18, _16, _13, _11, _9, _7, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var increment(Var value);
 
@@ -67,7 +67,7 @@ Var String_var(String);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

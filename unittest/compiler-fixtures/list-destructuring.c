@@ -15,7 +15,7 @@ static int calls;
 _x2c_initializer_choice_C720FE3A_0((calls = 0))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List values(void);
 
@@ -25,7 +25,7 @@ List cons(Var, List);
 
 Var double_var(double);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
