@@ -700,11 +700,6 @@ List List.map2(List a, List b, Func fn) {
   return a.zip_with(b, fn);
 }
 
-static Var _apply1(Func fn, Var arg) => fn.apply_value(arg);
-
-static Var _apply2(Func fn, Var left, Var right) =>
-  fn.apply_values(left, right);
-
 // reshaping
 
 /** Returns a copy of `lst` ordered by `Var.compare`.
