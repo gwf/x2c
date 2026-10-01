@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 static void _record_call(
   Compiler compiler, Map definitions, List callee, Map calls) {
@@ -2181,26 +2180,6 @@ static String _dataset_function_id(String path, String name) {
   return %"$path::$name";
 }
 
-static void _dataset_mkdirs(String path) {
-  char buffer[PATH_MAX];
-  if (!path || !path[0] || strlen(path) >= sizeof(buffer))
-    raise %(io-fail (operation mkdir) (path $path));
-  strcpy(buffer, path);
-  for (char *ch = buffer + 1; *ch; ch++) {
-    if (*ch != '/') continue;
-    *ch = 0;
-    if (mkdir(buffer, 0777) && errno != EEXIST) {
-      int error = errno;
-      raise %(io-fail (operation mkdir) (path $path) (errno $error));
-    }
-    *ch = '/';
-  }
-  if (mkdir(buffer, 0777) && errno != EEXIST) {
-    int error = errno;
-    raise %(io-fail (operation mkdir) (path $path) (errno $error));
-  }
-}
-
 static void _dataset_write_rows(
   String path, String header, Array rows) {
   File output = $auto(path.open("w"));
@@ -2272,7 +2251,7 @@ static void _write_datasets(
   functions.sort();
   src_calls.sort();
   lib_calls.sort();
-  _dataset_mkdirs(output);
+  Path.make_dirs(output);
   String function_header = "".join(
     %("function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
       "source_name\temitted_name\tvisibility\texternal_calls\t"
