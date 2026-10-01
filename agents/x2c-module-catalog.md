@@ -22,7 +22,8 @@ Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
 `binding_identity_spelling`, `Ast.rewrite_children`, `ast_contains_head`,
-`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
+`ast_collect_binding_references`, `Ast.never_returns`,
+`Symbol.compound_operator`, `Symbol.compound_assignment`,
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
 
@@ -120,8 +121,7 @@ Public functions:
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
 `Compiler._skip_shallow_expression`, `Compiler.full_parse`,
-`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`,
-`ast_collect_binding_references`
+`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`
 
 ### [src/deps.x](../src/deps.x)
 

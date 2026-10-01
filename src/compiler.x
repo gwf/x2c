@@ -2673,17 +2673,3 @@ static Var _meta_identity(List definition) {
   }
   return void;
 }
-
-/** Records in `referenced` the identity of every binding `node` names. */
-void ast_collect_binding_references(Var node, Map referenced) {
-  if (node is not <list>) return;
-  List syntax = node;
-  // A definition's own binder is a `bind`, so a function does not name itself.
-  match (syntax) case $source_identifier_content(
-      %((binding ?identity ?))): {
-    referenced[identity] = 1;
-    return;
-  }
-  foreach (Var child, syntax)
-    ast_collect_binding_references(child, referenced);
-}

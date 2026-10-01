@@ -13,6 +13,7 @@ Shared helpers for x2c compiler AST nodes.
 | Function | Summary |
 | --- | --- |
 | [`ast_changes_left_operand`](#ast_changes_left_operand) | Returns whether `op` writes its left operand. |
+| [`ast_collect_binding_references`](#ast_collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`ast_contains_head`](#ast_contains_head) | Returns whether any list under `value` has `kind` as its head. |
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
@@ -33,7 +34,15 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:192`
+Source: `src/ast.x:206`
+
+#### ast_collect_binding_references
+
+`void ast_collect_binding_references(Var node, Map referenced)`
+
+Records in `referenced` the identity of every binding `node` names.
+
+Source: `src/ast.x:97`
 
 #### ast_contains_head
 
@@ -80,7 +89,7 @@ Source: `src/ast.x:50`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:198`
+Source: `src/ast.x:212`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -91,7 +100,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:212`
+Source: `src/ast.x:226`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -104,7 +113,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:104`
+Source: `src/ast.x:118`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -127,7 +136,7 @@ Source: `src/ast.x:75`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:182`
+Source: `src/ast.x:196`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -136,7 +145,7 @@ Source: `src/ast.x:182`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:176`
+Source: `src/ast.x:190`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -145,7 +154,7 @@ Source: `src/ast.x:176`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:188`
+Source: `src/ast.x:202`
 
 ## Public types
 

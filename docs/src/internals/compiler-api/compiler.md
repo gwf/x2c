@@ -12,7 +12,6 @@ Core x2c compiler state and operations.
 
 | Function | Summary |
 | --- | --- |
-| [`ast_collect_binding_references`](#ast_collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`home_absolute_path`](#home_absolute_path) | Returns the absolute path that a `home_portable_path` spelling names. |
 | [`home_portable_path`](#home_portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`match_value_flat_head`](#match_value_flat_head) | Returns the head of a flat Symbol-and-captures pattern value, or zero. |
@@ -95,14 +94,6 @@ Core x2c compiler state and operations.
 | [`Var.compiler`](#Var.compiler) | Recovers the compiler pointer boxed by `Compiler.var`. |
 
 ### Functions
-
-#### ast_collect_binding_references
-
-`void ast_collect_binding_references(Var node, Map referenced)`
-
-Records in `referenced` the identity of every binding `node` names.
-
-Source: `src/compiler.x:2678`
 
 #### home_absolute_path
 
