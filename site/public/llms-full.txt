@@ -2612,8 +2612,9 @@ struct Handler handler = {1};
 struct Frame frame = {2};
 ```
 
-Most generated declarations need no directive: writing `int temporary` in a
-body makes both that declaration and its literal references hygienic. When
+Most generated declarations need no directive: writing `int temporary` or a
+destructuring `Var (key, value)` in a body makes both that declaration and its
+literal references hygienic. When
 compile-time Lisp or a nested macro needs a private name before an ordinary
 declaration can introduce it, place `using $name, $other;` at the start of the
 braced body. Each name is a compiler-allocated singular `Name` hole. Every
@@ -2767,7 +2768,9 @@ A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
 is a compiler internal with no compatibility promise.
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
-syntax.
+syntax. During expansion, syntax a template left untyped is resolved where the
+expansion stands, so a template's locals, casts, and method results report
+their declared types.
 
 `x2c.binding.spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling

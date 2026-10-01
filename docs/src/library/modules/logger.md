@@ -25,7 +25,7 @@ owns a private `Scope` for sink state. An invalid level returns NULL.
 **Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
 allocated.
 
-Source: `lib/logger.x:785`
+Source: `lib/logger.x:771`
 
 ## Advanced and interop API
 
@@ -73,7 +73,7 @@ Source: `lib/logger.x:785`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:770`
+Source: `lib/logger.x:756`
 
 #### log_error
 
@@ -82,7 +82,7 @@ Source: `lib/logger.x:770`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:773`
+Source: `lib/logger.x:759`
 
 #### log_event
 
@@ -101,7 +101,7 @@ Source: `lib/logger.x:696`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:774`
+Source: `lib/logger.x:760`
 
 #### log_get_global_logger
 
@@ -118,7 +118,7 @@ Source: `lib/logger.x:689`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:771`
+Source: `lib/logger.x:757`
 
 #### log_set_global_logger
 
@@ -146,7 +146,7 @@ Source: `lib/logger.x:198`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:769`
+Source: `lib/logger.x:755`
 
 #### log_warn
 
@@ -155,7 +155,7 @@ Source: `lib/logger.x:769`
 Logs borrowed `fields` globally at $method level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:772`
+Source: `lib/logger.x:758`
 
 ### `Logger`
 
@@ -244,7 +244,7 @@ Source: `lib/logger.x:282`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:754`
+Source: `lib/logger.x:740`
 
 <a id="Logger.error"></a>
 #### Logger.error
@@ -254,7 +254,7 @@ Source: `lib/logger.x:754`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:757`
+Source: `lib/logger.x:743`
 
 <a id="Logger.fatal"></a>
 #### Logger.fatal
@@ -264,7 +264,7 @@ Source: `lib/logger.x:757`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:758`
+Source: `lib/logger.x:744`
 
 <a id="Logger.flush"></a>
 #### Logger.flush
@@ -292,7 +292,7 @@ nothing.
 Either failure leaves the `Logger` and all sinks live; earlier flushers may
 already have run.
 
-Source: `lib/logger.x:803`
+Source: `lib/logger.x:789`
 
 <a id="Logger.info"></a>
 #### Logger.info
@@ -302,7 +302,7 @@ Source: `lib/logger.x:803`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:755`
+Source: `lib/logger.x:741`
 
 <a id="Logger.initialize"></a>
 #### Logger.initialize
@@ -317,7 +317,7 @@ shuts down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:823`
+Source: `lib/logger.x:809`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -406,7 +406,7 @@ a no-op.
 event delivery or a sink flusher. The failure may interrupt the remaining
 cleanup.
 
-Source: `lib/logger.x:844`
+Source: `lib/logger.x:830`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -425,7 +425,7 @@ Source: `lib/logger.x:296`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:753`
+Source: `lib/logger.x:739`
 
 <a id="Logger.warn"></a>
 #### Logger.warn
@@ -435,7 +435,7 @@ Source: `lib/logger.x:753`
 Logs borrowed `fields` synchronously at $method level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:756`
+Source: `lib/logger.x:742`
 
 ## Runtime-internal callables
 
