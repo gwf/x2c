@@ -2,10 +2,10 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    `foreach`, `$scope`, `class`, and `$lisp.bind` expand through these
-    functions, which run as native code inside the compiler. The compile-time
-    Lisp in `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls
-    them by name; `builtin_targets` binds each into the shared session.
+    The built-in macros expand through these functions, which run as native
+    code inside the compiler. The compile-time Lisp in
+    `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
+    name, and `builtin_targets` binds each into the shared session.
 */
 #pragma once
 #include "x2c.x"
@@ -22,7 +22,6 @@ List x2c_expr_field(List receiver, String name);
 List x2c_expr_cast(List type, List expression);
 List x2c_decl_make(List type, Var name, List initializer);
 List x2c_param_make(List type, Var name);
-static List _call(String name, List arguments);
 
 // $scope
 
