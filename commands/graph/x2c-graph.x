@@ -25,30 +25,31 @@ static void _increment(Map counts, List key, int amount) {
   counts[key] = count + amount;
 }
 
-static void _record_call(Compiler compiler, List callee, Map calls) {
-  match (callee) {
-    case %(expr ?
-           (ident (!set ?binding (binding ?identity ?spelling)))): {
-      String name = compiler.emitted_binding_name(binding);
-      if (compiler.semantic_binding_facts().contains(%(automatic $binding)))
-        _increment(calls, %(indirect $spelling), 1);
-      else
-        _increment(calls, %(direct $identity $name), 1);
-      return;
-    }
-  }
-  _increment(calls, %(indirect "computed"), 1);
+static void _record_call(
+  Compiler compiler, Map definitions, List callee, Map calls) {
+  List binding;
+  Symbol kind = project_callee(compiler, callee, binding);
+  if (kind == <direct>)
+    _increment(
+      calls,
+      %(direct ${project_binding_target(compiler, definitions, binding)}),
+      1);
+  else if (kind == <automatic>)
+    _increment(calls, %(indirect ${binding_identity_spelling(binding)}), 1);
+  else _increment(calls, %(indirect "computed"), 1);
 }
 
-static void _collect_calls(Compiler compiler, Var value, Map calls) {
+static void _collect_calls(
+  Compiler compiler, Map definitions, Var value, Map calls) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(expr ? (call ?callee (args *))):
-      _record_call(compiler, callee, calls);
+      _record_call(compiler, definitions, callee, calls);
   }
-  foreach (Var child, node) _collect_calls(compiler, child, calls);
+  foreach (Var child, node)
+    _collect_calls(compiler, definitions, child, calls);
 }
 
 static List _call_records(Map calls) {
@@ -56,8 +57,8 @@ static List _call_records(Map calls) {
   foreach (Var (key, count), calls) {
     List call = key;
     match (call) {
-      case %(direct ?identity ?name):
-        records.push(%(call direct $identity $name ${count.int()}));
+      case %(direct ?target):
+        records.push(%(call direct $target ${count.int()}));
       case %(indirect ?name):
         records.push(%(call indirect $name ${count.int()}));
     }
@@ -77,7 +78,8 @@ static String _source_function_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
-static List _analyze_unit(Compiler compiler, List ast) {
+static List _analyze_unit(Compiler compiler, List ast, String path) {
+  Map definitions = project_function_targets(compiler, ast, path);
   Array functions = [];
   Map top_level_calls = {};
   int source_order = 0;
@@ -87,7 +89,7 @@ static List _analyze_unit(Compiler compiler, List ast) {
              (bind (!set ?binding (binding ?identity ?)) ?)
              ?body): {
         Map calls = {};
-        _collect_calls(compiler, body, calls);
+        _collect_calls(compiler, definitions, body, calls);
         String name = compiler.emitted_binding_name(binding);
         String source_name = _source_function_name(compiler, binding);
         Symbol visibility = ((Type) type).is_static()
@@ -100,7 +102,7 @@ static List _analyze_unit(Compiler compiler, List ast) {
         continue;
       }
     }
-    _collect_calls(compiler, node, top_level_calls);
+    _collect_calls(compiler, definitions, node, top_level_calls);
   }
   if (top_level_calls.len())
     functions.push(
@@ -307,7 +309,7 @@ static void _collect_walk_calls(
            (call
              (expr ?
                (ident
-                 (!set ?callee (binding ?callee_identity ?))))
+                 (!set ?callee (binding ? ?))))
              (args *arguments))): {
       Array direct_arguments = [];
       int position = 0;
@@ -316,9 +318,7 @@ static void _collect_walk_calls(
         if (root) direct_arguments.push(%(argument $position $root));
         position++;
       }
-      List target = definitions.contains(callee)
-                  ? definitions[callee].list()
-                  : %(public ${compiler.emitted_binding_name(callee)});
+      List target = project_binding_target(compiler, definitions, callee);
       calls.push(
         %(call $target ${compiler.emitted_binding_name(callee)}
           ${project_location(compiler, path, origin)}
@@ -464,23 +464,14 @@ static List _walk_direct_parameters(
 }
 
 static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
-  Map definitions = {};
-  foreach (List node, ast)
-    match (node)
-      case %(function ?type
-             (bind (!set ?binding (binding ?identity ?)) ?)
-             ?):
-        definitions[binding] = %(
-          target $path ${compiler.emitted_binding_name(binding)}
-        );
-
+  Map definitions = project_function_targets(compiler, ast, path);
   Array functions = [];
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        List target = definitions[binding].list();
+        List target = definitions[binding];
         Map parameters = {};
         Array parameter_records = [];
         _walk_collect_parameters(
@@ -518,12 +509,10 @@ static List _walk_candidates(List functions) {
   foreach (List function, functions)
     match (function)
       case %(
-        function (!set ?target (target ? ?name)) ? public
+        function (!set ?target (target ? ?)) ? public
         (parameters *) (calls *) (direct *)
-      ): {
-        List targets = publics.contains(name) ? publics[name].list() : NULL;
-        publics[name] = cons(target, targets);
-      }
+      ):
+        project_add_public(publics, target);
 
   foreach (List function, functions)
     match (function)
@@ -728,14 +717,9 @@ static List _walk_candidates(List functions) {
 }
 
 static String _site_direct_callee(Compiler compiler, List callee) {
-  match (callee)
-    case %(expr ?
-           (ident (!set ?binding (binding ? ?)))): {
-      if (compiler.semantic_binding_facts().contains(%(automatic $binding)))
-        return NULL;
-      return compiler.emitted_binding_name(binding);
-    }
-  return NULL;
+  List binding;
+  return project_callee(compiler, callee, binding) == <direct>
+       ? compiler.emitted_binding_name(binding) : NULL;
 }
 
 static void _site_add_prior_write(
@@ -771,10 +755,8 @@ static List _site_value_summary(
           local $spelling (prior-writes @{writes.list_free()})
         );
       }
-      if (compiler.semantic_binding_facts().contains(%(automatic $binding)))
-        return %(local $spelling);
-      String name = compiler.emitted_binding_name(binding);
-      return %(global ${name ? name : spelling.str()});
+      if (project_automatic(compiler, binding)) return %(local $spelling);
+      return %(global ${compiler.emitted_binding_name(binding)});
     }
     case %(op . (expr ?type ?) (?member)):
       return %(field $type $member);
@@ -1205,7 +1187,7 @@ static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
     ParsedUnit parsed;
     if (!_open_input(frontend, input, parsed)) return NULL;
     String path = parsed.compiler.display_path(input);
-    List functions = _analyze_unit(parsed.compiler, parsed.ast);
+    List functions = _analyze_unit(parsed.compiler, parsed.ast, path);
     Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
     List record = %(
       unit $path $subtree ${parsed.source_lines}
@@ -1375,38 +1357,19 @@ static void _index_public_functions(List units, Map public_functions) {
       case %(unit ?path ? ? (functions *functions)):
         foreach (List function, functions)
           match (function)
-            case %(function ? ?name public ? (calls *)): {
-              List targets = public_functions.contains(name)
-                           ? public_functions[name].list() : NULL;
-              public_functions[name] = cons(%(target $path $name), targets);
-            }
+            case %(function ? ?name public ? (calls *)):
+              project_add_public(public_functions, %(target $path $name));
   }
 }
 
-static void _resolve_call(
-  List raw, String path, Map local, Map publics, Map resolved) {
+static void _resolve_call(List raw, Map publics, Map resolved) {
   match (raw) {
     case %(call indirect ?name ?count):
       _increment(resolved, %(indirect $name), count);
-    case %(call direct ?identity ?name ?count): {
-      Var target;
-      if (local.try_get(identity, target)) {
-        List destination = target;
-        match (destination)
-          case %(target ?target_path ?target_name):
-            _increment(
-              resolved, %(direct $target_path $target_name), count);
-        return;
-      }
-      List candidates = publics.contains(name) ? publics[name].list() : NULL;
-      if (candidates && !candidates.cdr()) {
-        List destination = candidates.car();
-        match (destination)
-          case %(target ?target_path ?target_name):
-            _increment(
-              resolved, %(direct $target_path $target_name), count);
-      }
-      else _increment(resolved, %(external $name), count);
+    case %(call direct ?callee ?count): {
+      List target = resolve_project_target(callee, publics);
+      if (target) _increment(resolved, %(direct @{target.cdr()}), count);
+      else _increment(resolved, %(external ${callee.list().cadr()}), count);
     }
   }
 }
@@ -1447,11 +1410,6 @@ static List _resolve_graph(List units, Map attributes) {
   foreach (List unit, units) {
     match (unit)
       case %(unit ?path ?subtree ?source_lines (functions *functions)): {
-        Map local = {};
-        foreach (List function, functions)
-          match (function)
-            case %(function ?identity ?name ? ? (calls *)):
-              local[identity] = %(target $path $name);
         Array output_functions = [];
         foreach (List function, functions)
           match (function)
@@ -1462,7 +1420,7 @@ static List _resolve_graph(List units, Map attributes) {
             ): {
               Map resolved = {};
               foreach (List call, calls)
-                _resolve_call(call, path, local, publics, resolved);
+                _resolve_call(call, publics, resolved);
               if ((void *) attributes != NULL) {
                 int external_calls, indirect_calls;
                 _resolved_unresolved_counts(
@@ -2416,7 +2374,7 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
     if (!_certify_open(frontend, input, parsed)) return NULL;
     Compiler compiler = parsed.compiler;
     String path = compiler.display_path(input);
-    List functions = _analyze_unit(compiler, parsed.ast);
+    List functions = _analyze_unit(compiler, parsed.ast, path);
     int effect = 0, has_top = 0;
     foreach (List node, parsed.ast)
       effect |= _certify_file_effect(node);
@@ -2559,10 +2517,8 @@ static Map _certify_publics(List graph) {
   foreach (List unit, graph)
     match (unit) case %(unit ?path (functions *functions)):
       foreach (List function, functions)
-        match (function) case %(function ?name public ?): {
-          List found = publics.contains(name) ? publics[name].list() : NULL;
-          publics[name] = cons(%(target $path $name), found);
-        }
+        match (function) case %(function ?name public ?):
+          project_add_public(publics, %(target $path $name));
   return publics;
 }
 

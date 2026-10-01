@@ -34,13 +34,12 @@ static List _flow_summary(
       Var position;
       if (parameters.try_get(binding, position)) return position.list();
       if (locals.contains(binding)) return %(local $spelling);
-      String name = compiler.emitted_binding_name(binding);
-      return %(identifier ${name ? name : spelling.str()});
+      return %(identifier ${compiler.emitted_binding_name(binding)});
     }
     case %(call ?callee (args *)): {
-      String name = NULL;
+      String name;
       project_call_target(compiler, {}, node, name, NULL);
-      return %(call ${name ? name : %"computed"});
+      return %(call $name);
     }
     case %(literal ? ?spelling *): return %(literal $spelling);
     case %(cons *): return %(list);
@@ -103,7 +102,7 @@ static List _flow_source(
       String name = NULL;
       List target = project_call_target(
         compiler, definitions, node, name, NULL);
-      if (name && name == "List_var" && arguments && !arguments.cdr())
+      if (name == "List_var" && arguments && !arguments.cdr())
         return %(
           wrapper $name ${project_location(compiler, path, origin)}
           ${_flow_source(
@@ -111,8 +110,7 @@ static List _flow_source(
             parameters, locals)}
         );
       return %(
-        call ${target ? target : %(computed)}
-        ${name ? name : %"computed"}
+        call $target $name
         ${project_location(compiler, path, origin)}
         (arguments
           @{_flow_arguments(
@@ -523,28 +521,13 @@ static void _flow_indexes(
   foreach (List function, functions)
     match (function)
       case %(
-        function (!set ?target (target ? ?name)) ? ?visibility
+        function (!set ?target (target ? ?)) ? ?visibility
         (parameters *) (returns *) (calls *) (unresolved *)
       ): {
         by_target[target] = function;
-        List named = by_name.contains(name) ? by_name[name].list() : NULL;
-        by_name[name] = cons(target, named);
-        if (visibility == <public>) {
-          List values = publics.contains(name)
-                      ? publics[name].list() : NULL;
-          publics[name] = cons(target, values);
-        }
+        project_add_public(by_name, target);
+        if (visibility == <public>) project_add_public(publics, target);
       }
-}
-
-static List _flow_exact_target(Map by_name, String name) {
-  if (!by_name.contains(name)) return NULL;
-  List values = by_name[name];
-  return values && !values.cdr() ? values.car().list() : NULL;
-}
-
-static List _flow_resolve(List raw, Map publics) {
-  return resolve_project_target(raw, publics);
 }
 
 static String _flow_unresolved_call(List raw, Map publics) {
@@ -591,7 +574,7 @@ static int _flow_is_tainted(List source, List current) {
       return _flow_tainted_parameters.contains(
         %(parameter $current $position));
     case %(call ?raw ? ? (arguments *)): {
-      List target = _flow_resolve(raw, _flow_public_index);
+      List target = resolve_project_target(raw, _flow_public_index);
       if (target &&
           (List.equal(target, _flow_producer_target) ||
            _flow_tainted_returns.contains(target)))
@@ -632,7 +615,7 @@ static void _flow_build_taint(List functions) {
           foreach (List call, calls)
             match (call)
               case %(call ?raw ? ? (arguments *arguments)): {
-                List callee = _flow_resolve(raw, _flow_public_index);
+                List callee = resolve_project_target(raw, _flow_public_index);
                 if (!callee) continue;
                 foreach (List argument, arguments)
                   match (argument)
@@ -740,7 +723,7 @@ static void _flow_trace(
                   call ?raw ?name ?location
                   (arguments *arguments)
                 ): {
-                  List target = _flow_resolve(raw, publics);
+                  List target = resolve_project_target(raw, publics);
                   if (!target || !List.equal(target, current)) continue;
                   if (active.contains(caller_target)) continue;
                   List argument = _flow_argument(
@@ -760,7 +743,7 @@ static void _flow_trace(
     case %(
       call ?raw ?name ?location (arguments *arguments)
     ): {
-      List target = _flow_resolve(raw, publics);
+      List target = resolve_project_target(raw, publics);
       if (target && List.equal(target, producer)) {
         _flow_record_result(
           paths, unresolved, blocked,
@@ -846,8 +829,10 @@ static List _flow_sorted_unique(Array values) {
 List Flow_finish(List functions, String producer_name, String consumer_name) {
   Map by_target = {}, publics = {}, by_name = {};
   _flow_indexes(functions, by_target, publics, by_name);
-  List producer = _flow_exact_target(by_name, producer_name);
-  List consumer = _flow_exact_target(by_name, consumer_name);
+  List producer = resolve_project_target(
+    %(public $producer_name), by_name);
+  List consumer = resolve_project_target(
+    %(public $consumer_name), by_name);
   Array paths = [], unresolved = [];
   if (!producer)
     unresolved.push(
@@ -876,7 +861,7 @@ List Flow_finish(List functions, String producer_name, String consumer_name) {
               case %(
                 call ?raw ? ?location (arguments *arguments)
               ): {
-                List resolved = _flow_resolve(raw, publics);
+                List resolved = resolve_project_target(raw, publics);
                 if (List.equal(resolved, consumer)) {
                   int position = 0;
                   foreach (List argument, arguments) {

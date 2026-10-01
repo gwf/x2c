@@ -376,7 +376,7 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
         int id = _lifetime_wrapped_allocation(lifetime, argument);
         List cause = %(
           call ${lifetime.path} ${lifetime.function}
-          ${name ? name : %"computed"} ${project_location(
+          $name ${project_location(
             lifetime.compiler, lifetime.path, lifetime.origin)}
         );
         if (id) _lifetime_unresolve(lifetime, id, cause);
@@ -827,10 +827,8 @@ static Map _lifetime_summaries(List functions, Map publics) {
   Map summaries = {};
   foreach (List function, functions)
     match (function)
-      case %(function ?target ?name public (returns *)):
-        publics[name] = cons(
-          target,
-          publics.contains(name) ? publics[name].list() : NULL);
+      case %(function ?target ? public (returns *)):
+        project_add_public(publics, target);
   for (int pass = 0; pass < functions.len(); pass++) {
     int changed = 0;
     foreach (List function, functions) {
