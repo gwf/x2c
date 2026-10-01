@@ -569,7 +569,7 @@ static void Definition.check_signature(Definition *d) {
       d.start, NULL);
   }
   if (d.kind != <decorator>) return;
-  Symbol kind = d.target.assoc(<kind>);
+  Symbol kind = d.target_kind();
   if (kind == <function> || kind == <unit> || kind == <named-type>) {
     String target = _kind_spelling(kind);
     c.report_error(
@@ -677,8 +677,8 @@ static List _recorded(Map m) {
    Finishing a definition turns its body into the stored template, derives
    the rows an invocation needs, and makes the `macrodef` visible. */
 
-/* Turns the body into the stored template, then derives the fresh rows,
-   captures, and pattern an invocation needs. Parsed literal names carry
+/* Turns the body into the stored template, then derives the fresh rows
+   and pattern an invocation needs. Parsed literal names carry
    definition-only identities, so the template stores binders instead and
    each expansion allocates one fresh identity per literal spelling. */
 static void Definition.finish(Definition *d) {
