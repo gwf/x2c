@@ -206,11 +206,7 @@ static size_t _curl_stream(
   }
   catch %(?cause *detail): {
     stream.cause = cause;
-    try stream.detail = Error.snapshot(detail);
-    catch %(?snapcause *): {
-      stream.cause = snapcause;
-      stream.detail = NULL;
-    }
+    stream.detail = Error.snapshot(detail);
     return 0;
   }
   stream.written += length;
@@ -237,6 +233,12 @@ static void _curl_raise(CurlEasy easy, String operation, CURLcode code) {
 
 static void _curl_check(CurlEasy easy, String operation, CURLcode result) {
   if (result != CURLE_OK) _curl_raise(easy, operation, result);
+}
+
+/* Sets one easy option, naming the option in a failure's operation. */
+macro Statement $curl.setopt(Expr $easy, Expr $option, Expr $value) {
+  _curl_check($easy, $(x2c.literal.string (x2c.source.text $option)),
+              curl_easy_setopt($easy.native, $option, $value));
 }
 
 static void _curl_getinfo(CurlEasy easy, CURLINFO info, void *out) {
@@ -370,16 +372,11 @@ CurlEasy CurlEasy.new(void) {
   CurlEasy completed = NULL;
   defer if (!completed) easy.free();
   easy.body_limit = 1024 * 1024;
-  _curl_check(easy, "CURLOPT_ERRORBUFFER",
-    curl_easy_setopt(easy.native, CURLOPT_ERRORBUFFER, easy.error));
-  _curl_check(easy, "CURLOPT_NOSIGNAL",
-    curl_easy_setopt(easy.native, CURLOPT_NOSIGNAL, 1L));
-  _curl_check(easy, "CURLOPT_PROTOCOLS_STR",
-    curl_easy_setopt(easy.native, CURLOPT_PROTOCOLS_STR, "http,https"));
-  _curl_check(easy, "CURLOPT_REDIR_PROTOCOLS_STR",
-    curl_easy_setopt(easy.native, CURLOPT_REDIR_PROTOCOLS_STR, "http,https"));
-  _curl_check(easy, "CURLOPT_USERAGENT",
-    curl_easy_setopt(easy.native, CURLOPT_USERAGENT, "x2c-libcurl/2"));
+  $curl.setopt(easy, CURLOPT_ERRORBUFFER, easy.error);
+  $curl.setopt(easy, CURLOPT_NOSIGNAL, 1L);
+  $curl.setopt(easy, CURLOPT_PROTOCOLS_STR, "http,https");
+  $curl.setopt(easy, CURLOPT_REDIR_PROTOCOLS_STR, "http,https");
+  $curl.setopt(easy, CURLOPT_USERAGENT, "x2c-libcurl/2");
   return completed = easy;
 }
 
@@ -426,10 +423,8 @@ CurlEasy CurlEasy.timeouts(CurlEasy easy, long connect_ms, long total_ms) {
   if (!easy || !easy.native || connect_ms <= 0 || total_ms <= 0) {
     raise %(bad-arg (library "libcurl") (operation "timeouts"));
   }
-  _curl_check(easy, "CURLOPT_CONNECTTIMEOUT_MS",
-    curl_easy_setopt(easy.native, CURLOPT_CONNECTTIMEOUT_MS, connect_ms));
-  _curl_check(easy, "CURLOPT_TIMEOUT_MS",
-    curl_easy_setopt(easy.native, CURLOPT_TIMEOUT_MS, total_ms));
+  $curl.setopt(easy, CURLOPT_CONNECTTIMEOUT_MS, connect_ms);
+  $curl.setopt(easy, CURLOPT_TIMEOUT_MS, total_ms);
   return easy;
 }
 
@@ -437,10 +432,8 @@ CurlEasy CurlEasy.follow_redirects(CurlEasy easy, long maximum) {
   if (!easy || !easy.native || maximum < 0) {
     raise %(bad-arg (library "libcurl") (operation "follow_redirects"));
   }
-  _curl_check(easy, "CURLOPT_FOLLOWLOCATION",
-    curl_easy_setopt(easy.native, CURLOPT_FOLLOWLOCATION, maximum ? 1L : 0L));
-  _curl_check(easy, "CURLOPT_MAXREDIRS",
-    curl_easy_setopt(easy.native, CURLOPT_MAXREDIRS, maximum));
+  $curl.setopt(easy, CURLOPT_FOLLOWLOCATION, maximum ? 1L : 0L);
+  $curl.setopt(easy, CURLOPT_MAXREDIRS, maximum);
   return easy;
 }
 
@@ -457,8 +450,7 @@ CurlEasy CurlEasy.user_agent(CurlEasy easy, String value) {
     raise %(bad-arg (library "libcurl") (operation "user_agent"));
   }
   easy.user_agent = value.intern();
-  _curl_check(easy, "CURLOPT_USERAGENT",
-    curl_easy_setopt(easy.native, CURLOPT_USERAGENT, easy.user_agent));
+  $curl.setopt(easy, CURLOPT_USERAGENT, easy.user_agent);
   return easy;
 }
 
@@ -479,12 +471,9 @@ CurlEasy CurlEasy.basic_auth(CurlEasy easy, String user, String password) {
   if (!easy || !easy.native || !user || !password) {
     raise %(bad-arg (library "libcurl") (operation "basic_auth"));
   }
-  _curl_check(easy, "CURLOPT_HTTPAUTH",
-    curl_easy_setopt(easy.native, CURLOPT_HTTPAUTH, (long) CURLAUTH_BASIC));
-  _curl_check(easy, "CURLOPT_USERNAME",
-    curl_easy_setopt(easy.native, CURLOPT_USERNAME, user));
-  _curl_check(easy, "CURLOPT_PASSWORD",
-    curl_easy_setopt(easy.native, CURLOPT_PASSWORD, password));
+  $curl.setopt(easy, CURLOPT_HTTPAUTH, (long) CURLAUTH_BASIC);
+  $curl.setopt(easy, CURLOPT_USERNAME, user);
+  $curl.setopt(easy, CURLOPT_PASSWORD, password);
   return easy;
 }
 
@@ -599,42 +588,27 @@ static void _curl_transfer_begin(
     _curl_add_header(
       &transfer.request_headers, %"Content-Type: $content_type");
 
-  _curl_check(easy, "CURLOPT_URL",
-    curl_easy_setopt(easy.native, CURLOPT_URL, easy.url));
-  _curl_check(easy, "CURLOPT_POSTFIELDS",
-    curl_easy_setopt(easy.native, CURLOPT_POSTFIELDS, NULL));
-  _curl_check(easy, "CURLOPT_HTTPGET",
-    curl_easy_setopt(easy.native, CURLOPT_HTTPGET, 1L));
-  _curl_check(easy, "CURLOPT_NOBODY",
-    curl_easy_setopt(easy.native, CURLOPT_NOBODY,
-                     !strcmp(method, "HEAD") ? 1L : 0L));
-  _curl_check(easy, "CURLOPT_CUSTOMREQUEST",
-    curl_easy_setopt(easy.native, CURLOPT_CUSTOMREQUEST,
-                     bodyless ? NULL : (const char *) method));
+  $curl.setopt(easy, CURLOPT_URL, easy.url);
+  $curl.setopt(easy, CURLOPT_POSTFIELDS, NULL);
+  $curl.setopt(easy, CURLOPT_HTTPGET, 1L);
+  $curl.setopt(easy, CURLOPT_NOBODY, !strcmp(method, "HEAD") ? 1L : 0L);
+  $curl.setopt(easy, CURLOPT_CUSTOMREQUEST,
+               bodyless ? NULL : (const char *) method);
   if ((void *) request_body != NULL) {
-    _curl_check(easy, "CURLOPT_POSTFIELDSIZE_LARGE",
-      curl_easy_setopt(easy.native, CURLOPT_POSTFIELDSIZE_LARGE,
-                       (curl_off_t) request_body_size));
-    _curl_check(easy, "CURLOPT_COPYPOSTFIELDS",
-      curl_easy_setopt(easy.native, CURLOPT_COPYPOSTFIELDS,
-                       (const char *) request_body));
+    $curl.setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE,
+                 (curl_off_t) request_body_size);
+    $curl.setopt(easy, CURLOPT_COPYPOSTFIELDS, (const char *) request_body);
   }
-  _curl_check(easy, "CURLOPT_HTTPHEADER",
-    curl_easy_setopt(
-      easy.native, CURLOPT_HTTPHEADER, transfer.request_headers));
-  _curl_check(easy, "CURLOPT_WRITEFUNCTION",
-    curl_easy_setopt(easy.native, CURLOPT_WRITEFUNCTION,
-                     path ? _curl_spill : consume ? _curl_stream
-                                                : _curl_collect));
-  _curl_check(easy, "CURLOPT_WRITEDATA",
-    curl_easy_setopt(easy.native, CURLOPT_WRITEDATA,
-                     path ? (void *) &transfer.sink
-                       : consume ? (void *) &transfer.stream
-                                 : (void *) &transfer.body));
-  _curl_check(easy, "CURLOPT_HEADERFUNCTION",
-    curl_easy_setopt(easy.native, CURLOPT_HEADERFUNCTION, _curl_collect));
-  _curl_check(easy, "CURLOPT_HEADERDATA",
-    curl_easy_setopt(easy.native, CURLOPT_HEADERDATA, &transfer.headers));
+  $curl.setopt(easy, CURLOPT_HTTPHEADER, transfer.request_headers);
+  $curl.setopt(easy, CURLOPT_WRITEFUNCTION,
+               path ? _curl_spill : consume ? _curl_stream
+                                            : _curl_collect);
+  $curl.setopt(easy, CURLOPT_WRITEDATA,
+               path ? (void *) &transfer.sink
+                 : consume ? (void *) &transfer.stream
+                           : (void *) &transfer.body);
+  $curl.setopt(easy, CURLOPT_HEADERFUNCTION, _curl_collect);
+  $curl.setopt(easy, CURLOPT_HEADERDATA, &transfer.headers);
 }
 
 static void _curl_transfer_close(CurlTransfer &transfer) {
@@ -752,8 +726,7 @@ static CurlEasy _curl_duplicate(CurlEasy source) {
   easy.body_limit = source.body_limit;
   for (struct curl_slist *node = source.headers; node; node = node->next)
     _curl_add_header(&easy.headers, node->data);
-  _curl_check(easy, "CURLOPT_ERRORBUFFER",
-    curl_easy_setopt(easy.native, CURLOPT_ERRORBUFFER, easy.error));
+  $curl.setopt(easy, CURLOPT_ERRORBUFFER, easy.error);
   return completed = easy;
 }
 
