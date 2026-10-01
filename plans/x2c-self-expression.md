@@ -1,7 +1,8 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is fixed
-> and in publication. Five further defects found while scoping L1-L4 are
+> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
+> `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
+> second bootstrap round. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
