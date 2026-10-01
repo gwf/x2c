@@ -9,6 +9,9 @@
 */
 
 #pragma once
+
+#pragma private
+
 #include "frontend.x"
 #include "meta-project.x"
 #include "project.x"
@@ -18,8 +21,6 @@
 #include "diagnostics.x"
 #include "report.x"
 #include "utils.x"
-
-#pragma private
 
 #include <stdio.h>
 #include <stdlib.h>

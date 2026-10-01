@@ -7,6 +7,7 @@
 */
 
 #pragma once
+#pragma private
 #include "build.x"
 #include "project.x"
 #include "frontend.x"
@@ -15,7 +16,6 @@
 #include "install.x"
 #include "script.x"
 #include "toolchain.x"
-#pragma private
 
 #include <ctype.h>
 #include <stdio.h>
