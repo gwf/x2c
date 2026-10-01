@@ -38,7 +38,7 @@ List Compiler_parse_simple_declaration(Compiler c);
 
 List Compiler_parse_declaration_argument(Compiler c);
 
-int Compiler_test_static_assert(Compiler compiler);
+int Compiler_test_static_assert(Compiler c);
 
 List Compiler_parse_static_assert(Compiler compiler);
 

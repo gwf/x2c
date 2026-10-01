@@ -106,6 +106,8 @@ typedef struct Compiler{
 * Compiler;
 
 #include "diagnostics.h"
+#include "symbols.h"
+#include "preprocess.h"
 Var Compiler_var(Compiler compiler);
 
 Compiler Var_compiler(Var value);
@@ -142,6 +144,8 @@ void Compiler_tokenize(Compiler c, char * text);
 
 Symbol Compiler_peek(Compiler c, int steps);
 
+Token Token_skip_trivia(Token token);
+
 Token Compiler_skip_trivia_from(Compiler c, Token token);
 
 void Compiler_require_input(Compiler c);
@@ -155,6 +159,10 @@ static inline int Compiler_test(Compiler c, Symbol type){
   Compiler_next(c);
   return 1;
 }
+
+int Compiler_at_word(Compiler c, String word);
+
+int Compiler_take_word(Compiler c, String word);
 
 int Symbol_group_step(Symbol s);
 
@@ -179,146 +187,6 @@ void Compiler_record_source_reference(Compiler c, List binding, Type type, Token
 void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
 
 void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
-
-Symbol preproc_never_active_arm(String s);
-
-int preproc_open_state(String text);
-
-int preproc_branch_state(int state);
-
-int preproc_visibility(String text);
-
-List Compiler_leading_preproc(Compiler c);
-
-void Compiler_update_source_visibility(Compiler c, List directives);
-
-void Sym_reset(Sym s, Map globals);
-
-void Sym_push_new_scope(Sym s);
-
-void Sym_push_scope(Sym s, SymScope scope);
-
-SymScope Sym_pop_scope(Sym s);
-
-int Sym_scope_count(Sym s);
-
-int Sym_at_file_scope(Sym s);
-
-Map Sym_global_symbols(Sym s);
-
-Map Sym_base_symbols(Sym s);
-
-Map Sym_current_symbols(Sym s);
-
-Map Sym_file_statics(Sym s);
-
-void Sym_mark_static(Sym s, List key);
-
-List Sym_visible_symbols(Sym s);
-
-void Sym_set(Sym s, List key, List type);
-
-List Sym_define(Sym s, List key, List type);
-
-void Sym_seed_var_tags(Sym s, Map symbols);
-
-void Sym_define_global(Sym s, List key, List type);
-
-void Sym_declare_enumerator(Sym s, List key, Symbol owner);
-
-List Sym_introduce(Sym s, String spelling);
-
-List Sym_current_binding(Sym s, List key);
-
-Symbol Sym_enumerator_owner(Sym s, List key);
-
-int Sym_binding_is_local(Sym s, List binding);
-
-int Sym_binding_is_local_before(Sym s, List binding, int scope_count);
-
-List Sym_get(Sym s, List key);
-
-List Sym_get_exact(Sym s, List key);
-
-List Sym_lookup(Sym s, List key, Type * type);
-
-List Sym_reference(Sym s, List key, Type * type);
-
-List Sym_resolve_global(Sym s, List key, Type * type);
-
-List Sym_reference_global(Sym s, List key);
-
-List Sym_declare(Sym s, List context, List key, List ast);
-
-List Sym_bind_identity(Sym s, List context, List binding, List ast);
-
-Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
-
-String Compiler_package_spelling(Compiler c, String name);
-
-void Compiler_register_package_alias(Compiler c, String name, String alias, Token token);
-
-void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token);
-
-String Compiler_package_member_spelling(Compiler c, String name);
-
-List Compiler_imported_providers(Compiler c, String name);
-
-String Compiler_imported_spelling(Compiler c, String name);
-
-void Sym_define_macro(Sym s, Atom name, List definition);
-
-int Sym_has_local_macros(Sym s);
-
-List Sym_lookup_macro(Sym s, Atom name);
-
-Map Compiler_macro_definition_locals(Compiler c);
-
-SymTxn Compiler_begin_semantic_transaction(Compiler c);
-
-int SymTxn_local_macros_changed(SymTxn s);
-
-void SymTxn_commit(SymTxn s);
-
-void SymTxn_commit_transient(SymTxn s);
-
-void SymTxn_rollback(SymTxn s);
-
-Type Sym_resolve_key(Sym s, Type key);
-
-Type Sym_next_typedef(Sym s, Type type, int * hops);
-
-Type Sym_resolve_base_type(Sym s, Type key);
-
-Type Sym_normalize_declared_type(Sym s, Type type);
-
-Type Sym_local_type(Sym s, Type type);
-
-Type Sym_resolve_numeric_type(Sym s, Type type);
-
-Symbol Sym_var_tag_for_type(Sym s, Type type, Type * resolved);
-
-int Sym_is_var_type(Sym s, Type type);
-
-int Sym_is_string_type(Sym s, Type type);
-
-int Sym_is_array_type(Sym s, Type type);
-
-int Sym_is_map_type(Sym s, Type type);
-
-int Sym_is_named_value_type(Sym s, Type type, String name);
-
-Type Sym_lookup_field(Sym s, Type type, List field);
-
-void Sym_declare_field_order(Sym s, Type type, List fields);
-
-List Sym_field_order(Sym s, Type type);
-
-void Sym_declare_delegate_field(Sym s, Type aggregate, String name);
-
-Type Sym_delegate_aggregate(Sym s, Type type);
-
-Map Compiler_semantic_binding_facts(Compiler c);
 
 String Compiler_emitted_binding_name(Compiler c, List binding);
 
@@ -405,8 +273,6 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 int Compiler_skip_collected_script_statement(Compiler c);
 
 void Compiler_skip_script_statement(Compiler c);
-
-void ast_collect_binding_references(Var node, Map referenced);
 
 
 #endif /* __GUARD_0x08246194__ */

@@ -29,18 +29,6 @@ List Compiler_parse_map_entry(Compiler compiler);
 
 List Compiler_parse_string_literal(Compiler compiler);
 
-List Compiler_parse_lambda_literal(Compiler c);
-
-List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body);
-
-void Compiler_begin_lambda_captures(Compiler c, List references, List supplied);
-
-List Compiler_end_lambda_captures(Compiler c);
-
-int Compiler_lambda_capture_required(Compiler c, List binding);
-
-List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
-
 List Compiler_parse_atomic_literal(Compiler c);
 
 

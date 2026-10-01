@@ -19,9 +19,17 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling);
 
 String binding_identity_spelling(List binding);
 
+List Ast_lvalue_binding(Ast ast);
+
 Ast Ast_rewrite_children(Ast ast, Func per_child);
 
 int ast_contains_head(Var value, Symbol kind);
+
+void ast_collect_binding_references(Var node, Map referenced);
+
+Ast Ast_without_origin(Ast ast);
+
+Ast Ast_rewrap_origin(Ast original, Ast replacement);
 
 int Ast_never_returns(Ast ast);
 
@@ -36,16 +44,6 @@ int ast_changes_left_operand(Symbol op);
 List Ast_initializer_cases(Ast ast, List * input);
 
 List Ast_initializer_functions(Ast ast, List * source);
-
-Symbol preproc_conditional_kind(String text);
-
-String preproc_directive(String text);
-
-String preproc_include_target(String text, int * angle);
-
-List preproc_track_arms(List arms, String text);
-
-List preproc_within_arms(List arms, List items);
 
 
 #endif /* __GUARD_0x29A28E81__ */

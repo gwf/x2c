@@ -19,7 +19,7 @@
 #include "exception.h"
 #include "list.h"
 #include "map.h"
-#include "match.h"
+#include "match-cache.h"
 #include "pool.h"
 #include "scope.h"
 #include "string.h"

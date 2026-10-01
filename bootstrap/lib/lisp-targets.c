@@ -6,15 +6,27 @@
 
 #include "lisp-targets.h"
 
-static List _46, _44, _43, _41, _40, _39, _37, _36, _34, _32, _29, _28, _24, _23, _21, _19, _18, _16, _15, _14, _13, _9, _8, _6, _5, _3;
+#include "error.h"
 
-static String _54, _53, _52, _51, _50, _49, _48, _47, _30, _26, _11, _1;
+#include "exception.h"
 
-static Var _45, _42, _38, _35, _33, _31, _27, _25, _22, _20, _17, _12, _10, _7, _4, _2, _0;
+static List _1236, _1234, _1233, _1230, _1224, _1222, _1221, _1219, _1218, _1216, _1215, _1213, _1212, _1210, _1209, _1207, _1206, _1204, _1203, _1201, _1200, _1198, _1197, _1195, _1194, _1192, _1191, _1189, _1188, _1186, _1185, _1183, _1182, _1181, _1179, _1178, _1176, _1175, _1173, _1172, _1170, _1169, _1167, _1166, _1164, _1163, _1161, _1160, _1158, _1157, _1155, _1154, _1152, _1151, _1150, _1149, _1148, _1147, _1145, _1144, _1142, _1140, _1138, _1137, _1135, _1134, _1132, _1131, _1129, _1128, _1126, _1125, _1123, _1121, _1120, _1119, _1117, _1116, _1114, _1113, _1111, _1110, _1108, _1107, _1105, _1104, _1102, _1101, _1099, _1098, _1096, _1095, _1093, _1092, _1091, _1090, _1089, _1088, _1086, _1085, _1083, _1082, _1080, _1079, _1077, _1076, _1074, _1073, _1071, _1069, _1067, _1066, _1064, _1062, _1060, _1059, _1057, _1056, _1053, _1051, _1050, _1048, _1047, _1046, _1045, _1044, _1043, _1040, _1039, _1036, _1035, _1032, _1031, _1030, _1029, _1027, _1026, _1023, _1022, _1019, _1018, _1015, _1013, _1012, _1010, _1009, _1007, _1006, _1004, _1003, _1002, _1001, _1000, _999, _998, _997, _996, _995, _994, _993, _990, _989, _988, _987, _985, _984, _981, _979, _978, _976, _975, _974, _973, _972, _971, _968, _967, _966, _965, _964, _963, _962, _961, _960, _958, _957, _955, _954, _952, _951, _950, _949, _947, _946, _944, _943, _941, _940, _938, _937, _935, _934, _932, _930, _929, _927, _926, _924, _923, _921, _920, _918, _917, _915, _914, _912, _911, _909, _908, _907, _905, _904, _902, _900, _899, _897, _896, _895, _893, _892, _890, _889, _888, _886, _885, _883, _882, _881, _879, _878, _876, _875, _874, _873, _871, _870, _868, _867, _866, _864, _863, _861, _860, _858, _857, _855, _854, _852, _851, _849, _848, _846, _845, _843, _842, _840, _839, _837, _836, _834, _833, _831, _830, _828, _826, _825, _824, _823, _821, _820, _818, _816, _814, _813, _811, _809, _806, _805, _803, _802, _800, _799, _797, _796, _794, _793, _792, _790, _789, _787, _785, _782, _780, _779, _777, _776, _774, _773, _771, _770, _769, _768, _767, _765, _764, _762, _761, _759, _758, _756, _755, _754, _753, _752, _751, _750, _749, _747, _746, _744, _743, _741, _740, _738, _737, _736, _734, _733, _731, _730, _729, _728, _726, _725, _723, _722, _720, _719, _717, _716, _714, _713, _711, _709, _706, _704, _703, _701, _699, _696, _694, _693, _691, _689, _686, _684, _683, _681, _679, _676, _675, _674, _673, _671, _670, _668, _667, _665, _664, _662, _661, _660, _659, _657, _656, _654, _653, _651, _650, _648, _647, _646, _644, _643, _641, _639, _636, _634, _633, _631, _629, _628, _626, _625, _624, _623, _622, _620, _619, _617, _616, _615, _614, _612, _611, _609, _608, _607, _605, _604, _602, _600, _599, _597, _596, _595, _593, _592, _590, _589, _588, _587, _585, _584, _582, _581, _580, _578, _577, _575, _573, _570, _568, _567, _565, _564, _563, _561, _560, _558, _557, _556, _554, _553, _551, _550, _548, _546, _545, _543, _542, _540, _539, _538, _536, _535, _533, _532, _530, _529, _528, _526, _525, _523, _521, _520, _518, _517, _515, _514, _512, _510, _509, _507, _506, _504, _501, _499, _498, _496, _495, _494, _493, _491, _490, _488, _487, _486, _485, _483, _482, _480, _479, _477, _476, _474, _473, _471, _470, _468, _467, _465, _464, _463, _461, _460, _458, _457, _455, _454, _452, _451, _450, _449, _447, _446, _444, _443, _442, _441, _440, _439, _437, _436, _434, _433, _432, _431, _428, _427, _426, _425, _424, _423, _422, _421, _419, _418, _416, _414, _411, _409, _408, _406, _404, _401, _399, _398, _396, _394, _391, _389, _388, _386, _384, _381, _379, _378, _376, _374, _371, _369, _368, _366, _364, _361, _359, _358, _356, _354, _351, _349, _348, _346, _344, _343, _341, _340, _339, _338, _337, _335, _334, _332, _331, _329, _328, _326, _325, _324, _323, _321, _320, _318, _317, _315, _314, _312, _311, _310, _308, _307, _305, _304, _302, _301, _299, _298, _296, _295, _293, _291, _289, _288, _287, _286, _284, _283, _281, _280, _279, _278, _276, _275, _273, _272, _271, _270, _269, _268, _267, _266, _265, _264, _263, _260, _259, _256, _255, _252, _251, _248, _247, _244, _243, _240, _239, _236, _235, _234, _233, _232, _231, _229, _228, _226, _225, _224, _222, _221, _219, _218, _217, _215, _213, _212, _210, _209, _207, _206, _204, _203, _201, _200, _198, _197, _196, _194, _193, _191, _190, _188, _187, _185, _184, _182, _181, _179, _178, _176, _175, _174, _172, _171, _169, _168, _165, _163, _162, _160, _159, _157, _156, _154, _153, _152, _151, _149, _148, _146, _145, _143, _142, _140, _139, _138, _137, _135, _134, _132, _131, _130, _129, _127, _126, _124, _123, _122, _121, _119, _118, _116, _114, _111, _109, _108, _106, _105, _104, _102, _100, _97, _95, _94, _92, _91, _89, _86, _84, _83, _81, _80, _79, _77, _75, _73, _71, _70, _68, _67, _66, _64, _62, _59, _57, _56, _54, _53, _52, _50, _47, _44, _43, _39, _38, _36, _35, _33, _32, _30, _29, _28, _26, _25, _24, _18, _15, _12, _11, _8, _7, _5, _3;
 
-#include "json.h"
+static String _1799, _1798, _1797, _1796, _1795, _1794, _1793, _1792, _1791, _1790, _1789, _1788, _1787, _1786, _1785, _1784, _1783, _1782, _1781, _1780, _1779, _1778, _1777, _1776, _1775, _1774, _1773, _1772, _1771, _1770, _1769, _1768, _1767, _1766, _1765, _1764, _1763, _1762, _1761, _1760, _1759, _1758, _1757, _1756, _1755, _1754, _1753, _1752, _1751, _1750, _1749, _1748, _1747, _1746, _1745, _1744, _1743, _1742, _1741, _1740, _1739, _1738, _1737, _1736, _1735, _1734, _1733, _1732, _1731, _1730, _1729, _1728, _1727, _1726, _1725, _1724, _1723, _1722, _1721, _1720, _1719, _1718, _1717, _1716, _1715, _1714, _1713, _1712, _1711, _1710, _1709, _1708, _1707, _1706, _1705, _1704, _1703, _1702, _1701, _1700, _1699, _1698, _1697, _1696, _1695, _1694, _1693, _1692, _1691, _1690, _1689, _1688, _1687, _1686, _1685, _1684, _1683, _1682, _1681, _1680, _1679, _1678, _1677, _1676, _1675, _1674, _1673, _1672, _1671, _1670, _1669, _1668, _1667, _1666, _1665, _1664, _1663, _1662, _1661, _1660, _1659, _1658, _1657, _1656, _1655, _1654, _1653, _1652, _1651, _1650, _1649, _1648, _1647, _1646, _1645, _1644, _1643, _1642, _1641, _1640, _1639, _1638, _1637, _1636, _1635, _1634, _1633, _1632, _1631, _1630, _1629, _1628, _1627, _1626, _1625, _1624, _1623, _1622, _1621, _1620, _1619, _1618, _1617, _1616, _1615, _1614, _1613, _1612, _1611, _1610, _1609, _1608, _1607, _1606, _1605, _1604, _1603, _1602, _1601, _1600, _1599, _1598, _1597, _1596, _1595, _1594, _1593, _1592, _1591, _1590, _1589, _1588, _1587, _1586, _1585, _1584, _1583, _1582, _1581, _1580, _1579, _1578, _1577, _1576, _1575, _1574, _1573, _1572, _1571, _1570, _1569, _1568, _1567, _1566, _1565, _1564, _1563, _1562, _1561, _1560, _1559, _1558, _1557, _1556, _1555, _1554, _1553, _1552, _1551, _1550, _1549, _1548, _1547, _1546, _1545, _1544, _1543, _1542, _1541, _1540, _1539, _1538, _1537, _1536, _1535, _1534, _1533, _1532, _1531, _1530, _1529, _1528, _1527, _1526, _1525, _1524, _1523, _1522, _1521, _1520, _1519, _1518, _1517, _1516, _1515, _1514, _1513, _1512, _1511, _1510, _1509, _1508, _1507, _1506, _1505, _1504, _1503, _1502, _1501, _1500, _1499, _1498, _1497, _1496, _1495, _1494, _1493, _1492, _1491, _1490, _1489, _1488, _1487, _1486, _1485, _1484, _1483, _1482, _1481, _1480, _1479, _1478, _1477, _1476, _1475, _1474, _1473, _1472, _1471, _1470, _1469, _1468, _1467, _1466, _1465, _1464, _1463, _1462, _1461, _1460, _1459, _1458, _1457, _1456, _1455, _1454, _1453, _1452, _1451, _1450, _1449, _1448, _1447, _1446, _1445, _1444, _1443, _1442, _1441, _1440, _1439, _1438, _1437, _1436, _1435, _1434, _1433, _1432, _1431, _1430, _1429, _1428, _1427, _1426, _1425, _1424, _1423, _1422, _1421, _1420, _1419, _1418, _1417, _1416, _1415, _1414, _1413, _1412, _1411, _1410, _1409, _1408, _1407, _1406, _1405, _1404, _1403, _1402, _1401, _1400, _1399, _1398, _1397, _1396, _1395, _1394, _1393, _1392, _1391, _1390, _1389, _1388, _1387, _1386, _1385, _1384, _1383, _1382, _1381, _1380, _1379, _1378, _1377, _1376, _1375, _1374, _1373, _1372, _1371, _1370, _1369, _1368, _1367, _1366, _1365, _1364, _1363, _1362, _1361, _1360, _1359, _1358, _1357, _1356, _1355, _1354, _1353, _1352, _1351, _1350, _1349, _1348, _1347, _1346, _1345, _1344, _1343, _1342, _1341, _1340, _1339, _1338, _1337, _1336, _1335, _1334, _1333, _1332, _1331, _1330, _1329, _1328, _1327, _1326, _1325, _1324, _1323, _1322, _1321, _1320, _1319, _1318, _1317, _1316, _1315, _1314, _1313, _1312, _1311, _1310, _1309, _1308, _1307, _1306, _1305, _1304, _1303, _1302, _1301, _1300, _1299, _1298, _1297, _1296, _1295, _1294, _1293, _1292, _1291, _1290, _1289, _1288, _1287, _1286, _1285, _1284, _1283, _1282, _1281, _1280, _1279, _1278, _1277, _1276, _1275, _1274, _1273, _1272, _1271, _1270, _1269, _1268, _1267, _1266, _1265, _1264, _1263, _1262, _1261, _1260, _1259, _1258, _1257, _1256, _1255, _1254, _1253, _1252, _1251, _1250, _1249, _1248, _1247, _1246, _1245, _1244, _1243, _1242, _1241, _1240, _1239, _1238, _1237, _1231, _1229, _1228, _1227, _1226, _1225, _1054, _1041, _1037, _1033, _1024, _1020, _1016, _991, _982, _969, _807, _783, _707, _697, _687, _677, _637, _571, _502, _429, _412, _402, _392, _382, _372, _362, _352, _261, _257, _253, _249, _245, _241, _237, _166, _112, _98, _87, _60, _45, _41, _22, _13, _1;
+
+static Var _1235, _1232, _1223, _1220, _1217, _1214, _1211, _1208, _1205, _1202, _1199, _1196, _1193, _1190, _1187, _1184, _1180, _1177, _1174, _1171, _1168, _1165, _1162, _1159, _1156, _1153, _1146, _1143, _1141, _1139, _1136, _1133, _1130, _1127, _1124, _1122, _1118, _1115, _1112, _1109, _1106, _1103, _1100, _1097, _1094, _1087, _1084, _1081, _1078, _1075, _1072, _1070, _1068, _1065, _1063, _1061, _1058, _1055, _1052, _1049, _1042, _1038, _1034, _1028, _1025, _1021, _1017, _1014, _1011, _1008, _1005, _992, _986, _983, _980, _977, _970, _959, _956, _953, _948, _945, _942, _939, _936, _933, _931, _928, _925, _922, _919, _916, _913, _910, _906, _903, _901, _898, _894, _891, _887, _884, _880, _877, _872, _869, _865, _862, _859, _856, _853, _850, _847, _844, _841, _838, _835, _832, _829, _827, _822, _819, _817, _815, _812, _810, _808, _804, _801, _798, _795, _791, _788, _786, _784, _781, _778, _775, _772, _766, _763, _760, _757, _748, _745, _742, _739, _735, _732, _727, _724, _721, _718, _715, _712, _710, _708, _705, _702, _700, _698, _695, _692, _690, _688, _685, _682, _680, _678, _672, _669, _666, _663, _658, _655, _652, _649, _645, _642, _640, _638, _635, _632, _630, _627, _621, _618, _613, _610, _606, _603, _601, _598, _594, _591, _586, _583, _579, _576, _574, _572, _569, _566, _562, _559, _555, _552, _549, _547, _544, _541, _537, _534, _531, _527, _524, _522, _519, _516, _513, _511, _508, _505, _503, _500, _497, _492, _489, _484, _481, _478, _475, _472, _469, _466, _462, _459, _456, _453, _448, _445, _438, _435, _430, _420, _417, _415, _413, _410, _407, _405, _403, _400, _397, _395, _393, _390, _387, _385, _383, _380, _377, _375, _373, _370, _367, _365, _363, _360, _357, _355, _353, _350, _347, _345, _342, _336, _333, _330, _327, _322, _319, _316, _313, _309, _306, _303, _300, _297, _294, _292, _290, _285, _282, _277, _274, _262, _258, _254, _250, _246, _242, _238, _230, _227, _223, _220, _216, _214, _211, _208, _205, _202, _199, _195, _192, _189, _186, _183, _180, _177, _173, _170, _167, _164, _161, _158, _155, _150, _147, _144, _141, _136, _133, _128, _125, _120, _117, _115, _113, _110, _107, _103, _101, _99, _96, _93, _90, _88, _85, _82, _78, _76, _74, _72, _69, _65, _63, _61, _58, _55, _51, _49, _48, _46, _42, _40, _37, _34, _31, _27, _23, _21, _20, _19, _17, _16, _14, _10, _9, _6, _4, _2, _0;
+
 #include "diff.h"
-static Map optional_targets;
+#include "digest.h"
+#include "json.h"
+#include "lisp-init.h"
+#include "list-selectors.h"
+#include "process.h"
+#include "regex.h"
+#include "typed-array.h"
+#include "typed-list.h"
+#include "typed-map.h"
+static Map native_targets;
 
 Map Map_update_n(Map, unsigned, ...);
 
@@ -42,10 +54,1152 @@ static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func
 
 static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7);
 
-_x2c_initializer_choice_47649B83_0((optional_targets = Map_update_n(Map_new(), 8, String_var(_47), Func_var(Func_new(_x2c_func_adapt_0, _14)), String_var(_48), Func_var(Func_new(_x2c_func_adapt_1, _21)), String_var(_49), Func_var(Func_new(_x2c_func_adapt_2, _29)), String_var(_50), Func_var(Func_new(_x2c_func_adapt_3, _39)), String_var(_51), Func_var(Func_new(_x2c_func_adapt_4, _39)), String_var(_52), Func_var(Func_new(_x2c_func_adapt_5, _40)), String_var(_53), Func_var(Func_new(_x2c_func_adapt_6, _46)), String_var(_54), Func_var(Func_new(_x2c_func_adapt_7, _40)))))
+static Var _x2c_func_adapt_8(Func _x2c_func_binding_8, const FuncArg * _x2c_func_argv_8);
+
+static Var _x2c_func_adapt_9(Func _x2c_func_binding_9, const FuncArg * _x2c_func_argv_9);
+
+static Var _x2c_func_adapt_10(Func _x2c_func_binding_10, const FuncArg * _x2c_func_argv_10);
+
+static Var _x2c_func_adapt_11(Func _x2c_func_binding_11, const FuncArg * _x2c_func_argv_11);
+
+static Var _x2c_func_adapt_12(Func _x2c_func_binding_12, const FuncArg * _x2c_func_argv_12);
+
+static Var _x2c_func_adapt_13(Func _x2c_func_binding_13, const FuncArg * _x2c_func_argv_13);
+
+static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_func_argv_14);
+
+static Var _x2c_func_adapt_15(Func _x2c_func_binding_15, const FuncArg * _x2c_func_argv_15);
+
+static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_func_argv_16);
+
+static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_func_argv_17);
+
+static Var _x2c_func_adapt_18(Func _x2c_func_binding_18, const FuncArg * _x2c_func_argv_18);
+
+static Var _x2c_func_adapt_19(Func _x2c_func_binding_19, const FuncArg * _x2c_func_argv_19);
+
+static Var _x2c_func_adapt_20(Func _x2c_func_binding_20, const FuncArg * _x2c_func_argv_20);
+
+static Var _x2c_func_adapt_21(Func _x2c_func_binding_21, const FuncArg * _x2c_func_argv_21);
+
+static Var _x2c_func_adapt_22(Func _x2c_func_binding_22, const FuncArg * _x2c_func_argv_22);
+
+static Var _x2c_func_adapt_23(Func _x2c_func_binding_23, const FuncArg * _x2c_func_argv_23);
+
+static Var _x2c_func_adapt_24(Func _x2c_func_binding_24, const FuncArg * _x2c_func_argv_24);
+
+static Var _x2c_func_adapt_25(Func _x2c_func_binding_25, const FuncArg * _x2c_func_argv_25);
+
+static Var _x2c_func_adapt_26(Func _x2c_func_binding_26, const FuncArg * _x2c_func_argv_26);
+
+static Var _x2c_func_adapt_27(Func _x2c_func_binding_27, const FuncArg * _x2c_func_argv_27);
+
+static Var _x2c_func_adapt_28(Func _x2c_func_binding_28, const FuncArg * _x2c_func_argv_28);
+
+static Var _x2c_func_adapt_29(Func _x2c_func_binding_29, const FuncArg * _x2c_func_argv_29);
+
+static Var _x2c_func_adapt_30(Func _x2c_func_binding_30, const FuncArg * _x2c_func_argv_30);
+
+static Var _x2c_func_adapt_31(Func _x2c_func_binding_31, const FuncArg * _x2c_func_argv_31);
+
+static Var _x2c_func_adapt_32(Func _x2c_func_binding_32, const FuncArg * _x2c_func_argv_32);
+
+static Var _x2c_func_adapt_33(Func _x2c_func_binding_33, const FuncArg * _x2c_func_argv_33);
+
+static Var _x2c_func_adapt_34(Func _x2c_func_binding_34, const FuncArg * _x2c_func_argv_34);
+
+Func Func_new_rest(FuncAdapter, List);
+
+static Var _x2c_func_adapt_35(Func _x2c_func_binding_35, const FuncArg * _x2c_func_argv_35);
+
+static Var _x2c_func_adapt_36(Func _x2c_func_binding_36, const FuncArg * _x2c_func_argv_36);
+
+static Var _x2c_func_adapt_37(Func _x2c_func_binding_37, const FuncArg * _x2c_func_argv_37);
+
+static Var _x2c_func_adapt_38(Func _x2c_func_binding_38, const FuncArg * _x2c_func_argv_38);
+
+static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39);
+
+static Var _x2c_func_adapt_40(Func _x2c_func_binding_40, const FuncArg * _x2c_func_argv_40);
+
+static Var _x2c_func_adapt_41(Func _x2c_func_binding_41, const FuncArg * _x2c_func_argv_41);
+
+static Var _x2c_func_adapt_42(Func _x2c_func_binding_42, const FuncArg * _x2c_func_argv_42);
+
+static Var _x2c_func_adapt_43(Func _x2c_func_binding_43, const FuncArg * _x2c_func_argv_43);
+
+static Var _x2c_func_adapt_44(Func _x2c_func_binding_44, const FuncArg * _x2c_func_argv_44);
+
+static Var _x2c_func_adapt_45(Func _x2c_func_binding_45, const FuncArg * _x2c_func_argv_45);
+
+static Var _x2c_func_adapt_46(Func _x2c_func_binding_46, const FuncArg * _x2c_func_argv_46);
+
+static Var _x2c_func_adapt_47(Func _x2c_func_binding_47, const FuncArg * _x2c_func_argv_47);
+
+static Var _x2c_func_adapt_48(Func _x2c_func_binding_48, const FuncArg * _x2c_func_argv_48);
+
+static Var _x2c_func_adapt_49(Func _x2c_func_binding_49, const FuncArg * _x2c_func_argv_49);
+
+static Var _x2c_func_adapt_50(Func _x2c_func_binding_50, const FuncArg * _x2c_func_argv_50);
+
+static Var _x2c_func_adapt_51(Func _x2c_func_binding_51, const FuncArg * _x2c_func_argv_51);
+
+static Var _x2c_func_adapt_52(Func _x2c_func_binding_52, const FuncArg * _x2c_func_argv_52);
+
+static Var _x2c_func_adapt_53(Func _x2c_func_binding_53, const FuncArg * _x2c_func_argv_53);
+
+static Var _x2c_func_adapt_54(Func _x2c_func_binding_54, const FuncArg * _x2c_func_argv_54);
+
+static Var _x2c_func_adapt_55(Func _x2c_func_binding_55, const FuncArg * _x2c_func_argv_55);
+
+static Var _x2c_func_adapt_56(Func _x2c_func_binding_56, const FuncArg * _x2c_func_argv_56);
+
+static Var _x2c_func_adapt_57(Func _x2c_func_binding_57, const FuncArg * _x2c_func_argv_57);
+
+static Var _x2c_func_adapt_58(Func _x2c_func_binding_58, const FuncArg * _x2c_func_argv_58);
+
+static Var _x2c_func_adapt_59(Func _x2c_func_binding_59, const FuncArg * _x2c_func_argv_59);
+
+static Var _x2c_func_adapt_60(Func _x2c_func_binding_60, const FuncArg * _x2c_func_argv_60);
+
+static Var _x2c_func_adapt_61(Func _x2c_func_binding_61, const FuncArg * _x2c_func_argv_61);
+
+static Var _x2c_func_adapt_62(Func _x2c_func_binding_62, const FuncArg * _x2c_func_argv_62);
+
+static Var _x2c_func_adapt_63(Func _x2c_func_binding_63, const FuncArg * _x2c_func_argv_63);
+
+static Var _x2c_func_adapt_64(Func _x2c_func_binding_64, const FuncArg * _x2c_func_argv_64);
+
+static Var _x2c_func_adapt_65(Func _x2c_func_binding_65, const FuncArg * _x2c_func_argv_65);
+
+static Var _x2c_func_adapt_66(Func _x2c_func_binding_66, const FuncArg * _x2c_func_argv_66);
+
+static Var _x2c_func_adapt_67(Func _x2c_func_binding_67, const FuncArg * _x2c_func_argv_67);
+
+static Var _x2c_func_adapt_68(Func _x2c_func_binding_68, const FuncArg * _x2c_func_argv_68);
+
+static Var _x2c_func_adapt_69(Func _x2c_func_binding_69, const FuncArg * _x2c_func_argv_69);
+
+static Var _x2c_func_adapt_70(Func _x2c_func_binding_70, const FuncArg * _x2c_func_argv_70);
+
+static Var _x2c_func_adapt_71(Func _x2c_func_binding_71, const FuncArg * _x2c_func_argv_71);
+
+static Var _x2c_func_adapt_72(Func _x2c_func_binding_72, const FuncArg * _x2c_func_argv_72);
+
+static Var _x2c_func_adapt_73(Func _x2c_func_binding_73, const FuncArg * _x2c_func_argv_73);
+
+static Var _x2c_func_adapt_74(Func _x2c_func_binding_74, const FuncArg * _x2c_func_argv_74);
+
+static Var _x2c_func_adapt_75(Func _x2c_func_binding_75, const FuncArg * _x2c_func_argv_75);
+
+static Var _x2c_func_adapt_76(Func _x2c_func_binding_76, const FuncArg * _x2c_func_argv_76);
+
+static Var _x2c_func_adapt_77(Func _x2c_func_binding_77, const FuncArg * _x2c_func_argv_77);
+
+static Var _x2c_func_adapt_78(Func _x2c_func_binding_78, const FuncArg * _x2c_func_argv_78);
+
+static Var _x2c_func_adapt_79(Func _x2c_func_binding_79, const FuncArg * _x2c_func_argv_79);
+
+static Var _x2c_func_adapt_80(Func _x2c_func_binding_80, const FuncArg * _x2c_func_argv_80);
+
+static Var _x2c_func_adapt_81(Func _x2c_func_binding_81, const FuncArg * _x2c_func_argv_81);
+
+static Var _x2c_func_adapt_82(Func _x2c_func_binding_82, const FuncArg * _x2c_func_argv_82);
+
+static Var _x2c_func_adapt_83(Func _x2c_func_binding_83, const FuncArg * _x2c_func_argv_83);
+
+static Var _x2c_func_adapt_84(Func _x2c_func_binding_84, const FuncArg * _x2c_func_argv_84);
+
+static Var _x2c_func_adapt_85(Func _x2c_func_binding_85, const FuncArg * _x2c_func_argv_85);
+
+static Var _x2c_func_adapt_86(Func _x2c_func_binding_86, const FuncArg * _x2c_func_argv_86);
+
+static Var _x2c_func_adapt_87(Func _x2c_func_binding_87, const FuncArg * _x2c_func_argv_87);
+
+static Var _x2c_func_adapt_88(Func _x2c_func_binding_88, const FuncArg * _x2c_func_argv_88);
+
+static Var _x2c_func_adapt_89(Func _x2c_func_binding_89, const FuncArg * _x2c_func_argv_89);
+
+static Var _x2c_func_adapt_90(Func _x2c_func_binding_90, const FuncArg * _x2c_func_argv_90);
+
+static Var _x2c_func_adapt_91(Func _x2c_func_binding_91, const FuncArg * _x2c_func_argv_91);
+
+static Var _x2c_func_adapt_92(Func _x2c_func_binding_92, const FuncArg * _x2c_func_argv_92);
+
+static Var _x2c_func_adapt_93(Func _x2c_func_binding_93, const FuncArg * _x2c_func_argv_93);
+
+static Var _x2c_func_adapt_94(Func _x2c_func_binding_94, const FuncArg * _x2c_func_argv_94);
+
+static Var _x2c_func_adapt_95(Func _x2c_func_binding_95, const FuncArg * _x2c_func_argv_95);
+
+static Var _x2c_func_adapt_96(Func _x2c_func_binding_96, const FuncArg * _x2c_func_argv_96);
+
+static Var _x2c_func_adapt_97(Func _x2c_func_binding_97, const FuncArg * _x2c_func_argv_97);
+
+static Var _x2c_func_adapt_98(Func _x2c_func_binding_98, const FuncArg * _x2c_func_argv_98);
+
+static Var _x2c_func_adapt_99(Func _x2c_func_binding_99, const FuncArg * _x2c_func_argv_99);
+
+static Var _x2c_func_adapt_100(Func _x2c_func_binding_100, const FuncArg * _x2c_func_argv_100);
+
+static Var _x2c_func_adapt_101(Func _x2c_func_binding_101, const FuncArg * _x2c_func_argv_101);
+
+static Var _x2c_func_adapt_102(Func _x2c_func_binding_102, const FuncArg * _x2c_func_argv_102);
+
+static Var _x2c_func_adapt_103(Func _x2c_func_binding_103, const FuncArg * _x2c_func_argv_103);
+
+static Var _x2c_func_adapt_104(Func _x2c_func_binding_104, const FuncArg * _x2c_func_argv_104);
+
+static Var _x2c_func_adapt_105(Func _x2c_func_binding_105, const FuncArg * _x2c_func_argv_105);
+
+static Var _x2c_func_adapt_106(Func _x2c_func_binding_106, const FuncArg * _x2c_func_argv_106);
+
+static Var _x2c_func_adapt_107(Func _x2c_func_binding_107, const FuncArg * _x2c_func_argv_107);
+
+static Var _x2c_func_adapt_108(Func _x2c_func_binding_108, const FuncArg * _x2c_func_argv_108);
+
+static Var _x2c_func_adapt_109(Func _x2c_func_binding_109, const FuncArg * _x2c_func_argv_109);
+
+static Var _x2c_func_adapt_110(Func _x2c_func_binding_110, const FuncArg * _x2c_func_argv_110);
+
+static Var _x2c_func_adapt_111(Func _x2c_func_binding_111, const FuncArg * _x2c_func_argv_111);
+
+static Var _x2c_func_adapt_112(Func _x2c_func_binding_112, const FuncArg * _x2c_func_argv_112);
+
+static Var _x2c_func_adapt_113(Func _x2c_func_binding_113, const FuncArg * _x2c_func_argv_113);
+
+static Var _x2c_func_adapt_114(Func _x2c_func_binding_114, const FuncArg * _x2c_func_argv_114);
+
+static Var _x2c_func_adapt_115(Func _x2c_func_binding_115, const FuncArg * _x2c_func_argv_115);
+
+static Var _x2c_func_adapt_116(Func _x2c_func_binding_116, const FuncArg * _x2c_func_argv_116);
+
+static Var _x2c_func_adapt_117(Func _x2c_func_binding_117, const FuncArg * _x2c_func_argv_117);
+
+static Var _x2c_func_adapt_118(Func _x2c_func_binding_118, const FuncArg * _x2c_func_argv_118);
+
+static Var _x2c_func_adapt_119(Func _x2c_func_binding_119, const FuncArg * _x2c_func_argv_119);
+
+static Var _x2c_func_adapt_120(Func _x2c_func_binding_120, const FuncArg * _x2c_func_argv_120);
+
+static Var _x2c_func_adapt_121(Func _x2c_func_binding_121, const FuncArg * _x2c_func_argv_121);
+
+static Var _x2c_func_adapt_122(Func _x2c_func_binding_122, const FuncArg * _x2c_func_argv_122);
+
+static Var _x2c_func_adapt_123(Func _x2c_func_binding_123, const FuncArg * _x2c_func_argv_123);
+
+static Var _x2c_func_adapt_124(Func _x2c_func_binding_124, const FuncArg * _x2c_func_argv_124);
+
+static Var _x2c_func_adapt_125(Func _x2c_func_binding_125, const FuncArg * _x2c_func_argv_125);
+
+static Var _x2c_func_adapt_126(Func _x2c_func_binding_126, const FuncArg * _x2c_func_argv_126);
+
+static Var _x2c_func_adapt_127(Func _x2c_func_binding_127, const FuncArg * _x2c_func_argv_127);
+
+static Var _x2c_func_adapt_128(Func _x2c_func_binding_128, const FuncArg * _x2c_func_argv_128);
+
+static Var _x2c_func_adapt_129(Func _x2c_func_binding_129, const FuncArg * _x2c_func_argv_129);
+
+static Var _x2c_func_adapt_130(Func _x2c_func_binding_130, const FuncArg * _x2c_func_argv_130);
+
+static Var _x2c_func_adapt_131(Func _x2c_func_binding_131, const FuncArg * _x2c_func_argv_131);
+
+static Var _x2c_func_adapt_132(Func _x2c_func_binding_132, const FuncArg * _x2c_func_argv_132);
+
+static Var _x2c_func_adapt_133(Func _x2c_func_binding_133, const FuncArg * _x2c_func_argv_133);
+
+static Var _x2c_func_adapt_134(Func _x2c_func_binding_134, const FuncArg * _x2c_func_argv_134);
+
+static Var _x2c_func_adapt_135(Func _x2c_func_binding_135, const FuncArg * _x2c_func_argv_135);
+
+static Var _x2c_func_adapt_136(Func _x2c_func_binding_136, const FuncArg * _x2c_func_argv_136);
+
+static Var _x2c_func_adapt_137(Func _x2c_func_binding_137, const FuncArg * _x2c_func_argv_137);
+
+static Var _x2c_func_adapt_138(Func _x2c_func_binding_138, const FuncArg * _x2c_func_argv_138);
+
+static Var _x2c_func_adapt_139(Func _x2c_func_binding_139, const FuncArg * _x2c_func_argv_139);
+
+static Var _x2c_func_adapt_140(Func _x2c_func_binding_140, const FuncArg * _x2c_func_argv_140);
+
+static Var _x2c_func_adapt_141(Func _x2c_func_binding_141, const FuncArg * _x2c_func_argv_141);
+
+static Var _x2c_func_adapt_142(Func _x2c_func_binding_142, const FuncArg * _x2c_func_argv_142);
+
+static Var _x2c_func_adapt_143(Func _x2c_func_binding_143, const FuncArg * _x2c_func_argv_143);
+
+static Var _x2c_func_adapt_144(Func _x2c_func_binding_144, const FuncArg * _x2c_func_argv_144);
+
+static Var _x2c_func_adapt_145(Func _x2c_func_binding_145, const FuncArg * _x2c_func_argv_145);
+
+static Var _x2c_func_adapt_146(Func _x2c_func_binding_146, const FuncArg * _x2c_func_argv_146);
+
+static Var _x2c_func_adapt_147(Func _x2c_func_binding_147, const FuncArg * _x2c_func_argv_147);
+
+static Var _x2c_func_adapt_148(Func _x2c_func_binding_148, const FuncArg * _x2c_func_argv_148);
+
+static Var _x2c_func_adapt_149(Func _x2c_func_binding_149, const FuncArg * _x2c_func_argv_149);
+
+static Var _x2c_func_adapt_150(Func _x2c_func_binding_150, const FuncArg * _x2c_func_argv_150);
+
+static Var _x2c_func_adapt_151(Func _x2c_func_binding_151, const FuncArg * _x2c_func_argv_151);
+
+static Var _x2c_func_adapt_152(Func _x2c_func_binding_152, const FuncArg * _x2c_func_argv_152);
+
+static Var _x2c_func_adapt_153(Func _x2c_func_binding_153, const FuncArg * _x2c_func_argv_153);
+
+static Var _x2c_func_adapt_154(Func _x2c_func_binding_154, const FuncArg * _x2c_func_argv_154);
+
+static Var _x2c_func_adapt_155(Func _x2c_func_binding_155, const FuncArg * _x2c_func_argv_155);
+
+static Var _x2c_func_adapt_156(Func _x2c_func_binding_156, const FuncArg * _x2c_func_argv_156);
+
+static Var _x2c_func_adapt_157(Func _x2c_func_binding_157, const FuncArg * _x2c_func_argv_157);
+
+static Var _x2c_func_adapt_158(Func _x2c_func_binding_158, const FuncArg * _x2c_func_argv_158);
+
+static Var _x2c_func_adapt_159(Func _x2c_func_binding_159, const FuncArg * _x2c_func_argv_159);
+
+static Var _x2c_func_adapt_160(Func _x2c_func_binding_160, const FuncArg * _x2c_func_argv_160);
+
+static Var _x2c_func_adapt_161(Func _x2c_func_binding_161, const FuncArg * _x2c_func_argv_161);
+
+static Var _x2c_func_adapt_162(Func _x2c_func_binding_162, const FuncArg * _x2c_func_argv_162);
+
+static Var _x2c_func_adapt_163(Func _x2c_func_binding_163, const FuncArg * _x2c_func_argv_163);
+
+static Var _x2c_func_adapt_164(Func _x2c_func_binding_164, const FuncArg * _x2c_func_argv_164);
+
+static Var _x2c_func_adapt_165(Func _x2c_func_binding_165, const FuncArg * _x2c_func_argv_165);
+
+static Var _x2c_func_adapt_166(Func _x2c_func_binding_166, const FuncArg * _x2c_func_argv_166);
+
+static Var _x2c_func_adapt_167(Func _x2c_func_binding_167, const FuncArg * _x2c_func_argv_167);
+
+static Var _x2c_func_adapt_168(Func _x2c_func_binding_168, const FuncArg * _x2c_func_argv_168);
+
+static Var _x2c_func_adapt_169(Func _x2c_func_binding_169, const FuncArg * _x2c_func_argv_169);
+
+static Var _x2c_func_adapt_170(Func _x2c_func_binding_170, const FuncArg * _x2c_func_argv_170);
+
+static Var _x2c_func_adapt_171(Func _x2c_func_binding_171, const FuncArg * _x2c_func_argv_171);
+
+static Var _x2c_func_adapt_172(Func _x2c_func_binding_172, const FuncArg * _x2c_func_argv_172);
+
+static Var _x2c_func_adapt_173(Func _x2c_func_binding_173, const FuncArg * _x2c_func_argv_173);
+
+static Var _x2c_func_adapt_174(Func _x2c_func_binding_174, const FuncArg * _x2c_func_argv_174);
+
+static Var _x2c_func_adapt_175(Func _x2c_func_binding_175, const FuncArg * _x2c_func_argv_175);
+
+static Var _x2c_func_adapt_176(Func _x2c_func_binding_176, const FuncArg * _x2c_func_argv_176);
+
+static Var _x2c_func_adapt_177(Func _x2c_func_binding_177, const FuncArg * _x2c_func_argv_177);
+
+static Var _x2c_func_adapt_178(Func _x2c_func_binding_178, const FuncArg * _x2c_func_argv_178);
+
+static Var _x2c_func_adapt_179(Func _x2c_func_binding_179, const FuncArg * _x2c_func_argv_179);
+
+static Var _x2c_func_adapt_180(Func _x2c_func_binding_180, const FuncArg * _x2c_func_argv_180);
+
+static Var _x2c_func_adapt_181(Func _x2c_func_binding_181, const FuncArg * _x2c_func_argv_181);
+
+static Var _x2c_func_adapt_182(Func _x2c_func_binding_182, const FuncArg * _x2c_func_argv_182);
+
+static Var _x2c_func_adapt_183(Func _x2c_func_binding_183, const FuncArg * _x2c_func_argv_183);
+
+static Var _x2c_func_adapt_184(Func _x2c_func_binding_184, const FuncArg * _x2c_func_argv_184);
+
+static Var _x2c_func_adapt_185(Func _x2c_func_binding_185, const FuncArg * _x2c_func_argv_185);
+
+static Var _x2c_func_adapt_186(Func _x2c_func_binding_186, const FuncArg * _x2c_func_argv_186);
+
+static Var _x2c_func_adapt_187(Func _x2c_func_binding_187, const FuncArg * _x2c_func_argv_187);
+
+static Var _x2c_func_adapt_188(Func _x2c_func_binding_188, const FuncArg * _x2c_func_argv_188);
+
+static Var _x2c_func_adapt_189(Func _x2c_func_binding_189, const FuncArg * _x2c_func_argv_189);
+
+static Var _x2c_func_adapt_190(Func _x2c_func_binding_190, const FuncArg * _x2c_func_argv_190);
+
+static Var _x2c_func_adapt_191(Func _x2c_func_binding_191, const FuncArg * _x2c_func_argv_191);
+
+static Var _x2c_func_adapt_192(Func _x2c_func_binding_192, const FuncArg * _x2c_func_argv_192);
+
+static Var _x2c_func_adapt_193(Func _x2c_func_binding_193, const FuncArg * _x2c_func_argv_193);
+
+static Var _x2c_func_adapt_194(Func _x2c_func_binding_194, const FuncArg * _x2c_func_argv_194);
+
+static Var _x2c_func_adapt_195(Func _x2c_func_binding_195, const FuncArg * _x2c_func_argv_195);
+
+static Var _x2c_func_adapt_196(Func _x2c_func_binding_196, const FuncArg * _x2c_func_argv_196);
+
+static Var _x2c_func_adapt_197(Func _x2c_func_binding_197, const FuncArg * _x2c_func_argv_197);
+
+static Var _x2c_func_adapt_198(Func _x2c_func_binding_198, const FuncArg * _x2c_func_argv_198);
+
+static Var _x2c_func_adapt_199(Func _x2c_func_binding_199, const FuncArg * _x2c_func_argv_199);
+
+static Var _x2c_func_adapt_200(Func _x2c_func_binding_200, const FuncArg * _x2c_func_argv_200);
+
+static Var _x2c_func_adapt_201(Func _x2c_func_binding_201, const FuncArg * _x2c_func_argv_201);
+
+static Var _x2c_func_adapt_202(Func _x2c_func_binding_202, const FuncArg * _x2c_func_argv_202);
+
+static Var _x2c_func_adapt_203(Func _x2c_func_binding_203, const FuncArg * _x2c_func_argv_203);
+
+static Var _x2c_func_adapt_204(Func _x2c_func_binding_204, const FuncArg * _x2c_func_argv_204);
+
+static Var _x2c_func_adapt_205(Func _x2c_func_binding_205, const FuncArg * _x2c_func_argv_205);
+
+static Var _x2c_func_adapt_206(Func _x2c_func_binding_206, const FuncArg * _x2c_func_argv_206);
+
+static Var _x2c_func_adapt_207(Func _x2c_func_binding_207, const FuncArg * _x2c_func_argv_207);
+
+static Var _x2c_func_adapt_208(Func _x2c_func_binding_208, const FuncArg * _x2c_func_argv_208);
+
+static Var _x2c_func_adapt_209(Func _x2c_func_binding_209, const FuncArg * _x2c_func_argv_209);
+
+static Var _x2c_func_adapt_210(Func _x2c_func_binding_210, const FuncArg * _x2c_func_argv_210);
+
+static Var _x2c_func_adapt_211(Func _x2c_func_binding_211, const FuncArg * _x2c_func_argv_211);
+
+static Var _x2c_func_adapt_212(Func _x2c_func_binding_212, const FuncArg * _x2c_func_argv_212);
+
+static Var _x2c_func_adapt_213(Func _x2c_func_binding_213, const FuncArg * _x2c_func_argv_213);
+
+static Var _x2c_func_adapt_214(Func _x2c_func_binding_214, const FuncArg * _x2c_func_argv_214);
+
+static Var _x2c_func_adapt_215(Func _x2c_func_binding_215, const FuncArg * _x2c_func_argv_215);
+
+static Var _x2c_func_adapt_216(Func _x2c_func_binding_216, const FuncArg * _x2c_func_argv_216);
+
+static Var _x2c_func_adapt_217(Func _x2c_func_binding_217, const FuncArg * _x2c_func_argv_217);
+
+static Var _x2c_func_adapt_218(Func _x2c_func_binding_218, const FuncArg * _x2c_func_argv_218);
+
+static Var _x2c_func_adapt_219(Func _x2c_func_binding_219, const FuncArg * _x2c_func_argv_219);
+
+static Var _x2c_func_adapt_220(Func _x2c_func_binding_220, const FuncArg * _x2c_func_argv_220);
+
+static Var _x2c_func_adapt_221(Func _x2c_func_binding_221, const FuncArg * _x2c_func_argv_221);
+
+static Var _x2c_func_adapt_222(Func _x2c_func_binding_222, const FuncArg * _x2c_func_argv_222);
+
+static Var _x2c_func_adapt_223(Func _x2c_func_binding_223, const FuncArg * _x2c_func_argv_223);
+
+static Var _x2c_func_adapt_224(Func _x2c_func_binding_224, const FuncArg * _x2c_func_argv_224);
+
+static Var _x2c_func_adapt_225(Func _x2c_func_binding_225, const FuncArg * _x2c_func_argv_225);
+
+static Var _x2c_func_adapt_226(Func _x2c_func_binding_226, const FuncArg * _x2c_func_argv_226);
+
+static Var _x2c_func_adapt_227(Func _x2c_func_binding_227, const FuncArg * _x2c_func_argv_227);
+
+static Var _x2c_func_adapt_228(Func _x2c_func_binding_228, const FuncArg * _x2c_func_argv_228);
+
+static Var _x2c_func_adapt_229(Func _x2c_func_binding_229, const FuncArg * _x2c_func_argv_229);
+
+static Var _x2c_func_adapt_230(Func _x2c_func_binding_230, const FuncArg * _x2c_func_argv_230);
+
+static Var _x2c_func_adapt_231(Func _x2c_func_binding_231, const FuncArg * _x2c_func_argv_231);
+
+static Var _x2c_func_adapt_232(Func _x2c_func_binding_232, const FuncArg * _x2c_func_argv_232);
+
+static Var _x2c_func_adapt_233(Func _x2c_func_binding_233, const FuncArg * _x2c_func_argv_233);
+
+static Var _x2c_func_adapt_234(Func _x2c_func_binding_234, const FuncArg * _x2c_func_argv_234);
+
+static Var _x2c_func_adapt_235(Func _x2c_func_binding_235, const FuncArg * _x2c_func_argv_235);
+
+static Var _x2c_func_adapt_236(Func _x2c_func_binding_236, const FuncArg * _x2c_func_argv_236);
+
+static Var _x2c_func_adapt_237(Func _x2c_func_binding_237, const FuncArg * _x2c_func_argv_237);
+
+static Var _x2c_func_adapt_238(Func _x2c_func_binding_238, const FuncArg * _x2c_func_argv_238);
+
+static Var _x2c_func_adapt_239(Func _x2c_func_binding_239, const FuncArg * _x2c_func_argv_239);
+
+static Var _x2c_func_adapt_240(Func _x2c_func_binding_240, const FuncArg * _x2c_func_argv_240);
+
+static Var _x2c_func_adapt_241(Func _x2c_func_binding_241, const FuncArg * _x2c_func_argv_241);
+
+static Var _x2c_func_adapt_242(Func _x2c_func_binding_242, const FuncArg * _x2c_func_argv_242);
+
+static Var _x2c_func_adapt_243(Func _x2c_func_binding_243, const FuncArg * _x2c_func_argv_243);
+
+static Var _x2c_func_adapt_244(Func _x2c_func_binding_244, const FuncArg * _x2c_func_argv_244);
+
+static Var _x2c_func_adapt_245(Func _x2c_func_binding_245, const FuncArg * _x2c_func_argv_245);
+
+static Var _x2c_func_adapt_246(Func _x2c_func_binding_246, const FuncArg * _x2c_func_argv_246);
+
+static Var _x2c_func_adapt_247(Func _x2c_func_binding_247, const FuncArg * _x2c_func_argv_247);
+
+static Var _x2c_func_adapt_248(Func _x2c_func_binding_248, const FuncArg * _x2c_func_argv_248);
+
+static Var _x2c_func_adapt_249(Func _x2c_func_binding_249, const FuncArg * _x2c_func_argv_249);
+
+static Var _x2c_func_adapt_250(Func _x2c_func_binding_250, const FuncArg * _x2c_func_argv_250);
+
+static Var _x2c_func_adapt_251(Func _x2c_func_binding_251, const FuncArg * _x2c_func_argv_251);
+
+static Var _x2c_func_adapt_252(Func _x2c_func_binding_252, const FuncArg * _x2c_func_argv_252);
+
+static Var _x2c_func_adapt_253(Func _x2c_func_binding_253, const FuncArg * _x2c_func_argv_253);
+
+static Var _x2c_func_adapt_254(Func _x2c_func_binding_254, const FuncArg * _x2c_func_argv_254);
+
+static Var _x2c_func_adapt_255(Func _x2c_func_binding_255, const FuncArg * _x2c_func_argv_255);
+
+static Var _x2c_func_adapt_256(Func _x2c_func_binding_256, const FuncArg * _x2c_func_argv_256);
+
+static Var _x2c_func_adapt_257(Func _x2c_func_binding_257, const FuncArg * _x2c_func_argv_257);
+
+static Var _x2c_func_adapt_258(Func _x2c_func_binding_258, const FuncArg * _x2c_func_argv_258);
+
+static Var _x2c_func_adapt_259(Func _x2c_func_binding_259, const FuncArg * _x2c_func_argv_259);
+
+static Var _x2c_func_adapt_260(Func _x2c_func_binding_260, const FuncArg * _x2c_func_argv_260);
+
+static Var _x2c_func_adapt_261(Func _x2c_func_binding_261, const FuncArg * _x2c_func_argv_261);
+
+static Var _x2c_func_adapt_262(Func _x2c_func_binding_262, const FuncArg * _x2c_func_argv_262);
+
+static Var _x2c_func_adapt_263(Func _x2c_func_binding_263, const FuncArg * _x2c_func_argv_263);
+
+static Var _x2c_func_adapt_264(Func _x2c_func_binding_264, const FuncArg * _x2c_func_argv_264);
+
+static Var _x2c_func_adapt_265(Func _x2c_func_binding_265, const FuncArg * _x2c_func_argv_265);
+
+static Var _x2c_func_adapt_266(Func _x2c_func_binding_266, const FuncArg * _x2c_func_argv_266);
+
+static Var _x2c_func_adapt_267(Func _x2c_func_binding_267, const FuncArg * _x2c_func_argv_267);
+
+static Var _x2c_func_adapt_268(Func _x2c_func_binding_268, const FuncArg * _x2c_func_argv_268);
+
+static Var _x2c_func_adapt_269(Func _x2c_func_binding_269, const FuncArg * _x2c_func_argv_269);
+
+static Var _x2c_func_adapt_270(Func _x2c_func_binding_270, const FuncArg * _x2c_func_argv_270);
+
+static Var _x2c_func_adapt_271(Func _x2c_func_binding_271, const FuncArg * _x2c_func_argv_271);
+
+static Var _x2c_func_adapt_272(Func _x2c_func_binding_272, const FuncArg * _x2c_func_argv_272);
+
+static Var _x2c_func_adapt_273(Func _x2c_func_binding_273, const FuncArg * _x2c_func_argv_273);
+
+static Var _x2c_func_adapt_274(Func _x2c_func_binding_274, const FuncArg * _x2c_func_argv_274);
+
+static Var _x2c_func_adapt_275(Func _x2c_func_binding_275, const FuncArg * _x2c_func_argv_275);
+
+static Var _x2c_func_adapt_276(Func _x2c_func_binding_276, const FuncArg * _x2c_func_argv_276);
+
+static Var _x2c_func_adapt_277(Func _x2c_func_binding_277, const FuncArg * _x2c_func_argv_277);
+
+static Var _x2c_func_adapt_278(Func _x2c_func_binding_278, const FuncArg * _x2c_func_argv_278);
+
+static Var _x2c_func_adapt_279(Func _x2c_func_binding_279, const FuncArg * _x2c_func_argv_279);
+
+static Var _x2c_func_adapt_280(Func _x2c_func_binding_280, const FuncArg * _x2c_func_argv_280);
+
+static Var _x2c_func_adapt_281(Func _x2c_func_binding_281, const FuncArg * _x2c_func_argv_281);
+
+static Var _x2c_func_adapt_282(Func _x2c_func_binding_282, const FuncArg * _x2c_func_argv_282);
+
+static Var _x2c_func_adapt_283(Func _x2c_func_binding_283, const FuncArg * _x2c_func_argv_283);
+
+static Var _x2c_func_adapt_284(Func _x2c_func_binding_284, const FuncArg * _x2c_func_argv_284);
+
+static Var _x2c_func_adapt_285(Func _x2c_func_binding_285, const FuncArg * _x2c_func_argv_285);
+
+static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_func_argv_286);
+
+static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287);
+
+static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288);
+
+static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289);
+
+static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290);
+
+static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291);
+
+static Var _x2c_func_adapt_292(Func _x2c_func_binding_292, const FuncArg * _x2c_func_argv_292);
+
+static Var _x2c_func_adapt_293(Func _x2c_func_binding_293, const FuncArg * _x2c_func_argv_293);
+
+static Var _x2c_func_adapt_294(Func _x2c_func_binding_294, const FuncArg * _x2c_func_argv_294);
+
+static Var _x2c_func_adapt_295(Func _x2c_func_binding_295, const FuncArg * _x2c_func_argv_295);
+
+static Var _x2c_func_adapt_296(Func _x2c_func_binding_296, const FuncArg * _x2c_func_argv_296);
+
+static Var _x2c_func_adapt_297(Func _x2c_func_binding_297, const FuncArg * _x2c_func_argv_297);
+
+static Var _x2c_func_adapt_298(Func _x2c_func_binding_298, const FuncArg * _x2c_func_argv_298);
+
+static Var _x2c_func_adapt_299(Func _x2c_func_binding_299, const FuncArg * _x2c_func_argv_299);
+
+static Var _x2c_func_adapt_300(Func _x2c_func_binding_300, const FuncArg * _x2c_func_argv_300);
+
+static Var _x2c_func_adapt_301(Func _x2c_func_binding_301, const FuncArg * _x2c_func_argv_301);
+
+static Var _x2c_func_adapt_302(Func _x2c_func_binding_302, const FuncArg * _x2c_func_argv_302);
+
+static Var _x2c_func_adapt_303(Func _x2c_func_binding_303, const FuncArg * _x2c_func_argv_303);
+
+static Var _x2c_func_adapt_304(Func _x2c_func_binding_304, const FuncArg * _x2c_func_argv_304);
+
+static Var _x2c_func_adapt_305(Func _x2c_func_binding_305, const FuncArg * _x2c_func_argv_305);
+
+static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_func_argv_306);
+
+static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307);
+
+static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308);
+
+static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309);
+
+static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310);
+
+static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311);
+
+static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312);
+
+static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313);
+
+static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314);
+
+static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315);
+
+static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316);
+
+static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317);
+
+static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318);
+
+static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319);
+
+static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320);
+
+static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321);
+
+static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322);
+
+static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323);
+
+static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324);
+
+static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325);
+
+static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326);
+
+static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327);
+
+static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328);
+
+static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329);
+
+static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330);
+
+static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331);
+
+static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332);
+
+static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333);
+
+static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334);
+
+static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335);
+
+static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336);
+
+static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337);
+
+static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_func_argv_338);
+
+static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339);
+
+static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340);
+
+static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341);
+
+static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342);
+
+static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343);
+
+static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344);
+
+static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345);
+
+static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346);
+
+static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347);
+
+static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348);
+
+static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349);
+
+static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350);
+
+static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351);
+
+static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352);
+
+static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353);
+
+static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354);
+
+static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355);
+
+static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356);
+
+static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357);
+
+static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358);
+
+static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359);
+
+static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360);
+
+static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361);
+
+static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362);
+
+static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363);
+
+static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364);
+
+static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365);
+
+static Var _x2c_func_adapt_366(Func _x2c_func_binding_366, const FuncArg * _x2c_func_argv_366);
+
+static Var _x2c_func_adapt_367(Func _x2c_func_binding_367, const FuncArg * _x2c_func_argv_367);
+
+static Var _x2c_func_adapt_368(Func _x2c_func_binding_368, const FuncArg * _x2c_func_argv_368);
+
+static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_func_argv_369);
+
+static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370);
+
+static Var _x2c_func_adapt_371(Func _x2c_func_binding_371, const FuncArg * _x2c_func_argv_371);
+
+static Var _x2c_func_adapt_372(Func _x2c_func_binding_372, const FuncArg * _x2c_func_argv_372);
+
+static Var _x2c_func_adapt_373(Func _x2c_func_binding_373, const FuncArg * _x2c_func_argv_373);
+
+static Var _x2c_func_adapt_374(Func _x2c_func_binding_374, const FuncArg * _x2c_func_argv_374);
+
+static Var _x2c_func_adapt_375(Func _x2c_func_binding_375, const FuncArg * _x2c_func_argv_375);
+
+static Var _x2c_func_adapt_376(Func _x2c_func_binding_376, const FuncArg * _x2c_func_argv_376);
+
+static Var _x2c_func_adapt_377(Func _x2c_func_binding_377, const FuncArg * _x2c_func_argv_377);
+
+static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_func_argv_378);
+
+static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379);
+
+static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380);
+
+static Var _x2c_func_adapt_381(Func _x2c_func_binding_381, const FuncArg * _x2c_func_argv_381);
+
+static Var _x2c_func_adapt_382(Func _x2c_func_binding_382, const FuncArg * _x2c_func_argv_382);
+
+static Var _x2c_func_adapt_383(Func _x2c_func_binding_383, const FuncArg * _x2c_func_argv_383);
+
+static Var _x2c_func_adapt_384(Func _x2c_func_binding_384, const FuncArg * _x2c_func_argv_384);
+
+static Var _x2c_func_adapt_385(Func _x2c_func_binding_385, const FuncArg * _x2c_func_argv_385);
+
+static Var _x2c_func_adapt_386(Func _x2c_func_binding_386, const FuncArg * _x2c_func_argv_386);
+
+static Var _x2c_func_adapt_387(Func _x2c_func_binding_387, const FuncArg * _x2c_func_argv_387);
+
+static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_func_argv_388);
+
+static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389);
+
+static Var _x2c_func_adapt_390(Func _x2c_func_binding_390, const FuncArg * _x2c_func_argv_390);
+
+static Var _x2c_func_adapt_391(Func _x2c_func_binding_391, const FuncArg * _x2c_func_argv_391);
+
+static Var _x2c_func_adapt_392(Func _x2c_func_binding_392, const FuncArg * _x2c_func_argv_392);
+
+static Var _x2c_func_adapt_393(Func _x2c_func_binding_393, const FuncArg * _x2c_func_argv_393);
+
+static Var _x2c_func_adapt_394(Func _x2c_func_binding_394, const FuncArg * _x2c_func_argv_394);
+
+static Var _x2c_func_adapt_395(Func _x2c_func_binding_395, const FuncArg * _x2c_func_argv_395);
+
+static Var _x2c_func_adapt_396(Func _x2c_func_binding_396, const FuncArg * _x2c_func_argv_396);
+
+static Var _x2c_func_adapt_397(Func _x2c_func_binding_397, const FuncArg * _x2c_func_argv_397);
+
+static Var _x2c_func_adapt_398(Func _x2c_func_binding_398, const FuncArg * _x2c_func_argv_398);
+
+static Var _x2c_func_adapt_399(Func _x2c_func_binding_399, const FuncArg * _x2c_func_argv_399);
+
+static Var _x2c_func_adapt_400(Func _x2c_func_binding_400, const FuncArg * _x2c_func_argv_400);
+
+static Var _x2c_func_adapt_401(Func _x2c_func_binding_401, const FuncArg * _x2c_func_argv_401);
+
+static Var _x2c_func_adapt_402(Func _x2c_func_binding_402, const FuncArg * _x2c_func_argv_402);
+
+static Var _x2c_func_adapt_403(Func _x2c_func_binding_403, const FuncArg * _x2c_func_argv_403);
+
+static Var _x2c_func_adapt_404(Func _x2c_func_binding_404, const FuncArg * _x2c_func_argv_404);
+
+static Var _x2c_func_adapt_405(Func _x2c_func_binding_405, const FuncArg * _x2c_func_argv_405);
+
+static Var _x2c_func_adapt_406(Func _x2c_func_binding_406, const FuncArg * _x2c_func_argv_406);
+
+static Var _x2c_func_adapt_407(Func _x2c_func_binding_407, const FuncArg * _x2c_func_argv_407);
+
+static Var _x2c_func_adapt_408(Func _x2c_func_binding_408, const FuncArg * _x2c_func_argv_408);
+
+static Var _x2c_func_adapt_409(Func _x2c_func_binding_409, const FuncArg * _x2c_func_argv_409);
+
+static Var _x2c_func_adapt_410(Func _x2c_func_binding_410, const FuncArg * _x2c_func_argv_410);
+
+static Var _x2c_func_adapt_411(Func _x2c_func_binding_411, const FuncArg * _x2c_func_argv_411);
+
+static Var _x2c_func_adapt_412(Func _x2c_func_binding_412, const FuncArg * _x2c_func_argv_412);
+
+static Var _x2c_func_adapt_413(Func _x2c_func_binding_413, const FuncArg * _x2c_func_argv_413);
+
+static Var _x2c_func_adapt_414(Func _x2c_func_binding_414, const FuncArg * _x2c_func_argv_414);
+
+static Var _x2c_func_adapt_415(Func _x2c_func_binding_415, const FuncArg * _x2c_func_argv_415);
+
+static Var _x2c_func_adapt_416(Func _x2c_func_binding_416, const FuncArg * _x2c_func_argv_416);
+
+static Var _x2c_func_adapt_417(Func _x2c_func_binding_417, const FuncArg * _x2c_func_argv_417);
+
+static Var _x2c_func_adapt_418(Func _x2c_func_binding_418, const FuncArg * _x2c_func_argv_418);
+
+static Var _x2c_func_adapt_419(Func _x2c_func_binding_419, const FuncArg * _x2c_func_argv_419);
+
+static Var _x2c_func_adapt_420(Func _x2c_func_binding_420, const FuncArg * _x2c_func_argv_420);
+
+static Var _x2c_func_adapt_421(Func _x2c_func_binding_421, const FuncArg * _x2c_func_argv_421);
+
+static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_func_argv_422);
+
+static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423);
+
+static Var _x2c_func_adapt_424(Func _x2c_func_binding_424, const FuncArg * _x2c_func_argv_424);
+
+static Var _x2c_func_adapt_425(Func _x2c_func_binding_425, const FuncArg * _x2c_func_argv_425);
+
+static Var _x2c_func_adapt_426(Func _x2c_func_binding_426, const FuncArg * _x2c_func_argv_426);
+
+static Var _x2c_func_adapt_427(Func _x2c_func_binding_427, const FuncArg * _x2c_func_argv_427);
+
+static Var _x2c_func_adapt_428(Func _x2c_func_binding_428, const FuncArg * _x2c_func_argv_428);
+
+static Var _x2c_func_adapt_429(Func _x2c_func_binding_429, const FuncArg * _x2c_func_argv_429);
+
+static Var _x2c_func_adapt_430(Func _x2c_func_binding_430, const FuncArg * _x2c_func_argv_430);
+
+static Var _x2c_func_adapt_431(Func _x2c_func_binding_431, const FuncArg * _x2c_func_argv_431);
+
+static Var _x2c_func_adapt_432(Func _x2c_func_binding_432, const FuncArg * _x2c_func_argv_432);
+
+static Var _x2c_func_adapt_433(Func _x2c_func_binding_433, const FuncArg * _x2c_func_argv_433);
+
+static Var _x2c_func_adapt_434(Func _x2c_func_binding_434, const FuncArg * _x2c_func_argv_434);
+
+static Var _x2c_func_adapt_435(Func _x2c_func_binding_435, const FuncArg * _x2c_func_argv_435);
+
+static Var _x2c_func_adapt_436(Func _x2c_func_binding_436, const FuncArg * _x2c_func_argv_436);
+
+static Var _x2c_func_adapt_437(Func _x2c_func_binding_437, const FuncArg * _x2c_func_argv_437);
+
+static Var _x2c_func_adapt_438(Func _x2c_func_binding_438, const FuncArg * _x2c_func_argv_438);
+
+static Var _x2c_func_adapt_439(Func _x2c_func_binding_439, const FuncArg * _x2c_func_argv_439);
+
+static Var _x2c_func_adapt_440(Func _x2c_func_binding_440, const FuncArg * _x2c_func_argv_440);
+
+static Var _x2c_func_adapt_441(Func _x2c_func_binding_441, const FuncArg * _x2c_func_argv_441);
+
+static Var _x2c_func_adapt_442(Func _x2c_func_binding_442, const FuncArg * _x2c_func_argv_442);
+
+static Var _x2c_func_adapt_443(Func _x2c_func_binding_443, const FuncArg * _x2c_func_argv_443);
+
+static Var _x2c_func_adapt_444(Func _x2c_func_binding_444, const FuncArg * _x2c_func_argv_444);
+
+static Var _x2c_func_adapt_445(Func _x2c_func_binding_445, const FuncArg * _x2c_func_argv_445);
+
+static Var _x2c_func_adapt_446(Func _x2c_func_binding_446, const FuncArg * _x2c_func_argv_446);
+
+static Var _x2c_func_adapt_447(Func _x2c_func_binding_447, const FuncArg * _x2c_func_argv_447);
+
+static Var _x2c_func_adapt_448(Func _x2c_func_binding_448, const FuncArg * _x2c_func_argv_448);
+
+static Var _x2c_func_adapt_449(Func _x2c_func_binding_449, const FuncArg * _x2c_func_argv_449);
+
+static Var _x2c_func_adapt_450(Func _x2c_func_binding_450, const FuncArg * _x2c_func_argv_450);
+
+static Var _x2c_func_adapt_451(Func _x2c_func_binding_451, const FuncArg * _x2c_func_argv_451);
+
+static Var _x2c_func_adapt_452(Func _x2c_func_binding_452, const FuncArg * _x2c_func_argv_452);
+
+static Var _x2c_func_adapt_453(Func _x2c_func_binding_453, const FuncArg * _x2c_func_argv_453);
+
+static Var _x2c_func_adapt_454(Func _x2c_func_binding_454, const FuncArg * _x2c_func_argv_454);
+
+static Var _x2c_func_adapt_455(Func _x2c_func_binding_455, const FuncArg * _x2c_func_argv_455);
+
+static Var _x2c_func_adapt_456(Func _x2c_func_binding_456, const FuncArg * _x2c_func_argv_456);
+
+static Var _x2c_func_adapt_457(Func _x2c_func_binding_457, const FuncArg * _x2c_func_argv_457);
+
+static Var _x2c_func_adapt_458(Func _x2c_func_binding_458, const FuncArg * _x2c_func_argv_458);
+
+static Var _x2c_func_adapt_459(Func _x2c_func_binding_459, const FuncArg * _x2c_func_argv_459);
+
+static Var _x2c_func_adapt_460(Func _x2c_func_binding_460, const FuncArg * _x2c_func_argv_460);
+
+static Var _x2c_func_adapt_461(Func _x2c_func_binding_461, const FuncArg * _x2c_func_argv_461);
+
+static Var _x2c_func_adapt_462(Func _x2c_func_binding_462, const FuncArg * _x2c_func_argv_462);
+
+static Var _x2c_func_adapt_463(Func _x2c_func_binding_463, const FuncArg * _x2c_func_argv_463);
+
+static Var _x2c_func_adapt_464(Func _x2c_func_binding_464, const FuncArg * _x2c_func_argv_464);
+
+static Var _x2c_func_adapt_465(Func _x2c_func_binding_465, const FuncArg * _x2c_func_argv_465);
+
+static Var _x2c_func_adapt_466(Func _x2c_func_binding_466, const FuncArg * _x2c_func_argv_466);
+
+static Var _x2c_func_adapt_467(Func _x2c_func_binding_467, const FuncArg * _x2c_func_argv_467);
+
+static Var _x2c_func_adapt_468(Func _x2c_func_binding_468, const FuncArg * _x2c_func_argv_468);
+
+static Var _x2c_func_adapt_469(Func _x2c_func_binding_469, const FuncArg * _x2c_func_argv_469);
+
+static Var _x2c_func_adapt_470(Func _x2c_func_binding_470, const FuncArg * _x2c_func_argv_470);
+
+static Var _x2c_func_adapt_471(Func _x2c_func_binding_471, const FuncArg * _x2c_func_argv_471);
+
+static Var _x2c_func_adapt_472(Func _x2c_func_binding_472, const FuncArg * _x2c_func_argv_472);
+
+static Var _x2c_func_adapt_473(Func _x2c_func_binding_473, const FuncArg * _x2c_func_argv_473);
+
+static Var _x2c_func_adapt_474(Func _x2c_func_binding_474, const FuncArg * _x2c_func_argv_474);
+
+static Var _x2c_func_adapt_475(Func _x2c_func_binding_475, const FuncArg * _x2c_func_argv_475);
+
+static Var _x2c_func_adapt_476(Func _x2c_func_binding_476, const FuncArg * _x2c_func_argv_476);
+
+static Var _x2c_func_adapt_477(Func _x2c_func_binding_477, const FuncArg * _x2c_func_argv_477);
+
+static Var _x2c_func_adapt_478(Func _x2c_func_binding_478, const FuncArg * _x2c_func_argv_478);
+
+static Var _x2c_func_adapt_479(Func _x2c_func_binding_479, const FuncArg * _x2c_func_argv_479);
+
+static Var _x2c_func_adapt_480(Func _x2c_func_binding_480, const FuncArg * _x2c_func_argv_480);
+
+static Var _x2c_func_adapt_481(Func _x2c_func_binding_481, const FuncArg * _x2c_func_argv_481);
+
+static Var _x2c_func_adapt_482(Func _x2c_func_binding_482, const FuncArg * _x2c_func_argv_482);
+
+static Var _x2c_func_adapt_483(Func _x2c_func_binding_483, const FuncArg * _x2c_func_argv_483);
+
+static Var _x2c_func_adapt_484(Func _x2c_func_binding_484, const FuncArg * _x2c_func_argv_484);
+
+static Var _x2c_func_adapt_485(Func _x2c_func_binding_485, const FuncArg * _x2c_func_argv_485);
+
+static Var _x2c_func_adapt_486(Func _x2c_func_binding_486, const FuncArg * _x2c_func_argv_486);
+
+static Var _x2c_func_adapt_487(Func _x2c_func_binding_487, const FuncArg * _x2c_func_argv_487);
+
+static Var _x2c_func_adapt_488(Func _x2c_func_binding_488, const FuncArg * _x2c_func_argv_488);
+
+static Var _x2c_func_adapt_489(Func _x2c_func_binding_489, const FuncArg * _x2c_func_argv_489);
+
+static Var _x2c_func_adapt_490(Func _x2c_func_binding_490, const FuncArg * _x2c_func_argv_490);
+
+static Var _x2c_func_adapt_491(Func _x2c_func_binding_491, const FuncArg * _x2c_func_argv_491);
+
+static Var _x2c_func_adapt_492(Func _x2c_func_binding_492, const FuncArg * _x2c_func_argv_492);
+
+static Var _x2c_func_adapt_493(Func _x2c_func_binding_493, const FuncArg * _x2c_func_argv_493);
+
+static Var _x2c_func_adapt_494(Func _x2c_func_binding_494, const FuncArg * _x2c_func_argv_494);
+
+static Var _x2c_func_adapt_495(Func _x2c_func_binding_495, const FuncArg * _x2c_func_argv_495);
+
+static Var _x2c_func_adapt_496(Func _x2c_func_binding_496, const FuncArg * _x2c_func_argv_496);
+
+static Var _x2c_func_adapt_497(Func _x2c_func_binding_497, const FuncArg * _x2c_func_argv_497);
+
+static Var _x2c_func_adapt_498(Func _x2c_func_binding_498, const FuncArg * _x2c_func_argv_498);
+
+static Var _x2c_func_adapt_499(Func _x2c_func_binding_499, const FuncArg * _x2c_func_argv_499);
+
+static Var _x2c_func_adapt_500(Func _x2c_func_binding_500, const FuncArg * _x2c_func_argv_500);
+
+static Var _x2c_func_adapt_501(Func _x2c_func_binding_501, const FuncArg * _x2c_func_argv_501);
+
+static Var _x2c_func_adapt_502(Func _x2c_func_binding_502, const FuncArg * _x2c_func_argv_502);
+
+static Var _x2c_func_adapt_503(Func _x2c_func_binding_503, const FuncArg * _x2c_func_argv_503);
+
+static Var _x2c_func_adapt_504(Func _x2c_func_binding_504, const FuncArg * _x2c_func_argv_504);
+
+static Var _x2c_func_adapt_505(Func _x2c_func_binding_505, const FuncArg * _x2c_func_argv_505);
+
+static Var _x2c_func_adapt_506(Func _x2c_func_binding_506, const FuncArg * _x2c_func_argv_506);
+
+static Var _x2c_func_adapt_507(Func _x2c_func_binding_507, const FuncArg * _x2c_func_argv_507);
+
+static Var _x2c_func_adapt_508(Func _x2c_func_binding_508, const FuncArg * _x2c_func_argv_508);
+
+static Var _x2c_func_adapt_509(Func _x2c_func_binding_509, const FuncArg * _x2c_func_argv_509);
+
+static Var _x2c_func_adapt_510(Func _x2c_func_binding_510, const FuncArg * _x2c_func_argv_510);
+
+static Var _x2c_func_adapt_511(Func _x2c_func_binding_511, const FuncArg * _x2c_func_argv_511);
+
+static Var _x2c_func_adapt_512(Func _x2c_func_binding_512, const FuncArg * _x2c_func_argv_512);
+
+static Var _x2c_func_adapt_513(Func _x2c_func_binding_513, const FuncArg * _x2c_func_argv_513);
+
+static Var _x2c_func_adapt_514(Func _x2c_func_binding_514, const FuncArg * _x2c_func_argv_514);
+
+static Var _x2c_func_adapt_515(Func _x2c_func_binding_515, const FuncArg * _x2c_func_argv_515);
+
+static Var _x2c_func_adapt_516(Func _x2c_func_binding_516, const FuncArg * _x2c_func_argv_516);
+
+static Var _x2c_func_adapt_517(Func _x2c_func_binding_517, const FuncArg * _x2c_func_argv_517);
+
+static Var _x2c_func_adapt_518(Func _x2c_func_binding_518, const FuncArg * _x2c_func_argv_518);
+
+static Var _x2c_func_adapt_519(Func _x2c_func_binding_519, const FuncArg * _x2c_func_argv_519);
+
+static Var _x2c_func_adapt_520(Func _x2c_func_binding_520, const FuncArg * _x2c_func_argv_520);
+
+static Var _x2c_func_adapt_521(Func _x2c_func_binding_521, const FuncArg * _x2c_func_argv_521);
+
+static Var _x2c_func_adapt_522(Func _x2c_func_binding_522, const FuncArg * _x2c_func_argv_522);
+
+static Var _x2c_func_adapt_523(Func _x2c_func_binding_523, const FuncArg * _x2c_func_argv_523);
+
+static Var _x2c_func_adapt_524(Func _x2c_func_binding_524, const FuncArg * _x2c_func_argv_524);
+
+static Var _x2c_func_adapt_525(Func _x2c_func_binding_525, const FuncArg * _x2c_func_argv_525);
+
+static Var _x2c_func_adapt_526(Func _x2c_func_binding_526, const FuncArg * _x2c_func_argv_526);
+
+static Var _x2c_func_adapt_527(Func _x2c_func_binding_527, const FuncArg * _x2c_func_argv_527);
+
+static Var _x2c_func_adapt_528(Func _x2c_func_binding_528, const FuncArg * _x2c_func_argv_528);
+
+static Var _x2c_func_adapt_529(Func _x2c_func_binding_529, const FuncArg * _x2c_func_argv_529);
+
+static Var _x2c_func_adapt_530(Func _x2c_func_binding_530, const FuncArg * _x2c_func_argv_530);
+
+static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_func_argv_531);
+
+static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532);
+
+static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533);
+
+static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534);
+
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535);
+
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536);
+
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537);
+
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538);
+
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539);
+
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540);
+
+static Var _x2c_func_adapt_541(Func _x2c_func_binding_541, const FuncArg * _x2c_func_argv_541);
+
+static Var _x2c_func_adapt_542(Func _x2c_func_binding_542, const FuncArg * _x2c_func_argv_542);
+
+static Var _x2c_func_adapt_543(Func _x2c_func_binding_543, const FuncArg * _x2c_func_argv_543);
+
+static Var _x2c_func_adapt_544(Func _x2c_func_binding_544, const FuncArg * _x2c_func_argv_544);
+
+static Var _x2c_func_adapt_545(Func _x2c_func_binding_545, const FuncArg * _x2c_func_argv_545);
+
+static Var _x2c_func_adapt_546(Func _x2c_func_binding_546, const FuncArg * _x2c_func_argv_546);
+
+static Var _x2c_func_adapt_547(Func _x2c_func_binding_547, const FuncArg * _x2c_func_argv_547);
+
+static Var _x2c_func_adapt_548(Func _x2c_func_binding_548, const FuncArg * _x2c_func_argv_548);
+
+static Var _x2c_func_adapt_549(Func _x2c_func_binding_549, const FuncArg * _x2c_func_argv_549);
+
+static Var _x2c_func_adapt_550(Func _x2c_func_binding_550, const FuncArg * _x2c_func_argv_550);
+
+static Var _x2c_func_adapt_551(Func _x2c_func_binding_551, const FuncArg * _x2c_func_argv_551);
+
+static Var _x2c_func_adapt_552(Func _x2c_func_binding_552, const FuncArg * _x2c_func_argv_552);
+
+static Var _x2c_func_adapt_553(Func _x2c_func_binding_553, const FuncArg * _x2c_func_argv_553);
+
+static Var _x2c_func_adapt_554(Func _x2c_func_binding_554, const FuncArg * _x2c_func_argv_554);
+
+static Var _x2c_func_adapt_555(Func _x2c_func_binding_555, const FuncArg * _x2c_func_argv_555);
+
+static Var _x2c_func_adapt_556(Func _x2c_func_binding_556, const FuncArg * _x2c_func_argv_556);
+
+static Var _x2c_func_adapt_557(Func _x2c_func_binding_557, const FuncArg * _x2c_func_argv_557);
+
+static Var _x2c_func_adapt_558(Func _x2c_func_binding_558, const FuncArg * _x2c_func_argv_558);
+
+static Var _x2c_func_adapt_559(Func _x2c_func_binding_559, const FuncArg * _x2c_func_argv_559);
+
+static Var _x2c_func_adapt_560(Func _x2c_func_binding_560, const FuncArg * _x2c_func_argv_560);
+
+static Var _x2c_func_adapt_561(Func _x2c_func_binding_561, const FuncArg * _x2c_func_argv_561);
+
+static Var _x2c_func_adapt_562(Func _x2c_func_binding_562, const FuncArg * _x2c_func_argv_562);
+
+static Var _x2c_func_adapt_563(Func _x2c_func_binding_563, const FuncArg * _x2c_func_argv_563);
+
+static Var _x2c_func_adapt_564(Func _x2c_func_binding_564, const FuncArg * _x2c_func_argv_564);
+
+static Var _x2c_func_adapt_565(Func _x2c_func_binding_565, const FuncArg * _x2c_func_argv_565);
+
+static Var _x2c_func_adapt_566(Func _x2c_func_binding_566, const FuncArg * _x2c_func_argv_566);
+
+static Var _x2c_func_adapt_567(Func _x2c_func_binding_567, const FuncArg * _x2c_func_argv_567);
+
+static Var _x2c_func_adapt_568(Func _x2c_func_binding_568, const FuncArg * _x2c_func_argv_568);
+
+static Var _x2c_func_adapt_569(Func _x2c_func_binding_569, const FuncArg * _x2c_func_argv_569);
+
+static Var _x2c_func_adapt_570(Func _x2c_func_binding_570, const FuncArg * _x2c_func_argv_570);
+
+static Var _x2c_func_adapt_571(Func _x2c_func_binding_571, const FuncArg * _x2c_func_argv_571);
+
+_x2c_initializer_choice_47649B83_0((native_targets = Map_update_n(Map_new(), 572, String_var(_1225), Func_var(Func_new(_x2c_func_adapt_0, _12)), String_var(_1226), Func_var(Func_new(_x2c_func_adapt_1, _35)), String_var(_1227), Func_var(Func_new(_x2c_func_adapt_2, _44)), String_var(_1228), Func_var(Func_new(_x2c_func_adapt_3, _59)), String_var(_1229), Func_var(Func_new(_x2c_func_adapt_4, _73)), String_var(_1231), Func_var(Func_new(_x2c_func_adapt_5, _86)), String_var(_1237), Func_var(Func_new(_x2c_func_adapt_6, _97)), String_var(_1238), Func_var(Func_new(_x2c_func_adapt_7, _111)), String_var(_1239), Func_var(Func_new(_x2c_func_adapt_8, _121)), String_var(_1240), Func_var(Func_new(_x2c_func_adapt_9, _129)), String_var(_1241), Func_var(Func_new(_x2c_func_adapt_10, _137)), String_var(_1242), Func_var(Func_new(_x2c_func_adapt_11, _145)), String_var(_1243), Func_var(Func_new(_x2c_func_adapt_12, _151)), String_var(_1244), Func_var(Func_new(_x2c_func_adapt_13, _151)), String_var(_1245), Func_var(Func_new(_x2c_func_adapt_14, _152)), String_var(_1246), Func_var(Func_new(_x2c_func_adapt_15, _152)), String_var(_1247), Func_var(Func_new(_x2c_func_adapt_16, _159)), String_var(_1248), Func_var(Func_new(_x2c_func_adapt_17, _152)), String_var(_1249), Func_var(Func_new(_x2c_func_adapt_18, _152)), String_var(_1250), Func_var(Func_new(_x2c_func_adapt_19, _152)), String_var(_1251), Func_var(Func_new(_x2c_func_adapt_20, _165)), String_var(_1252), Func_var(Func_new(_x2c_func_adapt_21, _169)), String_var(_1253), Func_var(Func_new(_x2c_func_adapt_22, _152)), String_var(_1254), Func_var(Func_new(_x2c_func_adapt_23, _152)), String_var(_1255), Func_var(Func_new(_x2c_func_adapt_24, _152)), String_var(_1256), Func_var(Func_new(_x2c_func_adapt_25, _152)), String_var(_1257), Func_var(Func_new(_x2c_func_adapt_26, _174)), String_var(_1258), Func_var(Func_new(_x2c_func_adapt_27, _175)), String_var(_1259), Func_var(Func_new(_x2c_func_adapt_28, _181)), String_var(_1260), Func_var(Func_new(_x2c_func_adapt_29, _187)), String_var(_1261), Func_var(Func_new(_x2c_func_adapt_30, _181)), String_var(_1262), Func_var(Func_new(_x2c_func_adapt_31, _188)), String_var(_1263), Func_var(Func_new(_x2c_func_adapt_32, _165)), String_var(_1264), Func_var(Func_new(_x2c_func_adapt_33, _196)), String_var(_1265), Func_var(Func_new(_x2c_func_adapt_34, _165)), String_var(_1266), Func_var(Func_new_rest(_x2c_func_adapt_35, _197)), String_var(_1267), Func_var(Func_new_rest(_x2c_func_adapt_36, _197)), String_var(_1268), Func_var(Func_new_rest(_x2c_func_adapt_37, _197)), String_var(_1269), Func_var(Func_new_rest(_x2c_func_adapt_38, _197)), String_var(_1270), Func_var(Func_new_rest(_x2c_func_adapt_39, _197)), String_var(_1271), Func_var(Func_new_rest(_x2c_func_adapt_40, _197)), String_var(_1272), Func_var(Func_new_rest(_x2c_func_adapt_41, _197)), String_var(_1273), Func_var(Func_new_rest(_x2c_func_adapt_42, _197)), String_var(_1274), Func_var(Func_new_rest(_x2c_func_adapt_43, _197)), String_var(_1275), Func_var(Func_new(_x2c_func_adapt_44, _152)), String_var(_1276), Func_var(Func_new(_x2c_func_adapt_45, _152)), String_var(_1277), Func_var(Func_new(_x2c_func_adapt_46, _203)), String_var(_1278), Func_var(Func_new(_x2c_func_adapt_47, _209)), String_var(_1279), Func_var(Func_new(_x2c_func_adapt_48, _215)), String_var(_1280), Func_var(Func_new(_x2c_func_adapt_49, _224)), String_var(_1281), Func_var(Func_new(_x2c_func_adapt_50, _225)), String_var(_1282), Func_var(Func_new(_x2c_func_adapt_51, _225)), String_var(_1283), Func_var(Func_new(_x2c_func_adapt_52, _215)), String_var(_1284), Func_var(Func_new(_x2c_func_adapt_53, _174)), String_var(_1285), Func_var(Func_new(_x2c_func_adapt_54, _152)), String_var(_1286), Func_var(Func_new_rest(_x2c_func_adapt_55, _197)), String_var(_1287), Func_var(Func_new(_x2c_func_adapt_56, _165)), String_var(_1288), Func_var(Func_new(_x2c_func_adapt_57, _165)), String_var(_1289), Func_var(Func_new_rest(_x2c_func_adapt_58, _197)), String_var(_1290), Func_var(Func_new(_x2c_func_adapt_59, _152)), String_var(_1291), Func_var(Func_new(_x2c_func_adapt_60, _152)), String_var(_1292), Func_var(Func_new(_x2c_func_adapt_61, _165)), String_var(_1293), Func_var(Func_new(_x2c_func_adapt_62, _165)), String_var(_1294), Func_var(Func_new(_x2c_func_adapt_63, _165)), String_var(_1295), Func_var(Func_new(_x2c_func_adapt_64, _165)), String_var(_1296), Func_var(Func_new(_x2c_func_adapt_65, _152)), String_var(_1297), Func_var(Func_new(_x2c_func_adapt_66, _152)), String_var(_1298), Func_var(Func_new(_x2c_func_adapt_67, _152)), String_var(_1299), Func_var(Func_new(_x2c_func_adapt_68, _152)), String_var(_1300), Func_var(Func_new(_x2c_func_adapt_69, _152)), String_var(_1301), Func_var(Func_new(_x2c_func_adapt_70, _152)), String_var(_1302), Func_var(Func_new(_x2c_func_adapt_71, _152)), String_var(_1303), Func_var(Func_new(_x2c_func_adapt_72, _152)), String_var(_1304), Func_var(Func_new(_x2c_func_adapt_73, _152)), String_var(_1305), Func_var(Func_new(_x2c_func_adapt_74, _152)), String_var(_1306), Func_var(Func_new(_x2c_func_adapt_75, _152)), String_var(_1307), Func_var(Func_new(_x2c_func_adapt_76, _152)), String_var(_1308), Func_var(Func_new(_x2c_func_adapt_77, _165)), String_var(_1309), Func_var(Func_new(_x2c_func_adapt_78, _165)), String_var(_1310), Func_var(Func_new(_x2c_func_adapt_79, _231)), String_var(_1311), Func_var(Func_new(_x2c_func_adapt_80, _152)), String_var(_1312), Func_var(Func_new(_x2c_func_adapt_81, _152)), String_var(_1313), Func_var(Func_new(_x2c_func_adapt_82, _165)), String_var(_1314), Func_var(Func_new_rest(_x2c_func_adapt_83, _197)), String_var(_1315), Func_var(Func_new(_x2c_func_adapt_84, _203)), String_var(_1316), Func_var(Func_new(_x2c_func_adapt_85, _232)), String_var(_1317), Func_var(Func_new(_x2c_func_adapt_86, _233)), String_var(_1318), Func_var(Func_new(_x2c_func_adapt_87, _234)), String_var(_1319), Func_var(Func_new(_x2c_func_adapt_88, _235)), String_var(_1320), Func_var(Func_new(_x2c_func_adapt_89, _169)), String_var(_1321), Func_var(Func_new(_x2c_func_adapt_90, _12)), String_var(_1322), Func_var(Func_new(_x2c_func_adapt_91, _236)), String_var(_1323), Func_var(Func_new(_x2c_func_adapt_92, _12)), String_var(_1324), Func_var(Func_new(_x2c_func_adapt_93, _12)), String_var(_1325), Func_var(Func_new(_x2c_func_adapt_94, _175)), String_var(_1326), Func_var(Func_new(_x2c_func_adapt_95, _240)), String_var(_1327), Func_var(Func_new(_x2c_func_adapt_96, _244)), String_var(_1328), Func_var(Func_new(_x2c_func_adapt_97, _248)), String_var(_1329), Func_var(Func_new(_x2c_func_adapt_98, _252)), String_var(_1330), Func_var(Func_new(_x2c_func_adapt_99, _256)), String_var(_1331), Func_var(Func_new(_x2c_func_adapt_100, _260)), String_var(_1332), Func_var(Func_new(_x2c_func_adapt_101, _264)), String_var(_1333), Func_var(Func_new(_x2c_func_adapt_102, _174)), String_var(_1334), Func_var(Func_new(_x2c_func_adapt_103, _174)), String_var(_1335), Func_var(Func_new(_x2c_func_adapt_104, _265)), String_var(_1336), Func_var(Func_new(_x2c_func_adapt_105, _266)), String_var(_1337), Func_var(Func_new(_x2c_func_adapt_106, _267)), String_var(_1338), Func_var(Func_new(_x2c_func_adapt_107, _268)), String_var(_1339), Func_var(Func_new(_x2c_func_adapt_108, _269)), String_var(_1340), Func_var(Func_new(_x2c_func_adapt_109, _270)), String_var(_1341), Func_var(Func_new(_x2c_func_adapt_110, _271)), String_var(_1342), Func_var(Func_new(_x2c_func_adapt_111, _232)), String_var(_1343), Func_var(Func_new(_x2c_func_adapt_112, _232)), String_var(_1344), Func_var(Func_new(_x2c_func_adapt_113, _235)), String_var(_1345), Func_var(Func_new(_x2c_func_adapt_114, _235)), String_var(_1346), Func_var(Func_new(_x2c_func_adapt_115, _272)), String_var(_1347), Func_var(Func_new(_x2c_func_adapt_116, _278)), String_var(_1348), Func_var(Func_new(_x2c_func_adapt_117, _279)), String_var(_1349), Func_var(Func_new(_x2c_func_adapt_118, _280)), String_var(_1350), Func_var(Func_new(_x2c_func_adapt_119, _286)), String_var(_1351), Func_var(Func_new(_x2c_func_adapt_120, _197)), String_var(_1352), Func_var(Func_new(_x2c_func_adapt_121, _287)), String_var(_1353), Func_var(Func_new(_x2c_func_adapt_122, _288)), String_var(_1354), Func_var(Func_new(_x2c_func_adapt_123, _288)), String_var(_1355), Func_var(Func_new(_x2c_func_adapt_124, _289)), String_var(_1356), Func_var(Func_new(_x2c_func_adapt_125, _298)), String_var(_1357), Func_var(Func_new(_x2c_func_adapt_126, _304)), String_var(_1358), Func_var(Func_new(_x2c_func_adapt_127, _310)), String_var(_1359), Func_var(Func_new(_x2c_func_adapt_128, _310)), String_var(_1360), Func_var(Func_new(_x2c_func_adapt_129, _317)), String_var(_1361), Func_var(Func_new(_x2c_func_adapt_130, _323)), String_var(_1362), Func_var(Func_new(_x2c_func_adapt_131, _324)), String_var(_1363), Func_var(Func_new(_x2c_func_adapt_132, _325)), String_var(_1364), Func_var(Func_new(_x2c_func_adapt_133, _331)), String_var(_1365), Func_var(Func_new(_x2c_func_adapt_134, _331)), String_var(_1366), Func_var(Func_new(_x2c_func_adapt_135, _337)), String_var(_1367), Func_var(Func_new(_x2c_func_adapt_136, _337)), String_var(_1368), Func_var(Func_new(_x2c_func_adapt_137, _338)), String_var(_1369), Func_var(Func_new(_x2c_func_adapt_138, _339)), String_var(_1370), Func_var(Func_new(_x2c_func_adapt_139, _337)), String_var(_1371), Func_var(Func_new(_x2c_func_adapt_140, _346)), String_var(_1372), Func_var(Func_new(_x2c_func_adapt_141, _351)), String_var(_1373), Func_var(Func_new(_x2c_func_adapt_142, _361)), String_var(_1374), Func_var(Func_new(_x2c_func_adapt_143, _371)), String_var(_1375), Func_var(Func_new(_x2c_func_adapt_144, _381)), String_var(_1376), Func_var(Func_new(_x2c_func_adapt_145, _391)), String_var(_1377), Func_var(Func_new(_x2c_func_adapt_146, _401)), String_var(_1378), Func_var(Func_new(_x2c_func_adapt_147, _411)), String_var(_1379), Func_var(Func_new(_x2c_func_adapt_148, _421)), String_var(_1380), Func_var(Func_new(_x2c_func_adapt_149, _422)), String_var(_1381), Func_var(Func_new(_x2c_func_adapt_150, _423)), String_var(_1382), Func_var(Func_new(_x2c_func_adapt_151, _424)), String_var(_1383), Func_var(Func_new(_x2c_func_adapt_152, _425)), String_var(_1384), Func_var(Func_new(_x2c_func_adapt_153, _426)), String_var(_1385), Func_var(Func_new(_x2c_func_adapt_154, _427)), String_var(_1386), Func_var(Func_new(_x2c_func_adapt_155, _428)), String_var(_1387), Func_var(Func_new(_x2c_func_adapt_156, _432)), String_var(_1388), Func_var(Func_new(_x2c_func_adapt_157, _433)), String_var(_1389), Func_var(Func_new(_x2c_func_adapt_158, _433)), String_var(_1390), Func_var(Func_new(_x2c_func_adapt_159, _439)), String_var(_1391), Func_var(Func_new(_x2c_func_adapt_160, _440)), String_var(_1392), Func_var(Func_new(_x2c_func_adapt_161, _441)), String_var(_1393), Func_var(Func_new(_x2c_func_adapt_162, _442)), String_var(_1394), Func_var(Func_new(_x2c_func_adapt_163, _441)), String_var(_1395), Func_var(Func_new(_x2c_func_adapt_164, _439)), String_var(_1396), Func_var(Func_new(_x2c_func_adapt_165, _441)), String_var(_1397), Func_var(Func_new(_x2c_func_adapt_166, _433)), String_var(_1398), Func_var(Func_new(_x2c_func_adapt_167, _323)), String_var(_1399), Func_var(Func_new(_x2c_func_adapt_168, _449)), String_var(_1400), Func_var(Func_new(_x2c_func_adapt_169, _310)), String_var(_1401), Func_var(Func_new(_x2c_func_adapt_170, _450)), String_var(_1402), Func_var(Func_new(_x2c_func_adapt_171, _433)), String_var(_1403), Func_var(Func_new(_x2c_func_adapt_172, _441)), String_var(_1404), Func_var(Func_new(_x2c_func_adapt_173, _457)), String_var(_1405), Func_var(Func_new(_x2c_func_adapt_174, _463)), String_var(_1406), Func_var(Func_new(_x2c_func_adapt_175, _432)), String_var(_1407), Func_var(Func_new(_x2c_func_adapt_176, _433)), String_var(_1408), Func_var(Func_new(_x2c_func_adapt_177, _470)), String_var(_1409), Func_var(Func_new(_x2c_func_adapt_178, _476)), String_var(_1410), Func_var(Func_new(_x2c_func_adapt_179, _477)), String_var(_1411), Func_var(Func_new(_x2c_func_adapt_180, _485)), String_var(_1412), Func_var(Func_new(_x2c_func_adapt_181, _442)), String_var(_1413), Func_var(Func_new(_x2c_func_adapt_182, _317)), String_var(_1414), Func_var(Func_new(_x2c_func_adapt_183, _493)), String_var(_1415), Func_var(Func_new(_x2c_func_adapt_184, _442)), String_var(_1416), Func_var(Func_new(_x2c_func_adapt_185, _493)), String_var(_1417), Func_var(Func_new(_x2c_func_adapt_186, _477)), String_var(_1418), Func_var(Func_new(_x2c_func_adapt_187, _485)), String_var(_1419), Func_var(Func_new(_x2c_func_adapt_188, _494)), String_var(_1420), Func_var(Func_new(_x2c_func_adapt_189, _304)), String_var(_1421), Func_var(Func_new(_x2c_func_adapt_190, _501)), String_var(_1422), Func_var(Func_new(_x2c_func_adapt_191, _512)), String_var(_1423), Func_var(Func_new(_x2c_func_adapt_192, _512)), String_var(_1424), Func_var(Func_new(_x2c_func_adapt_193, _517)), String_var(_1425), Func_var(Func_new(_x2c_func_adapt_194, _523)), String_var(_1426), Func_var(Func_new(_x2c_func_adapt_195, _517)), String_var(_1427), Func_var(Func_new(_x2c_func_adapt_196, _528)), String_var(_1428), Func_var(Func_new(_x2c_func_adapt_197, _517)), String_var(_1429), Func_var(Func_new(_x2c_func_adapt_198, _517)), String_var(_1430), Func_var(Func_new(_x2c_func_adapt_199, _517)), String_var(_1431), Func_var(Func_new(_x2c_func_adapt_200, _517)), String_var(_1432), Func_var(Func_new(_x2c_func_adapt_201, _517)), String_var(_1433), Func_var(Func_new(_x2c_func_adapt_202, _529)), String_var(_1434), Func_var(Func_new(_x2c_func_adapt_203, _535)), String_var(_1435), Func_var(Func_new(_x2c_func_adapt_204, _529)), String_var(_1436), Func_var(Func_new(_x2c_func_adapt_205, _536)), String_var(_1437), Func_var(Func_new(_x2c_func_adapt_206, _535)), String_var(_1438), Func_var(Func_new(_x2c_func_adapt_207, _548)), String_var(_1439), Func_var(Func_new(_x2c_func_adapt_208, _556)), String_var(_1440), Func_var(Func_new(_x2c_func_adapt_209, _563)), String_var(_1441), Func_var(Func_new(_x2c_func_adapt_210, _570)), String_var(_1442), Func_var(Func_new(_x2c_func_adapt_211, _580)), String_var(_1443), Func_var(Func_new(_x2c_func_adapt_212, _580)), String_var(_1444), Func_var(Func_new(_x2c_func_adapt_213, _581)), String_var(_1445), Func_var(Func_new(_x2c_func_adapt_214, _587)), String_var(_1446), Func_var(Func_new(_x2c_func_adapt_215, _581)), String_var(_1447), Func_var(Func_new(_x2c_func_adapt_216, _588)), String_var(_1448), Func_var(Func_new(_x2c_func_adapt_217, _595)), String_var(_1449), Func_var(Func_new(_x2c_func_adapt_218, _602)), String_var(_1450), Func_var(Func_new(_x2c_func_adapt_219, _607)), String_var(_1451), Func_var(Func_new(_x2c_func_adapt_220, _614)), String_var(_1452), Func_var(Func_new(_x2c_func_adapt_221, _615)), String_var(_1453), Func_var(Func_new(_x2c_func_adapt_222, _622)), String_var(_1454), Func_var(Func_new(_x2c_func_adapt_223, _622)), String_var(_1455), Func_var(Func_new(_x2c_func_adapt_224, _623)), String_var(_1456), Func_var(Func_new(_x2c_func_adapt_225, _624)), String_var(_1457), Func_var(Func_new(_x2c_func_adapt_226, _624)), String_var(_1458), Func_var(Func_new(_x2c_func_adapt_227, _625)), String_var(_1459), Func_var(Func_new(_x2c_func_adapt_228, _624)), String_var(_1460), Func_var(Func_new(_x2c_func_adapt_229, _624)), String_var(_1461), Func_var(Func_new(_x2c_func_adapt_230, _631)), String_var(_1462), Func_var(Func_new(_x2c_func_adapt_231, _624)), String_var(_1463), Func_var(Func_new(_x2c_func_adapt_232, _636)), String_var(_1464), Func_var(Func_new(_x2c_func_adapt_233, _614)), String_var(_1465), Func_var(Func_new(_x2c_func_adapt_234, _646)), String_var(_1466), Func_var(Func_new(_x2c_func_adapt_235, _647)), String_var(_1467), Func_var(Func_new(_x2c_func_adapt_236, _225)), String_var(_1468), Func_var(Func_new(_x2c_func_adapt_237, _653)), String_var(_1469), Func_var(Func_new(_x2c_func_adapt_238, _174)), String_var(_1470), Func_var(Func_new(_x2c_func_adapt_239, _174)), String_var(_1471), Func_var(Func_new(_x2c_func_adapt_240, _659)), String_var(_1472), Func_var(Func_new(_x2c_func_adapt_241, _660)), String_var(_1473), Func_var(Func_new(_x2c_func_adapt_242, _667)), String_var(_1474), Func_var(Func_new(_x2c_func_adapt_243, _287)), String_var(_1475), Func_var(Func_new(_x2c_func_adapt_244, _673)), String_var(_1476), Func_var(Func_new(_x2c_func_adapt_245, _674)), String_var(_1477), Func_var(Func_new(_x2c_func_adapt_246, _188)), String_var(_1478), Func_var(Func_new(_x2c_func_adapt_247, _675)), String_var(_1479), Func_var(Func_new(_x2c_func_adapt_248, _174)), String_var(_1480), Func_var(Func_new(_x2c_func_adapt_249, _676)), String_var(_1481), Func_var(Func_new(_x2c_func_adapt_250, _676)), String_var(_1482), Func_var(Func_new(_x2c_func_adapt_251, _659)), String_var(_1483), Func_var(Func_new(_x2c_func_adapt_252, _667)), String_var(_1484), Func_var(Func_new(_x2c_func_adapt_253, _174)), String_var(_1485), Func_var(Func_new(_x2c_func_adapt_254, _686)), String_var(_1486), Func_var(Func_new(_x2c_func_adapt_255, _696)), String_var(_1487), Func_var(Func_new(_x2c_func_adapt_256, _706)), String_var(_1488), Func_var(Func_new(_x2c_func_adapt_257, _716)), String_var(_1489), Func_var(Func_new(_x2c_func_adapt_258, _722)), String_var(_1490), Func_var(Func_new(_x2c_func_adapt_259, _728)), String_var(_1491), Func_var(Func_new(_x2c_func_adapt_260, _729)), String_var(_1492), Func_var(Func_new(_x2c_func_adapt_261, _730)), String_var(_1493), Func_var(Func_new(_x2c_func_adapt_262, _736)), String_var(_1494), Func_var(Func_new(_x2c_func_adapt_263, _728)), String_var(_1495), Func_var(Func_new(_x2c_func_adapt_264, _743)), String_var(_1496), Func_var(Func_new(_x2c_func_adapt_265, _749)), String_var(_1497), Func_var(Func_new(_x2c_func_adapt_266, _331)), String_var(_1498), Func_var(Func_new(_x2c_func_adapt_267, _736)), String_var(_1499), Func_var(Func_new(_x2c_func_adapt_268, _736)), String_var(_1500), Func_var(Func_new(_x2c_func_adapt_269, _750)), String_var(_1501), Func_var(Func_new(_x2c_func_adapt_270, _751)), String_var(_1502), Func_var(Func_new(_x2c_func_adapt_271, _752)), String_var(_1503), Func_var(Func_new(_x2c_func_adapt_272, _753)), String_var(_1504), Func_var(Func_new(_x2c_func_adapt_273, _754)), String_var(_1505), Func_var(Func_new(_x2c_func_adapt_274, _755)), String_var(_1506), Func_var(Func_new(_x2c_func_adapt_275, _756)), String_var(_1507), Func_var(Func_new(_x2c_func_adapt_276, _761)), String_var(_1508), Func_var(Func_new(_x2c_func_adapt_277, _767)), String_var(_1509), Func_var(Func_new(_x2c_func_adapt_278, _768)), String_var(_1510), Func_var(Func_new(_x2c_func_adapt_279, _769)), String_var(_1511), Func_var(Func_new(_x2c_func_adapt_280, _749)), String_var(_1512), Func_var(Func_new(_x2c_func_adapt_281, _749)), String_var(_1513), Func_var(Func_new(_x2c_func_adapt_282, _768)), String_var(_1514), Func_var(Func_new(_x2c_func_adapt_283, _770)), String_var(_1515), Func_var(Func_new(_x2c_func_adapt_284, _776)), String_var(_1516), Func_var(Func_new(_x2c_func_adapt_285, _782)), String_var(_1517), Func_var(Func_new(_x2c_func_adapt_286, _782)), String_var(_1518), Func_var(Func_new(_x2c_func_adapt_287, _792)), String_var(_1519), Func_var(Func_new(_x2c_func_adapt_288, _792)), String_var(_1520), Func_var(Func_new(_x2c_func_adapt_289, _793)), String_var(_1521), Func_var(Func_new(_x2c_func_adapt_290, _799)), String_var(_1522), Func_var(Func_new(_x2c_func_adapt_291, _793)), String_var(_1523), Func_var(Func_new(_x2c_func_adapt_292, _806)), String_var(_1524), Func_var(Func_new(_x2c_func_adapt_293, _816)), String_var(_1525), Func_var(Func_new(_x2c_func_adapt_294, _816)), String_var(_1526), Func_var(Func_new(_x2c_func_adapt_295, _823)), String_var(_1527), Func_var(Func_new(_x2c_func_adapt_296, _824)), String_var(_1528), Func_var(Func_new(_x2c_func_adapt_297, _833)), String_var(_1529), Func_var(Func_new(_x2c_func_adapt_298, _842)), String_var(_1530), Func_var(Func_new(_x2c_func_adapt_299, _843)), String_var(_1531), Func_var(Func_new(_x2c_func_adapt_300, _848)), String_var(_1532), Func_var(Func_new(_x2c_func_adapt_301, _849)), String_var(_1533), Func_var(Func_new(_x2c_func_adapt_302, _854)), String_var(_1534), Func_var(Func_new(_x2c_func_adapt_303, _860)), String_var(_1535), Func_var(Func_new(_x2c_func_adapt_304, _849)), String_var(_1536), Func_var(Func_new(_x2c_func_adapt_305, _849)), String_var(_1537), Func_var(Func_new(_x2c_func_adapt_306, _866)), String_var(_1538), Func_var(Func_new(_x2c_func_adapt_307, _272)), String_var(_1539), Func_var(Func_new(_x2c_func_adapt_308, _867)), String_var(_1540), Func_var(Func_new(_x2c_func_adapt_309, _867)), String_var(_1541), Func_var(Func_new(_x2c_func_adapt_310, _203)), String_var(_1542), Func_var(Func_new(_x2c_func_adapt_311, _867)), String_var(_1543), Func_var(Func_new(_x2c_func_adapt_312, _272)), String_var(_1544), Func_var(Func_new(_x2c_func_adapt_313, _867)), String_var(_1545), Func_var(Func_new(_x2c_func_adapt_314, _272)), String_var(_1546), Func_var(Func_new(_x2c_func_adapt_315, _867)), String_var(_1547), Func_var(Func_new(_x2c_func_adapt_316, _873)), String_var(_1548), Func_var(Func_new(_x2c_func_adapt_317, _874)), String_var(_1549), Func_var(Func_new(_x2c_func_adapt_318, _875)), String_var(_1550), Func_var(Func_new(_x2c_func_adapt_319, _881)), String_var(_1551), Func_var(Func_new(_x2c_func_adapt_320, _882)), String_var(_1552), Func_var(Func_new(_x2c_func_adapt_321, _272)), String_var(_1553), Func_var(Func_new(_x2c_func_adapt_322, _203)), String_var(_1554), Func_var(Func_new(_x2c_func_adapt_323, _203)), String_var(_1555), Func_var(Func_new(_x2c_func_adapt_324, _203)), String_var(_1556), Func_var(Func_new(_x2c_func_adapt_325, _203)), String_var(_1557), Func_var(Func_new(_x2c_func_adapt_326, _203)), String_var(_1558), Func_var(Func_new(_x2c_func_adapt_327, _203)), String_var(_1559), Func_var(Func_new(_x2c_func_adapt_328, _203)), String_var(_1560), Func_var(Func_new(_x2c_func_adapt_329, _203)), String_var(_1561), Func_var(Func_new(_x2c_func_adapt_330, _203)), String_var(_1562), Func_var(Func_new(_x2c_func_adapt_331, _203)), String_var(_1563), Func_var(Func_new(_x2c_func_adapt_332, _203)), String_var(_1564), Func_var(Func_new(_x2c_func_adapt_333, _888)), String_var(_1565), Func_var(Func_new(_x2c_func_adapt_334, _209)), String_var(_1566), Func_var(Func_new(_x2c_func_adapt_335, _339)), String_var(_1567), Func_var(Func_new(_x2c_func_adapt_336, _889)), String_var(_1568), Func_var(Func_new(_x2c_func_adapt_337, _272)), String_var(_1569), Func_var(Func_new(_x2c_func_adapt_338, _895)), String_var(_1570), Func_var(Func_new(_x2c_func_adapt_339, _902)), String_var(_1571), Func_var(Func_new(_x2c_func_adapt_340, _902)), String_var(_1572), Func_var(Func_new(_x2c_func_adapt_341, _902)), String_var(_1573), Func_var(Func_new(_x2c_func_adapt_342, _272)), String_var(_1574), Func_var(Func_new(_x2c_func_adapt_343, _203)), String_var(_1575), Func_var(Func_new(_x2c_func_adapt_344, _588)), String_var(_1576), Func_var(Func_new(_x2c_func_adapt_345, _339)), String_var(_1577), Func_var(Func_new(_x2c_func_adapt_346, _339)), String_var(_1578), Func_var(Func_new(_x2c_func_adapt_347, _339)), String_var(_1579), Func_var(Func_new(_x2c_func_adapt_348, _278)), String_var(_1580), Func_var(Func_new(_x2c_func_adapt_349, _907)), String_var(_1581), Func_var(Func_new(_x2c_func_adapt_350, _914)), String_var(_1582), Func_var(Func_new(_x2c_func_adapt_351, _867)), String_var(_1583), Func_var(Func_new(_x2c_func_adapt_352, _588)), String_var(_1584), Func_var(Func_new(_x2c_func_adapt_353, _588)), String_var(_1585), Func_var(Func_new(_x2c_func_adapt_354, _915)), String_var(_1586), Func_var(Func_new(_x2c_func_adapt_355, _920)), String_var(_1587), Func_var(Func_new(_x2c_func_adapt_356, _921)), String_var(_1588), Func_var(Func_new(_x2c_func_adapt_357, _339)), String_var(_1589), Func_var(Func_new(_x2c_func_adapt_358, _867)), String_var(_1590), Func_var(Func_new(_x2c_func_adapt_359, _280)), String_var(_1591), Func_var(Func_new(_x2c_func_adapt_360, _932)), String_var(_1592), Func_var(Func_new(_x2c_func_adapt_361, _943)), String_var(_1593), Func_var(Func_new(_x2c_func_adapt_362, _272)), String_var(_1594), Func_var(Func_new(_x2c_func_adapt_363, _272)), String_var(_1595), Func_var(Func_new(_x2c_func_adapt_364, _902)), String_var(_1596), Func_var(Func_new(_x2c_func_adapt_365, _889)), String_var(_1597), Func_var(Func_new(_x2c_func_adapt_366, _949)), String_var(_1598), Func_var(Func_new(_x2c_func_adapt_367, _950)), String_var(_1599), Func_var(Func_new(_x2c_func_adapt_368, _950)), String_var(_1600), Func_var(Func_new(_x2c_func_adapt_369, _951)), String_var(_1601), Func_var(Func_new(_x2c_func_adapt_370, _960)), String_var(_1602), Func_var(Func_new(_x2c_func_adapt_371, _165)), String_var(_1603), Func_var(Func_new(_x2c_func_adapt_372, _961)), String_var(_1604), Func_var(Func_new(_x2c_func_adapt_373, _962)), String_var(_1605), Func_var(Func_new(_x2c_func_adapt_374, _963)), String_var(_1606), Func_var(Func_new(_x2c_func_adapt_375, _964)), String_var(_1607), Func_var(Func_new(_x2c_func_adapt_376, _965)), String_var(_1608), Func_var(Func_new(_x2c_func_adapt_377, _966)), String_var(_1609), Func_var(Func_new(_x2c_func_adapt_378, _967)), String_var(_1610), Func_var(Func_new(_x2c_func_adapt_379, _968)), String_var(_1611), Func_var(Func_new(_x2c_func_adapt_380, _972)), String_var(_1612), Func_var(Func_new(_x2c_func_adapt_381, _973)), String_var(_1613), Func_var(Func_new(_x2c_func_adapt_382, _152)), String_var(_1614), Func_var(Func_new(_x2c_func_adapt_383, _974)), String_var(_1615), Func_var(Func_new(_x2c_func_adapt_384, _974)), String_var(_1616), Func_var(Func_new(_x2c_func_adapt_385, _975)), String_var(_1617), Func_var(Func_new(_x2c_func_adapt_386, _165)), String_var(_1618), Func_var(Func_new(_x2c_func_adapt_387, _976)), String_var(_1619), Func_var(Func_new(_x2c_func_adapt_388, _981)), String_var(_1620), Func_var(Func_new(_x2c_func_adapt_389, _985)), String_var(_1621), Func_var(Func_new(_x2c_func_adapt_390, _988)), String_var(_1622), Func_var(Func_new(_x2c_func_adapt_391, _976)), String_var(_1623), Func_var(Func_new(_x2c_func_adapt_392, _165)), String_var(_1624), Func_var(Func_new(_x2c_func_adapt_393, _989)), String_var(_1625), Func_var(Func_new(_x2c_func_adapt_394, _12)), String_var(_1626), Func_var(Func_new(_x2c_func_adapt_395, _12)), String_var(_1627), Func_var(Func_new(_x2c_func_adapt_396, _12)), String_var(_1628), Func_var(Func_new(_x2c_func_adapt_397, _12)), String_var(_1629), Func_var(Func_new(_x2c_func_adapt_398, _12)), String_var(_1630), Func_var(Func_new(_x2c_func_adapt_399, _12)), String_var(_1631), Func_var(Func_new(_x2c_func_adapt_400, _12)), String_var(_1632), Func_var(Func_new(_x2c_func_adapt_401, _12)), String_var(_1633), Func_var(Func_new(_x2c_func_adapt_402, _12)), String_var(_1634), Func_var(Func_new(_x2c_func_adapt_403, _12)), String_var(_1635), Func_var(Func_new(_x2c_func_adapt_404, _12)), String_var(_1636), Func_var(Func_new(_x2c_func_adapt_405, _981)), String_var(_1637), Func_var(Func_new(_x2c_func_adapt_406, _990)), String_var(_1638), Func_var(Func_new(_x2c_func_adapt_407, _994)), String_var(_1639), Func_var(Func_new(_x2c_func_adapt_408, _169)), String_var(_1640), Func_var(Func_new(_x2c_func_adapt_409, _989)), String_var(_1641), Func_var(Func_new(_x2c_func_adapt_410, _996)), String_var(_1642), Func_var(Func_new(_x2c_func_adapt_411, _996)), String_var(_1643), Func_var(Func_new(_x2c_func_adapt_412, _998)), String_var(_1644), Func_var(Func_new(_x2c_func_adapt_413, _998)), String_var(_1645), Func_var(Func_new(_x2c_func_adapt_414, _989)), String_var(_1646), Func_var(Func_new(_x2c_func_adapt_415, _999)), String_var(_1647), Func_var(Func_new(_x2c_func_adapt_416, _1000)), String_var(_1648), Func_var(Func_new(_x2c_func_adapt_417, _1001)), String_var(_1649), Func_var(Func_new(_x2c_func_adapt_418, _1002)), String_var(_1650), Func_var(Func_new(_x2c_func_adapt_419, _165)), String_var(_1651), Func_var(Func_new(_x2c_func_adapt_420, _165)), String_var(_1652), Func_var(Func_new(_x2c_func_adapt_421, _152)), String_var(_1653), Func_var(Func_new(_x2c_func_adapt_422, _1003)), String_var(_1654), Func_var(Func_new(_x2c_func_adapt_423, _1009)), String_var(_1655), Func_var(Func_new(_x2c_func_adapt_424, _1015)), String_var(_1656), Func_var(Func_new(_x2c_func_adapt_425, _1019)), String_var(_1657), Func_var(Func_new(_x2c_func_adapt_426, _1023)), String_var(_1658), Func_var(Func_new(_x2c_func_adapt_427, _1027)), String_var(_1659), Func_var(Func_new(_x2c_func_adapt_428, _974)), String_var(_1660), Func_var(Func_new(_x2c_func_adapt_429, _231)), String_var(_1661), Func_var(Func_new(_x2c_func_adapt_430, _1030)), String_var(_1662), Func_var(Func_new(_x2c_func_adapt_431, _165)), String_var(_1663), Func_var(Func_new(_x2c_func_adapt_432, _169)), String_var(_1664), Func_var(Func_new(_x2c_func_adapt_433, _1032)), String_var(_1665), Func_var(Func_new(_x2c_func_adapt_434, _1032)), String_var(_1666), Func_var(Func_new(_x2c_func_adapt_435, _12)), String_var(_1667), Func_var(Func_new(_x2c_func_adapt_436, _1036)), String_var(_1668), Func_var(Func_new(_x2c_func_adapt_437, _1040)), String_var(_1669), Func_var(Func_new(_x2c_func_adapt_438, _1044)), String_var(_1670), Func_var(Func_new(_x2c_func_adapt_439, _1046)), String_var(_1671), Func_var(Func_new(_x2c_func_adapt_440, _1046)), String_var(_1672), Func_var(Func_new(_x2c_func_adapt_441, _1047)), String_var(_1673), Func_var(Func_new(_x2c_func_adapt_442, _236)), String_var(_1674), Func_var(Func_new(_x2c_func_adapt_443, _1053)), String_var(_1675), Func_var(Func_new(_x2c_func_adapt_444, _1057)), String_var(_1676), Func_var(Func_new(_x2c_func_adapt_445, _1062)), String_var(_1677), Func_var(Func_new(_x2c_func_adapt_446, _1069)), String_var(_1678), Func_var(Func_new(_x2c_func_adapt_447, _1076)), String_var(_1679), Func_var(Func_new(_x2c_func_adapt_448, _1069)), String_var(_1680), Func_var(Func_new(_x2c_func_adapt_449, _1076)), String_var(_1681), Func_var(Func_new(_x2c_func_adapt_450, _1069)), String_var(_1682), Func_var(Func_new(_x2c_func_adapt_451, _1076)), String_var(_1683), Func_var(Func_new(_x2c_func_adapt_452, _1069)), String_var(_1684), Func_var(Func_new(_x2c_func_adapt_453, _1076)), String_var(_1685), Func_var(Func_new(_x2c_func_adapt_454, _1069)), String_var(_1686), Func_var(Func_new(_x2c_func_adapt_455, _1082)), String_var(_1687), Func_var(Func_new(_x2c_func_adapt_456, _1088)), String_var(_1688), Func_var(Func_new(_x2c_func_adapt_457, _1076)), String_var(_1689), Func_var(Func_new(_x2c_func_adapt_458, _1069)), String_var(_1690), Func_var(Func_new(_x2c_func_adapt_459, _1076)), String_var(_1691), Func_var(Func_new(_x2c_func_adapt_460, _1089)), String_var(_1692), Func_var(Func_new(_x2c_func_adapt_461, _1090)), String_var(_1693), Func_var(Func_new(_x2c_func_adapt_462, _1091)), String_var(_1694), Func_var(Func_new(_x2c_func_adapt_463, _1092)), String_var(_1695), Func_var(Func_new(_x2c_func_adapt_464, _1069)), String_var(_1696), Func_var(Func_new(_x2c_func_adapt_465, _1076)), String_var(_1697), Func_var(Func_new(_x2c_func_adapt_466, _1069)), String_var(_1698), Func_var(Func_new(_x2c_func_adapt_467, _1076)), String_var(_1699), Func_var(Func_new(_x2c_func_adapt_468, _1082)), String_var(_1700), Func_var(Func_new(_x2c_func_adapt_469, _1088)), String_var(_1701), Func_var(Func_new(_x2c_func_adapt_470, _1069)), String_var(_1702), Func_var(Func_new(_x2c_func_adapt_471, _1076)), String_var(_1703), Func_var(Func_new(_x2c_func_adapt_472, _1069)), String_var(_1704), Func_var(Func_new(_x2c_func_adapt_473, _1076)), String_var(_1705), Func_var(Func_new(_x2c_func_adapt_474, _1069)), String_var(_1706), Func_var(Func_new(_x2c_func_adapt_475, _1069)), String_var(_1707), Func_var(Func_new(_x2c_func_adapt_476, _1076)), String_var(_1708), Func_var(Func_new(_x2c_func_adapt_477, _1076)), String_var(_1709), Func_var(Func_new(_x2c_func_adapt_478, _1069)), String_var(_1710), Func_var(Func_new(_x2c_func_adapt_479, _1069)), String_var(_1711), Func_var(Func_new(_x2c_func_adapt_480, _1076)), String_var(_1712), Func_var(Func_new(_x2c_func_adapt_481, _1076)), String_var(_1713), Func_var(Func_new(_x2c_func_adapt_482, _1069)), String_var(_1714), Func_var(Func_new(_x2c_func_adapt_483, _1076)), String_var(_1715), Func_var(Func_new(_x2c_func_adapt_484, _1069)), String_var(_1716), Func_var(Func_new(_x2c_func_adapt_485, _1076)), String_var(_1717), Func_var(Func_new(_x2c_func_adapt_486, _1082)), String_var(_1718), Func_var(Func_new(_x2c_func_adapt_487, _1088)), String_var(_1719), Func_var(Func_new(_x2c_func_adapt_488, _1069)), String_var(_1720), Func_var(Func_new(_x2c_func_adapt_489, _1076)), String_var(_1721), Func_var(Func_new(_x2c_func_adapt_490, _1098)), String_var(_1722), Func_var(Func_new(_x2c_func_adapt_491, _1104)), String_var(_1723), Func_var(Func_new(_x2c_func_adapt_492, _1082)), String_var(_1724), Func_var(Func_new(_x2c_func_adapt_493, _1088)), String_var(_1725), Func_var(Func_new(_x2c_func_adapt_494, _1082)), String_var(_1726), Func_var(Func_new(_x2c_func_adapt_495, _1088)), String_var(_1727), Func_var(Func_new(_x2c_func_adapt_496, _1082)), String_var(_1728), Func_var(Func_new(_x2c_func_adapt_497, _1088)), String_var(_1729), Func_var(Func_new(_x2c_func_adapt_498, _1113)), String_var(_1730), Func_var(Func_new(_x2c_func_adapt_499, _1119)), String_var(_1731), Func_var(Func_new(_x2c_func_adapt_500, _1082)), String_var(_1732), Func_var(Func_new(_x2c_func_adapt_501, _1088)), String_var(_1733), Func_var(Func_new(_x2c_func_adapt_502, _1120)), String_var(_1734), Func_var(Func_new(_x2c_func_adapt_503, _1121)), String_var(_1735), Func_var(Func_new(_x2c_func_adapt_504, _1128)), String_var(_1736), Func_var(Func_new(_x2c_func_adapt_505, _1134)), String_var(_1737), Func_var(Func_new(_x2c_func_adapt_506, _1140)), String_var(_1738), Func_var(Func_new(_x2c_func_adapt_507, _1069)), String_var(_1739), Func_var(Func_new(_x2c_func_adapt_508, _1076)), String_var(_1740), Func_var(Func_new(_x2c_func_adapt_509, _1147)), String_var(_1741), Func_var(Func_new(_x2c_func_adapt_510, _1148)), String_var(_1742), Func_var(Func_new(_x2c_func_adapt_511, _1149)), String_var(_1743), Func_var(Func_new(_x2c_func_adapt_512, _1148)), String_var(_1744), Func_var(Func_new(_x2c_func_adapt_513, _1149)), String_var(_1745), Func_var(Func_new(_x2c_func_adapt_514, _1069)), String_var(_1746), Func_var(Func_new(_x2c_func_adapt_515, _1069)), String_var(_1747), Func_var(Func_new(_x2c_func_adapt_516, _1076)), String_var(_1748), Func_var(Func_new(_x2c_func_adapt_517, _1069)), String_var(_1749), Func_var(Func_new(_x2c_func_adapt_518, _1076)), String_var(_1750), Func_var(Func_new(_x2c_func_adapt_519, _1069)), String_var(_1751), Func_var(Func_new(_x2c_func_adapt_520, _1076)), String_var(_1752), Func_var(Func_new(_x2c_func_adapt_521, _1069)), String_var(_1753), Func_var(Func_new(_x2c_func_adapt_522, _1076)), String_var(_1754), Func_var(Func_new(_x2c_func_adapt_523, _1076)), String_var(_1755), Func_var(Func_new(_x2c_func_adapt_524, _1150)), String_var(_1756), Func_var(Func_new(_x2c_func_adapt_525, _1151)), String_var(_1757), Func_var(Func_new(_x2c_func_adapt_526, _1150)), String_var(_1758), Func_var(Func_new(_x2c_func_adapt_527, _1151)), String_var(_1759), Func_var(Func_new(_x2c_func_adapt_528, _1157)), String_var(_1760), Func_var(Func_new(_x2c_func_adapt_529, _1166)), String_var(_1761), Func_var(Func_new(_x2c_func_adapt_530, _1089)), String_var(_1762), Func_var(Func_new(_x2c_func_adapt_531, _1167)), String_var(_1763), Func_var(Func_new(_x2c_func_adapt_532, _1069)), String_var(_1764), Func_var(Func_new(_x2c_func_adapt_533, _1076)), String_var(_1765), Func_var(Func_new(_x2c_func_adapt_534, _1082)), String_var(_1766), Func_var(Func_new(_x2c_func_adapt_535, _1088)), String_var(_1767), Func_var(Func_new(_x2c_func_adapt_536, _1175)), String_var(_1768), Func_var(Func_new(_x2c_func_adapt_537, _1181)), String_var(_1769), Func_var(Func_new(_x2c_func_adapt_538, _1082)), String_var(_1770), Func_var(Func_new(_x2c_func_adapt_539, _1088)), String_var(_1771), Func_var(Func_new(_x2c_func_adapt_540, _1188)), String_var(_1772), Func_var(Func_new(_x2c_func_adapt_541, _1082)), String_var(_1773), Func_var(Func_new(_x2c_func_adapt_542, _1088)), String_var(_1774), Func_var(Func_new(_x2c_func_adapt_543, _1194)), String_var(_1775), Func_var(Func_new(_x2c_func_adapt_544, _1200)), String_var(_1776), Func_var(Func_new(_x2c_func_adapt_545, _1069)), String_var(_1777), Func_var(Func_new(_x2c_func_adapt_546, _1076)), String_var(_1778), Func_var(Func_new(_x2c_func_adapt_547, _1069)), String_var(_1779), Func_var(Func_new(_x2c_func_adapt_548, _1076)), String_var(_1780), Func_var(Func_new(_x2c_func_adapt_549, _1206)), String_var(_1781), Func_var(Func_new(_x2c_func_adapt_550, _1212)), String_var(_1782), Func_var(Func_new(_x2c_func_adapt_551, _1134)), String_var(_1783), Func_var(Func_new(_x2c_func_adapt_552, _1140)), String_var(_1784), Func_var(Func_new(_x2c_func_adapt_553, _1069)), String_var(_1785), Func_var(Func_new(_x2c_func_adapt_554, _1076)), String_var(_1786), Func_var(Func_new(_x2c_func_adapt_555, _1069)), String_var(_1787), Func_var(Func_new(_x2c_func_adapt_556, _1076)), String_var(_1788), Func_var(Func_new(_x2c_func_adapt_557, _1069)), String_var(_1789), Func_var(Func_new(_x2c_func_adapt_558, _1076)), String_var(_1790), Func_var(Func_new(_x2c_func_adapt_559, _1218)), String_var(_1791), Func_var(Func_new(_x2c_func_adapt_560, _1224)), String_var(_1792), Func_var(Func_new(_x2c_func_adapt_561, _1069)), String_var(_1793), Func_var(Func_new(_x2c_func_adapt_562, _1076)), String_var(_1794), Func_var(Func_new(_x2c_func_adapt_563, _1069)), String_var(_1795), Func_var(Func_new(_x2c_func_adapt_564, _1076)), String_var(_1796), Func_var(Func_new(_x2c_func_adapt_565, _1069)), String_var(_1797), Func_var(Func_new(_x2c_func_adapt_566, _1076)), String_var(_1798), Func_var(Func_new(_x2c_func_adapt_567, _1069)), String_var(_1799), Func_var(Func_new(_x2c_func_adapt_568, _1076)), String_var(_1476), Func_var(Func_new(_x2c_func_adapt_569, _674)), String_var(_1465), Func_var(Func_new(_x2c_func_adapt_570, _646)), String_var(_1440), Func_var(Func_new(_x2c_func_adapt_571, _563)))))
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static String _lisp_string_new_len(String text, int length);
+
+static Symbol _lisp_symbol_parse(String text);
+
+static Symbol _lisp_symbol_new_len(String text, int length);
+
+static Job _lisp_List_job(List command);
+
+static Job _lisp_Job_start(Job job);
+
+static Buffer _lisp_Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
@@ -63,6 +1217,1138 @@ static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func
 
 static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7);
 
+static Var _x2c_func_adapt_8(Func _x2c_func_binding_8, const FuncArg * _x2c_func_argv_8);
+
+static Var _x2c_func_adapt_9(Func _x2c_func_binding_9, const FuncArg * _x2c_func_argv_9);
+
+static Var _x2c_func_adapt_10(Func _x2c_func_binding_10, const FuncArg * _x2c_func_argv_10);
+
+static Var _x2c_func_adapt_11(Func _x2c_func_binding_11, const FuncArg * _x2c_func_argv_11);
+
+static Var _x2c_func_adapt_12(Func _x2c_func_binding_12, const FuncArg * _x2c_func_argv_12);
+
+static Var _x2c_func_adapt_13(Func _x2c_func_binding_13, const FuncArg * _x2c_func_argv_13);
+
+static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_func_argv_14);
+
+static Var _x2c_func_adapt_15(Func _x2c_func_binding_15, const FuncArg * _x2c_func_argv_15);
+
+static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_func_argv_16);
+
+static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_func_argv_17);
+
+static Var _x2c_func_adapt_18(Func _x2c_func_binding_18, const FuncArg * _x2c_func_argv_18);
+
+static Var _x2c_func_adapt_19(Func _x2c_func_binding_19, const FuncArg * _x2c_func_argv_19);
+
+static Var _x2c_func_adapt_20(Func _x2c_func_binding_20, const FuncArg * _x2c_func_argv_20);
+
+static Var _x2c_func_adapt_21(Func _x2c_func_binding_21, const FuncArg * _x2c_func_argv_21);
+
+static Var _x2c_func_adapt_22(Func _x2c_func_binding_22, const FuncArg * _x2c_func_argv_22);
+
+static Var _x2c_func_adapt_23(Func _x2c_func_binding_23, const FuncArg * _x2c_func_argv_23);
+
+static Var _x2c_func_adapt_24(Func _x2c_func_binding_24, const FuncArg * _x2c_func_argv_24);
+
+static Var _x2c_func_adapt_25(Func _x2c_func_binding_25, const FuncArg * _x2c_func_argv_25);
+
+static Var _x2c_func_adapt_26(Func _x2c_func_binding_26, const FuncArg * _x2c_func_argv_26);
+
+static Var _x2c_func_adapt_27(Func _x2c_func_binding_27, const FuncArg * _x2c_func_argv_27);
+
+static Var _x2c_func_adapt_28(Func _x2c_func_binding_28, const FuncArg * _x2c_func_argv_28);
+
+static Var _x2c_func_adapt_29(Func _x2c_func_binding_29, const FuncArg * _x2c_func_argv_29);
+
+static Var _x2c_func_adapt_30(Func _x2c_func_binding_30, const FuncArg * _x2c_func_argv_30);
+
+static Var _x2c_func_adapt_31(Func _x2c_func_binding_31, const FuncArg * _x2c_func_argv_31);
+
+static Var _x2c_func_adapt_32(Func _x2c_func_binding_32, const FuncArg * _x2c_func_argv_32);
+
+static Var _x2c_func_adapt_33(Func _x2c_func_binding_33, const FuncArg * _x2c_func_argv_33);
+
+static Var _x2c_func_adapt_34(Func _x2c_func_binding_34, const FuncArg * _x2c_func_argv_34);
+
+static Var _x2c_func_adapt_35(Func _x2c_func_binding_35, const FuncArg * _x2c_func_argv_35);
+
+static Var _x2c_func_adapt_36(Func _x2c_func_binding_36, const FuncArg * _x2c_func_argv_36);
+
+static Var _x2c_func_adapt_37(Func _x2c_func_binding_37, const FuncArg * _x2c_func_argv_37);
+
+static Var _x2c_func_adapt_38(Func _x2c_func_binding_38, const FuncArg * _x2c_func_argv_38);
+
+static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39);
+
+static Var _x2c_func_adapt_40(Func _x2c_func_binding_40, const FuncArg * _x2c_func_argv_40);
+
+static Var _x2c_func_adapt_41(Func _x2c_func_binding_41, const FuncArg * _x2c_func_argv_41);
+
+static Var _x2c_func_adapt_42(Func _x2c_func_binding_42, const FuncArg * _x2c_func_argv_42);
+
+static Var _x2c_func_adapt_43(Func _x2c_func_binding_43, const FuncArg * _x2c_func_argv_43);
+
+static Var _x2c_func_adapt_44(Func _x2c_func_binding_44, const FuncArg * _x2c_func_argv_44);
+
+static Var _x2c_func_adapt_45(Func _x2c_func_binding_45, const FuncArg * _x2c_func_argv_45);
+
+static Var _x2c_func_adapt_46(Func _x2c_func_binding_46, const FuncArg * _x2c_func_argv_46);
+
+static Var _x2c_func_adapt_47(Func _x2c_func_binding_47, const FuncArg * _x2c_func_argv_47);
+
+static Var _x2c_func_adapt_48(Func _x2c_func_binding_48, const FuncArg * _x2c_func_argv_48);
+
+static Var _x2c_func_adapt_49(Func _x2c_func_binding_49, const FuncArg * _x2c_func_argv_49);
+
+static Var _x2c_func_adapt_50(Func _x2c_func_binding_50, const FuncArg * _x2c_func_argv_50);
+
+static Var _x2c_func_adapt_51(Func _x2c_func_binding_51, const FuncArg * _x2c_func_argv_51);
+
+static Var _x2c_func_adapt_52(Func _x2c_func_binding_52, const FuncArg * _x2c_func_argv_52);
+
+static Var _x2c_func_adapt_53(Func _x2c_func_binding_53, const FuncArg * _x2c_func_argv_53);
+
+static Var _x2c_func_adapt_54(Func _x2c_func_binding_54, const FuncArg * _x2c_func_argv_54);
+
+static Var _x2c_func_adapt_55(Func _x2c_func_binding_55, const FuncArg * _x2c_func_argv_55);
+
+static Var _x2c_func_adapt_56(Func _x2c_func_binding_56, const FuncArg * _x2c_func_argv_56);
+
+static Var _x2c_func_adapt_57(Func _x2c_func_binding_57, const FuncArg * _x2c_func_argv_57);
+
+static Var _x2c_func_adapt_58(Func _x2c_func_binding_58, const FuncArg * _x2c_func_argv_58);
+
+static Var _x2c_func_adapt_59(Func _x2c_func_binding_59, const FuncArg * _x2c_func_argv_59);
+
+static Var _x2c_func_adapt_60(Func _x2c_func_binding_60, const FuncArg * _x2c_func_argv_60);
+
+static Var _x2c_func_adapt_61(Func _x2c_func_binding_61, const FuncArg * _x2c_func_argv_61);
+
+static Var _x2c_func_adapt_62(Func _x2c_func_binding_62, const FuncArg * _x2c_func_argv_62);
+
+static Var _x2c_func_adapt_63(Func _x2c_func_binding_63, const FuncArg * _x2c_func_argv_63);
+
+static Var _x2c_func_adapt_64(Func _x2c_func_binding_64, const FuncArg * _x2c_func_argv_64);
+
+static Var _x2c_func_adapt_65(Func _x2c_func_binding_65, const FuncArg * _x2c_func_argv_65);
+
+static Var _x2c_func_adapt_66(Func _x2c_func_binding_66, const FuncArg * _x2c_func_argv_66);
+
+static Var _x2c_func_adapt_67(Func _x2c_func_binding_67, const FuncArg * _x2c_func_argv_67);
+
+static Var _x2c_func_adapt_68(Func _x2c_func_binding_68, const FuncArg * _x2c_func_argv_68);
+
+static Var _x2c_func_adapt_69(Func _x2c_func_binding_69, const FuncArg * _x2c_func_argv_69);
+
+static Var _x2c_func_adapt_70(Func _x2c_func_binding_70, const FuncArg * _x2c_func_argv_70);
+
+static Var _x2c_func_adapt_71(Func _x2c_func_binding_71, const FuncArg * _x2c_func_argv_71);
+
+static Var _x2c_func_adapt_72(Func _x2c_func_binding_72, const FuncArg * _x2c_func_argv_72);
+
+static Var _x2c_func_adapt_73(Func _x2c_func_binding_73, const FuncArg * _x2c_func_argv_73);
+
+static Var _x2c_func_adapt_74(Func _x2c_func_binding_74, const FuncArg * _x2c_func_argv_74);
+
+static Var _x2c_func_adapt_75(Func _x2c_func_binding_75, const FuncArg * _x2c_func_argv_75);
+
+static Var _x2c_func_adapt_76(Func _x2c_func_binding_76, const FuncArg * _x2c_func_argv_76);
+
+static Var _x2c_func_adapt_77(Func _x2c_func_binding_77, const FuncArg * _x2c_func_argv_77);
+
+static Var _x2c_func_adapt_78(Func _x2c_func_binding_78, const FuncArg * _x2c_func_argv_78);
+
+static Var _x2c_func_adapt_79(Func _x2c_func_binding_79, const FuncArg * _x2c_func_argv_79);
+
+static Var _x2c_func_adapt_80(Func _x2c_func_binding_80, const FuncArg * _x2c_func_argv_80);
+
+static Var _x2c_func_adapt_81(Func _x2c_func_binding_81, const FuncArg * _x2c_func_argv_81);
+
+static Var _x2c_func_adapt_82(Func _x2c_func_binding_82, const FuncArg * _x2c_func_argv_82);
+
+static Var _x2c_func_adapt_83(Func _x2c_func_binding_83, const FuncArg * _x2c_func_argv_83);
+
+static Var _x2c_func_adapt_84(Func _x2c_func_binding_84, const FuncArg * _x2c_func_argv_84);
+
+static Var _x2c_func_adapt_85(Func _x2c_func_binding_85, const FuncArg * _x2c_func_argv_85);
+
+static Var _x2c_func_adapt_86(Func _x2c_func_binding_86, const FuncArg * _x2c_func_argv_86);
+
+static Var _x2c_func_adapt_87(Func _x2c_func_binding_87, const FuncArg * _x2c_func_argv_87);
+
+static Var _x2c_func_adapt_88(Func _x2c_func_binding_88, const FuncArg * _x2c_func_argv_88);
+
+static Var _x2c_func_adapt_89(Func _x2c_func_binding_89, const FuncArg * _x2c_func_argv_89);
+
+static Var _x2c_func_adapt_90(Func _x2c_func_binding_90, const FuncArg * _x2c_func_argv_90);
+
+static Var _x2c_func_adapt_91(Func _x2c_func_binding_91, const FuncArg * _x2c_func_argv_91);
+
+static Var _x2c_func_adapt_92(Func _x2c_func_binding_92, const FuncArg * _x2c_func_argv_92);
+
+static Var _x2c_func_adapt_93(Func _x2c_func_binding_93, const FuncArg * _x2c_func_argv_93);
+
+static Var _x2c_func_adapt_94(Func _x2c_func_binding_94, const FuncArg * _x2c_func_argv_94);
+
+static Var _x2c_func_adapt_95(Func _x2c_func_binding_95, const FuncArg * _x2c_func_argv_95);
+
+static Var _x2c_func_adapt_96(Func _x2c_func_binding_96, const FuncArg * _x2c_func_argv_96);
+
+static Var _x2c_func_adapt_97(Func _x2c_func_binding_97, const FuncArg * _x2c_func_argv_97);
+
+static Var _x2c_func_adapt_98(Func _x2c_func_binding_98, const FuncArg * _x2c_func_argv_98);
+
+static Var _x2c_func_adapt_99(Func _x2c_func_binding_99, const FuncArg * _x2c_func_argv_99);
+
+static Var _x2c_func_adapt_100(Func _x2c_func_binding_100, const FuncArg * _x2c_func_argv_100);
+
+static Var _x2c_func_adapt_101(Func _x2c_func_binding_101, const FuncArg * _x2c_func_argv_101);
+
+static Var _x2c_func_adapt_102(Func _x2c_func_binding_102, const FuncArg * _x2c_func_argv_102);
+
+static Var _x2c_func_adapt_103(Func _x2c_func_binding_103, const FuncArg * _x2c_func_argv_103);
+
+static Var _x2c_func_adapt_104(Func _x2c_func_binding_104, const FuncArg * _x2c_func_argv_104);
+
+static Var _x2c_func_adapt_105(Func _x2c_func_binding_105, const FuncArg * _x2c_func_argv_105);
+
+static Var _x2c_func_adapt_106(Func _x2c_func_binding_106, const FuncArg * _x2c_func_argv_106);
+
+static Var _x2c_func_adapt_107(Func _x2c_func_binding_107, const FuncArg * _x2c_func_argv_107);
+
+static Var _x2c_func_adapt_108(Func _x2c_func_binding_108, const FuncArg * _x2c_func_argv_108);
+
+static Var _x2c_func_adapt_109(Func _x2c_func_binding_109, const FuncArg * _x2c_func_argv_109);
+
+static Var _x2c_func_adapt_110(Func _x2c_func_binding_110, const FuncArg * _x2c_func_argv_110);
+
+static Var _x2c_func_adapt_111(Func _x2c_func_binding_111, const FuncArg * _x2c_func_argv_111);
+
+static Var _x2c_func_adapt_112(Func _x2c_func_binding_112, const FuncArg * _x2c_func_argv_112);
+
+static Var _x2c_func_adapt_113(Func _x2c_func_binding_113, const FuncArg * _x2c_func_argv_113);
+
+static Var _x2c_func_adapt_114(Func _x2c_func_binding_114, const FuncArg * _x2c_func_argv_114);
+
+static Var _x2c_func_adapt_115(Func _x2c_func_binding_115, const FuncArg * _x2c_func_argv_115);
+
+static Var _x2c_func_adapt_116(Func _x2c_func_binding_116, const FuncArg * _x2c_func_argv_116);
+
+static Var _x2c_func_adapt_117(Func _x2c_func_binding_117, const FuncArg * _x2c_func_argv_117);
+
+static Var _x2c_func_adapt_118(Func _x2c_func_binding_118, const FuncArg * _x2c_func_argv_118);
+
+static Var _x2c_func_adapt_119(Func _x2c_func_binding_119, const FuncArg * _x2c_func_argv_119);
+
+static Var _x2c_func_adapt_120(Func _x2c_func_binding_120, const FuncArg * _x2c_func_argv_120);
+
+static Var _x2c_func_adapt_121(Func _x2c_func_binding_121, const FuncArg * _x2c_func_argv_121);
+
+static Var _x2c_func_adapt_122(Func _x2c_func_binding_122, const FuncArg * _x2c_func_argv_122);
+
+static Var _x2c_func_adapt_123(Func _x2c_func_binding_123, const FuncArg * _x2c_func_argv_123);
+
+static Var _x2c_func_adapt_124(Func _x2c_func_binding_124, const FuncArg * _x2c_func_argv_124);
+
+static Var _x2c_func_adapt_125(Func _x2c_func_binding_125, const FuncArg * _x2c_func_argv_125);
+
+static Var _x2c_func_adapt_126(Func _x2c_func_binding_126, const FuncArg * _x2c_func_argv_126);
+
+static Var _x2c_func_adapt_127(Func _x2c_func_binding_127, const FuncArg * _x2c_func_argv_127);
+
+static Var _x2c_func_adapt_128(Func _x2c_func_binding_128, const FuncArg * _x2c_func_argv_128);
+
+static Var _x2c_func_adapt_129(Func _x2c_func_binding_129, const FuncArg * _x2c_func_argv_129);
+
+static Var _x2c_func_adapt_130(Func _x2c_func_binding_130, const FuncArg * _x2c_func_argv_130);
+
+static Var _x2c_func_adapt_131(Func _x2c_func_binding_131, const FuncArg * _x2c_func_argv_131);
+
+static Var _x2c_func_adapt_132(Func _x2c_func_binding_132, const FuncArg * _x2c_func_argv_132);
+
+static Var _x2c_func_adapt_133(Func _x2c_func_binding_133, const FuncArg * _x2c_func_argv_133);
+
+static Var _x2c_func_adapt_134(Func _x2c_func_binding_134, const FuncArg * _x2c_func_argv_134);
+
+static Var _x2c_func_adapt_135(Func _x2c_func_binding_135, const FuncArg * _x2c_func_argv_135);
+
+static Var _x2c_func_adapt_136(Func _x2c_func_binding_136, const FuncArg * _x2c_func_argv_136);
+
+static Var _x2c_func_adapt_137(Func _x2c_func_binding_137, const FuncArg * _x2c_func_argv_137);
+
+static Var _x2c_func_adapt_138(Func _x2c_func_binding_138, const FuncArg * _x2c_func_argv_138);
+
+static Var _x2c_func_adapt_139(Func _x2c_func_binding_139, const FuncArg * _x2c_func_argv_139);
+
+static Var _x2c_func_adapt_140(Func _x2c_func_binding_140, const FuncArg * _x2c_func_argv_140);
+
+static Var _x2c_func_adapt_141(Func _x2c_func_binding_141, const FuncArg * _x2c_func_argv_141);
+
+static Var _x2c_func_adapt_142(Func _x2c_func_binding_142, const FuncArg * _x2c_func_argv_142);
+
+static Var _x2c_func_adapt_143(Func _x2c_func_binding_143, const FuncArg * _x2c_func_argv_143);
+
+static Var _x2c_func_adapt_144(Func _x2c_func_binding_144, const FuncArg * _x2c_func_argv_144);
+
+static Var _x2c_func_adapt_145(Func _x2c_func_binding_145, const FuncArg * _x2c_func_argv_145);
+
+static Var _x2c_func_adapt_146(Func _x2c_func_binding_146, const FuncArg * _x2c_func_argv_146);
+
+static Var _x2c_func_adapt_147(Func _x2c_func_binding_147, const FuncArg * _x2c_func_argv_147);
+
+static Var _x2c_func_adapt_148(Func _x2c_func_binding_148, const FuncArg * _x2c_func_argv_148);
+
+static Var _x2c_func_adapt_149(Func _x2c_func_binding_149, const FuncArg * _x2c_func_argv_149);
+
+static Var _x2c_func_adapt_150(Func _x2c_func_binding_150, const FuncArg * _x2c_func_argv_150);
+
+static Var _x2c_func_adapt_151(Func _x2c_func_binding_151, const FuncArg * _x2c_func_argv_151);
+
+static Var _x2c_func_adapt_152(Func _x2c_func_binding_152, const FuncArg * _x2c_func_argv_152);
+
+static Var _x2c_func_adapt_153(Func _x2c_func_binding_153, const FuncArg * _x2c_func_argv_153);
+
+static Var _x2c_func_adapt_154(Func _x2c_func_binding_154, const FuncArg * _x2c_func_argv_154);
+
+static Var _x2c_func_adapt_155(Func _x2c_func_binding_155, const FuncArg * _x2c_func_argv_155);
+
+static Var _x2c_func_adapt_156(Func _x2c_func_binding_156, const FuncArg * _x2c_func_argv_156);
+
+static Var _x2c_func_adapt_157(Func _x2c_func_binding_157, const FuncArg * _x2c_func_argv_157);
+
+static Var _x2c_func_adapt_158(Func _x2c_func_binding_158, const FuncArg * _x2c_func_argv_158);
+
+static Var _x2c_func_adapt_159(Func _x2c_func_binding_159, const FuncArg * _x2c_func_argv_159);
+
+static Var _x2c_func_adapt_160(Func _x2c_func_binding_160, const FuncArg * _x2c_func_argv_160);
+
+static Var _x2c_func_adapt_161(Func _x2c_func_binding_161, const FuncArg * _x2c_func_argv_161);
+
+static Var _x2c_func_adapt_162(Func _x2c_func_binding_162, const FuncArg * _x2c_func_argv_162);
+
+static Var _x2c_func_adapt_163(Func _x2c_func_binding_163, const FuncArg * _x2c_func_argv_163);
+
+static Var _x2c_func_adapt_164(Func _x2c_func_binding_164, const FuncArg * _x2c_func_argv_164);
+
+static Var _x2c_func_adapt_165(Func _x2c_func_binding_165, const FuncArg * _x2c_func_argv_165);
+
+static Var _x2c_func_adapt_166(Func _x2c_func_binding_166, const FuncArg * _x2c_func_argv_166);
+
+static Var _x2c_func_adapt_167(Func _x2c_func_binding_167, const FuncArg * _x2c_func_argv_167);
+
+static Var _x2c_func_adapt_168(Func _x2c_func_binding_168, const FuncArg * _x2c_func_argv_168);
+
+static Var _x2c_func_adapt_169(Func _x2c_func_binding_169, const FuncArg * _x2c_func_argv_169);
+
+static Var _x2c_func_adapt_170(Func _x2c_func_binding_170, const FuncArg * _x2c_func_argv_170);
+
+static Var _x2c_func_adapt_171(Func _x2c_func_binding_171, const FuncArg * _x2c_func_argv_171);
+
+static Var _x2c_func_adapt_172(Func _x2c_func_binding_172, const FuncArg * _x2c_func_argv_172);
+
+static Var _x2c_func_adapt_173(Func _x2c_func_binding_173, const FuncArg * _x2c_func_argv_173);
+
+static Var _x2c_func_adapt_174(Func _x2c_func_binding_174, const FuncArg * _x2c_func_argv_174);
+
+static Var _x2c_func_adapt_175(Func _x2c_func_binding_175, const FuncArg * _x2c_func_argv_175);
+
+static Var _x2c_func_adapt_176(Func _x2c_func_binding_176, const FuncArg * _x2c_func_argv_176);
+
+static Var _x2c_func_adapt_177(Func _x2c_func_binding_177, const FuncArg * _x2c_func_argv_177);
+
+static Var _x2c_func_adapt_178(Func _x2c_func_binding_178, const FuncArg * _x2c_func_argv_178);
+
+static Var _x2c_func_adapt_179(Func _x2c_func_binding_179, const FuncArg * _x2c_func_argv_179);
+
+static Var _x2c_func_adapt_180(Func _x2c_func_binding_180, const FuncArg * _x2c_func_argv_180);
+
+static Var _x2c_func_adapt_181(Func _x2c_func_binding_181, const FuncArg * _x2c_func_argv_181);
+
+static Var _x2c_func_adapt_182(Func _x2c_func_binding_182, const FuncArg * _x2c_func_argv_182);
+
+static Var _x2c_func_adapt_183(Func _x2c_func_binding_183, const FuncArg * _x2c_func_argv_183);
+
+static Var _x2c_func_adapt_184(Func _x2c_func_binding_184, const FuncArg * _x2c_func_argv_184);
+
+static Var _x2c_func_adapt_185(Func _x2c_func_binding_185, const FuncArg * _x2c_func_argv_185);
+
+static Var _x2c_func_adapt_186(Func _x2c_func_binding_186, const FuncArg * _x2c_func_argv_186);
+
+static Var _x2c_func_adapt_187(Func _x2c_func_binding_187, const FuncArg * _x2c_func_argv_187);
+
+static Var _x2c_func_adapt_188(Func _x2c_func_binding_188, const FuncArg * _x2c_func_argv_188);
+
+static Var _x2c_func_adapt_189(Func _x2c_func_binding_189, const FuncArg * _x2c_func_argv_189);
+
+static Var _x2c_func_adapt_190(Func _x2c_func_binding_190, const FuncArg * _x2c_func_argv_190);
+
+static Var _x2c_func_adapt_191(Func _x2c_func_binding_191, const FuncArg * _x2c_func_argv_191);
+
+static Var _x2c_func_adapt_192(Func _x2c_func_binding_192, const FuncArg * _x2c_func_argv_192);
+
+static Var _x2c_func_adapt_193(Func _x2c_func_binding_193, const FuncArg * _x2c_func_argv_193);
+
+static Var _x2c_func_adapt_194(Func _x2c_func_binding_194, const FuncArg * _x2c_func_argv_194);
+
+static Var _x2c_func_adapt_195(Func _x2c_func_binding_195, const FuncArg * _x2c_func_argv_195);
+
+static Var _x2c_func_adapt_196(Func _x2c_func_binding_196, const FuncArg * _x2c_func_argv_196);
+
+static Var _x2c_func_adapt_197(Func _x2c_func_binding_197, const FuncArg * _x2c_func_argv_197);
+
+static Var _x2c_func_adapt_198(Func _x2c_func_binding_198, const FuncArg * _x2c_func_argv_198);
+
+static Var _x2c_func_adapt_199(Func _x2c_func_binding_199, const FuncArg * _x2c_func_argv_199);
+
+static Var _x2c_func_adapt_200(Func _x2c_func_binding_200, const FuncArg * _x2c_func_argv_200);
+
+static Var _x2c_func_adapt_201(Func _x2c_func_binding_201, const FuncArg * _x2c_func_argv_201);
+
+static Var _x2c_func_adapt_202(Func _x2c_func_binding_202, const FuncArg * _x2c_func_argv_202);
+
+static Var _x2c_func_adapt_203(Func _x2c_func_binding_203, const FuncArg * _x2c_func_argv_203);
+
+static Var _x2c_func_adapt_204(Func _x2c_func_binding_204, const FuncArg * _x2c_func_argv_204);
+
+static Var _x2c_func_adapt_205(Func _x2c_func_binding_205, const FuncArg * _x2c_func_argv_205);
+
+static Var _x2c_func_adapt_206(Func _x2c_func_binding_206, const FuncArg * _x2c_func_argv_206);
+
+static Var _x2c_func_adapt_207(Func _x2c_func_binding_207, const FuncArg * _x2c_func_argv_207);
+
+static Var _x2c_func_adapt_208(Func _x2c_func_binding_208, const FuncArg * _x2c_func_argv_208);
+
+static Var _x2c_func_adapt_209(Func _x2c_func_binding_209, const FuncArg * _x2c_func_argv_209);
+
+static Var _x2c_func_adapt_210(Func _x2c_func_binding_210, const FuncArg * _x2c_func_argv_210);
+
+static Var _x2c_func_adapt_211(Func _x2c_func_binding_211, const FuncArg * _x2c_func_argv_211);
+
+static Var _x2c_func_adapt_212(Func _x2c_func_binding_212, const FuncArg * _x2c_func_argv_212);
+
+static Var _x2c_func_adapt_213(Func _x2c_func_binding_213, const FuncArg * _x2c_func_argv_213);
+
+static Var _x2c_func_adapt_214(Func _x2c_func_binding_214, const FuncArg * _x2c_func_argv_214);
+
+static Var _x2c_func_adapt_215(Func _x2c_func_binding_215, const FuncArg * _x2c_func_argv_215);
+
+static Var _x2c_func_adapt_216(Func _x2c_func_binding_216, const FuncArg * _x2c_func_argv_216);
+
+static Var _x2c_func_adapt_217(Func _x2c_func_binding_217, const FuncArg * _x2c_func_argv_217);
+
+static Var _x2c_func_adapt_218(Func _x2c_func_binding_218, const FuncArg * _x2c_func_argv_218);
+
+static Var _x2c_func_adapt_219(Func _x2c_func_binding_219, const FuncArg * _x2c_func_argv_219);
+
+static Var _x2c_func_adapt_220(Func _x2c_func_binding_220, const FuncArg * _x2c_func_argv_220);
+
+static Var _x2c_func_adapt_221(Func _x2c_func_binding_221, const FuncArg * _x2c_func_argv_221);
+
+static Var _x2c_func_adapt_222(Func _x2c_func_binding_222, const FuncArg * _x2c_func_argv_222);
+
+static Var _x2c_func_adapt_223(Func _x2c_func_binding_223, const FuncArg * _x2c_func_argv_223);
+
+static Var _x2c_func_adapt_224(Func _x2c_func_binding_224, const FuncArg * _x2c_func_argv_224);
+
+static Var _x2c_func_adapt_225(Func _x2c_func_binding_225, const FuncArg * _x2c_func_argv_225);
+
+static Var _x2c_func_adapt_226(Func _x2c_func_binding_226, const FuncArg * _x2c_func_argv_226);
+
+static Var _x2c_func_adapt_227(Func _x2c_func_binding_227, const FuncArg * _x2c_func_argv_227);
+
+static Var _x2c_func_adapt_228(Func _x2c_func_binding_228, const FuncArg * _x2c_func_argv_228);
+
+static Var _x2c_func_adapt_229(Func _x2c_func_binding_229, const FuncArg * _x2c_func_argv_229);
+
+static Var _x2c_func_adapt_230(Func _x2c_func_binding_230, const FuncArg * _x2c_func_argv_230);
+
+static Var _x2c_func_adapt_231(Func _x2c_func_binding_231, const FuncArg * _x2c_func_argv_231);
+
+static Var _x2c_func_adapt_232(Func _x2c_func_binding_232, const FuncArg * _x2c_func_argv_232);
+
+static Var _x2c_func_adapt_233(Func _x2c_func_binding_233, const FuncArg * _x2c_func_argv_233);
+
+static Var _x2c_func_adapt_234(Func _x2c_func_binding_234, const FuncArg * _x2c_func_argv_234);
+
+static Var _x2c_func_adapt_235(Func _x2c_func_binding_235, const FuncArg * _x2c_func_argv_235);
+
+static Var _x2c_func_adapt_236(Func _x2c_func_binding_236, const FuncArg * _x2c_func_argv_236);
+
+static Var _x2c_func_adapt_237(Func _x2c_func_binding_237, const FuncArg * _x2c_func_argv_237);
+
+static Var _x2c_func_adapt_238(Func _x2c_func_binding_238, const FuncArg * _x2c_func_argv_238);
+
+static Var _x2c_func_adapt_239(Func _x2c_func_binding_239, const FuncArg * _x2c_func_argv_239);
+
+static Var _x2c_func_adapt_240(Func _x2c_func_binding_240, const FuncArg * _x2c_func_argv_240);
+
+static Var _x2c_func_adapt_241(Func _x2c_func_binding_241, const FuncArg * _x2c_func_argv_241);
+
+static Var _x2c_func_adapt_242(Func _x2c_func_binding_242, const FuncArg * _x2c_func_argv_242);
+
+static Var _x2c_func_adapt_243(Func _x2c_func_binding_243, const FuncArg * _x2c_func_argv_243);
+
+static Var _x2c_func_adapt_244(Func _x2c_func_binding_244, const FuncArg * _x2c_func_argv_244);
+
+static Var _x2c_func_adapt_245(Func _x2c_func_binding_245, const FuncArg * _x2c_func_argv_245);
+
+static Var _x2c_func_adapt_246(Func _x2c_func_binding_246, const FuncArg * _x2c_func_argv_246);
+
+static Var _x2c_func_adapt_247(Func _x2c_func_binding_247, const FuncArg * _x2c_func_argv_247);
+
+static Var _x2c_func_adapt_248(Func _x2c_func_binding_248, const FuncArg * _x2c_func_argv_248);
+
+static Var _x2c_func_adapt_249(Func _x2c_func_binding_249, const FuncArg * _x2c_func_argv_249);
+
+static Var _x2c_func_adapt_250(Func _x2c_func_binding_250, const FuncArg * _x2c_func_argv_250);
+
+static Var _x2c_func_adapt_251(Func _x2c_func_binding_251, const FuncArg * _x2c_func_argv_251);
+
+static Var _x2c_func_adapt_252(Func _x2c_func_binding_252, const FuncArg * _x2c_func_argv_252);
+
+static Var _x2c_func_adapt_253(Func _x2c_func_binding_253, const FuncArg * _x2c_func_argv_253);
+
+static Var _x2c_func_adapt_254(Func _x2c_func_binding_254, const FuncArg * _x2c_func_argv_254);
+
+static Var _x2c_func_adapt_255(Func _x2c_func_binding_255, const FuncArg * _x2c_func_argv_255);
+
+static Var _x2c_func_adapt_256(Func _x2c_func_binding_256, const FuncArg * _x2c_func_argv_256);
+
+static Var _x2c_func_adapt_257(Func _x2c_func_binding_257, const FuncArg * _x2c_func_argv_257);
+
+static Var _x2c_func_adapt_258(Func _x2c_func_binding_258, const FuncArg * _x2c_func_argv_258);
+
+static Var _x2c_func_adapt_259(Func _x2c_func_binding_259, const FuncArg * _x2c_func_argv_259);
+
+static Var _x2c_func_adapt_260(Func _x2c_func_binding_260, const FuncArg * _x2c_func_argv_260);
+
+static Var _x2c_func_adapt_261(Func _x2c_func_binding_261, const FuncArg * _x2c_func_argv_261);
+
+static Var _x2c_func_adapt_262(Func _x2c_func_binding_262, const FuncArg * _x2c_func_argv_262);
+
+static Var _x2c_func_adapt_263(Func _x2c_func_binding_263, const FuncArg * _x2c_func_argv_263);
+
+static Var _x2c_func_adapt_264(Func _x2c_func_binding_264, const FuncArg * _x2c_func_argv_264);
+
+static Var _x2c_func_adapt_265(Func _x2c_func_binding_265, const FuncArg * _x2c_func_argv_265);
+
+static Var _x2c_func_adapt_266(Func _x2c_func_binding_266, const FuncArg * _x2c_func_argv_266);
+
+static Var _x2c_func_adapt_267(Func _x2c_func_binding_267, const FuncArg * _x2c_func_argv_267);
+
+static Var _x2c_func_adapt_268(Func _x2c_func_binding_268, const FuncArg * _x2c_func_argv_268);
+
+static Var _x2c_func_adapt_269(Func _x2c_func_binding_269, const FuncArg * _x2c_func_argv_269);
+
+static Var _x2c_func_adapt_270(Func _x2c_func_binding_270, const FuncArg * _x2c_func_argv_270);
+
+static Var _x2c_func_adapt_271(Func _x2c_func_binding_271, const FuncArg * _x2c_func_argv_271);
+
+static Var _x2c_func_adapt_272(Func _x2c_func_binding_272, const FuncArg * _x2c_func_argv_272);
+
+static Var _x2c_func_adapt_273(Func _x2c_func_binding_273, const FuncArg * _x2c_func_argv_273);
+
+static Var _x2c_func_adapt_274(Func _x2c_func_binding_274, const FuncArg * _x2c_func_argv_274);
+
+static Var _x2c_func_adapt_275(Func _x2c_func_binding_275, const FuncArg * _x2c_func_argv_275);
+
+static Var _x2c_func_adapt_276(Func _x2c_func_binding_276, const FuncArg * _x2c_func_argv_276);
+
+static Var _x2c_func_adapt_277(Func _x2c_func_binding_277, const FuncArg * _x2c_func_argv_277);
+
+static Var _x2c_func_adapt_278(Func _x2c_func_binding_278, const FuncArg * _x2c_func_argv_278);
+
+static Var _x2c_func_adapt_279(Func _x2c_func_binding_279, const FuncArg * _x2c_func_argv_279);
+
+static Var _x2c_func_adapt_280(Func _x2c_func_binding_280, const FuncArg * _x2c_func_argv_280);
+
+static Var _x2c_func_adapt_281(Func _x2c_func_binding_281, const FuncArg * _x2c_func_argv_281);
+
+static Var _x2c_func_adapt_282(Func _x2c_func_binding_282, const FuncArg * _x2c_func_argv_282);
+
+static Var _x2c_func_adapt_283(Func _x2c_func_binding_283, const FuncArg * _x2c_func_argv_283);
+
+static Var _x2c_func_adapt_284(Func _x2c_func_binding_284, const FuncArg * _x2c_func_argv_284);
+
+static Var _x2c_func_adapt_285(Func _x2c_func_binding_285, const FuncArg * _x2c_func_argv_285);
+
+static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_func_argv_286);
+
+static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287);
+
+static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288);
+
+static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289);
+
+static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290);
+
+static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291);
+
+static Var _x2c_func_adapt_292(Func _x2c_func_binding_292, const FuncArg * _x2c_func_argv_292);
+
+static Var _x2c_func_adapt_293(Func _x2c_func_binding_293, const FuncArg * _x2c_func_argv_293);
+
+static Var _x2c_func_adapt_294(Func _x2c_func_binding_294, const FuncArg * _x2c_func_argv_294);
+
+static Var _x2c_func_adapt_295(Func _x2c_func_binding_295, const FuncArg * _x2c_func_argv_295);
+
+static Var _x2c_func_adapt_296(Func _x2c_func_binding_296, const FuncArg * _x2c_func_argv_296);
+
+static Var _x2c_func_adapt_297(Func _x2c_func_binding_297, const FuncArg * _x2c_func_argv_297);
+
+static Var _x2c_func_adapt_298(Func _x2c_func_binding_298, const FuncArg * _x2c_func_argv_298);
+
+static Var _x2c_func_adapt_299(Func _x2c_func_binding_299, const FuncArg * _x2c_func_argv_299);
+
+static Var _x2c_func_adapt_300(Func _x2c_func_binding_300, const FuncArg * _x2c_func_argv_300);
+
+static Var _x2c_func_adapt_301(Func _x2c_func_binding_301, const FuncArg * _x2c_func_argv_301);
+
+static Var _x2c_func_adapt_302(Func _x2c_func_binding_302, const FuncArg * _x2c_func_argv_302);
+
+static Var _x2c_func_adapt_303(Func _x2c_func_binding_303, const FuncArg * _x2c_func_argv_303);
+
+static Var _x2c_func_adapt_304(Func _x2c_func_binding_304, const FuncArg * _x2c_func_argv_304);
+
+static Var _x2c_func_adapt_305(Func _x2c_func_binding_305, const FuncArg * _x2c_func_argv_305);
+
+static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_func_argv_306);
+
+static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307);
+
+static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308);
+
+static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309);
+
+static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310);
+
+static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311);
+
+static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312);
+
+static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313);
+
+static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314);
+
+static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315);
+
+static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316);
+
+static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317);
+
+static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318);
+
+static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319);
+
+static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320);
+
+static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321);
+
+static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322);
+
+static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323);
+
+static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324);
+
+static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325);
+
+static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326);
+
+static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327);
+
+static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328);
+
+static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329);
+
+static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330);
+
+static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331);
+
+static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332);
+
+static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333);
+
+static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334);
+
+static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335);
+
+static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336);
+
+static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337);
+
+static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_func_argv_338);
+
+static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339);
+
+static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340);
+
+static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341);
+
+static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342);
+
+static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343);
+
+static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344);
+
+static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345);
+
+static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346);
+
+static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347);
+
+static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348);
+
+static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349);
+
+static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350);
+
+static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351);
+
+static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352);
+
+static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353);
+
+static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354);
+
+static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355);
+
+static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356);
+
+static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357);
+
+static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358);
+
+static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359);
+
+static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360);
+
+static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361);
+
+static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362);
+
+static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363);
+
+static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364);
+
+static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365);
+
+static Var _x2c_func_adapt_366(Func _x2c_func_binding_366, const FuncArg * _x2c_func_argv_366);
+
+static Var _x2c_func_adapt_367(Func _x2c_func_binding_367, const FuncArg * _x2c_func_argv_367);
+
+static Var _x2c_func_adapt_368(Func _x2c_func_binding_368, const FuncArg * _x2c_func_argv_368);
+
+static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_func_argv_369);
+
+static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370);
+
+static Var _x2c_func_adapt_371(Func _x2c_func_binding_371, const FuncArg * _x2c_func_argv_371);
+
+static Var _x2c_func_adapt_372(Func _x2c_func_binding_372, const FuncArg * _x2c_func_argv_372);
+
+static Var _x2c_func_adapt_373(Func _x2c_func_binding_373, const FuncArg * _x2c_func_argv_373);
+
+static Var _x2c_func_adapt_374(Func _x2c_func_binding_374, const FuncArg * _x2c_func_argv_374);
+
+static Var _x2c_func_adapt_375(Func _x2c_func_binding_375, const FuncArg * _x2c_func_argv_375);
+
+static Var _x2c_func_adapt_376(Func _x2c_func_binding_376, const FuncArg * _x2c_func_argv_376);
+
+static Var _x2c_func_adapt_377(Func _x2c_func_binding_377, const FuncArg * _x2c_func_argv_377);
+
+static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_func_argv_378);
+
+static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379);
+
+static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380);
+
+static Var _x2c_func_adapt_381(Func _x2c_func_binding_381, const FuncArg * _x2c_func_argv_381);
+
+static Var _x2c_func_adapt_382(Func _x2c_func_binding_382, const FuncArg * _x2c_func_argv_382);
+
+static Var _x2c_func_adapt_383(Func _x2c_func_binding_383, const FuncArg * _x2c_func_argv_383);
+
+static Var _x2c_func_adapt_384(Func _x2c_func_binding_384, const FuncArg * _x2c_func_argv_384);
+
+static Var _x2c_func_adapt_385(Func _x2c_func_binding_385, const FuncArg * _x2c_func_argv_385);
+
+static Var _x2c_func_adapt_386(Func _x2c_func_binding_386, const FuncArg * _x2c_func_argv_386);
+
+static Var _x2c_func_adapt_387(Func _x2c_func_binding_387, const FuncArg * _x2c_func_argv_387);
+
+static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_func_argv_388);
+
+static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389);
+
+static Var _x2c_func_adapt_390(Func _x2c_func_binding_390, const FuncArg * _x2c_func_argv_390);
+
+static Var _x2c_func_adapt_391(Func _x2c_func_binding_391, const FuncArg * _x2c_func_argv_391);
+
+static Var _x2c_func_adapt_392(Func _x2c_func_binding_392, const FuncArg * _x2c_func_argv_392);
+
+static Var _x2c_func_adapt_393(Func _x2c_func_binding_393, const FuncArg * _x2c_func_argv_393);
+
+static Var _x2c_func_adapt_394(Func _x2c_func_binding_394, const FuncArg * _x2c_func_argv_394);
+
+static Var _x2c_func_adapt_395(Func _x2c_func_binding_395, const FuncArg * _x2c_func_argv_395);
+
+static Var _x2c_func_adapt_396(Func _x2c_func_binding_396, const FuncArg * _x2c_func_argv_396);
+
+static Var _x2c_func_adapt_397(Func _x2c_func_binding_397, const FuncArg * _x2c_func_argv_397);
+
+static Var _x2c_func_adapt_398(Func _x2c_func_binding_398, const FuncArg * _x2c_func_argv_398);
+
+static Var _x2c_func_adapt_399(Func _x2c_func_binding_399, const FuncArg * _x2c_func_argv_399);
+
+static Var _x2c_func_adapt_400(Func _x2c_func_binding_400, const FuncArg * _x2c_func_argv_400);
+
+static Var _x2c_func_adapt_401(Func _x2c_func_binding_401, const FuncArg * _x2c_func_argv_401);
+
+static Var _x2c_func_adapt_402(Func _x2c_func_binding_402, const FuncArg * _x2c_func_argv_402);
+
+static Var _x2c_func_adapt_403(Func _x2c_func_binding_403, const FuncArg * _x2c_func_argv_403);
+
+static Var _x2c_func_adapt_404(Func _x2c_func_binding_404, const FuncArg * _x2c_func_argv_404);
+
+static Var _x2c_func_adapt_405(Func _x2c_func_binding_405, const FuncArg * _x2c_func_argv_405);
+
+static Var _x2c_func_adapt_406(Func _x2c_func_binding_406, const FuncArg * _x2c_func_argv_406);
+
+static Var _x2c_func_adapt_407(Func _x2c_func_binding_407, const FuncArg * _x2c_func_argv_407);
+
+static Var _x2c_func_adapt_408(Func _x2c_func_binding_408, const FuncArg * _x2c_func_argv_408);
+
+static Var _x2c_func_adapt_409(Func _x2c_func_binding_409, const FuncArg * _x2c_func_argv_409);
+
+static Var _x2c_func_adapt_410(Func _x2c_func_binding_410, const FuncArg * _x2c_func_argv_410);
+
+static Var _x2c_func_adapt_411(Func _x2c_func_binding_411, const FuncArg * _x2c_func_argv_411);
+
+static Var _x2c_func_adapt_412(Func _x2c_func_binding_412, const FuncArg * _x2c_func_argv_412);
+
+static Var _x2c_func_adapt_413(Func _x2c_func_binding_413, const FuncArg * _x2c_func_argv_413);
+
+static Var _x2c_func_adapt_414(Func _x2c_func_binding_414, const FuncArg * _x2c_func_argv_414);
+
+static Var _x2c_func_adapt_415(Func _x2c_func_binding_415, const FuncArg * _x2c_func_argv_415);
+
+static Var _x2c_func_adapt_416(Func _x2c_func_binding_416, const FuncArg * _x2c_func_argv_416);
+
+static Var _x2c_func_adapt_417(Func _x2c_func_binding_417, const FuncArg * _x2c_func_argv_417);
+
+static Var _x2c_func_adapt_418(Func _x2c_func_binding_418, const FuncArg * _x2c_func_argv_418);
+
+static Var _x2c_func_adapt_419(Func _x2c_func_binding_419, const FuncArg * _x2c_func_argv_419);
+
+static Var _x2c_func_adapt_420(Func _x2c_func_binding_420, const FuncArg * _x2c_func_argv_420);
+
+static Var _x2c_func_adapt_421(Func _x2c_func_binding_421, const FuncArg * _x2c_func_argv_421);
+
+static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_func_argv_422);
+
+static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423);
+
+static Var _x2c_func_adapt_424(Func _x2c_func_binding_424, const FuncArg * _x2c_func_argv_424);
+
+static Var _x2c_func_adapt_425(Func _x2c_func_binding_425, const FuncArg * _x2c_func_argv_425);
+
+static Var _x2c_func_adapt_426(Func _x2c_func_binding_426, const FuncArg * _x2c_func_argv_426);
+
+static Var _x2c_func_adapt_427(Func _x2c_func_binding_427, const FuncArg * _x2c_func_argv_427);
+
+static Var _x2c_func_adapt_428(Func _x2c_func_binding_428, const FuncArg * _x2c_func_argv_428);
+
+static Var _x2c_func_adapt_429(Func _x2c_func_binding_429, const FuncArg * _x2c_func_argv_429);
+
+static Var _x2c_func_adapt_430(Func _x2c_func_binding_430, const FuncArg * _x2c_func_argv_430);
+
+static Var _x2c_func_adapt_431(Func _x2c_func_binding_431, const FuncArg * _x2c_func_argv_431);
+
+static Var _x2c_func_adapt_432(Func _x2c_func_binding_432, const FuncArg * _x2c_func_argv_432);
+
+static Var _x2c_func_adapt_433(Func _x2c_func_binding_433, const FuncArg * _x2c_func_argv_433);
+
+static Var _x2c_func_adapt_434(Func _x2c_func_binding_434, const FuncArg * _x2c_func_argv_434);
+
+static Var _x2c_func_adapt_435(Func _x2c_func_binding_435, const FuncArg * _x2c_func_argv_435);
+
+static Var _x2c_func_adapt_436(Func _x2c_func_binding_436, const FuncArg * _x2c_func_argv_436);
+
+static Var _x2c_func_adapt_437(Func _x2c_func_binding_437, const FuncArg * _x2c_func_argv_437);
+
+static Var _x2c_func_adapt_438(Func _x2c_func_binding_438, const FuncArg * _x2c_func_argv_438);
+
+static Var _x2c_func_adapt_439(Func _x2c_func_binding_439, const FuncArg * _x2c_func_argv_439);
+
+static Var _x2c_func_adapt_440(Func _x2c_func_binding_440, const FuncArg * _x2c_func_argv_440);
+
+static Var _x2c_func_adapt_441(Func _x2c_func_binding_441, const FuncArg * _x2c_func_argv_441);
+
+static Var _x2c_func_adapt_442(Func _x2c_func_binding_442, const FuncArg * _x2c_func_argv_442);
+
+static Var _x2c_func_adapt_443(Func _x2c_func_binding_443, const FuncArg * _x2c_func_argv_443);
+
+static Var _x2c_func_adapt_444(Func _x2c_func_binding_444, const FuncArg * _x2c_func_argv_444);
+
+static Var _x2c_func_adapt_445(Func _x2c_func_binding_445, const FuncArg * _x2c_func_argv_445);
+
+static Var _x2c_func_adapt_446(Func _x2c_func_binding_446, const FuncArg * _x2c_func_argv_446);
+
+static Var _x2c_func_adapt_447(Func _x2c_func_binding_447, const FuncArg * _x2c_func_argv_447);
+
+static Var _x2c_func_adapt_448(Func _x2c_func_binding_448, const FuncArg * _x2c_func_argv_448);
+
+static Var _x2c_func_adapt_449(Func _x2c_func_binding_449, const FuncArg * _x2c_func_argv_449);
+
+static Var _x2c_func_adapt_450(Func _x2c_func_binding_450, const FuncArg * _x2c_func_argv_450);
+
+static Var _x2c_func_adapt_451(Func _x2c_func_binding_451, const FuncArg * _x2c_func_argv_451);
+
+static Var _x2c_func_adapt_452(Func _x2c_func_binding_452, const FuncArg * _x2c_func_argv_452);
+
+static Var _x2c_func_adapt_453(Func _x2c_func_binding_453, const FuncArg * _x2c_func_argv_453);
+
+static Var _x2c_func_adapt_454(Func _x2c_func_binding_454, const FuncArg * _x2c_func_argv_454);
+
+static Var _x2c_func_adapt_455(Func _x2c_func_binding_455, const FuncArg * _x2c_func_argv_455);
+
+static Var _x2c_func_adapt_456(Func _x2c_func_binding_456, const FuncArg * _x2c_func_argv_456);
+
+static Var _x2c_func_adapt_457(Func _x2c_func_binding_457, const FuncArg * _x2c_func_argv_457);
+
+static Var _x2c_func_adapt_458(Func _x2c_func_binding_458, const FuncArg * _x2c_func_argv_458);
+
+static Var _x2c_func_adapt_459(Func _x2c_func_binding_459, const FuncArg * _x2c_func_argv_459);
+
+static Var _x2c_func_adapt_460(Func _x2c_func_binding_460, const FuncArg * _x2c_func_argv_460);
+
+static Var _x2c_func_adapt_461(Func _x2c_func_binding_461, const FuncArg * _x2c_func_argv_461);
+
+static Var _x2c_func_adapt_462(Func _x2c_func_binding_462, const FuncArg * _x2c_func_argv_462);
+
+static Var _x2c_func_adapt_463(Func _x2c_func_binding_463, const FuncArg * _x2c_func_argv_463);
+
+static Var _x2c_func_adapt_464(Func _x2c_func_binding_464, const FuncArg * _x2c_func_argv_464);
+
+static Var _x2c_func_adapt_465(Func _x2c_func_binding_465, const FuncArg * _x2c_func_argv_465);
+
+static Var _x2c_func_adapt_466(Func _x2c_func_binding_466, const FuncArg * _x2c_func_argv_466);
+
+static Var _x2c_func_adapt_467(Func _x2c_func_binding_467, const FuncArg * _x2c_func_argv_467);
+
+static Var _x2c_func_adapt_468(Func _x2c_func_binding_468, const FuncArg * _x2c_func_argv_468);
+
+static Var _x2c_func_adapt_469(Func _x2c_func_binding_469, const FuncArg * _x2c_func_argv_469);
+
+static Var _x2c_func_adapt_470(Func _x2c_func_binding_470, const FuncArg * _x2c_func_argv_470);
+
+static Var _x2c_func_adapt_471(Func _x2c_func_binding_471, const FuncArg * _x2c_func_argv_471);
+
+static Var _x2c_func_adapt_472(Func _x2c_func_binding_472, const FuncArg * _x2c_func_argv_472);
+
+static Var _x2c_func_adapt_473(Func _x2c_func_binding_473, const FuncArg * _x2c_func_argv_473);
+
+static Var _x2c_func_adapt_474(Func _x2c_func_binding_474, const FuncArg * _x2c_func_argv_474);
+
+static Var _x2c_func_adapt_475(Func _x2c_func_binding_475, const FuncArg * _x2c_func_argv_475);
+
+static Var _x2c_func_adapt_476(Func _x2c_func_binding_476, const FuncArg * _x2c_func_argv_476);
+
+static Var _x2c_func_adapt_477(Func _x2c_func_binding_477, const FuncArg * _x2c_func_argv_477);
+
+static Var _x2c_func_adapt_478(Func _x2c_func_binding_478, const FuncArg * _x2c_func_argv_478);
+
+static Var _x2c_func_adapt_479(Func _x2c_func_binding_479, const FuncArg * _x2c_func_argv_479);
+
+static Var _x2c_func_adapt_480(Func _x2c_func_binding_480, const FuncArg * _x2c_func_argv_480);
+
+static Var _x2c_func_adapt_481(Func _x2c_func_binding_481, const FuncArg * _x2c_func_argv_481);
+
+static Var _x2c_func_adapt_482(Func _x2c_func_binding_482, const FuncArg * _x2c_func_argv_482);
+
+static Var _x2c_func_adapt_483(Func _x2c_func_binding_483, const FuncArg * _x2c_func_argv_483);
+
+static Var _x2c_func_adapt_484(Func _x2c_func_binding_484, const FuncArg * _x2c_func_argv_484);
+
+static Var _x2c_func_adapt_485(Func _x2c_func_binding_485, const FuncArg * _x2c_func_argv_485);
+
+static Var _x2c_func_adapt_486(Func _x2c_func_binding_486, const FuncArg * _x2c_func_argv_486);
+
+static Var _x2c_func_adapt_487(Func _x2c_func_binding_487, const FuncArg * _x2c_func_argv_487);
+
+static Var _x2c_func_adapt_488(Func _x2c_func_binding_488, const FuncArg * _x2c_func_argv_488);
+
+static Var _x2c_func_adapt_489(Func _x2c_func_binding_489, const FuncArg * _x2c_func_argv_489);
+
+static Var _x2c_func_adapt_490(Func _x2c_func_binding_490, const FuncArg * _x2c_func_argv_490);
+
+static Var _x2c_func_adapt_491(Func _x2c_func_binding_491, const FuncArg * _x2c_func_argv_491);
+
+static Var _x2c_func_adapt_492(Func _x2c_func_binding_492, const FuncArg * _x2c_func_argv_492);
+
+static Var _x2c_func_adapt_493(Func _x2c_func_binding_493, const FuncArg * _x2c_func_argv_493);
+
+static Var _x2c_func_adapt_494(Func _x2c_func_binding_494, const FuncArg * _x2c_func_argv_494);
+
+static Var _x2c_func_adapt_495(Func _x2c_func_binding_495, const FuncArg * _x2c_func_argv_495);
+
+static Var _x2c_func_adapt_496(Func _x2c_func_binding_496, const FuncArg * _x2c_func_argv_496);
+
+static Var _x2c_func_adapt_497(Func _x2c_func_binding_497, const FuncArg * _x2c_func_argv_497);
+
+static Var _x2c_func_adapt_498(Func _x2c_func_binding_498, const FuncArg * _x2c_func_argv_498);
+
+static Var _x2c_func_adapt_499(Func _x2c_func_binding_499, const FuncArg * _x2c_func_argv_499);
+
+static Var _x2c_func_adapt_500(Func _x2c_func_binding_500, const FuncArg * _x2c_func_argv_500);
+
+static Var _x2c_func_adapt_501(Func _x2c_func_binding_501, const FuncArg * _x2c_func_argv_501);
+
+static Var _x2c_func_adapt_502(Func _x2c_func_binding_502, const FuncArg * _x2c_func_argv_502);
+
+static Var _x2c_func_adapt_503(Func _x2c_func_binding_503, const FuncArg * _x2c_func_argv_503);
+
+static Var _x2c_func_adapt_504(Func _x2c_func_binding_504, const FuncArg * _x2c_func_argv_504);
+
+static Var _x2c_func_adapt_505(Func _x2c_func_binding_505, const FuncArg * _x2c_func_argv_505);
+
+static Var _x2c_func_adapt_506(Func _x2c_func_binding_506, const FuncArg * _x2c_func_argv_506);
+
+static Var _x2c_func_adapt_507(Func _x2c_func_binding_507, const FuncArg * _x2c_func_argv_507);
+
+static Var _x2c_func_adapt_508(Func _x2c_func_binding_508, const FuncArg * _x2c_func_argv_508);
+
+static Var _x2c_func_adapt_509(Func _x2c_func_binding_509, const FuncArg * _x2c_func_argv_509);
+
+static Var _x2c_func_adapt_510(Func _x2c_func_binding_510, const FuncArg * _x2c_func_argv_510);
+
+static Var _x2c_func_adapt_511(Func _x2c_func_binding_511, const FuncArg * _x2c_func_argv_511);
+
+static Var _x2c_func_adapt_512(Func _x2c_func_binding_512, const FuncArg * _x2c_func_argv_512);
+
+static Var _x2c_func_adapt_513(Func _x2c_func_binding_513, const FuncArg * _x2c_func_argv_513);
+
+static Var _x2c_func_adapt_514(Func _x2c_func_binding_514, const FuncArg * _x2c_func_argv_514);
+
+static Var _x2c_func_adapt_515(Func _x2c_func_binding_515, const FuncArg * _x2c_func_argv_515);
+
+static Var _x2c_func_adapt_516(Func _x2c_func_binding_516, const FuncArg * _x2c_func_argv_516);
+
+static Var _x2c_func_adapt_517(Func _x2c_func_binding_517, const FuncArg * _x2c_func_argv_517);
+
+static Var _x2c_func_adapt_518(Func _x2c_func_binding_518, const FuncArg * _x2c_func_argv_518);
+
+static Var _x2c_func_adapt_519(Func _x2c_func_binding_519, const FuncArg * _x2c_func_argv_519);
+
+static Var _x2c_func_adapt_520(Func _x2c_func_binding_520, const FuncArg * _x2c_func_argv_520);
+
+static Var _x2c_func_adapt_521(Func _x2c_func_binding_521, const FuncArg * _x2c_func_argv_521);
+
+static Var _x2c_func_adapt_522(Func _x2c_func_binding_522, const FuncArg * _x2c_func_argv_522);
+
+static Var _x2c_func_adapt_523(Func _x2c_func_binding_523, const FuncArg * _x2c_func_argv_523);
+
+static Var _x2c_func_adapt_524(Func _x2c_func_binding_524, const FuncArg * _x2c_func_argv_524);
+
+static Var _x2c_func_adapt_525(Func _x2c_func_binding_525, const FuncArg * _x2c_func_argv_525);
+
+static Var _x2c_func_adapt_526(Func _x2c_func_binding_526, const FuncArg * _x2c_func_argv_526);
+
+static Var _x2c_func_adapt_527(Func _x2c_func_binding_527, const FuncArg * _x2c_func_argv_527);
+
+static Var _x2c_func_adapt_528(Func _x2c_func_binding_528, const FuncArg * _x2c_func_argv_528);
+
+static Var _x2c_func_adapt_529(Func _x2c_func_binding_529, const FuncArg * _x2c_func_argv_529);
+
+static Var _x2c_func_adapt_530(Func _x2c_func_binding_530, const FuncArg * _x2c_func_argv_530);
+
+static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_func_argv_531);
+
+static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532);
+
+static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533);
+
+static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534);
+
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535);
+
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536);
+
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537);
+
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538);
+
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539);
+
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540);
+
+static Var _x2c_func_adapt_541(Func _x2c_func_binding_541, const FuncArg * _x2c_func_argv_541);
+
+static Var _x2c_func_adapt_542(Func _x2c_func_binding_542, const FuncArg * _x2c_func_argv_542);
+
+static Var _x2c_func_adapt_543(Func _x2c_func_binding_543, const FuncArg * _x2c_func_argv_543);
+
+static Var _x2c_func_adapt_544(Func _x2c_func_binding_544, const FuncArg * _x2c_func_argv_544);
+
+static Var _x2c_func_adapt_545(Func _x2c_func_binding_545, const FuncArg * _x2c_func_argv_545);
+
+static Var _x2c_func_adapt_546(Func _x2c_func_binding_546, const FuncArg * _x2c_func_argv_546);
+
+static Var _x2c_func_adapt_547(Func _x2c_func_binding_547, const FuncArg * _x2c_func_argv_547);
+
+static Var _x2c_func_adapt_548(Func _x2c_func_binding_548, const FuncArg * _x2c_func_argv_548);
+
+static Var _x2c_func_adapt_549(Func _x2c_func_binding_549, const FuncArg * _x2c_func_argv_549);
+
+static Var _x2c_func_adapt_550(Func _x2c_func_binding_550, const FuncArg * _x2c_func_argv_550);
+
+static Var _x2c_func_adapt_551(Func _x2c_func_binding_551, const FuncArg * _x2c_func_argv_551);
+
+static Var _x2c_func_adapt_552(Func _x2c_func_binding_552, const FuncArg * _x2c_func_argv_552);
+
+static Var _x2c_func_adapt_553(Func _x2c_func_binding_553, const FuncArg * _x2c_func_argv_553);
+
+static Var _x2c_func_adapt_554(Func _x2c_func_binding_554, const FuncArg * _x2c_func_argv_554);
+
+static Var _x2c_func_adapt_555(Func _x2c_func_binding_555, const FuncArg * _x2c_func_argv_555);
+
+static Var _x2c_func_adapt_556(Func _x2c_func_binding_556, const FuncArg * _x2c_func_argv_556);
+
+static Var _x2c_func_adapt_557(Func _x2c_func_binding_557, const FuncArg * _x2c_func_argv_557);
+
+static Var _x2c_func_adapt_558(Func _x2c_func_binding_558, const FuncArg * _x2c_func_argv_558);
+
+static Var _x2c_func_adapt_559(Func _x2c_func_binding_559, const FuncArg * _x2c_func_argv_559);
+
+static Var _x2c_func_adapt_560(Func _x2c_func_binding_560, const FuncArg * _x2c_func_argv_560);
+
+static Var _x2c_func_adapt_561(Func _x2c_func_binding_561, const FuncArg * _x2c_func_argv_561);
+
+static Var _x2c_func_adapt_562(Func _x2c_func_binding_562, const FuncArg * _x2c_func_argv_562);
+
+static Var _x2c_func_adapt_563(Func _x2c_func_binding_563, const FuncArg * _x2c_func_argv_563);
+
+static Var _x2c_func_adapt_564(Func _x2c_func_binding_564, const FuncArg * _x2c_func_argv_564);
+
+static Var _x2c_func_adapt_565(Func _x2c_func_binding_565, const FuncArg * _x2c_func_argv_565);
+
+static Var _x2c_func_adapt_566(Func _x2c_func_binding_566, const FuncArg * _x2c_func_argv_566);
+
+static Var _x2c_func_adapt_567(Func _x2c_func_binding_567, const FuncArg * _x2c_func_argv_567);
+
+static Var _x2c_func_adapt_568(Func _x2c_func_binding_568, const FuncArg * _x2c_func_argv_568);
+
+static Var _x2c_func_adapt_569(Func _x2c_func_binding_569, const FuncArg * _x2c_func_argv_569);
+
+static Var _x2c_func_adapt_570(Func _x2c_func_binding_570, const FuncArg * _x2c_func_argv_570);
+
+static Var _x2c_func_adapt_571(Func _x2c_func_binding_571, const FuncArg * _x2c_func_argv_571);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -74,139 +2360,6792 @@ __attribute__((constructor)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = Symbol_var(437126);
-  _1 = String_new("String");
+  _1 = String_new("Var");
   _2 = String_var(_1);
   _3 = cons(_2, NULL);
   _4 = List_var(_3);
   _5 = cons(_4, NULL);
-  _6 = cons(_4, _5);
-  _7 = List_var(_6);
-  _8 = cons(_7, NULL);
-  _9 = cons(_0, _8);
-  _10 = List_var(_9);
-  _11 = String_new("List");
-  _12 = String_var(_11);
-  _13 = cons(_12, NULL);
-  _14 = cons(_10, _13);
-  _15 = cons(_4, _6);
-  _16 = cons(_4, _15);
-  _17 = List_var(_16);
+  _6 = List_var(_5);
+  _7 = cons(_6, NULL);
+  _8 = cons(_0, _7);
+  _9 = List_var(_8);
+  _10 = Symbol_var(19368);
+  _11 = cons(_10, NULL);
+  _12 = cons(_9, _11);
+  _13 = String_new("Func");
+  _14 = String_var(_13);
+  _15 = cons(_14, NULL);
+  _16 = List_var(_15);
+  _17 = Symbol_var(1474468213064);
   _18 = cons(_17, NULL);
-  _19 = cons(_0, _18);
-  _20 = List_var(_19);
-  _21 = cons(_20, _3);
-  _22 = List_var(_5);
-  _23 = cons(_22, NULL);
-  _24 = cons(_0, _23);
-  _25 = List_var(_24);
-  _26 = String_new("Var");
-  _27 = String_var(_26);
+  _19 = List_var(_18);
+  _20 = Symbol_var(54);
+  _21 = Symbol_var(7304424);
+  _22 = String_new("FuncArg");
+  _23 = String_var(_22);
+  _24 = cons(_23, NULL);
+  _25 = cons(_21, _24);
+  _26 = cons(_20, _25);
+  _27 = List_var(_26);
   _28 = cons(_27, NULL);
-  _29 = cons(_25, _28);
-  _30 = String_new("Path");
-  _31 = String_var(_30);
+  _29 = cons(_19, _28);
+  _30 = cons(_16, _29);
+  _31 = List_var(_30);
   _32 = cons(_31, NULL);
-  _33 = List_var(_32);
-  _34 = cons(_33, NULL);
-  _35 = List_var(_34);
-  _36 = cons(_35, NULL);
-  _37 = cons(_0, _36);
-  _38 = List_var(_37);
-  _39 = cons(_38, _32);
-  _40 = cons(_38, _3);
-  _41 = cons(_33, _34);
-  _42 = List_var(_41);
+  _33 = cons(_0, _32);
+  _34 = List_var(_33);
+  _35 = cons(_34, _3);
+  _36 = cons(_16, NULL);
+  _37 = List_var(_36);
+  _38 = cons(_37, NULL);
+  _39 = cons(_0, _38);
+  _40 = List_var(_39);
+  _41 = String_new("List");
+  _42 = String_var(_41);
   _43 = cons(_42, NULL);
-  _44 = cons(_0, _43);
-  _45 = List_var(_44);
-  _46 = cons(_45, _32);
-  _47 = String_new("Diff_lines");
-  _48 = String_new("Diff_unified");
-  _49 = String_new("Json_parse");
-  _50 = String_new("Path_basename");
-  _51 = String_new("Path_dirname");
-  _52 = String_new("Path_extension");
-  _53 = String_new("Path_join");
-  _54 = String_new("Path_stem");
+  _44 = cons(_40, _43);
+  _45 = String_new("String");
+  _46 = String_var(_45);
+  _47 = cons(_46, NULL);
+  _48 = List_var(_47);
+  _49 = Symbol_var(33330008396);
+  _50 = cons(_49, _11);
+  _51 = List_var(_50);
+  _52 = cons(_51, NULL);
+  _53 = cons(_51, _52);
+  _54 = cons(_48, _53);
+  _55 = List_var(_54);
+  _56 = cons(_55, NULL);
+  _57 = cons(_0, _56);
+  _58 = List_var(_57);
+  _59 = cons(_58, _11);
+  _60 = String_new("Split");
+  _61 = String_var(_60);
+  _62 = cons(_61, NULL);
+  _63 = List_var(_62);
+  _64 = cons(_49, _47);
+  _65 = List_var(_64);
+  _66 = cons(_65, NULL);
+  _67 = cons(_51, _66);
+  _68 = cons(_63, _67);
+  _69 = List_var(_68);
+  _70 = cons(_69, NULL);
+  _71 = cons(_0, _70);
+  _72 = List_var(_71);
+  _73 = cons(_72, _11);
+  _74 = List_var(_43);
+  _75 = cons(_49, _43);
+  _76 = List_var(_75);
+  _77 = cons(_49, _3);
+  _78 = List_var(_77);
+  _79 = cons(_78, NULL);
+  _80 = cons(_76, _79);
+  _81 = cons(_74, _80);
+  _82 = List_var(_81);
+  _83 = cons(_82, NULL);
+  _84 = cons(_0, _83);
+  _85 = List_var(_84);
+  _86 = cons(_85, _11);
+  _87 = String_new("Array");
+  _88 = String_var(_87);
+  _89 = cons(_88, NULL);
+  _90 = List_var(_89);
+  _91 = cons(_51, _79);
+  _92 = cons(_90, _91);
+  _93 = List_var(_92);
+  _94 = cons(_93, NULL);
+  _95 = cons(_0, _94);
+  _96 = List_var(_95);
+  _97 = cons(_96, _11);
+  _98 = String_new("Map");
+  _99 = String_var(_98);
+  _100 = cons(_99, NULL);
+  _101 = List_var(_100);
+  _102 = cons(_49, _18);
+  _103 = List_var(_102);
+  _104 = cons(_78, _79);
+  _105 = cons(_103, _104);
+  _106 = cons(_101, _105);
+  _107 = List_var(_106);
+  _108 = cons(_107, NULL);
+  _109 = cons(_0, _108);
+  _110 = List_var(_109);
+  _111 = cons(_110, _11);
+  _112 = String_new("Iter");
+  _113 = String_var(_112);
+  _114 = cons(_113, NULL);
+  _115 = List_var(_114);
+  _116 = cons(_115, _79);
+  _117 = List_var(_116);
+  _118 = cons(_117, NULL);
+  _119 = cons(_0, _118);
+  _120 = List_var(_119);
+  _121 = cons(_120, _11);
+  _122 = cons(_76, NULL);
+  _123 = cons(_4, _122);
+  _124 = cons(_74, _123);
+  _125 = List_var(_124);
+  _126 = cons(_125, NULL);
+  _127 = cons(_0, _126);
+  _128 = List_var(_127);
+  _129 = cons(_128, _11);
+  _130 = cons(_4, _79);
+  _131 = cons(_4, _130);
+  _132 = cons(_74, _131);
+  _133 = List_var(_132);
+  _134 = cons(_133, NULL);
+  _135 = cons(_0, _134);
+  _136 = List_var(_135);
+  _137 = cons(_136, _11);
+  _138 = cons(_78, _122);
+  _139 = cons(_4, _138);
+  _140 = cons(_74, _139);
+  _141 = List_var(_140);
+  _142 = cons(_141, NULL);
+  _143 = cons(_0, _142);
+  _144 = List_var(_143);
+  _145 = cons(_144, _11);
+  _146 = cons(_101, _130);
+  _147 = List_var(_146);
+  _148 = cons(_147, NULL);
+  _149 = cons(_0, _148);
+  _150 = List_var(_149);
+  _151 = cons(_150, _11);
+  _152 = cons(_9, _3);
+  _153 = cons(_74, NULL);
+  _154 = cons(_4, _153);
+  _155 = List_var(_154);
+  _156 = cons(_155, NULL);
+  _157 = cons(_0, _156);
+  _158 = List_var(_157);
+  _159 = cons(_158, _43);
+  _160 = cons(_4, _5);
+  _161 = List_var(_160);
+  _162 = cons(_161, NULL);
+  _163 = cons(_0, _162);
+  _164 = List_var(_163);
+  _165 = cons(_164, _3);
+  _166 = String_new("Symbol");
+  _167 = String_var(_166);
+  _168 = cons(_167, NULL);
+  _169 = cons(_9, _168);
+  _170 = List_var(_153);
+  _171 = cons(_170, NULL);
+  _172 = cons(_0, _171);
+  _173 = List_var(_172);
+  _174 = cons(_173, _43);
+  _175 = cons(_173, _11);
+  _176 = cons(_74, _5);
+  _177 = List_var(_176);
+  _178 = cons(_177, NULL);
+  _179 = cons(_0, _178);
+  _180 = List_var(_179);
+  _181 = cons(_180, _43);
+  _182 = cons(_74, _160);
+  _183 = List_var(_182);
+  _184 = cons(_183, NULL);
+  _185 = cons(_0, _184);
+  _186 = List_var(_185);
+  _187 = cons(_186, _3);
+  _188 = cons(_186, _43);
+  _189 = List_var(_168);
+  _190 = cons(_189, _5);
+  _191 = cons(_4, _190);
+  _192 = List_var(_191);
+  _193 = cons(_192, NULL);
+  _194 = cons(_0, _193);
+  _195 = List_var(_194);
+  _196 = cons(_195, _3);
+  _197 = cons(_173, _3);
+  _198 = cons(_48, NULL);
+  _199 = List_var(_198);
+  _200 = cons(_199, NULL);
+  _201 = cons(_0, _200);
+  _202 = List_var(_201);
+  _203 = cons(_202, _11);
+  _204 = cons(_48, _153);
+  _205 = List_var(_204);
+  _206 = cons(_205, NULL);
+  _207 = cons(_0, _206);
+  _208 = List_var(_207);
+  _209 = cons(_208, _47);
+  _210 = cons(_48, _198);
+  _211 = List_var(_210);
+  _212 = cons(_211, NULL);
+  _213 = cons(_0, _212);
+  _214 = List_var(_213);
+  _215 = cons(_214, _3);
+  _216 = List_var(_11);
+  _217 = cons(_216, NULL);
+  _218 = cons(_216, _217);
+  _219 = cons(_48, _218);
+  _220 = List_var(_219);
+  _221 = cons(_220, NULL);
+  _222 = cons(_0, _221);
+  _223 = List_var(_222);
+  _224 = cons(_223, _3);
+  _225 = cons(_202, _3);
+  _226 = cons(_4, _160);
+  _227 = List_var(_226);
+  _228 = cons(_227, NULL);
+  _229 = cons(_0, _228);
+  _230 = List_var(_229);
+  _231 = cons(_230, _3);
+  _232 = cons(_9, _43);
+  _233 = cons(_9, _89);
+  _234 = cons(_9, _100);
+  _235 = cons(_9, _47);
+  _236 = cons(_9, _18);
+  _237 = String_new("ListChar");
+  _238 = String_var(_237);
+  _239 = cons(_238, NULL);
+  _240 = cons(_173, _239);
+  _241 = String_new("ListShort");
+  _242 = String_var(_241);
+  _243 = cons(_242, NULL);
+  _244 = cons(_173, _243);
+  _245 = String_new("ListInt");
+  _246 = String_var(_245);
+  _247 = cons(_246, NULL);
+  _248 = cons(_173, _247);
+  _249 = String_new("ListFloat");
+  _250 = String_var(_249);
+  _251 = cons(_250, NULL);
+  _252 = cons(_173, _251);
+  _253 = String_new("ListDbl");
+  _254 = String_var(_253);
+  _255 = cons(_254, NULL);
+  _256 = cons(_173, _255);
+  _257 = String_new("ListString");
+  _258 = String_var(_257);
+  _259 = cons(_258, NULL);
+  _260 = cons(_173, _259);
+  _261 = String_new("ListSymbol");
+  _262 = String_var(_261);
+  _263 = cons(_262, NULL);
+  _264 = cons(_173, _263);
+  _265 = cons(_9, _239);
+  _266 = cons(_9, _243);
+  _267 = cons(_9, _247);
+  _268 = cons(_9, _251);
+  _269 = cons(_9, _255);
+  _270 = cons(_9, _259);
+  _271 = cons(_9, _263);
+  _272 = cons(_202, _47);
+  _273 = cons(_48, _217);
+  _274 = List_var(_273);
+  _275 = cons(_274, NULL);
+  _276 = cons(_0, _275);
+  _277 = List_var(_276);
+  _278 = cons(_277, _47);
+  _279 = cons(_277, _168);
+  _280 = cons(_202, _168);
+  _281 = cons(_74, _217);
+  _282 = List_var(_281);
+  _283 = cons(_282, NULL);
+  _284 = cons(_0, _283);
+  _285 = List_var(_284);
+  _286 = cons(_285, _3);
+  _287 = cons(_180, _11);
+  _288 = cons(_180, _3);
+  _289 = cons(_173, _89);
+  _290 = Symbol_var(1473096);
+  _291 = cons(_290, NULL);
+  _292 = List_var(_291);
+  _293 = cons(_292, NULL);
+  _294 = List_var(_293);
+  _295 = cons(_294, NULL);
+  _296 = cons(_0, _295);
+  _297 = List_var(_296);
+  _298 = cons(_297, _89);
+  _299 = cons(_90, _5);
+  _300 = List_var(_299);
+  _301 = cons(_300, NULL);
+  _302 = cons(_0, _301);
+  _303 = List_var(_302);
+  _304 = cons(_303, _3);
+  _305 = cons(_90, NULL);
+  _306 = List_var(_305);
+  _307 = cons(_306, NULL);
+  _308 = cons(_0, _307);
+  _309 = List_var(_308);
+  _310 = cons(_309, _3);
+  _311 = cons(_216, _5);
+  _312 = cons(_90, _311);
+  _313 = List_var(_312);
+  _314 = cons(_313, NULL);
+  _315 = cons(_0, _314);
+  _316 = List_var(_315);
+  _317 = cons(_316, _3);
+  _318 = cons(_90, _217);
+  _319 = List_var(_318);
+  _320 = cons(_319, NULL);
+  _321 = cons(_0, _320);
+  _322 = List_var(_321);
+  _323 = cons(_322, _3);
+  _324 = cons(_309, _43);
+  _325 = cons(_297, _100);
+  _326 = cons(_101, _5);
+  _327 = List_var(_326);
+  _328 = cons(_327, NULL);
+  _329 = cons(_0, _328);
+  _330 = List_var(_329);
+  _331 = cons(_330, _3);
+  _332 = cons(_48, _5);
+  _333 = List_var(_332);
+  _334 = cons(_333, NULL);
+  _335 = cons(_0, _334);
+  _336 = List_var(_335);
+  _337 = cons(_336, _47);
+  _338 = cons(_277, _11);
+  _339 = cons(_214, _47);
+  _340 = cons(_189, NULL);
+  _341 = cons(_4, _340);
+  _342 = List_var(_341);
+  _343 = cons(_342, NULL);
+  _344 = cons(_0, _343);
+  _345 = List_var(_344);
+  _346 = cons(_345, _11);
+  _347 = List_var(_340);
+  _348 = cons(_347, NULL);
+  _349 = cons(_0, _348);
+  _350 = List_var(_349);
+  _351 = cons(_350, _47);
+  _352 = String_new("ArrayChar");
+  _353 = String_var(_352);
+  _354 = cons(_353, NULL);
+  _355 = List_var(_354);
+  _356 = cons(_355, NULL);
+  _357 = List_var(_356);
+  _358 = cons(_357, NULL);
+  _359 = cons(_0, _358);
+  _360 = List_var(_359);
+  _361 = cons(_360, _3);
+  _362 = String_new("ArrayDbl");
+  _363 = String_var(_362);
+  _364 = cons(_363, NULL);
+  _365 = List_var(_364);
+  _366 = cons(_365, NULL);
+  _367 = List_var(_366);
+  _368 = cons(_367, NULL);
+  _369 = cons(_0, _368);
+  _370 = List_var(_369);
+  _371 = cons(_370, _3);
+  _372 = String_new("ArrayFloat");
+  _373 = String_var(_372);
+  _374 = cons(_373, NULL);
+  _375 = List_var(_374);
+  _376 = cons(_375, NULL);
+  _377 = List_var(_376);
+  _378 = cons(_377, NULL);
+  _379 = cons(_0, _378);
+  _380 = List_var(_379);
+  _381 = cons(_380, _3);
+  _382 = String_new("ArrayInt");
+  _383 = String_var(_382);
+  _384 = cons(_383, NULL);
+  _385 = List_var(_384);
+  _386 = cons(_385, NULL);
+  _387 = List_var(_386);
+  _388 = cons(_387, NULL);
+  _389 = cons(_0, _388);
+  _390 = List_var(_389);
+  _391 = cons(_390, _3);
+  _392 = String_new("ArrayLong");
+  _393 = String_var(_392);
+  _394 = cons(_393, NULL);
+  _395 = List_var(_394);
+  _396 = cons(_395, NULL);
+  _397 = List_var(_396);
+  _398 = cons(_397, NULL);
+  _399 = cons(_0, _398);
+  _400 = List_var(_399);
+  _401 = cons(_400, _3);
+  _402 = String_new("ArrayShort");
+  _403 = String_var(_402);
+  _404 = cons(_403, NULL);
+  _405 = List_var(_404);
+  _406 = cons(_405, NULL);
+  _407 = List_var(_406);
+  _408 = cons(_407, NULL);
+  _409 = cons(_0, _408);
+  _410 = List_var(_409);
+  _411 = cons(_410, _3);
+  _412 = String_new("ArrayString");
+  _413 = String_var(_412);
+  _414 = cons(_413, NULL);
+  _415 = List_var(_414);
+  _416 = cons(_415, NULL);
+  _417 = List_var(_416);
+  _418 = cons(_417, NULL);
+  _419 = cons(_0, _418);
+  _420 = List_var(_419);
+  _421 = cons(_420, _3);
+  _422 = cons(_309, _354);
+  _423 = cons(_309, _364);
+  _424 = cons(_309, _374);
+  _425 = cons(_309, _384);
+  _426 = cons(_309, _394);
+  _427 = cons(_309, _404);
+  _428 = cons(_309, _414);
+  _429 = String_new("size_t");
+  _430 = String_var(_429);
+  _431 = cons(_430, NULL);
+  _432 = cons(_309, _431);
+  _433 = cons(_309, _291);
+  _434 = cons(_90, _305);
+  _435 = List_var(_434);
+  _436 = cons(_435, NULL);
+  _437 = cons(_0, _436);
+  _438 = List_var(_437);
+  _439 = cons(_438, _11);
+  _440 = cons(_438, _89);
+  _441 = cons(_303, _11);
+  _442 = cons(_309, _89);
+  _443 = cons(_216, _218);
+  _444 = cons(_90, _443);
+  _445 = List_var(_444);
+  _446 = cons(_445, NULL);
+  _447 = cons(_0, _446);
+  _448 = List_var(_447);
+  _449 = cons(_448, _89);
+  _450 = cons(_303, _291);
+  _451 = cons(_115, NULL);
+  _452 = cons(_90, _451);
+  _453 = List_var(_452);
+  _454 = cons(_453, NULL);
+  _455 = cons(_0, _454);
+  _456 = List_var(_455);
+  _457 = cons(_456, _114);
+  _458 = cons(_90, _198);
+  _459 = List_var(_458);
+  _460 = cons(_459, NULL);
+  _461 = cons(_0, _460);
+  _462 = List_var(_461);
+  _463 = cons(_462, _47);
+  _464 = cons(_216, _340);
+  _465 = cons(_90, _464);
+  _466 = List_var(_465);
+  _467 = cons(_466, NULL);
+  _468 = cons(_0, _467);
+  _469 = List_var(_468);
+  _470 = cons(_469, _3);
+  _471 = cons(_90, _218);
+  _472 = List_var(_471);
+  _473 = cons(_472, NULL);
+  _474 = cons(_0, _473);
+  _475 = List_var(_474);
+  _476 = cons(_475, _89);
+  _477 = cons(_309, _47);
+  _478 = List_var(_431);
+  _479 = cons(_478, NULL);
+  _480 = cons(_90, _479);
+  _481 = List_var(_480);
+  _482 = cons(_481, NULL);
+  _483 = cons(_0, _482);
+  _484 = List_var(_483);
+  _485 = cons(_484, _291);
+  _486 = cons(_216, _305);
+  _487 = cons(_216, _486);
+  _488 = cons(_90, _487);
+  _489 = List_var(_488);
+  _490 = cons(_489, NULL);
+  _491 = cons(_0, _490);
+  _492 = List_var(_491);
+  _493 = cons(_492, _89);
+  _494 = cons(_309, _11);
+  _495 = cons(_216, _190);
+  _496 = cons(_90, _495);
+  _497 = List_var(_496);
+  _498 = cons(_497, NULL);
+  _499 = cons(_0, _498);
+  _500 = List_var(_499);
+  _501 = cons(_500, _3);
+  _502 = String_new("Buffer");
+  _503 = String_var(_502);
+  _504 = cons(_503, NULL);
+  _505 = List_var(_504);
+  _506 = cons(_505, NULL);
+  _507 = cons(_90, _506);
+  _508 = List_var(_507);
+  _509 = cons(_508, NULL);
+  _510 = cons(_0, _509);
+  _511 = List_var(_510);
+  _512 = cons(_511, _504);
+  _513 = List_var(_506);
+  _514 = cons(_513, NULL);
+  _515 = cons(_0, _514);
+  _516 = List_var(_515);
+  _517 = cons(_516, _504);
+  _518 = cons(_505, _217);
+  _519 = List_var(_518);
+  _520 = cons(_519, NULL);
+  _521 = cons(_0, _520);
+  _522 = List_var(_521);
+  _523 = cons(_522, _11);
+  _524 = List_var(_479);
+  _525 = cons(_524, NULL);
+  _526 = cons(_0, _525);
+  _527 = List_var(_526);
+  _528 = cons(_527, _504);
+  _529 = cons(_516, _47);
+  _530 = cons(_505, _479);
+  _531 = List_var(_530);
+  _532 = cons(_531, NULL);
+  _533 = cons(_0, _532);
+  _534 = List_var(_533);
+  _535 = cons(_534, _504);
+  _536 = cons(_516, _11);
+  _537 = Symbol_var(213092);
+  _538 = cons(_537, NULL);
+  _539 = cons(_21, _538);
+  _540 = cons(_20, _539);
+  _541 = List_var(_540);
+  _542 = cons(_541, NULL);
+  _543 = cons(_505, _542);
+  _544 = List_var(_543);
+  _545 = cons(_544, NULL);
+  _546 = cons(_0, _545);
+  _547 = List_var(_546);
+  _548 = cons(_547, _504);
+  _549 = List_var(_538);
+  _550 = cons(_549, NULL);
+  _551 = cons(_505, _550);
+  _552 = List_var(_551);
+  _553 = cons(_552, NULL);
+  _554 = cons(_0, _553);
+  _555 = List_var(_554);
+  _556 = cons(_555, _504);
+  _557 = cons(_541, _479);
+  _558 = cons(_505, _557);
+  _559 = List_var(_558);
+  _560 = cons(_559, NULL);
+  _561 = cons(_0, _560);
+  _562 = List_var(_561);
+  _563 = cons(_562, _504);
+  _564 = cons(_549, _479);
+  _565 = cons(_505, _564);
+  _566 = List_var(_565);
+  _567 = cons(_566, NULL);
+  _568 = cons(_0, _567);
+  _569 = List_var(_568);
+  _570 = cons(_569, _504);
+  _571 = String_new("Context");
+  _572 = String_var(_571);
+  _573 = cons(_572, NULL);
+  _574 = List_var(_573);
+  _575 = cons(_574, NULL);
+  _576 = List_var(_575);
+  _577 = cons(_576, NULL);
+  _578 = cons(_0, _577);
+  _579 = List_var(_578);
+  _580 = cons(_579, _291);
+  _581 = cons(_297, _573);
+  _582 = cons(_574, _5);
+  _583 = List_var(_582);
+  _584 = cons(_583, NULL);
+  _585 = cons(_0, _584);
+  _586 = List_var(_585);
+  _587 = cons(_586, _3);
+  _588 = cons(_214, _43);
+  _589 = cons(_48, _210);
+  _590 = cons(_48, _589);
+  _591 = List_var(_590);
+  _592 = cons(_591, NULL);
+  _593 = cons(_0, _592);
+  _594 = List_var(_593);
+  _595 = cons(_594, _47);
+  _596 = cons(_4, _451);
+  _597 = cons(_115, _596);
+  _598 = List_var(_597);
+  _599 = cons(_598, NULL);
+  _600 = cons(_0, _599);
+  _601 = List_var(_600);
+  _602 = cons(_601, _114);
+  _603 = List_var(_451);
+  _604 = cons(_603, NULL);
+  _605 = cons(_0, _604);
+  _606 = List_var(_605);
+  _607 = cons(_606, _89);
+  _608 = cons(_115, _451);
+  _609 = cons(_115, _608);
+  _610 = List_var(_609);
+  _611 = cons(_610, NULL);
+  _612 = cons(_0, _611);
+  _613 = List_var(_612);
+  _614 = cons(_613, _114);
+  _615 = cons(_606, _11);
+  _616 = cons(_216, _451);
+  _617 = cons(_115, _616);
+  _618 = List_var(_617);
+  _619 = cons(_618, NULL);
+  _620 = cons(_0, _619);
+  _621 = List_var(_620);
+  _622 = cons(_621, _114);
+  _623 = cons(_606, _43);
+  _624 = cons(_606, _3);
+  _625 = cons(_297, _114);
+  _626 = cons(_4, _616);
+  _627 = List_var(_626);
+  _628 = cons(_627, NULL);
+  _629 = cons(_0, _628);
+  _630 = List_var(_629);
+  _631 = cons(_630, _114);
+  _632 = List_var(_608);
+  _633 = cons(_632, NULL);
+  _634 = cons(_0, _633);
+  _635 = List_var(_634);
+  _636 = cons(_635, _114);
+  _637 = String_new("Job");
+  _638 = String_var(_637);
+  _639 = cons(_638, NULL);
+  _640 = List_var(_639);
+  _641 = cons(_640, NULL);
+  _642 = List_var(_641);
+  _643 = cons(_642, NULL);
+  _644 = cons(_0, _643);
+  _645 = List_var(_644);
+  _646 = cons(_645, _639);
+  _647 = cons(_645, _3);
+  _648 = cons(_74, _153);
+  _649 = List_var(_648);
+  _650 = cons(_649, NULL);
+  _651 = cons(_0, _650);
+  _652 = List_var(_651);
+  _653 = cons(_652, _11);
+  _654 = cons(_74, _443);
+  _655 = List_var(_654);
+  _656 = cons(_655, NULL);
+  _657 = cons(_0, _656);
+  _658 = List_var(_657);
+  _659 = cons(_658, _43);
+  _660 = cons(_173, _18);
+  _661 = cons(_19, NULL);
+  _662 = cons(_74, _661);
+  _663 = List_var(_662);
+  _664 = cons(_663, NULL);
+  _665 = cons(_0, _664);
+  _666 = List_var(_665);
+  _667 = cons(_666, _43);
+  _668 = cons(_74, _451);
+  _669 = List_var(_668);
+  _670 = cons(_669, NULL);
+  _671 = cons(_0, _670);
+  _672 = List_var(_671);
+  _673 = cons(_672, _114);
+  _674 = cons(_173, _639);
+  _675 = cons(_285, _43);
+  _676 = cons(_652, _43);
+  _677 = String_new("MapIntInt");
+  _678 = String_var(_677);
+  _679 = cons(_678, NULL);
+  _680 = List_var(_679);
+  _681 = cons(_680, NULL);
+  _682 = List_var(_681);
+  _683 = cons(_682, NULL);
+  _684 = cons(_0, _683);
+  _685 = List_var(_684);
+  _686 = cons(_685, _3);
+  _687 = String_new("MapLongDouble");
+  _688 = String_var(_687);
+  _689 = cons(_688, NULL);
+  _690 = List_var(_689);
+  _691 = cons(_690, NULL);
+  _692 = List_var(_691);
+  _693 = cons(_692, NULL);
+  _694 = cons(_0, _693);
+  _695 = List_var(_694);
+  _696 = cons(_695, _3);
+  _697 = String_new("MapStringInt");
+  _698 = String_var(_697);
+  _699 = cons(_698, NULL);
+  _700 = List_var(_699);
+  _701 = cons(_700, NULL);
+  _702 = List_var(_701);
+  _703 = cons(_702, NULL);
+  _704 = cons(_0, _703);
+  _705 = List_var(_704);
+  _706 = cons(_705, _3);
+  _707 = String_new("MapStringString");
+  _708 = String_var(_707);
+  _709 = cons(_708, NULL);
+  _710 = List_var(_709);
+  _711 = cons(_710, NULL);
+  _712 = List_var(_711);
+  _713 = cons(_712, NULL);
+  _714 = cons(_0, _713);
+  _715 = List_var(_714);
+  _716 = cons(_715, _3);
+  _717 = cons(_101, NULL);
+  _718 = List_var(_717);
+  _719 = cons(_718, NULL);
+  _720 = cons(_0, _719);
+  _721 = List_var(_720);
+  _722 = cons(_721, _291);
+  _723 = cons(_101, _717);
+  _724 = List_var(_723);
+  _725 = cons(_724, NULL);
+  _726 = cons(_0, _725);
+  _727 = List_var(_726);
+  _728 = cons(_727, _11);
+  _729 = cons(_330, _11);
+  _730 = cons(_721, _100);
+  _731 = cons(_101, _451);
+  _732 = List_var(_731);
+  _733 = cons(_732, NULL);
+  _734 = cons(_0, _733);
+  _735 = List_var(_734);
+  _736 = cons(_735, _114);
+  _737 = cons(_4, _661);
+  _738 = cons(_101, _737);
+  _739 = List_var(_738);
+  _740 = cons(_739, NULL);
+  _741 = cons(_0, _740);
+  _742 = List_var(_741);
+  _743 = cons(_742, _3);
+  _744 = cons(_101, _160);
+  _745 = List_var(_744);
+  _746 = cons(_745, NULL);
+  _747 = cons(_0, _746);
+  _748 = List_var(_747);
+  _749 = cons(_748, _3);
+  _750 = cons(_721, _18);
+  _751 = cons(_721, _43);
+  _752 = cons(_721, _679);
+  _753 = cons(_721, _689);
+  _754 = cons(_721, _699);
+  _755 = cons(_721, _709);
+  _756 = cons(_727, _100);
+  _757 = List_var(_661);
+  _758 = cons(_757, NULL);
+  _759 = cons(_0, _758);
+  _760 = List_var(_759);
+  _761 = cons(_760, _100);
+  _762 = cons(_101, _341);
+  _763 = List_var(_762);
+  _764 = cons(_763, NULL);
+  _765 = cons(_0, _764);
+  _766 = List_var(_765);
+  _767 = cons(_766, _3);
+  _768 = cons(_721, _47);
+  _769 = cons(_748, _291);
+  _770 = cons(_721, _11);
+  _771 = cons(_101, _191);
+  _772 = List_var(_771);
+  _773 = cons(_772, NULL);
+  _774 = cons(_0, _773);
+  _775 = List_var(_774);
+  _776 = cons(_775, _3);
+  _777 = cons(_101, _506);
+  _778 = List_var(_777);
+  _779 = cons(_778, NULL);
+  _780 = cons(_0, _779);
+  _781 = List_var(_780);
+  _782 = cons(_781, _504);
+  _783 = String_new("Path");
+  _784 = String_var(_783);
+  _785 = cons(_784, NULL);
+  _786 = List_var(_785);
+  _787 = cons(_786, NULL);
+  _788 = List_var(_787);
+  _789 = cons(_788, NULL);
+  _790 = cons(_0, _789);
+  _791 = List_var(_790);
+  _792 = cons(_791, _785);
+  _793 = cons(_791, _47);
+  _794 = cons(_786, _787);
+  _795 = List_var(_794);
+  _796 = cons(_795, NULL);
+  _797 = cons(_0, _796);
+  _798 = List_var(_797);
+  _799 = cons(_798, _785);
+  _800 = cons(_478, _479);
+  _801 = List_var(_800);
+  _802 = cons(_801, NULL);
+  _803 = cons(_0, _802);
+  _804 = List_var(_803);
+  _805 = cons(_20, _291);
+  _806 = cons(_804, _805);
+  _807 = String_new("Scope");
+  _808 = String_var(_807);
+  _809 = cons(_808, NULL);
+  _810 = List_var(_809);
+  _811 = cons(_810, NULL);
+  _812 = List_var(_811);
+  _813 = cons(_812, NULL);
+  _814 = cons(_0, _813);
+  _815 = List_var(_814);
+  _816 = cons(_815, _291);
+  _817 = List_var(_805);
+  _818 = cons(_817, NULL);
+  _819 = List_var(_818);
+  _820 = cons(_819, NULL);
+  _821 = cons(_0, _820);
+  _822 = List_var(_821);
+  _823 = cons(_822, _291);
+  _824 = cons(_527, _805);
+  _825 = cons(_21, _291);
+  _826 = cons(_20, _825);
+  _827 = List_var(_826);
+  _828 = cons(_827, _479);
+  _829 = List_var(_828);
+  _830 = cons(_829, NULL);
+  _831 = cons(_0, _830);
+  _832 = List_var(_831);
+  _833 = cons(_832, _805);
+  _834 = cons(_20, _809);
+  _835 = List_var(_834);
+  _836 = cons(_835, NULL);
+  _837 = cons(_817, _836);
+  _838 = List_var(_837);
+  _839 = cons(_838, NULL);
+  _840 = cons(_0, _839);
+  _841 = List_var(_840);
+  _842 = cons(_841, _291);
+  _843 = cons(_297, _809);
+  _844 = List_var(_542);
+  _845 = cons(_844, NULL);
+  _846 = cons(_0, _845);
+  _847 = List_var(_846);
+  _848 = cons(_847, _809);
+  _849 = cons(_297, _291);
+  _850 = List_var(_836);
+  _851 = cons(_850, NULL);
+  _852 = cons(_0, _851);
+  _853 = List_var(_852);
+  _854 = cons(_853, _291);
+  _855 = cons(_817, _479);
+  _856 = List_var(_855);
+  _857 = cons(_856, NULL);
+  _858 = cons(_0, _857);
+  _859 = List_var(_858);
+  _860 = cons(_859, _805);
+  _861 = cons(_63, _451);
+  _862 = List_var(_861);
+  _863 = cons(_862, NULL);
+  _864 = cons(_0, _863);
+  _865 = List_var(_864);
+  _866 = cons(_865, _114);
+  _867 = cons(_214, _11);
+  _868 = cons(_48, _219);
+  _869 = List_var(_868);
+  _870 = cons(_869, NULL);
+  _871 = cons(_0, _870);
+  _872 = List_var(_871);
+  _873 = cons(_872, _43);
+  _874 = cons(_872, _11);
+  _875 = cons(_202, _291);
+  _876 = cons(_48, _443);
+  _877 = List_var(_876);
+  _878 = cons(_877, NULL);
+  _879 = cons(_0, _878);
+  _880 = List_var(_879);
+  _881 = cons(_880, _47);
+  _882 = cons(_202, _18);
+  _883 = cons(_48, _451);
+  _884 = List_var(_883);
+  _885 = cons(_884, NULL);
+  _886 = cons(_0, _885);
+  _887 = List_var(_886);
+  _888 = cons(_887, _114);
+  _889 = cons(_202, _62);
+  _890 = cons(_549, _217);
+  _891 = List_var(_890);
+  _892 = cons(_891, NULL);
+  _893 = cons(_0, _892);
+  _894 = List_var(_893);
+  _895 = cons(_894, _47);
+  _896 = cons(_216, _550);
+  _897 = cons(_48, _896);
+  _898 = List_var(_897);
+  _899 = cons(_898, NULL);
+  _900 = cons(_0, _899);
+  _901 = List_var(_900);
+  _902 = cons(_901, _47);
+  _903 = List_var(_589);
+  _904 = cons(_903, NULL);
+  _905 = cons(_0, _904);
+  _906 = List_var(_905);
+  _907 = cons(_906, _47);
+  _908 = cons(_48, _273);
+  _909 = cons(_48, _908);
+  _910 = List_var(_909);
+  _911 = cons(_910, NULL);
+  _912 = cons(_0, _911);
+  _913 = List_var(_912);
+  _914 = cons(_913, _47);
+  _915 = cons(_277, _43);
+  _916 = List_var(_908);
+  _917 = cons(_916, NULL);
+  _918 = cons(_0, _917);
+  _919 = List_var(_918);
+  _920 = cons(_919, _43);
+  _921 = cons(_214, _62);
+  _922 = Symbol_var(301273866);
+  _923 = cons(_922, NULL);
+  _924 = cons(_20, _923);
+  _925 = List_var(_924);
+  _926 = cons(_925, NULL);
+  _927 = cons(_48, _926);
+  _928 = List_var(_927);
+  _929 = cons(_928, NULL);
+  _930 = cons(_0, _929);
+  _931 = List_var(_930);
+  _932 = cons(_931, _11);
+  _933 = Symbol_var(818062);
+  _934 = cons(_933, NULL);
+  _935 = cons(_20, _934);
+  _936 = List_var(_935);
+  _937 = cons(_936, NULL);
+  _938 = cons(_48, _937);
+  _939 = List_var(_938);
+  _940 = cons(_939, NULL);
+  _941 = cons(_0, _940);
+  _942 = List_var(_941);
+  _943 = cons(_942, _11);
+  _944 = cons(_189, _340);
+  _945 = List_var(_944);
+  _946 = cons(_945, NULL);
+  _947 = cons(_0, _946);
+  _948 = List_var(_947);
+  _949 = cons(_948, _11);
+  _950 = cons(_350, _538);
+  _951 = cons(_350, _11);
+  _952 = cons(_20, _168);
+  _953 = List_var(_952);
+  _954 = cons(_953, NULL);
+  _955 = cons(_48, _954);
+  _956 = List_var(_955);
+  _957 = cons(_956, NULL);
+  _958 = cons(_0, _957);
+  _959 = List_var(_958);
+  _960 = cons(_959, _11);
+  _961 = cons(_9, _354);
+  _962 = cons(_9, _364);
+  _963 = cons(_9, _374);
+  _964 = cons(_9, _384);
+  _965 = cons(_9, _394);
+  _966 = cons(_9, _404);
+  _967 = cons(_9, _414);
+  _968 = cons(_9, _114);
+  _969 = String_new("Block");
+  _970 = String_var(_969);
+  _971 = cons(_970, NULL);
+  _972 = cons(_9, _971);
+  _973 = cons(_9, _538);
+  _974 = cons(_164, _11);
+  _975 = cons(_345, _3);
+  _976 = cons(_9, _923);
+  _977 = List_var(_596);
+  _978 = cons(_977, NULL);
+  _979 = cons(_0, _978);
+  _980 = List_var(_979);
+  _981 = cons(_980, _114);
+  _982 = String_new("File");
+  _983 = String_var(_982);
+  _984 = cons(_983, NULL);
+  _985 = cons(_9, _984);
+  _986 = Symbol_var(13400168);
+  _987 = cons(_986, NULL);
+  _988 = cons(_9, _987);
+  _989 = cons(_9, _934);
+  _990 = cons(_9, _639);
+  _991 = String_new("JsonBool");
+  _992 = String_var(_991);
+  _993 = cons(_992, NULL);
+  _994 = cons(_9, _993);
+  _995 = cons(_933, _923);
+  _996 = cons(_9, _995);
+  _997 = cons(_933, _934);
+  _998 = cons(_9, _997);
+  _999 = cons(_9, _679);
+  _1000 = cons(_9, _689);
+  _1001 = cons(_9, _699);
+  _1002 = cons(_9, _709);
+  _1003 = cons(_297, _3);
+  _1004 = cons(_48, _340);
+  _1005 = List_var(_1004);
+  _1006 = cons(_1005, NULL);
+  _1007 = cons(_0, _1006);
+  _1008 = List_var(_1007);
+  _1009 = cons(_1008, _3);
+  _1010 = cons(_4, _341);
+  _1011 = List_var(_1010);
+  _1012 = cons(_1011, NULL);
+  _1013 = cons(_0, _1012);
+  _1014 = List_var(_1013);
+  _1015 = cons(_1014, _3);
+  _1016 = String_new("Regex");
+  _1017 = String_var(_1016);
+  _1018 = cons(_1017, NULL);
+  _1019 = cons(_9, _1018);
+  _1020 = String_new("RegexCapture");
+  _1021 = String_var(_1020);
+  _1022 = cons(_1021, NULL);
+  _1023 = cons(_9, _1022);
+  _1024 = String_new("RegexMatch");
+  _1025 = String_var(_1024);
+  _1026 = cons(_1025, NULL);
+  _1027 = cons(_9, _1026);
+  _1028 = Symbol_var(40402088);
+  _1029 = cons(_1028, NULL);
+  _1030 = cons(_9, _1029);
+  _1031 = cons(_17, _934);
+  _1032 = cons(_350, _1031);
+  _1033 = String_new("uchar");
+  _1034 = String_var(_1033);
+  _1035 = cons(_1034, NULL);
+  _1036 = cons(_9, _1035);
+  _1037 = String_new("uint");
+  _1038 = String_var(_1037);
+  _1039 = cons(_1038, NULL);
+  _1040 = cons(_9, _1039);
+  _1041 = String_new("ulong");
+  _1042 = String_var(_1041);
+  _1043 = cons(_1042, NULL);
+  _1044 = cons(_9, _1043);
+  _1045 = cons(_17, _997);
+  _1046 = cons(_9, _1045);
+  _1047 = cons(_9, _1031);
+  _1048 = cons(_4, _191);
+  _1049 = List_var(_1048);
+  _1050 = cons(_1049, NULL);
+  _1051 = cons(_0, _1050);
+  _1052 = List_var(_1051);
+  _1053 = cons(_1052, _3);
+  _1054 = String_new("ushort");
+  _1055 = String_var(_1054);
+  _1056 = cons(_1055, NULL);
+  _1057 = cons(_9, _1056);
+  _1058 = List_var(_217);
+  _1059 = cons(_1058, NULL);
+  _1060 = cons(_0, _1059);
+  _1061 = List_var(_1060);
+  _1062 = cons(_1061, _11);
+  _1063 = List_var(_923);
+  _1064 = cons(_1063, NULL);
+  _1065 = List_var(_1064);
+  _1066 = cons(_1065, NULL);
+  _1067 = cons(_0, _1066);
+  _1068 = List_var(_1067);
+  _1069 = cons(_1068, _923);
+  _1070 = List_var(_987);
+  _1071 = cons(_1070, NULL);
+  _1072 = List_var(_1071);
+  _1073 = cons(_1072, NULL);
+  _1074 = cons(_0, _1073);
+  _1075 = List_var(_1074);
+  _1076 = cons(_1075, _987);
+  _1077 = cons(_1063, _1064);
+  _1078 = List_var(_1077);
+  _1079 = cons(_1078, NULL);
+  _1080 = cons(_0, _1079);
+  _1081 = List_var(_1080);
+  _1082 = cons(_1081, _923);
+  _1083 = cons(_1070, _1071);
+  _1084 = List_var(_1083);
+  _1085 = cons(_1084, NULL);
+  _1086 = cons(_0, _1085);
+  _1087 = List_var(_1086);
+  _1088 = cons(_1087, _987);
+  _1089 = cons(_847, _923);
+  _1090 = cons(_847, _11);
+  _1091 = cons(_847, _934);
+  _1092 = cons(_847, _997);
+  _1093 = cons(_1063, _1077);
+  _1094 = List_var(_1093);
+  _1095 = cons(_1094, NULL);
+  _1096 = cons(_0, _1095);
+  _1097 = List_var(_1096);
+  _1098 = cons(_1097, _923);
+  _1099 = cons(_1070, _1083);
+  _1100 = List_var(_1099);
+  _1101 = cons(_1100, NULL);
+  _1102 = cons(_0, _1101);
+  _1103 = List_var(_1102);
+  _1104 = cons(_1103, _987);
+  _1105 = cons(_20, _11);
+  _1106 = List_var(_1105);
+  _1107 = cons(_1106, NULL);
+  _1108 = cons(_1063, _1107);
+  _1109 = List_var(_1108);
+  _1110 = cons(_1109, NULL);
+  _1111 = cons(_0, _1110);
+  _1112 = List_var(_1111);
+  _1113 = cons(_1112, _923);
+  _1114 = cons(_1070, _1107);
+  _1115 = List_var(_1114);
+  _1116 = cons(_1115, NULL);
+  _1117 = cons(_0, _1116);
+  _1118 = List_var(_1117);
+  _1119 = cons(_1118, _987);
+  _1120 = cons(_1068, _11);
+  _1121 = cons(_1075, _11);
+  _1122 = List_var(_934);
+  _1123 = cons(_1122, NULL);
+  _1124 = List_var(_1123);
+  _1125 = cons(_1124, NULL);
+  _1126 = cons(_0, _1125);
+  _1127 = List_var(_1126);
+  _1128 = cons(_1127, _934);
+  _1129 = cons(_1063, _217);
+  _1130 = List_var(_1129);
+  _1131 = cons(_1130, NULL);
+  _1132 = cons(_0, _1131);
+  _1133 = List_var(_1132);
+  _1134 = cons(_1133, _923);
+  _1135 = cons(_1070, _217);
+  _1136 = List_var(_1135);
+  _1137 = cons(_1136, NULL);
+  _1138 = cons(_0, _1137);
+  _1139 = List_var(_1138);
+  _1140 = cons(_1139, _987);
+  _1141 = List_var(_997);
+  _1142 = cons(_1141, NULL);
+  _1143 = List_var(_1142);
+  _1144 = cons(_1143, NULL);
+  _1145 = cons(_0, _1144);
+  _1146 = List_var(_1145);
+  _1147 = cons(_1146, _997);
+  _1148 = cons(_1068, _997);
+  _1149 = cons(_1075, _997);
+  _1150 = cons(_1068, _934);
+  _1151 = cons(_1075, _934);
+  _1152 = cons(_1063, _926);
+  _1153 = List_var(_1152);
+  _1154 = cons(_1153, NULL);
+  _1155 = cons(_0, _1154);
+  _1156 = List_var(_1155);
+  _1157 = cons(_1156, _923);
+  _1158 = cons(_20, _987);
+  _1159 = List_var(_1158);
+  _1160 = cons(_1159, NULL);
+  _1161 = cons(_1070, _1160);
+  _1162 = List_var(_1161);
+  _1163 = cons(_1162, NULL);
+  _1164 = cons(_0, _1163);
+  _1165 = List_var(_1164);
+  _1166 = cons(_1165, _987);
+  _1167 = cons(_847, _987);
+  _1168 = List_var(_995);
+  _1169 = cons(_1168, NULL);
+  _1170 = cons(_1063, _1169);
+  _1171 = List_var(_1170);
+  _1172 = cons(_1171, NULL);
+  _1173 = cons(_0, _1172);
+  _1174 = List_var(_1173);
+  _1175 = cons(_1174, _923);
+  _1176 = cons(_1070, _1169);
+  _1177 = List_var(_1176);
+  _1178 = cons(_1177, NULL);
+  _1179 = cons(_0, _1178);
+  _1180 = List_var(_1179);
+  _1181 = cons(_1180, _987);
+  _1182 = cons(_216, _616);
+  _1183 = cons(_216, _1182);
+  _1184 = List_var(_1183);
+  _1185 = cons(_1184, NULL);
+  _1186 = cons(_0, _1185);
+  _1187 = List_var(_1186);
+  _1188 = cons(_1187, _114);
+  _1189 = cons(_1063, _1108);
+  _1190 = List_var(_1189);
+  _1191 = cons(_1190, NULL);
+  _1192 = cons(_0, _1191);
+  _1193 = List_var(_1192);
+  _1194 = cons(_1193, _923);
+  _1195 = cons(_1070, _1114);
+  _1196 = List_var(_1195);
+  _1197 = cons(_1196, NULL);
+  _1198 = cons(_0, _1197);
+  _1199 = List_var(_1198);
+  _1200 = cons(_1199, _987);
+  _1201 = cons(_1063, _1123);
+  _1202 = List_var(_1201);
+  _1203 = cons(_1202, NULL);
+  _1204 = cons(_0, _1203);
+  _1205 = List_var(_1204);
+  _1206 = cons(_1205, _923);
+  _1207 = cons(_1070, _1123);
+  _1208 = List_var(_1207);
+  _1209 = cons(_1208, NULL);
+  _1210 = cons(_0, _1209);
+  _1211 = List_var(_1210);
+  _1212 = cons(_1211, _987);
+  _1213 = cons(_541, _542);
+  _1214 = List_var(_1213);
+  _1215 = cons(_1214, NULL);
+  _1216 = cons(_0, _1215);
+  _1217 = List_var(_1216);
+  _1218 = cons(_1217, _11);
+  _1219 = cons(_541, _557);
+  _1220 = List_var(_1219);
+  _1221 = cons(_1220, NULL);
+  _1222 = cons(_0, _1221);
+  _1223 = List_var(_1222);
+  _1224 = cons(_1223, _11);
+  _1225 = String_new("Var_is_void");
+  _1226 = String_new("Func_apply");
+  _1227 = String_new("Func_signature");
+  _1228 = String_new("String_try_next");
+  _1229 = String_new("Split_try_next");
+  _1230 = cons(_20, _538);
+  _1231 = String_new("List_try_next");
+  _1232 = Symbol_var(1318234344);
+  _1233 = cons(_1232, _43);
+  _1234 = cons(_20, _1233);
+  _1235 = Symbol_var(44977116);
+  _1236 = cons(_1235, _3);
+  _1237 = String_new("Array_try_next");
+  _1238 = String_new("Map_try_next");
+  _1239 = String_new("Iter_try_next");
+  _1240 = String_new("List_try_match");
+  _1241 = String_new("List_try_match_replace");
+  _1242 = String_new("List_try_search");
+  _1243 = String_new("Map_try_get");
+  _1244 = String_new("Map_try_del");
+  _1245 = String_new("Var_car");
+  _1246 = String_new("Var_cdr");
+  _1247 = String_new("Var_cons");
+  _1248 = String_new("lisp_atom");
+  _1249 = String_new("lisp_pair");
+  _1250 = String_new("lisp_list");
+  _1251 = String_new("lisp_eq");
+  _1252 = String_new("lisp_type");
+  _1253 = String_new("lisp_number");
+  _1254 = String_new("lisp_string");
+  _1255 = String_new("lisp_symbol");
+  _1256 = String_new("lisp_procedure");
+  _1257 = String_new("List_reverse");
+  _1258 = String_new("List_len");
+  _1259 = String_new("List_match");
+  _1260 = String_new("lisp_match_replace");
+  _1261 = String_new("List_search");
+  _1262 = String_new("List_search_replace");
+  _1263 = String_new("lisp_add");
+  _1264 = String_new("Var_binary");
+  _1265 = String_new("lisp_compare");
+  _1266 = String_new("lisp_plus");
+  _1267 = String_new("lisp_minus");
+  _1268 = String_new("lisp_times");
+  _1269 = String_new("lisp_divide");
+  _1270 = String_new("lisp_eq_chain");
+  _1271 = String_new("lisp_lt_chain");
+  _1272 = String_new("lisp_le_chain");
+  _1273 = String_new("lisp_gt_chain");
+  _1274 = String_new("lisp_ge_chain");
+  _1275 = String_new("lisp_str");
+  _1276 = String_new("lisp_repr");
+  _1277 = String_new("String_len");
+  _1278 = String_new("String_format");
+  _1279 = String_new("lisp_string_append");
+  _1280 = String_new("lisp_substring");
+  _1281 = String_new("lisp_string_downcase");
+  _1282 = String_new("lisp_read_file");
+  _1283 = String_new("lisp_write_file");
+  _1284 = String_new("List_sort");
+  _1285 = String_new("lisp_last");
+  _1286 = String_new("lisp_begin");
+  _1287 = String_new("lisp_member");
+  _1288 = String_new("lisp_assoc");
+  _1289 = String_new("lisp_append");
+  _1290 = String_new("lisp_not");
+  _1291 = String_new("lisp_null");
+  _1292 = String_new("lisp_sub");
+  _1293 = String_new("lisp_mul");
+  _1294 = String_new("lisp_div");
+  _1295 = String_new("lisp_mod");
+  _1296 = String_new("lisp_caar");
+  _1297 = String_new("lisp_cadr");
+  _1298 = String_new("lisp_cdar");
+  _1299 = String_new("lisp_cddr");
+  _1300 = String_new("lisp_caaar");
+  _1301 = String_new("lisp_caadr");
+  _1302 = String_new("lisp_cadar");
+  _1303 = String_new("lisp_caddr");
+  _1304 = String_new("lisp_cdaar");
+  _1305 = String_new("lisp_cdadr");
+  _1306 = String_new("lisp_cddar");
+  _1307 = String_new("lisp_cdddr");
+  _1308 = String_new("lisp_match");
+  _1309 = String_new("lisp_bound");
+  _1310 = String_new("lisp_search_replace");
+  _1311 = String_new("lisp_binder");
+  _1312 = String_new("lisp_binders");
+  _1313 = String_new("lisp_binder_lets");
+  _1314 = String_new("lisp_string_append_all");
+  _1315 = String_new("String_truth");
+  _1316 = String_new("Var_list");
+  _1317 = String_new("Var_array");
+  _1318 = String_new("Var_map");
+  _1319 = String_new("Var_string");
+  _1320 = String_new("Var_symbol");
+  _1321 = String_new("Var_int");
+  _1322 = String_new("Var_hash");
+  _1323 = String_new("Var_is_integer");
+  _1324 = String_new("Var_is_wide");
+  _1325 = String_new("List_truth");
+  _1326 = String_new("List_listchar");
+  _1327 = String_new("List_listshort");
+  _1328 = String_new("List_listint");
+  _1329 = String_new("List_listfloat");
+  _1330 = String_new("List_listdbl");
+  _1331 = String_new("List_liststring");
+  _1332 = String_new("List_listsymbol");
+  _1333 = String_new("List_cdddr");
+  _1334 = String_new("List_cddddr");
+  _1335 = String_new("Var_listchar");
+  _1336 = String_new("Var_listshort");
+  _1337 = String_new("Var_listint");
+  _1338 = String_new("Var_listfloat");
+  _1339 = String_new("Var_listdbl");
+  _1340 = String_new("Var_liststring");
+  _1341 = String_new("Var_listsymbol");
+  _1342 = String_new("Var_cdddr");
+  _1343 = String_new("Var_cddddr");
+  _1344 = String_new("Var_json");
+  _1345 = String_new("Var_pretty_json");
+  _1346 = String_new("String_sha256");
+  _1347 = String_new("_lisp_string_new_len");
+  _1348 = String_new("_lisp_symbol_new_len");
+  _1349 = String_new("_lisp_symbol_parse");
+  _1350 = String_new("List_getindex");
+  _1351 = String_new("List_last");
+  _1352 = String_new("List_contains");
+  _1353 = String_new("List_get");
+  _1354 = String_new("List_assoc");
+  _1355 = String_new("List_array");
+  _1356 = String_new("Array_new");
+  _1357 = String_new("Array_push");
+  _1358 = String_new("Array_take_last");
+  _1359 = String_new("Array_shift");
+  _1360 = String_new("Array_insert");
+  _1361 = String_new("Array_remove");
+  _1362 = String_new("Array_list");
+  _1363 = String_new("Map_new");
+  _1364 = String_new("Map_get");
+  _1365 = String_new("Map_del");
+  _1366 = String_new("lisp_string_lstrip");
+  _1367 = String_new("lisp_string_rstrip");
+  _1368 = String_new("String_getindex");
+  _1369 = String_new("String_add");
+  _1370 = String_new("lisp_string_strip");
+  _1371 = String_new("Var_is");
+  _1372 = String_new("Symbol_str");
+  _1373 = String_new("ArrayChar_var");
+  _1374 = String_new("ArrayDbl_var");
+  _1375 = String_new("ArrayFloat_var");
+  _1376 = String_new("ArrayInt_var");
+  _1377 = String_new("ArrayLong_var");
+  _1378 = String_new("ArrayShort_var");
+  _1379 = String_new("ArrayString_var");
+  _1380 = String_new("Array_arraychar");
+  _1381 = String_new("Array_arraydbl");
+  _1382 = String_new("Array_arrayfloat");
+  _1383 = String_new("Array_arrayint");
+  _1384 = String_new("Array_arraylong");
+  _1385 = String_new("Array_arrayshort");
+  _1386 = String_new("Array_arraystring");
+  _1387 = String_new("Array_capacity");
+  _1388 = String_new("Array_cleanup");
+  _1389 = String_new("Array_clear");
+  _1390 = String_new("Array_compare");
+  _1391 = String_new("Array_concat");
+  _1392 = String_new("Array_contains");
+  _1393 = String_new("Array_copy");
+  _1394 = String_new("Array_count");
+  _1395 = String_new("Array_equal");
+  _1396 = String_new("Array_find");
+  _1397 = String_new("Array_free");
+  _1398 = String_new("Array_getindex");
+  _1399 = String_new("Array_getslice");
+  _1400 = String_new("Array_heap_pop");
+  _1401 = String_new("Array_heap_push");
+  _1402 = String_new("Array_heapify");
+  _1403 = String_new("Array_indexof");
+  _1404 = String_new("Array_iter_into");
+  _1405 = String_new("Array_join");
+  _1406 = String_new("Array_len");
+  _1407 = String_new("Array_pop");
+  _1408 = String_new("Array_postfixindex");
+  _1409 = String_new("Array_remslice");
+  _1410 = String_new("Array_repr");
+  _1411 = String_new("Array_resize");
+  _1412 = String_new("Array_reverse");
+  _1413 = String_new("Array_setindex");
+  _1414 = String_new("Array_setslice");
+  _1415 = String_new("Array_sort");
+  _1416 = String_new("Array_splice");
+  _1417 = String_new("Array_str");
+  _1418 = String_new("Array_truncate");
+  _1419 = String_new("Array_truth");
+  _1420 = String_new("Array_unshift");
+  _1421 = String_new("Array_updateindex");
+  _1422 = String_new("Array_write_repr");
+  _1423 = String_new("Array_write_str");
+  _1424 = String_new("Buffer_clear");
+  _1425 = String_new("Buffer_getindex");
+  _1426 = String_new("Buffer_indent");
+  _1427 = String_new("Buffer_new");
+  _1428 = String_new("Buffer_newline");
+  _1429 = String_new("Buffer_newline_indent");
+  _1430 = String_new("Buffer_pad");
+  _1431 = String_new("Buffer_pop");
+  _1432 = String_new("Buffer_push");
+  _1433 = String_new("Buffer_repr");
+  _1434 = String_new("Buffer_reserve");
+  _1435 = String_new("Buffer_str");
+  _1436 = String_new("Buffer_truth");
+  _1437 = String_new("Buffer_unwrite");
+  _1438 = String_new("Buffer_write");
+  _1439 = String_new("Buffer_write_char");
+  _1440 = String_new("Buffer_write_len");
+  _1441 = String_new("Buffer_write_repeat");
+  _1442 = String_new("Context_cleanup");
+  _1443 = String_new("Context_close");
+  _1444 = String_new("Context_current");
+  _1445 = String_new("Context_export");
+  _1446 = String_new("Context_open");
+  _1447 = String_new("Diff_lines");
+  _1448 = String_new("Diff_unified");
+  _1449 = String_new("Iter_accumulate_into");
+  _1450 = String_new("Iter_array");
+  _1451 = String_new("Iter_chain_into");
+  _1452 = String_new("Iter_count");
+  _1453 = String_new("Iter_enumerate_into");
+  _1454 = String_new("Iter_head_into");
+  _1455 = String_new("Iter_list");
+  _1456 = String_new("Iter_max");
+  _1457 = String_new("Iter_min");
+  _1458 = String_new("Iter_new");
+  _1459 = String_new("Iter_next");
+  _1460 = String_new("Iter_product");
+  _1461 = String_new("Iter_repeat_into");
+  _1462 = String_new("Iter_sum");
+  _1463 = String_new("Iter_unique_into");
+  _1464 = String_new("Iter_zip_into");
+  _1465 = String_new("Job_start");
+  _1466 = String_new("Job_var");
+  _1467 = String_new("Json_parse");
+  _1468 = String_new("List_compare");
+  _1469 = String_new("List_flatten");
+  _1470 = String_new("List_flatten_all");
+  _1471 = String_new("List_getslice");
+  _1472 = String_new("List_hash");
+  _1473 = String_new("List_head");
+  _1474 = String_new("List_index");
+  _1475 = String_new("List_iter_into");
+  _1476 = String_new("List_job");
+  _1477 = String_new("List_match_replace");
+  _1478 = String_new("List_nth_cdr");
+  _1479 = String_new("List_promote");
+  _1480 = String_new("List_replace");
+  _1481 = String_new("List_sublis");
+  _1482 = String_new("List_subseq");
+  _1483 = String_new("List_tail");
+  _1484 = String_new("List_unique");
+  _1485 = String_new("MapIntInt_var");
+  _1486 = String_new("MapLongDouble_var");
+  _1487 = String_new("MapStringInt_var");
+  _1488 = String_new("MapStringString_var");
+  _1489 = String_new("Map_cleanup");
+  _1490 = String_new("Map_compare");
+  _1491 = String_new("Map_contains");
+  _1492 = String_new("Map_copy");
+  _1493 = String_new("Map_enumerate_into");
+  _1494 = String_new("Map_equal");
+  _1495 = String_new("Map_get_hashed");
+  _1496 = String_new("Map_getdefault");
+  _1497 = String_new("Map_getindex");
+  _1498 = String_new("Map_iter_into");
+  _1499 = String_new("Map_keys_into");
+  _1500 = String_new("Map_len");
+  _1501 = String_new("Map_list");
+  _1502 = String_new("Map_mapintint");
+  _1503 = String_new("Map_maplongdouble");
+  _1504 = String_new("Map_mapstringint");
+  _1505 = String_new("Map_mapstringstring");
+  _1506 = String_new("Map_merge");
+  _1507 = String_new("Map_new_capacity");
+  _1508 = String_new("Map_postfixindex");
+  _1509 = String_new("Map_repr");
+  _1510 = String_new("Map_set");
+  _1511 = String_new("Map_setdefault");
+  _1512 = String_new("Map_setindex");
+  _1513 = String_new("Map_str");
+  _1514 = String_new("Map_truth");
+  _1515 = String_new("Map_updateindex");
+  _1516 = String_new("Map_write_repr");
+  _1517 = String_new("Map_write_str");
+  _1518 = String_new("Path_basename");
+  _1519 = String_new("Path_dirname");
+  _1520 = String_new("Path_extension");
+  _1521 = String_new("Path_join");
+  _1522 = String_new("Path_stem");
+  _1523 = String_new("Scope_calloc");
+  _1524 = String_new("Scope_cleanup");
+  _1525 = String_new("Scope_destroy");
+  _1526 = String_new("Scope_free");
+  _1527 = String_new("Scope_malloc");
+  _1528 = String_new("Scope_memdup");
+  _1529 = String_new("Scope_move");
+  _1530 = String_new("Scope_new");
+  _1531 = String_new("Scope_new_named");
+  _1532 = String_new("Scope_pop");
+  _1533 = String_new("Scope_push");
+  _1534 = String_new("Scope_realloc");
+  _1535 = String_new("Scope_release");
+  _1536 = String_new("Scope_retain");
+  _1537 = String_new("Split_iter_into");
+  _1538 = String_new("String_capitalize");
+  _1539 = String_new("String_compare");
+  _1540 = String_new("String_contains");
+  _1541 = String_new("String_contains_digit");
+  _1542 = String_new("String_count");
+  _1543 = String_new("String_dedent");
+  _1544 = String_new("String_endswith");
+  _1545 = String_new("String_escape");
+  _1546 = String_new("String_find");
+  _1547 = String_new("String_find_all");
+  _1548 = String_new("String_find_within");
+  _1549 = String_new("String_free");
+  _1550 = String_new("String_getslice");
+  _1551 = String_new("String_hash");
+  _1552 = String_new("String_intern");
+  _1553 = String_new("String_is_alnum");
+  _1554 = String_new("String_is_alnum_under");
+  _1555 = String_new("String_is_alpha");
+  _1556 = String_new("String_is_alpha_under");
+  _1557 = String_new("String_is_digit");
+  _1558 = String_new("String_is_identifier");
+  _1559 = String_new("String_is_lower");
+  _1560 = String_new("String_is_lower_under");
+  _1561 = String_new("String_is_space");
+  _1562 = String_new("String_is_upper");
+  _1563 = String_new("String_is_upper_under");
+  _1564 = String_new("String_iter_into");
+  _1565 = String_new("String_join");
+  _1566 = String_new("String_keep");
+  _1567 = String_new("String_lines");
+  _1568 = String_new("String_lower");
+  _1569 = String_new("String_new_fill");
+  _1570 = String_new("String_pad_center");
+  _1571 = String_new("String_pad_left");
+  _1572 = String_new("String_pad_right");
+  _1573 = String_new("String_parse");
+  _1574 = String_new("String_parse_char");
+  _1575 = String_new("String_partition");
+  _1576 = String_new("String_reject");
+  _1577 = String_new("String_remove_prefix");
+  _1578 = String_new("String_remove_suffix");
+  _1579 = String_new("String_repeat");
+  _1580 = String_new("String_replace");
+  _1581 = String_new("String_replace_n");
+  _1582 = String_new("String_rfind");
+  _1583 = String_new("String_rpartition");
+  _1584 = String_new("String_split");
+  _1585 = String_new("String_split_lines");
+  _1586 = String_new("String_split_n");
+  _1587 = String_new("String_splits");
+  _1588 = String_new("String_squeeze");
+  _1589 = String_new("String_startswith");
+  _1590 = String_new("String_symbol");
+  _1591 = String_new("String_try_double");
+  _1592 = String_new("String_try_long");
+  _1593 = String_new("String_unescape");
+  _1594 = String_new("String_upper");
+  _1595 = String_new("String_withindex");
+  _1596 = String_new("String_words");
+  _1597 = String_new("Symbol_compare");
+  _1598 = String_new("Symbol_first");
+  _1599 = String_new("Symbol_last");
+  _1600 = String_new("Symbol_len");
+  _1601 = String_new("Symbol_try_new");
+  _1602 = String_new("Var_add");
+  _1603 = String_new("Var_arraychar");
+  _1604 = String_new("Var_arraydbl");
+  _1605 = String_new("Var_arrayfloat");
+  _1606 = String_new("Var_arrayint");
+  _1607 = String_new("Var_arraylong");
+  _1608 = String_new("Var_arrayshort");
+  _1609 = String_new("Var_arraystring");
+  _1610 = String_new("Var_as_iter");
+  _1611 = String_new("Var_block");
+  _1612 = String_new("Var_char");
+  _1613 = String_new("Var_clone_wide");
+  _1614 = String_new("Var_compare");
+  _1615 = String_new("Var_contains");
+  _1616 = String_new("Var_convert");
+  _1617 = String_new("Var_div");
+  _1618 = String_new("Var_double");
+  _1619 = String_new("Var_fallback_iter_into");
+  _1620 = String_new("Var_file");
+  _1621 = String_new("Var_float");
+  _1622 = String_new("Var_floating");
+  _1623 = String_new("Var_getindex");
+  _1624 = String_new("Var_integer");
+  _1625 = String_new("Var_is_atom");
+  _1626 = String_new("Var_is_atom_binder");
+  _1627 = String_new("Var_is_binder");
+  _1628 = String_new("Var_is_floating");
+  _1629 = String_new("Var_is_list_binder");
+  _1630 = String_new("Var_is_match_op");
+  _1631 = String_new("Var_is_nil");
+  _1632 = String_new("Var_is_null");
+  _1633 = String_new("Var_is_object");
+  _1634 = String_new("Var_is_pointer");
+  _1635 = String_new("Var_is_reference");
+  _1636 = String_new("Var_iter_into");
+  _1637 = String_new("Var_job");
+  _1638 = String_new("Var_jsonbool");
+  _1639 = String_new("Var_kind");
+  _1640 = String_new("Var_long");
+  _1641 = String_new("Var_long_double");
+  _1642 = String_new("Var_long_double_value");
+  _1643 = String_new("Var_long_long");
+  _1644 = String_new("Var_long_long_value");
+  _1645 = String_new("Var_long_value");
+  _1646 = String_new("Var_mapintint");
+  _1647 = String_new("Var_maplongdouble");
+  _1648 = String_new("Var_mapstringint");
+  _1649 = String_new("Var_mapstringstring");
+  _1650 = String_new("Var_mod");
+  _1651 = String_new("Var_mul");
+  _1652 = String_new("Var_neg");
+  _1653 = String_new("Var_null");
+  _1654 = String_new("Var_parse");
+  _1655 = String_new("Var_postfixindex");
+  _1656 = String_new("Var_regex");
+  _1657 = String_new("Var_regexcapture");
+  _1658 = String_new("Var_regexmatch");
+  _1659 = String_new("Var_same");
+  _1660 = String_new("Var_setindex");
+  _1661 = String_new("Var_short");
+  _1662 = String_new("Var_sub");
+  _1663 = String_new("Var_tag");
+  _1664 = String_new("Var_tag_bottom");
+  _1665 = String_new("Var_tag_top");
+  _1666 = String_new("Var_truth");
+  _1667 = String_new("Var_uchar");
+  _1668 = String_new("Var_uint");
+  _1669 = String_new("Var_ulong");
+  _1670 = String_new("Var_ulong_long");
+  _1671 = String_new("Var_ulong_long_value");
+  _1672 = String_new("Var_ulong_value");
+  _1673 = String_new("Var_unsigned");
+  _1674 = String_new("Var_updateindex");
+  _1675 = String_new("Var_ushort");
+  _1676 = String_new("abs");
+  _1677 = String_new("acos");
+  _1678 = String_new("acosf");
+  _1679 = String_new("acosh");
+  _1680 = String_new("acoshf");
+  _1681 = String_new("asin");
+  _1682 = String_new("asinf");
+  _1683 = String_new("asinh");
+  _1684 = String_new("asinhf");
+  _1685 = String_new("atan");
+  _1686 = String_new("atan2");
+  _1687 = String_new("atan2f");
+  _1688 = String_new("atanf");
+  _1689 = String_new("atanh");
+  _1690 = String_new("atanhf");
+  _1691 = String_new("atof");
+  _1692 = String_new("atoi");
+  _1693 = String_new("atol");
+  _1694 = String_new("atoll");
+  _1695 = String_new("cbrt");
+  _1696 = String_new("cbrtf");
+  _1697 = String_new("ceil");
+  _1698 = String_new("ceilf");
+  _1699 = String_new("copysign");
+  _1700 = String_new("copysignf");
+  _1701 = String_new("cos");
+  _1702 = String_new("cosf");
+  _1703 = String_new("cosh");
+  _1704 = String_new("coshf");
+  _1705 = String_new("erf");
+  _1706 = String_new("erfc");
+  _1707 = String_new("erfcf");
+  _1708 = String_new("erff");
+  _1709 = String_new("exp");
+  _1710 = String_new("exp2");
+  _1711 = String_new("exp2f");
+  _1712 = String_new("expf");
+  _1713 = String_new("expm1");
+  _1714 = String_new("expm1f");
+  _1715 = String_new("fabs");
+  _1716 = String_new("fabsf");
+  _1717 = String_new("fdim");
+  _1718 = String_new("fdimf");
+  _1719 = String_new("floor");
+  _1720 = String_new("floorf");
+  _1721 = String_new("fma");
+  _1722 = String_new("fmaf");
+  _1723 = String_new("fmax");
+  _1724 = String_new("fmaxf");
+  _1725 = String_new("fmin");
+  _1726 = String_new("fminf");
+  _1727 = String_new("fmod");
+  _1728 = String_new("fmodf");
+  _1729 = String_new("frexp");
+  _1730 = String_new("frexpf");
+  _1731 = String_new("hypot");
+  _1732 = String_new("hypotf");
+  _1733 = String_new("ilogb");
+  _1734 = String_new("ilogbf");
+  _1735 = String_new("labs");
+  _1736 = String_new("ldexp");
+  _1737 = String_new("ldexpf");
+  _1738 = String_new("lgamma");
+  _1739 = String_new("lgammaf");
+  _1740 = String_new("llabs");
+  _1741 = String_new("llrint");
+  _1742 = String_new("llrintf");
+  _1743 = String_new("llround");
+  _1744 = String_new("llroundf");
+  _1745 = String_new("log");
+  _1746 = String_new("log10");
+  _1747 = String_new("log10f");
+  _1748 = String_new("log1p");
+  _1749 = String_new("log1pf");
+  _1750 = String_new("log2");
+  _1751 = String_new("log2f");
+  _1752 = String_new("logb");
+  _1753 = String_new("logbf");
+  _1754 = String_new("logf");
+  _1755 = String_new("lrint");
+  _1756 = String_new("lrintf");
+  _1757 = String_new("lround");
+  _1758 = String_new("lroundf");
+  _1759 = String_new("modf");
+  _1760 = String_new("modff");
+  _1761 = String_new("nan");
+  _1762 = String_new("nanf");
+  _1763 = String_new("nearbyint");
+  _1764 = String_new("nearbyintf");
+  _1765 = String_new("nextafter");
+  _1766 = String_new("nextafterf");
+  _1767 = String_new("nexttoward");
+  _1768 = String_new("nexttowardf");
+  _1769 = String_new("pow");
+  _1770 = String_new("powf");
+  _1771 = String_new("range_into");
+  _1772 = String_new("remainder");
+  _1773 = String_new("remainderf");
+  _1774 = String_new("remquo");
+  _1775 = String_new("remquof");
+  _1776 = String_new("rint");
+  _1777 = String_new("rintf");
+  _1778 = String_new("round");
+  _1779 = String_new("roundf");
+  _1780 = String_new("scalbln");
+  _1781 = String_new("scalblnf");
+  _1782 = String_new("scalbn");
+  _1783 = String_new("scalbnf");
+  _1784 = String_new("sin");
+  _1785 = String_new("sinf");
+  _1786 = String_new("sinh");
+  _1787 = String_new("sinhf");
+  _1788 = String_new("sqrt");
+  _1789 = String_new("sqrtf");
+  _1790 = String_new("strcmp");
+  _1791 = String_new("strncmp");
+  _1792 = String_new("tan");
+  _1793 = String_new("tanf");
+  _1794 = String_new("tanh");
+  _1795 = String_new("tanhf");
+  _1796 = String_new("tgamma");
+  _1797 = String_new("tgammaf");
+  _1798 = String_new("trunc");
+  _1799 = String_new("truncf");
   _x2c_static_initialize_0();
 }
 
-Map lisp_optional_native_targets(void){
+Map lisp_native_targets(void){
   if(! _init_guard_) _file_init_();
-  return optional_targets;
+  return native_targets;
+}
+
+String String_new_len(const char *, int);
+
+static String _lisp_string_new_len(String text, int length){
+  return String_new_len(text, length);
+}
+
+Symbol Symbol_parse(char *);
+
+static Symbol _lisp_symbol_parse(String text){
+  return Symbol_parse(text);
+}
+
+Symbol Symbol_new_len(const char *, int);
+
+static Symbol _lisp_symbol_new_len(String text, int length){
+  return Symbol_new_len(text, length);
+}
+
+void Scope_push(Scope *);
+
+Scope * Lisp_storage(Lisp);
+
+Lisp Lisp_active(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+Job List_job(List);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+static Job _lisp_List_job(List command){
+  Job job;
+  {
+    Scope_push(Lisp_storage(Lisp_active()));
+    {
+      {
+        X2CCleanup _x2c_defer_record_0 ={
+          .fn = _x2c_defer_cleanup_0, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_0);
+        {
+          {
+            job = List_job(command);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+      }
+
+    }
+
+  }
+  return job;
+}
+
+Job Job_start(Job);
+
+static Job _lisp_Job_start(Job job){
+  {
+    Scope_push(Lisp_storage(Lisp_active()));
+    {
+      {
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_1, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          {
+            Job_start(job);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+      }
+
+    }
+
+  }
+  return job;
+}
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
+
+static Buffer _lisp_Buffer_write_len(Buffer buf, const char * text, size_t length){
+  if(text && strnlen(text, length) < length){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-targets.x",.function = "_lisp_Buffer_write_len",.line = 227};
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_len")), NULL))));
+    __builtin_unreachable();
+  }
+  return Buffer_write_len(buf, text, length);
+}
+
+Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
+
+Var int_var(int);
+
+int Var_is_void(Var);
+
+static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 45156);
+  return int_var(Var_is_void(a0));
+  ;
+}
+
+Func Var_func(Var);
+
+void * x2c_func_pointer_argument(Func, const FuncArg *, unsigned);
+
+Var Func_apply(Func, unsigned, const FuncArg *);
+
+static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
+  Func a0 = Var_func(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 437126));
+  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 3847013), 3847013));
+  const FuncArg * a2 = x2c_func_pointer_argument(_x2c_func_binding_1, _x2c_func_argv_1, 2);
+  return Func_apply(a0, a1, a2);
+  ;
+}
+
+List Func_signature(Func);
+
+static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
+  Func a0 = Var_func(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 437126));
+  return List_var(Func_signature(a0));
+  ;
 }
 
 String Var_string(Var);
 
-Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
+void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
+
+int String_try_next(String, int *, int *);
+
+static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 1318210446));
+  int * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_3, _x2c_func_argv_3, 1, _11, _11);
+  int * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_3, _x2c_func_argv_3, 2, _11, _11);
+  return int_var(String_try_next(a0, a1, a2));
+  ;
+}
+
+Split Var_split(Var);
+
+int Split_try_next(Split, int *, String *);
+
+static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4){
+  Split a0 = Var_split(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 0, 40919656));
+  int * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_4, _x2c_func_argv_4, 1, _11, _11);
+  String * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_4, _x2c_func_argv_4, 2, _47, _1230);
+  return int_var(Split_try_next(a0, a1, a2));
+  ;
+}
+
+List Var_list(Var);
+
+int List_try_next(List, List *, Var *);
+
+static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 806120));
+  List * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_5, _x2c_func_argv_5, 1, _43, _1234);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_5, _x2c_func_argv_5, 2, _3, _1236);
+  return int_var(List_try_next(a0, a1, a2));
+  ;
+}
+
+Array Var_array(Var);
+
+int Array_try_next(Array, int *, Var *);
+
+static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, 3313778));
+  int * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 1, _11, _11);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 2, _3, _1236);
+  return int_var(Array_try_next(a0, a1, a2));
+  ;
+}
+
+Map Var_map(Var);
+
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 0, 26720));
+  unsigned * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_7, _x2c_func_argv_7, 1, _18, _18);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_7, _x2c_func_argv_7, 2, _3, _1236);
+  Var * a3 = x2c_func_declared_reference_argument(_x2c_func_binding_7, _x2c_func_argv_7, 3, _3, _1236);
+  return int_var(Map_try_next(a0, a1, a2, a3));
+  ;
+}
+
+int Iter_try_next(Iter, Var *);
+
+static Var _x2c_func_adapt_8(Func _x2c_func_binding_8, const FuncArg * _x2c_func_argv_8){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_8, _x2c_func_argv_8, 0, 631140));
+  Var * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_8, _x2c_func_argv_8, 1, _3, _1236);
+  return int_var(Iter_try_next(a0, a1));
+  ;
+}
+
+int List_try_match(List, Var, List *);
+
+static Var _x2c_func_adapt_9(Func _x2c_func_binding_9, const FuncArg * _x2c_func_argv_9){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_9, _x2c_func_argv_9, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_9, _x2c_func_argv_9, 1, 45156);
+  List * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_9, _x2c_func_argv_9, 2, _43, _1234);
+  return int_var(List_try_match(a0, a1, a2));
+  ;
+}
+
+int List_try_match_replace(List, Var, Var, Var *);
+
+static Var _x2c_func_adapt_10(Func _x2c_func_binding_10, const FuncArg * _x2c_func_argv_10){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 2, 45156);
+  Var * a3 = x2c_func_declared_reference_argument(_x2c_func_binding_10, _x2c_func_argv_10, 3, _3, _1236);
+  return int_var(List_try_match_replace(a0, a1, a2, a3));
+  ;
+}
+
+int List_try_search(List, Var, Var *, List *);
+
+static Var _x2c_func_adapt_11(Func _x2c_func_binding_11, const FuncArg * _x2c_func_argv_11){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 1, 45156);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_11, _x2c_func_argv_11, 2, _3, _1236);
+  List * a3 = x2c_func_declared_reference_argument(_x2c_func_binding_11, _x2c_func_argv_11, 3, _43, _1234);
+  return int_var(List_try_search(a0, a1, a2, a3));
+  ;
+}
+
+int Map_try_get(Map, Var, Var *);
+
+static Var _x2c_func_adapt_12(Func _x2c_func_binding_12, const FuncArg * _x2c_func_argv_12){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 1, 45156);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_12, _x2c_func_argv_12, 2, _3, _1236);
+  return int_var(Map_try_get(a0, a1, a2));
+  ;
+}
+
+int Map_try_del(Map, Var, Var *);
+
+static Var _x2c_func_adapt_13(Func _x2c_func_binding_13, const FuncArg * _x2c_func_argv_13){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_13, _x2c_func_argv_13, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_13, _x2c_func_argv_13, 1, 45156);
+  Var * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_13, _x2c_func_argv_13, 2, _3, _1236);
+  return int_var(Map_try_del(a0, a1, a2));
+  ;
+}
+
+Var lisp_car(Var);
+
+static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_func_argv_14){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 0, 45156);
+  return lisp_car(a0);
+  ;
+}
+
+Var lisp_cdr(Var);
+
+static Var _x2c_func_adapt_15(Func _x2c_func_binding_15, const FuncArg * _x2c_func_argv_15){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 0, 45156);
+  return lisp_cdr(a0);
+  ;
+}
+
+List Var_cons(Var, List);
+
+static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_func_argv_16){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_16, _x2c_func_argv_16, 0, 45156);
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_16, _x2c_func_argv_16, 1, 806120));
+  return List_var(Var_cons(a0, a1));
+  ;
+}
+
+Var lisp_atom(Var);
+
+static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_func_argv_17){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 0, 45156);
+  return lisp_atom(a0);
+  ;
+}
+
+Var lisp_pair(Var);
+
+static Var _x2c_func_adapt_18(Func _x2c_func_binding_18, const FuncArg * _x2c_func_argv_18){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 0, 45156);
+  return lisp_pair(a0);
+  ;
+}
+
+Var lisp_list(Var);
+
+static Var _x2c_func_adapt_19(Func _x2c_func_binding_19, const FuncArg * _x2c_func_argv_19){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 0, 45156);
+  return lisp_list(a0);
+  ;
+}
+
+Var lisp_eq(Var, Var);
+
+static Var _x2c_func_adapt_20(Func _x2c_func_binding_20, const FuncArg * _x2c_func_argv_20){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 1, 45156);
+  return lisp_eq(a0, a1);
+  ;
+}
+
+Symbol lisp_type(Var);
+
+static Var _x2c_func_adapt_21(Func _x2c_func_binding_21, const FuncArg * _x2c_func_argv_21){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 0, 45156);
+  return Symbol_var(lisp_type(a0));
+  ;
+}
+
+Var lisp_number(Var);
+
+static Var _x2c_func_adapt_22(Func _x2c_func_binding_22, const FuncArg * _x2c_func_argv_22){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 0, 45156);
+  return lisp_number(a0);
+  ;
+}
+
+Var lisp_string(Var);
+
+static Var _x2c_func_adapt_23(Func _x2c_func_binding_23, const FuncArg * _x2c_func_argv_23){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_23, _x2c_func_argv_23, 0, 45156);
+  return lisp_string(a0);
+  ;
+}
+
+Var lisp_symbol(Var);
+
+static Var _x2c_func_adapt_24(Func _x2c_func_binding_24, const FuncArg * _x2c_func_argv_24){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_24, _x2c_func_argv_24, 0, 45156);
+  return lisp_symbol(a0);
+  ;
+}
+
+Var lisp_procedure(Var);
+
+static Var _x2c_func_adapt_25(Func _x2c_func_binding_25, const FuncArg * _x2c_func_argv_25){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_25, _x2c_func_argv_25, 0, 45156);
+  return lisp_procedure(a0);
+  ;
+}
+
+List List_reverse(List);
+
+static Var _x2c_func_adapt_26(Func _x2c_func_binding_26, const FuncArg * _x2c_func_argv_26){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_26, _x2c_func_argv_26, 0, 806120));
+  return List_var(List_reverse(a0));
+  ;
+}
+
+int List_len(List);
+
+static Var _x2c_func_adapt_27(Func _x2c_func_binding_27, const FuncArg * _x2c_func_argv_27){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_27, _x2c_func_argv_27, 0, 806120));
+  return int_var(List_len(a0));
+  ;
+}
+
+List List_match(List, Var);
+
+static Var _x2c_func_adapt_28(Func _x2c_func_binding_28, const FuncArg * _x2c_func_argv_28){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_28, _x2c_func_argv_28, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_28, _x2c_func_argv_28, 1, 45156);
+  return List_var(List_match(a0, a1));
+  ;
+}
+
+Var lisp_match_replace(List, Var, Var);
+
+static Var _x2c_func_adapt_29(Func _x2c_func_binding_29, const FuncArg * _x2c_func_argv_29){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 2, 45156);
+  return lisp_match_replace(a0, a1, a2);
+  ;
+}
+
+List List_search(List, Var);
+
+static Var _x2c_func_adapt_30(Func _x2c_func_binding_30, const FuncArg * _x2c_func_argv_30){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_30, _x2c_func_argv_30, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_30, _x2c_func_argv_30, 1, 45156);
+  return List_var(List_search(a0, a1));
+  ;
+}
+
+List List_search_replace(List, Var, Var);
+
+static Var _x2c_func_adapt_31(Func _x2c_func_binding_31, const FuncArg * _x2c_func_argv_31){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 2, 45156);
+  return List_var(List_search_replace(a0, a1, a2));
+  ;
+}
+
+Var lisp_add(Var, Var);
+
+static Var _x2c_func_adapt_32(Func _x2c_func_binding_32, const FuncArg * _x2c_func_argv_32){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_32, _x2c_func_argv_32, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_32, _x2c_func_argv_32, 1, 45156);
+  return lisp_add(a0, a1);
+  ;
+}
+
+Var Var_binary(Var, Symbol, Var);
+
+static Var _x2c_func_adapt_33(Func _x2c_func_binding_33, const FuncArg * _x2c_func_argv_33){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 1, 1328354264));
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 2, 45156);
+  return Var_binary(a0, a1, a2);
+  ;
+}
+
+Var lisp_compare(Var, Var);
+
+static Var _x2c_func_adapt_34(Func _x2c_func_binding_34, const FuncArg * _x2c_func_argv_34){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_34, _x2c_func_argv_34, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_34, _x2c_func_argv_34, 1, 45156);
+  return lisp_compare(a0, a1);
+  ;
+}
+
+Var lisp_plus(List);
+
+static Var _x2c_func_adapt_35(Func _x2c_func_binding_35, const FuncArg * _x2c_func_argv_35){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_35, _x2c_func_argv_35, 0, 806120));
+  return lisp_plus(a0);
+  ;
+}
+
+Var lisp_minus(List);
+
+static Var _x2c_func_adapt_36(Func _x2c_func_binding_36, const FuncArg * _x2c_func_argv_36){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_36, _x2c_func_argv_36, 0, 806120));
+  return lisp_minus(a0);
+  ;
+}
+
+Var lisp_times(List);
+
+static Var _x2c_func_adapt_37(Func _x2c_func_binding_37, const FuncArg * _x2c_func_argv_37){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_37, _x2c_func_argv_37, 0, 806120));
+  return lisp_times(a0);
+  ;
+}
+
+Var lisp_divide(List);
+
+static Var _x2c_func_adapt_38(Func _x2c_func_binding_38, const FuncArg * _x2c_func_argv_38){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_38, _x2c_func_argv_38, 0, 806120));
+  return lisp_divide(a0);
+  ;
+}
+
+Var lisp_eq_chain(List);
+
+static Var _x2c_func_adapt_39(Func _x2c_func_binding_39, const FuncArg * _x2c_func_argv_39){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_39, _x2c_func_argv_39, 0, 806120));
+  return lisp_eq_chain(a0);
+  ;
+}
+
+Var lisp_lt_chain(List);
+
+static Var _x2c_func_adapt_40(Func _x2c_func_binding_40, const FuncArg * _x2c_func_argv_40){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_40, _x2c_func_argv_40, 0, 806120));
+  return lisp_lt_chain(a0);
+  ;
+}
+
+Var lisp_le_chain(List);
+
+static Var _x2c_func_adapt_41(Func _x2c_func_binding_41, const FuncArg * _x2c_func_argv_41){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_41, _x2c_func_argv_41, 0, 806120));
+  return lisp_le_chain(a0);
+  ;
+}
+
+Var lisp_gt_chain(List);
+
+static Var _x2c_func_adapt_42(Func _x2c_func_binding_42, const FuncArg * _x2c_func_argv_42){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_42, _x2c_func_argv_42, 0, 806120));
+  return lisp_gt_chain(a0);
+  ;
+}
+
+Var lisp_ge_chain(List);
+
+static Var _x2c_func_adapt_43(Func _x2c_func_binding_43, const FuncArg * _x2c_func_argv_43){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_43, _x2c_func_argv_43, 0, 806120));
+  return lisp_ge_chain(a0);
+  ;
+}
+
+Var lisp_str(Var);
+
+static Var _x2c_func_adapt_44(Func _x2c_func_binding_44, const FuncArg * _x2c_func_argv_44){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_44, _x2c_func_argv_44, 0, 45156);
+  return lisp_str(a0);
+  ;
+}
+
+Var lisp_repr(Var);
+
+static Var _x2c_func_adapt_45(Func _x2c_func_binding_45, const FuncArg * _x2c_func_argv_45){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_45, _x2c_func_argv_45, 0, 45156);
+  return lisp_repr(a0);
+  ;
+}
+
+int String_len(String);
+
+static Var _x2c_func_adapt_46(Func _x2c_func_binding_46, const FuncArg * _x2c_func_argv_46){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_46, _x2c_func_argv_46, 0, 1318210446));
+  return int_var(String_len(a0));
+  ;
+}
+
+String String_format(String, List);
+
+static Var _x2c_func_adapt_47(Func _x2c_func_binding_47, const FuncArg * _x2c_func_argv_47){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_47, _x2c_func_argv_47, 0, 1318210446));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_47, _x2c_func_argv_47, 1, 806120));
+  return String_var(String_format(a0, a1));
+  ;
+}
+
+Var lisp_string_append(String, String);
+
+static Var _x2c_func_adapt_48(Func _x2c_func_binding_48, const FuncArg * _x2c_func_argv_48){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 1, 1318210446));
+  return lisp_string_append(a0, a1);
+  ;
+}
+
+Var lisp_substring(String, int, int);
+
+static Var _x2c_func_adapt_49(Func _x2c_func_binding_49, const FuncArg * _x2c_func_argv_49){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 2, 3453797), 3453797));
+  return lisp_substring(a0, a1, a2);
+  ;
+}
+
+Var lisp_string_downcase(String);
+
+static Var _x2c_func_adapt_50(Func _x2c_func_binding_50, const FuncArg * _x2c_func_argv_50){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_50, _x2c_func_argv_50, 0, 1318210446));
+  return lisp_string_downcase(a0);
+  ;
+}
+
+Var lisp_read_file(String);
+
+static Var _x2c_func_adapt_51(Func _x2c_func_binding_51, const FuncArg * _x2c_func_argv_51){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_51, _x2c_func_argv_51, 0, 1318210446));
+  return lisp_read_file(a0);
+  ;
+}
+
+Var lisp_write_file(String, String);
+
+static Var _x2c_func_adapt_52(Func _x2c_func_binding_52, const FuncArg * _x2c_func_argv_52){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 1, 1318210446));
+  return lisp_write_file(a0, a1);
+  ;
+}
+
+List List_sort(List);
+
+static Var _x2c_func_adapt_53(Func _x2c_func_binding_53, const FuncArg * _x2c_func_argv_53){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_53, _x2c_func_argv_53, 0, 806120));
+  return List_var(List_sort(a0));
+  ;
+}
+
+Var lisp_last(Var);
+
+static Var _x2c_func_adapt_54(Func _x2c_func_binding_54, const FuncArg * _x2c_func_argv_54){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_54, _x2c_func_argv_54, 0, 45156);
+  return lisp_last(a0);
+  ;
+}
+
+Var lisp_begin(List);
+
+static Var _x2c_func_adapt_55(Func _x2c_func_binding_55, const FuncArg * _x2c_func_argv_55){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_55, _x2c_func_argv_55, 0, 806120));
+  return lisp_begin(a0);
+  ;
+}
+
+Var lisp_member(Var, Var);
+
+static Var _x2c_func_adapt_56(Func _x2c_func_binding_56, const FuncArg * _x2c_func_argv_56){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_56, _x2c_func_argv_56, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_56, _x2c_func_argv_56, 1, 45156);
+  return lisp_member(a0, a1);
+  ;
+}
+
+Var lisp_assoc(Var, Var);
+
+static Var _x2c_func_adapt_57(Func _x2c_func_binding_57, const FuncArg * _x2c_func_argv_57){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_57, _x2c_func_argv_57, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_57, _x2c_func_argv_57, 1, 45156);
+  return lisp_assoc(a0, a1);
+  ;
+}
+
+Var lisp_append(List);
+
+static Var _x2c_func_adapt_58(Func _x2c_func_binding_58, const FuncArg * _x2c_func_argv_58){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_58, _x2c_func_argv_58, 0, 806120));
+  return lisp_append(a0);
+  ;
+}
+
+Var lisp_not(Var);
+
+static Var _x2c_func_adapt_59(Func _x2c_func_binding_59, const FuncArg * _x2c_func_argv_59){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_59, _x2c_func_argv_59, 0, 45156);
+  return lisp_not(a0);
+  ;
+}
+
+Var lisp_null(Var);
+
+static Var _x2c_func_adapt_60(Func _x2c_func_binding_60, const FuncArg * _x2c_func_argv_60){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_60, _x2c_func_argv_60, 0, 45156);
+  return lisp_null(a0);
+  ;
+}
+
+Var lisp_sub(Var, Var);
+
+static Var _x2c_func_adapt_61(Func _x2c_func_binding_61, const FuncArg * _x2c_func_argv_61){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_61, _x2c_func_argv_61, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_61, _x2c_func_argv_61, 1, 45156);
+  return lisp_sub(a0, a1);
+  ;
+}
+
+Var lisp_mul(Var, Var);
+
+static Var _x2c_func_adapt_62(Func _x2c_func_binding_62, const FuncArg * _x2c_func_argv_62){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_62, _x2c_func_argv_62, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_62, _x2c_func_argv_62, 1, 45156);
+  return lisp_mul(a0, a1);
+  ;
+}
+
+Var lisp_div(Var, Var);
+
+static Var _x2c_func_adapt_63(Func _x2c_func_binding_63, const FuncArg * _x2c_func_argv_63){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_63, _x2c_func_argv_63, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_63, _x2c_func_argv_63, 1, 45156);
+  return lisp_div(a0, a1);
+  ;
+}
+
+Var lisp_mod(Var, Var);
+
+static Var _x2c_func_adapt_64(Func _x2c_func_binding_64, const FuncArg * _x2c_func_argv_64){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_64, _x2c_func_argv_64, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_64, _x2c_func_argv_64, 1, 45156);
+  return lisp_mod(a0, a1);
+  ;
+}
+
+Var lisp_caar(Var);
+
+static Var _x2c_func_adapt_65(Func _x2c_func_binding_65, const FuncArg * _x2c_func_argv_65){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_65, _x2c_func_argv_65, 0, 45156);
+  return lisp_caar(a0);
+  ;
+}
+
+Var lisp_cadr(Var);
+
+static Var _x2c_func_adapt_66(Func _x2c_func_binding_66, const FuncArg * _x2c_func_argv_66){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_66, _x2c_func_argv_66, 0, 45156);
+  return lisp_cadr(a0);
+  ;
+}
+
+Var lisp_cdar(Var);
+
+static Var _x2c_func_adapt_67(Func _x2c_func_binding_67, const FuncArg * _x2c_func_argv_67){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_67, _x2c_func_argv_67, 0, 45156);
+  return lisp_cdar(a0);
+  ;
+}
+
+Var lisp_cddr(Var);
+
+static Var _x2c_func_adapt_68(Func _x2c_func_binding_68, const FuncArg * _x2c_func_argv_68){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_68, _x2c_func_argv_68, 0, 45156);
+  return lisp_cddr(a0);
+  ;
+}
+
+Var lisp_caaar(Var);
+
+static Var _x2c_func_adapt_69(Func _x2c_func_binding_69, const FuncArg * _x2c_func_argv_69){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_69, _x2c_func_argv_69, 0, 45156);
+  return lisp_caaar(a0);
+  ;
+}
+
+Var lisp_caadr(Var);
+
+static Var _x2c_func_adapt_70(Func _x2c_func_binding_70, const FuncArg * _x2c_func_argv_70){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_70, _x2c_func_argv_70, 0, 45156);
+  return lisp_caadr(a0);
+  ;
+}
+
+Var lisp_cadar(Var);
+
+static Var _x2c_func_adapt_71(Func _x2c_func_binding_71, const FuncArg * _x2c_func_argv_71){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_71, _x2c_func_argv_71, 0, 45156);
+  return lisp_cadar(a0);
+  ;
+}
+
+Var lisp_caddr(Var);
+
+static Var _x2c_func_adapt_72(Func _x2c_func_binding_72, const FuncArg * _x2c_func_argv_72){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_72, _x2c_func_argv_72, 0, 45156);
+  return lisp_caddr(a0);
+  ;
+}
+
+Var lisp_cdaar(Var);
+
+static Var _x2c_func_adapt_73(Func _x2c_func_binding_73, const FuncArg * _x2c_func_argv_73){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_73, _x2c_func_argv_73, 0, 45156);
+  return lisp_cdaar(a0);
+  ;
+}
+
+Var lisp_cdadr(Var);
+
+static Var _x2c_func_adapt_74(Func _x2c_func_binding_74, const FuncArg * _x2c_func_argv_74){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_74, _x2c_func_argv_74, 0, 45156);
+  return lisp_cdadr(a0);
+  ;
+}
+
+Var lisp_cddar(Var);
+
+static Var _x2c_func_adapt_75(Func _x2c_func_binding_75, const FuncArg * _x2c_func_argv_75){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_75, _x2c_func_argv_75, 0, 45156);
+  return lisp_cddar(a0);
+  ;
+}
+
+Var lisp_cdddr(Var);
+
+static Var _x2c_func_adapt_76(Func _x2c_func_binding_76, const FuncArg * _x2c_func_argv_76){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_76, _x2c_func_argv_76, 0, 45156);
+  return lisp_cdddr(a0);
+  ;
+}
+
+Var lisp_match(Var, Var);
+
+static Var _x2c_func_adapt_77(Func _x2c_func_binding_77, const FuncArg * _x2c_func_argv_77){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_77, _x2c_func_argv_77, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_77, _x2c_func_argv_77, 1, 45156);
+  return lisp_match(a0, a1);
+  ;
+}
+
+Var lisp_bound(Var, Var);
+
+static Var _x2c_func_adapt_78(Func _x2c_func_binding_78, const FuncArg * _x2c_func_argv_78){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_78, _x2c_func_argv_78, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_78, _x2c_func_argv_78, 1, 45156);
+  return lisp_bound(a0, a1);
+  ;
+}
+
+Var lisp_search_replace(Var, Var, Var);
+
+static Var _x2c_func_adapt_79(Func _x2c_func_binding_79, const FuncArg * _x2c_func_argv_79){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_79, _x2c_func_argv_79, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_79, _x2c_func_argv_79, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_79, _x2c_func_argv_79, 2, 45156);
+  return lisp_search_replace(a0, a1, a2);
+  ;
+}
+
+Var lisp_binder(Var);
+
+static Var _x2c_func_adapt_80(Func _x2c_func_binding_80, const FuncArg * _x2c_func_argv_80){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_80, _x2c_func_argv_80, 0, 45156);
+  return lisp_binder(a0);
+  ;
+}
+
+Var lisp_binders(Var);
+
+static Var _x2c_func_adapt_81(Func _x2c_func_binding_81, const FuncArg * _x2c_func_argv_81){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_81, _x2c_func_argv_81, 0, 45156);
+  return lisp_binders(a0);
+  ;
+}
+
+Var lisp_binder_lets(Var, Var);
+
+static Var _x2c_func_adapt_82(Func _x2c_func_binding_82, const FuncArg * _x2c_func_argv_82){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_82, _x2c_func_argv_82, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_82, _x2c_func_argv_82, 1, 45156);
+  return lisp_binder_lets(a0, a1);
+  ;
+}
+
+Var lisp_string_append_all(List);
+
+static Var _x2c_func_adapt_83(Func _x2c_func_binding_83, const FuncArg * _x2c_func_argv_83){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_83, _x2c_func_argv_83, 0, 806120));
+  return lisp_string_append_all(a0);
+  ;
+}
+
+int String_truth(String);
+
+static Var _x2c_func_adapt_84(Func _x2c_func_binding_84, const FuncArg * _x2c_func_argv_84){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_84, _x2c_func_argv_84, 0, 1318210446));
+  return int_var(String_truth(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_85(Func _x2c_func_binding_85, const FuncArg * _x2c_func_argv_85){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_85, _x2c_func_argv_85, 0, 45156);
+  return List_var(Var_list(a0));
+  ;
+}
+
+Var Array_var(Array);
+
+static Var _x2c_func_adapt_86(Func _x2c_func_binding_86, const FuncArg * _x2c_func_argv_86){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_86, _x2c_func_argv_86, 0, 45156);
+  return Array_var(Var_array(a0));
+  ;
+}
+
+Var Map_var(Map);
+
+static Var _x2c_func_adapt_87(Func _x2c_func_binding_87, const FuncArg * _x2c_func_argv_87){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_87, _x2c_func_argv_87, 0, 45156);
+  return Map_var(Var_map(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_88(Func _x2c_func_binding_88, const FuncArg * _x2c_func_argv_88){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_88, _x2c_func_argv_88, 0, 45156);
+  return String_var(Var_string(a0));
+  ;
+}
+
+Symbol Var_symbol(Var);
+
+static Var _x2c_func_adapt_89(Func _x2c_func_binding_89, const FuncArg * _x2c_func_argv_89){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_89, _x2c_func_argv_89, 0, 45156);
+  return Symbol_var(Var_symbol(a0));
+  ;
+}
+
+int Var_int(Var);
+
+static Var _x2c_func_adapt_90(Func _x2c_func_binding_90, const FuncArg * _x2c_func_argv_90){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_90, _x2c_func_argv_90, 0, 45156);
+  return int_var(Var_int(a0));
+  ;
+}
+
+Var unsigned_var(unsigned);
+
+unsigned Var_hash(Var);
+
+static Var _x2c_func_adapt_91(Func _x2c_func_binding_91, const FuncArg * _x2c_func_argv_91){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_91, _x2c_func_argv_91, 0, 45156);
+  return unsigned_var(Var_hash(a0));
+  ;
+}
+
+int Var_is_integer(Var);
+
+static Var _x2c_func_adapt_92(Func _x2c_func_binding_92, const FuncArg * _x2c_func_argv_92){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_92, _x2c_func_argv_92, 0, 45156);
+  return int_var(Var_is_integer(a0));
+  ;
+}
+
+int Var_is_wide(Var);
+
+static Var _x2c_func_adapt_93(Func _x2c_func_binding_93, const FuncArg * _x2c_func_argv_93){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_93, _x2c_func_argv_93, 0, 45156);
+  return int_var(Var_is_wide(a0));
+  ;
+}
+
+int List_truth(List);
+
+static Var _x2c_func_adapt_94(Func _x2c_func_binding_94, const FuncArg * _x2c_func_argv_94){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_94, _x2c_func_argv_94, 0, 806120));
+  return int_var(List_truth(a0));
+  ;
+}
+
+ListChar List_listchar(List);
+
+static Var _x2c_func_adapt_95(Func _x2c_func_binding_95, const FuncArg * _x2c_func_argv_95){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_95, _x2c_func_argv_95, 0, 806120));
+  return List_var(List_listchar(a0));
+  ;
+}
+
+ListShort List_listshort(List);
+
+static Var _x2c_func_adapt_96(Func _x2c_func_binding_96, const FuncArg * _x2c_func_argv_96){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_96, _x2c_func_argv_96, 0, 806120));
+  return List_var(List_listshort(a0));
+  ;
+}
+
+ListInt List_listint(List);
+
+static Var _x2c_func_adapt_97(Func _x2c_func_binding_97, const FuncArg * _x2c_func_argv_97){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_97, _x2c_func_argv_97, 0, 806120));
+  return List_var(List_listint(a0));
+  ;
+}
+
+ListFloat List_listfloat(List);
+
+static Var _x2c_func_adapt_98(Func _x2c_func_binding_98, const FuncArg * _x2c_func_argv_98){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_98, _x2c_func_argv_98, 0, 806120));
+  return List_var(List_listfloat(a0));
+  ;
+}
+
+ListDbl List_listdbl(List);
+
+static Var _x2c_func_adapt_99(Func _x2c_func_binding_99, const FuncArg * _x2c_func_argv_99){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_99, _x2c_func_argv_99, 0, 806120));
+  return List_var(List_listdbl(a0));
+  ;
+}
+
+ListString List_liststring(List);
+
+static Var _x2c_func_adapt_100(Func _x2c_func_binding_100, const FuncArg * _x2c_func_argv_100){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_100, _x2c_func_argv_100, 0, 806120));
+  return List_var(List_liststring(a0));
+  ;
+}
+
+ListSymbol List_listsymbol(List);
+
+static Var _x2c_func_adapt_101(Func _x2c_func_binding_101, const FuncArg * _x2c_func_argv_101){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_101, _x2c_func_argv_101, 0, 806120));
+  return List_var(List_listsymbol(a0));
+  ;
+}
+
+List List_cdddr(List);
+
+static Var _x2c_func_adapt_102(Func _x2c_func_binding_102, const FuncArg * _x2c_func_argv_102){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_102, _x2c_func_argv_102, 0, 806120));
+  return List_var(List_cdddr(a0));
+  ;
+}
+
+List List_cddddr(List);
+
+static Var _x2c_func_adapt_103(Func _x2c_func_binding_103, const FuncArg * _x2c_func_argv_103){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_103, _x2c_func_argv_103, 0, 806120));
+  return List_var(List_cddddr(a0));
+  ;
+}
+
+ListChar Var_listchar(Var);
+
+static Var _x2c_func_adapt_104(Func _x2c_func_binding_104, const FuncArg * _x2c_func_argv_104){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_104, _x2c_func_argv_104, 0, 45156);
+  return List_var(Var_listchar(a0));
+  ;
+}
+
+ListShort Var_listshort(Var);
+
+static Var _x2c_func_adapt_105(Func _x2c_func_binding_105, const FuncArg * _x2c_func_argv_105){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_105, _x2c_func_argv_105, 0, 45156);
+  return List_var(Var_listshort(a0));
+  ;
+}
+
+ListInt Var_listint(Var);
+
+static Var _x2c_func_adapt_106(Func _x2c_func_binding_106, const FuncArg * _x2c_func_argv_106){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_106, _x2c_func_argv_106, 0, 45156);
+  return List_var(Var_listint(a0));
+  ;
+}
+
+ListFloat Var_listfloat(Var);
+
+static Var _x2c_func_adapt_107(Func _x2c_func_binding_107, const FuncArg * _x2c_func_argv_107){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_107, _x2c_func_argv_107, 0, 45156);
+  return List_var(Var_listfloat(a0));
+  ;
+}
+
+ListDbl Var_listdbl(Var);
+
+static Var _x2c_func_adapt_108(Func _x2c_func_binding_108, const FuncArg * _x2c_func_argv_108){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_108, _x2c_func_argv_108, 0, 45156);
+  return List_var(Var_listdbl(a0));
+  ;
+}
+
+ListString Var_liststring(Var);
+
+static Var _x2c_func_adapt_109(Func _x2c_func_binding_109, const FuncArg * _x2c_func_argv_109){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_109, _x2c_func_argv_109, 0, 45156);
+  return List_var(Var_liststring(a0));
+  ;
+}
+
+ListSymbol Var_listsymbol(Var);
+
+static Var _x2c_func_adapt_110(Func _x2c_func_binding_110, const FuncArg * _x2c_func_argv_110){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_110, _x2c_func_argv_110, 0, 45156);
+  return List_var(Var_listsymbol(a0));
+  ;
+}
+
+List Var_cdddr(Var);
+
+static Var _x2c_func_adapt_111(Func _x2c_func_binding_111, const FuncArg * _x2c_func_argv_111){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_111, _x2c_func_argv_111, 0, 45156);
+  return List_var(Var_cdddr(a0));
+  ;
+}
+
+List Var_cddddr(Var);
+
+static Var _x2c_func_adapt_112(Func _x2c_func_binding_112, const FuncArg * _x2c_func_argv_112){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_112, _x2c_func_argv_112, 0, 45156);
+  return List_var(Var_cddddr(a0));
+  ;
+}
+
+String Var_json(Var);
+
+static Var _x2c_func_adapt_113(Func _x2c_func_binding_113, const FuncArg * _x2c_func_argv_113){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_113, _x2c_func_argv_113, 0, 45156);
+  return String_var(Var_json(a0));
+  ;
+}
+
+String Var_pretty_json(Var);
+
+static Var _x2c_func_adapt_114(Func _x2c_func_binding_114, const FuncArg * _x2c_func_argv_114){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_114, _x2c_func_argv_114, 0, 45156);
+  return String_var(Var_pretty_json(a0));
+  ;
+}
+
+String String_sha256(String);
+
+static Var _x2c_func_adapt_115(Func _x2c_func_binding_115, const FuncArg * _x2c_func_argv_115){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_115, _x2c_func_argv_115, 0, 1318210446));
+  return String_var(String_sha256(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_116(Func _x2c_func_binding_116, const FuncArg * _x2c_func_argv_116){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_116, _x2c_func_argv_116, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_116, _x2c_func_argv_116, 1, 3453797), 3453797));
+  return String_var(_lisp_string_new_len(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_117(Func _x2c_func_binding_117, const FuncArg * _x2c_func_argv_117){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_117, _x2c_func_argv_117, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_117, _x2c_func_argv_117, 1, 3453797), 3453797));
+  return Symbol_var(_lisp_symbol_new_len(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_118(Func _x2c_func_binding_118, const FuncArg * _x2c_func_argv_118){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_118, _x2c_func_argv_118, 0, 1318210446));
+  return Symbol_var(_lisp_symbol_parse(a0));
+  ;
+}
+
+Var List_getindex(List, int);
+
+static Var _x2c_func_adapt_119(Func _x2c_func_binding_119, const FuncArg * _x2c_func_argv_119){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_119, _x2c_func_argv_119, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_119, _x2c_func_argv_119, 1, 3453797), 3453797));
+  return List_getindex(a0, a1);
+  ;
+}
+
+Var List_last(List);
+
+static Var _x2c_func_adapt_120(Func _x2c_func_binding_120, const FuncArg * _x2c_func_argv_120){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_120, _x2c_func_argv_120, 0, 806120));
+  return List_last(a0);
+  ;
+}
+
+int List_contains(List, Var);
+
+static Var _x2c_func_adapt_121(Func _x2c_func_binding_121, const FuncArg * _x2c_func_argv_121){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_121, _x2c_func_argv_121, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_121, _x2c_func_argv_121, 1, 45156);
+  return int_var(List_contains(a0, a1));
+  ;
+}
+
+Var List_get(List, Var);
+
+static Var _x2c_func_adapt_122(Func _x2c_func_binding_122, const FuncArg * _x2c_func_argv_122){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_122, _x2c_func_argv_122, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_122, _x2c_func_argv_122, 1, 45156);
+  return List_get(a0, a1);
+  ;
+}
+
+Var List_assoc(List, Var);
+
+static Var _x2c_func_adapt_123(Func _x2c_func_binding_123, const FuncArg * _x2c_func_argv_123){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_123, _x2c_func_argv_123, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_123, _x2c_func_argv_123, 1, 45156);
+  return List_assoc(a0, a1);
+  ;
+}
+
+Array List_array(List);
+
+static Var _x2c_func_adapt_124(Func _x2c_func_binding_124, const FuncArg * _x2c_func_argv_124){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_124, _x2c_func_argv_124, 0, 806120));
+  return Array_var(List_array(a0));
+  ;
+}
+
+Array Array_new(void);
+
+static Var _x2c_func_adapt_125(Func _x2c_func_binding_125, const FuncArg * _x2c_func_argv_125){
+  return Array_var(Array_new());
+  ;
+}
+
+Var Array_push(Array, Var);
+
+static Var _x2c_func_adapt_126(Func _x2c_func_binding_126, const FuncArg * _x2c_func_argv_126){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_126, _x2c_func_argv_126, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_126, _x2c_func_argv_126, 1, 45156);
+  return Array_push(a0, a1);
+  ;
+}
+
+Var Array_take_last(Array);
+
+static Var _x2c_func_adapt_127(Func _x2c_func_binding_127, const FuncArg * _x2c_func_argv_127){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_127, _x2c_func_argv_127, 0, 3313778));
+  return Array_take_last(a0);
+  ;
+}
+
+Var Array_shift(Array);
+
+static Var _x2c_func_adapt_128(Func _x2c_func_binding_128, const FuncArg * _x2c_func_argv_128){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_128, _x2c_func_argv_128, 0, 3313778));
+  return Array_shift(a0);
+  ;
+}
+
+Var Array_insert(Array, int, Var);
+
+static Var _x2c_func_adapt_129(Func _x2c_func_binding_129, const FuncArg * _x2c_func_argv_129){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_129, _x2c_func_argv_129, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_129, _x2c_func_argv_129, 1, 3453797), 3453797));
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_129, _x2c_func_argv_129, 2, 45156);
+  return Array_insert(a0, a1, a2);
+  ;
+}
+
+Var Array_remove(Array, int);
+
+static Var _x2c_func_adapt_130(Func _x2c_func_binding_130, const FuncArg * _x2c_func_argv_130){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_130, _x2c_func_argv_130, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_130, _x2c_func_argv_130, 1, 3453797), 3453797));
+  return Array_remove(a0, a1);
+  ;
+}
+
+List Array_list(Array);
+
+static Var _x2c_func_adapt_131(Func _x2c_func_binding_131, const FuncArg * _x2c_func_argv_131){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_131, _x2c_func_argv_131, 0, 3313778));
+  return List_var(Array_list(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_132(Func _x2c_func_binding_132, const FuncArg * _x2c_func_argv_132){
+  return Map_var(Map_new());
+  ;
+}
+
+Var Map_get(Map, Var);
+
+static Var _x2c_func_adapt_133(Func _x2c_func_binding_133, const FuncArg * _x2c_func_argv_133){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_133, _x2c_func_argv_133, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_133, _x2c_func_argv_133, 1, 45156);
+  return Map_get(a0, a1);
+  ;
+}
+
+Var Map_del(Map, Var);
+
+static Var _x2c_func_adapt_134(Func _x2c_func_binding_134, const FuncArg * _x2c_func_argv_134){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_134, _x2c_func_argv_134, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_134, _x2c_func_argv_134, 1, 45156);
+  return Map_del(a0, a1);
+  ;
+}
+
+String lisp_string_lstrip(String, Var);
+
+static Var _x2c_func_adapt_135(Func _x2c_func_binding_135, const FuncArg * _x2c_func_argv_135){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_135, _x2c_func_argv_135, 0, 1318210446));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_135, _x2c_func_argv_135, 1, 45156);
+  return String_var(lisp_string_lstrip(a0, a1));
+  ;
+}
+
+String lisp_string_rstrip(String, Var);
+
+static Var _x2c_func_adapt_136(Func _x2c_func_binding_136, const FuncArg * _x2c_func_argv_136){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_136, _x2c_func_argv_136, 0, 1318210446));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_136, _x2c_func_argv_136, 1, 45156);
+  return String_var(lisp_string_rstrip(a0, a1));
+  ;
+}
+
+int String_getindex(String, int);
+
+static Var _x2c_func_adapt_137(Func _x2c_func_binding_137, const FuncArg * _x2c_func_argv_137){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_137, _x2c_func_argv_137, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_137, _x2c_func_argv_137, 1, 3453797), 3453797));
+  return int_var(String_getindex(a0, a1));
+  ;
+}
+
+String String_add(String, String);
+
+static Var _x2c_func_adapt_138(Func _x2c_func_binding_138, const FuncArg * _x2c_func_argv_138){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 1, 1318210446));
+  return String_var(String_add(a0, a1));
+  ;
+}
+
+String lisp_string_strip(String, Var);
+
+static Var _x2c_func_adapt_139(Func _x2c_func_binding_139, const FuncArg * _x2c_func_argv_139){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_139, _x2c_func_argv_139, 0, 1318210446));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_139, _x2c_func_argv_139, 1, 45156);
+  return String_var(lisp_string_strip(a0, a1));
+  ;
+}
+
+int Var_is(Var, Symbol);
+
+static Var _x2c_func_adapt_140(Func _x2c_func_binding_140, const FuncArg * _x2c_func_argv_140){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_140, _x2c_func_argv_140, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_140, _x2c_func_argv_140, 1, 1328354264));
+  return int_var(Var_is(a0, a1));
+  ;
+}
+
+String Symbol_str(Symbol);
+
+static Var _x2c_func_adapt_141(Func _x2c_func_binding_141, const FuncArg * _x2c_func_argv_141){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_141, _x2c_func_argv_141, 0, 1328354264));
+  return String_var(Symbol_str(a0));
+  ;
+}
+
+ArrayChar Var_arraychar(Var);
+
+Var ArrayChar_var(ArrayChar);
+
+static Var _x2c_func_adapt_142(Func _x2c_func_binding_142, const FuncArg * _x2c_func_argv_142){
+  ArrayChar a0 = Var_arraychar(x2c_func_value_argument(_x2c_func_binding_142, _x2c_func_argv_142, 0, 3474748293220));
+  return ArrayChar_var(a0);
+  ;
+}
+
+ArrayDbl Var_arraydbl(Var);
+
+Var ArrayDbl_var(ArrayDbl);
+
+static Var _x2c_func_adapt_143(Func _x2c_func_binding_143, const FuncArg * _x2c_func_argv_143){
+  ArrayDbl a0 = Var_arraydbl(x2c_func_value_argument(_x2c_func_binding_143, _x2c_func_argv_143, 0, 108585885848));
+  return ArrayDbl_var(a0);
+  ;
+}
+
+ArrayFloat Var_arrayfloat(Var);
+
+Var ArrayFloat_var(ArrayFloat);
+
+static Var _x2c_func_adapt_144(Func _x2c_func_binding_144, const FuncArg * _x2c_func_argv_144){
+  ArrayFloat a0 = Var_arrayfloat(x2c_func_value_argument(_x2c_func_binding_144, _x2c_func_argv_144, 0, 111191951964264));
+  return ArrayFloat_var(a0);
+  ;
+}
+
+ArrayInt Var_arrayint(Var);
+
+Var ArrayInt_var(ArrayInt);
+
+static Var _x2c_func_adapt_145(Func _x2c_func_binding_145, const FuncArg * _x2c_func_argv_145){
+  ArrayInt a0 = Var_arrayint(x2c_func_value_argument(_x2c_func_binding_145, _x2c_func_argv_145, 0, 108585896872));
+  return ArrayInt_var(a0);
+  ;
+}
+
+ArrayLong Var_arraylong(Var);
+
+Var ArrayLong_var(ArrayLong);
+
+static Var _x2c_func_adapt_146(Func _x2c_func_binding_146, const FuncArg * _x2c_func_argv_146){
+  ArrayLong a0 = Var_arraylong(x2c_func_value_argument(_x2c_func_binding_146, _x2c_func_argv_146, 0, 3474748898190));
+  return ArrayLong_var(a0);
+  ;
+}
+
+ArrayShort Var_arrayshort(Var);
+
+Var ArrayShort_var(ArrayShort);
+
+static Var _x2c_func_adapt_147(Func _x2c_func_binding_147, const FuncArg * _x2c_func_argv_147){
+  ArrayShort a0 = Var_arrayshort(x2c_func_value_argument(_x2c_func_binding_147, _x2c_func_argv_147, 0, 111191978966184));
+  return ArrayShort_var(a0);
+  ;
+}
+
+ArrayString Var_arraystring(Var);
+
+Var ArrayString_var(ArrayString);
+
+static Var _x2c_func_adapt_148(Func _x2c_func_binding_148, const FuncArg * _x2c_func_argv_148){
+  ArrayString a0 = Var_arraystring(x2c_func_value_argument(_x2c_func_binding_148, _x2c_func_argv_148, 0, 108585917732));
+  return ArrayString_var(a0);
+  ;
+}
+
+ArrayChar Array_arraychar(Array);
+
+static Var _x2c_func_adapt_149(Func _x2c_func_binding_149, const FuncArg * _x2c_func_argv_149){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_149, _x2c_func_argv_149, 0, 3313778));
+  return ArrayChar_var(Array_arraychar(a0));
+  ;
+}
+
+ArrayDbl Array_arraydbl(Array);
+
+static Var _x2c_func_adapt_150(Func _x2c_func_binding_150, const FuncArg * _x2c_func_argv_150){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_150, _x2c_func_argv_150, 0, 3313778));
+  return ArrayDbl_var(Array_arraydbl(a0));
+  ;
+}
+
+ArrayFloat Array_arrayfloat(Array);
+
+static Var _x2c_func_adapt_151(Func _x2c_func_binding_151, const FuncArg * _x2c_func_argv_151){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_151, _x2c_func_argv_151, 0, 3313778));
+  return ArrayFloat_var(Array_arrayfloat(a0));
+  ;
+}
+
+ArrayInt Array_arrayint(Array);
+
+static Var _x2c_func_adapt_152(Func _x2c_func_binding_152, const FuncArg * _x2c_func_argv_152){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_152, _x2c_func_argv_152, 0, 3313778));
+  return ArrayInt_var(Array_arrayint(a0));
+  ;
+}
+
+ArrayLong Array_arraylong(Array);
+
+static Var _x2c_func_adapt_153(Func _x2c_func_binding_153, const FuncArg * _x2c_func_argv_153){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_153, _x2c_func_argv_153, 0, 3313778));
+  return ArrayLong_var(Array_arraylong(a0));
+  ;
+}
+
+ArrayShort Array_arrayshort(Array);
+
+static Var _x2c_func_adapt_154(Func _x2c_func_binding_154, const FuncArg * _x2c_func_argv_154){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_154, _x2c_func_argv_154, 0, 3313778));
+  return ArrayShort_var(Array_arrayshort(a0));
+  ;
+}
+
+ArrayString Array_arraystring(Array);
+
+static Var _x2c_func_adapt_155(Func _x2c_func_binding_155, const FuncArg * _x2c_func_argv_155){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_155, _x2c_func_argv_155, 0, 3313778));
+  return ArrayString_var(Array_arraystring(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_156(Func _x2c_func_binding_156, const FuncArg * _x2c_func_argv_156){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_156, _x2c_func_argv_156, 0, 3313778));
+  return Var_box_ulong(Array_capacity(a0));
+  ;
+}
+
+void Array_cleanup(Array);
+
+static Var _x2c_func_adapt_157(Func _x2c_func_binding_157, const FuncArg * _x2c_func_argv_157){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_157, _x2c_func_argv_157, 0, 3313778));
+  Array_cleanup(a0);
+  return((void) 0, Void);
+}
+
+static Var _x2c_func_adapt_158(Func _x2c_func_binding_158, const FuncArg * _x2c_func_argv_158){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_158, _x2c_func_argv_158, 0, 3313778));
+  Array_clear(a0);
+  return((void) 0, Void);
+}
+
+int Array_compare(Array, Array);
+
+static Var _x2c_func_adapt_159(Func _x2c_func_binding_159, const FuncArg * _x2c_func_argv_159){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_159, _x2c_func_argv_159, 0, 3313778));
+  Array a1 = Var_array(x2c_func_value_argument(_x2c_func_binding_159, _x2c_func_argv_159, 1, 3313778));
+  return int_var(Array_compare(a0, a1));
+  ;
+}
+
+Array Array_concat(Array, Array);
+
+static Var _x2c_func_adapt_160(Func _x2c_func_binding_160, const FuncArg * _x2c_func_argv_160){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_160, _x2c_func_argv_160, 0, 3313778));
+  Array a1 = Var_array(x2c_func_value_argument(_x2c_func_binding_160, _x2c_func_argv_160, 1, 3313778));
+  return Array_var(Array_concat(a0, a1));
+  ;
+}
+
+int Array_contains(Array, Var);
+
+static Var _x2c_func_adapt_161(Func _x2c_func_binding_161, const FuncArg * _x2c_func_argv_161){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_161, _x2c_func_argv_161, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_161, _x2c_func_argv_161, 1, 45156);
+  return int_var(Array_contains(a0, a1));
+  ;
+}
+
+Array Array_copy(Array);
+
+static Var _x2c_func_adapt_162(Func _x2c_func_binding_162, const FuncArg * _x2c_func_argv_162){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_162, _x2c_func_argv_162, 0, 3313778));
+  return Array_var(Array_copy(a0));
+  ;
+}
+
+int Array_count(Array, Var);
+
+static Var _x2c_func_adapt_163(Func _x2c_func_binding_163, const FuncArg * _x2c_func_argv_163){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_163, _x2c_func_argv_163, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_163, _x2c_func_argv_163, 1, 45156);
+  return int_var(Array_count(a0, a1));
+  ;
+}
+
+int Array_equal(Array, Array);
+
+static Var _x2c_func_adapt_164(Func _x2c_func_binding_164, const FuncArg * _x2c_func_argv_164){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_164, _x2c_func_argv_164, 0, 3313778));
+  Array a1 = Var_array(x2c_func_value_argument(_x2c_func_binding_164, _x2c_func_argv_164, 1, 3313778));
+  return int_var(Array_equal(a0, a1));
+  ;
+}
+
+int Array_find(Array, Var);
+
+static Var _x2c_func_adapt_165(Func _x2c_func_binding_165, const FuncArg * _x2c_func_argv_165){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_165, _x2c_func_argv_165, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_165, _x2c_func_argv_165, 1, 45156);
+  return int_var(Array_find(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_166(Func _x2c_func_binding_166, const FuncArg * _x2c_func_argv_166){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_166, _x2c_func_argv_166, 0, 3313778));
+  Array_free(a0);
+  return((void) 0, Void);
+}
+
+Var Array_getindex(Array, int);
+
+static Var _x2c_func_adapt_167(Func _x2c_func_binding_167, const FuncArg * _x2c_func_argv_167){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_167, _x2c_func_argv_167, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_167, _x2c_func_argv_167, 1, 3453797), 3453797));
+  return Array_getindex(a0, a1);
+  ;
+}
+
+Array Array_getslice(Array, int, int, int);
+
+static Var _x2c_func_adapt_168(Func _x2c_func_binding_168, const FuncArg * _x2c_func_argv_168){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_168, _x2c_func_argv_168, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_168, _x2c_func_argv_168, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_168, _x2c_func_argv_168, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_168, _x2c_func_argv_168, 3, 3453797), 3453797));
+  return Array_var(Array_getslice(a0, a1, a2, a3));
+  ;
+}
+
+Var Array_heap_pop(Array);
+
+static Var _x2c_func_adapt_169(Func _x2c_func_binding_169, const FuncArg * _x2c_func_argv_169){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_169, _x2c_func_argv_169, 0, 3313778));
+  return Array_heap_pop(a0);
+  ;
+}
+
+void Array_heap_push(Array, Var);
+
+static Var _x2c_func_adapt_170(Func _x2c_func_binding_170, const FuncArg * _x2c_func_argv_170){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_170, _x2c_func_argv_170, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_170, _x2c_func_argv_170, 1, 45156);
+  Array_heap_push(a0, a1);
+  return((void) 0, Void);
+}
+
+void Array_heapify(Array);
+
+static Var _x2c_func_adapt_171(Func _x2c_func_binding_171, const FuncArg * _x2c_func_argv_171){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_171, _x2c_func_argv_171, 0, 3313778));
+  Array_heapify(a0);
+  return((void) 0, Void);
+}
+
+int Array_indexof(Array, Var);
+
+static Var _x2c_func_adapt_172(Func _x2c_func_binding_172, const FuncArg * _x2c_func_argv_172){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_172, _x2c_func_argv_172, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_172, _x2c_func_argv_172, 1, 45156);
+  return int_var(Array_indexof(a0, a1));
+  ;
+}
+
+Var Iter_var(Iter);
+
+Iter Array_iter(Array, Iter);
+
+static Var _x2c_func_adapt_173(Func _x2c_func_binding_173, const FuncArg * _x2c_func_argv_173){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_173, _x2c_func_argv_173, 0, 3313778));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_173, _x2c_func_argv_173, 1, 631140));
+  return Iter_var(Array_iter(a0, a1));
+  ;
+}
+
+String Array_join(Array, String);
+
+static Var _x2c_func_adapt_174(Func _x2c_func_binding_174, const FuncArg * _x2c_func_argv_174){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_174, _x2c_func_argv_174, 0, 3313778));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_174, _x2c_func_argv_174, 1, 1318210446));
+  return String_var(Array_join(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_175(Func _x2c_func_binding_175, const FuncArg * _x2c_func_argv_175){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_175, _x2c_func_argv_175, 0, 3313778));
+  return Var_box_ulong(Array_len(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_176(Func _x2c_func_binding_176, const FuncArg * _x2c_func_argv_176){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_176, _x2c_func_argv_176, 0, 3313778));
+  Array_pop(a0);
+  return((void) 0, Void);
+}
+
+Var Array_postfixindex(Array, int, Symbol);
+
+static Var _x2c_func_adapt_177(Func _x2c_func_binding_177, const FuncArg * _x2c_func_argv_177){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_177, _x2c_func_argv_177, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_177, _x2c_func_argv_177, 1, 3453797), 3453797));
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_177, _x2c_func_argv_177, 2, 1328354264));
+  return Array_postfixindex(a0, a1, a2);
+  ;
+}
+
+Array Array_remslice(Array, int, int);
+
+static Var _x2c_func_adapt_178(Func _x2c_func_binding_178, const FuncArg * _x2c_func_argv_178){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_178, _x2c_func_argv_178, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_178, _x2c_func_argv_178, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_178, _x2c_func_argv_178, 2, 3453797), 3453797));
+  return Array_var(Array_remslice(a0, a1, a2));
+  ;
+}
+
+String Array_repr(Array);
+
+static Var _x2c_func_adapt_179(Func _x2c_func_binding_179, const FuncArg * _x2c_func_argv_179){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_179, _x2c_func_argv_179, 0, 3313778));
+  return String_var(Array_repr(a0));
+  ;
+}
+
+void Array_resize(Array, size_t);
+
+static Var _x2c_func_adapt_180(Func _x2c_func_binding_180, const FuncArg * _x2c_func_argv_180){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_180, _x2c_func_argv_180, 0, 3313778));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_180, _x2c_func_argv_180, 1, 44858254), 44858254));
+  Array_resize(a0, a1);
+  return((void) 0, Void);
+}
+
+Array Array_reverse(Array);
+
+static Var _x2c_func_adapt_181(Func _x2c_func_binding_181, const FuncArg * _x2c_func_argv_181){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_181, _x2c_func_argv_181, 0, 3313778));
+  return Array_var(Array_reverse(a0));
+  ;
+}
+
+Var Array_setindex(Array, int, Var);
+
+static Var _x2c_func_adapt_182(Func _x2c_func_binding_182, const FuncArg * _x2c_func_argv_182){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_182, _x2c_func_argv_182, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_182, _x2c_func_argv_182, 1, 3453797), 3453797));
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_182, _x2c_func_argv_182, 2, 45156);
+  return Array_setindex(a0, a1, a2);
+  ;
+}
+
+Array Array_setslice(Array, int, int, Array);
+
+static Var _x2c_func_adapt_183(Func _x2c_func_binding_183, const FuncArg * _x2c_func_argv_183){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_183, _x2c_func_argv_183, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_183, _x2c_func_argv_183, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_183, _x2c_func_argv_183, 2, 3453797), 3453797));
+  Array a3 = Var_array(x2c_func_value_argument(_x2c_func_binding_183, _x2c_func_argv_183, 3, 3313778));
+  return Array_var(Array_setslice(a0, a1, a2, a3));
+  ;
+}
+
+Array Array_sort(Array);
+
+static Var _x2c_func_adapt_184(Func _x2c_func_binding_184, const FuncArg * _x2c_func_argv_184){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_184, _x2c_func_argv_184, 0, 3313778));
+  return Array_var(Array_sort(a0));
+  ;
+}
+
+Array Array_splice(Array, int, int, Array);
+
+static Var _x2c_func_adapt_185(Func _x2c_func_binding_185, const FuncArg * _x2c_func_argv_185){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_185, _x2c_func_argv_185, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_185, _x2c_func_argv_185, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_185, _x2c_func_argv_185, 2, 3453797), 3453797));
+  Array a3 = Var_array(x2c_func_value_argument(_x2c_func_binding_185, _x2c_func_argv_185, 3, 3313778));
+  return Array_var(Array_splice(a0, a1, a2, a3));
+  ;
+}
+
+String Array_str(Array);
+
+static Var _x2c_func_adapt_186(Func _x2c_func_binding_186, const FuncArg * _x2c_func_argv_186){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_186, _x2c_func_argv_186, 0, 3313778));
+  return String_var(Array_str(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_187(Func _x2c_func_binding_187, const FuncArg * _x2c_func_argv_187){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_187, _x2c_func_argv_187, 0, 3313778));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_187, _x2c_func_argv_187, 1, 44858254), 44858254));
+  Array_truncate(a0, a1);
+  return((void) 0, Void);
+}
+
+static Var _x2c_func_adapt_188(Func _x2c_func_binding_188, const FuncArg * _x2c_func_argv_188){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_188, _x2c_func_argv_188, 0, 3313778));
+  return int_var(Array_truth(a0));
+  ;
+}
+
+Var Array_unshift(Array, Var);
+
+static Var _x2c_func_adapt_189(Func _x2c_func_binding_189, const FuncArg * _x2c_func_argv_189){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_189, _x2c_func_argv_189, 0, 3313778));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_189, _x2c_func_argv_189, 1, 45156);
+  return Array_unshift(a0, a1);
+  ;
+}
+
+Var Array_updateindex(Array, int, Symbol, Var);
+
+static Var _x2c_func_adapt_190(Func _x2c_func_binding_190, const FuncArg * _x2c_func_argv_190){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_190, _x2c_func_argv_190, 0, 3313778));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_190, _x2c_func_argv_190, 1, 3453797), 3453797));
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_190, _x2c_func_argv_190, 2, 1328354264));
+  Var a3 = x2c_func_value_argument(_x2c_func_binding_190, _x2c_func_argv_190, 3, 45156);
+  return Array_updateindex(a0, a1, a2, a3);
+  ;
+}
+
+Buffer Var_buffer(Var);
+
+Var Buffer_var(Buffer);
+
+Buffer Array_write_repr(Array, Buffer);
+
+static Var _x2c_func_adapt_191(Func _x2c_func_binding_191, const FuncArg * _x2c_func_argv_191){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_191, _x2c_func_argv_191, 0, 3313778));
+  Buffer a1 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_191, _x2c_func_argv_191, 1, 178663780));
+  return Buffer_var(Array_write_repr(a0, a1));
+  ;
+}
+
+Buffer Array_write_str(Array, Buffer);
+
+static Var _x2c_func_adapt_192(Func _x2c_func_binding_192, const FuncArg * _x2c_func_argv_192){
+  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_192, _x2c_func_argv_192, 0, 3313778));
+  Buffer a1 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_192, _x2c_func_argv_192, 1, 178663780));
+  return Buffer_var(Array_write_str(a0, a1));
+  ;
+}
+
+Buffer Buffer_clear(Buffer);
+
+static Var _x2c_func_adapt_193(Func _x2c_func_binding_193, const FuncArg * _x2c_func_argv_193){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_193, _x2c_func_argv_193, 0, 178663780));
+  return Buffer_var(Buffer_clear(a0));
+  ;
+}
+
+int Buffer_getindex(Buffer, int);
+
+static Var _x2c_func_adapt_194(Func _x2c_func_binding_194, const FuncArg * _x2c_func_argv_194){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_194, _x2c_func_argv_194, 0, 178663780));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_194, _x2c_func_argv_194, 1, 3453797), 3453797));
+  return int_var(Buffer_getindex(a0, a1));
+  ;
+}
+
+Buffer Buffer_indent(Buffer);
+
+static Var _x2c_func_adapt_195(Func _x2c_func_binding_195, const FuncArg * _x2c_func_argv_195){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_195, _x2c_func_argv_195, 0, 178663780));
+  return Buffer_var(Buffer_indent(a0));
+  ;
+}
+
+Buffer Buffer_new(size_t);
+
+static Var _x2c_func_adapt_196(Func _x2c_func_binding_196, const FuncArg * _x2c_func_argv_196){
+  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_196, _x2c_func_argv_196, 0, 44858254), 44858254));
+  return Buffer_var(Buffer_new(a0));
+  ;
+}
+
+Buffer Buffer_newline(Buffer);
+
+static Var _x2c_func_adapt_197(Func _x2c_func_binding_197, const FuncArg * _x2c_func_argv_197){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_197, _x2c_func_argv_197, 0, 178663780));
+  return Buffer_var(Buffer_newline(a0));
+  ;
+}
+
+Buffer Buffer_newline_indent(Buffer);
+
+static Var _x2c_func_adapt_198(Func _x2c_func_binding_198, const FuncArg * _x2c_func_argv_198){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_198, _x2c_func_argv_198, 0, 178663780));
+  return Buffer_var(Buffer_newline_indent(a0));
+  ;
+}
+
+Buffer Buffer_pad(Buffer);
+
+static Var _x2c_func_adapt_199(Func _x2c_func_binding_199, const FuncArg * _x2c_func_argv_199){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_199, _x2c_func_argv_199, 0, 178663780));
+  return Buffer_var(Buffer_pad(a0));
+  ;
+}
+
+Buffer Buffer_pop(Buffer);
+
+static Var _x2c_func_adapt_200(Func _x2c_func_binding_200, const FuncArg * _x2c_func_argv_200){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_200, _x2c_func_argv_200, 0, 178663780));
+  return Buffer_var(Buffer_pop(a0));
+  ;
+}
+
+Buffer Buffer_push(Buffer);
+
+static Var _x2c_func_adapt_201(Func _x2c_func_binding_201, const FuncArg * _x2c_func_argv_201){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_201, _x2c_func_argv_201, 0, 178663780));
+  return Buffer_var(Buffer_push(a0));
+  ;
+}
+
+String Buffer_repr(Buffer);
+
+static Var _x2c_func_adapt_202(Func _x2c_func_binding_202, const FuncArg * _x2c_func_argv_202){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_202, _x2c_func_argv_202, 0, 178663780));
+  return String_var(Buffer_repr(a0));
+  ;
+}
+
+Buffer Buffer_reserve(Buffer, size_t);
+
+static Var _x2c_func_adapt_203(Func _x2c_func_binding_203, const FuncArg * _x2c_func_argv_203){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_203, _x2c_func_argv_203, 0, 178663780));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_203, _x2c_func_argv_203, 1, 44858254), 44858254));
+  return Buffer_var(Buffer_reserve(a0, a1));
+  ;
+}
+
+String Buffer_str(Buffer);
+
+static Var _x2c_func_adapt_204(Func _x2c_func_binding_204, const FuncArg * _x2c_func_argv_204){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_204, _x2c_func_argv_204, 0, 178663780));
+  return String_var(Buffer_str(a0));
+  ;
+}
+
+int Buffer_truth(Buffer);
+
+static Var _x2c_func_adapt_205(Func _x2c_func_binding_205, const FuncArg * _x2c_func_argv_205){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_205, _x2c_func_argv_205, 0, 178663780));
+  return int_var(Buffer_truth(a0));
+  ;
+}
+
+Buffer Buffer_unwrite(Buffer, size_t);
+
+static Var _x2c_func_adapt_206(Func _x2c_func_binding_206, const FuncArg * _x2c_func_argv_206){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_206, _x2c_func_argv_206, 0, 178663780));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_206, _x2c_func_argv_206, 1, 44858254), 44858254));
+  return Buffer_var(Buffer_unwrite(a0, a1));
+  ;
+}
+
+Buffer Buffer_write(Buffer, const char *);
+
+static Var _x2c_func_adapt_207(Func _x2c_func_binding_207, const FuncArg * _x2c_func_argv_207){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_207, _x2c_func_argv_207, 0, 178663780));
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_207, _x2c_func_argv_207, 1);
+  return Buffer_var(Buffer_write(a0, a1));
+  ;
+}
+
+Buffer Buffer_write_char(Buffer, char);
+
+static Var _x2c_func_adapt_208(Func _x2c_func_binding_208, const FuncArg * _x2c_func_argv_208){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_208, _x2c_func_argv_208, 0, 178663780));
+  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_208, _x2c_func_argv_208, 1, 26993), 26993));
+  return Buffer_var(Buffer_write_char(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_209(Func _x2c_func_binding_209, const FuncArg * _x2c_func_argv_209){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_209, _x2c_func_argv_209, 0, 178663780));
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_209, _x2c_func_argv_209, 1);
+  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_209, _x2c_func_argv_209, 2, 44858254), 44858254));
+  return Buffer_var(Buffer_write_len(a0, a1, a2));
+  ;
+}
+
+Buffer Buffer_write_repeat(Buffer, char, size_t);
+
+static Var _x2c_func_adapt_210(Func _x2c_func_binding_210, const FuncArg * _x2c_func_argv_210){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_210, _x2c_func_argv_210, 0, 178663780));
+  char a1 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_210, _x2c_func_argv_210, 1, 26993), 26993));
+  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_210, _x2c_func_argv_210, 2, 44858254), 44858254));
+  return Buffer_var(Buffer_write_repeat(a0, a1, a2));
+  ;
+}
+
+void Context_cleanup(Context);
+
+static Var _x2c_func_adapt_211(Func _x2c_func_binding_211, const FuncArg * _x2c_func_argv_211){
+  Context a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_211, _x2c_func_argv_211, 0, 7479766568));
+  Context_cleanup(a0);
+  return((void) 0, Void);
+}
+
+void Context_close(Context);
+
+static Var _x2c_func_adapt_212(Func _x2c_func_binding_212, const FuncArg * _x2c_func_argv_212){
+  Context a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_212, _x2c_func_argv_212, 0, 7479766568));
+  Context_close(a0);
+  return((void) 0, Void);
+}
+
+Context Context_current(void);
+
+static Var _x2c_func_adapt_213(Func _x2c_func_binding_213, const FuncArg * _x2c_func_argv_213){
+  return Var_new(7479766568, Context_current());
+  ;
+}
+
+Var Context_export(Context, Var);
+
+static Var _x2c_func_adapt_214(Func _x2c_func_binding_214, const FuncArg * _x2c_func_argv_214){
+  Context a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_214, _x2c_func_argv_214, 0, 7479766568));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_214, _x2c_func_argv_214, 1, 45156);
+  return Context_export(a0, a1);
+  ;
+}
+
+Context Context_open(void);
+
+static Var _x2c_func_adapt_215(Func _x2c_func_binding_215, const FuncArg * _x2c_func_argv_215){
+  return Var_new(7479766568, Context_open());
+  ;
+}
 
 List Diff_lines(String, String);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 1318210446));
+static Var _x2c_func_adapt_216(Func _x2c_func_binding_216, const FuncArg * _x2c_func_argv_216){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 1, 1318210446));
   return List_var(Diff_lines(a0, a1));
   ;
 }
 
 String Diff_unified(String, String, String, String);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 2, 1318210446));
-  String a3 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 3, 1318210446));
+static Var _x2c_func_adapt_217(Func _x2c_func_binding_217, const FuncArg * _x2c_func_argv_217){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 1, 1318210446));
+  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 2, 1318210446));
+  String a3 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 3, 1318210446));
   return String_var(Diff_unified(a0, a1, a2, a3));
+  ;
+}
+
+Iter Iter_accumulate(Iter, Var, Iter);
+
+static Var _x2c_func_adapt_218(Func _x2c_func_binding_218, const FuncArg * _x2c_func_argv_218){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_218, _x2c_func_argv_218, 0, 631140));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_218, _x2c_func_argv_218, 1, 45156);
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_218, _x2c_func_argv_218, 2, 631140));
+  return Iter_var(Iter_accumulate(a0, a1, a2));
+  ;
+}
+
+Array Iter_array(Iter);
+
+static Var _x2c_func_adapt_219(Func _x2c_func_binding_219, const FuncArg * _x2c_func_argv_219){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_219, _x2c_func_argv_219, 0, 631140));
+  return Array_var(Iter_array(a0));
+  ;
+}
+
+Iter Iter_chain(Iter, Iter, Iter);
+
+static Var _x2c_func_adapt_220(Func _x2c_func_binding_220, const FuncArg * _x2c_func_argv_220){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_220, _x2c_func_argv_220, 0, 631140));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_220, _x2c_func_argv_220, 1, 631140));
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_220, _x2c_func_argv_220, 2, 631140));
+  return Iter_var(Iter_chain(a0, a1, a2));
+  ;
+}
+
+int Iter_count(Iter);
+
+static Var _x2c_func_adapt_221(Func _x2c_func_binding_221, const FuncArg * _x2c_func_argv_221){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_221, _x2c_func_argv_221, 0, 631140));
+  return int_var(Iter_count(a0));
+  ;
+}
+
+Iter Iter_enumerate(Iter, int, Iter);
+
+static Var _x2c_func_adapt_222(Func _x2c_func_binding_222, const FuncArg * _x2c_func_argv_222){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_222, _x2c_func_argv_222, 0, 631140));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_222, _x2c_func_argv_222, 1, 3453797), 3453797));
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_222, _x2c_func_argv_222, 2, 631140));
+  return Iter_var(Iter_enumerate(a0, a1, a2));
+  ;
+}
+
+Iter Iter_head(Iter, int, Iter);
+
+static Var _x2c_func_adapt_223(Func _x2c_func_binding_223, const FuncArg * _x2c_func_argv_223){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_223, _x2c_func_argv_223, 0, 631140));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_223, _x2c_func_argv_223, 1, 3453797), 3453797));
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_223, _x2c_func_argv_223, 2, 631140));
+  return Iter_var(Iter_head(a0, a1, a2));
+  ;
+}
+
+List Iter_list(Iter);
+
+static Var _x2c_func_adapt_224(Func _x2c_func_binding_224, const FuncArg * _x2c_func_argv_224){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_224, _x2c_func_argv_224, 0, 631140));
+  return List_var(Iter_list(a0));
+  ;
+}
+
+Var Iter_max(Iter);
+
+static Var _x2c_func_adapt_225(Func _x2c_func_binding_225, const FuncArg * _x2c_func_argv_225){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_225, _x2c_func_argv_225, 0, 631140));
+  return Iter_max(a0);
+  ;
+}
+
+Var Iter_min(Iter);
+
+static Var _x2c_func_adapt_226(Func _x2c_func_binding_226, const FuncArg * _x2c_func_argv_226){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_226, _x2c_func_argv_226, 0, 631140));
+  return Iter_min(a0);
+  ;
+}
+
+Iter Iter_new(void);
+
+static Var _x2c_func_adapt_227(Func _x2c_func_binding_227, const FuncArg * _x2c_func_argv_227){
+  return Iter_var(Iter_new());
+  ;
+}
+
+Var Iter_next(Iter);
+
+static Var _x2c_func_adapt_228(Func _x2c_func_binding_228, const FuncArg * _x2c_func_argv_228){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_228, _x2c_func_argv_228, 0, 631140));
+  return Iter_next(a0);
+  ;
+}
+
+Var Iter_product(Iter);
+
+static Var _x2c_func_adapt_229(Func _x2c_func_binding_229, const FuncArg * _x2c_func_argv_229){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_229, _x2c_func_argv_229, 0, 631140));
+  return Iter_product(a0);
+  ;
+}
+
+Iter Iter_repeat(Var, int, Iter);
+
+static Var _x2c_func_adapt_230(Func _x2c_func_binding_230, const FuncArg * _x2c_func_argv_230){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_230, _x2c_func_argv_230, 0, 45156);
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_230, _x2c_func_argv_230, 1, 3453797), 3453797));
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_230, _x2c_func_argv_230, 2, 631140));
+  return Iter_var(Iter_repeat(a0, a1, a2));
+  ;
+}
+
+Var Iter_sum(Iter);
+
+static Var _x2c_func_adapt_231(Func _x2c_func_binding_231, const FuncArg * _x2c_func_argv_231){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_231, _x2c_func_argv_231, 0, 631140));
+  return Iter_sum(a0);
+  ;
+}
+
+Iter Iter_unique(Iter, Iter);
+
+static Var _x2c_func_adapt_232(Func _x2c_func_binding_232, const FuncArg * _x2c_func_argv_232){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_232, _x2c_func_argv_232, 0, 631140));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_232, _x2c_func_argv_232, 1, 631140));
+  return Iter_var(Iter_unique(a0, a1));
+  ;
+}
+
+Iter Iter_zip(Iter, Iter, Iter);
+
+static Var _x2c_func_adapt_233(Func _x2c_func_binding_233, const FuncArg * _x2c_func_argv_233){
+  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_233, _x2c_func_argv_233, 0, 631140));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_233, _x2c_func_argv_233, 1, 631140));
+  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_233, _x2c_func_argv_233, 2, 631140));
+  return Iter_var(Iter_zip(a0, a1, a2));
+  ;
+}
+
+Job Var_job(Var);
+
+Var Job_var(Job);
+
+static Var _x2c_func_adapt_234(Func _x2c_func_binding_234, const FuncArg * _x2c_func_argv_234){
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_234, _x2c_func_argv_234, 0, 244620705480));
+  return Job_var(Job_start(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_235(Func _x2c_func_binding_235, const FuncArg * _x2c_func_argv_235){
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_235, _x2c_func_argv_235, 0, 244620705480));
+  return Job_var(a0);
   ;
 }
 
 Var Json_parse(String);
 
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));
+static Var _x2c_func_adapt_236(Func _x2c_func_binding_236, const FuncArg * _x2c_func_argv_236){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_236, _x2c_func_argv_236, 0, 1318210446));
   return Json_parse(a0);
+  ;
+}
+
+int List_compare(List, List);
+
+static Var _x2c_func_adapt_237(Func _x2c_func_binding_237, const FuncArg * _x2c_func_argv_237){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_237, _x2c_func_argv_237, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_237, _x2c_func_argv_237, 1, 806120));
+  return int_var(List_compare(a0, a1));
+  ;
+}
+
+List List_flatten(List);
+
+static Var _x2c_func_adapt_238(Func _x2c_func_binding_238, const FuncArg * _x2c_func_argv_238){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_238, _x2c_func_argv_238, 0, 806120));
+  return List_var(List_flatten(a0));
+  ;
+}
+
+List List_flatten_all(List);
+
+static Var _x2c_func_adapt_239(Func _x2c_func_binding_239, const FuncArg * _x2c_func_argv_239){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_239, _x2c_func_argv_239, 0, 806120));
+  return List_var(List_flatten_all(a0));
+  ;
+}
+
+List List_getslice(List, int, int, int);
+
+static Var _x2c_func_adapt_240(Func _x2c_func_binding_240, const FuncArg * _x2c_func_argv_240){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_240, _x2c_func_argv_240, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_240, _x2c_func_argv_240, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_240, _x2c_func_argv_240, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_240, _x2c_func_argv_240, 3, 3453797), 3453797));
+  return List_var(List_getslice(a0, a1, a2, a3));
+  ;
+}
+
+unsigned List_hash(List);
+
+static Var _x2c_func_adapt_241(Func _x2c_func_binding_241, const FuncArg * _x2c_func_argv_241){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_241, _x2c_func_argv_241, 0, 806120));
+  return unsigned_var(List_hash(a0));
+  ;
+}
+
+List List_head(List, unsigned);
+
+static Var _x2c_func_adapt_242(Func _x2c_func_binding_242, const FuncArg * _x2c_func_argv_242){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_242, _x2c_func_argv_242, 0, 806120));
+  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_242, _x2c_func_argv_242, 1, 3847013), 3847013));
+  return List_var(List_head(a0, a1));
+  ;
+}
+
+int List_index(List, Var);
+
+static Var _x2c_func_adapt_243(Func _x2c_func_binding_243, const FuncArg * _x2c_func_argv_243){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_243, _x2c_func_argv_243, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_243, _x2c_func_argv_243, 1, 45156);
+  return int_var(List_index(a0, a1));
+  ;
+}
+
+Iter List_iter(List, Iter);
+
+static Var _x2c_func_adapt_244(Func _x2c_func_binding_244, const FuncArg * _x2c_func_argv_244){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 0, 806120));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_244, _x2c_func_argv_244, 1, 631140));
+  return Iter_var(List_iter(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_245(Func _x2c_func_binding_245, const FuncArg * _x2c_func_argv_245){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_245, _x2c_func_argv_245, 0, 806120));
+  return Job_var(List_job(a0));
+  ;
+}
+
+List List_match_replace(List, Var, Var);
+
+static Var _x2c_func_adapt_246(Func _x2c_func_binding_246, const FuncArg * _x2c_func_argv_246){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 0, 806120));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_246, _x2c_func_argv_246, 2, 45156);
+  return List_var(List_match_replace(a0, a1, a2));
+  ;
+}
+
+List List_nth_cdr(List, int);
+
+static Var _x2c_func_adapt_247(Func _x2c_func_binding_247, const FuncArg * _x2c_func_argv_247){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_247, _x2c_func_argv_247, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_247, _x2c_func_argv_247, 1, 3453797), 3453797));
+  return List_var(List_nth_cdr(a0, a1));
+  ;
+}
+
+List List_promote(List);
+
+static Var _x2c_func_adapt_248(Func _x2c_func_binding_248, const FuncArg * _x2c_func_argv_248){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_248, _x2c_func_argv_248, 0, 806120));
+  return List_var(List_promote(a0));
+  ;
+}
+
+List List_replace(List, List);
+
+static Var _x2c_func_adapt_249(Func _x2c_func_binding_249, const FuncArg * _x2c_func_argv_249){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_249, _x2c_func_argv_249, 1, 806120));
+  return List_var(List_replace(a0, a1));
+  ;
+}
+
+List List_sublis(List, List);
+
+static Var _x2c_func_adapt_250(Func _x2c_func_binding_250, const FuncArg * _x2c_func_argv_250){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 0, 806120));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_250, _x2c_func_argv_250, 1, 806120));
+  return List_var(List_sublis(a0, a1));
+  ;
+}
+
+List List_subseq(List, int, int, int);
+
+static Var _x2c_func_adapt_251(Func _x2c_func_binding_251, const FuncArg * _x2c_func_argv_251){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 0, 806120));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_251, _x2c_func_argv_251, 3, 3453797), 3453797));
+  return List_var(List_subseq(a0, a1, a2, a3));
+  ;
+}
+
+List List_tail(List, unsigned);
+
+static Var _x2c_func_adapt_252(Func _x2c_func_binding_252, const FuncArg * _x2c_func_argv_252){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 0, 806120));
+  unsigned a1 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_252, _x2c_func_argv_252, 1, 3847013), 3847013));
+  return List_var(List_tail(a0, a1));
+  ;
+}
+
+List List_unique(List);
+
+static Var _x2c_func_adapt_253(Func _x2c_func_binding_253, const FuncArg * _x2c_func_argv_253){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_253, _x2c_func_argv_253, 0, 806120));
+  return List_var(List_unique(a0));
+  ;
+}
+
+MapIntInt Var_mapintint(Var);
+
+Var MapIntInt_var(MapIntInt);
+
+static Var _x2c_func_adapt_254(Func _x2c_func_binding_254, const FuncArg * _x2c_func_argv_254){
+  MapIntInt a0 = Var_mapintint(x2c_func_value_argument(_x2c_func_binding_254, _x2c_func_argv_254, 0, 28691016207272));
+  return MapIntInt_var(a0);
+  ;
+}
+
+MapLongDouble Var_maplongdouble(Var);
+
+Var MapLongDouble_var(MapLongDouble);
+
+static Var _x2c_func_adapt_255(Func _x2c_func_binding_255, const FuncArg * _x2c_func_argv_255){
+  MapLongDouble a0 = Var_maplongdouble(x2c_func_value_argument(_x2c_func_binding_255, _x2c_func_argv_255, 0, 918119015457770));
+  return MapLongDouble_var(a0);
+  ;
+}
+
+MapStringInt Var_mapstringint(Var);
+
+Var MapStringInt_var(MapStringInt);
+
+static Var _x2c_func_adapt_256(Func _x2c_func_binding_256, const FuncArg * _x2c_func_argv_256){
+  MapStringInt a0 = Var_mapstringint(x2c_func_value_argument(_x2c_func_binding_256, _x2c_func_argv_256, 0, 28691699747752));
+  return MapStringInt_var(a0);
+  ;
+}
+
+MapStringString Var_mapstringstring(Var);
+
+Var MapStringString_var(MapStringString);
+
+static Var _x2c_func_adapt_257(Func _x2c_func_binding_257, const FuncArg * _x2c_func_argv_257){
+  MapStringString a0 = Var_mapstringstring(x2c_func_value_argument(_x2c_func_binding_257, _x2c_func_argv_257, 0, 918134391927270));
+  return MapStringString_var(a0);
+  ;
+}
+
+void Map_cleanup(Map);
+
+static Var _x2c_func_adapt_258(Func _x2c_func_binding_258, const FuncArg * _x2c_func_argv_258){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_258, _x2c_func_argv_258, 0, 26720));
+  Map_cleanup(a0);
+  return((void) 0, Void);
+}
+
+int Map_compare(Map, Map);
+
+static Var _x2c_func_adapt_259(Func _x2c_func_binding_259, const FuncArg * _x2c_func_argv_259){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_259, _x2c_func_argv_259, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_259, _x2c_func_argv_259, 1, 26720));
+  return int_var(Map_compare(a0, a1));
+  ;
+}
+
+int Map_contains(Map, Var);
+
+static Var _x2c_func_adapt_260(Func _x2c_func_binding_260, const FuncArg * _x2c_func_argv_260){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_260, _x2c_func_argv_260, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_260, _x2c_func_argv_260, 1, 45156);
+  return int_var(Map_contains(a0, a1));
+  ;
+}
+
+Map Map_copy(Map);
+
+static Var _x2c_func_adapt_261(Func _x2c_func_binding_261, const FuncArg * _x2c_func_argv_261){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_261, _x2c_func_argv_261, 0, 26720));
+  return Map_var(Map_copy(a0));
+  ;
+}
+
+Iter Map_enumerate(Map, Iter);
+
+static Var _x2c_func_adapt_262(Func _x2c_func_binding_262, const FuncArg * _x2c_func_argv_262){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_262, _x2c_func_argv_262, 1, 631140));
+  return Iter_var(Map_enumerate(a0, a1));
+  ;
+}
+
+int Map_equal(Map, Map);
+
+static Var _x2c_func_adapt_263(Func _x2c_func_binding_263, const FuncArg * _x2c_func_argv_263){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_263, _x2c_func_argv_263, 1, 26720));
+  return int_var(Map_equal(a0, a1));
+  ;
+}
+
+Var Map_get_hashed(Map, Var, unsigned);
+
+static Var _x2c_func_adapt_264(Func _x2c_func_binding_264, const FuncArg * _x2c_func_argv_264){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 1, 45156);
+  unsigned a2 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_264, _x2c_func_argv_264, 2, 3847013), 3847013));
+  return Map_get_hashed(a0, a1, a2);
+  ;
+}
+
+Var Map_getdefault(Map, Var, Var);
+
+static Var _x2c_func_adapt_265(Func _x2c_func_binding_265, const FuncArg * _x2c_func_argv_265){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_265, _x2c_func_argv_265, 2, 45156);
+  return Map_getdefault(a0, a1, a2);
+  ;
+}
+
+Var Map_getindex(Map, Var);
+
+static Var _x2c_func_adapt_266(Func _x2c_func_binding_266, const FuncArg * _x2c_func_argv_266){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_266, _x2c_func_argv_266, 1, 45156);
+  return Map_getindex(a0, a1);
+  ;
+}
+
+Iter Map_iter(Map, Iter);
+
+static Var _x2c_func_adapt_267(Func _x2c_func_binding_267, const FuncArg * _x2c_func_argv_267){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_267, _x2c_func_argv_267, 1, 631140));
+  return Iter_var(Map_iter(a0, a1));
+  ;
+}
+
+Iter Map_keys(Map, Iter);
+
+static Var _x2c_func_adapt_268(Func _x2c_func_binding_268, const FuncArg * _x2c_func_argv_268){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_268, _x2c_func_argv_268, 0, 26720));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_268, _x2c_func_argv_268, 1, 631140));
+  return Iter_var(Map_keys(a0, a1));
+  ;
+}
+
+unsigned Map_len(Map);
+
+static Var _x2c_func_adapt_269(Func _x2c_func_binding_269, const FuncArg * _x2c_func_argv_269){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_269, _x2c_func_argv_269, 0, 26720));
+  return unsigned_var(Map_len(a0));
+  ;
+}
+
+List Map_list(Map);
+
+static Var _x2c_func_adapt_270(Func _x2c_func_binding_270, const FuncArg * _x2c_func_argv_270){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_270, _x2c_func_argv_270, 0, 26720));
+  return List_var(Map_list(a0));
+  ;
+}
+
+MapIntInt Map_mapintint(Map);
+
+static Var _x2c_func_adapt_271(Func _x2c_func_binding_271, const FuncArg * _x2c_func_argv_271){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_271, _x2c_func_argv_271, 0, 26720));
+  return MapIntInt_var(Map_mapintint(a0));
+  ;
+}
+
+MapLongDouble Map_maplongdouble(Map);
+
+static Var _x2c_func_adapt_272(Func _x2c_func_binding_272, const FuncArg * _x2c_func_argv_272){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_272, _x2c_func_argv_272, 0, 26720));
+  return MapLongDouble_var(Map_maplongdouble(a0));
+  ;
+}
+
+MapStringInt Map_mapstringint(Map);
+
+static Var _x2c_func_adapt_273(Func _x2c_func_binding_273, const FuncArg * _x2c_func_argv_273){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_273, _x2c_func_argv_273, 0, 26720));
+  return MapStringInt_var(Map_mapstringint(a0));
+  ;
+}
+
+MapStringString Map_mapstringstring(Map);
+
+static Var _x2c_func_adapt_274(Func _x2c_func_binding_274, const FuncArg * _x2c_func_argv_274){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_274, _x2c_func_argv_274, 0, 26720));
+  return MapStringString_var(Map_mapstringstring(a0));
+  ;
+}
+
+Map Map_merge(Map, Map);
+
+static Var _x2c_func_adapt_275(Func _x2c_func_binding_275, const FuncArg * _x2c_func_argv_275){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 0, 26720));
+  Map a1 = Var_map(x2c_func_value_argument(_x2c_func_binding_275, _x2c_func_argv_275, 1, 26720));
+  return Map_var(Map_merge(a0, a1));
+  ;
+}
+
+Map Map_new_capacity(unsigned);
+
+static Var _x2c_func_adapt_276(Func _x2c_func_binding_276, const FuncArg * _x2c_func_argv_276){
+  unsigned a0 = Var_uint(Var_convert(x2c_func_value_argument(_x2c_func_binding_276, _x2c_func_argv_276, 0, 3847013), 3847013));
+  return Map_var(Map_new_capacity(a0));
+  ;
+}
+
+Var Map_postfixindex(Map, Var, Symbol);
+
+static Var _x2c_func_adapt_277(Func _x2c_func_binding_277, const FuncArg * _x2c_func_argv_277){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_277, _x2c_func_argv_277, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_277, _x2c_func_argv_277, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_277, _x2c_func_argv_277, 2, 1328354264));
+  return Map_postfixindex(a0, a1, a2);
+  ;
+}
+
+String Map_repr(Map);
+
+static Var _x2c_func_adapt_278(Func _x2c_func_binding_278, const FuncArg * _x2c_func_argv_278){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_278, _x2c_func_argv_278, 0, 26720));
+  return String_var(Map_repr(a0));
+  ;
+}
+
+void Map_set(Map, Var, Var);
+
+static Var _x2c_func_adapt_279(Func _x2c_func_binding_279, const FuncArg * _x2c_func_argv_279){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_279, _x2c_func_argv_279, 2, 45156);
+  Map_set(a0, a1, a2);
+  return((void) 0, Void);
+}
+
+Var Map_setdefault(Map, Var, Var);
+
+static Var _x2c_func_adapt_280(Func _x2c_func_binding_280, const FuncArg * _x2c_func_argv_280){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_280, _x2c_func_argv_280, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_280, _x2c_func_argv_280, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_280, _x2c_func_argv_280, 2, 45156);
+  return Map_setdefault(a0, a1, a2);
+  ;
+}
+
+Var Map_setindex(Map, Var, Var);
+
+static Var _x2c_func_adapt_281(Func _x2c_func_binding_281, const FuncArg * _x2c_func_argv_281){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_281, _x2c_func_argv_281, 2, 45156);
+  return Map_setindex(a0, a1, a2);
+  ;
+}
+
+String Map_str(Map);
+
+static Var _x2c_func_adapt_282(Func _x2c_func_binding_282, const FuncArg * _x2c_func_argv_282){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_282, _x2c_func_argv_282, 0, 26720));
+  return String_var(Map_str(a0));
+  ;
+}
+
+int Map_truth(Map);
+
+static Var _x2c_func_adapt_283(Func _x2c_func_binding_283, const FuncArg * _x2c_func_argv_283){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_283, _x2c_func_argv_283, 0, 26720));
+  return int_var(Map_truth(a0));
+  ;
+}
+
+Var Map_updateindex(Map, Var, Symbol, Var);
+
+static Var _x2c_func_adapt_284(Func _x2c_func_binding_284, const FuncArg * _x2c_func_argv_284){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 0, 26720));
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 2, 1328354264));
+  Var a3 = x2c_func_value_argument(_x2c_func_binding_284, _x2c_func_argv_284, 3, 45156);
+  return Map_updateindex(a0, a1, a2, a3);
+  ;
+}
+
+Buffer Map_write_repr(Map, Buffer);
+
+static Var _x2c_func_adapt_285(Func _x2c_func_binding_285, const FuncArg * _x2c_func_argv_285){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_285, _x2c_func_argv_285, 0, 26720));
+  Buffer a1 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_285, _x2c_func_argv_285, 1, 178663780));
+  return Buffer_var(Map_write_repr(a0, a1));
+  ;
+}
+
+Buffer Map_write_str(Map, Buffer);
+
+static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_func_argv_286){
+  Map a0 = Var_map(x2c_func_value_argument(_x2c_func_binding_286, _x2c_func_argv_286, 0, 26720));
+  Buffer a1 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_286, _x2c_func_argv_286, 1, 178663780));
+  return Buffer_var(Map_write_str(a0, a1));
   ;
 }
 
 Path Path_basename(Path);
 
-static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 1318210446));
+static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287){
+  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_287, _x2c_func_argv_287, 0, 1318210446));
   return String_var(Path_basename(a0));
   ;
 }
 
 Path Path_dirname(Path);
 
-static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 0, 1318210446));
+static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288){
+  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_288, _x2c_func_argv_288, 0, 1318210446));
   return String_var(Path_dirname(a0));
   ;
 }
 
 String Path_extension(Path);
 
-static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 1318210446));
+static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289){
+  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_289, _x2c_func_argv_289, 0, 1318210446));
   return String_var(Path_extension(a0));
   ;
 }
 
 Path Path_join(Path, Path);
 
-static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, 1318210446));
-  Path a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 1, 1318210446));
+static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290){
+  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 0, 1318210446));
+  Path a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 1, 1318210446));
   return String_var(Path_join(a0, a1));
   ;
 }
 
 String Path_stem(Path);
 
-static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 0, 1318210446));
+static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291){
+  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_291, _x2c_func_argv_291, 0, 1318210446));
   return String_var(Path_stem(a0));
   ;
+}
+
+void * Scope_calloc(size_t, size_t);
+
+static Var _x2c_func_adapt_292(Func _x2c_func_binding_292, const FuncArg * _x2c_func_argv_292){
+  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_292, _x2c_func_argv_292, 0, 44858254), 44858254));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_292, _x2c_func_argv_292, 1, 44858254), 44858254));
+  return Var_new(3683441, Scope_calloc(a0, a1));
+  ;
+}
+
+void Scope_cleanup(Scope);
+
+static Var _x2c_func_adapt_293(Func _x2c_func_binding_293, const FuncArg * _x2c_func_argv_293){
+  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_293, _x2c_func_argv_293, 0, 40074250));
+  Scope_cleanup(a0);
+  return((void) 0, Void);
+}
+
+void Scope_destroy(Scope);
+
+static Var _x2c_func_adapt_294(Func _x2c_func_binding_294, const FuncArg * _x2c_func_argv_294){
+  Scope a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_294, _x2c_func_argv_294, 0, 40074250));
+  Scope_destroy(a0);
+  return((void) 0, Void);
+}
+
+void Scope_free(void *);
+
+static Var _x2c_func_adapt_295(Func _x2c_func_binding_295, const FuncArg * _x2c_func_argv_295){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_295, _x2c_func_argv_295, 0, 3683441));
+  Scope_free(a0);
+  return((void) 0, Void);
+}
+
+void * Scope_malloc(size_t);
+
+static Var _x2c_func_adapt_296(Func _x2c_func_binding_296, const FuncArg * _x2c_func_argv_296){
+  size_t a0 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_296, _x2c_func_argv_296, 0, 44858254), 44858254));
+  return Var_new(3683441, Scope_malloc(a0));
+  ;
+}
+
+void * Scope_memdup(const void *, size_t);
+
+static Var _x2c_func_adapt_297(Func _x2c_func_binding_297, const FuncArg * _x2c_func_argv_297){
+  const void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_297, _x2c_func_argv_297, 0, 3683441));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_297, _x2c_func_argv_297, 1, 44858254), 44858254));
+  return Var_new(3683441, Scope_memdup(a0, a1));
+  ;
+}
+
+void Scope_move(void *, Scope *);
+
+static Var _x2c_func_adapt_298(Func _x2c_func_binding_298, const FuncArg * _x2c_func_argv_298){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_298, _x2c_func_argv_298, 0, 3683441));
+  Scope * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_298, _x2c_func_argv_298, 1, 1282376054));
+  Scope_move(a0, a1);
+  return((void) 0, Void);
+}
+
+Scope Scope_new(void);
+
+static Var _x2c_func_adapt_299(Func _x2c_func_binding_299, const FuncArg * _x2c_func_argv_299){
+  return Var_new(40074250, Scope_new());
+  ;
+}
+
+Scope Scope_new_named(const char *);
+
+static Var _x2c_func_adapt_300(Func _x2c_func_binding_300, const FuncArg * _x2c_func_argv_300){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_300, _x2c_func_argv_300, 0);
+  return Var_new(40074250, Scope_new_named(a0));
+  ;
+}
+
+void Scope_pop(void);
+
+static Var _x2c_func_adapt_301(Func _x2c_func_binding_301, const FuncArg * _x2c_func_argv_301){
+  Scope_pop();
+  return((void) 0, Void);
+}
+
+static Var _x2c_func_adapt_302(Func _x2c_func_binding_302, const FuncArg * _x2c_func_argv_302){
+  Scope * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_302, _x2c_func_argv_302, 0, 1282376054));
+  Scope_push(a0);
+  return((void) 0, Void);
+}
+
+void * Scope_realloc(void *, size_t);
+
+static Var _x2c_func_adapt_303(Func _x2c_func_binding_303, const FuncArg * _x2c_func_argv_303){
+  void * a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 0, 3683441));
+  size_t a1 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_303, _x2c_func_argv_303, 1, 44858254), 44858254));
+  return Var_new(3683441, Scope_realloc(a0, a1));
+  ;
+}
+
+void Scope_release(void);
+
+static Var _x2c_func_adapt_304(Func _x2c_func_binding_304, const FuncArg * _x2c_func_argv_304){
+  Scope_release();
+  return((void) 0, Void);
+}
+
+void Scope_retain(void);
+
+static Var _x2c_func_adapt_305(Func _x2c_func_binding_305, const FuncArg * _x2c_func_argv_305){
+  Scope_retain();
+  return((void) 0, Void);
+}
+
+Iter Split_iter(Split, Iter);
+
+static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_func_argv_306){
+  Split a0 = Var_split(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 0, 40919656));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_306, _x2c_func_argv_306, 1, 631140));
+  return Iter_var(Split_iter(a0, a1));
+  ;
+}
+
+String String_capitalize(String);
+
+static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_307, _x2c_func_argv_307, 0, 1318210446));
+  return String_var(String_capitalize(a0));
+  ;
+}
+
+int String_compare(String, String);
+
+static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 1, 1318210446));
+  return int_var(String_compare(a0, a1));
+  ;
+}
+
+int String_contains(String, String);
+
+static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 1, 1318210446));
+  return int_var(String_contains(a0, a1));
+  ;
+}
+
+int String_contains_digit(String);
+
+static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_310, _x2c_func_argv_310, 0, 1318210446));
+  return int_var(String_contains_digit(a0));
+  ;
+}
+
+int String_count(String, String);
+
+static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 1, 1318210446));
+  return int_var(String_count(a0, a1));
+  ;
+}
+
+String String_dedent(String);
+
+static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_312, _x2c_func_argv_312, 0, 1318210446));
+  return String_var(String_dedent(a0));
+  ;
+}
+
+int String_endswith(String, String);
+
+static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 1, 1318210446));
+  return int_var(String_endswith(a0, a1));
+  ;
+}
+
+String String_escape(String);
+
+static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_314, _x2c_func_argv_314, 0, 1318210446));
+  return String_var(String_escape(a0));
+  ;
+}
+
+int String_find(String, String);
+
+static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 1, 1318210446));
+  return int_var(String_find(a0, a1));
+  ;
+}
+
+List String_find_all(String, String, int, int);
+
+static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 3, 3453797), 3453797));
+  return List_var(String_find_all(a0, a1, a2, a3));
+  ;
+}
+
+int String_find_within(String, String, int, int);
+
+static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 3, 3453797), 3453797));
+  return int_var(String_find_within(a0, a1, a2, a3));
+  ;
+}
+
+void String_free(String);
+
+static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 0, 1318210446));
+  String_free(a0);
+  return((void) 0, Void);
+}
+
+String String_getslice(String, int, int, int);
+
+static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 2, 3453797), 3453797));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 3, 3453797), 3453797));
+  return String_var(String_getslice(a0, a1, a2, a3));
+  ;
+}
+
+unsigned String_hash(String);
+
+static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 0, 1318210446));
+  return unsigned_var(String_hash(a0));
+  ;
+}
+
+String String_intern(String);
+
+static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 0, 1318210446));
+  return String_var(String_intern(a0));
+  ;
+}
+
+int String_is_alnum(String);
+
+static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 0, 1318210446));
+  return int_var(String_is_alnum(a0));
+  ;
+}
+
+int String_is_alnum_under(String);
+
+static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 0, 1318210446));
+  return int_var(String_is_alnum_under(a0));
+  ;
+}
+
+int String_is_alpha(String);
+
+static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 0, 1318210446));
+  return int_var(String_is_alpha(a0));
+  ;
+}
+
+int String_is_alpha_under(String);
+
+static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 0, 1318210446));
+  return int_var(String_is_alpha_under(a0));
+  ;
+}
+
+int String_is_digit(String);
+
+static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 0, 1318210446));
+  return int_var(String_is_digit(a0));
+  ;
+}
+
+int String_is_identifier(String);
+
+static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 0, 1318210446));
+  return int_var(String_is_identifier(a0));
+  ;
+}
+
+int String_is_lower(String);
+
+static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 0, 1318210446));
+  return int_var(String_is_lower(a0));
+  ;
+}
+
+int String_is_lower_under(String);
+
+static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 0, 1318210446));
+  return int_var(String_is_lower_under(a0));
+  ;
+}
+
+int String_is_space(String);
+
+static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 0, 1318210446));
+  return int_var(String_is_space(a0));
+  ;
+}
+
+int String_is_upper(String);
+
+static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 0, 1318210446));
+  return int_var(String_is_upper(a0));
+  ;
+}
+
+int String_is_upper_under(String);
+
+static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 0, 1318210446));
+  return int_var(String_is_upper_under(a0));
+  ;
+}
+
+Iter String_iter(String, Iter);
+
+static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 0, 1318210446));
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 1, 631140));
+  return Iter_var(String_iter(a0, a1));
+  ;
+}
+
+String String_join(String, List);
+
+static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));
+  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 1, 806120));
+  return String_var(String_join(a0, a1));
+  ;
+}
+
+String String_keep(String, String);
+
+static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 1, 1318210446));
+  return String_var(String_keep(a0, a1));
+  ;
+}
+
+Var Split_var(Split);
+
+Split String_lines(String);
+
+static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 0, 1318210446));
+  return Split_var(String_lines(a0));
+  ;
+}
+
+String String_lower(String);
+
+static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 0, 1318210446));
+  return String_var(String_lower(a0));
+  ;
+}
+
+String String_new_fill(char, int);
+
+static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_func_argv_338){
+  char a0 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 0, 26993), 26993));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_338, _x2c_func_argv_338, 1, 3453797), 3453797));
+  return String_var(String_new_fill(a0, a1));
+  ;
+}
+
+String String_pad_center(String, int, char);
+
+static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 2, 26993), 26993));
+  return String_var(String_pad_center(a0, a1, a2));
+  ;
+}
+
+String String_pad_left(String, int, char);
+
+static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 2, 26993), 26993));
+  return String_var(String_pad_left(a0, a1, a2));
+  ;
+}
+
+String String_pad_right(String, int, char);
+
+static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 2, 26993), 26993));
+  return String_var(String_pad_right(a0, a1, a2));
+  ;
+}
+
+String String_parse(String);
+
+static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 0, 1318210446));
+  return String_var(String_parse(a0));
+  ;
+}
+
+int String_parse_char(String);
+
+static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 0, 1318210446));
+  return int_var(String_parse_char(a0));
+  ;
+}
+
+List String_partition(String, String);
+
+static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 1, 1318210446));
+  return List_var(String_partition(a0, a1));
+  ;
+}
+
+String String_reject(String, String);
+
+static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 1, 1318210446));
+  return String_var(String_reject(a0, a1));
+  ;
+}
+
+String String_remove_prefix(String, String);
+
+static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 1, 1318210446));
+  return String_var(String_remove_prefix(a0, a1));
+  ;
+}
+
+String String_remove_suffix(String, String);
+
+static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 1, 1318210446));
+  return String_var(String_remove_suffix(a0, a1));
+  ;
+}
+
+String String_repeat(String, int);
+
+static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 1, 3453797), 3453797));
+  return String_var(String_repeat(a0, a1));
+  ;
+}
+
+String String_replace(String, String, String);
+
+static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 1, 1318210446));
+  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 2, 1318210446));
+  return String_var(String_replace(a0, a1, a2));
+  ;
+}
+
+String String_replace_n(String, String, String, int);
+
+static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 1, 1318210446));
+  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 2, 1318210446));
+  int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 3, 3453797), 3453797));
+  return String_var(String_replace_n(a0, a1, a2, a3));
+  ;
+}
+
+int String_rfind(String, String);
+
+static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 1, 1318210446));
+  return int_var(String_rfind(a0, a1));
+  ;
+}
+
+List String_rpartition(String, String);
+
+static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 1, 1318210446));
+  return List_var(String_rpartition(a0, a1));
+  ;
+}
+
+List String_split(String, String);
+
+static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 1, 1318210446));
+  return List_var(String_split(a0, a1));
+  ;
+}
+
+List String_split_lines(String, int);
+
+static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 1, 3453797), 3453797));
+  return List_var(String_split_lines(a0, a1));
+  ;
+}
+
+List String_split_n(String, String, int);
+
+static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 2, 3453797), 3453797));
+  return List_var(String_split_n(a0, a1, a2));
+  ;
+}
+
+Split String_splits(String, String);
+
+static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 1, 1318210446));
+  return Split_var(String_splits(a0, a1));
+  ;
+}
+
+String String_squeeze(String, String);
+
+static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 1, 1318210446));
+  return String_var(String_squeeze(a0, a1));
+  ;
+}
+
+int String_startswith(String, String);
+
+static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 0, 1318210446));
+  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 1, 1318210446));
+  return int_var(String_startswith(a0, a1));
+  ;
+}
+
+Symbol String_symbol(String);
+
+static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_359, _x2c_func_argv_359, 0, 1318210446));
+  return Symbol_var(String_symbol(a0));
+  ;
+}
+
+int String_try_double(String, double *);
+
+static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 0, 1318210446));
+  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 1, 429601877));
+  return int_var(String_try_double(a0, a1));
+  ;
+}
+
+int String_try_long(String, long *);
+
+static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 0, 1318210446));
+  long * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 1, 26178038));
+  return int_var(String_try_long(a0, a1));
+  ;
+}
+
+String String_unescape(String);
+
+static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 0, 1318210446));
+  return String_var(String_unescape(a0));
+  ;
+}
+
+String String_upper(String);
+
+static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 0, 1318210446));
+  return String_var(String_upper(a0));
+  ;
+}
+
+String String_withindex(String, int, char);
+
+static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 0, 1318210446));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 1, 3453797), 3453797));
+  char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 2, 26993), 26993));
+  return String_var(String_withindex(a0, a1, a2));
+  ;
+}
+
+Split String_words(String);
+
+static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 0, 1318210446));
+  return Split_var(String_words(a0));
+  ;
+}
+
+int Symbol_compare(Symbol, Symbol);
+
+static Var _x2c_func_adapt_366(Func _x2c_func_binding_366, const FuncArg * _x2c_func_argv_366){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_366, _x2c_func_argv_366, 0, 1328354264));
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_366, _x2c_func_argv_366, 1, 1328354264));
+  return int_var(Symbol_compare(a0, a1));
+  ;
+}
+
+Var char_var(char);
+
+char Symbol_first(Symbol);
+
+static Var _x2c_func_adapt_367(Func _x2c_func_binding_367, const FuncArg * _x2c_func_argv_367){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_367, _x2c_func_argv_367, 0, 1328354264));
+  return char_var(Symbol_first(a0));
+  ;
+}
+
+char Symbol_last(Symbol);
+
+static Var _x2c_func_adapt_368(Func _x2c_func_binding_368, const FuncArg * _x2c_func_argv_368){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_368, _x2c_func_argv_368, 0, 1328354264));
+  return char_var(Symbol_last(a0));
+  ;
+}
+
+int Symbol_len(Symbol);
+
+static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_func_argv_369){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_369, _x2c_func_argv_369, 0, 1328354264));
+  return int_var(Symbol_len(a0));
+  ;
+}
+
+int Symbol_try_new(String, Symbol *);
+
+static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 0, 1318210446));
+  Symbol * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 1, 42507336502));
+  return int_var(Symbol_try_new(a0, a1));
+  ;
+}
+
+Var Var_add(Var, Var);
+
+static Var _x2c_func_adapt_371(Func _x2c_func_binding_371, const FuncArg * _x2c_func_argv_371){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_371, _x2c_func_argv_371, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_371, _x2c_func_argv_371, 1, 45156);
+  return Var_add(a0, a1);
+  ;
+}
+
+static Var _x2c_func_adapt_372(Func _x2c_func_binding_372, const FuncArg * _x2c_func_argv_372){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_372, _x2c_func_argv_372, 0, 45156);
+  return ArrayChar_var(Var_arraychar(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_373(Func _x2c_func_binding_373, const FuncArg * _x2c_func_argv_373){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_373, _x2c_func_argv_373, 0, 45156);
+  return ArrayDbl_var(Var_arraydbl(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_374(Func _x2c_func_binding_374, const FuncArg * _x2c_func_argv_374){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_374, _x2c_func_argv_374, 0, 45156);
+  return ArrayFloat_var(Var_arrayfloat(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_375(Func _x2c_func_binding_375, const FuncArg * _x2c_func_argv_375){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_375, _x2c_func_argv_375, 0, 45156);
+  return ArrayInt_var(Var_arrayint(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_376(Func _x2c_func_binding_376, const FuncArg * _x2c_func_argv_376){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_376, _x2c_func_argv_376, 0, 45156);
+  return ArrayLong_var(Var_arraylong(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_377(Func _x2c_func_binding_377, const FuncArg * _x2c_func_argv_377){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_377, _x2c_func_argv_377, 0, 45156);
+  return ArrayShort_var(Var_arrayshort(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_func_argv_378){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_378, _x2c_func_argv_378, 0, 45156);
+  return ArrayString_var(Var_arraystring(a0));
+  ;
+}
+
+Iter Var_as_iter(Var);
+
+static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_379, _x2c_func_argv_379, 0, 45156);
+  return Iter_var(Var_as_iter(a0));
+  ;
+}
+
+Var Block_var(Block);
+
+Block Var_block(Var);
+
+static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_380, _x2c_func_argv_380, 0, 45156);
+  return Block_var(Var_block(a0));
+  ;
+}
+
+char Var_char(Var);
+
+static Var _x2c_func_adapt_381(Func _x2c_func_binding_381, const FuncArg * _x2c_func_argv_381){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_381, _x2c_func_argv_381, 0, 45156);
+  return char_var(Var_char(a0));
+  ;
+}
+
+Var Var_clone_wide(Var);
+
+static Var _x2c_func_adapt_382(Func _x2c_func_binding_382, const FuncArg * _x2c_func_argv_382){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_382, _x2c_func_argv_382, 0, 45156);
+  return Var_clone_wide(a0);
+  ;
+}
+
+int Var_compare(Var, Var);
+
+static Var _x2c_func_adapt_383(Func _x2c_func_binding_383, const FuncArg * _x2c_func_argv_383){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_383, _x2c_func_argv_383, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_383, _x2c_func_argv_383, 1, 45156);
+  return int_var(Var_compare(a0, a1));
+  ;
+}
+
+int Var_contains(Var, Var);
+
+static Var _x2c_func_adapt_384(Func _x2c_func_binding_384, const FuncArg * _x2c_func_argv_384){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_384, _x2c_func_argv_384, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_384, _x2c_func_argv_384, 1, 45156);
+  return int_var(Var_contains(a0, a1));
+  ;
+}
+
+Var Var_convert(Var, Symbol);
+
+static Var _x2c_func_adapt_385(Func _x2c_func_binding_385, const FuncArg * _x2c_func_argv_385){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_385, _x2c_func_argv_385, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_385, _x2c_func_argv_385, 1, 1328354264));
+  return Var_convert(a0, a1);
+  ;
+}
+
+Var Var_div(Var, Var);
+
+static Var _x2c_func_adapt_386(Func _x2c_func_binding_386, const FuncArg * _x2c_func_argv_386){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_386, _x2c_func_argv_386, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_386, _x2c_func_argv_386, 1, 45156);
+  return Var_div(a0, a1);
+  ;
+}
+
+Var double_var(double);
+
+double Var_double(Var);
+
+static Var _x2c_func_adapt_387(Func _x2c_func_binding_387, const FuncArg * _x2c_func_argv_387){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_387, _x2c_func_argv_387, 0, 45156);
+  return double_var(Var_double(a0));
+  ;
+}
+
+Iter Var_fallback_iter(Var, Iter);
+
+static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_func_argv_388){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_388, _x2c_func_argv_388, 0, 45156);
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_388, _x2c_func_argv_388, 1, 631140));
+  return Iter_var(Var_fallback_iter(a0, a1));
+  ;
+}
+
+Var File_var(File);
+
+File Var_file(Var);
+
+static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_389, _x2c_func_argv_389, 0, 45156);
+  return File_var(Var_file(a0));
+  ;
+}
+
+Var float_var(float);
+
+float Var_float(Var);
+
+static Var _x2c_func_adapt_390(Func _x2c_func_binding_390, const FuncArg * _x2c_func_argv_390){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_390, _x2c_func_argv_390, 0, 45156);
+  return float_var(Var_float(a0));
+  ;
+}
+
+double Var_floating(Var);
+
+static Var _x2c_func_adapt_391(Func _x2c_func_binding_391, const FuncArg * _x2c_func_argv_391){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_391, _x2c_func_argv_391, 0, 45156);
+  return double_var(Var_floating(a0));
+  ;
+}
+
+Var Var_getindex(Var, Var);
+
+static Var _x2c_func_adapt_392(Func _x2c_func_binding_392, const FuncArg * _x2c_func_argv_392){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_392, _x2c_func_argv_392, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_392, _x2c_func_argv_392, 1, 45156);
+  return Var_getindex(a0, a1);
+  ;
+}
+
+Var long_var(long);
+
+long Var_integer(Var);
+
+static Var _x2c_func_adapt_393(Func _x2c_func_binding_393, const FuncArg * _x2c_func_argv_393){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_393, _x2c_func_argv_393, 0, 45156);
+  return long_var(Var_integer(a0));
+  ;
+}
+
+int Var_is_atom(Var);
+
+static Var _x2c_func_adapt_394(Func _x2c_func_binding_394, const FuncArg * _x2c_func_argv_394){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_394, _x2c_func_argv_394, 0, 45156);
+  return int_var(Var_is_atom(a0));
+  ;
+}
+
+int Var_is_atom_binder(Var);
+
+static Var _x2c_func_adapt_395(Func _x2c_func_binding_395, const FuncArg * _x2c_func_argv_395){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_395, _x2c_func_argv_395, 0, 45156);
+  return int_var(Var_is_atom_binder(a0));
+  ;
+}
+
+int Var_is_binder(Var);
+
+static Var _x2c_func_adapt_396(Func _x2c_func_binding_396, const FuncArg * _x2c_func_argv_396){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_396, _x2c_func_argv_396, 0, 45156);
+  return int_var(Var_is_binder(a0));
+  ;
+}
+
+int Var_is_floating(Var);
+
+static Var _x2c_func_adapt_397(Func _x2c_func_binding_397, const FuncArg * _x2c_func_argv_397){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_397, _x2c_func_argv_397, 0, 45156);
+  return int_var(Var_is_floating(a0));
+  ;
+}
+
+int Var_is_list_binder(Var);
+
+static Var _x2c_func_adapt_398(Func _x2c_func_binding_398, const FuncArg * _x2c_func_argv_398){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_398, _x2c_func_argv_398, 0, 45156);
+  return int_var(Var_is_list_binder(a0));
+  ;
+}
+
+int Var_is_match_op(Var);
+
+static Var _x2c_func_adapt_399(Func _x2c_func_binding_399, const FuncArg * _x2c_func_argv_399){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_399, _x2c_func_argv_399, 0, 45156);
+  return int_var(Var_is_match_op(a0));
+  ;
+}
+
+int Var_is_nil(Var);
+
+static Var _x2c_func_adapt_400(Func _x2c_func_binding_400, const FuncArg * _x2c_func_argv_400){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_400, _x2c_func_argv_400, 0, 45156);
+  return int_var(Var_is_nil(a0));
+  ;
+}
+
+int Var_is_null(Var);
+
+static Var _x2c_func_adapt_401(Func _x2c_func_binding_401, const FuncArg * _x2c_func_argv_401){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_401, _x2c_func_argv_401, 0, 45156);
+  return int_var(Var_is_null(a0));
+  ;
+}
+
+int Var_is_object(Var);
+
+static Var _x2c_func_adapt_402(Func _x2c_func_binding_402, const FuncArg * _x2c_func_argv_402){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_402, _x2c_func_argv_402, 0, 45156);
+  return int_var(Var_is_object(a0));
+  ;
+}
+
+int Var_is_pointer(Var);
+
+static Var _x2c_func_adapt_403(Func _x2c_func_binding_403, const FuncArg * _x2c_func_argv_403){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_403, _x2c_func_argv_403, 0, 45156);
+  return int_var(Var_is_pointer(a0));
+  ;
+}
+
+int Var_is_reference(Var);
+
+static Var _x2c_func_adapt_404(Func _x2c_func_binding_404, const FuncArg * _x2c_func_argv_404){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_404, _x2c_func_argv_404, 0, 45156);
+  return int_var(Var_is_reference(a0));
+  ;
+}
+
+Iter Var_iter(Var, Iter);
+
+static Var _x2c_func_adapt_405(Func _x2c_func_binding_405, const FuncArg * _x2c_func_argv_405){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_405, _x2c_func_argv_405, 0, 45156);
+  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_405, _x2c_func_argv_405, 1, 631140));
+  return Iter_var(Var_iter(a0, a1));
+  ;
+}
+
+static Var _x2c_func_adapt_406(Func _x2c_func_binding_406, const FuncArg * _x2c_func_argv_406){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_406, _x2c_func_argv_406, 0, 45156);
+  return Job_var(Var_job(a0));
+  ;
+}
+
+Var JsonBool_var(JsonBool);
+
+JsonBool Var_jsonbool(Var);
+
+static Var _x2c_func_adapt_407(Func _x2c_func_binding_407, const FuncArg * _x2c_func_argv_407){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_407, _x2c_func_argv_407, 0, 45156);
+  return JsonBool_var(Var_jsonbool(a0));
+  ;
+}
+
+Symbol Var_kind(Var);
+
+static Var _x2c_func_adapt_408(Func _x2c_func_binding_408, const FuncArg * _x2c_func_argv_408){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_408, _x2c_func_argv_408, 0, 45156);
+  return Symbol_var(Var_kind(a0));
+  ;
+}
+
+long Var_long(Var);
+
+static Var _x2c_func_adapt_409(Func _x2c_func_binding_409, const FuncArg * _x2c_func_argv_409){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_409, _x2c_func_argv_409, 0, 45156);
+  return long_var(Var_long(a0));
+  ;
+}
+
+long double Var_long_double(Var);
+
+static Var _x2c_func_adapt_410(Func _x2c_func_binding_410, const FuncArg * _x2c_func_argv_410){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_410, _x2c_func_argv_410, 0, 45156);
+  return Var_box_long_double(Var_long_double(a0));
+  ;
+}
+
+long double Var_long_double_value(Var);
+
+static Var _x2c_func_adapt_411(Func _x2c_func_binding_411, const FuncArg * _x2c_func_argv_411){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_411, _x2c_func_argv_411, 0, 45156);
+  return Var_box_long_double(Var_long_double_value(a0));
+  ;
+}
+
+long long Var_long_long(Var);
+
+static Var _x2c_func_adapt_412(Func _x2c_func_binding_412, const FuncArg * _x2c_func_argv_412){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_412, _x2c_func_argv_412, 0, 45156);
+  return Var_box_long_long(Var_long_long(a0));
+  ;
+}
+
+long long Var_long_long_value(Var);
+
+static Var _x2c_func_adapt_413(Func _x2c_func_binding_413, const FuncArg * _x2c_func_argv_413){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_413, _x2c_func_argv_413, 0, 45156);
+  return Var_box_long_long(Var_long_long_value(a0));
+  ;
+}
+
+long Var_long_value(Var);
+
+static Var _x2c_func_adapt_414(Func _x2c_func_binding_414, const FuncArg * _x2c_func_argv_414){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_414, _x2c_func_argv_414, 0, 45156);
+  return long_var(Var_long_value(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_415(Func _x2c_func_binding_415, const FuncArg * _x2c_func_argv_415){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_415, _x2c_func_argv_415, 0, 45156);
+  return MapIntInt_var(Var_mapintint(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_416(Func _x2c_func_binding_416, const FuncArg * _x2c_func_argv_416){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_416, _x2c_func_argv_416, 0, 45156);
+  return MapLongDouble_var(Var_maplongdouble(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_417(Func _x2c_func_binding_417, const FuncArg * _x2c_func_argv_417){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_417, _x2c_func_argv_417, 0, 45156);
+  return MapStringInt_var(Var_mapstringint(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_418(Func _x2c_func_binding_418, const FuncArg * _x2c_func_argv_418){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_418, _x2c_func_argv_418, 0, 45156);
+  return MapStringString_var(Var_mapstringstring(a0));
+  ;
+}
+
+Var Var_mod(Var, Var);
+
+static Var _x2c_func_adapt_419(Func _x2c_func_binding_419, const FuncArg * _x2c_func_argv_419){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_419, _x2c_func_argv_419, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_419, _x2c_func_argv_419, 1, 45156);
+  return Var_mod(a0, a1);
+  ;
+}
+
+Var Var_mul(Var, Var);
+
+static Var _x2c_func_adapt_420(Func _x2c_func_binding_420, const FuncArg * _x2c_func_argv_420){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_420, _x2c_func_argv_420, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_420, _x2c_func_argv_420, 1, 45156);
+  return Var_mul(a0, a1);
+  ;
+}
+
+Var Var_neg(Var);
+
+static Var _x2c_func_adapt_421(Func _x2c_func_binding_421, const FuncArg * _x2c_func_argv_421){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_421, _x2c_func_argv_421, 0, 45156);
+  return Var_neg(a0);
+  ;
+}
+
+Var Var_null(void);
+
+static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_func_argv_422){
+  return Var_null();
+  ;
+}
+
+Var Var_parse(String, Symbol);
+
+static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423){
+  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 0, 1318210446));
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 1, 1328354264));
+  return Var_parse(a0, a1);
+  ;
+}
+
+Var Var_postfixindex(Var, Var, Symbol);
+
+static Var _x2c_func_adapt_424(Func _x2c_func_binding_424, const FuncArg * _x2c_func_argv_424){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_424, _x2c_func_argv_424, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_424, _x2c_func_argv_424, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_424, _x2c_func_argv_424, 2, 1328354264));
+  return Var_postfixindex(a0, a1, a2);
+  ;
+}
+
+Var Regex_var(Regex);
+
+Regex Var_regex(Var);
+
+static Var _x2c_func_adapt_425(Func _x2c_func_binding_425, const FuncArg * _x2c_func_argv_425){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_425, _x2c_func_argv_425, 0, 45156);
+  return Regex_var(Var_regex(a0));
+  ;
+}
+
+RegexCapture Var_regexcapture(Var);
+
+static Var _x2c_func_adapt_426(Func _x2c_func_binding_426, const FuncArg * _x2c_func_argv_426){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_426, _x2c_func_argv_426, 0, 45156);
+  return List_var(Var_regexcapture(a0));
+  ;
+}
+
+RegexMatch Var_regexmatch(Var);
+
+static Var _x2c_func_adapt_427(Func _x2c_func_binding_427, const FuncArg * _x2c_func_argv_427){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_427, _x2c_func_argv_427, 0, 45156);
+  return List_var(Var_regexmatch(a0));
+  ;
+}
+
+int Var_same(Var, Var);
+
+static Var _x2c_func_adapt_428(Func _x2c_func_binding_428, const FuncArg * _x2c_func_argv_428){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_428, _x2c_func_argv_428, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_428, _x2c_func_argv_428, 1, 45156);
+  return int_var(Var_same(a0, a1));
+  ;
+}
+
+Var Var_setindex(Var, Var, Var);
+
+static Var _x2c_func_adapt_429(Func _x2c_func_binding_429, const FuncArg * _x2c_func_argv_429){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_429, _x2c_func_argv_429, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_429, _x2c_func_argv_429, 1, 45156);
+  Var a2 = x2c_func_value_argument(_x2c_func_binding_429, _x2c_func_argv_429, 2, 45156);
+  return Var_setindex(a0, a1, a2);
+  ;
+}
+
+Var short_var(short);
+
+short Var_short(Var);
+
+static Var _x2c_func_adapt_430(Func _x2c_func_binding_430, const FuncArg * _x2c_func_argv_430){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_430, _x2c_func_argv_430, 0, 45156);
+  return short_var(Var_short(a0));
+  ;
+}
+
+Var Var_sub(Var, Var);
+
+static Var _x2c_func_adapt_431(Func _x2c_func_binding_431, const FuncArg * _x2c_func_argv_431){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_431, _x2c_func_argv_431, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_431, _x2c_func_argv_431, 1, 45156);
+  return Var_sub(a0, a1);
+  ;
+}
+
+Symbol Var_tag(Var);
+
+static Var _x2c_func_adapt_432(Func _x2c_func_binding_432, const FuncArg * _x2c_func_argv_432){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_432, _x2c_func_argv_432, 0, 45156);
+  return Symbol_var(Var_tag(a0));
+  ;
+}
+
+unsigned long Var_tag_bottom(Symbol);
+
+static Var _x2c_func_adapt_433(Func _x2c_func_binding_433, const FuncArg * _x2c_func_argv_433){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_433, _x2c_func_argv_433, 0, 1328354264));
+  return Var_box_ulong(Var_tag_bottom(a0));
+  ;
+}
+
+unsigned long Var_tag_top(Symbol);
+
+static Var _x2c_func_adapt_434(Func _x2c_func_binding_434, const FuncArg * _x2c_func_argv_434){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_434, _x2c_func_argv_434, 0, 1328354264));
+  return Var_box_ulong(Var_tag_top(a0));
+  ;
+}
+
+int Var_truth(Var);
+
+static Var _x2c_func_adapt_435(Func _x2c_func_binding_435, const FuncArg * _x2c_func_argv_435){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_435, _x2c_func_argv_435, 0, 45156);
+  return int_var(Var_truth(a0));
+  ;
+}
+
+Var uchar_var(uchar);
+
+uchar Var_uchar(Var);
+
+static Var _x2c_func_adapt_436(Func _x2c_func_binding_436, const FuncArg * _x2c_func_argv_436){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_436, _x2c_func_argv_436, 0, 45156);
+  return uchar_var(Var_uchar(a0));
+  ;
+}
+
+Var uint_var(uint);
+
+uint Var_uint(Var);
+
+static Var _x2c_func_adapt_437(Func _x2c_func_binding_437, const FuncArg * _x2c_func_argv_437){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_437, _x2c_func_argv_437, 0, 45156);
+  return uint_var(Var_uint(a0));
+  ;
+}
+
+Var ulong_var(ulong);
+
+ulong Var_ulong(Var);
+
+static Var _x2c_func_adapt_438(Func _x2c_func_binding_438, const FuncArg * _x2c_func_argv_438){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_438, _x2c_func_argv_438, 0, 45156);
+  return ulong_var(Var_ulong(a0));
+  ;
+}
+
+unsigned long long Var_ulong_long(Var);
+
+static Var _x2c_func_adapt_439(Func _x2c_func_binding_439, const FuncArg * _x2c_func_argv_439){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_439, _x2c_func_argv_439, 0, 45156);
+  return Var_box_ulong_long(Var_ulong_long(a0));
+  ;
+}
+
+unsigned long long Var_ulong_long_value(Var);
+
+static Var _x2c_func_adapt_440(Func _x2c_func_binding_440, const FuncArg * _x2c_func_argv_440){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_440, _x2c_func_argv_440, 0, 45156);
+  return Var_box_ulong_long(Var_ulong_long_value(a0));
+  ;
+}
+
+unsigned long Var_ulong_value(Var);
+
+static Var _x2c_func_adapt_441(Func _x2c_func_binding_441, const FuncArg * _x2c_func_argv_441){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_441, _x2c_func_argv_441, 0, 45156);
+  return Var_box_ulong(Var_ulong_value(a0));
+  ;
+}
+
+unsigned Var_unsigned(Var);
+
+static Var _x2c_func_adapt_442(Func _x2c_func_binding_442, const FuncArg * _x2c_func_argv_442){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_442, _x2c_func_argv_442, 0, 45156);
+  return unsigned_var(Var_unsigned(a0));
+  ;
+}
+
+Var Var_updateindex(Var, Var, Symbol, Var);
+
+static Var _x2c_func_adapt_443(Func _x2c_func_binding_443, const FuncArg * _x2c_func_argv_443){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 0, 45156);
+  Var a1 = x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 1, 45156);
+  Symbol a2 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 2, 1328354264));
+  Var a3 = x2c_func_value_argument(_x2c_func_binding_443, _x2c_func_argv_443, 3, 45156);
+  return Var_updateindex(a0, a1, a2, a3);
+  ;
+}
+
+Var ushort_var(ushort);
+
+ushort Var_ushort(Var);
+
+static Var _x2c_func_adapt_444(Func _x2c_func_binding_444, const FuncArg * _x2c_func_argv_444){
+  Var a0 = x2c_func_value_argument(_x2c_func_binding_444, _x2c_func_argv_444, 0, 45156);
+  return ushort_var(Var_ushort(a0));
+  ;
+}
+
+int abs(int);
+
+static Var _x2c_func_adapt_445(Func _x2c_func_binding_445, const FuncArg * _x2c_func_argv_445){
+  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_445, _x2c_func_argv_445, 0, 3453797), 3453797));
+  return int_var(abs(a0));
+  ;
+}
+
+double acos(double);
+
+static Var _x2c_func_adapt_446(Func _x2c_func_binding_446, const FuncArg * _x2c_func_argv_446){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_446, _x2c_func_argv_446, 0, 3356265), 3356265));
+  return double_var(acos(a0));
+  ;
+}
+
+float acosf(float);
+
+static Var _x2c_func_adapt_447(Func _x2c_func_binding_447, const FuncArg * _x2c_func_argv_447){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_447, _x2c_func_argv_447, 0, 3355493), 3355493));
+  return float_var(acosf(a0));
+  ;
+}
+
+double acosh(double);
+
+static Var _x2c_func_adapt_448(Func _x2c_func_binding_448, const FuncArg * _x2c_func_argv_448){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_448, _x2c_func_argv_448, 0, 3356265), 3356265));
+  return double_var(acosh(a0));
+  ;
+}
+
+float acoshf(float);
+
+static Var _x2c_func_adapt_449(Func _x2c_func_binding_449, const FuncArg * _x2c_func_argv_449){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_449, _x2c_func_argv_449, 0, 3355493), 3355493));
+  return float_var(acoshf(a0));
+  ;
+}
+
+double asin(double);
+
+static Var _x2c_func_adapt_450(Func _x2c_func_binding_450, const FuncArg * _x2c_func_argv_450){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_450, _x2c_func_argv_450, 0, 3356265), 3356265));
+  return double_var(asin(a0));
+  ;
+}
+
+float asinf(float);
+
+static Var _x2c_func_adapt_451(Func _x2c_func_binding_451, const FuncArg * _x2c_func_argv_451){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_451, _x2c_func_argv_451, 0, 3355493), 3355493));
+  return float_var(asinf(a0));
+  ;
+}
+
+double asinh(double);
+
+static Var _x2c_func_adapt_452(Func _x2c_func_binding_452, const FuncArg * _x2c_func_argv_452){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_452, _x2c_func_argv_452, 0, 3356265), 3356265));
+  return double_var(asinh(a0));
+  ;
+}
+
+float asinhf(float);
+
+static Var _x2c_func_adapt_453(Func _x2c_func_binding_453, const FuncArg * _x2c_func_argv_453){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_453, _x2c_func_argv_453, 0, 3355493), 3355493));
+  return float_var(asinhf(a0));
+  ;
+}
+
+double atan(double);
+
+static Var _x2c_func_adapt_454(Func _x2c_func_binding_454, const FuncArg * _x2c_func_argv_454){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_454, _x2c_func_argv_454, 0, 3356265), 3356265));
+  return double_var(atan(a0));
+  ;
+}
+
+double atan2(double, double);
+
+static Var _x2c_func_adapt_455(Func _x2c_func_binding_455, const FuncArg * _x2c_func_argv_455){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_455, _x2c_func_argv_455, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_455, _x2c_func_argv_455, 1, 3356265), 3356265));
+  return double_var(atan2(a0, a1));
+  ;
+}
+
+float atan2f(float, float);
+
+static Var _x2c_func_adapt_456(Func _x2c_func_binding_456, const FuncArg * _x2c_func_argv_456){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_456, _x2c_func_argv_456, 1, 3355493), 3355493));
+  return float_var(atan2f(a0, a1));
+  ;
+}
+
+float atanf(float);
+
+static Var _x2c_func_adapt_457(Func _x2c_func_binding_457, const FuncArg * _x2c_func_argv_457){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_457, _x2c_func_argv_457, 0, 3355493), 3355493));
+  return float_var(atanf(a0));
+  ;
+}
+
+double atanh(double);
+
+static Var _x2c_func_adapt_458(Func _x2c_func_binding_458, const FuncArg * _x2c_func_argv_458){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_458, _x2c_func_argv_458, 0, 3356265), 3356265));
+  return double_var(atanh(a0));
+  ;
+}
+
+float atanhf(float);
+
+static Var _x2c_func_adapt_459(Func _x2c_func_binding_459, const FuncArg * _x2c_func_argv_459){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_459, _x2c_func_argv_459, 0, 3355493), 3355493));
+  return float_var(atanhf(a0));
+  ;
+}
+
+double atof(const char *);
+
+static Var _x2c_func_adapt_460(Func _x2c_func_binding_460, const FuncArg * _x2c_func_argv_460){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_460, _x2c_func_argv_460, 0);
+  return double_var(atof(a0));
+  ;
+}
+
+int atoi(const char *);
+
+static Var _x2c_func_adapt_461(Func _x2c_func_binding_461, const FuncArg * _x2c_func_argv_461){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_461, _x2c_func_argv_461, 0);
+  return int_var(atoi(a0));
+  ;
+}
+
+long atol(const char *);
+
+static Var _x2c_func_adapt_462(Func _x2c_func_binding_462, const FuncArg * _x2c_func_argv_462){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_462, _x2c_func_argv_462, 0);
+  return long_var(atol(a0));
+  ;
+}
+
+long long atoll(const char *);
+
+static Var _x2c_func_adapt_463(Func _x2c_func_binding_463, const FuncArg * _x2c_func_argv_463){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_463, _x2c_func_argv_463, 0);
+  return Var_box_long_long(atoll(a0));
+  ;
+}
+
+double cbrt(double);
+
+static Var _x2c_func_adapt_464(Func _x2c_func_binding_464, const FuncArg * _x2c_func_argv_464){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_464, _x2c_func_argv_464, 0, 3356265), 3356265));
+  return double_var(cbrt(a0));
+  ;
+}
+
+float cbrtf(float);
+
+static Var _x2c_func_adapt_465(Func _x2c_func_binding_465, const FuncArg * _x2c_func_argv_465){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_465, _x2c_func_argv_465, 0, 3355493), 3355493));
+  return float_var(cbrtf(a0));
+  ;
+}
+
+double ceil(double);
+
+static Var _x2c_func_adapt_466(Func _x2c_func_binding_466, const FuncArg * _x2c_func_argv_466){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_466, _x2c_func_argv_466, 0, 3356265), 3356265));
+  return double_var(ceil(a0));
+  ;
+}
+
+float ceilf(float);
+
+static Var _x2c_func_adapt_467(Func _x2c_func_binding_467, const FuncArg * _x2c_func_argv_467){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_467, _x2c_func_argv_467, 0, 3355493), 3355493));
+  return float_var(ceilf(a0));
+  ;
+}
+
+double copysign(double, double);
+
+static Var _x2c_func_adapt_468(Func _x2c_func_binding_468, const FuncArg * _x2c_func_argv_468){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_468, _x2c_func_argv_468, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_468, _x2c_func_argv_468, 1, 3356265), 3356265));
+  return double_var(copysign(a0, a1));
+  ;
+}
+
+float copysignf(float, float);
+
+static Var _x2c_func_adapt_469(Func _x2c_func_binding_469, const FuncArg * _x2c_func_argv_469){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_469, _x2c_func_argv_469, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_469, _x2c_func_argv_469, 1, 3355493), 3355493));
+  return float_var(copysignf(a0, a1));
+  ;
+}
+
+double cos(double);
+
+static Var _x2c_func_adapt_470(Func _x2c_func_binding_470, const FuncArg * _x2c_func_argv_470){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_470, _x2c_func_argv_470, 0, 3356265), 3356265));
+  return double_var(cos(a0));
+  ;
+}
+
+float cosf(float);
+
+static Var _x2c_func_adapt_471(Func _x2c_func_binding_471, const FuncArg * _x2c_func_argv_471){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_471, _x2c_func_argv_471, 0, 3355493), 3355493));
+  return float_var(cosf(a0));
+  ;
+}
+
+double cosh(double);
+
+static Var _x2c_func_adapt_472(Func _x2c_func_binding_472, const FuncArg * _x2c_func_argv_472){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_472, _x2c_func_argv_472, 0, 3356265), 3356265));
+  return double_var(cosh(a0));
+  ;
+}
+
+float coshf(float);
+
+static Var _x2c_func_adapt_473(Func _x2c_func_binding_473, const FuncArg * _x2c_func_argv_473){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_473, _x2c_func_argv_473, 0, 3355493), 3355493));
+  return float_var(coshf(a0));
+  ;
+}
+
+double erf(double);
+
+static Var _x2c_func_adapt_474(Func _x2c_func_binding_474, const FuncArg * _x2c_func_argv_474){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_474, _x2c_func_argv_474, 0, 3356265), 3356265));
+  return double_var(erf(a0));
+  ;
+}
+
+double erfc(double);
+
+static Var _x2c_func_adapt_475(Func _x2c_func_binding_475, const FuncArg * _x2c_func_argv_475){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_475, _x2c_func_argv_475, 0, 3356265), 3356265));
+  return double_var(erfc(a0));
+  ;
+}
+
+float erfcf(float);
+
+static Var _x2c_func_adapt_476(Func _x2c_func_binding_476, const FuncArg * _x2c_func_argv_476){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_476, _x2c_func_argv_476, 0, 3355493), 3355493));
+  return float_var(erfcf(a0));
+  ;
+}
+
+float erff(float);
+
+static Var _x2c_func_adapt_477(Func _x2c_func_binding_477, const FuncArg * _x2c_func_argv_477){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_477, _x2c_func_argv_477, 0, 3355493), 3355493));
+  return float_var(erff(a0));
+  ;
+}
+
+double exp(double);
+
+static Var _x2c_func_adapt_478(Func _x2c_func_binding_478, const FuncArg * _x2c_func_argv_478){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_478, _x2c_func_argv_478, 0, 3356265), 3356265));
+  return double_var(exp(a0));
+  ;
+}
+
+double exp2(double);
+
+static Var _x2c_func_adapt_479(Func _x2c_func_binding_479, const FuncArg * _x2c_func_argv_479){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_479, _x2c_func_argv_479, 0, 3356265), 3356265));
+  return double_var(exp2(a0));
+  ;
+}
+
+float exp2f(float);
+
+static Var _x2c_func_adapt_480(Func _x2c_func_binding_480, const FuncArg * _x2c_func_argv_480){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_480, _x2c_func_argv_480, 0, 3355493), 3355493));
+  return float_var(exp2f(a0));
+  ;
+}
+
+float expf(float);
+
+static Var _x2c_func_adapt_481(Func _x2c_func_binding_481, const FuncArg * _x2c_func_argv_481){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_481, _x2c_func_argv_481, 0, 3355493), 3355493));
+  return float_var(expf(a0));
+  ;
+}
+
+double expm1(double);
+
+static Var _x2c_func_adapt_482(Func _x2c_func_binding_482, const FuncArg * _x2c_func_argv_482){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_482, _x2c_func_argv_482, 0, 3356265), 3356265));
+  return double_var(expm1(a0));
+  ;
+}
+
+float expm1f(float);
+
+static Var _x2c_func_adapt_483(Func _x2c_func_binding_483, const FuncArg * _x2c_func_argv_483){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_483, _x2c_func_argv_483, 0, 3355493), 3355493));
+  return float_var(expm1f(a0));
+  ;
+}
+
+double fabs(double);
+
+static Var _x2c_func_adapt_484(Func _x2c_func_binding_484, const FuncArg * _x2c_func_argv_484){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_484, _x2c_func_argv_484, 0, 3356265), 3356265));
+  return double_var(fabs(a0));
+  ;
+}
+
+float fabsf(float);
+
+static Var _x2c_func_adapt_485(Func _x2c_func_binding_485, const FuncArg * _x2c_func_argv_485){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_485, _x2c_func_argv_485, 0, 3355493), 3355493));
+  return float_var(fabsf(a0));
+  ;
+}
+
+double fdim(double, double);
+
+static Var _x2c_func_adapt_486(Func _x2c_func_binding_486, const FuncArg * _x2c_func_argv_486){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_486, _x2c_func_argv_486, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_486, _x2c_func_argv_486, 1, 3356265), 3356265));
+  return double_var(fdim(a0, a1));
+  ;
+}
+
+float fdimf(float, float);
+
+static Var _x2c_func_adapt_487(Func _x2c_func_binding_487, const FuncArg * _x2c_func_argv_487){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_487, _x2c_func_argv_487, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_487, _x2c_func_argv_487, 1, 3355493), 3355493));
+  return float_var(fdimf(a0, a1));
+  ;
+}
+
+double floor(double);
+
+static Var _x2c_func_adapt_488(Func _x2c_func_binding_488, const FuncArg * _x2c_func_argv_488){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_488, _x2c_func_argv_488, 0, 3356265), 3356265));
+  return double_var(floor(a0));
+  ;
+}
+
+float floorf(float);
+
+static Var _x2c_func_adapt_489(Func _x2c_func_binding_489, const FuncArg * _x2c_func_argv_489){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_489, _x2c_func_argv_489, 0, 3355493), 3355493));
+  return float_var(floorf(a0));
+  ;
+}
+
+double fma(double, double, double);
+
+static Var _x2c_func_adapt_490(Func _x2c_func_binding_490, const FuncArg * _x2c_func_argv_490){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_490, _x2c_func_argv_490, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_490, _x2c_func_argv_490, 1, 3356265), 3356265));
+  double a2 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_490, _x2c_func_argv_490, 2, 3356265), 3356265));
+  return double_var(fma(a0, a1, a2));
+  ;
+}
+
+float fmaf(float, float, float);
+
+static Var _x2c_func_adapt_491(Func _x2c_func_binding_491, const FuncArg * _x2c_func_argv_491){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_491, _x2c_func_argv_491, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_491, _x2c_func_argv_491, 1, 3355493), 3355493));
+  float a2 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_491, _x2c_func_argv_491, 2, 3355493), 3355493));
+  return float_var(fmaf(a0, a1, a2));
+  ;
+}
+
+double fmax(double, double);
+
+static Var _x2c_func_adapt_492(Func _x2c_func_binding_492, const FuncArg * _x2c_func_argv_492){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_492, _x2c_func_argv_492, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_492, _x2c_func_argv_492, 1, 3356265), 3356265));
+  return double_var(fmax(a0, a1));
+  ;
+}
+
+float fmaxf(float, float);
+
+static Var _x2c_func_adapt_493(Func _x2c_func_binding_493, const FuncArg * _x2c_func_argv_493){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_493, _x2c_func_argv_493, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_493, _x2c_func_argv_493, 1, 3355493), 3355493));
+  return float_var(fmaxf(a0, a1));
+  ;
+}
+
+double fmin(double, double);
+
+static Var _x2c_func_adapt_494(Func _x2c_func_binding_494, const FuncArg * _x2c_func_argv_494){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_494, _x2c_func_argv_494, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_494, _x2c_func_argv_494, 1, 3356265), 3356265));
+  return double_var(fmin(a0, a1));
+  ;
+}
+
+float fminf(float, float);
+
+static Var _x2c_func_adapt_495(Func _x2c_func_binding_495, const FuncArg * _x2c_func_argv_495){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_495, _x2c_func_argv_495, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_495, _x2c_func_argv_495, 1, 3355493), 3355493));
+  return float_var(fminf(a0, a1));
+  ;
+}
+
+double fmod(double, double);
+
+static Var _x2c_func_adapt_496(Func _x2c_func_binding_496, const FuncArg * _x2c_func_argv_496){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_496, _x2c_func_argv_496, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_496, _x2c_func_argv_496, 1, 3356265), 3356265));
+  return double_var(fmod(a0, a1));
+  ;
+}
+
+float fmodf(float, float);
+
+static Var _x2c_func_adapt_497(Func _x2c_func_binding_497, const FuncArg * _x2c_func_argv_497){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_497, _x2c_func_argv_497, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_497, _x2c_func_argv_497, 1, 3355493), 3355493));
+  return float_var(fmodf(a0, a1));
+  ;
+}
+
+double frexp(double, int *);
+
+static Var _x2c_func_adapt_498(Func _x2c_func_binding_498, const FuncArg * _x2c_func_argv_498){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_498, _x2c_func_argv_498, 0, 3356265), 3356265));
+  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_498, _x2c_func_argv_498, 1, 442085973));
+  return double_var(frexp(a0, a1));
+  ;
+}
+
+float frexpf(float, int *);
+
+static Var _x2c_func_adapt_499(Func _x2c_func_binding_499, const FuncArg * _x2c_func_argv_499){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_499, _x2c_func_argv_499, 0, 3355493), 3355493));
+  int * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_499, _x2c_func_argv_499, 1, 442085973));
+  return float_var(frexpf(a0, a1));
+  ;
+}
+
+double hypot(double, double);
+
+static Var _x2c_func_adapt_500(Func _x2c_func_binding_500, const FuncArg * _x2c_func_argv_500){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_500, _x2c_func_argv_500, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_500, _x2c_func_argv_500, 1, 3356265), 3356265));
+  return double_var(hypot(a0, a1));
+  ;
+}
+
+float hypotf(float, float);
+
+static Var _x2c_func_adapt_501(Func _x2c_func_binding_501, const FuncArg * _x2c_func_argv_501){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_501, _x2c_func_argv_501, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_501, _x2c_func_argv_501, 1, 3355493), 3355493));
+  return float_var(hypotf(a0, a1));
+  ;
+}
+
+int ilogb(double);
+
+static Var _x2c_func_adapt_502(Func _x2c_func_binding_502, const FuncArg * _x2c_func_argv_502){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_502, _x2c_func_argv_502, 0, 3356265), 3356265));
+  return int_var(ilogb(a0));
+  ;
+}
+
+int ilogbf(float);
+
+static Var _x2c_func_adapt_503(Func _x2c_func_binding_503, const FuncArg * _x2c_func_argv_503){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_503, _x2c_func_argv_503, 0, 3355493), 3355493));
+  return int_var(ilogbf(a0));
+  ;
+}
+
+long labs(long);
+
+static Var _x2c_func_adapt_504(Func _x2c_func_binding_504, const FuncArg * _x2c_func_argv_504){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_504, _x2c_func_argv_504, 0, 818062), 818062));
+  return long_var(labs(a0));
+  ;
+}
+
+double ldexp(double, int);
+
+static Var _x2c_func_adapt_505(Func _x2c_func_binding_505, const FuncArg * _x2c_func_argv_505){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 0, 3356265), 3356265));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_505, _x2c_func_argv_505, 1, 3453797), 3453797));
+  return double_var(ldexp(a0, a1));
+  ;
+}
+
+float ldexpf(float, int);
+
+static Var _x2c_func_adapt_506(Func _x2c_func_binding_506, const FuncArg * _x2c_func_argv_506){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 0, 3355493), 3355493));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_506, _x2c_func_argv_506, 1, 3453797), 3453797));
+  return float_var(ldexpf(a0, a1));
+  ;
+}
+
+double lgamma(double);
+
+static Var _x2c_func_adapt_507(Func _x2c_func_binding_507, const FuncArg * _x2c_func_argv_507){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_507, _x2c_func_argv_507, 0, 3356265), 3356265));
+  return double_var(lgamma(a0));
+  ;
+}
+
+float lgammaf(float);
+
+static Var _x2c_func_adapt_508(Func _x2c_func_binding_508, const FuncArg * _x2c_func_argv_508){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_508, _x2c_func_argv_508, 0, 3355493), 3355493));
+  return float_var(lgammaf(a0));
+  ;
+}
+
+long long llabs(long long);
+
+static Var _x2c_func_adapt_509(Func _x2c_func_binding_509, const FuncArg * _x2c_func_argv_509){
+  long long a0 = Var_long_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_509, _x2c_func_argv_509, 0, 25983886), 25983886));
+  return Var_box_long_long(llabs(a0));
+  ;
+}
+
+long long llrint(double);
+
+static Var _x2c_func_adapt_510(Func _x2c_func_binding_510, const FuncArg * _x2c_func_argv_510){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_510, _x2c_func_argv_510, 0, 3356265), 3356265));
+  return Var_box_long_long(llrint(a0));
+  ;
+}
+
+long long llrintf(float);
+
+static Var _x2c_func_adapt_511(Func _x2c_func_binding_511, const FuncArg * _x2c_func_argv_511){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_511, _x2c_func_argv_511, 0, 3355493), 3355493));
+  return Var_box_long_long(llrintf(a0));
+  ;
+}
+
+long long llround(double);
+
+static Var _x2c_func_adapt_512(Func _x2c_func_binding_512, const FuncArg * _x2c_func_argv_512){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_512, _x2c_func_argv_512, 0, 3356265), 3356265));
+  return Var_box_long_long(llround(a0));
+  ;
+}
+
+long long llroundf(float);
+
+static Var _x2c_func_adapt_513(Func _x2c_func_binding_513, const FuncArg * _x2c_func_argv_513){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_513, _x2c_func_argv_513, 0, 3355493), 3355493));
+  return Var_box_long_long(llroundf(a0));
+  ;
+}
+
+double log(double);
+
+static Var _x2c_func_adapt_514(Func _x2c_func_binding_514, const FuncArg * _x2c_func_argv_514){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_514, _x2c_func_argv_514, 0, 3356265), 3356265));
+  return double_var(log(a0));
+  ;
+}
+
+double log10(double);
+
+static Var _x2c_func_adapt_515(Func _x2c_func_binding_515, const FuncArg * _x2c_func_argv_515){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_515, _x2c_func_argv_515, 0, 3356265), 3356265));
+  return double_var(log10(a0));
+  ;
+}
+
+float log10f(float);
+
+static Var _x2c_func_adapt_516(Func _x2c_func_binding_516, const FuncArg * _x2c_func_argv_516){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_516, _x2c_func_argv_516, 0, 3355493), 3355493));
+  return float_var(log10f(a0));
+  ;
+}
+
+double log1p(double);
+
+static Var _x2c_func_adapt_517(Func _x2c_func_binding_517, const FuncArg * _x2c_func_argv_517){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_517, _x2c_func_argv_517, 0, 3356265), 3356265));
+  return double_var(log1p(a0));
+  ;
+}
+
+float log1pf(float);
+
+static Var _x2c_func_adapt_518(Func _x2c_func_binding_518, const FuncArg * _x2c_func_argv_518){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_518, _x2c_func_argv_518, 0, 3355493), 3355493));
+  return float_var(log1pf(a0));
+  ;
+}
+
+double log2(double);
+
+static Var _x2c_func_adapt_519(Func _x2c_func_binding_519, const FuncArg * _x2c_func_argv_519){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_519, _x2c_func_argv_519, 0, 3356265), 3356265));
+  return double_var(log2(a0));
+  ;
+}
+
+float log2f(float);
+
+static Var _x2c_func_adapt_520(Func _x2c_func_binding_520, const FuncArg * _x2c_func_argv_520){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_520, _x2c_func_argv_520, 0, 3355493), 3355493));
+  return float_var(log2f(a0));
+  ;
+}
+
+double logb(double);
+
+static Var _x2c_func_adapt_521(Func _x2c_func_binding_521, const FuncArg * _x2c_func_argv_521){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_521, _x2c_func_argv_521, 0, 3356265), 3356265));
+  return double_var(logb(a0));
+  ;
+}
+
+float logbf(float);
+
+static Var _x2c_func_adapt_522(Func _x2c_func_binding_522, const FuncArg * _x2c_func_argv_522){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_522, _x2c_func_argv_522, 0, 3355493), 3355493));
+  return float_var(logbf(a0));
+  ;
+}
+
+float logf(float);
+
+static Var _x2c_func_adapt_523(Func _x2c_func_binding_523, const FuncArg * _x2c_func_argv_523){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_523, _x2c_func_argv_523, 0, 3355493), 3355493));
+  return float_var(logf(a0));
+  ;
+}
+
+long lrint(double);
+
+static Var _x2c_func_adapt_524(Func _x2c_func_binding_524, const FuncArg * _x2c_func_argv_524){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_524, _x2c_func_argv_524, 0, 3356265), 3356265));
+  return long_var(lrint(a0));
+  ;
+}
+
+long lrintf(float);
+
+static Var _x2c_func_adapt_525(Func _x2c_func_binding_525, const FuncArg * _x2c_func_argv_525){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_525, _x2c_func_argv_525, 0, 3355493), 3355493));
+  return long_var(lrintf(a0));
+  ;
+}
+
+long lround(double);
+
+static Var _x2c_func_adapt_526(Func _x2c_func_binding_526, const FuncArg * _x2c_func_argv_526){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_526, _x2c_func_argv_526, 0, 3356265), 3356265));
+  return long_var(lround(a0));
+  ;
+}
+
+long lroundf(float);
+
+static Var _x2c_func_adapt_527(Func _x2c_func_binding_527, const FuncArg * _x2c_func_argv_527){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_527, _x2c_func_argv_527, 0, 3355493), 3355493));
+  return long_var(lroundf(a0));
+  ;
+}
+
+double modf(double, double *);
+
+static Var _x2c_func_adapt_528(Func _x2c_func_binding_528, const FuncArg * _x2c_func_argv_528){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_528, _x2c_func_argv_528, 0, 3356265), 3356265));
+  double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_528, _x2c_func_argv_528, 1, 429601877));
+  return double_var(modf(a0, a1));
+  ;
+}
+
+float modff(float, float *);
+
+static Var _x2c_func_adapt_529(Func _x2c_func_binding_529, const FuncArg * _x2c_func_argv_529){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_529, _x2c_func_argv_529, 0, 3355493), 3355493));
+  float * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_529, _x2c_func_argv_529, 1, 429503061));
+  return float_var(modff(a0, a1));
+  ;
+}
+
+double nan(const char *);
+
+static Var _x2c_func_adapt_530(Func _x2c_func_binding_530, const FuncArg * _x2c_func_argv_530){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_530, _x2c_func_argv_530, 0);
+  return double_var(nan(a0));
+  ;
+}
+
+float nanf(const char *);
+
+static Var _x2c_func_adapt_531(Func _x2c_func_binding_531, const FuncArg * _x2c_func_argv_531){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_531, _x2c_func_argv_531, 0);
+  return float_var(nanf(a0));
+  ;
+}
+
+double nearbyint(double);
+
+static Var _x2c_func_adapt_532(Func _x2c_func_binding_532, const FuncArg * _x2c_func_argv_532){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_532, _x2c_func_argv_532, 0, 3356265), 3356265));
+  return double_var(nearbyint(a0));
+  ;
+}
+
+float nearbyintf(float);
+
+static Var _x2c_func_adapt_533(Func _x2c_func_binding_533, const FuncArg * _x2c_func_argv_533){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_533, _x2c_func_argv_533, 0, 3355493), 3355493));
+  return float_var(nearbyintf(a0));
+  ;
+}
+
+double nextafter(double, double);
+
+static Var _x2c_func_adapt_534(Func _x2c_func_binding_534, const FuncArg * _x2c_func_argv_534){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_534, _x2c_func_argv_534, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_534, _x2c_func_argv_534, 1, 3356265), 3356265));
+  return double_var(nextafter(a0, a1));
+  ;
+}
+
+float nextafterf(float, float);
+
+static Var _x2c_func_adapt_535(Func _x2c_func_binding_535, const FuncArg * _x2c_func_argv_535){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_535, _x2c_func_argv_535, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_535, _x2c_func_argv_535, 1, 3355493), 3355493));
+  return float_var(nextafterf(a0, a1));
+  ;
+}
+
+double nexttoward(double, long double);
+
+static Var _x2c_func_adapt_536(Func _x2c_func_binding_536, const FuncArg * _x2c_func_argv_536){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_536, _x2c_func_argv_536, 0, 3356265), 3356265));
+  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_536, _x2c_func_argv_536, 1, 26071077642), 26071077642));
+  return double_var(nexttoward(a0, a1));
+  ;
+}
+
+float nexttowardf(float, long double);
+
+static Var _x2c_func_adapt_537(Func _x2c_func_binding_537, const FuncArg * _x2c_func_argv_537){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_537, _x2c_func_argv_537, 0, 3355493), 3355493));
+  long double a1 = Var_long_double(Var_convert(x2c_func_value_argument(_x2c_func_binding_537, _x2c_func_argv_537, 1, 26071077642), 26071077642));
+  return float_var(nexttowardf(a0, a1));
+  ;
+}
+
+double pow(double, double);
+
+static Var _x2c_func_adapt_538(Func _x2c_func_binding_538, const FuncArg * _x2c_func_argv_538){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_538, _x2c_func_argv_538, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_538, _x2c_func_argv_538, 1, 3356265), 3356265));
+  return double_var(pow(a0, a1));
+  ;
+}
+
+float powf(float, float);
+
+static Var _x2c_func_adapt_539(Func _x2c_func_binding_539, const FuncArg * _x2c_func_argv_539){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_539, _x2c_func_argv_539, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_539, _x2c_func_argv_539, 1, 3355493), 3355493));
+  return float_var(powf(a0, a1));
+  ;
+}
+
+Iter range(int, int, int, Iter);
+
+static Var _x2c_func_adapt_540(Func _x2c_func_binding_540, const FuncArg * _x2c_func_argv_540){
+  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_540, _x2c_func_argv_540, 0, 3453797), 3453797));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_540, _x2c_func_argv_540, 1, 3453797), 3453797));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_540, _x2c_func_argv_540, 2, 3453797), 3453797));
+  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_540, _x2c_func_argv_540, 3, 631140));
+  return Iter_var(range(a0, a1, a2, a3));
+  ;
+}
+
+double remainder(double, double);
+
+static Var _x2c_func_adapt_541(Func _x2c_func_binding_541, const FuncArg * _x2c_func_argv_541){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_541, _x2c_func_argv_541, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_541, _x2c_func_argv_541, 1, 3356265), 3356265));
+  return double_var(remainder(a0, a1));
+  ;
+}
+
+float remainderf(float, float);
+
+static Var _x2c_func_adapt_542(Func _x2c_func_binding_542, const FuncArg * _x2c_func_argv_542){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_542, _x2c_func_argv_542, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_542, _x2c_func_argv_542, 1, 3355493), 3355493));
+  return float_var(remainderf(a0, a1));
+  ;
+}
+
+double remquo(double, double, int *);
+
+static Var _x2c_func_adapt_543(Func _x2c_func_binding_543, const FuncArg * _x2c_func_argv_543){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_543, _x2c_func_argv_543, 0, 3356265), 3356265));
+  double a1 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_543, _x2c_func_argv_543, 1, 3356265), 3356265));
+  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_543, _x2c_func_argv_543, 2, 442085973));
+  return double_var(remquo(a0, a1, a2));
+  ;
+}
+
+float remquof(float, float, int *);
+
+static Var _x2c_func_adapt_544(Func _x2c_func_binding_544, const FuncArg * _x2c_func_argv_544){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_544, _x2c_func_argv_544, 0, 3355493), 3355493));
+  float a1 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_544, _x2c_func_argv_544, 1, 3355493), 3355493));
+  int * a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_544, _x2c_func_argv_544, 2, 442085973));
+  return float_var(remquof(a0, a1, a2));
+  ;
+}
+
+double rint(double);
+
+static Var _x2c_func_adapt_545(Func _x2c_func_binding_545, const FuncArg * _x2c_func_argv_545){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_545, _x2c_func_argv_545, 0, 3356265), 3356265));
+  return double_var(rint(a0));
+  ;
+}
+
+float rintf(float);
+
+static Var _x2c_func_adapt_546(Func _x2c_func_binding_546, const FuncArg * _x2c_func_argv_546){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_546, _x2c_func_argv_546, 0, 3355493), 3355493));
+  return float_var(rintf(a0));
+  ;
+}
+
+double round(double);
+
+static Var _x2c_func_adapt_547(Func _x2c_func_binding_547, const FuncArg * _x2c_func_argv_547){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_547, _x2c_func_argv_547, 0, 3356265), 3356265));
+  return double_var(round(a0));
+  ;
+}
+
+float roundf(float);
+
+static Var _x2c_func_adapt_548(Func _x2c_func_binding_548, const FuncArg * _x2c_func_argv_548){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_548, _x2c_func_argv_548, 0, 3355493), 3355493));
+  return float_var(roundf(a0));
+  ;
+}
+
+double scalbln(double, long);
+
+static Var _x2c_func_adapt_549(Func _x2c_func_binding_549, const FuncArg * _x2c_func_argv_549){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_549, _x2c_func_argv_549, 0, 3356265), 3356265));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_549, _x2c_func_argv_549, 1, 818062), 818062));
+  return double_var(scalbln(a0, a1));
+  ;
+}
+
+float scalblnf(float, long);
+
+static Var _x2c_func_adapt_550(Func _x2c_func_binding_550, const FuncArg * _x2c_func_argv_550){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_550, _x2c_func_argv_550, 0, 3355493), 3355493));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_550, _x2c_func_argv_550, 1, 818062), 818062));
+  return float_var(scalblnf(a0, a1));
+  ;
+}
+
+double scalbn(double, int);
+
+static Var _x2c_func_adapt_551(Func _x2c_func_binding_551, const FuncArg * _x2c_func_argv_551){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_551, _x2c_func_argv_551, 0, 3356265), 3356265));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_551, _x2c_func_argv_551, 1, 3453797), 3453797));
+  return double_var(scalbn(a0, a1));
+  ;
+}
+
+float scalbnf(float, int);
+
+static Var _x2c_func_adapt_552(Func _x2c_func_binding_552, const FuncArg * _x2c_func_argv_552){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_552, _x2c_func_argv_552, 0, 3355493), 3355493));
+  int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_552, _x2c_func_argv_552, 1, 3453797), 3453797));
+  return float_var(scalbnf(a0, a1));
+  ;
+}
+
+double sin(double);
+
+static Var _x2c_func_adapt_553(Func _x2c_func_binding_553, const FuncArg * _x2c_func_argv_553){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_553, _x2c_func_argv_553, 0, 3356265), 3356265));
+  return double_var(sin(a0));
+  ;
+}
+
+float sinf(float);
+
+static Var _x2c_func_adapt_554(Func _x2c_func_binding_554, const FuncArg * _x2c_func_argv_554){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_554, _x2c_func_argv_554, 0, 3355493), 3355493));
+  return float_var(sinf(a0));
+  ;
+}
+
+double sinh(double);
+
+static Var _x2c_func_adapt_555(Func _x2c_func_binding_555, const FuncArg * _x2c_func_argv_555){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_555, _x2c_func_argv_555, 0, 3356265), 3356265));
+  return double_var(sinh(a0));
+  ;
+}
+
+float sinhf(float);
+
+static Var _x2c_func_adapt_556(Func _x2c_func_binding_556, const FuncArg * _x2c_func_argv_556){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_556, _x2c_func_argv_556, 0, 3355493), 3355493));
+  return float_var(sinhf(a0));
+  ;
+}
+
+double sqrt(double);
+
+static Var _x2c_func_adapt_557(Func _x2c_func_binding_557, const FuncArg * _x2c_func_argv_557){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_557, _x2c_func_argv_557, 0, 3356265), 3356265));
+  return double_var(sqrt(a0));
+  ;
+}
+
+float sqrtf(float);
+
+static Var _x2c_func_adapt_558(Func _x2c_func_binding_558, const FuncArg * _x2c_func_argv_558){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_558, _x2c_func_argv_558, 0, 3355493), 3355493));
+  return float_var(sqrtf(a0));
+  ;
+}
+
+int strcmp(const char *, const char *);
+
+static Var _x2c_func_adapt_559(Func _x2c_func_binding_559, const FuncArg * _x2c_func_argv_559){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_559, _x2c_func_argv_559, 0);
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_559, _x2c_func_argv_559, 1);
+  return int_var(strcmp(a0, a1));
+  ;
+}
+
+int strncmp(const char *, const char *, size_t);
+
+static Var _x2c_func_adapt_560(Func _x2c_func_binding_560, const FuncArg * _x2c_func_argv_560){
+  const char * a0 = x2c_func_pointer_argument(_x2c_func_binding_560, _x2c_func_argv_560, 0);
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_560, _x2c_func_argv_560, 1);
+  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_560, _x2c_func_argv_560, 2, 44858254), 44858254));
+  return int_var(strncmp(a0, a1, a2));
+  ;
+}
+
+double tan(double);
+
+static Var _x2c_func_adapt_561(Func _x2c_func_binding_561, const FuncArg * _x2c_func_argv_561){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_561, _x2c_func_argv_561, 0, 3356265), 3356265));
+  return double_var(tan(a0));
+  ;
+}
+
+float tanf(float);
+
+static Var _x2c_func_adapt_562(Func _x2c_func_binding_562, const FuncArg * _x2c_func_argv_562){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_562, _x2c_func_argv_562, 0, 3355493), 3355493));
+  return float_var(tanf(a0));
+  ;
+}
+
+double tanh(double);
+
+static Var _x2c_func_adapt_563(Func _x2c_func_binding_563, const FuncArg * _x2c_func_argv_563){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_563, _x2c_func_argv_563, 0, 3356265), 3356265));
+  return double_var(tanh(a0));
+  ;
+}
+
+float tanhf(float);
+
+static Var _x2c_func_adapt_564(Func _x2c_func_binding_564, const FuncArg * _x2c_func_argv_564){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_564, _x2c_func_argv_564, 0, 3355493), 3355493));
+  return float_var(tanhf(a0));
+  ;
+}
+
+double tgamma(double);
+
+static Var _x2c_func_adapt_565(Func _x2c_func_binding_565, const FuncArg * _x2c_func_argv_565){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_565, _x2c_func_argv_565, 0, 3356265), 3356265));
+  return double_var(tgamma(a0));
+  ;
+}
+
+float tgammaf(float);
+
+static Var _x2c_func_adapt_566(Func _x2c_func_binding_566, const FuncArg * _x2c_func_argv_566){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_566, _x2c_func_argv_566, 0, 3355493), 3355493));
+  return float_var(tgammaf(a0));
+  ;
+}
+
+double trunc(double);
+
+static Var _x2c_func_adapt_567(Func _x2c_func_binding_567, const FuncArg * _x2c_func_argv_567){
+  double a0 = Var_floating(Var_convert(x2c_func_value_argument(_x2c_func_binding_567, _x2c_func_argv_567, 0, 3356265), 3356265));
+  return double_var(trunc(a0));
+  ;
+}
+
+float truncf(float);
+
+static Var _x2c_func_adapt_568(Func _x2c_func_binding_568, const FuncArg * _x2c_func_argv_568){
+  float a0 = Var_float(Var_convert(x2c_func_value_argument(_x2c_func_binding_568, _x2c_func_argv_568, 0, 3355493), 3355493));
+  return float_var(truncf(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_569(Func _x2c_func_binding_569, const FuncArg * _x2c_func_argv_569){
+  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_569, _x2c_func_argv_569, 0, 806120));
+  return Job_var(_lisp_List_job(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_570(Func _x2c_func_binding_570, const FuncArg * _x2c_func_argv_570){
+  Job a0 = Var_job(x2c_func_value_argument(_x2c_func_binding_570, _x2c_func_argv_570, 0, 244620705480));
+  return Job_var(_lisp_Job_start(a0));
+  ;
+}
+
+static Var _x2c_func_adapt_571(Func _x2c_func_binding_571, const FuncArg * _x2c_func_argv_571){
+  Buffer a0 = Var_buffer(x2c_func_value_argument(_x2c_func_binding_571, _x2c_func_argv_571, 0, 178663780));
+  const char * a1 = x2c_func_pointer_argument(_x2c_func_binding_571, _x2c_func_argv_571, 1);
+  size_t a2 = Var_ulong(Var_convert(x2c_func_value_argument(_x2c_func_binding_571, _x2c_func_argv_571, 2, 44858254), 44858254));
+  return Buffer_var(_lisp_Buffer_write_len(a0, a1, a2));
+  ;
+}
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  Scope_pop();
+}
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  Scope_pop();
 }
 
 #undef _x2c_initializer_choice_47649B83_0_expanded

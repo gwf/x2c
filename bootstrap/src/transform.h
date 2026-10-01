@@ -11,43 +11,13 @@
 #define X2C_TRANSFORM_SOURCE
 #endif
 #include "compiler.h"
-List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
+List Compiler_transform(Compiler compiler, List ast);
 
-List Compiler_func_signature(Compiler compiler, Type type);
-
-List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
-
-List Compiler_lift_func_expression(Compiler c, List expression);
-
-List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type);
-
-void Compiler_check_lambda_captures(Compiler c, List ast);
-
-List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
-
-List Compiler_lambda_param_types(Compiler c, List entries);
-
-List Compiler_lower_lambda_expr(Compiler c, List expression);
-
-int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
-
-List builtin_try_catch_site(List frame, List clause);
-
-List builtin_catch_patterns(List patterns, List items);
-
-List builtin_try_landing(List frame, List clause, List cleanup);
-
-List builtin_catch_cases(List selected, List arms);
-
-List builtin_defer_record(List record, List callback, List environment, List records);
-
-List builtin_defer_captures(List environment, List records);
+Ast Compiler_normalize(Compiler c, Ast ast);
 
 List transform_array_literal(Compiler compiler, List ast);
 
 List transform_map_literal(Compiler compiler, List ast);
-
-List Compiler_transform(Compiler compiler, List ast);
 
 #endif
 

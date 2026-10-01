@@ -6,7 +6,7 @@
 #define __GUARD_0x47649B83__
 
 #include "x2c.h"
-Map lisp_optional_native_targets(void);
+Map lisp_native_targets(void);
 
 
 #endif /* __GUARD_0x47649B83__ */

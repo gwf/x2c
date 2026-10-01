@@ -47,43 +47,5 @@ List type_base_suffix(List type);
 
 List type_declaration_parts(List type);
 
-typedef List Macro;
-
-Macro Macro_close(Macro value, List captures);
-
-List Macro_apply(Macro t, List values);
-
-Var Macro_subject(void);
-
-void Macro_use_subject(Var rows);
-
-List Macro_pattern(Macro t, List names);
-
-typedef struct MacroFixedSlots{
-  int count, slots[MACHINE_BINDER_MAX];
-  int names, name_slots[MACHINE_BINDER_MAX];
-}
-MacroFixedSlots;
-
-typedef struct MacroPublishing{
-  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
-  int to[MACHINE_BINDER_MAX];
-  int count, binders, complete;
-  unsigned long definite;
-}
-MacroPublishing;
-
-typedef struct MacroCaseSite{
-  MatchCaptureSite match;
-  MacroFixedSlots policy;
-  MacroPublishing route;
-  int ready;
-}
-MacroCaseSite;
-
-List Macro_case_pattern(Macro t, List names);
-
-int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
-
 
 #endif /* __GUARD_0xD219AB39__ */

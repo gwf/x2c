@@ -524,6 +524,25 @@ static void MatchMachine__count_share(MatchMachine m){
   m -> stats -> materializations_avoided ++;
 }
 
+void MatchMachine_open(MatchMachine m){
+  memset(& m -> program, 0, sizeof(MachineView));
+  m -> pc = 0;
+  m -> status = 598794;
+  m -> running = 0;
+  m -> value =((void) 0, Void);
+  m -> error =((void) 0, Void);
+  m -> fp = 0;
+  m -> current_entry_undo = 0;
+  m -> undo_count = 0;
+  m -> slot_count = 0;
+  m -> stats = NULL;
+  m -> relation = NULL;
+  m -> relation_context = NULL;
+  m -> view = NULL;
+  m -> scratch = NULL;
+  m -> scratch_capacity = 0;
+}
+
 void MatchMachine_begin(MatchMachine m, MachineView program, Var input){
   if(m -> running || m -> undo_count || m -> fp){
     MatchMachine__error(m, 995692716810);
@@ -546,7 +565,7 @@ Var String_var(String);
 
 void MatchMachine_finish(MatchMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 493};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 514};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
@@ -568,6 +587,14 @@ int Var_is_void(Var);
 int MatchMachine_clean(MatchMachine m){
   if(m -> running || m -> program.code || m -> fp || m -> undo_count || m -> slot_count) return 0;
   return m -> status == 598794 && Var_is_void(m -> error);
+}
+
+void Scope_free(void *);
+
+void MatchMachine_dispose(MatchMachine m){
+  if(m -> scratch) Scope_free(m -> scratch);
+  m -> scratch = NULL;
+  m -> scratch_capacity = 0;
 }
 
 static void MatchMachine__clear_slots(MatchMachine m){

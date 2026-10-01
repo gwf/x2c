@@ -6,7 +6,7 @@
 
 #include "exception.h"
 
-static String _25, _24, _23, _22, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _2, _1, _0;
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -22,7 +22,6 @@ static String _25, _24, _23, _22, _20, _19, _18, _17, _16, _15, _14, _13, _12, _
 #include "exception.h"
 #include "func.h"
 #include "symbol.h"
-#include "scan.h"
 #include "pool.h"
 typedef struct StringHeader{
   int length;
@@ -77,102 +76,6 @@ static int _newline_width(String str);
 
 static Var _apply(Func fn, char value);
 
-typedef struct _Spec{
-  int flags, width, precision, has_width, has_precision, modifier;
-  char conversion;
-}
-_Spec;
-
-enum{
-  FORMAT_LEFT = 1, FORMAT_PLUS = 2, FORMAT_SPACE = 4, FORMAT_ALT = 8, FORMAT_ZERO = 16
-}
-;
-
-enum{
-  FORMAT_HH = 1, FORMAT_H = 2, FORMAT_L = 3, FORMAT_LL = 4, FORMAT_CAP_L = 5
-}
-;
-
-typedef struct _Format{
-  String fmt;
-  int length, literal, cursor, offset;
-  List args;
-  Buffer out;
-}
-_Format;
-
-static void _Format_conversion(_Format * f);
-
-static void _Format_write_literal(_Format * f);
-
-_Noreturn static void _format_error(int offset, String reason);
-
-static void _Format_fail(_Format * f, String reason);
-
-static void _Format_need_byte(_Format * f);
-
-static _Spec _Format_spec(_Format * f);
-
-static int _Format_flags(_Format * f);
-
-static void _Format_width(_Format * f, _Spec * spec);
-
-static int _Format_star(_Format * f);
-
-static void _Format_precision(_Format * f, _Spec * spec);
-
-static int _Format_decimal(_Format * f, String label);
-
-static int _Format_byte(_Format * f);
-
-static int _Format_digit(_Format * f);
-
-static int _Format_modifier(_Format * f);
-
-static int _Format_doubled(_Format * f, char letter, int once, int twice);
-
-static void _Format_check(_Format * f, _Spec spec);
-
-static Var _Format_take(_Format * f, String reason);
-
-static Buffer _Format_print(_Format * f, _Spec spec, Var arg);
-
-static void _Spec_spell(_Spec s, char * out);
-
-static Buffer _Format_signed_int(_Format * f, const char * text, int modifier, Var arg);
-
-static int _Format_narrow_signed(_Format * f, Var arg, int modifier);
-
-static Buffer _Format_unsigned_int(_Format * f, const char * text, int modifier, Var arg);
-
-static unsigned _Format_narrow_unsigned(_Format * f, Var arg, int modifier);
-
-static Buffer _Format_floating(_Format * f, const char * text, int modifier, Var arg);
-
-static Buffer _Format_character(_Format * f, const char * text, Var arg);
-
-static Buffer _Format_string(_Format * f, const char * text, Var arg);
-
-static Var _Format_number(_Format * f, Var arg, Symbol target);
-
-static String _Format_text(_Format * f, Var arg);
-
-_Noreturn static void _Format_nested(_Format * f, String reason, Var code, List details);
-
-static inline int _escape_byte(unsigned char ch, char * out);
-
-static inline char _escape_letter(unsigned char ch);
-
-static int _unescape_into(char * out, const char * src);
-
-static inline int _decode_escape(const char * * at);
-
-static inline int _hex_escape(const char * * at, int esc);
-
-static inline int _octal_escape(const char * * at, int esc);
-
-static inline int _named_escape(int esc);
-
 static int _next(Iter iter, Var * out);
 
 typedef struct _x2c_defer_env_0{
@@ -215,42 +118,13 @@ _x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_10;
-}
-_x2c_defer_env_5;
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("\n");
-  _1 = String_new(" exceeds int range");
-  _2 = String_new("\"%s\"");
-  _3 = String_new("\n");
-  _4 = String_new("\r\n");
-  _5 = String_new("excess values");
-  _6 = String_new("missing value");
-  _7 = String_new("incomplete conversion");
-  _8 = String_new("width exceeds int range");
-  _9 = String_new("width");
-  _10 = String_new("missing star value");
-  _11 = String_new("precision");
-  _12 = String_new("unsupported length modifier");
-  _13 = String_new("positional formats are unsupported");
-  _14 = String_new("unsupported conversion");
-  _15 = String_new("unsupported integer length");
-  _16 = String_new("unsupported floating length");
-  _17 = String_new("wide strings and characters are unsupported");
-  _18 = String_new("unsupported flag for conversion");
-  _19 = String_new("unsupported precision for %c");
-  _20 = String_new("%c cannot produce an embedded NUL");
-  _22 = String_new("value conversion failed");
-  _23 = String_new("string conversion failed");
-  _24 = String_new("\\");
-  _25 = String_new("\"\"");
+  _1 = String_new("\n");
+  _2 = String_new("\r\n");
 }
 
 static inline StringHeader _header(String str){
@@ -626,7 +500,7 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 692};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 691};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
@@ -647,7 +521,7 @@ String String_add(String str, String other){
   int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 725};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 724};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
@@ -681,12 +555,12 @@ String String_repeat(String str, int count){
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 766};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 765};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 767};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 766};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))), Symbol_var(7318440), int_var(count));
     __builtin_unreachable();
   }
@@ -775,14 +649,14 @@ String String_pad_center(String str, int width, char fill){
 
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 854};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 853};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 857};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 856};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -828,7 +702,7 @@ String String_dedent(String str){
   while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;
   String prefix = String_new_len(str + skip, width);
   String body = String_new(str + skip + width);
-  if(width) body = String_replace(body, String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _3);
+  if(width) body = String_replace(body, String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _1);
   int end = String_len(body), tail = end;
   while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;
   if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;
@@ -836,8 +710,8 @@ String String_dedent(String str){
 }
 
 static int _newline_width(String str){
-  if(String_startswith(str, _4)) return 2;
-  return String_startswith(str, _3) ? 1 : 0;
+  if(String_startswith(str, _2)) return 2;
+  return String_startswith(str, _1) ? 1 : 0;
 }
 
 String String_remove_prefix(String str, String prefix){
@@ -1003,7 +877,7 @@ String String_map(String str, Func fn){
       for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
         if(! ch){
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1120};
+          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1119};
           x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -1167,669 +1041,14 @@ String String_printf(String fmt, ...){
   return _finish(string, n);
 }
 
-Buffer Buffer_new(size_t);
-
-String Buffer_str(Buffer);
-
-String String_format(String fmt, List values){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(fmt) || ! * fmt){
-    if(List_truth(values)) _format_error(0, _5);
-    return NULL;
-  }
-  Buffer out = Buffer_new(0);
-  {
-    _x2c_defer_env_5 _x2c_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_5._x2c_defer_capture_10 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_5 ={
-      .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_5);
-    {
-      _Format f ={
-        .fmt = fmt, .length = String_len(fmt), .args = values, .out = out
-      }
-      ;
-      while(f.cursor < f.length) if(_Format_byte(&(f)) == '%') _Format_conversion(&(f));
-      else f.cursor ++;
-      _Format_write_literal(&(f));
-      if(List_truth(f.args)) _format_error(f.length, _5);
-      {
-        String _x2c_return_value_5 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_5);
-          return _x2c_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_5);
-  }
-
-}
-
-Buffer Buffer_write_char(Buffer, char);
-
-static void _Format_conversion(_Format * f){
-  _Format_write_literal(f);
-  f -> offset = f -> cursor ++;
-  _Format_need_byte(f);
-  if(_Format_byte(f) == '%'){
-    Buffer_write_char(f -> out, '%');
-    f -> cursor ++;
-  }
-  else{
-    _Spec spec = _Format_spec(f);
-    _Format_print(f, spec, _Format_take(f, _6));
-  }
-  f -> literal = f -> cursor;
-}
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-static void _Format_write_literal(_Format * f){
-  Buffer_write_len(f -> out, f -> fmt + f -> literal, (size_t)(f -> cursor - f -> literal));
-}
-
-_Noreturn static void _format_error(int offset, String reason){
-  {
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_format_error",.line = 1284};
-    x2c_error_raise_n(& _x2c_error_site_7, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
-    __builtin_unreachable();
-  }
-
-}
-
-static void _Format_fail(_Format * f, String reason){
-  _format_error(f -> offset, reason);
-}
-
-static void _Format_need_byte(_Format * f){
-  if(f -> cursor == f -> length) _Format_fail(f, _7);
-}
-
-static _Spec _Format_spec(_Format * f){
-  _Spec spec ={
-    .flags = _Format_flags(f)
-  }
-  ;
-  _Format_width(f, &(spec));
-  _Format_precision(f, &(spec));
-  _Format_need_byte(f);
-  spec.modifier = _Format_modifier(f);
-  _Format_need_byte(f);
-  spec.conversion = String_getindex(f -> fmt, f -> cursor ++);
-  _Format_check(f, spec);
-  return spec;
-}
-
-static int _Format_flags(_Format * f){
-  int flags = 0;
-  for(; ; ){
-    switch(_Format_byte(f)){
-      case '-' : flags |= FORMAT_LEFT;
-      break;
-      case '+' : flags |= FORMAT_PLUS;
-      break;
-      case ' ' : flags |= FORMAT_SPACE;
-      break;
-      case '#' : flags |= FORMAT_ALT;
-      break;
-      case '0' : flags |= FORMAT_ZERO;
-      break;
-      default: return flags;
-    }
-    f -> cursor ++;
-    _Format_need_byte(f);
-  }
-
-}
-
-static void _Format_width(_Format * f, _Spec * spec){
-  if(_Format_byte(f) == '*'){
-    int width = _Format_star(f);
-    if(width == INT_MIN) _Format_fail(f, _8);
-    if(width < 0){
-      (* spec).flags |= FORMAT_LEFT;
-      width = - width;
-    }
-    (* spec).has_width = 1;
-    (* spec).width = width;
-    f -> cursor ++;
-  }
-  else if(_Format_digit(f)){
-    (* spec).has_width = 1;
-    (* spec).width = _Format_decimal(f, _9);
-  }
-
-}
-
-long Var_integer(Var);
-
-static int _Format_star(_Format * f){
-  return(int) Var_integer(_Format_number(f, _Format_take(f, _10), 3453797));
-}
-
-static void _Format_precision(_Format * f, _Spec * spec){
-  if(f -> cursor >= f -> length || _Format_byte(f) != '.') return;
-  (* spec).has_precision = 1;
-  f -> cursor ++;
-  _Format_need_byte(f);
-  if(_Format_byte(f) == '*'){
-    int precision = _Format_star(f);
-    if(precision < 0)(* spec).has_precision = 0;
-    else(* spec).precision = precision;
-    f -> cursor ++;
-  }
-  else if(_Format_digit(f))(* spec).precision = _Format_decimal(f, _11);
-}
-
-static int _Format_decimal(_Format * f, String label){
-  int number = 0, start = f -> cursor;
-  while(f -> cursor < f -> length && _Format_digit(f)){
-    int digit = _Format_byte(f) - '0';
-    if(number >(INT_MAX - digit) / 10) _format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_1), NULL))));
-    number = number * 10 + digit;
-    f -> cursor ++;
-  }
-  return number;
-}
-
-static int _Format_byte(_Format * f){
-  return String_getindex(f -> fmt, f -> cursor);
-}
-
-static int _Format_digit(_Format * f){
-  return _Format_byte(f) >= '0' && _Format_byte(f) <= '9';
-}
-
-static int _Format_modifier(_Format * f){
-  switch(_Format_byte(f)){
-    case 'h' : return _Format_doubled(f, 'h', FORMAT_H, FORMAT_HH);
-    case 'l' : return _Format_doubled(f, 'l', FORMAT_L, FORMAT_LL);
-    case 'L' : f -> cursor ++;
-    return FORMAT_CAP_L;
-    case 'j' : case 'z' : case 't' : _Format_fail(f, _12);
-  }
-  return 0;
-}
-
-static int _Format_doubled(_Format * f, char letter, int once, int twice){
-  f -> cursor ++;
-  if(f -> cursor >= f -> length || _Format_byte(f) != letter) return once;
-  f -> cursor ++;
-  return twice;
-}
-
-static void _Format_check(_Format * f, _Spec spec){
-  char ch = spec.conversion;
-  int integer = strchr("diouxX", ch) != NULL;
-  int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if(ch == '$') _Format_fail(f, _13);
-  if(! integer && ! floating && ! text) _Format_fail(f, _14);
-  if(integer && spec.modifier == FORMAT_CAP_L) _Format_fail(f, _15);
-  if(floating && spec.modifier && spec.modifier != FORMAT_L && spec.modifier != FORMAT_CAP_L) _Format_fail(f, _16);
-  if(text && spec.modifier) _Format_fail(f, _17);
-  if(text &&(spec.flags & ~ FORMAT_LEFT)) _Format_fail(f, _18);
-  if(ch == 'c' && spec.has_precision) _Format_fail(f, _19);
-}
-
-static Var _Format_take(_Format * f, String reason){
-  if(! List_truth(f -> args)) _Format_fail(f, reason);
-  Var arg = List_car(f -> args);
-  f -> args = List_cdr(f -> args);
-  return arg;
-}
-
-static Buffer _Format_print(_Format * f, _Spec spec, Var arg){
-  char text[48];
-  _Spec_spell(spec, text);
-  switch(spec.conversion){
-    case 'd' : case 'i' : return _Format_signed_int(f, text, spec.modifier, arg);
-    case 'o' : case 'u' : case 'x' : case 'X' : return _Format_unsigned_int(f, text, spec.modifier, arg);
-    case 'c' : return _Format_character(f, text, arg);
-    case 's' : return _Format_string(f, text, arg);
-  }
-  return _Format_floating(f, text, spec.modifier, arg);
-}
-
-static void _Spec_spell(_Spec s, char * out){
-  int n = 0;
-  out[n ++] = '%';
-  if(s.flags & FORMAT_LEFT) out[n ++] = '-';
-  if(s.flags & FORMAT_PLUS) out[n ++] = '+';
-  if(s.flags & FORMAT_SPACE) out[n ++] = ' ';
-  if(s.flags & FORMAT_ALT) out[n ++] = '#';
-  if(s.flags & FORMAT_ZERO) out[n ++] = '0';
-  if(s.has_width && s.width) n += snprintf(out + n, 16, "%d", s.width);
-  if(s.has_precision){
-    out[n ++] = '.';
-    n += snprintf(out + n, 16, "%d", s.precision);
-  }
-  switch(s.modifier){
-    case FORMAT_HH : out[n ++] = 'h';
-    out[n ++] = 'h';
-    break;
-    case FORMAT_H : out[n ++] = 'h';
-    break;
-    case FORMAT_L : out[n ++] = 'l';
-    break;
-    case FORMAT_LL : out[n ++] = 'l';
-    out[n ++] = 'l';
-    break;
-    case FORMAT_CAP_L : out[n ++] = 'L';
-    break;
-  }
-  out[n ++] = s.conversion;
-  out[n] = '\0';
-}
-
-Buffer Buffer_printf(Buffer, const char *, ...);
-
-long Var_long_value(Var);
-
-long long Var_long_long_value(Var);
-
-static Buffer _Format_signed_int(_Format * f, const char * text, int modifier, Var arg){
-  switch(modifier){
-    case FORMAT_L : return Buffer_printf(f -> out, text, Var_long_value(_Format_number(f, arg, 818062)));
-    case FORMAT_LL : return Buffer_printf(f -> out, text, Var_long_long_value(_Format_number(f, arg, 25983886)));
-  }
-  return Buffer_printf(f -> out, text, _Format_narrow_signed(f, arg, modifier));
-}
-
-static int _Format_narrow_signed(_Format * f, Var arg, int modifier){
-  switch(modifier){
-    case FORMAT_HH : return(signed char) Var_integer(_Format_number(f, arg, 26993));
-    case FORMAT_H : return(short) Var_integer(_Format_number(f, arg, 3453293));
-  }
-  return(int) Var_integer(_Format_number(f, arg, 3453797));
-}
-
-unsigned long Var_ulong_value(Var);
-
-unsigned long long Var_ulong_long_value(Var);
-
-static Buffer _Format_unsigned_int(_Format * f, const char * text, int modifier, Var arg){
-  switch(modifier){
-    case FORMAT_L : return Buffer_printf(f -> out, text, Var_ulong_value(_Format_number(f, arg, 44858254)));
-    case FORMAT_LL : return Buffer_printf(f -> out, text, Var_ulong_long_value(_Format_number(f, arg, 1435270030)));
-  }
-  return Buffer_printf(f -> out, text, _Format_narrow_unsigned(f, arg, modifier));
-}
-
-static unsigned _Format_narrow_unsigned(_Format * f, Var arg, int modifier){
-  switch(modifier){
-    case FORMAT_HH : return(unsigned char) Var_integer(_Format_number(f, arg, 30065));
-    case FORMAT_H : return(unsigned short) Var_integer(_Format_number(f, arg, 3846509));
-  }
-  return(unsigned) Var_integer(_Format_number(f, arg, 3847013));
-}
-
-long double Var_long_double_value(Var);
-
-double Var_floating(Var);
-
-static Buffer _Format_floating(_Format * f, const char * text, int modifier, Var arg){
-  if(modifier == FORMAT_CAP_L) return Buffer_printf(f -> out, text, Var_long_double_value(_Format_number(f, arg, 26071077642)));
-  return Buffer_printf(f -> out, text, Var_floating(_Format_number(f, arg, 3356265)));
-}
-
-static Buffer _Format_character(_Format * f, const char * text, Var arg){
-  int byte =(int) Var_integer(_Format_number(f, arg, 3453797));
-  if(!(unsigned char) byte) _Format_fail(f, _20);
-  return Buffer_printf(f -> out, text, byte);
-}
-
-static Buffer _Format_string(_Format * f, const char * text, Var arg){
-  String string = _Format_text(f, arg);
-  return Buffer_printf(f -> out, text, String_truth(string) ? string : "");
-}
-
-int x2c_error_catch_site_pending(ErrorCatchSite *);
-
-Var List_var(List);
-
-ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
-
-void x2c_exception_push(ExceptionFrame *);
-
-Var Var_convert(Var, Symbol);
-
-void x2c_exception_landed(ExceptionFrame *);
-
-int x2c_exception_is_error_target(ExceptionFrame *);
-
-int x2c_error_catch_selected(ErrorHandler);
-
-void x2c_error_catch_detach(ErrorHandler);
-
-void x2c_exception_mark_handled(ExceptionFrame *);
-
-void x2c_error_catch_close(ErrorHandler);
-
-void x2c_exception_leave(ExceptionFrame *);
-
-static Var _Format_number(_Format * f, Var arg, Symbol target){
-  Var volatile converted =((void) 0, Void);
-  {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) converted = Var_convert(arg, target);
-    else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
-          Var volatile code;
-          code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
-          List volatile details;
-          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
-          _Format_nested(f, _22, code, details);
-        }
-
-      }
-      else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
-  }
-  return converted;
-}
-
-String Var_str(Var);
-
-static String _Format_text(_Format * f, Var arg){
-  String volatile converted = NULL;
-  {
-    ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_macro_patterns_1[1];
-    static ErrorCatchSite _x2c_macro_site_1 ={
-      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_macro_patterns_1[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
-    }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
-    x2c_exception_push(& _x2c_exception_frame_1);
-    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) converted = Var_str(arg);
-    else{
-      x2c_exception_landed(& _x2c_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
-        int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
-        x2c_error_catch_detach(_x2c_error_handler_1);
-        x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        if(_x2c_macro_selected_1 == 0){
-          Var volatile code;
-          code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
-          List volatile details;
-          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
-          _Format_nested(f, _23, code, details);
-        }
-
-      }
-      else{
-        x2c_error_catch_close(_x2c_error_handler_1);
-        _x2c_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_error_handler_1);
-    _x2c_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_1);
-  }
-  return converted;
-}
-
-List cons(Var, List);
-
-_Noreturn static void _Format_nested(_Format * f, String reason, Var code, List details){
-  List cause = cons(code, details);
-  {
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_Format_nested",.line = 1551};
-    x2c_error_raise_n(& _x2c_error_site_8, 435316840, 3, Symbol_var(1019648360), int_var(f -> offset), Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
-    __builtin_unreachable();
-  }
-
-}
-
-String String_escape(String str){
-  if(! String_truth(str)) return NULL;
-  int bytes = 0;
-  {
-    int byte;
-    String _x2c_macro_object_1 = str;
-    int _x2c_macro_cursor_1 = 0;
-    int _x2c_macro_cursor_output_1;
-    while(String_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      byte = _x2c_macro_cursor_output_1;
-      {
-        int width = _escape_byte((unsigned char) byte, NULL);
-        if(bytes > INT_MAX - width - 1) return NULL;
-        bytes += width;
-      }
-
-    }
-
-  }
-  String string = String_malloc(bytes + 1);
-  char * dst = string;
-  {
-    int byte;
-    String _x2c_macro_object_2 = str;
-    int _x2c_macro_cursor_2 = 0;
-    int _x2c_macro_cursor_output_2;
-    while(String_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      byte = _x2c_macro_cursor_output_2;
-      dst += _escape_byte((unsigned char) byte, dst);
-    }
-
-  }
-  return _finish(string, bytes);
-}
-
-static inline int _escape_byte(unsigned char ch, char * out){
-  char letter = _escape_letter(ch);
-  if(letter){
-    if(out){
-      out[0] = '\\';
-      out[1] = letter;
-    }
-    return 2;
-  }
-  if(ch >= 32 && ch <= 126){
-    if(out) out[0] = ch;
-    return 1;
-  }
-  if(out){
-    out[0] = '\\';
-    out[1] =((ch >> 6) & 0x03) + '0';
-    out[2] =((ch >> 3) & 0x07) + '0';
-    out[3] =(ch & 0x07) + '0';
-  }
-  return 4;
-}
-
-static inline char _escape_letter(unsigned char ch){
-  switch(ch){
-    case '\n' : return 'n';
-    case '\r' : return 'r';
-    case '\t' : return 't';
-    case '\b' : return 'b';
-    case '\f' : return 'f';
-    case '\v' : return 'v';
-    case '\\' : return '\\';
-    case '"' : return '"';
-    case '\'' : return '\'';
-  }
-  return 0;
-}
-
-String String_unescape(String str){
-  if(! _init_guard_) _file_init_();
-  int n = String_len(str);
-  if(n == 0) return NULL;
-  if(! String_contains(str, _24)) return str;
-  String string = String_malloc(n + 1);
-  int length = _unescape_into(string, str);
-  if(length < 0){
-    _free_unchecked(string);
-    {
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1632};
-      x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
-      __builtin_unreachable();
-    }
-
-  }
-  return _finish(string, length);
-}
-
-static int _unescape_into(char * out, const char * src){
-  char * dst = out;
-  while(* src){
-    if(* src != '\\'){
-      * dst ++ = * src ++;
-      continue;
-    }
-    src ++;
-    if(! * src) break;
-    int byte = _decode_escape(&(src));
-    if(byte > 0377) return - 1;
-    if(byte > 0) * dst ++ = byte;
-  }
-  return(int)(dst - out);
-}
-
-static inline int _decode_escape(const char * * at){
-  int esc =(unsigned char) *(* at) ++;
-  switch(esc){
-    case 'x' : case 'X' : case 'u' : case 'U' : return _hex_escape(&((* at)), esc);
-    case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : return _octal_escape(&((* at)), esc);
-    case '\n' : return - 1;
-  }
-  return _named_escape(esc);
-}
-
-int scan_ascii_hex_value(int);
-
-static inline int _hex_escape(const char * * at, int esc){
-  int byte = 0, digits = 0;
-  for(;  *(* at) && digits < 2; (* at) ++, digits ++){
-    int hex = scan_ascii_hex_value(*(* at));
-    if(hex < 0) break;
-    byte =(byte << 4) | hex;
-  }
-  return digits ? byte : esc;
-}
-
-static inline int _octal_escape(const char * * at, int esc){
-  int byte = esc - '0';
-  for(int digits = 1;  *(* at) && digits < 3; (* at) ++, digits ++){
-    char next = *(* at);
-    if(next < '0' || next > '7') break;
-    byte =(byte << 3) |(next - '0');
-  }
-  return byte;
-}
-
-static inline int _named_escape(int esc){
-  switch(esc){
-    case 'a' : return '\a';
-    case 'b' : return '\b';
-    case 'f' : return '\f';
-    case 'n' : return '\n';
-    case 'r' : return '\r';
-    case 't' : return '\t';
-    case 'v' : return '\v';
-  }
-  return esc;
-}
-
-int String_parse_char(String str){
-  if(! String_truth(str) || ! * str) return - 1;
-  const char * at = str;
-  if(* at ++ != '\'' || ! * at) return - 1;
-  int byte = * at ++;
-  if(byte == '\\'){
-    if(! * at) return - 1;
-    byte = _decode_escape(&(at));
-    if(byte < 0 || byte > 0377) return - 1;
-  }
-  return * at == '\'' ? byte : - 1;
-}
-
-String String_parse(String str){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(str) || ! * str) return NULL;
-  int n = String_len(str);
-  if(String_getindex(str, 0) == '%' && String_getindex(str, 1) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 2, n - 3));
-  if(String_getindex(str, 0) == '"' && String_getindex(str, n - 1) == '"') return String_unescape(String_new_len(str + 1, n - 2));
-  return String_unescape(str);
-}
-
 String String_str(String str){
   return str;
-}
-
-String String_repr(String str){
-  if(! _init_guard_) _file_init_();
-  if(! String_truth(str) || ! * str) return _25;
-  return String_printf(_2, String_escape(str));
 }
 
 Buffer Buffer_write(Buffer, const char *);
 
 Buffer String_write_str(String str, Buffer out){
   return String_truth(str) ? Buffer_write(out, str) : out;
-}
-
-Buffer String_write_repr(String str, Buffer out){
-  Buffer_write_char(out, '"');
-  {
-    int byte;
-    String _x2c_macro_object_3 = str;
-    int _x2c_macro_cursor_3 = 0;
-    int _x2c_macro_cursor_output_3;
-    while(String_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      byte = _x2c_macro_cursor_output_3;
-      {
-        char escaped[4];
-        int width = _escape_byte((unsigned char) byte, escaped);
-        Buffer_write_len(out, escaped, width);
-      }
-
-    }
-
-  }
-  return Buffer_write_char(out, '"');
 }
 
 Symbol Symbol_new(const char *);
@@ -1890,12 +1109,5 @@ static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
   if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_8)) String_free((*(String *) _x2c_defer_data_4->_x2c_defer_capture_9));
-}
-
-void Buffer_cleanup(Buffer);
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_10));
 }
 

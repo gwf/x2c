@@ -18,6 +18,7 @@ static Var _869, _866, _857, _854, _853, _841, _838, _832, _829, _828, _825, _82
 #include "var.h"
 #include "string.h"
 #include "transform.h"
+#include "cleanup.h"
 #include "expressions.h"
 #include "logger.h"
 #include <stdio.h>
@@ -570,7 +571,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _422 = Symbol_var(1386033712394);
   _423 = Symbol_var(39266);
   _424 = Symbol_var(106239471489226);
-  _425 = int_var(37);
+  _425 = int_var(38);
   _426 = String_new("");
   _427 = String_var(_426);
   _428 = Symbol_var(458361162716);
@@ -623,7 +624,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _475 = cons(_471, _474);
   _476 = List_var(_475);
   _477 = Symbol_var(805770);
-  _478 = int_var(35);
+  _478 = int_var(36);
   _479 = cons(_478, NULL);
   _480 = cons(_477, _479);
   _481 = List_var(_480);
@@ -636,7 +637,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _488 = cons(_485, _487);
   _489 = List_var(_488);
   _490 = Symbol_var(1133019155420);
-  _491 = int_var(1067);
+  _491 = int_var(1088);
   _492 = cons(_491, NULL);
   _493 = cons(_490, _492);
   _494 = List_var(_493);
@@ -795,11 +796,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _647 = cons(_646, NULL);
   _648 = cons(_422, _647);
   _649 = List_var(_648);
-  _650 = int_var(42);
+  _650 = int_var(43);
   _651 = cons(_650, NULL);
   _652 = cons(_477, _651);
   _653 = List_var(_652);
-  _654 = int_var(1186);
+  _654 = int_var(1207);
   _655 = cons(_654, NULL);
   _656 = cons(_490, _655);
   _657 = List_var(_656);
@@ -970,11 +971,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _822 = cons(_821, NULL);
   _823 = cons(_422, _822);
   _824 = List_var(_823);
-  _825 = int_var(29);
+  _825 = int_var(30);
   _826 = cons(_825, NULL);
   _827 = cons(_477, _826);
   _828 = List_var(_827);
-  _829 = int_var(922);
+  _829 = int_var(943);
   _830 = cons(_829, NULL);
   _831 = cons(_490, _830);
   _832 = List_var(_831);

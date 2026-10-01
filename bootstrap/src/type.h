@@ -72,6 +72,8 @@ Type Type_reference(Type type);
 
 Type Type_apply(Type type);
 
+int Type_function_parts(Type type, List * params, Type * return_type);
+
 int Type_is_static(Type type);
 
 int Type_is_inline(Type type);
