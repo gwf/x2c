@@ -32,7 +32,7 @@ the emitted names visible in this unit. `effects` adds audit-only native
 contracts; neither input changes ordinary translation. Findings carry
 their function name and are returned without compiler diagnostics.
 
-Source: `src/regions.x:1423`
+Source: `src/regions.x:1433`
 
 <a id="Compiler.check_meta_regions"></a>
 #### Compiler.check_meta_regions
@@ -48,7 +48,7 @@ the bound and typed definition. The walk reads the summaries of the
 `meta` functions installed before `fn` and records the summary of `fn`
 in `meta_regions`.
 
-Source: `src/regions.x:1403`
+Source: `src/regions.x:1413`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -60,7 +60,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1381`
+Source: `src/regions.x:1391`
 
 <a id="Compiler.has_region_row"></a>
 #### Compiler.has_region_row

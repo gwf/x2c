@@ -98,11 +98,11 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.collect_symbols`, `collect_resolve_include`,
-`Compiler.record_generated_symbol`, `Compiler.collect_package`,
-`Compiler.replay_package_imports`, `Compiler.replay_included_package_imports`,
-`interface_configure`, `interface_prelude`, `interface_text`,
-`collect_forget_preload_entries`, `collect_cached_paths`,
-`collect_forget_entries_since`
+`Compiler.include_typedef_names`, `Compiler.record_generated_symbol`,
+`Compiler.collect_package`, `Compiler.replay_package_imports`,
+`Compiler.replay_included_package_imports`, `interface_configure`,
+`interface_prelude`, `interface_text`, `collect_forget_preload_entries`,
+`collect_cached_paths`, `collect_forget_entries_since`
 
 ### [src/compiler.x](../src/compiler.x)
 
