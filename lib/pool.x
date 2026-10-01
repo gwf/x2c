@@ -2,22 +2,12 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    A Pool pairs a control `Scope` and canonical `Map` with size-class regions
-    for small objects. Regions reuse losing intern candidates and lease backing
-    blocks from one process-wide depot; large objects retain `Scope` ownership.
-
-    Lookup walks outward. An ancestor hit retains that ancestor's ownership;
-    only a new identity lands in the requested pool. Release returns empty
-    blocks to the depot and transfers promoted survivors to the parent without
-    changing object pointers. Pools nest as a stack with no sibling branches,
-    which preserves one canonical pointer per equal value across the active
-    chain.
-
-    `String` and `List` allocate into one such stack per thread.
-    `Pool.open` and `Pool.close` bracket a level of it, so temporary canonical
-    values are reclaimed together; `Pool.current` names the level in force.
-    `Context` is the aggregate that pairs such a bracket with a `Scope` and
-    with `Error` and `Match` state.
+    Pool owns canonical identity for a stack of nested levels. Lookup walks
+    outward and a miss lands in the innermost level; release returns empty
+    blocks to one process-wide depot and moves promoted survivors to the
+    parent at the same address. Levels have no sibling branches, so the
+    active chain holds one canonical pointer per equal value. `String` and
+    `List` intern into one such stack per thread.
 */
 
 #pragma once
@@ -163,12 +153,12 @@ Var Pool.lookup(Pool inner, Var key) {
      `defer` measured 4% of a translation against 3% for this form. `locked`
      is the level whose mutex this call still holds. */
   Pool locked = NULL;
-  defer _unlock(locked);
+  defer locked._unlock();
   for (Pool pool = inner; pool; pool = pool.up) {
-    _lock(pool);
+    pool._lock();
     locked = pool;
     Var found = pool.table.get_hashed(key, key_hash);
-    _unlock(pool);
+    pool._unlock();
     locked = NULL;
     if (found is not void) return found;
   }
@@ -194,14 +184,14 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   Var canonical;
   int discard = 0;
   {
-    _lock(inner);
-    defer _unlock(inner);
+    inner._lock();
+    defer inner._unlock();
     Var existing = Pool.lookup(inner.up, object);
     if (existing is not void) {
       canonical = existing;
       discard = 1;
     }
-    else canonical = _intern_locked(inner, object, discard);
+    else canonical = inner._intern_locked(object, discard);
   }
   // See Pool.intern_new: the losing candidate is freed outside the lock.
   if (discard) inner.free(alloc);
@@ -210,7 +200,7 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
 
 /* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
    when a concurrent equal entry already holds the level. */
-static Var _intern_locked(Pool inner, Var object, int &discard) {
+static Var Pool._intern_locked(Pool inner, Var object, int &discard) {
   unsigned before = inner.table.len();
   Var stored = inner.table.setdefault(object, object);
   if (inner.table.len() != before) inner.interned++;
@@ -233,9 +223,9 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
   Var canonical;
   int discard = 0;
   {
-    _lock(inner);
-    defer _unlock(inner);
-    canonical = _intern_locked(inner, object, discard);
+    inner._lock();
+    defer inner._unlock();
+    canonical = inner._intern_locked(object, discard);
   }
   // Pool.free takes storage before the pool. Do not call it while holding
   // the pool mutex or another worker can complete the opposite lock order.
@@ -252,13 +242,13 @@ Var Pool.intern_new(Pool inner, Var object, void *alloc) {
 */
 void Pool.insert(Pool inner, Var object) {
   if (!inner) raise %(bad-arg (owner "Pool.insert"));
-  _lock(inner);
-  defer _unlock(inner);
-  _insert_locked(inner, object);
+  inner._lock();
+  defer inner._unlock();
+  inner._insert_locked(object);
 }
 
 /* Map insertion causes propagate and leave the object unregistered. */
-static void _insert_locked(Pool inner, Var object) {
+static void Pool._insert_locked(Pool inner, Var object) {
   inner.table.setindex(object, object);
   inner.interned++;
 }
@@ -268,12 +258,12 @@ static void _insert_locked(Pool inner, Var object) {
 */
 int Pool.owns(Pool pool, Var key) {
   if (!pool) return 0;
-  _lock(pool);
-  defer _unlock(pool);
-  return _owns_locked(pool, key);
+  pool._lock();
+  defer pool._unlock();
+  return pool._owns_locked(key);
 }
 
-static int _owns_locked(Pool pool, Var key) {
+static int Pool._owns_locked(Pool pool, Var key) {
   Var found = pool.table[key];
   return found is not void && found === key;
 }
@@ -291,37 +281,37 @@ static int _owns_locked(Pool pool, Var key) {
 void *Pool.malloc(Pool inner, size_t size) {
   if (!inner) raise %(bad-arg (owner "Pool.malloc"));
   int class_index = _size_class(size);
-  if (class_index >= 0) return _small_malloc(inner, class_index, size);
+  if (class_index >= 0) return inner._small_malloc(class_index, size);
   _storage_lock();
   _record_request(size);
   _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
+  inner._lock();
+  defer inner._unlock();
   return Scope.malloc_in(&inner.scope, size);
 }
 
 /* Takes a slot from the class's current block, leasing another block when
    that one is full. When the depot has no block to lease, a fresh one is
    allocated with no lock held and offered to the next attempt. */
-static void *_small_malloc(Pool inner, int class_index, size_t size) {
+static void *Pool._small_malloc(Pool inner, int class_index, size_t size) {
   PoolBlock fresh = NULL;
   loop {
     _storage_lock();
-    _lock(inner);
-    PoolBlock block = _block_with_room(inner, class_index);
-    if (!block) block = _block_lease(inner, class_index, fresh);
+    inner._lock();
+    PoolBlock block = inner._block_with_room(class_index);
+    if (!block) block = inner._block_lease(class_index, fresh);
     if (block) {
       if (block == fresh) fresh = NULL;
-      void *slot = _take_slot(block, class_index);
+      void *slot = block._take_slot(class_index);
       _record_request(size);
-      _unlock(inner);
+      inner._unlock();
       _storage_unlock();
       free(fresh);
       return slot;
     }
-    _unlock(inner);
+    inner._unlock();
     _storage_unlock();
-    fresh = _fresh_block(inner, class_index);
+    fresh = inner._fresh_block(class_index);
   }
 }
 
@@ -331,12 +321,12 @@ static int _size_class(size_t size) {
   return -1;
 }
 
-static PoolBlock _block_with_room(Pool pool, int class_index) {
+static PoolBlock Pool._block_with_room(Pool pool, int class_index) {
   PoolBlock current = pool.current[class_index];
-  return _has_room(current) ? current : NULL;
+  return current._has_room() ? current : NULL;
 }
 
-static int _has_room(PoolBlock block) {
+static int PoolBlock._has_room(PoolBlock block) {
   if (!block) return 0;
   if (block.free) return 1;
   unsigned size = pool_class_sizes[block.class_index];
@@ -344,22 +334,22 @@ static int _has_room(PoolBlock block) {
 }
 
 /* Reuses a freed slot, or else hands out the next slot never used. */
-static void *_take_slot(PoolBlock block, int class_index) {
+static void *PoolBlock._take_slot(PoolBlock block, int class_index) {
   void *slot = block.free;
   if (slot) {
     block.free = *(void **) slot;
     pool_slot_reuses++;
     return slot;
   }
-  slot = _block_data(block) + block.used;
+  slot = block._data() + block.used;
   block.used += pool_class_sizes[class_index];
   return slot;
 }
 
 /* Allocates with no lock held, so the failure can enter Error without
    reentering the storage mutex. */
-static PoolBlock _fresh_block(Pool inner, int class_index) {
-  PoolBlock fresh = malloc(_block_bytes(inner, class_index));
+static PoolBlock Pool._fresh_block(Pool inner, int class_index) {
+  PoolBlock fresh = malloc(inner._block_bytes(class_index));
   if (fresh) return fresh;
   if (x2c_error_runtime_ready)
     raise %(alloc-fail (owner "Pool backing block"));
@@ -377,32 +367,33 @@ void Pool.free(Pool inner, void *alloc) {
   if (!inner) raise %(bad-arg (owner "Pool.free"));
   _storage_lock();
   defer _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
+  inner._lock();
+  defer inner._unlock();
   PoolBlock block = _find_block(alloc);
   pool_free_calls++;
-  if (block) _small_free(block, alloc);
+  if (block) block._free_slot(alloc);
   else Scope.free(alloc);
 }
 
 /* The freed slot is reused first, from a block that becomes its class's
    current one. */
-static void _small_free(PoolBlock block, void *ptr) {
-  _push_free(block, ptr);
+static void PoolBlock._free_slot(PoolBlock block, void *ptr) {
+  block._push_free(ptr);
   block.owner.current[block.class_index] = block;
 }
 
-static void _push_free(PoolBlock block, void *slot) {
+static void PoolBlock._push_free(PoolBlock block, void *slot) {
   *(void **) slot = block.free;
   block.free = slot;
 }
 
 // blocks
 
-/* Called with storage and pool locked. `fresh` is a block `_fresh_block`
+/* Called with storage and pool locked. `fresh` is a block `Pool._fresh_block`
    allocated for an earlier attempt, or NULL. */
-static PoolBlock _block_lease(Pool pool, int class_index, PoolBlock fresh) {
-  unsigned bytes = _block_bytes(pool, class_index);
+static PoolBlock Pool._block_lease(
+  Pool pool, int class_index, PoolBlock fresh) {
+  unsigned bytes = pool._block_bytes(class_index);
   PoolBlock block = _depot_pop(bytes);
   if (!block) {
     if (!fresh) return NULL;
@@ -410,15 +401,15 @@ static PoolBlock _block_lease(Pool pool, int class_index, PoolBlock fresh) {
   }
   pool_active_blocks++;
   pool_active_bytes += bytes;
-  _block_reset(block, pool);
+  block._reset(pool);
   block.class_index = class_index;
   block.bytes = bytes;
-  _link(block, pool);
+  block._link(pool);
   return block;
 }
 
 /* A nested pool's smallest class leases 256-byte blocks. */
-static unsigned _block_bytes(Pool pool, int class_index) =>
+static unsigned Pool._block_bytes(Pool pool, int class_index) =>
   class_index == 0 && pool.up ? 256 : pool_block_sizes[class_index];
 
 static PoolBlock _depot_pop(unsigned bytes) {
@@ -442,7 +433,7 @@ static PoolBlock _registry_add(PoolBlock block, unsigned bytes) {
 }
 
 /* Empties `block` under `owner`: no slot handed out or free, and none kept. */
-static void _block_reset(PoolBlock block, Pool owner) {
+static void PoolBlock._reset(PoolBlock block, Pool owner) {
   block.owner = owner;
   block.free = NULL;
   block.used = 0;
@@ -451,7 +442,7 @@ static void _block_reset(PoolBlock block, Pool owner) {
 }
 
 /* Makes `block` the newest block of `pool` and its class's current one. */
-static void _link(PoolBlock block, Pool pool) {
+static void PoolBlock._link(PoolBlock block, Pool pool) {
   block.next = pool.blocks;
   pool.blocks = block;
   pool.current[block.class_index] = block;
@@ -459,7 +450,7 @@ static void _link(PoolBlock block, Pool pool) {
 
 static void _depot_push(PoolBlock block) {
   int depot_index = _depot_index(block.bytes);
-  _block_reset(block, NULL);
+  block._reset(NULL);
   block.next = pool_depot[depot_index];
   pool_depot[depot_index] = block;
   pool_active_blocks--;
@@ -478,18 +469,18 @@ static int _depot_index(unsigned bytes) {
   }
 }
 
-static inline char *_block_data(PoolBlock block) =>
+static inline char *PoolBlock._data(PoolBlock block) =>
   (char *) block + POOL_BLOCK_DATA_OFFSET;
 
-static inline void *_block_slot(PoolBlock block, unsigned slot) =>
-  _block_data(block) + slot * pool_class_sizes[block.class_index];
+static inline void *PoolBlock._slot(PoolBlock block, unsigned slot) =>
+  block._data() + slot * pool_class_sizes[block.class_index];
 
-static inline unsigned _slot_index(PoolBlock block, void *alloc) =>
-  ((char *) alloc - _block_data(block)) / pool_class_sizes[block.class_index];
+static inline unsigned PoolBlock._slot_index(PoolBlock block, void *alloc) =>
+  ((char *) alloc - block._data()) / pool_class_sizes[block.class_index];
 
-static int _block_contains(PoolBlock block, const void *ptr) {
+static int PoolBlock._contains(PoolBlock block, const void *ptr) {
   if (!block || !ptr || !block.owner) return 0;
-  const char *data = _block_data(block), *candidate = ptr;
+  const char *data = block._data(), *candidate = ptr;
   unsigned size = pool_class_sizes[block.class_index];
   if (candidate < data || candidate >= data + block.used) return 0;
   return (size_t) (candidate - data) % size == 0;
@@ -507,7 +498,7 @@ static PoolBlock _index_find(const void *ptr) {
   unsigned at = _index_start(page, pool_index_slots);
   while (pool_index[at].block) {
     if (pool_index[at].page == page &&
-        _block_contains(pool_index[at].block, ptr))
+        pool_index[at].block._contains(ptr))
       return pool_index[at].block;
     at = (at + 1) & (pool_index_slots - 1);
   }
@@ -516,13 +507,13 @@ static PoolBlock _index_find(const void *ptr) {
 
 static PoolBlock _registry_find(const void *ptr) {
   for (PoolBlock block = pool_registry; block; block = block.registry_next)
-    if (_block_contains(block, ptr)) return block;
+    if (block._contains(ptr)) return block;
   return NULL;
 }
 
 /* A block spans at most two pages, so it takes at most two slots. Growth is
    the one allocation here and it disables the index instead of failing, which
-   keeps `_block_lease` free of a failure path while storage is locked. */
+   keeps `Pool._block_lease` free of a failure path while storage is locked. */
 static void _index_add(PoolBlock block, unsigned bytes) {
   if (!pool_index_complete) return;
   uintptr_t first = (uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;
@@ -580,7 +571,7 @@ static unsigned _index_start(uintptr_t page, unsigned slots) =>
 */
 int Pool.promote(Pool inner, Var object, void *alloc) {
   if (!inner || !inner.up || !alloc) return 0;
-  return _promote_level(inner, object, alloc, _block_of(alloc));
+  return inner._promote_level(object, alloc, _block_of(alloc));
 }
 
 /** Proves `object` safe beyond every pool in `inner`'s chain.
@@ -604,7 +595,7 @@ int Pool.own(Pool inner, Var object, void *alloc) {
   if (!alloc) return 0;
   PoolBlock block = _block_of(alloc);
   while (owner.up) {
-    if (!_promote_level(owner, object, alloc, block)) return 0;
+    if (!owner._promote_level(object, alloc, block)) return 0;
     owner = owner.up;
   }
   return 1;
@@ -615,12 +606,12 @@ int Pool.own(Pool inner, Var object, void *alloc) {
    because a value promoted through several levels stays in the same one.
    Another thread's pool can promote an equal value first; that identity
    stays canonical, and `object` survives without replacing it. */
-static int _promote_level(
+static int Pool._promote_level(
   Pool inner, Var object, void *alloc, PoolBlock block) {
-  _lock(inner);
-  defer _unlock(inner);
-  if (!_owns_locked(inner, object)) return 0;
-  unsigned slot = block ? _slot_index(block, alloc) : 0;
+  inner._lock();
+  defer inner._unlock();
+  if (!inner._owns_locked(object)) return 0;
+  unsigned slot = block ? block._slot_index(alloc) : 0;
   PoolPromotion promotion = NULL;
   if (block && block.owner != inner) {
     promotion = Scope.malloc_in(&inner.scope, sizeof(struct PoolPromotion));
@@ -628,13 +619,13 @@ static int _promote_level(
     promotion.slot = slot;
   }
   Pool up = inner.up;
-  _lock(up);
-  defer _unlock(up);
+  up._lock();
+  defer up._unlock();
   unsigned before = up.table.len();
   up.table.setdefault(object, object);
   if (up.table.len() != before) up.interned++;
-  if (block && block.owner == inner) _mark_slot(block, slot);
-  else if (promotion) _push_promotion(inner, promotion);
+  if (block && block.owner == inner) block._mark_slot(slot);
+  else if (promotion) inner._push_promotion(promotion);
   else Scope.move(alloc, &up.scope);
   inner.promoted++;
   return 1;
@@ -649,27 +640,27 @@ static PoolBlock _block_of(void *alloc) {
   return block;
 }
 
-static void _mark_slot(PoolBlock block, unsigned slot) {
+static void PoolBlock._mark_slot(PoolBlock block, unsigned slot) {
   uint64_t mask = (uint64_t) 1 << (slot % 64), *word = &block.keep[slot / 64];
   if (*word & mask) return;
   *word |= mask;
   block.keep_count++;
 }
 
-static void _push_promotion(Pool inner, PoolPromotion promotion) {
+static void Pool._push_promotion(Pool inner, PoolPromotion promotion) {
   promotion.next = inner.promotions;
   inner.promotions = promotion;
 }
 
 /* Recorded promotions mark their slots first, so each block's keep count is
    complete before the block moves to the parent or the depot. */
-static void _release_blocks(Pool inner) {
+static void Pool._release_blocks(Pool inner) {
   for (PoolPromotion p = inner.promotions; p; p = p.next)
-    _mark_slot(p.block, p.slot);
+    p.block._mark_slot(p.slot);
   PoolBlock block = inner.blocks;
   while (block) {
     PoolBlock next = block.next;
-    if (inner.up && block.keep_count) _block_transfer(block, inner.up);
+    if (inner.up && block.keep_count) block._transfer(inner.up);
     else _depot_push(block);
     block = next;
   }
@@ -677,24 +668,24 @@ static void _release_blocks(Pool inner) {
   for (int i = 0; i < POOL_CLASS_COUNT; i++) inner.current[i] = NULL;
 }
 
-static void _block_transfer(PoolBlock block, Pool parent) {
-  _free_unkept(block);
+static void PoolBlock._transfer(PoolBlock block, Pool parent) {
+  block._free_unkept();
   block.owner = parent;
   block.keep_count = 0;
   memset(block.keep, 0, sizeof block.keep);
-  _link(block, parent);
+  block._link(parent);
 }
 
 /* Rebuilds the free list from the handed-out slots that are not kept,
    lowest slot first. */
-static void _free_unkept(PoolBlock block) {
+static void PoolBlock._free_unkept(PoolBlock block) {
   unsigned count = block.used / pool_class_sizes[block.class_index];
   block.free = NULL;
   for (unsigned slot = count; slot-- > 0;)
-    if (!_slot_kept(block, slot)) _push_free(block, _block_slot(block, slot));
+    if (!block._slot_kept(slot)) block._push_free(block._slot(slot));
 }
 
-static int _slot_kept(PoolBlock block, unsigned slot) {
+static int PoolBlock._slot_kept(PoolBlock block, unsigned slot) {
   uint64_t mask = (uint64_t) 1 << (slot % 64);
   return (block.keep[slot / 64] & mask) != 0;
 }
@@ -721,12 +712,12 @@ static void _storage_unlock(void) {
     _fatal("could not unlock storage mutex");
 }
 
-static void _lock(Pool pool) {
+static void Pool._lock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_lock(&pool.mutex))
     _fatal("could not lock branch mutex");
 }
 
-static void _unlock(Pool pool) {
+static void Pool._unlock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_unlock(&pool.mutex))
     _fatal("could not unlock branch mutex");
 }
@@ -754,8 +745,8 @@ static void _record_request(size_t size) {
 PoolStats Pool.stats(Pool inner) {
   _storage_lock();
   defer _storage_unlock();
-  _lock(inner);
-  defer _unlock(inner);
+  inner._lock();
+  defer inner._unlock();
   PoolStats stats = {
     .allocation_calls = pool_allocation_calls,
     .free_calls = pool_free_calls, .requested_bytes = pool_requested_bytes,
@@ -784,7 +775,7 @@ PoolStats Pool.stats(Pool inner) {
 */
 Pool Pool.retain_named(Pool inner, const char *name) {
   _storage_initialize();
-  unsigned capacity = _child_capacity(inner);
+  unsigned capacity = inner._child_capacity();
   Scope scope = Scope.new_named(name), Pool pool = NULL;
   int mutex_ready = 0, finished = 0;
   defer if (!finished) {
@@ -811,11 +802,11 @@ static void _storage_initialize(void) {
 
 /* A child's table starts at the capacity the last released direct child's
    table reached. */
-static unsigned _child_capacity(Pool inner) {
+static unsigned Pool._child_capacity(Pool inner) {
   if (!inner) return 2;
-  _lock(inner);
+  inner._lock();
   unsigned capacity = inner.child_capacity;
-  _unlock(inner);
+  inner._unlock();
   return capacity;
 }
 
@@ -838,15 +829,15 @@ Pool Pool.release(Pool inner) {
      value has not yet been able to observe a reused address. */
   __atomic_fetch_add(&value_epoch, 1, __ATOMIC_RELEASE);
   _storage_lock();
-  _lock(inner);
+  inner._lock();
   Pool up = inner.up;
   if (up) {
-    _lock(up);
+    up._lock();
     up.child_capacity = inner.table.capacity;
-    _unlock(up);
+    up._unlock();
   }
-  _release_blocks(inner);
-  _unlock(inner);
+  inner._release_blocks();
+  inner._unlock();
   _storage_unlock();
   pthread_mutex_destroy(&inner.mutex);
   Scope.destroy(inner.scope);
