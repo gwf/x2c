@@ -95,11 +95,17 @@ int main(void){
   }
   ;
   List list_nested = cons(Array_var(Array_update_n(Array_new(), 2, Symbol_var(3313778), int_var(count))), cons(Map_var(Map_update_n(Map_new(), 1, Symbol_var(26720), int_var(count))), NULL));
-  Array values = Array_update_n(Array_new(), 26, Symbol_var(38078770), Atom_intern(String_new("VeryLongIdentifierName")), String_var(_0), Array_var(Array_update_n(Array_new(), 2, Symbol_var(951296328), int_var(count))), Map_var(Map_update_n(Map_new(), 1, Symbol_var(740232), Symbol_var(1562655080))), int_var(count * 2), long_var(-3), char_var('q'), Atom_intern(String_new("colon:name")), Symbol_var(7890827244731), Symbol_var(7890827244795), Symbol_var(0), Symbol_var(99), Symbol_var(56), double_var(1.5), String_var(_1), String_var(_2), String_var(_11), int_var(pair.value), int_var(indexed[1]), int_var(bump(& evals)), Var_null(), Var_new(3453797, chosen), int_var(((Pair){
-    .value = 24
+  Array values =({
+    Var _x2c_literal_part_0 = Array_var(Array_update_n(Array_new(), 2, Symbol_var(951296328), int_var(count)));  Var _x2c_literal_part_1 = int_var(count * 2);  Var _x2c_literal_part_2 = int_var(pair.value);  Var _x2c_literal_part_3 = int_var(indexed[1]);  Var _x2c_literal_part_4 = int_var(bump(& evals));  Var _x2c_literal_part_5 = Var_null();  Var _x2c_literal_part_6 = Var_new(3453797, chosen);  Var _x2c_literal_part_7 = int_var(((Pair){
+      .value = 24
+    }
+    ).value);  Var _x2c_literal_part_8 = int_var((count, count + 3));  Array_update_n(Array_new(), 26, Symbol_var(38078770), Atom_intern(String_new("VeryLongIdentifierName")), String_var(_0), _x2c_literal_part_0, Map_var(Map_update_n(Map_new(), 1, Symbol_var(740232), Symbol_var(1562655080))), _x2c_literal_part_1, long_var(-3), char_var('q'), Atom_intern(String_new("colon:name")), Symbol_var(7890827244731), Symbol_var(7890827244795), Symbol_var(0), Symbol_var(99), Symbol_var(56), double_var(1.5), String_var(_1), String_var(_2), String_var(_11), _x2c_literal_part_2, _x2c_literal_part_3, _x2c_literal_part_4, _x2c_literal_part_5, _x2c_literal_part_6, _x2c_literal_part_7, _x2c_literal_part_8, int_var(25));
   }
-  ).value), int_var((count, count + 3)), int_var(25));
-  Map config = Map_update_n(Map_new(), 6, Symbol_var(920394), String_var(_3), Symbol_var(40094681930), int_var(count), Symbol_var(239278072136), int_var(count + 2), Symbol_var(951296328), Map_var(Map_update_n(Map_new(), 1, Symbol_var(8750352), int_var(8))), Symbol_var(1479321958), Array_var(Array_update_n(Array_new(), 2, int_var(1), int_var(count))), String_var(_12), int_var(12));
+  );
+  Map config =({
+    Var _x2c_literal_part_9 = int_var(count);  Var _x2c_literal_part_10 = int_var(count + 2);  Map_update_n(Map_new(), 6, Symbol_var(920394), String_var(_3), Symbol_var(40094681930), _x2c_literal_part_9, Symbol_var(239278072136), _x2c_literal_part_10, Symbol_var(951296328), Map_var(Map_update_n(Map_new(), 1, Symbol_var(8750352), int_var(8))), Symbol_var(1479321958), Array_var(Array_update_n(Array_new(), 2, int_var(1), int_var(count))), String_var(_12), int_var(12));
+  }
+  );
   if(Var_integer(Array_getindex(Var_array(List_getindex(list_nested, 0)), 1)) != 7 || Var_integer(Map_getindex(Var_map(List_getindex(list_nested, 1)), Symbol_var(26720))) != 7) return 1;
   if(! String_equal(Var_str(Array_getindex(values, 0)), _4)) return 2;
   if(! String_equal(Var_str(Array_getindex(values, 1)), _5)) return 3;

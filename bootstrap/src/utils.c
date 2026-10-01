@@ -366,7 +366,10 @@ String package_entry(SourceView sources, List roots, String name, String * direc
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       package_dir = Var_string(_x2c_macro_cursor_output_2);
       {
-        String root = String_join(NULL, cons(String_var(Path_absolute(package_dir)), cons(String_var(_11), cons(String_var(name), NULL))));
+        String root =({
+          Var _x2c_literal_part_0 = String_var(Path_absolute(package_dir));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_11), cons(String_var(name), NULL))));
+        }
+        );
         String nested = String_join(NULL, cons(String_var(root), cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL)))));
         String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_11), cons(String_var(name), cons(String_var(_13), NULL)))));
         if(! SourceView_exists(sources, entry)) continue;
@@ -499,7 +502,10 @@ void file_publish(List outputs){
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var(suffix), NULL))), Var_string(List_cadr(rest)));
+      for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(({
+        Var _x2c_literal_part_1 = String_var(Var_str(List_car(rest)));  String_join(NULL, cons(_x2c_literal_part_1, cons(String_var(suffix), NULL)));
+      }
+      ), Var_string(List_cadr(rest)));
       for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
         String target = Var_string(List_car(rest));
         if(rename(String_join(NULL, cons(String_var(target), cons(String_var(suffix), NULL))), target)) File_path_error(Symbol_var(1219365706), target, errno);
@@ -562,14 +568,20 @@ void host_error(List detail){
   Var subject = List_assoc(detail, Symbol_var(1051920));
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
-  driver_error(String_join(NULL, cons(String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140)))), cons(String_var(_19), cons(String_var(Var_str(subject)), cons(String_var(_20), cons(String_var(String_new(strerror(error))), NULL)))))));
+  driver_error(({
+    Var _x2c_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_literal_part_3 = String_var(Var_str(subject));  Var _x2c_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(_19), cons(_x2c_literal_part_3, cons(String_var(_20), cons(_x2c_literal_part_4, NULL))))));
+  }
+  ));
 }
 
 void Path_remove_file(Path);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  for(List rest =(*(List *) _x2c_defer_data_0->_x2c_defer_capture_0);  List_truth(rest);  rest = List_cddr(rest)) Path_remove_file(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_1)), NULL))));
+  for(List rest =(*(List *) _x2c_defer_data_0->_x2c_defer_capture_0);  List_truth(rest);  rest = List_cddr(rest)) Path_remove_file(({
+    Var _x2c_literal_part_5 = String_var(Var_str(List_car(rest)));  Var _x2c_literal_part_6 = String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_1));  String_join(NULL, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
+  }
+  ));
 }
 
 #undef _x2c_initializer_choice_6E6B8BB0_0_expanded

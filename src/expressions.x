@@ -278,12 +278,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       %(dstrdecl (params @parameters) $source), origin);
   }
 
-  List expression = c.parse_expression();
-  c.expect(<)>);
-  match (expression)
-    case %(expr ?type ?):
-      expression = %(expr $type (parens $expression));
-  return c._finish_paren_statement(expression, 1);
+  return c._finish_paren_statement(c._parse_group_rest(), 1);
 }
 
 static List Compiler._finish_paren_statement(
@@ -771,12 +766,70 @@ static int Compiler._string_word_follows(Compiler c) {
 
 static List Compiler._parse_parens(Compiler c) {
   c.expect(<(>);
+  return c._parse_group_rest();
+}
+
+/* Parses a group after its `(` through the closing `)`. */
+static List Compiler._parse_group_rest(Compiler c) {
+  if (c._statement_expression_follows()) {
+    Token origin = c.token;
+    c.expect(<"{">);
+    List block = c.parse_compound_statement();
+    c.expect(<)>);
+    return c._statement_expression(block, origin);
+  }
   List expr = c.parse_expression();
   c.expect(<)>);
   // C has no parenthesized brace; the brace converts at its destination.
   match (expr) case %(expr ? (composite ?)): return expr;
   List type = expr.cadr();
   return %(expr $type (parens $expr));
+}
+
+/* A brace after `(` opens a statement expression when a `;` stands at its
+   top level; any other brace is a composite or Map literal. */
+static int Compiler._statement_expression_follows(Compiler c) {
+  if (c.peek(0) != <"{">) return 0;
+  Token token = Token.skip_trivia(c.token + 1);
+  for (;; token = token.after_group())
+    switch (token.type) {
+      case <;>: return 1;
+      case <eof>: case <"}">: return 0;
+    }
+}
+
+/* A statement expression has the value and type of its final expression
+   statement, and is void otherwise. A defer directly inside would wrap that
+   statement in a cleanup region, and C would lose the value. A template
+   binds its statement expression where it expands. */
+static List Compiler._statement_expression(
+  Compiler c, List block, Token origin) {
+  List items = Ast.without_origin(block).cdr();
+  if (_defers_directly(items))
+    c.report_error(
+      <parse>,
+      "a statement expression cannot directly contain a defer or managed "
+      "declaration", origin, %("move it into a nested block"));
+  Type type = c.macro_holes ? %(<macro-expr>) : _final_value_type(items);
+  return %(expr $type (parens $block));
+}
+
+static int _defers_directly(List items) {
+  foreach (List item, items)
+    match (Ast.without_origin(item)) {
+      case %(defer ?): return 1;
+      case %(seq *rows): if (_defers_directly(rows)) return 1;
+    }
+  return 0;
+}
+
+/* A reference names a value C reads out of the statement expression. */
+static Type _final_value_type(List items) {
+  List last = items ? Ast.without_origin(items.last()) : NULL;
+  match (last)
+    case %(stmnt (expr ?(Type type) ?)):
+      return type.car() == <&> || type.car() == <opt-ref> ? type.cdr() : type;
+  return %(void);
 }
 
 static List Compiler._parse_composite(Compiler c) {
@@ -947,8 +1000,8 @@ static int Compiler._needs_resolution(Compiler c, Var value) {
     if (current is not <list>) continue;
     List syntax = current;
     match (syntax) {
-      case %(expr (? *) (parens (block *))): continue;
       case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case %(expr ? (parens (block *))): continue;
       case captured(?body, *captures, *params): {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
@@ -1160,7 +1213,7 @@ static List Compiler._resolve_identifier(
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);
-  c._shadow_identifier(binding, type, spelling, binding_facts);
+  c._shadow_identifier(binding, type, spelling, binding_facts, origin);
   if (!type) type = c._identifier_type(
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
@@ -1185,7 +1238,10 @@ static List Compiler._resolve_identifier(
    producer-issued binding identities. Semantic binding facts validate those
    identities before resolution. A visible local replaces a stale local
    identity; global shadow handling instead gives the visible declaration an
-   emitted alias so the original identity keeps its meaning. */
+   emitted alias so the original identity keeps its meaning. A closed macro's
+   free name that nothing declared where it was defined binds a declaration
+   its expansion introduced, else a global; a declaration outside the
+   expansion never captures it. */
 static List Compiler._identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
@@ -1226,7 +1282,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
 
 static void Compiler._shadow_identifier(
   Compiler c, List &binding, Type type, String spelling,
-  Map binding_facts) {
+  Map binding_facts, Token origin) {
   if (!spelling) return;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
@@ -1238,10 +1294,62 @@ static void Compiler._shadow_identifier(
   else if (c.sym.binding_is_local(binding) &&
            !binding_facts.contains(%(lambda-depth $binding)))
     binding = visible;
-  else if (visible_type &&
+  else if (!c._free_name(binding, spelling, visible, visible_type, origin) &&
+           visible != binding && visible_type &&
            (!type || c.sym.resolve_global(%($spelling), NULL)) &&
            !binding_facts.contains(%(emitted $visible)))
     binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+}
+
+/* Inside an expansion, a free name that no declared global supplies binds
+   the visible declaration when the expansion introduced it, and otherwise
+   a global declared since the definition. A declaration outside the
+   expansion never supplies it. Returns 1 when the visible declaration
+   does. */
+static int Compiler._free_name(
+  Compiler c, List &binding, String spelling, List visible,
+  Type visible_type, Token origin) {
+  if (!c.macro_stack ||
+      %(lambda-depth $binding) in c.semantic_binding_facts()) return 0;
+  Type global_type = NULL;
+  List global = c.sym.resolve_global(%($spelling), global_type);
+  if (binding == global && global_type) return 0;
+  if (visible_type && c._expansion_introduced(visible)) {
+    binding = visible;
+    return 1;
+  }
+  if (global_type) binding = global;
+  else if (visible_type) c._report_free_name(binding, spelling, origin);
+  return 0;
+}
+
+/* An active expansion issued `binding` after it began. */
+static int Compiler._expansion_introduced(Compiler c, List binding) {
+  int identity = 0;
+  return binding_identity_try_parts(binding, identity, NULL) &&
+         identity > c.expansion_floor;
+}
+
+/* A free name that nothing declared where its macro was defined, with only
+   a declaration outside the expansion in view. The macro is the innermost
+   active one whose template reads the name. */
+static void Compiler._report_free_name(
+  Compiler c, List binding, String spelling, Token origin) {
+  List owner = c.macro_stack.car().list().car();
+  foreach (List active, c.macro_stack) {
+    List definition = active.car(), template = definition.assoc(<template>);
+    if (template.search(%(ident $binding))) {
+      owner = definition;
+      break;
+    }
+  }
+  Atom name = owner.assoc(<name>);
+  String macro = name.str();
+  c.report_error(
+    <macro>,
+    %"'$spelling' in macro '$macro' is not declared " +
+    "where the macro is defined",
+    origin, %("declare it before the macro, or pass it through a Name hole"));
 }
 
 static Type Compiler._identifier_type(
@@ -2060,17 +2168,14 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
 /* A dynamic Func call stores its callee once, prepares each argument into
    an array from left to right, and applies the callee. Func_apply validates
    arity and dispatches; the selected adapter checks carrier, type and
-   conversion. The call is the value of a statement expression around this
-   block. */
-macro open Statement $func_call(Expr $callee, Expr $count,
-    Expr $arguments...) {
-  {
-    Func function = $callee;
-    FuncArg storage[$count];
-    $x2c_func_call_arguments(function, storage, $arguments)...
-    Func_apply(function, $count, storage);
-  }
-}
+   conversion. */
+macro open Expression $func_call(Expr $callee, Expr $count,
+    Expr $arguments...) => ({
+  Func function = $callee;
+  FuncArg storage[$count];
+  $x2c_func_call_arguments(function, storage, $arguments)...
+  Func_apply(function, $count, storage);
+});
 
 static List Compiler._resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
@@ -2082,8 +2187,8 @@ static List Compiler._resolve_func_call(
     return c.bind_syntax(apply(callee), AST_EXPRESSION, NULL);
   }
   Macro call = $func_call;
-  return %(expr ("Var") (parens ${c.bind_syntax(
-    call(callee, arguments.len(), arguments), AST_BLOCK, NULL)}));
+  return c.bind_syntax(
+    call(callee, arguments.len(), arguments), AST_EXPRESSION, NULL);
 }
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
@@ -2094,12 +2199,8 @@ static List Compiler._resolve_func_call(
     that takes the callee's own type. */
 List Compiler.func_call_parts(Compiler c, Var content) {
   Macro call = $func_call, apply = $func_apply;
-  match (%(expr () $content)) case apply(?callee): return %($callee);
-  List block = NULL;
-  match (content) case $source_content_pattern($grouped, %(?inner)):
-    block = inner;
-  if (!block) return NULL;
-  match (block)
+  match (%(expr () $content)) {
+    case apply(?callee): return %($callee);
     case call(?callee, ?count, *arguments): {
       Array parts = $auto([callee]);
       foreach (List argument, _slot_statements(arguments)) {
@@ -2109,6 +2210,7 @@ List Compiler.func_call_parts(Compiler c, Var content) {
       }
       return parts;
     }
+  }
   return NULL;
 }
 
@@ -2921,6 +3023,9 @@ static List Compiler._resolve_initializer(
 
 static List Compiler._resolve_parens(
   Compiler c, List inner, Token origin) {
+  if (Ast.without_origin(inner).car() == <block>)
+    return c._statement_expression(
+      c.bind_syntax(inner, AST_STATEMENT, c.return_type), origin);
   inner = c.resolve_expression(inner, origin);
   Type type = inner.cadr();
   return %(expr $type (parens $inner));
@@ -3239,10 +3344,12 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
       return %(expr ("String") ${c.cache(%(string $value))});
     }
     case %(expr (!or (* char) ((dim *) char))
-        ${$source_content_pattern($grouped, %(?inner))}): {
-      List converted = c._raw_string_to_string(inner);
-      return %(expr ("String") (parens $converted));
-    }
+        ${$source_content_pattern($grouped, %(?inner))}):
+      // A statement expression's block converts as one dynamic value.
+      match (inner) case %(expr *): {
+        List converted = c._raw_string_to_string(inner);
+        return %(expr ("String") (parens $converted));
+      }
     case %(expr (!or (* char) ((dim *) char))
         ${$source_operator_content(
           %(? ?condition ?ontrue ?onfalse))}): {
@@ -3645,6 +3752,30 @@ static String _converter_name(Type owner, Type target) {
   return targetedname == "String"
     ? %"$prefix${typename}_str"
     : %"$prefix${typename}_${targetedname.lower()}";
+}
+
+/** Returns whether `expr` calls the converter that its one argument's type
+    names for the call's type, as `converter_call` or a declared `Var`
+    converter builds it. */
+int Compiler.is_converter_call(Compiler c, List expr) {
+  match (expr)
+    case %(expr ?result (call ?callee (args ?argument))): {
+      Type target = result, source = argument.cadr();
+      if (!source || !source.match(%(?)) || !target.match(%(?))) return 0;
+      String spelled = _callee_spelling(callee);
+      return spelled && (spelled == _converter_name(source, target) ||
+        (c.sym.is_var_type(target) && spelled == source.var_converter()));
+    }
+  return 0;
+}
+
+static String _callee_spelling(Var callee) {
+  if (callee is <string>) return callee.str();
+  List function = callee;
+  match (function)
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding_identity_spelling(binding);
+  return NULL;
 }
 
 /* A converter's result exists only for the operator that asked for it.

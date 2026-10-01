@@ -167,7 +167,10 @@ int script_prepare(CliRequest c){
   _exec_current(c);
   Path_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_4), NULL))), script);
   _prune(String_join(NULL, cons(String_var(root), cons(String_var(_5), NULL))));
-  c -> output = String_join(NULL, cons(String_var(c -> output), cons(String_var(_6), cons(String_var(String_printf(_7, (long) getpid())), NULL))));
+  c -> output =({
+    Var _x2c_literal_part_0 = String_var(c -> output);  Var _x2c_literal_part_1 = String_var(String_printf(_7, (long) getpid()));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_6), cons(_x2c_literal_part_1, NULL))));
+  }
+  );
   return 0;
 }
 
@@ -354,7 +357,10 @@ static void _exec(CliRequest c){
   }
   fflush(NULL);
   execv(executable, argv);
-  driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(executable), cons(String_var(_14), cons(String_var(String_new(strerror(errno))), NULL))))));
+  driver_error(({
+    Var _x2c_literal_part_2 = String_var(executable);  Var _x2c_literal_part_3 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_13), cons(_x2c_literal_part_2, cons(String_var(_14), cons(_x2c_literal_part_3, NULL)))));
+  }
+  ));
 }
 
 ToolRun ToolAction_start(ToolAction);
@@ -362,6 +368,9 @@ ToolRun ToolAction_start(ToolAction);
 ToolAction tool_action_new(Symbol, List, int, int);
 
 static void _print_run(CliRequest c){
-  ToolAction_start(tool_action_new(38236, cons(String_var(_executable(c)), List_append(c -> run_args, NULL)), 0, 1));
+  ToolAction_start(tool_action_new(38236, ({
+    Var _x2c_literal_part_4 = String_var(_executable(c));  cons(_x2c_literal_part_4, List_append(c -> run_args, NULL));
+  }
+  ), 0, 1));
 }
 

@@ -1651,7 +1651,10 @@ case 458361162716: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_
   }
 
 }
-Array_push(found, List_var(cons(name, cons(List_var(Array_list_free(parameters)), cons(body, NULL)))));
+Array_push(found, List_var(({
+  Var _x2c_literal_part_0 = name;  Var _x2c_literal_part_1 = List_var(Array_list_free(parameters));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(body, NULL)));
+}
+)));
 }
 break;
 }
@@ -1696,7 +1699,10 @@ static void Walk_analyze(Walk * w, List function){
     }
 
   }
-  List summary = cons(int_var((* w).fresh), cons(List_var(Array_list_free(Array_sort(rows))), NULL)), previous = Var_list(Map_getindex((* w).summaries, String_var(name)));  if(List_equal(summary, previous)) return;  Map_setindex((* w).summaries, String_var(name), List_var(summary)); (* w).changed = 1;
+  List summary =({
+    Var _x2c_literal_part_2 = int_var((* w).fresh);  Var _x2c_literal_part_3 = List_var(Array_list_free(Array_sort(rows)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
+  }
+  ), previous = Var_list(Map_getindex((* w).summaries, String_var(name)));  if(List_equal(summary, previous)) return;  Map_setindex((* w).summaries, String_var(name), List_var(summary)); (* w).changed = 1;
 }
 
 List Macro_case_pattern(Macro, List);
@@ -2490,7 +2496,10 @@ static Region Walk_active(Walk * w){
 }
 
 static void Walk_warn(Walk * w, Symbol code, int origin, String message, List notes){
-  Array_push((* w).warnings, List_var((* w).audit ? cons(String_var((* w).function), cons(Symbol_var(code), cons(int_var(origin), cons(String_var(message), cons(List_var(notes), NULL))))) : cons(Symbol_var(code), cons(int_var(origin), cons(String_var(message), cons(List_var(notes), NULL))))));
+  Array_push((* w).warnings, List_var((* w).audit ?({
+    Var _x2c_literal_part_4 = String_var((* w).function);  cons(_x2c_literal_part_4, cons(Symbol_var(code), cons(int_var(origin), cons(String_var(message), cons(List_var(notes), NULL)))));
+  }
+  ) : cons(Symbol_var(code), cons(int_var(origin), cons(String_var(message), cons(List_var(notes), NULL))))));
 }
 
 List Compiler_origin_location(Compiler, int);
@@ -2672,7 +2681,10 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 List cdr(List);
 Type Type_reference(Type);
 static Var _passed(List types, List arguments, int index, Type * type){
-  Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! List_truth(Type_list((* type))) ||(! Var_equal(List_car(Type_list((* type))), Symbol_var(77)) && ! Var_equal(List_car(Type_list((* type))), Symbol_var(33330008396)))) return argument;  Type given = List_type(_expression_type(argument));  if(List_truth(Type_list(given)) &&(Var_equal(List_car(Type_list(given)), Symbol_var(77)) || Var_equal(List_car(Type_list(given)), Symbol_var(33330008396)))) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(cons(_33, cons(List_var((* type)), cons(List_var(cons(_883, cons(_1435, cons(argument, NULL)))), NULL))));
+  Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! List_truth(Type_list((* type))) ||(! Var_equal(List_car(Type_list((* type))), Symbol_var(77)) && ! Var_equal(List_car(Type_list((* type))), Symbol_var(33330008396)))) return argument;  Type given = List_type(_expression_type(argument));  if(List_truth(Type_list(given)) &&(Var_equal(List_car(Type_list(given)), Symbol_var(77)) || Var_equal(List_car(Type_list(given)), Symbol_var(33330008396)))) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
+    Var _x2c_literal_part_5 = List_var((* type));  cons(_33, cons(_x2c_literal_part_5, cons(List_var(cons(_883, cons(_1435, cons(argument, NULL)))), NULL)));
+  }
+  ));
 }
 
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);

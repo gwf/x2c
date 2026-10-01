@@ -366,7 +366,10 @@ static void Option__read_row(Option * o, List row, Map index, int position){
         String text = Var_str(word);
         if(String_startswith(text, _14)){
           if(! String_truth((* o).spelling) ||(String_startswith(text, _0) && ! String_startswith((* o).spelling, _0)))(* o).spelling = text;
-          (* o).spellings = String_truth((* o).spellings) ? String_join(NULL, cons(String_var((* o).spellings), cons(String_var(_1), cons(String_var(text), NULL)))) : text;
+          (* o).spellings = String_truth((* o).spellings) ?({
+            Var _x2c_literal_part_0 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_1), cons(String_var(text), NULL))));
+          }
+          ) : text;
           Map_setindex(index, String_var(text), int_var(position));
         }
         else if(String_equal(text, _2))(* o).required = 1;
@@ -647,7 +650,10 @@ static String Option__label(Option * o){
     return(* o).required ? label : String_join(NULL, cons(String_var(_8), cons(String_var(label), cons(String_var(_9), NULL))));
   }
   String label =(* o).spellings;
-  if(String_truth((* o).value)) label = String_join(NULL, cons(String_var(label), cons(String_var(_10), cons(String_var((* o).value), cons(String_var(_6), NULL)))));
+  if(String_truth((* o).value)) label =({
+    Var _x2c_literal_part_1 = String_var(label);  Var _x2c_literal_part_2 = String_var((* o).value);  String_join(NULL, cons(_x2c_literal_part_1, cons(String_var(_10), cons(_x2c_literal_part_2, cons(String_var(_6), NULL)))));
+  }
+  );
   return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_11), cons(String_var(label), NULL))) : label;
 }
 
@@ -662,7 +668,10 @@ String String_new(const char *);
 
 List Args_from_argv(int argc, char * * argv){
   List result = NULL;
-  for(int i = argc - 1;  i > 0;  i --) result = cons(String_var(String_new(argv[i])), List_append(result, NULL));
+  for(int i = argc - 1;  i > 0;  i --) result =({
+    Var _x2c_literal_part_3 = String_var(String_new(argv[i]));  cons(_x2c_literal_part_3, List_append(result, NULL));
+  }
+  );
   return result;
 }
 

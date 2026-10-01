@@ -44,7 +44,29 @@ typedef struct Walk {
 typedef struct Preserve {
   Compiler c;
   Map names, holders, pointers, escaped;
+  int expression_tries;
 } Preserve;
+
+/* A statement expression is the one expression that holds a block. */
+static int _holds_statements(List expression) =>
+  ast_contains_head(expression, <block>);
+
+/* Whether a statement expression in `body`, before its regions lower,
+   holds a `try`. */
+static int _expression_holds_try(List body) {
+  Array pending = $auto([body]);
+  while (pending.len()) {
+    Var current = pending.take_last();
+    if (current is not <list>) continue;
+    List node = current;
+    match (node) case %(expr *): {
+      if (ast_contains_head(node, <try>)) return 1;
+      continue;
+    }
+    foreach (Var child, node) pending.push(child);
+  }
+  return 0;
+}
 
 // function cleanup
 
@@ -81,6 +103,7 @@ static List Compiler._lower_function(Compiler c, List node) {
       p.collect(body);
       List rewritten = w.rewrite(body);
       if (p.names.len() || p.escaped.len()) {
+        p.expression_tries = _expression_holds_try(body);
         rewritten = p.rewrite(rewritten);
         bindings = p.rewrite(bindings);
         rewritten = p.escape_parameters(rewritten, bindings);
@@ -99,7 +122,8 @@ static List Compiler._lower_function(Compiler c, List node) {
    syntax use the same object reference. */
 static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   match (ast) {
-    case %((!or function localinit expr declare typedef) *): return ast;
+    case %(expr *): if (!_holds_statements(ast)) return ast;
+    case %((!or function localinit declare typedef) *): return ast;
     case $source_block_content(%(*statements)): {
       Array before = [];
       for (List rest = statements; rest; rest = rest.cdr()) {
@@ -270,8 +294,8 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
   List node = value;
   match (node) {
     // A label is a statement, and an expression nests as deeply as it is
-    // long, so the walk stops here.
-    case %(expr *): return;
+    // long, so the walk stops at one that holds no statements.
+    case %(expr *): if (!_holds_statements(node)) return;
     case %(label ?name *rest): {
       String spelling = _label_spelling(name);
       if (spelling) w.labels[spelling] = path;
@@ -323,13 +347,14 @@ static String _label_spelling(Var label) {
   return binding_identity_spelling(node);
 }
 
-/* Expressions cannot hold transfers or regions and may nest arbitrarily.
-   Position wrappers supply report origins. Bound returns carry one expression;
-   the source template's declared-type slot is not a matching source form. */
+/* Only a statement expression lets an expression hold transfers or
+   regions, and expressions may nest arbitrarily. Position wrappers supply
+   report origins. Bound returns carry one expression; the source template's
+   declared-type slot is not a matching source form. */
 static Var Walk.rewrite(Walk &w, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
-  match (node) case %(expr *): return value;
+  match (node) case %(expr *): if (!_holds_statements(node)) return value;
   Macro caught = $caught, tried = $tried;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro switched = $switched;
@@ -375,12 +400,14 @@ static Var Walk._lower_at(Walk &w, int origin, Var inner) {
   return %(at $origin $lowered);
 }
 
-/* Lowers a return of `expression`: only a region that runs something can
-   change what the expression read, so a static-local region alone leaves
-   the return as it is. */
+/* Lowers a return of `expression`, after any statement expression in it:
+   only a region that runs something can change what the expression read,
+   so a static-local region alone leaves the return as it is. */
 static List Walk._lower_return(Walk &w, List node, List expression) {
+  List value = w.rewrite(expression);
+  if (value != expression) node = source_return_content(%($value));
   List cleanup = w._unwind(0);
-  return cleanup ? w._return_value(expression, cleanup) : node;
+  return cleanup ? w._return_value(value, cleanup) : node;
 }
 
 /* Save the returned value before cleanup runs, since cleanup may change the
@@ -659,7 +686,7 @@ static Var _finalizer_label(Var value, int origin, int &at) {
     List node = current;
     match (node) {
       case %(function *): continue;
-      case %(expr *): continue;
+      case %(expr *): if (!_holds_statements(node)) continue;
       case %(at ?(int inner) ?wrapped): {
         pending.push(wrapped);
         origins.push(inner);
@@ -994,9 +1021,11 @@ macro open Statement $escape_local(Expr $local) {
 static Var Preserve.rewrite(Preserve &p, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
-  // Only declarations and parameters carry a qualifier, and neither appears
-  // inside an expression.
-  match (node) case %(expr *): return value;
+  // Only declarations and parameters carry a qualifier. A statement
+  // expression's own locals follow any `try` around it, so they need one
+  // only when a statement expression in the function holds a `try`.
+  match (node) case %(expr *):
+    if (!p.expression_tries || !_holds_statements(node)) return value;
   match (node) {
     case %(param ?type ?bind):
       return %(param $type ${p._binding(bind, p.escaped)});

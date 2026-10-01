@@ -3121,7 +3121,10 @@ String long_str(long);
 int Var_is_integer(Var);
 long Var_integer(Var);
 static String _location_string(List location){
-  String file = _location_file(location);  Var line = List_truth(location) ? List_assoc(location, Symbol_var(805770)) :((void) 0, Void);  Var column = List_truth(location) ? List_assoc(location, Symbol_var(233614172)) :((void) 0, Void);  return String_join(NULL, cons(String_var(file), cons(String_var(_30295), cons(String_var(long_str(Var_is_integer(line) ? Var_integer(line) : 1)), cons(String_var(_30295), cons(String_var(long_str(Var_is_integer(column) ? Var_integer(column) : 1)), NULL))))));
+  String file = _location_file(location);  Var line = List_truth(location) ? List_assoc(location, Symbol_var(805770)) :((void) 0, Void);  Var column = List_truth(location) ? List_assoc(location, Symbol_var(233614172)) :((void) 0, Void);  return({
+    Var _x2c_literal_part_0 = String_var(file);  Var _x2c_literal_part_1 = String_var(long_str(Var_is_integer(line) ? Var_integer(line) : 1));  Var _x2c_literal_part_2 = String_var(long_str(Var_is_integer(column) ? Var_integer(column) : 1));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_30295), cons(_x2c_literal_part_1, cons(String_var(_30295), cons(_x2c_literal_part_2, NULL))))));
+  }
+  );
 }
 
 int Map_contains(Map, Var);
@@ -3141,7 +3144,10 @@ static String _type_spelling(Type type){
 }
 
 static String _member_spelling(Type participant, String member){
-  return String_join(NULL, cons(String_var(Var_str(List_car(Type_list(participant)))), cons(String_var(_27633), cons(String_var(member), NULL))));
+  return({
+    Var _x2c_literal_part_3 = String_var(Var_str(List_car(Type_list(participant))));  String_join(NULL, cons(_x2c_literal_part_3, cons(String_var(_27633), cons(String_var(member), NULL))));
+  }
+  );
 }
 
 static String _representation_error(Type representation){
@@ -3158,7 +3164,10 @@ String Compiler_reverse_converter_spelling(Compiler c, String base_name, String 
   int split = String_find(participant, _32537);
   String package = split > 0 &&(String_equal(c -> package, String_getslice(participant, -2147483648, split, 1)) || Map_contains(c -> package_roots, String_var(String_getslice(participant, -2147483648, split, 1)))) ? String_getslice(participant, -2147483648, split, 1) : NULL;
   String bare = String_truth(package) ? String_getslice(participant, split + 2, -2147483648, 1) : participant;
-  String binding = String_join(NULL, cons(String_var(base_name), cons(String_var(_27633), cons(String_var(infix), cons(String_var(String_lower(bare)), NULL)))));
+  String binding =({
+    Var _x2c_literal_part_4 = String_var(base_name);  Var _x2c_literal_part_5 = String_var(infix);  Var _x2c_literal_part_6 = String_var(String_lower(bare));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_27633), cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)))));
+  }
+  );
   return String_truth(package) ? String_join(NULL, cons(String_var(package), cons(String_var(_30298), cons(String_var(binding), NULL)))) : binding;
 }
 
@@ -3324,9 +3333,15 @@ static List ProtocolSyntax_body(ProtocolSyntax * p){
   }
   Compiler_expect(c, 251);
   Sym_pop_scope(c -> sym);
-  List record = cons(_30309, cons(List_var((* p).base), cons(String_var(participant), cons(List_var(cons(_30310, List_append(Array_list_free(associations), NULL))), cons(List_var(cons(_30311, List_append(Array_list_free(members), NULL))), NULL)))));
+  List record =({
+    Var _x2c_literal_part_7 = List_var((* p).base);  Var _x2c_literal_part_8 = String_var(participant);  Var _x2c_literal_part_9 = List_var(cons(_30310, List_append(Array_list_free(associations), NULL)));  Var _x2c_literal_part_10 = List_var(cons(_30311, List_append(Array_list_free(members), NULL)));  cons(_30309, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)))));
+  }
+  );
   List location = Compiler_token_location(c, (* p).start);
-  if(Map_truth(c -> macro_holes) ||(c -> shallow && ! c -> collect_protocols)) return cons(_19082, cons(List_var(record), cons(Symbol_var((* p).storage), cons(List_var(location), NULL))));
+  if(Map_truth(c -> macro_holes) ||(c -> shallow && ! c -> collect_protocols)) return({
+    Var _x2c_literal_part_11 = List_var(record);  Var _x2c_literal_part_12 = Symbol_var((* p).storage);  cons(_19082, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, cons(List_var(location), NULL))));
+  }
+  );
   return Compiler__publish_record(c, record, (* p).base, location);
 }
 
@@ -3563,7 +3578,13 @@ static void Compiler__install_occurrence(Compiler c, Type base, List record, Sym
 String Var_str(Var);
 Var Map_del(Map, Var);
 static List AdoptionDraft_publish(AdoptionDraft * a){
-  Compiler c =(* a).c;  if(List_truth((* a).tag_expression))(* a).tag_expression = _tag_syntax((* a).tag_expression);  String spelling = Var_str(List_car(Type_list((* a).participant)));  List declared = Sym_get(c -> sym, cons(String_var(spelling), NULL));  if((! List_truth(declared) || ! Type_is_typedef(List_type(declared))) && ! c -> shallow) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(String_new("adoption participant \'")), cons(String_var(spelling), cons(String_var(String_new("\' does not name a declared type")), NULL)))), (* a).participant_token, NULL); (* a).tag = AdoptionDraft_check_modifiers(&((* a))); (* a).storage = AdoptionDraft_published_storage(&((* a)), spelling);  AdoptionDraft_check_previous(&((* a)));  AdoptionDraft_install(&((* a)));  List pair = cons(List_var((* a).base), cons(List_var((* a).participant), NULL));  int resolved = Map_contains(c -> conforms, List_var(pair));  Map_del(c -> conforms, List_var(pair));  c -> proto_cache = Map_new();  if(! c -> shallow) Compiler__resolve_adoption(c, (* a).base, (* a).participant, resolved ? NULL :(* a).location);  List published = AdoptionDraft_node(&((* a)));  Compiler__retain_source_node(c, published, (* a).storage, cons(_30270, cons(List_var((* a).base), List_append((* a).location, NULL))));  return published;
+  Compiler c =(* a).c;  if(List_truth((* a).tag_expression))(* a).tag_expression = _tag_syntax((* a).tag_expression);  String spelling = Var_str(List_car(Type_list((* a).participant)));  List declared = Sym_get(c -> sym, cons(String_var(spelling), NULL));  if((! List_truth(declared) || ! Type_is_typedef(List_type(declared))) && ! c -> shallow) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(String_new("adoption participant \'")), cons(String_var(spelling), cons(String_var(String_new("\' does not name a declared type")), NULL)))), (* a).participant_token, NULL); (* a).tag = AdoptionDraft_check_modifiers(&((* a))); (* a).storage = AdoptionDraft_published_storage(&((* a)), spelling);  AdoptionDraft_check_previous(&((* a)));  AdoptionDraft_install(&((* a)));  List pair =({
+    Var _x2c_literal_part_13 = List_var((* a).base);  Var _x2c_literal_part_14 = List_var((* a).participant);  cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL));
+  }
+  );  int resolved = Map_contains(c -> conforms, List_var(pair));  Map_del(c -> conforms, List_var(pair));  c -> proto_cache = Map_new();  if(! c -> shallow) Compiler__resolve_adoption(c, (* a).base, (* a).participant, resolved ? NULL :(* a).location);  List published = AdoptionDraft_node(&((* a)));  Compiler__retain_source_node(c, published, (* a).storage, ({
+    Var _x2c_literal_part_15 = List_var((* a).base);  List _x2c_literal_part_16 =(* a).location;  cons(_30270, cons(_x2c_literal_part_15, List_append(_x2c_literal_part_16, NULL)));
+  }
+  ));  return published;
 }
 
 static List AdoptionDraft_node(AdoptionDraft * a){
@@ -3571,7 +3592,10 @@ static List AdoptionDraft_node(AdoptionDraft * a){
 }
 
 static String AdoptionDraft_spelling(AdoptionDraft * a){
-  return String_join(NULL, cons(String_var(_type_spelling((* a).base)), cons(String_var(_30460), cons(String_var(_type_spelling((* a).participant)), cons(String_var(_30461), NULL)))));
+  return({
+    Var _x2c_literal_part_17 = String_var(_type_spelling((* a).base));  Var _x2c_literal_part_18 = String_var(_type_spelling((* a).participant));  String_join(NULL, cons(_x2c_literal_part_17, cons(String_var(_30460), cons(_x2c_literal_part_18, cons(String_var(_30461), NULL)))));
+  }
+  );
 }
 
 static List _tag_syntax(List expression){
@@ -3638,7 +3662,10 @@ return 0;
 }
 
 static Symbol AdoptionDraft_published_storage(AdoptionDraft * a, String spelling){
-  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  List record = Compiler__record(c, (* a).base);  int private_native = List_truth(record) && Compiler__has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ? String_join(NULL, cons(String_var(spelling), cons(String_var(_27633), cons(String_var(String_lower(base_name)), NULL)))) : NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _32557, spelling) : NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _32558, spelling) : NULL;  Var occurrence_value;  List occurrence = Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? Var_list(occurrence_value) : NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && _occurrence_storage(occurrence) == 1317118534) || Compiler__is_private(c, spelling) ||(String_truth(forward) && Compiler__is_private(c, forward)) ||(String_truth(reverse) && Compiler__is_private(c, reverse)) ||(String_truth(alternate) && Compiler__is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
+  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  List record = Compiler__record(c, (* a).base);  int private_native = List_truth(record) && Compiler__has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ?({
+    Var _x2c_literal_part_19 = String_var(spelling);  Var _x2c_literal_part_20 = String_var(String_lower(base_name));  String_join(NULL, cons(_x2c_literal_part_19, cons(String_var(_27633), cons(_x2c_literal_part_20, NULL))));
+  }
+  ) : NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _32557, spelling) : NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _32558, spelling) : NULL;  Var occurrence_value;  List occurrence = Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? Var_list(occurrence_value) : NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && _occurrence_storage(occurrence) == 1317118534) || Compiler__is_private(c, spelling) ||(String_truth(forward) && Compiler__is_private(c, forward)) ||(String_truth(reverse) && Compiler__is_private(c, reverse)) ||(String_truth(alternate) && Compiler__is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
 }
 
 int List_try_next(List, List *, Var *);
@@ -3656,7 +3683,10 @@ static int Compiler__has_private_native(Compiler c, List templates){
 }
 
 static void AdoptionDraft_check_previous(AdoptionDraft * a){
-  Compiler c =(* a).c;  if(c -> shallow) return;  String path = Compiler__canonical_file(c, (* a).location);  List key = cons(_30489, cons(List_var((* a).base), cons(List_var((* a).participant), cons(String_var(path), NULL))));  Var previous;  if(! Map_try_get(c -> protocol_helpers, List_var(key), &(previous))){
+  Compiler c =(* a).c;  if(c -> shallow) return;  String path = Compiler__canonical_file(c, (* a).location);  List key =({
+    Var _x2c_literal_part_21 = List_var((* a).base);  Var _x2c_literal_part_22 = List_var((* a).participant);  cons(_30489, cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, cons(String_var(path), NULL))));
+  }
+  );  Var previous;  if(! Map_try_get(c -> protocol_helpers, List_var(key), &(previous))){
     Map_setindex(c -> protocol_helpers, List_var(key), List_var(AdoptionDraft_node(&((* a)))));  return;
   }
   List row = Var_list(previous);  if(List_equal(Type_list(_adoption_representation(row)), Type_list((* a).representation)) && List_equal(_adoption_tag(row), (* a).tag_expression)) return;  String first = String_join(NULL, cons(String_var(_10945), cons(String_var(_location_string(_adoption_location(row))), NULL)));  String second = String_join(NULL, cons(String_var(_19013), cons(String_var(_location_string((* a).location)), NULL)));  Diagnostics_report(c -> diagnostics, 1139215899608, String_join(NULL, cons(String_var(_19092), cons(String_var(AdoptionDraft_spelling(&((* a)))), NULL))), (* a).location, cons(String_var(first), cons(String_var(second), NULL)));
@@ -3664,7 +3694,13 @@ static void AdoptionDraft_check_previous(AdoptionDraft * a){
 
 void Type_register_var_adoption(Type, Type, Symbol);
 static void AdoptionDraft_install(AdoptionDraft * a){
-  Compiler c =(* a).c;  String path = Compiler__canonical_file(c, (* a).location);  if((* a).storage == 1317118534 && ! String_equal(path, Compiler__path(c))) return;  Type_register_var_adoption((* a).participant, (* a).representation, (* a).tag);  List key =(* a).storage == 1317118534 ? cons(List_var((* a).base), cons(List_var((* a).participant), cons(String_var(path), NULL))) : cons(List_var((* a).base), cons(List_var((* a).participant), NULL));  List row = AdoptionDraft_node(&((* a)));  Var stored;  if(! Map_try_get(c -> adoptions, List_var(key), &(stored))){
+  Compiler c =(* a).c;  String path = Compiler__canonical_file(c, (* a).location);  if((* a).storage == 1317118534 && ! String_equal(path, Compiler__path(c))) return;  Type_register_var_adoption((* a).participant, (* a).representation, (* a).tag);  List key =(* a).storage == 1317118534 ?({
+    Var _x2c_literal_part_23 = List_var((* a).base);  Var _x2c_literal_part_24 = List_var((* a).participant);  cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, cons(String_var(path), NULL)));
+  }
+  ) :({
+    Var _x2c_literal_part_25 = List_var((* a).base);  Var _x2c_literal_part_26 = List_var((* a).participant);  cons(_x2c_literal_part_25, cons(_x2c_literal_part_26, NULL));
+  }
+  );  List row = AdoptionDraft_node(&((* a)));  Var stored;  if(! Map_try_get(c -> adoptions, List_var(key), &(stored))){
     Map_setindex(c -> adoptions, List_var(key), List_var(row));  return;
   }
   List existing = Var_list(stored);  if(List_equal(existing, row)) return;  List first_location = _adoption_location(existing);  if(String_equal(Compiler__canonical_file(c, first_location), path)) return; {
@@ -3729,17 +3765,29 @@ static void Compiler__resolve_record(Compiler c, Type base, Type participant, Li
 }
 
 static String Compiler__missing_detail(Compiler c, Type base, Type participant, int native, List failure){
-  String base_repr = _type_spelling(base);  String participant_repr = _type_spelling(participant);  String owner = String_join(NULL, cons(String_var(base_repr), cons(String_var(_30460), cons(String_var(participant_repr), cons(String_var(_30461), NULL)))));  String prefix = String_join(NULL, cons(String_var(participant_repr), cons(String_var(_30512), cons(String_var(owner), cons(String_var(_12780), NULL)))));  if(List_truth(failure)) return _requirement_detail(base, participant, failure);  if(native) return String_join(NULL, cons(String_var(prefix), cons(String_var(_30513), cons(String_var(base_repr), NULL))));  String base_name = _base_name(base);  String lowered = Type_is_bare_typedef_name(participant) ? String_lower(Var_str(List_car(Type_list(participant)))) : participant_repr;  String forward = String_truth(base_name) ? String_join(NULL, cons(String_var(participant_repr), cons(String_var(_22574), cons(String_var(String_lower(base_name)), NULL)))) : NULL;  Type forward_type = String_truth(forward) && String_truth(base_name) ? Compiler__declared(c, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(participant)))), cons(String_var(_27633), cons(String_var(String_lower(base_name)), NULL))))) : NULL;  if(String_truth(base_name) && ! _exact_conversion(forward_type, participant, base)) return String_join(NULL, cons(String_var(prefix), cons(String_var(_30514), cons(String_var(forward), cons(String_var(_1656), NULL)))));  return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30515), cons(String_var(base_repr), cons(String_var(_22574), cons(String_var(lowered), cons(String_var(_30516), NULL))))))), String_join(NULL, cons(String_var(_30517), cons(String_var(base_repr), cons(String_var(_30518), cons(String_var(lowered), cons(String_var(_1656), NULL)))))));
+  String base_repr = _type_spelling(base);  String participant_repr = _type_spelling(participant);  String owner = String_join(NULL, cons(String_var(base_repr), cons(String_var(_30460), cons(String_var(participant_repr), cons(String_var(_30461), NULL)))));  String prefix = String_join(NULL, cons(String_var(participant_repr), cons(String_var(_30512), cons(String_var(owner), cons(String_var(_12780), NULL)))));  if(List_truth(failure)) return _requirement_detail(base, participant, failure);  if(native) return String_join(NULL, cons(String_var(prefix), cons(String_var(_30513), cons(String_var(base_repr), NULL))));  String base_name = _base_name(base);  String lowered = Type_is_bare_typedef_name(participant) ? String_lower(Var_str(List_car(Type_list(participant)))) : participant_repr;  String forward = String_truth(base_name) ?({
+    Var _x2c_literal_part_27 = String_var(participant_repr);  Var _x2c_literal_part_28 = String_var(String_lower(base_name));  String_join(NULL, cons(_x2c_literal_part_27, cons(String_var(_22574), cons(_x2c_literal_part_28, NULL))));
+  }
+  ) : NULL;  Type forward_type = String_truth(forward) && String_truth(base_name) ? Compiler__declared(c, ({
+    Var _x2c_literal_part_29 = String_var(Var_str(List_car(Type_list(participant))));  Var _x2c_literal_part_30 = String_var(String_lower(base_name));  String_join(NULL, cons(_x2c_literal_part_29, cons(String_var(_27633), cons(_x2c_literal_part_30, NULL))));
+  }
+  )) : NULL;  if(String_truth(base_name) && ! _exact_conversion(forward_type, participant, base)) return String_join(NULL, cons(String_var(prefix), cons(String_var(_30514), cons(String_var(forward), cons(String_var(_1656), NULL)))));  return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30515), cons(String_var(base_repr), cons(String_var(_22574), cons(String_var(lowered), cons(String_var(_30516), NULL))))))), String_join(NULL, cons(String_var(_30517), cons(String_var(base_repr), cons(String_var(_30518), cons(String_var(lowered), cons(String_var(_1656), NULL)))))));
 }
 
 String Symbol_str(Symbol);
 static String _requirement_detail(Type base, Type participant, List failure){
   String base_repr = _type_spelling(base);  String participant_repr = _type_spelling(participant);  List _x2c_destructure_2 = failure;  String member = Var_string(List_getindex(_x2c_destructure_2, 0));  Symbol adapter = Var_symbol(List_getindex(_x2c_destructure_2, 1));  Symbol direction = Var_symbol(List_getindex(_x2c_destructure_2, 2));  Symbol position = Var_symbol(List_getindex(_x2c_destructure_2, 3));  String lowered = Type_is_bare_typedef_name(participant) ? String_lower(Var_str(List_car(Type_list(participant)))) : participant_repr;  String owner = String_join(NULL, cons(String_var(base_repr), cons(String_var(_30460), cons(String_var(participant_repr), cons(String_var(_30461), NULL)))));  String prefix = String_join(NULL, cons(String_var(participant_repr), cons(String_var(_30512), cons(String_var(owner), cons(String_var(_12780), NULL)))));  if(adapter == 415294949590 && direction == 951296328) return String_add(String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30520), NULL))))), String_join(NULL, cons(String_var(Symbol_str(position)), cons(String_var(_30521), NULL)))), _30522);
   if(adapter == 415294949590 && direction == 39036753098) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30523), cons(String_var(owner), cons(String_var(_30524), NULL))))))), String_join(NULL, cons(String_var(_1656), cons(String_var(base_repr), cons(String_var(_22574), cons(String_var(lowered), cons(String_var(_30525), cons(String_var(base_repr), cons(String_var(_30518), cons(String_var(lowered), cons(String_var(_1656), NULL)))))))))));
-  if(adapter == 415294949590) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30526), NULL))))), String_join(NULL, cons(String_var(_30527), cons(String_var(participant_repr), cons(String_var(_22574), cons(String_var(String_lower(base_repr)), cons(String_var(_1656), NULL)))))));
+  if(adapter == 415294949590) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30526), NULL))))), ({
+    Var _x2c_literal_part_31 = String_var(participant_repr);  Var _x2c_literal_part_32 = String_var(String_lower(base_repr));  String_join(NULL, cons(String_var(_30527), cons(_x2c_literal_part_31, cons(String_var(_22574), cons(_x2c_literal_part_32, cons(String_var(_1656), NULL))))));
+  }
+  ));
   if(adapter == 42511254 && direction == 951296328) return String_add(String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30520), NULL))))), String_join(NULL, cons(String_var(Symbol_str(position)), cons(String_var(_30528), NULL)))), _30522);
   if(adapter == 42511254 && position == 35291841012068) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30529), NULL))))), String_join(NULL, cons(String_var(owner), cons(String_var(_30530), cons(String_var(base_repr), cons(String_var(_22574), cons(String_var(lowered), cons(String_var(_30525), cons(String_var(base_repr), cons(String_var(_30518), cons(String_var(lowered), cons(String_var(_1656), NULL))))))))))));
-  if(adapter == 42511254) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30523), cons(String_var(owner), cons(String_var(_30524), NULL))))))), String_join(NULL, cons(String_var(_1656), cons(String_var(participant_repr), cons(String_var(_22574), cons(String_var(String_lower(base_repr)), cons(String_var(_1656), NULL)))))));
+  if(adapter == 42511254) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30519), cons(String_var(member), cons(String_var(_30523), cons(String_var(owner), cons(String_var(_30524), NULL))))))), ({
+    Var _x2c_literal_part_33 = String_var(participant_repr);  Var _x2c_literal_part_34 = String_var(String_lower(base_repr));  String_join(NULL, cons(String_var(_1656), cons(_x2c_literal_part_33, cons(String_var(_22574), cons(_x2c_literal_part_34, cons(String_var(_1656), NULL))))));
+  }
+  ));
   if(position == 35291841012068) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30531), cons(String_var(member), cons(String_var(_30532), NULL))))), String_join(NULL, cons(String_var(_30533), cons(String_var(base_repr), NULL))));
   if(position == 1219734312) return String_add(String_join(NULL, cons(String_var(prefix), cons(String_var(_30531), cons(String_var(member), cons(String_var(_30534), NULL))))), String_join(NULL, cons(String_var(_30535), cons(String_var(base_repr), NULL))));
   return String_join(NULL, cons(String_var(prefix), cons(String_var(_30531), cons(String_var(member), cons(String_var(_30536), NULL)))));
@@ -4000,7 +4048,10 @@ static List Compiler__resolve_ordinary(Compiler c, Type base, Type participant, 
 }
 
 static String Compiler__forward_binding(Compiler c, Type base, Type participant){
-  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) return NULL;  String binding = String_join(NULL, cons(String_var(Var_str(List_car(Type_list(participant)))), cons(String_var(_27633), cons(String_var(String_lower(base_name)), NULL))));  Type found = Compiler__declared(c, binding);  if(! _exact_conversion(found, participant, base)) return NULL;  return binding;
+  String base_name = _base_name(base);  if(! String_truth(base_name) || ! Type_is_bare_typedef_name(participant)) return NULL;  String binding =({
+    Var _x2c_literal_part_35 = String_var(Var_str(List_car(Type_list(participant))));  Var _x2c_literal_part_36 = String_var(String_lower(base_name));  String_join(NULL, cons(_x2c_literal_part_35, cons(String_var(_27633), cons(_x2c_literal_part_36, NULL))));
+  }
+  );  Type found = Compiler__declared(c, binding);  if(! _exact_conversion(found, participant, base)) return NULL;  return binding;
 }
 
 static String Compiler__reverse_binding(Compiler c, Type base, Type participant){
@@ -4219,7 +4270,10 @@ static int _is_exact_variable(Var value, String variable){
 }
 
 static void ProtocolAdapters_report_requirement(ProtocolAdapters * a, List failure){
-  Type base =(* a).base, participant =(* a).participant;  List dedupe = cons(_30672, cons(List_var(base), cons(List_var(participant), cons(List_car(failure), NULL))));  if(Map_contains((* a).c -> protocol_helpers, List_var(dedupe))) return;  Map_setindex((* a).c -> protocol_helpers, List_var(dedupe), int_var(1));  List row = Compiler__visible_adoption((* a).c, base, participant);  Diagnostics_report((* a).c -> diagnostics, 1139215899608, _requirement_detail(base, participant, failure), _adoption_location(row), NULL);
+  Type base =(* a).base, participant =(* a).participant;  List dedupe =({
+    Var _x2c_literal_part_37 = List_var(base);  Var _x2c_literal_part_38 = List_var(participant);  Var _x2c_literal_part_39 = List_car(failure);  cons(_30672, cons(_x2c_literal_part_37, cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, NULL))));
+  }
+  );  if(Map_contains((* a).c -> protocol_helpers, List_var(dedupe))) return;  Map_setindex((* a).c -> protocol_helpers, List_var(dedupe), int_var(1));  List row = Compiler__visible_adoption((* a).c, base, participant);  Diagnostics_report((* a).c -> diagnostics, 1139215899608, _requirement_detail(base, participant, failure), _adoption_location(row), NULL);
 }
 
 static int _function_parts(Type signature, List * parameters, Type * result){
@@ -4663,7 +4717,10 @@ static int GeneratedOwners_consider(GeneratedOwners * g, Compiler c, Type base, 
           (* g).first_linkage = owner; (* g).first_storage = storage;
         }
         else if((* g).first_storage != storage){
-          (* g).result = cons(_30744, cons(List_var((* g).first_linkage), cons(List_var(owner), NULL)));  return 1;
+          (* g).result =({
+            Var _x2c_literal_part_40 = List_var((* g).first_linkage);  cons(_30744, cons(_x2c_literal_part_40, cons(List_var(owner), NULL)));
+          }
+          );  return 1;
         }
 
       }
@@ -4700,7 +4757,16 @@ static void Compiler__report_collision(Compiler c, Type participant, String memb
 }
 
 static List _collision_notes(Symbol kind, List first, List second){
-  List _x2c_destructure_7 = List_cdr(first);  Type first_base = Var_type(List_getindex(_x2c_destructure_7, 0));  String first_source = Var_string(List_getindex(_x2c_destructure_7, 1));  Type first_expected = Var_type(List_getindex(_x2c_destructure_7, 2));  Symbol first_storage = Var_symbol(List_getindex(_x2c_destructure_7, 3));  List _x2c_destructure_8 = List_cdr(second);  Type second_base = Var_type(List_getindex(_x2c_destructure_8, 0));  String second_source = Var_string(List_getindex(_x2c_destructure_8, 1));  Type second_expected = Var_type(List_getindex(_x2c_destructure_8, 2));  Symbol second_storage = Var_symbol(List_getindex(_x2c_destructure_8, 3));  String first_repr = _type_spelling(first_base);  String second_repr = _type_spelling(second_base);  if(kind == 26403867082) return cons(String_var(String_join(NULL, cons(String_var(first_repr), cons(String_var(_30761), cons(String_var(Symbol_str(first_storage)), NULL))))), cons(String_var(String_join(NULL, cons(String_var(second_repr), cons(String_var(_30761), cons(String_var(Symbol_str(second_storage)), NULL))))), NULL));  if(! List_equal(Type_list(first_expected), Type_list(second_expected))) return cons(String_var(String_join(NULL, cons(String_var(first_repr), cons(String_var(_30762), cons(String_var(List_repr(Type_list(first_expected))), NULL))))), cons(String_var(String_join(NULL, cons(String_var(second_repr), cons(String_var(_30762), cons(String_var(List_repr(Type_list(second_expected))), NULL))))), NULL));  return cons(String_var(String_join(NULL, cons(String_var(first_repr), cons(String_var(_30763), cons(String_var(first_source), NULL))))), cons(String_var(String_join(NULL, cons(String_var(second_repr), cons(String_var(_30763), cons(String_var(second_source), NULL))))), NULL));
+  List _x2c_destructure_7 = List_cdr(first);  Type first_base = Var_type(List_getindex(_x2c_destructure_7, 0));  String first_source = Var_string(List_getindex(_x2c_destructure_7, 1));  Type first_expected = Var_type(List_getindex(_x2c_destructure_7, 2));  Symbol first_storage = Var_symbol(List_getindex(_x2c_destructure_7, 3));  List _x2c_destructure_8 = List_cdr(second);  Type second_base = Var_type(List_getindex(_x2c_destructure_8, 0));  String second_source = Var_string(List_getindex(_x2c_destructure_8, 1));  Type second_expected = Var_type(List_getindex(_x2c_destructure_8, 2));  Symbol second_storage = Var_symbol(List_getindex(_x2c_destructure_8, 3));  String first_repr = _type_spelling(first_base);  String second_repr = _type_spelling(second_base);  if(kind == 26403867082) return cons(String_var(String_join(NULL, cons(String_var(first_repr), cons(String_var(_30761), cons(String_var(Symbol_str(first_storage)), NULL))))), cons(String_var(String_join(NULL, cons(String_var(second_repr), cons(String_var(_30761), cons(String_var(Symbol_str(second_storage)), NULL))))), NULL));  if(! List_equal(Type_list(first_expected), Type_list(second_expected))) return({
+    Var _x2c_literal_part_41 = String_var(({
+      Var _x2c_literal_part_43 = String_var(first_repr);  Var _x2c_literal_part_44 = String_var(List_repr(Type_list(first_expected)));  String_join(NULL, cons(_x2c_literal_part_43, cons(String_var(_30762), cons(_x2c_literal_part_44, NULL))));
+    }
+    ));  Var _x2c_literal_part_42 = String_var(({
+      Var _x2c_literal_part_45 = String_var(second_repr);  Var _x2c_literal_part_46 = String_var(List_repr(Type_list(second_expected)));  String_join(NULL, cons(_x2c_literal_part_45, cons(String_var(_30762), cons(_x2c_literal_part_46, NULL))));
+    }
+    ));  cons(_x2c_literal_part_41, cons(_x2c_literal_part_42, NULL));
+  }
+  );  return cons(String_var(String_join(NULL, cons(String_var(first_repr), cons(String_var(_30763), cons(String_var(first_source), NULL))))), cons(String_var(String_join(NULL, cons(String_var(second_repr), cons(String_var(_30763), cons(String_var(second_source), NULL))))), NULL));
 }
 
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
@@ -4726,7 +4792,10 @@ String Compiler_protocol_update_helper(Compiler c, Type participant, String memb
 
     }
   }
-if(! List_truth(Type_list(rhs_type))) return NULL;  String suffix = postfix ? _32584 : _32585;  String name = String_join(NULL, cons(String_var(_31100), cons(String_var(String_lower(Var_str(List_car(Type_list(participant))))), cons(String_var(_27633), cons(String_var(member), cons(String_var(_27633), cons(String_var(suffix), NULL)))))));  ProtocolUpdate update ={
+if(! List_truth(Type_list(rhs_type))) return NULL;  String suffix = postfix ? _32584 : _32585;  String name =({
+  Var _x2c_literal_part_47 = String_var(String_lower(Var_str(List_car(Type_list(participant)))));  String_join(NULL, cons(String_var(_31100), cons(_x2c_literal_part_47, cons(String_var(_27633), cons(String_var(member), cons(String_var(_27633), cons(String_var(suffix), NULL)))))));
+}
+);  ProtocolUpdate update ={
   .c = c, .participant = participant, .rhs_type = rhs_type, .result = result, .source_type = List_type(source_type), .source_binding = source_binding, .helper_binding = Sym_introduce(c -> sym, name), .declarations = Array_new(), .postfix = postfix
 }
 ;  ProtocolUpdate_arguments(&(update));  ProtocolUpdate_emit(&(update));  Map_setindex(c -> protocol_helpers, List_var(key), String_var(name));  return name;
@@ -4734,18 +4803,39 @@ if(! List_truth(Type_list(rhs_type))) return NULL;  String suffix = postfix ? _3
 
 List Compiler_convert_expression(Compiler, List, Type);
 static void ProtocolUpdate_arguments(ProtocolUpdate * u){
-  List lhs_binding = Sym_introduce((* u).c -> sym, _32586);  List op_binding = Sym_introduce((* u).c -> sym, _32587);  Type pointer = List_type(cons(Symbol_var(54), cons(Symbol_var(1544849476362), Type_list((* u).participant))));  Type pointer_base = List_type(cons(Symbol_var(1544849476362), Type_list((* u).participant)));  List lhs_pointer = cons(_28, cons(List_var(pointer), cons(List_var(cons(_393, cons(List_var(lhs_binding), NULL))), NULL)));  List zero = _5981; (* u).current = cons(_28, cons(List_var((* u).participant), cons(List_var(cons(_6052, cons(List_var(lhs_pointer), cons(List_var(zero), NULL)))), NULL)));  Array_push((* u).declarations, List_var(cons(_30799, cons(List_var(pointer_base), cons(List_var(cons(_2491, cons(List_var(lhs_binding), _31102))), NULL)))));  Array_push((* u).declarations, List_var(cons(_30799, cons(_167, cons(List_var(cons(_2491, cons(List_var(op_binding), _30976))), NULL)))));  if((* u).postfix){
+  List lhs_binding = Sym_introduce((* u).c -> sym, _32586);  List op_binding = Sym_introduce((* u).c -> sym, _32587);  Type pointer = List_type(cons(Symbol_var(54), cons(Symbol_var(1544849476362), Type_list((* u).participant))));  Type pointer_base = List_type(cons(Symbol_var(1544849476362), Type_list((* u).participant)));  List lhs_pointer = cons(_28, cons(List_var(pointer), cons(List_var(cons(_393, cons(List_var(lhs_binding), NULL))), NULL)));  List zero = _5981; (* u).current =({
+    Var _x2c_literal_part_48 = List_var((* u).participant);  cons(_28, cons(_x2c_literal_part_48, cons(List_var(cons(_6052, cons(List_var(lhs_pointer), cons(List_var(zero), NULL)))), NULL)));
+  }
+  );  Array_push((* u).declarations, List_var(cons(_30799, cons(List_var(pointer_base), cons(List_var(cons(_2491, cons(List_var(lhs_binding), _31102))), NULL)))));  Array_push((* u).declarations, List_var(cons(_30799, cons(_167, cons(List_var(cons(_2491, cons(List_var(op_binding), _30976))), NULL)))));  if((* u).postfix){
     List one = _13388; (* u).call_rhs = Compiler_convert_expression((* u).c, one, (* u).rhs_type); (* u).old_binding = Sym_introduce((* u).c -> sym, _32588);
   }
   else{
-    List rhs_binding = Sym_introduce((* u).c -> sym, _32589);  Array_push((* u).declarations, List_var(cons(_30799, cons(List_var((* u).rhs_type), cons(List_var(cons(_2491, cons(List_var(rhs_binding), _30976))), NULL))))); (* u).call_rhs = cons(_28, cons(List_var((* u).rhs_type), cons(List_var(cons(_393, cons(List_var(rhs_binding), NULL))), NULL)));
+    List rhs_binding = Sym_introduce((* u).c -> sym, _32589);  Array_push((* u).declarations, List_var(({
+      Var _x2c_literal_part_49 = List_var((* u).rhs_type);  cons(_30799, cons(_x2c_literal_part_49, cons(List_var(cons(_2491, cons(List_var(rhs_binding), _30976))), NULL)));
+    }
+    ))); (* u).call_rhs =({
+      Var _x2c_literal_part_50 = List_var((* u).rhs_type);  cons(_28, cons(_x2c_literal_part_50, cons(List_var(cons(_393, cons(List_var(rhs_binding), NULL))), NULL)));
+    }
+    );
   }
 
 }
 
 void Compiler_add_early(Compiler, List);
 static void ProtocolUpdate_emit(ProtocolUpdate * u){
-  List call = Compiler__bound_call((* u).c, (* u).result, cons(_28, cons(List_var((* u).source_type), cons(List_var(cons(_393, cons(List_var((* u).source_binding), NULL))), NULL))), cons(List_var((* u).current), cons(List_var((* u).call_rhs), NULL)));  Macro ordinary = _31218, saved = _31331;  List shape =(* u).postfix ? Macro_apply(saved, cons(List_var((* u).participant), cons(List_var((* u).old_binding), cons(List_var((* u).current), cons(List_var(call), NULL))))) : Macro_apply(ordinary, cons(List_var((* u).current), cons(List_var(call), NULL)));  List body = Compiler_bind_syntax((* u).c, List_var(shape), AST_BLOCK, (* u).participant);  List helper = Compiler_wrapper_function((* u).c, List_type(cons(_30404, List_append(Type_list((* u).participant), NULL))), (* u).helper_binding, Array_list_free((* u).declarations), List_cdr(body));  Compiler_add_early((* u).c, helper);
+  List call = Compiler__bound_call((* u).c, (* u).result, ({
+    Var _x2c_literal_part_51 = List_var((* u).source_type);  Var _x2c_literal_part_52 = List_var(cons(_393, cons(List_var((* u).source_binding), NULL)));  cons(_28, cons(_x2c_literal_part_51, cons(_x2c_literal_part_52, NULL)));
+  }
+  ), ({
+    Var _x2c_literal_part_53 = List_var((* u).current);  Var _x2c_literal_part_54 = List_var((* u).call_rhs);  cons(_x2c_literal_part_53, cons(_x2c_literal_part_54, NULL));
+  }
+  ));  Macro ordinary = _31218, saved = _31331;  List shape =(* u).postfix ? Macro_apply(saved, ({
+    Var _x2c_literal_part_55 = List_var((* u).participant);  Var _x2c_literal_part_56 = List_var((* u).old_binding);  Var _x2c_literal_part_57 = List_var((* u).current);  cons(_x2c_literal_part_55, cons(_x2c_literal_part_56, cons(_x2c_literal_part_57, cons(List_var(call), NULL))));
+  }
+  )) : Macro_apply(ordinary, ({
+    Var _x2c_literal_part_58 = List_var((* u).current);  cons(_x2c_literal_part_58, cons(List_var(call), NULL));
+  }
+  ));  List body = Compiler_bind_syntax((* u).c, List_var(shape), AST_BLOCK, (* u).participant);  List helper = Compiler_wrapper_function((* u).c, List_type(cons(_30404, List_append(Type_list((* u).participant), NULL))), (* u).helper_binding, Array_list_free((* u).declarations), List_cdr(body));  Compiler_add_early((* u).c, helper);
 }
 
 Type Sym_resolve_key(Sym, Type);
@@ -4759,7 +4849,10 @@ List Compiler_discard_helper(Compiler c, List binding, Type signature, String st
 }
 
 List Compiler_protocol_discard_helper(Compiler c, Type participant, String member, int which){
-  if(! _init_guard_) _file_init_();  List resolved = Compiler_resolve_protocol_member(c, participant, member);  if(! List_truth(resolved)) return NULL;  List binding, signature;  List _x2c_destructure_10 = resolved;  binding = Var_list(List_getindex(_x2c_destructure_10, 0));  signature = Var_list(List_getindex(_x2c_destructure_10, 1));  String stem = String_join(NULL, cons(String_var(String_lower(Var_str(List_car(Type_list(participant))))), cons(String_var(_27633), cons(String_var(member), NULL))));  return Compiler_discard_helper(c, binding, List_type(signature), stem, which);
+  if(! _init_guard_) _file_init_();  List resolved = Compiler_resolve_protocol_member(c, participant, member);  if(! List_truth(resolved)) return NULL;  List binding, signature;  List _x2c_destructure_10 = resolved;  binding = Var_list(List_getindex(_x2c_destructure_10, 0));  signature = Var_list(List_getindex(_x2c_destructure_10, 1));  String stem =({
+    Var _x2c_literal_part_59 = String_var(String_lower(Var_str(List_car(Type_list(participant)))));  String_join(NULL, cons(_x2c_literal_part_59, cons(String_var(_27633), cons(String_var(member), NULL))));
+  }
+  );  return Compiler_discard_helper(c, binding, List_type(signature), stem, which);
 }
 
 String int_str(int);
@@ -4769,7 +4862,10 @@ static void DiscardCall_collect(DiscardCall * d){
     Type parameter;  List _x2c_macro_object_31 = parameters;  List _x2c_macro_cursor_31 = _x2c_macro_object_31;  Var _x2c_macro_cursor_output_35;  while(List_try_next(_x2c_macro_object_31, &(_x2c_macro_cursor_31), &(_x2c_macro_cursor_output_35))){
       parameter = Var_type(_x2c_macro_cursor_output_35); {
         List argument = Sym_introduce((* d).c -> sym, String_join(NULL, cons(String_var(_31448), cons(String_var(int_str(index)), NULL))));  Array_push((* d).declarations, List_var(Type_parameter_ast(parameter, argument)));  Array_push((* d).arguments, List_var(argument));  if((* d).which &(1 << index)){
-          List drop = Compiler_resolve_protocol_member((* d).c, parameter, _32590);  if(List_truth(drop)) Array_push((* d).discards, List_var(Macro_apply(drop_shape, cons(List_car(drop), cons(List_var(argument), NULL)))));
+          List drop = Compiler_resolve_protocol_member((* d).c, parameter, _32590);  if(List_truth(drop)) Array_push((* d).discards, List_var(Macro_apply(drop_shape, ({
+            Var _x2c_literal_part_60 = List_car(drop);  cons(_x2c_literal_part_60, cons(List_var(argument), NULL));
+          }
+          ))));
         }
         index ++;
       }
@@ -4781,7 +4877,22 @@ static void DiscardCall_collect(DiscardCall * d){
 }
 
 static List DiscardCall_emit(DiscardCall * d){
-  String name = String_join(NULL, cons(String_var(_31449), cons(String_var((* d).stem), cons(String_var(_27633), cons(String_var(int_str((* d).which)), NULL)))));  List helper_binding = Sym_introduce((* d).c -> sym, name);  List value_binding = Sym_introduce((* d).c -> sym, _32591);  Macro call_shape = _31494;  List expression = Compiler_bind_syntax((* d).c, List_var(Macro_apply(call_shape, cons(List_var((* d).binding), cons(List_var(Array_list_free((* d).arguments)), NULL)))), AST_EXPRESSION, (* d).result);  Macro void_shape = _31577, value_shape = _31659;  List shape = List_equal(Type_list((* d).result), _3161) ? Macro_apply(void_shape, cons(List_var(expression), cons(List_var(Array_list_free((* d).discards)), NULL))) : Macro_apply(value_shape, cons(List_var((* d).result), cons(List_var(value_binding), cons(List_var(expression), cons(List_var(Array_list_free((* d).discards)), NULL)))));  List body = Compiler_bind_syntax((* d).c, List_var(shape), AST_BLOCK, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_30404, List_append(Type_list((* d).result), NULL))), helper_binding, Array_list_free((* d).declarations), List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry = cons(List_var(helper_binding), cons(List_var((* d).signature), NULL));  Map_setindex((* d).c -> protocol_helpers, List_var((* d).key), List_var(entry));  long identity =(long) helper_binding;  Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_31660), cons(String_var(long_str(identity)), NULL)))), int_var(1));  if((* d).fresh) Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_31334), cons(String_var(long_str(identity)), NULL)))), int_var(1));  return entry;
+  String name =({
+    Var _x2c_literal_part_61 = String_var((* d).stem);  Var _x2c_literal_part_62 = String_var(int_str((* d).which));  String_join(NULL, cons(String_var(_31449), cons(_x2c_literal_part_61, cons(String_var(_27633), cons(_x2c_literal_part_62, NULL)))));
+  }
+  );  List helper_binding = Sym_introduce((* d).c -> sym, name);  List value_binding = Sym_introduce((* d).c -> sym, _32591);  Macro call_shape = _31494;  List expression = Compiler_bind_syntax((* d).c, List_var(Macro_apply(call_shape, ({
+    Var _x2c_literal_part_63 = List_var((* d).binding);  Var _x2c_literal_part_64 = List_var(Array_list_free((* d).arguments));  cons(_x2c_literal_part_63, cons(_x2c_literal_part_64, NULL));
+  }
+  ))), AST_EXPRESSION, (* d).result);  Macro void_shape = _31577, value_shape = _31659;  List shape = List_equal(Type_list((* d).result), _3161) ? Macro_apply(void_shape, ({
+    Var _x2c_literal_part_65 = List_var(expression);  Var _x2c_literal_part_66 = List_var(Array_list_free((* d).discards));  cons(_x2c_literal_part_65, cons(_x2c_literal_part_66, NULL));
+  }
+  )) : Macro_apply(value_shape, ({
+    Var _x2c_literal_part_67 = List_var((* d).result);  Var _x2c_literal_part_68 = List_var(value_binding);  Var _x2c_literal_part_69 = List_var(expression);  Var _x2c_literal_part_70 = List_var(Array_list_free((* d).discards));  cons(_x2c_literal_part_67, cons(_x2c_literal_part_68, cons(_x2c_literal_part_69, cons(_x2c_literal_part_70, NULL))));
+  }
+  ));  List body = Compiler_bind_syntax((* d).c, List_var(shape), AST_BLOCK, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_30404, List_append(Type_list((* d).result), NULL))), helper_binding, Array_list_free((* d).declarations), List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry =({
+    Var _x2c_literal_part_71 = List_var(helper_binding);  Var _x2c_literal_part_72 = List_var((* d).signature);  cons(_x2c_literal_part_71, cons(_x2c_literal_part_72, NULL));
+  }
+  );  Map_setindex((* d).c -> protocol_helpers, List_var((* d).key), List_var(entry));  long identity =(long) helper_binding;  Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_31660), cons(String_var(long_str(identity)), NULL)))), int_var(1));  if((* d).fresh) Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_31334), cons(String_var(long_str(identity)), NULL)))), int_var(1));  return entry;
 }
 
 Map Var_map(Var);
@@ -5060,9 +5171,18 @@ static void ProtocolAdapters_register_descriptor(ProtocolAdapters * a){
 
 static List AdapterFunction_generate(AdapterFunction * a){
   List target_parameters = Var_list(List_cadr(Var_list(List_car(Type_list((* a).target)))));  Type target_result = List_cdr((* a).target);  List source_parameters = Var_list(List_cadr(Var_list(List_car(Type_list((* a).signature)))));  Type source_result = List_cdr((* a).signature);  List template_parameters = Var_list(List_cadr(Var_list(List_car(Type_list((* a).template)))));  Array declarations = Array_new(), arguments = Array_new();  List target_at = target_parameters, template_at = template_parameters;  List source_at = source_parameters;  for(int i = 0;  List_truth(target_at);  i ++, target_at = List_cdr(target_at), template_at = List_cdr(template_at), source_at = List_cdr(source_at)){
-    List binding = Sym_introduce((* a).c -> sym, String_join(NULL, cons(String_var(_31448), cons(String_var(int_str(i)), NULL))));  Type parameter = Var_type(List_car(target_at));  Array_push(declarations, List_var(Type_parameter_ast(parameter, binding)));  List argument = cons(_28, cons(List_var(parameter), cons(List_var(cons(_393, cons(List_var(binding), NULL))), NULL)));  if(_variable_is(List_car(template_at), (* a).variables, (* a).binder)) argument = cons(_28, cons(List_car(source_at), cons(List_var(cons(_145, cons(String_var((* a).reverse), cons(List_var(cons(_70, cons(List_var(argument), NULL))), NULL)))), NULL)));  Array_push(arguments, List_var(argument));
+    List binding = Sym_introduce((* a).c -> sym, String_join(NULL, cons(String_var(_31448), cons(String_var(int_str(i)), NULL))));  Type parameter = Var_type(List_car(target_at));  Array_push(declarations, List_var(Type_parameter_ast(parameter, binding)));  List argument = cons(_28, cons(List_var(parameter), cons(List_var(cons(_393, cons(List_var(binding), NULL))), NULL)));  if(_variable_is(List_car(template_at), (* a).variables, (* a).binder)) argument =({
+      Var _x2c_literal_part_73 = List_car(source_at);  Var _x2c_literal_part_74 = List_var(({
+        Var _x2c_literal_part_75 = String_var((* a).reverse);  cons(_145, cons(_x2c_literal_part_75, cons(List_var(cons(_70, cons(List_var(argument), NULL))), NULL)));
+      }
+      ));  cons(_28, cons(_x2c_literal_part_73, cons(_x2c_literal_part_74, NULL)));
+    }
+    );  Array_push(arguments, List_var(argument));
   }
-  List source_binding = Sym_reference((* a).c -> sym, cons(String_var((* a).source), NULL), NULL);  List call = Compiler__bound_call((* a).c, source_result, cons(_28, cons(List_var((* a).signature), cons(List_var(cons(_393, cons(List_var(source_binding), NULL))), NULL))), Array_list_free(arguments)); (* a).binding = Sym_reference((* a).c -> sym, cons(String_var((* a).name), NULL), NULL);  if((* a).make_static)(* a).binding = Sym_introduce((* a).c -> sym, (* a).name);  List storage =(* a).make_static ? cons(_30404, cons(_31773, List_append(Type_list(target_result), NULL))) : Type_list(target_result);  return Compiler_wrapper_function((* a).c, List_type(storage), (* a).binding, Array_list_free(declarations), cons(List_var(cons(_30212, cons(List_var(target_result), cons(List_var(call), NULL)))), NULL));
+  List source_binding = Sym_reference((* a).c -> sym, cons(String_var((* a).source), NULL), NULL);  List call = Compiler__bound_call((* a).c, source_result, ({
+    Var _x2c_literal_part_76 = List_var((* a).signature);  cons(_28, cons(_x2c_literal_part_76, cons(List_var(cons(_393, cons(List_var(source_binding), NULL))), NULL)));
+  }
+  ), Array_list_free(arguments)); (* a).binding = Sym_reference((* a).c -> sym, cons(String_var((* a).name), NULL), NULL);  if((* a).make_static)(* a).binding = Sym_introduce((* a).c -> sym, (* a).name);  List storage =(* a).make_static ? cons(_30404, cons(_31773, List_append(Type_list(target_result), NULL))) : Type_list(target_result);  return Compiler_wrapper_function((* a).c, List_type(storage), (* a).binding, Array_list_free(declarations), cons(List_var(cons(_30212, cons(List_var(target_result), cons(List_var(call), NULL)))), NULL));
 }
 
 List Compiler_rebuild_function(Compiler, List, List);
@@ -5100,7 +5220,13 @@ static List Compiler__signature_declaration(Compiler c, String name, Type signat
     }
 
   }
-  List binding = Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);  List storage = make_static ? cons(_30404, List_append(Type_list(result), NULL)) : Type_list(result);  return cons(_2488, cons(List_var(storage), cons(List_var(cons(_2489, cons(List_var(cons(_2491, cons(List_var(binding), cons(List_var(cons(List_var(cons(_30889, cons(List_var(cons(_30890, List_append(Array_list_free(declarations), NULL))), NULL))), NULL)), NULL)))), NULL))), NULL)));
+  List binding = Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);  List storage = make_static ? cons(_30404, List_append(Type_list(result), NULL)) : Type_list(result);  return({
+    Var _x2c_literal_part_77 = List_var(storage);  Var _x2c_literal_part_78 = List_var(cons(_2489, cons(List_var(({
+      Var _x2c_literal_part_79 = List_var(binding);  Var _x2c_literal_part_80 = List_var(cons(List_var(cons(_30889, cons(List_var(cons(_30890, List_append(Array_list_free(declarations), NULL))), NULL))), NULL));  cons(_2491, cons(_x2c_literal_part_79, cons(_x2c_literal_part_80, NULL)));
+    }
+    )), NULL)));  cons(_2488, cons(_x2c_literal_part_77, cons(_x2c_literal_part_78, NULL)));
+  }
+  );
 }
 
 Symbol Type_var_tag(Type);
@@ -5131,11 +5257,17 @@ static List Compiler__builtin_registration(Compiler c, List methods, String name
 }
 
 static List Compiler__tagged_registration(Compiler c, List methods, String name, Symbol tag){
-  List symbol = cons(_28, cons(_167, cons(List_var(cons(_168, cons(_167, cons(String_var(Symbol_str(tag)), cons(Symbol_var(tag), NULL))))), NULL)));  List table = cons(_28, cons(_32287, cons(List_var(cons(_393, cons(List_var(methods), NULL))), NULL)));  return Compiler__helper_call(c, List_type(_3161), _32601, cons(List_var(symbol), cons(List_var(_string_literal(name)), cons(List_var(table), NULL))));
+  List symbol = cons(_28, cons(_167, cons(List_var(cons(_168, cons(_167, cons(String_var(Symbol_str(tag)), cons(Symbol_var(tag), NULL))))), NULL)));  List table = cons(_28, cons(_32287, cons(List_var(cons(_393, cons(List_var(methods), NULL))), NULL)));  return Compiler__helper_call(c, List_type(_3161), _32601, ({
+    Var _x2c_literal_part_81 = List_var(symbol);  Var _x2c_literal_part_82 = List_var(_string_literal(name));  cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, cons(List_var(table), NULL)));
+  }
+  ));
 }
 
 static List Compiler__fallback_registration(Compiler c, List methods, String name, List early_call){
-  List table = cons(_28, cons(_32287, cons(List_var(cons(_393, cons(List_var(methods), NULL))), NULL)));  List fallback = Compiler__helper_call(c, List_type(_3161), _32602, cons(List_var(_string_literal(name)), cons(List_var(table), NULL)));  Macro shape = _32435;  return Var_list(List_cadr(Compiler_rebuild_statement(c, Macro_apply(shape, cons(List_var(early_call), cons(List_var(fallback), NULL))))));
+  List table = cons(_28, cons(_32287, cons(List_var(cons(_393, cons(List_var(methods), NULL))), NULL)));  List fallback = Compiler__helper_call(c, List_type(_3161), _32602, ({
+    Var _x2c_literal_part_83 = List_var(_string_literal(name));  cons(_x2c_literal_part_83, cons(List_var(table), NULL));
+  }
+  ));  Macro shape = _32435;  return Var_list(List_cadr(Compiler_rebuild_statement(c, Macro_apply(shape, cons(List_var(early_call), cons(List_var(fallback), NULL))))));
 }
 
 static List Compiler__helper_call(Compiler c, Type result, String callee, List arguments){

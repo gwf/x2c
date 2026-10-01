@@ -521,7 +521,10 @@ String home_portable_path(String);
 
 static String _input_name(Compiler c, String filename){
   if(! String_startswith(filename, _30233)) return filename;
-  String canonical = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_dirname(filename))), cons(String_var(_2049), cons(String_var(Path_basename(filename)), NULL))));
+  String canonical =({
+    Var _x2c_literal_part_0 = String_var(Compiler_canonical_path(c, Path_dirname(filename)));  Var _x2c_literal_part_1 = String_var(Path_basename(filename));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_2049), cons(_x2c_literal_part_1, NULL))));
+  }
+  );
   return ! String_equal(home_portable_path(canonical), canonical) ? canonical : filename;
 }
 

@@ -650,7 +650,10 @@ static void Manifest_field(Manifest * m, char * line){
 }
 
 static void Manifest_extend(Manifest * m, char * line){
-  (* m).value = String_join(NULL, cons(String_var((* m).value), cons(String_var(_4), cons(String_var(String_new(line)), NULL))));
+  (* m).value =({
+    Var _x2c_literal_part_0 = String_var((* m).value);  Var _x2c_literal_part_1 = String_var(String_new(line));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_4), cons(_x2c_literal_part_1, NULL))));
+  }
+  );
   Manifest_settle(&((* m)));
 }
 
@@ -1103,7 +1106,10 @@ static void _write_lock(String path, List rows){
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       row = Var_list(_x2c_macro_cursor_output_4);
-      text = String_join(NULL, cons(String_var(text), cons(String_var(String_join(_29, row)), cons(String_var(_30), NULL))));
+      text =({
+        Var _x2c_literal_part_2 = String_var(text);  Var _x2c_literal_part_3 = String_var(String_join(_29, row));  String_join(NULL, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(String_var(_30), NULL))));
+      }
+      );
     }
 
   }
@@ -1180,9 +1186,18 @@ static CliRequest _target_request(Project p, ProjectTarget target){
   * request = * command;
   _set_product(p, target, request);
   request -> inputs = _target_inputs(p, target, request -> kind);
-  request -> native_modules = List_append(command -> native_modules, List_append(_target_modules(p, target), NULL));
-  request -> include_dirs = List_append(command -> include_dirs, List_append(_paths(p -> root, target -> include_dirs), NULL));
-  request -> package_dirs = List_append(command -> package_dirs, List_append(_paths(p -> root, target -> package_dirs), NULL));
+  request -> native_modules =({
+    List _x2c_literal_part_4 = command -> native_modules;  List _x2c_literal_part_5 = _target_modules(p, target);  List_append(_x2c_literal_part_4, List_append(_x2c_literal_part_5, NULL));
+  }
+  );
+  request -> include_dirs =({
+    List _x2c_literal_part_6 = command -> include_dirs;  List _x2c_literal_part_7 = _paths(p -> root, target -> include_dirs);  List_append(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
+  }
+  );
+  request -> package_dirs =({
+    List _x2c_literal_part_8 = command -> package_dirs;  List _x2c_literal_part_9 = _paths(p -> root, target -> package_dirs);  List_append(_x2c_literal_part_8, List_append(_x2c_literal_part_9, NULL));
+  }
+  );
   _set_flags(p, target, request);
   request -> label = target -> name;
   request -> state_seed = String_join(NULL, cons(String_var(p -> path), cons(String_var(_31), cons(String_var(target -> name), cons(String_var(_32), cons(String_var(command -> profile), NULL))))));
@@ -1397,8 +1412,14 @@ static void _set_flags(Project p, ProjectTarget target, CliRequest request){
     link = profile -> link_flags;
   }
   request -> cpp_args = List_append(defines, List_append(profile_defines, List_append(command -> cpp_args, NULL)));
-  request -> cc_args = List_append(defines, List_append(_c_flags(p, target -> c_flags), List_append(profile_defines, List_append(compile, List_append(command -> cc_args, List_append(_path_options(p -> root, target -> include_dirs, _113), NULL))))));
-  request -> ld_args = List_append(_path_options(p -> root, target -> library_dirs, _114), List_append(List_map(target -> libraries, _x2c_func_handle_0), List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
+  request -> cc_args =({
+    List _x2c_literal_part_10 = defines;  List _x2c_literal_part_11 = _c_flags(p, target -> c_flags);  List _x2c_literal_part_12 = profile_defines;  List _x2c_literal_part_13 = compile;  List _x2c_literal_part_14 = command -> cc_args;  List _x2c_literal_part_15 = _path_options(p -> root, target -> include_dirs, _113);  List_append(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, List_append(_x2c_literal_part_14, List_append(_x2c_literal_part_15, NULL))))));
+  }
+  );
+  request -> ld_args =({
+    List _x2c_literal_part_16 = _path_options(p -> root, target -> library_dirs, _114);  List _x2c_literal_part_17 = List_map(target -> libraries, _x2c_func_handle_0);  List_append(_x2c_literal_part_16, List_append(_x2c_literal_part_17, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
+  }
+  );
 }
 
 static ProjectProfile _target_profile(Project p, ProjectTarget target){
@@ -1415,7 +1436,12 @@ static List _profile_flags(Project p, ProjectProfile profile){
   List cc_args = p -> command -> cc_args;
   int optimized = List_any(cc_args, _x2c_func_handle_1);
   int debug = profile -> debug && !(List_contains(cc_args, String_var(_41)));
-  return List_append(_c_flags(p, profile -> c_flags), List_append(String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_42), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL, List_append(debug ? _45 : NULL, NULL)));
+  return({
+    List _x2c_literal_part_18 = _c_flags(p, profile -> c_flags);  List _x2c_literal_part_19 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_42), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;
+    List _x2c_literal_part_20 = debug ? _45 : NULL;
+    List_append(_x2c_literal_part_18, List_append(_x2c_literal_part_19, List_append(_x2c_literal_part_20, NULL)));
+  }
+  );
 }
 
 int cli_dependency_pass_through(String);
@@ -1600,7 +1626,10 @@ static Var _x2c_lambda_3(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
   Var path = x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 45156);
   const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
-  return List_var(cons(String_var(Var_string(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1)), cons(path, NULL)));
+  return List_var(({
+    Var _x2c_literal_part_21 = String_var(Var_string(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_1));  cons(_x2c_literal_part_21, cons(path, NULL));
+  }
+  ));
   ;
 }
 

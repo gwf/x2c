@@ -716,7 +716,10 @@ String x2c_get_root(void);
 static String _resolve(String directory, String spelling){
   String local = String_startswith(spelling, _106) ? spelling : String_join(NULL, cons(String_var(directory), cons(String_var(_9), cons(String_var(spelling), NULL))));
   if(Path_is_file(local)) return Path_absolute(local);
-  String system = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_10), cons(String_var(spelling), NULL))));
+  String system =({
+    Var _x2c_literal_part_0 = String_var(x2c_get_root());  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_10), cons(String_var(spelling), NULL))));
+  }
+  );
   return Path_is_file(system) ? system : NULL;
 }
 
@@ -746,7 +749,10 @@ String Compiler_extension_archive(void);
 
 static List _group_flags(CliRequest request, Map packages){
   List includes = List_flatten(List_map(request -> include_dirs, _x2c_func_handle_0));
-  List flags = List_append(includes, List_append(_host_args(request -> cc_args), NULL));
+  List flags =({
+    List _x2c_literal_part_1 = includes;  List _x2c_literal_part_2 = _host_args(request -> cc_args);  List_append(_x2c_literal_part_1, List_append(_x2c_literal_part_2, NULL));
+  }
+  );
   {
     Var root, _;
     Map _x2c_macro_object_6 = packages;
@@ -761,7 +767,11 @@ static List _group_flags(CliRequest request, Map packages){
 
   }
   String archive = Compiler_extension_archive();
-  if(String_truth(archive)) flags = cons(_23, cons(String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_26), NULL)))), List_append(flags, NULL)));
+  if(String_truth(archive)) flags =({
+    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(Path_dirname(archive)), cons(String_var(_26), NULL))));
+    cons(_23, cons(_x2c_literal_part_3, List_append(flags, NULL)));
+  }
+  );
   return flags;
 }
 
@@ -818,7 +828,13 @@ String String_sha256(String);
 
 static String Helper_identify(Helper * h, String stamp, String compiler){
   String loop = _loop_source();
-  return String_add(String_add(String_add(String_join(NULL, cons(String_var(stamp), cons(String_var(_34), cons(String_var(compiler), cons(String_var(_34), cons(String_var(List_repr(_cc_flags())), cons(String_var(_34), NULL))))))), String_join(NULL, cons(String_var(List_repr((* h).flags)), cons(String_var(_34), cons(String_var((* h).include), cons(String_var(_34), cons(String_var((* h).toolchain -> runtime_lib), cons(String_var(_34), NULL)))))))), String_join(NULL, cons(String_var(List_repr(Array_list((* h).modules))), cons(String_var(_34), NULL)))), (Path_is_file(loop) ? String_sha256(Path_read_text(loop)) : ""));
+  return String_add(String_add(String_add(({
+    Var _x2c_literal_part_4 = String_var(stamp);  Var _x2c_literal_part_5 = String_var(compiler);  Var _x2c_literal_part_6 = String_var(List_repr(_cc_flags()));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_34), cons(_x2c_literal_part_5, cons(String_var(_34), cons(_x2c_literal_part_6, cons(String_var(_34), NULL)))))));
+  }
+  ), ({
+    Var _x2c_literal_part_7 = String_var(List_repr((* h).flags));  Var _x2c_literal_part_8 = String_var((* h).include);  Var _x2c_literal_part_9 = String_var((* h).toolchain -> runtime_lib);  String_join(NULL, cons(_x2c_literal_part_7, cons(String_var(_34), cons(_x2c_literal_part_8, cons(String_var(_34), cons(_x2c_literal_part_9, cons(String_var(_34), NULL)))))));
+  }
+  )), String_join(NULL, cons(String_var(List_repr(Array_list((* h).modules))), cons(String_var(_34), NULL)))), (Path_is_file(loop) ? String_sha256(Path_read_text(loop)) : ""));
 }
 
 static List _cc_flags(void){
@@ -846,7 +862,10 @@ static String _directory(String root, String identity, Array imports, Array owne
     }
 
   }
-  return String_join(NULL, cons(String_var(root), cons(String_var(_44), cons(String_var(String_sha256(String_join(_45, Array_list(key)))), NULL))));
+  return({
+    Var _x2c_literal_part_10 = String_var(root);  Var _x2c_literal_part_11 = String_var(String_sha256(String_join(_45, Array_list(key))));  String_join(NULL, cons(_x2c_literal_part_10, cons(String_var(_44), cons(_x2c_literal_part_11, NULL))));
+  }
+  );
 }
 
 void Compiler_use_meta_build_directory(String);
@@ -861,7 +880,10 @@ static List Helper_build(Helper * h){
   String loop = _loop_source();
   {
     String path;
-    List _x2c_macro_object_9 = List_append(Array_list((* h).imports), List_append(Array_list((* h).owners), List_append(Array_list((* h).modules), cons(String_var(loop), NULL))));
+    List _x2c_macro_object_9 =({
+      List _x2c_literal_part_12 = Array_list((* h).imports);  List _x2c_literal_part_13 = Array_list((* h).owners);  List _x2c_literal_part_14 = Array_list((* h).modules);  List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, List_append(_x2c_literal_part_14, cons(String_var(loop), NULL))));
+    }
+    );
     List _x2c_macro_cursor_9 = _x2c_macro_object_9;
     Var _x2c_macro_cursor_output_9;
     while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
@@ -890,7 +912,10 @@ static List Helper_build(Helper * h){
 String int_str(int);
 
 static String Helper_base(Helper * h, int index){
-  return String_join(NULL, cons(String_var((* h).directory), cons(String_var(_47), cons(String_var(int_str(index)), NULL))));
+  return({
+    Var _x2c_literal_part_15 = String_var((* h).directory);  String_join(NULL, cons(_x2c_literal_part_15, cons(String_var(_47), cons(String_var(int_str(index)), NULL))));
+  }
+  );
 }
 
 int Path_exists(Path);
@@ -989,7 +1014,10 @@ static String Helper_compile(Helper * h, int index, String unit){
   }
   if(Path_is_file(String_join(NULL, cons(String_var(base), cons(String_var(_52), NULL))))) return Path_read_text(String_join(NULL, cons(String_var(base), cons(String_var(_52), NULL))));
   Toolchain t =(* h).toolchain;
-  String failure = Compiler_meta_cc_run(cons(String_var(t -> cc), List_append(_cc_flags(), cons(_23, cons(String_var((* h).directory), cons(_23, cons(String_var(Path_dirname(unit)), cons(_23, cons(String_var((* h).include), List_append((* h).flags, cons(_58, cons(_60, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL)))), cons(_63, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_48), NULL)))), cons(_65, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))), NULL)))))))))))))))), (* h).directory);
+  String failure = Compiler_meta_cc_run(({
+    Var _x2c_literal_part_16 = String_var(t -> cc);  List _x2c_literal_part_17 = _cc_flags();  Var _x2c_literal_part_18 = String_var((* h).directory);  Var _x2c_literal_part_19 = String_var(Path_dirname(unit));  Var _x2c_literal_part_20 = String_var((* h).include);  List _x2c_literal_part_21 =(* h).flags;  cons(_x2c_literal_part_16, List_append(_x2c_literal_part_17, cons(_23, cons(_x2c_literal_part_18, cons(_23, cons(_x2c_literal_part_19, cons(_23, cons(_x2c_literal_part_20, List_append(_x2c_literal_part_21, cons(_58, cons(_60, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL)))), cons(_63, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_48), NULL)))), cons(_65, cons(String_var(String_join(NULL, cons(String_var(base), cons(String_var(_46), NULL)))), NULL))))))))))))))));
+  }
+  ), (* h).directory);
   if(! String_truth(failure)) failure = _localize(t, base, index);
   _add_depfile(String_join(NULL, cons(String_var(base), cons(String_var(_61), NULL))), (* h).deps);
   return failure;
@@ -1088,8 +1116,14 @@ static String Helper_support(Helper * h, String * failure){
     (* failure) = String_join(NULL, cons(String_var(_78), cons(String_var(source), NULL)));
     return NULL;
   }
-  String key = String_sha256(String_join(NULL, cons(String_var((* h).identity), cons(String_var(_34), cons(String_var(String_sha256(Path_read_text(source))), NULL)))));
-  String directory = String_join(NULL, cons(String_var(script_cache_root()), cons(String_var(_79), cons(String_var(key), NULL))));
+  String key = String_sha256(({
+    Var _x2c_literal_part_22 = String_var((* h).identity);  Var _x2c_literal_part_23 = String_var(String_sha256(Path_read_text(source)));  String_join(NULL, cons(_x2c_literal_part_22, cons(String_var(_34), cons(_x2c_literal_part_23, NULL))));
+  }
+  ));
+  String directory =({
+    Var _x2c_literal_part_24 = String_var(script_cache_root());  String_join(NULL, cons(_x2c_literal_part_24, cons(String_var(_79), cons(String_var(key), NULL))));
+  }
+  );
   String object = String_join(NULL, cons(String_var(directory), cons(String_var(_80), NULL)));
   if(Path_is_file(object)) return object;
   Path_make_dirs(directory);
@@ -1138,10 +1172,19 @@ String String_strip(String, char *);
 
 static String Helper_compile_support(Helper * h, String source, String directory, String object){
   String printed = NULL, errors = NULL;
-  if(tool_capture(cons(String_var(x2c_get_executable()), cons(_82, cons(_84, cons(String_var(directory), cons(String_var(source), NULL))))), &(printed), &(errors))) return String_join(NULL, cons(String_var(_85), cons(String_var(source), cons(String_var(_86), cons(String_var(String_strip(errors, NULL)), NULL)))));
+  if(tool_capture(({
+    Var _x2c_literal_part_25 = String_var(x2c_get_executable());  cons(_x2c_literal_part_25, cons(_82, cons(_84, cons(String_var(directory), cons(String_var(source), NULL)))));
+  }
+  ), &(printed), &(errors))) return({
+    Var _x2c_literal_part_26 = String_var(source);  Var _x2c_literal_part_27 = String_var(String_strip(errors, NULL));  String_join(NULL, cons(String_var(_85), cons(_x2c_literal_part_26, cons(String_var(_86), cons(_x2c_literal_part_27, NULL)))));
+  }
+  );
   Toolchain t =(* h).toolchain;
   String include =(* h).include, output = _temporary(object);
-  String failure = Compiler_meta_cc_run(cons(String_var(t -> cc), List_append(_cc_flags(), cons(_23, cons(String_var(directory), cons(_23, cons(String_var(include), cons(_63, cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_87), NULL)))), cons(_65, cons(String_var(output), NULL)))))))))), NULL);
+  String failure = Compiler_meta_cc_run(({
+    Var _x2c_literal_part_28 = String_var(t -> cc);  List _x2c_literal_part_29 = _cc_flags();  cons(_x2c_literal_part_28, List_append(_x2c_literal_part_29, cons(_23, cons(String_var(directory), cons(_23, cons(String_var(include), cons(_63, cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_87), NULL)))), cons(_65, cons(String_var(output), NULL))))))))));
+  }
+  ), NULL);
   if(! String_truth(failure)) Path_move_to(output, object);
   return failure;
 }
@@ -1149,7 +1192,10 @@ static String Helper_compile_support(Helper * h, String source, String directory
 String String_printf(String, ...);
 
 static String _temporary(String path){
-  return String_join(NULL, cons(String_var(path), cons(String_var(_88), cons(String_var(String_printf(_89, (long) getpid())), NULL))));
+  return({
+    Var _x2c_literal_part_30 = String_var(path);  Var _x2c_literal_part_31 = String_var(String_printf(_89, (long) getpid()));  String_join(NULL, cons(_x2c_literal_part_30, cons(String_var(_88), cons(_x2c_literal_part_31, NULL))));
+  }
+  );
 }
 
 Buffer Buffer_new(size_t);
@@ -1202,17 +1248,26 @@ static List Helper_link_arguments(Helper * h, String output, String tables, Stri
 #else
   t -> ld_args = cons(_92, cons(String_var(t -> runtime_lib), _95));
 #endif
-  List inputs = List_append(Array_list((* h).objects), cons(String_var(tables), cons(String_var(support), NULL)));
+  List inputs =({
+    List _x2c_literal_part_32 = Array_list((* h).objects);  List_append(_x2c_literal_part_32, cons(String_var(tables), cons(String_var(support), NULL)));
+  }
+  );
   String archive = Compiler_extension_archive();
   if(String_truth(archive)) inputs = List_append(inputs, cons(String_var(archive), NULL));
   ToolAction link = Toolchain_link_action(t, output, inputs);
-  return List_append(link -> arguments, List_append(_cc_flags(), cons(_23, cons(String_var((* h).include), NULL))));
+  return({
+    List _x2c_literal_part_33 = link -> arguments;  List _x2c_literal_part_34 = _cc_flags();  Var _x2c_literal_part_35 = String_var((* h).include);  List_append(_x2c_literal_part_33, List_append(_x2c_literal_part_34, cons(_23, cons(_x2c_literal_part_35, NULL))));
+  }
+  );
 }
 
 int datum_write(Buffer, Var, int);
 
 static List Helper_write_manifest(Helper * h, String failure){
-  List manifest = cons(List_var(cons(_96, cons(List_var(Array_list((* h).groups)), NULL))), cons(List_var(cons(_97, cons(List_var(Array_list((* h).failures)), NULL))), cons(List_var(cons(_98, cons(String_truth(failure) ? String_var(failure) : String_var(_99), NULL))), cons(List_var(cons(_100, cons(List_var(_digests((* h).deps)), NULL))), NULL))));
+  List manifest =({
+    Var _x2c_literal_part_36 = List_var(cons(_96, cons(List_var(Array_list((* h).groups)), NULL)));  Var _x2c_literal_part_37 = List_var(cons(_97, cons(List_var(Array_list((* h).failures)), NULL)));  Var _x2c_literal_part_38 = List_var(cons(_98, cons(String_truth(failure) ? String_var(failure) : String_var(_99), NULL)));  Var _x2c_literal_part_39 = List_var(cons(_100, cons(List_var(_digests((* h).deps)), NULL)));  cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, NULL))));
+  }
+  );
   Buffer out = Buffer_new(0);
   {
     _x2c_defer_env_3 _x2c_macro_environment_3 ={

@@ -716,7 +716,10 @@ static Map Translation_package_names(Translation * t, List roots){
           }
 
         }
-        String depfile = String_join(NULL, cons(String_var(Translation_output_dir(&((* t)), input)), cons(String_var(_17), cons(String_var(Path_stem(input)), cons(String_var(_26), NULL)))));
+        String depfile =({
+          Var _x2c_literal_part_0 = String_var(Translation_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_17), cons(_x2c_literal_part_1, cons(String_var(_26), NULL)))));
+        }
+        );
         String volatile text = NULL;
         {
           ExceptionFrame _x2c_exception_frame_0;
@@ -1235,7 +1238,10 @@ static List _env_rows(CliRequest request){
   String executable = x2c_get_executable();
   String roots = String_join(_33, CliRequest_package_roots(request));
   interface_configure(request -> out_dir, 0);
-  return cons(List_var(cons(_35, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_37, cons(String_var(executable), NULL))), cons(List_var(cons(_39, cons(String_var(home_libexec()), NULL))), cons(List_var(cons(_41, cons(String_var(compiler_identity()), NULL))), cons(List_var(cons(_43, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_45, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_47, cons(String_var(interface_prelude()), NULL))), cons(List_var(cons(_49, cons(String_var(roots), NULL))), cons(List_var(cons(_51, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_53, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_55, cons(String_var(script_cache_root()), NULL))), NULL)))))))))));
+  return({
+    Var _x2c_literal_part_2 = List_var(cons(_35, cons(String_var(x2c_get_root()), NULL)));  Var _x2c_literal_part_3 = List_var(cons(_37, cons(String_var(executable), NULL)));  Var _x2c_literal_part_4 = List_var(cons(_39, cons(String_var(home_libexec()), NULL)));  Var _x2c_literal_part_5 = List_var(cons(_41, cons(String_var(compiler_identity()), NULL)));  Var _x2c_literal_part_6 = List_var(cons(_43, cons(String_var(toolchain -> include_dir), NULL)));  Var _x2c_literal_part_7 = List_var(cons(_45, cons(String_var(toolchain -> runtime_lib), NULL)));  Var _x2c_literal_part_8 = List_var(cons(_47, cons(String_var(interface_prelude()), NULL)));  Var _x2c_literal_part_9 = List_var(cons(_49, cons(String_var(roots), NULL)));  Var _x2c_literal_part_10 = List_var(cons(_51, cons(String_var(toolchain -> cc), NULL)));  Var _x2c_literal_part_11 = List_var(cons(_53, cons(String_var(toolchain -> ar), NULL)));  Var _x2c_literal_part_12 = List_var(cons(_55, cons(String_var(script_cache_root()), NULL)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)))))))))));
+  }
+  );
 }
 
 int strcmp(const char *, const char *);
@@ -1260,7 +1266,10 @@ static String _external_path(const char * name){
   if(! _external_name(name) || cli_builtin_command(name)) return NULL;
   String libexec = home_libexec();
   if(! String_truth(libexec)) return NULL;
-  String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_56), cons(String_var(String_new(name)), NULL))));
+  String path =({
+    Var _x2c_literal_part_13 = String_var(libexec);  Var _x2c_literal_part_14 = String_var(String_new(name));  String_join(NULL, cons(_x2c_literal_part_13, cons(String_var(_56), cons(_x2c_literal_part_14, NULL))));
+  }
+  );
   return Path_is_executable(path) ? path : NULL;
 }
 
@@ -1282,7 +1291,10 @@ static void _exec(String path, char * * args){
   if(String_truth(identity)) setenv("X2C_IDENTITY", identity, 1);
   args[0] = path;
   execv(path, args);
-  driver_error(String_join(NULL, cons(String_var(_57), cons(String_var(path), cons(String_var(_58), cons(String_var(String_new(strerror(errno))), NULL))))));
+  driver_error(({
+    Var _x2c_literal_part_15 = String_var(path);  Var _x2c_literal_part_16 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_57), cons(_x2c_literal_part_15, cons(String_var(_58), cons(_x2c_literal_part_16, NULL)))));
+  }
+  ));
 }
 
 void x2c_initialize_environment(const char *);

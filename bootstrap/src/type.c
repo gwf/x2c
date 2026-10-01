@@ -637,7 +637,10 @@ static List _from_aggregate(List node, Var head){
   if(Type_is_aggregate_tag(List_type(node))) return node;  if(Type__is_aggregate_body(List_type(node))){
     List fields = List_flatten(_from_ast(Var_list(List_cadr(node)), NULL));  return cons(head, cons(List_var(fields), NULL));
   }
-  return cons(head, cons(List_cadr(node), NULL));
+  return({
+    Var _x2c_literal_part_0 = head;  Var _x2c_literal_part_1 = List_cadr(node);  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+  }
+  );
 }
 
 int List_len(List);
@@ -703,7 +706,10 @@ Array_push(modifiers, modifier);
 if(! changed){
   Array_free(modifiers);  return declarator;
 }
-return cons(_202, cons(List_cadr(declarator), cons(List_var(Array_list_free(modifiers)), NULL)));
+return({
+  Var _x2c_literal_part_2 = List_cadr(declarator);  Var _x2c_literal_part_3 = List_var(Array_list_free(modifiers));  cons(_202, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+}
+);
 }
 
 static List _prototype_params(List parameters, int * changed){
@@ -1220,11 +1226,17 @@ Var Map_setindex(Map, Var, Var);
 Symbol String_symbol(String);
 String String_lower(String);
 void Type_register_var_tag(Type t, String name, String converter){
-  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(String_symbol(String_lower(name))), cons(String_var(converter), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(({
+    Var _x2c_literal_part_4 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_literal_part_4, cons(String_var(converter), NULL));
+  }
+  )));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){
-  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(cons(Symbol_var(tag), cons(List_cadr(Var_list(row)), NULL))));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(({
+    Var _x2c_literal_part_5 = Symbol_var(tag);  Var _x2c_literal_part_6 = List_cadr(Var_list(row));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+  }
+  )));
 }
 
 void Type_begin_unit(void){

@@ -428,7 +428,10 @@ int datum_frame(Buffer out, Var value){
         }
 
       }
-      Buffer_write(out, String_join(NULL, cons(String_var(Var_str(Var_box_ulong(Buffer_len(body)))), cons(String_var(_36), cons(String_var(Buffer_str(body)), NULL)))));
+      Buffer_write(out, ({
+        Var _x2c_literal_part_0 = String_var(Var_str(Var_box_ulong(Buffer_len(body))));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_36), cons(String_var(Buffer_str(body)), NULL))));
+      }
+      ));
       {
         int _x2c_return_value_1 = 1;
         {
