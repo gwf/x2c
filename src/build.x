@@ -84,7 +84,7 @@ static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
 Build CliRequest.prepare(CliRequest request) {
   request._add_extensions();
   if (!request.inputs)
-    x2c_driver_error("build requires input operands or a project manifest");
+    driver_error("build requires input operands or a project manifest");
   Build b = Scope.calloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
@@ -120,13 +120,13 @@ static void Build._add_inputs(Build b) {
     // A dry run runs nothing and reads nothing, and a planned target's
     // archive exists only after the build it is printing would run.
     if (!request.dry_run) build_check_input(input);
-    if (x2c_source_file(input)) b.xlat_n++;
+    if (is_source_file(input)) b.xlat_n++;
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       b.native_inputs.push(input);
-    else x2c_driver_error(%"unsupported build input: $input");
+    else driver_error(%"unsupported build input: $input");
     if (request.kind == <static-lib> && input.endswith(".a"))
-      x2c_driver_error(%"cannot nest an archive in a static library: $input");
+      driver_error(%"cannot nest an archive in a static library: $input");
   }
 }
 
@@ -134,7 +134,7 @@ static void Build._add_inputs(Build b) {
     A wildcard or directory operand adds a note on what to pass instead.
 */
 void build_check_input(String input) {
-  if (!input) x2c_driver_error("input path is empty");
+  if (!input) driver_error("input path is empty");
   if (Path.is_file(input)) return;
   if (Path.is_dir(input)) {
     fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
@@ -144,7 +144,7 @@ void build_check_input(String input) {
     exit(2);
   }
   if (Path.exists(input))
-    x2c_driver_error(%"input is not a regular file: $input");
+    driver_error(%"input is not a regular file: $input");
   fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
   if (strpbrk(input, "*?["))
     fputs("note: x2c does not expand wildcard operands\n", stderr);
@@ -156,12 +156,12 @@ void build_check_input(String input) {
 static void Build._check_compile_only(Build b) {
   List inputs = b.request.inputs;
   if (b.native_inputs)
-    x2c_driver_error("compile-only accepts only .x and .c inputs");
+    driver_error("compile-only accepts only .x and .c inputs");
   if (inputs.cdr() && b.request.output)
-    x2c_driver_error(
+    driver_error(
       "--output is ambiguous with multiple compile-only inputs");
   if (inputs.cdr() && !b.request.build_dir)
-    x2c_driver_error("multiple compile-only inputs require --build-dir");
+    driver_error("multiple compile-only inputs require --build-dir");
 }
 
 /* The selected compiler and archiver go back to the request. */
@@ -203,7 +203,7 @@ static void Build._make_work_dirs(Build b) {
     if (!request.dry_run)
       foreach (Path root, roots) if (root) root.make_dirs();
   }
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): host_error(detail);
 }
 
 static String _kept_dir(CliRequest request) {
@@ -217,7 +217,7 @@ static void Build._check_runtime(Build b) {
   if (b.request.compile_only || b.request.kind != <executable>) return;
   String runtime = b.toolchain.runtime_lib;
   if (access(runtime, R_OK))
-    x2c_driver_error(%"matching x2c runtime is unavailable: $runtime");
+    driver_error(%"matching x2c runtime is unavailable: $runtime");
 }
 
 // translated units
@@ -337,7 +337,7 @@ static void Build._link_packages(Build b, String input, String directory) {
     // A unit under a package directory that is not the package's own
     // source, such as a script kept beside it, consumes nothing by itself.
     if (dependency == self || dependency == input) continue;
-    String package = x2c_package_directory(roots, dependency);
+    String package = package_directory(roots, dependency);
     if (package && !b._package_built_here(roots, package))
       b._link_package(package);
   }
@@ -350,8 +350,8 @@ static void Build._link_packages(Build b, String input, String directory) {
 static int Build._package_built_here(Build b, List roots, String package) {
   foreach (String input, b.request.inputs) {
     String source = Path.absolute(input);
-    if (x2c_package_directory(roots, source) == package &&
-        x2c_package_source(package, source)) return 1;
+    if (package_directory(roots, source) == package &&
+        package_source(package, source)) return 1;
   }
   return 0;
 }
@@ -375,11 +375,11 @@ static void Build._link_package(Build b, String package) {
   if (b.request.kind == <static-lib>) return;
   String archive = %"$builds/lib$name.a";
   if (access(archive, R_OK))
-    x2c_driver_error(%"package '$name' is not built: $archive");
+    driver_error(%"package '$name' is not built: $archive");
   // The response file carries the link inputs the archive needs, so a
   // package built before it existed is the same unbuilt-package mistake
   // and is rebuilt; dropping them leaves undefined symbols at link.
-  if (!native) x2c_driver_error(%"package '$name' is not built: $response");
+  if (!native) driver_error(%"package '$name' is not built: $response");
   b.native_inputs.push(archive);
   b.toolchain.ld_args = b.toolchain.ld_args.append(native.ld_args);
 }
@@ -394,7 +394,7 @@ static void Build._link_package(Build b, String package) {
 */
 CliRequest Build.module_entry(Build b) {
   String stamp = build_module_stamp();
-  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
+  if (!stamp) driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
   _write_entry(
     entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
@@ -464,7 +464,7 @@ macro Expression \$module.targets() =>
   \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
 $exports");
   }
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): host_error(detail);
 }
 
 // finishing a build
@@ -737,7 +737,7 @@ static int Build._after_preprocess(Build b, CcJob *job, int status) {
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
 static uint64_t Build._compile_fingerprint(Build b, CcJob *job, int &ok) =>
-  x2c_fnv_file(
+  fnv_file(
     b._action_fingerprint(job.action, NULL, ok), job.preprocessed, ok);
 
 static int Build._compile_current(Build b, CcJob *job) {
@@ -894,7 +894,7 @@ static int Build._archive_extensions(Build b) {
     if (source in sources) objects.push(b.objects[i]);
     i++;
   }
-  String identity = x2c_file_identity(b.output);
+  String identity = file_identity(b.output);
   return b.toolchain.archive_action(
     %"$directory/$identity.a", objects.list_free()).run();
 }
@@ -1015,7 +1015,7 @@ List Build.script_helpers(Build b) {
   String depfile = _unit_file(b._unit_dir(script), script, ".d");
   Array helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
-    if (!x2c_source_file(path) || path == script || path in helpers) continue;
+    if (!is_source_file(path) || path == script || path in helpers) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     helpers.push(path);
     b.xlat_n++;
@@ -1161,7 +1161,7 @@ static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   uint64_t hash = FNV_OFFSET_BASIS;
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
-  String compiler = x2c_compiler_identity();
+  String compiler = compiler_identity();
   if (!compiler) ok = 0;
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
@@ -1180,21 +1180,21 @@ static uint64_t Build._action_fingerprint(
 /* Null text uses 0xff, present text ends with NUL, and each List ends with
    0xfe. These separators distinguish adjacent ordered fingerprint fields. */
 static uint64_t _state_text(uint64_t hash, String text) {
-  if (!text) return x2c_fnv_bytes(hash, "\xff", 1);
-  hash = x2c_fnv_bytes(hash, text, strlen(text));
-  return x2c_fnv_bytes(hash, "\0", 1);
+  if (!text) return fnv_bytes(hash, "\xff", 1);
+  hash = fnv_bytes(hash, text, strlen(text));
+  return fnv_bytes(hash, "\0", 1);
 }
 
 static uint64_t _state_list(uint64_t hash, List values) {
   foreach (String value, values) hash = _state_text(hash, value);
-  return x2c_fnv_bytes(hash, "\xfe", 1);
+  return fnv_bytes(hash, "\xfe", 1);
 }
 
 static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
-  x2c_fnv_file(_state_text(hash, path), path, ok);
+  fnv_file(_state_text(hash, path), path, ok);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
-  String path = "/" in tool ? tool : x2c_find_program(tool);
+  String path = "/" in tool ? tool : find_program(tool);
   if (path) return _state_file(hash, path, ok);
   ok = 0;
   return _state_text(hash, tool);

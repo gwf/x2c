@@ -14,13 +14,9 @@ prefix.
 | [`x2c_block_make`](meta.md#x2c_block_make) | `lib/meta.x` | `meta List x2c_block_make(List items)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
-| `x2c_compiler_identity` | `src/utils.x` | `String x2c_compiler_identity(void)` |
-| `x2c_cpp_include_dirs` | `src/utils.x` | `List x2c_cpp_include_dirs(void)` |
-| `x2c_default_include_dirs` | `src/utils.x` | `List x2c_default_include_dirs(void)` |
 | [`x2c_descriptor_registration_frozen`](dispatch.md#x2c_descriptor_registration_frozen) | `lib/dispatch.x` | `int x2c_descriptor_registration_frozen(void)` |
 | [`x2c_descriptor_thread_start_begin`](dispatch.md#x2c_descriptor_thread_start_begin) | `lib/dispatch.x` | `void x2c_descriptor_thread_start_begin(void)` |
 | [`x2c_descriptor_thread_start_end`](dispatch.md#x2c_descriptor_thread_start_end) | `lib/dispatch.x` | `void x2c_descriptor_thread_start_end(int success)` |
-| `x2c_driver_error` | `src/utils.x` | `void x2c_driver_error(const char *message)` |
 | [`x2c_error_catch_capture`](error.md#x2c_error_catch_capture) | `lib/error.x` | `Var x2c_error_catch_capture(ErrorHandler handle, int index)` |
 | [`x2c_error_catch_close`](error.md#x2c_error_catch_close) | `lib/error.x` | `void x2c_error_catch_close(ErrorHandler handle)` |
 | [`x2c_error_catch_detach`](error.md#x2c_error_catch_detach) | `lib/error.x` | `void x2c_error_catch_detach(ErrorHandler handle)` |
@@ -41,11 +37,6 @@ prefix.
 | [`x2c_expr_composite`](meta.md#x2c_expr_composite) | `lib/meta.x` | `meta List x2c_expr_composite(List items)` |
 | [`x2c_expr_ident`](meta.md#x2c_expr_ident) | `lib/meta.x` | `meta List x2c_expr_ident(List name)` |
 | [`x2c_expr_index`](meta.md#x2c_expr_index) | `lib/meta.x` | `meta List x2c_expr_index(List base, List subscript)` |
-| `x2c_file_identity` | `src/utils.x` | `String x2c_file_identity(String path)` |
-| `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
-| `x2c_find_program` | `src/utils.x` | `String x2c_find_program(String name)` |
-| `x2c_fnv_bytes` | `src/utils.x` | `uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)` |
-| `x2c_fnv_file` | `src/utils.x` | `uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok)` |
 | [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
@@ -58,15 +49,10 @@ prefix.
 | `x2c_get_root` | `src/utils.x` | `String x2c_get_root(void)` |
 | [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
 | [`x2c_hash_word`](common.md#x2c_hash_word) | `lib/common.x` | `inline unsigned x2c_hash_word(unsigned long word)` |
-| `x2c_home` | `src/utils.x` | `String x2c_home(void)` |
-| `x2c_home_libexec` | `src/utils.x` | `String x2c_home_libexec(void)` |
-| `x2c_home_packages` | `src/utils.x` | `String x2c_home_packages(void)` |
-| `x2c_host_error` | `src/utils.x` | `void x2c_host_error(List detail)` |
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
 | `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
-| `x2c_layout_file` | `src/utils.x` | `int x2c_layout_file(String path)` |
 | [`x2c_literal_int`](meta.md#x2c_literal_int) | `lib/meta.x` | `meta List x2c_literal_int(int value)` |
 | [`x2c_literal_string`](meta.md#x2c_literal_string) | `lib/meta.x` | `meta List x2c_literal_string(String value)` |
 | [`x2c_literal_symbol`](meta.md#x2c_literal_symbol) | `lib/meta.x` | `meta List x2c_literal_symbol(Symbol value)` |
@@ -84,11 +70,14 @@ prefix.
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
+| [`x2c_mutex_recursive_initialize`](mutex.md#x2c_mutex_recursive_initialize) | `lib/mutex.x` | `void x2c_mutex_recursive_initialize( pthread_mutex_t *mutex, const char *failure)` |
+| [`x2c_mutex_recursive_lock`](mutex.md#x2c_mutex_recursive_lock) | `lib/mutex.x` | `void x2c_mutex_recursive_lock( pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)` |
+| [`x2c_mutex_recursive_unlock`](mutex.md#x2c_mutex_recursive_unlock) | `lib/mutex.x` | `void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
-| `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
-| `x2c_package_entry` | `src/utils.x` | `String x2c_package_entry( SourceView sources, List roots, String name, String &directory)` |
-| `x2c_package_source` | `src/utils.x` | `int x2c_package_source(String directory, String path)` |
+| [`x2c_numeric_f32`](varconvert.md#x2c_numeric_f32) | `lib/varconvert.x` | `float x2c_numeric_f32(X2CVarNumeric &value)` |
+| [`x2c_numeric_f64`](varconvert.md#x2c_numeric_f64) | `lib/varconvert.x` | `double x2c_numeric_f64(X2CVarNumeric &value)` |
+| [`x2c_numeric_ldouble`](varconvert.md#x2c_numeric_ldouble) | `lib/varconvert.x` | `long double x2c_numeric_ldouble(X2CVarNumeric &value)` |
 | [`x2c_parameters_arguments`](meta.md#x2c_parameters_arguments) | `lib/meta.x` | `meta List x2c_parameters_arguments(List value)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
@@ -96,8 +85,6 @@ prefix.
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
-| `x2c_source_file` | `src/utils.x` | `int x2c_source_file(String path)` |
-| `x2c_stage_dir` | `src/utils.x` | `String x2c_stage_dir(void)` |
 | [`x2c_stmnt_make`](meta.md#x2c_stmnt_make) | `lib/meta.x` | `meta List x2c_stmnt_make(List expression)` |
 | [`x2c_stmnt_return`](meta.md#x2c_stmnt_return) | `lib/meta.x` | `meta List x2c_stmnt_return(List expression)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
@@ -123,4 +110,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 111 functions.
+Total: 98 functions.

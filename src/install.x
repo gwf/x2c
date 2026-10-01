@@ -24,7 +24,7 @@ $(import "../lib/private-keywords.xmacro")
 // the packages lock
 
 /* The packages lock this process holds, and the staging directory it is
-   filling. `x2c_driver_error` exits without running deferred cleanup, so
+   filling. `driver_error` exits without running deferred cleanup, so
    every failing exit below releases both first. */
 static int _packages_lock = -1;
 static String _staging = NULL;
@@ -78,12 +78,12 @@ static void _release_packages(void) {
 
 static void _error(const char *message) {
   _release_packages();
-  x2c_driver_error(%"install: $message");
+  driver_error(%"install: $message");
 }
 
 static void _host_error(List detail) {
   _release_packages();
-  x2c_host_error(detail);
+  host_error(detail);
 }
 
 // installing
@@ -376,9 +376,9 @@ static List _index_row(CliRequest request, String name, String work) {
 // host tools
 
 static String _home_packages(String command) {
-  String packages = x2c_home_packages();
+  String packages = home_packages();
   if (!packages)
-    x2c_driver_error(
+    driver_error(
       %"$command: no x2c home: install the compiler or set X2C_HOME");
   return packages;
 }
@@ -443,7 +443,7 @@ int remove_command(CliRequest request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
   if (!name.is_identifier())
-    x2c_driver_error(%"remove: no installed package '$name'");
+    driver_error(%"remove: no installed package '$name'");
   // A removal with nothing to remove refuses without taking the lock, and
   // the same decision is made again under it, since another removal may
   // have taken the package while this one waited.
@@ -460,9 +460,9 @@ int remove_command(CliRequest request) {
 /* Refuses a removal that has nothing to remove, naming which case it is. */
 static void _check_removable(String target, String name) {
   if (!Path.exists(target))
-    x2c_driver_error(%"remove: no installed package '$name'");
+    driver_error(%"remove: no installed package '$name'");
   if (!_installed_kind(target))
-    x2c_driver_error(
+    driver_error(
       %"remove: $target is not an installed package; remove it by hand");
 }
 

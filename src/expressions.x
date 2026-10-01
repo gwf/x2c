@@ -1429,7 +1429,7 @@ static List Compiler._binary_op_type(
    is the defining library's own syntax, bound wherever it expands, so only a
    reference written in an `.x` unit is reported. */
 static void _check_unit_static(Compiler c, String spelling, Token origin) {
-  if (!x2c_source_file(c.filename)) return;
+  if (!is_source_file(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
   String file = c.display_path(home_absolute_path(owner.car()));

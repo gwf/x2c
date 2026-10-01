@@ -187,8 +187,8 @@ static void _configure_package(
   Compiler c, CliRequest request, String filename) {
   c.package_dirs = request.package_roots();
   String source = Path.absolute(filename);
-  String package = x2c_package_directory(c.package_dirs, source);
-  if (!package || !x2c_package_source(package, source)) return;
+  String package = package_directory(c.package_dirs, source);
+  if (!package || !package_source(package, source)) return;
   String name = Path.basename(package);
   c.package = name;
   c.package_roots[name] = package;
@@ -464,7 +464,7 @@ Frontend Frontend.new(CliRequest request) {
   Frontend.load_support(request);
   Frontend f = Scope.calloc(1, sizeof(struct Frontend));
   f.request = request;
-  f.include_dirs = request.include_dirs.append(x2c_default_include_dirs());
+  f.include_dirs = request.include_dirs.append(default_include_dirs());
   f.toolchain = toolchain_new(request);
   Compiler.use_meta_toolchain(
     toolchain_meta_cc(request.meta_cc), f.toolchain.include_dir);

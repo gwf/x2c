@@ -732,7 +732,7 @@ static List Emitter._initializer_macro(Emitter e, List input, List body) {
     parameters.write(argument.car().str());
   }
   String formal = parameters.str_free();
-  String hash = x2c_filename_hash(e.compiler.filename);
+  String hash = filename_hash(e.compiler.filename);
   String name = e.compiler.fresh_name(%"initializer_choice_$hash");
   String replacement;
   $let(e.compiler.source_map, 0) {
@@ -880,7 +880,7 @@ static List Emitter._initializer_value(Emitter e, List ast) {
 static List Emitter._preproc(Emitter emitter, List ast) {
   int angle = 0;
   String target = preproc_include_target(ast.cadr(), angle);
-  if (!target || !x2c_source_file(target)) return ast.cdr();
+  if (!target || !is_source_file(target)) return ast.cdr();
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";
   return %( $out );

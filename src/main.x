@@ -185,8 +185,8 @@ static void Translation.preflight(Translation *t) {
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
   foreach (String input, request.inputs) {
     build_check_input(input);
-    if (!x2c_source_file(input))
-      x2c_driver_error(%"translation input is not an .x file: $input");
+    if (!is_source_file(input))
+      driver_error(%"translation input is not an .x file: $input");
     String stem = Path.stem(input);
     if (shared && stem in stems)
       _stem_collision(stem, stems[stem], input, request.out_dir);
@@ -196,11 +196,11 @@ static void Translation.preflight(Translation *t) {
 
 static void _check_out_dir(String out_dir) {
   if (!Path.exists(out_dir))
-    x2c_driver_error(%"output directory does not exist: $out_dir");
+    driver_error(%"output directory does not exist: $out_dir");
   if (!Path.is_dir(out_dir))
-    x2c_driver_error(%"output is not a directory: $out_dir");
+    driver_error(%"output is not a directory: $out_dir");
   if (access(out_dir, W_OK | X_OK))
-    x2c_driver_error(%"output directory is not writable: $out_dir");
+    driver_error(%"output directory is not writable: $out_dir");
 }
 
 static void _stem_collision(
@@ -289,7 +289,7 @@ static void Translation.preload_modules(Translation *t) {
   if (!roots) return;
   foreach (String name, t.package_names(roots).keys()) {
     String root = NULL;
-    if (!x2c_package_entry(t.request.sources, roots, name, root) ||
+    if (!package_entry(t.request.sources, roots, name, root) ||
         Compiler.links_extension(name)) continue;
     String module = %"$root/builds/$name.module";
     if (Path.is_file(module)) Compiler.preload_native_module(module);
@@ -307,7 +307,7 @@ static Map Translation.package_names(Translation *t, List roots) {
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;
     foreach (String dependency, translation_depfile_parse(text)) {
-      String package = x2c_package_directory(roots, dependency);
+      String package = package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;
     }
   }
@@ -434,17 +434,17 @@ static int _build_inputs(CliRequest request, Array commands) {
   /* Manifest options have no meaning without a manifest. The build fails
      before it builds something the command did not describe. */
   if (request.manifest)
-    x2c_driver_error("--manifest-path conflicts with explicit inputs");
+    driver_error("--manifest-path conflicts with explicit inputs");
   if (request.target)
-    x2c_driver_error("--target conflicts with explicit inputs");
+    driver_error("--target conflicts with explicit inputs");
   if (request.profile)
-    x2c_driver_error("--profile conflicts with explicit inputs");
+    driver_error("--profile conflicts with explicit inputs");
   return _build_target(request, commands);
 }
 
 static int _build_manifest(CliRequest request, Array commands) {
   if (request.compile_only)
-    x2c_driver_error("--compile-only needs input operands, not a manifest");
+    driver_error("--compile-only needs input operands, not a manifest");
   for (ProjectBuild node = project_plan(request); node; node = node.next) {
     int status = _build_target(node.request, commands);
     if (status) return status;
@@ -525,7 +525,7 @@ static int _translate_units(CliRequest request, Build b, List units) {
 static List _stale_inputs(Build b, List units, Map stale) {
   Array inputs = [];
   foreach (String input, units) {
-    if (!x2c_source_file(input)) continue;
+    if (!is_source_file(input)) continue;
     String directory = b.generated_dir(input);
     if (b.translation_current(input, directory)) {
       b.begin_translation(input);
@@ -545,7 +545,7 @@ static List _stale_inputs(Build b, List units, Map stale) {
 static void _register_units(
   CliRequest request, Build b, List units, Map stale) {
   foreach (String input, units) {
-    if (!x2c_source_file(input)) continue;
+    if (!is_source_file(input)) continue;
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
@@ -573,7 +573,7 @@ static int _run_env(CliRequest request) {
       return 0;
     }
   }
-  if (wanted) x2c_driver_error(%"unknown env name '$wanted'");
+  if (wanted) driver_error(%"unknown env name '$wanted'");
   return 0;
 }
 
@@ -586,8 +586,8 @@ static List _env_rows(CliRequest request) {
   return %(
     ("home" ${x2c_get_root()})
     ("executable" $executable)
-    ("libexec" ${x2c_home_libexec()})
-    ("identity" ${x2c_compiler_identity()})
+    ("libexec" ${home_libexec()})
+    ("identity" ${compiler_identity()})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
     ("prelude" ${interface_prelude()})
@@ -612,7 +612,7 @@ static void _run_external(int argc, char **argv) {
 
 static String _external_path(const char *name) {
   if (!_external_name(name) || cli_builtin_command(name)) return NULL;
-  String libexec = x2c_home_libexec();
+  String libexec = home_libexec();
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
   return Path.is_executable(path) ? path : NULL;
@@ -626,14 +626,14 @@ static int _external_name(const char *name) {
 }
 
 static void _exec(String path, char **args) {
-  String home = x2c_home(), executable = x2c_get_executable();
-  String identity = x2c_compiler_identity();
+  String home = home_dir(), executable = x2c_get_executable();
+  String identity = compiler_identity();
   if (home) setenv("X2C_HOME", home, 1);
   if (executable) setenv("X2C", executable, 1);
   if (identity) setenv("X2C_IDENTITY", identity, 1);
   args[0] = path;
   execv(path, args);
-  x2c_driver_error(
+  driver_error(
     %"cannot run external command '$path': ${String.new(strerror(errno))}");
 }
 
@@ -656,7 +656,7 @@ int main(int argc, char **argv) {
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
-    x2c_driver_error(%"cannot open diagnostics file '$diagnostics'");
+    driver_error(%"cannot open diagnostics file '$diagnostics'");
   if (request.command == <script> && script_prepare(request)) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,

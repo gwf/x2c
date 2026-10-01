@@ -274,8 +274,8 @@ static void _record_meta_hash(
   uint64_t hash = FNV_OFFSET_BASIS;
   for (Token token = first; token < c.token; token++)
     if (token.type != <space> && token.type != <comment> && token.len)
-      hash = x2c_fnv_bytes(
-        x2c_fnv_bytes(hash, token.text, token.text.len()), " ", 1);
+      hash = fnv_bytes(
+        fnv_bytes(hash, token.text, token.text.len()), " ", 1);
   match (function)
     case %(function ? (bind (binding ? ?(String name)) *) ?body): {
       c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);

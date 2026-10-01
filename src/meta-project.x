@@ -148,7 +148,7 @@ static int Scan.file(Scan *s, String path) {
   try text = Path.read_text(path);
   catch %((!or not-found io-fail) *): return 0;
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
-  tokens.layout = x2c_layout_file(path);
+  tokens.layout = is_layout_file(path);
   tokens.scan();
   return s.file_scope(tokens, Path.dirname(path));
 }
@@ -194,7 +194,7 @@ static void Scan.macro_import(Scan *s, Tokenizer tokens, String directory) {
 /* An imported package's entry is read for imports like an input. */
 static void Scan.package(Scan *s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
-  String entry = name ? x2c_package_entry(
+  String entry = name ? package_entry(
     s.request.sources, s.request.package_roots(), name, root) : NULL;
   if (!entry) return;
   s.packages[root] = 1;

@@ -554,7 +554,7 @@ static void _resolve_dependencies(Project p) {
   String path = %"${p.root}/x2c.lock";
   if (!p.dependencies) {
     try Path.remove_file(path);
-    catch %(io-fail *detail): x2c_host_error(detail);
+    catch %(io-fail *detail): host_error(detail);
     return;
   }
   List locked = _read_lock(path);
@@ -601,7 +601,7 @@ static void _write_lock(String path, List rows) {
     "# name version kind platform url sha256\n";
   foreach (List row, rows) text = %"$text${" ".join(row)}\n";
   try file_publish(%($path $text));
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): host_error(detail);
 }
 
 // build plans
@@ -722,7 +722,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   excluded.free();
   kept.sort();
   foreach (String path, kept)
-    if (!(x2c_source_file(path) || path.endswith(".c")))
+    if (!(is_source_file(path) || path.endswith(".c")))
       _error_name(p, 0, "manifest source is not .x or .c", path);
   return kept;
 }
@@ -859,10 +859,10 @@ static void _error_name(Project p, int line, String message, String name) {
 */
 int new_command(CliRequest request) {
   Path dir = request.inputs.car();
-  if (!dir) x2c_driver_error("new: the directory operand is empty");
+  if (!dir) driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   try _write_starter(dir, name);
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): host_error(detail);
   if (!request.quiet) fprintf(stderr, "x2c: created %s\n", dir);
   return 0;
 }
@@ -874,14 +874,14 @@ static String _starter_name(Path dir) {
   if (name == "." || name == ".." || name == "/")
     name = Path.absolute(dir).basename();
   if (!_name_ok(name))
-    x2c_driver_error(
+    driver_error(
       %"new: '$name' is not a target name; use letters, digits, '_', and '-'");
   return name;
 }
 
 static void _write_starter(Path dir, String name) {
   if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
-    x2c_driver_error(%"new: $dir exists and is not an empty directory");
+    driver_error(%"new: $dir exists and is not an empty directory");
   dir.join("src").make_dirs();
   dir.join("x2c.toml").write_text(
     %"[target.$name]

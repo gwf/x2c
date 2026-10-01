@@ -56,7 +56,7 @@ static List _without_trivia(List ast) =>
    `basename`. */
 static List _generated_code(Compiler c, List ast, String basename) {
   List (header, source) = _header_and_source(c, ast);
-  String hash = x2c_filename_hash(c.filename);
+  String hash = filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
     %"_x2c_hcache_init_$hash");
@@ -1123,7 +1123,7 @@ static List _vertical_spacing(List code) {
 static List _include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
-  String guard = x2c_filename_hash(c.filename);
+  String guard = filename_hash(c.filename);
   return %(@{_banner()} @{_header_guard(content, guard)});
 }
 

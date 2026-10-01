@@ -187,7 +187,7 @@ static void _file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
-  tokenizer.layout = x2c_layout_file(path);
+  tokenizer.layout = is_layout_file(path);
   tokenizer.scan();
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
@@ -196,7 +196,7 @@ static void _file(
     Walk w = {
       .compiler = c, .path = path, .text = text, .dir = dir, .globs = globs,
       .visited = visited, .parts = [], .definitions = {},
-      .dependencies = _cache_map(), .unit = x2c_source_file(path), .line = 1};
+      .dependencies = _cache_map(), .unit = is_source_file(path), .line = 1};
     w.split(tokenizer.tokens);
     w.add_defaults();
     w.publish();
@@ -388,7 +388,7 @@ static void Walk.include(Walk *w, String target, int angle) {
   int covered = 0;
   String path = _resolve_include(
     c.sources, c.include_dirs, w.dir, target, angle, covered);
-  if (!path || (covered && !x2c_source_file(path))) return;
+  if (!path || (covered && !is_source_file(path))) return;
   String canonical = _canonical_path(path);
   List entry = _entry(c, canonical);
   c.add_translation_dependency(canonical);
@@ -672,7 +672,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 
 static String Compiler._find_package(
   Compiler c, String name, String &root, Token token) {
-  String entry = x2c_package_entry(c.sources, c.package_dirs, name, root);
+  String entry = package_entry(c.sources, c.package_dirs, name, root);
   if (entry) return entry;
   c.report_error(
     <driver>, %"unknown package '$name'", token,
@@ -768,7 +768,7 @@ static void Surface.install(Surface *s) {
 
 /* A C header or a runtime module crosses with its own spellings. */
 static int _keeps_spellings(String path) =>
-  !x2c_source_file(path) || path.startswith(%"${_canonical_lib()}/") ||
+  !is_source_file(path) || path.startswith(%"${_canonical_lib()}/") ||
   path.startswith(%"${_canonical_include()}/");
 
 /* A declaration key is a plain name, or a typedef or aggregate name that a
@@ -892,7 +892,7 @@ static Map source_hashes = NULL, static Lisp interface_reader = NULL;
 void interface_configure(String out_dir, int cold) {
   _process_cache();
   interface_out_dir = out_dir;
-  String stage = x2c_stage_dir();
+  String stage = stage_dir();
   interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
 }
 
@@ -976,7 +976,7 @@ static void _interface_shutdown(void) {
    still hashes as it did when the interface was written. */
 static int _interface_current(
   Compiler c, String canonical, String compiler, String owner, String hash) {
-  String identity = x2c_compiler_identity();
+  String identity = compiler_identity();
   return identity && compiler.equal(identity) &&
     home_absolute_path(owner).equal(canonical) &&
     _hash_matches(c, canonical, hash);
@@ -1076,7 +1076,7 @@ static Map _read_dependencies(Compiler c, List stored) {
     source hashes are not checked.
 */
 String interface_prelude(void) {
-  String identity = x2c_compiler_identity();
+  String identity = compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
   String header = %"(interface 4 \"$identity\" ";
@@ -1096,7 +1096,7 @@ String interface_prelude(void) {
     `emit` diagnostic.
 */
 String interface_text(Compiler compiler, List selected) {
-  if (!x2c_compiler_identity()) return NULL;
+  if (!compiler_identity()) return NULL;
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
@@ -1112,7 +1112,7 @@ static int _write_interface_entry(
   Map identities = {}, Array parts = [];
   foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
   List record = %(
-    interface 4 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
+    interface 4 ${compiler_identity()} ${home_portable_path(canonical)}
     $hash ${parts.list_free()} $definitions
     ${_renumber_bindings(selected, identities)}
     ${_stored_dependencies(dependencies)}

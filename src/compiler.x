@@ -503,7 +503,7 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
-  c.tokenizer.layout = c.layout || x2c_layout_file(c.filename);
+  c.tokenizer.layout = c.layout || is_layout_file(c.filename);
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
   _report_malformed_token(c);

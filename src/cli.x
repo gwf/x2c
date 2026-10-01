@@ -341,7 +341,7 @@ CliRequest cli_parse(int argc, char **argv) {
   _read_arguments(args, argc, argv);
   if (!args.len()) _help_exit(0, 2);
   String first = args[0];
-  if (!first) x2c_driver_error("expected a command, found an empty argument");
+  if (!first) driver_error("expected a command, found an empty argument");
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args, command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
@@ -354,7 +354,7 @@ CliRequest cli_parse(int argc, char **argv) {
   String spelling = _two_dash(first);
   if (spelling) _one_dash_removed(first, %"x2c translate $spelling ...");
   if (first[0] != '-') _expected_command(first);
-  x2c_driver_error(%"unknown command or global option '$first'");
+  driver_error(%"unknown command or global option '$first'");
 }
 
 /* A script's arguments are its own, so `script` expands response files
@@ -437,32 +437,32 @@ static void Parse.finish(Parse *p) {
 static void _check_request(CliRequest r, int mask) {
   Symbol name = r.command, List inputs = r.inputs;
   if (mask == CLI_TRANSLATE && !inputs)
-    x2c_driver_error("translate requires at least one input");
+    driver_error("translate requires at least one input");
   if (inputs.cdr() && (r.dep_file || r.dep_target))
-    x2c_driver_error("--dep-file and --dep-target require exactly one input");
+    driver_error("--dep-file and --dep-target require exactly one input");
   if (r.no_deps && (r.dep_file || r.dep_target || r.no_phony_deps))
-    x2c_driver_error("--no-deps conflicts with dependency output options");
+    driver_error("--no-deps conflicts with dependency output options");
   if (r.compile_only && r.kind != <executable>)
-    x2c_driver_error("--compile-only conflicts with a library target kind");
+    driver_error("--compile-only conflicts with a library target kind");
   if (mask == CLI_ENV && inputs.cdr())
-    x2c_driver_error("env accepts at most one name");
+    driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!inputs || inputs.cdr()))
-    x2c_driver_error(%"${name} requires exactly one operand");
+    driver_error(%"${name} requires exactly one operand");
   if (mask == CLI_LIST && inputs)
-    x2c_driver_error(%"${name} accepts no operands");
+    driver_error(%"${name} accepts no operands");
   if (mask == CLI_SCRIPT && !inputs)
-    x2c_driver_error("script requires a script file");
+    driver_error("script requires a script file");
 }
 
 static void _help_command(Array args) {
   if (args.len() == 1) _help_exit(0, 0);
-  if (args.len() > 2) x2c_driver_error("help accepts at most one command");
+  if (args.len() > 2) driver_error("help accepts at most one command");
   String name = args[1];
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
   CliCommand *asked = name ? _command_row(name) : NULL;
-  if (!asked) x2c_driver_error(%"unknown help command '$name'");
+  if (!asked) driver_error(%"unknown help command '$name'");
   _help_exit(asked.name, 0);
 }
 
@@ -493,7 +493,7 @@ static void Parse.option(Parse *p, String arg, int &i) {
 static void _save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
   r.temps_dir = arg.remove_prefix("--save-temps=");
-  if (!r.temps_dir) x2c_driver_error("--save-temps= requires a directory");
+  if (!r.temps_dir) driver_error("--save-temps= requires a directory");
 }
 
 /* Reads the option at `i` for `mask`, advancing `i` past a separate value.
@@ -510,11 +510,11 @@ static Given _take_option(Array args, int &i, int mask) {
   Given given = {_find_option(written, mask, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
-    x2c_driver_error(%"option takes no value '$arg'");
+    driver_error(%"option takes no value '$arg'");
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if (given.option.value && !given.value && equals <= 2) {
-    if (++i == args.len()) x2c_driver_error(%"option requires a value '$arg'");
+    if (++i == args.len()) driver_error(%"option requires a value '$arg'");
     given.value = args[i];
   }
   return given;
@@ -576,11 +576,11 @@ static void Parse.apply(Parse *p, Given given) {
 }
 
 static Symbol _color_mode(String value) {
-  if (!value) x2c_driver_error("--color requires auto, always, or never");
+  if (!value) driver_error("--color requires auto, always, or never");
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
-  x2c_driver_error(%"invalid color mode '$value'");
+  driver_error(%"invalid color mode '$value'");
 }
 
 static Symbol _target_kind(String value) {
@@ -588,8 +588,8 @@ static Symbol _target_kind(String value) {
   if (value == "static-library") return <static-lib>;
   if (value == "meta-module") return <module>;
   if (value == "shared-library")
-    x2c_driver_error("shared-library is not supported by this compiler");
-  x2c_driver_error(%"unknown target kind '$value'");
+    driver_error("shared-library is not supported by this compiler");
+  driver_error(%"unknown target kind '$value'");
 }
 
 static int _count(String value, int minimum, String noun) {
@@ -597,7 +597,7 @@ static int _count(String value, int minimum, String noun) {
   errno = 0;
   long count = value ? strtol(value, &end, 10) : 0;
   if (!value || errno || *end || count < minimum || count > INT_MAX)
-    x2c_driver_error(%"invalid $noun '$value'");
+    driver_error(%"invalid $noun '$value'");
   return (int) count;
 }
 
@@ -622,7 +622,7 @@ static void _push_pair(Array out, String option, String value) {
 /* The driver owns C dependency output, so `-Xcc` cannot pass it. */
 static String _xcc_argument(String value) {
   if (cli_dependency_pass_through(value))
-    x2c_driver_error(%"C dependency option is driver-owned '$value'");
+    driver_error(%"C dependency option is driver-owned '$value'");
   return value;
 }
 
@@ -678,14 +678,14 @@ CliRequest cli_package_options(String path, String package) {
    carry. */
 static void Parse.native(Parse *p, int &i) {
   String arg = p.args[i];
-  if (!arg) x2c_driver_error("empty package native argument");
+  if (!arg) driver_error("empty package native argument");
   if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
     p.ld_args.push(arg);
     return;
   }
   Given given = _take_option(p.args, i, p.mask);
   if (!given.option || !given.option.package_native)
-    x2c_driver_error(%"unsupported package native argument '$arg'");
+    driver_error(%"unsupported package native argument '$arg'");
   p.apply(given);
 }
 
@@ -703,7 +703,7 @@ static void _expand_argument(Array out, String arg, List stack) {
     out.push(arg[1:]);
     return;
   }
-  if (arg.len() == 1) x2c_driver_error("empty response-file reference '@'");
+  if (arg.len() == 1) driver_error("empty response-file reference '@'");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);
@@ -925,7 +925,7 @@ static void _print_top_help(void) {
 /* Installed external commands list themselves in `commands.txt`, one
    `name|maturity|summary` line each. */
 static void _print_external_commands(void) {
-  String libexec = x2c_home_libexec();
+  String libexec = home_libexec();
   File manifest = libexec ? fopen(%"$libexec/commands.txt", "r") : NULL;
   if (!manifest) return;
   char *line = NULL, size_t capacity = 0;
@@ -1063,7 +1063,7 @@ static HelpPage help_pages[] = {
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
-  x2c_driver_error(%"unknown help command '${command}'");
+  driver_error(%"unknown help command '${command}'");
 }
 
 static void _print_page(HelpPage *page) {
@@ -1150,7 +1150,7 @@ static void _print_help_row(
 // diagnostics
 
 /* Prints an error and perhaps a note, then exits with status 2. The exit
-   runs the atexit handlers, which x2c_driver_error skips. */
+   runs the atexit handlers, which driver_error skips. */
 static void _fail(String message, String note) {
   fprintf(stderr, "x2c: error: %s\n", message);
   if (note) fprintf(stderr, "note: %s\n", note);
@@ -1173,7 +1173,7 @@ static void _expected_command(String arg) {
 static void _unknown_option(String arg, int mask) {
   String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
   if (spelling) _one_dash_removed(arg, spelling);
-  x2c_driver_error(%"unknown option '$arg'");
+  driver_error(%"unknown option '$arg'");
 }
 
 /* The two-dash translate option that a one-dash spelling such as
@@ -1231,7 +1231,7 @@ int CliRequest.inspects(CliRequest request) => request.dump != 0;
     `List` only when the home directory is appended.
 */
 List CliRequest.package_roots(CliRequest request) {
-  String home = x2c_home_packages();
+  String home = home_packages();
   if (!Path.is_dir(home)) return request.package_dirs;
   return request.package_dirs.append(cons(home, NULL));
 }

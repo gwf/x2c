@@ -53,7 +53,7 @@ void Compiler.use_meta_toolchain(String cc, String include_dir) {
    because it calls the compiler's own runtime: a built checkout stage's
    `lib`, the checked-in bootstrap's, or else `include_dir`. */
 static String _runtime_headers(String include_dir) {
-  String stage = x2c_stage_dir();
+  String stage = stage_dir();
   if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
   String executable = x2c_get_executable(), root = x2c_get_root();
   if (executable && root && Path.basename(executable) == "x2c-bootstrap" &&
@@ -72,8 +72,8 @@ String Compiler.meta_cc(String &include_dir) {
 /** Returns the identity of the C compiler at `cc`: its path and content
     hash. */
 String Compiler.meta_cc_identity(String cc) {
-  String path = "/" in cc ? cc : x2c_find_program(cc);
-  String hash = x2c_file_identity(path);
+  String path = "/" in cc ? cc : find_program(cc);
+  String hash = file_identity(path);
   return hash ? %"$path $hash" : cc;
 }
 

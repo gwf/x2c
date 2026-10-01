@@ -13,36 +13,36 @@ System utilities for environment discovery and workers.
 | Function | Summary |
 | --- | --- |
 | [`build_module_stamp`](#build_module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
+| [`compiler_identity`](#compiler_identity) | Returns the active compiler's identity in 16 hexadecimal digits. |
+| [`cpp_include_dirs`](#cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
+| [`default_include_dirs`](#default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
+| [`driver_error`](#driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
+| [`file_identity`](#file_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
 | [`file_lock`](#file_lock) | Locks the file `p`, creating it, and returns a descriptor that holds the lock until it is closed or the process exits. |
 | [`file_publish`](#file_publish) | Replaces each file named in `outputs`, a List of alternating paths and texts. |
+| [`filename_hash`](#filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
+| [`find_program`](#find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
+| [`fnv_bytes`](#fnv_bytes) | Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. |
+| [`fnv_file`](#fnv_file) | Returns `hash` extended with the contents of the file at `path`. |
+| [`home_dir`](#home_dir) | Returns the discovered or configured home, or NULL when there is none. |
+| [`home_libexec`](#home_libexec) | Returns the command directory for this checkout or installed home. |
+| [`home_packages`](#home_packages) | Returns `<home>/packages`, which may not exist, or NULL without a home. |
+| [`host_error`](#host_error) | Reports a caught `<not-found>` or `<io-fail>` through `driver_error` as its operation, path or program, and system reason. |
+| [`is_layout_file`](#is_layout_file) | Reports whether `path` names a file in the indentation syntax. |
+| [`is_source_file`](#is_source_file) | Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file of any other name whose first line is a shebang, which is a script. |
+| [`package_directory`](#package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
+| [`package_entry`](#package_entry) | Resolves the first readable package entry under `roots`, using the same source view as the importing compiler. |
+| [`package_source`](#package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`shell_status`](#shell_status) | Decodes the wait status `raw` of a child that has ended. |
+| [`stage_dir`](#stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait_any`](#worker_wait_any) | Waits until one of the `count` workers in `pids` exits and returns its index, storing its shell-style status: the exit status, `128 + signal`, or -1 when it cannot be waited. |
-| [`x2c_compiler_identity`](#x2c_compiler_identity) | Returns the active compiler's identity in 16 hexadecimal digits. |
-| [`x2c_cpp_include_dirs`](#x2c_cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
-| [`x2c_default_include_dirs`](#x2c_default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
-| [`x2c_driver_error`](#x2c_driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
-| [`x2c_file_identity`](#x2c_file_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
-| [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
-| [`x2c_find_program`](#x2c_find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
-| [`x2c_fnv_bytes`](#x2c_fnv_bytes) | Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. |
-| [`x2c_fnv_file`](#x2c_fnv_file) | Returns `hash` extended with the contents of the file at `path`. |
 | [`x2c_get_executable`](#x2c_get_executable) | Returns the borrowed resolved executable path, or NULL when unavailable. |
 | [`x2c_get_root`](#x2c_get_root) | Returns the borrowed repository root, or NULL before it is configured. |
-| [`x2c_home`](#x2c_home) | Returns the discovered or configured home, or NULL when there is none. |
-| [`x2c_home_libexec`](#x2c_home_libexec) | Returns the command directory for this checkout or installed home. |
-| [`x2c_home_packages`](#x2c_home_packages) | Returns `<home>/packages`, which may not exist, or NULL without a home. |
-| [`x2c_host_error`](#x2c_host_error) | Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error` as its operation, path or program, and system reason. |
 | [`x2c_initialize_command_environment`](#x2c_initialize_command_environment) | Initializes an external command with the compiler identity embedded when it was built. |
 | [`x2c_initialize_environment`](#x2c_initialize_environment) | Initializes compiler paths and default include `List`s once. |
-| [`x2c_layout_file`](#x2c_layout_file) | Reports whether `path` names a file in the indentation syntax. |
-| [`x2c_package_directory`](#x2c_package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
-| [`x2c_package_entry`](#x2c_package_entry) | Resolves the first readable package entry under `roots`, using the same source view as the importing compiler. |
-| [`x2c_package_source`](#x2c_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`x2c_set_root`](#x2c_set_root) | Overrides the repository root and rebuilds its default include `List`s. |
-| [`x2c_source_file`](#x2c_source_file) | Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file of any other name whose first line is a shebang, which is a script. |
-| [`x2c_stage_dir`](#x2c_stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 
 ### Functions
 
@@ -55,6 +55,56 @@ running compiler's identity. Returns NULL when the executable cannot be
 read. Only the compiler that built a module loads it.
 
 Source: `src/utils.x:279`
+
+#### compiler_identity
+
+`String compiler_identity(void)`
+
+Returns the active compiler's identity in 16 hexadecimal digits.
+Ordinary compiler startup hashes its executable with FNV-1a; an external
+command uses the identity embedded from the compiler that built it.
+Returns NULL if ordinary startup could not read its executable.
+
+Source: `src/utils.x:273`
+
+#### cpp_include_dirs
+
+`List cpp_include_dirs(void)`
+
+Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
+`<root>/src` is present only when the home has that directory. Returns
+NULL before environment setup.
+
+Source: `src/utils.x:188`
+
+#### default_include_dirs
+
+`List default_include_dirs(void)`
+
+Returns the borrowed default include `List` containing `<root>/include`.
+Returns NULL before environment setup.
+
+Source: `src/utils.x:182`
+
+#### driver_error
+
+`void driver_error(const char *message)`
+
+Prints `x2c: error: <message>` to stderr and exits with status 2.
+The streams are flushed and `atexit` handlers do not run, so the call is
+safe inside a `try` body or a catch arm, whose records those handlers
+would otherwise find still live.
+
+Source: `src/utils.x:426`
+
+#### file_identity
+
+`String file_identity(String path)`
+
+Returns the identity a compiler executable at `path` has when it runs:
+the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
+
+Source: `src/utils.x:287`
 
 #### file_lock
 
@@ -81,6 +131,120 @@ destinations replaced.
 
 Source: `src/utils.x:354`
 
+#### filename_hash
+
+`String filename_hash(String filename)`
+
+Hashes unit filename spelling for stable generated C identifiers.
+
+Source: `src/utils.x:322`
+
+#### find_program
+
+`String find_program(String name)`
+
+Returns the spelling of the first `PATH` candidate for the program `name`
+that this process may execute, searched as `execvp` searches, or NULL.
+An empty entry names the current directory.
+
+Source: `src/utils.x:194`
+
+#### fnv_bytes
+
+`uint64_t fnv_bytes(uint64_t hash, const void *bytes, size_t length)`
+
+Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
+
+Source: `src/utils.x:312`
+
+#### fnv_file
+
+`uint64_t fnv_file(uint64_t hash, String path, int &ok)`
+
+Returns `hash` extended with the contents of the file at `path`.
+A missing or unreadable file clears `ok`.
+
+Source: `src/utils.x:297`
+
+#### home_dir
+
+`String home_dir(void)`
+
+Returns the discovered or configured home, or NULL when there is none.
+
+Source: `src/utils.x:154`
+
+#### home_libexec
+
+`String home_libexec(void)`
+
+Returns the command directory for this checkout or installed home.
+
+Source: `src/utils.x:172`
+
+#### home_packages
+
+`String home_packages(void)`
+
+Returns `<home>/packages`, which may not exist, or NULL without a home.
+
+Source: `src/utils.x:166`
+
+#### host_error
+
+`void host_error(List detail)`
+
+Reports a caught `<not-found>` or `<io-fail>` through `driver_error`
+as its operation, path or program, and system reason.
+
+Source: `src/utils.x:435`
+
+#### is_layout_file
+
+`int is_layout_file(String path)`
+
+Reports whether `path` names a file in the indentation syntax.
+
+Source: `src/utils.x:221`
+
+#### is_source_file
+
+`int is_source_file(String path)`
+
+Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
+of any other name whose first line is a shebang, which is a script.
+
+Source: `src/utils.x:207`
+
+#### package_directory
+
+`String package_directory(List roots, String path)`
+
+Returns the package directory that holds `path` below one of `roots`:
+the root's child on the way to `path`, compared by canonical path, when
+that child's name is an identifier. Returns NULL for any other path.
+
+Source: `src/utils.x:228`
+
+#### package_entry
+
+`String package_entry( SourceView sources, List roots, String name, String &directory)`
+
+Resolves the first readable package entry under `roots`, using the same
+source view as the importing compiler. Returns its canonical directory
+through `directory`, or NULL when the package does not exist.
+
+Source: `src/utils.x:244`
+
+#### package_source
+
+`int package_source(String directory, String path)`
+
+Recognizes a package's `src/` files or its package-named legacy entry.
+Other files under the package directory are consumers.
+
+Source: `src/utils.x:260`
+
 #### shell_status
 
 `int shell_status(int raw, int &signal)`
@@ -90,6 +254,15 @@ exit status, `128 + signal` when a signal ended it, or -1 otherwise,
 and stores that signal in `signal`, or 0 when no signal ended it.
 
 Source: `src/utils.x:413`
+
+#### stage_dir
+
+`String stage_dir(void)`
+
+Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
+or NULL for any other compiler.
+
+Source: `src/utils.x:159`
 
 #### worker_exit
 
@@ -125,91 +298,6 @@ wait polls with a short sleep.
 
 Source: `src/utils.x:396`
 
-#### x2c_compiler_identity
-
-`String x2c_compiler_identity(void)`
-
-Returns the active compiler's identity in 16 hexadecimal digits.
-Ordinary compiler startup hashes its executable with FNV-1a; an external
-command uses the identity embedded from the compiler that built it.
-Returns NULL if ordinary startup could not read its executable.
-
-Source: `src/utils.x:273`
-
-#### x2c_cpp_include_dirs
-
-`List x2c_cpp_include_dirs(void)`
-
-Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
-`<root>/src` is present only when the home has that directory. Returns
-NULL before environment setup.
-
-Source: `src/utils.x:188`
-
-#### x2c_default_include_dirs
-
-`List x2c_default_include_dirs(void)`
-
-Returns the borrowed default include `List` containing `<root>/include`.
-Returns NULL before environment setup.
-
-Source: `src/utils.x:182`
-
-#### x2c_driver_error
-
-`void x2c_driver_error(const char *message)`
-
-Prints `x2c: error: <message>` to stderr and exits with status 2.
-The streams are flushed and `atexit` handlers do not run, so the call is
-safe inside a `try` body or a catch arm, whose records those handlers
-would otherwise find still live.
-
-Source: `src/utils.x:426`
-
-#### x2c_file_identity
-
-`String x2c_file_identity(String path)`
-
-Returns the identity a compiler executable at `path` has when it runs:
-the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
-
-Source: `src/utils.x:287`
-
-#### x2c_filename_hash
-
-`String x2c_filename_hash(String filename)`
-
-Hashes unit filename spelling for stable generated C identifiers.
-
-Source: `src/utils.x:322`
-
-#### x2c_find_program
-
-`String x2c_find_program(String name)`
-
-Returns the spelling of the first `PATH` candidate for the program `name`
-that this process may execute, searched as `execvp` searches, or NULL.
-An empty entry names the current directory.
-
-Source: `src/utils.x:194`
-
-#### x2c_fnv_bytes
-
-`uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)`
-
-Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
-
-Source: `src/utils.x:312`
-
-#### x2c_fnv_file
-
-`uint64_t x2c_fnv_file(uint64_t hash, String path, int &ok)`
-
-Returns `hash` extended with the contents of the file at `path`.
-A missing or unreadable file clears `ok`.
-
-Source: `src/utils.x:297`
-
 #### x2c_get_executable
 
 `String x2c_get_executable(void)`
@@ -227,39 +315,6 @@ The root is absolute with symbolic links resolved, the one spelling
 paths below the home are compared in.
 
 Source: `src/utils.x:148`
-
-#### x2c_home
-
-`String x2c_home(void)`
-
-Returns the discovered or configured home, or NULL when there is none.
-
-Source: `src/utils.x:154`
-
-#### x2c_home_libexec
-
-`String x2c_home_libexec(void)`
-
-Returns the command directory for this checkout or installed home.
-
-Source: `src/utils.x:172`
-
-#### x2c_home_packages
-
-`String x2c_home_packages(void)`
-
-Returns `<home>/packages`, which may not exist, or NULL without a home.
-
-Source: `src/utils.x:166`
-
-#### x2c_host_error
-
-`void x2c_host_error(List detail)`
-
-Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
-as its operation, path or program, and system reason.
-
-Source: `src/utils.x:435`
 
 #### x2c_initialize_command_environment
 
@@ -281,49 +336,12 @@ the executable and then from the current directory to a directory holding
 `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
 installed prefix alike. The root is kept absolute with symbolic links
 resolved, the one spelling every path below the home is compared in.
-Without a home the root is the current directory and `x2c_home` reports
+Without a home the root is the current directory and `home_dir` reports
 none. The compiler identity is taken here, before any later work could
 observe a replaced executable. An already configured root leaves all
 state unchanged.
 
 Source: `src/utils.x:57`
-
-#### x2c_layout_file
-
-`int x2c_layout_file(String path)`
-
-Reports whether `path` names a file in the indentation syntax.
-
-Source: `src/utils.x:221`
-
-#### x2c_package_directory
-
-`String x2c_package_directory(List roots, String path)`
-
-Returns the package directory that holds `path` below one of `roots`:
-the root's child on the way to `path`, compared by canonical path, when
-that child's name is an identifier. Returns NULL for any other path.
-
-Source: `src/utils.x:228`
-
-#### x2c_package_entry
-
-`String x2c_package_entry( SourceView sources, List roots, String name, String &directory)`
-
-Resolves the first readable package entry under `roots`, using the same
-source view as the importing compiler. Returns its canonical directory
-through `directory`, or NULL when the package does not exist.
-
-Source: `src/utils.x:244`
-
-#### x2c_package_source
-
-`int x2c_package_source(String directory, String path)`
-
-Recognizes a package's `src/` files or its package-named legacy entry.
-Other files under the package directory are consumers.
-
-Source: `src/utils.x:260`
 
 #### x2c_set_root
 
@@ -335,24 +353,6 @@ must remain valid until the next override or the process no longer uses
 them.
 
 Source: `src/utils.x:134`
-
-#### x2c_source_file
-
-`int x2c_source_file(String path)`
-
-Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
-of any other name whose first line is a shebang, which is a script.
-
-Source: `src/utils.x:207`
-
-#### x2c_stage_dir
-
-`String x2c_stage_dir(void)`
-
-Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
-or NULL for any other compiler.
-
-Source: `src/utils.x:159`
 
 ## Design notes
 

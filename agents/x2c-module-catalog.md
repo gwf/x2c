@@ -544,14 +544,13 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
-`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `x2c_home`,
-`x2c_stage_dir`, `x2c_home_packages`, `x2c_home_libexec`,
-`x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_find_program`,
-`x2c_source_file`, `x2c_layout_file`, `x2c_package_directory`,
-`x2c_package_entry`, `x2c_package_source`, `x2c_compiler_identity`,
-`build_module_stamp`, `x2c_file_identity`, `x2c_fnv_file`, `x2c_fnv_bytes`,
-`x2c_filename_hash`, `file_lock`, `file_publish`, `worker_fork`, `worker_exit`,
-`worker_wait_any`, `shell_status`, `x2c_driver_error`, `x2c_host_error`
+`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `home_dir`, `stage_dir`,
+`home_packages`, `home_libexec`, `default_include_dirs`, `cpp_include_dirs`,
+`find_program`, `is_source_file`, `is_layout_file`, `package_directory`,
+`package_entry`, `package_source`, `compiler_identity`, `build_module_stamp`,
+`file_identity`, `fnv_file`, `fnv_bytes`, `filename_hash`, `file_lock`,
+`file_publish`, `worker_fork`, `worker_exit`, `worker_wait_any`,
+`shell_status`, `driver_error`, `host_error`
 
 ## Runtime modules
 

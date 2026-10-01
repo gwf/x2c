@@ -94,7 +94,7 @@ static String _tool(String explicit, String name, String fallback) {
 }
 
 static String _recorded_tool(String name) {
-  String home = x2c_home(), record = NULL;
+  String home = home_dir(), record = NULL;
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
@@ -110,7 +110,7 @@ static String _recorded_tool(String name) {
    runtime.
 */
 static void Toolchain._layout(Toolchain t) {
-  String home = x2c_home(), stage = x2c_stage_dir();
+  String home = home_dir(), stage = stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if (!prefix)
     prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
@@ -373,7 +373,7 @@ static List Toolchain._cpp_arguments(
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token" "-Wno-pragma-once-outside-header"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
-    "-I" "." @{_includes(x2c_cpp_include_dirs())} @{_includes(include_dirs)}
+    "-I" "." @{_includes(cpp_include_dirs())} @{_includes(include_dirs)}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     $source);

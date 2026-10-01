@@ -4650,13 +4650,13 @@ static void _load_package_module(
 */
 String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
-    x2c_driver_error("native modules are not supported on this platform");
+    driver_error("native modules are not supported on this platform");
   String absolute = Path.absolute(path);
   if (Compiler.native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
-  if (stamp < 0) x2c_driver_error(%"not an x2c native module: $path");
+  if (stamp < 0) driver_error(%"not an x2c native module: $path");
   if (!stamp)
-    x2c_driver_error(
+    driver_error(
       %"native module '$path' was built by another compiler; rebuild it");
   _open_native_module(absolute);
   return absolute;
@@ -4679,11 +4679,11 @@ void Compiler.preload_native_module(String path) {
 static int _module_stamp(String path) {
   String expected = build_module_stamp();
   if (!expected)
-    x2c_driver_error(
+    driver_error(
       %"cannot read the running compiler to check native module '$path'");
   File input = fopen(path, "rb");
   if (!input)
-    x2c_driver_error(
+    driver_error(
       %"cannot read native module '$path': ${String.new(strerror(errno))}");
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
@@ -4716,10 +4716,10 @@ static int _stamp_in(char *data, size_t size, String expected) {
 static void _open_native_module(String path) {
   void *handle = _module_handle(path);
   if (!handle)
-    x2c_driver_error(
+    driver_error(
       %"cannot load native module '$path': ${String.new(dlerror())}");
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
-  if (!entry) x2c_driver_error(%"not an x2c native module: $path");
+  if (!entry) driver_error(%"not an x2c native module: $path");
   Compiler.add_native_module(path, entry);
 }
 
@@ -4809,7 +4809,7 @@ int Compiler.links_extension(String name) {
     when the compiler links none. Project meta code links it. */
 String Compiler.extension_archive(void) =>
   extensions ? %"${x2c_get_executable()}.extensions/"
-               + %"${x2c_compiler_identity()}.a" : NULL;
+               + %"${compiler_identity()}.a" : NULL;
 
 // sdk rejection
 
