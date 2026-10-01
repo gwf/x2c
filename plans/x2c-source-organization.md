@@ -461,6 +461,10 @@ plans index.
   (`src/macros.x`); only origin removal and one typedef base ever change a
   template. The native-call and replacement paths are candidates for an
   `investigate-x2c-overengineering` pass before anything is deleted.
+- A method cannot be called on a field whose type is spelled `struct X`
+  (for example `record.region` in `lib/error.x`): the typedef's methods are
+  not found, so callers write `ErrorRegion._m(&record.region, ...)`. Found
+  during Phase 5; method lookup should see through the struct tag.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
