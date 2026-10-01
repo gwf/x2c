@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1483`
+Source: `src/callables.x:1482`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -58,7 +58,7 @@ Source: `src/callables.x:188`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:1279`
+Source: `src/callables.x:1278`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -104,7 +104,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1354`
+Source: `src/callables.x:1353`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg

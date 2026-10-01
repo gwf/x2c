@@ -56,7 +56,7 @@ Returns the package rows of `text`: its lines holding the six fields
 and lines with another field count are skipped. The package index and a
 project lockfile share this format.
 
-Source: `src/install.x:346`
+Source: `src/install.x:348`
 
 #### install_version
 
@@ -65,7 +65,7 @@ Source: `src/install.x:346`
 Returns the version an installed package records, or NULL when no package
 of that name is installed or it records no version. Reaches no network.
 
-Source: `src/install.x:308`
+Source: `src/install.x:310`
 
 #### list_command
 
@@ -73,7 +73,7 @@ Source: `src/install.x:308`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
-Source: `src/install.x:470`
+Source: `src/install.x:472`
 
 #### remove_command
 
@@ -82,7 +82,7 @@ Source: `src/install.x:470`
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
-Source: `src/install.x:442`
+Source: `src/install.x:444`
 
 ## Design notes
 

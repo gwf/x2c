@@ -28,7 +28,7 @@ empty, and its last component names the target. Any other directory, an
 unusable name, or a failed write prints a diagnostic and exits with
 status 2.
 
-Source: `src/project.x:860`
+Source: `src/project.x:855`
 
 #### project_manifest
 

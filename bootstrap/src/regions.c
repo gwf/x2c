@@ -18,6 +18,16 @@ static String _1821, _1820, _1819, _1818, _1817, _1816, _1815, _1814, _1813, _18
 
 static Var _1804, _1801, _1797, _1795, _1778, _1775, _1774, _1770, _1768, _1763, _1759, _1758, _1757, _1755, _1752, _1750, _1747, _1746, _1744, _1740, _1736, _1639, _1627, _1622, _1618, _1614, _1567, _1491, _1488, _1482, _1479, _1478, _1475, _1474, _1471, _1467, _1464, _1461, _1458, _1455, _1453, _1450, _1444, _1443, _1440, _1436, _1435, _1432, _1429, _1427, _1424, _1414, _1411, _1407, _1368, _1318, _1314, _1275, _1234, _1226, _1214, _1211, _1205, _1202, _1201, _1198, _1197, _1194, _1190, _1186, _1184, _1182, _1179, _1174, _1170, _1165, _1162, _1161, _1159, _1155, _1153, _1151, _1145, _1142, _1141, _1138, _1136, _1131, _1128, _1127, _1124, _1120, _1115, _1113, _1110, _1107, _1106, _1102, _1099, _1096, _1095, _1092, _1089, _1085, _1081, _1071, _1068, _1064, _1054, _1050, _1002, _954, _937, _934, _930, _929, _926, _923, _914, _913, _912, _907, _904, _901, _898, _894, _888, _887, _879, _878, _877, _875, _873, _869, _866, _865, _861, _858, _856, _851, _849, _847, _838, _836, _834, _796, _788, _784, _781, _779, _777, _773, _772, _770, _766, _763, _762, _761, _760, _756, _755, _748, _747, _746, _745, _741, _738, _737, _725, _722, _716, _713, _712, _709, _708, _705, _702, _699, _696, _684, _681, _675, _672, _671, _668, _667, _664, _661, _659, _658, _655, _652, _647, _645, _642, _641, _638, _636, _633, _631, _627, _624, _623, _621, _618, _602, _600, _599, _597, _596, _594, _593, _590, _584, _581, _580, _579, _576, _575, _574, _571, _570, _569, _566, _565, _564, _561, _559, _558, _557, _554, _551, _548, _545, _543, _542, _541, _540, _539, _536, _533, _527, _525, _524, _521, _520, _519, _517, _516, _512, _510, _508, _507, _506, _505, _504, _503, _501, _500, _498, _497, _494, _492, _487, _484, _483, _482, _479, _476, _475, _474, _473, _472, _469, _468, _467, _464, _463, _462, _459, _458, _457, _454, _453, _452, _450, _446, _443, _439, _435, _433, _430, _427, _426, _425, _424, _420, _419, _418, _406, _402, _400, _398, _395, _383, _373, _369, _367, _365, _362, _355, _353, _351, _340, _338, _335, _332, _297, _292, _289, _282, _280, _277, _272, _230, _227, _216, _213, _209, _205, _192, _174, _171, _169, _162, _156, _154, _125, _124, _123, _119, _109, _99, _87, _83, _77, _75, _66, _62, _59, _55, _52, _51, _47, _46, _45, _44, _40, _39, _33, _32, _29, _28, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _2, _1, _0;
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
+
 #include "meta.h"
 #include "ast.h"
 #include "stage.h"
@@ -38,10 +48,6 @@ typedef struct Region{
   struct Region * outer;
 }
 * Region;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var Fact_var(Fact fact);
 
@@ -244,14 +250,22 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-Var Symbol_var(Symbol);
-
-List cons(Var, List);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+  _x2c_cache_initialize_2();
+  _x2c_static_initialize_0();
+  _x2c_static_initialize_1();
+}
+
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(1219800220);
   _1 = Symbol_var(62180362);
   _2 = Symbol_var(58);
@@ -764,6 +778,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _527 = List_var(_526);
   _528 = cons(_527, NULL);
   _529 = cons(_524, _528);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _530 = cons(_519, _529);
   _531 = cons(_516, _530);
   _532 = cons(_506, _531);
@@ -1276,6 +1293,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1190 = List_var(_1189);
   _1191 = cons(_1190, NULL);
   _1192 = cons(_545, _1191);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1193 = cons(_32, _1192);
   _1194 = List_var(_1193);
   _1195 = cons(_1194, NULL);
@@ -1523,8 +1543,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1819 = String_new("stored into an object of an outer region");
   _1820 = String_new("a closure");
   _1821 = String_new("a fresh allocation");
-  _x2c_static_initialize_0();
-  _x2c_static_initialize_1();
 }
 
 Var Var_new(Symbol, ...);

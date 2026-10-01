@@ -86,7 +86,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:995`
+Source: `src/build.x:989`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -169,7 +169,7 @@ executable is never reused for source it was not built from.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1034`
+Source: `src/build.x:1028`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -202,7 +202,7 @@ Source: `src/build.x:924`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:982`
+Source: `src/build.x:976`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -214,7 +214,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:1011`
+Source: `src/build.x:1005`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -251,7 +251,7 @@ Source: `src/build.x:84`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1107`
+Source: `src/build.x:1101`
 
 ## Public types
 

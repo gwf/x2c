@@ -16,6 +16,10 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
 #include "utils.h"
 #include "parse.h"
 #include "protocol.h"
@@ -352,6 +356,14 @@ _x2c_defer_env_12;
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
 
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+}
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -360,10 +372,7 @@ Var String_var(String);
 
 Var List_var(List);
 
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(895740748108);
   _28 = Symbol_var(377892);
   _42 = Symbol_var(63322012252);
@@ -876,6 +885,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _30784 = List_var(_30783);
   _30785 = cons(_30784, NULL);
   _30786 = cons(_14430, _30785);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _30787 = cons(_30581, _30786);
   _30788 = List_var(_30787);
   _30789 = Symbol_var(61614504);

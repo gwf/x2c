@@ -14,6 +14,18 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void);
+
 #ifndef X2C_TRANSFORM_SOURCE
 #include "meta.h"
 #include "ast.h"
@@ -284,6 +296,18 @@ _x2c_lambda_context_2;
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1);
 
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+  _x2c_cache_initialize_2();
+  _x2c_cache_initialize_3();
+  _x2c_cache_initialize_4();
+  _x2c_cache_initialize_5();
+}
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -294,10 +318,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(895740748108);
   _1 = Symbol_var(920394);
   _6 = Symbol_var(740232);
@@ -810,6 +831,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _30451 = cons(_30450, NULL);
   _30452 = cons(_245, _30451);
   _30453 = cons(_30446, _30452);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _30454 = cons(_30444, _30453);
   _30455 = cons(_30440, _30454);
   _30456 = List_var(_30455);
@@ -1322,6 +1346,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _30965 = cons(_30944, _30964);
   _30966 = cons(_30961, _30965);
   _30967 = cons(_30939, _30966);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _30968 = cons(_30922, _30967);
   _30969 = cons(_68, _30968);
   _30970 = cons(_65, _30969);
@@ -1834,6 +1861,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _31477 = cons(_10820, _31476);
   _31478 = cons(_30440, _31477);
   _31479 = List_var(_31478);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _31480 = cons(_31479, NULL);
   _31481 = cons(_224, _31480);
   _31482 = List_var(_31481);
@@ -2346,6 +2376,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _31992 = cons(_7603, _31991);
   _31993 = cons(_30215, _31992);
   _31994 = List_var(_31993);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _31995 = cons(_31994, NULL);
   _31996 = cons(_30381, _31995);
   _31997 = cons(_30282, _31996);
@@ -2858,6 +2891,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _32504 = List_var(_32503);
   _32505 = cons(_32504, NULL);
   _32506 = cons(_381, _32505);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _32507 = List_var(_32506);
   _32508 = cons(_32507, _77);
   _32509 = List_var(_32508);
