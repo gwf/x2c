@@ -1,8 +1,9 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is in
-> progress. Waves 1-3 are decided and not started. Language design L1-L4
-> is under investigation with Gary; its decisions will be recorded here.
+> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is fixed
+> and in publication. Five further defects found while scoping L1-L4 are
+> listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
+> Gary's decisions are pending.
 
 ## Result
 
@@ -49,10 +50,29 @@ owns the behavior.
 | `offsetof(struct P, b)` does not parse | lib/scan.x never produces `<offsetof>`; the parse, resolve, and type rows are unreachable; the emitter has no case | Recognize by spelling beside `va_arg`; add the emitter case |
 | `case %((!not ?x foo))` rejected | `MatchCaptureLayout.analyze` (lib/match.x:231) computes slots from the raw pattern after normalizing it (H4) | Compute slots from the normalized pattern |
 | `Lisp.bind` with a direct function crashes on the second session | `Lisp.bind` moves the shared file-static `Func` into the session, which frees it | Static `Func` handles are never moved or freed |
-| `x2c-lint` drops three rules outside the repo root | commands/lint/validation.x:41 reads `lib/error-macros.xmacro` from the working directory | Use `$error.nonreturning.causes()` (decision 3) |
+| `x2c-lint` drops two rules outside the repo root | commands/lint/validation.x:41 reads `lib/error-macros.xmacro` from the working directory | Use `$error.nonreturning.causes()` (decision 3) |
+
+The `Lisp.bind` fix marks the compiler's direct-conversion handle through
+an internal `x2c_func_shared` constructor; `Func.move` owns the rule and is
+classified internal, not public. `MatchLower._compile_set` keeps its own
+copy of the `!set` capture test because `_set_capture` is private to
+lib/match.x.
 
 Not in Phase 0: the statement-cast warning gap (src/expressions.x:276) is
 fixed by P7, and template splice order (L2) waits on its design decision.
+
+### Defects found while scoping L1-L4
+
+Each is accepted by x2c and emits C that the C compiler rejects.
+Reproduced with `builds/0/x2c` on 2026-10-01; not yet fixed.
+
+| Defect | Cause |
+| --- | --- |
+| `$let(local, 7)` on a template local emits `macro` as a C type | `x2c_syntax_type` (src/meta-sdk.x:58) returns the `(<macro-expr>)` placeholder (L1) |
+| A Lisp-built `(expr () (parens (block ...)))` is never bound; `String s = $wrap(3);` emits an int initializer | `_resolve_parens` (src/expressions.x:2966) treats the block as an expression (L4) |
+| `int z = ({1});` emits `({ 1 })` without a semicolon | The parenthesized composite path |
+| Two-name `foreach (Var (key, val), ...)` in a template: the body keeps `val` after the declaration is renamed | Template hygiene for literal names |
+| A template passing literal `k` and `k * 2` to an inner macro: the loop variable is renamed, the expression is not | Template hygiene for literal names |
 
 ## Wave 1: direct substitutions
 
@@ -152,16 +172,35 @@ before adoption.
 
 ## Language design
 
-Under investigation 2026-10-01; decisions go here before any work starts.
+Scoped 2026-10-01; Gary's decisions go here before any work starts.
 
 - L1 `foreach` inside macro bodies fails with "type (macro-expr) is not
-  iterable".
-- L2 `%()` insertions and splices evaluate in unspecified C order; about 22
-  emitter helpers exist only to sequence child emission.
-- L3 Shallow collection keeps public declarations only from unit macros
-  with protocol rows; four hand prototype blocks compensate.
-- L4 No source form for `({ ... })`, although six producers build the
-  canonical `(parens (block ...))` by hand.
+  iterable". Cause: `x2c_syntax_type` returns the template placeholder
+  type to compile-time code that runs before binding. Recommended: resolve
+  a `(<macro-expr>)` type at the expansion site in that one function (two
+  lines); a scratch build passed `make verify` and stage-1 self-translation
+  was byte-identical. Also fixes `$let` on template locals. Deletes almost
+  nothing; it is a correctness fix.
+- L2 `%()`, `%[]`, `%{}`, `%""`, and bare collection literals evaluate their
+  parts in C argument order. x86-64 gcc, a documented host compiler,
+  evaluates right to left, so user programs and the compiler's own cache
+  numbering (src/callables.x:1182) differ from clang builds. Recommended:
+  sequence parts left to right in transform when two or more are not
+  stable, through temporaries in a statement expression (about 50-60
+  lines, free at -O2), then fold about 18 emitter helpers (about -75).
+  Needs a local bootstrap refresh between capability and adoption.
+- L3 Collection skips Unit macros defined in the same file unless they
+  contain protocol rows; imported `.xmacro` Unit macros always expand.
+  Recommended: try the remaining local Unit macros under a diagnostics hold
+  and keep nothing on failure (about 15 lines), which honors the book's
+  existing "if expansion succeeds" wording. Deletes the four hand prototype
+  blocks (45 lines) after a local bootstrap refresh.
+- L4 No source form for `({ ... })`; seven producers build the canonical
+  `(parens (block ...))` by hand. Recommended: accept it in source when the
+  braces contain a top-level `;`, so `({})` and `({a: 1})` stay literals;
+  bind the block in `_resolve_parens` (also fixes the Lisp-built defect);
+  reject a top-level `defer` or managed declaration inside one. About 45
+  lines; deletes about 20, or about 45 with a measured callables rewrite.
 
 Backlog signals, not scheduled: L5 grammar macros as static constructors;
 L6 string-to-atom in compile-time Lisp; L7 Lisp callables crossing a
