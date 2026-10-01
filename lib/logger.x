@@ -102,8 +102,10 @@ typedef struct LogMemorySink {
 } *LogMemorySink;
 
 $(import "var-adapters.xmacro") $var.pointer(LogTextSink, logtextsink, <p48>);
+$var.pointer(LogMemorySink, logmemorysink, <p48>);
 
 protocol Var(LogTextSink) as void *;
+protocol Var(LogMemorySink) as void *;
 
 static Logger global_logger = NULL, default_logger = NULL;
 static ErrorHandler logger_error_handler = NULL;
@@ -586,13 +588,12 @@ LogSink Logger.add_memory_sink(Logger logger, List *destination) {
   $scope(&logger.storage) {
     context.wide_values = Block.new(sizeof(Var));
   }
-  return _new_sink(
-    logger, _emit_memory, NULL, Var.new(<p48>, context), _destroy_memory);
+  return _new_sink(logger, _emit_memory, NULL, context, _destroy_memory);
 }
 
 static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
   (void) logger;
-  LogMemorySink l = data.pointer();
+  LogMemorySink l = data;
   List entry = l._cons_retained(event.fields, NULL);
   entry = List.cons_in(l.pool, event.category, entry);
   entry = List.cons_in(l.pool, event.level, entry);
@@ -607,7 +608,7 @@ static List LogMemorySink._cons_retained(
   List.cons_in(l.pool, l._retain(value), tail);
 
 static void _destroy_memory(Var data) {
-  LogMemorySink context = data.pointer();
+  LogMemorySink context = data;
   Var *values = context.wide_values.bytes;
   for (size_t i = 0; i < context.wide_values.length; i++)
     values[i].move_wide_to(context.destination_scope);

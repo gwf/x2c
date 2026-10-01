@@ -324,7 +324,7 @@ meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
 
 static int _map_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source || !source.try_next(*out)) return 0;
+  if (!source.try_next(*out)) return 0;
   if (iter.aux) *out = _apply1(iter.aux, *out);
   return 1;
 }
@@ -437,7 +437,6 @@ meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
 
 static int _accumulate_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source) return 0;
   Var item;
   if (!source.try_next(item)) return 0;
   iter.state = iter.state.binary(<+>, item);
@@ -458,19 +457,8 @@ static int _accumulate_next(Iter iter, Var *out) {
     Raises: `<alloc-fail>` or `<size-limit>` while interning a pair, plus any
     cause raised by either source. A null `dest` returns NULL.
 */
-meta native Iter Iter.zip(Iter left, Iter right, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(left, _zip_next, right);
-}
-
-static int _zip_next(Iter iter, Var *out) {
-  Iter left_iter = iter.obj, right_iter = iter.state;
-  if (!left_iter || !right_iter) return 0;
-  Var left, right;
-  if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  *out = %($left $right);
-  return 1;
-}
+meta native Iter Iter.zip(Iter left, Iter right, Iter dest) =>
+  left.zip_with(right, NULL, dest);
 
 /** Returns a lazy iterator over `fn(left, right)`, applied pairwise.
     Like `Iter.zip`, but each pair is combined by `fn` instead of being
@@ -533,7 +521,6 @@ meta native Iter Iter.enumerate(Iter iter, int start, Iter dest) {
 
 static int _enumerate_next(Iter iter, Var *out) {
   Iter source = iter.obj;
-  if (!source) return 0;
   Var value;
   if (!source.try_next(value)) return 0;
   int index = iter.state;

@@ -79,85 +79,51 @@ struct MapLongDoubleRecord { long key; double val; };
 struct MapStringStringRecord { String key, val; };
 struct MapStringIntRecord { String key; int val; };
 
-// storage errors
+// storage errors and entry slots
 
-static void _int_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapIntInt.reinsert") (capacity $capacity)
-          (probe $probe));
+/* `$typed.storage` generates one family's storage errors, owned by
+   "<map>.reinsert" and "<map>.insert", and its record slot accessors. */
+$(defun _storage_owner (map operation)
+  (x2c.literal.string (string-append (str (car map)) operation)))
+
+macro Unit $typed.storage(
+  Type $map, Type $record, Type $key, Type $value,
+  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
+) {
+  static void $reinsert_error(unsigned capacity, int probe) {
+    raise %(invariant (owner ${$(_storage_owner $map ".reinsert")})
+            (capacity $capacity) (probe $probe));
+  }
+
+  static void $insert_error(unsigned capacity) {
+    raise %(invariant (owner ${$(_storage_owner $map ".insert")})
+            (capacity $capacity));
+  }
+
+  static $key *$key_at($map map, unsigned index) {
+    $record *records = map.entries;
+    return &records[index].key;
+  }
+
+  static $value *$value_at($map map, unsigned index) {
+    $record *records = map.entries;
+    return &records[index].val;
+  }
 }
 
-static void _int_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapIntInt.insert") (capacity $capacity));
-}
-
-static void _long_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapLongDouble.reinsert") (capacity $capacity)
-          (probe $probe));
-}
-
-static void _long_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapLongDouble.insert") (capacity $capacity));
-}
-
-static void _string_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapStringString.reinsert") (capacity $capacity)
-          (probe $probe));
-}
-
-static void _string_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapStringString.insert") (capacity $capacity));
-}
-
-static void _string_int_reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "MapStringInt.reinsert") (capacity $capacity)
-          (probe $probe));
-}
-
-static void _string_int_insert_error(unsigned capacity) {
-  raise %(invariant (owner "MapStringInt.insert") (capacity $capacity));
-}
-
-// entry slots
-
-static int *_int_key(MapIntInt map, unsigned index) {
-  struct MapIntIntRecord *records = map.entries;
-  return &records[index].key;
-}
-
-static int *_int_value(MapIntInt map, unsigned index) {
-  struct MapIntIntRecord *records = map.entries;
-  return &records[index].val;
-}
-
-static long *_long_key(MapLongDouble map, unsigned index) {
-  struct MapLongDoubleRecord *records = map.entries;
-  return &records[index].key;
-}
-
-static double *_double_value(MapLongDouble map, unsigned index) {
-  struct MapLongDoubleRecord *records = map.entries;
-  return &records[index].val;
-}
-
-static String *_string_key(MapStringString map, unsigned index) {
-  struct MapStringStringRecord *records = map.entries;
-  return &records[index].key;
-}
-
-static String *_string_value(MapStringString map, unsigned index) {
-  struct MapStringStringRecord *records = map.entries;
-  return &records[index].val;
-}
-
-static String *_string_int_key(MapStringInt map, unsigned index) {
-  struct MapStringIntRecord *records = map.entries;
-  return &records[index].key;
-}
-
-static int *_string_int_value(MapStringInt map, unsigned index) {
-  struct MapStringIntRecord *records = map.entries;
-  return &records[index].val;
-}
+$typed.storage(
+  MapIntInt, struct MapIntIntRecord, int, int,
+  _int_key, _int_value, _int_reinsert_error, _int_insert_error);
+$typed.storage(
+  MapLongDouble, struct MapLongDoubleRecord, long, double,
+  _long_key, _double_value, _long_reinsert_error, _long_insert_error);
+$typed.storage(
+  MapStringString, struct MapStringStringRecord, String, String,
+  _string_key, _string_value, _string_reinsert_error, _string_insert_error);
+$typed.storage(
+  MapStringInt, struct MapStringIntRecord, String, int,
+  _string_int_key, _string_int_value,
+  _string_int_reinsert_error, _string_int_insert_error);
 
 /* The three iterators each yield one boxed key or value, so a family needs a
    plain function per stored type. */

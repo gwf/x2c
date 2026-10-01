@@ -11,17 +11,6 @@ enum { LOOP_ALLOCATION_LIMIT = 25 };
 
 #pragma private
 
-static void _loop_increment(Map counts, List key, int amount) {
-  Var prior;
-  int count = counts.try_get(key, prior) ? prior.int() : 0;
-  counts[key] = count + amount;
-}
-
-static int _loop_count(Map counts, List key) {
-  Var value;
-  return counts.try_get(key, value) ? value.int() : 0;
-}
-
 static void _loop_collect(
   Compiler compiler, Map definitions, Var value, String path, String function,
   Symbol visibility, int origin, int loop_depth, Symbol use, Array direct,
@@ -210,7 +199,7 @@ static void _loop_add_event(
   List events = groups.contains(key) ? groups[key].list() : NULL;
   groups[key] = cons(%($source $kind $operation $use $depth), events);
   functions[%($unit $function $visibility)] = 1;
-  _loop_increment(totals, %($source $kind), 1);
+  project_count(totals, %($source $kind), 1);
 }
 
 static List _loop_candidate(List key, List events) {
@@ -228,22 +217,22 @@ static List _loop_candidate(List key, List events) {
   foreach (List event, events)
     match (event)
       case %(?source ?kind ?operation ?use ?depth): {
-        _loop_increment(counts, %(allocation $source $kind), 1);
-        _loop_increment(counts, %(use $use), 1);
-        _loop_increment(counts, %(operation $source $operation $kind), 1);
+        project_count(counts, %(allocation $source $kind), 1);
+        project_count(counts, %(use $use), 1);
+        project_count(counts, %(operation $source $operation $kind), 1);
         if (loop_depth < depth.integer()) loop_depth = depth.integer();
       }
 
-  int direct_pooled = _loop_count(counts, %(allocation direct pooled));
-  int direct_scoped = _loop_count(counts, %(allocation direct scoped));
-  int helper_pooled = _loop_count(counts, %(allocation helper pooled));
-  int helper_scoped = _loop_count(counts, %(allocation helper scoped));
-  int returned = _loop_count(counts, %(use returned));
-  int assigned = _loop_count(counts, %(use assigned));
-  int argument = _loop_count(counts, %(use argument));
-  int discarded = _loop_count(counts, %(use discarded));
-  int condition = _loop_count(counts, %(use condition));
-  int nested = _loop_count(counts, %(use nested));
+  int direct_pooled = counts.getdefault(%(allocation direct pooled), 0).int();
+  int direct_scoped = counts.getdefault(%(allocation direct scoped), 0).int();
+  int helper_pooled = counts.getdefault(%(allocation helper pooled), 0).int();
+  int helper_scoped = counts.getdefault(%(allocation helper scoped), 0).int();
+  int returned = counts.getdefault(%(use returned), 0).int();
+  int assigned = counts.getdefault(%(use assigned), 0).int();
+  int argument = counts.getdefault(%(use argument), 0).int();
+  int discarded = counts.getdefault(%(use discarded), 0).int();
+  int condition = counts.getdefault(%(use condition), 0).int();
+  int nested = counts.getdefault(%(use nested), 0).int();
 
   Array operations = [];
   foreach (Var (raw_operation, raw_count), counts) {
@@ -322,10 +311,10 @@ List LoopAllocations.finish(List units, int limit) {
 
   int function_count = functions.len();
   int expression_count = groups.len();
-  int direct_pooled = _loop_count(totals, %(direct pooled));
-  int direct_scoped = _loop_count(totals, %(direct scoped));
-  int helper_pooled = _loop_count(totals, %(helper pooled));
-  int helper_scoped = _loop_count(totals, %(helper scoped));
+  int direct_pooled = totals.getdefault(%(direct pooled), 0).int();
+  int direct_scoped = totals.getdefault(%(direct scoped), 0).int();
+  int helper_pooled = totals.getdefault(%(helper pooled), 0).int();
+  int helper_scoped = totals.getdefault(%(helper scoped), 0).int();
   int reported = ranked.len();
   return %(
     loop-allocations

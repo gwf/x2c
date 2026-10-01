@@ -94,7 +94,7 @@ struct ReplInput {
   int raw, ifd, ofd;
 };
 
-struct EditState {
+typedef struct EditState {
   ReplInput input;
   char *buf, **history;
   size_t buflen, buflen_max;
@@ -106,7 +106,7 @@ struct EditState {
   int completion_pending;
   size_t fold_start[LINENOISE_MAX_FOLDS];
   size_t fold_end[LINENOISE_MAX_FOLDS];
-};
+} EditState;
 
 #define LINENOISE_MAX_LINE (1024*1024)
 #define LINENOISE_INITIAL_BUFLEN 4096
@@ -580,7 +580,7 @@ failed:
 }
 
 /* Handles ctrl+l. */
-static void _clear_screen(struct EditState *l) {
+static void EditState._clear_screen(EditState *l) {
   _write_bytes(l.input.ofd, "\x1b[H\x1b[2J", 7);
 }
 
@@ -615,7 +615,7 @@ static void _render_buffer_close(struct RenderBuffer *ab) {
 }
 
 /* A fold is a display-only replacement for a range in l.buf. The edited
- * buffer always keeps the real bytes; refresh code asks _render_buffer()
+ * buffer always keeps the real bytes; refresh code asks l._render_buffer()
  * for a temporary printable version plus the cursor position inside it. */
 struct EditFold {
   size_t start;
@@ -662,7 +662,7 @@ static void _set_fold_text(struct EditFold *f, const char *buf) {
  * the real text, but not the original paste boundaries, so we reconstruct
  * an approximation of text we want to hide on the fly: if it is long or
  * contains newlines. */
-static int _history_fold(struct EditState *l, struct EditFold *f) {
+static int EditState._history_fold(EditState *l, struct EditFold *f) {
   f.start = f.end = f.displaylen = 0;
   if (l.len == 0) return 0;
   if (!_should_fold(l.buf,l.len)) return 0;
@@ -708,7 +708,7 @@ static int _history_fold(struct EditState *l, struct EditFold *f) {
 /* Populate fs with the folds to render for the current buffer. As a side
  * effect, the rendered text of each fold is updated. Return 1 if folding
  * should be used, or 0 if the buffer should be rendered as-is. */
-static int _render_folds(struct EditState *l, struct EditFolds *fs) {
+static int EditState._render_folds(EditState *l, struct EditFolds *fs) {
   int j;
 
   fs.count = 0;
@@ -733,14 +733,14 @@ static int _render_folds(struct EditState *l, struct EditFolds *fs) {
  * where pasted or multiline history ranges are replaced by their folded
  * "[...]" style versions. outpos is l.pos translated into this rendered
  * buffer. */
-static void _render_buffer(
-  struct EditState *l, char **out, size_t *outlen, size_t *outpos) {
+static void EditState._render_buffer(
+  EditState *l, char **out, size_t *outlen, size_t *outpos) {
   struct EditFolds fs;
   size_t len, pos, src, dst;
   char *r;
   int j, pos_set = 0;
 
-  if (!_render_folds(l,&fs)) {
+  if (!l._render_folds(&fs)) {
     /* Keep the refresh code simple: it always owns a temporary render
      * buffer, even when the render is identical to the real edit buffer. */
     r = Scope.malloc(l.len + 1);
@@ -799,11 +799,11 @@ static void _render_buffer(
 
 /* Return the number of bytes to move right from pos. If pos is at the start of
  * a folded range, the whole hidden range is skipped by one cursor movement. */
-static size_t _next_edit_len(struct EditState *l, size_t pos) {
+static size_t EditState._next_edit_len(EditState *l, size_t pos) {
   struct EditFolds fs;
   int j;
 
-  if (_render_folds(l,&fs))
+  if (l._render_folds(&fs))
     for (j = 0; j < fs.count; j++)
       if (pos == fs.fold[j].start)
         return fs.fold[j].end - fs.fold[j].start;
@@ -812,11 +812,11 @@ static size_t _next_edit_len(struct EditState *l, size_t pos) {
 
 /* Return the number of bytes to move left from pos. If pos is at the end of a
  * folded range, the whole hidden range is skipped by one cursor movement. */
-static size_t _previous_edit_len(struct EditState *l, size_t pos) {
+static size_t EditState._previous_edit_len(EditState *l, size_t pos) {
   struct EditFolds fs;
   int j;
 
-  if (_render_folds(l,&fs))
+  if (l._render_folds(&fs))
     for (j = 0; j < fs.count; j++)
       if (pos == fs.fold[j].end)
         return fs.fold[j].end - fs.fold[j].start;
@@ -824,7 +824,7 @@ static size_t _previous_edit_len(struct EditState *l, size_t pos) {
 }
 
 /* Keeps the fold array sorted by start offset. */
-static void _fold_add(struct EditState *l, size_t start, size_t end) {
+static void EditState._fold_add(EditState *l, size_t start, size_t end) {
   int j;
 
   if (start >= end || l.fold_count == LINENOISE_MAX_FOLDS) return;
@@ -839,11 +839,11 @@ static void _fold_add(struct EditState *l, size_t start, size_t end) {
   l.fold_count++;
 }
 
-static void _fold_clear(struct EditState *l) {
+static void EditState._fold_clear(EditState *l) {
   l.fold_count = 0;
 }
 
-static void _fold_remove(struct EditState *l, int j) {
+static void EditState._fold_remove(EditState *l, int j) {
   memmove(
     l.fold_start+j, l.fold_start+j+1,
     sizeof(size_t)*(l.fold_count-j-1));
@@ -854,7 +854,7 @@ static void _fold_remove(struct EditState *l, int j) {
 }
 
 /* Return true if [pos,pos+len) overlaps any folded range. */
-static int _overlaps_fold(struct EditState *l, size_t pos, size_t len) {
+static int EditState._overlaps_fold(EditState *l, size_t pos, size_t len) {
   size_t end = pos + len;
   int j;
 
@@ -865,8 +865,8 @@ static int _overlaps_fold(struct EditState *l, size_t pos, size_t len) {
 
 /* Adjust fold ranges after an insertion. If insertion somehow lands inside a
  * fold, remove that fold because it no longer maps to an unchanged range. */
-static void _adjust_folds_after_insert(
-  struct EditState *l, size_t pos, size_t len) {
+static void EditState._adjust_folds_after_insert(
+  EditState *l, size_t pos, size_t len) {
   int j = 0;
 
   while (j < l.fold_count) {
@@ -874,15 +874,15 @@ static void _adjust_folds_after_insert(
       l.fold_start[j] += len;
       l.fold_end[j] += len;
       j++;
-    } else if (pos < l.fold_end[j]) _fold_remove(l,j);
+    } else if (pos < l.fold_end[j]) l._fold_remove(j);
     else j++;
   }
 }
 
 /* Adjust fold ranges after a deletion. If deletion overlaps a fold, remove
  * that fold because it no longer maps to an unchanged range. */
-static void _adjust_folds_after_delete(
-  struct EditState *l, size_t pos, size_t len) {
+static void EditState._adjust_folds_after_delete(
+  EditState *l, size_t pos, size_t len) {
   size_t end = pos + len;
   int j = 0;
 
@@ -892,12 +892,12 @@ static void _adjust_folds_after_delete(
       l.fold_end[j] -= len;
       j++;
     } else if (pos >= l.fold_end[j]) j++;
-    else _fold_remove(l,j);
+    else l._fold_remove(j);
   }
 }
 
 /* Rewrite the wrapped display using terminal columns and codepoint widths. */
-static void _render(struct EditState *l, int flags) {
+static void EditState._render(EditState *l, int flags) {
   char seq[64];
   size_t pwidth = _display_width(l.prompt, l.plen);
   char *render = NULL;
@@ -912,7 +912,7 @@ static void _render(struct EditState *l, int flags) {
   int fd = l.input.ofd, j;
   struct RenderBuffer ab;
 
-  _render_buffer(l, &render, &render_len, &render_pos);
+  l._render_buffer(&render, &render_len, &render_pos);
   defer Scope.free(render);
   bufwidth = _display_width(render, render_len);
   poswidth = _display_width(render, render_pos);
@@ -984,12 +984,12 @@ static void _render(struct EditState *l, int flags) {
   _write_bytes(fd, ab.b, ab.len);
 }
 
-static void _refresh_line(struct EditState *l) {
-  _render(l,REFRESH_ALL);
+static void EditState._refresh_line(EditState *l) {
+  l._render(REFRESH_ALL);
 }
 
 /* Stops at the configured interactive-input limit. */
-static int _grow(struct EditState *l, size_t needed) {
+static int EditState._grow(EditState *l, size_t needed) {
   size_t newlen;
   char *newbuf;
 
@@ -1018,10 +1018,10 @@ static int _grow(struct EditState *l, size_t needed) {
 /* Insert bytes into l.buf without repainting the prompt. The paste path uses
  * this to first store the real pasted bytes, then mark their range as folded,
  * and only then refresh so raw pasted newlines are never printed directly. */
-static int _insert_raw(struct EditState *l, const char *c, size_t clen) {
+static int EditState._insert_raw(EditState *l, const char *c, size_t clen) {
   size_t insert_pos = l.pos;
 
-  if (_grow(l,l.len+clen) == -1) return -1;
+  if (l._grow(l.len+clen) == -1) return -1;
 
   if (l.len == l.pos) memcpy(l.buf+l.pos,c,clen);
   else {
@@ -1031,44 +1031,44 @@ static int _insert_raw(struct EditState *l, const char *c, size_t clen) {
   l.pos += clen;
   l.len += clen;
   l.buf[l.len] = '\0';
-  _adjust_folds_after_insert(l,insert_pos,clen);
+  l._adjust_folds_after_insert(insert_pos,clen);
   return 0;
 }
 
-static void _insert(struct EditState *l, const char *c, size_t clen) {
-  if (_insert_raw(l, c, clen) == -1)
+static void EditState._insert(EditState *l, const char *c, size_t clen) {
+  if (l._insert_raw(c, clen) == -1)
     raise %(size-limit (operation "ReplInput.read") (limit 1048576));
-  _refresh_line(l);
+  l._refresh_line();
 }
 
 /* Move cursor on the left. Moves by one UTF-8 character, not byte. */
-static void _move_left(struct EditState *l) {
+static void EditState._move_left(EditState *l) {
   if (l.pos > 0) {
-    l.pos -= _previous_edit_len(l, l.pos);
-    _refresh_line(l);
+    l.pos -= l._previous_edit_len(l.pos);
+    l._refresh_line();
   }
 }
 
 /* Move cursor on the right. Moves by one UTF-8 character, not byte. */
-static void _move_right(struct EditState *l) {
+static void EditState._move_right(EditState *l) {
   if (l.pos != l.len) {
-    l.pos += _next_edit_len(l, l.pos);
-    _refresh_line(l);
+    l.pos += l._next_edit_len(l.pos);
+    l._refresh_line();
   }
 }
 
 /* Move cursor to the start of the line. */
-static void _move_home(struct EditState *l) {
+static void EditState._move_home(EditState *l) {
   if (l.pos != 0) {
     l.pos = 0;
-    _refresh_line(l);
+    l._refresh_line();
   }
 }
 
-static void _move_end(struct EditState *l) {
+static void EditState._move_end(EditState *l) {
   if (l.pos != l.len) {
     l.pos = l.len;
-    _refresh_line(l);
+    l._refresh_line();
   }
 }
 
@@ -1076,7 +1076,7 @@ static void _move_end(struct EditState *l) {
  * entry as specified by 'dir'. */
 #define LINENOISE_HISTORY_NEXT 0
 #define LINENOISE_HISTORY_PREV 1
-static void _recall(struct EditState *l, int dir) {
+static void EditState._recall(EditState *l, int dir) {
   if (l.history_len > 1) {
     const char *src;
     size_t len;
@@ -1100,75 +1100,75 @@ static void _recall(struct EditState *l, int dir) {
     /* Copy the selected entry into the mutable history view. */
     src = l.history[l.history_len - 1 - l.history_index];
     len = strlen(src);
-    if (_grow(l, len) == -1)
+    if (l._grow(len) == -1)
       raise %(size-limit (operation "ReplInput.read") (limit 1048576));
     memcpy(l.buf,src,len);
     l.buf[len] = '\0';
     l.len = l.pos = len;
-    _fold_clear(l);
+    l._fold_clear();
 
     /* History stores the real text, but not the original paste ranges.
      * If the recalled entry needs folding, create one display fold now
      * so text typed after recall remains outside the folded range. */
-    if (_history_fold(l,&f))
-      _fold_add(l,f.start,f.end);
-    _refresh_line(l);
+    if (l._history_fold(&f))
+      l._fold_add(f.start,f.end);
+    l._refresh_line();
   }
 }
 
 /* Delete the character at the right of the cursor without altering the cursor
  * position. Basically this is what happens with the "Delete" keyboard key.
  * Now handles multi-byte UTF-8 characters. */
-static void _delete(struct EditState *l) {
+static void EditState._delete(EditState *l) {
   if (l.len > 0 && l.pos < l.len) {
-    size_t clen = _next_edit_len(l, l.pos);
-    _adjust_folds_after_delete(l,l.pos,clen);
+    size_t clen = l._next_edit_len(l.pos);
+    l._adjust_folds_after_delete(l.pos,clen);
     memmove(l.buf+l.pos, l.buf+l.pos+clen, l.len-l.pos-clen);
     l.len -= clen;
     l.buf[l.len] = '\0';
-    _refresh_line(l);
+    l._refresh_line();
   }
 }
 
 /* Deletes the whole UTF-8 character before the cursor. */
-static void _backspace(struct EditState *l) {
+static void EditState._backspace(EditState *l) {
   if (l.pos > 0 && l.len > 0) {
-    size_t clen = _previous_edit_len(l, l.pos);
-    _adjust_folds_after_delete(l,l.pos-clen,clen);
+    size_t clen = l._previous_edit_len(l.pos);
+    l._adjust_folds_after_delete(l.pos-clen,clen);
     memmove(l.buf+l.pos-clen, l.buf+l.pos, l.len-l.pos);
     l.pos -= clen;
     l.len -= clen;
     l.buf[l.len] = '\0';
-    _refresh_line(l);
+    l._refresh_line();
   }
 }
 
 /* Delete the previous word, maintaining the cursor at the start of the
  * current word. Handles UTF-8 by moving character-by-character. */
-static void _delete_previous_word(struct EditState *l) {
+static void EditState._delete_previous_word(EditState *l) {
   size_t old_pos = l.pos;
   size_t diff;
 
   /* Skip spaces before the word (move backwards by UTF-8 chars). */
   while (l.pos > 0 && l.buf[l.pos-1] == ' ')
-    l.pos -= _previous_edit_len(l, l.pos);
+    l.pos -= l._previous_edit_len(l.pos);
   /* Skip non-space characters (move backwards by UTF-8 chars). */
   while (l.pos > 0 && l.buf[l.pos-1] != ' ')
-    l.pos -= _previous_edit_len(l, l.pos);
+    l.pos -= l._previous_edit_len(l.pos);
   diff = old_pos - l.pos;
-  _adjust_folds_after_delete(l,l.pos,diff);
+  l._adjust_folds_after_delete(l.pos,diff);
   memmove(l.buf+l.pos, l.buf+old_pos, l.len-old_pos+1);
   l.len -= diff;
-  _refresh_line(l);
+  l._refresh_line();
 }
 
 static char *_copy_text(const char *text) =>
   Scope.memdup(text, strlen(text) + 1);
 
-static void _edit_prepare(
-  struct EditState *l, ReplInput input, String prompt,
+static void EditState._prepare(
+  EditState *l, ReplInput input, String prompt,
   ReplInputComplete complete, void *completion_context) {
-  *l = (struct EditState) {0};
+  *l = (EditState) {0};
   l.input = input;
   input.ifd = STDIN_FILENO;
   input.ofd = STDOUT_FILENO;
@@ -1189,7 +1189,7 @@ static void _edit_prepare(
   l.history[l.history_len - 1] = _copy_text("");
 }
 
-static void _edit_close(struct EditState *l) {
+static void EditState._close(EditState *l) {
   for (int i = 0; i < l.history_len; i++) Scope.free(l.history[i]);
   Scope.free(l.history);
   Scope.free(l.buf);
@@ -1227,21 +1227,21 @@ static int _reserve_paste(char **buf, size_t *cap, size_t len, size_t need) {
 
 /* Append bytes to the temporary paste buffer, growing both it and l.buf as
  * needed. Return -1 if the paste is too large or allocation fails. */
-static int _append_paste(
-  struct EditState *l, char **buf, size_t *cap, size_t *len,
+static int EditState._append_paste(
+  EditState *l, char **buf, size_t *cap, size_t *len,
   const char *s, size_t slen, size_t maxlen) {
   size_t needed;
 
   if (*len > maxlen || slen > maxlen-*len) return -1;
   needed = *len+slen;
-  if (_grow(l,l.len+needed) == -1) return -1;
+  if (l._grow(l.len+needed) == -1) return -1;
   if (_reserve_paste(buf,cap,*len,slen) == -1) return -1;
   memcpy(*buf+*len,s,slen);
   *len = needed;
   return 0;
 }
 
-static int _read_byte(struct EditState *l, char *out) {
+static int EditState._read_byte(EditState *l, char *out) {
   while (1) {
     ssize_t count = read(l.input.ifd, out, 1);
     if (count == 1) return 1;
@@ -1252,7 +1252,7 @@ static int _read_byte(struct EditState *l, char *out) {
 
 /* Read a bracketed paste until ESC[201~ and insert the real bytes. If folding
  * is needed, remember the inserted range so only rendering is shortened. */
-static void _paste(struct EditState *l) {
+static void EditState._paste(EditState *l) {
   static const char END[] = "\x1b[201~";
   const size_t ENDLEN = sizeof(END)-1;
   char *buf = NULL;
@@ -1268,7 +1268,7 @@ static void _paste(struct EditState *l) {
 
   while (1) {
     char c;
-    if (!_read_byte(l, &c)) break;
+    if (!l._read_byte(&c)) break;
 
     /* Track a possible ESC[201~ terminator without copying it into the
      * paste. If it turns out to be ordinary input, flush the partial
@@ -1281,7 +1281,7 @@ static void _paste(struct EditState *l) {
 
     if (match > 0) {
       if (!overflowed &&
-        _append_paste(l,&buf,&cap,&len,END,match,maxlen) == -1)
+        l._append_paste(&buf,&cap,&len,END,match,maxlen) == -1)
         overflowed = 1;
       match = 0;
       if (c == END[0]) {
@@ -1291,7 +1291,7 @@ static void _paste(struct EditState *l) {
     }
 
     if (!overflowed &&
-      _append_paste(l,&buf,&cap,&len,&c,1,maxlen) == -1)
+      l._append_paste(&buf,&cap,&len,&c,1,maxlen) == -1)
       overflowed = 1;
   }
 
@@ -1315,26 +1315,26 @@ static void _paste(struct EditState *l) {
 
   if (_should_fold(buf,len)) {
     size_t start = l.pos;
-    if (_insert_raw(l,buf,len) == -1)
+    if (l._insert_raw(buf,len) == -1)
       raise %(size-limit (operation "ReplInput.read")
                          (limit 1048576));
-    _fold_add(l,start,start+len);
-    _refresh_line(l);
-  } else _insert(l,buf,len);
+    l._fold_add(start,start+len);
+    l._refresh_line();
+  } else l._insert(buf,len);
 }
 
-static void _replace_completion(
-  struct EditState *l, size_t start, size_t end, String replacement) {
+static void EditState._replace_completion(
+  EditState *l, size_t start, size_t end, String replacement) {
   size_t added = replacement.len(), removed = end - start;
   size_t length = l.len - removed + added;
-  if (_grow(l, length) == -1)
+  if (l._grow(length) == -1)
     raise %(size-limit (operation "ReplInput.read") (limit 1048576));
   memmove(l.buf + start + added, l.buf + end, l.len - end + 1);
   memcpy(l.buf + start, replacement, added);
   l.len = length;
   l.pos = start + added;
-  _fold_clear(l);
-  _refresh_line(l);
+  l._fold_clear();
+  l._refresh_line();
 }
 
 static String _completion_spelling(Var candidate) {
@@ -1360,8 +1360,8 @@ static size_t _completion_common(List candidates) {
   return common;
 }
 
-static int _show_completion_group(
-  struct EditState *l, List candidates, Symbol kind, String heading) {
+static int EditState._show_completion_group(
+  EditState *l, List candidates, Symbol kind, String heading) {
   int found = 0;
   size_t column = 2;
   foreach (Var row, candidates) {
@@ -1388,22 +1388,22 @@ static int _show_completion_group(
   return found;
 }
 
-static void _show_completions(struct EditState *l, List candidates) {
-  _render(l, REFRESH_CLEAN);
+static void EditState._show_completions(EditState *l, List candidates) {
+  l._render(REFRESH_CLEAN);
   _write_bytes(l.input.ofd, "\r", 1);
-  _show_completion_group(l, candidates, <command>, "Commands");
-  _show_completion_group(l, candidates, <keyword>, "Keywords");
-  _show_completion_group(l, candidates, <session>, "Session");
-  _show_completion_group(l, candidates, <type>, "Types");
-  _show_completion_group(l, candidates, <callable>, "Functions and macros");
-  _show_completion_group(l, candidates, <name>, "Names");
-  _show_completion_group(l, candidates, <member>, "Members");
+  l._show_completion_group(candidates, <command>, "Commands");
+  l._show_completion_group(candidates, <keyword>, "Keywords");
+  l._show_completion_group(candidates, <session>, "Session");
+  l._show_completion_group(candidates, <type>, "Types");
+  l._show_completion_group(candidates, <callable>, "Functions and macros");
+  l._show_completion_group(candidates, <name>, "Names");
+  l._show_completion_group(candidates, <member>, "Members");
   l.oldrows = 0;
   l.oldrpos = 1;
-  _refresh_line(l);
+  l._refresh_line();
 }
 
-static void _complete(struct EditState *l) {
+static void EditState._complete(EditState *l) {
   if (!l.complete) { _beep(); return; }
   String text = String.new_len(l.buf, l.len);
   ReplInputCompletion completion =
@@ -1420,13 +1420,12 @@ static void _complete(struct EditState *l) {
   if (!candidates.cdr() || common > present) {
     String first = _completion_spelling(candidates.car());
     String replacement = String.new_len(first, common);
-    _replace_completion(
-      l, completion.start, completion.end, replacement);
+    l._replace_completion(completion.start, completion.end, replacement);
     l.completion_pending = 0;
     return;
   }
   if (l.completion_pending) {
-    _show_completions(l, candidates);
+    l._show_completions(candidates);
     l.completion_pending = 0;
   }
   else {
@@ -1435,40 +1434,40 @@ static void _complete(struct EditState *l) {
   }
 }
 
-static Symbol _edit_feed(struct EditState *l) {
+static Symbol EditState._feed(EditState *l) {
   char c, seq[3];
-  if (!_read_byte(l, &c)) return <eof>;
+  if (!l._read_byte(&c)) return <eof>;
 
   if (c != TAB) l.completion_pending = 0;
 
   switch(c) {
   case KEY_NULL: break;
   case TAB:
-    _complete(l);
+    l._complete();
     break;
   case ENTER:
-    _move_end(l);
+    l._move_end();
     return <line>;
   case CTRL_C:
     return <cancelled>;
   case BACKSPACE:   /* backspace */
   case 8:     /* ctrl-h */
-    _backspace(l);
+    l._backspace();
     break;
   case CTRL_D:     /* ctrl-d, remove char at right of cursor, or if the
             line is empty, act as end-of-file. */
-    if (l.len > 0) _delete(l);
+    if (l.len > 0) l._delete();
     else return <eof>;
     break;
   case CTRL_T:    /* ctrl-t, swaps current character with previous. */
     /* Handle UTF-8: swap the two UTF-8 characters around cursor. */
     if (l.pos > 0 && l.pos < l.len) {
       char tmp[32];
-      size_t prevlen = _previous_edit_len(l, l.pos);
-      size_t currlen = _next_edit_len(l, l.pos);
+      size_t prevlen = l._previous_edit_len(l.pos);
+      size_t currlen = l._next_edit_len(l.pos);
       size_t prevstart = l.pos - prevlen;
       if (prevlen > sizeof(tmp) || currlen > sizeof(tmp)) break;
-      if (_overlaps_fold(l,prevstart,prevlen+currlen)) {
+      if (l._overlaps_fold(prevstart,prevlen+currlen)) {
         _beep();
         break;
       }
@@ -1477,26 +1476,26 @@ static Symbol _edit_feed(struct EditState *l) {
       memmove(l.buf + prevstart + currlen, l.buf + prevstart, prevlen);
       memcpy(l.buf + prevstart, tmp, currlen);
       if (l.pos + currlen <= l.len) l.pos += currlen;
-      _refresh_line(l);
+      l._refresh_line();
     }
     break;
   case CTRL_B:     /* ctrl-b */
-    _move_left(l);
+    l._move_left();
     break;
   case CTRL_F:     /* ctrl-f */
-    _move_right(l);
+    l._move_right();
     break;
   case CTRL_P:    /* ctrl-p */
-    _recall(l, LINENOISE_HISTORY_PREV);
+    l._recall(LINENOISE_HISTORY_PREV);
     break;
   case CTRL_N:    /* ctrl-n */
-    _recall(l, LINENOISE_HISTORY_NEXT);
+    l._recall(LINENOISE_HISTORY_NEXT);
     break;
   case ESC:
     /* Read the next two bytes representing the escape sequence.
      * Use two calls to handle slow terminals returning the two
      * chars at different times. */
-    if (!_read_byte(l, seq) || !_read_byte(l, seq + 1)) break;
+    if (!l._read_byte(seq) || !l._read_byte(seq + 1)) break;
 
     /* ESC [ sequences. */
     if (seq[0] == '[') {
@@ -1508,7 +1507,7 @@ static Symbol _edit_feed(struct EditState *l) {
         param[0] = seq[1];
         while (plen < sizeof(param)) {
           char p;
-          if (!_read_byte(l, &p)) break;
+          if (!l._read_byte(&p)) break;
           if (p >= '0' && p <= '9') param[plen++] = p;
           else {
             final = p;
@@ -1516,28 +1515,28 @@ static Symbol _edit_feed(struct EditState *l) {
           }
         }
         if (final == '~') {
-          if (plen == 1 && param[0] == '3') _delete(l);
-          else if (plen == 3 && memcmp(param,"200",3) == 0) _paste(l);
+          if (plen == 1 && param[0] == '3') l._delete();
+          else if (plen == 3 && memcmp(param,"200",3) == 0) l._paste();
         }
       } else {
         switch(seq[1]) {
         case 'A': /* Up */
-          _recall(l, LINENOISE_HISTORY_PREV);
+          l._recall(LINENOISE_HISTORY_PREV);
           break;
         case 'B': /* Down */
-          _recall(l, LINENOISE_HISTORY_NEXT);
+          l._recall(LINENOISE_HISTORY_NEXT);
           break;
         case 'C': /* Right */
-          _move_right(l);
+          l._move_right();
           break;
         case 'D': /* Left */
-          _move_left(l);
+          l._move_left();
           break;
         case 'H': /* Home */
-          _move_home(l);
+          l._move_home();
           break;
         case 'F': /* End*/
-          _move_end(l);
+          l._move_end();
           break;
         }
       }
@@ -1547,10 +1546,10 @@ static Symbol _edit_feed(struct EditState *l) {
     else if (seq[0] == 'O') {
       switch(seq[1]) {
       case 'H': /* Home */
-        _move_home(l);
+        l._move_home();
         break;
       case 'F': /* End*/
-        _move_end(l);
+        l._move_end();
         break;
       }
     }
@@ -1564,34 +1563,34 @@ static Symbol _edit_feed(struct EditState *l) {
       int utf8len = _utf8_byte_len(c);
       utf8[0] = c;
       int length = 1;
-      while (length < utf8len && _read_byte(l, utf8 + length)) length++;
-      _insert(l, utf8, length);
+      while (length < utf8len && l._read_byte(utf8 + length)) length++;
+      l._insert(utf8, length);
     }
     break;
   case CTRL_U: /* Ctrl+u, delete the whole line. */
     l.buf[0] = '\0';
     l.pos = l.len = 0;
-    _fold_clear(l);
-    _refresh_line(l);
+    l._fold_clear();
+    l._refresh_line();
     break;
   case CTRL_K: /* Ctrl+k, delete from current to end of line. */
-    _adjust_folds_after_delete(l,l.pos,l.len-l.pos);
+    l._adjust_folds_after_delete(l.pos,l.len-l.pos);
     l.buf[l.pos] = '\0';
     l.len = l.pos;
-    _refresh_line(l);
+    l._refresh_line();
     break;
   case CTRL_A: /* Ctrl+a, go to the start of the line */
-    _move_home(l);
+    l._move_home();
     break;
   case CTRL_E: /* ctrl+e, go to the end of the line */
-    _move_end(l);
+    l._move_end();
     break;
   case CTRL_L: /* ctrl+l, clear screen */
-    _clear_screen(l);
-    _refresh_line(l);
+    l._clear_screen();
+    l._refresh_line();
     break;
   case CTRL_W:
-    _delete_previous_word(l);
+    l._delete_previous_word();
     break;
   }
   return <editing>;
@@ -1600,9 +1599,9 @@ static Symbol _edit_feed(struct EditState *l) {
 static ReplInputResult _read_interactive(
   ReplInput input, String prompt, ReplInputComplete complete,
   void *completion_context) {
-  struct EditState edit;
-  _edit_prepare(&edit, input, prompt, complete, completion_context);
-  defer _edit_close(&edit);
+  EditState edit;
+  edit._prepare(input, prompt, complete, completion_context);
+  defer edit._close();
 
   _enable_raw(input);
   defer _restore(input);
@@ -1611,7 +1610,7 @@ static ReplInputResult _read_interactive(
   _write_bytes(input.ofd, prompt, prompt.len());
 
   Symbol status;
-  while ((status = _edit_feed(&edit)) == <editing>) {}
+  while ((status = edit._feed()) == <editing>) {}
   String text = status == <line> ? String.new(edit.buf) : NULL;
   _restore(input);
   _write_bytes(input.ofd, "\n", 1);

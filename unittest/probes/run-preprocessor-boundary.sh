@@ -28,7 +28,7 @@ grep -Fq '#define PROBE_VALUE 37' "$BUILD/success.stdout"
 [[ ! -s "$success_stderr" ]]
 grep -Fxq "$SOURCE_NAME" "$args_log"
 grep -Fxq -- '-P' "$args_log"
-grep -Fxq -- '-Wno-pragma-once-outside-header' "$args_log"
+grep -Fxq -- '-include' "$args_log"
 awk -v first="$BUILD/include first" -v second="$BUILD/include second" \
     -v xonly="$BUILD/x include" '
   previous == "-I" && $0 == first { first_line = NR }

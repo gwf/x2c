@@ -681,6 +681,32 @@ static int _universal_escape(char *s, int count, Symbol *status) {
   return 2 + count;
 }
 
+// UTF-8
+
+/* Returns the length of the well-formed UTF-8 sequence at NUL-terminated
+   `s`, or the negated length of its maximal ill-formed subpart. Overlong
+   forms, surrogates, and code points above U+10FFFF are ill-formed. */
+int scan_utf8_length(const unsigned char *s) {
+  int length, low = 0x80, high = 0xBF;
+  if (s[0] < 0x80) return 1;
+  if (s[0] < 0xC2) return -1;
+  if (s[0] < 0xE0) length = 2;
+  else if (s[0] < 0xF0) {
+    length = 3;
+    if (s[0] == 0xE0) low = 0xA0;
+    if (s[0] == 0xED) high = 0x9F;
+  }
+  else if (s[0] < 0xF5) {
+    length = 4;
+    if (s[0] == 0xF0) low = 0x90;
+    if (s[0] == 0xF4) high = 0x8F;
+  }
+  else return -1;
+  if (s[1] < low || s[1] > high) return -1;
+  for (int i = 2; i < length; i++) if (s[i] < 0x80 || s[i] > 0xBF) return -i;
+  return length;
+}
+
 // source positions
 
 /* Advances one-based `*l` and `*c` across `n` borrowed bytes.

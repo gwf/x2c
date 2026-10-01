@@ -66,9 +66,9 @@ typedef struct Fact {
   List place;
 } *Fact;
 
-static Var Fact.var(Fact fact) => Var.new(<fact>, fact);
+static Var Fact.var(Fact fact) => Var.new(<p48>, fact);
 static Fact Var.fact(Var value) => value.pointer();
-protocol Var(Fact);
+protocol Var(Fact) as void *;
 
 /* The walk state for one unit. `facts` maps a binding to its Fact, `open`
    is the innermost open region, `frame` is the region of the function's

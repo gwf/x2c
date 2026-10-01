@@ -83,7 +83,7 @@ X2c semantic types.
 
 Returns the name whose address an expression takes, or `NULL`.
 
-Source: `src/type.x:825`
+Source: `src/type.x:800`
 
 #### ast_direct_identifier
 
@@ -95,7 +95,7 @@ a dereference - or `NULL` when the expression designates no single name.
 A declaration qualifier that must reach one object, such as the `volatile`
 an error transfer requires, applies to this name.
 
-Source: `src/type.x:844`
+Source: `src/type.x:819`
 
 #### ast_indirect_identifier
 
@@ -106,7 +106,7 @@ Returns the name of the pointer an expression designates through, or
 `pointer[index]`, and `pointer->member` all change the object the pointer
 holds, which `ast_direct_identifier` reports as no name at all.
 
-Source: `src/type.x:864`
+Source: `src/type.x:839`
 
 #### ast_prototype_declarator
 
@@ -118,7 +118,7 @@ compares a prototype with its definition, and the qualifier the error
 transfer requires belongs to the definition that writes the parameter,
 not to the declaration its callers read.
 
-Source: `src/type.x:242`
+Source: `src/type.x:217`
 
 ### `List`
 
@@ -151,7 +151,7 @@ Source: `src/type.x:50`
 
 Returns whether `sym` can begin a builtin C type specifier.
 
-Source: `src/type.x:299`
+Source: `src/type.x:274`
 
 <a id="Symbol.is_inline"></a>
 #### Symbol.is_inline
@@ -160,7 +160,7 @@ Source: `src/type.x:299`
 
 Returns whether `sym` is the `inline` function specifier.
 
-Source: `src/type.x:286`
+Source: `src/type.x:261`
 
 <a id="Symbol.is_storage_class"></a>
 #### Symbol.is_storage_class
@@ -169,7 +169,7 @@ Source: `src/type.x:286`
 
 Returns whether `sym` is a storage-class specifier.
 
-Source: `src/type.x:283`
+Source: `src/type.x:258`
 
 <a id="Symbol.is_type_modifier"></a>
 #### Symbol.is_type_modifier
@@ -178,7 +178,7 @@ Source: `src/type.x:283`
 
 Returns whether `sym` modifies the width or signedness of a scalar.
 
-Source: `src/type.x:292`
+Source: `src/type.x:267`
 
 <a id="Symbol.is_type_qualifier"></a>
 #### Symbol.is_type_qualifier
@@ -187,7 +187,7 @@ Source: `src/type.x:292`
 
 Returns whether `sym` is `const`, `restrict`, or `volatile`.
 
-Source: `src/type.x:289`
+Source: `src/type.x:264`
 
 ### `Type`
 
@@ -199,7 +199,7 @@ Source: `src/type.x:289`
 Returns the result `Type` of a function `Type`, following pointer and array
 modifiers, or `NULL` when the chain does not end at a function.
 
-Source: `src/type.x:387`
+Source: `src/type.x:362`
 
 <a id="Type.base_type"></a>
 #### Type.base_type
@@ -210,7 +210,7 @@ Returns the suffix of `type` beginning at its builtin or typedef base.
 The result shares the original `List` and is `NULL` when no base is
 present.
 
-Source: `src/type.x:440`
+Source: `src/type.x:415`
 
 <a id="Type.begin_unit"></a>
 #### Type.begin_unit
@@ -220,7 +220,7 @@ Source: `src/type.x:440`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:995`
+Source: `src/type.x:970`
 
 <a id="Type.body"></a>
 #### Type.body
@@ -230,7 +230,7 @@ Source: `src/type.x:995`
 Returns the stored body portion of an enum, struct, or union `Type`.
 Tag references and `Type`s without a stored body return `NULL`.
 
-Source: `src/type.x:344`
+Source: `src/type.x:319`
 
 <a id="Type.canonicalize"></a>
 #### Type.canonicalize
@@ -240,7 +240,7 @@ Source: `src/type.x:344`
 Removes non-typedef storage classes, `inline`, and type qualifiers from
 `type`.
 
-Source: `src/type.x:445`
+Source: `src/type.x:420`
 
 <a id="Type.declaration_ast"></a>
 #### Type.declaration_ast
@@ -250,7 +250,7 @@ Source: `src/type.x:445`
 Returns a complete `(declare ...)` AST for `type` and `binding`.
 A `NULL` binding produces an abstract declaration.
 
-Source: `src/type.x:223`
+Source: `src/type.x:198`
 
 <a id="Type.declaration_parts"></a>
 #### Type.declaration_parts
@@ -261,7 +261,7 @@ Returns `(base modifiers)` for reconstructing a declaration of `type`,
 through `type_declaration_parts` in `lib/meta.x`, which a project's
 helper shares.
 
-Source: `src/type.x:218`
+Source: `src/type.x:193`
 
 <a id="Type.declared"></a>
 #### Type.declared
@@ -272,7 +272,7 @@ Returns the stored declaration `Type` after removing non-typedef storage
 classes and `inline`. Those specifiers describe declaration placement;
 `const`, `restrict`, and `volatile` describe the stored value and remain.
 
-Source: `src/type.x:451`
+Source: `src/type.x:426`
 
 <a id="Type.dereference"></a>
 #### Type.dereference
@@ -281,7 +281,7 @@ Source: `src/type.x:451`
 
 Removes one outer pointer-like or array modifier, or returns `NULL`.
 
-Source: `src/type.x:375`
+Source: `src/type.x:350`
 
 <a id="Type.discards_qualifiers"></a>
 #### Type.discards_qualifiers
@@ -295,7 +295,7 @@ at, so only the deeper levels are compared. Callers use this where the
 two types are otherwise the same; a conversion through a converter
 function copies instead of aliasing.
 
-Source: `src/type.x:478`
+Source: `src/type.x:453`
 
 <a id="Type.end_unit"></a>
 #### Type.end_unit
@@ -305,7 +305,7 @@ Source: `src/type.x:478`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:1002`
+Source: `src/type.x:977`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -314,7 +314,7 @@ Source: `src/type.x:1002`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:934`
+Source: `src/type.x:909`
 
 <a id="Type.function_parts"></a>
 #### Type.function_parts
@@ -325,7 +325,7 @@ Splits a direct or pointer function `type` into its fixed `params`,
 which are `NULL` for `(void)`, and its `return_type` when one is asked
 for. Returns 0 and leaves both unchanged when `type` is not a function.
 
-Source: `src/type.x:400`
+Source: `src/type.x:375`
 
 <a id="Type.is_aggregate"></a>
 #### Type.is_aggregate
@@ -334,7 +334,7 @@ Source: `src/type.x:400`
 
 Returns whether `type` is any struct or union shape.
 
-Source: `src/type.x:305`
+Source: `src/type.x:280`
 
 <a id="Type.is_aggregate_tag"></a>
 #### Type.is_aggregate_tag
@@ -343,7 +343,7 @@ Source: `src/type.x:305`
 
 Returns whether `t` is a body-free struct or union tag reference.
 
-Source: `src/type.x:308`
+Source: `src/type.x:283`
 
 <a id="Type.is_aggregate_tag_body"></a>
 #### Type.is_aggregate_tag_body
@@ -352,7 +352,7 @@ Source: `src/type.x:308`
 
 Returns whether `type` is a tagged struct or union definition.
 
-Source: `src/type.x:315`
+Source: `src/type.x:290`
 
 <a id="Type.is_array"></a>
 #### Type.is_array
@@ -361,7 +361,7 @@ Source: `src/type.x:315`
 
 Returns whether the outer declarator represented by `type` is an array.
 
-Source: `src/type.x:356`
+Source: `src/type.x:331`
 
 <a id="Type.is_bare_typedef_name"></a>
 #### Type.is_bare_typedef_name
@@ -371,7 +371,7 @@ Source: `src/type.x:356`
 Returns whether `type` is one bare typedef-name `String`.
 Unlike `is_typedef_name`, this rejects pointer and array wrappers.
 
-Source: `src/type.x:531`
+Source: `src/type.x:506`
 
 <a id="Type.is_bitfield"></a>
 #### Type.is_bitfield
@@ -381,7 +381,7 @@ Source: `src/type.x:531`
 Returns whether the outer declarator represented by `type` is a
 bitfield.
 
-Source: `src/type.x:367`
+Source: `src/type.x:342`
 
 <a id="Type.is_builtin"></a>
 #### Type.is_builtin
@@ -390,7 +390,7 @@ Source: `src/type.x:367`
 
 Returns whether `type` is a builtin scalar, struct, union, or enum.
 
-Source: `src/type.x:513`
+Source: `src/type.x:488`
 
 <a id="Type.is_enum"></a>
 #### Type.is_enum
@@ -399,7 +399,7 @@ Source: `src/type.x:513`
 
 Returns whether `type` is any enum shape.
 
-Source: `src/type.x:319`
+Source: `src/type.x:294`
 
 <a id="Type.is_enum_tag"></a>
 #### Type.is_enum_tag
@@ -408,7 +408,7 @@ Source: `src/type.x:319`
 
 Returns whether `type` is a body-free enum tag reference.
 
-Source: `src/type.x:322`
+Source: `src/type.x:297`
 
 <a id="Type.is_enum_tag_body"></a>
 #### Type.is_enum_tag_body
@@ -417,7 +417,7 @@ Source: `src/type.x:322`
 
 Returns whether `type` is a tagged enum definition.
 
-Source: `src/type.x:328`
+Source: `src/type.x:303`
 
 <a id="Type.is_extern"></a>
 #### Type.is_extern
@@ -426,7 +426,7 @@ Source: `src/type.x:328`
 
 Returns whether `type` carries the `extern` storage class.
 
-Source: `src/type.x:426`
+Source: `src/type.x:401`
 
 <a id="Type.is_function"></a>
 #### Type.is_function
@@ -435,7 +435,7 @@ Source: `src/type.x:426`
 
 Returns whether the outer declarator is a function or inline function.
 
-Source: `src/type.x:359`
+Source: `src/type.x:334`
 
 <a id="Type.is_inline"></a>
 #### Type.is_inline
@@ -444,7 +444,7 @@ Source: `src/type.x:359`
 
 Returns whether `type` carries the `inline` function specifier.
 
-Source: `src/type.x:423`
+Source: `src/type.x:398`
 
 <a id="Type.is_integral"></a>
 #### Type.is_integral
@@ -453,7 +453,7 @@ Source: `src/type.x:423`
 
 Returns whether `type` is a fixed integral scalar or an enum.
 
-Source: `src/type.x:538`
+Source: `src/type.x:513`
 
 <a id="Type.is_number"></a>
 #### Type.is_number
@@ -462,7 +462,7 @@ Source: `src/type.x:538`
 
 Returns whether `type` is a fixed numeric scalar or an enum.
 
-Source: `src/type.x:535`
+Source: `src/type.x:510`
 
 <a id="Type.is_pointer"></a>
 #### Type.is_pointer
@@ -471,7 +471,7 @@ Source: `src/type.x:535`
 
 Returns whether `t` begins with a pointer-like modifier.
 
-Source: `src/type.x:353`
+Source: `src/type.x:328`
 
 <a id="Type.is_static"></a>
 #### Type.is_static
@@ -480,7 +480,7 @@ Source: `src/type.x:353`
 
 Returns whether `type` carries the `static` storage class.
 
-Source: `src/type.x:420`
+Source: `src/type.x:395`
 
 <a id="Type.is_threaded"></a>
 #### Type.is_threaded
@@ -489,7 +489,7 @@ Source: `src/type.x:420`
 
 Returns whether `type` carries the `threaded` storage class.
 
-Source: `src/type.x:429`
+Source: `src/type.x:404`
 
 <a id="Type.is_typedef"></a>
 #### Type.is_typedef
@@ -498,7 +498,7 @@ Source: `src/type.x:429`
 
 Returns whether `type` begins with the `typedef` storage class.
 
-Source: `src/type.x:432`
+Source: `src/type.x:407`
 
 <a id="Type.is_typedef_name"></a>
 #### Type.is_typedef_name
@@ -507,7 +507,7 @@ Source: `src/type.x:432`
 
 Returns whether the base of `type` is exactly one typedef-name `String`.
 
-Source: `src/type.x:523`
+Source: `src/type.x:498`
 
 <a id="Type.list"></a>
 #### Type.list
@@ -527,7 +527,7 @@ Returns the native type selected by a validated numeric token.
 `floating` selects floating suffix rules; an integer outside all supported
 native families returns `NULL`.
 
-Source: `src/type.x:708`
+Source: `src/type.x:683`
 
 <a id="Type.numeric_literal_value"></a>
 #### Type.numeric_literal_value
@@ -537,7 +537,7 @@ Source: `src/type.x:708`
 Reads a validated numeric literal at its semantic type's precision.
 Returns `void` when its magnitude exceeds the integer representation.
 
-Source: `src/type.x:732`
+Source: `src/type.x:707`
 
 <a id="Type.parameter_ast"></a>
 #### Type.parameter_ast
@@ -547,7 +547,7 @@ Source: `src/type.x:732`
 Returns a complete `(param ...)` AST for `type` and `binding`.
 A `NULL` binding produces an unnamed parameter.
 
-Source: `src/type.x:231`
+Source: `src/type.x:206`
 
 <a id="Type.promote"></a>
 #### Type.promote
@@ -558,7 +558,7 @@ Applies integer promotion to `type`.
 Enums and narrow integers become `int`; other scalars retain their
 canonical spelling, and a non-scalar returns `NULL`.
 
-Source: `src/type.x:657`
+Source: `src/type.x:632`
 
 <a id="Type.reference"></a>
 #### Type.reference
@@ -567,7 +567,7 @@ Source: `src/type.x:657`
 
 Returns the pointer `Type` formed by prefixing `type` with `*`.
 
-Source: `src/type.x:382`
+Source: `src/type.x:357`
 
 <a id="Type.register_var_adoption"></a>
 #### Type.register_var_adoption
@@ -578,7 +578,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:983`
+Source: `src/type.x:958`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -589,7 +589,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:971`
+Source: `src/type.x:946`
 
 <a id="Type.scalar"></a>
 #### Type.scalar
@@ -600,7 +600,7 @@ Returns the normalized builtin scalar spelling, or `NULL` when `t` is not
 one valid scalar combination. Storage classes and qualifiers do not
 affect the result.
 
-Source: `src/type.x:556`
+Source: `src/type.x:531`
 
 <a id="Type.scalar_tag"></a>
 #### Type.scalar_tag
@@ -609,7 +609,7 @@ Source: `src/type.x:556`
 
 Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
 
-Source: `src/type.x:629`
+Source: `src/type.x:604`
 
 <a id="Type.tag"></a>
 #### Type.tag
@@ -620,7 +620,7 @@ Returns the one-element tag `List` of an enum, struct, or union `Type`.
 For a compiler-generated anonymous tag, that element is a gensym node. A
 shape with no tag slot returns `NULL`.
 
-Source: `src/type.x:334`
+Source: `src/type.x:309`
 
 <a id="Type.var_converter"></a>
 #### Type.var_converter
@@ -630,7 +630,7 @@ Source: `src/type.x:334`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:945`
+Source: `src/type.x:920`
 
 <a id="Type.var_numeric_extractor"></a>
 #### Type.var_numeric_extractor
@@ -640,7 +640,7 @@ Source: `src/type.x:945`
 Returns the numeric `Var` reader for `type`, or `NULL` when unsupported.
 Enums use `Var_int` after conversion to their shared integer tag.
 
-Source: `src/type.x:637`
+Source: `src/type.x:612`
 
 <a id="Type.var_numeric_update_helper"></a>
 #### Type.var_numeric_update_helper
@@ -650,7 +650,7 @@ Source: `src/type.x:637`
 Returns the native numeric update helper for `type`, or `NULL` when the
 scalar has no registered update helper.
 
-Source: `src/type.x:646`
+Source: `src/type.x:621`
 
 <a id="Type.var_tag"></a>
 #### Type.var_tag
@@ -660,7 +660,7 @@ Source: `src/type.x:646`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:924`
+Source: `src/type.x:899`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -671,7 +671,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:956`
+Source: `src/type.x:931`
 
 <a id="Type.widest"></a>
 #### Type.widest
@@ -681,7 +681,7 @@ Source: `src/type.x:956`
 Returns the usual arithmetic result `Type` for two scalar operands.
 A missing or non-scalar operand produces `NULL`.
 
-Source: `src/type.x:670`
+Source: `src/type.x:645`
 
 ### `Var`
 

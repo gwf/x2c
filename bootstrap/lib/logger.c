@@ -91,6 +91,10 @@ static inline Var LogTextSink_var(LogTextSink _x2c_macro_value_0);
 
 static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1);
 
+static inline Var LogMemorySink_var(LogMemorySink _x2c_macro_value_2);
+
+static inline LogMemorySink Var_logmemorysink(Var _x2c_macro_value_3);
+
 static Logger global_logger, default_logger;
 
 _x2c_initializer_choice_45B76184_0((global_logger = NULL))
@@ -305,6 +309,14 @@ void * Var_pointer(Var);
 
 static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1){
   return Var_pointer(_x2c_macro_value_1);
+}
+
+static inline Var LogMemorySink_var(LogMemorySink _x2c_macro_value_2){
+  return Var_new(3683441, _x2c_macro_value_2);
+}
+
+static inline LogMemorySink Var_logmemorysink(Var _x2c_macro_value_3){
+  return Var_pointer(_x2c_macro_value_3);
 }
 
 void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
@@ -757,7 +769,7 @@ Var String_var(String);
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 331};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 333};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(owner));
     __builtin_unreachable();
   }
@@ -1209,7 +1221,7 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 
       }
       {
-        LogSink _x2c_return_value_16 = _new_sink(logger, _emit_memory, NULL, Var_new(3683441, context), _destroy_memory);
+        LogSink _x2c_return_value_16 = _new_sink(logger, _emit_memory, NULL, LogMemorySink_var(context), _destroy_memory);
         {
           x2c_cleanup_leave(& _x2c_defer_record_20);
           return _x2c_return_value_16;
@@ -1233,7 +1245,7 @@ Var Var_box_ulong(unsigned long);
 
 static void _emit_memory(Logger logger, const LogEvent * event, Var data){
   (void) logger;
-  LogMemorySink l = Var_pointer(data);
+  LogMemorySink l = Var_logmemorysink(data);
   List entry = LogMemorySink__cons_retained(l, List_var(event -> fields), NULL);
   entry = List_cons_in(l -> pool, Symbol_var(event -> category), entry);
   entry = List_cons_in(l -> pool, Symbol_var(event -> level), entry);
@@ -1252,7 +1264,7 @@ Var Var_move_wide_to(Var, Scope *);
 void Scope_destroy(Scope);
 
 static void _destroy_memory(Var data){
-  LogMemorySink context = Var_pointer(data);
+  LogMemorySink context = Var_logmemorysink(data);
   Var * values = context -> wide_values -> bytes;
   for(size_t i = 0;  i < context -> wide_values -> length;  i ++) Var_move_wide_to(values[i], context -> destination_scope);
   Block_free(context -> wide_values);
