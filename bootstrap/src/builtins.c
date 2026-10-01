@@ -28,6 +28,16 @@ static String _1501, _1500, _1499, _1498, _1497, _1496, _1495, _1494, _1493, _14
 
 static Var _1380, _1377, _1374, _1371, _1366, _1363, _1360, _1357, _1354, _1351, _1347, _1344, _1340, _1337, _1334, _1331, _1324, _1321, _1318, _1315, _1312, _1309, _1306, _1303, _1300, _1297, _1294, _1291, _1289, _1287, _1284, _1281, _1279, _1277, _1274, _1265, _1262, _1258, _1255, _1251, _1248, _1246, _1243, _1239, _1236, _1233, _1230, _1227, _1224, _1221, _1218, _1215, _1214, _1213, _1208, _1207, _1204, _1200, _1197, _1196, _1191, _1190, _1189, _1185, _1184, _1183, _1169, _1167, _1164, _1158, _1155, _1154, _1151, _1150, _1147, _1145, _1142, _1138, _1135, _1133, _1132, _1131, _1128, _1126, _1123, _1122, _1119, _1116, _1114, _1112, _1107, _1094, _1091, _1085, _1082, _1081, _1078, _1077, _1074, _1068, _1064, _1061, _1058, _1055, _1052, _1049, _1046, _1043, _1037, _1032, _1029, _1028, _1025, _1023, _1018, _1015, _1014, _1011, _1009, _1004, _1001, _1000, _997, _995, _992, _987, _984, _981, _980, _977, _974, _973, _970, _967, _966, _963, _961, _959, _945, _942, _936, _933, _932, _929, _928, _925, _920, _917, _913, _909, _906, _903, _900, _897, _890, _886, _883, _882, _879, _877, _872, _869, _868, _865, _863, _859, _856, _855, _852, _850, _845, _842, _841, _838, _836, _833, _827, _824, _821, _820, _817, _814, _813, _810, _807, _806, _803, _800, _799, _796, _794, _792, _789, _785, _783, _782, _765, _763, _762, _759, _753, _750, _749, _746, _745, _742, _739, _735, _731, _727, _723, _719, _715, _713, _712, _711, _707, _704, _700, _696, _693, _689, _686, _683, _681, _680, _679, _677, _674, _672, _670, _666, _663, _662, _659, _655, _652, _649, _646, _643, _642, _641, _634, _632, _627, _626, _625, _624, _622, _620, _618, _606, _603, _597, _594, _593, _590, _589, _586, _583, _579, _576, _573, _570, _567, _563, _558, _555, _554, _551, _549, _544, _541, _540, _537, _535, _532, _529, _526, _523, _522, _519, _516, _515, _512, _511, _509, _507, _506, _504, _499, _498, _497, _496, _494, _493, _492, _490, _488, _487, _474, _471, _465, _462, _461, _458, _457, _454, _451, _446, _442, _439, _436, _433, _427, _423, _418, _415, _414, _412, _408, _406, _404, _399, _396, _395, _392, _390, _386, _383, _382, _379, _377, _374, _369, _364, _362, _359, _358, _355, _352, _351, _347, _344, _343, _340, _339, _336, _334, _332, _329, _326, _321, _304, _302, _301, _299, _298, _296, _295, _292, _290, _287, _281, _278, _277, _276, _273, _272, _271, _268, _267, _266, _263, _262, _261, _258, _256, _255, _254, _251, _248, _244, _240, _237, _233, _230, _227, _224, _223, _219, _216, _213, _211, _210, _209, _208, _207, _206, _205, _202, _197, _192, _190, _187, _186, _183, _181, _176, _173, _172, _169, _167, _161, _159, _158, _155, _154, _153, _151, _150, _146, _144, _142, _141, _140, _139, _138, _137, _135, _134, _132, _131, _128, _124, _120, _117, _116, _114, _111, _108, _107, _102, _99, _98, _97, _94, _91, _90, _89, _88, _87, _84, _83, _82, _79, _78, _77, _74, _73, _72, _69, _68, _67, _42, _38, _33, _29, _8, _7, _2, _1, _0;
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
+
 #include "lisp.h"
 #include "macros.h"
 #include "transform.h"
@@ -38,10 +48,6 @@ List x2c_expr_cast(List type, List expression);
 List x2c_decl_make(List type, Var name, List initializer);
 
 List x2c_param_make(List type, Var name);
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _scope_expand(List body, List destinations);
 
@@ -371,6 +377,20 @@ static Var _x2c_func_adapt_61(Func _x2c_func_binding_61, const FuncArg * _x2c_fu
 
 static Var _x2c_func_adapt_62(Func _x2c_func_binding_62, const FuncArg * _x2c_func_argv_62);
 
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_cache_initialize_0();
+  _x2c_cache_initialize_1();
+  _x2c_cache_initialize_2();
+  _x2c_static_initialize_0();
+  _x2c_static_initialize_1();
+  _x2c_static_initialize_2();
+  _x2c_static_initialize_3();
+  _x2c_static_initialize_4();
+}
+
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -381,10 +401,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor, noinline, cold)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _0 = Symbol_var(1219800220);
   _1 = Symbol_var(62180362);
   _2 = Symbol_var(58);
@@ -897,6 +914,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _564 = cons(_563, NULL);
   _565 = cons(_549, _564);
   _566 = cons(_139, _565);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _567 = List_var(_566);
   _568 = cons(_567, NULL);
   _569 = cons(_138, _568);
@@ -1409,6 +1429,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1076 = cons(_206, _1075);
   _1077 = List_var(_1076);
   _1078 = int_var(743);
+}
+
+__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1079 = cons(_1078, NULL);
   _1080 = cons(_262, _1079);
   _1081 = List_var(_1080);
@@ -1832,11 +1855,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1499 = String_new("binding_target_row");
   _1500 = String_new("binding_targets");
   _1501 = String_new("cursor_output");
-  _x2c_static_initialize_0();
-  _x2c_static_initialize_1();
-  _x2c_static_initialize_2();
-  _x2c_static_initialize_3();
-  _x2c_static_initialize_4();
 }
 
 int List_len(List);

@@ -432,8 +432,9 @@ static List HeaderCache.prelude(HeaderCache &h, Array ids) {
     List statement = c._cache_initializer(i, h.prefix);
     statements.push(c._header_refs(statement, h.prefix, NULL));
   }
+  List body = c._cache_batches(statements, declarations, h.prefix);
   declarations.push(
-    c._header_initializer(h.guard, h.initializer, statements.list_free()));
+    c._header_initializer(h.guard, h.initializer, body));
   ids.free();
   return declarations.list_free();
 }
@@ -534,17 +535,48 @@ static List Compiler._source_cache(
     c._queue_statics(initializers, deferred_kind);
     return source;
   }
+  Array early = [], late = [], declarations = [];
+  foreach (List declaration, c._slot_declarations(ids, NULL))
+    declarations.push(declaration);
   for (int i = 0, n = c.id_keys.len(); i < n; i++) {
     if (ids[i].is_null()) continue;
     List stmt = c._cache_initializer(i, NULL);
     int deferred =
       deferred_kind && c._reaches_kind(%(cache $i), deferred_kind);
-    c.add_init(deferred ? <late> : <early>, stmt);
+    (deferred ? late : early).push(stmt);
   }
+  foreach (List stmt, c._cache_batches(early, declarations, NULL))
+    c.add_init(<early>, stmt);
+  foreach (List stmt, c._cache_batches(late, declarations, NULL))
+    c.add_init(<late>, stmt);
   c._queue_statics(initializers, deferred_kind);
-  List declarations = c._slot_declarations(ids, NULL);
   ids.free();
-  return declarations.append(source);
+  return declarations.list_free().append(source);
+}
+
+/* Large literal graphs otherwise become one enormous native basic block.
+   Bound only their generated assignments, keeping their dependency order
+   and initialization phase. Small caches keep the direct assignments. */
+static List Compiler._cache_batches(
+  Compiler c, Array statements, Array declarations, String prefix) {
+  int limit = 512, count = statements.len();
+  if (count <= limit) return statements.list_free();
+  Array calls = [];
+  String stem = prefix ? %"${prefix}initialize" : "cache_initialize";
+  Macro shape = $cache_function;
+  List type = %(("__attribute__((noinline, cold))") static void);
+  for (int first = 0; first < count; first += limit) {
+    Array batch = [];
+    for (int i = first; i < count && i < first + limit; i++)
+      batch.push(statements[i]);
+    List helper = c.sym.introduce(c.fresh_name(stem));
+    declarations.push(
+      c.rebuild_unit_function(shape(type, helper, batch.list_free())));
+    calls.push(%(stmnt (expr (void)
+      (call (expr ((func ((void))) void) (ident $helper)) (args)))));
+  }
+  statements.free();
+  return calls.list_free();
 }
 
 /* Whether a cache that `code` uses depends on a key of `kind`. */
