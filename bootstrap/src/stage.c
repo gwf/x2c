@@ -664,7 +664,10 @@ static Type _value_type(Var value){
 String Var_repr(Var);
 List Compiler_cache(Compiler, List);
 static List _string_literal(Compiler c, Type declared, Type type, Var value){
-  if(! List_truth(Type_list(declared)) || type == _183) return cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _384) return NULL;  List literal = cons(_28, cons(_385, cons(List_var(cons(_168, cons(_385, cons(value, NULL)))), NULL)));  return cons(_28, cons(List_var(declared), cons(List_var(Compiler_cache(c, cons(_30395, cons(List_var(literal), NULL)))), NULL)));
+  if(! List_truth(Type_list(declared)) || type == _183) return cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(Var_repr(value)), NULL)))), NULL)));  if(type != _384) return NULL;  List literal = cons(_28, cons(_385, cons(List_var(cons(_168, cons(_385, cons(value, NULL)))), NULL)));  return({
+    Var _x2c_literal_part_0 = List_var(declared);  Var _x2c_literal_part_1 = List_var(Compiler_cache(c, cons(_30395, cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+  }
+  );
 }
 
 Type Type_scalar(Type);

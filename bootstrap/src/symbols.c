@@ -471,7 +471,10 @@ List Sym_visible_symbols(Sym s){
   }
   if(scope -> macros != NULL){
     Var name, definition;  Map _x2c_macro_object_1 = scope -> macros;  unsigned _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_2;  Var _x2c_macro_cursor_output_3;  while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
-      name = _x2c_macro_cursor_output_2;  definition = _x2c_macro_cursor_output_3;  if(Var_is_row(name, 11, 7, 1) && _unseen(seen, name)) Array_push(rows, List_var(cons(name, cons(Symbol_var(_macro_kind(definition)), NULL))));
+      name = _x2c_macro_cursor_output_2;  definition = _x2c_macro_cursor_output_3;  if(Var_is_row(name, 11, 7, 1) && _unseen(seen, name)) Array_push(rows, List_var(({
+        Var _x2c_literal_part_0 = name;  Var _x2c_literal_part_1 = Symbol_var(_macro_kind(definition));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+      }
+      )));
     }
 
   }
@@ -581,7 +584,10 @@ static List Sym__scope_binding(Sym s, SymScope * scope, List key){
 
 Var Map_var(Map);
 static void Sym__note_source_key(Sym s, SymScope * scope, List key, List binding){
-  Compiler c = s -> c;  List source_key = cons(Map_var((* scope).symbols), cons(List_var(key), NULL));  Map_setindex(s -> binding_facts, List_var(cons(_30281, cons(List_var(binding), NULL))), List_var(source_key));  Var declaration;  if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))) Map_setindex(c -> source_definitions, List_var(binding), declaration);
+  Compiler c = s -> c;  List source_key =({
+    Var _x2c_literal_part_2 = Map_var((* scope).symbols);  cons(_x2c_literal_part_2, cons(List_var(key), NULL));
+  }
+  );  Map_setindex(s -> binding_facts, List_var(cons(_30281, cons(List_var(binding), NULL))), List_var(source_key));  Var declaration;  if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))) Map_setindex(c -> source_definitions, List_var(binding), declaration);
 }
 
 Var List_last(List);
@@ -680,7 +686,10 @@ List Sym_declare(Sym s, List context, List key, List ast){
 int Type_is_static(Type);
 List List_cddr(List);
 static List Sym__package_declared_key(Sym s, List context, List key, List ast){
-  Compiler c = s -> c;  if((int) Block_len(s -> scopes) != s -> base_scopes) return key;  if(List_truth(context) && !(context == _30283)) return key;  if(Type_is_static(List_type(ast))) return key;  Var head, tag;  List _x2c_destructure_1 = key;  head = List_getindex(_x2c_destructure_1, 0);  tag = List_getindex(_x2c_destructure_1, 1);  if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_string(head))), NULL);  if((Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return cons(head, cons(String_var(Compiler_package_spelling(c, Var_string(tag))), NULL));  return key;
+  Compiler c = s -> c;  if((int) Block_len(s -> scopes) != s -> base_scopes) return key;  if(List_truth(context) && !(context == _30283)) return key;  if(Type_is_static(List_type(ast))) return key;  Var head, tag;  List _x2c_destructure_1 = key;  head = List_getindex(_x2c_destructure_1, 0);  tag = List_getindex(_x2c_destructure_1, 1);  if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_string(head))), NULL);  if((Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return({
+    Var _x2c_literal_part_3 = head;  Var _x2c_literal_part_4 = String_var(Compiler_package_spelling(c, Var_string(tag)));  cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
+  }
+  );  return key;
 }
 
 static String _declared_spelling(List key){
@@ -857,7 +866,10 @@ List Compiler_imported_providers(Compiler c, String name){
 }
 
 String Compiler_imported_spelling(Compiler c, String name){
-  if(! _init_guard_) _file_init_();  List packages = Compiler_imported_providers(c, name);  if(! List_truth(packages) || List_truth(List_cdr(packages))) return NULL;  return String_join(NULL, cons(String_var(Var_str(List_car(packages))), cons(String_var(_30286), cons(String_var(name), NULL))));
+  if(! _init_guard_) _file_init_();  List packages = Compiler_imported_providers(c, name);  if(! List_truth(packages) || List_truth(List_cdr(packages))) return NULL;  return({
+    Var _x2c_literal_part_5 = String_var(Var_str(List_car(packages)));  String_join(NULL, cons(_x2c_literal_part_5, cons(String_var(_30286), cons(String_var(name), NULL))));
+  }
+  );
 }
 
 void Sym_define_macro(Sym s, Atom name, List definition){
@@ -958,7 +970,10 @@ Type Sym_local_type(Sym s, Type type){
 
 static Type Sym__local_tag(Sym s, Type type, Type base){
   for(int i = Block_len(s -> scopes) - 1;  i >= s -> base_scopes;  i --){
-    SymScope * scope = Sym__scope_at(s, i);  Var binding;  if(Map_try_get(scope -> bindings, List_var(base), &(binding))) return _replace_type_base(type, base, List_type(cons(List_car(Type_list(base)), cons(binding, NULL))));
+    SymScope * scope = Sym__scope_at(s, i);  Var binding;  if(Map_try_get(scope -> bindings, List_var(base), &(binding))) return _replace_type_base(type, base, List_type(({
+      Var _x2c_literal_part_6 = List_car(Type_list(base));  cons(_x2c_literal_part_6, cons(binding, NULL));
+    }
+    )));
   }
   return type;
 }
@@ -1052,7 +1067,10 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
 }
 
 static List Sym__field_row(Sym s, Type type, List declaration, List declarator){
-  String name = binding_identity_spelling(Var_list(List_cadr(declarator)));  Type declared = String_truth(name) ? List_type(Sym_get(s, List_append(Type_list(type), cons(String_var(name), NULL)))) : Type_declared(List_type_from_ast(cons(_2488, cons(List_cadr(declaration), cons(List_var(cons(_2489, cons(List_var(declarator), NULL))), NULL)))));  return cons(String_var(name), cons(List_var(declared), NULL));
+  String name = binding_identity_spelling(Var_list(List_cadr(declarator)));  Type declared = String_truth(name) ? List_type(Sym_get(s, List_append(Type_list(type), cons(String_var(name), NULL)))) : Type_declared(List_type_from_ast(({
+    Var _x2c_literal_part_7 = List_cadr(declaration);  cons(_2488, cons(_x2c_literal_part_7, cons(List_var(cons(_2489, cons(List_var(declarator), NULL))), NULL)));
+  }
+  )));  return cons(String_var(name), cons(List_var(declared), NULL));
 }
 
 List Sym_field_order(Sym s, Type type){

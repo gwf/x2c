@@ -692,7 +692,10 @@ static List Compiler__match_statement(Compiler c){
   List cases = NULL, expr = Compiler__keyword_paren_expr(c, 27369680);  if(Compiler_test(c, 247)){
     cases = Compiler__match_cases(c);  Compiler_expect(c, 251);
   }
-  else cases = cons(List_var(Compiler__match_case(c)), NULL);  return cons(_30285, cons(List_var(Compiler_resolve_expression(c, expr, c -> token)), cons(List_var(cases), NULL)));
+  else cases = cons(List_var(Compiler__match_case(c)), NULL);  return({
+    Var _x2c_literal_part_0 = List_var(Compiler_resolve_expression(c, expr, c -> token));  cons(_30285, cons(_x2c_literal_part_0, cons(List_var(cases), NULL)));
+  }
+  );
 }
 
 Array Array_new(void);
@@ -949,7 +952,10 @@ static List Compiler__catch_cases(Compiler c){
     }
     int is_default = 0;  Array_push(arms, List_var(Compiler__catch_arm(c, &(is_default), handle)));  if(is_default) saw_default = 1;  if(! Compiler_test(c, 6398160)) break;  if(saw_default) Compiler_report_error(c, 33658058, _30354, c -> token, cons(String_var(_9088), NULL));
   }
-  return cons(_30311, cons(List_var(Array_list_free(arms)), cons(List_var(handle), NULL)));
+  return({
+    Var _x2c_literal_part_1 = List_var(Array_list_free(arms));  cons(_30311, cons(_x2c_literal_part_1, cons(List_var(handle), NULL)));
+  }
+  );
 }
 
 static List Compiler__catch_handle(Compiler c){
@@ -958,7 +964,13 @@ static List Compiler__catch_handle(Compiler c){
 
 List Compiler_catch_binder_declarations(Compiler, List, List);
 static List Compiler__catch_arm(Compiler c, int * is_default, List handle){
-  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = Compiler__catch_filter(c);  List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _30309);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = Compiler__continued(c, body);  Sym_pop_scope(c -> sym);  return cons(List_var(pattern), cons(List_var(cons(_2485, List_append(Compiler_catch_binder_declarations(c, bindings, handle), cons(List_var(body), NULL)))), NULL));
+  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = Compiler__catch_filter(c);  List bindings = Compiler_begin_catch_arm(c, pattern, start);  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _30309);  if(Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722) body = Compiler__continued(c, body);  Sym_pop_scope(c -> sym);  return({
+    Var _x2c_literal_part_2 = List_var(pattern);  Var _x2c_literal_part_3 = List_var(({
+      List _x2c_literal_part_4 = Compiler_catch_binder_declarations(c, bindings, handle);  cons(_2485, List_append(_x2c_literal_part_4, cons(List_var(body), NULL)));
+    }
+    ));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
+  }
+  );
 }
 
 List Compiler_parse_catch_pattern_literal(Compiler);
