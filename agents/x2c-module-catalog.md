@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 39
+- Compiler modules: 37
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -22,10 +22,10 @@ Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
 `binding_identity_spelling`, `Ast.rewrite_children`, `ast_contains_head`,
-`ast_collect_binding_references`, `Ast.never_returns`,
-`Symbol.compound_operator`, `Symbol.compound_assignment`,
+`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`Ast.initializer_functions`, `preproc_conditional_kind`, `preproc_directive`,
+`preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/build.x](../src/build.x)
 
@@ -94,14 +94,38 @@ Public functions:
 `Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.tokenize`,
-`Compiler.peek`, `Token.skip_trivia`, `Compiler.skip_trivia_from`,
-`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
-`Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
-`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
-`Compiler.at_completion`, `Compiler.__complete_here`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `Compiler.emitted_binding_name`,
+`Compiler.peek`, `Compiler.skip_trivia_from`, `Compiler.require_input`,
+`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.at_word`,
+`Compiler.take_word`, `Symbol.group_step`, `Token.group_close`,
+`Token.after_group`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`preproc_never_active_arm`, `preproc_open_state`, `preproc_branch_state`,
+`preproc_visibility`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Sym.reset`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
+`Sym.global_symbols`, `Sym.base_symbols`, `Sym.current_symbols`,
+`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`, `Sym.set`,
+`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
+`Sym.declare_enumerator`, `Sym.introduce`, `Sym.current_binding`,
+`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
+`Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
+`Sym.bind_identity`, `Compiler.aggregate_name`, `Compiler.package_spelling`,
+`Compiler.register_package_alias`, `Compiler.register_package_member`,
+`Compiler.package_member_spelling`, `Compiler.imported_providers`,
+`Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
+`Sym.lookup_macro`, `Compiler.macro_definition_locals`,
+`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
+`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`,
+`Sym.resolve_key`, `Sym.next_typedef`, `Sym.resolve_base_type`,
+`Sym.normalize_declared_type`, `Sym.local_type`, `Sym.resolve_numeric_type`,
+`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
+`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_named_value_type`,
+`Sym.lookup_field`, `Sym.declare_field_order`, `Sym.field_order`,
+`Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
+`Compiler.semantic_binding_facts`, `Compiler.emitted_binding_name`,
 `Compiler.present_references`, `Compiler.mark_reference_present`,
 `Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
 `reference_guard_exits`, `Compiler.fresh_name`, `Compiler.gensym`,
@@ -121,7 +145,8 @@ Public functions:
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
 `Compiler._skip_shallow_expression`, `Compiler.full_parse`,
-`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`
+`Compiler.skip_collected_script_statement`, `Compiler.skip_script_statement`,
+`ast_collect_binding_references`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -366,18 +391,6 @@ Public functions:
 `Compiler.bind_syntax`, `Compiler.bind_callable_body`,
 `Compiler.finish_foreign_alias`
 
-### [src/preprocess.x](../src/preprocess.x)
-
-C preprocessor directives in x2c source.
-
-Public functions:
-
-`preproc_directive`, `preproc_conditional_kind`, `preproc_never_active_arm`,
-`preproc_open_state`, `preproc_branch_state`, `preproc_visibility`,
-`preproc_include_target`, `Compiler.scan_conditionals`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
-`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
-
 ### [src/project.x](../src/project.x)
 
 x2c project manifests.
@@ -392,15 +405,16 @@ Protocol collection and per-unit semantic registry.
 
 Public functions:
 
-`Compiler.rebuild_protocols`, `Compiler.reverse_converter_spelling`,
-`Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
-`Compiler.install_generated_protocol_symbols`, `Compiler.protocol_members_for`,
-`Compiler.protocol_rejects_direct_member`, `Compiler.operator_member`,
-`Compiler.dump_conformance`, `Compiler.derived_member`,
-`Compiler.protocol_member_names`, `Compiler.wrapper_function`,
-`Compiler.resolve_protocol_member`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
+`Compiler.record_declaration_visibility`, `Compiler.rebuild_protocols`,
+`Compiler.reverse_converter_spelling`, `Compiler.publish_protocol_node`,
+`Compiler.resolve_protocols`, `Compiler.install_generated_protocol_symbols`,
+`Compiler.protocol_members_for`, `Compiler.protocol_rejects_direct_member`,
+`Compiler.operator_member`, `Compiler.dump_conformance`,
+`Compiler.derived_member`, `Compiler.protocol_member_names`,
+`Compiler.wrapper_function`, `Compiler.resolve_protocol_member`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.parse_protocol_declaration`
 
 ### [src/regions.x](../src/regions.x)
 
@@ -461,36 +475,6 @@ Public functions:
 `Compiler.parse_governed`, `Compiler.parse_block_item`,
 `Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
 `Compiler.parse_callable_body`
-
-### [src/symbols.x](../src/symbols.x)
-
-the compiler's semantic symbol table.
-
-Public functions:
-
-`Sym.new`, `Sym.reset`, `Sym.reset_overlay`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
-`Sym.global_symbols`, `Sym.base_symbols`, `Sym.current_symbols`,
-`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`, `Sym.set`,
-`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
-`Sym.declare_enumerator`, `Sym.introduce`, `Sym.current_binding`,
-`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
-`Compiler.semantic_binding_facts`, `Sym.get`, `Sym.get_exact`, `Sym.lookup`,
-`Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.bind_identity`, `Compiler.aggregate_name`,
-`Compiler.record_declaration_visibility`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_providers`,
-`Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
-`Sym.lookup_macro`, `Compiler.macro_definition_locals`, `Sym.resolve_key`,
-`Sym.next_typedef`, `Sym.resolve_base_type`, `Sym.normalize_declared_type`,
-`Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
-`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
-`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
-`Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `SymTxn.commit`, `SymTxn.commit_transient`,
-`SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -842,11 +826,11 @@ Public functions:
 
 ### [lib/lisp-targets.x](../lib/lisp-targets.x)
 
-evaluator targets of the optional pure modules.
+the native operations a Lisp session can bind.
 
 Public functions:
 
-`lisp_optional_native_targets`
+`lisp_native_targets`
 
 ### [lib/lisp.x](../lib/lisp.x)
 

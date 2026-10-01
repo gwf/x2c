@@ -87,7 +87,7 @@ These modules implement the runtime and are not public APIs.
 - `lib/datum.x` - Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 - `lib/lisp-init.x` - The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
-- `lib/lisp-targets.x` - The evaluator targets of the pure Json, Diff, and Path operations, kept out of the implicit prelude.
+- `lib/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 - `lib/machine.x` - `Match` wordcode, builder, and execution-state definitions.
 - `lib/match-machine.x` - Private `Match` wordcode decoder.
 - `lib/protocols.x` - The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
