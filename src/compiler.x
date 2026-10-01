@@ -1,8 +1,8 @@
-/*  compiler.x -- core x2c compiler state and operations
+/*  compiler.x -- one x2c unit's translation state and its two parses
 
     Copyright (c) 2025 Gary William Flake.
 
-    A `Compiler` holds the translation state of one unit: its token cursor,
+    A `Compiler` owns the translation state of one unit: its token cursor,
     symbol table, and declaration state. Collection parses the unit
     shallowly, skipping function bodies; the full parse produces its AST.
     The related compilers of one unit share its package registries,
@@ -229,250 +229,1383 @@ $(import "../src/grammar.xmacro")
 #include <stdlib.h>
 #include <string.h>
 
-// translation state and lifecycle
+// shallow collection
 
-/** Creates a compiler with independent package and generated-name state. */
-Compiler Compiler.new(void) => _new(NULL);
-
-/** Creates a compiler sharing its owner's package and generated-name state. */
-Compiler Compiler.new_shared(Compiler owner) {
-  /* Shallow collection compilers must declare into the same package space,
-     and share the owner's package maps so an import seen in one segment is
-     registered and collected exactly once for the whole unit. */
-  return _new(owner);
-}
-
-// Zero finalizer-visible state before any fallible initialization.
-static Compiler _new(Compiler owner) {
-  Compiler c =
-    Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
-  memset(c, 0, sizeof(struct Compiler));
-  c._init_tables();
-  if (owner) c._share_unit(owner);
-  else c._own_unit();
-  c.sym = Sym.new(c);
-  c._init_queues();
-  c.collect_protocols = 1;
-  c.diagnostics = Diagnostics.new(
-    owner && owner.diagnostics.printer ? c : NULL,
-    owner ? owner.diagnostics.limit : 1);
-  c.braces = [];
-  c.import_stack = [];
-  c.origins = [];
-  c.root_dir = x2c_get_root();
-  return c;
-}
-
-static void Compiler._init_tables(Compiler c) {
-  c.id_keys = [];
-  c.key_ids = {};
-  c.deps = {};
+/** Collects file-scope declarations into `globals` without parsing bodies. */
+void Compiler.shallow_parse(Compiler c, Map globals) {
   c.macros = {};
   c.kw_aliases = {};
   c.kw_seen = {};
-  c.object_macros = {};
-  c.proto_cache = {};
+  c.import_stack.clear();
+  c.sym.reset(globals);
+  c.install_builtin_macros();
+  c._shallow_parse_loop();
+  c._check_unmatched_braces();
+}
+
+/** Collects declarations with reads over `base` then `overlay`.
+
+    Writes go to `overlay`, which captures exactly what this translation
+    contributes above `base`.
+*/
+void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
+  if (c.macros == NULL || !c.macros.len()) c._start_macros();
+  c.sym.reset_overlay(base, overlay);
+  c.install_builtin_macros();
+  c._shallow_parse_loop();
+  // Only linkage groups remain open; a later segment of the file closes them.
+  c.open_linkage += c.braces.len();
+}
+
+// A unit with no macros yet starts its macro, keyword, and import state.
+static void Compiler._start_macros(Compiler c) {
+  c.macros = {};
+  if (c.kw_aliases == NULL) c.kw_aliases = {};
+  if (c.kw_seen == NULL) c.kw_seen = {};
   c.imports = {};
-  c.init_tokens = {};
-  c.static_init_deps = {};
-  c.fn_defs = {};
-  c.meta_comptime = {};
-  c.meta_regions = {};
-  c.meta_hashes = {};
-  c.meta_calls = {};
-  c.native_meta = {};
+  c.import_stack.clear();
 }
 
-/* A child compiler owns its tokens, symbols, and diagnostics. Package
-   registries and generated-name state belong to the whole translation
-   unit, so every child must mutate the owner's exact objects. */
-static void Compiler._share_unit(Compiler c, Compiler owner) {
-  c.package = owner.package;
-  c.package_dirs = owner.package_dirs;
-  c.package_roots = owner.package_roots;
-  c.package_aliases = owner.package_aliases;
-  c.package_members = owner.package_members;
-  c.names = owner.names;
-  c.source_map = owner.source_map;
-  c.recovery_depth = owner.recovery_depth;
-  c.sources = owner.sources;
-  c.declaration_produced = owner.declaration_produced;
-  c.source_facts = owner.source_facts;
-  c.source_occurrences = owner.source_occurrences;
-  c.source_definitions = owner.source_definitions;
-  c.source_declarations = owner.source_declarations;
-  c.source_texts = owner.source_texts;
-  c.unit_script = owner.unit_script;
-  c.include_dirs = owner.include_dirs;
-  c.meta_build = owner.meta_build;
-}
-
-/* The first compiler of a unit creates the state its children share and
-   starts from the shared session's compile-time-only definitions. */
-static void Compiler._own_unit(Compiler c) {
-  c.inherit_library_comptime();
-  c.package_roots = {};
-  c.package_aliases = {};
-  c.package_members = {};
-  c.names = Scope.calloc(1, sizeof(struct GenNames));
-  c.names.counters = {};
-  c.names.adapters = {};
-  c.names.file_scope_owners = {};
-}
-
-static void Compiler._init_queues(Compiler c) {
-  c.inits = [];
-  c.early_decls = [];
-  c.meta_defs = [];
-  c.meta_group = [];
-  c.meta_group_bound = {};
-}
-
-/** Destroys a compiler's owned `Lisp` session, if any.
-
-    A borrowed session is left alive. Owned sessions not freed here are
-    destroyed when the compiler's Scope ends. This is final compiler cleanup:
-    it clears the diagnostic store and the compiler must not be reused.
-    At process exit, root Scope cleanup follows shutdown hooks and canonical
-    pool cleanup. Close explicitly while any native session dependencies live.
-*/
-void Compiler.free_lisp(Compiler c) {
-  if (!c) return;
-  if (c.macro_lisp && !c.borrowed_lisp) {
-    c.macro_lisp.destroy();
-    c.macro_lisp = NULL;
+static void Compiler._shallow_parse_loop(Compiler c) {
+  c.rebuild_protocols(NULL);
+  c.conforms = {};
+  c.shallow = 1;
+  c.braces.clear();
+  while (c.peek(0) != <eof>) {
+    Token start = c.token;
+    (void) c.parse_top_level_mode(1);
+    _debug_tokens(start, c.token);
   }
-  c.diagnostics = NULL;
+  /* Definitions after the last declaration, as before an include, still
+     define macros for the segments that follow. */
+  foreach (List directive, c.leading_preproc())
+    c.note_object_macro(directive.cadr());
+  c.shallow = 0;
 }
 
-// Lisp calls must have returned before the compiler's Scope is reclaimed.
-static void _drop_compiler(void *ptr) {
-  Compiler c = ptr;
-  c.free_lisp();
+static void _debug_tokens(Token start, Token end) {
+  if (!log_should_log(<debug>, <tokenizer>)) return;
+  for (Token tok = start; tok < end; tok++)
+    if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
+      log_debug(
+        <tokenizer>, %(
+        (func "tokenize")
+        (type ${tok.type})
+        (text ${tok.text})
+        (line ${tok.line})
+        (col  ${tok.col})
+      ));
 }
 
-// related compilers
-
-/** Shares the symbol table, literal cache, and protocol registries of the
-    unit `owner` is translating, so a child that binds declarations binds
-    them into that unit. A `meta` definition in a macro import is bound here
-    and emitted by `owner`, so both compilers must read one table: its
-    `(cache id)` references index `owner`'s keys, and its operations resolve
-    through `owner`'s protocol rows. Both install into one macro session, so
-    they also read one record of which `meta` functions reach file-scope
-    state.
+/** Collects a macro or keyword definition while deferring its diagnostics.
+    Returns one on success; malformed syntax skips to end of file and returns
+    zero so the full parse can report it.
 */
-void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
-  c.sym = owner.sym;
-  c.fn_defs = owner.fn_defs;
-  c.id_keys = owner.id_keys;
-  c.key_ids = owner.key_ids;
-  c.protocols = owner.protocols;
-  c.adoptions = owner.adoptions;
-  c.conforms = owner.conforms;
-  c.protocol_helpers = owner.protocol_helpers;
-  c.proto_cache = owner.proto_cache;
-  c.meta_comptime = owner.meta_comptime;
-  c.meta_regions = owner.meta_regions;
-  c.meta_hashes = owner.meta_hashes;
-  c.meta_calls = owner.meta_calls;
-  c.native_meta = owner.native_meta;
+int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
+  int failed = 0;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  $let(c.recovery_depth, c.recovery_depth + 1) {
+    try {
+      if (keyword) c.parse_keyword_definition();
+      else c.parse_macro_definition();
+    }
+    catch %(malformed *): failed = 1;
+  }
+  c.diagnostics.release(hold, 0);
+  if (failed) while (c.peek(0) != <eof>) c.next();
+  return !failed;
 }
 
-/** Shares `owner`'s pending `meta` group and the definitions it reads, which
-    belong with the Lisp session that holds the group's stubs. */
-void Compiler.share_meta_group(Compiler c, Compiler owner) {
-  c.meta_group = owner.meta_group;
-  c.meta_group_bound = owner.meta_group_bound;
-  c.meta_defs = owner.meta_defs;
-}
-
-/** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
-    Lisp state for one segment of a collected file. Segments are one
-    translation unit, so a shadow uses the unit's Lisp environment rather
-    than its own.
+/** Records declaration visibility and meta facts, then skips its body.
+    The declaration is already bound by the shared top-level parser.
 */
-void Compiler.take_unit_state(Compiler c, Compiler owner) {
-  c.macros = owner.macros;
-  c.object_macros = owner.object_macros;
-  c.imports = owner.imports;
-  c.kw_aliases = owner.kw_aliases;
-  c.kw_seen = owner.kw_seen;
+void Compiler.finish_collected_declaration(
+  Compiler c, List declaration, Token meta, int native) {
+  /* Collection records the runtime function a `meta` marker precedes, and
+     the native binding a bodyless or `native` marker advertises; the
+     compile-time form is installed by the full parse. */
+  c.record_declaration_visibility(declaration);
+  /* Lexical privacy also marks a name in Sym.statics, so a static function
+     is marked again as `(function name)`. File collection reads that key to
+     keep the function out of what a private region publishes. */
+  match (declaration)
+    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
+      if (type.type().is_static())
+        c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
+  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c._at_function_arrow())
+    c._skip_body(declaration, meta, native);
+  else if (c.peek(0) == <;>) {
+    if (meta) c.record_native_meta_effect(declaration, meta);
+    c.next();
+  }
+  else c.next();
+}
+
+static void Compiler._skip_body(
+  Compiler c, List declaration, Token meta, int native) {
+  if (native) c.record_native_meta_effect(declaration, meta);
+  match (declaration)
+    case %(declare ? (bindings (bind ?binding ?))):
+      c._note_function_body(declaration.type_from_ast(), binding);
+  if (c._at_function_arrow()) {
+    c.next();
+    c.next();
+    c._skip_shallow_expression(0);
+    c.expect(<;>);
+  }
+  else c._shallow_block();
+}
+
+// `fn_defs` holds each non-static function the unit defines.
+static void Compiler._note_function_body(Compiler c, Type type, List binding) {
+  if (!type.is_function() || type.is_static()) return;
+  c.fn_defs[binding_identity_spelling(binding)] = 1;
+}
+
+/** Reports whether the current two tokens are `=>`. */
+int Compiler._at_function_arrow(Compiler c) =>
+  c.peek(0) == <=> && c.peek(1) == <">">;
+
+/** Skips a balanced shallow expression without consuming its terminator.
+    A top-level comma also terminates the expression when `stop_at_comma` is
+    nonzero.
+*/
+void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
+  for (Symbol type = c.peek(0);
+       type != <eof> && type != <;> && (!stop_at_comma || type != <,>);
+       type = c.peek(0)) {
+    if (type.group_step() > 0) c.token = c.token.after_group();
+    else c.next();
+  }
+}
+
+static void Compiler._shallow_block(Compiler c) {
+  c.next();
+  for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
+    if (peek == <eof>)
+      c.report_error(<parse>, "unexpected end of file", c.token, NULL);
+    if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
+      c._shallow_block();
+    else c.next();
+  }
+  c.expect(<"}">);
+}
+
+/* declaration production
+
+   A declaration producer's source effects wait until production needs
+   their state. Collection retains the bundle a producer returns with its
+   token span, and the full parse replays that bundle. */
+
+/** Queues a source Lisp form until declaration production needs its state.
+    Files without declaration producers keep ordinary full-parse evaluation. */
+void Compiler.queue_declaration_effect(
+  Compiler c, String form, Token first, Token after) {
+  List key = c._declaration_source_key(first);
+  String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
+  c.declaration_effects = cons(
+    %($key ${after.pos} $form ${c.freeze_declaration_syntax(first)} $context),
+    c.declaration_effects);
+}
+
+static List Compiler._declaration_source_key(Compiler c, Token token) {
+  String path = home_portable_path(Path.absolute(c.filename));
+  return %("source-node" (declaration $path ${token.pos}));
+}
+
+/** Runs pending effects for declaration production or CPP macro evaluation. */
+void Compiler.run_declaration_effects(Compiler c) {
+  List effects = c.declaration_effects.reverse();
+  c.declaration_effects = NULL;
+  foreach (List effect, effects) {
+    (List key, int end, String form, Var site, String context) = effect;
+    $let(c.filename, c._effect_file(key)) {
+      c.import_stack.push(context);
+      defer c.import_stack.take_last();
+      Token token = c.thaw_declaration_syntax(site);
+      c.evaluate_declaration_effect(form, token);
+      if (c.collect_protocols)
+        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
+    }
+  }
+}
+
+static String Compiler._effect_file(Compiler c, List key) {
+  match (key)
+    case %("source-node" (declaration ?path ?)):
+      return _declaration_path(path, 1);
+  return c.filename;
+}
+
+/** Expands a file-scope unit macro and retains its declarations for
+    collection. Its private helpers remain available to later invocations.
+    Generated-name counters are restored when the full parse must expand it
+    again.
+*/
+void Compiler.collect_unit_macro(Compiler c) {
+  Map counters = c.names.counters;
+  c.names.counters = counters.copy();
+  SymTxn transaction = c.begin_semantic_transaction();
+  Token first = c.token;
+  List syntax = c.parse_top_level();
+  int retained = c._retain_bundle(syntax, first, c.token);
+  transaction.commit();
+  /* The full parse expands this unit again. Keep the declarations needed
+     by later shallow invocations, but do not count its generated names
+     twice. */
+  if (!retained) c.names.counters = counters;
+}
+
+/* The owning source records one declaration production, including its exact
+   token span. Full parsing consumes that production instead of invoking its
+   compile-time producer again. Ordinary Unit macros retain their old path. */
+static int Compiler._retain_bundle(
+  Compiler c, List syntax, Token first, Token after) {
+  match (syntax) {
+    case %(seq ?only): return c._retain_bundle(only, first, after);
+    case %(declaration-bundle (rows *)): {
+      List frozen = c.freeze_declaration_syntax(syntax);
+      c.sym.set(
+        c._declaration_source_key(first),
+        %(declaration-source ${after.pos} $frozen));
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static List Compiler._replay_bundle(Compiler c) {
+  List source = c.sym.get(c._declaration_source_key(c.token));
+  match (source)
+    case %(declaration-source ?(int end) ?syntax): {
+      List thawed = c.thaw_declaration_syntax(syntax);
+      List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
+      while (c.peek(0) != <eof> && c.token.pos < end) c.next();
+      return bound;
+    }
+  return NULL;
+}
+
+/* retained declaration syntax
+
+   Declaration syntax outlives the segment that parsed it, in the process
+   cache and in `.xi` interfaces. Freezing turns tokens and origin indices
+   into portable rows, and thawing rebuilds them in the current parse. */
+
+/** Retains declaration syntax across source segments and cached interfaces.
+    Tokens and origin indices become portable source data; marker-shaped user
+    Lists are escaped so thawing preserves their values.
+*/
+Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
+  if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
+  match (syntax) {
+    case %(macrodef *rows): return c._declaration_macro(rows, 0);
+    case %(src (source ?path ?begin ?end) ?node):
+      return %(src (source ${_declaration_path(path, 0)} $begin $end)
+        ${c.freeze_declaration_syntax(node)});
+    case %(at ?(int origin) ?node): return c._freeze_origin(origin, node);
+  }
+  return c._freeze_rows(syntax);
+}
+
+// A leaf that a List cannot carry as itself becomes a marker row.
+static Var _freeze_leaf(Var syntax) {
+  if (syntax is void) return %(declaration-void);
+  if (syntax is <symbol> && !syntax.symbol())
+    return %(declaration-empty-symbol);
+  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
+    return %(declaration-atom ${syntax.str()});
+  if (syntax is not <token>) return syntax;
+  Token token = syntax;
+  return %(declaration-token ${token.type.str()} ${token.text}
+            ${token.line} ${token.col} ${token.len} ${token.pos});
+}
+
+// An origin index freezes as the location it names in this parse.
+static List Compiler._freeze_origin(Compiler c, int origin, Var node) {
+  List location = c.origin_location(origin);
+  if (!location) return %(at m-origin ${c.freeze_declaration_syntax(node)});
+  return %(declaration-origin ${_declaration_location(location, 0)}
+            ${c.freeze_declaration_syntax(node)});
+}
+
+// A List whose head is a marker is escaped, so thawing keeps its value.
+static List Compiler._freeze_rows(Compiler c, List syntax) {
+  Array rows = [];
+  foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
+  match (syntax)
+    case %((!or declaration-void declaration-empty-symbol declaration-atom
+                declaration-token declaration-origin declaration-list) *):
+      return %(declaration-list @{rows.list_free()});
+  return rows.list_free();
+}
+
+/** Returns `freeze_declaration_syntax` of the active macro stack. */
+Var Compiler.freeze_macro_stack(Compiler c) {
+  unsigned long epoch = Pool.epoch();
+  if (c.macro_stack != c.frozen_stack_key || epoch != c.frozen_stack_epoch ||
+      c.frozen_stack is void) {
+    c.frozen_stack = c.freeze_declaration_syntax(c.macro_stack);
+    c.frozen_stack_key = c.macro_stack;
+    c.frozen_stack_epoch = epoch;
+  }
+  return c.frozen_stack;
+}
+
+/** Restores a retained declaration recipe in the current parsing lifetime. */
+Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
+  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  match (syntax) {
+    case %(declaration-list *rows): return c._thaw_rows(rows);
+    case %(macrodef *rows): return c._declaration_macro(rows, 1);
+    case %(src (source ?path ?begin ?end) ?node):
+      return %(src (source ${_declaration_path(path, 1)} $begin $end)
+        ${c.thaw_declaration_syntax(node)});
+    case %(declaration-void): return void;
+    case %(declaration-empty-symbol): return (Symbol) 0;
+    case %(declaration-atom ?spelling): return Atom.intern(spelling);
+    case %(declaration-token ?type ?text ?line ?column ?length ?position):
+      return _thaw_token(type, text, line, column, length, position);
+    case %(declaration-origin ?location ?node):
+      return c._thaw_origin(location, node);
+  }
+  return c._thaw_rows(syntax);
+}
+
+static List Compiler._thaw_rows(Compiler c, List rows) {
+  Array values = [];
+  foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
+  return values.list_free();
+}
+
+static Token _thaw_token(
+  Var type, Var text, Var line, Var column, Var length, Var position) {
+  Token token = Scope.calloc(1, sizeof(struct Token));
+  *token = (struct Token) {
+    .text = text, .type = Symbol.new(type.string()), .line = line,
+    .col = column, .len = length, .pos = position};
+  return token;
+}
+
+// A frozen location becomes a new row of this parse's origin table.
+static List Compiler._thaw_origin(Compiler c, List source, Var node) {
+  c.origins.push(
+    %(source ${source.assoc(<file>)}
+      ${source.assoc(<line>)} ${source.assoc(<column>)}
+      ${source.assoc(<length>)} ${source.assoc(<position>)}));
+  return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
+}
+
+static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
+  Array out = [];
+  foreach (List row, rows) out.push(c._macro_row(row, thaw));
+  return %(macrodef @{out.list_free()});
+}
+
+static List Compiler._macro_row(Compiler c, List row, int thaw) {
+  match (row)
+    case %(origin ?location):
+      return %(origin ${_declaration_location(location, thaw)});
+  return thaw ? c.thaw_declaration_syntax(row)
+              : c.freeze_declaration_syntax(row);
+}
+
+static List _declaration_location(List location, int thaw) {
+  Array rows = [];
+  foreach (List row, location) {
+    match (row)
+      case %(file ?path):
+        row = %(file ${_declaration_path(path, thaw)});
+    rows.push(row);
+  }
+  return rows.list_free();
+}
+
+static String _declaration_path(String path, int thaw) {
+  if (!path || path.startswith("<")) return path;
+  return thaw ? home_absolute_path(path) : home_portable_path(path);
+}
+
+/* declaration defaults
+
+   A declaration producer can offer defaults: functions that bind only when
+   no other declaration takes their name, and constructors that forward to
+   a parent's constructor. The owning file selects them after all its
+   segments. */
+
+/* One selection of a file's defaults. `c`, a shadow compiler, binds them
+   over the file's collected symbols. `sources` holds one
+   `(declarations key end rows)` entry per production, and `pending` the
+   children whose forwarded constructors wait for their parent's
+   constructor. */
+typedef struct Defaults {
+  Compiler c, Array parts, sources;
+  Map definitions, pending;
+} Defaults;
+
+/** Selects the owning file's declaration defaults after all its segments.
+    The selected signatures join ordinary declarations before protocol and
+    body binding; discarded candidates never bind their bodies. Returns added
+    signatures for the caller to retain in the header-cache lifetime.
+*/
+Map Compiler.select_declaration_defaults(
+  Compiler c, String path, Map symbols, Array parts, Map definitions) {
+  Compiler shadow = Compiler.new_shared(c);
+  defer c.close_child(shadow);
+  shadow._prepare_shadow(c, path, symbols);
+  Array sources = [];
+  Map pending = {};
+  Defaults d = {
+    .c = shadow, .parts = parts, .sources = sources,
+    .definitions = definitions, .pending = pending};
+  foreach (Var part, parts) if (part is <map>) d.produce(part);
+  d.select();
+  d.forward();
+  d.store(symbols);
+  Map additions = shadow.sym.current_symbols();
+  symbols.merge(additions);
+  c.merge_source_declarations(symbols, additions);
+  c.fn_defs.merge(shadow.fn_defs);
+  definitions.merge(shadow.fn_defs);
+  return additions;
+}
+
+/* The shadow binds over the file's collected symbols in an overlay,
+   without parsing, in the unit's Lisp session and meta group. */
+static void Compiler._prepare_shadow(
+  Compiler c, Compiler owner, String path, Map symbols) {
+  c.filename = path;
   c.macro_lisp = owner.macro_lisp;
-  c.declaration_effects = owner.declaration_effects;
   c.borrowed_lisp = c.macro_lisp != NULL;
   c.share_meta_group(owner);
+  c.sym.reset_overlay(symbols, {});
+  c.rebuild_protocols(symbols);
+  c.conforms = {};
+  c.shallow = 1;
+  c.declaration_projection = 1;
 }
 
-/** Returns that state to `owner`, so the next segment starts where this one
-    finished and any Lisp environment this segment created stays alive after
-    the shadow is released.
-*/
-void Compiler.return_unit_state(Compiler c, Compiler owner) {
-  owner.macros = c.macros;
-  owner.object_macros = c.object_macros;
-  owner.imports = c.imports;
-  owner.kw_aliases = c.kw_aliases;
-  owner.kw_seen = c.kw_seen;
-  owner.macro_lisp = c.macro_lisp;
-  owner.declaration_effects = c.declaration_effects;
-  owner.declaration_produced |= c.declaration_produced;
-  c.borrowed_lisp = c.macro_lisp != NULL;
+// A part's productions run in source order.
+static void Defaults.produce(Defaults *d, Map declarations) {
+  Array ordered = [];
+  foreach (Var (key, value), declarations)
+    match (key)
+      case %("source-node" (declaration ? ?position)):
+        ordered.push(%($position $key $value));
+  ordered.sort();
+  foreach (List entry, ordered) {
+    (Var position, Var key, Var value) = entry;
+    (void) position;
+    match (value)
+      case %(declaration-source ?end (declaration-bundle (rows *rows))): {
+        rows = d.c.thaw_declaration_syntax(rows);
+        Array produced = [];
+        d.c._produce(rows, produced);
+        d.sources.push(%($declarations $key $end ${produced.list_free()}));
+      }
+  }
 }
 
-// source files and dependencies
+/* A pending row runs its recipe under the macro stack and privacy of its
+   construction, and the rows it generates are produced in turn. */
+static void Compiler._produce(Compiler c, List rows, Array selected) {
+  foreach (List row, rows) {
+    match (row)
+      case %(declaration-pending ?callback ?arguments
+               ?construction ?privacy): {
+        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.source_private, privacy)
+          c._produce(c._generated_rows(callback, arguments), selected);
+        continue;
+      }
+    selected.push(row);
+  }
+}
 
-/** Reads a source through the request view and retains exact response
-    bytes.
-*/
-int Compiler.read_source(Compiler c, String path, String volatile &text) {
-  if (!c.sources.read(path, text)) return 0;
-  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
+// A recipe's rows: the children of a sequence or bundle, or its one node.
+static List Compiler._generated_rows(Compiler c, Var callback, Var arguments) {
+  List generated = c.bind_syntax(
+    c.evaluate_declaration_recipe(callback, arguments), AST_UNIT, NULL);
+  List additions = %($generated);
+  match (generated) {
+    case %(seq *children): additions = children;
+    case %(declaration-bundle (rows *children)): additions = children;
+  }
+  return additions;
+}
+
+/* Each production selects its defaults, and a forwarded constructor
+   waits for its parent's constructor. */
+static void Defaults.select(Defaults *d) {
+  for (size_t index = 0; index < d.sources.len(); index++) {
+    (Map declarations, Var key, Var end, List rows) = d.sources[index];
+    List selected = d._select_rows(rows);
+    foreach (List row, selected)
+      match (row)
+        case %(declaration-forward ?child *): d.pending[child] = 1;
+    d.sources[index] = %($declarations $key $end $selected);
+  }
+}
+
+static List Defaults._select_rows(Defaults *d, List rows) {
+  Compiler c = d.c;
+  Array selected = [];
+  foreach (List row, rows) {
+    match (row)
+      case %(declaration-default ?function ?construction ?privacy): {
+        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
+        $let(c.source_private, privacy) {
+          Var syntax = d._unless_taken(function);
+          if (syntax is not void) selected.push(c._bind_default(syntax));
+        }
+        continue;
+      }
+    selected.push(row);
+  }
+  return selected.list_free();
+}
+
+/* Returns the function to bind for a default, named through its macro
+   slot, or void when a declaration already takes its name. */
+static Var Defaults._unless_taken(Defaults *d, List syntax) {
+  match (syntax)
+    case %(function ?return_type (bind ?name ?modifiers) ?body): {
+      name = d.c.evaluate_macro_slot(name);
+      String spelling = binding_identity_spelling(name);
+      match (name) {
+        case %(?(String literal)): spelling = literal;
+        case %("x2c.ident" ?(String literal)): spelling = literal;
+      }
+      if (spelling && d._taken(spelling)) return void;
+      return %(function $return_type (bind $name $modifiers) $body);
+    }
+  return syntax;
+}
+
+/* A default yields to any declaration of its name except a bodyless,
+   non-static function prototype in the default's own file, which the
+   default then completes. */
+static int Defaults._taken(Defaults *d, String spelling) {
+  Compiler c = d.c;
+  List key = %($spelling);
+  Type declared = c.sym.get(key);
+  if (!declared) return 0;
+  if (!declared.is_function() || spelling in d.definitions ||
+      spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
+    return 1;
+  foreach (Var part, d.parts) if (part is <map> && key in part.map()) return 0;
   return 1;
 }
 
-/** Returns the spelling that identifies the file at `path`. Through a
-    source view it is the absolute path, because an unsaved file need not
-    exist on disk; otherwise it is the real path, or `path` itself when that
-    does not resolve.
-*/
-String Compiler.canonical_path(Compiler c, String path) {
-  if (c.sources) return Path.absolute(path);
-  char resolved[PATH_MAX];
-  return realpath(path, resolved) ? resolved : path;
+static List Compiler._bind_default(Compiler c, List syntax) {
+  if (c.source_private)
+    match (syntax)
+      case %(function ?type ?declarator ?body):
+        if (!type.type().is_static())
+          syntax = %(function (static @type) $declarator $body);
+  return c.bind_syntax(syntax, AST_UNIT, NULL);
 }
 
-/** Returns `path` relative to the canonical x2c home when it lies below the
-    home, otherwise `path`. Interfaces, macro definitions, retained
-    declarations, and generated identities spell paths this way, so they do
-    not depend on where the home is installed.
-*/
-String home_portable_path(String path) {
-  String prefix = %"${x2c_get_root()}/";
-  return path.startswith(prefix) ? path[prefix.len():] : path;
-}
-
-/** Returns the absolute path that a `home_portable_path` spelling names. */
-String home_absolute_path(String spelling) =>
-  spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
-
-/** Merges one translation dependency, preserving an existing content hash. */
-void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
-  if (content_hash is <string>) {
-    if (m[path] is not <string>) m[path] = content_hash;
+/* Forwarded constructors bind as their parents' constructors complete; a
+   round that completes none leaves a parent that never will. */
+static void Defaults.forward(Defaults *d) {
+  int remaining = d.pending.len();
+  while (remaining) {
+    int previous = remaining;
+    remaining = 0;
+    for (size_t index = 0; index < d.sources.len(); index++) {
+      (Map declarations, Var key, Var end, List rows) = d.sources[index];
+      rows = d._forward_rows(rows, remaining);
+      d.sources[index] = %($declarations $key $end $rows);
+    }
+    if (remaining && remaining == previous)
+      d.c.report_error(
+        <type>,
+        "a forwarded class constructor has no completed parent constructor",
+        d.c.token, NULL);
   }
-  else m.setdefault(path, 1);
 }
 
-/** Records a path dependency not embedded in generated C. */
-void Compiler.add_translation_dependency(Compiler c, String path) {
-  c.deps.merge_translation_dependency(path, 1);
+static List Defaults._forward_rows(Defaults *d, List rows, int &remaining) {
+  Array selected = [];
+  foreach (List row, rows) {
+    match (row)
+      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
+        List bound = NULL;
+        $let(d.c.source_private, privacy)
+          bound = d._forwarded(child, parent, member, fallback);
+        if (!bound) {
+          remaining++;
+          selected.push(row);
+        }
+        else {
+          d.pending.del(child);
+          if (bound.car() != <seq>) selected.push(bound);
+        }
+        continue;
+      }
+    selected.push(row);
+  }
+  return selected.list_free();
 }
 
-/** Merges another translation's dependency rows into this compiler. */
-void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
-  foreach (Var (path, content_hash), dependencies)
-    c.deps.merge_translation_dependency(path, content_hash);
+/* Binds the constructor `child_member` that forwards to the parent's
+   `member`. It is `(seq)` when that name is already declared, the fallback
+   when the parent has no such member, and NULL while the parent's own
+   constructor is still pending. */
+static List Defaults._forwarded(
+  Defaults *d, Type child, Type parent, String member, List fallback) {
+  Compiler c = d.c;
+  String name = %"${child.car()}_$member";
+  if (c.sym.get(%($name))) return %(seq);
+  List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
+  if (!method) {
+    if (parent in d.pending) return NULL;
+    return fallback ? c._bind_default(fallback.car()) : NULL;
+  }
+  List binding = NULL, Type signature = NULL;
+  match (method)
+    case %(method ?target ?type): {
+      binding = target;
+      signature = type;
+    }
+  if (!signature) return NULL;
+  return c._bind_default(c._forwarder(name, child, binding, signature));
+}
+
+// The forwarding constructor passes each argument on and casts the result.
+static List Compiler._forwarder(
+  Compiler c, String name, Type child, List binding, Type signature) {
+  List types = NULL;
+  match (signature) case %((func ?parameters) *): types = parameters;
+  Array parameters = [], arguments = [];
+  int index = 0;
+  foreach (Var type, types) {
+    if (type == <...>)
+      c.report_error(
+        <type>, %"'$name' requires an explicit variadic constructor",
+        c.token, NULL);
+    if (type == %(void)) continue;
+    String argument = %"argument$index";
+    index++;
+    parameters.push(%(param $type (bind ($argument) ())));
+    arguments.push(%(expr $type (ident ($argument))));
+  }
+  List call = %(expr ()
+    (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
+  List body = %(block (return () (expr () (cast $child $call))));
+  return %(function $child
+    (bind ($name) ((fnmod (params @{parameters.list_free()})))) $body);
+}
+
+/* The selected rows replace each production's bundle in its part and in
+   the unit's symbols. */
+static void Defaults.store(Defaults *d, Map symbols) {
+  foreach (List source, d.sources) {
+    (Map declarations, Var key, Var end, List rows) = source;
+    declarations[key] = d.c.freeze_declaration_syntax(
+      %(declaration-source $end (declaration-bundle (rows @rows))));
+    symbols[key] = declarations[key];
+  }
+}
+
+/* the parse driver
+
+   A full parse reads the unit's top-level forms in source order. A form
+   that fails is skipped whole, so one error does not hide the next. */
+
+/* One full parse of a unit. A script unit that does not define `main`
+   hoists its statements: `statements` holds each run's first and
+   past-the-end token index, `runs` counts the runs, `first` is where the
+   first one starts, and `gap` is the index after the last form, where the
+   next form's conditional directives begin. */
+typedef struct FullParse {
+  Compiler c, Array nodes, statements;
+  int hoisting, gap, runs, first;
+} FullParse;
+
+/** Parses and types the positioned source against `globs`.
+
+    The result is a source-ordered top-level AST. This resets per-parse
+    origins, macro state, and protocol resolution.
+    `generated_symbols` publishes external adapter signatures before parsing.
+*/
+List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
+  Array nodes = [];
+  c.unit_nodes = nodes;
+  c._reset_parse(globs, generated_symbols);
+  Token conflict = NULL;
+  $let(c.recovery_depth, c.recovery_depth + 1)
+    conflict = c._parse_forms(nodes);
+  if (conflict) {
+    c.token = conflict;
+    c._report_script_statement();
+  }
+  return c._finish_parse(nodes);
+}
+
+/* A full parse starts from the unit's collected symbols, without the parse
+   state that collection or an earlier parse left. */
+static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
+  c.meta_group.clear();
+  c.meta_group_bound = {};
+  c.origins.clear();
+  c.meta_defs.clear();
+  c.meta_comptime = {};
+  c.meta_regions = {};
+  c.native_meta = {};
+  c.inherit_library_comptime();
+  c.init_tokens = {};
+  c.static_init_deps = {};
+  c.origin = 0;
+  c.braces.clear();
+  c.arms = NULL;
+  c.sym.reset(globs);
+  c.rebuild_protocols(globs);
+  c._reset_macros();
+  c.resolve_protocols();
+  if (generated) c.install_generated_protocol_symbols();
+  c.install_native_meta_effects(globs);
+  c.replay_included_package_imports(globs, c.filename, {});
+}
+
+static void Compiler._reset_macros(Compiler c) {
+  c.macros = {};
+  c.kw_aliases = {};
+  c.kw_seen = {};
+  c.install_builtin_macros();
+  if (!c.declaration_produced) c.imports = {};
+  c.import_stack.clear();
+  c.macro_count = 0;
+  c.macro_stack = NULL;
+  c.source_private = 0;
+}
+
+/* Parses every form, then the `main` that a script's statement runs
+   become. Returns the first hoisted statement when a macro defined `main`
+   where the token scan saw none, and NULL otherwise. */
+static Token Compiler._parse_forms(Compiler c, Array nodes) {
+  c._append_preproc(nodes);
+  Array statements = [];
+  FullParse p = {
+    .c = c, .nodes = nodes, .statements = statements,
+    .hoisting = c.script && !c.script.defines_main};
+  loop {
+    while (c.peek(0) != <eof>) if (!p.form()) break;
+    if (!p.runs) return NULL;
+    Token tokens = c.tokenizer.tokens;
+    if ("main" in c.fn_defs) return tokens + p.first;
+    c._push_conditionals(statements, p.gap, c.token - tokens);
+    c._append_script_main(statements);
+    p.hoisting = p.runs = 0;
+  }
+}
+
+/* Parses one form, or skips a failed one whole. Returns 0 when the parse
+   stops: the error limit is reached, or the skip reached the end. */
+static int FullParse.form(FullParse *p) {
+  Compiler c = p.c;
+  Token start = c.token;
+  int braces = c.braces.len();
+  try {
+    p.parse(start);
+  }
+  catch %(malformed (category ?category) *): {
+    (void) category;
+    if (c.diagnostics.reached_limit()) return 0;
+    c._sync_top_level(start, braces);
+    p.gap = c._end_index(c.tokenizer.tokens);
+    c._append_preproc(p.nodes);
+    return c.peek(0) != <eof>;
+  }
+  return 1;
+}
+
+static void FullParse.parse(FullParse *p, Token start) {
+  Compiler c = p.c;
+  Token tokens = c.tokenizer.tokens;
+  int begin = start - tokens;
+  if (p.hoisting) c._push_conditionals(p.statements, p.gap, begin);
+  if (p.hoisting && c.script_statement_starts()) p.hoist(begin, tokens);
+  else p.top_level(begin, tokens);
+  p.gap = c._end_index(tokens);
+  c._append_preproc(p.nodes);
+  _debug_tokens(start, c.token);
+}
+
+// A script statement joins the runs that `main` executes.
+static void FullParse.hoist(FullParse *p, int begin, Token tokens) {
+  p.c.skip_script_statement();
+  int end = p.c._end_index(tokens);
+  p.statements.push(begin);
+  p.statements.push(end);
+  if (!p.runs++) p.first = begin;
+}
+
+// A retained declaration bundle replays; any other form parses.
+static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
+  Compiler c = p.c;
+  c._reject_statement();
+  Ast node = c._replay_bundle();
+  if (!node) node = c.parse_top_level();
+  int end = c._end_index(tokens);
+  if (node && node.car() == <seq>)
+    foreach (List item, node.cdr()) p.add(item, begin, end);
+  else if (node) p.add(node, begin, end);
+}
+
+static void FullParse.add(FullParse *p, List node, int begin, int end) {
+  Token tokens = p.c.tokenizer.tokens;
+  p.c._record_top_level(node, tokens + begin);
+  p.c._record_span(node, begin, end);
+  p.nodes.push(node);
+}
+
+// The index after the last non-trivia token before the cursor.
+static long Compiler._end_index(Compiler c, Token tokens) =>
+  _skip_backward(c.token - 1, tokens) + 1 - tokens;
+
+/* The directives before the cursor join the nodes in source order, after
+   they update source visibility and the unit's macro names. */
+static void Compiler._append_preproc(Compiler c, Array nodes) {
+  List directives = c.leading_preproc();
+  c.update_source_visibility(directives);
+  foreach (Var directive, directives) nodes.push(directive);
+}
+
+/* A failed declaration is skipped whole from its first token, because a
+   report inside a body leaves the cursor where no declaration can start.
+   The declaration ends at a `;` outside delimiters, at a closing delimiter
+   whose next token begins a later line, such as a function body or a macro
+   invocation, or at a `}` that nothing on its line continues. A `struct`
+   body continues to its declarators, and a second function body on the
+   same line is a second declaration. */
+static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
+  c.token = start;
+  c.braces.resize(braces);
+  int depth = 0;
+  while (c.peek(0) != <eof>) {
+    Token token = c.token;
+    c.next();
+    if (!depth && token.type == <;>) return;
+    int step = token.type.group_step();
+    depth += step;
+    if (depth < 0) depth = 0;
+    Symbol next = c.peek(0);
+    if (!depth && step < 0 &&
+        (c.token.line > token.line ||
+         (token.type == <"}"> && next != <ident> && next != <*> &&
+          next != <;> && next != <,> && next != <(>)))
+      return;
+  }
+}
+
+static List Compiler._finish_parse(Compiler c, Array nodes) {
+  if (c.meta_build) c.write_meta_build();
+  c._append_meta_definitions(nodes);
+  c.unit_nodes = NULL;
+  List ast = nodes.list_free();
+  if (c.script && !c.script.defines_main && !c.error_count())
+    c._check_script_locals(ast);
+  c._check_unmatched_braces();
+  if (!c.error_count()) c._check_static_inits();
+  return ast;
+}
+
+/* script units
+
+   A script unit that defines `main` rejects top-level statements; one that
+   does not runs them, in source order, inside a generated `main`. */
+
+/** Skips a collected script statement, or diagnoses one beside `main`.
+    Called after top-level directives establish source visibility.
+*/
+int Compiler.skip_collected_script_statement(Compiler c) {
+  if (!c.script) return 0;
+  if (!c.script.defines_main && c.script_statement_starts()) {
+    c.skip_script_statement();
+    return 1;
+  }
+  c._reject_statement();
+  return 0;
+}
+
+/** Moves past one run of a script unit's statement tokens, through a `;` or
+    a closing `}` outside every bracket. A statement that ends early this
+    way leaves its remainder as the next run, and runs are rejoined in order.
+*/
+void Compiler.skip_script_statement(Compiler c) {
+  for (int depth = 0; c.peek(0) != <eof>;) {
+    Symbol type = c.peek(0);
+    if (type == <"$(">) {
+      c.token = c.token.after_group();
+      continue;
+    }
+    depth += type.group_step();
+    c.next();
+    if (depth <= 0 && (type == <;> || type == <"}">)) return;
+  }
+}
+
+/* A script unit either defines `main` or runs its top-level statements, so
+   a statement beside `main` is the one form it rejects. */
+static void Compiler._reject_statement(Compiler c) {
+  if (c.script && c.script.defines_main && c.script_statement_executes())
+    c._report_script_statement();
+}
+
+static void Compiler._report_script_statement(Compiler c) {
+  c.report_error(
+    <parse>, "a script that defines main cannot have top-level statements",
+    c.token,
+    %("move the statement into main, or remove main so the statements run"));
+}
+
+/* A file-scope conditional directive also governs the statements it
+   surrounds, so a copy of each joins the statement runs in source order and
+   the script body keeps the file's conditional structure. */
+static void Compiler._push_conditionals(
+  Compiler c, Array statements, int first, int end) {
+  Token tokens = c.tokenizer.tokens;
+  for (int i = first; i < end; i++) {
+    Token token = tokens + i;
+    if (token.type != <preproc> || !preproc_conditional_kind(token.text))
+      continue;
+    statements.push(i);
+    statements.push(i + 1);
+  }
+}
+
+/* A script unit's `main` is ordinary source the parser reads after the last
+   top-level form: this template with the statement runs, in source order,
+   in place of `x2c_script_statements`. The statements run in their own
+   function, so the `try` that reports an uncaught error leaves their locals
+   ordinary. A failed command's status becomes the exit status; any other
+   uncaught error exits with 1. */
+static const char *script_main =
+  "static int x2c_script(int argc, char **argv, List args) {\n"
+  "  (void) argc, (void) argv, (void) args;\n"
+  "  x2c_script_statements\n"
+  "  return 0;\n"
+  "}\n"
+  "int main(int argc, char **argv) {\n"
+  "  try {\n"
+  "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n"
+  "  }\n"
+  "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
+  "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
+  "            argv[0], command.repr().str(), status.integer());\n"
+  "    return (int) status.integer();\n"
+  "  }\n"
+  "  catch %(?code *detail): {\n"
+  "    fprintf(stderr, \"%s: %s %s\\n\",\n"
+  "            argv[0], code, detail.repr().str());\n"
+  "    return 1;\n"
+  "  }\n"
+  "}\n";
+
+/* Replaces the token stream with a copy that ends in the script's `main`.
+   The copy keeps every consumed token at its index, so recorded token
+   indices stay valid, and drops the trivia already read before end of file.
+   `statements` holds each run's first and past-the-end token index. */
+static void Compiler._append_script_main(Compiler c, Array statements) {
+  Token tokens = c.tokenizer.tokens, eof = c.token;
+  long kept = c._end_index(tokens);
+  Token first = tokens + statements[0].integer();
+  Bytes stream = Bytes.new(sizeof(struct Token));
+  stream = stream.append(tokens, kept);
+  Tokenizer template = Tokenizer.new((char *) script_main, <x2c>);
+  template.scan();
+  for (Token token = template.tokens; token.type != <eof>; token++) {
+    if (token.text == "x2c_script_statements")
+      stream = _append_runs(stream, tokens, statements);
+    else stream = _append_placed(stream, token, first);
+  }
+  stream = stream.append(eof, 1);
+  c.tokenizer.tokens = stream;
+  c.token = Token.skip_trivia((Token) stream + kept);
+}
+
+static Bytes _append_runs(Bytes stream, Token tokens, Array statements) {
+  for (int i = 0; i < statements.len(); i += 2) {
+    long start = statements[i];
+    long end = statements[i + 1];
+    stream = stream.append(tokens + start, end - start);
+  }
+  return stream;
+}
+
+/* A template token takes the first statement's position with no length, so
+   a diagnostic about it names the script without reading past its text. */
+static Bytes _append_placed(Bytes stream, Token token, Token first) {
+  struct Token placed = *token;
+  placed.line = first.line;
+  placed.col = first.col;
+  placed.pos = first.pos;
+  placed.len = 0;
+  return stream.append(&placed, 1);
+}
+
+/* A script's functions cannot see the variables declared among its
+   statements, which are locals of `x2c_script`. C would report such a name
+   as undeclared; this names the cause and the `static` spelling that
+   shares it. */
+static void Compiler._check_script_locals(Compiler c, List ast) {
+  Map locals = _script_locals(ast);
+  if (!locals.len()) return;
+  foreach (List node, ast) match (node)
+    case %(function ? (bind (binding ? ?(String function)) ?)
+           (block *items)):
+      if (function != "x2c_script" && function != "main")
+        c._check_local_uses(items, locals);
+}
+
+static Map _script_locals(List ast) {
+  Map locals = {};
+  foreach (List node, ast) match (node)
+    case %(function ? (bind (binding ? "x2c_script") ?)
+        ${$source_block_content(%(*items))}):
+      foreach (List item, items) match (item)
+        case %(at ? (declare ? (bindings *bindings))):
+          foreach (List binding, bindings) match (binding)
+            case %(!or (bind (binding ? ?(String name)) ?)
+                       (op = (bind (binding ? ?(String name)) ?) ?)):
+              locals[name] = 1;
+  return locals;
+}
+
+static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
+  foreach (List item, items) match (item) case %(at ?origin ?statement):
+    foreach (Var name, locals.keys()) {
+      Var found;
+      List bindings;
+      int present = statement.list().try_search(
+        %(expr () ${source_identifier_content(%((binding ? $name)))}),
+        found, bindings);
+      if (!present) continue;
+      c.origin = origin;
+      c.report_error(
+        <type>,
+        %"'$name' is declared among the script's statements",
+        NULL,
+        %("functions cannot see those locals;"
+          "declare it static to share it"));
+    }
+}
+
+/* top-level definitions
+
+   Each form the full parse reads records the facts that later checks use:
+   its object and function definitions, prototypes, static initializers,
+   and the token span of its source. A conflict between definitions is
+   reported at `site`, the form's first token, or at the cursor for a form
+   without one. */
+
+static void Compiler._record_top_level(Compiler c, List node, Token site) {
+  match (node) {
+    case %(declare (!set ?declared (*)) (bindings *bindings)): {
+      Type type = declared;
+      c._record_objects(bindings, site);
+      c._record_static_object(type, bindings);
+      c._record_prototypes(type, bindings);
+    }
+    case %(function ?return_type
+           (!set ?target (bind ?binding *)) ?): {
+      List declaration = %(declare $return_type (bindings $target));
+      c._record_definition(declaration.type_from_ast(), binding, site);
+    }
+  }
+}
+
+/* An initializer makes a file-scope declaration a definition; a tentative
+   one may be repeated. */
+static void Compiler._record_objects(Compiler c, List bindings, Token site) {
+  foreach (List row, bindings)
+    match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
+      List key = %(defined $binding);
+      Map facts = c.semantic_binding_facts();
+      if (key in facts) c._report_redefinition("variable", binding, site);
+      facts[key] = 1;
+      facts[%(arms $binding)] = c.arms;
+    }
+}
+
+/* Reports a second definition of one file-scope name, which C rejects,
+   when both sit under the same conditional arms. Definitions under
+   different arms are not compared. For a variable, whose initializer moves
+   into the generated init function, a duplicate under two true conditions
+   is therefore not detected, and the later initializer wins. */
+static void Compiler._report_redefinition(
+  Compiler c, String kind, List binding, Token site) {
+  Var arms;
+  if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
+      !List.equal(arms, c.arms))
+    return;
+  String spelling = binding_identity_spelling(binding);
+  c.report_error(
+    <type>, %"$kind '$spelling' is already defined in this scope",
+    site, %("prior definition: '$spelling'"));
+}
+
+/* A definition remembers the token range of the top-level form that
+   produced it, and whether that form is private, for the definition walk.
+   A typedef or declaration may repeat its name, so each statement keys its
+   own range. */
+static void Compiler._record_span(Compiler c, List node, int start, int end) {
+  List key = NULL;
+  match (node) {
+    case %(function ? (bind ?binding ?) ?): key = binding;
+    case %(falias (declare ? (bindings (bind ?binding ?))) ?): key = binding;
+    case %((!or typedef declare) *): key = node;
+  }
+  if (key)
+    c.semantic_binding_facts()[%(definition-span $key)] =
+      %($start $end ${c.source_private > 0});
+}
+
+/* function completion
+
+   A function's completion fact records its contract: a prototype, a
+   definition, a definition that completed a prototype, or a conflict
+   between two prototypes. */
+
+// Record only prototypes reached in positioned full-parse source order.
+static void Compiler._record_prototypes(
+  Compiler c, Type declared_type, List items) {
+  foreach (List target, items)
+    match (target)
+      case %(bind ?binding ?modifiers): {
+        List single = %(declare $declared_type (bindings $target));
+        Type type = single.type_from_ast();
+        if (type.is_function()) c._record_prototype(binding, type, modifiers);
+      }
+}
+
+static void Compiler._record_prototype(
+  Compiler c, List binding, Type type, List modifiers) {
+  c._record_attributes(binding, modifiers);
+  List contract = c._contract(type, binding);
+  Var stored;
+  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
+    List state = stored;
+    Var (state_kind, prior_contract) = state;
+    if (state_kind == <definition> || state_kind == <completed>) return;
+    if (state_kind != <prototype> || !List.equal(prior_contract, contract)) {
+      c.semantic_binding_facts()[%(completion $binding)] = %(conflict);
+      return;
+    }
+  }
+  c.semantic_binding_facts()[%(completion $binding)] = %(prototype $contract);
+}
+
+/* A source attribute on the prototype belongs to the function; the
+   generator writes it on the prototype it derives from the definition. */
+static void Compiler._record_attributes(
+  Compiler c, List binding, List modifiers) {
+  List attributes = NULL;
+  foreach (Var item, modifiers)
+    if (item is <list> && car(item) is <string>)
+      attributes = attributes ? %( @attributes $item ) : %($item);
+  if (attributes)
+    c.semantic_binding_facts()[%(attributes $binding)] = attributes;
+}
+
+static void Compiler._record_definition(
+  Compiler c, Type type, List binding, Token site) {
+  List contract = c._contract(type, binding);
+  Var stored;
+  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
+    List state = stored;
+    Var (state_kind, prior_contract) = state;
+    if (state_kind == <prototype>) {
+      c._complete_prototype(binding, prior_contract, contract, site);
+      return;
+    }
+    if (state_kind == <definition> || state_kind == <completed>)
+      c._report_redefinition("function", binding, site);
+  }
+  c.semantic_binding_facts()[%(completion $binding)] = %(definition $contract);
+  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+  String spelling = binding_identity_spelling(binding);
+  if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
+}
+
+/* A definition completes the prior prototype whose contract it matches. A
+   definition without `static` after a `static` prototype keeps the
+   prototype's internal linkage in C. */
+static void Compiler._complete_prototype(
+  Compiler c, List binding, List prior_contract, List contract, Token site) {
+  match (prior_contract)
+    case %(function-contract ?a ?b static ?d)
+      if (contract.equal(%(function-contract $a $b extern $d))):
+        contract = prior_contract;
+  if (!List.equal(prior_contract, contract)) {
+    String spelling = binding_identity_spelling(binding);
+    c.report_error(
+      <type>,
+      %"definition '$spelling' does not match prior prototype",
+      site,
+      %(
+        "prototype: ${prior_contract.repr()}"
+        "definition: ${contract.repr()}"
+      )
+    );
+  }
+  c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
+  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+}
+
+static List Compiler._contract(Compiler c, Type type, List binding) =>
+  _completion_contract(
+    type, c._fact(%(method $binding)), c._fact(%(self $binding)));
+
+static List _completion_contract(
+  Type type, List method_identity, List self_signature) {
+  Symbol linkage = type.is_static() ? <static> : <extern>;
+  List contract = %(
+    function-contract
+    ${_contract_type(type, 0)}
+    ${_contract_type(type, 1)}
+    $linkage
+    $method_identity
+  );
+  return self_signature ? contract.append(%($self_signature)) : contract;
+}
+
+static Type _contract_type(Type type, int keep_qualifiers) {
+  Array kept = [];
+  foreach (Var item, type) {
+    if (item is <list>) kept.push(_contract_type(item, keep_qualifiers));
+    else if (!_omitted_specifier(item, keep_qualifiers)) kept.push(item);
+  }
+  return kept.list_free();
+}
+
+// A contract omits storage classes, `inline`, and qualifiers unless kept.
+static int _omitted_specifier(Var item, int keep_qualifiers) {
+  if (item is not <symbol>) return 0;
+  Symbol symbol = item;
+  return symbol.is_storage_class() ||
+         (!keep_qualifiers && symbol.is_type_qualifier()) ||
+         symbol.is_inline();
+}
+
+// static initializers
+
+static void Compiler._record_static_object(
+  Compiler c, Type declared, List bindings) {
+  if (!declared.is_static()) return;
+  int declared_var = c.sym.is_var_type(declared);
+  if (!declared_var && !c._initializable_type(declared)) return;
+  foreach (List binding_init, bindings)
+    match (binding_init)
+      case %(op = (bind (!set ?binding (binding ? ?)) ?)
+             (expr (!set ?initializer_type (*)) ?value)): {
+        if (declared_var && !c._initializable_type(initializer_type))
+          continue;
+        Map references = {}, Array ordered = [];
+        _collect_references(value, references, ordered);
+        c.static_init_deps[binding] = ordered.list_free();
+      }
+}
+
+static int Compiler._initializable_type(Compiler c, Type type) =>
+  c.sym.is_string_type(type) || c.sym.is_named_value_type(type, "List") ||
+  c.sym.is_array_type(type) || c.sym.is_map_type(type) ||
+  c.sym.is_named_value_type(type, "Func");
+
+static void _collect_references(Var value, Map references, Array ordered) {
+  if (value is not <list> || value.is_nil()) return;
+  List node = value;
+  match (node)
+    case %(input *arguments): {
+      foreach (List argument, arguments)
+        _collect_references(argument.cadr(), references, ordered);
+      return;
+    }
+  match (node)
+    case %(indexinit ? ?initializer): {
+      _collect_references(initializer, references, ordered);
+      return;
+    }
+  match (node)
+    case %(expr (!set ?type (*)) ${$source_identifier_content(
+        %((!set ?binding (binding ? ?))))}): {
+      if (!type.type().is_function()) {
+        if (!references.contains(binding)) ordered.push(binding);
+        references[binding] = 1;
+      }
+      return;
+    }
+  foreach (Var child, node) _collect_references(child, references, ordered);
+}
+
+static void Compiler._check_static_inits(Compiler c) {
+  Map statics = c.sym.file_statics();
+  foreach (Var (key, value), c.static_init_deps) {
+    List binding = key, dependencies = value;
+    foreach (List reference, dependencies) {
+      String name = binding_identity_spelling(reference);
+      if (!name || %($name) in statics) continue;
+      String target = binding_identity_spelling(binding);
+      c.report_error(
+        <parse>,
+        %"file-static x2c initializer depends on non-static '$name'",
+        c._init_token(binding), target ? %("initializer: $target") : NULL);
+    }
+  }
+}
+
+static Token Compiler._init_token(Compiler c, List binding) {
+  Var index;
+  if (!c.init_tokens.try_get(binding, index)) return NULL;
+  Token tokens = c.tokenizer.tokens;
+  return tokens + index.integer();
+}
+
+// meta definitions
+
+/* Emits the runtime form of each imported `meta` function or value this
+   unit reaches, in import order. A `meta` declaration has two lifetimes:
+   every importing unit installs its compile-time form, and the runtime
+   declaration belongs where it is used. A unit that uses one only during
+   translation emits nothing for it, and a declaration an emitted one uses
+   comes with it. A compile-time-only function has no runtime form to emit,
+   so a unit that calls it at run time reaches the link error that names
+   it. */
+static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
+  if (!c.meta_defs.len()) return;
+  Map referenced = {}, reached = {};
+  foreach (List node, nodes) ast_collect_binding_references(node, referenced);
+  /* A `meta` declaration uses only ones declared before it, so one pass
+     from the last declaration back reaches every one an emitted one
+     needs. */
+  for (size_t i = c.meta_defs.len(); i; i--) {
+    List definition = c.meta_defs[i - 1];
+    Var identity = _meta_identity(definition);
+    if (identity in referenced) {
+      reached[identity] = 1;
+      ast_collect_binding_references(definition, referenced);
+    }
+  }
+  foreach (List definition, c.meta_defs)
+    if (_meta_identity(definition) in reached &&
+        !c.meta_is_comptime_only(definition)) {
+      c._record_top_level(definition, NULL);
+      nodes.push(definition);
+    }
+}
+
+/* The binding an imported `meta` function or declaration introduces. */
+static Var _meta_identity(List definition) {
+  match (definition) {
+    case %(function ? (bind (binding ?identity ?) *) ?): return identity;
+    case %(declare ? (bindings (op = (bind (binding ?identity ?) *) ?))):
+      return identity;
+    case %(declare ? (bindings (bind (binding ?identity ?) *))):
+      return identity;
+  }
+  return void;
 }
 
 // tokenizing
@@ -1301,1381 +2434,248 @@ void Compiler.close_child(Compiler c, Compiler child) {
   child.free_lisp();
 }
 
-/* retained declaration syntax
+// related compilers
 
-   Declaration syntax outlives the segment that parsed it, in the process
-   cache and in `.xi` interfaces. Freezing turns tokens and origin indices
-   into portable rows, and thawing rebuilds them in the current parse. */
-
-/** Retains declaration syntax across source segments and cached interfaces.
-    Tokens and origin indices become portable source data; marker-shaped user
-    Lists are escaped so thawing preserves their values.
+/** Shares the symbol table, literal cache, and protocol registries of the
+    unit `owner` is translating, so a child that binds declarations binds
+    them into that unit. A `meta` definition in a macro import is bound here
+    and emitted by `owner`, so both compilers must read one table: its
+    `(cache id)` references index `owner`'s keys, and its operations resolve
+    through `owner`'s protocol rows. Both install into one macro session, so
+    they also read one record of which `meta` functions reach file-scope
+    state.
 */
-Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
-  if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
-  match (syntax) {
-    case %(macrodef *rows): return c._declaration_macro(rows, 0);
-    case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(path, 0)} $begin $end)
-        ${c.freeze_declaration_syntax(node)});
-    case %(at ?(int origin) ?node): return c._freeze_origin(origin, node);
-  }
-  return c._freeze_rows(syntax);
+void Compiler.borrow_unit_semantics(Compiler c, Compiler owner) {
+  c.sym = owner.sym;
+  c.fn_defs = owner.fn_defs;
+  c.id_keys = owner.id_keys;
+  c.key_ids = owner.key_ids;
+  c.protocols = owner.protocols;
+  c.adoptions = owner.adoptions;
+  c.conforms = owner.conforms;
+  c.protocol_helpers = owner.protocol_helpers;
+  c.proto_cache = owner.proto_cache;
+  c.meta_comptime = owner.meta_comptime;
+  c.meta_regions = owner.meta_regions;
+  c.meta_hashes = owner.meta_hashes;
+  c.meta_calls = owner.meta_calls;
+  c.native_meta = owner.native_meta;
 }
 
-// A leaf that a List cannot carry as itself becomes a marker row.
-static Var _freeze_leaf(Var syntax) {
-  if (syntax is void) return %(declaration-void);
-  if (syntax is <symbol> && !syntax.symbol())
-    return %(declaration-empty-symbol);
-  if (syntax.is_atom() && !Atom.bare_spelling(syntax.str()))
-    return %(declaration-atom ${syntax.str()});
-  if (syntax is not <token>) return syntax;
-  Token token = syntax;
-  return %(declaration-token ${token.type.str()} ${token.text}
-            ${token.line} ${token.col} ${token.len} ${token.pos});
+/** Shares `owner`'s pending `meta` group and the definitions it reads, which
+    belong with the Lisp session that holds the group's stubs. */
+void Compiler.share_meta_group(Compiler c, Compiler owner) {
+  c.meta_group = owner.meta_group;
+  c.meta_group_bound = owner.meta_group_bound;
+  c.meta_defs = owner.meta_defs;
 }
 
-// An origin index freezes as the location it names in this parse.
-static List Compiler._freeze_origin(Compiler c, int origin, Var node) {
-  List location = c.origin_location(origin);
-  if (!location) return %(at m-origin ${c.freeze_declaration_syntax(node)});
-  return %(declaration-origin ${_declaration_location(location, 0)}
-            ${c.freeze_declaration_syntax(node)});
-}
-
-// A List whose head is a marker is escaped, so thawing keeps its value.
-static List Compiler._freeze_rows(Compiler c, List syntax) {
-  Array rows = [];
-  foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
-  match (syntax)
-    case %((!or declaration-void declaration-empty-symbol declaration-atom
-                declaration-token declaration-origin declaration-list) *):
-      return %(declaration-list @{rows.list_free()});
-  return rows.list_free();
-}
-
-/** Returns `freeze_declaration_syntax` of the active macro stack. */
-Var Compiler.freeze_macro_stack(Compiler c) {
-  unsigned long epoch = Pool.epoch();
-  if (c.macro_stack != c.frozen_stack_key || epoch != c.frozen_stack_epoch ||
-      c.frozen_stack is void) {
-    c.frozen_stack = c.freeze_declaration_syntax(c.macro_stack);
-    c.frozen_stack_key = c.macro_stack;
-    c.frozen_stack_epoch = epoch;
-  }
-  return c.frozen_stack;
-}
-
-/** Restores a retained declaration recipe in the current parsing lifetime. */
-Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
-  if (syntax is not <list> || syntax.is_nil()) return syntax;
-  match (syntax) {
-    case %(declaration-list *rows): return c._thaw_rows(rows);
-    case %(macrodef *rows): return c._declaration_macro(rows, 1);
-    case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(path, 1)} $begin $end)
-        ${c.thaw_declaration_syntax(node)});
-    case %(declaration-void): return void;
-    case %(declaration-empty-symbol): return (Symbol) 0;
-    case %(declaration-atom ?spelling): return Atom.intern(spelling);
-    case %(declaration-token ?type ?text ?line ?column ?length ?position):
-      return _thaw_token(type, text, line, column, length, position);
-    case %(declaration-origin ?location ?node):
-      return c._thaw_origin(location, node);
-  }
-  return c._thaw_rows(syntax);
-}
-
-static List Compiler._thaw_rows(Compiler c, List rows) {
-  Array values = [];
-  foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
-  return values.list_free();
-}
-
-static Token _thaw_token(
-  Var type, Var text, Var line, Var column, Var length, Var position) {
-  Token token = Scope.calloc(1, sizeof(struct Token));
-  *token = (struct Token) {
-    .text = text, .type = Symbol.new(type.string()), .line = line,
-    .col = column, .len = length, .pos = position};
-  return token;
-}
-
-// A frozen location becomes a new row of this parse's origin table.
-static List Compiler._thaw_origin(Compiler c, List source, Var node) {
-  c.origins.push(
-    %(source ${source.assoc(<file>)}
-      ${source.assoc(<line>)} ${source.assoc(<column>)}
-      ${source.assoc(<length>)} ${source.assoc(<position>)}));
-  return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
-}
-
-static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
-  Array out = [];
-  foreach (List row, rows) out.push(c._macro_row(row, thaw));
-  return %(macrodef @{out.list_free()});
-}
-
-static List Compiler._macro_row(Compiler c, List row, int thaw) {
-  match (row)
-    case %(origin ?location):
-      return %(origin ${_declaration_location(location, thaw)});
-  return thaw ? c.thaw_declaration_syntax(row)
-              : c.freeze_declaration_syntax(row);
-}
-
-static List _declaration_location(List location, int thaw) {
-  Array rows = [];
-  foreach (List row, location) {
-    match (row)
-      case %(file ?path):
-        row = %(file ${_declaration_path(path, thaw)});
-    rows.push(row);
-  }
-  return rows.list_free();
-}
-
-static String _declaration_path(String path, int thaw) {
-  if (!path || path.startswith("<")) return path;
-  return thaw ? home_absolute_path(path) : home_portable_path(path);
-}
-
-/* declaration production
-
-   A declaration producer's source effects wait until production needs
-   their state. Collection retains the bundle a producer returns with its
-   token span, and the full parse replays that bundle. */
-
-/** Queues a source Lisp form until declaration production needs its state.
-    Files without declaration producers keep ordinary full-parse evaluation. */
-void Compiler.queue_declaration_effect(
-  Compiler c, String form, Token first, Token after) {
-  List key = c._declaration_source_key(first);
-  String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
-  c.declaration_effects = cons(
-    %($key ${after.pos} $form ${c.freeze_declaration_syntax(first)} $context),
-    c.declaration_effects);
-}
-
-static List Compiler._declaration_source_key(Compiler c, Token token) {
-  String path = home_portable_path(Path.absolute(c.filename));
-  return %("source-node" (declaration $path ${token.pos}));
-}
-
-/** Runs pending effects for declaration production or CPP macro evaluation. */
-void Compiler.run_declaration_effects(Compiler c) {
-  List effects = c.declaration_effects.reverse();
-  c.declaration_effects = NULL;
-  foreach (List effect, effects) {
-    (List key, int end, String form, Var site, String context) = effect;
-    $let(c.filename, c._effect_file(key)) {
-      c.import_stack.push(context);
-      defer c.import_stack.take_last();
-      Token token = c.thaw_declaration_syntax(site);
-      c.evaluate_declaration_effect(form, token);
-      if (c.collect_protocols)
-        c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
-    }
-  }
-}
-
-static String Compiler._effect_file(Compiler c, List key) {
-  match (key)
-    case %("source-node" (declaration ?path ?)):
-      return _declaration_path(path, 1);
-  return c.filename;
-}
-
-/** Expands a file-scope unit macro and retains its declarations for
-    collection. Its private helpers remain available to later invocations.
-    Generated-name counters are restored when the full parse must expand it
-    again.
+/** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
+    Lisp state for one segment of a collected file. Segments are one
+    translation unit, so a shadow uses the unit's Lisp environment rather
+    than its own.
 */
-void Compiler.collect_unit_macro(Compiler c) {
-  Map counters = c.names.counters;
-  c.names.counters = counters.copy();
-  SymTxn transaction = c.begin_semantic_transaction();
-  Token first = c.token;
-  List syntax = c.parse_top_level();
-  int retained = c._retain_bundle(syntax, first, c.token);
-  transaction.commit();
-  /* The full parse expands this unit again. Keep the declarations needed
-     by later shallow invocations, but do not count its generated names
-     twice. */
-  if (!retained) c.names.counters = counters;
-}
-
-/* The owning source records one declaration production, including its exact
-   token span. Full parsing consumes that production instead of invoking its
-   compile-time producer again. Ordinary Unit macros retain their old path. */
-static int Compiler._retain_bundle(
-  Compiler c, List syntax, Token first, Token after) {
-  match (syntax) {
-    case %(seq ?only): return c._retain_bundle(only, first, after);
-    case %(declaration-bundle (rows *)): {
-      List frozen = c.freeze_declaration_syntax(syntax);
-      c.sym.set(
-        c._declaration_source_key(first),
-        %(declaration-source ${after.pos} $frozen));
-      return 1;
-    }
-  }
-  return 0;
-}
-
-static List Compiler._replay_bundle(Compiler c) {
-  List source = c.sym.get(c._declaration_source_key(c.token));
-  match (source)
-    case %(declaration-source ?(int end) ?syntax): {
-      List thawed = c.thaw_declaration_syntax(syntax);
-      List bound = c.bind_syntax(thawed, AST_UNIT, NULL);
-      while (c.peek(0) != <eof> && c.token.pos < end) c.next();
-      return bound;
-    }
-  return NULL;
-}
-
-/* declaration defaults
-
-   A declaration producer can offer defaults: functions that bind only when
-   no other declaration takes their name, and constructors that forward to
-   a parent's constructor. The owning file selects them after all its
-   segments. */
-
-/* One selection of a file's defaults. `c`, a shadow compiler, binds them
-   over the file's collected symbols. `sources` holds one
-   `(declarations key end rows)` entry per production, and `pending` the
-   children whose forwarded constructors wait for their parent's
-   constructor. */
-typedef struct Defaults {
-  Compiler c, Array parts, sources;
-  Map definitions, pending;
-} Defaults;
-
-/** Selects the owning file's declaration defaults after all its segments.
-    The selected signatures join ordinary declarations before protocol and
-    body binding; discarded candidates never bind their bodies. Returns added
-    signatures for the caller to retain in the header-cache lifetime.
-*/
-Map Compiler.select_declaration_defaults(
-  Compiler c, String path, Map symbols, Array parts, Map definitions) {
-  Compiler shadow = Compiler.new_shared(c);
-  defer c.close_child(shadow);
-  shadow._prepare_shadow(c, path, symbols);
-  Array sources = [];
-  Map pending = {};
-  Defaults d = {
-    .c = shadow, .parts = parts, .sources = sources,
-    .definitions = definitions, .pending = pending};
-  foreach (Var part, parts) if (part is <map>) d.produce(part);
-  d.select();
-  d.forward();
-  d.store(symbols);
-  Map additions = shadow.sym.current_symbols();
-  symbols.merge(additions);
-  c.merge_source_declarations(symbols, additions);
-  c.fn_defs.merge(shadow.fn_defs);
-  definitions.merge(shadow.fn_defs);
-  return additions;
-}
-
-/* The shadow binds over the file's collected symbols in an overlay,
-   without parsing, in the unit's Lisp session and meta group. */
-static void Compiler._prepare_shadow(
-  Compiler c, Compiler owner, String path, Map symbols) {
-  c.filename = path;
+void Compiler.take_unit_state(Compiler c, Compiler owner) {
+  c.macros = owner.macros;
+  c.object_macros = owner.object_macros;
+  c.imports = owner.imports;
+  c.kw_aliases = owner.kw_aliases;
+  c.kw_seen = owner.kw_seen;
   c.macro_lisp = owner.macro_lisp;
+  c.declaration_effects = owner.declaration_effects;
   c.borrowed_lisp = c.macro_lisp != NULL;
   c.share_meta_group(owner);
-  c.sym.reset_overlay(symbols, {});
-  c.rebuild_protocols(symbols);
-  c.conforms = {};
-  c.shallow = 1;
-  c.declaration_projection = 1;
 }
 
-// A part's productions run in source order.
-static void Defaults.produce(Defaults *d, Map declarations) {
-  Array ordered = [];
-  foreach (Var (key, value), declarations)
-    match (key)
-      case %("source-node" (declaration ? ?position)):
-        ordered.push(%($position $key $value));
-  ordered.sort();
-  foreach (List entry, ordered) {
-    (Var position, Var key, Var value) = entry;
-    (void) position;
-    match (value)
-      case %(declaration-source ?end (declaration-bundle (rows *rows))): {
-        rows = d.c.thaw_declaration_syntax(rows);
-        Array produced = [];
-        d.c._produce(rows, produced);
-        d.sources.push(%($declarations $key $end ${produced.list_free()}));
-      }
-  }
+/** Returns that state to `owner`, so the next segment starts where this one
+    finished and any Lisp environment this segment created stays alive after
+    the shadow is released.
+*/
+void Compiler.return_unit_state(Compiler c, Compiler owner) {
+  owner.macros = c.macros;
+  owner.object_macros = c.object_macros;
+  owner.imports = c.imports;
+  owner.kw_aliases = c.kw_aliases;
+  owner.kw_seen = c.kw_seen;
+  owner.macro_lisp = c.macro_lisp;
+  owner.declaration_effects = c.declaration_effects;
+  owner.declaration_produced |= c.declaration_produced;
+  c.borrowed_lisp = c.macro_lisp != NULL;
 }
 
-/* A pending row runs its recipe under the macro stack and privacy of its
-   construction, and the rows it generates are produced in turn. */
-static void Compiler._produce(Compiler c, List rows, Array selected) {
-  foreach (List row, rows) {
-    match (row)
-      case %(declaration-pending ?callback ?arguments
-               ?construction ?privacy): {
-        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
-        $let(c.source_private, privacy)
-          c._produce(c._generated_rows(callback, arguments), selected);
-        continue;
-      }
-    selected.push(row);
-  }
-}
+// source files and dependencies
 
-// A recipe's rows: the children of a sequence or bundle, or its one node.
-static List Compiler._generated_rows(Compiler c, Var callback, Var arguments) {
-  List generated = c.bind_syntax(
-    c.evaluate_declaration_recipe(callback, arguments), AST_UNIT, NULL);
-  List additions = %($generated);
-  match (generated) {
-    case %(seq *children): additions = children;
-    case %(declaration-bundle (rows *children)): additions = children;
-  }
-  return additions;
-}
-
-/* Each production selects its defaults, and a forwarded constructor
-   waits for its parent's constructor. */
-static void Defaults.select(Defaults *d) {
-  for (size_t index = 0; index < d.sources.len(); index++) {
-    (Map declarations, Var key, Var end, List rows) = d.sources[index];
-    List selected = d._select_rows(rows);
-    foreach (List row, selected)
-      match (row)
-        case %(declaration-forward ?child *): d.pending[child] = 1;
-    d.sources[index] = %($declarations $key $end $selected);
-  }
-}
-
-static List Defaults._select_rows(Defaults *d, List rows) {
-  Compiler c = d.c;
-  Array selected = [];
-  foreach (List row, rows) {
-    match (row)
-      case %(declaration-default ?function ?construction ?privacy): {
-        $let(c.macro_stack, c.thaw_declaration_syntax(construction))
-        $let(c.source_private, privacy) {
-          Var syntax = d._unless_taken(function);
-          if (syntax is not void) selected.push(c._bind_default(syntax));
-        }
-        continue;
-      }
-    selected.push(row);
-  }
-  return selected.list_free();
-}
-
-/* Returns the function to bind for a default, named through its macro
-   slot, or void when a declaration already takes its name. */
-static Var Defaults._unless_taken(Defaults *d, List syntax) {
-  match (syntax)
-    case %(function ?return_type (bind ?name ?modifiers) ?body): {
-      name = d.c.evaluate_macro_slot(name);
-      String spelling = binding_identity_spelling(name);
-      match (name) {
-        case %(?(String literal)): spelling = literal;
-        case %("x2c.ident" ?(String literal)): spelling = literal;
-      }
-      if (spelling && d._taken(spelling)) return void;
-      return %(function $return_type (bind $name $modifiers) $body);
-    }
-  return syntax;
-}
-
-/* A default yields to any declaration of its name except a bodyless,
-   non-static function prototype in the default's own file, which the
-   default then completes. */
-static int Defaults._taken(Defaults *d, String spelling) {
-  Compiler c = d.c;
-  List key = %($spelling);
-  Type declared = c.sym.get(key);
-  if (!declared) return 0;
-  if (!declared.is_function() || spelling in d.definitions ||
-      spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
-    return 1;
-  foreach (Var part, d.parts) if (part is <map> && key in part.map()) return 0;
+/** Reads a source through the request view and retains exact response
+    bytes.
+*/
+int Compiler.read_source(Compiler c, String path, String volatile &text) {
+  if (!c.sources.read(path, text)) return 0;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = text;
   return 1;
 }
 
-static List Compiler._bind_default(Compiler c, List syntax) {
-  if (c.source_private)
-    match (syntax)
-      case %(function ?type ?declarator ?body):
-        if (!type.type().is_static())
-          syntax = %(function (static @type) $declarator $body);
-  return c.bind_syntax(syntax, AST_UNIT, NULL);
+/** Returns the spelling that identifies the file at `path`. Through a
+    source view it is the absolute path, because an unsaved file need not
+    exist on disk; otherwise it is the real path, or `path` itself when that
+    does not resolve.
+*/
+String Compiler.canonical_path(Compiler c, String path) {
+  if (c.sources) return Path.absolute(path);
+  char resolved[PATH_MAX];
+  return realpath(path, resolved) ? resolved : path;
 }
 
-/* Forwarded constructors bind as their parents' constructors complete; a
-   round that completes none leaves a parent that never will. */
-static void Defaults.forward(Defaults *d) {
-  int remaining = d.pending.len();
-  while (remaining) {
-    int previous = remaining;
-    remaining = 0;
-    for (size_t index = 0; index < d.sources.len(); index++) {
-      (Map declarations, Var key, Var end, List rows) = d.sources[index];
-      rows = d._forward_rows(rows, remaining);
-      d.sources[index] = %($declarations $key $end $rows);
-    }
-    if (remaining && remaining == previous)
-      d.c.report_error(
-        <type>,
-        "a forwarded class constructor has no completed parent constructor",
-        d.c.token, NULL);
+/** Returns `path` relative to the canonical x2c home when it lies below the
+    home, otherwise `path`. Interfaces, macro definitions, retained
+    declarations, and generated identities spell paths this way, so they do
+    not depend on where the home is installed.
+*/
+String home_portable_path(String path) {
+  String prefix = %"${x2c_get_root()}/";
+  return path.startswith(prefix) ? path[prefix.len():] : path;
+}
+
+/** Returns the absolute path that a `home_portable_path` spelling names. */
+String home_absolute_path(String spelling) =>
+  spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
+
+/** Merges one translation dependency, preserving an existing content hash. */
+void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
+  if (content_hash is <string>) {
+    if (m[path] is not <string>) m[path] = content_hash;
   }
+  else m.setdefault(path, 1);
 }
 
-static List Defaults._forward_rows(Defaults *d, List rows, int &remaining) {
-  Array selected = [];
-  foreach (List row, rows) {
-    match (row)
-      case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
-        List bound = NULL;
-        $let(d.c.source_private, privacy)
-          bound = d._forwarded(child, parent, member, fallback);
-        if (!bound) {
-          remaining++;
-          selected.push(row);
-        }
-        else {
-          d.pending.del(child);
-          if (bound.car() != <seq>) selected.push(bound);
-        }
-        continue;
-      }
-    selected.push(row);
-  }
-  return selected.list_free();
+/** Records a path dependency not embedded in generated C. */
+void Compiler.add_translation_dependency(Compiler c, String path) {
+  c.deps.merge_translation_dependency(path, 1);
 }
 
-/* Binds the constructor `child_member` that forwards to the parent's
-   `member`. It is `(seq)` when that name is already declared, the fallback
-   when the parent has no such member, and NULL while the parent's own
-   constructor is still pending. */
-static List Defaults._forwarded(
-  Defaults *d, Type child, Type parent, String member, List fallback) {
-  Compiler c = d.c;
-  String name = %"${child.car()}_$member";
-  if (c.sym.get(%($name))) return %(seq);
-  List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
-  if (!method) {
-    if (parent in d.pending) return NULL;
-    return fallback ? c._bind_default(fallback.car()) : NULL;
-  }
-  List binding = NULL, Type signature = NULL;
-  match (method)
-    case %(method ?target ?type): {
-      binding = target;
-      signature = type;
-    }
-  if (!signature) return NULL;
-  return c._bind_default(c._forwarder(name, child, binding, signature));
+/** Merges another translation's dependency rows into this compiler. */
+void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
+  foreach (Var (path, content_hash), dependencies)
+    c.deps.merge_translation_dependency(path, content_hash);
 }
 
-// The forwarding constructor passes each argument on and casts the result.
-static List Compiler._forwarder(
-  Compiler c, String name, Type child, List binding, Type signature) {
-  List types = NULL;
-  match (signature) case %((func ?parameters) *): types = parameters;
-  Array parameters = [], arguments = [];
-  int index = 0;
-  foreach (Var type, types) {
-    if (type == <...>)
-      c.report_error(
-        <type>, %"'$name' requires an explicit variadic constructor",
-        c.token, NULL);
-    if (type == %(void)) continue;
-    String argument = %"argument$index";
-    index++;
-    parameters.push(%(param $type (bind ($argument) ())));
-    arguments.push(%(expr $type (ident ($argument))));
-  }
-  List call = %(expr ()
-    (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
-  List body = %(block (return () (expr () (cast $child $call))));
-  return %(function $child
-    (bind ($name) ((fnmod (params @{parameters.list_free()})))) $body);
+// translation state and lifecycle
+
+/** Creates a compiler with independent package and generated-name state. */
+Compiler Compiler.new(void) => _new(NULL);
+
+/** Creates a compiler sharing its owner's package and generated-name state. */
+Compiler Compiler.new_shared(Compiler owner) {
+  /* Shallow collection compilers must declare into the same package space,
+     and share the owner's package maps so an import seen in one segment is
+     registered and collected exactly once for the whole unit. */
+  return _new(owner);
 }
 
-/* The selected rows replace each production's bundle in its part and in
-   the unit's symbols. */
-static void Defaults.store(Defaults *d, Map symbols) {
-  foreach (List source, d.sources) {
-    (Map declarations, Var key, Var end, List rows) = source;
-    declarations[key] = d.c.freeze_declaration_syntax(
-      %(declaration-source $end (declaration-bundle (rows @rows))));
-    symbols[key] = declarations[key];
-  }
+// Zero finalizer-visible state before any fallible initialization.
+static Compiler _new(Compiler owner) {
+  Compiler c =
+    Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
+  memset(c, 0, sizeof(struct Compiler));
+  c._init_tables();
+  if (owner) c._share_unit(owner);
+  else c._own_unit();
+  c.sym = Sym.new(c);
+  c._init_queues();
+  c.collect_protocols = 1;
+  c.diagnostics = Diagnostics.new(
+    owner && owner.diagnostics.printer ? c : NULL,
+    owner ? owner.diagnostics.limit : 1);
+  c.braces = [];
+  c.import_stack = [];
+  c.origins = [];
+  c.root_dir = x2c_get_root();
+  return c;
 }
 
-// shallow collection
-
-/** Collects file-scope declarations into `globals` without parsing bodies. */
-void Compiler.shallow_parse(Compiler c, Map globals) {
+static void Compiler._init_tables(Compiler c) {
+  c.id_keys = [];
+  c.key_ids = {};
+  c.deps = {};
   c.macros = {};
   c.kw_aliases = {};
   c.kw_seen = {};
-  c.import_stack.clear();
-  c.sym.reset(globals);
-  c.install_builtin_macros();
-  c._shallow_parse_loop();
-  c._check_unmatched_braces();
-}
-
-/** Collects declarations with reads over `base` then `overlay`.
-
-    Writes go to `overlay`, which captures exactly what this translation
-    contributes above `base`.
-*/
-void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  if (c.macros == NULL || !c.macros.len()) c._start_macros();
-  c.sym.reset_overlay(base, overlay);
-  c.install_builtin_macros();
-  c._shallow_parse_loop();
-  // Only linkage groups remain open; a later segment of the file closes them.
-  c.open_linkage += c.braces.len();
-}
-
-// A unit with no macros yet starts its macro, keyword, and import state.
-static void Compiler._start_macros(Compiler c) {
-  c.macros = {};
-  if (c.kw_aliases == NULL) c.kw_aliases = {};
-  if (c.kw_seen == NULL) c.kw_seen = {};
+  c.object_macros = {};
+  c.proto_cache = {};
   c.imports = {};
-  c.import_stack.clear();
-}
-
-static void Compiler._shallow_parse_loop(Compiler c) {
-  c.rebuild_protocols(NULL);
-  c.conforms = {};
-  c.shallow = 1;
-  c.braces.clear();
-  while (c.peek(0) != <eof>) {
-    Token start = c.token;
-    (void) c.parse_top_level_mode(1);
-    _debug_tokens(start, c.token);
-  }
-  /* Definitions after the last declaration, as before an include, still
-     define macros for the segments that follow. */
-  foreach (List directive, c.leading_preproc())
-    c.note_object_macro(directive.cadr());
-  c.shallow = 0;
-}
-
-static void _debug_tokens(Token start, Token end) {
-  if (!log_should_log(<debug>, <tokenizer>)) return;
-  for (Token tok = start; tok < end; tok++)
-    if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
-      log_debug(
-        <tokenizer>, %(
-        (func "tokenize")
-        (type ${tok.type})
-        (text ${tok.text})
-        (line ${tok.line})
-        (col  ${tok.col})
-      ));
-}
-
-/** Collects a macro or keyword definition while deferring its diagnostics.
-    Returns one on success; malformed syntax skips to end of file and returns
-    zero so the full parse can report it.
-*/
-int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
-  int failed = 0;
-  DiagnosticsHold hold = c.diagnostics.hold();
-  $let(c.recovery_depth, c.recovery_depth + 1) {
-    try {
-      if (keyword) c.parse_keyword_definition();
-      else c.parse_macro_definition();
-    }
-    catch %(malformed *): failed = 1;
-  }
-  c.diagnostics.release(hold, 0);
-  if (failed) while (c.peek(0) != <eof>) c.next();
-  return !failed;
-}
-
-/** Records declaration visibility and meta facts, then skips its body.
-    The declaration is already bound by the shared top-level parser.
-*/
-void Compiler.finish_collected_declaration(
-  Compiler c, List declaration, Token meta, int native) {
-  /* Collection records the runtime function a `meta` marker precedes, and
-     the native binding a bodyless or `native` marker advertises; the
-     compile-time form is installed by the full parse. */
-  c.record_declaration_visibility(declaration);
-  /* Lexical privacy also marks a name in Sym.statics, so a static function
-     is marked again as `(function name)`. File collection reads that key to
-     keep the function out of what a private region publishes. */
-  match (declaration)
-    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
-      if (type.type().is_static())
-        c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
-  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c._at_function_arrow())
-    c._skip_body(declaration, meta, native);
-  else if (c.peek(0) == <;>) {
-    if (meta) c.record_native_meta_effect(declaration, meta);
-    c.next();
-  }
-  else c.next();
-}
-
-static void Compiler._skip_body(
-  Compiler c, List declaration, Token meta, int native) {
-  if (native) c.record_native_meta_effect(declaration, meta);
-  match (declaration)
-    case %(declare ? (bindings (bind ?binding ?))):
-      c._note_function_body(declaration.type_from_ast(), binding);
-  if (c._at_function_arrow()) {
-    c.next();
-    c.next();
-    c._skip_shallow_expression(0);
-    c.expect(<;>);
-  }
-  else c._shallow_block();
-}
-
-// `fn_defs` holds each non-static function the unit defines.
-static void Compiler._note_function_body(Compiler c, Type type, List binding) {
-  if (!type.is_function() || type.is_static()) return;
-  c.fn_defs[binding_identity_spelling(binding)] = 1;
-}
-
-/** Reports whether the current two tokens are `=>`. */
-int Compiler._at_function_arrow(Compiler c) =>
-  c.peek(0) == <=> && c.peek(1) == <">">;
-
-/** Skips a balanced shallow expression without consuming its terminator.
-    A top-level comma also terminates the expression when `stop_at_comma` is
-    nonzero.
-*/
-void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
-  for (Symbol type = c.peek(0);
-       type != <eof> && type != <;> && (!stop_at_comma || type != <,>);
-       type = c.peek(0)) {
-    if (type.group_step() > 0) c.token = c.token.after_group();
-    else c.next();
-  }
-}
-
-static void Compiler._shallow_block(Compiler c) {
-  c.next();
-  for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
-    if (peek == <eof>)
-      c.report_error(<parse>, "unexpected end of file", c.token, NULL);
-    if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
-      c._shallow_block();
-    else c.next();
-  }
-  c.expect(<"}">);
-}
-
-/* the parse driver
-
-   A full parse reads the unit's top-level forms in source order. A form
-   that fails is skipped whole, so one error does not hide the next. */
-
-/* One full parse of a unit. A script unit that does not define `main`
-   hoists its statements: `statements` holds each run's first and
-   past-the-end token index, `runs` counts the runs, `first` is where the
-   first one starts, and `gap` is the index after the last form, where the
-   next form's conditional directives begin. */
-typedef struct FullParse {
-  Compiler c, Array nodes, statements;
-  int hoisting, gap, runs, first;
-} FullParse;
-
-/** Parses and types the positioned source against `globs`.
-
-    The result is a source-ordered top-level AST. This resets per-parse
-    origins, macro state, and protocol resolution.
-    `generated_symbols` publishes external adapter signatures before parsing.
-*/
-List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
-  Array nodes = [];
-  c.unit_nodes = nodes;
-  c._reset_parse(globs, generated_symbols);
-  Token conflict = NULL;
-  $let(c.recovery_depth, c.recovery_depth + 1)
-    conflict = c._parse_forms(nodes);
-  if (conflict) {
-    c.token = conflict;
-    c._report_script_statement();
-  }
-  return c._finish_parse(nodes);
-}
-
-/* A full parse starts from the unit's collected symbols, without the parse
-   state that collection or an earlier parse left. */
-static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
-  c.meta_group.clear();
-  c.meta_group_bound = {};
-  c.origins.clear();
-  c.meta_defs.clear();
-  c.meta_comptime = {};
-  c.meta_regions = {};
-  c.native_meta = {};
-  c.inherit_library_comptime();
   c.init_tokens = {};
   c.static_init_deps = {};
-  c.origin = 0;
-  c.braces.clear();
-  c.arms = NULL;
-  c.sym.reset(globs);
-  c.rebuild_protocols(globs);
-  c._reset_macros();
-  c.resolve_protocols();
-  if (generated) c.install_generated_protocol_symbols();
-  c.install_native_meta_effects(globs);
-  c.replay_included_package_imports(globs, c.filename, {});
+  c.fn_defs = {};
+  c.meta_comptime = {};
+  c.meta_regions = {};
+  c.meta_hashes = {};
+  c.meta_calls = {};
+  c.native_meta = {};
 }
 
-static void Compiler._reset_macros(Compiler c) {
-  c.macros = {};
-  c.kw_aliases = {};
-  c.kw_seen = {};
-  c.install_builtin_macros();
-  if (!c.declaration_produced) c.imports = {};
-  c.import_stack.clear();
-  c.macro_count = 0;
-  c.macro_stack = NULL;
-  c.source_private = 0;
+/* A child compiler owns its tokens, symbols, and diagnostics. Package
+   registries and generated-name state belong to the whole translation
+   unit, so every child must mutate the owner's exact objects. */
+static void Compiler._share_unit(Compiler c, Compiler owner) {
+  c.package = owner.package;
+  c.package_dirs = owner.package_dirs;
+  c.package_roots = owner.package_roots;
+  c.package_aliases = owner.package_aliases;
+  c.package_members = owner.package_members;
+  c.names = owner.names;
+  c.source_map = owner.source_map;
+  c.recovery_depth = owner.recovery_depth;
+  c.sources = owner.sources;
+  c.declaration_produced = owner.declaration_produced;
+  c.source_facts = owner.source_facts;
+  c.source_occurrences = owner.source_occurrences;
+  c.source_definitions = owner.source_definitions;
+  c.source_declarations = owner.source_declarations;
+  c.source_texts = owner.source_texts;
+  c.unit_script = owner.unit_script;
+  c.include_dirs = owner.include_dirs;
+  c.meta_build = owner.meta_build;
 }
 
-/* Parses every form, then the `main` that a script's statement runs
-   become. Returns the first hoisted statement when a macro defined `main`
-   where the token scan saw none, and NULL otherwise. */
-static Token Compiler._parse_forms(Compiler c, Array nodes) {
-  c._append_preproc(nodes);
-  Array statements = [];
-  FullParse p = {
-    .c = c, .nodes = nodes, .statements = statements,
-    .hoisting = c.script && !c.script.defines_main};
-  loop {
-    while (c.peek(0) != <eof>) if (!p.form()) break;
-    if (!p.runs) return NULL;
-    Token tokens = c.tokenizer.tokens;
-    if ("main" in c.fn_defs) return tokens + p.first;
-    c._push_conditionals(statements, p.gap, c.token - tokens);
-    c._append_script_main(statements);
-    p.hoisting = p.runs = 0;
-  }
+/* The first compiler of a unit creates the state its children share and
+   starts from the shared session's compile-time-only definitions. */
+static void Compiler._own_unit(Compiler c) {
+  c.inherit_library_comptime();
+  c.package_roots = {};
+  c.package_aliases = {};
+  c.package_members = {};
+  c.names = Scope.calloc(1, sizeof(struct GenNames));
+  c.names.counters = {};
+  c.names.adapters = {};
+  c.names.file_scope_owners = {};
 }
 
-/* Parses one form, or skips a failed one whole. Returns 0 when the parse
-   stops: the error limit is reached, or the skip reached the end. */
-static int FullParse.form(FullParse *p) {
-  Compiler c = p.c;
-  Token start = c.token;
-  int braces = c.braces.len();
-  try {
-    p.parse(start);
-  }
-  catch %(malformed (category ?category) *): {
-    (void) category;
-    if (c.diagnostics.reached_limit()) return 0;
-    c._sync_top_level(start, braces);
-    p.gap = c._end_index(c.tokenizer.tokens);
-    c._append_preproc(p.nodes);
-    return c.peek(0) != <eof>;
-  }
-  return 1;
+static void Compiler._init_queues(Compiler c) {
+  c.inits = [];
+  c.early_decls = [];
+  c.meta_defs = [];
+  c.meta_group = [];
+  c.meta_group_bound = {};
 }
 
-static void FullParse.parse(FullParse *p, Token start) {
-  Compiler c = p.c;
-  Token tokens = c.tokenizer.tokens;
-  int begin = start - tokens;
-  if (p.hoisting) c._push_conditionals(p.statements, p.gap, begin);
-  if (p.hoisting && c.script_statement_starts()) p.hoist(begin, tokens);
-  else p.top_level(begin, tokens);
-  p.gap = c._end_index(tokens);
-  c._append_preproc(p.nodes);
-  _debug_tokens(start, c.token);
-}
+/** Destroys a compiler's owned `Lisp` session, if any.
 
-// A script statement joins the runs that `main` executes.
-static void FullParse.hoist(FullParse *p, int begin, Token tokens) {
-  p.c.skip_script_statement();
-  int end = p.c._end_index(tokens);
-  p.statements.push(begin);
-  p.statements.push(end);
-  if (!p.runs++) p.first = begin;
-}
-
-// A retained declaration bundle replays; any other form parses.
-static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
-  Compiler c = p.c;
-  c._reject_statement();
-  Ast node = c._replay_bundle();
-  if (!node) node = c.parse_top_level();
-  int end = c._end_index(tokens);
-  if (node && node.car() == <seq>)
-    foreach (List item, node.cdr()) p.add(item, begin, end);
-  else if (node) p.add(node, begin, end);
-}
-
-static void FullParse.add(FullParse *p, List node, int begin, int end) {
-  Token tokens = p.c.tokenizer.tokens;
-  p.c._record_top_level(node, tokens + begin);
-  p.c._record_span(node, begin, end);
-  p.nodes.push(node);
-}
-
-// The index after the last non-trivia token before the cursor.
-static long Compiler._end_index(Compiler c, Token tokens) =>
-  _skip_backward(c.token - 1, tokens) + 1 - tokens;
-
-/* The directives before the cursor join the nodes in source order, after
-   they update source visibility and the unit's macro names. */
-static void Compiler._append_preproc(Compiler c, Array nodes) {
-  List directives = c.leading_preproc();
-  c.update_source_visibility(directives);
-  foreach (Var directive, directives) nodes.push(directive);
-}
-
-/* A failed declaration is skipped whole from its first token, because a
-   report inside a body leaves the cursor where no declaration can start.
-   The declaration ends at a `;` outside delimiters, at a closing delimiter
-   whose next token begins a later line, such as a function body or a macro
-   invocation, or at a `}` that nothing on its line continues. A `struct`
-   body continues to its declarators, and a second function body on the
-   same line is a second declaration. */
-static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
-  c.token = start;
-  c.braces.resize(braces);
-  int depth = 0;
-  while (c.peek(0) != <eof>) {
-    Token token = c.token;
-    c.next();
-    if (!depth && token.type == <;>) return;
-    int step = token.type.group_step();
-    depth += step;
-    if (depth < 0) depth = 0;
-    Symbol next = c.peek(0);
-    if (!depth && step < 0 &&
-        (c.token.line > token.line ||
-         (token.type == <"}"> && next != <ident> && next != <*> &&
-          next != <;> && next != <,> && next != <(>)))
-      return;
-  }
-}
-
-static List Compiler._finish_parse(Compiler c, Array nodes) {
-  if (c.meta_build) c.write_meta_build();
-  c._append_meta_definitions(nodes);
-  c.unit_nodes = NULL;
-  List ast = nodes.list_free();
-  if (c.script && !c.script.defines_main && !c.error_count())
-    c._check_script_locals(ast);
-  c._check_unmatched_braces();
-  if (!c.error_count()) c._check_static_inits();
-  return ast;
-}
-
-/* script units
-
-   A script unit that defines `main` rejects top-level statements; one that
-   does not runs them, in source order, inside a generated `main`. */
-
-/** Skips a collected script statement, or diagnoses one beside `main`.
-    Called after top-level directives establish source visibility.
+    A borrowed session is left alive. Owned sessions not freed here are
+    destroyed when the compiler's Scope ends. This is final compiler cleanup:
+    it clears the diagnostic store and the compiler must not be reused.
+    At process exit, root Scope cleanup follows shutdown hooks and canonical
+    pool cleanup. Close explicitly while any native session dependencies live.
 */
-int Compiler.skip_collected_script_statement(Compiler c) {
-  if (!c.script) return 0;
-  if (!c.script.defines_main && c.script_statement_starts()) {
-    c.skip_script_statement();
-    return 1;
+void Compiler.free_lisp(Compiler c) {
+  if (!c) return;
+  if (c.macro_lisp && !c.borrowed_lisp) {
+    c.macro_lisp.destroy();
+    c.macro_lisp = NULL;
   }
-  c._reject_statement();
-  return 0;
+  c.diagnostics = NULL;
 }
 
-/** Moves past one run of a script unit's statement tokens, through a `;` or
-    a closing `}` outside every bracket. A statement that ends early this
-    way leaves its remainder as the next run, and runs are rejoined in order.
-*/
-void Compiler.skip_script_statement(Compiler c) {
-  for (int depth = 0; c.peek(0) != <eof>;) {
-    Symbol type = c.peek(0);
-    if (type == <"$(">) {
-      c.token = c.token.after_group();
-      continue;
-    }
-    depth += type.group_step();
-    c.next();
-    if (depth <= 0 && (type == <;> || type == <"}">)) return;
-  }
-}
-
-/* A script unit either defines `main` or runs its top-level statements, so
-   a statement beside `main` is the one form it rejects. */
-static void Compiler._reject_statement(Compiler c) {
-  if (c.script && c.script.defines_main && c.script_statement_executes())
-    c._report_script_statement();
-}
-
-static void Compiler._report_script_statement(Compiler c) {
-  c.report_error(
-    <parse>, "a script that defines main cannot have top-level statements",
-    c.token,
-    %("move the statement into main, or remove main so the statements run"));
-}
-
-/* A file-scope conditional directive also governs the statements it
-   surrounds, so a copy of each joins the statement runs in source order and
-   the script body keeps the file's conditional structure. */
-static void Compiler._push_conditionals(
-  Compiler c, Array statements, int first, int end) {
-  Token tokens = c.tokenizer.tokens;
-  for (int i = first; i < end; i++) {
-    Token token = tokens + i;
-    if (token.type != <preproc> || !preproc_conditional_kind(token.text))
-      continue;
-    statements.push(i);
-    statements.push(i + 1);
-  }
-}
-
-/* A script unit's `main` is ordinary source the parser reads after the last
-   top-level form: this template with the statement runs, in source order,
-   in place of `x2c_script_statements`. The statements run in their own
-   function, so the `try` that reports an uncaught error leaves their locals
-   ordinary. A failed command's status becomes the exit status; any other
-   uncaught error exits with 1. */
-static const char *script_main =
-  "static int x2c_script(int argc, char **argv, List args) {\n"
-  "  (void) argc, (void) argv, (void) args;\n"
-  "  x2c_script_statements\n"
-  "  return 0;\n"
-  "}\n"
-  "int main(int argc, char **argv) {\n"
-  "  try {\n"
-  "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n"
-  "  }\n"
-  "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
-  "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
-  "            argv[0], command.repr().str(), status.integer());\n"
-  "    return (int) status.integer();\n"
-  "  }\n"
-  "  catch %(?code *detail): {\n"
-  "    fprintf(stderr, \"%s: %s %s\\n\",\n"
-  "            argv[0], code, detail.repr().str());\n"
-  "    return 1;\n"
-  "  }\n"
-  "}\n";
-
-/* Replaces the token stream with a copy that ends in the script's `main`.
-   The copy keeps every consumed token at its index, so recorded token
-   indices stay valid, and drops the trivia already read before end of file.
-   `statements` holds each run's first and past-the-end token index. */
-static void Compiler._append_script_main(Compiler c, Array statements) {
-  Token tokens = c.tokenizer.tokens, eof = c.token;
-  long kept = c._end_index(tokens);
-  Token first = tokens + statements[0].integer();
-  Bytes stream = Bytes.new(sizeof(struct Token));
-  stream = stream.append(tokens, kept);
-  Tokenizer template = Tokenizer.new((char *) script_main, <x2c>);
-  template.scan();
-  for (Token token = template.tokens; token.type != <eof>; token++) {
-    if (token.text == "x2c_script_statements")
-      stream = _append_runs(stream, tokens, statements);
-    else stream = _append_placed(stream, token, first);
-  }
-  stream = stream.append(eof, 1);
-  c.tokenizer.tokens = stream;
-  c.token = Token.skip_trivia((Token) stream + kept);
-}
-
-static Bytes _append_runs(Bytes stream, Token tokens, Array statements) {
-  for (int i = 0; i < statements.len(); i += 2) {
-    long start = statements[i];
-    long end = statements[i + 1];
-    stream = stream.append(tokens + start, end - start);
-  }
-  return stream;
-}
-
-/* A template token takes the first statement's position with no length, so
-   a diagnostic about it names the script without reading past its text. */
-static Bytes _append_placed(Bytes stream, Token token, Token first) {
-  struct Token placed = *token;
-  placed.line = first.line;
-  placed.col = first.col;
-  placed.pos = first.pos;
-  placed.len = 0;
-  return stream.append(&placed, 1);
-}
-
-/* A script's functions cannot see the variables declared among its
-   statements, which are locals of `x2c_script`. C would report such a name
-   as undeclared; this names the cause and the `static` spelling that
-   shares it. */
-static void Compiler._check_script_locals(Compiler c, List ast) {
-  Map locals = _script_locals(ast);
-  if (!locals.len()) return;
-  foreach (List node, ast) match (node)
-    case %(function ? (bind (binding ? ?(String function)) ?)
-           (block *items)):
-      if (function != "x2c_script" && function != "main")
-        c._check_local_uses(items, locals);
-}
-
-static Map _script_locals(List ast) {
-  Map locals = {};
-  foreach (List node, ast) match (node)
-    case %(function ? (bind (binding ? "x2c_script") ?)
-        ${$source_block_content(%(*items))}):
-      foreach (List item, items) match (item)
-        case %(at ? (declare ? (bindings *bindings))):
-          foreach (List binding, bindings) match (binding)
-            case %(!or (bind (binding ? ?(String name)) ?)
-                       (op = (bind (binding ? ?(String name)) ?) ?)):
-              locals[name] = 1;
-  return locals;
-}
-
-static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
-  foreach (List item, items) match (item) case %(at ?origin ?statement):
-    foreach (Var name, locals.keys()) {
-      Var found;
-      List bindings;
-      int present = statement.list().try_search(
-        %(expr () ${source_identifier_content(%((binding ? $name)))}),
-        found, bindings);
-      if (!present) continue;
-      c.origin = origin;
-      c.report_error(
-        <type>,
-        %"'$name' is declared among the script's statements",
-        NULL,
-        %("functions cannot see those locals;"
-          "declare it static to share it"));
-    }
-}
-
-/* top-level definitions
-
-   Each form the full parse reads records the facts that later checks use:
-   its object and function definitions, prototypes, static initializers,
-   and the token span of its source. A conflict between definitions is
-   reported at `site`, the form's first token, or at the cursor for a form
-   without one. */
-
-static void Compiler._record_top_level(Compiler c, List node, Token site) {
-  match (node) {
-    case %(declare (!set ?declared (*)) (bindings *bindings)): {
-      Type type = declared;
-      c._record_objects(bindings, site);
-      c._record_static_object(type, bindings);
-      c._record_prototypes(type, bindings);
-    }
-    case %(function ?return_type
-           (!set ?target (bind ?binding *)) ?): {
-      List declaration = %(declare $return_type (bindings $target));
-      c._record_definition(declaration.type_from_ast(), binding, site);
-    }
-  }
-}
-
-/* An initializer makes a file-scope declaration a definition; a tentative
-   one may be repeated. */
-static void Compiler._record_objects(Compiler c, List bindings, Token site) {
-  foreach (List row, bindings)
-    match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
-      List key = %(defined $binding);
-      Map facts = c.semantic_binding_facts();
-      if (key in facts) c._report_redefinition("variable", binding, site);
-      facts[key] = 1;
-      facts[%(arms $binding)] = c.arms;
-    }
-}
-
-/* Reports a second definition of one file-scope name, which C rejects,
-   when both sit under the same conditional arms. Definitions under
-   different arms are not compared. For a variable, whose initializer moves
-   into the generated init function, a duplicate under two true conditions
-   is therefore not detected, and the later initializer wins. */
-static void Compiler._report_redefinition(
-  Compiler c, String kind, List binding, Token site) {
-  Var arms;
-  if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
-      !List.equal(arms, c.arms))
-    return;
-  String spelling = binding_identity_spelling(binding);
-  c.report_error(
-    <type>, %"$kind '$spelling' is already defined in this scope",
-    site, %("prior definition: '$spelling'"));
-}
-
-/* A definition remembers the token range of the top-level form that
-   produced it, and whether that form is private, for the definition walk.
-   A typedef or declaration may repeat its name, so each statement keys its
-   own range. */
-static void Compiler._record_span(Compiler c, List node, int start, int end) {
-  List key = NULL;
-  match (node) {
-    case %(function ? (bind ?binding ?) ?): key = binding;
-    case %(falias (declare ? (bindings (bind ?binding ?))) ?): key = binding;
-    case %((!or typedef declare) *): key = node;
-  }
-  if (key)
-    c.semantic_binding_facts()[%(definition-span $key)] =
-      %($start $end ${c.source_private > 0});
-}
-
-/* function completion
-
-   A function's completion fact records its contract: a prototype, a
-   definition, a definition that completed a prototype, or a conflict
-   between two prototypes. */
-
-// Record only prototypes reached in positioned full-parse source order.
-static void Compiler._record_prototypes(
-  Compiler c, Type declared_type, List items) {
-  foreach (List target, items)
-    match (target)
-      case %(bind ?binding ?modifiers): {
-        List single = %(declare $declared_type (bindings $target));
-        Type type = single.type_from_ast();
-        if (type.is_function()) c._record_prototype(binding, type, modifiers);
-      }
-}
-
-static void Compiler._record_prototype(
-  Compiler c, List binding, Type type, List modifiers) {
-  c._record_attributes(binding, modifiers);
-  List contract = c._contract(type, binding);
-  Var stored;
-  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
-    List state = stored;
-    Var (state_kind, prior_contract) = state;
-    if (state_kind == <definition> || state_kind == <completed>) return;
-    if (state_kind != <prototype> || !List.equal(prior_contract, contract)) {
-      c.semantic_binding_facts()[%(completion $binding)] = %(conflict);
-      return;
-    }
-  }
-  c.semantic_binding_facts()[%(completion $binding)] = %(prototype $contract);
-}
-
-/* A source attribute on the prototype belongs to the function; the
-   generator writes it on the prototype it derives from the definition. */
-static void Compiler._record_attributes(
-  Compiler c, List binding, List modifiers) {
-  List attributes = NULL;
-  foreach (Var item, modifiers)
-    if (item is <list> && car(item) is <string>)
-      attributes = attributes ? %( @attributes $item ) : %($item);
-  if (attributes)
-    c.semantic_binding_facts()[%(attributes $binding)] = attributes;
-}
-
-static void Compiler._record_definition(
-  Compiler c, Type type, List binding, Token site) {
-  List contract = c._contract(type, binding);
-  Var stored;
-  if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
-    List state = stored;
-    Var (state_kind, prior_contract) = state;
-    if (state_kind == <prototype>) {
-      c._complete_prototype(binding, prior_contract, contract, site);
-      return;
-    }
-    if (state_kind == <definition> || state_kind == <completed>)
-      c._report_redefinition("function", binding, site);
-  }
-  c.semantic_binding_facts()[%(completion $binding)] = %(definition $contract);
-  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
-  String spelling = binding_identity_spelling(binding);
-  if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
-}
-
-/* A definition completes the prior prototype whose contract it matches. A
-   definition without `static` after a `static` prototype keeps the
-   prototype's internal linkage in C. */
-static void Compiler._complete_prototype(
-  Compiler c, List binding, List prior_contract, List contract, Token site) {
-  match (prior_contract)
-    case %(function-contract ?a ?b static ?d)
-      if (contract.equal(%(function-contract $a $b extern $d))):
-        contract = prior_contract;
-  if (!List.equal(prior_contract, contract)) {
-    String spelling = binding_identity_spelling(binding);
-    c.report_error(
-      <type>,
-      %"definition '$spelling' does not match prior prototype",
-      site,
-      %(
-        "prototype: ${prior_contract.repr()}"
-        "definition: ${contract.repr()}"
-      )
-    );
-  }
-  c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
-  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
-}
-
-static List Compiler._contract(Compiler c, Type type, List binding) =>
-  _completion_contract(
-    type, c._fact(%(method $binding)), c._fact(%(self $binding)));
-
-static List _completion_contract(
-  Type type, List method_identity, List self_signature) {
-  Symbol linkage = type.is_static() ? <static> : <extern>;
-  List contract = %(
-    function-contract
-    ${_contract_type(type, 0)}
-    ${_contract_type(type, 1)}
-    $linkage
-    $method_identity
-  );
-  return self_signature ? contract.append(%($self_signature)) : contract;
-}
-
-static Type _contract_type(Type type, int keep_qualifiers) {
-  Array kept = [];
-  foreach (Var item, type) {
-    if (item is <list>) kept.push(_contract_type(item, keep_qualifiers));
-    else if (!_omitted_specifier(item, keep_qualifiers)) kept.push(item);
-  }
-  return kept.list_free();
-}
-
-// A contract omits storage classes, `inline`, and qualifiers unless kept.
-static int _omitted_specifier(Var item, int keep_qualifiers) {
-  if (item is not <symbol>) return 0;
-  Symbol symbol = item;
-  return symbol.is_storage_class() ||
-         (!keep_qualifiers && symbol.is_type_qualifier()) ||
-         symbol.is_inline();
-}
-
-// static initializers
-
-static void Compiler._record_static_object(
-  Compiler c, Type declared, List bindings) {
-  if (!declared.is_static()) return;
-  int declared_var = c.sym.is_var_type(declared);
-  if (!declared_var && !c._initializable_type(declared)) return;
-  foreach (List binding_init, bindings)
-    match (binding_init)
-      case %(op = (bind (!set ?binding (binding ? ?)) ?)
-             (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !c._initializable_type(initializer_type))
-          continue;
-        Map references = {}, Array ordered = [];
-        _collect_references(value, references, ordered);
-        c.static_init_deps[binding] = ordered.list_free();
-      }
-}
-
-static int Compiler._initializable_type(Compiler c, Type type) =>
-  c.sym.is_string_type(type) || c.sym.is_named_value_type(type, "List") ||
-  c.sym.is_array_type(type) || c.sym.is_map_type(type) ||
-  c.sym.is_named_value_type(type, "Func");
-
-static void _collect_references(Var value, Map references, Array ordered) {
-  if (value is not <list> || value.is_nil()) return;
-  List node = value;
-  match (node)
-    case %(input *arguments): {
-      foreach (List argument, arguments)
-        _collect_references(argument.cadr(), references, ordered);
-      return;
-    }
-  match (node)
-    case %(indexinit ? ?initializer): {
-      _collect_references(initializer, references, ordered);
-      return;
-    }
-  match (node)
-    case %(expr (!set ?type (*)) ${$source_identifier_content(
-        %((!set ?binding (binding ? ?))))}): {
-      if (!type.type().is_function()) {
-        if (!references.contains(binding)) ordered.push(binding);
-        references[binding] = 1;
-      }
-      return;
-    }
-  foreach (Var child, node) _collect_references(child, references, ordered);
-}
-
-static void Compiler._check_static_inits(Compiler c) {
-  Map statics = c.sym.file_statics();
-  foreach (Var (key, value), c.static_init_deps) {
-    List binding = key, dependencies = value;
-    foreach (List reference, dependencies) {
-      String name = binding_identity_spelling(reference);
-      if (!name || %($name) in statics) continue;
-      String target = binding_identity_spelling(binding);
-      c.report_error(
-        <parse>,
-        %"file-static x2c initializer depends on non-static '$name'",
-        c._init_token(binding), target ? %("initializer: $target") : NULL);
-    }
-  }
-}
-
-static Token Compiler._init_token(Compiler c, List binding) {
-  Var index;
-  if (!c.init_tokens.try_get(binding, index)) return NULL;
-  Token tokens = c.tokenizer.tokens;
-  return tokens + index.integer();
-}
-
-// meta definitions
-
-/* Emits the runtime form of each imported `meta` function or value this
-   unit reaches, in import order. A `meta` declaration has two lifetimes:
-   every importing unit installs its compile-time form, and the runtime
-   declaration belongs where it is used. A unit that uses one only during
-   translation emits nothing for it, and a declaration an emitted one uses
-   comes with it. A compile-time-only function has no runtime form to emit,
-   so a unit that calls it at run time reaches the link error that names
-   it. */
-static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
-  if (!c.meta_defs.len()) return;
-  Map referenced = {}, reached = {};
-  foreach (List node, nodes) ast_collect_binding_references(node, referenced);
-  /* A `meta` declaration uses only ones declared before it, so one pass
-     from the last declaration back reaches every one an emitted one
-     needs. */
-  for (size_t i = c.meta_defs.len(); i; i--) {
-    List definition = c.meta_defs[i - 1];
-    Var identity = _meta_identity(definition);
-    if (identity in referenced) {
-      reached[identity] = 1;
-      ast_collect_binding_references(definition, referenced);
-    }
-  }
-  foreach (List definition, c.meta_defs)
-    if (_meta_identity(definition) in reached &&
-        !c.meta_is_comptime_only(definition)) {
-      c._record_top_level(definition, NULL);
-      nodes.push(definition);
-    }
-}
-
-/* The binding an imported `meta` function or declaration introduces. */
-static Var _meta_identity(List definition) {
-  match (definition) {
-    case %(function ? (bind (binding ?identity ?) *) ?): return identity;
-    case %(declare ? (bindings (op = (bind (binding ?identity ?) *) ?))):
-      return identity;
-    case %(declare ? (bindings (bind (binding ?identity ?) *))):
-      return identity;
-  }
-  return void;
+// Lisp calls must have returned before the compiler's Scope is reclaimed.
+static void _drop_compiler(void *ptr) {
+  Compiler c = ptr;
+  c.free_lisp();
 }
