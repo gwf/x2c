@@ -53,30 +53,33 @@ Type List.type_from_ast(List ast) {
   return type;
 }
 
-/* Each declaration form has its own step; any other node is a modifier
+/* Each declaration form has its own case; any other node is a modifier
    chain or converts its children. A nested declaration, such as a struct
    field that is a pointer, converts the same way. */
 static List _from_ast(List node, List context) {
   if (!node) return node;
-  // Initializers do not contribute to the declared Type.
-  match (node)
+  match (node) {
+    // Initializers do not contribute to the declared Type.
     case $source_operator_content(%(= (!set ?binding (bind *)) ?)):
       return _from_ast(binding, context);
-  Var head = node.car();
-  switch (head.symbol()) {
-    case <declare>:  return _from_declare(node);
-    case <bind>:     return _from_bind(node, context);
-    case <params>:
-    case <bindings>: return _from_items(node.cdr(), context);
-    case <fields>:   return _from_fields(node, context);
-    case <typedef>:  return _from_typedef(node);
-    case <fnmod>:    return _from_fnmod(node);
-    case <param>:    return _from_param(node);
+    case %(declare ?source_type ?bindings):
+      return _from_declarators(_without_leading_text(source_type), bindings);
+    case %(typedef ?source_type ?bindings):
+      return _from_declarators(source_type, bindings);
+    case %(bind ? ?mods): return _from_bind(mods, context);
+    case %(params *items): return _from_items(items, context);
+    case %(bindings *items): return _from_items(items, context);
+    case %(fields *fields): return _from_fields(fields, context);
+    case %(fnmod *params): return %(func @{_from_ast(params, NULL)});
+    case %(param ?type ?mods): return _from_ast(mods, type);
     // Binding identity is AST metadata; semantic Types retain the spelling.
-    case <binding>:  return %(${node.caddr()});
-    case <struct>:
-    case <union>:    return _from_aggregate(node, head);
-    case <expr>:     return _from_expr(node, context);
+    case %(binding ? ?spelling): return %($spelling);
+    // An integer literal, such as an array bound, keeps only its spelling.
+    case %(expr (int) ${$source_literal_content(%(? ?value))}):
+      return %($value);
+    case %(expr *): return _from_items(node, context);
+    case %(struct *): return _from_aggregate(node, <struct>);
+    case %(union *): return _from_aggregate(node, <union>);
   }
   return _from_modifiers(node, context);
 }
@@ -124,48 +127,28 @@ static List _from_items(List items, List context) {
 
 // declaration forms
 
-static List _from_declare(List node) {
-  (List source_type, List bindings) = node.cdr();
-  List type = _from_ast(_without_leading_text(source_type), NULL);
-  return _from_ast(bindings, type);
-}
+static List _from_declarators(List source_type, List bindings) =>
+  _from_ast(bindings, _from_ast(source_type, NULL));
 
 /* (bind ?ident ?mods): a declarator modifier is never a named type, so all
    of its source attribute text, `("__attribute__((unused))")`, drops. */
-static List _from_bind(List node, List context) {
+static List _from_bind(List mods, List context) {
   Array typed = [];
-  foreach (Var item, node.caddr())
+  foreach (Var item, mods)
     if (!_is_source_text(item)) typed.push(item);
-  List mods = _from_ast(typed.list_free(), context);
-  return context.type()._modify(mods);
+  return context.type()._modify(_from_ast(typed.list_free(), context));
 }
 
 /* A static assertion among the fields, under any origin wrappers, declares
    no field. */
-static List _from_fields(List node, List context) {
+static List _from_fields(List fields, List context) {
   Array types = [];
-  foreach (List field, node.cdr()) {
+  foreach (List field, fields) {
     List declaration = field;
     while (declaration.car() == <at>) declaration = declaration.caddr();
     if (declaration.car() != <c-assert>) types.push(_from_ast(field, context));
   }
   return types.list_free();
-}
-
-static List _from_typedef(List node) {
-  (List source_type, List bindings) = node.cdr();
-  List type = _from_ast(source_type, NULL);
-  return _from_ast(bindings, type);
-}
-
-static List _from_fnmod(List node) {
-  List params = _from_ast(node.cdr(), NULL);
-  return %( func @params );
-}
-
-static List _from_param(List node) {
-  (Type parameter_type, List mods) = node.cdr();
-  return _from_ast(mods, parameter_type);
 }
 
 /* (struct tag) stays as written, (struct (fields)) converts its fields, and
@@ -177,14 +160,6 @@ static List _from_aggregate(List node, Var head) {
     return %( $head $fields );
   }
   return %( $head ${node.cadr()} );
-}
-
-/* An integer literal, such as an array bound, keeps only its spelling; any
-   other expression converts its children. */
-static List _from_expr(List node, List context) {
-  match (node) case %(expr (int)
-      ${$source_literal_content(%(? ?value))}): return %($value);
-  return _from_items(node, context);
 }
 
 /* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,

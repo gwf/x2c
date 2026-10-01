@@ -290,8 +290,12 @@ int ToolRun.wait(ToolRun execution) {
     and returns its shell-style status. A tool that cannot start returns 127
     and leaves the reason in `errors`.
 */
-int tool_capture(List arguments, String &output, String &errors) {
-  Job job = _start_tool(_captured(arguments), arguments.car(), errors);
+int tool_capture(List arguments, String &output, String &errors) =>
+  _capture(_captured(arguments), arguments.car(), output, errors);
+
+static int _capture(
+  Job command, String program, String &output, String &errors) {
+  Job job = _start_tool(command, program, errors);
   if (!job) return 127;
   int status = job.status();
   output = job.output_text;
@@ -346,7 +350,11 @@ int Toolchain.preprocess(
   String depfile = %"$scratch/cpp.d";
   List arguments = t._cpp_arguments(include_dirs, imacros, depfile, fname);
   if (t.verbose) _print_action(<preprocess>, arguments);
-  int status = tool_capture(arguments, output, errors);
+  /* The empty standard input is the main file, so the unit is an included
+     file whose own `#pragma once` stops an include cycle from splicing it
+     again. The host ignores that pragma in a main file. */
+  Job command = _captured(arguments).options({input: ""});
+  int status = _capture(command, arguments.car(), output, errors);
   /* The dependency file is consumed and removed even after host failure. The
      returned status tells the caller whether stdout is usable. */
   try dependencies = Path.read_text(depfile);
@@ -371,12 +379,12 @@ static List Toolchain._cpp_arguments(
     "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
     "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
-    "-Wno-invalid-pp-token" "-Wno-pragma-once-outside-header"
+    "-Wno-invalid-pp-token"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
     "-I" "." @{_includes(cpp_include_dirs())} @{_includes(include_dirs)}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
-    $source);
+    "-include" $source "-");
 
 static List _includes(List directories) =>
   directories.map(%!(directory) => %("-I" $directory)).flatten();

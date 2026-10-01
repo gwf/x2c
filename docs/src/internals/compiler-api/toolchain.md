@@ -230,7 +230,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:338`
+Source: `src/toolchain.x:342`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -255,7 +255,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:391`
+Source: `src/toolchain.x:399`
 
 ## Public types
 

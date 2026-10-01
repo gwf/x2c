@@ -736,7 +736,7 @@ static char *_read_response_file(String path, size_t &length) {
     _response_error(path, 1, "could not read complete file");
   text[got] = 0;
   if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
-  if (!_valid_utf8((unsigned char *) text, got))
+  if (!_valid_utf8((unsigned char *) text))
     _response_error(path, 1, "input is not valid UTF-8");
   length = got;
   return text;
@@ -755,39 +755,12 @@ static long _response_size(FILE *file, String path) {
 }
 
 /* Shortest forms of scalar values only: no overlong sequence, surrogate, or
-   code point above U+10FFFF. */
-static int _valid_utf8(const unsigned char *text, size_t length) {
-  size_t i = 0;
-  while (i < length) {
-    unsigned char c = text[i++];
-    if (c < 0x80) continue;
-    int extra = 0, minimum = 0;
-    unsigned code = 0;
-    if ((c & 0xe0) == 0xc0) {
-      extra = 1;
-      minimum = 0x80;
-      code = c & 0x1f;
-    }
-    else if ((c & 0xf0) == 0xe0) {
-      extra = 2;
-      minimum = 0x800;
-      code = c & 0x0f;
-    }
-    else if ((c & 0xf8) == 0xf0) {
-      extra = 3;
-      minimum = 0x10000;
-      code = c & 0x07;
-    }
-    else return 0;
-    if (i + extra > length) return 0;
-    while (extra--) {
-      unsigned char next = text[i++];
-      if ((next & 0xc0) != 0x80) return 0;
-      code = (code << 6) | (next & 0x3f);
-    }
-    if (code < minimum || (code >= 0xd800 && code <= 0xdfff) ||
-        code > 0x10ffff)
-      return 0;
+   code point above U+10FFFF. `text` is NUL-terminated and has no other NUL. */
+static int _valid_utf8(const unsigned char *text) {
+  while (*text) {
+    int length = scan_utf8_length(text);
+    if (length < 0) return 0;
+    text += length;
   }
   return 1;
 }

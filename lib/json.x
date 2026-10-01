@@ -212,7 +212,7 @@ static String Reader._string(Reader r) {
     else if (!byte) r._fail("unterminated string");
     else if (byte < 0x20) r._fail("control character in string");
     else {
-      int length = _utf8_length((const unsigned char *) r.text + r.at);
+      int length = scan_utf8_length((const unsigned char *) r.text + r.at);
       if (length < 0) r._fail("invalid UTF-8");
       r.at += length;
     }
@@ -484,7 +484,7 @@ static void _write_string(Buffer out, String text) {
       case '\r': escape = "\\r"; break;
       case '\t': escape = "\\t"; break;
     }
-    int sequence = escape || byte < 0x20 ? -1 : _utf8_length(bytes + at);
+    int sequence = escape || byte < 0x20 ? -1 : scan_utf8_length(bytes + at);
     if (sequence > 0) {
       at += sequence;
       continue;
@@ -530,32 +530,9 @@ static void _write_double(Buffer out, double number) {
 
 /* UTF-8
 
-   Reading validates each unescaped sequence and decodes `\u` escapes;
-   writing replaces each ill-formed subpart with U+FFFD. */
-
-/* Returns the length of the well-formed UTF-8 sequence at `s`, or the negated
-   length of its maximal ill-formed subpart. Overlong forms, surrogates, and
-   code points above U+10FFFF are ill-formed. */
-static int _utf8_length(const unsigned char *s) {
-  int length, low = 0x80, high = 0xBF;
-  if (s[0] < 0x80) return 1;
-  if (s[0] < 0xC2) return -1;
-  if (s[0] < 0xE0) length = 2;
-  else if (s[0] < 0xF0) {
-    length = 3;
-    if (s[0] == 0xE0) low = 0xA0;
-    if (s[0] == 0xED) high = 0x9F;
-  }
-  else if (s[0] < 0xF5) {
-    length = 4;
-    if (s[0] == 0xF0) low = 0x90;
-    if (s[0] == 0xF4) high = 0x8F;
-  }
-  else return -1;
-  if (s[1] < low || s[1] > high) return -1;
-  for (int i = 2; i < length; i++) if (s[i] < 0x80 || s[i] > 0xBF) return -i;
-  return length;
-}
+   Reading validates each unescaped sequence with `scan_utf8_length` and
+   decodes `\u` escapes; writing replaces each ill-formed subpart with
+   U+FFFD. */
 
 static void _write_code_point(Buffer out, long point) {
   if (point < 0x80) {
