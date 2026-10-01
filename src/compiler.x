@@ -214,6 +214,7 @@ Var Compiler.var(Compiler c) => (Var) { .p64 = c };
 Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler) as void *;
+$(import "error-reports.xmacro")
 #pragma private
 $(import "../src/grammar.xmacro")
 
