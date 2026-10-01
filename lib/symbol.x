@@ -25,18 +25,19 @@
 #include "buffer.x"
 #include "string.x"
 
+// encoding
+
 static const char _symbol_alphabet[] =
     "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
-/* Maximum-capacity encodings within the 64-bit Symbol value:
+/* The maximum-capacity encodings within the 64-bit Symbol value, numbered
+   from bit 63 on the left to bit 0 on the right:
 
-   ----------------------------------------------------------------
    6666555555555544444444443333333333222222222211111111110000000000
    3210987654321098765432109876543210987654321098765432109876543210
-   ----------------------------------------------------------------
+
    XXXXXXXXXXXXX[555][555][555][555][555][555][555][555][555][555]0
    XXXXXXXXXXXXX0[77777][77777][77777][77777][77777][77777][77777]1
-   ----------------------------------------------------------------
 
    X marks an unused bit, [555] a 5-bit character, and [77777] a
    7-bit character. The low bit selects 5- or 7-bit encoding. Shorter
@@ -117,6 +118,8 @@ meta native int Symbol.try_new(String spelling, Symbol *out) {
   return 1;
 }
 
+// decoding
+
 /** Returns the number of decoded bytes in `symbol`. */
 meta native int Symbol.len(Symbol symbol) {
   int len = 0, bits = (symbol & 1) ? 7 : 5;
@@ -126,9 +129,8 @@ meta native int Symbol.len(Symbol symbol) {
 
 /** Decodes `symbol` into caller-owned byte storage.
     `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol`
-    is
-    NUL-terminated there. A null destination or zero `Symbol` leaves storage
-    unchanged.
+    is NUL-terminated there. A null destination or zero `Symbol` leaves
+    storage unchanged.
 */
 void Symbol.decode(Symbol symbol, char *dest) {
   if (!dest || !symbol) return;
@@ -155,8 +157,7 @@ void Symbol.decode(Symbol symbol, char *dest) {
     Conversion stops at the first decoded NUL.
     The result follows the canonical pool chain: it may already belong to an
     ancestor and lives until its actual owning pool is released. A zero
-    `Symbol`
-    returns NULL, the empty `String`.
+    `Symbol` returns NULL, the empty `String`.
     Raises: `<alloc-fail>` while canonicalizing the spelling.
 */
 String Symbol.str(Symbol symbol) {
@@ -249,6 +250,8 @@ meta native char Symbol.last(Symbol symbol) {
   if (bits == 5) return _symbol_alphabet[value & 0x1F];
   return value & 0x7F;
 }
+
+// parsing
 
 /** Parses the first compact `Symbol` spelling from `text`.
     The parser accepts an angled literal or a bare `Atom` prefix and ignores
