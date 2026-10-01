@@ -370,7 +370,10 @@ behavior. A `violation` includes its call path and source location. An
 `incomplete` result lists proof obstacles such as an indirect call, an unknown
 native effect, pointer arithmetic or casts, an aggregate copy, or a region
 closure the audit cannot establish. Obstacles do not change compiler warnings
-or errors. Returned or transferred ownership appears under `obligations`.
+or errors. Each violation and obstacle path is a shortest call path from a
+root or file scope. Among paths of equal length, the report picks the first
+by comparing their targets in order, by path and then name. Returned or
+transferred ownership appears under `obligations`.
 Calls and allocations inside a branch or loop are checked by the region
 walk. A conditional region opening or a close without an unconditional
 lexical `defer` remains an obstacle.
