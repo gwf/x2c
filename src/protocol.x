@@ -84,8 +84,7 @@ static List Compiler._visible_adoption(
   return local ? local : c._adoption_row(base, participant, <external>);
 }
 
-static Symbol Compiler._visibility(
-  Compiler c, Type base, Type participant) {
+static Symbol Compiler._visibility(Compiler c, Type base, Type participant) {
   List external = c._adoption_row(base, participant, <external>);
   List local = c._adoption_row(base, participant, <static>);
   if (external && local) {
@@ -100,12 +99,10 @@ static Symbol Compiler._visibility(
 }
 
 // Participation exists only for a declared adoption row.
-static int Compiler._is_adopted(
-  Compiler c, Type base, Type participant) =>
+static int Compiler._is_adopted(Compiler c, Type base, Type participant) =>
     !!c._visibility(base, participant);
 
-static int Compiler._owns_adoption(
-  Compiler c, Type base, Type participant) {
+static int Compiler._owns_adoption(Compiler c, Type base, Type participant) {
   List row = c._visible_adoption(base, participant);
   return row && c._canonical_file(_adoption_location(row)) == c._path();
 }
@@ -391,8 +388,7 @@ static List ProtocolSyntax.body(ProtocolSyntax *p) {
 static List Compiler._parse_associated(Compiler c, Map names) {
   c.expect(<associated>);
   if (c.peek(0) != <ident>)
-    c.report_error(
-      <protocol>, "expected associated type name", c.token, NULL);
+    c.report_error(<protocol>, "expected associated type name", c.token, NULL);
   String name = c.token.text;
   c.next();
   if (name in names)
@@ -443,8 +439,7 @@ static List Compiler._parse_member(
   return %($name $signature $native);
 }
 
-static String _member_name(
-  List identity, String participant) {
+static String _member_name(List identity, String participant) {
   String name = NULL;
   match (identity)
     case %((!or (!is ?owner type <string>)
@@ -609,8 +604,7 @@ static void Compiler._install_occurrence(
       c.protocols[base] = _occurrence(record, storage, location);
     return;
   }
-  String first_location = _location_string(
-    _occurrence_location(occurrence));
+  String first_location = _location_string(_occurrence_location(occurrence));
   String second_location = _location_string(location);
   if (first_location.compare(second_location) > 0) {
     String swap = first_location;
@@ -879,8 +873,7 @@ static String Compiler._missing_detail(
     %"or '$base_repr.as_$lowered'";
 }
 
-static String _requirement_detail(
-  Type base, Type participant, List failure) {
+static String _requirement_detail(Type base, Type participant, List failure) {
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
   (String member, Symbol adapter, Symbol direction, Symbol position) = failure;
@@ -1410,8 +1403,7 @@ static void ProtocolAdapters.report_requirement(
 
 // signature unification
 
-static int _function_parts(
-  Type signature, List &parameters, Type &result) {
+static int _function_parts(Type signature, List &parameters, Type &result) {
   match (signature)
     case %((func ?arguments) *return_type): {
       parameters = arguments;
@@ -1435,8 +1427,7 @@ static int _variable_is(Var template, Map variables, String name) {
   return variable && variable == name;
 }
 
-static int _unify(
-  Var pattern, Var actual, Map variables, Map bindings) {
+static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
   String variable = _type_variable(pattern, variables);
   if (variable) {
     Var bound;
@@ -1492,15 +1483,13 @@ static Type _substitute_signature(
   Type signature, Map variables, Map bindings) {
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
-  List parameter_types = parameters.map(
-    %!(Var parameter) =>
-      _substitute(parameter, variables, bindings));
+  List parameter_types = parameters.map(%!(Var parameter) =>
+    _substitute(parameter, variables, bindings));
   Type result_type = _substitute(result, variables, bindings);
   return %((func $parameter_types) @result_type);
 }
 
-static int _exact_conversion(
-  Type signature, Type parameter, Type result) {
+static int _exact_conversion(Type signature, Type parameter, Type result) {
   List parameters = NULL, Type actual_result = NULL;
   if (!_function_parts(signature, parameters, actual_result))
     return 0;
@@ -1962,8 +1951,7 @@ static void Compiler._report_collision(
 
   List notes = _collision_notes(kind, first, second);
   List row = c._visible_adoption(first_base, participant);
-  c.diagnostics.report(
-    <protocol>, message, _adoption_location(row), notes);
+  c.diagnostics.report(<protocol>, message, _adoption_location(row), notes);
 }
 
 static List _collision_notes(Symbol kind, List first, List second) {
@@ -2218,8 +2206,7 @@ static List DiscardCall.emit(DiscardCall *d) {
   Macro void_shape = $discard_void, value_shape = $discard_value;
   List shape = d.result.equal(%(void))
     ? void_shape(expression, d.discards.list_free())
-    : value_shape(
-      d.result, value_binding, expression, d.discards.list_free());
+    : value_shape(d.result, value_binding, expression, d.discards.list_free());
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
   List helper = d.c.wrapper_function(
     %(static @{d.result}), helper_binding,
@@ -2558,8 +2545,7 @@ macro open Statement $methods_value(Name $methods, Expr $value) {
   $methods = $value;
 }
 
-macro open Statement $registration_fallback(
-    Expr $registered, Expr $fallback) {
+macro open Statement $registration_fallback(Expr $registered, Expr $fallback) {
   if (!$registered) { $fallback; }
 }
 
