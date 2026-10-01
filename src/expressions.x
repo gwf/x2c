@@ -1039,14 +1039,12 @@ static inline int _precedence(Symbol op) {
    before a bare `[` literal. No name follows a complete operand, so there
    it is the membership operator. */
 static inline Symbol _binary_operator(Compiler c) =>
-  c.peek(0) == <ident> && c.token.text == "in" ? <in> : c.peek(0);
+  c.at_word("in") ? <in> : c.peek(0);
 
-static inline int _is_type_operator(Compiler compiler) =>
-  compiler.peek(0) == <ident> &&
-         compiler.token.text == "is";
+static inline int _is_type_operator(Compiler c) => c.at_word("is");
 
 static int _is_type_selector_start(Compiler c) {
-  if (c.peek(0) == <ident> && c.token.text == "Void") return 1;
+  if (c.at_word("Void")) return 1;
   Token head = c.token;
   if (c.test(<(>)) {
     int declaration = c.test_declaration();
@@ -2797,9 +2795,7 @@ static List _parse_binary_level_tail(Compiler c, int level, List lhs) {
     if (_is_type_operator(c)) {
       Token origin = c.token;
       c.next();
-      int negate = c.peek(0) == <ident> &&
-                   c.token.text == "not";
-      if (negate) c.next();
+      int negate = c.take_word("not");
       List test;
       if (_is_type_selector_start(c)) {
         Type target = _parse_is_type(c, origin);

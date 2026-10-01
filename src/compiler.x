@@ -682,6 +682,20 @@ inline int Compiler.test(Compiler c, Symbol type) {
   return 1;
 }
 
+/** Reports whether the current token is the identifier `word`. A contextual
+    keyword such as `with` or `as` is an ordinary identifier elsewhere. This
+    query does not consume tokens. */
+int Compiler.at_word(Compiler c, String word) =>
+  c.peek(0) == <ident> && c.token.text == word;
+
+/** Consumes the identifier `word` when current and reports whether it
+    matched. */
+int Compiler.take_word(Compiler c, String word) {
+  if (!c.at_word(word)) return 0;
+  c.next();
+  return 1;
+}
+
 static void _check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
   c.report_error(<parse>, "missing '}'", c.braces[-1], %( "'{' opened here" ));

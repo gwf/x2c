@@ -2702,7 +2702,7 @@ typedef struct ProtocolSyntax {
 
 static void _parse_adoption_modifiers(
   Compiler c, ProtocolSyntax *syntax) {
-  if (c.peek(0) == <ident> && c.token.text == "as") {
+  if (c.at_word("as")) {
     syntax.modifier_token = c.token;
     c.next();
     syntax.representation = c.parse_type_name().canonicalize();
@@ -2711,7 +2711,7 @@ static void _parse_adoption_modifiers(
         <protocol>, "'as' applies only to a Var adoption",
         syntax.modifier_token, NULL);
   }
-  if (c.peek(0) == <ident> && c.token.text == "tag") {
+  if (c.at_word("tag")) {
     syntax.modifier_token = c.token;
     c.next();
     if (syntax.representation)
@@ -2729,7 +2729,7 @@ static void _parse_adoption_modifiers(
 
 static ProtocolSyntax _parse_protocol_head(Compiler c) {
   ProtocolSyntax syntax = {.start = c.token, .storage = <external>};
-  if (c.peek(0) == <ident> && c.token.text == "meta") {
+  if (c.at_word("meta")) {
     syntax.meta = c.token;
     c.next();
   }

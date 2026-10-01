@@ -26,8 +26,7 @@ List Compiler.parse_statement(Compiler c) {
   c.__complete_here(<statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
-  if (c.peek(0) == <ident> && c.token.text == "with")
-    return _with_statement(c);
+  if (c.at_word("with")) return _with_statement(c);
   if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
     return _macro_statement(c);
   switch (c.peek(0)) {
@@ -115,8 +114,7 @@ static List _with_statement(Compiler c) {
 
 /* The name after `as`, or `_` when the statement names none. */
 static String _with_alias(Compiler c) {
-  if (c.peek(0) != <ident> || c.token.text != "as") return "_";
-  c.next();
+  if (!c.take_word("as")) return "_";
   if (c.peek(0) != <ident>)
     c.report_error(
       <parse>, "expected an alias identifier after 'as'", c.token, NULL);
@@ -720,8 +718,7 @@ List Compiler.parse_block_item(Compiler c) {
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
   if (c.local_macro_form_is_definition()) return _local_macro(c);
-  if (c.peek(0) == <ident> && c.token.text == "with")
-    return c.parse_statement();
+  if (c.at_word("with")) return c.parse_statement();
   // An identifier naming a live `with` expression is no macro target.
   int with_expression = !!c.with_binding();
   List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);

@@ -359,7 +359,7 @@ String Compiler.definition_doc(Compiler c, Token start) {
     including its `meta` and `static` markers. This query does not consume
     tokens. */
 int Compiler.protocol_form_starts(Compiler c) {
-  int at = c.peek(0) == <ident> && c.token.text == "meta";
+  int at = c.at_word("meta");
   if (c.peek(at) == <static>) at++;
   return c.peek(at) == <protocol>;
 }
@@ -367,7 +367,7 @@ int Compiler.protocol_form_starts(Compiler c) {
 /** Reports whether the cursor begins a contextual top-level `meta`
     declaration: a function or an initialized file-static value. */
 int Compiler.meta_form_is_declaration(Compiler c) {
-  if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
+  if (!c.at_word("meta")) return 0;
   Token head = c.token;
   c.take_meta_marker(NULL);
   int marker = c.test_declaration();
@@ -383,7 +383,7 @@ Token Compiler.take_meta_marker(Compiler c, int &?native) {
   Token meta = c.token;
   c.next();
   Token after = c.token;
-  int marked = _test_contextual(c, "native");
+  int marked = c.take_word("native");
   if (marked) {
     Token declaration = c.token;
     marked = c.test_declaration();
@@ -391,14 +391,6 @@ Token Compiler.take_meta_marker(Compiler c, int &?native) {
   }
   if (native) native = marked;
   return meta;
-}
-
-/* Consumes the contextual keyword `word` and reports whether it was there.
-   `as`, `with`, and `native` are ordinary identifiers everywhere else. */
-static int _test_contextual(Compiler compiler, String word) {
-  if (compiler.peek(0) != <ident> || compiler.token.text != word) return 0;
-  compiler.next();
-  return 1;
 }
 
 // imports
@@ -414,8 +406,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   String name = _package_name(c), alias = _import_alias(c, name);
   c.collect_package(name, start);
   c.register_package_alias(name, alias, start);
-  List members = _test_contextual(c, "with")
-    ? _import_members(c, name) : NULL;
+  List members = c.take_word("with") ? _import_members(c, name) : NULL;
   c.import_package_macros(name, start);
   c.expect(<;>);
   if (c.shallow)
@@ -443,7 +434,7 @@ static String _package_name(Compiler c) {
 }
 
 static String _import_alias(Compiler c, String name) {
-  if (!_test_contextual(c, "as")) return name;
+  if (!c.take_word("as")) return name;
   if (c.peek(0) != <ident>)
     c.report_error(
       <parse>, "expected an alias identifier after 'as'",
@@ -467,7 +458,7 @@ static List _import_members(Compiler c, String name) {
     Token member_token = c.token, local_token = member_token;
     String member = c.token.text, local = member;
     c.next();
-    if (_test_contextual(c, "as")) {
+    if (c.take_word("as")) {
       if (c.peek(0) != <ident>)
         c.report_error(
           <parse>, "expected a local name after 'as'", c.token, NULL);
@@ -520,7 +511,7 @@ int Compiler.script_statement_starts(Compiler c) {
       c.macro_form_is_definition() || c.meta_form_is_declaration() ||
       c.protocol_form_starts())
     return 0;
-  if (c.peek(0) == <ident> && c.token.text == "with") return 1;
+  if (c.at_word("with")) return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);
 }
@@ -548,7 +539,7 @@ static int _declaration_stays(Compiler c) {
 */
 int Compiler.script_statement_executes(Compiler c) =>
   c.script_statement_starts() &&
-  (c.peek(0) == <$> || c.token.text == "with" || !c.test_declaration());
+  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration());
 
 // declarations
 
@@ -661,9 +652,8 @@ List Compiler.parse_declaration_argument(Compiler c) {
 }
 
 /** Reports whether the current identifier starts a C static assertion. */
-int Compiler.test_static_assert(Compiler compiler) =>
-  compiler.peek(0) == <ident> &&
-  compiler.token.text == "_Static_assert";
+int Compiler.test_static_assert(Compiler c) =>
+  c.at_word("_Static_assert");
 
 /** Parses a C assertion declaration; native C owns constant-expression
     checks. */
@@ -738,7 +728,7 @@ static int _type_name_starts(Compiler c, int require_declarator) {
   c.next();
   if (alias) { c.next(); c.next(); }
   Symbol next = c.peek(0);
-  int is_operator = next == <ident> && c.token.text == "is";
+  int is_operator = c.at_word("is");
   // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
   int attribute = _attribute_starts(c);
   c.token = head;
@@ -955,10 +945,7 @@ static List _storage_class(Compiler c) {
     Symbol symbol = c.peek(0);
     String attribute = _attribute(c);
     if (attribute) text.push(%($attribute));
-    else if (symbol == <ident> && c.token.text == "_Noreturn") {
-      text.push(%("_Noreturn"));
-      c.next();
-    }
+    else if (c.take_word("_Noreturn")) text.push(%("_Noreturn"));
     else if (symbol.is_inline() ||
              (symbol == <threaded> ? !seen_threaded++ :
               symbol.is_storage_class() && !seen_ordinary++)) {

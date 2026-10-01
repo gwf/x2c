@@ -105,8 +105,7 @@ List Compiler.parse_macro_definition(Compiler c) {
    without `$`, and an anonymous one has no name to read. */
 static void Definition.head(Definition *d) {
   Compiler c = d.c;
-  d.open = c.peek(0) == <ident> && c.token.text == "open" &&
-           c.peek(1) == <ident>;
+  d.open = c.at_word("open") && c.peek(1) == <ident>;
   if (d.open) c.next();
   if (c.peek(0) == <$>)
     c.report_error(
@@ -159,10 +158,7 @@ static void Definition.signature(Definition *d) {
     c.expect(<)>);
   }
   d.check_signature();
-  if (c.peek(0) == <ident> && c.token.text == "using") {
-    c.next();
-    _using_holes(c, d.using);
-  }
+  if (c.take_word("using")) _using_holes(c, d.using);
   if (c.peek(0) == <:>)
     c.report_error(
       <parse>,
@@ -601,8 +597,7 @@ static List _parse_body(Compiler c, Symbol result_kind, Array using) {
 }
 
 static void _parse_body_using(Compiler c, Array binders) {
-  while (c.peek(0) == <ident> && c.token.text == "using" &&
-         c.peek(1) == <$>) {
+  while (c.at_word("using") && c.peek(1) == <$>) {
     c.next();
     _using_holes(c, binders);
     c.expect(<;>);
@@ -1118,15 +1113,15 @@ int Compiler.macro_form_is_definition(Compiler compiler) {
 int Compiler.local_macro_form_is_definition(Compiler c) {
   /* The `<(>` literal keeps this body braced: the API reference generator
      reads it as an unbalanced parenthesis and drops the rest of the file. */
-  return c.peek(0) == <ident> && c.token.text == "macro" &&
-         c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
+  return c.at_word("macro") && c.peek(1) == <ident> &&
+         c.peek(2) == <ident> && c.peek(3) == <(>;
 }
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.
     This query does not consume tokens.
 */
 int Compiler.keyword_form_is_definition(Compiler c) =>
-  c.peek(0) == <ident> && c.token.text == "keyword" && c.peek(2) == <$>;
+  c.at_word("keyword") && c.peek(2) == <$>;
 
 /** Parses and installs one source-local `keyword` alias.
     The named macro must already be visible; the alias captures that definition
@@ -1464,7 +1459,7 @@ static void _row_directives(Compiler c, Symbol kind, Array captured) {
    `foreach (String line in lines)`. Before a literal it scans as a name,
    which cannot follow a declaration either. */
 static void _argument_separator(Compiler c, Symbol kind) {
-  if (kind == <decl> && (c.peek(0) == <in> || c.token.text == "in")) c.next();
+  if (kind == <decl> && (c.peek(0) == <in> || c.at_word("in"))) c.next();
   else c.expect(<,>);
 }
 
