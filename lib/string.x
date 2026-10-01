@@ -1158,9 +1158,8 @@ meta native String String.squeeze(String str, String chars) {
 
 /* formatting
 
-   `String.printf` passes C arguments to `vsnprintf`. `String.format` parses
-   a checked subset of the same syntax itself and converts each `Var` value
-   to the C type its conversion names. */
+   `String.printf` passes C arguments to `vsnprintf`. The checked
+   `String.format` is in `string-format.x`. */
 
 /** Formats a canonical `String` from `fmt` and the trailing arguments.
     The receiver is the format `String`, so format-dependent construction reads
