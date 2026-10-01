@@ -348,14 +348,15 @@ static List CaptureBuild._construct(CaptureBuild *b, List context) {
     b.signature, _func_bound(constructor_type, constructor));
 }
 
+/* A value computed after its setup statements. */
+macro open Expression $statement_value(Expr $value, Statement $setup...) =>
+  ({ $setup... $value; });
+
 static List CaptureBuild._result(CaptureBuild *b, List storage, List value) {
-  Macro statement_shape = $expression_statement;
-  List statement = b.c.rebuild_statement(statement_shape(value)).cadr();
-  List setup = storage ? %($storage) : NULL;
-  return %(
-    expr ("Func")
-      (parens (block @{b.locals.list_free()} @setup $statement))
-  );
+  List setup = b.locals.list_free();
+  if (storage) setup = setup.append(%($storage));
+  Macro shape = $statement_value;
+  return b.c.rebuild_expression(%("Func"), shape(value, setup));
 }
 
 // lambda cells
@@ -413,7 +414,7 @@ static List Compiler._prepare_lambda_region(
   if (!candidates.len()) return body;
   r.allocate(candidates);
   List rewritten = r.rewrite(body);
-  return _prepend_setup(rewritten, r.setup(entries));
+  return c._prepend_setup(rewritten, r.setup(entries));
 }
 
 /* Nested bodies own their local cells; their construction expressions still
@@ -627,16 +628,14 @@ static List CellRegion.setup(CellRegion *r, List entries) {
   return setup.list_free();
 }
 
-static List _prepend_setup(List body, List setup) {
+static List Compiler._prepend_setup(Compiler c, List body, List setup) {
   if (!setup) return body;
+  Macro shape = $statement_value;
   match (body) {
     case $source_block_content(%(*items)):
       return source_block_content(%(@setup @items));
     case %(!set ?expression (expr ?type ?)):
-      return %(
-        expr $type
-          (parens (block @setup (stmnt $expression)))
-      );
+      return c.rebuild_expression(type, shape(expression, setup));
   }
   return body;
 }
@@ -647,10 +646,10 @@ macro open Statement $func_static_handle(Name $handle, Expr $value) {
   static Func $handle = $value;
 }
 
-macro open Statement $func_bridge_prototype(
-    Name $bridge, Param $parameters...) {
-  extern Func $bridge($parameters...);
-}
+/* A call through a bridge function the unit declares where it calls. */
+macro open Expression $func_bridge_call(
+    Name $bridge, Expr $call, Param $parameters...) =>
+  ({ extern Func $bridge($parameters...); $call; });
 
 macro open Expression $func_aggregate(Expr $value) => { $value };
 
@@ -788,16 +787,11 @@ static List Compiler._func_bridge_binding(Compiler c, String stem) {
 static List Compiler._func_bridge_call(
   Compiler c, List bridge, List parameters,
   Type function_type, List arguments) {
-  Macro prototype_shape = $func_bridge_prototype;
-  List prototype = c.rebuild_statement(
-    prototype_shape(bridge, parameters.cdr())).cadr();
   List call = c._func_call(
     %("Func"), _func_bound(function_type, bridge), arguments);
-  Macro statement_shape = $expression_statement;
-  List statement = c.rebuild_statement(statement_shape(call)).cadr();
-  return %(
-    expr ("Func") (parens (block $prototype $statement))
-  );
+  Macro shape = $func_bridge_call;
+  return c.rebuild_expression(
+    %("Func"), shape(bridge, call, parameters.cdr()));
 }
 
 static Type Compiler._func_pointer_value_type(Compiler c, Type type) {

@@ -2190,17 +2190,14 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
 /* A dynamic Func call stores its callee once, prepares each argument into
    an array from left to right, and applies the callee. Func_apply validates
    arity and dispatches; the selected adapter checks carrier, type and
-   conversion. The call is the value of a statement expression around this
-   block. */
-macro open Statement $func_call(Expr $callee, Expr $count,
-    Expr $arguments...) {
-  {
-    Func function = $callee;
-    FuncArg storage[$count];
-    $x2c_func_call_arguments(function, storage, $arguments)...
-    Func_apply(function, $count, storage);
-  }
-}
+   conversion. */
+macro open Expression $func_call(Expr $callee, Expr $count,
+    Expr $arguments...) => ({
+  Func function = $callee;
+  FuncArg storage[$count];
+  $x2c_func_call_arguments(function, storage, $arguments)...
+  Func_apply(function, $count, storage);
+});
 
 static List Compiler._resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
@@ -2212,8 +2209,8 @@ static List Compiler._resolve_func_call(
     return c.bind_syntax(apply(callee), AST_EXPRESSION, NULL);
   }
   Macro call = $func_call;
-  return %(expr ("Var") (parens ${c.bind_syntax(
-    call(callee, arguments.len(), arguments), AST_BLOCK, NULL)}));
+  return c.bind_syntax(
+    call(callee, arguments.len(), arguments), AST_EXPRESSION, NULL);
 }
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
@@ -2224,12 +2221,8 @@ static List Compiler._resolve_func_call(
     that takes the callee's own type. */
 List Compiler.func_call_parts(Compiler c, Var content) {
   Macro call = $func_call, apply = $func_apply;
-  match (%(expr () $content)) case apply(?callee): return %($callee);
-  List block = NULL;
-  match (content) case $source_content_pattern($grouped, %(?inner)):
-    block = inner;
-  if (!block) return NULL;
-  match (block)
+  match (%(expr () $content)) {
+    case apply(?callee): return %($callee);
     case call(?callee, ?count, *arguments): {
       Array parts = $auto([callee]);
       foreach (List argument, _slot_statements(arguments)) {
@@ -2239,6 +2232,7 @@ List Compiler.func_call_parts(Compiler c, Var content) {
       }
       return parts;
     }
+  }
   return NULL;
 }
 

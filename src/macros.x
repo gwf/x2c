@@ -2757,9 +2757,10 @@ static Var Compiler._helper_result(Compiler c, Var value) {
 
 /** Rebuilds an expression from a pending Macro value application, preserving
     its established root `type`, child stage, and source wrappers. Binding,
-    capture collection, hygiene, and effects do not run. */
+    capture collection, hygiene, and effects do not run, and a statement
+    expression's template-origin wrappers are omitted. */
 List Compiler.rebuild_expression(Compiler c, Type type, List application) {
-  List rebuilt = c._rebuild(application, 0, NULL);
+  List rebuilt = c._rebuild(application, NULL);
   return %(expr $type @{rebuilt.cddr()});
 }
 
@@ -2767,13 +2768,13 @@ List Compiler.rebuild_expression(Compiler c, Type type, List application) {
     children keep their identities and origins; template-origin wrappers
     are omitted because this path does not open an invocation. */
 List Compiler.rebuild_statement(Compiler c, List application) =>
-  c._rebuild(application, 1, NULL);
+  c._rebuild(application, NULL);
 
 /** Constructs a fresh function from a Unit template after lowering. The
     caller supplies its bound name and lowered children; binding does not
     run. */
 List Compiler.rebuild_unit_function(Compiler c, List application) {
-  List function = c._rebuild(application, 1, NULL).cadr();
+  List function = c._rebuild(application, NULL).cadr();
   match (function) case %(api-source ? ? ?inner): return inner;
   return function;
 }
@@ -2781,13 +2782,13 @@ List Compiler.rebuild_unit_function(Compiler c, List application) {
 /** Rebuilds a bound function through a Function decorator without binding it
     again. The template keeps the target's return type and declarator. */
 List Compiler.rebuild_function(Compiler c, List target, List application) =>
-  c._rebuild(application, 1, target).cadr();
+  c._rebuild(application, target).cadr();
 
 /* Substitute bound syntax into a structural template without binding it.
    The caller supplies complete children and a template with no free names,
    computed slots, or nested applications. */
 static List Compiler._rebuild(
-  Compiler c, List application, int statement, List target) {
+  Compiler c, List application, List target) {
   (Var marker, List definition, List values) = application;
   (void) marker;
   List arguments = c._template_arguments(definition, values, c.token, 1);
@@ -2805,8 +2806,8 @@ static List Compiler._rebuild(
       template = template.search_replace(
         %(expr (<macro-expr>) (!quote $binder)), binder);
     }
-  if (statement)
-    template = template.search_replace(%(at m-origin ?node), <?node>);
+  // This path opens no invocation, so template-origin wrappers are omitted.
+  template = template.search_replace(%(at m-origin ?node), <?node>);
   return template.replace(bindings);
 }
 
