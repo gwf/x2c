@@ -1018,7 +1018,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
 /* A meta call fills a declaration or block slot only when `...` splices
    its result there. */
 static List Compiler._meta_call_slot(Compiler c, Symbol role) {
-  Token arguments = c.skip_trivia_from(c.skip_trivia_from(c.token + 1) + 1);
+  Token arguments = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
   int follows_splice = arguments.after_group().type == <...>;
   if (!follows_splice && (role == <block> || role in declaration_roles))
     return NULL;
@@ -1083,7 +1083,7 @@ static int Compiler._slot_splice(Compiler c, int allowed) {
 */
 List Compiler.peek_macro_hole(Compiler c) {
   if (c.peek(0) != <$> || c.peek(1) != <ident>) return NULL;
-  Token name = c.skip_trivia_from(c.token + 1);
+  Token name = Token.skip_trivia(c.token + 1);
   return c._hole_record(Atom.intern(name.text));
 }
 
@@ -1170,7 +1170,7 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
   Token opening = c.token;
   if (opening.type == <$>) {
     if (c._peek_invocation()) return 0;
-    opening = c.skip_trivia_from(c.skip_trivia_from(opening + 1) + 1);
+    opening = Token.skip_trivia(Token.skip_trivia(opening + 1) + 1);
     if (opening.type != <(>) return 0;
   }
   Token token = opening.after_group();
@@ -1516,7 +1516,7 @@ static const SymbolSet alias_kinds =
 
 /* Parses one keyword alias of `c`'s source into `aliases`. */
 static void Compiler._record_alias(Compiler c, Map aliases) {
-  Token token = c.skip_trivia_from(c.token + 1);
+  Token token = Token.skip_trivia(c.token + 1);
   Atom alias = Atom.intern(token.text);
   c.parse_keyword_definition();
   aliases[alias] = c.kw_aliases[alias];
@@ -1615,13 +1615,13 @@ static List Compiler._peek_invocation(Compiler c) {
 static Token Compiler._scan_name(Compiler c, String &spelling) {
   Token token = c.token, String name = NULL;
   do {
-    token = c.skip_trivia_from(token + 1);
+    token = Token.skip_trivia(token + 1);
     if (token.type != <ident>) {
       name = NULL;
       break;
     }
     name = name ? %"$name.${token.text}" : token.text;
-    token = c.skip_trivia_from(token + 1);
+    token = Token.skip_trivia(token + 1);
   } while (token.type == <.>);
   spelling = name;
   return token;
@@ -3391,16 +3391,16 @@ static void Import.lisp_form(Import *in, Compiler child) {
 }
 
 static int Compiler._import_path(Compiler c, String &?path) {
-  Token token = c.skip_trivia_from(c.token + 1);
+  Token token = Token.skip_trivia(c.token + 1);
   /* The checked-in bootstrap still tokenizes `import` as an identifier, so
      both spellings of the same word open a compile-time import. */
   if ((token.type != <ident> && token.type != <import>) ||
       token.text != "import")
     return 0;
-  token = c.skip_trivia_from(token + 1);
+  token = Token.skip_trivia(token + 1);
   if (token.type != <lit-char*>) return 0;
   if (path) path = String.new_len(token.text + 1, token.len - 2).unescape();
-  token = c.skip_trivia_from(token + 1);
+  token = Token.skip_trivia(token + 1);
   return token.type == <)>;
 }
 
