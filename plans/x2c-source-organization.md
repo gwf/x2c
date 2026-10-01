@@ -333,6 +333,11 @@ For every file over 1,000 lines after Phase 4, and every new unit:
   `LogMemorySink` (`logger.x:619-655`), and the Context export family
   (`context.x:194-280`). Native callback trampolines keep their C
   signatures.
+- `Compiler.skip_trivia_from` repeats `Token.skip_trivia` (added by the
+  `preprocess.x` split) across about 31 callers; callers use the Token
+  method. `symbols.x`'s `_record_declaration_binding_visibility` still
+  writes the protocol registry's `source-typedef` row; that write returns
+  to `protocol.x` behind a call.
 - `_node` (`transform.x:4937`) only forwards to `_step`; the dispatcher
   takes the `_node` name and the layer goes. `Func._new` reads
   `params.len()` once.
