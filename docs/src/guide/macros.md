@@ -646,10 +646,14 @@ working through the generator. Keep unrelated outputs as direct source.
 
 ## Declare methods and converters before adoption
 
-Shallow collection loads `.xmacro` imports and expands their file-scope unit
-macros. Generated private helpers remain available to later macro invocations
-in the same source file, while generated public declarations and protocol rows
-remain visible to importing units. A generated public function definition may
+Shallow collection loads `.xmacro` imports and expands file-scope unit
+macros, both imported ones and those the source file defines. A local macro
+whose expansion fails during collection, for example because it reads a
+top-level `$(def ...)` value that collection has not evaluated, contributes
+nothing until the full parse. Generated private helpers remain available to
+later macro invocations in the same source file, while generated public
+declarations and protocol rows remain visible to earlier code and importing
+units. A generated public function definition may
 complete a prototype earlier in the same expansion when both have the same
 canonical signature and ownership.
 

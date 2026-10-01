@@ -98,11 +98,11 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `Compiler.collect_symbols`, `collect_resolve_include`,
-`Compiler.record_generated_symbol`, `Compiler.collect_package`,
-`Compiler.replay_package_imports`, `Compiler.replay_included_package_imports`,
-`interface_configure`, `interface_prelude`, `interface_text`,
-`collect_forget_preload_entries`, `collect_cached_paths`,
-`collect_forget_entries_since`
+`Compiler.include_typedef_names`, `Compiler.record_generated_symbol`,
+`Compiler.collect_package`, `Compiler.replay_package_imports`,
+`Compiler.replay_included_package_imports`, `interface_configure`,
+`interface_prelude`, `interface_text`, `collect_forget_preload_entries`,
+`collect_cached_paths`, `collect_forget_entries_since`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -295,8 +295,7 @@ Public functions:
 `Compiler.macro_tag_name`, `Compiler.publish_macro_definition_node`,
 `Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_starts_target_at`,
-`Compiler.macro_invocation_needs_shallow_expansion`,
+`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
 `Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,

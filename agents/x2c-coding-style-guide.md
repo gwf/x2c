@@ -1052,9 +1052,10 @@ compiler in `src/` is user-space x2c for this rule.
 Only runtime files under `lib/` have exceptions. Keep a declaration there when
 definitions must name each other through a genuinely co-recursive dependency,
 whether they share a file or cross runtime units. Also keep an exact literal
-prototype when shallow macro, protocol, or generated-definition collection
-must see it before expansion. State a non-obvious exception beside the
-declaration. A declaration merely repeated by a later definition is not an
+prototype when protocol or generated-definition collection must see it
+before expansion, or when a unit macro's expansion reads top-level Lisp from
+its own file, which collection does not evaluate. State a non-obvious
+exception beside the declaration. A declaration merely repeated by a later definition is not an
 exception.
 
 ## Let x2c carry the syntax

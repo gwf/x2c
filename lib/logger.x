@@ -724,20 +724,6 @@ Symbol Logger.error_handler(List errors, Var data) {
 
 // level shorthands
 
-// declared here because shallow symbol collection does not expand macros
-void Logger.trace(Logger, Symbol, List);
-void Logger.debug(Logger, Symbol, List);
-void Logger.info(Logger, Symbol, List);
-void Logger.warn(Logger, Symbol, List);
-void Logger.error(Logger, Symbol, List);
-void Logger.fatal(Logger, Symbol, List);
-void log_trace(Symbol, List);
-void log_debug(Symbol, List);
-void log_info(Symbol, List);
-void log_warn(Symbol, List);
-void log_error(Symbol, List);
-void log_fatal(Symbol, List);
-
 macro Unit $logger.method(Name $method, Literal $level) {
   /** Logs borrowed `fields` synchronously at $method level under `category`.
       Delivery and failure behavior follow `Logger.log`.

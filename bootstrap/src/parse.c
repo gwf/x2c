@@ -1255,7 +1255,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _794 = cons(_793, NULL);
   _795 = cons(_627, _794);
   _796 = List_var(_795);
-  _797 = int_var(88492);
+  _797 = int_var(88550);
   _798 = cons(_797, NULL);
   _799 = cons(_642, _798);
   _800 = List_var(_799);
@@ -2784,9 +2784,7 @@ int Compiler_skip_named_type_declaration(Compiler);
 
 int Compiler_macro_starts_target_at(Compiler, AstPos);
 
-int Compiler_macro_invocation_needs_shallow_expansion(Compiler);
-
-void Compiler_collect_unit_macro(Compiler);
+int Compiler_collect_unit_macro(Compiler);
 
 void Compiler_skip_macro_invocation(Compiler);
 
@@ -2799,10 +2797,7 @@ static int Compiler__skip_collected_form(Compiler c){
   }
   if(! c -> collect_protocols && Compiler_skip_named_type_declaration(c)) return 1;
   if(! Compiler_macro_starts_target_at(c, AST_UNIT)) return 0;
-  if(c -> collect_protocols && Compiler_macro_invocation_needs_shallow_expansion(c)){
-    Compiler_collect_unit_macro(c);
-    return 1;
-  }
+  if(c -> collect_protocols && Compiler_collect_unit_macro(c)) return 1;
   do{
     Compiler_skip_macro_invocation(c);
     if(Compiler_test(c, 119)) return 1;
@@ -3400,10 +3395,15 @@ static List Compiler__destructure_declaration(Compiler c, List type, List bindin
   Token origin_token = c -> token;  List bindings = Compiler__destructure_targets(c, binding_type);  if(allow_uninitialized || Compiler_peek(c, 0) == 604) return cons(_79, cons(List_var(type), cons(List_var(cons(_80, List_append(_destructure_binds(bindings), NULL))), NULL)));  if(! Compiler_test(c, 123)) Compiler_report_error(c, 33658058, _2184, c -> token, NULL);  List source = Compiler_parse_assignment(c);  List result = cons(_205, cons(List_var(type), cons(List_var(cons(_206, List_append(bindings, NULL))), cons(List_var(source), NULL))));  return Compiler_anchor_origin(c, result, origin_token);
 }
 
+List Compiler_macro_introduced_name(Compiler, String);
+Var List_car(List);
 List Sym_declare(Sym, List, List, List);
 static List Compiler__destructure_targets(Compiler c, List binding_type){
   Array targets = Array_new();  Compiler_expect(c, 81);  while(1){
-    if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _2185, c -> token, _209);  List ident = Compiler_parse_basic_identifier(c);  List binding = Map_truth(c -> macro_holes) ? ident : Sym_declare(c -> sym, NULL, ident, binding_type);  Array_push(targets, List_var(binding));  if(! Compiler_test(c, 89)) break;
+    if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _2185, c -> token, _209);  List ident = Compiler_parse_basic_identifier(c);  if(Map_truth(c -> macro_holes)){
+      List local = Compiler_macro_introduced_name(c, Var_string(List_car(ident)));  Compiler_bind_template_local(c, local, binding_type, NULL);  Array_push(targets, List_var(local));
+    }
+    else Array_push(targets, List_var(Sym_declare(c -> sym, NULL, ident, binding_type)));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  return Array_list_free(targets);
 }
@@ -3500,7 +3500,6 @@ return declarator;
 
 List Var_cdr(Var);
 Var List_caddr(List);
-Var List_car(List);
 List List_search_replace(List, Var, Var);
 int List_equal(List, List);
 static List Compiler__lower_self_declaration(Compiler c, List declaration){
@@ -3912,7 +3911,6 @@ static List Compiler__template_enumerator(Compiler c, Type context){
   List name = Compiler__enumerator_name(c, context);  List target = cons(_81, cons(List_var(name), _211));  if(Compiler_test(c, 123)) return cons(_216, cons(_217, cons(List_var(target), cons(List_var(Compiler_parse_conditional(c)), NULL))));  return target;
 }
 
-List Compiler_macro_introduced_name(Compiler, String);
 List Type_declaration_ast(Type, List);
 static List Compiler__enumerator_name(Compiler c, Type context){
   switch(Compiler_peek(c, 0)){

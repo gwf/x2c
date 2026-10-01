@@ -223,6 +223,8 @@ static Symbol Walk_value_class(Walk w, Type type);
 
 static int Walk_copies(Walk w, Type type, Var value);
 
+static int Walk_number(Walk w, Type type, Var value);
+
 static List source_return_type(List node);
 
 static Var source_expression(Var value);
@@ -2104,7 +2106,7 @@ return inner;
 }
 
 static void Walk_assign(Walk w, Fact fact, Var value, Type type, int store){
-  Walk_scan(w, value, 0);  Fact source = Walk_value_fact(w, value, NULL);  if(! source) source = Walk_returned_argument(w, value, NULL);  int born = 0;  Region other = source ? source -> other : NULL;  Region region = source ? source -> region : Walk_birth(w, value, type, &(born), &(other));  int owners = source ? source -> born : born;  int kept = source || born;  if(kept && Walk_copies(w, type, value)){
+  Walk_scan(w, value, 0);  Fact source = Walk_value_fact(w, value, NULL);  if(! source) source = Walk_returned_argument(w, value, NULL);  int born = 0;  Region other = source ? source -> other : NULL;  Region region = source ? source -> region : Walk_birth(w, value, type, &(born), &(other));  int owners = source ? source -> born : born;  int kept =(source || born) && ! Walk_number(w, type, value);  if(kept && Walk_copies(w, type, value)){
     if(owners == 3){
       region = other;  other = NULL;  owners = 2;
     }
@@ -2157,7 +2159,7 @@ default: break;
 }
 
 static int Walk_flow(Walk w, Var value, Type type, Symbol sink, Fact target){
-
+  if(Walk_number(w, type, value)) return 0;
   {
     List _x2c_match_expr = Var_list(_unwrap(value));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -2683,6 +2685,11 @@ int Sym_is_var_type(Sym, Type);
 List List_match(List, Var);
 static int Walk_copies(Walk w, Type type, Var value){
   if(Walk_value_class(w, type) == 6696890603608) return 1;  if(! List_truth(Type_list(type)) || ! Sym_is_var_type(w -> c -> sym, type)) return 0;  Type source = List_type(_expression_type(value));  return List_truth(Type_list(source)) &&(List_truth(({ static MatchCaptureSite _x2c_match_site_70;  x2c_match_site_match(& _x2c_match_site_70, Type_list(source), List_var(_1772)); })) || List_truth(({ static MatchCaptureSite _x2c_match_site_71;  x2c_match_site_match(& _x2c_match_site_71, Type_list(source), List_var(_1775)); })));
+}
+
+Type Sym_resolve_numeric_type(Sym, Type);
+static int Walk_number(Walk w, Type type, Var value){
+  Type given = List_type(_expression_type(value));  return(List_truth(Type_list(type)) && List_truth(Type_list(Sym_resolve_numeric_type(w -> c -> sym, type)))) ||(List_truth(Type_list(given)) && List_truth(Type_list(Sym_resolve_numeric_type(w -> c -> sym, given))));
 }
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);

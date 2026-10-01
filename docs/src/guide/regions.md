@@ -63,6 +63,11 @@ parameter given an `Array`, or a `Var` given a C string, which it boxes as a
 fresh `String`. A local C array
 passed on, returned, or stored counts as the address of its first element.
 
+A number holds no address. A value of integer, floating-point, or enum
+type, or a destination of such a type, carries nothing the pass tracks.
+An address cast to `intptr_t` and then returned does not report, and a
+pointer cast back from that number is not followed.
+
 ## What the warnings do not cover
 
 The check covers lexical regions and the storage it tracks. It does not

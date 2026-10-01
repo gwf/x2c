@@ -1,7 +1,10 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is fixed
-> and in publication. Five further defects found while scoping L1-L4 are
+> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
+> `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
+> second bootstrap round. L1-L4 are decided (5-10 below). L1, L3, the
+> `({1})` fix, and template destructuring hygiene landed together; the
+> forward-name hygiene case waits on Gary. L2 and L4 are next. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
@@ -39,6 +42,24 @@ Recorded 2026-10-01 from Gary:
 4. `$map.core.family` keeps its callback parameters. H8 generates the
    per-family scaffold instead of removing parameters.
 
+Recorded 2026-10-01 from Gary, after the L1-L4 scoping:
+
+5. L1: `x2c.syntax.type` resolves syntax a template left untyped at the
+   expansion point; the book says so.
+6. L2: the parts of `%()`, `%[]`, `%{}`, `%""`, and bare `[...]` and `{...}`
+   literals evaluate once each, left to right; function-call arguments keep
+   C's unspecified order.
+7. L3: collection tries every file-scope Unit macro defined in the unit;
+   imported and protocol-row macros stay mandatory, and a failed local
+   expansion keeps nothing.
+8. L4: `({ ... })` is accepted in ordinary source when the braces contain a
+   top-level `;`, so `({})` and `({a: 1})` keep their current meaning.
+9. L4: a `defer` or managed declaration directly inside a statement
+   expression is an error.
+10. Fix `({1})` and the two template hygiene defects.
+
+Order: L1 and L3 with the three defects first, then L2, then L4.
+
 ## Phase 0: reproduced defects
 
 One batch, one gate. Each fix adds regression coverage in the suite that
@@ -73,6 +94,21 @@ Reproduced with `builds/0/x2c` on 2026-10-01; not yet fixed.
 | `int z = ({1});` emits `({ 1 })` without a semicolon | The parenthesized composite path |
 | Two-name `foreach (Var (key, val), ...)` in a template: the body keeps `val` after the declaration is renamed | Template hygiene for literal names |
 | A template passing literal `k` and `k * 2` to an inner macro: the loop variable is renamed, the expression is not | Template hygiene for literal names |
+
+Status of these: `$let` is fixed by L1; `({1})` and the destructuring
+`foreach` are fixed in the L1/L3 batch. The forward-name case (`$repeat(k,
+3, k * 2, total)`) is held: the worker's fix let an undeclared free name
+in a closed template bind a local at the expansion site (a probe printed
+the caller's `x`), which contradicts "free identifiers written literally
+in a body resolve where the macro was defined". It needs Gary's choice
+between that rule, a narrower rule that binds only declarations the same
+expansion introduces, and a diagnostic.
+
+Also found, not yet fixed: a brace with no destination type, such as a
+variadic argument (`printf("%d\n", {10})`), emits invalid C; and with
+`int k = 0; $outer(k);` the nested macro's public loop variable `k`
+captures the caller's `k` (prints 0), through the stale-local branch of
+`_shadow_identifier`.
 
 ## Wave 1: direct substitutions
 

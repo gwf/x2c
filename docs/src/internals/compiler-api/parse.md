@@ -97,7 +97,7 @@ scope. A script unit that does is an ordinary program: its declarations
 stay at file scope and it may not have top-level statements. Both parse
 passes read the same tokens, so they agree before either parses.
 
-Source: `src/parse.x:217`
+Source: `src/parse.x:214`
 
 <a id="Compiler.definition_doc"></a>
 #### Compiler.definition_doc
@@ -109,7 +109,7 @@ starting at `start`, or NULL. A doc comment opens with two asterisks and
 ends on the line before `start` or on its line. Macro templates carry the
 text until their selected body binds at the invocation.
 
-Source: `src/parse.x:531`
+Source: `src/parse.x:528`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -141,7 +141,7 @@ Source: `src/parse.x:2363`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse.x:291`
+Source: `src/parse.x:288`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -183,7 +183,7 @@ Parses one non-function, non-typedef `Decl` macro argument.
 Returns a single declaration without consuming the invocation delimiter;
 flat destructuring may omit an initializer in this position.
 
-Source: `src/parse.x:636`
+Source: `src/parse.x:633`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -194,7 +194,7 @@ Parses one x2c declaration row and leaves its terminator current.
 A mixed-type comma row returns a `seq` of declarations in source order;
 a single declaration returns directly.
 
-Source: `src/parse.x:551`
+Source: `src/parse.x:548`
 
 <a id="Compiler.parse_declarator_argument"></a>
 #### Compiler.parse_declarator_argument
@@ -281,7 +281,7 @@ The alias defaults to the package name; `with` members add source-ordered
 local spellings. These spellings affect source resolution only; the package
 name in the returned AST drives the generated header include.
 
-Source: `src/parse.x:325`
+Source: `src/parse.x:322`
 
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
@@ -334,7 +334,7 @@ Parses one declaration group and leaves its terminating token current.
 Declared names are installed in `Sym` as their declarators are completed;
 the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
 
-Source: `src/parse.x:571`
+Source: `src/parse.x:568`
 
 <a id="Compiler.parse_static_assert"></a>
 #### Compiler.parse_static_assert
@@ -344,7 +344,7 @@ Source: `src/parse.x:571`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse.x:660`
+Source: `src/parse.x:657`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -357,7 +357,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:191`
+Source: `src/parse.x:188`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -366,7 +366,7 @@ Source: `src/parse.x:191`
 
 Parses one full top-level form through the shared classifier.
 
-Source: `src/parse.x:183`
+Source: `src/parse.x:180`
 
 <a id="Compiler.parse_top_level_mode"></a>
 #### Compiler.parse_top_level_mode
@@ -403,7 +403,7 @@ Reports whether the cursor begins a protocol declaration or adoption,
 including its `meta` and `static` markers. This query does not consume
 tokens.
 
-Source: `src/parse.x:283`
+Source: `src/parse.x:280`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -414,7 +414,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:274`
+Source: `src/parse.x:271`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -428,7 +428,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:238`
+Source: `src/parse.x:235`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -454,7 +454,7 @@ marker that may follow it, and returns the `meta` token. `native` binds
 the definition after it the way a bodyless prototype would. `*native`,
 when requested, reports whether that marker was present.
 
-Source: `src/parse.x:304`
+Source: `src/parse.x:301`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration
@@ -465,7 +465,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse.x:687`
+Source: `src/parse.x:684`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -474,7 +474,7 @@ Source: `src/parse.x:687`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse.x:655`
+Source: `src/parse.x:652`
 
 ## Design notes
 

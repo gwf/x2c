@@ -122,10 +122,7 @@ static int Compiler._skip_collected_form(Compiler c) {
   }
   if (!c.collect_protocols && c.skip_named_type_declaration()) return 1;
   if (!c.macro_starts_target_at(AST_UNIT)) return 0;
-  if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion()) {
-    c.collect_unit_macro();
-    return 1;
-  }
+  if (c.collect_protocols && c.collect_unit_macro()) return 1;
   do {
     c.skip_macro_invocation();
     if (c.test(<;>)) return 1;
@@ -794,9 +791,12 @@ static List Compiler._destructure_targets(Compiler c, List binding_type) {
         <parse>, "expected identifier in destructuring declaration",
         c.token, %("destructuring targets must be simple identifiers"));
     List ident = c.parse_basic_identifier();
-    List binding = c.macro_holes
-      ? ident : c.sym.declare(NULL, ident, binding_type);
-    targets.push(binding);
+    if (c.macro_holes) {
+      List local = c.macro_introduced_name(ident.car());
+      c.bind_template_local(local, binding_type, NULL);
+      targets.push(local);
+    }
+    else targets.push(c.sym.declare(NULL, ident, binding_type));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);

@@ -478,10 +478,10 @@ with byte-identical C.
 
 ## Outside this plan
 
-- A public function below `#pragma private` that returns a type from a
-  private include puts its prototype in the generated header without that
-  type's header, so any unit including the header fails in clang. Found
-  during defect 1; it needs its own `fix-x2c-bug` pass.
+- Fixed 2026-10-01: a private include of x2c source now moves to the
+  generated header when a later public prototype names a typedef it
+  declares, as a private typedef already did; fixture
+  `private-include-header`.
 - `try return f(); catch ...: return g();` generates C that clang flags
   with `-Wreturn-type` (seen in `tools/check-doc-examples` `_stdout`); every
   path returns at run time. Found during defect 6.
@@ -516,10 +516,10 @@ with byte-identical C.
 - `x2c graph certify` prints a different call path with each obstacle on
   each run of the same binary; the obstacles themselves are stable. Found
   during Phase 6.
-- The region check treats a pointer cast to `int` and returned as a
-  returned address (`return (int) value;`). Found during defect 5; it
-  needs its own `fix-x2c-bug` pass.
-
+- Fixed 2026-10-01: the region check carries no address through a value
+  of number type, so an address cast to an integer, or an integer read
+  through an optional reference, no longer reports; fixture
+  `region-number-values`.
 - The unwired tests other than those Phase 2 wires
   (`bound-template-expression.c`, `source-call-projection.x`,
   `tools/test-examples.py`, `tools/test-performance-snapshot.py`) stay

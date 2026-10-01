@@ -507,11 +507,6 @@ inline double Var.decode_f64(Var value) {
   return result;
 }
 
-// declared here because shallow symbol collection does not expand macros
-Var Var.box_i8(char); Var Var.box_u8(uchar);
-Var Var.box_i16(short); Var Var.box_u16(ushort);
-Var Var.box_i32_bits(unsigned); Var Var.box_u32(unsigned);
-
 macro Unit $var.immediate(
   Type $type, Name $method, Expr $prefix, Type $payload, Name $value) {
   inline Var Var.$method($type $value) {
@@ -574,19 +569,6 @@ inline Var    Symbol.var(Symbol x)       => x < (1ul << 51)
 inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 
 // primitive conversions
-
-// declared here because shallow symbol collection does not expand macros
-Var char.var(char); String char.str(char); String char.repr(char);
-Var uchar.var(uchar); String uchar.str(uchar); String uchar.repr(uchar);
-Var short.var(short); String short.str(short); String short.repr(short);
-Var ushort.var(ushort); String ushort.str(ushort); String ushort.repr(ushort);
-Var int.var(int); String int.str(int); String int.repr(int);
-Var uint.var(uint); String uint.str(uint); String uint.repr(uint);
-Var unsigned.var(unsigned);
-String unsigned.str(unsigned);
-String unsigned.repr(unsigned);
-Var float.var(float); String float.str(float); String float.repr(float);
-Var double.var(double); String double.str(double); String double.repr(double);
 
 macro Unit $scalar(Type $type, Literal $tag, Param $parameter) {
   /** Boxes a native `$type` value as `Var`. */
