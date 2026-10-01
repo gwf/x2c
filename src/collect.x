@@ -479,7 +479,10 @@ String collect_resolve_include(
   return _resolve_include(sources, dirs, includer_dir, target, angle, covered);
 }
 
-/* Unresolvable paths retain the caller's spelling. */
+/* Unresolvable paths retain the caller's spelling. This is
+   `Compiler.canonical_path` without a source view: an unsaved file keeps
+   the spelling the include search built, which keys its process-cache
+   entry, and `collect_resolve_include` searches with no Compiler. */
 static String _canonical_path(String path) {
   char buffer[PATH_MAX];
   return realpath(path, buffer) ? buffer : path;

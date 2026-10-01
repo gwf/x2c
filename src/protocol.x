@@ -30,7 +30,9 @@ macro Decorator $guard_value_rendering(
 }
 
 /* A relative path names a file below the working directory, or else one below
-   the x2c root, where `Compiler.display_path` spells root sources. */
+   the x2c root, where `Compiler.display_path` spells root sources. It
+   resolves on disk itself: trying the root depends on whether the first path
+   resolved, which `Compiler.canonical_path` does not report. */
 static String _normalize_file(Compiler compiler, String file) {
   char path[PATH_MAX], String root = compiler.root_dir;
   if (realpath(file, path) ||
