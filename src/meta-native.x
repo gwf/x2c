@@ -35,28 +35,6 @@ $(import "../etc/lisp-bindings.xlisp")
    unit's session. The stub calls the function's compiled copy in the
    project's helper, or in the REPL the group's native code. */
 
-/** Applies a contextual `meta` marker to one initialized file-static value.
-    The unit's staged `meta` group holds the compile-time instance, which
-    its module initializes for each unit. */
-void Compiler.install_meta_declaration(
-  Compiler c, List declaration, Token marker) {
-  match (declaration) {
-    case %(declare ?spec
-           (bindings
-             (op = (bind (binding ? ?(String name)) *) ?))): {
-      if (!spec.type().is_static())
-        c.report_error(
-          <parse>, "a meta value must have file-static storage", marker,
-          %("declaration: '$name'"));
-      if (c.groups_meta()) c.meta_group.push(%(static $declaration));
-      return;
-    }
-  }
-  c.report_error(
-    <parse>, "meta requires a function or one initialized static value",
-    marker, NULL);
-}
-
 /** Installs a bodied `meta` function. The project meta build compiled it
     into the project's helper, so the session holds a stub that calls it
     there; the REPL's stub stages the session's group at the first call
@@ -76,13 +54,13 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       c.group_meta_function(fn);
       if (c.meta_build) return;
       if (!macro_library_filling() && !c.shares_meta_definition(name))
-        _install_stub(c, name, marker);
+        c._install_stub(name, marker);
     }
 }
 
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
-static void _install_stub(Compiler c, String name, Token marker) {
+static void Compiler._install_stub(Compiler c, String name, Token marker) {
   Type type = ((List) c.meta_group[-1]).last();
   try c.macro_lisp.set_global(
     name,
@@ -105,7 +83,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   String name = String.new((const char *) Func.context(function));
   Token site;
   Compiler c = _stub_compiler(name, site);
-  List rows = _subject_rows(c, values);
+  List rows = c._subject_rows(values);
   Var previous = Macro.subject();
   Macro.use_subject(rows);
   defer Macro.use_subject(previous);
@@ -114,15 +92,14 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   c.bind_meta_group(name, site);
   Var bound;
   c.macro_lisp.try_get(name, bound);
-  return _meta_apply(c, bound, values.list_free());
+  return c._meta_apply(bound, values.list_free());
 }
 
 static Array _stub_arguments(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
   if (parameters.equal(%((void)))) parameters = NULL;
   Array values = [];
-  for (int i = 0; i < parameters.len(); i++)
-    values.push(argv[i].data.value);
+  for (int i = 0; i < parameters.len(); i++) values.push(argv[i].data.value);
   return values;
 }
 
@@ -137,10 +114,9 @@ static Compiler _stub_compiler(String name, Token &site) {
 
 /* The caller's global bindings and source-name projections for bindings in
    the arguments, carried through the existing helper subject context. */
-static List _subject_rows(Compiler c, Array values) {
+static List Compiler._subject_rows(Compiler c, Array values) {
   Map globals = {}, source_names = {};
-  foreach (Var value, values)
-    _subject_globals(c, value, globals, source_names);
+  foreach (Var value, values) c._subject_globals(value, globals, source_names);
   Array rows = [];
   foreach (Var (spelling, binding), globals) rows.push(%($spelling $binding));
   foreach (Var (binding, spelling), source_names)
@@ -149,29 +125,49 @@ static List _subject_rows(Compiler c, Array values) {
 }
 
 /* Records global identities and source spellings from argument syntax. */
-static void _subject_globals(
+static void Compiler._subject_globals(
   Compiler c, Var value, Map globals, Map source_names) {
   if (value is not <list>) return;
   String spelling = NULL;
   if (binding_identity_try_parts(value, NULL, spelling)) {
     Var source;
-    if (c.semantic_binding_facts().try_get(
-          %(source-spelling $value), source))
+    if (c.semantic_binding_facts().try_get(%(source-spelling $value), source))
       source_names[value] = source;
     List global = c.sym.resolve_global(%($spelling), NULL);
-    if (global && List.compare(global, value) == 0)
-      globals[spelling] = value;
+    if (global && List.compare(global, value) == 0) globals[spelling] = value;
     return;
   }
   foreach (Var child, value.list())
-    _subject_globals(c, child, globals, source_names);
+    c._subject_globals(child, globals, source_names);
 }
 
 /* Calls the session value `function` with the evaluated `arguments`. */
-static Var _meta_apply(Compiler c, Var function, List arguments) {
+static Var Compiler._meta_apply(Compiler c, Var function, List arguments) {
   Array quoted = [%(quote $function)];
   foreach (Var argument, arguments) quoted.push(%(quote $argument));
   return c.macro_lisp.eval(quoted.list_free());
+}
+
+/** Applies a contextual `meta` marker to one initialized file-static value.
+    The unit's staged `meta` group holds the compile-time instance, which
+    its module initializes for each unit. */
+void Compiler.install_meta_declaration(
+  Compiler c, List declaration, Token marker) {
+  match (declaration) {
+    case %(declare ?spec
+           (bindings
+             (op = (bind (binding ? ?(String name)) *) ?))): {
+      if (!spec.type().is_static())
+        c.report_error(
+          <parse>, "a meta value must have file-static storage", marker,
+          %("declaration: '$name'"));
+      if (c.groups_meta()) c.meta_group.push(%(static $declaration));
+      return;
+    }
+  }
+  c.report_error(
+    <parse>, "meta requires a function or one initialized static value",
+    marker, NULL);
 }
 
 /* explicit meta calls
@@ -239,12 +235,12 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
             %((binding ? ?name)))}): {
           if (name is not <string>) break;
           String spelling = name;
-          Array values = _meta_values(c, callee, arguments, site);
-          Var function = _meta_function(c, spelling, site);
+          Array values = c._meta_values(callee, arguments, site);
+          Var function = c._meta_function(spelling, site);
           List applied = values.list_free();
           meta_call_form = cons(Atom.intern(spelling), applied).repr();
           meta_call_form.try_own();
-          return _meta_apply(c, function, applied);
+          return c._meta_apply(function, applied);
         }
     }
   c.report_error(
@@ -253,7 +249,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
-static Array _meta_values(
+static Array Compiler._meta_values(
   Compiler c, Var callee, List arguments, Token site) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
@@ -272,7 +268,7 @@ static Array _meta_values(
 /* The session's binding of `name`, binding an included native function on
    first use. The project meta build's own parse has no helper yet, so a
    call to a project function there is left for the translation. */
-static Var _meta_function(Compiler c, String name, Token site) {
+static Var Compiler._meta_function(Compiler c, String name, Token site) {
   Var function = void;
   if (!c.macro_lisp.try_get(name, function) && c.bind_native_meta(name))
     c.macro_lisp.try_get(name, function);
@@ -299,13 +295,14 @@ void Compiler.record_native_meta_effect(
   List key = %("source-node" (declaration $path ${marker.pos}));
   if (declaration.type_from_ast().is_function()) {
     Type type = declaration.type_from_ast().canonicalize();
-    String name = _native_meta_name(c, declaration, marker);
+    String name = c._native_meta_name(declaration, marker);
     List signature = c.func_signature(type);
     c.sym.set(key, %(native-meta $name $signature));
   }
 }
 
-static String _native_meta_name(Compiler c, List declaration, Token marker) {
+static String Compiler._native_meta_name(
+  Compiler c, List declaration, Token marker) {
   String name = NULL;
   match (declaration)
     case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
@@ -322,10 +319,10 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   String unit = Path.absolute(c.filename);
   foreach (Var (key, value), globs) {
     if (_local_effect(unit, key)) continue;
-    foreach (List row, _native_meta_rows(c, value)) {
+    foreach (List row, c._native_meta_rows(value)) {
       (String name, List signature) = row;
       c.native_meta[name] = signature;
-      _certify_native_meta(c, name, signature, NULL);
+      c._certify_native_meta(name, signature, NULL);
     }
   }
 }
@@ -347,7 +344,7 @@ int Compiler.bind_native_meta(Compiler c, String name) {
   if (!c.native_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
   if (!c.native_meta.try_get(name, signature)) return 0;
-  _bind_native_meta(c, name, signature, NULL);
+  c._bind_native_meta(name, signature, NULL);
   return c.macro_lisp.try_get(name, bound);
 }
 
@@ -357,12 +354,12 @@ int Compiler.bind_native_meta(Compiler c, String name) {
 void Compiler.install_native_meta_function(
   Compiler c, List declaration, Token marker) {
   Type type = declaration.type_from_ast().canonicalize();
-  String name = _native_meta_name(c, declaration, marker);
+  String name = c._native_meta_name(declaration, marker);
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   List signature = c.func_signature(type);
   c.native_meta[name] = signature;
-  _bind_native_meta(c, name, signature, marker);
+  c._bind_native_meta(name, signature, marker);
 }
 
 /* One declared native function while it binds. An iterator operation's
@@ -377,9 +374,9 @@ typedef struct NativeBinding {
    the same name, or an iterator operation to its `_into` target, or else to
    a selected native module's target. A declaration with neither binds
    nothing, and a meta body that calls it reports the missing binding. */
-static void _bind_native_meta(
+static void Compiler._bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
-  _certify_native_meta(c, name, signature, marker);
+  c._certify_native_meta(name, signature, marker);
   int iterator = _iterator_operation(signature);
   String target = iterator ? %"${name}_into" : name;
   NativeBinding n = {
@@ -457,32 +454,32 @@ static void NativeBinding.install(NativeBinding *n, Var function) {
     of one native type match each other. */
 int Compiler.native_meta_accepts(Compiler c, Var function, List signature) {
   if (function is not <func>) return 0;
-  List target = _native_signature_type(
-    c, ((Func) function.pointer()).signature());
+  List target =
+    c._native_signature_type(((Func) function.pointer()).signature());
   match (signature)
     case %((func ?(List parameters)) *result): {
       List boxed = parameters.search_replace(%("Func"), %("Var"));
-      return target.equal(_native_signature_type(c, signature)) ||
-             target.equal(_native_signature_type(c, %((func $boxed) @result)));
+      return target.equal(c._native_signature_type(signature)) ||
+             target.equal(c._native_signature_type(%((func $boxed) @result)));
     }
   return 0;
 }
 
 /* The native type a signature names: each parameter, reference target,
    and result with its aliases resolved. */
-static List _native_signature_type(Compiler c, List signature) {
+static List Compiler._native_signature_type(Compiler c, List signature) {
   match (signature)
     case %((func ?(List parameters)) *result): {
       Array resolved = [];
       foreach (Type parameter, parameters)
-        resolved.push(_native_parameter(c, parameter));
+        resolved.push(c._native_parameter(parameter));
       Type native = c.sym.normalize_declared_type(result);
       return %((func ${resolved.list_free()}) @native);
     }
   return signature;
 }
 
-static List _native_parameter(Compiler c, Type parameter) {
+static List Compiler._native_parameter(Compiler c, Type parameter) {
   if (parameter.car() == <&> || parameter.car() == <opt-ref>)
     return cons(
       parameter.car(), c.sym.normalize_declared_type(parameter.cdr()));
@@ -515,12 +512,12 @@ static List _native_module_suppliers(String name) =>
    result owns. A function without a runtime row takes the summary its
    signature implies, or is rejected where it is declared. */
 
-/* A native function without a runtime row takes the summary its signature
-   implies, so a `meta` body's walk knows what its result owns. */
-static void _certify_native_meta(
+/* A declaration whose signature implies no summary is rejected at its
+   `marker`; an advertisement read from an interface records nothing. */
+static void Compiler._certify_native_meta(
   Compiler c, String name, List signature, Token marker) {
   if (Compiler.has_region_row(name)) return;
-  List summary = _native_meta_summary(c, signature);
+  List summary = c._native_meta_summary(signature);
   if (summary) {
     c.meta_regions[name] = summary;
     return;
@@ -537,14 +534,13 @@ static void _certify_native_meta(
    and a handle argument is borrowed for the call. A function that takes a
    handle and returns one, neither owned by its cleanup, might return or
    keep its argument, so it has none. */
-static List _native_meta_summary(Compiler c, List signature) {
+static List Compiler._native_meta_summary(Compiler c, List signature) {
   match (signature) case %((func ?(List parameters)) *result): {
-    int takes = 0, gives = _native_handle(c, result, 0);
+    int takes = 0, gives = c._native_handle(result, 0);
     foreach (List parameter, parameters)
       takes = takes ||
-              (_native_handle(c, parameter, 1) &&
-               !_native_owned(c, parameter));
-    if (takes && gives && !_native_owned(c, result)) return NULL;
+              (c._native_handle(parameter, 1) && !c._native_owned(parameter));
+    if (takes && gives && !c._native_owned(result)) return NULL;
     return gives ? %(1 ()) : %(0 ());
   }
   return %(0 ());
@@ -554,10 +550,10 @@ static List _native_meta_summary(Compiler c, List signature) {
    cannot hold as a value, so its lifetime is unknown without a region row.
    Scalars and the value types are not; a parameter pointing at one is an
    input or an output the call finishes with before it returns. */
-static int _native_handle(Compiler c, List type, int parameter) {
+static int Compiler._native_handle(Compiler c, List type, int parameter) {
   match (type) {
     case %((!quote *) *pointee) if (parameter):
-      return pointee.equal(%(void)) || _native_handle(c, pointee, 0);
+      return pointee.equal(%(void)) || c._native_handle(pointee, 0);
     case %((!or "Var" "Symbol" "String" "List" "Array" "Map" "Func")):
       return 0;
   }
@@ -573,7 +569,7 @@ static int _native_handle(Compiler c, List type, int parameter) {
 /* Whether a handle's own cleanup owns it: a runtime class, or a type that
    adopts `Var` or `Cleanup`. A signature spells a `typedef struct X *X`
    handle as its pointer, so the adoption is read from the typedef `X`. */
-static int _native_owned(Compiler c, List type) {
+static int Compiler._native_owned(Compiler c, List type) {
   match (type) case %((!quote *) struct ?(String tag)): type = %($tag);
   return c.sym.var_tag_for_type(type, NULL) ||
          c.protocol_members_for(type, %("Var")) ||
@@ -591,12 +587,12 @@ static int _native_owned(Compiler c, List type) {
     it is not empty. Sorting makes that inventory independent of Map order.
 */
 List Compiler.native_meta_targets(List paths) {
-  Compiler compiler = Compiler.expanding();
-  if (!compiler) return %();
+  Compiler c = Compiler.expanding();
+  if (!c) return %();
   Map selected = {};
-  foreach (Var (key, value), compiler.sym.base_symbols()) {
+  foreach (Var (key, value), c.sym.base_symbols()) {
     if (paths && !_declared_in(key, paths)) continue;
-    foreach (List row, _native_meta_rows(compiler, value)) {
+    foreach (List row, c._native_meta_rows(value)) {
       (String name, List signature) = row;
       if (_takes_callback(signature)) continue;
       String into = %"${name}_into";
@@ -622,11 +618,11 @@ static int _declared_in(Var key, List paths) {
 /* The native functions one symbol row makes available to compile-time code,
    as `(name signature)` rows: a bodyless `meta` prototype, or each witness
    of a `meta protocol` adoption. */
-static List _native_meta_rows(Compiler c, Var row) {
+static List Compiler._native_meta_rows(Compiler c, Var row) {
   match (row) {
     case %(native-meta ?name ?signature): return %(($name $signature));
     case %(meta-protocol ?(Type base) ?(Type participant)):
-      return _witness_rows(c, base, participant);
+      return c._witness_rows(base, participant);
   }
   return %();
 }
@@ -634,7 +630,7 @@ static List _native_meta_rows(Compiler c, Var row) {
 /* The witnesses include the forwarding function the conformance generates
    for a base default. An adoption that does not resolve makes none
    available. */
-static List _witness_rows(Compiler c, Type base, Type participant) {
+static List Compiler._witness_rows(Compiler c, Type base, Type participant) {
   List conformance = c.protocol_members_for(participant, base);
   List rows = %();
   if (!conformance) return rows;
@@ -691,7 +687,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   Map linked = _linked_module();
   Var function, bound;
   if (!linked.try_get(name, function)) return 0;
-  if (!_linked_copy(c, name, linked)) return 0;
+  if (!c._linked_copy(name, linked)) return 0;
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
@@ -716,8 +712,8 @@ static Map _linked_module(void) {
 /* A row without a hash is the runtime library's own compiled definition
    of a `lib/meta.x` builder, which has no copy to compare; only
    `lib/meta.x` itself binds it. */
-static int _linked_copy(Compiler c, String name, Map linked) {
-  if (name in linked_hashes) return _linked_texts_match(c, name, linked, {});
+static int Compiler._linked_copy(Compiler c, String name, Map linked) {
+  if (name in linked_hashes) return c._linked_texts_match(name, linked, {});
   return c.filename &&
     Path.absolute(c.filename) == %"${x2c_get_root()}/lib/meta.x";
 }
@@ -726,7 +722,7 @@ static int _linked_copy(Compiler c, String name, Map linked) {
    reaches through references are the texts compiled into the linked
    copies, which freeze their callees into their own code. A reached
    runtime builder without a hash is the runtime's own definition. */
-static int _linked_texts_match(
+static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names;
   if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
@@ -737,7 +733,7 @@ static int _linked_texts_match(
   else if (!(name in linked)) return 0;
   if (c.meta_calls.try_get(name, names))
     foreach (String callee, (List) names)
-      if (!_linked_texts_match(c, callee, linked, reached)) return 0;
+      if (!c._linked_texts_match(callee, linked, reached)) return 0;
   return 1;
 }
 
@@ -813,7 +809,7 @@ void Compiler.select_package_module(
       %("package: $name" "module: $module"));
   c.add_translation_dependency(module);
   if (!Compiler.native_module_loaded(module))
-    _load_package_module(c, name, module, token);
+    c._load_package_module(name, module, token);
   if (module in native_module_order) return;
   $scope(&native_module_scope) {
     native_module_order = native_module_order.append(%($module));
@@ -821,7 +817,7 @@ void Compiler.select_package_module(
   }
 }
 
-static void _load_package_module(
+static void Compiler._load_package_module(
   Compiler c, String name, String module, Token token) {
   if (_module_stamp(module) != 1)
     c.report_error(
