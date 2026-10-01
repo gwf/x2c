@@ -7,8 +7,8 @@
 
     Template slots, `$(...)` forms, and `meta` functions run in the unit's
     compile-time Lisp session, whose parent is the shared library session.
-    A native operation has no Compiler parameter, so it reads the active
-    compiler from the dynamically scoped statics below.
+    Each evaluation installs the `MetaContext` that `meta-sdk.x` answers
+    compile-time operations from.
 */
 
 #pragma once
@@ -40,24 +40,6 @@ $(import "../src/ast-rewrite.xmacro")
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-
-// expansion context
-
-/* Native Lisp callbacks have no Compiler parameter, so these values hold
-   dynamically scoped evaluation context. Lisp entry points restore the
-   relevant frame after nested import evaluation; captured-source entries are
-   valid only while their expansion is active. */
-static Compiler sdk_compiler = NULL;
-static String sdk_file = NULL;
-static Map sdk_captures = NULL;
-static int sdk_references = 0;
-static Compiler lisp_compiler = NULL;
-static Token lisp_site = NULL;
-
-/** Returns the compiler running the current compile-time call. A slot
-    function compiled into the compiler reads its facts through it. */
-Compiler Compiler.expanding(void) =>
-  sdk_compiler ? sdk_compiler : lisp_compiler;
 
 /* macro definitions
 
@@ -266,7 +248,7 @@ static void Definition.announce(Definition *d) {
   d.parameters = d.params.list_free();
   (void) c.record_origin(d.start);
   d.origin = c.token_location(d.start);
-  d.file = home_portable_path(_source_file(c, c.filename));
+  d.file = home_portable_path(c.source_path(c.filename));
   d.imported = c.import_src != NULL;
   d.builtin = c.builtin_defs;
   d.publish();
@@ -1516,8 +1498,8 @@ static Var _capture_source(
   Token last = _previous_source_token(compiler, after);
   if (!last || last < first) return syntax;
   int end = last.pos + last.len;
-  String file = _source_file(
-    compiler, compiler.filename ? compiler.filename : "<stdin>");
+  String file = compiler.source_path(
+    compiler.filename ? compiler.filename : "<stdin>");
   List source = %(source $file ${first.pos} $end);
   return %(src $source $syntax);
 }
@@ -2558,10 +2540,11 @@ static Var _eval_template_form(
   if (references) form = _rewrite_references(form, references);
   if (construction is not void)
     form = _with_construction(compiler, serial, form, construction);
-  $let(sdk_references, !!references)
-  $let(sdk_captures, source_captures)
-  $let(sdk_file, source_file)
-  $let(sdk_compiler, compiler)
+  MetaContext *context = MetaContext.current();
+  $let(context.references, !!references)
+  $let(context.captures, source_captures)
+  $let(context.file, source_file)
+  $let(context.expansion, compiler)
     return _eval_string(compiler, form, invocation);
 }
 
@@ -2674,10 +2657,10 @@ List x2c_template_call(Var stored, List values) =>
 
 static List _sdk_template_call(Var stored, List values) {
   Compiler c = Compiler.expanding();
-  List definition = stored.is_atom()
-    ? _lookup(c, stored, lisp_site) : stored;
+  Token site = MetaContext.current().site;
+  List definition = stored.is_atom() ? _lookup(c, stored, site) : stored;
   return %(macro-invoke $stored
-    ${_template_arguments(c, definition, values, lisp_site, 0)}
+    ${_template_arguments(c, definition, values, site, 0)}
     m-invoke);
 }
 
@@ -2715,8 +2698,9 @@ static Var _helper_result(Compiler c, Var value) {
       values = _helper_result(c, values);
       Token site = c.macro_invocation_site(<m-invoke>);
       if (!site) site = c.token;
-      $let(sdk_compiler, c)
-      $let(lisp_site, site)
+      MetaContext *context = MetaContext.current();
+      $let(context.expansion, c)
+      $let(context.site, site)
         return _sdk_template_call(
           stored is <string> ? Atom.intern(stored.str()) : stored, values);
     }
@@ -3008,8 +2992,9 @@ static void _ensure_lisp(Compiler compiler) {
 
 static Var _eval_string(Compiler compiler, String source, Token invocation) {
   Var result;
-  $let(lisp_site, invocation)
-  $let(lisp_compiler, compiler) {
+  MetaContext *context = MetaContext.current();
+  $let(context.site, invocation)
+  $let(context.evaluator, compiler) {
     /* A compiler operation called from Lisp has already reported its
        failure; wrapping the transfer would report it a second time. */
     try result = compiler.macro_lisp.eval_string(source);
@@ -3149,9 +3134,10 @@ static Var _sdk_identifier_result(Var value) {
 }
 
 static Var _lisp_import_hook(String path) {
-  Compiler compiler = lisp_compiler;
+  MetaContext *context = MetaContext.current();
+  Compiler compiler = context.evaluator;
   if (!compiler) raise %(bad-state (operation "compile-time import"));
-  _import(compiler, path, lisp_site);
+  _import(compiler, path, context.site);
   return %();
 }
 
@@ -3448,19 +3434,14 @@ static String _source_dir(Compiler compiler) {
   return filename ? Path.dirname(filename) : ".";
 }
 
-/* A relative source name that is not a file resolves against the home. */
-static String _source_file(Compiler c, String file) {
+/** Returns the canonical path of the source `file`. A relative name that
+    is not a file resolves against the home. */
+String Compiler.source_path(Compiler c, String file) {
   if (!file || file.startswith("<")) return file;
   String rooted = %"${c.root_dir}/$file";
   if (file[0] != '/' && !c.sources.exists(file) && c.sources.exists(rooted))
     file = rooted;
   return c.canonical_path(file);
-}
-
-static String _embed_path(Compiler c, String source_file, String requested) {
-  if (requested[0] == '/') return c.canonical_path(requested);
-  String base = Path.dirname(_source_file(c, source_file));
-  return c.canonical_path(%"$base/$requested");
 }
 
 /* An absolute path; the definition keeps the home-portable spelling. */
@@ -3743,20 +3724,10 @@ static void _bind_primitives(Lisp lisp) {
   $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
   $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
   $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
-  $lisp.bind(lisp, "_x2c.function.reference", _sdk_function_reference);
-  $lisp.bind(lisp, "_x2c.function.native-type", _sdk_native_type);
-  $lisp.bind(lisp, "_x2c.literal.list", _sdk_literal_list);
   $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);
   $lisp.bind(lisp, "_x2c.native-meta.declared", _sdk_meta_declared);
-  $lisp.bind(lisp, "_x2c.foreach.complete-iter-chain", _sdk_iter_chain);
-  $lisp.bind(lisp, "_x2c.foreach.string-collection", _sdk_string_collection);
-  $lisp.bind(lisp, "_x2c.source.text", _sdk_source_text);
-  $lisp.bind(lisp, "_x2c.embed.text", _sdk_embed_text);
-  $lisp.bind(lisp, "_x2c.invocation.location", _sdk_invocation_location);
-  $lisp.bind(lisp, "_x2c.symbol-set", _sdk_symbol_set);
   $lisp.bind(lisp, "_x2c.tpl-call", _sdk_template_call);
-  $lisp.bind(lisp, "_x2c.name.unique", _sdk_ident_unique);
-  $lisp.bind(lisp, "_x2c.declaration.bindings", _sdk_bindings);
+  Compiler.bind_sdk_primitives(lisp);
 }
 
 /* Binds the built-in macro algorithms into `lisp` under the names its
@@ -3909,8 +3880,9 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
 /* The compiler that runs a stub's call, and where the call stands. */
 static Compiler _stub_compiler(String name, Token &site) {
   Compiler c = Compiler.expanding();
-  if (!c) _sdk_reject(%"$name used outside compilation", NULL);
-  site = lisp_site ? lisp_site : c.token;
+  if (!c) MetaContext.reject(%"$name used outside compilation", NULL);
+  site = MetaContext.current().site;
+  if (!site) site = c.token;
   return c;
 }
 
@@ -3988,12 +3960,13 @@ static Var _evaluate_meta_value(
   List active = c.macro_stack ? c.macro_stack.car() : NULL;
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;
-  $let(sdk_references, !!bindings)
-  $let(sdk_captures, _source_captures(bindings))
-  $let(sdk_file, source_file)
-  $let(sdk_compiler, c)
-  $let(lisp_compiler, c)
-  $let(lisp_site, site)
+  MetaContext *context = MetaContext.current();
+  $let(context.references, !!bindings)
+  $let(context.captures, _source_captures(bindings))
+  $let(context.file, source_file)
+  $let(context.expansion, c)
+  $let(context.evaluator, c)
+  $let(context.site, site)
     return _run_meta_call(c, expression, site, slot);
 }
 
@@ -4490,7 +4463,7 @@ static List _sdk_meta_targets(void) => _native_meta_targets(NULL);
 static List _sdk_meta_declared(List paths) {
   List rows = _native_meta_targets(paths);
   if (!rows)
-    _sdk_reject(
+    MetaContext.reject(
       "native module sources declare no meta function",
       %("declare each exported function with a bodyless meta prototype"));
   return rows;
@@ -4567,12 +4540,6 @@ static int _linked_texts_match(
     foreach (String callee, (List) names)
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;
   return 1;
-}
-
-/** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
-Map x2c_meta_definition_hashes(void) {
-  _sdk_guard("x2c.meta.definition.hashes");
-  return sdk_compiler.meta_hashes;
 }
 
 /* native modules

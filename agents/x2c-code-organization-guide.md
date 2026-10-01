@@ -79,8 +79,9 @@ The compiler is consolidated by phase rather than filename prefixes:
   `preprocess.x`, `parse.x`, `expressions.x`, `initializers.x`,
   `statements.x`, `literals.x`, `lambdas.x`, `macros.x`, `grammar.xmacro`,
   `ast-rewrite.xmacro`, `ast.x`;
-- compile-time code: `stage.x`, `builtins.x`, `linked-meta.x`,
-  `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
+- compile-time code: `stage.x`, `meta-sdk.x`, `builtins.x`,
+  `linked-meta.x`, `meta-group.x`, `meta-project.x`,
+  `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
   `protocol.x`, `transform.x`, `callables.x`, `cleanup.x`,
   `adapter-memo.xmacro`, `regions.x`;

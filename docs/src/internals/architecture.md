@@ -501,6 +501,8 @@ The modules under `src/` divide ownership as follows:
   source and constructed lambdas;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
+- `src/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
+  and the context of the running compile-time call;
 - `src/stage.x` -- the arguments and results that cross between meta code
   and program code;
 - `src/meta-group.x` -- a unit's meta group, its emission as C, and

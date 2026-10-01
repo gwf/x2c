@@ -121,6 +121,7 @@
   - [src/meta-group.x](internals/compiler-api/meta-group.md)
   - [src/meta-helper-client.x](internals/compiler-api/meta-helper-client.md)
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
+  - [src/meta-sdk.x](internals/compiler-api/meta-sdk.md)
   - [src/parse.x](internals/compiler-api/parse.md)
   - [src/preprocess.x](internals/compiler-api/preprocess.md)
   - [src/project.x](internals/compiler-api/project.md)

@@ -112,7 +112,8 @@ commits need not rebuild from their own bootstrap.
   (translation state, + `symbols`, its symbol table) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
-  `parse`/`expressions`/`statements`/`macros` (+ `meta-group`, which emits
+  `parse`/`expressions`/`statements`/`macros` (+ `meta-sdk`, which answers
+  compile-time operations, `meta-group`, which emits
   a unit's meta group, `stage`, which carries values across the
   compile-time boundary, and `builtins` and `linked-meta`,
   the compile-time code compiled into the compiler)/

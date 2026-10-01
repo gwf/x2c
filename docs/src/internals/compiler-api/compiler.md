@@ -12,27 +12,20 @@ Core x2c compiler state and operations.
 
 | Function | Summary |
 | --- | --- |
-| [`ast_collect_binding_references`](#ast_collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`home_absolute_path`](#home_absolute_path) | Returns the absolute path that a `home_portable_path` spelling names. |
 | [`home_portable_path`](#home_portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`match_value_flat_head`](#match_value_flat_head) | Returns the head of a flat Symbol-and-captures pattern value, or zero. |
 | [`match_value_head`](#match_value_head) | Returns a recovered pattern value's fixed literal head symbol, or zero. |
 | [`match_value_is_static`](#match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
-| [`preproc_branch_state`](#preproc_branch_state) | Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when the group's state was 1, and 0 otherwise. |
-| [`preproc_never_active_arm`](#preproc_never_active_arm) | Classifies an opening conditional directive by which of its arms C can never reach: `<first>` when the condition requires a never-defined name or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. |
-| [`preproc_open_state`](#preproc_open_state) | Returns the hidden-arm state of the conditional group that `text` opens: 2 when C never takes its first arm, 1 when C never takes the arms after its first `#else`, and 0 otherwise. |
-| [`preproc_visibility`](#preproc_visibility) | Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when it is `#pragma public`, and -1 otherwise. |
 | [`reference_guard_exits`](#reference_guard_exits) | Returns whether `arm` ends with a return or non-returning raise. |
 | [`Compiler._at_function_arrow`](#Compiler._at_function_arrow) | Reports whether the current two tokens are `=>`. |
 | [`Compiler._skip_shallow_expression`](#Compiler._skip_shallow_expression) | Skips a balanced shallow expression without consuming its terminator. |
 | [`Compiler.add_early`](#Compiler.add_early) | Appends a generated declaration to the early-declaration queue. |
 | [`Compiler.add_init`](#Compiler.add_init) | Appends a statement to file initialization order under `phase`, which is `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for the file initializer's three stages. |
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
-| [`Compiler.aggregate_name`](#Compiler.aggregate_name) | Binds a local aggregate tag before its fields, preserving native spelling. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
-| [`Compiler.begin_semantic_transaction`](#Compiler.begin_semantic_transaction) | Begins a reversible transaction over the current semantic scope. |
 | [`Compiler.borrow_diagnostics`](#Compiler.borrow_diagnostics) | Shares a caller's diagnostic stream while preserving its emission policy. |
 | [`Compiler.borrow_unit_semantics`](#Compiler.borrow_unit_semantics) | Shares the symbol table, literal cache, and protocol registries of the unit `owner` is translating, so a child that binds declarations binds them into that unit. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
@@ -56,10 +49,6 @@ Core x2c compiler state and operations.
 | [`Compiler.fresh_name`](#Compiler.fresh_name) | Allocates the next compiler-private C spelling for `stem`. |
 | [`Compiler.full_parse`](#Compiler.full_parse) | Parses and types the positioned source against `globs`. |
 | [`Compiler.gensym`](#Compiler.gensym) | Returns a fresh semantic identity for an anonymous aggregate. |
-| [`Compiler.imported_providers`](#Compiler.imported_providers) | Returns sorted imported packages that publish `name`. |
-| [`Compiler.imported_spelling`](#Compiler.imported_spelling) | Returns an unambiguous imported spelling for `name`, or `NULL`. |
-| [`Compiler.leading_preproc`](#Compiler.leading_preproc) | Returns source-ordered preprocessor nodes in the preceding trivia. |
-| [`Compiler.macro_definition_locals`](#Compiler.macro_definition_locals) | Returns the active macro definition's borrowed local map, or `NULL`. |
 | [`Compiler.mark_completion`](#Compiler.mark_completion) | Retags the token beginning at `position` as a private completion marker. |
 | [`Compiler.mark_reference_present`](#Compiler.mark_reference_present) | Records a nonnull optional parameter for the current lexical path. |
 | [`Compiler.match_pattern_binders`](#Compiler.match_pattern_binders) | Returns definite binders from a typed `Match` pattern AST. |
@@ -72,8 +61,6 @@ Core x2c compiler state and operations.
 | [`Compiler.next`](#Compiler.next) | Consumes the current token and advances past following trivia. |
 | [`Compiler.optional_reference_test`](#Compiler.optional_reference_test) | Returns the optional-reference parameter tested by `condition`, or NULL. |
 | [`Compiler.own_diagnostics`](#Compiler.own_diagnostics) | Routes this compiler's diagnostic store through its own printer. |
-| [`Compiler.package_member_spelling`](#Compiler.package_member_spelling) | Returns a visible `with` name's package-prefixed spelling, or `NULL`. |
-| [`Compiler.package_spelling`](#Compiler.package_spelling) | Returns a name in the current package namespace, preserving prefixes. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
 | [`Compiler.queue_declaration_effect`](#Compiler.queue_declaration_effect) | Queues a source Lisp form until declaration production needs its state. |
@@ -81,14 +68,11 @@ Core x2c compiler state and operations.
 | [`Compiler.record_origin`](#Compiler.record_origin) | Records a token's location and returns its one-based occurrence. |
 | [`Compiler.record_source_declaration`](#Compiler.record_source_declaration) | Records a physical declaration using the binding's actual scope and key. |
 | [`Compiler.record_source_reference`](#Compiler.record_source_reference) | Records a resolved reference without inventing spans for constructed ASTs. |
-| [`Compiler.register_package_alias`](#Compiler.register_package_alias) | Registers one local package alias. |
-| [`Compiler.register_package_member`](#Compiler.register_package_member) | Registers one package member under a bare local spelling. |
 | [`Compiler.require_input`](#Compiler.require_input) | Raises `<incomplete>` when a required grammar item reaches the supplied input boundary. |
 | [`Compiler.restore_reference_presence`](#Compiler.restore_reference_presence) | Restores the optional-reference facts saved before a lexical path. |
 | [`Compiler.return_unit_state`](#Compiler.return_unit_state) | Returns that state to `owner`, so the next segment starts where this one finished and any Lisp environment this segment created stays alive after the shadow is released. |
 | [`Compiler.run_declaration_effects`](#Compiler.run_declaration_effects) | Runs pending effects for declaration production or CPP macro evaluation. |
 | [`Compiler.select_declaration_defaults`](#Compiler.select_declaration_defaults) | Selects the owning file's declaration defaults after all its segments. |
-| [`Compiler.semantic_binding_facts`](#Compiler.semantic_binding_facts) | Returns the current borrowed semantic-facts map indexed by binding. |
 | [`Compiler.shallow_parse`](#Compiler.shallow_parse) | Collects file-scope declarations into `globals` without parsing bodies. |
 | [`Compiler.shallow_parse_overlay`](#Compiler.shallow_parse_overlay) | Collects declarations with reads over `base` then `overlay`. |
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
@@ -101,77 +85,15 @@ Core x2c compiler state and operations.
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores a retained declaration recipe in the current parsing lifetime. |
 | [`Compiler.tokenize`](#Compiler.tokenize) | Scans source and positions the compiler at its first non-trivia token. |
-| [`Compiler.update_source_visibility`](#Compiler.update_source_visibility) | Applies public and private pragma directives to source visibility state and records each object-like `#define` name, less those `#undef` drops, for the literal warning. |
 | [`Compiler.var`](#Compiler.var) | Boxes the compiler's pointer; the caller keeps the compiler. |
 | [`Map.merge_translation_dependency`](#Map.merge_translation_dependency) | Merges one translation dependency, preserving an existing content hash. |
-| [`Sym.at_file_scope`](#Sym.at_file_scope) | Returns whether declarations currently bind at file scope. |
-| [`Sym.base_symbols`](#Sym.base_symbols) | Copies all base-scope symbols into a fresh map in source order. |
-| [`Sym.bind_identity`](#Sym.bind_identity) | Installs an existing binding with `ast`'s qualifier-preserving type. |
-| [`Sym.binding_is_local`](#Sym.binding_is_local) | Reports whether `binding` belongs to a scope inside the base scopes. |
-| [`Sym.binding_is_local_before`](#Sym.binding_is_local_before) | Reports whether `binding` belongs to a local scope below `scope_count`. |
-| [`Sym.current_binding`](#Sym.current_binding) | Returns `key`'s binding in the current scope, or `NULL`. |
-| [`Sym.current_symbols`](#Sym.current_symbols) | Returns the current scope's mutable symbol map, or `NULL`. |
-| [`Sym.declare`](#Sym.declare) | Analyzes a complete declaration type and installs its stored declared type. |
-| [`Sym.declare_delegate_field`](#Sym.declare_delegate_field) | Marks one named aggregate field as a delegate. |
-| [`Sym.declare_enumerator`](#Sym.declare_enumerator) | Associates an enumerator key with its owner in the active scope. |
-| [`Sym.declare_field_order`](#Sym.declare_field_order) | Records declaration AST fields in source order after binding finishes. |
-| [`Sym.define`](#Sym.define) | Defines `key` and returns its stable binding in the active scope. |
-| [`Sym.define_global`](#Sym.define_global) | Defines `key` in the unit's writable base scope. |
-| [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
-| [`Sym.delegate_aggregate`](#Sym.delegate_aggregate) | Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`. |
-| [`Sym.enumerator_owner`](#Sym.enumerator_owner) | Returns the current scope's enum owner for `key`, or zero. |
-| [`Sym.field_order`](#Sym.field_order) | Returns recorded fields in source order, or `NULL`. |
-| [`Sym.file_statics`](#Sym.file_statics) | Returns the current borrowed set of file-static declaration keys. |
-| [`Sym.get`](#Sym.get) | Returns `key`'s type, retrying a bare key in package space, or `NULL`. |
-| [`Sym.get_exact`](#Sym.get_exact) | Returns `key`'s type without package fallback, or `NULL`. |
-| [`Sym.global_symbols`](#Sym.global_symbols) | Returns the mutable global symbol map supplied to the latest reset. |
-| [`Sym.has_local_macros`](#Sym.has_local_macros) | Returns whether any lexical scope contains a local macro definition. |
-| [`Sym.introduce`](#Sym.introduce) | Allocates a fresh binding identity for a compiler-introduced spelling. |
-| [`Sym.is_array_type`](#Sym.is_array_type) | Reports whether `type` reaches the named `Array` value type. |
-| [`Sym.is_map_type`](#Sym.is_map_type) | Reports whether `type` reaches the named `Map` value type. |
-| [`Sym.is_named_value_type`](#Sym.is_named_value_type) | Reports whether `type` reaches a named value type before its definition. |
-| [`Sym.is_string_type`](#Sym.is_string_type) | Reports whether `type` reaches the named `String` value type. |
-| [`Sym.is_var_type`](#Sym.is_var_type) | Reports whether `type` reaches the named `Var` value type. |
-| [`Sym.local_type`](#Sym.local_type) | Resolves a block-local typedef to the type saved at its declaration. |
-| [`Sym.lookup`](#Sym.lookup) | Resolves an existing key and optionally stores its semantic type. |
-| [`Sym.lookup_field`](#Sym.lookup_field) | Returns an aggregate field's declared type, or `NULL`. |
-| [`Sym.lookup_macro`](#Sym.lookup_macro) | Returns the innermost visible local macro named `name`, or `NULL`. |
-| [`Sym.mark_static`](#Sym.mark_static) | Marks a declaration key as file-static. |
-| [`Sym.next_typedef`](#Sym.next_typedef) | Resolves one typedef hop and counts against the shared cycle budget. |
-| [`Sym.normalize_declared_type`](#Sym.normalize_declared_type) | Resolves typedef bases while retaining every declarator qualifier. |
-| [`Sym.pop_scope`](#Sym.pop_scope) | Pops the innermost scope, or returns an empty scope when none exists. |
-| [`Sym.push_new_scope`](#Sym.push_new_scope) | Pushes a new empty lexical scope. |
-| [`Sym.push_scope`](#Sym.push_scope) | Pushes a caller-supplied lexical scope while retaining its map objects. |
-| [`Sym.reference`](#Sym.reference) | Resolves `key` or creates a forward binding in the current scope. |
-| [`Sym.reference_global`](#Sym.reference_global) | Resolves a global name or creates its forward binding in the base scope. |
-| [`Sym.reset`](#Sym.reset) | Resets symbol state to one base scope backed by `globals`. |
-| [`Sym.resolve_base_type`](#Sym.resolve_base_type) | Resolves a typedef name through the base scopes only, ignoring local typedefs, or returns NULL when the base scopes do not declare it. |
-| [`Sym.resolve_global`](#Sym.resolve_global) | Resolves a binding through base scopes and optionally stores its type. |
-| [`Sym.resolve_key`](#Sym.resolve_key) | Resolves a canonical typedef key to the end of its declared chain. |
-| [`Sym.resolve_numeric_type`](#Sym.resolve_numeric_type) | Resolves a numeric typedef without reducing semantic object types. |
-| [`Sym.scope_count`](#Sym.scope_count) | Returns the number of semantic scopes, including base scopes. |
-| [`Sym.seed_var_tags`](#Sym.seed_var_tags) | Registers declared `T_var` converters in the active `Type` unit. |
-| [`Sym.set`](#Sym.set) | Sets a semantic type for `key` in the required active scope. |
-| [`Sym.var_tag_for_type`](#Sym.var_tag_for_type) | Returns a type's `Var` tag and optionally stores its resolved type. |
-| [`Sym.visible_symbols`](#Sym.visible_symbols) | Returns the visible one-part source names and their semantic types. |
-| [`SymTxn.commit`](#SymTxn.commit) | Publishes an active semantic transaction and makes rollback a no-op. |
-| [`SymTxn.commit_transient`](#SymTxn.commit_transient) | Commits an active transaction, retaining the original semantic-map owners. |
-| [`SymTxn.local_macros_changed`](#SymTxn.local_macros_changed) | Returns whether the transaction's active scope changed its macro map. |
-| [`SymTxn.rollback`](#SymTxn.rollback) | Restores every semantic value captured by an active transaction. |
 | [`Symbol.group_step`](#Symbol.group_step) | Returns 1 for a token type that opens a delimited group, -1 for one that closes a group, and 0 otherwise. |
 | [`Token.after_group`](#Token.after_group) | Returns the first non-trivia token after the group `t` opens, or after `t` when it opens no group. |
 | [`Token.group_close`](#Token.group_close) | Returns the token that closes the group `t` opens, `t` itself when it opens no group, or the `eof` token when the group never closes. |
+| [`Token.skip_trivia`](#Token.skip_trivia) | Returns the first token at or after `token` that is not a space, comment, or preprocessor line. |
 | [`Var.compiler`](#Var.compiler) | Recovers the compiler pointer boxed by `Compiler.var`. |
 
 ### Functions
-
-#### ast_collect_binding_references
-
-`void ast_collect_binding_references(Var node, Map referenced)`
-
-Records in `referenced` the identity of every binding `node` names.
-
-Source: `src/compiler.x:4343`
 
 #### home_absolute_path
 
@@ -179,7 +101,7 @@ Source: `src/compiler.x:4343`
 
 Returns the absolute path that a `home_portable_path` spelling names.
 
-Source: `src/compiler.x:472`
+Source: `src/compiler.x:456`
 
 #### home_portable_path
 
@@ -190,7 +112,7 @@ home, otherwise `path`. Interfaces, macro definitions, retained
 declarations, and generated identities spell paths this way, so they do
 not depend on where the home is installed.
 
-Source: `src/compiler.x:466`
+Source: `src/compiler.x:450`
 
 #### match_value_flat_head
 
@@ -202,7 +124,7 @@ Each element after the head is a unique named `?` binder or a typed
 capture of one. When `tags` is non-null, stores one entry per binder
 in order: the capture's tag Symbol, or integer zero when untyped.
 
-Source: `src/compiler.x:2837`
+Source: `src/compiler.x:1172`
 
 #### match_value_head
 
@@ -214,7 +136,7 @@ A binder, guard, non-list value, or computed head has no fixed symbol.
 Other pattern elements may remain dynamic because a literal head alone
 constrains the first input element.
 
-Source: `src/compiler.x:2822`
+Source: `src/compiler.x:1157`
 
 #### match_value_is_static
 
@@ -222,47 +144,7 @@ Source: `src/compiler.x:2822`
 
 Reports whether a recovered pattern value graph is fully static.
 
-Source: `src/compiler.x:2805`
-
-#### preproc_branch_state
-
-`int preproc_branch_state(int state)`
-
-Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
-the group's state was 1, and 0 otherwise.
-
-Source: `src/compiler.x:904`
-
-#### preproc_never_active_arm
-
-`Symbol preproc_never_active_arm(String s)`
-
-Classifies an opening conditional directive by which of its arms C can
-never reach: `<first>` when the condition requires a never-defined name
-or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. Each
-never-defined name reads as `<never>`, which no C token spells.
-
-Source: `src/compiler.x:864`
-
-#### preproc_open_state
-
-`int preproc_open_state(String text)`
-
-Returns the hidden-arm state of the conditional group that `text` opens:
-2 when C never takes its first arm, 1 when C never takes the arms after
-its first `#else`, and 0 otherwise.
-
-Source: `src/compiler.x:897`
-
-#### preproc_visibility
-
-`int preproc_visibility(String text)`
-
-Returns 1 when the preprocessor line `text` is `#pragma private`, 0 when
-it is `#pragma public`, and -1 otherwise. A comment in the line reads as
-a blank, as it does in C.
-
-Source: `src/compiler.x:909`
+Source: `src/compiler.x:1140`
 
 #### reference_guard_exits
 
@@ -270,7 +152,7 @@ Source: `src/compiler.x:909`
 
 Returns whether `arm` ends with a return or non-returning raise.
 
-Source: `src/compiler.x:2599`
+Source: `src/compiler.x:934`
 
 ### `Compiler`
 
@@ -281,7 +163,7 @@ Source: `src/compiler.x:2599`
 
 Reports whether the current two tokens are `=>`.
 
-Source: `src/compiler.x:3618`
+Source: `src/compiler.x:1953`
 
 <a id="Compiler._skip_shallow_expression"></a>
 #### Compiler._skip_shallow_expression
@@ -292,7 +174,7 @@ Skips a balanced shallow expression without consuming its terminator.
 A top-level comma also terminates the expression when `stop_at_comma` is
 nonzero.
 
-Source: `src/compiler.x:3625`
+Source: `src/compiler.x:1960`
 
 <a id="Compiler.add_early"></a>
 #### Compiler.add_early
@@ -301,7 +183,7 @@ Source: `src/compiler.x:3625`
 
 Appends a generated declaration to the early-declaration queue.
 
-Source: `src/compiler.x:2646`
+Source: `src/compiler.x:981`
 
 <a id="Compiler.add_init"></a>
 #### Compiler.add_init
@@ -312,7 +194,7 @@ Appends a statement to file initialization order under `phase`, which is
 `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for
 the file initializer's three stages.
 
-Source: `src/compiler.x:2654`
+Source: `src/compiler.x:989`
 
 <a id="Compiler.add_translation_dependency"></a>
 #### Compiler.add_translation_dependency
@@ -321,19 +203,7 @@ Source: `src/compiler.x:2654`
 
 Records a path dependency not embedded in generated C.
 
-Source: `src/compiler.x:484`
-
-<a id="Compiler.aggregate_name"></a>
-#### Compiler.aggregate_name
-
-`Var Compiler.aggregate_name( Compiler c, Symbol kind, Var name, int definition)`
-
-Binds a local aggregate tag before its fields, preserving native spelling.
-A reference reuses the nearest visible tag; a definition or standalone
-forward declaration introduces the tag in the current lexical scope. A
-macro template names its tags as template locals.
-
-Source: `src/compiler.x:1791`
+Source: `src/compiler.x:468`
 
 <a id="Compiler.anchor_origin"></a>
 #### Compiler.anchor_origin
@@ -345,7 +215,7 @@ Wraps a parsed node in the source location of its opening token.
 A null node remains null. Macro construction uses its active `m-origin`
 marker; otherwise a node without a token remains unwrapped.
 
-Source: `src/compiler.x:787`
+Source: `src/compiler.x:774`
 
 <a id="Compiler.at_completion"></a>
 #### Compiler.at_completion
@@ -354,7 +224,7 @@ Source: `src/compiler.x:787`
 
 Reports whether the parser is at the private REPL completion marker.
 
-Source: `src/compiler.x:750`
+Source: `src/compiler.x:737`
 
 <a id="Compiler.at_word"></a>
 #### Compiler.at_word
@@ -365,21 +235,7 @@ Reports whether the current token is the identifier `word`. A contextual
 keyword such as `with` or `as` is an ordinary identifier elsewhere. This
 query does not consume tokens.
 
-Source: `src/compiler.x:688`
-
-<a id="Compiler.begin_semantic_transaction"></a>
-#### Compiler.begin_semantic_transaction
-
-`SymTxn Compiler.begin_semantic_transaction(Compiler c)`
-
-Begins a reversible transaction over the current semantic scope.
-
-The transaction stages the current scope maps, file-static and binding
-facts, compile-time struct layouts, binding and generated-name
-counters, and initializer names. It does not snapshot parser position or
-other compiler state.
-
-Source: `src/compiler.x:1988`
+Source: `src/compiler.x:675`
 
 <a id="Compiler.borrow_diagnostics"></a>
 #### Compiler.borrow_diagnostics
@@ -389,7 +245,7 @@ Source: `src/compiler.x:1988`
 Shares a caller's diagnostic stream while preserving its emission policy.
 The caller restores the saved printer after this child finishes.
 
-Source: `src/compiler.x:2945`
+Source: `src/compiler.x:1280`
 
 <a id="Compiler.borrow_unit_semantics"></a>
 #### Compiler.borrow_unit_semantics
@@ -405,7 +261,7 @@ through `owner`'s protocol rows. Both install into one macro session, so
 they also read one record of which `meta` functions reach file-scope
 state.
 
-Source: `src/compiler.x:381`
+Source: `src/compiler.x:365`
 
 <a id="Compiler.cache"></a>
 #### Compiler.cache
@@ -414,7 +270,7 @@ Source: `src/compiler.x:381`
 
 Interns a constant key and returns its stable `(cache id)` reference.
 
-Source: `src/compiler.x:2661`
+Source: `src/compiler.x:996`
 
 <a id="Compiler.cache_cons_cell"></a>
 #### Compiler.cache_cons_cell
@@ -426,7 +282,7 @@ Caches a cons cell when both parts have immutable cache forms.
 Returns `NULL` when runtime literals are required or either part cannot
 be represented by the immutable cache graph.
 
-Source: `src/compiler.x:2684`
+Source: `src/compiler.x:1019`
 
 <a id="Compiler.cache_literal_list"></a>
 #### Compiler.cache_literal_list
@@ -438,7 +294,7 @@ Returns a runtime `List` expression for cached compiler-owned syntax.
 `values` may contain nested `List`s, `String`s, integer `Var`s, and
 `Symbol`s.
 
-Source: `src/compiler.x:2746`
+Source: `src/compiler.x:1081`
 
 <a id="Compiler.cache_literal_var"></a>
 #### Compiler.cache_literal_var
@@ -449,7 +305,7 @@ Interns an immutable value and returns its `(cache id)` reference.
 `value` is a `List` of such values, a `String`, a number with its tag, or
 a `Symbol`; any other value returns NULL.
 
-Source: `src/compiler.x:2701`
+Source: `src/compiler.x:1036`
 
 <a id="Compiler.canonical_path"></a>
 #### Compiler.canonical_path
@@ -461,7 +317,7 @@ source view it is the absolute path, because an unsaved file need not
 exist on disk; otherwise it is the real path, or `path` itself when that
 does not resolve.
 
-Source: `src/compiler.x:455`
+Source: `src/compiler.x:439`
 
 <a id="Compiler.catch_binder_declarations"></a>
 #### Compiler.catch_binder_declarations
@@ -470,7 +326,7 @@ Source: `src/compiler.x:455`
 
 Builds ordinary declarations from a catch scope's issued bindings.
 
-Source: `src/compiler.x:2909`
+Source: `src/compiler.x:1244`
 
 <a id="Compiler.close_child"></a>
 #### Compiler.close_child
@@ -479,7 +335,7 @@ Source: `src/compiler.x:2909`
 
 Retains a child's final diagnostics and closes its owned Lisp session.
 
-Source: `src/compiler.x:2964`
+Source: `src/compiler.x:1299`
 
 <a id="Compiler.collect_compile_time_definition"></a>
 #### Compiler.collect_compile_time_definition
@@ -490,7 +346,7 @@ Collects a macro or keyword definition while deferring its diagnostics.
 Returns one on success; malformed syntax skips to end of file and returns
 zero so the full parse can report it.
 
-Source: `src/compiler.x:3557`
+Source: `src/compiler.x:1892`
 
 <a id="Compiler.collect_unit_macro"></a>
 #### Compiler.collect_unit_macro
@@ -502,7 +358,7 @@ collection. Its private helpers remain available to later invocations.
 Generated-name counters are restored when the full parse must expand it
 again.
 
-Source: `src/compiler.x:3160`
+Source: `src/compiler.x:1495`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -511,7 +367,7 @@ Source: `src/compiler.x:3160`
 
 Carries declaration metadata with one actual symbol contribution.
 
-Source: `src/compiler.x:837`
+Source: `src/compiler.x:824`
 
 <a id="Compiler.define_catch_binders"></a>
 #### Compiler.define_catch_binders
@@ -520,7 +376,7 @@ Source: `src/compiler.x:837`
 
 Defines catch binders and returns their capture-token/binding pairs.
 
-Source: `src/compiler.x:2895`
+Source: `src/compiler.x:1230`
 
 <a id="Compiler.define_match_binders"></a>
 #### Compiler.define_match_binders
@@ -529,7 +385,7 @@ Source: `src/compiler.x:2895`
 
 Defines a typed `Match` pattern's definite binders in the current scope.
 
-Source: `src/compiler.x:2887`
+Source: `src/compiler.x:1222`
 
 <a id="Compiler.emitted_binding_name"></a>
 #### Compiler.emitted_binding_name
@@ -540,7 +396,7 @@ Returns a binding's selected emitted spelling.
 
 A binding without an explicit emission rename uses its identity spelling.
 
-Source: `src/compiler.x:2515`
+Source: `src/compiler.x:850`
 
 <a id="Compiler.expect"></a>
 #### Compiler.expect
@@ -552,7 +408,7 @@ Requires and consumes the current token type.
 A mismatch reports a parse diagnostic. An active recovery boundary raises
 `<malformed>`; without one, diagnostic reporting exits.
 
-Source: `src/compiler.x:641`
+Source: `src/compiler.x:628`
 
 <a id="Compiler.finish_collected_declaration"></a>
 #### Compiler.finish_collected_declaration
@@ -562,7 +418,7 @@ Source: `src/compiler.x:641`
 Records declaration visibility and meta facts, then skips its body.
 The declaration is already bound by the shared top-level parser.
 
-Source: `src/compiler.x:3575`
+Source: `src/compiler.x:1910`
 
 <a id="Compiler.free_lisp"></a>
 #### Compiler.free_lisp
@@ -577,7 +433,7 @@ it clears the diagnostic store and the compiler must not be reused.
 At process exit, root Scope cleanup follows shutdown hooks and canonical
 pool cleanup. Close explicitly while any native session dependencies live.
 
-Source: `src/compiler.x:355`
+Source: `src/compiler.x:339`
 
 <a id="Compiler.freeze_declaration_syntax"></a>
 #### Compiler.freeze_declaration_syntax
@@ -588,7 +444,7 @@ Retains declaration syntax across source segments and cached interfaces.
 Tokens and origin indices become portable source data; marker-shaped user
 Lists are escaped so thawing preserves their values.
 
-Source: `src/compiler.x:2979`
+Source: `src/compiler.x:1314`
 
 <a id="Compiler.freeze_macro_stack"></a>
 #### Compiler.freeze_macro_stack
@@ -597,7 +453,7 @@ Source: `src/compiler.x:2979`
 
 Returns `freeze_declaration_syntax` of the active macro stack.
 
-Source: `src/compiler.x:3024`
+Source: `src/compiler.x:1359`
 
 <a id="Compiler.fresh_name"></a>
 #### Compiler.fresh_name
@@ -613,7 +469,7 @@ built from the `.xi` prelude, so a name minted there must not move the
 unit's own counter or the two modes emit different C. Those names carry
 an `m` before the stem, so they cannot collide with the unit's.
 
-Source: `src/compiler.x:2621`
+Source: `src/compiler.x:956`
 
 <a id="Compiler.full_parse"></a>
 #### Compiler.full_parse
@@ -626,7 +482,7 @@ The result is a source-ordered top-level AST. This resets per-parse
 origins, macro state, and protocol resolution.
 `generated_symbols` publishes external adapter signatures before parsing.
 
-Source: `src/compiler.x:3667`
+Source: `src/compiler.x:2002`
 
 <a id="Compiler.gensym"></a>
 #### Compiler.gensym
@@ -638,49 +494,7 @@ Identities are scoped to the compiler's current file and numbered per
 file, so every process mints the same sequence for one file and two
 files never share an identity. No emission path prints one.
 
-Source: `src/compiler.x:2635`
-
-<a id="Compiler.imported_providers"></a>
-#### Compiler.imported_providers
-
-`List Compiler.imported_providers(Compiler c, String name)`
-
-Returns sorted imported packages that publish `name`.
-
-Package-owned methods use `<package>__<Type>_<member>` internally while
-consumers retain the spelling from the package header. Sorting keeps
-ambiguity diagnostics deterministic.
-
-Source: `src/compiler.x:1903`
-
-<a id="Compiler.imported_spelling"></a>
-#### Compiler.imported_spelling
-
-`String Compiler.imported_spelling(Compiler c, String name)`
-
-Returns an unambiguous imported spelling for `name`, or `NULL`.
-
-Source: `src/compiler.x:1915`
-
-<a id="Compiler.leading_preproc"></a>
-#### Compiler.leading_preproc
-
-`List Compiler.leading_preproc(Compiler c)`
-
-Returns source-ordered preprocessor nodes in the preceding trivia.
-
-Spaces and comments remain trivia rather than becoming AST nodes.
-
-Source: `src/compiler.x:1103`
-
-<a id="Compiler.macro_definition_locals"></a>
-#### Compiler.macro_definition_locals
-
-`Map Compiler.macro_definition_locals(Compiler c)`
-
-Returns the active macro definition's borrowed local map, or `NULL`.
-
-Source: `src/compiler.x:1955`
+Source: `src/compiler.x:970`
 
 <a id="Compiler.mark_completion"></a>
 #### Compiler.mark_completion
@@ -689,7 +503,7 @@ Source: `src/compiler.x:1955`
 
 Retags the token beginning at `position` as a private completion marker.
 
-Source: `src/compiler.x:739`
+Source: `src/compiler.x:726`
 
 <a id="Compiler.mark_reference_present"></a>
 #### Compiler.mark_reference_present
@@ -698,7 +512,7 @@ Source: `src/compiler.x:739`
 
 Records a nonnull optional parameter for the current lexical path.
 
-Source: `src/compiler.x:2533`
+Source: `src/compiler.x:868`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -709,7 +523,7 @@ Returns definite binders from a typed `Match` pattern AST.
 
 When `possible` is non-null, stores every binder appearing on any path.
 
-Source: `src/compiler.x:2876`
+Source: `src/compiler.x:1211`
 
 <a id="Compiler.match_pattern_is_static"></a>
 #### Compiler.match_pattern_is_static
@@ -718,7 +532,7 @@ Source: `src/compiler.x:2876`
 
 Reports whether a typed `Match` pattern has a fully static value graph.
 
-Source: `src/compiler.x:2813`
+Source: `src/compiler.x:1148`
 
 <a id="Compiler.match_pattern_value"></a>
 #### Compiler.match_pattern_value
@@ -727,7 +541,7 @@ Source: `src/compiler.x:2813`
 
 Recovers a pattern value graph, using `x2c-dyn` for computed values.
 
-Source: `src/compiler.x:2758`
+Source: `src/compiler.x:1093`
 
 <a id="Compiler.merge_source_declarations"></a>
 #### Compiler.merge_source_declarations
@@ -736,7 +550,7 @@ Source: `src/compiler.x:2758`
 
 Carries declaration metadata beside a completed symbol-map merge.
 
-Source: `src/compiler.x:848`
+Source: `src/compiler.x:835`
 
 <a id="Compiler.merge_translation_dependencies"></a>
 #### Compiler.merge_translation_dependencies
@@ -745,7 +559,7 @@ Source: `src/compiler.x:848`
 
 Merges another translation's dependency rows into this compiler.
 
-Source: `src/compiler.x:489`
+Source: `src/compiler.x:473`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -754,7 +568,7 @@ Source: `src/compiler.x:489`
 
 Creates a compiler with independent package and generated-name state.
 
-Source: `src/compiler.x:242`
+Source: `src/compiler.x:235`
 
 <a id="Compiler.new_shared"></a>
 #### Compiler.new_shared
@@ -763,7 +577,7 @@ Source: `src/compiler.x:242`
 
 Creates a compiler sharing its owner's package and generated-name state.
 
-Source: `src/compiler.x:245`
+Source: `src/compiler.x:238`
 
 <a id="Compiler.next"></a>
 #### Compiler.next
@@ -775,7 +589,7 @@ Consumes the current token and advances past following trivia.
 This updates the unmatched-brace stack. An unmatched `}` reports a parse
 diagnostic, which raises `<malformed>` under recovery and otherwise exits.
 
-Source: `src/compiler.x:655`
+Source: `src/compiler.x:642`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test
@@ -786,7 +600,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler.x:2550`
+Source: `src/compiler.x:885`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -798,29 +612,7 @@ Routes this compiler's diagnostic store through its own printer.
 Compilers that share a store call this when taking the diagnostic stream
 back from another compiler.
 
-Source: `src/compiler.x:2938`
-
-<a id="Compiler.package_member_spelling"></a>
-#### Compiler.package_member_spelling
-
-`String Compiler.package_member_spelling(Compiler c, String name)`
-
-Returns a visible `with` name's package-prefixed spelling, or `NULL`.
-
-An ordinary declaration of the local spelling shadows the `with` name.
-
-Source: `src/compiler.x:1888`
-
-<a id="Compiler.package_spelling"></a>
-#### Compiler.package_spelling
-
-`String Compiler.package_spelling(Compiler c, String name)`
-
-Returns a name in the current package namespace, preserving prefixes.
-
-Idempotence lets parsing and declaration rewrites share this operation.
-
-Source: `src/compiler.x:1819`
+Source: `src/compiler.x:1273`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek
@@ -832,7 +624,7 @@ Returns the non-trivia token type `steps` from parser position.
 Zero reads the current token; positive and negative steps count forward
 and backward through non-trivia tokens. The parser cursor is unchanged.
 
-Source: `src/compiler.x:587`
+Source: `src/compiler.x:571`
 
 <a id="Compiler.present_references"></a>
 #### Compiler.present_references
@@ -841,7 +633,7 @@ Source: `src/compiler.x:587`
 
 Returns the optional references proven present in this lexical path.
 
-Source: `src/compiler.x:2529`
+Source: `src/compiler.x:864`
 
 <a id="Compiler.queue_declaration_effect"></a>
 #### Compiler.queue_declaration_effect
@@ -851,7 +643,7 @@ Source: `src/compiler.x:2529`
 Queues a source Lisp form until declaration production needs its state.
 Files without declaration producers keep ordinary full-parse evaluation.
 
-Source: `src/compiler.x:3117`
+Source: `src/compiler.x:1452`
 
 <a id="Compiler.read_source"></a>
 #### Compiler.read_source
@@ -861,7 +653,7 @@ Source: `src/compiler.x:3117`
 Reads a source through the request view and retains exact response
 bytes.
 
-Source: `src/compiler.x:444`
+Source: `src/compiler.x:428`
 
 <a id="Compiler.record_origin"></a>
 #### Compiler.record_origin
@@ -874,7 +666,7 @@ A null token returns zero. Callers pass the token that opened a construct,
 so an `(at N node)` wrapper retains its start for transform diagnostics
 after `compiler.token` has reached end of file.
 
-Source: `src/compiler.x:773`
+Source: `src/compiler.x:760`
 
 <a id="Compiler.record_source_declaration"></a>
 #### Compiler.record_source_declaration
@@ -883,7 +675,7 @@ Source: `src/compiler.x:773`
 
 Records a physical declaration using the binding's actual scope and key.
 
-Source: `src/compiler.x:796`
+Source: `src/compiler.x:783`
 
 <a id="Compiler.record_source_reference"></a>
 #### Compiler.record_source_reference
@@ -893,32 +685,7 @@ Source: `src/compiler.x:796`
 Records a resolved reference without inventing spans for constructed
 ASTs.
 
-Source: `src/compiler.x:828`
-
-<a id="Compiler.register_package_alias"></a>
-#### Compiler.register_package_alias
-
-`void Compiler.register_package_alias( Compiler c, String name, String alias, Token token)`
-
-Registers one local package alias.
-
-Shallow collection and full parsing both see an import, so repeating the
-same package and alias is a no-op. Another binding of the local spelling
-is a parse error.
-
-Source: `src/compiler.x:1831`
-
-<a id="Compiler.register_package_member"></a>
-#### Compiler.register_package_member
-
-`void Compiler.register_package_member( Compiler c, String name, String member, String local, Token member_token, Token local_token)`
-
-Registers one package member under a bare local spelling.
-
-The package member must already exist in the symbol table. Repeating the
-same binding is a no-op; any conflicting local binding is an error.
-
-Source: `src/compiler.x:1844`
+Source: `src/compiler.x:815`
 
 <a id="Compiler.require_input"></a>
 #### Compiler.require_input
@@ -929,7 +696,7 @@ Raises `<incomplete>` when a required grammar item reaches the supplied
 input boundary. The caller sets a token in the current token stream after
 tokenizing; tokenization clears it. Semantic failures do not call this.
 
-Source: `src/compiler.x:632`
+Source: `src/compiler.x:619`
 
 <a id="Compiler.restore_reference_presence"></a>
 #### Compiler.restore_reference_presence
@@ -938,7 +705,7 @@ Source: `src/compiler.x:632`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler.x:2540`
+Source: `src/compiler.x:875`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state
@@ -949,7 +716,7 @@ Returns that state to `owner`, so the next segment starts where this one
 finished and any Lisp environment this segment created stays alive after
 the shadow is released.
 
-Source: `src/compiler.x:427`
+Source: `src/compiler.x:411`
 
 <a id="Compiler.run_declaration_effects"></a>
 #### Compiler.run_declaration_effects
@@ -958,7 +725,7 @@ Source: `src/compiler.x:427`
 
 Runs pending effects for declaration production or CPP macro evaluation.
 
-Source: `src/compiler.x:3132`
+Source: `src/compiler.x:1467`
 
 <a id="Compiler.select_declaration_defaults"></a>
 #### Compiler.select_declaration_defaults
@@ -970,18 +737,7 @@ The selected signatures join ordinary declarations before protocol and
 body binding; discarded candidates never bind their bodies. Returns added
 signatures for the caller to retain in the header-cache lifetime.
 
-Source: `src/compiler.x:3224`
-
-<a id="Compiler.semantic_binding_facts"></a>
-#### Compiler.semantic_binding_facts
-
-`Map Compiler.semantic_binding_facts(Compiler c)`
-
-Returns the current borrowed semantic-facts map indexed by binding.
-
-A semantic transaction may replace this map, so reacquire it afterwards.
-
-Source: `src/compiler.x:2509`
+Source: `src/compiler.x:1559`
 
 <a id="Compiler.shallow_parse"></a>
 #### Compiler.shallow_parse
@@ -990,7 +746,7 @@ Source: `src/compiler.x:2509`
 
 Collects file-scope declarations into `globals` without parsing bodies.
 
-Source: `src/compiler.x:3488`
+Source: `src/compiler.x:1823`
 
 <a id="Compiler.shallow_parse_overlay"></a>
 #### Compiler.shallow_parse_overlay
@@ -1002,7 +758,7 @@ Collects declarations with reads over `base` then `overlay`.
 Writes go to `overlay`, which captures exactly what this translation
 contributes above `base`.
 
-Source: `src/compiler.x:3504`
+Source: `src/compiler.x:1839`
 
 <a id="Compiler.share_meta_group"></a>
 #### Compiler.share_meta_group
@@ -1012,7 +768,7 @@ Source: `src/compiler.x:3504`
 Shares `owner`'s pending `meta` group and the definitions it reads, which
 belong with the Lisp session that holds the group's stubs.
 
-Source: `src/compiler.x:400`
+Source: `src/compiler.x:384`
 
 <a id="Compiler.skip_collected_script_statement"></a>
 #### Compiler.skip_collected_script_statement
@@ -1022,7 +778,7 @@ Source: `src/compiler.x:400`
 Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
-Source: `src/compiler.x:3857`
+Source: `src/compiler.x:2192`
 
 <a id="Compiler.skip_script_statement"></a>
 #### Compiler.skip_script_statement
@@ -1033,7 +789,7 @@ Moves past one run of a script unit's statement tokens, through a `;` or
 a closing `}` outside every bracket. A statement that ends early this
 way leaves its remainder as the next run, and runs are rejoined in order.
 
-Source: `src/compiler.x:3871`
+Source: `src/compiler.x:2206`
 
 <a id="Compiler.skip_trivia_from"></a>
 #### Compiler.skip_trivia_from
@@ -1042,7 +798,7 @@ Source: `src/compiler.x:3871`
 
 Returns the first non-trivia token at or after `token`.
 
-Source: `src/compiler.x:625`
+Source: `src/compiler.x:612`
 
 <a id="Compiler.take_diagnostics"></a>
 #### Compiler.take_diagnostics
@@ -1053,7 +809,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/compiler.x:2954`
+Source: `src/compiler.x:1289`
 
 <a id="Compiler.take_unit_state"></a>
 #### Compiler.take_unit_state
@@ -1065,7 +821,7 @@ Lisp state for one segment of a collected file. Segments are one
 translation unit, so a shadow uses the unit's Lisp environment rather
 than its own.
 
-Source: `src/compiler.x:411`
+Source: `src/compiler.x:395`
 
 <a id="Compiler.take_word"></a>
 #### Compiler.take_word
@@ -1075,7 +831,7 @@ Source: `src/compiler.x:411`
 Consumes the identifier `word` when current and reports whether it
 matched.
 
-Source: `src/compiler.x:693`
+Source: `src/compiler.x:680`
 
 <a id="Compiler.test"></a>
 #### Compiler.test
@@ -1084,7 +840,7 @@ Source: `src/compiler.x:693`
 
 Consumes `type` when current and reports whether it matched.
 
-Source: `src/compiler.x:679`
+Source: `src/compiler.x:666`
 
 <a id="Compiler.thaw_declaration_syntax"></a>
 #### Compiler.thaw_declaration_syntax
@@ -1093,7 +849,7 @@ Source: `src/compiler.x:679`
 
 Restores a retained declaration recipe in the current parsing lifetime.
 
-Source: `src/compiler.x:3036`
+Source: `src/compiler.x:1371`
 
 <a id="Compiler.tokenize"></a>
 #### Compiler.tokenize
@@ -1105,21 +861,7 @@ Scans source and positions the compiler at its first non-trivia token.
 The compiler borrows `text` for diagnostics and macro source capture until
 translation finishes.
 
-Source: `src/compiler.x:501`
-
-<a id="Compiler.update_source_visibility"></a>
-#### Compiler.update_source_visibility
-
-`void Compiler.update_source_visibility(Compiler c, List directives)`
-
-Applies public and private pragma directives to source visibility state
-and records each object-like `#define` name, less those `#undef` drops,
-for the literal warning.
-
-A negative visibility state disables pragma tracking for this token
-stream; macro names are recorded regardless.
-
-Source: `src/compiler.x:1122`
+Source: `src/compiler.x:485`
 
 <a id="Compiler.var"></a>
 #### Compiler.var
@@ -1128,7 +870,7 @@ Source: `src/compiler.x:1122`
 
 Boxes the compiler's pointer; the caller keeps the compiler.
 
-Source: `src/compiler.x:209`
+Source: `src/compiler.x:211`
 
 ### `Map`
 
@@ -1139,552 +881,7 @@ Source: `src/compiler.x:209`
 
 Merges one translation dependency, preserving an existing content hash.
 
-Source: `src/compiler.x:476`
-
-### `Sym`
-
-<a id="Sym.at_file_scope"></a>
-#### Sym.at_file_scope
-
-`int Sym.at_file_scope(Sym s)`
-
-Returns whether declarations currently bind at file scope.
-
-Source: `src/compiler.x:1332`
-
-<a id="Sym.base_symbols"></a>
-#### Sym.base_symbols
-
-`Map Sym.base_symbols(Sym s)`
-
-Copies all base-scope symbols into a fresh map in source order.
-
-Package collection uses this so it resolves against the prelude and the
-importing unit's already-visible includes without mutating either.
-
-Source: `src/compiler.x:1344`
-
-<a id="Sym.bind_identity"></a>
-#### Sym.bind_identity
-
-`List Sym.bind_identity(Sym s, List context, List binding, List ast)`
-
-Installs an existing binding with `ast`'s qualifier-preserving type.
-
-Source: `src/compiler.x:1770`
-
-<a id="Sym.binding_is_local"></a>
-#### Sym.binding_is_local
-
-`int Sym.binding_is_local(Sym s, List binding)`
-
-Reports whether `binding` belongs to a scope inside the base scopes.
-
-Source: `src/compiler.x:1529`
-
-<a id="Sym.binding_is_local_before"></a>
-#### Sym.binding_is_local_before
-
-`int Sym.binding_is_local_before(Sym s, List binding, int scope_count)`
-
-Reports whether `binding` belongs to a local scope below `scope_count`.
-
-Counts beyond the current scope depth are clamped to that depth.
-
-Source: `src/compiler.x:1536`
-
-<a id="Sym.current_binding"></a>
-#### Sym.current_binding
-
-`List Sym.current_binding(Sym s, List key)`
-
-Returns `key`'s binding in the current scope, or `NULL`.
-
-Source: `src/compiler.x:1515`
-
-<a id="Sym.current_symbols"></a>
-#### Sym.current_symbols
-
-`Map Sym.current_symbols(Sym s)`
-
-Returns the current scope's mutable symbol map, or `NULL`.
-
-Source: `src/compiler.x:1351`
-
-<a id="Sym.declare"></a>
-#### Sym.declare
-
-`List Sym.declare(Sym s, List context, List key, List ast)`
-
-Analyzes a complete declaration type and installs its stored declared type.
-
-Returns the declared binding. At file scope this also records static
-visibility; local declarations record automatic-storage and declared-type
-facts. Stored types discard storage and `inline` while retaining `const`,
-`restrict`, and `volatile`.
-
-Source: `src/compiler.x:1638`
-
-<a id="Sym.declare_delegate_field"></a>
-#### Sym.declare_delegate_field
-
-`void Sym.declare_delegate_field(Sym s, Type aggregate, String name)`
-
-Marks one named aggregate field as a delegate.
-
-Source: `src/compiler.x:2482`
-
-<a id="Sym.declare_enumerator"></a>
-#### Sym.declare_enumerator
-
-`void Sym.declare_enumerator(Sym s, List key, Symbol owner)`
-
-Associates an enumerator key with its owner in the active scope.
-
-Source: `src/compiler.x:1462`
-
-<a id="Sym.declare_field_order"></a>
-#### Sym.declare_field_order
-
-`void Sym.declare_field_order(Sym s, Type type, List fields)`
-
-Records declaration AST fields in source order after binding finishes.
-
-`Field` types already use member keys. Unnamed rows retain their type
-and an empty name so initializer traversal preserves anonymous subobjects.
-
-Source: `src/compiler.x:2458`
-
-<a id="Sym.define"></a>
-#### Sym.define
-
-`List Sym.define(Sym s, List key, List type)`
-
-Defines `key` and returns its stable binding in the active scope.
-
-Source: `src/compiler.x:1413`
-
-<a id="Sym.define_global"></a>
-#### Sym.define_global
-
-`void Sym.define_global(Sym s, List key, List type)`
-
-Defines `key` in the unit's writable base scope.
-
-The definition survives the expression scope that first resolved it. Its
-binding is issued at the first reference, as for a row an included file
-contributes, so the unit numbers its bindings the same whether it defined
-the row here or replayed it from an interface.
-
-Source: `src/compiler.x:1455`
-
-<a id="Sym.define_macro"></a>
-#### Sym.define_macro
-
-`void Sym.define_macro(Sym s, Atom name, List definition)`
-
-Defines or replaces a macro in the active lexical scope.
-
-Captured bindings are recorded for later shadow handling. Replacing a
-name already defined in this scope does not increase the local macro
-count.
-
-Source: `src/compiler.x:1929`
-
-<a id="Sym.delegate_aggregate"></a>
-#### Sym.delegate_aggregate
-
-`Type Sym.delegate_aggregate(Sym s, Type type)`
-
-Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
-
-Source: `src/compiler.x:2487`
-
-<a id="Sym.enumerator_owner"></a>
-#### Sym.enumerator_owner
-
-`Symbol Sym.enumerator_owner(Sym s, List key)`
-
-Returns the current scope's enum owner for `key`, or zero.
-
-Source: `src/compiler.x:1522`
-
-<a id="Sym.field_order"></a>
-#### Sym.field_order
-
-`List Sym.field_order(Sym s, Type type)`
-
-Returns recorded fields in source order, or `NULL`.
-
-Source: `src/compiler.x:2479`
-
-<a id="Sym.file_statics"></a>
-#### Sym.file_statics
-
-`Map Sym.file_statics(Sym s)`
-
-Returns the current borrowed set of file-static declaration keys.
-
-A semantic transaction may replace this map, so reacquire it afterwards.
-
-Source: `src/compiler.x:1360`
-
-<a id="Sym.get"></a>
-#### Sym.get
-
-`List Sym.get(Sym s, List key)`
-
-Returns `key`'s type, retrying a bare key in package space, or `NULL`.
-
-Source: `src/compiler.x:1547`
-
-<a id="Sym.get_exact"></a>
-#### Sym.get_exact
-
-`List Sym.get_exact(Sym s, List key)`
-
-Returns `key`'s type without package fallback, or `NULL`.
-
-Source: `src/compiler.x:1555`
-
-<a id="Sym.global_symbols"></a>
-#### Sym.global_symbols
-
-`Map Sym.global_symbols(Sym s)`
-
-Returns the mutable global symbol map supplied to the latest reset.
-
-Source: `src/compiler.x:1337`
-
-<a id="Sym.has_local_macros"></a>
-#### Sym.has_local_macros
-
-`int Sym.has_local_macros(Sym s)`
-
-Returns whether any lexical scope contains a local macro definition.
-
-Source: `src/compiler.x:1941`
-
-<a id="Sym.introduce"></a>
-#### Sym.introduce
-
-`List Sym.introduce(Sym s, String spelling)`
-
-Allocates a fresh binding identity for a compiler-introduced spelling.
-
-Source: `src/compiler.x:1512`
-
-<a id="Sym.is_array_type"></a>
-#### Sym.is_array_type
-
-`int Sym.is_array_type(Sym s, Type type)`
-
-Reports whether `type` reaches the named `Array` value type.
-
-Source: `src/compiler.x:2417`
-
-<a id="Sym.is_map_type"></a>
-#### Sym.is_map_type
-
-`int Sym.is_map_type(Sym s, Type type)`
-
-Reports whether `type` reaches the named `Map` value type.
-
-Source: `src/compiler.x:2421`
-
-<a id="Sym.is_named_value_type"></a>
-#### Sym.is_named_value_type
-
-`int Sym.is_named_value_type(Sym s, Type type, String name)`
-
-Reports whether `type` reaches a named value type before its definition.
-
-Source: `src/compiler.x:2424`
-
-<a id="Sym.is_string_type"></a>
-#### Sym.is_string_type
-
-`int Sym.is_string_type(Sym s, Type type)`
-
-Reports whether `type` reaches the named `String` value type.
-
-Source: `src/compiler.x:2413`
-
-<a id="Sym.is_var_type"></a>
-#### Sym.is_var_type
-
-`int Sym.is_var_type(Sym s, Type type)`
-
-Reports whether `type` reaches the named `Var` value type.
-
-Source: `src/compiler.x:2410`
-
-<a id="Sym.local_type"></a>
-#### Sym.local_type
-
-`Type Sym.local_type(Sym s, Type type)`
-
-Resolves a block-local typedef to the type saved at its declaration.
-File-scope names retain their semantic identity. Local alias definitions
-are resolved before they are installed, so one lookup crosses the whole
-local chain without consulting names shadowed since its declaration.
-
-Source: `src/compiler.x:2289`
-
-<a id="Sym.lookup"></a>
-#### Sym.lookup
-
-`List Sym.lookup(Sym s, List key, Type &?type)`
-
-Resolves an existing key and optionally stores its semantic type.
-
-A symbol row without a binding receives a stable binding identity. A total
-miss returns `NULL` and stores `NULL` through `type` when provided.
-
-Source: `src/compiler.x:1582`
-
-<a id="Sym.lookup_field"></a>
-#### Sym.lookup_field
-
-`Type Sym.lookup_field(Sym s, Type type, List field)`
-
-Returns an aggregate field's declared type, or `NULL`.
-A member of an anonymous struct or union belongs to its enclosing
-aggregate in C, so unnamed rows are searched the way a designated
-initializer already reaches them.
-
-Source: `src/compiler.x:2439`
-
-<a id="Sym.lookup_macro"></a>
-#### Sym.lookup_macro
-
-`List Sym.lookup_macro(Sym s, Atom name)`
-
-Returns the innermost visible local macro named `name`, or `NULL`.
-
-Source: `src/compiler.x:1944`
-
-<a id="Sym.mark_static"></a>
-#### Sym.mark_static
-
-`void Sym.mark_static(Sym s, List key)`
-
-Marks a declaration key as file-static.
-
-Source: `src/compiler.x:1363`
-
-<a id="Sym.next_typedef"></a>
-#### Sym.next_typedef
-
-`Type Sym.next_typedef(Sym s, Type type, int &hops)`
-
-Resolves one typedef hop and counts against the shared cycle budget.
-
-`hops` is an in-out counter initialized by the caller for the whole walk.
-Returns `NULL` for an unresolved link. The shared budget turns a cycle
-into the same diagnostic as full-chain resolution.
-
-Source: `src/compiler.x:2236`
-
-<a id="Sym.normalize_declared_type"></a>
-#### Sym.normalize_declared_type
-
-`Type Sym.normalize_declared_type(Sym s, Type type)`
-
-Resolves typedef bases while retaining every declarator qualifier.
-
-Source: `src/compiler.x:2258`
-
-<a id="Sym.pop_scope"></a>
-#### Sym.pop_scope
-
-`SymScope Sym.pop_scope(Sym s)`
-
-Pops the innermost scope, or returns an empty scope when none exists.
-
-Source: `src/compiler.x:1321`
-
-<a id="Sym.push_new_scope"></a>
-#### Sym.push_new_scope
-
-`void Sym.push_new_scope(Sym s)`
-
-Pushes a new empty lexical scope.
-
-Source: `src/compiler.x:1313`
-
-<a id="Sym.push_scope"></a>
-#### Sym.push_scope
-
-`void Sym.push_scope(Sym s, SymScope scope)`
-
-Pushes a caller-supplied lexical scope while retaining its map objects.
-
-Source: `src/compiler.x:1316`
-
-<a id="Sym.reference"></a>
-#### Sym.reference
-
-`List Sym.reference(Sym s, List key, Type &?type)`
-
-Resolves `key` or creates a forward binding in the current scope.
-
-Stores `NULL` through `type` when no declaration supplies a type.
-
-Source: `src/compiler.x:1589`
-
-<a id="Sym.reference_global"></a>
-#### Sym.reference_global
-
-`List Sym.reference_global(Sym s, List key)`
-
-Resolves a global name or creates its forward binding in the base scope.
-Local declarations cannot capture a retained macro's global reference.
-
-Source: `src/compiler.x:1602`
-
-<a id="Sym.reset"></a>
-#### Sym.reset
-
-`void Sym.reset(Sym s, Map globals)`
-
-Resets symbol state to one base scope backed by `globals`.
-
-Later definitions mutate that caller-supplied map.
-
-Source: `src/compiler.x:1285`
-
-<a id="Sym.resolve_base_type"></a>
-#### Sym.resolve_base_type
-
-`Type Sym.resolve_base_type(Sym s, Type key)`
-
-Resolves a typedef name through the base scopes only, ignoring local
-typedefs, or returns NULL when the base scopes do not declare it.
-
-Source: `src/compiler.x:2247`
-
-<a id="Sym.resolve_global"></a>
-#### Sym.resolve_global
-
-`List Sym.resolve_global(Sym s, List key, Type &?type)`
-
-Resolves a binding through base scopes and optionally stores its type.
-
-Returns `NULL` when no base scope contains the key.
-
-Source: `src/compiler.x:1596`
-
-<a id="Sym.resolve_key"></a>
-#### Sym.resolve_key
-
-`Type Sym.resolve_key(Sym s, Type key)`
-
-Resolves a canonical typedef key to the end of its declared chain.
-
-Source: `src/compiler.x:2188`
-
-<a id="Sym.resolve_numeric_type"></a>
-#### Sym.resolve_numeric_type
-
-`Type Sym.resolve_numeric_type(Sym s, Type type)`
-
-Resolves a numeric typedef without reducing semantic object types.
-
-Returns `NULL` when resolution yields neither a numeric type nor a
-recognized builtin numeric typedef.
-
-Source: `src/compiler.x:2327`
-
-<a id="Sym.scope_count"></a>
-#### Sym.scope_count
-
-`int Sym.scope_count(Sym s)`
-
-Returns the number of semantic scopes, including base scopes.
-
-Source: `src/compiler.x:1329`
-
-<a id="Sym.seed_var_tags"></a>
-#### Sym.seed_var_tags
-
-`void Sym.seed_var_tags(Sym s, Map symbols)`
-
-Registers declared `T_var` converters in the active `Type` unit.
-
-Source: `src/compiler.x:1442`
-
-<a id="Sym.set"></a>
-#### Sym.set
-
-`void Sym.set(Sym s, List key, List type)`
-
-Sets a semantic type for `key` in the required active scope.
-
-Source: `src/compiler.x:1400`
-
-<a id="Sym.var_tag_for_type"></a>
-#### Sym.var_tag_for_type
-
-`Symbol Sym.var_tag_for_type(Sym s, Type type, Type &?resolved)`
-
-Returns a type's `Var` tag and optionally stores its resolved type.
-
-`resolved` receives the final type even when the result is zero because no
-`Var` tag is registered. A null input stores `NULL` and returns zero.
-
-Source: `src/compiler.x:2385`
-
-<a id="Sym.visible_symbols"></a>
-#### Sym.visible_symbols
-
-`List Sym.visible_symbols(Sym s)`
-
-Returns the visible one-part source names and their semantic types.
-Inner scopes win. The result is a fresh List; types remain borrowed.
-
-Source: `src/compiler.x:1369`
-
-### `SymTxn`
-
-<a id="SymTxn.commit"></a>
-#### SymTxn.commit
-
-`void SymTxn.commit(SymTxn s)`
-
-Publishes an active semantic transaction and makes rollback a no-op.
-
-Source: `src/compiler.x:2066`
-
-<a id="SymTxn.commit_transient"></a>
-#### SymTxn.commit_transient
-
-`void SymTxn.commit_transient(SymTxn s)`
-
-Commits an active transaction, retaining the original semantic-map owners.
-The caller may then release the transaction's construction scope.
-Source-fact collection must be disabled: its records retain staged maps.
-Parsing and evaluation must allocate outside that temporary scope.
-
-Source: `src/compiler.x:2107`
-
-<a id="SymTxn.local_macros_changed"></a>
-#### SymTxn.local_macros_changed
-
-`int SymTxn.local_macros_changed(SymTxn s)`
-
-Returns whether the transaction's active scope changed its macro map.
-
-Source: `src/compiler.x:2055`
-
-<a id="SymTxn.rollback"></a>
-#### SymTxn.rollback
-
-`void SymTxn.rollback(SymTxn s)`
-
-Restores every semantic value captured by an active transaction.
-
-Source: `src/compiler.x:2129`
+Source: `src/compiler.x:460`
 
 ### `Symbol`
 
@@ -1697,7 +894,7 @@ Returns 1 for a token type that opens a delimited group, -1 for one that
 closes a group, and 0 otherwise. Every opener spelling ends in the `(`,
 `[`, or `{` that its closer matches.
 
-Source: `src/compiler.x:708`
+Source: `src/compiler.x:695`
 
 ### `Token`
 
@@ -1709,7 +906,7 @@ Source: `src/compiler.x:708`
 Returns the first non-trivia token after the group `t` opens, or after
 `t` when it opens no group. A group that never closes yields `eof`.
 
-Source: `src/compiler.x:731`
+Source: `src/compiler.x:718`
 
 <a id="Token.group_close"></a>
 #### Token.group_close
@@ -1719,7 +916,17 @@ Source: `src/compiler.x:731`
 Returns the token that closes the group `t` opens, `t` itself when it
 opens no group, or the `eof` token when the group never closes.
 
-Source: `src/compiler.x:722`
+Source: `src/compiler.x:709`
+
+<a id="Token.skip_trivia"></a>
+#### Token.skip_trivia
+
+`Token Token.skip_trivia(Token token)`
+
+Returns the first token at or after `token` that is not a space,
+comment, or preprocessor line. The stream must end in `eof`.
+
+Source: `src/compiler.x:591`
 
 ### `Var`
 
@@ -1730,7 +937,7 @@ Source: `src/compiler.x:722`
 
 Recovers the compiler pointer boxed by `Compiler.var`.
 
-Source: `src/compiler.x:212`
+Source: `src/compiler.x:214`
 
 ## Public types
 
@@ -1833,8 +1040,8 @@ A `Compiler` holds the translation state of one unit: its token cursor,
 symbol table, and declaration state. Collection parses the unit
 shallowly, skipping function bodies; the full parse produces its AST.
 The related compilers of one unit share its package registries,
-generated names, and binding numbers.
+generated names, and binding numbers. The symbol table is `Sym`, in
+`symbols.x`.
 
-`Symbol` lookup walks the scope stack from inner to outer. Diagnostics may
-exit immediately or raise `<malformed>` while a recovery boundary is
-active.
+Diagnostics may exit immediately or raise `<malformed>` while a recovery
+boundary is active.

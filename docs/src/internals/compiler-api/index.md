@@ -37,6 +37,7 @@ Functions and types exposed by each compiler module.
 | [`src/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
+| [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
 | [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |
