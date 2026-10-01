@@ -570,6 +570,9 @@ inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 
 // primitive conversions
 
+// Keep the float promotion that quiets signaling NaNs.
+inline Var _box_float(float x) => Var.new(<f32>, x);
+
 macro Unit $scalar(Type $type, Expr $box, Param $parameter) {
   /** Boxes a native `$type` value as `Var`. */
   inline Var $type.var($parameter) {
@@ -592,7 +595,7 @@ $scalar(ushort, Var.box_u16, ushort x);
 $scalar(int, Var.box_i32_bits, int x);
 $scalar(uint, Var.box_u32, uint x);
 $scalar(unsigned, Var.box_u32, unsigned x);
-$scalar(float, Var.box_f32, float x);
+$scalar(float, _box_float, float x);
 $scalar(double, Var.box_f64, double x);
 
 // indirect primitives to Var
