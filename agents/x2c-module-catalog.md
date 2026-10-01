@@ -382,20 +382,20 @@ the compiler's answers to `lib/meta.x` operations.
 Public functions:
 
 `MetaContext.current`, `Compiler.expanding`, `x2c_syntax_type`,
-`x2c_protocol_member`, `x2c_method_resolve`, `x2c_type_is_integral`,
-`x2c_type_is_pointer`, `x2c_type_element`, `x2c_type_parameters`,
-`x2c_type_return`, `x2c_type_parts`, `x2c_type_reverse_name`,
-`x2c_type_resolve`, `x2c_type_layout`, `x2c_type_is_value`,
-`x2c_type_tag_name`, `x2c_type_fields`, `x2c_binding_spelling`, `x2c_ident`,
+`x2c_protocol_member`, `x2c_method_resolve`, `builtin_foreach_bindings`,
+`builtin_foreach_reference`, `x2c_type_is_integral`, `x2c_type_is_pointer`,
+`x2c_type_element`, `x2c_type_parameters`, `x2c_type_return`, `x2c_type_parts`,
+`x2c_type_reverse_name`, `x2c_type_resolve`, `x2c_type_layout`,
+`x2c_type_is_value`, `x2c_type_tag_name`, `x2c_type_fields`,
+`x2c_binding_spelling`, `x2c_ident`, `builtin_foreach_unique`,
 `x2c_meta_definition_hashes`, `x2c_function_name`, `x2c_function_parameter`,
-`x2c_source_text`, `x2c_embed_text`, `x2c_literal_value`,
+`binding_native_type`, `binding_literal_list`, `x2c_source_text`,
+`x2c_embed_text`, `x2c_literal_value`, `builtin_class_location`,
 `x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
 `x2c_diagnostic_fail`, `x2c_diagnostic_warn`, `meta_type_description`,
-`meta_source_description`, `builtin_foreach_reference`,
-`builtin_foreach_unique`, `builtin_foreach_complete`,
-`builtin_foreach_collection`, `builtin_foreach_bindings`,
-`builtin_class_location`, `binding_native_type`, `binding_literal_list`,
-`MetaContext.reject`, `Compiler.bind_sdk_primitives`
+`meta_source_description`, `builtin_foreach_complete`,
+`builtin_foreach_collection`, `MetaContext.reject`,
+`Compiler.bind_sdk_primitives`
 
 ### [src/parse.x](../src/parse.x)
 
@@ -457,7 +457,8 @@ Public functions:
 `Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
 `Compiler.protocol_update_helper`, `Compiler.discard_helper`,
 `Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
-`Compiler.install_generated_protocol_symbols`, `Compiler.rebuild_protocols`
+`Compiler.install_generated_protocol_symbols`,
+`Compiler.record_source_typedef`, `Compiler.rebuild_protocols`
 
 ### [src/regions.x](../src/regions.x)
 

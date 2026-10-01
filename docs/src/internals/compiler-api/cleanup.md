@@ -33,7 +33,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`; `$catch_landing` calls this in a
 slot.
 
-Source: `src/cleanup.x:765`
+Source: `src/cleanup.x:759`
 
 #### builtin_catch_patterns
 
@@ -42,7 +42,7 @@ Source: `src/cleanup.x:765`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/cleanup.x:741`
+Source: `src/cleanup.x:735`
 
 #### builtin_defer_captures
 
@@ -50,7 +50,7 @@ Source: `src/cleanup.x:741`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:848`
+Source: `src/cleanup.x:842`
 
 #### builtin_defer_record
 
@@ -59,7 +59,7 @@ Source: `src/cleanup.x:848`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:839`
+Source: `src/cleanup.x:833`
 
 #### builtin_try_catch_site
 
@@ -69,7 +69,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:726`
+Source: `src/cleanup.x:720`
 
 #### builtin_try_landing
 
@@ -79,7 +79,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:753`
+Source: `src/cleanup.x:747`
 
 ### `Compiler`
 
@@ -104,7 +104,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1234`
+Source: `src/cleanup.x:1216`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -114,7 +114,7 @@ Source: `src/cleanup.x:1234`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1197`
+Source: `src/cleanup.x:1191`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime

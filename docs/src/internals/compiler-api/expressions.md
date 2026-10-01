@@ -17,7 +17,7 @@ Expression syntax and its resolution.
 | [`Compiler.complete_iter_chain`](#Compiler.complete_iter_chain) | Completes an eligible resolved `Iter` call chain for immediate consumption. |
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
-| [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter `type` declares for `target`, applied to `expr`, or NULL when it declares none. |
+| [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
 | [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
 | [`Compiler.parse_conditional`](#Compiler.parse_conditional) | Parses a binary expression and its optional conditional tail. |
@@ -118,10 +118,11 @@ Source: `src/expressions.x:3520`
 
 `List Compiler.converter_call(Compiler c, List expr, Type type, Type target)`
 
-The call to the converter `type` declares for `target`, applied to
-`expr`, or NULL when it declares none.
+The call to the converter that `type`, or the first of its typedef names
+that declares one, provides for `target`, applied to `expr`, or NULL
+when none declares one.
 
-Source: `src/expressions.x:3675`
+Source: `src/expressions.x:3660`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts

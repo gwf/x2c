@@ -27,7 +27,7 @@ already be closed.
 
 **Raises:** `<bad-state>` when a lease remains active.
 
-Source: `lib/match-cache.x:559`
+Source: `lib/match-cache.x:527`
 
 ### `MatchCache`
 
@@ -43,7 +43,7 @@ the token storage remains owned by its `Context` `Scope`.
 **Raises:** `<bad-state>` when `token` is not the top state or its cache has an
 active lease. The failure leaves the state installed.
 
-Source: `lib/match-cache.x:542`
+Source: `lib/match-cache.x:510`
 
 <a id="MatchCache.context_open"></a>
 #### MatchCache.context_open
@@ -58,7 +58,7 @@ active `Scope` and must be passed to `MatchCache.context_close` before that
 
 **Raises:** `<alloc-fail>` when the state cannot be allocated.
 
-Source: `lib/match-cache.x:528`
+Source: `lib/match-cache.x:496`
 
 ## Runtime-internal callables
 
@@ -100,7 +100,7 @@ inactive pressure lease is a no-op.
 pattern compiles to no program, so it is never cached and never leased.
 `<alloc-fail>` may also be raised while preparing or growing storage.
 
-Source: `lib/match-cache.x:92`
+Source: `lib/match-cache.x:94`
 
 <a id="MatchCache.current"></a>
 #### MatchCache.current
@@ -111,7 +111,7 @@ Returns the active default `Match` cache, creating it on first use.
 
 **Raises:** `<alloc-fail>` when the cache cannot be created.
 
-Source: `lib/match-cache.x:495`
+Source: `lib/match-cache.x:463`
 
 <a id="MatchCache.dispose"></a>
 #### MatchCache.dispose
@@ -125,7 +125,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match-cache.x:604`
+Source: `lib/match-cache.x:570`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default
@@ -139,7 +139,7 @@ compiler capture sites are unaffected.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache installed.
 
-Source: `lib/match-cache.x:514`
+Source: `lib/match-cache.x:482`
 
 <a id="MatchCache.new"></a>
 #### MatchCache.new
@@ -155,7 +155,7 @@ pools. `MatchCache.dispose` is required after every lease is released.
 storage dimensions cannot be represented, and `<alloc-fail>` when cache
 storage cannot be allocated.
 
-Source: `lib/match-cache.x:576`
+Source: `lib/match-cache.x:543`
 
 <a id="MatchCache.search"></a>
 #### MatchCache.search
@@ -171,7 +171,7 @@ that `List` is nonempty.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match-cache.x:424`
+Source: `lib/match-cache.x:403`
 
 <a id="MatchCache.search_replace"></a>
 #### MatchCache.search_replace
@@ -186,7 +186,7 @@ or machine error returns 0 and writes `input` unchanged.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match-cache.x:460`
+Source: `lib/match-cache.x:434`
 
 <a id="MatchCache.try_capture"></a>
 #### MatchCache.try_capture
@@ -201,7 +201,7 @@ malformed pattern, invalid buffer, cache pressure, or machine error returns
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match-cache.x:371`
+Source: `lib/match-cache.x:360`
 
 <a id="MatchCache.try_match"></a>
 #### MatchCache.try_match
@@ -216,7 +216,7 @@ binding shape and order follow `MatchPlan.execute`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or publishing.
 
-Source: `lib/match-cache.x:388`
+Source: `lib/match-cache.x:374`
 
 <a id="MatchCache.try_match_replace"></a>
 #### MatchCache.try_match_replace
@@ -231,7 +231,7 @@ may be any `Var`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match-cache.x:442`
+Source: `lib/match-cache.x:420`
 
 <a id="MatchCache.try_search"></a>
 #### MatchCache.try_search
@@ -246,7 +246,7 @@ follows `MatchPlan.try_search`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing bindings.
 
-Source: `lib/match-cache.x:405`
+Source: `lib/match-cache.x:388`
 
 ### `MatchLease`
 
@@ -262,7 +262,7 @@ transient plan or unpins its cached entry and makes the lease inactive.
 **Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
 entry state is inconsistent. The failure leaves the lease active.
 
-Source: `lib/match-cache.x:306`
+Source: `lib/match-cache.x:299`
 
 ## Public types
 

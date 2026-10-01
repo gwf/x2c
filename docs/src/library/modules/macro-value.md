@@ -27,7 +27,7 @@ Macros as values that build and recognize code.
 Applies a macro value to code values. The result is a pending
 invocation; inserting it into a program expands and binds it there.
 
-Source: `lib/macro-value.x:72`
+Source: `lib/macro-value.x:70`
 
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
@@ -39,7 +39,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:333`
+Source: `lib/macro-value.x:331`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -49,7 +49,7 @@ Source: `lib/macro-value.x:333`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:326`
+Source: `lib/macro-value.x:324`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -59,7 +59,7 @@ Source: `lib/macro-value.x:326`
 Records the Macro values an anonymous macro captured where it was
 created, so applying it later applies the same children.
 
-Source: `lib/macro-value.x:67`
+Source: `lib/macro-value.x:65`
 
 <a id="Macro_pattern"></a>
 #### Macro_pattern
@@ -69,7 +69,7 @@ Source: `lib/macro-value.x:67`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:131`
+Source: `lib/macro-value.x:129`
 
 ### `Macro`
 
@@ -80,7 +80,7 @@ Source: `lib/macro-value.x:131`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macro-value.x:103`
+Source: `lib/macro-value.x:101`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -94,7 +94,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macro-value.x:111`
+Source: `lib/macro-value.x:109`
 
 ## Public types
 

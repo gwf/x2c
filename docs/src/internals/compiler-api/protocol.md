@@ -26,6 +26,7 @@ Protocols from declaration to generated adapters.
 | [`Compiler.protocol_update_helper`](#Compiler.protocol_update_helper) | Returns a generated helper for a direct protocol-backed update. |
 | [`Compiler.publish_protocol_node`](#Compiler.publish_protocol_node) | Validates and installs one normalized protocol or adoption node. |
 | [`Compiler.rebuild_protocols`](#Compiler.rebuild_protocols) | Rebuilds the per-unit protocol and adoption registries from `symbols`. |
+| [`Compiler.record_source_typedef`](#Compiler.record_source_typedef) | Remembers a source typedef's declaration and visibility, which native alias insertion reads for its participant. |
 | [`Compiler.resolve_protocol_member`](#Compiler.resolve_protocol_member) | Resolves a protocol member for `participant`. |
 | [`Compiler.resolve_protocols`](#Compiler.resolve_protocols) | Resolves every visible adoption into the current conformance registry. |
 | [`Compiler.reverse_converter_spelling`](#Compiler.reverse_converter_spelling) | Returns the conventional reverse converter spelling. |
@@ -196,7 +197,17 @@ Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:2711`
+Source: `src/protocol.x:2718`
+
+<a id="Compiler.record_source_typedef"></a>
+#### Compiler.record_source_typedef
+
+`void Compiler.record_source_typedef( Compiler c, String name, List declaration, int private)`
+
+Remembers a source typedef's declaration and visibility, which native
+alias insertion reads for its participant.
+
+Source: `src/protocol.x:2641`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
