@@ -490,9 +490,9 @@ static List Compiler._parse_offsetof(Compiler c) {
   List member = c.parse_basic_identifier();
   for (;;) {
     if (c.test(<.>))
-      member = member.append(cons(".", c.parse_basic_identifier()));
+      member = %(@member "." @{c.parse_basic_identifier()});
     else if (c.test(<[>)) {
-      member = member.append(%("[" ${c.parse_expression()} "]"));
+      member = %(@member "[" ${c.parse_expression()} "]");
       c.expect(<]>);
     }
     else break;
