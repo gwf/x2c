@@ -40,8 +40,6 @@ typedef struct Spec {
   Map index;
 } Spec;
 
-// parsing
-
 /** Parses `args` against `spec` and returns a `Map` from each row's name
     to its value.
 
