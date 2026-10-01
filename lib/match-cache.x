@@ -40,6 +40,7 @@ typedef struct MatchLease {
 #pragma private
 
 #include <assert.h>
+#include <string.h>
 #include "pool.x"
 #include "scope.x"
 
@@ -74,7 +75,8 @@ struct MatchCache {
   int *buckets;
   int capacity, bucket_count, size, lru_head, active_leases;
   unsigned long next_generation, pool_epoch;
-  unsigned long admitted_memo[256], refused_memo[256];
+  unsigned long admitted_memo[MATCH_ADMITTED_MEMO];
+  unsigned long refused_memo[MATCH_ADMITTED_MEMO];
 };
 
 /** Acquires a lease for a cached prepared pattern.
@@ -112,12 +114,7 @@ int MatchCache.acquire(
 /* An inadmissible pattern gets a plan its lease owns. */
 static int MatchCache._transient(
   MatchCache cache, Var pattern, MatchLease *lease, const char *owner) {
-  MatchPlan plan = MatchPlan.prepare(pattern);
-  if (plan.status == MACHINE_INELIGIBLE) {
-    const char *reason = plan.reason;
-    plan.free();
-    MatchPlan.raise_ineligible(reason, owner);
-  }
+  MatchPlan plan = _unfenced(MatchPlan.prepare(pattern), owner);
   lease.cache = cache;
   lease.transient_plan = plan;
   lease.active = 1;
@@ -130,29 +127,29 @@ static int MatchCache._transient(
 static MatchPlan MatchCache._prepare(
   MatchCache cache, Var pattern, const char *owner) {
   MatchPlan plan = NULL;
-  const char *fenced = NULL;
-  $scope(&cache.scope) {
-    plan = MatchPlan.prepare(pattern);
-    if (plan.status == MACHINE_INELIGIBLE) {
-      fenced = plan.reason;
-      plan.free();
-    }
+  $scope(&cache.scope) { plan = MatchPlan.prepare(pattern); }
+  return _unfenced(plan, owner);
+}
+
+/* Frees a fenced plan and raises its fence; returns any other plan. */
+static MatchPlan _unfenced(MatchPlan plan, const char *owner) {
+  if (plan.status == MACHINE_INELIGIBLE) {
+    const char *reason = plan.reason;
+    plan.free();
+    MatchPlan.raise_ineligible(reason, owner);
   }
-  if (fenced) MatchPlan.raise_ineligible(fenced, owner);
   return plan;
 }
 
 /* Installs `plan` under `key` as the most recent entry, with a fresh
-   nonzero generation. */
+   generation. */
 static void MatchCache._insert(
   MatchCache cache, int slot, unsigned long key, MatchPlan plan) {
   MatchCacheEntry *entry = &cache.entries[slot];
   entry.key = key;
   entry.plan = plan;
-  entry.pin_count = 0;
   entry.occupied = 1;
   entry.generation = ++cache.next_generation;
-  if (!entry.generation) entry.generation = ++cache.next_generation;
   int bucket = cache._bucket(key);
   entry.bucket_next = cache.buckets[bucket];
   cache.buckets[bucket] = slot;
@@ -186,10 +183,8 @@ static int MatchCache._resync(MatchCache cache) {
   if (cache.active_leases) return 0;
   for (int slot = 0; slot < cache.capacity; slot++)
     if (cache.entries[slot].occupied) cache._remove(slot);
-  for (int i = 0; i < MATCH_ADMITTED_MEMO; i++) {
-    cache.admitted_memo[i] = 0;
-    cache.refused_memo[i] = 0;
-  }
+  memset(cache.admitted_memo, 0, sizeof(cache.admitted_memo));
+  memset(cache.refused_memo, 0, sizeof(cache.refused_memo));
   cache.pool_epoch = epoch;
   return 1;
 }
@@ -276,10 +271,8 @@ static void MatchCache._remove(MatchCache cache, int slot) {
   while (*link >= 0 && *link != slot) link = &cache.entries[*link].bucket_next;
   assert(*link == slot);
   *link = entry.bucket_next;
-  entry.bucket_next = -1;
   cache._unlink(slot);
   entry.plan.free();
-  entry.plan = NULL;
   entry.occupied = 0;
   cache.size--;
 }
@@ -326,23 +319,18 @@ void MatchLease.release(MatchLease *lease) {
   lease.active = 0;
 }
 
-static MatchPlan MatchLease._plan(MatchLease *lease) {
-  if (!lease || !lease.active) return NULL;
-  if (lease.transient_plan) return lease.transient_plan;
-  MatchCacheEntry *entry = lease._entry();
-  return entry ? entry.plan : NULL;
-}
+/* The plan a lease holds while its acquisition stays active. */
+static MatchPlan MatchLease._plan(MatchLease *lease) =>
+  lease.transient_plan ? lease.transient_plan
+                       : lease.cache.entries[lease.slot].plan;
 
-/* NULL for a transient lease, or once the slot is empty or recycled under a
-   newer generation. */
+/* The entry an active cached lease pins, or NULL once the slot is empty or
+   recycled under a newer generation. */
 static MatchCacheEntry *MatchLease._entry(MatchLease *lease) {
-  if (!lease.active || lease.transient_plan || !lease.cache) return NULL;
   MatchCache cache = lease.cache;
-  if (lease.slot >= 0 && lease.slot < cache.capacity) {
-    MatchCacheEntry *entry = &cache.entries[lease.slot];
-    if (entry.occupied && entry.generation == lease.generation) return entry;
-  }
-  return NULL;
+  if (!cache || lease.slot < 0 || lease.slot >= cache.capacity) return NULL;
+  MatchCacheEntry *entry = &cache.entries[lease.slot];
+  return entry.occupied && entry.generation == lease.generation ? entry : NULL;
 }
 
 /* cached consumers
@@ -351,14 +339,15 @@ static MatchCacheEntry *MatchLease._entry(MatchLease *lease) {
    program. Malformed, cache-pressure, and machine-error cases do not match;
    a fenced pattern raised out of `acquire` and never reaches an adapter. */
 
-/* Declares `$lease` for `$pattern` and the `$status` its acquisition
-   returned. */
-macro Statement $match.lease(
-  Name $lease, Name $status, Expr $cache, Expr $pattern, Expr $owner) {
+/* Declares `$plan`, the program `$cache` prepared for `$pattern`, leased
+   until the scope exits, or NULL when acquisition prepared none. */
+macro Statement $match.plan(
+  Name $plan, Expr $cache, Expr $pattern, Expr $owner) {
   MatchLease storage;
-  MatchLease *$lease = &storage;
-  int $status = $cache.acquire($pattern, *$lease, $owner);
-  defer $lease.release();
+  MatchLease *lease = &storage;
+  int status = $cache.acquire($pattern, *lease, $owner);
+  defer lease.release();
+  MatchPlan $plan = status == MACHINE_PREPARED ? lease._plan() : NULL;
 }
 
 /** Matches through `cache` into caller-owned positional storage.
@@ -371,11 +360,8 @@ macro Statement $match.lease(
 int MatchCache.try_capture(
   MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures,
   const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
-  int result = 0;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED) result = plan.try_capture(input, captures);
-  return result == 1;
+  $match.plan(plan, cache, pattern, owner);
+  return plan && plan.try_capture(input, captures) == 1;
 }
 
 /** Matches through `cache`, writing bindings on success.
@@ -388,11 +374,8 @@ int MatchCache.try_capture(
 int MatchCache.try_match(
   MatchCache cache, List input, Var pattern, List &?out_bindings,
   const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
-  int result = 0;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED) result = plan.try_match(input, out_bindings);
-  return result == 1;
+  $match.plan(plan, cache, pattern, owner);
+  return plan && plan.try_match(input, out_bindings) == 1;
 }
 
 /** Searches through `cache`, writing the first match and bindings.
@@ -405,12 +388,8 @@ int MatchCache.try_match(
 int MatchCache.try_search(
   MatchCache cache, List input, Var pattern, Var &?out_match,
   List &?out_bindings, const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
-  int result = 0;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED)
-    result = plan.try_search(input, out_match, out_bindings);
-  return result == 1;
+  $match.plan(plan, cache, pattern, owner);
+  return plan && plan.try_search(input, out_match, out_bindings) == 1;
 }
 
 /** Searches through `cache`, writing every match.
@@ -424,10 +403,9 @@ int MatchCache.try_search(
 int MatchCache.search(
   MatchCache cache, List input, Var pattern, List &out_results,
   const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
+  $match.plan(plan, cache, pattern, owner);
   List results = NULL;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED) plan.search(input, results);
+  if (plan) plan.search(input, results);
   out_results = results;
   return results != NULL;
 }
@@ -442,12 +420,8 @@ int MatchCache.search(
 int MatchCache.try_match_replace(
   MatchCache cache, List input, Var pattern, Var template, Var &?out,
   const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
-  int result = 0;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED)
-    result = plan.try_match_replace(input, template, out);
-  return result == 1;
+  $match.plan(plan, cache, pattern, owner);
+  return plan && plan.try_match_replace(input, template, out) == 1;
 }
 
 /** Replaces every match through `cache` from the leaves upward.
@@ -460,13 +434,11 @@ int MatchCache.try_match_replace(
 int MatchCache.search_replace(
   MatchCache cache, List input, Var pattern, Var template, List &out,
   const char *owner) {
-  $match.lease(lease, status, cache, pattern, owner);
-  int answered = status != MACHINE_PREPARED, List result = input;
-  MatchPlan plan = lease._plan();
-  if (status == MACHINE_PREPARED)
-    answered = plan.search_replace(input, template, result) >= 0;
+  $match.plan(plan, cache, pattern, owner);
+  List result = input;
+  int answered = plan && plan.search_replace(input, template, result) >= 0;
   out = result;
-  return status == MACHINE_PREPARED && answered;
+  return answered;
 }
 
 /* default caches
@@ -480,14 +452,10 @@ typedef struct MatchContextState {
   struct MatchContextState *prev, MatchCache cache;
 } *MatchContextState;
 
-typedef struct MatchThreadState {
+static threaded struct {
   MatchCache plan_cache;
   MatchContextState context_top;
-} *MatchThreadState;
-
-static threaded struct MatchThreadState match_thread;
-
-static MatchThreadState _thread(void) => &match_thread;
+} match_thread;
 
 /** Returns the active default `Match` cache, creating it on first use.
     Raises: `<alloc-fail>` when the cache cannot be created.
@@ -501,8 +469,8 @@ MatchCache MatchCache.current(void) {
 
 /* The top Context's cache when a Context is open, or else the thread's. */
 static MatchCache *_default_slot(void) {
-  MatchThreadState state = _thread();
-  return state.context_top ? &state.context_top.cache : &state.plan_cache;
+  MatchContextState top = match_thread.context_top;
+  return top ? &top.cache : &match_thread.plan_cache;
 }
 
 /** Destroys the active `Context`-local or thread-local `Match` cache.
@@ -527,9 +495,9 @@ void MatchCache.flush_default(void) {
 */
 void *MatchCache.context_open(void) {
   MatchContextState state = Scope.malloc(sizeof(struct MatchContextState));
-  state.prev = _thread().context_top;
+  state.prev = match_thread.context_top;
   state.cache = NULL;
-  _thread().context_top = state;
+  match_thread.context_top = state;
   return state;
 }
 
@@ -542,11 +510,11 @@ void *MatchCache.context_open(void) {
 void MatchCache.context_close(void *token) {
   MatchContextState state = token;
   if (!state) return;
-  if (_thread().context_top != state)
+  if (match_thread.context_top != state)
     raise %(bad-state (owner "MatchCache.context_close"));
 
   if (state.cache) state.cache.dispose();
-  _thread().context_top = state.prev;
+  match_thread.context_top = state.prev;
 }
 
 /** Disposes this thread's default `Match` plan cache.
@@ -557,10 +525,9 @@ void MatchCache.context_close(void *token) {
     Raises: `<bad-state>` when a lease remains active.
 */
 void x2c_match_thread_release(void) {
-  MatchThreadState state = &match_thread;
-  if (!state.plan_cache) return;
-  state.plan_cache.dispose();
-  state.plan_cache = NULL;
+  if (!match_thread.plan_cache) return;
+  match_thread.plan_cache.dispose();
+  match_thread.plan_cache = NULL;
 }
 
 // lifecycle
@@ -589,7 +556,6 @@ MatchCache MatchCache.new(int capacity) {
   cache.pool_epoch = Pool.epoch();
   cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
   cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
-  for (int i = 0; i < capacity; i++) cache.entries[i].bucket_next = -1;
   for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
   Scope.pop();
   return cache;
