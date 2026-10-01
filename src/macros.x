@@ -2039,9 +2039,16 @@ static int _source_capture_parts(Var value, List &?source, Var &?syntax) {
   return 0;
 }
 
+/* `value` without its source wrappers. A pending invocation inside it keeps
+   its own capture rows, so nested applications unwrap each argument once. */
 static Var _source_unwrap(Var value) {
   if (value is not <list> || value.is_nil()) return value;
-  return value.list().search_replace(%(src ? ?syntax), <?syntax>);
+  match (value) {
+    case %(src ? ?syntax): return _source_unwrap(syntax);
+    case %(macro-invoke *): return value;
+  }
+  List child;
+  $ast.rewrite_children(value.list(), child, _source_unwrap(child));
 }
 
 /* invocations at syntax positions
