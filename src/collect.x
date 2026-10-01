@@ -392,8 +392,7 @@ static void FileWalk.include(FileWalk *w, String target, int angle) {
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
-    if (!entry)
-      entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
+    if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
     w.c._replay_cached(entry, w.globs, w.visited);
   }
   _cache_dependency(
@@ -405,8 +404,7 @@ static void FileWalk.include(FileWalk *w, String target, int angle) {
 static String Compiler._walked_hash(
   Compiler c, String target, String canonical) {
   Var walked = _process_cache()[canonical];
-  if (walked is void)
-    return _content_hash(c._include_text(target, canonical));
+  if (walked is void) return _content_hash(c._include_text(target, canonical));
   return walked.list().cadr();
 }
 

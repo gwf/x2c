@@ -159,11 +159,12 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
 
     A failure while staging leaves the `Map`'s original records, backing
     storage, and recorded `Scope` unchanged. Effects of callbacks that
-    already completed, including nested exports, are not rolled back. Any failure while moving the
-    rebuilt `Block`s occurs after the table has replaced the original. A null
-    `Map`, callback, or `Scope` pointer does nothing. Raises: `<alloc-fail>`,
-    `<size-limit>`, or `<invariant>` while rebuilding, or any cause from
-    export, key hashing, or moving the rebuilt `Block`s. */
+    already completed, including nested exports, are not rolled back. Any
+    failure while moving the rebuilt `Block`s occurs after the table has
+    replaced the original. A null `Map`, callback, or `Scope` pointer does
+    nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
+    rebuilding, or any cause from export, key hashing, or moving the rebuilt
+    `Block`s. */
 void Map.export_to(
   Map map, Context source, VarExportContextFn export_value, Scope *scope) {
   if (map == NULL || !export_value || !scope) return;

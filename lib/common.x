@@ -266,7 +266,7 @@ void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
 
 /* Read by Exception, Scope, and Pool on paths that run before Error is
-   initialized, so it is the storage rather than an accessor over it. */
+   initialized, so callers read the storage itself; no accessor wraps it. */
 extern threaded int x2c_error_runtime_ready;
 
 extern File Stdin, Stdout, Stderr;
