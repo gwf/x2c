@@ -570,32 +570,30 @@ inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 
 // primitive conversions
 
-macro Unit $scalar(Type $type, Literal $tag, Param $parameter) {
+macro Unit $scalar(Type $type, Expr $box, Param $parameter) {
   /** Boxes a native `$type` value as `Var`. */
   inline Var $type.var($parameter) {
-    return Var.new($tag, $(x2c.parameters.arguments (list $parameter))...);
+    return $box($(x2c.parameters.arguments (list $parameter))...);
   }
   /** Returns the display `String` of `$type`. */
   inline String $type.str($parameter) {
-    return Var.new(
-      $tag, $(x2c.parameters.arguments (list $parameter))...).str();
+    return $box($(x2c.parameters.arguments (list $parameter))...).str();
   }
   /** Returns the readable representation of `$type`. */
   inline String $type.repr($parameter) {
-    return Var.new(
-      $tag, $(x2c.parameters.arguments (list $parameter))...).repr();
+    return $box($(x2c.parameters.arguments (list $parameter))...).repr();
   }
 }
 
-$scalar(char, <i8>, char x);
-$scalar(uchar, <u8>, uchar x);
-$scalar(short, <i16>, short x);
-$scalar(ushort, <u16>, ushort x);
-$scalar(int, <i32>, int x);
-$scalar(uint, <u32>, uint x);
-$scalar(unsigned, <u32>, unsigned x);
-$scalar(float, <f32>, float x);
-$scalar(double, <f64>, double x);
+$scalar(char, Var.box_i8, char x);
+$scalar(uchar, Var.box_u8, uchar x);
+$scalar(short, Var.box_i16, short x);
+$scalar(ushort, Var.box_u16, ushort x);
+$scalar(int, Var.box_i32_bits, int x);
+$scalar(uint, Var.box_u32, uint x);
+$scalar(unsigned, Var.box_u32, unsigned x);
+$scalar(float, Var.box_f32, float x);
+$scalar(double, Var.box_f64, double x);
 
 // indirect primitives to Var
 

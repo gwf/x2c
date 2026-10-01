@@ -666,8 +666,7 @@ macro Unit $array.core.observe(
 }
 
 macro Unit $array.typed.observe(
-  Type $family, Type $element, Literal $owner, Name $compare_element,
-  Name $new_buffer, Name $finish_buffer
+  Type $family, Type $element, Name $compare_element
 ) {
   $array.core.observe($family, $element, $compare_element);
   int $family.compare($family, $family);
@@ -695,16 +694,16 @@ macro Unit $array.typed.observe(
 
   /** Returns the packed-Array display String. */
   String $family.str($family array) {
-    Buffer out = $new_buffer();
+    Buffer out = Buffer_new(0);
     array.write_str(out);
-    return $finish_buffer(out);
+    return out.str_free();
   }
 
   /** Returns the readable packed-Array representation. */
   String $family.repr($family array) {
-    Buffer out = $new_buffer();
+    Buffer out = Buffer_new(0);
     array.write_repr(out);
-    return $finish_buffer(out);
+    return out.str_free();
   }
 }
 
