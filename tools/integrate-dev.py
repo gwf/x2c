@@ -635,11 +635,11 @@ def main():
             queue.wait(args)
         elif args.operation == "status":
             queue.status()
+        elif args.operation == "submit":
+            queue.submit(args)
         else:
             with queue.lock():
-                if args.operation == "submit":
-                    queue.submit(args)
-                elif args.operation == "prepare":
+                if args.operation == "prepare":
                     if args.max_batch < 1 or args.window < 0:
                         raise ValueError("batch size must be positive and window nonnegative")
                     queue.prepare(args)

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -293,6 +294,35 @@ class IntegrationProbe(unittest.TestCase):
         add=max(i for i,c in enumerate(calls) if 'POST' in c)
         self.assertLess(delete,patch); self.assertLess(patch,add)
         self.assertEqual(state.get('gates',[]),[])
+
+    def test_submission_during_gate_keeps_integration_owner_lock(self):
+        head=self.pr(1,ready=False)
+        submitting=self.directory/'independent-pr-worktree'
+        self.git('worktree','add',str(submitting),'work-1')
+        tool=submitting/'tools'/'integrate-dev.py'
+        self.command([sys.executable,str(tool),'--root',str(submitting),
+                      'context','--role','individual','--delivery','pr'],
+                     cwd=submitting)
+        evidence=submitting/'debug'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'focused check','result':'passed'}]))
+        lock=self.root/'.git'/'integration.lock'
+        with lock.open('a+') as holder:
+            fcntl.flock(holder,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            holder.write(str(os.getpid())); holder.flush()
+            submitted=self.command(
+                [sys.executable,str(tool),'--root',str(submitting),'submit',
+                 '--pr','1','--base',self.base,'--evidence-file',str(evidence)],
+                cwd=submitting,ok=False)
+            self.assertEqual(submitted.returncode,0,
+                             submitted.stdout+submitted.stderr)
+            self.assertEqual(json.loads(submitted.stdout)['head'],head)
+            second=self.cli('prepare','--flush',ok=False)
+            self.assertNotEqual(second.returncode,0)
+            self.assertIn('another coordinator command is active',second.stderr)
+        self.assertEqual(self.state()['pulls']['1']['labels'],
+                         [{'name':'integration-ready'}])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
 
     def test_malformed_metadata_does_not_block_good_ready_work(self):
         self.pr(1); bad_evidence_head=self.pr(2); self.pr(3)
