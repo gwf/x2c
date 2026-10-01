@@ -238,7 +238,7 @@ static char _mark(Symbol kind) {
    prints it. */
 static void Hunk.write(Hunk *h, Buffer out) {
   out.printf(
-    "@@ -%s,%s +%s,%s @@\n", h.old_count ? h.old_start + 1 : h.old_start,
+    "@@ -%d,%d +%d,%d @@\n", h.old_count ? h.old_start + 1 : h.old_start,
     h.old_count, h.new_count ? h.new_start + 1 : h.new_start, h.new_count);
   foreach (String line, h.lines.reverse()) out.write(line);
 }
