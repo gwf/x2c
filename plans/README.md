@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Batched dev integration](batched-dev-integration.md): preserve individual
+  and session-orchestrated integration; add an optional standing PR integrator
+  for workers and orchestrators, supporting Codex and Claude in version 1.
+  No policy change is live.
 - [x2c self-expression](x2c-self-expression.md): reproduced defects, then
   three waves that express each relationship at the largest ordinary x2c
   form that owns it, prototypes, and four language-design questions.

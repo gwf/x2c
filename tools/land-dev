@@ -1,83 +1,266 @@
-#!/bin/sh
-# land-dev -- validate the current branch against current dev and push it.
-#
-# Usage: tools/land-dev "commit message for a bootstrap refresh"
-#
-# Each attempt merges origin/dev, rebuilds and regenerates the docs, runs
-# the agent-pr-check gate once, commits refreshed bootstrap/ and etc/ output,
-# confirms the gate, and
-# pushes to dev only when the tree is clean. A rejected push retries from the
-# merge. A change to emitted C leaves bootstrap one round behind and fails
-# stage-diff-0; that gate has already refreshed bootstrap, so land-dev runs
-# it once more. Any other failed gate preserves the tree and stops. Each invocation keeps
-# its logs under debug/land-dev-*, with debug/land-dev-latest pointing to it.
-# Only shared publication takes this lock; private commits and builds do not.
-set -u
-message=${1:?usage: tools/land-dev "bootstrap refresh commit message"}
-mkdir -p debug
-lock="$(git rev-parse --git-common-dir)/land-dev.lock"
-waiting=
-until mkdir "$lock" 2>/dev/null; do
-  holder=$(cat "$lock/pid" 2>/dev/null)
-  if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
-    rm -rf "$lock"
-    continue
-  fi
-  if [ "$waiting" != "${holder:-unknown}" ]; then
-    echo "land-dev: waiting for publication lock (pid ${holder:-unknown})"
-    waiting=${holder:-unknown}
-  fi
-  sleep 10
-done
-echo $$ >"$lock/pid"
-trap 'rm -rf "$lock"' EXIT
-trap 'exit 1' INT TERM
-run=$(mktemp -d debug/land-dev-XXXXXXXX) || exit 1
-ln -sfn "$(basename "$run")" debug/land-dev-latest
-echo "land-dev: logs in $run"
-for attempt in 1 2 3 4; do
-  logs="$run/attempt-$attempt"
-  mkdir "$logs" || exit 1
-  git fetch -q origin && git merge -q --no-edit origin/dev ||
-    { echo "land-dev: merge with origin/dev failed"; exit 1; }
-  upstream=$(git rev-parse origin/dev) || exit 1
-  make build >"$logs/build.log" 2>&1 &&
-    make doc-generate >"$logs/docgen.log" 2>&1 ||
-    { echo "land-dev: build or doc-generate failed; see $logs"; exit 1; }
-  if [ -n "$(git status --short)" ]; then
-    git add -A docs agents site && git commit -qm "refresh generated docs"
-  fi
-  if ! tools/gate-state.py ensure agent-pr-check >"$logs/gate.log" 2>&1; then
-    grep -q '\[stage-diff-0\] Error' "$logs/gate.log" || {
-      echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
-      exit 1
-    }
-    echo "land-dev: bootstrap needs a second round; running the gate again"
-    mv "$logs/gate.log" "$logs/gate-first-round.log"
-    tools/gate-state.py ensure agent-pr-check >"$logs/gate.log" 2>&1 || {
-      echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
-      exit 1
-    }
-  fi
-  if [ -n "$(git status --short)" ]; then
-    git add bootstrap etc && git commit -qm "$message" &&
-      tools/gate-state.py check agent-pr-check >>"$logs/gate.log" 2>&1 ||
-      { echo "land-dev: proof changed after commit; see $logs/gate.log"; exit 1; }
-  fi
-  if [ -n "$(git status --short)" ]; then
-    echo "land-dev: the gate left changes:"; git status --short; exit 1
-  fi
-  if git push origin HEAD:refs/heads/dev >"$logs/push.log" 2>&1; then
-    tail -1 "$logs/push.log"
-    exit 0
-  fi
-  git fetch -q origin ||
-    { echo "land-dev: push/fetch failed; see $logs/push.log"; exit 1; }
-  if [ "$(git rev-parse origin/dev)" = "$upstream" ]; then
-    echo "land-dev: push failed without upstream movement; see $logs/push.log"
-    exit 1
-  fi
-  echo "land-dev: dev advanced (attempt $attempt); integrating again"
-done
-echo "land-dev: gave up after four rejected pushes"
-exit 1
+#!/usr/bin/env python3
+"""Validate and publish to dev, optionally stopping for generated review.
+
+Direct use keeps the current upstream integration and bounded retry sequence.
+Queued publication pins --expected-dev and uses --review-stop, followed by
+--publish-reviewed SHA after artifact review. Logs remain under debug/.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+from agent_context import publication_blocked
+
+DOC_FILES = {
+    "agents/x2c-module-catalog.md", "docs/src/SUMMARY.md",
+    "site/public/llms.txt", "site/public/llms-full.txt",
+}
+DOC_DIRS = {"docs/src/library/modules", "docs/src/internals/compiler-api"}
+SOURCE_FILES = {"lib/x2c.x", "src/linked-meta.x"}
+
+
+def generated(path: str) -> bool:
+    name = Path(path)
+    return (path in DOC_FILES or path in SOURCE_FILES or
+            (str(name.parent) in DOC_DIRS and name.suffix == ".md") or
+            (str(name.parent) in {"bootstrap/lib", "bootstrap/src"} and
+             name.suffix in {".c", ".h"}))
+
+
+def git(*arguments: str) -> str:
+    result = subprocess.run(["git", *arguments], capture_output=True,
+                            text=True, check=False)
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or "git command failed")
+    return result.stdout
+
+
+def changed_paths() -> list[str]:
+    tracked = git("diff", "--no-renames", "--name-only", "-z", "HEAD")
+    untracked = git("ls-files", "--others", "--exclude-standard", "-z")
+    return sorted(set((tracked + untracked).split("\0")) - {""})
+
+
+def clean() -> None:
+    if git("status", "--porcelain=v1", "-z"):
+        raise ValueError("tree has pending changes; preserve and review them")
+
+
+def command(arguments: list[str], log: Path) -> bool:
+    with log.open("w") as output:
+        result = subprocess.run(arguments, stdout=output,
+                                stderr=subprocess.STDOUT, check=False)
+    return result.returncode == 0
+
+
+def require_command(arguments: list[str], log: Path) -> None:
+    if not command(arguments, log):
+        raise ValueError(f"{' '.join(arguments)} failed; see {log}")
+
+
+def commit_generated(message: str, log: Path) -> None:
+    paths = changed_paths()
+    if not paths:
+        return
+    unexpected = [path for path in paths if not generated(path)]
+    if unexpected:
+        raise ValueError("unexpected authored changes; tree preserved: " +
+                         ", ".join(repr(path) for path in unexpected))
+    git("diff", "--check")
+    git("diff", "--cached", "--check")
+    git("--literal-pathspecs", "add", "-A", "--", *paths)
+    require_command(["git", "commit", "-qm", message], log)
+
+
+def upstream(expected: str | None, logs: Path) -> str:
+    require_command(["git", "fetch", "-q", "origin"], logs / "fetch.log")
+    current = git("rev-parse", "origin/dev^{commit}").strip()
+    if expected and current != expected:
+        raise ValueError("dev advanced from the reviewed base; integrate and "
+                         "review before validation")
+    return current
+
+
+def verify(candidate: str, base: str, gate: str, logs: Path) -> None:
+    if git("rev-parse", "HEAD").strip() != candidate:
+        raise ValueError("candidate commit changed after generated review")
+    clean()
+    git("merge-base", "--is-ancestor", base, candidate)
+    git("diff", "--check", base, candidate)
+    require_command(["tools/gate-state.py", "check", gate], logs / "proof.log")
+    clean()
+
+
+def push(logs: Path, base: str) -> bool:
+    if command(["git", "push", "origin", "HEAD:refs/heads/dev"],
+               logs / "push.log"):
+        print((logs / "push.log").read_text().strip())
+        return True
+    current = upstream(None, logs)
+    if current == base:
+        raise ValueError("push failed without upstream movement; see " +
+                         str(logs / "push.log"))
+    return False
+
+
+def save_review(candidate: str, base: str, gate: str, run: Path) -> None:
+    record = {"candidate": candidate, "upstream": base, "gate": gate}
+    text = json.dumps(record, indent=2, sort_keys=True) + "\n"
+    (run / "review.json").write_text(text)
+    with tempfile.NamedTemporaryFile(mode="w", dir="debug", delete=False) as out:
+        temporary = Path(out.name)
+        out.write(text)
+    os.replace(temporary, "debug/land-dev-review.json")
+
+
+def publish_reviewed(args: argparse.Namespace, run: Path) -> None:
+    expected = args.expected_dev
+    if expected is None:
+        try:
+            record = json.loads(Path("debug/land-dev-review.json").read_text())
+            if (record["candidate"] != args.publish_reviewed or
+                    record["gate"] != args.gate):
+                raise ValueError("reviewed candidate or gate does not match")
+            expected = record["upstream"]
+        except (OSError, KeyError, TypeError, ValueError) as error:
+            raise ValueError("supply --expected-dev or retain the matching "
+                             "land-dev review record") from error
+    base = upstream(expected, run)
+    verify(args.publish_reviewed, base, args.gate, run)
+    if not push(run, base):
+        raise ValueError("dev advanced; return to integration and review")
+
+
+def prepare(args: argparse.Namespace, run: Path) -> None:
+    for attempt in range(1, 5):
+        logs = run / f"attempt-{attempt}"
+        logs.mkdir()
+        clean()
+        base = upstream(args.expected_dev, logs)
+        if args.expected_dev:
+            git("merge-base", "--is-ancestor", base, "HEAD")
+        else:
+            require_command(["git", "merge", "-q", "--no-edit", "origin/dev"],
+                            logs / "merge.log")
+        if args.gate == "doc-check":
+            if not os.access("builds/0/x2c", os.X_OK):
+                require_command(["make", "build-safe"], logs / "build.log")
+        else:
+            require_command(["make", "build"], logs / "build.log")
+            require_command(["make", "doc-generate"], logs / "docgen.log")
+        commit_generated("refresh generated sources and docs",
+                         logs / "docs-commit.log")
+        gate = ["tools/gate-state.py", "ensure", args.gate]
+        if not command(gate, logs / "gate.log"):
+            if (args.gate != "agent-pr-check" or not re.search(
+                    r"\[stage-diff-0\] Error", (logs / "gate.log").read_text())):
+                raise ValueError("gate failed; tree preserved; see " +
+                                 str(logs / "gate.log"))
+            print("land-dev: bootstrap needs a second round; "
+                  "running the gate again")
+            (logs / "gate.log").rename(logs / "gate-first-round.log")
+            require_command(gate, logs / "gate.log")
+        commit_generated(args.message, logs / "generated-commit.log")
+        candidate = git("rev-parse", "HEAD").strip()
+        verify(candidate, base, args.gate, logs)
+        if args.review_stop:
+            save_review(candidate, base, args.gate, run)
+            print(f"land-dev: reviewed candidate {candidate}; stopped before push")
+            return
+        if args.expected_dev:
+            upstream(args.expected_dev, logs)
+        if push(logs, base):
+            return
+        if args.expected_dev:
+            raise ValueError("dev advanced; return to integration and review")
+        print(f"land-dev: dev advanced (attempt {attempt}); integrating again")
+    raise ValueError("gave up after four rejected pushes")
+
+
+def acquire_lock() -> Path:
+    lock = Path(git("rev-parse", "--git-common-dir").strip()) / "land-dev.lock"
+    waiting = None
+    while True:
+        try:
+            lock.mkdir()
+            (lock / "pid").write_text(str(os.getpid()) + "\n")
+            return lock
+        except FileExistsError:
+            try:
+                holder = int((lock / "pid").read_text())
+            except (OSError, ValueError):
+                holder = None
+            if holder:
+                try:
+                    os.kill(holder, 0)
+                except ProcessLookupError:
+                    shutil.rmtree(lock)
+                    continue
+                except PermissionError:
+                    pass
+            if waiting != (holder or "unknown"):
+                print("land-dev: waiting for publication lock "
+                      f"(pid {holder or 'unknown'})", flush=True)
+                waiting = holder or "unknown"
+            time.sleep(10)
+
+
+def sha(value: str) -> str:
+    if not re.fullmatch(r"[0-9a-f]{40}", value):
+        raise argparse.ArgumentTypeError("use the complete immutable commit SHA")
+    return value
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("message", nargs="?")
+    parser.add_argument("--review-stop", action="store_true")
+    parser.add_argument("--publish-reviewed", type=sha)
+    parser.add_argument("--expected-dev", type=sha)
+    parser.add_argument("--gate", choices=("agent-pr-check", "doc-check"),
+                        default="agent-pr-check")
+    args = parser.parse_args()
+    if args.review_stop and args.publish_reviewed:
+        parser.error("choose --review-stop or --publish-reviewed")
+    if not args.message and not args.publish_reviewed:
+        parser.error("a generated refresh commit message is required")
+    lock = None
+    try:
+        root = Path(git("rev-parse", "--show-toplevel").strip())
+        os.chdir(root)
+        if publication_blocked(root):
+            raise ValueError("this worktree submits private or PR work; "
+                             "its integration owner publishes")
+        Path("debug").mkdir(exist_ok=True)
+        lock = acquire_lock()
+        run = Path(tempfile.mkdtemp(prefix="land-dev-", dir="debug"))
+        latest = Path("debug/land-dev-latest")
+        latest.unlink(missing_ok=True)
+        latest.symlink_to(run.name)
+        print(f"land-dev: logs in {run}", flush=True)
+        if args.publish_reviewed:
+            publish_reviewed(args, run)
+        else:
+            prepare(args, run)
+        return 0
+    except (OSError, ValueError, KeyboardInterrupt) as error:
+        print(f"land-dev: {error or 'interrupted; tree and logs preserved'}",
+              file=sys.stderr)
+        return 1
+    finally:
+        if lock is not None:
+            shutil.rmtree(lock)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
