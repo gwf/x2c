@@ -513,18 +513,20 @@ with byte-identical C.
   open macro applied after an `#include` in its file, and closed macros
   show that one is not needed; translated C stayed byte-identical. Origin
   removal and typedef base resolution remain.
-- A method cannot be called on a field whose type is spelled `struct X`
-  (for example `record.region` in `lib/error.x`): the typedef's methods are
-  not found, so callers write `ErrorRegion._m(&record.region, ...)`. Found
-  during Phase 5; method lookup should see through the struct tag.
-- `packages/libuv`: `watch_reports_an_entry_a_child_creates` and
-  `a_failed_watch_callback_reaches_the_caller` in `test-uv` fail
-  intermittently on the unchanged tree (27-28 of 29), and `release-checks`
-  output order varies between runs. Found during Phase 6; neither involves
-  the stream code it changed.
-- `x2c graph certify` prints a different call path with each obstacle on
-  each run of the same binary; the obstacles themselves are stable. Found
-  during Phase 6.
+- Fixed 2026-10-01: a receiver spelled `struct T` or `union T` finds the
+  methods of the typedef naming that aggregate, whether the typedef is `T`
+  or the only differently named one, and keeps its qualifiers; fixtures
+  `struct-tag-methods` and `struct-tag-const-receiver` (PRs #80 and #82).
+  Callers such as `ErrorRegion._m(&record.region, ...)` in `lib/error.x`
+  can now use method syntax.
+- Fixed 2026-10-01: the two `test-uv` watch tests waited on FSEvents, which
+  fseventsd delivers seconds late on a busy macOS machine. One now watches
+  a file through kqueue; the other repeats its touch until the watch
+  reports it. 40 of 40 runs pass, up from 19 (PR #83). `release-checks`
+  prints its concurrent checks as they finish, by design.
+- Fixed 2026-10-01: `x2c graph certify` seeded its path search in hash
+  order. It now reports a shortest path, with ties broken by target order
+  (PR #86).
 - Fixed 2026-10-01: the region check carries no address through a value
   of number type, so an address cast to an integer, or an integer read
   through an optional reference, no longer reports; fixture
