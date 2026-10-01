@@ -715,18 +715,18 @@ Public functions:
 `Var.decode_f64`, `Var.box_i8`, `Var.box_u8`, `Var.box_i16`, `Var.box_u16`,
 `Var.box_i32_bits`, `Var.box_u32`, `Var.box_f32`, `Var.box_f64`, `Array.var`,
 `Block.var`, `Buffer.var`, `Bytes.var`, `List.var`, `File.var`, `Map.var`,
-`String.var`, `Symbol.var`, `Iter.var`, `char.var`, `char.str`, `char.repr`,
-`uchar.var`, `uchar.str`, `uchar.repr`, `short.var`, `short.str`, `short.repr`,
-`ushort.var`, `ushort.str`, `ushort.repr`, `int.var`, `int.str`, `int.repr`,
-`uint.var`, `uint.str`, `uint.repr`, `unsigned.var`, `unsigned.str`,
-`unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
-`double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
-`Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
-`Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`,
-`Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`,
-`Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`,
-`Var.float`, `Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
-`x2c_normalize_index`, `x2c_normalize_slice`
+`String.var`, `Symbol.var`, `Iter.var`, `_box_float`, `char.var`, `char.str`,
+`char.repr`, `uchar.var`, `uchar.str`, `uchar.repr`, `short.var`, `short.str`,
+`short.repr`, `ushort.var`, `ushort.str`, `ushort.repr`, `int.var`, `int.str`,
+`int.repr`, `uint.var`, `uint.str`, `uint.repr`, `unsigned.var`,
+`unsigned.str`, `unsigned.repr`, `float.var`, `float.str`, `float.repr`,
+`double.var`, `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`,
+`long.repr`, `Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`,
+`Var.file`, `Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`,
+`Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
+`Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
+`Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize_protocols`,
+`x2c_initialize`, `x2c_normalize_index`, `x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)
 
