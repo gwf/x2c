@@ -2636,6 +2636,13 @@ static List _string_literal(String value) {
 
 // alias insertion
 
+/** Remembers a source typedef's declaration and visibility, which native
+    alias insertion reads for its participant. */
+void Compiler.record_source_typedef(
+  Compiler c, String name, List declaration, int private) {
+  c.protocol_helpers[%("source-typedef" $name)] = %($declaration $private);
+}
+
 static List Compiler._native_aliases(
   Compiler c, List ast, Type base, Type participant, List rows) {
   Var stored;

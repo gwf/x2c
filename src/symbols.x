@@ -665,14 +665,12 @@ static void Compiler._record_rows_visibility(
 }
 
 static void _record_declaration_binding_visibility(
-  Compiler compiler, List declaration, Symbol kind, int private, int mark,
+  Compiler c, List declaration, Symbol kind, int private, int mark,
   List identity) {
   String name = binding_identity_spelling(identity);
   if (kind == <typedef> && name)
-    compiler.protocol_helpers[%(
-      "source-typedef" $name
-    )] = %($declaration $private);
-  if (mark && name) compiler.sym.mark_static(%($name));
+    c.record_source_typedef(name, declaration, private);
+  if (mark && name) c.sym.mark_static(%($name));
 }
 
 // package names
