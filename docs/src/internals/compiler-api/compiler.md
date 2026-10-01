@@ -169,7 +169,7 @@ Core x2c compiler state and operations.
 
 Records in `referenced` the identity of every binding `node` names.
 
-Source: `src/compiler.x:4324`
+Source: `src/compiler.x:4329`
 
 #### home_absolute_path
 
@@ -1009,7 +1009,7 @@ Source: `src/compiler.x:400`
 Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
-Source: `src/compiler.x:3842`
+Source: `src/compiler.x:3843`
 
 <a id="Compiler.skip_script_statement"></a>
 #### Compiler.skip_script_statement
@@ -1020,7 +1020,7 @@ Moves past one run of a script unit's statement tokens, through a `;` or
 a closing `}` outside every bracket. A statement that ends early this
 way leaves its remainder as the next run, and runs are rejoined in order.
 
-Source: `src/compiler.x:3856`
+Source: `src/compiler.x:3857`
 
 <a id="Compiler.skip_trivia_from"></a>
 #### Compiler.skip_trivia_from

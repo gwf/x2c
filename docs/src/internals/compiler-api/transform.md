@@ -42,7 +42,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`; `$catch_landing` calls this in a
 slot.
 
-Source: `src/transform.x:2713`
+Source: `src/transform.x:2794`
 
 #### builtin_catch_patterns
 
@@ -51,7 +51,7 @@ Source: `src/transform.x:2713`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/transform.x:2689`
+Source: `src/transform.x:2770`
 
 #### builtin_defer_captures
 
@@ -59,7 +59,7 @@ Source: `src/transform.x:2689`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/transform.x:2818`
+Source: `src/transform.x:2899`
 
 #### builtin_defer_record
 
@@ -68,7 +68,7 @@ Source: `src/transform.x:2818`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/transform.x:2809`
+Source: `src/transform.x:2890`
 
 #### builtin_try_catch_site
 
@@ -78,7 +78,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2674`
+Source: `src/transform.x:2755`
 
 #### builtin_try_landing
 
@@ -88,7 +88,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/transform.x:2701`
+Source: `src/transform.x:2782`
 
 #### transform_array_literal
 
@@ -97,7 +97,7 @@ Source: `src/transform.x:2701`
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:4125`
+Source: `src/transform.x:4210`
 
 #### transform_map_literal
 
@@ -106,7 +106,7 @@ Source: `src/transform.x:4125`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:4134`
+Source: `src/transform.x:4219`
 
 ### `Compiler`
 
@@ -256,7 +256,7 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:4948`
+Source: `src/transform.x:5033`
 
 ## Design notes
 
