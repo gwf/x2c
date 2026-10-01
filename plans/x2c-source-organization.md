@@ -201,12 +201,12 @@ Each was reproduced at 2685655f.
 | Fact | Copies | Owner after |
 | --- | --- | --- |
 | SymbolSet perfect hash | encoder `src/literals.x:651-671`, decoder `lib/symbolset.x:54-91` | `lib/symbolset.x`; the encoder moves there and the compiler calls it |
-| Self-relative method signature | Sym spelling store and binding facts (`parse.x:896-898`, `compiler.x:1467-1472`); two different `_receiver_relative_signature` | binding facts; delete the Sym store and one helper |
+| Self-relative method signature | Sym spelling store and binding facts (`parse.x:896-898`, `compiler.x:1467-1472`) | kept: the Sym row is the only store `.xi` interfaces carry to other units (`collect.x:352, 376`), and binding facts are filled from it per compiler (`compiler.x:1481`); removing it broke a two-unit `Self` method probe |
 | FNV offset basis | `build.x:1161`, `utils.x:286`, `meta-group.x:77` (last digit dropped), `parse.x:273` | one constant beside `x2c_fnv_bytes`; `meta_cc_identity` calls `x2c_file_identity` |
 | Exit status decoding | `src/utils.x:406`, `src/meta-helper-client.x:237` | `utils.x`; `lib/process.x:300` keeps its own because the runtime cannot call the compiler |
 | Hex digit | `lib/json.x:186`, `lib/string.x:1679`, `src/type.x:767` | `lib/scan.x`, by making `_ascii_hex` a public `scan_ascii_hex` beside `scan_ascii_digit` (scan.x is internal) |
 | Contextual keyword test | 13 copies in 5 files; static `_test_contextual` at `parse.x:397` | `Compiler.at_word` (non-consuming) and `Compiler.take_word` in compiler.x token navigation |
-| Realpath or keep | `compiler.x:455`, `collect.x:483`, `protocol.x:34` | `Compiler.canonical_path` |
+| Realpath or keep | `compiler.x:455`, `collect.x:483`, `protocol.x:34` | kept, with comments: under a source view `Compiler.canonical_path` makes a path absolute, while collect keys unsaved files by the searched spelling and protocol needs to know whether the first path resolved |
 | Emitter recognition | `Emitter._emit` head switch plus six `_emit_*` groups that match again and return `matched` (`src/emit.x:1194-1399`, b796f4e1) | one `match` in `_emit` with one-line arms; delete the groups and the flag |
 | List to Array copy | the copy loop in `List.array`, `append`, `sort`, `sort_with`, `sort_by` (`lib/list.x:322, 365, 734, 746, 759`) | `List.array`, after it cleans up a partial Array on failure; keep `append`'s shared tail and `sort_by`'s one key call for a one-element List |
 | Nested-lambda presence | `ast_contains_head` at region entry and again on every child before descending (`src/transform.x:1437-1528`) | one identity-preserving visit that prepares regions and reports presence; measure deep-lambda and lambda-free cases |
