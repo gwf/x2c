@@ -2917,8 +2917,7 @@ static List Compiler._bind_if(Compiler c, Var condition, Var ontrue) {
   int true_is_present = 1;
   List binding = c.optional_reference_test(test, true_is_present);
   List yes = c._bind_branch(ontrue, binding, true_is_present);
-  if (binding && !true_is_present && reference_guard_exits(yes))
-    c.mark_reference_present(binding);
+  c.settle_reference(binding, true_is_present, yes, NULL);
   return %(if $test $yes);
 }
 
@@ -2929,10 +2928,7 @@ static List Compiler._bind_if_else(
   List binding = c.optional_reference_test(test, true_is_present);
   List yes = c._bind_branch(ontrue, binding, true_is_present);
   List no = c._bind_branch(onfalse, binding, !true_is_present);
-  if (binding &&
-      ((reference_guard_exits(yes) && !true_is_present) ||
-       (reference_guard_exits(no) && true_is_present)))
-    c.mark_reference_present(binding);
+  c.settle_reference(binding, true_is_present, yes, no);
   return %(if $test $yes $no);
 }
 

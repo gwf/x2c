@@ -820,10 +820,8 @@ String ast_addressed_identifier(Var value) {
     an error transfer requires, applies to this name.
 */
 String ast_direct_identifier(Var value) {
-  Var designated = _designated(value);
-  if (designated is not <list>) return NULL;
-  List ast = designated;
-  match (ast) {
+  List designated = Ast.designated(value);
+  match (designated) {
     case $source_identifier_content(%(?binding)):
       return binding_identity_spelling(binding);
     case $source_operator_content(%((!quote ->) ?base *)):
@@ -840,10 +838,8 @@ String ast_direct_identifier(Var value) {
     holds, which `ast_direct_identifier` reports as no name at all.
 */
 String ast_indirect_identifier(Var value) {
-  Var designated = _designated(value);
-  if (designated is not <list>) return NULL;
-  List ast = designated;
-  match (ast) {
+  List designated = Ast.designated(value);
+  match (designated) {
     case $source_pattern_with($indexed, %(?receiver ?selector),
         %((?receiver (!set ?base (expr ? ?))) (?selector ?))):
       return ast_direct_identifier(base);
@@ -853,35 +849,6 @@ String ast_indirect_identifier(Var value) {
       return ast_direct_identifier(base);
   }
   return NULL;
-}
-
-/* The innermost node an expression designates, past the forms that still
-   name the same object: parentheses, a member, and an index into an array.
-   What remains is a name, a designation through a pointer, or neither. */
-static Var _designated(Var value) {
-  while (value is <list>) {
-    List node = value;
-    Var inner = _same_object(node);
-    if (inner is void) return node;
-    value = inner;
-  }
-  return NULL;
-}
-
-/* One step inward through an `expr` wrapper, parentheses, a member, or an
-   array index; `void` when `node` is none of them. */
-static Var _same_object(List node) {
-  match (node) {
-    case %(expr ? ?inner): return inner;
-    case $source_pattern($grouped, %(?inner)): return inner;
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (!set ?base (expr ? ?))) (?selector ?))): {
-      Type type = base.cadr();
-      if (type.is_array()) return base;
-    }
-    case $source_operator_content(%(. ?base *)): return base;
-  }
-  return void;
 }
 
 // var tags

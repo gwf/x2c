@@ -168,17 +168,13 @@ static List Compiler._if_statement(Compiler c) {
   List ontrue = c._if_arm(binding, true_is_present);
   c.__complete_here(<continue>, %("else"));
   if (c.peek(0) != <else>) {
-    if (binding && !true_is_present && reference_guard_exits(ontrue))
-      c.mark_reference_present(binding);
+    c.settle_reference(binding, true_is_present, ontrue, NULL);
     return %(if $cond $ontrue);
   }
   ontrue = c._continued(ontrue);
   c.next();
   List onfalse = c._if_arm(binding, !true_is_present);
-  if (binding && reference_guard_exits(ontrue) && !true_is_present)
-    c.mark_reference_present(binding);
-  if (binding && reference_guard_exits(onfalse) && true_is_present)
-    c.mark_reference_present(binding);
+  c.settle_reference(binding, true_is_present, ontrue, onfalse);
   return %(if $cond $ontrue $onfalse);
 }
 

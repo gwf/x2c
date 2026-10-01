@@ -65,26 +65,48 @@ String binding_identity_spelling(List binding) {
   return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
 }
 
+/** Returns the innermost node `value` designates, past the forms that still
+    name the same object: an `expr` wrapper, parentheses, a member, and an
+    index into an array. What remains is a name, a designation through a
+    pointer, or another expression; a non-list designates nothing.
+*/
+List Ast.designated(Var value) {
+  while (value is <list>) {
+    List node = value;
+    match (node) {
+      case %(expr ? ?inner): value = inner;
+      case $source_pattern($grouped, %(?inner)): value = inner;
+      case $source_pattern_with($indexed, %(?receiver ?selector),
+          %((?receiver (!set ?base (expr ((dim *) *) ?))) (?selector ?))):
+        value = base;
+      case $source_operator_content(%(. ?base *)): value = base;
+      default: return node;
+    }
+  }
+  return NULL;
+}
+
 /** Returns the binding whose stored object the lvalue `ast` names, or
     `NULL`. Pointer dereferences and pointer indexes name another object; an
     array field remains part of its containing aggregate.
 */
 List Ast.lvalue_binding(Ast ast) {
-  if (!ast) return NULL;
-  match (ast) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding;
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
-      return Ast.lvalue_binding(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return Ast.lvalue_binding(inner);
-    case %(expr ? ${$source_operator_content(%(. ?base *))}):
-      return Ast.lvalue_binding(base);
-    case $source_operator_content(%(. ?base *)):
-      return Ast.lvalue_binding(base);
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (expr ((dim *) *) ?base)) (?selector ?))):
-      return Ast.lvalue_binding(base);
+  List designated = Ast.designated(ast);
+  match (designated)
+    case $source_identifier_content(%(?binding)): return binding;
+  return NULL;
+}
+
+/** Returns the operand a write `node` changes: the left operand of an
+    assignment or prefix update, or the operand of a postfix update; `NULL`
+    when `node` writes no operand.
+*/
+List Ast.written_operand(Ast node) {
+  match (node) {
+    case $source_operator_content(%(?operator ?target *)):
+      if (operator is <symbol> && ast_changes_left_operand(operator))
+        return target;
+    case $source_postfix_content(%(? ?target)): return target;
   }
   return NULL;
 }

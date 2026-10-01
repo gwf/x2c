@@ -961,16 +961,13 @@ static void Preserve._write(Preserve &p, List node) {
 }
 
 /* C requires automatic state changed after `sigsetjmp` to be volatile once
-   `siglongjmp` returns. These are the forms that change their left operand;
-   the operand names the object directly, or names a pointer that holds it. */
+   `siglongjmp` returns. These are the source writes and the lowered update
+   helpers; the operand names the object directly, or names a pointer that
+   holds it. */
 static Var Compiler._changed_operand(Compiler c, List node) {
+  List written = Ast.written_operand(node);
+  if (written) return written;
   match (node) {
-    case $source_operator_content(%(?operator ?target *)): {
-      if (operator is <symbol> && ast_changes_left_operand(operator))
-        return target;
-      return NULL;
-    }
-    case $source_postfix_content(%(? ?target)): return target;
     case %(call ?(String helper)
                 (args (expr ? (op & (parens ?target))) *)): {
       if (helper == "x2c_var_update_volatile"
@@ -1320,14 +1317,7 @@ static void DeferCaptures.collect(DeferCaptures &d, List ast) {
       d._capture(bound);
       return;
     }
-  List modified = NULL;
-  match (ast) {
-    case $source_operator_content(%(?operator ?target *)):
-      if (operator is <symbol> && ast_changes_left_operand(operator))
-        modified = _defer_direct_binding(target);
-    case $source_postfix_content(%(? ?target)):
-      modified = _defer_direct_binding(target);
-  }
+  List modified = Ast.lvalue_binding(Ast.written_operand(ast));
   foreach (Var child, ast) if (child is <list>) d.collect(child);
   Var field;
   List changed = d.written;
@@ -1349,20 +1339,6 @@ static void DeferCaptures._capture(DeferCaptures &d, List binding) {
   List field = c.sym.introduce(c.fresh_name("defer_capture"));
   d.captures[binding] = field;
   d.records.push(%($binding $stored_type $field));
-}
-
-static List _defer_direct_binding(Var value) {
-  if (value is not <list>) return NULL;
-  List ast = value;
-  match (ast) {
-    case $source_identifier_content(%(?binding)): return binding;
-    case %(expr ? ?inner):  return _defer_direct_binding(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return _defer_direct_binding(inner);
-    case $source_operator_content(%(. ?inner *)):
-      return _defer_direct_binding(inner);
-  }
-  return NULL;
 }
 
 // File-static cleanup thunks cannot name block-local or variably-sized types.
