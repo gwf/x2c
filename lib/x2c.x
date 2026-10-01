@@ -19,6 +19,7 @@
 #include "list.x"
 #include "logger.x"
 #include "machine.x"
+#include "macro-value.x"
 #include "map.x"
 #include "match-cache.x"
 #include "match-machine.x"
