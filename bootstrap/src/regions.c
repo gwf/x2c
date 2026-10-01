@@ -2682,7 +2682,7 @@ List cdr(List);
 Type Type_reference(Type);
 static Var _passed(List types, List arguments, int index, Type * type){
   Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void); (* type) = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(! List_truth(Type_list((* type))) ||(! Var_equal(List_car(Type_list((* type))), Symbol_var(77)) && ! Var_equal(List_car(Type_list((* type))), Symbol_var(33330008396)))) return argument;  Type given = List_type(_expression_type(argument));  if(List_truth(Type_list(given)) &&(Var_equal(List_car(Type_list(given)), Symbol_var(77)) || Var_equal(List_car(Type_list(given)), Symbol_var(33330008396)))) return argument;  Type object = List_type(cdr(Type_list((* type)))); (* type) = Type_reference(object);  return List_var(({
-    Var _x2c_literal_part_5 = List_var((* type));  cons(_33, cons(_x2c_literal_part_5, cons(List_var(cons(_883, cons(_1435, cons(argument, NULL)))), NULL)));
+    Var _x2c_literal_part_5 = List_var((* type));  Var _x2c_literal_part_6 = List_var(cons(_883, cons(_1435, cons(argument, NULL))));  cons(_33, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
   }
   ));
 }

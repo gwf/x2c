@@ -1865,7 +1865,12 @@ Func Func_new_context(FuncAdapter, List, const void *, size_t);
 List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
   String script = Var_string(List_car(b -> request -> inputs)), root = x2c_get_root();
-  List excluded = List_append(cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_125), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_126), NULL)))), cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_127), NULL)))), NULL))), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
+  List excluded = List_append(({
+    Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_125), NULL))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_126), NULL))));
+    Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_127), NULL))));
+    cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
+  }
+  ), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
   String depfile = _unit_file(Build__unit_dir(b, script), script, _175);
   Array helpers = Array_new();
   {
@@ -1936,7 +1941,7 @@ static List Build__script_files(Build b){
       {
         String path;
         List _x2c_macro_object_24 = _depfile_inputs(({
-          Var _x2c_literal_part_18 = String_var(b -> dep_root);  Var _x2c_literal_part_19 = String_var(_key(source));  String_join(NULL, cons(_x2c_literal_part_18, cons(String_var(_2), cons(_x2c_literal_part_19, cons(String_var(_54), NULL)))));
+          Var _x2c_literal_part_21 = String_var(b -> dep_root);  Var _x2c_literal_part_22 = String_var(_key(source));  String_join(NULL, cons(_x2c_literal_part_21, cons(String_var(_2), cons(_x2c_literal_part_22, cons(String_var(_54), NULL)))));
         }
         ));
         List _x2c_macro_cursor_24 = _x2c_macro_object_24;

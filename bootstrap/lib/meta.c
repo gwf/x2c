@@ -188,7 +188,10 @@ String Symbol_str(Symbol);
 
 List x2c_literal_symbol(Symbol value){
   if(! _init_guard_) _file_init_();
-  return cons(_0, cons(_14, cons(List_var(cons(_7, cons(_14, cons(String_var(Symbol_str(value)), cons(Symbol_var(value), NULL))))), NULL)));
+  return cons(_0, cons(_14, cons(List_var(({
+    Var _x2c_literal_part_0 = String_var(Symbol_str(value));  cons(_7, cons(_14, cons(_x2c_literal_part_0, cons(Symbol_var(value), NULL))));
+  }
+  )), NULL)));
 }
 
 List x2c_expr_ident(List name){
@@ -203,7 +206,10 @@ List x2c_expr_index(List base, List subscript){
 
 List x2c_expr_call(List callee, List arguments){
   if(! _init_guard_) _file_init_();
-  return cons(_0, cons(_15, cons(List_var(cons(_20, cons(List_var(callee), cons(List_var(cons(_21, List_append(arguments, NULL))), NULL)))), NULL)));
+  return cons(_0, cons(_15, cons(List_var(({
+    Var _x2c_literal_part_1 = List_var(callee);  Var _x2c_literal_part_2 = List_var(cons(_21, List_append(arguments, NULL)));  cons(_20, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL)));
+  }
+  )), NULL)));
 }
 
 List x2c_expr_composite(List items){
@@ -330,7 +336,7 @@ List type_declaration_parts(List type){
 
   }
   return({
-    Var _x2c_literal_part_0 = List_var(List_append(qualifiers, base));  Var _x2c_literal_part_1 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+    Var _x2c_literal_part_3 = List_var(List_append(qualifiers, base));  Var _x2c_literal_part_4 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
   }
   );
 }
@@ -348,7 +354,10 @@ static Var _modifier_syntax(Var modifier){
         Array params = Array_new(); {
           List parameter;  List _x2c_macro_object_3 = parameters;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
             parameter = Var_list(_x2c_macro_cursor_output_3); {
-              List base, modifiers;  List _x2c_destructure_0 = type_declaration_parts(parameter);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  modifiers = Var_list(List_getindex(_x2c_destructure_0, 1));  Array_push(params, List_var(cons(_33, cons(List_var(base), cons(List_var(cons(_27, cons(_15, cons(List_var(modifiers), NULL)))), NULL)))));
+              List base, modifiers;  List _x2c_destructure_0 = type_declaration_parts(parameter);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  modifiers = Var_list(List_getindex(_x2c_destructure_0, 1));  Array_push(params, List_var(({
+                Var _x2c_literal_part_5 = List_var(base);  Var _x2c_literal_part_6 = List_var(cons(_27, cons(_15, cons(List_var(modifiers), NULL))));  cons(_33, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
+              }
+              )));
             }
 
           }

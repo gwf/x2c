@@ -244,7 +244,10 @@ int Diagnostics_reached_limit(Diagnostics diag){
 
 static List _build_entry(Symbol code, Symbol severity, String message, List location, List notes){
   Symbol effective_code = code ? code : 306819428;
-  return cons(List_var(cons(_0, cons(Symbol_var(effective_code), NULL))), cons(List_var(cons(_1, cons(Symbol_var(severity), NULL))), cons(List_var(cons(_2, cons(String_var(message), NULL))), cons(List_var(cons(_3, cons(List_var(location), NULL))), cons(List_var(cons(_4, cons(List_var(notes), NULL))), NULL)))));
+  return({
+    Var _x2c_literal_part_0 = List_var(cons(_0, cons(Symbol_var(effective_code), NULL)));  Var _x2c_literal_part_1 = List_var(cons(_1, cons(Symbol_var(severity), NULL)));  Var _x2c_literal_part_2 = List_var(cons(_2, cons(String_var(message), NULL)));  Var _x2c_literal_part_3 = List_var(cons(_3, cons(List_var(location), NULL)));  Var _x2c_literal_part_4 = List_var(cons(_4, cons(List_var(notes), NULL)));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)))));
+  }
+  );
 }
 
 int Array_contains(Array, Var);
@@ -381,7 +384,7 @@ static void Compiler__write_json(Compiler c, List entry){
             if(Var_is_void(value)) value = Var_null();
             else if(Var_is_row(value, 11, 7, 1)) value = String_var(Compiler__json_path(c, Var_string(value)));
             Buffer_write(out, ({
-              Var _x2c_literal_part_0 = String_var(Var_json(Symbol_var(key)));  Var _x2c_literal_part_1 = String_var(Var_json(value));  String_join(NULL, cons(String_var(_20), cons(_x2c_literal_part_0, cons(String_var(_21), cons(_x2c_literal_part_1, NULL)))));
+              Var _x2c_literal_part_5 = String_var(Var_json(Symbol_var(key)));  Var _x2c_literal_part_6 = String_var(Var_json(value));  String_join(NULL, cons(String_var(_20), cons(_x2c_literal_part_5, cons(String_var(_21), cons(_x2c_literal_part_6, NULL)))));
             }
             ));
           }
@@ -456,7 +459,10 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
   Var column = _x2c_match_values[2];
   Var length = _x2c_match_values[3];
   Var position = _x2c_match_values[4];
-  return cons(List_var(cons(_10, cons(file, NULL))), cons(List_var(cons(_11, cons(line, NULL))), cons(List_var(cons(_12, cons(column, NULL))), cons(List_var(cons(_13, cons(length, NULL))), cons(List_var(cons(_14, cons(position, NULL))), NULL)))));
+  return({
+    Var _x2c_literal_part_7 = List_var(cons(_10, cons(file, NULL)));  Var _x2c_literal_part_8 = List_var(cons(_11, cons(line, NULL)));  Var _x2c_literal_part_9 = List_var(cons(_12, cons(column, NULL)));  Var _x2c_literal_part_10 = List_var(cons(_13, cons(length, NULL)));  Var _x2c_literal_part_11 = List_var(cons(_14, cons(position, NULL)));  cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)))));
+  }
+  );
   break; } } default: break;
 
     }
@@ -486,7 +492,10 @@ List Compiler_token_location(Compiler compiler, Token token){
   if(! token) token = compiler -> token;
   if(! token) return cons(List_var(cons(_10, cons(String_var(file), NULL))), _63);
   file = Compiler_display_path(compiler, file);
-  return cons(List_var(cons(_10, cons(String_var(file), NULL))), cons(List_var(cons(_11, cons(int_var(token -> line), NULL))), cons(List_var(cons(_12, cons(int_var(token -> col), NULL))), cons(List_var(cons(_13, cons(int_var(token -> len), NULL))), cons(List_var(cons(_14, cons(int_var(token -> pos), NULL))), NULL)))));
+  return({
+    Var _x2c_literal_part_12 = List_var(cons(_10, cons(String_var(file), NULL)));  Var _x2c_literal_part_13 = List_var(cons(_11, cons(int_var(token -> line), NULL)));  Var _x2c_literal_part_14 = List_var(cons(_12, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_15 = List_var(cons(_13, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_16 = List_var(cons(_14, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)))));
+  }
+  );
 }
 
 static List _compiler_location(Compiler compiler, Token token){
