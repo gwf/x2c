@@ -1438,7 +1438,10 @@ return 0;
 }
 
 static void FileWalk_publish(FileWalk * w){
-  List parts = Array_list_free((* w).parts);  _retain(String_var((* w).path));  _retain_rows(parts);  String hash = _content_hash((* w).text);  List definitions = _sorted_names((* w).definitions);  List entry = cons(List_var(parts), cons(String_var(hash), cons(List_var(definitions), cons(Map_var((* w).dependencies), NULL))));  _require_retained(List_try_own(entry));  if(Map_contains(_process_cache(), String_var((* w).path))) return;  Map_setindex(_process_cache(), String_var((* w).path), List_var(entry));  if((* w).deferred){
+  List parts = Array_list_free((* w).parts);  _retain(String_var((* w).path));  _retain_rows(parts);  String hash = _content_hash((* w).text);  List definitions = _sorted_names((* w).definitions);  List entry =({
+    Var _x2c_literal_part_0 = List_var(parts);  Var _x2c_literal_part_1 = String_var(hash);  Var _x2c_literal_part_2 = List_var(definitions);  Var _x2c_literal_part_3 = Map_var((* w).dependencies);  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL))));
+  }
+  );  _require_retained(List_try_own(entry));  if(Map_contains(_process_cache(), String_var((* w).path))) return;  Map_setindex(_process_cache(), String_var((* w).path), List_var(entry));  if((* w).deferred){
     Scope_push(& process_cache_scope); {
       {
         X2CCleanup _x2c_defer_record_11 ={
@@ -1802,7 +1805,7 @@ String Path_stem(Path);
 static List _interface_candidates(String canonical){
   String stem = Path_stem(canonical), relative = home_portable_path(canonical);  String dir = Path_dirname(canonical);  Array paths = Array_new();  if(String_truth(interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_out_dir), cons(String_var(_3), cons(String_var(stem), cons(String_var(_145), NULL)))))));  if(! String_equal(relative, canonical)){
     String mirror =({
-      Var _x2c_literal_part_0 = String_var(Path_dirname(relative));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_3), cons(String_var(stem), cons(String_var(_145), NULL)))));
+      Var _x2c_literal_part_4 = String_var(Path_dirname(relative));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_3), cons(String_var(stem), cons(String_var(_145), NULL)))));
     }
     );  if(String_truth(interface_out_dir)) Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_out_dir), cons(String_var(_146), cons(String_var(mirror), NULL))))));  Array_push(paths, String_var(String_join(NULL, cons(String_var(interface_mirror), cons(String_var(_3), cons(String_var(mirror), NULL))))));
   }
@@ -1984,7 +1987,7 @@ static List Compiler__interface_entry(Compiler c, String canonical, String hash,
 
   }
   List entry =({
-    Var _x2c_literal_part_1 = List_var(Array_list_free(parts));  cons(_x2c_literal_part_1, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), NULL))));
+    Var _x2c_literal_part_5 = List_var(Array_list_free(parts));  cons(_x2c_literal_part_5, cons(String_var(hash), cons(List_var(definitions), cons(Map_var(dependencies), NULL))));
   }
   );  _retain(String_var(canonical));  _require_retained(List_try_own(entry));  Map_setindex(_process_cache(), String_var(canonical), List_var(entry));  return entry;
 }
@@ -2128,7 +2131,7 @@ static int _write_interface_entry(Buffer out, String canonical, List entry, List
 
   }
   List record =({
-    Var _x2c_literal_part_2 = String_var(compiler_identity());  Var _x2c_literal_part_3 = String_var(home_portable_path(canonical));  Var _x2c_literal_part_4 = hash;  Var _x2c_literal_part_5 = List_var(Array_list_free(parts));  Var _x2c_literal_part_6 = List_var(definitions);  Var _x2c_literal_part_7 = List_var(_renumber_bindings(selected, identities));  Var _x2c_literal_part_8 = List_var(_stored_dependencies(dependencies));  cons(_149, cons(_150, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)))))))));
+    Var _x2c_literal_part_6 = String_var(compiler_identity());  Var _x2c_literal_part_7 = String_var(home_portable_path(canonical));  Var _x2c_literal_part_8 = hash;  Var _x2c_literal_part_9 = List_var(Array_list_free(parts));  Var _x2c_literal_part_10 = List_var(definitions);  Var _x2c_literal_part_11 = List_var(_renumber_bindings(selected, identities));  Var _x2c_literal_part_12 = List_var(_stored_dependencies(dependencies));  cons(_149, cons(_150, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)))))))));
   }
   );  if(! datum_write(out, List_var(record), 0)) return 0;  Buffer_write_char(out, '\n');  return 1;
 }
@@ -2147,7 +2150,7 @@ static List _stored_dependencies(Map dependencies){
   Array rows = Array_new(); {
     Var path, hash;  Map _x2c_macro_object_33 = dependencies;  unsigned _x2c_macro_cursor_33 = 0;  Var _x2c_macro_cursor_output_31;  Var _x2c_macro_cursor_output_32;  while(Map_try_next(_x2c_macro_object_33, &(_x2c_macro_cursor_33), &(_x2c_macro_cursor_output_31), &(_x2c_macro_cursor_output_32))){
       path = _x2c_macro_cursor_output_31;  hash = _x2c_macro_cursor_output_32;  Array_push(rows, List_var(({
-        Var _x2c_literal_part_9 = String_var(home_portable_path(Var_string(path)));  cons(_x2c_literal_part_9, cons(hash, NULL));
+        Var _x2c_literal_part_13 = String_var(home_portable_path(Var_string(path)));  cons(_x2c_literal_part_13, cons(hash, NULL));
       }
       )));
     }

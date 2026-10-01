@@ -352,28 +352,28 @@ int Map_try_get(Map, Var, Var *);
 Var int_var(int);
 void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static void Call_check(Call * call){
-  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(call, Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(call, _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(call, Var_string(failure));  Compiler_refuse_record_meta_call(call -> compiler, call -> name, call -> site);
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 
 Var Macro_subject(void);
 static void Call_send(Call * call, List arguments){
   if(helper_reset){
-    Call_send_frame(call, cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
+    Call_send_frame(&((* call)), cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
   }
-  Call_send_frame(call, ({
-    Var _x2c_literal_part_0 = String_var(call -> name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+  Call_send_frame(&((* call)), ({
+    Var _x2c_literal_part_0 = String_var((* call).name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
   }
   ));
 }
 
 static void Call_send_frame(Call * call, List message){
-  int status = _helper_send(message, call -> deadline);  if(status < 0) Call_overdue(call);  if(! status) Call_stopped(call, _helper_ending());
+  int status = _helper_send(message, (* call).deadline);  if(status < 0) Call_overdue(&((* call)));  if(! status) Call_stopped(&((* call)), _helper_ending());
 }
 
 String Env_get(String);
 double atof(const char *);
 static void Call_set_deadline(Call * call){
-  String text = Env_get(_78);  call -> limit = String_truth(text) ? atof(text) : 60.0;  call -> deadline = call -> limit > 0 ? _now() + call -> limit : 0;
+  String text = Env_get(_78); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
 }
 
 static double _now(void){
@@ -381,7 +381,7 @@ static double _now(void){
 }
 
 static Var Call_next_reply(Call * call){
-  Var reply;  int status = _helper_receive(call -> deadline, &(reply));  if(status < 0) Call_overdue(call);  if(! status) Call_stopped(call, _helper_ending());  return reply;
+  Var reply;  int status = _helper_receive((* call).deadline, &(reply));  if(status < 0) Call_overdue(&((* call)));  if(! status) Call_stopped(&((* call)), _helper_ending());  return reply;
 }
 
 int Buffer_truth(Buffer);
@@ -569,7 +569,7 @@ static int _helper_receive(double deadline, Var * reply){
             }
 
           }
-
+          __builtin_unreachable();
         }
         else{
           x2c_error_catch_close(_x2c_error_handler_0);
@@ -631,18 +631,21 @@ static int _read_input(double deadline){
 void Compiler_refuse_meta_call(Compiler, String, Token, String);
 
 static void Call_refuse(Call * call, String why){
-  Compiler_refuse_meta_call(call -> compiler, call -> name, call -> site, why);
+  Compiler_refuse_meta_call((* call).compiler, (* call).name, (* call).site, why);
 }
 
 String String_printf(String, ...);
 
 static void Call_overdue(Call * call){
   _helper_stop(SIGKILL);
-  Compiler_report_error(call -> compiler, 27335838, String_printf(_69, "this meta call ran longer than ", call -> limit), call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), _73));
+  Compiler_report_error((* call).compiler, 27335838, String_printf(_69, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var((* call).name), NULL)))), _73));
 }
 
 static void Call_stopped(Call * call, String reason){
-  Compiler_report_error(call -> compiler, 27335838, _80, call -> site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var(call -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL)))), NULL)));
+  Compiler_report_error((* call).compiler, 27335838, _80, (* call).site, ({
+    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(_70), cons(String_var((* call).name), NULL))));  cons(_x2c_literal_part_3, cons(String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL)))), NULL));
+  }
+  ));
 }
 
 void Scope_shutdown_hook(void(*)(void));

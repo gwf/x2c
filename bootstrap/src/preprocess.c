@@ -319,27 +319,27 @@ List Array_list(Array);
 
 static void ArmScan_directive(ArmScan * s, Token token, size_t i){
   Symbol kind = preproc_conditional_kind(token -> text);
-  int conditional = kind == 1016156 ||(kind && Array_len(s -> stack));
-  if(kind == 1016156) Array_push(s -> stack, List_var(({
-    Var _x2c_literal_part_0 = int_var(++ s -> serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_14, cons(_x2c_literal_part_1, NULL)));
+  int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
+  if(kind == 1016156) Array_push((* s).stack, List_var(({
+    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_14, cons(_x2c_literal_part_1, NULL)));
   }
   )));
-  else if(kind == 172060880 && Array_len(s -> stack)){
+  else if(kind == 172060880 && Array_len((* s).stack)){
     Var id, arm, state;
-    List _x2c_destructure_0 = Var_list(Array_getindex(s -> stack, - 1));
+    List _x2c_destructure_0 = Var_list(Array_getindex((* s).stack, - 1));
     id = List_getindex(_x2c_destructure_0, 0);
     arm = List_getindex(_x2c_destructure_0, 1);
     state = List_getindex(_x2c_destructure_0, 2);
-    Array_setindex(s -> stack, - 1, List_var(({
+    Array_setindex((* s).stack, - 1, List_var(({
       Var _x2c_literal_part_2 = id;  Var _x2c_literal_part_3 = long_var(Var_integer(arm) + 1);  Var _x2c_literal_part_4 = int_var(preproc_branch_state(Var_int(Var_convert(state, 3453797))));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
     }
     )));
   }
-  else if(kind == 7109834 && Array_len(s -> stack)) Array_take_last(s -> stack);
-  else if(! s -> hidden) ArmScan__note_layout_macro(s, token -> text);
+  else if(kind == 7109834 && Array_len((* s).stack)) Array_take_last((* s).stack);
+  else if(!(* s).hidden) ArmScan__note_layout_macro(&((* s)), token -> text);
   if(! conditional) return;
-  Map_setindex(s -> c -> arm_stacks, long_var((long) i), List_var(Array_list(s -> stack)));
-  s -> hidden = _hidden_group(s -> stack);
+  Map_setindex((* s).c -> arm_stacks, long_var((long) i), List_var(Array_list((* s).stack)));
+  (* s).hidden = _hidden_group((* s).stack);
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -366,27 +366,27 @@ int Map_contains(Map, Var);
 Var Map_getindex(Map, Var);
 
 static size_t ArmScan_code(ArmScan * s, Token token, size_t i){
-  if(s -> hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _15)) return ArmScan__note_attribute(s, i);
-  else if(token -> type == 19147688 && Map_contains(s -> layout, String_var(token -> text))) ArmScan__mark_layout(s, i, Var_equal(Map_getindex(s -> layout, String_var(token -> text)), int_var(2)));
+  if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
+  else if(token -> type == 19147688 && String_equal(token -> text, _15)) return ArmScan__note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, Var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
 
 Token Token_group_close(Token);
 
 static size_t ArmScan__note_attribute(ArmScan * s, size_t index){
-  Token base = s -> c -> tokenizer -> tokens;
+  Token base =(* s).c -> tokenizer -> tokens;
   Token open = Token_skip_trivia(base + index + 1);
   if(open -> type != 81) return index;
   Token last = Token_group_close(open);
   if(last -> type == 11212) return index;
   int level = _attribute_layout(base + index);
-  if(level) ArmScan__mark_layout(s, index, level == 2);
+  if(level) ArmScan__mark_layout(&((* s)), index, level == 2);
   return last - base;
 }
 
 static void ArmScan__mark_layout(ArmScan * s, size_t index, int packed){
-  Compiler c = s -> c;
+  Compiler c =(* s).c;
   Array_push(c -> layout_marks, long_var((long) index));
   Array_push(c -> layout_marks, long_var((long) index + 1));
   if(! packed) return;
@@ -420,8 +420,8 @@ static void ArmScan__note_layout_macro(ArmScan * s, String content){
   int undefined;
   Token name = _macro_directive(content, &(undefined));
   if(! name) return;
-  Map layout = s -> layout;
-  if(! Array_len(s -> stack)) Map_del(layout, String_var(name -> text));
+  Map layout =(* s).layout;
+  if(! Array_len((* s).stack)) Map_del(layout, String_var(name -> text));
   if(undefined) return;
   Token token = name + 1;
   if(token -> type == 81) token = Token_after_group(token);

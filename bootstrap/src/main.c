@@ -489,7 +489,7 @@ int Map_contains(Map, Var);
 Var Map_getindex(Map, Var);
 Var Map_setindex(Map, Var, Var);
 static void Translation_preflight(Translation * t){
-  CliRequest request = t -> request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth(t -> unit_dirs);  Map stems = Map_new(); {
+  CliRequest request =(* t).request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);  Map stems = Map_new(); {
     String input;  List _x2c_macro_object_2 = request -> inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       input = Var_string(_x2c_macro_cursor_output_2); {
         build_check_input(input);  if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
@@ -552,18 +552,18 @@ static void Translation_translate_serial(Translation * t){
   int done = 0;
   {
     String input;
-    List _x2c_macro_object_4 = t -> request -> inputs;
+    List _x2c_macro_object_4 =(* t).request -> inputs;
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       input = Var_string(_x2c_macro_cursor_output_4);
       {
-        if(t -> build) Build_begin_translation(t -> build, input);
-        else report_progress(45220543335690, done, t -> total, input);
-        Translation_translate(t, input);
+        if((* t).build) Build_begin_translation((* t).build, input);
+        else report_progress(45220543335690, done, (* t).total, input);
+        Translation_translate(&((* t)), input);
         done ++;
-        if(t -> build) Build_end_translation(t -> build, input, 0);
-        else report_progress(45220543335690, done, t -> total, input);
+        if((* t).build) Build_end_translation((* t).build, input, 0);
+        else report_progress(45220543335690, done, (* t).total, input);
       }
 
     }
@@ -573,12 +573,12 @@ static void Translation_translate_serial(Translation * t){
 }
 
 static void Translation_translate(Translation * t, String input){
-  _translate_unit(t -> frontend, input, Translation_output_dir(t, input));
+  _translate_unit((* t).frontend, input, Translation_output_dir(&((* t)), input));
 }
 
 static String Translation_output_dir(Translation * t, String input){
-  if(! Map_truth(t -> unit_dirs)) return t -> request -> out_dir;
-  return Var_string(Map_getindex(t -> unit_dirs, String_var(input)));
+  if(! Map_truth((* t).unit_dirs)) return(* t).request -> out_dir;
+  return Var_string(Map_getindex((* t).unit_dirs, String_var(input)));
 }
 
 unsigned long long report_file_bytes(String);
@@ -592,11 +592,11 @@ String int_str(int);
 void report_generated(int, unsigned long long);
 
 static void Translation_report(Translation * t, unsigned long started_at){
-  String out_dir = t -> request -> out_dir;
+  String out_dir =(* t).request -> out_dir;
   unsigned long long bytes = 0;
   {
     String input;
-    List _x2c_macro_object_5 = t -> request -> inputs;
+    List _x2c_macro_object_5 =(* t).request -> inputs;
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
@@ -611,17 +611,17 @@ static void Translation_report(Translation * t, unsigned long started_at){
 
   }
   String duration = report_duration(report_now_us() - started_at);
-  int n = t -> total;
+  int n =(* t).total;
   String noun = n == 1 ? _60 : _61;
   report_line(42217975014, String_join(NULL, cons(String_var(_20), cons(String_var(int_str(n)), cons(String_var(_21), cons(String_var(noun), cons(String_var(_22), cons(String_var(out_dir), cons(String_var(_23), cons(String_var(duration), NULL))))))))));
   report_generated(n, bytes);
 }
 
 static int Translation_translate_parallel(Translation * t){
-  Translation_preload_modules(t);
-  int count = Map_truth(t -> unit_dirs) ? t -> total : t -> request -> jobs;
-  Array slices = _slices(t -> request -> inputs, t -> total, count);
-  int failed = Translation_run_workers(t, slices);
+  Translation_preload_modules(&((* t)));
+  int count = Map_truth((* t).unit_dirs) ?(* t).total :(* t).request -> jobs;
+  Array slices = _slices((* t).request -> inputs, (* t).total, count);
+  int failed = Translation_run_workers(&((* t)), slices);
   Array_free(slices);
   return failed;
 }
@@ -643,11 +643,11 @@ int Path_is_file(Path);
 void Compiler_preload_native_module(String);
 
 static void Translation_preload_modules(Translation * t){
-  List roots = CliRequest_package_roots(t -> request);
+  List roots = CliRequest_package_roots((* t).request);
   if(! List_truth(roots)) return;
   {
     String name;
-    Iter _x2c_macro_iterator_6 = Map_keys(Translation_package_names(t, roots), &(struct Iter){
+    Iter _x2c_macro_iterator_6 = Map_keys(Translation_package_names(&((* t)), roots), &(struct Iter){
       int_var(0)
     }
     );
@@ -656,7 +656,7 @@ static void Translation_preload_modules(Translation * t){
       name = Var_string(_x2c_macro_item_6);
       {
         String root = NULL;
-        if(! String_truth(package_entry(t -> request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
+        if(! String_truth(package_entry((* t).request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
         String module = String_join(NULL, cons(String_var(root), cons(String_var(_24), cons(String_var(name), cons(String_var(_25), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
@@ -699,7 +699,7 @@ static Map Translation_package_names(Translation * t, List roots){
   Map names = Map_new();
   {
     String input;
-    List _x2c_macro_object_9 = t -> request -> inputs;
+    List _x2c_macro_object_9 =(* t).request -> inputs;
     List _x2c_macro_cursor_9 = _x2c_macro_object_9;
     Var _x2c_macro_cursor_output_8;
     while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_8))){
@@ -717,7 +717,7 @@ static Map Translation_package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_literal_part_0 = String_var(Translation_output_dir(t, input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_17), cons(_x2c_literal_part_1, cons(String_var(_26), NULL)))));
+          Var _x2c_literal_part_0 = String_var(Translation_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_17), cons(_x2c_literal_part_1, cons(String_var(_26), NULL)))));
         }
         );
         String volatile text = NULL;
@@ -840,7 +840,7 @@ static List _imported_packages(String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);
@@ -895,13 +895,13 @@ Var Array_getindex(Array, int);
 void Scope_free(void *);
 
 static int Translation_run_workers(Translation * t, Array slices){
-  int jobs = t -> request -> jobs, count = Array_len(slices), next = 0;
+  int jobs =(* t).request -> jobs, count = Array_len(slices), next = 0;
   if(jobs > count) jobs = count;
-  if(t -> request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, t -> total);
+  if((* t).request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, (* t).total);
   long * pids = Scope_calloc(jobs, sizeof(long));
   List * carried = Scope_calloc(jobs, sizeof(List));
   Workers w ={
-    .t = t, .pids = pids, .carried = carried
+    .t = &(* t), .pids = pids, .carried = carried
   }
   ;
   while(next < count || w.live){
@@ -916,17 +916,16 @@ static int Translation_run_workers(Translation * t, Array slices){
 long worker_fork(void);
 
 static void Workers_start(Workers * w, List slice){
-  Translation * t = w -> t;
-  if(t -> build) Build_begin_translation(t -> build, Var_string(List_car(slice)));
+  if((* w).t -> build) Build_begin_translation((* w).t -> build, Var_string(List_car(slice)));
   long pid = worker_fork();
-  if(! pid) Translation_work(t, slice);
+  if(! pid) Translation_work(&((*(* w).t)), slice);
   if(pid < 0){
     report_line(11703268, _62);
-    w -> failed ++;
+    (* w).failed ++;
     return;
   }
-  w -> carried[w -> live] = slice;
-  w -> pids[w -> live ++] = pid;
+  (* w).carried[(* w).live] = slice;
+  (* w).pids[(* w).live ++] = pid;
 }
 
 void Compiler_stop_meta_helper(void);
@@ -941,7 +940,7 @@ static void Translation_work(Translation * t, List slice){
     Var _x2c_macro_cursor_output_9;
     while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_9))){
       input = Var_string(_x2c_macro_cursor_output_9);
-      Translation_translate(t, input);
+      Translation_translate(&((* t)), input);
     }
 
   }
@@ -952,16 +951,15 @@ static void Translation_work(Translation * t, List slice){
 int worker_wait_any(long *, int, int *);
 
 static void Workers_reap(Workers * w){
-  Translation * t = w -> t;
-  int status, slot = worker_wait_any(w -> pids, w -> live, &(status));
-  if(status) w -> failed ++;
-  List slice = w -> carried[slot];
-  if(t -> build && ! status) Build_end_translation(t -> build, Var_string(List_car(slice)), 0);
-  w -> done += List_len(slice);
-  w -> live --;
-  w -> pids[slot] = w -> pids[w -> live];
-  w -> carried[slot] = w -> carried[w -> live];
-  if(! t -> build) report_progress(45220543335690, w -> done, t -> total, NULL);
+  int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
+  if(status)(* w).failed ++;
+  List slice =(* w).carried[slot];
+  if((* w).t -> build && ! status) Build_end_translation((* w).t -> build, Var_string(List_car(slice)), 0);
+  (* w).done += List_len(slice);
+  (* w).live --;
+  (* w).pids[slot] =(* w).pids[(* w).live];
+  (* w).carried[slot] =(* w).carried[(* w).live];
+  if(!(* w).t -> build) report_progress(45220543335690, (* w).done, (* w).t -> total, NULL);
 }
 
 int compile_commands_write(String, Array);

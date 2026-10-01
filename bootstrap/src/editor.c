@@ -142,11 +142,11 @@ static CliRequest Query_configure(Query * q, int argc, char * * argv){
   }
   ;
   CliRequest request = argc == 1 ? cli_parse(2, defaults) : cli_parse(argc, argv);
-  request -> sources = q -> sources;
+  request -> sources =(* q).sources;
   if(request -> command != 5589768 && request -> command != 45220543335690) _fail("x2c editor: use a build or translate configuration\n");
-  if(! List_truth(request -> inputs) && request -> command == 5589768) request = _project_target(request, q -> source);
-  request -> sources = q -> sources;
-  if(SourceView_is_changed(q -> sources, q -> source) && _native_cpp(request)) _fail(unsaved_cpp);
+  if(! List_truth(request -> inputs) && request -> command == 5589768) request = _project_target(request, (* q).source);
+  request -> sources =(* q).sources;
+  if(SourceView_is_changed((* q).sources, (* q).source) && _native_cpp(request)) _fail(unsaved_cpp);
   request -> source_facts = 1;
   return request;
 }
@@ -216,7 +216,7 @@ void x2c_cleanup_leave(X2CCleanup *);
 static int Query_serve(Query * q, CliRequest request){
   Frontend frontend = Frontend_new(request);
   if(! Frontend_preload_macro_libraries(frontend)) return 2;
-  Frontend_prepare_meta(frontend, cons(String_var(q -> source), NULL));
+  Frontend_prepare_meta(frontend, cons(String_var((* q).source), NULL));
   Context command = Context_open_isolated_named("editor request");
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -231,7 +231,7 @@ static int Query_serve(Query * q, CliRequest request){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       ParsedUnit unit;
-      int parsed = Frontend_open(frontend, q -> source, &(unit));
+      int parsed = Frontend_open(frontend, (* q).source, &(unit));
       {
         _x2c_defer_env_0 _x2c_macro_environment_0 ={
           0
@@ -244,8 +244,8 @@ static int Query_serve(Query * q, CliRequest request){
         ;
         x2c_cleanup_push(& _x2c_defer_record_1);
         {
-          q -> compiler = unit.compiler;
-          if(_native_cpp(request) && _changed_dependency(q -> compiler, q -> sources)){
+          (* q).compiler = unit.compiler;
+          if(_native_cpp(request) && _changed_dependency((* q).compiler, (* q).sources)){
             fputs(unsaved_cpp, stderr);
             {
               int _x2c_return_value_0 = 2;
@@ -259,7 +259,7 @@ static int Query_serve(Query * q, CliRequest request){
 
           }
           {
-            int _x2c_return_value_1 = Query_write(q, parsed);
+            int _x2c_return_value_1 = Query_write(&((* q)), parsed);
             {
               x2c_cleanup_leave(& _x2c_defer_record_1);
               x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -329,16 +329,16 @@ String Var_json(Var);
 Var Map_var(Map);
 
 static int Query_write(Query * q, int parsed){
-  File out = fopen(q -> response, "w");
+  File out = fopen((* q).response, "w");
   if(! out) return 2;
-  q -> needed = Map_new();
-  q -> reply =({
-    Var _x2c_literal_part_0 = String_var(q -> source);  Var _x2c_literal_part_1 = Array_var(Query_diagnostics(q));  Map_update_n(Map_new(), 2, Symbol_var(412426), _x2c_literal_part_0, Atom_intern(String_new("diagnostics")), _x2c_literal_part_1);
+  (* q).needed = Map_new();
+  (* q).reply =({
+    Var _x2c_literal_part_0 = String_var((* q).source);  Var _x2c_literal_part_1 = Array_var(Query_diagnostics(&((* q))));  Map_update_n(Map_new(), 2, Symbol_var(412426), _x2c_literal_part_0, Atom_intern(String_new("diagnostics")), _x2c_literal_part_1);
   }
   );
-  if(parsed) Query_answer(q);
-  Map_setindex(q -> reply, Symbol_var(41854048614), Array_var(Query_texts(q)));
-  fprintf(out, "%s\n", Var_json(Map_var(q -> reply)));
+  if(parsed) Query_answer(&((* q)));
+  Map_setindex((* q).reply, Symbol_var(41854048614), Array_var(Query_texts(&((* q)))));
+  fprintf(out, "%s\n", Var_json(Map_var((* q).reply)));
   return fclose(out) ? 2 : 0;
 }
 
@@ -354,12 +354,12 @@ static Array Query_diagnostics(Query * q){
   Array diagnostics = Array_new();
   {
     List entry;
-    List _x2c_macro_object_3 = Compiler_diagnostics(q -> compiler);
+    List _x2c_macro_object_3 = Compiler_diagnostics((* q).compiler);
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_1))){
       entry = Var_list(_x2c_macro_cursor_output_1);
-      Array_push(diagnostics, Map_var(Query_diagnostic(q, entry)));
+      Array_push(diagnostics, Map_var(Query_diagnostic(&((* q)), entry)));
     }
 
   }
@@ -376,10 +376,10 @@ static Map Query_diagnostic(Query * q, List entry){
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
   Var file = List_assoc(location, Symbol_var(412426)), position = List_assoc(location, Symbol_var(1133019155420));
   Var width = List_assoc(location, Symbol_var(816725264));
-  String path = Var_string(Var_is_row(file, 11, 7, 1) ? file : String_var(q -> compiler -> filename));
+  String path = Var_string(Var_is_row(file, 11, 7, 1) ? file : String_var((* q).compiler -> filename));
   int start = Var_int(Var_convert(Var_is_void(position) ? int_var(0) : position, 3453797));
   int length = Var_int(Var_convert(Var_is_void(width) ? int_var(0) : width, 3453797));
-  Map diagnostic = Query_location(q, Path_absolute(path), start, start + length);
+  Map diagnostic = Query_location(&((* q)), Path_absolute(path), start, start + length);
   Map_setindex(diagnostic, Symbol_var(28293925322), List_assoc(entry, Symbol_var(28293925322)));
   Map_setindex(diagnostic, Symbol_var(227594), List_assoc(entry, Symbol_var(227594)));
   Map_setindex(diagnostic, Symbol_var(1317895556402), List_assoc(entry, Symbol_var(1317895556402)));
@@ -387,15 +387,15 @@ static Map Query_diagnostic(Query * q, List entry){
 }
 
 static Map Query_location(Query * q, String path, int start, int end){
-  Map_setindex(q -> needed, String_var(path), int_var(1));
+  Map_setindex((* q).needed, String_var(path), int_var(1));
   return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
 }
 
 static void Query_answer(Query * q){
-  List row = _occurrence(q -> compiler, q -> source, q -> offset);
+  List row = _occurrence((* q).compiler, (* q).source, (* q).offset);
   if(! List_truth(row)) return;
-  if(String_equal(q -> kind, _0)) Query_definition(q, row);
-  else if(String_equal(q -> kind, _1)) Query_hover(q, row);
+  if(String_equal((* q).kind, _0)) Query_definition(&((* q)), row);
+  else if(String_equal((* q).kind, _1)) Query_hover(&((* q)), row);
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -432,10 +432,10 @@ Var List_var(List);
 
 static void Query_definition(Query * q, List row){
   List binding = Var_list(List_getindex(row, 3));
-  Var value = Map_getindex(q -> compiler -> source_definitions, List_var(binding));
+  Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));
   if(! Var_is_row(value, 9, 7, 4)) return;
   List target = Var_list(value);
-  Map_setindex(q -> reply, Symbol_var(292902696930268), Map_var(Query_location(q, Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
+  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
 }
 
 Type Var_type(Var);
@@ -451,11 +451,11 @@ List Compiler_emit(Compiler, List);
 static void Query_hover(Query * q, List row){
   Type type = Var_type(List_getindex(row, 4));
   if(! List_truth(Type_list(type))) return;
-  Compiler c = q -> compiler;
+  Compiler c =(* q).compiler;
   List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));
-  Map hover = Query_location(q, Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
   Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL)), NULL))));
-  Map_setindex(q -> reply, Symbol_var(17805668), Map_var(hover));
+  Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
 }
 
 int Map_try_get(Map, Var, Var *);
@@ -464,7 +464,7 @@ static Array Query_texts(Query * q){
   Array texts = Array_new();
   {
     Var path;
-    Iter _x2c_macro_iterator_5 = Map_keys(q -> needed, &(struct Iter){
+    Iter _x2c_macro_iterator_5 = Map_keys((* q).needed, &(struct Iter){
       int_var(0)
     }
     );
@@ -473,7 +473,7 @@ static Array Query_texts(Query * q){
       path = _x2c_macro_item_5;
       {
         Var text;
-        if(Map_try_get(q -> compiler -> source_texts, path, &(text))) Array_push(texts, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), path, Symbol_var(1322536), text)));
+        if(Map_try_get((* q).compiler -> source_texts, path, &(text))) Array_push(texts, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), path, Symbol_var(1322536), text)));
       }
 
     }
