@@ -227,8 +227,6 @@ static List source_return_type(List node);
 
 static Var source_expression(Var value);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
-
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -252,9 +250,6 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(395496, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("fact"), _x2c__x2c_protocol_methods_0);
-  }
   _0 = Symbol_var(1219800220);
   _1 = Symbol_var(62180362);
   _2 = Symbol_var(58);
@@ -1533,7 +1528,7 @@ __attribute__((constructor)) static void _file_init_(void){
 Var Var_new(Symbol, ...);
 
 static Var Fact_var(Fact fact){
-  return Var_new(395496, fact);
+  return Var_new(3683441, fact);
 }
 
 void * Var_pointer(Var);
