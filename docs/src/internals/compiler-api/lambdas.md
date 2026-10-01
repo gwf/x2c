@@ -33,7 +33,7 @@ Opens lexical capture resolution while a lambda body is parsed or bound.
 contains canonical capture rows supplied by constructed syntax. Evolving
 rows live in semantic binding facts so macro transactions restore them.
 
-Source: `src/lambdas.x:329`
+Source: `src/lambdas.x:332`
 
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
@@ -44,7 +44,7 @@ Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;
 supplied canonical capture rows retain their value or reference mode.
 
-Source: `src/lambdas.x:201`
+Source: `src/lambdas.x:202`
 
 <a id="Compiler.capture_lambda_identifier"></a>
 #### Compiler.capture_lambda_identifier
@@ -56,7 +56,7 @@ Fresh captured bindings keep sibling snapshots independent of shared-cell
 rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
-Source: `src/lambdas.x:367`
+Source: `src/lambdas.x:370`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -67,7 +67,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambdas.x:497`
+Source: `src/lambdas.x:502`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -76,7 +76,7 @@ Source: `src/lambdas.x:497`
 
 Finishes the active lambda's captures in first-use order.
 
-Source: `src/lambdas.x:338`
+Source: `src/lambdas.x:341`
 
 <a id="Compiler.lambda_capture_required"></a>
 #### Compiler.lambda_capture_required
@@ -85,7 +85,7 @@ Source: `src/lambdas.x:338`
 
 Reports whether the active lambda still needs to capture a binding.
 
-Source: `src/lambdas.x:351`
+Source: `src/lambdas.x:354`
 
 <a id="Compiler.lambda_param_types"></a>
 #### Compiler.lambda_param_types
@@ -95,7 +95,7 @@ Source: `src/lambdas.x:351`
 The parameter types of a lambda's function signature, keeping typed
 declarators; a bare parameter is a `Var`.
 
-Source: `src/lambdas.x:160`
+Source: `src/lambdas.x:161`
 
 <a id="Compiler.parse_lambda_literal"></a>
 #### Compiler.parse_lambda_literal

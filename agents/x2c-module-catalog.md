@@ -186,22 +186,22 @@ Public functions:
 
 ### [src/expressions.x](../src/expressions.x)
 
-expression syntax, resolution, and conversion.
+expression syntax and its resolution.
 
 Public functions:
 
-`Compiler.complete_iter_chain`, `List.printf_family`,
-`Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
-`Compiler.postfix_completions`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `x2c_func_call_arguments`,
-`Compiler.func_call_parts`, `Compiler.check_explicit_converter`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
-`Compiler.parse_variable`, `Compiler.parse_conditional`,
-`Compiler.parse_assignment`, `Compiler.parse_primary`,
-`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.converter_call`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.parse_expression`, `Compiler.parse_assignment`,
+`Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
+`Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
+`Compiler.parse_variable`, `Compiler.resolve_expression`,
+`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
+`x2c_func_call_arguments`, `Compiler.func_call_parts`,
+`Compiler.complete_iter_chain`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.check_explicit_converter`, `List.printf_family`,
+`Compiler.printf_static_format`, `Compiler.promote_string_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
+`Compiler.converter_call`
 
 ### [src/format.x](../src/format.x)
 
@@ -236,9 +236,9 @@ brace initializer conversion.
 
 Public functions:
 
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.initializer_native_types`, `Compiler.initializer_rows`,
-`Compiler.initializer_field_path`, `Compiler.initializer_slot`
+`Compiler.convert_initializer`, `Compiler.initializer_rows`,
+`Compiler.initializer_field_path`, `Compiler.initializer_slot`,
+`Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
 
 ### [src/install.x](../src/install.x)
 

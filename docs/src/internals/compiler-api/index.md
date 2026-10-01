@@ -23,7 +23,7 @@ Functions and types exposed by each compiler module.
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
 | [`src/emit.x`](emit.md) | emit C tokens from x2c ASTs. |
-| [`src/expressions.x`](expressions.md) | expression syntax, resolution, and conversion. |
+| [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
