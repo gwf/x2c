@@ -341,6 +341,9 @@ plans index.
   private include puts its prototype in the generated header without that
   type's header, so any unit including the header fails in clang. Found
   during defect 1; it needs its own `fix-x2c-bug` pass.
+- The region check treats a pointer cast to `int` and returned as a
+  returned address (`return (int) value;`). Found during defect 5; it
+  needs its own `fix-x2c-bug` pass.
 
 - The unwired tests other than those Phase 2 wires
   (`bound-template-expression.c`, `source-call-projection.x`,
