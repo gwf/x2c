@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import sys
 import time
@@ -30,17 +31,47 @@ SHA = re.compile(r"[0-9a-f]{40}\Z")
 FINAL = {"landed", "parked"}
 
 
-def command(args, root, *, input=None, check=True):
-    result = subprocess.run(args, cwd=root, input=input, text=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+class WaitExpired(Exception):
+    pass
+
+
+def interrupt_wait(_signal, _frame):
+    raise KeyboardInterrupt("wait interrupted")
+
+
+def command(args, root, *, input=None, check=True, deadline=None):
+    options = {"cwd": root, "text": True, "stdout": subprocess.PIPE,
+               "stderr": subprocess.PIPE}
+    if deadline is None:
+        result = subprocess.run(args, input=input, **options)
+    else:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise WaitExpired("wait I/O budget expired before " + str(args[0]))
+        with subprocess.Popen(args, start_new_session=True, **options) as process:
+            try:
+                stdout, stderr = process.communicate(input, timeout=remaining)
+            except (subprocess.TimeoutExpired, KeyboardInterrupt) as error:
+                # Git's SSH/credential helpers can retain its output pipes.
+                # Stop this wait's process group before draining those pipes.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.communicate()
+                if isinstance(error, KeyboardInterrupt):
+                    raise
+                raise WaitExpired("wait I/O budget expired during " + str(args[0]))
+            result = subprocess.CompletedProcess(args, process.returncode,
+                                                 stdout, stderr)
     if check and result.returncode:
         raise RuntimeError(f"{args[0]} failed: " +
                            (result.stderr or result.stdout).strip())
     return result
 
 
-def git(root, *args):
-    return command(["git", *args], root).stdout.strip()
+def git(root, *args, deadline=None):
+    return command(["git", *args], root, deadline=deadline).stdout.strip()
 
 
 def now():
@@ -95,16 +126,19 @@ def metadata(body):
 
 
 class Queue:
-    def __init__(self, root):
+    def __init__(self, root, *, deadline=None):
         self.root = root
         self.directory = root / "debug" / "integration"
         self.repo = None
+        self.deadline = deadline
+        self.observed_pending = []
 
     def repository(self):
         if self.repo is None:
             self.repo = command(
                 ["gh", "repo", "view", "--json", "nameWithOwner", "--jq",
-                 ".nameWithOwner"], self.root).stdout.strip()
+                 ".nameWithOwner"], self.root,
+                deadline=self.deadline).stdout.strip()
             if not re.fullmatch(r"[\w.-]+/[\w.-]+", self.repo):
                 raise ValueError("cannot identify the GitHub repository")
         return self.repo
@@ -116,7 +150,8 @@ class Queue:
         if data is not None:
             args += ["--method", "POST", "--input", "-"]
         result = command(args, self.root,
-                         input=None if data is None else json.dumps(data))
+                         input=None if data is None else json.dumps(data),
+                         deadline=self.deadline)
         value = json.loads(result.stdout)
         return [item for page in value for item in page] if pages else value
 
@@ -210,12 +245,13 @@ class Queue:
             raise ValueError("set context --role integrator --delivery direct")
 
     def fetch_dev(self):
-        git(self.root, "fetch", "origin", "dev")
-        return git(self.root, "rev-parse", "origin/dev")
+        git(self.root, "fetch", "origin", "dev", deadline=self.deadline)
+        return git(self.root, "rev-parse", "origin/dev", deadline=self.deadline)
 
     def ancestor(self, commit, tip, root=None):
         return command(["git", "merge-base", "--is-ancestor", commit, tip],
-                       root or self.root, check=False).returncode == 0
+                       root or self.root, check=False,
+                       deadline=self.deadline).returncode == 0
 
     def ready(self):
         pulls = self.api("pulls?state=open&base=dev&per_page=100", pages=True)
@@ -223,6 +259,7 @@ class Queue:
                 if record["state"] == "parked" and not record.get("retry")
                 for pr in record["prs"]}
         ready, pending = [], []
+        self.observed_pending = pending
         for pull in pulls:
             if READY not in {label["name"] for label in pull["labels"]}:
                 continue
@@ -519,20 +556,28 @@ class Queue:
 
     def wait(self, args):
         self.integrator()
-        deadline = time.monotonic() + args.timeout
-        while True:
-            active = self.active()
-            if active:
-                output({"active": active})
-                return
-            base = self.fetch_dev()
-            entries, pending = self.ready()
-            selected, blocked, wait = self.select(entries, base, args)
-            if selected or time.monotonic() >= deadline:
-                output({"ready": [e["number"] for e in selected],
-                        "pending": pending + blocked, "wait_seconds": wait})
-                return
-            time.sleep(min(10, max(0, deadline - time.monotonic())))
+        if self.deadline is None:
+            self.deadline = time.monotonic() + (args.timeout or 60)
+        try:
+            while True:
+                active = self.active()
+                if active:
+                    output({"active": active, "timed_out": False})
+                    return
+                base = self.fetch_dev()
+                entries, pending = self.ready()
+                selected, blocked, wait = self.select(entries, base, args)
+                self.observed_pending = pending + blocked
+                timed_out = time.monotonic() >= self.deadline
+                if selected or args.timeout == 0 or timed_out:
+                    output({"ready": [e["number"] for e in selected],
+                            "pending": self.observed_pending,
+                            "wait_seconds": wait, "timed_out": timed_out})
+                    return
+                time.sleep(min(10, max(0, self.deadline - time.monotonic())))
+        except WaitExpired as error:
+            output({"ready": [], "pending": self.observed_pending,
+                    "timed_out": True, "reason": str(error)})
 
 
 def main():
@@ -560,7 +605,10 @@ def main():
             operation.add_argument("--prs", type=int, nargs="+")
             operation.add_argument("--retry")
         else:
-            operation.add_argument("--timeout", type=float, default=60)
+            operation.add_argument(
+                "--timeout", type=float, default=60,
+                help="overall wait/I/O budget (0-60 seconds); 0 polls once "
+                     "with a maximum 60-second I/O budget")
     land = commands.add_parser("land", help="gate, or publish a reviewed gated batch")
     land.add_argument("batch")
     land.add_argument("--publish", action="store_true")
@@ -569,16 +617,21 @@ def main():
     park.add_argument("--reason", default="parked for diagnosis")
     args = parser.parse_args()
     try:
-        root = Path(git(args.root.resolve(), "rev-parse", "--show-toplevel"))
-        queue = Queue(root)
-        if args.operation == "context":
-            set_context(root, args.role, args.delivery)
-            output(read_context(root))
-        elif args.operation == "wait":
+        deadline = None
+        if args.operation == "wait":
             if not 0 <= args.timeout <= 60:
                 raise ValueError("wait timeout must be between 0 and 60 seconds")
             if args.max_batch < 1 or args.window < 0:
                 raise ValueError("batch size must be positive and window nonnegative")
+            signal.signal(signal.SIGTERM, interrupt_wait)
+            deadline = time.monotonic() + (args.timeout or 60)
+        root = Path(git(args.root.resolve(), "rev-parse", "--show-toplevel",
+                        deadline=deadline))
+        queue = Queue(root, deadline=deadline)
+        if args.operation == "context":
+            set_context(root, args.role, args.delivery)
+            output(read_context(root))
+        elif args.operation == "wait":
             queue.wait(args)
         elif args.operation == "status":
             queue.status()
@@ -600,6 +653,10 @@ def main():
                     record.update(state="parked", reason=args.reason)
                     queue.save(record)
                     output(record)
+        return 0
+    except WaitExpired as error:
+        output({"ready": [], "pending": [], "timed_out": True,
+                "reason": str(error)})
         return 0
     except (OSError, RuntimeError, ValueError, KeyError, TypeError,
             KeyboardInterrupt) as error:

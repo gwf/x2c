@@ -15,16 +15,26 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 TOOL_ROOT = Path(__file__).resolve().parent.parent
 
 GH = r'''#!/usr/bin/env python3
-import json, os, re, sys
+import json, os, re, subprocess, sys, time
 from pathlib import Path
 path = Path(os.environ['PROBE_STATE'])
 s = json.loads(path.read_text())
 a = sys.argv[1:]
+blocking = os.environ.get('PROBE_GH_BLOCK')
+if blocking and any(blocking in arg for arg in a):
+    with Path(os.environ['PROBE_BLOCK_TRACE']).open('a') as trace:
+        trace.write('gh ' + blocking + '\n')
+    if os.environ.get('PROBE_BLOCK_CHILD'):
+        subprocess.Popen([sys.executable,'-c','import time; time.sleep(2)'])
+    time.sleep(2)
+if os.environ.get('PROBE_IO_DELAY'):
+    time.sleep(float(os.environ['PROBE_IO_DELAY']))
 s.setdefault('gh_calls', []).append(a)
 def done(value):
     path.write_text(json.dumps(s))
@@ -151,7 +161,11 @@ class IntegrationProbe(unittest.TestCase):
         self.write(self.bin/'make', MAKE, executable=True)
         git_binary = shutil.which('git')
         git_wrapper = ('#!/usr/bin/env python3\n'
-                       'import json, os, sys\nfrom pathlib import Path\n'
+                       'import json, os, sys, time\nfrom pathlib import Path\n'
+                       "blocking=os.environ.get('PROBE_GIT_BLOCK')\n"
+                       "if blocking and blocking in sys.argv[1:]:\n"
+                       "    with Path(os.environ['PROBE_BLOCK_TRACE']).open('a') as trace: trace.write('git '+blocking+'\\n')\n"
+                       "    time.sleep(2)\n"
                        "p=Path(os.environ['PROBE_STATE']); s=json.loads(p.read_text())\n"
                        "s.setdefault('git_calls',[]).append(sys.argv[1:])\n"
                        'p.write_text(json.dumps(s))\n'
@@ -503,6 +517,78 @@ class IntegrationProbe(unittest.TestCase):
         self.assertEqual(self.tip(),self.base)
         self.cli('land',batch,'--publish')
         self.assertEqual(len(self.state()['gates']),1)
+
+    def test_wait_budget_bounds_git_and_gh_io(self):
+        self.pr(1)
+        for variable, value in [('PROBE_GIT_BLOCK','rev-parse'),
+                                ('PROBE_GIT_BLOCK','fetch'),
+                                ('PROBE_GH_BLOCK','repo'),
+                                ('PROBE_GH_BLOCK','pulls?'),
+                                ('PROBE_GH_BLOCK','/events')]:
+            with self.subTest(variable=variable,value=value):
+                self.env[variable]=value
+                if value == '/events': self.env['PROBE_BLOCK_CHILD']='1'
+                trace=self.root/'debug'/'blocking-io.log'
+                trace.unlink(missing_ok=True)
+                self.env['PROBE_BLOCK_TRACE']=str(trace)
+                started=time.monotonic()
+                budget=1.5 if value == '/events' else 0.75
+                result=self.cli('wait','--timeout',str(budget),'--flush')
+                elapsed=time.monotonic()-started
+                self.env.pop(variable)
+                self.env.pop('PROBE_BLOCK_CHILD',None)
+                self.assertLess(elapsed,budget+0.55,result.stdout+result.stderr)
+                self.assertIn(value,trace.read_text())
+                value=json.loads(result.stdout)
+                self.assertTrue(value['timed_out'])
+                self.assertEqual(value['ready'],[])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_wait_budget_includes_dependency_ancestry_checks(self):
+        first=self.pr(1)
+        self.pr(2,base=first,depends=[(1,first)])
+        self.env['PROBE_GIT_BLOCK']='merge-base'
+        trace=self.root/'debug'/'blocking-io.log'
+        self.env['PROBE_BLOCK_TRACE']=str(trace)
+        started=time.monotonic()
+        result=self.cli('wait','--timeout','1.5','--flush')
+        elapsed=time.monotonic()-started
+        self.env.pop('PROBE_GIT_BLOCK')
+        self.assertLess(elapsed,2.05,result.stdout+result.stderr)
+        self.assertIn('merge-base',trace.read_text())
+        self.assertTrue(json.loads(result.stdout)['timed_out'])
+        self.assertEqual(self.tip(),self.base)
+
+    def test_wait_io_uses_one_overall_budget_and_retains_pending(self):
+        self.pr(1); self.pr(2)
+        state=self.state(); state['pulls']['1']['draft']=True
+        self.state_path.write_text(json.dumps(state))
+        self.env['PROBE_GH_BLOCK']='/events'
+        self.env['PROBE_BLOCK_TRACE']=str(self.root/'debug'/'blocking-io.log')
+        result=self.cli('wait','--timeout','1.5','--flush')
+        self.env.pop('PROBE_GH_BLOCK')
+        value=json.loads(result.stdout)
+        self.assertTrue(value['timed_out'])
+        self.assertEqual(value['ready'],[])
+        self.assertEqual([p['number'] for p in value['pending']],[1])
+        self.env['PROBE_IO_DELAY']='0.15'
+        started=time.monotonic()
+        result=self.cli('wait','--timeout','0.25','--flush')
+        elapsed=time.monotonic()-started
+        self.env.pop('PROBE_IO_DELAY')
+        self.assertLess(elapsed,1,result.stdout+result.stderr)
+        self.assertTrue(json.loads(result.stdout)['timed_out'])
+
+    def test_zero_timeout_is_one_poll_with_bounded_io(self):
+        started=time.monotonic()
+        result=self.cli('wait','--timeout','0')
+        self.assertLess(time.monotonic()-started,3,result.stdout+result.stderr)
+        value=json.loads(result.stdout)
+        self.assertEqual(value['ready'],[])
+        self.assertFalse(value['timed_out'])
+        state=self.state()
+        self.assertEqual(sum('fetch' in call for call in state['git_calls']),1)
 
     def test_provider_neutral_push_guard(self):
         for role,delivery,blocked in [('worker','direct',True),('individual','pr',True),
