@@ -50,9 +50,6 @@ $(import "errors.xmacro")
 
 typedef void (*UvTimerFn)(UvTimer, Var);
 typedef void (*UvAsyncFn)(UvAsync, Var);
-typedef void (*UvIdleFn)(UvIdle, Var);
-typedef void (*UvPrepareFn)(UvPrepare, Var);
-typedef void (*UvCheckFn)(UvCheck, Var);
 typedef void (*UvLookupFn)(UvLookup, Var);
 typedef void (*UvTcpConnectFn)(UvTcp, Var);
 typedef void (*UvTcpListenFn)(UvTcp, UvTcp, Var);
@@ -269,30 +266,6 @@ struct UvAsync {
   UvLoop loop;
   Var value;
   UvAsyncFn handler;
-  int stopped;
-};
-
-struct UvIdle {
-  uv_idle_t idle;
-  UvLoop loop;
-  Var value;
-  UvIdleFn handler;
-  int stopped;
-};
-
-struct UvPrepare {
-  uv_prepare_t prepare;
-  UvLoop loop;
-  Var value;
-  UvPrepareFn handler;
-  int stopped;
-};
-
-struct UvCheck {
-  uv_check_t check;
-  UvLoop loop;
-  Var value;
-  UvCheckFn handler;
   int stopped;
 };
 
@@ -647,81 +620,6 @@ static void _uv_async_callback(uv_async_t *handle) {
     if (async) {
       _uv_callback_failed(async.loop, cause, detail);
       _uv_async_release(async);
-    }
-  }
-}
-
-static void _uv_idle_release(UvIdle idle) {
-  if (!idle || idle.stopped) return;
-  idle.stopped = 1;
-  uv_idle_stop(&idle.idle);
-  _uv_close_handle((uv_handle_t *) &idle.idle);
-}
-
-static void _uv_idle_event(uv_idle_t *handle) {
-  UvIdle idle = handle ? handle->data : NULL;
-  if (!idle) return;
-  UvIdleFn handler = idle.handler;
-  handler(idle, idle.value);
-}
-
-static void _uv_idle_callback(uv_idle_t *handle) {
-  try _uv_idle_event(handle);
-  catch %(?cause *detail): {
-    UvIdle idle = handle ? handle->data : NULL;
-    if (idle) {
-      _uv_callback_failed(idle.loop, cause, detail);
-      _uv_idle_release(idle);
-    }
-  }
-}
-
-static void _uv_prepare_release(UvPrepare prepare) {
-  if (!prepare || prepare.stopped) return;
-  prepare.stopped = 1;
-  uv_prepare_stop(&prepare.prepare);
-  _uv_close_handle((uv_handle_t *) &prepare.prepare);
-}
-
-static void _uv_prepare_event(uv_prepare_t *handle) {
-  UvPrepare prepare = handle ? handle->data : NULL;
-  if (!prepare) return;
-  UvPrepareFn handler = prepare.handler;
-  handler(prepare, prepare.value);
-}
-
-static void _uv_prepare_callback(uv_prepare_t *handle) {
-  try _uv_prepare_event(handle);
-  catch %(?cause *detail): {
-    UvPrepare prepare = handle ? handle->data : NULL;
-    if (prepare) {
-      _uv_callback_failed(prepare.loop, cause, detail);
-      _uv_prepare_release(prepare);
-    }
-  }
-}
-
-static void _uv_check_release(UvCheck check) {
-  if (!check || check.stopped) return;
-  check.stopped = 1;
-  uv_check_stop(&check.check);
-  _uv_close_handle((uv_handle_t *) &check.check);
-}
-
-static void _uv_check_event(uv_check_t *handle) {
-  UvCheck check = handle ? handle->data : NULL;
-  if (!check) return;
-  UvCheckFn handler = check.handler;
-  handler(check, check.value);
-}
-
-static void _uv_check_callback(uv_check_t *handle) {
-  try _uv_check_event(handle);
-  catch %(?cause *detail): {
-    UvCheck check = handle ? handle->data : NULL;
-    if (check) {
-      _uv_callback_failed(check.loop, cause, detail);
-      _uv_check_release(check);
     }
   }
 }
@@ -2750,105 +2648,92 @@ UvLoop UvAsync.loop(UvAsync async) => async ? async.loop : NULL;
 
 uv_async_t *UvAsync.native(UvAsync async) => async ? &async.async : NULL;
 
+/*  An idle, prepare, or check handle calls `fn(handle, value)` once in every
+    loop turn, at its phase, until UvLoop.free or `handle.stop()`, which is
+    idempotent. A failed start closes the handle. A callback that raises
+    stops only its own handle, and UvLoop.run reports the error.
+*/
+macro Unit $uv.phase(
+  Type $phase, Type $native, Name $method, Expr $init, Expr $start,
+  Expr $stop, Literal $operation, Literal $init_operation,
+  Literal $start_operation
+) {
+  /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
+  struct $(x2c.ident (str (car $phase))) {
+    $native handle;
+    UvLoop loop;
+    Var value;
+    void (*handler)($phase, Var);
+  };
+
+  static void _release($phase phase) {
+    if (!phase) return;
+    $stop(&phase.handle);
+    _uv_close_handle((uv_handle_t *) &phase.handle);
+  }
+
+  static void _callback($native *handle) {
+    $phase phase = handle ? handle->data : NULL;
+    if (!phase) return;
+    try phase.handler(phase, phase.value);
+    catch %(?cause *detail): {
+      _uv_callback_failed(phase.loop, cause, detail);
+      _release(phase);
+    }
+  }
+
+  $phase UvLoop.$method(UvLoop loop, Var value, void (*fn)($phase, Var)) {
+    if (!loop || !loop.initialized || !fn) {
+      $uv.error("phase.args", $operation);
+    }
+    $phase phase = Scope.calloc(1, sizeof(*phase));
+    phase.loop = loop;
+    phase.value = value;
+    phase.handler = fn;
+    int status = $init(&loop.loop, &phase.handle);
+    if (status < 0) {
+      Scope.free(phase);
+      _uv_raise($init_operation, status);
+    }
+    phase.handle.data = phase;
+    status = $start(&phase.handle, _callback);
+    if (status < 0) {
+      _release(phase);
+      _uv_raise($start_operation, status);
+    }
+    return phase;
+  }
+
+  $phase $phase.stop($phase phase) {
+    _release(phase);
+    return NULL;
+  }
+
+  UvLoop $phase.loop($phase phase) => phase ? phase.loop : NULL;
+
+  $native *$phase.native($phase phase) => phase ? &phase.handle : NULL;
+}
+
 /*  Runs once per loop turn before prepare and polling. An active idle handle
     forces a zero-timeout poll; it is a deliberate busy-loop mechanism, not a
     notification that the loop has nothing else to do.
 */
-UvIdle UvLoop.idle(UvLoop loop, Var value, void (*fn)(UvIdle, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("idle.args");
-  }
-  UvIdle idle = Scope.calloc(1, sizeof(struct UvIdle));
-  idle.loop = loop;
-  idle.value = value;
-  idle.handler = fn;
-  int status = uv_idle_init(&loop.loop, &idle.idle);
-  if (status < 0) {
-    Scope.free(idle);
-    _uv_raise("idle_init", status);
-  }
-  idle.idle.data = idle;
-  status = uv_idle_start(&idle.idle, _uv_idle_callback);
-  if (status < 0) {
-    _uv_idle_release(idle);
-    _uv_raise("idle_start", status);
-  }
-  return idle;
-}
-
-UvIdle UvIdle.stop(UvIdle idle) {
-  _uv_idle_release(idle);
-  return NULL;
-}
-
-UvLoop UvIdle.loop(UvIdle idle) => idle ? idle.loop : NULL;
-
-uv_idle_t *UvIdle.native(UvIdle idle) => idle ? &idle.idle : NULL;
+$uv.phase(
+  UvIdle, uv_idle_t, idle, uv_idle_init, uv_idle_start, uv_idle_stop,
+  "idle", "idle_init", "idle_start"
+);
 
 /*  Runs once per loop turn immediately before libuv polls for I/O. */
-UvPrepare UvLoop.prepare(UvLoop loop, Var value, void (*fn)(UvPrepare, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("prepare.args");
-  }
-  UvPrepare prepare = Scope.calloc(1, sizeof(struct UvPrepare));
-  prepare.loop = loop;
-  prepare.value = value;
-  prepare.handler = fn;
-  int status = uv_prepare_init(&loop.loop, &prepare.prepare);
-  if (status < 0) {
-    Scope.free(prepare);
-    _uv_raise("prepare_init", status);
-  }
-  prepare.prepare.data = prepare;
-  status = uv_prepare_start(&prepare.prepare, _uv_prepare_callback);
-  if (status < 0) {
-    _uv_prepare_release(prepare);
-    _uv_raise("prepare_start", status);
-  }
-  return prepare;
-}
-
-UvPrepare UvPrepare.stop(UvPrepare prepare) {
-  _uv_prepare_release(prepare);
-  return NULL;
-}
-
-UvLoop UvPrepare.loop(UvPrepare prepare) => prepare ? prepare.loop : NULL;
-
-uv_prepare_t *UvPrepare.native(UvPrepare prepare) =>
-  prepare ? &prepare.prepare : NULL;
+$uv.phase(
+  UvPrepare, uv_prepare_t, prepare, uv_prepare_init, uv_prepare_start,
+  uv_prepare_stop, "prepare", "prepare_init", "prepare_start"
+);
 
 /*  Runs once per loop turn immediately after libuv polls for I/O. */
-UvCheck UvLoop.check(UvLoop loop, Var value, void (*fn)(UvCheck, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("check.args");
-  }
-  UvCheck check = Scope.calloc(1, sizeof(struct UvCheck));
-  check.loop = loop;
-  check.value = value;
-  check.handler = fn;
-  int status = uv_check_init(&loop.loop, &check.check);
-  if (status < 0) {
-    Scope.free(check);
-    _uv_raise("check_init", status);
-  }
-  check.check.data = check;
-  status = uv_check_start(&check.check, _uv_check_callback);
-  if (status < 0) {
-    _uv_check_release(check);
-    _uv_raise("check_start", status);
-  }
-  return check;
-}
-
-UvCheck UvCheck.stop(UvCheck check) {
-  _uv_check_release(check);
-  return NULL;
-}
-
-UvLoop UvCheck.loop(UvCheck check) => check ? check.loop : NULL;
-
-uv_check_t *UvCheck.native(UvCheck check) => check ? &check.check : NULL;
+$uv.phase(
+  UvCheck, uv_check_t, check, uv_check_init, uv_check_start, uv_check_stop,
+  "check", "check_init", "check_start"
+);
 
 /*  Calls `fn(timer, value)` after `delay` milliseconds, and every `repeat`
     milliseconds after that when `repeat` is positive. A repeating timer

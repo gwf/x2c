@@ -39,11 +39,6 @@ meta static Map _uv_error_rows(void) => {
     raise %(bad-state (library "libuv") (operation "async_send")
             (reason "the async handle has stopped"));
   },
-  "check.args" :
-  macro Statement() {
-    raise %(bad-arg (library "libuv") (operation "check")
-            (reason "a live loop and a callback are required"));
-  },
   "command.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "command")
@@ -212,11 +207,6 @@ meta static Map _uv_error_rows(void) => {
     raise %(bad-arg (library "libuv") (operation "write_file")
             (reason "text is required"));
   },
-  "idle.args" :
-  macro Statement() {
-    raise %(bad-arg (library "libuv") (operation "idle")
-            (reason "a live loop and a callback are required"));
-  },
   "ip4.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "ip4")
@@ -293,6 +283,11 @@ meta static Map _uv_error_rows(void) => {
     raise %(io-fail (library "libuv") (operation ${$operation})
             (status ${$status}) (name ${$name}) (message ${$message}));
   },
+  "phase.args" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (library "libuv") (operation ${$operation})
+            (reason "a live loop and a callback are required"));
+  },
   "pipe.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "pipe")
@@ -320,11 +315,6 @@ meta static Map _uv_error_rows(void) => {
   macro Statement(Expr $operation) {
     raise %(bad-arg (library "libuv") (operation ${$operation})
             (reason "a pipe handle is required"));
-  },
-  "prepare.args" :
-  macro Statement() {
-    raise %(bad-arg (library "libuv") (operation "prepare")
-            (reason "a live loop and a callback are required"));
   },
   "process.capture" :
   macro Statement(Expr $operation) {
