@@ -1501,8 +1501,7 @@ static void Compiler._record_static_object(
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !c._initializable_type(initializer_type))
-          continue;
+        if (declared_var && !c._initializable_type(initializer_type)) continue;
         Map references = {}, Array ordered = [];
         _collect_references(value, references, ordered);
         c.static_init_deps[binding] = ordered.list_free();

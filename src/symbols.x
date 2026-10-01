@@ -39,11 +39,8 @@
       U: union tag name
       T: typedef name
 
-    Entry formats:
-      ____________            ____________________________
-      Lookup Key              Type Result (value in table)
-      ------------            ----------------------------
-      (V)                     TYPE
+    Entry formats, each a lookup key and the type the table holds for it:
+      (V)                   TYPE
       (union U K)             TYPE
       (union U)               (union TYPE-LIST)
       (struct S K)            (TYPE)
