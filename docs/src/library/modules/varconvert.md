@@ -9,39 +9,10 @@
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_numeric_f32`](#x2c_numeric_f32) | Converts a decoded numeric value to native `float` without boxing. |
-| [`x2c_numeric_f64`](#x2c_numeric_f64) | Converts a decoded numeric value to native `double` without boxing. |
-| [`x2c_numeric_ldouble`](#x2c_numeric_ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
 | [`Var.convert`](#Var.convert) | Converts `value` to a numeric `target`, or returns exact-tag identity. |
-
-### Functions
-
-#### x2c_numeric_f32
-
-`float x2c_numeric_f32(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `float` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/varconvert.x:280`
-
-#### x2c_numeric_f64
-
-`double x2c_numeric_f64(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `double` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/varconvert.x:289`
-
-#### x2c_numeric_ldouble
-
-`long double x2c_numeric_ldouble(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `long double` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/varconvert.x:298`
+| [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
+| [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
+| [`X2CVarNumeric.ldouble`](#X2CVarNumeric.ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
 
 ### `Var`
 
@@ -67,6 +38,38 @@ decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
 Source: `lib/varconvert.x:74`
+
+### `X2CVarNumeric`
+
+<a id="X2CVarNumeric.f32"></a>
+#### X2CVarNumeric.f32
+
+`float X2CVarNumeric.f32(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `float` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/varconvert.x:280`
+
+<a id="X2CVarNumeric.f64"></a>
+#### X2CVarNumeric.f64
+
+`double X2CVarNumeric.f64(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/varconvert.x:289`
+
+<a id="X2CVarNumeric.ldouble"></a>
+#### X2CVarNumeric.ldouble
+
+`long double X2CVarNumeric.ldouble(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `long double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/varconvert.x:298`
 
 ## Advanced and interop API
 

@@ -89,9 +89,6 @@ prefix.
 | [`x2c_mutex_recursive_unlock`](mutex.md#x2c_mutex_recursive_unlock) | `lib/mutex.x` | `void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
-| [`x2c_numeric_f32`](varconvert.md#x2c_numeric_f32) | `lib/varconvert.x` | `float x2c_numeric_f32(X2CVarNumeric &value)` |
-| [`x2c_numeric_f64`](varconvert.md#x2c_numeric_f64) | `lib/varconvert.x` | `double x2c_numeric_f64(X2CVarNumeric &value)` |
-| [`x2c_numeric_ldouble`](varconvert.md#x2c_numeric_ldouble) | `lib/varconvert.x` | `long double x2c_numeric_ldouble(X2CVarNumeric &value)` |
 | `x2c_package_directory` | `src/utils.x` | `String x2c_package_directory(List roots, String path)` |
 | `x2c_package_entry` | `src/utils.x` | `String x2c_package_entry( SourceView sources, List roots, String name, String &directory)` |
 | `x2c_package_source` | `src/utils.x` | `int x2c_package_source(String directory, String path)` |
@@ -129,4 +126,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 117 functions.
+Total: 114 functions.

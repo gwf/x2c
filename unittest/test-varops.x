@@ -324,9 +324,9 @@ static void var_floating_rounding_matrix(void) {
         X2CVarNumeric decoded;
         source.numeric_decode(decoded);
         Var casted = targets[t] == <f32>
-          ? Var.box_f32(x2c_numeric_f32(decoded))
-          : targets[t] == <f64> ? Var.box_f64(x2c_numeric_f64(decoded))
-          : Var.box_long_double(x2c_numeric_ldouble(decoded));
+          ? Var.box_f32(decoded.f32())
+          : targets[t] == <f64> ? Var.box_f64(decoded.f64())
+          : Var.box_long_double(decoded.ldouble());
         long double cast_value = converted_test_value(casted);
         long double public_value = converted_test_value(
           source.convert(targets[t]));

@@ -416,14 +416,14 @@ static Symbol _floating_tag(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
 static Var _floating_binary(
   Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag) {
   if (tag == <f32>) {
-    float a = x2c_numeric_f32(lhs), b = x2c_numeric_f32(rhs);
+    float a = lhs.f32(), b = rhs.f32();
     return Var.box_f32(_f32_step(op, a, b));
   }
   if (tag == <f64>) {
-    double a = x2c_numeric_f64(lhs), b = x2c_numeric_f64(rhs);
+    double a = lhs.f64(), b = rhs.f64();
     return Var.box_f64(_f64_step(op, a, b));
   }
-  long double a = x2c_numeric_ldouble(lhs), b = x2c_numeric_ldouble(rhs);
+  long double a = lhs.ldouble(), b = rhs.ldouble();
   return Var.box_long_double(_ldouble_step(op, a, b));
 }
 

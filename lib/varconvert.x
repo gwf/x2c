@@ -31,9 +31,9 @@ typedef struct X2CVarNumeric {
   long double floating_value;
 } X2CVarNumeric;
 
-float x2c_numeric_f32(X2CVarNumeric &value);
-double x2c_numeric_f64(X2CVarNumeric &value);
-long double x2c_numeric_ldouble(X2CVarNumeric &value);
+float X2CVarNumeric.f32(X2CVarNumeric &value);
+double X2CVarNumeric.f64(X2CVarNumeric &value);
+long double X2CVarNumeric.ldouble(X2CVarNumeric &value);
 
 #pragma private
 
@@ -267,9 +267,9 @@ long long Var.signed_from_bits(unsigned long long raw, int bits) {
 /* Floating results use host casts, so a wide target gets a new Scope box. */
 static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
   switch (target) {
-    case <f32>: return Var.box_f32(x2c_numeric_f32(source));
-    case <f64>: return Var.box_f64(x2c_numeric_f64(source));
-    case <ldouble>: return Var.box_long_double(x2c_numeric_ldouble(source));
+    case <f32>: return Var.box_f32(source.f32());
+    case <f64>: return Var.box_f64(source.f64());
+    case <ldouble>: return Var.box_long_double(source.ldouble());
     default: raise %(bad-target (target $target));
   }
 }
@@ -277,7 +277,7 @@ static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
 /** Converts a decoded numeric value to native `float` without boxing.
     Uses the target host cast, preserving its rounding behavior.
 */
-float x2c_numeric_f32(X2CVarNumeric &value) {
+float X2CVarNumeric.f32(X2CVarNumeric &value) {
   if (value.floating) return (float) value.floating_value;
   if (value.unsigned_value) return (float) value.raw;
   return (float) Var.signed_from_bits(value.raw, value.bits);
@@ -286,7 +286,7 @@ float x2c_numeric_f32(X2CVarNumeric &value) {
 /** Converts a decoded numeric value to native `double` without boxing.
     Uses the target host cast, preserving its rounding behavior.
 */
-double x2c_numeric_f64(X2CVarNumeric &value) {
+double X2CVarNumeric.f64(X2CVarNumeric &value) {
   if (value.floating) return (double) value.floating_value;
   if (value.unsigned_value) return (double) value.raw;
   return (double) Var.signed_from_bits(value.raw, value.bits);
@@ -295,7 +295,7 @@ double x2c_numeric_f64(X2CVarNumeric &value) {
 /** Converts a decoded numeric value to native `long double` without boxing.
     Uses the target host cast, preserving its rounding behavior.
 */
-long double x2c_numeric_ldouble(X2CVarNumeric &value) {
+long double X2CVarNumeric.ldouble(X2CVarNumeric &value) {
   if (value.floating) return value.floating_value;
   if (value.unsigned_value) return (long double) value.raw;
   return (long double) Var.signed_from_bits(value.raw, value.bits);

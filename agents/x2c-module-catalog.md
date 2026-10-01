@@ -1388,8 +1388,8 @@ Public functions:
 Public functions:
 
 `Var.convert`, `Var.numeric_info`, `Var.numeric_decode`, `Var.integer_box`,
-`Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`, `x2c_numeric_f32`,
-`x2c_numeric_f64`, `x2c_numeric_ldouble`
+`Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`,
+`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`
 
 ### [lib/varops.x](../lib/varops.x)
 
