@@ -209,7 +209,7 @@ Each was reproduced at 2685655f.
 | Realpath or keep | `compiler.x:455`, `collect.x:483`, `protocol.x:34` | kept, with comments: under a source view `Compiler.canonical_path` makes a path absolute, while collect keys unsaved files by the searched spelling and protocol needs to know whether the first path resolved |
 | Emitter recognition | `Emitter._emit` head switch plus six `_emit_*` groups that match again and return `matched` (`src/emit.x:1194-1399`, b796f4e1) | one `match` in `_emit` with one-line arms; delete the groups and the flag |
 | List to Array copy | the copy loop in `List.array`, `append`, `sort`, `sort_with`, `sort_by` (`lib/list.x:322, 365, 734, 746, 759`) | `List.array`, after it cleans up a partial Array on failure; keep `append`'s shared tail and `sort_by`'s one key call for a one-element List |
-| Nested-lambda presence | `ast_contains_head` at region entry and again on every child before descending (`src/transform.x:1437-1528`) | one identity-preserving visit that prepares regions and reports presence; measure deep-lambda and lambda-free cases |
+| Nested-lambda presence | `ast_contains_head` at region entry and again on every child (`src/transform.x:1437-1528`) | kept: the repeated search was 5 of 16,729 profile samples on a deep-lambda source; a one-visit rewrite added a mode parameter and seven lines, and a whole-tree visit overflowed the C stack on long operator chains |
 | Open-template rebuild | `_template` discovers, then `_replace_bindings`, `_open_natives`, and origin `search_replace` each rebuild (`src/macros.x:2277-2338`) | one coordinated rewrite after discovery, if fixtures and stage equality prove it equal; otherwise record why the passes stay |
 | Typed zero-pointer target | the same initializer-target template at `src/expressions.x:4490, 4536` | one constructor |
 | Args repeated values | shared-name rows still append prefixes (`lib/args.x:147-150`); 200 values make 19,910 allocations against 201 | one accumulator per result name, keeping first-occurrence reset, defaults, mixed-row overwrite, and store order |
@@ -397,6 +397,11 @@ plans index.
   new `process.x` option that also stops Ctrl-C reaching samples.
   `preprocess-missing-include` keeps its status-only check, because its
   stderr carries the host C compiler's own message.
+- Lambda cell rewriting calls `bind_syntax` once per cell reference, and
+  each call opens a semantic transaction that copies and merges the binding
+  facts (`_rewrite_lambda_cells`, `Compiler_begin_semantic_transaction`).
+  40 functions with lambdas nested 10 deep take 16-39 seconds and 9.1 GB to
+  translate. Found during Phase 3; it needs its own performance fix.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
