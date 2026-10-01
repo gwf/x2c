@@ -2943,16 +2943,9 @@ void Compiler.ensure_macro_lisp(Compiler c) {
     c.macro_lisp = Lisp.kernel();
     c.macro_lisp.adopt(library_session);
   }
-  c._eval_library(
-    ready, "etc/init.xlisp", "cannot open the compile-time Lisp environment");
-  c._eval_library(
-    ready, "etc/lisp-values.xlisp",
-    "cannot open the compile-time value operations");
-  c._eval_library(
-    ready, "etc/compiler-sdk.xlisp", "cannot open the compile-time Lisp SDK");
   if (!ready) _install_builtins(c.macro_lisp);
-  c._eval_library(
-    ready, "etc/builtin-core.xlisp", "cannot open the built-in macro support");
+  foreach (Var (relative, message), _library_files())
+    c._eval_library(ready, relative, message);
   if (!ready) c._install_native_operations();
 }
 
@@ -3577,10 +3570,10 @@ int Compiler.shares_meta_definition(Compiler c, String name) {
    marker. */
 
 macro Expression $_embed_lisp_binding_macros() =>
-  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"));
+  $(x2c.literal.string (x2c.embed.text "../etc/lisp-bindings.xmacro"));
 
 macro Expression $_embed_builtin_macros() =>
-  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"));
+  $(x2c.literal.string (x2c.embed.text "../etc/builtin-macros.xmacro"));
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
 static String lisp_bindings_marker = NULL;

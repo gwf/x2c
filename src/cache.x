@@ -109,12 +109,31 @@ static int Compiler._collect_ids(
    most file-static initializers are calls. Each such binding keeps its
    declaration and moves its assignment into a generated helper. */
 
-macro Unit $cache_function(Type $type, Name $name,
+macro Unit $initializer_function(Type $type, Name $name,
     Statement $body...) {
-  $type $name(void) {
-    $body...
-  }
+  $type $name(void) { $body... }
 }
+
+/* The function `type name(void)` running `body`. */
+List _initializer_function(Compiler c, List type, List name, List body) {
+  Macro shape = $initializer_function;
+  return c.rebuild_unit_function(shape(type, name, body));
+}
+
+macro Statement $initializer_run_once(Expr $guard) {
+  if ($guard) return;
+  $guard = 1;
+}
+
+/* Returns when `guard` is set and sets it otherwise. */
+List _run_once(Compiler c, List guard) {
+  Macro shape = $initializer_run_once;
+  return c.rebuild_statement(shape(%(expr (int) (ident $guard)))).cdr();
+}
+
+/* The statement calling the `void (void)` function `entry`. */
+List _entry_call(String entry) =>
+  %((stmnt (expr (void) (call $entry (args)))));
 
 /* Apply file-scope initializer rewrites across one generated region. Both
    regions share one initializer list, so a header definition deferred into
@@ -134,9 +153,8 @@ static List Compiler._rewrite_statics(
       (List binding, List assignment) = initializers[i];
       List helper = c.sym.introduce(c.fresh_name("static_initialize"));
       initializers[i] = %($binding $assignment $helper $arms);
-      Macro shape = $cache_function;
-      List function = c.rebuild_unit_function(
-        shape(%(static void), helper, %($assignment)));
+      List function =
+        _initializer_function(c, %(static void), helper, %($assignment));
       output.push(%(sourceinit $function));
     }
   }
@@ -480,23 +498,13 @@ static List Compiler._header_refs(
   $ast.rewrite_children(node, child, c._header_refs(child, prefix, replaced));
 }
 
-macro Statement $header_cache_setup(Statement $protocol, Expr $guard,
-    Statement $body...) {
-  $protocol
-  if ($guard) return;
-  $guard = 1;
-  $body...
-}
-
 static List Compiler._header_initializer(
   Compiler c, List guard, List initializer, List statements) {
-  Macro setup = $header_cache_setup, shape = $cache_function;
   List type = %(("__attribute__((constructor))") static void);
-  List protocol_call = %(stmnt
-    (expr (void) (call "x2c_initialize_protocols" (args))));
-  List body = c.rebuild_statement(
-    setup(protocol_call, %(expr (int) (ident $guard)), statements)).cdr();
-  return c.rebuild_unit_function(shape(type, initializer, body));
+  List body = List.concat_n(
+    3, _entry_call("x2c_initialize_protocols"), _run_once(c, guard),
+    statements);
+  return _initializer_function(c, type, initializer, body);
 }
 
 List _initialization_guard(List guard) => %(declare (static int)
@@ -563,7 +571,6 @@ static List Compiler._cache_batches(
   if (count <= limit) return statements.list_free();
   Array calls = [];
   String stem = prefix ? %"${prefix}initialize" : "cache_initialize";
-  Macro shape = $cache_function;
   List type = %(("__attribute__((noinline, cold))") static void);
   for (int first = 0; first < count; first += limit) {
     Array batch = [];
@@ -571,7 +578,7 @@ static List Compiler._cache_batches(
       batch.push(statements[i]);
     List helper = c.sym.introduce(c.fresh_name(stem));
     declarations.push(
-      c.rebuild_unit_function(shape(type, helper, batch.list_free())));
+      _initializer_function(c, type, helper, batch.list_free()));
     calls.push(%(stmnt (expr (void)
       (call (expr ((func ((void))) void) (ident $helper)) (args)))));
   }
