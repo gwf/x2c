@@ -4737,13 +4737,13 @@ return CallSite__function(&(site), function);
 }
 
 static List CallSite__function(CallSite * k, List function){
-  List resolved = Compiler_resolve_expression(k -> c, function, k -> origin);  Type type = Var_type(List_cadr(resolved)), func_type = Sym_resolve_key(k -> c -> sym, List_type(_1545));  if(List_truth(Type_list(type)) && List_equal(Type_list(Sym_resolve_key(k -> c -> sym, type)), Type_list(func_type))) return Compiler__resolve_func_call(k -> c, resolved, k -> supplied, k -> origin);  return CallSite__finish(k, k -> result_type, resolved, type, NULL);
+  List resolved = Compiler_resolve_expression((* k).c, function, (* k).origin);  Type type = Var_type(List_cadr(resolved)), func_type = Sym_resolve_key((* k).c -> sym, List_type(_1545));  if(List_truth(Type_list(type)) && List_equal(Type_list(Sym_resolve_key((* k).c -> sym, type)), Type_list(func_type))) return Compiler__resolve_func_call((* k).c, resolved, (* k).supplied, (* k).origin);  return CallSite__finish(&((* k)), (* k).result_type, resolved, type, NULL);
 }
 
 Type Type_apply(Type);
 void Compiler_check_meta_call(Compiler, List, Token);
 static List CallSite__finish(CallSite * k, Type result_type, List callee, Type callee_type, List receiver){
-  if(result_type == _515) result_type = NULL;  Type applied = Type_apply(callee_type);  if(! List_truth(Type_list(applied)) && List_truth(Type_list(callee_type))) applied = Type_apply(Sym_resolve_key(k -> c -> sym, callee_type));  List arguments = Compiler__resolve_call_arguments(k -> c, receiver, k -> supplied, k -> origin);  if(_deferred_call(callee, receiver, arguments)) result_type = List_type(_515);  if(! List_truth(Type_list(result_type))) result_type = applied;  if(List_truth(receiver) && result_type != _515) CallSite__check_arity(k, callee_type, arguments);  Compiler_check_meta_call(k -> c, callee, k -> origin);  callee = Compiler__discarding_callee(k -> c, callee, callee_type, arguments);  Macro called = _797;  return Compiler_rebuild_expression(k -> c, result_type, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));
+  if(result_type == _515) result_type = NULL;  Type applied = Type_apply(callee_type);  if(! List_truth(Type_list(applied)) && List_truth(Type_list(callee_type))) applied = Type_apply(Sym_resolve_key((* k).c -> sym, callee_type));  List arguments = Compiler__resolve_call_arguments((* k).c, receiver, (* k).supplied, (* k).origin);  if(_deferred_call(callee, receiver, arguments)) result_type = List_type(_515);  if(! List_truth(Type_list(result_type))) result_type = applied;  if(List_truth(receiver) && result_type != _515) CallSite__check_arity(&((* k)), callee_type, arguments);  Compiler_check_meta_call((* k).c, callee, (* k).origin);  callee = Compiler__discarding_callee((* k).c, callee, callee_type, arguments);  Macro called = _797;  return Compiler_rebuild_expression((* k).c, result_type, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));
 }
 
 static int _deferred_call(List callee, List receiver, List arguments){
@@ -4767,7 +4767,7 @@ static void CallSite__check_arity(CallSite * k, Type callee_type, List arguments
     List _x2c_match_expr = Type_list(callee_type);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x2c_match_site_66, _x2c_match_expr, List_var(_1553), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  if(! _parameters_variadic(Var_list(parameters)) && List_len(arguments) > List_len(Var_list(parameters))) Compiler_report_error(k -> c, 1362954, String_join(NULL, cons(String_var(_1554), cons(String_var(int_str(List_len(Var_list(parameters)) - 1)), cons(String_var(_1555), cons(String_var(List_len(Var_list(parameters)) == 2 ? _1556 : _1557), cons(String_var(_1558), cons(String_var(int_str(List_len(arguments) - 1)), NULL))))))), k -> origin, NULL);  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_66;  if (x2c_match_site_try_capture(& _x2c_match_site_66, _x2c_match_expr, List_var(_1553), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  if(! _parameters_variadic(Var_list(parameters)) && List_len(arguments) > List_len(Var_list(parameters))) Compiler_report_error((* k).c, 1362954, String_join(NULL, cons(String_var(_1554), cons(String_var(int_str(List_len(Var_list(parameters)) - 1)), cons(String_var(_1555), cons(String_var(List_len(Var_list(parameters)) == 2 ? _1556 : _1557), cons(String_var(_1558), cons(String_var(int_str(List_len(arguments) - 1)), NULL))))))), (* k).origin, NULL);  break;
 }
 
     }
@@ -4829,28 +4829,28 @@ if(! which) return callee;  String stem = binding_identity_spelling(binding);  i
 }
 
 static List CallSite__method(CallSite * k, List receiver, List field){
-  k -> receiver = receiver;  k -> field = field;  List resolution = CallSite__lookup(k);  if(! List_truth(resolution) && _deferred_receiver(k -> receiver)){
-    List callee = cons(_33, cons(_821, cons(List_var(cons(_262, cons(_798, cons(List_var(k -> receiver), cons(List_var(k -> field), NULL))))), NULL)));  return CallSite__finish(k, k -> result_type, callee, NULL, NULL);
+  (* k).receiver = receiver; (* k).field = field;  List resolution = CallSite__lookup(&((* k)));  if(! List_truth(resolution) && _deferred_receiver((* k).receiver)){
+    List callee = cons(_33, cons(_821, cons(List_var(cons(_262, cons(_798, cons(List_var((* k).receiver), cons(List_var((* k).field), NULL))))), NULL)));  return CallSite__finish(&((* k)), (* k).result_type, callee, NULL, NULL);
   }
   if(! List_truth(resolution)){
-    Var name = List_car(k -> field);  Compiler_report_error(k -> c, 1362954, String_join(NULL, cons(String_var(_1521), cons(String_var(List_repr(Type_list(k -> type))), cons(String_var(_1573), cons(String_var(Var_str(name)), NULL))))), k -> origin, NULL);
+    Var name = List_car((* k).field);  Compiler_report_error((* k).c, 1362954, String_join(NULL, cons(String_var(_1521), cons(String_var(List_repr(Type_list((* k).type))), cons(String_var(_1573), cons(String_var(Var_str(name)), NULL))))), (* k).origin, NULL);
   }
 
   {
     List _x2c_match_expr = resolution;
     Var _x2c_match_values[6];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 6 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 3097291488614: ;  static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x2c_match_site_69, _x2c_match_expr, List_var(_1577), &_x2c_match_capture)) {List packages = Var_list(_x2c_match_values[0]);  Compiler__report_method_ambiguity(k -> c, k -> type, k -> method, packages, NULL, k -> origin);  break;
+      case 3097291488614: ;  static MatchCaptureSite _x2c_match_site_69;  if (x2c_match_site_try_capture(& _x2c_match_site_69, _x2c_match_expr, List_var(_1577), &_x2c_match_capture)) {List packages = Var_list(_x2c_match_values[0]);  Compiler__report_method_ambiguity((* k).c, (* k).type, (* k).method, packages, NULL, (* k).origin);  break;
 }
-case 884229064: ;  static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x2c_match_site_70, _x2c_match_expr, List_var(_1600), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Var signature = _x2c_match_values[1];  Var parameters = _x2c_match_values[2];  Var declared = _x2c_match_values[3];  List returns = Var_list(_x2c_match_values[4]);  return CallSite__bound(k, Var_list(binding), Var_type(signature), Var_list(declared), Var_list(parameters), returns);  break;
+case 884229064: ;  static MatchCaptureSite _x2c_match_site_70;  if (x2c_match_site_try_capture(& _x2c_match_site_70, _x2c_match_expr, List_var(_1600), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Var signature = _x2c_match_values[1];  Var parameters = _x2c_match_values[2];  Var declared = _x2c_match_values[3];  List returns = Var_list(_x2c_match_values[4]);  return CallSite__bound(&((* k)), Var_list(binding), Var_type(signature), Var_list(declared), Var_list(parameters), returns);  break;
 }
 case 286431579402: ;  static MatchCaptureSite _x2c_match_site_71;  if (x2c_match_site_try_capture(& _x2c_match_site_71, _x2c_match_expr, List_var(_1606), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Var signature = _x2c_match_values[1];  Var parameters = _x2c_match_values[2];  Var declared = _x2c_match_values[3];  List returns = Var_list(_x2c_match_values[4]);  Var path = _x2c_match_values[5]; {
-  k -> receiver = _delegate_receiver(k -> receiver, Var_list(path));  k -> type = Var_type(List_cadr(k -> receiver));  return CallSite__bound(k, Var_list(binding), Var_type(signature), Var_list(declared), Var_list(parameters), returns);
+  (* k).receiver = _delegate_receiver((* k).receiver, Var_list(path)); (* k).type = Var_type(List_cadr((* k).receiver));  return CallSite__bound(&((* k)), Var_list(binding), Var_type(signature), Var_list(declared), Var_list(parameters), returns);
 }
 break;
 }
 case 13183752: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936774802184ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var access = _x2c_match_values[0];  Var field_type = _x2c_match_values[1]; {
-  List callee = cons(_33, cons(field_type, cons(List_var(cons(_262, cons(access, cons(List_var(k -> receiver), cons(List_var(k -> field), NULL))))), NULL)));  return CallSite__finish(k, k -> result_type, callee, Var_type(field_type), NULL);
+  List callee = cons(_33, cons(field_type, cons(List_var(cons(_262, cons(access, cons(List_var((* k).receiver), cons(List_var((* k).field), NULL))))), NULL)));  return CallSite__finish(&((* k)), (* k).result_type, callee, Var_type(field_type), NULL);
 }
 break; } } default: break;
     }
@@ -4859,14 +4859,14 @@ return NULL;
 }
 
 static List CallSite__lookup(CallSite * k){
-  k -> receiver = Compiler_resolve_expression(k -> c, k -> receiver, k -> origin);  k -> type = Var_type(List_cadr(k -> receiver));  k -> method = Var_str(List_car(k -> field));  List resolution = Compiler_resolve_postfix_member(k -> c, k -> type, k -> field, 93, 1);  if(! List_truth(resolution) && _expr_is_raw_string_literal(k -> receiver)){
-    k -> receiver = Compiler_promote_string_literal(k -> c, k -> receiver);  k -> type = Var_type(List_cadr(k -> receiver));  resolution = Compiler_resolve_postfix_member(k -> c, k -> type, k -> field, 93, 1);
+  (* k).receiver = Compiler_resolve_expression((* k).c, (* k).receiver, (* k).origin); (* k).type = Var_type(List_cadr((* k).receiver)); (* k).method = Var_str(List_car((* k).field));  List resolution = Compiler_resolve_postfix_member((* k).c, (* k).type, (* k).field, 93, 1);  if(! List_truth(resolution) && _expr_is_raw_string_literal((* k).receiver)){
+    (* k).receiver = Compiler_promote_string_literal((* k).c, (* k).receiver); (* k).type = Var_type(List_cadr((* k).receiver));  resolution = Compiler_resolve_postfix_member((* k).c, (* k).type, (* k).field, 93, 1);
   }
-  return List_truth(resolution) ? resolution : Compiler__resolve_delegate_method(k -> c, k -> type, k -> method, k -> origin);
+  return List_truth(resolution) ? resolution : Compiler__resolve_delegate_method((* k).c, (* k).type, (* k).method, (* k).origin);
 }
 
 static List CallSite__bound(CallSite * k, List binding, Type signature, List declared, List parameters, List returns){
-  k -> receiver = Compiler__method_bind(k -> c, k -> receiver, k -> type, List_type(declared), k -> origin);  List callee = cons(_33, cons(List_var(cons(List_var(cons(_1527, cons(List_var(parameters), NULL))), cons(List_var(returns), NULL))), cons(List_var(cons(_252, cons(List_var(binding), NULL))), NULL)));  return CallSite__finish(k, Type_apply(signature), callee, signature, k -> receiver);
+  (* k).receiver = Compiler__method_bind((* k).c, (* k).receiver, (* k).type, List_type(declared), (* k).origin);  List callee = cons(_33, cons(List_var(cons(List_var(cons(_1527, cons(List_var(parameters), NULL))), cons(List_var(returns), NULL))), cons(List_var(cons(_252, cons(List_var(binding), NULL))), NULL)));  return CallSite__finish(&((* k)), Type_apply(signature), callee, signature, (* k).receiver);
 }
 
 Type Type_canonicalize(Type);
@@ -4951,19 +4951,19 @@ Type Sym_delegate_aggregate(Sym, Type);
 List Sym_field_order(Sym, Type);
 List List_cddr(List);
 static void DelegateSearch__find(DelegateSearch * d, Type receiver, List reverse_path, List seen){
-  Type aggregate = Sym_delegate_aggregate(d -> c -> sym, receiver);  if(! List_truth(Type_list(aggregate))) return;  if(List_contains(seen, List_var(aggregate))){
-    if(! List_truth(d -> first_cycle)) d -> first_cycle = cons(Symbol_var(1051920), List_reverse(reverse_path));  return;
+  Type aggregate = Sym_delegate_aggregate((* d).c -> sym, receiver);  if(! List_truth(Type_list(aggregate))) return;  if(List_contains(seen, List_var(aggregate))){
+    if(! List_truth((* d).first_cycle))(* d).first_cycle = cons(Symbol_var(1051920), List_reverse(reverse_path));  return;
   }
-  seen = cons(List_var(aggregate), seen);  List order = Sym_field_order(d -> c -> sym, aggregate); {
+  seen = cons(List_var(aggregate), seen);  List order = Sym_field_order((* d).c -> sym, aggregate); {
     List row;  List _x2c_macro_object_10 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
       row = Var_list(_x2c_macro_cursor_output_10); {
-        String name = Var_string(List_car(row));  if(! String_truth(name)) continue;  if(! List_truth(Sym_get(d -> c -> sym, List_append(Type_list(aggregate), cons(_1601, cons(String_var(name), NULL)))))) continue;  List step = Compiler__delegate_step(d -> c, receiver, name);  Type field_type = Var_type(List_cadr(List_cddr(step)));  List next_path = cons(List_var(step), reverse_path);  List resolution = Compiler_resolve_postfix_member(d -> c, field_type, cons(String_var(d -> member), NULL), 93, 1);  if(List_truth(resolution) && Var_equal(List_car(resolution), Symbol_var(884229064))){
-          List binding = Var_list(List_cadr(resolution));  Type signature = Var_type(List_caddr(resolution));  List path = cons(Symbol_var(1051920), List_reverse(next_path));  Array_push(d -> candidates, List_var(cons(_1601, cons(List_var(binding), cons(List_var(signature), cons(List_var(path), NULL))))));
+        String name = Var_string(List_car(row));  if(! String_truth(name)) continue;  if(! List_truth(Sym_get((* d).c -> sym, List_append(Type_list(aggregate), cons(_1601, cons(String_var(name), NULL)))))) continue;  List step = Compiler__delegate_step((* d).c, receiver, name);  Type field_type = Var_type(List_cadr(List_cddr(step)));  List next_path = cons(List_var(step), reverse_path);  List resolution = Compiler_resolve_postfix_member((* d).c, field_type, cons(String_var((* d).member), NULL), 93, 1);  if(List_truth(resolution) && Var_equal(List_car(resolution), Symbol_var(884229064))){
+          List binding = Var_list(List_cadr(resolution));  Type signature = Var_type(List_caddr(resolution));  List path = cons(Symbol_var(1051920), List_reverse(next_path));  Array_push((* d).candidates, List_var(cons(_1601, cons(List_var(binding), cons(List_var(signature), cons(List_var(path), NULL))))));
         }
         else if(List_truth(resolution) && Var_equal(List_car(resolution), Symbol_var(3097291488614))){
-          String path = _delegate_path_string(d -> outer, cons(Symbol_var(1051920), List_reverse(next_path)), NULL);  Compiler__report_method_ambiguity(d -> c, field_type, d -> member, List_cdr(resolution), path, d -> origin);
+          String path = _delegate_path_string((* d).outer, cons(Symbol_var(1051920), List_reverse(next_path)), NULL);  Compiler__report_method_ambiguity((* d).c, field_type, (* d).member, List_cdr(resolution), path, (* d).origin);
         }
-        else if(! List_truth(resolution)) DelegateSearch__find(d, field_type, next_path, seen);
+        else if(! List_truth(resolution)) DelegateSearch__find(&((* d)), field_type, next_path, seen);
       }
 
     }
@@ -4980,17 +4980,17 @@ static void DelegateSearch__report_paths(DelegateSearch * d, List candidates){
   List notes = NULL; {
     List candidate;  List _x2c_macro_object_11 = candidates;  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
       candidate = Var_list(_x2c_macro_cursor_output_11); {
-        List path = Var_list(List_cadr(List_cddr(candidate)));  String spelling = binding_identity_spelling(Var_list(List_cadr(candidate)));  String description = _delegate_path_string(d -> outer, path, d -> member);  notes = cons(String_var(String_join(NULL, cons(String_var(_1625), cons(String_var(description), cons(String_var(_1626), cons(String_var(spelling), NULL)))))), notes);
+        List path = Var_list(List_cadr(List_cddr(candidate)));  String spelling = binding_identity_spelling(Var_list(List_cadr(candidate)));  String description = _delegate_path_string((* d).outer, path, (* d).member);  notes = cons(String_var(String_join(NULL, cons(String_var(_1625), cons(String_var(description), cons(String_var(_1626), cons(String_var(spelling), NULL)))))), notes);
       }
 
     }
 
   }
-  String type = _delegate_type_name(d -> outer), member = d -> member;  Compiler_report_error(d -> c, 1362954, String_join(NULL, cons(String_var(_1627), cons(String_var(type), cons(String_var(_663), cons(String_var(member), cons(String_var(_1628), NULL)))))), d -> origin, List_reverse(notes));
+  String type = _delegate_type_name((* d).outer), member =(* d).member;  Compiler_report_error((* d).c, 1362954, String_join(NULL, cons(String_var(_1627), cons(String_var(type), cons(String_var(_663), cons(String_var(member), cons(String_var(_1628), NULL)))))), (* d).origin, List_reverse(notes));
 }
 
 static void DelegateSearch__report_cycle(DelegateSearch * d){
-  String type = _delegate_type_name(d -> outer), member = d -> member;  String path = _delegate_path_string(d -> outer, d -> first_cycle, NULL);  Compiler_report_error(d -> c, 1362954, String_join(NULL, cons(String_var(_1629), cons(String_var(type), cons(String_var(_663), cons(String_var(member), NULL))))), d -> origin, cons(String_var(String_join(NULL, cons(String_var(_1625), cons(String_var(path), NULL)))), NULL));
+  String type = _delegate_type_name((* d).outer), member =(* d).member;  String path = _delegate_path_string((* d).outer, (* d).first_cycle, NULL);  Compiler_report_error((* d).c, 1362954, String_join(NULL, cons(String_var(_1629), cons(String_var(type), cons(String_var(_663), cons(String_var(member), NULL))))), (* d).origin, cons(String_var(String_join(NULL, cons(String_var(_1625), cons(String_var(path), NULL)))), NULL));
 }
 
 static void Compiler__report_method_ambiguity(Compiler c, Type receiver, String member, List packages, String delegate_path, Token origin){

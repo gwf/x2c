@@ -1924,15 +1924,15 @@ static void Lisp__capture(Lisp lisp, LispEnv * env, Lambda lambda){
 
 static void FreeNames_form(FreeNames * f, Var form, List bound, int depth){
   if(Var_is_atom(form)){
-    if(depth <= 0 && ! _param_has(bound, form)) Array_push(f -> out, form);
+    if(depth <= 0 && ! _param_has(bound, form)) Array_push((* f).out, form);
     return;
   }
   if(! Var_is_row(form, 9, 7, 4)) return;
   List items = Var_list(form);
   if(! List_truth(items)) return;
-  if(depth < 0) FreeNames_all(f, items, bound, depth);
-  else if(depth > 0) FreeNames_quoted(f, items, bound, depth);
-  else FreeNames_call(f, items, bound);
+  if(depth < 0) FreeNames_all(&((* f)), items, bound, depth);
+  else if(depth > 0) FreeNames_quoted(&((* f)), items, bound, depth);
+  else FreeNames_call(&((* f)), items, bound);
 }
 
 static void FreeNames_all(FreeNames * f, List items, List bound, int depth){
@@ -1943,7 +1943,7 @@ static void FreeNames_all(FreeNames * f, List items, List bound, int depth){
     Var _x2c_macro_cursor_output_6;
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       part = _x2c_macro_cursor_output_6;
-      FreeNames_form(f, part, bound, depth);
+      FreeNames_form(&((* f)), part, bound, depth);
     }
 
   }
@@ -1952,25 +1952,25 @@ static void FreeNames_all(FreeNames * f, List items, List bound, int depth){
 
 static void FreeNames_quoted(FreeNames * f, List items, List bound, int depth){
   int inner = _quote_depth(List_car(items), depth);
-  FreeNames_all(f, inner >= 0 ? List_cdr(items) : items, bound, inner >= 0 ? inner : depth);
+  FreeNames_all(&((* f)), inner >= 0 ? List_cdr(items) : items, bound, inner >= 0 ? inner : depth);
 }
 
 static void FreeNames_call(FreeNames * f, List items, List bound){
   Var head = List_car(items), callable;
-  FreeNames_form(f, head, bound, 0);
-  if(! Var_is_atom(head) || _param_has(bound, head) || ! LispEnv__lookup(f -> env, head, &(callable))){
-    FreeNames_all(f, List_cdr(items), bound, - 1);
+  FreeNames_form(&((* f)), head, bound, 0);
+  if(! Var_is_atom(head) || _param_has(bound, head) || ! LispEnv__lookup((* f).env, head, &(callable))){
+    FreeNames_all(&((* f)), List_cdr(items), bound, - 1);
     return;
   }
-  int special = Var_is_row(callable, 9, 7, 1) ? Lisp__special_id(f -> lisp, Var_pointer(callable)) : - 1;
+  int special = Var_is_row(callable, 9, 7, 1) ? Lisp__special_id((* f).lisp, Var_pointer(callable)) : - 1;
   if(special == LISP_QUOTE) return;
   if(special == LISP_LAMBDA || special == LISP_MACRO){
     List rest = List_cdr(items), params = _with_params(bound, rest);
-    FreeNames_all(f, List_cdr(rest), params, 0);
+    FreeNames_all(&((* f)), List_cdr(rest), params, 0);
     return;
   }
   int inner = special == LISP_QUASIQUOTE ? 1 : Var_is_row(callable, 9, 7, 3) &&(Var_lambda(callable)) -> macro ? - 1 : 0;
-  FreeNames_all(f, List_cdr(items), bound, inner);
+  FreeNames_all(&((* f)), List_cdr(items), bound, inner);
 }
 
 static int _quote_depth(Var head, int depth){
@@ -2580,10 +2580,10 @@ static Var LispReader_form(LispReader * r, Token token, int depth){
   if(! token || token -> type == 11212) return((void) 0, Void);
   Var prefix =((void) 0, Void);
   switch(token -> type){
-    case 11703268 : if(Tokenizer_status(r -> tokenizer) == 664344300629258) return((void) 0, Void);
-    return LispReader_malformed(r, token);
-    case 83 : return LispReader_malformed(r, token);
-    case 81 : return LispReader_list(r, depth + 1);
+    case 11703268 : if(Tokenizer_status((* r).tokenizer) == 664344300629258) return((void) 0, Void);
+    return LispReader_malformed(&((* r)), token);
+    case 83 : return LispReader_malformed(&((* r)), token);
+    case 81 : return LispReader_list(&((* r)), depth + 1);
     case 79 : prefix = lsym_quote;
     break;
     case 193 : prefix = lsym_quasiquote;
@@ -2593,13 +2593,13 @@ static Var LispReader_form(LispReader * r, Token token, int depth){
     case 11393 : prefix = lsym_splicing;
     break;
   }
-  if(! Var_is_void(prefix)) return LispReader_prefixed(r, prefix, depth);
-  r -> end = token -> pos + token -> len;
-  return LispReader_atom(r, token);
+  if(! Var_is_void(prefix)) return LispReader_prefixed(&((* r)), prefix, depth);
+  (* r).end = token -> pos + token -> len;
+  return LispReader_atom(&((* r)), token);
 }
 
 static Var LispReader_prefixed(LispReader * r, Var prefix, int depth){
-  Var inner = LispReader_form(r, Tokenizer_next(r -> tokenizer), depth + 1);
+  Var inner = LispReader_form(&((* r)), Tokenizer_next((* r).tokenizer), depth + 1);
   if(Var_is_void(inner)) return((void) 0, Void);
   return List_var(cons(prefix, cons(inner, NULL)));
 }
@@ -2625,14 +2625,14 @@ static Var LispReader_list(LispReader * r, int depth){
     {
       Var out =((void) 0, Void);
       while(1){
-        Token token = Tokenizer_next(r -> tokenizer);
+        Token token = Tokenizer_next((* r).tokenizer);
         if(! token || token -> type == 11212) break;
         if(token -> type == 83){
-          r -> end = token -> pos + token -> len;
+          (* r).end = token -> pos + token -> len;
           out = List_var(Array_list(elements));
           break;
         }
-        Var element = LispReader_form(r, token, depth);
+        Var element = LispReader_form(&((* r)), token, depth);
         if(Var_is_void(element)) break;
         Array_push(elements, element);
       }
@@ -2659,12 +2659,12 @@ static Var LispReader_atom(LispReader * r, Token token){
   String text = token -> text;
   switch(token -> type){
     case 27051791223990 : return String_var(String_unescape(String_new_len(text + 1, token -> len - 2)));
-    case 26417777576 : return LispReader_integer(r, token);
-    case 27051797805160 : return LispReader_floating(r, token);
-    case 865658429314008 : return LispReader_symbol(r, token);
+    case 26417777576 : return LispReader_integer(&((* r)), token);
+    case 27051797805160 : return LispReader_floating(&((* r)), token);
+    case 865658429314008 : return LispReader_symbol(&((* r)), token);
     case 19147688 : return Atom_intern(String_unescape(text));
   }
-  return LispReader_malformed(r, token);
+  return LispReader_malformed(&((* r)), token);
 }
 
 int String_try_long(String, long *);
@@ -2672,7 +2672,7 @@ int String_try_long(String, long *);
 static Var LispReader_integer(LispReader * r, Token token){
   long value;
   String literal = String_new_len(token -> text, token -> len);
-  if(! String_try_long(literal, & value)) return LispReader_malformed(r, token);
+  if(! String_try_long(literal, & value)) return LispReader_malformed(&((* r)), token);
   if(value ==(int) value) return int_var((int) value);
   return long_var(value);
 }
@@ -2682,7 +2682,7 @@ int String_try_double(String, double *);
 static Var LispReader_floating(LispReader * r, Token token){
   double value;
   String literal = String_new_len(token -> text, token -> len);
-  if(! String_try_double(literal, & value)) return LispReader_malformed(r, token);
+  if(! String_try_double(literal, & value)) return LispReader_malformed(&((* r)), token);
   return double_var(value);
 }
 
@@ -2696,12 +2696,12 @@ static Var LispReader_symbol(LispReader * r, Token token){
   String text = token -> text;
   int n = token -> len;
   String inner = String_getindex(text, 1) == '"' ? String_unescape(String_new_len(text + 2, n - 4)) : String_new_len(text + 1, n - 2);
-  if(! String_truth(inner)) return LispReader_malformed(r, token);
+  if(! String_truth(inner)) return LispReader_malformed(&((* r)), token);
   return Symbol_var(Symbol_new(inner));
 }
 
 static Var LispReader_malformed(LispReader * r, Token token){
-  return _malformed(String_new(r -> source), r -> base + token -> pos);
+  return _malformed(String_new((* r).source), (* r).base + token -> pos);
 }
 
 void scan_next_line_col(char *, int, int *, int *);

@@ -26,42 +26,42 @@ typedef struct Emitter{
   Map static_objects;
   int static_support;
 }
-* Emitter;
+Emitter;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static List Emitter__emit(Emitter e, List ast);
+static List Emitter__emit(Emitter * e, List ast);
 
-static List Emitter__emit_sequence(Emitter e, List ast);
+static List Emitter__emit_sequence(Emitter * e, List ast);
 
-static List Emitter__emit_prefix(Emitter e, List ast);
+static List Emitter__emit_prefix(Emitter * e, List ast);
 
-static List Emitter__emit_leaf(Emitter e, List ast);
+static List Emitter__emit_leaf(Emitter * e, List ast);
 
-static List Emitter__emit_at(Emitter e, int origin, List inner);
+static List Emitter__emit_at(Emitter * e, int origin, List inner);
 
-static List Emitter__emit_cons(Emitter e, Var item, Var tail);
+static List Emitter__emit_cons(Emitter * e, Var item, Var tail);
 
-static List Emitter__emit_append(Emitter e, Var head_list, Var tail);
+static List Emitter__emit_append(Emitter * e, Var head_list, Var tail);
 
-static List Emitter__emit_assert(Emitter e, Var condition, Var message);
+static List Emitter__emit_assert(Emitter * e, Var condition, Var message);
 
-static List Emitter__initializer_macro(Emitter e, List input, List body);
+static List Emitter__initializer_macro(Emitter * e, List input, List body);
 
-static List Emitter__initializer_value(Emitter e, List ast);
+static List Emitter__initializer_value(Emitter * e, List ast);
 
-static List Emitter__emit_index_init(Emitter e, Var index, List value);
+static List Emitter__emit_index_init(Emitter * e, Var index, List value);
 
-static List Emitter__emit_dot_init(Emitter e, Var field, List value);
+static List Emitter__emit_dot_init(Emitter * e, Var field, List value);
 
-static List Emitter__local_static(Emitter e, List ast);
+static List Emitter__local_static(Emitter * e, List ast);
 
 static int _static_case_entry(List node);
 
 typedef struct StaticRuntime{
-  Emitter e;
+  Emitter * e;
   Array output;
   Type declared_base, type;
   List name, initial, prefix, initial_copy, source;
@@ -71,21 +71,21 @@ typedef struct StaticRuntime{
 }
 StaticRuntime;
 
-static void Emitter__static_binding(Emitter e, List binding, Type declared_base, String base_name, String storage, Array output);
+static void Emitter__static_binding(Emitter * e, List binding, Type declared_base, String base_name, String storage, Array output);
 
 static void StaticRuntime_prepare(StaticRuntime * r);
 
 static void StaticRuntime_emit(StaticRuntime * r);
 
-static List Emitter__static_copy(Emitter e, String alias, String guard, List source, String object);
+static List Emitter__static_copy(Emitter * e, String alias, String guard, List source, String object);
 
-static List Emitter__source_initializer(Emitter e, List function);
+static List Emitter__source_initializer(Emitter * e, List function);
 
-static List Emitter__capture_source(Emitter e, List node, Array inputs, Array declarations);
+static List Emitter__capture_source(Emitter * e, List node, Array inputs, Array declarations);
 
-static List Emitter__capture_definition(Emitter e, List node, Array inputs, Array declarations);
+static List Emitter__capture_definition(Emitter * e, List node, Array inputs, Array declarations);
 
-static List Emitter__capture_children(Emitter e, List node, Array inputs, Array declarations);
+static List Emitter__capture_children(Emitter * e, List node, Array inputs, Array declarations);
 
 static int _source_type_definition(List value);
 
@@ -102,121 +102,121 @@ static int _left_operand_level(Symbol operator);
 
 static int _right_operand_level(Symbol operator);
 
-static List Emitter__operand(Emitter e, Var node, int level);
+static List Emitter__operand(Emitter * e, Var node, int level);
 
-static List Emitter__op_spine(Emitter e, Var operator, Var left, Var right);
+static List Emitter__op_spine(Emitter * e, Var operator, Var left, Var right);
 
-static List Emitter__emit_cast(Emitter e, Type type, Var expression);
+static List Emitter__emit_cast(Emitter * e, Type type, Var expression);
 
-static List Emitter__emit_postfix(Emitter e, Symbol operator, Var argument);
+static List Emitter__emit_postfix(Emitter * e, Symbol operator, Var argument);
 
-static List Emitter__emit_generic(Emitter e, Var control, List associations);
+static List Emitter__emit_generic(Emitter * e, Var control, List associations);
 
-static List Emitter__generic_typed(Emitter e, Type type, Var value);
+static List Emitter__generic_typed(Emitter * e, Type type, Var value);
 
-static List Emitter__emit_va_arg(Emitter e, Var expression, Var declaration);
+static List Emitter__emit_va_arg(Emitter * e, Var expression, Var declaration);
 
-static List Emitter__emit_offsetof(Emitter e, Type type, List member);
+static List Emitter__emit_offsetof(Emitter * e, Type type, List member);
 
-static List Emitter__emit_index(Emitter e, Var array, Var index);
+static List Emitter__emit_index(Emitter * e, Var array, Var index);
 
-static List Emitter__emit_unary(Emitter e, Symbol operator, Var argument);
+static List Emitter__emit_unary(Emitter * e, Symbol operator, Var argument);
 
-static List Emitter__emit_binary(Emitter e, Symbol operator, Var left, Var right);
+static List Emitter__emit_binary(Emitter * e, Symbol operator, Var left, Var right);
 
-static List Emitter__emit_conditional(Emitter e, Var condition, Var ontrue, Var onfalse);
+static List Emitter__emit_conditional(Emitter * e, Var condition, Var ontrue, Var onfalse);
 
-static List Emitter__emit_ident(Emitter e, Var binding);
+static List Emitter__emit_ident(Emitter * e, Var binding);
 
-static List Emitter__emit_call(Emitter e, Var function, Var arguments);
+static List Emitter__emit_call(Emitter * e, Var function, Var arguments);
 
-static List Emitter__match_site_call(Emitter e, Var function, Var arguments);
+static List Emitter__match_site_call(Emitter * e, Var function, Var arguments);
 
 static String _match_site_entry(String name);
 
-static List Emitter__emit_if(Emitter e, Var condition, Var ontrue);
+static List Emitter__emit_if(Emitter * e, Var condition, Var ontrue);
 
-static List Emitter__emit_if_else(Emitter e, Var condition, Var ontrue, Var onfalse);
+static List Emitter__emit_if_else(Emitter * e, Var condition, Var ontrue, Var onfalse);
 
-static List Emitter__emit_while(Emitter e, Var condition, Var body);
+static List Emitter__emit_while(Emitter * e, Var condition, Var body);
 
-static List Emitter__emit_do(Emitter e, Var body, Var condition);
+static List Emitter__emit_do(Emitter * e, Var body, Var condition);
 
-static List Emitter__emit_for(Emitter e, Var initial, Var condition, Var increment, Var body);
+static List Emitter__emit_for(Emitter * e, Var initial, Var condition, Var increment, Var body);
 
-static List Emitter__emit_switch(Emitter e, Var expression, Var body);
+static List Emitter__emit_switch(Emitter * e, Var expression, Var body);
 
-static List Emitter__emit_return(Emitter e, Var expression);
+static List Emitter__emit_return(Emitter * e, Var expression);
 
-static List Emitter__emit_parameters(Emitter e, Var parameters);
+static List Emitter__emit_parameters(Emitter * e, Var parameters);
 
-static List Emitter__emit_label(Emitter e, Var name);
+static List Emitter__emit_label(Emitter * e, Var name);
 
-static List Emitter__raise(Emitter e, Ast ast, Var cause, List arguments);
+static List Emitter__raise(Emitter * e, Ast ast, Var cause, List arguments);
 
 static String _c_string_literal(String value);
 
-static List Emitter__literal(Emitter e, List ast);
+static List Emitter__literal(Emitter * e, List ast);
 
 static List _atom_intern(String spelling);
 
-static List Emitter__preproc(Emitter e, List ast);
+static List Emitter__preproc(Emitter * e, List ast);
 
-static List Emitter__declare_stmt(Emitter e, List ast);
+static List Emitter__declare_stmt(Emitter * e, List ast);
 
-static List Emitter__decl_stmt(Emitter e, List ast);
+static List Emitter__decl_stmt(Emitter * e, List ast);
 
-static List Emitter__declare(Emitter e, List ast);
+static List Emitter__declare(Emitter * e, List ast);
 
-static List Emitter__bind(Emitter e, Ast ast);
+static List Emitter__bind(Emitter * e, Ast ast);
 
-static List Emitter__param(Emitter e, List ast);
+static List Emitter__param(Emitter * e, List ast);
 
-static List Emitter__args(Emitter e, List ast);
+static List Emitter__args(Emitter * e, List ast);
 
-static List Emitter__function(Emitter e, List ast);
+static List Emitter__function(Emitter * e, List ast);
 
-static List Emitter__foreign_alias(Emitter e, List ast);
+static List Emitter__foreign_alias(Emitter * e, List ast);
 
-static List Emitter__typedef(Emitter e, List ast);
+static List Emitter__typedef(Emitter * e, List ast);
 
-static List Emitter__block(Emitter e, List ast);
+static List Emitter__block(Emitter * e, List ast);
 
-static List Emitter__binding(Emitter e, List ast);
+static List Emitter__binding(Emitter * e, List ast);
 
-static List Emitter__declarator(Emitter e, List decl, List mods);
+static List Emitter__declarator(Emitter * e, List decl, List mods);
 
-static List Emitter__array_declarator(Emitter e, List decl, List dimension);
+static List Emitter__array_declarator(Emitter * e, List decl, List dimension);
 
 static List _parens(List decl);
 
-static List Emitter__function_declarator(Emitter e, List decl, List parameters);
+static List Emitter__function_declarator(Emitter * e, List decl, List parameters);
 
-static List Emitter__semantic_type(Emitter e, Type type);
+static List Emitter__semantic_type(Emitter * e, Type type);
 
-static List Emitter__semantic_name(Emitter e, Type type, String name);
+static List Emitter__semantic_name(Emitter * e, Type type, String name);
 
 static List _commas(List items);
 
-static List Emitter__enum(Emitter e, List ast);
+static List Emitter__enum(Emitter * e, List ast);
 
-static List Emitter__aggregate(Emitter e, List ast);
+static List Emitter__aggregate(Emitter * e, List ast);
 
 static int _is_gensym_tag(List tag);
 
-static List Emitter__match_cases(Emitter e, List ast);
+static List Emitter__match_cases(Emitter * e, List ast);
 
-static List Emitter__match_if(Emitter e, List ast, int * dispatched);
+static List Emitter__match_if(Emitter * e, List ast, int * dispatched);
 
 static List _match_arm_label(Symbol head, Array heads, int * labelling);
 
-static List Emitter__match_arm(Emitter e, List binders, List pattern_ast, List body_ast, Var value);
+static List Emitter__match_arm(Emitter * e, List binders, List pattern_ast, List body_ast, Var value);
 
-static List Emitter__macro_case(Emitter e, List pattern_ast);
+static List Emitter__macro_case(Emitter * e, List pattern_ast);
 
 static List _flat_match_condition(Symbol head, List tags);
 
-static List Emitter__match_capture_arm(Emitter e, List binders, List pattern, List body, List implicit_break, Var value);
+static List Emitter__match_capture_arm(Emitter * e, List binders, List pattern, List body, List implicit_break, Var value);
 
 static List _make_local_binders(List binders, String values_name);
 
@@ -1087,17 +1087,16 @@ List List_append(List, List);
 
 List Compiler_emit(Compiler c, List ast){
   if(! _init_guard_) _file_init_();
-  struct Emitter state ={
+  Emitter e ={
     .c = c, .origin = 0, .native_macros = Array_new()
   }
   ;
-  Emitter e = & state;
-  List code = List_flatten_all(Emitter__emit(e, ast));
+  List code = List_flatten_all(Emitter__emit(&(e), ast));
   Array before = Array_new(), after = Array_new();
-  if(state.static_support) Array_push(before, String_var(_739));
+  if(e.static_support) Array_push(before, String_var(_739));
   {
     List entry;
-    List _x2c_macro_object_0 = Array_list_free(state.native_macros);
+    List _x2c_macro_object_0 = Array_list_free(e.native_macros);
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -1136,13 +1135,13 @@ int Symbol_is_inline(Symbol);
 
 Type Var_type(Var);
 
-static List Emitter__emit(Emitter e, List ast){
+static List Emitter__emit(Emitter * e, List ast){
   if(! List_truth(ast)) return ast;
   Var head = List_car(ast);
-  if(Var_is_row(head, 9, 7, 4)) return Emitter__emit_sequence(e, ast);
-  if(! Var_is(head, 1328354264)) return cons(head, List_append(Emitter__emit(e, List_cdr(ast)), NULL));
+  if(Var_is_row(head, 9, 7, 4)) return Emitter__emit_sequence(&((* e)), ast);
+  if(! Var_is(head, 1328354264)) return cons(head, List_append(Emitter__emit(&((* e)), List_cdr(ast)), NULL));
   if(! Var_equal(head, Symbol_var(44661285196)) &&(Symbol_is_storage_class(Var_symbol(head)) || Symbol_is_type_qualifier(Var_symbol(head)) || Symbol_is_inline(Var_symbol(head)))){
-    return Emitter__emit_prefix(e, ast);
+    return Emitter__emit_prefix(&((* e)), ast);
   }
 
   {
@@ -1155,90 +1154,90 @@ static List Emitter__emit(Emitter e, List ast){
   { List _x2c_match_cursor;
   if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var origin = _x2c_match_values[0];
   Var inner = _x2c_match_values[1];
-  return Emitter__emit_at(e, Var_int(Var_convert(origin, 3453797)), Var_list(inner));
+  return Emitter__emit_at(&((* e)), Var_int(Var_convert(origin, 3453797)), Var_list(inner));
   break; } } case 228262: ;
   { List _x2c_match_cursor;
   if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761846694ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var item = _x2c_match_values[0];
   Var tail = _x2c_match_values[1];
-  return Emitter__emit_cons(e, item, tail);
+  return Emitter__emit_cons(&((* e)), item, tail);
   break; } } case 101723016: ;
   { List _x2c_match_cursor;
   if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936863341448ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var head_list = _x2c_match_values[0];
   Var tail = _x2c_match_values[1];
-  return Emitter__emit_append(e, head_list, tail);
+  return Emitter__emit_append(&((* e)), head_list, tail);
   break; } } case 272838634664: ;
   { List _x2c_match_cursor;
   if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224498209600253096ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];
   Var message = _x2c_match_values[1];
-  return Emitter__emit_assert(e, condition, message);
+  return Emitter__emit_assert(&((* e)), condition, message);
   break; } } case 649186212106: ;
   { List _x2c_match_cursor;
   if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224498585947830538ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var input = _x2c_match_values[0];
   Var body = _x2c_match_values[1];
-  return List_append(Emitter__initializer_macro(e, Var_list(input), Var_list(body)), _31);
+  return List_append(Emitter__initializer_macro(&((* e)), Var_list(input), Var_list(body)), _31);
   break; } } case 27425606562408: ;
   static MatchCaptureSite _x2c_match_site_0;
-  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_36), &_x2c_match_capture)) {return Emitter__local_static(e, ast);  break;
+  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_36), &_x2c_match_capture)) {return Emitter__local_static(&((* e)), ast);  break;
 }
-case 1371473464357480: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9225869410225975912ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var function = _x2c_match_values[0];  return Emitter__source_initializer(e, Var_list(function));  break; } } case 20287107160: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_44), &_x2c_match_capture)) {return Emitter__initializer_value(e, ast);  break;
+case 1371473464357480: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9225869410225975912ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var function = _x2c_match_values[0];  return Emitter__source_initializer(&((* e)), Var_list(function));  break; } } case 20287107160: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_44), &_x2c_match_capture)) {return Emitter__initializer_value(&((* e)), ast);  break;
 }
-case 20762258403944: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224518699020022376ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var index = _x2c_match_values[0];  Var value = _x2c_match_values[1];  return Emitter__emit_index_init(e, index, Var_list(value));  break; } } case 9639129704: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497946400748136ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var field = _x2c_match_values[0];
+case 20762258403944: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224518699020022376ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var index = _x2c_match_values[0];  Var value = _x2c_match_values[1];  return Emitter__emit_index_init(&((* e)), index, Var_list(value));  break; } } case 9639129704: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497946400748136ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var field = _x2c_match_values[0];
 Var value = _x2c_match_values[1];
-return Emitter__emit_dot_init(e, field, Var_list(value));
+return Emitter__emit_dot_init(&((* e)), field, Var_list(value));
 break; } } case 199912: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761818344ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];
 Var expression = _x2c_match_values[1];
-return Emitter__emit_cast(e, Var_type(type), expression);
+return Emitter__emit_cast(&((* e)), Var_type(type), expression);
 break; } } case 6363658: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936767982090ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var id = _x2c_match_values[0];
 return cons(String_var(String_join(NULL, cons(String_var(_65), cons(String_var(Var_str(id)), NULL)))), NULL);
 break; } } case 377892: ;
 static MatchCaptureSite _x2c_match_site_2;
-if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_70), &_x2c_match_capture)) {Var content = _x2c_match_values[0];  return Emitter__emit(e, cons(content, NULL));  break;
+if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_70), &_x2c_match_capture)) {Var content = _x2c_match_values[0];  return Emitter__emit(&((* e)), cons(content, NULL));  break;
 }
 case 35407540848: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972169159280ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];
 Var argument = _x2c_match_values[1];
-return Emitter__emit_postfix(e, Var_symbol(operator), argument);
+return Emitter__emit_postfix(&((* e)), Var_symbol(operator), argument);
 break; } } case 15397655110: ;
 static MatchCaptureSite _x2c_match_site_3;
-if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {Var control = _x2c_match_values[0];  List associations = Var_list(_x2c_match_values[1]);  return Emitter__emit_generic(e, control, associations);  break;
+if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_82), &_x2c_match_capture)) {Var control = _x2c_match_values[0];  List associations = Var_list(_x2c_match_values[1]);  return Emitter__emit_generic(&((* e)), control, associations);  break;
 }
 case 1480526990: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497938242145422ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];
 Var declaration = _x2c_match_values[1];
-return Emitter__emit_va_arg(e, expression, declaration);
+return Emitter__emit_va_arg(&((* e)), expression, declaration);
 break; } } case 1044119921612: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224498980881540044ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];
 Var member = _x2c_match_values[1];
-return Emitter__emit_offsetof(e, Var_type(type), Var_list(member));
+return Emitter__emit_offsetof(&((* e)), Var_type(type), Var_list(member));
 break; } } case 199448: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761817880ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var function = _x2c_match_values[0];
 Var arguments = _x2c_match_values[1];
-return Emitter__emit_call(e, function, arguments);
+return Emitter__emit_call(&((* e)), function, arguments);
 break; } } case 19800432: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936781418864ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var array = _x2c_match_values[0];
 Var index = _x2c_match_values[1];
-return Emitter__emit_index(e, array, index);
+return Emitter__emit_index(&((* e)), array, index);
 break; } } case 992: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];
 Var argument = _x2c_match_values[1];
-return Emitter__emit_unary(e, Var_symbol(operator), argument);
+return Emitter__emit_unary(&((* e)), Var_symbol(operator), argument);
 break; } }{ List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];
 Var left = _x2c_match_values[1];
 Var right = _x2c_match_values[2];
-return Emitter__emit_binary(e, Var_symbol(operator), left, right);
+return Emitter__emit_binary(&((* e)), Var_symbol(operator), left, right);
 break; } }{ List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[3] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];
 Var condition = _x2c_match_values[1];
 Var ontrue = _x2c_match_values[2];
 Var onfalse = _x2c_match_values[3];
-return Emitter__emit_conditional(e, condition, ontrue, onfalse);
+return Emitter__emit_conditional(&((* e)), condition, ontrue, onfalse);
 break; } } case 5384278: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936767002710ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _122;
@@ -1249,54 +1248,54 @@ break; } } case 588: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619020ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];
 Var ontrue = _x2c_match_values[1];
-return Emitter__emit_if(e, condition, ontrue);
+return Emitter__emit_if(&((* e)), condition, ontrue);
 break; } }{ List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619020ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];
 Var ontrue = _x2c_match_values[1];
 Var onfalse = _x2c_match_values[2];
-return Emitter__emit_if_else(e, condition, ontrue, onfalse);
+return Emitter__emit_if_else(&((* e)), condition, ontrue, onfalse);
 break; } } case 48777994: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936810396426ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var condition = _x2c_match_values[0];
 Var body = _x2c_match_values[1];
-return Emitter__emit_while(e, condition, body);
+return Emitter__emit_while(&((* e)), condition, body);
 break; } } case 286: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618718ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var body = _x2c_match_values[0];
 Var condition = _x2c_match_values[1];
-return Emitter__emit_do(e, body, condition);
+return Emitter__emit_do(&((* e)), body, condition);
 break; } } case 13284: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761631716ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[3] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var initial = _x2c_match_values[0];
 Var condition = _x2c_match_values[1];
 Var increment = _x2c_match_values[2];
 Var body = _x2c_match_values[3];
-return Emitter__emit_for(e, initial, condition, increment, body);
+return Emitter__emit_for(&((* e)), initial, condition, increment, body);
 break; } } case 1323933904: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497938085552336ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];
 Var body = _x2c_match_values[1];
-return Emitter__emit_switch(e, expression, body);
+return Emitter__emit_switch(&((* e)), expression, body);
 break; } } case 1219800220: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937981418652ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _154;
 break; } } static MatchCaptureSite _x2c_match_site_4;
-if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_163), &_x2c_match_capture)) {Var expression = _x2c_match_values[0];  return Emitter__emit_return(e, expression);  break;
+if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_163), &_x2c_match_capture)) {Var expression = _x2c_match_values[0];  return Emitter__emit_return(&((* e)), expression);  break;
 }
-case 490782: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762109214ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var label = _x2c_match_values[0];  return cons(_169, List_append(Emitter__emit(e, cons(label, NULL)), _31));  break; } } case 37833930: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_179), &_x2c_match_capture)) {Var cause = _x2c_match_values[0];  List arguments = Var_list(_x2c_match_values[1]);  return Emitter__raise(e, ast, cause, arguments);  break;
+case 490782: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762109214ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var label = _x2c_match_values[0];  return cons(_169, List_append(Emitter__emit(&((* e)), cons(label, NULL)), _31));  break; } } case 37833930: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_179), &_x2c_match_capture)) {Var cause = _x2c_match_values[0];  List arguments = Var_list(_x2c_match_values[1]);  return Emitter__raise(&((* e)), ast, cause, arguments);  break;
 }
-default: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_189), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  return Emitter__emit_parameters(e, parameters);  break;
+default: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_189), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  return Emitter__emit_parameters(&((* e)), parameters);  break;
 }
-{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936786854232ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  return Emitter__emit_label(e, name);  break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  return Emitter__emit_ident(e, binding);  break; } }
+{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936786854232ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  return Emitter__emit_label(&((* e)), name);  break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  return Emitter__emit_ident(&((* e)), binding);  break; } }
     }
   }
-return Emitter__emit_leaf(e, ast);
+return Emitter__emit_leaf(&((* e)), ast);
 }
 
 void x2c_cleanup_push(X2CCleanup *);
 Var Array_getindex(Array, int);
 void x2c_cleanup_leave(X2CCleanup *);
-static List Emitter__emit_sequence(Emitter e, List ast){
+static List Emitter__emit_sequence(Emitter * e, List ast){
   Array emitted = Array_new(); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -1306,9 +1305,9 @@ static List Emitter__emit_sequence(Emitter e, List ast){
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       while(List_truth(ast) && Var_is_row(List_car(ast), 9, 7, 4)){
-        Array_push(emitted, List_var(Emitter__emit(e, Var_list(List_car(ast)))));  ast = List_cdr(ast);
+        Array_push(emitted, List_var(Emitter__emit(&((* e)), Var_list(List_car(ast)))));  ast = List_cdr(ast);
       }
-      List result = Emitter__emit(e, ast);  for(int i =(int) Array_len(emitted) - 1;  i >= 0;  i --) result = cons(Array_getindex(emitted, i), result); {
+      List result = Emitter__emit(&((* e)), ast);  for(int i =(int) Array_len(emitted) - 1;  i >= 0;  i --) result = cons(Array_getindex(emitted, i), result); {
         List _x2c_return_value_0 = result; {
           x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
         }
@@ -1321,35 +1320,35 @@ static List Emitter__emit_sequence(Emitter e, List ast){
 
 }
 
-static List Emitter__emit_prefix(Emitter e, List ast){
+static List Emitter__emit_prefix(Emitter * e, List ast){
   Array prefix = Array_new();  while(List_truth(ast) && Var_is(List_car(ast), 1328354264)){
     Symbol item = Var_symbol(List_car(ast));  if(item == 44661285196 ||(! Symbol_is_storage_class(item) && ! Symbol_is_type_qualifier(item) && ! Symbol_is_inline(item))) break;  if(item == 1392787923272) Array_push(prefix, String_var(_740));  else Array_push(prefix, List_car(ast));  ast = List_cdr(ast);
   }
-  return List_append(Array_list_free(prefix), Emitter__emit(e, ast));
+  return List_append(Array_list_free(prefix), Emitter__emit(&((* e)), ast));
 }
 
-static List Emitter__emit_leaf(Emitter e, List ast){
+static List Emitter__emit_leaf(Emitter * e, List ast){
   Var head = List_car(ast);  switch(Var_symbol(head)){
-    case 2391080 : case 895740748108 : case 1139215899608 : return NULL;  case 26416091224 : return Emitter__literal(e, ast);  case 35579270086 : return Emitter__preproc(e, ast);  case 150408 : return Emitter__bind(e, ast);  case 8932560010 : return Emitter__declare_stmt(e, ast);  case 272600 : return Emitter__decl_stmt(e, ast);  case 357722 : return Emitter__enum(e, ast);  case 405555302 : return Emitter__foreign_alias(e, ast);  case 458361162716 : return Emitter__function(e, ast);  case 33656922 : return Emitter__param(e, ast);  case 1318234344 : return Emitter__aggregate(e, ast);  case 44661285196 : return Emitter__typedef(e, ast);  case 44977116 : return Emitter__aggregate(e, ast);  case 102886 : return Emitter__args(e, ast);  case 157714837990 : case 1077021542 : return _commas(Emitter__emit(e, List_cdr(ast)));  case 421880102 : return Emitter__emit(e, List_cdr(ast));  case 5011670 : return Emitter__block(e, ast);  case 15891808 : return Emitter__emit(e, List_cdr(ast));  case 1077029798 : return cons(_199, List_append(Emitter__emit(e, List_cdr(ast)), _202));  case 1295657932 : return cons(_204, List_append(Emitter__emit(e, List_cdr(ast)), NULL));  case 199882 : return cons(_206, cons(List_var(Emitter__emit(e, List_cdr(ast))), _209));  case 7656885669130 : return cons(_211, List_append(Emitter__emit(e, List_cdr(ast)), _214));  case 8938171176 : return _217;  case 11371826 : return _31;  case 41184168 : return List_append(Emitter__emit(e, List_cdr(ast)), _31);  case 918374072818022 : return Emitter__match_cases(e, ast);  case 4928588686 : return Emitter__binding(e, ast);  case 233662566 : return _commas(Emitter__emit(e, List_cdr(ast)));  case 7477210024 : return List_cdr(ast);  case 29272 : return _220;  case 40896714 : return List_cdr(ast);
+    case 2391080 : case 895740748108 : case 1139215899608 : return NULL;  case 26416091224 : return Emitter__literal(&((* e)), ast);  case 35579270086 : return Emitter__preproc(&((* e)), ast);  case 150408 : return Emitter__bind(&((* e)), ast);  case 8932560010 : return Emitter__declare_stmt(&((* e)), ast);  case 272600 : return Emitter__decl_stmt(&((* e)), ast);  case 357722 : return Emitter__enum(&((* e)), ast);  case 405555302 : return Emitter__foreign_alias(&((* e)), ast);  case 458361162716 : return Emitter__function(&((* e)), ast);  case 33656922 : return Emitter__param(&((* e)), ast);  case 1318234344 : return Emitter__aggregate(&((* e)), ast);  case 44661285196 : return Emitter__typedef(&((* e)), ast);  case 44977116 : return Emitter__aggregate(&((* e)), ast);  case 102886 : return Emitter__args(&((* e)), ast);  case 157714837990 : case 1077021542 : return _commas(Emitter__emit(&((* e)), List_cdr(ast)));  case 421880102 : return Emitter__emit(&((* e)), List_cdr(ast));  case 5011670 : return Emitter__block(&((* e)), ast);  case 15891808 : return Emitter__emit(&((* e)), List_cdr(ast));  case 1077029798 : return cons(_199, List_append(Emitter__emit(&((* e)), List_cdr(ast)), _202));  case 1295657932 : return cons(_204, List_append(Emitter__emit(&((* e)), List_cdr(ast)), NULL));  case 199882 : return cons(_206, cons(List_var(Emitter__emit(&((* e)), List_cdr(ast))), _209));  case 7656885669130 : return cons(_211, List_append(Emitter__emit(&((* e)), List_cdr(ast)), _214));  case 8938171176 : return _217;  case 11371826 : return _31;  case 41184168 : return List_append(Emitter__emit(&((* e)), List_cdr(ast)), _31);  case 918374072818022 : return Emitter__match_cases(&((* e)), ast);  case 4928588686 : return Emitter__binding(&((* e)), ast);  case 233662566 : return _commas(Emitter__emit(&((* e)), List_cdr(ast)));  case 7477210024 : return List_cdr(ast);  case 29272 : return _220;  case 40896714 : return List_cdr(ast);
   }
-  return cons(head, List_append(Emitter__emit(e, List_cdr(ast)), NULL));
+  return cons(head, List_append(Emitter__emit(&((* e)), List_cdr(ast)), NULL));
 }
 
 Var int_var(int);
-static List Emitter__emit_at(Emitter e, int origin, List inner){
-  int old_origin = e -> origin;  e -> origin = origin;  List result = Emitter__emit(e, inner);  e -> origin = old_origin;  if(e -> c -> source_map) return cons(_221, cons(int_var(origin), List_append(result, cons(_221, cons(int_var(old_origin), NULL)))));  return result;
+static List Emitter__emit_at(Emitter * e, int origin, List inner){
+  int old_origin =(* e).origin; (* e).origin = origin;  List result = Emitter__emit(&((* e)), inner); (* e).origin = old_origin;  if((* e).c -> source_map) return cons(_221, cons(int_var(origin), List_append(result, cons(_221, cons(int_var(old_origin), NULL)))));  return result;
 }
 
-static List Emitter__emit_cons(Emitter e, Var item, Var tail){
-  List c_item = Emitter__emit(e, cons(item, NULL));  List c_tail = Emitter__emit(e, cons(tail, NULL));  return cons(_223, List_append(c_item, cons(_225, List_append(c_tail, _202))));
+static List Emitter__emit_cons(Emitter * e, Var item, Var tail){
+  List c_item = Emitter__emit(&((* e)), cons(item, NULL));  List c_tail = Emitter__emit(&((* e)), cons(tail, NULL));  return cons(_223, List_append(c_item, cons(_225, List_append(c_tail, _202))));
 }
 
-static List Emitter__emit_append(Emitter e, Var head_list, Var tail){
-  List c_head = Emitter__emit(e, cons(head_list, NULL));  List c_tail = Emitter__emit(e, cons(tail, NULL));  return cons(_227, List_append(c_head, cons(_225, List_append(c_tail, _202))));
+static List Emitter__emit_append(Emitter * e, Var head_list, Var tail){
+  List c_head = Emitter__emit(&((* e)), cons(head_list, NULL));  List c_tail = Emitter__emit(&((* e)), cons(tail, NULL));  return cons(_227, List_append(c_head, cons(_225, List_append(c_tail, _202))));
 }
 
-static List Emitter__emit_assert(Emitter e, Var condition, Var message){
-  List c_condition = Emitter__emit(e, cons(condition, NULL));  List c_message = Emitter__emit(e, cons(message, NULL));  return cons(_229, List_append(c_condition, cons(_231, List_append(c_message, _234))));
+static List Emitter__emit_assert(Emitter * e, Var condition, Var message){
+  List c_condition = Emitter__emit(&((* e)), cons(condition, NULL));  List c_message = Emitter__emit(&((* e)), cons(message, NULL));  return cons(_229, List_append(c_condition, cons(_231, List_append(c_message, _234))));
 }
 
 Buffer Buffer_new(size_t);
@@ -1364,7 +1363,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 String String_replace(String, String, String);
 String String_rstrip(String, char *);
 Var List_cadr(List);
-static List Emitter__initializer_macro(Emitter e, List input, List body){
+static List Emitter__initializer_macro(Emitter * e, List input, List body){
   Buffer parameters = Buffer_new(0); {
     List argument;  List _x2c_macro_object_1 = List_cdr(input);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       argument = Var_list(_x2c_macro_cursor_output_1); {
@@ -1374,8 +1373,8 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
     }
 
   }
-  String formal = Buffer_str_free(parameters);  String hash = filename_hash(e -> c -> filename);  String name = Compiler_fresh_name(e -> c, String_join(NULL, cons(String_var(_235), cons(String_var(hash), NULL))));  String replacement; {
-    int * _x2c_macro_address_0 = & e -> c -> source_map;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
+  String formal = Buffer_str_free(parameters);  String hash = filename_hash((* e).c -> filename);  String name = Compiler_fresh_name((* e).c, String_join(NULL, cons(String_var(_235), cons(String_var(hash), NULL))));  String replacement; {
+    int * _x2c_macro_address_0 = &(* e).c -> source_map;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
       }
@@ -1384,7 +1383,7 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_1); {
         * _x2c_macro_address_0 = 0; {
-          List tokens = List_flatten_all(Emitter__emit(e, body));  String formatted = String_new(Compiler_code_pretty_string(e -> c, tokens, NULL));  replacement = String_replace(String_rstrip(formatted, "\n"), _741, _742);
+          List tokens = List_flatten_all(Emitter__emit(&((* e)), body));  String formatted = String_new(Compiler_code_pretty_string((* e).c, tokens, NULL));  replacement = String_replace(String_rstrip(formatted, "\n"), _741, _742);
         }
 
       }
@@ -1393,8 +1392,8 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
 
   }
   String expanded = String_join(NULL, cons(String_var(name), cons(String_var(_236), NULL)));  String definition = String_join(NULL, cons(String_var(_237), cons(String_var(expanded), cons(String_var(_198), cons(String_var(formal), cons(String_var(_238), cons(String_var(replacement), NULL)))))));
-  Array_push(e -> native_macros, List_var(cons(String_var(expanded), cons(String_var(definition), NULL))));
-  Array_push(e -> native_macros, List_var(cons(String_var(name), cons(String_var(String_join(NULL, cons(String_var(_237), cons(String_var(name), cons(String_var(_198), cons(String_var(formal), cons(String_var(_238), cons(String_var(expanded), cons(String_var(_198), cons(String_var(formal), cons(String_var(_200), NULL))))))))))), NULL))));
+  Array_push((* e).native_macros, List_var(cons(String_var(expanded), cons(String_var(definition), NULL))));
+  Array_push((* e).native_macros, List_var(cons(String_var(name), cons(String_var(String_join(NULL, cons(String_var(_237), cons(String_var(name), cons(String_var(_198), cons(String_var(formal), cons(String_var(_238), cons(String_var(expanded), cons(String_var(_198), cons(String_var(formal), cons(String_var(_200), NULL))))))))))), NULL))));
   Array arguments = Array_new();
   {
     List argument;
@@ -1404,7 +1403,7 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       argument = Var_list(_x2c_macro_cursor_output_2);
       {
-        List emitted = Emitter__emit(e, Var_list(List_cadr(argument)));
+        List emitted = Emitter__emit(&((* e)), Var_list(List_cadr(argument)));
         Array_push(arguments, List_var(cons(_199, List_append(emitted, _202))));
       }
 
@@ -1424,13 +1423,13 @@ List List_match(List, Var);
 
 List Type_list(Type);
 
-static List Emitter__initializer_value(Emitter e, List ast){
+static List Emitter__initializer_value(Emitter * e, List ast){
   List source = NULL;
   List functions = Ast_initializer_functions(ast, &(source));
-  if(List_truth(functions)) return Emitter__emit(e, cons(_93, cons(List_var(cons(_66, cons(_239, cons(List_var(cons(_41, List_append(functions, NULL))), NULL)))), cons(List_var(cons(_172, cons(List_var(source), NULL))), NULL))));
+  if(List_truth(functions)) return Emitter__emit(&((* e)), cons(_93, cons(List_var(cons(_66, cons(_239, cons(List_var(cons(_41, List_append(functions, NULL))), NULL)))), cons(List_var(cons(_172, cons(List_var(source), NULL))), NULL))));
   List input = NULL;
   List cases = Ast_initializer_cases(ast, &(input));
-  if(List_truth(input)) return Emitter__initializer_macro(e, input, cons(_41, List_append(cases, NULL)));
+  if(List_truth(input)) return Emitter__initializer_macro(&((* e)), input, cons(_41, List_append(cases, NULL)));
   List result = NULL;
   {
     List choice;
@@ -1446,10 +1445,10 @@ static List Emitter__initializer_value(Emitter e, List ast){
         Type type = Var_type(List_getindex(_x2c_destructure_1, 2));
         List value = Var_list(List_getindex(_x2c_destructure_1, 3));
         if(List_truth(({ static MatchCaptureSite _x2c_match_site_7;  x2c_match_site_match(& _x2c_match_site_7, value, List_var(_245)); }))) value = List_truth(Type_list(type)) ? cons(_66, cons(List_var(type), cons(List_var(cons(_55, cons(List_var(type), cons(List_var(value), NULL)))), NULL))) : _258;
-        List emitted = Emitter__emit(e, cons(List_var(value), NULL));
+        List emitted = Emitter__emit(&((* e)), cons(List_var(value), NULL));
         if(! List_truth(result) || ! List_truth(condition)) result = emitted;
         else{
-          List test = Emitter__emit(e, cons(List_var(condition), NULL));
+          List test = Emitter__emit(&((* e)), cons(List_var(condition), NULL));
           result = cons(_260, List_append(test, cons(_231, List_append(emitted, cons(_231, List_append(result, _202))))));
         }
 
@@ -1461,16 +1460,16 @@ static List Emitter__initializer_value(Emitter e, List ast){
   return result;
 }
 
-static List Emitter__emit_index_init(Emitter e, Var index, List value){
-  List c_index = Emitter__emit(e, cons(index, NULL));
-  List c_value = Emitter__emit(e, cons(List_var(value), NULL));
+static List Emitter__emit_index_init(Emitter * e, Var index, List value){
+  List c_index = Emitter__emit(&((* e)), cons(index, NULL));
+  List c_value = Emitter__emit(&((* e)), cons(List_var(value), NULL));
   String assign = Var_equal(List_car(value), Symbol_var(9639129704)) || Var_equal(List_car(value), Symbol_var(20762258403944)) ? _743 : _744;
   return cons(_262, List_append(c_index, cons(_264, cons(String_var(assign), List_append(c_value, NULL)))));
 }
 
-static List Emitter__emit_dot_init(Emitter e, Var field, List value){
-  List c_field = Emitter__emit(e, cons(field, NULL));
-  List c_value = Emitter__emit(e, cons(List_var(value), NULL));
+static List Emitter__emit_dot_init(Emitter * e, Var field, List value){
+  List c_field = Emitter__emit(&((* e)), cons(field, NULL));
+  List c_value = Emitter__emit(&((* e)), cons(List_var(value), NULL));
   String assign = Var_equal(List_car(value), Symbol_var(9639129704)) || Var_equal(List_car(value), Symbol_var(20762258403944)) ? _743 : _745;
   return cons(_266, List_append(c_field, cons(String_var(assign), List_append(c_value, NULL))));
 }
@@ -1485,24 +1484,24 @@ Type Type_declared(Type);
 
 int Type_is_threaded(Type);
 
-static List Emitter__local_static(Emitter e, List ast){
+static List Emitter__local_static(Emitter * e, List ast){
   List declaration = Var_list(List_cadr(ast)), body = Var_list(List_caddr(ast));
   while(Var_equal(List_car(declaration), Symbol_var(104))){
-    e -> origin = Var_int(Var_convert(List_cadr(declaration), 3453797));
+    (* e).origin = Var_int(Var_convert(List_cadr(declaration), 3453797));
     declaration = Var_list(List_caddr(declaration));
   }
   if(_static_case_entry(body)){
-    e -> c -> origin = e -> origin;
+    (* e).c -> origin =(* e).origin;
     String note = _269;
-    Compiler_report_error(e -> c, 354920, _746, NULL, cons(String_var(note), NULL));
+    Compiler_report_error((* e).c, 354920, _746, NULL, cons(String_var(note), NULL));
   }
   List base, bindings;
   List _x2c_destructure_2 = List_cdr(declaration);
   base = Var_list(List_getindex(_x2c_destructure_2, 0));
   bindings = Var_list(List_getindex(_x2c_destructure_2, 1));
   Type declared_base = List_type(base);
-  String base_name = Compiler_fresh_name(e -> c, _747);
-  List base_decl = Emitter__semantic_name(e, Type_declared(declared_base), base_name);
+  String base_name = Compiler_fresh_name((* e).c, _747);
+  List base_decl = Emitter__semantic_name(&((* e)), Type_declared(declared_base), base_name);
   Array output = Array_new();
   Array_push(output, List_var(cons(_271, List_append(base_decl, _31))));
   String storage = Type_is_threaded(declared_base) ? _748 : _749;
@@ -1513,11 +1512,11 @@ static List Emitter__local_static(Emitter e, List ast){
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       binding = Var_list(_x2c_macro_cursor_output_4);
-      Emitter__static_binding(e, binding, declared_base, base_name, storage, output);
+      Emitter__static_binding(&((* e)), binding, declared_base, base_name, storage, output);
     }
 
   }
-  Array_push(output, List_var(Emitter__emit(e, body)));
+  Array_push(output, List_var(Emitter__emit(&((* e)), body)));
   return Array_list_free(output);
 }
 
@@ -1546,7 +1545,7 @@ return 0;
 
 String Compiler_emitted_binding_name(Compiler, List);
 int Compiler_static_value_is_runtime(Compiler, List, Map);
-static void Emitter__static_binding(Emitter e, List binding, Type declared_base, String base_name, String storage, Array output){
+static void Emitter__static_binding(Emitter * e, List binding, Type declared_base, String base_name, String storage, Array output){
   List name, mods, initial = NULL;
   {
     List _x2c_match_expr = binding;
@@ -1563,53 +1562,53 @@ case 150408: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr
 break; } } default: break;
     }
   }
-Type type = List_type(List_append(mods, cons(String_var(base_name), NULL)));  String spelling = Compiler_emitted_binding_name(e -> c, name);  if(! List_truth(initial) || ! Compiler_static_value_is_runtime(e -> c, initial, e -> static_objects)){
-  List native = Emitter__semantic_name(e, type, spelling);  List value = List_truth(initial) ? cons(_302, List_append(Emitter__emit(e, initial), NULL)) : NULL;  Array_push(output, List_var(cons(String_var(storage), List_append(native, List_append(value, _31)))));  return;
+Type type = List_type(List_append(mods, cons(String_var(base_name), NULL)));  String spelling = Compiler_emitted_binding_name((* e).c, name);  if(! List_truth(initial) || ! Compiler_static_value_is_runtime((* e).c, initial, (* e).static_objects)){
+  List native = Emitter__semantic_name(&((* e)), type, spelling);  List value = List_truth(initial) ? cons(_302, List_append(Emitter__emit(&((* e)), initial), NULL)) : NULL;  Array_push(output, List_var(cons(String_var(storage), List_append(native, List_append(value, _31)))));  return;
 }
-e -> static_support = 1;  StaticRuntime runtime ={
-  .e = e, .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = Var_equal(List_car(Type_list(type)), Symbol_var(8794)) || List_truth(({ static MatchCaptureSite _x2c_match_site_11;  x2c_match_site_match(& _x2c_match_site_11, Type_list(type), List_var(_306)); }))
+(* e).static_support = 1;  StaticRuntime runtime ={
+  .e = &(* e), .output = output, .declared_base = declared_base, .type = type, .name = name, .initial = initial, .storage = storage, .inferred = Var_equal(List_car(Type_list(type)), Symbol_var(8794)) || List_truth(({ static MatchCaptureSite _x2c_match_site_11;  x2c_match_site_match(& _x2c_match_site_11, Type_list(type), List_var(_306)); }))
 }
-;  runtime.alias = Compiler_fresh_name(e -> c, _750);  runtime.pointer = Compiler_fresh_name(e -> c, _751);  runtime.guard = Compiler_fresh_name(e -> c, _752);  runtime.cleanup = Compiler_fresh_name(e -> c, _753);  runtime.temporary = Compiler_fresh_name(e -> c, _754);  StaticRuntime_prepare(&(runtime));  StaticRuntime_emit(&(runtime));
+;  runtime.alias = Compiler_fresh_name((* e).c, _750);  runtime.pointer = Compiler_fresh_name((* e).c, _751);  runtime.guard = Compiler_fresh_name((* e).c, _752);  runtime.cleanup = Compiler_fresh_name((* e).c, _753);  runtime.temporary = Compiler_fresh_name((* e).c, _754);  StaticRuntime_prepare(&(runtime));  StaticRuntime_emit(&(runtime));
 }
 
 Type Type_reference(Type);
 Var Map_setindex(Map, Var, Var);
 static void StaticRuntime_prepare(StaticRuntime * r){
-  Emitter e = r -> e;  r -> slot = r -> pointer;  r -> object = r -> temporary;  if(r -> inferred){
-    r -> slot = Compiler_fresh_name(e -> c, _755);  r -> formal = Compiler_fresh_name(e -> c, _756);  List probe_decl = Emitter__semantic_name(e, Type_reference(r -> type), r -> slot);  Array_push(r -> output, List_var(List_append(probe_decl, _31)));  Map_setindex(e -> static_objects, List_var(r -> name), String_var(r -> slot));  r -> prefix = cons(_308, cons(String_var(r -> formal), cons(_201, cons(String_var(r -> alias), _31))));  r -> source = cons(_310, cons(String_var(r -> formal), NULL));  r -> object = r -> alias;  return;
+  (* r).slot =(* r).pointer; (* r).object =(* r).temporary;  if((* r).inferred){
+    (* r).slot = Compiler_fresh_name((*(* r).e).c, _755); (* r).formal = Compiler_fresh_name((*(* r).e).c, _756);  List probe_decl = Emitter__semantic_name(&((*(* r).e)), Type_reference((* r).type), (* r).slot);  Array_push((* r).output, List_var(List_append(probe_decl, _31)));  Map_setindex((* r).e -> static_objects, List_var((* r).name), String_var((* r).slot)); (* r).prefix = cons(_308, cons(String_var((* r).formal), cons(_201, cons(String_var((* r).alias), _31)))); (* r).source = cons(_310, cons(String_var((* r).formal), NULL)); (* r).object =(* r).alias;  return;
   }
-  List alias_decl = Emitter__semantic_name(e, r -> type, r -> alias);  Map_setindex(e -> static_objects, List_var(r -> name), String_var(r -> pointer));  List value = Emitter__emit(e, r -> initial);  r -> prefix = cons(_271, List_append(alias_decl, cons(_30, cons(_312, cons(String_var(r -> alias), _318)))));  r -> initial_copy = cons(String_var(r -> alias), cons(String_var(r -> temporary), cons(_302, List_append(value, _31))));  r -> source = cons(_310, cons(String_var(r -> temporary), NULL));
+  List alias_decl = Emitter__semantic_name(&((*(* r).e)), (* r).type, (* r).alias);  Map_setindex((* r).e -> static_objects, List_var((* r).name), String_var((* r).pointer));  List value = Emitter__emit(&((*(* r).e)), (* r).initial); (* r).prefix = cons(_271, List_append(alias_decl, cons(_30, cons(_312, cons(String_var((* r).alias), _318))))); (* r).initial_copy = cons(String_var((* r).alias), cons(String_var((* r).temporary), cons(_302, List_append(value, _31)))); (* r).source = cons(_310, cons(String_var((* r).temporary), NULL));
 }
 
 static void StaticRuntime_emit(StaticRuntime * r){
-  Emitter e = r -> e;  List acquisition = List_append(r -> prefix, cons(String_var(r -> storage), cons(_320, cons(String_var(r -> guard), cons(_322, cons(String_var(r -> alias), cons(_324, cons(String_var(r -> pointer), cons(_30, cons(_326, cons(String_var(r -> guard), cons(_328, cons(String_var(r -> alias), cons(_330, cons(_332, cons(String_var(r -> alias), cons(_330, cons(String_var(Type_is_threaded(r -> declared_base) ? _352 : _353), cons(_334, cons(String_var(r -> slot), cons(_302, cons(String_var(r -> guard), cons(_336, cons(_338, cons(String_var(r -> cleanup), cons(_340, cons(_342, cons(String_var(r -> guard), cons(_344, cons(_346, cons(String_var(r -> cleanup), cons(_233, List_append(r -> initial_copy, List_append(Emitter__static_copy(e, r -> alias, r -> guard, r -> source, r -> object), cons(_348, cons(String_var(r -> guard), cons(_233, cons(_350, cons(String_var(r -> cleanup), cons(_233, cons(_213, cons(String_var(r -> pointer), cons(_302, cons(String_var(r -> guard), _351))))))))))))))))))))))))))))))))))))))))))));  if(r -> inferred){
-    List operand = cons(_66, cons(List_var(r -> type), cons(List_var(cons(_55, cons(List_var(r -> type), cons(List_var(r -> initial), NULL)))), NULL)));  acquisition = Emitter__initializer_macro(e, cons(_354, cons(List_var(cons(String_var(r -> formal), cons(List_var(operand), NULL))), NULL)), acquisition);
+  List acquisition = List_append((* r).prefix, cons(String_var((* r).storage), cons(_320, cons(String_var((* r).guard), cons(_322, cons(String_var((* r).alias), cons(_324, cons(String_var((* r).pointer), cons(_30, cons(_326, cons(String_var((* r).guard), cons(_328, cons(String_var((* r).alias), cons(_330, cons(_332, cons(String_var((* r).alias), cons(_330, cons(String_var(Type_is_threaded((* r).declared_base) ? _352 : _353), cons(_334, cons(String_var((* r).slot), cons(_302, cons(String_var((* r).guard), cons(_336, cons(_338, cons(String_var((* r).cleanup), cons(_340, cons(_342, cons(String_var((* r).guard), cons(_344, cons(_346, cons(String_var((* r).cleanup), cons(_233, List_append((* r).initial_copy, List_append(Emitter__static_copy(&((*(* r).e)), (* r).alias, (* r).guard, (* r).source, (* r).object), cons(_348, cons(String_var((* r).guard), cons(_233, cons(_350, cons(String_var((* r).cleanup), cons(_233, cons(_213, cons(String_var((* r).pointer), cons(_302, cons(String_var((* r).guard), _351))))))))))))))))))))))))))))))))))))))))))));  if((* r).inferred){
+    List operand = cons(_66, cons(List_var((* r).type), cons(List_var(cons(_55, cons(List_var((* r).type), cons(List_var((* r).initial), NULL)))), NULL)));  acquisition = Emitter__initializer_macro(&((*(* r).e)), cons(_354, cons(List_var(cons(String_var((* r).formal), cons(List_var(operand), NULL))), NULL)), acquisition);
   }
-  Array_push(r -> output, List_var(acquisition));  Map_setindex(e -> static_objects, List_var(r -> name), String_var(r -> pointer));
+  Array_push((* r).output, List_var(acquisition));  Map_setindex((* r).e -> static_objects, List_var((* r).name), String_var((* r).pointer));
 }
 
-static List Emitter__static_copy(Emitter e, String alias, String guard, List source, String object){
-  String data = Compiler_fresh_name(e -> c, _757);  String index = Compiler_fresh_name(e -> c, _758);  return cons(_356, cons(String_var(alias), cons(_358, cons(String_var(alias), cons(_360, cons(_362, cons(String_var(data), cons(_302, cons(_364, List_append(source, cons(_30, cons(_366, cons(String_var(index), cons(_368, cons(String_var(index), cons(_370, cons(String_var(object), cons(_233, cons(String_var(index), cons(_372, cons(_374, cons(String_var(guard), cons(_376, cons(String_var(index), cons(_378, cons(String_var(data), cons(_262, cons(String_var(index), cons(_380, cons(_382, cons(String_var(guard), cons(_384, List_append(source, cons(_231, cons(_386, cons(String_var(object), _389))))))))))))))))))))))))))))))))))));
+static List Emitter__static_copy(Emitter * e, String alias, String guard, List source, String object){
+  String data = Compiler_fresh_name((* e).c, _757);  String index = Compiler_fresh_name((* e).c, _758);  return cons(_356, cons(String_var(alias), cons(_358, cons(String_var(alias), cons(_360, cons(_362, cons(String_var(data), cons(_302, cons(_364, List_append(source, cons(_30, cons(_366, cons(String_var(index), cons(_368, cons(String_var(index), cons(_370, cons(String_var(object), cons(_233, cons(String_var(index), cons(_372, cons(_374, cons(String_var(guard), cons(_376, cons(String_var(index), cons(_378, cons(String_var(data), cons(_262, cons(String_var(index), cons(_380, cons(_382, cons(String_var(guard), cons(_384, List_append(source, cons(_231, cons(_386, cons(String_var(object), _389))))))))))))))))))))))))))))))))))));
 }
 
-static List Emitter__source_initializer(Emitter e, List function){
-  List type, binding, body;  List _x2c_destructure_3 = List_cdr(function);  type = Var_list(List_getindex(_x2c_destructure_3, 0));  binding = Var_list(List_getindex(_x2c_destructure_3, 1));  body = Var_list(List_getindex(_x2c_destructure_3, 2));  Array inputs = Array_new(), declarations = Array_new();  body = Emitter__capture_source(e, body, inputs, declarations);  List emitted = List_append(Array_list_free(declarations), cons(List_var(cons(_272, cons(List_var(type), cons(List_var(binding), cons(List_var(body), NULL))))), NULL));  return Emitter__initializer_macro(e, cons(_354, List_append(Array_list_free(inputs), NULL)), emitted);
+static List Emitter__source_initializer(Emitter * e, List function){
+  List type, binding, body;  List _x2c_destructure_3 = List_cdr(function);  type = Var_list(List_getindex(_x2c_destructure_3, 0));  binding = Var_list(List_getindex(_x2c_destructure_3, 1));  body = Var_list(List_getindex(_x2c_destructure_3, 2));  Array inputs = Array_new(), declarations = Array_new();  body = Emitter__capture_source(&((* e)), body, inputs, declarations);  List emitted = List_append(Array_list_free(declarations), cons(List_var(cons(_272, cons(List_var(type), cons(List_var(binding), cons(List_var(body), NULL))))), NULL));  return Emitter__initializer_macro(&((* e)), cons(_354, List_append(Array_list_free(inputs), NULL)), emitted);
 }
 
 int Var_truth(Var);
-static List Emitter__capture_source(Emitter e, List node, Array inputs, Array declarations){
+static List Emitter__capture_source(Emitter * e, List node, Array inputs, Array declarations){
 
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_408), &_x2c_match_capture)) {Var kind = _x2c_match_values[0];  Var input = _x2c_match_values[1];  List body = Var_list(_x2c_match_values[2]); {
-    List captured = Emitter__capture_source(e, Var_list(input), inputs, declarations);  return cons(kind, cons(List_var(captured), List_append(body, NULL)));
+    List captured = Emitter__capture_source(&((* e)), Var_list(input), inputs, declarations);  return cons(kind, cons(List_var(captured), List_append(body, NULL)));
   }
   break;
 }
 static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_414), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var content = _x2c_match_values[1]; {
-  List captured = Emitter__capture_source(e, Var_list(content), inputs, declarations);  return cons(_66, cons(type, cons(List_var(captured), NULL)));
+  List captured = Emitter__capture_source(&((* e)), Var_list(content), inputs, declarations);  return cons(_66, cons(type, cons(List_var(captured), NULL)));
 }
 break;
 }
@@ -1625,31 +1624,31 @@ default: break;
     }
   }
 if(opaque || ! _source_type_definition(Var_list(content))){
-  String formal = Compiler_fresh_name(e -> c, _756);  Array_push(inputs, List_var(cons(String_var(formal), cons(List_var(node), NULL))));  return cons(_66, cons(type, cons(String_var(formal), NULL)));
+  String formal = Compiler_fresh_name((* e).c, _756);  Array_push(inputs, List_var(cons(String_var(formal), cons(List_var(node), NULL))));  return cons(_66, cons(type, cons(String_var(formal), NULL)));
 }
-List captured = Emitter__capture_source(e, Var_list(content), inputs, declarations);  return cons(_66, cons(type, cons(List_var(captured), NULL)));
+List captured = Emitter__capture_source(&((* e)), Var_list(content), inputs, declarations);  return cons(_66, cons(type, cons(List_var(captured), NULL)));
 }
-break; } } static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_453), &_x2c_match_capture)) {return Emitter__capture_definition(e, node, inputs, declarations);  break;
+break; } } static MatchCaptureSite _x2c_match_site_15;  if (x2c_match_site_try_capture(& _x2c_match_site_15, _x2c_match_expr, List_var(_453), &_x2c_match_capture)) {return Emitter__capture_definition(&((* e)), node, inputs, declarations);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761817880ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var callee = _x2c_match_values[0];  Var arguments = _x2c_match_values[1]; {
-  List captured = Emitter__capture_source(e, Var_list(arguments), inputs, declarations);  return cons(_93, cons(callee, cons(List_var(captured), NULL)));
+  List captured = Emitter__capture_source(&((* e)), Var_list(arguments), inputs, declarations);  return cons(_93, cons(callee, cons(List_var(captured), NULL)));
 }
 break; } }
     }
   }
-return Emitter__capture_children(e, node, inputs, declarations);
+return Emitter__capture_children(&((* e)), node, inputs, declarations);
 }
 
 List Compiler_initializer_native_types(Compiler, Type);
-static List Emitter__capture_definition(Emitter e, List node, Array inputs, Array declarations){
-  List _x2c_destructure_4 = Compiler_initializer_native_types(e -> c, List_type(node));  Type definition = Var_type(List_getindex(_x2c_destructure_4, 0));  Type reference = Var_type(List_getindex(_x2c_destructure_4, 1));  if(Var_equal(List_car(node), Symbol_var(357722))){
+static List Emitter__capture_definition(Emitter * e, List node, Array inputs, Array declarations){
+  List _x2c_destructure_4 = Compiler_initializer_native_types((* e).c, List_type(node));  Type definition = Var_type(List_getindex(_x2c_destructure_4, 0));  Type reference = Var_type(List_getindex(_x2c_destructure_4, 1));  if(Var_equal(List_car(node), Symbol_var(357722))){
     reference = List_type(cons(_438, cons(List_cadr(node), NULL)));
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 357722: ;  static MatchCaptureSite _x2c_match_site_16;  if (x2c_match_site_try_capture(& _x2c_match_site_16, _x2c_match_expr, List_var(_461), &_x2c_match_capture)) {Var body = _x2c_match_values[0]; {
-      String name = Compiler_fresh_name(e -> c, _759);  definition = List_type(cons(_438, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(_438, cons(String_var(name), NULL)));
+      String name = Compiler_fresh_name((* e).c, _759);  definition = List_type(cons(_438, cons(String_var(name), cons(body, NULL))));  reference = List_type(cons(_438, cons(String_var(name), NULL)));
     }
     break;
   }
@@ -1657,14 +1656,14 @@ static List Emitter__capture_definition(Emitter e, List node, Array inputs, Arra
     }
   }
 }
-definition = List_type(Emitter__capture_children(e, Type_list(definition), inputs, declarations));  Array_push(declarations, List_var(cons(_273, cons(List_var(definition), _470))));  return Type_list(reference);
+definition = List_type(Emitter__capture_children(&((* e)), Type_list(definition), inputs, declarations));  Array_push(declarations, List_var(cons(_273, cons(List_var(definition), _470))));  return Type_list(reference);
 }
 
-static List Emitter__capture_children(Emitter e, List node, Array inputs, Array declarations){
+static List Emitter__capture_children(Emitter * e, List node, Array inputs, Array declarations){
   Array children = Array_new(); {
     Var child;  List _x2c_macro_object_6 = node;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       child = _x2c_macro_cursor_output_6; {
-        if(Var_is_row(child, 9, 7, 4)) Array_push(children, List_var(Emitter__capture_source(e, Var_list(child), inputs, declarations)));  else Array_push(children, child);
+        if(Var_is_row(child, 9, 7, 4)) Array_push(children, List_var(Emitter__capture_source(&((* e)), Var_list(child), inputs, declarations)));  else Array_push(children, child);
       }
 
     }
@@ -1787,11 +1786,11 @@ static int _right_operand_level(Symbol operator){
 }
 
 int Var_is_nil(Var);
-static List Emitter__operand(Emitter e, Var node, int level){
-  List code = Var_is_row(node, 9, 7, 4) && ! Var_is_nil(node) ? Emitter__emit(e, Var_list(node)) : Emitter__emit(e, cons(node, NULL));  if(_emitted_precedence(node) < level) return _parens(code);  return code;
+static List Emitter__operand(Emitter * e, Var node, int level){
+  List code = Var_is_row(node, 9, 7, 4) && ! Var_is_nil(node) ? Emitter__emit(&((* e)), Var_list(node)) : Emitter__emit(&((* e)), cons(node, NULL));  if(_emitted_precedence(node) < level) return _parens(code);  return code;
 }
 
-static List Emitter__op_spine(Emitter e, Var operator, Var left, Var right){
+static List Emitter__op_spine(Emitter * e, Var operator, Var left, Var right){
   Array operators = Array_new(); {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
@@ -1824,7 +1823,7 @@ static List Emitter__op_spine(Emitter e, Var operator, Var left, Var right){
   }
 if(! deeper) break;
         }
-        List result = Emitter__operand(e, left_item, level);  Array pieces = Array_new(); {
+        List result = Emitter__operand(&((* e)), left_item, level);  Array pieces = Array_new(); {
           _x2c_defer_env_3 _x2c_macro_environment_3 ={
             0
           }
@@ -1833,7 +1832,7 @@ if(! deeper) break;
           }
           ;  x2c_cleanup_push(& _x2c_defer_record_5); {
             for(int i =(int) Array_len(operators) - 1;  i >= 0;  i --){
-              Symbol binary = Var_symbol(Array_getindex(operators, i));  Array_push(pieces, Array_getindex(operators, i));  Array_push(pieces, List_var(Emitter__operand(e, Array_getindex(rights, i), _right_operand_level(binary))));
+              Symbol binary = Var_symbol(Array_getindex(operators, i));  Array_push(pieces, Array_getindex(operators, i));  Array_push(pieces, List_var(Emitter__operand(&((* e)), Array_getindex(rights, i), _right_operand_level(binary))));
             }
             List tail = NULL;  for(int i =(int) Array_len(pieces) - 1;  i >= 0;  i --){
               Var piece = Array_getindex(pieces, i);  if(Var_is_row(piece, 9, 7, 4)) tail = List_append(Var_list(piece), tail);  else tail = cons(piece, tail);
@@ -1858,25 +1857,25 @@ if(! deeper) break;
 }
 }
 
-static List Emitter__emit_cast(Emitter e, Type type, Var expression){
-  List c_type = Emitter__semantic_type(e, type);  List c_expr = Emitter__operand(e, expression, EMIT_UNARY);  return cons(_199, List_append(c_type, cons(_201, List_append(c_expr, NULL))));
+static List Emitter__emit_cast(Emitter * e, Type type, Var expression){
+  List c_type = Emitter__semantic_type(&((* e)), type);  List c_expr = Emitter__operand(&((* e)), expression, EMIT_UNARY);  return cons(_199, List_append(c_type, cons(_201, List_append(c_expr, NULL))));
 }
 
-static List Emitter__emit_postfix(Emitter e, Symbol operator, Var argument){
-  List c_arg = Emitter__operand(e, argument, EMIT_POSTFIX);  return List_append(c_arg, cons(Symbol_var(operator), NULL));
+static List Emitter__emit_postfix(Emitter * e, Symbol operator, Var argument){
+  List c_arg = Emitter__operand(&((* e)), argument, EMIT_POSTFIX);  return List_append(c_arg, cons(Symbol_var(operator), NULL));
 }
 
-static List Emitter__emit_generic(Emitter e, Var control, List associations){
-  List c_control = Emitter__emit(e, cons(control, NULL));  Array rows = Array_new(); {
+static List Emitter__emit_generic(Emitter * e, Var control, List associations){
+  List c_control = Emitter__emit(&((* e)), cons(control, NULL));  Array rows = Array_new(); {
     List association;  List _x2c_macro_object_8 = associations;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       association = Var_list(_x2c_macro_cursor_output_8);
   {
     List _x2c_match_expr = association;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_501), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  Array_push(rows, List_var(cons(_503, cons(_208, List_append(Emitter__emit(e, cons(value, NULL)), NULL)))));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_30;  if (x2c_match_site_try_capture(& _x2c_match_site_30, _x2c_match_expr, List_var(_501), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  Array_push(rows, List_var(cons(_503, cons(_208, List_append(Emitter__emit(&((* e)), cons(value, NULL)), NULL)))));  break;
     }
-    static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_505), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var value = _x2c_match_values[1];  Array_push(rows, List_var(Emitter__generic_typed(e, Var_type(type), value)));  break;
+    static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_505), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var value = _x2c_match_values[1];  Array_push(rows, List_var(Emitter__generic_typed(&((* e)), Var_type(type), value)));  break;
   }
 
     }
@@ -1886,42 +1885,42 @@ static List Emitter__emit_generic(Emitter e, Var control, List associations){
 List c_rows = _commas(Array_list_free(rows));  return cons(_507, List_append(c_control, cons(_225, List_append(c_rows, _202))));
 }
 
-static List Emitter__generic_typed(Emitter e, Type type, Var value){
-  List c_type = Emitter__semantic_type(e, type);  List c_value = Emitter__emit(e, cons(value, NULL));  return List_append(c_type, cons(_208, List_append(c_value, NULL)));
+static List Emitter__generic_typed(Emitter * e, Type type, Var value){
+  List c_type = Emitter__semantic_type(&((* e)), type);  List c_value = Emitter__emit(&((* e)), cons(value, NULL));  return List_append(c_type, cons(_208, List_append(c_value, NULL)));
 }
 
-static List Emitter__emit_va_arg(Emitter e, Var expression, Var declaration){
-  List c_expr = Emitter__emit(e, cons(expression, NULL));  List c_decl = Emitter__emit(e, cons(declaration, NULL));  return cons(_509, List_append(c_expr, cons(_225, List_append(c_decl, _202))));
+static List Emitter__emit_va_arg(Emitter * e, Var expression, Var declaration){
+  List c_expr = Emitter__emit(&((* e)), cons(expression, NULL));  List c_decl = Emitter__emit(&((* e)), cons(declaration, NULL));  return cons(_509, List_append(c_expr, cons(_225, List_append(c_decl, _202))));
 }
 
-static List Emitter__emit_offsetof(Emitter e, Type type, List member){
-  List c_type = Emitter__semantic_type(e, type);  List c_member = Emitter__emit(e, member);  return cons(_511, List_append(c_type, cons(_225, List_append(c_member, _202))));
+static List Emitter__emit_offsetof(Emitter * e, Type type, List member){
+  List c_type = Emitter__semantic_type(&((* e)), type);  List c_member = Emitter__emit(&((* e)), member);  return cons(_511, List_append(c_type, cons(_225, List_append(c_member, _202))));
 }
 
-static List Emitter__emit_index(Emitter e, Var array, Var index){
-  List c_array = Emitter__operand(e, array, EMIT_POSTFIX);  List c_index = Emitter__emit(e, cons(index, NULL));  return List_append(c_array, cons(_262, List_append(c_index, _512)));
+static List Emitter__emit_index(Emitter * e, Var array, Var index){
+  List c_array = Emitter__operand(&((* e)), array, EMIT_POSTFIX);  List c_index = Emitter__emit(&((* e)), cons(index, NULL));  return List_append(c_array, cons(_262, List_append(c_index, _512)));
 }
 
-static List Emitter__emit_unary(Emitter e, Symbol operator, Var argument){
-  List c_arg = Emitter__operand(e, argument, EMIT_UNARY);  return cons(Symbol_var(operator), List_append(c_arg, NULL));
+static List Emitter__emit_unary(Emitter * e, Symbol operator, Var argument){
+  List c_arg = Emitter__operand(&((* e)), argument, EMIT_UNARY);  return cons(Symbol_var(operator), List_append(c_arg, NULL));
 }
 
-static List Emitter__emit_binary(Emitter e, Symbol operator, Var left, Var right){
-  if(Var_is_row(left, 9, 7, 4) && List_truth(({ static MatchCaptureSite _x2c_match_site_32;  x2c_match_site_match(& _x2c_match_site_32, Var_list(left), List_var(_517)); }))) return Emitter__op_spine(e, Symbol_var(operator), left, right);  Symbol binary = operator;  List c_left = Emitter__operand(e, left, _left_operand_level(binary));  List c_right = Emitter__operand(e, right, _right_operand_level(binary));  return List_append(c_left, cons(Symbol_var(operator), List_append(c_right, NULL)));
+static List Emitter__emit_binary(Emitter * e, Symbol operator, Var left, Var right){
+  if(Var_is_row(left, 9, 7, 4) && List_truth(({ static MatchCaptureSite _x2c_match_site_32;  x2c_match_site_match(& _x2c_match_site_32, Var_list(left), List_var(_517)); }))) return Emitter__op_spine(&((* e)), Symbol_var(operator), left, right);  Symbol binary = operator;  List c_left = Emitter__operand(&((* e)), left, _left_operand_level(binary));  List c_right = Emitter__operand(&((* e)), right, _right_operand_level(binary));  return List_append(c_left, cons(Symbol_var(operator), List_append(c_right, NULL)));
 }
 
-static List Emitter__emit_conditional(Emitter e, Var condition, Var ontrue, Var onfalse){
-  List c_cond = Emitter__operand(e, condition, EMIT_CONDITIONAL + 1);  List c_then = Emitter__emit(e, cons(ontrue, NULL));  List c_else = Emitter__operand(e, onfalse, EMIT_CONDITIONAL);  return List_append(c_cond, cons(_519, List_append(c_then, cons(_208, List_append(c_else, NULL)))));
+static List Emitter__emit_conditional(Emitter * e, Var condition, Var ontrue, Var onfalse){
+  List c_cond = Emitter__operand(&((* e)), condition, EMIT_CONDITIONAL + 1);  List c_then = Emitter__emit(&((* e)), cons(ontrue, NULL));  List c_else = Emitter__operand(&((* e)), onfalse, EMIT_CONDITIONAL);  return List_append(c_cond, cons(_519, List_append(c_then, cons(_208, List_append(c_else, NULL)))));
 }
 
 int Map_truth(Map);
 int Map_try_get(Map, Var, Var *);
-static List Emitter__emit_ident(Emitter e, Var binding){
-  Var pointer;  if(Map_truth(e -> static_objects) && Map_try_get(e -> static_objects, binding, &(pointer))) return cons(_521, cons(pointer, _202));  return Emitter__emit(e, cons(binding, NULL));
+static List Emitter__emit_ident(Emitter * e, Var binding){
+  Var pointer;  if(Map_truth((* e).static_objects) && Map_try_get((* e).static_objects, binding, &(pointer))) return cons(_521, cons(pointer, _202));  return Emitter__emit(&((* e)), cons(binding, NULL));
 }
 
-static List Emitter__emit_call(Emitter e, Var function, Var arguments){
-  List site_call = Emitter__match_site_call(e, function, arguments);  if(List_truth(site_call)) return site_call;  List c_fn = Emitter__operand(e, function, EMIT_POSTFIX);  List c_args = Emitter__emit(e, cons(arguments, NULL));  return List_append(c_fn, cons(_199, List_append(c_args, _202)));
+static List Emitter__emit_call(Emitter * e, Var function, Var arguments){
+  List site_call = Emitter__match_site_call(&((* e)), function, arguments);  if(List_truth(site_call)) return site_call;  List c_fn = Emitter__operand(&((* e)), function, EMIT_POSTFIX);  List c_args = Emitter__emit(&((* e)), cons(arguments, NULL));  return List_append(c_fn, cons(_199, List_append(c_args, _202)));
 }
 
 String binding_identity_spelling(List);
@@ -1930,7 +1929,7 @@ List Sym_resolve_global(Sym, List, Type *);
 int List_equal(List, List);
 int Type_is_function(Type);
 int Compiler_match_pattern_is_static(Compiler, List);
-static List Emitter__match_site_call(Emitter e, Var function, Var arguments){
+static List Emitter__match_site_call(Emitter * e, Var function, Var arguments){
   List binding = NULL;  while(! List_truth(binding) && Var_is_row(function, 9, 7, 4))
   {
     List _x2c_match_expr = Var_list(function);
@@ -1943,13 +1942,13 @@ static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x
 default: ;  return NULL;  break;
     }
   }
-String name = binding_identity_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global(e -> c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list(arguments);
+String name = binding_identity_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global((* e).c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list(arguments);
   {
     List _x2c_match_expr = args;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 102886: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_538), &_x2c_match_capture)) {Var pattern = _x2c_match_values[0]; {
-  if(! Var_is_row(pattern, 9, 7, 4) || ! Compiler_match_pattern_is_static(e -> c, Var_list(pattern))) return NULL;  String site = Compiler_fresh_name(e -> c, _760);  List c_args = Emitter__emit(e, cons(arguments, NULL));  return cons(_540, cons(String_var(site), cons(_30, cons(String_var(entry), cons(_542, cons(String_var(site), cons(_231, List_append(c_args, _545))))))));
+  if(! Var_is_row(pattern, 9, 7, 4) || ! Compiler_match_pattern_is_static((* e).c, Var_list(pattern))) return NULL;  String site = Compiler_fresh_name((* e).c, _760);  List c_args = Emitter__emit(&((* e)), cons(arguments, NULL));  return cons(_540, cons(String_var(site), cons(_30, cons(String_var(entry), cons(_542, cons(String_var(site), cons(_231, List_append(c_args, _545))))))));
 }
 break;
 }
@@ -1964,40 +1963,40 @@ static String _match_site_entry(String name){
   if(! String_truth(name)) return NULL;  if(String_equal(name, _546)) return _761;  if(String_equal(name, _547)) return _762;  if(String_equal(name, _548)) return _763;  if(String_equal(name, _549)) return _764;  if(String_equal(name, _550)) return _765;  if(String_equal(name, _551)) return _766;  if(String_equal(name, _552)) return _767;  return NULL;
 }
 
-static List Emitter__emit_if(Emitter e, Var condition, Var ontrue){
-  List c_cond = Emitter__emit(e, cons(condition, NULL));  List c_then = Emitter__emit(e, cons(ontrue, NULL));  return cons(_554, cons(_199, List_append(c_cond, cons(_201, List_append(c_then, NULL)))));
+static List Emitter__emit_if(Emitter * e, Var condition, Var ontrue){
+  List c_cond = Emitter__emit(&((* e)), cons(condition, NULL));  List c_then = Emitter__emit(&((* e)), cons(ontrue, NULL));  return cons(_554, cons(_199, List_append(c_cond, cons(_201, List_append(c_then, NULL)))));
 }
 
-static List Emitter__emit_if_else(Emitter e, Var condition, Var ontrue, Var onfalse){
-  List c_cond = Emitter__emit(e, cons(condition, NULL));  List c_then = Emitter__emit(e, cons(ontrue, NULL));  List c_else = Emitter__emit(e, cons(onfalse, NULL));  return cons(_554, cons(_199, List_append(c_cond, cons(_201, List_append(c_then, cons(_556, List_append(c_else, NULL)))))));
+static List Emitter__emit_if_else(Emitter * e, Var condition, Var ontrue, Var onfalse){
+  List c_cond = Emitter__emit(&((* e)), cons(condition, NULL));  List c_then = Emitter__emit(&((* e)), cons(ontrue, NULL));  List c_else = Emitter__emit(&((* e)), cons(onfalse, NULL));  return cons(_554, cons(_199, List_append(c_cond, cons(_201, List_append(c_then, cons(_556, List_append(c_else, NULL)))))));
 }
 
-static List Emitter__emit_while(Emitter e, Var condition, Var body){
-  List c_cond = Emitter__emit(e, cons(condition, NULL));  List c_body = Emitter__emit(e, cons(body, NULL));  return cons(_558, cons(_199, List_append(c_cond, cons(_201, List_append(c_body, NULL)))));
+static List Emitter__emit_while(Emitter * e, Var condition, Var body){
+  List c_cond = Emitter__emit(&((* e)), cons(condition, NULL));  List c_body = Emitter__emit(&((* e)), cons(body, NULL));  return cons(_558, cons(_199, List_append(c_cond, cons(_201, List_append(c_body, NULL)))));
 }
 
-static List Emitter__emit_do(Emitter e, Var body, Var condition){
-  List c_body = Emitter__emit(e, cons(body, NULL));  List c_cond = Emitter__emit(e, cons(condition, NULL));  return cons(_560, List_append(c_body, cons(_558, cons(_199, List_append(c_cond, _561)))));
+static List Emitter__emit_do(Emitter * e, Var body, Var condition){
+  List c_body = Emitter__emit(&((* e)), cons(body, NULL));  List c_cond = Emitter__emit(&((* e)), cons(condition, NULL));  return cons(_560, List_append(c_body, cons(_558, cons(_199, List_append(c_cond, _561)))));
 }
 
-static List Emitter__emit_for(Emitter e, Var initial, Var condition, Var increment, Var body){
-  List c_init = Emitter__emit(e, cons(initial, NULL));  List c_cond = Emitter__emit(e, cons(condition, NULL));  List c_inc = Emitter__emit(e, cons(increment, NULL));  List c_body = Emitter__emit(e, cons(body, NULL));  return cons(_563, cons(_199, List_append(c_init, cons(_30, List_append(c_cond, cons(_30, List_append(c_inc, cons(_201, List_append(c_body, NULL)))))))));
+static List Emitter__emit_for(Emitter * e, Var initial, Var condition, Var increment, Var body){
+  List c_init = Emitter__emit(&((* e)), cons(initial, NULL));  List c_cond = Emitter__emit(&((* e)), cons(condition, NULL));  List c_inc = Emitter__emit(&((* e)), cons(increment, NULL));  List c_body = Emitter__emit(&((* e)), cons(body, NULL));  return cons(_563, cons(_199, List_append(c_init, cons(_30, List_append(c_cond, cons(_30, List_append(c_inc, cons(_201, List_append(c_body, NULL)))))))));
 }
 
-static List Emitter__emit_switch(Emitter e, Var expression, Var body){
-  List c_expr = Emitter__emit(e, cons(expression, NULL));  List c_body = Emitter__emit(e, cons(body, NULL));  return cons(_565, cons(_199, List_append(c_expr, cons(_201, List_append(c_body, NULL)))));
+static List Emitter__emit_switch(Emitter * e, Var expression, Var body){
+  List c_expr = Emitter__emit(&((* e)), cons(expression, NULL));  List c_body = Emitter__emit(&((* e)), cons(body, NULL));  return cons(_565, cons(_199, List_append(c_expr, cons(_201, List_append(c_body, NULL)))));
 }
 
-static List Emitter__emit_return(Emitter e, Var expression){
-  List value = Emitter__emit(e, cons(expression, NULL));  return cons(_567, List_append(value, _31));
+static List Emitter__emit_return(Emitter * e, Var expression){
+  List value = Emitter__emit(&((* e)), cons(expression, NULL));  return cons(_567, List_append(value, _31));
 }
 
-static List Emitter__emit_parameters(Emitter e, Var parameters){
-  List c_params = Emitter__emit(e, cons(parameters, NULL));  return cons(_199, List_append(c_params, _202));
+static List Emitter__emit_parameters(Emitter * e, Var parameters){
+  List c_params = Emitter__emit(&((* e)), cons(parameters, NULL));  return cons(_199, List_append(c_params, _202));
 }
 
-static List Emitter__emit_label(Emitter e, Var name){
-  List c_name = Emitter__emit(e, cons(name, NULL));  return List_append(c_name, _209);
+static List Emitter__emit_label(Emitter * e, Var name){
+  List c_name = Emitter__emit(&((* e)), cons(name, NULL));  return List_append(c_name, _209);
 }
 
 List Compiler_origin_location(Compiler, int);
@@ -2005,8 +2004,8 @@ Var List_assoc(List, Var);
 int Ast_never_returns(Ast);
 String int_str(int);
 int List_len(List);
-static List Emitter__raise(Emitter e, Ast ast, Var cause, List arguments){
-  List code = Emitter__emit(e, Var_list(cause));  List arg_tokens = _commas(Emitter__emit(e, arguments));  String site_name = Compiler_fresh_name(e -> c, _768);  List location = Compiler_origin_location(e -> c, e -> origin);  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var(e -> c -> filename));  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));  String function = String_truth(e -> fn_name) ? e -> fn_name : _583;  String file_literal = _c_string_literal(file);  String function_literal = _c_string_literal(function);  List tail = List_truth(arguments) ? cons(_231, List_append(arg_tokens, NULL)) : NULL;  List terminal = Ast_never_returns(ast) ? _570 : NULL;  return cons(_211, cons(_572, cons(String_var(site_name), cons(_574, cons(_576, cons(String_var(file_literal), cons(_231, cons(_578, cons(String_var(function_literal), cons(_231, cons(_580, cons(int_var(line), cons(_344, cons(_582, cons(String_var(site_name), cons(_231, List_append(code, cons(_231, cons(String_var(String_join(NULL, cons(String_var(int_str(List_len(arguments) / 2)), NULL))), List_append(tail, cons(_233, List_append(terminal, _214))))))))))))))))))))));
+static List Emitter__raise(Emitter * e, Ast ast, Var cause, List arguments){
+  List code = Emitter__emit(&((* e)), Var_list(cause));  List arg_tokens = _commas(Emitter__emit(&((* e)), arguments));  String site_name = Compiler_fresh_name((* e).c, _768);  List location = Compiler_origin_location((* e).c, (* e).origin);  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));  String function = String_truth((* e).fn_name) ?(* e).fn_name : _583;  String file_literal = _c_string_literal(file);  String function_literal = _c_string_literal(function);  List tail = List_truth(arguments) ? cons(_231, List_append(arg_tokens, NULL)) : NULL;  List terminal = Ast_never_returns(ast) ? _570 : NULL;  return cons(_211, cons(_572, cons(String_var(site_name), cons(_574, cons(_576, cons(String_var(file_literal), cons(_231, cons(_578, cons(String_var(function_literal), cons(_231, cons(_580, cons(int_var(line), cons(_344, cons(_582, cons(String_var(site_name), cons(_231, List_append(code, cons(_231, cons(String_var(String_join(NULL, cons(String_var(int_str(List_len(arguments) / 2)), NULL))), List_append(tail, cons(_233, List_append(terminal, _214))))))))))))))))))))));
 }
 
 String String_escape(String);
@@ -2017,7 +2016,7 @@ static String _c_string_literal(String value){
 String long_str(long);
 int String_getindex(String, int);
 String String_new(const char *);
-static List Emitter__literal(Emitter e, List ast){
+static List Emitter__literal(Emitter * e, List ast){
   List _x2c_destructure_5 = List_cdr(ast);  List type = Var_list(List_getindex(_x2c_destructure_5, 0));  String text = Var_string(List_getindex(_x2c_destructure_5, 1));  Var value = List_getindex(_x2c_destructure_5, 2);  if(type == _587 && String_equal(text, _588)) return _591;  if(type == _594){
     String qq = _771;  text = String_add(String_add(qq, String_replace(String_escape(text), _769, _770)), qq);  return cons(_596, cons(_199, cons(String_var(text), _202)));
   }
@@ -2035,15 +2034,15 @@ static List _atom_intern(String spelling){
 String preproc_include_target(String, int *);
 int is_source_file(String);
 int String_rfind(String, String);
-static List Emitter__preproc(Emitter e, List ast){
+static List Emitter__preproc(Emitter * e, List ast){
   int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _772), 1);  String out = String_join(NULL, cons(String_var(_606), cons(String_var(stem), cons(String_var(_607), NULL))));  return cons(String_var(out), NULL);
 }
 
-static List Emitter__declare_stmt(Emitter e, List ast){
-  return List_append(Emitter__declare(e, ast), _31);
+static List Emitter__declare_stmt(Emitter * e, List ast){
+  return List_append(Emitter__declare(&((* e)), ast), _31);
 }
 
-static List Emitter__decl_stmt(Emitter e, List ast){
+static List Emitter__decl_stmt(Emitter * e, List ast){
 
   {
     List _x2c_match_expr = ast;
@@ -2054,26 +2053,26 @@ static List Emitter__decl_stmt(Emitter e, List ast){
 default: break;
     }
   }
-return Emitter__declare(e, ast);
+return Emitter__declare(&((* e)), ast);
 }
 
-static List Emitter__declare(Emitter e, List ast){
-  List type, bindings;  List _x2c_destructure_6 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_6, 0));  bindings = Var_list(List_getindex(_x2c_destructure_6, 1));  type = Emitter__emit(e, cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  return List_append(type, Emitter__emit(e, bindings));
+static List Emitter__declare(Emitter * e, List ast){
+  List type, bindings;  List _x2c_destructure_6 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_6, 0));  bindings = Var_list(List_getindex(_x2c_destructure_6, 1));  type = Emitter__emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  return List_append(type, Emitter__emit(&((* e)), bindings));
 }
 
-static List Emitter__bind(Emitter e, Ast ast){
-  List ident, mods;  List _x2c_destructure_7 = List_cdr(ast);  ident = Var_list(List_getindex(_x2c_destructure_7, 0));  mods = Var_list(List_getindex(_x2c_destructure_7, 1));  ident = Emitter__emit(e, ident);  if(! List_truth(mods)) return ident;  return Emitter__declarator(e, ident, mods);
+static List Emitter__bind(Emitter * e, Ast ast){
+  List ident, mods;  List _x2c_destructure_7 = List_cdr(ast);  ident = Var_list(List_getindex(_x2c_destructure_7, 0));  mods = Var_list(List_getindex(_x2c_destructure_7, 1));  ident = Emitter__emit(&((* e)), ident);  if(! List_truth(mods)) return ident;  return Emitter__declarator(&((* e)), ident, mods);
 }
 
-static List Emitter__param(Emitter e, List ast){
-  List type, mods;  List _x2c_destructure_8 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_8, 0));  mods = Var_list(List_getindex(_x2c_destructure_8, 1));  List code = Emitter__emit(e, type);  mods = cons(List_var(mods), NULL);  return List_append(code, Emitter__emit(e, mods));
+static List Emitter__param(Emitter * e, List ast){
+  List type, mods;  List _x2c_destructure_8 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_8, 0));  mods = Var_list(List_getindex(_x2c_destructure_8, 1));  List code = Emitter__emit(&((* e)), type);  mods = cons(List_var(mods), NULL);  return List_append(code, Emitter__emit(&((* e)), mods));
 }
 
-static List Emitter__args(Emitter e, List ast){
+static List Emitter__args(Emitter * e, List ast){
   Array result = Array_new();  int first = 1; {
     List argument;  List _x2c_macro_object_9 = List_cdr(ast);  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       argument = Var_list(_x2c_macro_cursor_output_9); {
-        List emitted = Emitter__emit(e, argument);  if(List_truth(({ static MatchCaptureSite _x2c_match_site_37;  x2c_match_site_match(& _x2c_match_site_37, argument, List_var(_615)); }))) emitted = _parens(emitted);  if(! first) Array_push(result, String_var(_773));  Array_push(result, List_var(emitted));  first = 0;
+        List emitted = Emitter__emit(&((* e)), argument);  if(List_truth(({ static MatchCaptureSite _x2c_match_site_37;  x2c_match_site_match(& _x2c_match_site_37, argument, List_var(_615)); }))) emitted = _parens(emitted);  if(! first) Array_push(result, String_var(_773));  Array_push(result, List_var(emitted));  first = 0;
       }
 
     }
@@ -2084,22 +2083,22 @@ static List Emitter__args(Emitter e, List ast){
 
 Map Compiler_semantic_binding_facts(Compiler);
 Map Map_new(void);
-static List Emitter__function(Emitter e, List ast){
-  List type, bindings, body;  List _x2c_destructure_9 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_9, 0));  bindings = Var_list(List_getindex(_x2c_destructure_9, 1));  body = Var_list(List_getindex(_x2c_destructure_9, 2));  String old_fn = e -> fn_name;  List function_binding = Var_list(List_cadr(bindings));  e -> fn_name = binding_identity_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts(e -> c), List_var(cons(_616, cons(List_var(function_binding), NULL))), &(defer_owner))) e -> fn_name = Var_string(defer_owner);  type = Emitter__emit(e, cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  Map old_statics = e -> static_objects;  e -> static_objects = Map_new();  List decl = Emitter__emit(e, bindings), body_code = Emitter__emit(e, body);  e -> fn_name = old_fn;  e -> static_objects = old_statics;  return List_append(type, List_append(decl, List_append(body_code, NULL)));
+static List Emitter__function(Emitter * e, List ast){
+  List type, bindings, body;  List _x2c_destructure_9 = List_cdr(ast);  type = Var_list(List_getindex(_x2c_destructure_9, 0));  bindings = Var_list(List_getindex(_x2c_destructure_9, 1));  body = Var_list(List_getindex(_x2c_destructure_9, 2));  String old_fn =(* e).fn_name;  List function_binding = Var_list(List_cadr(bindings)); (* e).fn_name = binding_identity_spelling(function_binding);  Var defer_owner;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_616, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_string(defer_owner);  type = Emitter__emit(&((* e)), cons(List_var(type), NULL));  bindings = cons(List_var(bindings), NULL);  body = cons(List_var(body), NULL);  Map old_statics =(* e).static_objects; (* e).static_objects = Map_new();  List decl = Emitter__emit(&((* e)), bindings), body_code = Emitter__emit(&((* e)), body); (* e).fn_name = old_fn; (* e).static_objects = old_statics;  return List_append(type, List_append(decl, List_append(body_code, NULL)));
 }
 
 Var Var_cadr(Var);
 Type List_type_from_ast(List);
-static List Emitter__foreign_alias(Emitter e, List ast){
-  List declaration, native_binding;  List _x2c_destructure_10 = List_cdr(ast);  declaration = Var_list(List_getindex(_x2c_destructure_10, 0));  native_binding = Var_list(List_getindex(_x2c_destructure_10, 1));  List bindings = Var_list(List_caddr(declaration)), target = Var_list(Var_cadr(List_cadr(bindings)));  Type function_type = Type_declared(List_type_from_ast(declaration));  Type pointer_type = Type_reference(function_type);  List pointer = Emitter__semantic_type(e, pointer_type);  List native = Emitter__emit(e, native_binding);  String target_name = Compiler_emitted_binding_name(e -> c, target);  String native_name = Compiler_emitted_binding_name(e -> c, native_binding);  String message = String_join(NULL, cons(String_var(_617), cons(String_var(target_name), cons(String_var(_618), cons(String_var(native_name), NULL)))));  String define = String_join(NULL, cons(String_var(_237), cons(String_var(target_name), cons(String_var(_619), cons(String_var(native_name), NULL)))));  return cons(_621, cons(_229, cons(_623, List_append(native, cons(_225, List_append(pointer, cons(_625, cons(String_var(String_join(NULL, cons(String_var(_584), cons(String_var(message), cons(String_var(_626), NULL))))), cons(_628, cons(String_var(define), NULL))))))))));
+static List Emitter__foreign_alias(Emitter * e, List ast){
+  List declaration, native_binding;  List _x2c_destructure_10 = List_cdr(ast);  declaration = Var_list(List_getindex(_x2c_destructure_10, 0));  native_binding = Var_list(List_getindex(_x2c_destructure_10, 1));  List bindings = Var_list(List_caddr(declaration)), target = Var_list(Var_cadr(List_cadr(bindings)));  Type function_type = Type_declared(List_type_from_ast(declaration));  Type pointer_type = Type_reference(function_type);  List pointer = Emitter__semantic_type(&((* e)), pointer_type);  List native = Emitter__emit(&((* e)), native_binding);  String target_name = Compiler_emitted_binding_name((* e).c, target);  String native_name = Compiler_emitted_binding_name((* e).c, native_binding);  String message = String_join(NULL, cons(String_var(_617), cons(String_var(target_name), cons(String_var(_618), cons(String_var(native_name), NULL)))));  String define = String_join(NULL, cons(String_var(_237), cons(String_var(target_name), cons(String_var(_619), cons(String_var(native_name), NULL)))));  return cons(_621, cons(_229, cons(_623, List_append(native, cons(_225, List_append(pointer, cons(_625, cons(String_var(String_join(NULL, cons(String_var(_584), cons(String_var(message), cons(String_var(_626), NULL))))), cons(_628, cons(String_var(define), NULL))))))))));
 }
 
 List Var_cdr(Var);
-static List Emitter__typedef(Emitter e, List ast){
-  List code = cons(_271, List_append(Emitter__emit(e, List_cdr(ast)), _31)); {
+static List Emitter__typedef(Emitter * e, List ast){
+  List code = cons(_271, List_append(Emitter__emit(&((* e)), List_cdr(ast)), _31)); {
     List declarator;  List _x2c_macro_object_10 = Var_cdr(List_caddr(ast));  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
       declarator = Var_list(_x2c_macro_cursor_output_10); {
-        List binding = Var_list(List_cadr(declarator));  Var type;  if(Map_try_get(Compiler_semantic_binding_facts(e -> c), List_var(cons(_629, cons(List_var(binding), NULL))), &(type))) e -> native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), e -> native_aliases);
+        List binding = Var_list(List_cadr(declarator));  Var type;  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_629, cons(List_var(binding), NULL))), &(type)))(* e).native_aliases = cons(List_var(cons(type, cons(List_var(binding), NULL))), (* e).native_aliases);
       }
 
     }
@@ -2108,9 +2107,9 @@ static List Emitter__typedef(Emitter e, List ast){
   return code;
 }
 
-static List Emitter__block(Emitter e, List ast){
+static List Emitter__block(Emitter * e, List ast){
   {
-    List * _x2c_macro_address_1 = & e -> native_aliases;  List _x2c_macro_previous_1 = * _x2c_macro_address_1; {
+    List * _x2c_macro_address_1 = &(* e).native_aliases;  List _x2c_macro_previous_1 = * _x2c_macro_address_1; {
       _x2c_defer_env_6 _x2c_macro_environment_6 ={
         0
       }
@@ -2118,8 +2117,8 @@ static List Emitter__block(Emitter e, List ast){
         .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_6); {
-        * _x2c_macro_address_1 = e -> native_aliases; {
-          List _x2c_return_value_6 = cons(_211, List_append(Emitter__emit(e, List_cdr(ast)), _214)); {
+        * _x2c_macro_address_1 =(* e).native_aliases; {
+          List _x2c_return_value_6 = cons(_211, List_append(Emitter__emit(&((* e)), List_cdr(ast)), _214)); {
             x2c_cleanup_leave(& _x2c_defer_record_6);  return _x2c_return_value_6;
           }
 
@@ -2133,12 +2132,12 @@ static List Emitter__block(Emitter e, List ast){
 
 }
 
-static List Emitter__binding(Emitter e, List ast){
-  return cons(String_var(Compiler_emitted_binding_name(e -> c, ast)), NULL);
+static List Emitter__binding(Emitter * e, List ast){
+  return cons(String_var(Compiler_emitted_binding_name((* e).c, ast)), NULL);
 }
 
 int Type_is_array(Type);
-static List Emitter__declarator(Emitter e, List decl, List mods){
+static List Emitter__declarator(Emitter * e, List decl, List mods){
   int typedefs = 0;  while(List_truth(mods)){
 
   {
@@ -2146,12 +2145,12 @@ static List Emitter__declarator(Emitter e, List decl, List mods){
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_635), &_x2c_match_capture)) {Var parameters = _x2c_match_values[0];  List remaining = Var_list(_x2c_match_values[1]); {
-      decl = Emitter__function_declarator(e, decl, Var_list(parameters));  mods = remaining;  continue;
+      decl = Emitter__function_declarator(&((* e)), decl, Var_list(parameters));  mods = remaining;  continue;
     }
     break;
   }
   static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try_capture(& _x2c_match_site_39, _x2c_match_expr, List_var(_638), &_x2c_match_capture)) {List remaining = Var_list(_x2c_match_values[0]); {
-    decl = Emitter__function_declarator(e, decl, NULL);  mods = remaining;  continue;
+    decl = Emitter__function_declarator(&((* e)), decl, NULL);  mods = remaining;  continue;
   }
   break;
 }
@@ -2159,10 +2158,10 @@ static List Emitter__declarator(Emitter e, List decl, List mods){
     }
   }
 Var first = List_car(mods);  if(Var_is_row(first, 9, 7, 4)){
-  Type mod = Var_type(first);  if(Var_is_row(List_car(Type_list(mod)), 11, 7, 1)) decl = List_append(decl, List_append(Type_list(mod), NULL));  else if(Type_is_array(mod)) decl = Emitter__array_declarator(e, decl, Var_list(List_cadr(Type_list(mod))));  else decl = List_append(decl, cons(_208, List_append(Emitter__emit(e, Var_list(List_cadr(Type_list(mod)))), NULL)));  mods = List_cdr(mods);  continue;
+  Type mod = Var_type(first);  if(Var_is_row(List_car(Type_list(mod)), 11, 7, 1)) decl = List_append(decl, List_append(Type_list(mod), NULL));  else if(Type_is_array(mod)) decl = Emitter__array_declarator(&((* e)), decl, Var_list(List_cadr(Type_list(mod))));  else decl = List_append(decl, cons(_208, List_append(Emitter__emit(&((* e)), Var_list(List_cadr(Type_list(mod)))), NULL)));  mods = List_cdr(mods);  continue;
 }
 Symbol sym = Var_symbol(first);  switch(sym){
-  case 8794 : decl = Emitter__array_declarator(e, decl, NULL);  break;  case 77 : case 33330008396 : decl = cons(Symbol_var(54), decl);  break;  case 54 : decl = cons(first, decl);  break;  case 44661285196 : typedefs ++;  break;  case 158121667336 : decl = Emitter__emit(e, List_cdr(mods));  mods = NULL;  continue;  default: if(Symbol_is_type_qualifier(sym)) decl = cons(first, decl);  else{
+  case 8794 : decl = Emitter__array_declarator(&((* e)), decl, NULL);  break;  case 77 : case 33330008396 : decl = cons(Symbol_var(54), decl);  break;  case 54 : decl = cons(first, decl);  break;  case 44661285196 : typedefs ++;  break;  case 158121667336 : decl = Emitter__emit(&((* e)), List_cdr(mods));  mods = NULL;  continue;  default: if(Symbol_is_type_qualifier(sym)) decl = cons(first, decl);  else{
     decl = List_append(mods, List_append(decl, NULL));  mods = NULL;  continue;
   }
 
@@ -2173,26 +2172,26 @@ while(typedefs --) decl = cons(Symbol_var(44661285196), decl);  return decl;
 }
 
 int Type_is_pointer(Type);
-static List Emitter__array_declarator(Emitter e, List decl, List dimension){
-  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  List size = Emitter__emit(e, dimension);  return List_truth(size) ? List_append(decl, cons(_262, List_append(size, _512))) : List_append(decl, _641);
+static List Emitter__array_declarator(Emitter * e, List decl, List dimension){
+  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  List size = Emitter__emit(&((* e)), dimension);  return List_truth(size) ? List_append(decl, cons(_262, List_append(size, _512))) : List_append(decl, _641);
 }
 
 static List _parens(List decl){
   return cons(_199, List_append(decl, _202));
 }
 
-static List Emitter__function_declarator(Emitter e, List decl, List parameters){
-  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  return List_append(decl, cons(_199, List_append(Emitter__emit(e, parameters), _202)));
+static List Emitter__function_declarator(Emitter * e, List decl, List parameters){
+  if(Type_is_pointer(List_type(decl))) decl = _parens(decl);  return List_append(decl, cons(_199, List_append(Emitter__emit(&((* e)), parameters), _202)));
 }
 
 List Type_declaration_ast(Type, List);
-static List Emitter__semantic_type(Emitter e, Type type){
-  List declaration = Type_declaration_ast(type, NULL);  return Emitter__declare(e, declaration);
+static List Emitter__semantic_type(Emitter * e, Type type){
+  List declaration = Type_declaration_ast(type, NULL);  return Emitter__declare(&((* e)), declaration);
 }
 
 List Type_declaration_parts(Type);
-static List Emitter__semantic_name(Emitter e, Type type, String name){
-  List base, mods;  List _x2c_destructure_11 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_11, 0));  mods = Var_list(List_getindex(_x2c_destructure_11, 1));  List declarator = Emitter__declarator(e, cons(String_var(name), NULL), mods);  return cons(List_var(Emitter__emit(e, base)), List_append(declarator, NULL));
+static List Emitter__semantic_name(Emitter * e, Type type, String name){
+  List base, mods;  List _x2c_destructure_11 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_11, 0));  mods = Var_list(List_getindex(_x2c_destructure_11, 1));  List declarator = Emitter__declarator(&((* e)), cons(String_var(name), NULL), mods);  return cons(List_var(Emitter__emit(&((* e)), base)), List_append(declarator, NULL));
 }
 
 static List _commas(List items){
@@ -2211,27 +2210,27 @@ static List _commas(List items){
 List Type_tag(Type);
 List Type_body(Type);
 int Type_is_enum_tag(Type);
-static List Emitter__enum(Emitter e, List ast){
-  List name = Type_tag(List_type(ast)), body = Var_list(List_car(Type_body(List_type(ast))));  if(_is_gensym_tag(name) && ! Type_is_enum_tag(List_type(ast))) name = NULL;  if(List_truth(name)) name = Emitter__emit(e, name);  body = Emitter__emit(e, body);  body = _commas(body);  if(List_truth(name)){
+static List Emitter__enum(Emitter * e, List ast){
+  List name = Type_tag(List_type(ast)), body = Var_list(List_car(Type_body(List_type(ast))));  if(_is_gensym_tag(name) && ! Type_is_enum_tag(List_type(ast))) name = NULL;  if(List_truth(name)) name = Emitter__emit(&((* e)), name);  body = Emitter__emit(&((* e)), body);  body = _commas(body);  if(List_truth(name)){
     if(List_truth(body)) return cons(List_car(ast), List_append(name, cons(_211, List_append(body, _214))));  return cons(List_car(ast), List_append(name, NULL));
   }
   return cons(List_car(ast), cons(_211, List_append(body, _214)));
 }
 
 int Type_is_aggregate_tag(Type);
-static List Emitter__aggregate(Emitter e, List ast){
+static List Emitter__aggregate(Emitter * e, List ast){
   if(Type_is_aggregate_tag(List_type(ast))){
-    Var alias = List_assoc(e -> native_aliases, List_var(ast));  if(Var_is_row(alias, 9, 7, 4)) return Emitter__emit(e, Var_list(alias));
+    Var alias = List_assoc((* e).native_aliases, List_var(ast));  if(Var_is_row(alias, 9, 7, 4)) return Emitter__emit(&((* e)), Var_list(alias));
   }
-  List tag = Type_tag(List_type(ast));  if(_is_gensym_tag(tag) && ! Type_is_aggregate_tag(List_type(ast))) tag = NULL;  if(List_truth(tag)) tag = Emitter__emit(e, tag);  if(Type_is_aggregate_tag(List_type(ast))) return cons(List_car(ast), List_append(tag, NULL));  List body = Type_body(List_type(ast));  body = Emitter__emit(e, body);  body = List_flatten_all(body);  if(List_truth(tag) && List_truth(body)) return cons(List_car(ast), List_append(tag, cons(_211, List_append(body, _214))));  if(List_truth(tag)) return cons(List_car(ast), List_append(tag, NULL));  return cons(List_car(ast), cons(_211, List_append(body, _214)));
+  List tag = Type_tag(List_type(ast));  if(_is_gensym_tag(tag) && ! Type_is_aggregate_tag(List_type(ast))) tag = NULL;  if(List_truth(tag)) tag = Emitter__emit(&((* e)), tag);  if(Type_is_aggregate_tag(List_type(ast))) return cons(List_car(ast), List_append(tag, NULL));  List body = Type_body(List_type(ast));  body = Emitter__emit(&((* e)), body);  body = List_flatten_all(body);  if(List_truth(tag) && List_truth(body)) return cons(List_car(ast), List_append(tag, cons(_211, List_append(body, _214))));  if(List_truth(tag)) return cons(List_car(ast), List_append(tag, NULL));  return cons(List_car(ast), cons(_211, List_append(body, _214)));
 }
 
 static int _is_gensym_tag(List tag){
   if(! List_truth(tag)) return 0;  Var head = List_car(tag);  if(! Var_is_row(head, 9, 7, 4)) return 0;  return Var_equal(List_car(Var_list(head)), Symbol_var(481205850));
 }
 
-static List Emitter__match_cases(Emitter e, List ast){
-  List expr, cases;  List _x2c_destructure_12 = List_cdr(ast);  expr = Var_list(List_getindex(_x2c_destructure_12, 0));  cases = Var_list(List_getindex(_x2c_destructure_12, 1));  expr = Emitter__emit(e, expr);  int max_binders = 0; {
+static List Emitter__match_cases(Emitter * e, List ast){
+  List expr, cases;  List _x2c_destructure_12 = List_cdr(ast);  expr = Var_list(List_getindex(_x2c_destructure_12, 0));  cases = Var_list(List_getindex(_x2c_destructure_12, 1));  expr = Emitter__emit(&((* e)), expr);  int max_binders = 0; {
     List rec;  List _x2c_macro_object_12 = cases;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
       rec = Var_list(_x2c_macro_cursor_output_12); {
         int count = Var_equal(List_car(rec), Symbol_var(35579270086)) ? 0 : List_len(Var_list(List_car(rec)));  if(count > max_binders) max_binders = count;
@@ -2243,21 +2242,21 @@ static List Emitter__match_cases(Emitter e, List ast){
   List capture_declarations;  if(max_binders){
     String values_decl = String_join(NULL, cons(String_var(_642), cons(String_var(int_str(max_binders)), cons(String_var(_379), NULL))));  String capture_decl = String_add(_645, String_join(NULL, cons(String_var(_643), cons(String_var(int_str(max_binders)), cons(String_var(_644), NULL)))));  capture_declarations = cons(String_var(values_decl), cons(String_var(capture_decl), NULL));
   }
-  else capture_declarations = _648;  int dispatched;  List arms = Emitter__match_if(e, cases, &(dispatched));  List selector = dispatched ? _651 : _252;  return cons(_653, cons(List_var(expr), cons(_655, List_append(capture_declarations, cons(_657, List_append(selector, cons(_659, List_append(arms, _662))))))));
+  else capture_declarations = _648;  int dispatched;  List arms = Emitter__match_if(&((* e)), cases, &(dispatched));  List selector = dispatched ? _651 : _252;  return cons(_653, cons(List_var(expr), cons(_655, List_append(capture_declarations, cons(_657, List_append(selector, cons(_659, List_append(arms, _662))))))));
 }
 
 List preproc_track_arms(List, String);
 Var Compiler_match_pattern_value(Compiler, Var);
 Symbol match_value_head(Var);
 Var Array_insert(Array, int, Var);
-static List Emitter__match_if(Emitter e, List ast, int * dispatched){
+static List Emitter__match_if(Emitter * e, List ast, int * dispatched){
   Array values = Array_new(), heads = Array_new();  int labelling = 1, opening = 0;  List arms = NULL; {
     List rec;  List _x2c_macro_object_13 = ast;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       rec = Var_list(_x2c_macro_cursor_output_13); {
         if(Var_equal(List_car(rec), Symbol_var(35579270086))){
-          if(! List_truth(arms)) opening = Array_len(values);  arms = preproc_track_arms(arms, Var_string(List_cadr(rec)));  Array_push(values, List_var(Emitter__emit(e, rec)));  continue;
+          if(! List_truth(arms)) opening = Array_len(values);  arms = preproc_track_arms(arms, Var_string(List_cadr(rec)));  Array_push(values, List_var(Emitter__emit(&((* e)), rec)));  continue;
         }
-        List binders, pattern_ast, body_ast;  List _x2c_destructure_13 = rec;  binders = Var_list(List_getindex(_x2c_destructure_13, 0));  pattern_ast = Var_list(List_getindex(_x2c_destructure_13, 1));  body_ast = Var_list(List_getindex(_x2c_destructure_13, 2));  Var value = Compiler_match_pattern_value(e -> c, List_var(pattern_ast));  List label = _match_arm_label(match_value_head(value), heads, &(labelling));  if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));  Array_push(values, List_var(Emitter__match_arm(e, binders, pattern_ast, body_ast, value)));
+        List binders, pattern_ast, body_ast;  List _x2c_destructure_13 = rec;  binders = Var_list(List_getindex(_x2c_destructure_13, 0));  pattern_ast = Var_list(List_getindex(_x2c_destructure_13, 1));  body_ast = Var_list(List_getindex(_x2c_destructure_13, 2));  Var value = Compiler_match_pattern_value((* e).c, List_var(pattern_ast));  List label = _match_arm_label(match_value_head(value), heads, &(labelling));  if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));  Array_push(values, List_var(Emitter__match_arm(&((* e)), binders, pattern_ast, body_ast, value)));
       }
 
     }
@@ -2275,7 +2274,7 @@ static List _match_arm_label(Symbol head, Array heads, int * labelling){
 }
 
 Symbol match_value_flat_head(Var, List, List *);
-static List Emitter__match_arm(Emitter e, List binders, List pattern_ast, List body_ast, Var value){
+static List Emitter__match_arm(Emitter * e, List binders, List pattern_ast, List body_ast, Var value){
   List implicit_break = _122;
   {
     List _x2c_match_expr = body_ast;
@@ -2287,22 +2286,22 @@ static List Emitter__match_arm(Emitter e, List binders, List pattern_ast, List b
   break; } } default: break;
     }
   }
-List flat_tags = NULL;  Symbol flat_head = match_value_flat_head(value, binders, &(flat_tags));  List pattern = Emitter__emit(e, pattern_ast);  List body = Emitter__emit(e, body_ast);  List macro_case = Emitter__macro_case(e, pattern_ast);  if(pattern == _43) return cons(List_var(body), List_append(implicit_break, NULL));  if(List_truth(macro_case)){
+List flat_tags = NULL;  Symbol flat_head = match_value_flat_head(value, binders, &(flat_tags));  List pattern = Emitter__emit(&((* e)), pattern_ast);  List body = Emitter__emit(&((* e)), body_ast);  List macro_case = Emitter__macro_case(&((* e)), pattern_ast);  if(pattern == _43) return cons(List_var(body), List_append(implicit_break, NULL));  if(List_truth(macro_case)){
     List declarations = _make_local_binders(binders, _774);  String site = Var_string(List_getindex(macro_case, 1));  return cons(_674, cons(String_var(site), cons(_30, cons(_676, List_append(macro_case, cons(_678, List_append(declarations, List_append(body, List_append(implicit_break, _214)))))))));
   }
   if(flat_head){
     List condition = _flat_match_condition(flat_head, flat_tags);  List declarations = _make_local_binders(binders, _774);  String closing = List_truth(implicit_break) ? _775 : _776;  return cons(_680, cons(_676, List_append(condition, cons(_678, List_append(declarations, List_append(body, cons(String_var(closing), NULL)))))));
   }
-  return Emitter__match_capture_arm(e, binders, pattern, body, implicit_break, value);
+  return Emitter__match_capture_arm(&((* e)), binders, pattern, body, implicit_break, value);
 }
 
-static List Emitter__macro_case(Emitter e, List pattern_ast){
+static List Emitter__macro_case(Emitter * e, List pattern_ast){
 
   {
     List _x2c_match_expr = pattern_ast;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_707), &_x2c_match_capture)) {Var template = _x2c_match_values[0];  Var names = _x2c_match_values[1];  return cons(_709, cons(String_var(Compiler_fresh_name(e -> c, _777)), cons(_711, List_append(Emitter__emit(e, Var_list(template)), cons(_231, List_append(Emitter__emit(e, Var_list(names)), _715))))));  break;
+      case 377892: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_707), &_x2c_match_capture)) {Var template = _x2c_match_values[0];  Var names = _x2c_match_values[1];  return cons(_709, cons(String_var(Compiler_fresh_name((* e).c, _777)), cons(_711, List_append(Emitter__emit(&((* e)), Var_list(template)), cons(_231, List_append(Emitter__emit(&((* e)), Var_list(names)), _715))))));  break;
 }
 default: break;
     }
@@ -2324,8 +2323,8 @@ static List _flat_match_condition(Symbol head, List tags){
 }
 
 int match_value_is_static(Var);
-static List Emitter__match_capture_arm(Emitter e, List binders, List pattern, List body, List implicit_break, Var value){
-  int static_pattern = match_value_is_static(value);  String site_name = static_pattern ? Compiler_fresh_name(e -> c, _760) : NULL;  List site_declaration = static_pattern ? cons(String_var(String_join(NULL, cons(String_var(_724), cons(String_var(site_name), cons(String_var(_29), NULL))))), NULL) : NULL;  List entry = static_pattern ? cons(_726, cons(String_var(site_name), _727)) : _730;  List declarations = _make_local_binders(binders, _774);  return List_append(site_declaration, cons(_676, List_append(entry, cons(_732, List_append(pattern, cons(_330, cons(_734, List_append(declarations, List_append(body, List_append(implicit_break, _214))))))))));
+static List Emitter__match_capture_arm(Emitter * e, List binders, List pattern, List body, List implicit_break, Var value){
+  int static_pattern = match_value_is_static(value);  String site_name = static_pattern ? Compiler_fresh_name((* e).c, _760) : NULL;  List site_declaration = static_pattern ? cons(String_var(String_join(NULL, cons(String_var(_724), cons(String_var(site_name), cons(String_var(_29), NULL))))), NULL) : NULL;  List entry = static_pattern ? cons(_726, cons(String_var(site_name), _727)) : _730;  List declarations = _make_local_binders(binders, _774);  return List_append(site_declaration, cons(_676, List_append(entry, cons(_732, List_append(pattern, cons(_330, cons(_734, List_append(declarations, List_append(body, List_append(implicit_break, _214))))))))));
 }
 
 int Var_is_list_binder(Var);

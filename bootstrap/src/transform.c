@@ -4154,14 +4154,14 @@ static void Compiler__printf_error(Compiler c, String family, String message){
 #ifndef X2C_TRANSFORM_SOURCE
 int String_getindex(String, int);
 static void PrintfWalk_scan(PrintfWalk * w, int raw){
-  while(w -> cursor < w -> end){
-    if(raw && String_getindex(w -> format, w -> cursor) == '\\'){
-      w -> cursor += w -> cursor + 1 < w -> end ? 2 : 1;  continue;
+  while((* w).cursor <(* w).end){
+    if(raw && String_getindex((* w).format, (* w).cursor) == '\\'){
+      (* w).cursor +=(* w).cursor + 1 <(* w).end ? 2 : 1;  continue;
     }
-    if(String_getindex(w -> format, w -> cursor ++) != '%') continue;  if(w -> cursor >= w -> end) PrintfWalk__error(w, _2654);  if(String_getindex(w -> format, w -> cursor) == '%'){
-      w -> cursor ++;  continue;
+    if(String_getindex((* w).format, (* w).cursor ++) != '%') continue;  if((* w).cursor >=(* w).end) PrintfWalk__error(&((* w)), _2654);  if(String_getindex((* w).format, (* w).cursor) == '%'){
+      (* w).cursor ++;  continue;
     }
-    PrintfWalk__conversion(w);
+    PrintfWalk__conversion(&((* w)));
   }
 
 }
@@ -4169,51 +4169,51 @@ static void PrintfWalk_scan(PrintfWalk * w, int raw){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__conversion(PrintfWalk * w){
-  PrintfWalk__position(w);  PrintfWalk__width(w);  PrintfWalk__precision(w);  PrintfLength length = PrintfWalk__length(w);  if(w -> cursor >= w -> end) PrintfWalk__error(w, _2654);  int conversion = String_getindex(w -> format, w -> cursor ++);  if(! _printf_valid_length(length, conversion)){
-    String message = String_printf(_2038, conversion);  PrintfWalk__error(w, message);
+  PrintfWalk__position(&((* w)));  PrintfWalk__width(&((* w)));  PrintfWalk__precision(&((* w)));  PrintfLength length = PrintfWalk__length(&((* w)));  if((* w).cursor >=(* w).end) PrintfWalk__error(&((* w)), _2654);  int conversion = String_getindex((* w).format, (* w).cursor ++);  if(! _printf_valid_length(length, conversion)){
+    String message = String_printf(_2038, conversion);  PrintfWalk__error(&((* w)), message);
   }
-  if(w -> value_index >= Array_len(w -> values)){
-    String message = String_printf(_2039, conversion);  PrintfWalk__error(w, message);
+  if((* w).value_index >= Array_len((* w).values)){
+    String message = String_printf(_2039, conversion);  PrintfWalk__error(&((* w)), message);
   }
-  PrintfWalk__value(w, length, conversion);
+  PrintfWalk__value(&((* w)), length, conversion);
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__position(PrintfWalk * w){
-  int probe = w -> cursor;  while(probe < w -> end && _printf_is_digit(String_getindex(w -> format, probe))) probe ++;  if(probe < w -> end && String_getindex(w -> format, probe) == '$') PrintfWalk__error(w, _2655);
+  int probe =(* w).cursor;  while(probe <(* w).end && _printf_is_digit(String_getindex((* w).format, probe))) probe ++;  if(probe <(* w).end && String_getindex((* w).format, probe) == '$') PrintfWalk__error(&((* w)), _2655);
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__width(PrintfWalk * w){
-  while(w -> cursor < w -> end &&(String_getindex(w -> format, w -> cursor) == '-' || String_getindex(w -> format, w -> cursor) == '+' || String_getindex(w -> format, w -> cursor) == ' ' || String_getindex(w -> format, w -> cursor) == '#' || String_getindex(w -> format, w -> cursor) == '0')) w -> cursor ++;  if(w -> cursor < w -> end && String_getindex(w -> format, w -> cursor) == '*'){
-    w -> cursor ++;  PrintfWalk__position(w);  PrintfWalk__star(w);
+  while((* w).cursor <(* w).end &&(String_getindex((* w).format, (* w).cursor) == '-' || String_getindex((* w).format, (* w).cursor) == '+' || String_getindex((* w).format, (* w).cursor) == ' ' || String_getindex((* w).format, (* w).cursor) == '#' || String_getindex((* w).format, (* w).cursor) == '0'))(* w).cursor ++;  if((* w).cursor <(* w).end && String_getindex((* w).format, (* w).cursor) == '*'){
+    (* w).cursor ++;  PrintfWalk__position(&((* w)));  PrintfWalk__star(&((* w)));
   }
-  else while(w -> cursor < w -> end && _printf_is_digit(String_getindex(w -> format, w -> cursor))) w -> cursor ++;
+  else while((* w).cursor <(* w).end && _printf_is_digit(String_getindex((* w).format, (* w).cursor)))(* w).cursor ++;
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__precision(PrintfWalk * w){
-  if(w -> cursor >= w -> end || String_getindex(w -> format, w -> cursor) != '.') return;  w -> cursor ++;  if(w -> cursor < w -> end && String_getindex(w -> format, w -> cursor) == '*'){
-    w -> cursor ++;  PrintfWalk__position(w);  PrintfWalk__star(w);
+  if((* w).cursor >=(* w).end || String_getindex((* w).format, (* w).cursor) != '.') return; (* w).cursor ++;  if((* w).cursor <(* w).end && String_getindex((* w).format, (* w).cursor) == '*'){
+    (* w).cursor ++;  PrintfWalk__position(&((* w)));  PrintfWalk__star(&((* w)));
   }
-  else while(w -> cursor < w -> end && _printf_is_digit(String_getindex(w -> format, w -> cursor))) w -> cursor ++;
+  else while((* w).cursor <(* w).end && _printf_is_digit(String_getindex((* w).format, (* w).cursor)))(* w).cursor ++;
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static PrintfLength PrintfWalk__length(PrintfWalk * w){
-  PrintfLength length = _printf_default;  if(w -> cursor + 1 < w -> end && String_getindex(w -> format, w -> cursor) == 'h' && String_getindex(w -> format, w -> cursor + 1) == 'h'){
-    length = _printf_hh;  w -> cursor += 2;
+  PrintfLength length = _printf_default;  if((* w).cursor + 1 <(* w).end && String_getindex((* w).format, (* w).cursor) == 'h' && String_getindex((* w).format, (* w).cursor + 1) == 'h'){
+    length = _printf_hh; (* w).cursor += 2;
   }
-  else if(w -> cursor + 1 < w -> end && String_getindex(w -> format, w -> cursor) == 'l' && String_getindex(w -> format, w -> cursor + 1) == 'l'){
-    length = _printf_ll;  w -> cursor += 2;
+  else if((* w).cursor + 1 <(* w).end && String_getindex((* w).format, (* w).cursor) == 'l' && String_getindex((* w).format, (* w).cursor + 1) == 'l'){
+    length = _printf_ll; (* w).cursor += 2;
   }
-  else if(w -> cursor < w -> end){
-    switch(String_getindex(w -> format, w -> cursor)){
-      case 'h' : length = _printf_h;  w -> cursor ++;  break;  case 'l' : length = _printf_l;  w -> cursor ++;  break;  case 'j' : length = _printf_j;  w -> cursor ++;  break;  case 'z' : length = _printf_z;  w -> cursor ++;  break;  case 't' : length = _printf_t;  w -> cursor ++;  break;  case 'L' : length = _printf_L;  w -> cursor ++;  break;
+  else if((* w).cursor <(* w).end){
+    switch(String_getindex((* w).format, (* w).cursor)){
+      case 'h' : length = _printf_h; (* w).cursor ++;  break;  case 'l' : length = _printf_l; (* w).cursor ++;  break;  case 'j' : length = _printf_j; (* w).cursor ++;  break;  case 'z' : length = _printf_z; (* w).cursor ++;  break;  case 't' : length = _printf_t; (* w).cursor ++;  break;  case 'L' : length = _printf_L; (* w).cursor ++;  break;
     }
 
   }
@@ -4223,7 +4223,7 @@ static PrintfLength PrintfWalk__length(PrintfWalk * w){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__error(PrintfWalk * w, String message){
-  Compiler__printf_error(w -> c, w -> family, message);
+  Compiler__printf_error((* w).c, (* w).family, message);
 }
 
 #endif
@@ -4245,19 +4245,19 @@ static int _printf_is_digit(int ch){
 #ifndef X2C_TRANSFORM_SOURCE
 Var Array_setindex(Array, int, Var);
 static void PrintfWalk__value(PrintfWalk * w, PrintfLength length, int conversion){
-  int index = w -> value_index ++;  List arg = Var_list(Array_getindex(w -> values, index));  if(! Sym_is_var_type(w -> c -> sym, Var_type(List_cadr(arg)))) return;  Type target = NULL;  if(conversion == 'd' || conversion == 'i') target = _printf_integer_type(length, 0);  else if(conversion == 'o' || conversion == 'u' || conversion == 'x' || conversion == 'X') target = _printf_integer_type(length, 1);  else if(conversion == 'f' || conversion == 'F' || conversion == 'e' || conversion == 'E' || conversion == 'g' || conversion == 'G' || conversion == 'a' || conversion == 'A') target = List_type(length == _printf_L ? _2042 : _2041);  else if(conversion == 'c' && length == _printf_default) target = List_type(_178);  else if(conversion == 's' && length == _printf_default){
-    Array_setindex(w -> values, index, List_var(cons(_33, cons(_926, cons(List_var(cons(_185, cons(_2044, cons(List_var(cons(_186, cons(List_var(arg), NULL))), NULL)))), NULL)))));  return;
+  int index =(* w).value_index ++;  List arg = Var_list(Array_getindex((* w).values, index));  if(! Sym_is_var_type((* w).c -> sym, Var_type(List_cadr(arg)))) return;  Type target = NULL;  if(conversion == 'd' || conversion == 'i') target = _printf_integer_type(length, 0);  else if(conversion == 'o' || conversion == 'u' || conversion == 'x' || conversion == 'X') target = _printf_integer_type(length, 1);  else if(conversion == 'f' || conversion == 'F' || conversion == 'e' || conversion == 'E' || conversion == 'g' || conversion == 'G' || conversion == 'a' || conversion == 'A') target = List_type(length == _printf_L ? _2042 : _2041);  else if(conversion == 'c' && length == _printf_default) target = List_type(_178);  else if(conversion == 's' && length == _printf_default){
+    Array_setindex((* w).values, index, List_var(cons(_33, cons(_926, cons(List_var(cons(_185, cons(_2044, cons(List_var(cons(_186, cons(List_var(arg), NULL))), NULL)))), NULL)))));  return;
   }
   if(List_truth(Type_list(target))){
-    Array_setindex(w -> values, index, List_var(Compiler_convert_expression(w -> c, arg, target)));  return;
+    Array_setindex((* w).values, index, List_var(Compiler_convert_expression((* w).c, arg, target)));  return;
   }
-  String message = String_printf(_2045, conversion);  PrintfWalk__error(w, String_join(NULL, cons(String_var(message), cons(String_var(_2046), NULL))));
+  String message = String_printf(_2045, conversion);  PrintfWalk__error(&((* w)), String_join(NULL, cons(String_var(message), cons(String_var(_2046), NULL))));
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static void PrintfWalk__star(PrintfWalk * w){
-  int index = w -> value_index ++;  if(index >= Array_len(w -> values)) PrintfWalk__error(w, _2656);  List arg = Var_list(Array_getindex(w -> values, index));  if(Sym_is_var_type(w -> c -> sym, Var_type(List_cadr(arg)))) Array_setindex(w -> values, index, List_var(Compiler_convert_expression(w -> c, arg, List_type(_178))));
+  int index =(* w).value_index ++;  if(index >= Array_len((* w).values)) PrintfWalk__error(&((* w)), _2656);  List arg = Var_list(Array_getindex((* w).values, index));  if(Sym_is_var_type((* w).c -> sym, Var_type(List_cadr(arg)))) Array_setindex((* w).values, index, List_var(Compiler_convert_expression((* w).c, arg, List_type(_178))));
 }
 
 #endif

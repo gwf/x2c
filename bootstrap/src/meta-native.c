@@ -1240,26 +1240,26 @@ static void Compiler__bind_native_meta(Compiler c, String name, List signature, 
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 static Var NativeBinding_linked(NativeBinding * n){
-  Compiler c = n -> c;  Var function = Lisp_eval(c -> macro_lisp, List_var(cons(_68, cons(String_var(n -> target), cons(List_var(cons(_107, cons(List_var(n -> signature), NULL))), NULL)))));  if(List_truth(n -> suppliers)) Compiler_report_warning(c, 942951818, _504, n -> marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var(n -> name), NULL)))), NULL));  return function;
+  Compiler c =(* n).c;  Var function = Lisp_eval(c -> macro_lisp, List_var(cons(_68, cons(String_var((* n).target), cons(List_var(cons(_107, cons(List_var((* n).signature), NULL))), NULL)))));  if(List_truth((* n).suppliers)) Compiler_report_warning(c, 942951818, _504, (* n).marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var((* n).name), NULL)))), NULL));  return function;
 }
 
 Var Map_getindex(Map, Var);
 Map Var_map(Var);
 static Var NativeBinding_module_target(NativeBinding * n){
-  String first = Var_string(List_car(n -> suppliers));  return Map_getindex((Var_map(Map_getindex(native_modules, String_var(first)))), String_var(n -> target));
+  String first = Var_string(List_car((* n).suppliers));  return Map_getindex((Var_map(Map_getindex(native_modules, String_var(first)))), String_var((* n).target));
 }
 
 int Var_equal(Var, Var);
 String String_join(String, List);
 static void NativeBinding_check(NativeBinding * n, Var function){
-  Compiler c = n -> c;  List suppliers = n -> suppliers;  if(List_truth(List_cdr(suppliers)) && Var_equal(function, NativeBinding_module_target(n))) Compiler_report_warning(c, 942951818, _505, n -> marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var(n -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_254), cons(String_var(Var_str(List_car(suppliers))), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_255), cons(String_var(String_join(_256, List_cdr(suppliers))), NULL)))), NULL))));  if(! Compiler_native_meta_accepts(c, function, n -> signature)) Compiler_report_error(c, 1362954, _506, n -> marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var(n -> name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_257), cons(String_var(List_repr(n -> signature)), NULL)))), NULL)));
+  Compiler c =(* n).c;  List suppliers =(* n).suppliers;  if(List_truth(List_cdr(suppliers)) && Var_equal(function, NativeBinding_module_target(&((* n))))) Compiler_report_warning(c, 942951818, _505, (* n).marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var((* n).name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_254), cons(String_var(Var_str(List_car(suppliers))), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_255), cons(String_var(String_join(_256, List_cdr(suppliers))), NULL)))), NULL))));  if(! Compiler_native_meta_accepts(c, function, (* n).signature)) Compiler_report_error(c, 1362954, _506, (* n).marker, cons(String_var(String_join(NULL, cons(String_var(_253), cons(String_var((* n).name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_257), cons(String_var(List_repr((* n).signature)), NULL)))), NULL)));
 }
 
 static void NativeBinding_install(NativeBinding * n, Var function){
-  Compiler c = n -> c;  if(n -> iterator){
-    int arity = List_len(Var_list(List_cadr(Var_list(List_car(n -> signature))))) - 1;  function = Lisp_eval(c -> macro_lisp, List_var(cons(_258, cons(List_var(cons(_107, cons(function, NULL))), cons(int_var(arity), NULL)))));
+  Compiler c =(* n).c;  if((* n).iterator){
+    int arity = List_len(Var_list(List_cadr(Var_list(List_car((* n).signature))))) - 1;  function = Lisp_eval(c -> macro_lisp, List_var(cons(_258, cons(List_var(cons(_107, cons(function, NULL))), cons(int_var(arity), NULL)))));
   }
-  Lisp_set_global(c -> macro_lisp, n -> name, function);
+  Lisp_set_global(c -> macro_lisp, (* n).name, function);
 }
 
 void * Var_pointer(Var);

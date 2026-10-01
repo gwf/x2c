@@ -1,7 +1,8 @@
 > Status: active
 > Authored conversions and guidance are complete on
-> `codex/value-reference-campaign`, based on dev `d67ffb28`. Delivery is a
-> PR targeting `dev`; no dev merge or remote push without Gary's approval.
+> `codex/value-reference-campaign`, rebased onto dev `00536cc8`. Delivery is a
+> draft PR targeting `dev`, as Gary requested. Integration belongs to the
+> integration agent; this branch does not advance dev.
 
 # Value declarations and reference parameters
 
@@ -47,7 +48,7 @@ Intentional pointer fixtures and native ABI declarations are not style targets.
 
 ## Completed authored batch
 
-- Compiler: 55 private context owners, 484 receiver definitions, and 17
+- Compiler: 55 private context owners, 488 receiver definitions, and 17
   single-record helper parameters. Emitter and region Walk now declare values;
   nested contexts retain their genuine parent borrows.
 - Runtime: 17 private owners, including JSON, matching, regex, formatting,
@@ -74,6 +75,10 @@ and found the Cstar Options allocation. No additional private context migration
 is known from the screened source; this is not a proof that every remaining
 pointer in every fixture, callback, native library, or unseen client is needed.
 
+The PR branch incorporates dev's newer Buffer-based REPL renderer, template,
+header partitioning, and region changes. Its removed RenderBuffer stays removed;
+four newly added private compiler receivers follow the same reference style.
+
 ## Focused evidence and remaining coverage
 
 Fresh compiler builds and a warning-free self-host stage pass. Runtime checks
@@ -99,9 +104,9 @@ samples, runs command integration checks and the existing final
 `tools/gate-state.py ensure agent-pr-check`, and reviews generated artifacts.
 No recurring check or gate is added by this campaign.
 
-Prepare a reviewable PR branch and description for `dev`. Ask for approval to
-push and open the PR once the final tree is validated. Integration belongs to
-the integration agent, not this campaign worker.
+Publish the validated branch and open a draft PR targeting `dev`, as Gary
+authorized. Integration belongs to the integration agent, not this campaign
+worker.
 
 ## Plan review
 
