@@ -288,6 +288,7 @@ source macros and the compile-time Lisp they run.
 
 Public functions:
 
+`Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
 `Compiler.parse_macro_definition`, `Compiler.try_parse_macro_slot`,
 `Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
 `Compiler.try_parse_macro_member`, `Compiler.macro_introduced_name`,
@@ -298,8 +299,7 @@ Public functions:
 `Compiler.macro_invocation_needs_shallow_expansion`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
-`Compiler.try_parse_macro_expression`, `Compiler.expand_macro_invocation_node`,
-`Compiler.macro_invocation_site`, `Compiler.evaluate_macro_slot`,
+`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,
 `Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
 `Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
 `Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
@@ -354,7 +354,7 @@ meta functions and the native code they call.
 
 Public functions:
 
-`Compiler.install_meta_declaration`, `Compiler.install_meta_function`,
+`Compiler.install_meta_function`, `Compiler.install_meta_declaration`,
 `Compiler.evaluate_meta_expression`, `Compiler.run_meta_call`,
 `Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
