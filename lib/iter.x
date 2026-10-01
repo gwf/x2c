@@ -429,11 +429,8 @@ static Var _apply2(Func fn, Var left, Var right) {
     Raises: any cause from the source or `Var.binary` while adding an element
     to the running total. A null `dest` returns NULL without raising.
 */
-meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) {
-  if (!dest) return NULL;
-  return dest.init(
-    iter, _accumulate_next, initial is void ? (Var) 0 : initial);
-}
+meta native Iter Iter.accumulate(Iter iter, Var initial, Iter dest) =>
+  dest.init(iter, _accumulate_next, initial is void ? (Var) 0 : initial);
 
 static int _accumulate_next(Iter iter, Var *out) {
   Iter source = iter.obj;

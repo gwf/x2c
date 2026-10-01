@@ -637,15 +637,8 @@ Self List.filter(Self lst, Func pred) {
     Any cause raised by `fn` propagates.
 */
 Var List.foldl(List lst, Var seed, Func fn) {
-  Var acc = seed;
-  if (acc is void) {
-    if (!lst) return void;
-    acc = lst.car;
-    lst = lst.cdr();
-  }
-  if (!fn) return acc;
-  foreach (Var value, lst) acc = _apply2(fn, acc, value);
-  return acc;
+  struct Iter storage;
+  return lst.iter(&storage).foldl(seed, fn);
 }
 
 /** Returns the first element `pred` accepts by ordinary `Var` truthiness, or
@@ -655,9 +648,8 @@ Var List.foldl(List lst, Var seed, Func fn) {
     null `pred` returns `void`.
 */
 Var List.find(List lst, Func pred) {
-  if (!pred) return void;
-  foreach (Var value, lst) if (_apply1(pred, value)) return value;
-  return void;
+  struct Iter storage;
+  return lst.iter(&storage).find(pred);
 }
 
 /** True when at least one element satisfies `pred` by ordinary `Var`
@@ -667,9 +659,8 @@ Var List.find(List lst, Func pred) {
     Any cause raised by `pred` or its result's truth operation propagates.
 */
 int List.any(List lst, Func pred) {
-  if (!pred) return 0;
-  foreach (Var value, lst) if (_apply1(pred, value)) return 1;
-  return 0;
+  struct Iter storage;
+  return lst.iter(&storage).any(pred);
 }
 
 /** True when every element satisfies `pred` by ordinary `Var` truthiness.
@@ -679,10 +670,8 @@ int List.any(List lst, Func pred) {
     Any cause raised by `pred` or its result's truth operation propagates.
 */
 int List.all(List lst, Func pred) {
-  if (!lst) return 1;
-  if (!pred) return 0;
-  foreach (Var value, lst) if (!_apply1(pred, value)) return 0;
-  return 1;
+  struct Iter storage;
+  return lst.iter(&storage).all(pred);
 }
 
 /** Combines aligned values from two `List`s with `fn`.
