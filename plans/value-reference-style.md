@@ -1,6 +1,6 @@
-> Status: active
+> Status: implemented; delivery and integration pending
 > The private-context batch merged into dev in PR #76.
-> Public follow-ups are underway on `codex/value-reference-public`, based on
+> Public follow-ups are implemented on `codex/value-reference-public`, based on
 > dev `32ab98cb`. Delivery is another PR targeting `dev`; integration belongs
 > to the integration agent.
 
@@ -100,8 +100,8 @@ the package's full verification passes, including expected failing proofs.
 
 - SymTxn becomes a value returned by `begin_semantic_transaction`; borrowed
   compiler maps retain their owners and new snapshots use the current Scope.
-  Required references mutate that one
-  transaction. Optional commit/rollback references preserve absent-input
+  Required references mutate that one transaction. Optional commit/rollback
+  references preserve absent-input
   no-ops, and the zero value is inactive. REPL rollback, completion, map
   identity, and transient-Scope teardown pass the existing command API test.
 - Job retains its shared pointer representation, boxing, and Scope finalizer.

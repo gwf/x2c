@@ -66,9 +66,9 @@ An active transaction or builder has one owner even when its record is a
 value. Copying it shares the saved maps or backing arrays; the copy is not a
 second transaction or an independently owned builder. Borrow the original
 through reference methods. `SymTxn` and `MachineBuilder` use this pattern;
-their zero values are inactive or empty. A `Job` keeps a shared handle because
-its recorded run and Scope finalizer must reach the same job, while its
-launch options live directly inside that job.
+use their begin or `new` operation to prepare active storage. A `Job` keeps a
+shared handle because its recorded run and Scope finalizer must reach the
+same job, while its launch options live directly inside that job.
 
 ## Borrow required and optional outputs
 
