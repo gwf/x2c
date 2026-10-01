@@ -93,6 +93,9 @@ typedef struct Compiler {
   List frozen_stack_key;
   Var frozen_stack;
   unsigned long frozen_stack_epoch;
+  /* The last binding identity issued before the outermost active expansion
+     began; a later identity was introduced by that expansion. */
+  int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
   /* `#define` names this unit has passed, for the literal warning and for

@@ -1173,7 +1173,7 @@ static List Compiler._resolve_identifier(
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);
-  c._shadow_identifier(binding, type, spelling, binding_facts);
+  c._shadow_identifier(binding, type, spelling, binding_facts, origin);
   if (!type) type = c._identifier_type(
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
@@ -1200,7 +1200,10 @@ static List Compiler._resolve_identifier(
    producer-issued binding identities. Semantic binding facts validate those
    identities before resolution. A visible local replaces a stale local
    identity; global shadow handling instead gives the visible declaration an
-   emitted alias so the original identity keeps its meaning. */
+   emitted alias so the original identity keeps its meaning. A closed macro's
+   free name that nothing declared where it was defined binds a declaration
+   its expansion introduced, else a global; a declaration outside the
+   expansion never captures it. */
 static List Compiler._identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
@@ -1243,7 +1246,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
 
 static void Compiler._shadow_identifier(
   Compiler c, List &binding, Type type, String spelling,
-  Map binding_facts) {
+  Map binding_facts, Token origin) {
   if (!spelling) return;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
@@ -1255,10 +1258,62 @@ static void Compiler._shadow_identifier(
   else if (c.sym.binding_is_local(binding) &&
            !binding_facts.contains(%(lambda-depth $binding)))
     binding = visible;
-  else if (visible_type &&
+  else if (!c._free_name(binding, spelling, visible, visible_type, origin) &&
+           visible != binding && visible_type &&
            (!type || c.sym.resolve_global(%($spelling), NULL)) &&
            !binding_facts.contains(%(emitted $visible)))
     binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+}
+
+/* Inside an expansion, a free name that no declared global supplies binds
+   the visible declaration when the expansion introduced it, and otherwise
+   a global declared since the definition. A declaration outside the
+   expansion never supplies it. Returns 1 when the visible declaration
+   does. */
+static int Compiler._free_name(
+  Compiler c, List &binding, String spelling, List visible,
+  Type visible_type, Token origin) {
+  if (!c.macro_stack ||
+      %(lambda-depth $binding) in c.semantic_binding_facts()) return 0;
+  Type global_type = NULL;
+  List global = c.sym.resolve_global(%($spelling), global_type);
+  if (binding == global && global_type) return 0;
+  if (visible_type && c._expansion_introduced(visible)) {
+    binding = visible;
+    return 1;
+  }
+  if (global_type) binding = global;
+  else if (visible_type) c._report_free_name(binding, spelling, origin);
+  return 0;
+}
+
+/* An active expansion issued `binding` after it began. */
+static int Compiler._expansion_introduced(Compiler c, List binding) {
+  int identity = 0;
+  return binding_identity_try_parts(binding, identity, NULL) &&
+         identity > c.expansion_floor;
+}
+
+/* A free name that nothing declared where its macro was defined, with only
+   a declaration outside the expansion in view. The macro is the innermost
+   active one whose template reads the name. */
+static void Compiler._report_free_name(
+  Compiler c, List binding, String spelling, Token origin) {
+  List owner = c.macro_stack.car().list().car();
+  foreach (List active, c.macro_stack) {
+    List definition = active.car(), template = definition.assoc(<template>);
+    if (template.search(%(ident $binding))) {
+      owner = definition;
+      break;
+    }
+  }
+  Atom name = owner.assoc(<name>);
+  String macro = name.str();
+  c.report_error(
+    <macro>,
+    %"'$spelling' in macro '$macro' is not declared " +
+    "where the macro is defined",
+    origin, %("declare it before the macro, or pass it through a Name hole"));
 }
 
 static Type Compiler._identifier_type(

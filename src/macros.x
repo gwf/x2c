@@ -72,6 +72,8 @@ List Compiler.expand_macro_invocation_node(
     x.check();
     c.macro_count++;
     List result = NULL;
+    $let(c.expansion_floor,
+         c.macro_stack ? c.expansion_floor : c.names.next_binding)
     $let(c.macro_stack, c.macro_stack) {
       result = x.bind(position);
     }

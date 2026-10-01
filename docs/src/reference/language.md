@@ -1457,6 +1457,40 @@ aggregate, and an anonymous aggregate is a distinct type in each expansion. A
 visible body local passed to a nested macro's `Name` hole is that expansion's
 binding, so the nested macro can read and assign it.
 
+A free name that nothing declares where the macro is defined binds a
+declaration that the same expansion introduces. This includes a declaration
+that a nested macro makes from a literal `Name` written in the body. Without
+one, the name binds a global, including a global declared after the
+definition. A caller's local never captures a free name. When only a caller's
+declaration of that spelling is in view, x2c reports the name and the macro
+instead of emitting C. A name that nothing declares anywhere is left to C,
+as a native macro such as `errno` is.
+
+```x2c
+macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+  for (int $i = 0; $i < $count; $i++) $sum += $value;
+}
+
+macro Statement $print_doubles() {
+  int total = 0;
+  $repeat(k, 3, k * 2, total);
+  printf("%d\n", total);
+}
+
+int main(void) {
+  int k = 100;
+  $print_doubles();
+  return k != 100;
+}
+```
+
+```text
+6
+```
+
+In `$print_doubles`, `k * 2` reads the loop variable that `$repeat` declares
+from the literal `k`. The caller's `k` is not involved.
+
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
 are a separate namespace, so `struct tm tm;` names the outside tag and a
