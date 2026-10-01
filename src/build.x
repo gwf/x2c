@@ -1,10 +1,10 @@
-/*  build.x -- Typed native build request and artifact graph
+/*  build.x -- the native build of one target
 
     Copyright (c) 2026 Gary William Flake.
 
-    Direct operands and project targets use the same CliRequest. This module
-    places native artifacts and lowers them to toolchain actions; translation
-    remains with the compiler driver.
+    Direct operands and project targets reach a build as the same
+    `CliRequest`. This module places the target's native artifacts and lowers
+    them to toolchain actions; translation remains with the compiler driver.
 */
 
 #pragma once
@@ -94,7 +94,7 @@ Build CliRequest.prepare(CliRequest request) {
   if (!request.state_seed) request.state_seed = "direct";
   b._select_tools();
   if (request.compile_commands && !request.dry_run) b.compile_commands = [];
-  b.output = _default_output(request);
+  b.output = request._default_output();
   b.started_at = report_now_us();
   b.started_wall = _wall_seconds();
   b._make_work_dirs();
@@ -176,7 +176,7 @@ static void Build._select_tools(Build b) {
 
 /* An unnamed output is named for the first input and the kind.
    `Build.finish` places a run's output in the work directory. */
-static String _default_output(CliRequest request) {
+static String CliRequest._default_output(CliRequest request) {
   if (request.output) return request.output;
   if (request.command == <run>) return NULL;
   String stem = Path.stem(request.inputs.car());
@@ -190,7 +190,7 @@ static String _default_output(CliRequest request) {
    a temporary one that a successful build removes. */
 static void Build._make_work_dirs(Build b) {
   CliRequest request = b.request;
-  b.work_dir = _kept_dir(request);
+  b.work_dir = request._kept_dir();
   b.temporary = !b.work_dir;
   try {
     if (!b.work_dir && request.dry_run) b.work_dir = "/tmp/x2c-build-dry-run";
@@ -206,7 +206,7 @@ static void Build._make_work_dirs(Build b) {
   catch %(io-fail *detail): host_error(detail);
 }
 
-static String _kept_dir(CliRequest request) {
+static String CliRequest._kept_dir(CliRequest request) {
   if (request.build_dir) return request.build_dir;
   if (request.temps_dir) return request.temps_dir;
   return request.save_temps ? ".x2c-build" : NULL;
