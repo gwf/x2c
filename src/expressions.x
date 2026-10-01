@@ -143,35 +143,13 @@ static List Compiler._parse_binary_level(Compiler c, int level) {
     level, c._parse_binary_level(level + 1));
 }
 
-/* Each parser entry consumes exactly its grammar level and leaves
-   `c.token` at the first token belonging to its caller. Operators are
-   resolved as their AST nodes are built, so higher levels receive typed or
-   deferred expression nodes. */
 static List Compiler._parse_binary_level_tail(
   Compiler c, int level, List lhs) {
   int first = 1;
   while (_precedence(c._binary_operator()) == level ||
          (level == 7 && c._is_type_operator())) {
     if (c._is_type_operator()) {
-      Token origin = c.token;
-      c.next();
-      int negate = c.take_word("not");
-      List test;
-      if (c._is_type_selector_start()) {
-        Type target = c._parse_is_type(origin);
-        Macro has_type = $has_type;
-        test = c.resolve_expression(
-          c.rebuild_expression(NULL, has_type(lhs, target)), origin);
-      }
-      else {
-        List selector = c._parse_cast();
-        Macro has_symbol = $has_symbol;
-        test = c.resolve_expression(
-          c.rebuild_expression(NULL, has_symbol(lhs, selector)), origin);
-      }
-      lhs = negate
-        ? c.resolve_expression(%(expr () (op ! $test)), origin)
-        : test;
+      lhs = c._parse_type_test(lhs);
       continue;
     }
     Symbol op = c._binary_operator();
@@ -223,6 +201,29 @@ static inline Symbol Compiler._binary_operator(Compiler c) =>
   c.at_word("in") ? <in> : c.peek(0);
 
 static inline int Compiler._is_type_operator(Compiler c) => c.at_word("is");
+
+/* `value is T` tests a Var tag; `value is selector` tests a Symbol. Either
+   may be negated as `is not`. */
+static List Compiler._parse_type_test(Compiler c, List lhs) {
+  Token origin = c.token;
+  c.next();
+  int negate = c.take_word("not");
+  List test;
+  if (c._is_type_selector_start()) {
+    Type target = c._parse_is_type(origin);
+    Macro has_type = $has_type;
+    test = c.resolve_expression(
+      c.rebuild_expression(NULL, has_type(lhs, target)), origin);
+  }
+  else {
+    List selector = c._parse_cast();
+    Macro has_symbol = $has_symbol;
+    test = c.resolve_expression(
+      c.rebuild_expression(NULL, has_symbol(lhs, selector)), origin);
+  }
+  return negate ? c.resolve_expression(%(expr () (op ! $test)), origin)
+                : test;
+}
 
 static int Compiler._is_type_selector_start(Compiler c) {
   if (c.at_word("Void")) return 1;
@@ -492,10 +493,7 @@ static List Compiler._parse_offsetof(Compiler c) {
   return %(expr (unsigned) (offsetof $type $field));
 }
 
-/* postfix operators
-
-   A postfix operator makes the expression before it a receiver or a base.
-   Indexing, calls, and member access resolve as they are parsed. */
+// postfix operators
 
 static List Compiler._parse_postfix(Compiler c) =>
   c._parse_postfix_tail(c.parse_primary());
@@ -910,9 +908,8 @@ static List Compiler._parse_generic(Compiler c) {
 
 /* expression resolution
 
-   Parsed source and constructed syntax enter the same resolver. A node
-   whose type is known and whose descendants need nothing returns
-   unchanged; any other node dispatches on its content. */
+   Parsed source and constructed syntax enter the same resolver, which
+   dispatches on a node's content. */
 
 /** Resolves and type-annotates one expression AST in current compiler state.
     Existing `expr` type annotations are resolved semantic types.
@@ -2026,9 +2023,9 @@ macro open Expression $func_opaque(Expr $function, Expr $index,
 /* A call with no arguments applies the callee directly. */
 macro open Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 
-static int _null_literal(List argument) =>
-  _integer_literal_kind(argument, NULL) == <zero> ||
-  argument.match(%(expr ? ${$source_identifier_content(
+static int _null_literal(List expr) =>
+  _integer_literal_kind(expr, NULL) == <zero> ||
+  expr.match(%(expr ? ${$source_identifier_content(
     %((binding ? "NULL")))}));
 
 /** Returns one `$func_argument` or `$func_null_argument` application for
