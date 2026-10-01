@@ -2635,9 +2635,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
         obstacles.push(%(obstacle $caller $location
           "Scope object destruction is outside the proof subset" $callee));
       if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
-        List key = %(open $caller $callee);
-        Var prior = scope_counts[key];
-        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        project_count(scope_counts, %(open $caller $callee), 1);
         if (conditional)
           obstacles.push(%(obstacle $caller $location
             "conditional region opening is outside the proof subset"
@@ -2646,9 +2644,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
         String open = callee == "Scope_release" ? "Scope_retain"
                     : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
-        List key = %(close $caller $open);
-        Var prior = scope_counts[key];
-        scope_counts[key] = (prior is void ? 0 : prior.int()) + 1;
+        project_count(scope_counts, %(close $caller $open), 1);
         if (!deferred || conditional)
           obstacles.push(%(obstacle $caller $location
             "region closing is not an unconditional lexical defer"
@@ -2739,10 +2735,8 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
           name, 0, reached, contracts, assumptions, scope_counts,
           obligations, obstacles, 0, 0);
         foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
-          Var opening = scope_counts[%(open $target $open)];
-          Var closing = scope_counts[%(close $target $open)];
-          if ((opening is void ? 0 : opening.int()) !=
-              (closing is void ? 0 : closing.int()))
+          if (scope_counts.getdefault(%(open $target $open), 0).int() !=
+              scope_counts.getdefault(%(close $target $open), 0).int())
             obstacles.push(%(obstacle $target (location $path 0 0)
               "region opening and lexical closing do not match" $open));
         }
