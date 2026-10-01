@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 60
+- Runtime modules: 61
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -826,11 +826,11 @@ Public functions:
 
 ### [lib/lisp-targets.x](../lib/lisp-targets.x)
 
-the native operations a Lisp session can bind.
+evaluator targets of the optional pure modules.
 
 Public functions:
 
-`lisp_native_targets`
+`lisp_optional_native_targets`
 
 ### [lib/lisp.x](../lib/lisp.x)
 
@@ -917,6 +917,15 @@ Public functions:
 `MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.init`,
 `MachineBuilder.drop`
 
+### [lib/macro-value.x](../lib/macro-value.x)
+
+macros as values that build and recognize code.
+
+Public functions:
+
+`Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
+`Macro_pattern`, `Macro_case_pattern`, `Macro_case_capture_at`
+
 ### [lib/map.x](../lib/map.x)
 
 hash table mapping `Var` keys to `Var` values.
@@ -931,19 +940,6 @@ Public functions:
 `Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`,
 `Map.keys`, `Map.enumerate`, `Map.cleanup`
 
-### [lib/match-cache.x](../lib/match-cache.x)
-
-caches of prepared Match plans.
-
-Public functions:
-
-`MatchCache.acquire`, `MatchLease.release`, `MatchCache.try_capture`,
-`MatchCache.try_match`, `MatchCache.try_search`, `MatchCache.search`,
-`MatchCache.try_match_replace`, `MatchCache.search_replace`,
-`MatchCache.current`, `MatchCache.flush_default`, `MatchCache.context_open`,
-`MatchCache.context_close`, `x2c_match_thread_release`, `MatchCache.new`,
-`MatchCache.dispose`
-
 ### [lib/match-machine.x](../lib/match-machine.x)
 
 `Match` wordcode execution.
@@ -951,16 +947,7 @@ Public functions:
 Public functions:
 
 `MatchMachine.run`, `MatchMachine.step`, `MatchMachine.materialize_span`,
-`MatchMachine.open`, `MatchMachine.begin`, `MatchMachine.finish`,
-`MatchMachine.clean`, `MatchMachine.dispose`
-
-### [lib/match-plan.x](../lib/match-plan.x)
-
-lowering Match patterns to prepared plans.
-
-Public functions:
-
-`MatchPlan.prepare`, `MatchPlan.free`
+`MatchMachine.begin`, `MatchMachine.finish`, `MatchMachine.clean`
 
 ### [lib/match.x](../lib/match.x)
 
@@ -971,18 +958,24 @@ Public functions:
 `Var.is_atom_binder`, `Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
 `MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
 `MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
-`MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
-`MatchPlan.try_capture`, `MatchPlan.execute`, `MatchPlan.try_match`,
-`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
-`MatchPlan.try_match_replace`, `List.replace`, `MatchPlan.borrowable`,
-`x2c_match_site_try_capture`, `x2c_match_pattern_retainable`,
-`x2c_match_site_prepare`, `x2c_match_site_try_match`, `x2c_match_site_match`,
+`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`, `MatchPlan.prepare`,
+`MatchPlan.free`, `MatchPlan.execute_capture`, `MatchPlan.try_capture`,
+`MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_search`,
+`MatchPlan.search`, `MatchPlan.search_replace`, `MatchPlan.try_match_replace`,
+`List.replace`, `MatchCache.acquire`, `MatchCache.new`, `MatchCache.dispose`,
+`MatchLease.release`, `MatchCache.try_capture`, `MatchCache.try_match`,
+`MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
+`MatchCache.search_replace`, `MatchCache.flush_default`,
+`MatchCache.context_open`, `MatchCache.context_close`,
+`x2c_match_thread_release`, `x2c_match_site_try_capture`,
+`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
+`x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
 `x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,
 `List.match`, `List.try_match_replace`, `List.match_replace`, `List.search`,
-`List.try_search`, `List.search_replace`, `x2c_match_initialize`
+`List.try_search`, `List.search_replace`, `x2c_match_initialize`,
+`MatchMachine.open`, `MatchMachine.dispose`
 
 ### [lib/meta.x](../lib/meta.x)
 
@@ -993,9 +986,7 @@ Public functions:
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
 `x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`,
-`Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
-`Macro_pattern`, `Macro_case_pattern`, `Macro_case_capture_at`
+`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -1133,6 +1124,23 @@ Public functions:
 `String.is_identifier`, `String.is_space`, `String.is_lower`,
 `String.is_lower_under`, `String.is_upper`, `String.is_upper_under`
 
+### [lib/string-escape.x](../lib/string-escape.x)
+
+escaped spelling of canonical strings.
+
+Public functions:
+
+`String.escape`, `String.repr`, `String.write_repr`, `String.unescape`,
+`String.parse_char`, `String.parse`
+
+### [lib/string-format.x](../lib/string-format.x)
+
+checked formatting of `Var` values into a `String`.
+
+Public functions:
+
+`String.format`
+
 ### [lib/string-number.x](../lib/string-number.x)
 
 numeric parsing from canonical byte strings.
@@ -1159,10 +1167,8 @@ Public functions:
 `String.dedent`, `String.remove_prefix`, `String.remove_suffix`,
 `String.partition`, `String.rpartition`, `String.lower`, `String.upper`,
 `String.capitalize`, `String.filter`, `String.map`, `String.keep`,
-`String.reject`, `String.squeeze`, `String.printf`, `String.format`,
-`String.escape`, `String.unescape`, `String.parse_char`, `String.parse`,
-`String.str`, `String.repr`, `String.write_str`, `String.write_repr`,
-`String.symbol`, `String.iter`, `String.try_next`
+`String.reject`, `String.squeeze`, `String.printf`, `String.str`,
+`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
 
 ### [lib/symbol.x](../lib/symbol.x)
 

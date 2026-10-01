@@ -19,7 +19,6 @@ Canonical byte strings and core text operations.
 | [`String.find`](#String.find) | Returns the index of the first occurrence of `sub` in `str`, or -1. |
 | [`String.find_all`](#String.find_all) | Returns each non-overlapping starting index at which `sub` occurs. |
 | [`String.find_within`](#String.find_within) | Returns the first index of `sub` within `str[start:end]`, or -1. |
-| [`String.format`](#String.format) | Formats `values` through a checked, C-style subset of `fmt`. |
 | [`String.getindex`](#String.getindex) | Returns the byte at `index` in `str` as an int, or -1 if out of range. |
 | [`String.getslice`](#String.getslice) | Returns the canonical `String` `s[start:stop:step]`. |
 | [`String.iter`](#String.iter) | Initializes `dest` as a lazy iterator over the bytes of `x`. |
@@ -47,7 +46,6 @@ Canonical byte strings and core text operations.
 | [`String.startswith`](#String.startswith) | Reports whether `str` starts with `prefix`. |
 | [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `negChars` removed. |
 | [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
-| [`String.unescape`](#String.unescape) | Decodes supported backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
 | [`String.write_str`](#String.write_str) | Appends `str` to `out` unchanged. |
@@ -206,31 +204,6 @@ printf("%d %d %d\n", text.find_within("c", 0, -1),
 
 Source: `lib/string.x:446`
 
-<a id="String.format"></a>
-#### String.format
-
-`String String.format(String fmt, List values)`
-
-Formats `values` through a checked, C-style subset of `fmt`.
-The receiver is decoded runtime text, so this fixed-signature operation is
-safe to call through the interpreter as `fmt.format(values)`. It supports
-`%%`, flags `-+ #0`, numeric or `*` width and precision, integer
-conversions `d i o u x X` with `hh h l ll`, floating conversions
-`f F e E g G a A` with default, `l`, or `L`, and `%c` and `%s`.
-Numeric values are converted with `Var.convert`; `%s` uses `Var.str`.
-
-Pointer and write-count conversions, wide strings and characters,
-positional arguments, `j z t` lengths, malformed formats, and missing or
-excess values are rejected. `%c` also rejects NUL because canonical
-`String`s cannot contain it. Output is staged privately and no result is
-published on failure. Formatting follows the process locale.
-
-**Raises:** `<format>` with byte `offset` and `reason`; numeric and string
-conversion failures are nested as `cause`. Allocation failures may also
-transfer while staging or canonicalizing the result.
-
-Source: `lib/string.x:1247`
-
 <a id="String.getindex"></a>
 #### String.getindex
 
@@ -284,7 +257,7 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1807`
+Source: `lib/string.x:1244`
 
 <a id="String.join"></a>
 #### String.join
@@ -644,24 +617,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
 loop.
 
-Source: `lib/string.x:1828`
-
-<a id="String.unescape"></a>
-#### String.unescape
-
-`meta native String String.unescape(String str)`
-
-Decodes supported backslash escapes in `str` into a canonical `String`.
-Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
-or `U`, and up to three octal digits are consumed. A backslash-newline is
-removed, an unknown escape yields its following byte, and a trailing
-backslash is dropped. `Null` input returns NULL and input without a
-backslash is returned unchanged.
-
-**Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
-a byte, or `<alloc-fail>` while constructing a changed result.
-
-Source: `lib/string.x:1624`
+Source: `lib/string.x:1265`
 
 <a id="String.upper"></a>
 #### String.upper
@@ -713,7 +669,7 @@ borrowed `out` is returned and not retained.
 
 **Raises:** any cause from `Buffer.write`.
 
-Source: `lib/string.x:1763`
+Source: `lib/string.x:1216`
 
 ## Advanced and interop API
 
@@ -721,7 +677,6 @@ Source: `lib/string.x:1763`
 | --- | --- |
 | [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
 | [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
-| [`String.escape`](#String.escape) | Returns a canonical escaped representation of the bytes in `str`. |
 | [`String.free`](#String.free) | Releases a transient `String.malloc` buffer early. |
 | [`String.hash`](#String.hash) | Returns the content hash of `str`, or zero for the empty `String`. |
 | [`String.intern`](#String.intern) | Returns the canonical `String` for the borrowed bytes of `string`. |
@@ -730,14 +685,10 @@ Source: `lib/string.x:1763`
 | [`String.new_fill`](#String.new_fill) | Returns the canonical `String` containing `count` copies of `fill`. |
 | [`String.new_in`](#String.new_in) | Returns the canonical `String` for at most `length` borrowed bytes in `pool`. |
 | [`String.new_len`](#String.new_len) | Returns the canonical `String` holding at most `len` bytes of `str`. |
-| [`String.parse`](#String.parse) | Returns the canonical unescaped contents of `str`. |
-| [`String.parse_char`](#String.parse_char) | Parses one leading single-quoted escaped or literal byte, or returns -1. |
 | [`String.printf`](#String.printf) | Formats a canonical `String` from `fmt` and the trailing arguments. |
 | [`String.promote`](#String.promote) | Moves `str` from the active pool to its parent and returns the same pointer. |
-| [`String.repr`](#String.repr) | Returns a canonical quoted and escaped representation of `str`. |
 | [`String.str`](#String.str) | Returns `str` itself as its display `String` without copying or retaining it. |
 | [`String.symbol`](#String.symbol) | Returns the compact `Symbol` encoded from `str`, or zero for empty input. |
-| [`String.write_repr`](#String.write_repr) | Appends a quoted escaped representation of `str` to borrowed `out`. |
 
 ### `String`
 
@@ -767,20 +718,6 @@ are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
 Source: `lib/string.x:126`
-
-<a id="String.escape"></a>
-#### String.escape
-
-`meta native String String.escape(String str)`
-
-Returns a canonical escaped representation of the bytes in `str`.
-Common control and delimiter bytes use named escapes, printable ASCII is
-copied, and every other byte uses a three-digit octal escape. `Null`
-input or an oversized result returns NULL.
-
-**Raises:** `<alloc-fail>` while constructing the result.
-
-Source: `lib/string.x:1562`
 
 <a id="String.free"></a>
 #### String.free
@@ -931,33 +868,6 @@ without raising.
 
 Source: `lib/string.x:177`
 
-<a id="String.parse"></a>
-#### String.parse
-
-`meta native String String.parse(String str)`
-
-Returns the canonical unescaped contents of `str`.
-Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input
-is unescaped directly. `Null` or empty input returns NULL. An unquoted
-input without backslashes is returned unchanged.
-
-**Raises:** `<alloc-fail>` while copying or decoding.
-
-Source: `lib/string.x:1731`
-
-<a id="String.parse_char"></a>
-#### String.parse_char
-
-`meta native int String.parse_char(String str)`
-
-Parses one leading single-quoted escaped or literal byte, or returns -1.
-The opening quote, one decoded byte, and a closing quote are required.
-Text after that closing quote is ignored. A decoded NUL is returned as
-zero; malformed and null input returns -1, as does an octal escape above
-`\377`, which does not fit a byte.
-
-Source: `lib/string.x:1712`
-
 <a id="String.printf"></a>
 #### String.printf
 
@@ -975,7 +885,7 @@ you want.
 `fmt` or formatting error also returns NULL without raising. Arguments
 that do not match the conversions are undefined behavior as in C.
 
-Source: `lib/string.x:1176`
+Source: `lib/string.x:1175`
 
 <a id="String.promote"></a>
 #### String.promote
@@ -991,18 +901,6 @@ the promotion.
 
 Source: `lib/string.x:385`
 
-<a id="String.repr"></a>
-#### String.repr
-
-`String String.repr(String str)`
-
-Returns a canonical quoted and escaped representation of `str`.
-Empty input returns the canonical literal spelling `"\"\""`.
-
-**Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
-
-Source: `lib/string.x:1752`
-
 <a id="String.str"></a>
 #### String.str
 
@@ -1011,7 +909,7 @@ Source: `lib/string.x:1752`
 Returns `str` itself as its display `String` without copying or retaining
 it.
 
-Source: `lib/string.x:1746`
+Source: `lib/string.x:1208`
 
 <a id="String.symbol"></a>
 #### String.symbol
@@ -1023,21 +921,7 @@ Returns the compact `Symbol` encoded from `str`, or zero for empty input.
 use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
-Source: `lib/string.x:1786`
-
-<a id="String.write_repr"></a>
-#### String.write_repr
-
-`Buffer String.write_repr(String str, Buffer out)`
-
-Appends a quoted escaped representation of `str` to borrowed `out`.
-Bytes are streamed without first allocating an intermediate `String`. The
-same `out` is returned and not retained. Text written before a failure
-remains in the `Buffer`.
-
-**Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
-
-Source: `lib/string.x:1771`
+Source: `lib/string.x:1223`
 
 ## Runtime-internal callables
 

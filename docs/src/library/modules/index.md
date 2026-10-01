@@ -35,6 +35,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/list-selectors.x`](list-selectors.md) | optional compound `List` selectors. |
 | [`lib/list.x`](list.md) | linked list with `Var` elements. |
 | [`lib/logger.x`](logger.md) | owned structured event delivery. |
+| [`lib/macro-value.x`](macro-value.md) | macros as values that build and recognize code. |
 | [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
 | [`lib/match-cache.x`](match-cache.md) | caches of prepared Match plans. |
 | [`lib/match-plan.x`](match-plan.md) | lowering Match patterns to prepared plans. |
@@ -49,6 +50,8 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/scripting.x`](scripting.md) | the modules every script unit includes. |
 | [`lib/split.x`](split.md) | `String` field splitting and repeatable typed cursors. |
 | [`lib/string-classify.x`](string-classify.md) | byte classification for canonical strings. |
+| [`lib/string-escape.x`](string-escape.md) | escaped spelling of canonical strings. |
+| [`lib/string-format.x`](string-format.md) | checked formatting of `Var` values into a `String`. |
 | [`lib/string-number.x`](string-number.md) | numeric parsing from canonical byte strings. |
 | [`lib/string.x`](string.md) | canonical byte strings and core text operations. |
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |

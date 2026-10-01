@@ -9,11 +9,6 @@ The compiler surface a `meta` function calls.
 
 | Function | Summary |
 | --- | --- |
-| [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
-| [`Macro_case_capture_at`](#Macro_case_capture_at) | Recognizes code built by `t` for the `case` whose site is `site`, which may be NULL, and publishes the captures under `names`. |
-| [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
-| [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
-| [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
 | [`type_base_suffix`](#type_base_suffix) | Returns the suffix of `type` that begins at its typedef name or base keyword, sharing `type`, or `NULL` when it has none. |
 | [`type_declaration_parts`](#type_declaration_parts) | Returns `(base modifiers)` for reconstructing a declaration of `type`. |
 | [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
@@ -28,62 +23,8 @@ The compiler surface a `meta` function calls.
 | [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
 | [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
 | [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
-| [`Macro.subject`](#Macro.subject) | Returns the table `Macro.use_subject` last set, or void. |
-| [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows for global references and the `(source-spelling BINDING SPELLING)` rows for renamed local bindings in a compile-time call's syntax arguments. |
 
 ### Functions
-
-<a id="Macro_apply"></a>
-#### Macro_apply
-
-`List Macro_apply(Macro t, List values)`
-
-Applies a macro value to code values. The result is a pending
-invocation; inserting it into a program expands and binds it there.
-
-Source: `lib/meta.x:404`
-
-<a id="Macro_case_capture_at"></a>
-#### Macro_case_capture_at
-
-`int Macro_case_capture_at( MacroCaseSite *site, List code, Macro t, List names, MatchCaptureBuffer *published)`
-
-Recognizes code built by `t` for the `case` whose site is `site`, which
-may be NULL, and publishes the captures under `names`. A pattern that
-does not depend on the current call's subject is prepared once and kept
-in the site; generated `match` code calls this for a macro-valued case.
-
-Source: `lib/meta.x:695`
-
-<a id="Macro_case_pattern"></a>
-#### Macro_case_pattern
-
-`List Macro_case_pattern(Macro t, List names)`
-
-The pattern a macro-valued `case` compiles to; the compiler lowers a
-call of this to `Macro_case_capture_at` over the match subject.
-
-Source: `lib/meta.x:688`
-
-<a id="Macro_close"></a>
-#### Macro_close
-
-`Macro Macro_close(Macro value, List captures)`
-
-Records the Macro values an anonymous macro captured where it was
-created, so applying it later applies the same children.
-
-Source: `lib/meta.x:399`
-
-<a id="Macro_pattern"></a>
-#### Macro_pattern
-
-`List Macro_pattern(Macro t, List names)`
-
-Derives the Match pattern that recognizes code this macro builds,
-capturing each parameter under the given binder.
-
-Source: `lib/meta.x:463`
 
 #### type_base_suffix
 
@@ -205,84 +146,12 @@ Returns a return statement carrying `expression`.
 
 Source: `lib/meta.x:120`
 
-### `Macro`
-
-<a id="Macro.subject"></a>
-#### Macro.subject
-
-`Var Macro.subject(void)`
-
-Returns the table `Macro.use_subject` last set, or void.
-
-Source: `lib/meta.x:435`
-
-<a id="Macro.use_subject"></a>
-#### Macro.use_subject
-
-`void Macro.use_subject(Var rows)`
-
-Sets the `(SPELLING BINDING)` rows for global references and the
-`(source-spelling BINDING SPELLING)` rows for renamed local bindings in
-a compile-time call's syntax arguments. A macro value's free reference
-recognizes only the recorded global binding; with void it recognizes
-any binding of its spelling. The compiler sets these rows for each
-`meta` call and carries them through the helper.
-
-Source: `lib/meta.x:443`
-
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Macro`](#Macro) | alias | A macro as a value: called to build code, or used in a Match `case` to recognize code and capture its parameters. |
-| [`MacroCaseSite`](#MacroCaseSite) | struct | Holds one macro-valued `case` site's prepared recognition for the process: the plan Match keeps, the slots of the macro's fixed locals, and where each binder reads its capture. |
-| [`MacroFixedSlots`](#MacroFixedSlots) | struct | Records fixed-local slots for distinct-identity checks and Name slots for member-spelling comparisons during recognition. |
-| [`MacroPublishing`](#MacroPublishing) | struct | Records where each of a `case`'s binders reads its capture: the slot of its internal binder in the pattern that captured, and its own slot in the `case`, which need not share the parameters' order. |
 | [`Source`](#Source) | alias | A `meta` parameter declared `Source` receives, at a `$` call, captured syntax with the source text it came from: `((text T) (file F) (syntax S))`. |
 | [`Type`](#Type) | alias | A `meta` parameter declared `Type` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F) (methods M))`. |
-
-<a id="Macro"></a>
-### Macro
-
-`typedef List Macro`
-
-A macro as a value: called to build code, or used in a Match `case` to
-recognize code and capture its parameters.
-
-Source: `lib/meta.x:395`
-
-<a id="MacroCaseSite"></a>
-### MacroCaseSite
-
-`typedef struct MacroCaseSite { MatchCaptureSite match; MacroFixedSlots policy; MacroPublishing route; int ready; } MacroCaseSite`
-
-Holds one macro-valued `case` site's prepared recognition for the
-process: the plan Match keeps, the slots of the macro's fixed locals, and
-where each binder reads its capture. The compiler emits one
-zero-initialized static site per `case`.
-
-Source: `lib/meta.x:679`
-
-<a id="MacroFixedSlots"></a>
-### MacroFixedSlots
-
-`typedef struct MacroFixedSlots { int count, slots[MACHINE_BINDER_MAX]; int names, name_slots[MACHINE_BINDER_MAX]; } MacroFixedSlots`
-
-Records fixed-local slots for distinct-identity checks and Name slots
-for member-spelling comparisons during recognition.
-
-Source: `lib/meta.x:658`
-
-<a id="MacroPublishing"></a>
-### MacroPublishing
-
-`typedef struct MacroPublishing { int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX]; int to[MACHINE_BINDER_MAX]; int count, binders, complete; unsigned long definite; } MacroPublishing`
-
-Records where each of a `case`'s binders reads its capture: the slot
-of its internal binder in the pattern that captured, and its own slot
-in the `case`, which need not share the parameters' order.
-
-Source: `lib/meta.x:667`
 
 <a id="Source"></a>
 ### Source
@@ -310,9 +179,9 @@ Source: `lib/meta.x:42`
 
 A `meta` function runs inside the compiler, so it can ask the compiler
 questions and build syntax for it to bind. This module declares those
-operations in x2c and implements the macro values a `meta` function
-applies and recognizes. Each operation's semantics and Lisp name are
-specified under "Compile-time Lisp and imports" in the language
+operations in x2c; the macro values a `meta` function applies and
+recognizes are in `macro-value.x`. Each operation's semantics and Lisp
+name are specified under "Compile-time Lisp and imports" in the language
 reference.
 
 A syntax builder's `meta` body is shared by compile time and run time.
