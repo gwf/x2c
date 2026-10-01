@@ -165,12 +165,21 @@ String Var.repr(Var v) {
   return v.fallback_repr();
 }
 
-/** Returns the non-dispatch readable representation of `Var`.
-    It renders through `Var.fallback_write_repr`, so the two forms cannot
-    drift apart.
-*/
-String Var.fallback_repr(Var v) =>
-  v.fallback_write_repr(Buffer.new(0)).str_free();
+/** Returns the non-dispatch readable representation of `Var`. */
+String Var.fallback_repr(Var v) {
+  Symbol tag = v.tag();
+  switch (v.kind()) {
+    case <floating>: case <integer>:   return _primitive_repr(v, tag);
+    case <pointer>:  case <reference>: return v.pointer_string();
+    case <void>:     return "void";
+  }
+  return v.pointer_string();
+}
+
+/* `_write_primitive_repr` owns the numeric repr spellings. The `String`
+   form renders through a `Buffer`, so the two forms cannot drift apart. */
+static String _primitive_repr(Var v, Symbol tag) =>
+  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
 
 /** Appends the readable representation of `Var` to a `Buffer`. */
 Buffer Var.write_repr(Var v, Buffer out) {
