@@ -1060,7 +1060,7 @@ CliRequest cli_parse(int argc, char * * argv){
       if(! String_truth(first)) driver_error("expected a command, found an empty argument");
       CliCommand * command = _command_row(first);
       if(command){
-        CliRequest _x2c_return_value_0 = _parse_command(args, &(* command));
+        CliRequest _x2c_return_value_0 = _parse_command(args, command);
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
           return _x2c_return_value_0;
@@ -1099,7 +1099,7 @@ static void _read_arguments(Array args, int argc, char * * argv){
 
 static CliRequest _parse_command(Array args, CliCommand * command){
   Parse p ={
-    .request = cli_request((* command).name), .args = args, .mask =(* command).mask, .inputs = Array_new(), .run_args = Array_new(), .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
+    .request = cli_request(command -> name), .args = args, .mask = command -> mask, .inputs = Array_new(), .run_args = Array_new(), .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
   }
   ;
   for(int i = 1;  i < Array_len(args);  i ++) Parse_word(&(p), &(i));
@@ -1109,17 +1109,17 @@ static CliRequest _parse_command(Array args, CliCommand * command){
 }
 
 static void Parse_word(Parse * p, int * i){
-  String arg = Var_string(Array_getindex((* p).args, (* i)));
-  if(!(* p).operands && String_equal(arg, _58))(* p).operands = 1;
-  else if(Parse_expands(&((* p)), arg, (* i))) Parse_expand(&((* p)), arg, &((* i)));
-  else if((* p).operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') Parse_operand(&((* p)), arg, &((* i)));
-  else Parse_option(&((* p)), arg, &((* i)));
+  String arg = Var_string(Array_getindex(p -> args, (* i)));
+  if(! p -> operands && String_equal(arg, _58)) p -> operands = 1;
+  else if(Parse_expands(p, arg, (* i))) Parse_expand(p, arg, &((* i)));
+  else if(p -> operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') Parse_operand(p, arg, &((* i)));
+  else Parse_option(p, arg, &((* i)));
 }
 
 int String_startswith(String, String);
 
 static int Parse_expands(Parse * p, String arg, int i){
-  return(* p).mask == CLI_SCRIPT && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _186);
+  return p -> mask == CLI_SCRIPT && ! p -> operands && i >= p -> expanded && String_startswith(arg, _186);
 }
 
 Array Array_splice(Array, int, int, Array);
@@ -1127,15 +1127,15 @@ Array Array_splice(Array, int, int, Array);
 static void Parse_expand(Parse * p, String arg, int * i){
   Array words = Array_new();
   _expand_argument(words, arg, NULL);
-  Array_splice((* p).args, (* i), 1, words);
-  (* p).expanded =(* i) + Array_len(words);
+  Array_splice(p -> args, (* i), 1, words);
+  p -> expanded =(* i) + Array_len(words);
   (* i) --;
 }
 
 static void Parse_operand(Parse * p, String arg, int * i){
-  if((* p).operands &&(* p).mask == CLI_RUN) Array_push((* p).run_args, String_var(arg));
-  else Array_push((* p).inputs, String_var(arg));
-  if((* p).mask == CLI_SCRIPT) while(++(* i) < Array_len((* p).args)) Array_push((* p).run_args, Array_getindex((* p).args, (* i)));
+  if(p -> operands && p -> mask == CLI_RUN) Array_push(p -> run_args, String_var(arg));
+  else Array_push(p -> inputs, String_var(arg));
+  if(p -> mask == CLI_SCRIPT) while(++(* i) < Array_len(p -> args)) Array_push(p -> run_args, Array_getindex(p -> args, (* i)));
 }
 
 List Array_list_free(Array);
@@ -1143,13 +1143,13 @@ List Array_list_free(Array);
 List List_reverse(List);
 
 static void Parse_finish(Parse * p){
-  CliRequest r =(* p).request;
-  r -> inputs = Array_list_free((* p).inputs);
-  r -> run_args = Array_list_free((* p).run_args);
-  r -> include_dirs = Array_list_free((* p).include_dirs);
-  r -> cpp_args = Array_list_free((* p).cpp_args);
-  r -> cc_args = Array_list_free((* p).cc_args);
-  r -> ld_args = Array_list_free((* p).ld_args);
+  CliRequest r = p -> request;
+  r -> inputs = Array_list_free(p -> inputs);
+  r -> run_args = Array_list_free(p -> run_args);
+  r -> include_dirs = Array_list_free(p -> include_dirs);
+  r -> cpp_args = Array_list_free(p -> cpp_args);
+  r -> cc_args = Array_list_free(p -> cc_args);
+  r -> ld_args = Array_list_free(p -> ld_args);
   r -> package_dirs = List_reverse(r -> package_dirs);
   r -> native_modules = List_reverse(r -> native_modules);
   r -> extensions = List_reverse(r -> extensions);
@@ -1184,13 +1184,13 @@ static void _help_command(Array args){
 
 static void Parse_option(Parse * p, String arg, int * i){
   if(String_equal(arg, _53)) _removed_output();
-  if(((* p).mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _187)){
-    CliRequest__save_temps_dir((* p).request, arg);
+  if((p -> mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _187)){
+    CliRequest__save_temps_dir(p -> request, arg);
     return;
   }
-  Given given = _take_option((* p).args, &((* i)), (* p).mask);
-  if(! given.option) _unknown_option(arg, (* p).mask);
-  Parse_apply(&((* p)), given);
+  Given given = _take_option(p -> args, &((* i)), p -> mask);
+  if(! given.option) _unknown_option(arg, p -> mask);
+  Parse_apply(p, given);
 }
 
 String String_remove_prefix(String, String);
@@ -1248,7 +1248,7 @@ static CliOption * _find_option(String spelling, int mask, String * attached){
 }
 
 static void Parse_apply(Parse * p, Given given){
-  CliRequest r =(* p).request;
+  CliRequest r = p -> request;
   String spelling = given.spelling, value = given.value;
   switch(given.option -> id){
     case 535328 :{
@@ -1260,11 +1260,11 @@ static void Parse_apply(Parse * p, Given given){
       break;
     }
     case 20273998090 :{
-      Parse_include_dir(&((* p)), value);
+      Parse_include_dir(p, value);
       break;
     }
     case 54927135910154 :{
-      Array_push((* p).include_dirs, String_var(value));
+      Array_push(p -> include_dirs, String_var(value));
       break;
     }
     case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 10268258347430 :{
@@ -1290,49 +1290,49 @@ static void Parse_apply(Parse * p, Given given){
       break;
     }
     case 8747647543562 :{
-      _push_pair((* p).cc_args, _147, value);
+      _push_pair(p -> cc_args, _147, value);
       break;
     }
     case 274059207002 :{
-      _push_pair((* p).cc_args, _191, value);
+      _push_pair(p -> cc_args, _191, value);
       break;
     }
     case 31784 : case 14 :{
-      Array_push((* p).cc_args, String_var(spelling));
+      Array_push(p -> cc_args, String_var(spelling));
       break;
     }
     case 279333770 : case 1473453116298 :{
-      _forward((* p).cpp_args, given);
-      _forward((* p).cc_args, given);
+      _forward(p -> cpp_args, given);
+      _forward(p -> cc_args, given);
       break;
     }
     case 49350 :{
-      Array_push((* p).cc_args, String_var(_xcc_argument(value)));
+      Array_push(p -> cc_args, String_var(_xcc_argument(value)));
       break;
     }
     case 26380018276 : case 26379160754 :{
-      _forward((* p).ld_args, given);
+      _forward(p -> ld_args, given);
       break;
     }
     case 38800656 :{
-      Array_push((* p).ld_args, String_var(String_join(NULL, cons(String_var(_64), cons(String_var(value), NULL)))));
+      Array_push(p -> ld_args, String_var(String_join(NULL, cons(String_var(_64), cons(String_var(value), NULL)))));
       break;
     }
     case 35719882824 :{
-      Array_push((* p).cc_args, String_var(spelling));
-      Array_push((* p).ld_args, String_var(spelling));
+      Array_push(p -> cc_args, String_var(spelling));
+      Array_push(p -> ld_args, String_var(spelling));
       break;
     }
     case 14434122038422 : case 52364728676 :{
-      _push_pair((* p).ld_args, spelling, value);
+      _push_pair(p -> ld_args, spelling, value);
       break;
     }
     case 1496 :{
-      Array_push((* p).ld_args, String_var(spelling));
+      Array_push(p -> ld_args, String_var(spelling));
       break;
     }
     default:{
-      CliRequest__set_field(r, &(* given.option), value);
+      CliRequest__set_field(r, given.option, value);
       break;
     }
 
@@ -1365,8 +1365,8 @@ static int _count(String value, int minimum, String noun){
 }
 
 static void Parse_include_dir(Parse * p, String dir){
-  Array_push((* p).include_dirs, String_var(dir));
-  if((* p).request -> command != 45220543335690) _push_pair((* p).cc_args, _147, dir);
+  Array_push(p -> include_dirs, String_var(dir));
+  if(p -> request -> command != 45220543335690) _push_pair(p -> cc_args, _147, dir);
 }
 
 static void _forward(Array out, Given given){
@@ -1394,8 +1394,8 @@ int cli_dependency_pass_through(String s){
 List cons(Var, List);
 
 static void CliRequest__set_field(CliRequest r, CliOption * option, String value){
-  char * field =(char *) r +(* option).offset;
-  switch((* option).apply){
+  char * field =(char *) r + option -> offset;
+  switch(option -> apply){
     case FIELD_FLAG :{
       *(int *) field = 1;
       break;
@@ -1474,15 +1474,15 @@ CliRequest cli_package_options(String path, String package){
 int String_endswith(String, String);
 
 static void Parse_native(Parse * p, int * i){
-  String arg = Var_string(Array_getindex((* p).args, (* i)));
+  String arg = Var_string(Array_getindex(p -> args, (* i)));
   if(! String_truth(arg)) driver_error("empty package native argument");
   if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _197)){
-    Array_push((* p).ld_args, String_var(arg));
+    Array_push(p -> ld_args, String_var(arg));
     return;
   }
-  Given given = _take_option((* p).args, &((* i)), (* p).mask);
+  Given given = _take_option(p -> args, &((* i)), p -> mask);
   if(! given.option || ! given.option -> package_native) driver_error(String_join(NULL, cons(String_var(_81), cons(String_var(arg), cons(String_var(_57), NULL)))));
-  Parse_apply(&((* p)), given);
+  Parse_apply(p, given);
 }
 
 Path Path_absolute(Path);
@@ -1583,38 +1583,38 @@ static Array _response_words(String path, const char * text, size_t length){
 }
 
 static void Words_scan(Words * w, int c){
-  if((* w).comment){
-    if(c == '\n') Words_newline(&((* w)));
+  if(w -> comment){
+    if(c == '\n') Words_newline(w);
   }
-  else if((* w).escaped){
-    (* w).escaped = 0;
-    Words_put(&((* w)), c);
+  else if(w -> escaped){
+    w -> escaped = 0;
+    Words_put(w, c);
   }
   else if(c == '\\'){
-    (* w).escaped = 1;
-    (* w).blank = 0;
+    w -> escaped = 1;
+    w -> blank = 0;
   }
-  else if((* w).quote){
-    if(c ==(* w).quote)(* w).quote = 0;
-    else Words_put(&((* w)), c);
+  else if(w -> quote){
+    if(c == w -> quote) w -> quote = 0;
+    else Words_put(w, c);
   }
-  else Words_bare(&((* w)), c);
+  else Words_bare(w, c);
 }
 
 static void Words_bare(Words * w, int c){
   if(c == '\'' || c == '"'){
-    (* w).quote = c;
-    (* w).started = 1;
-    (* w).blank = 0;
+    w -> quote = c;
+    w -> started = 1;
+    w -> blank = 0;
   }
-  else if((* w).blank && c == '#')(* w).comment = 1;
+  else if(w -> blank && c == '#') w -> comment = 1;
   else if(isspace(c)){
-    Words_flush(&((* w)));
-    if(c == '\n') Words_newline(&((* w)));
+    Words_flush(w);
+    if(c == '\n') Words_newline(w);
   }
   else{
-    (* w).blank = 0;
-    Words_put(&((* w)), c);
+    w -> blank = 0;
+    Words_put(w, c);
   }
 
 }
@@ -1622,15 +1622,15 @@ static void Words_bare(Words * w, int c){
 Buffer Buffer_write_char(Buffer, char);
 
 static void Words_put(Words * w, int c){
-  Buffer_write_char((* w).word, c);
-  (* w).started = 1;
-  if(c == '\n')(* w).line ++;
+  Buffer_write_char(w -> word, c);
+  w -> started = 1;
+  if(c == '\n') w -> line ++;
 }
 
 static void Words_newline(Words * w){
-  (* w).comment = 0;
-  (* w).blank = 1;
-  (* w).line ++;
+  w -> comment = 0;
+  w -> blank = 1;
+  w -> line ++;
 }
 
 String Buffer_str(Buffer);
@@ -1638,23 +1638,23 @@ String Buffer_str(Buffer);
 Buffer Buffer_clear(Buffer);
 
 static void Words_flush(Words * w){
-  if(!(* w).started) return;
-  Array_push((* w).out, String_var(Buffer_str((* w).word)));
-  Buffer_clear((* w).word);
-  (* w).started = 0;
+  if(! w -> started) return;
+  Array_push(w -> out, String_var(Buffer_str(w -> word)));
+  Buffer_clear(w -> word);
+  w -> started = 0;
 }
 
 static void Words_finish(Words * w){
-  if((* w).comment) return;
-  if((* w).escaped) _response_error((* w).path, (* w).line, "trailing backslash");
-  if((* w).quote) _response_error((* w).path, (* w).line, "unterminated quote");
-  Words_flush(&((* w)));
+  if(w -> comment) return;
+  if(w -> escaped) _response_error(w -> path, w -> line, "trailing backslash");
+  if(w -> quote) _response_error(w -> path, w -> line, "unterminated quote");
+  Words_flush(w);
 }
 
 _Noreturn static void _help_exit(Symbol command, int status){
   if(! command) _print_top_help();
   else if(command == 535328) _print_help_usage();
-  else _print_page(&(* _help_page(command)));
+  else _print_page(_help_page(command));
   exit(status);
 }
 
@@ -1702,20 +1702,20 @@ static HelpPage * _help_page(Symbol command){
 }
 
 static void _print_page(HelpPage * page){
-  puts((* page).usage);
-  _print_options((* page).command);
-  _print_help_row("@<file>", (* page).response, 2);
-  if((* page).end) _print_help_row("--", (* page).end, 2);
-  if(!(* page).notes) return;
+  puts(page -> usage);
+  _print_options(page -> command);
+  _print_help_row("@<file>", page -> response, 2);
+  if(page -> end) _print_help_row("--", page -> end, 2);
+  if(! page -> notes) return;
   puts("");
-  puts((* page).notes);
+  puts(page -> notes);
 }
 
 static void _print_options(Symbol command){
   int mask = _command_mask(command);
   if(mask == CLI_TOP){
     puts("\nGlobal options:");
-    for(CliOption * option = cli_options;  String_truth(option -> spelling);  option ++) if(_listed(&(* option), mask)) _print_option(&(* option));
+    for(CliOption * option = cli_options;  String_truth(option -> spelling);  option ++) if(_listed(option, mask)) _print_option(option);
     return;
   }
   Symbol groups[] ={
@@ -1727,18 +1727,18 @@ static void _print_options(Symbol command){
 
 static void _print_group(Symbol command, int mask, Symbol group){
   CliOption * option = cli_options;
-  while(String_truth(option -> spelling) && ! _in_group(&(* option), mask, group)) option ++;
+  while(String_truth(option -> spelling) && ! _in_group(option, mask, group)) option ++;
   if(! String_truth(option -> spelling)) return;
   printf("\n%s\n", _group_title(command, group));
-  for(;  String_truth(option -> spelling);  option ++) if(_in_group(&(* option), mask, group)) _print_option(&(* option));
+  for(;  String_truth(option -> spelling);  option ++) if(_in_group(option, mask, group)) _print_option(option);
 }
 
 static int _listed(CliOption * option, int mask){
-  return !(* option).hidden &&((* option).commands & mask);
+  return ! option -> hidden &&(option -> commands & mask);
 }
 
 static int _in_group(CliOption * option, int mask, Symbol group){
-  return _listed(&((* option)), mask) &&(* option).group == group;
+  return _listed(option, mask) && option -> group == group;
 }
 
 static const char * _group_title(Symbol command, Symbol group){
@@ -1756,9 +1756,9 @@ static const char * _group_title(Symbol command, Symbol group){
 }
 
 static void _print_option(const CliOption * option){
-  String spelled = String_truth((* option).label) ?(* option).label : String_truth((* option).alias) ? String_join(NULL, cons(String_var((* option).spelling), cons(String_var(_102), cons(String_var((* option).alias), NULL)))) :(* option).spelling;
-  String label =(* option).value ? String_join(NULL, cons(String_var(spelled), cons(String_var(_103), cons(String_var(String_new((* option).value)), NULL)))) : spelled;
-  _print_help_row(label, (* option).description, String_startswith(label, _58) ? 6 : 2);
+  String spelled = String_truth(option -> label) ? option -> label : String_truth(option -> alias) ? String_join(NULL, cons(String_var(option -> spelling), cons(String_var(_102), cons(String_var(option -> alias), NULL)))) : option -> spelling;
+  String label = option -> value ? String_join(NULL, cons(String_var(spelled), cons(String_var(_103), cons(String_var(String_new(option -> value)), NULL)))) : spelled;
+  _print_help_row(label, option -> description, String_startswith(label, _58) ? 6 : 2);
 }
 
 static void _print_help_row(const char * label, const char * description, int indent){

@@ -1635,24 +1635,24 @@ Buffer List_write_repr(List lst, Buffer out){
 Buffer Buffer_newline_indent(Buffer);
 
 static void Render__value(Render * r, Var elem){
-  Buffer out =(* r).out;
+  Buffer out = r -> out;
   if(out -> pos >= _WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
-  if(! Var_is_row(elem, 9, 7, 4)) Render__leaf(&((* r)), elem);
+  if(! Var_is_row(elem, 9, 7, 4)) Render__leaf(r, elem);
   else if(! List_truth(Var_list(elem))) _nil(out);
-  else if(! Render__fits(&((* r)), elem)) Render__items(&((* r)), elem);
+  else if(! Render__fits(r, elem)) Render__items(r, elem);
 }
 
 Buffer Buffer_unwrite(Buffer, size_t);
 
 static void Render__leaf(Render * r, Var elem){
-  Buffer out =(* r).out;
+  Buffer out = r -> out;
   size_t before = out -> content -> length, position = out -> pos;
-  Render__write_leaf(&((* r)), elem);
+  Render__write_leaf(r, elem);
   size_t length = out -> content -> length - before;
   if(position + length <= _WIDTH) return;
   Buffer_unwrite(out, length);
   Buffer_newline_indent(out);
-  Render__write_leaf(&((* r)), elem);
+  Render__write_leaf(r, elem);
 }
 
 Buffer Buffer_write(Buffer, const char *);
@@ -1665,7 +1665,7 @@ static void _nil(Buffer out){
 Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static int Render__fits(Render * r, Var elem){
-  Buffer line = Buffer_new((* r).out -> padding);
+  Buffer line = Buffer_new(r -> out -> padding);
   {
     _x2c_defer_env_21 _x2c_macro_environment_21 ={
       0
@@ -1679,11 +1679,11 @@ static int Render__fits(Render * r, Var elem){
     x2c_cleanup_push(& _x2c_defer_record_22);
     {
       Render flat ={
-        line, (* r).mode
+        line, r -> mode
       }
       ;
       Render__flat(&(flat), elem);
-      if((* r).out -> pos + line -> content -> length > _WIDTH){
+      if(r -> out -> pos + line -> content -> length > _WIDTH){
         int _x2c_return_value_22 = 0;
         {
           x2c_cleanup_leave(& _x2c_defer_record_22);
@@ -1691,7 +1691,7 @@ static int Render__fits(Render * r, Var elem){
         }
 
       }
-      Buffer_write_len((* r).out, line -> content -> bytes, line -> content -> length);
+      Buffer_write_len(r -> out, line -> content -> bytes, line -> content -> length);
       {
         int _x2c_return_value_23 = 1;
         {
@@ -1715,7 +1715,7 @@ size_t Buffer_tabstop(Buffer);
 
 static void Render__items(Render * r, Var elem){
   List lst = Var_list(elem);
-  Buffer out =(* r).out;
+  Buffer out = r -> out;
   RenderPath path;
   if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
   {
@@ -1733,7 +1733,7 @@ static void Render__items(Render * r, Var elem){
       if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
       _open(lst, out);
       for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        Render__value(&((* r)), List_car(l));
+        Render__value(r, List_car(l));
         if(List_truth(List_cdr(l))) Buffer_write(out, " ");
       }
       _close(out);
@@ -1744,14 +1744,14 @@ static void Render__items(Render * r, Var elem){
 }
 
 static void Render__flat(Render * r, Var elem){
-  if(! Var_is_row(elem, 9, 7, 4)) Render__write_leaf(&((* r)), elem);
-  else if(! List_truth(Var_list(elem))) Buffer_write((* r).out, "()");
-  else Render__flat_items(&((* r)), elem);
+  if(! Var_is_row(elem, 9, 7, 4)) Render__write_leaf(r, elem);
+  else if(! List_truth(Var_list(elem))) Buffer_write(r -> out, "()");
+  else Render__flat_items(r, elem);
 }
 
 static void Render__flat_items(Render * r, Var elem){
   List lst = Var_list(elem);
-  Buffer out =(* r).out;
+  Buffer out = r -> out;
   RenderPath path;
   if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
   {
@@ -1768,7 +1768,7 @@ static void Render__flat_items(Render * r, Var elem){
     {
       _open(lst, out);
       for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        Render__flat(&((* r)), List_car(l));
+        Render__flat(r, List_car(l));
         if(List_truth(List_cdr(l))) Buffer_write(out, " ");
       }
       _close(out);
@@ -1785,9 +1785,9 @@ Buffer Atom_write_repr(Atom, Buffer);
 Buffer Var_write_repr(Var, Buffer);
 
 static void Render__write_leaf(Render * r, Var elem){
-  if((* r).mode == 40228) Var_write_str(elem, (* r).out);
-  else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, (* r).out);
-  else Var_write_repr(elem, (* r).out);
+  if(r -> mode == 40228) Var_write_str(elem, r -> out);
+  else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, r -> out);
+  else Var_write_repr(elem, r -> out);
 }
 
 Buffer Buffer_pad(Buffer);

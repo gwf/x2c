@@ -19,6 +19,7 @@
 #endif
 
 #pragma private
+$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "type.x"
@@ -697,9 +698,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
     time, and `why`. */
 void Compiler.refuse_meta_call(
   Compiler c, String name, Token site, String why) {
-  c.report_error(
-    <macro>, "this function cannot run at compile time", site,
-    %("function: $name" "reason: $why"));
+  $report(c, "macro.function.unavailable", site, name, why);
 }
 
 /** Reports at `site` that the group function `name` cannot run at compile

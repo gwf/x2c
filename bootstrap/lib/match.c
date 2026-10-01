@@ -137,7 +137,7 @@ typedef struct MatchWalk{
   List bindings, results;
   int error;
 }
-MatchWalk;
+* MatchWalk;
 
 static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings);
 
@@ -145,23 +145,23 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results);
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out);
 
-static int MatchWalk__test(MatchWalk * walk, Var node);
+static int MatchWalk__test(MatchWalk walk, Var node);
 
-static List MatchWalk__hit(MatchWalk * walk, Var node);
+static List MatchWalk__hit(MatchWalk walk, Var node);
 
 static Var _spine_get(Block spine, size_t index);
 
-static int MatchWalk__all(MatchWalk * walk, Var input, int include_empty);
+static int MatchWalk__all(MatchWalk walk, Var input, int include_empty);
 
-static void MatchWalk__answer(MatchWalk * walk, size_t base);
+static void MatchWalk__answer(MatchWalk walk, size_t base);
 
-static int MatchWalk__first(MatchWalk * walk, Var input, int include_empty);
+static int MatchWalk__first(MatchWalk walk, Var input, int include_empty);
 
-static int MatchWalk__settle(MatchWalk * walk, Var node);
+static int MatchWalk__settle(MatchWalk walk, Var node);
 
-static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty);
+static Var MatchWalk__rewrite(MatchWalk walk, Var node, int include_empty);
 
-static Var MatchWalk__replace_node(MatchWalk * walk, Var node);
+static Var MatchWalk__replace_node(MatchWalk walk, Var node);
 
 static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out);
 
@@ -428,7 +428,7 @@ int Var_is_nil(Var);
 
 static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
-    MatchLayoutBuilder__atom(&((* b)), pattern);
+    MatchLayoutBuilder__atom(b, pattern);
     return;
   }
   if(Var_is_nil(pattern)) return;
@@ -437,49 +437,49 @@ static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
   if(Var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
     List args = List_cdr(list);
-    if(List_truth(args) && Var_is_list_binder(List_car(args)))(* b).leading_list_binder = 1;
+    if(List_truth(args) && Var_is_list_binder(List_car(args))) b -> leading_list_binder = 1;
   }
   List parts = Var_equal(head, Symbol_var(1059020478773725)) ? List_cdr(list) : list;
   int predicate_form = Var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
     if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_predicate(part)) continue;
-    MatchLayoutBuilder__collect(&((* b)), part);
-    if((* b).malformed_binder) return;
+    MatchLayoutBuilder__collect(b, part);
+    if(b -> malformed_binder) return;
   }
 
 }
 
 static void MatchLayoutBuilder__atom(MatchLayoutBuilder * b, Var atom){
-  if(_malformed_binder(atom))(* b).malformed_binder = 1;
-  else if(_named_binder(atom) && MatchLayoutBuilder__add(&((* b)), atom) < 0)(* b).past_capacity = 1;
+  if(_malformed_binder(atom)) b -> malformed_binder = 1;
+  else if(_named_binder(atom) && MatchLayoutBuilder__add(b, atom) < 0) b -> past_capacity = 1;
 }
 
 static int MatchLayoutBuilder__add(MatchLayoutBuilder * b, Atom binder){
-  for(int i = 0;  i <(* b).count;  i ++) if((* b).binders[i].u64 == binder.u64) return i;
-  if((* b).count >= MACHINE_BINDER_MAX) return - 1;
-  (* b).binders[(* b).count] = binder;
-  return(* b).count ++;
+  for(int i = 0;  i < b -> count;  i ++) if(b -> binders[i].u64 == binder.u64) return i;
+  if(b -> count >= MACHINE_BINDER_MAX) return - 1;
+  b -> binders[b -> count] = binder;
+  return b -> count ++;
 }
 
 static const char * MatchLayoutBuilder__malformed(MatchLayoutBuilder * b){
-  if((* b).malformed_binder) return "binder-name";
-  if((* b).leading_list_binder) return "leading-list-binder-in-guard";
-  if((* b).past_capacity) return "binder-capacity";
+  if(b -> malformed_binder) return "binder-name";
+  if(b -> leading_list_binder) return "leading-list-binder-in-guard";
+  if(b -> past_capacity) return "binder-capacity";
   return NULL;
 }
 
 void * Scope_calloc(size_t, size_t);
 
 static MatchCaptureLayout MatchLayoutBuilder__layout(MatchLayoutBuilder * b, Var normalized, const char * malformed){
-  size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) *(* b).count;
+  size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b -> count;
   MatchCaptureLayout layout = Scope_calloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
-  layout -> binder_count =(* b).count;
+  layout -> binder_count = b -> count;
   layout -> status = malformed ? MACHINE_MALFORMED : MACHINE_PREPARED;
   layout -> reason = malformed ? malformed : "prepared";
   layout -> normalized = normalized;
-  if((* b).count) memcpy(layout -> binders, (* b).binders, sizeof(Atom) *(* b).count);
+  if(b -> count) memcpy(layout -> binders, b -> binders, sizeof(Atom) * b -> count);
   return layout;
 }
 
@@ -778,16 +778,17 @@ static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * 
     _x2c_macro_values_0, 0, MACHINE_BINDER_MAX
   }
   ;
-  MatchWalk walk ={
+  struct MatchWalk _x2c_macro_storage_3 ={
     plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine, Block_new(sizeof(Var))
   }
   ;
-  int result = MatchWalk__first(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
+  MatchWalk walk = & _x2c_macro_storage_3;
+  int result = MatchWalk__first(walk, List_var(input), 1);
+  Block_free(walk -> spine);
   MatchMachine_dispose(machine);
   if(result == 1){
-    * out_match = walk.found;
-    * out_bindings = walk.bindings;
+    * out_match = walk -> found;
+    * out_bindings = walk -> bindings;
   }
   return result;
 }
@@ -799,8 +800,8 @@ int MatchPlan_search(MatchPlan plan, List input, List * out_results){
 }
 
 static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
-  struct MatchMachine _x2c_macro_storage_3;
-  MatchMachine machine = & _x2c_macro_storage_3;
+  struct MatchMachine _x2c_macro_storage_4;
+  MatchMachine machine = & _x2c_macro_storage_4;
   MatchMachine_open(machine);
   machine -> stats = NULL;
   Var _x2c_macro_values_1[MACHINE_BINDER_MAX];
@@ -808,15 +809,16 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
     _x2c_macro_values_1, 0, MACHINE_BINDER_MAX
   }
   ;
-  MatchWalk walk ={
+  struct MatchWalk _x2c_macro_storage_5 ={
     plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine, Block_new(sizeof(Var))
   }
   ;
-  int status = MatchWalk__all(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
+  MatchWalk walk = & _x2c_macro_storage_5;
+  int status = MatchWalk__all(walk, List_var(input), 1);
+  Block_free(walk -> spine);
   MatchMachine_dispose(machine);
   if(status < 0) return - 1;
-  (* out_results) = walk.results;
+  (* out_results) = walk -> results;
   return 1;
 }
 
@@ -827,8 +829,8 @@ int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * ou
 }
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out){
-  struct MatchMachine _x2c_macro_storage_4;
-  MatchMachine machine = & _x2c_macro_storage_4;
+  struct MatchMachine _x2c_macro_storage_6;
+  MatchMachine machine = & _x2c_macro_storage_6;
   MatchMachine_open(machine);
   machine -> stats = NULL;
   Var _x2c_macro_values_2[MACHINE_BINDER_MAX];
@@ -836,33 +838,34 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
     _x2c_macro_values_2, 0, MACHINE_BINDER_MAX
   }
   ;
-  MatchWalk walk ={
+  struct MatchWalk _x2c_macro_storage_7 ={
     plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine, Block_new(sizeof(Var))
   }
   ;
-  walk.template = template;
-  Var result = MatchWalk__rewrite(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
+  MatchWalk walk = & _x2c_macro_storage_7;
+  walk -> template = template;
+  Var result = MatchWalk__rewrite(walk, List_var(input), 1);
+  Block_free(walk -> spine);
   MatchMachine_dispose(machine);
-  if(walk.error) return - 1;
+  if(walk -> error) return - 1;
   * out = Var_list(result);
   return 1;
 }
 
-static int MatchWalk__test(MatchWalk * walk, Var node){
-  return _run_capture((* walk).view, (* walk).m, node, (* walk).captures);
+static int MatchWalk__test(MatchWalk walk, Var node){
+  return _run_capture(walk -> view, walk -> m, node, walk -> captures);
 }
 
-static List MatchWalk__hit(MatchWalk * walk, Var node){
-  return cons(List_var(cons(_1, cons(node, NULL))), MatchCaptureLayout__publish((* walk).plan -> layout, (* walk).captures));
+static List MatchWalk__hit(MatchWalk walk, Var node){
+  return cons(List_var(cons(_1, cons(node, NULL))), MatchCaptureLayout__publish(walk -> plan -> layout, walk -> captures));
 }
 
 static Var _spine_get(Block spine, size_t index){
   return((Var *) spine -> bytes)[index];
 }
 
-static int MatchWalk__all(MatchWalk * walk, Var input, int include_empty){
-  Block hits =(* walk).spine;
+static int MatchWalk__all(MatchWalk walk, Var input, int include_empty){
+  Block hits = walk -> spine;
   size_t base = hits -> length;
   int visit_tail = 1;
   while(Var_is_row(input, 9, 7, 4)){
@@ -871,34 +874,34 @@ static int MatchWalk__all(MatchWalk * walk, Var input, int include_empty){
       visit_tail = include_empty;
       break;
     }
-    if(MatchWalk__all(&((* walk)), List_car(lst), 1) < 0) return - 1;
-    int status = MatchWalk__test(&((* walk)), input);
+    if(MatchWalk__all(walk, List_car(lst), 1) < 0) return - 1;
+    int status = MatchWalk__test(walk, input);
     if(status < 0) return - 1;
     if(status == 1){
-      Var hit = List_var(MatchWalk__hit(&((* walk)), input));
+      Var hit = List_var(MatchWalk__hit(walk, input));
       Block_push(hits, & hit);
     }
     input = List_var(List_cdr(lst));
     include_empty = 0;
   }
   if(visit_tail){
-    int status = MatchWalk__test(&((* walk)), input);
+    int status = MatchWalk__test(walk, input);
     if(status < 0) return - 1;
-    if(status == 1)(* walk).results = cons(List_var(MatchWalk__hit(&((* walk)), input)), (* walk).results);
+    if(status == 1) walk -> results = cons(List_var(MatchWalk__hit(walk, input)), walk -> results);
   }
-  MatchWalk__answer(&((* walk)), base);
+  MatchWalk__answer(walk, base);
   return 0;
 }
 
 void Block_truncate(Block, size_t);
 
-static void MatchWalk__answer(MatchWalk * walk, size_t base){
-  Block hits =(* walk).spine;
-  for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(_spine_get(hits, i - 1), (* walk).results);
+static void MatchWalk__answer(MatchWalk walk, size_t base){
+  Block hits = walk -> spine;
+  for(size_t i = hits -> length;  i > base;  i --) walk -> results = cons(_spine_get(hits, i - 1), walk -> results);
   Block_truncate(hits, base);
 }
 
-static int MatchWalk__first(MatchWalk * walk, Var input, int include_empty){
+static int MatchWalk__first(MatchWalk walk, Var input, int include_empty){
   Var last_cell =((void) 0, Void);
   int have_cell = 0, visit_tail = 1;
   while(Var_is_row(input, 9, 7, 4)){
@@ -907,9 +910,9 @@ static int MatchWalk__first(MatchWalk * walk, Var input, int include_empty){
       visit_tail = include_empty;
       break;
     }
-    int found = MatchWalk__first(&((* walk)), List_car(lst), 1);
+    int found = MatchWalk__first(walk, List_car(lst), 1);
     if(found) return found;
-    int status = MatchWalk__test(&((* walk)), input);
+    int status = MatchWalk__test(walk, input);
     if(status < 0) return - 1;
     if(status == 1){
       last_cell = input;
@@ -919,22 +922,22 @@ static int MatchWalk__first(MatchWalk * walk, Var input, int include_empty){
     include_empty = 0;
   }
   if(visit_tail){
-    int status = MatchWalk__settle(&((* walk)), input);
+    int status = MatchWalk__settle(walk, input);
     if(status) return status;
   }
-  return have_cell ? MatchWalk__settle(&((* walk)), last_cell) : 0;
+  return have_cell ? MatchWalk__settle(walk, last_cell) : 0;
 }
 
-static int MatchWalk__settle(MatchWalk * walk, Var node){
-  int status = MatchWalk__test(&((* walk)), node);
+static int MatchWalk__settle(MatchWalk walk, Var node){
+  int status = MatchWalk__test(walk, node);
   if(status != 1) return status;
-  (* walk).found = node;
-  (* walk).bindings = MatchCaptureLayout__publish((* walk).plan -> layout, (* walk).captures);
+  walk -> found = node;
+  walk -> bindings = MatchCaptureLayout__publish(walk -> plan -> layout, walk -> captures);
   return 1;
 }
 
-static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty){
-  Block heads =(* walk).spine;
+static Var MatchWalk__rewrite(MatchWalk walk, Var node, int include_empty){
+  Block heads = walk -> spine;
   size_t base = heads -> length;
   int visit_tail = 1;
   while(Var_is_row(node, 9, 7, 4)){
@@ -943,29 +946,29 @@ static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty){
       visit_tail = include_empty;
       break;
     }
-    Var head = MatchWalk__rewrite(&((* walk)), List_car(lst), 1);
-    if((* walk).error) return node;
+    Var head = MatchWalk__rewrite(walk, List_car(lst), 1);
+    if(walk -> error) return node;
     Block_push(heads, & head);
     node = List_var(List_cdr(lst));
     include_empty = 0;
   }
-  if(visit_tail) node = MatchWalk__replace_node(&((* walk)), node);
-  for(size_t i = heads -> length;  i > base && !(* walk).error;  i --){
+  if(visit_tail) node = MatchWalk__replace_node(walk, node);
+  for(size_t i = heads -> length;  i > base && ! walk -> error;  i --){
     List tail = Var_list(node);
-    node = MatchWalk__replace_node(&((* walk)), List_var(cons(_spine_get(heads, i - 1), tail)));
+    node = MatchWalk__replace_node(walk, List_var(cons(_spine_get(heads, i - 1), tail)));
   }
   Block_truncate(heads, base);
   return node;
 }
 
-static Var MatchWalk__replace_node(MatchWalk * walk, Var node){
-  int status = MatchWalk__test(&((* walk)), node);
+static Var MatchWalk__replace_node(MatchWalk walk, Var node){
+  int status = MatchWalk__test(walk, node);
   if(status < 0){
-    (* walk).error = 1;
+    walk -> error = 1;
     return node;
   }
   if(status == 0) return node;
-  return _capture_replace((* walk).template, (* walk).plan -> layout, (* walk).captures);
+  return _capture_replace(walk -> template, walk -> plan -> layout, walk -> captures);
 }
 
 int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out){

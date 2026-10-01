@@ -134,9 +134,9 @@ int scan_number_typed(char * s, Symbol * type){
   char * number = s + sign;
   int n;
   Symbol found = 19368;
-  if(number[0] != '0' || _decimal_zero(number)) n = _decimal_number(number, &(found));
+  if(number[0] != '0' || _decimal_zero(number)) n = _decimal_number(number, & found);
   else{
-    n = _prefixed_number(number, &(found));
+    n = _prefixed_number(number, & found);
     if(n < 0) return - 1;
   }
   if(n <= 0) return sign ? 0 : n;
@@ -163,7 +163,7 @@ static int _decimal_zero(char * s){
 static int _prefixed_number(char * s, Symbol * type){
   int n;
   switch(s[1]){
-    case 'x' : case 'X' : n = _hex_number(s + 2, &((* type)));
+    case 'x' : case 'X' : n = _hex_number(s + 2, type);
     break;
     case 'b' : case 'B' : n = _radix_integer(s + 2, 2, 0);
     break;
@@ -190,13 +190,13 @@ static int _hex_number(char * s, Symbol * type){
   if(s[n] == 'p' || s[n] == 'P'){
     int exponent = _exponent(s + n + 1);
     if(exponent < 0) return - 1;
-    (* type) = 13400168;
+    if(type) * type = 13400168;
     return n + 1 + exponent;
   }
   if(has_point) return - 1;
   int suffix = _int_suffix(s + n);
   if(suffix < 0) return - 1;
-  (* type) = 19368;
+  if(type) * type = 19368;
   return n + suffix;
 }
 
@@ -206,19 +206,19 @@ static int _decimal_number(char * s, Symbol * type){
   if(s[n] == '.'){
     int fraction = _float_tail(s + n + 1, n > 0);
     if(fraction < 0) return - 1;
-    if(type)(* type) = 13400168;
+    if(type) * type = 13400168;
     return n + 1 + fraction;
   }
   if(! n) return 0;
   if(s[n] == 'e' || s[n] == 'E'){
     int exponent = _exponent(s + n + 1);
     if(exponent < 0) return - 1;
-    if(type)(* type) = 13400168;
+    if(type) * type = 13400168;
     return n + 1 + exponent;
   }
   int suffix = _int_suffix(s + n);
   if(suffix < 0) return - 1;
-  if(type)(* type) = 19368;
+  if(type) * type = 19368;
   return n + suffix;
 }
 

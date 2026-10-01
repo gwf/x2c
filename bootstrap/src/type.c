@@ -986,20 +986,20 @@ Type Type_scalar(Type t){
 }
 
 static int Specifiers_add(Specifiers * s, Symbol symbol){
-  if(_omit_specifier(symbol, 0)) return 1; (* s).count ++;  switch(symbol){
-    case 1294430536 :(* s).sign = - 1; (* s).signs ++;  break;  case 1474468213064 :(* s).sign = 1; (* s).signs ++;  break;  case 40402088 :(* s).shorts ++;  break;  case 818062 :(* s).longs ++;  break;  case 19368 :(* s).ints ++;  break;  case 213092 :(* s).chars ++;  break;  case 13400168 :(* s).floats ++;  break;  case 301273866 :(* s).doubles ++;  break;  case 1473096 :(* s).voids ++;  break;  default: return 0;
+  if(_omit_specifier(symbol, 0)) return 1;  s -> count ++;  switch(symbol){
+    case 1294430536 : s -> sign = - 1;  s -> signs ++;  break;  case 1474468213064 : s -> sign = 1;  s -> signs ++;  break;  case 40402088 : s -> shorts ++;  break;  case 818062 : s -> longs ++;  break;  case 19368 : s -> ints ++;  break;  case 213092 : s -> chars ++;  break;  case 13400168 : s -> floats ++;  break;  case 301273866 : s -> doubles ++;  break;  case 1473096 : s -> voids ++;  break;  default: return 0;
   }
   return 1;
 }
 
 static Type Specifiers_spelling(Specifiers * s){
-  if(!(* s).count ||(* s).signs > 1 ||(* s).shorts > 1 ||(* s).longs > 2 ||(* s).ints > 1 ||(* s).chars > 1 ||(* s).floats > 1 ||(* s).doubles > 1 ||(* s).voids > 1) return NULL;  if((* s).voids) return(* s).count == 1 ? List_type(_350) : NULL;  if((* s).floats) return(* s).count == 1 ? List_type(_169) : NULL;  if((* s).doubles){
-    if((* s).longs <= 1 &&(* s).count ==(* s).doubles +(* s).longs) return List_type((* s).longs ? _188 : _179);  return NULL;
+  if(! s -> count || s -> signs > 1 || s -> shorts > 1 || s -> longs > 2 || s -> ints > 1 || s -> chars > 1 || s -> floats > 1 || s -> doubles > 1 || s -> voids > 1) return NULL;  if(s -> voids) return s -> count == 1 ? List_type(_350) : NULL;  if(s -> floats) return s -> count == 1 ? List_type(_169) : NULL;  if(s -> doubles){
+    if(s -> longs <= 1 && s -> count == s -> doubles + s -> longs) return List_type(s -> longs ? _188 : _179);  return NULL;
   }
-  if((* s).chars){
-    if((* s).shorts ||(* s).longs ||(* s).ints ||(* s).count !=(* s).chars +(* s).signs) return NULL;  if((* s).sign > 0) return List_type(_85);  if((* s).sign < 0) return List_type(_78);  return List_type(_68);
+  if(s -> chars){
+    if(s -> shorts || s -> longs || s -> ints || s -> count != s -> chars + s -> signs) return NULL;  if(s -> sign > 0) return List_type(_85);  if(s -> sign < 0) return List_type(_78);  return List_type(_68);
   }
-  if((* s).shorts &&(* s).longs) return NULL;  if((* s).count !=(* s).signs +(* s).shorts +(* s).longs +(* s).ints) return NULL;  if((* s).shorts) return List_type((* s).sign > 0 ? _104 : _95);  if((* s).longs == 1) return List_type((* s).sign > 0 ? _141 : _133);  if((* s).longs == 2) return List_type((* s).sign > 0 ? _159 : _150);  return List_type((* s).sign > 0 ? _123 : _114);
+  if(s -> shorts && s -> longs) return NULL;  if(s -> count != s -> signs + s -> shorts + s -> longs + s -> ints) return NULL;  if(s -> shorts) return List_type(s -> sign > 0 ? _104 : _95);  if(s -> longs == 1) return List_type(s -> sign > 0 ? _141 : _133);  if(s -> longs == 2) return List_type(s -> sign > 0 ? _159 : _150);  return List_type(s -> sign > 0 ? _123 : _114);
 }
 
 Var Map_getindex(Map, Var);

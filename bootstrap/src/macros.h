@@ -37,7 +37,7 @@ void Compiler_parse_keyword_definition(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
-Symbol Compiler_macro_invocation_collection(Compiler c);
+int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 void Compiler_skip_macro_invocation(Compiler c);
 

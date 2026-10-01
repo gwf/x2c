@@ -574,27 +574,27 @@ String String_new(const char *);
 
 static void Manifest_header(Manifest * m, char * line){
   int length = strlen(line);
-  if(length < 3 || line[length - 1] != ']') _error((* m).project, (* m).line, _69);
+  if(length < 3 || line[length - 1] != ']') _error(m -> project, m -> line, _69);
   line[length - 1] = 0;
   String name = String_new(line + 1);
-  if(String_equal(name, _2)) Manifest_enter_project(&((* m)));
-  else if(String_equal(name, _3)) Manifest_enter_dependencies(&((* m)));
-  else Manifest_target_header(&((* m)), name);
+  if(String_equal(name, _2)) Manifest_enter_project(m);
+  else if(String_equal(name, _3)) Manifest_enter_dependencies(m);
+  else Manifest_target_header(m, name);
 }
 
 static void Manifest_enter_project(Manifest * m){
-  Project p =(* m).project;
-  if(p -> declared) _error(p, (* m).line, _70);
+  Project p = m -> project;
+  if(p -> declared) _error(p, m -> line, _70);
   p -> declared = 1;
-  (* m).section = PROJECT;
+  m -> section = PROJECT;
 }
 
 static void Manifest_enter_dependencies(Manifest * m){
-  Project p =(* m).project;
-  if(p -> dependency_declared) _error(p, (* m).line, _71);
+  Project p = m -> project;
+  if(p -> dependency_declared) _error(p, m -> line, _71);
   p -> dependency_declared = 1;
   p -> dependency_seen = Map_new();
-  (* m).section = DEPENDENCIES;
+  m -> section = DEPENDENCIES;
 }
 
 String String_remove_prefix(String, String);
@@ -604,54 +604,54 @@ int String_find(String, String);
 int String_startswith(String, String);
 
 static void Manifest_target_header(Manifest * m, String header){
-  Project p =(* m).project;
+  Project p = m -> project;
   String name = String_remove_prefix(header, _72), profile = NULL;
   int split = String_find(name, _73);
   if(split >= 0){
     profile = String_getslice(name, split + 9, -2147483648, 1);
     name = String_getslice(name, -2147483648, split, 1);
   }
-  if(! String_startswith(header, _72) || ! _name_ok(name) ||(split >= 0 && ! _name_ok(profile))) _error(p, (* m).line, _74);
+  if(! String_startswith(header, _72) || ! _name_ok(name) ||(split >= 0 && ! _name_ok(profile))) _error(p, m -> line, _74);
   ProjectTarget target = _target(p, name);
   if(! target) target = _new_target(p, name);
-  if(split < 0) Manifest_enter_target(&((* m)), target);
-  else Manifest_enter_profile(&((* m)), target, profile);
+  if(split < 0) Manifest_enter_target(m, target);
+  else Manifest_enter_profile(m, target, profile);
 }
 
 static void Manifest_enter_target(Manifest * m, ProjectTarget target){
-  if(target -> declared) _error_name((* m).project, (* m).line, _75, target -> name);
+  if(target -> declared) _error_name(m -> project, m -> line, _75, target -> name);
   target -> declared = 1;
-  (* m).section = TARGET;
-  (* m).target = target;
+  m -> section = TARGET;
+  m -> target = target;
 }
 
 static void Manifest_enter_profile(Manifest * m, ProjectTarget target, String name){
   ProjectProfile profile = _profile(target, name);
   if(! profile) profile = _new_profile(target, name);
-  if(profile -> declared) _error_name((* m).project, (* m).line, _76, name);
+  if(profile -> declared) _error_name(m -> project, m -> line, _76, name);
   profile -> declared = 1;
-  (* m).section = PROFILE;
-  (* m).profile = profile;
+  m -> section = PROFILE;
+  m -> profile = profile;
 }
 
 static void Manifest_field(Manifest * m, char * line){
-  Project p =(* m).project;
-  if((* m).section == NONE) _error(p, (* m).line, _77);
+  Project p = m -> project;
+  if(m -> section == NONE) _error(p, m -> line, _77);
   char * equals = strchr(line, '=');
-  if(! equals) _error(p, (* m).line, _78);
+  if(! equals) _error(p, m -> line, _78);
   * equals = 0;
   String key = String_new(_trim(line)), value = String_new(_trim(equals + 1));
-  if(! _name_ok(key)) _error(p, (* m).line, _79);
-  Manifest_claim(&((* m)), key);
-  (* m).key = key;
-  (* m).value = value;
-  (* m).start =(* m).line;
-  Manifest_settle(&((* m)));
+  if(! _name_ok(key)) _error(p, m -> line, _79);
+  Manifest_claim(m, key);
+  m -> key = key;
+  m -> value = value;
+  m -> start = m -> line;
+  Manifest_settle(m);
 }
 
 static void Manifest_extend(Manifest * m, char * line){
-  (* m).value = String_join(NULL, cons(String_var((* m).value), cons(String_var(_4), cons(String_var(String_new(line)), NULL))));
-  Manifest_settle(&((* m)));
+  m -> value = String_join(NULL, cons(String_var(m -> value), cons(String_var(_4), cons(String_var(String_new(line)), NULL))));
+  Manifest_settle(m);
 }
 
 int Map_contains(Map, Var);
@@ -661,31 +661,31 @@ Var Map_setindex(Map, Var, Var);
 Var int_var(int);
 
 static void Manifest_claim(Manifest * m, String key){
-  Map keys = Manifest_keys(&((* m)));
-  if(Map_contains(keys, String_var(key))) _error((* m).project, (* m).line, _80);
+  Map keys = Manifest_keys(m);
+  if(Map_contains(keys, String_var(key))) _error(m -> project, m -> line, _80);
   Map_setindex(keys, String_var(key), int_var(1));
 }
 
 static Map Manifest_keys(Manifest * m){
-  if((* m).section == PROJECT) return(* m).project -> seen;
-  if((* m).section == DEPENDENCIES) return(* m).project -> dependency_seen;
-  return(* m).section == TARGET ?(* m).target -> seen :(* m).profile -> seen;
+  if(m -> section == PROJECT) return m -> project -> seen;
+  if(m -> section == DEPENDENCIES) return m -> project -> dependency_seen;
+  return m -> section == TARGET ? m -> target -> seen : m -> profile -> seen;
 }
 
 static void Manifest_settle(Manifest * m){
-  if(_array_open((* m).value)) return;
-  Manifest_set(&((* m)));
-  (* m).key = NULL;
+  if(_array_open(m -> value)) return;
+  Manifest_set(m);
+  m -> key = NULL;
 }
 
 static void Manifest_set(Manifest * m){
-  Project p =(* m).project;
-  int line =(* m).start;
-  String key =(* m).key, value =(* m).value;
-  if((* m).section == PROJECT) _set_project_field(p, line, key, value);
-  else if((* m).section == DEPENDENCIES) _set_dependency(p, line, key, value);
-  else if((* m).section == TARGET) _set_target_field(p, (* m).target, line, key, value);
-  else _set_profile_field(p, (* m).profile, line, key, value);
+  Project p = m -> project;
+  int line = m -> start;
+  String key = m -> key, value = m -> value;
+  if(m -> section == PROJECT) _set_project_field(p, line, key, value);
+  else if(m -> section == DEPENDENCIES) _set_dependency(p, line, key, value);
+  else if(m -> section == TARGET) _set_target_field(p, m -> target, line, key, value);
+  else _set_profile_field(p, m -> profile, line, key, value);
 }
 
 static void _set_project_field(Project p, int line, String key, String value){
@@ -1038,7 +1038,7 @@ static List _read_lock(String path){
           }
 
         }
-        __builtin_unreachable();
+
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);

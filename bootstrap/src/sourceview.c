@@ -343,7 +343,7 @@ int SourceView_read(SourceView sources, String path, String volatile * text){
           }
 
         }
-        __builtin_unreachable();
+
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_0);

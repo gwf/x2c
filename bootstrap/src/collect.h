@@ -11,8 +11,6 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 
 String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
 
-List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
-
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
 void Compiler_collect_package(Compiler c, String name, Token token);

@@ -12,6 +12,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
+$(import "../src/error-reports.xmacro")
 
 // symbol scopes
 
@@ -507,14 +508,11 @@ static String _declared_spelling(List key) {
    generated spellings are the compiler's own output. */
 static void Compiler._check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling)) {
-    String message = %"'$spelling' is reserved for compiler-generated names";
-    c.report_error(<parse>, message, c.token, NULL);
+    $report(c, "parse.name.reserved", spelling);
   }
   String owner = c._package_reserved_owner(spelling);
   if (owner)
-    c.report_error(
-      <parse>, %"'$spelling' is reserved for imported package '$owner'",
-      c.token, NULL);
+    $report(c, "parse.name.package", spelling, owner);
 }
 
 // Checked once per declaration, with no prepass over the token stream.
@@ -714,9 +712,7 @@ void Compiler.register_package_member(
   if (bound is not void && bound.list() === binding) return;
   String spelling = %"${name}__$member";
   if (!c.sym.get_exact(%($spelling)))
-    c.report_error(
-      <parse>, %"package '$name' has no public name '$member'",
-      member_token, NULL);
+    $report(c, "parse.package.member", member_token, name, member);
   c._check_package_binding("name", local, local_token);
   c.package_members[local] = binding;
 }
@@ -735,13 +731,9 @@ static void Compiler._check_package_binding(
     bound = %"$package.$member_name";
   }
   if (bound)
-    c.report_error(
-      <parse>, %"package $kind '$local' is already bound",
-      token, %( "bound to: $bound" ));
+    $report(c, "parse.package.bound", token, kind, local, bound);
   if (c.sym.get_exact(%($local)))
-    c.report_error(
-      <parse>, %"package $kind '$local' collides with a declared name",
-      token, NULL);
+    $report(c, "parse.package.collision", token, kind, local);
 }
 
 /** Returns a visible `with` name's package-prefixed spelling, or `NULL`.
@@ -865,9 +857,7 @@ static Type Sym._resolve_chain(
    legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
    real. */
 static void Sym._typedef_budget_error(Sym s, Type origin) {
-  String message =
-    %"typedef chain too deep (possible cycle) resolving ${origin.repr()}";
-  s.c.report_error(<type>, message, NULL, NULL);
+  $report(s.c, "type.typedef.depth", origin);
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling

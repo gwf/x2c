@@ -71,16 +71,16 @@ static inline int _end(String str, String sep, int start, int * next){
   int length = String_len(str);
   if(! String_truth(str) || start < 0 || start > length) return - 1;
   if(! String_truth(sep)){
-    (* next) = - 1;
+    * next = - 1;
     return length;
   }
   const char * found = strstr(str + start, sep);
   if(! found){
-    (* next) = - 1;
+    * next = - 1;
     return length;
   }
   int end =(int)(found - str);
-  (* next) = end + String_len(sep);
+  * next = end + String_len(sep);
   return end;
 }
 
@@ -92,8 +92,8 @@ static inline int _line_end(String str, int start, int keep_ends, int * next){
   while(end < length && text[end] != '\n' && text[end] != '\r') end ++;
   int ending = 0;
   if(end < length) ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n' ? 2 : 1;
-  (* next) = end + ending;
-  return keep_ends ?(* next) : end;
+  * next = end + ending;
+  return keep_ends ? * next : end;
 }
 
 Array Array_new(void);
@@ -112,7 +112,7 @@ List String_split_n(String str, String sep, int max_splits){
   int start = 0, splits = 0;
   while(start >= 0){
     int next = - 1;
-    int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : _end(str, sep, start, &(next));
+    int end = max_splits >= 0 && splits >= max_splits ? String_len(str) : _end(str, sep, start, & next);
     String field = String_new_len(str + start, end - start);
     Array_push(results, String_var(field));
     start = next;
@@ -130,7 +130,7 @@ List String_split_lines(String str, int keep_ends){
   Array results = Array_new();
   int start = 0;
   while(start < String_len(str)){
-    int next, end = _line_end(str, start, keep_ends, &(next));
+    int next, end = _line_end(str, start, keep_ends, & next);
     String field = String_new_len(str + start, end - start);
     Array_push(results, String_var(field));
     start = next;
@@ -165,7 +165,7 @@ static int _words_next(Split split, int * cursor, String * out){
 
 static int _lines_next(Split split, int * cursor, String * out){
   if(! split || ! String_truth(split -> str)) return 0;
-  int start = * cursor, next, end = _line_end(split -> str, start, 0, &(next));
+  int start = * cursor, next, end = _line_end(split -> str, start, 0, & next);
   if(end < 0) return 0;
   String field = String_new_len(split -> str + start, end - start);
   * out = field;
@@ -176,7 +176,7 @@ static int _lines_next(Split split, int * cursor, String * out){
 static int _splits_next(Split split, int * cursor, String * out){
   if(! split || ! String_truth(split -> str)) return 0;
   int start = * cursor, next;
-  int end = _end(split -> str, split -> sep, start, &(next));
+  int end = _end(split -> str, split -> sep, start, & next);
   if(end < 0) return 0;
   String field = String_new_len(split -> str + start, end - start);
   * out = field;
