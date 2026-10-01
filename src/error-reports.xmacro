@@ -1,0 +1,27 @@
+/* Compiler error templates, selected by stable, descriptive String keys.
+   Captured operands stay runtime expressions; categories remain unchanged. */
+
+meta static Map _error_report_rows(void) => {
+  "parse.token.eof": macro Statement(Expr $c) {
+    $c.report_error(<parse>, "unexpected end of file", $c.token, NULL);
+  },
+  "parse.token.expected": macro Statement(Expr $c, Expr $type) {
+    $c.report_error(<parse>, %"expected '${$type}'", $c.token, NULL);
+  }
+};
+
+meta static List _error_report_expand(
+  List compiler, String key, List arguments) {
+  Map rows = _error_report_rows();
+  Var value = rows[key];
+  if (value is void)
+    x2c_diagnostic_fail(%"unknown error report '$key'", %());
+  Macro selected = value;
+  if (arguments.len() + 1 != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for error report '$key'", %());
+  return %(${Macro_apply(selected, %($compiler @arguments))});
+}
+
+macro Statement $report(Expr $compiler, Literal $key, Expr $arguments...) {
+  $(_error_report_expand $compiler (x2c.literal.value $key) $arguments)...
+}

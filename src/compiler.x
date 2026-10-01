@@ -19,6 +19,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "type.x"
 #include "logger.x"
 #include "sourceview.x"
+#include "meta.x"
 
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
@@ -214,6 +215,7 @@ Var Compiler.var(Compiler c) => (Var) { .p64 = c };
 Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler) as void *;
+$(import "error-reports.xmacro")
 #pragma private
 $(import "../src/grammar.xmacro")
 

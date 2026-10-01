@@ -81,6 +81,29 @@ List x2c_type_members(List type) {
   return rows.reverse();
 }
 
+/* --- src/error-reports.xmacro -------------------------------------------- */
+
+static Map _error_report_rows(void) => {
+  "parse.token.eof": macro Statement(Expr $c) {
+    $c.report_error(<parse>, "unexpected end of file", $c.token, NULL);
+  },
+  "parse.token.expected": macro Statement(Expr $c, Expr $type) {
+    $c.report_error(<parse>, %"expected '${$type}'", $c.token, NULL);
+  }
+};
+
+static List _error_report_expand(
+  List compiler, String key, List arguments) {
+  Map rows = _error_report_rows();
+  Var value = rows[key];
+  if (value is void)
+    x2c_diagnostic_fail(%"unknown error report '$key'", %());
+  Macro selected = value;
+  if (arguments.len() + 1 != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for error report '$key'", %());
+  return %(${Macro_apply(selected, %($compiler @arguments))});
+}
+
 /* --- src/grammar.xmacro -------------------------------------------------- */
 
 static List source_return_type(List node) {
@@ -691,6 +714,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_meta_fail", _meta_fail);
   $linked.row(rows, "_meta_member", _meta_member);
   $linked.row(rows, "x2c_type_members", x2c_type_members);
+  $linked.row(rows, "_error_report_rows", _error_report_rows);
+  $linked.row(rows, "_error_report_expand", _error_report_expand);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_cast_content", source_cast_content);
