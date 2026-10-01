@@ -133,6 +133,10 @@ static List Compiler._parse_conditional_tail(Compiler c, List condition) {
 static List Compiler._parse_binary_ops(Compiler c) =>
   c._parse_binary_level(1);
 
+/* Larger levels of `Symbol.binary_precedence` bind more tightly. The
+   recursive parser descends to level 10 before consuming operators while
+   each level folds left; `is` shares the relational level but is recognized
+   from its identifier spelling. */
 static List Compiler._parse_binary_level(Compiler c, int level) {
   if (level > 10) return c._parse_cast();
   return c._parse_binary_level_tail(level, c._parse_binary_level(level + 1));
@@ -141,7 +145,7 @@ static List Compiler._parse_binary_level(Compiler c, int level) {
 static List Compiler._parse_binary_level_tail(
   Compiler c, int level, List lhs) {
   int first = 1;
-  while (_precedence(c._binary_operator()) == level ||
+  while (c._binary_operator().binary_precedence() == level ||
          (level == 7 && c._is_type_operator())) {
     if (c._is_type_operator()) {
       lhs = c._parse_type_test(lhs);
@@ -165,28 +169,6 @@ static List Compiler._parse_binary_levels_from(Compiler c, List lhs) {
   for (int level = 10; level > 0; level--)
     lhs = c._parse_binary_level_tail(level, lhs);
   return lhs;
-}
-
-/* Larger levels bind more tightly. The recursive parser descends to level 10
-   before consuming operators while each level folds left; `is` shares the
-   relational level but is recognized from its identifier spelling. */
-static inline int _precedence(Symbol op) {
-  switch (op) {
-    case <||>:                 return 1;   // logical OR
-    case <&&>:                 return 2;   // logical AND
-    case <|>:                  return 3;   // bitwise OR
-    case <^>:                  return 4;   // bitwise XOR
-    case <&>:                  return 5;   // bitwise AND
-    case <==>:   case <!=>:
-    case <===>:  case <!==>:   return 6;   // equality
-    case <"<">:  case <">">:   case <in>:
-    case <"<=">: case <">=">:  return 7;   // relational
-    case <"<<">: case <">>">:  return 8;   // shift
-    case <+>:    case <->:     return 9;   // additive
-    case <*>:    case </>:
-    case <%>:    case <@>:     return 10;  // multiplicative
-    default:                   return 0;
-  }
 }
 
 /* The keyword pass leaves `in` a name where a neighbor could also be C, as
@@ -337,41 +319,18 @@ static int Compiler._macro_hole_starts_cast_type(Compiler c, Token after) {
   return _cast_operand_follows(after.type);
 }
 
-static int _cast_operand_follows(Symbol s) {
-  switch (s) {
-    case <ident>:
-    case <in>:
-    case <$>:
-    case <"$(">:
-    case <"(">:
-    case <"{">:
-    case <"%(">:
-    case <"%<<">:
-    case <[>:
-    case <"%[">:
-    case <"%{">:
-    case <"%\"">:
-    case <"%!">:
-    case <lit-char>:
-    case <lit-int>:
-    case <lit-float>:
-    case <lit-char*>:
-    case <lit-atom>:
-    case <lit-symbol>:
-    case <void>:
-    case <sizeof>:
-    case <++>:
-    case <-->:
-    case <!>:
-    case <~>:
-    case <*>:
-    case <&>:
-    case <->:
-    case <+>:
-      return 1;
-  }
-  return 0;
-}
+/* C 6.5.3: `++` and `--` take a unary expression, and the unary operators
+   take a cast expression. A primary expression begins with a name, a
+   literal, a group, or a macro form. */
+static const SymbolSet increments = %<<"++" "--">>;
+static const SymbolSet unary_operators = %<<"&" "*" "+" "-" "~" "!">>;
+static const SymbolSet primary_starts =
+  %<<ident in "$" "$(" "(" "{" "[" "%(" "%<<" "%[" "%{" "%\"" "%!" void
+     lit-char lit-int lit-float lit-char* lit-atom lit-symbol>>;
+
+static int _cast_operand_follows(Symbol s) =>
+  primary_starts.contains(s) || s == <sizeof> || increments.contains(s) ||
+  unary_operators.contains(s);
 
 /* A template typedef is named by the binding each expansion supplies, so a
    cast to it, qualified or not, is typed where the template expands. A
@@ -433,12 +392,10 @@ static List Compiler._parse_unary_op(Compiler c) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return c._parse_sizeof();
-  if (op != <++> && op != <--> && op != <~> && op != <*> &&
-      op != <&> && op != <-> && op != <+> && op != <!>)
-    return c._parse_postfix();
+  int increment = increments.contains(op);
+  if (!increment && !unary_operators.contains(op)) return c._parse_postfix();
   c.next();
-  List operand = op == <++> || op == <-->
-               ? c._parse_unary_op() : c._parse_cast();
+  List operand = increment ? c._parse_unary_op() : c._parse_cast();
   return c.resolve_expression(
     source_operator_expression(NULL, %($op $operand)), origin);
 }
