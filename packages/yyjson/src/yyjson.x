@@ -14,6 +14,7 @@
  */
 
 #include "yyjson-0.12.h"
+$(import "cleanup.xmacro")
 
 typedef enum Json {
   JSON_NAMESPACE
@@ -62,10 +63,13 @@ protocol JsonObjectIndex(JsonObject);
 protocol Iter(JsonArray);
 protocol Iter(JsonObject);
 
-void JsonDocument.cleanup(JsonDocument);
-protocol Cleanup(JsonDocument);
+$cleanup.by(JsonDocument, free);
 
 #pragma private
+
+#include "meta.x"
+
+$(import "json-api.xmacro")
 
 #include <limits.h>
 #include <stdint.h>
@@ -190,114 +194,80 @@ static String _json_string(
   return String.new_len((char *) bytes, (int) length);
 }
 
-static Var _json_from_value(yyjson_val *value, unsigned depth) {
-  if (!value) return void;
-  if (depth > JSON_MAX_DEPTH) {
-    raise %(size-limit (library "yyjson") (operation "parse")
-            (reason "JSON nesting exceeds client limit")
-            (depth $depth));
-  }
-
-  if (yyjson_is_null(value)) return (Var) { .u64 = 0 };
-  if (yyjson_is_bool(value)) return Json.bool(yyjson_get_bool(value));
-  if (yyjson_is_sint(value))
-    return Var.box_long_long((long long) yyjson_get_sint(value));
-  if (yyjson_is_uint(value))
-    return Var.box_ulong_long((unsigned long long) yyjson_get_uint(value));
-  if (yyjson_is_real(value)) return Var.new(<f64>, yyjson_get_real(value));
-  if (yyjson_is_str(value)) {
-    return _json_string(
-      yyjson_get_str(value), yyjson_get_len(value), "parse"
-    );
-  }
-  if (yyjson_is_arr(value)) {
-    Array array = [];
-    yyjson_arr_iter iter = yyjson_arr_iter_with(value);
-    yyjson_val *child = NULL;
-    while ((child = yyjson_arr_iter_next(&iter))) {
-      Var converted = _json_from_value(child, depth + 1);
-      if (converted is void) return void;
-      array.push(converted);
+/* Defines `$reader`, which converts a native tree to Map and Array values
+   through the `$prefix` API family and names `$operation` in its errors.
+   The family's node and iterator types follow. */
+macro Unit $json.reader(
+  Name $reader, Literal $prefix, Literal $operation,
+  Type $node, Type $array_iter, Type $object_iter) {
+  static Var $reader($node *value, unsigned depth) {
+    if (!value) return void;
+    if (depth > JSON_MAX_DEPTH) {
+      raise %(size-limit (library "yyjson") (operation ${$operation})
+              (reason "JSON nesting exceeds client limit")
+              (depth $depth));
     }
-    return array;
-  }
-  if (yyjson_is_obj(value)) {
-    Map map = {};
-    yyjson_obj_iter iter = yyjson_obj_iter_with(value);
-    yyjson_val *key = NULL;
-    while ((key = yyjson_obj_iter_next(&iter))) {
-      String name = _json_string(
-        yyjson_get_str(key), yyjson_get_len(key), "parse"
-      );
-      if (!name && yyjson_get_len(key)) return void;
-      Var converted = _json_from_value(
-        yyjson_obj_iter_get_val(key), depth + 1
-      );
-      if (converted is void) return void;
-      map[name] = converted;
-    }
-    return map;
-  }
 
-  String kind = _json_message(yyjson_get_type_desc(value));
-  raise %(bad-types (library "yyjson") (operation "parse") (type $kind));
+    if ($_json_call($prefix, "is_null", value)) return (Var) { .u64 = 0 };
+    if ($_json_call($prefix, "is_bool", value))
+      return Json.bool($_json_call($prefix, "get_bool", value));
+    if ($_json_call($prefix, "is_sint", value))
+      return Var.box_long_long(
+        (long long) $_json_call($prefix, "get_sint", value));
+    if ($_json_call($prefix, "is_uint", value))
+      return Var.box_ulong_long(
+        (unsigned long long) $_json_call($prefix, "get_uint", value));
+    if ($_json_call($prefix, "is_real", value))
+      return Var.new(<f64>, $_json_call($prefix, "get_real", value));
+    if ($_json_call($prefix, "is_str", value)) {
+      return _json_string(
+        $_json_call($prefix, "get_str", value),
+        $_json_call($prefix, "get_len", value), $operation
+      );
+    }
+    if ($_json_call($prefix, "is_arr", value)) {
+      Array array = [];
+      $array_iter iter = $_json_call($prefix, "arr_iter_with", value);
+      $array_iter *items = &iter;
+      $node *child = NULL;
+      while ((child = $_json_call($prefix, "arr_iter_next", items))) {
+        Var converted = $reader(child, depth + 1);
+        if (converted is void) return void;
+        array.push(converted);
+      }
+      return array;
+    }
+    if ($_json_call($prefix, "is_obj", value)) {
+      Map map = {};
+      $object_iter iter = $_json_call($prefix, "obj_iter_with", value);
+      $object_iter *members = &iter;
+      $node *key = NULL;
+      while ((key = $_json_call($prefix, "obj_iter_next", members))) {
+        String name = _json_string(
+          $_json_call($prefix, "get_str", key),
+          $_json_call($prefix, "get_len", key), $operation
+        );
+        if (!name && $_json_call($prefix, "get_len", key)) return void;
+        Var converted = $reader(
+          $_json_call($prefix, "obj_iter_get_val", key), depth + 1
+        );
+        if (converted is void) return void;
+        map[name] = converted;
+      }
+      return map;
+    }
+
+    String kind =
+      _json_message($_json_call($prefix, "get_type_desc", value));
+    raise %(bad-types (library "yyjson") (operation ${$operation})
+            (type $kind));
+  }
 }
 
-static Var _json_from_mut_value(yyjson_mut_val *value, unsigned depth) {
-  if (!value) return void;
-  if (depth > JSON_MAX_DEPTH) {
-    raise %(size-limit (library "yyjson") (operation "convert")
-            (reason "JSON nesting exceeds client limit")
-            (depth $depth));
-  }
-
-  if (yyjson_mut_is_null(value)) return (Var) { .u64 = 0 };
-  if (yyjson_mut_is_bool(value)) return Json.bool(yyjson_mut_get_bool(value));
-  if (yyjson_mut_is_sint(value))
-    return Var.box_long_long((long long) yyjson_mut_get_sint(value));
-  if (yyjson_mut_is_uint(value))
-    return Var.box_ulong_long((unsigned long long) yyjson_mut_get_uint(value));
-  if (yyjson_mut_is_real(value))
-    return Var.new(<f64>, yyjson_mut_get_real(value));
-  if (yyjson_mut_is_str(value)) {
-    return _json_string(
-      yyjson_mut_get_str(value), yyjson_mut_get_len(value),
-      "convert"
-    );
-  }
-  if (yyjson_mut_is_arr(value)) {
-    Array array = [];
-    yyjson_mut_arr_iter iter = yyjson_mut_arr_iter_with(value);
-    yyjson_mut_val *child = NULL;
-    while ((child = yyjson_mut_arr_iter_next(&iter))) {
-      Var converted = _json_from_mut_value(child, depth + 1);
-      if (converted is void) return void;
-      array.push(converted);
-    }
-    return array;
-  }
-  if (yyjson_mut_is_obj(value)) {
-    Map map = {};
-    yyjson_mut_obj_iter iter = yyjson_mut_obj_iter_with(value);
-    yyjson_mut_val *key = NULL;
-    while ((key = yyjson_mut_obj_iter_next(&iter))) {
-      String name = _json_string(
-        yyjson_mut_get_str(key), yyjson_mut_get_len(key),
-        "convert"
-      );
-      if (!name && yyjson_mut_get_len(key)) return void;
-      Var converted = _json_from_mut_value(
-        yyjson_mut_obj_iter_get_val(key), depth + 1
-      );
-      if (converted is void) return void;
-      map[name] = converted;
-    }
-    return map;
-  }
-
-  String kind = _json_message(yyjson_mut_get_type_desc(value));
-  raise %(bad-types (library "yyjson") (operation "convert") (type $kind));
-}
+$json.reader(_json_from_value, "yyjson_", "parse",
+  yyjson_val, yyjson_arr_iter, yyjson_obj_iter);
+$json.reader(_json_from_mut_value, "yyjson_mut_", "convert",
+  yyjson_mut_val, yyjson_mut_arr_iter, yyjson_mut_obj_iter);
 
 Var Json.parse_opts(String source, yyjson_read_flag options) {
   if (options & YYJSON_READ_INSITU) {
@@ -615,10 +585,6 @@ JsonDocument JsonDocument.free(JsonDocument document) {
     document.native = NULL;
   }
   return NULL;
-}
-
-void JsonDocument.cleanup(JsonDocument json_document) {
-  json_document.free();
 }
 
 yyjson_doc *JsonDocument.native(JsonDocument document) {

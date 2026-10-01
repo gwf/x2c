@@ -20,6 +20,7 @@
 #pragma once
 
 $(import "private-keywords.xmacro")
+$(import "cleanup.xmacro")
 #include "x2c.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
@@ -71,7 +72,7 @@ typedef struct Lisp *Lisp;
 macro Expression $lisp._standard.source() =>
   $(x2c.literal.string (x2c.embed.text "../etc/init.xlisp"));
 
-protocol Cleanup(Lisp);
+$cleanup.by(Lisp, destroy);
 
 #pragma private
 #include "meta.x"
@@ -1719,9 +1720,6 @@ void Lisp.adopt(Lisp lisp, Lisp parent) {
     values that die with that `Context`.
 */
 void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
-
-/** Ends the owned lifetime when a managed local leaves its block. */
-void Lisp.cleanup(Lisp value) { value.destroy(); }
 
 /* entry points
 

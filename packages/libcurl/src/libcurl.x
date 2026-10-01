@@ -6,6 +6,7 @@
  */
 
 #include "curl-822.h"
+$(import "cleanup.xmacro")
 
 typedef struct CurlEasy *CurlEasy;
 typedef struct CurlResponse *CurlResponse;
@@ -18,14 +19,9 @@ typedef enum CurlLisp {
   CURLLISP_NAMESPACE
 } CurlLisp;
 
-void CurlEasy.cleanup(CurlEasy);
-protocol Cleanup(CurlEasy);
-
-void CurlResponse.cleanup(CurlResponse);
-protocol Cleanup(CurlResponse);
-
-void CurlBatch.cleanup(CurlBatch);
-protocol Cleanup(CurlBatch);
+$cleanup.by(CurlEasy, free);
+$cleanup.by(CurlResponse, free);
+$cleanup.by(CurlBatch, free);
 
 #pragma private
 
@@ -415,10 +411,6 @@ CurlEasy CurlEasy.free(CurlEasy easy) {
   return NULL;
 }
 
-void CurlEasy.cleanup(CurlEasy curl_easy) {
-  curl_easy.free();
-}
-
 CurlEasy CurlEasy.timeouts(CurlEasy easy, long connect_ms, long total_ms) {
   if (!easy || !easy.native || connect_ms <= 0 || total_ms <= 0) {
     raise %(bad-arg (library "libcurl") (operation "timeouts"));
@@ -747,10 +739,6 @@ CurlBatch CurlBatch.free(CurlBatch batch) {
   return NULL;
 }
 
-void CurlBatch.cleanup(CurlBatch curl_batch) {
-  curl_batch.free();
-}
-
 static void _curl_batch_live(CurlBatch batch, String operation) {
   if (batch && !batch.released) return;
   raise %(bad-state (library "libcurl") (operation $operation)
@@ -914,10 +902,6 @@ CurlResponse CurlResponse.free(CurlResponse response) {
   }
   response.released = 1;
   return NULL;
-}
-
-void CurlResponse.cleanup(CurlResponse curl_response) {
-  curl_response.free();
 }
 
 long CurlResponse.response_code(CurlResponse response) {
