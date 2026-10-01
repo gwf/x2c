@@ -1,6 +1,11 @@
 # x2c Beautification Project
 
-> Status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
+> Status: done; Waves 0-5 delivered through 0bccd679. The file-level work it
+> deferred, and its closing audit, continue in
+> [x2c-source-organization.md](../x2c-source-organization.md). Archived
+> 2026-09-30.
+>
+> Earlier status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
 > boundaries were agreed with the dual-macro session. The initial campaign
 > baseline measurements are from `dev` `f6606dbf`. The closing audit is
 > queued. Track H (unit directories) was retired after Wave 5.

@@ -15,11 +15,10 @@ captures, expression and block bodies, and typed parameter sequences.
   units. REPL API checks preserve shared definitions through a second preload.
 - Linked extension probes build with parallel translation, so registration
   units collect package-prefixed declarations without a preceding unit cache.
-- Lisp AUTO cases cover interpreted forms inside prepared bodies, release
-  of private programs discarded during partial lowering, and special-form
-  rebinding after earlier effects or call arguments. Quasiquote cases retain
-  operation selection, splice identity, and error/effect order. A mutating
-  self-tail-call case checks 100,000 iterations with one machine frame.
+- Lisp cases cover special-form rebinding after earlier effects or call
+  arguments. Quasiquote cases retain operation selection, splice identity,
+  and error/effect order. Tail-call cases check 100,000 iterations in
+  constant stack.
 - Automatic-differentiation cases compare forward loop initialization and
   step updates against finite differences, including comma clauses and
   `continue`. Tape cases cover inactive singular operations before and after

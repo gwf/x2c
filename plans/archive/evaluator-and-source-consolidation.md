@@ -1,9 +1,12 @@
 # Evaluator and source consolidation campaign
 
 
-> Status: reference
+> Status: obsolete; superseded by [source consolidation
+> research](../source-consolidation-research.md). Archived 2026-09-30.
+>
+> Earlier status: reference
 > The earlier first-wave scope and conclusions are historical. The current
-> implementation spike is [source consolidation research](source-consolidation-research.md).
+> implementation spike is [source consolidation research](../source-consolidation-research.md).
 > Its working prototypes independently revisit the larger original targets;
 > publication is held for Gary's review.
 

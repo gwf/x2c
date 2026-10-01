@@ -7,8 +7,9 @@ description: >-
   dispatch arm one line, group shared context into records, call existing
   owners instead of repeating their work, give incidental work one place,
   rename with the glossary, and put the file in reading order. Use for the
-  beautification campaign in plans/x2c-beautification.md or any request to
-  make a src/ or lib/ file readable at the function and file level. Use
+  source organization campaign in plans/x2c-source-organization.md or any
+  request to make a src/ or lib/ file readable at the function and file
+  level. Use
   clean-x2c-source for comment and spelling cleanup alone, and
   simplify-x2c-source for removing machinery across files.
 ---
@@ -22,8 +23,17 @@ the [Shape chapter](../../x2c-coding-style-guide.md#shape), the
 [reading order](../../x2c-coding-style-guide.md#reading-order), and the
 naming glossary under
 [Names expose ownership](../../x2c-coding-style-guide.md#names-expose-ownership).
-The [beautification plan](../../../plans/x2c-beautification.md) records the
-baseline and the order of files.
+The [source organization plan](../../../plans/x2c-source-organization.md)
+records the current campaign and its baseline.
+
+## Settle the file boundary first
+
+List the file's subjects. For a file over 1,500 lines, or one whose subject
+needs "and", apply "Large files" in the
+[organization guide](../../x2c-code-organization-guide.md): count the
+private helpers each candidate boundary would cross in each direction, and
+split only a part with its own owner, a one-way dependency, and its own
+tests. Function work comes after the boundary is settled.
 
 ## Outline before editing
 
@@ -54,7 +64,8 @@ Work in this order:
 3. Split functions. Dispatcher arms become one-line calls to named helpers,
    phases become named steps, flags become separate functions or early
    returns, and a group of parameters passed through several helpers
-   becomes a record or a receiver.
+   becomes a record whose methods are the steps. A record copied into
+   locals on entry is a parameter list; pass the parameters instead.
 4. Replace hand-expanded idioms with system macros: `$let` for save and
    restore, `$scope(&owner)` for a pushed destination, and `$auto` for an
    owned local.
@@ -96,8 +107,8 @@ rebaseline it. A batch that touches a hot path also needs the
 
 ## Report
 
-Report `.x` lines deleted and added, then the shape measures before and
-after: functions over 40 lines, the deepest brace depth, the largest
+Report the file's subjects and any boundary split, `.x` lines deleted and
+added, then the shape measures before and after: sections over 400 lines, functions over 40 lines, the deepest brace depth, the largest
 parameter count, and the longest name. Name each neutral algorithm tweak and
 its reason. Publication follows the root [AGENTS.md](../../../AGENTS.md); in
 a campaign, the orchestrator integrates and gates each batch once.

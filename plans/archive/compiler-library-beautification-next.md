@@ -1,6 +1,9 @@
 # Compiler and library: the next beautification pass
 
-> Status: implementation campaign complete, 2026-09-30.
+> Status: done, 2026-09-30, as PR #72 (2685655f). Remaining organization work
+> moved to [x2c-source-organization.md](../x2c-source-organization.md).
+>
+> Earlier status: implementation campaign complete, 2026-09-30.
 > The merged mitigation is PR 71, origin/dev b56a9ac2.
 > Packets 1-12 are implemented, including Gary's approved runtime CRLF dedent
 > behavior and quasiquote form/sequence repair. Packet 13 completed bounded

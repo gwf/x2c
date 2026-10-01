@@ -1,6 +1,9 @@
 # Bug findings at the f28fc36 baseline
 
-> Status: reference
+> Status: done; all eight findings repaired, with dispositions below.
+> Archived 2026-09-30.
+>
+> Earlier status: reference
 > Eight defects reproduced at `f28fc36`, recorded 2026-09-22. No fixes were
 > made during the audit. Later dispositions do not rewrite those baseline
 > observations.

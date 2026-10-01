@@ -335,8 +335,8 @@ code whose real purpose is recognizing and rewriting syntax.
 ### Collapse helper families into the grammar dispatcher
 
 `Emitter._emit` states its AST productions in a source `match`. Its helpers
-own substantial behavior, such as `Emitter._var_collection`, which emits both
-Array and Map literals with the target name supplied by its caller.
+own substantial behavior, such as `Emitter._local_static`, which emits a
+function-local static together with its initializer.
 
 The dispatcher owns the current grammar choice. A case that reaches another
 grammar rule calls a function for that rule with the named captures. Helpers

@@ -37,7 +37,7 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed against dev cfd8324c on 2026-09-30. A historical
+Reviewed against dev 2685655f on 2026-09-30. A historical
 plan's original branch, baseline and authorization notes are evidence for
 that work; its opening status and this index distinguish them from current
 execution.
@@ -46,28 +46,11 @@ execution.
 
 - [Source organization](x2c-source-organization.md): module ownership,
   reading order, record ownership, duplicate owners, and seven reproduced
-  defects left after the beautification waves; written 2026-09-30 and
-  awaiting Gary's scoping.
-- [Next compiler/library beautification](compiler-library-beautification-next.md):
-  independent 111-file review and ranked plan complete on verified dev;
-  larger source implementation is separately scoped and not started.
-- [Beautification](x2c-beautification.md): Waves 0-5 delivered; a closing
-  before/after source audit is queued. The unit-directory option was
-  retired after Wave 5.
-- [Macro capture-role consolidation](macro-capture-role-consolidation.md):
-  shared projection keys and row layout are on dev at 0e2f1359. Further
-  cleanup must start with the current consumers rather than repeat that work.
-- [Native meta execution](native-meta-execution.md): every bodied `meta`
-  function runs natively through a cached project helper; present on the
-  verified dev baseline. The plan retains its dated design and progress.
-- [Meta-integration mitigation](meta-integration-mitigation.md): the
-  integration repairs are present on dev. Its recorded gate/CI results and
-  build-time discussion belong to that integration campaign; the remaining
-  follow-ups are listed in the plan.
+  defects left after the beautification waves. Approved 2026-09-30.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.
-  The earlier [first-wave record](evaluator-and-source-consolidation.md)
+  The earlier [first-wave record](archive/evaluator-and-source-consolidation.md)
   remains as corrected historical evidence.
 - [Public release workflow](public-release-workflow.md): staging is live at
   `staging.x2c-lang.dev`, with successful candidate and staging runs. Only
@@ -88,24 +71,28 @@ execution.
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
+| [Consolidation catalog C13](archive/consolidation-catalog-f28fc36.md#c13-larger-lifetime-sharing-locate-overlap-without-pretending-equivalence) | Shared lifetime summary and flow production; design and measurement before any rewrite. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
 Production promotion remains separately authorized under the release workflow.
 
-### Reference audits
-
-- [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
-  cleanup candidates with paired source ranges and deletion boundaries.
-- [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,
-  with portable probe sources, historical results and later repair
-  dispositions, separate from cleanup.
-
-Both reports audit `f28fc36` (2026-09-22). The bug report now also links
-campaign outcomes; the original observations do not describe later
-`dev` by themselves or approve every proposed design.
-
 ### Decisions and completed records
 
+- [Beautification](archive/x2c-beautification.md): done; Waves 0-5
+  delivered through 0bccd679. Its deferred file-level work continues in
+  [source organization](x2c-source-organization.md).
+- [Next compiler/library beautification](archive/compiler-library-beautification-next.md)
+  and its [coverage record](archive/compiler-library-review-coverage.md):
+  done 2026-09-30 as PR #72.
+- [Native meta execution](archive/native-meta-execution.md) and the
+  [meta-integration mitigation](archive/meta-integration-mitigation.md):
+  done; present on dev.
+- [Macro capture-role consolidation](archive/macro-capture-role-consolidation.md):
+  done at 0e2f1359.
+- [Bug findings](archive/bug-findings-f28fc36.md) and the
+  [consolidation catalog](archive/consolidation-catalog-f28fc36.md): audits
+  of `f28fc36`; every finding is repaired or decided except catalog C13,
+  which is in the backlog.
 - [Compiler dual-macro campaign](archive/compiler-dual-macro-contract.md#e45-final-source-family-accounting):
   done 2026-09-29 at `82d686e2`; shared grammar projections cover parsed
   source families. The [architecture reference](archive/compiler-dual-macro-architecture.md)

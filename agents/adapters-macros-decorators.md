@@ -475,7 +475,7 @@ Limits or counterexample: the family does not adopt `protocol Var`. A typed
 list already boxes as `<list>` through the typedef chain, so adopting would
 declare one custom tag per family to gain only bracket indexing,
 which is a linear walk on a cons chain. There is no `long` family, and
-`lib/typed-list.x:16-20` says why: `Var.box_i64` allocates a Scope-owned box,
+`lib/typed-list.x:14-18` says why: `Var.box_long` allocates a Scope-owned box,
 so a cell outliving that scope would hold a dangling car, and `List.equal`
 compares car bits, so two boxes of one number differ and every `cons` would
 miss the interning table and grow it without bound.

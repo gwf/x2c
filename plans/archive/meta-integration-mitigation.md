@@ -1,13 +1,16 @@
 # Meta-integration mitigation
 
-> Status: reference -- integration repairs are present on verified dev
+> Status: done; the integration repairs are on dev and present at 2685655f
+> (2026-09-30).
+>
+> Earlier status: reference -- integration repairs are present on verified dev
 > cfd8324c (2026-09-30). The original 2026-09-27 results follow.
 > The review findings R1-R12 and the
 > documentation items are repaired on `origin/meta-integration` at 4bb59cc3.
 > `agent-pr-check` is green there, and CI `check.yml` with release
 > validation and the Windows probe passes all 12 jobs (run 36342464030).
 > APE and Cosmopolitan were removed on the same branch
-> ([archive/remove-ape.md](archive/remove-ape.md)). Optional checks that
+> ([archive/remove-ape.md](../archive/remove-ape.md)). Optional checks that
 > also failed on `dev` were repaired; see "Optional checks" below. Opacity
 > enforcement of project-meta results is withdrawn by Gary.
 >

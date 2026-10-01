@@ -9,7 +9,7 @@
 ## Scope and preserved evidence
 
 The input is the cleanup table on `spike/evaluator` in
-`plans/native-meta-execution.md`. Its estimates remain hypotheses. This spike
+`plans/archive/native-meta-execution.md`. Its estimates remain hypotheses. This spike
 implements comparable replacement prototypes for the largest targets, counts
 replacement templates and glue, and separates relocation from deletion.
 No finding here declares the original estimates overstated.
@@ -18,7 +18,7 @@ The earlier `6e4089e9` candidate on `codex/consolidation-first-wave` and the
 artifacts in `/Users/gary/.codex/worktrees/56af/x2c/.context/campaign-patches/`
 remain intact. Copies are in this checkout's `.context/previous-campaign/`.
 The earlier claim that core-family sharing completes typed-family Array/Map
-wrappers is corrected in `evaluator-and-source-consolidation.md`.
+wrappers is corrected in `archive/evaluator-and-source-consolidation.md`.
 Its narrow compiler experiments do not reject the full lowering merger.
 
 Initial current-dev inspection found the lowering owners, six emitter cases,

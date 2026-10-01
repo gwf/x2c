@@ -12,7 +12,7 @@ reproducible suites with different strengths:
 - Attractive Chaos's [udb3][udb3] measures CPU time and peak memory together
   for counting and mixed insertion/deletion workloads.
 
-The existing `make map-benchmark` remains the quick direct-C regression against
+The existing `make bm-map` remains the quick direct-C regression against
 pinned `khashl`. These external suites answer the broader comparison question.
 
 The direct runner writes a fresh timestamped directory containing its frozen
@@ -94,8 +94,8 @@ archive was not built under the equal-LTO profile.
 Run the complete smoke or campaign with:
 
 ```sh
-make map-u32-benchmark-smoke
-make map-u32-benchmark-campaign
+make bm-map-u32-smoke
+make bm-map-u32-campaign
 ```
 
 Or select a suite, profile, or single implementation:
@@ -234,14 +234,14 @@ An optimized x2c runtime is required:
 make config-optimize
 make clean
 make build
-make map-standard-benchmark-smoke
+make bm-map-standard-smoke
 ```
 
 The smoke target compiles every adapter and runs small versions of both
 workloads. The complete campaign is intentionally optional and long-running:
 
 ```sh
-make map-standard-benchmark-campaign
+make bm-map-standard-campaign
 ```
 
 Individual lanes can be run directly:

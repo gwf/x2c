@@ -8,9 +8,11 @@ rules remain in `agents/x2c-coding-style-guide.md`.
 Put a contract where it can be enforced completely and let downstream code
 rely on it. A module should expose a small public surface above
 `#pragma private`; its implementation and private dependencies belong below
-that boundary. Compiler and runtime modules retain `#pragma once` because
-`--cpp-symbols` and `--live-symbols` hand their raw `.x` include graph to the
-host preprocessor, and that graph is co-recursive. Nothing else needs it: the
+that boundary. Compiler and runtime modules that other modules include
+retain `#pragma once` because `--cpp-symbols` and `--live-symbols` hand
+their raw `.x` include graph to the host preprocessor, and that graph is
+co-recursive. A unit no module includes, such as `src/type-ledger.x` or
+`lib/var-ledger.x`, omits it. Nothing else needs it: the
 default path resolves includes itself and terminates cycles on its own, so
 tests, examples, packages, and user programs omit it unless their own `.x`
 includes form a cycle. Generated headers receive their own compiler-owned
@@ -31,6 +33,26 @@ includes form a cycle. Generated headers receive their own compiler-owned
 Do not create a new helper file solely to shorten an existing coherent module.
 Split a module only when the new file has a distinct owner, dependency
 direction, and test surface.
+
+### Large files
+
+A file over 1,500 lines is a review trigger, not a split order. The review
+lists the file's subjects and measures each candidate boundary by the
+private helpers that would cross it in each direction. A part becomes its
+own unit when it has a distinct owner, depends on the rest in one direction,
+and has its own tests. A file with no such boundary keeps its size: its
+header names its one subject, and its sections follow the reading order in
+the style guide, each under 400 lines. A helper that crosses a new boundary
+becomes a method of the owner that establishes its fact; it never becomes a
+new `x2c_*` export. A split lands as a move with no edits inside the moved
+text, followed by the change that settles its crossings, header, and order.
+
+### Context records
+
+A private record that carries the state of one operation owns that
+operation: its steps are `Record.step(Record *r, ...)` methods. A record
+whose fields are copied into locals on entry is a parameter list; it goes
+back to parameters or becomes a receiver. One concept has one record.
 
 Within a coherent module, put state-bearing private helpers on their dominant
 implicit-class receiver. Keep stateless helpers free. This makes ownership
@@ -55,11 +77,11 @@ The compiler is consolidated by phase rather than filename prefixes:
   `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `parse.x`, `expressions.x`, `statements.x`, `literals.x`, `macros.x`,
-  `grammar.xmacro`, `ast.x`;
+  `grammar.xmacro`, `ast-rewrite.xmacro`, `ast.x`;
 - compile-time code: `stage.x`, `builtins.x`, `linked-meta.x`,
   `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
-  `protocol.x`, `transform.x`, `regions.x`;
+  `protocol.x`, `transform.x`, `adapter-memo.xmacro`, `regions.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,
   `install.x`, `script.x`, `editor.x`.
@@ -72,7 +94,8 @@ them.
 
 Compiler phase state may use mutable storage internally even when its output
 is an immutable List. Compiler scope and brace stacks and initialization
-queues use Arrays; Diagnostics stores chronological entries in an Array and
+queues use Arrays, and the symbol table's scope stack is a Block;
+Diagnostics stores chronological entries in an Array and
 returns a List snapshot; the cleanup pass keeps its open regions in an
 Array. Convert at the phase boundary rather than maintaining two live
 representations.
@@ -91,29 +114,33 @@ When adding compiler behavior:
 Runtime files are capability owners, not a hierarchy of wrappers:
 
 ```text
-common, scope, pool           shared representation, lifetime, interning
+common, scope, pool,          shared representation, lifetime, interning,
+static-init                   and static initialization
 var, varconvert, varops       tagged values, conversions, operations
 dispatch, protocols           dynamic behavior and protocol adoption
 string, string-classify,      canonical immutable values, string
 string-number, split,         classification, numeric parsing, splitting,
 symbol, symbolset, atom, list and closed vocabularies
 block, buffer, array, map     mutable storage and builders
-iter, match, machine          traversal, pattern matching, and the Match
-                              wordcode machine
+iter, match, machine,         traversal, pattern matching, and the Match
+match-machine                 wordcode machine
 error, error_init, exception  ambient errors and structured control flow
 file, logger                  system boundaries
 context, thread, thread-state bounded runtime state, native workers, and
 mutex                         their coordination primitive
 scan, tokenizer               lexical scanners and the shared tokenizer
 func, lisp                    native callable binding and embedded Lisp
+clibc, cmath                  C prototypes declared for compile-time calls
+                              and Var unboxing
 lib                           DisjointSet utility
 ```
 
-More modules ship with the runtime but stay out of the implicit prelude, so
-a client names one in an explicit include. The `optional` rows of
-`docs/library-manifest.txt` list them, and that file owns every module's
-visibility in the generated library reference; `lib/Makefile` builds the
-same modules from `OPTIONAL_SOURCES`.
+More modules ship with the runtime but stay out of the implicit prelude.
+`lib/Makefile` lists them in `OPTIONAL_SOURCES`. A client names an
+`optional` module of `docs/library-manifest.txt` in an explicit include;
+the `internal` ones outside the prelude serve other runtime units. The
+manifest owns every module's visibility in the generated library
+reference.
 
 `lib/x2c.x` is generated from the standard modules by `lib/Makefile`. Never
 edit it by hand. `.xmacro` files beside the modules own shared macro

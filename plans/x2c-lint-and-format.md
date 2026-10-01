@@ -8,7 +8,7 @@
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
 > instead of translating"), including catalog item
-> [C09](consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation).
+> [C09](archive/consolidation-catalog-f28fc36.md#c09-remove-docs-independent-declarationmacro-interpretation).
 > The 2026-09-17 design decided that lint stays optional until it replaces
 > the Python analyzers and that the class ceiling gets a diagnostic rather
 > than a runtime change. Its third decision, lint as an `x2c lint`

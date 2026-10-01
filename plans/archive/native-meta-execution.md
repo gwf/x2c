@@ -1,6 +1,8 @@
 # Native meta execution: staging user meta code and removing the Lisp lowering
 
-> Status: reference -- implementation and integration repairs are present
+> Status: done; delivered on dev and present at 2685655f (2026-09-30).
+>
+> Earlier status: reference -- implementation and integration repairs are present
 > on verified dev cfd8324c (2026-09-30). The dated progress below records
 > the earlier `meta-integration` campaign, rather than a pending dev merge.
 > Every bodied `meta` function runs natively. A project's meta functions

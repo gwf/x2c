@@ -68,8 +68,11 @@ among 8-character ones, or a side effect inside a condition.
 | Section | a label over one function | 3-12 functions | over 400 lines, or two concepts |
 | File | a file for one helper | one subject, 200-1,200 lines | several owners; over 1,500 lines |
 
-A table, or a dispatcher whose arms are one line each, may run past 40
-lines. Compress routine work into guards on one line, tables, `=>` bodies,
+A file over 1,500 lines is reviewed by the rule under "Large files" in the
+[organization guide](x2c-code-organization-guide.md): it splits where a
+part has its own owner, and otherwise names its one subject and keeps its
+sections in band. A table, or a dispatcher whose arms are one line each,
+may run past 40 lines. Compress routine work into guards on one line, tables, `=>` bodies,
 and system macros. Expand the algorithm into one named step per idea.
 
 ### Functions
@@ -971,6 +974,22 @@ static int _is_reserved_spelling(String s) {
 
 Do not move a function merely to obtain dot syntax.
 
+A private record that carries one operation's state is that operation's
+receiver. Its steps are `Record.step(Record *r, ...)` methods, its
+Compiler field is `c`, and its name is bare PascalCase; the leading
+underscore marks private functions only. A record whose fields are copied
+into locals on entry is a parameter list and goes back to parameters:
+
+```x2c
+typedef struct Expansion {
+  Compiler c, List definition, input, template, direct, Token invocation;
+} Expansion;
+
+static List Expansion.bind(Expansion *x, AstPos position) {
+  // ...
+}
+```
+
 Names should make routine comments unnecessary:
 
 Prefer:
@@ -1469,8 +1488,13 @@ it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?
+- Does the file hold one subject? If it runs past 1,500 lines, does it
+  split at each boundary the organization guide qualifies, and otherwise
+  keep every section under 400 lines?
 - Does the header state one subject, and do the sections follow reading
   order, each opened by a label?
+- Does each context record own the steps of its operation, rather than
+  being unpacked into locals on entry?
 - Does each function do one job at one level, guards first, with dispatch
   arms of one line?
 - Does each kind of incidental work have one place, and does the code call

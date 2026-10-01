@@ -104,10 +104,8 @@ make BUILD_LTO=1 build
 ```
 
 External programs linked with the resulting `libx2c.a` must also use the
-reported `BUILD_LDFLAGS` (`-rdynamic -pthread -flto`) on their final link.
-`-rdynamic` preserves runtime-loaded function symbols after LTO
-internalization. Rebuild after changing the option; ordinary builds keep
-`BUILD_LTO=0`.
+reported `BUILD_LDFLAGS` (`-pthread -flto`) on their final link. Rebuild
+after changing the option; ordinary builds keep `BUILD_LTO=0`.
 
 ## Further references
 

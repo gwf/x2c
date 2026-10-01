@@ -1,9 +1,8 @@
 # x2c Source Organization
 
-> Status: needs author scoping. Written 2026-09-30 against `dev`
-> 2685655f. Two independent reviews found that the beautification waves
-> met the function bands but left module ownership, reading order, and
-> several duplicate owners unaddressed. Nothing here is implemented.
+> Status: active. Gary approved the plan on 2026-09-30, written against
+> `dev` 2685655f. Phase 1 (rules, guide corrections, plan archive) and the
+> merge of `main` back into `dev` are delivered; Phase 2 is in progress.
 
 ## Result
 
@@ -21,7 +20,7 @@ drive this plan.
 ## Why the waves left this
 
 The original campaign stated the file rule. Rule 18 of
-[x2c-beautification.md](x2c-beautification.md) says "A file with two
+[x2c-beautification.md](archive/x2c-beautification.md) says "A file with two
 subjects splits into new units when the parts have distinct owners", and its
 baseline table lists the file-level defect of each large compiler file. The
 wave tables then measured only lines, functions, longest function, functions
@@ -251,9 +250,13 @@ Each phase is one batch delivered to `dev`. Workers within a batch follow
   Move `consolidation-catalog-f28fc36.md` item C13 to the backlog table and
   archive the rest. Mark `x2c-beautification.md` done with a pointer here.
   Refresh the index in `plans/README.md`.
-- Delete the orphan
-  `unittest/compiler-fixtures/comptime-declines-meta.compile-status`.
 - Validation: `tools/gate-state.py ensure doc-check`.
+
+Delivered with the merge of `origin/main` into `dev` (`git merge -s ours`):
+`main` held f28fc36f and the 45e5b445/247b7fbe pair, which cancels; `dev`
+had rewritten every region f28fc36f touched, so the merge keeps `dev`'s tree
+and restores the release ancestry check. The orphan fixture file moves to
+Phase 2, which edits the fixtures.
 
 ### Phase 2: defects
 
@@ -331,16 +334,15 @@ plans index.
 
 ## Outside this plan
 
-- Wiring the unwired tests (`unittest/probes/run-meta-transport.sh`,
-  `run-meta-source-kinds.sh`, `bound-template-expression.c`,
-  `source-call-projection.x`, `commands/graph/tests/certify.sh`,
-  `tools/test-examples.py`, `tools/test-performance-snapshot.py`). They
-  take seconds, but the Process ceiling in `AGENTS.md` requires Gary's
-  approval to add them to a recurring target.
+- The unwired tests other than those Phase 2 wires
+  (`bound-template-expression.c`, `source-call-projection.x`,
+  `tools/test-examples.py`, `tools/test-performance-snapshot.py`) stay
+  manual. Gary approved wiring `run-meta-transport.sh`,
+  `run-meta-source-kinds.sh`, and `commands/graph/tests/certify.sh` into
+  their existing runners in Phase 2.
 - Command builds use no `-Werror`; defect 4 removes the one C warning.
-- The release: `origin/main` has three commits `dev` lacks (f28fc36f,
-  45e5b445, 247b7fbe), so the release ancestry check fails; the version is
-  still 0.14.0. Release work follows `agents/releasing.md`.
+- The release: the version is still 0.14.0. Release work follows
+  `agents/releasing.md`.
 
 ## Plan review
 
