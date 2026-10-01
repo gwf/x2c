@@ -541,13 +541,14 @@ Public functions:
 `Compiler.imported_providers`, `Compiler.imported_spelling`,
 `Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
 `Compiler.macro_definition_locals`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.resolve_base_type`, `Sym.normalize_declared_type`, `Sym.local_type`,
-`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
-`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
-`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
+`Sym.resolve_base_type`, `Sym.sole_typedef`, `Sym.normalize_declared_type`,
+`Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
+`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
+`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
+`Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
+`Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
+`SymTxn.local_macros_changed`, `SymTxn.commit`, `SymTxn.commit_transient`,
+`SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
