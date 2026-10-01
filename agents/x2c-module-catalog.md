@@ -1165,7 +1165,7 @@ immutable ordered sets of compact `Symbol`s.
 Public functions:
 
 `SymbolSet.len`, `SymbolSet.index`, `SymbolSet.contains`, `SymbolSet.getindex`,
-`SymbolSet.iter`
+`SymbolSet.iter`, `SymbolSet.encode`
 
 ### [lib/thread-state.x](../lib/thread-state.x)
 
