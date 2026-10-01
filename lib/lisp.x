@@ -2,28 +2,19 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Each `Lisp` session owns a `Scope` holding its global environment.
-    Evaluation uses eager left-to-right arguments for lambdas and natives,
-    raw arguments for macros and special forms, macro expansion evaluated
-    once in the caller's environment, globals able to shadow reserved forms,
-    `nil` as the only false value, and by-value capture of the free locals a
-    Lambda's body reads.
+    Lisp owns embedded compile-time Lisp sessions: the reader, the evaluator,
+    and each session's global environment. Lambdas and natives receive their
+    arguments evaluated left to right, macros and special forms receive them
+    raw, nil is the only false value, and a Lambda captures by value the free
+    locals its body reads. Names are canonical Atoms, and `bind` reaches
+    native operations through the table that lisp-targets.x builds.
 
-    Identifiers use canonical `Atom`s: compact x2c `Symbol`s when their
-    spelling round-trips exactly, with direct canonical-`String` `<lsym>`
-    `Var`s as the arbitrary-length, case-sensitive fallback. The reader
-    converts shared Tokenizer output into `Var` and `List` forms. `bind`
-    resolves a native operation through the callback adapters here, which
-    run interpreted callables, and then through the table `lisp-targets.x`
-    builds outside the implicit prelude.
-
-    The session `Scope` owns the Lisp record, `Map`s, Lambdas, and bound
-    `Func` storage. `Map`s, Lambda bodies, and captures retain `Var`s by
-    value without cloning their referents. Canonical graphs and
-    identity-bearing values therefore keep their pool or caller ownership
-    and must outlive every session entry that refers to them. A session is
-    not synchronized; its caller serializes evaluation and mutation and
-    destroys it only after every call has returned.
+    The session Scope owns the Lisp record, its Maps, Lambdas, and bound Func
+    storage, which hold Vars by value without cloning their referents. Those
+    referents keep their own pool or caller owners and must outlive every
+    session entry that refers to them. A session is not synchronized: its
+    caller serializes evaluation and destroys it only after every call has
+    returned.
 */
 
 #pragma once
@@ -470,19 +461,18 @@ static void _not_procedure(Var callable) {
 /* The value of quasiquoted `expr`. A List's element contributes its value,
    or at depth zero an unquote-splicing contributes the elements it
    evaluates to. */
-static Var Lisp._qq(Lisp lisp, Var expr, LispEnv *env, int depth) {
+static Var Lisp._qq(Lisp l, Var expr, LispEnv *env, int depth) {
   if (expr is not <list> || expr.is_nil()) return expr;
   List form = expr;
   Var head = form.car();
   if (head == lsym_quasiquote)
-    return head.cons(lisp._qq_elements(form.cdr(), env, depth + 1));
+    return head.cons(l._qq_elements(form.cdr(), env, depth + 1));
   if (head != lsym_unquote && head != lsym_splicing)
-    return lisp._qq_elements(form, env, depth);
+    return l._qq_elements(form, env, depth);
   if (form.len() != 2)
     raise %(bad-arity (operation "quasiquote") (value $expr));
-  if (depth > 0)
-    return head.cons(lisp._qq_elements(form.cdr(), env, depth - 1));
-  Var value = lisp._eval(form.cadr(), env);
+  if (depth > 0) return head.cons(l._qq_elements(form.cdr(), env, depth - 1));
+  Var value = l._eval(form.cadr(), env);
   if (head == lsym_splicing)
     raise %(bad-types (operation "quasiquote-splice")
                        (actual ${expr.kind()}));
@@ -493,9 +483,8 @@ static Var Lisp._qq(Lisp lisp, Var expr, LispEnv *env, int depth) {
 static List Lisp._qq_elements(Lisp lisp, List items, LispEnv *env, int depth) {
   Array values = $auto([]);
   foreach (Var item, items) {
-    if (!depth && _is_splice(item)) {
+    if (!depth && _is_splice(item))
       foreach (Var value, lisp._splice(item, env)) values.push(value);
-    }
     else values.push(lisp._qq(item, env, depth));
   }
   return values;
@@ -539,7 +528,8 @@ static Var Lisp._make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
 
 static void Lisp._capture(Lisp lisp, LispEnv *env, Lambda lambda) {
   Array names = $auto([]);
-  lisp._free_names(env, lambda.body, lambda.params, 0, names);
+  FreeNames walk = {lisp, env, names};
+  walk.form(lambda.body, lambda.params, 0);
   foreach (Var name, names) {
     Var value;
     if (name in lambda.captures) continue;
@@ -548,53 +538,60 @@ static void Lisp._capture(Lisp lisp, LispEnv *env, Lambda lambda) {
   }
 }
 
+/* One capture analysis: the session and environment that resolve call
+   heads, and the free names found so far. */
+typedef struct FreeNames {
+  Lisp lisp, LispEnv *env, Array out;
+} FreeNames;
+
 /* A captured local callable keeps its identity. Global, parameter and
    computed heads may change which operands evaluate, so their operands
    retain all possible local reads. Negative depth marks that possibility;
    zero is an evaluated position and positive depth is quasiquote data.
    Stable special identities preserve quote opacity and inner binders. */
-static void Lisp._free_names(
-  Lisp lisp, LispEnv *env, Var form, List bound, int depth, Array out) {
+static void FreeNames.form(FreeNames *f, Var form, List bound, int depth) {
   if (form.is_atom()) {
-    if (depth <= 0 && !_param_has(bound, form)) out.push(form);
+    if (depth <= 0 && !_param_has(bound, form)) f.out.push(form);
     return;
   }
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
-  Var head = items.car();
-  if (depth < 0) {
-    foreach (Var part, items) lisp._free_names(env, part, bound, depth, out);
-    return;
-  }
-  if (depth > 0) {
-    int inner = _quote_depth(head, depth);
-    List parts = inner >= 0 ? items.cdr() : items;
-    foreach (Var part, parts)
-      lisp._free_names(env, part, bound, inner >= 0 ? inner : depth, out);
-    return;
-  }
-  lisp._free_names(env, head, bound, 0, out);
-  Var callable;
+  if (depth < 0) f.all(items, bound, depth);
+  else if (depth > 0) f.quoted(items, bound, depth);
+  else f.call(items, bound);
+}
+
+static void FreeNames.all(FreeNames *f, List items, List bound, int depth) {
+  foreach (Var part, items) f.form(part, bound, depth);
+}
+
+static void FreeNames.quoted(FreeNames *f, List items, List bound, int depth) {
+  int inner = _quote_depth(items.car(), depth);
+  f.all(inner >= 0 ? items.cdr() : items, bound, inner >= 0 ? inner : depth);
+}
+
+/* The head is an evaluated position, and what it names decides how its
+   operands are read. */
+static void FreeNames.call(FreeNames *f, List items, List bound) {
+  Var head = items.car(), callable;
+  f.form(head, bound, 0);
   if (!head.is_atom() || _param_has(bound, head) ||
-      !env._lookup(head, callable)) {
-    foreach (Var part, items.cdr())
-      lisp._free_names(env, part, bound, -1, out);
+      !f.env._lookup(head, callable)) {
+    f.all(items.cdr(), bound, -1);
     return;
   }
   int special = callable is <func>
-    ? lisp._special_id((Func) callable.pointer()) : -1;
+    ? f.lisp._special_id((Func) callable.pointer()) : -1;
   if (special == LISP_QUOTE) return;
   if (special == LISP_LAMBDA || special == LISP_MACRO) {
     List rest = items.cdr(), params = _with_params(bound, rest);
-    foreach (Var part, rest.cdr())
-      lisp._free_names(env, part, params, 0, out);
+    f.all(rest.cdr(), params, 0);
     return;
   }
   int inner = special == LISP_QUASIQUOTE ? 1 :
     callable is <lambda> && ((Lambda) callable).macro ? -1 : 0;
-  foreach (Var part, items.cdr())
-    lisp._free_names(env, part, bound, inner, out);
+  f.all(items.cdr(), bound, inner);
 }
 
 /* The quasiquote depth below a form headed by `head`, or -1 when `head`
@@ -624,14 +621,13 @@ static int _param_has(List params, Var name) {
    activation frame. Positional parameters read that array; a rest
    parameter is bound in the frame to a List of the values. */
 
-static Var Lisp._apply_lambda(
-  Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
-  if (lambda.macro) return lisp._eval(lisp._call_lambda(lambda, raw), env);
+static Var Lisp._apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv *env) {
+  if (lambda.macro) return l._eval(l._call_lambda(lambda, raw), env);
   int count = raw.len(), index = 0;
-  Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
+  Var *values = Scope.malloc_in(&l.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
-  foreach (Var form, raw) values[index++] = lisp._eval(form, env);
-  return lisp._call_lambda_slots(lambda, values, count);
+  foreach (Var form, raw) values[index++] = l._eval(form, env);
+  return l._call_lambda_slots(lambda, values, count);
 }
 
 static Var Lisp._call_lambda(Lisp lisp, Lambda lambda, List args) {
@@ -665,8 +661,8 @@ static Var Lisp._call_lambda_slots(
 }
 
 /* Runs one activation of `lambda`. In tail position it may leave a pending
-   call on `lisp` instead of making it; _call_lambda_slots runs that call
-   after this frame is gone. */
+   call on `lisp` instead of making it; `Lisp._call_lambda_slots` runs that
+   call after this frame is gone. */
 static Var Lisp._run_frame(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
@@ -678,7 +674,7 @@ static Var Lisp._run_frame(
   LispEnv local = {.bindings = bindings, .parent = &captured};
   if (Atom.intern(".") in lambda.params)
     _bind_params(&frame, lambda, _value_list(values, count), bindings);
-  else LispEnv._bind_values(&local, lambda, values, count);
+  else local._bind_values(lambda, values, count);
   if (lambda.source_function)
     return lisp._run_source(lambda.body, &local, &frame);
   return lisp._eval_tail(lambda.body, &local);
@@ -824,7 +820,7 @@ static int Lisp._global_lookup(Lisp lisp, Var name, Var &out) {
 
 /* A reserved special form, from this session or the nearest parent. A child
    that inherits its parent's specials also inherits their identity, which is
-   what `_special_id` compares. */
+   what `Lisp._special_id` compares. */
 static int Lisp._reserved_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
     if (s.reserved.try_get(name, out)) return 1;
