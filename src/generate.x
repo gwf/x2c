@@ -605,15 +605,14 @@ static List Compiler._file_init(Compiler c, List source) {
 
 /* A file without a type initializer, or with one that conditional groups
    may compile out, gets a synthetic initializer. */
-static void Init.prepare(Init *init, List source) {
-  Compiler c = init.c;
-  init.guard = c.sym.reference(%("_init_guard_"), NULL);
-  init.shutdown = c._shutdown_registration(source);
-  List arms = init.initializer
-    ? _definition_arms(source, init.initializer) : NULL;
-  if (!init.initializer || arms) init.synthetic = init.synthesize(arms);
-  init.entry = init.synthetic ? "_file_init_" : init.initializer;
-  if (c._cache_only()) init.reachable = _cache_reachable(source);
+static void Init.prepare(Init *i, List source) {
+  Compiler c = i.c;
+  i.guard = c.sym.reference(%("_init_guard_"), NULL);
+  i.shutdown = c._shutdown_registration(source);
+  List arms = i.initializer ? _definition_arms(source, i.initializer) : NULL;
+  if (!i.initializer || arms) i.synthetic = i.synthesize(arms);
+  i.entry = i.synthetic ? "_file_init_" : i.initializer;
+  if (c._cache_only()) i.reachable = _cache_reachable(source);
 }
 
 /* The position of the first function definition in `source`, or of the
@@ -639,26 +638,26 @@ static int _prelude_position(List source) {
 /* The guard's declaration, then the synthetic initializer.
    `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
-static List Init.prelude(Init *init, List out) {
-  out = cons(_initialization_guard(init.guard), out);
-  return init.synthetic ? cons(init.synthetic, out) : out;
+static List Init.prelude(Init *i, List out) {
+  out = cons(_initialization_guard(i.guard), out);
+  return i.synthetic ? cons(i.synthetic, out) : out;
 }
 
 /* The protocol initializer and the type initializer wrap their own bodies.
    Other non-static entries initialize their static helpers first. */
-static List Init.patch(Init *init, List item) {
+static List Init.patch(Init *i, List item) {
   match (item)
     case %(function (!set ?type (*))
            (!set ?declarator (bind (binding ? ?spelling) ?))
            (block *body)): {
       String name = spelling;
       if (name == "x2c_initialize_protocols")
-        return init.c._protocol_initializer(item, body);
-      if (init.initializer && name == init.initializer)
-        return init.c._replace_body(item, init.statements(NULL, body));
-      if (init.patches(type, spelling)) {
-        List entry = init.c.sym.reference(%(${init.entry}), NULL);
-        return _patch_initialized_entry(init.c, item, body, init.guard, entry);
+        return i.c._protocol_initializer(item, body);
+      if (i.initializer && name == i.initializer)
+        return i.c._replace_body(item, i.statements(NULL, body));
+      if (i.patches(type, spelling)) {
+        List entry = i.c.sym.reference(%(${i.entry}), NULL);
+        return _patch_initialized_entry(i.c, item, body, i.guard, entry);
       }
     }
   return item;
@@ -666,9 +665,9 @@ static List Init.patch(Init *init, List item) {
 
 /* The protocol bootstrap functions are never patched, and a cache-only
    file patches only the entries that reach a cache. */
-static int Init.patches(Init *init, Var type, Var spelling) =>
+static int Init.patches(Init *i, Var type, Var spelling) =>
   !type.type().is_static() && !_protocol_bootstrap(spelling) &&
-  (init.reachable == NULL || spelling in init.reachable);
+  (i.reachable == NULL || spelling in i.reachable);
 
 static int _protocol_bootstrap(String name) =>
   name == "x2c_initialize_protocols" ||
@@ -700,18 +699,18 @@ macro Statement $initializer_run_once(Expr $guard) {
    fallback. A type initializer in conditional groups may be compiled out,
    so the synthetic initializer calls it under the arms that compile it,
    which sets the guard, and otherwise runs the file's own initialization. */
-static List Init.synthesize(Init *init, List arms) {
-  List binding = init.c.sym.introduce("_file_init_");
+static List Init.synthesize(Init *i, List arms) {
+  List binding = i.c.sym.introduce("_file_init_");
   List type = %(("__attribute__((constructor))") static void);
   String entry = "x2c_initialize_protocols";
-  if (init.initializer) {
+  if (i.initializer) {
     type = %(static void);
-    entry = init.initializer;
+    entry = i.initializer;
   }
   List call = %((stmnt (expr (void) (call $entry (args)))));
-  List statements = init.statements(_within_definitions(arms, call), NULL);
+  List statements = i.statements(_within_definitions(arms, call), NULL);
   Macro shape = $file_initializer_function;
-  return init.c.rebuild_unit_function(shape(type, binding, statements));
+  return i.c.rebuild_unit_function(shape(type, binding, statements));
 }
 
 /* An initializer runs `entry`, returns when its guard is set and sets it
@@ -719,11 +718,11 @@ static List Init.synthesize(Init *init, List arms) {
    late queue, and the shutdown registration. Cache graphs that require the
    initializer's own String/List canonicalizer are queued late; all other
    cache and static setup keeps its pre-body order. */
-static List Init.statements(Init *init, List entry, List body) {
-  Compiler c = init.c;
-  return List.concat_n(7, entry, c._run_once(init.guard),
-    c.init_statements(<early>), c.init_statements(<mid>), body,
-    c.init_statements(<late>), init.shutdown);
+static List Init.statements(Init *i, List entry, List body) {
+  Compiler c = i.c;
+  return List.concat_n(
+    7, entry, c._run_once(i.guard), c.init_statements(<early>),
+    c.init_statements(<mid>), body, c.init_statements(<late>), i.shutdown);
 }
 
 static List Compiler._replace_body(
@@ -742,8 +741,9 @@ static List Compiler._run_once(Compiler c, List guard) {
 static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
-  List statements = List.concat_n(4, %(${_initialization_guard(guard)}),
-    c._run_once(guard), c.init_statements(<protocol>), body);
+  List statements = List.concat_n(
+    4, %(${_initialization_guard(guard)}), c._run_once(guard),
+    c.init_statements(<protocol>), body);
   return c._replace_body(function, statements);
 }
 
