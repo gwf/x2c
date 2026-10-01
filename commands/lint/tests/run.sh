@@ -37,6 +37,9 @@ run() {
   run --all "$tests/src/comments.x"
   echo "# structure and validation rules"
   run --all "$tests/src/review.x"
+  echo "# shared Error causes outside the repository"
+  cp "$tests/src/review.x" "$work/review.x"
+  (cd "$work" && run --rule return-after-raise review.x)
   echo "# shape rules"
   run --all "$tests/src/shape.x"
   echo "# a script unit"

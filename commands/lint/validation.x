@@ -18,6 +18,8 @@
 
 #pragma private
 
+$(import "../../lib/error-macros.xmacro")
+
 static const List validator_words = %(
   "check" "compatible" "require" "valid" "validate" "validator" "verify"
   "well_formed"
@@ -36,23 +38,9 @@ static int _among(String word, List words):
 static int _is(Lint l, int at, String text) =>
   at >= 0 && at < l.count && l.tokens[at].text == text
 
-/* The causes `lib/error-macros.xmacro` lists as never returning, the
-   atoms of its `error.nonreturning.causes` list. */
-static Map _shared_causes(void):
-  static Map causes
-  if causes: return causes
-  causes = {}
-  Path file = "lib/error-macros.xmacro"
-  String text = file.exists() ? file.read_text() : ""
-  int at = text.find("error.nonreturning.causes '(")
-  if at < 0: return causes
-  int open = text.find_within("(", at, -1)
-  int close = text.find_within(")", open, -1)
-  String list = String.new_len((char *) text + open + 1, close - open - 1)
-  foreach String line in list.split("\n"):
-    foreach String cause in line.split(" "):
-      if cause: causes[cause] = 1
-  return causes
+/* The causes `lib/error-macros.xmacro` lists as never returning when this
+   command is built. */
+static const SymbolSet shared_causes = $error.nonreturning.causes()
 
 /* The word that starts the quoted form opened at `open`. */
 static String _cause(Lint l, int open):
@@ -72,12 +60,12 @@ static int _then_return(Lint l, int at, int end):
   int semi = _semicolon(l, at, end)
   return semi < end && _is(l, l.next(semi), "return")
 
-/* The shared cause a `raise` at `at` names, or NULL. */
-static String _raised(Lint l, int at):
+/* Whether a `raise` at `at` names a shared cause. */
+static int _raised(Lint l, int at):
   int open = l.next(at)
-  if !_is(l, at, "raise") || !_is(l, open, "%("): return NULL
-  String cause = _cause(l, open)
-  return cause in _shared_causes() ? cause : NULL
+  Symbol cause
+  return _is(l, at, "raise") && _is(l, open, "%(") &&
+    Symbol.try_new(_cause(l, open), &cause) && cause in shared_causes
 
 /* Whether the tokens at `at` start a manual shape test: `.car(`, `.cdr(`,
    `.cadr(` and its relatives, `.len(`, `.is(<list>)`, `is <list>` or
