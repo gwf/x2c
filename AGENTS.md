@@ -43,9 +43,9 @@ offering reassurance or continuing.
 Use subagents for independent discovery or bounded work. A session that
 launches implementation subagents is their orchestrator: load
 `orchestrate-x2c-work` first. Its workers never merge `dev`, gate, or push;
-the orchestrator integrates and gates once per batch. Verify a reported
-finding against current source and reproduce claimed behavior before acting
-on it or presenting it as established.
+the orchestrator collects their private handoffs and owns the session's
+delivery choice below. Verify a reported finding against current source and
+reproduce claimed behavior before acting on it or presenting it as established.
 
 ## Write x2c that belongs here
 
@@ -167,10 +167,56 @@ can use focused probes and the existing build and stage targets locally; it
 does not require an intermediate publication or full gate. Ordinary publication
 uses the single command below.
 
-Published tips on shared upstream branches, including requested PR branches,
-must rebuild from their shipped bootstrap. Validate the completed integrated
-tree before pushing; intermediate commits in that push need no independent
-gates.
+Published tips on shared upstream branches, including ordinary requested PR
+branches, must rebuild from their shipped bootstrap. Validate the completed
+integrated tree before pushing; intermediate commits in that push need no
+independent gates. Shared-integrator submissions follow the exception below.
+
+### Select integration ownership
+
+There are three delivery modes, chosen by Gary's instruction to the session:
+
+- An individual session integrates, gates, and publishes its work to `dev`.
+- An `orchestrate-x2c-work` session collects its workers' private handoffs,
+  integrates, gates once per coherent batch, and publishes to `dev`.
+- A session told to use the shared integrator submits ready PRs targeting
+  `dev`. The standing `integrate-x2c-prs` session batches, reviews, gates, and
+  publishes them. Either individual sessions or orchestrators may submit.
+
+Direct delivery is the default. Starting an integrator alone changes no other
+session's mode. An explicit choice persists until Gary changes it; pass it to
+delegated workers. Local-only work and a requested review stop still take
+precedence. An absent integrator leaves submissions waiting; do not fall back
+to direct delivery.
+
+When selecting or switching modes, establish the worktree's role and delivery
+with `tools/integrate-dev.py context --role <role> --delivery <delivery>`.
+Roles are `individual`, `orchestrator`, `integrator`, and subordinate `worker`;
+delivery choices are `direct`, `pr`, and `private`. Subordinate workers always
+use `worker`/`private` and give their changes to their orchestrator. Context
+setup verifies the common Git push hook; stop on a conflicting hook setup
+rather than silently replacing it. These tools and canonical skills work for
+both providers; provider-specific session or messaging APIs are unnecessary.
+
+For shared-integrator delivery, review the authored change and run meaningful
+focused checks, then push a work branch and submit its non-draft PR through
+`tools/integrate-dev.py submit`. Record the starting revision, exact head,
+dependencies, and focused evidence as described in
+[quick start](agents/quick-start.md#submit-to-the-shared-integrator).
+The coordinator enrolls it with `integration-ready`; merely creating a PR
+does not enroll it. Readiness requests integration of that pinned revision.
+Withdrawals take effect when observed before push, rather than transactionally
+across GitHub and Git.
+
+A submission may be pushed without a publication gate or final shipped
+bootstrap. Do not merge moving `dev`, regenerate final artifacts, or run a
+full gate solely to submit. Keep local bootstrap transitions usable for
+development. The integrator owns final generated artifacts and the applicable
+performance work and publication gate once per combined batch. Report a PR
+as submitted, not published or validated. Ordinary review-held PRs retain
+the existing publication validation below and are never enrolled.
+
+### Validate publication
 
 Before publishing, fetch and integrate current `origin/dev`, review the
 resulting diff and generated changes, and run `git diff --check`. Commit
@@ -208,8 +254,9 @@ work cannot continue within scope. Escalate an increase in failures or an
 unresolved consequential design choice rather than hiding it in output.
 
 Routine implementation includes validated delivery directly to `dev` unless
-Gary requests a PR, review stop, or local-only work. Network actions needed
-for that delivery are authorized by the task. Use the explicit destination:
+Gary selects the shared integrator, requests a PR, review stop, or local-only
+work. Network actions needed for that delivery are authorized by the task.
+Use the explicit destination:
 
 ```sh
 git push origin HEAD:refs/heads/dev

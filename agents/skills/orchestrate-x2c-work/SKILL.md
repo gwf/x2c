@@ -2,18 +2,27 @@
 name: orchestrate-x2c-work
 description: >-
   Run several independent x2c changes in parallel with subagent workers in
-  isolated worktrees, then integrate them yourself in batches with one gate
-  run per batch. Use when a session has two or more separable changes, a
-  campaign with independent deliverables, or contention on dev from other
-  sessions. Do not use for a single change; use the matching task skill.
+  isolated worktrees, then deliver coherent batches directly or submit PRs to
+  a shared integrator when instructed. Use when a session has two or more
+  separable changes, a campaign with independent deliverables, or contention
+  on dev from other sessions. Do not use for a single change; use the matching
+  task skill.
 ---
 
 # Orchestrate and integrate x2c work
 
-The orchestrator splits the work, runs workers in parallel, and is the only
-integrator. Workers build and check their own change; only integration merges
-`dev`, runs the gate, and pushes. One gate run then covers several changes,
-and the session stops churning on `dev`.
+The orchestrator splits the work, runs workers in parallel, and collects their
+private handoffs. It normally integrates, gates, and publishes their combined
+work. When Gary says "use the integrator", it submits coherent PRs instead;
+the standing integrator owns the final gate and `dev` publication. A running
+integrator alone does not change this session's delivery.
+
+Establish `orchestrator` context with `direct` or `pr` delivery through
+`tools/integrate-dev.py context`, as selected under root
+[AGENTS.md](../../../AGENTS.md#select-integration-ownership). Pass that choice
+to workers, while setting each isolated worker to `worker`/`private` before it
+starts. Context setup and private handoffs use common repository tools and
+Git revisions across providers; no provider-specific messaging API is needed.
 
 ## Split the work
 
@@ -50,7 +59,7 @@ Launch each worker with worktree isolation. Tell it to:
 - make only its assigned change. Private checkpoint commits are unrestricted
   under the root local-work policy;
 - not merge `dev`, push, or run `tools/gate-state.py` or `tools/land-dev`;
-  shared integration and publication belong to the orchestrator;
+  give a private handoff to the orchestrator even when it uses PR delivery;
 - hand over its commits or a patch containing all authored committed and
   uncommitted changes against the recorded starting revision. For a patch,
   use `git diff --binary <starting-revision> -- <authored-paths>` and include
@@ -62,7 +71,7 @@ A diff against a moving `origin/dev` can reverse other sessions' changes.
 Generated docs and final bootstrap artifacts are regenerated at integration;
 local bootstrap refreshes needed for development remain available to workers.
 
-## Integrate a batch
+## Collect a batch
 
 Combine finished work into a coherent batch rather than landing each worker
 separately. Several phases of one campaign can share a batch: local commits
@@ -70,28 +79,45 @@ need no gate, and each landing costs a full gate run. Dependent workers can
 consume local capability commits before any publication. The gate runs on the
 completed integrated tree; commit organization is an implementation choice.
 
-1. Integrate current `origin/dev` and the workers' commits or patches. For
+1. Combine the workers' commits or patches against the recorded starting
+   revision. In direct mode, also integrate current `origin/dev`. For
    patches, use `git apply --index -3`. Resolve conflicts by keeping both
-   sides' intent; regenerate generated files rather than merging them. Take
-   either side of a generated-doc conflict and run `make doc-generate` once at
-   the end. Check that each cherry-pick finished before committing anything
-   after it, and pass commit lists through `xargs`; zsh does not split an
-   unquoted variable into words.
+   sides' intent. Final generated artifacts belong to the integration owner;
+   in direct mode, take either side of a generated-doc conflict and run
+   `make doc-generate` once at the end. Shared mode hands authoritative
+   changes to the standing integrator for final regeneration. Check that each
+   cherry-pick finished before committing anything after it, and pass commit
+   lists through `xargs`; zsh does not split an unquoted variable into words.
 2. Build or probe the combined changes as needed. A three-way apply does not
    catch a caller using code another change deleted. For a language transition,
    follow [Capabilities](#capabilities) before applying callers that need it.
 3. Review the combined authored diff for overlap, repeated checks, and
    leftover machinery.
-4. Run `tools/land-dev "<bootstrap refresh message>"`. It integrates `dev`,
-   regenerates docs, runs the final gate, commits generated changes when needed,
-   and pushes only when the gate passes and the tree is clean. A rejected push
-   requires integration and validation of the resulting tree.
-5. A failed gate stops that attempt. Read its reported log path, fix the cause
+
+In shared-integrator mode, follow
+[the submission handoff](../../quick-start.md#submit-to-the-shared-integrator).
+Commit, push the work branch, and enroll one or more ready PRs targeting `dev`
+with the actual starting revision, pinned dependencies, focused evidence, and
+transition notes. Do not merge moving `dev`, refresh final generated artifacts,
+or run a publication gate solely to submit. The parent submits; subordinate
+workers remain private. Review-held PRs stay unenrolled, and local-only work
+stays local. Report submitted revisions rather than claiming they landed.
+
+In direct mode, publish the collected batch:
+
+1. Run `tools/land-dev "<bootstrap refresh message>"`. It integrates `dev`,
+   regenerates docs, runs the final gate, commits generated changes when
+   needed, and pushes only when the gate passes and the tree is clean.
+   Use `--gate doc-check` for a documentation-only batch under root scope rules.
+   A rejected push requires integration and validation of the resulting tree.
+   Its review-stop and publish-reviewed options allow generated artifact
+   review before the push without rebuilding the unchanged gated candidate.
+2. A failed gate stops that attempt. Read its reported log path, fix the cause
    with focused checks, and then run `tools/land-dev` again. Each attempt keeps
-   its own logs and a latest-attempt pointer. Preserve the failed tree and logs;
-   do not discard generated changes or blindly rerun the full gate. A change to
-   emitted C needs a second bootstrap round; `tools/land-dev` reruns the gate
-   once when `stage-diff-0` fails, so no manual round is needed.
+   its own logs and a latest-attempt pointer. Preserve the failed tree and
+   logs; do not discard generated changes or blindly rerun the full gate.
+   A change to emitted C needs a second bootstrap round; `tools/land-dev`
+   reruns the gate once when `stage-diff-0` fails, so no manual round is needed.
 
 ## Capabilities
 
@@ -103,8 +129,10 @@ current question. Give dependent workers the local capability commit as their
 starting revision; no intervening gate or upstream landing is required.
 
 The final published tip must rebuild from its shipped bootstrap and pass the
-root publication checks. Intermediate private commits need not each satisfy
-that property.
+root publication checks. Intermediate private commits and shared-integrator
+submissions need not each satisfy that property. An orchestrator submitting
+dependent work must pin the required PR heads and include transition notes;
+the standing integrator prepares the final seed and combined tree.
 
 ## Isolation
 

@@ -50,9 +50,11 @@ Inspect generated changes against the authored changes that explain them.
 
 ## Deliver
 
-Follow root validation and publication instructions on the final tree. Routine
-implementation delivers to `dev`; use a PR when requested. The work is
-complete when the requested behavior works and the authorized delivery is
-verified. Production promotion and advancement of `main` require Gary's
-separate release authorization. Report the behavior delivered, validation
-result, and any remaining limitation plainly.
+Follow the root delivery selection: direct integration is the default;
+"use the integrator" means a ready PR submission with focused evidence rather
+than a publication gate. Subordinate workers give private handoffs to their
+orchestrator. Review-held PRs and local-only requests retain their boundaries.
+The work is complete when the requested behavior works and the authorized
+delivery is verified. Production promotion and advancement of `main` require
+Gary's separate release authorization. Report whether the result was published,
+submitted, or retained locally, its verification, and any remaining limitation.
