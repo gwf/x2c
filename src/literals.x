@@ -9,6 +9,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
+$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
@@ -127,8 +128,7 @@ static List Compiler._parse_list_tail(Compiler c) {
 
 static List Compiler._parse_splice(Compiler c) {
   if (c.peek(0) == <@>) {
-    List expr = c._parse_named_reference(
-      <@>, "use '@{...}' to splice an expression");
+    List expr = c._parse_named_reference(<@>);
     return %(splice $expr);
   }
   if (!c.test(<"@{">)) return NULL;
@@ -139,8 +139,7 @@ static List Compiler._parse_splice(Compiler c) {
 
 static List Compiler._parse_insertion(Compiler c) {
   if (c.peek(0) == <$>)
-    return c._parse_named_reference(
-      <$>, "use '${...}' to insert an expression");
+    return c._parse_named_reference(<$>);
   if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
   c.next();
   List expr = c.parse_expression();
@@ -149,12 +148,10 @@ static List Compiler._parse_insertion(Compiler c) {
   return expr;
 }
 
-static List Compiler._parse_named_reference(
-  Compiler c, Symbol sigil, String hint) {
+static List Compiler._parse_named_reference(Compiler c, Symbol sigil) {
   c.expect(sigil);
   if (c.peek(0) != <ident>) {
-    String message = %"expected identifier after '$sigil'";
-    c.report_error(<parse>, message, c.token, %( $hint ));
+    $report(c, "parse.insert.name", sigil);
   }
   return c.parse_variable();
 }
@@ -371,8 +368,7 @@ static List Compiler._parse_raise_code(Compiler c) {
   List code = c.try_parse_macro_slot(<expression>);
   if (!code) code = c._parse_insertion();
   if (code) return code;
-  return c._parse_bare_symbol(
-    "raise", "code", "use raise %(code (key value)...);");
+  return c._parse_bare_symbol(<raise>, 0);
 }
 
 static void Compiler._parse_raise_detail(Compiler c, Array args) {
@@ -380,8 +376,7 @@ static void Compiler._parse_raise_detail(Compiler c, Array args) {
   c.expect(<(>);
   List key = c.try_parse_macro_slot(<expression>);
   if (!key)
-    key = c._parse_bare_symbol(
-      "raise", "detail key", "use raise %(code (key value)...);");
+    key = c._parse_bare_symbol(<raise>, 1);
   List value = c._parse_detail_value(
     origin, "raise detail requires exactly one value",
     "raise detail value cannot splice", %("pass one value expression"));
@@ -390,11 +385,10 @@ static void Compiler._parse_raise_detail(Compiler c, Array args) {
 }
 
 static List Compiler._parse_bare_symbol(
-  Compiler c, String owner, String role, String hint) {
+  Compiler c, Symbol owner, int detail) {
   Token token = c.token;
   if (c.peek(0) != <lit-atom>)
-    c.report_error(
-      <parse>, %"$owner $role must be a bare Symbol", token, %($hint));
+    $report(c, "parse.symbol.bare", owner, detail, token);
   String text = token.text.unescape();
   Symbol symbol = c._exact_symbol(token, text);
   c.next();
@@ -436,8 +430,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
 
 static List Compiler._parse_catch_code(Compiler c) {
   if (c.peek(0) != <lit-atom>) return c._parse_list_head();
-  return c._parse_bare_symbol(
-    "catch filter", "code", "use catch %(code (key pattern)...):");
+  return c._parse_bare_symbol(<catch>, 0);
 }
 
 /* A `*` pattern stands alone, and a `(key pattern)` pair becomes a
@@ -449,11 +442,8 @@ static void Compiler._parse_catch_detail(Compiler c, Array elements) {
     return;
   }
   if (!c.test(<(>))
-    c.report_error(
-      <parse>, "catch filter detail must be '*' or '(key pattern)'",
-      origin, %("wrap keyed detail patterns in parentheses"));
-  List key = c._parse_bare_symbol(
-    "catch filter", "detail key", "use catch %(code (key pattern)...):");
+    $report(c, "parse.catch.detail", origin);
+  List key = c._parse_bare_symbol(<catch>, 1);
   List value = c._parse_detail_value(
     origin, "catch filter detail requires exactly one pattern",
     "catch filter detail pattern cannot splice",
@@ -487,9 +477,7 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   if (duplicate >= 0) {
     Token token = tokens[duplicate];
     Symbol symbol = symbols[duplicate];
-    c.report_error(
-      <parse>, "duplicate Symbol in symbol set", token,
-      %("symbol:" ${symbol.repr()}));
+    $report(c, "parse.symbol.duplicate", token, symbol);
   }
   symbols.free();
   tokens.free();
@@ -500,9 +488,7 @@ static Symbol Compiler._member_symbol(Compiler c) {
   Token token = c.token;
   Symbol kind = c.peek(0);
   if (kind != <lit-atom> && kind != <lit-symbol>)
-    c.report_error(
-      <parse>, "symbol-set entries must be literal Symbols",
-      token, %("use %<<foo bar>>"));
+    $report(c, "parse.symbol.literal", token);
   String spelling = kind == <lit-symbol>
     ? _angle_spelling(token.text) : _member_spelling(token.text);
   return c._exact_symbol(token, spelling);
@@ -708,7 +694,7 @@ static List Compiler._parse_string_segment(Compiler c) {
     case <$>:       return c._parse_named_segment();
     case <"${">:    return c._parse_braced_segment();
     default:
-      c.report_error(<parse>, "expected string segment", c.token, NULL);
+      $report(c, "parse.string.segment");
   }
 }
 
@@ -725,8 +711,7 @@ static List Compiler._parse_text_segment(Compiler c) {
 }
 
 static List Compiler._parse_named_segment(Compiler c) {
-  List expr = c._parse_named_reference(
-    <$>, "use '${...}' to insert an expression");
+  List expr = c._parse_named_reference(<$>);
   expr = c.convert_segment_to_string(expr);
   return %(segvar $expr);
 }
@@ -808,9 +793,7 @@ List Compiler.parse_atomic_literal(Compiler c) {
     return %(expr ${literal.cadr()} $literal);
   }
   Symbol kind = c.peek(0);
-  c.report_error(
-    <parse>, "expected atomic expression", c.token,
-    %( "token:" ${c.token.text} "kind:" ${kind.str()} ));
+  $report(c, "parse.atom.expected", kind);
 }
 
 /* Shallow declaration discovery gives a number outside every supported
@@ -819,9 +802,7 @@ static List Compiler._number_literal(Compiler c, String text, int floating) {
   Type type = Type.numeric_literal(text, floating);
   if (!type && c.shallow) type = floating ? %(double) : %(int);
   if (!type)
-    c.report_error(
-      <type>, "numeric literal is outside the supported scalar range",
-      c.token, %( "literal:" $text ));
+    $report(c, "type.number.range", text);
   return %(literal $type $text);
 }
 
@@ -843,9 +824,7 @@ static void Compiler._check_binder(Compiler c, Atom atom) {
   if ((first != '?' && first != '*') || atom.is_binder()) return;
   int reserved = atom == <?binder?> || atom == <*binder?>;
   if (reserved && c.match_is && c.peek(1) == <)>) return;
-  c.report_error(
-    <parse>, "invalid match binder name",
-    c.token, %( "binder-name:" ${atom.str()} ));
+  $report(c, "parse.binder.name", atom);
 }
 
 /* The preprocessor never sees a literal, so a macro's name here is data.
@@ -882,7 +861,5 @@ static Symbol Compiler._exact_symbol(
   Symbol symbol;
   if (Symbol.try_new(spelling, &symbol)) return symbol;
   Symbol lossy = spelling ? Symbol.new(spelling) : 0;
-  c.report_error(
-    <parse>, "Symbol literal does not round-trip", token,
-    %("source spelling: $spelling" "encoded spelling: ${lossy}"));
+  $report(c, "parse.symbol.truncated", token, spelling, lossy);
 }
