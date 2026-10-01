@@ -37,6 +37,8 @@ Map Sym_base_symbols(Sym s);
 
 Map Sym_current_symbols(Sym s);
 
+Map Sym_unit_symbols(Sym s);
+
 Map Sym_file_statics(Sym s);
 
 void Sym_mark_static(Sym s, List key);

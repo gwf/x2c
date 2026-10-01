@@ -7,8 +7,6 @@
 
 #include "x2c.h"
 #include "compiler.h"
-Compiler Compiler_expanding(void);
-
 List Compiler_parse_macro_definition(Compiler c);
 
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
@@ -55,6 +53,8 @@ Var Compiler_evaluate_macro_slot(Compiler c, Var value);
 
 List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
 
+Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
+
 Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
 
 List x2c_template_call(Var stored, List values);
@@ -75,6 +75,8 @@ List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
 
+void Compiler_ensure_macro_lisp(Compiler compiler);
+
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 void Compiler_parse_macro_lisp_shallow(Compiler compiler);
@@ -87,11 +89,15 @@ List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation
 
 void Compiler_import_package_macros(Compiler c, String name, Token invocation);
 
+String Compiler_source_path(Compiler c, String file);
+
 Lisp Compiler_open_macro_library(Compiler compiler);
 
 void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
 
 int Compiler_inherits_import(String path);
+
+void Compiler_record_comptime(Compiler c, String name);
 
 void Compiler_inherit_library_comptime(Compiler c);
 
@@ -99,127 +105,13 @@ int macro_library_filling(void);
 
 Map Compiler_shared_definitions(Compiler compiler);
 
+int Compiler_shares_meta_definition(Compiler c, String name);
+
 void Compiler_install_builtin_macros(Compiler compiler);
 
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
-void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
-
-void Compiler_install_meta_function(Compiler c, List fn, Token marker);
-
-List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
-
-void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
-
-void Compiler_install_native_meta_effects(Compiler c, Map globs);
-
-int Compiler_bind_native_meta(Compiler c, String name);
-
-void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
-
-int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
-
-String Compiler_native_meta_module(Compiler c, String name, Type * type);
-
-int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
-
-Map x2c_meta_definition_hashes(void);
-
-void Compiler_select_native_modules(List paths);
-
-void Compiler_select_package_module(Compiler c, String name, String root, Token token);
-
-String Compiler_load_native_module(String path);
-
-void Compiler_preload_native_module(String path);
-
-void Compiler_add_native_module(String path, Map(* entry)(void));
-
-int Compiler_native_module_loaded(String path);
-
-Map Compiler_native_module_targets(String path);
-
-int Compiler_supplies_native_meta(String name);
-
-void x2c_register_extension(const char * name, Map(* targets)(void));
-
-int Compiler_links_extension(String name);
-
-String Compiler_extension_archive(void);
-
-List x2c_syntax_type(List value);
-
-List x2c_protocol_member(List participant, List base, String member);
-
-List x2c_method_resolve(List type_value, String name);
-
-int x2c_type_is_integral(List value);
-
-int x2c_type_is_pointer(List value);
-
-List x2c_type_element(List value);
-
-List x2c_type_parameters(List value);
-
-List x2c_type_return(List value);
-
-List x2c_type_parts(List value);
-
-String x2c_type_reverse_name(String base, String participant);
-
-List x2c_type_resolve(List value);
-
-List x2c_type_layout(List value);
-
-int x2c_type_is_value(List value);
-
-Symbol x2c_type_tag_name(String name);
-
-List x2c_type_fields(List value);
-
-String x2c_binding_spelling(Var syntax);
-
-List x2c_ident(String spelling);
-
-String x2c_function_name(List function);
-
-List x2c_function_parameter(List function, String wanted);
-
-String x2c_source_text(Var syntax);
-
-String x2c_embed_text(Var path);
-
-Var x2c_literal_value(Var syntax);
-
-String x2c_invocation_file(void);
-
-int x2c_invocation_line(void);
-
-int x2c_invocation_column(void);
-
-void x2c_diagnostic_fail(String message, List notes);
-
-void x2c_diagnostic_warn(String message, List notes);
-
-List meta_type_description(Var value);
-
-List meta_source_description(Var value);
-
-List builtin_foreach_reference(String name);
-
-Var builtin_foreach_unique(String name);
-
-List builtin_foreach_complete(List expression);
-
-List builtin_foreach_collection(List expression);
-
-List builtin_foreach_bindings(List declaration);
-
-List builtin_class_location(void);
-
-List binding_native_type(List function);
-
-List binding_literal_list(List values);
+void Compiler_report_lisp_failure(Compiler compiler, Token invocation, List error, String source);
 
 void macro_library_reset(void);
 

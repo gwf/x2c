@@ -31,9 +31,11 @@ static String _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, 
 static Var _697, _695, _693, _691, _659, _657, _647, _645, _644, _641, _639, _636, _633, _621, _619, _616, _614, _613, _612, _609, _605, _602, _598, _594, _591, _588, _586, _585, _582, _580, _578, _577, _574, _573, _571, _566, _562, _558, _555, _550, _549, _545, _541, _540, _539, _538, _537, _535, _531, _523, _517, _514, _510, _506, _305, _304, _303, _301, _297, _293, _291, _290, _286, _283, _279, _265, _264, _257, _253, _252, _251, _247, _244, _241, _235, _232, _230, _223, _218, _216, _213, _208, _204, _203, _200, _197, _195, _189, _188, _185, _182, _180, _177, _175, _172, _168, _165, _161, _157, _156, _155, _154, _152, _149, _146, _144, _142, _140, _138, _135, _133, _128, _124, _123, _122, _121, _120, _116, _112, _109, _105, _103, _100, _98, _82, _81, _80, _79, _78, _77, _76, _50, _35, _34, _33, _29, _6, _2, _1, _0;
 
 #include "type.h"
+#include "generate.h"
 #include "macros.h"
 #include "script.h"
 #include "toolchain.h"
+#include "transform.h"
 #include "utils.h"
 #include <unistd.h>
 static String meta_cc, meta_include_dir;
@@ -747,6 +749,8 @@ SymTxn Compiler_begin_semantic_transaction(Compiler);
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 void x2c_exception_push(ExceptionFrame *);
+List Compiler_transform(Compiler, List);
+List generate_code_text(Compiler, List, String);
 void x2c_exception_landed(ExceptionFrame *);
 int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
