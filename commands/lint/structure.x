@@ -35,22 +35,10 @@ static const List route_words = %(
 
 static const List branch_words = %("if" "for" "while" "switch" "match")
 
-static int _among(String word, List words):
-  foreach String each in words:
-    if each == word: return 1
-  return 0
-
 static int _among_folded(String word, List words):
   foreach String each in words:
     if !strcasecmp(each, word): return 1
   return 0
-
-static int _is(Lint l, int at, String text) =>
-  at >= 0 && at < l.count && l.tokens[at].text == text
-
-static int _line(Lint l, Var at) => l.tokens[at.int()].line
-
-static int _last_line(Lint l, Var end) => l.end_line(l.prev(end.int()))
 
 /* Same-named field transfers `a.f = b.f;` and whole copies through a
    pointer, `*a = b;` or `a = *b;`. */
@@ -61,21 +49,23 @@ static void _copies(Lint l, List function):
   for (int at = body.int(); at < end.int(); at = l.next(at)):
     int dot = l.next(at), field = l.next(dot), eq = l.next(field)
     int right = l.next(eq), dot2 = l.next(right), field2 = l.next(dot2)
-    if l.tokens[at].type == <ident> && _is(l, dot, ".") &&
-       l.tokens[field].type == <ident> && _is(l, eq, "=") &&
-       l.tokens[right].type == <ident> && _is(l, dot2, ".") &&
-       _is(l, field2, l.tokens[field].text) && _is(l, l.next(field2), ";"):
+    if l.tokens[at].type == <ident> && l.token_is(dot, ".") &&
+       l.tokens[field].type == <ident> && l.token_is(eq, "=") &&
+       l.tokens[right].type == <ident> && l.token_is(dot2, ".") &&
+       l.token_is(field2, l.tokens[field].text) &&
+       l.token_is(l.next(field2), ";"):
       transfers++
-    int left = _is(l, at, "*") ? l.next(at) : at
+    int left = l.token_is(at, "*") ? l.next(at) : at
     int assign = l.next(left)
-    int value = _is(l, l.next(assign), "*") ? l.next(l.next(assign)) :
+    int value = l.token_is(l.next(assign), "*") ? l.next(l.next(assign)) :
       l.next(assign)
-    if (left != at || value != l.next(assign)) && !_is(l, l.prev(at), "*") &&
-       l.tokens[left].type == <ident> && _is(l, assign, "=") &&
-       l.tokens[value].type == <ident> && _is(l, l.next(value), ";"):
+    if (left != at || value != l.next(assign)) &&
+       !l.token_is(l.prev(at), "*") &&
+       l.tokens[left].type == <ident> && l.token_is(assign, "=") &&
+       l.tokens[value].type == <ident> && l.token_is(l.next(value), ";"):
       whole++
   if transfers || whole:
-    l.add("struct-copy", _line(l, start),
+    l.add("struct-copy", l.at(start).line,
           %"$transfers field transfers and $whole whole copies in $name")
 
 /* The counter updates and cleanup calls in one function: a counter word
@@ -87,7 +77,7 @@ static void _bookkeeping(Lint l, List function):
   for (int at = body.int(); at < end.int(); at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
-    if _among(t.text, cleanup_words) && _is(l, l.next(at), "("): cleanup++
+    if t.text in cleanup_words && l.token_is(l.next(at), "("): cleanup++
     if !_among_folded(t.text, stat_words): continue
     int last = -1
     for (int k = l.next(at); k < end.int() && l.tokens[k].type != <;> &&
@@ -99,7 +89,7 @@ static void _bookkeeping(Lint l, List function):
     stats++
     at = last
   if stats >= 5 || cleanup >= 5:
-    l.add("manual-bookkeeping", _line(l, start),
+    l.add("manual-bookkeeping", l.at(start).line,
           %"$stats statistics sites and $cleanup cleanup calls in $name")
 
 /* The deepest nesting of code braces among the tokens `from` up to `to`.
@@ -120,7 +110,7 @@ static int _parameter_count(Lint l, int start, int body):
   int open = start
   while open < body && l.tokens[open].type != <"(">: open++
   int close = l.partner[open], first = l.next(open)
-  if first == close || _is(l, first, "void") && l.next(first) == close:
+  if first == close || l.token_is(first, "void") && l.next(first) == close:
     return 0
   int count = 1
   for (int at = first; at < close; at = l.next(at)):
@@ -134,7 +124,7 @@ static int _parameter_count(Lint l, int start, int body):
 static void _shape(Lint l, List function):
   Var (key, start, body, end) = function
   String (owner, dot, name) = lint_name(function).rpartition(".")
-  int line = _line(l, start), lines = _last_line(l, end) - line + 1
+  int line = l.at(start).line, lines = l.end_line(l.prev(end)) - line + 1
   int depth = _brace_depth(l, body.int(), end.int())
   int parameters = _parameter_count(l, start.int(), body.int())
   if lines > 40:
@@ -164,8 +154,8 @@ static Array _route(Lint l, List function, Map ids):
   for (int at = body.int(); at < end.int(); at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
-    if _among(t.text, route_words): controls.push(_id(ids, t.text))
-    if _is(l, l.next(at), "(") && !_among(t.text, branch_words):
+    if t.text in route_words: controls.push(_id(ids, t.text))
+    if l.token_is(l.next(at), "(") && !(t.text in branch_words):
       calls.push(_id(ids, t.text))
   foreach Var call in calls:
     controls.push(call)
@@ -226,8 +216,8 @@ static void _routes(Lint l):
       List function = functions[k]
       Var (key, start, body, end) = function
       String name = lint_name(function)
-      int lines = _last_line(l, end) - _line(l, body) + 1
-      if !first: first = _line(l, start)
+      int lines = l.end_line(l.prev(end)) - l.at(body).line + 1
+      if !first: first = l.at(start).line
       if !shortest || lines < shortest: shortest = lines
       names.push(name)
     if names.len() < 3: continue
@@ -258,7 +248,7 @@ static void _lifecycles(Lint l):
       if key in seen: continue
       seen[key] = 1
       Var start = function.cadr(), other_start = other.cadr()
-      int line = _line(l, start), other_line = _line(l, other_start)
+      int line = l.at(start).line, other_line = l.at(other_start).line
       l.add("lifecycle-pair", line < other_line ? line : other_line,
             %"paired $left/$right functions ${key.car()} and ${key.cadr()}")
 
@@ -266,12 +256,14 @@ static void _lifecycles(Lint l):
    optional `static` or `typedef` before it. Returns the index of its name,
    or -1. */
 static int _type_name(Lint l, int at):
-  while _is(l, at, "static") || _is(l, at, "typedef"): at = l.next(at)
+  while l.token_is(at, "static") || l.token_is(at, "typedef"): at = l.next(at)
   Token t = l.at(at)
-  if !_is(l, at, "struct") && !_is(l, at, "enum") && !_is(l, at, "protocol"):
+  if !l.token_is(at, "struct") && !l.token_is(at, "enum") &&
+     !l.token_is(at, "protocol"):
     return -1
   int name = l.next(at)
-  if l.tokens[name].type != <ident> || !_is(l, l.next(name), "{"): return -1
+  if l.tokens[name].type != <ident> || !l.token_is(l.next(name), "{"):
+    return -1
   return name
 
 /* An `enum` table, an array table, and a switch that share three or more
@@ -287,15 +279,15 @@ static void _tables(Lint l):
     if l.quoted[at]: continue
     int first = l.first[t.line] == at
     int name = first && depth == 0 ? _type_name(l, at) : -1
-    if name >= 0 && _is(l, l.prev(name), "enum"):
+    if name >= 0 && l.token_is(l.prev(name), "enum"):
       enums.push(%($name ${l.next(name)}))
-    if t.type == <ident> && _is(l, l.next(at), "[") &&
-       _is(l, l.next(l.partner[l.next(at)]), "=") &&
-       _is(l, l.next(l.next(l.partner[l.next(at)])), "{") && first == 0:
+    if t.type == <ident> && l.token_is(l.next(at), "[") &&
+       l.token_is(l.next(l.partner[l.next(at)]), "=") &&
+       l.token_is(l.next(l.next(l.partner[l.next(at)])), "{") && first == 0:
       tables.push(%($at ${l.next(l.next(l.partner[l.next(at)]))}))
-    if t.text == "switch" && _is(l, l.next(at), "("):
+    if t.text == "switch" && l.token_is(l.next(at), "("):
       int open = l.next(l.partner[l.next(at)])
-      if _is(l, open, "{"): switches.push(%($at $open))
+      if l.token_is(open, "{"): switches.push(%($at $open))
   foreach List entry in enums:
     Var (name, open) = entry
     Map words = _words(l, open.int())
@@ -330,8 +322,8 @@ static Map _case_words(Lint l, int open):
   Map words = {}
   for (int at = open; at <= l.partner[open]; at = l.next(at)):
     int name = l.next(at)
-    if _is(l, at, "case") && l.tokens[name].type == <ident> &&
-       _is(l, l.next(name), ":"):
+    if l.token_is(at, "case") && l.tokens[name].type == <ident> &&
+       l.token_is(l.next(name), ":"):
       words[l.tokens[name].text] = 1
   return words
 
@@ -393,11 +385,11 @@ void lint_corpus_rules(Lint *lints, int count):
       Var (key, start, body, end) = function
       String name = lint_name(function)
       String text = _body_text(l, function)
-      if text.len() < 80 || _last_line(l, end) - _line(l, start) + 1 < 5:
+      if text.len() < 80 || l.end_line(l.prev(end)) - l.at(start).line + 1 < 5:
         continue
       if !(text in bodies): bodies[text] = []
       Array owners = bodies[text]
-      owners.push(%($index $name ${_line(l, start)}))
+      owners.push(%($index $name ${l.at(start).line}))
   foreach Var (text, owners) in bodies:
     Array entries = owners
     Map files = {}

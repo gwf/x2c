@@ -1504,26 +1504,6 @@ static Var _lower_returned(Lowering &l, Var value) {
 
 /* --- match -------------------------------------------------------------- */
 
-/* A binder is an atom spelled `?name` or `*name`; a bare `?` or `*` is a
-   wildcard and names nothing. */
-static int _lower_binder(Var value, String &?name) {
-  if (!value.is_atom()) return 0;
-  String spelling = value.str();
-  if (!spelling || spelling.len() < 2) return 0;
-  if (spelling[0] != '?' && spelling[0] != '*') return 0;
-  if (name) name = String.new_len(spelling + 1, spelling.len() - 1);
-  return 1;
-}
-
-static void _lower_binders(Var pattern, Array found) {
-  if (pattern is <list>) {
-    List items = pattern;
-    foreach (Var part, items) _lower_binders(part, found);
-    return;
-  }
-  if (_lower_binder(pattern, NULL)) found.push(pattern);
-}
-
 /* The compiler bound each `?name` to an ordinary local, so the arm's body
    refers to it by binding id. Those ids are what the environment needs. */
 static void _lower_arm_ids(Var form, String name, Array found) {
@@ -1551,12 +1531,9 @@ static Var _lower_arms(
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
-  Array binders = $auto([]);
-  _lower_binders(pattern, binders);
   Map saved = _lower_env_copy(l);
-  foreach (Var binder, binders) {
-    String name = NULL;
-    _lower_binder(binder, name);
+  foreach (Var binder, l.compiler.match_pattern_binders(arm.car(), NULL)) {
+    String name = binder.str()[1:];
     Array ids = $auto([]);
     _lower_arm_ids(arm.cadr(), name, ids);
     foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));

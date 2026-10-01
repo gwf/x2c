@@ -48,11 +48,6 @@ static const List catalog_labels = %(
   "helper functions" "utility functions"
 )
 
-static int _among(String word, List words):
-  foreach String each in words:
-    if each == word: return 1
-  return 0
-
 /* The lower-case words of `text`: runs of letters and digits, split where
    a capital follows a lower-case letter or digit. */
 static Array _words(String text):
@@ -75,7 +70,7 @@ static Array _words(String text):
 static Map _content(String text):
   Map content = {}
   foreach String word in _words(text):
-    if word.len() > 1 && !_among(word, stop_words): content[word] = 1
+    if word.len() > 1 && !(word in stop_words): content[word] = 1
   return content
 
 static int _shared(Map a, Map b):
@@ -194,7 +189,7 @@ static void _comment(Lint l, Comment c, Array lines, int next):
   Array words = _words(text)
   int count = words.len(), reason = 0
   foreach String word in words:
-    if _among(word, reason_words): reason = 1
+    if word in reason_words: reason = 1
   String code = next <= lines.len() ? lines[next - 1] : NULL
   code = code.strip(NULL)
   String name = _declared(l, next)
@@ -211,13 +206,13 @@ static void _comment(Lint l, Comment c, Array lines, int next):
   int decorated = text.contains("----") || text.contains("====")
   if c.kind == <line> && (decorated || letters >= 4 && upper && count <= 8):
     l.add("section-label", c.start, "decorative or all-capitals label")
-  else if count <= 4 && _among(lower, catalog_labels):
+  else if count <= 4 && lower in catalog_labels:
     l.add("catalog-label", c.start, "catalog-style section label")
   if c.kind != <doc> && name && count:
     Map function = _content(name), prose = _content(text)
     int shared = _shared(function, prose), size = function.len()
     String first = words[0]
-    int verb = _among(first, verbs) && first in function
+    int verb = first in verbs && first in function
     if !reason && count <= 12 && (verb || shared >= (size < 2 ? size : 2)):
       l.add("restates-name", c.start, %"restates the name $name")
   // A comment followed by another comment has no statement to restate.
@@ -229,7 +224,7 @@ static void _comment(Lint l, Comment c, Array lines, int next):
   if c.kind == <block> && c.start <= 20:
     int verb_count = 0
     foreach String word in words:
-      if _among(word, verbs): verb_count++
+      if word in verbs: verb_count++
     if verb_count >= 5 || _code_spans(text) >= 5:
       l.add("module-header-inventory", c.start,
             "the module header inventories the implementation")

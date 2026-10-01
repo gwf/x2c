@@ -23,29 +23,6 @@ struct Lifetime {
   int origin, transfers, summary_unresolved;
 };
 
-static List _lifetime_binding(Var value) {
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(expr ? ?inner): return _lifetime_binding(inner);
-    case %(parens ?inner): return _lifetime_binding(inner);
-    case %(at ? ?inner): return _lifetime_binding(inner);
-    case %(ident (!set ?binding (binding ? ?))): return binding;
-  }
-  return NULL;
-}
-
-static Type _lifetime_expression_type(Var value) {
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(expr ?type ?): return type;
-    case %(parens ?inner): return _lifetime_expression_type(inner);
-    case %(at ? ?inner): return _lifetime_expression_type(inner);
-  }
-  return NULL;
-}
-
 static Type _lifetime_binding_type(Lifetime &lifetime, List binding) {
   Var stored;
   Map facts = lifetime.compiler.semantic_binding_facts();
@@ -194,13 +171,13 @@ static void _lifetime_end_region(Lifetime &lifetime, int id, int deferred) {
 }
 
 static int _lifetime_allocation_id(Lifetime &lifetime, Var value) {
-  List binding = _lifetime_binding(value);
+  List binding = project_direct_binding(value);
   if (!binding || !lifetime.bindings.contains(binding)) return 0;
   return lifetime.bindings[binding].integer();
 }
 
 static List _lifetime_summary_fact(Lifetime &lifetime, Var value) {
-  List binding = _lifetime_binding(value);
+  List binding = project_direct_binding(value);
   if (binding)
     return lifetime.return_bindings.contains(binding)
          ? lifetime.return_bindings[binding].list() : %(other);
@@ -234,7 +211,7 @@ static List _lifetime_typed_summary_fact(
   List fact = _lifetime_summary_fact(lifetime, value);
   match (fact)
     case %((!or kind call) *): {
-      Type source = _lifetime_expression_type(value);
+      Type source = project_expression_type(value);
       if (!_lifetime_preserves_value(lifetime, source, target))
         return %(unresolved);
     }
@@ -336,7 +313,7 @@ static void _lifetime_unresolve(Lifetime &lifetime, int id, List cause) {
 
 static void _lifetime_replace_return_fact(
   Lifetime &lifetime, Var value, List replacement) {
-  List binding = _lifetime_binding(value);
+  List binding = project_direct_binding(value);
   if (binding && lifetime.return_bindings.contains(binding)) {
     List fact = lifetime.return_bindings[binding];
     match (fact)
@@ -415,7 +392,7 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
       arguments.len() > 1)
     return _lifetime_expression(lifetime, arguments[1]);
   if (arguments && !_lifetime_known_call(name)) {
-    Type result_type = _lifetime_expression_type(value);
+    Type result_type = project_expression_type(value);
     int scope_region = _lifetime_region(lifetime, <scoped>);
     int pool_region = _lifetime_region(lifetime, <pooled>);
     if (target && _lifetime_candidate_type(result_type) &&
@@ -473,7 +450,7 @@ static void _lifetime_bind(Lifetime &lifetime, List binding, Var expression) {
   int id = _lifetime_expression(lifetime, expression);
   if (previous_allocation && previous_allocation != id)
     lifetime.uncertain_allocations[previous_allocation] = 1;
-  Type source = _lifetime_expression_type(expression);
+  Type source = project_expression_type(expression);
   if (id && _lifetime_preserves_value(lifetime, source, target))
     lifetime.bindings[binding] = id;
   else lifetime.bindings.del(binding);
@@ -511,7 +488,7 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
     );
     lifetime.allocation_returns.push(row);
   }
-  Type source = _lifetime_expression_type(expression);
+  Type source = project_expression_type(expression);
   if (!_lifetime_preserves_value(lifetime, source, target)) return;
   int id = _lifetime_expression(lifetime, expression);
   if (!id || !lifetime.allocations.contains(id)) return;
@@ -653,7 +630,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
         _lifetime_end_region(lifetime, _lifetime_scope_region(lifetime), 1);
       else if (name == "Context_close" && arguments &&
                arguments.len() > 1) {
-        List binding = _lifetime_binding(arguments[1]);
+        List binding = project_direct_binding(arguments[1]);
         if (binding)
           _lifetime_end_region(
             lifetime, _lifetime_context_region(lifetime, binding), 1);
@@ -673,7 +650,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
       return;
     }
     case %(stmnt (expr ? (op = ?left ?right))): {
-      List binding = _lifetime_binding(left);
+      List binding = project_direct_binding(left);
       if (binding) _lifetime_bind(lifetime, binding, right);
       else {
         _lifetime_expression(lifetime, right);
@@ -705,7 +682,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
       }
       if (name == "Context_close" && arguments &&
           arguments.len() > 1) {
-        List binding = _lifetime_binding(arguments[1]);
+        List binding = project_direct_binding(arguments[1]);
         if (binding)
           _lifetime_end_region(
             lifetime, _lifetime_context_region(lifetime, binding), 0);
