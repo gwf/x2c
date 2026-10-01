@@ -38,7 +38,7 @@ static Var _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _35, _6, _5, _2, _1
 #include "protocol.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _translate_unit(Frontend frontend, String filename, String output_dir);
 
@@ -173,7 +173,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -13,7 +13,7 @@ static Var _604, _600, _598, _596, _592, _589, _585, _584, _580, _578, _577, _57
 #include "symbolset.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Ast _unwrap_origin(Ast node);
 
@@ -53,7 +53,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

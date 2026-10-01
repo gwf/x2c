@@ -19,7 +19,7 @@ int arms = 0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int deferred(Var item);
 
@@ -38,7 +38,7 @@ List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

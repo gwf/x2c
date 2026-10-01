@@ -23,7 +23,7 @@ static Var _2178, _2175, _2173, _2171, _2149, _2146, _2145, _2142, _2140, _2135,
 #include "utils.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void Compiler__leading_directives(Compiler c, int skip_body);
 
@@ -588,7 +588,7 @@ Var List_var(List);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -12,7 +12,7 @@ static Var _28, _23, _22, _20, _14;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String _directive_line(String directive);
 
@@ -78,7 +78,7 @@ List cons(Var, List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

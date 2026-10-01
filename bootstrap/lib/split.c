@@ -4,7 +4,7 @@
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 #include <ctype.h>
 #include <string.h>
@@ -37,7 +37,7 @@ static inline Iter _x2c_proto_split_iter_0(Var a0, Iter a1);
 
 static VarMethods _x2c__x2c_protocol_methods_0;
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

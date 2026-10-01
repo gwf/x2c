@@ -10,7 +10,7 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String echo(String value);
 
@@ -45,7 +45,7 @@ static int _x2c_callback_adapt_3(Var a0, Var a1);
 
 static Iter _x2c_callback_adapt_4(Var a0, Iter a1);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

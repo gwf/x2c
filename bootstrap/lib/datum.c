@@ -16,7 +16,7 @@ static Var _48, _46, _42, _40, _38, _17, _15, _13, _11, _9, _7, _5, _3, _1;
 #include <stdlib.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int _tag_headed(List list);
 
@@ -53,7 +53,7 @@ List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

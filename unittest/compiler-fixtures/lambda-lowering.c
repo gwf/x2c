@@ -18,7 +18,7 @@ static Var _23, _20, _18, _16, _14, _11, _9, _8, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _x2c_lambda_0(Var value);
 
@@ -46,7 +46,7 @@ Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

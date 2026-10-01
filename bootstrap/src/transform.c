@@ -12,7 +12,7 @@ static Var _2642, _2639, _2631, _2629, _2626, _2623, _2619, _2615, _2613, _2609,
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 #ifndef X2C_TRANSFORM_SOURCE
 #include "meta.h"
@@ -296,7 +296,7 @@ Var int_var(int);
 
 String String_add(String, String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

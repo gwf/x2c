@@ -28,7 +28,7 @@ static Var _125, _122, _120, _118, _116, _107, _101, _98, _96, _94, _92, _90, _8
 #include "utils.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Toolchain _toolchain(String cc, String ar);
 
@@ -94,7 +94,7 @@ Var Symbol_var(Symbol);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

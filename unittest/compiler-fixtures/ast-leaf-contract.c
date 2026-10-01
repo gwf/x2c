@@ -14,7 +14,7 @@ int * ast_phase1_plain_pointer, ast_phase1_plain_array[3], (* ast_phase1_pointer
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int ast_phase1_zero(void);
 
@@ -38,7 +38,7 @@ List cons(Var, List);
 
 Var Symbol_var(Symbol);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

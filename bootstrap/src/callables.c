@@ -36,7 +36,7 @@ static Var _2229, _2226, _2224, _2222, _2192, _2189, _2187, _2185, _2180, _2177,
 #include "lambdas.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _params_to_decl_params(List names);
 
@@ -301,7 +301,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

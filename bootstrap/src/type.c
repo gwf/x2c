@@ -21,7 +21,7 @@ static Var _774, _771, _767, _757, _753, _705, _643, _639, _590, _589, _586, _58
 #include <stdio.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _from_ast(List node, List context);
 
@@ -128,7 +128,7 @@ List cons(Var, List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

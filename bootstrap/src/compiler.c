@@ -14,7 +14,7 @@ static Var _872, _871, _869, _867, _866, _864, _862, _856, _851, _845, _844, _83
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 #include "utils.h"
 #include "parse.h"
@@ -348,7 +348,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

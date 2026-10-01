@@ -22,7 +22,7 @@ static Var _151, _147, _145, _144, _142, _140, _132, _125, _124, _120, _117, _11
 #include "string.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _macro_group(Macro t, List values);
 
@@ -120,7 +120,7 @@ List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -10,7 +10,7 @@ static Var _2136, _2134, _2132, _2130, _2128, _2126, _2124, _2122, _2120, _2118,
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _meta_initializer(List node);
 
@@ -388,7 +388,7 @@ Var String_var(String);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

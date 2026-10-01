@@ -8,7 +8,7 @@ static Var _51, _49, _48, _46, _45, _44, _43, _41, _38, _37, _34, _31, _30, _29,
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void arms(List subject);
 
@@ -22,7 +22,7 @@ List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

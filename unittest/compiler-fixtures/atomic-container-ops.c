@@ -16,7 +16,7 @@ static int rhs_calls;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Scores array_base(void);
 
@@ -30,7 +30,7 @@ static Var next_rhs(int value);
 
 static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
