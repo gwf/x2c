@@ -7,5 +7,6 @@ if [[ ${CPP_FAIL:-0} == 1 ]]; then
   exit 23
 fi
 
-last=${!#}
-exec /bin/cat "$last"
+# The unit arrives as the `-include` file; the main input is empty stdin.
+while (($#)) && [[ $1 != -include ]]; do shift; done
+exec /bin/cat "$2"
