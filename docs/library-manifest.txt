@@ -49,6 +49,7 @@ lib/scope.x|api|
 lib/split.x|api|
 lib/static-init.x|internal|Compiler-owned first-use static storage and initialization guards.
 lib/string-classify.x|api|
+lib/string-escape.x|api|
 lib/string-format.x|api|
 lib/string-number.x|api|
 lib/string.x|api|

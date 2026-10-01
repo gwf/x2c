@@ -1,3 +1,15 @@
+/*  string-escape.x -- escaped spelling of canonical strings
+
+    Copyright (c) 2025 Gary William Flake
+
+    This module translates between a `String`'s bytes and their escaped
+    spelling inside a C or x2c string literal: `escape`, `repr`, and
+    `write_repr` write it, and `unescape`, `parse`, and `parse_char` read
+    it. A changed result is built in a `String.malloc` buffer and finalized
+    by `String.intern_free`, so the canonical header stays private to
+    `string.x`.
+*/
+
 #pragma once
 
 #include "string.x"
@@ -10,7 +22,7 @@
 #include "exception.x"
 #include "scan.x"
 
-// escapes
+// writing escapes
 
 /** Returns a canonical escaped representation of the bytes in `str`.
     Common control and delimiter bytes use named escapes, printable ASCII is
@@ -21,14 +33,16 @@
 meta native String String.escape(String str) {
   if (!str) return NULL;
   int bytes = 0;
-  foreach (int byte, str) {
-    int width = _escape_byte((unsigned char) byte, NULL);
+  for (const char *at = str; *at; at++) {
+    int width = _escape_byte((unsigned char) *at, NULL);
     if (bytes > INT_MAX - width - 1) return NULL;
     bytes += width;
   }
   String string = String.malloc(bytes + 1), char *dst = string;
-  foreach (int byte, str) dst += _escape_byte((unsigned char) byte, dst);
-  return _finish(string, bytes);
+  for (const char *at = str; *at; at++)
+    dst += _escape_byte((unsigned char) *at, dst);
+  *dst = '\0';
+  return string.intern_free();
 }
 
 /* Writes the escape of `ch` to `out` unless `out` is NULL, and returns its
@@ -71,6 +85,33 @@ static inline char _escape_letter(unsigned char ch) {
   return 0;
 }
 
+/** Returns a canonical quoted and escaped representation of `str`.
+    Empty input returns the canonical literal spelling `"\"\""`.
+    Raises: `<alloc-fail>` while escaping or formatting a nonempty `String`.
+*/
+String String.repr(String str) {
+  if (!str || !*str) return "\"\"";
+  return "\"%s\"".printf(str.escape());
+}
+
+/** Appends a quoted escaped representation of `str` to borrowed `out`.
+    Bytes are streamed without first allocating an intermediate `String`. The
+    same `out` is returned and not retained. Text written before a failure
+    remains in the `Buffer`.
+    Raises: any cause from `Buffer.write_char` or `Buffer.write_len`.
+*/
+Buffer String.write_repr(String str, Buffer out) {
+  out.write_char('"');
+  for (const char *at = str; at && *at; at++) {
+    char escaped[4];
+    int width = _escape_byte((unsigned char) *at, escaped);
+    out.write_len(escaped, width);
+  }
+  return out.write_char('"');
+}
+
+// reading escapes
+
 /** Decodes supported backslash escapes in `str` into a canonical `String`.
     Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
     or `U`, and up to three octal digits are consumed. A backslash-newline is
@@ -85,16 +126,16 @@ meta native String String.unescape(String str) {
   if (n == 0) return NULL;
   if (!str.contains("\\")) return str;
   String string = String.malloc(n + 1);
-  int length = _unescape_into(string, str);
-  if (length < 0) {
-    _free_unchecked(string);
+  if (_unescape_into(string, str) < 0) {
+    string.free();
     raise %(bad-arg (owner "String.unescape"));
   }
-  return _finish(string, length);
+  return string.intern_free();
 }
 
-/* Decodes the escapes of `src` into `out` and returns the bytes written, or
-   -1 at an octal escape above `\377`. A trailing backslash is dropped. */
+/* Decodes the escapes of `src` into `out`, NUL-terminated, and returns the
+   bytes written, or -1 at an octal escape above `\377`. A trailing
+   backslash is dropped. */
 static int _unescape_into(char *out, const char *src) {
   char *dst = out;
   while (*src) {
@@ -108,6 +149,7 @@ static int _unescape_into(char *out, const char *src) {
     if (byte > 0377) return -1;
     if (byte > 0) *dst++ = byte;
   }
+  *dst = '\0';
   return (int) (dst - out);
 }
 
@@ -195,29 +237,4 @@ meta native String String.parse(String str) {
   if (str[0] == '"' && str[n - 1] == '"')
     return String.new_len(str + 1, n - 2).unescape();
   return str.unescape();
-}
-
-/** Returns a canonical quoted and escaped representation of `str`.
-    Empty input returns the canonical literal spelling `"\"\""`.
-    Raises: `<alloc-fail>` while escaping or formatting a nonempty `String`.
-*/
-String String.repr(String str) {
-  if (!str || !*str) return "\"\"";
-  return "\"%s\"".printf(str.escape());
-}
-
-/** Appends a quoted escaped representation of `str` to borrowed `out`.
-    Bytes are streamed without first allocating an intermediate `String`. The
-    same `out` is returned and not retained. Text written before a failure
-    remains in the `Buffer`.
-    Raises: any cause from `Buffer.write_char` or `Buffer.write_len`.
-*/
-Buffer String.write_repr(String str, Buffer out) {
-  out.write_char('"');
-  foreach (int byte, str) {
-    char escaped[4];
-    int width = _escape_byte((unsigned char) byte, escaped);
-    out.write_len(escaped, width);
-  }
-  return out.write_char('"');
 }
