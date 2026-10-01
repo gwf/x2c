@@ -206,11 +206,7 @@ static size_t _curl_stream(
   }
   catch %(?cause *detail): {
     stream.cause = cause;
-    try stream.detail = Error.snapshot(detail);
-    catch %(?snapcause *): {
-      stream.cause = snapcause;
-      stream.detail = NULL;
-    }
+    stream.detail = Error.snapshot(detail);
     return 0;
   }
   stream.written += length;
