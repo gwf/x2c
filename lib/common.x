@@ -119,6 +119,8 @@ typedef unsigned int uint;
 /** Unsigned native long type. */
 typedef unsigned long ulong;
 
+// Var descriptors
+
 /** Caller-owned frame in this thread's active recursive rendering path. */
 typedef struct RenderPath {
   const void *identity;
@@ -196,6 +198,8 @@ typedef struct VarDescriptor {
 } VarDescriptor;
 
 #include "protocols.x"
+
+// runtime ABI
 
 /* Compiler-emitted raises cross every runtime unit through this ABI. */
 /** Borrowed source location supplied during one compiler-generated raise.
@@ -800,6 +804,8 @@ meta native double Var.double(Var x) {
   return x.convert(<f64>).floating();
 }
 
+// startup
+
 /* Source-only declarations for centrally declared Block adoptions. Static
    inline definitions are in array.x/block.x; placing these at the public
    boundary keeps them in the protocol declaration view without changing C
@@ -831,6 +837,8 @@ void x2c_initialize(void) {
   File.initialize();
   Logger_initialize();
 }
+
+// index normalization
 
 /* Normalize an ordinary element index following x2c index conventions.
    Negative indices count once from the end. Returns -1 when the normalized
