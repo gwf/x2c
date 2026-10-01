@@ -1,6 +1,8 @@
-> Status: active - implementation plan, 2026-10-01.
-> No queue, policy change, integration service, or remote configuration has
-> been implemented. Baseline: origin/dev at ff9946c82.
+> Status: implemented; publication and provider acceptance in progress,
+> 2026-10-01. Original design baseline: origin/dev at ff9946c82.
+> Tools, shared worktree context, and optional offline probes are implemented.
+> The connected guidance is a separate submission in the first live batch.
+> Local rollout evidence lives in `debug/integration/` and `.context/`.
 
 # Batched dev integration
 
