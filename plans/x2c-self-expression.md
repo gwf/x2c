@@ -2,8 +2,9 @@
 
 > Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
 > `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
-> second bootstrap round. L1-L4 are decided (5-10 below); L1 and L3 are
-> in progress. Five further defects found while scoping L1-L4 are
+> second bootstrap round. L1-L4 are decided (5-10 below). L1, L3, the
+> `({1})` fix, and template destructuring hygiene landed together; the
+> forward-name hygiene case waits on Gary. L2 and L4 are next. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
