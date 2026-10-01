@@ -22,6 +22,8 @@ NativeScalarAccess native_scalar_access(List exact_type);
 
 typedef struct Lisp * Lisp;
 
+void Lisp_cleanup(Lisp _x2c_macro_value_28);
+
 void Lisp_call_budget(Lisp lisp, long budget);
 
 void Lisp_set_interrupted(Lisp lisp, int interrupted);
@@ -103,8 +105,6 @@ void Lisp_destroy(Lisp lisp);
 void Lisp_adopt(Lisp lisp, Lisp parent);
 
 void Lisp_freeze(Lisp lisp);
-
-void Lisp_cleanup(Lisp value);
 
 Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 

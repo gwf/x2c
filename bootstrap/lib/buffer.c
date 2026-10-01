@@ -45,6 +45,10 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
+void Buffer_cleanup(Buffer _x2c_macro_value_0){
+  Buffer_free(_x2c_macro_value_0);
+}
+
 Var Symbol_var(Symbol);
 
 Var int_var(int);
@@ -54,13 +58,13 @@ void Block_append(Block, const void *, size_t);
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
   if(! length) return buf;
   if(! text){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 57};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 58};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 0);
     __builtin_unreachable();
   }
   if(length == 1) return _write_char(buf, * text);
   if(memchr(text, '\0', length)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 59};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/buffer.x",.function = "Buffer_write_len",.line = 60};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
@@ -73,7 +77,7 @@ Buffer Buffer_write_len(Buffer buf, const char * text, size_t length){
 
 Buffer Buffer_write(Buffer buf, const char * text){
   if(! text){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/buffer.x",.function = "Buffer_write",.line = 73};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/buffer.x",.function = "Buffer_write",.line = 74};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -93,7 +97,7 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
   int length = vsnprintf(stack, sizeof stack, format, args);
   va_end(args);
   if(length < 0){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 89};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 90};
     x2c_error_raise_n(& _x2c_error_site_3, 435316840, 0);
     __builtin_unreachable();
   }
@@ -115,7 +119,7 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
       int written = vsnprintf(bytes, (size_t) length + 1, format, args);
       va_end(args);
       if(written < 0){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 96};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/buffer.x",.function = "Buffer_printf",.line = 97};
         x2c_error_raise_n(& _x2c_error_site_4, 435316840, 0);
         __builtin_unreachable();
       }
@@ -140,7 +144,7 @@ Buffer Buffer_write_char(Buffer buf, char value){
 
 static Buffer _write_char(Buffer buf, char value){
   if(! value){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 110};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 111};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
@@ -154,7 +158,7 @@ void Block_append_fill(Block, const void *, size_t);
 Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   if(! count) return buf;
   if(! value){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 123};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 124};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
@@ -294,7 +298,7 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 271};
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 272};
       x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
       __builtin_unreachable();
     }
@@ -390,10 +394,6 @@ void Buffer_free(Buffer buf){
   if(buf -> content != NULL) Block_free(buf -> content);
   if(buf -> indents != NULL) Block_free(buf -> indents);
   Scope_free(buf);
-}
-
-void Buffer_cleanup(Buffer value){
-  Buffer_free(value);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

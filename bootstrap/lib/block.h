@@ -14,6 +14,10 @@ typedef struct Block{
 }
 * Block;
 
+void Block_cleanup(Block _x2c_macro_value_0);
+
+void Bytes_cleanup(Bytes _x2c_macro_value_1);
+
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;
   unsigned char * data = bytes;
@@ -93,10 +97,6 @@ Bytes Bytes_new(size_t width);
 void Block_free(Block b);
 
 void Block_move_to(Block block, Scope * scope);
-
-void Block_cleanup(Block value);
-
-void Bytes_cleanup(Bytes value);
 
 void Bytes_clear(Bytes a0);
 
