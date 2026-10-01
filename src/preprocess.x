@@ -34,26 +34,32 @@ Symbol preproc_conditional_kind(String text) {
   return 0;
 }
 
-/** Classifies an opening conditional directive by which of its arms C can
-    never reach: `<first>` when the condition requires a never-defined name
-    or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. Each
-    never-defined name reads as `<never>`, which no C token spells. */
-Symbol preproc_never_active_arm(String s) {
-  Tokenizer scanned = Tokenizer.new(preproc_directive(s), <x2c>);
-  scanned.scan();
-  Array words = [];
-  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
-       t = Token.skip_trivia(t + 1))
-    words.push(_never_defined(t.text) ? "<never>" : t.text);
-  String line = " ".join(words.list_free()).replace(
+/** Returns the hidden-arm state of the conditional group that `text` opens:
+    2 when C never takes its first arm, because the condition requires a
+    never-defined name or is `0`; 1 when C never takes the arms after its
+    first `#else`, because the condition is exactly `!defined(NAME)`; and 0
+    otherwise. */
+int preproc_open_state(String text) {
+  String line = _directive_line(preproc_directive(text)).replace(
     "defined ( <never> )", "defined <never>");
   // A `||` gives the condition another way to hold, so the arm can be taken.
   if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
       line == "if defined <never>" ||
       (line.startswith("if defined <never> && ") && !line.contains(" || ")))
-    return <first>;
-  return line == "ifndef <never>" || line == "if ! defined <never>"
-    ? <rest> : 0;
+    return 2;
+  return line == "ifndef <never>" || line == "if ! defined <never>";
+}
+
+/* The tokens of `directive` joined by single blanks, with each
+   never-defined name read as `<never>`, which no C token spells. */
+static String _directive_line(String directive) {
+  Tokenizer scanned = Tokenizer.new(directive, <x2c>);
+  scanned.scan();
+  Array words = [];
+  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
+       t = Token.skip_trivia(t + 1))
+    words.push(_never_defined(t.text) ? "<never>" : t.text);
+  return " ".join(words.list_free());
 }
 
 /* x2c output is compiled as C by a GNU-style compiler, so `__cplusplus` and
@@ -68,14 +74,6 @@ static int _never_defined(String name) {
 #endif
 }
 
-/** Returns the hidden-arm state of the conditional group that `text` opens:
-    2 when C never takes its first arm, 1 when C never takes the arms after
-    its first `#else`, and 0 otherwise. */
-int preproc_open_state(String text) {
-  Symbol never = preproc_never_active_arm(text);
-  return never == <first> ? 2 : never == <rest>;
-}
-
 /** Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
     the group's state was 1, and 0 otherwise. */
 int preproc_branch_state(int state) => state == 1 ? 2 : 0;
@@ -86,13 +84,7 @@ int preproc_branch_state(int state) => state == 1 ? 2 : 0;
 int preproc_visibility(String text) {
   String directive = preproc_directive(text);
   if (!directive.startswith("pragma")) return -1;
-  Tokenizer scanned = Tokenizer.new(directive, <x2c>);
-  scanned.scan();
-  Array words = [];
-  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
-       t = Token.skip_trivia(t + 1))
-    words.push(t.text);
-  String line = " ".join(words.list_free());
+  String line = _directive_line(directive);
   if (line == "pragma private") return 1;
   return line == "pragma public" ? 0 : -1;
 }
@@ -204,11 +196,10 @@ static size_t ArmScan._note_attribute(ArmScan *s, size_t index) {
   Token base = s.c.tokenizer.tokens;
   Token open = Token.skip_trivia(base + index + 1);
   if (open.type != <(>) return index;
-  Token inner = Token.skip_trivia(open + 1), last = open.group_close();
+  Token last = open.group_close();
   if (last.type == <eof>) return index;
-  int packed = 0;
-  if (inner.type == <(> && _layout_attribute(inner, packed))
-    s._mark_layout(index, packed);
+  int level = _attribute_layout(base + index);
+  if (level) s._mark_layout(index, level == 2);
   return last - base;
 }
 
@@ -262,19 +253,12 @@ static void ArmScan._note_layout_macro(ArmScan *s, String content) {
   int value = 0;
   for (; token.type != <eof>; token = Token.skip_trivia(token + 1)) {
     if (token.type != <ident>) continue;
-    int level = _word_layout(token, layout);
+    int level = token.text == "__attribute__" ? _attribute_layout(token)
+              : token.text in layout ? layout[token.text] : 0;
     if (level > value) value = level;
   }
   if (value && (!layout.contains(name.text) || layout[name.text] < value))
     layout[name.text] = value;
-}
-
-/* The layout level one word of a macro body contributes: an attribute's
-   own level, or the level of the layout macro it names. */
-static int _word_layout(Token token, Map layout) {
-  if (token.text == "__attribute__") return _attribute_layout(token);
-  if (token.text in layout) return layout[token.text];
-  return 0;
 }
 
 /* 2 for a packing `__attribute__` at `token`, 1 for another attribute that
@@ -299,7 +283,6 @@ static int _attribute_layout(Token token) {
 List Compiler.leading_preproc(Compiler c) {
   List noncode = %();
   Token base = c.tokenizer.tokens, token = c.token;
-  if (token == base) return NULL;
   while (--token >= base) {
     if (token.type == <preproc>)
       noncode = cons(%( preproc ${token.text} ), noncode);
@@ -316,10 +299,10 @@ List Compiler.leading_preproc(Compiler c) {
     stream; macro names are recorded regardless.
 */
 void Compiler.update_source_visibility(Compiler c, List directives) {
-  foreach (List directive, directives) c.note_object_macro(directive.cadr());
-  if (c.source_private < 0) return;
   foreach (List directive, directives) {
-    int visibility = preproc_visibility(directive.cadr());
+    c.note_object_macro(directive.cadr());
+    int visibility = c.source_private < 0 ? -1
+                   : preproc_visibility(directive.cadr());
     if (visibility >= 0) c.source_private = visibility;
   }
 }
