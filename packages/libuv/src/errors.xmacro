@@ -288,11 +288,6 @@ meta static Map _uv_error_rows(void) => {
     raise %(bad-arg (library "libuv") (operation ${$operation})
             (reason "a live loop and a callback are required"));
   },
-  "pipe.args" :
-  macro Statement() {
-    raise %(bad-arg (library "libuv") (operation "pipe")
-            (reason "a live loop is required"));
-  },
   "pipe.connect.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "pipe_connect")
@@ -310,11 +305,6 @@ meta static Map _uv_error_rows(void) => {
   macro Statement(Expr $operation) {
     raise %(bad-arg (library "libuv") (operation ${$operation})
             (reason "a filesystem path without embedded NUL is required"));
-  },
-  "pipe.required" :
-  macro Statement(Expr $operation) {
-    raise %(bad-arg (library "libuv") (operation ${$operation})
-            (reason "a pipe handle is required"));
   },
   "process.capture" :
   macro Statement(Expr $operation) {
@@ -402,6 +392,11 @@ meta static Map _uv_error_rows(void) => {
     raise %(bad-arg (library "libuv") (operation "signal")
             (reason "a live loop, a callback, and a signal number"));
   },
+  "stream.args" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (library "libuv") (operation ${$operation})
+            (reason "a live loop is required"));
+  },
   "stream.listen.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "listen")
@@ -416,6 +411,11 @@ meta static Map _uv_error_rows(void) => {
   macro Statement() {
     raise %(bad-state (library "libuv") (operation "read_start")
             (reason "reads have already started"));
+  },
+  "stream.required" :
+  macro Statement(Expr $operation, Expr $reason) {
+    raise %(bad-arg (library "libuv") (operation ${$operation})
+            (reason ${$reason}));
   },
   "stream.state" :
   macro Statement(Expr $operation, Expr $reason) {
@@ -441,11 +441,6 @@ meta static Map _uv_error_rows(void) => {
     raise %(bad-arg (library "libuv") (operation "write")
             (reason "text is required"));
   },
-  "tcp.args" :
-  macro Statement() {
-    raise %(bad-arg (library "libuv") (operation "tcp")
-            (reason "a live loop is required"));
-  },
   "tcp.bind.args" :
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "tcp_bind")
@@ -455,11 +450,6 @@ meta static Map _uv_error_rows(void) => {
   macro Statement() {
     raise %(bad-arg (library "libuv") (operation "tcp_connect")
             (reason "an address and callback are required"));
-  },
-  "tcp.required" :
-  macro Statement(Expr $operation) {
-    raise %(bad-arg (library "libuv") (operation ${$operation})
-            (reason "a TCP handle is required"));
   },
   "timer.args" :
   macro Statement() {
