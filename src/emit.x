@@ -573,33 +573,24 @@ static int _source_type_definition(List value) {
    structure alone and none of them tracks grouping.
 
    Larger levels bind more tightly, matching the C grammar: member access with
-   postfix, then unary and cast, the binary levels, the conditional, and
-   assignment. Level 0 means the emitter has no grouping rule for the
-   operator, which leaves its text exactly as the other cases build it. */
-static int _operator_precedence(Symbol operator) {
-  switch (operator) {
-    case <.>:    case <"->">:                   return 15;
-    case <*>:    case </>:      case <%>:       return 13;
-    case <+>:    case <->:                      return 12;
-    case <"<<">: case <">>">:                   return 11;
-    case <"<">:  case <">">:
-    case <"<=">: case <">=">:                   return 10;
-    case <==>:   case <!=>:                     return 9;
-    case <&>:                                   return 8;
-    case <^>:                                   return 7;
-    case <|>:                                   return 6;
-    case <&&>:                                  return 5;
-    case <||>:                                  return 4;
-  }
-  return operator.is_assignment_op() ? 2 : 0;
-}
-
+   postfix, then unary and cast, the binary levels above the conditional,
+   the conditional, and assignment. Level 0 means the emitter has no
+   grouping rule for the operator, which leaves its text exactly as the
+   other cases build it. */
 enum {
+  EMIT_ASSIGNMENT  = 2,
   EMIT_CONDITIONAL = 3,
   EMIT_UNARY       = 14,
   EMIT_POSTFIX     = 15,
   EMIT_PRIMARY     = 16
 };
+
+static int _operator_precedence(Symbol operator) {
+  if (operator == <.> || operator == <"->">) return EMIT_POSTFIX;
+  if (operator.is_assignment_op()) return EMIT_ASSIGNMENT;
+  int level = operator.binary_precedence();
+  return level ? EMIT_CONDITIONAL + level : 0;
+}
 
 /* The precedence of the C expression a node emits. Names, literals, calls,
    compound literals, statement expressions, and `parens` all emit text that

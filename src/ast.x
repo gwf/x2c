@@ -270,6 +270,31 @@ Symbol Symbol.compound_assignment(Symbol op) {
   return index < 0 ? 0 : compound_assignments.getindex(index);
 }
 
+/** Returns a binary operator's precedence level, or zero for any other
+    `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
+    operators, so a larger level binds more tightly. `===` and `!==` share
+    the equality level, `in` the relational level, and `@` the
+    multiplicative level.
+*/
+int Symbol.binary_precedence(Symbol op) {
+  switch (op) {
+    case <||>:                 return 1;   // logical OR
+    case <&&>:                 return 2;   // logical AND
+    case <|>:                  return 3;   // bitwise OR
+    case <^>:                  return 4;   // bitwise XOR
+    case <&>:                  return 5;   // bitwise AND
+    case <==>:   case <!=>:
+    case <===>:  case <!==>:   return 6;   // equality
+    case <"<">:  case <">">:   case <in>:
+    case <"<=">: case <">=">:  return 7;   // relational
+    case <"<<">: case <">>">:  return 8;   // shift
+    case <+>:    case <->:     return 9;   // additive
+    case <*>:    case </>:
+    case <%>:    case <@>:     return 10;  // multiplicative
+  }
+  return 0;
+}
+
 /** Returns whether `op` is plain or compound assignment. */
 int Symbol.is_assignment_op(Symbol op) =>
   op == <=> || op.compound_operator() != 0;
