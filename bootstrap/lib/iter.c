@@ -52,8 +52,6 @@ static Var _apply2(Func fn, Var left, Var right);
 
 static int _accumulate_next(Iter iter, Var * out);
 
-static int _zip_next(Iter iter, Var * out);
-
 static int _zip_with_next(Iter iter, Var * out);
 
 static int _enumerate_next(Iter iter, Var * out);
@@ -228,7 +226,7 @@ Iter Iter_map(Iter iter, Func func, Iter dest){
 
 static int _map_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
-  if(! Iter_truth(source) || ! Iter_try_next(source, &(* out))) return 0;
+  if(! Iter_try_next(source, &(* out))) return 0;
   if(iter -> aux) * out = _apply1(iter -> aux, * out);
   return 1;
 }
@@ -312,7 +310,6 @@ Var Var_binary(Var, Symbol, Var);
 
 static int _accumulate_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
-  if(! Iter_truth(source)) return 0;
   Var item;
   if(! Iter_try_next(source, &(item))) return 0;
   iter -> state = Var_binary(iter -> state, 56, item);
@@ -321,19 +318,7 @@ static int _accumulate_next(Iter iter, Var * out){
 }
 
 Iter Iter_zip(Iter left, Iter right, Iter dest){
-  if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, Iter_var(left), _zip_next, Iter_var(right));
-}
-
-Var List_var(List);
-
-static int _zip_next(Iter iter, Var * out){
-  Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
-  if(! Iter_truth(left_iter) || ! Iter_truth(right_iter)) return 0;
-  Var left, right;
-  if(! Iter_try_next(left_iter, &(left)) || ! Iter_try_next(right_iter, &(right))) return 0;
-  * out = List_var(cons(left, cons(right, NULL)));
-  return 1;
+  return Iter_zip_with(left, right, NULL, dest);
 }
 
 Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest){
@@ -342,6 +327,8 @@ Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest){
   dest -> aux = fn;
   return dest;
 }
+
+Var List_var(List);
 
 static int _zip_with_next(Iter iter, Var * out){
   Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
@@ -365,7 +352,6 @@ Iter Iter_enumerate(Iter iter, int start, Iter dest){
 
 static int _enumerate_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
-  if(! Iter_truth(source)) return 0;
   Var value;
   if(! Iter_try_next(source, &(value))) return 0;
   int index = Var_int(Var_convert(iter -> state, 3453797));
@@ -520,13 +506,13 @@ Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 728};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 715};
     x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
   List list = Var_list(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 732};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 719};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
