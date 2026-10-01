@@ -938,7 +938,7 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
-void x2c_host_error(List);
+void host_error(List);
 
 void x2c_error_catch_close(ErrorHandler);
 
@@ -974,7 +974,7 @@ static void _resolve_dependencies(Project p){
           if(_x2c_macro_selected_0 == 0){
             List volatile detail;
             detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-            x2c_host_error(detail);
+            host_error(detail);
           }
 
         }
@@ -1130,7 +1130,7 @@ static void _write_lock(String path, List rows){
         if(_x2c_macro_selected_2 == 0){
           List volatile detail;
           detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 0));
-          x2c_host_error(detail);
+          host_error(detail);
         }
 
       }
@@ -1259,7 +1259,7 @@ int Array_contains(Array, Var);
 
 Array Array_sort(Array);
 
-int x2c_source_file(String);
+int is_source_file(String);
 
 int String_endswith(String, String);
 
@@ -1293,7 +1293,7 @@ static Array _target_sources(Project p, ProjectTarget target){
     Var _x2c_macro_cursor_output_9;
     while(Array_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       path = Var_string(_x2c_macro_cursor_output_9);
-      if(!(x2c_source_file(path) || String_endswith(path, _103))) _error_name(p, 0, _104, path);
+      if(!(is_source_file(path) || String_endswith(path, _103))) _error_name(p, 0, _104, path);
     }
 
   }
@@ -1476,12 +1476,12 @@ static void _error_name(Project p, int line, String message, String name){
   _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_51), cons(String_var(name), cons(String_var(_49), NULL))))));
 }
 
-void x2c_driver_error(const char *);
+void driver_error(const char *);
 
 int new_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   Path dir = Var_string(List_car(request -> inputs));
-  if(! String_truth(dir)) x2c_driver_error("new: the directory operand is empty");
+  if(! String_truth(dir)) driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   {
     ExceptionFrame _x2c_exception_frame_3;
@@ -1506,7 +1506,7 @@ int new_command(CliRequest request){
         if(_x2c_macro_selected_3 == 0){
           List volatile detail;
           detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_3, 0));
-          x2c_host_error(detail);
+          host_error(detail);
         }
 
       }
@@ -1531,7 +1531,7 @@ Path Path_basename(Path);
 static String _starter_name(Path dir){
   String name = Path_basename(dir);
   if(String_equal(name, _52) || String_equal(name, _53) || String_equal(name, _0)) name = Path_basename(Path_absolute(dir));
-  if(! _name_ok(name)) x2c_driver_error(String_join(NULL, cons(String_var(_54), cons(String_var(name), cons(String_var(_55), NULL)))));
+  if(! _name_ok(name)) driver_error(String_join(NULL, cons(String_var(_54), cons(String_var(name), cons(String_var(_55), NULL)))));
   return name;
 }
 
@@ -1546,7 +1546,7 @@ void Path_make_dirs(Path);
 void Path_write_text(Path, String);
 
 static void _write_starter(Path dir, String name){
-  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) x2c_driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(dir), cons(String_var(_57), NULL)))));
+  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(dir), cons(String_var(_57), NULL)))));
   Path_make_dirs(Path_join(dir, _137));
   Path_write_text(Path_join(dir, _63), String_join(NULL, cons(String_var(_58), cons(String_var(name), cons(String_var(_59), NULL)))));
   Path_write_text(Path_join(dir, _138), _60);

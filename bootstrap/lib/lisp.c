@@ -2283,7 +2283,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv * env){
   Func fn = Var_pointer(callable);  int special = _special_id(lisp, fn);  if(special >= 0) return _apply_special(lisp, special, raw, env);  int count = List_len(raw);  FuncArg narrow[LISP_NATIVE_ARG_MAX];  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg)); {
     ExceptionFrame _x2c_exception_frame_0;  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
       unsigned volatile argc = 0; {
-        Var volatile arg;  List _x2c_macro_object_0 = raw;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+        Var volatile arg;  List _x2c_macro_object_0 = raw;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  x2c_exception_escaped = & _x2c_macro_cursor_0;  Var _x2c_macro_cursor_output_0;  x2c_exception_escaped = & _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
           arg = _x2c_macro_cursor_output_0;  argv[argc ++] = FuncArg_value(_eval(lisp, arg, env));
         }
 
@@ -2335,7 +2335,7 @@ static Var _call_native(Lisp lisp, Func fn, List values){
   int count = List_len(values);  FuncArg narrow[LISP_NATIVE_ARG_MAX];  FuncArg * argv = count <= LISP_NATIVE_ARG_MAX ? narrow : Scope_malloc_in(& lisp -> scope, count * sizeof(FuncArg)); {
     ExceptionFrame _x2c_exception_frame_1;  x2c_exception_push(& _x2c_exception_frame_1);  if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
       unsigned volatile argc = 0; {
-        Var volatile value;  List _x2c_macro_object_1 = values;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+        Var volatile value;  List _x2c_macro_object_1 = values;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  x2c_exception_escaped = & _x2c_macro_cursor_1;  Var _x2c_macro_cursor_output_1;  x2c_exception_escaped = & _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
           value = _x2c_macro_cursor_output_1;  argv[argc ++] = FuncArg_value(value);
         }
 

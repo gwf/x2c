@@ -6,14 +6,6 @@
 #define __GUARD_0x1E27A9AE__
 
 #include "x2c.h"
-#include "build.h"
-#include "project.h"
-#include "frontend.h"
-#include "meta-project.h"
-#include "editor.h"
-#include "install.h"
-#include "script.h"
-#include "toolchain.h"
 int main(int argc, char * * argv);
 
 

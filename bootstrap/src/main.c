@@ -10,6 +10,14 @@ static String _62, _61, _60, _59, _58, _57, _56, _54, _52, _50, _48, _46, _44, _
 
 static Var _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _35, _6, _5, _2, _1, _0;
 
+#include "build.h"
+#include "project.h"
+#include "frontend.h"
+#include "meta-project.h"
+#include "editor.h"
+#include "install.h"
+#include "script.h"
+#include "toolchain.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -474,8 +482,8 @@ int Map_truth(Map);
 Map Map_new(void);
 String Var_string(Var);
 void build_check_input(String);
-int x2c_source_file(String);
-void x2c_driver_error(const char *);
+int is_source_file(String);
+void driver_error(const char *);
 String Path_stem(Path);
 int Map_contains(Map, Var);
 Var Map_getindex(Map, Var);
@@ -484,7 +492,7 @@ static void Translation_preflight(Translation * t){
   CliRequest request = t -> request;  if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);  int shared = ! CliRequest_inspects(request) && ! Map_truth(t -> unit_dirs);  Map stems = Map_new(); {
     String input;  List _x2c_macro_object_2 = request -> inputs;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       input = Var_string(_x2c_macro_cursor_output_2); {
-        build_check_input(input);  if(! x2c_source_file(input)) x2c_driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
+        build_check_input(input);  if(! is_source_file(input)) driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(input), NULL))));
         String stem = Path_stem(input);
         if(shared && Map_contains(stems, String_var(stem))) _stem_collision(stem, Var_string(Map_getindex(stems, String_var(stem))), input, request -> out_dir);
         Map_setindex(stems, String_var(stem), String_var(input));
@@ -501,9 +509,9 @@ int Path_exists(Path);
 int Path_is_dir(Path);
 
 static void _check_out_dir(String out_dir){
-  if(! Path_exists(out_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(out_dir), NULL))));
-  if(! Path_is_dir(out_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(out_dir), NULL))));
-  if(access(out_dir, W_OK | X_OK)) x2c_driver_error(String_join(NULL, cons(String_var(_16), cons(String_var(out_dir), NULL))));
+  if(! Path_exists(out_dir)) driver_error(String_join(NULL, cons(String_var(_14), cons(String_var(out_dir), NULL))));
+  if(! Path_is_dir(out_dir)) driver_error(String_join(NULL, cons(String_var(_15), cons(String_var(out_dir), NULL))));
+  if(access(out_dir, W_OK | X_OK)) driver_error(String_join(NULL, cons(String_var(_16), cons(String_var(out_dir), NULL))));
 }
 
 _Noreturn static void _stem_collision(String stem, String first, String other, String out_dir){
@@ -626,7 +634,7 @@ Var int_var(int);
 
 int Iter_try_next(Iter, Var *);
 
-String x2c_package_entry(SourceView, List, String, String *);
+String package_entry(SourceView, List, String, String *);
 
 int Compiler_links_extension(String);
 
@@ -648,7 +656,7 @@ static void Translation_preload_modules(Translation * t){
       name = Var_string(_x2c_macro_item_6);
       {
         String root = NULL;
-        if(! String_truth(x2c_package_entry(t -> request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
+        if(! String_truth(package_entry(t -> request -> sources, roots, name, &(root))) || Compiler_links_extension(name)) continue;
         String module = String_join(NULL, cons(String_var(root), cons(String_var(_24), cons(String_var(name), cons(String_var(_25), NULL)))));
         if(Path_is_file(module)) Compiler_preload_native_module(module);
       }
@@ -683,7 +691,7 @@ void x2c_exception_leave(ExceptionFrame *);
 
 List translation_depfile_parse(String);
 
-String x2c_package_directory(List, String);
+String package_directory(List, String);
 
 Path Path_basename(Path);
 
@@ -764,7 +772,7 @@ static Map Translation_package_names(Translation * t, List roots){
           while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_7))){
             dependency = Var_string(_x2c_macro_cursor_output_7);
             {
-              String package = x2c_package_directory(roots, dependency);
+              String package = package_directory(roots, dependency);
               if(String_truth(package)) Map_setindex(names, String_var(Path_basename(package)), int_var(1));
             }
 
@@ -963,16 +971,16 @@ static int _run_build(CliRequest request){
 }
 
 static int _build_inputs(CliRequest request, Array commands){
-  if(String_truth(request -> manifest)) x2c_driver_error("--manifest-path conflicts with explicit inputs");
-  if(String_truth(request -> target)) x2c_driver_error("--target conflicts with explicit inputs");
-  if(String_truth(request -> profile)) x2c_driver_error("--profile conflicts with explicit inputs");
+  if(String_truth(request -> manifest)) driver_error("--manifest-path conflicts with explicit inputs");
+  if(String_truth(request -> target)) driver_error("--target conflicts with explicit inputs");
+  if(String_truth(request -> profile)) driver_error("--profile conflicts with explicit inputs");
   return _build_target(request, commands);
 }
 
 ProjectBuild project_plan(CliRequest);
 
 static int _build_manifest(CliRequest request, Array commands){
-  if(request -> compile_only) x2c_driver_error("--compile-only needs input operands, not a manifest");
+  if(request -> compile_only) driver_error("--compile-only needs input operands, not a manifest");
   for(ProjectBuild node = project_plan(request);  node;  node = node -> next){
     int status = _build_target(node -> request, commands);
     if(status) return status;
@@ -1124,7 +1132,7 @@ static List _stale_inputs(Build b, List units, Map stale){
     while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_11))){
       input = Var_string(_x2c_macro_cursor_output_11);
       {
-        if(! x2c_source_file(input)) continue;
+        if(! is_source_file(input)) continue;
         String directory = Build_generated_dir(b, input);
         if(Build_translation_current(b, input, directory)){
           Build_begin_translation(b, input);
@@ -1154,7 +1162,7 @@ static void _register_units(CliRequest request, Build b, List units, Map stale){
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_12))){
       input = Var_string(_x2c_macro_cursor_output_12);
       {
-        if(! x2c_source_file(input)) continue;
+        if(! is_source_file(input)) continue;
         String directory = Build_generated_dir(b, input);
         if(Map_contains(stale, String_var(input)) && request -> dry_run){
           Build_begin_translation(b, input);
@@ -1202,7 +1210,7 @@ static int _run_env(CliRequest request){
     }
 
   }
-  if(String_truth(wanted)) x2c_driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(wanted), cons(String_var(_32), NULL)))));
+  if(String_truth(wanted)) driver_error(String_join(NULL, cons(String_var(_31), cons(String_var(wanted), cons(String_var(_32), NULL)))));
   return 0;
 }
 
@@ -1216,9 +1224,9 @@ void interface_configure(String, int);
 
 String x2c_get_root(void);
 
-String x2c_home_libexec(void);
+String home_libexec(void);
 
-String x2c_compiler_identity(void);
+String compiler_identity(void);
 
 String interface_prelude(void);
 
@@ -1229,7 +1237,7 @@ static List _env_rows(CliRequest request){
   String executable = x2c_get_executable();
   String roots = String_join(_33, CliRequest_package_roots(request));
   interface_configure(request -> out_dir, 0);
-  return cons(List_var(cons(_35, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_37, cons(String_var(executable), NULL))), cons(List_var(cons(_39, cons(String_var(x2c_home_libexec()), NULL))), cons(List_var(cons(_41, cons(String_var(x2c_compiler_identity()), NULL))), cons(List_var(cons(_43, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_45, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_47, cons(String_var(interface_prelude()), NULL))), cons(List_var(cons(_49, cons(String_var(roots), NULL))), cons(List_var(cons(_51, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_53, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_55, cons(String_var(script_cache_root()), NULL))), NULL)))))))))));
+  return cons(List_var(cons(_35, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_37, cons(String_var(executable), NULL))), cons(List_var(cons(_39, cons(String_var(home_libexec()), NULL))), cons(List_var(cons(_41, cons(String_var(compiler_identity()), NULL))), cons(List_var(cons(_43, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_45, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_47, cons(String_var(interface_prelude()), NULL))), cons(List_var(cons(_49, cons(String_var(roots), NULL))), cons(List_var(cons(_51, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_53, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_55, cons(String_var(script_cache_root()), NULL))), NULL)))))))))));
 }
 
 int strcmp(const char *, const char *);
@@ -1252,7 +1260,7 @@ int Path_is_executable(Path);
 
 static String _external_path(const char * name){
   if(! _external_name(name) || cli_builtin_command(name)) return NULL;
-  String libexec = x2c_home_libexec();
+  String libexec = home_libexec();
   if(! String_truth(libexec)) return NULL;
   String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_56), cons(String_var(String_new(name)), NULL))));
   return Path_is_executable(path) ? path : NULL;
@@ -1264,19 +1272,19 @@ static int _external_name(const char * name){
   return 1;
 }
 
-String x2c_home(void);
+String home_dir(void);
 
 String String_new(const char *);
 
 static void _exec(String path, char * * args){
-  String home = x2c_home(), executable = x2c_get_executable();
-  String identity = x2c_compiler_identity();
+  String home = home_dir(), executable = x2c_get_executable();
+  String identity = compiler_identity();
   if(String_truth(home)) setenv("X2C_HOME", home, 1);
   if(String_truth(executable)) setenv("X2C", executable, 1);
   if(String_truth(identity)) setenv("X2C_IDENTITY", identity, 1);
   args[0] = path;
   execv(path, args);
-  x2c_driver_error(String_join(NULL, cons(String_var(_57), cons(String_var(path), cons(String_var(_58), cons(String_var(String_new(strerror(errno))), NULL))))));
+  driver_error(String_join(NULL, cons(String_var(_57), cons(String_var(path), cons(String_var(_58), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
 void x2c_initialize_environment(const char *);
@@ -1310,7 +1318,7 @@ int main(int argc, char * * argv){
   if(argc > 1) _run_external(argc, argv);
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) x2c_driver_error(String_join(NULL, cons(String_var(_59), cons(String_var(diagnostics), cons(String_var(_32), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) driver_error(String_join(NULL, cons(String_var(_59), cons(String_var(diagnostics), cons(String_var(_32), NULL)))));
   if(request -> command == 1282559016 && script_prepare(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   switch(request -> command){

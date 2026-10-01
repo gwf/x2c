@@ -32,6 +32,8 @@ typedef struct ExceptionFrame{
 }
 ExceptionFrame;
 
+extern _Thread_local const volatile void * volatile x2c_exception_escaped;
+
 void x2c_cleanup_push(X2CCleanup * record);
 
 void x2c_cleanup_leave(X2CCleanup * record);

@@ -837,7 +837,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _532 = cons(_529, _531);
   _533 = List_var(_532);
   _534 = Symbol_var(1133019155420);
-  _535 = int_var(26147);
+  _535 = int_var(26143);
   _536 = cons(_535, NULL);
   _537 = cons(_534, _536);
   _538 = List_var(_537);
@@ -952,7 +952,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _647 = cons(_646, NULL);
   _648 = cons(_521, _647);
   _649 = List_var(_648);
-  _650 = int_var(26271);
+  _650 = int_var(26267);
   _651 = cons(_650, NULL);
   _652 = cons(_534, _651);
   _653 = List_var(_652);
@@ -1071,7 +1071,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _766 = cons(_765, NULL);
   _767 = cons(_521, _766);
   _768 = List_var(_767);
-  _769 = int_var(26365);
+  _769 = int_var(26361);
   _770 = cons(_769, NULL);
   _771 = cons(_534, _770);
   _772 = List_var(_771);
@@ -1440,7 +1440,7 @@ List Var_list(Var);
 
 Var List_getindex(List, int);
 
-String x2c_filename_hash(String);
+String filename_hash(String);
 
 List Compiler_setup_cache_init(Compiler, List, List, String, String, String);
 
@@ -1451,7 +1451,7 @@ static List _generated_code(Compiler c, List ast, String basename){
   List _x2c_destructure_0 = _header_and_source(c, ast);
   header = Var_list(List_getindex(_x2c_destructure_0, 0));
   source = Var_list(List_getindex(_x2c_destructure_0, 1));
-  String hash = x2c_filename_hash(c -> filename);
+  String hash = filename_hash(c -> filename);
   {
     List _x2c_destructure_1 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_14), cons(String_var(hash), cons(String_var(_15), NULL)))), String_join(NULL, cons(String_var(_16), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_17), cons(String_var(hash), NULL))));
     header = Var_list(List_getindex(_x2c_destructure_1, 0));
@@ -2739,7 +2739,7 @@ static List _vertical_spacing(List code){
 }
 
 static List _include_guard(Compiler c, List content){
-  if(c -> runtime_inc && ! _has_runtime_include(content)) content = cons(List_var(_916), content);  String guard = x2c_filename_hash(c -> filename);  return List_append(_banner(), List_append(_header_guard(content, guard), NULL));
+  if(c -> runtime_inc && ! _has_runtime_include(content)) content = cons(List_var(_916), content);  String guard = filename_hash(c -> filename);  return List_append(_banner(), List_append(_header_guard(content, guard), NULL));
 }
 
 static int _has_runtime_include(List content){

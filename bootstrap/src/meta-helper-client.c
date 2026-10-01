@@ -418,10 +418,11 @@ static int _helper_stop(int signal){
   helper_pid = 0;  helper_status = - 1;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
 }
 
+int shell_status(int, int *);
 String int_str(int);
 String String_new(const char *);
 static String _helper_ending(void){
-  int status = _helper_stop(0), code = WEXITSTATUS(status);  if(! WIFSIGNALED(status)) return String_join(NULL, cons(String_var(_65), cons(String_var(int_str(code)), NULL)));  int signal = WTERMSIG(status);  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_66), cons(String_var(int_str(signal)), cons(String_var(_67), cons(String_var(name), cons(String_var(_68), NULL))))));
+  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_65), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_66), cons(String_var(int_str(signal)), cons(String_var(_67), cons(String_var(name), cons(String_var(_68), NULL))))));
 }
 
 Buffer Buffer_new(size_t);

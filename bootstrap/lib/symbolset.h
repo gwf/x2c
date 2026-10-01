@@ -17,5 +17,7 @@ Symbol SymbolSet_getindex(SymbolSet x, int index);
 
 Iter SymbolSet_iter(SymbolSet x, Iter dest);
 
+Block SymbolSet_encode(Array symbols);
+
 
 #endif /* __GUARD_0x1117B12A__ */

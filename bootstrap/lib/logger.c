@@ -300,22 +300,22 @@ static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1){
   return Var_pointer(_x2c_macro_value_1);
 }
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
 static void _mutex_initialize(void){
-  x2c_mutex_recursive_initialize(& logger_mutex, "Logger: could not initialize mutex");
+  Mutex_recursive_initialize(& logger_mutex, "Logger: could not initialize mutex");
 }
 
-void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
+void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
 
 static void _lock(void){
-  x2c_mutex_recursive_lock(& logger_mutex, & logger_mutex_once, _mutex_initialize, "Logger: could not lock mutex");
+  Mutex_recursive_lock(& logger_mutex, & logger_mutex_once, _mutex_initialize, "Logger: could not lock mutex");
 }
 
-void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
+void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
 static void _unlock(void){
-  x2c_mutex_recursive_unlock(& logger_mutex, "Logger: could not unlock mutex");
+  Mutex_recursive_unlock(& logger_mutex, "Logger: could not unlock mutex");
 }
 
 void x2c_cleanup_push(X2CCleanup *);
@@ -750,7 +750,7 @@ Var String_var(String);
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 332};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 331};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(owner));
     __builtin_unreachable();
   }

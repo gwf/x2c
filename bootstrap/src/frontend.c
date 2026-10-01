@@ -489,9 +489,9 @@ static void _tokenize_session(Frontend frontend, Compiler c, String source){
 
 List CliRequest_package_roots(CliRequest);
 
-String x2c_package_directory(List, String);
+String package_directory(List, String);
 
-int x2c_package_source(String, String);
+int package_source(String, String);
 
 Path Path_basename(Path);
 
@@ -500,8 +500,8 @@ Var Map_setindex(Map, Var, Var);
 static void _configure_package(Compiler c, CliRequest request, String filename){
   c -> package_dirs = CliRequest_package_roots(request);
   String source = Path_absolute(filename);
-  String package = x2c_package_directory(c -> package_dirs, source);
-  if(! String_truth(package) || ! x2c_package_source(package, source)) return;
+  String package = package_directory(c -> package_dirs, source);
+  if(! String_truth(package) || ! package_source(package, source)) return;
   String name = Path_basename(package);
   c -> package = name;
   Map_setindex(c -> package_roots, String_var(name), String_var(package));
@@ -923,7 +923,7 @@ void Frontend_load_support(CliRequest request){
 
 List List_append(List, List);
 
-List x2c_default_include_dirs(void);
+List default_include_dirs(void);
 
 Toolchain toolchain_new(CliRequest);
 
@@ -936,7 +936,7 @@ Frontend Frontend_new(CliRequest request){
   Frontend_load_support(request);
   Frontend f = Scope_calloc(1, sizeof(struct Frontend));
   f -> request = request;
-  f -> include_dirs = List_append(request -> include_dirs, x2c_default_include_dirs());
+  f -> include_dirs = List_append(request -> include_dirs, default_include_dirs());
   f -> toolchain = toolchain_new(request);
   Compiler_use_meta_toolchain(toolchain_meta_cc(request -> meta_cc), f -> toolchain -> include_dir);
   return f;

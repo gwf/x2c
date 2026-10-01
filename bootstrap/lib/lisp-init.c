@@ -2,7 +2,9 @@
 
 #include "lisp-init.h"
 
-static String _1, _0;
+#include "error.h"
+
+static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -12,14 +14,21 @@ static int _nil(Var value);
 
 static Var _truth(int x);
 
+static String _string(Var value, String operation);
+
+static List _list(Var value, String operation);
+
 static Var _append2(Var left, Var right);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("quote");
-  _1 = String_new("bound");
+  _0 = String_new("append");
+  _1 = String_new("search-replace");
+  _2 = String_new("quote");
+  _3 = String_new("bound");
+  _4 = String_new("string-append");
 }
 
 Var List_var(List);
@@ -33,6 +42,34 @@ Var Symbol_var(Symbol);
 static Var _truth(int x){
   if(x) return Symbol_var(1348938);
   return List_var(NULL);
+}
+
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+Var String_var(String);
+
+Symbol Var_tag(Var);
+
+String Var_string(Var);
+
+static String _string(Var value, String operation){
+  if(! Var_is_row(value, 11, 7, 1)){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 27};
+    x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(1318210446));
+    __builtin_unreachable();
+  }
+  return Var_string(value);
+}
+
+List Var_list(Var);
+
+static List _list(Var value, String operation){
+  if(! Var_is_row(value, 9, 7, 4)){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 34};
+    x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(806120));
+    __builtin_unreachable();
+  }
+  return Var_list(value);
 }
 
 Var lisp_cdr(Var);
@@ -56,8 +93,6 @@ Var lisp_member(Var value, Var values){
   return values;
 }
 
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
 int Var_is_nil(Var);
 
 Var lisp_assoc(Var key, Var pairs){
@@ -70,15 +105,15 @@ Var lisp_assoc(Var key, Var pairs){
 
 List cons(Var, List);
 
+int List_truth(List);
+
 int List_try_next(List, List *, Var *);
-
-List Var_cons(Var, List);
-
-List Var_list(Var);
 
 static Var _append2(Var left, Var right){
   List items = NULL;
   for(;  ! _nil(left);  left = lisp_cdr(left)) items = cons(lisp_car(left), items);
+  if(! List_truth(items)) return right;
+  List tail = _list(right, _0);
   {
     Var value;
     List _x2c_macro_object_0 = items;
@@ -86,14 +121,12 @@ static Var _append2(Var left, Var right){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       value = _x2c_macro_cursor_output_0;
-      right = List_var(Var_cons(value, Var_list(right)));
+      tail = cons(value, tail);
     }
 
   }
-  return right;
+  return List_var(tail);
 }
-
-int List_truth(List);
 
 List List_reverse(List);
 
@@ -102,6 +135,7 @@ Var List_car(List);
 List List_cdr(List);
 
 Var lisp_append(List lists){
+  if(! _init_guard_) _file_init_();
   if(! List_truth(lists)) return List_var(NULL);
   List reversed = List_reverse(lists);
   Var result = List_car(reversed);
@@ -210,14 +244,13 @@ List List_search_replace(List, Var, Var);
 Var lisp_match_replace(List, Var, Var);
 
 Var lisp_search_replace(Var input, Var pat, Var template){
-  List list = Var_list(input);
+  if(! _init_guard_) _file_init_();
+  List list = _list(input, _1);
   if(_nil(lisp_match(input, pat))) return List_var(List_search_replace(list, pat, template));
   return lisp_match_replace(list, pat, template);
 }
 
 Symbol Var_kind(Var);
-
-Symbol Var_tag(Var);
 
 String Var_str(Var);
 
@@ -230,6 +263,8 @@ Var lisp_binder(Var value){
   String name = Var_str(value);
   return _truth(String_len(name) > 1 &&(String_getindex(name, 0) == '?' || String_getindex(name, 0) == '*'));
 }
+
+List Var_cons(Var, List);
 
 Var lisp_binders(Var pat){
   if(! Var_is_row(pat, 9, 7, 4)){
@@ -262,20 +297,17 @@ Var lisp_binder_lets(Var bindings, Var binders){
   List reversed = NULL;
   for(;  ! _nil(binders);  binders = lisp_cdr(binders)){
     Var name = lisp_car(binders);
-    List quoted = cons(Atom_intern(_0), cons(name, NULL));
-    List bound = cons(Atom_intern(_1), cons(bindings, cons(List_var(quoted), NULL)));
+    List quoted = cons(Atom_intern(_2), cons(name, NULL));
+    List bound = cons(Atom_intern(_3), cons(bindings, cons(List_var(quoted), NULL)));
     reversed = cons(List_var(cons(name, cons(List_var(bound), NULL))), reversed);
   }
   return List_var(List_reverse(reversed));
 }
 
-Var String_var(String);
-
 Var lisp_string_append(String, String);
 
-String Var_string(Var);
-
 Var lisp_string_append_all(List strings){
+  if(! _init_guard_) _file_init_();
   Var text = String_var(0);
   {
     Var s;
@@ -284,7 +316,7 @@ Var lisp_string_append_all(List strings){
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       s = _x2c_macro_cursor_output_3;
-      text = lisp_string_append(Var_string(text), Var_string(s));
+      text = lisp_string_append(Var_string(text), _string(s, _4));
     }
 
   }

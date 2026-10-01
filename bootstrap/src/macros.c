@@ -6352,7 +6352,7 @@ static Lisp _fill_library(Compiler compiler, Lisp shared){
         Var volatile relative;  Var volatile message;  Iter _x2c_macro_iterator_45 = List_iter(_library_files(), &(struct Iter){
           int_var(0)
         }
-        );  Var _x2c_macro_item_48;  while(Iter_try_next(_x2c_macro_iterator_45, &(_x2c_macro_item_48))){
+        );  Var _x2c_macro_item_48;  x2c_exception_escaped = & _x2c_macro_item_48;  while(Iter_try_next(_x2c_macro_iterator_45, &(_x2c_macro_item_48))){
           List volatile _x2c_macro_pair_45;  _x2c_macro_pair_45 = Var_list(_x2c_macro_item_48);  relative = List_getindex(_x2c_macro_pair_45, 0);  message = List_getindex(_x2c_macro_pair_45, 1);  _eval_library(compiler, 0, Var_string(relative), Var_string(message));
         }
 
@@ -7036,7 +7036,7 @@ static void _bind_native_meta(Compiler c, String name, List signature, Token mar
   _certify_native_meta(c, name, signature, marker);  int iterator = _iterator_operation(signature);  String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_1131), NULL))) : name;  NativeBinding n ={
     .c = c, .name = name, .target = target, .signature = signature, .suppliers = _native_module_suppliers(target), .marker = marker, .iterator = iterator
   }
-  ;  Var bound;  Var volatile function;  int present = Lisp_try_get(c -> macro_lisp, name, &(bound));  if(present && ! iterator) function = bound;  else{
+  ;  x2c_exception_escaped = & n;  Var bound;  Var volatile function;  int present = Lisp_try_get(c -> macro_lisp, name, &(bound));  if(present && ! iterator) function = bound;  else{
     {
       ExceptionFrame _x2c_exception_frame_4;  static MatchCaptureSite _x2c_macro_arms_4[1];  Var _x2c_macro_patterns_4[1];  static ErrorCatchSite _x2c_macro_site_4 ={
         _x2c_macro_arms_4, -1, 1, ERROR_CATCH_PENDING, - 1
@@ -7508,9 +7508,9 @@ static void _load_package_module(Compiler c, String name, String module, Token t
   if(_module_stamp(module) != 1) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_1273), cons(String_var(name), cons(String_var(_1274), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_1272), cons(String_var(module), NULL)))), NULL));  _open_native_module(module);
 }
 
-void x2c_driver_error(const char *);
+void driver_error(const char *);
 String Compiler_load_native_module(String path){
-  if(! _init_guard_) _file_init_();  if(! X2C_NATIVE_MODULES) x2c_driver_error("native modules are not supported on this platform");  String absolute = Path_absolute(path);  if(Compiler_native_module_loaded(absolute)) return absolute;  int stamp = _module_stamp(path);  if(stamp < 0) x2c_driver_error(String_join(NULL, cons(String_var(_1275), cons(String_var(path), NULL))));  if(! stamp) x2c_driver_error(String_join(NULL, cons(String_var(_1276), cons(String_var(path), cons(String_var(_1274), NULL)))));  _open_native_module(absolute);  return absolute;
+  if(! _init_guard_) _file_init_();  if(! X2C_NATIVE_MODULES) driver_error("native modules are not supported on this platform");  String absolute = Path_absolute(path);  if(Compiler_native_module_loaded(absolute)) return absolute;  int stamp = _module_stamp(path);  if(stamp < 0) driver_error(String_join(NULL, cons(String_var(_1275), cons(String_var(path), NULL))));  if(! stamp) driver_error(String_join(NULL, cons(String_var(_1276), cons(String_var(path), cons(String_var(_1274), NULL)))));  _open_native_module(absolute);  return absolute;
 }
 
 void Compiler_preload_native_module(String path){
@@ -7521,7 +7521,7 @@ String build_module_stamp(void);
 void * Scope_malloc(size_t);
 void Scope_free(void *);
 static int _module_stamp(String path){
-  String expected = build_module_stamp();  if(! String_truth(expected)) x2c_driver_error(String_join(NULL, cons(String_var(_1277), cons(String_var(path), cons(String_var(_149), NULL)))));  File input = fopen(path, "rb");  if(! input) x2c_driver_error(String_join(NULL, cons(String_var(_1278), cons(String_var(path), cons(String_var(_1279), cons(String_var(String_new(strerror(errno))), NULL))))));  fseek(input, 0, SEEK_END);  long end = ftell(input);  rewind(input);  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;  File_close(input);  int stamp = _stamp_in(data, size, expected);  Scope_free(data);  return stamp;
+  String expected = build_module_stamp();  if(! String_truth(expected)) driver_error(String_join(NULL, cons(String_var(_1277), cons(String_var(path), cons(String_var(_149), NULL)))));  File input = fopen(path, "rb");  if(! input) driver_error(String_join(NULL, cons(String_var(_1278), cons(String_var(path), cons(String_var(_1279), cons(String_var(String_new(strerror(errno))), NULL))))));  fseek(input, 0, SEEK_END);  long end = ftell(input);  rewind(input);  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;  File_close(input);  int stamp = _stamp_in(data, size, expected);  Scope_free(data);  return stamp;
 }
 
 static int _stamp_in(char * data, size_t size, String expected){
@@ -7532,7 +7532,7 @@ static int _stamp_in(char * data, size_t size, String expected){
 }
 
 static void _open_native_module(String path){
-  void * handle = _module_handle(path);  if(! handle) x2c_driver_error(String_join(NULL, cons(String_var(_1280), cons(String_var(path), cons(String_var(_1279), cons(String_var(String_new(dlerror())), NULL))))));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) x2c_driver_error(String_join(NULL, cons(String_var(_1275), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
+  void * handle = _module_handle(path);  if(! handle) driver_error(String_join(NULL, cons(String_var(_1280), cons(String_var(path), cons(String_var(_1279), cons(String_var(String_new(dlerror())), NULL))))));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) driver_error(String_join(NULL, cons(String_var(_1275), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
 }
 
 static void * _module_handle(String path){
@@ -7629,9 +7629,9 @@ int Compiler_links_extension(String name){
 }
 
 String x2c_get_executable(void);
-String x2c_compiler_identity(void);
+String compiler_identity(void);
 String Compiler_extension_archive(void){
-  if(! _init_guard_) _file_init_();  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_1281), NULL))), String_join(NULL, cons(String_var(x2c_compiler_identity()), cons(String_var(_1282), NULL)))) : NULL;
+  if(! _init_guard_) _file_init_();  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_1281), NULL))), String_join(NULL, cons(String_var(compiler_identity()), cons(String_var(_1282), NULL)))) : NULL;
 }
 
 _Noreturn static void _sdk_reject(String message, List notes){

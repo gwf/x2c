@@ -66,7 +66,7 @@ String script_cache_root(void){
   return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_0), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_1), NULL))) : NULL;
 }
 
-void x2c_driver_error(const char *);
+void driver_error(const char *);
 
 Path Path_absolute(Path);
 
@@ -98,7 +98,7 @@ void x2c_error_catch_detach(ErrorHandler);
 
 void x2c_exception_mark_handled(ExceptionFrame *);
 
-void x2c_host_error(List);
+void host_error(List);
 
 void x2c_error_catch_close(ErrorHandler);
 
@@ -113,14 +113,14 @@ String String_printf(String, ...);
 int script_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
   String root = script_cache_root();
-  if(! String_truth(root)) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
+  if(! String_truth(root)) driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path_absolute(Var_string(List_car(c -> inputs)));
   c -> build_dir = _entry(root, script);
   if(c -> clean){
     _clean(c -> build_dir);
     return 1;
   }
-  if(! Path_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_2), cons(String_var(script), NULL))));
+  if(! Path_is_file(script)) driver_error(String_join(NULL, cons(String_var(_2), cons(String_var(script), NULL))));
   _configure(c, script);
   if(c -> dry_run) return 0;
   _exec_current(c);
@@ -147,7 +147,7 @@ int script_prepare(CliRequest c){
         if(_x2c_macro_selected_0 == 0){
           List volatile detail;
           detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-          x2c_host_error(detail);
+          host_error(detail);
         }
 
       }
@@ -210,7 +210,7 @@ static void _clean(String entry){
         if(_x2c_macro_selected_1 == 0){
           List volatile detail;
           detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-          x2c_host_error(detail);
+          host_error(detail);
         }
 
       }
@@ -354,7 +354,7 @@ static void _exec(CliRequest c){
   }
   fflush(NULL);
   execv(executable, argv);
-  x2c_driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(executable), cons(String_var(_14), cons(String_var(String_new(strerror(errno))), NULL))))));
+  driver_error(String_join(NULL, cons(String_var(_13), cons(String_var(executable), cons(String_var(_14), cons(String_var(String_new(strerror(errno))), NULL))))));
 }
 
 ToolRun ToolAction_start(ToolAction);

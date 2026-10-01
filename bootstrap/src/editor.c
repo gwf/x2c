@@ -6,6 +6,15 @@
 
 static String _1, _0;
 
+#include "frontend.h"
+#include "meta-project.h"
+#include "project.h"
+#include "sourceview.h"
+#include "emit.h"
+#include "format.h"
+#include "diagnostics.h"
+#include "report.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

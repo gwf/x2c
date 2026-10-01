@@ -12,6 +12,8 @@ static _Thread_local struct ExceptionThreadState exception_thread;
 
 static ExceptionThreadState _thread(void);
 
+_Thread_local const volatile void * volatile x2c_exception_escaped;
+
 #include "error.h"
 static inline ExceptionFrame * _current(void);
 

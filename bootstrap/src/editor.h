@@ -6,15 +6,6 @@
 #define __GUARD_0x92FF49A2__
 
 #include "x2c.h"
-#include "frontend.h"
-#include "meta-project.h"
-#include "project.h"
-#include "sourceview.h"
-#include "emit.h"
-#include "format.h"
-#include "diagnostics.h"
-#include "report.h"
-#include "utils.h"
 int editor_request(int argc, char * * argv);
 
 

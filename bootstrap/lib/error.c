@@ -1030,22 +1030,22 @@ static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
 
 }
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
 static void _site_mutex_initialize(void){
-  x2c_mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
+  Mutex_recursive_initialize(& catch_site_mutex, "Error: could not initialize catch site mutex");
 }
 
-void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
+void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
 
 static void _site_lock(void){
-  x2c_mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _site_mutex_initialize, "Error: could not lock catch site");
+  Mutex_recursive_lock(& catch_site_mutex, & catch_site_mutex_once, _site_mutex_initialize, "Error: could not lock catch site");
 }
 
-void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
+void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
 static void _site_unlock(void){
-  x2c_mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
+  Mutex_recursive_unlock(& catch_site_mutex, "Error: could not unlock catch site");
 }
 
 MatchPlan MatchPlan_prepare(Var);

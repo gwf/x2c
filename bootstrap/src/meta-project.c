@@ -574,7 +574,7 @@ void x2c_exception_leave(ExceptionFrame *);
 
 Tokenizer Tokenizer_new(char *, Symbol);
 
-int x2c_layout_file(String);
+int is_layout_file(String);
 
 void Tokenizer_scan(Tokenizer);
 
@@ -632,7 +632,7 @@ static int Scan_file(Scan * s, String path){
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
   Tokenizer tokens = Tokenizer_new(text, 3945159);
-  tokens -> layout = x2c_layout_file(path);
+  tokens -> layout = is_layout_file(path);
   Tokenizer_scan(tokens);
   return Scan_file_scope(s, tokens, Path_dirname(path));
 }
@@ -671,13 +671,13 @@ static void Scan_macro_import(Scan * s, Tokenizer tokens, String directory){
   if(String_truth(file) &&(String_endswith(file, _102) || String_endswith(file, _103)) && ! _compiler_owns(file) && Scan_file(s, file)) Array_push(s -> imports, String_var(file));
 }
 
-String x2c_package_entry(SourceView, List, String, String *);
+String package_entry(SourceView, List, String, String *);
 
 List CliRequest_package_roots(CliRequest);
 
 static void Scan_package(Scan * s, Tokenizer tokens){
   String name = _quoted(Tokenizer_next(tokens)), root = NULL;
-  String entry = String_truth(name) ? x2c_package_entry(s -> request -> sources, CliRequest_package_roots(s -> request), name, &(root)) : NULL;
+  String entry = String_truth(name) ? package_entry(s -> request -> sources, CliRequest_package_roots(s -> request), name, &(root)) : NULL;
   if(! String_truth(entry)) return;
   Map_setindex(s -> packages, String_var(root), int_var(1));
   Scan_file(s, entry);
@@ -1280,7 +1280,9 @@ static List _current(String directory){
   if(! Path_is_file(path)) return NULL;
   String text = Path_read_text(path);
   unsigned cursor = 0;
+  x2c_exception_escaped = & cursor;
   Var datum =((void) 0, Void);
+  x2c_exception_escaped = & datum;
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_macro_arms_1[1];

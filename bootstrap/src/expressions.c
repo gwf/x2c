@@ -2102,7 +2102,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1548 = cons(_1547, NULL);
   _1549 = cons(_258, _1548);
   _1550 = List_var(_1549);
-  _1551 = int_var(63572);
+  _1551 = int_var(63571);
   _1552 = cons(_1551, NULL);
   _1553 = cons(_271, _1552);
   _1554 = List_var(_1553);
@@ -2246,7 +2246,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1692 = cons(_1691, NULL);
   _1693 = cons(_258, _1692);
   _1694 = List_var(_1693);
-  _1695 = int_var(63937);
+  _1695 = int_var(63936);
   _1696 = cons(_1695, NULL);
   _1697 = cons(_271, _1696);
   _1698 = List_var(_1697);
@@ -2345,7 +2345,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1791 = cons(_1790, NULL);
   _1792 = cons(_258, _1791);
   _1793 = List_var(_1792);
-  _1794 = int_var(64352);
+  _1794 = int_var(64351);
   _1795 = cons(_1794, NULL);
   _1796 = cons(_271, _1795);
   _1797 = List_var(_1796);
@@ -2427,7 +2427,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1873 = cons(_1872, NULL);
   _1874 = cons(_258, _1873);
   _1875 = List_var(_1874);
-  _1876 = int_var(64432);
+  _1876 = int_var(64431);
   _1877 = cons(_1876, NULL);
   _1878 = cons(_271, _1877);
   _1879 = List_var(_1878);
@@ -2509,7 +2509,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _1955 = cons(_1954, NULL);
   _1956 = cons(_258, _1955);
   _1957 = List_var(_1956);
-  _1958 = int_var(64637);
+  _1958 = int_var(64636);
   _1959 = cons(_1958, NULL);
   _1960 = cons(_271, _1959);
   _1961 = List_var(_1960);
@@ -2707,7 +2707,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _2153 = cons(_2152, NULL);
   _2154 = cons(_258, _2153);
   _2155 = List_var(_2154);
-  _2156 = int_var(66849);
+  _2156 = int_var(66848);
   _2157 = cons(_2156, NULL);
   _2158 = cons(_271, _2157);
   _2159 = List_var(_2158);
@@ -5159,11 +5159,11 @@ static List Compiler__binary_op_type(Compiler compiler, Symbol op, List lhs, Lis
 
 }
 
-int x2c_source_file(String);
+int is_source_file(String);
 String Compiler_display_path(Compiler, String);
 String home_absolute_path(String);
 static void _check_unit_static(Compiler c, String spelling, Token origin){
-  if(! x2c_source_file(c -> filename)) return;  List owner = Sym_get(c -> sym, cons(_1039, cons(String_var(spelling), NULL)));  if(! List_truth(owner)) return;  String file = Compiler_display_path(c, home_absolute_path(Var_string(List_car(owner))));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_486), cons(String_var(spelling), cons(String_var(_1040), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_1041), cons(String_var(file), cons(String_var(_1042), NULL))))), _1045));
+  if(! is_source_file(c -> filename)) return;  List owner = Sym_get(c -> sym, cons(_1039, cons(String_var(spelling), NULL)));  if(! List_truth(owner)) return;  String file = Compiler_display_path(c, home_absolute_path(Var_string(List_car(owner))));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_486), cons(String_var(spelling), cons(String_var(_1040), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_1041), cons(String_var(file), cons(String_var(_1042), NULL))))), _1045));
 }
 
 int binding_identity_try_parts(List, int *, String *);

@@ -9,6 +9,7 @@
 #include "path.h"
 #include "process.h"
 #include "sourceview.h"
+#define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_initialize_command_environment(const char * argv0, String embedded_identity);
@@ -19,41 +20,41 @@ String x2c_get_root(void);
 
 String x2c_get_executable(void);
 
-String x2c_home(void);
+String home_dir(void);
 
-String x2c_stage_dir(void);
+String stage_dir(void);
 
-String x2c_home_packages(void);
+String home_packages(void);
 
-String x2c_home_libexec(void);
+String home_libexec(void);
 
-List x2c_default_include_dirs(void);
+List default_include_dirs(void);
 
-List x2c_cpp_include_dirs(void);
+List cpp_include_dirs(void);
 
-String x2c_find_program(String name);
+String find_program(String name);
 
-int x2c_source_file(String path);
+int is_source_file(String path);
 
-int x2c_layout_file(String path);
+int is_layout_file(String path);
 
-String x2c_package_directory(List roots, String path);
+String package_directory(List roots, String path);
 
-String x2c_package_entry(SourceView sources, List roots, String name, String * directory);
+String package_entry(SourceView sources, List roots, String name, String * directory);
 
-int x2c_package_source(String directory, String path);
+int package_source(String directory, String path);
 
-String x2c_compiler_identity(void);
+String compiler_identity(void);
 
 String build_module_stamp(void);
 
-String x2c_file_identity(String path);
+String file_identity(String path);
 
-uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok);
+uint64_t fnv_file(uint64_t hash, String path, int * ok);
 
-uint64_t x2c_fnv_bytes(uint64_t hash, const void * bytes, size_t length);
+uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length);
 
-String x2c_filename_hash(String filename);
+String filename_hash(String filename);
 
 int file_lock(Path p, int wait);
 
@@ -65,9 +66,11 @@ _Noreturn void worker_exit(int status);
 
 int worker_wait_any(long * pids, int count, int * status);
 
-_Noreturn void x2c_driver_error(const char * message);
+int shell_status(int raw, int * signal);
 
-void x2c_host_error(List detail);
+_Noreturn void driver_error(const char * message);
+
+void host_error(List detail);
 
 
 #endif /* __GUARD_0x6E6B8BB0__ */

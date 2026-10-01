@@ -1034,22 +1034,22 @@ static void _install_methods(VarDescriptor * descriptor, VarMethods methods){
 
 }
 
-void x2c_mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
+void Mutex_recursive_lock(pthread_mutex_t *, pthread_once_t *, void(*)(void), const char *);
 
 static void _lock(void){
-  x2c_mutex_recursive_lock(& descriptor_mutex, & descriptor_mutex_once, _mutex_initialize, "Var descriptor: could not lock mutex");
+  Mutex_recursive_lock(& descriptor_mutex, & descriptor_mutex_once, _mutex_initialize, "Var descriptor: could not lock mutex");
 }
 
-void x2c_mutex_recursive_unlock(pthread_mutex_t *, const char *);
+void Mutex_recursive_unlock(pthread_mutex_t *, const char *);
 
 static void _unlock(void){
-  x2c_mutex_recursive_unlock(& descriptor_mutex, "Var descriptor: could not unlock mutex");
+  Mutex_recursive_unlock(& descriptor_mutex, "Var descriptor: could not unlock mutex");
 }
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
 static void _mutex_initialize(void){
-  x2c_mutex_recursive_initialize(& descriptor_mutex, "Var descriptor: could not initialize mutex");
+  Mutex_recursive_initialize(& descriptor_mutex, "Var descriptor: could not initialize mutex");
 }
 
 void x2c_descriptor_thread_start_begin(void){

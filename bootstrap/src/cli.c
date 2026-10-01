@@ -1029,7 +1029,7 @@ Var Array_getindex(Array, int);
 
 int String_truth(String);
 
-void x2c_driver_error(const char *);
+void driver_error(const char *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
@@ -1057,7 +1057,7 @@ CliRequest cli_parse(int argc, char * * argv){
       _read_arguments(args, argc, argv);
       if(! Array_len(args)) _help_exit(0, 2);
       String first = Var_string(Array_getindex(args, 0));
-      if(! String_truth(first)) x2c_driver_error("expected a command, found an empty argument");
+      if(! String_truth(first)) driver_error("expected a command, found an empty argument");
       CliCommand * command = _command_row(first);
       if(command){
         CliRequest _x2c_return_value_0 = _parse_command(args, command);
@@ -1077,7 +1077,7 @@ CliRequest cli_parse(int argc, char * * argv){
       String spelling = _two_dash(first);
       if(String_truth(spelling)) _one_dash_removed(first, String_join(NULL, cons(String_var(_54), cons(String_var(spelling), cons(String_var(_55), NULL)))));
       if(String_getindex(first, 0) != '-') _expected_command(first);
-      x2c_driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(first), cons(String_var(_57), NULL)))));
+      driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(first), cons(String_var(_57), NULL)))));
     }
     x2c_cleanup_leave(& _x2c_defer_record_0);
   }
@@ -1162,23 +1162,23 @@ List List_cdr(List);
 static void _check_request(CliRequest r, int mask){
   Symbol name = r -> command;
   List inputs = r -> inputs;
-  if(mask == CLI_TRANSLATE && ! List_truth(inputs)) x2c_driver_error("translate requires at least one input");
-  if(List_truth(List_cdr(inputs)) &&(String_truth(r -> dep_file) || String_truth(r -> dep_target))) x2c_driver_error("--dep-file and --dep-target require exactly one input");
-  if(r -> no_deps &&(String_truth(r -> dep_file) || String_truth(r -> dep_target) || r -> no_phony_deps)) x2c_driver_error("--no-deps conflicts with dependency output options");
-  if(r -> compile_only && r -> kind != 404971770155786) x2c_driver_error("--compile-only conflicts with a library target kind");
-  if(mask == CLI_ENV && List_truth(List_cdr(inputs))) x2c_driver_error("env accepts at most one name");
-  if((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) x2c_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_59), NULL))));
-  if(mask == CLI_LIST && List_truth(inputs)) x2c_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_60), NULL))));
-  if(mask == CLI_SCRIPT && ! List_truth(inputs)) x2c_driver_error("script requires a script file");
+  if(mask == CLI_TRANSLATE && ! List_truth(inputs)) driver_error("translate requires at least one input");
+  if(List_truth(List_cdr(inputs)) &&(String_truth(r -> dep_file) || String_truth(r -> dep_target))) driver_error("--dep-file and --dep-target require exactly one input");
+  if(r -> no_deps &&(String_truth(r -> dep_file) || String_truth(r -> dep_target) || r -> no_phony_deps)) driver_error("--no-deps conflicts with dependency output options");
+  if(r -> compile_only && r -> kind != 404971770155786) driver_error("--compile-only conflicts with a library target kind");
+  if(mask == CLI_ENV && List_truth(List_cdr(inputs))) driver_error("env accepts at most one name");
+  if((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_59), NULL))));
+  if(mask == CLI_LIST && List_truth(inputs)) driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_60), NULL))));
+  if(mask == CLI_SCRIPT && ! List_truth(inputs)) driver_error("script requires a script file");
 }
 
 static void _help_command(Array args){
   if(Array_len(args) == 1) _help_exit(0, 0);
-  if(Array_len(args) > 2) x2c_driver_error("help accepts at most one command");
+  if(Array_len(args) > 2) driver_error("help accepts at most one command");
   String name = Var_string(Array_getindex(args, 1));
   if(String_equal(name, _52) || String_equal(name, _48) || String_equal(name, _49)) _help_exit(535328, 0);
   CliCommand * asked = String_truth(name) ? _command_row(name) : NULL;
-  if(! asked) x2c_driver_error(String_join(NULL, cons(String_var(_61), cons(String_var(name), cons(String_var(_57), NULL)))));
+  if(! asked) driver_error(String_join(NULL, cons(String_var(_61), cons(String_var(name), cons(String_var(_57), NULL)))));
   _help_exit(asked -> name, 0);
 }
 
@@ -1198,7 +1198,7 @@ String String_remove_prefix(String, String);
 static void _save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
   r -> temps_dir = String_remove_prefix(arg, _187);
-  if(! String_truth(r -> temps_dir)) x2c_driver_error("--save-temps= requires a directory");
+  if(! String_truth(r -> temps_dir)) driver_error("--save-temps= requires a directory");
 }
 
 int String_find(String, String);
@@ -1215,11 +1215,11 @@ static Given _take_option(Array args, int * i, int mask){
   }
   ;
   if(! given.option) return given;
-  if(equals > 2 && ! given.option -> value) x2c_driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(arg), cons(String_var(_57), NULL)))));
+  if(equals > 2 && ! given.option -> value) driver_error(String_join(NULL, cons(String_var(_62), cons(String_var(arg), cons(String_var(_57), NULL)))));
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if(given.option -> value && ! String_truth(given.value) && equals <= 2){
-    if(++(* i) == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_63), cons(String_var(arg), cons(String_var(_57), NULL)))));
+    if(++(* i) == Array_len(args)) driver_error(String_join(NULL, cons(String_var(_63), cons(String_var(arg), cons(String_var(_57), NULL)))));
     given.value = Var_string(Array_getindex(args, (* i)));
   }
   return given;
@@ -1341,26 +1341,26 @@ static void Parse_apply(Parse * p, Given given){
 }
 
 static Symbol _color_mode(String value){
-  if(! String_truth(value)) x2c_driver_error("--color requires auto, always, or never");
+  if(! String_truth(value)) driver_error("--color requires auto, always, or never");
   if(String_equal(value, _65)) return 109854;
   if(String_equal(value, _66)) return 93785702;
   if(String_equal(value, _67)) return 29733220;
-  x2c_driver_error(String_join(NULL, cons(String_var(_68), cons(String_var(value), cons(String_var(_57), NULL)))));
+  driver_error(String_join(NULL, cons(String_var(_68), cons(String_var(value), cons(String_var(_57), NULL)))));
 }
 
 static Symbol _target_kind(String value){
   if(String_equal(value, _69)) return 404971770155786;
   if(String_equal(value, _70)) return 1381098885964356;
   if(String_equal(value, _71)) return 904178442;
-  if(String_equal(value, _72)) x2c_driver_error("shared-library is not supported by this compiler");
-  x2c_driver_error(String_join(NULL, cons(String_var(_73), cons(String_var(value), cons(String_var(_57), NULL)))));
+  if(String_equal(value, _72)) driver_error("shared-library is not supported by this compiler");
+  driver_error(String_join(NULL, cons(String_var(_73), cons(String_var(value), cons(String_var(_57), NULL)))));
 }
 
 static int _count(String value, int minimum, String noun){
   char * end = NULL;
   errno = 0;
   long count = String_truth(value) ? strtol(value, & end, 10) : 0;
-  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) x2c_driver_error(String_join(NULL, cons(String_var(_74), cons(String_var(noun), cons(String_var(_75), cons(String_var(value), cons(String_var(_57), NULL)))))));
+  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) driver_error(String_join(NULL, cons(String_var(_74), cons(String_var(noun), cons(String_var(_75), cons(String_var(value), cons(String_var(_57), NULL)))))));
   return(int) count;
 }
 
@@ -1380,7 +1380,7 @@ static void _push_pair(Array out, String option, String value){
 }
 
 static String _xcc_argument(String value){
-  if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_76), cons(String_var(value), cons(String_var(_57), NULL)))));
+  if(cli_dependency_pass_through(value)) driver_error(String_join(NULL, cons(String_var(_76), cons(String_var(value), cons(String_var(_57), NULL)))));
   return value;
 }
 
@@ -1475,13 +1475,13 @@ int String_endswith(String, String);
 
 static void Parse_native(Parse * p, int * i){
   String arg = Var_string(Array_getindex(p -> args, (* i)));
-  if(! String_truth(arg)) x2c_driver_error("empty package native argument");
+  if(! String_truth(arg)) driver_error("empty package native argument");
   if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _197)){
     Array_push(p -> ld_args, String_var(arg));
     return;
   }
   Given given = _take_option(p -> args, &((* i)), p -> mask);
-  if(! given.option || ! given.option -> package_native) x2c_driver_error(String_join(NULL, cons(String_var(_81), cons(String_var(arg), cons(String_var(_57), NULL)))));
+  if(! given.option || ! given.option -> package_native) driver_error(String_join(NULL, cons(String_var(_81), cons(String_var(arg), cons(String_var(_57), NULL)))));
   Parse_apply(p, given);
 }
 
@@ -1498,7 +1498,7 @@ static void _expand_argument(Array out, String arg, List stack){
     Array_push(out, String_var(String_getslice(arg, 1, -2147483648, 1)));
     return;
   }
-  if(String_len(arg) == 1) x2c_driver_error("empty response-file reference '@'");
+  if(String_len(arg) == 1) driver_error("empty response-file reference '@'");
   String path = String_getslice(arg, 1, -2147483648, 1), identity = Path_absolute(path);
   if(List_contains(stack, String_var(identity))) _fail(String_join(NULL, cons(String_var(_82), cons(String_var(path), NULL))), NULL);
   List nested = cons(String_var(identity), stack);
@@ -1697,10 +1697,10 @@ static void _print_top_help(void){
   puts(_199);
 }
 
-String x2c_home_libexec(void);
+String home_libexec(void);
 
 static void _print_external_commands(void){
-  String libexec = x2c_home_libexec();
+  String libexec = home_libexec();
   File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_85), NULL))), "r") : NULL;
   if(! manifest) return;
   char * line = NULL;
@@ -1721,7 +1721,7 @@ static void _print_external_commands(void){
 
 static HelpPage * _help_page(Symbol command){
   for(HelpPage * page = help_pages;  page -> command;  page ++) if(page -> command == command) return page;
-  x2c_driver_error(String_join(NULL, cons(String_var(_61), cons(String_var(Symbol_str(command)), cons(String_var(_57), NULL)))));
+  driver_error(String_join(NULL, cons(String_var(_61), cons(String_var(Symbol_str(command)), cons(String_var(_57), NULL)))));
 }
 
 static void _print_page(HelpPage * page){
@@ -1815,7 +1815,7 @@ static void _expected_command(String arg){
 static void _unknown_option(String arg, int mask){
   String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
   if(String_truth(spelling)) _one_dash_removed(arg, spelling);
-  x2c_driver_error(String_join(NULL, cons(String_var(_106), cons(String_var(arg), cons(String_var(_57), NULL)))));
+  driver_error(String_join(NULL, cons(String_var(_106), cons(String_var(arg), cons(String_var(_57), NULL)))));
 }
 
 static String _two_dash(String arg){
@@ -1867,7 +1867,7 @@ int CliRequest_inspects(CliRequest request){
   return request -> dump != 0;
 }
 
-String x2c_home_packages(void);
+String home_packages(void);
 
 int Path_is_dir(Path);
 
@@ -1875,7 +1875,7 @@ List List_append(List, List);
 
 List CliRequest_package_roots(CliRequest request){
   if(! _init_guard_) _file_init_();
-  String home = x2c_home_packages();
+  String home = home_packages();
   if(! Path_is_dir(home)) return request -> package_dirs;
   return List_append(request -> package_dirs, cons(String_var(home), NULL));
 }

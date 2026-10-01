@@ -303,9 +303,9 @@ Var Var_box_long_double(long double);
 
 static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
   switch(target){
-    case 3355493 : return Var_box_f32(x2c_numeric_f32(&((* source))));
-    case 3356265 : return Var_box_f64(x2c_numeric_f64(&((* source))));
-    case 26071077642 : return Var_box_long_double(x2c_numeric_ldouble(&((* source))));
+    case 3355493 : return Var_box_f32(X2CVarNumeric_f32(&((* source))));
+    case 3356265 : return Var_box_f64(X2CVarNumeric_f64(&((* source))));
+    case 26071077642 : return Var_box_long_double(X2CVarNumeric_ldouble(&((* source))));
     default:{
       static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/varconvert.x",.function = "_convert_to_float",.line = 273};
       x2c_error_raise_n(& _x2c_error_site_12, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
@@ -316,19 +316,19 @@ static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
 
 }
 
-float x2c_numeric_f32(X2CVarNumeric * value){
+float X2CVarNumeric_f32(X2CVarNumeric * value){
   if((* value).floating) return(float)(* value).floating_value;
   if((* value).unsigned_value) return(float)(* value).raw;
   return(float) Var_signed_from_bits((* value).raw, (* value).bits);
 }
 
-double x2c_numeric_f64(X2CVarNumeric * value){
+double X2CVarNumeric_f64(X2CVarNumeric * value){
   if((* value).floating) return(double)(* value).floating_value;
   if((* value).unsigned_value) return(double)(* value).raw;
   return(double) Var_signed_from_bits((* value).raw, (* value).bits);
 }
 
-long double x2c_numeric_ldouble(X2CVarNumeric * value){
+long double X2CVarNumeric_ldouble(X2CVarNumeric * value){
   if((* value).floating) return(* value).floating_value;
   if((* value).unsigned_value) return(long double)(* value).raw;
   return(long double) Var_signed_from_bits((* value).raw, (* value).bits);

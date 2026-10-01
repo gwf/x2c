@@ -20,6 +20,7 @@ static Var _2181, _2178, _2176, _2174, _2154, _2151, _2150, _2147, _2145, _2140,
 #include "collect.h"
 #include "macros.h"
 #include "protocol.h"
+#include "utils.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -1257,11 +1258,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _795 = cons(_794, NULL);
   _796 = cons(_626, _795);
   _797 = List_var(_796);
-  _798 = int_var(2415);
+  _798 = int_var(2416);
   _799 = cons(_798, NULL);
   _800 = cons(_632, _799);
   _801 = List_var(_800);
-  _802 = int_var(89590);
+  _802 = int_var(89596);
   _803 = cons(_802, NULL);
   _804 = cons(_647, _803);
   _805 = List_var(_804);
@@ -3021,7 +3022,7 @@ default: break;
 Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_148), cons(String_var(name), cons(String_var(_149), NULL)))), meta, _152);
 }
 
-uint64_t x2c_fnv_bytes(uint64_t, const void *, size_t);
+uint64_t fnv_bytes(uint64_t, const void *, size_t);
 int String_len(String);
 Var Map_setindex(Map, Var, Var);
 String String_printf(String, ...);
@@ -3029,7 +3030,7 @@ Array Array_new(void);
 Map Map_new(void);
 List Array_list_free(Array);
 static void _record_meta_hash(Compiler c, List function, Token first, int meta){
-  uint64_t hash = 0xcbf29ce484222325ULL;  for(Token token = first;  token < c -> token;  token ++) if(token -> type != 40896714 && token -> type != 7477210024 && token -> len) hash = x2c_fnv_bytes(x2c_fnv_bytes(hash, token -> text, String_len(token -> text)), " ", 1);
+  uint64_t hash = FNV_OFFSET_BASIS;  for(Token token = first;  token < c -> token;  token ++) if(token -> type != 40896714 && token -> type != 7477210024 && token -> len) hash = fnv_bytes(fnv_bytes(hash, token -> text, String_len(token -> text)), " ", 1);
   {
     List _x2c_match_expr = function;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };

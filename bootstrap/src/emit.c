@@ -1640,7 +1640,7 @@ size_t Buffer_len(Buffer);
 Buffer Buffer_write_char(Buffer, char);
 Buffer Buffer_write(Buffer, const char *);
 String Buffer_str_free(Buffer);
-String x2c_filename_hash(String);
+String filename_hash(String);
 char * Compiler_code_pretty_string(Compiler, List, String);
 String String_rstrip(String, char *);
 static List Emitter__initializer_macro(Emitter e, List input, List body){
@@ -1653,7 +1653,7 @@ static List Emitter__initializer_macro(Emitter e, List input, List body){
     }
 
   }
-  String formal = Buffer_str_free(parameters);  String hash = x2c_filename_hash(e -> compiler -> filename);  String name = Compiler_fresh_name(e -> compiler, String_join(NULL, cons(String_var(_380), cons(String_var(hash), NULL))));  String replacement; {
+  String formal = Buffer_str_free(parameters);  String hash = filename_hash(e -> compiler -> filename);  String name = Compiler_fresh_name(e -> compiler, String_join(NULL, cons(String_var(_380), cons(String_var(hash), NULL))));  String replacement; {
     int * _x2c_macro_address_1 = & e -> compiler -> source_map;  int _x2c_macro_previous_1 = * _x2c_macro_address_1; {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
@@ -1873,10 +1873,10 @@ static List Emitter__initializer_value(Emitter e, List ast){
 }
 
 String preproc_include_target(String, int *);
-int x2c_source_file(String);
+int is_source_file(String);
 int String_rfind(String, String);
 static List Emitter__preproc(Emitter emitter, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! x2c_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _767), 1);  String out = String_join(NULL, cons(String_var(_495), cons(String_var(stem), cons(String_var(_496), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, -2147483648, String_rfind(target, _767), 1);  String out = String_join(NULL, cons(String_var(_495), cons(String_var(stem), cons(String_var(_496), NULL))));  return cons(String_var(out), NULL);
 }
 
 int Symbol_is_assignment_op(Symbol);

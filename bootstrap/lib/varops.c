@@ -720,22 +720,22 @@ static Symbol _floating_tag(X2CVarNumeric * lhs, X2CVarNumeric * rhs){
   return(* lhs).rank >=(* rhs).rank ?(* lhs).tag :(* rhs).tag;
 }
 
-float x2c_numeric_f32(X2CVarNumeric *);
+float X2CVarNumeric_f32(X2CVarNumeric *);
 
-double x2c_numeric_f64(X2CVarNumeric *);
+double X2CVarNumeric_f64(X2CVarNumeric *);
 
-long double x2c_numeric_ldouble(X2CVarNumeric *);
+long double X2CVarNumeric_ldouble(X2CVarNumeric *);
 
 static Var _floating_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs, Symbol tag){
   if(tag == 3355493){
-    float a = x2c_numeric_f32(&(lhs)), b = x2c_numeric_f32(&(rhs));
+    float a = X2CVarNumeric_f32(&(lhs)), b = X2CVarNumeric_f32(&(rhs));
     return Var_box_f32(_f32_step(op, a, b));
   }
   if(tag == 3356265){
-    double a = x2c_numeric_f64(&(lhs)), b = x2c_numeric_f64(&(rhs));
+    double a = X2CVarNumeric_f64(&(lhs)), b = X2CVarNumeric_f64(&(rhs));
     return Var_box_f64(_f64_step(op, a, b));
   }
-  long double a = x2c_numeric_ldouble(&(lhs)), b = x2c_numeric_ldouble(&(rhs));
+  long double a = X2CVarNumeric_ldouble(&(lhs)), b = X2CVarNumeric_ldouble(&(rhs));
   return Var_box_long_double(_ldouble_step(op, a, b));
 }
 

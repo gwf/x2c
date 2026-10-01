@@ -16,7 +16,7 @@ struct Mutex{
 
 _Noreturn static void _error(const char * operation, int error);
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure){
+void Mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure){
   pthread_mutexattr_t attributes;
   if(pthread_mutexattr_init(& attributes) || pthread_mutexattr_settype(& attributes, PTHREAD_MUTEX_RECURSIVE) || pthread_mutex_init(mutex, & attributes)){
     fprintf(stderr, "%s\n", failure);
@@ -25,7 +25,7 @@ void x2c_mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failur
   pthread_mutexattr_destroy(& attributes);
 }
 
-void x2c_mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, void(* initialize)(void), const char * failure){
+void Mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, void(* initialize)(void), const char * failure){
   if(pthread_once(once, initialize) || pthread_mutex_lock(mutex)){
     fprintf(stderr, "%s\n", failure);
     abort();
@@ -33,7 +33,7 @@ void x2c_mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, vo
 
 }
 
-void x2c_mutex_recursive_unlock(pthread_mutex_t * mutex, const char * failure){
+void Mutex_recursive_unlock(pthread_mutex_t * mutex, const char * failure){
   if(pthread_mutex_unlock(mutex)){
     fprintf(stderr, "%s\n", failure);
     abort();
@@ -50,7 +50,7 @@ Var int_var(int);
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/mutex.x",.function = "_error",.line = 76};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/mutex.x",.function = "_error",.line = 75};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), String_var(name), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -73,7 +73,7 @@ Mutex Mutex_new(void){
 
 void Mutex_lock(Mutex mutex){
   if(! mutex){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/mutex.x",.function = "Mutex_lock",.line = 99};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/mutex.x",.function = "Mutex_lock",.line = 98};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.lock")), NULL))));
     __builtin_unreachable();
   }
@@ -83,7 +83,7 @@ void Mutex_lock(Mutex mutex){
 
 int Mutex_try_lock(Mutex mutex){
   if(! mutex){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/mutex.x",.function = "Mutex_try_lock",.line = 109};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/mutex.x",.function = "Mutex_try_lock",.line = 108};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.try_lock")), NULL))));
     __builtin_unreachable();
   }
@@ -95,7 +95,7 @@ int Mutex_try_lock(Mutex mutex){
 
 void Mutex_unlock(Mutex mutex){
   if(! mutex){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/mutex.x",.function = "Mutex_unlock",.line = 120};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/mutex.x",.function = "Mutex_unlock",.line = 119};
     x2c_error_raise_n(& _x2c_error_site_3, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.unlock")), NULL))));
     __builtin_unreachable();
   }
@@ -105,7 +105,7 @@ void Mutex_unlock(Mutex mutex){
 
 void Mutex_free(Mutex mutex){
   if(! mutex){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/mutex.x",.function = "Mutex_free",.line = 132};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/mutex.x",.function = "Mutex_free",.line = 131};
     x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Mutex.free")), NULL))));
     __builtin_unreachable();
   }

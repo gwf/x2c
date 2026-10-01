@@ -22,6 +22,7 @@ static String _25, _24, _23, _22, _20, _19, _18, _17, _16, _15, _14, _13, _12, _
 #include "exception.h"
 #include "func.h"
 #include "symbol.h"
+#include "scan.h"
 #include "pool.h"
 typedef struct StringHeader{
   int length;
@@ -167,8 +168,6 @@ static int _unescape_into(char * out, const char * src);
 static inline int _decode_escape(const char * * at);
 
 static inline int _hex_escape(const char * * at, int esc);
-
-static inline int _hex_digit(int ch);
 
 static inline int _octal_escape(const char * * at, int esc);
 
@@ -627,7 +626,7 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 691};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 692};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
@@ -648,7 +647,7 @@ String String_add(String str, String other){
   int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 724};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 725};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
@@ -682,12 +681,12 @@ String String_repeat(String str, int count){
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 765};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 766};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 766};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 767};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))), Symbol_var(7318440), int_var(count));
     __builtin_unreachable();
   }
@@ -776,14 +775,14 @@ String String_pad_center(String str, int width, char fill){
 
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 853};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 854};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 856};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 857};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -1004,7 +1003,7 @@ String String_map(String str, Func fn){
       for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
         if(! ch){
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1119};
+          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1120};
           x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -1239,7 +1238,7 @@ static void _Format_write_literal(_Format * f){
 
 _Noreturn static void _format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_format_error",.line = 1283};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_format_error",.line = 1284};
     x2c_error_raise_n(& _x2c_error_site_7, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
@@ -1615,7 +1614,7 @@ List cons(Var, List);
 _Noreturn static void _Format_nested(_Format * f, String reason, Var code, List details){
   List cause = cons(code, details);
   {
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_Format_nested",.line = 1550};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "_Format_nested",.line = 1551};
     x2c_error_raise_n(& _x2c_error_site_8, 435316840, 3, Symbol_var(1019648360), int_var(f -> offset), Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
     __builtin_unreachable();
   }
@@ -1704,7 +1703,7 @@ String String_unescape(String str){
   if(length < 0){
     _free_unchecked(string);
     {
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1631};
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1632};
       x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }
@@ -1739,21 +1738,16 @@ static inline int _decode_escape(const char * * at){
   return _named_escape(esc);
 }
 
+int scan_ascii_hex_value(int);
+
 static inline int _hex_escape(const char * * at, int esc){
   int byte = 0, digits = 0;
   for(;  *(* at) && digits < 2; (* at) ++, digits ++){
-    int hex = _hex_digit(*(* at));
+    int hex = scan_ascii_hex_value(*(* at));
     if(hex < 0) break;
     byte =(byte << 4) | hex;
   }
   return digits ? byte : esc;
-}
-
-static inline int _hex_digit(int ch){
-  if(ch >= '0' && ch <= '9') return ch - '0';
-  if(ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
-  if(ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
-  return - 1;
 }
 
 static inline int _octal_escape(const char * * at, int esc){

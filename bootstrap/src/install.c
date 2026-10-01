@@ -450,18 +450,18 @@ static void _release_packages(void){
   _packages_lock = - 1;
 }
 
-void x2c_driver_error(const char *);
+void driver_error(const char *);
 
 static void _error(const char * message){
   _release_packages();
-  x2c_driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(String_new(message)), NULL))));
+  driver_error(String_join(NULL, cons(String_var(_3), cons(String_var(String_new(message)), NULL))));
 }
 
-void x2c_host_error(List);
+void host_error(List);
 
 static void _host_error(List detail){
   _release_packages();
-  x2c_host_error(detail);
+  host_error(detail);
 }
 
 Var List_car(List);
@@ -1008,11 +1008,11 @@ static List _index_row(CliRequest request, String name, String work){
   return NULL;
 }
 
-String x2c_home_packages(void);
+String home_packages(void);
 
 static String _home_packages(String command){
-  String packages = x2c_home_packages();
-  if(! String_truth(packages)) x2c_driver_error(String_join(NULL, cons(String_var(command), cons(String_var(_64), NULL))));
+  String packages = home_packages();
+  if(! String_truth(packages)) driver_error(String_join(NULL, cons(String_var(command), cons(String_var(_64), NULL))));
   return packages;
 }
 
@@ -1106,7 +1106,7 @@ int remove_command(CliRequest request){
   if(! _init_guard_) _file_init_();
   String name = Var_string(List_car(request -> inputs));
   String target = String_join(NULL, cons(String_var(_home_packages(_124)), cons(String_var(_1), cons(String_var(name), NULL))));
-  if(! String_is_identifier(name)) x2c_driver_error(String_join(NULL, cons(String_var(_85), cons(String_var(name), cons(String_var(_8), NULL)))));
+  if(! String_is_identifier(name)) driver_error(String_join(NULL, cons(String_var(_85), cons(String_var(name), cons(String_var(_8), NULL)))));
   _check_removable(target, name);
   _locked_packages(_124, request -> quiet);
   {
@@ -1173,8 +1173,8 @@ int remove_command(CliRequest request){
 }
 
 static void _check_removable(String target, String name){
-  if(! Path_exists(target)) x2c_driver_error(String_join(NULL, cons(String_var(_85), cons(String_var(name), cons(String_var(_8), NULL)))));
-  if(! String_truth(_installed_kind(target))) x2c_driver_error(String_join(NULL, cons(String_var(_86), cons(String_var(target), cons(String_var(_87), NULL)))));
+  if(! Path_exists(target)) driver_error(String_join(NULL, cons(String_var(_85), cons(String_var(name), cons(String_var(_8), NULL)))));
+  if(! String_truth(_installed_kind(target))) driver_error(String_join(NULL, cons(String_var(_86), cons(String_var(target), cons(String_var(_87), NULL)))));
 }
 
 int list_command(CliRequest request){

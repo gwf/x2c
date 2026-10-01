@@ -14,6 +14,12 @@ static inline int scan_ascii_digit(int c){
   return(unsigned)(c - '0') < 10;
 }
 
+static inline int scan_ascii_hex_value(int c){
+  if(scan_ascii_digit(c)) return c - '0';
+  c |= 32;
+  return(unsigned)(c - 'a') < 6 ? c - 'a' + 10 : - 1;
+}
+
 int scan_white_space(char * s);
 
 int scan_line_comment(char * s);

@@ -1104,7 +1104,7 @@ PoolStats Pool_stats(Pool inner){
 
 Scope Scope_new_named(const char *);
 
-void x2c_mutex_recursive_initialize(pthread_mutex_t *, const char *);
+void Mutex_recursive_initialize(pthread_mutex_t *, const char *);
 
 void Scope_push(Scope *);
 
@@ -1137,7 +1137,7 @@ Pool Pool_retain_named(Pool inner, const char * name){
         .scope = scope, .up = inner, .child_capacity = 2
       }
       ;
-      x2c_mutex_recursive_initialize(& pool -> mutex, "Pool: could not initialize branch mutex");
+      Mutex_recursive_initialize(& pool -> mutex, "Pool: could not initialize branch mutex");
       mutex_ready = 1;
       {
         Scope_push(& pool -> scope);

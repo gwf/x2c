@@ -2,9 +2,14 @@
 
 #include "symbolset.h"
 
+#include "exception.h"
+
 #include <limits.h>
 #include <stdint.h>
+#include "array.h"
+#include "block.h"
 #include "iter.h"
+#include "scope.h"
 #include "var.h"
 #define SYMBOL_SET_HEADER_SIZE 20
 static unsigned _byte(SymbolSet set, size_t offset);
@@ -13,13 +18,49 @@ static uint32_t _u32(SymbolSet set, size_t offset);
 
 static uint64_t _u64(SymbolSet set, size_t offset);
 
-static uint64_t _mix(uint64_t value);
+static inline uint64_t _mix(uint64_t value);
+
+static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices);
 
 static uint32_t _g(SymbolSet set, uint32_t vertex);
 
 static size_t _order_offset(SymbolSet x, uint32_t span);
 
 static int _next(Iter iter, Var * out);
+
+typedef struct Hash{
+  uint32_t span, * table;
+  uint64_t seed;
+  int vertices;
+}
+Hash;
+
+typedef struct Edge{
+  uint32_t vertices[3];
+}
+Edge;
+
+typedef struct Graph{
+  Edge * edges;
+  int count, vertices, * degree, * edge_xor, * queue;
+  int * order_edges, * order_vertices;
+  unsigned char * removed;
+}
+Graph;
+
+static void _put(Block bytes, uint64_t value, int size);
+
+static Hash _hash(Array symbols);
+
+static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * table);
+
+static Graph _graph(Array symbols, uint32_t span, uint64_t seed);
+
+static int Graph_peel(Graph * g);
+
+static void Graph_assign(Graph * g, uint32_t * table);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 static unsigned _byte(SymbolSet set, size_t offset){
   unsigned char * bytes =(unsigned char *) set;
@@ -38,12 +79,20 @@ static uint64_t _u64(SymbolSet set, size_t offset){
   return value;
 }
 
-static uint64_t _mix(uint64_t value){
+static inline uint64_t _mix(uint64_t value){
   value ^= value >> 30;
   value *= UINT64_C(0xbf58476d1ce4e5b9);
   value ^= value >> 27;
   value *= UINT64_C(0x94d049bb133111eb);
   return value ^(value >> 31);
+}
+
+static inline void _place(Symbol symbol, uint64_t seed, uint32_t mask, uint32_t * vertices){
+  uint64_t hash = _mix((uint64_t) symbol ^ seed);
+  uint32_t span = mask + 1;
+  vertices[0] =(uint32_t) hash & mask;
+  vertices[1] = span +((uint32_t)(hash >> 21) & mask);
+  vertices[2] = span * 2 +((uint32_t)(hash >> 42) & mask);
 }
 
 static uint32_t _g(SymbolSet set, uint32_t vertex){
@@ -66,10 +115,9 @@ int SymbolSet_index(SymbolSet x, Symbol symbol){
   if(! x) return - 1;
   uint32_t count = _u32(x, 4);
   if(! count) return - 1;
-  uint32_t mask = _u32(x, 8), span = mask + 1;
-  uint64_t seed = _u64(x, 12);
-  uint64_t hash = _mix((uint64_t) symbol ^ seed);
-  uint32_t index = _g(x, (uint32_t) hash & mask) ^ _g(x, span +((uint32_t)(hash >> 21) & mask)) ^ _g(x, span * 2 +((uint32_t)(hash >> 42) & mask));
+  uint32_t mask = _u32(x, 8), span = mask + 1, vertices[3];
+  _place(symbol, _u64(x, 12), mask, vertices);
+  uint32_t index = _g(x, vertices[0]) ^ _g(x, vertices[1]) ^ _g(x, vertices[2]);
   if(index >= count) return - 1;
   Symbol stored =(Symbol) _u64(x, _order_offset(x, span) +(size_t) index * sizeof(Symbol));
   return stored == symbol ?(int) index : - 1;
@@ -110,5 +158,181 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter SymbolSet_iter(SymbolSet x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, Var_new(3683441, (void *) x), _next, int_var(0));
+}
+
+Block Block_new(size_t);
+
+Symbol Var_symbol(Var);
+
+Var Array_getindex(Array, int);
+
+void Scope_free(void *);
+
+Block SymbolSet_encode(Array symbols){
+  Hash h = _hash(symbols);
+  int count =(int) Array_len(symbols);
+  int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4;
+  Block bytes = Block_new(1);
+  _put(bytes, width, 1);
+  _put(bytes, 0, 3);
+  _put(bytes, count, 4);
+  _put(bytes, h.span - 1, 4);
+  _put(bytes, h.seed, 8);
+  for(int vertex = 0;  vertex < h.vertices;  vertex ++) _put(bytes, h.table[vertex], width);
+  for(int index = 0;  index < count;  index ++) _put(bytes, Var_symbol(Array_getindex(symbols, index)), 8);
+  Scope_free(h.table);
+  return bytes;
+}
+
+void Block_push(Block, const void *);
+
+static void _put(Block bytes, uint64_t value, int size){
+  for(int byte = 0;  byte < size;  byte ++){
+    unsigned char low = value & 0xff;
+    Block_push(bytes, & low);
+    value >>= 8;
+  }
+
+}
+
+void * Scope_calloc(size_t, size_t);
+
+static Hash _hash(Array symbols){
+  int count =(int) Array_len(symbols), built = count == 0;
+  Hash h ={
+    .span = 1
+  }
+  ;
+  while((uint64_t) h.span * 3 <(uint64_t) count * 3 / 2) h.span <<= 1;
+  while(! built){
+    h.vertices =(int) h.span * 3;
+    h.table = Scope_calloc(h.vertices, sizeof(uint32_t));
+    for(uint64_t attempt = 0;  ! built && attempt < 4096;  attempt ++){
+      memset(h.table, 0, (size_t) h.vertices * sizeof(uint32_t));
+      h.seed = UINT64_C(0x9e3779b97f4a7c15) + attempt * UINT64_C(0xd1b54a32d192ed03);
+      built = _try_seed(symbols, h.span, h.seed, h.table);
+    }
+    if(! built){
+      Scope_free(h.table);
+      h.span <<= 1;
+    }
+
+  }
+  return h;
+}
+
+void Scope_retain(void);
+
+void x2c_cleanup_push(X2CCleanup *);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * table){
+  {
+    Scope_retain();
+    {
+      {
+        X2CCleanup _x2c_defer_record_0 ={
+          .fn = _x2c_defer_cleanup_0, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_0);
+        {
+          {
+            Graph g = _graph(symbols, span, seed);
+            if(! Graph_peel(&(g))){
+              int _x2c_return_value_0 = 0;
+              {
+                x2c_cleanup_leave(& _x2c_defer_record_0);
+                return _x2c_return_value_0;
+              }
+
+            }
+            Graph_assign(&(g), table);
+            {
+              int _x2c_return_value_1 = 1;
+              {
+                x2c_cleanup_leave(& _x2c_defer_record_0);
+                return _x2c_return_value_1;
+              }
+
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+      }
+
+    }
+
+  }
+
+}
+
+static Graph _graph(Array symbols, uint32_t span, uint64_t seed){
+  int count =(int) Array_len(symbols), vertices =(int) span * 3;
+  Graph g ={
+    .count = count, .vertices = vertices
+  }
+  ;
+  g.edges = Scope_calloc(count, sizeof(Edge));
+  g.degree = Scope_calloc(vertices, sizeof(int));
+  g.edge_xor = Scope_calloc(vertices, sizeof(int));
+  g.queue = Scope_calloc(vertices, sizeof(int));
+  g.order_edges = Scope_calloc(count, sizeof(int));
+  g.order_vertices = Scope_calloc(count, sizeof(int));
+  g.removed = Scope_calloc(count, 1);
+  for(int edge = 0;  edge < count;  edge ++){
+    _place(Var_symbol(Array_getindex(symbols, edge)), seed, span - 1, g.edges[edge].vertices);
+    for(int part = 0;  part < 3;  part ++){
+      uint32_t vertex = g.edges[edge].vertices[part];
+      g.degree[vertex] ++;
+      g.edge_xor[vertex] ^= edge;
+    }
+
+  }
+  return g;
+}
+
+static int Graph_peel(Graph * g){
+  int head = 0, tail = 0, ordered = 0;
+  for(int vertex = 0;  vertex < g -> vertices;  vertex ++) if(g -> degree[vertex] == 1) g -> queue[tail ++] = vertex;
+  while(head < tail){
+    int vertex = g -> queue[head ++];
+    if(g -> degree[vertex] != 1) continue;
+    int edge = g -> edge_xor[vertex];
+    if(g -> removed[edge]) continue;
+    g -> removed[edge] = 1;
+    g -> order_edges[ordered] = edge;
+    g -> order_vertices[ordered ++] = vertex;
+    for(int part = 0;  part < 3;  part ++){
+      uint32_t adjacent = g -> edges[edge].vertices[part];
+      g -> degree[adjacent] --;
+      g -> edge_xor[adjacent] ^= edge;
+      if(g -> degree[adjacent] == 1) g -> queue[tail ++] = adjacent;
+    }
+
+  }
+  return ordered == g -> count;
+}
+
+static void Graph_assign(Graph * g, uint32_t * table){
+  for(int position = g -> count - 1;  position >= 0;  position --){
+    int edge = g -> order_edges[position], vertex = g -> order_vertices[position];
+    uint32_t value =(uint32_t) edge;
+    for(int part = 0;  part < 3;  part ++){
+      uint32_t adjacent = g -> edges[edge].vertices[part];
+      if((int) adjacent != vertex) value ^= table[adjacent];
+    }
+    table[vertex] = value;
+  }
+
+}
+
+void Scope_release(void);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  Scope_release();
 }
 

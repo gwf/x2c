@@ -117,8 +117,6 @@ static int _literal_magnitude(String text, int end, unsigned long long * magnitu
 
 static int _radix(String text, int end, int * pos);
 
-static unsigned _literal_digit(int ch);
-
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs);
 
 static Var _designated(Var value);
@@ -1174,12 +1172,14 @@ static int _integer_literal_end(String text){
   return end;
 }
 
+int scan_ascii_hex_value(int);
+
 static int _literal_magnitude(String text, int end, unsigned long long * magnitude, int * decimal){
   int pos = 0, base = _radix(text, end, &(pos));
   (* decimal) = base == 10;
   unsigned long long sum = 0;
   for(;  pos < end;  pos ++){
-    unsigned digit = _literal_digit((unsigned char) String_getindex(text, pos));
+    unsigned digit = scan_ascii_hex_value((unsigned char) String_getindex(text, pos));
     if(sum >(ULLONG_MAX - digit) /(unsigned) base) return 0;
     sum = sum *(unsigned) base + digit;
   }
@@ -1198,10 +1198,6 @@ static int _radix(String text, int end, int * pos){
     return 8;
   }
   return String_getindex(text, 1) >= '0' && String_getindex(text, 1) <= '7' ? 8 : 10;
-}
-
-static unsigned _literal_digit(int ch){
-  return ch <= '9' ?(unsigned)(ch - '0') :(unsigned)((ch | 32) - 'a' + 10);
 }
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs){

@@ -375,11 +375,11 @@ static Map _script_locals(List ast);
 
 static void _check_local_uses(Compiler c, List items, Map locals);
 
-static void _record_top_level(Compiler c, List node);
+static void _record_top_level(Compiler c, List node, Token site);
 
-static void _record_objects(Compiler c, List bindings);
+static void _record_objects(Compiler c, List bindings, Token site);
 
-static void _report_redefinition(Compiler c, String kind, List binding);
+static void _report_redefinition(Compiler c, String kind, List binding, Token site);
 
 static void _record_span(Compiler c, List node, int start, int end);
 
@@ -389,9 +389,9 @@ static void _record_prototype(Compiler c, List binding, Type type, List modifier
 
 static void _record_attributes(Compiler c, List binding, List modifiers);
 
-static void _record_definition(Compiler c, Type type, List binding);
+static void _record_definition(Compiler c, Type type, List binding, Token site);
 
-static void _complete_prototype(Compiler c, List binding, List prior_contract, List contract);
+static void _complete_prototype(Compiler c, List binding, List prior_contract, List contract, Token site);
 
 static List _contract(Compiler c, Type type, List binding);
 
@@ -1593,7 +1593,7 @@ void Compiler_merge_translation_dependencies(Compiler c, Map dependencies){
 
 Tokenizer Tokenizer_new(char *, Symbol);
 
-int x2c_layout_file(String);
+int is_layout_file(String);
 
 void Tokenizer_scan(Tokenizer);
 
@@ -1603,7 +1603,7 @@ void Compiler_tokenize(Compiler c, char * text){
   c -> input_boundary = NULL;
   c -> text = String_new(text);
   c -> tokenizer = Tokenizer_new(c -> text, 3945159);
-  c -> tokenizer -> layout = c -> layout || x2c_layout_file(c -> filename);
+  c -> tokenizer -> layout = c -> layout || is_layout_file(c -> filename);
   Tokenizer_scan(c -> tokenizer);
   c -> layout = c -> tokenizer -> layout;
   _report_malformed_token(c);
@@ -4652,7 +4652,7 @@ static void FullParse_top_level(FullParse * p, int begin, Token tokens){
 }
 
 static void FullParse_add(FullParse * p, List node, int begin, int end){
-  _record_top_level(p -> c, node);  _record_span(p -> c, node, begin, end);  Array_push(p -> nodes, List_var(node));
+  Token tokens = p -> c -> tokenizer -> tokens;  _record_top_level(p -> c, node, tokens + begin);  _record_span(p -> c, node, begin, end);  Array_push(p -> nodes, List_var(node));
 }
 
 static long _end_index(Compiler c, Token tokens){
@@ -4843,19 +4843,19 @@ static void _check_local_uses(Compiler c, List items, Map locals){
 
 }
 
-static void _record_top_level(Compiler c, List node){
+static void _record_top_level(Compiler c, List node, Token site){
 
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 8932560010: ;  static MatchCaptureSite _x2c_match_site_60;  if (x2c_match_site_try_capture(& _x2c_match_site_60, _x2c_match_expr, List_var(_890), &_x2c_match_capture)) {Var declared = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]); {
-    Type type = Var_type(declared);  _record_objects(c, bindings);  _record_static_object(c, type, bindings);  _record_prototypes(c, type, bindings);
+    Type type = Var_type(declared);  _record_objects(c, bindings, site);  _record_static_object(c, type, bindings);  _record_prototypes(c, type, bindings);
   }
   break;
 }
 case 458361162716: ;  static MatchCaptureSite _x2c_match_site_61;  if (x2c_match_site_try_capture(& _x2c_match_site_61, _x2c_match_expr, List_var(_900), &_x2c_match_capture)) {Var return_type = _x2c_match_values[0];  Var target = _x2c_match_values[1];  Var binding = _x2c_match_values[2]; {
-  List declaration = cons(_240, cons(return_type, cons(List_var(cons(_241, cons(target, NULL))), NULL)));  _record_definition(c, List_type_from_ast(declaration), Var_list(binding));
+  List declaration = cons(_240, cons(return_type, cons(List_var(cons(_241, cons(target, NULL))), NULL)));  _record_definition(c, List_type_from_ast(declaration), Var_list(binding), site);
 }
 break;
 }
@@ -4864,7 +4864,7 @@ default: break;
   }
 }
 
-static void _record_objects(Compiler c, List bindings){
+static void _record_objects(Compiler c, List bindings, Token site){
   {
     List row;  List _x2c_macro_object_51 = bindings;  List _x2c_macro_cursor_51 = _x2c_macro_object_51;  Var _x2c_macro_cursor_output_54;  while(List_try_next(_x2c_macro_object_51, &(_x2c_macro_cursor_51), &(_x2c_macro_cursor_output_54))){
       row = Var_list(_x2c_macro_cursor_output_54);
@@ -4873,7 +4873,7 @@ static void _record_objects(Compiler c, List bindings){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 992: ;  static MatchCaptureSite _x2c_match_site_62;  if (x2c_match_site_try_capture(& _x2c_match_site_62, _x2c_match_expr, List_var(_910), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        List key = cons(_911, cons(binding, NULL));  Map facts = Compiler_semantic_binding_facts(c);  if(Map_contains(facts, List_var(key))) _report_redefinition(c, _1035, Var_list(binding));  Map_setindex(facts, List_var(key), int_var(1));  Map_setindex(facts, List_var(cons(_912, cons(binding, NULL))), List_var(c -> arms));
+        List key = cons(_911, cons(binding, NULL));  Map facts = Compiler_semantic_binding_facts(c);  if(Map_contains(facts, List_var(key))) _report_redefinition(c, _1035, Var_list(binding), site);  Map_setindex(facts, List_var(key), int_var(1));  Map_setindex(facts, List_var(cons(_912, cons(binding, NULL))), List_var(c -> arms));
       }
       break;
     }
@@ -4885,8 +4885,8 @@ static void _record_objects(Compiler c, List bindings){
 }
 }
 
-static void _report_redefinition(Compiler c, String kind, List binding){
-  Var arms;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_912, cons(List_var(binding), NULL))), &(arms)) || ! List_equal(Var_list(arms), c -> arms)) return;  String spelling = binding_identity_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(kind), cons(String_var(_194), cons(String_var(spelling), cons(String_var(_913), NULL))))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_914), cons(String_var(spelling), cons(String_var(_69), NULL))))), NULL));
+static void _report_redefinition(Compiler c, String kind, List binding, Token site){
+  Var arms;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_912, cons(List_var(binding), NULL))), &(arms)) || ! List_equal(Var_list(arms), c -> arms)) return;  String spelling = binding_identity_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(kind), cons(String_var(_194), cons(String_var(spelling), cons(String_var(_913), NULL))))), site, cons(String_var(String_join(NULL, cons(String_var(_914), cons(String_var(spelling), cons(String_var(_69), NULL))))), NULL));
 }
 
 static void _record_span(Compiler c, List node, int start, int end){
@@ -4947,17 +4947,17 @@ static void _record_attributes(Compiler c, List binding, List modifiers){
   if(List_truth(attributes)) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_934, cons(List_var(binding), NULL))), List_var(attributes));
 }
 
-static void _record_definition(Compiler c, Type type, List binding){
+static void _record_definition(Compiler c, Type type, List binding, Token site){
   List contract = _contract(c, type, binding);  Var stored;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_930, cons(List_var(binding), NULL))), &(stored))){
     List state = Var_list(stored);  Var state_kind, prior_contract;  List _x2c_destructure_14 = state;  state_kind = List_getindex(_x2c_destructure_14, 0);  prior_contract = List_getindex(_x2c_destructure_14, 1);  if(Var_equal(state_kind, Symbol_var(36454909922314))){
-      _complete_prototype(c, binding, Var_list(prior_contract), contract);  return;
+      _complete_prototype(c, binding, Var_list(prior_contract), contract, site);  return;
     }
-    if(Var_equal(state_kind, Symbol_var(292902696930268)) || Var_equal(state_kind, Symbol_var(7656878481736))) _report_redefinition(c, _1036, binding);
+    if(Var_equal(state_kind, Symbol_var(292902696930268)) || Var_equal(state_kind, Symbol_var(7656878481736))) _report_redefinition(c, _1036, binding, site);
   }
   Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_930, cons(List_var(binding), NULL))), List_var(cons(_935, cons(List_var(contract), NULL))));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_912, cons(List_var(binding), NULL))), List_var(c -> arms));  String spelling = binding_identity_spelling(binding);  if(String_truth(spelling) && ! Type_is_static(type)) Map_setindex(c -> fn_defs, String_var(spelling), int_var(1));
 }
 
-static void _complete_prototype(Compiler c, List binding, List prior_contract, List contract){
+static void _complete_prototype(Compiler c, List binding, List prior_contract, List contract, Token site){
 
   {
     List _x2c_match_expr = prior_contract;
@@ -4972,7 +4972,7 @@ static void _complete_prototype(Compiler c, List binding, List prior_contract, L
     }
   }
 if(! List_equal(prior_contract, contract)){
-  String spelling = binding_identity_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_946), cons(String_var(spelling), cons(String_var(_947), NULL)))), c -> token, cons(String_var(String_join(NULL, cons(String_var(_948), cons(String_var(List_repr(prior_contract)), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_949), cons(String_var(List_repr(contract)), NULL)))), NULL)));
+  String spelling = binding_identity_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_946), cons(String_var(spelling), cons(String_var(_947), NULL)))), site, cons(String_var(String_join(NULL, cons(String_var(_948), cons(String_var(List_repr(prior_contract)), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_949), cons(String_var(List_repr(contract)), NULL)))), NULL)));
 }
 Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_930, cons(List_var(binding), NULL))), List_var(cons(_950, cons(List_var(contract), NULL))));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_912, cons(List_var(binding), NULL))), List_var(c -> arms));
 }
@@ -5131,7 +5131,7 @@ static void _append_meta_definitions(Compiler c, Array nodes){
   {
     List definition;  Array _x2c_macro_object_61 = c -> meta_defs;  int _x2c_macro_cursor_61 = 0;  Var _x2c_macro_cursor_output_64;  while(Array_try_next(_x2c_macro_object_61, &(_x2c_macro_cursor_61), &(_x2c_macro_cursor_output_64))){
       definition = Var_list(_x2c_macro_cursor_output_64);  if(Map_contains(reached, _meta_identity(definition)) && ! Compiler_meta_is_comptime_only(c, definition)){
-        _record_top_level(c, definition);  Array_push(nodes, List_var(definition));
+        _record_top_level(c, definition, NULL);  Array_push(nodes, List_var(definition));
       }
 
     }

@@ -12,7 +12,8 @@ typedef struct _Option{
   String spelling, spellings, name, value, help;
   Var fallback;
   Array collected;
-  int operand, defaulted, required, repeated, given, shared_name;
+  struct _Option * owner;
+  int operand, defaulted, required, repeated, given;
 }
 _Option;
 
@@ -156,7 +157,7 @@ Var String_var(String);
 
 _Noreturn static void _bad_option(String why, String option){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 43};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 45};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
     __builtin_unreachable();
   }
@@ -165,7 +166,7 @@ _Noreturn static void _bad_option(String why, String option){
 
 _Noreturn static void _bad_operand(String why, String operand){
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 47};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 49};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
     __builtin_unreachable();
   }
@@ -174,7 +175,7 @@ _Noreturn static void _bad_operand(String why, String operand){
 
 _Noreturn static void _bad_spec(String why, Var entry){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 52};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 54};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
     __builtin_unreachable();
   }
@@ -319,10 +320,7 @@ static _Spec _read_spec(List spec){
             _Option * option = & result.options[position];
             _read_row(option, row, result.index, position);
             Var earlier;
-            if(Map_try_get(result.index, String_var(option -> name), &(earlier))){
-              result.options[Var_integer(earlier)].shared_name = 1;
-              option -> shared_name = 1;
-            }
+            option -> owner = Map_try_get(result.index, String_var(option -> name), &(earlier)) ? result.options[Var_integer(earlier)].owner : option;
             Map_setindex(result.index, String_var(option -> name), int_var(position));
             position ++;
           }
@@ -352,22 +350,19 @@ static _Option * _find(_Spec * spec, String spelling){
   return & spec -> options[Var_integer(position)];
 }
 
-Var Map_getindex(Map, Var);
-
-List List_append(List, List);
-
 Array Array_new(void);
 
 Var Array_push(Array, Var);
 
 static void _store(_Option * option, Map result, Var value){
-  if(option -> repeated && option -> shared_name){
-    List earlier = option -> given ? Var_list(Map_getindex(result, String_var(option -> name))) : NULL;
-    Map_setindex(result, String_var(option -> name), List_var(List_append(earlier, cons(value, NULL))));
+  _Option * owner = option -> owner;
+  if(! option -> repeated || ! option -> given){
+    Array_free(owner -> collected);
+    owner -> collected = NULL;
   }
-  else if(option -> repeated){
-    if(! option -> given) option -> collected = Array_new();
-    Array_push(option -> collected, value);
+  if(option -> repeated){
+    if(! Array_truth(owner -> collected)) owner -> collected = Array_new();
+    Array_push(owner -> collected, value);
   }
   else if(String_truth(option -> value) || option -> operand) Map_setindex(result, String_var(option -> name), value);
   else Map_setindex(result, String_var(option -> name), int_var(option -> given + 1));
@@ -488,7 +483,7 @@ Map Args_parse(List args, List spec){
               _assign_operands(& parsed, result, remaining);
               for(int i = 0;  i < parsed.count;  i ++){
                 _Option * option = & parsed.options[i];
-                if(option -> repeated && option -> given && ! option -> shared_name){
+                if(Array_truth(option -> collected)){
                   List collected = Array_list(option -> collected);
                   Map_setindex(result, String_var(option -> name), List_var(collected));
                 }

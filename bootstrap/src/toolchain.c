@@ -269,7 +269,7 @@ static String _tool(String explicit, String name, String fallback){
   return String_truth(value) ? value : fallback;
 }
 
-String x2c_home(void);
+String home_dir(void);
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 
@@ -304,7 +304,7 @@ int String_startswith(String, String);
 String String_remove_prefix(String, String);
 
 static String _recorded_tool(String name){
-  String home = x2c_home();
+  String home = home_dir();
   String volatile record = NULL;
   if(! String_truth(home)) return NULL;
   {
@@ -361,7 +361,7 @@ static String _recorded_tool(String name){
   return NULL;
 }
 
-String x2c_stage_dir(void);
+String stage_dir(void);
 
 String x2c_get_executable(void);
 
@@ -370,7 +370,7 @@ Path Path_dirname(Path);
 int Path_is_file(Path);
 
 static void Toolchain__layout(Toolchain t){
-  String home = x2c_home(), stage = x2c_stage_dir();
+  String home = home_dir(), stage = stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if(! String_truth(prefix)) prefix = Path_dirname(String_truth(executable) ? Path_dirname(executable) : _111);
   t -> include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_3), NULL)));
@@ -641,10 +641,10 @@ static int _keeps_system_includes(String cc){
   return tool_capture(probe, &(output), &(errors)) == 0 ? 1 : - 1;
 }
 
-List x2c_cpp_include_dirs(void);
+List cpp_include_dirs(void);
 
 static List Toolchain__cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source){
-  return cons(String_var(t -> cc), cons(_20, cons(_57, cons(_44, cons(_46, cons(_59, cons(_61, cons(_63, cons(_65, cons(_67, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, cons(_87, List_append(t -> keep_system_includes > 0 ? _88 : NULL, cons(_90, cons(_92, List_append(_includes(x2c_cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_94, cons(String_var(macros), NULL)) : NULL, cons(_8, cons(_12, cons(String_var(depfile), cons(_14, cons(_96, cons(String_var(source), NULL)))))))))))))))))))))))))))))))));
+  return cons(String_var(t -> cc), cons(_20, cons(_57, cons(_44, cons(_46, cons(_59, cons(_61, cons(_63, cons(_65, cons(_67, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, cons(_87, List_append(t -> keep_system_includes > 0 ? _88 : NULL, cons(_90, cons(_92, List_append(_includes(cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_94, cons(String_var(macros), NULL)) : NULL, cons(_8, cons(_12, cons(String_var(depfile), cons(_14, cons(_96, cons(String_var(source), NULL)))))))))))))))))))))))))))))))));
 }
 
 static List _includes(List directories){
