@@ -396,19 +396,24 @@ void worker_exit(int status) {
 int worker_wait_any(long *pids, int count, int &status) {
   loop {
     for (int i = 0; i < count; i++) {
-      int raw;
+      int raw, signal;
       pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
       if (!done || (done < 0 && errno == EINTR)) continue;
-      status = done < 0 ? -1 : _shell_status(raw);
+      status = done < 0 ? -1 : shell_status(raw, signal);
       return i;
     }
     usleep(1000);
   }
 }
 
-static int _shell_status(int raw) {
+/** Decodes the wait status `raw` of a child that has ended. Returns its
+    exit status, `128 + signal` when a signal ended it, or -1 otherwise,
+    and stores that signal in `signal`, or 0 when no signal ended it.
+*/
+int shell_status(int raw, int &signal) {
+  signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
   if (WIFEXITED(raw)) return WEXITSTATUS(raw);
-  return WIFSIGNALED(raw) ? 128 + WTERMSIG(raw) : -1;
+  return signal ? 128 + signal : -1;
 }
 
 // driver errors

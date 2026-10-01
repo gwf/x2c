@@ -15,6 +15,7 @@ System utilities for environment discovery and workers.
 | [`build_module_stamp`](#build_module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`file_lock`](#file_lock) | Locks the file `p`, creating it, and returns a descriptor that holds the lock until it is closed or the process exits. |
 | [`file_publish`](#file_publish) | Replaces each file named in `outputs`, a List of alternating paths and texts. |
+| [`shell_status`](#shell_status) | Decodes the wait status `raw` of a child that has ended. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait_any`](#worker_wait_any) | Waits until one of the `count` workers in `pids` exits and returns its index, storing its shell-style status: the exit status, `128 + signal`, or -1 when it cannot be waited. |
@@ -79,6 +80,16 @@ destinations replaced.
 **Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
 Source: `src/utils.x:354`
+
+#### shell_status
+
+`int shell_status(int raw, int &signal)`
+
+Decodes the wait status `raw` of a child that has ended. Returns its
+exit status, `128 + signal` when a signal ended it, or -1 otherwise,
+and stores that signal in `signal`, or 0 when no signal ended it.
+
+Source: `src/utils.x:413`
 
 #### worker_exit
 
@@ -153,7 +164,7 @@ The streams are flushed and `atexit` handlers do not run, so the call is
 safe inside a `try` body or a catch arm, whose records those handlers
 would otherwise find still live.
 
-Source: `src/utils.x:421`
+Source: `src/utils.x:426`
 
 #### x2c_file_identity
 
@@ -248,7 +259,7 @@ Source: `src/utils.x:166`
 Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
 as its operation, path or program, and system reason.
 
-Source: `src/utils.x:430`
+Source: `src/utils.x:435`
 
 #### x2c_initialize_command_environment
 

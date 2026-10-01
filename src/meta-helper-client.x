@@ -234,9 +234,8 @@ static int _helper_stop(int signal) {
    that stopped it, which is also how a body that overflows the stack
    ends. */
 static String _helper_ending(void) {
-  int status = _helper_stop(0), code = WEXITSTATUS(status);
-  if (!WIFSIGNALED(status)) return %"the body exited with status $code";
-  int signal = WTERMSIG(status);
+  int signal, code = shell_status(_helper_stop(0), signal);
+  if (!signal) return %"the body exited with status $code";
   String name = String.new(strsignal(signal));
   return %"the body crashed or overflowed the stack (signal $signal: $name)";
 }

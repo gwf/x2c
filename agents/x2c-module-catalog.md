@@ -551,7 +551,7 @@ Public functions:
 `x2c_package_entry`, `x2c_package_source`, `x2c_compiler_identity`,
 `build_module_stamp`, `x2c_file_identity`, `x2c_fnv_file`, `x2c_fnv_bytes`,
 `x2c_filename_hash`, `file_lock`, `file_publish`, `worker_fork`, `worker_exit`,
-`worker_wait_any`, `x2c_driver_error`, `x2c_host_error`
+`worker_wait_any`, `shell_status`, `x2c_driver_error`, `x2c_host_error`
 
 ## Runtime modules
 
