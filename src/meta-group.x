@@ -2,12 +2,11 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    A bodied `meta` function a project defines runs as native code in the
+    A bodied `meta` function a project defines runs as native code: in the
     project's helper program, which the project meta build compiles from
-    each unit's `meta` group before translation (`meta-project.x`). This
-    file owns that group: what it reaches, its emission through the
-    ordinary backend, and the files the project meta build reads. It also
-    stages a session's group in process as a native module.
+    each unit's `meta` group before translation (`meta-project.x`), or in a
+    native module that a session stages in process. This module owns the
+    group, from the functions it holds to the C it emits.
 */
 #pragma once
 #include "compiler.x"
@@ -172,9 +171,9 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
    borrows the unit's bindings and types and leaves the unit as it found
    it: generated names, literal caches, helpers, initializers, and semantic
    rows are its own. */
-static List _code(
+static List Compiler._emit(
   Compiler c, String stamp, String stem, String suffix, String &failure) {
-  Array units = _units(c);
+  Array units = c._units();
   /* The backend reads more of the unit's compiler than a child from
      `Compiler.new_shared` inherits, such as its tokenizer, runtime header
      and literal policy, init names, origin, and Lisp session, so the
@@ -182,10 +181,10 @@ static List _code(
   struct Compiler saved = *c;
   struct GenNames names = *c.names;
   SymTxn transaction = c.begin_semantic_transaction();
-  _isolate(c, saved, names, stem);
+  c._isolate(saved, names, stem);
   List code = NULL;
   try {
-    List lowered = _lower(c, units, stamp, suffix);
+    List lowered = c._lower(units, stamp, suffix);
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
     List ast = c.transform(lowered);
@@ -205,7 +204,7 @@ static List _code(
 /* Gives the emission its own copies of the state it adds to, taken from
    the unit's `saved` compiler and `names`, and fresh state where it starts
    from nothing, so restoring those undoes the emission. */
-static void _isolate(
+static void Compiler._isolate(
   Compiler c, struct Compiler &saved, struct GenNames &names, String stem) {
   with c {
     _.names.adapters = names.adapters.copy();
@@ -238,34 +237,35 @@ static void _isolate(
    a call of `x2c_template_call`, which is declared after the leading
    directives; a meta build's native calls go through their modules; and
    the entry follows. */
-static List _lower(Compiler c, Array units, String stamp, String suffix) {
+static List Compiler._lower(
+  Compiler c, Array units, String stamp, String suffix) {
   List binding = c.sym.introduce("x2c_template_call");
   Type type = %((func (("Var") ("List"))) "List");
   List callee = %(expr $type (ident $binding));
   for (int i = 0; i < (int) units.len(); i++)
-    units[i] = _template_calls(c, units[i], callee);
-  if (c.meta_build) _native_lookups(c, units);
+    units[i] = c._template_calls(units[i], callee);
+  if (c.meta_build) c._native_lookups(units);
   int after = _after_directives(units);
   units.insert(
     after,
     %(declare ("List") (bindings (bind $binding
       ((fnmod (params (param ("Var") (bind () ()))
                       (param ("List") (bind () ())))))))));
-  Map initials = _initial_copies(c, units);
-  foreach (Var unit, _entry(c, stamp, initials, suffix)) units.push(unit);
+  Map initials = c._initial_copies(units);
+  foreach (Var unit, c._entry(stamp, initials, suffix)) units.push(unit);
   return units.list_free();
 }
 
 /* A meta build calls a native module's function through the address
    `x2c_meta_native_symbol` finds in the module. */
-static void _native_lookups(Compiler c, Array units) {
+static void Compiler._native_lookups(Compiler c, Array units) {
   Type lookup_type = %((func (("String") ("String"))) * void);
   List lookup_binding = c.sym.introduce("x2c_meta_native_symbol");
   List lookup = %(expr $lookup_type (ident $lookup_binding));
   List (base, mods) = lookup_type.declaration_parts();
   units.push(%(declare $base (bindings (bind $lookup_binding $mods))));
   for (int i = 0; i < (int) units.len(); i++)
-    units[i] = _native_targets(c, units[i], lookup);
+    units[i] = c._native_targets(units[i], lookup);
 }
 
 static int _after_directives(Array units) {
@@ -282,11 +282,11 @@ static int _after_directives(Array units) {
    every directive and declaration, the imported `meta` definitions where
    their import stands, each function the group reaches, and the group's
    compile-time-only functions, which the unit itself never emits. */
-static Array _units(Compiler c) {
+static Array Compiler._units(Compiler c) {
   String lib = %"${x2c_get_root()}/lib/";
-  Array ordered = _runtime_includes(c, lib);
-  _source_order(c, ordered, lib);
-  Map reached = _roots(c, ordered);
+  Array ordered = c._runtime_includes(lib);
+  c._source_order(ordered, lib);
+  Map reached = c._roots(ordered);
   _close(ordered, reached);
   return _reachable(ordered, reached);
 }
@@ -295,7 +295,7 @@ static Array _units(Compiler c) {
    name any of it, so the group includes each runtime unit the translation
    read, and the prelude and the compile-time surface when a collection
    pass has read none. */
-static Array _runtime_includes(Compiler c, String lib) {
+static Array Compiler._runtime_includes(Compiler c, String lib) {
   Array ordered = [];
   foreach (String header, %("x2c.x" "meta.x"))
     ordered.push(%(preproc ${%"#include \"$header\""}));
@@ -313,11 +313,11 @@ static Array _runtime_includes(Compiler c, String lib) {
    definitions where the import stands, then the imports' remaining
    definitions. Collection parses no bodies, so its group holds only
    imports. */
-static void _source_order(Compiler c, Array ordered, String lib) {
-  Map placeholders = _placeholders(c);
+static void Compiler._source_order(Compiler c, Array ordered, String lib) {
+  Map placeholders = c._placeholders();
   int flushed = 0, count = c.unit_nodes ? c.unit_nodes.len() : 0;
   for (int i = 0; i <= count; i++) {
-    _imports_at(c, ordered, i, flushed);
+    c._imports_at(ordered, i, flushed);
     if (i < count && !_local_include(c.unit_nodes[i], lib))
       ordered.push(_uninitialized(c.unit_nodes[i], placeholders));
   }
@@ -327,7 +327,7 @@ static void _source_order(Compiler c, Array ordered, String lib) {
 
 /* The values the project meta build's parse put in place of calls left for
    the translation, by address. */
-static Map _placeholders(Compiler c) {
+static Map Compiler._placeholders(Compiler c) {
   Map placeholders = {};
   foreach (List entry, c.meta_group)
     match (entry) case %(later ?(List placeholder)):
@@ -337,7 +337,8 @@ static Map _placeholders(Compiler c) {
 
 /* Appends the imported definitions of each import that stands before unit
    node `i`; `flushed` counts the definitions appended so far. */
-static void _imports_at(Compiler c, Array ordered, int i, int &flushed) {
+static void Compiler._imports_at(
+  Compiler c, Array ordered, int i, int &flushed) {
   foreach (List entry, c.meta_group)
     match (entry)
       case %(import ?(int at) ?(int end)):
@@ -386,7 +387,7 @@ static int _holds(Var node, Map placeholders) {
 /* What the group reaches before following function bodies: each group
    function and what it names, and what every other definition names. A
    group function the unit's definitions lack joins them. */
-static Map _roots(Compiler c, Array ordered) {
+static Map Compiler._roots(Compiler c, Array ordered) {
   Map present = {}, reached = {};
   Var identity, String name;
   foreach (List item, ordered)
@@ -453,27 +454,27 @@ static int _function_identity(List fn, Var &identity, String &name) {
 
 /* `node` with each template call replaced by a call of `x2c_template_call`,
    named by `callee`, on its template and its arguments as Vars. */
-static Var _template_calls(Compiler c, Var node, List callee) {
+static Var Compiler._template_calls(Compiler c, Var node, List callee) {
   if (node is not <list>) return node;
   match (node)
     case %(expr ?type (tpl-call ?stored (args *arguments))): {
       List values = %(nil);
       foreach (Var argument, arguments.reverse())
         values = %(expr ("List") (cons ${c.convert_expression(
-          _template_calls(c, argument, callee), %("Var"))} $values));
+          c._template_calls(argument, callee), %("Var"))} $values));
       List template = stored is <list>
         ? c.convert_expression(c.cache_literal_list(stored), %("Var"))
         : %(expr ("Var") ${c.cache_literal_var(stored.str())});
       return %(expr $type (call $callee (args $template $values)));
     }
   List child;
-  $ast.rewrite_children(node, child, _template_calls(c, child, callee));
+  $ast.rewrite_children(node, child, c._template_calls(child, callee));
 }
 
 /* `node` with each use of a native module's function made through the
    address `lookup` finds in that module. A native module's C target lives
    in the module, not in the helper. */
-static Var _native_targets(Compiler c, Var node, List lookup) {
+static Var Compiler._native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
     case %(expr ?(Type result) ${$source_call_content($called,
@@ -481,25 +482,25 @@ static Var _native_targets(Compiler c, Var node, List lookup) {
             %((binding ? ?name)))})), %(*arguments))}): {
       if (name is not <string>) break;
       String spelling = name;
-      List call = _native_call(c, callee, spelling, arguments, lookup);
+      List call = c._native_call(callee, spelling, arguments, lookup);
       if (call) return c.convert_expression(call, result);
     }
     case %(expr ?(Type type) ${$source_identifier_content(
         %((binding ? ?name)))}): {
       if (name is not <string>) break;
       String spelling = name;
-      List symbol = _native_symbol(c, type, spelling, lookup);
+      List symbol = c._native_symbol(type, spelling, lookup);
       if (symbol) return symbol;
     }
   }
   List child;
-  $ast.rewrite_children(node, child, _native_targets(c, child, lookup));
+  $ast.rewrite_children(node, child, c._native_targets(child, lookup));
 }
 
 /* A call of the native function `callee`, or NULL when no native module
    supplies it. A Func argument the module takes as a Var is passed boxed.
 */
-static List _native_call(
+static List Compiler._native_call(
   Compiler c, Var callee, String name, List arguments, List lookup) {
   Type native = NULL;
   if (!(name in c.native_meta) || !c.native_meta_module(name, native))
@@ -509,22 +510,22 @@ static List _native_call(
                    .cadr();
   List parameters = native.car().list().cadr();
   foreach (List argument, arguments) {
-    argument = _native_targets(c, argument, lookup);
-    if (_boxes_func(c, declared.car(), parameters.car()))
+    argument = c._native_targets(argument, lookup);
+    if (c._boxes_func(declared.car(), parameters.car()))
       argument = c.convert_expression(
         c.convert_expression(argument, %("Func")), %("Var"));
     values.push(argument);
     declared = declared.cdr();
     parameters = parameters.cdr();
   }
-  List target = _native_targets(c, callee, lookup);
+  List target = c._native_targets(callee, lookup);
   return c.resolve_expression(
     %(expr () (call $target (args @{values.list_free()}))), NULL);
 }
 
 /* Whether the compiler declares a parameter `Func` that the native module
    declares `Var`. */
-static int _boxes_func(Compiler c, List declared, List parameter) =>
+static int Compiler._boxes_func(Compiler c, List declared, List parameter) =>
   c.sym.normalize_declared_type(declared).equal(
     c.sym.normalize_declared_type(%("Func"))) &&
   c.sym.normalize_declared_type(parameter).equal(
@@ -533,7 +534,8 @@ static int _boxes_func(Compiler c, List declared, List parameter) =>
 /* The native function `name` of `type` read through its module's address,
    or NULL when no native module supplies it. The read keeps the function
    type of the module that supplied the compiler's binding. */
-static List _native_symbol(Compiler c, Type type, String name, List lookup) {
+static List Compiler._native_symbol(
+  Compiler c, Type type, String name, List lookup) {
   if (!type.is_function() || !(name in c.native_meta)) return NULL;
   String module = c.native_meta_module(name, type);
   if (!module) return NULL;
@@ -552,7 +554,7 @@ static List _native_symbol(Compiler c, Type type, String name, List lookup) {
    unchanging copy that `x2c_module_reset` assigns from. Replaces those
    declarations in `units` and returns each copy's expression by the
    static's binding. */
-static Map _initial_copies(Compiler c, Array units) {
+static Map Compiler._initial_copies(Compiler c, Array units) {
   Map copies = {};
   foreach (List entry, c.meta_group)
     match (entry)
@@ -587,11 +589,12 @@ static int _braced(Var node) {
    group function and of the reset entry to a `Func` that calls it. The
    exported names end in `suffix`, so several groups link into one
    program. */
-static List _entry(Compiler c, String stamp, Map initials, String suffix) {
-  List resets = _resets(c, initials);
-  List reset = _entry_function(
-    c, %(void), %"x2c_module_reset$suffix", %(block @resets));
-  List table = _targets(c, _named(c, reset));
+static List Compiler._entry(
+  Compiler c, String stamp, Map initials, String suffix) {
+  List resets = c._resets(initials);
+  List reset = c._entry_function(
+    %(void), %"x2c_module_reset$suffix", %(block @resets));
+  List table = c._targets(c._named(reset));
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
   return %(
@@ -599,14 +602,14 @@ static List _entry(Compiler c, String stamp, Map initials, String suffix) {
       (bindings (op = (bind $stamp_binding ((dim)))
                      (expr (* char) (literal (* char) $literal)))))
     $reset
-    ${_entry_function(
-      c, %("Map"), %"x2c_module_targets$suffix",
+    ${c._entry_function(
+      %("Map"), %"x2c_module_targets$suffix",
       %(block (return ("Map") $table)))});
 }
 
 /* An assignment of each mutable `meta static` value's initializer, or of
    the unchanging copy `initials` holds for a braced one. */
-static List _resets(Compiler c, Map initials) {
+static List Compiler._resets(Compiler c, Map initials) {
   Array resets = [];
   foreach (List entry, c.meta_group)
     match (entry)
@@ -626,7 +629,7 @@ static List _resets(Compiler c, Map initials) {
 }
 
 /* The reset entry and each group function as `(name binding type)`. */
-static List _named(Compiler c, List reset) {
+static List Compiler._named(Compiler c, List reset) {
   List named = %(("x2c_module_reset" ${reset.caddr().cadr()}
                   ((func ((void))) void)));
   foreach (List entry, c.meta_group)
@@ -638,7 +641,7 @@ static List _named(Compiler c, List reset) {
 /* The Map `x2c_module_targets` returns, with a Func for each of `named`.
    A function whose values have no Var form, such as C's `bool` or a
    record pointer, is called only from other group code. */
-static List _targets(Compiler c, List named) {
+static List Compiler._targets(Compiler c, List named) {
   Array targets = [];
   int count = 0;
   foreach (List row, named) {
@@ -659,7 +662,7 @@ static List _targets(Compiler c, List named) {
 }
 
 /* A function definition with no parameters. */
-static List _entry_function(
+static List Compiler._entry_function(
   Compiler c, List result, String name, List body) =>
   %(function $result
       (bind ${c.sym.introduce(name)}
@@ -709,10 +712,10 @@ void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
 
 /* Why the group cannot link, or NULL: a function it calls is a bodyless
    `meta` prototype that nothing supplies. */
-static String _unbound(Compiler c) {
+static String Compiler._unbound(Compiler c) {
   foreach (List entry, c.meta_group)
     match (entry) case %(function ?fn *): {
-      String name = _unbound_callee(c, fn);
+      String name = c._unbound_callee(fn);
       if (name) return %"no binding for $name";
     }
   return NULL;
@@ -720,7 +723,7 @@ static String _unbound(Compiler c) {
 
 /* The first name `node` reads that is a bodyless `meta` prototype nothing
    supplies, or NULL. */
-static String _unbound_callee(Compiler c, Var node) {
+static String Compiler._unbound_callee(Compiler c, Var node) {
   if (node is not <list>) return NULL;
   Var bound;
   match (node) case $source_identifier_content(%((binding ? ?name))): {
@@ -733,7 +736,7 @@ static String _unbound_callee(Compiler c, Var node) {
             !c.bind_native_meta(spelling)) ? spelling : NULL;
   }
   foreach (Var child, (List) node) {
-    String name = _unbound_callee(c, child);
+    String name = c._unbound_callee(child);
     if (name) return name;
   }
   return NULL;
@@ -760,9 +763,9 @@ void Compiler.write_meta_build(Compiler c) {
     match (entry) case %(function *): functions++;
   if (!functions || !meta_build_directory) return;
   String base = %"$meta_build_directory/group-$index";
-  String failure = _unbound(c);
-  List code = failure ? NULL : _code(
-    c, build_module_stamp(), %"meta_group_$index", %"_$index", failure);
+  String failure = c._unbound();
+  List code = failure ? NULL : c._emit(
+    build_module_stamp(), %"meta_group_$index", %"_$index", failure);
   Array sources = [];
   foreach (Var (path, _), c.deps) sources.push(path);
   Path.write_text(%"$base.deps", "\n".join(sources.list_free()));
@@ -794,8 +797,8 @@ void Compiler.bind_meta_group(Compiler c, String name, Token site) {
    group function in the session not yet bound. Returns the loaded module,
    or NULL with `failure` set when the group does not stage. */
 static String Compiler._stage(Compiler c, String &failure) {
-  failure = c.groups_meta() ? _unbound(c) : "native modules are unavailable";
-  String module = failure ? NULL : _module(c, failure);
+  failure = c.groups_meta() ? c._unbound() : "native modules are unavailable";
+  String module = failure ? NULL : c._module(failure);
   if (!module) return NULL;
   module = Compiler.load_native_module(module);
   Map targets = Compiler.native_module_targets(module);
@@ -821,13 +824,13 @@ static String Compiler._stage(Compiler c, String &failure) {
    runtime headers' directory: one an earlier submission built, or else a
    new build. Returns its path, or NULL with `failure` set when there is no
    cache or the group does not build. */
-static String _module(Compiler c, String &failure) {
+static String Compiler._module(Compiler c, String &failure) {
   String root = script_cache_root(), stamp = build_module_stamp();
   if (!root || !stamp) {
     failure = "native modules need a cache directory and a known compiler";
     return NULL;
   }
-  List code = _code(c, stamp, "group", "", failure);
+  List code = c._emit(stamp, "group", "", failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
   String key = String.sha256(
