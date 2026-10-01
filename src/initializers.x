@@ -29,17 +29,6 @@ List Compiler.convert_initializer(
   Compiler c, List value, Type type, List target) =>
   c._convert_initializer(value, type, target, NULL);
 
-/** Keeps a compound literal's native type definition at its original scope. */
-List Compiler.convert_compound_literal(
-  Compiler c, List value, Type type, Type native_type) {
-  (Type definition, Type reference) = c.initializer_native_types(native_type);
-  List target = _zero_pointer_target(type, reference);
-  int native_used = 0;
-  List converted = c._convert_initializer(value, type, target, native_used);
-  if (!native_used) definition = native_type;
-  return %(cast $definition $converted);
-}
-
 static List Compiler._convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
   if (value.match(%(expr ? (composite ?))))
@@ -135,72 +124,6 @@ static List _composite_excess_check(List parent_condition) {
     (expr $array (composite (commas $zero)))));
   List count = %(expr (unsigned) (sizeof (parens $probe)));
   return %(expr (int) (op + $one (expr (int) (op * $zero $count))));
-}
-
-// compound literal layout
-
-/** Returns native definition/reference types for a compound literal.
-    Macro expansion stays in the original cast; named tags let later sizeof
-    expressions reuse that exact layout without a new scope. */
-List Compiler.initializer_native_types(Compiler c, Type type) {
-  Type base = type.base_type(), definition = base, reference = base;
-  match (base) {
-    case %((!set ?kind (!or struct union)) (gensym ? ?) ?body): {
-      String name = c.fresh_name("initializer_type");
-      definition = %($kind $name $body);
-      reference = %($kind $name);
-    }
-    case %((!set ?kind (!or struct union)) (!set ?body (fields *))): {
-      String name = c.fresh_name("initializer_type");
-      definition = %($kind $name $body);
-      reference = %($kind $name);
-    }
-    case %((!set ?kind (!or struct union)) ?name (fields *)):
-      reference = %($kind $name);
-  }
-  Array definitions = [], references = [];
-  for (List rest = type; rest !== base; rest = rest.cdr()) {
-    Var reused = NULL;
-    Var modifier = c._native_modifier(rest.car(), reused);
-    definitions.push(modifier);
-    references.push(reused);
-  }
-  definition = definitions.list_free().append(definition);
-  reference = references.list_free().append(reference);
-  return %($definition $reference);
-}
-
-static Var Compiler._native_modifier(Compiler c, Var modifier, Var &reused) {
-  reused = modifier;
-  match (modifier)
-    case %(dim ?dimension): {
-      List bound = dimension;
-      unsigned long long count;
-      int captured = 0;
-      match (bound)
-        case %(expr ? ${$source_content_pattern(
-          $sizeof_grouped, %(?argument))}):
-          match (argument)
-            case %(struct ?name (fields
-              (declare (char) (bindings (bind ? ((dim ?))))))): {
-              List prior = %(expr (unsigned long)
-                (sizeof (parens (struct $name))));
-              reused = %(dim $prior);
-              captured = 1;
-            }
-      if (bound && !captured && !_initializer_integer(bound, count)) {
-        String name = c.fresh_name("initializer_bound");
-        Type bytes = %((dim $bound) char);
-        List field = bytes.declaration_ast(%("bytes"));
-        Type declared = %(struct $name (fields $field));
-        List size = %(expr (unsigned long) (sizeof (parens $declared)));
-        List prior = %(expr (unsigned long)
-          (sizeof (parens (struct $name))));
-        modifier = %(dim $size);
-        reused = %(dim $prior);
-      }
-    }
-  return modifier;
 }
 
 // initializer rows
@@ -709,85 +632,6 @@ static void _ordinal_field(
           (expr (unsigned long long) (parens $units)))) : units;
 }
 
-// native conditions
-
-static List _initializer_and(List first, List second) {
-  if (!first) return second;
-  if (!second) return first;
-  match (second)
-    case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
-            (expr ? ${$source_content_pattern($grouped, %(?bound))})))}): {
-      unsigned long long at;
-      List base;
-      _initializer_position(index, base, at);
-      first = _initializer_drop_bound(first, bound, base, at);
-    }
-  return first ? %(expr (int) (op && (expr (int) (parens $first))
-                                    (expr (int) (parens $second)))) : second;
-}
-
-static List _initializer_drop_bound(
-  List condition, List bound, List base, unsigned long long minimum) {
-  match (condition) {
-    case %(expr ? ${$source_operator_content(
-        %(&& (expr ? ${$source_content_pattern($grouped, %(?left))})
-             (expr ? ${$source_content_pattern($grouped, %(?right))})))}):
-      return _initializer_and(
-        _initializer_drop_bound(left, bound, base, minimum),
-        _initializer_drop_bound(right, bound, base, minimum));
-    case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
-            (expr ? ${$source_content_pattern($grouped, %(?length))})))}): {
-      unsigned long long at;
-      List origin;
-      _initializer_position(index, origin, at);
-      if (length === bound && origin === base && at <= minimum) return NULL;
-    }
-  }
-  return condition;
-}
-
-/* Cursor offsets are literal facts even when their native starting index
-   is not. Keep one base-plus-offset expression instead of nested
-   increments. */
-static void _initializer_position(
-  List index, List &base, unsigned long long &offset) {
-  base = NULL;
-  if (_initializer_integer(index, offset)) return;
-  match (index)
-    case %(expr ? ${$source_operator_content(
-        %(+ (expr ? ${$source_content_pattern(
-          $grouped, %(?origin))}) ?amount))}):
-      if (_initializer_integer(amount, offset)) {
-        base = origin;
-        return;
-      }
-  base = index;
-  offset = 0;
-}
-
-// Decode only a literal fact; native expressions are never evaluated here.
-static int _initializer_integer(List expression, unsigned long long &value) {
-  String text = NULL;
-  match (expression) {
-    case %(expr ? ${$source_literal_content(%(? ?spelling))}):
-      text = spelling;
-    case %(?(String spelling)): text = spelling;
-  }
-  if (!text || text[0] < '0' || text[0] > '9') return 0;
-  char *end, *digits = text;
-  int base = 0;
-  if (text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) base = 2;
-  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O')) base = 8;
-  if (base) digits += 2;
-  unsigned long long decoded = strtoull(digits, &end, base);
-  while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
-  if (*end) return 0;
-  value = decoded;
-  return 1;
-}
-
 // row conversion
 
 typedef struct RowSelection {
@@ -1143,4 +987,160 @@ static Type Compiler._initializer_value_type(Compiler c, Type type) {
   if (c.sym.is_var_type(type)) return %("Var");
   Type scalar = c.sym.resolve_key(type).scalar();
   return scalar === %(void) ? NULL : scalar;
+}
+
+// native conditions
+
+static List _initializer_and(List first, List second) {
+  if (!first) return second;
+  if (!second) return first;
+  match (second)
+    case %(expr ? ${$source_operator_content(
+        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
+            (expr ? ${$source_content_pattern($grouped, %(?bound))})))}): {
+      unsigned long long at;
+      List base;
+      _initializer_position(index, base, at);
+      first = _initializer_drop_bound(first, bound, base, at);
+    }
+  return first ? %(expr (int) (op && (expr (int) (parens $first))
+                                    (expr (int) (parens $second)))) : second;
+}
+
+static List _initializer_drop_bound(
+  List condition, List bound, List base, unsigned long long minimum) {
+  match (condition) {
+    case %(expr ? ${$source_operator_content(
+        %(&& (expr ? ${$source_content_pattern($grouped, %(?left))})
+             (expr ? ${$source_content_pattern($grouped, %(?right))})))}):
+      return _initializer_and(
+        _initializer_drop_bound(left, bound, base, minimum),
+        _initializer_drop_bound(right, bound, base, minimum));
+    case %(expr ? ${$source_operator_content(
+        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
+            (expr ? ${$source_content_pattern($grouped, %(?length))})))}): {
+      unsigned long long at;
+      List origin;
+      _initializer_position(index, origin, at);
+      if (length === bound && origin === base && at <= minimum) return NULL;
+    }
+  }
+  return condition;
+}
+
+/* Cursor offsets are literal facts even when their native starting index
+   is not. Keep one base-plus-offset expression instead of nested
+   increments. */
+static void _initializer_position(
+  List index, List &base, unsigned long long &offset) {
+  base = NULL;
+  if (_initializer_integer(index, offset)) return;
+  match (index)
+    case %(expr ? ${$source_operator_content(
+        %(+ (expr ? ${$source_content_pattern(
+          $grouped, %(?origin))}) ?amount))}):
+      if (_initializer_integer(amount, offset)) {
+        base = origin;
+        return;
+      }
+  base = index;
+  offset = 0;
+}
+
+// Decode only a literal fact; native expressions are never evaluated here.
+static int _initializer_integer(List expression, unsigned long long &value) {
+  String text = NULL;
+  match (expression) {
+    case %(expr ? ${$source_literal_content(%(? ?spelling))}):
+      text = spelling;
+    case %(?(String spelling)): text = spelling;
+  }
+  if (!text || text[0] < '0' || text[0] > '9') return 0;
+  char *end, *digits = text;
+  int base = 0;
+  if (text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) base = 2;
+  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O')) base = 8;
+  if (base) digits += 2;
+  unsigned long long decoded = strtoull(digits, &end, base);
+  while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
+  if (*end) return 0;
+  value = decoded;
+  return 1;
+}
+
+// compound literals
+
+/** Keeps a compound literal's native type definition at its original scope. */
+List Compiler.convert_compound_literal(
+  Compiler c, List value, Type type, Type native_type) {
+  (Type definition, Type reference) = c.initializer_native_types(native_type);
+  List target = _zero_pointer_target(type, reference);
+  int native_used = 0;
+  List converted = c._convert_initializer(value, type, target, native_used);
+  if (!native_used) definition = native_type;
+  return %(cast $definition $converted);
+}
+
+/** Returns native definition/reference types for a compound literal.
+    Macro expansion stays in the original cast; named tags let later sizeof
+    expressions reuse that exact layout without a new scope. */
+List Compiler.initializer_native_types(Compiler c, Type type) {
+  Type base = type.base_type(), definition = base, reference = base;
+  match (base) {
+    case %((!set ?kind (!or struct union)) (gensym ? ?) ?body): {
+      String name = c.fresh_name("initializer_type");
+      definition = %($kind $name $body);
+      reference = %($kind $name);
+    }
+    case %((!set ?kind (!or struct union)) (!set ?body (fields *))): {
+      String name = c.fresh_name("initializer_type");
+      definition = %($kind $name $body);
+      reference = %($kind $name);
+    }
+    case %((!set ?kind (!or struct union)) ?name (fields *)):
+      reference = %($kind $name);
+  }
+  Array definitions = [], references = [];
+  for (List rest = type; rest !== base; rest = rest.cdr()) {
+    Var reused = NULL;
+    Var modifier = c._native_modifier(rest.car(), reused);
+    definitions.push(modifier);
+    references.push(reused);
+  }
+  definition = definitions.list_free().append(definition);
+  reference = references.list_free().append(reference);
+  return %($definition $reference);
+}
+
+static Var Compiler._native_modifier(Compiler c, Var modifier, Var &reused) {
+  reused = modifier;
+  match (modifier)
+    case %(dim ?dimension): {
+      List bound = dimension;
+      unsigned long long count;
+      int captured = 0;
+      match (bound)
+        case %(expr ? ${$source_content_pattern(
+          $sizeof_grouped, %(?argument))}):
+          match (argument)
+            case %(struct ?name (fields
+              (declare (char) (bindings (bind ? ((dim ?))))))): {
+              List prior = %(expr (unsigned long)
+                (sizeof (parens (struct $name))));
+              reused = %(dim $prior);
+              captured = 1;
+            }
+      if (bound && !captured && !_initializer_integer(bound, count)) {
+        String name = c.fresh_name("initializer_bound");
+        Type bytes = %((dim $bound) char);
+        List field = bytes.declaration_ast(%("bytes"));
+        Type declared = %(struct $name (fields $field));
+        List size = %(expr (unsigned long) (sizeof (parens $declared)));
+        List prior = %(expr (unsigned long)
+          (sizeof (parens (struct $name))));
+        modifier = %(dim $size);
+        reused = %(dim $prior);
+      }
+    }
+  return modifier;
 }
