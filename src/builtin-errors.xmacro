@@ -1,0 +1,86 @@
+/*  builtin-errors.xmacro -- builtin error conditions */
+
+meta static Map _builtin_error_rows(void) => {
+  "scope.arity" :
+  macro Statement() {
+    x2c_diagnostic_fail("$scope accepts zero or one destination", %());
+  },
+  "foreach.bindings" :
+  macro Statement() {
+    x2c_diagnostic_fail(
+      "foreach requires one binding or a two-name destructuring declaration",
+      %());
+  },
+  "foreach.type" :
+  macro Statement(Expr $printable) {
+    x2c_diagnostic_fail(
+      "type " + $printable.repr() + " is not iterable",
+      %("declare an Iter protocol adoption or iterate an Iter directly"));
+  },
+  "class.enum" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} cannot take an enum value " +
+      "representation: Var has no fixed tag for an enum",
+      %("give the enum a typedef and name that typedef instead"));
+  },
+  "class.ctor" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} requires an explicit constructor", %());
+  },
+  "class.comparison" :
+  macro Statement(Expr $owner) {
+    x2c_diagnostic_fail(
+      %"value class ${$owner} requires compatible equal " +
+      "and hash methods", %());
+  },
+  "class.init" :
+  macro Statement(Expr $owner, Expr $suffix) {
+    x2c_diagnostic_fail(
+      %"class ${$owner} requires void ${$owner}.init(${$owner}${$suffix}",
+      %());
+  },
+  "binding.sealed" :
+  macro Statement(Expr $group) {
+    x2c_diagnostic_fail(
+      "native Lisp binding appears after its group was installed",
+      %("group: ${$group}"));
+  },
+  "binding.duplicate" :
+  macro Statement(Expr $group, Expr $name) {
+    x2c_diagnostic_fail(
+      "duplicate native Lisp binding name",
+      %("group: ${$group}" "name: ${$name}"));
+  },
+  "binding.name" :
+  macro Statement(Expr $node) {
+    x2c_diagnostic_fail(
+      "native Lisp binding name requires a String literal",
+      %("value: ${$node.repr()}"));
+  },
+  "binding.group" :
+  macro Statement(Expr $group) {
+    x2c_diagnostic_fail(
+      "unknown native Lisp binding group", %("group: ${$group}"));
+  },
+  "try.cleanup" :
+  macro Statement() {
+    x2c_diagnostic_fail("try cleanup must be lowered statements", %());
+  },
+};
+
+meta static List _builtin_error_expand(String key, List arguments) {
+  Map rows = _builtin_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown builtin error '$key'", %());
+  Macro selected = row;
+  if (arguments.len() != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for builtin error '$key'", %());
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $builtin.error(Literal $key, Expr $arguments...) {
+  $(_builtin_error_expand (x2c.literal.value $key) $arguments)...
+}
