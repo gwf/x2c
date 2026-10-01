@@ -201,7 +201,7 @@ Public functions:
 `Compiler.check_explicit_converter`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
 `Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`, `Compiler.is_converter_call`
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/format.x](../src/format.x)
 

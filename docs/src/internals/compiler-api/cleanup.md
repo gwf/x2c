@@ -33,7 +33,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`, then `$catch_none` when no arm can
 fall out; `$catch_landing` calls this in a slot.
 
-Source: `src/cleanup.x:774`
+Source: `src/cleanup.x:801`
 
 #### builtin_catch_patterns
 
@@ -42,7 +42,7 @@ Source: `src/cleanup.x:774`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/cleanup.x:742`
+Source: `src/cleanup.x:769`
 
 #### builtin_defer_captures
 
@@ -50,7 +50,7 @@ Source: `src/cleanup.x:742`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:860`
+Source: `src/cleanup.x:887`
 
 #### builtin_defer_record
 
@@ -59,7 +59,7 @@ Source: `src/cleanup.x:860`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:851`
+Source: `src/cleanup.x:878`
 
 #### builtin_try_catch_site
 
@@ -69,7 +69,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:727`
+Source: `src/cleanup.x:754`
 
 #### builtin_try_landing
 
@@ -79,7 +79,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:754`
+Source: `src/cleanup.x:781`
 
 ### `Compiler`
 
@@ -93,7 +93,7 @@ Lowers the cleanup regions and transfers of the completed top-level
 function completion. Expressions cannot contain an unlifted function, so
 no second unit-tree traversal is needed.
 
-Source: `src/cleanup.x:56`
+Source: `src/cleanup.x:78`
 
 <a id="Compiler.lower_defer_region"></a>
 #### Compiler.lower_defer_region
@@ -104,7 +104,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1234`
+Source: `src/cleanup.x:1264`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -114,7 +114,7 @@ Source: `src/cleanup.x:1234`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1209`
+Source: `src/cleanup.x:1239`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -126,7 +126,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/cleanup.x:154`
+Source: `src/cleanup.x:178`
 
 ## Design notes
 
