@@ -33,7 +33,7 @@ static uint64_t _clone_hash(uint64_t head, uint64_t tail) {
   return value ^ (value >> 27);
 }
 
-static void CloneIndex._rehash(CloneIndex *index, size_t count) {
+static void CloneIndex._rehash(CloneIndex &index, size_t count) {
   free(index.slots);
   index.slots = calloc(count, sizeof(uint64_t));
   if (!index.slots) raise %(alloc-fail (owner "graph clones"));
@@ -47,16 +47,15 @@ static void CloneIndex._rehash(CloneIndex *index, size_t count) {
 }
 
 static uint64_t CloneIndex._cons(
-  CloneIndex *index, uint64_t head, uint64_t tail) {
+  CloneIndex &index, uint64_t head, uint64_t tail) {
   index.visits++;
   if ((index.count + 1) * 2 >= index.slot_count)
     index._rehash(index.slot_count ? index.slot_count * 2 : 1024);
   size_t slot = _clone_hash(head, tail) & (index.slot_count - 1);
   while (index.slots[slot]) {
     uint64_t id = index.slots[slot];
-    CloneCell *cell = &index.cells[id];
-    if (cell.head == head && cell.tail == tail) {
-      cell.occurrences++;
+    if (index.cells[id].head == head && index.cells[id].tail == tail) {
+      index.cells[id].occurrences++;
       return id * 2;
     }
     slot = (slot + 1) & (index.slot_count - 1);
@@ -85,7 +84,7 @@ static uint64_t CloneIndex._cons(
   return id * 2;
 }
 
-static uint64_t CloneIndex._atom(CloneIndex *index, Var value) {
+static uint64_t CloneIndex._atom(CloneIndex &index, Var value) {
   Var found;
   if (index.atoms.try_get(value, found)) return found.integer();
   if (index.atoms.len() >= INT_MAX / 2)
@@ -96,7 +95,7 @@ static uint64_t CloneIndex._atom(CloneIndex *index, Var value) {
   return id;
 }
 
-static int CloneIndex._local(CloneIndex *index, List binding) {
+static int CloneIndex._local(CloneIndex &index, List binding) {
   Map facts = index.parsed.compiler.semantic_binding_facts();
   if (!facts.contains(%(automatic $binding))) return 0;
   Var declared;
@@ -110,7 +109,7 @@ static int CloneIndex._local(CloneIndex *index, List binding) {
 /* The ordered identity stream establishes one bijection per fragment.
    This optional verification is separate from linear structural indexing. */
 static void CloneIndex._bindings(
-  CloneIndex *index, Var value, Map names, Array stream) {
+  CloneIndex &index, Var value, Map names, Array stream) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
@@ -146,14 +145,14 @@ static int _clone_root(List node) {
       tag);
 }
 
-static uint64_t CloneIndex._list(CloneIndex *index, List node, int origin) {
+static uint64_t CloneIndex._list(CloneIndex &index, List node, int origin) {
   if (!node) return 0;
   uint64_t head = index._value(node.car(), origin);
   uint64_t tail = index._list(node.cdr(), origin);
   return index._cons(head, tail);
 }
 
-static uint64_t CloneIndex._value(CloneIndex *index, Var value, int origin) {
+static uint64_t CloneIndex._value(CloneIndex &index, Var value, int origin) {
   if (index.sequence == INT_MAX)
     raise %(size-limit (owner "graph clones"));
   int start = index.sequence++;

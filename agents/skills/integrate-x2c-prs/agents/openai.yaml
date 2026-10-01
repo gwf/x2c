@@ -1,0 +1,4 @@
+interface:
+  display_name: "Integrate x2c PRs"
+  short_description: "Run the shared dev integration queue"
+  default_prompt: "Use $integrate-x2c-prs to start or resume the standing integrator, batch ready PRs targeting dev, review and publish their gated combined trees, and keep waiting for later submissions until I stop it."

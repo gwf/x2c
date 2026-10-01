@@ -38,7 +38,6 @@ static List _path_audit(void) => %(
 /* Pages whose `--flags` must be compiler options. */
 static List _flag_audit(void) => %(
   "README.md"
-  "agents/quick-start.md"
   "agents/x2c-debugging-guide.md"
   "agents/x2c-philosophy.md"
   "docs/src/guide/idioms.md"
@@ -49,7 +48,9 @@ static List _flag_audit(void) => %(
   "docs/src/reference/language.md")
 
 /* These pages also run other programs, so only lines that name x2c count. */
-static List _line_flag_audit(void) => %("docs/src/guide/scripting.md")
+static List _line_flag_audit(void) => %(
+  "agents/quick-start.md"
+  "docs/src/guide/scripting.md")
 
 static List _workflow_audit(void) => %(
   "AGENTS.md"

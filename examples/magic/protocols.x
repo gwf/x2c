@@ -1,11 +1,11 @@
 /*  protocols.x -- protocol declaration, adoption, and base defaults */
 
 
-/* A class declares the type and supplies its constructor, so each unit
-   here is one line instead of a struct, a malloc, and a field store. */
-class Meters struct { long value; } *;
-class Km struct { long value; } *;
-class Cm struct { long value; } *;
+/* Each magnitude is an ordinary record value initialized by its class
+   constructor. Protocols share the magnitude and display operations. */
+class Meters { long value; };
+class Km { long value; };
+class Cm { long value; };
 
 protocol Meters(T) {
   long T.magnitude(T);

@@ -39,7 +39,8 @@ int Guarded.init(Guarded guarded, int level) {
   return level >= 0;
 }
 class Scaled { int x; int y; };
-void Scaled.init(Scaled *scaled, int x) {
+void Scaled.init(Scaled &scaled, int x) {
+  assert(scaled.x == 0 && scaled.y == 0);
   scaled.x = x;
   scaled.y = x * 2;
 }

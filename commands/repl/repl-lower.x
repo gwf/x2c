@@ -68,7 +68,7 @@ typedef struct Lowering {
   struct LowerCleanup *pending;
   int declined, on_loop, rejected, uncallable;
   int automatic;        // the function keeps C objects in frame storage
-} *Lowering;
+} Lowering;
 
 /* A block's statements after a `defer` run as a function inside
    `C.unwind`, which runs the cleanup on every exit. The body returns the
@@ -87,7 +87,7 @@ typedef struct LowerCleanup {
 /* The struct a declared spelling names, or NULL when it names none that
    compile-time code can lay out: any complete struct the compiler sees,
    including an anonymous inline one. */
-static Type _lower_record_type(Lowering l, Type type) {
+static Type _lower_record_type(Lowering &l, Type type) {
   if (!type) return NULL;
   Type key = type.canonicalize();
   if (key.is_pointer() || key.is_array() || key.is_function()) return NULL;
@@ -103,7 +103,7 @@ static Type _lower_record_type(Lowering l, Type type) {
    native bytes laid out by `ReplLower.type_layout`. Its slot holds the
    pointer to those bytes, boxed the way native code boxes that pointer, so
    `&x` is the slot itself and a native callee receives real storage. */
-static List _lower_storage_layout(Lowering l, int id) {
+static List _lower_storage_layout(Lowering &l, int id) {
   Var layout;
   return l.cells.try_get(id, layout) && layout is <list> ? layout : NULL;
 }
@@ -111,7 +111,7 @@ static List _lower_storage_layout(Lowering l, int id) {
 /* The Var tag of a slot for an object of `layout`: the tag native code
    gives a pointer to it, or `<p48>` where the pointer has no tag of its own.
    A record's slot is its value, which is always `<p48>`; `&` retags it. */
-static Symbol _lower_pointer_tag(Lowering l, List layout) {
+static Symbol _lower_pointer_tag(Lowering &l, List layout) {
   Sym sym = l.compiler.sym;
   Symbol tag = 0, untagged = <p48>;
   match (layout) {
@@ -130,7 +130,7 @@ static Symbol _lower_pointer_tag(Lowering l, List layout) {
 }
 
 /* Zeroed automatic storage for one object of `layout`. */
-static Var _lower_new_storage(Lowering l, List layout) {
+static Var _lower_new_storage(Lowering &l, List layout) {
   (Var size) = layout.cddr();
   l.automatic = 1;
   return %(C.at (C.bytes $size) 0 (quote ${_lower_pointer_tag(l, layout)}));
@@ -140,7 +140,7 @@ static Var _lower_new_storage(Lowering l, List layout) {
    automatic storage. A record's value is copied from the bytes it names,
    unless `fresh` says its initializer just built those bytes. */
 static Var _lower_new_object(
-  Lowering l, List layout, Var value, int fresh) {
+  Lowering &l, List layout, Var value, int fresh) {
   match (layout) case %(?kind ? ?size *): {
     if (fresh && kind == <record>) return value;
     Symbol tag = _lower_pointer_tag(l, layout);
@@ -157,7 +157,7 @@ static Map _lower_scratch_map(Scope scratch) {
 }
 
 /* Generated names are unique throughout one interpreter session. */
-static Var _lower_name(Lowering l, String stem) {
+static Var _lower_name(Lowering &l, String stem) {
   int count = ++l.owner.counter;
   if (stem != "loop" && stem != "after" && stem != "static" &&
       stem != "body" && stem != "undo")
@@ -167,7 +167,7 @@ static Var _lower_name(Lowering l, String stem) {
 
 /* --- the single scan --------------------------------------------------- */
 
-static void _lower_scan_each(Lowering l, List items) {
+static void _lower_scan_each(Lowering &l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
 
@@ -221,7 +221,7 @@ static int _lower_cursor_addressed(Var form, struct LowerCursor &walk) {
   return 0;
 }
 
-static void _lower_scan_cursor_block(Lowering l, List parts) {
+static void _lower_scan_cursor_block(Lowering &l, List parts) {
   if (!parts) return;
   struct LowerCursor walk;
   match (_lower_bare(parts.last())) case %(while ?test ?body): {
@@ -253,7 +253,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts) {
    iteration path and even when its value comes from a call: the binding it
    needs is an immediately applied lambda, and the lowering puts one of those
    in the frame's own slots. */
-static void _lower_scan_op(Lowering l, List form) {
+static void _lower_scan_op(Lowering &l, List form) {
   match (form) {
     case %(op & (parens ?inner)):
       _lower_scan_op(l, %(op & $inner));
@@ -269,7 +269,7 @@ static void _lower_scan_op(Lowering l, List form) {
   }
 }
 
-static void _lower_scan_bind(Lowering l, List form) {
+static void _lower_scan_bind(Lowering &l, List form) {
   match (form) {
     /* A local C array's slot holds its native element storage. */
     case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
@@ -284,7 +284,7 @@ static void _lower_scan_bind(Lowering l, List form) {
 }
 
 static void _lower_scan_storage_binding(
-  Lowering l, Type type, Var declarator) {
+  Lowering &l, Type type, Var declarator) {
   List binding = NULL;
   match (declarator) {
     case %(op = ?bound ?): binding = bound;
@@ -309,7 +309,7 @@ static void _lower_scan_storage_binding(
     }
 }
 
-static void _lower_scan_storage_declaration(Lowering l, List form) {
+static void _lower_scan_storage_declaration(Lowering &l, List form) {
   match (form) {
     case %(declare ?type (bindings *declarators)):
       foreach (Var declarator, declarators)
@@ -322,13 +322,13 @@ static void _lower_scan_storage_declaration(Lowering l, List form) {
 /* A destructuring declaration names its targets directly rather than through
    `bind`, so this is where they join the locals. Without them a later write
    would read as file-scope state. */
-static void _lower_scan_targets(Lowering l, List targets) {
+static void _lower_scan_targets(Lowering &l, List targets) {
   foreach (List target, targets)
     match (target) case %(binding ?(int id) ?): l.locals[id] = 1;
 }
 
 /* Resolve calls only against this interpreter's environment. */
-static int _lower_known(Lowering l, String name) {
+static int _lower_known(Lowering &l, String name) {
   Var value;
   if (l.own && l.own.equal(name)) return 1;
   if (l.owner.lisp.try_get(name, value)) return 1;
@@ -338,7 +338,7 @@ static int _lower_known(Lowering l, String name) {
   return 1;
 }
 
-static void _lower_scan_callee(Lowering l, String name) {
+static void _lower_scan_callee(Lowering &l, String name) {
   if (!_lower_known(l, name)) {
     l.uncallable = 1;
     l.owner.missing = name;
@@ -350,14 +350,14 @@ static void _lower_scan_callee(Lowering l, String name) {
    this is where that callee is established, and it carries the same reach as
    a call to it would. A local of function-pointer type holds a value rather
    than naming a definition. */
-static void _lower_scan_function_value(Lowering l, List form) {
+static void _lower_scan_function_value(Lowering &l, List form) {
   match (form)
     case %(expr ((func *) *) (ident (binding ?(int id) ?(String name)))): {
       if (!l.locals.contains(id)) _lower_scan_callee(l, name);
     }
 }
 
-static void _lower_scan_call(Lowering l, List form) {
+static void _lower_scan_call(Lowering &l, List form) {
   match (form)
     case %(call (expr ((func ?params) *) ?) (args *args)):
       for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
@@ -381,7 +381,7 @@ static void _lower_scan_call(Lowering l, List form) {
 
 /* A union, or a struct with no compile-time layout, is refused here, where
    the reason is still plain. */
-static int _lower_scan_aggregate(Lowering l, List items) {
+static int _lower_scan_aggregate(Lowering &l, List items) {
   match (items) {
     case %(declare (union *) *): return 1;
     case %(declare ?type *):
@@ -395,7 +395,7 @@ static int _lower_scan_aggregate(Lowering l, List items) {
    need a memory cell, which are arrays, which ids the function declares,
    whether it uses a construct the substitution cannot carry, and whether
    every callee has a compile-time binding. */
-static void _lower_scan(Lowering l, Var form) {
+static void _lower_scan(Lowering &l, Var form) {
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
@@ -440,7 +440,7 @@ static void _lower_scan(Lowering l, Var form) {
 
 /* --- declining ---------------------------------------------------------- */
 
-static Var _lower_decline(Lowering l, String why) {
+static Var _lower_decline(Lowering &l, String why) {
   if (!l.declined) {
     l.declined = 1;
     l.owner.reason = why;
@@ -448,13 +448,13 @@ static Var _lower_decline(Lowering l, String why) {
   return void;
 }
 
-static int _lower_failed(Lowering l, Var value) =>
+static int _lower_failed(Lowering &l, Var value) =>
   l.declined || value is void;
 
 /* --- environment -------------------------------------------------------- */
 
 /* Bindings outside this function live in the session's persistent table. */
-static Var _lower_read(Lowering l, int id) {
+static Var _lower_read(Lowering &l, int id) {
   Var form;
   if (l.env.try_get(id, form)) return form;
   if (!l.locals.contains(id)) return %(C.gread $id);
@@ -464,7 +464,7 @@ static Var _lower_read(Lowering l, int id) {
 /* The value a local holds. An object in bytes is read through its slot, and
    a record reads as that address; an evaluator cell loads its Var. Every
    other slot already is the value. */
-static Var _lower_value(Lowering l, int id) {
+static Var _lower_value(Lowering &l, int id) {
   Var slot = _lower_read(l, id);
   if (_lower_failed(l, slot)) return void;
   List layout = _lower_storage_layout(l, id);
@@ -476,14 +476,14 @@ static Var _lower_value(Lowering l, int id) {
 
 /* --- literals ----------------------------------------------------------- */
 
-static Var _lower_number(Lowering l, List type, String text) {
+static Var _lower_number(Lowering &l, List type, String text) {
   Var value = ((Type) type).numeric_literal_value(text);
   if (value is not void) return value;
   return _lower_decline(l, "unreadable numeric literal");
 }
 
 /* The slot holding a local's storage. */
-static Var _lower_address(Lowering l, int id) {
+static Var _lower_address(Lowering &l, int id) {
   Var slot;
   if (!l.env.try_get(id, slot))
     return _lower_decline(l, "address of an unknown local");
@@ -493,7 +493,7 @@ static Var _lower_address(Lowering l, int id) {
 /* An object in bytes is addressed by its slot, which native code would box
    the same way; a record's slot is retagged as native code tags its pointer.
    An evaluator cell retags its raw `Var` slot. */
-static Var _lower_typed_address(Lowering l, List type, int id) {
+static Var _lower_typed_address(Lowering &l, List type, int id) {
   Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
   Var slot = void;
   List layout = NULL;
@@ -519,7 +519,7 @@ static Var _lower_typed_address(Lowering l, List type, int id) {
 
 /* An interpolated string joins its parts; each part already carries the
    conversion the type needs. */
-static Var _lower_segments(Lowering l, List parts) {
+static Var _lower_segments(Lowering &l, List parts) {
   Array values = [];
   foreach (List part, parts) {
     Var inner = part;
@@ -535,7 +535,7 @@ static Var _lower_segments(Lowering l, List parts) {
 }
 
 /* A folded constant used as a value. */
-static Var _lower_quoted(Lowering l, Var node) {
+static Var _lower_quoted(Lowering &l, Var node) {
   Var value = l.compiler.folded_constant(node);
   if (value is void) return _lower_decline(l, "a constant did not fold");
   return %(quote $value);
@@ -547,7 +547,7 @@ static Var _lower_quoted(Lowering l, Var node) {
    is read from its bytes, and a record reads as its own address; any other
    place is an evaluator cell. A field place's offset goes to the access
    itself, so reading a field is one native call. */
-static Var _lower_load(Lowering l, Type type, Var place) {
+static Var _lower_load(Lowering &l, Type type, Var place) {
   List layout = l.owner.type_layout(type);
   if (!layout) return %(C.load $place);
   if (layout.car() == <record>) return place;
@@ -559,7 +559,7 @@ static Var _lower_load(Lowering l, Type type, Var place) {
 /* Writes `value`, already converted to `type`, where a place addresses. A
    record is copied into the existing bytes, so addresses taken from it stay
    valid, as they do in C. */
-static Var _lower_poke(Lowering l, Type type, Var place, Var value) {
+static Var _lower_poke(Lowering &l, Type type, Var place, Var value) {
   List layout = l.owner.type_layout(type);
   if (!layout) return %(C.store $place $value);
   Var base = place, offset = 0;
@@ -577,7 +577,7 @@ static Type _lower_type_of(Var node) {
 /* Whether a compiler-known expression is an ordinary C object pointer, which
    compares by address alone. Function pointers and handles such as List keep
    their own Var equality. */
-static int _lower_object_pointer_type(Lowering l, Type type) {
+static int _lower_object_pointer_type(Lowering &l, Type type) {
   Type represented = NULL;
   (void) l.compiler.sym.var_tag_for_type(type, represented);
   /* A semantic handle such as List or Array owns a non-pointer Type at the
@@ -594,7 +594,7 @@ static int _lower_object_pointer_type(Lowering l, Type type) {
 
 /* The byte offset of a resolved field path from its outermost record, and
    the selected field's layout. */
-static long _lower_field_offset(Lowering l, List path, List &field_layout) {
+static long _lower_field_offset(Lowering &l, List path, List &field_layout) {
   long offset = 0;
   foreach (List frame, path.reverse()) {
     match (frame) {
@@ -619,7 +619,7 @@ static long _lower_field_offset(Lowering l, List path, List &field_layout) {
 /* The typed pointer to one field. `a.f` offsets the address `a` reads as,
    and `p->f` offsets the pointer `p`. */
 static Var _lower_field_place(
-  Lowering l, Symbol access, Var receiver, List field) {
+  Lowering &l, Symbol access, Var receiver, List field) {
   Type owner = _lower_type_of(receiver);
   if (access == <"->">) {
     Type pointer = l.compiler.sym.resolve_key(owner);
@@ -643,7 +643,7 @@ static Var _lower_field_place(
 
 /* One owner for addressable x2c places. A substitution-only scalar returns
    void and continues through the existing SSA-style local path. */
-static Var _lower_place(Lowering l, Var target) {
+static Var _lower_place(Lowering &l, Var target) {
   match (target) {
     case %(parens ?inner): return _lower_place(l, inner);
     case %(expr ? (parens ?inner)): return _lower_place(l, inner);
@@ -683,7 +683,7 @@ static Var _lower_place(Lowering l, Var target) {
    widens - so this pass names a tag and performs no arithmetic of its own.
    A type with no scalar tag, a pointer or a library type, keeps its value.
    A bool is the exception: C converts any nonzero value to 1. */
-static Var _lower_to_type(Lowering l, Type want, Var value) {
+static Var _lower_to_type(Lowering &l, Type want, Var value) {
   if (_lower_bool_type(l.compiler.sym, want)) return %(C.bool $value);
   Type resolved = l.compiler.sym.resolve_numeric_type(want);
   Symbol tag = resolved ? resolved.scalar_tag() : 0;
@@ -702,7 +702,7 @@ static List _lower_param_type(List params) {
 }
 
 static List _lower_args(
-  Lowering l, List params, List args, String callee_name) {
+  Lowering &l, List params, List args, String callee_name) {
   Array values = $auto([]);
   for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
@@ -738,7 +738,7 @@ static List _lower_args(
    the lowered code pays a lookup and nothing more. Its type carries the
    parameter types the arguments have to reach, and carries none where the
    compiler constructed the call itself. */
-static Var _lower_call(Lowering l, List callee, String name, List args) {
+static Var _lower_call(Lowering &l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
   List values = _lower_args(l, params, args, name);
@@ -752,7 +752,7 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
    same name may be a lowered Lisp function in another unit, which takes the
    addresses directly, so the choice is made when the call runs. */
 static Var _lower_native_call(
-  Lowering l, List callee, String name, List args) {
+  Lowering &l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
   int references = 0;
@@ -787,7 +787,7 @@ static Var _lower_native_call(
 
 /* Prepare native carriers in source order, then dispatch through Func.apply.
    Each branch evaluates just the value or just the address. */
-static Var _lower_application(Lowering l, Var content) {
+static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
   if (!parts) return _lower_decline(l, "not a dynamic Func call");
   Var callee = _lower_expr(l, parts.car());
@@ -826,7 +826,7 @@ static Var _lower_application(Lowering l, Var content) {
 
 /* The compiler-generated adapter calls the same readers as its native peer.
    Its two arguments are the Func and the borrowed FuncArg array. */
-static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
+static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   List signature = l.compiler.func_signature(type), params = NULL;
   Type result = NULL;
   match (signature) case %((func ?parameters) *returned): {
@@ -876,7 +876,7 @@ static int _lower_relation(Var operator) =>
 
 /* The C scalar type a value of `type` has in arithmetic, or NULL. A bool or
    enum value is the int C promotes it to. */
-static Type _lower_numeric_type(Lowering l, Type type) {
+static Type _lower_numeric_type(Lowering &l, Type type) {
   Type numeric = type ? l.compiler.sym.resolve_numeric_type(type) : NULL;
   if (numeric && numeric.scalar_tag()) return numeric;
   if ((numeric && numeric.is_enum()) ||
@@ -887,7 +887,7 @@ static Type _lower_numeric_type(Lowering l, Type type) {
 
 /* Whether two operands are scalars of different families. An equal pair,
    which is nearly every pair, needs no conversion and is left alone. */
-static int _lower_mixed_scalars(Lowering l, List operands) {
+static int _lower_mixed_scalars(Lowering &l, List operands) {
   if (operands.len() != 2) return 0;
   Type left = _lower_numeric_type(l, _lower_type_of(operands.car()));
   Type right = _lower_numeric_type(l, _lower_type_of(operands.cadr()));
@@ -906,7 +906,7 @@ static int _lower_null_constant(Var operand) {
 
 /* Two object pointers, or one and a null pointer constant, compare by
    address as C compares them. */
-static int _lower_object_pointer_operands(Lowering l, List operands) {
+static int _lower_object_pointer_operands(Lowering &l, List operands) {
   if (operands.len() != 2) return 0;
   Var left = operands.car(), right = operands.cadr();
   int a = _lower_object_pointer_type(l, _lower_type_of(left));
@@ -917,7 +917,7 @@ static int _lower_object_pointer_operands(Lowering l, List operands) {
 
 /* The element layout of an object pointer or C array operand, or NULL. A
    semantic handle such as String keeps its own operators. */
-static List _lower_step_layout(Lowering l, Var operand) {
+static List _lower_step_layout(Lowering &l, Var operand) {
   Type type = _lower_type_of(operand);
   Type resolved = type ? l.compiler.sym.resolve_key(type) : NULL;
   if (!resolved || (!resolved.is_array() &&
@@ -928,7 +928,7 @@ static List _lower_step_layout(Lowering l, Var operand) {
 /* A pointer plus or minus an integer is the address that many elements
    away, as C computes it; nothing when neither side is such a pointer. */
 static Var _lower_pointer_step(
-  Lowering l, Var operator, List operands, Var left, Var right) {
+  Lowering &l, Var operator, List operands, Var left, Var right) {
   Var pointer = operands.car(), count = operands.cadr();
   if (operator == <+> && !_lower_step_layout(l, pointer))
     (pointer, count, left, right) = %($count $pointer $right $left);
@@ -942,7 +942,7 @@ static Var _lower_pointer_step(
 }
 
 static Var _lower_operands(
-  Lowering l, Type result, Var operator, List operands) {
+  Lowering &l, Type result, Var operator, List operands) {
   Array values = $auto([]);
   foreach (Var operand, operands) {
     Var value = _lower_expr(l, operand);
@@ -986,7 +986,7 @@ static Var _lower_operands(
 
 /* Captures run at construction. Record values copy into closure storage;
    addressed scalars load their value before the source frame ends. */
-static Var _lower_lambda(Lowering l, List params, List held, Var body) {
+static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
   if (l.on_loop) return _lower_decline(l, "a lambda in a loop");
   match (body) case %(block *):
     return _lower_decline(l, "a block-bodied lambda");
@@ -1091,7 +1091,7 @@ static Var _lower_zero(List type) {
 /* The caller owns the result and frees it, or hands it to `_lower_sequence`.
    Failure is reported through `declined`, because an empty Array is a
    legitimate result and is falsy. */
-static Array _lower_values(Lowering l, List items) {
+static Array _lower_values(Lowering &l, List items) {
   Array values = [];
   foreach (Var item, items) {
     Var value = _lower_expr(l, item);
@@ -1106,7 +1106,7 @@ static Array _lower_values(Lowering l, List items) {
 }
 
 /* Elements as a Lisp List, which is what every container is built from. */
-static Var _lower_sequence(Lowering l, List items) {
+static Var _lower_sequence(Lowering &l, List items) {
   Array values = _lower_values(l, items);
   if (l.declined) return void;
   return cons(<list>, values.list_free());
@@ -1116,13 +1116,13 @@ static Var _lower_sequence(Lowering l, List items) {
    position where no destination names a type, so it lowers to an `Array`
    and a `List` destination converts. Lowering it to a Lisp List instead
    would hand an argument the wrong container without saying so. */
-static Var _lower_array(Lowering l, List items) {
+static Var _lower_array(Lowering &l, List items) {
   Var values = _lower_sequence(l, items);
   if (_lower_failed(l, values)) return void;
   return %(List_array $values);
 }
 
-static Var _lower_map(Lowering l, List entries) {
+static Var _lower_map(Lowering &l, List entries) {
   Array flat = [];
   foreach (List entry, entries) {
     match (entry)
@@ -1152,7 +1152,7 @@ static String _lower_indexed(Var receiver, int is_c_array) {
 }
 
 /* The layout shared by C indexing and indexed reference arguments. */
-static List _lower_pointee_layout(Lowering l, Var receiver) {
+static List _lower_pointee_layout(Lowering &l, Var receiver) {
   Type type = _lower_type_of(receiver);
   Type pointer = type ? l.compiler.sym.resolve_key(type) : NULL;
   if (!pointer || (!pointer.is_pointer() && !pointer.is_array())) return NULL;
@@ -1162,7 +1162,7 @@ static List _lower_pointee_layout(Lowering l, Var receiver) {
 /* C arrays and pointers read native bytes; library collections call their
    ordinary indexing operation. */
 static Var _lower_getindex(
-  Lowering l, Var receiver, Var key, int is_c_array) {
+  Lowering &l, Var receiver, Var key, int is_c_array) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
     return _lower_decline(l, "indexing a type with no compile-time meaning");
@@ -1177,7 +1177,7 @@ static Var _lower_getindex(
 
 /* `sizeof` reads the size from the native layout of its operand's type; the
    operand is never evaluated, as in C. */
-static Var _lower_sizeof(Lowering l, Type type, List operand) {
+static Var _lower_sizeof(Lowering &l, Type type, List operand) {
   Type measured = NULL;
   match (operand) {
     case %(parens (decl ?base (bindings ?binding))):
@@ -1192,7 +1192,7 @@ static Var _lower_sizeof(Lowering l, Type type, List operand) {
 
 /* One `match` over the expression grammar. The compiler turns it into a
    decision tree, so reading the productions costs nothing extra. */
-static Var _lower_expr(Lowering l, Var form) {
+static Var _lower_expr(Lowering &l, Var form) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
@@ -1214,7 +1214,7 @@ static Var _lower_expr(Lowering l, Var form) {
   return _lower_decline(l, "not an expression");
 }
 
-static Var _lower_content(Lowering l, List type, Var content) {
+static Var _lower_content(Lowering &l, List type, Var content) {
   match (content) {
     case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
     case %(literal ("Var") "void"): return %(C.void);
@@ -1357,35 +1357,35 @@ static Var _lower_content(Lowering l, List type, Var content) {
 /* The continuation after a block is data, not a closure: either the end of
    the function, or one more turn of the loop it sits inside. */
 
-static Map _lower_env_copy(Lowering l) {
+static Map _lower_env_copy(Lowering &l) {
   Map copy = _lower_scratch_map(l.scratch);
   foreach (Var (id, form), l.env) copy[id] = form;
   return copy;
 }
 
-static void _lower_env_restore(Lowering l, Map saved) {
+static void _lower_env_restore(Lowering &l, Map saved) {
   l.env = saved;
 }
 
 /* The bound ids a function over the live locals carries, in id order, so
    its parameters do not follow the hash layout of the environment. */
-static void _lower_live_ids(Lowering l, Map used, Array ids) {
+static void _lower_live_ids(Lowering &l, Map used, Array ids) {
   foreach (Var (id, form), l.env) if (id in used) ids.push(id);
   ids.sort();
 }
 
-static int _lower_depth(Lowering l) => l.pending ? l.pending.depth : 0;
+static int _lower_depth(Lowering &l) => l.pending ? l.pending.depth : 0;
 
 /* A continuation that must run with the wrappers its point of creation
    had, however many cleanups hold the point that reaches it. */
-static List _lower_here(Lowering l, List k) =>
+static List _lower_here(Lowering &l, List k) =>
   %(at-depth ${_lower_depth(l)} $k);
 
 /* Leaves the innermost cleanup's body for a continuation outside it. The
    body answers the exit's tag, and the exit's code runs after the cleanup,
    in the environment the `defer` saw: everything the body wrote that the
    code reads is in a cell. */
-static Var _lower_leave(Lowering l, int target, List k) {
+static Var _lower_leave(Lowering &l, int target, List k) {
   LowerCleanup here = l.pending;
   Map inner = l.env;
   l.env = _lower_scratch_map(l.scratch);
@@ -1400,7 +1400,7 @@ static Var _lower_leave(Lowering l, int target, List k) {
   return tag;
 }
 
-static Var _lower_apply_k(Lowering l, List k) {
+static Var _lower_apply_k(Lowering &l, List k) {
   match (k) {
     case %(end): return %(C.void);
     case %(at-depth ?(int target) ?(List next)):
@@ -1436,7 +1436,7 @@ static Var _lower_apply_k(Lowering l, List k) {
    the equality, without boxing and retesting it. Other values still need
    C.true?: even a typed parameter may arrive through an uncoerced Lisp
    call. */
-static Var _lower_truth(Lowering l, Var test) {
+static Var _lower_truth(Lowering &l, Var test) {
   Var value = _lower_expr(l, test);
   if (_lower_failed(l, value)) return void;
   match (value) {
@@ -1469,7 +1469,7 @@ static int _lower_pure(Var form) {
 }
 
 static Var _lower_bind_value(
-  Lowering l, int id, Var value, List rest, List k) {
+  Lowering &l, int id, Var value, List rest, List k) {
   if (_lower_failed(l, value)) return void;
   if (_lower_pure(value)) {
     Var previous = void;
@@ -1488,7 +1488,7 @@ static Var _lower_bind_value(
    block in tail position. Its raw parameter slot can transport `void`; the
    variadic `begin` helper cannot, because packing rest arguments into a List
    deliberately rejects `void`. */
-static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
+static Var _lower_effect(Lowering &l, Var effect, List rest, List k) {
   Var after = _lower_block(l, rest, k);
   if (_lower_failed(l, after)) return void;
   Var discarded = _lower_name(l, "discard");
@@ -1497,7 +1497,7 @@ static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
 
 /* Inside a cleanup, a return's value is computed first and leaves in a
    cell, which every wrapper passes out after running its cleanup. */
-static Var _lower_returned(Lowering l, Var value) {
+static Var _lower_returned(Lowering &l, Var value) {
   if (_lower_failed(l, value) || !l.pending) return value;
   for (LowerCleanup c = l.pending; c; c = c.outer) c.returns = 1;
   return %(C.cell $value);
@@ -1544,7 +1544,7 @@ static void _lower_arm_ids(Var form, String name, Array found) {
    repeats the match rather than naming its result: matching is pure, and an
    arm free of a binding form stays usable on a loop's iteration path. */
 static Var _lower_arms(
-  Lowering l, Var subject, List arms, List rest, List k) {
+  Lowering &l, Var subject, List arms, List rest, List k) {
   if (!arms) return _lower_block(l, rest, k);
   List arm = arms.car();
   Var pattern = l.compiler.folded_constant(arm.car());
@@ -1575,7 +1575,7 @@ static Var _lower_arms(
 /* Both arms continue with the same remaining statements, so the rest of the
    block appears in each. `cond` keeps every path in tail position. */
 static Var _lower_branch(
-  Lowering l, Var test, List then, List alt, List rest, List k) {
+  Lowering &l, Var test, List then, List alt, List rest, List k) {
   Var guard = _lower_truth(l, test);
   if (_lower_failed(l, guard)) return void;
   Map saved = _lower_env_copy(l);
@@ -1595,7 +1595,7 @@ static Var _lower_branch(
    accumulate environment once per loop. */
 /* A cell the body declares is allocated once before the loop runs, so the
    declaration inside it is a store rather than a binding form. */
-static void _lower_loop_cells(Lowering l, Var form, Array out) {
+static void _lower_loop_cells(Lowering &l, Var form, Array out) {
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
@@ -1639,7 +1639,7 @@ static void _lower_referenced(Var form, Map used) {
 }
 
 static Var _lower_loop(
-  Lowering l, Var test, List body, List step, List rest, List k) {
+  Lowering &l, Var test, List body, List step, List rest, List k) {
   Var name = _lower_name(l, "loop");
   Array boxes = $auto([]);
   _lower_loop_cells(l, body, boxes);
@@ -1781,7 +1781,7 @@ static Var _lower_arm(Array tests, Array body, int fallback) {
    The arms sit in one flat block with their labels as markers, so an arm is
    the statements between one label run and the next. */
 static Var _lower_switch(
-  Lowering l, Var subject, List items, List rest, List k) {
+  Lowering &l, Var subject, List items, List rest, List k) {
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   int bound = !_lower_pure(value);
@@ -1874,7 +1874,7 @@ static Var _lower_switch(
 
 /* An object in bytes gets fresh storage at its declaration, and an
    evaluator cell boxes its value. Every other local keeps the value itself. */
-static Var _lower_boxed(Lowering l, int id, Var value, int fresh) {
+static Var _lower_boxed(Lowering &l, int id, Var value, int fresh) {
   if (_lower_failed(l, value)) return void;
   List layout = _lower_storage_layout(l, id);
   if (layout) return _lower_new_object(l, layout, value, fresh);
@@ -1884,7 +1884,7 @@ static Var _lower_boxed(Lowering l, int id, Var value, int fresh) {
 
 /* A C array's dimension, read at lowering time so a partly written one is
    zero-filled the way C fills it. A computed dimension has no such answer. */
-static int _lower_dimension(Lowering l, int id, int &out) {
+static int _lower_dimension(Lowering &l, int id, int &out) {
   Var size;
   if (!l.arrays.try_get(id, size)) return 0;
   match (size)
@@ -1901,7 +1901,7 @@ static int _lower_dimension(Lowering l, int id, int &out) {
 /* A record's storage is zeroed bytes, the way C zero-fills an object whose
    initializer names no field. `into` names storage a loop already holds for
    the record, which is zeroed in place; otherwise the bytes are new. */
-static Var _lower_record_zero(Lowering l, Type type, Var into) {
+static Var _lower_record_zero(Lowering &l, Type type, Var into) {
   Type record = _lower_record_type(l, type);
   match (record ? l.owner.type_layout(record) : NULL)
     case %(? ? ?size *): {
@@ -1914,7 +1914,7 @@ static Var _lower_record_zero(Lowering l, Type type, Var into) {
 
 /* Each initializer row stores one field value at its offset. */
 static Var _lower_record_braced(
-  Lowering l, Type type, List items, Var into) {
+  Lowering &l, Type type, List items, Var into) {
   Type record = _lower_record_type(l, type);
   Var fresh = _lower_record_zero(l, record, into);
   if (_lower_failed(l, fresh) || !items) return fresh;
@@ -1944,7 +1944,7 @@ static Var _lower_record_braced(
 
 /* A braced initializer carries no type of its own, so the declared type
    decides which container it builds. */
-static Var _lower_braced(Lowering l, List type, int id, List items) {
+static Var _lower_braced(Lowering &l, List type, int id, List items) {
   if (_lower_record_type(l, type))
     return _lower_record_braced(l, type, items, void);
   if (id in l.arrays) {
@@ -1992,7 +1992,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
    Lisp value can tell apart need one: a `Symbol` is not a `String`, and an
    `Array` is not a `List`. Without the argument case an `Array` reached a
    `List` parameter and the native adapter refused it. */
-static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
+static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
   /* A lambda typed `Func`, as constructed syntax may be, is one wherever
      it goes, a `Var` included. */
   Type type = _lower_type_of(node);
@@ -2078,7 +2078,7 @@ static int _lower_braced_init(Var init) {
   return 0;
 }
 
-static Var _lower_initializer(Lowering l, List type, int id, Var init) {
+static Var _lower_initializer(Lowering &l, List type, int id, Var init) {
   match (init) {
     case %(expr ? (composite (commas *items))):
       return _lower_braced(l, type, id, items);
@@ -2090,7 +2090,7 @@ static Var _lower_initializer(Lowering l, List type, int id, Var init) {
 }
 
 static Var _lower_declarator(
-  Lowering l, List type, List declarator, List rest, List k) {
+  Lowering &l, List type, List declarator, List rest, List k) {
   match (declarator) {
     case %(op = (!set ?bound (bind (binding ?(int id) ?) *)) ?init): {
       Type declared = %(declare $type (bindings $bound))
@@ -2162,7 +2162,7 @@ static int _lower_destructure_id(Var target, int &out) {
    same declaration. An element read is duplicable, so every target
    substitutes; only a source that is not is held in a binding first. */
 static Var _lower_destructure(
-  Lowering l, List targets, Var init, List rest, List k) {
+  Lowering &l, List targets, Var init, List rest, List k) {
   Var source = _lower_expr(l, init);
   if (_lower_failed(l, source)) return void;
   source = _lower_coerce(l, %("List"), init, source);
@@ -2214,7 +2214,7 @@ static int _lower_target(Var form) {
 /* `m[k] = v` and `a[i] = v`. A `List` has no indexed write, so a store
    through one declines rather than silently dropping. */
 static Var _lower_setindex_value(
-  Lowering l, Var receiver, Var key, int is_c_array, Var value) {
+  Lowering &l, Var receiver, Var key, int is_c_array, Var value) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
     return _lower_decline(l, "indexing a type with no compile-time meaning");
@@ -2233,7 +2233,7 @@ static Var _lower_setindex_value(
 }
 
 static Var _lower_setindex(
-  Lowering l, Var receiver, Var key, int is_c_array, Var value, List rest,
+  Lowering &l, Var receiver, Var key, int is_c_array, Var value, List rest,
   List k) {
   return _lower_effect(
     l, _lower_setindex_value(l, receiver, key, is_c_array, value), rest, k);
@@ -2242,7 +2242,7 @@ static Var _lower_setindex(
 /* An assignment used as a value writes its actual place. Locals used this
    way were given cells by the scan, so a selected branch or short-circuit
    operand performs the write exactly when it runs. */
-static Var _lower_assign_expr(Lowering l, Var target, Var rhs) {
+static Var _lower_assign_expr(Lowering &l, Var target, Var rhs) {
   Var value = _lower_expr(l, rhs);
   if (_lower_failed(l, value)) return void;
   Type type = _lower_type_of(target);
@@ -2263,7 +2263,7 @@ static Var _lower_assign_expr(Lowering l, Var target, Var rhs) {
 
 /* A compound update evaluates the place once and returns its new value. */
 static Var _lower_update_expr(
-  Lowering l, Var target, Symbol operator, Var right) {
+  Lowering &l, Var target, Symbol operator, Var right) {
   if (_lower_failed(l, right)) return void;
   Var place = _lower_place(l, target);
   if (l.declined || place is void)
@@ -2279,7 +2279,7 @@ static Var _lower_update_expr(
 }
 
 static Var _lower_store(
-  Lowering l, Var target, Var value, List rest, List k) {
+  Lowering &l, Var target, Var value, List rest, List k) {
   match (target) {
     case %(expr ? (getindex ?receiver ?key)):
       return _lower_setindex(l, receiver, key, 0, value, rest, k);
@@ -2308,7 +2308,7 @@ static Var _lower_store(
    so the result converts back to the place's own type, which is what
    `$native.update` in `lib/varops.x` does for each family. */
 static Var _lower_update(
-  Lowering l, Var target, Var operator, Var right, List rest, List k) {
+  Lowering &l, Var target, Var operator, Var right, List rest, List k) {
   int id = _lower_target(target);
   if (_lower_failed(l, right)) return void;
   Type want = _lower_type_of(target);
@@ -2355,7 +2355,7 @@ static Var _lower_step_of(Var target) {
    assignment statement keeps its existing substitution path. This runs
    after the normal scan has collected every local and its layout. */
 static void _lower_scan_nested_writes(
-  Lowering l, Var form, int direct_statement) {
+  Lowering &l, Var form, int direct_statement) {
   if (form is not <list>) return;
   List items = form;
   match (items) {
@@ -2409,7 +2409,7 @@ static void _lower_scan_names(Var form, Map named, Map declared) {
    functions of their own, so a local either of them names lives in a cell
    that both sides of the wrapper share, unless it is declared after the
    `defer`, where it ends with the block. */
-static void _lower_scan_cleanups(Lowering l, Var form) {
+static void _lower_scan_cleanups(Lowering &l, Var form) {
   if (form is not <list>) return;
   List items = form;
   foreach (Var part, items) _lower_scan_cleanups(l, part);
@@ -2431,7 +2431,7 @@ static void _lower_scan_cleanups(Lowering l, Var form) {
 }
 
 static Var _lower_expression_stmnt(
-  Lowering l, Var e, List rest, List k) {
+  Lowering &l, Var e, List rest, List k) {
   match (e) {
     case %(expr ? (op = ?target ?rhs)): {
       Var value = _lower_expr(l, rhs);
@@ -2474,7 +2474,7 @@ static Var _lower_expression_stmnt(
    cleanup are functions over the live locals, as a loop is, and the code
    after the wrapper selects the exit the body took, so a loop continuing
    from inside the block calls its next turn from here, in tail position. */
-static Var _lower_defer(Lowering l, Var cleanup, List rest, List k) {
+static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   Map used = $auto({});
   _lower_referenced(cleanup, used);
   _lower_referenced(rest, used);
@@ -2528,7 +2528,7 @@ static Var _lower_defer(Lowering l, Var cleanup, List rest, List k) {
            (C.unwind $body_name $undo_name (list @{entry.list_free()})));
 }
 
-static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
+static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):    return _lower_stmnt(l, node, rest, k);
@@ -2624,7 +2624,7 @@ static List _lower_for_init(List init) {
   return %(stmnt $init);
 }
 
-static Var _lower_block(Lowering l, List items, List k) {
+static Var _lower_block(Lowering &l, List items, List k) {
   if (l.declined) return void;
   if (!items) return _lower_apply_k(l, k);
   return _lower_stmnt(l, items.car(), items.cdr(), k);
@@ -2638,7 +2638,7 @@ List ReplLower.lower(ReplLower self, List fn) {
   self.layouts.cleanup();
   self.layouts = {};
   Scope scratch = $auto(Scope.new());
-  struct Lowering state = {
+  Lowering l = {
     .compiler = self.compiler, .owner = self, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
     .cells = _lower_scratch_map(scratch),
@@ -2648,7 +2648,6 @@ List ReplLower.lower(ReplLower self, List fn) {
     .cursors = _lower_scratch_map(scratch),
     .definitions = []
   };
-  Lowering l = &state;
   self.reason = NULL;
   self.missing = NULL;
   match (fn) {

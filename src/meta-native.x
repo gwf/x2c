@@ -385,7 +385,7 @@ static void Compiler._bind_native_meta(
 }
 
 /* The compiler's own linked target, which hides any module's. */
-static Var NativeBinding.linked(NativeBinding *n) {
+static Var NativeBinding.linked(NativeBinding &n) {
   Compiler c = n.c;
   Var function = c.macro_lisp.eval(
     %(bind ${n.target} (quote ${n.signature})));
@@ -396,14 +396,14 @@ static Var NativeBinding.linked(NativeBinding *n) {
   return function;
 }
 
-static Var NativeBinding.module_target(NativeBinding *n) {
+static Var NativeBinding.module_target(NativeBinding &n) {
   String first = n.suppliers.car();
   return ((Map) native_modules[first])[n.target];
 }
 
 /* A second module that defines the function is reported, and the
    declaration must match the target it binds. */
-static void NativeBinding.check(NativeBinding *n, Var function) {
+static void NativeBinding.check(NativeBinding &n, Var function) {
   Compiler c = n.c;
   List suppliers = n.suppliers;
   if (suppliers.cdr() && function.equal(n.module_target()))
@@ -419,7 +419,7 @@ static void NativeBinding.check(NativeBinding *n, Var function) {
 
 /* An iterator operation binds through a call that allocates the
    destination a call omits. */
-static void NativeBinding.install(NativeBinding *n, Var function) {
+static void NativeBinding.install(NativeBinding &n, Var function) {
   Compiler c = n.c;
   if (n.iterator) {
     int arity = n.signature.car().list().cadr().list().len() - 1;

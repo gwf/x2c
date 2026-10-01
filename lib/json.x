@@ -96,7 +96,7 @@ typedef struct Reader {
   const char *text;
   String path;
   int at, depth;
-} *Reader;
+} Reader;
 
 /** Returns the x2c value of the JSON text `source`.
     Objects become `Map`s, arrays `Array`s, and strings `String`s. A number
@@ -118,15 +118,14 @@ meta native Var Json.parse(String source) => _parse(source, NULL);
 Var Json.read_file(Path path) => _parse(path.read_text(), path);
 
 static Var _parse(String source, String path) {
-  struct Reader reader = {.text = source ? source : "", .path = path};
-  Reader r = &reader;
+  Reader r = {.text = source ? source : "", .path = path};
   Var value = r._value();
   r._space();
   if (r._peek()) r._fail("unexpected text after the value");
   return value;
 }
 
-static Var Reader._value(Reader r) {
+static Var Reader._value(Reader &r) {
   r._space();
   switch (r._peek()) {
     case '{': case '[': {
@@ -146,7 +145,7 @@ static Var Reader._value(Reader r) {
   r._fail("unexpected character");
 }
 
-static Var Reader._object(Reader r) {
+static Var Reader._object(Reader &r) {
   Map object = {};
   r.at++;
   r._space();
@@ -169,7 +168,7 @@ static Var Reader._object(Reader r) {
   }
 }
 
-static Var Reader._array(Reader r) {
+static Var Reader._array(Reader &r) {
   Array array = [];
   r.at++;
   r._space();
@@ -191,7 +190,7 @@ static Var Reader._array(Reader r) {
 /* Text without escapes becomes a String directly; the Buffer exists only
    once an escape needs decoding. A Buffer's truth is its length, so its
    presence is tested as a pointer. */
-static String Reader._string(Reader r) {
+static String Reader._string(Reader &r) {
   int run = ++r.at;
   Buffer decoded = NULL;
   defer decoded.free();
@@ -219,7 +218,7 @@ static String Reader._string(Reader r) {
   }
 }
 
-static void Reader._escape(Reader r, Buffer out) {
+static void Reader._escape(Reader &r, Buffer out) {
   int escape = r.text[++r.at];
   r.at++;
   switch (escape) {
@@ -260,7 +259,7 @@ static void Reader._escape(Reader r, Buffer out) {
   _write_code_point(out, point);
 }
 
-static long Reader._hex4(Reader r) {
+static long Reader._hex4(Reader &r) {
   long unit = 0;
   for (int i = 0; i < 4; i++) {
     int digit = scan_ascii_hex_value(r._peek());
@@ -273,7 +272,7 @@ static long Reader._hex4(Reader r) {
 
 /* The grammar check runs first, so strtol, strtoul, and strtod stop exactly
    at `r.at`: none of them sees a sign, radix prefix, or suffix JSON lacks. */
-static Var Reader._number(Reader r) {
+static Var Reader._number(Reader &r) {
   int start = r.at;
   if (r._peek() == '-') r.at++;
   if (r._peek() == '0') r.at++;
@@ -314,25 +313,25 @@ static Var Reader._number(Reader r) {
   return number;
 }
 
-static int Reader._digits(Reader r) {
+static int Reader._digits(Reader &r) {
   int start = r.at;
   while (scan_ascii_digit(r._peek())) r.at++;
   return r.at - start;
 }
 
-static void Reader._word(Reader r, const char *word) {
+static void Reader._word(Reader &r, const char *word) {
   size_t length = strlen(word);
   if (strncmp(r.text + r.at, word, length)) r._fail("unexpected character");
   r.at += length;
 }
 
-static void Reader._expect(Reader r, char byte, const char *why) {
+static void Reader._expect(Reader &r, char byte, const char *why) {
   r._space();
   if (r._peek() != byte) r._fail(why);
   r.at++;
 }
 
-static void Reader._space(Reader r) {
+static void Reader._space(Reader &r) {
   loop {
     switch (r._peek()) {
       case ' ': case '\t': case '\n': case '\r': r.at++; break;
@@ -341,10 +340,10 @@ static void Reader._space(Reader r) {
   }
 }
 
-static int Reader._peek(Reader r) =>
+static int Reader._peek(Reader &r) =>
   (unsigned char) r.text[r.at];
 
-static void Reader._fail(Reader r, String why) {
+static void Reader._fail(Reader &r, String why) {
   int line = 1, column = 1, offset = r.at;
   scan_next_line_col((char *) r.text, offset, &line, &column);
   if (r.path)
@@ -367,7 +366,7 @@ static void Reader._fail(Reader r, String why) {
 typedef struct Writer {
   Buffer out;
   int pretty;
-} *Writer;
+} Writer;
 
 /** Returns `value` as compact JSON text.
     `Map` names are written in byte order and must be `String`s or
@@ -397,13 +396,12 @@ void Json.write_file(Var value, Path path) {
 
 static String _json(Var value, int pretty) {
   Buffer out = $auto(Buffer.new(0));
-  struct Writer writer = {.out = out, .pretty = pretty};
-  Writer w = &writer;
+  Writer w = {.out = out, .pretty = pretty};
   w._value(value, 0);
   return out;
 }
 
-static void Writer._value(Writer w, Var value, int depth) {
+static void Writer._value(Writer &w, Var value, int depth) {
   if (depth > JSON_MAX_DEPTH)
     raise %(size-limit (operation "Var.json")
             (why "nesting exceeds 512 levels"));
@@ -421,7 +419,7 @@ static void Writer._value(Writer w, Var value, int depth) {
   }
 }
 
-static void Writer._elements(Writer w, Var sequence, int depth) {
+static void Writer._elements(Writer &w, Var sequence, int depth) {
   int count = 0;
   w.out.write_char('[');
   foreach (Var element, sequence) {
@@ -433,7 +431,7 @@ static void Writer._elements(Writer w, Var sequence, int depth) {
   w.out.write_char(']');
 }
 
-static void Writer._members(Writer w, Map object, int depth) {
+static void Writer._members(Writer &w, Map object, int depth) {
   Array names = $auto([]);
   foreach (Var (name, member), object) {
     if (name is not <string> && !name.is_atom()) {
@@ -464,7 +462,7 @@ static void Writer._members(Writer w, Map object, int depth) {
   w.out.write_char('}');
 }
 
-static void Writer._line(Writer w, int depth) {
+static void Writer._line(Writer &w, int depth) {
   if (w.pretty) w.out.newline().write_repeat(' ', 2 * depth);
 }
 

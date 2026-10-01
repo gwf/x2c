@@ -30,7 +30,7 @@ typedef struct Emitter {
   Array native_macros;
   Map static_objects;
   int static_support;
-} *Emitter;
+} Emitter;
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
     Source mapping adds `src-at`/ID pairs consumed by the formatter.
@@ -44,15 +44,14 @@ typedef struct Emitter {
     tokens must survive.
 */
 List Compiler.emit(Compiler c, List ast) {
-  struct Emitter state = {.c = c, .origin = 0, .native_macros = []};
-  Emitter e = &state;
+  Emitter e = {.c = c, .origin = 0, .native_macros = []};
   // flatten_all leaves no list element behind, so one pass is the fixed
   // point and a second call would only re-cons the whole unit to prove it.
   List code = e._emit(ast).flatten_all();
   Array before = [], after = [];
-  if (state.static_support)
+  if (e.static_support)
     before.push("#include \"exception.h\"\n#include <string.h>");
-  foreach (List entry, state.native_macros.list_free()) {
+  foreach (List entry, e.native_macros.list_free()) {
     (String name, String definition) = entry;
     before.push(definition);
     after.push(%"#undef $name");
@@ -68,7 +67,7 @@ List Compiler.emit(Compiler c, List ast) {
    blocks introduce runtime sequencing. Parser, transform, and generation
    produce every recognized AST shape, so the fallback handles only already
    C-shaped nodes. */
-static List Emitter._emit(Emitter e, List ast) {
+static List Emitter._emit(Emitter &e, List ast) {
   if (!ast) return ast;
   Var head = ast.car();
   if (head is <list>) return e._emit_sequence(ast);
@@ -160,7 +159,7 @@ static List Emitter._emit(Emitter e, List ast) {
   return e._emit_leaf(ast);
 }
 
-static List Emitter._emit_sequence(Emitter e, List ast) {
+static List Emitter._emit_sequence(Emitter &e, List ast) {
   Array emitted = $auto([]);
   while (ast && ast.car() is <list>) {
     emitted.push(e._emit(ast.car()));
@@ -172,7 +171,7 @@ static List Emitter._emit_sequence(Emitter e, List ast) {
   return result;
 }
 
-static List Emitter._emit_prefix(Emitter e, List ast) {
+static List Emitter._emit_prefix(Emitter &e, List ast) {
   Array prefix = [];
   while (ast && ast.car() is <symbol>) {
     Symbol item = ast.car();
@@ -187,7 +186,7 @@ static List Emitter._emit_prefix(Emitter e, List ast) {
   return prefix.list_free().append(e._emit(ast));
 }
 
-static List Emitter._emit_leaf(Emitter e, List ast) {
+static List Emitter._emit_leaf(Emitter &e, List ast) {
   Var head = ast.car();
   switch (head.symbol()) {
     case <adopt>: case <macrodef>: case <protocol>: return NULL;
@@ -228,7 +227,7 @@ static List Emitter._emit_leaf(Emitter e, List ast) {
 
 // source positions and list forms
 
-static List Emitter._emit_at(Emitter e, int origin, List inner) {
+static List Emitter._emit_at(Emitter &e, int origin, List inner) {
   int old_origin = e.origin;
   e.origin = origin;
   List result = e._emit(inner);
@@ -247,7 +246,7 @@ static List Emitter._emit_at(Emitter e, int origin, List inner) {
 /* Native macro arguments expand once before C sees the selected conversion.
    Generated bodies have no source-map directives; the original argument keeps
    its ordinary mapping at the invocation and its original storage scope. */
-static List Emitter._initializer_macro(Emitter e, List input, List body) {
+static List Emitter._initializer_macro(Emitter &e, List input, List body) {
   Buffer parameters = Buffer.new(0);
   foreach (List argument, input.cdr()) {
     if (parameters.len()) parameters.write_char(',');
@@ -274,7 +273,7 @@ static List Emitter._initializer_macro(Emitter e, List input, List body) {
   return %($name "(" @{_commas(arguments.list_free())} ")");
 }
 
-static List Emitter._initializer_value(Emitter e, List ast) {
+static List Emitter._initializer_value(Emitter &e, List ast) {
   List source = NULL;
   List functions = Ast.initializer_functions(ast, source);
   if (functions)
@@ -300,13 +299,13 @@ static List Emitter._initializer_value(Emitter e, List ast) {
   return result;
 }
 
-static List Emitter._emit_index_init(Emitter e, Var index, List value) {
+static List Emitter._emit_index_init(Emitter &e, Var index, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : " =";
   return %("[" @{e._emit(%($index))} "]" $assign @{e._emit(%($value))});
 }
 
-static List Emitter._emit_dot_init(Emitter e, Var field, List value) {
+static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
   String assign = value.car() == <dotinit> ||
                   value.car() == <indexinit> ? "" : "=";
   return %("." @{e._emit(%($field))} $assign @{e._emit(%($value))});
@@ -314,7 +313,7 @@ static List Emitter._emit_dot_init(Emitter e, Var field, List value) {
 
 // local statics
 
-static List Emitter._local_static(Emitter e, List ast) {
+static List Emitter._local_static(Emitter &e, List ast) {
   List declaration = ast.cadr(), body = ast.caddr();
   while (declaration.car() == <at>) {
     e.origin = declaration.cadr();
@@ -353,7 +352,7 @@ static int _static_case_entry(List node) {
 }
 
 typedef struct StaticRuntime {
-  Emitter e;
+  Emitter *e;
   Array output;
   Type declared_base, type;
   List name, initial, prefix, initial_copy, source;
@@ -363,7 +362,7 @@ typedef struct StaticRuntime {
 } StaticRuntime;
 
 static void Emitter._static_binding(
-  Emitter e, List binding, Type declared_base,
+  Emitter &e, List binding, Type declared_base,
   String base_name, String storage, Array output) {
   List name, mods, initial = NULL;
   match (binding) {
@@ -385,7 +384,7 @@ static void Emitter._static_binding(
   }
   e.static_support = 1;
   StaticRuntime runtime = {
-    .e = e, .output = output, .declared_base = declared_base,
+    .e = &e, .output = output, .declared_base = declared_base,
     .type = type, .name = name, .initial = initial, .storage = storage,
     .inferred = type.car() == <dim> || type.match(%((dim) *))};
   runtime.alias = e.fresh_name("static_object_type");
@@ -397,24 +396,23 @@ static void Emitter._static_binding(
   runtime.emit();
 }
 
-static void StaticRuntime.prepare(StaticRuntime *r) {
-  Emitter e = r.e;
+static void StaticRuntime.prepare(StaticRuntime &r) {
   r.slot = r.pointer;
   r.object = r.temporary;
   if (r.inferred) {
-    r.slot = e.fresh_name("static_incomplete");
-    r.formal = e.fresh_name("static_input");
-    List probe_decl = e._semantic_name(r.type.reference(), r.slot);
+    r.slot = (*r.e).fresh_name("static_incomplete");
+    r.formal = (*r.e).fresh_name("static_input");
+    List probe_decl = (*r.e)._semantic_name(r.type.reference(), r.slot);
     r.output.push(%(@probe_decl ";"));
-    e.static_objects[r.name] = r.slot;
+    r.e.static_objects[r.name] = r.slot;
     r.prefix = %("typedef __typeof__(" ${r.formal} ")" ${r.alias} ";");
     r.source = %("&" ${r.formal});
     r.object = r.alias;
     return;
   }
-  List alias_decl = e._semantic_name(r.type, r.alias);
-  e.static_objects[r.name] = r.pointer;
-  List value = e._emit(r.initial);
+  List alias_decl = (*r.e)._semantic_name(r.type, r.alias);
+  r.e.static_objects[r.name] = r.pointer;
+  List value = (*r.e)._emit(r.initial);
   r.prefix = %(
     "typedef" @alias_decl ";"
     "_Static_assert(__builtin_constant_p(sizeof(" ${r.alias} ")),"
@@ -424,8 +422,7 @@ static void StaticRuntime.prepare(StaticRuntime *r) {
   r.source = %("&" ${r.temporary});
 }
 
-static void StaticRuntime.emit(StaticRuntime *r) {
-  Emitter e = r.e;
+static void StaticRuntime.emit(StaticRuntime &r) {
   List acquisition = %(
     @{r.prefix}
     ${r.storage} "X2CStatic" ${r.guard} "= {0};"
@@ -438,7 +435,7 @@ static void StaticRuntime.emit(StaticRuntime *r) {
                                ".env = &" ${r.guard} "};"
       "x2c_cleanup_push(&" ${r.cleanup} ");"
       @{r.initial_copy}
-      @{e._static_copy(r.alias, r.guard, r.source, r.object)}
+      @{(*r.e)._static_copy(r.alias, r.guard, r.source, r.object)}
       "x2c_static_commit(&" ${r.guard} ");"
       "x2c_cleanup_leave(&" ${r.cleanup} ");"
     "}"
@@ -446,17 +443,17 @@ static void StaticRuntime.emit(StaticRuntime *r) {
   );
   if (r.inferred) {
     List operand = %(expr ${r.type} (cast ${r.type} ${r.initial}));
-    acquisition = e._initializer_macro(
+    acquisition = (*r.e)._initializer_macro(
       %(input (${r.formal} $operand)), acquisition);
   }
   r.output.push(acquisition);
-  e.static_objects[r.name] = r.pointer;
+  r.e.static_objects[r.name] = r.pointer;
 }
 
 /* The native alias retains typedef and array qualifiers. Only a volatile
    object needs bytewise volatile reads; storage has no declared type yet. */
 static List Emitter._static_copy(
-  Emitter e, String alias, String guard, List source, String object) {
+  Emitter &e, String alias, String guard, List source, String object) {
   String data = e.fresh_name("static_bytes");
   String index = e.fresh_name("static_byte");
   return %(
@@ -474,7 +471,7 @@ static List Emitter._static_copy(
 
 // source initializers
 
-static List Emitter._source_initializer(Emitter e, List function) {
+static List Emitter._source_initializer(Emitter &e, List function) {
   List (type, binding, body) = function.cdr();
   Array inputs = [], declarations = [];
   body = e._capture_source(body, inputs, declarations);
@@ -484,7 +481,7 @@ static List Emitter._source_initializer(Emitter e, List function) {
 }
 
 static List Emitter._capture_source(
-  Emitter e, List node, Array inputs, Array declarations) {
+  Emitter &e, List node, Array inputs, Array declarations) {
   match (node) {
     case %((!set ?kind (!or initval initcode))
            (!set ?input (input *)) *body): {
@@ -520,7 +517,7 @@ static List Emitter._capture_source(
 }
 
 static List Emitter._capture_definition(
-  Emitter e, List node, Array inputs, Array declarations) {
+  Emitter &e, List node, Array inputs, Array declarations) {
   (Type definition, Type reference) = e.initializer_native_types(node);
   if (node.car() == <enum>) {
     reference = %(enum ${node.cadr()});
@@ -541,7 +538,7 @@ static List Emitter._capture_definition(
    token-pasting rules; x2c does not interpret declarations hidden inside
    it. */
 static List Emitter._capture_children(
-  Emitter e, List node, Array inputs, Array declarations) {
+  Emitter &e, List node, Array inputs, Array declarations) {
   Array children = [];
   foreach (Var child, node) {
     if (child is <list>)
@@ -645,7 +642,7 @@ static int _right_operand_level(Symbol operator) {
 /* A node already stored as a List enters its own dispatch directly. Wrapping
    it in a one-element sequence would emit the same tokens through two more
    frames per operand, which the pinned chain stack budgets cannot spend. */
-static List Emitter._operand(Emitter e, Var node, int level) {
+static List Emitter._operand(Emitter &e, Var node, int level) {
   List code = node is <list> && !node.is_nil()
             ? e._emit(node) : e._emit(%($node));
   if (_emitted_precedence(node) < level) return _parens(code);
@@ -658,7 +655,7 @@ static List Emitter._operand(Emitter e, Var node, int level) {
    spine arrays out of _emit's frame on every other recursion path. The walk
    stops where the nested operator needs parentheses, leaving that operand to
    the ordinary recursion. */
-static List Emitter._op_spine(Emitter e, Var operator, Var left, Var right) {
+static List Emitter._op_spine(Emitter &e, Var operator, Var left, Var right) {
   Array operators = $auto([]);
   Array rights = $auto([]);
   Var op_item = operator, left_item = left, right_item = right;
@@ -696,12 +693,12 @@ static List Emitter._op_spine(Emitter e, Var operator, Var left, Var right) {
 
 // expressions
 
-static List Emitter._emit_postfix(Emitter e, Symbol operator, Var argument) {
+static List Emitter._emit_postfix(Emitter &e, Symbol operator, Var argument) {
   List c_arg = e._operand(argument, EMIT_POSTFIX);
   return %(@c_arg $operator);
 }
 
-static List Emitter._emit_generic(Emitter e, Var control, List associations) {
+static List Emitter._emit_generic(Emitter &e, Var control, List associations) {
   List c_control = e._emit(%($control));
   Array rows = [];
   foreach (List association, associations) match (association) {
@@ -714,13 +711,13 @@ static List Emitter._emit_generic(Emitter e, Var control, List associations) {
   return %("_Generic(" @c_control ", " @c_rows ")");
 }
 
-static List Emitter._emit_unary(Emitter e, Symbol operator, Var argument) {
+static List Emitter._emit_unary(Emitter &e, Symbol operator, Var argument) {
   List c_arg = e._operand(argument, EMIT_UNARY);
   return %($operator @c_arg);
 }
 
 static List Emitter._emit_binary(
-  Emitter e, Symbol operator, Var left, Var right) {
+  Emitter &e, Symbol operator, Var left, Var right) {
   if (left is <list> && left.list().match(%(expr ? (op *))))
     return e._op_spine(operator, left, right);
   Symbol binary = operator;
@@ -728,7 +725,7 @@ static List Emitter._emit_binary(
            @{e._operand(right, _right_operand_level(binary))});
 }
 
-static List Emitter._emit_ident(Emitter e, Var binding) {
+static List Emitter._emit_ident(Emitter &e, Var binding) {
   Var pointer;
   if (e.static_objects && e.static_objects.try_get(binding, pointer))
     return %("(*" $pointer ")");
@@ -737,7 +734,7 @@ static List Emitter._emit_ident(Emitter e, Var binding) {
 
 // calls
 
-static List Emitter._emit_call(Emitter e, Var function, Var arguments) {
+static List Emitter._emit_call(Emitter &e, Var function, Var arguments) {
   List site_call = e._match_site_call(function, arguments);
   if (site_call) return site_call;
   return %(@{e._operand(function, EMIT_POSTFIX)} "("
@@ -749,7 +746,7 @@ static List Emitter._emit_call(Emitter e, Var function, Var arguments) {
    keeps the ordinary entry, which prepares one plan per call. Only a direct
    global function binding identifies a runtime operation. Returns NULL
    when the call is not one of those operations or its pattern is computed. */
-static List Emitter._match_site_call(Emitter e, Var function, Var arguments) {
+static List Emitter._match_site_call(Emitter &e, Var function, Var arguments) {
   List binding = NULL;
   while (!binding && function is <list>) match (function) {
     case %(expr ? (parens ?inner)): function = inner;
@@ -792,22 +789,22 @@ static String _match_site_entry(String name) {
 
 // statements
 
-static List Emitter._emit_return(Emitter e, Var expression) {
+static List Emitter._emit_return(Emitter &e, Var expression) {
   List value = e._emit(%($expression));
   return %("return" @value ";");
 }
 
-static List Emitter._emit_parameters(Emitter e, Var parameters) {
+static List Emitter._emit_parameters(Emitter &e, Var parameters) {
   List c_params = e._emit(%($parameters));
   return %("(" @c_params ")");
 }
 
-static List Emitter._emit_label(Emitter e, Var name) {
+static List Emitter._emit_label(Emitter &e, Var name) {
   List c_name = e._emit(%($name));
   return %(@c_name ":");
 }
 
-static List Emitter._raise(Emitter e, Ast ast, Var cause, List arguments) {
+static List Emitter._raise(Emitter &e, Ast ast, Var cause, List arguments) {
   List code = e._emit(cause);
   List arg_tokens = _commas(e._emit(arguments));
   String site_name = e.fresh_name("error_site");
@@ -841,7 +838,7 @@ static String _c_string_literal(String value) {
 
 // literals and directives
 
-static List Emitter._literal(Emitter e, List ast) {
+static List Emitter._literal(Emitter &e, List ast) {
   (List type, String text, Var value) = ast.cdr();
   if (type === %("Var") && text == "void") return %("((void) 0, Void)");
   if (type === %("String")) {
@@ -868,7 +865,7 @@ static List _atom_intern(String spelling) {
 }
 
 // Normalize #include directives to reference generated headers.
-static List Emitter._preproc(Emitter e, List ast) {
+static List Emitter._preproc(Emitter &e, List ast) {
   int angle = 0;
   String target = preproc_include_target(ast.cadr(), angle);
   if (!target || !is_source_file(target)) return ast.cdr();
@@ -879,37 +876,37 @@ static List Emitter._preproc(Emitter e, List ast) {
 
 // declarations
 
-static List Emitter._declare_stmt(Emitter e, List ast) =>
+static List Emitter._declare_stmt(Emitter &e, List ast) =>
   %( @{e._declare(ast)} ";");
 
-static List Emitter._decl_stmt(Emitter e, List ast) {
+static List Emitter._decl_stmt(Emitter &e, List ast) {
   match (ast)
     case %(decl *declaration): ast = %(declare @declaration);
   return e._declare(ast);
 }
 
-static List Emitter._declare(Emitter e, List ast) {
+static List Emitter._declare(Emitter &e, List ast) {
   List (type, bindings) = ast.cdr();
   type = e._emit(%( $type ));
   bindings = %( $bindings );
   return type.append(e._emit(bindings));
 }
 
-static List Emitter._bind(Emitter e, Ast ast) {
+static List Emitter._bind(Emitter &e, Ast ast) {
   List (ident, mods) = ast.cdr();
   ident = e._emit(ident);
   if (!mods) return ident;
   return e._declarator(ident, mods);
 }
 
-static List Emitter._param(Emitter e, List ast) {
+static List Emitter._param(Emitter &e, List ast) {
   List (type, mods) = ast.cdr();
   List code = e._emit(type);
   mods = %( $mods );
   return code.append(e._emit(mods));
 }
 
-static List Emitter._args(Emitter e, List ast) {
+static List Emitter._args(Emitter &e, List ast) {
   Array result = [];
   int first = 1;
   foreach (List argument, ast.cdr()) {
@@ -922,7 +919,7 @@ static List Emitter._args(Emitter e, List ast) {
   return result.list_free();
 }
 
-static List Emitter._function(Emitter e, List ast) {
+static List Emitter._function(Emitter &e, List ast) {
   List (type, bindings, body) = ast.cdr();
   String old_fn = e.fn_name;
   List function_binding = bindings.cadr();
@@ -943,7 +940,7 @@ static List Emitter._function(Emitter e, List ast) {
 }
 
 // Emit a checked native-function alias without a wrapper object.
-static List Emitter._foreign_alias(Emitter e, List ast) {
+static List Emitter._foreign_alias(Emitter &e, List ast) {
   List (declaration, native_binding) = ast.cdr();
   List bindings = declaration.caddr(), target = bindings.cadr().cadr();
   Type function_type = declaration.type_from_ast().declared();
@@ -964,7 +961,7 @@ static List Emitter._foreign_alias(Emitter e, List ast) {
   );
 }
 
-static List Emitter._typedef(Emitter e, List ast) {
+static List Emitter._typedef(Emitter &e, List ast) {
   List code = %("typedef" @{e._emit(ast.cdr())} ";");
   foreach (List declarator, ast.caddr().cdr()) {
     List binding = declarator.cadr();
@@ -975,18 +972,18 @@ static List Emitter._typedef(Emitter e, List ast) {
   return code;
 }
 
-static List Emitter._block(Emitter e, List ast) {
+static List Emitter._block(Emitter &e, List ast) {
   $let(e.native_aliases, e.native_aliases)
     return %("{" @{e._emit(ast.cdr())} "}");
 }
 
-static List Emitter._binding(Emitter e, List ast) =>
+static List Emitter._binding(Emitter &e, List ast) =>
   %(${e.emitted_binding_name(ast)});
 
 // declarators
 
 /* Fold one layer at a time; typedef prefixes surround the final result. */
-static List Emitter._declarator(Emitter e, List decl, List mods) {
+static List Emitter._declarator(Emitter &e, List decl, List mods) {
   int typedefs = 0;
   while (mods) {
     match (mods) {
@@ -1033,7 +1030,7 @@ static List Emitter._declarator(Emitter e, List decl, List mods) {
   return decl;
 }
 
-static List Emitter._array_declarator(Emitter e, List decl, List dimension) {
+static List Emitter._array_declarator(Emitter &e, List decl, List dimension) {
   if (decl.type().is_pointer()) decl = _parens(decl);
   List size = e._emit(dimension);
   return size ? %(@decl "[" @size "]") : %(@decl "[]");
@@ -1042,17 +1039,17 @@ static List Emitter._array_declarator(Emitter e, List decl, List dimension) {
 // Wrap declarators in parentheses when pointer precedence requires it.
 static List _parens(List decl) => %("(" @decl ")");
 static List Emitter._function_declarator(
-  Emitter e, List decl, List parameters) {
+  Emitter &e, List decl, List parameters) {
   if (decl.type().is_pointer()) decl = _parens(decl);
   return %(@decl "(" @{e._emit(parameters)} ")");
 }
 
-static List Emitter._semantic_type(Emitter e, Type type) {
+static List Emitter._semantic_type(Emitter &e, Type type) {
   List declaration = type.declaration_ast(NULL);
   return e._declare(declaration);
 }
 
-static List Emitter._semantic_name(Emitter e, Type type, String name) {
+static List Emitter._semantic_name(Emitter &e, Type type, String name) {
   List (base, mods) = type.declaration_parts();
   List declarator = e._declarator(%($name), mods);
   return %(${e._emit(base)} @declarator);
@@ -1072,7 +1069,7 @@ static List _commas(List items) {
 
 // tagged types
 
-static List Emitter._enum(Emitter e, List ast) {
+static List Emitter._enum(Emitter &e, List ast) {
   List name = ast.type().tag(), body = ast.type().body().car();
   if (_is_gensym_tag(name) && !ast.type().is_enum_tag()) name = NULL;
   if (name) name = e._emit(name);
@@ -1085,7 +1082,7 @@ static List Emitter._enum(Emitter e, List ast) {
   return %( ${ast.car()} "{" @body "}");
 }
 
-static List Emitter._aggregate(Emitter e, List ast) {
+static List Emitter._aggregate(Emitter &e, List ast) {
   if (ast.type().is_aggregate_tag()) {
     Var alias = e.native_aliases.assoc(ast);
     if (alias is <list>) return e._emit(alias);
@@ -1122,7 +1119,7 @@ static int _is_gensym_tag(List tag) {
    groups around its arm, so the switch still reaches later arms when the
    preprocessor removes that arm. */
 
-static List Emitter._match_cases(Emitter e, List ast) {
+static List Emitter._match_cases(Emitter &e, List ast) {
   List (expr, cases) = ast.cdr();
   expr = e._emit(expr);
   int max_binders = 0;
@@ -1161,7 +1158,7 @@ static List Emitter._match_cases(Emitter e, List ast) {
 ");
 }
 
-static List Emitter._match_if(Emitter e, List ast, int &dispatched) {
+static List Emitter._match_if(Emitter &e, List ast, int &dispatched) {
   Array values = [], heads = [], int labelling = 1, opening = 0;
   List arms = NULL;
   foreach (List rec, ast) {
@@ -1203,7 +1200,7 @@ static List _match_arm_label(Symbol head, Array heads, int &labelling) {
 }
 
 static List Emitter._match_arm(
-  Emitter e, List binders, List pattern_ast, List body_ast, Var value) {
+  Emitter &e, List binders, List pattern_ast, List body_ast, Var value) {
   List implicit_break = %("break;");
   match (body_ast)
     case %(guarded ?body): {
@@ -1234,7 +1231,7 @@ static List Emitter._match_arm(
 
 /* A macro-valued case recognizes the subject through the runtime, which
    publishes captures into the arm's buffer. */
-static List Emitter._macro_case(Emitter e, List pattern_ast) {
+static List Emitter._macro_case(Emitter &e, List pattern_ast) {
   match (pattern_ast)
     case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
                         (args ?template ?names))):
@@ -1273,7 +1270,7 @@ static List _flat_match_condition(Symbol head, List tags) {
 }
 
 static List Emitter._match_capture_arm(
-  Emitter e, List binders, List pattern, List body,
+  Emitter &e, List binders, List pattern, List body,
   List implicit_break, Var value) {
   int static_pattern = match_value_is_static(value);
   String site_name = static_pattern ? e.fresh_name("match_site") : NULL;

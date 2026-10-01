@@ -297,32 +297,32 @@ static Graph _graph(Array symbols, uint32_t span, uint64_t seed){
 
 static int Graph_peel(Graph * g){
   int head = 0, tail = 0, ordered = 0;
-  for(int vertex = 0;  vertex < g -> vertices;  vertex ++) if(g -> degree[vertex] == 1) g -> queue[tail ++] = vertex;
+  for(int vertex = 0;  vertex <(* g).vertices;  vertex ++) if((* g).degree[vertex] == 1)(* g).queue[tail ++] = vertex;
   while(head < tail){
-    int vertex = g -> queue[head ++];
-    if(g -> degree[vertex] != 1) continue;
-    int edge = g -> edge_xor[vertex];
-    if(g -> removed[edge]) continue;
-    g -> removed[edge] = 1;
-    g -> order_edges[ordered] = edge;
-    g -> order_vertices[ordered ++] = vertex;
+    int vertex =(* g).queue[head ++];
+    if((* g).degree[vertex] != 1) continue;
+    int edge =(* g).edge_xor[vertex];
+    if((* g).removed[edge]) continue;
+    (* g).removed[edge] = 1;
+    (* g).order_edges[ordered] = edge;
+    (* g).order_vertices[ordered ++] = vertex;
     for(int part = 0;  part < 3;  part ++){
-      uint32_t adjacent = g -> edges[edge].vertices[part];
-      g -> degree[adjacent] --;
-      g -> edge_xor[adjacent] ^= edge;
-      if(g -> degree[adjacent] == 1) g -> queue[tail ++] = adjacent;
+      uint32_t adjacent =(* g).edges[edge].vertices[part];
+      (* g).degree[adjacent] --;
+      (* g).edge_xor[adjacent] ^= edge;
+      if((* g).degree[adjacent] == 1)(* g).queue[tail ++] = adjacent;
     }
 
   }
-  return ordered == g -> count;
+  return ordered ==(* g).count;
 }
 
 static void Graph_assign(Graph * g, uint32_t * table){
-  for(int position = g -> count - 1;  position >= 0;  position --){
-    int edge = g -> order_edges[position], vertex = g -> order_vertices[position];
+  for(int position =(* g).count - 1;  position >= 0;  position --){
+    int edge =(* g).order_edges[position], vertex =(* g).order_vertices[position];
     uint32_t value =(uint32_t) edge;
     for(int part = 0;  part < 3;  part ++){
-      uint32_t adjacent = g -> edges[edge].vertices[part];
+      uint32_t adjacent =(* g).edges[edge].vertices[part];
       if((int) adjacent != vertex) value ^= table[adjacent];
     }
     table[vertex] = value;

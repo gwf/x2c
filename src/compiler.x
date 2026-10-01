@@ -717,7 +717,7 @@ static void Compiler._prepare_shadow(
 }
 
 // A part's productions run in source order.
-static void Defaults.produce(Defaults *d, Map declarations) {
+static void Defaults.produce(Defaults &d, Map declarations) {
   Array ordered = [];
   foreach (Var (key, value), declarations)
     match (key)
@@ -767,7 +767,7 @@ static List Compiler._generated_rows(Compiler c, Var callback, Var arguments) {
 
 /* Each production selects its defaults, and a forwarded constructor
    waits for its parent's constructor. */
-static void Defaults.select(Defaults *d) {
+static void Defaults.select(Defaults &d) {
   for (size_t index = 0; index < d.sources.len(); index++) {
     (Map declarations, Var key, Var end, List rows) = d.sources[index];
     List selected = d._select_rows(rows);
@@ -778,7 +778,7 @@ static void Defaults.select(Defaults *d) {
   }
 }
 
-static List Defaults._select_rows(Defaults *d, List rows) {
+static List Defaults._select_rows(Defaults &d, List rows) {
   Compiler c = d.c;
   Array selected = [];
   foreach (List row, rows) {
@@ -798,7 +798,7 @@ static List Defaults._select_rows(Defaults *d, List rows) {
 
 /* Returns the function to bind for a default, named through its macro
    slot, or void when a declaration already takes its name. */
-static Var Defaults._unless_taken(Defaults *d, List syntax) {
+static Var Defaults._unless_taken(Defaults &d, List syntax) {
   match (syntax)
     case %(function ?return_type (bind ?name ?modifiers) ?body): {
       name = d.c.evaluate_macro_slot(name);
@@ -816,7 +816,7 @@ static Var Defaults._unless_taken(Defaults *d, List syntax) {
 /* A default yields to any declaration of its name except a bodyless,
    non-static function prototype in the default's own file, which the
    default then completes. */
-static int Defaults._taken(Defaults *d, String spelling) {
+static int Defaults._taken(Defaults &d, String spelling) {
   Compiler c = d.c;
   List key = %($spelling);
   Type declared = c.sym.get(key);
@@ -839,7 +839,7 @@ static List Compiler._bind_default(Compiler c, List syntax) {
 
 /* Forwarded constructors bind as their parents' constructors complete; a
    round that completes none leaves a parent that never will. */
-static void Defaults.forward(Defaults *d) {
+static void Defaults.forward(Defaults &d) {
   int remaining = d.pending.len();
   while (remaining) {
     int previous = remaining;
@@ -857,7 +857,7 @@ static void Defaults.forward(Defaults *d) {
   }
 }
 
-static List Defaults._forward_rows(Defaults *d, List rows, int &remaining) {
+static List Defaults._forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
@@ -885,7 +885,7 @@ static List Defaults._forward_rows(Defaults *d, List rows, int &remaining) {
    when the parent has no such member, and NULL while the parent's own
    constructor is still pending. */
 static List Defaults._forwarded(
-  Defaults *d, Type child, Type parent, String member, List fallback) {
+  Defaults &d, Type child, Type parent, String member, List fallback) {
   Compiler c = d.c;
   String name = %"${child.car()}_$member";
   if (c.sym.get(%($name))) return %(seq);
@@ -931,7 +931,7 @@ static List Compiler._forwarder(
 
 /* The selected rows replace each production's bundle in its part and in
    the unit's symbols. */
-static void Defaults.store(Defaults *d, Map symbols) {
+static void Defaults.store(Defaults &d, Map symbols) {
   foreach (List source, d.sources) {
     (Map declarations, Var key, Var end, List rows) = source;
     declarations[key] = d.c.freeze_declaration_syntax(
@@ -1034,7 +1034,7 @@ static Token Compiler._parse_forms(Compiler c, Array nodes) {
 
 /* Parses one form, or skips a failed one whole. Returns 0 when the parse
    stops: the error limit is reached, or the skip reached the end. */
-static int FullParse.form(FullParse *p) {
+static int FullParse.form(FullParse &p) {
   Compiler c = p.c;
   Token start = c.token;
   int braces = c.braces.len();
@@ -1052,7 +1052,7 @@ static int FullParse.form(FullParse *p) {
   return 1;
 }
 
-static void FullParse.parse(FullParse *p, Token start) {
+static void FullParse.parse(FullParse &p, Token start) {
   Compiler c = p.c;
   Token tokens = c.tokenizer.tokens;
   int begin = start - tokens;
@@ -1065,7 +1065,7 @@ static void FullParse.parse(FullParse *p, Token start) {
 }
 
 // A script statement joins the runs that `main` executes.
-static void FullParse.hoist(FullParse *p, int begin, Token tokens) {
+static void FullParse.hoist(FullParse &p, int begin, Token tokens) {
   p.c.skip_script_statement();
   int end = p.c._end_index(tokens);
   p.statements.push(begin);
@@ -1074,7 +1074,7 @@ static void FullParse.hoist(FullParse *p, int begin, Token tokens) {
 }
 
 // A retained declaration bundle replays; any other form parses.
-static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
+static void FullParse.top_level(FullParse &p, int begin, Token tokens) {
   Compiler c = p.c;
   c._reject_statement();
   Ast node = c._replay_bundle();
@@ -1085,7 +1085,7 @@ static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
   else if (node) p.add(node, begin, end);
 }
 
-static void FullParse.add(FullParse *p, List node, int begin, int end) {
+static void FullParse.add(FullParse &p, List node, int begin, int end) {
   Token tokens = p.c.tokenizer.tokens;
   p.c._record_top_level(node, tokens + begin);
   p.c._record_span(node, begin, end);

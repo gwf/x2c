@@ -343,7 +343,7 @@ CliRequest cli_parse(int argc, char **argv) {
   String first = args[0];
   if (!first) driver_error("expected a command, found an empty argument");
   CliCommand *command = _command_row(first);
-  if (command) return _parse_command(args, command);
+  if (command) return _parse_command(args, *command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
   if (first == "--version" || first == "-V") {
     puts(cli_version());
@@ -375,7 +375,7 @@ typedef struct Parse {
   Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
 } Parse;
 
-static CliRequest _parse_command(Array args, CliCommand *command) {
+static CliRequest _parse_command(Array args, CliCommand &command) {
   Parse p = {
     .request = cli_request(command.name), .args = args, .mask = command.mask,
     .inputs = [], .run_args = [], .include_dirs = [], .cpp_args = [],
@@ -387,7 +387,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
 }
 
 /* Reads the word at `i` and leaves `i` on the last word it used. */
-static void Parse.word(Parse *p, int &i) {
+static void Parse.word(Parse &p, int &i) {
   String arg = p.args[i];
   if (!p.operands && arg == "--") p.operands = 1;
   else if (p.expands(arg, i)) p.expand(arg, i);
@@ -397,11 +397,11 @@ static void Parse.word(Parse *p, int &i) {
 
 /* A script expands a response file among its options. The expanded words
    replace the reference and are read next, but never expanded again. */
-static int Parse.expands(Parse *p, String arg, int i) =>
+static int Parse.expands(Parse &p, String arg, int i) =>
   p.mask == CLI_SCRIPT && !p.operands && i >= p.expanded &&
   arg.startswith("@");
 
-static void Parse.expand(Parse *p, String arg, int &i) {
+static void Parse.expand(Parse &p, String arg, int &i) {
   Array words = [];
   _expand_argument(words, arg, NULL);
   p.args.splice(i, 1, words);
@@ -411,7 +411,7 @@ static void Parse.expand(Parse *p, String arg, int &i) {
 
 /* An operand is an input, or after `--` a program argument for `run`.
    Every word after a script belongs to the script, `@` and `--` too. */
-static void Parse.operand(Parse *p, String arg, int &i) {
+static void Parse.operand(Parse &p, String arg, int &i) {
   if (p.operands && p.mask == CLI_RUN) p.run_args.push(arg);
   else p.inputs.push(arg);
   if (p.mask == CLI_SCRIPT)
@@ -420,7 +420,7 @@ static void Parse.operand(Parse *p, String arg, int &i) {
 
 /* The argument lists become the request's. The table conses its list
    fields newest first. */
-static void Parse.finish(Parse *p) {
+static void Parse.finish(Parse &p) {
   CliRequest r = p.request;
   r.inputs = p.inputs.list_free();
   r.run_args = p.run_args.list_free();
@@ -477,7 +477,7 @@ typedef struct Given {
 
 /* A dashed word is the removed `-o`, `--save-temps=<dir>`, or an option
    from the table. */
-static void Parse.option(Parse *p, String arg, int &i) {
+static void Parse.option(Parse &p, String arg, int &i) {
   if (arg == "-o") _removed_output();
   if ((p.mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
     p.request._save_temps_dir(arg);
@@ -543,7 +543,7 @@ static CliOption *_find_option(String spelling, int mask, String &attached) {
 }
 
 /* An option without an arm here sets the request field its row names. */
-static void Parse.apply(Parse *p, Given given) {
+static void Parse.apply(Parse &p, Given given) {
   CliRequest r = p.request;
   String spelling = given.spelling, value = given.value;
   $switch(given.option.id)
@@ -571,7 +571,7 @@ static void Parse.apply(Parse *p, Given given) {
     case <pthread>: p.cc_args.push(spelling); p.ld_args.push(spelling);
     case <framework>: case <xlinker>: _push_pair(p.ld_args, spelling, value);
     case <wl>: p.ld_args.push(spelling);
-    default: r._set_field(given.option, value);
+    default: r._set_field(*given.option, value);
   }
 }
 
@@ -603,7 +603,7 @@ static int _count(String value, int minimum, String noun) {
 
 /* Commands other than translate also hand a shared include directory to
    the C compiler. */
-static void Parse.include_dir(Parse *p, String dir) {
+static void Parse.include_dir(Parse &p, String dir) {
   p.include_dirs.push(dir);
   if (p.request.command != <translate>) _push_pair(p.cc_args, "-I", dir);
 }
@@ -639,7 +639,7 @@ int cli_dependency_pass_through(String s) {
 }
 
 static void CliRequest._set_field(
-  CliRequest r, CliOption *option, String value) {
+  CliRequest r, CliOption &option, String value) {
   char *field = (char *) r + option.offset;
   $switch(option.apply)
   {
@@ -677,7 +677,7 @@ CliRequest cli_package_options(String path, String package) {
 
 /* A package's native word is an archive to link or an option a package may
    carry. */
-static void Parse.native(Parse *p, int &i) {
+static void Parse.native(Parse &p, int &i) {
   String arg = p.args[i];
   if (!arg) driver_error("empty package native argument");
   if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
@@ -786,7 +786,7 @@ static Array _response_words(String path, const char *text, size_t length) {
 
 /* Inside a comment only a newline counts. A backslash escapes the next
    character, in quotes or out. */
-static void Words.scan(Words *w, int c) {
+static void Words.scan(Words &w, int c) {
   if (w.comment) {
     if (c == '\n') w.newline();
   }
@@ -807,7 +807,7 @@ static void Words.scan(Words *w, int c) {
 
 /* Outside quotes, a quote opens, `#` on a blank line starts a comment, and
    whitespace ends a word. */
-static void Words.bare(Words *w, int c) {
+static void Words.bare(Words &w, int c) {
   if (c == '\'' || c == '"') {
     w.quote = c;
     w.started = 1;
@@ -825,19 +825,19 @@ static void Words.bare(Words *w, int c) {
 }
 
 /* Quoted and escaped newlines stay in the word and still count as lines. */
-static void Words.put(Words *w, int c) {
+static void Words.put(Words &w, int c) {
   w.word.write_char(c);
   w.started = 1;
   if (c == '\n') w.line++;
 }
 
-static void Words.newline(Words *w) {
+static void Words.newline(Words &w) {
   w.comment = 0;
   w.blank = 1;
   w.line++;
 }
 
-static void Words.flush(Words *w) {
+static void Words.flush(Words &w) {
   if (!w.started) return;
   w.out.push(w.word.str());
   w.word.clear();
@@ -845,7 +845,7 @@ static void Words.flush(Words *w) {
 }
 
 /* The text may end in a comment, but not in quotes or after a backslash. */
-static void Words.finish(Words *w) {
+static void Words.finish(Words &w) {
   if (w.comment) return;
   if (w.escaped) _response_error(w.path, w.line, "trailing backslash");
   if (w.quote) _response_error(w.path, w.line, "unterminated quote");
@@ -858,7 +858,7 @@ static void Words.finish(Words *w) {
 static void _help_exit(Symbol command, int status) {
   if (!command) _print_top_help();
   else if (command == <help>) _print_help_usage();
-  else _print_page(_help_page(command));
+  else _print_page(*_help_page(command));
   exit(status);
 }
 
@@ -1040,7 +1040,7 @@ static HelpPage *_help_page(Symbol command) {
   driver_error(%"unknown help command '${command}'");
 }
 
-static void _print_page(HelpPage *page) {
+static void _print_page(HelpPage &page) {
   puts(page.usage);
   _print_options(page.command);
   _print_help_row("@<file>", page.response, 2);
@@ -1057,7 +1057,7 @@ static void _print_options(Symbol command) {
   if (mask == CLI_TOP) {
     puts("\nGlobal options:");
     for (CliOption *option = cli_options; option.spelling; option++)
-      if (_listed(option, mask)) _print_option(option);
+      if (_listed(*option, mask)) _print_option(*option);
     return;
   }
   Symbol groups[] = {
@@ -1071,17 +1071,17 @@ static void _print_options(Symbol command) {
 /* A group's title prints only above options the command lists. */
 static void _print_group(Symbol command, int mask, Symbol group) {
   CliOption *option = cli_options;
-  while (option.spelling && !_in_group(option, mask, group)) option++;
+  while (option.spelling && !_in_group(*option, mask, group)) option++;
   if (!option.spelling) return;
   printf("\n%s\n", _group_title(command, group));
   for (; option.spelling; option++)
-    if (_in_group(option, mask, group)) _print_option(option);
+    if (_in_group(*option, mask, group)) _print_option(*option);
 }
 
-static int _listed(CliOption *option, int mask) =>
+static int _listed(CliOption &option, int mask) =>
   !option.hidden && (option.commands & mask);
 
-static int _in_group(CliOption *option, int mask, Symbol group) =>
+static int _in_group(CliOption &option, int mask, Symbol group) =>
   _listed(option, mask) && option.group == group;
 
 static const char *_group_title(Symbol command, Symbol group) {
@@ -1100,7 +1100,7 @@ static const char *_group_title(Symbol command, Symbol group) {
   return "Global options:";
 }
 
-static void _print_option(const CliOption *option) {
+static void _print_option(const CliOption &option) {
   String spelled = option.label ? option.label :
                    option.alias ? %"${option.spelling}, ${option.alias}" :
                    option.spelling;

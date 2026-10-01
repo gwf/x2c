@@ -226,7 +226,7 @@ List Sym.define(Sym s, List key, List type) {
   SymScope *scope = s._scope_at(-1);
   s.set(key, type);
   _seed_var_tag(key, type);
-  return s._scope_binding(scope, key);
+  return s._scope_binding(*scope, key);
 }
 
 static void _seed_var_tag(List key, List type) {
@@ -276,7 +276,7 @@ void Sym.declare_enumerator(Sym s, List key, Symbol owner) {
 
 // bindings
 
-static List Sym._scope_binding(Sym s, SymScope *scope, List key) {
+static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
   Var found;
   List binding;
   if (scope.bindings.try_get(key, found)) binding = found;
@@ -301,7 +301,7 @@ static List Sym._scope_binding(Sym s, SymScope *scope, List key) {
 /* Source facts find a binding's declaration through the map and key that
    hold its symbol row. */
 static void Sym._note_source_key(
-  Sym s, SymScope *scope, List key, List binding) {
+  Sym s, SymScope &scope, List key, List binding) {
   Compiler c = s.c;
   List source_key = %(${scope.symbols} $key);
   s.binding_facts[%(src-key $binding)] = source_key;
@@ -419,7 +419,7 @@ List Sym.resolve_global(Sym s, List key, Type &?type) =>
 List Sym.reference_global(Sym s, List key) {
   List binding = s.resolve_global(key, NULL);
   if (binding) return binding;
-  return s._scope_binding(s._scope_at(s.base_scopes - 1), key);
+  return s._scope_binding(*s._scope_at(s.base_scopes - 1), key);
 }
 
 static List Sym._lookup_from(
@@ -429,7 +429,7 @@ static List Sym._lookup_from(
     SymScope *scope = s._scope_at(i);
     if (scope.symbols.try_get(key, found)) {
       if (type) type = found;
-      return s._scope_binding(scope, key);
+      return s._scope_binding(*scope, key);
     }
     if (scope.bindings.try_get(key, found)) {
       if (type) type = NULL;
@@ -440,7 +440,7 @@ static List Sym._lookup_from(
   if (retry && (!forward || s.get_exact(retry)))
     return s._lookup_from(retry, type, first, forward);
   if (type) type = NULL;
-  return forward ? s._scope_binding(s._scope_at(-1), key) : NULL;
+  return forward ? s._scope_binding(*s._scope_at(-1), key) : NULL;
 }
 
 // declarations
@@ -1180,7 +1180,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction._save(*scope);
   if (transaction.extended) transaction._save_effects();
   if (c.source_facts && c.source_primary) transaction._save_sources();
-  transaction._stage(scope);
+  transaction._stage(*scope);
   transaction.active = 1;
   return transaction;
 }
@@ -1226,7 +1226,7 @@ static void SymTxn._save_sources(SymTxn s) {
 /* Macro binding is incremental. Copy only the maps that construction
    mutates so failure can discard its rows while reads still reach the
    unchanged outer scopes. */
-static void SymTxn._stage(SymTxn s, SymScope *scope) {
+static void SymTxn._stage(SymTxn s, SymScope &scope) {
   Compiler c = s.c;
   scope.symbols = s.scope.symbols.copy();
   c.merge_source_declarations(scope.symbols, s.scope.symbols);
@@ -1258,13 +1258,13 @@ void SymTxn.commit(SymTxn s) {
   /* Restore the original map identities before merging staged rows. Code
      holding a borrowed scope map must observe a committed expansion. */
   *scope = s.scope;
-  c._merge_scope(scope, staged);
+  c._merge_scope(*scope, staged);
   if (s.extended) s._commit_effects();
   s.active = 0;
 }
 
 static void Compiler._merge_scope(
-  Compiler c, SymScope *scope, SymScope staged) {
+  Compiler c, SymScope &scope, SymScope staged) {
   scope.symbols.merge(staged.symbols);
   c.merge_source_declarations(scope.symbols, staged.symbols);
   scope.bindings.merge(staged.bindings);

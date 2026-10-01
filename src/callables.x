@@ -175,7 +175,7 @@ static List Compiler._captured_lambda(
 }
 
 static void CaptureBuild.declare(
-  CaptureBuild *b, List type_binding, List captures) {
+  CaptureBuild &b, List type_binding, List captures) {
   Array fields = [];
   foreach (List capture, captures) b._field(fields, capture);
   b.c.add_early(b.c.capture_environment(type_binding, fields.list_free()));
@@ -190,7 +190,7 @@ List Compiler.capture_environment(Compiler c, List name, List fields) {
   return c.bind_syntax(environment(name, fields), AST_UNIT, NULL);
 }
 
-static void CaptureBuild._field(CaptureBuild *b, Array fields, List capture) {
+static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
   match (capture)
     case %(capture ?binding ?captured_type ?expression): {
       Compiler c = b.c;
@@ -216,7 +216,7 @@ static void CaptureBuild._field(CaptureBuild *b, Array fields, List capture) {
 
 /* The adapter borrows the copied context for each synchronous Func call. */
 static void CaptureBuild.publish(
-  CaptureBuild *b, List entries, List body, List closure, List argv) {
+  CaptureBuild &b, List entries, List body, List closure, List argv) {
   Compiler c = b.c;
   List params = c.lambda_param_types(entries);
   List locals = c._func_argument_locals(
@@ -240,7 +240,7 @@ static List _entry_binding(List entry) {
 /* Capture-construction expressions read through this context, but a nested
    lambda body is left alone: its own environment and lowering handle that
    body once the rewritten capture values are available. */
-static List CaptureBuild._rewrite(CaptureBuild *b, List ast) {
+static List CaptureBuild._rewrite(CaptureBuild &b, List ast) {
   if (!ast) return ast;
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   if (ast.car() == <expr>) {
@@ -261,12 +261,12 @@ static List CaptureBuild._rewrite(CaptureBuild *b, List ast) {
   $ast.rewrite_children(ast, child, b._rewrite(child));
 }
 
-static List CaptureBuild._rows(CaptureBuild *b, List captures) {
+static List CaptureBuild._rows(CaptureBuild &b, List captures) {
   Var row;
   $ast.rewrite_children(captures, row, b._row(row));
 }
 
-static List CaptureBuild._row(CaptureBuild *b, List row) {
+static List CaptureBuild._row(CaptureBuild &b, List row) {
   match (row)
     case %(capture ?binding ?type ?expression): {
       List value = b._rewrite(expression);
@@ -276,7 +276,7 @@ static List CaptureBuild._row(CaptureBuild *b, List row) {
 }
 
 static List CaptureBuild._read(
-  CaptureBuild *b, List ast, Type source_type, List bound) {
+  CaptureBuild &b, List ast, Type source_type, List bound) {
   Var stored;
   if (!b.slots.try_get(bound, stored)) return ast;
   (List field, Type storage_type) = stored;
@@ -298,7 +298,7 @@ static List CaptureBuild._read(
 
 /* A public inline function reaches the file-static context through a
    generated bridge that copies the capture values it receives. */
-static List CaptureBuild.bridged(CaptureBuild *b) {
+static List CaptureBuild.bridged(CaptureBuild &b) {
   Compiler c = b.c;
   List bridge = c._func_bridge_binding("func_from_capture");
   Array parameters = [], factory_values = [];
@@ -323,14 +323,14 @@ static List CaptureBuild.bridged(CaptureBuild *b) {
   return b._result(NULL, call);
 }
 
-static List CaptureBuild.direct(CaptureBuild *b) {
+static List CaptureBuild.direct(CaptureBuild &b) {
   Compiler c = b.c;
   List context = c.sym.introduce(c.fresh_name("lambda_context"));
   List storage = b._storage(context, b.values.list_free());
   return b._result(storage, b._construct(context));
 }
 
-static List CaptureBuild._storage(CaptureBuild *b, List context, List values) {
+static List CaptureBuild._storage(CaptureBuild &b, List context, List values) {
   List initializer = %(expr ${b.value_type}
     (composite (commas @values)));
   Macro local = $func_local;
@@ -338,7 +338,7 @@ static List CaptureBuild._storage(CaptureBuild *b, List context, List values) {
     local(b.value_type, %(op = (bind $context ()) $initializer))).cadr();
 }
 
-static List CaptureBuild._construct(CaptureBuild *b, List context) {
+static List CaptureBuild._construct(CaptureBuild &b, List context) {
   Compiler c = b.c;
   Type constructor_type = NULL;
   List constructor = c._adapter_helper("Func_new_context", constructor_type);
@@ -352,7 +352,7 @@ static List CaptureBuild._construct(CaptureBuild *b, List context) {
 macro open Expression $statement_value(Expr $value, Statement $setup...) =>
   ({ $setup... $value; });
 
-static List CaptureBuild._result(CaptureBuild *b, List storage, List value) {
+static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
   List setup = b.locals.list_free();
   if (storage) setup = setup.append(%($storage));
   Macro shape = $statement_value;
@@ -443,7 +443,7 @@ static List Compiler._prepare_nested_regions(Compiler c, List ast) {
       ? c._prepare_nested_regions(child) : child.list());
 }
 
-static void CellRegion.own(CellRegion *r, List binding) {
+static void CellRegion.own(CellRegion &r, List binding) {
   if (!binding || binding in r.owned) return;
   Var automatic, stored_type;
   Map facts = r.c.semantic_binding_facts();
@@ -461,7 +461,7 @@ static void CellRegion.own(CellRegion *r, List binding) {
    Keep the manual worklist: a Func visit callback's dynamic call per node
    cost ~6% of self-translation.
    Pending sibling suffixes wait on `resume` to stay off the C stack. */
-static void CellRegion.collect(CellRegion *r, List ast) {
+static void CellRegion.collect(CellRegion &r, List ast) {
   if (!ast) return;
   Array resume = $auto([]);
   Macro lambda = $lambda_expression, captured = $lambda_captured;
@@ -513,7 +513,7 @@ static void _collect_reference_captures(List ast, Map owned, Map candidates) {
 }
 
 /* Each candidate binding gets a cell, in declaration order. */
-static void CellRegion.allocate(CellRegion *r, Map candidates) {
+static void CellRegion.allocate(CellRegion &r, Map candidates) {
   Compiler c = r.c;
   foreach (List binding, r.order) {
     Var stored_type;
@@ -526,7 +526,7 @@ static void CellRegion.allocate(CellRegion *r, Map candidates) {
   }
 }
 
-static List CellRegion.rewrite(CellRegion *r, List ast) {
+static List CellRegion.rewrite(CellRegion &r, List ast) {
   if (!ast) return ast;
   match (ast) {
     case %(declare ?target (bindings *bindings)): {
@@ -553,7 +553,7 @@ static List CellRegion.rewrite(CellRegion *r, List ast) {
    its binding preserves declaration order and evaluates its initializer once;
    moving allocations to lambda construction would reorder visible effects. */
 static List CellRegion._declaration(
-  CellRegion *r, List target, List bindings) {
+  CellRegion &r, List target, List bindings) {
   int has_cell = 0;
   foreach (List item, bindings)
     match (item) case %(!or (bind ?binding *) (op = (bind ?binding *) ?)):
@@ -585,7 +585,7 @@ static List CellRegion._declaration(
    once and keeps it in the cell's row. Binding opens a semantic
    transaction that copies the unit's maps; doing that per read made
    translation quadratic in the number of captured reads. */
-static List CellRegion._value(CellRegion *r, List binding, List cell) {
+static List CellRegion._value(CellRegion &r, List binding, List cell) {
   Var cached;
   if (r.values.try_get(binding, cached)) return cached;
   Macro shape = $compiler_cell_value;
@@ -595,7 +595,7 @@ static List CellRegion._value(CellRegion *r, List binding, List cell) {
 }
 
 static int CellRegion._lookup(
-  CellRegion *r, List binding, List &cell, Type &type) {
+  CellRegion &r, List binding, List &cell, Type &type) {
   Var stored;
   if (!r.cells.try_get(binding, stored)) return 0;
   List row = stored;
@@ -615,7 +615,7 @@ static List Compiler._cell_declaration(
 }
 
 /* Parameters copy into their cells at entry. */
-static List CellRegion.setup(CellRegion *r, List entries) {
+static List CellRegion.setup(CellRegion &r, List entries) {
   Array setup = [];
   foreach (List entry, entries) {
     List binding = _entry_binding(entry);
@@ -1169,7 +1169,7 @@ static List Compiler._func_argument_locals(
 }
 
 static List FuncReaders.read(
-  FuncReaders *r, Type parameter_type, int index, Type &storage_type) {
+  FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
   if (parameter_type.car() == <&> ||
       parameter_type.car() == <opt-ref>)
     return r._reference(parameter_type, index, storage_type);
@@ -1182,7 +1182,7 @@ static List FuncReaders.read(
 }
 
 static List FuncReaders._reference(
-  FuncReaders *r, Type parameter_type, int index, Type &storage_type) {
+  FuncReaders &r, Type parameter_type, int index, Type &storage_type) {
   Compiler c = r.c;
   Type target = parameter_type.cdr(), pointer = target.reference();
   List picked = r._call(
@@ -1193,7 +1193,7 @@ static List FuncReaders._reference(
 }
 
 static List FuncReaders._pointer(
-  FuncReaders *r, Type parameter_type, Type resolved, int index,
+  FuncReaders &r, Type parameter_type, Type resolved, int index,
   Type &storage_type) {
   Compiler c = r.c;
   /* A pointer without its own Var tag and a by-value record both arrive as
@@ -1213,7 +1213,7 @@ static List FuncReaders._pointer(
 }
 
 static List FuncReaders._value(
-  FuncReaders *r, Type parameter_type, Symbol tag, int index,
+  FuncReaders &r, Type parameter_type, Symbol tag, int index,
   Type &storage_type) {
   if (!tag)
     r.c._adapter_error(
@@ -1227,7 +1227,7 @@ static List FuncReaders._value(
 
 /* Call a resolved adapter reader without rebinding its typed arguments. */
 static List FuncReaders._call(
-  FuncReaders *r, Type result_type, List target, int index,
+  FuncReaders &r, Type result_type, List target, int index,
   List details) {
   List fn = %(expr ("Func") (ident ${r.fn}));
   List argv = %(expr (* const "FuncArg") (ident ${r.argv}));
@@ -1364,7 +1364,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
 
 /* The source is a direct function, and both signatures are complete and
    fixed. */
-static void Callback.split(Callback *cb) {
+static void Callback.split(Callback &cb) {
   Type source = cb.source;
   if (!cb.source_binding || !source || source.is_pointer() ||
       !source.is_function())
@@ -1380,7 +1380,7 @@ static void Callback.split(Callback *cb) {
     cb._fail("typed callback adapter cannot be variadic", NULL);
 }
 
-static void Callback.check_signature(Callback *cb) {
+static void Callback.check_signature(Callback &cb) {
   int target_count = cb.params.len(), source_count = cb.source_params.len();
   if (target_count != source_count) {
     String detail = "target has %d parameters; source has %d".printf(
@@ -1395,7 +1395,7 @@ static void Callback.check_signature(Callback *cb) {
     cb._fail("typed callback adapter return type mismatch", NULL);
 }
 
-static void Callback.check_params(Callback *cb) {
+static void Callback.check_params(Callback &cb) {
   int index = 0;
   List targets = cb.params, sources = cb.source_params;
   for (; targets;
@@ -1410,7 +1410,7 @@ static void Callback.check_params(Callback *cb) {
 }
 
 // Permit matching parameter types and one dynamic extraction.
-static int Callback._allows(Callback *cb, Type target, Type source) {
+static int Callback._allows(Callback &cb, Type target, Type source) {
   target = target.canonicalize();
   source = source.canonicalize();
   if (target == source) return 1;
@@ -1422,11 +1422,11 @@ static int Callback._allows(Callback *cb, Type target, Type source) {
   }
 }
 
-static void Callback._fail(Callback *cb, String message, List details) {
+static void Callback._fail(Callback &cb, String message, List details) {
   cb.c._adapter_error(message, cb.target, cb.source, details);
 }
 
-static List Callback.publish_typed(Callback *cb, Type spelling) {
+static List Callback.publish_typed(Callback &cb, Type spelling) {
   Compiler c = cb.c;
   List key = %(tadapt ${cb.source_binding} ${cb.target}), binding = NULL;
   $adapter.memo(c, key, binding) {
@@ -1440,7 +1440,7 @@ static List Callback.publish_typed(Callback *cb, Type spelling) {
 
 /* The helper `binding` names: each argument converts to its source
    parameter, and the source result converts to the callback result. */
-static List Callback.function(Callback *cb, List binding) {
+static List Callback.function(Callback &cb, List binding) {
   Compiler c = cb.c;
   List params = cb.params, source_params = cb.source_params;
   List names = c._auto_names(params.len());
@@ -1503,7 +1503,7 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   return cb.publish_lambda();
 }
 
-static List Callback.publish_lambda(Callback *cb) {
+static List Callback.publish_lambda(Callback &cb) {
   Compiler c = cb.c;
   List binding = c.sym.introduce(c.fresh_name("lambda_adapt"));
   c.add_early(cb.function(binding));

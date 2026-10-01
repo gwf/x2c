@@ -660,13 +660,13 @@ static _Layout _layout_open(Tokenizer t) {
   return l;
 }
 
-static void _Layout.close(_Layout *l) {
+static void _Layout.close(_Layout &l) {
   free(l.sig); free(l.depths); free(l.lines); free(l.edits);
   free(l.indents); free(l.closers); free(l.enums); free(l.ternary);
 }
 
 /* The edit of significant token `k`. */
-static _LayoutEdit *_Layout.edit(_Layout *l, int k) =>
+static _LayoutEdit *_Layout.edit(_Layout &l, int k) =>
   &l.edits[l.sig[k] - l.all];
 
 // logical lines
@@ -674,7 +674,7 @@ static _LayoutEdit *_Layout.edit(_Layout *l, int k) =>
 /* Logical lines run to a line break at bracket depth zero, except that a
    deeper line or one starting with `.` continues them. A colon that closes
    a `?` opens no block, so the line after it continues too. */
-static void _Layout.split_lines(_Layout *l) {
+static void _Layout.split_lines(_Layout &l) {
   int depth = 0, end_line = 0, pending = 0;
   for (int k = 0; k < l.nsig; k++) {
     Token tok = l.sig[k];
@@ -697,7 +697,7 @@ static void _Layout.split_lines(_Layout *l) {
   }
 }
 
-static int _Layout.starts_line(_Layout *l, int k, int depth, int end_line) {
+static int _Layout.starts_line(_Layout &l, int k, int depth, int end_line) {
   Token tok = l.sig[k];
   if (tok.type == <preproc> || !l.nlines || l.lines[l.nlines - 1].directive)
     return 1;
@@ -707,7 +707,7 @@ static int _Layout.starts_line(_Layout *l, int k, int depth, int end_line) {
 }
 
 /* A tab in a statement line's indentation is inconsistent. */
-static void _Layout.check_tab(_Layout *l, Token tok) {
+static void _Layout.check_tab(_Layout &l, Token tok) {
   if (tok.type == <preproc> || l.error_at || tok <= l.all) return;
   Token space = tok - 1;
   if (space.type != <space>) return;
@@ -726,7 +726,7 @@ static int _end_line(Token tok) {
 /* A line ending in `:` before a deeper line opens a block, and any other
    statement line ends with `;` where it needs one. Each dedent after the
    line closes the blocks it leaves. */
-static void _Layout.edit_line(_Layout *l, int i) {
+static void _Layout.edit_line(_Layout &l, int i) {
   _LayoutLine line = l.lines[i];
   if (line.directive) {
     if (l.sig[line.first].text.strip(" \t\r\n") == "#pragma indent")
@@ -749,14 +749,14 @@ static void _Layout.edit_line(_Layout *l, int i) {
   if (suffix) tail.after = tail.after ? %"${tail.after}$suffix" : suffix;
 }
 
-static int _Layout.next_statement(_Layout *l, int i) {
+static int _Layout.next_statement(_Layout &l, int i) {
   int j = i + 1;
   while (j < l.nlines && l.lines[j].directive) j++;
   return j;
 }
 
 static void _Layout.open_block(
-  _Layout *l, _LayoutLine line, int j, int next) {
+  _Layout &l, _LayoutLine line, int j, int next) {
   Token first = l.sig[line.first];
   _LayoutHeader header = l.header(line);
   if (header.labeled) l.edit(line.last).after = "{";
@@ -769,7 +769,7 @@ static void _Layout.open_block(
   l.closers[l.top] = header.aggregate && first.text != "typedef" ? "};" : "}";
 }
 
-static _LayoutHeader _Layout.header(_Layout *l, _LayoutLine line) {
+static _LayoutHeader _Layout.header(_Layout &l, _LayoutLine line) {
   int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
   for (int m = line.first; m < line.last; m++) {
     String word = l.sig[m].text;
@@ -783,7 +783,7 @@ static _LayoutHeader _Layout.header(_Layout *l, _LayoutLine line) {
 }
 
 /* `do:` without a `while` trailer at its own indentation is a bare block. */
-static int _Layout.bare_do(_Layout *l, _LayoutLine line, int j) {
+static int _Layout.bare_do(_Layout &l, _LayoutLine line, int j) {
   int k = j;
   for (; k < l.nlines; k++)
     if (!l.lines[k].directive && l.lines[k].indent <= line.indent) break;
@@ -796,7 +796,7 @@ static int _Layout.bare_do(_Layout *l, _LayoutLine line, int j) {
 /* A statement line ends with `;` unless it already does or it is an enum
    member, one whole `$(...)` form, or a bare macro hole. A leading `@` marks
    a decorator line, which takes none. */
-static String _Layout.end_statement(_Layout *l, _LayoutLine line) {
+static String _Layout.end_statement(_Layout &l, _LayoutLine line) {
   l.one_line_body(line);
   if (l.sig[line.first].type == <"@">) {
     l.edit(line.first).type = <space>;
@@ -810,7 +810,7 @@ static String _Layout.end_statement(_Layout *l, _LayoutLine line) {
 
 /* A one-line body follows the first colon at depth zero that closes no
    `?`, unless a label owns that colon. */
-static void _Layout.one_line_body(_Layout *l, _LayoutLine line) {
+static void _Layout.one_line_body(_Layout &l, _LayoutLine line) {
   for (int m = line.first + 1; m < line.last; m++) {
     String word = l.sig[m].text;
     if (l.depths[m]) continue;
@@ -822,14 +822,14 @@ static void _Layout.one_line_body(_Layout *l, _LayoutLine line) {
   }
 }
 
-static int _Layout.lisp_form(_Layout *l, _LayoutLine line) {
+static int _Layout.lisp_form(_Layout &l, _LayoutLine line) {
   if (l.sig[line.first].type != <"$(">) return 0;
   for (int m = line.first + 1; m < line.last; m++)
     if (l.depths[m] <= 0) return 0;
   return 1;
 }
 
-static int _Layout.hole(_Layout *l, _LayoutLine line) {
+static int _Layout.hole(_Layout &l, _LayoutLine line) {
   int last = line.last;
   return l.sig[last].type == <ident> && last > line.first &&
     l.sig[last - 1].type == <"$"> &&
@@ -841,7 +841,7 @@ static int _Layout.hole(_Layout *l, _LayoutLine line) {
    spans the condition. A `for` header keeps the parentheses it must have.
    The colon then becomes `body`, or goes when `body` is NULL.
    Returns 0 when no control keyword precedes the colon. */
-static int _Layout.condition(_Layout *l, int first, int colon, String body) {
+static int _Layout.condition(_Layout &l, int first, int colon, String body) {
   int key = l.control_keyword(first, colon);
   if (key < 0) return 0;
   _LayoutEdit *tail = l.edit(colon);
@@ -854,7 +854,7 @@ static int _Layout.condition(_Layout *l, int first, int colon, String body) {
   return 1;
 }
 
-static int _Layout.control_keyword(_Layout *l, int first, int colon) {
+static int _Layout.control_keyword(_Layout &l, int first, int colon) {
   int key = -1;
   for (int m = first; m < colon; m++)
     if (!l.depths[m] && _conditional(l.sig[m]) &&
@@ -863,7 +863,7 @@ static int _Layout.control_keyword(_Layout *l, int first, int colon) {
   return key;
 }
 
-static int _Layout.wrapped(_Layout *l, int key, int colon) {
+static int _Layout.wrapped(_Layout &l, int key, int colon) {
   int wrapped = l.sig[key].text == "for" ||
     (l.sig[key + 1].type == <"("> && l.sig[colon - 1].type == <")">);
   for (int m = key + 2; wrapped && m < colon - 1; m++)
@@ -875,7 +875,7 @@ static int _Layout.wrapped(_Layout *l, int key, int colon) {
 
 /* Copies each token with its edits and ends the stream at the first
    inconsistently indented token. */
-static Bytes _Layout.emit(_Layout *l) {
+static Bytes _Layout.emit(_Layout &l) {
   Bytes out = Bytes.new(sizeof(struct Token));
   for (int i = 0; i <= l.count; i++) {
     Token tok = &l.all[i];

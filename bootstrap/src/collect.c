@@ -944,9 +944,9 @@ static void FileWalk_split(FileWalk * w, Token first){
     {
       for(Token token = first;  token -> type != 11212;  token ++){
         if(token -> type != 35579270086 || ! _starts_line(first, token)) continue;
-        if(! _track_arms(arms, token -> text)) FileWalk_directive(w, token, _hidden(arms));
+        if(! _track_arms(arms, token -> text)) FileWalk_directive(&((* w)), token, _hidden(arms));
       }
-      FileWalk_flush(w, String_getslice(w -> text, w -> pos, -2147483648, 1));
+      FileWalk_flush(&((* w)), String_getslice((* w).text, (* w).pos, -2147483648, 1));
     }
     x2c_cleanup_leave(& _x2c_defer_record_7);
   }
@@ -965,15 +965,15 @@ static void FileWalk_directive(FileWalk * w, Token token, int hidden){
   int angle = 0, visibility = preproc_visibility(token -> text);
   String target = hidden ? NULL : preproc_include_target(token -> text, &(angle));
   if(! String_truth(target) && visibility < 0) return;
-  FileWalk_flush(w, String_getslice(w -> text, w -> pos, token -> pos, 1));
-  if(String_truth(target)) FileWalk_include(w, target, angle);
+  FileWalk_flush(&((* w)), String_getslice((* w).text, (* w).pos, token -> pos, 1));
+  if(String_truth(target)) FileWalk_include(&((* w)), target, angle);
   else{
-    w -> private = visibility;
-    Array_push(w -> parts, Symbol_var(visibility ? 35588017418 : 1117938246));
+    (* w).private = visibility;
+    Array_push((* w).parts, Symbol_var(visibility ? 35588017418 : 1117938246));
   }
   Token next = token + 1;
-  w -> line = next -> line;
-  w -> pos = next -> pos;
+  (* w).line = next -> line;
+  (* w).pos = next -> pos;
 }
 
 int String_contains(String, String);
@@ -1031,8 +1031,8 @@ Var Map_var(Map);
 static void FileWalk_flush(FileWalk * w, String segment){
   if(! String_truth(segment) || ! * segment) return;
   Map overlay = _cache_map();
-  FileWalk_parse(w, segment, overlay);
-  if(Map_len(overlay)) Array_push(w -> parts, Map_var(overlay));
+  FileWalk_parse(&((* w)), segment, overlay);
+  if(Map_len(overlay)) Array_push((* w).parts, Map_var(overlay));
 }
 
 Compiler Compiler_new_shared(Compiler);
@@ -1042,7 +1042,7 @@ void Compiler_shallow_parse_overlay(Compiler, Map, Map);
 void Compiler_return_unit_state(Compiler, Compiler);
 
 static void FileWalk_parse(FileWalk * w, String segment, Map overlay){
-  Compiler shadow = Compiler_new_shared(w -> c);
+  Compiler shadow = Compiler_new_shared((* w).c);
   {
     _x2c_defer_env_5 _x2c_macro_environment_5 ={
       0
@@ -1056,11 +1056,11 @@ static void FileWalk_parse(FileWalk * w, String segment, Map overlay){
     ;
     x2c_cleanup_push(& _x2c_defer_record_8);
     {
-      FileWalk_prepare(w, shadow, segment);
-      Compiler_shallow_parse_overlay(shadow, w -> globs, overlay);
-      w -> linkage = shadow -> open_linkage;
-      Compiler_return_unit_state(shadow, w -> c);
-      FileWalk_merge(w, shadow, overlay);
+      FileWalk_prepare(&((* w)), shadow, segment);
+      Compiler_shallow_parse_overlay(shadow, (* w).globs, overlay);
+      (* w).linkage = shadow -> open_linkage;
+      Compiler_return_unit_state(shadow, (* w).c);
+      FileWalk_merge(&((* w)), shadow, overlay);
     }
     x2c_cleanup_leave(& _x2c_defer_record_8);
   }
@@ -1074,16 +1074,16 @@ void Compiler_tokenize(Compiler, char *);
 Path Path_absolute(Path);
 
 static void FileWalk_prepare(FileWalk * w, Compiler shadow, String segment){
-  if(! w -> unit || ! Compiler__package_owns(w -> c, w -> path)) shadow -> package = NULL;
-  shadow -> filename = w -> path;
-  shadow -> layout = w -> c -> layout;
-  shadow -> source_private = w -> private;
-  shadow -> open_linkage = w -> linkage;
-  Compiler_take_unit_state(shadow, w -> c);
+  if(!(* w).unit || ! Compiler__package_owns((* w).c, (* w).path)) shadow -> package = NULL;
+  shadow -> filename =(* w).path;
+  shadow -> layout =(* w).c -> layout;
+  shadow -> source_private =(* w).private;
+  shadow -> open_linkage =(* w).linkage;
+  Compiler_take_unit_state(shadow, (* w).c);
   Compiler_tokenize(shadow, segment);
-  shadow -> text = w -> text;
-  if(w -> c -> source_facts) Map_setindex(w -> c -> source_texts, String_var(Path_absolute(w -> path)), String_var(w -> text));
-  _shift_tokens(shadow -> tokenizer, w -> line, w -> pos);
+  shadow -> text =(* w).text;
+  if((* w).c -> source_facts) Map_setindex((* w).c -> source_texts, String_var(Path_absolute((* w).path)), String_var((* w).text));
+  _shift_tokens(shadow -> tokenizer, (* w).line, (* w).pos);
 }
 
 static void _shift_tokens(Tokenizer t, int line, int pos){
@@ -1108,16 +1108,16 @@ void Compiler_merge_translation_dependencies(Compiler, Map);
 Map Sym_file_statics(Sym);
 
 static void FileWalk_merge(FileWalk * w, Compiler shadow, Map overlay){
-  if(w -> unit){
-    Map_merge(w -> c -> fn_defs, shadow -> fn_defs);
-    Map_merge(w -> definitions, shadow -> fn_defs);
+  if((* w).unit){
+    Map_merge((* w).c -> fn_defs, shadow -> fn_defs);
+    Map_merge((* w).definitions, shadow -> fn_defs);
   }
-  _cache_dependencies(w -> dependencies, shadow -> deps);
-  Compiler_merge_translation_dependencies(w -> c, shadow -> deps);
-  Compiler__merge_rows(w -> c, w -> globs, overlay);
+  _cache_dependencies((* w).dependencies, shadow -> deps);
+  Compiler_merge_translation_dependencies((* w).c, shadow -> deps);
+  Compiler__merge_rows((* w).c, (* w).globs, overlay);
   Map statics = Sym_file_statics(shadow -> sym);
-  if(w -> private) _keep_published_rows(statics, overlay);
-  if(w -> unit) _publish_unit_statics(statics, overlay, w -> path);
+  if((* w).private) _keep_published_rows(statics, overlay);
+  if((* w).unit) _publish_unit_statics(statics, overlay, (* w).path);
 }
 
 Var Map_del(Map, Var);
@@ -1238,10 +1238,10 @@ static void _publish_unit_statics(Map statics, Map overlay, String path){
 }
 
 static void FileWalk_include(FileWalk * w, String target, int angle){
-  int covered = 0;  String path = _resolve_include(w -> c -> sources, w -> c -> include_dirs, w -> dir, target, angle, &(covered));  if(! String_truth(path) ||(covered && ! is_source_file(path))) return;  String canonical = _canonical_path(path);  List entry = Compiler__entry(w -> c, canonical);  Compiler_add_translation_dependency(w -> c, canonical);  if(!(Map_contains(w -> visited, String_var(canonical)))){
-    Map_setindex(w -> visited, String_var(canonical), int_var(1));  if(! List_truth(entry)) entry = Compiler__walk_cold(w -> c, target, canonical, w -> globs, w -> visited);  Compiler__replay_cached(w -> c, entry, w -> globs, w -> visited);
+  int covered = 0;  String path = _resolve_include((* w).c -> sources, (* w).c -> include_dirs, (* w).dir, target, angle, &(covered));  if(! String_truth(path) ||(covered && ! is_source_file(path))) return;  String canonical = _canonical_path(path);  List entry = Compiler__entry((* w).c, canonical);  Compiler_add_translation_dependency((* w).c, canonical);  if(!(Map_contains((* w).visited, String_var(canonical)))){
+    Map_setindex((* w).visited, String_var(canonical), int_var(1));  if(! List_truth(entry)) entry = Compiler__walk_cold((* w).c, target, canonical, (* w).globs, (* w).visited);  Compiler__replay_cached((* w).c, entry, (* w).globs, (* w).visited);
   }
-  _cache_dependency(w -> dependencies, canonical, String_var(Compiler__walked_hash(w -> c, target, canonical)));  Array_push(w -> parts, String_var(canonical));
+  _cache_dependency((* w).dependencies, canonical, String_var(Compiler__walked_hash((* w).c, target, canonical)));  Array_push((* w).parts, String_var(canonical));
 }
 
 Var List_cadr(List);
@@ -1406,12 +1406,12 @@ int macro_library_filling(void);
 Map Compiler_select_declaration_defaults(Compiler, String, Map, Array, Map);
 int Map_truth(Map);
 static void FileWalk_add_defaults(FileWalk * w){
-  if(! FileWalk_produces(w)) return;  w -> deferred = macro_library_filling();  if(w -> deferred) return;  Map generated = Compiler_select_declaration_defaults(w -> c, w -> path, w -> globs, w -> parts, w -> definitions);  if(Map_truth(generated)) Array_push(w -> parts, Map_var(_cache_copy(generated)));
+  if(! FileWalk_produces(&((* w)))) return; (* w).deferred = macro_library_filling();  if((* w).deferred) return;  Map generated = Compiler_select_declaration_defaults((* w).c, (* w).path, (* w).globs, (* w).parts, (* w).definitions);  if(Map_truth(generated)) Array_push((* w).parts, Map_var(_cache_copy(generated)));
 }
 
 static int FileWalk_produces(FileWalk * w){
   {
-    Var part;  Array _x2c_macro_object_11 = w -> parts;  int _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_10;  while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_10))){
+    Var part;  Array _x2c_macro_object_11 =(* w).parts;  int _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_10;  while(Array_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_10))){
       part = _x2c_macro_cursor_output_10; {
         if(! Var_is(part, 26720)) continue; {
           Var value;  Map _x2c_macro_object_10 = Var_map(part);  unsigned _x2c_macro_cursor_10 = 0;  Var _x2c_macro_cursor_output_8;  Var _x2c_macro_cursor_output_9;  while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_8), &(_x2c_macro_cursor_output_9))){
@@ -1438,14 +1438,14 @@ return 0;
 }
 
 static void FileWalk_publish(FileWalk * w){
-  List parts = Array_list_free(w -> parts);  _retain(String_var(w -> path));  _retain_rows(parts);  String hash = _content_hash(w -> text);  List definitions = _sorted_names(w -> definitions);  List entry = cons(List_var(parts), cons(String_var(hash), cons(List_var(definitions), cons(Map_var(w -> dependencies), NULL))));  _require_retained(List_try_own(entry));  if(Map_contains(_process_cache(), String_var(w -> path))) return;  Map_setindex(_process_cache(), String_var(w -> path), List_var(entry));  if(w -> deferred){
+  List parts = Array_list_free((* w).parts);  _retain(String_var((* w).path));  _retain_rows(parts);  String hash = _content_hash((* w).text);  List definitions = _sorted_names((* w).definitions);  List entry = cons(List_var(parts), cons(String_var(hash), cons(List_var(definitions), cons(Map_var((* w).dependencies), NULL))));  _require_retained(List_try_own(entry));  if(Map_contains(_process_cache(), String_var((* w).path))) return;  Map_setindex(_process_cache(), String_var((* w).path), List_var(entry));  if((* w).deferred){
     Scope_push(& process_cache_scope); {
       {
         X2CCleanup _x2c_defer_record_11 ={
           .fn = _x2c_defer_cleanup_11, .env = 0
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_11); {
-          preload_deferred = cons(String_var(w -> path), preload_deferred);
+          preload_deferred = cons(String_var((* w).path), preload_deferred);
         }
         x2c_cleanup_leave(& _x2c_defer_record_11);
       }
@@ -1574,7 +1574,7 @@ static void Compiler__walk_package(Compiler c, Compiler package, String entry, T
 }
 
 static void Surface_gather(Surface * s, String path, List entry){
-  Compiler_merge_translation_dependencies(s -> c, Var_map(List_getindex(entry, 3)));  int private = 0; {
+  Compiler_merge_translation_dependencies((* s).c, Var_map(List_getindex(entry, 3)));  int private = 0; {
     Var part;  Iter _x2c_macro_iterator_18 = Var_iter(List_car(entry), &(struct Iter){
       int_var(0)
     }
@@ -1586,7 +1586,7 @@ static void Surface_gather(Surface * s, String path, List entry){
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_55), &_x2c_match_capture)) {Var rows = _x2c_match_values[0]; {
         Var _x2c_match_value_6 = rows; {
-          Map rows = Var_map(_x2c_match_value_6);  Surface_merge(s, path, rows);
+          Map rows = Var_map(_x2c_match_value_6);  Surface_merge(&((* s)), path, rows);
         }
 
       }
@@ -1594,7 +1594,7 @@ static void Surface_gather(Surface * s, String path, List entry){
     }
     { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972349635850ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {private = 1;  break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497937879556678ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {private = 0;  break; } } static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_73), &_x2c_match_capture)) {Var include = _x2c_match_values[0]; {
       Var _x2c_match_value_7 = include; {
-        String include = Var_string(_x2c_match_value_7);  Surface_include(s, include, private);
+        String include = Var_string(_x2c_match_value_7);  Surface_include(&((* s)), include, private);
       }
 
     }
@@ -1608,15 +1608,15 @@ static void Surface_gather(Surface * s, String path, List entry){
 }
 
 static void Surface_include(Surface * s, String path, int private){
-  Compiler_add_translation_dependency(s -> c, path);  if(private || Map_contains(s -> visited, String_var(path))) return;  Map_setindex(s -> visited, String_var(path), int_var(1));  Surface_gather(s, path, Var_list(Map_getindex(_process_cache(), String_var(path))));
+  Compiler_add_translation_dependency((* s).c, path);  if(private || Map_contains((* s).visited, String_var(path))) return;  Map_setindex((* s).visited, String_var(path), int_var(1));  Surface_gather(&((* s)), path, Var_list(Map_getindex(_process_cache(), String_var(path))));
 }
 
 int Var_is_nil(Var);
 static void Surface_merge(Surface * s, String path, Map rows){
-  String prefix = String_join(NULL, cons(String_var(s -> name), cons(String_var(_90), NULL)));  int keeps = _keeps_spellings(path);  int foreign = ! String_startswith(path, String_join(NULL, cons(String_var(s -> root), cons(String_var(_3), NULL)))); {
+  String prefix = String_join(NULL, cons(String_var((* s).name), cons(String_var(_90), NULL)));  int keeps = _keeps_spellings(path);  int foreign = ! String_startswith(path, String_join(NULL, cons(String_var((* s).root), cons(String_var(_3), NULL)))); {
     Var key, value;  Map _x2c_macro_object_19 = rows;  unsigned _x2c_macro_cursor_19 = 0;  Var _x2c_macro_cursor_output_14;  Var _x2c_macro_cursor_output_15;  while(Map_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_14), &(_x2c_macro_cursor_output_15))){
       key = _x2c_macro_cursor_output_14;  value = _x2c_macro_cursor_output_15; {
-        if(! Var_is_row(key, 9, 7, 4) || Var_is_nil(key)) continue;  String spelling = _package_key_spelling(Var_list(key));  if(_package_protocol_row(Var_list(key), value)) Surface_take(s, rows, Var_list(key), value);  else if(String_truth(spelling) &&(keeps || String_startswith(spelling, prefix))) Surface_take(s, rows, Var_list(key), value);  else if(String_truth(spelling) && foreign) Surface_reject(s, path, spelling);
+        if(! Var_is_row(key, 9, 7, 4) || Var_is_nil(key)) continue;  String spelling = _package_key_spelling(Var_list(key));  if(_package_protocol_row(Var_list(key), value)) Surface_take(&((* s)), rows, Var_list(key), value);  else if(String_truth(spelling) &&(keeps || String_startswith(spelling, prefix))) Surface_take(&((* s)), rows, Var_list(key), value);  else if(String_truth(spelling) && foreign) Surface_reject(&((* s)), path, spelling);
       }
 
     }
@@ -1627,22 +1627,22 @@ static void Surface_merge(Surface * s, String path, Map rows){
 
 void Compiler_copy_source_declaration(Compiler, Map, Map, List);
 static void Surface_take(Surface * s, Map rows, List key, Var value){
-  Map_setindex(s -> merged, List_var(key), value);  Compiler_copy_source_declaration(s -> c, s -> merged, rows, key);
+  Map_setindex((* s).merged, List_var(key), value);  Compiler_copy_source_declaration((* s).c, (* s).merged, rows, key);
 }
 
 Var List_last(List);
 List String_split(String, String);
 static void Surface_reject(Surface * s, String path, String spelling){
-  String name = s -> name, unit = Var_string(List_last(String_split(path, _210)));  String fix = String_join(NULL, cons(String_var(_91), cons(String_var(name), cons(String_var(_92), NULL))));  Compiler_report_error(s -> c, 306819428, String_join(NULL, cons(String_var(_93), cons(String_var(name), cons(String_var(_94), cons(String_var(spelling), cons(String_var(_84), NULL)))))), s -> token, cons(String_var(String_join(NULL, cons(String_var(_84), cons(String_var(unit), cons(String_var(_95), cons(String_var(fix), NULL)))))), NULL));
+  String name =(* s).name, unit = Var_string(List_last(String_split(path, _210)));  String fix = String_join(NULL, cons(String_var(_91), cons(String_var(name), cons(String_var(_92), NULL))));  Compiler_report_error((* s).c, 306819428, String_join(NULL, cons(String_var(_93), cons(String_var(name), cons(String_var(_94), cons(String_var(spelling), cons(String_var(_84), NULL)))))), (* s).token, cons(String_var(String_join(NULL, cons(String_var(_84), cons(String_var(unit), cons(String_var(_95), cons(String_var(fix), NULL)))))), NULL));
 }
 
 void Sym_set(Sym, List, List);
 Map Sym_current_symbols(Sym);
 static void Surface_install(Surface * s){
   {
-    Var key, value;  Map _x2c_macro_object_20 = s -> merged;  unsigned _x2c_macro_cursor_20 = 0;  Var _x2c_macro_cursor_output_16;  Var _x2c_macro_cursor_output_17;  while(Map_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_16), &(_x2c_macro_cursor_output_17))){
+    Var key, value;  Map _x2c_macro_object_20 =(* s).merged;  unsigned _x2c_macro_cursor_20 = 0;  Var _x2c_macro_cursor_output_16;  Var _x2c_macro_cursor_output_17;  while(Map_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_16), &(_x2c_macro_cursor_output_17))){
       key = _x2c_macro_cursor_output_16;  value = _x2c_macro_cursor_output_17; {
-        Sym_set(s -> c -> sym, Var_list(key), Var_list(value));  Compiler_copy_source_declaration(s -> c, Sym_current_symbols(s -> c -> sym), s -> merged, Var_list(key));
+        Sym_set((* s).c -> sym, Var_list(key), Var_list(value));  Compiler_copy_source_declaration((* s).c, Sym_current_symbols((* s).c -> sym), (* s).merged, Var_list(key));
       }
 
     }
@@ -1860,7 +1860,7 @@ static List _interface_record(String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
@@ -1887,7 +1887,7 @@ static List _interface_record(String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
@@ -1964,7 +1964,7 @@ static String Compiler__source_hash(Compiler c, String path){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);  __builtin_unreachable();
@@ -2251,7 +2251,7 @@ static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
 
 void Compiler_close_child(Compiler, Compiler);
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_8;  Compiler_close_child((*(FileWalk * *) _x2c_defer_data_5->_x2c_defer_capture_9) -> c, (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_10));
+  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_8;  Compiler_close_child((*(*(FileWalk * *) _x2c_defer_data_5->_x2c_defer_capture_9)).c, (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_10));
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){

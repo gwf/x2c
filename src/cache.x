@@ -419,7 +419,7 @@ static List Compiler._header_cache(
   return cache.entries(header, cache.prelude(ids));
 }
 
-static List HeaderCache.prelude(HeaderCache *h, Array ids) {
+static List HeaderCache.prelude(HeaderCache &h, Array ids) {
   Compiler c = h.c;
   Array declarations = [];
   foreach (List declaration, c._slot_declarations(ids, h.prefix))
@@ -437,7 +437,7 @@ static List HeaderCache.prelude(HeaderCache *h, Array ids) {
   return declarations.list_free();
 }
 
-static List HeaderCache.entries(HeaderCache *h, List header, List prelude) {
+static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
   Compiler c = h.c;
   Array output = [];
   int inserted = 0;
@@ -584,7 +584,7 @@ static void Compiler._queue_statics(
   foreach (List initializer, initializers) queue.visit(initializer.car());
 }
 
-static void StaticQueue.visit(StaticQueue *q, List binding) {
+static void StaticQueue.visit(StaticQueue &q, List binding) {
   Var status;
   if (q.state.try_get(binding, status)) {
     if (status == 2) return;
@@ -610,7 +610,7 @@ static void StaticQueue.visit(StaticQueue *q, List binding) {
   q.state[binding] = 2;
 }
 
-static int StaticQueue.deferred(StaticQueue *q, Array definitions) {
+static int StaticQueue.deferred(StaticQueue &q, Array definitions) {
   if (!q.deferred_kind) return 0;
   foreach (List initializer, definitions)
     if (q.c._reaches_kind(initializer.cadr(), q.deferred_kind)) return 1;
@@ -618,7 +618,7 @@ static int StaticQueue.deferred(StaticQueue *q, Array definitions) {
 }
 
 static void StaticQueue.add_calls(
-  StaticQueue *q, Array definitions, int late) {
+  StaticQueue &q, Array definitions, int late) {
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
@@ -631,7 +631,7 @@ static void StaticQueue.add_calls(
   }
 }
 
-static void StaticQueue.report_cycle(StaticQueue *q) {
+static void StaticQueue.report_cycle(StaticQueue &q) {
   Compiler c = q.c;
   Array notes = [], List first = NULL;
   foreach (List initializer, q.initializers)

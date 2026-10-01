@@ -1233,15 +1233,15 @@ ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
 ToolRun ToolAction_start(ToolAction);
 
 static int CcPool_add(CcPool * pool, String source){
-  Build b = pool -> b;
+  Build b =(* pool).b;
   report_progress(7477414666, b -> cc_done, b -> cc_n, source);
   List directories = Build__include_dirs(b, source);
   CcJob job = Build__compile_job(b, source, directories);
-  if(CcPool_reap(pool, 0)) return 1;
+  if(CcPool_reap(&((* pool)), 0)) return 1;
   ToolAction step = String_truth(job.preprocessed) ? Toolchain_preprocess_action(b -> toolchain, source, job.preprocessed, directories) : job.action;
   job.execution = ToolAction_start(step);
-  pool -> running[pool -> count ++] = job;
-  return pool -> count >= b -> request -> jobs && CcPool_wait(pool);
+  (* pool).running[(* pool).count ++] = job;
+  return(* pool).count >= b -> request -> jobs && CcPool_wait(&((* pool)));
 }
 
 static List Build__include_dirs(Build b, String source){
@@ -1364,8 +1364,8 @@ int ToolRun_ready(ToolRun);
 
 static int CcPool_reap(CcPool * pool, int i){
   int failed = 0;
-  while(i < pool -> count){
-    int status = ToolRun_ready(pool -> running[i].execution) ? CcPool_finish(pool, i) : - 1;
+  while(i <(* pool).count){
+    int status = ToolRun_ready((* pool).running[i].execution) ? CcPool_finish(&((* pool)), i) : - 1;
     if(status < 0) i ++;
     else failed |= status;
   }
@@ -1374,10 +1374,10 @@ static int CcPool_reap(CcPool * pool, int i){
 
 static int CcPool_wait(CcPool * pool){
   for(; ; ){
-    for(int i = 0;  i < pool -> count;  i ++){
-      if(pool -> count > 1 && ! ToolRun_ready(pool -> running[i].execution)) continue;
-      int status = CcPool_finish(pool, i);
-      if(status >= 0) return status | CcPool_reap(pool, i);
+    for(int i = 0;  i <(* pool).count;  i ++){
+      if((* pool).count > 1 && ! ToolRun_ready((* pool).running[i].execution)) continue;
+      int status = CcPool_finish(&((* pool)), i);
+      if(status >= 0) return status | CcPool_reap(&((* pool)), i);
     }
     usleep(1000);
   }
@@ -1385,51 +1385,51 @@ static int CcPool_wait(CcPool * pool){
 }
 
 static int CcPool_finish(CcPool * pool, int i){
-  CcJob * at = pool -> running + i;
-  int status = Build__finish_job(pool -> b, at);
+  CcJob * at =(* pool).running + i;
+  int status = Build__finish_job((* pool).b, &(* at));
   if(status < 0) return - 1;
-  pool -> count --;
-  memmove(at, at + 1, (pool -> count - i) * sizeof(CcJob));
+  (* pool).count --;
+  memmove(at, at + 1, ((* pool).count - i) * sizeof(CcJob));
   return status;
 }
 
 int ToolRun_wait(ToolRun);
 
 static int Build__finish_job(Build b, CcJob * job){
-  int status = ToolRun_wait(job -> execution);
-  if(String_truth(job -> preprocessed)){
-    int step = Build__after_preprocess(b, job, status);
+  int status = ToolRun_wait((* job).execution);
+  if(String_truth((* job).preprocessed)){
+    int step = Build__after_preprocess(b, &((* job)), status);
     if(step) return step;
   }
   else if(status) return 1;
-  else if(job -> fingerprinted && ! b -> request -> dry_run) _state_write(job -> state_path, job -> fingerprint);
+  else if((* job).fingerprinted && ! b -> request -> dry_run) _state_write((* job).state_path, (* job).fingerprint);
   b -> cc_done ++;
-  report_progress(7477414666, b -> cc_done, b -> cc_n, job -> source);
+  report_progress(7477414666, b -> cc_done, b -> cc_n, (* job).source);
   return 0;
 }
 
 static int Build__after_preprocess(Build b, CcJob * job, int status){
   int ok = 1;
-  if(! status) job -> fingerprint = Build__compile_fingerprint(b, job, &(ok));
-  unlink(job -> preprocessed);
-  job -> preprocessed = NULL;
+  if(! status)(* job).fingerprint = Build__compile_fingerprint(b, &((* job)), &(ok));
+  unlink((* job).preprocessed);
+  (* job).preprocessed = NULL;
   if(status) return 1;
-  job -> fingerprinted = ok;
-  if(ok && Build__compile_current(b, job)) return 0;
-  job -> execution = ToolAction_start(job -> action);
+  (* job).fingerprinted = ok;
+  if(ok && Build__compile_current(b, &((* job)))) return 0;
+  (* job).execution = ToolAction_start((* job).action);
   return - 1;
 }
 
 uint64_t fnv_file(uint64_t, String, int *);
 
 static uint64_t Build__compile_fingerprint(Build b, CcJob * job, int * ok){
-  return fnv_file(Build__action_fingerprint(b, job -> action, NULL, &((* ok))), job -> preprocessed, &((* ok)));
+  return fnv_file(Build__action_fingerprint(b, (* job).action, NULL, &((* ok))), (* job).preprocessed, &((* ok)));
 }
 
 static int Build__compile_current(Build b, CcJob * job){
-  if(access(job -> object, R_OK) || access(job -> depfile, R_OK)) return 0;
-  if(! _state_matches(job -> state_path, job -> fingerprint)) return 0;
-  if(b -> request -> verbose) fprintf(stderr, "x2c: up-to-date compile %s\n", job -> source);
+  if(access((* job).object, R_OK) || access((* job).depfile, R_OK)) return 0;
+  if(! _state_matches((* job).state_path, (* job).fingerprint)) return 0;
+  if(b -> request -> verbose) fprintf(stderr, "x2c: up-to-date compile %s\n", (* job).source);
   b -> cc_cached ++;
   return 1;
 }
@@ -2097,7 +2097,7 @@ int CliRequest_script_current(CliRequest request, String directory){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_4);
@@ -2287,7 +2287,7 @@ static List _depfile_inputs(String depfile){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_5);
@@ -2339,7 +2339,7 @@ static int _state_matches(String path, uint64_t hash){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_6);

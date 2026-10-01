@@ -534,10 +534,10 @@ static Regex Regex_new(String pattern){
 }
 
 static void Parser_flags(Parser * p){
-  if(p -> len < 4 || p -> text[0] != '(' || p -> text[1] != '?') return;
+  if((* p).len < 4 ||(* p).text[0] != '(' ||(* p).text[1] != '?') return;
   int at = 2, caseless = 0, multiline = 0, dotall = 0;
-  for(;  at < p -> len;  at ++){
-    switch(p -> text[at]){
+  for(;  at <(* p).len;  at ++){
+    switch((* p).text[at]){
       case 'i' : caseless = 1;
       continue;
       case 'm' : multiline = 1;
@@ -547,21 +547,21 @@ static void Parser_flags(Parser * p){
     }
     break;
   }
-  if(at == 2 || at >= p -> len || p -> text[at] != ')') return;
-  p -> regex -> caseless = caseless;
-  p -> regex -> multiline = multiline;
-  p -> regex -> dotall = dotall;
-  p -> pos = at + 1;
+  if(at == 2 || at >=(* p).len ||(* p).text[at] != ')') return;
+  (* p).regex -> caseless = caseless;
+  (* p).regex -> multiline = multiline;
+  (* p).regex -> dotall = dotall;
+  (* p).pos = at + 1;
 }
 
 static _RegexNode Parser_alternation(Parser * p){
-  _RegexNode first = Parser_sequence(p);
-  if(Parser_peek(p) != '|') return first;
+  _RegexNode first = Parser_sequence(&((* p)));
+  if(Parser_peek(&((* p))) != '|') return first;
   _RegexNode node = _node(2856), last = _group_node(- 1, first);
   node -> child = last;
-  while(Parser_peek(p) == '|'){
-    p -> pos ++;
-    last -> sibling = _group_node(- 1, Parser_sequence(p));
+  while(Parser_peek(&((* p))) == '|'){
+    (* p).pos ++;
+    last -> sibling = _group_node(- 1, Parser_sequence(&((* p))));
     last = last -> sibling;
   }
   return node;
@@ -569,8 +569,8 @@ static _RegexNode Parser_alternation(Parser * p){
 
 static _RegexNode Parser_sequence(Parser * p){
   _RegexNode head = NULL, last = NULL;
-  while(p -> pos < p -> len && Parser_peek(p) != '|' && Parser_peek(p) != ')'){
-    _RegexNode atom = Parser_quantified(p, Parser_atom(p));
+  while((* p).pos <(* p).len && Parser_peek(&((* p))) != '|' && Parser_peek(&((* p))) != ')'){
+    _RegexNode atom = Parser_quantified(&((* p)), Parser_atom(&((* p))));
     if(last) last -> next = atom;
     else head = atom;
     last = atom;
@@ -580,21 +580,21 @@ static _RegexNode Parser_sequence(Parser * p){
 
 static _RegexNode Parser_quantified(Parser * p, _RegexNode atom){
   int min, max;
-  if(! Parser_bounds(p, &(min), &(max))) return atom;
-  if(atom -> kind == 5080 || atom -> kind == 11224 || atom -> kind == 49254660 || atom -> kind == 988778756) Parser_fail(p, _20);
-  p -> pos ++;
+  if(! Parser_bounds(&((* p)), &(min), &(max))) return atom;
+  if(atom -> kind == 5080 || atom -> kind == 11224 || atom -> kind == 49254660 || atom -> kind == 988778756) Parser_fail(&((* p)), _20);
+  (* p).pos ++;
   _RegexNode node = _node(1219504232);
   node -> min = min;
   node -> max = max;
-  node -> greedy = Parser_peek(p) != '?';
+  node -> greedy = Parser_peek(&((* p))) != '?';
   node -> child = atom;
-  if(! node -> greedy) p -> pos ++;
-  if(_is_quantifier(Parser_peek(p))) Parser_fail(p, _20);
+  if(! node -> greedy)(* p).pos ++;
+  if(_is_quantifier(Parser_peek(&((* p))))) Parser_fail(&((* p)), _20);
   return node;
 }
 
 static int Parser_bounds(Parser * p, int * min, int * max){
-  switch(Parser_peek(p)){
+  switch(Parser_peek(&((* p)))){
     case '*' :(* min) = 0;
     (* max) = - 1;
     return 1;
@@ -604,34 +604,34 @@ static int Parser_bounds(Parser * p, int * min, int * max){
     case '?' :(* min) = 0;
     (* max) = 1;
     return 1;
-    case '{' : return Parser_braces(p, &((* min)), &((* max)));
+    case '{' : return Parser_braces(&((* p)), &((* min)), &((* max)));
   }
   return 0;
 }
 
 static int Parser_braces(Parser * p, int * min, int * max){
-  int start = p -> pos ++;
+  int start =(* p).pos ++;
   long long low, high;
-  if(! Parser_digits(p, &(low))){
-    p -> pos = start;
+  if(! Parser_digits(&((* p)), &(low))){
+    (* p).pos = start;
     return 0;
   }
   high = low;
-  if(Parser_peek(p) == ','){
-    p -> pos ++;
-    if(! Parser_digits(p, &(high))) high = - 1;
+  if(Parser_peek(&((* p))) == ','){
+    (* p).pos ++;
+    if(! Parser_digits(&((* p)), &(high))) high = - 1;
   }
-  if(Parser_peek(p) != '}'){
-    p -> pos = start;
+  if(Parser_peek(&((* p))) != '}'){
+    (* p).pos = start;
     return 0;
   }
   if(low > INT_MAX || high > INT_MAX){
-    p -> pos ++;
-    Parser_fail(p, _21);
+    (* p).pos ++;
+    Parser_fail(&((* p)), _21);
   }
   if(high >= 0 && high < low){
-    p -> pos ++;
-    Parser_fail(p, _22);
+    (* p).pos ++;
+    Parser_fail(&((* p)), _22);
   }
   (* min) =(int) low;
   (* max) =(int) high;
@@ -639,11 +639,11 @@ static int Parser_braces(Parser * p, int * min, int * max){
 }
 
 static int Parser_digits(Parser * p, long long * out){
-  int start = p -> pos;
+  int start =(* p).pos;
   long long value = 0;
-  for(;  scan_ascii_digit(Parser_peek(p));  p -> pos ++) if(value <= INT_MAX) value = value * 10 +(p -> text[p -> pos] - '0');
+  for(;  scan_ascii_digit(Parser_peek(&((* p)))); (* p).pos ++) if(value <= INT_MAX) value = value * 10 +((* p).text[(* p).pos] - '0');
   (* out) = value;
-  return p -> pos > start;
+  return(* p).pos > start;
 }
 
 static int _is_quantifier(int byte){
@@ -651,37 +651,37 @@ static int _is_quantifier(int byte){
 }
 
 static int Parser_peek(Parser * p){
-  return p -> pos < p -> len ?(unsigned char) p -> text[p -> pos] : - 1;
+  return(* p).pos <(* p).len ?(unsigned char)(* p).text[(* p).pos] : - 1;
 }
 
 _Noreturn static void Parser_fail(Parser * p, String why){
   {
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/regex.x",.function = "Parser_fail",.line = 274};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(34470112412), String_var(p -> regex -> pattern), Symbol_var(1019648360), int_var(p -> pos));
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.compile")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(34470112412), String_var((* p).regex -> pattern), Symbol_var(1019648360), int_var((* p).pos));
     __builtin_unreachable();
   }
 
 }
 
 static _RegexNode Parser_atom(Parser * p){
-  int byte =(unsigned char) p -> text[p -> pos];
-  if(_is_quantifier(byte)) Parser_fail(p, _20);
-  p -> pos ++;
+  int byte =(unsigned char)(* p).text[(* p).pos];
+  if(_is_quantifier(byte)) Parser_fail(&((* p)), _20);
+  (* p).pos ++;
   switch(byte){
     case '.' : return _node(2994);
     case '^' : return _node(5080);
     case '$' : return _node(11224);
-    case '[' : return Parser_set(p);
-    case '(' : return Parser_group(p);
-    case '\\' : return Parser_escape_atom(p);
+    case '[' : return Parser_set(&((* p)));
+    case '(' : return Parser_group(&((* p)));
+    case '\\' : return Parser_escape_atom(&((* p)));
   }
-  return Parser_literal(p, byte);
+  return Parser_literal(&((* p)), byte);
 }
 
 static _RegexNode Parser_escape_atom(Parser * p){
-  int letter = Parser_peek(p);
-  if(letter != 'b' && letter != 'B') return Parser_literal(p, Parser_escape(p));
-  p -> pos ++;
+  int letter = Parser_peek(&((* p)));
+  if(letter != 'b' && letter != 'B') return Parser_literal(&((* p)), Parser_escape(&((* p))));
+  (* p).pos ++;
   return _node(letter == 'b' ? 49254660 : 988778756);
 }
 
@@ -689,50 +689,50 @@ static _RegexNode Parser_literal(Parser * p, int byte){
   _RegexNode node = _node(39272);
   if(byte < 0) _RegexNode__add_class(node, - byte);
   else _RegexNode__add(node, byte);
-  if(p -> regex -> caseless) _RegexNode__fold(node);
+  if((* p).regex -> caseless) _RegexNode__fold(node);
   return node;
 }
 
 static _RegexNode Parser_group(Parser * p){
-  int index = Parser_peek(p) == '?' ? Parser_group_syntax(p) : Parser_add_capture(p, NULL);
-  _RegexNode body = Parser_alternation(p);
-  if(Parser_peek(p) != ')') Parser_fail(p, _23);
-  p -> pos ++;
+  int index = Parser_peek(&((* p))) == '?' ? Parser_group_syntax(&((* p))) : Parser_add_capture(&((* p)), NULL);
+  _RegexNode body = Parser_alternation(&((* p)));
+  if(Parser_peek(&((* p))) != ')') Parser_fail(&((* p)), _23);
+  (* p).pos ++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
 
 static int Parser_group_syntax(Parser * p){
-  p -> pos ++;
-  int marker = Parser_peek(p);
+  (* p).pos ++;
+  int marker = Parser_peek(&((* p)));
   if(marker == ':'){
-    p -> pos ++;
+    (* p).pos ++;
     return - 1;
   }
   if(marker != '<'){
-    p -> pos --;
-    Parser_fail(p, _24);
+    (* p).pos --;
+    Parser_fail(&((* p)), _24);
   }
-  p -> pos ++;
-  return Parser_add_capture(p, Parser_name(p));
+  (* p).pos ++;
+  return Parser_add_capture(&((* p)), Parser_name(&((* p))));
 }
 
 static String Parser_name(Parser * p){
-  int start = p -> pos;
-  while(_is_word(Parser_peek(p))) p -> pos ++;
-  if(p -> pos == start || scan_ascii_digit(p -> text[start]) || Parser_peek(p) != '>'){
-    p -> pos = start;
-    Parser_fail(p, _25);
+  int start =(* p).pos;
+  while(_is_word(Parser_peek(&((* p)))))(* p).pos ++;
+  if((* p).pos == start || scan_ascii_digit((* p).text[start]) || Parser_peek(&((* p))) != '>'){
+    (* p).pos = start;
+    Parser_fail(&((* p)), _25);
   }
-  String name = String_getslice(p -> regex -> pattern, start, p -> pos, 1);
-  p -> pos ++;
+  String name = String_getslice((* p).regex -> pattern, start, (* p).pos, 1);
+  (* p).pos ++;
   return name;
 }
 
 List List_append(List, List);
 
 static int Parser_add_capture(Parser * p, String name){
-  int index = ++ p -> regex -> capture_count;
-  p -> regex -> capture_names = List_append(p -> regex -> capture_names, cons(String_var(name), NULL));
+  int index = ++(* p).regex -> capture_count;
+  (* p).regex -> capture_names = List_append((* p).regex -> capture_names, cons(String_var(name), NULL));
   return index;
 }
 
@@ -748,38 +748,38 @@ static _RegexNode _close_capture(_RegexNode body, int index){
 
 static _RegexNode Parser_set(Parser * p){
   _RegexNode node = _node(39272);
-  int negate = Parser_peek(p) == '^';
-  if(negate) p -> pos ++;
-  int first = p -> pos;
-  while(p -> pos == first || Parser_peek(p) != ']'){
-    if(p -> pos >= p -> len) Parser_fail(p, _26);
-    Parser_member(p, node);
+  int negate = Parser_peek(&((* p))) == '^';
+  if(negate)(* p).pos ++;
+  int first =(* p).pos;
+  while((* p).pos == first || Parser_peek(&((* p))) != ']'){
+    if((* p).pos >=(* p).len) Parser_fail(&((* p)), _26);
+    Parser_member(&((* p)), node);
   }
-  p -> pos ++;
-  if(p -> regex -> caseless) _RegexNode__fold(node);
+  (* p).pos ++;
+  if((* p).regex -> caseless) _RegexNode__fold(node);
   if(negate) for(int i = 0;  i < 32;  i ++) node -> set[i] =(unsigned char) ~ node -> set[i];
   return node;
 }
 
 static void Parser_member(Parser * p, _RegexNode node){
-  int low =(unsigned char) p -> text[p -> pos ++];
-  if(low == '\\') low = Parser_escape(p);
+  int low =(unsigned char)(* p).text[(* p).pos ++];
+  if(low == '\\') low = Parser_escape(&((* p)));
   if(low < 0) _RegexNode__add_class(node, - low);
-  else if(Parser_peek(p) == '-' && p -> pos + 1 < p -> len && p -> text[p -> pos + 1] != ']') _RegexNode__add_range(node, low, Parser_range_end(p, low));
+  else if(Parser_peek(&((* p))) == '-' &&(* p).pos + 1 <(* p).len &&(* p).text[(* p).pos + 1] != ']') _RegexNode__add_range(node, low, Parser_range_end(&((* p)), low));
   else _RegexNode__add(node, low);
 }
 
 static int Parser_range_end(Parser * p, int low){
-  p -> pos ++;
-  int high =(unsigned char) p -> text[p -> pos ++];
-  if(high == '\\') high = Parser_escape(p);
-  if(high < low) Parser_fail(p, _27);
+  (* p).pos ++;
+  int high =(unsigned char)(* p).text[(* p).pos ++];
+  if(high == '\\') high = Parser_escape(&((* p)));
+  if(high < low) Parser_fail(&((* p)), _27);
   return high;
 }
 
 static int Parser_escape(Parser * p){
-  if(p -> pos >= p -> len) Parser_fail(p, _28);
-  int byte =(unsigned char) p -> text[p -> pos ++];
+  if((* p).pos >=(* p).len) Parser_fail(&((* p)), _28);
+  int byte =(unsigned char)(* p).text[(* p).pos ++];
   switch(byte){
     case 't' : return '\t';
     case 'n' : return '\n';
@@ -790,8 +790,8 @@ static int Parser_escape(Parser * p){
     case 'd' : case 'D' : case 'w' : case 'W' : case 's' : case 'S' : return - byte;
   }
   if(! _is_word(byte) && byte < 128) return byte;
-  p -> pos --;
-  Parser_fail(p, _29);
+  (* p).pos --;
+  Parser_fail(&((* p)), _29);
 }
 
 static RegexMatch _search(Regex regex, String subject, int offset){
@@ -843,10 +843,10 @@ static RegexMatch _search(Regex regex, String subject, int offset){
 Var List_var(List);
 
 static RegexMatch Matcher_found(Matcher * m, String subject, int at){
-  m -> starts[0] = at;
-  m -> ends[0] = m -> end;
+  (* m).starts[0] = at;
+  (* m).ends[0] =(* m).end;
   List captures = NULL;
-  for(int i = m -> regex -> capture_count;  i >= 0;  i --) captures = cons(List_var(Matcher_capture(m, subject, i)), captures);
+  for(int i =(* m).regex -> capture_count;  i >= 0;  i --) captures = cons(List_var(Matcher_capture(&((* m)), subject, i)), captures);
   return(RegexMatch) captures;
 }
 
@@ -855,8 +855,8 @@ String Var_string(Var);
 Var List_getindex(List, int);
 
 static RegexCapture Matcher_capture(Matcher * m, String subject, int i){
-  int start = m -> starts[i], end = m -> ends[i], matched = start >= 0;
-  String name = i ? Var_string(List_getindex(m -> regex -> capture_names, i - 1)) : NULL;
+  int start =(* m).starts[i], end =(* m).ends[i], matched = start >= 0;
+  String name = i ? Var_string(List_getindex((* m).regex -> capture_names, i - 1)) : NULL;
   String text = matched ? String_getslice(subject, start, end, 1) : NULL;
   return cons(int_var(i), cons(String_var(name), cons(int_var(matched), cons(String_var(text), cons(int_var(start), cons(int_var(end), NULL))))));
 }
@@ -875,45 +875,45 @@ static RegexMatch _next(Regex r, String subject, RegexMatch previous){
 static int Matcher_run(Matcher * m, _RegexNode n, int pos, Rest * k){
   for(;  n;  n = n -> next){
     switch(n -> kind){
-      case 39272 : case 2994 : if(! Matcher_accepts(m, n, pos)) return 0;
+      case 39272 : case 2994 : if(! Matcher_accepts(&((* m)), n, pos)) return 0;
       pos ++;
       break;
-      case 5080 : if(! Matcher_at_line_start(m, pos)) return 0;
+      case 5080 : if(! Matcher_at_line_start(&((* m)), pos)) return 0;
       break;
-      case 11224 : if(! Matcher_at_line_end(m, pos)) return 0;
+      case 11224 : if(! Matcher_at_line_end(&((* m)), pos)) return 0;
       break;
-      case 49254660 : if(! Matcher_at_boundary(m, pos)) return 0;
+      case 49254660 : if(! Matcher_at_boundary(&((* m)), pos)) return 0;
       break;
-      case 988778756 : if(Matcher_at_boundary(m, pos)) return 0;
+      case 988778756 : if(Matcher_at_boundary(&((* m)), pos)) return 0;
       break;
-      case 15891808 : return Matcher_group(m, n, pos, k);
-      case 204483464 : return Matcher_capture_end(m, n, pos, k);
-      case 2856 : return Matcher_alternation(m, n, pos, k);
-      case 1219504232 : return Matcher_repeat(m, n, pos, k);
+      case 15891808 : return Matcher_group(&((* m)), n, pos, k);
+      case 204483464 : return Matcher_capture_end(&((* m)), n, pos, k);
+      case 2856 : return Matcher_alternation(&((* m)), n, pos, k);
+      case 1219504232 : return Matcher_repeat(&((* m)), n, pos, k);
     }
 
   }
-  return Matcher_resume(m, pos, k);
+  return Matcher_resume(&((* m)), pos, k);
 }
 
 static int Matcher_accepts(Matcher * m, _RegexNode n, int pos){
-  if(pos >= m -> len) return 0;
-  int byte =(unsigned char) m -> text[pos];
-  if(n -> kind == 2994) return m -> regex -> dotall || byte != '\n';
+  if(pos >=(* m).len) return 0;
+  int byte =(unsigned char)(* m).text[pos];
+  if(n -> kind == 2994) return(* m).regex -> dotall || byte != '\n';
   return _RegexNode__has(n, byte) != 0;
 }
 
 static int Matcher_at_line_start(Matcher * m, int pos){
-  return pos == 0 ||(m -> regex -> multiline && m -> text[pos - 1] == '\n');
+  return pos == 0 ||((* m).regex -> multiline &&(* m).text[pos - 1] == '\n');
 }
 
 static int Matcher_at_line_end(Matcher * m, int pos){
-  return pos == m -> len ||(m -> regex -> multiline && m -> text[pos] == '\n');
+  return pos ==(* m).len ||((* m).regex -> multiline &&(* m).text[pos] == '\n');
 }
 
 static int Matcher_at_boundary(Matcher * m, int pos){
-  int before = pos > 0 && _is_word((unsigned char) m -> text[pos - 1]);
-  int after = pos < m -> len && _is_word((unsigned char) m -> text[pos]);
+  int before = pos > 0 && _is_word((unsigned char)(* m).text[pos - 1]);
+  int after = pos <(* m).len && _is_word((unsigned char)(* m).text[pos]);
   return before != after;
 }
 
@@ -922,20 +922,20 @@ static int Matcher_group(Matcher * m, _RegexNode n, int pos, Rest * k){
     0, n -> next, 0, 0, k
   }
   ;
-  if(n -> index < 0) return Matcher_run(m, n -> child, pos, & after);
-  int old_start = m -> starts[n -> index], old_end = m -> ends[n -> index];
-  m -> starts[n -> index] = pos;
-  if(Matcher_run(m, n -> child, pos, & after)) return 1;
-  m -> starts[n -> index] = old_start;
-  m -> ends[n -> index] = old_end;
+  if(n -> index < 0) return Matcher_run(&((* m)), n -> child, pos, & after);
+  int old_start =(* m).starts[n -> index], old_end =(* m).ends[n -> index];
+  (* m).starts[n -> index] = pos;
+  if(Matcher_run(&((* m)), n -> child, pos, & after)) return 1;
+  (* m).starts[n -> index] = old_start;
+  (* m).ends[n -> index] = old_end;
   return 0;
 }
 
 static int Matcher_capture_end(Matcher * m, _RegexNode n, int pos, Rest * k){
-  int old_end = m -> ends[n -> index];
-  m -> ends[n -> index] = pos;
-  if(Matcher_run(m, n -> next, pos, k)) return 1;
-  m -> ends[n -> index] = old_end;
+  int old_end =(* m).ends[n -> index];
+  (* m).ends[n -> index] = pos;
+  if(Matcher_run(&((* m)), n -> next, pos, k)) return 1;
+  (* m).ends[n -> index] = old_end;
   return 0;
 }
 
@@ -944,67 +944,67 @@ static int Matcher_alternation(Matcher * m, _RegexNode n, int pos, Rest * k){
     0, n -> next, 0, 0, k
   }
   ;
-  for(_RegexNode alt = n -> child;  alt;  alt = alt -> sibling) if(Matcher_run(m, alt -> child, pos, & after)) return 1;
+  for(_RegexNode alt = n -> child;  alt;  alt = alt -> sibling) if(Matcher_run(&((* m)), alt -> child, pos, & after)) return 1;
   return 0;
 }
 
 static int Matcher_resume(Matcher * m, int pos, Rest * k){
   if(! k){
-    m -> end = pos;
+    (* m).end = pos;
     return 1;
   }
-  if(k -> repeat) return Matcher_iterate(m, k -> node, k -> count + 1, pos, k -> start, k -> up);
-  return Matcher_run(m, k -> node, pos, k -> up);
+  if(k -> repeat) return Matcher_iterate(&((* m)), k -> node, k -> count + 1, pos, k -> start, k -> up);
+  return Matcher_run(&((* m)), k -> node, pos, k -> up);
 }
 
 static int Matcher_repeat(Matcher * m, _RegexNode n, int pos, Rest * k){
-  if(n -> child -> kind == 39272 || n -> child -> kind == 2994) return Matcher_byte_loop(m, n, pos, k);
-  return Matcher_iterate(m, n, 0, pos, - 1, k);
+  if(n -> child -> kind == 39272 || n -> child -> kind == 2994) return Matcher_byte_loop(&((* m)), n, pos, k);
+  return Matcher_iterate(&((* m)), n, 0, pos, - 1, k);
 }
 
 static int Matcher_byte_loop(Matcher * m, _RegexNode rep, int pos, Rest * k){
-  int limit = rep -> max < 0 ? m -> len - pos : rep -> max, count = 0;
-  while(count < limit && Matcher_accepts(m, rep -> child, pos + count)) count ++;
+  int limit = rep -> max < 0 ?(* m).len - pos : rep -> max, count = 0;
+  while(count < limit && Matcher_accepts(&((* m)), rep -> child, pos + count)) count ++;
   if(count < rep -> min) return 0;
   if(rep -> greedy){
-    for(int n = count;  n >= rep -> min;  n --) if(Matcher_run(m, rep -> next, pos + n, k)) return 1;
+    for(int n = count;  n >= rep -> min;  n --) if(Matcher_run(&((* m)), rep -> next, pos + n, k)) return 1;
     return 0;
   }
-  for(int n = rep -> min;  n <= count;  n ++) if(Matcher_run(m, rep -> next, pos + n, k)) return 1;
+  for(int n = rep -> min;  n <= count;  n ++) if(Matcher_run(&((* m)), rep -> next, pos + n, k)) return 1;
   return 0;
 }
 
 static int Matcher_iterate(Matcher * m, _RegexNode rep, int count, int pos, int last_start, Rest * k){
-  if(m -> depth == _DEPTH_LIMIT) Matcher_too_deep(m);
-  m -> depth ++;
-  int matched = Matcher_iteration(m, rep, count, pos, last_start, k);
-  m -> depth --;
+  if((* m).depth == _DEPTH_LIMIT) Matcher_too_deep(&((* m)));
+  (* m).depth ++;
+  int matched = Matcher_iteration(&((* m)), rep, count, pos, last_start, k);
+  (* m).depth --;
   return matched;
 }
 
 _Noreturn static void Matcher_too_deep(Matcher * m){
   {
     static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/regex.x",.function = "Matcher_too_deep",.line = 616};
-    x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))), Symbol_var(34470112412), String_var(m -> regex -> pattern), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL))), Symbol_var(25782888), int_var(_DEPTH_LIMIT));
+    x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Regex.match")), NULL))), Symbol_var(34470112412), String_var((* m).regex -> pattern), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL))), Symbol_var(25782888), int_var(_DEPTH_LIMIT));
     __builtin_unreachable();
   }
 
 }
 
 static int Matcher_iteration(Matcher * m, _RegexNode rep, int count, int pos, int last_start, Rest * k){
-  if(count > 0 && pos == last_start && count >= rep -> min) return Matcher_run(m, rep -> next, pos, k);
+  if(count > 0 && pos == last_start && count >= rep -> min) return Matcher_run(&((* m)), rep -> next, pos, k);
   int more = rep -> max < 0 || count < rep -> max;
   Rest again ={
     1, rep, count, pos, k
   }
   ;
-  if(count < rep -> min) return Matcher_run(m, rep -> child, pos, & again);
+  if(count < rep -> min) return Matcher_run(&((* m)), rep -> child, pos, & again);
   if(rep -> greedy){
-    if(more && Matcher_run(m, rep -> child, pos, & again)) return 1;
-    return Matcher_run(m, rep -> next, pos, k);
+    if(more && Matcher_run(&((* m)), rep -> child, pos, & again)) return 1;
+    return Matcher_run(&((* m)), rep -> next, pos, k);
   }
-  if(Matcher_run(m, rep -> next, pos, k)) return 1;
-  return more && Matcher_run(m, rep -> child, pos, & again);
+  if(Matcher_run(&((* m)), rep -> next, pos, k)) return 1;
+  return more && Matcher_run(&((* m)), rep -> child, pos, & again);
 }
 
 int List_truth(List);

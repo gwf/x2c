@@ -136,7 +136,7 @@ int filtered(int volatile mode){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         if(x2c_exception_claim(& _x2c_exception_frame_0)){

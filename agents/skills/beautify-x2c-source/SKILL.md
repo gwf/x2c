@@ -108,5 +108,6 @@ rebaseline it. A batch that touches a hot path also needs the
 Report the file's subjects and any boundary split, `.x` lines deleted and
 added, then the shape measures before and after: sections over 400 lines, functions over 40 lines, the deepest brace depth, the largest
 parameter count, and the longest name. Name each neutral algorithm tweak and
-its reason. Publication follows the root [AGENTS.md](../../../AGENTS.md); in
-a campaign, the orchestrator integrates and gates each batch once.
+its reason. Delivery follows the root [AGENTS.md](../../../AGENTS.md); in
+a campaign, the orchestrator collects workers' handoffs and either publishes
+each batch or submits it to the shared integrator, as Gary selected.

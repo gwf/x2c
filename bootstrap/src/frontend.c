@@ -276,7 +276,7 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_0);
@@ -332,7 +332,7 @@ int ParsedUnit_parse(ParsedUnit * p){
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_1);
@@ -421,7 +421,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
           }
 
         }
-
+        __builtin_unreachable();
       }
       else{
         x2c_error_catch_close(_x2c_error_handler_2);

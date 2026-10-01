@@ -48,9 +48,9 @@ List project_binding_target(
 
 List project_call_target(
   Compiler compiler, Map definitions, Var value, String &name,
-  List *arguments) {
+  List &?arguments) {
   name = NULL;
-  if (arguments) *arguments = NULL;
+  if (arguments) arguments = NULL;
   if (value is not <list>) return NULL;
   List node = value;
   match (node) {
@@ -61,7 +61,7 @@ List project_call_target(
       return project_call_target(
         compiler, definitions, inner, name, arguments);
     case %(call ?callee (!set ?call_arguments (args *))): {
-      if (arguments) *arguments = call_arguments;
+      if (arguments) arguments = call_arguments;
       List binding;
       if (project_callee(compiler, callee, binding) != <direct>) {
         name = "computed";

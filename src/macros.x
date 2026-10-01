@@ -97,7 +97,7 @@ static List Compiler._stored_definition(
 
 /* An identical recursive expansion, nesting deeper than 64, or more than
    10000 expansions stops the compile. */
-static void Expansion.check(Expansion *x) {
+static void Expansion.check(Expansion &x) {
   Compiler c = x.c;
   foreach (List active, c.macro_stack) {
     (List prior, List prior_input, Var bindings, Var site) = active;
@@ -111,7 +111,7 @@ static void Expansion.check(Expansion *x) {
       x.invocation, NULL);
 }
 
-static void Expansion.recursion(Expansion *x) {
+static void Expansion.recursion(Expansion &x) {
   Atom name = x.definition.assoc(<name>);
   String spelling = name.str();
   List captured = x.input.search_replace(
@@ -123,7 +123,7 @@ static void Expansion.recursion(Expansion *x) {
     %(${_definition_note(x.definition)} "input: ${shown.repr()}"));
 }
 
-static void Expansion.too_deep(Expansion *x) {
+static void Expansion.too_deep(Expansion &x) {
   /* Compiler-generated applications can have no invocation token. */
   List first = x.c.macro_stack.last().list().car();
   String first_note = %"first expansion: ${_definition_note(first)}";
@@ -134,7 +134,7 @@ static void Expansion.too_deep(Expansion *x) {
 
 /* Pushes this expansion's frame on the macro stack, fills the template,
    and binds the result. A failed match binds nothing. */
-static List Expansion.bind(Expansion *x, AstPos position) {
+static List Expansion.bind(Expansion &x, AstPos position) {
   Compiler c = x.c;
   List old_stack = c.macro_stack;
   x.template = c._template(x.definition);
@@ -231,7 +231,7 @@ static Var Compiler._open_template(
 /* Allocates each fresh name of the definition. A name compile-time Lisp
    reads joins the match input as a Name capture row; the others, with the
    member holes, bind directly. Returns the Name rows. */
-static List Expansion.fresh_names(Expansion *x, List old_stack) {
+static List Expansion.fresh_names(Expansion &x, List old_stack) {
   Compiler c = x.c;
   Map file_locals = {};
   // The outermost active row's fourth field is its invocation token.
@@ -299,7 +299,7 @@ static List _lisp_bindings(List bindings) {
 
 /* The filled template. A Declaration result, or a NamedType decorator's,
    becomes one declaration bundle. */
-static Ast Expansion.construct(Expansion *x, List replacement_bindings) {
+static Ast Expansion.construct(Expansion &x, List replacement_bindings) {
   List definition = x.definition;
   Ast constructed = x.template.replace(replacement_bindings);
   if (constructed &&
@@ -442,7 +442,7 @@ List Compiler.parse_macro_definition(Compiler c) {
 
 /* Reads `open` and the result kind. A local definition names itself
    without `$`, and an anonymous one has no name to read. */
-static void Definition.head(Definition *d) {
+static void Definition.head(Definition &d) {
   Compiler c = d.c;
   d.open = c.at_word("open") && c.peek(1) == <ident>;
   if (d.open) c.next();
@@ -477,7 +477,7 @@ static Symbol Compiler._result_kind_token(Compiler c, Token token) {
 static const SymbolSet direct_result_kinds =
   %<<expression field enumerator map-entry unit>>;
 
-static void Definition.naming(Definition *d) {
+static void Definition.naming(Definition &d) {
   Compiler c = d.c;
   if (d.anonymous) d.name = Atom.intern(c.fresh_name("anonymous_macro"));
   else if (d.local) {
@@ -504,7 +504,7 @@ static void Definition.naming(Definition *d) {
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first
    parameter is its target. */
-static void Definition.signature(Definition *d) {
+static void Definition.signature(Definition &d) {
   Compiler c = d.c;
   Array params = [];
   c.expect(<(>);
@@ -522,7 +522,7 @@ static void Definition.signature(Definition *d) {
       c.token, NULL);
 }
 
-static void Definition.parameter(Definition *d, Array params, List hole) {
+static void Definition.parameter(Definition &d, Array params, List hole) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target) d.take_target(hole);
   else params.push(hole);
@@ -534,7 +534,7 @@ static void Definition.parameter(Definition *d, Array params, List hole) {
 
 /* A Unit target's source stays visible to compile-time Lisp, whose
    template slots find the target hole under `(target)`. */
-static void Definition.take_target(Definition *d, List hole) {
+static void Definition.take_target(Definition &d, List hole) {
   Compiler c = d.c;
   if (!decorator_target_kinds.contains(hole.assoc(<kind>)))
     c.report_error(
@@ -557,7 +557,7 @@ static const SymbolSet decorator_target_kinds =
 
 /* A local macro produces no file-scope syntax, directly or through the
    target it decorates. */
-static void Definition.check_signature(Definition *d) {
+static void Definition.check_signature(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target)
     c.report_error(
@@ -582,7 +582,7 @@ static void Definition.check_signature(Definition *d) {
 
 /* An Expression result, or a decorator of an expression, has an `=>`
    body. Every other result has a braced body after an optional `=>`. */
-static void Definition.arrow(Definition *d) {
+static void Definition.arrow(Definition &d) {
   Compiler c = d.c;
   if (d.has_expression_body()) {
     if (c.peek(0) == <"{">) c._braced_body_error();
@@ -602,11 +602,11 @@ static void Definition.arrow(Definition *d) {
   if (c.peek(0) != <"{">) c._braced_body_error();
 }
 
-static int Definition.has_expression_body(Definition *d) =>
+static int Definition.has_expression_body(Definition &d) =>
   d.kind == <expression> ||
   (d.kind == <decorator> && d.target_kind() == <expr>);
 
-static Symbol Definition.target_kind(Definition *d) {
+static Symbol Definition.target_kind(Definition &d) {
   if (!d.target) return 0;
   return d.target.assoc(<kind>);
 }
@@ -621,7 +621,7 @@ static void Compiler._braced_body_error(Compiler c) {
 
 /* Records where the definition stands and shows its signature, so an
    invocation inside the body names this macro. */
-static void Definition.announce(Definition *d) {
+static void Definition.announce(Definition &d) {
   Compiler c = d.c;
   (void) c.record_origin(d.start);
   d.origin = c.token_location(d.start);
@@ -631,7 +631,7 @@ static void Definition.announce(Definition *d) {
 
 /* Reads the body in its own scope, with the kinds it infers for the holes.
    A local macro records the outer names its body captures. */
-static void Definition.body(Definition *d) {
+static void Definition.body(Definition &d) {
   Compiler c = d.c;
   $let(c.local_macro_captures, d.local ? {} : NULL)
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
@@ -647,7 +647,7 @@ static void Definition.body(Definition *d) {
 
 /* The legacy form is parenthesized. The canonical form ends at `;`, which
    an anonymous macro omits. */
-static List Definition.expression_body(Definition *d) {
+static List Definition.expression_body(Definition &d) {
   Compiler c = d.c;
   if (c._legacy_expression_body()) {
     c.expect(<(>);
@@ -662,7 +662,7 @@ static List Definition.expression_body(Definition *d) {
 
 /* A decorator's body produces what its target is, and a Function or
    Block target's body is block items. */
-static Symbol Definition.body_kind(Definition *d) {
+static Symbol Definition.body_kind(Definition &d) {
   if (d.kind != <decorator>) return d.kind;
   Symbol target = d.target_kind();
   return target == <function> || target == <block> ? <block-item> : target;
@@ -683,7 +683,7 @@ static List _recorded(Map m) {
    and pattern an invocation needs. Parsed literal names carry
    definition-only identities, so the template stores binders instead and
    each expansion allocates one fresh identity per literal spelling. */
-static void Definition.finish(Definition *d) {
+static void Definition.finish(Definition &d) {
   d.template = _slot_binders(d.wrap());
   Map bindings = {};
   if (d.target_kind() == <unit>) d.constructed_names(bindings);
@@ -697,7 +697,7 @@ static void Definition.finish(Definition *d) {
 /* A Function decorator's body becomes a function with the target's return
    type and declarator, and an Expression decorator's body a parenthesized
    expression. */
-static List Definition.wrap(Definition *d) {
+static List Definition.wrap(Definition &d) {
   List replacement = d.template;
   if (d.kind != <decorator>) return replacement;
   Symbol target = d.target_kind();
@@ -733,7 +733,7 @@ static List _slot_binders(List replacement) {
 
 /* A Unit target requires construction, which each Name hole's value
    carries. */
-static void Definition.constructed_names(Definition *d, Map bindings) {
+static void Definition.constructed_names(Definition &d, Map bindings) {
   Var required = _hole_key(d.target, "construction");
   foreach (List parameter, d.parameters)
     if (parameter.assoc(<kind>) == <name>) {
@@ -745,7 +745,7 @@ static void Definition.constructed_names(Definition *d, Map bindings) {
 /* Binds each template local to its binder and returns the locals that get
    fresh names. A tag the template only references keeps its public
    spelling. */
-static Array Definition.local_binders(Definition *d, Map bindings) {
+static Array Definition.local_binders(Definition &d, Map bindings) {
   Array fresh = [];
   foreach (Var identity, _recorded(d.locals)) {
     if (%(provisional $identity) in d.locals) {
@@ -759,7 +759,7 @@ static Array Definition.local_binders(Definition *d, Map bindings) {
   return fresh;
 }
 
-static void Definition.check_kinds(Definition *d) {
+static void Definition.check_kinds(Definition &d) {
   foreach (List hole, d.parameters)
     if (!hole.assoc(<kind>)) {
       String hole_spelling = hole.assoc(<binder>).str()[1:];
@@ -771,7 +771,7 @@ static void Definition.check_kinds(Definition *d) {
 
 /* Each `using` hole and each template local gets a fresh name per
    expansion; the last field marks the names compile-time Lisp reads. */
-static List Definition.fresh_rows(Definition *d, Array locals) {
+static List Definition.fresh_rows(Definition &d, Array locals) {
   Array fresh = [];
   foreach (Var binder, d.using.list_free())
     fresh.push(%($binder ${binder.str()[1:]} 1));
@@ -785,7 +785,7 @@ static List Definition.fresh_rows(Definition *d, Array locals) {
 }
 
 /* Makes the finished definition visible in place of its signature. */
-static List Definition.publish(Definition *d) {
+static List Definition.publish(Definition &d) {
   List node = d.node();
   d.show(node);
   return node;
@@ -793,12 +793,12 @@ static List Definition.publish(Definition *d) {
 
 /* A named local macro is visible in its scope, and a global one unless a
    template holds it. */
-static void Definition.show(Definition *d, List node) {
+static void Definition.show(Definition &d, List node) {
   if (d.local && !d.anonymous) d.c.sym.define_macro(d.name, node);
   else if (!d.local && !d.nested) d.c.publish_macro_definition_node(node);
 }
 
-static List Definition.node(Definition *d) {
+static List Definition.node(Definition &d) {
   Compiler c = d.c;
   List definition = %(
     macrodef
@@ -1345,7 +1345,7 @@ static Var _replace_bindings(Var value, Map bindings) {
    fresh name compile-time Lisp reads. Each row binds only the projections
    the template uses. */
 
-static List Definition.invocation_pattern(Definition *d) {
+static List Definition.invocation_pattern(Definition &d) {
   Map binders = {};
   _template_binders(d.template, binders);
   Array arguments = [];
@@ -2041,9 +2041,16 @@ static int _source_capture_parts(Var value, List &?source, Var &?syntax) {
   return 0;
 }
 
+/* `value` without its source wrappers. A pending invocation inside it keeps
+   its own capture rows, so nested applications unwrap each argument once. */
 static Var _source_unwrap(Var value) {
   if (value is not <list> || value.is_nil()) return value;
-  return value.list().search_replace(%(src ? ?syntax), <?syntax>);
+  match (value) {
+    case %(src ? ?syntax): return _source_unwrap(syntax);
+    case %(macro-invoke *): return value;
+  }
+  List child;
+  $ast.rewrite_children(value.list(), child, _source_unwrap(child));
 }
 
 /* invocations at syntax positions
@@ -2169,10 +2176,10 @@ static List Compiler._decorate(
   return result;
 }
 
-static int Decoration.on_body(Decoration *d) =>
+static int Decoration.on_body(Decoration &d) =>
   d.kind == <block> && d.position == AST_UNIT;
 
-static void Decoration.misplaced(Decoration *d) {
+static void Decoration.misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
   d.c.report_error(
@@ -2181,7 +2188,7 @@ static void Decoration.misplaced(Decoration *d) {
     d.invocation, NULL);
 }
 
-static List Decoration.arguments(Decoration *d, int block_scope) {
+static List Decoration.arguments(Decoration &d, int block_scope) {
   Compiler c = d.c;
   List definition = d.definition;
   List arguments = c._invocation_arguments(definition, d.invocation);
@@ -2201,7 +2208,7 @@ static List Decoration.arguments(Decoration *d, int block_scope) {
   return arguments;
 }
 
-static List Decoration.node(Decoration *d, List arguments) {
+static List Decoration.node(Decoration &d, List arguments) {
   Compiler c = d.c;
   d.start = c.token;
   List target = d.target();
@@ -2214,7 +2221,7 @@ static List Decoration.node(Decoration *d, List arguments) {
   return c._invocation_node(d.definition, input, d.invocation);
 }
 
-static List Decoration.target(Decoration *d) {
+static List Decoration.target(Decoration &d) {
   Compiler c = d.c;
   if (d.on_body()) {
     d.function = c.parse_function_definition();
@@ -2240,7 +2247,7 @@ static List Compiler._positional_target(Compiler c, AstPos position) {
 
 /* The target's capture row. A public Unit target of one item also carries
    that item as the construction the template requires. */
-static List Decoration.capture(Decoration *d, List target) {
+static List Decoration.capture(Decoration &d, List target) {
   Compiler c = d.c;
   List targets = target.car() == <seq> ? target.cdr() : %($target);
   Array captured_targets = [];
@@ -2270,7 +2277,7 @@ static int Compiler._private_target(Compiler c, List target) {
   return private_target;
 }
 
-static List Decoration.bind(Decoration *d, List node) {
+static List Decoration.bind(Decoration &d, List node) {
   Compiler c = d.c;
   if (!d.on_body()) return c.bind_syntax(node, d.position, c.return_type);
   return c._bind_body(node, d.function);
@@ -3262,7 +3269,7 @@ static void Compiler._import_cycle(Compiler c, String path, Token invocation) {
 /* Reads the file and caches what it added: macros, dependencies, aliases,
    and whether it contributed `meta` declarations, which the import returns
    as a `seq`. */
-static List Import.read(Import *in) {
+static List Import.read(Import &in) {
   Compiler c = in.c;
   Map previous_definitions = c.macros.copy();
   Map previous_dependencies = c.deps.copy();
@@ -3294,7 +3301,7 @@ static Map _changed(Map now, Map before) {
   return changed;
 }
 
-static void Import.file(Import *in) {
+static void Import.file(Import &in) {
   String path = in.path;
   if (path.endswith(".xlisp")) in.lisp();
   else if (path.endswith(".xmacro") || path.endswith(".xpmacro"))
@@ -3308,7 +3315,7 @@ static void Import.file(Import *in) {
 /* The shared session evaluated this file once for the target, and a session
    cannot replace a name an ancestor binds. The read still reports a file
    that has gone missing. */
-static void Import.lisp(Import *in) {
+static void Import.lisp(Import &in) {
   Compiler c = in.c;
   String text = c._read_source(
     in.path, "cannot open compile-time Lisp import", in.invocation);
@@ -3321,7 +3328,7 @@ static void Import.lisp(Import *in) {
    diagnostics are returned to the caller before release; lasting effects
    enter the shared definitions, aliases, dependencies, literal cache, and
    Lisp session. */
-static void Import.macros(Import *in) {
+static void Import.macros(Import &in) {
   Compiler c = in.c;
   in.aliases = {};
   String text = c._read_source(
@@ -3347,7 +3354,7 @@ static void Import.macros(Import *in) {
 /* A `meta` definition the import returns is emitted by the caller when the
    caller reaches it, so its `(cache id)` references index the caller's
    keys. */
-static void Import.borrow(Import *in, Compiler child) {
+static void Import.borrow(Import &in, Compiler child) {
   Compiler c = in.c;
   child.borrow_diagnostics(c);
   child.borrow_unit_semantics(c);
@@ -3366,7 +3373,7 @@ static void Import.borrow(Import *in, Compiler child) {
   child.declaration_effects = c.declaration_effects;
 }
 
-static void Import.form(Import *in, Compiler child) {
+static void Import.form(Import &in, Compiler child) {
   if (child.keyword_form_is_definition()) child._record_alias(in.aliases);
   else if (child.macro_form_is_definition()) child.parse_macro_definition();
   else if (child.meta_form_is_declaration()) in.meta_declaration(child);
@@ -3376,7 +3383,7 @@ static void Import.form(Import *in, Compiler child) {
       <macro>, "unexpected form in macro import", child.token, NULL);
 }
 
-static void Import.meta_declaration(Import *in, Compiler child) {
+static void Import.meta_declaration(Import &in, Compiler child) {
   in.meta = 1;
   List definition = child.parse_top_level();
   if (definition) in.metas.push(definition);
@@ -3384,7 +3391,7 @@ static void Import.meta_declaration(Import *in, Compiler child) {
 
 /* A nested import's own `meta` definitions belong to the same consuming
    unit. */
-static void Import.lisp_form(Import *in, Compiler child) {
+static void Import.lisp_form(Import &in, Compiler child) {
   if (!in.c.collect_protocols && !child._import_path(NULL)) {
     child.parse_macro_lisp_shallow();
     return;

@@ -279,7 +279,7 @@ static void _curl_transfer_end(CurlEasy easy) {
 }
 
 static void _curl_buffer_failure(
-  CurlEasy easy, CurlBuffer *buffer, String channel, String operation) {
+  CurlEasy easy, CurlBuffer &buffer, String channel, String operation) {
   size_t limit = buffer.limit, attempted = buffer.attempted;
   if (buffer.failure == CURL_BUFFER_LIMIT) {
     raise %(size-limit (library "libcurl") (operation $operation)
@@ -569,7 +569,7 @@ String CurlEasy.unescape(String value) {
 /* The frame owns every borrowed native callback target until cleanup. Both
    easy and multi execution use the same preparation and result conversion. */
 static void _curl_transfer_begin(
-  CurlTransfer *transfer, CurlEasy easy, String method, String url,
+  CurlTransfer &transfer, CurlEasy easy, String method, String url,
   String path, CurlStreamFn consume, Var stream_data) {
   if (!easy || !easy.native || !method || !url) {
     raise %(bad-arg (library "libcurl") (operation "request"));
@@ -637,24 +637,24 @@ static void _curl_transfer_begin(
     curl_easy_setopt(easy.native, CURLOPT_HEADERDATA, &transfer.headers));
 }
 
-static void _curl_transfer_close(CurlTransfer *transfer) {
+static void _curl_transfer_close(CurlTransfer &transfer) {
   _curl_transfer_end(transfer.easy);
   curl_slist_free_all(transfer.request_headers);
   free(transfer.body.bytes);
   free(transfer.headers.bytes);
   if (transfer.sink.file) fclose(transfer.sink.file);
-  *transfer = (CurlTransfer) { 0 };
+  transfer = (CurlTransfer) { 0 };
 }
 
 static CurlResponse _curl_transfer_finish(
-  CurlTransfer *transfer, CURLcode result, String operation) {
+  CurlTransfer &transfer, CURLcode result, String operation) {
   CurlEasy easy = transfer.easy;
   String path = transfer.path;
   CurlStreamFn consume = transfer.stream.consume;
   if (transfer.body.failure)
-    _curl_buffer_failure(easy, &transfer.body, "body", operation);
+    _curl_buffer_failure(easy, transfer.body, "body", operation);
   if (transfer.headers.failure)
-    _curl_buffer_failure(easy, &transfer.headers, "headers", operation);
+    _curl_buffer_failure(easy, transfer.headers, "headers", operation);
   if (transfer.sink.failed ||
       (transfer.sink.file && fflush(transfer.sink.file))) {
     raise %(io-fail (library "libcurl") (operation "download")
@@ -696,11 +696,11 @@ static CurlResponse _curl_perform(
   CurlEasy easy, String method, String url, String path, CurlStreamFn consume,
   Var stream_data) {
   CurlTransfer transfer = { 0 };
-  defer _curl_transfer_close(&transfer);
+  defer _curl_transfer_close(transfer);
   _curl_transfer_begin(
-    &transfer, easy, method, url, path, consume, stream_data);
+    transfer, easy, method, url, path, consume, stream_data);
   return _curl_transfer_finish(
-    &transfer, curl_easy_perform(easy.native), "easy_perform");
+    transfer, curl_easy_perform(easy.native), "easy_perform");
 }
 
 /** Performs `method` against `url` and returns the complete response.
@@ -806,7 +806,7 @@ CurlResponse CurlBatch.response(CurlBatch batch, int index) {
 }
 
 static void _curl_batch_failure(
-  CurlBatchItem *item, Symbol cause, List detail) {
+  CurlBatchItem &item, Symbol cause, List detail) {
   item.cause = cause;
   item.detail = Error.snapshot(detail);
 }
@@ -847,7 +847,7 @@ CurlBatch CurlEasy.request_all(
     for (int i = 0; i < width; i++) {
       if (slots[i].attached)
         curl_multi_remove_handle(multi, slots[i].easy.native);
-      _curl_transfer_close(&slots[i].transfer);
+      _curl_transfer_close(slots[i].transfer);
       slots[i].easy.free();
     }
     curl_multi_cleanup(multi);
@@ -867,11 +867,11 @@ CurlBatch CurlEasy.request_all(
             _curl_set_body(slot.easy, easy.content_type, easy.request_body,
               easy.request_body_size, "request_all");
           _curl_transfer_begin(
-            &slot.transfer, slot.easy, method, url, NULL, NULL, void);
+            slot.transfer, slot.easy, method, url, NULL, NULL, void);
         }
         catch %(?cause *detail): {
-          _curl_batch_failure(&batch.items[slot.index], cause, detail);
-          _curl_transfer_close(&slot.transfer);
+          _curl_batch_failure(batch.items[slot.index], cause, detail);
+          _curl_transfer_close(slot.transfer);
           continue;
         }
         _curl_multi_check("multi_add_handle",
@@ -897,10 +897,10 @@ CurlBatch CurlEasy.request_all(
         active--;
         finished = 1;
         try batch.items[slot.index].response =
-          _curl_transfer_finish(&slot.transfer, result, "multi_info_read");
+          _curl_transfer_finish(slot.transfer, result, "multi_info_read");
         catch %(?cause *detail):
-          _curl_batch_failure(&batch.items[slot.index], cause, detail);
-        _curl_transfer_close(&slot.transfer);
+          _curl_batch_failure(batch.items[slot.index], cause, detail);
+        _curl_transfer_close(slot.transfer);
         break;
       }
     }
