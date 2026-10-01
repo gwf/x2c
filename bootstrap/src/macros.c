@@ -361,7 +361,7 @@ static List Compiler__lookup(Compiler c, Atom name, Token invocation);
 
 static int Compiler__try_definition(Compiler c, Atom name, int install_lisp, Var * stored);
 
-static int _needs_shallow(List definition);
+static Symbol _collection(List definition);
 
 static List Compiler__invocation_arguments(Compiler c, List definition, Token invocation);
 
@@ -3158,22 +3158,22 @@ static int Compiler__try_definition(Compiler c, Atom name, int install_lisp, Var
   return found || Map_try_get(c -> macros, name, &((* stored)));
 }
 
-int Compiler_macro_invocation_needs_shallow_expansion(Compiler c){
+Symbol Compiler_macro_invocation_collection(Compiler c){
   if(! _init_guard_) _file_init_();
-  return _needs_shallow(Compiler__peek_invocation(c));
+  return _collection(Compiler__peek_invocation(c));
 }
 
 int List_try_search(List, Var, Var *, List *);
 
-static int _needs_shallow(List definition){
+static Symbol _collection(List definition){
   if(! List_truth(definition)) return 0;
-  if(Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1;
+  if(Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || Var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;
   if(! Var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;
-  if(Var_int(List_assoc(definition, Symbol_var(647498998088)))) return 1;
+  if(Var_int(List_assoc(definition, Symbol_var(647498998088)))) return 1248873517384;
   List template = Var_list(List_assoc(definition, Symbol_var(1386033712394))), bindings;
   Var matched;
-  return({ static MatchCaptureSite _x2c_match_site_19;
-  x2c_match_site_try_search(& _x2c_match_site_19, template, List_var(_525), &(matched), &(bindings)); });
+  if(({ static MatchCaptureSite _x2c_match_site_19;  x2c_match_site_try_search(& _x2c_match_site_19, template, List_var(_525), &(matched), &(bindings)); })) return 1248873517384;
+  return 43141448;
 }
 
 void Compiler_skip_macro_invocation(Compiler c){
@@ -4624,7 +4624,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3041};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3043};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -4749,7 +4749,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3179};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3181};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

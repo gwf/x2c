@@ -1251,11 +1251,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _790 = cons(_789, NULL);
   _791 = cons(_621, _790);
   _792 = List_var(_791);
-  _793 = int_var(2399);
+  _793 = int_var(2396);
   _794 = cons(_793, NULL);
   _795 = cons(_627, _794);
   _796 = List_var(_795);
-  _797 = int_var(88492);
+  _797 = int_var(88432);
   _798 = cons(_797, NULL);
   _799 = cons(_642, _798);
   _800 = List_var(_799);
@@ -2784,9 +2784,7 @@ int Compiler_skip_named_type_declaration(Compiler);
 
 int Compiler_macro_starts_target_at(Compiler, AstPos);
 
-int Compiler_macro_invocation_needs_shallow_expansion(Compiler);
-
-void Compiler_collect_unit_macro(Compiler);
+int Compiler_collect_unit_macro(Compiler);
 
 void Compiler_skip_macro_invocation(Compiler);
 
@@ -2799,10 +2797,7 @@ static int Compiler__skip_collected_form(Compiler c){
   }
   if(! c -> collect_protocols && Compiler_skip_named_type_declaration(c)) return 1;
   if(! Compiler_macro_starts_target_at(c, AST_UNIT)) return 0;
-  if(c -> collect_protocols && Compiler_macro_invocation_needs_shallow_expansion(c)){
-    Compiler_collect_unit_macro(c);
-    return 1;
-  }
+  if(c -> collect_protocols && Compiler_collect_unit_macro(c)) return 1;
   do{
     Compiler_skip_macro_invocation(c);
     if(Compiler_test(c, 119)) return 1;
