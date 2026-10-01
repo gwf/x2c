@@ -2,20 +2,17 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    A `String` is an immutable, interned, NUL-terminated byte sequence. Equal
-    nonempty `String`s visible in one pool chain share one canonical pointer,
-    and the empty `String` is native zero. A private header before the bytes
-    holds the exact length and a cached content hash. A `String` cannot hold
-    an embedded NUL, and every operation here works on bytes, without Unicode
-    character semantics.
+    String owns canonical immutable byte strings. Equal nonempty contents in
+    one pool chain share one pointer, the empty String is native zero, and a
+    private header before the bytes holds the exact length and a cached
+    content hash. A String cannot hold an embedded NUL, and every operation
+    here works on bytes, without Unicode character semantics.
 
-    A canonical `String` belongs to the pool that interned it or to an
+    A canonical String belongs to the pool that interned it or to an
     ancestor, and releasing that pool invalidates it unless it was promoted.
-    A transient `String.malloc` buffer belongs to the active pool until
-    `String.intern_free` makes it canonical or `String.free` releases it.
-    Constructing a nonempty `String` may raise `<alloc-fail>`, `<size-limit>`,
-    or `<invariant>` through pool storage and registration; these causes
-    transfer and never return to the operation.
+    A transient `String.malloc` buffer belongs to the active pool until it is
+    interned or freed. Pool storage and registration causes transfer and
+    never return to the constructing operation.
 */
 
 #pragma once
@@ -37,7 +34,6 @@ protocol const char *(T) {
   char * T.c_find(T, int)  = strchr;
 }
 
-/*  String adopts the native const char * protocol beside its declaration. */
 protocol const char *(String);
 
 #pragma private
@@ -864,6 +860,45 @@ static String _pad(String str, int width, char fill, int side) {
   return _finish(string, width);
 }
 
+/** Formats a canonical `String` from `fmt` and the trailing arguments.
+    The receiver is the format `String`, so format-dependent construction reads
+    `%"%-12s %.2f".printf(name, score)`. Conversions, promotion rules, and
+    argument matching are C's, since the work is done by `vsnprintf`;
+    canonical `String`s are NUL-terminated and satisfy `%s` directly. Prefer
+    `%"$name has ${name.len()} bytes"` when interpolation already says what
+    you want, and `String.format` when the arguments must be checked.
+    Raises: `<alloc-fail>` when result storage cannot be allocated. An empty
+    `fmt` or formatting error also returns NULL without raising. Arguments
+    that do not match the conversions are undefined behavior as in C.
+*/
+String String.printf(String fmt, ...) {
+  if (!fmt || !*fmt) return NULL;
+  va_list args, measure;
+  va_start(args, fmt);
+  va_copy(measure, args);
+  int n = vsnprintf(NULL, 0, fmt, measure);
+  va_end(measure);
+  if (n < 0) {
+    va_end(args);
+    return NULL;
+  }
+  if (n <= STRING_STACK_BYTES) {
+    char bytes[STRING_STACK_BYTES + 1];
+    int written = vsnprintf(bytes, n + 1, fmt, args);
+    va_end(args);
+    if (written != n) return NULL;
+    return _from_bytes(bytes, n);
+  }
+  String string = String.malloc(n + 1);
+  int written = vsnprintf(string, n + 1, fmt, args);
+  va_end(args);
+  if (written != n) {
+    _free_unchecked(string);
+    return NULL;
+  }
+  return _finish(string, n);
+}
+
 // trimming and splitting
 
 /** Returns `str` with leading and trailing bytes in `negChars` removed.
@@ -1153,50 +1188,6 @@ meta native String String.squeeze(String str, String chars) {
   if (!str || !chars || !*str) return str;
   $string.select(
     str, i, !(i && str[i] == str[i - 1] && strchr(chars, str[i])));
-}
-
-/* formatting
-
-   `String.printf` passes C arguments to `vsnprintf`. The checked
-   `String.format` is in `string-format.x`. */
-
-/** Formats a canonical `String` from `fmt` and the trailing arguments.
-    The receiver is the format `String`, so format-dependent construction reads
-    `%"%-12s %.2f".printf(name, score)`. Conversions, promotion rules, and
-    argument matching are C's, since the work is done by `vsnprintf`;
-    canonical `String`s are NUL-terminated and satisfy `%s` directly. Prefer
-    `%"$name has ${name.len()} bytes"` when interpolation already says what
-    you want.
-    Raises: `<alloc-fail>` when result storage cannot be allocated. An empty
-    `fmt` or formatting error also returns NULL without raising. Arguments
-    that do not match the conversions are undefined behavior as in C.
-*/
-String String.printf(String fmt, ...) {
-  if (!fmt || !*fmt) return NULL;
-  va_list args, measure;
-  va_start(args, fmt);
-  va_copy(measure, args);
-  int n = vsnprintf(NULL, 0, fmt, measure);
-  va_end(measure);
-  if (n < 0) {
-    va_end(args);
-    return NULL;
-  }
-  if (n <= STRING_STACK_BYTES) {
-    char bytes[STRING_STACK_BYTES + 1];
-    int written = vsnprintf(bytes, n + 1, fmt, args);
-    va_end(args);
-    if (written != n) return NULL;
-    return _from_bytes(bytes, n);
-  }
-  String string = String.malloc(n + 1);
-  int written = vsnprintf(string, n + 1, fmt, args);
-  va_end(args);
-  if (written != n) {
-    _free_unchecked(string);
-    return NULL;
-  }
-  return _finish(string, n);
 }
 
 // conversions
