@@ -16,6 +16,8 @@ $(import "error-macros.xmacro")
 $(import "map-generics.xmacro")
 $(import "integer-ops.xmacro")
 
+// representation
+
 /** A mutable, `Scope`-owned map from native `int` keys to `int` values.
     Keys and values are copied into native entry fields; assignment shares the
     map, while `MapIntInt.copy` makes an independent table. Compound indexed
@@ -77,6 +79,8 @@ struct MapLongDoubleRecord { long key; double val; };
 struct MapStringStringRecord { String key, val; };
 struct MapStringIntRecord { String key; int val; };
 
+// storage errors
+
 static void _int_reinsert_error(unsigned capacity, int probe) {
   raise %(invariant (owner "MapIntInt.reinsert") (capacity $capacity)
           (probe $probe));
@@ -112,6 +116,8 @@ static void _string_int_reinsert_error(unsigned capacity, int probe) {
 static void _string_int_insert_error(unsigned capacity) {
   raise %(invariant (owner "MapStringInt.insert") (capacity $capacity));
 }
+
+// entry slots
 
 static int *_int_key(MapIntInt map, unsigned index) {
   struct MapIntIntRecord *records = map.entries;
@@ -155,6 +161,8 @@ static int *_string_int_value(MapStringInt map, unsigned index) {
 
 /* The three iterators each yield one boxed key or value, so a family needs a
    plain function per stored type. */
+
+// boxing, hashing, and comparison
 
 static Var _box_int(int value) => value;
 
@@ -201,6 +209,8 @@ static int _map_compare_int(int a, int b) => (a > b) - (a < b);
 static int _map_compare_long(long a, long b) => (a > b) - (a < b);
 static int _map_compare_double(double a, double b) => Var.compare(a, b);
 static int _map_compare_string(String a, String b) => a.compare(b);
+
+// checks and updates
 
 static void _valid_int(int *value) {
   (void) value;
@@ -269,6 +279,8 @@ static String _update_string(
   slot[0] = result;
   return result;
 }
+
+// families
 
 $map.core.family(
   MapIntInt, struct MapIntInt, int, int,
@@ -385,6 +397,8 @@ $map.typed.publish(
   MapStringInt, String, int, mapstringint, <mapstrint>,
   _box_string, _box_int,
   _prepare_string_int_export);
+
+// compile-time conversions
 
 /* Compile-time code reaches the typed-map conversions through these literal
    `meta` prototypes; a family macro cannot emit one. */

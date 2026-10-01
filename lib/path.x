@@ -35,6 +35,8 @@ class Path String;
 #include <sys/stat.h>
 #include <unistd.h>
 
+// path spelling
+
 static String _trimmed(String path) {
   int length = path.len();
   while (length > 1 && path[length - 1] == '/') length--;
@@ -120,6 +122,8 @@ Self Path.absolute(Self path) {
   return result;
 }
 
+// queries
+
 static int _mode(Path p) {
   struct stat info;
   return p && stat(p, &info) == 0 ? info.st_mode : 0;
@@ -173,6 +177,8 @@ double Path.modified_time(Path path) {
   return info.st_mtim.tv_sec + info.st_mtim.tv_nsec / 1e9;
 #endif
 }
+
+// listing and walking
 
 /** Returns the names in the directory `path`, sorted, without `.` and `..`.
     Raises: `<not-found>` or `<io-fail>`.
@@ -243,6 +249,8 @@ static void _walk(Path directory, int depth, int hidden, Array paths) {
       _walk(child, depth - 1, hidden, paths);
   }
 }
+
+// globbing
 
 /* A `]` that opens a class is a member, as in a shell. */
 static int _class_match(const char *&pattern, unsigned char value) {
@@ -388,6 +396,8 @@ List Path.glob(Path pattern) {
   return matches.sort().list_free();
 }
 
+// changing the filesystem
+
 /** Creates the directory `p` and any missing parents.
     An existing directory is left as it is.
     Raises: `<io-fail>` when a component cannot be created or names an
@@ -528,6 +538,8 @@ void Path.move_to(Path source, Path target) {
 void Path.symlink_to(Path link, Path target) {
   if (symlink(target, link)) File.path_error("Path.symlink_to", link, errno);
 }
+
+// whole files and temporary directories
 
 /** Returns the contents of the file at `path`, or NULL when it is empty.
     Raises: `<not-found>`, `<io-fail>`, or `<bad-arg>` when the file contains
