@@ -875,6 +875,27 @@ static void lisp_car_and_cdr_check_the_operand_tag(void) {
   lisp.destroy();
 }
 
+/* A standard operation that reads an operand as a `String` or `List`
+   checks its tag as the Func adapter does, rather than converting a wrong
+   tag to NULL and returning a wrong value. */
+static void lisp_standard_operations_check_object_operands(void) {
+  Lisp lisp = Lisp.new();
+  if (!EXPECT_NOT_NULL(lisp)) return;
+  EXPECT_INT_EQ(_raised_code(lisp, "(string-append \"a\" 1)"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(string-append \"a\" nil)"),
+                <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(search-replace 5 'a 'z)"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(search-replace \"abc\" 'a 'z)"),
+                <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(append '(1) 7)"), <bad-types>);
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(string-append \"a\" \"b\")")), "ab");
+  EXPECT_VAR_EQ(_ev(lisp, "(search-replace '(a b) 'a 'z)"),
+                _ev(lisp, "'(z b)"));
+  EXPECT_TRUE(_ev(lisp, "(search-replace nil 'a 'z)").is_nil());
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(append nil 7)")), 7);
+  lisp.destroy();
+}
+
 
 /* Numeric comparison answers about numbers, so the integer and floating
    encodings of one value compare equal rather than by the Var total order,
@@ -1822,6 +1843,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_bind_native);
   $test.run(lisp_default_session_is_ready);
   $test.run(lisp_car_and_cdr_check_the_operand_tag);
+  $test.run(lisp_standard_operations_check_object_operands);
   $test.run(lisp_numeric_comparison_reads_the_value);
   $test.run(lisp_read_fences_nesting_depth);
   $test.run(lisp_pattern_matching_operations);

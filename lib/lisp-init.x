@@ -6,7 +6,9 @@
     native target table, so a compile-time session and a runtime `Lisp.new`
     session share them. Each follows the Lisp definition it replaced: nil is
     the empty `List`, truth is any other value, and a list walk reads through
-    `lisp_car` and `lisp_cdr` so a nonlist operand raises `<bad-types>`.
+    `lisp_car` and `lisp_cdr` so a nonlist operand raises `<bad-types>`. A
+    `String` or `List` operand reads through `_string` or `_list`, which
+    raise `<bad-types>` for another tag as the Func adapter does.
 */
 
 #pragma once
@@ -19,6 +21,20 @@ static int _nil(Var value) => value == %();
 static Var _truth(int x) {
   if (x) return <true>;
   return %();
+}
+
+static String _string(Var value, String operation) {
+  if (value is not <string>)
+    raise %(bad-types (operation $operation) (actual ${value.tag()})
+                       (want string));
+  return value;
+}
+
+static List _list(Var value, String operation) {
+  if (value is not <list>)
+    raise %(bad-types (operation $operation) (actual ${value.tag()})
+                       (want list));
+  return value;
 }
 
 /* Returns the last element of `values`, or nil when it is nil. */
@@ -54,9 +70,10 @@ static Var _append2(Var left, Var right) {
   List items = NULL;
   for (; !_nil(left); left = lisp_cdr(left))
     items = cons(lisp_car(left), items);
-  foreach (Var value, items)
-    right = Var.cons(value, right);
-  return right;
+  if (!items) return right;
+  List tail = _list(right, "append");
+  foreach (Var value, items) tail = cons(value, tail);
+  return tail;
 }
 
 /* Concatenates its list arguments; the last is shared, not copied. */
@@ -110,7 +127,7 @@ Var lisp_bound(Var bindings, Var name) =>
     matching sublist.
 */
 Var lisp_search_replace(Var input, Var pat, Var template) {
-  List list = input;
+  List list = _list(input, "search-replace");
   if (_nil(lisp_match(input, pat)))
     return list.search_replace(pat, template);
   return lisp_match_replace(list, pat, template);
@@ -157,6 +174,7 @@ Var lisp_binder_lets(Var bindings, Var binders) {
 /* Concatenates its `String` arguments; no arguments gives "". */
 Var lisp_string_append_all(List strings) {
   Var text = %"";
-  foreach (Var s, strings) text = lisp_string_append(text, s);
+  foreach (Var s, strings)
+    text = lisp_string_append(text, _string(s, "string-append"));
   return text;
 }
