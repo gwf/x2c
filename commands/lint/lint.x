@@ -261,6 +261,10 @@ int Lint.line_end(Lint l, int at):
     at = next
   return at
 
+/** Returns whether a token exists at index `at` with text `text`. */
+int Lint.token_is(Lint l, int at, String text) =>
+  at >= 0 && at < l.count && l.tokens[at].text == text
+
 /** Returns the line on which the token at `at` ends. */
 int Lint.end_line(Lint l, int at):
   Token t = l.at(at)
