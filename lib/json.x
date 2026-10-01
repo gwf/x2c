@@ -2,16 +2,12 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    A JSON object becomes a `Map` with `String` keys, an array an `Array`, a
-    string a `String`, a number an integer or `double` `Var`, null the
-    all-zero `Var`, and true or false a `JsonBool`. The names match the
-    converting surface of `packages/yyjson`, which a program can use instead
-    when it needs object order, duplicate names, or numeric intent. A `Map`
-    has none of those: a repeated name keeps its last value, and output lists
-    names in byte order so the same value always writes the same text.
-
-    Input follows the RFC 8259 grammar. Rejected text raises `<bad-arg>` with
-    the byte `offset`, one-based `line` and byte `column`, and a `why`.
+    Json owns the crossing between JSON text and ordinary x2c values: an
+    object is a `Map` with `String` keys, an array an `Array`, null the
+    all-zero `Var`, and true or false a `JsonBool`. A `Map` keeps neither
+    member order nor duplicate names, so a repeated name keeps its last value
+    and output writes names in byte order; `packages/yyjson` serves a program
+    that needs either.
 */
 
 #pragma once
@@ -94,74 +90,209 @@ int Json.boolean(Var value) {
     surrogates, and U+0000 is rejected because a `String` cannot hold it.
 */
 
-typedef struct _JsonReader {
+/* One parse of `text`: `at` is the byte being read, `depth` counts the open
+   arrays and objects, and `path` names a file for the error details. */
+typedef struct Reader {
   const char *text;
   String path;
   int at, depth;
-} *_JsonReader;
+} *Reader;
 
-static void _JsonReader._fail(_JsonReader j, String why) {
-  int line = 1, column = 1, offset = j.at;
-  scan_next_line_col((char *) j.text, offset, &line, &column);
-  if (j.path)
-    raise %(bad-arg (operation "Json.read_file") (path ${j.path})
-            (why $why) (offset $offset) (line $line) (column $column));
-  raise %(bad-arg (operation "Json.parse") (why $why)
-          (offset $offset) (line $line) (column $column));
+/** Returns the x2c value of the JSON text `source`.
+    Objects become `Map`s, arrays `Array`s, and strings `String`s. A number
+    without a fraction or exponent is an `int` `Var` when it fits, then a
+    `long`, then an `unsigned long`; any other number is a `double`. JSON
+    null is the all-zero `Var`, and true and false are `JsonBool`s. A
+    repeated object name keeps its last value.
+    Raises: `<bad-arg>` with `why`, `offset`, `line`, and `column` details
+    when `source` is not one JSON value surrounded only by whitespace, nests
+    arrays and objects more than 512 deep, or contains a number too large for
+    a `double`, an unpaired surrogate escape, or `\u0000`.
+*/
+meta native Var Json.parse(String source) => _parse(source, NULL);
+
+/** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
+    Raises: the causes of `Path.read_text`, or `<bad-arg>` as
+    `Json.parse` does, with a `path` detail added.
+*/
+Var Json.read_file(Path path) => _parse(path.read_text(), path);
+
+static Var _parse(String source, String path) {
+  struct Reader reader = {.text = source ? source : "", .path = path};
+  Reader r = &reader;
+  Var value = r._value();
+  r._space();
+  if (r._peek()) r._fail("unexpected text after the value");
+  return value;
 }
 
-static int _JsonReader._peek(_JsonReader j) =>
-  (unsigned char) j.text[j.at];
+static Var Reader._value(Reader r) {
+  r._space();
+  switch (r._peek()) {
+    case '{': case '[': {
+      if (++r.depth > JSON_MAX_DEPTH) r._fail("nesting exceeds 512 levels");
+      Var nested = r._peek() == '{' ? r._object() : r._array();
+      r.depth--;
+      return nested;
+    }
+    case '"': return r._string();
+    case 't': r._word("true"); return Json.bool(1);
+    case 'f': r._word("false"); return Json.bool(0);
+    case 'n': r._word("null"); return (Var) { .u64 = 0 };
+    case '-': case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9': return r._number();
+    case '\0': r._fail("unexpected end of input");
+  }
+  r._fail("unexpected character");
+}
 
-static void _JsonReader._space(_JsonReader j) {
+static Var Reader._object(Reader r) {
+  Map object = {};
+  r.at++;
+  r._space();
+  if (r._peek() == '}') {
+    r.at++;
+    return object;
+  }
   loop {
-    switch (j._peek()) {
-      case ' ': case '\t': case '\n': case '\r': j.at++; break;
-      default: return;
+    r._space();
+    if (r._peek() != '"') r._fail("expected a string key");
+    String name = r._string();
+    r._expect(':', "expected ':'");
+    object[name] = r._value();
+    r._space();
+    if (r._peek() == '}') {
+      r.at++;
+      return object;
+    }
+    r._expect(',', "expected ',' or '}'");
+  }
+}
+
+static Var Reader._array(Reader r) {
+  Array array = [];
+  r.at++;
+  r._space();
+  if (r._peek() == ']') {
+    r.at++;
+    return array;
+  }
+  loop {
+    array.push(r._value());
+    r._space();
+    if (r._peek() == ']') {
+      r.at++;
+      return array;
+    }
+    r._expect(',', "expected ',' or ']'");
+  }
+}
+
+/* Text without escapes becomes a String directly; the Buffer exists only
+   once an escape needs decoding. A Buffer's truth is its length, so its
+   presence is tested as a pointer. */
+static String Reader._string(Reader r) {
+  int run = ++r.at;
+  Buffer decoded = NULL;
+  defer decoded.free();
+  loop {
+    int byte = r._peek();
+    if (byte == '"') {
+      int end = r.at++;
+      if (decoded == NULL) return String.new_len(r.text + run, end - run);
+      decoded.write_len(r.text + run, end - run);
+      return decoded;
+    }
+    if (byte == '\\') {
+      if (decoded == NULL) decoded = Buffer.new(0);
+      decoded.write_len(r.text + run, r.at - run);
+      r._escape(decoded);
+      run = r.at;
+    }
+    else if (!byte) r._fail("unterminated string");
+    else if (byte < 0x20) r._fail("control character in string");
+    else {
+      int length = _utf8_length((const unsigned char *) r.text + r.at);
+      if (length < 0) r._fail("invalid UTF-8");
+      r.at += length;
     }
   }
 }
 
-static void _JsonReader._expect(_JsonReader j, char byte, const char *why) {
-  j._space();
-  if (j._peek() != byte) j._fail(why);
-  j.at++;
+static void Reader._escape(Reader r, Buffer out) {
+  int escape = r.text[++r.at];
+  r.at++;
+  switch (escape) {
+    case '"': case '\\': case '/': out.write_char(escape); return;
+    case 'b': out.write_char('\b'); return;
+    case 'f': out.write_char('\f'); return;
+    case 'n': out.write_char('\n'); return;
+    case 'r': out.write_char('\r'); return;
+    case 't': out.write_char('\t'); return;
+    case 'u': break;
+    default:
+      r.at -= 2;
+      r._fail("invalid escape");
+  }
+  int start = r.at - 2;
+  long point = r._hex4();
+  if (point >= 0xD800 && point <= 0xDBFF) {
+    if (r._peek() != '\\' || r.text[r.at + 1] != 'u') {
+      r.at = start;
+      r._fail("unpaired surrogate");
+    }
+    r.at += 2;
+    long low = r._hex4();
+    if (low < 0xDC00 || low > 0xDFFF) {
+      r.at = start;
+      r._fail("unpaired surrogate");
+    }
+    point = 0x10000 + ((point - 0xD800) << 10) + (low - 0xDC00);
+  }
+  else if (point >= 0xDC00 && point <= 0xDFFF) {
+    r.at = start;
+    r._fail("unpaired surrogate");
+  }
+  else if (!point) {
+    r.at = start;
+    r._fail("U+0000 cannot appear in a String");
+  }
+  _write_code_point(out, point);
 }
 
-static void _JsonReader._word(_JsonReader j, const char *word) {
-  size_t length = strlen(word);
-  if (strncmp(j.text + j.at, word, length)) j._fail("unexpected character");
-  j.at += length;
-}
-
-static int _JsonReader._digits(_JsonReader j) {
-  int start = j.at;
-  while (scan_ascii_digit(j._peek())) j.at++;
-  return j.at - start;
+static long Reader._hex4(Reader r) {
+  long unit = 0;
+  for (int i = 0; i < 4; i++) {
+    int digit = scan_ascii_hex_value(r._peek());
+    if (digit < 0) r._fail("invalid \\u escape");
+    unit = unit * 16 + digit;
+    r.at++;
+  }
+  return unit;
 }
 
 /* The grammar check runs first, so strtol, strtoul, and strtod stop exactly
-   at `j.at`: none of them sees a sign, radix prefix, or suffix JSON lacks. */
-static Var _JsonReader._number(_JsonReader j) {
-  int start = j.at;
-  if (j._peek() == '-') j.at++;
-  if (j._peek() == '0') j.at++;
-  else if (!j._digits()) j._fail("invalid number");
+   at `r.at`: none of them sees a sign, radix prefix, or suffix JSON lacks. */
+static Var Reader._number(Reader r) {
+  int start = r.at;
+  if (r._peek() == '-') r.at++;
+  if (r._peek() == '0') r.at++;
+  else if (!r._digits()) r._fail("invalid number");
   int integral = 1;
-  if (j._peek() == '.') {
+  if (r._peek() == '.') {
     integral = 0;
-    j.at++;
-    if (!j._digits()) j._fail("invalid number");
+    r.at++;
+    if (!r._digits()) r._fail("invalid number");
   }
-  if ((j._peek() | 32) == 'e') {
+  if ((r._peek() | 32) == 'e') {
     integral = 0;
-    j.at++;
-    if (j._peek() == '+' || j._peek() == '-') j.at++;
-    if (!j._digits()) j._fail("invalid number");
+    r.at++;
+    if (r._peek() == '+' || r._peek() == '-') r.at++;
+    if (!r._digits()) r._fail("invalid number");
   }
-  if (scan_ascii_digit(j._peek())) j._fail("invalid number");
+  if (scan_ascii_digit(r._peek())) r._fail("invalid number");
 
-  const char *spelling = j.text + start;
+  const char *spelling = r.text + start;
   errno = 0;
   if (integral) {
     long number = strtol(spelling, NULL, 10);
@@ -177,22 +308,230 @@ static Var _JsonReader._number(_JsonReader j) {
   }
   double number = strtod(spelling, NULL);
   if (isinf(number)) {
-    j.at = start;
-    j._fail("number out of range");
+    r.at = start;
+    r._fail("number out of range");
   }
   return number;
 }
 
-static long _JsonReader._hex4(_JsonReader j) {
-  long unit = 0;
-  for (int i = 0; i < 4; i++) {
-    int digit = scan_ascii_hex_value(j._peek());
-    if (digit < 0) j._fail("invalid \\u escape");
-    unit = unit * 16 + digit;
-    j.at++;
-  }
-  return unit;
+static int Reader._digits(Reader r) {
+  int start = r.at;
+  while (scan_ascii_digit(r._peek())) r.at++;
+  return r.at - start;
 }
+
+static void Reader._word(Reader r, const char *word) {
+  size_t length = strlen(word);
+  if (strncmp(r.text + r.at, word, length)) r._fail("unexpected character");
+  r.at += length;
+}
+
+static void Reader._expect(Reader r, char byte, const char *why) {
+  r._space();
+  if (r._peek() != byte) r._fail(why);
+  r.at++;
+}
+
+static void Reader._space(Reader r) {
+  loop {
+    switch (r._peek()) {
+      case ' ': case '\t': case '\n': case '\r': r.at++; break;
+      default: return;
+    }
+  }
+}
+
+static int Reader._peek(Reader r) =>
+  (unsigned char) r.text[r.at];
+
+static void Reader._fail(Reader r, String why) {
+  int line = 1, column = 1, offset = r.at;
+  scan_next_line_col((char *) r.text, offset, &line, &column);
+  if (r.path)
+    raise %(bad-arg (operation "Json.read_file") (path ${r.path})
+            (why $why) (offset $offset) (line $line) (column $column));
+  raise %(bad-arg (operation "Json.parse") (why $why)
+          (offset $offset) (line $line) (column $column));
+}
+
+/*  writing
+
+    Compact output has no whitespace. Pretty output puts each member and
+    element on its own line, indented two spaces per level, and writes empty
+    containers as `[]` and `{}`; it matches Python's
+    `json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False)` for
+    integers, strings, and containers.
+*/
+
+/* One write: the output Buffer and whether it is indented. */
+typedef struct Writer {
+  Buffer out;
+  int pretty;
+} *Writer;
+
+/** Returns `value` as compact JSON text.
+    `Map` names are written in byte order and must be `String`s or
+    `Symbol`s with distinct spellings; a `Symbol` value is written as a
+    string. A `List` is written as an array. A `double` is written with the
+    fewest digits that read back to the same value. Each maximal ill-formed
+    UTF-8 subsequence in a string is written as U+FFFD, as Python and
+    JavaScript decoders replace it.
+    Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
+    for a `String` and a `Symbol` name with the same spelling,
+    `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
+    deeper than 512 levels.
+*/
+String Var.json(Var value) => _json(value, 0);
+
+/** Returns `value` as JSON text indented two spaces per level.
+    Raises: the causes of `Var.json`.
+*/
+String Var.pretty_json(Var value) => _json(value, 1);
+
+/** Replaces the file at `path` with `value` as compact JSON text.
+    Raises: the causes of `Var.json` and `Path.write_text`.
+*/
+void Json.write_file(Var value, Path path) {
+  path.write_text(value.json());
+}
+
+static String _json(Var value, int pretty) {
+  Buffer out = $auto(Buffer.new(0));
+  struct Writer writer = {.out = out, .pretty = pretty};
+  Writer w = &writer;
+  w._value(value, 0);
+  return out;
+}
+
+static void Writer._value(Writer w, Var value, int depth) {
+  if (depth > JSON_MAX_DEPTH)
+    raise %(size-limit (operation "Var.json")
+            (why "nesting exceeds 512 levels"));
+  if (value.is_null()) w.out.write("null");
+  else if (value is <jsonbool>) w.out.write(value.jsonbool().str());
+  else if (value is <string> || value.is_atom())
+    _write_string(w.out, value.str());
+  else if (value.is_integer()) _write_integer(w.out, value);
+  else if (value.is_floating()) _write_double(w.out, value.floating());
+  else if (value is <array> || value is <list>) w._elements(value, depth);
+  else if (value is <map>) w._members(value, depth);
+  else {
+    Symbol tag = value.tag();
+    raise %(bad-types (operation "Var.json") (tag $tag));
+  }
+}
+
+static void Writer._elements(Writer w, Var sequence, int depth) {
+  int count = 0;
+  w.out.write_char('[');
+  foreach (Var element, sequence) {
+    if (count++) w.out.write_char(',');
+    w._line(depth + 1);
+    w._value(element, depth + 1);
+  }
+  if (count) w._line(depth);
+  w.out.write_char(']');
+}
+
+static void Writer._members(Writer w, Map object, int depth) {
+  Array names = $auto([]);
+  foreach (Var (name, member), object) {
+    if (name is not <string> && !name.is_atom()) {
+      Symbol tag = name.tag();
+      raise %(bad-types (operation "Var.json") (want "String object key")
+              (tag $tag));
+    }
+    names.push(name);
+  }
+  names.sort_by(%!(name) => name.str());
+  int count = 0;
+  String previous = NULL;
+  w.out.write_char('{');
+  foreach (Var name, names) {
+    String text = name.str();
+    // A String and a Symbol with the same spelling would write one name twice.
+    if (count && text == previous)
+      raise %(bad-arg (operation "Var.json") (why "duplicate object name")
+              (name $text));
+    previous = text;
+    if (count++) w.out.write_char(',');
+    w._line(depth + 1);
+    _write_string(w.out, text);
+    w.out.write(w.pretty ? ": " : ":");
+    w._value(object[name], depth + 1);
+  }
+  if (count) w._line(depth);
+  w.out.write_char('}');
+}
+
+static void Writer._line(Writer w, int depth) {
+  if (w.pretty) w.out.newline().write_repeat(' ', 2 * depth);
+}
+
+static void _write_string(Buffer out, String text) {
+  const unsigned char *bytes = (const unsigned char *) text;
+  int length = text.len(), run = 0;
+  out.write_char('"');
+  for (int at = 0; at < length;) {
+    int byte = bytes[at];
+    const char *escape = NULL;
+    switch (byte) {
+      case '"':  escape = "\\\""; break;
+      case '\\': escape = "\\\\"; break;
+      case '\b': escape = "\\b"; break;
+      case '\f': escape = "\\f"; break;
+      case '\n': escape = "\\n"; break;
+      case '\r': escape = "\\r"; break;
+      case '\t': escape = "\\t"; break;
+    }
+    int sequence = escape || byte < 0x20 ? -1 : _utf8_length(bytes + at);
+    if (sequence > 0) {
+      at += sequence;
+      continue;
+    }
+    out.write_len(text + run, at - run);
+    if (escape) out.write(escape);
+    else if (byte < 0x20) out.printf("\\u%04x", byte);
+    else _write_code_point(out, 0xFFFD);
+    run = at -= sequence;
+  }
+  // The empty String is NULL, so an empty tail must not offset it.
+  if (run < length) out.write_len(text + run, length - run);
+  out.write_char('"');
+}
+
+static void _write_integer(Buffer out, Var value) {
+  if (value is <ulong>) out.printf("%lu", value.ulong_value());
+  else if (value is <ullong>) out.printf("%llu", value.ulong_long_value());
+  else if (value is <llong>) out.printf("%lld", value.long_long_value());
+  else out.printf("%ld", value.integer());
+}
+
+/* The shortest `%e` spelling that reads back exactly supplies the digits;
+   positional notation is used for decimal exponents from -4 through 15, as
+   Python's `repr` does, and a fraction or exponent is always present so the
+   text reads back as a `double`. */
+static void _write_double(Buffer out, double number) {
+  if (!isfinite(number))
+    raise %(conv-range (operation "Var.json")
+            (why "JSON has no NaN or infinity"));
+  char text[32];
+  int precision = 0;
+  do snprintf(text, sizeof(text), "%.*e", precision++, number);
+  while (strtod(text, NULL) != number);
+  int exponent = atoi(strchr(text, 'e') + 1), decimals;
+  if (exponent >= -4 && exponent < 16) {
+    decimals = precision - 1 - exponent;
+    snprintf(text, sizeof(text), "%.*f", decimals > 0 ? decimals : 0, number);
+  }
+  out.write(text);
+  if (!strpbrk(text, ".e")) out.write(".0");
+}
+
+/* UTF-8
+
+   Reading validates each unescaped sequence and decodes `\u` escapes;
+   writing replaces each ill-formed subpart with U+FFFD. */
 
 /* Returns the length of the well-formed UTF-8 sequence at `s`, or the negated
    length of its maximal ill-formed subpart. Overlong forms, surrogates, and
@@ -232,333 +571,4 @@ static void _write_code_point(Buffer out, long point) {
   }
   bytes[0] = (0xF0 << (4 - length)) | point;
   out.write_len(bytes, length);
-}
-
-static void _JsonReader._escape(_JsonReader j, Buffer out) {
-  int escape = j.text[++j.at];
-  j.at++;
-  switch (escape) {
-    case '"': case '\\': case '/': out.write_char(escape); return;
-    case 'b': out.write_char('\b'); return;
-    case 'f': out.write_char('\f'); return;
-    case 'n': out.write_char('\n'); return;
-    case 'r': out.write_char('\r'); return;
-    case 't': out.write_char('\t'); return;
-    case 'u': break;
-    default:
-      j.at -= 2;
-      j._fail("invalid escape");
-  }
-  int start = j.at - 2;
-  long point = j._hex4();
-  if (point >= 0xD800 && point <= 0xDBFF) {
-    if (j._peek() != '\\' || j.text[j.at + 1] != 'u') {
-      j.at = start;
-      j._fail("unpaired surrogate");
-    }
-    j.at += 2;
-    long low = j._hex4();
-    if (low < 0xDC00 || low > 0xDFFF) {
-      j.at = start;
-      j._fail("unpaired surrogate");
-    }
-    point = 0x10000 + ((point - 0xD800) << 10) + (low - 0xDC00);
-  }
-  else if (point >= 0xDC00 && point <= 0xDFFF) {
-    j.at = start;
-    j._fail("unpaired surrogate");
-  }
-  else if (!point) {
-    j.at = start;
-    j._fail("U+0000 cannot appear in a String");
-  }
-  _write_code_point(out, point);
-}
-
-/* Text without escapes becomes a String directly; the Buffer exists only
-   once an escape needs decoding. A Buffer's truth is its length, so its
-   presence is tested as a pointer. */
-static String _JsonReader._string(_JsonReader j) {
-  int run = ++j.at;
-  Buffer decoded = NULL;
-  defer decoded.free();
-  loop {
-    int byte = j._peek();
-    if (byte == '"') {
-      int end = j.at++;
-      if (decoded == NULL) return String.new_len(j.text + run, end - run);
-      decoded.write_len(j.text + run, end - run);
-      return decoded;
-    }
-    if (byte == '\\') {
-      if (decoded == NULL) decoded = Buffer.new(0);
-      decoded.write_len(j.text + run, j.at - run);
-      j._escape(decoded);
-      run = j.at;
-    }
-    else if (!byte) j._fail("unterminated string");
-    else if (byte < 0x20) j._fail("control character in string");
-    else {
-      int length = _utf8_length((const unsigned char *) j.text + j.at);
-      if (length < 0) j._fail("invalid UTF-8");
-      j.at += length;
-    }
-  }
-}
-
-static Var _JsonReader._array(_JsonReader j) {
-  Array array = [];
-  j.at++;
-  j._space();
-  if (j._peek() == ']') {
-    j.at++;
-    return array;
-  }
-  loop {
-    array.push(j._value());
-    j._space();
-    if (j._peek() == ']') {
-      j.at++;
-      return array;
-    }
-    j._expect(',', "expected ',' or ']'");
-  }
-}
-
-static Var _JsonReader._object(_JsonReader j) {
-  Map object = {};
-  j.at++;
-  j._space();
-  if (j._peek() == '}') {
-    j.at++;
-    return object;
-  }
-  loop {
-    j._space();
-    if (j._peek() != '"') j._fail("expected a string key");
-    String name = j._string();
-    j._expect(':', "expected ':'");
-    object[name] = j._value();
-    j._space();
-    if (j._peek() == '}') {
-      j.at++;
-      return object;
-    }
-    j._expect(',', "expected ',' or '}'");
-  }
-}
-
-static Var _JsonReader._value(_JsonReader j) {
-  j._space();
-  switch (j._peek()) {
-    case '{': case '[': {
-      if (++j.depth > JSON_MAX_DEPTH) j._fail("nesting exceeds 512 levels");
-      Var nested = j._peek() == '{' ? j._object() : j._array();
-      j.depth--;
-      return nested;
-    }
-    case '"': return j._string();
-    case 't': j._word("true"); return Json.bool(1);
-    case 'f': j._word("false"); return Json.bool(0);
-    case 'n': j._word("null"); return (Var) { .u64 = 0 };
-    case '-': case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': return j._number();
-    case '\0': j._fail("unexpected end of input");
-  }
-  j._fail("unexpected character");
-}
-
-static Var _parse(String source, String path) {
-  struct _JsonReader reader = {.text = source ? source : "", .path = path};
-  _JsonReader j = &reader;
-  Var value = j._value();
-  j._space();
-  if (j._peek()) j._fail("unexpected text after the value");
-  return value;
-}
-
-/** Returns the x2c value of the JSON text `source`.
-    Objects become `Map`s, arrays `Array`s, and strings `String`s. A number
-    without a fraction or exponent is an `int` `Var` when it fits, then a
-    `long`, then an `unsigned long`; any other number is a `double`. JSON
-    null is the all-zero `Var`, and true and false are `JsonBool`s. A
-    repeated object name keeps its last value.
-    Raises: `<bad-arg>` with `why`, `offset`, `line`, and `column` details
-    when `source` is not one JSON value surrounded only by whitespace, nests
-    arrays and objects more than 512 deep, or contains a number too large for
-    a `double`, an unpaired surrogate escape, or `\u0000`.
-*/
-meta native Var Json.parse(String source) => _parse(source, NULL);
-
-/** Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
-    Raises: the causes of `Path.read_text`, or `<bad-arg>` as
-    `Json.parse` does, with a `path` detail added.
-*/
-Var Json.read_file(Path path) => _parse(path.read_text(), path);
-
-/*  writing
-
-    Compact output has no whitespace. Pretty output puts each member and
-    element on its own line, indented two spaces per level, and writes empty
-    containers as `[]` and `{}`; it matches Python's
-    `json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False)` for
-    integers, strings, and containers.
-*/
-
-static void _write_string(Buffer out, String text) {
-  const unsigned char *bytes = (const unsigned char *) text;
-  int length = text.len(), run = 0;
-  out.write_char('"');
-  for (int at = 0; at < length;) {
-    int byte = bytes[at];
-    const char *escape = NULL;
-    switch (byte) {
-      case '"':  escape = "\\\""; break;
-      case '\\': escape = "\\\\"; break;
-      case '\b': escape = "\\b"; break;
-      case '\f': escape = "\\f"; break;
-      case '\n': escape = "\\n"; break;
-      case '\r': escape = "\\r"; break;
-      case '\t': escape = "\\t"; break;
-    }
-    int sequence = escape || byte < 0x20 ? -1 : _utf8_length(bytes + at);
-    if (sequence > 0) {
-      at += sequence;
-      continue;
-    }
-    out.write_len(text + run, at - run);
-    if (escape) out.write(escape);
-    else if (byte < 0x20) out.printf("\\u%04x", byte);
-    else _write_code_point(out, 0xFFFD);
-    run = at -= sequence;
-  }
-  // The empty String is NULL, so an empty tail must not offset it.
-  if (run < length) out.write_len(text + run, length - run);
-  out.write_char('"');
-}
-
-/* The shortest `%e` spelling that reads back exactly supplies the digits;
-   positional notation is used for decimal exponents from -4 through 15, as
-   Python's `repr` does, and a fraction or exponent is always present so the
-   text reads back as a `double`. */
-static void _write_double(Buffer out, double number) {
-  if (!isfinite(number))
-    raise %(conv-range (operation "Var.json")
-            (why "JSON has no NaN or infinity"));
-  char text[32];
-  int precision = 0;
-  do snprintf(text, sizeof(text), "%.*e", precision++, number);
-  while (strtod(text, NULL) != number);
-  int exponent = atoi(strchr(text, 'e') + 1), decimals;
-  if (exponent >= -4 && exponent < 16) {
-    decimals = precision - 1 - exponent;
-    snprintf(text, sizeof(text), "%.*f", decimals > 0 ? decimals : 0, number);
-  }
-  out.write(text);
-  if (!strpbrk(text, ".e")) out.write(".0");
-}
-
-static void _write_integer(Buffer out, Var value) {
-  if (value is <ulong>) out.printf("%lu", value.ulong_value());
-  else if (value is <ullong>) out.printf("%llu", value.ulong_long_value());
-  else if (value is <llong>) out.printf("%lld", value.long_long_value());
-  else out.printf("%ld", value.integer());
-}
-
-static void _write_line(Buffer out, int pretty, int depth) {
-  if (pretty) out.newline().write_repeat(' ', 2 * depth);
-}
-
-static void _write_elements(Buffer out, Var sequence, int pretty, int depth) {
-  int count = 0;
-  out.write_char('[');
-  foreach (Var element, sequence) {
-    if (count++) out.write_char(',');
-    _write_line(out, pretty, depth + 1);
-    _write(out, element, pretty, depth + 1);
-  }
-  if (count) _write_line(out, pretty, depth);
-  out.write_char(']');
-}
-
-static void _write_members(Buffer out, Map object, int pretty, int depth) {
-  Array names = $auto([]);
-  foreach (Var (name, member), object) {
-    if (name is not <string> && !name.is_atom()) {
-      Symbol tag = name.tag();
-      raise %(bad-types (operation "Var.json") (want "String object key")
-              (tag $tag));
-    }
-    names.push(name);
-  }
-  names.sort_by(%!(name) => name.str());
-  int count = 0;
-  String previous = NULL;
-  out.write_char('{');
-  foreach (Var name, names) {
-    String text = name.str();
-    // A String and a Symbol with the same spelling would write one name twice.
-    if (count && text == previous)
-      raise %(bad-arg (operation "Var.json") (why "duplicate object name")
-              (name $text));
-    previous = text;
-    if (count++) out.write_char(',');
-    _write_line(out, pretty, depth + 1);
-    _write_string(out, text);
-    out.write(pretty ? ": " : ":");
-    _write(out, object[name], pretty, depth + 1);
-  }
-  if (count) _write_line(out, pretty, depth);
-  out.write_char('}');
-}
-
-static void _write(Buffer out, Var value, int pretty, int depth) {
-  if (depth > JSON_MAX_DEPTH)
-    raise %(size-limit (operation "Var.json")
-            (why "nesting exceeds 512 levels"));
-  if (value.is_null()) out.write("null");
-  else if (value is <jsonbool>) out.write(value.jsonbool().str());
-  else if (value is <string> || value.is_atom())
-    _write_string(out, value.str());
-  else if (value.is_integer()) _write_integer(out, value);
-  else if (value.is_floating()) _write_double(out, value.floating());
-  else if (value is <array> || value is <list>)
-    _write_elements(out, value, pretty, depth);
-  else if (value is <map>) _write_members(out, value, pretty, depth);
-  else {
-    Symbol tag = value.tag();
-    raise %(bad-types (operation "Var.json") (tag $tag));
-  }
-}
-
-static String _json(Var value, int pretty) {
-  Buffer out = $auto(Buffer.new(0));
-  _write(out, value, pretty, 0);
-  return out;
-}
-
-/** Returns `value` as compact JSON text.
-    `Map` names are written in byte order and must be `String`s or
-    `Symbol`s with distinct spellings; a `Symbol` value is written as a
-    string. A `List` is written as an array. A `double` is written with the
-    fewest digits that read back to the same value. Each maximal ill-formed
-    UTF-8 subsequence in a string is written as U+FFFD, as Python and
-    JavaScript decoders replace it.
-    Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
-    for a `String` and a `Symbol` name with the same spelling,
-    `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
-    deeper than 512 levels.
-*/
-String Var.json(Var value) => _json(value, 0);
-
-/** Returns `value` as JSON text indented two spaces per level.
-    Raises: the causes of `Var.json`.
-*/
-String Var.pretty_json(Var value) => _json(value, 1);
-
-/** Replaces the file at `path` with `value` as compact JSON text.
-    Raises: the causes of `Var.json` and `Path.write_text`.
-*/
-void Json.write_file(Var value, Path path) {
-  path.write_text(value.json());
 }
