@@ -136,6 +136,7 @@ struct UvStream {
   UvLoop loop;
   Scope owner_scope;
   void *owner;
+  String kind;
   uv_connect_t connect_request;
   uv_shutdown_t shutdown_request;
   UvStreamAcceptFn accept;
@@ -828,11 +829,13 @@ static void _uv_stream_write_callback(uv_write_t *request, int status);
 static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status);
 
 static void _uv_stream_initialize(
-  UvStream stream, UvLoop loop, uv_stream_t *native, void *owner) {
+  UvStream stream, UvLoop loop, uv_stream_t *native, void *owner,
+  String kind) {
   stream.native = native;
   stream.loop = loop;
   stream.owner_scope = *Scope.top();
   stream.owner = owner;
+  stream.kind = kind;
   native->data = stream;
   stream.connect_request.data = stream;
   stream.shutdown_request.data = stream;
@@ -846,7 +849,7 @@ static UvTcp _uv_tcp_new(UvLoop loop) {
     _uv_raise("tcp_init", status);
   }
   _uv_stream_initialize(
-    &tcp.stream, loop, (uv_stream_t *) &tcp.tcp, tcp
+    &tcp.stream, loop, (uv_stream_t *) &tcp.tcp, tcp, "TCP"
   );
   return tcp;
 }
@@ -859,7 +862,7 @@ static UvPipe _uv_pipe_new(UvLoop loop) {
     _uv_raise("pipe_init", status);
   }
   _uv_stream_initialize(
-    &pipe.stream, loop, (uv_stream_t *) &pipe.pipe, pipe
+    &pipe.stream, loop, (uv_stream_t *) &pipe.pipe, pipe, "pipe"
   );
   return pipe;
 }
@@ -1056,6 +1059,40 @@ static void _uv_stream_shutdown_callback(uv_shutdown_t *request, int status) {
     _uv_stream_fail(stream, "shutdown", status);
 }
 
+static void _uv_stream_bad_state(
+  UvStream stream, String operation, String state) {
+  String reason = %"the ${stream.kind} $state";
+  raise %(bad-state (library "libuv") (operation $operation) (reason $reason));
+}
+
+static UvStream _uv_stream_live(UvStream stream, String operation) {
+  if (!stream.loop || !stream.loop.initialized || stream.closing ||
+      stream.closed) {
+    _uv_stream_bad_state(stream, operation, "handle or its loop is closed");
+  }
+  return stream;
+}
+
+static void _uv_stream_unused(UvStream stream, String operation) {
+  if (stream.connected || stream.connect_pending || stream.listening)
+    _uv_stream_bad_state(stream, operation, "handle is already in use");
+}
+
+static void _uv_stream_require_connected(UvStream stream, String operation) {
+  if (!stream.connected)
+    _uv_stream_bad_state(stream, operation, "handle is not connected");
+}
+
+static void _uv_stream_readable(UvStream stream) {
+  _uv_stream_require_connected(stream, "read_start");
+  if (stream.read_eof)
+    _uv_stream_bad_state(stream, "read_start", "read side has reached EOF");
+  if (stream.reading) {
+    raise %(bad-state (library "libuv") (operation "read_start")
+            (reason "reads have already started"));
+  }
+}
+
 static void _uv_stream_start_read(UvStream stream) {
   int status = uv_read_start(
     stream.native, _uv_alloc_event, _uv_stream_read_callback
@@ -1073,6 +1110,9 @@ static void _uv_stream_stop_read(UvStream stream) {
 
 static void _uv_stream_submit_write(
   UvStream stream, const void *bytes, size_t length) {
+  _uv_stream_require_connected(stream, "write");
+  if (stream.shutdown_pending || stream.shutdown_done)
+    _uv_stream_bad_state(stream, "write", "write side has shut down");
   if (!length) return;
   if (length > UINT_MAX)
     raise %(size-limit (library "libuv") (operation "write")
@@ -1096,6 +1136,7 @@ static void _uv_stream_submit_write(
 }
 
 static void _uv_stream_submit_shutdown(UvStream stream) {
+  _uv_stream_require_connected(stream, "shutdown");
   if (stream.shutdown_pending || stream.shutdown_done) return;
   int status = uv_shutdown(
     &stream.shutdown_request, stream.native,
@@ -1380,13 +1421,7 @@ static UvStream _uv_tcp_ready(UvTcp tcp, String operation) {
     raise %(bad-arg (library "libuv") (operation $operation)
             (reason "a TCP handle is required"));
   }
-  UvStream stream = &tcp.stream;
-  if (!stream.loop || !stream.loop.initialized || stream.closing ||
-      stream.closed) {
-    raise %(bad-state (library "libuv") (operation $operation)
-            (reason "the TCP handle or its loop is closed"));
-  }
-  return stream;
+  return _uv_stream_live(&tcp.stream, operation);
 }
 
 /*  Creates one TCP handle. Accepted connections use the same constructor,
@@ -1419,10 +1454,7 @@ UvTcp UvTcp.connect(
     raise %(bad-arg (library "libuv") (operation "tcp_connect")
             (reason "an address and callback are required"));
   }
-  if (stream.connected || stream.connect_pending || stream.listening) {
-    raise %(bad-state (library "libuv") (operation "tcp_connect")
-            (reason "the TCP handle is already in use"));
-  }
+  _uv_stream_unused(stream, "tcp_connect");
   tcp.connect_value = value;
   tcp.connect_handler = fn;
   stream.connected_fn = _uv_tcp_connected;
@@ -1451,10 +1483,7 @@ UvTcp UvTcp.listen(
     raise %(bad-arg (library "libuv") (operation "listen")
             (reason "a positive backlog and callback are required"));
   }
-  if (stream.connected || stream.connect_pending || stream.listening) {
-    raise %(bad-state (library "libuv") (operation "listen")
-            (reason "the TCP handle is already in use"));
-  }
+  _uv_stream_unused(stream, "listen");
   tcp.listen_value = value;
   tcp.listen_handler = fn;
   stream.accept = _uv_tcp_accept;
@@ -1477,18 +1506,7 @@ UvTcp UvTcp.read(UvTcp tcp, Var value, void (*fn)(UvTcp, Bytes, Var)) {
     raise %(bad-arg (library "libuv") (operation "read_start")
             (reason "a callback is required"));
   }
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "the TCP handle is not connected"));
-  }
-  if (stream.read_eof) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "the TCP read side has reached EOF"));
-  }
-  if (stream.reading) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "reads have already started"));
-  }
+  _uv_stream_readable(stream);
   tcp.read_value = value;
   tcp.read_handler = fn;
   stream.read_fn = _uv_tcp_read;
@@ -1503,16 +1521,7 @@ UvTcp UvTcp.stop_read(UvTcp tcp) {
 }
 
 static UvTcp _uv_tcp_write(UvTcp tcp, const void *bytes, size_t length) {
-  UvStream stream = _uv_tcp_ready(tcp, "write");
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "write")
-            (reason "the TCP handle is not connected"));
-  }
-  if (stream.shutdown_pending || stream.shutdown_done) {
-    raise %(bad-state (library "libuv") (operation "write")
-            (reason "the TCP write side has shut down"));
-  }
-  _uv_stream_submit_write(stream, bytes, length);
+  _uv_stream_submit_write(_uv_tcp_ready(tcp, "write"), bytes, length);
   return tcp;
 }
 
@@ -1536,12 +1545,7 @@ UvTcp UvTcp.write_bytes(UvTcp tcp, Bytes bytes) {
 }
 
 UvTcp UvTcp.shutdown_write(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, "shutdown");
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "shutdown")
-            (reason "the TCP handle is not connected"));
-  }
-  _uv_stream_submit_shutdown(stream);
+  _uv_stream_submit_shutdown(_uv_tcp_ready(tcp, "shutdown"));
   return tcp;
 }
 
@@ -1594,13 +1598,7 @@ static UvStream _uv_pipe_ready(UvPipe pipe, String operation) {
     raise %(bad-arg (library "libuv") (operation $operation)
             (reason "a pipe handle is required"));
   }
-  UvStream stream = &pipe.stream;
-  if (!stream.loop || !stream.loop.initialized || stream.closing ||
-      stream.closed) {
-    raise %(bad-state (library "libuv") (operation $operation)
-            (reason "the pipe handle or its loop is closed"));
-  }
-  return stream;
+  return _uv_stream_live(&pipe.stream, operation);
 }
 
 static void _uv_pipe_path(String name, String operation) {
@@ -1634,10 +1632,7 @@ UvPipe UvPipe.connect(
     raise %(bad-arg (library "libuv") (operation "pipe_connect")
             (reason "a callback is required"));
   }
-  if (stream.connected || stream.connect_pending || stream.listening) {
-    raise %(bad-state (library "libuv") (operation "pipe_connect")
-            (reason "the pipe handle is already in use"));
-  }
+  _uv_stream_unused(stream, "pipe_connect");
   pipe.connect_value = value;
   pipe.connect_handler = fn;
   stream.connected_fn = _uv_pipe_connected;
@@ -1658,10 +1653,7 @@ UvPipe UvPipe.listen(
     raise %(bad-arg (library "libuv") (operation "listen")
             (reason "a positive backlog and callback are required"));
   }
-  if (stream.connected || stream.connect_pending || stream.listening) {
-    raise %(bad-state (library "libuv") (operation "listen")
-            (reason "the pipe handle is already in use"));
-  }
+  _uv_stream_unused(stream, "listen");
   pipe.listen_value = value;
   pipe.listen_handler = fn;
   stream.accept = _uv_pipe_accept;
@@ -1684,18 +1676,7 @@ UvPipe UvPipe.read(UvPipe pipe, Var value, void (*fn)(UvPipe, Bytes, Var)) {
     raise %(bad-arg (library "libuv") (operation "read_start")
             (reason "a callback is required"));
   }
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "the pipe handle is not connected"));
-  }
-  if (stream.read_eof) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "the pipe read side has reached EOF"));
-  }
-  if (stream.reading) {
-    raise %(bad-state (library "libuv") (operation "read_start")
-            (reason "reads have already started"));
-  }
+  _uv_stream_readable(stream);
   pipe.read_value = value;
   pipe.read_handler = fn;
   stream.read_fn = _uv_pipe_read;
@@ -1710,16 +1691,7 @@ UvPipe UvPipe.stop_read(UvPipe pipe) {
 }
 
 static UvPipe _uv_pipe_write(UvPipe pipe, const void *bytes, size_t length) {
-  UvStream stream = _uv_pipe_ready(pipe, "write");
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "write")
-            (reason "the pipe handle is not connected"));
-  }
-  if (stream.shutdown_pending || stream.shutdown_done) {
-    raise %(bad-state (library "libuv") (operation "write")
-            (reason "the pipe write side has shut down"));
-  }
-  _uv_stream_submit_write(stream, bytes, length);
+  _uv_stream_submit_write(_uv_pipe_ready(pipe, "write"), bytes, length);
   return pipe;
 }
 
@@ -1743,12 +1715,7 @@ UvPipe UvPipe.write_bytes(UvPipe pipe, Bytes bytes) {
 }
 
 UvPipe UvPipe.shutdown_write(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, "shutdown");
-  if (!stream.connected) {
-    raise %(bad-state (library "libuv") (operation "shutdown")
-            (reason "the pipe handle is not connected"));
-  }
-  _uv_stream_submit_shutdown(stream);
+  _uv_stream_submit_shutdown(_uv_pipe_ready(pipe, "shutdown"));
   return pipe;
 }
 
