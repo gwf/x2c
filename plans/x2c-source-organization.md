@@ -1,8 +1,8 @@
 # x2c Source Organization
 
 > Status: active. Gary approved the plan on 2026-09-30, written against
-> `dev` 2685655f. Phase 1 (rules, guide corrections, plan archive) and the
-> merge of `main` back into `dev` are delivered; Phase 2 is in progress.
+> `dev` 2685655f. Phases 1-3 are delivered or settled, and every Phase 4
+> split is integrated; the batch is being published. Phase 5 is next.
 
 ## Result
 
@@ -308,6 +308,21 @@ takes `$(SOURCE)/*.x`); new `lib/` units need `lib/Makefile` and
 manifest rows. Run the performance checkpoint once for the batch: the build
 cost score within its 4-point noise, and the bench lanes for String and
 Match within noise. Validation: `agent-pr-check`.
+
+Phase 4 result: `compiler.x` 4,354 to 2,675 lines (with `symbols.x`
+1,367 and `preprocess.x` 453); `transform.x` 5,050 to 1,763 (`callables.x`
+1,810, `cleanup.x` 1,436); `literals.x` 1,337 to 883 (`lambdas.x` 541);
+`expressions.x` 4,949 to 3,846 (`initializers.x` 1,145); `macros.x` 5,536 to
+3,851 (`meta-sdk.x` 770, `meta-native.x` 1,007); `match.x` 2,815 to 1,371
+(`match-plan.x` 849, `match-cache.x` 613); `string.x` 1,836 to 1,272
+(`string-format.x` 381, `string-escape.x` 240); `meta.x` 1,042 to 384
+(`macro-value.x` 680); `lisp.x` 2,185 to 1,931. Stage 1 equals stage 0
+after every split. With bootstrap converged, translating four unchanged
+test and example sources retires about 9.73G instructions against 11.62G on
+`dev` 2685655f's successor `accff2db`, 16% fewer, with byte-identical C; the
+smaller prelude after the `lisp-targets.x` move is the likely cause. The
+`match.x` split costs 0.4% instructions on the capture benchmark through
+file-init inlining (see the backlog below).
 
 ### Phase 5: reading order and record ownership
 
