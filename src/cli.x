@@ -37,6 +37,14 @@ typedef struct CliRequest {
   SourceView sources;
 } *CliRequest;
 
+/** Describes one target kind: its spelling on the command line and in a
+    manifest, the noun a report uses, and the default output file name
+    around the target's name.
+*/
+typedef struct TargetKind {
+  Symbol kind, String spelling, noun, prefix, suffix;
+} TargetKind;
+
 #pragma private
 
 $(import "../lib/system-macros.xmacro")
@@ -584,12 +592,39 @@ static Symbol _color_mode(String value) {
 }
 
 static Symbol _target_kind(String value) {
-  if (value == "executable") return <executable>;
-  if (value == "static-library") return <static-lib>;
-  if (value == "meta-module") return <module>;
-  if (value == "shared-library")
-    driver_error("shared-library is not supported by this compiler");
-  driver_error(%"unknown target kind '$value'");
+  String refusal = NULL;
+  Symbol kind = TargetKind.named(value, refusal);
+  if (refusal) driver_error(refusal);
+  if (!kind) driver_error(%"unknown target kind '$value'");
+  return kind;
+}
+
+// target kinds
+
+static TargetKind target_kinds[] = {
+  { <executable>, "executable",     "executable",     "",    ""    },
+  { <static-lib>, "static-library", "static library", "lib", ".a"  },
+  { <module>,     "meta-module",    "native module",  "",    ".so" },
+  { 0 }
+};
+
+/** Returns the target kind spelled `spelling`, or 0 when no kind has that
+    spelling. `refusal` says why this compiler refuses a known spelling, and
+    is NULL otherwise. */
+Symbol TargetKind.named(String spelling, String &refusal) {
+  refusal = spelling == "shared-library" ?
+    "shared-library is not supported by this compiler" : NULL;
+  for (TargetKind *row = target_kinds; row.kind; row++)
+    if (spelling == row.spelling) return row.kind;
+  return 0;
+}
+
+/** Returns the row of target kind `kind`; any other kind reads as an
+    executable. */
+TargetKind *TargetKind.of(Symbol kind) {
+  for (TargetKind *row = target_kinds; row.kind; row++)
+    if (row.kind == kind) return row;
+  return target_kinds;
 }
 
 static int _count(String value, int minimum, String noun) {
