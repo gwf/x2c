@@ -50,68 +50,13 @@ static String _path(Compiler compiler) {
   return result;
 }
 
-static int _lexically_private(Compiler compiler) =>
+int _lexically_private(Compiler compiler) =>
   compiler.source_private > 0;
-
-static void _mark_private(
-  Compiler compiler, Symbol kind, String name) {
-  (void) kind;
-  compiler.sym.mark_static(%($name));
-}
 
 static int _declaration_is_private(
   Compiler compiler, Symbol kind, String name) {
   (void) kind;
   return %($name) in compiler.sym.file_statics();
-}
-
-static void _record_declaration_binding_visibility(
-  Compiler compiler, List declaration, Symbol kind, int private, int mark,
-  List identity) {
-  String name = binding_identity_spelling(identity);
-  if (kind == <typedef> && name)
-    compiler.protocol_helpers[%(
-      "source-typedef" $name
-    )] = %($declaration $private);
-  if (mark && name)
-    _mark_private(
-      compiler, kind == <typedef> ? <type> : <binding>, name);
-}
-
-static void _record_rows_visibility(
-  Compiler compiler, List declaration, Symbol kind, int private, int mark,
-  List rows) {
-  foreach (List row, rows) match (row) {
-    case %(bind ?identity *):
-      _record_declaration_binding_visibility(
-        compiler, declaration, kind, private, mark, identity);
-    case %(op = (bind ?identity *) ?):
-      _record_declaration_binding_visibility(
-        compiler, declaration, kind, private, mark, identity);
-  }
-}
-
-/** Records the visibility of one parsed top-level declaration.
-    Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
-    retained for placing generated protocol declarations at the same boundary.
-*/
-void Compiler.record_declaration_visibility(Compiler c, List declaration) {
-  int private = _lexically_private(c);
-  match (declaration) {
-    case %(seq *rows):
-      foreach (List row, rows) c.record_declaration_visibility(row);
-    case %(function ?type (bind ?identity *) *): {
-      if (!private && !type.type().is_static()) return;
-      String name = binding_identity_spelling(identity);
-      if (name) _mark_private(c, <binding>, name);
-    }
-    case %(
-      (!set ?kind (!or typedef declare)) ?type (bindings *rows)
-    ): {
-      int mark = private || type.type().is_static();
-      _record_rows_visibility(c, declaration, kind, private, mark, rows);
-    }
-  }
 }
 
 /* Protocol occurrences retain the declaration record with its linkage and
