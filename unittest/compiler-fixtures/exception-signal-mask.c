@@ -36,6 +36,8 @@ int main(void){
   x2c_initialize();
   Error_initialize();
   sigset_t original, working, blocked, current;
+  x2c_exception_escaped = & blocked;
+  x2c_exception_escaped = & current;
   if(sigprocmask(SIG_SETMASK, NULL, & original)) return 2;
   working = original;
   sigdelset(& working, SIGUSR1);

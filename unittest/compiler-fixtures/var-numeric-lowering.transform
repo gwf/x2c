@@ -456,14 +456,16 @@
     (bindings 
      (op = (bind (binding 53 "preserved_box") (volatile)) 
       (expr ("NumericBox") (composite (commas (expr (int) (literal (int) "2"))))))))) 
-  (declare (int) 
-   (bindings 
-    (op = (bind (binding 54 "preserved_values") (volatile (dim))) 
-     (expr ((dim) int) (composite (commas (expr (int) (literal (int) "3")))))))) 
-  (declare (int) 
-   (bindings 
-    (op = (bind (binding 55 "addressed") (volatile)) 
-     (expr (int) (literal (int) "4"))))) 
+  (at 127 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 54 "preserved_values") (volatile (dim))) 
+      (expr ((dim) int) (composite (commas (expr (int) (literal (int) "3"))))))))) 
+  (at 127 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 55 "addressed") (volatile)) 
+      (expr (int) (literal (int) "4")))))) 
   (at 128 
    (declare ("NumericBox") 
     (bindings 

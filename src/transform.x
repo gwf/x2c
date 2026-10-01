@@ -2356,13 +2356,21 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
    `holders` gains the pointers the body writes through, whose own locals
    `_collect_aliased` resolves.
 
-   A local that only a callee writes, through an address the body hands it,
-   is not qualified. Taking its address already forces it to memory, so the
-   register `siglongjmp` would restore is not where its value lives, and
-   qualifying it would discard the qualifier at every such call instead. */
+   `escaped` gains the locals whose address the body hands to a callee. A
+   callee's pointer parameter has no `volatile`, so qualifying the local
+   would discard the qualifier at the call. Its address escapes at its
+   declaration instead, which keeps its value in memory across a transfer. */
 static void _preserved_write(
-  Compiler c, List node, Map names, Map holders) {
+  Compiler c, List node, Map names, Map holders, Map escaped) {
   Var operand = _changed_operand(c, node);
+  if (!operand) {
+    match (node) case %(call ? (args *arguments)):
+      foreach (Var argument, arguments) {
+        String addressed = ast_addressed_identifier(argument);
+        if (addressed) escaped[addressed] = 1;
+      }
+    return;
+  }
   String name = ast_direct_identifier(operand);
   if (name) names[name] = 1;
   String holder = ast_indirect_identifier(operand);
@@ -2370,7 +2378,7 @@ static void _preserved_write(
 }
 
 static void _collect_preserved(
-  Compiler c, Var value, int in_try, Map names, Map holders) {
+  Compiler c, Var value, int in_try, Map names, Map holders, Map escaped) {
   /* A long expression chain nests as deeply as it is long, so the walk keeps
      its pending work off the C stack. */
   Array pending = $auto([value]), flags = $auto([in_try]);
@@ -2379,7 +2387,7 @@ static void _collect_preserved(
     int inside = flags.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
-    if (inside) _preserved_write(c, node, names, holders);
+    if (inside) _preserved_write(c, node, names, holders, escaped);
     match (node) {
       case %(function *): continue;
       case %(defer ?body ? ? ? ?written *): {
@@ -2453,15 +2461,39 @@ static Var _inside(Walk walk, List cleanup, List marker, Var body) {
   return result;
 }
 
-/* Qualify one binding that a transfer may leave stale. */
-static List _preserve_binding(List bind, Map names) {
+/* Qualify one binding that a transfer may leave stale, unless `escaped`
+   names it: its address escapes instead. */
+static List _preserve_binding(List bind, Map names, Map escaped) {
   match (bind)
     case %(bind ?name ?mods): {
       String spelling = binding_identity_spelling(name);
-      if (spelling && spelling in names && !mods.contains(<volatile>))
+      if (spelling && spelling in names &&
+          !(escaped && spelling in escaped) && !mods.contains(<volatile>))
         return %(bind $name ${cons(<volatile>, mods)});
     }
   return bind;
+}
+
+/* Once the runtime holds a local's address, C must assume every later call,
+   `sigsetjmp` and the raise included, reads and writes the local. */
+macro open Statement $escape_local(Expr $local) {
+  x2c_exception_escaped = &$local;
+}
+
+/* Escape the address of each of `binds` that `escaped` names. */
+static void _escape_declared(
+  Compiler c, Array output, List binds, Map escaped) {
+  Macro escape = $escape_local;
+  foreach (List bind, binds)
+    match (bind)
+      case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
+        String spelling = binding_identity_spelling(name);
+        if (spelling && spelling in escaped) {
+          Type type = c.semantic_binding_facts()[%(type $name)];
+          output.push(c.bind_syntax(
+            escape(%(expr $type (ident $name))), AST_BLOCK, c.return_type));
+        }
+      }
 }
 
 static int _declares_preserved(List bindings, Map names) {
@@ -2506,12 +2538,14 @@ static int _declares_pointee(List bindings, Map names, Map pointers) {
 /* Qualify the declarations and parameters the sets name. C puts a qualifier
    on the whole declaration - on the declarator for the object itself, and on
    the base type for a pointee - so a statement that qualifies any of several
-   names splits into one declaration each. */
-static List _preserve_block(List statements, Map names, Map pointers) {
+   names splits into one declaration each. A local in `escaped` escapes
+   right after its declaration; one declared anywhere else is qualified. */
+static List _preserve_block(
+  Compiler c, List statements, Map names, Map pointers, Map escaped) {
   Array output = [];
   foreach (Var statement, statements) {
-    List origin = NULL, Var inner = statement;
-    match (inner) case %(at ?anchor ?wrapped): {
+    int origin = 0, Var inner = statement;
+    match (inner) case %(at ?(int anchor) ?wrapped): {
       origin = anchor;
       inner = wrapped;
     }
@@ -2519,28 +2553,58 @@ static List _preserve_block(List statements, Map names, Map pointers) {
        needs does not reach the names beside it. */
     match (inner)
       case %(!set ?declaration
-             ((!or declare decl) ?type
-              (!set ?bindings (bindings ? ? *)))):
-        if (_is_automatic(declaration) &&
-            (_declares_preserved(bindings, names) ||
-             _declares_pointee(bindings, names, pointers))) {
-          Symbol head = declaration.car();
-          foreach (List binding, bindings.cdr()) {
-            Var one = _preserve(
-              %($head $type (bindings $binding)), names, pointers);
+             ((!or declare decl) ?type (!set ?bindings (bindings *)))):
+        if (_is_automatic(declaration)) {
+          List parts = %($declaration);
+          if (_declares_preserved(bindings, names) ||
+              _declares_pointee(bindings, names, pointers)) {
+            Symbol head = declaration.car();
+            Array split = [];
+            foreach (List binding, bindings.cdr())
+              split.push(%($head $type (bindings $binding)));
+            parts = split.list_free();
+          }
+          foreach (List part, parts) {
+            List one = _preserve_declaration(part, names, pointers, escaped);
             output.push(origin ? %(at $origin $one) : one);
           }
+          _escape_declared(c, output, bindings.cdr(), escaped);
           continue;
         }
-    output.push(_preserve(statement, names, pointers));
+    List loop = _escape_loop(c, inner, names, pointers, escaped);
+    if (loop) {
+      output.push(origin ? %(at $origin $loop) : loop);
+      continue;
+    }
+    output.push(_preserve(c, statement, names, pointers, escaped));
   }
   return source_block_content(output.list_free());
 }
 
+/* A `for` that declares a local in `escaped` moves the declaration into a
+   block around the loop, so the address escapes once, before the loop. */
+static List _escape_loop(
+  Compiler c, List loop, Map names, Map pointers, Map escaped) {
+  match (loop)
+    case %(for (decl ?type (!set ?bindings (bindings *binds))) *rest): {
+      Array output = [];
+      _escape_declared(c, output, binds, escaped);
+      List escapes = output.list_free();
+      if (!escapes) return NULL;
+      List declaration = _preserve_declaration(
+        %(declare $type $bindings), names, pointers, escaped);
+      List remaining = _preserve(c, %(for () @rest), names, pointers, escaped);
+      return source_block_content(%($declaration @escapes $remaining));
+    }
+  return NULL;
+}
+
 static List _preserve_declaration(
-  List declaration, Type type, List bindings, Map names, Map pointers) {
-  Symbol head = declaration.car();
+  List declaration, Map names, Map pointers, Map escaped) {
   if (!_is_automatic(declaration)) return declaration;
+  Symbol head = declaration.car();
+  Type type = declaration.cadr();
+  List bindings = declaration.caddr();
   if (_declares_pointee(bindings, names, pointers) &&
       !type.type().flatten_all().contains(<volatile>))
     type = cons(<volatile>, type);
@@ -2548,13 +2612,16 @@ static List _preserve_declaration(
   foreach (List binding, bindings.cdr())
     match (binding) {
       case %(op = ?bind ?value):
-        preserved.push(%(op = ${_preserve_binding(bind, names)} $value));
-      case %(bind * ): preserved.push(_preserve_binding(binding, names));
+        preserved.push(
+          %(op = ${_preserve_binding(bind, names, escaped)} $value));
+      case %(bind * ):
+        preserved.push(_preserve_binding(binding, names, escaped));
     }
   return %($head $type (bindings @{preserved.list_free()}));
 }
 
-static Var _preserve(Var value, Map names, Map pointers) {
+static Var _preserve(
+  Compiler c, Var value, Map names, Map pointers, Map escaped) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   // Only declarations and parameters carry a qualifier, and neither appears
@@ -2562,16 +2629,30 @@ static Var _preserve(Var value, Map names, Map pointers) {
   match (node) case %(expr *): return value;
   match (node) {
     case %(param ?type ?bind):
-      return %(param $type ${_preserve_binding(bind, names)});
+      return %(param $type ${_preserve_binding(bind, names, escaped)});
     case $source_block_content(%(*statements)):
-      return _preserve_block(statements, names, pointers);
-    case %(!set ?declaration
-           ((!or declare decl) ?type (!set ?bindings (bindings *)))):
-      return _preserve_declaration(
-        declaration, type, bindings, names, pointers);
+      return _preserve_block(c, statements, names, pointers, escaped);
+    case %(!set ?declaration ((!or declare decl) ? (bindings *))):
+      return _preserve_declaration(declaration, names, pointers, NULL);
   }
   Var child;
-  $ast.rewrite_children(node, child, _preserve(child, names, pointers));
+  $ast.rewrite_children(
+    node, child, _preserve(c, child, names, pointers, escaped));
+}
+
+/* A parameter in `escaped` escapes before the function body runs. */
+static List _escape_parameters(
+  Compiler c, List body, List bindings, Map escaped) {
+  Array output = [];
+  match (bindings) case %(bind ? ((fnmod (params *parameters)) *)):
+    foreach (List parameter, parameters)
+      match (parameter) case %(param ? ?bind):
+        _escape_declared(c, output, %($bind), escaped);
+  List escapes = output.list_free();
+  if (escapes)
+    match (body) case $source_block_content(%(*statements)):
+      return source_block_content(%(@escapes @statements));
+  return body;
 }
 
 /* Save the returned value before cleanup runs, since cleanup may change the
@@ -2941,14 +3022,18 @@ static List _function(Compiler compiler, List node) {
       Map runtime = {};
       body = _static_regions(compiler, body, runtime);
       _collect_labels(walk, body, NULL);
-      Map preserved = {}, holders = {}, pointers = {};
-      _collect_preserved(compiler, body, 0, preserved, holders);
+      Map preserved = {}, holders = {}, pointers = {}, escaped = {};
+      _collect_preserved(compiler, body, 0, preserved, holders, escaped);
       if (holders.len())
         _collect_aliased(body, holders, preserved, pointers);
       List rewritten = _rewrite(walk, body);
-      if (preserved.len()) {
-        rewritten = _preserve(rewritten, preserved, pointers);
-        bindings = _preserve(bindings, preserved, pointers);
+      if (preserved.len() || escaped.len()) {
+        rewritten = _preserve(
+          compiler, rewritten, preserved, pointers, escaped);
+        bindings = _preserve(
+          compiler, bindings, preserved, pointers, escaped);
+        rewritten = _escape_parameters(
+          compiler, rewritten, bindings, escaped);
       }
       state.regions.free();
       return %(function $type $bindings $rewritten);

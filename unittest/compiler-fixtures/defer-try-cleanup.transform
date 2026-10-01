@@ -201,14 +201,14 @@
 (function (int) 
  (bind (binding 28 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (declare (int) 
-   (bindings 
-    (op = (bind (binding 29 "caught") (volatile)) 
-     (expr (int) (literal (int) "0"))))) 
-  (declare (int) 
-   (bindings 
-    (op = (bind (binding 30 "inner_handled") (volatile)) 
-     (expr (int) (literal (int) "0"))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 29 "caught") (volatile)) 
+           (expr (int) (literal (int) "0")))))) 
+  (at 7 (declare (int) 
+         (bindings 
+          (op = (bind (binding 30 "inner_handled") (volatile)) 
+           (expr (int) (literal (int) "0")))))) 
   (at 23 
    (block 
     (declare ("ExceptionFrame") 

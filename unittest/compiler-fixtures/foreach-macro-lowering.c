@@ -393,8 +393,11 @@ int main(void){
         Var volatile value;
         Map _x2c_macro_object_12 = counts;
         unsigned _x2c_macro_cursor_12 = 0;
+        x2c_exception_escaped = & _x2c_macro_cursor_12;
         Var _x2c_macro_cursor_output_21;
+        x2c_exception_escaped = & _x2c_macro_cursor_output_21;
         Var _x2c_macro_cursor_output_22;
+        x2c_exception_escaped = & _x2c_macro_cursor_output_22;
         while(Map_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_21), &(_x2c_macro_cursor_output_22))){
           value = _x2c_macro_cursor_output_22;
           {

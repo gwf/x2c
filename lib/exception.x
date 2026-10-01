@@ -58,6 +58,14 @@ static ExceptionThreadState _thread(void) => &exception_thread;
 
 #pragma public
 
+/** Holds the address of a local that a `try` body hands to a callee.
+    Compiler-generated code stores the address at the local's declaration.
+    From then on C must assume any call, `sigsetjmp` and the raise included,
+    reads and writes the local, so its value stays in memory across the
+    transfer without a `volatile` qualifier the callee's pointer would drop.
+*/
+threaded const volatile void *volatile x2c_exception_escaped;
+
 /** Pushes one compiler-generated cleanup record.
     `record` and its `fn` must be nonnull, and the record and borrowed `env`
     must remain live until leave or `Error` transfer. Invalid registration
