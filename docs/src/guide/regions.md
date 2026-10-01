@@ -128,7 +128,9 @@ local, a parameter, or a compound literal belongs to the function's own
 storage. An address reached through a pointer, such as `&box->value`,
 belongs to whatever that pointer holds, so an address inside a parameter's
 object counts as that parameter in the summary. A caller of a function that
-returns `&box->value` therefore sees its own borrow come back.
+returns `&box->value` therefore sees its own borrow come back. An argument
+to a reference parameter is the address of the object it names, so
+`bind(object)` with `T &` is checked as `bind(&object)` with `T *`.
 
 A `meta` function is walked the same way when it is defined, against the
 summaries of the `meta` functions defined before it. A compile-time call

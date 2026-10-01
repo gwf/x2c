@@ -324,6 +324,31 @@ static String _callee_of(Var value, List &arguments) {
   return NULL;
 }
 
+/* The parameter types of a direct call's bound callee. */
+static List _parameter_types(Var call) {
+  match (_source_call(_unwrap(call)))
+    case %((expr ((func ?parameters) *) ?) *): return parameters;
+  return NULL;
+}
+
+/* The argument a call passes at `index`, and the type it passes it as. A
+   reference parameter receives the address of the object its argument
+   names, as `&object` passes it to a pointer; an argument that is itself
+   a reference is already that address. */
+static Var _passed(List types, List arguments, int index, Type &type) {
+  Var argument = arguments[index];
+  Var declared = index < types.len() ? types[index] : void;
+  type = declared is <list> ? declared.list() : NULL;
+  if (!type || (type.car() != <&> && type.car() != <opt-ref>))
+    return argument;
+  Type given = _expression_type(argument);
+  if (given && (given.car() == <&> || given.car() == <opt-ref>))
+    return argument;
+  Type object = cdr(type);
+  type = object.reference();
+  return %(expr $type (op & $argument));
+}
+
 /* A canonical type's values belong to their pool; a container type's
    compound literal allocates. */
 static Symbol _class(Walk w, Type type) {
@@ -489,10 +514,12 @@ static Fact _returned_argument(Walk w, Var value, List &?named) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
+  List types = _parameter_types(value);
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
-    Fact fact = _fact_of(w, arguments[index], named);
+    Type type = NULL;
+    Fact fact = _fact_of(w, _passed(types, arguments, index, type), named);
     if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other))
       return fact;
   }
@@ -825,19 +852,14 @@ static Symbol _sink_of(Fact base, int through, Fact &target) {
 }
 
 /* A call sinks each argument where the callee's summary says. */
-static void _scan_call(
-  Walk w, Var call, Var function, String callee, List arguments) {
+static void _scan_call(Walk w, Var call, String callee, List arguments) {
   int count = arguments.len();
-  /* The callee's bound function type determines canonical conversions. */
-  List types = NULL;
-  match (function) case %(expr ((func ?parameters) *) ?):
-    types = parameters;
+  List types = _parameter_types(call);
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (index >= count) continue;
-    Var argument = arguments[index];
-    Var declared = index < types.len() ? types[index] : void;
-    Type type = declared is <list> ? declared.list() : NULL;
+    Type type = NULL, holder_type = NULL;
+    Var argument = _passed(types, arguments, index, type);
     if (target == <static>) _flow(w, argument, type, <static>, NULL);
     else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
     else if (target == <result>) {
@@ -850,7 +872,7 @@ static void _scan_call(
     }
     else match (target) case %(param ?other): {
       if (other.int() >= count) continue;
-      Var holder = arguments[other.int()];
+      Var holder = _passed(types, arguments, other.int(), holder_type);
       int through = 1;
       Fact base = _base(w, _address_of(holder), through), object = NULL;
       if (!base) base = _fact_of(w, holder, NULL);
@@ -921,7 +943,7 @@ static int _scan_call_node(Walk w, Var node) {
     case %(free scope): _end(w, arguments.car(), "Scope.free", <freed>);
     case %(alloc moved):
       _end(w, arguments.car(), "Scope.realloc", <moved>);
-    default: if (callee) _scan_call(w, node, function, callee, arguments);
+    default: if (callee) _scan_call(w, node, callee, arguments);
   }
   if (arguments) w.pending.push(arguments);
   return 1;

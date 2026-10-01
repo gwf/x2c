@@ -1,0 +1,20 @@
+unittest/compiler-fixtures/region-reference-parameters.x:26:3: region: the address of 'a' can outlive the local storage it points into when stored into a static
+    keep_ptr(&a);
+    ^^^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-reference-parameters.x:27:3: region: an address from 'c' can outlive the local storage it points into when returned
+    return same_ptr(&c);
+    ^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-reference-parameters.x:32:3: region: the address of 'b' can outlive the local storage it points into when stored into a static
+    keep_ref(b);
+    ^^^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-reference-parameters.x:33:3: region: an address from 'd' can outlive the local storage it points into when returned
+    return same_ref(d);
+    ^^^^^^
+  note: local storage ends when the function returns
+
