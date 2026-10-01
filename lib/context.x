@@ -102,56 +102,54 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
   return Context._export_value(&source, value);
 }
 
-static Var Context._export_value(Context source, Var v) {
+static Var Context._export_value(Context c, Var v) {
   if (v is void || v.is_null() || v.is_nil() || v is <symbol>) return v;
-  if (v.is_wide()) return source._export_wide(v);
+  if (v.is_wide()) return c._export_wide(v);
   if (v.is_integer() || v.is_floating()) return v;
-  if (v is <string>) return source._export_string(v);
-  if (v is <lsym>) return source._export_atom(v);
-  if (v is <list>) return source._export_list(v);
-  if (v is <array>) return source._export_array(v);
-  if (v is <map>) return source._export_map(v);
+  if (v is <string>) return c._export_string(v);
+  if (v is <lsym>) return c._export_atom(v);
+  if (v is <list>) return c._export_list(v);
+  if (v is <array>) return c._export_array(v);
+  if (v is <map>) return c._export_map(v);
   if (v is <block> || v is <bytes> || v is <buffer>)
-    return source._export_storage(v);
+    return c._export_storage(v);
   Var custom;
-  if (v.try_export_context(source, custom)) return custom;
+  if (v.try_export_context(c, custom)) return custom;
   Symbol tag = v.tag();
   raise %(bad-types (owner "Context.export") (tag $tag));
 }
 
-static Var Context._export_wide(Context source, Var v) {
-  if (!source._owns_scope(v.wide_owner())) return v;
-  return v.move_wide_to(source.destination_scope);
+static Var Context._export_wide(Context c, Var v) {
+  if (!c._owns_scope(v.wide_owner())) return v;
+  return v.move_wide_to(c.destination_scope);
 }
 
-static Var Context._export_string(Context source, Var value) {
-  if (!source.pool || !source.pool.owns(value)) return value;
+static Var Context._export_string(Context c, Var value) {
+  if (!c.pool || !c.pool.owns(value)) return value;
   String string = value;
-  return String.new_in(source.destination_pool, string, string.len());
+  return String.new_in(c.destination_pool, string, string.len());
 }
 
-static Var Context._export_atom(Context source, Var value) {
+static Var Context._export_atom(Context c, Var value) {
   String spelling = value.str();
-  if (!source.pool || !source.pool.owns(spelling)) return value;
-  String result = String.new_in(
-    source.destination_pool, spelling, spelling.len());
+  if (!c.pool || !c.pool.owns(spelling)) return value;
+  String result = String.new_in(c.destination_pool, spelling, spelling.len());
   return Var.new(<lsym>, result);
 }
 
-static List Context._export_list(Context source, List list) {
-  if (!list || (source.pool && !source.pool.owns(list))) return list;
+static List Context._export_list(Context c, List list) {
+  if (!list || (c.pool && !c.pool.owns(list))) return list;
   Block heads = $auto(Block.new(sizeof(Var)));
   List tail = list;
-  while (tail && (!source.pool || source.pool.owns(tail))) {
-    Var head = source._export_value(tail.car);
+  while (tail && (!c.pool || c.pool.owns(tail))) {
+    Var head = c._export_value(tail.car);
     heads.push(&head);
     tail = tail.cdr;
   }
   Var *items = heads.bytes;
   for (size_t i = heads.length; i; i--)
-    tail = source.pool
-         ? List.cons_in(source.destination_pool, items[i - 1], tail)
-         : List.cons(items[i - 1], tail);
+    tail = c.pool ? List.cons_in(c.destination_pool, items[i - 1], tail)
+                  : List.cons(items[i - 1], tail);
   return tail;
 }
 
@@ -160,43 +158,43 @@ static List Context._export_list(Context source, List list) {
    Failure restores this container's original owner, but nested exports that
    already completed are not rolled back; backing storage moves only after
    the recursive work succeeds. */
-static Var Context._export_array(Context source, Var value) {
+static Var Context._export_array(Context c, Var value) {
   Array array = value;
-  if (!source.owns(array)) return value;
+  if (!c.owns(array)) return value;
   Scope owner = Scope.owner(array);
-  Scope.move(array, source.destination_scope);
+  Scope.move(array, c.destination_scope);
   int exported = 0;
   defer if (!exported) Scope.move(array, &owner);
   Var *items = array.bytes;
   for (size_t i = 0; i < array.length; i++)
-    items[i] = source._export_value(items[i]);
-  array.move_to(source.destination_scope);
+    items[i] = c._export_value(items[i]);
+  array.move_to(c.destination_scope);
   exported = 1;
   return value;
 }
 
-static Var Context._export_map(Context source, Var value) {
+static Var Context._export_map(Context c, Var value) {
   Map map = value;
-  if (!source.owns(map)) return value;
+  if (!c.owns(map)) return value;
   Scope owner = Scope.owner(map);
-  Scope.move(map, source.destination_scope);
+  Scope.move(map, c.destination_scope);
   int exported = 0;
   defer if (!exported) Scope.move(map, &owner);
-  map.export_to(source, _export_callback, source.destination_scope);
+  map.export_to(c, _export_callback, c.destination_scope);
   exported = 1;
   return value;
 }
 
 /* `Map.export_to` takes the value-first C signature of a custom exporter. */
-static Var _export_callback(Var value, Context source) =>
-  source._export_value(value);
+static Var _export_callback(Var value, Context c) =>
+  c._export_value(value);
 
 /* Block, Bytes, and Buffer storage moves and keeps its identity. */
-static Var Context._export_storage(Context source, Var v) {
+static Var Context._export_storage(Context c, Var v) {
   void *allocation = v is <bytes> ? v.bytes().block() : v.pointer();
-  if (!source.owns(allocation)) return v;
-  if (v is <buffer>) ((Buffer) allocation).move_to(source.destination_scope);
-  else ((Block) allocation).move_to(source.destination_scope);
+  if (!c.owns(allocation)) return v;
+  if (v is <buffer>) ((Buffer) allocation).move_to(c.destination_scope);
+  else ((Block) allocation).move_to(c.destination_scope);
   return v;
 }
 

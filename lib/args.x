@@ -3,8 +3,8 @@
     Copyright (c) 2026 Gary William Flake
 
     Args owns the reading of a command line against a spec: an ordinary
-    `List` with one row per option or operand. The result is a `Map` from
-    each row's name to its value, words stay `String`s, and bad input raises
+    List with one row per option or operand. The result is a Map from each
+    row's name to its value, words stay Strings, and bad input raises
     `<bad-arg>` so the caller decides whether to print `Args.usage` and which
     status to return.
 */
@@ -97,8 +97,7 @@ Map Args.parse(List args, List spec) {
   int options_ended = 0;
   for (List rest = args; rest; rest = rest.cdr()) {
     String word = rest.car().str();
-    if (options_ended || word.len() < 2 || word[0] != '-')
-      operands.push(word);
+    if (options_ended || word.len() < 2 || word[0] != '-') operands.push(word);
     else if (word == "--") options_ended = 1;
     else if (word[1] == '-') parsed._parse_long(result, rest, word);
     else parsed._parse_short(result, rest, word);
@@ -142,73 +141,71 @@ static Spec _read_spec(List spec) {
 
 /* The first word names an operand unless it begins with a dash; every
    dashed word is a spelling of the same option. */
-static void Option._read_row(
-  Option *option, List row, Map index, int position) {
+static void Option._read_row(Option *o, List row, Map index, int position) {
   String first = row.car().str();
-  option.operand = !first.startswith("-");
+  o.operand = !first.startswith("-");
   foreach (Var word, row) {
     if (word is List) {
-      option._read_property(word);
+      o._read_property(word);
       continue;
     }
     String text = word.str();
     if (text.startswith("-")) {
-      if (!option.spelling ||
-          (text.startswith("--") && !option.spelling.startswith("--")))
-        option.spelling = text;
-      option.spellings =
-        option.spellings ? %"${option.spellings}, $text" : text;
+      if (!o.spelling ||
+          (text.startswith("--") && !o.spelling.startswith("--")))
+        o.spelling = text;
+      o.spellings =
+        o.spellings ? %"${o.spellings}, $text" : text;
       index[text] = position;
     }
-    else if (text == "required") option.required = 1;
-    else if (text == "repeated") option.repeated = 1;
+    else if (text == "required") o.required = 1;
+    else if (text == "repeated") o.repeated = 1;
     else if (text != first) _bad_spec("unknown spec word", text);
   }
-  if (option.operand) option.name = first;
+  if (o.operand) o.name = first;
   else {
-    int dashes = option.spelling.startswith("--") ? 2 : 1;
-    option.name = option.spelling[dashes:];
+    int dashes = o.spelling.startswith("--") ? 2 : 1;
+    o.name = o.spelling[dashes:];
   }
-  if (option.defaulted) return;
-  if (option.repeated) option.fallback = (List) NULL;
-  else if (option.value || option.operand)
-    option.fallback = (String) NULL;
-  else option.fallback = 0;
+  if (o.defaulted) return;
+  if (o.repeated) o.fallback = (List) NULL;
+  else if (o.value || o.operand)
+    o.fallback = (String) NULL;
+  else o.fallback = 0;
 }
 
-static void Option._read_property(Option *option, List property) {
+static void Option._read_property(Option *o, List property) {
   Symbol key = 0;
   if (property.car() is Symbol) key = property.car();
   switch (key) {
     case <value>:
-      option.value = property.cadr().str();
+      o.value = property.cadr().str();
       break;
     case <default>:
-      option.fallback = property.cadr();
-      option.defaulted = 1;
+      o.fallback = property.cadr();
+      o.defaulted = 1;
       break;
     case <help>:
-      option.help = property.cadr().str();
+      o.help = property.cadr().str();
       break;
     default:
       _bad_spec("unknown spec property", property);
   }
 }
 
-static void Spec._free(Spec *spec) {
-  if (spec.options)
-    for (int i = 0; i < spec.count; i++) spec.options[i].collected.free();
-  Scope.free(spec.options);
-  spec.index.cleanup();
+static void Spec._free(Spec *s) {
+  if (s.options)
+    for (int i = 0; i < s.count; i++) s.options[i].collected.free();
+  Scope.free(s.options);
+  s.index.cleanup();
 }
 
 // words
 
-static void Spec._parse_long(
-  Spec *spec, Map result, List &rest, String word) {
+static void Spec._parse_long(Spec *s, Map result, List &rest, String word) {
   int equals = word.find("=");
   String spelling = equals < 0 ? word : word[:equals];
-  Option *option = spec._find(spelling);
+  Option *option = s._find(spelling);
   if (!option.value) {
     if (equals >= 0) _bad_option("unexpected value", spelling);
     option._store(result, 1);
@@ -219,11 +216,10 @@ static void Spec._parse_long(
 
 /* Short flags may share one word, as in `-vq`; the first short option that
    takes a value consumes the rest of the word, or else the next word. */
-static void Spec._parse_short(
-  Spec *spec, Map result, List &rest, String word) {
+static void Spec._parse_short(Spec *s, Map result, List &rest, String word) {
   for (int at = 1; at < word.len(); at++) {
     String spelling = %"-${word[at:at + 1]}";
-    Option *option = spec._find(spelling);
+    Option *option = s._find(spelling);
     if (!option.value) {
       option._store(result, 1);
       continue;
@@ -235,11 +231,11 @@ static void Spec._parse_short(
   }
 }
 
-static Option *Spec._find(Spec *spec, String spelling) {
+static Option *Spec._find(Spec *s, String spelling) {
   Var position;
-  if (!spec.index.try_get(spelling, position))
+  if (!s.index.try_get(spelling, position))
     _bad_option("unknown option", spelling);
-  return &spec.options[position.integer()];
+  return &s.options[position.integer()];
 }
 
 static String _next_value(List &rest, String spelling) {
@@ -251,24 +247,24 @@ static String _next_value(List &rest, String spelling) {
 /* A repeated row collects every value in order, starting afresh at its
    first occurrence or after another row replaced the value; a flag counts
    its occurrences; any other value replaces an earlier one. */
-static void Option._store(Option *option, Map result, Var value) {
-  Option *owner = option.owner;
-  if (!option.repeated || !option.given) {
+static void Option._store(Option *o, Map result, Var value) {
+  Option *owner = o.owner;
+  if (!o.repeated || !o.given) {
     owner.collected.free();
     owner.collected = NULL;
   }
-  if (option.repeated) {
+  if (o.repeated) {
     if (!owner.collected) owner.collected = [];
     owner.collected.push(value);
   }
-  else if (option.value || option.operand) result[option.name] = value;
-  else result[option.name] = option.given + 1;
-  option.given++;
+  else if (o.value || o.operand) result[o.name] = value;
+  else result[o.name] = o.given + 1;
+  o.given++;
 }
 
-static void Spec._assign_operands(Spec *spec, Map result, List operands) {
-  for (int i = 0; i < spec.count; i++) {
-    Option *option = &spec.options[i];
+static void Spec._assign_operands(Spec *s, Map result, List operands) {
+  for (int i = 0; i < s.count; i++) {
+    Option *option = &s.options[i];
     if (!option.operand) continue;
     while (operands) {
       option._store(result, operands.car());
@@ -324,14 +320,14 @@ String Args.usage(String program, List spec) {
   return out;
 }
 
-static String Option._label(Option *option) {
-  if (option.operand) {
-    String label = %"<${option.name}>";
-    if (option.repeated) label = %"$label...";
-    return option.required ? label : %"[$label]";
+static String Option._label(Option *o) {
+  if (o.operand) {
+    String label = %"<${o.name}>";
+    if (o.repeated) label = %"$label...";
+    return o.required ? label : %"[$label]";
   }
-  String label = option.spellings;
-  if (option.value) label = %"$label <${option.value}>";
+  String label = o.spellings;
+  if (o.value) label = %"$label <${o.value}>";
   return label.startswith("--") ? %"    $label" : label;
 }
 

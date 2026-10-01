@@ -3,11 +3,11 @@
     Copyright (c) 2026 Gary William Flake
 
     Json owns the crossing between JSON text and ordinary x2c values: an
-    object is a `Map` with `String` keys, an array an `Array`, null the
-    all-zero `Var`, and true or false a `JsonBool`. A `Map` keeps neither
-    member order nor duplicate names, so a repeated name keeps its last value
-    and output writes names in byte order; `packages/yyjson` serves a program
-    that needs either.
+    object is a Map with String keys, an array an Array, null the all-zero
+    Var, and true or false a `JsonBool`. A Map keeps neither member order nor
+    duplicate names, so a repeated name keeps its last value and output
+    writes names in byte order; `packages/yyjson` serves a program that
+    needs either.
 */
 
 #pragma once
@@ -553,8 +553,7 @@ static int _utf8_length(const unsigned char *s) {
   }
   else return -1;
   if (s[1] < low || s[1] > high) return -1;
-  for (int i = 2; i < length; i++)
-    if (s[i] < 0x80 || s[i] > 0xBF) return -i;
+  for (int i = 2; i < length; i++) if (s[i] < 0x80 || s[i] > 0xBF) return -i;
   return length;
 }
 
