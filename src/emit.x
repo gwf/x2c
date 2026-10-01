@@ -809,18 +809,12 @@ static List Emitter._match_site_call(Emitter &e, Var function, Var arguments) {
   return NULL;
 }
 
-static String _match_site_entry(String name) {
-  if (!name) return NULL;
-  if (name == "List_match") return "x2c_match_site_match";
-  if (name == "List_try_match") return "x2c_match_site_try_match";
-  if (name == "List_search") return "x2c_match_site_search";
-  if (name == "List_try_search") return "x2c_match_site_try_search";
-  if (name == "List_match_replace") return "x2c_match_site_match_replace";
-  if (name == "List_try_match_replace")
-    return "x2c_match_site_try_match_replace";
-  if (name == "List_search_replace") return "x2c_match_site_search_replace";
-  return NULL;
-}
+/* Each `List_` matcher has an `x2c_match_site_` entry of the same name. */
+static String _match_site_entry(String name) =>
+  name && name in %("List_match" "List_try_match" "List_search"
+                    "List_try_search" "List_match_replace"
+                    "List_try_match_replace" "List_search_replace")
+    ? "x2c_match_site_" + name[5:] : NULL;
 
 // statements
 
