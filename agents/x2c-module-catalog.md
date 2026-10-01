@@ -119,10 +119,10 @@ Public functions:
 `Compiler.thaw_declaration_syntax`, `Compiler.select_declaration_defaults`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
 `Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
-`Token.skip_trivia`, `Compiler.skip_trivia_from`, `Compiler.require_input`,
-`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.at_word`,
-`Compiler.take_word`, `Symbol.group_step`, `Token.group_close`,
-`Token.after_group`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
+`Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
+`Symbol.group_step`, `Token.group_close`, `Token.after_group`,
+`Compiler.mark_completion`, `Compiler.at_completion`,
 `Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
@@ -429,11 +429,11 @@ C preprocessor directives in x2c source.
 
 Public functions:
 
-`preproc_directive`, `preproc_conditional_kind`, `preproc_never_active_arm`,
-`preproc_open_state`, `preproc_branch_state`, `preproc_visibility`,
-`preproc_include_target`, `Compiler.scan_conditionals`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
-`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
+`preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
+`preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
+`Compiler.scan_conditionals`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Compiler.note_object_macro`,
+`preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 
