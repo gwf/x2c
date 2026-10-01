@@ -35,7 +35,7 @@
 typedef struct MatchLower {
   MachineBuilder b;
   int *sites, site_count, site_capacity, depth;
-} *MatchLower;
+} MatchLower;
 
 /** Compiles `pattern` into a reusable immutable `MatchPlan`.
     The caller owns the returned plan in the active `Scope`. Preparation
@@ -60,8 +60,7 @@ MatchPlan MatchPlan.prepare(Var pattern) {
    slots are the layout's. */
 static void MatchPlan._lower(MatchPlan plan, Var pattern) {
   MachineBuilder b = MachineBuilder.new();
-  struct MatchLower storage = {.b = b, .depth = 1};
-  MatchLower l = &storage;
+  MatchLower l = {.b = b, .depth = 1};
   for (int i = 0; i < plan.layout.binder_count; i++)
     if (b.binder(plan.layout.binders[i]) != i) break;
   b.root = b.status == MACHINE_PREPARED ? l._compile_value(pattern) : -1;
@@ -85,7 +84,7 @@ void MatchPlan.free(MatchPlan plan) {
 }
 
 /* Compiles one pattern into a block and returns its entry, or -1. */
-static int MatchLower._compile_value(MatchLower l, Var pattern) {
+static int MatchLower._compile_value(MatchLower &l, Var pattern) {
   if (pattern.is_atom_binder()) return l._compile_binder(pattern);
   if (pattern is not <list>) return l._compile_literal(pattern);
   List list = pattern;
@@ -95,7 +94,7 @@ static int MatchLower._compile_value(MatchLower l, Var pattern) {
   return l._compile_segment(list);
 }
 
-static int MatchLower._compile_binder(MatchLower l, Var binder) {
+static int MatchLower._compile_binder(MatchLower &l, Var binder) {
   int entry = l.b.length;
   if (binder == <?>) {
     l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
@@ -106,7 +105,7 @@ static int MatchLower._compile_binder(MatchLower l, Var binder) {
 }
 
 /* Binds a fresh slot to the current value, or compares a bound one. */
-static int MatchLower._emit_binder(MatchLower l, Var binder) {
+static int MatchLower._emit_binder(MatchLower &l, Var binder) {
   if (binder == <?>) return 1;
   MachineBuilder b = l.b;
   int slot = b.binder(binder);
@@ -122,7 +121,7 @@ static int MatchLower._emit_binder(MatchLower l, Var binder) {
   return 1;
 }
 
-static int MatchLower._compile_literal(MatchLower l, Var pattern) {
+static int MatchLower._compile_literal(MatchLower &l, Var pattern) {
   int entry = l.b.length, base = l.site_count;
   return l._emit_literal(pattern) ? l._finish(entry, base) : -1;
 }
@@ -158,13 +157,13 @@ static int _bits_unique(Var value) {
    segment template: literals compare, atom binders bind or compare through
    the journal in slot order, and the anonymous ? matches without emitting a
    word. Failure sites are recorded for the enclosing block to patch. */
-static int MatchLower._emit_leaf_value(MatchLower l, Var pattern) {
+static int MatchLower._emit_leaf_value(MatchLower &l, Var pattern) {
   if (pattern.is_atom_binder()) return l._emit_binder(pattern);
   return l._emit_literal(pattern);
 }
 
 /* Compares the current value with the constant `pattern`. */
-static int MatchLower._emit_literal(MatchLower l, Var pattern) {
+static int MatchLower._emit_literal(MatchLower &l, Var pattern) {
   int constant = l.b.constant(pattern);
   return constant >= 0 &&
     l._fail_site(MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
@@ -183,7 +182,7 @@ static int _is_list_literal(List pat) {
    back to the elementwise segment, mirroring the recursive matcher's
    interned-list fast path without collapsing boxed-equal elements into a
    bit comparison. */
-static int MatchLower._compile_literal_list(MatchLower l, List pattern) {
+static int MatchLower._compile_literal_list(MatchLower &l, List pattern) {
   MachineBuilder b = l.b;
   int constant = b.constant(pattern);
   if (constant < 0) return -1;
@@ -205,7 +204,7 @@ static int MatchLower._compile_literal_list(MatchLower l, List pattern) {
 /* Frame-depth fence: a block compiled here executes through one more call
    frame than its parent, so programs that could exceed the machine's frame
    capacity are rejected at preparation instead of erroring mid-execution. */
-static int MatchLower._compile_child(MatchLower l, Var pattern) {
+static int MatchLower._compile_child(MatchLower &l, Var pattern) {
   if (l.depth + 1 >= MACHINE_FRAME_MAX - 1) return l._fail("frame-depth");
   l.depth++;
   int entry = l._compile_value(pattern);
@@ -217,7 +216,7 @@ static int MatchLower._compile_child(MatchLower l, Var pattern) {
    site on the shared site stack. This is the only place a failure site is
    created. Every lowering path stops immediately on emission failure. */
 static int MatchLower._fail_site(
-  MatchLower l, int op, int a, int b, int c, int d) {
+  MatchLower &l, int op, int a, int b, int c, int d) {
   int site = l.b.emit(op, a, b, c, d, -1);
   if (site < 0) return 0;
   if (l.site_count >= l.site_capacity) {
@@ -231,32 +230,32 @@ static int MatchLower._fail_site(
 
 /* Patches every site recorded since `base` to `target` and releases them.
    Block compilers leave the site stack at their entry base. */
-static void MatchLower._patch_sites(MatchLower l, int base, int target) {
+static void MatchLower._patch_sites(MatchLower &l, int base, int target) {
   for (int i = base; i < l.site_count; i++) l.b.set_target(l.sites[i], target);
   l.site_count = base;
 }
 
 /* Ends the block at `entry` with its success and failure returns and
    returns `entry`, or -1. */
-static int MatchLower._finish(MatchLower l, int entry, int base) {
+static int MatchLower._finish(MatchLower &l, int entry, int base) {
   l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   return l._finish_failure(entry, base);
 }
 
-static int MatchLower._finish_failure(MatchLower l, int entry, int base) {
+static int MatchLower._finish_failure(MatchLower &l, int entry, int base) {
   int failure = l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if (failure < 0) return -1;
   l._patch_sites(base, failure);
   return entry;
 }
 
-static int MatchLower._emit_call(MatchLower l, int child, int mode, int reg) {
+static int MatchLower._emit_call(MatchLower &l, int child, int mode, int reg) {
   if (l.b.emit(MW_CALL, child, mode, reg, 0, 0) < 0) return 0;
   return l._fail_site(MW_BR_FAIL, 0, 0, 0, 0);
 }
 
 /* Records the first ineligibility reason and returns the failed entry. */
-static int MatchLower._fail(MatchLower l, const char *reason) {
+static int MatchLower._fail(MatchLower &l, const char *reason) {
   MachineBuilder b = l.b;
   if (b.status == MACHINE_PREPARED) {
     b.status = MACHINE_INELIGIBLE;
@@ -265,7 +264,7 @@ static int MatchLower._fail(MatchLower l, const char *reason) {
   return -1;
 }
 
-static int MatchLower._stopped(MatchLower l) => l.b.status != MACHINE_PREPARED;
+static int MatchLower._stopped(MatchLower &l) => l.b.status != MACHINE_PREPARED;
 
 /* guards
 
@@ -281,7 +280,7 @@ typedef struct MatchParts {
   int entries[MATCH_SEGMENT_MAX], count;
 } MatchParts;
 
-static int MatchLower._compile_guard(MatchLower l, Var op, List args) {
+static int MatchLower._compile_guard(MatchLower &l, Var op, List args) {
   if (op == <!or>) return l._compile_or(args);
   if (op == <!not>) return l._compile_not(args);
   if (op == <!is>) return l._compile_is(args);
@@ -292,7 +291,7 @@ static int MatchLower._compile_guard(MatchLower l, Var op, List args) {
 
 /* Compiles each operand that is not an atom as a child block. */
 static int MatchLower._guard_parts(
-  MatchLower l, List args, MatchParts &parts) {
+  MatchLower &l, List args, MatchParts &parts) {
   int n = 0;
   foreach (Var part, args) {
     if (n >= MATCH_SEGMENT_MAX) return l._fail("guard-width") + 1;
@@ -308,12 +307,12 @@ static int MatchLower._guard_parts(
 }
 
 static int MatchLower._emit_operand(
-  MatchLower l, MatchParts &parts, int i) =>
+  MatchLower &l, MatchParts &parts, int i) =>
   l._emit_test(parts.elements[i], parts.entries[i]);
 
 /* Tests the current value: an atom `test` inline when `child` is negative,
    or else by calling its child block. */
-static int MatchLower._emit_test(MatchLower l, Var test, int child) {
+static int MatchLower._emit_test(MatchLower &l, Var test, int child) {
   if (child < 0) return l._emit_leaf_value(test);
   return l._emit_call(child, MACHINE_CALL_CURRENT, 0);
 }
@@ -321,7 +320,7 @@ static int MatchLower._emit_test(MatchLower l, Var test, int child) {
 /* Ordered alternatives are static call, branch, and return templates: every
    failed arm returns through its paired undo and order call-entry mark, and
    the first successful arm returns immediately as the local cut. */
-static int MatchLower._compile_or(MatchLower l, List args) {
+static int MatchLower._compile_or(MatchLower &l, List args) {
   MachineBuilder b = l.b;
   MatchParts operands;
   if (!l._guard_parts(args, operands)) return -1;
@@ -336,7 +335,7 @@ static int MatchLower._compile_or(MatchLower l, List args) {
 
 /* Negation uses one frame-local mark and rolls the journal back on both
    inverted outcomes, so no child binding can leak. */
-static int MatchLower._compile_not(MatchLower l, List args) {
+static int MatchLower._compile_not(MatchLower &l, List args) {
   MachineBuilder b = l.b;
   MatchParts operands;
   if (!l._guard_parts(args, operands)) return -1;
@@ -362,7 +361,7 @@ static int MatchLower._compile_not(MatchLower l, List args) {
 
 /* `(!set BINDER TEST)` binds and tests in one block, calling a List TEST
    as a child block; any other set is a list of ordered alternatives. */
-static int MatchLower._compile_set(MatchLower l, List args) {
+static int MatchLower._compile_set(MatchLower &l, List args) {
   if (!args || !args.cdr() || args.cddr() || !args.car().is_atom_binder())
     return l._compile_or(args);
   Var (binder, test) = args;
@@ -374,7 +373,7 @@ static int MatchLower._compile_set(MatchLower l, List args) {
 }
 
 /* Every operand must match the current value, in order. */
-static int MatchLower._compile_and(MatchLower l, List args) {
+static int MatchLower._compile_and(MatchLower &l, List args) {
   MatchParts operands;
   if (!l._guard_parts(args, operands)) return -1;
   int entry = l.b.length, base = l.site_count;
@@ -384,7 +383,7 @@ static int MatchLower._compile_and(MatchLower l, List args) {
 }
 
 /* The runtime compares only one quoted operand. */
-static int MatchLower._compile_quote(MatchLower l, List args) {
+static int MatchLower._compile_quote(MatchLower &l, List args) {
   if (!args || args.cdr()) return l._fail("quote-arity");
   return l._compile_literal(args.car());
 }
@@ -395,7 +394,7 @@ static int MatchLower._compile_quote(MatchLower l, List args) {
    operator kind, whether it is an atom, or its tag. An unknown shape fails
    at execution. */
 
-static int MatchLower._compile_is(MatchLower l, List args) {
+static int MatchLower._compile_is(MatchLower &l, List args) {
   int kind = _match_kind(args);
   if (kind >= 0) return l._is_kind(kind);
   if (args == %(atom)) return l._is_atom();
@@ -413,14 +412,14 @@ static int _match_kind(List args) {
   return -1;
 }
 
-static int MatchLower._is_kind(MatchLower l, int kind) {
+static int MatchLower._is_kind(MatchLower &l, int kind) {
   int entry = l.b.length, base = l.site_count;
   return l._fail_site(MW_MATCH_KIND, 0, kind, 0, 0)
        ? l._finish(entry, base) : -1;
 }
 
 /* `(atom)` holds for any value whose tag is not `list`. */
-static int MatchLower._is_atom(MatchLower l) {
+static int MatchLower._is_atom(MatchLower &l) {
   MachineBuilder b = l.b;
   int entry = b.length, constant = b.constant(<list>);
   if (constant < 0) return -1;
@@ -438,7 +437,7 @@ static int MatchLower._is_atom(MatchLower l) {
 
 /* `(type TAG)` canonicalizes varray and vmap to the public tags before
    freezing the constant; a TAG that is not a Symbol never matches. */
-static int MatchLower._is_type(MatchLower l, Var type) {
+static int MatchLower._is_type(MatchLower &l, Var type) {
   Symbol tag = _canonical_type_tag(type is <symbol> ? type.symbol() : 0);
   if (!tag) return l._never();
   int entry = l.b.length, base = l.site_count, constant = l.b.constant(tag);
@@ -453,7 +452,7 @@ static inline Symbol _canonical_type_tag(Symbol tag) {
 }
 
 /* A block that always fails. */
-static int MatchLower._never(MatchLower l) {
+static int MatchLower._never(MatchLower &l) {
   int entry = l.b.length;
   return l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0 ? -1 : entry;
 }
@@ -489,7 +488,7 @@ typedef struct MatchSegment {
   MatchStar star;
 } MatchSegment;
 
-static int MatchLower._compile_segment(MatchLower l, List pattern) {
+static int MatchLower._compile_segment(MatchLower &l, List pattern) {
   MatchSegment s;
   s.nested.count = s.nested.used = 0;
   if (!l._segment_prefix(s, pattern) || !l._segment_star(s.star)) return -1;
@@ -506,25 +505,24 @@ static int MatchLower._compile_segment(MatchLower l, List pattern) {
    literal lists, and starred or deep sublists keep a call frame with an
    independent register bank. */
 static int MatchLower._segment_prefix(
-  MatchLower l, MatchSegment &s, List pattern) {
-  MatchParts *prefix = &s.prefix;
+  MatchLower &l, MatchSegment &s, List pattern) {
   int n = 0, List at = pattern;
   while (at && !at.car().is_list_binder()) {
     if (n >= MATCH_SEGMENT_MAX) return l._fail("segment-width") + 1;
     Var part = at.car();
-    prefix.elements[n] = part;
-    if (part is not <list>) prefix.entries[n++] = -1;
+    s.prefix.elements[n] = part;
+    if (part is not <list>) s.prefix.entries[n++] = -1;
     else if (_inline_descend_ok(part, 0)) {
       if (!l._compile_nested(part, 1, s.nested)) return 0;
-      prefix.entries[n++] = -2;
+      s.prefix.entries[n++] = -2;
     }
     else {
-      prefix.entries[n] = l._compile_child(part);
-      if (prefix.entries[n++] < 0) return 0;
+      s.prefix.entries[n] = l._compile_child(part);
+      if (s.prefix.entries[n++] < 0) return 0;
     }
     at = at.cdr();
   }
-  prefix.count = n;
+  s.prefix.count = n;
   s.star.cell = at;
   return 1;
 }
@@ -545,7 +543,7 @@ static int _inline_descend_ok(List child, int reg) {
 /* Precompiles every framed child block reachable through inline descents,
    in traversal order. */
 static int MatchLower._compile_nested(
-  MatchLower l, List pattern, int reg, MatchInlinePlan &nested) {
+  MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
   foreach (Var part, pattern) {
     if (part is not <list>) continue;
     List child = part;
@@ -563,7 +561,7 @@ static int MatchLower._compile_nested(
 /* Resolves the star after the prefix: its binder's slot, whether the
    binder can defer its span, and the tail with its anchor. A binder the
    tail never mentions is delayed until the tail succeeds. */
-static int MatchLower._segment_star(MatchLower l, MatchStar &star) {
+static int MatchLower._segment_star(MatchLower &l, MatchStar &star) {
   List cell = star.cell;
   star = (MatchStar) {.cell = cell, .slot = -1, .entry = -1, .anchor = void};
   if (!cell) return 1;
@@ -595,7 +593,7 @@ static int _pattern_contains_binder(List pat, Var binder) {
 }
 
 /* A star's tail compiles as a child segment under the frame-depth fence. */
-static int MatchLower._compile_tail(MatchLower l, List pattern) {
+static int MatchLower._compile_tail(MatchLower &l, List pattern) {
   if (l.depth + 1 >= MACHINE_FRAME_MAX - 1) return l._fail("frame-depth");
   l.depth++;
   int entry = l._compile_segment(pattern);
@@ -627,12 +625,12 @@ static int _find_fixed_anchor(List pat, Var &anchor, int &offset) {
    next register, and any other element is a child block called on the
    head. Each element then advances the cursor. */
 
-static int MatchLower._emit_prefix(MatchLower l, MatchSegment &s) {
+static int MatchLower._emit_prefix(MatchLower &l, MatchSegment &s) {
   for (int i = 0; i < s.prefix.count; i++) if (!l._emit_part(s, i)) return 0;
   return 1;
 }
 
-static int MatchLower._emit_part(MatchLower l, MatchSegment &s, int i) {
+static int MatchLower._emit_part(MatchLower &l, MatchSegment &s, int i) {
   int entry = s.prefix.entries[i];
   if (entry == -1) return l._emit_head_leaf(s.prefix.elements[i], 0);
   if (entry == -2) return l._emit_descend(s.prefix.elements[i], 0, s.nested);
@@ -641,7 +639,7 @@ static int MatchLower._emit_part(MatchLower l, MatchSegment &s, int i) {
 
 /* Tests the element at the cursor head of `reg`: `?` skips it, an atom
    binder binds or compares it, and a literal compares it. */
-static int MatchLower._emit_head_leaf(MatchLower l, Var part, int reg) {
+static int MatchLower._emit_head_leaf(MatchLower &l, Var part, int reg) {
   MachineBuilder b = l.b;
   if (part == <?>) return l._fail_site(MW_SKIP_HEAD, 0, reg, 0, 0);
   if (part.is_atom_binder()) {
@@ -658,21 +656,21 @@ static int MatchLower._emit_head_leaf(MatchLower l, Var part, int reg) {
 /* Descends into the sublist at the cursor head of `reg` through the next
    register, then advances past it. */
 static int MatchLower._emit_descend(
-  MatchLower l, List child, int reg, MatchInlinePlan &nested) =>
+  MatchLower &l, List child, int reg, MatchInlinePlan &nested) =>
   l._fail_site(MW_DESCEND, 0, reg, reg + 1, 0) &&
   l._emit_inline_segment(child, reg + 1, nested) &&
   l.b.emit(MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 
 /* Calls a child block on the cursor head of `reg`, which must exist, then
    advances past it. */
-static int MatchLower._emit_framed(MatchLower l, int entry, int reg) =>
+static int MatchLower._emit_framed(MatchLower &l, int entry, int reg) =>
   l._fail_site(MW_NONNIL, reg, 0, 0, 0) &&
   l._emit_call(entry, MACHINE_CALL_HEAD, reg) &&
   l.b.emit(MW_ADVANCE, reg, 0, 0, 0, 0) >= 0;
 
 /* Emits an inline sublist through `reg`; its elements must end with it. */
 static int MatchLower._emit_inline_segment(
-  MatchLower l, List pattern, int reg, MatchInlinePlan &nested) {
+  MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
   foreach (Var part, pattern) {
     if (part is not <list>) {
       if (!l._emit_head_leaf(part, reg)) return 0;
@@ -695,7 +693,7 @@ static int MatchLower._emit_inline_segment(
    List; an interior star searches the List for a split where the tail
    matches. */
 
-static int MatchLower._segment_end(MatchLower l, MatchStar &star) {
+static int MatchLower._segment_end(MatchLower &l, MatchStar &star) {
   if (!star.cell) {
     if (!l._fail_site(MW_NIL, 0, 0, 0, 0)) return 0;
     l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
@@ -708,7 +706,7 @@ static int MatchLower._segment_end(MatchLower l, MatchStar &star) {
 /* A final star consumes the remaining input: a fresh binder shares the
    native suffix directly, and a repeated binder keeps production's shallow
    List identity rule and memoizes a proven span as its suffix VALUE. */
-static int MatchLower._final_star(MatchLower l, int slot) {
+static int MatchLower._final_star(MatchLower &l, int slot) {
   MachineBuilder b = l.b;
   if (slot < 0) return b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) >= 0;
 
@@ -744,7 +742,7 @@ static int MatchLower._final_star(MatchLower l, int slot) {
    star advances one optional split per retry. A unique unreferenced binder
    defers its span until the tail succeeds, and a repeated binder compares
    the candidate range in place. */
-static int MatchLower._search_star(MatchLower l, MatchStar &star) {
+static int MatchLower._search_star(MatchLower &l, MatchStar &star) {
   MachineBuilder b = l.b;
   int slot = star.slot, loop = l._star_loop(star);
   if (loop < 0) return 0;
@@ -772,7 +770,7 @@ static int MatchLower._search_star(MatchLower l, MatchStar &star) {
 
 /* Starts the split cursors and emits the loop head, which fails the
    segment once no split remains. Returns the head's site, or -1. */
-static int MatchLower._star_loop(MatchLower l, MatchStar &star) {
+static int MatchLower._star_loop(MatchLower &l, MatchStar &star) {
   MachineBuilder b = l.b;
   int anchored = star.anchored;
   int constant = anchored ? b.constant(star.anchor) : -1;
@@ -796,7 +794,7 @@ static int MatchLower._star_loop(MatchLower l, MatchStar &star) {
 
 /* A fresh binder takes the split's span before the tail runs or, when
    delayed, after it succeeds. Returns the tail's failure branch, or -1. */
-static int MatchLower._star_fresh(MatchLower l, MatchStar &star) {
+static int MatchLower._star_fresh(MatchLower &l, MatchStar &star) {
   MachineBuilder b = l.b;
   int slot = star.slot;
   if (slot >= 0 && !star.delayed) b.emit(MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
@@ -808,13 +806,13 @@ static int MatchLower._star_fresh(MatchLower l, MatchStar &star) {
 }
 
 /* Calls the tail at the split cursor; returns its failure branch. */
-static int MatchLower._star_tail(MatchLower l, MatchStar &star) {
+static int MatchLower._star_tail(MatchLower &l, MatchStar &star) {
   l.b.emit(MW_CALL, star.entry, MACHINE_CALL_CURSOR, 1, 0, 0);
   return l.b.emit(MW_BR_FAIL, 0, 0, 0, 0, -1);
 }
 
 /* Undoes the failed split's bindings and moves to the next split. */
-static int MatchLower._star_retry(MatchLower l, MatchStar &star, int loop) {
+static int MatchLower._star_retry(MatchLower &l, MatchStar &star, int loop) {
   MachineBuilder b = l.b;
   b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
   if (star.anchored) {

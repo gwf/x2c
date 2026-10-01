@@ -50,24 +50,24 @@ struct Split {
   int (*next)(Split split, int *cursor, String *out);
 };
 
-static inline int _end(String str, String sep, int start, int *next) {
+static inline int _end(String str, String sep, int start, int &next) {
   int length = str.len();
   if (!str || start < 0 || start > length) return -1;
   if (!sep) {
-    *next = -1;
+    next = -1;
     return length;
   }
   const char *found = strstr(str + start, sep);
   if (!found) {
-    *next = -1;
+    next = -1;
     return length;
   }
   int end = (int) (found - str);
-  *next = end + sep.len();
+  next = end + sep.len();
   return end;
 }
 
-static inline int _line_end(String str, int start, int keep_ends, int *next) {
+static inline int _line_end(String str, int start, int keep_ends, int &next) {
   int length = str.len();
   if (!str || start < 0 || start >= length) return -1;
   const char *text = str;
@@ -77,8 +77,8 @@ static inline int _line_end(String str, int start, int keep_ends, int *next) {
   if (end < length)
     ending = text[end] == '\r' && end + 1 < length && text[end + 1] == '\n'
       ? 2 : 1;
-  *next = end + ending;
-  return keep_ends ? *next : end;
+  next = end + ending;
+  return keep_ends ? next : end;
 }
 
 /** Splits `str` at no more than `max_splits` separators.
@@ -95,7 +95,7 @@ meta native List String.split_n(String str, String sep, int max_splits) {
   while (start >= 0) {
     int next = -1;
     int end = max_splits >= 0 && splits >= max_splits
-      ? str.len() : _end(str, sep, start, &next);
+      ? str.len() : _end(str, sep, start, next);
     String field = String.new_len(str + start, end - start);
     results.push(field);
     start = next;
@@ -136,7 +136,7 @@ meta native List String.split_lines(String str, int keep_ends) {
   if (!str) return %();
   Array results = [], int start = 0;
   while (start < str.len()) {
-    int next, end = _line_end(str, start, keep_ends, &next);
+    int next, end = _line_end(str, start, keep_ends, next);
     String field = String.new_len(str + start, end - start);
     results.push(field);
     start = next;
@@ -166,7 +166,7 @@ static int _words_next(Split split, int *cursor, String *out) {
 
 static int _lines_next(Split split, int *cursor, String *out) {
   if (!split || !split.str) return 0;
-  int start = *cursor, next, end = _line_end(split.str, start, 0, &next);
+  int start = *cursor, next, end = _line_end(split.str, start, 0, next);
   if (end < 0) return 0;
   String field = String.new_len(split.str + start, end - start);
   *out = field;
@@ -177,7 +177,7 @@ static int _lines_next(Split split, int *cursor, String *out) {
 static int _splits_next(Split split, int *cursor, String *out) {
   if (!split || !split.str) return 0;
   int start = *cursor, next;
-  int end = _end(split.str, split.sep, start, &next);
+  int end = _end(split.str, split.sep, start, next);
   if (end < 0) return 0;
   String field = String.new_len(split.str + start, end - start);
   *out = field;

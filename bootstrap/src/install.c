@@ -549,20 +549,20 @@ int Path_exists(Path);
 int String_is_identifier(String);
 
 static void Install_locate(Install * i){
-  String spec = i -> spec;
+  String spec =(* i).spec;
   if(_remote(spec)){
-    if(! String_truth(i -> sha256)) _error("a URL needs --sha256 <hex>");
-    i -> url = spec;
+    if(! String_truth((* i).sha256)) _error("a URL needs --sha256 <hex>");
+    (* i).url = spec;
   }
-  else if(Path_exists(spec)) i -> source = spec;
-  else if(String_is_identifier(spec)) Install_resolve(i, _index_row(i -> request, spec, i -> work));
+  else if(Path_exists(spec))(* i).source = spec;
+  else if(String_is_identifier(spec)) Install_resolve(&((* i)), _index_row((* i).request, spec, (* i).work));
   else _error(String_join(NULL, cons(String_var(_7), cons(String_var(spec), cons(String_var(_8), NULL)))));
 }
 
 static void Install_resolve(Install * i, List row){
-  i -> version = Var_string(List_getindex(row, 1));
-  i -> url = Var_string(List_getindex(row, 4));
-  i -> sha256 = Var_string(List_getindex(row, 5));
+  (* i).version = Var_string(List_getindex(row, 1));
+  (* i).url = Var_string(List_getindex(row, 4));
+  (* i).sha256 = Var_string(List_getindex(row, 5));
 }
 
 Path Path_basename(Path);
@@ -570,9 +570,9 @@ Path Path_basename(Path);
 void Path_copy_tree(Path, Path);
 
 static void Install_run(Install * i){
-  String package = Install_unpacked(i), name = Path_basename(package);
+  String package = Install_unpacked(&((* i))), name = Path_basename(package);
   if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), NULL)))));
-  String staged = String_join(NULL, cons(String_var(i -> work), cons(String_var(_1), cons(String_var(name), NULL))));
+  String staged = String_join(NULL, cons(String_var((* i).work), cons(String_var(_1), cons(String_var(name), NULL))));
   {
     ExceptionFrame _x2c_exception_frame_2;
     static MatchCaptureSite _x2c_macro_arms_2[1];
@@ -612,25 +612,25 @@ static void Install_run(Install * i){
     _x2c_error_handler_2 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_2);
   }
-  if(Path_exists(String_join(NULL, cons(String_var(staged), cons(String_var(_10), NULL))))) _check_bundle(i -> request, staged, name);
+  if(Path_exists(String_join(NULL, cons(String_var(staged), cons(String_var(_10), NULL))))) _check_bundle((* i).request, staged, name);
   else{
-    _build_source(staged, name, i -> spec);
-    Install_mark_source(i, staged, name);
+    _build_source(staged, name, (* i).spec);
+    Install_mark_source(&((* i)), staged, name);
   }
-  _publish(staged, i -> packages, name);
-  if(! i -> request -> quiet) fprintf(stderr, "x2c: installed %s/%s\n", i -> packages, name);
+  _publish(staged, (* i).packages, name);
+  if(!(* i).request -> quiet) fprintf(stderr, "x2c: installed %s/%s\n", (* i).packages, name);
 }
 
 int Path_is_dir(Path);
 
 static String Install_unpacked(Install * i){
-  String source = i -> source;
-  if(String_truth(i -> url)){
-    source = _fetch(i -> url, i -> work, _90);
-    _verify(source, i -> sha256);
+  String source =(* i).source;
+  if(String_truth((* i).url)){
+    source = _fetch((* i).url, (* i).work, _90);
+    _verify(source, (* i).sha256);
   }
-  else if(String_truth(i -> sha256) && ! Path_is_dir(source)) _verify(source, i -> sha256);
-  return Path_is_dir(source) ? source : _unpack(source, i -> work);
+  else if(String_truth((* i).sha256) && ! Path_is_dir(source)) _verify(source, (* i).sha256);
+  return Path_is_dir(source) ? source : _unpack(source, (* i).work);
 }
 
 Map Map_update_n(Map, unsigned, ...);
@@ -650,11 +650,11 @@ String Var_pretty_json(Var);
 Var Map_var(Map);
 
 static void Install_mark_source(Install * i, String staged, String name){
-  String version = i -> version;
-  if(! String_truth(version)) version = _installed_version(String_join(NULL, cons(String_var(i -> packages), cons(String_var(_1), cons(String_var(name), NULL)))));
-  Map record = Map_update_n(Map_new(), 3, String_var(_91), String_var(name), String_var(_60), String_truth(i -> url) ? String_var(i -> url) : String_var(Path_absolute(i -> spec)), String_var(_92), String_var(cli_version()));
+  String version =(* i).version;
+  if(! String_truth(version)) version = _installed_version(String_join(NULL, cons(String_var((* i).packages), cons(String_var(_1), cons(String_var(name), NULL)))));
+  Map record = Map_update_n(Map_new(), 3, String_var(_91), String_var(name), String_var(_60), String_truth((* i).url) ? String_var((* i).url) : String_var(Path_absolute((* i).spec)), String_var(_92), String_var(cli_version()));
   if(String_truth(version)) Map_setindex(record, String_var(_93), String_var(version));
-  if(String_truth(i -> sha256)) Map_setindex(record, String_var(_94), String_var(i -> sha256));
+  if(String_truth((* i).sha256)) Map_setindex(record, String_var(_94), String_var((* i).sha256));
   Path_write_text(String_join(NULL, cons(String_var(staged), cons(String_var(_11), NULL))), String_join(NULL, cons(String_var(Var_pretty_json(Map_var(record))), cons(String_var(_12), NULL))));
 }
 

@@ -1451,7 +1451,7 @@ static List Compiler._resolve_call(
   return site._function(function);
 }
 
-static List CallSite._function(CallSite *k, List function) {
+static List CallSite._function(CallSite &k, List function) {
   List resolved = k.c.resolve_expression(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type).equal(func_type))
@@ -1460,7 +1460,7 @@ static List CallSite._function(CallSite *k, List function) {
 }
 
 static List CallSite._finish(
-  CallSite *k, Type result_type, List callee, Type callee_type,
+  CallSite &k, Type result_type, List callee, Type callee_type,
   List receiver) {
   if (result_type === %(<macro-expr>)) result_type = NULL;
   Type applied = callee_type.apply();
@@ -1495,7 +1495,7 @@ static int _deferred_call(List callee, List receiver, List arguments) {
 }
 
 static void CallSite._check_arity(
-  CallSite *k, Type callee_type, List arguments) {
+  CallSite &k, Type callee_type, List arguments) {
   match (callee_type)
     case %((func (!set ?parameters (*))) *):
       if (!_parameters_variadic(parameters) &&
@@ -1570,7 +1570,7 @@ static List Compiler._discarding_callee(
 
 // method calls
 
-static List CallSite._method(CallSite *k, List receiver, List field) {
+static List CallSite._method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
   k.field = field;
   List resolution = k._lookup();
@@ -1605,7 +1605,7 @@ static List CallSite._method(CallSite *k, List receiver, List field) {
   return NULL;
 }
 
-static List CallSite._lookup(CallSite *k) {
+static List CallSite._lookup(CallSite &k) {
   k.receiver = k.c.resolve_expression(k.receiver, k.origin);
   k.type = k.receiver.cadr();
   k.method = k.field.car().str();
@@ -1620,7 +1620,7 @@ static List CallSite._lookup(CallSite *k) {
 }
 
 static List CallSite._bound(
-  CallSite *k, List binding, Type signature, List declared,
+  CallSite &k, List binding, Type signature, List declared,
   List parameters, List returns) {
   k.receiver = k.c._method_bind(k.receiver, k.type, declared, k.origin);
   List callee = %(expr ((func $parameters) $returns) (ident $binding));
@@ -1801,7 +1801,7 @@ static List Compiler._resolve_delegate_method(
 }
 
 static void DelegateSearch._find(
-  DelegateSearch *d, Type receiver, List reverse_path, List seen) {
+  DelegateSearch &d, Type receiver, List reverse_path, List seen) {
   Type aggregate = d.c.sym.delegate_aggregate(receiver);
   if (!aggregate) return;
   if (aggregate in seen) {
@@ -1843,7 +1843,7 @@ static List Compiler._delegate_step(Compiler c, Type receiver, String name) {
 }
 
 static void DelegateSearch._report_paths(
-  DelegateSearch *d, List candidates) {
+  DelegateSearch &d, List candidates) {
   List notes = NULL;
   foreach (List candidate, candidates) {
     List path = candidate.cddr().cadr();
@@ -1857,7 +1857,7 @@ static void DelegateSearch._report_paths(
     d.origin, notes.reverse());
 }
 
-static void DelegateSearch._report_cycle(DelegateSearch *d) {
+static void DelegateSearch._report_cycle(DelegateSearch &d) {
   String type = _delegate_type_name(d.outer), member = d.member;
   String path = _delegate_path_string(d.outer, d.first_cycle, NULL);
   d.c.report_error(

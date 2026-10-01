@@ -418,7 +418,7 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
 /* A supplied row fixes the captured type and value. Otherwise a binding
    listed after `using` captures by reference, and a snapshot of a
    reference parameter copies its referent. */
-static List Capture.add(Capture *k) {
+static List Capture.add(Capture &k) {
   Type type = k.type, captured_type = type.car() == <&> ? type.cdr() : type;
   List binding = k.binding, expression = %(expr $type (ident $binding));
   int reference = k.original in k.references.list();
@@ -455,7 +455,7 @@ static List Compiler._resolve_outside(Compiler c, List frame, Var value) {
 /* The captured copy is a fresh automatic binding: a reference parameter or
    a snapshot. Rows join the lambda's order newest first. */
 static List Capture.record(
-  Capture *k, Type captured_type, List expression, int reference) {
+  Capture &k, Type captured_type, List expression, int reference) {
   Map facts = k.facts;
   List captured = k.c.sym.introduce(binding_identity_spelling(k.binding));
   List row = %(capture $captured $captured_type $expression);

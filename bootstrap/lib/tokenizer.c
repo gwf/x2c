@@ -1073,38 +1073,38 @@ static _Layout _layout_open(Tokenizer t){
 }
 
 static void _Layout_close(_Layout * l){
-  free(l -> sig);
-  free(l -> depths);
-  free(l -> lines);
-  free(l -> edits);
-  free(l -> indents);
-  free(l -> closers);
-  free(l -> enums);
-  free(l -> ternary);
+  free((* l).sig);
+  free((* l).depths);
+  free((* l).lines);
+  free((* l).edits);
+  free((* l).indents);
+  free((* l).closers);
+  free((* l).enums);
+  free((* l).ternary);
 }
 
 static _LayoutEdit * _Layout_edit(_Layout * l, int k){
-  return & l -> edits[l -> sig[k] - l -> all];
+  return &(* l).edits[(* l).sig[k] -(* l).all];
 }
 
 static void _Layout_split_lines(_Layout * l){
   int depth = 0, end_line = 0, pending = 0;
-  for(int k = 0;  k < l -> nsig;  k ++){
-    Token tok = l -> sig[k];
-    if(_Layout_starts_line(l, k, depth, end_line)){
-      _Layout_check_tab(l, tok);
-      l -> lines[l -> nlines ++] =(_LayoutLine){
+  for(int k = 0;  k <(* l).nsig;  k ++){
+    Token tok =(* l).sig[k];
+    if(_Layout_starts_line(&((* l)), k, depth, end_line)){
+      _Layout_check_tab(&((* l)), tok);
+      (* l).lines[(* l).nlines ++] =(_LayoutLine){
         k, k, tok -> col, tok -> type == 35579270086
       }
       ;
       pending = 0;
     }
-    l -> lines[l -> nlines - 1].last = k;
+    (* l).lines[(* l).nlines - 1].last = k;
     if(_closes(tok)) depth --;
-    l -> depths[k] = depth;
+    (* l).depths[k] = depth;
     if(! depth && String_equal(tok -> text, _12)) pending ++;
     else if(! depth && String_equal(tok -> text, _13) && pending){
-      l -> ternary[k] = 1;
+      (* l).ternary[k] = 1;
       pending --;
     }
     if(_opens(tok)) depth ++;
@@ -1114,17 +1114,17 @@ static void _Layout_split_lines(_Layout * l){
 }
 
 static int _Layout_starts_line(_Layout * l, int k, int depth, int end_line){
-  Token tok = l -> sig[k];
-  if(tok -> type == 35579270086 || ! l -> nlines || l -> lines[l -> nlines - 1].directive) return 1;
-  return depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _14) &&(tok -> col <= l -> lines[l -> nlines - 1].indent ||(String_equal(l -> sig[k - 1] -> text, _13) && ! l -> ternary[k - 1]));
+  Token tok =(* l).sig[k];
+  if(tok -> type == 35579270086 || !(* l).nlines ||(* l).lines[(* l).nlines - 1].directive) return 1;
+  return depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _14) &&(tok -> col <=(* l).lines[(* l).nlines - 1].indent ||(String_equal((* l).sig[k - 1] -> text, _13) && !(* l).ternary[k - 1]));
 }
 
 static void _Layout_check_tab(_Layout * l, Token tok){
-  if(tok -> type == 35579270086 || l -> error_at || tok <= l -> all) return;
+  if(tok -> type == 35579270086 ||(* l).error_at || tok <=(* l).all) return;
   Token space = tok - 1;
   if(space -> type != 40896714) return;
   char * newline = strrchr(space -> text, '\n');
-  if(newline && strchr(newline, '\t')) l -> error_at = tok;
+  if(newline && strchr(newline, '\t'))(* l).error_at = tok;
 }
 
 static int _end_line(Token tok){
@@ -1136,48 +1136,48 @@ static int _end_line(Token tok){
 int String_truth(String);
 
 static void _Layout_edit_line(_Layout * l, int i){
-  _LayoutLine line = l -> lines[i];
+  _LayoutLine line =(* l).lines[i];
   if(line.directive){
-    if(String_equal(String_strip(l -> sig[line.first] -> text, " \t\r\n"), _8)) _Layout_edit(l, line.first) -> type = 7477210024;
+    if(String_equal(String_strip((* l).sig[line.first] -> text, " \t\r\n"), _8)) _Layout_edit(&((* l)), line.first) -> type = 7477210024;
     return;
   }
-  if(! l -> top && ! l -> indents[0]) l -> indents[0] = line.indent;
-  int j = _Layout_next_statement(l, i);
-  int next = j < l -> nlines ? l -> lines[j].indent : l -> indents[0];
+  if(!(* l).top && !(* l).indents[0])(* l).indents[0] = line.indent;
+  int j = _Layout_next_statement(&((* l)), i);
+  int next = j <(* l).nlines ?(* l).lines[j].indent :(* l).indents[0];
   String suffix = NULL;
-  if(String_equal(l -> sig[line.last] -> text, _13) && ! l -> ternary[line.last] && next > line.indent) _Layout_open_block(l, line, j, next);
-  else suffix = _Layout_end_statement(l, line);
-  while(l -> top && next < l -> indents[l -> top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(l -> closers[l -> top --]), NULL)));
-  if(next != l -> indents[l -> top] && ! l -> error_at && j < l -> nlines) l -> error_at = l -> sig[l -> lines[j].first];
-  _LayoutEdit * tail = _Layout_edit(l, line.last);
+  if(String_equal((* l).sig[line.last] -> text, _13) && !(* l).ternary[line.last] && next > line.indent) _Layout_open_block(&((* l)), line, j, next);
+  else suffix = _Layout_end_statement(&((* l)), line);
+  while((* l).top && next <(* l).indents[(* l).top]) suffix = String_join(NULL, cons(String_var(suffix), cons(String_var((* l).closers[(* l).top --]), NULL)));
+  if(next !=(* l).indents[(* l).top] && !(* l).error_at && j <(* l).nlines)(* l).error_at =(* l).sig[(* l).lines[j].first];
+  _LayoutEdit * tail = _Layout_edit(&((* l)), line.last);
   if(String_truth(suffix)) tail -> after = String_truth(tail -> after) ? String_join(NULL, cons(String_var(tail -> after), cons(String_var(suffix), NULL))) : suffix;
 }
 
 static int _Layout_next_statement(_Layout * l, int i){
   int j = i + 1;
-  while(j < l -> nlines && l -> lines[j].directive) j ++;
+  while(j <(* l).nlines &&(* l).lines[j].directive) j ++;
   return j;
 }
 
 static void _Layout_open_block(_Layout * l, _LayoutLine line, int j, int next){
-  Token first = l -> sig[line.first];
-  _LayoutHeader header = _Layout_header(l, line);
-  if(header.labeled) _Layout_edit(l, line.last) -> after = _15;
-  else if(! _Layout_condition(l, line.first, line.last, _15)) _Layout_edit(l, line.last) -> type = 247;
-  if(String_equal(first -> text, _16) && line.last == line.first + 1 && _Layout_bare_do(l, line, j)) _Layout_edit(l, line.first) -> type = 40896714;
-  l -> indents[++ l -> top] = next;
-  l -> enums[l -> top] = header.enumeration;
-  l -> closers[l -> top] = header.aggregate && ! String_equal(first -> text, _17) ? _18 : _19;
+  Token first =(* l).sig[line.first];
+  _LayoutHeader header = _Layout_header(&((* l)), line);
+  if(header.labeled) _Layout_edit(&((* l)), line.last) -> after = _15;
+  else if(! _Layout_condition(&((* l)), line.first, line.last, _15)) _Layout_edit(&((* l)), line.last) -> type = 247;
+  if(String_equal(first -> text, _16) && line.last == line.first + 1 && _Layout_bare_do(&((* l)), line, j)) _Layout_edit(&((* l)), line.first) -> type = 40896714;
+  (* l).indents[++(* l).top] = next;
+  (* l).enums[(* l).top] = header.enumeration;
+  (* l).closers[(* l).top] = header.aggregate && ! String_equal(first -> text, _17) ? _18 : _19;
 }
 
 static _LayoutHeader _Layout_header(_Layout * l, _LayoutLine line){
   int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
   for(int m = line.first;  m < line.last;  m ++){
-    String word = l -> sig[m] -> text;
+    String word =(* l).sig[m] -> text;
     aggregate |= String_equal(word, _20) || String_equal(word, _21) || String_equal(word, _22);
     enumeration |= String_equal(word, _22);
-    parameters |= l -> sig[m] -> type == 81;
-    labeled |= ! l -> depths[m] && _is_label(word);
+    parameters |=(* l).sig[m] -> type == 81;
+    labeled |= !(* l).depths[m] && _is_label(word);
   }
   return(_LayoutHeader){
     aggregate && ! parameters, enumeration && ! parameters, labeled
@@ -1187,52 +1187,52 @@ static _LayoutHeader _Layout_header(_Layout * l, _LayoutLine line){
 
 static int _Layout_bare_do(_Layout * l, _LayoutLine line, int j){
   int k = j;
-  for(;  k < l -> nlines;  k ++) if(! l -> lines[k].directive && l -> lines[k].indent <= line.indent) break;
-  if(k == l -> nlines) return 1;
-  _LayoutLine trailer = l -> lines[k];
-  return trailer.indent != line.indent || ! String_equal(l -> sig[trailer.first] -> text, _23) || String_equal(l -> sig[trailer.last] -> text, _13);
+  for(;  k <(* l).nlines;  k ++) if(!(* l).lines[k].directive &&(* l).lines[k].indent <= line.indent) break;
+  if(k ==(* l).nlines) return 1;
+  _LayoutLine trailer =(* l).lines[k];
+  return trailer.indent != line.indent || ! String_equal((* l).sig[trailer.first] -> text, _23) || String_equal((* l).sig[trailer.last] -> text, _13);
 }
 
 static String _Layout_end_statement(_Layout * l, _LayoutLine line){
-  _Layout_one_line_body(l, line);
-  if(l -> sig[line.first] -> type == 129){
-    _Layout_edit(l, line.first) -> type = 40896714;
+  _Layout_one_line_body(&((* l)), line);
+  if((* l).sig[line.first] -> type == 129){
+    _Layout_edit(&((* l)), line.first) -> type = 40896714;
     return NULL;
   }
-  if(l -> sig[line.last] -> type == 119 || l -> enums[l -> top] || _Layout_lisp_form(l, line) || _Layout_hole(l, line)) return NULL;
+  if((* l).sig[line.last] -> type == 119 ||(* l).enums[(* l).top] || _Layout_lisp_form(&((* l)), line) || _Layout_hole(&((* l)), line)) return NULL;
   return _47;
 }
 
 static void _Layout_one_line_body(_Layout * l, _LayoutLine line){
   for(int m = line.first + 1;  m < line.last;  m ++){
-    String word = l -> sig[m] -> text;
-    if(l -> depths[m]) continue;
+    String word =(* l).sig[m] -> text;
+    if((* l).depths[m]) continue;
     if(_is_label(word)) return;
-    if(! String_equal(word, _13) || l -> ternary[m]) continue;
-    if(! _Layout_condition(l, line.first, m, NULL) && String_equal(l -> sig[m - 1] -> text, _24)) _Layout_edit(l, m) -> type = 40896714;
+    if(! String_equal(word, _13) ||(* l).ternary[m]) continue;
+    if(! _Layout_condition(&((* l)), line.first, m, NULL) && String_equal((* l).sig[m - 1] -> text, _24)) _Layout_edit(&((* l)), m) -> type = 40896714;
     return;
   }
 
 }
 
 static int _Layout_lisp_form(_Layout * l, _LayoutLine line){
-  if(l -> sig[line.first] -> type != 9297) return 0;
-  for(int m = line.first + 1;  m < line.last;  m ++) if(l -> depths[m] <= 0) return 0;
+  if((* l).sig[line.first] -> type != 9297) return 0;
+  for(int m = line.first + 1;  m < line.last;  m ++) if((* l).depths[m] <= 0) return 0;
   return 1;
 }
 
 static int _Layout_hole(_Layout * l, _LayoutLine line){
   int last = line.last;
-  return l -> sig[last] -> type == 19147688 && last > line.first && l -> sig[last - 1] -> type == 73 &&(last - 1 == line.first || l -> sig[last - 2] -> type == 83);
+  return(* l).sig[last] -> type == 19147688 && last > line.first &&(* l).sig[last - 1] -> type == 73 &&(last - 1 == line.first ||(* l).sig[last - 2] -> type == 83);
 }
 
 static int _Layout_condition(_Layout * l, int first, int colon, String body){
-  int key = _Layout_control_keyword(l, first, colon);
+  int key = _Layout_control_keyword(&((* l)), first, colon);
   if(key < 0) return 0;
-  _LayoutEdit * tail = _Layout_edit(l, colon);
-  if(_Layout_wrapped(l, key, colon)) tail -> type = String_truth(body) ? 247 : 40896714;
+  _LayoutEdit * tail = _Layout_edit(&((* l)), colon);
+  if(_Layout_wrapped(&((* l)), key, colon)) tail -> type = String_truth(body) ? 247 : 40896714;
   else{
-    _Layout_edit(l, key + 1) -> before = _25;
+    _Layout_edit(&((* l)), key + 1) -> before = _25;
     tail -> type = 83;
     tail -> after = body;
   }
@@ -1241,13 +1241,13 @@ static int _Layout_condition(_Layout * l, int first, int colon, String body){
 
 static int _Layout_control_keyword(_Layout * l, int first, int colon){
   int key = - 1;
-  for(int m = first;  m < colon;  m ++) if(! l -> depths[m] && _conditional(l -> sig[m]) &&(m == first || ! String_equal(l -> sig[m - 1] -> text, _14))) key = m;
+  for(int m = first;  m < colon;  m ++) if(!(* l).depths[m] && _conditional((* l).sig[m]) &&(m == first || ! String_equal((* l).sig[m - 1] -> text, _14))) key = m;
   return key;
 }
 
 static int _Layout_wrapped(_Layout * l, int key, int colon){
-  int wrapped = String_equal(l -> sig[key] -> text, _26) ||(l -> sig[key + 1] -> type == 81 && l -> sig[colon - 1] -> type == 83);
-  for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped = l -> depths[m] > 0;
+  int wrapped = String_equal((* l).sig[key] -> text, _26) ||((* l).sig[key + 1] -> type == 81 &&(* l).sig[colon - 1] -> type == 83);
+  for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped =(* l).depths[m] > 0;
   return wrapped;
 }
 
@@ -1255,10 +1255,10 @@ Bytes Bytes_new(size_t);
 
 static Bytes _Layout_emit(_Layout * l){
   Bytes out = Bytes_new(sizeof(struct Token));
-  for(int i = 0;  i <= l -> count;  i ++){
-    Token tok = & l -> all[i];
-    if(Token_equal(tok, l -> error_at)) return _append_error(out, tok);
-    _LayoutEdit edit = l -> edits[i];
+  for(int i = 0;  i <=(* l).count;  i ++){
+    Token tok = &(* l).all[i];
+    if(Token_equal(tok, (* l).error_at)) return _append_error(out, tok);
+    _LayoutEdit edit =(* l).edits[i];
     out = _layout_insert(out, edit.before, tok, 0);
     struct Token copy = * tok;
     if(edit.type && edit.type != 40896714 && edit.type != 7477210024) copy.text = Symbol_str(edit.type);

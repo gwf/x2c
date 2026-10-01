@@ -170,14 +170,14 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
 
 /* Queues `node` to be read as an address or a value; the 0 it returns
    means the caller's node is handled. */
-static int RuntimeScan._push(RuntimeScan *s, Var node, int address) {
+static int RuntimeScan._push(RuntimeScan &s, Var node, int address) {
   s.pending.push(node);
   s.modes.push(address);
   return 0;
 }
 
 /* -1 means descend, 0 means this node is handled, 1 means runtime. */
-static int RuntimeScan._value(RuntimeScan *s, List node) {
+static int RuntimeScan._value(RuntimeScan &s, List node) {
   match (node) {
     case %((!or cache call var array map varray vmap initval cons append) *):
       return 1;
@@ -198,7 +198,7 @@ static int RuntimeScan._value(RuntimeScan *s, List node) {
   return -1;
 }
 
-static int RuntimeScan._identifier(RuntimeScan *s, Type type, List binding) {
+static int RuntimeScan._identifier(RuntimeScan &s, Type type, List binding) {
   if (s._input(binding)) return 1;
   if (%(function $binding) in s.c.semantic_binding_facts()) return 0;
   Type native = type;
@@ -207,7 +207,7 @@ static int RuntimeScan._identifier(RuntimeScan *s, Type type, List binding) {
          (native.is_pointer() || !native.contains(<const>));
 }
 
-static int RuntimeScan._address(RuntimeScan *s, List node) {
+static int RuntimeScan._address(RuntimeScan &s, List node) {
   match (node) {
     case %(!or (expr ? ?inner)
         ${$source_content_pattern($grouped, %(?inner))}
@@ -227,14 +227,14 @@ static int RuntimeScan._address(RuntimeScan *s, List node) {
 }
 
 /* A runtime static or an automatic object read where the initializer runs. */
-static int RuntimeScan._input(RuntimeScan *s, List binding) =>
+static int RuntimeScan._input(RuntimeScan &s, List binding) =>
   (s.runtime && binding in s.runtime) ||
   s.c._automatic_static_input(binding);
 
 /* The operand of sizeof is unevaluated except for VLA dimensions. Inspect
    those dimensions through the same static-input classifier as an ordinary
    initializer, without evaluating calls in a fixed-size operand. */
-static int RuntimeScan._sizeof_dimensions(RuntimeScan *s, List operand) {
+static int RuntimeScan._sizeof_dimensions(RuntimeScan &s, List operand) {
   Array pending = $auto([operand]);
   while (pending.len()) {
     List node = pending.take_last();
@@ -265,7 +265,7 @@ static int Compiler._automatic_static_input(Compiler c, List binding) {
    jump backward to a label reads the same ancestry as a jump forward. The
    ancestry is the chain of region nodes enclosing the label, and the rewrite
    compares against the same nodes. */
-static void Walk.collect_labels(Walk *w, Var value, List path) {
+static void Walk.collect_labels(Walk &w, Var value, List path) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
@@ -326,7 +326,7 @@ static String _label_spelling(Var label) {
 /* Expressions cannot hold transfers or regions and may nest arbitrarily.
    Position wrappers supply report origins. Bound returns carry one expression;
    the source template's declared-type slot is not a matching source form. */
-static Var Walk.rewrite(Walk *w, Var value) {
+static Var Walk.rewrite(Walk &w, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   match (node) case %(expr *): return value;
@@ -367,7 +367,7 @@ static Var Walk.rewrite(Walk *w, Var value) {
 }
 
 /* Lowers `inner` with `origin` as the source position of its reports. */
-static Var Walk._lower_at(Walk *w, int origin, Var inner) {
+static Var Walk._lower_at(Walk &w, int origin, Var inner) {
   int previous = w.origin;
   w.origin = origin;
   Var lowered = w.rewrite(inner);
@@ -378,14 +378,14 @@ static Var Walk._lower_at(Walk *w, int origin, Var inner) {
 /* Lowers a return of `expression`: only a region that runs something can
    change what the expression read, so a static-local region alone leaves
    the return as it is. */
-static List Walk._lower_return(Walk *w, List node, List expression) {
+static List Walk._lower_return(Walk &w, List node, List expression) {
   List cleanup = w._unwind(0);
   return cleanup ? w._return_value(expression, cleanup) : node;
 }
 
 /* Save the returned value before cleanup runs, since cleanup may change the
    state the expression read. */
-static List Walk._return_value(Walk *w, List expression, List cleanup) {
+static List Walk._return_value(Walk &w, List expression, List cleanup) {
   List binding = w.c._region_binding("return_value");
   Type type = w.return_type;
   /* The declarator carries the type's pointer and array modifiers, so the
@@ -401,31 +401,31 @@ static List Walk._return_value(Walk *w, List expression, List cleanup) {
 /* A function-static initializer remains in ancestry for label checks,
    although no exit runs its record. */
 static List Walk._rewrite_localinit(
-  Walk *w, List node, List guard, List body) =>
+  Walk &w, List node, List guard, List body) =>
   %(localinit ${w.rewrite(guard)} ${w._inside(NULL, node, body)});
 
-static List Walk._rewrite_while(Walk *w, List condition, List body) =>
+static List Walk._rewrite_while(Walk &w, List condition, List body) =>
   %(while ${w.rewrite(condition)} ${w._bounded(body, 1)});
 
-static List Walk._rewrite_do(Walk *w, List body, List condition) =>
+static List Walk._rewrite_do(Walk &w, List body, List condition) =>
   %(do ${w._bounded(body, 1)} ${w.rewrite(condition)});
 
 static List Walk._rewrite_for(
-  Walk *w, List initial, List condition, List increment, List body) =>
+  Walk &w, List initial, List condition, List increment, List body) =>
   %(for ${w.rewrite(initial)} ${w.rewrite(condition)}
         ${w.rewrite(increment)} ${w._bounded(body, 1)});
 
-static List Walk._rewrite_switch(Walk *w, List subject, List body) =>
+static List Walk._rewrite_switch(Walk &w, List subject, List body) =>
   %(switch ${w.rewrite(subject)} ${w._bounded(body, 0)});
 
 /* A match arm's break exits the match; continue reaches the loop. */
-static List Walk._rewrite_matchcases(Walk *w, List subject, List records) =>
+static List Walk._rewrite_matchcases(Walk &w, List subject, List records) =>
   %(matchcases ${w.rewrite(subject)} ${w._bounded(records, 0)});
 
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
    because a `continue` inside it still targets the enclosing loop. */
-static Var Walk._bounded(Walk *w, Var body, int is_loop) {
+static Var Walk._bounded(Walk &w, Var body, int is_loop) {
   int saved_break = w.break_stop, saved_continue = w.continue_stop;
   w.break_stop = (int) w.regions.len();
   if (is_loop) w.continue_stop = (int) w.regions.len();
@@ -436,7 +436,7 @@ static Var Walk._bounded(Walk *w, Var body, int is_loop) {
 }
 
 /* Rewrite a region's body and its handlers with the region open. */
-static Var Walk._inside(Walk *w, List cleanup, List marker, Var body) {
+static Var Walk._inside(Walk &w, List cleanup, List marker, Var body) {
   w.regions.push(%(${_statements(cleanup)} $marker));
   Var result = w.rewrite(body);
   w.regions.take_last();
@@ -450,7 +450,7 @@ static List _statements(List code) {
 
 /* Wrap a transfer in the cleanup it runs first. A transfer that leaves no
    region keeps its own shape. */
-static List Walk._transfer(Walk *w, int stop, List statement) {
+static List Walk._transfer(Walk &w, int stop, List statement) {
   List cleanup = w._unwind(stop);
   return cleanup ? source_block_content(%(@cleanup $statement)) : statement;
 }
@@ -458,7 +458,7 @@ static List Walk._transfer(Walk *w, int stop, List statement) {
 /* The statements that leave every region down to `stop`, innermost first.
    Each region runs its own statements before the next one out, so an inner
    frame leaves before an outer defer runs. */
-static List Walk._unwind(Walk *w, int stop) {
+static List Walk._unwind(Walk &w, int stop) {
   Array statements = [];
   for (int i = (int) w.regions.len() - 1; i >= stop; i--)
     foreach (List statement, w.regions[i].list().car().list())
@@ -468,7 +468,7 @@ static List Walk._unwind(Walk *w, int stop) {
 
 /* Reject a jump that would enter a region it did not open, and return the
    depth the jump unwinds to. */
-static int Walk._goto_stop(Walk *w, Var label) {
+static int Walk._goto_stop(Walk &w, Var label) {
   String name = _label_spelling(label);
   Var stored;
   if (!name || !w.labels.try_get(name, stored)) {
@@ -492,7 +492,7 @@ static int Walk._goto_stop(Walk *w, Var label) {
 
 /* The open regions, innermost first. A label's ancestry is this list, and a
    jump may only leave a suffix of it. */
-static List Walk._region_path(Walk *w) {
+static List Walk._region_path(Walk &w) {
   List path = %();
   foreach (List region, w.regions) path = cons(region.cadr(), path);
   return path;
@@ -500,7 +500,7 @@ static List Walk._region_path(Walk *w) {
 
 /* Report at `origin`, and leave the compiler's origin as it was for whatever
    reports next. */
-static void Walk._report_at(Walk *w, int origin, String message, List note) {
+static void Walk._report_at(Walk &w, int origin, String message, List note) {
   $let(w.c.origin, origin)
     w.c.report_error(<emit>, message, NULL, note);
 }
@@ -621,7 +621,7 @@ macro open Statement $try_finish_cleanup(Expr $frame,
 /* Lowers the parsed try `node`: its body, its catch arms, which may be
    NULL, and its finalizer, which may be NULL. */
 static List Walk._lower_try(
-  Walk *w, List node, List body, List arms, List finalizer) {
+  Walk &w, List node, List body, List arms, List finalizer) {
   Compiler c = w.c;
   w._check_finalizer_label(finalizer);
   List frame = c._region_binding("exception_frame");
@@ -636,7 +636,7 @@ static List Walk._lower_try(
 
 /* Reports a label the finalizer defines: it runs on every path that
    leaves its region, so the label would be defined once for each. */
-static void Walk._check_finalizer_label(Walk *w, List finalizer) {
+static void Walk._check_finalizer_label(Walk &w, List finalizer) {
   int labelled_at = w.origin;
   Var labelled = _finalizer_label(finalizer, w.origin, labelled_at);
   if (!labelled) return;
@@ -697,7 +697,7 @@ static List Compiler._try_cleanup(
 
 /* A try region's body or catch arm, lowered inside the region `cleanup`
    leaves. */
-static List Walk._try_region(Walk *w, List cleanup, List body) =>
+static List Walk._try_region(Walk &w, List cleanup, List body) =>
   %(code-value "lowered" ${w._inside(cleanup, body, body)} ());
 
 /* The facts `$compiler_try` writes a try's catch site and landing from,
@@ -705,7 +705,7 @@ static List Walk._try_region(Walk *w, List cleanup, List body) =>
    jump from the body may not enter, and leaves `cleanup` on its exits. A
    pattern with a dynamic part is prepared again on each entry. */
 static List Walk._catch_clause(
-  Walk *w, List handle, List cleanup, List records) {
+  Walk &w, List handle, List cleanup, List records) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
@@ -825,7 +825,7 @@ macro open Statement $defer_cleanup_call(Expr $record) {
 /* Lowers a defer: its record is pushed before the body and left on each
    of the body's exits. */
 static List Walk._lower_defer(
-  Walk *w, List body, List env, List callback, List records) {
+  Walk &w, List body, List env, List callback, List records) {
   Compiler c = w.c;
   c.needs_exception = 1;
   List record = c._region_binding("defer_record");
@@ -875,7 +875,7 @@ List builtin_defer_captures(List environment, List records) {
    covers a subtree, so a write outside every `try` preserves nothing. A
    long expression chain nests as deeply as it is long, so the walk keeps
    its pending work off the C stack. */
-static void Preserve.collect(Preserve *p, List body) {
+static void Preserve.collect(Preserve &p, List body) {
   Array pending = $auto([body]), flags = $auto([0]);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -917,7 +917,7 @@ static void Preserve.collect(Preserve *p, List body) {
    qualifying the local would discard the qualifier at the call. Its
    address escapes at its declaration instead, which keeps its value in
    memory across a transfer. */
-static void Preserve._write(Preserve *p, List node) {
+static void Preserve._write(Preserve &p, List node) {
   Var operand = p.c._changed_operand(node);
   if (!operand) {
     match (node) case %(call ? (args *arguments)):
@@ -965,7 +965,7 @@ static Var Compiler._changed_operand(Compiler c, List node) {
    such a pointer changes the local without naming it, so the local needs the
    qualifier the write itself does not ask for. `pointers` gains the holders
    that resolved, because their pointee type has to carry the qualifier too. */
-static void Preserve._aliased(Preserve *p, List body) {
+static void Preserve._aliased(Preserve &p, List body) {
   Array pending = $auto([body]);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -991,7 +991,7 @@ macro open Statement $escape_local(Expr $local) {
   x2c_exception_escaped = &$local;
 }
 
-static Var Preserve.rewrite(Preserve *p, Var value) {
+static Var Preserve.rewrite(Preserve &p, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   // Only declarations and parameters carry a qualifier, and neither appears
@@ -1013,7 +1013,7 @@ static Var Preserve.rewrite(Preserve *p, Var value) {
    the base type for a pointee - so a statement that qualifies any of several
    names splits into one declaration each. A local in `escaped` escapes
    right after its declaration; one declared anywhere else is qualified. */
-static List Preserve._block(Preserve *p, List statements) {
+static List Preserve._block(Preserve &p, List statements) {
   Array output = [];
   foreach (Var statement, statements) {
     int origin = 0, Var inner = statement;
@@ -1041,7 +1041,7 @@ static List Preserve._block(Preserve *p, List statements) {
 /* Split before qualifying, so a base-type qualifier one declarator needs
    does not reach the names beside it. */
 static void Preserve._split(
-  Preserve *p, Array output, int origin, List declaration, Type type,
+  Preserve &p, Array output, int origin, List declaration, Type type,
   List bindings) {
   List parts = %($declaration);
   if (p._declares_name(bindings) || p._declares_pointee(bindings)) {
@@ -1060,7 +1060,7 @@ static void Preserve._split(
 
 /* `escaped` is the set whose locals escape rather than take the qualifier,
    or NULL where no escape can follow the declaration. */
-static List Preserve._declaration(Preserve *p, List declaration, Map escaped) {
+static List Preserve._declaration(Preserve &p, List declaration, Map escaped) {
   if (!_is_automatic(declaration)) return declaration;
   Symbol head = declaration.car();
   Type type = declaration.cadr();
@@ -1080,7 +1080,7 @@ static List Preserve._declaration(Preserve *p, List declaration, Map escaped) {
 
 /* Qualify one binding that a transfer may leave stale, unless `escaped`
    names it: its address escapes instead. */
-static List Preserve._binding(Preserve *p, List bind, Map escaped) {
+static List Preserve._binding(Preserve &p, List bind, Map escaped) {
   match (bind)
     case %(bind ?name ?mods): {
       String spelling = binding_identity_spelling(name);
@@ -1091,7 +1091,7 @@ static List Preserve._binding(Preserve *p, List bind, Map escaped) {
   return bind;
 }
 
-static int Preserve._declares_name(Preserve *p, List bindings) {
+static int Preserve._declares_name(Preserve &p, List bindings) {
   foreach (List binding, bindings.cdr())
     match (binding)
       case %(!or (bind ?name ?) (op = (bind ?name ?) ?)): {
@@ -1106,7 +1106,7 @@ static int Preserve._declares_name(Preserve *p, List bindings) {
    qualifier. `pointers` names the holders the walk resolved, which covers a
    pointer assigned after its declaration; an initializer that takes the
    address directly says the same thing on its own. */
-static int Preserve._declares_pointee(Preserve *p, List bindings) {
+static int Preserve._declares_pointee(Preserve &p, List bindings) {
   foreach (List binding, bindings.cdr()) {
     List declarator = binding;
     match (binding) case %(op = ?bind ?value): {
@@ -1132,7 +1132,7 @@ static int _is_automatic(List declaration) {
 
 /* A `for` that declares a local in `escaped` moves the declaration into a
    block around the loop, so the address escapes once, before the loop. */
-static List Preserve._escape_loop(Preserve *p, List loop) {
+static List Preserve._escape_loop(Preserve &p, List loop) {
   match (loop)
     case %(for (decl ?type (!set ?bindings (bindings *binds))) *rest): {
       Array output = [];
@@ -1147,7 +1147,7 @@ static List Preserve._escape_loop(Preserve *p, List loop) {
 }
 
 /* Escape the address of each of `binds` that `escaped` names. */
-static void Preserve._escape_declared(Preserve *p, Array output, List binds) {
+static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
   Compiler c = p.c;
   Macro escape = $escape_local;
   foreach (List bind, binds)
@@ -1163,7 +1163,7 @@ static void Preserve._escape_declared(Preserve *p, Array output, List binds) {
 }
 
 /* A parameter in `escaped` escapes before the function body runs. */
-static List Preserve.escape_parameters(Preserve *p, List body, List bindings) {
+static List Preserve.escape_parameters(Preserve &p, List body, List bindings) {
   Array output = [];
   match (bindings) case %(bind ? ((fnmod (params *parameters)) *)):
     foreach (List parameter, parameters)
@@ -1278,7 +1278,7 @@ static List Compiler._callable_defer(Compiler c, List body, List finalizer) {
   return %(defer $body $env_binding $callback $records ${d.written});
 }
 
-static void DeferCaptures.collect(DeferCaptures *d, List ast) {
+static void DeferCaptures.collect(DeferCaptures &d, List ast) {
   if (!ast || d.unsupported) return;
   match (ast)
     case %(bind ?bound *): {
@@ -1306,7 +1306,7 @@ static void DeferCaptures.collect(DeferCaptures *d, List ast) {
     d.written = cons(modified, changed);
 }
 
-static void DeferCaptures._capture(DeferCaptures *d, List binding) {
+static void DeferCaptures._capture(DeferCaptures &d, List binding) {
   Compiler c = d.c;
   Map facts = c.semantic_binding_facts();
   if (!binding || d.declared.contains(binding) ||
@@ -1353,7 +1353,7 @@ static int Compiler._defer_type_hoistable(Compiler c, Type type) {
 // Replace captured object references with pointer dereferences through the
 // thunk environment. Expression types remain the source expression's type.
 static List DeferCaptures._rewrite(
-  DeferCaptures *d, List ast, String env_name) {
+  DeferCaptures &d, List ast, String env_name) {
   if (!ast) return ast;
   match (ast)
     case %(expr ?captured_type

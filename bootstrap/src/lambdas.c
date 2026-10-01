@@ -1163,14 +1163,14 @@ static int Compiler__declared_outside(Compiler c, List binding, int depth){
 }
 
 static List Capture_add(Capture * k){
-  Type type = k -> type, captured_type = Var_equal(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;  List binding = k -> binding, expression = cons(_33, cons(List_var(type), cons(List_var(cons(_93, cons(List_var(binding), NULL))), NULL)));  int reference = List_contains(Var_list(k -> references), List_var(k -> original));  if(List_truth(k -> prescribed)){
+  Type type =(* k).type, captured_type = Var_equal(List_car(Type_list(type)), Symbol_var(77)) ? List_cdr(type) : type;  List binding =(* k).binding, expression = cons(_33, cons(List_var(type), cons(List_var(cons(_93, cons(List_var(binding), NULL))), NULL)));  int reference = List_contains(Var_list((* k).references), List_var((* k).original));  if(List_truth((* k).prescribed)){
 
   {
-    List _x2c_match_expr = k -> prescribed;
+    List _x2c_match_expr = (* k).prescribed;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6544469130: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_479), &_x2c_match_capture)) {Var target_type = _x2c_match_values[0];  Var value = _x2c_match_values[1]; {
-      captured_type = Var_type(target_type);  expression = Compiler__resolve_outside(k -> c, k -> frame, value);  reference = Var_equal(List_car(Type_list(captured_type)), Symbol_var(77));
+      captured_type = Var_type(target_type);  expression = Compiler__resolve_outside((* k).c, (* k).frame, value);  reference = Var_equal(List_car(Type_list(captured_type)), Symbol_var(77));
     }
     break;
   }
@@ -1181,7 +1181,7 @@ static List Capture_add(Capture * k){
 else if(reference){
   captured_type = List_type(cons(Symbol_var(77), Type_list(captured_type)));  if(! Var_equal(List_car(Type_list(type)), Symbol_var(77))) expression = cons(_33, cons(List_var(captured_type), cons(List_var(cons(_96, cons(_88, cons(List_var(expression), NULL)))), NULL)));
 }
-else if(Var_equal(List_car(Type_list(type)), Symbol_var(77))) expression = cons(_33, cons(List_var(captured_type), cons(List_var(cons(_96, cons(_29, cons(List_var(expression), NULL)))), NULL)));  if(reference && Map_contains(k -> facts, List_var(cons(_480, cons(List_var(binding), NULL))))) Compiler_report_error(k -> c, 1362954, _621, k -> c -> token, cons(String_var(String_join(NULL, cons(String_var(_481), cons(String_var(binding_identity_spelling(k -> original)), NULL)))), NULL));  return Capture_record(k, captured_type, expression, reference);
+else if(Var_equal(List_car(Type_list(type)), Symbol_var(77))) expression = cons(_33, cons(List_var(captured_type), cons(List_var(cons(_96, cons(_29, cons(List_var(expression), NULL)))), NULL)));  if(reference && Map_contains((* k).facts, List_var(cons(_480, cons(List_var(binding), NULL))))) Compiler_report_error((* k).c, 1362954, _621, (* k).c -> token, cons(String_var(String_join(NULL, cons(String_var(_481), cons(String_var(binding_identity_spelling((* k).original)), NULL)))), NULL));  return Capture_record(&((* k)), captured_type, expression, reference);
 }
 
 static List Compiler__resolve_outside(Compiler c, List frame, Var value){
@@ -1210,7 +1210,7 @@ static List Compiler__resolve_outside(Compiler c, List frame, Var value){
 }
 
 static List Capture_record(Capture * k, Type captured_type, List expression, int reference){
-  Map facts = k -> facts;  List captured = Sym_introduce(k -> c -> sym, binding_identity_spelling(k -> binding));  List row = cons(_95, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Map_setindex(facts, List_var(k -> key), List_var(row));  Map_setindex(facts, List_var(cons(_85, cons(List_var(captured), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_86, cons(List_var(captured), NULL))), List_var(captured_type));  Map_setindex(facts, List_var(cons(_473, cons(List_var(captured), NULL))), k -> depth);  if(reference) Map_setindex(facts, List_var(cons(_446, cons(List_var(captured), NULL))), int_var(1));  else Map_setindex(facts, List_var(cons(_480, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_450, cons(k -> scope, NULL));  Map_setindex(facts, List_var(order), List_var(cons(List_var(row), Var_list(Map_getdefault(facts, List_var(order), List_var(NULL))))));  return row;
+  Map facts =(* k).facts;  List captured = Sym_introduce((* k).c -> sym, binding_identity_spelling((* k).binding));  List row = cons(_95, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Map_setindex(facts, List_var((* k).key), List_var(row));  Map_setindex(facts, List_var(cons(_85, cons(List_var(captured), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_86, cons(List_var(captured), NULL))), List_var(captured_type));  Map_setindex(facts, List_var(cons(_473, cons(List_var(captured), NULL))), (* k).depth);  if(reference) Map_setindex(facts, List_var(cons(_446, cons(List_var(captured), NULL))), int_var(1));  else Map_setindex(facts, List_var(cons(_480, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_450, cons((* k).scope, NULL));  Map_setindex(facts, List_var(order), List_var(cons(List_var(row), Var_list(Map_getdefault(facts, List_var(order), List_var(NULL))))));  return row;
 }
 
 Var Array_take_last(Array);

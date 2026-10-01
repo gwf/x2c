@@ -521,7 +521,7 @@ typedef struct FreeNames {
    retain all possible local reads. Negative depth marks that possibility;
    zero is an evaluated position and positive depth is quasiquote data.
    Stable special identities preserve quote opacity and inner binders. */
-static void FreeNames.form(FreeNames *f, Var form, List bound, int depth) {
+static void FreeNames.form(FreeNames &f, Var form, List bound, int depth) {
   if (form.is_atom()) {
     if (depth <= 0 && !_param_has(bound, form)) f.out.push(form);
     return;
@@ -534,18 +534,18 @@ static void FreeNames.form(FreeNames *f, Var form, List bound, int depth) {
   else f.call(items, bound);
 }
 
-static void FreeNames.all(FreeNames *f, List items, List bound, int depth) {
+static void FreeNames.all(FreeNames &f, List items, List bound, int depth) {
   foreach (Var part, items) f.form(part, bound, depth);
 }
 
-static void FreeNames.quoted(FreeNames *f, List items, List bound, int depth) {
+static void FreeNames.quoted(FreeNames &f, List items, List bound, int depth) {
   int inner = _quote_depth(items.car(), depth);
   f.all(inner >= 0 ? items.cdr() : items, bound, inner >= 0 ? inner : depth);
 }
 
 /* The head is an evaluated position, and what it names decides how its
    operands are read. */
-static void FreeNames.call(FreeNames *f, List items, List bound) {
+static void FreeNames.call(FreeNames &f, List items, List bound) {
   Var head = items.car(), callable;
   f.form(head, bound, 0);
   if (!head.is_atom() || _param_has(bound, head) ||
@@ -1000,7 +1000,7 @@ typedef struct LispReader {
 
 /* The form that starts at `token`, or `void` when the tokens end inside
    it. A form is never `void`. */
-static Var LispReader.form(LispReader *r, Token token, int depth) {
+static Var LispReader.form(LispReader &r, Token token, int depth) {
   if (!token || token.type == <eof>) return void;
   Var prefix = void;
   switch (token.type) {
@@ -1020,7 +1020,7 @@ static Var LispReader.form(LispReader *r, Token token, int depth) {
 }
 
 /* A reader prefix wraps the next form, as `'x` reads `(quote x)`. */
-static Var LispReader.prefixed(LispReader *r, Var prefix, int depth) {
+static Var LispReader.prefixed(LispReader &r, Var prefix, int depth) {
   Var inner = r.form(r.tokenizer.next(), depth + 1);
   if (inner is void) return void;
   return %($prefix $inner);
@@ -1032,7 +1032,7 @@ static Var LispReader.prefixed(LispReader *r, Var prefix, int depth) {
 #define LISP_READ_DEPTH_MAX 1024
 
 /* The List after its `(`, or `void` when the tokens end inside it. */
-static Var LispReader.list(LispReader *r, int depth) {
+static Var LispReader.list(LispReader &r, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
   Array elements = $auto([]);
@@ -1052,7 +1052,7 @@ static Var LispReader.list(LispReader *r, int depth) {
   return out;
 }
 
-static Var LispReader.atom(LispReader *r, Token token) {
+static Var LispReader.atom(LispReader &r, Token token) {
   String text = token.text;
   switch (token.type) {
     case <lit-char*>:
@@ -1066,7 +1066,7 @@ static Var LispReader.atom(LispReader *r, Token token) {
 }
 
 /* An integer that fits an `int` reads as one. */
-static Var LispReader.integer(LispReader *r, Token token) {
+static Var LispReader.integer(LispReader &r, Token token) {
   long value;
   String literal = String.new_len(token.text, token.len);
   if (!literal.try_long(&value)) return r.malformed(token);
@@ -1074,14 +1074,14 @@ static Var LispReader.integer(LispReader *r, Token token) {
   return value;
 }
 
-static Var LispReader.floating(LispReader *r, Token token) {
+static Var LispReader.floating(LispReader &r, Token token) {
   double value, String literal = String.new_len(token.text, token.len);
   if (!literal.try_double(&value)) return r.malformed(token);
   return value;
 }
 
 /* A Symbol literal is `<name>` or `<"escaped name">`. */
-static Var LispReader.symbol(LispReader *r, Token token) {
+static Var LispReader.symbol(LispReader &r, Token token) {
   String text = token.text, int n = token.len;
   String inner = text[1] == '"'
     ? String.new_len(text + 2, n - 4).unescape()
@@ -1090,7 +1090,7 @@ static Var LispReader.symbol(LispReader *r, Token token) {
   return Symbol.new(inner);
 }
 
-static Var LispReader.malformed(LispReader *r, Token token) =>
+static Var LispReader.malformed(LispReader &r, Token token) =>
   _malformed(r.source, r.base + token.pos);
 
 static Var _malformed(String source, unsigned at) {

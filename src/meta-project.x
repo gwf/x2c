@@ -76,7 +76,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
 /* The manifest of the helper in the build directory: the one a previous
    build left while every file it read is unchanged, or a new build's. One
    process at a time does either, under the directory's lock. */
-static List Helper.manifest(Helper *h) {
+static List Helper.manifest(Helper &h) {
   Path.make_dirs(h.directory);
   int lock = file_lock(%"${h.directory}/lock", 1);
   defer close(lock);
@@ -92,7 +92,7 @@ static List Helper.manifest(Helper *h) {
 
 /* Each owner with a group calls its table, and a table or a helper that
    does not build keeps its reason for the first call that needs it. */
-static void Helper.use(Helper *h, List manifest) {
+static void Helper.use(Helper &h, List manifest) {
   Map failures = {}, units = {}, groups = {};
   foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;
   foreach (List row, manifest.assoc(<failures>))
@@ -120,7 +120,7 @@ typedef struct Scan {
 /* Each input that reaches meta code becomes an owner. One without meta
    code of its own keeps the files it imports, for a group of those alone.
 */
-static void Helper.scan(Helper *h, List inputs) {
+static void Helper.scan(Helper &h, List inputs) {
   Map known = {};
   foreach (String input, inputs) {
     String path = Path.absolute(input);
@@ -141,7 +141,7 @@ static void Helper.scan(Helper *h, List inputs) {
 
 /* Reads the file at `path` once per scan, and returns whether it holds a
    file-scope `meta` marker other than `meta native`. */
-static int Scan.file(Scan *s, String path) {
+static int Scan.file(Scan &s, String path) {
   if (path in s.seen) return 0;
   s.seen[path] = 1;
   String text = NULL;
@@ -155,7 +155,7 @@ static int Scan.file(Scan *s, String path) {
 
 /* Only file-scope tokens count. Each arm reads the tokens that follow its
    word. */
-static int Scan.file_scope(Scan *s, Tokenizer tokens, String directory) {
+static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
   int depth = 0, meta = 0;
   for (Token token = tokens.next(); token.type != <eof>;
        token = tokens.next()) {
@@ -182,7 +182,7 @@ static int _marker(Tokenizer tokens) {
 
 /* A project `.xmacro` or `.xpmacro` file that `$(import` names joins
    `imports` after the files it imports, when it holds meta code. */
-static void Scan.macro_import(Scan *s, Tokenizer tokens, String directory) {
+static void Scan.macro_import(Scan &s, Tokenizer tokens, String directory) {
   if (tokens.next().text != "import") return;
   String spelling = _quoted(tokens.next());
   String file = spelling ? _resolve(directory, spelling) : NULL;
@@ -192,7 +192,7 @@ static void Scan.macro_import(Scan *s, Tokenizer tokens, String directory) {
 }
 
 /* An imported package's entry is read for imports like an input. */
-static void Scan.package(Scan *s, Tokenizer tokens) {
+static void Scan.package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
   String entry = name ? package_entry(
     s.request.sources, s.request.package_roots(), name, root) : NULL;
@@ -202,7 +202,7 @@ static void Scan.package(Scan *s, Tokenizer tokens) {
 }
 
 /* An included project `.x` or `.xp` file is read for imports too. */
-static void Scan.include(Scan *s, String directive, String directory) {
+static void Scan.include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = preproc_include_target(directive, angle);
   if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return;
@@ -284,7 +284,7 @@ static Array _modules(CliRequest request, Map packages) {
 /* Everything the helper is built with besides its sources. The helper's
    own source is read at build time, not linked into the compiler, so the
    stamp does not cover it. */
-static String Helper.identify(Helper *h, String stamp, String compiler) {
+static String Helper.identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_source();
   return %"$stamp\n$compiler\n${_cc_flags().repr()}\n"
     + %"${h.flags.repr()}\n${h.include}\n${h.toolchain.runtime_lib}\n"
@@ -313,7 +313,7 @@ static String _directory(
 /* Parses each owner into the group of its table, compiles the groups, and
    links the helper, keeping what an earlier build left when it is
    unchanged. Returns the manifest the build writes. */
-static List Helper.build(Helper *h) {
+static List Helper.build(Helper &h) {
   int count = h.owners.len() + 1;
   for (int index = 0; index < count; index++) {
     String base = h.base(index);
@@ -331,7 +331,7 @@ static List Helper.build(Helper *h) {
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
-static String Helper.base(Helper *h, int index) =>
+static String Helper.base(Helper &h, int index) =>
   %"${h.directory}/group-$index";
 
 /* Removes what a parse left of the group at `base`. */
@@ -345,7 +345,7 @@ static void _clear(String base) {
 /* Builds the group of table `index` from the input `owner`. An input that
    only imports its meta code, and whose own group does not build, gets
    the group of its imports alone. */
-static void Helper.group(Helper *h, String owner, int index) {
+static void Helper.group(Helper &h, String owner, int index) {
   h.parse(owner, index);
   String failure = h.compile(index, owner);
   List reached = h.reaches[owner];
@@ -360,7 +360,7 @@ static void Helper.group(Helper *h, String owner, int index) {
 /* Parses the unit at `path` for the group of table `index`, which the
    parse writes into the build directory. Diagnostics are the translation's
    to report; a unit that does not parse leaves the part it reached. */
-static void Helper.parse(Helper *h, String path, int index) {
+static void Helper.parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
   ParsedUnit unit;
   int started = f.start(path, unit);
@@ -378,7 +378,7 @@ static void Helper.parse(Helper *h, String path, int index) {
 /* Compiles the group a parse left for table `index`, adding the files it
    read to `deps`. A quoted include resolves from the directory of `unit`.
    Returns NULL when its object is built, or else why not. */
-static String Helper.compile(Helper *h, int index, String unit) {
+static String Helper.compile(Helper &h, int index, String unit) {
   String base = h.base(index);
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
   foreach (String path, Path.read_text(%"$base.deps").split("\n"))
@@ -437,7 +437,7 @@ static String _imports_unit(String base, List reached) {
 /* A table whose parse left a group joins the groups, with why it does not
    build or with its object. An object that differs from the earlier
    build's changes the helper. */
-static void Helper.record(Helper *h, int index, String failure) {
+static void Helper.record(Helper &h, int index, String failure) {
   String base = h.base(index);
   if (!Path.is_file(%"$base.deps")) return;
   h.groups.push(index);
@@ -454,7 +454,7 @@ static void Helper.record(Helper *h, int index, String failure) {
 /* Links the helper with the runtime when an object or the table changed,
    so a change to program code alone keeps the helper. Returns why the
    helper does not link, or NULL. */
-static String Helper.link(Helper *h, int count) {
+static String Helper.link(Helper &h, int count) {
   String failure = NULL;
   String support = h.support(failure);
   if (!support) return failure;
@@ -473,7 +473,7 @@ static String Helper.link(Helper *h, int count) {
 
 /* The object of the helper's protocol loop, which this compiler translates
    once per identity, or NULL with `failure` set. */
-static String Helper.support(Helper *h, String &failure) {
+static String Helper.support(Helper &h, String &failure) {
   String source = _loop_source();
   if (!Path.is_file(source)) {
     failure = %"cannot read $source";
@@ -495,7 +495,7 @@ static String Helper.support(Helper *h, String &failure) {
 /* Translates the loop's `source` into `directory` and compiles it to
    `object`. Returns why not, or NULL. */
 static String Helper.compile_support(
-  Helper *h, String source, String directory, String object) {
+  Helper &h, String source, String directory, String object) {
   String printed = NULL, errors = NULL;
   if (tool_capture(
     %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),
@@ -532,7 +532,7 @@ static String _tables(Array built, int count) {
    itself never calls, so the link matches the compiler's whole-runtime
    link. It also compiles the table, which includes the runtime headers. */
 static List Helper.link_arguments(
-  Helper *h, String output, String tables, String support) {
+  Helper &h, String output, String tables, String support) {
   Toolchain t = h.toolchain;
 #ifdef __APPLE__
   t.ld_args = %(${%"-Wl,-force_load,${t.runtime_lib}"});
@@ -554,7 +554,7 @@ static List Helper.link_arguments(
    ...))` for those that do not build, `(failure WHY)`, empty unless the
    helper does not link, and `(deps ((PATH DIGEST) ...))` for every file
    the build read. */
-static List Helper.write_manifest(Helper *h, String failure) {
+static List Helper.write_manifest(Helper &h, String failure) {
   List manifest = %(
     (groups ${h.groups.list()}) (failures ${h.failures.list()})
     (failure ${failure ? failure : ""}) (deps ${_digests(h.deps)}));

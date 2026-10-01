@@ -121,9 +121,9 @@ int scan_number_typed(char *s, Symbol *type) {
   int sign = s[0] == '-' || s[0] == '+', char *number = s + sign, int n;
   Symbol found = <int>;
   if (number[0] != '0' || _decimal_zero(number))
-    n = _decimal_number(number, &found);
+    n = _decimal_number(number, found);
   else {
-    n = _prefixed_number(number, &found);
+    n = _prefixed_number(number, found);
     if (n < 0) return -1;
   }
   if (n <= 0) return sign ? 0 : n;
@@ -151,7 +151,7 @@ static int _decimal_zero(char *s) {
 /* Scans a hexadecimal, binary, or octal number with its `0` prefix, or
    returns -1 when it is malformed. An octal digit after the `0` begins an
    octal number. */
-static int _prefixed_number(char *s, Symbol *type) {
+static int _prefixed_number(char *s, Symbol &type) {
   int n;
   switch (s[1]) {
     case 'x': case 'X': n = _hex_number(s + 2, type); break;
@@ -164,7 +164,7 @@ static int _prefixed_number(char *s, Symbol *type) {
 
 /* Hexadecimal digits with an optional fraction. A `p` exponent makes the
    number floating, and a fraction requires one. */
-static int _hex_number(char *s, Symbol *type) {
+static int _hex_number(char *s, Symbol &type) {
   int n = 0;
   while (_ascii_hex((unsigned char) s[n])) n++;
   int digits = n, has_point = 0;
@@ -179,36 +179,36 @@ static int _hex_number(char *s, Symbol *type) {
   if (s[n] == 'p' || s[n] == 'P') {
     int exponent = _exponent(s + n + 1);
     if (exponent < 0) return -1;
-    if (type) *type = <float>;
+    type = <float>;
     return n + 1 + exponent;
   }
   if (has_point) return -1;
   int suffix = _int_suffix(s + n);
   if (suffix < 0) return -1;
-  if (type) *type = <int>;
+  type = <int>;
   return n + suffix;
 }
 
 /* Decimal digits, then a fraction, an exponent, or an integer suffix. */
-static int _decimal_number(char *s, Symbol *type) {
+static int _decimal_number(char *s, Symbol &?type) {
   int n = 0;
   while (scan_ascii_digit((unsigned char) s[n])) n++;
   if (s[n] == '.') {
     int fraction = _float_tail(s + n + 1, n > 0);
     if (fraction < 0) return -1;
-    if (type) *type = <float>;
+    if (type) type = <float>;
     return n + 1 + fraction;
   }
   if (!n) return 0;
   if (s[n] == 'e' || s[n] == 'E') {
     int exponent = _exponent(s + n + 1);
     if (exponent < 0) return -1;
-    if (type) *type = <float>;
+    if (type) type = <float>;
     return n + 1 + exponent;
   }
   int suffix = _int_suffix(s + n);
   if (suffix < 0) return -1;
-  if (type) *type = <int>;
+  if (type) type = <int>;
   return n + suffix;
 }
 

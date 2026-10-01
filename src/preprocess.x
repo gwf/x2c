@@ -154,7 +154,7 @@ void Compiler.scan_conditionals(Compiler c) {
   }
 }
 
-static void ArmScan.directive(ArmScan *s, Token token, size_t i) {
+static void ArmScan.directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = preproc_conditional_kind(token.text);
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
@@ -179,7 +179,7 @@ static int _hidden_group(Array stack) {
    returns the index of the token's last part. A lexical failure ends the
    token stream, so the rest of the unit is missing whichever arm holds it;
    the `<error>` token stays visible, and the parser reports it. */
-static size_t ArmScan.code(ArmScan *s, Token token, size_t i) {
+static size_t ArmScan.code(ArmScan &s, Token token, size_t i) {
   if (s.hidden && token.type != <space> && token.type != <error>)
     token.type = <comment>;
   else if (token.type == <ident> && token.text == "__attribute__")
@@ -192,7 +192,7 @@ static size_t ArmScan.code(ArmScan *s, Token token, size_t i) {
 /* Records a pair of layout marks at the `__attribute__ ((...))` starting at
    token `index` when it can change a struct's layout. Returns the index of
    the attribute's last token. */
-static size_t ArmScan._note_attribute(ArmScan *s, size_t index) {
+static size_t ArmScan._note_attribute(ArmScan &s, size_t index) {
   Token base = s.c.tokenizer.tokens;
   Token open = Token.skip_trivia(base + index + 1);
   if (open.type != <(>) return index;
@@ -205,7 +205,7 @@ static size_t ArmScan._note_attribute(ArmScan *s, size_t index) {
 
 /* A layout mark pair brackets the token at `index`, and a packing
    attribute adds a packed pair. */
-static void ArmScan._mark_layout(ArmScan *s, size_t index, int packed) {
+static void ArmScan._mark_layout(ArmScan &s, size_t index, int packed) {
   Compiler c = s.c;
   c.layout_marks.push((long) index);
   c.layout_marks.push((long) index + 1);
@@ -241,7 +241,7 @@ static int _layout_attribute(Token open, int &packed) {
    layout, a macro that any arm defines with such an attribute stays in
    `layout`; only an `#undef` or definition outside every conditional group
    removes it. */
-static void ArmScan._note_layout_macro(ArmScan *s, String content) {
+static void ArmScan._note_layout_macro(ArmScan &s, String content) {
   int undefined;
   Token name = _macro_directive(content, undefined);
   if (!name) return;

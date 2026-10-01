@@ -50,7 +50,8 @@ text, followed by the change that settles its crossings, header, and order.
 ### Context records
 
 A private record that carries the state of one operation owns that
-operation: its steps are `Record.step(Record *r, ...)` methods. A record
+operation: its steps are `Record.step(Record &r, ...)` methods. Declare its
+local context as a value, and use a reference receiver to update it. A record
 whose fields are copied into locals on entry is a parameter list; it goes
 back to parameters or becomes a receiver. One concept has one record.
 

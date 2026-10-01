@@ -145,7 +145,7 @@ static Install _locked_install(CliRequest request, String spec) {
 }
 
 /* The operand is a URL, a local path, or a name the index resolves. */
-static void Install.locate(Install *i) {
+static void Install.locate(Install &i) {
   String spec = i.spec;
   if (_remote(spec)) {
     if (!i.sha256) _error("a URL needs --sha256 <hex>");
@@ -158,14 +158,14 @@ static void Install.locate(Install *i) {
 }
 
 /* A resolved row names the version to record and the archive to fetch. */
-static void Install.resolve(Install *i, List row) {
+static void Install.resolve(Install &i, List row) {
   i.version = row[1];
   i.url = row[4];
   i.sha256 = row[5];
 }
 
 /* Stages, builds, and publishes one package. */
-static void Install.run(Install *i) {
+static void Install.run(Install &i) {
   String package = i.unpacked(), name = Path.basename(package);
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
   String staged = %"${i.work}/$name";
@@ -184,7 +184,7 @@ static void Install.run(Install *i) {
 
 /* The package directory: `source` itself, or the tarball that `source`
    names or `url` downloads, checked and unpacked in the work directory. */
-static String Install.unpacked(Install *i) {
+static String Install.unpacked(Install &i) {
   String source = i.source;
   if (i.url) {
     source = _fetch(i.url, i.work, "package.tar.gz");
@@ -198,7 +198,7 @@ static String Install.unpacked(Install *i) {
    carries no version of its own. The package it replaces recorded one, and
    a project pin matches a name and a version, so dropping it would send the
    next build back to the index. */
-static void Install.mark_source(Install *i, String staged, String name) {
+static void Install.mark_source(Install &i, String staged, String name) {
   String version = i.version;
   if (!version) version = _installed_version(%"${i.packages}/$name");
   Map record = {

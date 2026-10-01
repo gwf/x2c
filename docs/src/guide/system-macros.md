@@ -83,7 +83,7 @@ class IntPointer int *;
 class ValuePointer Var *;
 class Values Array;
 class Point { int x; int y; };
-class HeapPoint struct { int x; int y; } *;
+class HeapPoint { int x; int y; } *;
 ~int main(void) {
 ~  Point point = Point.new(3, 4);
 ~  return point.x == 3 && point.y == 4 ? 0 : 1;
@@ -91,10 +91,14 @@ class HeapPoint struct { int x; int y; } *;
 ```
 
 `Point` is a value aggregate; the short braces abbreviate a struct definition.
-`HeapPoint` explicitly names a pointer representation. A value may live in a
-local, a field, an array, or allocated storage. `Values` follows the existing
-Array type chain and constructor; it does not acquire a second allocation
-layout. A forward declaration such as `class Point;` reserves the identity
+`HeapPoint` explicitly names a pointer representation; short braces accept
+the same trailing `*` as an explicit struct declaration. Prefer a value for
+local state without retained identity, and use `Point &` for a method that
+updates the caller's Point. A value may live in a local, a field, an array,
+or allocated storage. Its declaration does not select a storage location.
+`Values` follows the existing Array type chain and constructor; it does not
+acquire a second allocation layout. A forward declaration such as
+`class Point;` reserves the identity
 until its visible definition supplies the representation.
 
 An enum cannot be a class's value representation, because a `Var` has no fixed
@@ -111,7 +115,7 @@ value fields accepts positional arguments in field order:
 
 ```x2c
 class Point { int x; int y; };
-class HeapPoint struct { int x; int y; } *;
+class HeapPoint { int x; int y; } *;
 ~int main(void) {
 Point value = Point.new(3, 4);
 HeapPoint object = HeapPoint.new(3, 4);
@@ -130,9 +134,31 @@ String, List, and their aliases. Var slots are shallow copies.
 A class that defines `init` gets a constructor built from it. The
 constructor obtains zeroed storage, passes it to `init` with the
 constructor's arguments, and returns it. A heap class obtains that storage
-from `alloc`, whose default is a zeroed Scope allocation. `init` receives the handle of a heap class, or the
-address of a value record, followed by any parameters it declares; `new`
-takes those parameters in the same order. A record containing a mutable
+from `alloc`, whose default is a zeroed Scope allocation. A heap class's
+`init` receives its bare handle. Prefer a reference receiver for a value
+class's `init`; the existing pointer receiver is also accepted. `new` takes
+the parameters after that receiver in the same order:
+
+```x2c
+class Counter { int value; };
+void Counter.init(Counter &c, int initial) {
+  c.value = initial;
+}
+static void Counter.step(Counter &c, int amount) => c.value += amount;
+~int main(void) {
+Counter counter = Counter.new(2);
+counter.step(3);
+printf("%d\n", counter.value);
+~  return 0;
+~}
+```
+
+```text
+5
+```
+
+The Counter record is a local value and its methods update that value through
+references. A record containing a mutable
 handle such as Array, Map, Iter, or another heap class requires `init`, as do
 nested records and arrays. A flat record that defines `init` uses it in place
 of its positional constructor.
@@ -142,7 +168,7 @@ generated `free` calls `drop` and then releases the object, so `drop` only
 releases what the fields own:
 
 ```x2c
-class History struct { int limit; Array items; } *;
+class History { int limit; Array items; } *;
 void History.init(History self, int limit) {
   self.limit = limit;
   self.items = [];
@@ -533,7 +559,7 @@ before that region ends. The History method makes ownership of its Array
 explicit.
 
 ```x2c
-class History struct { Array lengths; } *;
+class History { Array lengths; } *;
 
 void History.init(History self) {
   self.lengths = [];

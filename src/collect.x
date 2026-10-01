@@ -204,7 +204,7 @@ static void Compiler._walk_file(
   }
 }
 
-static void FileWalk.split(FileWalk *w, Token first) {
+static void FileWalk.split(FileWalk &w, Token first) {
   Array arms = $auto([]);
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
@@ -215,7 +215,7 @@ static void FileWalk.split(FileWalk *w, Token first) {
 
 /* An include or a visibility pragma ends the current segment. An include
    in an arm that C never takes is not read. */
-static void FileWalk.directive(FileWalk *w, Token token, int hidden) {
+static void FileWalk.directive(FileWalk &w, Token token, int hidden) {
   int angle = 0, visibility = preproc_visibility(token.text);
   String target = hidden ? NULL : preproc_include_target(token.text, angle);
   if (!target && visibility < 0) return;
@@ -259,7 +259,7 @@ static int _hidden(Array arms) {
 // segments
 
 /* Append one segment's nonempty published rows before the next part. */
-static void FileWalk.flush(FileWalk *w, String segment) {
+static void FileWalk.flush(FileWalk &w, String segment) {
   if (!segment || !*segment) return;
   Map overlay = _cache_map();
   w.parse(segment, overlay);
@@ -271,7 +271,7 @@ static void FileWalk.flush(FileWalk *w, String segment) {
    semantic transactions, so their committed declarations and protocol rows
    are recorded at this segment's source position. Macro, Lisp, and keyword
    state then returns to the enclosing compiler for the next segment. */
-static void FileWalk.parse(FileWalk *w, String segment, Map overlay) {
+static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
   Compiler shadow = Compiler.new_shared(w.c);
   defer w.c.close_child(shadow);
   w.prepare(shadow, segment);
@@ -283,7 +283,7 @@ static void FileWalk.parse(FileWalk *w, String segment, Map overlay) {
 
 /* The shadow parses the segment as part of this file, in the unit's state,
    with token lines and positions counted from the start of the file. */
-static void FileWalk.prepare(FileWalk *w, Compiler shadow, String segment) {
+static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.unit || !w.c._package_owns(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
   shadow.layout = w.c.layout;
@@ -317,7 +317,7 @@ static int Compiler._package_owns(Compiler c, String path) {
 
 /* The file takes every row the segment declared. What stays in the overlay
    afterwards is what the file publishes to an including unit. */
-static void FileWalk.merge(FileWalk *w, Compiler shadow, Map overlay) {
+static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
   if (w.unit) {
     w.c.fn_defs.merge(shadow.fn_defs);
     w.definitions.merge(shadow.fn_defs);
@@ -382,7 +382,7 @@ static void _publish_unit_statics(Map statics, Map overlay, String path) {
 /* Splice one include: replay its entry, or walk it cold, once per unit.
    Its content hash joins this file's dependencies, so a replayed interface
    is rejected when any file it spliced has changed. */
-static void FileWalk.include(FileWalk *w, String target, int angle) {
+static void FileWalk.include(FileWalk &w, String target, int angle) {
   int covered = 0;
   String path = _resolve_include(
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered);
@@ -558,7 +558,7 @@ static String _canonical_cwd(void) {
    lacks while `lib/meta.x` is preloading. That walk's entry for a producing
    file is dropped afterwards, so a later unit walks the file again with the
    builders. */
-static void FileWalk.add_defaults(FileWalk *w) {
+static void FileWalk.add_defaults(FileWalk &w) {
   if (!w.produces()) return;
   w.deferred = macro_library_filling();
   if (w.deferred) return;
@@ -567,7 +567,7 @@ static void FileWalk.add_defaults(FileWalk *w) {
   if (generated) w.parts.push(_cache_copy(generated));
 }
 
-static int FileWalk.produces(FileWalk *w) {
+static int FileWalk.produces(FileWalk &w) {
   foreach (Var part, w.parts) {
     if (part is not <map>) continue;
     foreach (Var value, part.map())
@@ -580,7 +580,7 @@ static int FileWalk.produces(FileWalk *w) {
    walk of a file fixes its contribution: a later walk of the same file, such
    as a unit whose text the prelude already covered, does not replace an
    entry that other units may already have replayed. */
-static void FileWalk.publish(FileWalk *w) {
+static void FileWalk.publish(FileWalk &w) {
   List parts = w.parts.list_free();
   _retain(w.path);
   _retain_rows(parts);
@@ -740,7 +740,7 @@ static void Compiler._walk_package(
 /* Replay one cached entry for its declarations only, recording each package
    file as a dependency of the importing unit. An include below the file's
    private boundary is not part of the package surface. */
-static void Surface.gather(Surface *s, String path, List entry) {
+static void Surface.gather(Surface &s, String path, List entry) {
   s.c.merge_translation_dependencies(entry[3]);
   int private = 0;
   foreach (Var part, entry.car())
@@ -753,7 +753,7 @@ static void Surface.gather(Surface *s, String path, List entry) {
     }
 }
 
-static void Surface.include(Surface *s, String path, int private) {
+static void Surface.include(Surface &s, String path, int private) {
   s.c.add_translation_dependency(path);
   if (private || path in s.visited) return;
   s.visited[path] = 1;
@@ -767,7 +767,7 @@ static void Surface.include(Surface *s, String path, int private) {
    static, which keeps C internal linkage and stays home; outside it the file
    escaped the declare-time rewrite and its bare names would merge into the
    consumer's one flat namespace. */
-static void Surface.merge(Surface *s, String path, Map rows) {
+static void Surface.merge(Surface &s, String path, Map rows) {
   String prefix = %"${s.name}__";
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"${s.root}/");
@@ -781,12 +781,12 @@ static void Surface.merge(Surface *s, String path, Map rows) {
   }
 }
 
-static void Surface.take(Surface *s, Map rows, List key, Var value) {
+static void Surface.take(Surface &s, Map rows, List key, Var value) {
   s.merged[key] = value;
   s.c.copy_source_declaration(s.merged, rows, key);
 }
 
-static void Surface.reject(Surface *s, String path, String spelling) {
+static void Surface.reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
   String fix = %"below #pragma private, or move it into '$name/src'";
   s.c.report_error(
@@ -797,7 +797,7 @@ static void Surface.reject(Surface *s, String path, String spelling) {
 }
 
 /* The merged rows enter the importing unit's symbols. */
-static void Surface.install(Surface *s) {
+static void Surface.install(Surface &s) {
   foreach (Var (key, value), s.merged) {
     s.c.sym.set(key, value);
     s.c.copy_source_declaration(s.c.sym.current_symbols(), s.merged, key);

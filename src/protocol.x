@@ -238,7 +238,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   return syntax.body();
 }
 
-static void ProtocolSyntax.head(ProtocolSyntax *p) {
+static void ProtocolSyntax.head(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (c.at_word("meta")) {
     p.meta = c.token;
@@ -259,7 +259,7 @@ static void ProtocolSyntax.head(ProtocolSyntax *p) {
   p.modifiers();
 }
 
-static void ProtocolSyntax.modifiers(ProtocolSyntax *p) {
+static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (c.at_word("as")) {
     p.modifier_token = c.token;
@@ -286,7 +286,7 @@ static void ProtocolSyntax.modifiers(ProtocolSyntax *p) {
   }
 }
 
-static List ProtocolSyntax.adoption(ProtocolSyntax *p) {
+static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
   Compiler c = p.c;
   c.next();
   List location = c.token_location(p.start);
@@ -307,7 +307,7 @@ static List ProtocolSyntax.adoption(ProtocolSyntax *p) {
   return adoption;
 }
 
-static void ProtocolSyntax.check_body(ProtocolSyntax *p) {
+static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (p.meta)
     c.report_error(
@@ -335,7 +335,7 @@ static void ProtocolSyntax.check_body(ProtocolSyntax *p) {
   c.expect(<"{">);
 }
 
-static void ProtocolSyntax.warn_shadowed(ProtocolSyntax *p) {
+static void ProtocolSyntax.warn_shadowed(ProtocolSyntax &p) {
   /* Only the full parse warns about a binder shadowing a visible type. */
   Compiler c = p.c;
   if (c.shallow) return;
@@ -350,7 +350,7 @@ static void ProtocolSyntax.warn_shadowed(ProtocolSyntax *p) {
     p.participant_token, %($hint));
 }
 
-static List ProtocolSyntax.body(ProtocolSyntax *p) {
+static List ProtocolSyntax.body(ProtocolSyntax &p) {
   Compiler c = p.c;
   String participant = p.participant;
   Array associations = [], members = [];
@@ -620,7 +620,7 @@ static void Compiler._install_occurrence(
 
 // adoption drafts
 
-static List AdoptionDraft.publish(AdoptionDraft *a) {
+static List AdoptionDraft.publish(AdoptionDraft &a) {
   Compiler c = a.c;
   if (a.tag_expression) a.tag_expression = _tag_syntax(a.tag_expression);
   String spelling = a.participant.car().str();
@@ -648,11 +648,11 @@ static List AdoptionDraft.publish(AdoptionDraft *a) {
   return published;
 }
 
-static List AdoptionDraft.node(AdoptionDraft *a) => _adoption_node(
+static List AdoptionDraft.node(AdoptionDraft &a) => _adoption_node(
   a.base, a.participant, a.storage, a.representation, a.tag_expression,
   a.location);
 
-static String AdoptionDraft.spelling(AdoptionDraft *a) =>
+static String AdoptionDraft.spelling(AdoptionDraft &a) =>
   %"${_type_spelling(a.base)}(${_type_spelling(a.participant)})";
 
 static List _tag_syntax(List expression) {
@@ -665,7 +665,7 @@ static List _tag_syntax(List expression) {
   return expression;
 }
 
-static Symbol AdoptionDraft.check_modifiers(AdoptionDraft *a) {
+static Symbol AdoptionDraft.check_modifiers(AdoptionDraft &a) {
   Type representation = a.representation;
   if (representation && !representation.fixed_var_tag())
     a.report_modifier(_representation_error(representation));
@@ -677,7 +677,7 @@ static Symbol AdoptionDraft.check_modifiers(AdoptionDraft *a) {
 
 /* A constructed adoption has no modifier token, so its diagnostic goes to
    the adoption's location. */
-static void AdoptionDraft.report_modifier(AdoptionDraft *a, String message) {
+static void AdoptionDraft.report_modifier(AdoptionDraft &a, String message) {
   if (a.modifier_token)
     a.c.report_error(<protocol>, message, a.modifier_token, NULL);
   else
@@ -694,7 +694,7 @@ static Symbol _tag_value(List expression) {
 }
 
 static Symbol AdoptionDraft.published_storage(
-  AdoptionDraft *a, String spelling) {
+  AdoptionDraft &a, String spelling) {
   Compiler c = a.c;
   if (a.storage == <static>) return <static>;
   if (c.source_private < 0) return a.storage;
@@ -728,7 +728,7 @@ static int Compiler._has_private_native(Compiler c, List templates) {
   return 0;
 }
 
-static void AdoptionDraft.check_previous(AdoptionDraft *a) {
+static void AdoptionDraft.check_previous(AdoptionDraft &a) {
   Compiler c = a.c;
   if (c.shallow) return;
   String path = c._canonical_file(a.location);
@@ -748,7 +748,7 @@ static void AdoptionDraft.check_previous(AdoptionDraft *a) {
     a.location, %($first $second));
 }
 
-static void AdoptionDraft.install(AdoptionDraft *a) {
+static void AdoptionDraft.install(AdoptionDraft &a) {
   Compiler c = a.c;
   String path = c._canonical_file(a.location);
   if (a.storage == <static> && path != c._path()) return;
@@ -819,13 +819,13 @@ static void Compiler._resolve_adoption(
       ProtocolRequirements requirements = {
         .binder = binder, .associations = associations,
         .templates = members};
-      c._resolve_record(base, participant, location, &requirements);
+      c._resolve_record(base, participant, location, requirements);
     }
 }
 
 static void Compiler._resolve_record(
   Compiler c, Type base, Type participant, List location,
-  ProtocolRequirements *requirements) {
+  ProtocolRequirements &requirements) {
   int native = _is_native(requirements.templates);
   List conformance = NULL, failure = NULL;
   if (native) {
@@ -955,7 +955,7 @@ typedef struct NativeResolution {
 } NativeResolution;
 
 static List Compiler._resolve_native(
-  Compiler c, Type base, Type participant, ProtocolRequirements *requirements,
+  Compiler c, Type base, Type participant, ProtocolRequirements &requirements,
   Type participant_definition, List &failure) {
   failure = NULL;
   List key = %($base $participant);
@@ -995,7 +995,7 @@ static List Compiler._resolve_native(
 }
 
 static List NativeResolution.rows(
-  NativeResolution *r, List templates, List &failure) {
+  NativeResolution &r, List templates, List &failure) {
   Array members = [];
   Map native_bindings = NULL;
   foreach (List template, templates) {
@@ -1097,7 +1097,7 @@ typedef struct MemberResolution {
 
 static List Compiler._resolve_ordinary(
   Compiler c, Type base, Type participant,
-  ProtocolRequirements *requirements, List &failure) {
+  ProtocolRequirements &requirements, List &failure) {
   failure = NULL;
   Var stored;
   List key = %($base $participant);
@@ -1165,7 +1165,7 @@ static String Compiler._reverse_binding(
    associated-type defaults fill what selection left unbound before each
    member's expected signature is completed. */
 static List MemberResolution.resolve(
-  MemberResolution *r, List associations, List templates) {
+  MemberResolution &r, List associations, List templates) {
   r.variables[r.binder] = 1;
   r.bindings[r.binder] = r.participant;
   foreach (List association, associations) {
@@ -1188,7 +1188,7 @@ static List MemberResolution.resolve(
   return completed.list_free();
 }
 
-static List MemberResolution.select(MemberResolution *r, List row) {
+static List MemberResolution.select(MemberResolution &r, List row) {
   match (row)
     case %(?(String member) ?(Type template) ?): {
       String selected = NULL;
@@ -1208,7 +1208,7 @@ static List MemberResolution.select(MemberResolution *r, List row) {
 }
 
 static Type MemberResolution.find_member(
-  MemberResolution *r, String member, String &selected) {
+  MemberResolution &r, String member, String &selected) {
   String binding = _member_spelling(r.participant, member);
   Type actual = r.c._declared(binding);
   if (actual && r.c._default_completes(binding, actual, r.forward))
@@ -1286,7 +1286,7 @@ static int Compiler._default_completes(
   !c.fn_defs.contains(name) &&
   !c.sym.file_statics().contains(%(function $name));
 
-static List MemberResolution.complete(MemberResolution *r, List row) {
+static List MemberResolution.complete(MemberResolution &r, List row) {
   match (row)
     case %(?(String member) ?(Symbol status) ?(String source)
            ? ? ?(Type template)): {
@@ -1331,7 +1331,7 @@ typedef struct ProtocolAdapters {
   int shares_var_tag, central_initializer;
 } ProtocolAdapters;
 
-static List ProtocolAdapters.requirement(ProtocolAdapters *a, List rows) {
+static List ProtocolAdapters.requirement(ProtocolAdapters &a, List rows) {
   foreach (List row, rows)
     match (row)
       case %(?(String member) ?(Symbol status) ? ?
@@ -1350,7 +1350,7 @@ static List ProtocolAdapters.requirement(ProtocolAdapters *a, List rows) {
 }
 
 static List ProtocolAdapters.descriptor_requirement(
-  ProtocolAdapters *a, String member, Type template) {
+  ProtocolAdapters &a, String member, Type template) {
   if (a.base !== %("Var") ||
       !a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
     return NULL;
@@ -1358,7 +1358,7 @@ static List ProtocolAdapters.descriptor_requirement(
 }
 
 static List ProtocolAdapters.conversion_requirement(
-  ProtocolAdapters *a, String member, Type template, Symbol adapter) {
+  ProtocolAdapters &a, String member, Type template, Symbol adapter) {
   int fallback = adapter == <fallback>;
   List parameters = template.car().list().cadr();
   Type result = template.cdr();
@@ -1389,7 +1389,7 @@ static int _is_exact_variable(Var value, String variable) {
 }
 
 static void ProtocolAdapters.report_requirement(
-  ProtocolAdapters *a, List failure) {
+  ProtocolAdapters &a, List failure) {
   Type base = a.base, participant = a.participant;
   List dedupe =
     %("protocol-adapter-requirement" $base $participant ${failure.car()});
@@ -1893,7 +1893,7 @@ static List Compiler._generated_owner(
 }
 
 static int GeneratedOwners.consider(
-  GeneratedOwners *g, Compiler c, Type base, List row) {
+  GeneratedOwners &g, Compiler c, Type base, List row) {
   match (row)
     case %(?(String member) base-dflt ?(String source)
            ?(Type expected) ordinary ?): {
@@ -1917,7 +1917,7 @@ static int GeneratedOwners.consider(
   return 0;
 }
 
-static List GeneratedOwners.decision(GeneratedOwners *owners) {
+static List GeneratedOwners.decision(GeneratedOwners &owners) {
   List rows = owners.candidates.list_free();
   if (owners.result) return owners.result;
   match (rows) {
@@ -2074,7 +2074,7 @@ String Compiler.protocol_update_helper(
   return name;
 }
 
-static void ProtocolUpdate.arguments(ProtocolUpdate *u) {
+static void ProtocolUpdate.arguments(ProtocolUpdate &u) {
   List lhs_binding = u.c.sym.introduce("lhs");
   List op_binding = u.c.sym.introduce("op");
   Type pointer = cons(<*>, cons(<volatile>, u.participant));
@@ -2096,7 +2096,7 @@ static void ProtocolUpdate.arguments(ProtocolUpdate *u) {
   }
 }
 
-static void ProtocolUpdate.emit(ProtocolUpdate *u) {
+static void ProtocolUpdate.emit(ProtocolUpdate &u) {
   List call = u.c._bound_call(
     u.result, %(expr ${u.source_type} (ident ${u.source_binding})),
     %(${u.current} ${u.call_rhs}));
@@ -2183,7 +2183,7 @@ List Compiler.protocol_discard_helper(
   return c.discard_helper(binding, signature, stem, which);
 }
 
-static void DiscardCall.collect(DiscardCall *d) {
+static void DiscardCall.collect(DiscardCall &d) {
   Macro drop_shape = $discard_argument;
   List parameters = d.signature.car().list().cadr();
   int index = 0;
@@ -2199,7 +2199,7 @@ static void DiscardCall.collect(DiscardCall *d) {
   }
 }
 
-static List DiscardCall.emit(DiscardCall *d) {
+static List DiscardCall.emit(DiscardCall &d) {
   String name = %"_x2c_discard_${d.stem}_${d.which}";
   List helper_binding = d.c.sym.introduce(name);
   List value_binding = d.c.sym.introduce("value");
@@ -2343,7 +2343,7 @@ static void Compiler._ordinary_adapters(
         }
 }
 
-static void ProtocolAdapters.member(ProtocolAdapters *a, List row) {
+static void ProtocolAdapters.member(ProtocolAdapters &a, List row) {
   match (row)
     case %(?(String member) ?(Symbol status) ?(String source)
            ?(Type expected) ? ?(Type template)): {
@@ -2357,7 +2357,7 @@ static void ProtocolAdapters.member(ProtocolAdapters *a, List row) {
 }
 
 static void ProtocolAdapters.default_member(
-  ProtocolAdapters *a, String member, String source, Type expected,
+  ProtocolAdapters &a, String member, String source, Type expected,
   Type template) {
   List decision = a.c._generated_owner(a.participant, member);
   match (decision) {
@@ -2378,7 +2378,7 @@ static void ProtocolAdapters.default_member(
 }
 
 static void ProtocolAdapters.missing_member(
-  ProtocolAdapters *a, String member, Type template) {
+  ProtocolAdapters &a, String member, Type template) {
   if (a.base !== %("Var") || a.shares_var_tag) return;
   List decision = a.c._generated_owner(a.participant, member);
   match (decision) {
@@ -2390,7 +2390,7 @@ static void ProtocolAdapters.missing_member(
 }
 
 static void ProtocolAdapters.inherited_member(
-  ProtocolAdapters *a, String member, Type expected, Type template) {
+  ProtocolAdapters &a, String member, Type expected, Type template) {
   List requirement = a.descriptor_requirement(member, template);
   if (requirement) {
     a.report_requirement(requirement);
@@ -2403,7 +2403,7 @@ static void ProtocolAdapters.inherited_member(
 }
 
 static void ProtocolAdapters.implemented_member(
-  ProtocolAdapters *a, String member, String source, Type expected,
+  ProtocolAdapters &a, String member, String source, Type expected,
   Type template) {
   if (a.base !== %("Var") || a.shares_var_tag) return;
   if (!a.c.sym.lookup_field(%(struct "VarMethods"), %($member))) return;
@@ -2411,7 +2411,7 @@ static void ProtocolAdapters.implemented_member(
 }
 
 static List ProtocolAdapters.thunk(
-  ProtocolAdapters *a, String member, Type expected, Type template,
+  ProtocolAdapters &a, String member, Type expected, Type template,
   String source) {
   Map erased = a.bindings.copy();
   foreach (Var variable, a.variables.keys()) erased[variable] = %("Var");
@@ -2431,7 +2431,7 @@ static List ProtocolAdapters.thunk(
   return %($member ${adapter.binding} $target);
 }
 
-static void ProtocolAdapters.register_descriptor(ProtocolAdapters *a) {
+static void ProtocolAdapters.register_descriptor(ProtocolAdapters &a) {
   List thunks = a.thunks.list_free();
   if (a.base !== %("Var") || a.shares_var_tag) return;
   Symbol tag = _tag_value(_adoption_tag(a.adoption));
@@ -2443,7 +2443,7 @@ static void ProtocolAdapters.register_descriptor(ProtocolAdapters *a) {
 
 // adapter functions
 
-static List AdapterFunction.generate(AdapterFunction *a) {
+static List AdapterFunction.generate(AdapterFunction &a) {
   List target_parameters = a.target.car().list().cadr();
   Type target_result = a.target.cdr();
   List source_parameters = a.signature.car().list().cadr();

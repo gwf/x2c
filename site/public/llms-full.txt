@@ -450,7 +450,7 @@ class IntPointer int *;
 class ValuePointer Var *;
 class Values Array;
 class Point { int x; int y; };
-class HeapPoint struct { int x; int y; } *;
+class HeapPoint { int x; int y; } *;
 int main(void) {
   Point point = Point.new(3, 4);
   return point.x == 3 && point.y == 4 ? 0 : 1;
@@ -458,10 +458,14 @@ int main(void) {
 ```
 
 `Point` is a value aggregate; the short braces abbreviate a struct definition.
-`HeapPoint` explicitly names a pointer representation. A value may live in a
-local, a field, an array, or allocated storage. `Values` follows the existing
-Array type chain and constructor; it does not acquire a second allocation
-layout. A forward declaration such as `class Point;` reserves the identity
+`HeapPoint` explicitly names a pointer representation; short braces accept
+the same trailing `*` as an explicit struct declaration. Prefer a value for
+local state without retained identity, and use `Point &` for a method that
+updates the caller's Point. A value may live in a local, a field, an array,
+or allocated storage. Its declaration does not select a storage location.
+`Values` follows the existing Array type chain and constructor; it does not
+acquire a second allocation layout. A forward declaration such as
+`class Point;` reserves the identity
 until its visible definition supplies the representation.
 
 An enum cannot be a class's value representation, because a `Var` has no fixed
@@ -478,7 +482,7 @@ value fields accepts positional arguments in field order:
 
 ```x2c
 class Point { int x; int y; };
-class HeapPoint struct { int x; int y; } *;
+class HeapPoint { int x; int y; } *;
 int main(void) {
 Point value = Point.new(3, 4);
 HeapPoint object = HeapPoint.new(3, 4);
@@ -497,9 +501,31 @@ String, List, and their aliases. Var slots are shallow copies.
 A class that defines `init` gets a constructor built from it. The
 constructor obtains zeroed storage, passes it to `init` with the
 constructor's arguments, and returns it. A heap class obtains that storage
-from `alloc`, whose default is a zeroed Scope allocation. `init` receives the handle of a heap class, or the
-address of a value record, followed by any parameters it declares; `new`
-takes those parameters in the same order. A record containing a mutable
+from `alloc`, whose default is a zeroed Scope allocation. A heap class's
+`init` receives its bare handle. Prefer a reference receiver for a value
+class's `init`; the existing pointer receiver is also accepted. `new` takes
+the parameters after that receiver in the same order:
+
+```x2c
+class Counter { int value; };
+void Counter.init(Counter &c, int initial) {
+  c.value = initial;
+}
+static void Counter.step(Counter &c, int amount) => c.value += amount;
+int main(void) {
+Counter counter = Counter.new(2);
+counter.step(3);
+printf("%d\n", counter.value);
+  return 0;
+}
+```
+
+```text
+5
+```
+
+The Counter record is a local value and its methods update that value through
+references. A record containing a mutable
 handle such as Array, Map, Iter, or another heap class requires `init`, as do
 nested records and arrays. A flat record that defines `init` uses it in place
 of its positional constructor.
@@ -509,7 +535,7 @@ generated `free` calls `drop` and then releases the object, so `drop` only
 releases what the fields own:
 
 ```x2c
-class History struct { int limit; Array items; } *;
+class History { int limit; Array items; } *;
 void History.init(History self, int limit) {
   self.limit = limit;
   self.items = [];
@@ -900,7 +926,7 @@ before that region ends. The History method makes ownership of its Array
 explicit.
 
 ```x2c
-class History struct { Array lengths; } *;
+class History { Array lengths; } *;
 
 void History.init(History self) {
   self.lengths = [];
@@ -939,6 +965,87 @@ Use C scalar, pointer, struct, union, and enum types when the value's type is
 known at compile time. Use `Var` where the value is dynamic: heterogeneous
 collection elements, dynamic arithmetic, generic callbacks, or interchange
 data.
+
+## Use values for local state and references for updates
+
+Declare a record as a value when it belongs to one operation and needs no
+retained identity. A method that updates that record takes a reference:
+
+```x2c
+class Counter { int value; };
+
+static void Counter.step(Counter &c, int amount) => c.value += amount;
+
+int main(void) {
+  Counter counter = Counter.new(2);
+  counter.step(3);
+  Counter copy = counter;
+  copy.step(1);
+  printf("%d %d\n", counter.value, copy.value);
+  return 0;
+}
+```
+
+```text
+5 6
+```
+
+`counter` holds the record directly; constructing it needs no allocation for
+the record. `step` changes the caller's object, and its call needs no `&` or
+explicit dereference. Copying the record creates a separate Counter. Pass a
+small record by value when reading a copy is the intended contract.
+
+`class` adds constructors, boxing, and other methods to the declared
+representation. Use an ordinary value typedef for a private context that
+does not need that bundle. In either case, pass its mutable state through
+`T &` helpers instead of introducing a pointer typedef and a second local
+whose only purpose is taking the context's address.
+
+A trailing `*` selects a pointer representation:
+`class Node { int value; } *;`. Its bare `Node` name is already a pointer,
+and its methods take that handle. Choose it when shared or retained identity
+is useful. The spelling `struct` before the braces is optional; short braces
+work for both representations. See
+[Choose a representation](https://x2c-lang.dev/docs/guide/system-macros.html#choose-a-representation).
+
+Representation and storage location are separate choices. A value can be a
+local, a field, an array element, or part of allocated storage. A reference
+borrows one live caller object for a call; it does not own or extend its
+lifetime. Record copies are shallow: a copied Array, Buffer, or pointer field
+still reaches the same backing object. Keep cleanup with the owner of those
+resources, including when the record itself is a value.
+
+## Borrow required and optional outputs
+
+Use a reference when a result must update a caller's existing object:
+
+```x2c
+static int take(int &remaining, int &item) {
+  if (!remaining) return 0;
+  remaining--;
+  item = remaining;
+  return 1;
+}
+
+int main(void) {
+  int remaining = 2, item;
+  while (take(remaining, item)) printf("%d\n", item);
+  return 0;
+}
+```
+
+```text
+1
+0
+```
+
+Use `T &?` when supplying the object is optional, and test its presence before
+using it. A required reference takes an addressable value, not a pointer or
+NULL. An existing pointer `p` supplies its object as `*p`. Keep pointers for
+buffers and arrays, retained addresses, nullable links, native signatures,
+and callback state. A nested context that borrows its mutable parent needs a
+pointer field so both contexts reach the same parent. See
+[Reference parameters](https://x2c-lang.dev/docs/reference/language.html#reference-parameters).
 
 ## Adopt a protocol for one real contract
 
@@ -1524,7 +1631,7 @@ shorthand for a compound body containing one expression statement:
 
 ```x2c
 typedef struct Counter { int value; } Counter;
-static void Counter.step(Counter *self) => self.value++;
+static void Counter.step(Counter &self) => self.value++;
 ```
 
 An expression is required; `=>;` is invalid. The rules for writing `return` in
@@ -3191,8 +3298,9 @@ from.
 
 `NamedType` captures `NAME TYPE;` or the forward form `NAME;`. The name comes
 first, with no equals sign. `{ FIELDS }` abbreviates a value struct;
-`struct { FIELDS } *` explicitly declares a pointer representation. Ordinary
-type and declarator grammar owns qualifiers, fields, arrays, and pointers.
+`{ FIELDS } *` declares a pointer representation, with `struct` optional
+before the braces. Ordinary type and declarator grammar owns qualifiers,
+fields, arrays, and pointers.
 The name is reserved before its fields are parsed, and the complete definition
 supplies its representation. A forward declaration does not imply a pointer.
 Layout must be complete wherever the ordinary type rules require it.
@@ -3242,8 +3350,9 @@ An explicit `new` suppresses its generated constructor and init requirement.
 Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
-An aggregate class that defines `void T.init(T *, ...)` for a value or
-`void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer gets a `new`
+An aggregate class that defines `void T.init(T &, ...)` for a value (also
+accepting the existing `T *` receiver), or `void T.init(T, ...)` or
+`int T.init(T, ...)` for a heap pointer, gets a `new`
 taking the parameters after the receiver; it calls `init` on zero-initialized
 storage, which a heap class obtains from its replaceable `T.alloc`. A zero
 result from an `int` initializer releases that storage and makes `new`

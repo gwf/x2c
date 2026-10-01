@@ -134,79 +134,79 @@ Buffer Buffer_write(Buffer, const char *);
 String int_str(int);
 
 static void Pretty_source_marker(Pretty * p, Var value){
-  List location = Compiler_origin_location(p -> c, Var_int(Var_convert(value, 3453797)));
-  while(Buffer_len(p -> buff) > 0 && Buffer_get(p -> buff, - 1) == ' ') Buffer_unwrite(p -> buff, 1);
-  if(Buffer_len(p -> buff) > 0 && Buffer_get(p -> buff, - 1) != '\n') _write_newline(p -> buff);
-  while(p -> scanned < Buffer_len(p -> buff)) if(Buffer_get(p -> buff, p -> scanned ++) == '\n') p -> output_line ++;
-  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var(p -> output_file));
+  List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));
+  while(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
+  if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_newline((* p).buff);
+  while((* p).scanned < Buffer_len((* p).buff)) if(Buffer_get((* p).buff, (* p).scanned ++) == '\n')(* p).output_line ++;
+  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* p).output_file));
   if(! String_truth(file)) file = _0;
-  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(p -> output_line + 1), 3453797));
-  p -> source_line = List_truth(location) ? line : 0;
+  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797));
+  (* p).source_line = List_truth(location) ? line : 0;
   String escaped = String_replace(String_escape(file), _5, _6);
-  Buffer_write(p -> buff, String_join(NULL, cons(String_var(_1), cons(String_var(int_str(line)), cons(String_var(_2), cons(String_var(escaped), cons(String_var(_3), NULL)))))));
-  _write_newline(p -> buff);
-  if(p -> indent > 0) _write_indent(p -> buff, p -> indent);
-  p -> directive_break = 1;
-  p -> prev_token = NULL;
+  Buffer_write((* p).buff, String_join(NULL, cons(String_var(_1), cons(String_var(int_str(line)), cons(String_var(_2), cons(String_var(escaped), cons(String_var(_3), NULL)))))));
+  _write_newline((* p).buff);
+  if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+  (* p).directive_break = 1;
+  (* p).prev_token = NULL;
 }
 
 static void Pretty_directive(Pretty * p, String token){
-  while(Buffer_len(p -> buff) > 0 && Buffer_get(p -> buff, - 1) == ' ') Buffer_unwrite(p -> buff, 1);
-  if(Buffer_len(p -> buff) > 0 && Buffer_get(p -> buff, - 1) != '\n') _write_newline(p -> buff);
-  _write_token(p -> buff, token, 0);
-  _write_newline(p -> buff);
-  if(p -> indent > 0) _write_indent(p -> buff, p -> indent);
-  p -> directive_break = 1;
-  p -> prev_token = NULL;
+  while(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
+  if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_newline((* p).buff);
+  _write_token((* p).buff, token, 0);
+  _write_newline((* p).buff);
+  if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+  (* p).directive_break = 1;
+  (* p).prev_token = NULL;
 }
 
 static void Pretty_ordinary(Pretty * p, String token, List rest){
   char last = String_truth(token) ? String_getindex(token, - 1) : '\0';
-  if(last == '(') p -> paren_depth ++;
+  if(last == '(')(* p).paren_depth ++;
   else if(last == ')'){
-    p -> paren_depth --;
-    if(p -> paren_depth < 0) p -> paren_depth = 0;
+    (* p).paren_depth --;
+    if((* p).paren_depth < 0)(* p).paren_depth = 0;
   }
-  Pretty_before(p, token);
-  _write_token(p -> buff, token, p -> source_line);
-  Pretty_after(p, token, last, rest);
+  Pretty_before(&((* p)), token);
+  _write_token((* p).buff, token, (* p).source_line);
+  Pretty_after(&((* p)), token, last, rest);
 }
 
 static void Pretty_before(Pretty * p, String token){
   if(_token_is(token, '}')){
-    if(p -> indent >= 2) p -> indent -= 2;
-    if(Buffer_len(p -> buff) > 0 && Buffer_get(p -> buff, - 1) != '\n') _write_mapped_newline(p -> buff, p -> source_line);
-    if(p -> indent > 0) _write_indent(p -> buff, p -> indent);
-    p -> prev_token = NULL;
+    if((* p).indent >= 2)(* p).indent -= 2;
+    if(Buffer_len((* p).buff) > 0 && Buffer_get((* p).buff, - 1) != '\n') _write_mapped_newline((* p).buff, (* p).source_line);
+    if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+    (* p).prev_token = NULL;
   }
-  else if(_need_space(p -> prev_token, token)) Buffer_write(p -> buff, " ");
+  else if(_need_space((* p).prev_token, token)) Buffer_write((* p).buff, " ");
 }
 
 static void Pretty_after(Pretty * p, String token, char last, List rest){
   if(_token_is(token, '{')){
-    p -> indent += 2;
-    _write_mapped_newline(p -> buff, p -> source_line);
-    if(p -> indent > 0) _write_indent(p -> buff, p -> indent);
-    p -> prev_token = NULL;
+    (* p).indent += 2;
+    _write_mapped_newline((* p).buff, (* p).source_line);
+    if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+    (* p).prev_token = NULL;
   }
   else if(last == ';'){
-    if(p -> paren_depth == 0){
-      _write_mapped_newline(p -> buff, p -> source_line);
-      if(! _next_is_closing_brace(rest) && p -> indent > 0) _write_indent(p -> buff, p -> indent);
-      p -> prev_token = NULL;
+    if((* p).paren_depth == 0){
+      _write_mapped_newline((* p).buff, (* p).source_line);
+      if(! _next_is_closing_brace(rest) &&(* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+      (* p).prev_token = NULL;
     }
     else{
-      Buffer_write(p -> buff, " ");
-      p -> prev_token = token;
+      Buffer_write((* p).buff, " ");
+      (* p).prev_token = token;
     }
 
   }
   else if(_token_is(token, '}')){
-    _write_mapped_newline(p -> buff, p -> source_line);
-    if(p -> indent > 0) _write_indent(p -> buff, p -> indent);
-    p -> prev_token = NULL;
+    _write_mapped_newline((* p).buff, (* p).source_line);
+    if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
+    (* p).prev_token = NULL;
   }
-  else p -> prev_token = token;
+  else(* p).prev_token = token;
 }
 
 static int _is_prefix_punct(char ch){
