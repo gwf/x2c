@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/region-number-values.x:27:3: region: the address of 'count' can outlive the local storage it points into when returned
+    return &count;
+    ^^^^^^
+  note: local storage ends when the function returns
+

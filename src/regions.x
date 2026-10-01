@@ -737,7 +737,7 @@ static void Walk.assign(Walk w, Fact fact, Var value, Type type, int store) {
   Region region = source ? source.region
                          : w.birth(value, type, born, other);
   int owners = source ? source.born : born;
-  int kept = source || born;
+  int kept = (source || born) && !w.number(type, value);
   if (kept && w.copies(type, value)) {
     if (owners == 3) {
       region = other;
@@ -801,6 +801,7 @@ typedef struct Flow {
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
 static int Walk.flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
+  if (w.number(type, value)) return 0;
   match (_unwrap(value))
     case $source_operator_content(%((!quote ?) ? ?yes ?no)):
       return w.flow(yes, type, sink, target) ||
@@ -1369,6 +1370,15 @@ static int Walk.copies(Walk w, Type type, Var value) {
   return source &&
          (source.match(%((!or (dim *) (!quote *)) char)) ||
           source.match(%((!or (dim *) (!quote *)) const char)));
+}
+
+/* Whether `value` or a destination of `type` is a number: an integer,
+   floating, or enum type. A number holds no address the program can follow
+   without a cast back, so nothing the walk knows moves with it. */
+static int Walk.number(Walk w, Type type, Var value) {
+  Type given = _expression_type(value);
+  return (type && w.c.sym.resolve_numeric_type(type)) ||
+         (given && w.c.sym.resolve_numeric_type(given));
 }
 
 // entry points

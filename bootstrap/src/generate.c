@@ -39,7 +39,7 @@ static void Compiler__publish(Compiler c, List outputs);
 typedef struct Partition{
   Compiler c;
   Array header, source, pending, opened, open;
-  Map forwarded;
+  Map forwarded, included;
   int private;
 }
 Partition;
@@ -55,6 +55,8 @@ static void Partition_mark(Partition * p, List marker);
 static List Partition_finish(Partition * p);
 
 static void Partition_add_typedef(Partition * p, List node);
+
+static void Partition_hold(Partition * p, List names, List node);
 
 static List _typedef_names(List node);
 
@@ -105,6 +107,8 @@ static void Partition_add_preproc(Partition * p, List node, String content);
 static void Partition_mark_conditional(Partition * p, List node, Symbol kind);
 
 static void Partition_place_directive(Partition * p, List node, String content);
+
+static List Partition_include_names(Partition * p, String content);
 
 static int _is_pragma_once(String content);
 
@@ -778,7 +782,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _473 = Symbol_var(1386033712394);
   _474 = Symbol_var(39266);
   _475 = Symbol_var(106239471489226);
-  _476 = int_var(681);
+  _476 = int_var(699);
   _477 = String_new("");
   _478 = String_var(_477);
   _479 = List_var(_416);
@@ -829,7 +833,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _524 = cons(_520, _523);
   _525 = List_var(_524);
   _526 = Symbol_var(805770);
-  _527 = int_var(679);
+  _527 = int_var(697);
   _528 = cons(_527, NULL);
   _529 = cons(_526, _528);
   _530 = List_var(_529);
@@ -842,7 +846,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _537 = cons(_534, _536);
   _538 = List_var(_537);
   _539 = Symbol_var(1133019155420);
-  _540 = int_var(26017);
+  _540 = int_var(26892);
   _541 = cons(_540, NULL);
   _542 = cons(_539, _541);
   _543 = List_var(_542);
@@ -953,11 +957,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _648 = cons(_647, NULL);
   _649 = cons(_473, _648);
   _650 = List_var(_649);
-  _651 = int_var(684);
+  _651 = int_var(702);
   _652 = cons(_651, NULL);
   _653 = cons(_526, _652);
   _654 = List_var(_653);
-  _655 = int_var(26141);
+  _655 = int_var(27016);
   _656 = cons(_655, NULL);
   _657 = cons(_539, _656);
   _658 = List_var(_657);
@@ -1072,11 +1076,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _767 = cons(_766, NULL);
   _768 = cons(_473, _767);
   _769 = List_var(_768);
-  _770 = int_var(689);
+  _770 = int_var(707);
   _771 = cons(_770, NULL);
   _772 = cons(_526, _771);
   _773 = List_var(_772);
-  _774 = int_var(26235);
+  _774 = int_var(27110);
   _775 = cons(_774, NULL);
   _776 = cons(_539, _775);
   _777 = List_var(_776);
@@ -1566,7 +1570,7 @@ int List_try_next(List, List *, Var *);
 
 static List Compiler__header_and_source(Compiler c, List ast){
   Partition p ={
-    .c = c, .header = Array_new(), .source = Array_new(), .pending = Array_new(), .opened = Array_new(), .open = Array_new(), .forwarded = Map_new()
+    .c = c, .header = Array_new(), .source = Array_new(), .pending = Array_new(), .opened = Array_new(), .open = Array_new(), .forwarded = Map_new(), .included = Map_new()
   }
   ;
   {
@@ -1627,7 +1631,11 @@ static List Partition_finish(Partition * p){
 }
 
 static void Partition_add_typedef(Partition * p, List node){
-  List names = p -> private ? _typedef_names(node) : NULL;  if(! List_truth(names)){
+  Partition_hold(p, p -> private ? _typedef_names(node) : NULL, node);
+}
+
+static void Partition_hold(Partition * p, List names, List node){
+  if(! List_truth(names)){
     Array_push(Partition_side(p), List_var(node));  return;
   }
   Partition_mark(p, cons(_95, cons(Var_box_ulong(Array_len(p -> pending)), NULL)));  Array_push(p -> pending, List_var(cons(List_var(names), cons(List_var(node), _97))));
@@ -1968,7 +1976,14 @@ static void Partition_mark_conditional(Partition * p, List node, Symbol kind){
 
 int preproc_visibility(String);
 static void Partition_place_directive(Partition * p, List node, String content){
-  if(_is_pragma_once(content)) return;  int visibility = preproc_visibility(content);  if(visibility >= 0) p -> private = visibility;  else Array_push(Partition_side(p), List_var(node));
+  if(_is_pragma_once(content)) return;  int visibility = preproc_visibility(content);  if(visibility >= 0) p -> private = visibility;  else Partition_hold(p, Partition_include_names(p, content), node);
+}
+
+String preproc_include_target(String, int *);
+List Compiler_include_typedef_names(Compiler, String, int, Map);
+Map Map_copy(Map);
+static List Partition_include_names(Partition * p, String content){
+  int angle = 0;  String target = preproc_include_target(content, &(angle));  if(! String_truth(target)) return NULL;  if(p -> private) return Compiler_include_typedef_names(p -> c, target, angle, Map_copy(p -> included));  Compiler_include_typedef_names(p -> c, target, angle, p -> included);  return NULL;
 }
 
 String String_strip(String, char *);

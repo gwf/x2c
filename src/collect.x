@@ -477,6 +477,42 @@ String collect_resolve_include(
   return _resolve_include(sources, dirs, includer_dir, target, angle, covered);
 }
 
+/** The typedef names published by the files that the current unit's
+    include of `target` reaches: the included file and, transitively, the
+    includes above each file's `#pragma private`. A file already in `seen`
+    is skipped with the files it reaches, and each file reached is added to
+    `seen`. NULL when the include does not resolve to x2c source; a runtime
+    module adds nothing the prelude has not declared. */
+List Compiler.include_typedef_names(
+  Compiler c, String target, int angle, Map seen) {
+  String path = collect_resolve_include(
+    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  if (!path || !is_source_file(path)) return NULL;
+  Array names = [];
+  c._add_typedef_names(names, _canonical_path(path), seen);
+  return names.list_free();
+}
+
+static void Compiler._add_typedef_names(
+  Compiler c, Array names, String path, Map seen) {
+  if (path in seen || _in_runtime(path)) return;
+  seen[path] = 1;
+  List entry = c._entry(path);
+  int private = 0;
+  if (entry)
+    foreach (Var part, entry.car())
+      match (%($part)) {
+        case %(?(Map rows)):
+          foreach (Var key, rows.keys())
+            match (%($key)) case %((typedef ?(String name))):
+              names.push(name);
+        case %(private): private = 1;
+        case %(public): private = 0;
+        case %(?(String include)):
+          if (!private) c._add_typedef_names(names, include, seen);
+      }
+}
+
 /* Unresolvable paths retain the caller's spelling. This is
    `Compiler.canonical_path` without a source view: an unsaved file keeps
    the spelling the include search built, which keys its process-cache
@@ -770,7 +806,11 @@ static void Surface.install(Surface *s) {
 
 /* A C header or a runtime module crosses with its own spellings. */
 static int _keeps_spellings(String path) =>
-  !is_source_file(path) || path.startswith(%"${_canonical_lib()}/") ||
+  !is_source_file(path) || _in_runtime(path);
+
+/* A canonical path in the runtime's `lib/` or `include/x2c`. */
+static int _in_runtime(String path) =>
+  path.startswith(%"${_canonical_lib()}/") ||
   path.startswith(%"${_canonical_include()}/");
 
 /* A declaration key is a plain name, or a typedef or aggregate name that a

@@ -1,8 +1,3 @@
-unittest/compiler-fixtures/optional-reference-initializer.x:8:3: region: an address from 'count' can outlive the local storage it points into when returned
-    return read(count);
-    ^^^^^^
-  note: local storage ends when the function returns
-
 unittest/compiler-fixtures/optional-reference-initializer.x:2:3: type: check optional reference before using its value
     unsigned value = count;
     ^^^^^^^^
