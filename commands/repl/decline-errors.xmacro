@@ -1,0 +1,262 @@
+/* REPL lowering conditions. Declines return through the existing sink;
+   scan reasons remain text and keep their separate status precedence. */
+
+meta static Map _repl_decline_rows(void) => {
+
+  "address.global" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "the address of file-scope state")),
+
+  "address.storage" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an address of a value with no storage")),
+
+  "address.tag" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an address with no Var pointer tag")),
+
+  "address.unknown" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "address of an unknown local")),
+
+  "argument.storage" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a reference argument with no storage")),
+
+  "array.capacity" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "more initializers than the array holds")),
+
+  "array.dimension" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an array dimension that is not a literal")),
+
+  "array.layout" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an array element with no compile-time layout")),
+
+  "array.nested" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an array inside a compile-time struct")),
+
+  "array.struct" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an array of structs")),
+
+  "assignment.computed" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "assignment to a computed place")),
+
+  "assignment.storage" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "assignment expression without storage")),
+
+  "binding.loop" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a value needing a binding is on a loop path")),
+
+  "binding.missing" :
+  (macro Expression(Expr $l, Expr $name) =>
+    _lower_decline($l, "no binding for " + $name)),
+
+  "break.scope" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "break outside a loop or switch")),
+
+  "capture.layout" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a captured struct with no host layout")),
+
+  "case.unfolded" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "case pattern is not folded")),
+
+  "constant.unfolded" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a constant did not fold")),
+
+  "continuation.unknown" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unknown continuation")),
+
+  "continue.scope" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "continue outside a loop")),
+
+  "declarator.unsupported" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported declarator")),
+
+  "destructure.target" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported destructuring target")),
+
+  "element.expression" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an element that is not an expression")),
+
+  "enum.value" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an enum constant has no compile-time value")),
+
+  "expression.expected" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "not an expression")),
+
+  "expression.unsupported" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported expression")),
+
+  "field.pointer" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "field access through a non-pointer")),
+
+  "field.unknown" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an unknown compile-time struct field")),
+
+  "func.dynamic" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "not a dynamic Func call")),
+
+  "index.immutable" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "indexed write to a List or String")),
+
+  "index.layout" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an indexed object with no layout")),
+
+  "index.type" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "indexing a type with no compile-time meaning")),
+
+  "init.map" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a braced Map initializer needs keys")),
+
+  "init.native" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a native-dependent compile-time struct initializer")),
+
+  "init.struct" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "an unsupported compile-time struct initializer")),
+
+  "init.type" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a braced initializer for this type")),
+
+  "lambda.block" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a block-bodied lambda")),
+
+  "lambda.loop" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a lambda in a loop")),
+
+  "layout.compile" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a struct with no compile-time layout")),
+
+  "layout.host" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a compile-time struct with no host layout")),
+
+  "layout.unsupported" :
+  (macro Expression(Expr $l) =>
+    _lower_decline(
+      $l, "a struct or union, which has no compile-time representation")),
+
+  "literal.number" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unreadable numeric literal")),
+
+  "local.static" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a local static")),
+
+  "local.unbound" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unbound local")),
+
+  "map.entry" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported map entry")),
+
+  "name.declaration" :
+  (macro Expression(Expr $l, Expr $name) =>
+    _lower_decline($l, "a name with no declaration: " + $name)),
+
+  "operator.arity" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported operator arity")),
+
+  "operator.postfix" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported postfix operator")),
+
+  "operator.unary" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported unary operator")),
+
+  "sizeof.layout" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "sizeof a type with no layout")),
+
+  "statement.effect" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "statement with no effect on a local")),
+
+  "statement.unsupported" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "unsupported statement")),
+
+  "struct.types" :
+  (macro Expression(Expr $l, Expr $types) =>
+    _lower_decline($l, "incompatible compile-time struct types: " + $types)),
+
+  "switch.binding" :
+  (macro Expression(Expr $l) =>
+    _lower_decline(
+      $l, "a switch subject needing a binding is on a loop path")),
+
+  "switch.fallthrough" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a switch arm that falls through into the next")),
+
+  "update.computed" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "update of a computed place")),
+
+  "update.storage" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "update expression without storage")),
+
+  "scan.binding" :
+  (macro Expression(Expr $name) => "no binding for " + $name),
+
+  "scan.goto" :
+  (macro Expression() => "a goto has no lowering")
+};
+
+meta static List _repl_decline_expand(String key, List arguments) {
+  Var value = _repl_decline_rows()[key];
+  if (value is void)
+    x2c_diagnostic_fail(%"unknown REPL decline '$key'", %());
+  Macro selected = value;
+  if (arguments.len() != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for REPL decline '$key'", %());
+  return Macro_apply(selected, arguments);
+}
+
+meta static List _repl_decline_with(
+  List lowering, String key, List arguments) =>
+  _repl_decline_expand(key, %($lowering @arguments));
+
+macro Expression $repl.decline(
+  Expr $lowering, Literal $key, Expr $arguments...) =>
+  $(_repl_decline_with $lowering (x2c.literal.value $key) $arguments);
+
+macro Expression $repl.reason(Literal $key, Expr $arguments...) =>
+  $(_repl_decline_expand (x2c.literal.value $key) $arguments);

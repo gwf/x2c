@@ -33,6 +33,7 @@ void ReplLower.free(ReplLower self) {
 
 String ReplLower.declined(ReplLower self) => self.reason;
 #pragma private
+$(import "decline-errors.xmacro")
 #include "type.x"
 #include "transform.x"
 #include "var.x"
@@ -293,7 +294,7 @@ static void _lower_scan_storage_binding(
   Type declared = %(declare $type (bindings $binding))
     .type_from_ast().declared();
   if (declared.is_array() && _lower_record_type(l, declared.dereference())) {
-    (void) _lower_decline(l, "an array of structs");
+    (void) $repl.decline(l, "array.struct");
     return;
   }
   Type record = _lower_record_type(l, declared);
@@ -305,7 +306,7 @@ static void _lower_scan_storage_binding(
         l.cells[id] = layout ? layout : 1;
         l.records[id] = record;
       }
-      if (type.is_static()) (void) _lower_decline(l, "a local static");
+      if (type.is_static()) (void) $repl.decline(l, "local.static");
     }
 }
 
@@ -420,8 +421,7 @@ static void _lower_scan(Lowering &l, Var form) {
   /* This refuses the function outright, so the scan stops rather than
      reporting what the refused statement happens to call. */
   if (_lower_scan_aggregate(l, items)) {
-    (void) _lower_decline(
-      l, "a struct or union, which has no compile-time representation");
+    (void) $repl.decline(l, "layout.unsupported");
     return;
   }
   if (head == <block>) _lower_scan_cursor_block(l, items.cdr());
@@ -458,7 +458,7 @@ static Var _lower_read(Lowering &l, int id) {
   Var form;
   if (l.env.try_get(id, form)) return form;
   if (!l.locals.contains(id)) return %(C.gread $id);
-  return _lower_decline(l, "unbound local");
+  return $repl.decline(l, "local.unbound");
 }
 
 /* The value a local holds. An object in bytes is read through its slot, and
@@ -479,14 +479,14 @@ static Var _lower_value(Lowering &l, int id) {
 static Var _lower_number(Lowering &l, List type, String text) {
   Var value = ((Type) type).numeric_literal_value(text);
   if (value is not void) return value;
-  return _lower_decline(l, "unreadable numeric literal");
+  return $repl.decline(l, "literal.number");
 }
 
 /* The slot holding a local's storage. */
 static Var _lower_address(Lowering &l, int id) {
   Var slot;
   if (!l.env.try_get(id, slot))
-    return _lower_decline(l, "address of an unknown local");
+    return $repl.decline(l, "address.unknown");
   return slot;
 }
 
@@ -505,7 +505,7 @@ static Var _lower_typed_address(Lowering &l, List type, int id) {
     Type record = pointer && pointer.is_pointer()
                 ? _lower_record_type(l, pointer.dereference()) : NULL;
     if (!record)
-      return _lower_decline(l, "the address of file-scope state");
+      return $repl.decline(l, "address.global");
     slot = %(C.gread $id);
     layout = l.owner.type_layout(record);
   }
@@ -513,7 +513,7 @@ static Var _lower_typed_address(Lowering &l, List type, int id) {
   if (slot is void) slot = _lower_address(l, id);
   if (_lower_failed(l, slot)) return void;
   if (layout && (layout.car() != <record> || !tag)) return slot;
-  if (!tag) return _lower_decline(l, "an address with no Var pointer tag");
+  if (!tag) return $repl.decline(l, "address.tag");
   return %(C.address $slot (quote $tag));
 }
 
@@ -537,7 +537,7 @@ static Var _lower_segments(Lowering &l, List parts) {
 /* A folded constant used as a value. */
 static Var _lower_quoted(Lowering &l, Var node) {
   Var value = l.compiler.folded_constant(node);
-  if (value is void) return _lower_decline(l, "a constant did not fold");
+  if (value is void) return $repl.decline(l, "constant.unfolded");
   return %(quote $value);
 }
 
@@ -599,7 +599,7 @@ static long _lower_field_offset(Lowering &l, List path, List &field_layout) {
   foreach (List frame, path.reverse()) {
     match (frame) {
       case %(? index *): {
-        (void) _lower_decline(l, "an array inside a compile-time struct");
+        (void) $repl.decline(l, "array.nested");
         return -1;
       }
       case %(?owner field ?name *):
@@ -610,7 +610,7 @@ static long _lower_field_offset(Lowering &l, List path, List &field_layout) {
             continue;
           }
     }
-    (void) _lower_decline(l, "a compile-time struct with no host layout");
+    (void) $repl.decline(l, "layout.host");
     return -1;
   }
   return offset;
@@ -624,14 +624,14 @@ static Var _lower_field_place(
   if (access == <"->">) {
     Type pointer = l.compiler.sym.resolve_key(owner);
     if (!pointer || !pointer.is_pointer())
-      return _lower_decline(l, "field access through a non-pointer");
+      return $repl.decline(l, "field.pointer");
     owner = pointer.dereference();
   }
   Type record = _lower_record_type(l, owner);
   if (!record)
-    return _lower_decline(l, "a struct with no compile-time layout");
+    return $repl.decline(l, "layout.compile");
   List path = l.compiler.initializer_field_path(record, field);
-  if (!path) return _lower_decline(l, "an unknown compile-time struct field");
+  if (!path) return $repl.decline(l, "field.unknown");
   List layout = NULL;
   long offset = _lower_field_offset(l, path, layout);
   if (offset < 0) return void;
@@ -654,7 +654,7 @@ static Var _lower_place(Lowering &l, Var target) {
       if (operator == <"*">) return _lower_expr(l, operand);
     case %(expr ?type (index ?receiver ?key)): {
       List layout = l.owner.type_layout(type);
-      if (!layout) return _lower_decline(l, "an indexed object with no layout");
+      if (!layout) return $repl.decline(l, "index.layout");
       Var base = _lower_expr(l, receiver), index = _lower_expr(l, key);
       if (l.declined) return void;
       (Var size) = layout.cddr();
@@ -714,7 +714,7 @@ static List _lower_args(
                 ? 0 : argument.cadr().car() == <opt-ref>
                     ? _lower_expr(l, argument) : _lower_place(l, argument);
       if (place is void) {
-        (void) _lower_decline(l, "a reference argument with no storage");
+        (void) $repl.decline(l, "argument.storage");
         return NULL;
       }
       values.push(place);
@@ -789,7 +789,7 @@ static Var _lower_native_call(
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
-  if (!parts) return _lower_decline(l, "not a dynamic Func call");
+  if (!parts) return $repl.decline(l, "func.dynamic");
   Var callee = _lower_expr(l, parts.car());
   if (_lower_failed(l, callee)) return void;
   Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
@@ -955,7 +955,7 @@ static Var _lower_operands(
     if (operator == <+>) return only;
     if (operator == <~>) return %(_binary -1 (quote <^>) $only);
     if (operator == <!>) return %(C.not $only);
-    return _lower_decline(l, "unsupported unary operator");
+    return $repl.decline(l, "operator.unary");
   }
   if (values.len() == 2) {
     Var left = values[0], right = values[1];
@@ -981,15 +981,15 @@ static Var _lower_operands(
     b = _lower_coerce(l, result, operands.caddr(), b);
     return %(C.ternary $test $a $b);
   }
-  return _lower_decline(l, "unsupported operator arity");
+  return $repl.decline(l, "operator.arity");
 }
 
 /* Captures run at construction. Record values copy into closure storage;
    addressed scalars load their value before the source frame ends. */
 static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
-  if (l.on_loop) return _lower_decline(l, "a lambda in a loop");
+  if (l.on_loop) return $repl.decline(l, "lambda.loop");
   match (body) case %(block *):
-    return _lower_decline(l, "a block-bodied lambda");
+    return $repl.decline(l, "lambda.block");
   int automatic = l.automatic;
   Map previous = l.env;
   l.env = _lower_env_copy(l);
@@ -1010,7 +1010,7 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
         if (_lower_record_type(l, type)) {
           List layout = l.owner.type_layout(type);
           if (!layout)
-            return _lower_decline(l, "a captured struct with no host layout");
+            return $repl.decline(l, "capture.layout");
           (Var size) = layout.cddr();
           value = %(C.session-copy $value $size);
         }
@@ -1097,7 +1097,7 @@ static Array _lower_values(Lowering &l, List items) {
     Var value = _lower_expr(l, item);
     if (_lower_failed(l, value)) {
       values.free();
-      _lower_decline(l, "an element that is not an expression");
+      (void) $repl.decline(l, "element.expression");
       return NULL;
     }
     values.push(value);
@@ -1138,7 +1138,7 @@ static Var _lower_map(Lowering &l, List entries) {
         continue;
       }
     flat.free();
-    return _lower_decline(l, "unsupported map entry");
+    return $repl.decline(l, "map.entry");
   }
   return %(Map_of ${cons(<list>, flat.list_free())});
 }
@@ -1165,7 +1165,7 @@ static Var _lower_getindex(
   Lowering &l, Var receiver, Var key, int is_c_array) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
-    return _lower_decline(l, "indexing a type with no compile-time meaning");
+    return $repl.decline(l, "index.type");
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
@@ -1187,7 +1187,7 @@ static Var _lower_sizeof(Lowering &l, Type type, List operand) {
   }
   match (measured ? l.owner.type_layout(measured) : NULL)
     case %(? ? ?size *): return _lower_to_type(l, type, size);
-  return _lower_decline(l, "sizeof a type with no layout");
+  return $repl.decline(l, "sizeof.layout");
 }
 
 /* One `match` over the expression grammar. The compiler turns it into a
@@ -1211,7 +1211,7 @@ static Var _lower_expr(Lowering &l, Var form) {
     case %(nil):     return %(quote ());
     case %(cache ?): return _lower_quoted(l, form);
   }
-  return _lower_decline(l, "not an expression");
+  return $repl.decline(l, "expression.expected");
 }
 
 static Var _lower_content(Lowering &l, List type, Var content) {
@@ -1249,7 +1249,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
           case %(next ?previous):
             return %(+ ${_lower_expr(l, %(expr $type (ident $previous)))} 1);
         }
-        return _lower_decline(l, "an enum constant has no compile-time value");
+        return $repl.decline(l, "enum.value");
       }
       /* A name with no type has no declaration the compiler read: it is a
          preprocessor macro. The null pointer constant and `stdbool.h`'s
@@ -1257,7 +1257,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       if (!type && !l.locals.contains(id)) {
         if (name == "NULL" || name == "false") return 0;
         if (name == "true") return 1;
-        return _lower_decline(l, "a name with no declaration: " + name);
+        return $repl.decline(l, "name.declaration", name);
       }
       return _lower_value(l, id);
     }
@@ -1288,7 +1288,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       Var place = _lower_place(l, target);
       if (l.declined) return void;
       if (place is void)
-        return _lower_decline(l, "an address of a value with no storage");
+        return $repl.decline(l, "address.storage");
       Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
       return tag ? %(C.address $place (quote $tag)) : place;
     }
@@ -1337,7 +1337,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(index ?receiver ?key):
       return _lower_getindex(l, receiver, key, 1);
     case %(postfix ? ?):
-      return _lower_decline(l, "unsupported postfix operator");
+      return $repl.decline(l, "operator.postfix");
     case %(lambda (params *params) (captures *held) ?body):
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
@@ -1349,7 +1349,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(nil):     return %(quote ());
     case %(cache ?): return _lower_quoted(l, content);
   }
-  return _lower_decline(l, "unsupported expression");
+  return $repl.decline(l, "expression.unsupported");
 }
 
 /* --- statements --------------------------------------------------------- */
@@ -1429,7 +1429,7 @@ static Var _lower_apply_k(Lowering &l, List k) {
       return values.list();
     }
   }
-  return _lower_decline(l, "unknown continuation");
+  return $repl.decline(l, "continuation.unknown");
 }
 
 /* The equality adapters box Lisp equality as an int. A guard needs only
@@ -1548,7 +1548,7 @@ static Var _lower_arms(
   if (!arms) return _lower_block(l, rest, k);
   List arm = arms.car();
   Var pattern = l.compiler.folded_constant(arm.car());
-  if (pattern is void) return _lower_decline(l, "case pattern is not folded");
+  if (pattern is void) return $repl.decline(l, "case.unfolded");
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
@@ -1786,8 +1786,7 @@ static Var _lower_switch(
   if (_lower_failed(l, value)) return void;
   int bound = !_lower_pure(value);
   if (bound && l.on_loop)
-    return _lower_decline(
-      l, "a switch subject needing a binding is on a loop path");
+    return $repl.decline(l, "switch.binding");
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
   Array arms = $auto([]);
@@ -1834,7 +1833,7 @@ static Var _lower_switch(
     List cases = arm.car();
     List statements = arm.cadr();
     if (i + 1 < count && !_lower_terminated(statements)) {
-      _lower_decline(l, "a switch arm that falls through into the next");
+      (void) $repl.decline(l, "switch.fallthrough");
       break;
     }
     Array conditions = [];
@@ -1909,7 +1908,7 @@ static Var _lower_record_zero(Lowering &l, Type type, Var into) {
       if (into is not void) return %(C.zero $into $size);
       return %(C.bytes $size);
     }
-  return _lower_decline(l, "a compile-time struct with no host layout");
+  return $repl.decline(l, "layout.host");
 }
 
 /* Each initializer row stores one field value at its offset. */
@@ -1923,15 +1922,13 @@ static Var _lower_record_braced(
   foreach (List row, l.compiler.initializer_rows(record, items, NULL)) {
     List choices = row.cadr();
     if (!choices || choices.cdr())
-      return _lower_decline(
-        l, "a native-dependent compile-time struct initializer");
+      return $repl.decline(l, "init.native");
     List choice = choices.car();
     List condition = choice.car(), path = choice.cadr();
     Type destination = choice.caddr();
     List input = choice[3];
     if (condition || !destination || !path)
-      return _lower_decline(
-        l, "an unsupported compile-time struct initializer");
+      return $repl.decline(l, "init.struct");
     List layout = NULL;
     long offset = _lower_field_offset(l, path, layout);
     if (offset < 0) return void;
@@ -1952,12 +1949,12 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
     Type element = declared.is_array() ? declared.dereference() : declared;
     int size = 0;
     if (!_lower_dimension(l, id, size))
-      return _lower_decline(l, "an array dimension that is not a literal");
+      return $repl.decline(l, "array.dimension");
     Array values = _lower_values(l, items);
     if (l.declined) return void;
     if (values.len() > size) {
       values.free();
-      return _lower_decline(l, "more initializers than the array holds");
+      return $repl.decline(l, "array.capacity");
     }
     int index = 0;
     foreach (Var item, items) {
@@ -1969,7 +1966,7 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
     List layout = l.owner.type_layout(element);
     if (!layout) {
       values.free();
-      return _lower_decline(l, "an array element with no compile-time layout");
+      return $repl.decline(l, "array.layout");
     }
     l.automatic = 1;
     Symbol tag = _lower_pointer_tag(l, layout);
@@ -1978,12 +1975,12 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
       (quote $tag));
   }
   if (type.equal(%("Map")) || l.compiler.sym.is_var_type(type)) {
-    if (items) return _lower_decline(l, "a braced Map initializer needs keys");
+    if (items) return $repl.decline(l, "init.map");
     return %(Map_new);
   }
   if (type.equal(%("Array"))) return _lower_array(l, items);
   if (type.equal(%("List")))  return _lower_sequence(l, items);
-  return _lower_decline(l, "a braced initializer for this type");
+  return $repl.decline(l, "init.type");
 }
 
 /* A declaration, a cast, an assignment, a return and an argument each name a
@@ -2013,8 +2010,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         if (!target_record || !source_record ||
             !target_record.equal(source_record)) {
           String types = %"${want.repr()} from ${from.repr()}";
-          return _lower_decline(
-            l, "incompatible compile-time struct types: " + types);
+          return $repl.decline(l, "struct.types", types);
         }
         return value;
       }
@@ -2062,7 +2058,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
         _lower_scan_callee(l, name);
         if (l.uncallable)
-          return _lower_decline(l, "no binding for " + name);
+          return $repl.decline(l, "binding.missing", name);
         return %(${Atom.intern(name)} $value);
       }
     }
@@ -2140,7 +2136,7 @@ static Var _lower_declarator(
         l, id, _lower_boxed(l, id, initial, 1), rest, k);
     }
   }
-  return _lower_decline(l, "unsupported declarator");
+  return $repl.decline(l, "declarator.unsupported");
 }
 
 /* A destructuring names its targets bare when one type covers them all and
@@ -2168,14 +2164,14 @@ static Var _lower_destructure(
   source = _lower_coerce(l, %("List"), init, source);
   int hold = !_lower_pure(source);
   if (hold && l.on_loop)
-    return _lower_decline(l, "a value needing a binding is on a loop path");
+    return $repl.decline(l, "binding.loop");
   Var held = hold ? _lower_name(l, "hold") : source;
   List wraps = %();
   int index = 0;
   foreach (List target, targets) {
     int id;
     if (!_lower_destructure_id(target, id))
-      return _lower_decline(l, "unsupported destructuring target");
+      return $repl.decline(l, "destructure.target");
     Var element = %(List_getindex $held $index);
     index++;
     if (!l.cells.contains(id)) {
@@ -2217,9 +2213,9 @@ static Var _lower_setindex_value(
   Lowering &l, Var receiver, Var key, int is_c_array, Var value) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
-    return _lower_decline(l, "indexing a type with no compile-time meaning");
+    return $repl.decline(l, "index.type");
   if (container.equal("List") || container.equal("String"))
-    return _lower_decline(l, "indexed write to a List or String");
+    return $repl.decline(l, "index.immutable");
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
@@ -2258,7 +2254,7 @@ static Var _lower_assign_expr(Lowering &l, Var target, Var rhs) {
   if (l.declined || _lower_failed(l, value)) return void;
   if (place is not void) return _lower_poke(l, type, place, value);
   if (id >= 0 && !l.locals.contains(id)) return %(C.gwrite $id $value);
-  return _lower_decline(l, "assignment expression without storage");
+  return $repl.decline(l, "assignment.storage");
 }
 
 /* A compound update evaluates the place once and returns its new value. */
@@ -2267,7 +2263,7 @@ static Var _lower_update_expr(
   if (_lower_failed(l, right)) return void;
   Var place = _lower_place(l, target);
   if (l.declined || place is void)
-    return _lower_decline(l, "update expression without storage");
+    return $repl.decline(l, "update.storage");
   Type want = _lower_type_of(target);
   Var slot = _lower_name(l, "place");
   Var old = _lower_name(l, "old");
@@ -2292,7 +2288,7 @@ static Var _lower_store(
   if (l.declined || _lower_failed(l, value)) return void;
   if (place is not void)
     return _lower_effect(l, _lower_poke(l, type, place, value), rest, k);
-  if (id < 0) return _lower_decline(l, "assignment to a computed place");
+  if (id < 0) return $repl.decline(l, "assignment.computed");
   if (!l.locals.contains(id)) {
     match (l.owner.type_layout(type))
       case %(record ? ?size *):
@@ -2323,7 +2319,7 @@ static Var _lower_update(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
       rest, k);
   }
-  if (id < 0) return _lower_decline(l, "update of a computed place");
+  if (id < 0) return $repl.decline(l, "update.computed");
   if (!l.locals.contains(id)) {
     Var combined = _lower_to_type(
       l, want, %(_binary (C.gread $id) (quote $operator) $right));
@@ -2447,7 +2443,7 @@ static Var _lower_expression_stmnt(
     case %(expr ? (op ?operator ?target ?rhs)): {
       Symbol applied = _lower_compound(operator);
       if (!applied)
-        return _lower_decline(l, "statement with no effect on a local");
+        return $repl.decline(l, "statement.effect");
       return _lower_update(
         l, target, applied, _lower_expr(l, rhs), rest, k);
     }
@@ -2466,7 +2462,7 @@ static Var _lower_expression_stmnt(
       return _lower_effect(l, value, rest, k);
     }
   }
-  return _lower_decline(l, "statement with no effect on a local");
+  return $repl.decline(l, "statement.effect");
 }
 
 /* A `defer` runs the rest of its block through `C.unwind`, and the
@@ -2587,11 +2583,11 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
       return _lower_switch(l, subject, items, rest, k);
     case %(break): {
       if (!l.on_break)
-        return _lower_decline(l, "break outside a loop or switch");
+        return $repl.decline(l, "break.scope");
       return _lower_apply_k(l, l.on_break);
     }
     case %(continue): {
-      if (!l.on_continue) return _lower_decline(l, "continue outside a loop");
+      if (!l.on_continue) return $repl.decline(l, "continue.scope");
       return _lower_apply_k(l, l.on_continue);
     }
     /* `do BODY while (TEST)` checks the test after the body, which is the
@@ -2613,7 +2609,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
         l, guard, %($body), step ? %((stmnt $step)) : %(), rest, k);
     }
   }
-  return _lower_decline(l, "unsupported statement");
+  return $repl.decline(l, "statement.unsupported");
 }
 
 static List _lower_for_init(List init) {
@@ -2662,9 +2658,9 @@ List ReplLower.lower(ReplLower self, List fn) {
       /* The scan records its own wording for a construct refused by
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
-        if (l.rejected) l.owner.reason = "a goto has no lowering";
+        if (l.rejected) l.owner.reason = $repl.reason("scan.goto");
         else if (l.uncallable)
-          l.owner.reason = "no binding for " + l.owner.missing;
+          l.owner.reason = $repl.reason("scan.binding", l.owner.missing);
       }
       if (l.declined || l.rejected || l.uncallable) {
         l.definitions.free();
