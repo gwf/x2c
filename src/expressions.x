@@ -3686,30 +3686,16 @@ static List Compiler._converter_owned_call(
   List callee = %(expr $cvrtrtype (ident $converter_binding));
   List argument = expr.cadr() == owner
     ? expr : %(expr $owner $expr);
-  Macro called = $called;
-  if (cvrtrtype && cvrtrtype.car() is <list>) {
-    List function = cvrtrtype.car();
-    (Var function_tag, List parameters) = function;
-    Type result = cvrtrtype.cdr();
-    if (function_tag == <func> &&
-        parameters && !parameters.cdr() &&
-        List.equal(parameters.car(), owner) &&
-        result.equal(target)) {
-      List call = c.rebuild_expression(
-        target, called(callee, %($argument)));
-      return c._converted_temporary(call, owner, target);
-    }
-  }
   /* The relaxed form exists so a converter may spell its parameter as a
-     typedef of the source type, which the exact comparison above rejects.
-     It still takes exactly one argument: matching a longer parameter list
+     typedef of the source type, which the exact comparison rejects. It
+     still takes exactly one argument: matching a longer parameter list
      emitted a call with the arguments missing. */
-  if (cvrtrtype.match(%((func (($typename))) ?))) {
-    List call = c.rebuild_expression(
-      target, called(callee, %($argument)));
-    return c._converted_temporary(call, owner, target);
-  }
-  return NULL;
+  if (!cvrtrtype.equal(%((func ($owner)) @target)) &&
+      !cvrtrtype.match(%((func (($typename))) ?)))
+    return NULL;
+  Macro called = $called;
+  List call = c.rebuild_expression(target, called(callee, %($argument)));
+  return c._converted_temporary(call, owner, target);
 }
 
 /* A package converter uses the package spelling of the external owner. */
