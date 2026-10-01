@@ -76,8 +76,8 @@ The compiler is consolidated by phase rather than filename prefixes:
   `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`, `deps.x`,
   `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
-  `parse.x`, `expressions.x`, `statements.x`, `literals.x`, `macros.x`,
-  `grammar.xmacro`, `ast-rewrite.xmacro`, `ast.x`;
+  `parse.x`, `expressions.x`, `initializers.x`, `statements.x`,
+  `literals.x`, `macros.x`, `grammar.xmacro`, `ast-rewrite.xmacro`, `ast.x`;
 - compile-time code: `stage.x`, `builtins.x`, `linked-meta.x`,
   `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,

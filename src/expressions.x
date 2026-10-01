@@ -2,7 +2,8 @@
 
     Parses expressions with C precedence, resolves their types and members,
     and converts resolved values for typed destinations. Constructed syntax
-    enters the same resolver as parsed source.
+    enters the same resolver as parsed source. A brace initializer converts
+    through `initializers.x`.
   */
 #pragma once
 $(import "../lib/private-keywords.xmacro")
@@ -3447,7 +3448,7 @@ static int _conditional_joins(Compiler c, Type type, Type other) =>
    as an initializer. An anonymous struct or union has no spelling for that
    literal. */
 static List _compound_literal(Compiler c, List composite, Type target) {
-  List converted = _convert_composite(c, composite, target, NULL, NULL, NULL);
+  List converted = c.convert_initializer(composite, target, NULL);
   match (converted)
     case %(expr ?type (composite *)): {
       if (Type.tag(type).match(%((gensym *))))

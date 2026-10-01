@@ -25,6 +25,7 @@ Functions and types exposed by each compiler module.
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
+| [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
 | [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |

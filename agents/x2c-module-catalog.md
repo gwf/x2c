@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 37
+- Compiler modules: 38
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -95,22 +95,23 @@ Public functions:
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.tokenize`,
 `Compiler.peek`, `Compiler.skip_trivia_from`, `Compiler.require_input`,
-`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Symbol.group_step`,
-`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
-`Compiler.at_completion`, `Compiler.__complete_here`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `preproc_never_active_arm`,
-`preproc_open_state`, `preproc_branch_state`, `preproc_visibility`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`, `Sym.reset`,
-`Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`,
-`Sym.at_file_scope`, `Sym.global_symbols`, `Sym.base_symbols`,
-`Sym.current_symbols`, `Sym.file_statics`, `Sym.mark_static`,
-`Sym.visible_symbols`, `Sym.set`, `Sym.define`, `Sym.seed_var_tags`,
-`Sym.define_global`, `Sym.declare_enumerator`, `Sym.introduce`,
-`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
-`Sym.binding_is_local_before`, `Sym.get`, `Sym.get_exact`, `Sym.lookup`,
-`Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
+`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.at_word`,
+`Compiler.take_word`, `Symbol.group_step`, `Token.group_close`,
+`Token.after_group`, `Compiler.mark_completion`, `Compiler.at_completion`,
+`Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
+`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
+`preproc_never_active_arm`, `preproc_open_state`, `preproc_branch_state`,
+`preproc_visibility`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Sym.reset`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
+`Sym.global_symbols`, `Sym.base_symbols`, `Sym.current_symbols`,
+`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`, `Sym.set`,
+`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
+`Sym.declare_enumerator`, `Sym.introduce`, `Sym.current_binding`,
+`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
+`Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
 `Sym.bind_identity`, `Compiler.aggregate_name`, `Compiler.package_spelling`,
 `Compiler.register_package_alias`, `Compiler.register_package_member`,
 `Compiler.package_member_spelling`, `Compiler.imported_providers`,
@@ -201,10 +202,7 @@ Public functions:
 `Compiler.parse_variable`, `Compiler.parse_conditional`,
 `Compiler.parse_assignment`, `Compiler.parse_primary`,
 `Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.converter_call`, `Compiler.initializer_native_types`,
-`Compiler.initializer_slot`, `Compiler.initializer_field_path`,
-`Compiler.initializer_rows`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.converter_call`, `Compiler.convert_expression`,
 `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
@@ -233,6 +231,16 @@ Public functions:
 
 `generate_code`, `generate_code_text`, `Compiler.init_statements`,
 `Compiler.definition_rows`, `Compiler.dump_definitions`
+
+### [src/initializers.x](../src/initializers.x)
+
+brace initializer conversion.
+
+Public functions:
+
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.initializer_native_types`, `Compiler.initializer_rows`,
+`Compiler.initializer_field_path`, `Compiler.initializer_slot`
 
 ### [src/install.x](../src/install.x)
 
