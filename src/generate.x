@@ -11,6 +11,7 @@
 #include "compiler.x"
 #pragma private
 $(import "../src/error-reports.xmacro")
+$(import "../src/grammar.xmacro")
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -978,10 +979,9 @@ static void _set_declared(Map available, List node, List declarator) {
 }
 
 static List _declaration_binding(List declarator) {
-  match (declarator) {
-    case %(bind (!set ?binding (binding ? ?)) ?): return binding;
-    case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): return binding;
-  }
+  match (declarator)
+    case $source_declarator_row(%((!set ?binding (binding ? ?)) ?)):
+      return binding;
   return NULL;
 }
 
