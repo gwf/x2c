@@ -585,8 +585,14 @@ List Compiler_cache(Compiler, List);
 
 static List Compiler__atom_element(Compiler c, String spelling){
   Atom atom = Atom_intern(spelling);
-  List literal = Var_is(atom, 1328354264) ? cons(_81, cons(_85, cons(String_var(spelling), cons(Symbol_var(Var_symbol(atom)), NULL)))) : cons(_81, cons(_89, cons(String_var(spelling), cons(atom, NULL))));
-  List expression = cons(_33, cons(List_cadr(literal), cons(List_var(literal), NULL)));
+  List literal = Var_is(atom, 1328354264) ?({
+    Var _x2c_literal_part_0 = String_var(spelling);  Var _x2c_literal_part_1 = Symbol_var(Var_symbol(atom));  cons(_81, cons(_85, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+  }
+  ) : cons(_81, cons(_89, cons(String_var(spelling), cons(atom, NULL))));
+  List expression =({
+    Var _x2c_literal_part_2 = List_cadr(literal);  cons(_33, cons(_x2c_literal_part_2, cons(List_var(literal), NULL)));
+  }
+  );
   if(c -> runtime_literals) return expression;
   return Compiler_cache(c, cons(_90, cons(List_var(expression), NULL)));
 }
@@ -1151,7 +1157,10 @@ List Compiler_parse_map_entries(Compiler c){
 List Compiler_parse_assignment(Compiler);
 List Compiler_parse_map_entry(Compiler c){
   if(! _init_guard_) _file_init_();  List slot = Compiler_try_parse_macro_slot(c, 28692473357490);  if(List_truth(slot)) return slot;  List macro = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);  if(List_truth(macro)) return macro;  Token origin = c -> token;  List key = NULL;  if(Compiler_peek(c, 0) == 19147688 && Compiler_peek(c, 1) == 117){
-    List literal = Compiler__atom_literal(c, c -> token -> text);  Compiler_next(c);  key = cons(_33, cons(List_cadr(literal), cons(List_var(literal), NULL)));
+    List literal = Compiler__atom_literal(c, c -> token -> text);  Compiler_next(c);  key =({
+      Var _x2c_literal_part_3 = List_cadr(literal);  cons(_33, cons(_x2c_literal_part_3, cons(List_var(literal), NULL)));
+    }
+    );
   }
   else key = Compiler_parse_assignment(c);  Compiler_expect(c, 117);  List value = Compiler_parse_assignment(c);  return Compiler_resolve_map_entry(c, cons(_245, cons(List_var(key), cons(List_var(value), NULL))), origin);
 }
@@ -1219,7 +1228,10 @@ List Compiler_parse_atomic_literal(Compiler c){
     case 1473096 : literal = source_literal_content(_263);  break;  case 845368475748 : literal = source_literal_content(cons(_264, cons(String_var(text), NULL)));  break;  case 26417777576 : literal = Compiler__number_literal(c, text, 0);  break;  case 27051797805160 : literal = Compiler__number_literal(c, text, 1);  break;  case 27051791223990 : literal = source_literal_content(cons(_224, cons(String_var(text), NULL)));  break;  case 845368370138 : literal = Compiler__atom_literal(c, text);  break;  case 865658429314008 : literal = Compiler__symbol_literal(c, text);  break;
   }
   if(List_truth(literal)){
-    Compiler_next(c);  return cons(_33, cons(List_cadr(literal), cons(List_var(literal), NULL)));
+    Compiler_next(c);  return({
+      Var _x2c_literal_part_4 = List_cadr(literal);  cons(_33, cons(_x2c_literal_part_4, cons(List_var(literal), NULL)));
+    }
+    );
   }
   Symbol kind = Compiler_peek(c, 0);  Compiler_report_error(c, 33658058, _303, c -> token, cons(_266, cons(String_var(c -> token -> text), cons(_268, cons(String_var(Symbol_str(kind)), NULL)))));
 }
@@ -1232,7 +1244,10 @@ static List Compiler__number_literal(Compiler c, String text, int floating){
 int Map_truth(Map);
 int Var_is_binder(Var);
 static List Compiler__atom_literal(Compiler c, String text){
-  String spelling = String_unescape(text);  Atom atom = Atom_intern(spelling);  Compiler__check_binder(c, atom);  if(Map_contains(c -> object_macros, String_var(spelling))) Compiler__warn_macro_name(c, spelling);  if(Var_is(atom, 1328354264)) return cons(_81, cons(_85, cons(String_var(text), cons(Symbol_var(Var_symbol(atom)), NULL))));  Var value = Map_truth(c -> macro_holes) && Var_is_binder(atom) ? List_var(cons(_66, cons(atom, NULL))) : atom;  return cons(_81, cons(_89, cons(String_var(spelling), cons(value, NULL))));
+  String spelling = String_unescape(text);  Atom atom = Atom_intern(spelling);  Compiler__check_binder(c, atom);  if(Map_contains(c -> object_macros, String_var(spelling))) Compiler__warn_macro_name(c, spelling);  if(Var_is(atom, 1328354264)) return({
+    Var _x2c_literal_part_5 = String_var(text);  Var _x2c_literal_part_6 = Symbol_var(Var_symbol(atom));  cons(_81, cons(_85, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL))));
+  }
+  );  Var value = Map_truth(c -> macro_holes) && Var_is_binder(atom) ? List_var(cons(_66, cons(atom, NULL))) : atom;  return cons(_81, cons(_89, cons(String_var(spelling), cons(value, NULL))));
 }
 
 int Var_is_atom(Var);

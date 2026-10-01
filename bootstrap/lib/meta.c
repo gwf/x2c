@@ -329,7 +329,10 @@ List type_declaration_parts(List type){
     }
 
   }
-  return cons(List_var(List_append(qualifiers, base)), cons(List_var(List_append(Array_list_free(syntax), NULL)), NULL));
+  return({
+    Var _x2c_literal_part_0 = List_var(List_append(qualifiers, base));  Var _x2c_literal_part_1 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+  }
+  );
 }
 
 Var List_getindex(List, int);

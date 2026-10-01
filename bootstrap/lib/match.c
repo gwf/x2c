@@ -343,7 +343,10 @@ static List _normalize_pattern(List pattern){
   Var binder = List_car(args);
   List rest = List_cdr(args);
   if(! Var_is_binder(binder) || ! List_truth(rest) ||(Var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
-  return cons(_0, cons(binder, cons(List_var(_normalize_pattern(cons(op, List_append(rest, NULL)))), NULL)));
+  return({
+    Var _x2c_literal_part_0 = binder;  Var _x2c_literal_part_1 = List_var(_normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+  }
+  );
 }
 
 Block Block_new(size_t);
@@ -754,7 +757,10 @@ static List MatchCaptureLayout__publish(MatchCaptureLayout layout, MatchCaptureB
   List bindings = NULL;
   for(int i = 0;  i < layout -> binder_count;  i ++){
     if(! _capture_bit(captures -> present, i)) continue;
-    List pair = cons(layout -> binders[i], cons(captures -> values[i], NULL));
+    List pair =({
+      Atom _x2c_literal_part_2 = layout -> binders[i];  Var _x2c_literal_part_3 = captures -> values[i];  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
+    }
+    );
     bindings = cons(List_var(pair), bindings);
   }
   return bindings;

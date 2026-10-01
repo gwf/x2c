@@ -1427,7 +1427,10 @@ List List_append(List, List);
 void generate_code(Compiler c, List ast, String dir){
   if(! _init_guard_) _file_init_();
   ast = _without_trivia(ast);
-  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(c -> filename)), NULL))));
+  String basename =({
+    Var _x2c_literal_part_0 = String_var(String_rstrip(dir, "/"));  Var _x2c_literal_part_1 = String_var(Path_stem(c -> filename));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_0), cons(_x2c_literal_part_1, NULL))));
+  }
+  );
   List outputs = Compiler__generated_code(c, ast, basename);
   String interface = c -> source_facts ? NULL : interface_text(c, _public_rows(Compiler_definition_rows(c, ast)));
   if(String_truth(interface)) outputs = List_append(outputs, cons(String_var(String_join(NULL, cons(String_var(basename), cons(String_var(_1), NULL)))), cons(String_var(interface), NULL)));
@@ -1469,7 +1472,10 @@ static List Compiler__generated_code(Compiler c, List ast, String basename){
   List hcode = Compiler__emit_header(c, header);
   List ccode = Compiler__emit_source(c, source, header);
   String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_18), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_19), NULL)));
-  return cons(String_var(hfile), cons(String_var(String_new(Compiler_code_pretty_string(c, hcode, hfile))), cons(String_var(cfile), cons(String_var(String_new(Compiler_code_pretty_string(c, ccode, cfile))), NULL))));
+  return({
+    Var _x2c_literal_part_2 = String_var(hfile);  Var _x2c_literal_part_3 = String_var(String_new(Compiler_code_pretty_string(c, hcode, hfile)));  Var _x2c_literal_part_4 = String_var(cfile);  Var _x2c_literal_part_5 = String_var(String_new(Compiler_code_pretty_string(c, ccode, cfile)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL))));
+  }
+  );
 }
 
 List Compiler_emit(Compiler, List);
@@ -1559,7 +1565,10 @@ static void Compiler__publish(Compiler c, List outputs){
   }
   if(! List_truth(failure)) return;
   String reason = String_new(strerror(Var_int(Var_convert(List_assoc(failure, Symbol_var(11703198)), 3453797))));
-  Compiler_report_error(c, 354920, _1128, c -> token, cons(String_var(String_join(NULL, cons(String_var(_20), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_21), cons(String_var(reason), NULL)))), NULL)));
+  Compiler_report_error(c, 354920, _1128, c -> token, ({
+    Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(_20), cons(String_var(Var_str(List_assoc(failure, Symbol_var(1051920)))), NULL))));  cons(_x2c_literal_part_6, cons(String_var(String_join(NULL, cons(String_var(_21), cons(String_var(reason), NULL)))), NULL));
+  }
+  ));
 }
 
 Array Array_new(void);
@@ -1801,7 +1810,10 @@ static List _header_function(Type type, List declarator, List body){
 
 List ast_prototype_declarator(List);
 static List _prototype(List type, List declarator){
-  return cons(_61, cons(List_var(type), cons(List_var(ast_prototype_declarator(declarator)), NULL)));
+  return({
+    Var _x2c_literal_part_7 = List_var(type);  Var _x2c_literal_part_8 = List_var(ast_prototype_declarator(declarator));  cons(_61, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
+  }
+  );
 }
 
 Var Map_setindex(Map, Var, Var);
@@ -1906,7 +1918,10 @@ if(! String_truth(tag) || ! _declares_object(bindings)) return 0;  List tagged =
 
 int List_len(List);
 static List _tag_only(Type type, Type core, Var name){
-  return List_append(List_getslice(Type_list(type), -2147483648, List_len(Type_list(type)) - List_len(Type_list(core)), 1), cons(List_car(Type_list(core)), cons(name, NULL)));
+  return List_append(List_getslice(Type_list(type), -2147483648, List_len(Type_list(type)) - List_len(Type_list(core)), 1), ({
+    Var _x2c_literal_part_9 = List_car(Type_list(core));  cons(_x2c_literal_part_9, cons(name, NULL));
+  }
+  ));
 }
 
 int Type_is_extern(Type);
@@ -1971,7 +1986,10 @@ static void Partition_add_preproc(Partition * p, List node, String content){
 
 Var Array_take_last(Array);
 static void Partition_mark_conditional(Partition * p, List node, Symbol kind){
-  Partition_mark(p, cons(_225, cons(Array_getindex(p -> open, - 1), cons(Symbol_var(kind), cons(List_var(node), NULL)))));  if(kind == 7109834) Array_take_last(p -> open);
+  Partition_mark(p, ({
+    Var _x2c_literal_part_10 = Array_getindex(p -> open, - 1);  cons(_225, cons(_x2c_literal_part_10, cons(Symbol_var(kind), cons(List_var(node), NULL))));
+  }
+  ));  if(kind == 7109834) Array_take_last(p -> open);
 }
 
 int preproc_visibility(String);
@@ -2111,7 +2129,10 @@ static List _typedef_forward(Type type, List bindings){
     List _x2c_match_expr = Type_list(core);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_248), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_truth(name)) return cons(_31, cons(List_var(_tag_only(type, core, name)), cons(List_var(bindings), NULL)));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_248), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_truth(name)) return({
+    Var _x2c_literal_part_11 = List_var(_tag_only(type, core, name));  cons(_31, cons(_x2c_literal_part_11, cons(List_var(bindings), NULL)));
+  }
+  );  break;
 }
 
     }
@@ -2662,7 +2683,10 @@ static void _set_static(Map statics, List node, List declarator){
 default: break;
     }
   }
-List declaration = Var_equal(List_car(node), Symbol_var(44661285196)) ? node : cons(_61, cons(List_cadr(node), cons(List_var(cons(_33, cons(List_var(declarator), NULL))), NULL)));  Map_setindex(statics, List_var(binding), List_var(declaration));  if(Var_equal(List_car(node), Symbol_var(44661285196))) Map_setindex(statics, String_var(binding_identity_spelling(binding)), List_var(declaration));
+List declaration = Var_equal(List_car(node), Symbol_var(44661285196)) ? node :({
+  Var _x2c_literal_part_12 = List_cadr(node);  cons(_61, cons(_x2c_literal_part_12, cons(List_var(cons(_33, cons(List_var(declarator), NULL))), NULL)));
+}
+);  Map_setindex(statics, List_var(binding), List_var(declaration));  if(Var_equal(List_car(node), Symbol_var(44661285196))) Map_setindex(statics, String_var(binding_identity_spelling(binding)), List_var(declaration));
 }
 
 static void Forward_dependencies(Forward * f, Var value){
@@ -2759,7 +2783,10 @@ static List _vertical_spacing(List code){
 }
 
 static List Compiler__include_guard(Compiler c, List content){
-  if(c -> runtime_inc && ! _has_runtime_include(content)) content = cons(List_var(_921), content);  String guard = filename_hash(c -> filename);  return List_append(_banner(), List_append(_header_guard(content, guard), NULL));
+  if(c -> runtime_inc && ! _has_runtime_include(content)) content = cons(List_var(_921), content);  String guard = filename_hash(c -> filename);  return({
+    List _x2c_literal_part_13 = _banner();  List _x2c_literal_part_14 = _header_guard(content, guard);  List_append(_x2c_literal_part_13, List_append(_x2c_literal_part_14, NULL));
+  }
+  );
 }
 
 static int _has_runtime_include(List content){
@@ -2785,7 +2812,10 @@ static List _header_guard(List content, String guard){
 
 int ast_contains_head(Var, Symbol);
 static List Compiler__primary_include(Compiler c, List content){
-  List own = _include_directive(String_join(NULL, cons(String_var(Path_stem(c -> filename)), cons(String_var(_18), NULL))));  List error = ast_contains_head(List_var(content), 37833930) ? _include_directive(_1131) : NULL;  List exception = c -> needs_exception ? _include_directive(_1132) : NULL;  return List_append(_banner(), List_append(own, List_append(error, List_append(exception, List_append(content, NULL)))));
+  List own = _include_directive(String_join(NULL, cons(String_var(Path_stem(c -> filename)), cons(String_var(_18), NULL))));  List error = ast_contains_head(List_var(content), 37833930) ? _include_directive(_1131) : NULL;  List exception = c -> needs_exception ? _include_directive(_1132) : NULL;  return({
+    List _x2c_literal_part_15 = _banner();  List_append(_x2c_literal_part_15, List_append(own, List_append(error, List_append(exception, List_append(content, NULL)))));
+  }
+  );
 }
 
 static List _include_directive(String fname){
@@ -2830,7 +2860,10 @@ List Compiler_definition_rows(Compiler c, List ast){
     List _x2c_match_expr = declarator;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 150408: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761768840ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  Var modifiers = _x2c_match_values[1];  Array_push(rows, List_var(cons(_31, cons(String_var(binding_identity_spelling(Var_list(binding))), cons(base, cons(modifiers, cons(List_var(Compiler__span(c, node)), NULL)))))));  break; } } default: break;
+      case 150408: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761768840ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  Var modifiers = _x2c_match_values[1];  Array_push(rows, List_var(({
+        Var _x2c_literal_part_16 = String_var(binding_identity_spelling(Var_list(binding)));  Var _x2c_literal_part_17 = base;  Var _x2c_literal_part_18 = modifiers;  Var _x2c_literal_part_19 = List_var(Compiler__span(c, node));  cons(_31, cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, NULL)))));
+      }
+      )));  break; } } default: break;
     }
   }
     }
@@ -2886,7 +2919,10 @@ break;
 
     }
   }
-Symbol origin = List_truth(declarator) ? 1307939018 : 27335838;  if(alias) origin = 2902118;  return cons(_39, cons(String_var(name), cons(String_var(Compiler__display(c, binding, name)), cons(List_var(signature), cons(List_var(Compiler__parameter_names(c, modifiers)), cons(int_var(line), cons(doc, cons(int_var(Type_is_static(List_type(type))), cons(Symbol_var(origin), cons(List_var(declarator), cons(List_var(span), NULL)))))))))));
+Symbol origin = List_truth(declarator) ? 1307939018 : 27335838;  if(alias) origin = 2902118;  return({
+  Var _x2c_literal_part_20 = String_var(name);  Var _x2c_literal_part_21 = String_var(Compiler__display(c, binding, name));  Var _x2c_literal_part_22 = List_var(signature);  Var _x2c_literal_part_23 = List_var(Compiler__parameter_names(c, modifiers));  Var _x2c_literal_part_24 = int_var(line);  Var _x2c_literal_part_25 = doc;  Var _x2c_literal_part_26 = int_var(Type_is_static(List_type(type)));  cons(_39, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, cons(_x2c_literal_part_26, cons(Symbol_var(origin), cons(List_var(declarator), cons(List_var(span), NULL)))))))))));
+}
+);
 }
 
 static String Compiler__display(Compiler c, List binding, String name){
@@ -3014,7 +3050,10 @@ static void _print_function(Token tokens, List row){
 
     }
   }
-List location = _location(tokens, Var_list(span));  printf("%s\n", List_repr(cons(_39, cons(List_var(cons(_321, cons(name, NULL))), cons(List_var(cons(_1080, cons(display, NULL))), cons(List_var(cons(_526, cons(line, NULL))), cons(List_cadr(location), cons(List_var(cons(_130, cons(is_static, NULL))), cons(List_var(cons(_519, cons(origin, NULL))), cons(List_var(cons(_1081, cons(doc, NULL))), cons(List_var(cons(_1082, cons(String_var(text), NULL))), cons(List_var(cons(_147, cons(type, NULL))), cons(List_var(cons(_480, cons(names, NULL))), NULL)))))))))))));
+List location = _location(tokens, Var_list(span));  printf("%s\n", List_repr(({
+    Var _x2c_literal_part_27 = List_var(cons(_321, cons(name, NULL)));  Var _x2c_literal_part_28 = List_var(cons(_1080, cons(display, NULL)));  Var _x2c_literal_part_29 = List_var(cons(_526, cons(line, NULL)));  Var _x2c_literal_part_30 = List_cadr(location);  cons(_39, cons(_x2c_literal_part_27, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, cons(List_var(cons(_130, cons(is_static, NULL))), cons(List_var(cons(_519, cons(origin, NULL))), cons(List_var(cons(_1081, cons(doc, NULL))), cons(List_var(cons(_1082, cons(String_var(text), NULL))), cons(List_var(cons(_147, cons(type, NULL))), cons(List_var(cons(_480, cons(names, NULL))), NULL)))))))))));
+  }
+  )));
 }
 break; } } default: break;
     }
@@ -3096,7 +3135,13 @@ static List _location(Token tokens, List range){
       default: ;  static MatchCaptureSite _x2c_match_site_56;  if (x2c_match_site_try_capture(& _x2c_match_site_56, _x2c_match_expr, List_var(_1102), &_x2c_match_capture)) {Var start = _x2c_match_values[0];  Var end = _x2c_match_values[1]; {
     Var _x2c_match_value_17 = start;  Var _x2c_match_value_18 = end; {
       int start = Var_int(Var_convert(_x2c_match_value_17, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_18, 3453797)); {
-        Token first = tokens + start, last = tokens + end - 1;  return cons(List_var(cons(_526, cons(int_var(first -> line), NULL))), cons(List_var(cons(_1103, cons(int_var(first -> pos), cons(int_var(last -> pos + last -> len), NULL)))), NULL));
+        Token first = tokens + start, last = tokens + end - 1;  return({
+          Var _x2c_literal_part_31 = List_var(cons(_526, cons(int_var(first -> line), NULL)));  Var _x2c_literal_part_32 = List_var(({
+            Var _x2c_literal_part_33 = int_var(first -> pos);  Var _x2c_literal_part_34 = int_var(last -> pos + last -> len);  cons(_1103, cons(_x2c_literal_part_33, cons(_x2c_literal_part_34, NULL)));
+          }
+          ));  cons(_x2c_literal_part_31, cons(_x2c_literal_part_32, NULL));
+        }
+        );
       }
 
     }

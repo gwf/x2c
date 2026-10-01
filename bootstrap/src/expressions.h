@@ -60,5 +60,7 @@ List Compiler_convert_segment_to_string(Compiler c, List expr);
 
 List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 
+int Compiler_is_converter_call(Compiler c, List expr);
+
 
 #endif /* __GUARD_0xAA205D9A__ */

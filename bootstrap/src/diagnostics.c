@@ -380,7 +380,10 @@ static void Compiler__write_json(Compiler c, List entry){
             Var value = List_assoc(location, Symbol_var(key));
             if(Var_is_void(value)) value = Var_null();
             else if(Var_is_row(value, 11, 7, 1)) value = String_var(Compiler__json_path(c, Var_string(value)));
-            Buffer_write(out, String_join(NULL, cons(String_var(_20), cons(String_var(Var_json(Symbol_var(key))), cons(String_var(_21), cons(String_var(Var_json(value)), NULL))))));
+            Buffer_write(out, ({
+              Var _x2c_literal_part_0 = String_var(Var_json(Symbol_var(key)));  Var _x2c_literal_part_1 = String_var(Var_json(value));  String_join(NULL, cons(String_var(_20), cons(_x2c_literal_part_0, cons(String_var(_21), cons(_x2c_literal_part_1, NULL)))));
+            }
+            ));
           }
 
         }

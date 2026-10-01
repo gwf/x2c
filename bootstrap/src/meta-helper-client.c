@@ -360,7 +360,10 @@ static void Call_send(Call * call, List arguments){
   if(helper_reset){
     Call_send_frame(call, cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
   }
-  Call_send_frame(call, cons(_62, cons(String_var(call -> name), cons(List_var(arguments), cons(Macro_subject(), NULL)))));
+  Call_send_frame(call, ({
+    Var _x2c_literal_part_0 = String_var(call -> name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+  }
+  ));
 }
 
 static void Call_send_frame(Call * call, List message){

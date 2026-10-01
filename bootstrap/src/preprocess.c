@@ -320,14 +320,20 @@ List Array_list(Array);
 static void ArmScan_directive(ArmScan * s, Token token, size_t i){
   Symbol kind = preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len(s -> stack));
-  if(kind == 1016156) Array_push(s -> stack, List_var(cons(int_var(++ s -> serial), cons(_14, cons(int_var(preproc_open_state(token -> text)), NULL)))));
+  if(kind == 1016156) Array_push(s -> stack, List_var(({
+    Var _x2c_literal_part_0 = int_var(++ s -> serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_14, cons(_x2c_literal_part_1, NULL)));
+  }
+  )));
   else if(kind == 172060880 && Array_len(s -> stack)){
     Var id, arm, state;
     List _x2c_destructure_0 = Var_list(Array_getindex(s -> stack, - 1));
     id = List_getindex(_x2c_destructure_0, 0);
     arm = List_getindex(_x2c_destructure_0, 1);
     state = List_getindex(_x2c_destructure_0, 2);
-    Array_setindex(s -> stack, - 1, List_var(cons(id, cons(long_var(Var_integer(arm) + 1), cons(int_var(preproc_branch_state(Var_int(Var_convert(state, 3453797)))), NULL)))));
+    Array_setindex(s -> stack, - 1, List_var(({
+      Var _x2c_literal_part_2 = id;  Var _x2c_literal_part_3 = long_var(Var_integer(arm) + 1);  Var _x2c_literal_part_4 = int_var(preproc_branch_state(Var_int(Var_convert(state, 3453797))));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
+    }
+    )));
   }
   else if(kind == 7109834 && Array_len(s -> stack)) Array_take_last(s -> stack);
   else if(! s -> hidden) ArmScan__note_layout_macro(s, token -> text);
@@ -598,7 +604,10 @@ List preproc_track_arms(List arms, String text){
   Symbol kind = preproc_conditional_kind(text);
   if(kind == 1016156) return cons(List_var(cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
-  if(kind == 172060880) return cons(List_var(List_append(Var_list(List_car(arms)), cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL))), List_cdr(arms));
+  if(kind == 172060880) return cons(List_var(({
+    List _x2c_literal_part_5 = Var_list(List_car(arms));  List_append(_x2c_literal_part_5, cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL));
+  }
+  )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
 }
 

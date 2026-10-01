@@ -410,7 +410,10 @@ Ast Ast_rewrap_origin(Ast original, Ast replacement){
     List _x2c_match_expr = original;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 104: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var origin = _x2c_match_values[0];  Var inner = _x2c_match_values[1];  return cons(_410, cons(origin, cons(List_var(Ast_rewrap_origin(Var_list(inner), replacement)), NULL)));  break; } } default: break;
+      case 104: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var origin = _x2c_match_values[0];  Var inner = _x2c_match_values[1];  return({
+    Var _x2c_literal_part_0 = origin;  Var _x2c_literal_part_1 = List_var(Ast_rewrap_origin(Var_list(inner), replacement));  cons(_410, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+  }
+  );  break; } } default: break;
     }
   }
 return replacement;
@@ -536,7 +539,10 @@ return List_cdr(ast);
 int List_len(List);
 List Array_list(Array);
 List Ast_initializer_functions(Ast ast, List * source){
-  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_33, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
+  if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, &(header));  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument =({
+    Var _x2c_literal_part_2 = List_cadr(value);  Var _x2c_literal_part_3 = List_car(input);  cons(_33, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+  }
+  );  Array functions = Array_new(); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }

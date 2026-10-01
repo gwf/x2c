@@ -712,7 +712,10 @@ default: break;
 }
 
 void Compiler_record_meta_import(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_groups_meta(c)) Array_push(c -> meta_group, List_var(cons(_122, cons(Var_box_ulong(Array_truth(c -> unit_nodes) ? Array_len(c -> unit_nodes) : 0), cons(Var_box_ulong(Array_len(c -> meta_defs)), NULL)))));
+  if(! _init_guard_) _file_init_();  if(Compiler_groups_meta(c)) Array_push(c -> meta_group, List_var(({
+    Var _x2c_literal_part_0 = Var_box_ulong(Array_truth(c -> unit_nodes) ? Array_len(c -> unit_nodes) : 0);  Var _x2c_literal_part_1 = Var_box_ulong(Array_len(c -> meta_defs));  cons(_122, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+  }
+  )));
 }
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -979,7 +982,10 @@ Array_push(bare, List_var(binding));
     }
 
   }
-  return List_var(cons(_120, cons(spec, cons(List_var(cons(_121, List_append(Array_list_free(bare), NULL))), NULL))));
+  return List_var(({
+    Var _x2c_literal_part_2 = spec;  Var _x2c_literal_part_3 = List_var(cons(_121, List_append(Array_list_free(bare), NULL)));  cons(_120, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+  }
+  ));
 }
 break;
 }
@@ -1112,7 +1118,10 @@ static Var Compiler__template_calls(Compiler c, Var node, List callee){
       case 377892: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_300), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var stored = _x2c_match_values[1];  List arguments = Var_list(_x2c_match_values[2]); {
     List values = _302; {
       Var argument;  List _x2c_macro_object_14 = List_reverse(arguments);  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_15))){
-        argument = _x2c_macro_cursor_output_15;  values = cons(_33, cons(_146, cons(List_var(cons(_303, cons(List_var(Compiler_convert_expression(c, Var_list(Compiler__template_calls(c, argument, callee)), List_type(_141))), cons(List_var(values), NULL)))), NULL)));
+        argument = _x2c_macro_cursor_output_15;  values = cons(_33, cons(_146, cons(List_var(({
+          Var _x2c_literal_part_4 = List_var(Compiler_convert_expression(c, Var_list(Compiler__template_calls(c, argument, callee)), List_type(_141)));  cons(_303, cons(_x2c_literal_part_4, cons(List_var(values), NULL)));
+        }
+        )), NULL)));
       }
 
     }
@@ -1194,7 +1203,10 @@ static List Compiler__native_call(Compiler c, Var callee, String name, List argu
     }
 
   }
-  List target = Var_list(Compiler__native_targets(c, callee, lookup));  return Compiler_resolve_expression(c, cons(_33, cons(_157, cons(List_var(cons(_304, cons(List_var(target), cons(List_var(cons(_291, List_append(Array_list_free(values), NULL))), NULL)))), NULL))), NULL);
+  List target = Var_list(Compiler__native_targets(c, callee, lookup));  return Compiler_resolve_expression(c, cons(_33, cons(_157, cons(List_var(({
+    Var _x2c_literal_part_5 = List_var(target);  Var _x2c_literal_part_6 = List_var(cons(_291, List_append(Array_list_free(values), NULL)));  cons(_304, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
+  }
+  )), NULL))), NULL);
 }
 
 Type Sym_normalize_declared_type(Sym, Type);
@@ -1207,7 +1219,13 @@ void Compiler_add_translation_dependency(Compiler, String);
 Type Type_reference(Type);
 List x2c_literal_string(String);
 static List Compiler__native_symbol(Compiler c, Type type, String name, List lookup){
-  if(! Type_is_function(type) || !(Map_contains(c -> native_meta, String_var(name)))) return NULL;  String module = Compiler_native_meta_module(c, name, &(type));  if(! String_truth(module)) return NULL;  Compiler_add_translation_dependency(c, module);  Type pointer = Type_reference(type);  List target = cons(_33, cons(_537, cons(List_var(cons(_304, cons(List_var(lookup), cons(List_var(cons(_291, cons(List_var(x2c_literal_string(module)), cons(List_var(x2c_literal_string(name)), NULL)))), NULL)))), NULL)));  return cons(_33, cons(List_var(pointer), cons(List_var(cons(_50, cons(List_var(pointer), cons(List_var(target), NULL)))), NULL)));
+  if(! Type_is_function(type) || !(Map_contains(c -> native_meta, String_var(name)))) return NULL;  String module = Compiler_native_meta_module(c, name, &(type));  if(! String_truth(module)) return NULL;  Compiler_add_translation_dependency(c, module);  Type pointer = Type_reference(type);  List target = cons(_33, cons(_537, cons(List_var(({
+    Var _x2c_literal_part_7 = List_var(lookup);  Var _x2c_literal_part_8 = List_var(({
+      Var _x2c_literal_part_9 = List_var(x2c_literal_string(module));  Var _x2c_literal_part_10 = List_var(x2c_literal_string(name));  cons(_291, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
+    }
+    ));  cons(_304, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
+  }
+  )), NULL)));  return cons(_33, cons(List_var(pointer), cons(List_var(cons(_50, cons(List_var(pointer), cons(List_var(target), NULL)))), NULL)));
 }
 
 Type Type_declared(Type);
@@ -1247,7 +1265,10 @@ static int _braced(Var node){
 }
 
 static List Compiler__entry(Compiler c, String stamp, Map initials, String suffix){
-  List resets = Compiler__resets(c, initials);  List reset = Compiler__entry_function(c, _190, String_join(NULL, cons(String_var(_570), cons(String_var(suffix), NULL))), cons(_571, List_append(resets, NULL)));  List table = Compiler__targets(c, Compiler__named(c, reset));  List stamp_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_572), cons(String_var(suffix), NULL))));  String literal = String_join(NULL, cons(String_var(_202), cons(String_var(stamp), cons(String_var(_202), NULL))));  return cons(List_var(cons(_120, cons(_577, cons(List_var(cons(_121, cons(List_var(cons(_251, cons(_252, cons(List_var(cons(_80, cons(List_var(stamp_binding), _583))), cons(List_var(cons(_33, cons(_585, cons(List_var(cons(_586, cons(_585, cons(String_var(literal), NULL)))), NULL)))), NULL))))), NULL))), NULL)))), cons(List_var(reset), cons(List_var(Compiler__entry_function(c, _589, String_join(NULL, cons(String_var(_590), cons(String_var(suffix), NULL))), cons(_571, cons(List_var(cons(_0, cons(_591, cons(List_var(table), NULL)))), NULL)))), NULL)));
+  List resets = Compiler__resets(c, initials);  List reset = Compiler__entry_function(c, _190, String_join(NULL, cons(String_var(_570), cons(String_var(suffix), NULL))), cons(_571, List_append(resets, NULL)));  List table = Compiler__targets(c, Compiler__named(c, reset));  List stamp_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_572), cons(String_var(suffix), NULL))));  String literal = String_join(NULL, cons(String_var(_202), cons(String_var(stamp), cons(String_var(_202), NULL))));  return({
+    Var _x2c_literal_part_11 = List_var(cons(_120, cons(_577, cons(List_var(cons(_121, cons(List_var(cons(_251, cons(_252, cons(List_var(cons(_80, cons(List_var(stamp_binding), _583))), cons(List_var(cons(_33, cons(_585, cons(List_var(cons(_586, cons(_585, cons(String_var(literal), NULL)))), NULL)))), NULL))))), NULL))), NULL))));  Var _x2c_literal_part_12 = List_var(reset);  Var _x2c_literal_part_13 = List_var(Compiler__entry_function(c, _589, String_join(NULL, cons(String_var(_590), cons(String_var(suffix), NULL))), cons(_571, cons(List_var(cons(_0, cons(_591, cons(List_var(table), NULL)))), NULL))));  cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+  }
+  );
 }
 
 int Map_try_get(Map, Var, Var *);
@@ -1287,7 +1308,10 @@ static List Compiler__named(Compiler c, List reset){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_630), &_x2c_match_capture)) {Var fn = _x2c_match_values[0];  Var name = _x2c_match_values[1];  Var type = _x2c_match_values[2]; {
         Var _x2c_match_value_8 = name;  Var _x2c_match_value_9 = type; {
-          String name = Var_string(_x2c_match_value_8);  Type type = Var_type(_x2c_match_value_9);  named = List_append(named, cons(List_var(cons(String_var(name), cons(Var_cadr(Var_caddr(fn)), cons(List_var(type), NULL)))), NULL));
+          String name = Var_string(_x2c_match_value_8);  Type type = Var_type(_x2c_match_value_9);  named = List_append(named, cons(List_var(({
+            Var _x2c_literal_part_14 = String_var(name);  Var _x2c_literal_part_15 = Var_cadr(Var_caddr(fn));  cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(List_var(type), NULL)));
+          }
+          )), NULL));
         }
 
       }
@@ -1341,11 +1365,17 @@ static List Compiler__targets(Compiler c, List named){
     }
 
   }
-  List update = _call(_710, cons(List_var(_call(_711, NULL)), cons(List_var(x2c_literal_int(count)), List_append(Array_list_free(targets), NULL))));  return Compiler_bind_syntax(c, List_var(update), AST_EXPRESSION, NULL);
+  List update = _call(_710, ({
+    Var _x2c_literal_part_16 = List_var(_call(_711, NULL));  Var _x2c_literal_part_17 = List_var(x2c_literal_int(count));  List _x2c_literal_part_18 = Array_list_free(targets);  cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, List_append(_x2c_literal_part_18, NULL)));
+  }
+  ));  return Compiler_bind_syntax(c, List_var(update), AST_EXPRESSION, NULL);
 }
 
 static List Compiler__entry_function(Compiler c, List result, String name, List body){
-  return cons(_76, cons(List_var(result), cons(List_var(cons(_80, cons(List_var(Sym_introduce(c -> sym, name)), _642))), cons(List_var(body), NULL))));
+  return({
+    Var _x2c_literal_part_19 = List_var(result);  Var _x2c_literal_part_20 = List_var(cons(_80, cons(List_var(Sym_introduce(c -> sym, name)), _642)));  cons(_76, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(List_var(body), NULL))));
+  }
+  );
 }
 
 static List _call(String name, List arguments){
@@ -1527,7 +1557,10 @@ static String Compiler__module(Compiler c, String * failure){
   String root = script_cache_root(), stamp = build_module_stamp();  if(! String_truth(root) || ! String_truth(stamp)){
     (* failure) = _684;  return NULL;
   }
-  List code = Compiler__emit(c, stamp, _718, _719, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_3 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_string(List_getindex(_x2c_destructure_3, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_685), cons(String_var(source), cons(String_var(_685), cons(String_var(stamp), cons(String_var(_685), NULL))))))), String_join(NULL, cons(String_var(Compiler_meta_cc_identity(meta_cc)), cons(String_var(_685), cons(String_var(meta_include_dir), NULL))))));  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_686), cons(String_var(key), NULL))));  String module = String_join(NULL, cons(String_var(directory), cons(String_var(_687), NULL)));  if(Path_is_file(module)) return module; (* failure) = _build_module(directory, module, code);  return String_truth((* failure)) ? NULL : module;
+  List code = Compiler__emit(c, stamp, _718, _719, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_3 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_string(List_getindex(_x2c_destructure_3, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_685), cons(String_var(source), cons(String_var(_685), cons(String_var(stamp), cons(String_var(_685), NULL))))))), ({
+    Var _x2c_literal_part_21 = String_var(Compiler_meta_cc_identity(meta_cc));  String_join(NULL, cons(_x2c_literal_part_21, cons(String_var(_685), cons(String_var(meta_include_dir), NULL))));
+  }
+  )));  String directory = String_join(NULL, cons(String_var(root), cons(String_var(_686), cons(String_var(key), NULL))));  String module = String_join(NULL, cons(String_var(directory), cons(String_var(_687), NULL)));  if(Path_is_file(module)) return module; (* failure) = _build_module(directory, module, code);  return String_truth((* failure)) ? NULL : module;
 }
 
 String String_printf(String, ...);
@@ -1536,7 +1569,10 @@ Toolchain toolchain_meta(String);
 ToolAction Toolchain_module_action(Toolchain, String, List);
 void Path_move_to(Path, Path);
 static String _build_module(String directory, String module, List code){
-  List _x2c_destructure_4 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_4, 0));  String header = Var_string(List_getindex(_x2c_destructure_4, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_4, 2));  String source = Var_string(List_getindex(_x2c_destructure_4, 3));  String output = String_join(NULL, cons(String_var(module), cons(String_var(_688), cons(String_var(String_printf(_689, (long) getpid())), NULL))));  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(cfile), NULL)))), source);  Toolchain linker = toolchain_meta(meta_cc);  List arguments = Toolchain_module_action(linker, output, cons(_691, cons(_693, cons(_695, cons(_697, cons(String_var(directory), cons(_697, cons(String_var(meta_include_dir), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(cfile), NULL))))), NULL))))))))) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;
+  List _x2c_destructure_4 = code;  String hfile = Var_string(List_getindex(_x2c_destructure_4, 0));  String header = Var_string(List_getindex(_x2c_destructure_4, 1));  String cfile = Var_string(List_getindex(_x2c_destructure_4, 2));  String source = Var_string(List_getindex(_x2c_destructure_4, 3));  String output =({
+    Var _x2c_literal_part_22 = String_var(module);  Var _x2c_literal_part_23 = String_var(String_printf(_689, (long) getpid()));  String_join(NULL, cons(_x2c_literal_part_22, cons(String_var(_688), cons(_x2c_literal_part_23, NULL))));
+  }
+  );  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(cfile), NULL)))), source);  Toolchain linker = toolchain_meta(meta_cc);  List arguments = Toolchain_module_action(linker, output, cons(_691, cons(_693, cons(_695, cons(_697, cons(String_var(directory), cons(_697, cons(String_var(meta_include_dir), cons(String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_675), cons(String_var(cfile), NULL))))), NULL))))))))) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;
 }
 
 #undef _x2c_initializer_choice_BF7298EC_0_expanded
