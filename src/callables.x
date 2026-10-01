@@ -25,6 +25,7 @@ $(import "../src/grammar.xmacro")
 #include "expressions.x"
 #include "protocol.x"
 #include "transform.x"
+#include "lambdas.x"
 
 // lambda lowering
 
@@ -72,25 +73,6 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
     }
   }
   return expression;
-}
-
-/** The parameter types of a lambda's function signature, keeping typed
-    declarators; a bare parameter is a `Var`. */
-List Compiler.lambda_param_types(Compiler c, List entries) {
-  if (!entries) return %((void));
-  Array types = [];
-  foreach (List entry, entries)
-    match (entry) {
-      case %(binding ? ?): types.push(%("Var"));
-      case %(param ? ?): {
-        Type type = entry.type_from_ast().declared();
-        if (type.car() == <&> || type.car() == <opt-ref>)
-          type = cons(
-            type.car(), c.sym.normalize_declared_type(type.cdr()));
-        types.push(type);
-      }
-    }
-  return types.list_free();
 }
 
 // Preserve typed declarators; bare lambda parameters remain Var.
@@ -1530,56 +1512,6 @@ static List _prepend_setup(List body, List setup) {
       );
   }
   return body;
-}
-
-/** Rejects writes and reference access to read-only snapshot bindings.
-    The body has already resolved identifiers and call arguments. Templates
-    defer this check until expansion; nested lambdas check their own bodies.
-*/
-void Compiler.check_lambda_captures(Compiler c, List ast) {
-  if (c.macro_holes) return;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
-  Array pending = $auto([]);
-  pending.push(ast);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    match (node) {
-      case lambda(?body, *params): continue;
-      case captured(?body, *captures, *params): continue;
-      case $source_operator_content(%(& ?target)):
-        _require_capture_lvalue(c, target);
-      case $source_operator_content(%(?operator ?target *)):
-        if (operator is <symbol> && ast_changes_left_operand(operator))
-          _require_capture_lvalue(c, target);
-      case $source_postfix_content(%(? ?target)):
-        _require_capture_lvalue(c, target);
-      case %(dstrasgn (targets *targets) ?):
-        foreach (List target, targets) _require_capture_lvalue(c, target);
-      case $source_call_content($called,
-          %(expr ?callee_type ?), %(*arguments)): {
-        List parameters = NULL;
-        if (_typed_function_parts(callee_type, parameters, NULL))
-          for (; parameters && arguments;
-               parameters = parameters.cdr(), arguments = arguments.cdr()) {
-            Type parameter = parameters.car();
-            if (parameter.car() == <&> || parameter.car() == <opt-ref>)
-              _require_capture_lvalue(c, arguments.car());
-          }
-      }
-    }
-    foreach (Var child, node) pending.push(child);
-  }
-}
-
-static void _require_capture_lvalue(Compiler c, List target) {
-  List binding = _lvalue_binding(target);
-  if (binding &&
-      %(lambda-snapshot $binding) in c.semantic_binding_facts())
-    c.report_error(
-      <type>, "captured value requires 'using &name' for reference access",
-      c.token, %("binding: ${binding_identity_spelling(binding)}"));
 }
 
 // typed adapters
