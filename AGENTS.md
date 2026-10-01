@@ -214,7 +214,11 @@ full gate solely to submit. Keep local bootstrap transitions usable for
 development. The integrator owns final generated artifacts and the applicable
 performance work and publication gate once per combined batch. Report a PR
 as submitted, not published or validated. Ordinary review-held PRs retain
-the existing publication validation below and are never enrolled.
+the existing publication validation below and are never enrolled. For that
+review stop, use `individual`/`direct` or `orchestrator`/`direct` context so
+the session owns validation, then push only its draft PR branch. The review
+stop still forbids publishing to `dev`; `direct` identifies validation
+ownership and does not override Gary's requested destination.
 
 ### Validate publication
 

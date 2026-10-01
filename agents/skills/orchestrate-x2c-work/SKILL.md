@@ -100,8 +100,10 @@ Commit, push the work branch, and enroll one or more ready PRs targeting `dev`
 with the actual starting revision, pinned dependencies, focused evidence, and
 transition notes. Do not merge moving `dev`, refresh final generated artifacts,
 or run a publication gate solely to submit. The parent submits; subordinate
-workers remain private. Review-held PRs stay unenrolled, and local-only work
-stays local. Report submitted revisions rather than claiming they landed.
+workers remain private. A requested review stop uses `orchestrator`/`direct`
+context for normal publication validation, pushes only a draft PR branch, and
+stays unenrolled; it never publishes to `dev`. Local-only work stays local.
+Report submitted revisions rather than claiming they landed.
 
 In direct mode, publish the collected batch:
 

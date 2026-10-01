@@ -93,8 +93,12 @@ artifacts, gate, and `dev` push. Report the PR and focused evidence as
 submitted; the integrator records actual publication. If it is absent, the
 PR waits.
 
-For a requested review stop, create a draft PR using normal publication
-validation and leave it unenrolled. A PR alone is never automatic permission
+For a requested review stop, switch the submitting parent to
+`individual`/`direct` or `orchestrator`/`direct` context, use normal publication
+validation, and push only a draft PR branch. Leave it unenrolled and do not
+publish to `dev`. Subordinate workers remain `worker`/`private`. Here `direct`
+keeps validation with the session; the requested review stop chooses the
+destination. A PR alone is never automatic permission
 to integrate. Local-only work stays local. Integration readiness requests
 landing the pinned revision; removing it cancels only if observed before push.
 
