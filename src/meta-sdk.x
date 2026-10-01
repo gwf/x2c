@@ -60,6 +60,8 @@ List x2c_syntax_type(List value) {
   match (value) {
     case %(expr ? ?): {
       Type type = value.cadr();
+      if (type === %(<macro-expr>))
+        type = active.expander.resolve_expression(value, active.site).cadr();
       return type.canonicalize();
     }
     case %(param ? ?):  return value.type_from_ast().canonicalize();

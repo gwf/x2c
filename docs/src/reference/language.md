@@ -1623,7 +1623,9 @@ A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
 is a compiler internal with no compatibility promise.
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
-syntax.
+syntax. During expansion, syntax a template left untyped is resolved where the
+expansion stands, so a template's locals, casts, and method results report
+their declared types.
 
 `x2c.binding.spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling
