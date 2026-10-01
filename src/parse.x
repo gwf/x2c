@@ -21,6 +21,7 @@ $(import "../src/grammar.xmacro")
 #include "collect.x"
 #include "macros.x"
 #include "protocol.x"
+#include "utils.x"
 
 // top-level forms
 
@@ -270,7 +271,7 @@ static void _reject_expanded_meta(Compiler c, List decl, Token meta) {
    definition it reaches agree. */
 static void _record_meta_hash(
   Compiler c, List function, Token first, int meta) {
-  uint64_t hash = 0xcbf29ce484222325ULL;
+  uint64_t hash = FNV_OFFSET_BASIS;
   for (Token token = first; token < c.token; token++)
     if (token.type != <space> && token.type != <comment> && token.len)
       hash = x2c_fnv_bytes(

@@ -1158,7 +1158,7 @@ static uint64_t _state_entry(uint64_t hash, String path, int &ok) {
    or unreadable input clears `ok`. */
 
 static uint64_t _state_base(CliRequest request, String tool, int &ok) {
-  uint64_t hash = UINT64_C(1469598103934665603);
+  uint64_t hash = FNV_OFFSET_BASIS;
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   String compiler = x2c_compiler_identity();

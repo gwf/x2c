@@ -73,10 +73,8 @@ String Compiler.meta_cc(String &include_dir) {
     hash. */
 String Compiler.meta_cc_identity(String cc) {
   String path = "/" in cc ? cc : x2c_find_program(cc);
-  int ok = path != NULL;
-  uint64_t hash = UINT64_C(1469598103934665603);
-  if (ok) hash = x2c_fnv_file(hash, path, ok);
-  return ok ? "%s %016llx".printf(path, (unsigned long long) hash) : cc;
+  String hash = x2c_file_identity(path);
+  return hash ? %"$path $hash" : cc;
 }
 
 /** Runs `arguments`, a C compiler command building the group C in

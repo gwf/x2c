@@ -15,6 +15,9 @@ $(import "../lib/private-keywords.xmacro")
 #include "process.x"
 #include "sourceview.x"
 
+/* The 64-bit FNV-1a offset basis, which starts every FNV hash. */
+#define FNV_OFFSET_BASIS 0xcbf29ce484222325ULL
+
 #pragma private
 
 #include <errno.h>
@@ -283,7 +286,7 @@ String build_module_stamp(void) {
 */
 String x2c_file_identity(String path) {
   int ok = path != NULL;
-  uint64_t hash = UINT64_C(1469598103934665603);
+  uint64_t hash = FNV_OFFSET_BASIS;
   if (ok) hash = x2c_fnv_file(hash, path, ok);
   return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
 }
