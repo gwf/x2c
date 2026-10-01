@@ -1,0 +1,148 @@
+/* Json reading and writing error conditions.
+   Reports expand at their existing owners. */
+
+meta static Map _json_error_rows(void) => {
+
+  "boolean.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Json.boolean") (tag ${$tag}));
+  },
+
+  "read.file" :
+  macro Statement(
+    Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
+    raise %(bad-arg (operation "Json.read_file") (path ${$path})
+            (why ${$why}) (offset ${$offset})
+            (line ${$line}) (column ${$column}));
+  },
+
+  "read.text" :
+  macro Statement(Expr $why, Expr $offset, Expr $line, Expr $column) {
+    raise %(bad-arg (operation "Json.parse") (why ${$why})
+            (offset ${$offset}) (line ${$line}) (column ${$column}));
+  },
+
+  "write.depth" :
+  macro Statement() {
+    raise %(size-limit (operation "Var.json")
+            (why "nesting exceeds 512 levels"));
+  },
+
+  "write.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Var.json") (tag ${$tag}));
+  },
+
+  "write.key" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Var.json") (want "String object key")
+            (tag ${$tag}));
+  },
+
+  "write.duplicate" :
+  macro Statement(Expr $text) {
+    raise %(bad-arg (operation "Var.json") (why "duplicate object name")
+            (name ${$text}));
+  },
+
+  "write.nonfinite" :
+  macro Statement() {
+    raise %(conv-range (operation "Var.json")
+            (why "JSON has no NaN or infinity"));
+  },
+
+  "read.trailing" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected text after the value");
+  },
+
+  "read.depth" :
+  macro Statement(Expr $reader) {
+    $reader._fail("nesting exceeds 512 levels");
+  },
+
+  "read.end" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected end of input");
+  },
+
+  "read.char" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected character");
+  },
+
+  "read.key" :
+  macro Statement(Expr $reader) {
+    $reader._fail("expected a string key");
+  },
+
+  "read.colon" :
+  (macro Expression() => "expected ':'"),
+
+  "read.object.sep" :
+  (macro Expression() => "expected ',' or '}'"),
+
+  "read.array.sep" :
+  (macro Expression() => "expected ',' or ']'"),
+
+  "read.string.end" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unterminated string");
+  },
+
+  "read.control" :
+  macro Statement(Expr $reader) {
+    $reader._fail("control character in string");
+  },
+
+  "read.utf8" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid UTF-8");
+  },
+
+  "read.escape" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid escape");
+  },
+
+  "read.surrogate" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unpaired surrogate");
+  },
+
+  "read.nul" :
+  macro Statement(Expr $reader) {
+    $reader._fail("U+0000 cannot appear in a String");
+  },
+
+  "read.unicode" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid \\u escape");
+  },
+
+  "read.number" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid number");
+  },
+
+  "read.range" :
+  macro Statement(Expr $reader) {
+    $reader._fail("number out of range");
+  }
+};
+
+meta static List _json_error_expand(String key, List arguments) {
+  Map rows = _json_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown json error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $json.error(Literal $key, Expr $arguments...) {
+  $(_json_error_expand (x2c.literal.value $key) $arguments)...
+}
+
+macro Expression $json.reason(Literal $key, Expr $arguments...) =>
+  $(car (_json_error_expand (x2c.literal.value $key) $arguments));
