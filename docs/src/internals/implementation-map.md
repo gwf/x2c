@@ -112,6 +112,8 @@ is listed under [compiler options](../reference/cli.md).
 
 - Parse, import, hygiene, and expand: `src/macros.x`
 - Shared compile-time syntax builders: `lib/meta.x`
+- Macro values, their application, and macro-valued `case` recognition:
+  `lib/macro-value.x`
 - Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
 - `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
   in-process staging: `src/meta-group.x`; the project helper:

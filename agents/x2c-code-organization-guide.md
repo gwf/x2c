@@ -120,12 +120,14 @@ static-init                   and static initialization
 var, varconvert, varops       tagged values, conversions, operations
 dispatch, protocols           dynamic behavior and protocol adoption
 string, string-classify,      canonical immutable values, string
-string-number, split,         classification, numeric parsing, splitting,
-symbol, symbolset, atom, list and closed vocabularies
+string-number, string-format, classification, numeric parsing, checked
+string-escape, split,         formatting, escaped spelling, splitting, and
+symbol, symbolset, atom, list closed vocabularies
 block, buffer, array, map     mutable storage and builders
 iter, match, match-plan,      traversal, pattern matching, plan lowering
 match-cache, machine,         and caching, and the Match wordcode machine
 match-machine
+macro-value                   macros as values that build and recognize code
 error, error_init, exception  ambient errors and structured control flow
 file, logger                  system boundaries
 context, thread, thread-state bounded runtime state, native workers, and

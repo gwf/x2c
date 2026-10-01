@@ -758,6 +758,8 @@ static const char *evidence_rows[][2] = {
   {"json", "`make verify` (`unittest/test-json.x`)."},
   {"list-selectors", "`make verify` (`unittest/test-list.x`)."},
   {"logger", "`make verify` (`unittest/test-logger.x`)."},
+  {"macro-value", "`make verify` (`macro-values`, `macro-sequence-case`, "
+                  "and `macro-slot-recognition` compiler fixtures)."},
   {"map", "`make verify` (`unittest/test-map.x`) and `make examples` "
           "(`docs-word-count`)."},
   {"meta", "`make verify` (`meta-comptime-only-call`, "
@@ -777,6 +779,8 @@ static const char *evidence_rows[][2] = {
             "(`docs-tour`)."},
   {"split", "`make verify` (`unittest/test-split.x`)."},
   {"string-classify", "`make verify` (`unittest/test-string-classify.x`)."},
+  {"string-escape", "`make verify` (`unittest/test-string.x`)."},
+  {"string-format", "`make verify` (`unittest/test-string.x`)."},
   {"string", "`make verify` (`unittest/test-string.x`) and `make examples` "
              "(`docs-word-count`)."},
   {"symbol", "`make verify` (`unittest/test-symbol.x`) and `make examples` "

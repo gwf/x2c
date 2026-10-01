@@ -126,11 +126,13 @@ lib/scope.x|advanced|Scope.release,Scope.retain,Scope_shutdown,Scope.stats
 lib/scope.x|advanced|Scope.top
 lib/scope.x|internal|Scope.initialize,Scope.shutdown_hook
 lib/string-number.x|advanced|String.try_double,String.try_long
-lib/string.x|advanced|String.compare,String.equal,String.escape,String.free
+lib/string-escape.x|advanced|String.escape,String.parse,String.parse_char
+lib/string-escape.x|advanced|String.repr,String.write_repr
+lib/string.x|advanced|String.compare,String.equal,String.free
 lib/string.x|advanced|String.hash,String.intern,String.intern_free
-lib/string.x|advanced|String.malloc,String.new_fill,String.new_len,String.parse
-lib/string.x|advanced|String.parse_char,String.printf,String.promote
-lib/string.x|advanced|String.repr,String.str,String.symbol,String.write_repr
+lib/string.x|advanced|String.malloc,String.new_fill,String.new_len
+lib/string.x|advanced|String.printf,String.promote
+lib/string.x|advanced|String.str,String.symbol
 lib/string.x|internal|String.is_permanent,String.try_own
 lib/symbol.x|advanced|Symbol.compare,Symbol.decode,Symbol.first,Symbol.new_len
 lib/symbol.x|advanced|Symbol.parse,Symbol.repr,Symbol.str,Symbol.write_repr
