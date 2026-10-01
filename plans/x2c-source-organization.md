@@ -169,10 +169,15 @@ Each was reproduced at 2685655f.
 4. A local assigned inside `try` is emitted `volatile`; passed to a `&`
    parameter it becomes `&(status)` at an `int *` parameter, which drops
    the qualifier (C11 6.7.3p6). Seen live in
-   `commands/graph/x2c-graph.x:3176-3185`. The fix emits no
-   qualifier-discarding conversion, and a value the callee writes before
-   a raise is still visible in the catch. A copy-in/copy-out temporary
-   fails the second condition.
+   `commands/graph/x2c-graph.x:3176-3185`. The fix also found a
+   miscompile: a local written only by a callee is not `volatile`, so a
+   callee that writes it and raises loses the write at `-O1` and above
+   (`x2c run -O2` prints `only=0`; `-O0` prints `only=5`). A local whose
+   address a `try` body passes to a call now keeps its plain type, and its
+   declaration stores its address in the thread-local
+   `x2c_exception_escaped` (`lib/exception.x`), so C must assume every call,
+   `sigsetjmp` and the raise included, reads and writes it. Locals that are
+   not address-taken stay `volatile`.
 5. The region check warns on `bind_ref(Env &local, ...)` and not on the
    same body written with `Env *local`. Both forms must give the same
    result. This is why `x2c lint` suggests `LispEnv &local` at
@@ -181,6 +186,12 @@ Each was reproduced at 2685655f.
 6. `tools/check-doc-examples:74-77` limits CPU time only; a sample that
    sleeps blocks `Job.wait_any` with no wall deadline and can stall
    `doc-outputs`. Add a wall deadline through the existing Job lifecycle.
+8. Logger retention recurses once per cell of a flat List
+   (`lib/logger.x:619-655`, `_retain_list` calls `_retain` on each cdr
+   before consing), so logging a 200,000-cell List from a child pool to a
+   memory sink crashes with SIGSEGV. Rebuild the spine iteratively, as
+   `lib/context.x:208-222` does, keeping Logger's ancestor-pool identity,
+   borrowed values, and sink lifetime. Found by the call-graph review.
 7. `self-annotation-mismatch` reports its error at `int main` (line 11)
    instead of the definition (line 7). Its fixture checks only the compile
    status. Fix the location and pin it with a `.diagnostics` file.
@@ -197,6 +208,10 @@ Each was reproduced at 2685655f.
 | Contextual keyword test | 13 copies in 5 files; static `_test_contextual` at `parse.x:397` | `Compiler.at_word` (non-consuming) and `Compiler.take_word` in compiler.x token navigation |
 | Realpath or keep | `compiler.x:455`, `collect.x:483`, `protocol.x:34` | `Compiler.canonical_path` |
 | Emitter recognition | `Emitter._emit` head switch plus six `_emit_*` groups that match again and return `matched` (`src/emit.x:1194-1399`, b796f4e1) | one `match` in `_emit` with one-line arms; delete the groups and the flag |
+| List to Array copy | the copy loop in `List.array`, `append`, `sort`, `sort_with`, `sort_by` (`lib/list.x:322, 365, 734, 746, 759`) | `List.array`, after it cleans up a partial Array on failure; keep `append`'s shared tail and `sort_by`'s one key call for a one-element List |
+| Nested-lambda presence | `ast_contains_head` at region entry and again on every child before descending (`src/transform.x:1437-1528`) | one identity-preserving visit that prepares regions and reports presence; measure deep-lambda and lambda-free cases |
+| Open-template rebuild | `_template` discovers, then `_replace_bindings`, `_open_natives`, and origin `search_replace` each rebuild (`src/macros.x:2277-2338`) | one coordinated rewrite after discovery, if fixtures and stage equality prove it equal; otherwise record why the passes stay |
+| Typed zero-pointer target | the same initializer-target template at `src/expressions.x:4490, 4536` | one constructor |
 | Args repeated values | shared-name rows still append prefixes (`lib/args.x:147-150`); 200 values make 19,910 allocations against 201 | one accumulator per result name, keeping first-occurrence reset, defaults, mixed-row overwrite, and store order |
 
 Kept on purpose, with the reason: the one-argument FuncArg stanza and the
@@ -230,7 +245,10 @@ owner, and adding one is a library change outside this plan.
 
 ## Phases
 
-Each phase is one batch delivered to `dev`. Workers within a batch follow
+Each phase is one batch delivered to `dev`. A
+call-graph review of 2026-09-30, made with `x2c graph` over the whole
+production source, added defect 8 and the Phase 3, 5, and 6 items it names; it
+argued against size-driven splits, which this plan does not make. Workers within a batch follow
 `orchestrate-x2c-work`; the orchestrator integrates and gates once.
 
 ### Phase 1: rules and records (documentation only)
@@ -309,12 +327,42 @@ For every file over 1,000 lines after Phase 4, and every new unit:
   state its steps share, and `publish` runs once.
 - Private Compiler helpers become `Compiler._helper` methods where the
   Compiler is their dominant receiver, as the organization guide says.
+  The same holds for the existing records the call graph names:
+  `DeferCaptures` (`transform.x:4280-4333`), the regions `Walk`
+  (`regions.x:78`), `Pool` (`pool.x:213, 306, 334, 404, 666`),
+  `LogMemorySink` (`logger.x:619-655`), and the Context export family
+  (`context.x:194-280`). Native callback trampolines keep their C
+  signatures.
+- `_node` (`transform.x:4937`) only forwards to `_step`; the dispatcher
+  takes the `_node` name and the layer goes. `Func._new` reads
+  `params.len()` once.
 - The subject parameter and record field are `c`; private records lose the
   leading underscore.
 
 Validation: `agent-pr-check`.
 
-### Phase 6: closing measure
+### Phase 6: commands and packages
+
+- `commands/graph`: target classification, emitted names, and unique
+  public targets are derived in `x2c-graph.x:28, 730, 1386` and again in
+  `targets.x:24, 63`; `targets.x` owns them. The open, analyze, export,
+  close stanza repeats in eight entry points near `x2c-graph.x:1202-1350`;
+  one operation owns that lifetime. Keep each report's records, sorting,
+  and output. The graph tests are the corpus.
+- `packages/blis`: `copy_from`, `add`, and `sub` repeat the live-object,
+  shape, and precision checks (`blis.x:525, 624, 646`); share one
+  compatibility operation and keep each operation's error and fresh result.
+- `packages/libuv`: TCP and Pipe repeat the connected, EOF, reading, and
+  write-shutdown rules (`libuv.x:1476, 1505, 1683, 1712`); put them on
+  `UvStream`, keeping typed callback wrappers and request lifetimes.
+- Package changes land only after the package's own check runs with its
+  prepared dependencies (`packages/Makefile`); a package whose dependencies
+  cannot be prepared keeps its current source, and the plan records why.
+
+Validation: `agent-pr-check`, `make commands-check`, and each touched
+package's check.
+
+### Phase 7: closing measure
 
 Rerun the baseline analyzer on the final tree with the same file
 selection and report the table above, the remaining files over 1,500 lines
@@ -331,7 +379,7 @@ plans index.
 - Every row of the duplicate-owner table has one owner.
 - No record is unpacked into locals on entry; one record convention holds
   across `src/` and `lib/`.
-- The seven defects are fixed and pinned.
+- The eight defects are fixed and pinned.
 - Function bands hold: no more functions over 40 lines than the 11 today.
 - Every phase passed its gate, and Phase 4 its performance checkpoint.
 
