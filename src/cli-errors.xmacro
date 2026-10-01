@@ -1,0 +1,196 @@
+/* cli condition templates. Keys are private to this owner. */
+
+/* The first Expr hole names the sink, bound at the invocation site. */
+meta static Map _cli_error_rows(void) => {
+
+  "command.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("expected a command, found an empty argument");
+  },
+
+  "command.unknown" :
+  macro Statement(Expr $driver_error, Expr $first) {
+    $driver_error(%"unknown command or global option '${$first}'");
+  },
+
+  "translate.inputs" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("translate requires at least one input");
+  },
+
+  "deps.inputs" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--dep-file and --dep-target require exactly one input");
+  },
+
+  "deps.disabled" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--no-deps conflicts with dependency output options");
+  },
+
+  "compile.kind" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--compile-only conflicts with a library target kind");
+  },
+
+  "env.operands" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("env accepts at most one name");
+  },
+
+  "operand.one" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"${$name} requires exactly one operand");
+  },
+
+  "operand.none" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"${$name} accepts no operands");
+  },
+
+  "script.input" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("script requires a script file");
+  },
+
+  "help.operands" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("help accepts at most one command");
+  },
+
+  "help.unknown" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"unknown help command '${$name}'");
+  },
+
+  "temps.dir" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--save-temps= requires a directory");
+  },
+
+  "option.no-value" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"option takes no value '${$arg}'");
+  },
+
+  "option.needs-value" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"option requires a value '${$arg}'");
+  },
+
+  "color.missing" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--color requires auto, always, or never");
+  },
+
+  "color.unknown" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"invalid color mode '${$value}'");
+  },
+
+  "kind.shared" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("shared-library is not supported by this compiler");
+  },
+
+  "kind.unknown" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"unknown target kind '${$value}'");
+  },
+
+  "count.invalid" :
+  macro Statement(Expr $driver_error, Expr $noun, Expr $value) {
+    $driver_error(%"invalid ${$noun} '${$value}'");
+  },
+
+  "cflag.deps" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"C dependency option is driver-owned '${$value}'");
+  },
+
+  "native.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("empty package native argument");
+  },
+
+  "native.unsupported" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"unsupported package native argument '${$arg}'");
+  },
+
+  "response.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("empty response-file reference '@'");
+  },
+
+  "response.cycle" :
+  macro Statement(Expr $_fail, Expr $path) {
+    $_fail(%"recursive response-file inclusion: ${$path}", NULL);
+  },
+
+  "response.read" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "could not read complete file");
+  },
+
+  "response.nul" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "embedded NUL byte");
+  },
+
+  "response.utf8" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "input is not valid UTF-8");
+  },
+
+  "response.escape" :
+  macro Statement(Expr $_response_error, Expr $path, Expr $line) {
+    $_response_error($path, $line, "trailing backslash");
+  },
+
+  "response.quote" :
+  macro Statement(Expr $_response_error, Expr $path, Expr $line) {
+    $_response_error($path, $line, "unterminated quote");
+  },
+
+  "option.output.removed" :
+  macro Statement(Expr $_fail) {
+    $_fail(
+      "option '-o' was removed",
+      "use '--out-dir' with translate or '--output' with build and run");
+  },
+
+  "command.expected" :
+  macro Statement(Expr $_fail, Expr $arg) {
+    $_fail(
+      %"expected a command before '${$arg}'",
+      %"use 'x2c translate --out-dir <dir> ${$arg}'");
+  },
+
+  "option.unknown" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"unknown option '${$arg}'");
+  },
+
+  "option.dash.removed" :
+  macro Statement(Expr $_fail, Expr $arg, Expr $use) {
+    $_fail(%"one-dash long option '${$arg}' was removed", %"use '${$use}'");
+  },
+};
+
+meta static List _cli_error_expand(String key, List arguments) {
+  Map rows = _cli_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown cli error '$key'", %());
+  Macro selected = row;
+  List parameters = selected.assoc(<parameters>);
+  List parameter = parameters.car();
+  String sink = parameter.assoc(<binder>).str()[1:];
+  List callee = %(ident $sink);
+  return %(${Macro_apply(selected, %($callee @arguments))});
+}
+
+macro Statement $cli.error(Literal $key, Expr $arguments...) {
+  $(_cli_error_expand (x2c.literal.value $key) $arguments)...
+}

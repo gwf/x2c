@@ -23,6 +23,7 @@ typedef struct ProjectBuild {
 } *ProjectBuild;
 
 #pragma private
+$(import "../src/project-errors.xmacro")
 
 #include <ctype.h>
 #include <stdio.h>
@@ -98,9 +99,9 @@ static Project _open_project(CliRequest request) {
   *p = (struct Project) {
     .seen = {}, .sources = request.sources, .command = request,
     .path = project_manifest(request)};
-  if (!p.path) _error(NULL, 0, "no explicit inputs and no x2c.toml found");
+  if (!p.path) $project.error("manifest.missing");
   p.path = Path.absolute(p.path);
-  if (!p.sources.read(p.path, p.text)) _error(p, 0, "cannot read manifest");
+  if (!p.sources.read(p.path, p.text)) $project.error("manifest.read", p);
   p.root = Path.dirname(p.path);
   return p;
 }
@@ -123,13 +124,13 @@ static ProjectTarget _selected_target(Project p) {
   CliRequest request = p.command;
   String name = request.target ? request.target : p.default_target;
   if (!name && p.targets.next)
-    _error(p, 0, "select --target or set project.default-target");
+    $project.error("target.select", p);
   if (!name) name = p.targets.name;
   ProjectTarget selected = _target(p, name);
-  if (!selected) _error_name(p, 0, "unknown target", name);
+  if (!selected) $project.error("target.unknown", p, name);
   Symbol kind = request.kind_explicit ? request.kind : selected.kind;
   if (request.command == <run> && kind != <executable>)
-    _error(p, 0, "run requires an executable target");
+    $project.error("target.run", p);
   (void) _selected_profile(p, selected, request.profile);
   return selected;
 }
@@ -171,8 +172,8 @@ static void _parse_manifest(Project p) {
     else if (*line == '[') m.header(line);
     else m.field(line);
   }
-  if (m.key) _error(p, m.start, "unterminated array");
-  if (!p.targets) _error(p, 0, "manifest defines no targets");
+  if (m.key) $project.error("array.open", p, m.start);
+  if (!p.targets) $project.error("target.none", p);
 }
 
 /* A copy of the line that the parser may write into, without its comment
@@ -213,7 +214,7 @@ static char *_trim(char *text) {
 static void Manifest.header(Manifest &m, char *line) {
   int length = strlen(line);
   if (length < 3 || line[length - 1] != ']')
-    _error(m.project, m.line, "malformed section header");
+    $project.error("section.header", m.project, m.line);
   line[length - 1] = 0;
   String name = String.new(line + 1);
   if (name == "project") m.enter_project();
@@ -223,7 +224,7 @@ static void Manifest.header(Manifest &m, char *line) {
 
 static void Manifest.enter_project(Manifest &m) {
   Project p = m.project;
-  if (p.declared) _error(p, m.line, "duplicate project section");
+  if (p.declared) $project.error("section.project", p, m.line);
   p.declared = 1;
   m.section = PROJECT;
 }
@@ -231,7 +232,7 @@ static void Manifest.enter_project(Manifest &m) {
 static void Manifest.enter_dependencies(Manifest &m) {
   Project p = m.project;
   if (p.dependency_declared)
-    _error(p, m.line, "duplicate dependencies section");
+    $project.error("section.deps", p, m.line);
   p.dependency_declared = 1;
   p.dependency_seen = {};
   m.section = DEPENDENCIES;
@@ -249,7 +250,7 @@ static void Manifest.target_header(Manifest &m, String header) {
   }
   if (!header.startswith("target.") || !_name_ok(name) ||
       (split >= 0 && !_name_ok(profile)))
-    _error(p, m.line, "unknown manifest section");
+    $project.error("section.unknown", p, m.line);
   ProjectTarget target = _target(p, name);
   if (!target) target = _new_target(p, name);
   if (split < 0) m.enter_target(target);
@@ -258,7 +259,7 @@ static void Manifest.target_header(Manifest &m, String header) {
 
 static void Manifest.enter_target(Manifest &m, ProjectTarget target) {
   if (target.declared)
-    _error_name(m.project, m.line, "duplicate target section", target.name);
+    $project.error("section.target", m.project, m.line, target.name);
   target.declared = 1;
   m.section = TARGET;
   m.target = target;
@@ -269,7 +270,7 @@ static void Manifest.enter_profile(
   ProjectProfile profile = _profile(target, name);
   if (!profile) profile = _new_profile(target, name);
   if (profile.declared)
-    _error_name(m.project, m.line, "duplicate profile section", name);
+    $project.error("section.profile", m.project, m.line, name);
   profile.declared = 1;
   m.section = PROFILE;
   m.profile = profile;
@@ -280,12 +281,12 @@ static void Manifest.enter_profile(
 /* A `key = value` field of the current section. */
 static void Manifest.field(Manifest &m, char *line) {
   Project p = m.project;
-  if (m.section == NONE) _error(p, m.line, "field appears before a section");
+  if (m.section == NONE) $project.error("field.section", p, m.line);
   char *equals = strchr(line, '=');
-  if (!equals) _error(p, m.line, "expected key = value");
+  if (!equals) $project.error("field.equals", p, m.line);
   *equals = 0;
   String key = String.new(_trim(line)), value = String.new(_trim(equals + 1));
-  if (!_name_ok(key)) _error(p, m.line, "invalid field name");
+  if (!_name_ok(key)) $project.error("field.name", p, m.line);
   m.claim(key);
   m.key = key;
   m.value = value;
@@ -302,7 +303,7 @@ static void Manifest.extend(Manifest &m, char *line) {
 /* Each section takes a key once. */
 static void Manifest.claim(Manifest &m, String key) {
   Map keys = m.keys();
-  if (key in keys) _error(m.project, m.line, "duplicate manifest field");
+  if (key in keys) $project.error("field.duplicate", m.project, m.line);
   keys[key] = 1;
 }
 
@@ -336,7 +337,7 @@ static void _set_project_field(Project p, int line, String key, String value) {
   else if (key == "default-target")
     p.default_target = _string_value(p, line, value);
   else if (key == "build-dir") p.build_dir = _string_value(p, line, value);
-  else _error_name(p, line, "unknown project field", key);
+  else $project.error("field.project", p, line, key);
 }
 
 /* One `[dependencies]` entry: an index package name and its exact version. */
@@ -355,7 +356,7 @@ static void _set_target_field(
   if (list) *list = _string_array(p, line, value);
   else if (key == "kind") _set_kind(p, target, line, value);
   else if (key == "output") target.output = _string_value(p, line, value);
-  else _error_name(p, line, "unknown target field", key);
+  else $project.error("field.target", p, line, key);
 }
 
 static List *_target_list(ProjectTarget target, String key) {
@@ -380,8 +381,8 @@ static void _set_kind(
   else if (kind == "static-library") target.kind = <static-lib>;
   else if (kind == "meta-module") target.kind = <module>;
   else if (kind == "shared-library")
-    _error(p, line, "shared-library is not supported by this compiler");
-  else _error_name(p, line, "unknown target kind", kind);
+    $project.error("kind.shared", p, line);
+  else $project.error("kind.unknown", p, line, kind);
 }
 
 static void _set_profile_field(
@@ -393,7 +394,7 @@ static void _set_profile_field(
   else if (key == "c-flags") profile.c_flags = _string_array(p, line, value);
   else if (key == "link-flags")
     profile.link_flags = _string_array(p, line, value);
-  else _error_name(p, line, "unknown profile field", key);
+  else $project.error("field.profile", p, line, key);
 }
 
 // values
@@ -401,36 +402,36 @@ static void _set_profile_field(
 static String _string_value(Project p, int line, String value) {
   char *at = value;
   String text = _parse_string(p, line, &at);
-  if (*_skip_space(at)) _error(p, line, "unexpected text after string");
+  if (*_skip_space(at)) $project.error("string.tail", p, line);
   return text;
 }
 
 static List _string_array(Project p, int line, String value) {
   char *at = _skip_space(value ? value : "");
-  if (*at != '[') _error(p, line, "expected an array of quoted strings");
+  if (*at != '[') $project.error("array.expected", p, line);
   at = _skip_space(at + 1);
   Array values = [];
   while (*at != ']') {
     values.push(_parse_string(p, line, &at));
     at = _skip_space(at);
     if (*at == ',') at = _skip_space(at + 1);
-    else if (*at != ']') _error(p, line, "expected ',' or ']' in array");
+    else if (*at != ']') $project.error("array.separator", p, line);
   }
-  if (*_skip_space(at + 1)) _error(p, line, "unexpected text after array");
+  if (*_skip_space(at + 1)) $project.error("array.tail", p, line);
   return values.list_free();
 }
 
 /* Reads the quoted string at `*cursor` and moves the cursor past it. */
 static String _parse_string(Project p, int line, char **cursor) {
   char *at = _skip_space(*cursor ? *cursor : "");
-  if (*at != '"') _error(p, line, "expected a quoted string");
+  if (*at != '"') $project.error("string.expected", p, line);
   Buffer out = Buffer.new(0);
   for (at++; *at && *at != '"'; at++) {
     char ch = *at;
     if (ch == '\\') ch = _escape(p, line, *++at);
     out.write_char(ch);
   }
-  if (*at != '"') _error(p, line, "unterminated quoted string");
+  if (*at != '"') $project.error("string.open", p, line);
   *cursor = at + 1;
   return out.str_free();
 }
@@ -440,13 +441,13 @@ static char _escape(Project p, int line, char ch) {
   if (ch == '"' || ch == '\\') return ch;
   if (ch == 'n') return '\n';
   if (ch == 't') return '\t';
-  _error(p, line, "unsupported string escape");
+  $project.error("string.escape", p, line);
 }
 
 static int _bool_value(Project p, int line, String value) {
   if (value && value == "true") return 1;
   if (value && value == "false") return 0;
-  _error(p, line, "expected true or false");
+  $project.error("bool.expected", p, line);
 }
 
 /* Whether `value` opens an array that no later bracket closes, so the field
@@ -514,11 +515,11 @@ static ProjectProfile _new_profile(ProjectTarget target, String name) {
 static void _validate_target(Project p, ProjectTarget target) {
   if (target.visited) return;
   if (target.visiting)
-    _error_name(p, 0, "target dependency cycle reaches", target.name);
+    $project.error("target.cycle", p, target.name);
   target.visiting = 1;
   foreach (String name, _prerequisites(target)) {
     ProjectTarget prerequisite = _target(p, name);
-    if (!prerequisite) _error_name(p, 0, "unknown target dependency", name);
+    if (!prerequisite) $project.error("target.dep", p, name);
     _validate_target(p, prerequisite);
   }
   target.visiting = 0;
@@ -534,7 +535,7 @@ static ProjectProfile _selected_profile(
   Project p, ProjectTarget target, String name) {
   if (!name) return NULL;
   ProjectProfile profile = _profile(target, name);
-  if (!profile) _error_name(p, 0, "target has no profile", name);
+  if (!profile) $project.error("profile.unknown", p, name);
   return profile;
 }
 
@@ -675,15 +676,12 @@ static String _target_output(Project p, ProjectTarget target, Symbol kind) {
 /* A target's sources, then the archives of the libraries it links. */
 static List _target_inputs(Project p, ProjectTarget target, Symbol kind) {
   if (kind == <static-lib> && target.dependencies)
-    _error_name(
-      p, 0, "static-library target cannot contain target dependencies",
-      target.name);
+    $project.error("target.static.deps", p, target.name);
   Array inputs = _target_sources(p, target);
   foreach (String name, target.dependencies) {
     ProjectTarget dependency = _target(p, name);
     if (dependency.kind != <static-lib>)
-      _error_name(
-        p, 0, "dependency target is not a static library", dependency.name);
+      $project.error("target.dep.kind", p, dependency.name);
     inputs.push(_target_output(p, dependency, dependency.kind));
   }
   return inputs.list_free();
@@ -696,7 +694,7 @@ static List _target_modules(Project p, ProjectTarget target) {
   foreach (String name, target.native_modules) {
     ProjectTarget loaded = _target(p, name);
     if (loaded.kind != <module>)
-      _error_name(p, 0, "native module target is not a meta-module", name);
+      $project.error("target.module.kind", p, name);
     modules.push(_target_output(p, loaded, <module>));
   }
   return modules.list_free();
@@ -707,7 +705,7 @@ static List _target_modules(Project p, ProjectTarget target) {
 /* What the source patterns match, less what the exclude patterns match,
    sorted. Every source is x2c or C. */
 static Array _target_sources(Project p, ProjectTarget target) {
-  if (!target.sources) _error_name(p, 0, "target has no sources", target.name);
+  if (!target.sources) $project.error("source.none", p, target.name);
   Array sources = _expand_patterns(p, target.sources, "source");
   Array excluded = _expand_patterns(p, target.exclude, "exclude");
   Array kept = [];
@@ -723,7 +721,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   kept.sort();
   foreach (String path, kept)
     if (!(is_source_file(path) || path.endswith(".c")))
-      _error_name(p, 0, "manifest source is not .x or .c", path);
+      $project.error("source.kind", p, path);
   return kept;
 }
 
@@ -741,7 +739,7 @@ static Array _expand_patterns(Project p, List patterns, String owner) {
 static Array _expand_pattern(Project p, String pattern, String owner) {
   Array matches =
     _has_glob(pattern) ? _glob(p, pattern) : _named_file(p, pattern);
-  if (!matches.len()) _error_name(p, 0, %"unmatched $owner pattern", pattern);
+  if (!matches.len()) $project.error("pattern.unmatched", p, owner, pattern);
   return matches.sort();
 }
 
@@ -824,7 +822,7 @@ static List _profile_flags(Project p, ProjectProfile profile) {
 static List _c_flags(Project p, List values) {
   foreach (String value, values)
     if (cli_dependency_pass_through(value))
-      _error_name(p, 0, "C dependency option is driver-owned", value);
+      $project.error("cflag.deps", p, value);
   return values;
 }
 
@@ -859,7 +857,7 @@ static void _error_name(Project p, int line, String message, String name) {
 */
 int new_command(CliRequest request) {
   Path dir = request.inputs.car();
-  if (!dir) driver_error("new: the directory operand is empty");
+  if (!dir) $project.error("new.empty");
   String name = _starter_name(dir);
   try _write_starter(dir, name);
   catch %(io-fail *detail): host_error(detail);
@@ -874,14 +872,13 @@ static String _starter_name(Path dir) {
   if (name == "." || name == ".." || name == "/")
     name = Path.absolute(dir).basename();
   if (!_name_ok(name))
-    driver_error(
-      %"new: '$name' is not a target name; use letters, digits, '_', and '-'");
+    $project.error("new.name", name);
   return name;
 }
 
 static void _write_starter(Path dir, String name) {
   if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
-    driver_error(%"new: $dir exists and is not an empty directory");
+    $project.error("new.occupied", dir);
   dir.join("src").make_dirs();
   dir.join("x2c.toml").write_text(
     %"[target.$name]
