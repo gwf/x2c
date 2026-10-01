@@ -3794,8 +3794,7 @@ void Compiler.bind_meta_operation(Lisp lisp, String name, Var function) {
 static String _meta_lisp_name(String name) {
   if (name == "x2c_type_tag_name") return "x2c.type.tag-name";
   if (name == "x2c_type_reverse_name") return "x2c.type.reverse-name";
-  if (name.startswith("x2c_type_is_"))
-    return %"x2c.type.${name[12:]}?";
+  if (name.startswith("x2c_type_is_")) return %"x2c.type.${name[12:]}?";
   return name.replace("_", ".");
 }
 

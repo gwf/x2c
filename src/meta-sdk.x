@@ -87,8 +87,7 @@ static List _sdk_binding_type(List binding) =>
   ];
 
 /** Answers `x2c.protocol.member`, declared in `lib/meta.x`. */
-List x2c_protocol_member(
-  List participant, List base, String member) {
+List x2c_protocol_member(List participant, List base, String member) {
   List conformance =
     active.expander.protocol_members_for(participant, base);
   if (!conformance) return %();
@@ -117,8 +116,7 @@ List x2c_method_resolve(List type_value, String name) {
   match (resolution) {
     case %(ambiguous *packages): {
       Array notes = [];
-      foreach (String package, packages)
-        notes.push(%"package: '$package'");
+      foreach (String package, packages) notes.push(%"package: '$package'");
       String owner = type.base_type().car().str();
       MetaContext.reject(
         %"method '$owner.$name' is provided by multiple imported packages",
@@ -164,8 +162,8 @@ static Var _sdk_bindings(List declaration) {
   return result.list_free();
 }
 
-/* This reads the symbol table only, so it serves any compile-time Lisp
-   evaluation, not just an active macro expansion. */
+/* This reads the symbol table only, so any compile-time Lisp evaluation
+   may call it, including one outside a macro expansion. */
 static Var _sdk_function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
@@ -207,8 +205,7 @@ List x2c_type_parts(List value) => value.type().declaration_parts();
 /** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
 String x2c_type_reverse_name(String base, String participant) {
   _sdk_guard("x2c.type.reverse-name");
-  return active.expander.reverse_converter_spelling(
-    base, "", participant);
+  return active.expander.reverse_converter_spelling(base, "", participant);
 }
 
 /** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
@@ -266,8 +263,7 @@ List x2c_type_fields(List value) {
       "x2c.type.fields requires a complete struct or union Type",
       %("value: ${value.repr()}"));
   Array named = [];
-  foreach (List row, metadata.cdr())
-    if (row.car().truth()) named.push(row);
+  foreach (List row, metadata.cdr()) if (row.car().truth()) named.push(row);
   return named.list_free();
 }
 
@@ -391,8 +387,7 @@ static Var _sdk_symbol_set(List values) {
         "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
-  List expression = active.expander.symbol_set_expression(
-    values, duplicate);
+  List expression = active.expander.symbol_set_expression(values, duplicate);
   if (duplicate >= 0)
     MetaContext.reject(
       "_x2c.symbol-set requires distinct Symbols",
@@ -439,14 +434,12 @@ String x2c_embed_text(Var path) => _sdk_embed_text(path);
 static Var _sdk_embed_text(Var requested) {
   Compiler c = active.expander;
   if (!c)
-    MetaContext.reject(
-      "x2c.embed.text used outside macro expansion", NULL);
+    MetaContext.reject("x2c.embed.text used outside macro expansion", NULL);
   String source_file = active.definition_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
   else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
-    MetaContext.reject(
-      "x2c.embed.text requires a non-empty path", NULL);
+    MetaContext.reject("x2c.embed.text requires a non-empty path", NULL);
   String path = c._embed_path(source_file, requested_path);
   String text = c.sources ? c._embed_source(path) : c._embed_file(path);
   c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));
