@@ -2550,10 +2550,10 @@ static Var Compiler._eval_template_form(
   if (construction is not void)
     form = c._with_construction(serial, form, construction);
   MetaContext *context = MetaContext.current();
-  $let(context.references, !!references)
+  $let(context.has_bindings, !!references)
   $let(context.captures, source_captures)
-  $let(context.file, source_file)
-  $let(context.expansion, c)
+  $let(context.definition_file, source_file)
+  $let(context.expander, c)
     return c._eval_string(form, invocation);
 }
 
@@ -2568,10 +2568,10 @@ Var Compiler.evaluate_meta_value(
   List bindings = active ? active.caddr() : NULL;
   String source_file = active ? _definition_file(active.car()) : c.filename;
   MetaContext *context = MetaContext.current();
-  $let(context.references, !!bindings)
+  $let(context.has_bindings, !!bindings)
   $let(context.captures, _source_captures(bindings))
-  $let(context.file, source_file)
-  $let(context.expansion, c)
+  $let(context.definition_file, source_file)
+  $let(context.expander, c)
   $let(context.evaluator, c)
   $let(context.site, site)
     return c.run_meta_call(expression, site, slot);
@@ -2741,7 +2741,7 @@ static Var Compiler._helper_result(Compiler c, Var value) {
       Token site = c.macro_invocation_site(<m-invoke>);
       if (!site) site = c.token;
       MetaContext *context = MetaContext.current();
-      $let(context.expansion, c)
+      $let(context.expander, c)
       $let(context.site, site)
         return _sdk_template_call(
           stored is <string> ? Atom.intern(stored.str()) : stored, values);

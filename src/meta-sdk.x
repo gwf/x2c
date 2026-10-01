@@ -15,19 +15,19 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 
-/** What the running compile-time call answers from. `expansion` is the
-    compiler of the active macro expansion, `file` its definition's source,
-    `captures` its complete captured syntax by identity, and `references`
-    whether it bound captured values. `evaluator` is the compiler evaluating
-    Lisp and `site` where that evaluation stands, which a nested import
-    changes without an expansion. Each evaluation installs its part with
-    `$let`, so a captured entry is valid only while its expansion is
-    active. */
+/** What the running compile-time call answers from. `expander` is the
+    compiler of the active macro expansion, `definition_file` the source of
+    its definition, `captures` its complete captured syntax by identity, and
+    `has_bindings` whether it bound captured values. `evaluator` is the
+    compiler evaluating Lisp and `site` where that evaluation stands, which
+    a nested import changes without an expansion. Each evaluation installs
+    its part with `$let`, so a captured entry is valid only while its
+    expansion is active. */
 typedef struct MetaContext {
-  Compiler expansion, evaluator;
-  String file;
+  Compiler expander, evaluator;
+  String definition_file;
   Map captures;
-  int references;
+  int has_bindings;
   Token site;
 } MetaContext;
 
@@ -50,7 +50,7 @@ MetaContext *MetaContext.current(void) => &active;
 /** Returns the compiler running the current compile-time call. A slot
     function compiled into the compiler reads its facts through it. */
 Compiler Compiler.expanding(void) =>
-  active.expansion ? active.expansion : active.evaluator;
+  active.expander ? active.expander : active.evaluator;
 
 // syntax queries
 
@@ -82,7 +82,7 @@ List x2c_syntax_type(List value) {
 }
 
 static List _sdk_binding_type(List binding) =>
-  active.expansion.semantic_binding_facts()[
+  active.expander.semantic_binding_facts()[
     %(type $binding)
   ];
 
@@ -90,14 +90,14 @@ static List _sdk_binding_type(List binding) =>
 List x2c_protocol_member(
   List participant, List base, String member) {
   List conformance =
-    active.expansion.protocol_members_for(participant, base);
+    active.expander.protocol_members_for(participant, base);
   if (!conformance) return %();
   foreach (List row, conformance.last().list().cdr()) {
     (String row_member, Symbol status, String source, Type signature,
      Symbol default_kind, Type template) = row;
     (void) default_kind; (void) template;
     if (status != <implmntd> || row_member != member) continue;
-    List binding = active.expansion.sym.lookup(%($source), NULL);
+    List binding = active.expander.sym.lookup(%($source), NULL);
     if (binding) return %(expr $signature (ident $binding));
     return %();
   }
@@ -112,7 +112,7 @@ List x2c_method_resolve(List type_value, String name) {
       "x2c.method.resolve requires an identifier String",
       %("value: ${name.repr()}"));
   Type type = type_value;
-  List resolution = active.expansion.resolve_postfix_member(
+  List resolution = active.expander.resolve_postfix_member(
     type, %($name), <.>, 1);
   match (resolution) {
     case %(ambiguous *packages): {
@@ -167,10 +167,10 @@ static Var _sdk_bindings(List declaration) {
 /* This reads the symbol table only, so it serves any compile-time Lisp
    evaluation, not just an active macro expansion. */
 static Var _sdk_function_reference(String name) {
-  Compiler compiler = active.evaluator;
-  if (!compiler) raise %(bad-state (operation "_x2c.function.reference"));
+  Compiler c = active.evaluator;
+  if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
-  List binding = compiler.sym.lookup(%($name), type);
+  List binding = c.sym.lookup(%($name), type);
   if (!binding || !type || !type.is_function()) return %();
   return %(expr $type (ident $binding));
 }
@@ -207,21 +207,21 @@ List x2c_type_parts(List value) => value.type().declaration_parts();
 /** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
 String x2c_type_reverse_name(String base, String participant) {
   _sdk_guard("x2c.type.reverse-name");
-  return active.expansion.reverse_converter_spelling(
+  return active.expander.reverse_converter_spelling(
     base, "", participant);
 }
 
 /** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
 List x2c_type_resolve(List value) {
   _sdk_guard("x2c.type.resolve");
-  return active.expansion.sym.resolve_key(value).type_from_ast();
+  return active.expander.sym.resolve_key(value).type_from_ast();
 }
 
 /** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
 List x2c_type_layout(List value) {
   _sdk_guard("x2c.type.layout");
-  Type type = active.expansion.sym.resolve_key(value).type_from_ast();
-  return active.expansion.sym.field_order(type).cdr();
+  Type type = active.expander.sym.resolve_key(value).type_from_ast();
+  return active.expander.sym.field_order(type).cdr();
 }
 
 /** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
@@ -230,15 +230,15 @@ int x2c_type_is_value(List value) {
   Type type = value.type().canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
   foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
-    if (active.expansion.sym.is_named_value_type(type, name)) return 1;
-  return active.expansion.sym.resolve_key(type).is_number();
+    if (active.expander.sym.is_named_value_type(type, name)) return 1;
+  return active.expander.sym.resolve_key(type).is_number();
 }
 
 /** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
 Symbol x2c_type_tag_name(String name) {
   _sdk_guard("x2c.type.tag-name");
-  String file = active.expansion.source_path(active.expansion.filename);
-  file = active.expansion.display_path(file);
+  String file = active.expander.source_path(active.expander.filename);
+  file = active.expander.display_path(file);
   String identity = %"$file:$name";
   unsigned hash = identity.hash();
   const char *alphabet = "abcdefghijklmnopqrstuvwxyz*+?!-";
@@ -255,12 +255,12 @@ List x2c_type_fields(List value) {
   _sdk_guard("x2c.type.fields");
   Type type = value;
   type = type.canonicalize();
-  Type resolved = active.expansion.sym.resolve_key(type);
+  Type resolved = active.expander.sym.resolve_key(type);
   if (!resolved || !resolved.is_aggregate_tag())
     MetaContext.reject(
       "x2c.type.fields requires a struct or union Type",
       %("value: ${value.repr()}"));
-  List metadata = active.expansion.sym.field_order(resolved);
+  List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)
     MetaContext.reject(
       "x2c.type.fields requires a complete struct or union Type",
@@ -313,7 +313,7 @@ static String _binding_spelling(List value, Var syntax) {
       "x2c.binding.spelling requires an identifier or binding",
       %("value: ${syntax.repr()}" ));
   Var registered =
-    active.expansion.semantic_binding_facts()[%(known $identity)];
+    active.expander.semantic_binding_facts()[%(known $identity)];
   if (registered is not <string> || !registered.string().equal(spelling))
     MetaContext.reject(
       "x2c.binding.spelling requires a known binding",
@@ -335,14 +335,14 @@ static Var _sdk_ident_unique(String stem) {
   if (!stem.is_identifier()) MetaContext.reject(
     "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
-  String spelling = active.expansion.fresh_name(%"macro_$stem");
-  return active.expansion.sym.introduce(spelling);
+  String spelling = active.expander.fresh_name(%"macro_$stem");
+  return active.expander.sym.introduce(spelling);
 }
 
 /** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
   _sdk_guard("x2c.meta.definition.hashes");
-  return active.expansion.meta_hashes;
+  return active.expander.meta_hashes;
 }
 
 /** Answers `x2c.function.name`, declared in `lib/meta.x`. */
@@ -374,14 +374,14 @@ List x2c_function_parameter(List function, String wanted) {
 static List _sdk_native_type(List syntax) {
   match (syntax)
     case %(function ?rtype ?declarator ?):
-      return active.expansion.func_signature(
+      return active.expander.func_signature(
         %(declare $rtype (bindings $declarator)).type_from_ast());
-  return active.expansion.func_signature(x2c_syntax_type(syntax));
+  return active.expander.func_signature(x2c_syntax_type(syntax));
 }
 
 /* Lisp-built signatures become cached literals of the expanding unit. */
 static List _sdk_literal_list(List values) =>
-  active.expansion.cache_literal_list(values);
+  active.expander.cache_literal_list(values);
 
 static Var _sdk_symbol_set(List values) {
   _sdk_guard("_x2c.symbol-set");
@@ -391,7 +391,7 @@ static Var _sdk_symbol_set(List values) {
         "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
-  List expression = active.expansion.symbol_set_expression(
+  List expression = active.expander.symbol_set_expression(
     values, duplicate);
   if (duplicate >= 0)
     MetaContext.reject(
@@ -427,32 +427,34 @@ static Var _sdk_source_text(Var value) {
       !active.captures.try_get(key, stored))
     MetaContext.reject(
       "x2c.source.text requires complete captured syntax",
-      active.references ? NULL : %("value: ${value.repr()}"));
+      active.has_bindings ? NULL : %("value: ${value.repr()}"));
   List source = stored;
   int begin = source.caddr(), end = source.last();
-  return String.new_len(active.expansion.text + begin, end - begin);
+  return String.new_len(active.expander.text + begin, end - begin);
 }
 
 /** Answers `x2c.embed.text`, declared in `lib/meta.x`. */
 String x2c_embed_text(Var path) => _sdk_embed_text(path);
 
 static Var _sdk_embed_text(Var requested) {
-  Compiler compiler = active.expansion;
-  if (!compiler)
+  Compiler c = active.expander;
+  if (!c)
     MetaContext.reject(
       "x2c.embed.text used outside macro expansion", NULL);
-  String source_file = active.file, requested_path = NULL;
+  String source_file = active.definition_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
   else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
     MetaContext.reject(
       "x2c.embed.text requires a non-empty path", NULL);
-  String path = _embed_path(compiler, source_file, requested_path);
-  if (compiler.sources) return _embed_source(compiler, path);
-  return _embed_file(compiler, path);
+  String path = c._embed_path(source_file, requested_path);
+  String text = c.sources ? c._embed_source(path) : c._embed_file(path);
+  c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));
+  return text;
 }
 
-static String _embed_path(Compiler c, String source_file, String requested) {
+static String Compiler._embed_path(
+  Compiler c, String source_file, String requested) {
   if (requested[0] == '/') return c.canonical_path(requested);
   String base = Path.dirname(c.source_path(source_file));
   return c.canonical_path(%"$base/$requested");
@@ -477,54 +479,49 @@ static String _embed_literal(Var requested, String &source_file) {
   return requested_path;
 }
 
-static String _embed_source(Compiler compiler, String path) {
+static String Compiler._embed_source(Compiler c, String path) {
   String text;
-  if (!compiler.read_source(path, text))
+  if (!c.read_source(path, text))
     MetaContext.reject(
       "cannot read embedded text",
-      %("path: ${compiler.display_path(path)}"));
-  compiler.deps.merge_translation_dependency(
-    path, "%08x".printf(text.hash()));
+      %("path: ${c.display_path(path)}"));
   return text;
 }
 
-static String _embed_file(Compiler compiler, String path) {
-  File file = _open_embed_file(compiler, path);
-  String result = _read_embed_file(compiler, path, file);
-  String content_hash = "%08x".printf(result.hash());
-  compiler.deps.merge_translation_dependency(path, content_hash);
-  return result;
+static String Compiler._embed_file(Compiler c, String path) {
+  File file = c._open_embed_file(path);
+  return c._read_embed_file(path, file);
 }
 
-static File _open_embed_file(Compiler compiler, String path) {
+static File Compiler._open_embed_file(Compiler c, String path) {
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
     MetaContext.reject(
       "embedded text is not a regular file",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   File file = NULL, int open_failed = 0;
   try file = path.open("r");
   catch %((!or not-found io-fail) *): open_failed = 1;
   if (open_failed)
     MetaContext.reject(
       "cannot open embedded text",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   if (file.stat(&info) || !S_ISREG(info.st_mode)) {
     file.close();
     MetaContext.reject(
       "embedded text is not a regular file",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   }
   if ((uintmax_t) info.st_size >= INT_MAX) {
     file.close();
     MetaContext.reject(
       "embedded text exceeds the String size limit",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   }
   return file;
 }
 
-static String _read_embed_file(Compiler compiler, String path, File file) {
+static String Compiler._read_embed_file(Compiler c, String path, File file) {
   String result = NULL;
   int read_failed = 0, embedded_nul = 0, size_overflow = 0;
   try result = file.string_close();
@@ -534,15 +531,15 @@ static String _read_embed_file(Compiler compiler, String path, File file) {
   if (read_failed)
     MetaContext.reject(
       "cannot read embedded text",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   if (embedded_nul)
     MetaContext.reject(
       "embedded text contains an embedded NUL",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   if (size_overflow)
     MetaContext.reject(
       "embedded text exceeds the String size limit",
-      %("path: ${compiler.display_path(path)}"));
+      %("path: ${c.display_path(path)}"));
   return result;
 }
 
@@ -592,10 +589,10 @@ Var x2c_literal_value(Var syntax) {
 // invocations and diagnostics
 
 static Var _sdk_invocation_location(void) {
-  if (!active.expansion || !active.site)
+  if (!active.expander || !active.site)
     MetaContext.reject(
       "x2c invocation location used outside macro expansion", NULL);
-  return active.expansion.token_location(active.site);
+  return active.expander.token_location(active.site);
 }
 
 /** Answers `x2c.invocation.file`, declared in `lib/meta.x`. */
@@ -630,8 +627,8 @@ void x2c_diagnostic_warn(String message, List notes) {
       MetaContext.reject(
         "x2c.diagnostic.warn notes must be Strings",
         %("value: ${note.repr()}" ));
-  active.expansion.report_warning(
-    <macro>, message, active.expansion.token, notes);
+  active.expander.report_warning(
+    <macro>, message, active.expander.token, notes);
 }
 
 // meta parameter descriptions
@@ -665,7 +662,7 @@ List meta_type_description(Var value) {
       else if (_symbol_words(shape)) kind = <scalar>;
   }
   if (kind == <struct> || kind == <union>) fields = x2c_type_fields(type);
-  Compiler c = active.expansion;
+  Compiler c = active.expander;
   Array methods = [];
   foreach (String member, c.postfix_completions(type, <.>))
     match (c.resolve_postfix_member(type, %($member), <.>, 1))
@@ -723,12 +720,12 @@ List binding_literal_list(List values) => _sdk_literal_list(values);
 
 static Var _sdk_iter_chain(List expression) {
   _sdk_guard("private foreach iterator completion");
-  return active.expansion.complete_iter_chain(expression);
+  return active.expander.complete_iter_chain(expression);
 }
 
 static Var _sdk_string_collection(List expression) {
   _sdk_guard("private foreach string conversion");
-  return active.expansion.promote_string_literal(expression);
+  return active.expander.promote_string_literal(expression);
 }
 
 // rejection
@@ -737,15 +734,14 @@ static Var _sdk_string_collection(List expression) {
     returns, so the rejected operation's caller cannot continue with a
     missing answer. With no active invocation it is a bad state. */
 void MetaContext.reject(String message, List notes) {
-  Compiler compiler = active.evaluator;
-  if (compiler)
-    compiler.report_error(<macro>, message, active.site, notes);
+  Compiler c = active.evaluator;
+  if (c) c.report_error(<macro>, message, active.site, notes);
   raise %(bad-state (operation "x2c SDK rejection") (why $message));
 }
 
 // SDK operations reject use outside an active expansion.
 static void _sdk_guard(String operation) {
-  if (!active.expansion)
+  if (!active.expander)
     MetaContext.reject(%"$operation used outside macro expansion", NULL);
 }
 
