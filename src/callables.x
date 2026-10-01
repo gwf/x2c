@@ -246,7 +246,7 @@ static List _build_func_adapter(
   Compiler c, Type diagnostic_type, Type source_type,
   List target, List supplied_fn_binding, List prefix) {
   List params = NULL, Type return_type = NULL;
-  _typed_function_parts(source_type, params, return_type);
+  source_type.function_parts(params, return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
     String message = c.sym.resolve_key(diagnostic_type).equal(func_type)
@@ -443,7 +443,7 @@ static List _func_record_call(
 List Compiler.func_signature(Compiler compiler, Type type) {
   List params = NULL;
   Type result = NULL;
-  _typed_function_parts(type, params, result);
+  type.function_parts(params, result);
   Array declared = [];
   foreach (List parameter, params)
     declared.push(parameter.type().declared());
@@ -909,7 +909,7 @@ macro open Statement $capture_factory(Statement $storage, Expr $value) {
   return $value;
 }
 
-/* Capture rows arrive resolved and in first-use order from `literals.x`.
+/* Capture rows arrive resolved and in first-use order from `lambdas.x`.
    Their locals run before the context aggregate; value fields are snapshots
    and reference fields retain caller or cell addresses. */
 typedef struct CaptureBuild {
@@ -1359,7 +1359,7 @@ static void _collect_reference_captures(
     List node = current;
     match (node)
       case %(capture ? (& *) (expr ? (op & ?target))): {
-        List binding = _lvalue_binding(target);
+        List binding = Ast.lvalue_binding(target);
         Var stored;
         if (binding && owned.try_get(binding, stored)) {
           Type type = stored;
@@ -1368,29 +1368,6 @@ static void _collect_reference_captures(
       }
     foreach (Var child, node) pending.push(child);
   }
-}
-
-/* Return the binding whose stored object an lvalue names. Pointer
-   dereferences and pointer indexes name another object; an array field
-   remains part of its containing aggregate. */
-static List _lvalue_binding(List ast) {
-  if (!ast) return NULL;
-  match (ast) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding;
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
-      return _lvalue_binding(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return _lvalue_binding(inner);
-    case %(expr ? ${$source_operator_content(%(. ?base *))}):
-      return _lvalue_binding(base);
-    case $source_operator_content(%(. ?base *)):
-      return _lvalue_binding(base);
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (expr ((dim *) *) ?base)) (?selector ?))):
-      return _lvalue_binding(base);
-  }
-  return NULL;
 }
 
 static List _rewrite_lambda_cells(
@@ -1578,36 +1555,18 @@ static void _typed_adapter_parts(TypedAdapter *adapter) {
       c, "typed callback adapter source must be a direct function",
       target, source,
       %("supported: a free function or Type.method designator"));
-  if (!_typed_function_parts(
-    target, adapter.target_params, adapter.target_return))
+  if (!target.function_parts(
+    adapter.target_params, adapter.target_return))
     _typed_adapter_error(
       c, "typed callback adapter target is incomplete", target, source, NULL);
-  if (!_typed_function_parts(
-    source, adapter.source_params, adapter.source_return))
+  if (!source.function_parts(
+    adapter.source_params, adapter.source_return))
     _typed_adapter_error(
       c, "typed callback adapter source is incomplete", target, source, NULL);
   if (_typed_params_variadic(adapter.target_params) ||
       _typed_params_variadic(adapter.source_params))
     _typed_adapter_error(
       c, "typed callback adapter cannot be variadic", target, source, NULL);
-}
-
-// Split a direct or pointer function Type into fixed parameters and return.
-static int _typed_function_parts(Type type, List &params, Type &?return_type) {
-  if (!type) return 0;
-  type = type.canonicalize();
-  if (type.is_pointer()) type = type.dereference();
-  match (type)
-    case %((func (*parameters)) ?return_head *return_tail): {
-      List values = parameters;
-      match (values)
-        case %(?(Type only)) if (only.canonicalize() === %(void)):
-          values = NULL;
-      params = values;
-      if (return_type) return_type = %($return_head @return_tail);
-      return 1;
-    }
-  return 0;
 }
 
 static int _typed_params_variadic(List params) {
@@ -1782,7 +1741,7 @@ List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   List param_types = NULL;
   int all_params_var = _collect_param_types(raw_params, param_types);
   List source_params = NULL, source_param_types = NULL;
-  _typed_function_parts(orig_type, source_params, NULL);
+  orig_type.function_parts(source_params, NULL);
   _collect_param_types(source_params, source_param_types);
   List return_type_list = return_type is <list>
     ? return_type : %( $return_type );

@@ -119,6 +119,7 @@
 - [src/generate.x](https://x2c-lang.dev/docs/internals/compiler-api/generate.html)
 - [src/initializers.x](https://x2c-lang.dev/docs/internals/compiler-api/initializers.html)
 - [src/install.x](https://x2c-lang.dev/docs/internals/compiler-api/install.html)
+- [src/lambdas.x](https://x2c-lang.dev/docs/internals/compiler-api/lambdas.html)
 - [src/linked-meta.x](https://x2c-lang.dev/docs/internals/compiler-api/linked-meta.html)
 - [src/literals.x](https://x2c-lang.dev/docs/internals/compiler-api/literals.html)
 - [src/macros.x](https://x2c-lang.dev/docs/internals/compiler-api/macros.html)

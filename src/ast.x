@@ -65,6 +65,30 @@ String binding_identity_spelling(List binding) {
   return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
 }
 
+/** Returns the binding whose stored object the lvalue `ast` names, or
+    `NULL`. Pointer dereferences and pointer indexes name another object; an
+    array field remains part of its containing aggregate.
+*/
+List Ast.lvalue_binding(Ast ast) {
+  if (!ast) return NULL;
+  match (ast) {
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding;
+    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+      return Ast.lvalue_binding(inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return Ast.lvalue_binding(inner);
+    case %(expr ? ${$source_operator_content(%(. ?base *))}):
+      return Ast.lvalue_binding(base);
+    case $source_operator_content(%(. ?base *)):
+      return Ast.lvalue_binding(base);
+    case $source_pattern_with($indexed, %(?receiver ?selector),
+        %((?receiver (expr ((dim *) *) ?base)) (?selector ?))):
+      return Ast.lvalue_binding(base);
+  }
+  return NULL;
+}
+
 // traversal
 
 /** Applies `per_child` to each `List` child of `ast` and returns the node

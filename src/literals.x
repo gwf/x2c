@@ -1,9 +1,9 @@
-/*  literals.x -- x2c literal and lambda parsing
+/*  literals.x -- x2c literal parsing
 
     Each literal parses to a typed expression. A `List` cell or `String`
     segment with no dynamic reference enters the compiler cache and is built
     once; `runtime_literals` builds every one at run time instead. Lambda
-    literals and constructed lambdas share one capture resolution.
+    literals parse in `lambdas.x`.
 */
 #pragma once
 $(import "../lib/private-keywords.xmacro")

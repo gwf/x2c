@@ -1,3 +1,12 @@
+/*  lambdas.x -- lambda parsing and capture resolution
+
+    Copyright (c) 2026 Gary William Flake.
+
+    A source lambda and a lambda that a macro or transform constructs bind
+    through the same capture operations, which record each captured binding
+    and its value or reference mode in semantic binding facts. The rows
+    leave here resolved and in first-use order; `callables.x` lowers them.
+*/
 #pragma once
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
@@ -6,7 +15,6 @@ $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
 #include "expressions.x"
-#include "transform.x"
 
 /* lambda literals
 
@@ -145,6 +153,25 @@ static List _shared_binding(Compiler c) {
 static List _parse_lambda_body(Compiler c) {
   if (!c.test(<"{">)) return c.parse_assignment();
   $let(c.return_type, %("Var")) return c.parse_callable_body();
+}
+
+/** The parameter types of a lambda's function signature, keeping typed
+    declarators; a bare parameter is a `Var`. */
+List Compiler.lambda_param_types(Compiler c, List entries) {
+  if (!entries) return %((void));
+  Array types = [];
+  foreach (List entry, entries)
+    match (entry) {
+      case %(binding ? ?): types.push(%("Var"));
+      case %(param ? ?): {
+        Type type = entry.type_from_ast().declared();
+        if (type.car() == <&> || type.car() == <opt-ref>)
+          type = cons(
+            type.car(), c.sym.normalize_declared_type(type.cdr()));
+        types.push(type);
+      }
+    }
+  return types.list_free();
 }
 
 /* The body hole may supply either an expression or a block. */
@@ -491,7 +518,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
       case $source_call_content($called,
           %(expr ?callee_type ?), %(*arguments)): {
         List parameters = NULL;
-        if (_typed_function_parts(callee_type, parameters, NULL))
+        if (Type.function_parts(callee_type, parameters, NULL))
           for (; parameters && arguments;
                parameters = parameters.cdr(), arguments = arguments.cdr()) {
             Type parameter = parameters.car();
@@ -505,29 +532,10 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
 }
 
 static void _require_capture_lvalue(Compiler c, List target) {
-  List binding = _lvalue_binding(target);
+  List binding = Ast.lvalue_binding(target);
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
     c.report_error(
       <type>, "captured value requires 'using &name' for reference access",
       c.token, %("binding: ${binding_identity_spelling(binding)}"));
-}
-
-/** The parameter types of a lambda's function signature, keeping typed
-    declarators; a bare parameter is a `Var`. */
-List Compiler.lambda_param_types(Compiler c, List entries) {
-  if (!entries) return %((void));
-  Array types = [];
-  foreach (List entry, entries)
-    match (entry) {
-      case %(binding ? ?): types.push(%("Var"));
-      case %(param ? ?): {
-        Type type = entry.type_from_ast().declared();
-        if (type.car() == <&> || type.car() == <opt-ref>)
-          type = cons(
-            type.car(), c.sym.normalize_declared_type(type.cdr()));
-        types.push(type);
-      }
-    }
-  return types.list_free();
 }

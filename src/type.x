@@ -393,6 +393,27 @@ Type Type.apply(Type type) {
   return NULL;
 }
 
+/** Splits a direct or pointer function `type` into its fixed `params`,
+    which are `NULL` for `(void)`, and its `return_type` when one is asked
+    for. Returns 0 and leaves both unchanged when `type` is not a function.
+*/
+int Type.function_parts(Type type, List &params, Type &?return_type) {
+  if (!type) return 0;
+  type = type.canonicalize();
+  if (type.is_pointer()) type = type.dereference();
+  match (type)
+    case %((func (*parameters)) ?return_head *return_tail): {
+      List values = parameters;
+      match (values)
+        case %(?(Type only)) if (only.canonicalize() === %(void)):
+          values = NULL;
+      params = values;
+      if (return_type) return_type = %($return_head @return_tail);
+      return 1;
+    }
+  return 0;
+}
+
 // storage classes
 
 /** Returns whether `type` carries the `static` storage class. */

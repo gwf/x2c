@@ -29,8 +29,9 @@ Functions and types exposed by each compiler module.
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
+| [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
-| [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
+| [`src/literals.x`](literals.md) | x2c literal parsing. |
 | [`src/macros.x`](macros.md) | source macros and the compile-time code they run. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
 | [`src/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |

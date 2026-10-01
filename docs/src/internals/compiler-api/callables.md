@@ -14,9 +14,7 @@ Lambdas and Func conversions lowered to C helpers.
 | --- | --- |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.capture_environment`](#Compiler.capture_environment) | Binds the file-static context type `name` with the field rows `fields`, for captured lambdas and callable defers. |
-| [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
-| [`Compiler.lambda_param_types`](#Compiler.lambda_param_types) | The parameter types of a lambda's function signature, keeping typed declarators; a bare parameter is a `Var`. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
 | [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression to emitter-ready helper references. |
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
@@ -40,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1829`
+Source: `src/callables.x:1720`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -51,18 +49,7 @@ Binds the file-static context type `name` with the field rows `fields`,
 for captured lambdas and callable defers. The complete typedef is bound
 at once, so each field keeps its member type.
 
-Source: `src/callables.x:988`
-
-<a id="Compiler.check_lambda_captures"></a>
-#### Compiler.check_lambda_captures
-
-`void Compiler.check_lambda_captures(Compiler c, List ast)`
-
-Rejects writes and reference access to read-only snapshot bindings.
-The body has already resolved identifiers and call arguments. Templates
-defer this check until expansion; nested lambdas check their own bodies.
-
-Source: `src/callables.x:1539`
+Source: `src/callables.x:970`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -71,17 +58,7 @@ Source: `src/callables.x:1539`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:461`
-
-<a id="Compiler.lambda_param_types"></a>
-#### Compiler.lambda_param_types
-
-`List Compiler.lambda_param_types(Compiler c, List entries)`
-
-The parameter types of a lambda's function signature, keeping typed
-declarators; a bare parameter is a `Var`.
-
-Source: `src/callables.x:79`
+Source: `src/callables.x:443`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -96,7 +73,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:555`
+Source: `src/callables.x:537`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -113,7 +90,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/callables.x:41`
+Source: `src/callables.x:42`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -127,7 +104,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1606`
+Source: `src/callables.x:1515`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -141,7 +118,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:179`
+Source: `src/callables.x:161`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -156,7 +133,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/callables.x:1246`
+Source: `src/callables.x:1228`
 
 ## Design notes
 

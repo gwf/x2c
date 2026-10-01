@@ -24,6 +24,7 @@ Shared helpers for x2c compiler AST nodes.
 | [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
+| [`Ast.lvalue_binding`](#Ast.lvalue_binding) | Returns the binding whose stored object the lvalue `ast` names, or `NULL`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
 | [`Ast.rewrap_origin`](#Ast.rewrap_origin) | Returns `replacement` under the anchors of `original`, the statement it replaces, so a rewrite does not lose the node's source position. |
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
@@ -40,7 +41,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:218`
+Source: `src/ast.x:242`
 
 #### ast_contains_head
 
@@ -49,7 +50,7 @@ Source: `src/ast.x:218`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:82`
+Source: `src/ast.x:106`
 
 #### binding_identity_new
 
@@ -86,7 +87,7 @@ Classifies the preprocessor line `text` as a conditional directive:
 `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
 and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 
-Source: `src/ast.x:274`
+Source: `src/ast.x:298`
 
 #### preproc_directive
 
@@ -95,7 +96,7 @@ Source: `src/ast.x:274`
 Returns the preprocessor line `text` without its `#` and the blanks
 around the directive.
 
-Source: `src/ast.x:284`
+Source: `src/ast.x:308`
 
 #### preproc_include_target
 
@@ -105,7 +106,7 @@ Returns the file named by the `#include` line `text`, or `NULL` for any
 other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
 the name, such as a comment, is ignored.
 
-Source: `src/ast.x:291`
+Source: `src/ast.x:315`
 
 #### preproc_track_arms
 
@@ -115,7 +116,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/ast.x:306`
+Source: `src/ast.x:330`
 
 #### preproc_within_arms
 
@@ -125,7 +126,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/ast.x:319`
+Source: `src/ast.x:343`
 
 ### `Ast`
 
@@ -136,7 +137,7 @@ Source: `src/ast.x:319`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:224`
+Source: `src/ast.x:248`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -147,7 +148,18 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:238`
+Source: `src/ast.x:262`
+
+<a id="Ast.lvalue_binding"></a>
+#### Ast.lvalue_binding
+
+`List Ast.lvalue_binding(Ast ast)`
+
+Returns the binding whose stored object the lvalue `ast` names, or
+`NULL`. Pointer dereferences and pointer indexes name another object; an
+array field remains part of its containing aggregate.
+
+Source: `src/ast.x:72`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -160,7 +172,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:130`
+Source: `src/ast.x:154`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -170,7 +182,7 @@ Source: `src/ast.x:130`
 Returns `replacement` under the anchors of `original`, the statement it
 replaces, so a rewrite does not lose the node's source position.
 
-Source: `src/ast.x:115`
+Source: `src/ast.x:139`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -182,7 +194,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:75`
+Source: `src/ast.x:99`
 
 <a id="Ast.without_origin"></a>
 #### Ast.without_origin
@@ -194,7 +206,7 @@ in. Every block statement carries one so that a transform-phase
 diagnostic can name its line; a pass that dispatches on a statement tag
 has to see the statement, not the anchor.
 
-Source: `src/ast.x:103`
+Source: `src/ast.x:127`
 
 ### `Symbol`
 
@@ -205,7 +217,7 @@ Source: `src/ast.x:103`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:208`
+Source: `src/ast.x:232`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -214,7 +226,7 @@ Source: `src/ast.x:208`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:202`
+Source: `src/ast.x:226`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -223,7 +235,7 @@ Source: `src/ast.x:202`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:214`
+Source: `src/ast.x:238`
 
 ## Public types
 
