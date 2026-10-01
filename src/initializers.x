@@ -378,12 +378,12 @@ static void Compiler._initializer_next(
     List frame = path.car(), parent = path.cdr();
     (Type owner, Symbol kind, Var selector, Type type, List rest) = frame;
     if (kind == <field>) {
-      if (owner.car() != <union>) {
-        List next = _initializer_field(owner, rest, parent);
-        if (next) {
-          states.push(%($condition $next 1));
-          return;
-        }
+      // A union initializes one member, so no field follows another.
+      List next = owner.car() == <union> ? NULL
+        : _initializer_field(owner, rest, parent);
+      if (next) {
+        states.push(%($condition $next 1));
+        return;
       }
     }
     else if (c._next_index(target, frame, parent, condition, states)) return;
