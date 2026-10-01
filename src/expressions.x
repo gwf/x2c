@@ -2613,11 +2613,11 @@ static Type Compiler._converted_participant(
   int rhs_member = !!c.resolve_protocol_member(rhs_type, member) &&
     c._converts_operands(rhs_type);
   if (lhs_member && !rhs_member) {
-    List converted = c._converter_call(rhs, rhs_type, lhs_type);
+    List converted = c.converter_call(rhs, rhs_type, lhs_type);
     if (converted) { rhs = converted; return lhs_type; }
   }
   else if (rhs_member && !lhs_member) {
-    List converted = c._converter_call(lhs, lhs_type, rhs_type);
+    List converted = c.converter_call(lhs, lhs_type, rhs_type);
     if (converted) { lhs = converted; return rhs_type; }
   }
   return NULL;
@@ -3155,7 +3155,7 @@ static int Compiler._implicit_converter(
   int source_is_var) =>
   source_is_var || c.sym.is_var_type(target) ||
   List.equal(c.sym.resolve_key(source), c.sym.resolve_key(target)) ||
-  !!c._converter_call(receiver, source, target);
+  !!c.converter_call(receiver, source, target);
 
 /* The function being defined may be the implicit crossing itself, as a
    `Var.row` converter is for a `Row` destination; its explicit calls are how
@@ -3478,7 +3478,7 @@ static List Compiler._convert_known_value(
     List declared = c._declared_var_converter(expr, type);
     if (declared) return declared;
   }
-  List converted = c._converter_call(expr, type, target);
+  List converted = c.converter_call(expr, type, target);
   if (converted) return converted;
   if (!type_is_var && target_is_var) return c._box_var(expr, type);
   return NULL;
@@ -3523,7 +3523,7 @@ List Compiler.convert_segment_to_string(Compiler c, List expr) {
     return %(expr ("String") (call "Var_str" (args $expr)));
   if (!c.sym.resolve_numeric_type(type))
     return c.convert_expression(expr, %("String"));
-  List converted = c._converter_call(expr, type, %("String"));
+  List converted = c.converter_call(expr, type, %("String"));
   if (converted) return converted;
   List boxed = c.convert_expression(expr, %("Var"));
   return %(expr ("String") (call "Var_str" (args $boxed)));
@@ -3579,7 +3579,7 @@ static List Compiler._var_checked_reader(
               ? c._typedef_names(target).list_free() : %($target);
   foreach (Type owner, owners) {
     List reader = c._var_exact_reader(expr, owner);
-    if (!reader) reader = c._converter_call(expr, type, owner);
+    if (!reader) reader = c.converter_call(expr, type, owner);
     if (reader)
       return owner == target ? reader : %(expr $target ${reader.caddr()});
   }
@@ -3654,10 +3654,10 @@ static List Compiler._box_var(Compiler c, List expr, Type type) {
 
 // converter calls
 
-/* The call to the converter that `type`, or the first of its typedef names
-   that declares one, provides for `target`, or NULL. */
-static List Compiler._converter_call(
-  Compiler c, List expr, Type type, Type target) {
+/** The call to the converter that `type`, or the first of its typedef names
+    that declares one, provides for `target`, applied to `expr`, or NULL
+    when none declares one. */
+List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
               ? c._typedef_names(type).list_free() : %($type);
@@ -3669,11 +3669,6 @@ static List Compiler._converter_call(
   }
   return NULL;
 }
-
-/** The call to the converter `type` declares for `target`, applied to
-    `expr`, or NULL when it declares none. */
-List Compiler.converter_call(Compiler c, List expr, Type type, Type target) =>
-  c._converter_call(expr, type, target);
 
 static List Compiler._converter_owned_call(
   Compiler c, List expr, Type owner, Type target, int &declared) {
