@@ -70,14 +70,8 @@ prefix.
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
-| [`x2c_mutex_recursive_initialize`](mutex.md#x2c_mutex_recursive_initialize) | `lib/mutex.x` | `void x2c_mutex_recursive_initialize( pthread_mutex_t *mutex, const char *failure)` |
-| [`x2c_mutex_recursive_lock`](mutex.md#x2c_mutex_recursive_lock) | `lib/mutex.x` | `void x2c_mutex_recursive_lock( pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)` |
-| [`x2c_mutex_recursive_unlock`](mutex.md#x2c_mutex_recursive_unlock) | `lib/mutex.x` | `void x2c_mutex_recursive_unlock(pthread_mutex_t *mutex, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
-| [`x2c_numeric_f32`](varconvert.md#x2c_numeric_f32) | `lib/varconvert.x` | `float x2c_numeric_f32(X2CVarNumeric &value)` |
-| [`x2c_numeric_f64`](varconvert.md#x2c_numeric_f64) | `lib/varconvert.x` | `double x2c_numeric_f64(X2CVarNumeric &value)` |
-| [`x2c_numeric_ldouble`](varconvert.md#x2c_numeric_ldouble) | `lib/varconvert.x` | `long double x2c_numeric_ldouble(X2CVarNumeric &value)` |
 | [`x2c_parameters_arguments`](meta.md#x2c_parameters_arguments) | `lib/meta.x` | `meta List x2c_parameters_arguments(List value)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
@@ -110,4 +104,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 98 functions.
+Total: 92 functions.
