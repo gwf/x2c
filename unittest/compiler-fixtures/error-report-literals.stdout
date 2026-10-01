@@ -1,0 +1,10 @@
+type: identifier 'dynamic' has no semantic type
+type: identifier 'dynamic' has no semantic type
+protocol: 'meta' applies only to a concrete protocol adoption "mark each adoption: meta protocol BASE(TYPE);"
+protocol: 'meta' applies only to a concrete protocol adoption "mark each adoption: meta protocol BASE(TYPE);"
+type: destructuring requires a List source ("source type" (int))
+type: destructuring requires a List source ("source type" (int))
+macro: this meta call ran longer than 1.5 s "function: fixture" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"
+macro: this meta call ran longer than 1.5 s "function: fixture" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"
+xform: String does not support bracket assignment "String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer"
+xform: String does not support bracket assignment "String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer"

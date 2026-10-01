@@ -19,6 +19,7 @@ $(import "../lib/private-keywords.xmacro")
 #include "type.x"
 #include "logger.x"
 #include "sourceview.x"
+#include "meta.x"
 
 /** Names the positioned diagnostic store routed by a `Compiler`. */
 typedef struct Diagnostics *Diagnostics;
@@ -217,6 +218,7 @@ Var Compiler.var(Compiler c) => (Var) { .p64 = c };
 Compiler Var.compiler(Var value) => value.p64;
 
 protocol Var(Compiler) as void *;
+$(import "error-reports.xmacro")
 #pragma private
 $(import "../src/grammar.xmacro")
 
@@ -386,7 +388,7 @@ static void Compiler._shallow_block(Compiler c) {
   c.next();
   for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
-      c.report_error(<parse>, "unexpected end of file", c.token, NULL);
+      $report(c, "parse.token.eof");
     if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
       c._shallow_block();
     else c.next();
@@ -850,10 +852,7 @@ static void Defaults.forward(Defaults &d) {
       d.sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
-      d.c.report_error(
-        <type>,
-        "a forwarded class constructor has no completed parent constructor",
-        d.c.token, NULL);
+      $report(d.c, "type.ctor.parent");
   }
 }
 
@@ -913,9 +912,7 @@ static List Compiler._forwarder(
   int index = 0;
   foreach (Var type, types) {
     if (type == <...>)
-      c.report_error(
-        <type>, %"'$name' requires an explicit variadic constructor",
-        c.token, NULL);
+      $report(c, "type.ctor.variadic", name);
     if (type == %(void)) continue;
     String argument = %"argument$index";
     index++;
@@ -1186,10 +1183,7 @@ static void Compiler._reject_statement(Compiler c) {
 }
 
 static void Compiler._report_script_statement(Compiler c) {
-  c.report_error(
-    <parse>, "a script that defines main cannot have top-level statements",
-    c.token,
-    %("move the statement into main, or remove main so the statements run"));
+  $report(c, "parse.script.main");
 }
 
 /* A file-scope conditional directive also governs the statements it
@@ -1315,12 +1309,7 @@ static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
         found, bindings);
       if (!present) continue;
       c.origin = origin;
-      c.report_error(
-        <type>,
-        %"'$name' is declared among the script's statements",
-        NULL,
-        %("functions cannot see those locals;"
-          "declare it static to share it"));
+      $report(c, "type.script.local", name);
     }
 }
 
@@ -1373,9 +1362,7 @@ static void Compiler._report_redefinition(
       !List.equal(arms, c.arms))
     return;
   String spelling = binding_identity_spelling(binding);
-  c.report_error(
-    <type>, %"$kind '$spelling' is already defined in this scope",
-    site, %("prior definition: '$spelling'"));
+  $report(c, "type.decl.duplicate", site, kind, spelling);
 }
 
 /* A definition remembers the token range of the top-level form that
@@ -1472,15 +1459,7 @@ static void Compiler._complete_prototype(
         contract = prior_contract;
   if (!List.equal(prior_contract, contract)) {
     String spelling = binding_identity_spelling(binding);
-    c.report_error(
-      <type>,
-      %"definition '$spelling' does not match prior prototype",
-      site,
-      %(
-        "prototype: ${prior_contract.repr()}"
-        "definition: ${contract.repr()}"
-      )
-    );
+    $report(c, "type.decl.prototype", site, spelling, prior_contract, contract);
   }
   c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
   c.semantic_binding_facts()[%(arms $binding)] = c.arms;
@@ -1578,10 +1557,7 @@ static void Compiler._check_static_inits(Compiler c) {
       String name = binding_identity_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
-      c.report_error(
-        <parse>,
-        %"file-static x2c initializer depends on non-static '$name'",
-        c._init_token(binding), target ? %("initializer: $target") : NULL);
+      $report(c, "parse.static.dependency", c._init_token(binding), name, target);
     }
   }
 }
@@ -1674,11 +1650,9 @@ static int Compiler._is_script_file(Compiler c) =>
 static void Compiler._report_malformed_token(Compiler c) {
   Symbol status = c.tokenizer.status();
   if (status != <malformed> && status != <indent>) return;
-  String message =
-    status == <indent> ? "inconsistent indentation" : "invalid token";
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) c.report_error(<parse>, message, token, NULL);
+    if (token.type == <error>) $report(c, "parse.token.malformed", token, status);
   }
 }
 
@@ -1787,7 +1761,7 @@ void Compiler.require_input(Compiler c) {
 Symbol Compiler.expect(Compiler c, Symbol type) {
   if (c.token.type != type) {
     c.require_input();
-    c.report_error(<parse>, %"expected '$type'", c.token, NULL);
+    $report(c, "parse.token.expected", type);
   }
   c.next();
   return type;
@@ -1814,8 +1788,7 @@ static void Compiler._update_brace_stack(Compiler c, Token consumed) {
     case <"}">:
       if (c.braces.len()) c.braces.take_last();
       else {
-        List notes = %( "encountered '}' without matching '{'" );
-        c.report_error(<parse>, "unexpected '}'", consumed, notes);
+        $report(c, "parse.brace.unexpected", consumed);
       }
       break;
   }
@@ -1844,7 +1817,7 @@ int Compiler.take_word(Compiler c, String word) {
 
 static void Compiler._check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
-  c.report_error(<parse>, "missing '}'", c.braces[-1], %( "'{' opened here" ));
+  $report(c, "parse.brace.missing", c.braces[-1]);
 }
 
 /** Returns 1 for a token type that opens a delimited group, -1 for one that
