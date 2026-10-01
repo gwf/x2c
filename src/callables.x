@@ -96,8 +96,7 @@ static List _params_to_decl_params(List names) {
         out.push(%(param ("Var") (bind $identity ())));
       case %(param ? ?): out.push(item);
     }
-  List params = out.list_free();
-  return %(params @params);
+  return %(params @{out.list_free()});
 }
 
 static List Compiler._helper_body(Compiler c, List body, List setup) {
@@ -203,7 +202,7 @@ static void CaptureBuild._field(CaptureBuild *b, Array fields, List capture) {
       List (field_base, field_mods) = storage_type.declaration_parts();
       fields.push(%(declare $field_base (bindings (bind $field $field_mods))));
       b.field_types.push(storage_type);
-      b.slots[binding] = %(capture-field $field $storage_type);
+      b.slots[binding] = %($field $storage_type);
 
       List temporary = c.sym.introduce(c.fresh_name("lambda_capture_value"));
       List value = c.convert_expression(expression, storage_type);
@@ -223,27 +222,11 @@ static void CaptureBuild.publish(
   List locals = c._func_argument_locals(
     c.sym.resolve_key(%("FuncAdapter")), entries ? params : NULL,
     entries.map(_entry_binding), closure, argv);
-  List setup = b._context_setup(closure);
+  List setup = c._context_local(b.value_type, b.environment, closure);
   List rewritten = c.normalize(b._rewrite(body));
   c._publish_func_adapter(
     b.adapter, closure, argv, rewritten, %(@locals $setup));
   b.signature = c.cache_literal_list(%((func $params) "Var"));
-}
-
-/* Inside the adapter, a typed pointer to the copied context. */
-static List CaptureBuild._context_setup(CaptureBuild *b, List closure) {
-  Compiler c = b.c;
-  Type helper_type = NULL;
-  List helper = c._adapter_helper("Func_context", helper_type);
-  List call = c._func_call(
-    %(* const void), _func_bound(helper_type, helper),
-    %(${_func_bound(%("Func"), closure)}));
-  List cast = %(expr ${b.pointer_type} (cast ${b.pointer_type} $call));
-  Macro local = $func_local;
-  return c.rebuild_statement(
-    local(
-      %(const @{b.value_type}),
-      %(op = (bind ${b.environment} (*)) $cast))).cadr();
 }
 
 static List _entry_binding(List entry) {
@@ -296,13 +279,7 @@ static List CaptureBuild._read(
   CaptureBuild *b, List ast, Type source_type, List bound) {
   Var stored;
   if (!b.slots.try_get(bound, stored)) return ast;
-  List field = NULL;
-  Type storage_type = NULL;
-  match (stored)
-    case %(capture-field ?matched_field ?matched_type): {
-      field = matched_field;
-      storage_type = matched_type;
-    }
+  (List field, Type storage_type) = stored;
   String field_name = binding_identity_spelling(field);
   List read = %(
     expr $storage_type
@@ -541,7 +518,7 @@ static void CellRegion.allocate(CellRegion *r, Map candidates) {
     if (!candidates.try_get(binding, stored_type)) continue;
     Type type = stored_type;
     List cell = c.sym.introduce(c.fresh_name("lambda_cell"));
-    r.cells[binding] = %(lambda-cell $cell $type);
+    r.cells[binding] = %($cell $type);
     c.semantic_binding_facts()[%(automatic $cell)] = 1;
     c.semantic_binding_facts()[%(type $cell)] = type.reference();
   }
@@ -577,14 +554,9 @@ static List CellRegion.rewrite(CellRegion *r, List ast) {
 static List CellRegion._declaration(
   CellRegion *r, List target, List bindings) {
   int has_cell = 0;
-  foreach (List item, bindings) {
-    List binding = NULL;
-    match (item) {
-      case %(bind ?matched *): binding = matched;
-      case %(op = (bind ?matched *) ?): binding = matched;
-    }
-    has_cell |= binding && binding in r.cells;
-  }
+  foreach (List item, bindings)
+    match (item) case %(!or (bind ?binding *) (op = (bind ?binding *) ?)):
+      has_cell |= binding && binding in r.cells;
   if (!has_cell) return NULL;
 
   Array sequence = [];
@@ -612,13 +584,10 @@ static int CellRegion._lookup(
   CellRegion *r, List binding, List &cell, Type &type) {
   Var stored;
   if (!r.cells.try_get(binding, stored)) return 0;
-  match (stored)
-    case %(lambda-cell ?matched_cell ?matched_type): {
-      cell = matched_cell;
-      type = matched_type;
-      return 1;
-    }
-  return 0;
+  List row = stored;
+  cell = row.car();
+  type = row.cadr();
+  return 1;
 }
 
 /* A plain initializer is the one element of the compound a cell copies. */
@@ -710,7 +679,7 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
 
   Type source_type = NULL;
   List source_binding = NULL;
-  if (_direct_func_source(type, payload, source_type, source_binding))
+  if (_direct_func_source(type, payload, 0, source_type, source_binding))
     return c._direct_func_value(source_binding, source_type);
 
   Type pointer_type = c._func_pointer_value_type(type);
@@ -723,8 +692,11 @@ List Compiler.lift_func_expression(Compiler c, List expression) {
   return c._deref_func_lift(expression, payload);
 }
 
+/* The direct function a designator names under parentheses and address-of,
+   and under casts when `through_cast` is set. */
 static int _direct_func_source(
-  Type type, List payload, Type &source_type, List &source_binding) {
+  Type type, List payload, int through_cast, Type &source_type,
+  List &source_binding) {
   match (payload) {
     case $source_identifier_content(%(?binding)): {
       if (!type || type.is_pointer() || !type.is_function()) return 0;
@@ -732,14 +704,19 @@ static int _direct_func_source(
       source_binding = binding;
       return 1;
     }
+    case $source_cast_content(%(? (expr ?inner_type ?inner_payload))):
+      return through_cast && _direct_func_source(
+        inner_type, inner_payload, 1, source_type, source_binding);
     case $source_content_pattern($grouped, %(?inner)):
       match (inner)
         case %(expr ?inner_type ?inner_payload):
           return _direct_func_source(
-            inner_type, inner_payload, source_type, source_binding);
+            inner_type, inner_payload, through_cast, source_type,
+            source_binding);
     case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
       return _direct_func_source(
-        inner_type, inner_payload, source_type, source_binding);
+        inner_type, inner_payload, through_cast, source_type,
+        source_binding);
   }
   return 0;
 }
@@ -902,23 +879,15 @@ static List Compiler._build_indirect_func_adapter(
   Type context_type = %($context_name);
   Type context_pointer = %(* const $context_name);
   Type context_helper_type = NULL;
-  List context_helper = c._adapter_helper("Func_context", context_helper_type);
-  if (!context_helper || !context_helper_type)
+  if (!c._adapter_helper("Func_context", context_helper_type) ||
+      !context_helper_type)
     c._adapter_error(
       "native binding needs Func.context from lib/func.x",
       diagnostic_type, pointer_type, NULL);
   List fn_binding = c.sym.introduce(c.fresh_name("func_binding"));
-  List context_value = c._func_call(
-    %(* const void), _func_bound(context_helper_type, context_helper),
-    %(${_func_bound(%("Func"), fn_binding)}));
   List context_local = c.sym.introduce(c.fresh_name("func_pointer_context"));
-  List cast = %(expr $context_pointer
-    (cast $context_pointer $context_value));
-  Macro storage_shape = $func_local;
-  List context_declaration = c.rebuild_statement(
-    storage_shape(
-      %(const $context_name),
-      %(op = (bind $context_local (*)) $cast))).cadr();
+  List context_declaration = c._context_local(
+    context_type, context_local, fn_binding);
   String field_name = binding_identity_spelling(field_binding);
   List context = _func_bound(context_pointer, context_local);
   List target = %(expr $pointer_type (op -> $context ($field_name)));
@@ -926,6 +895,22 @@ static List Compiler._build_indirect_func_adapter(
     diagnostic_type, pointer_type, target, fn_binding,
     %($context_declaration));
   return %(indirect-adapter $adapter $context_type $field_binding);
+}
+
+/* Inside an adapter, `local` points at the context `fn` copied, typed as a
+   `value_type` record. */
+static List Compiler._context_local(
+  Compiler c, Type value_type, List local, List fn) {
+  Type pointer = %(* const @value_type);
+  Type helper_type = NULL;
+  List helper = c._adapter_helper("Func_context", helper_type);
+  List call = c._func_call(
+    %(* const void), _func_bound(helper_type, helper),
+    %(${_func_bound(%("Func"), fn)}));
+  List cast = %(expr $pointer (cast $pointer $call));
+  Macro shape = $func_local;
+  return c.rebuild_statement(
+    shape(%(const @value_type), %(op = (bind $local (*)) $cast))).cadr();
 }
 
 static void Compiler._func_pointer_context(
@@ -1053,7 +1038,7 @@ List Compiler.maybe_adapt_func_arg(
   }
   if (c._is_func_adapter(arg_type)) return argument;
   Type source_type = NULL, List source_binding = NULL;
-  if (!_func_adapter_source(arg_type, payload, source_type, source_binding))
+  if (!_direct_func_source(arg_type, payload, 1, source_type, source_binding))
     c._adapter_error(
       "native binding target must be a direct function",
       expected_type, arg_type,
@@ -1069,30 +1054,6 @@ static int Compiler._is_func_adapter(Compiler c, Type type) {
   Type adapter = c.sym.resolve_key(%("FuncAdapter"));
   if (!adapter) return 0;
   return c.sym.resolve_key(type).equal(adapter);
-}
-
-static int _func_adapter_source(
-  Type type, List payload, Type &source_type, List &source_binding) {
-  match (payload) {
-    case $source_identifier_content(%(?binding)): {
-      if (!type || type.is_pointer() || !type.is_function()) return 0;
-      source_type = type;
-      source_binding = binding;
-      return 1;
-    }
-    case $source_cast_content(%(? (expr ?inner_type ?inner_payload))):
-      return _func_adapter_source(
-        inner_type, inner_payload, source_type, source_binding);
-    case $source_content_pattern($grouped, %(?inner)):
-      match (inner)
-        case %(expr ?inner_type ?inner_payload):
-          return _func_adapter_source(
-            inner_type, inner_payload, source_type, source_binding);
-    case $source_operator_content(%(& (expr ?inner_type ?inner_payload))):
-      return _func_adapter_source(
-        inner_type, inner_payload, source_type, source_binding);
-  }
-  return 0;
 }
 
 /* A function already written in the adapter's own shape needs no wrapper:
@@ -1309,8 +1270,7 @@ List Compiler.func_signature(Compiler c, Type type) {
   foreach (List parameter, params) declared.push(parameter.type().declared());
   List parameter_types = params ? declared.list_free() : %((void));
   Type declared_result = result.declared();
-  List signature = %((func $parameter_types) @declared_result);
-  return signature;
+  return %((func $parameter_types) @declared_result);
 }
 
 static List Compiler._func_signature_literal(Compiler c, Type type) =>
@@ -1347,10 +1307,8 @@ static List Compiler._func_return_body(Compiler c, List value) {
 // Build fresh binding identities a0..aN.
 static List Compiler._auto_names(Compiler c, int count) {
   Array out = [];
-  for (int index = 0; index < count; index++) {
-    String pname = %"a$index";
-    out.push(c.sym.introduce(pname));
-  }
+  for (int index = 0; index < count; index++)
+    out.push(c.sym.introduce(%"a$index"));
   return out.list_free();
 }
 
@@ -1546,23 +1504,15 @@ static List Callback.publish_lambda(Callback *cb) {
 
 static int _lambda_adapter_signature(
   List expected_type, List &raw_params, Var &return_type) {
-  if (!expected_type) return 0;
   Type expected = expected_type;
-  expected = expected.canonicalize();
-  if (!expected) expected = expected_type;
-  match (expected) {
+  List signature = expected.canonicalize();
+  match (signature) case %((!or (!quote *) & ^) *rest): signature = rest;
+  match (signature)
     case %((func (*parameters)) ?return_head *): {
       raw_params = parameters;
       return_type = return_head;
       return 1;
     }
-    case %((!or (!quote *) & ^)
-           (func (*parameters)) ?return_head *): {
-      raw_params = parameters;
-      return_type = return_head;
-      return 1;
-    }
-  }
   return 0;
 }
 
@@ -1576,8 +1526,7 @@ static int _collect_param_types(List raw_params, List &out_types) {
     types.push(ptype_list);
     if (all_var && ptype_list != %("Var")) all_var = 0;
   }
-  List result = types.list_free();
-  out_types = result;
+  out_types = types.list_free();
   return all_var;
 }
 
