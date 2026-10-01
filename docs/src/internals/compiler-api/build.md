@@ -6,7 +6,7 @@
 
 # `src/build.x`
 
-Typed native build request and artifact graph.
+The native build of one target.
 
 ## Functions
 
@@ -277,6 +277,6 @@ Source: `src/build.x:24`
 
 ## Design notes
 
-Direct operands and project targets use the same CliRequest. This module
-places native artifacts and lowers them to toolchain actions; translation
-remains with the compiler driver.
+Direct operands and project targets reach a build as the same
+`CliRequest`. This module places the target's native artifacts and lowers
+them to toolchain actions; translation remains with the compiler driver.

@@ -24,7 +24,7 @@ Immediate encoded names.
 
 Returns the final decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:246`
+Source: `lib/symbol.x:247`
 
 <a id="Symbol.len"></a>
 #### Symbol.len
@@ -33,7 +33,7 @@ Source: `lib/symbol.x:246`
 
 Returns the number of decoded bytes in `symbol`.
 
-Source: `lib/symbol.x:121`
+Source: `lib/symbol.x:124`
 
 <a id="Symbol.new"></a>
 #### Symbol.new
@@ -43,7 +43,7 @@ Source: `lib/symbol.x:121`
 Encodes the nonnull NUL-terminated spelling `str` as a compact `Symbol`.
 Encoding and truncation follow `Symbol.new_len`.
 
-Source: `lib/symbol.x:104`
+Source: `lib/symbol.x:105`
 
 <a id="Symbol.try_new"></a>
 #### Symbol.try_new
@@ -57,7 +57,7 @@ the spelling. The null `String` is the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while checking the decoded spelling.
 
-Source: `lib/symbol.x:112`
+Source: `lib/symbol.x:113`
 
 <a id="Symbol.write_str"></a>
 #### Symbol.write_str
@@ -70,7 +70,7 @@ appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:205`
+Source: `lib/symbol.x:206`
 
 ## Advanced and interop API
 
@@ -97,7 +97,7 @@ Zero sorts before nonzero values. Equal decoded lengths and bytes are
 ordered by the encoded value, so distinct encodings still have a total
 order. The result is -1, 0, or 1.
 
-Source: `lib/symbol.x:174`
+Source: `lib/symbol.x:175`
 
 <a id="Symbol.decode"></a>
 #### Symbol.decode
@@ -106,11 +106,10 @@ Source: `lib/symbol.x:174`
 
 Decodes `symbol` into caller-owned byte storage.
 `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol`
-is
-NUL-terminated there. A null destination or zero `Symbol` leaves storage
-unchanged.
+is NUL-terminated there. A null destination or zero `Symbol` leaves
+storage unchanged.
 
-Source: `lib/symbol.x:133`
+Source: `lib/symbol.x:135`
 
 <a id="Symbol.first"></a>
 #### Symbol.first
@@ -119,7 +118,7 @@ Source: `lib/symbol.x:133`
 
 Returns the first decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:235`
+Source: `lib/symbol.x:236`
 
 <a id="Symbol.new_len"></a>
 #### Symbol.new_len
@@ -134,7 +133,7 @@ underscore as hyphen; the general encoding retains each low seven bits,
 including embedded NUL. `String` and `Buffer` conversions stop at the first
 decoded NUL.
 
-Source: `lib/symbol.x:78`
+Source: `lib/symbol.x:79`
 
 <a id="Symbol.parse"></a>
 #### Symbol.parse
@@ -149,7 +148,7 @@ malformed input returns zero. Zero is also the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while unescaping a quoted literal.
 
-Source: `lib/symbol.x:260`
+Source: `lib/symbol.x:263`
 
 <a id="Symbol.repr"></a>
 #### Symbol.repr
@@ -163,7 +162,7 @@ described by `Symbol.str`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/symbol.x:194`
+Source: `lib/symbol.x:195`
 
 <a id="Symbol.str"></a>
 #### Symbol.str
@@ -174,12 +173,11 @@ Returns the decoded spelling as a canonical `String`.
 Conversion stops at the first decoded NUL.
 The result follows the canonical pool chain: it may already belong to an
 ancestor and lives until its actual owning pool is released. A zero
-`Symbol`
-returns NULL, the empty `String`.
+`Symbol` returns NULL, the empty `String`.
 
 **Raises:** `<alloc-fail>` while canonicalizing the spelling.
 
-Source: `lib/symbol.x:162`
+Source: `lib/symbol.x:163`
 
 <a id="Symbol.write_repr"></a>
 #### Symbol.write_repr
@@ -192,7 +190,7 @@ values use a quoted angled spelling, escaping backslash and double quote.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:217`
+Source: `lib/symbol.x:218`
 
 ## Design notes
 

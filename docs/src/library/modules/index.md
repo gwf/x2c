@@ -19,7 +19,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/atom.x`](atom.md) | canonical exact names. |
 | [`lib/block.x`](block.md) | checked dynamic storage for fixed-width elements. |
 | [`lib/buffer.x`](buffer.md) | growable text buffer with indentation support. |
-| [`lib/common.x`](common.md) | the shared `Var` union and operations used by every module. |
+| [`lib/common.x`](common.md) | the `Var` encoding every runtime module shares. |
 | [`lib/context.x`](context.md) | bounded runtime state and value export. |
 | [`lib/diff.x`](diff.md) | line differences between two texts. |
 | [`lib/digest.x`](digest.md) | SHA-256 digests of Strings and streams. |

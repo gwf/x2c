@@ -33,7 +33,7 @@ Source-ordered shallow symbol collection and replay.
 
 Returns the canonical paths collected so far.
 
-Source: `src/collect.x:1172`
+Source: `src/collect.x:1175`
 
 #### collect_forget_entries_since
 
@@ -44,7 +44,7 @@ Drops the entries collected since `before` returned by
 compile-time effects of the file's imports, which the unit that walked
 it installed in its own session.
 
-Source: `src/collect.x:1178`
+Source: `src/collect.x:1181`
 
 #### collect_forget_preload_entries
 
@@ -53,7 +53,7 @@ Source: `src/collect.x:1178`
 Drops the entries collected without declaration defaults while the shared
 compile-time session was filled. Call once that session is published.
 
-Source: `src/collect.x:1166`
+Source: `src/collect.x:1169`
 
 #### collect_resolve_include
 
@@ -62,7 +62,7 @@ Source: `src/collect.x:1166`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect.x:475`
+Source: `src/collect.x:473`
 
 #### interface_configure
 
@@ -75,7 +75,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:895`
+Source: `src/collect.x:896`
 
 #### interface_prelude
 
@@ -85,11 +85,11 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1081`
+Source: `src/collect.x:1083`
 
 #### interface_text
 
-`String interface_text(Compiler compiler, List selected)`
+`String interface_text(Compiler c, List selected)`
 
 Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols or the compiler's
@@ -97,7 +97,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1101`
+Source: `src/collect.x:1105`
 
 ### `Compiler`
 
@@ -144,7 +144,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:586`
+Source: `src/collect.x:584`
 
 <a id="Compiler.replay_included_package_imports"></a>
 #### Compiler.replay_included_package_imports
@@ -155,7 +155,7 @@ Repeats included imports after full parsing resets macros, in the
 cache's original include order. The unit's own imports stay at their
 source sites.
 
-Source: `src/collect.x:859`
+Source: `src/collect.x:860`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -165,13 +165,13 @@ Source: `src/collect.x:859`
 Replays the import operations retained by this declaration contribution.
 The shadow borrows the unit's macro state and shared package registries.
 
-Source: `src/collect.x:811`
+Source: `src/collect.x:812`
 
 ## Design notes
 
-Raw collection scans includes without running cpp. Each cold walk records
-declaration maps and included paths at their source positions; cache and
-interface replay consume that same order so declaration precedence does
-not depend on whether a file was already collected. A translated unit
-writes its own contribution beside its generated C as a `.xi` interface,
-and the runtime prelude is `lib/x2c.xi`.
+Raw collection scans includes without running cpp. Each cold walk
+records declaration maps and included paths at their source positions;
+cache and interface replay consume that same order so declaration
+precedence does not depend on whether a file was already collected. A
+translated unit writes its own contribution beside its generated C as a
+`.xi` interface, and the runtime prelude is `lib/x2c.xi`.

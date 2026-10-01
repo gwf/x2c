@@ -30,7 +30,7 @@ Public functions:
 
 ### [src/build.x](../src/build.x)
 
-Typed native build request and artifact graph.
+the native build of one target.
 
 Public functions:
 
@@ -703,7 +703,7 @@ None. This module has no non-static function definitions.
 
 ### [lib/common.x](../lib/common.x)
 
-the shared `Var` union and operations used by every module.
+the `Var` encoding every runtime module shares.
 
 Public functions:
 
