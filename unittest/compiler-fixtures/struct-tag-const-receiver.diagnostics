@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/struct-tag-const-receiver.x:11:14: type: cannot convert (* const "TagReceiverRec") to (* "TagReceiverRec")
+    rec.bump(4);
+               ^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
