@@ -9,6 +9,12 @@
 #include "compiler.h"
 List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name);
 
+List _initializer_function(Compiler c, List type, List name, List body);
+
+List _run_once(Compiler c, List guard);
+
+List _entry_call(String entry);
+
 List _initialization_guard(List guard);
 
 List _patch_initialized_entry(Compiler c, List function, List body, List guard, List entry);

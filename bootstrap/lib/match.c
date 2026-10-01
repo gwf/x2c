@@ -163,7 +163,18 @@ static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty);
 
 static Var MatchWalk__replace_node(MatchWalk * walk, Var node);
 
+typedef struct ReplacementSource{
+  MatchCaptureLayout layout;
+  MatchCaptureBuffer * captures;
+  List bindings;
+}
+ReplacementSource;
+
 static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * out);
+
+static Var ReplacementSource__value(ReplacementSource * source, Var binder);
+
+static Var MatchCaptureLayout__captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder);
 
 typedef struct ReplacementCell{
   Var value;
@@ -171,11 +182,7 @@ typedef struct ReplacementCell{
 }
 ReplacementCell;
 
-static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
-
-static Var MatchCaptureLayout__captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder);
-
-static Var _replace(Var input, List bindings);
+static Var _replace(Var input, ReplacementSource * source);
 
 static int _pattern_borrowable(Var value, int depth, int permanent_lists);
 
@@ -227,18 +234,11 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
-}
-_x2c_defer_env_2;
-
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
 Var Symbol_var(Symbol);
 
@@ -965,7 +965,11 @@ static Var MatchWalk__replace_node(MatchWalk * walk, Var node){
     return node;
   }
   if(status == 0) return node;
-  return _capture_replace((* walk).template, (* walk).plan -> layout, (* walk).captures);
+  ReplacementSource source ={
+    (* walk).plan -> layout, (* walk).captures, NULL
+  }
+  ;
+  return _replace((* walk).template, &(source));
 }
 
 int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out){
@@ -982,14 +986,45 @@ static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * ou
   ;
   int result = MatchPlan__capture(plan, List_var(input), & captures, NULL);
   if(result != 1) return result;
-  * out = _capture_replace(template, plan -> layout, & captures);
+  ReplacementSource source ={
+    plan -> layout, & captures, NULL
+  }
+  ;
+  * out = _replace(template, &(source));
   return 1;
+}
+
+Var List_assoc(List, Var);
+
+int Var_is_void(Var);
+
+static Var ReplacementSource__value(ReplacementSource * source, Var binder){
+  if((* source).captures) return MatchCaptureLayout__captured((* source).layout, (* source).captures, binder);
+  Var bound = List_assoc((* source).bindings, binder);
+  return Var_is_void(bound) ? binder : bound;
+}
+
+static Var MatchCaptureLayout__captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
+  int index = MatchCaptureLayout_index(layout, binder);
+  if(index < 0 || ! _capture_bit(captures -> present, index)) return binder;
+  return captures -> values[index];
+}
+
+List List_replace(List template, List bindings){
+  if(! _init_guard_) _file_init_();
+  if(! List_truth(template)) return NULL;
+  if(! List_truth(bindings)) return template;
+  ReplacementSource source ={
+    NULL, NULL, bindings
+  }
+  ;
+  return Var_list(_replace(List_var(template), &(source)));
 }
 
 Var List_cadr(List);
 
-static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
-  if(_named_binder(input)) return MatchCaptureLayout__captured(layout, captures, input);
+static Var _replace(Var input, ReplacementSource * source){
+  if(_named_binder(input)) return ReplacementSource__value(&((* source)), input);
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list(input);
   if(! List_truth(list)) return input;
@@ -1015,7 +1050,7 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
           break;
         }
         ReplacementCell row ={
-          _capture_replace(head, layout, captures), Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58))
+          _replace(head, &((* source))), Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58))
         }
         ;
         Block_push(spine, & row);
@@ -1037,79 +1072,6 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
 
     }
     x2c_cleanup_leave(& _x2c_defer_record_1);
-  }
-
-}
-
-static Var MatchCaptureLayout__captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
-  int index = MatchCaptureLayout_index(layout, binder);
-  if(index < 0 || ! _capture_bit(captures -> present, index)) return binder;
-  return captures -> values[index];
-}
-
-List List_replace(List template, List bindings){
-  if(! _init_guard_) _file_init_();
-  if(! List_truth(template)) return NULL;
-  if(! List_truth(bindings)) return template;
-  return Var_list(_replace(List_var(template), bindings));
-}
-
-Var List_assoc(List, Var);
-
-int Var_is_void(Var);
-
-static Var _replace(Var input, List bindings){
-  if(Var_is_binder(input) && ! Var_equal(input, Symbol_var(54)) && ! Var_equal(input, Symbol_var(58))){
-    Var bound = List_assoc(bindings, input);
-    return Var_is_void(bound) ? input : bound;
-  }
-  if(! Var_is_row(input, 9, 7, 4)) return input;
-  List list = Var_list(input);
-  if(! List_truth(list)) return input;
-  if(Var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
-  Block spine = Block_new(sizeof(ReplacementCell));
-  {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & spine;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
-    {
-      Var tail = List_var((List) NULL);
-      for(;  List_truth(list);  list = List_cdr(list)){
-        Var head = List_car(list);
-        if(Var_equal(head, Symbol_var(2050325770))){
-          tail = List_cadr(list);
-          break;
-        }
-        ReplacementCell row ={
-          _replace(head, bindings), Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58))
-        }
-        ;
-        Block_push(spine, & row);
-      }
-      for(size_t i = spine -> length;  i > 0;  i --){
-        ReplacementCell row =((ReplacementCell *) spine -> bytes)[i - 1];
-        Var head = row.value;
-        if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(List_append(Var_list(head), List_append(Var_list(tail), NULL)));
-        else tail = List_var(cons(head, List_append(Var_list(tail), NULL)));
-      }
-      {
-        Var _x2c_return_value_2 = tail;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
 
 }
@@ -1179,24 +1141,24 @@ static MatchPlan MatchCaptureSite__published(MatchCaptureSite * site, Var patter
 static MatchPlan MatchCaptureSite__publish(MatchCaptureSite * m, Var pattern){
   _site_lock();
   {
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = 0
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
+    x2c_cleanup_push(& _x2c_defer_record_2);
     {
       if(! m -> plan) MatchCaptureSite__prepare(m, pattern);
       {
-        MatchPlan _x2c_return_value_3 = m -> plan;
+        MatchPlan _x2c_return_value_2 = m -> plan;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_3;
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          return _x2c_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
 
 }
@@ -1218,11 +1180,11 @@ static void MatchCaptureSite__prepare(MatchCaptureSite * site, Var pattern){
     Scope_push(& match_capture_site_scope);
     {
       {
-        X2CCleanup _x2c_defer_record_4 ={
-          .fn = _x2c_defer_cleanup_4, .env = 0
+        X2CCleanup _x2c_defer_record_3 ={
+          .fn = _x2c_defer_cleanup_3, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_4);
+        x2c_cleanup_push(& _x2c_defer_record_3);
         {
           {
             plan = MatchPlan_prepare(pattern);
@@ -1230,7 +1192,7 @@ static void MatchCaptureSite__prepare(MatchCaptureSite * site, Var pattern){
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_4);
+        x2c_cleanup_leave(& _x2c_defer_record_3);
       }
 
     }
@@ -1249,18 +1211,18 @@ static void _sites_initialize(void){
     Scope_push(& match_capture_site_scope);
     {
       {
-        X2CCleanup _x2c_defer_record_5 ={
-          .fn = _x2c_defer_cleanup_5, .env = 0
+        X2CCleanup _x2c_defer_record_4 ={
+          .fn = _x2c_defer_cleanup_4, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_5);
+        x2c_cleanup_push(& _x2c_defer_record_4);
         {
           {
             match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_5);
+        x2c_cleanup_leave(& _x2c_defer_record_4);
       }
 
     }
@@ -1467,21 +1429,16 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Block_cleanup((*(Block *) _x2c_defer_data_2->_x2c_defer_capture_2));
-}
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _site_unlock();
 }
 
 void Scope_pop(void);
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   Scope_pop();
 }
 
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   Scope_pop();
 }
 

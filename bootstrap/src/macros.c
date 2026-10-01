@@ -60,7 +60,7 @@
 
 static List _30914, _30913, _30908, _30906, _30904, _30903, _30901, _30900, _30898, _30897, _30895, _30894, _30893, _30892, _30891, _30889, _30888, _30885, _30884, _30875, _30874, _30873, _30872, _30870, _30869, _30863, _30862, _30856, _30855, _30849, _30848, _30842, _30841, _30839, _30837, _30836, _30835, _30834, _30828, _30827, _30825, _30824, _30823, _30821, _30820, _30810, _30809, _30808, _30807, _30806, _30804, _30803, _30802, _30801, _30785, _30783, _30782, _30781, _30780, _30779, _30778, _30777, _30776, _30775, _30774, _30773, _30770, _30769, _30768, _30765, _30764, _30763, _30761, _30760, _30753, _30752, _30750, _30749, _30746, _30745, _30740, _30739, _30738, _30736, _30735, _30730, _30729, _30728, _30726, _30725, _30721, _30718, _30717, _30715, _30714, _30713, _30711, _30710, _30701, _30700, _30699, _30696, _30694, _30693, _30692, _30691, _30689, _30688, _30687, _30679, _30678, _30677, _30676, _30675, _30673, _30672, _30670, _30669, _30668, _30667, _30659, _30658, _30657, _30654, _30653, _30650, _30649, _30648, _30647, _30644, _30643, _30641, _30640, _30639, _30638, _30635, _30634, _30631, _30630, _30629, _30627, _30626, _30625, _30624, _30623, _30620, _30619, _30618, _30615, _30614, _30613, _30612, _30610, _30609, _30607, _30606, _30605, _30604, _30603, _30602, _30601, _30598, _30597, _30594, _30593, _30591, _30590, _30589, _30588, _30586, _30583, _30581, _30580, _30579, _30572, _30560, _30559, _30556, _30555, _30550, _30549, _30548, _30543, _30541, _30539, _30537, _30533, _30532, _30530, _30529, _30528, _30526, _30524, _30523, _30520, _30518, _30516, _30514, _30513, _30512, _30510, _30509, _30508, _30507, _30506, _30505, _30503, _30501, _30500, _30499, _30496, _30495, _30494, _30493, _30489, _30488, _30487, _30485, _30483, _30482, _30481, _30479, _30478, _30477, _30474, _30473, _30472, _30470, _30469, _30467, _30466, _30464, _30463, _30461, _30459, _30458, _30457, _30447, _30446, _30444, _30443, _30440, _30439, _30438, _30436, _30435, _30434, _30433, _30432, _30430, _30429, _30428, _30427, _30426, _30425, _30424, _30423, _30422, _30421, _30420, _30419, _30418, _30417, _30416, _30414, _30412, _30411, _30409, _30408, _30407, _30406, _30405, _30403, _30402, _30399, _30397, _30396, _30392, _30391, _30389, _30388, _30387, _30385, _30384, _30383, _30381, _30379, _30378, _30376, _30375, _30373, _30372, _30371, _30369, _30368, _30367, _30365, _30364, _30363, _30362, _30360, _30359, _30356, _30354, _30353, _30352, _30350, _30348, _30346, _30345, _30344, _30343, _30341, _30340, _30337, _30336, _30334, _30332, _30331, _30329, _30328, _30326, _30325, _30324, _30323, _30321, _30319, _30317, _30316, _30314, _30313, _30311, _30310, _30308, _30307, _30305, _30304, _30302, _30301, _30300, _30299, _30295, _30293, _30291, _30290, _30288, _30287, _30285, _30284, _30282, _30281, _30280, _30279, _21825, _21250, _14593, _14591, _14590, _14588, _14587, _12112, _12110, _12109, _2600, _2480, _2479, _551, _549, _461, _459, _458, _456, _454, _449, _444, _336, _333, _332, _314, _313, _236, _214, _168, _166, _158, _153, _151, _142, _139, _113, _112, _110, _109, _105, _104, _95, _94, _90, _89, _60, _53, _49, _48, _43, _42, _30, _3;
 
-static String _31000, _30999, _30998, _30997, _30996, _30995, _30994, _30993, _30992, _30991, _30990, _30989, _30988, _30987, _30986, _30985, _30984, _30983, _30982, _30981, _30980, _30979, _30978, _30977, _30976, _30975, _30974, _30973, _30972, _30971, _30970, _30969, _30968, _30967, _30966, _30965, _30964, _30963, _30962, _30961, _30960, _30959, _30958, _30957, _30956, _30955, _30954, _30953, _30952, _30951, _30950, _30949, _30948, _30947, _30946, _30945, _30944, _30943, _30942, _30941, _30940, _30939, _30938, _30937, _30936, _30935, _30934, _30933, _30932, _30931, _30930, _30929, _30928, _30927, _30926, _30925, _30924, _30923, _30922, _30921, _30920, _30919, _30918, _30917, _30916, _30915, _30907, _30880, _30879, _30878, _30876, _30867, _30865, _30860, _30858, _30853, _30851, _30846, _30844, _30843, _30811, _30787, _30786, _30754, _30733, _30732, _30731, _30723, _30719, _30702, _30684, _30683, _30682, _30681, _30680, _30661, _30616, _30582, _30577, _30575, _30573, _30569, _30568, _30567, _30566, _30565, _30564, _30563, _30562, _30561, _30557, _30552, _30551, _30546, _30545, _30544, _30517, _30455, _30454, _30453, _30452, _30451, _30450, _30394, _27697, _22638, _22487, _13774, _13667, _11696, _9800, _9769, _6680, _2132, _2119, _2093, _771, _452, _447, _442, _234;
+static String _30992, _30991, _30990, _30989, _30988, _30987, _30986, _30985, _30984, _30983, _30982, _30981, _30980, _30979, _30978, _30977, _30976, _30975, _30974, _30973, _30972, _30971, _30970, _30969, _30968, _30967, _30966, _30965, _30964, _30963, _30962, _30961, _30960, _30959, _30958, _30957, _30956, _30955, _30954, _30953, _30952, _30951, _30950, _30949, _30948, _30947, _30946, _30945, _30944, _30943, _30942, _30941, _30940, _30939, _30938, _30937, _30936, _30935, _30934, _30933, _30932, _30931, _30930, _30929, _30928, _30927, _30926, _30925, _30924, _30923, _30922, _30921, _30920, _30919, _30918, _30917, _30916, _30915, _30907, _30880, _30879, _30878, _30876, _30867, _30865, _30860, _30858, _30853, _30851, _30846, _30844, _30843, _30811, _30787, _30786, _30754, _30733, _30732, _30731, _30723, _30719, _30702, _30684, _30683, _30682, _30681, _30680, _30661, _30616, _30582, _30577, _30575, _30573, _30569, _30568, _30567, _30566, _30565, _30564, _30563, _30562, _30561, _30557, _30552, _30551, _30546, _30545, _30544, _30517, _30455, _30454, _30453, _30452, _30451, _30450, _30394, _27697, _22638, _22487, _13774, _13667, _11696, _9800, _9769, _6680, _2132, _2119, _2093, _771, _452, _447, _442, _234;
 
 static Var _30912, _30911, _30910, _30909, _30905, _30902, _30899, _30896, _30890, _30887, _30886, _30883, _30882, _30881, _30877, _30871, _30868, _30866, _30864, _30861, _30859, _30857, _30854, _30852, _30850, _30847, _30845, _30840, _30838, _30826, _30822, _30812, _30805, _30800, _30793, _30792, _30791, _30790, _30789, _30788, _30784, _30772, _30771, _30767, _30766, _30762, _30755, _30751, _30744, _30743, _30741, _30737, _30734, _30727, _30724, _30722, _30720, _30712, _30705, _30704, _30703, _30698, _30697, _30695, _30690, _30686, _30685, _30674, _30671, _30666, _30662, _30660, _30656, _30655, _30652, _30651, _30646, _30645, _30642, _30637, _30636, _30633, _30632, _30628, _30622, _30621, _30617, _30611, _30608, _30600, _30599, _30596, _30595, _30592, _30587, _30585, _30584, _30578, _30576, _30574, _30571, _30570, _30558, _30554, _30553, _30547, _30542, _30540, _30538, _30536, _30535, _30534, _30531, _30527, _30525, _30522, _30521, _30519, _30515, _30511, _30504, _30502, _30498, _30497, _30492, _30491, _30490, _30486, _30484, _30480, _30476, _30475, _30471, _30468, _30465, _30462, _30460, _30456, _30449, _30448, _30445, _30442, _30441, _30437, _30431, _30415, _30413, _30410, _30404, _30401, _30400, _30398, _30395, _30393, _30390, _30386, _30382, _30380, _30377, _30374, _30370, _30366, _30361, _30358, _30357, _30355, _30351, _30349, _30347, _30342, _30339, _30338, _30335, _30333, _30330, _30327, _30322, _30320, _30318, _30315, _30312, _30309, _30306, _30303, _30298, _30294, _30289, _30286, _30283, _30278, _30277, _30276, _25017, _21824, _21249, _20951, _19446, _19140, _14592, _14589, _12740, _12111, _4144, _2601, _2599, _2598, _2559, _2558, _2557, _2556, _2555, _2481, _2478, _1858, _1623, _1319, _629, _550, _548, _464, _463, _460, _457, _455, _453, _451, _450, _448, _446, _445, _443, _338, _337, _335, _334, _331, _330, _316, _315, _312, _311, _306, _301, _295, _294, _238, _237, _235, _216, _215, _213, _211, _210, _167, _165, _160, _159, _157, _152, _148, _147, _146, _145, _144, _143, _141, _140, _138, _111, _108, _107, _106, _99, _98, _97, _96, _93, _92, _91, _88, _87, _82, _77, _76, _75, _52, _51, _47, _46, _45, _44, _41, _40, _33, _32, _29, _7, _6, _2, _1;
 
@@ -613,13 +613,13 @@ static void Compiler__eval_library(Compiler c, int loaded, String relative, Stri
 
 static String lisp_binding_macros;
 
-_x2c_initializer_choice_28FCBFDC_9((lisp_binding_macros = _30983))
+_x2c_initializer_choice_28FCBFDC_9((lisp_binding_macros = _30975))
 static String lisp_bindings_marker;
 
 _x2c_initializer_choice_28FCBFDC_10((lisp_bindings_marker = NULL))
 static String builtin_macros;
 
-_x2c_initializer_choice_28FCBFDC_11((builtin_macros = _30984))
+_x2c_initializer_choice_28FCBFDC_11((builtin_macros = _30976))
 static String builtin_macros_marker;
 
 _x2c_initializer_choice_28FCBFDC_12((builtin_macros_marker = NULL))
@@ -1820,45 +1820,37 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _30959 = String_new("x2c.template");
   _30960 = String_new("(apply (eval $callback) $arguments)");
   _30961 = String_new("Macro");
-  _30962 = String_new("etc/init.xlisp");
-  _30963 = String_new("cannot open the compile-time Lisp environment");
-  _30964 = String_new("etc/lisp-values.xlisp");
-  _30965 = String_new("cannot open the compile-time value operations");
-  _30966 = String_new("etc/compiler-sdk.xlisp");
-  _30967 = String_new("cannot open the compile-time Lisp SDK");
-  _30968 = String_new("etc/builtin-core.xlisp");
-  _30969 = String_new("cannot open the built-in macro support");
-  _30970 = String_new("unterminated compile-time Lisp form");
-  _30971 = String_new(".xmacro");
-  _30972 = String_new("compile-time Lisp result cannot fill an expression slot");
-  _30973 = String_new("compile-time import cycle");
-  _30974 = String_new(".xlisp");
-  _30975 = String_new(".xpmacro");
-  _30976 = String_new("compile-time import requires .xlisp or .xmacro");
-  _30977 = String_new("cannot open compile-time Lisp import");
-  _30978 = String_new("cannot open macro import");
-  _30979 = String_new("unexpected form in macro import");
-  _30980 = String_new("/");
-  _30981 = String_new(".");
-  _30982 = String_new("<");
-  _30983 = String_new("macro Statement $lisp.bind(\n  Expr $lisp, Expr $name, Expr $function\n) {\n  Func callable = Func.new(\n    $function,\n    $(_x2c.literal.list (_x2c.function.native-type $function))\n  );\n  Lisp.bind($lisp, $name, callable);\n}\n\nmacro Decorator $lisp.binding(\n  Function $function, Name $group, Literal $name\n) {\n  $(lisp.binding.record $group $name $function)...\n  $(x2c.function.body $function)...\n}\n\nmacro Statement $lisp.install(Expr $lisp, Name $group) {\n  $(lisp.binding.install $lisp $group)...\n}\n");
-  _30984 = String_new("macro Decorator $x2c.foreign.alias(\n  Unit $declaration,\n  Expr $native\n) {\n  $(list (list \'falias $declaration $native))...\n}\n\nmacro Expression $x2c.callback.adapt(\n  Expr $target,\n  Expr $source\n) =>\n  $(list \'expr nil (list \'tadapt $target $source));\n\nmacro Decorator $x2c.foreach(\n  Block $body,\n  Decl $declaration,\n  Expr $collection\n) {\n  using $iterator, $item, $pair, $object, $cursor;\n  $(foreach.expand\n    $declaration $collection $body\n    $iterator $item $pair $object $cursor)...\n}\n\nkeyword foreach $x2c.foreach;\n\nmacro Decorator $scope(Block $body, Expr $destination...) {\n  $(scope.expand $body $destination)...\n}\n\nmacro Decorator $let(Block $body, Expr $place, Expr $value) {\n  {\n    $(x2c.syntax.type $place) *address = &$place;\n    $(x2c.syntax.type $place) previous = *address;\n    defer *address = previous;\n    *address = $value;\n    $body\n  }\n}\n\nmacro Decorator $lock(Block $body, Expr $mutex) {\n  {\n    $(list \"Mutex\") held = $mutex;\n    held.lock();\n    defer held.unlock();\n    $body\n  }\n}\n\nmacro Expression $auto(Expr $value) =>\n  $(list \'managed-init $value);\n\nmacro Decorator $class(NamedType $definition) {\n  $(class.expand $definition)...\n}\n\nkeyword class $class;\n");
-  _30985 = String_new("<builtin:macros>");
-  _30986 = String_new("unexpected form in built-in macro source");
-  _30987 = String_new("etc/lisp-bindings.xlisp");
-  _30988 = String_new("cannot open the native Lisp macro support");
-  _30989 = String_new("<builtin:lisp-bindings>");
-  _30990 = String_new("x2c_literal_string");
-  _30991 = String_new("x2c_literal_int");
-  _30992 = String_new("x2c_literal_symbol");
-  _30993 = String_new("_x2c.import-hook");
-  _30994 = String_new("_x2c.tpl-call");
-  _30995 = String_new("binding_");
-  _30996 = String_new("x2c_type_is_");
-  _30997 = String_new("x2c.type.tag-name");
-  _30998 = String_new("x2c.type.reverse-name");
-  _30999 = String_new("_");
-  _31000 = String_new("compile-time Lisp evaluation failed");
+  _30962 = String_new("unterminated compile-time Lisp form");
+  _30963 = String_new(".xmacro");
+  _30964 = String_new("compile-time Lisp result cannot fill an expression slot");
+  _30965 = String_new("compile-time import cycle");
+  _30966 = String_new(".xlisp");
+  _30967 = String_new(".xpmacro");
+  _30968 = String_new("compile-time import requires .xlisp or .xmacro");
+  _30969 = String_new("cannot open compile-time Lisp import");
+  _30970 = String_new("cannot open macro import");
+  _30971 = String_new("unexpected form in macro import");
+  _30972 = String_new("/");
+  _30973 = String_new(".");
+  _30974 = String_new("<");
+  _30975 = String_new("macro Statement $lisp.bind(\n  Expr $lisp, Expr $name, Expr $function\n) {\n  Func callable = Func.new(\n    $function,\n    $(_x2c.literal.list (_x2c.function.native-type $function))\n  );\n  Lisp.bind($lisp, $name, callable);\n}\n\nmacro Decorator $lisp.binding(\n  Function $function, Name $group, Literal $name\n) {\n  $(lisp.binding.record $group $name $function)...\n  $(x2c.function.body $function)...\n}\n\nmacro Statement $lisp.install(Expr $lisp, Name $group) {\n  $(lisp.binding.install $lisp $group)...\n}\n");
+  _30976 = String_new("macro Decorator $x2c.foreign.alias(\n  Unit $declaration,\n  Expr $native\n) {\n  $(list (list \'falias $declaration $native))...\n}\n\nmacro Expression $x2c.callback.adapt(\n  Expr $target,\n  Expr $source\n) =>\n  $(list \'expr nil (list \'tadapt $target $source));\n\nmacro Decorator $x2c.foreach(\n  Block $body,\n  Decl $declaration,\n  Expr $collection\n) {\n  using $iterator, $item, $pair, $object, $cursor;\n  $(foreach.expand\n    $declaration $collection $body\n    $iterator $item $pair $object $cursor)...\n}\n\nkeyword foreach $x2c.foreach;\n\nmacro Decorator $scope(Block $body, Expr $destination...) {\n  $(scope.expand $body $destination)...\n}\n\nmacro Decorator $let(Block $body, Expr $place, Expr $value) {\n  {\n    $(x2c.syntax.type $place) *address = &$place;\n    $(x2c.syntax.type $place) previous = *address;\n    defer *address = previous;\n    *address = $value;\n    $body\n  }\n}\n\nmacro Decorator $lock(Block $body, Expr $mutex) {\n  {\n    $(list \"Mutex\") held = $mutex;\n    held.lock();\n    defer held.unlock();\n    $body\n  }\n}\n\nmacro Expression $auto(Expr $value) =>\n  $(list \'managed-init $value);\n\nmacro Decorator $class(NamedType $definition) {\n  $(class.expand $definition)...\n}\n\nkeyword class $class;\n");
+  _30977 = String_new("<builtin:macros>");
+  _30978 = String_new("unexpected form in built-in macro source");
+  _30979 = String_new("etc/lisp-bindings.xlisp");
+  _30980 = String_new("cannot open the native Lisp macro support");
+  _30981 = String_new("<builtin:lisp-bindings>");
+  _30982 = String_new("x2c_literal_string");
+  _30983 = String_new("x2c_literal_int");
+  _30984 = String_new("x2c_literal_symbol");
+  _30985 = String_new("_x2c.import-hook");
+  _30986 = String_new("_x2c.tpl-call");
+  _30987 = String_new("binding_");
+  _30988 = String_new("x2c_type_is_");
+  _30989 = String_new("x2c.type.tag-name");
+  _30990 = String_new("x2c.type.reverse-name");
+  _30991 = String_new("_");
+  _30992 = String_new("compile-time Lisp evaluation failed");
 }
 
 Var List_assoc(List, Var);
@@ -4565,11 +4557,21 @@ return Var_null();
 
 Lisp Lisp_kernel(void);
 void Lisp_adopt(Lisp, Lisp);
+Iter List_iter(List, Iter);
 void Compiler_ensure_macro_lisp(Compiler c){
   if(! _init_guard_) _file_init_();  int loaded = c -> macro_lisp != NULL;  int shared = library_session != NULL, ready = loaded || shared;  if(! loaded){
     c -> macro_lisp = Lisp_kernel();  Lisp_adopt(c -> macro_lisp, library_session);
   }
-  Compiler__eval_library(c, ready, _30962, _30963);  Compiler__eval_library(c, ready, _30964, _30965);  Compiler__eval_library(c, ready, _30966, _30967);  if(! ready) _install_builtins(c -> macro_lisp);  Compiler__eval_library(c, ready, _30968, _30969);  if(! ready) Compiler__install_native_operations(c);
+  if(! ready) _install_builtins(c -> macro_lisp); {
+    Var relative, message;  Iter _x2c_macro_iterator_35 = List_iter(_library_files(), &(struct Iter){
+      int_var(0)
+    }
+    );  Var _x2c_macro_item_40;  while(Iter_try_next(_x2c_macro_iterator_35, &(_x2c_macro_item_40))){
+      List _x2c_macro_pair_35;  _x2c_macro_pair_35 = Var_list(_x2c_macro_item_40);  relative = List_getindex(_x2c_macro_pair_35, 0);  message = List_getindex(_x2c_macro_pair_35, 1);  Compiler__eval_library(c, ready, Var_string(relative), Var_string(message));
+    }
+
+  }
+  if(! ready) Compiler__install_native_operations(c);
 }
 
 int x2c_error_catch_site_pending(ErrorCatchSite *);
@@ -4616,7 +4618,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 2966};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 2959};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -4662,7 +4664,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
 Token Token_group_close(Token);
 String String_new_len(const char *, int);
 static String Compiler__lisp_form(Compiler c){
-  Token start = c -> token, close = Token_group_close(start);  if(close -> type == 11212) Compiler_report_error(c, 33658058, _30970, start, NULL);  c -> token = Token_after_group(close);  int begin = start -> pos + start -> len;  return String_join(NULL, cons(String_var(_30786), cons(String_var(String_new_len(c -> text + begin, close -> pos - begin)), cons(String_var(_30684), NULL))));
+  Token start = c -> token, close = Token_group_close(start);  if(close -> type == 11212) Compiler_report_error(c, 33658058, _30962, start, NULL);  c -> token = Token_after_group(close);  int begin = start -> pos + start -> len;  return String_join(NULL, cons(String_var(_30786), cons(String_var(String_new_len(c -> text + begin, close -> pos - begin)), cons(String_var(_30684), NULL))));
 }
 
 List Compiler_parse_macro_lisp_top_level(Compiler c){
@@ -4681,12 +4683,12 @@ void Compiler_record_meta_import(Compiler);
 int String_endswith(String, String);
 static void Compiler__shallow_import(Compiler c, String requested){
   Token first = c -> token;  List imported = Compiler_parse_macro_lisp_top_level(c);  if(List_truth(imported)){
-    Var definition;  List _x2c_macro_object_35 = List_cdr(imported);  List _x2c_macro_cursor_40 = _x2c_macro_object_35;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_35, &(_x2c_macro_cursor_40), &(_x2c_macro_cursor_output_34))){
+    Var definition;  List _x2c_macro_object_36 = List_cdr(imported);  List _x2c_macro_cursor_41 = _x2c_macro_object_36;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_36, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_34))){
       definition = _x2c_macro_cursor_output_34;  Array_push(c -> meta_defs, definition);
     }
 
   }
-  Compiler_record_meta_import(c);  if(String_truth(c -> package) && ! c -> source_private && String_endswith(requested, _30971)) Compiler__record_package_macro(c, requested, first);
+  Compiler_record_meta_import(c);  if(String_truth(c -> package) && ! c -> source_private && String_endswith(requested, _30963)) Compiler__record_package_macro(c, requested, first);
 }
 
 void Sym_set(Sym, List, List);
@@ -4722,7 +4724,7 @@ List Compiler_parse_macro_lisp_expression(Compiler c){
 
 List Compiler_meta_value_expression(Compiler, Type, Var, Token);
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation){
-  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(c, NULL, value, invocation);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_32, cons(_30547, cons(List_var(cons(_463, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(c, Compiler__helper_result(c, value), AST_EXPRESSION, NULL);  Compiler_report_error(c, 27335838, _30972, invocation, cons(String_var(_6680), cons(String_var(Var_repr(value)), NULL)));
+  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(c, NULL, value, invocation);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_32, cons(_30547, cons(List_var(cons(_463, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(c, Compiler__helper_result(c, value), AST_EXPRESSION, NULL);  Compiler_report_error(c, 27335838, _30964, invocation, cons(String_var(_6680), cons(String_var(Var_repr(value)), NULL)));
 }
 
 static Var _sdk_identifier_result(Var value){
@@ -4741,7 +4743,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3101};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3094};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
@@ -4781,7 +4783,7 @@ return 0;
 int Map_try_next(Map, unsigned *, Var *, Var *);
 static int Compiler__forget_import(Compiler c, String path, Var definitions){
   if(Map_contains(c -> kw_seen, String_var(path))) return 0; {
-    Var name, definition;  Map _x2c_macro_object_36 = Var_map(definitions);  unsigned _x2c_macro_cursor_41 = 0;  Var _x2c_macro_cursor_output_35;  Var _x2c_macro_cursor_output_36;  while(Map_try_next(_x2c_macro_object_36, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_35), &(_x2c_macro_cursor_output_36))){
+    Var name, definition;  Map _x2c_macro_object_37 = Var_map(definitions);  unsigned _x2c_macro_cursor_42 = 0;  Var _x2c_macro_cursor_output_35;  Var _x2c_macro_cursor_output_36;  while(Map_try_next(_x2c_macro_object_37, &(_x2c_macro_cursor_42), &(_x2c_macro_cursor_output_35), &(_x2c_macro_cursor_output_36))){
       name = _x2c_macro_cursor_output_35;  definition = _x2c_macro_cursor_output_36;  Map_del(c -> macros, name);
     }
 
@@ -4792,7 +4794,7 @@ static int Compiler__forget_import(Compiler c, String path, Var definitions){
 Map Map_merge(Map, Map);
 static void Compiler__replay_import(Compiler c, String path, Var aliases, Var definitions){
   {
-    Var name, definition;  Map _x2c_macro_object_37 = Var_map(definitions);  unsigned _x2c_macro_cursor_42 = 0;  Var _x2c_macro_cursor_output_37;  Var _x2c_macro_cursor_output_38;  while(Map_try_next(_x2c_macro_object_37, &(_x2c_macro_cursor_42), &(_x2c_macro_cursor_output_37), &(_x2c_macro_cursor_output_38))){
+    Var name, definition;  Map _x2c_macro_object_38 = Var_map(definitions);  unsigned _x2c_macro_cursor_43 = 0;  Var _x2c_macro_cursor_output_37;  Var _x2c_macro_cursor_output_38;  while(Map_try_next(_x2c_macro_object_38, &(_x2c_macro_cursor_43), &(_x2c_macro_cursor_output_37), &(_x2c_macro_cursor_output_38))){
       name = _x2c_macro_cursor_output_37;  definition = _x2c_macro_cursor_output_38;  Map_setindex(c -> macros, name, Compiler__rebind_imported(c, definition));
     }
 
@@ -4806,7 +4808,7 @@ static void Compiler__import_cycle(Compiler c, String path, Token invocation){
     String _x2c_macro_display_0 = Compiler_display_path(c, path);  Array _x2c_macro_notes_0 = Array_update_n(Array_new(), 1, String_var(String_join(NULL, cons(String_var(String_new("import: ")), cons(String_var(_x2c_macro_display_0), NULL)))));  Array _x2c_macro_parents_0 = c -> import_stack;  for(int _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < Array_len(_x2c_macro_parents_0);  _x2c_macro_i_0 ++){
       Var _x2c_macro_parent_0 = Array_getindex(_x2c_macro_parents_0, _x2c_macro_i_0);  Array_push(_x2c_macro_notes_0, String_var(String_join(NULL, cons(String_var(String_new("from: ")), cons(String_var(Compiler_display_path(c, Var_string(_x2c_macro_parent_0))), NULL)))));
     }
-    Compiler_report_error(c, 27335838, _30973, invocation, Array_list_free(_x2c_macro_notes_0));
+    Compiler_report_error(c, 27335838, _30965, invocation, Array_list_free(_x2c_macro_notes_0));
   }
 
 }
@@ -4836,7 +4838,7 @@ static List Import_read(Import * in){
 
 static Map _changed(Map now, Map before){
   Map changed = Map_new(); {
-    Var key, value;  Map _x2c_macro_object_38 = now;  unsigned _x2c_macro_cursor_43 = 0;  Var _x2c_macro_cursor_output_39;  Var _x2c_macro_cursor_output_40;  while(Map_try_next(_x2c_macro_object_38, &(_x2c_macro_cursor_43), &(_x2c_macro_cursor_output_39), &(_x2c_macro_cursor_output_40))){
+    Var key, value;  Map _x2c_macro_object_39 = now;  unsigned _x2c_macro_cursor_44 = 0;  Var _x2c_macro_cursor_output_39;  Var _x2c_macro_cursor_output_40;  while(Map_try_next(_x2c_macro_object_39, &(_x2c_macro_cursor_44), &(_x2c_macro_cursor_output_39), &(_x2c_macro_cursor_output_40))){
       key = _x2c_macro_cursor_output_39;  value = _x2c_macro_cursor_output_40;  if(! Var_equal(Map_getindex(before, key), value)) Map_setindex(changed, key, value);
     }
 
@@ -4845,17 +4847,17 @@ static Map _changed(Map now, Map before){
 }
 
 static void Import_file(Import * in){
-  String path =(* in).path;  if(String_endswith(path, _30974)) Import_lisp(&((* in)));  else if(String_endswith(path, _30971) || String_endswith(path, _30975)) Import_macros(&((* in)));  else Compiler_report_error((* in).c, 27335838, _30976, (* in).invocation, Compiler__path_note((* in).c, path));
+  String path =(* in).path;  if(String_endswith(path, _30966)) Import_lisp(&((* in)));  else if(String_endswith(path, _30963) || String_endswith(path, _30967)) Import_macros(&((* in)));  else Compiler_report_error((* in).c, 27335838, _30968, (* in).invocation, Compiler__path_note((* in).c, path));
 }
 
 static void Import_lisp(Import * in){
-  Compiler c =(* in).c;  String text = Compiler__read_source(c, (* in).path, _30977, (* in).invocation);  if(Compiler_inherits_import((* in).path)) return;  if(c -> collect_protocols) Compiler__eval_string(c, text, (* in).invocation);  else Compiler_queue_declaration_effect(c, text, (* in).invocation, (* in).invocation);
+  Compiler c =(* in).c;  String text = Compiler__read_source(c, (* in).path, _30969, (* in).invocation);  if(Compiler_inherits_import((* in).path)) return;  if(c -> collect_protocols) Compiler__eval_string(c, text, (* in).invocation);  else Compiler_queue_declaration_effect(c, text, (* in).invocation, (* in).invocation);
 }
 
 Compiler Compiler_new_shared(Compiler);
 void Compiler_tokenize(Compiler, char *);
 static void Import_macros(Import * in){
-  Compiler c =(* in).c; (* in).aliases = Map_new();  String text = Compiler__read_source(c, (* in).path, _30978, (* in).invocation);  Compiler child = Compiler_new_shared(c); {
+  Compiler c =(* in).c; (* in).aliases = Map_new();  String text = Compiler__read_source(c, (* in).path, _30970, (* in).invocation);  Compiler child = Compiler_new_shared(c); {
     _x2c_defer_env_34 _x2c_macro_environment_35 ={
       0
     }
@@ -4896,7 +4898,7 @@ static void Import_borrow(Import * in, Compiler child){
 
 int Compiler_meta_form_is_declaration(Compiler);
 static void Import_form(Import * in, Compiler child){
-  if(Compiler_keyword_form_is_definition(child)) Compiler__record_alias(child, (* in).aliases);  else if(Compiler_macro_form_is_definition(child)) Compiler_parse_macro_definition(child);  else if(Compiler_meta_form_is_declaration(child)) Import_meta_declaration(&((* in)), child);  else if(Compiler_peek(child, 0) == 9297) Import_lisp_form(&((* in)), child);  else Compiler_report_error(child, 27335838, _30979, child -> token, NULL);
+  if(Compiler_keyword_form_is_definition(child)) Compiler__record_alias(child, (* in).aliases);  else if(Compiler_macro_form_is_definition(child)) Compiler_parse_macro_definition(child);  else if(Compiler_meta_form_is_declaration(child)) Import_meta_declaration(&((* in)), child);  else if(Compiler_peek(child, 0) == 9297) Import_lisp_form(&((* in)), child);  else Compiler_report_error(child, 27335838, _30971, child -> token, NULL);
 }
 
 static void Import_meta_declaration(Import * in, Compiler child){
@@ -4908,7 +4910,7 @@ static void Import_lisp_form(Import * in, Compiler child){
     Compiler_parse_macro_lisp_shallow(child);  return;
   }
   List nested = Compiler_parse_macro_lisp_top_level(child);  if(! List_truth(nested)) return; (* in).meta = 1; {
-    Var form;  List _x2c_macro_object_39 = List_cdr(nested);  List _x2c_macro_cursor_44 = _x2c_macro_object_39;  Var _x2c_macro_cursor_output_41;  while(List_try_next(_x2c_macro_object_39, &(_x2c_macro_cursor_44), &(_x2c_macro_cursor_output_41))){
+    Var form;  List _x2c_macro_object_40 = List_cdr(nested);  List _x2c_macro_cursor_45 = _x2c_macro_object_40;  Var _x2c_macro_cursor_output_41;  while(List_try_next(_x2c_macro_object_40, &(_x2c_macro_cursor_45), &(_x2c_macro_cursor_output_41))){
       form = _x2c_macro_cursor_output_41;  Array_push((* in).metas, form);
     }
 
@@ -4941,7 +4943,7 @@ default: break;
     }
   }
 {
-  Var child;  List _x2c_macro_object_40 = syntax;  List _x2c_macro_cursor_45 = _x2c_macro_object_40;  Var _x2c_macro_cursor_output_42;  while(List_try_next(_x2c_macro_object_40, &(_x2c_macro_cursor_45), &(_x2c_macro_cursor_output_42))){
+  Var child;  List _x2c_macro_object_41 = syntax;  List _x2c_macro_cursor_46 = _x2c_macro_object_41;  Var _x2c_macro_cursor_output_42;  while(List_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_46), &(_x2c_macro_cursor_output_42))){
     child = _x2c_macro_cursor_output_42;  if(Var_is_row(child, 9, 7, 4)) Compiler__reference_bindings(c, Var_list(child), replacements);
   }
 
@@ -4950,10 +4952,10 @@ default: break;
 
 void Compiler_import_package_macros(Compiler c, String name, Token invocation){
   if(! _init_guard_) _file_init_(); {
-    List entry;  Array _x2c_macro_object_42 = Compiler__package_exports(c, name);  int _x2c_macro_cursor_47 = 0;  Var _x2c_macro_cursor_output_44;  while(Array_try_next(_x2c_macro_object_42, &(_x2c_macro_cursor_47), &(_x2c_macro_cursor_output_44))){
+    List entry;  Array _x2c_macro_object_43 = Compiler__package_exports(c, name);  int _x2c_macro_cursor_48 = 0;  Var _x2c_macro_cursor_output_44;  while(Array_try_next(_x2c_macro_object_43, &(_x2c_macro_cursor_48), &(_x2c_macro_cursor_output_44))){
       entry = Var_list(_x2c_macro_cursor_output_44); {
-        String path = Var_string(List_cadr(entry));  if(! String_startswith(path, _30980)) path = String_join(NULL, cons(String_var(Var_str(Map_getindex(c -> package_roots, String_var(name)))), cons(String_var(_2119), cons(String_var(path), NULL))));  List imported = Compiler__import(c, path, invocation);  if(List_truth(imported)){
-          Var definition;  List _x2c_macro_object_41 = List_cdr(imported);  List _x2c_macro_cursor_46 = _x2c_macro_object_41;  Var _x2c_macro_cursor_output_43;  while(List_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_46), &(_x2c_macro_cursor_output_43))){
+        String path = Var_string(List_cadr(entry));  if(! String_startswith(path, _30972)) path = String_join(NULL, cons(String_var(Var_str(Map_getindex(c -> package_roots, String_var(name)))), cons(String_var(_2119), cons(String_var(path), NULL))));  List imported = Compiler__import(c, path, invocation);  if(List_truth(imported)){
+          Var definition;  List _x2c_macro_object_42 = List_cdr(imported);  List _x2c_macro_cursor_47 = _x2c_macro_object_42;  Var _x2c_macro_cursor_output_43;  while(List_try_next(_x2c_macro_object_42, &(_x2c_macro_cursor_47), &(_x2c_macro_cursor_output_43))){
             definition = _x2c_macro_cursor_output_43;  Array_push(c -> meta_defs, definition);
           }
 
@@ -4971,7 +4973,7 @@ Map Sym_unit_symbols(Sym);
 Array Array_sort(Array);
 static Array Compiler__package_exports(Compiler c, String name){
   Array exports = Array_new(); {
-    Var key, value;  Map _x2c_macro_object_43 = Sym_unit_symbols(c -> sym);  unsigned _x2c_macro_cursor_48 = 0;  Var _x2c_macro_cursor_output_45;  Var _x2c_macro_cursor_output_46;  while(Map_try_next(_x2c_macro_object_43, &(_x2c_macro_cursor_48), &(_x2c_macro_cursor_output_45), &(_x2c_macro_cursor_output_46))){
+    Var key, value;  Map _x2c_macro_object_44 = Sym_unit_symbols(c -> sym);  unsigned _x2c_macro_cursor_49 = 0;  Var _x2c_macro_cursor_output_45;  Var _x2c_macro_cursor_output_46;  while(Map_try_next(_x2c_macro_object_44, &(_x2c_macro_cursor_49), &(_x2c_macro_cursor_output_45), &(_x2c_macro_cursor_output_46))){
       key = _x2c_macro_cursor_output_45;  value = _x2c_macro_cursor_output_46;
   {
     List _x2c_match_expr = Var_list(key);
@@ -5016,16 +5018,16 @@ static String Compiler__canonical_path(Compiler c, String path){
 
 Path Path_dirname(Path);
 static String Compiler__source_dir(Compiler c){
-  String filename = Var_string(Array_len(c -> import_stack) ? Array_getindex(c -> import_stack, - 1) : String_var(c -> filename));  return String_truth(filename) ? Path_dirname(filename) : _30981;
+  String filename = Var_string(Array_len(c -> import_stack) ? Array_getindex(c -> import_stack, - 1) : String_var(c -> filename));  return String_truth(filename) ? Path_dirname(filename) : _30973;
 }
 
 String Compiler_source_path(Compiler c, String file){
-  if(! _init_guard_) _file_init_();  if(! String_truth(file) || String_startswith(file, _30982)) return file;  String rooted = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_2119), cons(String_var(file), NULL))));  if(String_getindex(file, 0) != '/' && ! SourceView_exists(c -> sources, file) && SourceView_exists(c -> sources, rooted)) file = rooted;  return Compiler_canonical_path(c, file);
+  if(! _init_guard_) _file_init_();  if(! String_truth(file) || String_startswith(file, _30974)) return file;  String rooted = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_2119), cons(String_var(file), NULL))));  if(String_getindex(file, 0) != '/' && ! SourceView_exists(c -> sources, file) && SourceView_exists(c -> sources, rooted)) file = rooted;  return Compiler_canonical_path(c, file);
 }
 
 String home_absolute_path(String);
 static String _definition_file(List definition){
-  String file = Var_string(List_assoc(definition, Symbol_var(412426)));  return ! String_truth(file) || String_startswith(file, _30982) ? file : home_absolute_path(file);
+  String file = Var_string(List_assoc(definition, Symbol_var(412426)));  return ! String_truth(file) || String_startswith(file, _30974) ? file : home_absolute_path(file);
 }
 
 void Map_merge_translation_dependency(Map, String, Var);
@@ -5086,7 +5088,6 @@ Lisp Compiler_open_macro_library(Compiler c){
 
 }
 
-Iter List_iter(List, Iter);
 static Lisp Compiler__fill_library(Compiler c, Lisp shared){
   library_filling = 1; {
     ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_macro_arms_1[1];  Var _x2c_macro_patterns_1[1];  static ErrorCatchSite _x2c_macro_site_1 ={
@@ -5097,11 +5098,11 @@ static Lisp Compiler__fill_library(Compiler c, Lisp shared){
     }
     volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
       _install_builtins(shared); {
-        Var volatile relative;  Var volatile message;  Iter _x2c_macro_iterator_44 = List_iter(_library_files(), &(struct Iter){
+        Var volatile relative;  Var volatile message;  Iter _x2c_macro_iterator_45 = List_iter(_library_files(), &(struct Iter){
           int_var(0)
         }
-        );  Var _x2c_macro_item_49;  x2c_exception_escaped = & _x2c_macro_item_49;  while(Iter_try_next(_x2c_macro_iterator_44, &(_x2c_macro_item_49))){
-          List volatile _x2c_macro_pair_44;  _x2c_macro_pair_44 = Var_list(_x2c_macro_item_49);  relative = List_getindex(_x2c_macro_pair_44, 0);  message = List_getindex(_x2c_macro_pair_44, 1);  Compiler__eval_library(c, 0, Var_string(relative), Var_string(message));
+        );  Var _x2c_macro_item_50;  x2c_exception_escaped = & _x2c_macro_item_50;  while(Iter_try_next(_x2c_macro_iterator_45, &(_x2c_macro_item_50))){
+          List volatile _x2c_macro_pair_45;  _x2c_macro_pair_45 = Var_list(_x2c_macro_item_50);  relative = List_getindex(_x2c_macro_pair_45, 0);  message = List_getindex(_x2c_macro_pair_45, 1);  Compiler__eval_library(c, 0, Var_string(relative), Var_string(message));
         }
 
       }
@@ -5176,11 +5177,11 @@ void Compiler_record_comptime(Compiler c, String name){
 Iter Map_keys(Map, Iter);
 void Compiler_inherit_library_comptime(Compiler c){
   if(! _init_guard_) _file_init_();  if(library_filling || library_comptime == NULL) return; {
-    String name;  Iter _x2c_macro_iterator_45 = Map_keys(library_comptime, &(struct Iter){
+    String name;  Iter _x2c_macro_iterator_46 = Map_keys(library_comptime, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_50;  while(Iter_try_next(_x2c_macro_iterator_45, &(_x2c_macro_item_50))){
-      name = Var_string(_x2c_macro_item_50);  Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
+    );  Var _x2c_macro_item_51;  while(Iter_try_next(_x2c_macro_iterator_46, &(_x2c_macro_item_51))){
+      name = Var_string(_x2c_macro_item_51);  Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
     }
 
   }
@@ -5200,7 +5201,7 @@ int Compiler_shares_meta_definition(Compiler c, String name){
 }
 
 void Compiler_install_builtin_macros(Compiler c){
-  if(! _init_guard_) _file_init_();  if(! String_truth(builtin_macros_marker)) builtin_macros_marker = _30879;  Compiler__install_source(c, builtin_macros, _30985, builtin_macros_marker, 1);
+  if(! _init_guard_) _file_init_();  if(! String_truth(builtin_macros_marker)) builtin_macros_marker = _30879;  Compiler__install_source(c, builtin_macros, _30977, builtin_macros_marker, 1);
 }
 
 static void Compiler__install_source(Compiler c, String text, String filename, String marker, int builtin){
@@ -5224,20 +5225,20 @@ static void Compiler__install_source(Compiler c, String text, String filename, S
 
 static Map Compiler__read_definitions(Compiler c){
   Map aliases = Map_new();  while(Compiler_peek(c, 0) != 11212){
-    if(Compiler_keyword_form_is_definition(c)) Compiler__record_alias(c, aliases);  else if(Compiler_macro_form_is_definition(c)) Compiler_parse_macro_definition(c);  else Compiler_report_error(c, 27335838, _30986, c -> token, NULL);
+    if(Compiler_keyword_form_is_definition(c)) Compiler__record_alias(c, aliases);  else if(Compiler_macro_form_is_definition(c)) Compiler_parse_macro_definition(c);  else Compiler_report_error(c, 27335838, _30978, c -> token, NULL);
   }
   return aliases;
 }
 
 Var Lisp_eval(Lisp, Var);
 static void Compiler__use_lisp_bindings(Compiler c, int install){
-  if(! String_truth(lisp_bindings_marker)) lisp_bindings_marker = _30880;  int loaded = ! install || Map_contains(c -> macros, String_var(lisp_bindings_marker));  if(! loaded) Compiler_ensure_macro_lisp(c);  Compiler__eval_library(c, loaded, _30987, _30988);  if(loaded) return;  Lisp_eval(c -> macro_lisp, List_var(_30893));  Compiler__install_source(c, lisp_binding_macros, _30989, lisp_bindings_marker, 0);
+  if(! String_truth(lisp_bindings_marker)) lisp_bindings_marker = _30880;  int loaded = ! install || Map_contains(c -> macros, String_var(lisp_bindings_marker));  if(! loaded) Compiler_ensure_macro_lisp(c);  Compiler__eval_library(c, loaded, _30979, _30980);  if(loaded) return;  Lisp_eval(c -> macro_lisp, List_var(_30893));  Compiler__install_source(c, lisp_binding_macros, _30981, lisp_bindings_marker, 0);
 }
 
 Map Compiler_compiler_targets(void);
 static void Compiler__install_native_operations(Compiler c){
   _bind_primitives(c -> macro_lisp); {
-    Var name, function;  Map _x2c_macro_object_46 = Compiler_compiler_targets();  unsigned _x2c_macro_cursor_51 = 0;  Var _x2c_macro_cursor_output_47;  Var _x2c_macro_cursor_output_48;  while(Map_try_next(_x2c_macro_object_46, &(_x2c_macro_cursor_51), &(_x2c_macro_cursor_output_47), &(_x2c_macro_cursor_output_48))){
+    Var name, function;  Map _x2c_macro_object_47 = Compiler_compiler_targets();  unsigned _x2c_macro_cursor_52 = 0;  Var _x2c_macro_cursor_output_47;  Var _x2c_macro_cursor_output_48;  while(Map_try_next(_x2c_macro_object_47, &(_x2c_macro_cursor_52), &(_x2c_macro_cursor_output_47), &(_x2c_macro_cursor_output_48))){
       name = _x2c_macro_cursor_output_47;  function = _x2c_macro_cursor_output_48; {
         Lisp_set_global(c -> macro_lisp, Var_string(name), function);  Compiler_bind_meta_operation(c -> macro_lisp, Var_string(name), function);
       }
@@ -5252,15 +5253,15 @@ Func Func_new(FuncAdapter, List);
 void Lisp_bind(Lisp, String, Func);
 void Compiler_bind_sdk_primitives(Lisp);
 static void _bind_primitives(Lisp lisp){
-  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _30894);  Lisp_bind(lisp, _30990, _x2c_macro_callable_0);  Func _x2c_macro_callable_1 = Func_new(_x2c_func_adapt_1, _30900);  Lisp_bind(lisp, _30991, _x2c_macro_callable_1);  Func _x2c_macro_callable_2 = Func_new(_x2c_func_adapt_2, _30906);  Lisp_bind(lisp, _30992, _x2c_macro_callable_2);  Func _x2c_macro_callable_3 = Func_new(_x2c_func_adapt_3, _461);  Lisp_bind(lisp, _30993, _x2c_macro_callable_3);  Func _x2c_macro_callable_4 = Func_new(_x2c_func_adapt_4, _14593);  Lisp_bind(lisp, _30994, _x2c_macro_callable_4);  Compiler_bind_sdk_primitives(lisp);
+  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _30894);  Lisp_bind(lisp, _30982, _x2c_macro_callable_0);  Func _x2c_macro_callable_1 = Func_new(_x2c_func_adapt_1, _30900);  Lisp_bind(lisp, _30983, _x2c_macro_callable_1);  Func _x2c_macro_callable_2 = Func_new(_x2c_func_adapt_2, _30906);  Lisp_bind(lisp, _30984, _x2c_macro_callable_2);  Func _x2c_macro_callable_3 = Func_new(_x2c_func_adapt_3, _461);  Lisp_bind(lisp, _30985, _x2c_macro_callable_3);  Func _x2c_macro_callable_4 = Func_new(_x2c_func_adapt_4, _14593);  Lisp_bind(lisp, _30986, _x2c_macro_callable_4);  Compiler_bind_sdk_primitives(lisp);
 }
 
 Map builtin_targets(void);
 static void _install_builtins(Lisp lisp){
   {
-    Var name, function;  Map _x2c_macro_object_47 = builtin_targets();  unsigned _x2c_macro_cursor_52 = 0;  Var _x2c_macro_cursor_output_49;  Var _x2c_macro_cursor_output_50;  while(Map_try_next(_x2c_macro_object_47, &(_x2c_macro_cursor_52), &(_x2c_macro_cursor_output_49), &(_x2c_macro_cursor_output_50))){
+    Var name, function;  Map _x2c_macro_object_48 = builtin_targets();  unsigned _x2c_macro_cursor_53 = 0;  Var _x2c_macro_cursor_output_49;  Var _x2c_macro_cursor_output_50;  while(Map_try_next(_x2c_macro_object_48, &(_x2c_macro_cursor_53), &(_x2c_macro_cursor_output_49), &(_x2c_macro_cursor_output_50))){
       name = _x2c_macro_cursor_output_49;  function = _x2c_macro_cursor_output_50; {
-        String spelling = Var_string(name);  Lisp_set_global(lisp, String_startswith(spelling, _30995) ? String_join(NULL, cons(String_var(_30907), cons(String_var(spelling), NULL))) : spelling, function);
+        String spelling = Var_string(name);  Lisp_set_global(lisp, String_startswith(spelling, _30987) ? String_join(NULL, cons(String_var(_30907), cons(String_var(spelling), NULL))) : spelling, function);
       }
 
     }
@@ -5271,12 +5272,12 @@ static void _install_builtins(Lisp lisp){
 
 int Lisp_try_get(Lisp, String, Var *);
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function){
-  if(! _init_guard_) _file_init_();  String dotted = _meta_lisp_name(name);  Var bound;  if(Lisp_try_get(lisp, dotted, &(bound))) return;  if(String_startswith(name, _30996)) function = Lisp_eval(lisp, List_var(cons(_33, cons(_30909, cons(List_var(cons(_7, cons(List_var(cons(_30910, cons(List_var(cons(List_var(cons(_30911, cons(function, NULL))), _30908)), _30539))), _30914))), NULL)))));  Lisp_set_global(lisp, dotted, function);
+  if(! _init_guard_) _file_init_();  String dotted = _meta_lisp_name(name);  Var bound;  if(Lisp_try_get(lisp, dotted, &(bound))) return;  if(String_startswith(name, _30988)) function = Lisp_eval(lisp, List_var(cons(_33, cons(_30909, cons(List_var(cons(_7, cons(List_var(cons(_30910, cons(List_var(cons(List_var(cons(_30911, cons(function, NULL))), _30908)), _30539))), _30914))), NULL)))));  Lisp_set_global(lisp, dotted, function);
 }
 
 String String_replace(String, String, String);
 static String _meta_lisp_name(String name){
-  if(String_equal(name, _30915)) return _30997;  if(String_equal(name, _30916)) return _30998;  if(String_startswith(name, _30996)) return String_join(NULL, cons(String_var(_30917), cons(String_var(String_getslice(name, 12, -2147483648, 1)), cons(String_var(_30545), NULL))));  return String_replace(name, _30999, _30981);
+  if(String_equal(name, _30915)) return _30989;  if(String_equal(name, _30916)) return _30990;  if(String_startswith(name, _30988)) return String_join(NULL, cons(String_var(_30917), cons(String_var(String_getslice(name, 12, -2147483648, 1)), cons(String_var(_30545), NULL))));  return String_replace(name, _30991, _30973);
 }
 
 static String _definition_note(List definition){
@@ -5286,7 +5287,7 @@ static String _definition_note(List definition){
 String List_repr(List);
 void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source){
   if(! _init_guard_) _file_init_(); {
-    String _x2c_macro_form_note_0 = String_join(NULL, cons(String_var(String_new("form: ")), cons(String_var(source), NULL))), _x2c_macro_error_note_0 = String_join(NULL, cons(String_var(String_new("error: ")), cons(String_var(List_repr(error)), NULL)));  Compiler_report_error(c, 27335838, _31000, invocation, cons(String_var(_x2c_macro_form_note_0), cons(String_var(_x2c_macro_error_note_0), NULL)));
+    String _x2c_macro_form_note_0 = String_join(NULL, cons(String_var(String_new("form: ")), cons(String_var(source), NULL))), _x2c_macro_error_note_0 = String_join(NULL, cons(String_var(String_new("error: ")), cons(String_var(List_repr(error)), NULL)));  Compiler_report_error(c, 27335838, _30992, invocation, cons(String_var(_x2c_macro_form_note_0), cons(String_var(_x2c_macro_error_note_0), NULL)));
   }
 
 }

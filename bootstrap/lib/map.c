@@ -687,13 +687,7 @@ void Map_set(Map _x2c_macro_map_27, Var _x2c_macro_key_19, Var _x2c_macro_val_5)
 }
 
 Var Map_setindex(Map _x2c_macro_map_28, Var _x2c_macro_key_20, Var _x2c_macro_val_6){
-  if((void *) _x2c_macro_map_28 == 0)(void) _bad_arg(0);
-  if(1 &&(Var_is_void(_x2c_macro_key_20) || Var_is_void(_x2c_macro_val_6))){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_setindex",.line = 107};
-    x2c_error_raise_n(& _x2c_error_site_9, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  Map__core_set(_x2c_macro_map_28, & _x2c_macro_key_20, & _x2c_macro_val_6);
+  Map_set(_x2c_macro_map_28, _x2c_macro_key_20, _x2c_macro_val_6);
   return _x2c_macro_val_6;
 }
 
@@ -711,8 +705,8 @@ Var Map_updateindex(Map _x2c_macro_map_29, Var _x2c_macro_key_21, Symbol _x2c_ma
     X2CVarNumericInfo _x2c_macro_info_0;
     _x2c_macro_insert_0 = Var_encoding_valid(_x2c_macro_boxed_rhs_0) && Var_numeric_info(Var_tag(_x2c_macro_boxed_rhs_0), &(_x2c_macro_info_0));
     if(Var_is_void(_x2c_macro_key_21) || Var_is_void(_x2c_macro_boxed_rhs_0)){
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
-      x2c_error_raise_n(& _x2c_error_site_10, 48270474208, 0);
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
+      x2c_error_raise_n(& _x2c_error_site_9, 48270474208, 0);
       __builtin_unreachable();
     }
 
@@ -724,15 +718,15 @@ Var Map_updateindex(Map _x2c_macro_map_29, Var _x2c_macro_key_21, Symbol _x2c_ma
     return _update_var(_x2c_macro_stored_5, _x2c_macro_op_0, _x2c_macro_rhs_0);
   }
   if(1 && Var_is_void(_x2c_macro_key_21)){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
-    x2c_error_raise_n(& _x2c_error_site_11, 48270474208, 0);
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
+    x2c_error_raise_n(& _x2c_error_site_10, 48270474208, 0);
     __builtin_unreachable();
   }
   long _x2c_macro_index_6 = Map__core_find_index(_x2c_macro_map_29, & _x2c_macro_key_21);
   if(_x2c_macro_index_6 < 0){
     if(1){
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
-      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_21);
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 107};
+      x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_21);
       __builtin_unreachable();
     }
     (void) _bad_arg(0);
@@ -746,15 +740,15 @@ Var Var_postfix(Var *, Symbol);
 Var Map_postfixindex(Map _x2c_macro_map_30, Var _x2c_macro_key_22, Symbol _x2c_macro_op_1){
   if((void *) _x2c_macro_map_30 == 0)(void) _bad_arg(0);
   if(1 && Var_is_void(_x2c_macro_key_22)){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 107};
-    x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 0);
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 107};
+    x2c_error_raise_n(& _x2c_error_site_12, 48270474208, 0);
     __builtin_unreachable();
   }
   long _x2c_macro_index_7 = Map__core_find_index(_x2c_macro_map_30, & _x2c_macro_key_22);
   if(_x2c_macro_index_7 < 0){
     if(1){
-      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 107};
-      x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_22);
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 107};
+      x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 1, Symbol_var(22898), _x2c_macro_key_22);
       __builtin_unreachable();
     }
     (void) _bad_arg(0);
