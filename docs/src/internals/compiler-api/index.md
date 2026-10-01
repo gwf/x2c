@@ -14,8 +14,6 @@ Functions and types exposed by each compiler module.
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
-| [`src/callables.x`](callables.md) | lambdas and Func conversions lowered to C helpers. |
-| [`src/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
@@ -29,13 +27,13 @@ Functions and types exposed by each compiler module.
 | [`src/generate.x`](generate.md) | generate C headers and source files. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
-| [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
-| [`src/literals.x`](literals.md) | x2c literal parsing. |
-| [`src/macros.x`](macros.md) | source macros and the compile-time code they run. |
+| [`src/literals.x`](literals.md) | x2c literal and lambda parsing. |
+| [`src/macros.x`](macros.md) | source macros and the compile-time Lisp they run. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
 | [`src/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
+| [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
 | [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |

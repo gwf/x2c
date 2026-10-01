@@ -1,6 +1,13 @@
 /*  meta-native.x -- meta functions and the native code they call
 
     Copyright (c) 2026 Gary William Flake.
+
+    A bodied `meta` function runs at compile time through a stub that calls
+    its compiled copy, and a bodyless `meta` prototype binds a native
+    function that the compiler links, a selected native module defines, or
+    a linked package supplies. This unit owns those bindings, the region
+    summaries a native signature implies, and the native modules, which a
+    request loads once per process and never unloads.
 */
 
 #pragma once
@@ -9,10 +16,12 @@ $(import "../lib/private-keywords.xmacro")
 
 #pragma private
 $(import "../src/grammar.xmacro")
+$(import "../etc/lisp-bindings.xlisp")
 #include "macros.x"
 #include "meta-group.x"
 #include "meta-sdk.x"
 #include "meta.x"
+#include "stage.x"
 #include "utils.x"
 #include <dlfcn.h>
 #include <errno.h>
@@ -58,15 +67,15 @@ void Compiler.install_meta_declaration(
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
-  _ensure_lisp(c);
+  c.ensure_macro_lisp();
   c.check_meta_regions(fn);
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) *) ?): {
-      if (c.meta_reaches_compile_time(fn)) _record_comptime(c, name);
+      if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
       if (c.macro_holes) return;
       c.group_meta_function(fn);
       if (c.meta_build) return;
-      if (!macro_library_filling() && !_shared_meta_definition(c, name))
+      if (!macro_library_filling() && !c.shares_meta_definition(name))
         _install_stub(c, name, marker);
     }
 }
@@ -174,7 +183,7 @@ static Var _meta_apply(Compiler c, Var function, List arguments) {
     boundary. */
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) {
-  Var value = _evaluate_meta_value(c, expression, site, 0);
+  Var value = c.evaluate_meta_value(expression, site, 0);
   if (value is void && c.meta_build) {
     List placeholder = %(expr (int) (literal (int) "0"));
     c.meta_group.push(%(later $placeholder));
@@ -191,29 +200,12 @@ List Compiler.evaluate_meta_expression(
   return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 
-/* Evaluates the explicit meta call `expression` at `site` with the active
-   expansion's captures visible to the SDK. */
-static Var _evaluate_meta_value(
+/** Runs the explicit meta call `expression` at `site`. The project meta
+    build's own parse leaves a project function's call for the translation:
+    an expression takes a placeholder, and a template `slot`, which has
+    none, is reported. */
+Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) {
-  if (!c.collect_protocols) c.run_declaration_effects();
-  _ensure_lisp(c);
-  List active = c.macro_stack ? c.macro_stack.car() : NULL;
-  List bindings = active ? active.caddr() : NULL;
-  String source_file = active ? _definition_file(active.car()) : c.filename;
-  MetaContext *context = MetaContext.current();
-  $let(context.references, !!bindings)
-  $let(context.captures, _source_captures(bindings))
-  $let(context.file, source_file)
-  $let(context.expansion, c)
-  $let(context.evaluator, c)
-  $let(context.site, site)
-    return _run_meta_call(c, expression, site, slot);
-}
-
-/* The project meta build's own parse leaves a project function's call for
-   the translation: an expression takes a placeholder, and a template
-   `slot`, which has none, is reported. */
-static Var _run_meta_call(Compiler c, List expression, Token site, int slot) {
   Var value;
   try value = _meta_call_value(c, expression, site);
   catch %(meta-later *): {
@@ -229,21 +221,8 @@ static Var _run_meta_call(Compiler c, List expression, Token site, int slot) {
       <macro>, "explicit meta call was stopped", site,
       %("reason: its compile-time form nested too deep"));
   catch %(?code *detail):
-    _report_lisp_failure(c, site, cons(code, detail), meta_call_form);
+    c.report_lisp_failure(site, cons(code, detail), meta_call_form);
   return value;
-}
-
-/* Both entry forms expose source only for complete captures in the active
-   expansion. The keys are the same unwrapped values passed to the helper. */
-static Map _source_captures(List bindings) {
-  Map captures = {};
-  foreach (List pair, bindings) {
-    List source;
-    Var syntax;
-    if (pair && _source_capture_parts(pair.cadr(), source, syntax))
-      captures[((ulong) syntax.u64)] = source;
-  }
-  return captures;
 }
 
 /* The last call a `$` expression made, as a failure reports it. */
@@ -366,18 +345,10 @@ static int _local_effect(String unit, Var key) {
 int Compiler.bind_native_meta(Compiler c, String name) {
   Var signature, bound;
   if (!c.native_meta.len())
-    c.install_native_meta_effects(_visible_symbols(c));
+    c.install_native_meta_effects(c.sym.unit_symbols());
   if (!c.native_meta.try_get(name, signature)) return 0;
   _bind_native_meta(c, name, signature, NULL);
   return c.macro_lisp.try_get(name, bound);
-}
-
-/* The unit's base symbols with the current scope's rows merged in. */
-static Map _visible_symbols(Compiler c) {
-  Map symbols = c.sym.base_symbols();
-  Map current = c.sym.current_symbols();
-  if (current) symbols.merge(current);
-  return symbols;
 }
 
 /** Installs a prototype-only `meta` function from the compiler's trusted
@@ -388,7 +359,7 @@ void Compiler.install_native_meta_function(
   Type type = declaration.type_from_ast().canonicalize();
   String name = _native_meta_name(c, declaration, marker);
   if (!c.collect_protocols) c.run_declaration_effects();
-  _ensure_lisp(c);
+  c.ensure_macro_lisp();
   List signature = c.func_signature(type);
   c.native_meta[name] = signature;
   _bind_native_meta(c, name, signature, marker);
@@ -614,11 +585,12 @@ static int _native_owned(Compiler c, List type) {
    The native functions interface rows advertise, as `lib/lisp-targets.x`
    generates its target inventory from them. */
 
-/* Returns the declared native targets advertised by `meta` interface rows,
-   in the row form `lib/lisp-targets.x` generates its target inventory
-   from, or only those declared in the files `paths` names when it is not
-   empty. Sorting makes that inventory independent of Map order. */
-static List _native_meta_targets(List paths) {
+/** Returns the declared native targets advertised by `meta` interface
+    rows, in the row form `lib/lisp-targets.x` generates its target
+    inventory from, or only those declared in the files `paths` names when
+    it is not empty. Sorting makes that inventory independent of Map order.
+*/
+List Compiler.native_meta_targets(List paths) {
   Compiler compiler = Compiler.expanding();
   if (!compiler) return %();
   Map selected = {};
@@ -696,19 +668,6 @@ static int _iterator_operation(List signature) {
   return 0;
 }
 
-static List _sdk_meta_targets(void) => _native_meta_targets(NULL);
-
-/* A native module's entry exports the prototypes its own sources declare,
-   and a module that declares none is a mistake. */
-static List _sdk_meta_declared(List paths) {
-  List rows = _native_meta_targets(paths);
-  if (!rows)
-    MetaContext.reject(
-      "native module sources declare no meta function",
-      %("declare each exported function with a bodyless meta prototype"));
-  return rows;
-}
-
 /* linked meta definitions
 
    The shipped `meta` definitions compiled into the compiler
@@ -734,13 +693,13 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   if (!linked.try_get(name, function)) return 0;
   if (!_linked_copy(c, name, linked)) return 0;
   if (!c.collect_protocols) c.run_declaration_effects();
-  _ensure_lisp(c);
+  c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
   /* The shared session binds the copy once for every unit that imports the
      same file. */
   if (!c.macro_lisp.try_get(name, bound) || bound.equal(%()))
     c.macro_lisp.set_global(name, function);
-  if (c.meta_reaches_compile_time(fn)) _record_comptime(c, name);
+  if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
   return 1;
 }
 
@@ -796,13 +755,36 @@ static Map native_modules = NULL;
 static List native_module_order = NULL;
 static Scope native_module_scope = NULL;
 
+/* The compiler supplies the operations `lib/meta.x` declares with a bodyless
+   `meta` prototype, the `x2c_` targets, as the native module
+   `compiler_supplier`, which every request selects first. */
+macro Expression $compiler.targets() => $(lisp.native.targets
+  (filter (lambda (row) (not (eq? (String.startswith (car row) "x2c_") 0)))
+    (_x2c.native-meta.targets)));
+
+static String compiler_supplier = "<compiler>";
+
+static Map _compiler_targets(void) => $compiler.targets();
+
+/** Returns the compiler's own targets, the operations `lib/meta.x` declares
+    with a bodyless `meta` prototype, loaded as the native module every
+    request selects first. */
+Map Compiler.compiler_targets(void) {
+  _load_compiler_module();
+  return _compiler_targets();
+}
+
+static void _load_compiler_module(void) {
+  if (!Compiler.native_module_loaded(compiler_supplier))
+    Compiler.add_native_module(compiler_supplier, _compiler_targets);
+}
+
 /** Selects the loaded native modules, by absolute path, that bodyless `meta`
     prototypes bind in the current request. The first module in `paths`
     that defines a name supplies it.
 */
 void Compiler.select_native_modules(List paths) {
-  if (!Compiler.native_module_loaded(compiler_supplier))
-    Compiler.add_native_module(compiler_supplier, _compiler_targets);
+  _load_compiler_module();
   Array linked = [];
   for (struct _Extension *e = extensions; e; e = e.next) {
     String key = %"<${String.new(e.name)}>";
@@ -958,6 +940,13 @@ static Map _module_targets(String path, Map (*entry)(void)) {
     native_modules[path] = targets;
     return targets;
   }
+}
+
+static void _native_module_shutdown(void) {
+  native_module_scope.destroy();
+  native_module_scope = NULL;
+  native_modules = NULL;
+  native_module_order = NULL;
 }
 
 /** Reports whether the native module at absolute `path` is loaded. */

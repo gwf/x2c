@@ -1,14 +1,15 @@
-/*  macros.x -- source macros and the compile-time code they run
+/*  macros.x -- source macros and the compile-time Lisp they run
 
-    A definition is a compiler-only `macrodef` List: its holes, a Match
+    Expansion fills a definition's template from an invocation's captures
+    and binds the result through the operations that bind parsed source. A
+    definition is a compiler-only `macrodef` List: its holes, a Match
     pattern over an invocation's capture rows, and a template of the
-    binders that pattern captures. Expansion fills the template and binds
-    the result through the operations that bind parsed source.
+    binders that pattern captures.
 
-    Template slots, `$(...)` forms, and `meta` functions run in the unit's
-    compile-time Lisp session, whose parent is the shared library session.
-    Each evaluation installs the `MetaContext` that `meta-sdk.x` answers
-    compile-time operations from.
+    Template slots and `$(...)` forms run in the unit's compile-time Lisp
+    session, whose parent is the shared library session, under the
+    `MetaContext` each evaluation installs. `meta-sdk.x` answers the
+    operations they call, and `meta-native.x` runs `meta` functions.
 */
 
 #pragma once
@@ -2477,7 +2478,7 @@ static Var _slot_value(Compiler c, List slot) {
   String source_file = _definition_file(definition);
   Var required = slot.assoc(<construct>);
   Var result = form is <list>
-    ? _evaluate_meta_value(c, form, invocation, 1)
+    ? c.evaluate_meta_value(form, invocation, 1)
     : _eval_template_form(
       c, form, bindings, invocation, source_file, required);
   result = _helper_result(c, result);
@@ -2532,7 +2533,7 @@ static Var _eval_template_form(
   Compiler compiler, String form, List bindings, Token invocation,
   String source_file, Var construction) {
   if (!compiler.collect_protocols) compiler.run_declaration_effects();
-  _ensure_lisp(compiler);
+  compiler.ensure_macro_lisp();
   unsigned long serial = template_serial++;
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
@@ -2547,6 +2548,39 @@ static Var _eval_template_form(
   $let(context.file, source_file)
   $let(context.expansion, compiler)
     return _eval_string(compiler, form, invocation);
+}
+
+/** Evaluates the explicit meta call `expression` at `site` with the active
+    expansion's captures visible to the SDK. A nonzero `slot` marks a
+    template slot, which reports a call the project meta build leaves. */
+Var Compiler.evaluate_meta_value(
+  Compiler c, List expression, Token site, int slot) {
+  if (!c.collect_protocols) c.run_declaration_effects();
+  c.ensure_macro_lisp();
+  List active = c.macro_stack ? c.macro_stack.car() : NULL;
+  List bindings = active ? active.caddr() : NULL;
+  String source_file = active ? _definition_file(active.car()) : c.filename;
+  MetaContext *context = MetaContext.current();
+  $let(context.references, !!bindings)
+  $let(context.captures, _source_captures(bindings))
+  $let(context.file, source_file)
+  $let(context.expansion, c)
+  $let(context.evaluator, c)
+  $let(context.site, site)
+    return c.run_meta_call(expression, site, slot);
+}
+
+/* Both entry forms expose source only for complete captures in the active
+   expansion. The keys are the same unwrapped values passed to the helper. */
+static Map _source_captures(List bindings) {
+  Map captures = {};
+  foreach (List pair, bindings) {
+    List source;
+    Var syntax;
+    if (pair && _source_capture_parts(pair.cadr(), source, syntax))
+      captures[((ulong) syntax.u64)] = source;
+  }
+  return captures;
 }
 
 /* Binds each captured value to a scratch global and returns the
@@ -2965,10 +2999,11 @@ static Var _carrier_binder(Var value) {
    scope evaluates there, or imports a file; in an expression its value
    lifts into syntax. */
 
-/* An `.xmacro` import parser borrows its parent's session; the parent
-   Compiler frees it. Every use records the library files as dependencies,
-   and a session loads them once. */
-static void _ensure_lisp(Compiler compiler) {
+/** Opens the unit's compile-time Lisp session when it has none. An
+    `.xmacro` import parser borrows its parent's session; the parent
+    Compiler frees it. Every use records the library files as dependencies,
+    and a session loads them once. */
+void Compiler.ensure_macro_lisp(Compiler compiler) {
   int loaded = compiler.macro_lisp != NULL;
   int shared = library_session != NULL, ready = loaded || shared;
   if (!loaded) {
@@ -3002,7 +3037,7 @@ static Var _eval_string(Compiler compiler, String source, Token invocation) {
     catch %(malformed (category ?category)):
       raise %(malformed (category $category));
     catch %(?code *detail):
-      _report_lisp_failure(compiler, invocation, cons(code, detail), source);
+      compiler.report_lisp_failure(invocation, cons(code, detail), source);
   }
   return result;
 }
@@ -3036,7 +3071,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
      every unit inherits them, so evaluating this one again would only try to
      replace a name an ancestor binds. */
   if (compiler.inherited_lisp) return NULL;
-  _ensure_lisp(compiler);
+  compiler.ensure_macro_lisp();
   _eval_string(compiler, form, invocation);
   return NULL;
 }
@@ -3090,7 +3125,7 @@ static void _record_package_macro(
 void Compiler.evaluate_declaration_effect(
   Compiler compiler, String form, Token invocation) {
   $let(compiler.collect_protocols, 1) {
-    _ensure_lisp(compiler);
+    compiler.ensure_macro_lisp();
     _eval_string(compiler, form, invocation);
   }
 }
@@ -3104,7 +3139,7 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
   String form = _lisp_form(compiler);
   if (compiler.macro_holes) return %(expr (<macro-expr>) (macro-slot 0 $form));
   if (!compiler.collect_protocols) compiler.run_declaration_effects();
-  _ensure_lisp(compiler);
+  compiler.ensure_macro_lisp();
   Var value = _eval_string(compiler, form, invocation);
   return compiler.lift_macro_lisp_expression(value, invocation);
 }
@@ -3162,7 +3197,7 @@ typedef struct Import {
 } Import;
 
 static List _import(Compiler c, String requested, Token invocation) {
-  _ensure_lisp(c);
+  c.ensure_macro_lisp();
   String path = _canonical_path(c, requested);
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
@@ -3406,7 +3441,7 @@ void Compiler.import_package_macros(
 /* The macro imports package `name` recorded, in source order. */
 static Array _package_exports(Compiler c, String name) {
   Array exports = [];
-  foreach (Var (key, value), _visible_symbols(c))
+  foreach (Var (key, value), c.sym.unit_symbols())
     match (key)
       case %("source-node" (package-macro ? ?(int position))):
         match (value)
@@ -3584,9 +3619,9 @@ static int _inherited_import(String path) {
 */
 int Compiler.inherits_import(String path) => _inherited_import(path);
 
-/* Records that `name` is compile-time only in `c`, and in the shared
-   session when it is being filled. */
-static void _record_comptime(Compiler c, String name) {
+/** Records that `name` is compile-time only in `c`, and in the shared
+    session when it is being filled. */
+void Compiler.record_comptime(Compiler c, String name) {
   c.meta_comptime[name] = 1;
   if (!library_filling || !(void *) library_comptime) return;
   $scope(&library_scope) library_comptime[name] = 1;
@@ -3612,9 +3647,10 @@ Map Compiler.shared_definitions(Compiler compiler) {
   return library_session ? library_definitions : NULL;
 }
 
-/* Whether the published shared session already holds the definition of
-   `name` from this file, which a unit reading the file again leaves alone. */
-static int _shared_meta_definition(Compiler c, String name) {
+/** Answers whether the published shared session already holds the
+    definition of `name` from this file, which a unit reading the file again
+    leaves alone. */
+int Compiler.shares_meta_definition(Compiler c, String name) {
   if (library_filling || library_definitions == NULL || !c.filename) return 0;
   String key = %"${Path.absolute(c.filename)}#$name";
   return key in library_definitions;
@@ -3688,7 +3724,7 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
   if (!lisp_bindings_marker) lisp_bindings_marker = "_x2c.lisp.bindings";
   int loaded =
     !install || lisp_bindings_marker in compiler.macros;
-  if (!loaded) _ensure_lisp(compiler);
+  if (!loaded) compiler.ensure_macro_lisp();
   _eval_library(
     compiler, loaded, "etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
@@ -3709,9 +3745,7 @@ static void _use_lisp_bindings(Compiler compiler, int install) {
 
 static void _install_native_operations(Compiler compiler) {
   _bind_primitives(compiler.macro_lisp);
-  if (!Compiler.native_module_loaded(compiler_supplier))
-    Compiler.add_native_module(compiler_supplier, _compiler_targets);
-  foreach (Var (name, function), _compiler_targets()) {
+  foreach (Var (name, function), Compiler.compiler_targets()) {
     compiler.macro_lisp.set_global(name, function);
     Compiler.bind_meta_operation(compiler.macro_lisp, name, function);
   }
@@ -3725,8 +3759,6 @@ static void _bind_primitives(Lisp lisp) {
   $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
   $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
   $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
-  $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);
-  $lisp.bind(lisp, "_x2c.native-meta.declared", _sdk_meta_declared);
   $lisp.bind(lisp, "_x2c.tpl-call", _sdk_template_call);
   Compiler.bind_sdk_primitives(lisp);
 }
@@ -3742,18 +3774,6 @@ static void _install_builtins(Lisp lisp) {
       function);
   }
 }
-
-/* The compiler supplies the operations `lib/meta.x` declares with a bodyless
-   `meta` prototype, the `x2c_` targets, as the native module
-   `compiler_supplier`, which every request selects first. */
-$(import "../etc/lisp-bindings.xlisp")
-macro Expression $compiler.targets() => $(lisp.native.targets
-  (filter (lambda (row) (not (eq? (String.startswith (car row) "x2c_") 0)))
-    (_x2c.native-meta.targets)));
-
-static String compiler_supplier = "<compiler>";
-
-static Map _compiler_targets(void) => $compiler.targets();
 
 /** Binds `function`, the operation `lib/meta.x` declares as `name`, under
     its Lisp name in `lisp`. A predicate answers a Lisp truth value where the
@@ -3791,7 +3811,9 @@ static String _definition_note(List definition) {
   return %"definition: $file:$line:$column";
 }
 
-static void _report_lisp_failure(
+/** Reports that the compile-time Lisp `source` failed with `error` at
+    `invocation`. */
+void Compiler.report_lisp_failure(
   Compiler compiler, Token invocation, List error, String source) {
   String form_note = %"form: $source", error_note = %"error: ${error.repr()}";
   compiler.report_error(
@@ -3826,11 +3848,4 @@ static void _library_shutdown(void) {
 void macro_library_reset(void) {
   _library_shutdown();
   library_filling = 0;
-}
-
-static void _native_module_shutdown(void) {
-  native_module_scope.destroy();
-  native_module_scope = NULL;
-  native_modules = NULL;
-  native_module_order = NULL;
 }

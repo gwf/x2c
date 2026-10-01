@@ -120,6 +120,7 @@
   - [src/main.x](internals/compiler-api/main.md)
   - [src/meta-group.x](internals/compiler-api/meta-group.md)
   - [src/meta-helper-client.x](internals/compiler-api/meta-helper-client.md)
+  - [src/meta-native.x](internals/compiler-api/meta-native.md)
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/meta-sdk.x](internals/compiler-api/meta-sdk.md)
   - [src/parse.x](internals/compiler-api/parse.md)

@@ -12,11 +12,6 @@
 #pragma once
 #include "compiler.x"
 
-/* `generate.x` reaches this unit through `emit.x` and `transform.x`, so
-   including it here would make a cycle. */
-List Compiler.transform(Compiler compiler, List ast);
-List generate_code_text(Compiler c, List ast, String basename);
-
 /* In-process staging loads native modules, which these platforms lack. */
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
@@ -28,9 +23,11 @@ List generate_code_text(Compiler c, List ast, String basename);
 $(import "../src/grammar.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "type.x"
+#include "generate.x"
 #include "macros.x"
 #include "script.x"
 #include "toolchain.x"
+#include "transform.x"
 #include "utils.x"
 #include <unistd.h>
 

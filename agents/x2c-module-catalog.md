@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 41
+- Compiler modules: 42
 - Runtime modules: 60
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -253,7 +253,7 @@ Public functions:
 
 ### [src/macros.x](../src/macros.x)
 
-source macros and the compile-time code they run.
+source macros and the compile-time Lisp they run.
 
 Public functions:
 
@@ -269,30 +269,22 @@ Public functions:
 `Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
 `Compiler.try_parse_macro_expression`, `Compiler.expand_macro_invocation_node`,
 `Compiler.macro_invocation_site`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.evaluate_declaration_recipe`,
-`x2c_template_call`, `Compiler.rebuild_expression`,
-`Compiler.rebuild_statement`, `Compiler.rebuild_unit_function`,
-`Compiler.rebuild_function`, `Compiler.macro_value_literal`,
-`Compiler.try_parse_macro_pattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
+`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
+`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
+`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
+`Compiler.macro_value_literal`, `Compiler.try_parse_macro_pattern`,
+`Compiler.capture_macro_value`, `Compiler.take_code_value`,
+`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
 `Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
 `Compiler.import_package_macros`, `Compiler.source_path`,
 `Compiler.open_macro_library`, `Compiler.publish_macro_library`,
-`Compiler.inherits_import`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
 `Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.install_meta_declaration`, `Compiler.install_meta_function`,
-`Compiler.evaluate_meta_expression`, `Compiler.record_native_meta_effect`,
-`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
-`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
-`Compiler.native_meta_module`, `Compiler.bind_linked_meta`,
-`Compiler.select_native_modules`, `Compiler.select_package_module`,
-`Compiler.load_native_module`, `Compiler.preload_native_module`,
-`Compiler.add_native_module`, `Compiler.native_module_loaded`,
-`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
-`x2c_register_extension`, `Compiler.links_extension`,
-`Compiler.extension_archive`, `macro_library_reset`
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -324,6 +316,25 @@ Public functions:
 
 `Compiler.meta_helper_call`, `Compiler.use_meta_helper`,
 `Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`
+
+### [src/meta-native.x](../src/meta-native.x)
+
+meta functions and the native code they call.
+
+Public functions:
+
+`Compiler.install_meta_declaration`, `Compiler.install_meta_function`,
+`Compiler.evaluate_meta_expression`, `Compiler.run_meta_call`,
+`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
+`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
+`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
+`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
+`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.select_package_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.add_native_module`,
+`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.supplies_native_meta`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -486,26 +497,26 @@ Public functions:
 `Sym.new`, `Sym.reset`, `Sym.reset_overlay`, `Sym.push_new_scope`,
 `Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
 `Sym.global_symbols`, `Sym.base_symbols`, `Sym.current_symbols`,
-`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`, `Sym.set`,
-`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
-`Sym.declare_enumerator`, `Sym.introduce`, `Sym.current_binding`,
-`Sym.enumerator_owner`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
-`Compiler.semantic_binding_facts`, `Sym.get`, `Sym.get_exact`, `Sym.lookup`,
-`Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.bind_identity`, `Compiler.aggregate_name`,
-`Compiler.record_declaration_visibility`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_providers`,
-`Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
-`Sym.lookup_macro`, `Compiler.macro_definition_locals`, `Sym.resolve_key`,
-`Sym.next_typedef`, `Sym.resolve_base_type`, `Sym.normalize_declared_type`,
-`Sym.local_type`, `Sym.resolve_numeric_type`, `Sym.var_tag_for_type`,
-`Sym.is_var_type`, `Sym.is_string_type`, `Sym.is_array_type`,
-`Sym.is_map_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
-`Sym.declare_field_order`, `Sym.field_order`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `SymTxn.commit`, `SymTxn.commit_transient`,
-`SymTxn.rollback`
+`Sym.unit_symbols`, `Sym.file_statics`, `Sym.mark_static`,
+`Sym.visible_symbols`, `Sym.set`, `Sym.define`, `Sym.seed_var_tags`,
+`Sym.define_global`, `Sym.declare_enumerator`, `Sym.introduce`,
+`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
+`Sym.binding_is_local_before`, `Compiler.semantic_binding_facts`, `Sym.get`,
+`Sym.get_exact`, `Sym.lookup`, `Sym.reference`, `Sym.resolve_global`,
+`Sym.reference_global`, `Sym.declare`, `Sym.bind_identity`,
+`Compiler.aggregate_name`, `Compiler.record_declaration_visibility`,
+`Compiler.package_spelling`, `Compiler.register_package_alias`,
+`Compiler.register_package_member`, `Compiler.package_member_spelling`,
+`Compiler.imported_providers`, `Compiler.imported_spelling`,
+`Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
+`Compiler.macro_definition_locals`, `Sym.resolve_key`, `Sym.next_typedef`,
+`Sym.resolve_base_type`, `Sym.normalize_declared_type`, `Sym.local_type`,
+`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
+`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
+`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
 
 ### [src/toolchain.x](../src/toolchain.x)
 

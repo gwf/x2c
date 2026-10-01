@@ -400,6 +400,19 @@ static Var _sdk_symbol_set(List values) {
   return expression;
 }
 
+static List _sdk_meta_targets(void) => Compiler.native_meta_targets(NULL);
+
+/* A native module's entry exports the prototypes its own sources declare,
+   and a module that declares none is a mistake. */
+static List _sdk_meta_declared(List paths) {
+  List rows = Compiler.native_meta_targets(paths);
+  if (!rows)
+    MetaContext.reject(
+      "native module sources declare no meta function",
+      %("declare each exported function with a bodyless meta prototype"));
+  return rows;
+}
+
 // source and literals
 
 /** Answers `x2c.source.text`, declared in `lib/meta.x`. */
@@ -744,6 +757,8 @@ void Compiler.bind_sdk_primitives(Lisp lisp) {
   $lisp.bind(lisp, "_x2c.function.reference", _sdk_function_reference);
   $lisp.bind(lisp, "_x2c.function.native-type", _sdk_native_type);
   $lisp.bind(lisp, "_x2c.literal.list", _sdk_literal_list);
+  $lisp.bind(lisp, "_x2c.native-meta.targets", _sdk_meta_targets);
+  $lisp.bind(lisp, "_x2c.native-meta.declared", _sdk_meta_declared);
   $lisp.bind(lisp, "_x2c.foreach.complete-iter-chain", _sdk_iter_chain);
   $lisp.bind(lisp, "_x2c.foreach.string-collection", _sdk_string_collection);
   $lisp.bind(lisp, "_x2c.source.text", _sdk_source_text);

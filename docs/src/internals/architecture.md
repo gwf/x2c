@@ -497,12 +497,16 @@ The modules under `src/` divide ownership as follows:
   the directives before each form;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
+- `src/initializers.x` -- brace initializer conversion by C's
+  initialization order;
 - `src/lambdas.x` -- lambda parsing and the capture resolution shared by
   source and constructed lambdas;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
 - `src/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
   and the context of the running compile-time call;
+- `src/meta-native.x` -- meta functions, explicit meta calls, native meta
+  bindings and their lifetimes, and native modules;
 - `src/stage.x` -- the arguments and results that cross between meta code
   and program code;
 - `src/meta-group.x` -- a unit's meta group, its emission as C, and

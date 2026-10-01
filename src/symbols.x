@@ -167,6 +167,15 @@ Map Sym.current_symbols(Sym s) {
   return scope ? scope.symbols : NULL;
 }
 
+/** Returns a fresh map of the base symbols with the current scope's rows
+    merged in. */
+Map Sym.unit_symbols(Sym s) {
+  Map symbols = s.base_symbols();
+  Map current = s.current_symbols();
+  if (current) symbols.merge(current);
+  return symbols;
+}
+
 /** Returns the current borrowed set of file-static declaration keys.
 
     A semantic transaction may replace this map, so reacquire it afterwards.
