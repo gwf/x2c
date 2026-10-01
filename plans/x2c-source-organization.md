@@ -361,6 +361,20 @@ For every file over 1,000 lines after Phase 4, and every new unit:
 
 Validation: `agent-pr-check`.
 
+### Phase 5b: simplify the new units
+
+Gary asked for a simplify pass after the campaign measured +559 net `.x`
+lines (2685655f to the Phase 5 batch). Apply `simplify-x2c-source` to the 14
+units Phase 4 created: `src/symbols.x`, `preprocess.x`, `initializers.x`,
+`callables.x`, `cleanup.x`, `lambdas.x`, `meta-sdk.x`, `meta-native.x`, and
+`lib/match-plan.x`, `match-cache.x`, `string-format.x`, `string-escape.x`,
+`macro-value.x`, `lisp-targets.x`. Delete machinery the language or an
+existing owner already covers, checks of established facts, one-use
+wrappers, and repeated stanzas. Behavior, public runtime API, and generated
+code contracts stay the same; each change is proven by stage-1 byte
+equality and the suites that exercise moved runtime code. Report `.x` lines
+deleted and added per unit.
+
 ### Phase 6: commands and packages
 
 - `commands/graph`: target classification, emitted names, and unique
