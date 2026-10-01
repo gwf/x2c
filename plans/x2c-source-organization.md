@@ -477,6 +477,11 @@ plans index.
   (for example `record.region` in `lib/error.x`): the typedef's methods are
   not found, so callers write `ErrorRegion._m(&record.region, ...)`. Found
   during Phase 5; method lookup should see through the struct tag.
+- `packages/libuv`: `watch_reports_an_entry_a_child_creates` and
+  `a_failed_watch_callback_reaches_the_caller` in `test-uv` fail
+  intermittently on the unchanged tree (27-28 of 29), and `release-checks`
+  output order varies between runs. Found during Phase 6; neither involves
+  the stream code it changed.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
