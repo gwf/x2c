@@ -1,12 +1,13 @@
-/*  parse.x -- x2c top-level forms, declarations, and constructed syntax
+/*  parse.x -- x2c declarations, parsed from source or constructed
 
     Copyright (c) 2025 Gary William Flake.
 
+    This module owns declarations and the top-level forms that hold them.
     One classifier reads each top-level form in collection and in the full
     parse. Each declarator installs its name in the current Sym before its
     initializer resolves, and syntax that macros and compile-time Lisp
-    construct binds through the same declaration operations. Expression,
-    statement, and literal parsing are in their own modules.
+    construct binds through the same declaration operations. Expressions,
+    statements, and literals parse in their own modules.
 */
 
 #pragma once
@@ -206,6 +207,194 @@ List Compiler.parse_submission(Compiler c, int end_position) {
   return result;
 }
 
+// script units
+
+/** Reports whether the unit's tokens define a function named `main` at file
+    scope. A script unit that does is an ordinary program: its declarations
+    stay at file scope and it may not have top-level statements. Both parse
+    passes read the same tokens, so they agree before either parses.
+*/
+int Compiler.defines_main(Compiler c) {
+  for (Token token = c.skip_trivia_from(c.tokenizer.tokens);
+       token.type != <eof>; token = token.after_group()) {
+    Token open = c.skip_trivia_from(token + 1);
+    if (token.type != <ident> || token.text != "main" || open.type != <(>)
+      continue;
+    Token body = open.after_group();
+    if (body.type == <"{"> || (body.type == <=> &&
+        c.skip_trivia_from(body + 1).type == <">">))
+      return 1;
+  }
+  return 0;
+}
+
+/** Reports whether the top-level item at the cursor is one of a script
+    unit's statements, which become `main`'s body.
+    Preprocessor lines, imports, protocols, compile-time definitions and
+    Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
+    declarations, linkage braces, type definitions, and function prototypes
+    and definitions stay at file scope. This query does not consume tokens.
+*/
+int Compiler.script_statement_starts(Compiler c) {
+  switch (c.peek(0)) {
+    case <eof>: case <import>: case <protocol>: case <"$(">:
+    case <typedef>: case <static>: case <extern>: case <"}">:
+      return 0;
+  }
+  if (c.test_static_assert() || c.keyword_form_is_definition() ||
+      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
+      c.protocol_form_starts())
+    return 0;
+  if (c.at_word("with")) return 1;
+  if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
+  return !c.test_declaration() || !c._declaration_stays();
+}
+
+/* A declaration in a script unit stays at file scope when a body follows
+   its declarator, `{` for a function or aggregate and `=>` for an
+   expression-bodied function, or when it ends right after a parameter list
+   as a prototype does. An initialized or plain object declaration belongs
+   to `main`. */
+static int Compiler._declaration_stays(Compiler c) {
+  Symbol previous = 0;
+  for (Token token = c.token; token.type != <eof>;
+       previous = token.type, token = token.after_group()) {
+    if (token.type == <;>) return previous == <(>;
+    if (token.type == <"{">) return 1;
+    if (token.type == <=>)
+      return c.skip_trivia_from(token + 1).type == <">">;
+  }
+  return 0;
+}
+
+/** Reports whether the top-level item at the cursor is a script statement
+    that runs, rather than a declaration: an expression, control flow, a
+    `with` block, or a statement macro. This query does not consume tokens.
+*/
+int Compiler.script_statement_executes(Compiler c) =>
+  c.script_statement_starts() &&
+  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration());
+
+// markers
+
+/** Reports whether the cursor begins a protocol declaration or adoption,
+    including its `meta` and `static` markers. This query does not consume
+    tokens. */
+int Compiler.protocol_form_starts(Compiler c) {
+  int at = c.at_word("meta");
+  if (c.peek(at) == <static>) at++;
+  return c.peek(at) == <protocol>;
+}
+
+/** Reports whether the cursor begins a contextual top-level `meta`
+    declaration: a function or an initialized file-static value. */
+int Compiler.meta_form_is_declaration(Compiler c) {
+  if (!c.at_word("meta")) return 0;
+  Token head = c.token;
+  c.take_meta_marker(NULL);
+  int marker = c.test_declaration();
+  c.token = head;
+  return marker;
+}
+
+/** Consumes the `meta` marker at the cursor and the contextual `native`
+    marker that may follow it, and returns the `meta` token. `native` binds
+    the definition after it the way a bodyless prototype would. `*native`,
+    when requested, reports whether that marker was present. */
+Token Compiler.take_meta_marker(Compiler c, int &?native) {
+  Token meta = c.token;
+  c.next();
+  Token after = c.token;
+  int marked = c.take_word("native");
+  if (marked) {
+    Token declaration = c.token;
+    marked = c.test_declaration();
+    c.token = marked ? declaration : after;
+  }
+  if (native) native = marked;
+  return meta;
+}
+
+// imports
+
+/** Parses and registers one `import` declaration, including its semicolon.
+    The alias defaults to the package name; `with` members add source-ordered
+    local spellings. These spellings affect source resolution only; the package
+    name in the returned AST drives the generated header include.
+*/
+List Compiler.parse_import_declaration(Compiler c) {
+  Token start = c.token;
+  c.expect(<import>);
+  String name = c._package_name(), alias = c._import_alias(name);
+  c.collect_package(name, start);
+  c.register_package_alias(name, alias, start);
+  List members = c.take_word("with") ? c._import_members(name) : NULL;
+  c.import_package_macros(name, start);
+  c.expect(<;>);
+  if (c.shallow)
+    c.sym.set(
+      %("source-node" (package-import
+        ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
+      %(package-import $name $alias $members));
+  return %(import $name $alias);
+}
+
+// Rejects unquoted package names before parsing their identifier.
+static String Compiler._package_name(Compiler c) {
+  if (c.peek(0) != <lit-char*>)
+    c.report_error(
+      <parse>, "expected a quoted package name after 'import'",
+      c.token, NULL);
+  Token name_token = c.token;
+  String name = String.new_len(
+    c.token.text + 1, c.token.len - 2).unescape();
+  if (!name.is_identifier())
+    c.report_error(
+      <parse>, "package name must be a C identifier", name_token, NULL);
+  c.next();
+  return name;
+}
+
+static String Compiler._import_alias(Compiler c, String name) {
+  if (!c.take_word("as")) return name;
+  if (c.peek(0) != <ident>)
+    c.report_error(
+      <parse>, "expected an alias identifier after 'as'",
+      c.token, NULL);
+  String alias = c.token.text;
+  c.next();
+  return alias;
+}
+
+/* with Name [as Local] {, Name [as Local]}
+   Each name binds a bare local spelling to one already-built package member.
+   Registration runs at the name's own token so an unknown member and a
+   collision both point at the spelling the developer wrote. */
+static List Compiler._import_members(Compiler c, String name) {
+  Array members = [];
+  do {
+    if (c.peek(0) != <ident>)
+      c.report_error(
+        <parse>, "expected a package member name after 'with'",
+        c.token, NULL);
+    Token member_token = c.token, local_token = member_token;
+    String member = c.token.text, local = member;
+    c.next();
+    if (c.take_word("as")) {
+      if (c.peek(0) != <ident>)
+        c.report_error(
+          <parse>, "expected a local name after 'as'", c.token, NULL);
+      local_token = c.token;
+      local = c.token.text;
+      c.next();
+    }
+    c.register_package_member(
+      name, member, local, member_token, local_token);
+    members.push(%($member $local));
+  } while (c.test(<,>));
+  return members.list_free();
+}
+
 // file-scope definitions
 
 /* A declaration ends at `;`. A `meta` one installs its compile-time form
@@ -352,194 +541,6 @@ String Compiler.definition_doc(Compiler c, Token start) {
     if (c.text[position] == '\n' && ++lines > 1) return NULL;
   return String.new_len(token.text + 3, token.len - 5);
 }
-
-// markers
-
-/** Reports whether the cursor begins a protocol declaration or adoption,
-    including its `meta` and `static` markers. This query does not consume
-    tokens. */
-int Compiler.protocol_form_starts(Compiler c) {
-  int at = c.at_word("meta");
-  if (c.peek(at) == <static>) at++;
-  return c.peek(at) == <protocol>;
-}
-
-/** Reports whether the cursor begins a contextual top-level `meta`
-    declaration: a function or an initialized file-static value. */
-int Compiler.meta_form_is_declaration(Compiler c) {
-  if (!c.at_word("meta")) return 0;
-  Token head = c.token;
-  c.take_meta_marker(NULL);
-  int marker = c.test_declaration();
-  c.token = head;
-  return marker;
-}
-
-/** Consumes the `meta` marker at the cursor and the contextual `native`
-    marker that may follow it, and returns the `meta` token. `native` binds
-    the definition after it the way a bodyless prototype would. `*native`,
-    when requested, reports whether that marker was present. */
-Token Compiler.take_meta_marker(Compiler c, int &?native) {
-  Token meta = c.token;
-  c.next();
-  Token after = c.token;
-  int marked = c.take_word("native");
-  if (marked) {
-    Token declaration = c.token;
-    marked = c.test_declaration();
-    c.token = marked ? declaration : after;
-  }
-  if (native) native = marked;
-  return meta;
-}
-
-// imports
-
-/** Parses and registers one `import` declaration, including its semicolon.
-    The alias defaults to the package name; `with` members add source-ordered
-    local spellings. These spellings affect source resolution only; the package
-    name in the returned AST drives the generated header include.
-*/
-List Compiler.parse_import_declaration(Compiler c) {
-  Token start = c.token;
-  c.expect(<import>);
-  String name = c._package_name(), alias = c._import_alias(name);
-  c.collect_package(name, start);
-  c.register_package_alias(name, alias, start);
-  List members = c.take_word("with") ? c._import_members(name) : NULL;
-  c.import_package_macros(name, start);
-  c.expect(<;>);
-  if (c.shallow)
-    c.sym.set(
-      %("source-node" (package-import
-        ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
-      %(package-import $name $alias $members));
-  return %(import $name $alias);
-}
-
-// Rejects unquoted package names before parsing their identifier.
-static String Compiler._package_name(Compiler c) {
-  if (c.peek(0) != <lit-char*>)
-    c.report_error(
-      <parse>, "expected a quoted package name after 'import'",
-      c.token, NULL);
-  Token name_token = c.token;
-  String name = String.new_len(
-    c.token.text + 1, c.token.len - 2).unescape();
-  if (!name.is_identifier())
-    c.report_error(
-      <parse>, "package name must be a C identifier", name_token, NULL);
-  c.next();
-  return name;
-}
-
-static String Compiler._import_alias(Compiler c, String name) {
-  if (!c.take_word("as")) return name;
-  if (c.peek(0) != <ident>)
-    c.report_error(
-      <parse>, "expected an alias identifier after 'as'",
-      c.token, NULL);
-  String alias = c.token.text;
-  c.next();
-  return alias;
-}
-
-/* with Name [as Local] {, Name [as Local]}
-   Each name binds a bare local spelling to one already-built package member.
-   Registration runs at the name's own token so an unknown member and a
-   collision both point at the spelling the developer wrote. */
-static List Compiler._import_members(Compiler c, String name) {
-  Array members = [];
-  do {
-    if (c.peek(0) != <ident>)
-      c.report_error(
-        <parse>, "expected a package member name after 'with'",
-        c.token, NULL);
-    Token member_token = c.token, local_token = member_token;
-    String member = c.token.text, local = member;
-    c.next();
-    if (c.take_word("as")) {
-      if (c.peek(0) != <ident>)
-        c.report_error(
-          <parse>, "expected a local name after 'as'", c.token, NULL);
-      local_token = c.token;
-      local = c.token.text;
-      c.next();
-    }
-    c.register_package_member(
-      name, member, local, member_token, local_token);
-    members.push(%($member $local));
-  } while (c.test(<,>));
-  return members.list_free();
-}
-
-// script units
-
-/** Reports whether the unit's tokens define a function named `main` at file
-    scope. A script unit that does is an ordinary program: its declarations
-    stay at file scope and it may not have top-level statements. Both parse
-    passes read the same tokens, so they agree before either parses.
-*/
-int Compiler.defines_main(Compiler c) {
-  for (Token token = c.skip_trivia_from(c.tokenizer.tokens);
-       token.type != <eof>; token = token.after_group()) {
-    Token open = c.skip_trivia_from(token + 1);
-    if (token.type != <ident> || token.text != "main" || open.type != <(>)
-      continue;
-    Token body = open.after_group();
-    if (body.type == <"{"> || (body.type == <=> &&
-        c.skip_trivia_from(body + 1).type == <">">))
-      return 1;
-  }
-  return 0;
-}
-
-/** Reports whether the top-level item at the cursor is one of a script
-    unit's statements, which become `main`'s body.
-    Preprocessor lines, imports, protocols, compile-time definitions and
-    Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
-    declarations, linkage braces, type definitions, and function prototypes
-    and definitions stay at file scope. This query does not consume tokens.
-*/
-int Compiler.script_statement_starts(Compiler c) {
-  switch (c.peek(0)) {
-    case <eof>: case <import>: case <protocol>: case <"$(">:
-    case <typedef>: case <static>: case <extern>: case <"}">:
-      return 0;
-  }
-  if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
-      c.protocol_form_starts())
-    return 0;
-  if (c.at_word("with")) return 1;
-  if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
-  return !c.test_declaration() || !c._declaration_stays();
-}
-
-/* A declaration in a script unit stays at file scope when a body follows
-   its declarator, `{` for a function or aggregate and `=>` for an
-   expression-bodied function, or when it ends right after a parameter list
-   as a prototype does. An initialized or plain object declaration belongs
-   to `main`. */
-static int Compiler._declaration_stays(Compiler c) {
-  Symbol previous = 0;
-  for (Token token = c.token; token.type != <eof>;
-       previous = token.type, token = token.after_group()) {
-    if (token.type == <;>) return previous == <(>;
-    if (token.type == <"{">) return 1;
-    if (token.type == <=>)
-      return c.skip_trivia_from(token + 1).type == <">">;
-  }
-  return 0;
-}
-
-/** Reports whether the top-level item at the cursor is a script statement
-    that runs, rather than a declaration: an expression, control flow, a
-    `with` block, or a statement macro. This query does not consume tokens.
-*/
-int Compiler.script_statement_executes(Compiler c) =>
-  c.script_statement_starts() &&
-  (c.peek(0) == <$> || c.at_word("with") || !c.test_declaration());
 
 // declarations
 
@@ -906,8 +907,7 @@ static List Compiler._method_self_signature(Compiler c, List binding) {
 static Type Compiler._self_owner_type(Compiler c, List method) {
   String source = method.car();
   Type declared = c.sym.get(%($source));
-  if (declared.is_typedef())
-    return %(${c._package_type_reference(0, source)});
+  if (declared.is_typedef()) return %(${c._package_type_reference(0, source)});
   Symbol builtin = Atom.intern(source);
   return builtin.is_builtin_type() ? %($builtin) : NULL;
 }
@@ -1186,8 +1186,7 @@ static List Compiler._package_aggregate_name(
   // A template's tag slot supplies its exact spelling where it expands.
   if (name.car() is not <string>) return name;
   String spelling = name.car();
-  if (c.peek(0) == <"{">)
-    return %(${c.package_spelling(spelling)});
+  if (c.peek(0) == <"{">) return %(${c.package_spelling(spelling)});
   return %(${c._package_type_reference(tag, spelling)});
 }
 
@@ -2062,8 +2061,7 @@ static List Compiler._finish_parameter(
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):
-      if (!c.macro_holes)
-        c._parameter_facts(binding, parameter);
+      if (!c.macro_holes) c._parameter_facts(binding, parameter);
   return parameter;
 }
 
