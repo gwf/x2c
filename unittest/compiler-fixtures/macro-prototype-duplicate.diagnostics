@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/macro-prototype-duplicate.x:12:1: type: function 'generated_increment' is already defined in this scope
-  
+unittest/compiler-fixtures/macro-prototype-duplicate.x:11:1: type: function 'generated_increment' is already defined in this scope
+  $define_increment();
   ^
   note: prior definition: 'generated_increment'
 

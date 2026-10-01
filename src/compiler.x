@@ -3775,7 +3775,8 @@ static void FullParse.top_level(FullParse *p, int begin, Token tokens) {
 }
 
 static void FullParse.add(FullParse *p, List node, int begin, int end) {
-  _record_top_level(p.c, node);
+  Token tokens = p.c.tokenizer.tokens;
+  _record_top_level(p.c, node, tokens + begin);
   _record_span(p.c, node, begin, end);
   p.nodes.push(node);
 }
@@ -4016,32 +4017,34 @@ static void _check_local_uses(Compiler c, List items, Map locals) {
 
    Each form the full parse reads records the facts that later checks use:
    its object and function definitions, prototypes, static initializers,
-   and the token span of its source. */
+   and the token span of its source. A conflict between definitions is
+   reported at `site`, the form's first token, or at the cursor for a form
+   without one. */
 
-static void _record_top_level(Compiler c, List node) {
+static void _record_top_level(Compiler c, List node, Token site) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
-      _record_objects(c, bindings);
+      _record_objects(c, bindings, site);
       _record_static_object(c, type, bindings);
       _record_prototypes(c, type, bindings);
     }
     case %(function ?return_type
            (!set ?target (bind ?binding *)) ?): {
       List declaration = %(declare $return_type (bindings $target));
-      _record_definition(c, declaration.type_from_ast(), binding);
+      _record_definition(c, declaration.type_from_ast(), binding, site);
     }
   }
 }
 
 /* An initializer makes a file-scope declaration a definition; a tentative
    one may be repeated. */
-static void _record_objects(Compiler c, List bindings) {
+static void _record_objects(Compiler c, List bindings, Token site) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
       Map facts = c.semantic_binding_facts();
-      if (key in facts) _report_redefinition(c, "variable", binding);
+      if (key in facts) _report_redefinition(c, "variable", binding, site);
       facts[key] = 1;
       facts[%(arms $binding)] = c.arms;
     }
@@ -4052,7 +4055,8 @@ static void _record_objects(Compiler c, List bindings) {
    different arms are not compared. For a variable, whose initializer moves
    into the generated init function, a duplicate under two true conditions
    is therefore not detected, and the later initializer wins. */
-static void _report_redefinition(Compiler c, String kind, List binding) {
+static void _report_redefinition(
+  Compiler c, String kind, List binding, Token site) {
   Var arms;
   if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
       !List.equal(arms, c.arms))
@@ -4060,7 +4064,7 @@ static void _report_redefinition(Compiler c, String kind, List binding) {
   String spelling = binding_identity_spelling(binding);
   c.report_error(
     <type>, %"$kind '$spelling' is already defined in this scope",
-    c.token, %("prior definition: '$spelling'"));
+    site, %("prior definition: '$spelling'"));
 }
 
 /* A definition remembers the token range of the top-level form that
@@ -4124,18 +4128,19 @@ static void _record_attributes(Compiler c, List binding, List modifiers) {
     c.semantic_binding_facts()[%(attributes $binding)] = attributes;
 }
 
-static void _record_definition(Compiler c, Type type, List binding) {
+static void _record_definition(
+  Compiler c, Type type, List binding, Token site) {
   List contract = _contract(c, type, binding);
   Var stored;
   if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
     List state = stored;
     Var (state_kind, prior_contract) = state;
     if (state_kind == <prototype>) {
-      _complete_prototype(c, binding, prior_contract, contract);
+      _complete_prototype(c, binding, prior_contract, contract, site);
       return;
     }
     if (state_kind == <definition> || state_kind == <completed>)
-      _report_redefinition(c, "function", binding);
+      _report_redefinition(c, "function", binding, site);
   }
   c.semantic_binding_facts()[%(completion $binding)] = %(definition $contract);
   c.semantic_binding_facts()[%(arms $binding)] = c.arms;
@@ -4147,7 +4152,7 @@ static void _record_definition(Compiler c, Type type, List binding) {
    definition without `static` after a `static` prototype keeps the
    prototype's internal linkage in C. */
 static void _complete_prototype(
-  Compiler c, List binding, List prior_contract, List contract) {
+  Compiler c, List binding, List prior_contract, List contract, Token site) {
   match (prior_contract)
     case %(function-contract ?a ?b static ?d)
       if (contract.equal(%(function-contract $a $b extern $d))):
@@ -4157,7 +4162,7 @@ static void _complete_prototype(
     c.report_error(
       <type>,
       %"definition '$spelling' does not match prior prototype",
-      c.token,
+      site,
       %(
         "prototype: ${prior_contract.repr()}"
         "definition: ${contract.repr()}"
@@ -4303,7 +4308,7 @@ static void _append_meta_definitions(Compiler c, Array nodes) {
   foreach (List definition, c.meta_defs)
     if (_meta_identity(definition) in reached &&
         !c.meta_is_comptime_only(definition)) {
-      _record_top_level(c, definition);
+      _record_top_level(c, definition, NULL);
       nodes.push(definition);
     }
 }

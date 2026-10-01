@@ -1,0 +1,8 @@
+unittest/compiler-fixtures/self-annotation-mismatch.x:7:1: type: definition 'Marked_next' does not match prior prototype
+  Marked Marked.next(Marked value) {
+  ^^^^^^
+  note: prototype: (function-contract ((func (("Marked"))) "Marked") 
+ ((func (("Marked"))) "Marked") extern ("Marked" "next") 
+ ((func ((self))) self)) definition: (function-contract ((func (("Marked"))) "Marked") 
+ ((func (("Marked"))) "Marked") extern ("Marked" "next"))
+
