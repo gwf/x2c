@@ -1,0 +1,79 @@
+/* Session refusals keep their existing raise and transaction boundary. */
+
+meta static Map _repl_refusal_rows(void) => {
+
+  "binding.unresolved" :
+  macro Statement(Expr $name) {
+    _refuse(%"unresolved identifier: ${$name}");
+  },
+
+  "storage.native" :
+  macro Statement() {
+    _refuse("static, extern, and threaded storage need native execution");
+  },
+
+  "binding.redefined" :
+  macro Statement() {
+    _refuse("redeclaration is disabled; use assignment");
+  },
+
+  "binding.initializer" :
+  macro Statement() {
+    _refuse("top-level values need an initializer and a simple binding");
+  },
+
+  "form.unsupported" :
+  macro Statement() {
+    _refuse("this top-level form is outside the REPL subset");
+  },
+
+  "input.unsupported" :
+  macro Statement() {
+    _refuse("preprocessor and direct Lisp input are unsupported");
+  },
+
+  "qualifier.native" :
+  macro Statement() {
+    _refuse("const and volatile need native checks outside the REPL");
+  },
+
+  "definition.unsupported" :
+  macro Statement() {
+    _refuse("compiler-session definitions are outside the REPL subset");
+  },
+
+  "declaration.unsupported" :
+  macro Statement() {
+    _refuse("type and storage declarations are outside the REPL subset");
+  },
+
+  "function.redefined" :
+  macro Statement() {
+    _refuse("function redeclaration is disabled");
+  },
+
+  "function.missing" :
+  macro Statement(Expr $name) {
+    _refuse(%"no native function is available for ${$name}");
+  },
+
+  "type.redefined" :
+  macro Statement() {
+    _refuse("a type cannot be redefined; the session keeps its layout");
+  }
+};
+
+meta static List _repl_refusal_expand(String key, List arguments) {
+  Map rows = _repl_refusal_rows();
+  Var value = rows[key];
+  if (value is void)
+    x2c_diagnostic_fail(%"unknown REPL refusal '$key'", %());
+  Macro selected = value;
+  if (arguments.len() != selected.assoc(<parameters>).list().len())
+    x2c_diagnostic_fail(%"wrong argument count for REPL refusal '$key'", %());
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $repl.error(Literal $key, Expr $arguments...) {
+  $(_repl_refusal_expand (x2c.literal.value $key) $arguments)...
+}
