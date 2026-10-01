@@ -22,8 +22,6 @@ static void _bad_step(String owner, int step) {
 }
 
 static int _compare_int(int a, int b) => (a > b) - (a < b);
-static Buffer _new_buffer(void) => Buffer.new(0);
-static String _finish_buffer(Buffer out) => out.str_free();
 static Block _prepare_probe_export(Block array, Context source) {
   (void) array; (void) source;
   return NULL;
@@ -31,9 +29,7 @@ static Block _prepare_probe_export(Block array, Context source) {
 
 $array.core.family(ProbeArrayInt, int);
 $array.typed.family(ProbeArrayInt, int, 0, "ProbeArrayInt");
-$array.typed.observe(
-  ProbeArrayInt, int, "ProbeArrayInt", _compare_int,
-  _new_buffer, _finish_buffer);
+$array.typed.observe(ProbeArrayInt, int, _compare_int);
 $array.typed.box(ProbeArrayInt, int, "ProbeArrayInt");
 $array.typed.update.integer(ProbeArrayInt, int, uint);
 $array.typed.publish(

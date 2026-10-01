@@ -224,11 +224,7 @@ Var Array.foldl(Array array, Var seed, Func fn) {
 }
 
 static int _compare_var(Var a, Var b) => a.compare(b);
-static Buffer _array_new_buffer(void) => Buffer.new(0);
-static String _array_finish_buffer(Buffer out) => out.str_free();
-$array.typed.observe(
-  Array, Var, "Array", _compare_var, _array_new_buffer,
-  _array_finish_buffer);
+$array.typed.observe(Array, Var, _compare_var);
 $array.typed.iterate(Array, Var, array);
 
 static int _sort_compare(const void *ap, const void *bp) {
