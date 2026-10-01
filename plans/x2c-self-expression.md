@@ -110,11 +110,16 @@ in a body resolve where the macro was defined". It needs Gary's choice
 between that rule, a narrower rule that binds only declarations the same
 expansion introduces, and a diagnostic.
 
+Decision 11 is implemented: `$repeat(k, 3, k * 2, total)` binds the
+expansion's own `k`, and a free name that only a caller declaration would
+supply is reported. A name nothing declares anywhere (`errno`, `EOF`) is
+still left to C, so header names keep working. Still open and needing a
+semantics decision: with `int k = 0; $outer(k);` the caller's `k` passed
+through a `Name` hole is captured by the nested macro's loop variable `k`,
+because a `Name` argument travels as a bare spelling.
+
 Also found, not yet fixed: a brace with no destination type, such as a
-variadic argument (`printf("%d\n", {10})`), emits invalid C; and with
-`int k = 0; $outer(k);` the nested macro's public loop variable `k`
-captures the caller's `k` (prints 0), through the stale-local branch of
-`_shadow_identifier`.
+variadic argument (`printf("%d\n", {10})`), emits invalid C.
 
 ## Wave 1: direct substitutions
 
