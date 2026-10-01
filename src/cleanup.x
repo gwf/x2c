@@ -102,13 +102,13 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
     case %((!or function localinit expr declare typedef) *): return ast;
     case $source_block_content(%(*statements)): {
       Array before = [];
-      foreach (List statement, statements) {
+      for (List rest = statements; rest; rest = rest.cdr()) {
+        List statement = rest.car();
         if (c._runtime_static_declaration(statement, runtime)) {
-          List rest = statements;
-          for (int i = 0; i <= before.len(); i++) rest = rest.cdr();
-          List body = c._static_regions(source_block_content(rest), runtime);
+          List body = c._static_regions(
+            source_block_content(rest.cdr()), runtime);
           before.push(%(localinit $statement $body));
-          return source_block_content(before.list_free());
+          break;
         }
         before.push(c._static_regions(statement, runtime));
       }
@@ -680,16 +680,10 @@ static List Compiler._try_cleanup(
   List before = has_clause
     ? %(${close(%(expr $handler (ident $handle)))}) : NULL;
   List address = _address_of(_frame_type, frame);
-  List syntax;
-  if (finalizer) {
-    Macro finish = $try_finish_cleanup;
-    syntax = finish(
-      address, %(code-value "lowered" (seq $finalizer) ()), before);
-  }
-  else {
-    Macro leave = $try_leave_cleanup;
-    syntax = leave(address, before);
-  }
+  Macro finish = $try_finish_cleanup, leave = $try_leave_cleanup;
+  List syntax = finalizer
+    ? finish(address, %(code-value "lowered" (seq $finalizer) ()), before)
+    : leave(address, before);
   List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
   return %(code-value "lowered" $result ());
 }
@@ -1195,36 +1189,24 @@ macro open Unit $defer_captured_callback(Type $type, Name $callback,
 /** Returns `stmts` with each `defer` statement and the statements after
     it replaced by one region; a list without `defer` returns unchanged. */
 List Compiler.rewrite_defer_list(Compiler c, List stmts) {
-  if (!stmts) return stmts;
-  int has_defer = 0;
   Macro deferred = $deferred;
-  foreach (List statement, stmts) {
-    List head = Ast.without_origin(statement);
-    match (head) case deferred(?finalizer): has_defer = 1;
-    if (has_defer) break;
-  }
-  if (!has_defer) return stmts;
-  Array suffixes = $auto([]);
-  for (List suffix = stmts; suffix; suffix = suffix.cdr())
-    suffixes.push(suffix);
-  List result = stmts;
-  int tail_changed = 0;
-  for (int i = (int) suffixes.len() - 1; i >= 0; i--) {
-    List suffix = suffixes[i];
+  for (List suffix = stmts; suffix; suffix = suffix.cdr()) {
     List anchored = suffix.car();
-    List tail = tail_changed ? result : suffix.cdr();
     List head = Ast.without_origin(anchored);
     match (head) case deferred(?final_stmt): {
-      List body = source_block_content(tail), finalizer = final_stmt;
+      List rest = c.rewrite_defer_list(suffix.cdr());
+      List finalizer = final_stmt;
       if (c.source_map) finalizer = Ast.rewrap_origin(anchored, finalizer);
-      List region = c.lower_defer_region(body, finalizer);
-      result = %( ${Ast.rewrap_origin(anchored, region)} );
-      tail_changed = 1;
-      continue;
+      List region = c.lower_defer_region(
+        source_block_content(rest), finalizer);
+      Array before = [];
+      for (List item = stmts; item != suffix; item = item.cdr())
+        before.push(item.car());
+      before.push(Ast.rewrap_origin(anchored, region));
+      return before.list_free();
     }
-    if (tail_changed) result = cons(anchored, result);
   }
-  return result;
+  return stmts;
 }
 
 /** Returns the region that runs `finalizer` when `body` leaves. Ordinary
@@ -1253,7 +1235,7 @@ static int _defer_needs_landing(List ast) {
 static List Compiler._callable_defer(Compiler c, List body, List finalizer) {
   DeferCaptures d = {
     .c = c, .declared = %(), .written = %(),
-    .captures = {}, .records = [], .unsupported = 0,
+    .captures = {}, .records = []
   };
   d.collect(finalizer);
   if (d.unsupported) {
@@ -1308,11 +1290,10 @@ static void DeferCaptures.collect(DeferCaptures *d, List ast) {
 
 static void DeferCaptures._capture(DeferCaptures *d, List binding) {
   Compiler c = d.c;
-  Var automatic, existing, stored_type;
+  Map facts = c.semantic_binding_facts();
   if (!binding || d.declared.contains(binding) ||
-      !c.semantic_binding_facts().try_get(%(automatic $binding), automatic) ||
-      d.captures.try_get(binding, existing)) return;
-  stored_type = c.semantic_binding_facts()[%(type $binding)];
+      !(%(automatic $binding) in facts) || binding in d.captures) return;
+  Var stored_type = facts[%(type $binding)];
   if (!c._defer_type_hoistable(stored_type)) {
     d.unsupported = 1;
     return;
@@ -1384,10 +1365,9 @@ static List DeferCaptures._rewrite(
 static List Compiler._defer_environment(
   Compiler c, List env_binding, List records) {
   Array fields = [];
-  foreach (List record, records) {
-    List field = record.caddr();
-    fields.push(%(declare (const void) (bindings (bind $field (*)))));
-  }
+  foreach (List record, records)
+    fields.push(
+      %(declare (const void) (bindings (bind ${record.caddr()} (*)))));
   return c.capture_environment(env_binding, fields.list_free());
 }
 
