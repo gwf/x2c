@@ -389,7 +389,7 @@ static void _file_scope_locals(List rows, Map locals) {
 
 static void _file_scope_declarators(List declarators, Map locals) {
   foreach (Var declarator, declarators) match (declarator)
-    case %(!or (bind ?binder ?) (op = (bind ?binder ?) ?)):
+    case $source_declarator_row(%(?binder ?)):
       if (binder.is_binder()) locals[binder] = 1;
 }
 
