@@ -35,6 +35,7 @@ lib/list.x|api|
 lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 lib/logger.x|api|
 lib/machine.x|internal|`Match` wordcode, builder, and execution-state definitions.
+lib/macro-value.x|api|
 lib/map.x|api|
 lib/match-cache.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.

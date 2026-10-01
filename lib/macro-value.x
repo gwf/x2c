@@ -1,19 +1,66 @@
+/*  macro-value.x -- macros as values that build and recognize code
+
+    Copyright (c) 2025 Gary William Flake
+
+    A `Macro` is the canonical `macrodef` record of a definition. `$name`
+    selects one and `macro Kind(...) => ...` creates one. Applying it returns
+    a pending invocation the compiler expands and binds at the insertion
+    site; naming it in a `case` derives a Match pattern from the same body.
+    Generated code calls these operations by name, so the module is part of
+    the prelude.
+*/
+
 #pragma once
 
 #include "common.x"
 #include "match.x"
-#include "meta.x"
-
-/* macro values
-
-   A `Macro` is the canonical `macrodef` record of a definition. `$name`
-   selects one and `macro Kind(...) => ...` creates one. Applying it returns
-   a pending invocation the compiler expands and binds at the insertion
-   site; naming it in a `case` derives a Match pattern from the same body. */
 
 /** A macro as a value: called to build code, or used in a Match `case` to
    recognize code and capture its parameters. */
 typedef List Macro;
+
+/** Records fixed-local slots for distinct-identity checks and Name slots
+    for member-spelling comparisons during recognition. */
+typedef struct MacroFixedSlots {
+  int count, slots[MACHINE_BINDER_MAX];
+  int names, name_slots[MACHINE_BINDER_MAX];
+} MacroFixedSlots;
+
+/** Records where each of a `case`'s binders reads its capture: the slot
+    of its internal binder in the pattern that captured, and its own slot
+    in the `case`, which need not share the parameters' order.
+*/
+typedef struct MacroPublishing {
+  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
+  int to[MACHINE_BINDER_MAX];
+  int count, binders, complete;
+  unsigned long definite;
+} MacroPublishing;
+
+/** Holds one macro-valued `case` site's prepared recognition for the
+    process: the plan Match keeps, the slots of the macro's fixed locals, and
+    where each binder reads its capture. The compiler emits one
+    zero-initialized static site per `case`.
+*/
+typedef struct MacroCaseSite {
+  MatchCaptureSite match;
+  MacroFixedSlots policy;
+  MacroPublishing route;
+  int ready;
+} MacroCaseSite;
+
+#pragma private
+
+#include <string.h>
+
+#include "array.x"
+#include "atom.x"
+#include "list.x"
+#include "match-machine.x"
+#include "meta.x"
+#include "string.x"
+
+// application
 
 /** Records the Macro values an anonymous macro captured where it was
    created, so applying it later applies the same children. */
@@ -273,36 +320,6 @@ static Var _macro_slot_binder(Var form) {
    invocation of the same definition matches by its arguments; other code
    matches the pattern derived from the body, which the case's site keeps
    unless it depends on the current call. */
-
-/** Records fixed-local slots for distinct-identity checks and Name slots
-    for member-spelling comparisons during recognition. */
-typedef struct MacroFixedSlots {
-  int count, slots[MACHINE_BINDER_MAX];
-  int names, name_slots[MACHINE_BINDER_MAX];
-} MacroFixedSlots;
-
-/** Records where each of a `case`'s binders reads its capture: the slot
-    of its internal binder in the pattern that captured, and its own slot
-    in the `case`, which need not share the parameters' order.
-*/
-typedef struct MacroPublishing {
-  int from[MACHINE_BINDER_MAX], fallback[MACHINE_BINDER_MAX];
-  int to[MACHINE_BINDER_MAX];
-  int count, binders, complete;
-  unsigned long definite;
-} MacroPublishing;
-
-/** Holds one macro-valued `case` site's prepared recognition for the
-    process: the plan Match keeps, the slots of the macro's fixed locals, and
-    where each binder reads its capture. The compiler emits one
-    zero-initialized static site per `case`.
-*/
-typedef struct MacroCaseSite {
-  MatchCaptureSite match;
-  MacroFixedSlots policy;
-  MacroPublishing route;
-  int ready;
-} MacroCaseSite;
 
 /** The pattern a macro-valued `case` compiles to; the compiler lowers a
    call of this to `Macro_case_capture_at` over the match subject. */

@@ -4,9 +4,9 @@
 
     A `meta` function runs inside the compiler, so it can ask the compiler
     questions and build syntax for it to bind. This module declares those
-    operations in x2c and implements the macro values a `meta` function
-    applies and recognizes. Each operation's semantics and Lisp name are
-    specified under "Compile-time Lisp and imports" in the language
+    operations in x2c; the macro values a `meta` function applies and
+    recognizes are in `macro-value.x`. Each operation's semantics and Lisp
+    name are specified under "Compile-time Lisp and imports" in the language
     reference.
 
     A syntax builder's `meta` body is shared by compile time and run time.
