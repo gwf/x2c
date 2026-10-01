@@ -1050,6 +1050,7 @@ List List_filter(List lst, Func pred){
 Var Iter_foldl(Iter, Var, Func);
 
 Var List_foldl(List lst, Var seed, Func fn){
+  if(! fn) return Var_is_void(seed) && List_truth(lst) ? lst -> car : seed;
   struct Iter storage;
   return Iter_foldl(List_iter(lst, & storage), seed, fn);
 }
@@ -1452,7 +1453,7 @@ int List_unpack_vars_n(List src, unsigned destination_count, ...){
 
 static int _unpack_va(List src, unsigned n, va_list ap, int lists){
   if(n > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 865};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 866};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
     __builtin_unreachable();
   }

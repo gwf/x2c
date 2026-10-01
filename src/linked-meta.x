@@ -164,6 +164,198 @@ static List _builtin_error_expand(String key, List arguments) {
   return %(${Macro_apply(selected, arguments)});
 }
 
+/* --- src/cli-errors.xmacro ----------------------------------------------- */
+
+static Map _cli_error_rows(void) => {
+
+  "command.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("expected a command, found an empty argument");
+  },
+
+  "command.unknown" :
+  macro Statement(Expr $driver_error, Expr $first) {
+    $driver_error(%"unknown command or global option '${$first}'");
+  },
+
+  "translate.inputs" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("translate requires at least one input");
+  },
+
+  "deps.inputs" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--dep-file and --dep-target require exactly one input");
+  },
+
+  "deps.disabled" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--no-deps conflicts with dependency output options");
+  },
+
+  "compile.kind" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--compile-only conflicts with a library target kind");
+  },
+
+  "env.operands" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("env accepts at most one name");
+  },
+
+  "operand.one" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"${$name} requires exactly one operand");
+  },
+
+  "operand.none" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"${$name} accepts no operands");
+  },
+
+  "script.input" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("script requires a script file");
+  },
+
+  "help.operands" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("help accepts at most one command");
+  },
+
+  "help.unknown" :
+  macro Statement(Expr $driver_error, Expr $name) {
+    $driver_error(%"unknown help command '${$name}'");
+  },
+
+  "temps.dir" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--save-temps= requires a directory");
+  },
+
+  "option.no-value" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"option takes no value '${$arg}'");
+  },
+
+  "option.needs-value" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"option requires a value '${$arg}'");
+  },
+
+  "color.missing" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("--color requires auto, always, or never");
+  },
+
+  "color.unknown" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"invalid color mode '${$value}'");
+  },
+
+  "kind.shared" :
+  macro Statement(Expr $driver_error, Expr $refusal) {
+    $driver_error($refusal);
+  },
+
+  "kind.unknown" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"unknown target kind '${$value}'");
+  },
+
+  "count.invalid" :
+  macro Statement(Expr $driver_error, Expr $noun, Expr $value) {
+    $driver_error(%"invalid ${$noun} '${$value}'");
+  },
+
+  "cflag.deps" :
+  macro Statement(Expr $driver_error, Expr $value) {
+    $driver_error(%"C dependency option is driver-owned '${$value}'");
+  },
+
+  "native.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("empty package native argument");
+  },
+
+  "native.unsupported" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"unsupported package native argument '${$arg}'");
+  },
+
+  "response.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("empty response-file reference '@'");
+  },
+
+  "response.cycle" :
+  macro Statement(Expr $_fail, Expr $path) {
+    $_fail(%"recursive response-file inclusion: ${$path}", NULL);
+  },
+
+  "response.read" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "could not read complete file");
+  },
+
+  "response.nul" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "embedded NUL byte");
+  },
+
+  "response.utf8" :
+  macro Statement(Expr $_response_error, Expr $path) {
+    $_response_error($path, 1, "input is not valid UTF-8");
+  },
+
+  "response.escape" :
+  macro Statement(Expr $_response_error, Expr $path, Expr $line) {
+    $_response_error($path, $line, "trailing backslash");
+  },
+
+  "response.quote" :
+  macro Statement(Expr $_response_error, Expr $path, Expr $line) {
+    $_response_error($path, $line, "unterminated quote");
+  },
+
+  "option.output.removed" :
+  macro Statement(Expr $_fail) {
+    $_fail(
+      "option '-o' was removed",
+      "use '--out-dir' with translate or '--output' with build and run");
+  },
+
+  "command.expected" :
+  macro Statement(Expr $_fail, Expr $arg) {
+    $_fail(
+      %"expected a command before '${$arg}'",
+      %"use 'x2c translate --out-dir <dir> ${$arg}'");
+  },
+
+  "option.unknown" :
+  macro Statement(Expr $driver_error, Expr $arg) {
+    $driver_error(%"unknown option '${$arg}'");
+  },
+
+  "option.dash.removed" :
+  macro Statement(Expr $_fail, Expr $arg, Expr $use) {
+    $_fail(%"one-dash long option '${$arg}' was removed", %"use '${$use}'");
+  },
+};
+
+static List _cli_error_expand(String key, List arguments) {
+  Map rows = _cli_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown cli error '$key'", %());
+  Macro selected = row;
+  List parameters = selected.assoc(<parameters>);
+  List parameter = parameters.car();
+  String sink = parameter.assoc(<binder>).str()[1:];
+  List callee = %(ident $sink);
+  return %(${Macro_apply(selected, %($callee @arguments))});
+}
+
 /* --- src/error-reports.xmacro -------------------------------------------- */
 
 static Map _error_report_rows(void) => {
@@ -2302,6 +2494,444 @@ static List retain_catch_handle(List rebuilt, List handle) {
   return rebuilt.search_replace(%(!quote $marker), handle);
 }
 
+/* --- lib/job-errors.xmacro ----------------------------------------------- */
+
+static Map _job_error_rows(void) => {
+
+  "start.alloc" :
+  macro Statement() {
+    raise %(alloc-fail);
+  },
+
+  "start.empty" :
+  macro Statement() {
+    raise %(bad-arg (operation "Job.start") (why "empty command"));
+  },
+
+  "start.missing" :
+  macro Statement(Expr $program, Expr $error) {
+    raise %(not-found (operation "Job.start") (program ${$program})
+            (errno ${$error}));
+  },
+
+  "start.program" :
+  macro Statement(Expr $program, Expr $error) {
+    raise %(io-fail (operation "Job.start") (program ${$program})
+            (errno ${$error}));
+  },
+
+  "start.path" :
+  macro Statement(Expr $path, Expr $error) {
+    raise %(io-fail (operation "Job.start") (path ${$path}) (errno ${$error}));
+  },
+
+  "start.io" :
+  macro Statement(Expr $error) {
+    raise %(io-fail (operation "Job.start") (errno ${$error}));
+  },
+
+  "job.started" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (operation ${$operation}) (why "the job has started"));
+  },
+
+  "options.key" :
+  macro Statement() {
+    raise %(bad-arg (operation "Job.options")
+            (why "option keys are atoms"));
+  },
+
+  "options.unknown" :
+  macro Statement(Expr $name) {
+    raise %(bad-arg (operation "Job.options") (option ${$name}));
+  },
+
+  "check.both" :
+  macro Statement(Expr $command, Expr $status, Expr $output, Expr $errors) {
+    raise %(cmd-fail (command ${$command}) (status ${$status})
+            (output ${$output}) (errors ${$errors}));
+  },
+
+  "check.output" :
+  macro Statement(Expr $command, Expr $status, Expr $output) {
+    raise %(cmd-fail (command ${$command}) (status ${$status})
+            (output ${$output}));
+  },
+
+  "check.errors" :
+  macro Statement(Expr $command, Expr $status, Expr $errors) {
+    raise %(cmd-fail (command ${$command}) (status ${$status})
+            (errors ${$errors}));
+  },
+
+  "check.status" :
+  macro Statement(Expr $command, Expr $status) {
+    raise %(cmd-fail (command ${$command}) (status ${$status}));
+  },
+
+  "text.nul" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (operation ${$operation}) (why "embedded NUL"));
+  },
+
+  "wait.unstarted" :
+  macro Statement() {
+    raise %(bad-arg (operation "Job.wait_any")
+            (why "a job has not started"));
+  }
+};
+
+static List _job_error_expand(String key, List arguments) {
+  Map rows = _job_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown job error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+/* --- lib/json-errors.xmacro ---------------------------------------------- */
+
+static Map _json_error_rows(void) => {
+
+  "boolean.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Json.boolean") (tag ${$tag}));
+  },
+
+  "read.file" :
+  macro Statement(
+    Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
+    raise %(bad-arg (operation "Json.read_file") (path ${$path})
+            (why ${$why}) (offset ${$offset})
+            (line ${$line}) (column ${$column}));
+  },
+
+  "read.text" :
+  macro Statement(Expr $why, Expr $offset, Expr $line, Expr $column) {
+    raise %(bad-arg (operation "Json.parse") (why ${$why})
+            (offset ${$offset}) (line ${$line}) (column ${$column}));
+  },
+
+  "write.depth" :
+  macro Statement() {
+    raise %(size-limit (operation "Var.json")
+            (why "nesting exceeds 512 levels"));
+  },
+
+  "write.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Var.json") (tag ${$tag}));
+  },
+
+  "write.key" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (operation "Var.json") (want "String object key")
+            (tag ${$tag}));
+  },
+
+  "write.duplicate" :
+  macro Statement(Expr $text) {
+    raise %(bad-arg (operation "Var.json") (why "duplicate object name")
+            (name ${$text}));
+  },
+
+  "write.nonfinite" :
+  macro Statement() {
+    raise %(conv-range (operation "Var.json")
+            (why "JSON has no NaN or infinity"));
+  },
+
+  "read.trailing" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected text after the value");
+  },
+
+  "read.depth" :
+  macro Statement(Expr $reader) {
+    $reader._fail("nesting exceeds 512 levels");
+  },
+
+  "read.end" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected end of input");
+  },
+
+  "read.char" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unexpected character");
+  },
+
+  "read.key" :
+  macro Statement(Expr $reader) {
+    $reader._fail("expected a string key");
+  },
+
+  "read.colon" :
+  (macro Expression() => "expected ':'"),
+
+  "read.object.sep" :
+  (macro Expression() => "expected ',' or '}'"),
+
+  "read.array.sep" :
+  (macro Expression() => "expected ',' or ']'"),
+
+  "read.string.end" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unterminated string");
+  },
+
+  "read.control" :
+  macro Statement(Expr $reader) {
+    $reader._fail("control character in string");
+  },
+
+  "read.utf8" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid UTF-8");
+  },
+
+  "read.escape" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid escape");
+  },
+
+  "read.surrogate" :
+  macro Statement(Expr $reader) {
+    $reader._fail("unpaired surrogate");
+  },
+
+  "read.nul" :
+  macro Statement(Expr $reader) {
+    $reader._fail("U+0000 cannot appear in a String");
+  },
+
+  "read.unicode" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid \\u escape");
+  },
+
+  "read.number" :
+  macro Statement(Expr $reader) {
+    $reader._fail("invalid number");
+  },
+
+  "read.range" :
+  macro Statement(Expr $reader) {
+    $reader._fail("number out of range");
+  }
+};
+
+static List _json_error_expand(String key, List arguments) {
+  Map rows = _json_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown json error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+/* --- lib/lisp-form-errors.xmacro ----------------------------------------- */
+
+static Map _lisp_form_error_rows(void) => {
+
+  "eval.void" :
+  macro Statement() {
+    raise %(void-op (operation "eval"));
+  },
+
+  "eval.unbound" :
+  macro Statement(Expr $expr) {
+    raise %(unbound (name ${$expr}));
+  },
+
+  "call.type" :
+  macro Statement(Expr $callable) {
+    raise %(not-call (actual ${$callable.kind()}));
+  },
+
+  "def.arity" :
+  macro Statement(Expr $actual, Expr $args) {
+    raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
+            (value ${$args}));
+  },
+
+  "def.protected" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (name ${$name}));
+  },
+
+  "def.inherited" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (why "inherited") (name ${$name}));
+  },
+
+  "def.frozen" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (why "frozen") (name ${$name}));
+  },
+
+  "cond.empty" :
+  macro Statement() {
+    raise %(bad-arity (operation "cond") (expected 1) (actual 0));
+  },
+
+  "cond.type" :
+  macro Statement(Expr $clause) {
+    raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
+  },
+
+  "cond.arity" :
+  macro Statement(Expr $actual, Expr $clause) {
+    raise %(bad-arity (operation "cond-clause") (expected 2)
+            (actual ${$actual}) (value ${$clause}));
+  },
+
+  "bind.signature" :
+  macro Statement(Expr $signature) {
+    raise %(bad-sig (operation "bind") (value ${$signature}));
+  },
+
+  "bind.missing" :
+  macro Statement(Expr $name, Expr $sig) {
+    raise %(no-symbol (name ${$name}) (sig ${$sig}));
+  },
+
+  "quote.shape" :
+  macro Statement(Expr $expr) {
+    raise %(bad-arity (operation "quasiquote") (value ${$expr}));
+  },
+
+  "splice.type" :
+  macro Statement(Expr $value) {
+    raise %(bad-types (operation "quasiquote-splice")
+            (actual ${$value.kind()}));
+  },
+
+  "lambda.signature" :
+  macro Statement(Expr $operation, Expr $args) {
+    raise %(bad-sig (operation ${$operation}) (value ${$args}));
+  },
+
+  "apply.void" :
+  macro Statement(Expr $index) {
+    raise %(void-op (operation "apply") (index ${$index}));
+  },
+
+  "apply.rest" :
+  macro Statement(Expr $body) {
+    raise %(bad-sig (operation "apply") (value ${$body}));
+  },
+
+  "apply.arity" :
+  macro Statement(Expr $body) {
+    raise %(bad-arity (operation "apply") (value ${$body}));
+  },
+
+  "apply.interrupted" :
+  macro Statement() {
+    raise %(interrupt (operation "apply"));
+  },
+
+  "apply.steps" :
+  macro Statement() {
+    raise %(call-stack (operation "apply") (why "steps"));
+  },
+
+  "apply.stack" :
+  macro Statement(Expr $body) {
+    raise %(call-stack (operation "apply") (value ${$body}));
+  },
+
+  "form.arity" :
+  macro Statement(Expr $operation, Expr $expected, Expr $actual) {
+    raise %(bad-arity (operation ${$operation}) (expected ${$expected})
+            (actual ${$actual}));
+  },
+
+  "form.string" :
+  macro Statement(Expr $operation, Expr $value) {
+    raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
+            (want "String"));
+  },
+
+  "apply.list" :
+  macro Statement(Expr $values) {
+    raise %(bad-types (operation "apply") (actual ${$values.kind()})
+            (want "List"));
+  },
+
+  "apply.procedure" :
+  macro Statement(Expr $callable) {
+    raise %(not-call (operation "apply") (actual ${$callable.kind()}));
+  }
+};
+
+static List _lisp_form_error_expand(String key, List arguments) {
+  Map rows = _lisp_form_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Lisp form error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+/* --- lib/lisp-session-errors.xmacro -------------------------------------- */
+
+static Map _lisp_session_error_rows(void) => {
+
+  "callback.absent" :
+  macro Statement(Expr $operation) {
+    raise %(bad-state (operation ${$operation}) (why "no session"));
+  },
+
+  "callback.wrong" :
+  macro Statement(Expr $operation) {
+    raise %(bad-state (operation ${$operation}) (why "wrong session"));
+  },
+
+  "entry.null" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (operation ${$operation}));
+  },
+
+  "global.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Lisp.set_global"));
+  },
+
+  "global.frozen" :
+  macro Statement() {
+    raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
+  },
+
+  "global.inherited" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "Lisp.set_global") (why "inherited")
+            (name ${$name}));
+  },
+
+  "bind.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Lisp.bind"));
+  },
+
+  "source.callable" :
+  macro Statement(Expr $callable) {
+    raise %(bad-types (operation "lisp_source_function") (want "Lambda")
+            (actual ${$callable.kind()}));
+  }
+};
+
+static List _lisp_session_error_expand(String key, List arguments) {
+  Map rows = _lisp_session_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Lisp session error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -2322,6 +2952,242 @@ static Map native_scalar_types(void) => {
   %(long double):
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
+
+/* --- src/project-errors.xmacro ------------------------------------------- */
+
+static Map _project_error_rows(void) => {
+
+  "manifest.missing" :
+  macro Statement(Expr $_error) {
+    $_error(NULL, 0, "no explicit inputs and no x2c.toml found");
+  },
+
+  "manifest.read" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "cannot read manifest");
+  },
+
+  "target.select" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "select --target or set project.default-target");
+  },
+
+  "target.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "unknown target", $name);
+  },
+
+  "target.run" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "run requires an executable target");
+  },
+
+  "array.open" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unterminated array");
+  },
+
+  "target.none" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "manifest defines no targets");
+  },
+
+  "section.header" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "malformed section header");
+  },
+
+  "section.project" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate project section");
+  },
+
+  "section.deps" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate dependencies section");
+  },
+
+  "section.unknown" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unknown manifest section");
+  },
+
+  "section.target" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $name) {
+    $_error_name($p, $line, "duplicate target section", $name);
+  },
+
+  "section.profile" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $name) {
+    $_error_name($p, $line, "duplicate profile section", $name);
+  },
+
+  "field.section" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "field appears before a section");
+  },
+
+  "field.equals" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected key = value");
+  },
+
+  "field.name" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "invalid field name");
+  },
+
+  "field.duplicate" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate manifest field");
+  },
+
+  "field.project" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown project field", $key);
+  },
+
+  "field.target" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown target field", $key);
+  },
+
+  "kind.shared" :
+  macro Statement(Expr $_error, Expr $p, Expr $line, Expr $refusal) {
+    $_error($p, $line, $refusal);
+  },
+
+  "kind.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $kind) {
+    $_error_name($p, $line, "unknown target kind", $kind);
+  },
+
+  "field.profile" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown profile field", $key);
+  },
+
+  "string.tail" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unexpected text after string");
+  },
+
+  "array.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected an array of quoted strings");
+  },
+
+  "array.separator" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected ',' or ']' in array");
+  },
+
+  "array.tail" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unexpected text after array");
+  },
+
+  "string.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected a quoted string");
+  },
+
+  "string.open" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unterminated quoted string");
+  },
+
+  "string.escape" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unsupported string escape");
+  },
+
+  "bool.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected true or false");
+  },
+
+  "target.cycle" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target dependency cycle reaches", $name);
+  },
+
+  "target.dep" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "unknown target dependency", $name);
+  },
+
+  "profile.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target has no profile", $name);
+  },
+
+  "target.static.deps" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name(
+      $p, 0, "static-library target cannot contain target dependencies",
+      $name);
+  },
+
+  "target.dep.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "dependency target is not a static library", $name);
+  },
+
+  "target.module.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "native module target is not a meta-module", $name);
+  },
+
+  "source.none" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target has no sources", $name);
+  },
+
+  "source.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $path) {
+    $_error_name($p, 0, "manifest source is not .x or .c", $path);
+  },
+
+  "pattern.unmatched" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $owner, Expr $pattern) {
+    $_error_name($p, 0, %"unmatched ${$owner} pattern", $pattern);
+  },
+
+  "cflag.deps" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $value) {
+    $_error_name($p, 0, "C dependency option is driver-owned", $value);
+  },
+
+  "new.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("new: the directory operand is empty");
+  },
+
+  "new.name" :
+  macro Statement(Expr $driver_error, Expr $n) {
+    $driver_error(
+      %"new: '${$n}' is not a target name; use letters, digits, '_', and '-'");
+  },
+
+  "new.occupied" :
+  macro Statement(Expr $driver_error, Expr $dir) {
+    $driver_error(%"new: ${$dir} exists and is not an empty directory");
+  },
+};
+
+static List _project_error_expand(String key, List arguments) {
+  Map rows = _project_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown project error '$key'", %());
+  Macro selected = row;
+  List parameters = selected.assoc(<parameters>);
+  List parameter = parameters.car();
+  String sink = parameter.assoc(<binder>).str()[1:];
+  List callee = %(ident $sink);
+  return %(${Macro_apply(selected, %($callee @arguments))});
+}
 
 /* --- src/sdk-errors.xmacro ----------------------------------------------- */
 
@@ -2883,6 +3749,69 @@ static int var_tag_top(List tag) =>
 static int var_tag_bottom(List tag) =>
   (int) Var_tag_bottom(List_last((List) List_last(tag)));
 
+/* --- lib/varconvert-errors.xmacro ---------------------------------------- */
+
+static Map _convert_error_rows(void) => {
+
+  "encoding.bad" :
+  macro Statement(Expr $bits) {
+    raise %(bad-enc (value ${$bits}));
+  },
+
+  "convert.void" :
+  macro Statement() {
+    raise %(void-op (owner "Var.convert"));
+  },
+
+  "target.invalid" :
+  macro Statement(Expr $target) {
+    raise %(bad-target (target ${$target}));
+  },
+
+  "source.numeric" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    using $lower;
+    {
+      List $lower = %(bad-types (source ${$source_tag}));
+      raise %(no-convert (target ${$target}) (cause ${$lower}));
+    }
+  },
+
+  "target.numeric" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    raise %(no-convert (source ${$source_tag}) (target ${$target}));
+  },
+
+  "decode.output" :
+  macro Statement() {
+    raise %(bad-arg (owner "Var.numeric_decode"));
+  },
+
+  "decode.void" :
+  macro Statement() {
+    raise %(void-op (owner "Var.numeric_decode"));
+  },
+
+  "decode.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (source ${$tag}));
+  },
+
+  "convert.range" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    raise %(conv-range (source ${$source_tag}) (target ${$target}));
+  }
+};
+
+static List _convert_error_expand(String key, List arguments) {
+  Map rows = _convert_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown convert error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
 /* --- lib/varops.xmacro --------------------------------------------------- */
 
 static List _update_rows(void) => %(
@@ -2970,6 +3899,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "x2c_type_members", x2c_type_members);
   $linked.row(rows, "_builtin_error_rows", _builtin_error_rows);
   $linked.row(rows, "_builtin_error_expand", _builtin_error_expand);
+  $linked.row(rows, "_cli_error_rows", _cli_error_rows);
+  $linked.row(rows, "_cli_error_expand", _cli_error_expand);
   $linked.row(rows, "_error_report_rows", _error_report_rows);
   $linked.row(rows, "_error_report_expand", _error_report_expand);
   $linked.row(rows, "_func_error_rows", _func_error_rows);
@@ -3000,7 +3931,17 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
+  $linked.row(rows, "_job_error_rows", _job_error_rows);
+  $linked.row(rows, "_job_error_expand", _job_error_expand);
+  $linked.row(rows, "_json_error_rows", _json_error_rows);
+  $linked.row(rows, "_json_error_expand", _json_error_expand);
+  $linked.row(rows, "_lisp_form_error_rows", _lisp_form_error_rows);
+  $linked.row(rows, "_lisp_form_error_expand", _lisp_form_error_expand);
+  $linked.row(rows, "_lisp_session_error_rows", _lisp_session_error_rows);
+  $linked.row(rows, "_lisp_session_error_expand", _lisp_session_error_expand);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_project_error_rows", _project_error_rows);
+  $linked.row(rows, "_project_error_expand", _project_error_expand);
   $linked.row(rows, "_sdk_error_rows", _sdk_error_rows);
   $linked.row(rows, "_sdk_error_expand", _sdk_error_expand);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
@@ -3048,6 +3989,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_types", _tag_types);
   $linked.row(rows, "var_tag_top", var_tag_top);
   $linked.row(rows, "var_tag_bottom", var_tag_bottom);
+  $linked.row(rows, "_convert_error_rows", _convert_error_rows);
+  $linked.row(rows, "_convert_error_expand", _convert_error_expand);
   $linked.row(rows, "_update_rows", _update_rows);
   $linked.row(rows, "_update_row", _update_row);
   $linked.row(rows, "_update_tag", _update_tag);

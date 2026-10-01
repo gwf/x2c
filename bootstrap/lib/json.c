@@ -18,12 +18,13 @@
 
 #include "exception.h"
 
-static List _26, _24, _23, _21, _19;
+static List _2130, _2128, _2127, _2125, _2123;
 
-static String _17, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _2121, _2119, _2118, _2117, _2116, _2115, _2114, _2113, _2112, _2111, _2110, _2109, _2108, _2107, _2106, _2105, _2104;
 
-static Var _25, _22, _20, _18, _16;
+static Var _2129, _2126, _2124, _2122, _2120;
 
+#include "meta.h"
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
@@ -139,7 +140,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _26)))
+_x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2130)))
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
 }
@@ -166,33 +167,33 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(! x2c_register_builtin_descriptor(729033112536, _x2c__x2c_protocol_methods_0)){
     x2c_register_descriptor(String_new("jsonbool"), _x2c__x2c_protocol_methods_0);
   }
-  _0 = String_new("true");
-  _1 = String_new("false");
-  _2 = String_new("unexpected text after the value");
-  _3 = String_new("nesting exceeds 512 levels");
-  _4 = String_new("unexpected end of input");
-  _5 = String_new("unexpected character");
-  _6 = String_new("expected a string key");
-  _7 = String_new("unterminated string");
-  _8 = String_new("control character in string");
-  _9 = String_new("invalid UTF-8");
-  _10 = String_new("invalid escape");
-  _11 = String_new("unpaired surrogate");
-  _12 = String_new("U+0000 cannot appear in a String");
-  _13 = String_new("invalid \\u escape");
-  _14 = String_new("invalid number");
-  _15 = String_new("number out of range");
-  _16 = Symbol_var(437126);
-  _17 = String_new("Var");
-  _18 = String_var(_17);
-  _19 = cons(_18, NULL);
-  _20 = List_var(_19);
-  _21 = cons(_20, NULL);
-  _22 = List_var(_21);
-  _23 = cons(_22, NULL);
-  _24 = cons(_16, _23);
-  _25 = List_var(_24);
-  _26 = cons(_25, _19);
+  _2104 = String_new("true");
+  _2105 = String_new("false");
+  _2106 = String_new("unexpected text after the value");
+  _2107 = String_new("nesting exceeds 512 levels");
+  _2108 = String_new("unexpected end of input");
+  _2109 = String_new("unexpected character");
+  _2110 = String_new("expected a string key");
+  _2111 = String_new("unterminated string");
+  _2112 = String_new("control character in string");
+  _2113 = String_new("invalid UTF-8");
+  _2114 = String_new("invalid escape");
+  _2115 = String_new("unpaired surrogate");
+  _2116 = String_new("U+0000 cannot appear in a String");
+  _2117 = String_new("invalid \\u escape");
+  _2118 = String_new("invalid number");
+  _2119 = String_new("number out of range");
+  _2120 = Symbol_var(437126);
+  _2121 = String_new("Var");
+  _2122 = String_var(_2121);
+  _2123 = cons(_2122, NULL);
+  _2124 = List_var(_2123);
+  _2125 = cons(_2124, NULL);
+  _2126 = List_var(_2125);
+  _2127 = cons(_2126, NULL);
+  _2128 = cons(_2120, _2127);
+  _2129 = List_var(_2128);
+  _2130 = cons(_2129, _2123);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -214,7 +215,7 @@ JsonBool Var_jsonbool(Var value){
 
 String JsonBool_str(JsonBool value){
   if(! _init_guard_) _file_init_();
-  return value -> value ? _0 : _1;
+  return value -> value ? _2104 : _2105;
 }
 
 String JsonBool_repr(JsonBool value){
@@ -246,7 +247,7 @@ int Json_boolean(Var value){
   if(! Var_is(value, 729033112536)){
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 76};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 79};
       x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.boolean")), NULL))), Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -276,7 +277,7 @@ static Var _parse(String source, String path){
   ;
   Var value = Reader__value(&(r));
   Reader__space(&(r));
-  if(Reader__peek(&(r))) Reader__fail(&(r), _2);
+  if(Reader__peek(&(r))) Reader__fail(&(r), _2106);
   return value;
 }
 
@@ -284,7 +285,7 @@ static Var Reader__value(Reader * r){
   Reader__space(&((* r)));
   switch(Reader__peek(&((* r)))){
     case '{' : case '[' :{
-      if(++(* r).depth > JSON_MAX_DEPTH) Reader__fail(&((* r)), _3);
+      if(++(* r).depth > JSON_MAX_DEPTH) Reader__fail(&((* r)), _2107);
       Var nested = Reader__peek(&((* r))) == '{' ? Reader__object(&((* r))) : Reader__array(&((* r)));
       (* r).depth --;
       return nested;
@@ -300,9 +301,9 @@ static Var Reader__value(Reader * r){
     }
     ;
     case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Reader__number(&((* r)));
-    case '\0' : Reader__fail(&((* r)), _4);
+    case '\0' : Reader__fail(&((* r)), _2108);
   }
-  Reader__fail(&((* r)), _5);
+  Reader__fail(&((* r)), _2109);
 }
 
 Map Map_new(void);
@@ -321,7 +322,7 @@ static Var Reader__object(Reader * r){
   }
   while(1){
     Reader__space(&((* r)));
-    if(Reader__peek(&((* r))) != '"') Reader__fail(&((* r)), _6);
+    if(Reader__peek(&((* r))) != '"') Reader__fail(&((* r)), _2110);
     String name = Reader__string(&((* r)));
     Reader__expect(&((* r)), ':', "expected ':'");
     Map_setindex(object, String_var(name), Reader__value(&((* r))));
@@ -419,11 +420,11 @@ static String Reader__string(Reader * r){
           Reader__escape(&((* r)), decoded);
           run =(* r).at;
         }
-        else if(! byte) Reader__fail(&((* r)), _7);
-        else if(byte < 0x20) Reader__fail(&((* r)), _8);
+        else if(! byte) Reader__fail(&((* r)), _2111);
+        else if(byte < 0x20) Reader__fail(&((* r)), _2112);
         else{
           int length = scan_utf8_length((const unsigned char *)(* r).text +(* r).at);
-          if(length < 0) Reader__fail(&((* r)), _9);
+          if(length < 0) Reader__fail(&((* r)), _2113);
           (* r).at += length;
         }
 
@@ -455,30 +456,30 @@ static void Reader__escape(Reader * r, Buffer out){
     return;
     case 'u' : break;
     default:(* r).at -= 2;
-    Reader__fail(&((* r)), _10);
+    Reader__fail(&((* r)), _2114);
   }
   int start =(* r).at - 2;
   long point = Reader__hex4(&((* r)));
   if(point >= 0xD800 && point <= 0xDBFF){
     if(Reader__peek(&((* r))) != '\\' ||(* r).text[(* r).at + 1] != 'u'){
       (* r).at = start;
-      Reader__fail(&((* r)), _11);
+      Reader__fail(&((* r)), _2115);
     }
     (* r).at += 2;
     long low = Reader__hex4(&((* r)));
     if(low < 0xDC00 || low > 0xDFFF){
       (* r).at = start;
-      Reader__fail(&((* r)), _11);
+      Reader__fail(&((* r)), _2115);
     }
     point = 0x10000 +((point - 0xD800) << 10) +(low - 0xDC00);
   }
   else if(point >= 0xDC00 && point <= 0xDFFF){
     (* r).at = start;
-    Reader__fail(&((* r)), _11);
+    Reader__fail(&((* r)), _2115);
   }
   else if(! point){
     (* r).at = start;
-    Reader__fail(&((* r)), _12);
+    Reader__fail(&((* r)), _2116);
   }
   _write_code_point(out, point);
 }
@@ -489,7 +490,7 @@ static long Reader__hex4(Reader * r){
   long unit = 0;
   for(int i = 0;  i < 4;  i ++){
     int digit = scan_ascii_hex_value(Reader__peek(&((* r))));
-    if(digit < 0) Reader__fail(&((* r)), _13);
+    if(digit < 0) Reader__fail(&((* r)), _2117);
     unit = unit * 16 + digit;
     (* r).at ++;
   }
@@ -510,20 +511,20 @@ static Var Reader__number(Reader * r){
   int start =(* r).at;
   if(Reader__peek(&((* r))) == '-')(* r).at ++;
   if(Reader__peek(&((* r))) == '0')(* r).at ++;
-  else if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+  else if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _2118);
   int integral = 1;
   if(Reader__peek(&((* r))) == '.'){
     integral = 0;
     (* r).at ++;
-    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _2118);
   }
   if((Reader__peek(&((* r))) | 32) == 'e'){
     integral = 0;
     (* r).at ++;
     if(Reader__peek(&((* r))) == '+' || Reader__peek(&((* r))) == '-')(* r).at ++;
-    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _2118);
   }
-  if(scan_ascii_digit(Reader__peek(&((* r))))) Reader__fail(&((* r)), _14);
+  if(scan_ascii_digit(Reader__peek(&((* r))))) Reader__fail(&((* r)), _2118);
   const char * spelling =(* r).text + start;
   errno = 0;
   if(integral){
@@ -542,7 +543,7 @@ static Var Reader__number(Reader * r){
   double number = strtod(spelling, NULL);
   if(isinf(number)){
     (* r).at = start;
-    Reader__fail(&((* r)), _15);
+    Reader__fail(&((* r)), _2119);
   }
   return double_var(number);
 }
@@ -557,7 +558,7 @@ int strncmp(const char *, const char *, size_t);
 
 static void Reader__word(Reader * r, const char * word){
   size_t length = strlen(word);
-  if(strncmp((* r).text +(* r).at, word, length)) Reader__fail(&((* r)), _5);
+  if(strncmp((* r).text +(* r).at, word, length)) Reader__fail(&((* r)), _2109);
   (* r).at += length;
 }
 
@@ -589,12 +590,12 @@ _Noreturn static void Reader__fail(Reader * r, String why){
   int line = 1, column = 1, offset =(* r).at;
   scan_next_line_col((char *)(* r).text, offset, & line, & column);
   if(String_truth((* r).path)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 349};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 352};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL))), Symbol_var(1051920), String_var((* r).path), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 352};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 354};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
@@ -672,7 +673,7 @@ Map Var_map(Var);
 
 static void Writer__value(Writer * w, Var value, int depth){
   if(depth > JSON_MAX_DEPTH){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 405};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 406};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
     __builtin_unreachable();
   }
@@ -787,7 +788,7 @@ static void Writer__members(Writer * w, Map object, int depth){
           {
             String text = Var_str(name);
             if(count && String_equal(text, previous)){
-              static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 451};
+              static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 450};
               x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
               __builtin_unreachable();
             }
@@ -879,7 +880,7 @@ int atoi(const char *);
 
 static void _write_double(Buffer out, double number){
   if(! isfinite(number)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write_double",.line = 513};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write_double",.line = 511};
     x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL))));
     __builtin_unreachable();
   }
