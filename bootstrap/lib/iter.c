@@ -42,13 +42,9 @@ static int _range_raw_high(Var value);
 
 static int _map_next(Iter iter, Var * out);
 
-static Var _apply1(Func fn, Var value);
-
 static int _filter_next(Iter iter, Var * out);
 
 static int _scan_next(Iter iter, Var * out);
-
-static Var _apply2(Func fn, Var left, Var right);
 
 static int _accumulate_next(Iter iter, Var * out);
 
@@ -224,23 +220,13 @@ Iter Iter_map(Iter iter, Func func, Iter dest){
   return dest;
 }
 
+Var Func_apply_value(Func, Var);
+
 static int _map_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_try_next(source, &(* out))) return 0;
-  if(iter -> aux) * out = _apply1(iter -> aux, * out);
+  if(iter -> aux) * out = Func_apply_value(iter -> aux, * out);
   return 1;
-}
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-static Var _apply1(Func fn, Var value){
-  FuncArg arguments[1] ={
-    FuncArg_value(value)
-  }
-  ;
-  return Func_apply(fn, 1, arguments);
 }
 
 Iter Iter_filter(Iter iter, Func func, Iter dest){
@@ -263,7 +249,7 @@ static int _filter_next(Iter iter, Var * out){
     while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
       value = _x2c_macro_item_0;
       {
-        if(Var_truth(_apply1(func, value))){
+        if(Var_truth(Func_apply_value(func, value))){
           * out = value;
           return 1;
         }
@@ -283,22 +269,16 @@ Iter Iter_scan(Iter iter, Var seed, Func fn, Iter dest){
   return dest;
 }
 
+Var Func_apply_values(Func, Var, Var);
+
 static int _scan_next(Iter iter, Var * out){
   Iter source = Var_pointer(iter -> obj);
   if(! Iter_truth(source) || ! iter -> aux) return 0;
   Var item;
   if(! Iter_try_next(source, &(item))) return 0;
-  iter -> state = _apply2(iter -> aux, iter -> state, item);
+  iter -> state = Func_apply_values(iter -> aux, iter -> state, item);
   * out = iter -> state;
   return 1;
-}
-
-static Var _apply2(Func fn, Var left, Var right){
-  FuncArg arguments[2] ={
-    FuncArg_value(left), FuncArg_value(right)
-  }
-  ;
-  return Func_apply(fn, 2, arguments);
 }
 
 Iter Iter_accumulate(Iter iter, Var initial, Iter dest){
@@ -334,7 +314,7 @@ static int _zip_with_next(Iter iter, Var * out){
   if(! Iter_truth(left_iter) || ! Iter_truth(right_iter)) return 0;
   Var left, right;
   if(! Iter_try_next(left_iter, &(left)) || ! Iter_try_next(right_iter, &(right))) return 0;
-  if(iter -> aux) * out = _apply2(iter -> aux, left, right);
+  if(iter -> aux) * out = Func_apply_values(iter -> aux, left, right);
   else * out = List_var(cons(left, cons(right, NULL)));
   return 1;
 }
@@ -505,13 +485,13 @@ Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 712};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 700};
     x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
   List list = Var_list(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 716};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 704};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
@@ -545,7 +525,7 @@ Var Iter_foldl(Iter iter, Var seed, Func fn){
     return acc;
   }
   while(has_item){
-    acc = _apply2(fn, acc, item);
+    acc = Func_apply_values(fn, acc, item);
     has_item = Iter_try_next(iter, &(item));
   }
   return acc;
@@ -559,7 +539,7 @@ int Iter_any(Iter iter, Func pred){
     Var _x2c_macro_item_1;
     while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
       item = _x2c_macro_item_1;
-      if(Var_truth(_apply1(pred, item))) return 1;
+      if(Var_truth(Func_apply_value(pred, item))) return 1;
     }
 
   }
@@ -570,7 +550,7 @@ int Iter_all(Iter iter, Func pred){
   Var item;
   if(! Iter_try_next(iter, &(item))) return 1;
   if(! pred) return 0;
-  do if(! Var_truth(_apply1(pred, item))) return 0;
+  do if(! Var_truth(Func_apply_value(pred, item))) return 0;
   while(Iter_try_next(iter, &(item)));
   ;
   return 1;
@@ -584,7 +564,7 @@ Var Iter_find(Iter iter, Func pred){
     Var _x2c_macro_item_2;
     while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
       item = _x2c_macro_item_2;
-      if(Var_truth(_apply1(pred, item))) return item;
+      if(Var_truth(Func_apply_value(pred, item))) return item;
     }
 
   }

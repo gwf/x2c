@@ -39,6 +39,22 @@ static inline FuncArg FuncArg_reference(const void * reference, List type){
   ;
 }
 
+static inline Var Func_apply_value(Func fn, Var value){
+  FuncArg arguments[1] ={
+    FuncArg_value(value)
+  }
+  ;
+  return Func_apply(fn, 1, arguments);
+}
+
+static inline Var Func_apply_values(Func fn, Var left, Var right){
+  FuncArg arguments[2] ={
+    FuncArg_value(left), FuncArg_value(right)
+  }
+  ;
+  return Func_apply(fn, 2, arguments);
+}
+
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index);
 
 Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol want);

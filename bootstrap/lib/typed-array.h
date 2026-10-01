@@ -105,7 +105,7 @@ static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c
     break;
     case 95 : case 75 :{
       if(! _x2c_macro_rhs_0){
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 111};
+        static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 107};
         x2c_error_raise_n(& _x2c_error_site_0, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
         __builtin_unreachable();
       }
@@ -119,7 +119,7 @@ static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c
       if(_x2c_macro_rhs_0 < 0 ||(long long) _x2c_macro_rhs_0 >= _x2c_macro_width_0){
         long long _x2c_macro_count_0 = _x2c_macro_rhs_0;
         {
-          static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 111};
+          static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 107};
           x2c_error_raise_n(& _x2c_error_site_1, 4477476686248, 3, Symbol_var(992), Symbol_var(_x2c_macro_op_0), Symbol_var(7318440), Var_box_long_long(_x2c_macro_count_0), Symbol_var(48833808), int_var(_x2c_macro_width_0));
           __builtin_unreachable();
         }
@@ -129,7 +129,7 @@ static inline char ArrayChar_updateindex(ArrayChar _x2c_macro_array_42, int _x2c
       break;
     }
     default:{
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 111};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_updateindex",.line = 107};
       x2c_error_raise_n(& _x2c_error_site_2, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
       __builtin_unreachable();
     }
@@ -143,7 +143,7 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_macro_array_43, int _x2
   if(_x2c_macro_op_1 == 1848) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_11, 56, 1);
   else if(_x2c_macro_op_1 == 2046) ArrayChar_updateindex(_x2c_macro_array_43, _x2c_macro_index_11, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_postfixindex",.line = 111};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_postfixindex",.line = 107};
     x2c_error_raise_n(& _x2c_error_site_3, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_1));
     __builtin_unreachable();
   }
@@ -249,7 +249,7 @@ static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _
     break;
     case 95 : case 75 :{
       if(! _x2c_macro_rhs_1){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 122};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 116};
         x2c_error_raise_n(& _x2c_error_site_4, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_2));
         __builtin_unreachable();
       }
@@ -263,7 +263,7 @@ static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _
       if(_x2c_macro_rhs_1 < 0 ||(long long) _x2c_macro_rhs_1 >= _x2c_macro_width_1){
         long long _x2c_macro_count_1 = _x2c_macro_rhs_1;
         {
-          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 122};
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 116};
           x2c_error_raise_n(& _x2c_error_site_5, 4477476686248, 3, Symbol_var(992), Symbol_var(_x2c_macro_op_2), Symbol_var(7318440), Var_box_long_long(_x2c_macro_count_1), Symbol_var(48833808), int_var(_x2c_macro_width_1));
           __builtin_unreachable();
         }
@@ -273,7 +273,7 @@ static inline short ArrayShort_updateindex(ArrayShort _x2c_macro_array_91, int _
       break;
     }
     default:{
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 122};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_updateindex",.line = 116};
       x2c_error_raise_n(& _x2c_error_site_6, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_2));
       __builtin_unreachable();
     }
@@ -287,7 +287,7 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_macro_array_92, int 
   if(_x2c_macro_op_3 == 1848) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_24, 56, 1);
   else if(_x2c_macro_op_3 == 2046) ArrayShort_updateindex(_x2c_macro_array_92, _x2c_macro_index_24, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_postfixindex",.line = 122};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_postfixindex",.line = 116};
     x2c_error_raise_n(& _x2c_error_site_7, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_3));
     __builtin_unreachable();
   }
@@ -393,7 +393,7 @@ static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_m
     break;
     case 95 : case 75 :{
       if(! _x2c_macro_rhs_2){
-        static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 133};
+        static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 125};
         x2c_error_raise_n(& _x2c_error_site_8, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_4));
         __builtin_unreachable();
       }
@@ -407,7 +407,7 @@ static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_m
       if(_x2c_macro_rhs_2 < 0 ||(long long) _x2c_macro_rhs_2 >= _x2c_macro_width_2){
         long long _x2c_macro_count_2 = _x2c_macro_rhs_2;
         {
-          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 133};
+          static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 125};
           x2c_error_raise_n(& _x2c_error_site_9, 4477476686248, 3, Symbol_var(992), Symbol_var(_x2c_macro_op_4), Symbol_var(7318440), Var_box_long_long(_x2c_macro_count_2), Symbol_var(48833808), int_var(_x2c_macro_width_2));
           __builtin_unreachable();
         }
@@ -417,7 +417,7 @@ static inline int ArrayInt_updateindex(ArrayInt _x2c_macro_array_140, int _x2c_m
       break;
     }
     default:{
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 133};
+      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_updateindex",.line = 125};
       x2c_error_raise_n(& _x2c_error_site_10, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_4));
       __builtin_unreachable();
     }
@@ -431,7 +431,7 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_macro_array_141, int _x2c_
   if(_x2c_macro_op_5 == 1848) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_37, 56, 1);
   else if(_x2c_macro_op_5 == 2046) ArrayInt_updateindex(_x2c_macro_array_141, _x2c_macro_index_37, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_postfixindex",.line = 133};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_postfixindex",.line = 125};
     x2c_error_raise_n(& _x2c_error_site_11, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_5));
     __builtin_unreachable();
   }
@@ -537,7 +537,7 @@ static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2
     break;
     case 95 : case 75 :{
       if(! _x2c_macro_rhs_3){
-        static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 144};
+        static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 134};
         x2c_error_raise_n(& _x2c_error_site_12, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_6));
         __builtin_unreachable();
       }
@@ -551,7 +551,7 @@ static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2
       if(_x2c_macro_rhs_3 < 0 ||(long long) _x2c_macro_rhs_3 >= _x2c_macro_width_3){
         long long _x2c_macro_count_3 = _x2c_macro_rhs_3;
         {
-          static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 144};
+          static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 134};
           x2c_error_raise_n(& _x2c_error_site_13, 4477476686248, 3, Symbol_var(992), Symbol_var(_x2c_macro_op_6), Symbol_var(7318440), Var_box_long_long(_x2c_macro_count_3), Symbol_var(48833808), int_var(_x2c_macro_width_3));
           __builtin_unreachable();
         }
@@ -561,7 +561,7 @@ static inline long ArrayLong_updateindex(ArrayLong _x2c_macro_array_189, int _x2
       break;
     }
     default:{
-      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 144};
+      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_updateindex",.line = 134};
       x2c_error_raise_n(& _x2c_error_site_14, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_6));
       __builtin_unreachable();
     }
@@ -575,7 +575,7 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_macro_array_190, int _x
   if(_x2c_macro_op_7 == 1848) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_50, 56, 1);
   else if(_x2c_macro_op_7 == 2046) ArrayLong_updateindex(_x2c_macro_array_190, _x2c_macro_index_50, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_postfixindex",.line = 144};
+    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_postfixindex",.line = 134};
     x2c_error_raise_n(& _x2c_error_site_15, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_7));
     __builtin_unreachable();
   }
@@ -671,7 +671,7 @@ static inline float ArrayFloat_updateindex(ArrayFloat _x2c_macro_array_238, int 
     case 95 : return * _x2c_macro_slot_4 /= _x2c_macro_rhs_4;
   }
   {
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_updateindex",.line = 155};
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_updateindex",.line = 143};
     x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_8));
     __builtin_unreachable();
   }
@@ -683,7 +683,7 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_macro_array_239, int
   if(_x2c_macro_op_9 == 1848) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_63, 56, 1);
   else if(_x2c_macro_op_9 == 2046) ArrayFloat_updateindex(_x2c_macro_array_239, _x2c_macro_index_63, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_postfixindex",.line = 155};
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_postfixindex",.line = 143};
     x2c_error_raise_n(& _x2c_error_site_17, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_9));
     __builtin_unreachable();
   }
@@ -779,7 +779,7 @@ static inline double ArrayDbl_updateindex(ArrayDbl _x2c_macro_array_287, int _x2
     case 95 : return * _x2c_macro_slot_5 /= _x2c_macro_rhs_5;
   }
   {
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_updateindex",.line = 166};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_updateindex",.line = 152};
     x2c_error_raise_n(& _x2c_error_site_18, 4477479911782, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_10));
     __builtin_unreachable();
   }
@@ -791,7 +791,7 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_macro_array_288, int _x
   if(_x2c_macro_op_11 == 1848) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_76, 56, 1);
   else if(_x2c_macro_op_11 == 2046) ArrayDbl_updateindex(_x2c_macro_array_288, _x2c_macro_index_76, 62, 1);
   else{
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_postfixindex",.line = 166};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_postfixindex",.line = 152};
     x2c_error_raise_n(& _x2c_error_site_19, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_11));
     __builtin_unreachable();
   }
@@ -880,7 +880,7 @@ Array ArrayString_array(ArrayString _x2c_macro_array_335);
 
 static inline String ArrayString_updateindex(ArrayString _x2c_macro_array_336, int _x2c_macro_index_88, Symbol _x2c_macro_op_12, String _x2c_macro_rhs_6){
   if(_x2c_macro_op_12 != 56){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/typed-array.x",.function = "ArrayString_updateindex",.line = 177};
+    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/typed-array.x",.function = "ArrayString_updateindex",.line = 161};
     x2c_error_raise_n(& _x2c_error_site_20, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_12));
     __builtin_unreachable();
   }
@@ -893,7 +893,7 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_macro_a
   (void) _x2c_macro_array_337;
   (void) _x2c_macro_index_89;
   {
-    static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/typed-array.x",.function = "ArrayString_postfixindex",.line = 177};
+    static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/typed-array.x",.function = "ArrayString_postfixindex",.line = 161};
     x2c_error_raise_n(& _x2c_error_site_21, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_13));
     __builtin_unreachable();
   }

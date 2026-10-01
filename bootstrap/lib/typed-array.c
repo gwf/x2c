@@ -34,10 +34,6 @@ static int _array_compare_double(double a, double b);
 
 static int _array_compare_string(String a, String b);
 
-static Buffer _array_new_buffer(void);
-
-static String _array_finish_buffer(Buffer out);
-
 static Block _prepare_array_export(Block array, Context source);
 
 static ArrayString _prepare_string_array_export(ArrayString array, Context source);
@@ -939,18 +935,6 @@ static int _array_compare_string(String a, String b){
   return String_compare(a, b);
 }
 
-Buffer Buffer_new(size_t);
-
-static Buffer _array_new_buffer(void){
-  return Buffer_new(0);
-}
-
-String Buffer_str_free(Buffer);
-
-static String _array_finish_buffer(Buffer out){
-  return Buffer_str_free(out);
-}
-
 static Block _prepare_array_export(Block array, Context source){
   (void) array;
   (void) source;
@@ -1117,7 +1101,7 @@ static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_7, int _x2c_macr
         if(_x2c_macro_delta_0 > INT_MAX - _x2c_macro_n_3){
           size_t _x2c_macro_size_0 =(size_t) _x2c_macro_n_3 +(size_t) _x2c_macro_delta_0;
           {
-            static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/typed-array.x",.function = "ArrayChar__core_setslice",.line = 105};
+            static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/typed-array.x",.function = "ArrayChar__core_setslice",.line = 103};
             x2c_error_raise_n(& _x2c_error_site_26, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_0));
             __builtin_unreachable();
           }
@@ -1224,7 +1208,7 @@ Var char_var(char);
 char ArrayChar_push(ArrayChar _x2c_macro_array_16, char _x2c_macro_value_3){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(char_var(_x2c_macro_value_3))){
-    static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_push",.line = 106};
+    static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_push",.line = 104};
     x2c_error_raise_n(& _x2c_error_site_27, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -1260,7 +1244,7 @@ char ArrayChar_shift(ArrayChar _x2c_macro_array_19){
 char ArrayChar_unshift(ArrayChar _x2c_macro_array_20, char _x2c_macro_value_6){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(char_var(_x2c_macro_value_6))){
-    static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_unshift",.line = 106};
+    static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_unshift",.line = 104};
     x2c_error_raise_n(& _x2c_error_site_28, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -1279,7 +1263,7 @@ char ArrayChar_insert(ArrayChar _x2c_macro_array_21, int _x2c_macro_index_4, cha
     if(_x2c_macro_index_4 < 0 || _x2c_macro_index_4 > _x2c_macro_n_8) return 0;
     if(_x2c_macro_n_8 == INT_MAX) _size_limit(_0, _x2c_macro_n_8);
     if(Var_is_void(char_var(_x2c_macro_value_7))){
-      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_insert",.line = 106};
+      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/typed-array.x",.function = "ArrayChar_insert",.line = 104};
       x2c_error_raise_n(& _x2c_error_site_29, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -1470,16 +1454,20 @@ Buffer ArrayChar_write_str(ArrayChar _x2c_macro_array_37, Buffer _x2c_macro_out_
   return ArrayChar__core_write(_x2c_macro_array_37, _x2c_macro_out_8, 40228);
 }
 
+Buffer Buffer_new(size_t);
+
+String Buffer_str_free(Buffer);
+
 String ArrayChar_str(ArrayChar _x2c_macro_array_38){
-  Buffer _x2c_macro_out_9 = _array_new_buffer();
+  Buffer _x2c_macro_out_9 = Buffer_new(0);
   ArrayChar_write_str(_x2c_macro_array_38, _x2c_macro_out_9);
-  return _array_finish_buffer(_x2c_macro_out_9);
+  return Buffer_str_free(_x2c_macro_out_9);
 }
 
 String ArrayChar_repr(ArrayChar _x2c_macro_array_39){
-  Buffer _x2c_macro_out_10 = _array_new_buffer();
+  Buffer _x2c_macro_out_10 = Buffer_new(0);
   ArrayChar_write_repr(_x2c_macro_array_39, _x2c_macro_out_10);
-  return _array_finish_buffer(_x2c_macro_out_10);
+  return Buffer_str_free(_x2c_macro_out_10);
 }
 
 Array Array_new(void);
@@ -1748,7 +1736,7 @@ static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_56, int _x2c_m
         if(_x2c_macro_delta_1 > INT_MAX - _x2c_macro_n_14){
           size_t _x2c_macro_size_3 =(size_t) _x2c_macro_n_14 +(size_t) _x2c_macro_delta_1;
           {
-            static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/typed-array.x",.function = "ArrayShort__core_setslice",.line = 116};
+            static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/typed-array.x",.function = "ArrayShort__core_setslice",.line = 112};
             x2c_error_raise_n(& _x2c_error_site_30, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_3));
             __builtin_unreachable();
           }
@@ -1853,7 +1841,7 @@ Var short_var(short);
 short ArrayShort_push(ArrayShort _x2c_macro_array_65, short _x2c_macro_value_18){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(short_var(_x2c_macro_value_18))){
-    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_push",.line = 117};
+    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_push",.line = 113};
     x2c_error_raise_n(& _x2c_error_site_31, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -1887,7 +1875,7 @@ short ArrayShort_shift(ArrayShort _x2c_macro_array_68){
 short ArrayShort_unshift(ArrayShort _x2c_macro_array_69, short _x2c_macro_value_21){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(short_var(_x2c_macro_value_21))){
-    static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_unshift",.line = 117};
+    static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_unshift",.line = 113};
     x2c_error_raise_n(& _x2c_error_site_32, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -1906,7 +1894,7 @@ short ArrayShort_insert(ArrayShort _x2c_macro_array_70, int _x2c_macro_index_17,
     if(_x2c_macro_index_17 < 0 || _x2c_macro_index_17 > _x2c_macro_n_19) return 0;
     if(_x2c_macro_n_19 == INT_MAX) _size_limit(_1, _x2c_macro_n_19);
     if(Var_is_void(short_var(_x2c_macro_value_22))){
-      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_insert",.line = 117};
+      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/typed-array.x",.function = "ArrayShort_insert",.line = 113};
       x2c_error_raise_n(& _x2c_error_site_33, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -2088,15 +2076,15 @@ Buffer ArrayShort_write_str(ArrayShort _x2c_macro_array_86, Buffer _x2c_macro_ou
 }
 
 String ArrayShort_str(ArrayShort _x2c_macro_array_87){
-  Buffer _x2c_macro_out_22 = _array_new_buffer();
+  Buffer _x2c_macro_out_22 = Buffer_new(0);
   ArrayShort_write_str(_x2c_macro_array_87, _x2c_macro_out_22);
-  return _array_finish_buffer(_x2c_macro_out_22);
+  return Buffer_str_free(_x2c_macro_out_22);
 }
 
 String ArrayShort_repr(ArrayShort _x2c_macro_array_88){
-  Buffer _x2c_macro_out_23 = _array_new_buffer();
+  Buffer _x2c_macro_out_23 = Buffer_new(0);
   ArrayShort_write_repr(_x2c_macro_array_88, _x2c_macro_out_23);
-  return _array_finish_buffer(_x2c_macro_out_23);
+  return Buffer_str_free(_x2c_macro_out_23);
 }
 
 Array ArrayShort_array(ArrayShort _x2c_macro_array_90){
@@ -2349,7 +2337,7 @@ static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_105, int _x2c_macr
         if(_x2c_macro_delta_2 > INT_MAX - _x2c_macro_n_25){
           size_t _x2c_macro_size_6 =(size_t) _x2c_macro_n_25 +(size_t) _x2c_macro_delta_2;
           {
-            static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/typed-array.x",.function = "ArrayInt__core_setslice",.line = 127};
+            static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/typed-array.x",.function = "ArrayInt__core_setslice",.line = 121};
             x2c_error_raise_n(& _x2c_error_site_34, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_6));
             __builtin_unreachable();
           }
@@ -2452,7 +2440,7 @@ int ArrayInt_try_next(ArrayInt _x2c_macro_array_113, int * _x2c_macro_cursor_5, 
 int ArrayInt_push(ArrayInt _x2c_macro_array_114, int _x2c_macro_value_33){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(int_var(_x2c_macro_value_33))){
-    static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_push",.line = 128};
+    static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_push",.line = 122};
     x2c_error_raise_n(& _x2c_error_site_35, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -2486,7 +2474,7 @@ int ArrayInt_shift(ArrayInt _x2c_macro_array_117){
 int ArrayInt_unshift(ArrayInt _x2c_macro_array_118, int _x2c_macro_value_36){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(int_var(_x2c_macro_value_36))){
-    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_unshift",.line = 128};
+    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_unshift",.line = 122};
     x2c_error_raise_n(& _x2c_error_site_36, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -2505,7 +2493,7 @@ int ArrayInt_insert(ArrayInt _x2c_macro_array_119, int _x2c_macro_index_30, int 
     if(_x2c_macro_index_30 < 0 || _x2c_macro_index_30 > _x2c_macro_n_30) return 0;
     if(_x2c_macro_n_30 == INT_MAX) _size_limit(_2, _x2c_macro_n_30);
     if(Var_is_void(int_var(_x2c_macro_value_37))){
-      static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_insert",.line = 128};
+      static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/typed-array.x",.function = "ArrayInt_insert",.line = 122};
       x2c_error_raise_n(& _x2c_error_site_37, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -2687,15 +2675,15 @@ Buffer ArrayInt_write_str(ArrayInt _x2c_macro_array_135, Buffer _x2c_macro_out_3
 }
 
 String ArrayInt_str(ArrayInt _x2c_macro_array_136){
-  Buffer _x2c_macro_out_35 = _array_new_buffer();
+  Buffer _x2c_macro_out_35 = Buffer_new(0);
   ArrayInt_write_str(_x2c_macro_array_136, _x2c_macro_out_35);
-  return _array_finish_buffer(_x2c_macro_out_35);
+  return Buffer_str_free(_x2c_macro_out_35);
 }
 
 String ArrayInt_repr(ArrayInt _x2c_macro_array_137){
-  Buffer _x2c_macro_out_36 = _array_new_buffer();
+  Buffer _x2c_macro_out_36 = Buffer_new(0);
   ArrayInt_write_repr(_x2c_macro_array_137, _x2c_macro_out_36);
-  return _array_finish_buffer(_x2c_macro_out_36);
+  return Buffer_str_free(_x2c_macro_out_36);
 }
 
 Array ArrayInt_array(ArrayInt _x2c_macro_array_139){
@@ -2948,7 +2936,7 @@ static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_154, int _x2c_ma
         if(_x2c_macro_delta_3 > INT_MAX - _x2c_macro_n_36){
           size_t _x2c_macro_size_9 =(size_t) _x2c_macro_n_36 +(size_t) _x2c_macro_delta_3;
           {
-            static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/typed-array.x",.function = "ArrayLong__core_setslice",.line = 138};
+            static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/typed-array.x",.function = "ArrayLong__core_setslice",.line = 130};
             x2c_error_raise_n(& _x2c_error_site_38, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_9));
             __builtin_unreachable();
           }
@@ -3053,7 +3041,7 @@ Var long_var(long);
 long ArrayLong_push(ArrayLong _x2c_macro_array_163, long _x2c_macro_value_48){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(long_var(_x2c_macro_value_48))){
-    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_push",.line = 139};
+    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_push",.line = 131};
     x2c_error_raise_n(& _x2c_error_site_39, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -3087,7 +3075,7 @@ long ArrayLong_shift(ArrayLong _x2c_macro_array_166){
 long ArrayLong_unshift(ArrayLong _x2c_macro_array_167, long _x2c_macro_value_51){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(long_var(_x2c_macro_value_51))){
-    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_unshift",.line = 139};
+    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_unshift",.line = 131};
     x2c_error_raise_n(& _x2c_error_site_40, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -3106,7 +3094,7 @@ long ArrayLong_insert(ArrayLong _x2c_macro_array_168, int _x2c_macro_index_43, l
     if(_x2c_macro_index_43 < 0 || _x2c_macro_index_43 > _x2c_macro_n_41) return 0L;
     if(_x2c_macro_n_41 == INT_MAX) _size_limit(_3, _x2c_macro_n_41);
     if(Var_is_void(long_var(_x2c_macro_value_52))){
-      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_insert",.line = 139};
+      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/typed-array.x",.function = "ArrayLong_insert",.line = 131};
       x2c_error_raise_n(& _x2c_error_site_41, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -3288,15 +3276,15 @@ Buffer ArrayLong_write_str(ArrayLong _x2c_macro_array_184, Buffer _x2c_macro_out
 }
 
 String ArrayLong_str(ArrayLong _x2c_macro_array_185){
-  Buffer _x2c_macro_out_48 = _array_new_buffer();
+  Buffer _x2c_macro_out_48 = Buffer_new(0);
   ArrayLong_write_str(_x2c_macro_array_185, _x2c_macro_out_48);
-  return _array_finish_buffer(_x2c_macro_out_48);
+  return Buffer_str_free(_x2c_macro_out_48);
 }
 
 String ArrayLong_repr(ArrayLong _x2c_macro_array_186){
-  Buffer _x2c_macro_out_49 = _array_new_buffer();
+  Buffer _x2c_macro_out_49 = Buffer_new(0);
   ArrayLong_write_repr(_x2c_macro_array_186, _x2c_macro_out_49);
-  return _array_finish_buffer(_x2c_macro_out_49);
+  return Buffer_str_free(_x2c_macro_out_49);
 }
 
 Array ArrayLong_array(ArrayLong _x2c_macro_array_188){
@@ -3549,7 +3537,7 @@ static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_203, int _x2c_
         if(_x2c_macro_delta_4 > INT_MAX - _x2c_macro_n_47){
           size_t _x2c_macro_size_12 =(size_t) _x2c_macro_n_47 +(size_t) _x2c_macro_delta_4;
           {
-            static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat__core_setslice",.line = 149};
+            static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat__core_setslice",.line = 139};
             x2c_error_raise_n(& _x2c_error_site_42, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_12));
             __builtin_unreachable();
           }
@@ -3652,7 +3640,7 @@ int ArrayFloat_try_next(ArrayFloat _x2c_macro_array_211, int * _x2c_macro_cursor
 float ArrayFloat_push(ArrayFloat _x2c_macro_array_212, float _x2c_macro_value_63){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(float_var(_x2c_macro_value_63))){
-    static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_push",.line = 150};
+    static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_push",.line = 140};
     x2c_error_raise_n(& _x2c_error_site_43, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -3686,7 +3674,7 @@ float ArrayFloat_shift(ArrayFloat _x2c_macro_array_215){
 float ArrayFloat_unshift(ArrayFloat _x2c_macro_array_216, float _x2c_macro_value_66){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(float_var(_x2c_macro_value_66))){
-    static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_unshift",.line = 150};
+    static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_unshift",.line = 140};
     x2c_error_raise_n(& _x2c_error_site_44, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -3705,7 +3693,7 @@ float ArrayFloat_insert(ArrayFloat _x2c_macro_array_217, int _x2c_macro_index_56
     if(_x2c_macro_index_56 < 0 || _x2c_macro_index_56 > _x2c_macro_n_52) return 0.0f;
     if(_x2c_macro_n_52 == INT_MAX) _size_limit(_4, _x2c_macro_n_52);
     if(Var_is_void(float_var(_x2c_macro_value_67))){
-      static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_insert",.line = 150};
+      static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/typed-array.x",.function = "ArrayFloat_insert",.line = 140};
       x2c_error_raise_n(& _x2c_error_site_45, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -3887,15 +3875,15 @@ Buffer ArrayFloat_write_str(ArrayFloat _x2c_macro_array_233, Buffer _x2c_macro_o
 }
 
 String ArrayFloat_str(ArrayFloat _x2c_macro_array_234){
-  Buffer _x2c_macro_out_61 = _array_new_buffer();
+  Buffer _x2c_macro_out_61 = Buffer_new(0);
   ArrayFloat_write_str(_x2c_macro_array_234, _x2c_macro_out_61);
-  return _array_finish_buffer(_x2c_macro_out_61);
+  return Buffer_str_free(_x2c_macro_out_61);
 }
 
 String ArrayFloat_repr(ArrayFloat _x2c_macro_array_235){
-  Buffer _x2c_macro_out_62 = _array_new_buffer();
+  Buffer _x2c_macro_out_62 = Buffer_new(0);
   ArrayFloat_write_repr(_x2c_macro_array_235, _x2c_macro_out_62);
-  return _array_finish_buffer(_x2c_macro_out_62);
+  return Buffer_str_free(_x2c_macro_out_62);
 }
 
 Array ArrayFloat_array(ArrayFloat _x2c_macro_array_237){
@@ -4148,7 +4136,7 @@ static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_252, int _x2c_macr
         if(_x2c_macro_delta_5 > INT_MAX - _x2c_macro_n_58){
           size_t _x2c_macro_size_15 =(size_t) _x2c_macro_n_58 +(size_t) _x2c_macro_delta_5;
           {
-            static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl__core_setslice",.line = 160};
+            static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl__core_setslice",.line = 148};
             x2c_error_raise_n(& _x2c_error_site_46, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_15));
             __builtin_unreachable();
           }
@@ -4251,7 +4239,7 @@ int ArrayDbl_try_next(ArrayDbl _x2c_macro_array_260, int * _x2c_macro_cursor_11,
 double ArrayDbl_push(ArrayDbl _x2c_macro_array_261, double _x2c_macro_value_78){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(double_var(_x2c_macro_value_78))){
-    static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_push",.line = 161};
+    static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_push",.line = 149};
     x2c_error_raise_n(& _x2c_error_site_47, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -4285,7 +4273,7 @@ double ArrayDbl_shift(ArrayDbl _x2c_macro_array_264){
 double ArrayDbl_unshift(ArrayDbl _x2c_macro_array_265, double _x2c_macro_value_81){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(double_var(_x2c_macro_value_81))){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_unshift",.line = 161};
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_unshift",.line = 149};
     x2c_error_raise_n(& _x2c_error_site_48, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -4304,7 +4292,7 @@ double ArrayDbl_insert(ArrayDbl _x2c_macro_array_266, int _x2c_macro_index_69, d
     if(_x2c_macro_index_69 < 0 || _x2c_macro_index_69 > _x2c_macro_n_63) return 0.0;
     if(_x2c_macro_n_63 == INT_MAX) _size_limit(_5, _x2c_macro_n_63);
     if(Var_is_void(double_var(_x2c_macro_value_82))){
-      static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_insert",.line = 161};
+      static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/typed-array.x",.function = "ArrayDbl_insert",.line = 149};
       x2c_error_raise_n(& _x2c_error_site_49, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -4486,15 +4474,15 @@ Buffer ArrayDbl_write_str(ArrayDbl _x2c_macro_array_282, Buffer _x2c_macro_out_7
 }
 
 String ArrayDbl_str(ArrayDbl _x2c_macro_array_283){
-  Buffer _x2c_macro_out_74 = _array_new_buffer();
+  Buffer _x2c_macro_out_74 = Buffer_new(0);
   ArrayDbl_write_str(_x2c_macro_array_283, _x2c_macro_out_74);
-  return _array_finish_buffer(_x2c_macro_out_74);
+  return Buffer_str_free(_x2c_macro_out_74);
 }
 
 String ArrayDbl_repr(ArrayDbl _x2c_macro_array_284){
-  Buffer _x2c_macro_out_75 = _array_new_buffer();
+  Buffer _x2c_macro_out_75 = Buffer_new(0);
   ArrayDbl_write_repr(_x2c_macro_array_284, _x2c_macro_out_75);
-  return _array_finish_buffer(_x2c_macro_out_75);
+  return Buffer_str_free(_x2c_macro_out_75);
 }
 
 Array ArrayDbl_array(ArrayDbl _x2c_macro_array_286){
@@ -4747,7 +4735,7 @@ static void ArrayString__core_setslice(ArrayString _x2c_macro_array_301, int _x2
         if(_x2c_macro_delta_6 > INT_MAX - _x2c_macro_n_69){
           size_t _x2c_macro_size_18 =(size_t) _x2c_macro_n_69 +(size_t) _x2c_macro_delta_6;
           {
-            static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/typed-array.x",.function = "ArrayString__core_setslice",.line = 171};
+            static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/typed-array.x",.function = "ArrayString__core_setslice",.line = 157};
             x2c_error_raise_n(& _x2c_error_site_50, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_18));
             __builtin_unreachable();
           }
@@ -4852,7 +4840,7 @@ int ArrayString_try_next(ArrayString _x2c_macro_array_309, int * _x2c_macro_curs
 String ArrayString_push(ArrayString _x2c_macro_array_310, String _x2c_macro_value_93){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(String_var(_x2c_macro_value_93))){
-    static const X2CErrorSite _x2c_error_site_51 = {.file = "../../lib/typed-array.x",.function = "ArrayString_push",.line = 172};
+    static const X2CErrorSite _x2c_error_site_51 = {.file = "../../lib/typed-array.x",.function = "ArrayString_push",.line = 158};
     x2c_error_raise_n(& _x2c_error_site_51, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -4886,7 +4874,7 @@ String ArrayString_shift(ArrayString _x2c_macro_array_313){
 String ArrayString_unshift(ArrayString _x2c_macro_array_314, String _x2c_macro_value_96){
   if(! _init_guard_) _file_init_();
   if(0 && Var_is_void(String_var(_x2c_macro_value_96))){
-    static const X2CErrorSite _x2c_error_site_52 = {.file = "../../lib/typed-array.x",.function = "ArrayString_unshift",.line = 172};
+    static const X2CErrorSite _x2c_error_site_52 = {.file = "../../lib/typed-array.x",.function = "ArrayString_unshift",.line = 158};
     x2c_error_raise_n(& _x2c_error_site_52, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -4905,7 +4893,7 @@ String ArrayString_insert(ArrayString _x2c_macro_array_315, int _x2c_macro_index
     if(_x2c_macro_index_82 < 0 || _x2c_macro_index_82 > _x2c_macro_n_74) return 0;
     if(_x2c_macro_n_74 == INT_MAX) _size_limit(_6, _x2c_macro_n_74);
     if(Var_is_void(String_var(_x2c_macro_value_97))){
-      static const X2CErrorSite _x2c_error_site_53 = {.file = "../../lib/typed-array.x",.function = "ArrayString_insert",.line = 172};
+      static const X2CErrorSite _x2c_error_site_53 = {.file = "../../lib/typed-array.x",.function = "ArrayString_insert",.line = 158};
       x2c_error_raise_n(& _x2c_error_site_53, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -5087,15 +5075,15 @@ Buffer ArrayString_write_str(ArrayString _x2c_macro_array_331, Buffer _x2c_macro
 }
 
 String ArrayString_str(ArrayString _x2c_macro_array_332){
-  Buffer _x2c_macro_out_87 = _array_new_buffer();
+  Buffer _x2c_macro_out_87 = Buffer_new(0);
   ArrayString_write_str(_x2c_macro_array_332, _x2c_macro_out_87);
-  return _array_finish_buffer(_x2c_macro_out_87);
+  return Buffer_str_free(_x2c_macro_out_87);
 }
 
 String ArrayString_repr(ArrayString _x2c_macro_array_333){
-  Buffer _x2c_macro_out_88 = _array_new_buffer();
+  Buffer _x2c_macro_out_88 = Buffer_new(0);
   ArrayString_write_repr(_x2c_macro_array_333, _x2c_macro_out_88);
-  return _array_finish_buffer(_x2c_macro_out_88);
+  return Buffer_str_free(_x2c_macro_out_88);
 }
 
 Array ArrayString_array(ArrayString _x2c_macro_array_335){

@@ -5487,17 +5487,17 @@ static List Compiler__bind_switch(Compiler c, Var expr, Var body){
 }
 
 List Compiler_optional_reference_test(Compiler, List, int *);
-int reference_guard_exits(List);
-void Compiler_mark_reference_present(Compiler, List);
+void Compiler_settle_reference(Compiler, List, int, List, List);
 static List Compiler__bind_if(Compiler c, Var condition, Var ontrue){
-  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  if(List_truth(binding) && ! true_is_present && reference_guard_exits(yes)) Compiler_mark_reference_present(c, binding);  return cons(_14519, cons(List_var(test), cons(List_var(yes), NULL)));
+  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, NULL);  return cons(_14519, cons(List_var(test), cons(List_var(yes), NULL)));
 }
 
 static List Compiler__bind_if_else(Compiler c, Var condition, Var ontrue, Var onfalse){
-  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  List no = Compiler__bind_branch(c, onfalse, binding, ! true_is_present);  if(List_truth(binding) &&((reference_guard_exits(yes) && ! true_is_present) ||(reference_guard_exits(no) && true_is_present))) Compiler_mark_reference_present(c, binding);  return cons(_14519, cons(List_var(test), cons(List_var(yes), cons(List_var(no), NULL))));
+  List test = Compiler__resolve(c, Var_list(condition));  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, test, &(true_is_present));  List yes = Compiler__bind_branch(c, ontrue, binding, true_is_present);  List no = Compiler__bind_branch(c, onfalse, binding, ! true_is_present);  Compiler_settle_reference(c, binding, true_is_present, yes, no);  return cons(_14519, cons(List_var(test), cons(List_var(yes), cons(List_var(no), NULL))));
 }
 
 List Compiler_present_references(Compiler);
+void Compiler_mark_reference_present(Compiler, List);
 void Compiler_restore_reference_presence(Compiler, List);
 static List Compiler__bind_branch(Compiler c, Var arm, List binding, int present){
   if(! List_truth(binding)) return Compiler__bind_statement(c, arm);  List before = Compiler_present_references(c);  if(present) Compiler_mark_reference_present(c, binding);  List bound = Compiler__bind_statement(c, arm);  Compiler_restore_reference_presence(c, before);  return bound;

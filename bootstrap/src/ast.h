@@ -19,7 +19,11 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling);
 
 String binding_identity_spelling(List binding);
 
+List Ast_designated(Var value);
+
 List Ast_lvalue_binding(Ast ast);
+
+List Ast_written_operand(Ast node);
 
 Ast Ast_rewrite_children(Ast ast, Func per_child);
 
@@ -36,6 +40,8 @@ int Ast_never_returns(Ast ast);
 Symbol Symbol_compound_operator(Symbol op);
 
 Symbol Symbol_compound_assignment(Symbol op);
+
+int Symbol_binary_precedence(Symbol op);
 
 int Symbol_is_assignment_op(Symbol op);
 

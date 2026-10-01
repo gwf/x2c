@@ -10,11 +10,11 @@
 
 #include "type.h"
 
-static List _782, _781, _779, _778, _776, _775, _774, _772, _771, _762, _761, _760, _758, _651, _650, _648, _647, _646, _644, _643, _642, _599, _598, _597, _594, _593, _591, _589, _588, _587, _585, _584, _583, _581, _580, _578, _577, _534, _533, _369, _368, _367, _365, _364, _362, _361, _359, _358, _356, _354, _352, _350, _349, _347, _342, _341, _340, _336, _335, _333, _331, _330, _329, _328, _327, _322, _321, _320, _319, _318, _316, _315, _314, _313, _311, _310, _309, _308, _307, _305, _304, _303, _302, _300, _298, _297, _294, _292, _290, _289, _288, _287, _286, _285, _283, _282, _281, _279, _278, _274, _273, _271, _270, _268, _266, _264, _263, _262, _261, _259, _257, _256, _253, _252, _251, _248, _247, _244, _243, _240, _239, _236, _234, _233, _230, _229, _228, _226, _224, _223, _222, _218, _217, _216, _214, _213, _212, _210, _207, _205, _204, _203, _197, _196, _195, _194, _188, _186, _185, _184, _178, _176, _175, _174, _168, _167, _166, _165, _159, _158, _157, _156, _150, _149, _148, _147, _142, _140, _139, _138, _132, _131, _130, _129, _123, _121, _120, _119, _113, _112, _111, _110, _104, _102, _101, _100, _94, _92, _91, _90, _87, _85, _84, _83, _77, _60, _58, _57, _56, _54, _53, _30, _3;
+static List _779, _778, _776, _775, _774, _772, _771, _762, _761, _760, _758, _651, _650, _648, _647, _646, _644, _643, _642, _599, _598, _597, _594, _593, _591, _589, _588, _587, _585, _584, _583, _581, _580, _578, _577, _534, _533, _369, _368, _367, _365, _364, _362, _361, _359, _358, _356, _354, _352, _350, _349, _347, _342, _341, _340, _336, _335, _333, _331, _330, _329, _328, _327, _322, _321, _320, _319, _318, _316, _315, _314, _313, _311, _310, _309, _308, _307, _305, _304, _303, _302, _300, _298, _297, _294, _292, _290, _289, _288, _287, _286, _285, _283, _282, _281, _279, _278, _274, _273, _271, _270, _268, _266, _264, _263, _262, _261, _259, _257, _256, _253, _252, _251, _248, _247, _244, _243, _240, _239, _236, _234, _233, _230, _229, _228, _226, _224, _223, _222, _218, _217, _216, _214, _213, _212, _210, _207, _205, _204, _203, _197, _196, _195, _194, _188, _186, _185, _184, _178, _176, _175, _174, _168, _167, _166, _165, _159, _158, _157, _156, _150, _149, _148, _147, _142, _140, _139, _138, _132, _131, _130, _129, _123, _121, _120, _119, _113, _112, _111, _110, _104, _102, _101, _100, _94, _92, _91, _90, _87, _85, _84, _83, _77, _60, _58, _57, _56, _54, _53, _30, _3;
 
-static String _783, _201, _199, _192, _190, _182, _180, _172, _170, _163, _161, _154, _152, _145, _143, _136, _134, _127, _125, _117, _115, _108, _106, _98, _96, _88, _81, _79;
+static String _780, _201, _199, _192, _190, _182, _180, _172, _170, _163, _161, _154, _152, _145, _143, _136, _134, _127, _125, _117, _115, _108, _106, _98, _96, _88, _81, _79;
 
-static Var _780, _777, _773, _763, _759, _711, _649, _645, _596, _595, _592, _590, _586, _582, _579, _532, _366, _363, _360, _357, _355, _353, _351, _348, _346, _343, _339, _338, _337, _334, _332, _326, _325, _324, _323, _317, _312, _306, _301, _299, _296, _295, _293, _291, _284, _280, _277, _276, _275, _272, _269, _267, _265, _260, _258, _255, _254, _250, _249, _246, _245, _242, _241, _238, _237, _235, _232, _231, _227, _225, _221, _220, _219, _215, _211, _209, _208, _206, _202, _200, _198, _193, _191, _189, _187, _183, _181, _179, _177, _173, _171, _169, _164, _162, _160, _155, _153, _151, _146, _144, _141, _137, _135, _133, _128, _126, _124, _122, _118, _116, _114, _109, _107, _105, _103, _99, _97, _95, _93, _89, _86, _82, _80, _78, _76, _75, _55, _52, _51, _46, _45, _44, _32, _29, _6, _2, _1;
+static Var _777, _773, _763, _759, _711, _649, _645, _596, _595, _592, _590, _586, _582, _579, _532, _366, _363, _360, _357, _355, _353, _351, _348, _346, _343, _339, _338, _337, _334, _332, _326, _325, _324, _323, _317, _312, _306, _301, _299, _296, _295, _293, _291, _284, _280, _277, _276, _275, _272, _269, _267, _265, _260, _258, _255, _254, _250, _249, _246, _245, _242, _241, _238, _237, _235, _232, _231, _227, _225, _221, _220, _219, _215, _211, _209, _208, _206, _202, _200, _198, _193, _191, _189, _187, _183, _181, _179, _177, _173, _171, _169, _164, _162, _160, _155, _153, _151, _146, _144, _141, _137, _135, _133, _128, _126, _124, _122, _118, _116, _114, _109, _107, _105, _103, _99, _97, _95, _93, _89, _86, _82, _80, _78, _76, _75, _55, _52, _51, _46, _45, _44, _32, _29, _6, _2, _1;
 
 #include <limits.h>
 #include <stdarg.h>
@@ -110,10 +110,6 @@ static int _literal_magnitude(String text, int end, unsigned long long * magnitu
 static int _radix(String text, int end, int * pos);
 
 static Type _integer_literal_type(unsigned long long magnitude, int decimal, int is_unsigned, int longs);
-
-static Var _designated(Var value);
-
-static Var _same_object(List node);
 
 Map Type_builtin_var_tags(void);
 
@@ -496,10 +492,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _777 = List_var(_776);
   _778 = cons(_777, _774);
   _779 = cons(_6, _778);
-  _780 = Symbol_var(93);
-  _781 = cons(_780, _597);
-  _782 = cons(_45, _781);
-  _783 = String_new("Var_int");
+  _780 = String_new("Var_int");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -1042,7 +1035,7 @@ Symbol Type_scalar_tag(Type type){
 
 String Var_string(Var);
 String Type_var_numeric_extractor(Type type){
-  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _783;  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_cadr(row)) : NULL;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _780;  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_cadr(row)) : NULL;
 }
 
 String Type_var_numeric_update_helper(Type type){
@@ -1154,11 +1147,12 @@ static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x
 return NULL;
 }
 
+List Ast_designated(Var);
 String binding_identity_spelling(List);
 String ast_direct_identifier(Var value){
-  if(! _init_guard_) _file_init_();  Var designated = _designated(value);  if(! Var_is_row(designated, 9, 7, 4)) return NULL;  List ast = Var_list(designated);
+  if(! _init_guard_) _file_init_();  List designated = Ast_designated(value);
   {
-    List _x2c_match_expr = ast;
+    List _x2c_match_expr = designated;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 19147688: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var binding = _x2c_match_values[0];  return binding_identity_spelling(Var_list(binding));  break; } } case 992: ;  static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_599), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return ast_addressed_identifier(base);  break;
@@ -1172,9 +1166,9 @@ return NULL;
 }
 
 String ast_indirect_identifier(Var value){
-  if(! _init_guard_) _file_init_();  Var designated = _designated(value);  if(! Var_is_row(designated, 9, 7, 4)) return NULL;  List ast = Var_list(designated);
+  if(! _init_guard_) _file_init_();  List designated = Ast_designated(value);
   {
-    List _x2c_match_expr = ast;
+    List _x2c_match_expr = designated;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_779), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return ast_direct_identifier(base);  break;
@@ -1190,37 +1184,6 @@ return NULL;
 }
 
 int Var_is_void(Var);
-static Var _designated(Var value){
-  while(Var_is_row(value, 9, 7, 4)){
-    List node = Var_list(value);  Var inner = _same_object(node);  if(Var_is_void(inner)) return List_var(node);  value = inner;
-  }
-  return Var_null();
-}
-
-Var Var_cadr(Var);
-static Var _same_object(List node){
-
-  {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_capture(& _x2c_match_site_38, _x2c_match_expr, List_var(_369), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  return inner;  break;
-}
-default: ;  static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try_capture(& _x2c_match_site_39, _x2c_match_expr, List_var(_534), &_x2c_match_capture)) {Var inner = _x2c_match_values[0];  return inner;  break;
-}
-static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_779), &_x2c_match_capture)) {Var base = _x2c_match_values[0]; {
-  Type type = Var_type(Var_cadr(base));  if(Type_is_array(type)) return base;
-}
-break;
-}
-static MatchCaptureSite _x2c_match_site_41;  if (x2c_match_site_try_capture(& _x2c_match_site_41, _x2c_match_expr, List_var(_782), &_x2c_match_capture)) {Var base = _x2c_match_values[0];  return base;  break;
-}
-
-    }
-  }
-return((void) 0, Void);
-}
-
 Symbol Type_var_tag(Type type){
   if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type))) return 0;  if(declared_typetags != NULL){
     Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(! Var_is_void(row)) return Var_symbol(List_car(Var_list(row)));

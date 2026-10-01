@@ -581,13 +581,12 @@ List Compiler_with_binding(Compiler c){
 }
 
 List Compiler_optional_reference_test(Compiler, List, int *);
-int reference_guard_exits(List);
-void Compiler_mark_reference_present(Compiler, List);
+void Compiler_settle_reference(Compiler, List, int, List, List);
 static List Compiler__if_statement(Compiler c){
   List cond = Compiler__keyword_paren_expr(c, 588);  int true_is_present = 1;  List binding = Compiler_optional_reference_test(c, cond, &(true_is_present));  List ontrue = Compiler__if_arm(c, binding, true_is_present);  Compiler___complete_here(c, 239352771914, _30268);  if(Compiler_peek(c, 0) != 353482){
-    if(List_truth(binding) && ! true_is_present && reference_guard_exits(ontrue)) Compiler_mark_reference_present(c, binding);  return cons(_14519, cons(List_var(cond), cons(List_var(ontrue), NULL)));
+    Compiler_settle_reference(c, binding, true_is_present, ontrue, NULL);  return cons(_14519, cons(List_var(cond), cons(List_var(ontrue), NULL)));
   }
-  ontrue = Compiler__continued(c, ontrue);  Compiler_next(c);  List onfalse = Compiler__if_arm(c, binding, ! true_is_present);  if(List_truth(binding) && reference_guard_exits(ontrue) && ! true_is_present) Compiler_mark_reference_present(c, binding);  if(List_truth(binding) && reference_guard_exits(onfalse) && true_is_present) Compiler_mark_reference_present(c, binding);  return cons(_14519, cons(List_var(cond), cons(List_var(ontrue), cons(List_var(onfalse), NULL))));
+  ontrue = Compiler__continued(c, ontrue);  Compiler_next(c);  List onfalse = Compiler__if_arm(c, binding, ! true_is_present);  Compiler_settle_reference(c, binding, true_is_present, ontrue, onfalse);  return cons(_14519, cons(List_var(cond), cons(List_var(ontrue), cons(List_var(onfalse), NULL))));
 }
 
 static List Compiler__keyword_paren_expr(Compiler c, Symbol keyword){
@@ -595,6 +594,7 @@ static List Compiler__keyword_paren_expr(Compiler c, Symbol keyword){
 }
 
 List Compiler_present_references(Compiler);
+void Compiler_mark_reference_present(Compiler, List);
 void Compiler_restore_reference_presence(Compiler, List);
 static List Compiler__if_arm(Compiler c, List binding, int present){
   if(! List_truth(binding)) return Compiler_parse_governed(c, AST_STATEMENT);  List before = Compiler_present_references(c);  if(present) Compiler_mark_reference_present(c, binding);  List arm = Compiler_parse_governed(c, AST_STATEMENT);  Compiler_restore_reference_presence(c, before);  return arm;

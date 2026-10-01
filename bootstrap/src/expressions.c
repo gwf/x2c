@@ -55,8 +55,6 @@ static List Compiler__parse_binary_level_tail(Compiler c, int level, List lhs);
 
 static List Compiler__parse_binary_levels_from(Compiler c, List lhs);
 
-static inline int _precedence(Symbol op);
-
 static inline Symbol Compiler__binary_operator(Compiler c);
 
 static inline int Compiler__is_type_operator(Compiler c);
@@ -74,6 +72,12 @@ static List Compiler__parse_cast(Compiler c);
 static int Compiler__cast_operand_after_parens(Compiler c);
 
 static int Compiler__macro_hole_starts_cast_type(Compiler c, Token after);
+
+static const SymbolSet increments =(SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\000\001\000\000\070\007\000\000\000\000\000\000\376\007\000\000\000\000\000\000";
+
+static const SymbolSet unary_operators =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\002\000\003\006\005\000\000\000\000\002\002\000\115\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\375\000\000\000\000\000\000\000\074\000\000\000\000\000\000\000";
+
+static const SymbolSet primary_starts =(SymbolSet) "\001\000\000\000\024\000\000\000\017\000\000\000\025\174\112\177\271\171\067\236\000\017\003\020\000\004\014\000\000\000\000\016\000\013\011\022\000\001\000\032\000\000\000\000\000\014\037\000\035\010\000\000\000\000\007\005\000\000\000\000\000\000\000\000\012\000\011\000\250\053\044\001\000\000\000\000\134\002\000\000\000\000\000\000\111\000\000\000\000\000\000\000\121\044\000\000\000\000\000\000\121\000\000\000\000\000\000\000\367\000\000\000\000\000\000\000\267\000\000\000\000\000\000\000\121\045\000\000\000\000\000\000\171\274\022\000\000\000\000\000\267\045\000\000\000\000\000\000\367\045\000\000\000\000\000\000\105\045\000\000\000\000\000\000\103\045\000\000\000\000\000\000\110\172\026\000\000\000\000\000\144\100\343\323\304\000\000\000\250\113\237\046\006\000\000\000\150\170\314\174\232\030\000\000\266\014\150\174\232\030\000\000\332\243\341\323\304\000\000\000\330\023\055\317\117\023\003\000";
 
 static int _cast_operand_follows(Symbol s);
 
@@ -2432,11 +2436,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _31909 = cons(_31908, NULL);
   _31910 = cons(_225, _31909);
   _31911 = List_var(_31910);
-  _31912 = int_var(2098);
+  _31912 = int_var(2055);
   _31913 = cons(_31912, NULL);
   _31914 = cons(_231, _31913);
   _31915 = List_var(_31914);
-  _31916 = int_var(77808);
+  _31916 = int_var(77072);
   _31917 = cons(_31916, NULL);
   _31918 = cons(_246, _31917);
   _31919 = List_var(_31918);
@@ -2563,11 +2567,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _32040 = cons(_32039, NULL);
   _32041 = cons(_139, _32040);
   _32042 = List_var(_32041);
-  _32043 = int_var(2106);
+  _32043 = int_var(2063);
   _32044 = cons(_32043, NULL);
   _32045 = cons(_231, _32044);
   _32046 = List_var(_32045);
-  _32047 = int_var(78173);
+  _32047 = int_var(77437);
   _32048 = cons(_32047, NULL);
   _32049 = cons(_246, _32048);
   _32050 = List_var(_32049);
@@ -2664,11 +2668,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32138 = cons(_32137, NULL);
   _32139 = cons(_139, _32138);
   _32140 = List_var(_32139);
-  _32141 = int_var(2117);
+  _32141 = int_var(2074);
   _32142 = cons(_32141, NULL);
   _32143 = cons(_231, _32142);
   _32144 = List_var(_32143);
-  _32145 = int_var(78588);
+  _32145 = int_var(77852);
   _32146 = cons(_32145, NULL);
   _32147 = cons(_246, _32146);
   _32148 = List_var(_32147);
@@ -2744,11 +2748,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32218 = cons(_32217, NULL);
   _32219 = cons(_139, _32218);
   _32220 = List_var(_32219);
-  _32221 = int_var(2119);
+  _32221 = int_var(2076);
   _32222 = cons(_32221, NULL);
   _32223 = cons(_231, _32222);
   _32224 = List_var(_32223);
-  _32225 = int_var(78668);
+  _32225 = int_var(77932);
   _32226 = cons(_32225, NULL);
   _32227 = cons(_246, _32226);
   _32228 = List_var(_32227);
@@ -2826,11 +2830,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32300 = cons(_32299, NULL);
   _32301 = cons(_139, _32300);
   _32302 = List_var(_32301);
-  _32303 = int_var(2123);
+  _32303 = int_var(2080);
   _32304 = cons(_32303, NULL);
   _32305 = cons(_231, _32304);
   _32306 = List_var(_32305);
-  _32307 = int_var(78873);
+  _32307 = int_var(78137);
   _32308 = cons(_32307, NULL);
   _32309 = cons(_246, _32308);
   _32310 = List_var(_32309);
@@ -3017,11 +3021,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32491 = cons(_32490, NULL);
   _32492 = cons(_139, _32491);
   _32493 = List_var(_32492);
-  _32494 = int_var(2172);
+  _32494 = int_var(2129);
   _32495 = cons(_32494, NULL);
   _32496 = cons(_231, _32495);
   _32497 = List_var(_32496);
-  _32498 = int_var(81000);
+  _32498 = int_var(80264);
   _32499 = cons(_32498, NULL);
   _32500 = cons(_246, _32499);
   _32501 = List_var(_32500);
@@ -3735,8 +3739,9 @@ static List Compiler__parse_binary_level(Compiler c, int level){
   if(level > 10) return Compiler__parse_cast(c);  return Compiler__parse_binary_level_tail(c, level, Compiler__parse_binary_level(c, level + 1));
 }
 
+int Symbol_binary_precedence(Symbol);
 static List Compiler__parse_binary_level_tail(Compiler c, int level, List lhs){
-  int first = 1;  while(_precedence(Compiler__binary_operator(c)) == level ||(level == 7 && Compiler__is_type_operator(c))){
+  int first = 1;  while(Symbol_binary_precedence(Compiler__binary_operator(c)) == level ||(level == 7 && Compiler__is_type_operator(c))){
     if(Compiler__is_type_operator(c)){
       lhs = Compiler__parse_type_test(c, lhs);  continue;
     }
@@ -3750,13 +3755,6 @@ static List Compiler__parse_binary_level_tail(Compiler c, int level, List lhs){
 
 static List Compiler__parse_binary_levels_from(Compiler c, List lhs){
   for(int level = 10;  level > 0;  level --) lhs = Compiler__parse_binary_level_tail(c, level, lhs);  return lhs;
-}
-
-static inline int _precedence(Symbol op){
-  switch(op){
-    case 31993 : return 1;  case 9805 : return 2;  case 249 : return 3;  case 189 : return 4;  case 77 : return 5;  case 15739 : case 8571 : case 2014587 : case 1097083 : return 6;  case 121 : case 125 : case 604 : case 15483 : case 15995 : return 7;  case 15481 : case 15997 : return 8;  case 56 : case 62 : return 9;  case 54 : case 95 : case 75 : case 129 : return 10;  default: return 0;
-  }
-
 }
 
 int Compiler_at_word(Compiler, String);
@@ -3869,11 +3867,9 @@ static int Compiler__macro_hole_starts_cast_type(Compiler c, Token after){
   if(! Map_truth(c -> macro_holes) || Compiler_peek(c, 0) != 73 || Compiler_peek(c, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  if((after -> type == 183 || String_equal(after -> text, _30598)) && kind != 1362954) return 0;  return _cast_operand_follows(after -> type);
 }
 
+int SymbolSet_contains(SymbolSet, Symbol);
 static int _cast_operand_follows(Symbol s){
-  switch(s){
-    case 19147688 : case 604 : case 73 : case 9297 : case 81 : case 247 : case 9553 : case 1227897 : case 183 : case 9655 : case 9719 : case 9541 : case 9539 : case 845368475748 : case 26417777576 : case 27051797805160 : case 27051791223990 : case 845368370138 : case 865658429314008 : case 1473096 : case 1295657932 : case 1848 : case 2046 : case 60 : case 253 : case 54 : case 77 : case 62 : case 56 : return 1;
-  }
-  return 0;
+  return SymbolSet_contains(primary_starts, s) || s == 1295657932 || SymbolSet_contains(increments, s) || SymbolSet_contains(unary_operators, s);
 }
 
 List List_match(List, Var);
@@ -3922,7 +3918,7 @@ Type type = Var_type(List_cadr(operand)), numeric = Sym_resolve_numeric_type(c -
 
 void Compiler___complete_here(Compiler, Symbol, List);
 static List Compiler__parse_unary_op(Compiler c){
-  Compiler___complete_here(c, 377892, NULL);  Symbol op = Compiler_peek(c, 0);  Token origin = c -> token;  if(op == 1295657932) return Compiler__parse_sizeof(c);  if(op != 1848 && op != 2046 && op != 253 && op != 54 && op != 77 && op != 62 && op != 56 && op != 60) return Compiler__parse_postfix(c);  Compiler_next(c);  List operand = op == 1848 || op == 2046 ? Compiler__parse_unary_op(c) : Compiler__parse_cast(c);  return Compiler_resolve_expression(c, source_operator_expression(NULL, cons(Symbol_var(op), cons(List_var(operand), NULL))), origin);
+  Compiler___complete_here(c, 377892, NULL);  Symbol op = Compiler_peek(c, 0);  Token origin = c -> token;  if(op == 1295657932) return Compiler__parse_sizeof(c);  int increment = SymbolSet_contains(increments, op);  if(! increment && ! SymbolSet_contains(unary_operators, op)) return Compiler__parse_postfix(c);  Compiler_next(c);  List operand = increment ? Compiler__parse_unary_op(c) : Compiler__parse_cast(c);  return Compiler_resolve_expression(c, source_operator_expression(NULL, cons(Symbol_var(op), cons(List_var(operand), NULL))), origin);
 }
 
 static List Compiler__parse_sizeof(Compiler c){
@@ -4039,7 +4035,7 @@ int Compiler_at_completion(Compiler);
 static List Compiler__parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 606};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 563};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4049,7 +4045,7 @@ static List Compiler__parse_postfix_arrow(Compiler c, List expr){
 static List Compiler__parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_384) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 620};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 577};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
