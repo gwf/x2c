@@ -1,8 +1,8 @@
 #!/bin/sh
 # Writes src/linked-meta.x, the shipped `meta` code compiled into the
 # compiler, from the sources that define it. Each bodied `meta` definition
-# of lib/meta.x and of every `.xmacro` the compiler, the standard prelude
-# (lib/x2c.x), or another such `.xmacro` imports is copied without its `meta` marker, so its tokens, and therefore
+# of lib/meta.x and of every `.xmacro` a shipped compiler or runtime source
+# imports is copied without its `meta` marker, so its tokens, and therefore
 # its definition hash, match the source. A lib/meta.x builder with a
 # run-time form is bound to the runtime's own definition instead: one that
 # is not static and reaches no compiler operation. The file is rewritten
@@ -15,8 +15,7 @@ cd "$root"
 
 # The imported `.xmacro` files that hold a bodied `meta` definition, in name
 # order, which is also the order they are copied in.
-prelude=$(sed -n 's|^#include "\(.*\)"$|lib/\1|p' lib/x2c.x)
-imported=$(grep -ho '\$(import "[^"]*\.xmacro")' src/*.x $prelude \
+imported=$(grep -ho '\$(import "[^"]*\.xmacro")' src/*.x lib/*.x \
     lib/*.xmacro src/*.xmacro |
   sed 's/.*"\(.*\)")/\1/; s|.*/||' | sort -u)
 sources=lib/meta.x
