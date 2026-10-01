@@ -74,6 +74,9 @@ macro Expression $lisp._standard.source() =>
 protocol Cleanup(Lisp);
 
 #pragma private
+#include "meta.x"
+$(import "lisp-form-errors.xmacro")
+$(import "lisp-session-errors.xmacro")
 
 #include <signal.h>
 
@@ -225,10 +228,10 @@ static int _initialize(void) {
    special form receives the raw forms. */
 
 static Var Lisp._eval(Lisp lisp, Var expr, LispEnv *env) {
-  if (expr is void) raise %(void-op (operation "eval"));
+  if (expr is void) $lisp.form.error("eval.void");
   if (expr.is_atom()) {
     Var value;
-    if (!lisp._lookup(env, expr, value)) raise %(unbound (name $expr));
+    if (!lisp._lookup(env, expr, value)) $lisp.form.error("eval.unbound", expr);
     return value;
   }
   if (expr is not <list> || expr.is_nil()) return expr;
@@ -247,7 +250,7 @@ static Var Lisp._eval(Lisp lisp, Var expr, LispEnv *env) {
    nested call. */
 static Var Lisp._apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   if (callable is <lambda>) return lisp._apply_lambda(callable, raw, env);
-  if (callable is not <func>) raise %(not-call (actual ${callable.kind()}));
+  if (callable is not <func>) $lisp.form.error("call.type", callable);
   Func fn = (Func) callable.pointer();
   int special = lisp._special_id(fn);
   if (special >= 0) return lisp._apply_special(special, raw, env);
@@ -278,7 +281,7 @@ static Var Lisp._apply_values(
     if (lambda.macro) _not_procedure(callable);
     return lisp._call_lambda(lambda, values);
   }
-  if (callable is not <func>) raise %(not-call (actual ${callable.kind()}));
+  if (callable is not <func>) $lisp.form.error("call.type", callable);
   Func fn = (Func) callable.pointer();
   int special = lisp._special_id(fn);
   if (special < 0) return lisp._call_native(fn, values);
@@ -329,18 +332,17 @@ static Var Lisp._special_def(Lisp lisp, List args, LispEnv *env) {
   Var (name, form) = args;
   if (args.len() != 2 || !name.is_atom()) {
     int actual = args.len();
-    raise %(bad-arity (operation "def") (expected 2) (actual $actual)
-                       (value $args));
+    $lisp.form.error("def.arity", actual, args);
   }
   if (lisp.protect_x2c && name.str().startswith("x2c."))
-    raise %(bad-state (operation "def") (name $name));
+    $lisp.form.error("def.protected", name);
   if (lisp._inherited(name))
-    raise %(bad-state (operation "def") (why "inherited") (name $name));
+    $lisp.form.error("def.inherited", name);
   /* A frozen session is complete, and a value produced now belongs to a
      narrower Context than it does, so the binding would outlive what it
      names. A child session is where a later definition goes. */
   if (lisp.frozen)
-    raise %(bad-state (operation "def") (why "frozen") (name $name));
+    $lisp.form.error("def.frozen", name);
   Var value = lisp._eval(form, env);
   _binding_set(&lisp.scope, lisp.globals, name, value);
   return value;
@@ -356,7 +358,7 @@ static Var Lisp._special_cond(Lisp lisp, List args, LispEnv *env) {
    when none does. A clause's form comes from a List, so it is never
    `void`. */
 static Var Lisp._cond_select(Lisp lisp, List args, LispEnv *env) {
-  if (!args) raise %(bad-arity (operation "cond") (expected 1) (actual 0));
+  if (!args) $lisp.form.error("cond.empty");
   foreach (Var clause, args) {
     Var (test, form) = _cond_clause(clause);
     if (lisp_truth(lisp._eval(test, env))) return form;
@@ -367,12 +369,11 @@ static Var Lisp._cond_select(Lisp lisp, List args, LispEnv *env) {
 /* A clause is a List of a test and a result form. */
 static List _cond_clause(Var clause) {
   if (clause is not <list>)
-    raise %(bad-types (operation "cond") (value $clause) (want "List"));
+    $lisp.form.error("cond.type", clause);
   List pair = clause;
   if (pair.len() != 2) {
     int actual = pair.len();
-    raise %(bad-arity (operation "cond-clause") (expected 2)
-                       (actual $actual) (value $clause));
+    $lisp.form.error("cond.arity", actual, clause);
   }
   return pair;
 }
@@ -397,10 +398,10 @@ static Var Lisp._special_bind(Lisp lisp, List args, LispEnv *env) {
   Var signature = lisp._eval(signature_form, env);
   _string_argument(name, "bind");
   if (signature is not <list>)
-    raise %(bad-sig (operation "bind") (value $signature));
+    $lisp.form.error("bind.signature", signature);
   String native_name = name, List native_signature = signature;
   Func fn = _native_target(native_name);
-  if (!fn) raise %(no-symbol (name $native_name) (sig $native_signature));
+  if (!fn) $lisp.form.error("bind.missing", native_name, native_signature);
   return fn;
 }
 
@@ -442,12 +443,11 @@ static Var Lisp._qq(Lisp l, Var expr, LispEnv *env, int depth) {
   if (head != lsym_unquote && head != lsym_splicing)
     return l._qq_elements(form, env, depth);
   if (form.len() != 2)
-    raise %(bad-arity (operation "quasiquote") (value $expr));
+    $lisp.form.error("quote.shape", expr);
   if (depth > 0) return head.cons(l._qq_elements(form.cdr(), env, depth - 1));
   Var value = l._eval(form.cadr(), env);
   if (head == lsym_splicing)
-    raise %(bad-types (operation "quasiquote-splice")
-                       (actual ${expr.kind()}));
+    $lisp.form.error("splice.type", expr);
   return value;
 }
 
@@ -468,11 +468,10 @@ static int _is_splice(Var expr) =>
 static List Lisp._splice(Lisp lisp, Var expr, LispEnv *env) {
   List form = expr;
   if (form.len() != 2)
-    raise %(bad-arity (operation "quasiquote") (value $expr));
+    $lisp.form.error("quote.shape", expr);
   Var value = lisp._eval(form.cadr(), env);
   if (value is not <list>)
-    raise %(bad-types (operation "quasiquote-splice")
-                       (actual ${value.kind()}));
+    $lisp.form.error("splice.type", value);
   return value;
 }
 
@@ -486,7 +485,7 @@ static List Lisp._splice(Lisp lisp, Var expr, LispEnv *env) {
 static Var Lisp._make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   if (args.len() != 2 || args.car() is not <list>) {
     Symbol operation = macro ? <macro> : <lambda>;
-    raise %(bad-sig (operation $operation) (value $args));
+    $lisp.form.error("lambda.signature", operation, args);
   }
   Lambda lambda = Scope.malloc_in(&lisp.scope, sizeof(struct Lambda));
   Var result = void;
@@ -656,7 +655,7 @@ static Var Lisp._run_frame(
 static List _value_list(const Var *values, int count) {
   List args = NULL;
   for (int i = count - 1; i >= 0; i--) {
-    if (values[i] is void) raise %(void-op (operation "apply") (index $i));
+    if (values[i] is void) $lisp.form.error("apply.void", i);
     args = cons(values[i], args);
   }
   return args;
@@ -670,21 +669,21 @@ static void _bind_params(
   for (List p = lambda.params; p; p = p.cdr()) {
     Var name = p.car();
     if (name.is_atom() && name.str() == ".") {
-      if (!p.cdr()) raise %(bad-sig (operation "apply") (value $body));
+      if (!p.cdr()) $lisp.form.error("apply.rest", body);
       _binding_set(frame, bindings, p.cadr(), args);
       return;
     }
-    if (!args) raise %(bad-arity (operation "apply") (value $body));
+    if (!args) $lisp.form.error("apply.arity", body);
     _binding_set(frame, bindings, name, args.car());
     args = args.cdr();
   }
-  if (args) raise %(bad-arity (operation "apply") (value $body));
+  if (args) $lisp.form.error("apply.arity", body);
 }
 
 static void LispEnv._bind_values(
   LispEnv *local, Lambda lambda, const Var *values, int count) {
   if (count != lambda.params.len())
-    raise %(bad-arity (operation "apply") (value ${lambda.body}));
+    $lisp.form.error("apply.arity", lambda.body);
   local.params = lambda.params;
   local.values = values;
   local.value_count = count;
@@ -843,9 +842,9 @@ static void _cell_store(Var cell, Var value) {
 
 static void Lisp._spend_call(Lisp lisp) {
   if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
-    if (lisp.interrupted) raise %(interrupt (operation "apply"));
+    if (lisp.interrupted) $lisp.form.error("apply.interrupted");
     lisp.call_exhausted = 1;
-    raise %(call-stack (operation "apply") (why "steps"));
+    $lisp.form.error("apply.steps");
   }
 }
 
@@ -859,7 +858,7 @@ static void Lisp._check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
   unsigned long used =
     lisp.stack_base > at ? lisp.stack_base - at : at - lisp.stack_base;
   if (used > lisp.stack_allowance)
-    raise %(call-stack (operation "apply") (value ${lambda.body}));
+    $lisp.form.error("apply.stack", lambda.body);
 }
 
 /* C stack evaluator calls may use below the outermost one. Threads get 8 MB
@@ -942,26 +941,23 @@ static void Lisp._open_call_budget(Lisp lisp) {
 static void _arity(List args, int expected, String operation) {
   int actual = args.len();
   if (actual != expected)
-    raise %(bad-arity (operation $operation) (expected $expected)
-                       (actual $actual));
+    $lisp.form.error("form.arity", operation, expected, actual);
 }
 
 static void _string_argument(Var value, String operation) {
   if (value is not <string>)
-    raise %(bad-types (operation $operation) (actual ${value.kind()})
-                       (want "String"));
+    $lisp.form.error("form.string", operation, value);
 }
 
 /* `apply` takes its values as one List. */
 static List _list_argument(Var values) {
   if (values is not <list>)
-    raise %(bad-types (operation "apply") (actual ${values.kind()})
-                       (want "List"));
+    $lisp.form.error("apply.list", values);
   return values;
 }
 
 static void _not_procedure(Var callable) {
-  raise %(not-call (operation "apply") (actual ${callable.kind()}));
+  $lisp.form.error("apply.procedure", callable);
 }
 
 /* reader
@@ -1415,7 +1411,7 @@ static Func _callback(
   Var callable, FuncAdapter adapter, List signature, String operation) {
   if (callable.is_nil()) return NULL;
   if (!lisp_active)
-    raise %(bad-state (operation $operation) (why "no session"));
+    $lisp.session.error("callback.absent", operation);
   LispCallback context = { lisp_active, callable };
   return Func.new_context(adapter, signature, &context, sizeof context);
 }
@@ -1455,7 +1451,7 @@ static Var _iter_next_call(Func fn, const FuncArg *args) {
 static LispCallback *_callback_context(Func fn, String operation) {
   LispCallback *context = (void *) fn.context();
   if (!lisp_active || lisp_active != context.lisp)
-    raise %(bad-state (operation $operation) (why "wrong session"));
+    $lisp.session.error("callback.wrong", operation);
   return context;
 }
 
@@ -1738,7 +1734,7 @@ void Lisp.cleanup(Lisp value) { value.destroy(); }
    restores its caller's session when it returns. */
 
 static Var _bad_session(String operation) {
-  raise %(bad-arg (operation $operation));
+  $lisp.session.error("entry.null", operation);
 }
 
 macro Decorator $lisp.entry(Function $function, Expr $operation) {
@@ -1880,14 +1876,13 @@ int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
     `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 */
 void Lisp.set_global(Lisp lisp, String name, Var value) {
-  if (!lisp || !name) raise %(bad-arg (operation "Lisp.set_global"));
+  if (!lisp || !name) $lisp.session.error("global.args");
   if (lisp.frozen)
-    raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
+    $lisp.session.error("global.frozen");
   $scope(&lisp.scope) {
     Var interned = Atom.intern(name);
     if (lisp._inherited(interned))
-      raise %(bad-state (operation "Lisp.set_global") (why "inherited")
-                        (name $interned));
+      $lisp.session.error("global.inherited", interned);
     _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
@@ -1904,7 +1899,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     including its signature graph, retain their existing owners.
 */
 void Lisp.bind(Lisp lisp, String name, Func function) {
-  if (!lisp || !name || !function) raise %(bad-arg (operation "Lisp.bind"));
+  if (!lisp || !name || !function) $lisp.session.error("bind.args");
   function.move(&lisp.scope);
   lisp.set_global(name, function);
 }
@@ -1925,8 +1920,7 @@ Scope *Lisp.result_storage(Lisp lisp) =>
 /** Marks the actual Lambda installed for one lowered source function. */
 Var lisp_source_function(Var callable) {
   if (callable is not <lambda>)
-    raise %(bad-types (operation "lisp_source_function")
-                     (want "Lambda") (actual ${callable.kind()}));
+    $lisp.session.error("source.callable", callable);
   ((Lambda) callable).source_function = 1;
   return callable;
 }

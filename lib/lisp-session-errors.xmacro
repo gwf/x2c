@@ -1,0 +1,61 @@
+/* Lisp session error conditions. Runtime operands retain their original
+   detail types, order and source helper ownership. */
+
+meta static Map _lisp_session_error_rows(void) => {
+
+  "callback.absent" :
+  macro Statement(Expr $operation) {
+    raise %(bad-state (operation ${$operation}) (why "no session"));
+  },
+
+  "callback.wrong" :
+  macro Statement(Expr $operation) {
+    raise %(bad-state (operation ${$operation}) (why "wrong session"));
+  },
+
+  "entry.null" :
+  macro Statement(Expr $operation) {
+    raise %(bad-arg (operation ${$operation}));
+  },
+
+  "global.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Lisp.set_global"));
+  },
+
+  "global.frozen" :
+  macro Statement() {
+    raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
+  },
+
+  "global.inherited" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "Lisp.set_global") (why "inherited")
+            (name ${$name}));
+  },
+
+  "bind.args" :
+  macro Statement() {
+    raise %(bad-arg (operation "Lisp.bind"));
+  },
+
+  "source.callable" :
+  macro Statement(Expr $callable) {
+    raise %(bad-types (operation "lisp_source_function") (want "Lambda")
+            (actual ${$callable.kind()}));
+  }
+};
+
+meta static List _lisp_session_error_expand(String key, List arguments) {
+  Map rows = _lisp_session_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Lisp session error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $lisp.session.error(
+  Literal $key, Expr $arguments...) {
+  $(_lisp_session_error_expand (x2c.literal.value $key) $arguments)...
+}

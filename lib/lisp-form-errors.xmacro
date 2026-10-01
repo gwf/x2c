@@ -1,0 +1,150 @@
+/* Lisp form error conditions. Runtime operands retain their original
+   detail types, order and source helper ownership. */
+
+meta static Map _lisp_form_error_rows(void) => {
+
+  "eval.void" :
+  macro Statement() {
+    raise %(void-op (operation "eval"));
+  },
+
+  "eval.unbound" :
+  macro Statement(Expr $expr) {
+    raise %(unbound (name ${$expr}));
+  },
+
+  "call.type" :
+  macro Statement(Expr $callable) {
+    raise %(not-call (actual ${$callable.kind()}));
+  },
+
+  "def.arity" :
+  macro Statement(Expr $actual, Expr $args) {
+    raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
+            (value ${$args}));
+  },
+
+  "def.protected" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (name ${$name}));
+  },
+
+  "def.inherited" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (why "inherited") (name ${$name}));
+  },
+
+  "def.frozen" :
+  macro Statement(Expr $name) {
+    raise %(bad-state (operation "def") (why "frozen") (name ${$name}));
+  },
+
+  "cond.empty" :
+  macro Statement() {
+    raise %(bad-arity (operation "cond") (expected 1) (actual 0));
+  },
+
+  "cond.type" :
+  macro Statement(Expr $clause) {
+    raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
+  },
+
+  "cond.arity" :
+  macro Statement(Expr $actual, Expr $clause) {
+    raise %(bad-arity (operation "cond-clause") (expected 2)
+            (actual ${$actual}) (value ${$clause}));
+  },
+
+  "bind.signature" :
+  macro Statement(Expr $signature) {
+    raise %(bad-sig (operation "bind") (value ${$signature}));
+  },
+
+  "bind.missing" :
+  macro Statement(Expr $name, Expr $sig) {
+    raise %(no-symbol (name ${$name}) (sig ${$sig}));
+  },
+
+  "quote.shape" :
+  macro Statement(Expr $expr) {
+    raise %(bad-arity (operation "quasiquote") (value ${$expr}));
+  },
+
+  "splice.type" :
+  macro Statement(Expr $value) {
+    raise %(bad-types (operation "quasiquote-splice")
+            (actual ${$value.kind()}));
+  },
+
+  "lambda.signature" :
+  macro Statement(Expr $operation, Expr $args) {
+    raise %(bad-sig (operation ${$operation}) (value ${$args}));
+  },
+
+  "apply.void" :
+  macro Statement(Expr $index) {
+    raise %(void-op (operation "apply") (index ${$index}));
+  },
+
+  "apply.rest" :
+  macro Statement(Expr $body) {
+    raise %(bad-sig (operation "apply") (value ${$body}));
+  },
+
+  "apply.arity" :
+  macro Statement(Expr $body) {
+    raise %(bad-arity (operation "apply") (value ${$body}));
+  },
+
+  "apply.interrupted" :
+  macro Statement() {
+    raise %(interrupt (operation "apply"));
+  },
+
+  "apply.steps" :
+  macro Statement() {
+    raise %(call-stack (operation "apply") (why "steps"));
+  },
+
+  "apply.stack" :
+  macro Statement(Expr $body) {
+    raise %(call-stack (operation "apply") (value ${$body}));
+  },
+
+  "form.arity" :
+  macro Statement(Expr $operation, Expr $expected, Expr $actual) {
+    raise %(bad-arity (operation ${$operation}) (expected ${$expected})
+            (actual ${$actual}));
+  },
+
+  "form.string" :
+  macro Statement(Expr $operation, Expr $value) {
+    raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
+            (want "String"));
+  },
+
+  "apply.list" :
+  macro Statement(Expr $values) {
+    raise %(bad-types (operation "apply") (actual ${$values.kind()})
+            (want "List"));
+  },
+
+  "apply.procedure" :
+  macro Statement(Expr $callable) {
+    raise %(not-call (operation "apply") (actual ${$callable.kind()}));
+  }
+};
+
+meta static List _lisp_form_error_expand(String key, List arguments) {
+  Map rows = _lisp_form_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown Lisp form error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $lisp.form.error(
+  Literal $key, Expr $arguments...) {
+  $(_lisp_form_error_expand (x2c.literal.value $key) $arguments)...
+}
