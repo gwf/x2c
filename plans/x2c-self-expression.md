@@ -2,7 +2,8 @@
 
 > Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
 > `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
-> second bootstrap round. Five further defects found while scoping L1-L4 are
+> second bootstrap round. L1-L4 are decided (5-10 below); L1 and L3 are
+> in progress. Five further defects found while scoping L1-L4 are
 > listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
 > Gary's decisions are pending.
 
@@ -39,6 +40,24 @@ Recorded 2026-10-01 from Gary:
    (`$error.nonreturning.causes()`), not the checkout being linted.
 4. `$map.core.family` keeps its callback parameters. H8 generates the
    per-family scaffold instead of removing parameters.
+
+Recorded 2026-10-01 from Gary, after the L1-L4 scoping:
+
+5. L1: `x2c.syntax.type` resolves syntax a template left untyped at the
+   expansion point; the book says so.
+6. L2: the parts of `%()`, `%[]`, `%{}`, `%""`, and bare `[...]` and `{...}`
+   literals evaluate once each, left to right; function-call arguments keep
+   C's unspecified order.
+7. L3: collection tries every file-scope Unit macro defined in the unit;
+   imported and protocol-row macros stay mandatory, and a failed local
+   expansion keeps nothing.
+8. L4: `({ ... })` is accepted in ordinary source when the braces contain a
+   top-level `;`, so `({})` and `({a: 1})` keep their current meaning.
+9. L4: a `defer` or managed declaration directly inside a statement
+   expression is an error.
+10. Fix `({1})` and the two template hygiene defects.
+
+Order: L1 and L3 with the three defects first, then L2, then L4.
 
 ## Phase 0: reproduced defects
 
