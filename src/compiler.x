@@ -2022,6 +2022,15 @@ void Compiler.mark_reference_present(Compiler c, List binding) {
     c.semantic_binding_facts()[%(present-references)] = cons(binding, present);
 }
 
+/** Marks the optional reference `binding` present after an `if` when the
+    arm that runs without it cannot fall through: `no` when the true arm
+    proves presence, `yes` otherwise. A missing `no` arm falls through. */
+void Compiler.settle_reference(
+  Compiler c, List binding, int true_is_present, List yes, List no) {
+  if (binding && reference_guard_exits(true_is_present ? no : yes))
+    c.mark_reference_present(binding);
+}
+
 /** Restores the optional-reference facts saved before a lexical path. */
 void Compiler.restore_reference_presence(Compiler c, List before) {
   if (before === c.present_references()) return;
