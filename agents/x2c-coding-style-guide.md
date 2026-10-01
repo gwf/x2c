@@ -88,7 +88,8 @@ and system macros. Expand the algorithm into one named step per idea.
   or an early return.
 - Shared context is one value. Seven or more parameters, or one group of
   parameters passed through several helpers, becomes a record or the
-  receiver of `Type._helper` methods.
+  receiver of `Type._helper` methods. Declare an operation's local record as a
+  value and borrow it through `Type &` receivers.
 
 Prefer:
 
@@ -947,7 +948,7 @@ Use:
 
 When one parameter is the subject of the whole function and a longer name
 would wrap statements or expressions onto more lines, name it with the first
-lowercase letter of its unqualified type: `Compiler c`, `Emitter e`, or
+lowercase letter of its unqualified type: `Compiler c`, `Emitter &e`, or
 `UnzipShared *u`. Otherwise either name is fine. If the short name is already
 bound, repeat the letter until the name is free: `c`, `cc`, `ccc`. A symmetric
 operation such as `String.add(String left, String right)` has no single
@@ -959,7 +960,7 @@ object:
 
 ```x2c
 static List Emitter._declarator(
-  Emitter e, List declaration, List modifiers) {
+  Emitter &e, List declaration, List modifiers) {
   // ...
 }
 ```
@@ -975,7 +976,7 @@ static int _is_reserved_spelling(String s) {
 Do not move a function merely to obtain dot syntax.
 
 A private record that carries one operation's state is that operation's
-receiver. Its steps are `Record.step(Record *r, ...)` methods, its
+receiver. Its steps are `Record.step(Record &r, ...)` methods, its
 Compiler field is `c`, and its name is bare PascalCase; the leading
 underscore marks private functions only. A record whose fields are copied
 into locals on entry is a parameter list and goes back to parameters:
@@ -985,7 +986,7 @@ typedef struct Expansion {
   Compiler c, List definition, input, template, direct, Token invocation;
 } Expansion;
 
-static List Expansion.bind(Expansion *x, AstPos position) {
+static List Expansion.bind(Expansion &x, AstPos position) {
   // ...
 }
 ```
@@ -1300,10 +1301,40 @@ data](../docs/src/guide/idioms.md#separate-absence-from-data). See the root
 [AGENTS.md](../AGENTS.md) for the Error causes that never return and the
 checks that stay.
 
-### Required aliases
+### Values and borrowed parameters
 
-Declare a parameter `T &name` when every caller passes one of its own `T`
-variables and the function only reads and writes through it for the call:
+Prefer a value representation for a record without shared or retained
+identity. Construct the value directly in the caller's local; do not add a
+pointer typedef or a second local that only takes its address. A mutating
+method borrows the record with `T &`:
+
+```x2c
+typedef struct Counter { int count; } Counter;
+static void Counter.step(Counter &c) => c.count++;
+
+Counter counter = {0};
+counter.step();
+```
+
+Pass a small read-only record by value when copying it expresses the intended
+contract. Borrow a record when its updates must reach the caller or its copy
+is unnecessary. A record copy is shallow: copying a Buffer, Array, or pointer
+field shares the same backing object and does not transfer its ownership.
+
+For a class, `class Point { int x; int y; };` declares a value and
+`class Node { int value; } *;` declares a pointer. Omit the redundant
+`struct` before the braces. Both follow ordinary typedef representation;
+`class` adds methods rather than selecting heap storage. A local Point needs
+no allocator for its record. A value can also live inside a field, an array,
+or allocated storage. A Node constructor supplies its pointed-to storage,
+and its methods take the bare `Node` handle. A value class initializer takes
+`void Point.init(Point &p, ...)`; a pointer class initializer takes the bare
+handle. See the book's
+[construction patterns](../docs/src/guide/system-macros.md#construction-and-early-release).
+
+Declare a parameter `T &name` when every caller supplies one live `T` object
+and the function only reads and writes through it for the call. Locals,
+fields, array elements, and dereferenced borrows can supply that object:
 
 ```x2c
 static void _advance(int &count) {
@@ -1314,7 +1345,10 @@ static void _advance(int &count) {
 Use `T &?` for an optional single-object alias when the callee tests for
 absence before accessing it. Keep `T *` for an address the function retains,
 indexed storage, a buffer, a callback or C API signature, and a published
-signature whose callers would have to change. `x2c lint` reports
+signature whose callers would have to change. A nested record that retains a
+borrow of its mutable parent uses a pointer field; copying the parent would
+give it a different record. References are parameters, not stored fields,
+locals, or returns. `x2c lint` reports
 static functions whose pointer parameters qualify as `reference-parameter`
 candidates. See
 [Reference parameters](../docs/src/reference/language.md#reference-parameters).
@@ -1496,6 +1530,9 @@ it cannot:
   order, each opened by a label?
 - Does each context record own the steps of its operation, rather than
   being unpacked into locals on entry?
+- Is local context declared as a value, with borrowed reference receivers and
+  no address-only alias? Do remaining pointers carry identity, storage,
+  absence, or an actual native boundary?
 - Does each function do one job at one level, guards first, with dispatch
   arms of one line?
 - Does each kind of incidental work have one place, and does the code call

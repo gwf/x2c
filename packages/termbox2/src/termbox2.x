@@ -46,10 +46,12 @@ protocol Cleanup(Termbox);
     base character plus its combining marks. */
 #define TERMBOX_CLUSTER_MAX 8
 
+typedef struct sigaction TermboxSignal;
+
 struct Termbox {
   int open;
   int has_previous_winch;
-  struct sigaction previous_winch;
+  TermboxSignal previous_winch;
 };
 
 static Termbox _termbox_active = NULL;
@@ -101,14 +103,14 @@ static void _termbox_signal_error(String operation, int error_number) {
           (message $message));
 }
 
-static void _termbox_save_winch(struct sigaction *previous) {
-  if (sigaction(SIGWINCH, NULL, previous) == 0) return;
+static void _termbox_save_winch(TermboxSignal &previous) {
+  if (sigaction(SIGWINCH, NULL, &previous) == 0) return;
   int error_number = errno;
   _termbox_signal_error("save SIGWINCH", error_number);
 }
 
-static int _termbox_restore_winch(struct sigaction *previous) {
-  if (sigaction(SIGWINCH, previous, NULL) == 0) return 0;
+static int _termbox_restore_winch(TermboxSignal &previous) {
+  if (sigaction(SIGWINCH, &previous, NULL) == 0) return 0;
   return errno;
 }
 
@@ -125,11 +127,11 @@ Termbox Termbox.open(void) {
   }
 
   Termbox terminal = Scope.calloc(1, sizeof(struct Termbox));
-  struct sigaction previous = { 0 };
-  _termbox_save_winch(&previous);
+  TermboxSignal previous = { 0 };
+  _termbox_save_winch(previous);
   int result = tb_init();
   if (result < 0) {
-    int restore_errno = _termbox_restore_winch(&previous);
+    int restore_errno = _termbox_restore_winch(previous);
     _termbox_native_error("init", result, restore_errno);
   }
   terminal.open = 1;
@@ -148,7 +150,7 @@ Termbox Termbox.close(Termbox terminal) {
 
   int result = tb_shutdown();
   int restore_errno = terminal.has_previous_winch ?
-    _termbox_restore_winch(&terminal.previous_winch) : 0;
+    _termbox_restore_winch(terminal.previous_winch) : 0;
   terminal.open = 0;
   terminal.has_previous_winch = 0;
   _termbox_active = NULL;

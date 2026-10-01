@@ -389,7 +389,7 @@ shorthand for a compound body containing one expression statement:
 
 ```x2c
 ~typedef struct Counter { int value; } Counter;
-static void Counter.step(Counter *self) => self.value++;
+static void Counter.step(Counter &self) => self.value++;
 ```
 
 An expression is required; `=>;` is invalid. The rules for writing `return` in
@@ -2056,8 +2056,9 @@ from.
 
 `NamedType` captures `NAME TYPE;` or the forward form `NAME;`. The name comes
 first, with no equals sign. `{ FIELDS }` abbreviates a value struct;
-`struct { FIELDS } *` explicitly declares a pointer representation. Ordinary
-type and declarator grammar owns qualifiers, fields, arrays, and pointers.
+`{ FIELDS } *` declares a pointer representation, with `struct` optional
+before the braces. Ordinary type and declarator grammar owns qualifiers,
+fields, arrays, and pointers.
 The name is reserved before its fields are parsed, and the complete definition
 supplies its representation. A forward declaration does not imply a pointer.
 Layout must be complete wherever the ordinary type rules require it.
@@ -2107,8 +2108,9 @@ An explicit `new` suppresses its generated constructor and init requirement.
 Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
-An aggregate class that defines `void T.init(T *, ...)` for a value or
-`void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer gets a `new`
+An aggregate class that defines `void T.init(T &, ...)` for a value (also
+accepting the existing `T *` receiver), or `void T.init(T, ...)` or
+`int T.init(T, ...)` for a heap pointer, gets a `new`
 taking the parameters after the receiver; it calls `init` on zero-initialized
 storage, which a heap class obtains from its replaceable `T.alloc`. A zero
 result from an `int` initializer releases that storage and makes `new`

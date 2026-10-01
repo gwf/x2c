@@ -953,7 +953,7 @@ Buffer List.write_repr(List lst, Buffer out) {
 }
 
 /* Renders `elem` at the current column, breaking lines as it goes. */
-static void Render._value(Render *r, Var elem) {
+static void Render._value(Render &r, Var elem) {
   Buffer out = r.out;
   if (out.pos >= _WIDTH - 1 || out.pos - out._indent > 40)
     out.newline_indent();
@@ -963,7 +963,7 @@ static void Render._value(Render *r, Var elem) {
 }
 
 /* A leaf that overflows the line is written again on the next one. */
-static void Render._leaf(Render *r, Var elem) {
+static void Render._leaf(Render &r, Var elem) {
   Buffer out = r.out;
   size_t before = out.content.length, position = out.pos;
   r._write_leaf(elem);
@@ -981,7 +981,7 @@ static void _nil(Buffer out) {
 
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
-static int Render._fits(Render *r, Var elem) {
+static int Render._fits(Render &r, Var elem) {
   Buffer line = $auto(Buffer.new(r.out.padding));
   Render flat = {line, r.mode};
   flat._flat(elem);
@@ -992,7 +992,7 @@ static int Render._fits(Render *r, Var elem) {
 
 /* Writes a List's elements in turn, each rendered as `Render._value`
    does. */
-static void Render._items(Render *r, Var elem) {
+static void Render._items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
   RenderPath path;
@@ -1008,13 +1008,13 @@ static void Render._items(Render *r, Var elem) {
 }
 
 /* Writes `elem` on one line. */
-static void Render._flat(Render *r, Var elem) {
+static void Render._flat(Render &r, Var elem) {
   if (elem is not <list>) r._write_leaf(elem);
   else if (!elem.list()) r.out.write("()");
   else r._flat_items(elem);
 }
 
-static void Render._flat_items(Render *r, Var elem) {
+static void Render._flat_items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
   RenderPath path;
@@ -1028,7 +1028,7 @@ static void Render._flat_items(Render *r, Var elem) {
   _close(out);
 }
 
-static void Render._write_leaf(Render *r, Var elem) {
+static void Render._write_leaf(Render &r, Var elem) {
   if (r.mode == <str>) elem.write_str(r.out);
   else if (elem is <symbol>) Atom.write_repr(elem, r.out);
   else elem.write_repr(r.out);

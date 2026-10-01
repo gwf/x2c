@@ -18,11 +18,11 @@ typedef struct RecursiveMatchState {
   List span_begin[MACHINE_BINDER_MAX], span_end[MACHINE_BINDER_MAX];
   int span_length[MACHINE_BINDER_MAX];
   unsigned long present, spans;
-} *RecursiveMatchState;
+} RecursiveMatchState;
 
-static int _match(RecursiveMatchState state, Var input, Var pattern);
+static int _match(RecursiveMatchState &state, Var input, Var pattern);
 
-static int _bind(RecursiveMatchState state, Var binder, Var value) {
+static int _bind(RecursiveMatchState &state, Var binder, Var value) {
   if (binder == <?> || binder == <*>) return 1;
   int index = state.layout.index(binder);
   if (index < 0) return 0;
@@ -35,7 +35,7 @@ static int _bind(RecursiveMatchState state, Var binder, Var value) {
 }
 
 static int _bind_span(
-  RecursiveMatchState r, Var binder, List input, List end, int length) {
+  RecursiveMatchState &r, Var binder, List input, List end, int length) {
   if (binder == <*>) return 1;
   int index = r.layout.index(binder);
   if (index < 0) return 0;
@@ -67,7 +67,7 @@ static int _bind_span(
 }
 
 static int _bind_final(
-  RecursiveMatchState state, Var binder, List input) {
+  RecursiveMatchState &state, Var binder, List input) {
   if (binder == <*>) return 1;
   int index = state.layout.index(binder);
   if (index < 0) return 0;
@@ -104,19 +104,19 @@ static int _bind_final(
 /* Each star candidate snapshots every capture so a failed suffix cannot leak
    bindings into the next attempt. */
 static int _star_candidate(
-  RecursiveMatchState state, List input, List rest, int length, Var binder,
+  RecursiveMatchState &state, List input, List rest, int length, Var binder,
   List pattern_tail) {
-  struct RecursiveMatchState snapshot = *state;
+  RecursiveMatchState snapshot = state;
   int matched = _bind_span(state, binder, input, rest, length) &&
                 _match(state, rest, pattern_tail);
-  if (!matched) *state = snapshot;
+  if (!matched) state = snapshot;
   return matched;
 }
 
 /* Prefix lengths run shortest first, giving each `*` binder the leftmost
    shortest capture that permits the remaining pattern to match. */
 static int _star(
-  RecursiveMatchState state, List input, List pattern) {
+  RecursiveMatchState &state, List input, List pattern) {
   Var binder = pattern.car();
   List pattern_tail = pattern.cdr();
   if (!pattern_tail) return _bind_final(state, binder, input);
@@ -132,7 +132,7 @@ static int _star(
 }
 
 static int _all(
-  RecursiveMatchState state, Var input, List patterns) {
+  RecursiveMatchState &state, Var input, List patterns) {
   foreach (Var pattern, patterns)
     if (!_match(state, input, pattern)) return 0;
   return 1;
@@ -140,22 +140,22 @@ static int _all(
 
 /* Alternatives run in source order and restore captures after each miss. */
 static int _any(
-  RecursiveMatchState state, Var input, List patterns) {
+  RecursiveMatchState &state, Var input, List patterns) {
   foreach (Var pattern, patterns) {
-    struct RecursiveMatchState snapshot = *state;
+    RecursiveMatchState snapshot = state;
     if (_match(state, input, pattern)) return 1;
-    *state = snapshot;
+    state = snapshot;
   }
   return 0;
 }
 
 /* Negated probes never publish captures. */
 static int _none(
-  RecursiveMatchState state, Var input, List patterns) {
+  RecursiveMatchState &state, Var input, List patterns) {
   foreach (Var pattern, patterns) {
-    struct RecursiveMatchState snapshot = *state;
+    RecursiveMatchState snapshot = state;
     int matched = _match(state, input, pattern);
-    *state = snapshot;
+    state = snapshot;
     if (matched) return 0;
   }
   return 1;
@@ -181,7 +181,7 @@ static int _is(Var input, List patterns) {
 }
 
 static int _match(
-  RecursiveMatchState state, Var input, Var pattern) {
+  RecursiveMatchState &state, Var input, Var pattern) {
   if (pattern.is_atom_binder()) return _bind(state, pattern, input);
   if (input is not <list> && pattern is not <list>) return input == pattern;
   if (pattern is not <list>) return 0;
@@ -212,7 +212,7 @@ static int _match(
   return _match(state, input_list.cdr(), tail);
 }
 
-static List _bindings(RecursiveMatchState state) {
+static List _bindings(RecursiveMatchState &state) {
   List result = NULL;
   for (int i = 0; i < state.layout.binder_count; i++) {
     unsigned long bit = 1UL << i;
@@ -235,8 +235,8 @@ static int _try_capture(
     return 0;
   /* Speculation stays local until the complete match succeeds, so a miss
      cannot alter the caller's value array or presence bits. */
-  struct RecursiveMatchState state = { .layout = layout };
-  if (!_match(&state, input, layout.normalized)) return 0;
+  RecursiveMatchState state = { .layout = layout };
+  if (!_match(state, input, layout.normalized)) return 0;
   for (int i = 0; i < layout.binder_count; i++) {
     unsigned long bit = 1UL << i;
     if (!(state.present & bit)) continue;
@@ -264,11 +264,11 @@ static int _try_value(Var input, Var pattern, List *out_bindings) {
   };
   int matched = _try_capture(layout, input, &captures);
   if (matched) {
-    struct RecursiveMatchState state = {
+    RecursiveMatchState state = {
       .layout = layout, .present = captures.present
     };
     for (int i = 0; i < layout.binder_count; i++) state.values[i] = values[i];
-    *out_bindings = _bindings(&state);
+    *out_bindings = _bindings(state);
   }
   layout.free();
   return matched;

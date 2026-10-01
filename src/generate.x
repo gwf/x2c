@@ -117,7 +117,7 @@ static List Compiler._header_and_source(Compiler c, List ast) {
   return p.finish();
 }
 
-static void Partition.add(Partition *p, Ast node) {
+static void Partition.add(Partition &p, Ast node) {
   match (node) {
     case %((!or protocol adopt macrodef) *): return;
     case %(typedef ? (bindings *)): p.add_typedef(node);
@@ -138,17 +138,17 @@ static void Partition.add(Partition *p, Ast node) {
 }
 
 /* The file that takes a node at the current visibility. */
-static Array Partition.side(Partition *p) => p.private ? p.source : p.header;
+static Array Partition.side(Partition &p) => p.private ? p.source : p.header;
 
 /* A marker holds a node's place in both files until the partition ends. */
-static void Partition.mark(Partition *p, List marker) {
+static void Partition.mark(Partition &p, List marker) {
   p.header.push(marker);
   p.source.push(marker);
 }
 
 /* Once the whole unit is seen, the pending typedefs settle, then the
    conditional groups, then the typedef forwards each file needs. */
-static List Partition.finish(Partition *p) {
+static List Partition.finish(Partition &p) {
   _promote_typedefs(p.header, p.pending);
   List header = _place_typedefs(p.header, p.pending, 1);
   List source = _place_typedefs(p.source, p.pending, 0);
@@ -170,13 +170,13 @@ static List Partition.finish(Partition *p) {
    include of x2c source follows the same rule for the typedefs it
    declares. */
 
-static void Partition.add_typedef(Partition *p, List node) =>
+static void Partition.add_typedef(Partition &p, List node) =>
   p.hold(p.private ? _typedef_names(node) : NULL, node);
 
 /* A private node declaring `names` waits as a `pending` marker in both
    files until the whole unit has been partitioned. A node without names
    takes the current side. */
-static void Partition.hold(Partition *p, List names, List node) {
+static void Partition.hold(Partition &p, List names, List node) {
   if (!names) {
     p.side().push(node);
     return;
@@ -269,7 +269,7 @@ static List _place_typedefs(Array items, Array pending, int header) {
 /* A function definition makes the rest of the unit private, unless it is a
    generated declaration default. */
 static void Partition.add_function(
-  Partition *p, List type, List declarator, Ast body) {
+  Partition &p, List type, List declarator, Ast body) {
   int generated = 0;
   match (declarator) case %(bind ?binding *): {
     Map facts = p.c.semantic_binding_facts();
@@ -291,7 +291,7 @@ static List _with_attributes(Map facts, List type, Var binding) {
    prototype, or its whole body when inline, after forward declarations of
    the tags the prototype spells. */
 static void Partition.place_function(
-  Partition *p, Type type, List declarator, Ast body) {
+  Partition &p, Type type, List declarator, Ast body) {
   type = _noreturn(type, declarator, body);
   List function = %(function $type $declarator $body);
   if (type.is_static()) {
@@ -327,7 +327,7 @@ static List _prototype(List type, List declarator) =>
 /* A public prototype that names `struct tag` before the header declares it
    would give the tag prototype scope in C. A forward declaration of each
    tag the prototype spells keeps it the file-scope type. */
-static void Partition.forward_tags(Partition *p, List node) {
+static void Partition.forward_tags(Partition &p, List node) {
   match (node)
     case %((!set ?tag (!or struct union)) ?(String name)): {
       if (name in p.forwarded) return;
@@ -344,7 +344,7 @@ static void Partition.forward_tags(Partition *p, List node) {
    or union declaration puts its tag in the header, so no prototype forwards
    it again. */
 static void Partition.add_declaration(
-  Partition *p, List decl, Type type, List bindings) {
+  Partition &p, List decl, Type type, List bindings) {
   match (bindings)
     case %(bindings (bind (!set ?binding (*)) ?))
       if (p.c._completed_prototype(binding)): return;
@@ -373,7 +373,7 @@ static int Compiler._completed_prototype(Compiler c, List binding) {
 /* `struct b { ... } g;` at public file scope publishes the body and an
    `extern` declaration of `g`, and defines `g` in the source. */
 static int Partition.place_tagged_object(
-  Partition *p, Type type, List bindings) {
+  Partition &p, Type type, List bindings) {
   Type core = type.base_type();
   String tag = NULL;
   match (core)
@@ -395,7 +395,7 @@ static List _tag_only(Type type, Type core, Var name) =>
    every including unit its own copy, and a runtime initializer there is not
    a C constant expression. */
 static int Partition.place_object(
-  Partition *p, List decl, Type type, List bindings) {
+  Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
   p.header.push(_header_declaration(NULL, %(extern @type), bindings));
   p.source.push(decl);
@@ -430,7 +430,7 @@ static List _header_declaration(List node, Type type, List bindings) {
 }
 
 /* A foreign alias makes the rest of the unit private. */
-static void Partition.add_alias(Partition *p, List alias, Type type) {
+static void Partition.add_alias(Partition &p, List alias, Type type) {
   (type.is_static() ? p.source : p.header).push(alias);
   p.private = 1;
 }
@@ -443,7 +443,7 @@ static void Partition.add_alias(Partition *p, List alias, Type type) {
 
 /* A group records the visibility at which it opened. A conditional
    directive outside every group is placed as any other directive is. */
-static void Partition.add_preproc(Partition *p, List node, String content) {
+static void Partition.add_preproc(Partition &p, List node, String content) {
   Symbol kind = preproc_conditional_kind(content);
   if (kind == <open>) {
     p.open.push(p.opened.len());
@@ -453,7 +453,7 @@ static void Partition.add_preproc(Partition *p, List node, String content) {
   else p.place_directive(node, content);
 }
 
-static void Partition.mark_conditional(Partition *p, List node, Symbol kind) {
+static void Partition.mark_conditional(Partition &p, List node, Symbol kind) {
   p.mark(%(conditional ${p.open[-1]} $kind $node));
   if (kind == <close>) p.open.take_last();
 }
@@ -463,7 +463,7 @@ static void Partition.mark_conditional(Partition *p, List node, Symbol kind) {
    visibility pragmas switch sides, and any other directive stays on the
    current side. */
 static void Partition.place_directive(
-  Partition *p, List node, String content) {
+  Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int visibility = preproc_visibility(content);
   if (visibility >= 0) p.private = visibility;
@@ -473,7 +473,7 @@ static void Partition.place_directive(
 /* An include of x2c source below `#pragma private` waits, as a private
    typedef does, under the typedef names of the files it reaches that no
    earlier header include reaches. Any other directive names nothing. */
-static List Partition.include_names(Partition *p, String content) {
+static List Partition.include_names(Partition &p, String content) {
   int angle = 0;
   String target = preproc_include_target(content, angle);
   if (!target) return NULL;
@@ -623,7 +623,7 @@ static List Compiler._file_init(Compiler c, List source) {
 
 /* A file without a type initializer, or with one that conditional groups
    may compile out, gets a synthetic initializer. */
-static void Init.prepare(Init *i, List source) {
+static void Init.prepare(Init &i, List source) {
   Compiler c = i.c;
   i.guard = c.sym.reference(%("_init_guard_"), NULL);
   i.shutdown = c._shutdown_registration(source);
@@ -656,14 +656,14 @@ static int _prelude_position(List source) {
 /* The guard's declaration, then the synthetic initializer.
    `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
-static List Init.prelude(Init *i, List out) {
+static List Init.prelude(Init &i, List out) {
   out = cons(_initialization_guard(i.guard), out);
   return i.synthetic ? cons(i.synthetic, out) : out;
 }
 
 /* The protocol initializer and the type initializer wrap their own bodies.
    Other non-static entries initialize their static helpers first. */
-static List Init.patch(Init *i, List item) {
+static List Init.patch(Init &i, List item) {
   match (item)
     case %(function (!set ?type (*))
            (!set ?declarator (bind (binding ? ?spelling) ?))
@@ -683,7 +683,7 @@ static List Init.patch(Init *i, List item) {
 
 /* The protocol bootstrap functions are never patched, and a cache-only
    file patches only the entries that reach a cache. */
-static int Init.patches(Init *i, Var type, Var spelling) =>
+static int Init.patches(Init &i, Var type, Var spelling) =>
   !type.type().is_static() && !_protocol_bootstrap(spelling) &&
   (i.reachable == NULL || spelling in i.reachable);
 
@@ -720,7 +720,7 @@ macro Statement $initializer_run_once(Expr $guard) {
    Every public entry checks the guard before calling it, so it stays out
    of line and cold: a small initializer inlined into each entry costs
    every call its frame setup. */
-static List Init.synthesize(Init *i, List arms) {
+static List Init.synthesize(Init &i, List arms) {
   List binding = i.c.sym.introduce("_file_init_");
   List type =
     %(("__attribute__((constructor, noinline, cold))") static void);
@@ -740,7 +740,7 @@ static List Init.synthesize(Init *i, List arms) {
    late queue, and the shutdown registration. Cache graphs that require the
    initializer's own String/List canonicalizer are queued late; all other
    cache and static setup keeps its pre-body order. */
-static List Init.statements(Init *i, List entry, List body) {
+static List Init.statements(Init &i, List entry, List body) {
   Compiler c = i.c;
   return List.concat_n(
     7, entry, c._run_once(i.guard), c.init_statements(<early>),
@@ -1046,7 +1046,7 @@ typedef struct Forward {
 
 /* Pending sibling suffixes stay off the C stack. Only declaration
    dependencies recurse; ordinary expressions share the same worklist. */
-static void Forward.dependencies(Forward *f, Var value) {
+static void Forward.dependencies(Forward &f, Var value) {
   if (value is not <list> || value.is_nil()) return;
   Array resume = $auto([]);
   for (List node = value; node; node = _next(node, resume)) f.visit(node);
@@ -1070,7 +1070,7 @@ static List _next(List node, Array resume) {
   }
 }
 
-static void Forward.visit(Forward *f, List node) {
+static void Forward.visit(Forward &f, List node) {
   match (node) {
     case %(!set ?binding (binding ? ?)): f.binding(binding);
     case %(call ?(String name) *): f.declaration(%(native $name));
@@ -1081,7 +1081,7 @@ static void Forward.visit(Forward *f, List node) {
 
 /* A binding needs its static declaration, found by binding or by native
    spelling, or else the prototype of the global function it names. */
-static void Forward.binding(Forward *f, Var binding) {
+static void Forward.binding(Forward &f, Var binding) {
   String spelling = binding_identity_spelling(binding);
   List native = %(native $spelling);
   if (binding in f.statics) f.declaration(binding);
@@ -1093,7 +1093,7 @@ static void Forward.binding(Forward *f, Var binding) {
    A native alias among them is a macro over the host function, and newlib
    spells some of those as function-like macros, so a prototype of the alias
    would not even parse. */
-static void Forward.global(Forward *f, Var binding, String spelling) {
+static void Forward.global(Forward &f, Var binding, String spelling) {
   Compiler c = f.c;
   Type type = NULL;
   List global = spelling ? c.sym.resolve_global(%($spelling), type) : NULL;
@@ -1106,7 +1106,7 @@ static void Forward.global(Forward *f, Var binding, String spelling) {
 }
 
 /* Forwards the static declaration under `key` once, after what it needs. */
-static void Forward.declaration(Forward *f, Var key) {
+static void Forward.declaration(Forward &f, Var key) {
   Var declaration;
   if (key in f.available || key in f.seen ||
       !f.statics.try_get(key, declaration)) return;
@@ -1117,7 +1117,7 @@ static void Forward.declaration(Forward *f, Var key) {
   f.out.push(declaration);
 }
 
-static void Forward.types(Forward *f, List type) {
+static void Forward.types(Forward &f, List type) {
   foreach (Var part, type) {
     if (part is <string>) f.declaration(part);
     else if (part is <list>) f.types(part);

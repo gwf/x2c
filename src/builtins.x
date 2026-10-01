@@ -149,7 +149,7 @@ static int _valid_outputs(List outputs) {
 /* A cursor loop calls `try_next` with the collection, the cursor, and one
    output per value. A reference parameter takes the object itself; a
    pointer takes its address. */
-static List Foreach.with_cursor(Foreach *f, List spec) {
+static List Foreach.with_cursor(Foreach &f, List spec) {
   List function = spec[0], cursor_type = spec[1], types = spec[2];
   int by_reference = spec.len() > 3;
   List outputs = types.map(
@@ -184,7 +184,7 @@ static List _cursor_assignments(List targets, List outputs) {
 
 /* `Iter_try_next` reads each item into a Var; a pair of names takes the
    item's first two elements. */
-static List Foreach.with_iter(Foreach *f, List converter) {
+static List Foreach.with_iter(Foreach &f, List converter) {
   List constructor = f.constructor(converter);
   List iterator_expression = _expr(%("Iter"), f.iterator);
   List item_expression = _expr(%("Var"), f.item);
@@ -206,14 +206,14 @@ static List Foreach.with_iter(Foreach *f, List converter) {
 }
 
 static List Foreach.loop(
-  Foreach *f, List condition, List body, List setup) {
+  Foreach &f, List condition, List body, List setup) {
   Macro shape = $builtin_foreach_loop;
   return shape(f.declaration, condition, body, setup);
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
    pair of names, or else the collection's converter. */
-static List Foreach.constructor(Foreach *f, List converter) {
+static List Foreach.constructor(Foreach &f, List converter) {
   List type = f.type;
   int atom = _atom_type(type);
   String owner = atom ? type.car().str() : "";
@@ -330,7 +330,7 @@ static int _positional(List fields) {
 /* The default `new`, unless the class defines one. An aggregate other
    than an alias takes the extra parameters of its own `init`, and an
    alias forwards `new` to the class it names. */
-static List Shape.constructor(Shape *s) {
+static List Shape.constructor(Shape &s) {
   String owner = s.owner;
   if (_own_method(owner, "new")) return %();
   List extras = %();
@@ -358,7 +358,7 @@ macro Statement $class_drop(Expr $value, Expr $call) {
   if ($value) $call;
 }
 
-static List Shape.release(Shape *s) {
+static List Shape.release(Shape &s) {
   List value = s.value;
   List drop = _own_method(s.owner, "drop");
   List release = %(${x2c_stmnt_make(_call("Scope_free", %($value)))});
@@ -369,7 +369,7 @@ static List Shape.release(Shape *s) {
 }
 
 /* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
-static List Shape.alloc(Shape *s) {
+static List Shape.alloc(Shape &s) {
   String owner = s.owner;
   List value = s.value;
   List allocated = _call(
@@ -382,7 +382,7 @@ static List Shape.alloc(Shape *s) {
 }
 
 /* A heap class's `free` and `cleanup`, and its Cleanup adoption. */
-static List Shape.cleanup(Shape *s, List release) {
+static List Shape.cleanup(Shape &s, List release) {
   String owner = s.owner;
   List parameter = s.parameter;
   List free_method = _default(
@@ -396,7 +396,7 @@ static List Shape.cleanup(Shape *s, List release) {
 
 /* A heap or aggregate class boxes by its tag, with equality, hashing, and
    writers. */
-static List Shape.boxed(Shape *s) {
+static List Shape.boxed(Shape &s) {
   List body = s.boxing();
   body = body.append(s.comparison());
   body = body.append(s.writers());
@@ -407,7 +407,7 @@ static List Shape.boxed(Shape *s) {
 
 /* `var`, and the conversion back: the pointer a heap class boxed, or a
    copy of an aggregate's boxed record. */
-static List Shape.boxing(Shape *s) {
+static List Shape.boxing(Shape &s) {
   String owner = s.owner;
   List pointer = _call("Var_pointer", %(${s.value}));
   List unboxed = s.heap ? x2c_expr_cast(%($owner), pointer) :
@@ -420,7 +420,7 @@ static List Shape.boxing(Shape *s) {
 
 /* `equal` and `hash` of a heap or positional class; a value class of
    another shape must define compatible ones. */
-static List Shape.comparison(Shape *s) {
+static List Shape.comparison(Shape &s) {
   String owner = s.owner;
   if (s.heap || s.positional)
     return %(${_equal(owner, s.heap, s.named)}
@@ -434,7 +434,7 @@ static List Shape.comparison(Shape *s) {
 }
 
 /* The `str` and `repr` writers and methods the class does not define. */
-static List Shape.writers(Shape *s) {
+static List Shape.writers(Shape &s) {
   String owner = s.owner;
   Array writers = [];
   foreach (Var member_value, %("str" "repr")) {
@@ -449,7 +449,7 @@ static List Shape.writers(Shape *s) {
 }
 
 /* A scalar class boxes as its representation. */
-static List Shape.scalar(Shape *s) {
+static List Shape.scalar(Shape &s) {
   String owner = s.owner;
   List value = s.value, representation = s.representation;
   List boxed = x2c_expr_cast(%("Var"), x2c_expr_cast(representation, value));
@@ -474,7 +474,7 @@ static List _new(
                   representation.car() == <union>;
   if (!aggregate) return _scalar_new(owner, representation, heap);
   if (positional) return _positional_new(owner, representation, heap, named);
-  return _initialized_new(owner, representation, heap, extras);
+  return _initialized_new(owner, heap, extras);
 }
 
 static List _scalar_new(String owner, List representation, int heap) {
@@ -500,17 +500,16 @@ static List _positional_new(
 /* Another aggregate starts zeroed, or from `alloc` for a heap class, and
    the deferred initializer calls its `init`. */
 static List _initialized_new(
-  String owner, List representation, int heap, List extras) {
+  String owner, int heap, List extras) {
   List type = %($owner);
   Array parameters = [];
   foreach (List extra, extras)
     parameters.push(x2c_param_make(extra, %"argument_${parameters.len()}"));
-  List declared = heap ? type : representation;
   List initializer = heap ? _call(%"${owner}_alloc", %())
                           : x2c_expr_composite(%(${x2c_literal_int(0)}));
   Var heap_value = %();
   if (heap) heap_value = <true>;
-  List body = %(${x2c_decl_make(declared, "value", initializer)}
+  List body = %(${x2c_decl_make(type, "value", initializer)}
     (syntax-recipe class.initializer ($owner $heap_value)));
   return _finish_new(owner, type, parameters.list_free(), body, 0);
 }
@@ -539,15 +538,17 @@ static List _class_initializer(String owner, Var heap_value) {
     List signature = x2c_syntax_type(method);
     List function = signature.car();
     List declared = function[1];
+    int reference = !heap && declared.car().equal(%(& @type));
+    if (reference) receiver = declared.car();
     List parameters = cons(receiver, declared.cdr());
     int refusable = heap && signature.equal(%((func $parameters) int));
     if (refusable || signature.equal(%((func $parameters) void))) {
-      List object = heap ? value : _op(<&>, %($value));
+      List object = heap || reference ? value : _op(<&>, %($value));
       List call = _init_call(method, parameters, object);
       return refusable ? _refusal(call, value) : x2c_stmnt_make(call);
     }
   }
-  String suffix = heap ? ")" : " *)";
+  String suffix = heap ? ")" : " &)";
   x2c_diagnostic_fail(
     %"class ${owner} requires void ${owner}.init(${owner}${suffix}", %());
   return %();

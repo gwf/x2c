@@ -595,7 +595,7 @@ static int Build._compile_sources(Build b) {
 
 /* Starts compiling `source` once the ready jobs finish, and waits for one
    when every slot is busy. Returns nonzero when a finished job failed. */
-static int CcPool.add(CcPool *pool, String source) {
+static int CcPool.add(CcPool &pool, String source) {
   Build b = pool.b;
   report_progress(<compile>, b.cc_done, b.cc_n, source);
   List directories = b._include_dirs(source);
@@ -666,7 +666,7 @@ int compile_commands_write(String path, Array commands) {
 
 /* Finishes the ready jobs from slot `i` on. Returns nonzero when one
    failed. */
-static int CcPool.reap(CcPool *pool, int i) {
+static int CcPool.reap(CcPool &pool, int i) {
   int failed = 0;
   while (i < pool.count) {
     int status = pool.running[i].execution.ready() ? pool.finish(i) : -1;
@@ -680,7 +680,7 @@ static int CcPool.reap(CcPool *pool, int i) {
    lone job uses the ordinary blocking wait; parallel jobs keep their own
    statuses and captures. The short idle delay bounds polling without a
    global child signal handler or consuming another owner's child status. */
-static int CcPool.wait(CcPool *pool) {
+static int CcPool.wait(CcPool &pool) {
   for (;;) {
     for (int i = 0; i < pool.count; i++) {
       if (pool.count > 1 && !pool.running[i].execution.ready()) continue;
@@ -693,9 +693,9 @@ static int CcPool.wait(CcPool *pool) {
 
 /* Finishes the step job `i` runs. A job that is done or failed leaves the
    pool; one whose preprocessing started its compile stays, for -1. */
-static int CcPool.finish(CcPool *pool, int i) {
+static int CcPool.finish(CcPool &pool, int i) {
   CcJob *at = pool.running + i;
-  int status = pool.b._finish_job(at);
+  int status = pool.b._finish_job(*at);
   if (status < 0) return -1;
   pool.count--;
   memmove(at, at + 1, (pool.count - i) * sizeof(CcJob));
@@ -704,7 +704,7 @@ static int CcPool.finish(CcPool *pool, int i) {
 
 /* Waits for the step `job` runs. Returns -1 when its preprocessing started
    the compile in the same slot, 1 when it failed, and 0 when it is done. */
-static int Build._finish_job(Build b, CcJob *job) {
+static int Build._finish_job(Build b, CcJob &job) {
   int status = job.execution.wait();
   if (job.preprocessed) {
     int step = b._after_preprocess(job, status);
@@ -722,7 +722,7 @@ static int Build._finish_job(Build b, CcJob *job) {
    and records nothing. Only the preprocessing command itself failing is an
    error, and the C compiler has already said why. Returns -1 when the
    compile starts, 1 on failure, and 0 when the object is current. */
-static int Build._after_preprocess(Build b, CcJob *job, int status) {
+static int Build._after_preprocess(Build b, CcJob &job, int status) {
   int ok = 1;
   if (!status) job.fingerprint = b._compile_fingerprint(job, ok);
   unlink(job.preprocessed);
@@ -736,11 +736,11 @@ static int Build._after_preprocess(Build b, CcJob *job, int status) {
 
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
-static uint64_t Build._compile_fingerprint(Build b, CcJob *job, int &ok) =>
+static uint64_t Build._compile_fingerprint(Build b, CcJob &job, int &ok) =>
   fnv_file(
     b._action_fingerprint(job.action, NULL, ok), job.preprocessed, ok);
 
-static int Build._compile_current(Build b, CcJob *job) {
+static int Build._compile_current(Build b, CcJob &job) {
   if (access(job.object, R_OK) || access(job.depfile, R_OK)) return 0;
   if (!_state_matches(job.state_path, job.fingerprint)) return 0;
   if (b.request.verbose)

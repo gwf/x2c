@@ -1060,7 +1060,7 @@ static void Compiler._printf_error(Compiler c, String family, String message) {
   c.report_error(<xform>, message, NULL, %($note));
 }
 
-static void PrintfWalk.scan(PrintfWalk *w, int raw) {
+static void PrintfWalk.scan(PrintfWalk &w, int raw) {
   while (w.cursor < w.end) {
     if (raw && w.format[w.cursor] == '\\') {
       w.cursor += w.cursor + 1 < w.end ? 2 : 1;
@@ -1076,7 +1076,7 @@ static void PrintfWalk.scan(PrintfWalk *w, int raw) {
   }
 }
 
-static void PrintfWalk._conversion(PrintfWalk *w) {
+static void PrintfWalk._conversion(PrintfWalk &w) {
   w._position();
   w._width();
   w._precision();
@@ -1096,14 +1096,14 @@ static void PrintfWalk._conversion(PrintfWalk *w) {
   w._value(length, conversion);
 }
 
-static void PrintfWalk._position(PrintfWalk *w) {
+static void PrintfWalk._position(PrintfWalk &w) {
   int probe = w.cursor;
   while (probe < w.end && _printf_is_digit(w.format[probe])) probe++;
   if (probe < w.end && w.format[probe] == '$')
     w._error("positional formats cannot infer Var argument types");
 }
 
-static void PrintfWalk._width(PrintfWalk *w) {
+static void PrintfWalk._width(PrintfWalk &w) {
   while (w.cursor < w.end &&
          (w.format[w.cursor] == '-' || w.format[w.cursor] == '+' ||
           w.format[w.cursor] == ' ' || w.format[w.cursor] == '#' ||
@@ -1118,7 +1118,7 @@ static void PrintfWalk._width(PrintfWalk *w) {
     w.cursor++;
 }
 
-static void PrintfWalk._precision(PrintfWalk *w) {
+static void PrintfWalk._precision(PrintfWalk &w) {
   if (w.cursor >= w.end || w.format[w.cursor] != '.') return;
   w.cursor++;
   if (w.cursor < w.end && w.format[w.cursor] == '*') {
@@ -1130,7 +1130,7 @@ static void PrintfWalk._precision(PrintfWalk *w) {
     w.cursor++;
 }
 
-static PrintfLength PrintfWalk._length(PrintfWalk *w) {
+static PrintfLength PrintfWalk._length(PrintfWalk &w) {
   PrintfLength length = _printf_default;
   if (w.cursor + 1 < w.end && w.format[w.cursor] == 'h' &&
       w.format[w.cursor + 1] == 'h') {
@@ -1155,7 +1155,7 @@ static PrintfLength PrintfWalk._length(PrintfWalk *w) {
   return length;
 }
 
-static void PrintfWalk._error(PrintfWalk *w, String message) {
+static void PrintfWalk._error(PrintfWalk &w, String message) {
   w.c._printf_error(w.family, message);
 }
 
@@ -1180,7 +1180,7 @@ static int _printf_is_digit(int ch) => ch >= '0' && ch <= '9';
 /* The next value argument, read by one conversion. Native arguments retain
    C calling semantics. */
 static void PrintfWalk._value(
-  PrintfWalk *w, PrintfLength length, int conversion) {
+  PrintfWalk &w, PrintfLength length, int conversion) {
   int index = w.value_index++;
   List arg = w.values[index];
   if (!w.c.sym.is_var_type(arg.cadr())) return;
@@ -1212,7 +1212,7 @@ static void PrintfWalk._value(
 }
 
 /* A `*` width or precision reads the next argument as an int. */
-static void PrintfWalk._star(PrintfWalk *w) {
+static void PrintfWalk._star(PrintfWalk &w) {
   int index = w.value_index++;
   if (index >= w.values.len())
     w._error("format consumes a missing '*' argument");

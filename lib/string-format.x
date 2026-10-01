@@ -84,7 +84,7 @@ String String.format(String fmt, List values) {
 
 /* Writes the text before the `%` at the cursor, then the conversion that
    `%` starts. */
-static void Format.conversion(Format *f) {
+static void Format.conversion(Format &f) {
   f.write_literal();
   f.offset = f.cursor++;
   f.need_byte();
@@ -99,12 +99,12 @@ static void Format.conversion(Format *f) {
   f.literal = f.cursor;
 }
 
-static void Format.write_literal(Format *f) {
+static void Format.write_literal(Format &f) {
   f.out.write_len(f.fmt + f.literal, (size_t) (f.cursor - f.literal));
 }
 
 /* A conversion that reaches the end of the format is incomplete. */
-static void Format.need_byte(Format *f) {
+static void Format.need_byte(Format &f) {
   if (f.cursor == f.length) f.fail("incomplete conversion");
 }
 
@@ -112,7 +112,7 @@ static void Format.need_byte(Format *f) {
 
 /* Parses the flags, width, precision, length modifier, and conversion
    after `%`, then rejects what the checked subset leaves out. */
-static Spec Format.spec(Format *f) {
+static Spec Format.spec(Format &f) {
   Spec spec = {.flags = f.flags(), .precision = -1};
   f.width(spec);
   f.precision(spec);
@@ -124,7 +124,7 @@ static Spec Format.spec(Format *f) {
   return spec;
 }
 
-static int Format.flags(Format *f) {
+static int Format.flags(Format &f) {
   int flags = 0;
   for (const char *flag; (flag = strchr(_format_flags, f.byte()));) {
     flags |= 1 << (flag - _format_flags);
@@ -135,7 +135,7 @@ static int Format.flags(Format *f) {
 }
 
 /* A `*` width takes the next value, and a negative one also sets `-`. */
-static void Format.width(Format *f, Spec &spec) {
+static void Format.width(Format &f, Spec &spec) {
   if (f.byte() == '*') {
     int width = f.star();
     if (width == INT_MIN) f.fail("width exceeds int range");
@@ -147,11 +147,11 @@ static void Format.width(Format *f, Spec &spec) {
 }
 
 /* A `*` width or precision is the next value as an int. */
-static int Format.star(Format *f) =>
+static int Format.star(Format &f) =>
   (int) f.number(f.take("missing star value"), <i32>).integer();
 
 /* A `*` precision takes the next value, and a negative one means none. */
-static void Format.precision(Format *f, Spec &spec) {
+static void Format.precision(Format &f, Spec &spec) {
   if (f.byte() != '.') return;
   f.cursor++;
   f.need_byte();
@@ -164,7 +164,7 @@ static void Format.precision(Format *f, Spec &spec) {
 
 /* Reads the digits at the cursor. An overflow reports the offset of the
    first digit and names the field with `label`. */
-static int Format.decimal(Format *f, String label) {
+static int Format.decimal(Format &f, String label) {
   int number = 0, start = f.cursor;
   while (f.digit()) {
     int digit = f.byte() - '0';
@@ -176,11 +176,11 @@ static int Format.decimal(Format *f, String label) {
   return number;
 }
 
-static int Format.byte(Format *f) => f.fmt[f.cursor];
+static int Format.byte(Format &f) => f.fmt[f.cursor];
 
-static int Format.digit(Format *f) => f.byte() >= '0' && f.byte() <= '9';
+static int Format.digit(Format &f) => f.byte() >= '0' && f.byte() <= '9';
 
-static int Format.modifier(Format *f) {
+static int Format.modifier(Format &f) {
   switch (f.byte()) {
     case 'h': return f.doubled('h', FORMAT_H, FORMAT_HH);
     case 'l': return f.doubled('l', FORMAT_L, FORMAT_LL);
@@ -191,7 +191,7 @@ static int Format.modifier(Format *f) {
 }
 
 /* `h` or `hh`, and `l` or `ll`. */
-static int Format.doubled(Format *f, char letter, int once, int twice) {
+static int Format.doubled(Format &f, char letter, int once, int twice) {
   f.cursor++;
   if (f.byte() != letter) return once;
   f.cursor++;
@@ -200,7 +200,7 @@ static int Format.doubled(Format *f, char letter, int once, int twice) {
 
 /* Rejects the conversions and combinations the checked subset leaves out,
    in this order. */
-static void Format.check(Format *f, Spec spec) {
+static void Format.check(Format &f, Spec spec) {
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
@@ -221,7 +221,7 @@ static void Format.check(Format *f, Spec spec) {
 // conversion arguments
 
 /* The next argument, or a failure with `reason` when none is left. */
-static Var Format.take(Format *f, String reason) {
+static Var Format.take(Format &f, String reason) {
   if (!f.args) f.fail(reason);
   Var arg = f.args.car();
   f.args = f.args.cdr();
@@ -230,7 +230,7 @@ static Var Format.take(Format *f, String reason) {
 
 /* Prints `arg` through the C spelling of `spec`. The check leaves only
    these conversions, so the floating ones are the rest. */
-static Buffer Format.print(Format *f, Spec spec, Var arg) {
+static Buffer Format.print(Format &f, Spec spec, Var arg) {
   if (strchr("diouxX", spec.conversion)) return f.integer(spec, arg);
   char text[48];
   spec.spell(text);
@@ -260,7 +260,7 @@ static const Symbol _integer_targets[][2] = {
 
 /* An integer is converted to its modifier's type, then printed as a long
    long, which prints every narrower value as its own modifier would. */
-static Buffer Format.integer(Format *f, Spec spec, Var arg) {
+static Buffer Format.integer(Format &f, Spec spec, Var arg) {
   int is_unsigned = strchr("ouxX", spec.conversion) != NULL;
   Var value = f.number(arg, _integer_targets[spec.modifier][is_unsigned]);
   char text[48];
@@ -272,20 +272,20 @@ static Buffer Format.integer(Format *f, Spec spec, Var arg) {
 
 /* `L` prints a long double, and the other modifiers a double. */
 static Buffer Format.floating(
-  Format *f, const char *text, int modifier, Var arg) {
+  Format &f, const char *text, int modifier, Var arg) {
   if (modifier == FORMAT_CAP_L)
     return f.out.printf(text, f.number(arg, <ldouble>).long_double_value());
   return f.out.printf(text, f.number(arg, <f64>).floating());
 }
 
-static Buffer Format.character(Format *f, const char *text, Var arg) {
+static Buffer Format.character(Format &f, const char *text, Var arg) {
   int byte = (int) f.number(arg, <i32>).integer();
   if (!(unsigned char) byte) f.fail("%c cannot produce an embedded NUL");
   return f.out.printf(text, byte);
 }
 
 /* Prints the display text of `arg`, nesting a failure's cause. */
-static Buffer Format.string(Format *f, const char *text, Var arg) {
+static Buffer Format.string(Format &f, const char *text, Var arg) {
   String string = NULL;
   try string = arg.str();
   catch %(?code *details): f.nested("string conversion failed", code, details);
@@ -293,7 +293,7 @@ static Buffer Format.string(Format *f, const char *text, Var arg) {
 }
 
 /* Converts `arg` to the numeric `target`, nesting a failure's cause. */
-static Var Format.number(Format *f, Var arg, Symbol target) {
+static Var Format.number(Format &f, Var arg, Symbol target) {
   Var converted = void;
   try converted = arg.convert(target);
   catch %(?code *details): f.nested("value conversion failed", code, details);
@@ -306,13 +306,13 @@ static void _format_error(int offset, String reason) {
   raise %(format (offset $offset) (reason $reason));
 }
 
-static void Format.fail(Format *f, String reason) {
+static void Format.fail(Format &f, String reason) {
   _format_error(f.offset, reason);
 }
 
 /* Raises `<format>` for the current conversion with the cause of a failed
    conversion nested. */
-static void Format.nested(Format *f, String reason, Var code, List details) {
+static void Format.nested(Format &f, String reason, Var code, List details) {
   List cause = cons(code, details);
   raise %(format (offset ${f.offset}) (reason $reason) (cause $cause));
 }

@@ -2632,8 +2632,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       String callee = NULL;
       List arguments = NULL;
       List target = project_call_target(
-        compiler, definitions, node, callee, &arguments
-      );
+        compiler, definitions, node, callee, arguments);
       List resolved = target ? resolve_project_target(target, publics) : NULL;
       if (!resolved && callee && contracts.contains(callee)) {
         foreach (String declared, contracts.keys())

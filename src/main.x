@@ -179,7 +179,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
 
 /* Each input must be a regular `.x` file. Units that write to the shared
    `--out-dir` must not share an output stem; inspection writes nothing. */
-static void Translation.preflight(Translation *t) {
+static void Translation.preflight(Translation &t) {
   CliRequest request = t.request;
   if (!request.inspects()) _check_out_dir(request.out_dir);
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
@@ -223,7 +223,7 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static void Translation.translate_serial(Translation *t) {
+static void Translation.translate_serial(Translation &t) {
   int done = 0;
   foreach (String input, t.request.inputs) {
     if (t.build) t.build.begin_translation(input);
@@ -235,18 +235,18 @@ static void Translation.translate_serial(Translation *t) {
   }
 }
 
-static void Translation.translate(Translation *t, String input) =>
+static void Translation.translate(Translation &t, String input) =>
   _translate_unit(t.frontend, input, t.output_dir(input));
 
 /* Where one unit's generated C, header, and depfile are written. A build
    gives each unit its own directory so units sharing an output stem cannot
    collide; `x2c translate` writes them all to the shared `--out-dir`. */
-static String Translation.output_dir(Translation *t, String input) {
+static String Translation.output_dir(Translation &t, String input) {
   if (!t.unit_dirs) return t.request.out_dir;
   return t.unit_dirs[input];
 }
 
-static void Translation.report(Translation *t, unsigned long started_at) {
+static void Translation.report(Translation &t, unsigned long started_at) {
   String out_dir = t.request.out_dir;
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {
@@ -272,7 +272,7 @@ typedef struct Workers {
 
 /* Translate the inputs in forked workers. Returns the number of slices
    that failed. */
-static int Translation.translate_parallel(Translation *t) {
+static int Translation.translate_parallel(Translation &t) {
   t.preload_modules();
   int count = t.unit_dirs ? t.total : t.request.jobs;
   Array slices = _slices(t.request.inputs, t.total, count);
@@ -284,7 +284,7 @@ static int Translation.translate_parallel(Translation *t) {
 /* Loads the native modules of the packages the inputs import before the
    workers fork, so each worker inherits them. A worker loads a module this
    misses itself when its import needs it. */
-static void Translation.preload_modules(Translation *t) {
+static void Translation.preload_modules(Translation &t) {
   List roots = t.request.package_roots();
   if (!roots) return;
   foreach (String name, t.package_names(roots).keys()) {
@@ -298,7 +298,7 @@ static void Translation.preload_modules(Translation *t) {
 
 /* The packages a unit's own imports name, and those its previous depfile
    records, which include imports reached through a header. */
-static Map Translation.package_names(Translation *t, List roots) {
+static Map Translation.package_names(Translation &t, List roots) {
   Map names = {};
   foreach (String input, t.request.inputs) {
     foreach (String name, _imported_packages(input)) names[name] = 1;
@@ -362,7 +362,7 @@ static Array _slices(List inputs, int total, int count) {
    end, so the only state workers share is the output directory, where no
    two units write the same file. The parent reports progress as workers
    finish. */
-static int Translation.run_workers(Translation *t, Array slices) {
+static int Translation.run_workers(Translation &t, Array slices) {
   int jobs = t.request.jobs, count = slices.len(), next = 0;
   if (jobs > count) jobs = count;
   if (t.request.verbose)
@@ -371,7 +371,7 @@ static int Translation.run_workers(Translation *t, Array slices) {
       t.total);
   long *pids = Scope.calloc(jobs, sizeof(long));
   List *carried = Scope.calloc(jobs, sizeof(List));
-  Workers w = {.t = t, .pids = pids, .carried = carried};
+  Workers w = {.t = &t, .pids = pids, .carried = carried};
   while (next < count || w.live) {
     if (next < count && w.live < jobs) w.start(slices[next++]);
     else w.reap();
@@ -382,11 +382,10 @@ static int Translation.run_workers(Translation *t, Array slices) {
 }
 
 // A slice that cannot fork counts as one failure.
-static void Workers.start(Workers *w, List slice) {
-  Translation *t = w.t;
-  if (t.build) t.build.begin_translation(slice.car());
+static void Workers.start(Workers &w, List slice) {
+  if (w.t.build) w.t.build.begin_translation(slice.car());
   long pid = worker_fork();
-  if (!pid) t.work(slice);
+  if (!pid) (*w.t).work(slice);
   if (pid < 0) {
     report_line(<error>, "could not start a translation worker");
     w.failed++;
@@ -397,24 +396,23 @@ static void Workers.start(Workers *w, List slice) {
 }
 
 // A forked worker exits after its slice, or at the first unit that fails.
-static void Translation.work(Translation *t, List slice) {
+static void Translation.work(Translation &t, List slice) {
   foreach (String input, slice) t.translate(input);
   Compiler.stop_meta_helper();
   worker_exit(0);
 }
 
 /* The last live worker moves into the slot of the one that finished. */
-static void Workers.reap(Workers *w) {
-  Translation *t = w.t;
+static void Workers.reap(Workers &w) {
   int status, slot = worker_wait_any(w.pids, w.live, status);
   if (status) w.failed++;
   List slice = w.carried[slot];
-  if (t.build && !status) t.build.end_translation(slice.car(), 0);
+  if (w.t.build && !status) w.t.build.end_translation(slice.car(), 0);
   w.done += slice.len();
   w.live--;
   w.pids[slot] = w.pids[w.live];
   w.carried[slot] = w.carried[w.live];
-  if (!t.build) report_progress(<translate>, w.done, t.total, NULL);
+  if (!w.t.build) report_progress(<translate>, w.done, w.t.total, NULL);
 }
 
 // builds

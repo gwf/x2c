@@ -536,7 +536,7 @@ Type Type.scalar(Type t) {
 
 /* Counts one specifier; storage classes, qualifiers, and `inline` count as
    nothing. Any other symbol means the type is no scalar. */
-static int Specifiers.add(Specifiers *s, Symbol symbol) {
+static int Specifiers.add(Specifiers &s, Symbol symbol) {
   if (_omit_specifier(symbol, 0)) return 1;
   s.count++;
   switch (symbol) {
@@ -555,7 +555,7 @@ static int Specifiers.add(Specifiers *s, Symbol symbol) {
 }
 
 /* The one spelling C gives a valid combination of counts, or `NULL`. */
-static Type Specifiers.spelling(Specifiers *s) {
+static Type Specifiers.spelling(Specifiers &s) {
   if (!s.count || s.signs > 1 || s.shorts > 1 || s.longs > 2 || s.ints > 1 ||
       s.chars > 1 || s.floats > 1 || s.doubles > 1 || s.voids > 1)
     return NULL;

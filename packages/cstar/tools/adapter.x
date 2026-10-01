@@ -13,13 +13,7 @@
 
 #include "frontend.x"
 
-typedef struct Adapter *Adapter;
-
-#pragma private
-
-#include <stdlib.h>
-
-struct Adapter {
+typedef struct Adapter {
   Compiler compiler;
   Array lines;
   Map annotations;
@@ -27,7 +21,11 @@ struct Adapter {
   String failure;
   String file;
   int line, column, arrays;
-};
+} Adapter;
+
+#pragma private
+
+#include <stdlib.h>
 
 static Map _binary_operators = %{
   <"*">: BINOP_MULTIPLY, <"/">: BINOP_DIVIDE, <"%">: BINOP_MODULO,
@@ -55,26 +53,26 @@ static Map _scalar_types = %{
 
 /** Records the first unsupported construct and returns NULL so every caller
     stops rendering. */
-static String _reject(Adapter adapter, String what) {
+static String _reject(Adapter &adapter, String what) {
   if (!adapter.failure)
     adapter.failure = %"unsupported: ${what} at " +
                       %"${adapter.file}:${adapter.line}";
   return NULL;
 }
 
-static void _emit(Adapter adapter, String text) {
+static void _emit(Adapter &adapter, String text) {
   if (!adapter.failure) adapter.lines.push(text);
 }
 
 /** Submits one segment at the statement position currently being rendered. */
-static void _feed(Adapter adapter, String segment) {
+static void _feed(Adapter &adapter, String segment) {
   if (!segment) return;
   _emit(adapter, %"  cstar.feed(${segment}, ${adapter.line}, " +
                   %"${adapter.column});");
 }
 
 /** Moves the rendered position to the source of one `(at ID NODE)` wrapper. */
-static List _locate(Adapter adapter, List node) {
+static List _locate(Adapter &adapter, List node) {
   match (node)
     case %(at ?occurrence ?inner): {
       List where = adapter.compiler.origin_location(occurrence.integer());
@@ -89,9 +87,9 @@ static List _locate(Adapter adapter, List node) {
 
 // types
 
-static String _ctype(Adapter adapter, Var declared);
+static String _ctype(Adapter &adapter, Var declared);
 
-static String _pointers(Adapter adapter, String base, List declarator) {
+static String _pointers(Adapter &adapter, String base, List declarator) {
   foreach (Var star, declarator) {
     if (star !== <"*">)
       return _reject(adapter, %"declarator ${declarator.repr()}");
@@ -105,7 +103,7 @@ static const SymbolSet _storage = %<<static extern inline register auto>>;
 /** Renders one type. A single-word type reaches the adapter as the bare
     symbol wherever the parser had nothing to qualify, as in a function
     type's result, so both spellings name the same type here. */
-static String _ctype(Adapter adapter, Var declared) {
+static String _ctype(Adapter &adapter, Var declared) {
   List type = declared is <list> ? declared.list() : %($declared);
   while (type && type.car() is <symbol> && _storage.contains(type.car()))
     type = type.cdr();
@@ -117,16 +115,16 @@ static String _ctype(Adapter adapter, Var declared) {
 }
 
 /** Combines a declaration's base type with one declarator's pointers. */
-static String _declared(Adapter adapter, Var type, List declarator) {
+static String _declared(Adapter &adapter, Var type, List declarator) {
   String base = _ctype(adapter, type);
   return base ? _pointers(adapter, base, declarator) : NULL;
 }
 
 // expressions
 
-static String _expression(Adapter adapter, Var value);
+static String _expression(Adapter &adapter, Var value);
 
-static String _arguments(Adapter adapter, List args) {
+static String _arguments(Adapter &adapter, List args) {
   Array rendered = [];
   foreach (Var argument, args) {
     String text = _expression(adapter, argument);
@@ -138,7 +136,7 @@ static String _arguments(Adapter adapter, List args) {
     : "(expression *) NULL";
 }
 
-static String _call(Adapter adapter, List callee, List args, String result) {
+static String _call(Adapter &adapter, List callee, List args, String result) {
   match (callee) {
     case %(expr ((func ?parameters) ?returns)
            (ident (binding ? ?spelling))): {
@@ -164,7 +162,7 @@ static String _call(Adapter adapter, List callee, List args, String result) {
   return _reject(adapter, "indirect call");
 }
 
-static String _expression(Adapter adapter, Var value) {
+static String _expression(Adapter &adapter, Var value) {
   if (value is not <list>) return _reject(adapter, "expression");
   List node = value;
   match (node) {
@@ -228,7 +226,7 @@ static String _expression(Adapter adapter, Var value) {
 
 /** Returns the record a `cstar_marker(id)` statement stands for, or NULL
     when the statement is not a marker. */
-static List _annotation(Adapter adapter, List node) {
+static List _annotation(Adapter &adapter, List node) {
   match (node)
     case %(stmnt (expr ?
            (call (expr ? (ident (binding ? "cstar_marker")))
@@ -247,7 +245,7 @@ static String _quoted(List texts) {
   return parts.join(", ");
 }
 
-static void _feed_annotation(Adapter adapter, List record) {
+static void _feed_annotation(Adapter &adapter, List record) {
   match (record) {
     case %(assert ? ?text ? ? ?):
       _feed(adapter,
@@ -273,13 +271,13 @@ static void _feed_annotation(Adapter adapter, List record) {
 
 // statements
 
-static void _statement(Adapter adapter, Var value);
+static void _statement(Adapter &adapter, Var value);
 
 /** Feeds `i++`, `++i`, `i--`, or `--i` written as a whole statement. The
     parser produces these two nodes for those four spellings only. The same
     operator inside an expression stays unsupported, because its place in
     the evaluation order is not part of the admitted subset. */
-static void _increment(Adapter adapter, Var operator, Var operand,
+static void _increment(Adapter &adapter, Var operator, Var operand,
                        String position) {
   String rendered = _expression(adapter, operand);
   String step = operator === <"++"> ? "INCREMENT" : "DECREMENT";
@@ -287,7 +285,7 @@ static void _increment(Adapter adapter, Var operator, Var operand,
     _feed(adapter, %"make_inc_dec(${rendered}, INCDEC_${step}_${position})");
 }
 
-static void _braced(Adapter adapter, Var value) {
+static void _braced(Adapter &adapter, Var value) {
   List node = _locate(adapter, value);
   if (node && node.car() === <block>) {
     _statement(adapter, node);
@@ -298,7 +296,7 @@ static void _braced(Adapter adapter, Var value) {
   _feed(adapter, "make_block_end()");
 }
 
-static void _declaration(Adapter adapter, Var type, List bindings) {
+static void _declaration(Adapter &adapter, Var type, List bindings) {
   Type declared_type = type;
   if (declared_type.is_static() || declared_type.is_extern()) {
     _reject(adapter, "static or extern local declaration");
@@ -326,7 +324,7 @@ static void _declaration(Adapter adapter, Var type, List bindings) {
   }
 }
 
-static void _statement(Adapter adapter, Var value) {
+static void _statement(Adapter &adapter, Var value) {
   if (adapter.failure) return;
   List node = _locate(adapter, value);
   if (!node) return;
@@ -406,7 +404,7 @@ static void _statement(Adapter adapter, Var value) {
 
 // functions
 
-static void _signature(Adapter adapter, String name, Var returns,
+static void _signature(Adapter &adapter, String name, Var returns,
                        List parameters) {
   Array types = [], names = [];
   foreach (Var declared, parameters) {
@@ -435,7 +433,7 @@ static void _signature(Adapter adapter, String name, Var returns,
 
 /** Renders one verified function: ghost parameters, contract, signature,
     and the captured body, whose markers place the annotations. */
-void Adapter.function(Adapter adapter, List record, List definition) {
+void Adapter.function(Adapter &adapter, List record, List definition) {
   match (record)
     case %(function ?name ?pre ?post ?ghosts ?file ?line ?column ?captured ?):
     {
@@ -477,7 +475,7 @@ void Adapter.function(Adapter adapter, List record, List definition) {
 
 /** Opens an adapter over one unit's annotation records. */
 Adapter Adapter.new(Compiler compiler, Map annotations) {
-  Adapter adapter = Scope.calloc(1, sizeof(struct Adapter));
+  Adapter adapter = {0};
   adapter.compiler = compiler;
   adapter.lines = [];
   adapter.annotations = annotations;
@@ -487,11 +485,11 @@ Adapter Adapter.new(Compiler compiler, Map annotations) {
 
 /** Returns the first unsupported construct, or NULL when every rendered
     function stayed inside the admitted subset. */
-String Adapter.failure(Adapter adapter) => adapter.failure;
+String Adapter.failure(Adapter &adapter) => adapter.failure;
 
 /** Reports whether any rendered function used one of the session's own
     proof steps, all of which are array steps today. */
-int Adapter.uses_arrays(Adapter adapter) => adapter.arrays;
+int Adapter.uses_arrays(Adapter &adapter) => adapter.arrays;
 
 /** Returns the rendered function bodies. */
-String Adapter.text(Adapter adapter) => adapter.lines.join("\n");
+String Adapter.text(Adapter &adapter) => adapter.lines.join("\n");

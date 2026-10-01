@@ -36,22 +36,22 @@ typedef struct Options {
   String input, root, x2c, packages, cstar_home;
   List include_dirs;
   int port, emit, keep, timeout;
-} *Options;
+} Options;
 
 static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
-  int ok = frontend.start(filename, *unit);
+static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
+  int ok = frontend.start(filename, unit);
   if (ok) {
-    unit->compiler.own_diagnostics();
+    unit.compiler.own_diagnostics();
     ok = unit.collect(frontend) && unit.parse();
   }
   if (ok) return 1;
-  if (!unit->compiler.diagnostics.printer)
-    foreach (Var entry, unit->compiler.diagnostics())
-      unit->compiler.print_diagnostic(entry);
+  if (!unit.compiler.diagnostics.printer)
+    foreach (Var entry, unit.compiler.diagnostics())
+      unit.compiler.print_diagnostic(entry);
   unit.close();
   return 0;
 }
@@ -99,7 +99,7 @@ static String _companion(String input) {
 
 /** Renders the proof program and the `(name line)` row of every function it
     verifies, or NULL after reporting why the file cannot be verified. */
-static List _program(Options options, ParsedUnit parsed, List records) {
+static List _program(Options &options, ParsedUnit parsed, List records) {
   Map annotations = {};
   foreach (List record, records)
     match (record)
@@ -156,7 +156,7 @@ static List _program(Options options, ParsedUnit parsed, List records) {
 
 /** Renders the proof program while the parsed unit is still open, and
     exports the result past the unit's pools. */
-static List _render(Options options) {
+static List _render(Options &options) {
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   request.include_dirs = options.include_dirs;
@@ -164,7 +164,7 @@ static List _render(Options options) {
   frontend.preprocessor_errors = _preprocessor_errors;
   frontend.prepare_meta(%(${options.input}));
   ParsedUnit parsed;
-  if (!_open_input(frontend, options.input, &parsed)) return NULL;
+  if (!_open_input(frontend, options.input, parsed)) return NULL;
   Var stored;
   List rendered = NULL;
   if (!Lisp.try_get(parsed.compiler.macro_lisp, "cstar.records", stored))
@@ -186,40 +186,40 @@ static String _start_failure(Job job, List detail) {
 
 /** Starts `job`, or returns NULL with the reason it could not start in
     `failure`. */
-static Job _start(Job job, String *failure) {
+static Job _start(Job job, String &failure) {
   Job started = NULL;
   try started = job.start();
-  catch %(not-found *detail): *failure = _start_failure(job, detail);
-  catch %(io-fail *detail): *failure = _start_failure(job, detail);
+  catch %(not-found *detail): failure = _start_failure(job, detail);
+  catch %(io-fail *detail): failure = _start_failure(job, detail);
   return started;
 }
 
 /** Runs `job` to completion with both streams captured, or kills it after
     `seconds` and reports `-2`. A job that cannot start reports 127, as a
     shell does, with the reason in `errors`. */
-static int _run(Job job, int seconds, String *output, String *errors) {
-  *output = NULL;
+static int _run(Job job, int seconds, String &output, String &errors) {
+  output = NULL;
   if (!_start(job.options({stderr: <capture>}), errors)) return 127;
   int finished = 0;
   for (int tick = 0; tick < seconds * 50 && !(finished = job.ready()); tick++)
     usleep(20 * 1000);
   if (!finished) job.kill(SIGKILL);
   int status = job.status();
-  *output = job.output_text;
-  *errors = job.errors_text;
+  output = job.output_text;
+  errors = job.errors_text;
   return finished ? status : -2;
 }
 
 /** Starts a prover session and returns it once its log reports the port it
     listens on. macOS Control Center also binds 7000, so readiness comes from
     the log line and never from a port probe. */
-static Job _server(Options options, Path directory, int port) {
+static Job _server(Options &options, Path directory, int port) {
   Path log = directory.join("server.log");
   String program = %"${options.cstar_home}/bin/hol_light_server";
   Job server = %($program).job().options({
     env: {"LCF_SERVER_PORT": %"$port"}, stdout: log, stderr: <stdout>});
   String failure = NULL;
-  if (!_start(server, &failure)) {
+  if (!_start(server, failure)) {
     Stderr.printf("%s", failure);
     return NULL;
   }
@@ -310,8 +310,7 @@ static String _env(String name, String fallback) {
   return value ? value : fallback;
 }
 
-static Options _options(int argc, char **argv) {
-  Options options = Scope.calloc(1, sizeof(struct Options));
+static int _options(int argc, char **argv, Options &options) {
   options.timeout = 600;
   Array include_dirs = [];
   for (int i = 1; i < argc; i++) {
@@ -323,20 +322,20 @@ static Options _options(int argc, char **argv) {
       options.root = String.new(argv[++i]);
     else if (!strcmp(argv[i], "-I") && i + 1 < argc)
       include_dirs.push(String.new(argv[++i]));
-    else if (argv[i][0] == '-' || options.input) return NULL;
+    else if (argv[i][0] == '-' || options.input) return 0;
     else options.input = String.new(argv[i]);
   }
-  if (!options.input) return NULL;
+  if (!options.input) return 0;
   options.include_dirs = include_dirs.list_free();
   String port = Env.get("CSTAR_PORT");
   if (port && !options.port) options.port = atoi(port);
   options.x2c = _env("X2C", "x2c");
   options.packages = _env("X2C_PACKAGES", "packages");
   options.cstar_home = _env("CSTAR_HOME", "");
-  return options;
+  return 1;
 }
 
-static int _verify(Options options, String program, List functions) {
+static int _verify(Options &options, String program, List functions) {
   char pattern[] = "/tmp/cstar-verify.XXXXXX";
   Path directory = String.new(mkdtemp(pattern));
   Path source = directory.join("unit.proof.x");
@@ -347,7 +346,7 @@ static int _verify(Options options, String program, List functions) {
     ${options.x2c} build --output $executable
     --build-dir ${directory.join("cc")} --package-dir ${options.packages}
     --x-include-dir ${Path.dirname(options.input)} $source
-  ), 600, &output, &errors);
+  ), 600, output, errors);
   if (status) {
     Stderr.printf("cstar-verify: cannot build the proof program; kept %s\n"
                   "%s%s", directory, output ? output : "",
@@ -363,7 +362,7 @@ static int _verify(Options options, String program, List functions) {
   }
   Map env = {"LCF_SERVER_PORT": %"$port", "CSTAR_HOME": options.cstar_home};
   status = _run(%($executable).job().options({env: env}), options.timeout,
-                &output, &errors);
+                output, errors);
   if (server) {
     server.kill(SIGKILL);
     server.status();
@@ -397,8 +396,8 @@ static int _verify(Options options, String program, List functions) {
 
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
-  Options options = _options(argc, argv);
-  if (!options) {
+  Options options = {0};
+  if (!_options(argc, argv, options)) {
     _usage(argv[0]);
     return 3;
   }

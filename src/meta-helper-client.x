@@ -81,7 +81,7 @@ Var Compiler.meta_helper_call(
 
 /* Refuses the call when the project's helper or the unit's table did not
    build, or when the function returns a struct or union. */
-static void Call.check(Call *call) {
+static void Call.check(Call &call) {
   Var failure;
   if (!helper_path && helper_failures && helper_failures.try_get(-1, failure))
     call.refuse(failure);
@@ -92,7 +92,7 @@ static void Call.check(Call *call) {
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
-static void Call.send(Call *call, List arguments) {
+static void Call.send(Call &call, List arguments) {
   if (helper_reset) {
     call.send_frame(%(reset $helper_table));
     helper_reset = 0;
@@ -100,7 +100,7 @@ static void Call.send(Call *call, List arguments) {
   call.send_frame(%(call ${call.name} $arguments ${Macro.subject()}));
 }
 
-static void Call.send_frame(Call *call, List message) {
+static void Call.send_frame(Call &call, List message) {
   int status = _helper_send(message, call.deadline);
   if (status < 0) call.overdue();
   if (!status) call.stopped(_helper_ending());
@@ -108,7 +108,7 @@ static void Call.send_frame(Call *call, List message) {
 
 /* The limit is `X2C_META_TIMEOUT` in seconds, 60 by default; zero or less
    sets no deadline. */
-static void Call.set_deadline(Call *call) {
+static void Call.set_deadline(Call &call) {
   String text = Env.get("X2C_META_TIMEOUT");
   call.limit = text ? atof(text) : 60.0;
   call.deadline = call.limit > 0 ? _now() + call.limit : 0;
@@ -122,7 +122,7 @@ static double _now(void) {
 
 /* The next reply. A helper that passes the deadline or ends first is
    reported at the call. */
-static Var Call.next_reply(Call *call) {
+static Var Call.next_reply(Call &call) {
   Var reply;
   int status = _helper_receive(call.deadline, reply);
   if (status < 0) call.overdue();
@@ -331,12 +331,12 @@ static int _read_input(double deadline) {
 
 // failures
 
-static void Call.refuse(Call *call, String why) =>
+static void Call.refuse(Call &call, String why) =>
   call.compiler.refuse_meta_call(call.name, call.site, why);
 
 /* Kills the helper, which passed the call's deadline, and reports the
    call. */
-static void Call.overdue(Call *call) {
+static void Call.overdue(Call &call) {
   _helper_stop(SIGKILL);
   call.compiler.report_error(
     <macro>, "%s%g s".printf("this meta call ran longer than ", call.limit),
@@ -345,7 +345,7 @@ static void Call.overdue(Call *call) {
       "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
-static void Call.stopped(Call *call, String reason) {
+static void Call.stopped(Call &call, String reason) {
   call.compiler.report_error(
     <macro>, "this meta call stopped the compile-time helper", call.site,
     %("function: ${call.name}" "reason: $reason"));

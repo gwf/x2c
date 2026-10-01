@@ -126,7 +126,7 @@ static Spec _read_spec(List spec) {
   int position = 0;
   foreach (List row, spec) {
     Option *option = &result.options[position];
-    option._read_row(row, result.index, position);
+    (*option)._read_row(row, result.index, position);
     Var earlier;
     option.owner = result.index.try_get(option.name, earlier)
       ? result.options[earlier.integer()].owner : option;
@@ -139,7 +139,7 @@ static Spec _read_spec(List spec) {
 
 /* The first word names an operand unless it begins with a dash; every
    dashed word is a spelling of the same option. */
-static void Option._read_row(Option *o, List row, Map index, int position) {
+static void Option._read_row(Option &o, List row, Map index, int position) {
   String first = row.car().str();
   o.operand = !first.startswith("-");
   foreach (Var word, row) {
@@ -172,7 +172,7 @@ static void Option._read_row(Option *o, List row, Map index, int position) {
   else o.fallback = 0;
 }
 
-static void Option._read_property(Option *o, List property) {
+static void Option._read_property(Option &o, List property) {
   Symbol key = 0;
   if (property.car() is Symbol) key = property.car();
   switch (key) {
@@ -191,7 +191,7 @@ static void Option._read_property(Option *o, List property) {
   }
 }
 
-static void Spec._free(Spec *s) {
+static void Spec._free(Spec &s) {
   if (s.options)
     for (int i = 0; i < s.count; i++) s.options[i].collected.free();
   Scope.free(s.options);
@@ -200,36 +200,36 @@ static void Spec._free(Spec *s) {
 
 // words
 
-static void Spec._parse_long(Spec *s, Map result, List &rest, String word) {
+static void Spec._parse_long(Spec &s, Map result, List &rest, String word) {
   int equals = word.find("=");
   String spelling = equals < 0 ? word : word[:equals];
   Option *option = s._find(spelling);
   if (!option.value) {
     if (equals >= 0) _bad_option("unexpected value", spelling);
-    option._store(result, 1);
+    (*option)._store(result, 1);
   }
-  else if (equals >= 0) option._store(result, word[equals + 1:]);
-  else option._store(result, _next_value(rest, spelling));
+  else if (equals >= 0) (*option)._store(result, word[equals + 1:]);
+  else (*option)._store(result, _next_value(rest, spelling));
 }
 
 /* Short flags may share one word, as in `-vq`; the first short option that
    takes a value consumes the rest of the word, or else the next word. */
-static void Spec._parse_short(Spec *s, Map result, List &rest, String word) {
+static void Spec._parse_short(Spec &s, Map result, List &rest, String word) {
   for (int at = 1; at < word.len(); at++) {
     String spelling = %"-${word[at:at + 1]}";
     Option *option = s._find(spelling);
     if (!option.value) {
-      option._store(result, 1);
+      (*option)._store(result, 1);
       continue;
     }
     String value = at + 1 < word.len()
       ? word[at + 1:] : _next_value(rest, spelling);
-    option._store(result, value);
+    (*option)._store(result, value);
     return;
   }
 }
 
-static Option *Spec._find(Spec *s, String spelling) {
+static Option *Spec._find(Spec &s, String spelling) {
   Var position;
   if (!s.index.try_get(spelling, position))
     _bad_option("unknown option", spelling);
@@ -245,7 +245,7 @@ static String _next_value(List &rest, String spelling) {
 /* A repeated row collects every value in order, starting afresh at its
    first occurrence or after another row replaced the value; a flag counts
    its occurrences; any other value replaces an earlier one. */
-static void Option._store(Option *o, Map result, Var value) {
+static void Option._store(Option &o, Map result, Var value) {
   Option *owner = o.owner;
   if (!o.repeated || !o.given) {
     owner.collected.free();
@@ -260,12 +260,12 @@ static void Option._store(Option *o, Map result, Var value) {
   o.given++;
 }
 
-static void Spec._assign_operands(Spec *s, Map result, List operands) {
+static void Spec._assign_operands(Spec &s, Map result, List operands) {
   for (int i = 0; i < s.count; i++) {
     Option *option = &s.options[i];
     if (!option.operand) continue;
     while (operands) {
-      option._store(result, operands.car());
+      (*option)._store(result, operands.car());
       operands = operands.cdr();
       if (!option.repeated) break;
     }
@@ -301,7 +301,7 @@ String Args.usage(String program, List spec) {
   Buffer operands = $auto(Buffer.new(0)), out = $auto(Buffer.new(0));
   for (int i = 0; i < parsed.count; i++) {
     Option *option = &parsed.options[i];
-    String label = option._label();
+    String label = (*option)._label();
     if (!option.operand) _write_row(options, label, option.help);
     else {
       synopsis.printf(" %s", label);
@@ -318,7 +318,7 @@ String Args.usage(String program, List spec) {
   return out;
 }
 
-static String Option._label(Option *o) {
+static String Option._label(Option &o) {
   if (o.operand) {
     String label = %"<${o.name}>";
     if (o.repeated) label = %"$label...";

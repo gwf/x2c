@@ -238,7 +238,7 @@ MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
    are control vocabulary only as the final operand of `!is`. The compiler's
    dynamic-value marker retains binders in its literal children without
    treating the marker as data. */
-static void MatchLayoutBuilder._collect(MatchLayoutBuilder *b, Var pattern) {
+static void MatchLayoutBuilder._collect(MatchLayoutBuilder &b, Var pattern) {
   if (pattern is not <list>) {
     b._atom(pattern);
     return;
@@ -262,13 +262,13 @@ static void MatchLayoutBuilder._collect(MatchLayoutBuilder *b, Var pattern) {
 }
 
 /* A sigil-leading `Atom` must spell a binder; a named binder takes a slot. */
-static void MatchLayoutBuilder._atom(MatchLayoutBuilder *b, Var atom) {
+static void MatchLayoutBuilder._atom(MatchLayoutBuilder &b, Var atom) {
   if (_malformed_binder(atom)) b.malformed_binder = 1;
   else if (_named_binder(atom) && b._add(atom) < 0) b.past_capacity = 1;
 }
 
 /* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
-static int MatchLayoutBuilder._add(MatchLayoutBuilder *b, Atom binder) {
+static int MatchLayoutBuilder._add(MatchLayoutBuilder &b, Atom binder) {
   for (int i = 0; i < b.count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
   if (b.count >= MACHINE_BINDER_MAX) return -1;
@@ -277,7 +277,7 @@ static int MatchLayoutBuilder._add(MatchLayoutBuilder *b, Atom binder) {
 }
 
 /* The first malformation the walk noted, or NULL. */
-static const char *MatchLayoutBuilder._malformed(MatchLayoutBuilder *b) {
+static const char *MatchLayoutBuilder._malformed(MatchLayoutBuilder &b) {
   if (b.malformed_binder) return "binder-name";
   if (b.leading_list_binder) return "leading-list-binder-in-guard";
   if (b.past_capacity) return "binder-capacity";
@@ -286,7 +286,7 @@ static const char *MatchLayoutBuilder._malformed(MatchLayoutBuilder *b) {
 
 /* One allocation holds the layout and its binder table. */
 static MatchCaptureLayout MatchLayoutBuilder._layout(
-  MatchLayoutBuilder *b, Var normalized, const char *malformed) {
+  MatchLayoutBuilder &b, Var normalized, const char *malformed) {
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b.count;
   MatchCaptureLayout layout = Scope.calloc(1, bytes);
   layout.binders =
@@ -608,18 +608,17 @@ typedef struct MatchWalk {
   Var found, template;
   List bindings, results;
   int error;
-} *MatchWalk;
+} MatchWalk;
 
 /* Declares `$walk` over `$plan` and `$machine` with its own capture buffer
    and an empty cell stack. */
 macro Statement $match.walk(Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  struct MatchWalk storage = {
+  MatchWalk $walk = {
     $plan, ($plan).program.view(), &captures, $machine,
     Block.new(sizeof(Var))
   };
-  MatchWalk $walk = &storage;
 }
 
 /** Searches `input` with `plan`, writing the first match and bindings.
@@ -708,11 +707,11 @@ static int MatchPlan._replace_all(
    A walk runs the plan at each node of one traversal, sharing one machine,
    one capture buffer, and one cell stack. */
 
-static int MatchWalk._test(MatchWalk walk, Var node) =>
+static int MatchWalk._test(MatchWalk &walk, Var node) =>
   _run_capture(walk.view, walk.m, node, walk.captures);
 
 /* One search result: `(* node)` followed by the node's bindings. */
-static List MatchWalk._hit(MatchWalk walk, Var node) =>
+static List MatchWalk._hit(MatchWalk &walk, Var node) =>
   cons(%(* $node), walk.plan.layout._publish(walk.captures));
 
 static Var _spine_get(Block spine, size_t index) =>
@@ -724,7 +723,7 @@ static Var _spine_get(Block spine, size_t index) =>
    depth reaches the C stack. The loop visits every car in order and then
    answers for the cells from the last one back, which is the order the
    recursion produced. */
-static int MatchWalk._all(MatchWalk walk, Var input, int include_empty) {
+static int MatchWalk._all(MatchWalk &walk, Var input, int include_empty) {
   Block hits = walk.spine;
   size_t base = hits.length;
   int visit_tail = 1;
@@ -755,7 +754,7 @@ static int MatchWalk._all(MatchWalk walk, Var input, int include_empty) {
 
 /* Prepends the hits the loop pushed above `base`, last one first, as the
    recursion answered them, and releases them. */
-static void MatchWalk._answer(MatchWalk walk, size_t base) {
+static void MatchWalk._answer(MatchWalk &walk, size_t base) {
   Block hits = walk.spine;
   for (size_t i = hits.length; i > base; i--)
     walk.results = cons(_spine_get(hits, i - 1), walk.results);
@@ -764,7 +763,7 @@ static void MatchWalk._answer(MatchWalk walk, size_t base) {
 
 /* The cells answer from the last one back, so the walk remembers the last
    cell that matched and settles on it once nothing earlier matches. */
-static int MatchWalk._first(MatchWalk walk, Var input, int include_empty) {
+static int MatchWalk._first(MatchWalk &walk, Var input, int include_empty) {
   Var last_cell = void;
   int have_cell = 0, visit_tail = 1;
   while (input is <list>) {
@@ -793,7 +792,7 @@ static int MatchWalk._first(MatchWalk walk, Var input, int include_empty) {
 }
 
 /* Tests `node` and, when it matches, publishes it with its bindings. */
-static int MatchWalk._settle(MatchWalk walk, Var node) {
+static int MatchWalk._settle(MatchWalk &walk, Var node) {
   int status = walk._test(node);
   if (status != 1) return status;
   walk.found = node;
@@ -804,7 +803,7 @@ static int MatchWalk._settle(MatchWalk walk, Var node) {
 /* Rewrites children before the List that holds them. The loop pushes each
    rewritten car; the cells then rebuild from the last one back, each around
    the tail so far. */
-static Var MatchWalk._rewrite(MatchWalk walk, Var node, int include_empty) {
+static Var MatchWalk._rewrite(MatchWalk &walk, Var node, int include_empty) {
   Block heads = walk.spine;
   size_t base = heads.length;
   int visit_tail = 1;
@@ -830,7 +829,7 @@ static Var MatchWalk._rewrite(MatchWalk walk, Var node, int include_empty) {
 }
 
 /* The instantiated template when `node` matches, or else `node`. */
-static Var MatchWalk._replace_node(MatchWalk walk, Var node) {
+static Var MatchWalk._replace_node(MatchWalk &walk, Var node) {
   int status = walk._test(node);
   if (status < 0) {
     walk.error = 1;

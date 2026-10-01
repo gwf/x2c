@@ -13,6 +13,87 @@ known at compile time. Use `Var` where the value is dynamic: heterogeneous
 collection elements, dynamic arithmetic, generic callbacks, or interchange
 data.
 
+## Use values for local state and references for updates
+
+Declare a record as a value when it belongs to one operation and needs no
+retained identity. A method that updates that record takes a reference:
+
+```x2c
+class Counter { int value; };
+
+static void Counter.step(Counter &c, int amount) => c.value += amount;
+
+int main(void) {
+  Counter counter = Counter.new(2);
+  counter.step(3);
+  Counter copy = counter;
+  copy.step(1);
+  printf("%d %d\n", counter.value, copy.value);
+  return 0;
+}
+```
+
+```text
+5 6
+```
+
+`counter` holds the record directly; constructing it needs no allocation for
+the record. `step` changes the caller's object, and its call needs no `&` or
+explicit dereference. Copying the record creates a separate Counter. Pass a
+small record by value when reading a copy is the intended contract.
+
+`class` adds constructors, boxing, and other methods to the declared
+representation. Use an ordinary value typedef for a private context that
+does not need that bundle. In either case, pass its mutable state through
+`T &` helpers instead of introducing a pointer typedef and a second local
+whose only purpose is taking the context's address.
+
+A trailing `*` selects a pointer representation:
+`class Node { int value; } *;`. Its bare `Node` name is already a pointer,
+and its methods take that handle. Choose it when shared or retained identity
+is useful. The spelling `struct` before the braces is optional; short braces
+work for both representations. See
+[Choose a representation](system-macros.md#choose-a-representation).
+
+Representation and storage location are separate choices. A value can be a
+local, a field, an array element, or part of allocated storage. A reference
+borrows one live caller object for a call; it does not own or extend its
+lifetime. Record copies are shallow: a copied Array, Buffer, or pointer field
+still reaches the same backing object. Keep cleanup with the owner of those
+resources, including when the record itself is a value.
+
+## Borrow required and optional outputs
+
+Use a reference when a result must update a caller's existing object:
+
+```x2c
+static int take(int &remaining, int &item) {
+  if (!remaining) return 0;
+  remaining--;
+  item = remaining;
+  return 1;
+}
+
+int main(void) {
+  int remaining = 2, item;
+  while (take(remaining, item)) printf("%d\n", item);
+  return 0;
+}
+```
+
+```text
+1
+0
+```
+
+Use `T &?` when supplying the object is optional, and test its presence before
+using it. A required reference takes an addressable value, not a pointer or
+NULL. An existing pointer `p` supplies its object as `*p`. Keep pointers for
+buffers and arrays, retained addresses, nullable links, native signatures,
+and callback state. A nested context that borrows its mutable parent needs a
+pointer field so both contexts reach the same parent. See
+[Reference parameters](../reference/language.md#reference-parameters).
+
 ## Adopt a protocol for one real contract
 
 Adopt a protocol when a concrete type should support a shared interface.

@@ -47,7 +47,7 @@ meta native List Diff.lines(String old, String new) {
 
 /* Emits the lines both texts start with and sets the middle to the lines
    before those both texts end with. */
-static void Script.trim(Script *s) {
+static void Script.trim(Script &s) {
   int lo = 0, old_hi = s.old.len(), new_hi = s.new.len();
   for (; lo < old_hi && lo < new_hi && s.same(lo, lo); lo++)
     s.emit(<same>, s.old[lo]);
@@ -58,15 +58,15 @@ static void Script.trim(Script *s) {
 
 /* Past `_LIMIT`, the middle becomes one run of deletions and one run of
    insertions. */
-static void Script.replace(Script *s) {
+static void Script.replace(Script &s) {
   for (int i = s.lo; i < s.lo + s.n; i++) s.emit(<delete>, s.old[i]);
   for (int j = s.lo; j < s.lo + s.m; j++) s.emit(<insert>, s.new[j]);
 }
 
-static void Script.emit(Script *s, Symbol kind, String line) =>
+static void Script.emit(Script &s, Symbol kind, String line) =>
   s.edits = cons(%($kind $line), s.edits);
 
-static int Script.same(Script *s, int i, int j) =>
+static int Script.same(Script &s, int i, int j) =>
   s.old[i].string() == s.new[j].string();
 
 /* frontier search
@@ -81,7 +81,7 @@ typedef int *Trace;
 
 /* Myers' greedy search over the middle. Returns the edit count after
    emitting the edits, or -1 past `_LIMIT`. */
-static int Script.myers(Script *s) {
+static int Script.myers(Script &s) {
   int max = s.n + s.m < _LIMIT ? s.n + s.m : _LIMIT;
   Trace trace = Scope.calloc((max + 1) * (max + 1), sizeof(int));
   defer Scope.free(trace);
@@ -96,7 +96,7 @@ static int Script.myers(Script *s) {
 
 /* Fills the frontier of each step up to `max` and returns the first step
    whose path reaches the end of both middles, or -1. */
-static int Script.forward(Script *s, Trace trace, int max) {
+static int Script.forward(Script &s, Trace trace, int max) {
   for (int step = 0; step <= max; step++)
     for (int k = -step; k <= step; k += 2) {
       int x = s.snake(trace.entry(step, k), k);
@@ -108,7 +108,7 @@ static int Script.forward(Script *s, Trace trace, int max) {
 
 /* Follows diagonal `k` from old index `x` while the lines agree and
    returns the old index where it stops. */
-static int Script.snake(Script *s, int x, int k) {
+static int Script.snake(Script &s, int x, int k) {
   int y = x - k;
   while (x < s.n && y < s.m && s.same(s.lo + x, s.lo + y)) x++, y++;
   return x;
@@ -236,7 +236,7 @@ static char _mark(Symbol kind) {
 
 /* An empty side of a hunk starts at the line before it, as `diff -u`
    prints it. */
-static void Hunk.write(Hunk *h, Buffer out) {
+static void Hunk.write(Hunk &h, Buffer out) {
   out.printf(
     "@@ -%d,%d +%d,%d @@\n", h.old_count ? h.old_start + 1 : h.old_start,
     h.old_count, h.new_count ? h.new_start + 1 : h.new_start, h.new_count);

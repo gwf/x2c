@@ -66,7 +66,7 @@ char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
 }
 
 /* Emit a source position after flushing the preceding physical line. */
-static void Pretty.source_marker(Pretty *p, Var value) {
+static void Pretty.source_marker(Pretty &p, Var value) {
   List location = p.c.origin_location(value);
   while (p.buff.len() > 0 && p.buff.get(-1) == ' ') p.buff.unwrite(1);
   if (p.buff.len() > 0 && p.buff.get(-1) != '\n') _write_newline(p.buff);
@@ -85,7 +85,7 @@ static void Pretty.source_marker(Pretty *p, Var value) {
 }
 
 /* A preprocessor token occupies its own line. */
-static void Pretty.directive(Pretty *p, String token) {
+static void Pretty.directive(Pretty &p, String token) {
   while (p.buff.len() > 0 && p.buff.get(-1) == ' ') p.buff.unwrite(1);
   if (p.buff.len() > 0 && p.buff.get(-1) != '\n') _write_newline(p.buff);
   _write_token(p.buff, token, 0);
@@ -96,7 +96,7 @@ static void Pretty.directive(Pretty *p, String token) {
 }
 
 /* Write one ordinary token between its leading and trailing layout. */
-static void Pretty.ordinary(Pretty *p, String token, List rest) {
+static void Pretty.ordinary(Pretty &p, String token, List rest) {
   char last = token ? token[-1] : '\0';
   if (last == '(') p.paren_depth++;
   else if (last == ')') {
@@ -108,7 +108,7 @@ static void Pretty.ordinary(Pretty *p, String token, List rest) {
   p.after(token, last, rest);
 }
 
-static void Pretty.before(Pretty *p, String token) {
+static void Pretty.before(Pretty &p, String token) {
   if (_token_is(token, '}')) {
     if (p.indent >= 2) p.indent -= 2;
     if (p.buff.len() > 0 && p.buff.get(-1) != '\n')
@@ -119,7 +119,7 @@ static void Pretty.before(Pretty *p, String token) {
   else if (_need_space(p.prev_token, token)) p.buff.write(" ");
 }
 
-static void Pretty.after(Pretty *p, String token, char last, List rest) {
+static void Pretty.after(Pretty &p, String token, char last, List rest) {
   if (_token_is(token, '{')) {
     p.indent += 2;
     _write_mapped_newline(p.buff, p.source_line);
