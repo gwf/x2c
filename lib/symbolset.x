@@ -151,24 +151,24 @@ Iter SymbolSet.iter(SymbolSet x, Iter dest) {
    values at an edge's vertices then XOR to its index. */
 
 /* A seeded table of `3 * span` vertex values. An empty set has none. */
-typedef struct _SymbolSetHash {
+typedef struct Hash {
   uint32_t span, *table;
   uint64_t seed;
   int vertices;
-} _SymbolSetHash;
+} Hash;
 
-typedef struct _SymbolSetEdge {
+typedef struct Edge {
   uint32_t vertices[3];
-} _SymbolSetEdge;
+} Edge;
 
 /* One seed's graph and its peeling order: each removed edge and the vertex
    that freed it. */
-typedef struct _SymbolSetGraph {
-  _SymbolSetEdge *edges;
+typedef struct Graph {
+  Edge *edges;
   int count, vertices, *degree, *edge_xor, *queue;
   int *order_edges, *order_vertices;
   unsigned char *removed;
-} _SymbolSetGraph;
+} Graph;
 
 /** Returns the bytes of a `SymbolSet` holding `symbols` in order, in a new
     byte `Block` owned by the active `Scope`. The compiler emits them for each
@@ -176,7 +176,7 @@ typedef struct _SymbolSetGraph {
     end for a repeated `Symbol`.
 */
 Block SymbolSet.encode(Array symbols) {
-  _SymbolSetHash h = _hash(symbols);
+  Hash h = _hash(symbols);
   int count = (int) symbols.len();
   int width = count <= 0x100 ? 1 : count <= 0x10000 ? 2 : 4;
   Block bytes = Block.new(1);
@@ -204,9 +204,9 @@ static void _put(Block bytes, uint64_t value, int size) {
 
 /* The smallest power-of-two span, from about half the count, that some
    seed peels within 4096 tries. */
-static _SymbolSetHash _hash(Array symbols) {
+static Hash _hash(Array symbols) {
   int count = (int) symbols.len(), built = count == 0;
-  _SymbolSetHash h = {.span = 1};
+  Hash h = {.span = 1};
   while ((uint64_t) h.span * 3 < (uint64_t) count * 3 / 2) h.span <<= 1;
   while (!built) {
     h.vertices = (int) h.span * 3;
@@ -228,17 +228,17 @@ static _SymbolSetHash _hash(Array symbols) {
 static int _try_seed(
   Array symbols, uint32_t span, uint64_t seed, uint32_t *table) {
   $scope() {
-    _SymbolSetGraph g = _graph(symbols, span, seed);
-    if (!g._peel()) return 0;
-    g._assign(table);
+    Graph g = _graph(symbols, span, seed);
+    if (!g.peel()) return 0;
+    g.assign(table);
     return 1;
   }
 }
 
-static _SymbolSetGraph _graph(Array symbols, uint32_t span, uint64_t seed) {
+static Graph _graph(Array symbols, uint32_t span, uint64_t seed) {
   int count = (int) symbols.len(), vertices = (int) span * 3;
-  _SymbolSetGraph g = {.count = count, .vertices = vertices};
-  g.edges = Scope.calloc(count, sizeof(_SymbolSetEdge));
+  Graph g = {.count = count, .vertices = vertices};
+  g.edges = Scope.calloc(count, sizeof(Edge));
   g.degree = Scope.calloc(vertices, sizeof(int));
   g.edge_xor = Scope.calloc(vertices, sizeof(int));
   g.queue = Scope.calloc(vertices, sizeof(int));
@@ -257,7 +257,7 @@ static _SymbolSetGraph _graph(Array symbols, uint32_t span, uint64_t seed) {
 }
 
 /* Returns whether peeling removed every edge. */
-static int _SymbolSetGraph._peel(_SymbolSetGraph *g) {
+static int Graph.peel(Graph *g) {
   int head = 0, tail = 0, ordered = 0;
   for (int vertex = 0; vertex < g.vertices; vertex++)
     if (g.degree[vertex] == 1) g.queue[tail++] = vertex;
@@ -281,7 +281,7 @@ static int _SymbolSetGraph._peel(_SymbolSetGraph *g) {
 
 /* In reverse peeling order, the vertex that freed each edge takes the
    value that makes the edge's three values XOR to its index. */
-static void _SymbolSetGraph._assign(_SymbolSetGraph *g, uint32_t *table) {
+static void Graph.assign(Graph *g, uint32_t *table) {
   for (int position = g.count - 1; position >= 0; position--) {
     int edge = g.order_edges[position], vertex = g.order_vertices[position];
     uint32_t value = (uint32_t) edge;
