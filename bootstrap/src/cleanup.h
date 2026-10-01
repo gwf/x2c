@@ -23,9 +23,9 @@ List builtin_defer_record(List record, List callback, List environment, List rec
 
 List builtin_defer_captures(List environment, List records);
 
-List Compiler_rewrite_defer_list(Compiler compiler, List stmts);
+List Compiler_rewrite_defer_list(Compiler c, List stmts);
 
-List Compiler_lower_defer_region(Compiler compiler, List body, List finalizer);
+List Compiler_lower_defer_region(Compiler c, List body, List finalizer);
 
 
 #endif /* __GUARD_0xEF59A7A3__ */

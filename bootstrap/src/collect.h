@@ -23,7 +23,7 @@ void interface_configure(String out_dir, int cold);
 
 String interface_prelude(void);
 
-String interface_text(Compiler compiler, List selected);
+String interface_text(Compiler c, List selected);
 
 void collect_forget_preload_entries(void);
 

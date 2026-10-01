@@ -11,8 +11,6 @@ String preproc_directive(String text);
 
 Symbol preproc_conditional_kind(String text);
 
-Symbol preproc_never_active_arm(String s);
-
 int preproc_open_state(String text);
 
 int preproc_branch_state(int state);

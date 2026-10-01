@@ -10,15 +10,15 @@
 #include "type.h"
 List Compiler_convert_initializer(Compiler c, List value, Type type, List target);
 
-List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type native_type);
-
-List Compiler_initializer_native_types(Compiler c, Type type);
-
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
 
 List Compiler_initializer_field_path(Compiler c, Type type, List field);
 
 List Compiler_initializer_slot(Compiler c, List target, List path);
+
+List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type native_type);
+
+List Compiler_initializer_native_types(Compiler c, Type type);
 
 
 #endif /* __GUARD_0x63A6D8C6__ */

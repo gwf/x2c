@@ -14,51 +14,51 @@ typedef struct PrintfFn{
 }
 PrintfFn;
 
-List Compiler_complete_iter_chain(Compiler compiler, List expression);
+List Compiler_parse_expression(Compiler c);
 
-const PrintfFn * List_printf_family(List l);
+List Compiler_parse_assignment(Compiler c);
 
-String Compiler_printf_static_format(Compiler compiler, Var format, int * raw);
+List Compiler_parse_conditional(Compiler c);
+
+List Compiler_parse_parenthesized_statement(Compiler c);
+
+List Compiler_parse_macro_expression_target(Compiler c);
+
+List Compiler_parse_primary(Compiler c);
+
+List Compiler_parse_variable(Compiler c);
+
+List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 
-List Compiler_parse_macro_expression_target(Compiler c);
-
-List Compiler_promote_string_literal(Compiler c, List expr);
-
 List x2c_func_call_arguments(List function, List storage, List arguments);
 
-List Compiler_func_call_parts(Compiler compiler, Var content);
+List Compiler_func_call_parts(Compiler c, Var content);
 
-void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
+List Compiler_complete_iter_chain(Compiler c, List expression);
 
-Symbol Compiler_require_var_tag(Compiler compiler, Type target, Token origin);
+Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
-List Compiler_resolve_map_entry(Compiler compiler, List input, Token origin);
+List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
 
-List Compiler_resolve_expression(Compiler c, List input, Token origin);
+void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
 
-List Compiler_parse_variable(Compiler c);
+const PrintfFn * List_printf_family(List l);
 
-List Compiler_parse_conditional(Compiler compiler);
+String Compiler_printf_static_format(Compiler c, Var format, int * raw);
 
-List Compiler_parse_assignment(Compiler compiler);
-
-List Compiler_parse_primary(Compiler compiler);
-
-List Compiler_parse_expression(Compiler compiler);
-
-List Compiler_parse_parenthesized_statement(Compiler c);
-
-List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
+List Compiler_promote_string_literal(Compiler c, List expr);
 
 List Compiler_convert_expression(Compiler c, List expr, Type target);
 
-List Compiler_convert_segment_to_string(Compiler compiler, List expr);
+List Compiler_convert_segment_to_string(Compiler c, List expr);
+
+List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 
 
 #endif /* __GUARD_0xAA205D9A__ */

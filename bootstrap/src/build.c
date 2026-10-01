@@ -45,11 +45,11 @@ static void Build__check_compile_only(Build b);
 
 static void Build__select_tools(Build b);
 
-static String _default_output(CliRequest request);
+static String CliRequest__default_output(CliRequest request);
 
 static void Build__make_work_dirs(Build b);
 
-static String _kept_dir(CliRequest request);
+static String CliRequest__kept_dir(CliRequest request);
 
 static void Build__check_runtime(Build b);
 
@@ -500,7 +500,7 @@ Build CliRequest_prepare(CliRequest request){
   if(! String_truth(request -> state_seed)) request -> state_seed = _4;
   Build__select_tools(b);
   if(String_truth(request -> compile_commands) && ! request -> dry_run) b -> compile_commands = Array_new();
-  b -> output = _default_output(request);
+  b -> output = CliRequest__default_output(request);
   b -> started_at = report_now_us();
   b -> started_wall = _wall_seconds();
   Build__make_work_dirs(b);
@@ -612,7 +612,7 @@ static void Build__select_tools(Build b){
 
 Var List_car(List);
 
-static String _default_output(CliRequest request){
+static String CliRequest__default_output(CliRequest request){
   if(String_truth(request -> output)) return request -> output;
   if(request -> command == 38236) return NULL;
   String stem = Path_stem(Var_string(List_car(request -> inputs)));
@@ -650,7 +650,7 @@ void x2c_exception_leave(ExceptionFrame *);
 
 static void Build__make_work_dirs(Build b){
   CliRequest request = b -> request;
-  b -> work_dir = _kept_dir(request);
+  b -> work_dir = CliRequest__kept_dir(request);
   b -> temporary = ! String_truth(b -> work_dir);
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -716,7 +716,7 @@ static void Build__make_work_dirs(Build b){
 
 }
 
-static String _kept_dir(CliRequest request){
+static String CliRequest__kept_dir(CliRequest request){
   if(String_truth(request -> build_dir)) return request -> build_dir;
   if(String_truth(request -> temps_dir)) return request -> temps_dir;
   return request -> save_temps ? _164 : NULL;

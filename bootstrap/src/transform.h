@@ -11,13 +11,13 @@
 #define X2C_TRANSFORM_SOURCE
 #endif
 #include "compiler.h"
-List Compiler_transform(Compiler compiler, List ast);
+List Compiler_transform(Compiler c, List ast);
 
 Ast Compiler_normalize(Compiler c, Ast ast);
 
-List transform_array_literal(Compiler compiler, List ast);
+List transform_array_literal(Compiler c, List ast);
 
-List transform_map_literal(Compiler compiler, List ast);
+List transform_map_literal(Compiler c, List ast);
 
 #endif
 

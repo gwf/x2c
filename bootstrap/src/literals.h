@@ -19,15 +19,15 @@ List Compiler_parse_symbol_set_literal(Compiler c);
 
 List Compiler_symbol_set_expression(Compiler c, List values, int * duplicate);
 
-List Compiler_parse_array_literal(Compiler compiler);
+List Compiler_parse_array_literal(Compiler c);
 
-List Compiler_parse_map_literal(Compiler compiler);
+List Compiler_parse_map_literal(Compiler c);
 
 List Compiler_parse_map_entries(Compiler c);
 
-List Compiler_parse_map_entry(Compiler compiler);
+List Compiler_parse_map_entry(Compiler c);
 
-List Compiler_parse_string_literal(Compiler compiler);
+List Compiler_parse_string_literal(Compiler c);
 
 List Compiler_parse_atomic_literal(Compiler c);
 

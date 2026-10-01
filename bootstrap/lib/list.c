@@ -53,25 +53,31 @@ static int _unpack_va(List src, unsigned n, va_list ap, int lists);
 
 static const int _WIDTH = 80;
 
-static void _render(Var elem, Buffer buf, Symbol mode);
+typedef struct Render{
+  Buffer out;
+  Symbol mode;
+}
+Render;
 
-static void _render_leaf(Var elem, Buffer buf, Symbol mode);
+static void Render__value(Render * r, Var elem);
 
-static void _render_nil(Buffer buf);
+static void Render__leaf(Render * r, Var elem);
 
-static int _render_flat(Var elem, Buffer buf, Symbol mode);
+static void _nil(Buffer out);
 
-static void _render_items(Var elem, Buffer buf, Symbol mode);
+static int Render__fits(Render * r, Var elem);
 
-static void _flat(Var elem, Buffer buf, Symbol mode);
+static void Render__items(Render * r, Var elem);
 
-static void _flat_items(Var elem, Buffer buf, Symbol mode);
+static void Render__flat(Render * r, Var elem);
 
-static void _leaf(Var elem, Buffer buf, Symbol mode);
+static void Render__flat_items(Render * r, Var elem);
 
-static void _open(List lst, Buffer buf);
+static void Render__write_leaf(Render * r, Var elem);
 
-static void _close(Buffer buf);
+static void _open(List lst, Buffer out);
+
+static void _close(Buffer out);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -278,7 +284,7 @@ Pool Pool_current(void);
 
 List cons(Var head, List tail){
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 92};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 91};
     x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
@@ -603,7 +609,7 @@ Var unsigned_var(unsigned);
 
 static List _concat_va(unsigned n, va_list ap){
   if(n > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_va",.line = 386};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_va",.line = 385};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
     __builtin_unreachable();
   }
@@ -672,7 +678,7 @@ static List _list_va(unsigned n, va_list ap){
       for(unsigned i = 0;  i < n;  i ++){
         Var value = va_arg(ap, Var);
         if(Var_is_void(value)){
-          static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_list_va",.line = 420};
+          static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_list_va",.line = 419};
           x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
           __builtin_unreachable();
         }
@@ -853,7 +859,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 
 List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 560};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 559};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -898,7 +904,7 @@ static List _collect_subseq(List list, int start, int step, int span){
 
 List List_getslice(List list, int start, int stop, int step){
   if(! step){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 585};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 584};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1489,7 +1495,7 @@ int List_unpack_vars_n(List src, unsigned destination_count, ...){
 
 static int _unpack_va(List src, unsigned n, va_list ap, int lists){
   if(n > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 877};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 876};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
     __builtin_unreachable();
   }
@@ -1551,6 +1557,11 @@ int x2c_exception_claim(ExceptionFrame *);
 void x2c_exception_leave(ExceptionFrame *);
 
 Buffer List_write_str(List lst, Buffer out){
+  Render r ={
+    out, 40228
+  }
+  ;
+  x2c_exception_escaped = & r;
   {
     size_t * _x2c_macro_address_0 = & out -> padding;
     size_t _x2c_macro_previous_0 = * _x2c_macro_address_0;
@@ -1559,7 +1570,7 @@ Buffer List_write_str(List lst, Buffer out){
       x2c_exception_push(& _x2c_exception_frame_0);
       if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
         * _x2c_macro_address_0 = 1;
-        _render(List_var(lst), out, 40228);
+        Render__value(&(r), List_var(lst));
       }
       else{
         x2c_exception_landed(& _x2c_exception_frame_0);
@@ -1613,42 +1624,48 @@ String List_repr(List lst){
 }
 
 Buffer List_write_repr(List lst, Buffer out){
-  _render(List_var(lst), out, 1190948);
+  Render r ={
+    out, 1190948
+  }
+  ;
+  Render__value(&(r), List_var(lst));
   return out;
 }
 
 Buffer Buffer_newline_indent(Buffer);
 
-static void _render(Var elem, Buffer buf, Symbol mode){
-  if(buf -> pos >= _WIDTH - 1 || buf -> pos - buf -> _indent > 40) Buffer_newline_indent(buf);
-  if(! Var_is_row(elem, 9, 7, 4)) _render_leaf(elem, buf, mode);
-  else if(! List_truth(Var_list(elem))) _render_nil(buf);
-  else if(! _render_flat(elem, buf, mode)) _render_items(elem, buf, mode);
+static void Render__value(Render * r, Var elem){
+  Buffer out = r -> out;
+  if(out -> pos >= _WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
+  if(! Var_is_row(elem, 9, 7, 4)) Render__leaf(r, elem);
+  else if(! List_truth(Var_list(elem))) _nil(out);
+  else if(! Render__fits(r, elem)) Render__items(r, elem);
 }
 
 Buffer Buffer_unwrite(Buffer, size_t);
 
-static void _render_leaf(Var elem, Buffer buf, Symbol mode){
-  size_t before = buf -> content -> length, position = buf -> pos;
-  _leaf(elem, buf, mode);
-  size_t length = buf -> content -> length - before;
+static void Render__leaf(Render * r, Var elem){
+  Buffer out = r -> out;
+  size_t before = out -> content -> length, position = out -> pos;
+  Render__write_leaf(r, elem);
+  size_t length = out -> content -> length - before;
   if(position + length <= _WIDTH) return;
-  Buffer_unwrite(buf, length);
-  Buffer_newline_indent(buf);
-  _leaf(elem, buf, mode);
+  Buffer_unwrite(out, length);
+  Buffer_newline_indent(out);
+  Render__write_leaf(r, elem);
 }
 
 Buffer Buffer_write(Buffer, const char *);
 
-static void _render_nil(Buffer buf){
-  if(buf -> pos + 2 > _WIDTH) Buffer_newline_indent(buf);
-  Buffer_write(buf, "()");
+static void _nil(Buffer out){
+  if(out -> pos + 2 > _WIDTH) Buffer_newline_indent(out);
+  Buffer_write(out, "()");
 }
 
 Buffer Buffer_write_len(Buffer, const char *, size_t);
 
-static int _render_flat(Var elem, Buffer buf, Symbol mode){
-  Buffer line = Buffer_new(buf -> padding);
+static int Render__fits(Render * r, Var elem){
+  Buffer line = Buffer_new(r -> out -> padding);
   {
     _x2c_defer_env_21 _x2c_macro_environment_21 ={
       0
@@ -1661,8 +1678,12 @@ static int _render_flat(Var elem, Buffer buf, Symbol mode){
     ;
     x2c_cleanup_push(& _x2c_defer_record_22);
     {
-      _flat(elem, line, mode);
-      if(buf -> pos + line -> content -> length > _WIDTH){
+      Render flat ={
+        line, r -> mode
+      }
+      ;
+      Render__flat(&(flat), elem);
+      if(r -> out -> pos + line -> content -> length > _WIDTH){
         int _x2c_return_value_22 = 0;
         {
           x2c_cleanup_leave(& _x2c_defer_record_22);
@@ -1670,7 +1691,7 @@ static int _render_flat(Var elem, Buffer buf, Symbol mode){
         }
 
       }
-      Buffer_write_len(buf, line -> content -> bytes, line -> content -> length);
+      Buffer_write_len(r -> out, line -> content -> bytes, line -> content -> length);
       {
         int _x2c_return_value_23 = 1;
         {
@@ -1692,10 +1713,11 @@ Buffer Var_write_pointer_repr(Var, Buffer);
 
 size_t Buffer_tabstop(Buffer);
 
-static void _render_items(Var elem, Buffer buf, Symbol mode){
+static void Render__items(Render * r, Var elem){
   List lst = Var_list(elem);
+  Buffer out = r -> out;
   RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
+  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
   {
     _x2c_defer_env_22 _x2c_macro_environment_22 ={
       0
@@ -1708,29 +1730,30 @@ static void _render_items(Var elem, Buffer buf, Symbol mode){
     ;
     x2c_cleanup_push(& _x2c_defer_record_23);
     {
-      if(buf -> pos - Buffer_tabstop(buf) > 5) Buffer_newline_indent(buf);
-      _open(lst, buf);
+      if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
+      _open(lst, out);
       for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        _render(List_car(l), buf, mode);
-        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
+        Render__value(r, List_car(l));
+        if(List_truth(List_cdr(l))) Buffer_write(out, " ");
       }
-      _close(buf);
+      _close(out);
     }
     x2c_cleanup_leave(& _x2c_defer_record_23);
   }
 
 }
 
-static void _flat(Var elem, Buffer buf, Symbol mode){
-  if(! Var_is_row(elem, 9, 7, 4)) _leaf(elem, buf, mode);
-  else if(! List_truth(Var_list(elem))) Buffer_write(buf, "()");
-  else _flat_items(elem, buf, mode);
+static void Render__flat(Render * r, Var elem){
+  if(! Var_is_row(elem, 9, 7, 4)) Render__write_leaf(r, elem);
+  else if(! List_truth(Var_list(elem))) Buffer_write(r -> out, "()");
+  else Render__flat_items(r, elem);
 }
 
-static void _flat_items(Var elem, Buffer buf, Symbol mode){
+static void Render__flat_items(Render * r, Var elem){
   List lst = Var_list(elem);
+  Buffer out = r -> out;
   RenderPath path;
-  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, buf);
+  if(! RenderPath_enter(&(path), lst)) return(void) Var_write_pointer_repr(elem, out);
   {
     _x2c_defer_env_23 _x2c_macro_environment_23 ={
       0
@@ -1743,12 +1766,12 @@ static void _flat_items(Var elem, Buffer buf, Symbol mode){
     ;
     x2c_cleanup_push(& _x2c_defer_record_24);
     {
-      _open(lst, buf);
+      _open(lst, out);
       for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-        _flat(List_car(l), buf, mode);
-        if(List_truth(List_cdr(l))) Buffer_write(buf, " ");
+        Render__flat(r, List_car(l));
+        if(List_truth(List_cdr(l))) Buffer_write(out, " ");
       }
-      _close(buf);
+      _close(out);
     }
     x2c_cleanup_leave(& _x2c_defer_record_24);
   }
@@ -1761,30 +1784,30 @@ Buffer Atom_write_repr(Atom, Buffer);
 
 Buffer Var_write_repr(Var, Buffer);
 
-static void _leaf(Var elem, Buffer buf, Symbol mode){
-  if(mode == 40228) Var_write_str(elem, buf);
-  else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, buf);
-  else Var_write_repr(elem, buf);
+static void Render__write_leaf(Render * r, Var elem){
+  if(r -> mode == 40228) Var_write_str(elem, r -> out);
+  else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, r -> out);
+  else Var_write_repr(elem, r -> out);
 }
 
 Buffer Buffer_pad(Buffer);
 
 Buffer Buffer_push(Buffer);
 
-static void _open(List lst, Buffer buf){
-  Buffer_write(buf, "(");
-  if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(buf);
-  Buffer_push(buf);
+static void _open(List lst, Buffer out){
+  Buffer_write(out, "(");
+  if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(out);
+  Buffer_push(out);
 }
 
 char Buffer_get(Buffer, ptrdiff_t);
 
 Buffer Buffer_pop(Buffer);
 
-static void _close(Buffer buf){
-  if(Buffer_get(buf, - 1) != ')') Buffer_pad(buf);
-  Buffer_write(buf, ")");
-  Buffer_pop(buf);
+static void _close(Buffer out){
+  if(Buffer_get(out, - 1) != ')') Buffer_pad(out);
+  Buffer_write(out, ")");
+  Buffer_pop(out);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

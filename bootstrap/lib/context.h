@@ -6,7 +6,11 @@
 #define __GUARD_0xC34B3F4F__
 
 #include "common.h"
-void Context_initialize(void);
+Var Context_export(Context context, Var value);
+
+Var Context_export_scope(Scope source_scope, Pool pool, Var value);
+
+Var Context_export_nested(Context c, Var value);
 
 int Context_owns(Context context, void * allocation);
 
@@ -24,15 +28,11 @@ Context Context_open_isolated_named(const char * name);
 
 Context Context_current(void);
 
-Var Context_export_nested(Context c, Var value);
-
-Var Context_export(Context context, Var value);
-
-Var Context_export_scope(Scope source_scope, Pool pool, Var value);
-
 void Context_close(Context c);
 
 void Context_cleanup(Context value);
+
+void Context_initialize(void);
 
 
 #endif /* __GUARD_0xC34B3F4F__ */

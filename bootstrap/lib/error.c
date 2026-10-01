@@ -109,65 +109,65 @@ typedef struct ErrorPair{
 }
 ErrorPair;
 
-static List _counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args);
+static List ErrorRegion__counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args);
 
-static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
+static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
 
-static List _location(ErrorRegion * region, const X2CErrorSite * site);
+static List ErrorRegion__location(ErrorRegion * e, const X2CErrorSite * site);
 
-static String _site_text(ErrorRegion * region, const char * text);
+static String ErrorRegion__site_text(ErrorRegion * region, const char * text);
 
-static List _field(ErrorRegion * region, Var key, Var value, List tail);
+static List ErrorRegion__field(ErrorRegion * region, Var key, Var value, List tail);
 
-static List _pair(ErrorRegion * region, Var key, Var value);
+static List ErrorRegion__pair(ErrorRegion * region, Var key, Var value);
 
-static List _cons(ErrorRegion * region, Var head, List tail);
+static List ErrorRegion__cons(ErrorRegion * region, Var head, List tail);
 
 static ErrorRecord * _record_at(int index);
 
 static void _truncate(int mark);
 
-static Var _copy_value(ErrorRegion * region, Var value);
+static Var ErrorRegion__copy_value(ErrorRegion * region, Var value);
 
-static Var _copy_wide(ErrorRegion * region, Var value);
+static Var ErrorRegion__copy_wide(ErrorRegion * region, Var value);
 
 static Var _snapshot_wide(Var v);
 
 static Var _clone_in(Scope * owner, Var v);
 
-static Var _copy_text(ErrorRegion * region, Var value);
+static Var ErrorRegion__copy_text(ErrorRegion * region, Var value);
 
 static Var _snapshot_text(Var value, String source);
 
-static List _copy_list(ErrorRegion * region, List source);
+static List ErrorRegion__copy_list(ErrorRegion * region, List source);
 
 static ErrorRegion _region_new(void);
 
-static void _region_destroy(ErrorRegion * region);
+static void ErrorRegion__destroy(ErrorRegion * region);
 
-static Symbol _dispatch(ErrorRaise r);
+static Symbol ErrorRaise__dispatch(ErrorRaise r);
 
-static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code);
+static Symbol ErrorThreadState__offer(ErrorThreadState e, ErrorHandler h, Symbol code);
 
-static Symbol _observe(ErrorThreadState state, ErrorHandler h);
+static Symbol ErrorThreadState__observe(ErrorThreadState e, ErrorHandler h);
 
-static void _transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition);
+static void ErrorThreadState__transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition);
 
-static void _apply_policy(ErrorThreadState state, ErrorRaise r);
+static void ErrorThreadState__apply_policy(ErrorThreadState e, ErrorRaise r);
 
 static void _report(Symbol code);
 
-static Symbol _catch_match(ErrorHandler h);
+static Symbol ErrorHandler__catch_match(ErrorHandler h);
 
-static int _catch_select(ErrorHandler h, ErrorRecord * record, List projection);
+static int ErrorHandler__catch_select(ErrorHandler h, ErrorRecord * record, List projection);
 
-static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i);
+static int ErrorHandler__catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i);
 
-static MatchPlan _arm_plan(ErrorHandler h, int i);
+static MatchPlan ErrorHandler__arm_plan(ErrorHandler h, int i);
 
-static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
+static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
-static void _catch_retain(ErrorHandler handle);
+static void ErrorHandler__catch_retain(ErrorHandler handle);
 
 static void _retained_destroy(Block retained);
 
@@ -187,21 +187,21 @@ static int _fill_pairs(Map policy, Symbol * pairs, int at, int capacity);
 
 static ErrorHandler _handler_new(ErrorHandlerFn fn, Var data);
 
-static void _handler_free(ErrorHandler handle);
+static void ErrorHandler__free(ErrorHandler handle);
 
 static void _plans_free(Block plans);
 
-static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate);
+static void ErrorThreadState__unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate);
 
-static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth);
+static ErrorHandler ErrorThreadState__handler_at_depth(ErrorThreadState state, int depth);
 
 static int _chain_contains(ErrorHandler head, ErrorHandler wanted);
 
-static const char * _prepare_arms(ErrorHandler h, Var * patterns, int * arm);
+static const char * ErrorHandler__prepare_arms(ErrorHandler h, Var * patterns, int * arm);
 
-static int _site_state(ErrorCatchSite * site);
+static int ErrorCatchSite__state(ErrorCatchSite * site);
 
-static void _catch_site_bind(ErrorCatchSite * site, Var * patterns);
+static void ErrorCatchSite__bind(ErrorCatchSite * site, Var * patterns);
 
 static pthread_mutex_t catch_site_mutex;
 
@@ -214,9 +214,9 @@ static void _site_lock(void);
 
 static void _site_unlock(void);
 
-static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm);
+static const char * ErrorHandler__prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm);
 
-static List _view_since(ErrorRegion * region, int mark);
+static List ErrorRegion__view_since(ErrorRegion * region, int mark);
 
 static ErrorRegion _owners(Scope * values, Pool pool);
 
@@ -224,7 +224,7 @@ _Noreturn static void _floor(Symbol code, const char * why);
 
 static int _scope_push(Symbol code, const char * message);
 
-static void _reclaim_hidden(ErrorThreadState state);
+static void ErrorThreadState__reclaim_hidden(ErrorThreadState state);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -265,13 +265,13 @@ void x2c_error_raise_n(const X2CErrorSite * site, Symbol code, unsigned pair_cou
   va_start(args, pair_count);
   _record_n(site, r.code, pair_count, args);
   va_end(args);
-  _dispatch(r);
+  ErrorRaise__dispatch(r);
 }
 
 static Symbol _raise(const X2CErrorSite * site, Symbol code, List detail){
   ErrorRaise r = _raise_enter(code);
   _record(site, r.code, detail);
-  return _dispatch(r);
+  return ErrorRaise__dispatch(r);
 }
 
 static ErrorRaise _raise_enter(Symbol code){
@@ -322,8 +322,8 @@ static void _record(const X2CErrorSite * site, Symbol code, List detail){
     .region = _region_new()
   }
   ;
-  detail = Var_list(_copy_value(& record.region, List_var(detail)));
-  record.entry = _entry(& record.region, site, code, detail);
+  detail = Var_list(ErrorRegion__copy_value(& record.region, List_var(detail)));
+  record.entry = ErrorRegion__entry(& record.region, site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;
 }
@@ -336,8 +336,8 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
     .region = _region_new()
   }
   ;
-  List detail = _counted_detail(& record.region, code, pair_count, args);
-  record.entry = _entry(& record.region, site, code, detail);
+  List detail = ErrorRegion__counted_detail(& record.region, code, pair_count, args);
+  record.entry = ErrorRegion__entry(& record.region, site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;
 }
@@ -348,20 +348,20 @@ void Block_free(Block);
 
 void Scope_pop(void);
 
-static List _counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args){
+static List ErrorRegion__counted_detail(ErrorRegion * region, Symbol code, unsigned count, va_list args){
   int pushed = _scope_push(code, "could not enter error scope for counted detail");
   Block pairs = Block_new(sizeof(ErrorPair));
   for(unsigned i = 0;  i < count;  i ++){
     ErrorPair pair ={
-      .key = _copy_value(region, va_arg(args, Var))
+      .key = ErrorRegion__copy_value(region, va_arg(args, Var))
     }
     ;
-    pair.value = _copy_value(region, va_arg(args, Var));
+    pair.value = ErrorRegion__copy_value(region, va_arg(args, Var));
     Block_push(pairs, & pair);
   }
   ErrorPair * items = pairs -> bytes;
   List detail = NULL;
-  for(int i =(int) count - 1;  i >= 0;  i --) detail = _field(region, items[i].key, items[i].value, detail);
+  for(int i =(int) count - 1;  i >= 0;  i --) detail = ErrorRegion__field(region, items[i].key, items[i].value, detail);
   Block_free(pairs);
   if(pushed) Scope_pop();
   return detail;
@@ -369,11 +369,11 @@ static List _counted_detail(ErrorRegion * region, Symbol code, unsigned count, v
 
 Var Symbol_var(Symbol);
 
-static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
-  List location = _location(region, site), entry = NULL;
-  entry = _field(region, Symbol_var(857050729436), List_var(location), entry);
-  entry = _field(region, Symbol_var(280234584), List_var(detail), entry);
-  entry = _field(region, Symbol_var(227594), Symbol_var(code), entry);
+static List ErrorRegion__entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail){
+  List location = ErrorRegion__location(region, site), entry = NULL;
+  entry = ErrorRegion__field(region, Symbol_var(857050729436), List_var(location), entry);
+  entry = ErrorRegion__field(region, Symbol_var(280234584), List_var(detail), entry);
+  entry = ErrorRegion__field(region, Symbol_var(227594), Symbol_var(code), entry);
   return entry;
 }
 
@@ -381,33 +381,33 @@ Var String_var(String);
 
 Var int_var(int);
 
-static List _location(ErrorRegion * region, const X2CErrorSite * site){
+static List ErrorRegion__location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
-  String file = _site_text(region, site -> file);
-  String function = _site_text(region, site -> function);
-  List location = _field(region, Symbol_var(458361162716), String_var(function), NULL);
-  location = _field(region, Symbol_var(805770), int_var(site -> line), location);
-  return _field(region, Symbol_var(412426), String_var(file), location);
+  String file = ErrorRegion__site_text(e, site -> file);
+  String function = ErrorRegion__site_text(e, site -> function);
+  List location = ErrorRegion__field(e, Symbol_var(458361162716), String_var(function), NULL);
+  location = ErrorRegion__field(e, Symbol_var(805770), int_var(site -> line), location);
+  return ErrorRegion__field(e, Symbol_var(412426), String_var(file), location);
 }
 
 String String_new_in(Pool, const char *, int);
 
-static String _site_text(ErrorRegion * region, const char * text){
+static String ErrorRegion__site_text(ErrorRegion * region, const char * text){
   if(! text) text = "<unknown>";
   return String_new_in(region -> pool, text, strlen(text));
 }
 
-static List _field(ErrorRegion * region, Var key, Var value, List tail){
-  return _cons(region, List_var(_pair(region, key, value)), tail);
+static List ErrorRegion__field(ErrorRegion * region, Var key, Var value, List tail){
+  return ErrorRegion__cons(region, List_var(ErrorRegion__pair(region, key, value)), tail);
 }
 
-static List _pair(ErrorRegion * region, Var key, Var value){
-  return _cons(region, key, _cons(region, value, NULL));
+static List ErrorRegion__pair(ErrorRegion * region, Var key, Var value){
+  return ErrorRegion__cons(region, key, ErrorRegion__cons(region, value, NULL));
 }
 
 List List_cons_in(Pool, Var, List);
 
-static List _cons(ErrorRegion * region, Var head, List tail){
+static List ErrorRegion__cons(ErrorRegion * region, Var head, List tail){
   return List_cons_in(region -> pool, head, tail);
 }
 
@@ -422,7 +422,7 @@ static void _truncate(int mark){
   if(! Error_ready() || mark < 0) return;
   while(Error_count() > mark){
     ErrorRecord * record = _record_at(Error_count() - 1);
-    _region_destroy(& record -> region);
+    ErrorRegion__destroy(& record -> region);
     Block_pop(_thread() -> stack);
   }
 
@@ -444,17 +444,17 @@ int Var_is_floating(Var);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-static Var _copy_value(ErrorRegion * region, Var value){
+static Var ErrorRegion__copy_value(ErrorRegion * region, Var value){
   if(Var_is_void(value)) _floor(4477479911782, region ? "void is not an admissible error detail" : "void is not an admissible error snapshot");
   if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
-  if(Var_is_wide(value)) return _copy_wide(region, value);
+  if(Var_is_wide(value)) return ErrorRegion__copy_wide(region, value);
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)) return _copy_text(region, value);
-  if(Var_is_row(value, 9, 7, 4)) return List_var(_copy_list(region, Var_list(value)));
+  if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)) return ErrorRegion__copy_text(region, value);
+  if(Var_is_row(value, 9, 7, 4)) return List_var(ErrorRegion__copy_list(region, Var_list(value)));
   _floor(4477479911782, region ? "error detail contains an identity-bearing value" : "error snapshot contains an identity-bearing value");
 }
 
-static Var _copy_wide(ErrorRegion * region, Var value){
+static Var ErrorRegion__copy_wide(ErrorRegion * region, Var value){
   return region ? _clone_in(& region -> values, value) : _snapshot_wide(value);
 }
 
@@ -486,7 +486,7 @@ int String_len(String);
 
 Var Var_new(Symbol, ...);
 
-static Var _copy_text(ErrorRegion * region, Var value){
+static Var ErrorRegion__copy_text(ErrorRegion * region, Var value){
   String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
   if(! region) return _snapshot_text(value, source);
   String owned = String_new_in(region -> pool, source, String_len(source));
@@ -516,10 +516,10 @@ List cons(Var, List);
 
 int List_try_own(List);
 
-static List _copy_list(ErrorRegion * region, List source){
-  Var head = _copy_value(region, List_car(source));
-  List tail = Var_list(_copy_value(region, List_var(List_cdr(source))));
-  if(region) return _cons(region, head, tail);
+static List ErrorRegion__copy_list(ErrorRegion * region, List source){
+  Var head = ErrorRegion__copy_value(region, List_car(source));
+  List tail = Var_list(ErrorRegion__copy_value(region, List_var(List_cdr(source))));
+  if(region) return ErrorRegion__cons(region, head, tail);
   List owned = cons(head, tail);
   List_try_own(owned);
   return owned;
@@ -543,7 +543,7 @@ Pool Pool_release(Pool);
 
 void Scope_destroy(Scope);
 
-static void _region_destroy(ErrorRegion * region){
+static void ErrorRegion__destroy(ErrorRegion * region){
   if(region -> pool) region -> pool = Pool_release(region -> pool);
   if(region -> values){
     Scope_destroy(region -> values);
@@ -552,27 +552,27 @@ static void _region_destroy(ErrorRegion * region){
 
 }
 
-static Symbol _dispatch(ErrorRaise r){
+static Symbol ErrorRaise__dispatch(ErrorRaise r){
   ErrorThreadState state = _thread();
   ErrorHandler saved = state -> handler_top, outer = state -> dispatch_saved;
   ErrorHandler outer_running = state -> dispatch_running;
   if(! outer) state -> dispatch_saved = saved;
-  Symbol disposition = _offer(state, saved, r.code);
+  Symbol disposition = ErrorThreadState__offer(state, saved, r.code);
   state -> handler_top = saved;
   state -> dispatch_saved = outer;
   state -> dispatch_running = outer_running;
   _leave();
   if(_never_returns(r.code)) _floor(r.code, "non-returning error was not caught");
-  if(disposition == 285842436424) _apply_policy(state, r);
+  if(disposition == 285842436424) ErrorThreadState__apply_policy(state, r);
   return disposition;
 }
 
-static Symbol _offer(ErrorThreadState state, ErrorHandler h, Symbol code){
+static Symbol ErrorThreadState__offer(ErrorThreadState e, ErrorHandler h, Symbol code){
   for(;  h;  h = h -> prev){
-    state -> dispatch_running = h;
-    state -> handler_top = h -> prev;
-    Symbol disposition = h -> site ? _catch_match(h) : _observe(state, h);
-    if(disposition == 1440172936 || disposition == 12689496) _transfer(state, h, code, disposition);
+    e -> dispatch_running = h;
+    e -> handler_top = h -> prev;
+    Symbol disposition = h -> site ? ErrorHandler__catch_match(h) : ErrorThreadState__observe(e, h);
+    if(disposition == 1440172936 || disposition == 12689496) ErrorThreadState__transfer(e, h, code, disposition);
     if(disposition == 17276625224){
       _truncate(h -> watermark);
       return 17276625224;
@@ -586,7 +586,7 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-static Symbol _observe(ErrorThreadState state, ErrorHandler h){
+static Symbol ErrorThreadState__observe(ErrorThreadState e, ErrorHandler h){
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -599,10 +599,10 @@ static Symbol _observe(ErrorThreadState state, ErrorHandler h){
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      state -> floor_only ++;
+      e -> floor_only ++;
       h -> view = _region_new();
-      List slice = _view_since(& h -> view, h -> watermark);
-      state -> floor_only --;
+      List slice = ErrorRegion__view_since(& h -> view, h -> watermark);
+      e -> floor_only --;
       {
         Symbol _x2c_return_value_0 = h -> fn(slice, h -> data);
         {
@@ -620,7 +620,7 @@ static Symbol _observe(ErrorThreadState state, ErrorHandler h){
 
 void ExceptionFrame_unwind(void *);
 
-static void _transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition){
+static void ErrorThreadState__transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbol disposition){
   state -> handler_top = state -> dispatch_saved;
   state -> dispatch_saved = state -> dispatch_running = NULL;
   _leave();
@@ -628,11 +628,11 @@ static void _transfer(ErrorThreadState state, ErrorHandler h, Symbol code, Symbo
   _floor(code, disposition == 12689496 ? "handler returned fatal" : "<unwind> from an observing registration");
 }
 
-static void _apply_policy(ErrorThreadState state, ErrorRaise r){
+static void ErrorThreadState__apply_policy(ErrorThreadState e, ErrorRaise r){
   Symbol policy = Error_policy_get(r.code);
   if(policy == 2260136) _floor(r.code, "unhandled and policy is abort");
   if(policy == 25550){
-    if(! state -> rendered[r.depth]) _report(r.code);
+    if(! e -> rendered[r.depth]) _report(r.code);
     _truncate(r.raised_at);
   }
   else if(policy == 619609226) _truncate(r.raised_at);
@@ -665,24 +665,24 @@ Pool Pool_open_named(const char *);
 
 void Pool_close(void);
 
-static Symbol _catch_match(ErrorHandler h){
+static Symbol ErrorHandler__catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
   ErrorRecord * record = _record_at(Error_count() - 1);
   Symbol code = Var_symbol(List_cadr(Var_list(List_car(record -> entry))));
   List detail = Var_list(List_cadr(Var_list(List_cadr(record -> entry))));
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List projection = _cons(& record -> region, Symbol_var(code), detail);
+  List projection = ErrorRegion__cons(& record -> region, Symbol_var(code), detail);
   Pool_open_named("Error catch bindings");
-  int selected = _catch_select(h, record, projection);
+  int selected = ErrorHandler__catch_select(h, record, projection);
   Pool_close();
-  if(selected) _catch_retain(h);
+  if(selected) ErrorHandler__catch_retain(h);
   state -> floor_only --;
   return selected ? 1440172936 : 285842436424;
 }
 
-static int _catch_select(ErrorHandler h, ErrorRecord * record, List projection){
-  for(int i = 0;  i < h -> site -> arm_count;  i ++) if(_catch_arm(h, record, projection, i)){
+static int ErrorHandler__catch_select(ErrorHandler h, ErrorRecord * record, List projection){
+  for(int i = 0;  i < h -> site -> arm_count;  i ++) if(ErrorHandler__catch_arm(h, record, projection, i)){
     h -> selected = i;
     return 1;
   }
@@ -695,8 +695,8 @@ int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats
 
 void Scope_free(void *);
 
-static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i){
-  MatchPlan plan = _arm_plan(h, i);
+static int ErrorHandler__catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int i){
+  MatchPlan plan = ErrorHandler__arm_plan(h, i);
   MatchCaptureLayout layout = plan ? plan -> layout : NULL;
   int binders = layout ? layout -> binder_count : 0;
   Var * values = binders ? Scope_malloc(sizeof(Var) * binders) : NULL;
@@ -705,12 +705,12 @@ static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int
   }
   ;
   int matched = i == h -> site -> default_arm ||(plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
-  if(matched) _catch_commit_captures(h, record, layout, & captures);
+  if(matched) ErrorHandler__commit_captures(h, record, layout, & captures);
   if(values) Scope_free(values);
   return matched;
 }
 
-static MatchPlan _arm_plan(ErrorHandler h, int i){
+static MatchPlan ErrorHandler__arm_plan(ErrorHandler h, int i){
   if(i == h -> site -> default_arm) return NULL;
   MatchPlan * plans = h -> plans != NULL ? h -> plans -> bytes : NULL;
   return plans ? plans[i] : h -> site -> arms[i].plan;
@@ -720,7 +720,7 @@ void Block_append(Block, const void *, size_t);
 
 int MatchCaptureBuffer_has(MatchCaptureBuffer *, int);
 
-static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
+static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * record, MatchCaptureLayout layout, MatchCaptureBuffer * captures){
   if(handle -> capture_values != NULL){
     Block_free(handle -> capture_values);
     handle -> capture_values = NULL;
@@ -732,12 +732,12 @@ static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, Ma
   Var * values = handle -> capture_values -> bytes;
   for(int i = 0;  i < layout -> binder_count;  i ++){
     values[i] =((void) 0, Void);
-    if(MatchCaptureBuffer_has(captures, i)) values[i] = _copy_value(& record -> region, captures -> values[i]);
+    if(MatchCaptureBuffer_has(captures, i)) values[i] = ErrorRegion__copy_value(& record -> region, captures -> values[i]);
   }
   if(pushed) Scope_pop();
 }
 
-static void _catch_retain(ErrorHandler handle){
+static void ErrorHandler__catch_retain(ErrorHandler handle){
   int pushed = _scope_push(97614135954008, "could not enter error scope for retained catch records");
   _retained_destroy(handle -> retained);
   handle -> retained = Block_new(sizeof(ErrorRecord));
@@ -752,7 +752,7 @@ static void _catch_retain(ErrorHandler handle){
 static void _retained_destroy(Block retained){
   if(retained == NULL) return;
   ErrorRecord * records = retained -> bytes;
-  for(size_t i = 0;  i < retained -> length;  i ++) _region_destroy(& records[i].region);
+  for(size_t i = 0;  i < retained -> length;  i ++) ErrorRegion__destroy(& records[i].region);
   Block_free(retained);
 }
 
@@ -768,12 +768,12 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 644};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 647};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 647};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 650};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -826,7 +826,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 715};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 718};
     x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
@@ -903,16 +903,16 @@ void Error_pop(ErrorHandler handle){
   if(state -> handler_top != handle) _floor(20800632064936, "Error.pop out of order");
   _truncate(handle -> watermark);
   state -> handler_top = handle -> prev;
-  _handler_free(handle);
+  ErrorHandler__free(handle);
 }
 
-static void _handler_free(ErrorHandler handle){
+static void ErrorHandler__free(ErrorHandler handle){
   if(! handle) return;
   if(handle -> site && ! handle -> site -> arms) Scope_free(handle -> site);
   _plans_free(handle -> plans);
   if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
   _retained_destroy(handle -> retained);
-  _region_destroy(& handle -> view);
+  ErrorRegion__destroy(& handle -> view);
   Scope_free(handle);
 }
 
@@ -925,17 +925,17 @@ static void _plans_free(Block plans){
   Block_free(plans);
 }
 
-static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate){
+static void ErrorThreadState__unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate){
   while(state -> handler_top && state -> handler_top != stop){
     ErrorHandler removed = state -> handler_top;
     state -> handler_top = removed -> prev;
     if(truncate) _truncate(removed -> watermark);
-    _handler_free(removed);
+    ErrorHandler__free(removed);
   }
 
 }
 
-static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth){
+static ErrorHandler ErrorThreadState__handler_at_depth(ErrorThreadState state, int depth){
   ErrorHandler stop = state -> handler_top;
   for(int height = Error_handler_depth();  height > depth && stop;  height --) stop = stop -> prev;
   return stop;
@@ -970,13 +970,13 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
   h -> site = site;
   h -> target = target;
   int arm = - 1;
-  const char * fenced = _prepare_arms(h, patterns, &(arm));
+  const char * fenced = ErrorHandler__prepare_arms(h, patterns, &(arm));
   state -> floor_only --;
   if(fenced){
-    _handler_free(h);
+    ErrorHandler__free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 923};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 927};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -986,16 +986,16 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
   return h;
 }
 
-static const char * _prepare_arms(ErrorHandler h, Var * patterns, int * arm){
+static const char * ErrorHandler__prepare_arms(ErrorHandler h, Var * patterns, int * arm){
   ErrorCatchSite * site = h -> site;
-  if(_site_state(site) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
-  if(_site_state(site) == ERROR_CATCH_TRANSIENT) return _catch_prepare_plans(h, patterns, &((* arm)));
+  if(ErrorCatchSite__state(site) == ERROR_CATCH_PENDING) ErrorCatchSite__bind(site, patterns);
+  if(ErrorCatchSite__state(site) == ERROR_CATCH_TRANSIENT) return ErrorHandler__prepare_plans(h, patterns, &((* arm)));
   if(site -> fenced_arm < 0) return NULL;
   (* arm) = site -> fenced_arm;
   return site -> arms[(* arm)].plan -> reason;
 }
 
-static int _site_state(ErrorCatchSite * site){
+static int ErrorCatchSite__state(ErrorCatchSite * site){
   return __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE);
 }
 
@@ -1003,7 +1003,7 @@ int x2c_match_pattern_retainable(Var);
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 
-static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
+static void ErrorCatchSite__bind(ErrorCatchSite * site, Var * patterns){
   _site_lock();
   {
     X2CCleanup _x2c_defer_record_1 ={
@@ -1012,7 +1012,7 @@ static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      if(_site_state(site) != ERROR_CATCH_PENDING){
+      if(ErrorCatchSite__state(site) != ERROR_CATCH_PENDING){
         x2c_cleanup_leave(& _x2c_defer_record_1);
         return;
       }
@@ -1050,7 +1050,7 @@ static void _site_unlock(void){
 
 MatchPlan MatchPlan_prepare(Var);
 
-static const char * _catch_prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm){
+static const char * ErrorHandler__prepare_plans(ErrorHandler h, Var * patterns, int * fenced_arm){
   ErrorCatchSite * site = h -> site;
   const char * fenced = NULL;
   int pushed = _scope_push(97614135954008, "could not enter error scope for catch patterns");
@@ -1090,7 +1090,7 @@ ErrorHandler x2c_error_catch_push(void * target, unsigned arm_count, ...){
 
 int x2c_error_catch_site_pending(ErrorCatchSite * site){
   if(! _init_guard_) _file_init_();
-  return ! site || _site_state(site) != ERROR_CATCH_STATIC;
+  return ! site || ErrorCatchSite__state(site) != ERROR_CATCH_STATIC;
 }
 
 int x2c_error_catch_selected(ErrorHandler handle){
@@ -1131,7 +1131,7 @@ void x2c_error_catch_close(ErrorHandler handle){
     _truncate(handle -> watermark);
     state -> handler_top = handle -> prev;
   }
-  _handler_free(handle);
+  ErrorHandler__free(handle);
 }
 
 void * Error_unwind_head(void){
@@ -1153,14 +1153,14 @@ void Error_trim(void * saved_head, int stack_height){
   if(! _init_guard_) _file_init_();
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
-  if(_chain_contains(state -> handler_top, saved)) _unwind_to(state, saved, 1);
+  if(_chain_contains(state -> handler_top, saved)) ErrorThreadState__unwind_to(state, saved, 1);
   _truncate(stack_height);
 }
 
 void Error_restore(int handler_depth, int stack_height){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
-  _unwind_to(state, _handler_at_depth(state, handler_depth), 1);
+  ErrorThreadState__unwind_to(state, ErrorThreadState__handler_at_depth(state, handler_depth), 1);
   _truncate(stack_height);
 }
 
@@ -1185,8 +1185,8 @@ void Error_context_close(void * token, int preserve_records){
   if(! context) return;
   ErrorThreadState state = _thread();
   if(state -> context_top != context) _floor(20800632064936, "Error Context close out of order");
-  ErrorHandler stop = _handler_at_depth(state, context -> handler_depth);
-  _unwind_to(state, stop, ! preserve_records);
+  ErrorHandler stop = ErrorThreadState__handler_at_depth(state, context -> handler_depth);
+  ErrorThreadState__unwind_to(state, stop, ! preserve_records);
   if(! preserve_records) _truncate(context -> stack_height);
   state -> context_top = context -> prev;
 }
@@ -1206,18 +1206,18 @@ List Error_since(int mark){
   if(! Error_ready() || mark < 0) return NULL;
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List out = _view_since(NULL, mark);
+  List out = ErrorRegion__view_since(NULL, mark);
   List_try_own(out);
   state -> floor_only --;
   return out;
 }
 
-static List _view_since(ErrorRegion * region, int mark){
+static List ErrorRegion__view_since(ErrorRegion * region, int mark){
   List out = NULL;
   for(int i = Error_count() - 1;  i >= mark;  i --){
     ErrorRecord * record = _record_at(i);
-    Var entry = _copy_value(region, List_var(record -> entry));
-    out = region ? _cons(region, entry, out) : cons(entry, out);
+    Var entry = ErrorRegion__copy_value(region, List_var(record -> entry));
+    out = region ? ErrorRegion__cons(region, entry, out) : cons(entry, out);
   }
   return out;
 }
@@ -1228,7 +1228,7 @@ List Error_since_in(int mark, Scope * values, Pool pool){
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List out = _view_since(& region, mark);
+  List out = ErrorRegion__view_since(& region, mark);
   state -> floor_only --;
   * values = region.values;
   return out;
@@ -1246,7 +1246,7 @@ Var Error_snapshot(Var value){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  Var copy = _copy_value(NULL, value);
+  Var copy = ErrorRegion__copy_value(NULL, value);
   state -> floor_only --;
   return copy;
 }
@@ -1256,7 +1256,7 @@ Var Error_snapshot_in(Var value, Scope * values, Pool pool){
   ErrorRegion region = _owners(values, pool);
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  Var copy = _copy_value(& region, value);
+  Var copy = ErrorRegion__copy_value(& region, value);
   state -> floor_only --;
   * values = region.values;
   return copy;
@@ -1318,8 +1318,8 @@ void Error_shutdown_raw(void){
   if(! _init_guard_) _file_init_();
   ErrorThreadState state = _thread();
   if(state -> shutdown_done) return;
-  _reclaim_hidden(state);
-  _unwind_to(state, NULL, 1);
+  ErrorThreadState__reclaim_hidden(state);
+  ErrorThreadState__unwind_to(state, NULL, 1);
   _truncate(0);
   if(state -> stack != NULL){
     Block_free(state -> stack);
@@ -1335,12 +1335,12 @@ void Error_shutdown_raw(void){
 
 }
 
-static void _reclaim_hidden(ErrorThreadState state){
+static void ErrorThreadState__reclaim_hidden(ErrorThreadState state){
   ErrorHandler stop = state -> dispatch_running;
   for(ErrorHandler h = stop ? state -> dispatch_saved : NULL;  h; ){
     ErrorHandler prev = h -> prev;
     int last = h == stop;
-    _handler_free(h);
+    ErrorHandler__free(h);
     if(last) break;
     h = prev;
   }
@@ -1348,7 +1348,7 @@ static void _reclaim_hidden(ErrorThreadState state){
   while(state -> running_top){
     ErrorHandler running = state -> running_top;
     state -> running_top = running -> running;
-    _handler_free(running);
+    ErrorHandler__free(running);
   }
 
 }
@@ -1360,7 +1360,7 @@ int Error_ready(void){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  _region_destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
+  ErrorRegion__destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){

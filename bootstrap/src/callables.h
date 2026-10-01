@@ -9,15 +9,15 @@
 #include "compiler.h"
 List Compiler_lower_lambda_expr(Compiler c, List expression);
 
-List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
-
-List Compiler_func_signature(Compiler compiler, Type type);
-
-List Compiler_lift_func_expression(Compiler c, List expression);
-
 List Compiler_capture_environment(Compiler c, List name, List fields);
 
 List Compiler_prepare_lambda_cells(Compiler c, List declarator, List body);
+
+List Compiler_lift_func_expression(Compiler c, List expression);
+
+List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
+
+List Compiler_func_signature(Compiler c, Type type);
 
 List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
 

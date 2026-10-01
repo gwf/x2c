@@ -7,23 +7,27 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
+
+Token Compiler_macro_invocation_site(Compiler c, Var site);
+
 List Compiler_parse_macro_definition(Compiler c);
 
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
-List Compiler_peek_macro_hole(Compiler compiler);
+List Compiler_peek_macro_hole(Compiler c);
 
 int Compiler_macro_lisp_starts_declaration(Compiler c);
 
 List Compiler_try_parse_macro_member(Compiler c);
 
-List Compiler_macro_introduced_name(Compiler compiler, String spelling);
+List Compiler_macro_introduced_name(Compiler c, String spelling);
 
 List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
 
-List Compiler_publish_macro_definition_node(Compiler compiler, List node);
+List Compiler_publish_macro_definition_node(Compiler c, List node);
 
-int Compiler_macro_form_is_definition(Compiler compiler);
+int Compiler_macro_form_is_definition(Compiler c);
 
 int Compiler_local_macro_form_is_definition(Compiler c);
 
@@ -45,17 +49,13 @@ List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
 
-List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
-
-Token Compiler_macro_invocation_site(Compiler compiler, Var site);
-
 Var Compiler_evaluate_macro_slot(Compiler c, Var value);
 
-List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
+List Compiler_evaluate_macro_rows(Compiler c, Var value);
 
 Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
 
-Var Compiler_evaluate_declaration_recipe(Compiler compiler, Atom callback, List arguments);
+Var Compiler_evaluate_declaration_recipe(Compiler c, Atom callback, List arguments);
 
 List x2c_template_call(Var stored, List values);
 
@@ -75,15 +75,15 @@ List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
 
-void Compiler_ensure_macro_lisp(Compiler compiler);
+void Compiler_ensure_macro_lisp(Compiler c);
 
-List Compiler_parse_macro_lisp_top_level(Compiler compiler);
+List Compiler_parse_macro_lisp_top_level(Compiler c);
 
-void Compiler_parse_macro_lisp_shallow(Compiler compiler);
+void Compiler_parse_macro_lisp_shallow(Compiler c);
 
-void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
+void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
 
-List Compiler_parse_macro_lisp_expression(Compiler compiler);
+List Compiler_parse_macro_lisp_expression(Compiler c);
 
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
 
@@ -91,9 +91,9 @@ void Compiler_import_package_macros(Compiler c, String name, Token invocation);
 
 String Compiler_source_path(Compiler c, String file);
 
-Lisp Compiler_open_macro_library(Compiler compiler);
+Lisp Compiler_open_macro_library(Compiler c);
 
-void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
+void Compiler_publish_macro_library(Compiler c, Lisp shared);
 
 int Compiler_inherits_import(String path);
 
@@ -103,15 +103,15 @@ void Compiler_inherit_library_comptime(Compiler c);
 
 int macro_library_filling(void);
 
-Map Compiler_shared_definitions(Compiler compiler);
+Map Compiler_shared_definitions(Compiler c);
 
 int Compiler_shares_meta_definition(Compiler c, String name);
 
-void Compiler_install_builtin_macros(Compiler compiler);
+void Compiler_install_builtin_macros(Compiler c);
 
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
-void Compiler_report_lisp_failure(Compiler compiler, Token invocation, List error, String source);
+void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
 
 void macro_library_reset(void);
 

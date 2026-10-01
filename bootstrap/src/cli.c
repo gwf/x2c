@@ -647,7 +647,7 @@ static void Parse_operand(Parse * p, String arg, int * i);
 
 static void Parse_finish(Parse * p);
 
-static void _check_request(CliRequest r, int mask);
+static void CliRequest__check(CliRequest r, int mask);
 
 static void _help_command(Array args);
 
@@ -660,7 +660,7 @@ Given;
 
 static void Parse_option(Parse * p, String arg, int * i);
 
-static void _save_temps_dir(CliRequest r, String arg);
+static void CliRequest__save_temps_dir(CliRequest r, String arg);
 
 static Given _take_option(Array args, int * i, int mask);
 
@@ -682,7 +682,7 @@ static void _push_pair(Array out, String option, String value);
 
 static String _xcc_argument(String value);
 
-static void _set_field(CliRequest r, CliOption * option, String value);
+static void CliRequest__set_field(CliRequest r, CliOption * option, String value);
 
 static void Parse_native(Parse * p, int * i);
 
@@ -1104,7 +1104,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   ;
   for(int i = 1;  i < Array_len(args);  i ++) Parse_word(&(p), &(i));
   Parse_finish(&(p));
-  _check_request(p.request, p.mask);
+  CliRequest__check(p.request, p.mask);
   return p.request;
 }
 
@@ -1159,7 +1159,7 @@ int List_truth(List);
 
 List List_cdr(List);
 
-static void _check_request(CliRequest r, int mask){
+static void CliRequest__check(CliRequest r, int mask){
   Symbol name = r -> command;
   List inputs = r -> inputs;
   if(mask == CLI_TRANSLATE && ! List_truth(inputs)) driver_error("translate requires at least one input");
@@ -1185,7 +1185,7 @@ static void _help_command(Array args){
 static void Parse_option(Parse * p, String arg, int * i){
   if(String_equal(arg, _53)) _removed_output();
   if((p -> mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _187)){
-    _save_temps_dir(p -> request, arg);
+    CliRequest__save_temps_dir(p -> request, arg);
     return;
   }
   Given given = _take_option(p -> args, &((* i)), p -> mask);
@@ -1195,7 +1195,7 @@ static void Parse_option(Parse * p, String arg, int * i){
 
 String String_remove_prefix(String, String);
 
-static void _save_temps_dir(CliRequest r, String arg){
+static void CliRequest__save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
   r -> temps_dir = String_remove_prefix(arg, _187);
   if(! String_truth(r -> temps_dir)) driver_error("--save-temps= requires a directory");
@@ -1332,7 +1332,7 @@ static void Parse_apply(Parse * p, Given given){
       break;
     }
     default:{
-      _set_field(r, given.option, value);
+      CliRequest__set_field(r, given.option, value);
       break;
     }
 
@@ -1393,7 +1393,7 @@ int cli_dependency_pass_through(String s){
 
 List cons(Var, List);
 
-static void _set_field(CliRequest r, CliOption * option, String value){
+static void CliRequest__set_field(CliRequest r, CliOption * option, String value){
   char * field =(char *) r + option -> offset;
   switch(option -> apply){
     case FIELD_FLAG :{

@@ -108,45 +108,47 @@ typedef struct Compiler{
 #include "diagnostics.h"
 #include "symbols.h"
 #include "preprocess.h"
-Var Compiler_var(Compiler compiler);
+Var Compiler_var(Compiler c);
 
 Compiler Var_compiler(Var value);
 
-Compiler Compiler_new(void);
+void Compiler_shallow_parse(Compiler c, Map globals);
 
-Compiler Compiler_new_shared(Compiler owner);
+void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
 
-void Compiler_free_lisp(Compiler c);
+int Compiler_collect_compile_time_definition(Compiler c, int keyword);
 
-void Compiler_borrow_unit_semantics(Compiler c, Compiler owner);
+void Compiler_finish_collected_declaration(Compiler c, List declaration, Token meta, int native);
 
-void Compiler_share_meta_group(Compiler c, Compiler owner);
+int Compiler__at_function_arrow(Compiler c);
 
-void Compiler_take_unit_state(Compiler c, Compiler owner);
+void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
 
-void Compiler_return_unit_state(Compiler c, Compiler owner);
+void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
 
-int Compiler_read_source(Compiler c, String path, String volatile * text);
+void Compiler_run_declaration_effects(Compiler c);
 
-String Compiler_canonical_path(Compiler c, String path);
+void Compiler_collect_unit_macro(Compiler c);
 
-String home_portable_path(String path);
+Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
 
-String home_absolute_path(String spelling);
+Var Compiler_freeze_macro_stack(Compiler c);
 
-void Map_merge_translation_dependency(Map m, String path, Var content_hash);
+Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
 
-void Compiler_add_translation_dependency(Compiler c, String path);
+Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions);
 
-void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
+List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
+
+int Compiler_skip_collected_script_statement(Compiler c);
+
+void Compiler_skip_script_statement(Compiler c);
 
 void Compiler_tokenize(Compiler c, char * text);
 
 Symbol Compiler_peek(Compiler c, int steps);
 
 Token Token_skip_trivia(Token token);
-
-Token Compiler_skip_trivia_from(Compiler c, Token token);
 
 void Compiler_require_input(Compiler c);
 
@@ -242,37 +244,33 @@ void Compiler_take_diagnostics(Compiler c, Compiler child);
 
 void Compiler_close_child(Compiler c, Compiler child);
 
-Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
+void Compiler_borrow_unit_semantics(Compiler c, Compiler owner);
 
-Var Compiler_freeze_macro_stack(Compiler c);
+void Compiler_share_meta_group(Compiler c, Compiler owner);
 
-Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
+void Compiler_take_unit_state(Compiler c, Compiler owner);
 
-void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
+void Compiler_return_unit_state(Compiler c, Compiler owner);
 
-void Compiler_run_declaration_effects(Compiler c);
+int Compiler_read_source(Compiler c, String path, String volatile * text);
 
-void Compiler_collect_unit_macro(Compiler c);
+String Compiler_canonical_path(Compiler c, String path);
 
-Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions);
+String home_portable_path(String path);
 
-void Compiler_shallow_parse(Compiler c, Map globals);
+String home_absolute_path(String spelling);
 
-void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
+void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 
-int Compiler_collect_compile_time_definition(Compiler c, int keyword);
+void Compiler_add_translation_dependency(Compiler c, String path);
 
-void Compiler_finish_collected_declaration(Compiler c, List declaration, Token meta, int native);
+void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
 
-int Compiler__at_function_arrow(Compiler c);
+Compiler Compiler_new(void);
 
-void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
+Compiler Compiler_new_shared(Compiler owner);
 
-List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
-
-int Compiler_skip_collected_script_statement(Compiler c);
-
-void Compiler_skip_script_statement(Compiler c);
+void Compiler_free_lisp(Compiler c);
 
 
 #endif /* __GUARD_0x08246194__ */

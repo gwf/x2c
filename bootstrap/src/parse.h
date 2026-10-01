@@ -16,7 +16,11 @@ List Compiler_parse_top_level(Compiler c);
 
 List Compiler_parse_submission(Compiler c, int end_position);
 
-String Compiler_definition_doc(Compiler c, Token start);
+int Compiler_defines_main(Compiler c);
+
+int Compiler_script_statement_starts(Compiler c);
+
+int Compiler_script_statement_executes(Compiler c);
 
 int Compiler_protocol_form_starts(Compiler c);
 
@@ -26,13 +30,9 @@ Token Compiler_take_meta_marker(Compiler c, int * native);
 
 List Compiler_parse_import_declaration(Compiler c);
 
-int Compiler_defines_main(Compiler c);
+String Compiler_definition_doc(Compiler c, Token start);
 
-int Compiler_script_statement_starts(Compiler c);
-
-int Compiler_script_statement_executes(Compiler c);
-
-List Compiler_parse_declaration_row(Compiler compiler);
+List Compiler_parse_declaration_row(Compiler c);
 
 List Compiler_parse_simple_declaration(Compiler c);
 
@@ -40,15 +40,15 @@ List Compiler_parse_declaration_argument(Compiler c);
 
 int Compiler_test_static_assert(Compiler c);
 
-List Compiler_parse_static_assert(Compiler compiler);
+List Compiler_parse_static_assert(Compiler c);
 
 int Compiler_test_declaration(Compiler c);
 
-Type Compiler_parse_type_name(Compiler compiler);
+Type Compiler_parse_type_name(Compiler c);
 
 List Compiler_parse_fields(Compiler c, List context);
 
-List Compiler_parse_field(Compiler compiler, List context);
+List Compiler_parse_field(Compiler c, List context);
 
 List Compiler_parse_named_type(Compiler c);
 
@@ -62,19 +62,19 @@ void Compiler_bind_template_local(Compiler c, List key, List type, List context)
 
 List Compiler_parse_parameter_list(Compiler c);
 
-List Compiler_parse_parameter(Compiler compiler);
+List Compiler_parse_parameter(Compiler c);
 
-List Compiler_parse_complex_identifier(Compiler compiler);
+List Compiler_parse_complex_identifier(Compiler c);
 
 String Compiler_package_alias_spelling(Compiler c);
 
-List Compiler_parse_basic_identifier(Compiler compiler);
+List Compiler_parse_basic_identifier(Compiler c);
 
-List Compiler_parse_optional_identifier(Compiler compiler);
+List Compiler_parse_optional_identifier(Compiler c);
 
-List Compiler_parse_function_definition(Compiler compiler);
+List Compiler_parse_function_definition(Compiler c);
 
-List Compiler_parse_function_target(Compiler compiler);
+List Compiler_parse_function_target(Compiler c);
 
 List Compiler_finish_managed_declaration(Compiler c, List declaration, Token origin);
 

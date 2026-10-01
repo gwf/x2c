@@ -500,7 +500,7 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 691};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
@@ -521,7 +521,7 @@ String String_add(String str, String other){
   int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 724};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 720};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
@@ -555,12 +555,12 @@ String String_repeat(String str, int count){
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 765};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 761};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));
     __builtin_unreachable();
   }
   if(count == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 766};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 762};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))), Symbol_var(7318440), int_var(count));
     __builtin_unreachable();
   }
@@ -649,14 +649,14 @@ String String_pad_center(String str, int width, char fill){
 
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 853};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 849};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 856};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 852};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -668,6 +668,34 @@ static String _pad(String str, int width, char fill, int side){
   if(length) memcpy(string + left, str, length);
   memset(string + left + length, fill, right);
   return _finish(string, width);
+}
+
+String String_printf(String fmt, ...){
+  if(! String_truth(fmt) || ! * fmt) return NULL;
+  va_list args, measure;
+  va_start(args, fmt);
+  va_copy(measure, args);
+  int n = vsnprintf(NULL, 0, fmt, measure);
+  va_end(measure);
+  if(n < 0){
+    va_end(args);
+    return NULL;
+  }
+  if(n <= STRING_STACK_BYTES){
+    char bytes[STRING_STACK_BYTES + 1];
+    int written = vsnprintf(bytes, n + 1, fmt, args);
+    va_end(args);
+    if(written != n) return NULL;
+    return _from_bytes(bytes, n);
+  }
+  String string = String_malloc(n + 1);
+  int written = vsnprintf(string, n + 1, fmt, args);
+  va_end(args);
+  if(written != n){
+    _free_unchecked(string);
+    return NULL;
+  }
+  return _finish(string, n);
 }
 
 String String_strip(String str, char * negChars){
@@ -877,7 +905,7 @@ String String_map(String str, Func fn){
       for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
         if(! ch){
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1119};
+          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1154};
           x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -1011,34 +1039,6 @@ String String_squeeze(String str, String chars){
     x2c_cleanup_leave(& _x2c_defer_record_4);
   }
 
-}
-
-String String_printf(String fmt, ...){
-  if(! String_truth(fmt) || ! * fmt) return NULL;
-  va_list args, measure;
-  va_start(args, fmt);
-  va_copy(measure, args);
-  int n = vsnprintf(NULL, 0, fmt, measure);
-  va_end(measure);
-  if(n < 0){
-    va_end(args);
-    return NULL;
-  }
-  if(n <= STRING_STACK_BYTES){
-    char bytes[STRING_STACK_BYTES + 1];
-    int written = vsnprintf(bytes, n + 1, fmt, args);
-    va_end(args);
-    if(written != n) return NULL;
-    return _from_bytes(bytes, n);
-  }
-  String string = String_malloc(n + 1);
-  int written = vsnprintf(string, n + 1, fmt, args);
-  va_end(args);
-  if(written != n){
-    _free_unchecked(string);
-    return NULL;
-  }
-  return _finish(string, n);
 }
 
 String String_str(String str){

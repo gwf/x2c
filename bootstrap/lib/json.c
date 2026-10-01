@@ -50,60 +50,66 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-typedef struct _JsonReader{
+typedef struct Reader{
   const char * text;
   String path;
   int at, depth;
 }
-* _JsonReader;
+* Reader;
 
-_Noreturn static void _JsonReader__fail(_JsonReader j, String why);
+static Var _parse(String source, String path);
 
-static int _JsonReader__peek(_JsonReader j);
+static Var Reader__value(Reader r);
 
-static void _JsonReader__space(_JsonReader j);
+static Var Reader__object(Reader r);
 
-static void _JsonReader__expect(_JsonReader j, char byte, const char * why);
+static Var Reader__array(Reader r);
 
-static void _JsonReader__word(_JsonReader j, const char * word);
+static String Reader__string(Reader r);
 
-static int _JsonReader__digits(_JsonReader j);
+static void Reader__escape(Reader r, Buffer out);
 
-static Var _JsonReader__number(_JsonReader j);
+static long Reader__hex4(Reader r);
 
-static long _JsonReader__hex4(_JsonReader j);
+static Var Reader__number(Reader r);
+
+static int Reader__digits(Reader r);
+
+static void Reader__word(Reader r, const char * word);
+
+static void Reader__expect(Reader r, char byte, const char * why);
+
+static void Reader__space(Reader r);
+
+static int Reader__peek(Reader r);
+
+_Noreturn static void Reader__fail(Reader r, String why);
+
+typedef struct Writer{
+  Buffer out;
+  int pretty;
+}
+* Writer;
+
+static String _json(Var value, int pretty);
+
+static void Writer__value(Writer w, Var value, int depth);
+
+static void Writer__elements(Writer w, Var sequence, int depth);
+
+static void Writer__members(Writer w, Map object, int depth);
+
+static void Writer__line(Writer w, int depth);
+
+static void _write_string(Buffer out, String text);
+
+static void _write_integer(Buffer out, Var value);
+
+static void _write_double(Buffer out, double number);
 
 static int _utf8_length(const unsigned char * s);
 
 static void _write_code_point(Buffer out, long point);
-
-static void _JsonReader__escape(_JsonReader j, Buffer out);
-
-static String _JsonReader__string(_JsonReader j);
-
-static Var _JsonReader__array(_JsonReader j);
-
-static Var _JsonReader__object(_JsonReader j);
-
-static Var _JsonReader__value(_JsonReader j);
-
-static Var _parse(String source, String path);
-
-static void _write_string(Buffer out, String text);
-
-static void _write_double(Buffer out, double number);
-
-static void _write_integer(Buffer out, Var value);
-
-static void _write_line(Buffer out, int pretty, int depth);
-
-static void _write_elements(Buffer out, Var sequence, int pretty, int depth);
-
-static void _write_members(Buffer out, Map object, int pretty, int depth);
-
-static void _write(Buffer out, Var value, int pretty, int depth);
-
-static String _json(Var value, int pretty);
 
 static inline String _x2c_proto_jsonbool_str_0(Var a0);
 
@@ -120,6 +126,13 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
 static Var _x2c_lambda_0(Var name);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
@@ -129,13 +142,6 @@ static Func _x2c_func_handle_0;
 Func Func_new(FuncAdapter, List);
 
 _x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26)))
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
-}
-_x2c_defer_env_1;
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
 }
@@ -164,20 +170,20 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   _0 = String_new("true");
   _1 = String_new("false");
-  _2 = String_new("unexpected character");
-  _3 = String_new("invalid number");
-  _4 = String_new("number out of range");
-  _5 = String_new("invalid \\u escape");
-  _6 = String_new("invalid escape");
-  _7 = String_new("unpaired surrogate");
-  _8 = String_new("U+0000 cannot appear in a String");
-  _9 = String_new("unterminated string");
-  _10 = String_new("control character in string");
-  _11 = String_new("invalid UTF-8");
-  _12 = String_new("expected a string key");
-  _13 = String_new("nesting exceeds 512 levels");
-  _14 = String_new("unexpected end of input");
-  _15 = String_new("unexpected text after the value");
+  _2 = String_new("unexpected text after the value");
+  _3 = String_new("nesting exceeds 512 levels");
+  _4 = String_new("unexpected end of input");
+  _5 = String_new("unexpected character");
+  _6 = String_new("expected a string key");
+  _7 = String_new("unterminated string");
+  _8 = String_new("control character in string");
+  _9 = String_new("invalid UTF-8");
+  _10 = String_new("invalid escape");
+  _11 = String_new("unpaired surrogate");
+  _12 = String_new("U+0000 cannot appear in a String");
+  _13 = String_new("invalid \\u escape");
+  _14 = String_new("invalid number");
+  _15 = String_new("number out of range");
   _16 = Symbol_var(437126);
   _17 = String_new("Var");
   _18 = String_var(_17);
@@ -242,7 +248,7 @@ int Json_boolean(Var value){
   if(! Var_is(value, 729033112536)){
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 80};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/json.x",.function = "Json_boolean",.line = 76};
       x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.boolean")), NULL))), Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -251,65 +257,249 @@ int Json_boolean(Var value){
   return JsonBool_truth(Var_jsonbool(value));
 }
 
-void scan_next_line_col(char *, int, int *, int *);
+Var Json_parse(String source){
+  if(! _init_guard_) _file_init_();
+  return _parse(source, NULL);
+}
+
+String Path_read_text(Path);
+
+Var Json_read_file(Path path){
+  if(! _init_guard_) _file_init_();
+  return _parse(Path_read_text(path), path);
+}
 
 int String_truth(String);
 
-Var int_var(int);
-
-_Noreturn static void _JsonReader__fail(_JsonReader j, String why){
-  int line = 1, column = 1, offset = j -> at;
-  scan_next_line_col((char *) j -> text, offset, & line, & column);
-  if(String_truth(j -> path)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "_JsonReader__fail",.line = 106};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL))), Symbol_var(1051920), String_var(j -> path), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
-    __builtin_unreachable();
+static Var _parse(String source, String path){
+  struct Reader reader ={
+    .text = String_truth(source) ? source : "", .path = path
   }
-  {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "_JsonReader__fail",.line = 109};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
-    __builtin_unreachable();
-  }
-
+  ;
+  Reader r = & reader;
+  Var value = Reader__value(r);
+  Reader__space(r);
+  if(Reader__peek(r)) Reader__fail(r, _2);
+  return value;
 }
 
-static int _JsonReader__peek(_JsonReader j){
-  return(unsigned char) j -> text[j -> at];
-}
-
-static void _JsonReader__space(_JsonReader j){
-  while(1){
-    switch(_JsonReader__peek(j)){
-      case ' ' : case '\t' : case '\n' : case '\r' : j -> at ++;
-      break;
-      default: return;
+static Var Reader__value(Reader r){
+  Reader__space(r);
+  switch(Reader__peek(r)){
+    case '{' : case '[' :{
+      if(++ r -> depth > JSON_MAX_DEPTH) Reader__fail(r, _3);
+      Var nested = Reader__peek(r) == '{' ? Reader__object(r) : Reader__array(r);
+      r -> depth --;
+      return nested;
     }
+    case '"' : return String_var(Reader__string(r));
+    case 't' : Reader__word(r, "true");
+    return Json_bool(1);
+    case 'f' : Reader__word(r, "false");
+    return Json_bool(0);
+    case 'n' : Reader__word(r, "null");
+    return(Var){
+      .u64 = 0
+    }
+    ;
+    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Reader__number(r);
+    case '\0' : Reader__fail(r, _4);
+  }
+  Reader__fail(r, _5);
+}
 
+Map Map_new(void);
+
+Var Map_var(Map);
+
+Var Map_setindex(Map, Var, Var);
+
+static Var Reader__object(Reader r){
+  Map object = Map_new();
+  r -> at ++;
+  Reader__space(r);
+  if(Reader__peek(r) == '}'){
+    r -> at ++;
+    return Map_var(object);
+  }
+  while(1){
+    Reader__space(r);
+    if(Reader__peek(r) != '"') Reader__fail(r, _6);
+    String name = Reader__string(r);
+    Reader__expect(r, ':', "expected ':'");
+    Map_setindex(object, String_var(name), Reader__value(r));
+    Reader__space(r);
+    if(Reader__peek(r) == '}'){
+      r -> at ++;
+      return Map_var(object);
+    }
+    Reader__expect(r, ',', "expected ',' or '}'");
   }
 
 }
 
-static void _JsonReader__expect(_JsonReader j, char byte, const char * why){
-  _JsonReader__space(j);
-  if(_JsonReader__peek(j) != byte) _JsonReader__fail(j, String_new(why));
-  j -> at ++;
+Array Array_new(void);
+
+Var Array_var(Array);
+
+Var Array_push(Array, Var);
+
+static Var Reader__array(Reader r){
+  Array array = Array_new();
+  r -> at ++;
+  Reader__space(r);
+  if(Reader__peek(r) == ']'){
+    r -> at ++;
+    return Array_var(array);
+  }
+  while(1){
+    Array_push(array, Reader__value(r));
+    Reader__space(r);
+    if(Reader__peek(r) == ']'){
+      r -> at ++;
+      return Array_var(array);
+    }
+    Reader__expect(r, ',', "expected ',' or ']'");
+  }
+
 }
 
-int strncmp(const char *, const char *, size_t);
+void x2c_cleanup_push(X2CCleanup *);
 
-static void _JsonReader__word(_JsonReader j, const char * word){
-  size_t length = strlen(word);
-  if(strncmp(j -> text + j -> at, word, length)) _JsonReader__fail(j, _2);
-  j -> at += length;
+String String_new_len(const char *, int);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+Buffer Buffer_write_len(Buffer, const char *, size_t);
+
+String Buffer_str(Buffer);
+
+Buffer Buffer_new(size_t);
+
+static String Reader__string(Reader r){
+  int run = ++ r -> at;
+  Buffer decoded = NULL;
+  {
+    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & decoded;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      while(1){
+        int byte = Reader__peek(r);
+        if(byte == '"'){
+          int end = r -> at ++;
+          if(decoded == NULL){
+            String _x2c_return_value_0 = String_new_len(r -> text + run, end - run);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_0;
+            }
+
+          }
+          Buffer_write_len(decoded, r -> text + run, end - run);
+          {
+            String _x2c_return_value_1 = Buffer_str(decoded);
+            {
+              x2c_cleanup_leave(& _x2c_defer_record_0);
+              return _x2c_return_value_1;
+            }
+
+          }
+
+        }
+        if(byte == '\\'){
+          if(decoded == NULL) decoded = Buffer_new(0);
+          Buffer_write_len(decoded, r -> text + run, r -> at - run);
+          Reader__escape(r, decoded);
+          run = r -> at;
+        }
+        else if(! byte) Reader__fail(r, _7);
+        else if(byte < 0x20) Reader__fail(r, _8);
+        else{
+          int length = _utf8_length((const unsigned char *) r -> text + r -> at);
+          if(length < 0) Reader__fail(r, _9);
+          r -> at += length;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+  }
+
+}
+
+Buffer Buffer_write_char(Buffer, char);
+
+static void Reader__escape(Reader r, Buffer out){
+  int escape = r -> text[++ r -> at];
+  r -> at ++;
+  switch(escape){
+    case '"' : case '\\' : case '/' : Buffer_write_char(out, escape);
+    return;
+    case 'b' : Buffer_write_char(out, '\b');
+    return;
+    case 'f' : Buffer_write_char(out, '\f');
+    return;
+    case 'n' : Buffer_write_char(out, '\n');
+    return;
+    case 'r' : Buffer_write_char(out, '\r');
+    return;
+    case 't' : Buffer_write_char(out, '\t');
+    return;
+    case 'u' : break;
+    default: r -> at -= 2;
+    Reader__fail(r, _10);
+  }
+  int start = r -> at - 2;
+  long point = Reader__hex4(r);
+  if(point >= 0xD800 && point <= 0xDBFF){
+    if(Reader__peek(r) != '\\' || r -> text[r -> at + 1] != 'u'){
+      r -> at = start;
+      Reader__fail(r, _11);
+    }
+    r -> at += 2;
+    long low = Reader__hex4(r);
+    if(low < 0xDC00 || low > 0xDFFF){
+      r -> at = start;
+      Reader__fail(r, _11);
+    }
+    point = 0x10000 +((point - 0xD800) << 10) +(low - 0xDC00);
+  }
+  else if(point >= 0xDC00 && point <= 0xDFFF){
+    r -> at = start;
+    Reader__fail(r, _11);
+  }
+  else if(! point){
+    r -> at = start;
+    Reader__fail(r, _12);
+  }
+  _write_code_point(out, point);
+}
+
+int scan_ascii_hex_value(int);
+
+static long Reader__hex4(Reader r){
+  long unit = 0;
+  for(int i = 0;  i < 4;  i ++){
+    int digit = scan_ascii_hex_value(Reader__peek(r));
+    if(digit < 0) Reader__fail(r, _13);
+    unit = unit * 16 + digit;
+    r -> at ++;
+  }
+  return unit;
 }
 
 int scan_ascii_digit(int);
 
-static int _JsonReader__digits(_JsonReader j){
-  int start = j -> at;
-  while(scan_ascii_digit(_JsonReader__peek(j))) j -> at ++;
-  return j -> at - start;
-}
+Var int_var(int);
 
 Var long_var(long);
 
@@ -317,25 +507,25 @@ Var Var_box_ulong(unsigned long);
 
 Var double_var(double);
 
-static Var _JsonReader__number(_JsonReader j){
-  int start = j -> at;
-  if(_JsonReader__peek(j) == '-') j -> at ++;
-  if(_JsonReader__peek(j) == '0') j -> at ++;
-  else if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
+static Var Reader__number(Reader r){
+  int start = r -> at;
+  if(Reader__peek(r) == '-') r -> at ++;
+  if(Reader__peek(r) == '0') r -> at ++;
+  else if(! Reader__digits(r)) Reader__fail(r, _14);
   int integral = 1;
-  if(_JsonReader__peek(j) == '.'){
+  if(Reader__peek(r) == '.'){
     integral = 0;
-    j -> at ++;
-    if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
+    r -> at ++;
+    if(! Reader__digits(r)) Reader__fail(r, _14);
   }
-  if((_JsonReader__peek(j) | 32) == 'e'){
+  if((Reader__peek(r) | 32) == 'e'){
     integral = 0;
-    j -> at ++;
-    if(_JsonReader__peek(j) == '+' || _JsonReader__peek(j) == '-') j -> at ++;
-    if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
+    r -> at ++;
+    if(Reader__peek(r) == '+' || Reader__peek(r) == '-') r -> at ++;
+    if(! Reader__digits(r)) Reader__fail(r, _14);
   }
-  if(scan_ascii_digit(_JsonReader__peek(j))) _JsonReader__fail(j, _3);
-  const char * spelling = j -> text + start;
+  if(scan_ascii_digit(Reader__peek(r))) Reader__fail(r, _14);
+  const char * spelling = r -> text + start;
   errno = 0;
   if(integral){
     long number = strtol(spelling, NULL, 10);
@@ -352,289 +542,285 @@ static Var _JsonReader__number(_JsonReader j){
   }
   double number = strtod(spelling, NULL);
   if(isinf(number)){
-    j -> at = start;
-    _JsonReader__fail(j, _4);
+    r -> at = start;
+    Reader__fail(r, _15);
   }
   return double_var(number);
 }
 
-int scan_ascii_hex_value(int);
-
-static long _JsonReader__hex4(_JsonReader j){
-  long unit = 0;
-  for(int i = 0;  i < 4;  i ++){
-    int digit = scan_ascii_hex_value(_JsonReader__peek(j));
-    if(digit < 0) _JsonReader__fail(j, _5);
-    unit = unit * 16 + digit;
-    j -> at ++;
-  }
-  return unit;
+static int Reader__digits(Reader r){
+  int start = r -> at;
+  while(scan_ascii_digit(Reader__peek(r))) r -> at ++;
+  return r -> at - start;
 }
 
-static int _utf8_length(const unsigned char * s){
-  int length, low = 0x80, high = 0xBF;
-  if(s[0] < 0x80) return 1;
-  if(s[0] < 0xC2) return - 1;
-  if(s[0] < 0xE0) length = 2;
-  else if(s[0] < 0xF0){
-    length = 3;
-    if(s[0] == 0xE0) low = 0xA0;
-    if(s[0] == 0xED) high = 0x9F;
-  }
-  else if(s[0] < 0xF5){
-    length = 4;
-    if(s[0] == 0xF0) low = 0x90;
-    if(s[0] == 0xF4) high = 0x8F;
-  }
-  else return - 1;
-  if(s[1] < low || s[1] > high) return - 1;
-  for(int i = 2;  i < length;  i ++) if(s[i] < 0x80 || s[i] > 0xBF) return - i;
-  return length;
+int strncmp(const char *, const char *, size_t);
+
+static void Reader__word(Reader r, const char * word){
+  size_t length = strlen(word);
+  if(strncmp(r -> text + r -> at, word, length)) Reader__fail(r, _5);
+  r -> at += length;
 }
 
-Buffer Buffer_write_char(Buffer, char);
-
-Buffer Buffer_write_len(Buffer, const char *, size_t);
-
-static void _write_code_point(Buffer out, long point){
-  if(point < 0x80){
-    Buffer_write_char(out, point);
-    return;
-  }
-  char bytes[4];
-  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
-  for(int i = length - 1;  i > 0;  i --){
-    bytes[i] = 0x80 |(point & 0x3F);
-    point >>= 6;
-  }
-  bytes[0] =(0xF0 <<(4 - length)) | point;
-  Buffer_write_len(out, bytes, length);
+static void Reader__expect(Reader r, char byte, const char * why){
+  Reader__space(r);
+  if(Reader__peek(r) != byte) Reader__fail(r, String_new(why));
+  r -> at ++;
 }
 
-static void _JsonReader__escape(_JsonReader j, Buffer out){
-  int escape = j -> text[++ j -> at];
-  j -> at ++;
-  switch(escape){
-    case '"' : case '\\' : case '/' : Buffer_write_char(out, escape);
-    return;
-    case 'b' : Buffer_write_char(out, '\b');
-    return;
-    case 'f' : Buffer_write_char(out, '\f');
-    return;
-    case 'n' : Buffer_write_char(out, '\n');
-    return;
-    case 'r' : Buffer_write_char(out, '\r');
-    return;
-    case 't' : Buffer_write_char(out, '\t');
-    return;
-    case 'u' : break;
-    default: j -> at -= 2;
-    _JsonReader__fail(j, _6);
-  }
-  int start = j -> at - 2;
-  long point = _JsonReader__hex4(j);
-  if(point >= 0xD800 && point <= 0xDBFF){
-    if(_JsonReader__peek(j) != '\\' || j -> text[j -> at + 1] != 'u'){
-      j -> at = start;
-      _JsonReader__fail(j, _7);
+static void Reader__space(Reader r){
+  while(1){
+    switch(Reader__peek(r)){
+      case ' ' : case '\t' : case '\n' : case '\r' : r -> at ++;
+      break;
+      default: return;
     }
-    j -> at += 2;
-    long low = _JsonReader__hex4(j);
-    if(low < 0xDC00 || low > 0xDFFF){
-      j -> at = start;
-      _JsonReader__fail(j, _7);
-    }
-    point = 0x10000 +((point - 0xD800) << 10) +(low - 0xDC00);
+
   }
-  else if(point >= 0xDC00 && point <= 0xDFFF){
-    j -> at = start;
-    _JsonReader__fail(j, _7);
-  }
-  else if(! point){
-    j -> at = start;
-    _JsonReader__fail(j, _8);
-  }
-  _write_code_point(out, point);
+
 }
 
-void x2c_cleanup_push(X2CCleanup *);
+static int Reader__peek(Reader r){
+  return(unsigned char) r -> text[r -> at];
+}
 
-String String_new_len(const char *, int);
+void scan_next_line_col(char *, int, int *, int *);
 
-void x2c_cleanup_leave(X2CCleanup *);
-
-String Buffer_str(Buffer);
-
-Buffer Buffer_new(size_t);
-
-static String _JsonReader__string(_JsonReader j){
-  int run = ++ j -> at;
-  Buffer decoded = NULL;
+_Noreturn static void Reader__fail(Reader r, String why){
+  int line = 1, column = 1, offset = r -> at;
+  scan_next_line_col((char *) r -> text, offset, & line, & column);
+  if(String_truth(r -> path)){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 350};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL))), Symbol_var(1051920), String_var(r -> path), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+    __builtin_unreachable();
+  }
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 353};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+    __builtin_unreachable();
+  }
+
+}
+
+String Var_json(Var value){
+  if(! _init_guard_) _file_init_();
+  return _json(value, 0);
+}
+
+String Var_pretty_json(Var value){
+  if(! _init_guard_) _file_init_();
+  return _json(value, 1);
+}
+
+void Path_write_text(Path, String);
+
+void Json_write_file(Var value, Path path){
+  if(! _init_guard_) _file_init_();
+  Path_write_text(path, Var_json(value));
+}
+
+static String _json(Var value, int pretty){
+  Buffer out = Buffer_new(0);
+  {
+    _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & decoded;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & out;
+    X2CCleanup _x2c_defer_record_1 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      while(1){
-        int byte = _JsonReader__peek(j);
-        if(byte == '"'){
-          int end = j -> at ++;
-          if(decoded == NULL){
-            String _x2c_return_value_0 = String_new_len(j -> text + run, end - run);
-            {
-              x2c_cleanup_leave(& _x2c_defer_record_0);
-              return _x2c_return_value_0;
-            }
-
-          }
-          Buffer_write_len(decoded, j -> text + run, end - run);
-          {
-            String _x2c_return_value_1 = Buffer_str(decoded);
-            {
-              x2c_cleanup_leave(& _x2c_defer_record_0);
-              return _x2c_return_value_1;
-            }
-
-          }
-
-        }
-        if(byte == '\\'){
-          if(decoded == NULL) decoded = Buffer_new(0);
-          Buffer_write_len(decoded, j -> text + run, j -> at - run);
-          _JsonReader__escape(j, decoded);
-          run = j -> at;
-        }
-        else if(! byte) _JsonReader__fail(j, _9);
-        else if(byte < 0x20) _JsonReader__fail(j, _10);
-        else{
-          int length = _utf8_length((const unsigned char *) j -> text + j -> at);
-          if(length < 0) _JsonReader__fail(j, _11);
-          j -> at += length;
+      struct Writer writer ={
+        .out = out, .pretty = pretty
+      }
+      ;
+      Writer w = & writer;
+      Writer__value(w, value, 0);
+      {
+        String _x2c_return_value_2 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_1);
   }
 
 }
 
-Array Array_new(void);
+int Var_is_null(Var);
 
-Var Array_var(Array);
+Buffer Buffer_write(Buffer, const char *);
 
-Var Array_push(Array, Var);
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-static Var _JsonReader__array(_JsonReader j){
-  Array array = Array_new();
-  j -> at ++;
-  _JsonReader__space(j);
-  if(_JsonReader__peek(j) == ']'){
-    j -> at ++;
-    return Array_var(array);
+int Var_is_atom(Var);
+
+String Var_str(Var);
+
+int Var_is_integer(Var);
+
+int Var_is_floating(Var);
+
+double Var_floating(Var);
+
+Map Var_map(Var);
+
+static void Writer__value(Writer w, Var value, int depth){
+  if(depth > JSON_MAX_DEPTH){
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 407};
+    x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
+    __builtin_unreachable();
   }
-  while(1){
-    Array_push(array, _JsonReader__value(j));
-    _JsonReader__space(j);
-    if(_JsonReader__peek(j) == ']'){
-      j -> at ++;
-      return Array_var(array);
+  if(Var_is_null(value)) Buffer_write(w -> out, "null");
+  else if(Var_is(value, 729033112536)) Buffer_write(w -> out, JsonBool_str(Var_jsonbool(value)));
+  else if(Var_is_row(value, 11, 7, 1) || Var_is_atom(value)) _write_string(w -> out, Var_str(value));
+  else if(Var_is_integer(value)) _write_integer(w -> out, value);
+  else if(Var_is_floating(value)) _write_double(w -> out, Var_floating(value));
+  else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) Writer__elements(w, value, depth);
+  else if(Var_is(value, 26720)) Writer__members(w, Var_map(value), depth);
+  else{
+    Symbol tag = Var_tag(value);
+    {
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 420};
+      x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
+      __builtin_unreachable();
     }
-    _JsonReader__expect(j, ',', "expected ',' or ']'");
+
   }
 
 }
 
-Map Map_new(void);
+Iter Var_iter(Var, Iter);
 
-Var Map_var(Map);
+int Iter_try_next(Iter, Var *);
 
-Var Map_setindex(Map, Var, Var);
-
-static Var _JsonReader__object(_JsonReader j){
-  Map object = Map_new();
-  j -> at ++;
-  _JsonReader__space(j);
-  if(_JsonReader__peek(j) == '}'){
-    j -> at ++;
-    return Map_var(object);
-  }
-  while(1){
-    _JsonReader__space(j);
-    if(_JsonReader__peek(j) != '"') _JsonReader__fail(j, _12);
-    String name = _JsonReader__string(j);
-    _JsonReader__expect(j, ':', "expected ':'");
-    Map_setindex(object, String_var(name), _JsonReader__value(j));
-    _JsonReader__space(j);
-    if(_JsonReader__peek(j) == '}'){
-      j -> at ++;
-      return Map_var(object);
+static void Writer__elements(Writer w, Var sequence, int depth){
+  int count = 0;
+  Buffer_write_char(w -> out, '[');
+  {
+    Var element;
+    Iter _x2c_macro_iterator_0 = Var_iter(sequence, &(struct Iter){
+      int_var(0)
     }
-    _JsonReader__expect(j, ',', "expected ',' or '}'");
-  }
+    );
+    Var _x2c_macro_item_0;
+    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
+      element = _x2c_macro_item_0;
+      {
+        if(count ++) Buffer_write_char(w -> out, ',');
+        Writer__line(w, depth + 1);
+        Writer__value(w, element, depth + 1);
+      }
 
+    }
+
+  }
+  if(count) Writer__line(w, depth);
+  Buffer_write_char(w -> out, ']');
 }
 
-static Var _JsonReader__value(_JsonReader j){
-  _JsonReader__space(j);
-  switch(_JsonReader__peek(j)){
-    case '{' : case '[' :{
-      if(++ j -> depth > JSON_MAX_DEPTH) _JsonReader__fail(j, _13);
-      Var nested = _JsonReader__peek(j) == '{' ? _JsonReader__object(j) : _JsonReader__array(j);
-      j -> depth --;
-      return nested;
-    }
-    case '"' : return String_var(_JsonReader__string(j));
-    case 't' : _JsonReader__word(j, "true");
-    return Json_bool(1);
-    case 'f' : _JsonReader__word(j, "false");
-    return Json_bool(0);
-    case 'n' : _JsonReader__word(j, "null");
-    return(Var){
-      .u64 = 0
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+Array Array_sort_by(Array, Func);
+
+int Array_try_next(Array, int *, Var *);
+
+int String_equal(String, String);
+
+Var Map_getindex(Map, Var);
+
+static void Writer__members(Writer w, Map object, int depth){
+  Array names = Array_new();
+  {
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+      0
     }
     ;
-    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return _JsonReader__number(j);
-    case '\0' : _JsonReader__fail(j, _14);
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & names;
+    X2CCleanup _x2c_defer_record_2 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_2);
+    {
+      {
+        Var name, member;
+        Map _x2c_macro_object_1 = object;
+        unsigned _x2c_macro_cursor_1 = 0;
+        Var _x2c_macro_cursor_output_0;
+        Var _x2c_macro_cursor_output_1;
+        while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
+          name = _x2c_macro_cursor_output_0;
+          member = _x2c_macro_cursor_output_1;
+          {
+            if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
+              Symbol tag = Var_tag(name);
+              {
+                static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 441};
+                x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
+                __builtin_unreachable();
+              }
+
+            }
+            Array_push(names, name);
+          }
+
+        }
+
+      }
+      Array_sort_by(names, _x2c_func_handle_0);
+      int count = 0;
+      String previous = NULL;
+      Buffer_write_char(w -> out, '{');
+      {
+        Var name;
+        Array _x2c_macro_object_2 = names;
+        int _x2c_macro_cursor_2 = 0;
+        Var _x2c_macro_cursor_output_2;
+        while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+          name = _x2c_macro_cursor_output_2;
+          {
+            String text = Var_str(name);
+            if(count && String_equal(text, previous)){
+              static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 453};
+              x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
+              __builtin_unreachable();
+            }
+            previous = text;
+            if(count ++) Buffer_write_char(w -> out, ',');
+            Writer__line(w, depth + 1);
+            _write_string(w -> out, text);
+            Buffer_write(w -> out, w -> pretty ? ": " : ":");
+            Writer__value(w, Map_getindex(object, name), depth + 1);
+          }
+
+        }
+
+      }
+      if(count) Writer__line(w, depth);
+      Buffer_write_char(w -> out, '}');
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_2);
   }
-  _JsonReader__fail(j, _2);
+
 }
 
-static Var _parse(String source, String path){
-  struct _JsonReader reader ={
-    .text = String_truth(source) ? source : "", .path = path
-  }
-  ;
-  _JsonReader j = & reader;
-  Var value = _JsonReader__value(j);
-  _JsonReader__space(j);
-  if(_JsonReader__peek(j)) _JsonReader__fail(j, _15);
-  return value;
-}
+Buffer Buffer_write_repeat(Buffer, char, size_t);
 
-Var Json_parse(String source){
-  if(! _init_guard_) _file_init_();
-  return _parse(source, NULL);
-}
+Buffer Buffer_newline(Buffer);
 
-String Path_read_text(Path);
-
-Var Json_read_file(Path path){
-  if(! _init_guard_) _file_init_();
-  return _parse(Path_read_text(path), path);
+static void Writer__line(Writer w, int depth){
+  if(w -> pretty) Buffer_write_repeat(Buffer_newline(w -> out), ' ', 2 * depth);
 }
 
 int String_len(String);
-
-Buffer Buffer_write(Buffer, const char *);
 
 Buffer Buffer_printf(Buffer, const char *, ...);
 
@@ -676,12 +862,27 @@ static void _write_string(Buffer out, String text){
   Buffer_write_char(out, '"');
 }
 
+unsigned long Var_ulong_value(Var);
+
+unsigned long long Var_ulong_long_value(Var);
+
+long long Var_long_long_value(Var);
+
+long Var_integer(Var);
+
+static void _write_integer(Buffer out, Var value){
+  if(Var_is(value, 44858254)) Buffer_printf(out, "%lu", Var_ulong_value(value));
+  else if(Var_is(value, 1435270030)) Buffer_printf(out, "%llu", Var_ulong_long_value(value));
+  else if(Var_is(value, 25983886)) Buffer_printf(out, "%lld", Var_long_long_value(value));
+  else Buffer_printf(out, "%ld", Var_integer(value));
+}
+
 int atoi(const char *);
 
 static void _write_double(Buffer out, double number){
   if(! isfinite(number)){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "_write_double",.line = 445};
-    x2c_error_raise_n(& _x2c_error_site_3, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL))));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write_double",.line = 515};
+    x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL))));
     __builtin_unreachable();
   }
   char text[32];
@@ -698,230 +899,40 @@ static void _write_double(Buffer out, double number){
   if(! strpbrk(text, ".e")) Buffer_write(out, ".0");
 }
 
-unsigned long Var_ulong_value(Var);
-
-unsigned long long Var_ulong_long_value(Var);
-
-long long Var_long_long_value(Var);
-
-long Var_integer(Var);
-
-static void _write_integer(Buffer out, Var value){
-  if(Var_is(value, 44858254)) Buffer_printf(out, "%lu", Var_ulong_value(value));
-  else if(Var_is(value, 1435270030)) Buffer_printf(out, "%llu", Var_ulong_long_value(value));
-  else if(Var_is(value, 25983886)) Buffer_printf(out, "%lld", Var_long_long_value(value));
-  else Buffer_printf(out, "%ld", Var_integer(value));
-}
-
-Buffer Buffer_write_repeat(Buffer, char, size_t);
-
-Buffer Buffer_newline(Buffer);
-
-static void _write_line(Buffer out, int pretty, int depth){
-  if(pretty) Buffer_write_repeat(Buffer_newline(out), ' ', 2 * depth);
-}
-
-Iter Var_iter(Var, Iter);
-
-int Iter_try_next(Iter, Var *);
-
-static void _write_elements(Buffer out, Var sequence, int pretty, int depth){
-  int count = 0;
-  Buffer_write_char(out, '[');
-  {
-    Var element;
-    Iter _x2c_macro_iterator_0 = Var_iter(sequence, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      element = _x2c_macro_item_0;
-      {
-        if(count ++) Buffer_write_char(out, ',');
-        _write_line(out, pretty, depth + 1);
-        _write(out, element, pretty, depth + 1);
-      }
-
-    }
-
+static int _utf8_length(const unsigned char * s){
+  int length, low = 0x80, high = 0xBF;
+  if(s[0] < 0x80) return 1;
+  if(s[0] < 0xC2) return - 1;
+  if(s[0] < 0xE0) length = 2;
+  else if(s[0] < 0xF0){
+    length = 3;
+    if(s[0] == 0xE0) low = 0xA0;
+    if(s[0] == 0xED) high = 0x9F;
   }
-  if(count) _write_line(out, pretty, depth);
-  Buffer_write_char(out, ']');
-}
-
-int Map_try_next(Map, unsigned *, Var *, Var *);
-
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-int Var_is_atom(Var);
-
-Array Array_sort_by(Array, Func);
-
-int Array_try_next(Array, int *, Var *);
-
-String Var_str(Var);
-
-int String_equal(String, String);
-
-Var Map_getindex(Map, Var);
-
-static void _write_members(Buffer out, Map object, int pretty, int depth){
-  Array names = Array_new();
-  {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & names;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
-    {
-      {
-        Var name, member;
-        Map _x2c_macro_object_1 = object;
-        unsigned _x2c_macro_cursor_1 = 0;
-        Var _x2c_macro_cursor_output_0;
-        Var _x2c_macro_cursor_output_1;
-        while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0), &(_x2c_macro_cursor_output_1))){
-          name = _x2c_macro_cursor_output_0;
-          member = _x2c_macro_cursor_output_1;
-          {
-            if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
-              Symbol tag = Var_tag(name);
-              {
-                static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_members",.line = 489};
-                x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
-                __builtin_unreachable();
-              }
-
-            }
-            Array_push(names, name);
-          }
-
-        }
-
-      }
-      Array_sort_by(names, _x2c_func_handle_0);
-      int count = 0;
-      String previous = NULL;
-      Buffer_write_char(out, '{');
-      {
-        Var name;
-        Array _x2c_macro_object_2 = names;
-        int _x2c_macro_cursor_2 = 0;
-        Var _x2c_macro_cursor_output_2;
-        while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-          name = _x2c_macro_cursor_output_2;
-          {
-            String text = Var_str(name);
-            if(count && String_equal(text, previous)){
-              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 501};
-              x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
-              __builtin_unreachable();
-            }
-            previous = text;
-            if(count ++) Buffer_write_char(out, ',');
-            _write_line(out, pretty, depth + 1);
-            _write_string(out, text);
-            Buffer_write(out, pretty ? ": " : ":");
-            _write(out, Map_getindex(object, name), pretty, depth + 1);
-          }
-
-        }
-
-      }
-      if(count) _write_line(out, pretty, depth);
-      Buffer_write_char(out, '}');
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+  else if(s[0] < 0xF5){
+    length = 4;
+    if(s[0] == 0xF0) low = 0x90;
+    if(s[0] == 0xF4) high = 0x8F;
   }
-
+  else return - 1;
+  if(s[1] < low || s[1] > high) return - 1;
+  for(int i = 2;  i < length;  i ++) if(s[i] < 0x80 || s[i] > 0xBF) return - i;
+  return length;
 }
 
-int Var_is_null(Var);
-
-int Var_is_integer(Var);
-
-int Var_is_floating(Var);
-
-double Var_floating(Var);
-
-Map Var_map(Var);
-
-static void _write(Buffer out, Var value, int pretty, int depth){
-  if(depth > JSON_MAX_DEPTH){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 516};
-    x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
-    __builtin_unreachable();
+static void _write_code_point(Buffer out, long point){
+  if(point < 0x80){
+    Buffer_write_char(out, point);
+    return;
   }
-  if(Var_is_null(value)) Buffer_write(out, "null");
-  else if(Var_is(value, 729033112536)) Buffer_write(out, JsonBool_str(Var_jsonbool(value)));
-  else if(Var_is_row(value, 11, 7, 1) || Var_is_atom(value)) _write_string(out, Var_str(value));
-  else if(Var_is_integer(value)) _write_integer(out, value);
-  else if(Var_is_floating(value)) _write_double(out, Var_floating(value));
-  else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) _write_elements(out, value, pretty, depth);
-  else if(Var_is(value, 26720)) _write_members(out, Var_map(value), pretty, depth);
-  else{
-    Symbol tag = Var_tag(value);
-    {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 530};
-      x2c_error_raise_n(& _x2c_error_site_7, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
-      __builtin_unreachable();
-    }
-
+  char bytes[4];
+  int length = point < 0x800 ? 2 : point < 0x10000 ? 3 : 4;
+  for(int i = length - 1;  i > 0;  i --){
+    bytes[i] = 0x80 |(point & 0x3F);
+    point >>= 6;
   }
-
-}
-
-static String _json(Var value, int pretty){
-  Buffer out = Buffer_new(0);
-  {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
-    {
-      _write(out, value, pretty, 0);
-      {
-        String _x2c_return_value_2 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
-  }
-
-}
-
-String Var_json(Var value){
-  if(! _init_guard_) _file_init_();
-  return _json(value, 0);
-}
-
-String Var_pretty_json(Var value){
-  if(! _init_guard_) _file_init_();
-  return _json(value, 1);
-}
-
-void Path_write_text(Path, String);
-
-void Json_write_file(Var value, Path path){
-  if(! _init_guard_) _file_init_();
-  Path_write_text(path, Var_json(value));
+  bytes[0] =(0xF0 <<(4 - length)) | point;
+  Buffer_write_len(out, bytes, length);
 }
 
 static inline String _x2c_proto_jsonbool_str_0(Var a0){
@@ -943,6 +954,13 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
+void Buffer_cleanup(Buffer);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_1->_x2c_defer_capture_1));
+}
+
 static Var _x2c_lambda_0(Var name){
   return String_var(Var_str(name));
   ;
@@ -958,16 +976,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 void Array_cleanup(Array);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
-}
-
-void Buffer_cleanup(Buffer);
-
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Buffer_cleanup((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 #undef _x2c_initializer_choice_CDBE555C_0_expanded

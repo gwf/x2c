@@ -11,7 +11,7 @@ void generate_code(Compiler c, List ast, String dir);
 
 List generate_code_text(Compiler c, List ast, String basename);
 
-List Compiler_init_statements(Compiler compiler, Symbol phase);
+List Compiler_init_statements(Compiler c, Symbol phase);
 
 List Compiler_definition_rows(Compiler c, List ast);
 

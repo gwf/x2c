@@ -8,10 +8,10 @@
 #include "x2c.h"
 #include "compiler.h"
 typedef struct MetaContext{
-  Compiler expansion, evaluator;
-  String file;
+  Compiler expander, evaluator;
+  String definition_file;
   Map captures;
-  int references;
+  int has_bindings;
   Token site;
 }
 MetaContext;
@@ -25,6 +25,10 @@ List x2c_syntax_type(List value);
 List x2c_protocol_member(List participant, List base, String member);
 
 List x2c_method_resolve(List type_value, String name);
+
+List builtin_foreach_bindings(List declaration);
+
+List builtin_foreach_reference(String name);
 
 int x2c_type_is_integral(List value);
 
@@ -54,17 +58,25 @@ String x2c_binding_spelling(Var syntax);
 
 List x2c_ident(String spelling);
 
+Var builtin_foreach_unique(String stem);
+
 Map x2c_meta_definition_hashes(void);
 
 String x2c_function_name(List function);
 
 List x2c_function_parameter(List function, String wanted);
 
-String x2c_source_text(Var syntax);
+List binding_native_type(List syntax);
 
-String x2c_embed_text(Var path);
+List binding_literal_list(List values);
+
+String x2c_source_text(Var value);
+
+String x2c_embed_text(Var requested);
 
 Var x2c_literal_value(Var syntax);
+
+List builtin_class_location(void);
 
 String x2c_invocation_file(void);
 
@@ -80,21 +92,9 @@ List meta_type_description(Var value);
 
 List meta_source_description(Var value);
 
-List builtin_foreach_reference(String name);
-
-Var builtin_foreach_unique(String name);
-
 List builtin_foreach_complete(List expression);
 
 List builtin_foreach_collection(List expression);
-
-List builtin_foreach_bindings(List declaration);
-
-List builtin_class_location(void);
-
-List binding_native_type(List function);
-
-List binding_literal_list(List values);
 
 _Noreturn void MetaContext_reject(String message, List notes);
 

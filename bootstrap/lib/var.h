@@ -72,6 +72,8 @@ int x2c_var_tag_descriptor_index(Symbol tag);
 
 Var Var_new(Symbol tag, ...);
 
+Var Var_parse(String str, Symbol kind);
+
 Var Var_box_record(Symbol tag, const void * record, size_t size);
 
 Var Var_box_long(long value);
@@ -115,8 +117,6 @@ int Var_integer_compare(Var a, Var b);
 int Var_integer_floating_compare(Var integer, Var floating);
 
 int Var_wide_compare(Var a, Var b);
-
-Var Var_parse(String str, Symbol kind);
 
 int Var_register_object_tag(Symbol tag);
 

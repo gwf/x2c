@@ -7,31 +7,29 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void Compiler_rebuild_protocols(Compiler compiler, Map symbols);
-
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
+
+List Compiler_parse_protocol_declaration(Compiler c);
 
 List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
 
-void Compiler_resolve_protocols(Compiler compiler);
-
-void Compiler_install_generated_protocol_symbols(Compiler c);
+void Compiler_resolve_protocols(Compiler c);
 
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base);
 
-int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member);
+List Compiler_protocol_member_names(Compiler c, Type participant);
 
-Symbol Compiler_operator_member(Compiler compiler, Symbol op);
+int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String member);
 
-void Compiler_dump_conformance(Compiler compiler, Map globs);
+void Compiler_dump_conformance(Compiler c, Map globs);
 
-Symbol Compiler_derived_member(Compiler compiler, Symbol op);
+Symbol Compiler_operator_member(Compiler c, Symbol op);
 
-List Compiler_protocol_member_names(Compiler compiler, Type participant);
+Symbol Compiler_derived_member(Compiler c, Symbol op);
+
+List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
 
 List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);
-
-List Compiler_resolve_protocol_member(Compiler compiler, Type participant, String member_name);
 
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
@@ -41,7 +39,11 @@ List Compiler_protocol_discard_helper(Compiler c, Type participant, String membe
 
 List Compiler_generate_protocol_adapters(Compiler c, List ast);
 
-List Compiler_parse_protocol_declaration(Compiler c);
+void Compiler_install_generated_protocol_symbols(Compiler c);
+
+void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
+
+void Compiler_rebuild_protocols(Compiler c, Map symbols);
 
 
 #endif /* __GUARD_0xD9CA694D__ */

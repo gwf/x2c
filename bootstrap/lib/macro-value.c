@@ -14,7 +14,6 @@ static String _157, _156, _155, _121, _17, _16, _15, _14, _13, _12, _8, _1;
 
 static Var _151, _147, _145, _144, _142, _140, _132, _125, _124, _120, _117, _113, _110, _109, _108, _103, _100, _99, _95, _94, _91, _88, _83, _79, _77, _76, _73, _69, _68, _67, _64, _62, _59, _57, _53, _52, _51, _48, _47, _43, _40, _39, _38, _34, _31, _30, _26, _22, _21, _20, _18, _11, _10, _9, _7, _6, _5, _4, _3, _2, _0;
 
-#include <string.h>
 #include "array.h"
 #include "atom.h"
 #include "list.h"
@@ -74,7 +73,7 @@ static int _macro_pending_capture(Macro t, List grouped, List names, MatchCaptur
 
 static List _macro_internal_names(Macro t, List names, int pending);
 
-static int _macro_site_capture(MacroCaseSite * site, List code, MatchCaptureBuffer * published);
+static int _macro_capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published);
 
 static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
 
@@ -94,11 +93,9 @@ static int _macro_take_slots(MatchMachine machine, MatchCaptureBuffer * captured
 
 static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy);
 
-static int _macro_is_name(MacroFixedSlots * policy, int slot);
+static int _macro_has_slot(const int * slots, int count, int slot);
 
 static String _macro_source_spelling(Var value);
-
-static int _macro_is_fixed(MacroFixedSlots * policy, int slot);
 
 static int _macro_held_elsewhere(MatchMachine machine, MacroFixedSlots * policy, int slot, Var value);
 
@@ -578,7 +575,7 @@ List Macro_case_pattern(Macro t, List names){
 }
 
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
-  if(! _init_guard_) _file_init_();  List grouped = NULL;  if(_macro_pending_parts(t, code, &(grouped))) return _macro_pending_capture(t, grouped, names, published);  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return _macro_site_capture(site, code, published);  return _macro_derived_capture(site, code, t, names, published);
+  if(! _init_guard_) _file_init_();  List grouped = NULL;  if(_macro_pending_parts(t, code, &(grouped))) return _macro_pending_capture(t, grouped, names, published);  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return _macro_capture(code, site -> match.plan, & site -> policy, & site -> route, published);  return _macro_derived_capture(site, code, t, names, published);
 }
 
 static int _macro_pending_parts(Macro t, List code, List * grouped){
@@ -652,21 +649,18 @@ static List _macro_internal_names(Macro t, List names, int pending){
   return Array_list_free(internal);
 }
 
-static int _macro_site_capture(MacroCaseSite * site, List code, MatchCaptureBuffer * published){
+static int _macro_capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published){
   Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX
   }
-  ;  return _macro_case_match(code, site -> match.plan, & site -> policy, & captured) && _macro_publish(& site -> route, & captured, published);
+  ;  return _macro_case_match(code, plan, policy, & captured) && _macro_publish(route, & captured, published);
 }
 
 MatchPlan MatchPlan_prepare(Var);
 void x2c_cleanup_push(X2CCleanup *);
 void x2c_cleanup_leave(X2CCleanup *);
 static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
-  macro_subject_used = 0;  List pattern = _macro_case_shape(t, names);  MacroPublishing route = _macro_publishing(t, List_var(pattern), names, _macro_internal_names(t, names, 0));  if(_macro_keep(site, t, names, pattern, &(route))) return _macro_site_capture(site, code, published);  Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
-    values, 0, MACHINE_BINDER_MAX
-  }
-  ;  MatchPlan plan = MatchPlan_prepare(List_var(pattern)); {
+  macro_subject_used = 0;  List pattern = _macro_case_shape(t, names);  MacroPublishing route = _macro_publishing(t, List_var(pattern), names, _macro_internal_names(t, names, 0));  if(_macro_keep(site, t, names, pattern, &(route))) return _macro_capture(code, site -> match.plan, & site -> policy, & site -> route, published);  MatchPlan plan = MatchPlan_prepare(List_var(pattern)); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
@@ -675,7 +669,7 @@ static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       MacroFixedSlots policy = _macro_fixed_slots(t, names, plan); {
-        int _x2c_return_value_0 = _macro_case_match(code, plan, & policy, & captured) && _macro_publish(& route, & captured, published); {
+        int _x2c_return_value_0 = _macro_capture(code, plan, & policy, & route, published); {
           x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
         }
 
@@ -791,14 +785,14 @@ static int _macro_take_slots(MatchMachine machine, MatchCaptureBuffer * captured
 int String_truth(String);
 int Var_equal(Var, Var);
 static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy){
-  MatchMachine machine = raw_machine;  MacroFixedSlots * policy = raw_policy;  left = _macro_unwrap(left);  right = _macro_unwrap(right);  if(_macro_is_name(policy, slot)){
+  MatchMachine machine = raw_machine;  MacroFixedSlots * policy = raw_policy;  left = _macro_unwrap(left);  right = _macro_unwrap(right);  if(_macro_has_slot(policy -> name_slots, policy -> names, slot)){
     String spelling = NULL;  if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = _macro_source_spelling(right);  else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = _macro_source_spelling(left);  if(String_truth(spelling)) return Var_equal(String_var(spelling), (Var_is_row(left, 11, 7, 1) ? left : right));
   }
-  if(! Var_equal(left, right)) return 0;  if(! _macro_is_fixed(policy, slot)) return 1;  return ! _macro_held_elsewhere(machine, policy, slot, right);
+  if(! Var_equal(left, right)) return 0;  if(! _macro_has_slot(policy -> slots, policy -> count, slot)) return 1;  return ! _macro_held_elsewhere(machine, policy, slot, right);
 }
 
-static int _macro_is_name(MacroFixedSlots * policy, int slot){
-  for(int i = 0;  i < policy -> names;  i ++) if(policy -> name_slots[i] == slot) return 1;  return 0;
+static int _macro_has_slot(const int * slots, int count, int slot){
+  for(int i = 0;  i < count;  i ++) if(slots[i] == slot) return 1;  return 0;
 }
 
 static String _macro_source_spelling(Var value){
@@ -842,10 +836,6 @@ default: break;
 return NULL;
 }
 
-static int _macro_is_fixed(MacroFixedSlots * policy, int slot){
-  for(int i = 0;  i < policy -> count;  i ++) if(policy -> slots[i] == slot) return 1;  return 0;
-}
-
 static int _macro_held_elsewhere(MatchMachine machine, MacroFixedSlots * policy, int slot, Var value){
   for(int i = 0;  i < policy -> count;  i ++){
     int other = policy -> slots[i];  if(other != slot && machine -> slots[other].kind == MACHINE_SLOT_VALUE && Var_equal(machine -> slots[other].value, value)) return 1;
@@ -875,7 +865,10 @@ default: ;  return value;  break;
 MatchCaptureLayout MatchCaptureLayout_analyze(Var);
 void MatchCaptureLayout_free(MatchCaptureLayout);
 static MacroPublishing _macro_publishing(Macro t, Var pattern, List names, List internal){
-  MacroPublishing route;  memset(& route, 0, sizeof(route));  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(names));  route.complete = 1;  List holes = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){
+  MacroPublishing route ={
+    .complete = 1
+  }
+  ;  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(names));  List holes = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){
     int fallback = MatchCaptureLayout_index(actual, List_car(internal));  int from = Var_equal(List_assoc(Var_list(List_car(holes)), Symbol_var(740232)), Symbol_var(920394)) ? MatchCaptureLayout_index(actual, _macro_name_identity(Var_list(List_car(holes)))) : - 1;  if(from < 0) from = fallback;  int to = MatchCaptureLayout_index(logical, List_car(names));  if(from < 0 || to < 0) route.complete = 0;  route.from[route.count] = from;  route.fallback[route.count] = fallback;  route.to[route.count ++] = to;
   }
   route.binders = logical -> binder_count;  route.definite = logical -> definite;  MatchCaptureLayout_free(actual);  MatchCaptureLayout_free(logical);  return route;

@@ -8,25 +8,45 @@
 
 static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-typedef struct _Option{
+typedef struct Option{
   String spelling, spellings, name, value, help;
   Var fallback;
   Array collected;
-  struct _Option * owner;
+  struct Option * owner;
   int operand, defaulted, required, repeated, given;
 }
-_Option;
+Option;
 
-typedef struct _Spec{
-  _Option * options;
+typedef struct Spec{
+  Option * options;
   int count;
   Map index;
 }
-_Spec;
+Spec;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static Spec _read_spec(List spec);
+
+static void Option__read_row(Option * o, List row, Map index, int position);
+
+static void Option__read_property(Option * o, List property);
+
+static void Spec__free(Spec * s);
+
+static void Spec__parse_long(Spec * s, Map result, List * rest, String word);
+
+static void Spec__parse_short(Spec * s, Map result, List * rest, String word);
+
+static Option * Spec__find(Spec * s, String spelling);
+
+static String _next_value(List * rest, String spelling);
+
+static void Option__store(Option * o, Map result, Var value);
+
+static void Spec__assign_operands(Spec * s, Map result, List operands);
 
 _Noreturn static void _bad_option(String why, String option);
 
@@ -34,27 +54,7 @@ _Noreturn static void _bad_operand(String why, String operand);
 
 _Noreturn static void _bad_spec(String why, Var entry);
 
-static void _read_property(_Option * option, List property);
-
-static void _read_row(_Option * option, List row, Map index, int position);
-
-static void _free_spec(_Spec * spec);
-
-static _Spec _read_spec(List spec);
-
-static _Option * _find(_Spec * spec, String spelling);
-
-static void _store(_Option * option, Map result, Var value);
-
-static String _next_value(List * rest, String spelling);
-
-static void _parse_long(_Spec * spec, Map result, List * rest, String word);
-
-static void _parse_short(_Spec * spec, Map result, List * rest, String word);
-
-static void _assign_operands(_Spec * spec, Map result, List operands);
-
-static String _label(_Option * option);
+static String Option__label(Option * o);
 
 static void _write_row(Buffer out, String label, String help);
 
@@ -68,20 +68,20 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_4;
   const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_3;
@@ -127,11 +127,11 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new(", ");
-  _1 = String_new("required");
-  _2 = String_new("repeated");
-  _3 = String_new("-");
-  _4 = String_new("--");
+  _0 = String_new("--");
+  _1 = String_new(", ");
+  _2 = String_new("required");
+  _3 = String_new("repeated");
+  _4 = String_new("-");
   _5 = String_new("<");
   _6 = String_new(">");
   _7 = String_new("...");
@@ -139,186 +139,184 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = String_new("]");
   _10 = String_new(" <");
   _11 = String_new("    ");
-  _12 = String_new("unknown spec property");
-  _13 = String_new("-");
-  _14 = String_new("unknown spec word");
-  _15 = String_new("unknown option");
-  _16 = String_new("missing value");
+  _12 = String_new("missing operand");
+  _13 = String_new("missing option");
+  _14 = String_new("-");
+  _15 = String_new("unknown spec word");
+  _16 = String_new("unknown spec property");
   _17 = String_new("=");
   _18 = String_new("unexpected value");
-  _19 = String_new("unexpected operand");
-  _20 = String_new("missing operand");
-  _21 = String_new("missing option");
+  _19 = String_new("unknown option");
+  _20 = String_new("missing value");
+  _21 = String_new("unexpected operand");
 }
 
-Var Symbol_var(Symbol);
+void x2c_cleanup_push(X2CCleanup *);
 
-Var String_var(String);
-
-_Noreturn static void _bad_option(String why, String option){
-  {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 45};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
-    __builtin_unreachable();
-  }
-
-}
-
-_Noreturn static void _bad_operand(String why, String operand){
-  {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 49};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
-    __builtin_unreachable();
-  }
-
-}
-
-_Noreturn static void _bad_spec(String why, Var entry){
-  {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 54};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
-    __builtin_unreachable();
-  }
-
-}
-
-int Var_is(Var, Symbol);
-
-Var List_car(List);
-
-String Var_str(Var);
-
-Var List_cadr(List);
-
-Var List_var(List);
-
-static void _read_property(_Option * option, List property){
-  Symbol key = 0;
-  if(Var_is(List_car(property), 1328354264)) key = Var_symbol(List_car(property));
-  switch(key){
-    case 46228810 : option -> value = Var_str(List_cadr(property));
-    break;
-    case 8938171176 : option -> fallback = List_cadr(property);
-    option -> defaulted = 1;
-    break;
-    case 535328 : option -> help = Var_str(List_cadr(property));
-    break;
-    default: _bad_spec(_12, List_var(property));
-  }
-
-}
-
-int String_startswith(String, String);
-
-int List_try_next(List, List *, Var *);
-
-int Var_is_row(Var, unsigned, unsigned long, unsigned long);
-
-List Var_list(Var);
-
-int String_truth(String);
+Map Map_new(void);
 
 Var Map_setindex(Map, Var, Var);
 
-Var int_var(int);
+Var String_var(String);
+
+Array Array_new(void);
+
+int List_truth(List);
+
+List List_cdr(List);
+
+String Var_str(Var);
+
+Var List_car(List);
+
+int String_len(String);
+
+int String_getindex(String, int);
+
+Var Array_push(Array, Var);
 
 int String_equal(String, String);
 
-static void _read_row(_Option * option, List row, Map index, int position){
-  String first = Var_str(List_car(row));
-  option -> operand = ! String_startswith(first, _13);
+List Array_list(Array);
+
+Var List_var(List);
+
+void x2c_cleanup_leave(X2CCleanup *);
+
+Map Args_parse(List args, List spec){
+  if(! _init_guard_) _file_init_();
+  Spec parsed = _read_spec(spec);
   {
-    Var word;
-    List _x2c_macro_object_0 = row;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      word = _x2c_macro_cursor_output_0;
+    _x2c_defer_env_1 _x2c_macro_environment_2 ={
+      0
+    }
+    ;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & parsed;
+    X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_2
+    }
+    ;
+    x2c_cleanup_push(& _x2c_defer_record_0);
+    {
+      Map result = Map_new(), complete = NULL;
       {
-        if(Var_is_row(word, 9, 7, 4)){
-          _read_property(option, Var_list(word));
-          continue;
+        _x2c_defer_env_0 _x2c_macro_environment_1 ={
+          0
         }
-        String text = Var_str(word);
-        if(String_startswith(text, _13)){
-          if(! String_truth(option -> spelling) ||(String_startswith(text, _4) && ! String_startswith(option -> spelling, _4))) option -> spelling = text;
-          option -> spellings = String_truth(option -> spellings) ? String_join(NULL, cons(String_var(option -> spellings), cons(String_var(_0), cons(String_var(text), NULL)))) : text;
-          Map_setindex(index, String_var(text), int_var(position));
+        ;
+        _x2c_macro_environment_1._x2c_defer_capture_0 =(const void *) & complete;
+        _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & result;
+        X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_1
         }
-        else if(String_equal(text, _1)) option -> required = 1;
-        else if(String_equal(text, _2)) option -> repeated = 1;
-        else if(! String_equal(text, first)) _bad_spec(_14, String_var(text));
+        ;
+        x2c_cleanup_push(& _x2c_defer_record_1);
+        {
+          for(int i = 0;  i < parsed.count;  i ++) Map_setindex(result, String_var(parsed.options[i].name), parsed.options[i].fallback);
+          Array operands = Array_new();
+          {
+            _x2c_defer_env_2 _x2c_macro_environment_0 ={
+              0
+            }
+            ;
+            _x2c_macro_environment_0._x2c_defer_capture_3 =(const void *) & operands;
+            X2CCleanup _x2c_defer_record_2 ={
+              .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_0
+            }
+            ;
+            x2c_cleanup_push(& _x2c_defer_record_2);
+            {
+              int options_ended = 0;
+              for(List rest = args;  List_truth(rest);  rest = List_cdr(rest)){
+                String word = Var_str(List_car(rest));
+                if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
+                else if(String_equal(word, _0)) options_ended = 1;
+                else if(String_getindex(word, 1) == '-') Spec__parse_long(&(parsed), result, &(rest), word);
+                else Spec__parse_short(&(parsed), result, &(rest), word);
+              }
+              List remaining = Array_list(operands);
+              Spec__assign_operands(&(parsed), result, remaining);
+              for(int i = 0;  i < parsed.count;  i ++){
+                Option * option = & parsed.options[i];
+                if(Array_truth(option -> collected)){
+                  List collected = Array_list(option -> collected);
+                  Map_setindex(result, String_var(option -> name), List_var(collected));
+                }
+                if(! option -> required || option -> given) continue;
+                String name = option -> name, spelling = option -> spelling;
+                if(option -> operand) _bad_operand(_12, name);
+                _bad_option(_13, spelling);
+              }
+              {
+                Map _x2c_return_value_0 = complete = result;
+                {
+                  x2c_cleanup_leave(& _x2c_defer_record_2);
+                  x2c_cleanup_leave(& _x2c_defer_record_1);
+                  x2c_cleanup_leave(& _x2c_defer_record_0);
+                  return _x2c_return_value_0;
+                }
+
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
 
     }
-
+    x2c_cleanup_leave(& _x2c_defer_record_0);
   }
-  if(option -> operand) option -> name = first;
-  else{
-    int dashes = String_startswith(option -> spelling, _4) ? 2 : 1;
-    option -> name = String_getslice(option -> spelling, dashes, -2147483648, 1);
-  }
-  if(option -> defaulted) return;
-  if(option -> repeated) option -> fallback = List_var((List) NULL);
-  else if(String_truth(option -> value) || option -> operand) option -> fallback = String_var((String) NULL);
-  else option -> fallback = int_var(0);
-}
 
-void Scope_free(void *);
-
-void Map_cleanup(Map);
-
-static void _free_spec(_Spec * spec){
-  if(spec -> options) for(int i = 0;  i < spec -> count;  i ++) Array_free(spec -> options[i].collected);
-  Scope_free(spec -> options);
-  Map_cleanup(spec -> index);
 }
 
 int List_len(List);
 
-Map Map_new(void);
-
-void x2c_cleanup_push(X2CCleanup *);
-
 void * Scope_calloc(size_t, size_t);
+
+int List_try_next(List, List *, Var *);
+
+List Var_list(Var);
 
 int Map_try_get(Map, Var, Var *);
 
 long Var_integer(Var);
 
-void x2c_cleanup_leave(X2CCleanup *);
+Var int_var(int);
 
-static _Spec _read_spec(List spec){
-  _Spec result ={
+static Spec _read_spec(List spec){
+  Spec result ={
     .count = List_len(spec), .index = Map_new()
   }
   ;
   int complete = 0;
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & complete;
-    _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & result;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_macro_environment_3._x2c_defer_capture_4 =(const void *) & complete;
+    _x2c_macro_environment_3._x2c_defer_capture_5 =(const void *) & result;
+    X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_defer_record_3);
     {
-      result.options = Scope_calloc(result.count, sizeof(_Option));
+      result.options = Scope_calloc(result.count, sizeof(Option));
       int position = 0;
       {
         List row;
-        List _x2c_macro_object_1 = spec;
-        List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-        Var _x2c_macro_cursor_output_1;
-        while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-          row = Var_list(_x2c_macro_cursor_output_1);
+        List _x2c_macro_object_0 = spec;
+        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+        Var _x2c_macro_cursor_output_0;
+        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+          row = Var_list(_x2c_macro_cursor_output_0);
           {
-            _Option * option = & result.options[position];
-            _read_row(option, row, result.index, position);
+            Option * option = & result.options[position];
+            Option__read_row(option, row, result.index, position);
             Var earlier;
             option -> owner = Map_try_get(result.index, String_var(option -> name), &(earlier)) ? result.options[Var_integer(earlier)].owner : option;
             Map_setindex(result.index, String_var(option -> name), int_var(position));
@@ -330,220 +328,204 @@ static _Spec _read_spec(List spec){
       }
       complete = 1;
       {
-        _Spec _x2c_return_value_0 = result;
+        Spec _x2c_return_value_1 = result;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
 
 }
 
-static _Option * _find(_Spec * spec, String spelling){
-  Var position;
-  if(! Map_try_get(spec -> index, String_var(spelling), &(position))) _bad_option(_15, spelling);
-  return & spec -> options[Var_integer(position)];
+int String_startswith(String, String);
+
+int Var_is_row(Var, unsigned, unsigned long, unsigned long);
+
+int String_truth(String);
+
+static void Option__read_row(Option * o, List row, Map index, int position){
+  String first = Var_str(List_car(row));
+  o -> operand = ! String_startswith(first, _14);
+  {
+    Var word;
+    List _x2c_macro_object_1 = row;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      word = _x2c_macro_cursor_output_1;
+      {
+        if(Var_is_row(word, 9, 7, 4)){
+          Option__read_property(o, Var_list(word));
+          continue;
+        }
+        String text = Var_str(word);
+        if(String_startswith(text, _14)){
+          if(! String_truth(o -> spelling) ||(String_startswith(text, _0) && ! String_startswith(o -> spelling, _0))) o -> spelling = text;
+          o -> spellings = String_truth(o -> spellings) ? String_join(NULL, cons(String_var(o -> spellings), cons(String_var(_1), cons(String_var(text), NULL)))) : text;
+          Map_setindex(index, String_var(text), int_var(position));
+        }
+        else if(String_equal(text, _2)) o -> required = 1;
+        else if(String_equal(text, _3)) o -> repeated = 1;
+        else if(! String_equal(text, first)) _bad_spec(_15, String_var(text));
+      }
+
+    }
+
+  }
+  if(o -> operand) o -> name = first;
+  else{
+    int dashes = String_startswith(o -> spelling, _0) ? 2 : 1;
+    o -> name = String_getslice(o -> spelling, dashes, -2147483648, 1);
+  }
+  if(o -> defaulted) return;
+  if(o -> repeated) o -> fallback = List_var((List) NULL);
+  else if(String_truth(o -> value) || o -> operand) o -> fallback = String_var((String) NULL);
+  else o -> fallback = int_var(0);
 }
 
-Array Array_new(void);
+int Var_is(Var, Symbol);
 
-Var Array_push(Array, Var);
+Var List_cadr(List);
 
-static void _store(_Option * option, Map result, Var value){
-  _Option * owner = option -> owner;
-  if(! option -> repeated || ! option -> given){
-    Array_free(owner -> collected);
-    owner -> collected = NULL;
+static void Option__read_property(Option * o, List property){
+  Symbol key = 0;
+  if(Var_is(List_car(property), 1328354264)) key = Var_symbol(List_car(property));
+  switch(key){
+    case 46228810 : o -> value = Var_str(List_cadr(property));
+    break;
+    case 8938171176 : o -> fallback = List_cadr(property);
+    o -> defaulted = 1;
+    break;
+    case 535328 : o -> help = Var_str(List_cadr(property));
+    break;
+    default: _bad_spec(_16, List_var(property));
   }
-  if(option -> repeated){
-    if(! Array_truth(owner -> collected)) owner -> collected = Array_new();
-    Array_push(owner -> collected, value);
-  }
-  else if(String_truth(option -> value) || option -> operand) Map_setindex(result, String_var(option -> name), value);
-  else Map_setindex(result, String_var(option -> name), int_var(option -> given + 1));
-  option -> given ++;
+
 }
 
-int List_truth(List);
+void Scope_free(void *);
 
-List List_cdr(List);
+void Map_cleanup(Map);
 
-static String _next_value(List * rest, String spelling){
-  if(! List_truth(List_cdr((* rest)))) _bad_option(_16, spelling);
-  (* rest) = List_cdr((* rest));
-  return Var_str(List_car((* rest)));
+static void Spec__free(Spec * s){
+  if(s -> options) for(int i = 0;  i < s -> count;  i ++) Array_free(s -> options[i].collected);
+  Scope_free(s -> options);
+  Map_cleanup(s -> index);
 }
 
 int String_find(String, String);
 
-static void _parse_long(_Spec * spec, Map result, List * rest, String word){
+static void Spec__parse_long(Spec * s, Map result, List * rest, String word){
   int equals = String_find(word, _17);
   String spelling = equals < 0 ? word : String_getslice(word, -2147483648, equals, 1);
-  _Option * option = _find(spec, spelling);
+  Option * option = Spec__find(s, spelling);
   if(! String_truth(option -> value)){
     if(equals >= 0) _bad_option(_18, spelling);
-    _store(option, result, int_var(1));
+    Option__store(option, result, int_var(1));
   }
-  else if(equals >= 0) _store(option, result, String_var(String_getslice(word, equals + 1, -2147483648, 1)));
-  else _store(option, result, String_var(_next_value(&((* rest)), spelling)));
+  else if(equals >= 0) Option__store(option, result, String_var(String_getslice(word, equals + 1, -2147483648, 1)));
+  else Option__store(option, result, String_var(_next_value(&((* rest)), spelling)));
 }
 
-int String_len(String);
-
-static void _parse_short(_Spec * spec, Map result, List * rest, String word){
+static void Spec__parse_short(Spec * s, Map result, List * rest, String word){
   for(int at = 1;  at < String_len(word);  at ++){
-    String spelling = String_join(NULL, cons(String_var(_3), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
-    _Option * option = _find(spec, spelling);
+    String spelling = String_join(NULL, cons(String_var(_4), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
+    Option * option = Spec__find(s, spelling);
     if(! String_truth(option -> value)){
-      _store(option, result, int_var(1));
+      Option__store(option, result, int_var(1));
       continue;
     }
     String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, -2147483648, 1) : _next_value(&((* rest)), spelling);
-    _store(option, result, String_var(value));
+    Option__store(option, result, String_var(value));
     return;
   }
 
 }
 
-static void _assign_operands(_Spec * spec, Map result, List operands){
-  for(int i = 0;  i < spec -> count;  i ++){
-    _Option * option = & spec -> options[i];
+static Option * Spec__find(Spec * s, String spelling){
+  Var position;
+  if(! Map_try_get(s -> index, String_var(spelling), &(position))) _bad_option(_19, spelling);
+  return & s -> options[Var_integer(position)];
+}
+
+static String _next_value(List * rest, String spelling){
+  if(! List_truth(List_cdr((* rest)))) _bad_option(_20, spelling);
+  (* rest) = List_cdr((* rest));
+  return Var_str(List_car((* rest)));
+}
+
+static void Option__store(Option * o, Map result, Var value){
+  Option * owner = o -> owner;
+  if(! o -> repeated || ! o -> given){
+    Array_free(owner -> collected);
+    owner -> collected = NULL;
+  }
+  if(o -> repeated){
+    if(! Array_truth(owner -> collected)) owner -> collected = Array_new();
+    Array_push(owner -> collected, value);
+  }
+  else if(String_truth(o -> value) || o -> operand) Map_setindex(result, String_var(o -> name), value);
+  else Map_setindex(result, String_var(o -> name), int_var(o -> given + 1));
+  o -> given ++;
+}
+
+static void Spec__assign_operands(Spec * s, Map result, List operands){
+  for(int i = 0;  i < s -> count;  i ++){
+    Option * option = & s -> options[i];
     if(! option -> operand) continue;
     while(List_truth(operands)){
-      _store(option, result, List_car(operands));
+      Option__store(option, result, List_car(operands));
       operands = List_cdr(operands);
       if(! option -> repeated) break;
     }
 
   }
-  if(List_truth(operands)) _bad_operand(_19, Var_str(List_car(operands)));
+  if(List_truth(operands)) _bad_operand(_21, Var_str(List_car(operands)));
 }
 
-int String_getindex(String, int);
+Var Symbol_var(Symbol);
 
-List Array_list(Array);
-
-Map Args_parse(List args, List spec){
-  if(! _init_guard_) _file_init_();
-  _Spec parsed = _read_spec(spec);
+_Noreturn static void _bad_option(String why, String option){
   {
-    _x2c_defer_env_2 _x2c_macro_environment_3 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_3._x2c_defer_capture_4 =(const void *) & parsed;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_3
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
-    {
-      Map result = Map_new(), complete = NULL;
-      {
-        _x2c_defer_env_1 _x2c_macro_environment_2 ={
-          0
-        }
-        ;
-        _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & complete;
-        _x2c_macro_environment_2._x2c_defer_capture_3 =(const void *) & result;
-        X2CCleanup _x2c_defer_record_2 ={
-          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_2
-        }
-        ;
-        x2c_cleanup_push(& _x2c_defer_record_2);
-        {
-          for(int i = 0;  i < parsed.count;  i ++) Map_setindex(result, String_var(parsed.options[i].name), parsed.options[i].fallback);
-          Array operands = Array_new();
-          {
-            _x2c_defer_env_3 _x2c_macro_environment_1 ={
-              0
-            }
-            ;
-            _x2c_macro_environment_1._x2c_defer_capture_5 =(const void *) & operands;
-            X2CCleanup _x2c_defer_record_3 ={
-              .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_1
-            }
-            ;
-            x2c_cleanup_push(& _x2c_defer_record_3);
-            {
-              int options_ended = 0;
-              for(List rest = args;  List_truth(rest);  rest = List_cdr(rest)){
-                String word = Var_str(List_car(rest));
-                if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
-                else if(String_equal(word, _4)) options_ended = 1;
-                else if(String_getindex(word, 1) == '-') _parse_long(& parsed, result, &(rest), word);
-                else _parse_short(& parsed, result, &(rest), word);
-              }
-              List remaining = Array_list(operands);
-              _assign_operands(& parsed, result, remaining);
-              for(int i = 0;  i < parsed.count;  i ++){
-                _Option * option = & parsed.options[i];
-                if(Array_truth(option -> collected)){
-                  List collected = Array_list(option -> collected);
-                  Map_setindex(result, String_var(option -> name), List_var(collected));
-                }
-                if(! option -> required || option -> given) continue;
-                String name = option -> name, spelling = option -> spelling;
-                if(option -> operand) _bad_operand(_20, name);
-                _bad_option(_21, spelling);
-              }
-              {
-                Map _x2c_return_value_1 = complete = result;
-                {
-                  x2c_cleanup_leave(& _x2c_defer_record_3);
-                  x2c_cleanup_leave(& _x2c_defer_record_2);
-                  x2c_cleanup_leave(& _x2c_defer_record_1);
-                  return _x2c_return_value_1;
-                }
-
-              }
-
-            }
-            x2c_cleanup_leave(& _x2c_defer_record_3);
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_2);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/args.x",.function = "_bad_option",.line = 279};
+    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1041517532), String_var(option));
+    __builtin_unreachable();
   }
 
 }
 
-static String _label(_Option * option){
-  if(option -> operand){
-    String label = String_join(NULL, cons(String_var(_5), cons(String_var(option -> name), cons(String_var(_6), NULL))));
-    if(option -> repeated) label = String_join(NULL, cons(String_var(label), cons(String_var(_7), NULL)));
-    return option -> required ? label : String_join(NULL, cons(String_var(_8), cons(String_var(label), cons(String_var(_9), NULL))));
+_Noreturn static void _bad_operand(String why, String operand){
+  {
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/args.x",.function = "_bad_operand",.line = 283};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(33297664904), String_var(operand));
+    __builtin_unreachable();
   }
-  String label = option -> spellings;
-  if(String_truth(option -> value)) label = String_join(NULL, cons(String_var(label), cons(String_var(_10), cons(String_var(option -> value), cons(String_var(_6), NULL)))));
-  return String_startswith(label, _4) ? String_join(NULL, cons(String_var(_11), cons(String_var(label), NULL))) : label;
+
 }
 
-Buffer Buffer_printf(Buffer, const char *, ...);
+_Noreturn static void _bad_spec(String why, Var entry){
+  {
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/args.x",.function = "_bad_spec",.line = 288};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Args.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1278278), entry);
+    __builtin_unreachable();
+  }
 
-static void _write_row(Buffer out, String label, String help){
-  const int column = 30;
-  if(! String_truth(help)) Buffer_printf(out, "  %s\n", label);
-  else if(String_len(label) + 2 >= column) Buffer_printf(out, "  %s\n%*s%s\n", label, column, "", help);
-  else Buffer_printf(out, "  %-*s%s\n", column - 2, label, help);
 }
 
 Buffer Buffer_new(size_t);
+
+Buffer Buffer_printf(Buffer, const char *, ...);
 
 String Buffer_str(Buffer);
 
 String Args_usage(String program, List spec){
   if(! _init_guard_) _file_init_();
-  _Spec parsed = _read_spec(spec);
+  Spec parsed = _read_spec(spec);
   {
     _x2c_defer_env_4 _x2c_macro_environment_8 ={
       0
@@ -609,8 +591,8 @@ String Args_usage(String program, List spec){
                     x2c_cleanup_push(& _x2c_defer_record_8);
                     {
                       for(int i = 0;  i < parsed.count;  i ++){
-                        _Option * option = & parsed.options[i];
-                        String label = _label(option);
+                        Option * option = & parsed.options[i];
+                        String label = Option__label(option);
                         if(! option -> operand) _write_row(options, label, option -> help);
                         else{
                           Buffer_printf(synopsis, " %s", label);
@@ -658,6 +640,24 @@ String Args_usage(String program, List spec){
 
 }
 
+static String Option__label(Option * o){
+  if(o -> operand){
+    String label = String_join(NULL, cons(String_var(_5), cons(String_var(o -> name), cons(String_var(_6), NULL))));
+    if(o -> repeated) label = String_join(NULL, cons(String_var(label), cons(String_var(_7), NULL)));
+    return o -> required ? label : String_join(NULL, cons(String_var(_8), cons(String_var(label), cons(String_var(_9), NULL))));
+  }
+  String label = o -> spellings;
+  if(String_truth(o -> value)) label = String_join(NULL, cons(String_var(label), cons(String_var(_10), cons(String_var(o -> value), cons(String_var(_6), NULL)))));
+  return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_11), cons(String_var(label), NULL))) : label;
+}
+
+static void _write_row(Buffer out, String label, String help){
+  const int column = 30;
+  if(! String_truth(help)) Buffer_printf(out, "  %s\n", label);
+  else if(String_len(label) + 2 >= column) Buffer_printf(out, "  %s\n%*s%s\n", label, column, "", help);
+  else Buffer_printf(out, "  %-*s%s\n", column - 2, label, help);
+}
+
 String String_new(const char *);
 
 List Args_from_argv(int argc, char * * argv){
@@ -668,29 +668,29 @@ List Args_from_argv(int argc, char * * argv){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)) _free_spec(&(*(_Spec *) _x2c_defer_data_0->_x2c_defer_capture_1));
+  if((void *)(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_0) == 0) Map_cleanup((*(Map *) _x2c_defer_data_0->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  if((void *)(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_2) == 0) Map_cleanup((*(Map *) _x2c_defer_data_1->_x2c_defer_capture_3));
-}
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  _free_spec(&(*(_Spec *) _x2c_defer_data_2->_x2c_defer_capture_4));
+  Spec__free(&((*(Spec *) _x2c_defer_data_1->_x2c_defer_capture_2)));
 }
 
 void Array_cleanup(Array);
 
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_3));
+}
+
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
+  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_4)) Spec__free(&((*(Spec *) _x2c_defer_data_3->_x2c_defer_capture_5)));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  _free_spec(&(*(_Spec *) _x2c_defer_data_4->_x2c_defer_capture_6));
+  Spec__free(&((*(Spec *) _x2c_defer_data_4->_x2c_defer_capture_6)));
 }
 
 void Buffer_cleanup(Buffer);

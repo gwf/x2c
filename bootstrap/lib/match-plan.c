@@ -37,6 +37,8 @@ static int _bits_unique(Var value);
 
 static int MatchLower__emit_leaf_value(MatchLower l, Var pattern);
 
+static int MatchLower__emit_literal(MatchLower l, Var pattern);
+
 static int _is_list_literal(List pat);
 
 static int MatchLower__compile_literal_list(MatchLower l, List pattern);
@@ -47,9 +49,9 @@ static int MatchLower__fail_site(MatchLower l, int op, int a, int b, int c, int 
 
 static void MatchLower__patch_sites(MatchLower l, int base, int target);
 
-static int MatchLower__finish(MatchLower l, int base);
+static int MatchLower__finish(MatchLower l, int entry, int base);
 
-static int MatchLower__finish_failure(MatchLower l, int base);
+static int MatchLower__finish_failure(MatchLower l, int entry, int base);
 
 static int MatchLower__emit_call(MatchLower l, int child, int mode, int reg);
 
@@ -69,15 +71,13 @@ static int MatchLower__guard_parts(MatchLower l, List args, MatchParts * parts);
 
 static int MatchLower__emit_operand(MatchLower l, MatchParts * parts, int i);
 
+static int MatchLower__emit_test(MatchLower l, Var test, int child);
+
 static int MatchLower__compile_or(MatchLower l, List args);
 
 static int MatchLower__compile_not(MatchLower l, List args);
 
 static int MatchLower__compile_set(MatchLower l, List args);
-
-static int MatchLower__compile_bind_and(MatchLower l, Var binder, int child);
-
-static int MatchLower__compile_bind_and_leaf(MatchLower l, Var binder, Var leaf);
 
 static int MatchLower__compile_and(MatchLower l, List args);
 
@@ -263,8 +263,7 @@ static int MatchLower__compile_binder(MatchLower l, Var binder){
     return MatchLower__stopped(l) ? - 1 : entry;
   }
   int base = l -> site_count;
-  if(! MatchLower__emit_binder(l, binder)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
+  return MatchLower__emit_binder(l, binder) ? MatchLower__finish(l, entry, base) : - 1;
 }
 
 void MachineBuilder_set_target(MachineBuilder, int, int);
@@ -285,19 +284,9 @@ static int MatchLower__emit_binder(MatchLower l, Var binder){
   return 1;
 }
 
-int MachineBuilder_constant(MachineBuilder, Var);
-
 static int MatchLower__compile_literal(MatchLower l, Var pattern){
-  MachineBuilder b = l -> b;
-  int constant = MachineBuilder_constant(b, pattern);
-  if(constant < 0) return - 1;
-  int mode = _compare_mode(pattern), entry = b -> length;
-  int miss = MachineBuilder_emit(b, MW_EQ_VALUE_CONST, constant, 0, 0, mode, - 1);
-  MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if(failure < 0) return - 1;
-  MachineBuilder_set_target(b, miss, failure);
-  return entry;
+  int entry = l -> b -> length, base = l -> site_count;
+  return MatchLower__emit_literal(l, pattern) ? MatchLower__finish(l, entry, base) : - 1;
 }
 
 static int _compare_mode(Var value){
@@ -334,10 +323,14 @@ static int _bits_unique(Var value){
 
 static int MatchLower__emit_leaf_value(MatchLower l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__emit_binder(l, pattern);
+  return MatchLower__emit_literal(l, pattern);
+}
+
+int MachineBuilder_constant(MachineBuilder, Var);
+
+static int MatchLower__emit_literal(MatchLower l, Var pattern){
   int constant = MachineBuilder_constant(l -> b, pattern);
-  if(constant < 0) return 0;
-  int mode = _compare_mode(pattern);
-  return MatchLower__fail_site(l, MW_EQ_VALUE_CONST, constant, 0, 0, mode);
+  return constant >= 0 && MatchLower__fail_site(l, MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
 }
 
 int Var_is_binder(Var);
@@ -402,16 +395,16 @@ static void MatchLower__patch_sites(MatchLower l, int base, int target){
   l -> site_count = base;
 }
 
-static int MatchLower__finish(MatchLower l, int base){
+static int MatchLower__finish(MatchLower l, int entry, int base){
   MachineBuilder_emit(l -> b, MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  return MatchLower__finish_failure(l, base);
+  return MatchLower__finish_failure(l, entry, base);
 }
 
-static int MatchLower__finish_failure(MatchLower l, int base){
+static int MatchLower__finish_failure(MatchLower l, int entry, int base){
   int failure = MachineBuilder_emit(l -> b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if(failure < 0) return 0;
+  if(failure < 0) return - 1;
   MatchLower__patch_sites(l, base, failure);
-  return 1;
+  return entry;
 }
 
 static int MatchLower__emit_call(MatchLower l, int child, int mode, int reg){
@@ -469,8 +462,12 @@ static int MatchLower__guard_parts(MatchLower l, List args, MatchParts * parts){
 }
 
 static int MatchLower__emit_operand(MatchLower l, MatchParts * parts, int i){
-  if((* parts).entries[i] < 0) return MatchLower__emit_leaf_value(l, (* parts).elements[i]);
-  return MatchLower__emit_call(l, (* parts).entries[i], MACHINE_CALL_CURRENT, 0);
+  return MatchLower__emit_test(l, (* parts).elements[i], (* parts).entries[i]);
+}
+
+static int MatchLower__emit_test(MatchLower l, Var test, int child){
+  if(child < 0) return MatchLower__emit_leaf_value(l, test);
+  return MatchLower__emit_call(l, child, MACHINE_CALL_CURRENT, 0);
 }
 
 static int MatchLower__compile_or(MatchLower l, List args){
@@ -483,10 +480,7 @@ static int MatchLower__compile_or(MatchLower l, List args){
     if(! MatchLower__emit_operand(l, &(operands), i)) return - 1;
     if(MachineBuilder_emit(b, MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return - 1;
   }
-  int failure = MachineBuilder_emit(b, MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if(failure < 0) return - 1;
-  MatchLower__patch_sites(l, base, failure);
-  return entry;
+  return MatchLower__finish_failure(l, entry, base);
 }
 
 void MachineBuilder_patch(MachineBuilder, int *, int, int);
@@ -525,24 +519,10 @@ static int MatchLower__compile_set(MatchLower l, List args){
   List _x2c_destructure_0 = args;
   binder = List_getindex(_x2c_destructure_0, 0);
   test = List_getindex(_x2c_destructure_0, 1);
-  if(! Var_is_row(test, 9, 7, 4)) return MatchLower__compile_bind_and_leaf(l, binder, test);
-  int child = MatchLower__compile_child(l, test);
-  if(child < 0) return - 1;
-  return MatchLower__compile_bind_and(l, binder, child);
-}
-
-static int MatchLower__compile_bind_and(MatchLower l, Var binder, int child){
-  MachineBuilder b = l -> b;
-  int entry = b -> length, base = l -> site_count;
-  if(! MatchLower__emit_binder(l, binder) || ! MatchLower__emit_call(l, child, MACHINE_CALL_CURRENT, 0)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
-}
-
-static int MatchLower__compile_bind_and_leaf(MatchLower l, Var binder, Var leaf){
-  MachineBuilder b = l -> b;
-  int entry = b -> length, base = l -> site_count;
-  if(! MatchLower__emit_binder(l, binder) || ! MatchLower__emit_leaf_value(l, leaf)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
+  int child = Var_is_row(test, 9, 7, 4) ? MatchLower__compile_child(l, test) : - 1;
+  if(Var_is_row(test, 9, 7, 4) && child < 0) return - 1;
+  int entry = l -> b -> length, base = l -> site_count;
+  return MatchLower__emit_binder(l, binder) && MatchLower__emit_test(l, test, child) ? MatchLower__finish(l, entry, base) : - 1;
 }
 
 static int MatchLower__compile_and(MatchLower l, List args){
@@ -550,7 +530,7 @@ static int MatchLower__compile_and(MatchLower l, List args){
   if(! MatchLower__guard_parts(l, args, &(operands))) return - 1;
   int entry = l -> b -> length, base = l -> site_count;
   for(int i = 0;  i < operands.count;  i ++) if(! MatchLower__emit_operand(l, &(operands), i)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
+  return MatchLower__finish(l, entry, base);
 }
 
 static int MatchLower__compile_quote(MatchLower l, List args){
@@ -580,8 +560,7 @@ static int _match_kind(List args){
 
 static int MatchLower__is_kind(MatchLower l, int kind){
   int entry = l -> b -> length, base = l -> site_count;
-  if(! MatchLower__fail_site(l, MW_MATCH_KIND, 0, kind, 0, 0)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
+  return MatchLower__fail_site(l, MW_MATCH_KIND, 0, kind, 0, 0) ? MatchLower__finish(l, entry, base) : - 1;
 }
 
 static int MatchLower__is_atom(MatchLower l){
@@ -608,8 +587,7 @@ static int MatchLower__is_type(MatchLower l, Var type){
   Symbol tag = _canonical_type_tag(Var_is(type, 1328354264) ? Var_symbol(type) : 0);
   if(! tag) return MatchLower__never(l);
   int entry = l -> b -> length, base = l -> site_count, constant = MachineBuilder_constant(l -> b, Symbol_var(tag));
-  if(constant < 0 || ! MatchLower__fail_site(l, MW_TAG, constant, 0, 0, 0)) return - 1;
-  return MatchLower__finish(l, base) ? entry : - 1;
+  return constant >= 0 && MatchLower__fail_site(l, MW_TAG, constant, 0, 0, 0) ? MatchLower__finish(l, entry, base) : - 1;
 }
 
 static inline Symbol _canonical_type_tag(Symbol tag){
@@ -625,12 +603,11 @@ static int MatchLower__never(MatchLower l){
 
 static int MatchLower__compile_segment(MatchLower l, List pattern){
   MatchSegment s;
-  s.nested.count = 0;
-  s.nested.used = 0;
+  s.nested.count = s.nested.used = 0;
   if(! MatchLower__segment_prefix(l, &(s), pattern) || ! MatchLower__segment_star(l, &(s.star))) return - 1;
   int entry = l -> b -> length, base = l -> site_count;
   if(! MatchLower__fail_site(l, MW_INPUT_LIST, 0, 0, 0, 0) || ! MatchLower__emit_prefix(l, &(s)) || ! MatchLower__segment_end(l, &(s.star))) return - 1;
-  return MatchLower__finish_failure(l, base) ? entry : - 1;
+  return MatchLower__finish_failure(l, entry, base);
 }
 
 int Var_is_list_binder(Var);
@@ -660,10 +637,7 @@ static int MatchLower__segment_prefix(MatchLower l, MatchSegment * s, List patte
 }
 
 static int _inline_descend_ok(List child, int reg){
-  if(reg + 1 >= MACHINE_CURSOR_REGS) return 0;
-  if(! List_truth(child)) return 0;
-  if(Var_is_match_op(List_car(child))) return 0;
-  if(_is_list_literal(child)) return 0;
+  if(reg + 1 >= MACHINE_CURSOR_REGS || ! List_truth(child) || Var_is_match_op(List_car(child)) || _is_list_literal(child)) return 0;
   {
     Var part;
     List _x2c_macro_object_3 = child;

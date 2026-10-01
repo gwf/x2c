@@ -11,13 +11,13 @@ Symbol Compiler_region_result(String name);
 
 int Compiler_region_wrapper(String name);
 
+int Compiler_has_region_row(String name);
+
 void Compiler_check_regions(Compiler c, List ast);
 
 void Compiler_check_meta_regions(Compiler c, List fn);
 
 Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array findings);
-
-int Compiler_has_region_row(String name);
 
 
 #endif /* __GUARD_0x3FB21E3E__ */

@@ -11,7 +11,7 @@ typedef struct Sym{
   Block scopes;
   Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
-  Compiler compiler;
+  Compiler c;
 }
 * Sym;
 
@@ -142,7 +142,7 @@ void Sym_declare_delegate_field(Sym s, Type aggregate, String name);
 Type Sym_delegate_aggregate(Sym s, Type type);
 
 typedef struct SymTxn{
-  Compiler compiler;
+  Compiler c;
   int scope_index, next_binding, active;
   String initializer_name;
   String shutdown_name;
