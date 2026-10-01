@@ -51,8 +51,6 @@ typedef struct MacroCaseSite {
 
 #pragma private
 
-#include <string.h>
-
 #include "array.x"
 #include "atom.x"
 #include "list.x"
@@ -337,7 +335,8 @@ int Macro_case_capture_at(
   if (_macro_pending_parts(t, code, grouped))
     return _macro_pending_capture(t, grouped, names, published);
   if (site && __atomic_load_n(&site.ready, __ATOMIC_ACQUIRE))
-    return _macro_site_capture(site, code, published);
+    return _macro_capture(
+      code, site.match.plan, &site.policy, &site.route, published);
   return _macro_derived_capture(site, code, t, names, published);
 }
 
@@ -407,13 +406,14 @@ static List _macro_internal_names(Macro t, List names, int pending) {
   return internal.list_free();
 }
 
-/* Recognizes `code` with the pattern `site` keeps. */
-static int _macro_site_capture(
-  MacroCaseSite *site, List code, MatchCaptureBuffer *published) {
+/* Recognizes `code` with `plan` and publishes its captures by `route`. */
+static int _macro_capture(
+  List code, MatchPlan plan, MacroFixedSlots *policy, MacroPublishing *route,
+  MatchCaptureBuffer *published) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
-  return _macro_case_match(code, site.match.plan, &site.policy, &captured) &&
-    _macro_publish(&site.route, &captured, published);
+  return _macro_case_match(code, plan, policy, &captured) &&
+    _macro_publish(route, &captured, published);
 }
 
 /* Derives the pattern for this call. `site` keeps a pattern that does not
@@ -427,14 +427,12 @@ static int _macro_derived_capture(
   MacroPublishing route = _macro_publishing(
     t, pattern, names, _macro_internal_names(t, names, 0));
   if (_macro_keep(site, t, names, pattern, route))
-    return _macro_site_capture(site, code, published);
-  Var values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer captured = {values, 0, MACHINE_BINDER_MAX};
+    return _macro_capture(
+      code, site.match.plan, &site.policy, &site.route, published);
   MatchPlan plan = MatchPlan.prepare(pattern);
   defer plan.free();
   MacroFixedSlots policy = _macro_fixed_slots(t, names, plan);
-  return _macro_case_match(code, plan, &policy, &captured) &&
-    _macro_publish(&route, &captured, published);
+  return _macro_capture(code, plan, &policy, &route, published);
 }
 
 /* Keeps `pattern` in `site` with its fixed slots and route once Match
@@ -562,7 +560,7 @@ static int _macro_identity_equal(
   MacroFixedSlots *policy = raw_policy;
   left = _macro_unwrap(left);
   right = _macro_unwrap(right);
-  if (_macro_is_name(policy, slot)) {
+  if (_macro_has_slot(policy.name_slots, policy.names, slot)) {
     String spelling = NULL;
     if (left is <string> && right is <list>)
       spelling = _macro_source_spelling(right);
@@ -571,13 +569,12 @@ static int _macro_identity_equal(
     if (spelling) return spelling == (left is <string> ? left : right);
   }
   if (left != right) return 0;
-  if (!_macro_is_fixed(policy, slot)) return 1;
+  if (!_macro_has_slot(policy.slots, policy.count, slot)) return 1;
   return !_macro_held_elsewhere(machine, policy, slot, right);
 }
 
-static int _macro_is_name(MacroFixedSlots *policy, int slot) {
-  for (int i = 0; i < policy.names; i++)
-    if (policy.name_slots[i] == slot) return 1;
+static int _macro_has_slot(const int *slots, int count, int slot) {
+  for (int i = 0; i < count; i++) if (slots[i] == slot) return 1;
   return 0;
 }
 
@@ -591,11 +588,6 @@ static String _macro_source_spelling(Var value) {
         if (List.compare(binding, value) == 0) return spelling;
   match (value) case %(binding ? ?(String spelling)): return spelling;
   return NULL;
-}
-
-static int _macro_is_fixed(MacroFixedSlots *policy, int slot) {
-  for (int i = 0; i < policy.count; i++) if (policy.slots[i] == slot) return 1;
-  return 0;
 }
 
 /* Whether a fixed local's slot other than `slot` holds `value`. */
@@ -636,11 +628,9 @@ static Var _macro_unwrap(Var value) {
    either side lacks leaves the route incomplete. */
 static MacroPublishing _macro_publishing(
   Macro t, Var pattern, List names, List internal) {
-  MacroPublishing route;
-  memset(&route, 0, sizeof(route));
+  MacroPublishing route = {.complete = 1};
   MatchCaptureLayout actual = MatchCaptureLayout.analyze(pattern);
   MatchCaptureLayout logical = MatchCaptureLayout.analyze(names);
-  route.complete = 1;
   List holes = t.assoc(<parameters>);
   for (; names; names = names.cdr(), internal = internal.cdr(),
                   holes = holes.cdr()) {
