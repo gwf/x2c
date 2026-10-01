@@ -522,6 +522,10 @@ static inline Var Iter_var(Iter x){
   return Var_new(631140, x);
 }
 
+static inline Var _box_float(float x){
+  return Var_new(3355493, x);
+}
+
 static inline Var char_var(char x){
   return Var_box_i8(x);
 }
@@ -607,15 +611,15 @@ static inline String unsigned_repr(unsigned x){
 }
 
 static inline Var float_var(float x){
-  return Var_box_f32(x);
+  return _box_float(x);
 }
 
 static inline String float_str(float x){
-  return Var_str(Var_box_f32(x));
+  return Var_str(_box_float(x));
 }
 
 static inline String float_repr(float x){
-  return Var_repr(Var_box_f32(x));
+  return Var_repr(_box_float(x));
 }
 
 static inline Var double_var(double x){
