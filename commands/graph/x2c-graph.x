@@ -1181,174 +1181,137 @@ static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
   return 0;
 }
 
-static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
-  Array units = [];
+/* Parses each input, keeps the records analyze returns for it past the
+   unit's context, closes the unit, and sorts the records. analyze receives
+   the parsed unit, its input, and its display path, and returns a List of
+   records. Returns 0 after reporting an input that does not parse. */
+static int _analyze_inputs(
+  Frontend frontend, Array inputs, Func analyze, List &records) {
+  Array found = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
+    if (!_open_input(frontend, input, parsed)) return 0;
     String path = parsed.compiler.display_path(input);
-    List functions = _analyze_unit(parsed.compiler, parsed.ast, path);
-    Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
-    List record = %(
-      unit $path $subtree ${parsed.source_lines}
-      (functions @functions)
-    );
-    record = parsed.context.export(record).list();
+    List unit_records = parsed.context.export(
+      analyze((void *) &parsed, input, path));
     parsed.close();
-    units.push(record);
+    foreach (List record, unit_records) found.push(record);
   }
-  units.sort();
-  return units.list_free();
+  found.sort();
+  records = found.list_free();
+  return 1;
+}
+
+static List _parse_units(Frontend frontend, Array inputs, Map subtrees) {
+  List units;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) using &subtrees => {
+      Symbol subtree = subtrees ? subtrees[input].symbol() : <none>;
+      return %((
+        unit $path $subtree ${parsed.source_lines}
+        (functions @{_analyze_unit(parsed.compiler, parsed.ast, path)})
+      ));
+    },
+    units)) return NULL;
+  return units;
 }
 
 static List _parse_field_units(
   Frontend frontend, Array inputs, String receiver_name, String field_name) {
-  Array units = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List sites = _analyze_field_sites_unit(
-      parsed.compiler, parsed.ast, path, receiver_name, field_name);
-    List functions = _field_functions_from_sites(sites);
-    if (functions) {
-      List record = %(unit $path (functions @functions));
-      record = parsed.context.export(record).list();
-      units.push(record);
-    }
-    parsed.close();
-  }
-  units.sort();
-  return %(
-    field $receiver_name $field_name (units @{units.list_free()})
-  );
+  List units;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) => {
+      List functions = _field_functions_from_sites(
+        _analyze_field_sites_unit(
+          parsed.compiler, parsed.ast, path, receiver_name, field_name));
+      return functions ? %((unit $path (functions @functions))) : NULL;
+    },
+    units)) return NULL;
+  return %(field $receiver_name $field_name (units @units));
 }
 
 static List _parse_field_sites(
   Frontend frontend, Array inputs, String receiver_name, String field_name) {
-  Array sites = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List records = _analyze_field_sites_unit(
-      parsed.compiler, parsed.ast, path, receiver_name, field_name);
-    records = parsed.context.export(records).list();
-    parsed.close();
-    foreach (List record, records) sites.push(record);
-  }
-  sites.sort();
-  return %(
-    field-sites $receiver_name $field_name
-    (sites @{sites.list_free()})
-  );
+  List sites;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) =>
+      _analyze_field_sites_unit(
+        parsed.compiler, parsed.ast, path, receiver_name, field_name),
+    sites)) return NULL;
+  return %(field-sites $receiver_name $field_name (sites @sites));
 }
 
 static List _parse_sites(Frontend frontend, Array inputs, String wanted) {
-  Array sites = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List records = _analyze_sites_unit(
-      parsed.compiler, parsed.ast, path, wanted);
-    records = parsed.context.export(records).list();
-    parsed.close();
-    foreach (List record, records) sites.push(record);
-  }
-  sites.sort();
-  return %(sites $wanted (calls @{sites.list_free()}));
+  List calls;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) =>
+      _analyze_sites_unit(parsed.compiler, parsed.ast, path, wanted),
+    calls)) return NULL;
+  return %(sites $wanted (calls @calls));
 }
 
 static List _parse_walk_units(Frontend frontend, Array inputs) {
-  Array functions = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List records = _analyze_walk_unit(
-      parsed.compiler, parsed.ast, path);
-    records = parsed.context.export(records).list();
-    parsed.close();
-    foreach (List record, records) functions.push(record);
-  }
-  functions.sort();
-  return _walk_candidates(functions.list_free());
+  List functions;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) =>
+      _analyze_walk_unit(parsed.compiler, parsed.ast, path),
+    functions)) return NULL;
+  return _walk_candidates(functions);
 }
 
 static List _parse_flow_units(
   Frontend frontend, Array inputs, String producer, String consumer) {
-  Array functions = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List records = Flow_analyze_unit(
-      parsed.compiler, parsed.ast, path);
-    records = parsed.context.export(records).list();
-    parsed.close();
-    foreach (List record, records) functions.push(record);
-  }
-  functions.sort();
-  return Flow_finish(functions.list_free(), producer, consumer);
+  List functions;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) =>
+      Flow_analyze_unit(parsed.compiler, parsed.ast, path),
+    functions)) return NULL;
+  return Flow_finish(functions, producer, consumer);
 }
 
 static List _parse_tail_units(Frontend frontend, Array inputs) {
-  Array units = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List functions = _analyze_tail_unit(
-      parsed.compiler, parsed.ast, path);
-    if (functions) {
-      List record = %(unit $path (functions @functions));
-      record = parsed.context.export(record).list();
-      units.push(record);
-    }
-    parsed.close();
-  }
-  units.sort();
-  return %(tail-calls (units @{units.list_free()}));
+  List units;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) => {
+      List functions = _analyze_tail_unit(parsed.compiler, parsed.ast, path);
+      return functions ? %((unit $path (functions @functions))) : NULL;
+    },
+    units)) return NULL;
+  return %(tail-calls (units @units));
 }
 
 static List _parse_loop_allocation_units(
   Frontend frontend, Array inputs, int limit) {
-  Array units = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    List record = LoopAllocations.analyze_unit(
-      parsed.compiler, parsed.ast, path);
-    record = parsed.context.export(record).list();
-    parsed.close();
-    units.push(record);
-  }
-  units.sort();
-  return LoopAllocations.finish(units.list_free(), limit);
+  List units;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) =>
+      %(${LoopAllocations.analyze_unit(parsed.compiler, parsed.ast, path)}),
+    units)) return NULL;
+  return LoopAllocations.finish(units, limit);
 }
 
 static List _parse_lifetime_units(
   Frontend frontend, Array inputs, String allocation_returns) {
-  Array units = [];
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return NULL;
-    String path = parsed.compiler.display_path(input);
-    Map definitions = project_function_targets(
-      parsed.compiler, parsed.ast, path);
-    List record = Lifetime.analyze_unit(
-      parsed.compiler, parsed.ast, path, definitions);
-    record = parsed.context.export(record).list();
-    parsed.close();
-    units.push(record);
-  }
-  units.sort();
-  List records = units.list_free();
+  List units;
+  if (!_analyze_inputs(
+    frontend, inputs,
+    %!(ParsedUnit *parsed, String input, String path) => %(${
+      Lifetime.analyze_unit(
+        parsed.compiler, parsed.ast, path,
+        project_function_targets(parsed.compiler, parsed.ast, path))
+    }),
+    units)) return NULL;
   return allocation_returns
-       ? Lifetime.allocation_returns(records, allocation_returns)
-       : Lifetime.finish(records);
+       ? Lifetime.allocation_returns(units, allocation_returns)
+       : Lifetime.finish(units);
 }
 
 static void _index_public_functions(List units, Map public_functions) {
