@@ -315,7 +315,7 @@ List LoopAllocations.finish(List units, int limit) {
 
   Array ranked = [];
   foreach (Var (raw_key, raw_events), groups)
-    ranked.push(_loop_candidate(raw_key.list(), raw_events.list()));
+    ranked.push(_loop_candidate(raw_key, raw_events));
   ranked.sort_by(%!(List candidate) => _loop_candidate_rank(candidate));
   if (limit && (int) ranked.len() > limit)
     ranked.remslice(limit, ranked.len()).free();

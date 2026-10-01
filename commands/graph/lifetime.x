@@ -163,7 +163,7 @@ static int _lifetime_context_region(Lifetime lifetime, List owner) {
     match (row)
       case %(region ? context ? ?alive ? ?binding ?):
         if (alive.integer() && binding is <list> &&
-            List.equal(binding.list(), owner))
+            List.equal(binding, owner))
           return id;
   }
   return 0;
@@ -541,7 +541,7 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
     }
     case %(allocation ? ?region ? unresolved ?): {
       if (lifetime.regions.contains(region) &&
-          _lifetime_owner_ended(lifetime.regions[region].list()))
+          _lifetime_owner_ended(lifetime.regions[region]))
         _lifetime_emit_unresolved(lifetime, id);
       return;
     }
@@ -802,7 +802,7 @@ static int _lifetime_resolve_summary(
   foreach (List fact, facts)
     match (fact) {
       case %(kind ?direct):
-        if (!_lifetime_combine_kind(kind, direct.symbol())) return 0;
+        if (!_lifetime_combine_kind(kind, direct)) return 0;
       case %((!or other unresolved)): return 0;
     }
   foreach (List fact, facts)
@@ -815,7 +815,7 @@ static int _lifetime_resolve_summary(
           continue;
         }
         if (!summaries.contains(target)) return 0;
-        Symbol next = summaries[target].symbol();
+        Symbol next = summaries[target];
         if (!_lifetime_combine_kind(kind, next)) return 0;
       }
   if (!kind) return 0;

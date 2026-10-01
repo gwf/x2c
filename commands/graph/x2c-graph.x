@@ -116,7 +116,7 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
 static int _field_access_parts(
   Var type, Var member, String receiver_name, String field_name) {
   return type is <list> && member is <string> &&
-         List.equal(type.list(), %($receiver_name)) &&
+         List.equal(type, %($receiver_name)) &&
          member.str() == field_name;
 }
 
@@ -381,7 +381,7 @@ static void _walk_mark_root(
   if (position < 0) return;
   match (root)
     case %(root ? ? ?type (path *path) ?display):
-      if (type is <list> && List.equal(type.list(), %("List")))
+      if (type is <list> && List.equal(type, %("List")))
         direct[%(
           walk $position $type (path @path) $display linear $location
         )] = 1;
@@ -793,7 +793,7 @@ static List _site_argument_summary(
     case %(expr ?type ?): {
       List summary = _site_value_summary(
         compiler, argument, parameters, prior_writes);
-      if (type is <list> && List.equal(type.list(), %("List")) &&
+      if (type is <list> && List.equal(type, %("List")) &&
           List.equal(summary, %(constant)))
         summary = %(list);
       return %(
@@ -845,7 +845,7 @@ static void _collect_sites(
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
-          ast_changes_left_operand(operator.symbol())) {
+          ast_changes_left_operand(operator)) {
         _collect_sites(
           compiler, left, path, caller, visibility, wanted,
           parameters, prior_writes, sites);
@@ -1026,7 +1026,7 @@ static void _collect_field_sites(
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
-          ast_changes_left_operand(operator.symbol())) {
+          ast_changes_left_operand(operator)) {
         _collect_field_sites(
           compiler, left, path, caller, visibility,
           receiver_name, field_name, parameters, <mutate>, void,
@@ -1828,7 +1828,7 @@ static List _components(List names, Map adjacency, String excluded) {
     groups.push(%(group @{members.list_free()}));
   }
   groups.sort_by(
-    %!(List group) => %(${1 - (int) group.len()} ${group.cadr()}));
+    %!(List group) => %(${1 - group.len()} ${group.cadr()}));
   return groups.list_free();
 }
 
@@ -1845,7 +1845,7 @@ static List _nontrivial_components(List groups, Array isolated) {
   foreach (List group, groups)
     match (group)
       case %(group *members): {
-        if ((int) members.len() >= ARCHITECTURE_COMPONENT_FUNCTIONS)
+        if (members.len() >= ARCHITECTURE_COMPONENT_FUNCTIONS)
           components.push(group);
         else isolated.push(members.car());
       }
@@ -1889,7 +1889,7 @@ static List _architecture_local_components(List graph) {
             List groups = _components(names, adjacency, NULL);
             Array isolated = [];
             List components = _nontrivial_components(groups, isolated);
-            if ((int) components.len() < 2) continue;
+            if (components.len() < 2) continue;
             int isolated_count = isolated.len();
             rows.push(
               %(unit $path (functions $function_count)
@@ -1978,8 +1978,8 @@ static List _structure(List graph, String wanted) {
                     case %(function ?name (groups ? *rest)): {
                       int outside = 0;
                       foreach (List group, rest)
-                        outside += (int) group.len() - 1;
-                      return %(${1 - (int) rest.car().list().len()}
+                        outside += group.len() - 1;
+                      return %(${1 - rest.car().list().len()}
                                ${-outside} $name);
                     }
                   return nil;
@@ -2239,7 +2239,7 @@ static void _dataset_rows(
                   function ?name ?visibility (calls *calls)
                 ): {
                   List target = %(target $path $name);
-                  List node = attributes[target].list();
+                  List node = attributes[target];
                   match (node)
                     case %(
                       node ?subtree ?unit_lines ?source_order ?source_name
@@ -2252,7 +2252,7 @@ static void _dataset_rows(
                         "%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
                           function_id, kind, subtree.symbol().str(), path,
                           unit_lines.int(), source_order.int(), source_name,
-                          name, visibility.str(), external_calls.int(),
+                          name, visibility, external_calls.int(),
                           indirect_calls.int())
                       );
                       foreach (List call, calls)
@@ -2264,7 +2264,7 @@ static void _dataset_rows(
                               target $callee_path $callee_name
                             );
                             List callee_node =
-                              attributes[callee_target].list();
+                              attributes[callee_target];
                             String callee_id = _dataset_function_id(
                               callee_path, callee_name);
                             String row = "%s\t%s\t%d".printf(
@@ -2272,7 +2272,7 @@ static void _dataset_rows(
                             Symbol callee_subtree;
                             match (callee_node)
                               case %(node ?callee_group *):
-                                callee_subtree = callee_group.symbol();
+                                callee_subtree = callee_group;
                             if (subtree.symbol() == <src> &&
                                 callee_subtree == <src>)
                               src_calls.push(row);
@@ -2355,7 +2355,7 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
       unit $path <none> ${parsed.source_lines}
       (functions @functions)
     );
-    record = parsed.context.export(record).list();
+    record = parsed.context.export(record);
     parsed.close();
     units.push(record);
   }
@@ -3091,7 +3091,7 @@ int main(int argc, char **argv) {
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
   if (!frontend.preload_macro_libraries()) return 1;
-  frontend.prepare_meta(inputs.list());
+  frontend.prepare_meta(inputs);
   Context command = Context.open_isolated_named("x2c graph command");
   int status = 0;
   try {
