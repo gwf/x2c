@@ -2,17 +2,16 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `List` is an immutable, interned cons chain. A car may hold any non-`void`
-    `Var`; a cdr is `nil` or another `List`. Canonical identity is the car's
-    exact `Var` bits plus the canonical tail identity, so mutating an `Array`
-    or `Map` stored in a car does not change the identity of the cell that
-    contains it.
+    List owns canonical immutable cons chains. A car holds any non-void Var
+    and a cdr is nil or another List; identity is the car's exact bits plus
+    the canonical tail, so mutating an Array or Map stored in a car leaves the
+    identity of its cell unchanged.
 
-    Construction searches the requested pool and its ancestors. An existing
-    cell keeps its ancestor's lifetime; a miss belongs to the requested pool.
-    Releasing a nested pool invalidates its unpromoted cells, while promotion
-    preserves complete canonical `List`, `String`, and long-`Atom` structure
-    without changing pointers. `void` is a terminal sentinel, not `List` data.
+    Construction searches the requested pool and its ancestors: an existing
+    cell keeps its ancestor's lifetime, and a miss belongs to the requested
+    pool. Releasing a nested pool invalidates its unpromoted cells, while
+    promotion keeps whole canonical List, String, and long-Atom structure at
+    the same addresses. `void` is a terminal sentinel and never List data.
 */
 
 #pragma once
@@ -897,6 +896,13 @@ static int _unpack_va(List src, unsigned n, va_list ap, int lists) {
 
 static const int _WIDTH = 80;
 
+/* One rendering: the output Buffer and whether elements write their `str`
+   or their `repr`. */
+typedef struct Render {
+  Buffer out;
+  Symbol mode;
+} Render;
+
 /** Returns the human-readable rendering of `lst`.
     Elements are rendered with their own `str`, so a `String` element appears
     unquoted. The writer pads inside parentheses and breaks nested structure
@@ -919,7 +925,8 @@ String List.str(List lst) {
     to one and restores it afterward.
 */
 Buffer List.write_str(List lst, Buffer out) {
-  $let(out.padding, 1) _render(lst, out, <str>);
+  Render r = {out, <str>};
+  $let(out.padding, 1) r._value(lst);
   return out;
 }
 
@@ -940,96 +947,102 @@ String List.repr(List lst) {
 
 /** Appends the readable representation of `List` to a `Buffer`. */
 Buffer List.write_repr(List lst, Buffer out) {
-  _render(lst, out, <repr>);
+  Render r = {out, <repr>};
+  r._value(lst);
   return out;
 }
 
-/* Renders `elem` at the current column, breaking lines as it goes. `mode`
-   is `<str>` or `<repr>`. */
-static void _render(Var elem, Buffer buf, Symbol mode) {
-  if (buf.pos >= _WIDTH - 1 || buf.pos - buf._indent > 40)
-    buf.newline_indent();
-  if (elem is not <list>) _render_leaf(elem, buf, mode);
-  else if (!elem.list()) _render_nil(buf);
-  else if (!_render_flat(elem, buf, mode)) _render_items(elem, buf, mode);
+/* Renders `elem` at the current column, breaking lines as it goes. */
+static void Render._value(Render *r, Var elem) {
+  Buffer out = r.out;
+  if (out.pos >= _WIDTH - 1 || out.pos - out._indent > 40)
+    out.newline_indent();
+  if (elem is not <list>) r._leaf(elem);
+  else if (!elem.list()) _nil(out);
+  else if (!r._fits(elem)) r._items(elem);
 }
 
 /* A leaf that overflows the line is written again on the next one. */
-static void _render_leaf(Var elem, Buffer buf, Symbol mode) {
-  size_t before = buf.content.length, position = buf.pos;
-  _leaf(elem, buf, mode);
-  size_t length = buf.content.length - before;
+static void Render._leaf(Render *r, Var elem) {
+  Buffer out = r.out;
+  size_t before = out.content.length, position = out.pos;
+  r._write_leaf(elem);
+  size_t length = out.content.length - before;
   if (position + length <= _WIDTH) return;
-  buf.unwrite(length);
-  buf.newline_indent();
-  _leaf(elem, buf, mode);
+  out.unwrite(length);
+  out.newline_indent();
+  r._write_leaf(elem);
 }
 
-static void _render_nil(Buffer buf) {
-  if (buf.pos + 2 > _WIDTH) buf.newline_indent();
-  buf.write("()");
+static void _nil(Buffer out) {
+  if (out.pos + 2 > _WIDTH) out.newline_indent();
+  out.write("()");
 }
 
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
-static int _render_flat(Var elem, Buffer buf, Symbol mode) {
-  Buffer line = $auto(Buffer.new(buf.padding));
-  _flat(elem, line, mode);
-  if (buf.pos + line.content.length > _WIDTH) return 0;
-  buf.write_len(line.content.bytes, line.content.length);
+static int Render._fits(Render *r, Var elem) {
+  Buffer line = $auto(Buffer.new(r.out.padding));
+  Render flat = {line, r.mode};
+  flat._flat(elem);
+  if (r.out.pos + line.content.length > _WIDTH) return 0;
+  r.out.write_len(line.content.bytes, line.content.length);
   return 1;
 }
 
-/* Writes a List's elements in turn, each rendered as `_render` does. */
-static void _render_items(Var elem, Buffer buf, Symbol mode) {
+/* Writes a List's elements in turn, each rendered as `Render._value`
+   does. */
+static void Render._items(Render *r, Var elem) {
   List lst = elem;
+  Buffer out = r.out;
   RenderPath path;
-  if (!path.enter(lst)) return (void) elem.write_pointer_repr(buf);
+  if (!path.enter(lst)) return (void) elem.write_pointer_repr(out);
   defer path.leave();
-  if (buf.pos - buf.tabstop() > 5) buf.newline_indent();
-  _open(lst, buf);
+  if (out.pos - out.tabstop() > 5) out.newline_indent();
+  _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
-    _render(l.car(), buf, mode);
-    if (l.cdr()) buf.write(" ");
+    r._value(l.car());
+    if (l.cdr()) out.write(" ");
   }
-  _close(buf);
+  _close(out);
 }
 
 /* Writes `elem` on one line. */
-static void _flat(Var elem, Buffer buf, Symbol mode) {
-  if (elem is not <list>) _leaf(elem, buf, mode);
-  else if (!elem.list()) buf.write("()");
-  else _flat_items(elem, buf, mode);
+static void Render._flat(Render *r, Var elem) {
+  if (elem is not <list>) r._write_leaf(elem);
+  else if (!elem.list()) r.out.write("()");
+  else r._flat_items(elem);
 }
 
-static void _flat_items(Var elem, Buffer buf, Symbol mode) {
+static void Render._flat_items(Render *r, Var elem) {
   List lst = elem;
+  Buffer out = r.out;
   RenderPath path;
-  if (!path.enter(lst)) return (void) elem.write_pointer_repr(buf);
+  if (!path.enter(lst)) return (void) elem.write_pointer_repr(out);
   defer path.leave();
-  _open(lst, buf);
+  _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
-    _flat(l.car(), buf, mode);
-    if (l.cdr()) buf.write(" ");
+    r._flat(l.car());
+    if (l.cdr()) out.write(" ");
   }
-  _close(buf);
+  _close(out);
 }
 
-static void _leaf(Var elem, Buffer buf, Symbol mode) {
-  if (mode == <str>) elem.write_str(buf);
-  else if (elem is <symbol>) Atom.write_repr(elem, buf);
-  else elem.write_repr(buf);
+static void Render._write_leaf(Render *r, Var elem) {
+  if (r.mode == <str>) elem.write_str(r.out);
+  else if (elem is <symbol>) Atom.write_repr(elem, r.out);
+  else elem.write_repr(r.out);
 }
 
 /* Opens a List and makes the column after its padding the tabstop. */
-static void _open(List lst, Buffer buf) {
-  buf.write("(");
-  if (lst.car() is not <list>) buf.pad();
-  buf.push();
+static void _open(List lst, Buffer out) {
+  out.write("(");
+  if (lst.car() is not <list>) out.pad();
+  out.push();
 }
 
-static void _close(Buffer buf) {
-  if (buf.get(-1) != ')') buf.pad();
-  buf.write(")");
-  buf.pop();
+static void _close(Buffer out) {
+  if (out.get(-1) != ')') out.pad();
+  out.write(")");
+  out.pop();
 }
