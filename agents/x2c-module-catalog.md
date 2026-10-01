@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 59
+- Runtime modules: 60
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -931,6 +931,19 @@ Public functions:
 `Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`,
 `Map.keys`, `Map.enumerate`, `Map.cleanup`
 
+### [lib/match-cache.x](../lib/match-cache.x)
+
+caches of prepared Match plans.
+
+Public functions:
+
+`MatchCache.acquire`, `MatchLease.release`, `MatchCache.try_capture`,
+`MatchCache.try_match`, `MatchCache.try_search`, `MatchCache.search`,
+`MatchCache.try_match_replace`, `MatchCache.search_replace`,
+`MatchCache.current`, `MatchCache.flush_default`, `MatchCache.context_open`,
+`MatchCache.context_close`, `x2c_match_thread_release`, `MatchCache.new`,
+`MatchCache.dispose`
+
 ### [lib/match-machine.x](../lib/match-machine.x)
 
 `Match` wordcode execution.
@@ -958,17 +971,12 @@ Public functions:
 `MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
 `MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
 `MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
-`MatchPlan.execute_capture`, `MatchPlan.try_capture`, `MatchPlan.execute`,
-`MatchPlan.try_match`, `MatchPlan.try_search`, `MatchPlan.search`,
-`MatchPlan.search_replace`, `MatchPlan.try_match_replace`, `List.replace`,
-`MatchCache.acquire`, `MatchCache.new`, `MatchCache.dispose`,
-`MatchLease.release`, `MatchCache.try_capture`, `MatchCache.try_match`,
-`MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
-`MatchCache.search_replace`, `MatchCache.flush_default`,
-`MatchCache.context_open`, `MatchCache.context_close`,
-`x2c_match_thread_release`, `x2c_match_site_try_capture`,
-`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
-`x2c_match_site_try_match`, `x2c_match_site_match`,
+`MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
+`MatchPlan.try_capture`, `MatchPlan.execute`, `MatchPlan.try_match`,
+`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
+`MatchPlan.try_match_replace`, `List.replace`, `MatchPlan.borrowable`,
+`x2c_match_site_try_capture`, `x2c_match_pattern_retainable`,
+`x2c_match_site_prepare`, `x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
 `x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,

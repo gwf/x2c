@@ -1,12 +1,47 @@
+/*  match-cache.x -- caches of prepared Match plans
+
+    Copyright (c) 2026 Gary William Flake.
+
+    A MatchCache keeps immutable prepared plans under the canonical identity
+    of their patterns and lends them through leases. The `List.match` family
+    runs through the active default cache, which is Context-local while a
+    Context is open and otherwise thread-local.
+*/
+
 #pragma once
 
 $(import "error-macros.xmacro")
 #include "match.x"
 
+/** Cache pressure is the acquire status beyond MachinePrepare: every slot is
+    leased, so none can be recycled.
+*/
+#define MATCH_CACHE_PRESSURE 3
+
+/** Names an explicit cache of immutable prepared Match plans.
+    A cache is not synchronized. Its caller must serialize access, keep every
+    admitted pattern value alive until disposal, and dispose it when no lease
+    remains active.
+*/
+typedef struct MatchCache *MatchCache;
+
+/** Represents one acquired use of a cached or transient Match plan.
+    A cached lease pins its entry; a transient lease owns its plan. Initialize
+    it only through `MatchCache.acquire` and call `MatchLease.release` on every
+    exit after acquisition returns, including a pressure result.
+*/
+typedef struct MatchLease {
+  MatchCache cache;
+  MatchPlan transient_plan;
+  unsigned long generation;
+  int slot, active;
+} MatchLease;
+
 #pragma private
 
-#include "scope.x"
+#include <assert.h>
 #include "pool.x"
+#include "scope.x"
 
 /* the plan cache
 
@@ -81,7 +116,7 @@ static int MatchCache._transient(
   if (plan.status == MACHINE_INELIGIBLE) {
     const char *reason = plan.reason;
     plan.free();
-    _raise_ineligible(reason, owner);
+    MatchPlan.raise_ineligible(reason, owner);
   }
   lease.cache = cache;
   lease.transient_plan = plan;
@@ -103,7 +138,7 @@ static MatchPlan MatchCache._prepare(
       plan.free();
     }
   }
-  if (fenced) _raise_ineligible(fenced, owner);
+  if (fenced) MatchPlan.raise_ineligible(fenced, owner);
   return plan;
 }
 
@@ -133,7 +168,8 @@ static int MatchCache._admitted(MatchCache cache, Var pattern) {
   int slot = _memo_slot(key);
   if (cache.admitted_memo[slot] == key) return 1;
   if (cache.refused_memo[slot] == key) return 0;
-  if (!_cache_keyable(pattern, 0)) {
+  // an entry borrows its pattern only until its level is released
+  if (!MatchPlan.borrowable(pattern, 0)) {
     cache.refused_memo[slot] = key;
     return 0;
   }
@@ -163,53 +199,6 @@ static int MatchCache._resync(MatchCache cache) {
    computed only after admission succeeds. */
 static int _memo_slot(unsigned long key) =>
   (int) ((key * 0x9e3779b97f4a7c15UL >> 48) & (MATCH_ADMITTED_MEMO - 1));
-
-/** Creates a `MatchCache` retaining up to `capacity` prepared patterns.
-    The returned cache owns a named `Scope` and is not synchronized. It borrows
-    admitted pattern identities, so dispose it before their owning canonical
-    pools. `MatchCache.dispose` is required after every lease is released.
-    Raises: `<bad-arg>` when capacity is not positive, `<size-limit>` when its
-    storage dimensions cannot be represented, and `<alloc-fail>` when cache
-    storage cannot be allocated.
-*/
-MatchCache MatchCache.new(int capacity) {
-  if (capacity <= 0)
-    raise %(bad-arg (owner "MatchCache.new") (capacity $capacity));
-  if (capacity > (INT_MAX - 1) / 2)
-    raise %(size-limit (owner "MatchCache.new") (capacity $capacity));
-
-  Scope owner = Scope.new_named("Match plan cache");
-  Scope.push(&owner);
-  MatchCache cache = Scope.calloc(1, sizeof(struct MatchCache));
-  cache.scope = owner;
-  cache.capacity = capacity;
-  cache.bucket_count = capacity * 2 + 1;
-  cache.lru_head = -1;
-  cache.pool_epoch = Pool.epoch();
-  cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
-  cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
-  for (int i = 0; i < capacity; i++) cache.entries[i].bucket_next = -1;
-  for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
-  Scope.pop();
-  return cache;
-}
-
-/** Destroys a `Match` cache with no active leases.
-    A null cache is ignored. Disposal frees all plans and cache storage and
-    invalidates every alias.
-    Raises: `<bad-state>` when a lease remains active. The failure leaves the
-    cache intact.
-*/
-void MatchCache.dispose(MatchCache cache) {
-  if (!cache) return;
-  if (cache.active_leases) raise %(bad-state (owner "MatchCache.dispose"));
-
-  for (int i = 0; i < cache.capacity; i++) {
-    assert(!cache.entries[i].pin_count);
-    if (cache.entries[i].occupied) cache.entries[i].plan.free();
-  }
-  Scope.destroy(cache.scope);
-}
 
 /* cache entries
 
@@ -500,7 +489,10 @@ static threaded struct MatchThreadState match_thread;
 
 static MatchThreadState _thread(void) => &match_thread;
 
-static MatchCache _plan_cache(void) {
+/** Returns the active default `Match` cache, creating it on first use.
+    Raises: `<alloc-fail>` when the cache cannot be created.
+*/
+MatchCache MatchCache.current(void) {
   MatchCache *slot = _default_slot();
   if (!*slot) *slot = MatchCache.new(256);
   x2c_match_initialize();
@@ -569,4 +561,53 @@ void x2c_match_thread_release(void) {
   if (!state.plan_cache) return;
   state.plan_cache.dispose();
   state.plan_cache = NULL;
+}
+
+// lifecycle
+
+/** Creates a `MatchCache` retaining up to `capacity` prepared patterns.
+    The returned cache owns a named `Scope` and is not synchronized. It borrows
+    admitted pattern identities, so dispose it before their owning canonical
+    pools. `MatchCache.dispose` is required after every lease is released.
+    Raises: `<bad-arg>` when capacity is not positive, `<size-limit>` when its
+    storage dimensions cannot be represented, and `<alloc-fail>` when cache
+    storage cannot be allocated.
+*/
+MatchCache MatchCache.new(int capacity) {
+  if (capacity <= 0)
+    raise %(bad-arg (owner "MatchCache.new") (capacity $capacity));
+  if (capacity > (INT_MAX - 1) / 2)
+    raise %(size-limit (owner "MatchCache.new") (capacity $capacity));
+
+  Scope owner = Scope.new_named("Match plan cache");
+  Scope.push(&owner);
+  MatchCache cache = Scope.calloc(1, sizeof(struct MatchCache));
+  cache.scope = owner;
+  cache.capacity = capacity;
+  cache.bucket_count = capacity * 2 + 1;
+  cache.lru_head = -1;
+  cache.pool_epoch = Pool.epoch();
+  cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
+  cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
+  for (int i = 0; i < capacity; i++) cache.entries[i].bucket_next = -1;
+  for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
+  Scope.pop();
+  return cache;
+}
+
+/** Destroys a `Match` cache with no active leases.
+    A null cache is ignored. Disposal frees all plans and cache storage and
+    invalidates every alias.
+    Raises: `<bad-state>` when a lease remains active. The failure leaves the
+    cache intact.
+*/
+void MatchCache.dispose(MatchCache cache) {
+  if (!cache) return;
+  if (cache.active_leases) raise %(bad-state (owner "MatchCache.dispose"));
+
+  for (int i = 0; i < cache.capacity; i++) {
+    assert(!cache.entries[i].pin_count);
+    if (cache.entries[i].occupied) cache.entries[i].plan.free();
+  }
+  Scope.destroy(cache.scope);
 }

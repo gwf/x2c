@@ -139,9 +139,9 @@ Current proven shapes include:
   direct `p64` store and load used by iterator callbacks.
 - The native adapter family in `lib/varops.x:72-86`. Each invocation supplies
   the facts that differ.
-- Local resource setup in `lib/match.x:296` and `lib/match.x:304`. The macro
-  hides stack-storage mechanics while release and fallback policy stay
-  visible.
+- Local resource setup in `$match.machine` in `lib/match.x` and
+  `$match.lease` in `lib/match-cache.x`. The macro hides stack-storage
+  mechanics while release and fallback policy stay visible.
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
   mechanical name-to-registration conversion.
 - One ledger in `lib/var-tags.xmacro` with mechanical projections in

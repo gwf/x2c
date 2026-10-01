@@ -30,7 +30,7 @@ protocol Cleanup(Context);
 #include "exception.x"
 #include "list.x"
 #include "map.x"
-#include "match.x"
+#include "match-cache.x"
 #include "pool.x"
 #include "scope.x"
 #include "string.x"

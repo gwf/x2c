@@ -36,6 +36,7 @@ lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and ca
 lib/logger.x|api|
 lib/machine.x|internal|`Match` wordcode, builder, and execution-state definitions.
 lib/map.x|api|
+lib/match-cache.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match-plan.x|api|
 lib/match.x|api|

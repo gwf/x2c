@@ -3,10 +3,10 @@
     Copyright (c) 2025 Gary William Flake
 
     Match owns the pattern vocabulary, capture layouts, and the execution of
-    plans `match-plan.x` prepares. Core matching runs only prepared plans;
-    `unittest/match-recursive.x` is the reference matcher of the differential
-    tests. An invocation commits captures to caller-owned storage only after
-    the whole match succeeds.
+    plans that `match-plan.x` prepares and `match-cache.x` retains. Core
+    matching runs only prepared plans; `unittest/match-recursive.x` is the
+    reference matcher of the differential tests. An invocation commits
+    captures to caller-owned storage only after the whole match succeeds.
 
     Association-List results are published from committed captures. New
     Lists canonicalize through the active pool chain; a result may belong to
@@ -67,30 +67,6 @@ typedef struct MatchCaptureSite {
   MatchPlan plan;
   int refused;
 } MatchCaptureSite;
-
-/** Cache pressure is the acquire status beyond MachinePrepare: every slot is
-    leased, so none can be recycled.
-*/
-#define MATCH_CACHE_PRESSURE 3
-
-/** Names an explicit cache of immutable prepared Match plans.
-    A cache is not synchronized. Its caller must serialize access, keep every
-    admitted pattern value alive until disposal, and dispose it when no lease
-    remains active.
-*/
-typedef struct MatchCache *MatchCache;
-
-/** Represents one acquired use of a cached or transient Match plan.
-    A cached lease pins its entry; a transient lease owns its plan. Initialize
-    it only through `MatchCache.acquire` and call `MatchLease.release` on every
-    exit after acquisition returns, including a pressure result.
-*/
-typedef struct MatchLease {
-  MatchCache cache;
-  MatchPlan transient_plan;
-  unsigned long generation;
-  int slot, active;
-} MatchLease;
 
 #pragma private
 
@@ -459,11 +435,14 @@ static int _capture_bit(unsigned long bits, int index) =>
    Only a prepared plan runs. An entry point raises the fence of an
    ineligible plan, and a malformed plan answers no match. */
 
-/* The one place an ineligible pattern is reported. Such a pattern compiles
-   to no program, so answering "no match" would be wrong and no caller could
-   tell it from a real miss. Every entry point raises here instead, naming
-   the fence the pattern crossed. */
-static void _raise_ineligible(const char *reason, const char *owner) {
+/** Raises the fence an ineligible plan crossed, naming `owner`.
+    This is the one place an ineligible pattern is reported. Such a pattern
+    compiles to no program, so answering "no match" would be wrong and no
+    caller could tell it from a real miss. `reason` is the plan's static
+    category string.
+    Raises: `<size-limit>` naming `owner` and the fence.
+*/
+void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
   String fence = String.new(reason), site = String.new(owner);
   raise %(size-limit (owner $site) (fence $fence));
 }
@@ -472,7 +451,7 @@ static void _raise_ineligible(const char *reason, const char *owner) {
    its caller. Malformed patterns keep their categorized no-match. */
 static int _plan_prepared(MatchPlan plan, const char *owner) {
   if (plan && plan.status == MACHINE_INELIGIBLE)
-    _raise_ineligible(plan.reason, owner);
+    MatchPlan.raise_ineligible(plan.reason, owner);
   return plan && plan.status == MACHINE_PREPARED;
 }
 
@@ -1027,13 +1006,13 @@ static int _object_borrowable(Var value, int depth, int permanent_lists) {
   return 1;
 }
 
-/* The plan cache borrows a pattern only until its level is released. */
-static int _cache_keyable(Var value, int depth) =>
-  _pattern_borrowable(value, depth, 0);
-
-/* A compiler-owned site borrows its pattern for the life of the process. */
-static int _pattern_admissible(Var value, int depth) =>
-  _pattern_borrowable(value, depth, 1);
+/** Reports whether a plan may borrow `pattern` by its canonical identity.
+    `permanent_lists` requires every `List` in it to belong to the outermost
+    pool, as a plan kept for the life of the process does. Without it, a
+    `List` that is canonical now qualifies until its pool level is released.
+*/
+int MatchPlan.borrowable(Var pattern, int permanent_lists) =>
+  _pattern_borrowable(pattern, 0, permanent_lists);
 
 /* capture sites
 
@@ -1098,7 +1077,7 @@ static MatchPlan _site_publish(MatchCaptureSite *site, Var pattern) {
 }
 
 static void _site_prepare(MatchCaptureSite *site, Var pattern) {
-  if (!_pattern_admissible(pattern, 0)) {
+  if (!MatchPlan.borrowable(pattern, 1)) {
     __atomic_store_n(&site.refused, 1, __ATOMIC_RELEASE);
     return;
   }
@@ -1144,7 +1123,7 @@ static void _thread_check(int status, const char *action) {
     graph of values that outlives every call qualifies.
 */
 int x2c_match_pattern_retainable(Var pattern) =>
-  _pattern_admissible(pattern, 0);
+  MatchPlan.borrowable(pattern, 1);
 
 /** Returns the process-lifetime plan for one compiler-owned site.
     The first retainable pattern binds the site permanently. A pattern the site
@@ -1264,7 +1243,7 @@ List x2c_match_site_search_replace(
 int x2c_match_try_capture(
   List input, Var pattern, MatchCaptureBuffer *captures) {
   if (!captures) return 0;
-  return _plan_cache().try_capture(input, pattern, *captures, "match");
+  return MatchCache.current().try_capture(input, pattern, *captures, "match");
 }
 
 /** Matches `input` against `pat`, writing bindings on success.
@@ -1275,7 +1254,7 @@ int x2c_match_try_capture(
     preparing, materializing captures, or publishing bindings.
 */
 int List.try_match(List input, Var pat, List &?out_bindings) => out_bindings &&
-  _plan_cache().try_match(input, pat, out_bindings, "List.try_match");
+  MatchCache.current().try_match(input, pat, out_bindings, "List.try_match");
 
 /** Returns bindings when `input` matches `pat`, or `nil` on a miss.
     A binder-free success returns the nonnull `%(())` sentinel
@@ -1297,7 +1276,7 @@ List List.match(List input, Var pat) {
     preparing, materializing, or replacing.
 */
 int List.try_match_replace(List input, Var pat, Var template, Var &?out) =>
-  out && _plan_cache().try_match_replace(
+  out && MatchCache.current().try_match_replace(
     input, pat, template, out, "List.try_match_replace");
 
 /** Returns the `List` replacement when `input` matches `pat`.
@@ -1322,7 +1301,7 @@ meta native List List.match_replace(List input, Var pat, Var template) {
 */
 List List.search(List input, Var pat) {
   List results;
-  _plan_cache().search(input, pat, results, "List.search");
+  MatchCache.current().search(input, pat, results, "List.search");
   return results;
 }
 
@@ -1334,7 +1313,7 @@ List List.search(List input, Var pat) {
 */
 int List.try_search(
   List input, Var pat, Var &?out_match, List &?out_bindings) =>
-    out_match && out_bindings && _plan_cache().try_search(
+    out_match && out_bindings && MatchCache.current().try_search(
       input, pat, out_match, out_bindings, "List.try_search");
 
 /** Replaces every matching subtree in `input` from the leaves upward.
@@ -1346,7 +1325,7 @@ int List.try_search(
 */
 List List.search_replace(List input, Var pat, Var template) {
   List result;
-  _plan_cache().search_replace(
+  MatchCache.current().search_replace(
     input, pat, template, result, "List.search_replace");
   return result;
 }

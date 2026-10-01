@@ -765,6 +765,7 @@ static const char *evidence_rows[][2] = {
            "compiler fixtures)."},
   {"match", "`make verify` (`unittest/test-match.x`) and `make examples` "
             "(`match-nested`)."},
+  {"match-cache", "`make verify` (`unittest/test-match-cache.x`)."},
   {"match-recursive", "`make verify` (`unittest/test-match.x`)."},
   {"mutex", "`make verify` (`unittest/test-mutex.x`)."},
   {"pool", "`make verify` (`unittest/test-pool.x`)."},

@@ -67,7 +67,7 @@ prefix.
 | [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match.x` | `int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List *out_bindings)` |
 | [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match.x` | `int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var *out)` |
 | [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match.x` | `int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var *out_match, List *out_bindings)` |
-| [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match.x` | `void x2c_match_thread_release(void)` |
+| [`x2c_match_thread_release`](match-cache.md#x2c_match_thread_release) | `lib/match-cache.x` | `void x2c_match_thread_release(void)` |
 | [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer *captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
