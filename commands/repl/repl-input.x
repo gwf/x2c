@@ -591,29 +591,6 @@ static void _beep(void) {
 
 // editable buffer and display folds
 
-/* Rendering batches escape sequences into one write to reduce flicker. */
-struct RenderBuffer {
-  char *b;
-  int len;
-};
-
-static void _render_buffer_init(struct RenderBuffer *ab) {
-  ab.b = NULL;
-  ab.len = 0;
-}
-
-static void _render_buffer_append(
-  struct RenderBuffer *ab, const char *s, int len) {
-  char *new = Scope.realloc(ab.b, (size_t) ab.len + len);
-  memcpy(new+ab.len,s,len);
-  ab.b = new;
-  ab.len += len;
-}
-
-static void _render_buffer_close(struct RenderBuffer *ab) {
-  Scope.free(ab.b);
-}
-
 /* A fold is a display-only replacement for a range in l.buf. The edited
  * buffer always keeps the real bytes; refresh code asks l._render_buffer()
  * for a temporary printable version plus the cursor position inside it. */
@@ -896,9 +873,9 @@ static void EditState._adjust_folds_after_delete(
   }
 }
 
-/* Rewrite the wrapped display using terminal columns and codepoint widths. */
+/* Rewrite the wrapped display using terminal columns and codepoint widths,
+   batching escape sequences into one write to reduce flicker. */
 static void EditState._render(EditState *l, int flags) {
-  char seq[64];
   size_t pwidth = _display_width(l.prompt, l.plen);
   char *render = NULL;
   size_t render_len, render_pos;
@@ -910,7 +887,6 @@ static void EditState._render(EditState *l, int flags) {
   int col; /* column position, zero-based. */
   int old_rows = l.oldrows;
   int fd = l.input.ofd, j;
-  struct RenderBuffer ab;
 
   l._render_buffer(&render, &render_len, &render_pos);
   defer Scope.free(render);
@@ -921,41 +897,30 @@ static void EditState._render(EditState *l, int flags) {
 
   /* First step: clear all the lines used before. To do so start by
    * going to the last row. */
-  _render_buffer_init(&ab);
-  defer _render_buffer_close(&ab);
+  Buffer ab = $auto(Buffer.new(0));
 
   if (flags & REFRESH_CLEAN) {
-    if (old_rows-rpos > 0) {
-      snprintf(seq,64,"\x1b[%dB", old_rows-rpos);
-      _render_buffer_append(&ab,seq,strlen(seq));
-    }
+    if (old_rows-rpos > 0) ab.printf("\x1b[%dB", old_rows-rpos);
 
     /* Now for every row clear it, go up. */
-    for (j = 0; j < old_rows-1; j++) {
-      snprintf(seq,64,"\r\x1b[0K\x1b[1A");
-      _render_buffer_append(&ab,seq,strlen(seq));
-    }
+    for (j = 0; j < old_rows-1; j++) ab.write("\r\x1b[0K\x1b[1A");
   }
 
   if (flags & REFRESH_ALL) {
     /* Clean the top line. */
-    snprintf(seq,64,"\r\x1b[0K");
-    _render_buffer_append(&ab,seq,strlen(seq));
+    ab.write("\r\x1b[0K");
   }
 
   if (flags & REFRESH_WRITE) {
     /* Write the prompt and the current buffer content */
-    _render_buffer_append(&ab,l.prompt,l.plen);
-    _render_buffer_append(&ab,render,render_len);
+    ab.write_len(l.prompt, l.plen).write_len(render, render_len);
     /* If we are at the very end of the screen with our prompt, we need to
      * emit a newline and move the prompt to the first column. */
     if (l.pos &&
       render_pos == render_len &&
       (poswidth+pwidth) % l.cols == 0)
     {
-      _render_buffer_append(&ab,"\n",1);
-      snprintf(seq,64,"\r");
-      _render_buffer_append(&ab,seq,strlen(seq));
+      ab.write("\n\r");
       rows++;
       if (rows > (int)l.oldrows) l.oldrows = rows;
     }
@@ -964,24 +929,18 @@ static void EditState._render(EditState *l, int flags) {
     rpos2 = (pwidth+poswidth+l.cols)/l.cols;
 
     /* Go up till we reach the expected position. */
-    if (rows-rpos2 > 0) {
-      snprintf(seq,64,"\x1b[%dA", rows-rpos2);
-      _render_buffer_append(&ab,seq,strlen(seq));
-    }
+    if (rows-rpos2 > 0) ab.printf("\x1b[%dA", rows-rpos2);
 
     /* Set column. */
     col = (pwidth+poswidth) % l.cols;
-    if (col)
-      snprintf(seq,64,"\r\x1b[%dC", col);
-    else
-      snprintf(seq,64,"\r");
-    _render_buffer_append(&ab,seq,strlen(seq));
+    ab.write("\r");
+    if (col) ab.printf("\x1b[%dC", col);
   }
 
   l.oldpos = l.pos;
   if (flags & REFRESH_WRITE) l.oldrpos = rpos2;
 
-  _write_bytes(fd, ab.b, ab.len);
+  _write_bytes(fd, ab.content.bytes, ab.len());
 }
 
 static void EditState._refresh_line(EditState *l) {
@@ -1302,13 +1261,14 @@ static void EditState._paste(EditState *l) {
 
   {
     /* Normalize pasted CR and CRLF to LF, so the edit buffer uses one
-     * internal newline representation. */
+     * internal newline representation, and drop NUL as typed input does. */
     size_t r = 0, w = 0;
     while (r < len) {
       if (buf[r] == '\r') {
         buf[w++] = '\n';
         r += (r+1 < len && buf[r+1] == '\n') ? 2 : 1;
-      } else buf[w++] = buf[r++];
+      } else if (buf[r]) buf[w++] = buf[r++];
+      else r++;
     }
     len = w;
   }
