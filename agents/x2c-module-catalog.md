@@ -1155,7 +1155,7 @@ Public functions:
 `scan_c_string_status`, `scan_c_string`, `scan_c_character`,
 `scan_string_segment`, `scan_symbol_literal_status`, `scan_symbol_literal`,
 `scan_symbol_set_atom`, `scan_atom_status`, `scan_atom`,
-`scan_escape_sequence`, `scan_next_line_col`
+`scan_escape_sequence`, `scan_utf8_length`, `scan_next_line_col`
 
 ### [lib/scope.x](../lib/scope.x)
 
