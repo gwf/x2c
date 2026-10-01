@@ -123,19 +123,10 @@ Ast Ast.rewrite_children(Ast ast, Func per_child) {
   $ast.rewrite_children(ast, child, per_child(child.list()));
 }
 
-/** Returns whether any list under `value` has `kind` as its head. The
-    worklist keeps deeply nested operator chains off the C stack. */
+/** Returns whether any list under `value` has `kind` as its head. */
 int ast_contains_head(Var value, Symbol kind) {
-  Array pending = $auto([]);
-  pending.push(value);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    if (node.car() === kind) return 1;
-    for (List cursor = node; cursor; cursor = cursor.cdr)
-      if (cursor.car is <list>) pending.push(cursor.car);
-  }
+  List node;
+  $ast.walk(value, node) if (node.car() === kind) return 1;
   return 0;
 }
 

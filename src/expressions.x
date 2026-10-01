@@ -21,6 +21,7 @@ typedef struct PrintfFn {
 } PrintfFn;
 
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 $(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
@@ -947,15 +948,9 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
 }
 
 static int Compiler._needs_resolution(Compiler c, Var value) {
-  // The scan is an any-search; a worklist keeps deep operator chains from
-  // costing one C frame per nesting level.
-  Array pending = $auto([]);
   Macro lambda = $lambda_expression, captured = $lambda_captured;
-  pending.push(value);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list>) continue;
-    List syntax = current;
+  List syntax;
+  $ast.walk(value, syntax)
     match (syntax) {
       case %(expr (!or () (<macro-expr>)) ?): return 1;
       case %(expr ? (parens (block *))): continue;
@@ -980,9 +975,6 @@ static int Compiler._needs_resolution(Compiler c, Var value) {
       case %(decl ?(List base) *):
         if (base.type().declaration_parts().cadr()) return 1;
     }
-    foreach (Var child, syntax)
-      if (child is <list>) pending.push(child);
-  }
   return 0;
 }
 

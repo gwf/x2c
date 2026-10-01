@@ -11,6 +11,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 $(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
@@ -475,12 +476,8 @@ static List Capture.record(
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
-  Array pending = $auto([]);
-  pending.push(ast);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
+  List node;
+  $ast.walk(ast, node)
     match (node) {
       case $source_any_lambda(): continue;
       case $source_operator_content(%(& ?target)):
@@ -492,8 +489,6 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
         c._require_reference_arguments(callee_type, arguments);
       default: c._require_capture_lvalue(Ast.written_operand(node));
     }
-    foreach (Var child, node) pending.push(child);
-  }
 }
 
 static void Compiler._require_capture_lvalue(Compiler c, List target) {

@@ -54,16 +54,10 @@ static int _holds_statements(List expression) =>
 /* Whether a statement expression in `body`, before its regions lower,
    holds a `try`. */
 static int _expression_holds_try(List body) {
-  Array pending = $auto([body]);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list>) continue;
-    List node = current;
-    match (node) case %(expr *): {
-      if (ast_contains_head(node, <try>)) return 1;
-      continue;
-    }
-    foreach (Var child, node) pending.push(child);
+  List node;
+  $ast.walk(body, node) match (node) case %(expr *): {
+    if (ast_contains_head(node, <try>)) return 1;
+    continue;
   }
   return 0;
 }
@@ -259,16 +253,11 @@ static int RuntimeScan._input(RuntimeScan &s, List binding) =>
    those dimensions through the same static-input classifier as an ordinary
    initializer, without evaluating calls in a fixed-size operand. */
 static int RuntimeScan._sizeof_dimensions(RuntimeScan &s, List operand) {
-  Array pending = $auto([operand]);
-  while (pending.len()) {
-    List node = pending.take_last();
-    match (node)
-      case %(dim ?dimension): {
-        if (dimension && s.c.static_value_is_runtime(dimension, s.runtime))
-          return 1;
-        continue;
-      }
-    foreach (Var child, node) if (child is <list>) pending.push(child);
+  List node;
+  $ast.walk(operand, node) match (node) case %(dim ?dimension): {
+    if (dimension && s.c.static_value_is_runtime(dimension, s.runtime))
+      return 1;
+    continue;
   }
   return 0;
 }
@@ -990,22 +979,16 @@ static Var Compiler._changed_operand(Compiler c, List node) {
    qualifier the write itself does not ask for. `pointers` gains the holders
    that resolved, because their pointee type has to carry the qualifier too. */
 static void Preserve._aliased(Preserve &p, List body) {
-  Array pending = $auto([body]);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    match (node) case %(op = ?target ?source): {
-      String addressed = ast_addressed_identifier(source), holder = NULL;
-      match (target) case %(bind ?binding ?):
-        holder = binding_identity_spelling(binding);
-      if (!holder) holder = ast_direct_identifier(target);
-      if (addressed && holder && holder in p.holders) {
-        p.names[addressed] = 1;
-        p.pointers[holder] = 1;
-      }
+  List node;
+  $ast.walk(body, node) match (node) case %(op = ?target ?source): {
+    String addressed = ast_addressed_identifier(source), holder = NULL;
+    match (target) case %(bind ?binding ?):
+      holder = binding_identity_spelling(binding);
+    if (!holder) holder = ast_direct_identifier(target);
+    if (addressed && holder && holder in p.holders) {
+      p.names[addressed] = 1;
+      p.pointers[holder] = 1;
     }
-    foreach (Var child, node) pending.push(child);
   }
 }
 
