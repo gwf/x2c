@@ -1,8 +1,8 @@
-> Status: implemented; publication and provider acceptance in progress,
-> 2026-10-01. Original design baseline: origin/dev at ff9946c82.
-> Tools, shared worktree context, and optional offline probes are implemented.
-> The connected guidance is a separate submission in the first live batch.
-> Local rollout evidence lives in `debug/integration/` and `.context/`.
+> Status: done, 2026-10-01. Delivered to dev at 0e2c03a93195 through
+> PRs #74 and #75; the first live batch also integrated PR #76.
+> All three delivery modes and both supported providers were verified.
+> One successful full gate validated the three-PR batch; an earlier attempt
+> failed on mixed command examples in the documentation flag audit and was fixed.
 
 # Batched dev integration
 
@@ -63,32 +63,32 @@ making a worker fall back to direct publication without Gary's instruction.
 
 ## Current owners and evidence
 
-- [Root guidance](../AGENTS.md) currently gates shared tips, including PR
+- [Root guidance](../../AGENTS.md) currently gates shared tips, including PR
   branches, and authorizes routine direct delivery to `dev`. PR submissions
   need a deliberate exception in shared-integrator mode. Direct delivery in
   individual and session-orchestration modes remains valid.
-- [Orchestration](../agents/skills/orchestrate-x2c-work/SKILL.md) already
+- [Orchestration](../../agents/skills/orchestrate-x2c-work/SKILL.md) already
   assigns focused verification to workers and batches their private handoffs.
   Preserve that mode and add its optional PR delivery route. The standing
   integrator skill owns the queue across independent sessions and providers.
-- [land-dev](../tools/land-dev) serializes publication in one Git common
+- [land-dev](../../tools/land-dev) serializes publication in one Git common
   directory, integrates upstream, generates docs, gates, commits generated
   output, and pushes. It does not collect independent waiting submissions.
   It now allows one second bootstrap round after a `stage-diff-0` failure.
-- [gate-state](../tools/gate-state.py) owns exact file/configuration/tool
+- [gate-state](../../tools/gate-state.py) owns exact file/configuration/tool
   identity and unchanged-tree reuse. Its ignored receipts are workspace-local.
-- [The worker hook](../tools/hooks/pre-push) prevents `agent-*` worktrees
+- [The worker hook](../../tools/hooks/pre-push) prevents `agent-*` worktrees
   pushing shared branches, but is not a remote access boundary. `make configure`
   sets Git's `core.hooksPath` to `tools/hooks`; that Git hook is shared by
   providers. Its current directory-name check does not prove coverage of
   either provider's differently named worktrees.
-- [Agent guidance](../agents/AGENTS.md) owns one canonical `agents/skills/`
+- [Agent guidance](../../agents/AGENTS.md) owns one canonical `agents/skills/`
   directory. `.agents/skills` and `.claude/skills` both link there, and
   `CLAUDE.md` links to `AGENTS.md`. Preserve these shared owners rather than
   copy the new skill or delivery rules into separate provider versions.
-- [Performance guidance](../agents/performance-checkpoints.md) already
+- [Performance guidance](../../agents/performance-checkpoints.md) already
   measures applicable coherent batches separately from correctness gates.
-- [The tooling plan](x2c-scripting-ports.md#ruling-on-gate-tooling) keeps
+- [The tooling plan](../x2c-scripting-ports.md#ruling-on-gate-tooling) keeps
   tooling that operates around bootstrap independent of the compiler.
 
 Current local gate duration, queue arrival rate, and realized batching savings
@@ -437,6 +437,43 @@ a failed worktree to make the queue appear healthy.
   repeated per-agent publication work; it adds no recurring test/planning/commit
   gate and does not replace the other two operating modes.
   The plan does not authorize production promotion or install a scheduler.
+
+## Delivered result
+
+The shared coordinator, delivery context, Git hook, publication helper, and
+standing integrator skill are live. Direct delivery remains the default.
+The canonical skill and context work in both native worktree types; no extra
+provider startup adapter was necessary. Fresh native sessions verified mode
+selection, inherited worker ownership, review stops, private checkpoints, and
+submission through the common tools. Disposable probes covered the queue,
+publication recovery, dependencies, upstream races, bounded waits, and worker
+submission while the integration gate owns its lock.
+
+The first landed batch froze PRs #75, #74, and #76 at their submitted revisions.
+Its successful full gate took 291.7 seconds; publication reused the unchanged
+proof and took 4.0 seconds. An earlier two-PR attempt failed after 71.2 seconds
+because the documentation audit interpreted coordinator and Git flags as
+compiler flags. Reusing the existing mixed-command audit fixed the cause.
+The successful batch passed bootstrap/self-host comparisons, 934 unit tests,
+920 compiler fixtures, documentation checks, displayed examples, and REPL
+checks without another bootstrap round.
+
+Readiness-to-landing latency was 35m55s for #75, 35m49s for #74, and 17m17s for
+#76. These include first-rollout acceptance, the documentation repair, and
+final proof diagnosis; they are not steady-state queue timings. No comparable
+single-change gate run establishes a measured speedup. The observed result is
+three ready PRs validated by one successful full gate. The five-minute collection
+window and cap of five remain configurable defaults rather than performance
+claims. Review-held PR #73 was kept outside this batch, so its conflicts did
+not block publication of ready work.
+
+A direct shell opened in the nested candidate reordered PATH and reported a
+configuration mismatch. The original integration checkout's environment
+matched the recorded build configuration exactly, and publication checked and
+reused that proof normally. No receipt was edited and no gate was rerun for
+this shell difference. Full attempt logs and frozen metadata remain in the
+integration checkout's ignored `debug/integration/`; local provider and rollout
+evidence remains outside shipped source.
 
 ## Plan review
 

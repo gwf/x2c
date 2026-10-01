@@ -44,10 +44,6 @@ execution.
 
 ### Current work
 
-- [Batched dev integration](batched-dev-integration.md): preserve individual
-  and session-orchestrated integration; add an optional standing PR integrator
-  for workers and orchestrators, supporting Codex and Claude in version 1.
-  No policy change is live.
 - [x2c self-expression](x2c-self-expression.md): reproduced defects, then
   three waves that express each relationship at the largest ordinary x2c
   form that owns it, prototypes, and four language-design questions.
@@ -86,6 +82,10 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Batched dev integration](archive/batched-dev-integration.md): done
+  2026-10-01 at `0e2c03a93195`; all three delivery modes are live, the shared
+  tools work in both native worktree types, and PRs #74, #75, and #76 landed
+  with one successful full gate. Explicit review stops remain held.
 - [Source organization](archive/x2c-source-organization.md): done
   2026-09-30; one subject per file, one owner per fact, reading order, and
   record ownership across `src/` and `lib/`, with 14 new units and every
