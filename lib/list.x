@@ -637,6 +637,7 @@ Self List.filter(Self lst, Func pred) {
     Any cause raised by `fn` propagates.
 */
 Var List.foldl(List lst, Var seed, Func fn) {
+  if (!fn) return seed is void && lst ? lst.car : seed;
   struct Iter storage;
   return lst.iter(&storage).foldl(seed, fn);
 }
