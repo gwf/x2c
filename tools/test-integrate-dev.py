@@ -1,0 +1,468 @@
+#!/usr/bin/env python3
+"""Optional offline integration probes; never part of a Make gate.
+
+Run tools/test-integrate-dev.py. Every remote, PR, gate and compiler operation
+is disposable or stubbed. Git's real merges, ancestry and pushes are retained.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
+TOOL_ROOT = Path(__file__).resolve().parent.parent
+
+GH = r'''#!/usr/bin/env python3
+import json, os, re, sys
+from pathlib import Path
+path = Path(os.environ['PROBE_STATE'])
+s = json.loads(path.read_text())
+a = sys.argv[1:]
+s.setdefault('gh_calls', []).append(a)
+def done(value):
+    path.write_text(json.dumps(s))
+    print(json.dumps([value] if '--slurp' in a else value))
+    sys.exit(0)
+if a[:2] == ['repo', 'view']:
+    path.write_text(json.dumps(s))
+    print('fixture/x2c' if '--jq' in a else json.dumps({'nameWithOwner':'fixture/x2c'}))
+    sys.exit(0)
+if not a or a[0] != 'api':
+    sys.exit('unexpected gh command: ' + repr(a))
+method = 'GET'
+for flag in ('--method', '-X'):
+    if flag in a: method = a[a.index(flag)+1]
+endpoint = next(x for x in a[1:] if x.startswith('repos/'))
+body = {}
+if '--input' in a:
+    input_file = a[a.index('--input')+1]
+    body = json.loads(sys.stdin.read() if input_file == '-' else Path(input_file).read_text())
+for i, arg in enumerate(a[:-1]):
+    if arg in ('-f','-F','--field','--raw-field'):
+        key, value = a[i+1].split('=',1)
+        if key == 'labels[]': body.setdefault('labels',[]).append(value)
+        else: body[key] = value
+        if method == 'GET': method = 'POST'
+m = re.search(r'/(?:pulls|issues)/(\d+)', endpoint)
+pr = s['pulls'].get(m.group(1)) if m else None
+if '/events' in endpoint or '/timeline' in endpoint:
+    done(pr.get('events',[]) if pr else [])
+if '/labels' in endpoint:
+    if endpoint.rstrip('/').endswith('/labels'):
+        if method == 'GET': done(pr['labels'] if pr else [])
+        if pr:
+            for label in body.get('labels',[]):
+                if not any(x['name'] == label for x in pr['labels']):
+                    pr['labels'].append({'name':label})
+                    pr.setdefault('events',[]).append({'event':'labeled','label':{'name':label},'created_at':'2026-01-01T00:00:00Z'})
+        done(pr['labels'] if pr else body)
+    if method == 'DELETE' and pr:
+        label = endpoint.rsplit('/',1)[-1]
+        pr['labels'] = [x for x in pr['labels'] if x['name'] != label]
+    done({})
+if '/pulls' in endpoint:
+    if pr:
+        if method in ('PATCH','POST'): pr.update(body)
+        done(pr)
+    done([p for p in s['pulls'].values() if p['state']=='open' and p['base']['ref']=='dev'])
+if '/issues' in endpoint and pr:
+    if method == 'PATCH': pr.update(body)
+    done(pr)
+sys.exit('unexpected gh endpoint: ' + endpoint)
+'''
+
+GATE = r'''#!/usr/bin/env python3
+import hashlib, json, os, subprocess, sys
+from pathlib import Path
+root = Path.cwd()
+p = Path(os.environ['PROBE_STATE'])
+s = json.loads(p.read_text())
+def identity():
+    names = subprocess.check_output(['git','ls-files','-co','--exclude-standard','-z']).split(b'\0')
+    h = hashlib.sha256()
+    for name in sorted(set(names)):
+        if not name: continue
+        f = root / os.fsdecode(name)
+        h.update(name)
+        h.update(str(f.stat().st_mode).encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()
+receipt = root / 'debug' / 'probe-receipt.json'
+command, target = sys.argv[1:3]
+if command == 'check':
+    sys.exit(0 if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity()} else 1)
+if receipt.exists() and json.loads(receipt.read_text()) == {'target':target,'identity':identity()}:
+    print('valid'); sys.exit(0)
+s.setdefault('gates',[]).append({'target':target,'root':str(root)})
+mode = s.get('gate_failure')
+if target == 'agent-pr-check':
+    files = sorted((root/'src').glob('*.x'))
+    (root/'bootstrap'/'src'/'compiled.c').write_text('generated: ' + '|'.join(f.read_text() for f in files))
+if s.get('advance_on_gate'):
+    subprocess.check_call(['git','--git-dir',s['remote'],'update-ref','refs/heads/dev',s.pop('advance_on_gate')])
+if mode == 'ordinary' or mode == 'bootstrap_once':
+    if mode == 'bootstrap_once': s.pop('gate_failure')
+    p.write_text(json.dumps(s))
+    print('[stage-diff-0] Error' if mode == 'bootstrap_once' else 'fixture test failure')
+    sys.exit(1)
+if s.get('authored_mutation'):
+    (root/'src'/'surprise.x').write_text('unreviewed mutation\n')
+receipt.parent.mkdir(exist_ok=True)
+receipt.write_text(json.dumps({'target':target,'identity':identity()}))
+p.write_text(json.dumps(s))
+print('valid')
+'''
+
+MAKE = r'''#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+p=Path(os.environ['PROBE_STATE']); s=json.loads(p.read_text())
+s.setdefault('makes',[]).append({'args':sys.argv[1:],'root':str(Path.cwd())})
+p.write_text(json.dumps(s))
+if 'build-safe' in sys.argv or 'build' in sys.argv:
+    binary=Path('builds/0/x2c'); binary.parent.mkdir(parents=True,exist_ok=True)
+    binary.write_text('#!/bin/sh\nexit 0\n'); binary.chmod(0o755)
+'''
+
+
+class IntegrationProbe(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix='x2c-integration-probe-')
+        self.addCleanup(self.temporary.cleanup)
+        self.directory = Path(self.temporary.name)
+        self.root = self.directory / 'plain-checkout'
+        self.remote = self.directory / 'remote.git'
+        self.bin = self.directory / 'bin'
+        self.bin.mkdir()
+        self.state_path = self.directory / 'github.json'
+        self.state_path.write_text(json.dumps({'pulls':{},'remote':str(self.remote)}))
+        self.env = dict(os.environ, PATH=str(self.bin)+os.pathsep+os.environ['PATH'],
+                        PROBE_STATE=str(self.state_path), GIT_TERMINAL_PROMPT='0',
+                        GIT_AUTHOR_NAME='Fixture', GIT_AUTHOR_EMAIL='fixture@example.invalid',
+                        GIT_COMMITTER_NAME='Fixture', GIT_COMMITTER_EMAIL='fixture@example.invalid')
+        self.write(self.bin/'gh', GH, executable=True)
+        self.write(self.bin/'make', MAKE, executable=True)
+        git_binary = shutil.which('git')
+        git_wrapper = ('#!/usr/bin/env python3\n'
+                       'import json, os, sys\nfrom pathlib import Path\n'
+                       "p=Path(os.environ['PROBE_STATE']); s=json.loads(p.read_text())\n"
+                       "s.setdefault('git_calls',[]).append(sys.argv[1:])\n"
+                       'p.write_text(json.dumps(s))\n'
+                       f'os.execv({git_binary!r}, [{git_binary!r}, *sys.argv[1:]])\n')
+        self.write(self.bin/'git', git_wrapper, executable=True)
+        self.command(['git','init','--bare',str(self.remote)], cwd=self.directory)
+        self.command(['git','init','-b','dev',str(self.root)], cwd=self.directory)
+        self.git('config','user.name','Fixture')
+        self.git('config','user.email','fixture@example.invalid')
+        self.git('remote','add','origin',str(self.remote))
+        for name in ('integrate-dev.py','agent_context.py','land-dev','hooks/pre-push'):
+            source = TOOL_ROOT/'tools'/name
+            self.assertTrue(source.exists(), f'missing implementation tool: {source}')
+            dest = self.root/'tools'/name
+            dest.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy2(source,dest)
+        self.write(self.root/'tools'/'gate-state.py',GATE,executable=True)
+        self.write(self.root/'.gitignore','debug/\nbuilds/\n__pycache__/\n')
+        self.write(self.root/'src'/'baseline.x','baseline\n')
+        self.write(self.root/'bootstrap'/'src'/'compiled.c','seed\n')
+        self.write(self.root/'docs'/'guide.md','old guide\n')
+        self.git('add','.')
+        self.git('commit','-qm','fixture baseline')
+        self.base = self.git('rev-parse','HEAD').stdout.strip()
+        self.git('push','-q','origin','HEAD:refs/heads/dev')
+        self.cli('context','--role','integrator','--delivery','direct')
+
+    @staticmethod
+    def write(path, content, executable=False):
+        path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text(content)
+        if executable: path.chmod(0o755)
+
+    def command(self,args,cwd=None,ok=True,input=None):
+        result=subprocess.run(args,cwd=cwd or self.root,env=self.env,input=input,
+                              text=True,capture_output=True,timeout=30)
+        if ok: self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        return result
+
+    def git(self,*args,ok=True,cwd=None):
+        return self.command(['git',*args],cwd=cwd,ok=ok)
+
+    def cli(self,*args,ok=True):
+        return self.command([sys.executable,str(self.root/'tools'/'integrate-dev.py'),
+                         '--root',str(self.root),*map(str,args)],ok=ok)
+
+    def state(self,**changes):
+        value=json.loads(self.state_path.read_text())
+        if changes:
+            value.update(changes)
+            self.state_path.write_text(json.dumps(value))
+        return value
+
+    def pr(self,number,path=None,content=None,base=None,depends=(),ready=True):
+        self.git('checkout','-q','-B',f'work-{number}',base or self.base)
+        self.write(self.root/(path or f'src/change-{number}.x'),content or f'change {number}\n')
+        self.git('add','.')
+        self.git('commit','-qm',f'fixture change {number}')
+        head=self.git('rev-parse','HEAD').stdout.strip()
+        self.git('push','-q','origin',f'HEAD:refs/pull/{number}/head')
+        self.git('checkout','-q','dev')
+        metadata={'version':1,'base':base or self.base,'head':head,
+                  'dependencies':[{'pr':n,'head':h} for n,h in depends],
+                  'evidence':[{'command':'fixture focused check','result':'passes'}],'notes':''}
+        body='Authored explanation.\n<!-- x2c-integration:start -->\n```json\n'+json.dumps(metadata)+'\n```\n<!-- x2c-integration:end -->\n'
+        pull={'number':number,'state':'open','draft':False,'body':body,
+              'html_url':f'https://example.invalid/fixture/x2c/pull/{number}',
+              'head':{'sha':head,'ref':f'work-{number}','repo':{'full_name':'fixture/x2c'}},
+              'base':{'sha':self.base,'ref':'dev','repo':{'full_name':'fixture/x2c'}},
+              'labels':[{'name':'integration-ready'}] if ready else [],
+              'events':[{'event':'labeled','label':{'name':'integration-ready'},
+                         'created_at':'2026-01-01T00:00:00Z'}] if ready else []}
+        s=self.state(); s['pulls'][str(number)]=pull
+        self.state_path.write_text(json.dumps(s))
+        return head
+
+    def record(self,batch=None):
+        paths=sorted((self.root/'debug'/'integration').glob('*/batch.json'))
+        self.assertTrue(paths,'prepare must retain a batch record')
+        for path in paths:
+            value=json.loads(path.read_text())
+            if batch is None or value['id']==batch:
+                return {**value,'_path':str(path)}
+        self.fail(f'missing batch record: {batch}')
+
+    def prepare(self,*args):
+        result=self.cli('prepare','--flush',*args)
+        record=json.loads(result.stdout)
+        self.assertEqual(record['state'],'review',result.stdout)
+        return record['id']
+
+    def checkout(self,record):
+        return Path(record['worktree'])
+
+    def tip(self):
+        return self.git('--git-dir',str(self.remote),'rev-parse','refs/heads/dev').stdout.strip()
+
+    def assert_ancestor(self,revision):
+        self.git('--git-dir',str(self.remote),'merge-base','--is-ancestor',revision,self.tip())
+
+    def land(self,batch):
+        result=self.cli('land',batch)
+        value=json.loads(result.stdout)
+        if value['state'] != 'gated':
+            logs='\n'.join(Path(a['log']).read_text() for a in value['attempts'])
+            self.fail(result.stdout+'\n'+logs)
+        result=self.cli('land',batch,'--publish')
+        self.assertEqual(json.loads(result.stdout)['state'],'landed',result.stdout)
+
+    def test_submit_preserves_prose_and_refreshes_readiness(self):
+        head=self.pr(1)
+        self.git('checkout','-q','work-1')
+        self.cli('context','--role','individual','--delivery','pr')
+        evidence=self.root/'debug'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'specific fixture check','result':'passes'}]))
+        self.cli('submit','--pr','1','--base',self.base,'--evidence-file',evidence)
+        state=self.state(); pull=state['pulls']['1']
+        self.assertTrue(pull['body'].startswith('Authored explanation.'))
+        self.assertEqual(pull['body'].count('<!-- x2c-integration:start -->'),1)
+        self.assertIn(head,pull['body'])
+        self.assertEqual(pull['labels'],[{'name':'integration-ready'}])
+        calls=state['gh_calls']
+        delete=next(i for i,c in enumerate(calls) if 'DELETE' in c)
+        patch=next(i for i,c in enumerate(calls) if 'PATCH' in c)
+        add=max(i for i,c in enumerate(calls) if 'POST' in c)
+        self.assertLess(delete,patch); self.assertLess(patch,add)
+        self.assertEqual(state.get('gates',[]),[])
+
+    def test_missing_dependency_waits_without_creating_candidate(self):
+        self.pr(1,depends=[(99,'0'*40)])
+        result=json.loads(self.cli('prepare','--flush').stdout)
+        self.assertEqual(result['ready'],[])
+        self.assertIn('dependency',result['pending'][0]['reason'])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_conflict_preserves_candidate_and_requires_resolution(self):
+        self.pr(1,'src/shared.x','first intent\n')
+        self.pr(2,'src/shared.x','second intent\n')
+        record=json.loads(self.cli('prepare','--flush').stdout)
+        self.assertEqual(record['state'],'needs-attention')
+        candidate=Path(record['worktree'])
+        self.assertTrue(self.git('rev-parse','--verify','MERGE_HEAD',cwd=candidate).stdout)
+        self.assertIn('<<<<<<<',(candidate/'src/shared.x').read_text())
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+        self.assertNotEqual(self.cli('land',record['id'],ok=False).returncode,0)
+
+    def test_upstream_changes_during_gate_never_pushes(self):
+        self.pr(1); batch=self.prepare()
+        self.git('checkout','-q','-B','external',self.base)
+        self.write(self.root/'src/external.x','outside change\n')
+        self.git('add','.'); self.git('commit','-qm','fixture outside advance')
+        advance=self.git('rev-parse','HEAD').stdout.strip()
+        self.git('push','-q','origin','HEAD:refs/heads/external')
+        self.git('checkout','-q','dev')
+        self.state(advance_on_gate=advance)
+        result=json.loads(self.cli('land',batch).stdout)
+        self.assertIn(result['state'],{'gated','needs-attention'})
+        result=json.loads(self.cli('land',batch,'--publish').stdout)
+        self.assertEqual(result['state'],'review')
+        self.assertEqual(self.tip(),advance)
+        self.assertEqual(len(self.state()['gates']),1)
+
+    def test_multi_pr_one_gate_includes_generated_output(self):
+        heads=[self.pr(1),self.pr(2)]
+        batch=self.prepare(); self.land(batch)
+        for head in heads: self.assert_ancestor(head)
+        self.assertEqual(len(self.state().get('gates',[])),1)
+        generated=self.git('--git-dir',str(self.remote),'show','dev:bootstrap/src/compiled.c').stdout
+        self.assertIn('change 1',generated); self.assertIn('change 2',generated)
+        self.assertFalse(any(p['labels'] for p in self.state()['pulls'].values()))
+
+    def test_mixed_and_unknown_documentation_paths_use_code_gate(self):
+        self.pr(1,'docs/guide.md','new guide\n')
+        self.pr(2,'docs/checker.sh','echo executable documentation helper\n')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['agent-pr-check'])
+
+    def test_documentation_batch_uses_only_doc_gate(self):
+        head=self.pr(1,'docs/guide.md','new guide\n')
+        batch=self.prepare(); self.land(batch)
+        self.assert_ancestor(head)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_gate_failure_never_pushes(self):
+        self.pr(1); self.state(gate_failure='ordinary')
+        batch=self.prepare()
+        result=self.cli('land',batch,ok=False)
+        self.assertEqual(json.loads(result.stdout)['state'],'needs-attention')
+        self.assertEqual(self.tip(),self.base)
+        self.assertNotEqual(self.cli('land',batch,'--publish',ok=False).returncode,0)
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(len(self.state().get('gates',[])),1)
+
+    def test_bootstrap_second_round_is_bounded(self):
+        self.pr(1); self.state(gate_failure='bootstrap_once')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual(len(self.state()['gates']),2)
+
+    def test_changed_head_and_withdrawal_stop_before_push(self):
+        for change in ('head','label'):
+            with self.subTest(change=change):
+                if change=='label':
+                    self.cli('park',batch)
+                    self.pr(2)
+                    batch=self.prepare('--prs','2')
+                else:
+                    self.pr(1); batch=self.prepare()
+                self.cli('land',batch)
+                s=self.state(); number='1' if change=='head' else '2'
+                if change=='head': s['pulls'][number]['head']['sha']='0'*40
+                else: s['pulls'][number]['labels']=[]
+                self.state_path.write_text(json.dumps(s))
+                self.assertNotEqual(self.cli('land',batch,'--publish',ok=False).returncode,0)
+                self.assertEqual(self.tip(),self.base)
+
+    def test_dependencies_preserve_pinned_ancestry(self):
+        first=self.pr(1)
+        second=self.pr(2,base=first,depends=[(1,first)])
+        batch=self.prepare(); self.land(batch)
+        self.assert_ancestor(first); self.assert_ancestor(second)
+        self.assertEqual(len(self.state()['gates']),1)
+
+    def test_parked_revisions_are_held(self):
+        self.pr(1); batch=self.prepare(); self.cli('park',batch)
+        self.pr(2); another=self.prepare()
+        record=self.record(another)
+        candidate=self.checkout(record)
+        first=self.state()['pulls']['1']['head']['sha']
+        self.assertNotEqual(self.git('merge-base','--is-ancestor',first,'HEAD',cwd=candidate,ok=False).returncode,0)
+
+    def test_upstream_advancement_requires_new_review(self):
+        self.pr(1); batch=self.prepare()
+        self.git('checkout','-q','-B','external',self.base)
+        self.write(self.root/'src/external.x','outside change\n')
+        self.git('add','.'); self.git('commit','-qm','fixture outside advance')
+        advanced=self.git('rev-parse','HEAD').stdout.strip()
+        self.git('push','-q','origin','HEAD:refs/heads/dev')
+        self.git('checkout','-q','dev')
+        result=self.cli('land',batch,ok=False)
+        self.assertEqual(json.loads(result.stdout)['state'],'review')
+        self.assertIn('dev advanced',json.loads(result.stdout)['reason'])
+        self.assertEqual(self.tip(),advanced)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_crash_after_push_reconciles_without_repeating_work(self):
+        head=self.pr(1); batch=self.prepare(); self.cli('land',batch)
+        candidate=self.checkout(self.record(batch))
+        self.git('push','-q','origin','HEAD:refs/heads/dev',cwd=candidate)
+        before=self.state()
+        pushes=sum('push' in call for call in before['git_calls'])
+        gates=len(before['gates'])
+        landed=self.tip()
+        self.cli('land',batch,'--publish')
+        self.assertEqual(self.tip(),landed)
+        self.assert_ancestor(head)
+        after=self.state()
+        self.assertEqual(sum('push' in call for call in after['git_calls']),pushes)
+        self.assertEqual(len(after['gates']),gates)
+
+    def test_generated_conflict_can_resume_after_owner_resolution(self):
+        heads=[self.pr(1,'bootstrap/src/compiled.c','first generated output\n'),
+               self.pr(2,'bootstrap/src/compiled.c','second generated output\n')]
+        record=json.loads(self.cli('prepare','--flush').stdout)
+        self.assertEqual(record['state'],'needs-attention')
+        candidate=Path(record['worktree'])
+        self.write(candidate/'bootstrap/src/compiled.c','fixture regenerated seed\n')
+        self.git('add','bootstrap/src/compiled.c',cwd=candidate)
+        self.git('commit','-qm','resolve generated output from owner',cwd=candidate)
+        batch=self.prepare(); self.land(batch)
+        for head in heads: self.assert_ancestor(head)
+        self.assertEqual(len(self.state()['gates']),1)
+        generated=self.git('--git-dir',str(self.remote),'show','dev:bootstrap/src/compiled.c').stdout
+        self.assertEqual(generated,'generated: baseline\n')
+
+    def test_gate_cannot_silently_commit_unexpected_authored_changes(self):
+        self.pr(1); self.state(authored_mutation=True)
+        batch=self.prepare()
+        result=json.loads(self.cli('land',batch).stdout)
+        self.assertEqual(result['state'],'needs-attention')
+        self.assertEqual(self.tip(),self.base)
+        candidate=self.checkout(result)
+        self.assertTrue((candidate/'src/surprise.x').exists())
+
+    def test_interrupted_before_push_reuses_unchanged_gate_proof(self):
+        self.pr(1); batch=self.prepare(); self.cli('land',batch)
+        record=self.record(batch)
+        path=Path(record.pop('_path'))
+        record['state']='gating'; record.pop('gated',None)
+        path.write_text(json.dumps(record))
+        self.land(batch)
+        self.assertEqual(len(self.state()['gates']),1)
+
+    def test_provider_neutral_push_guard(self):
+        for role,delivery,blocked in [('worker','direct',True),('individual','pr',True),
+                                      ('orchestrator','pr',True),('individual','direct',False),
+                                      ('integrator','direct',False)]:
+            with self.subTest(role=role,delivery=delivery):
+                self.cli('context','--role',role,'--delivery',delivery)
+                hook=self.command([str(self.root/'tools'/'hooks'/'pre-push')],
+                              input='refs/heads/dev '+self.base+' refs/heads/dev '+self.base+'\n',ok=False)
+                self.assertEqual(hook.returncode!=0,blocked)
+                pr_hook=self.command([str(self.root/'tools'/'hooks'/'pre-push')],
+                                input='refs/heads/work '+self.base+' refs/heads/work '+self.base+'\n',ok=False)
+                self.assertEqual(pr_hook.returncode,0,pr_hook.stderr)
+
+
+if __name__ == '__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--tool-root',type=Path,default=TOOL_ROOT,
+                        help='checkout containing the implementation under test')
+    args,unittest_args=parser.parse_known_args()
+    TOOL_ROOT=args.tool_root.resolve()
+    unittest.main(argv=[sys.argv[0],*unittest_args],verbosity=2)
