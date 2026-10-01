@@ -202,13 +202,13 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
   meta.requested_size = size;
   meta.drop = drop;
   ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
-  _attach(*slot, alloc);
+  (*slot)._attach(alloc);
   _record_allocation(size);
   return $scope.alloc_ptr(alloc);
 }
 
 /* New blocks go first, so destruction reclaims the newest block first. */
-static void _attach(Scope scope, ScopeAlloc alloc) {
+static void Scope._attach(Scope scope, ScopeAlloc alloc) {
   alloc.next = scope.first;
   alloc.prev = $scope.tag_pointer(scope);
   if (scope.first) scope.first.prev = alloc;
@@ -250,9 +250,9 @@ void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
     duplicating a C string means copying its terminator too:
     `Scope.memdup(text, strlen(text) + 1)`.
 
-    A NULL `ptr` or a zero `size` returns NULL rather than an empty
-    allocation, so a duplicate of nothing is indistinguishable from failure;
-    check the arguments yourself when that distinction matters.
+    A NULL `ptr` or a zero `size` returns NULL and allocates nothing, so a
+    duplicate of nothing is indistinguishable from failure; check the
+    arguments when that distinction matters.
     Raises: `<size-limit>` or `<alloc-fail>` from the underlying allocation.
     A NULL `ptr` or zero `size` returns NULL without raising.
 */
@@ -310,7 +310,7 @@ static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
 meta native void Scope.free(void *ptr) {
   _require_running();
   if (!ptr) return;
-  _free_alloc($scope.ptr_alloc(ptr));
+  ScopeAlloc._free($scope.ptr_alloc(ptr));
 }
 
 /** Returns the `Scope` that currently owns `ptr`.
@@ -359,8 +359,8 @@ meta native void Scope.move(void *ptr, Scope *slot) {
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
   ScopeAlloc alloc = $scope.ptr_alloc(ptr);
-  _detach(alloc);
-  _attach(*slot, alloc);
+  alloc._detach();
+  (*slot)._attach(alloc);
 }
 
 /** Resizes one scope-owned allocation and returns the new pointer.
@@ -379,7 +379,7 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
   _require_running();
   if (!ptr) return _malloc_in(_thread().active, size, NULL);
   if (!size) {
-    _free_alloc($scope.ptr_alloc(ptr));
+    ScopeAlloc._free($scope.ptr_alloc(ptr));
     return NULL;
   }
   ScopeAlloc old = $scope.ptr_alloc(ptr), next = old.next, prev = old.prev;
@@ -391,33 +391,34 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
     old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
   meta.requested_size = size;
   ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
-  _relink(replacement, prev, next);
+  replacement._relink(prev, next);
   _record_resize(old_size, size);
   return $scope.alloc_ptr(replacement);
 }
 
-static void _free_alloc(ScopeAlloc alloc) {
-  _detach(alloc);
-  _release_alloc(alloc);
+static void ScopeAlloc._free(ScopeAlloc alloc) {
+  alloc._detach();
+  alloc._release();
 }
 
-static void _detach(ScopeAlloc alloc) {
+static void ScopeAlloc._detach(ScopeAlloc alloc) {
   ScopeAlloc next = alloc.next, prev = alloc.prev;
-  _point_to(prev, next);
+  prev._point_to(next);
   if (next) next.prev = prev;
 }
 
 /* Puts `alloc` where a block between `prev` and `next` was. */
-static void _relink(ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
+static void ScopeAlloc._relink(
+  ScopeAlloc alloc, ScopeAlloc prev, ScopeAlloc next) {
   alloc.next = next;
   alloc.prev = prev;
   if (next) next.prev = alloc;
-  _point_to(prev, alloc);
+  prev._point_to(alloc);
 }
 
 /* The link before a block is its owner's head when `prev` is the tagged
    owner, and the preceding block's `next` otherwise. */
-static void _point_to(ScopeAlloc prev, ScopeAlloc alloc) {
+static void ScopeAlloc._point_to(ScopeAlloc prev, ScopeAlloc alloc) {
   if ($scope.is_tagged(prev)) {
     Scope scope = $scope.untag_pointer(prev);
     scope.first = alloc;
@@ -427,7 +428,7 @@ static void _point_to(ScopeAlloc prev, ScopeAlloc alloc) {
 
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
-static void _release_alloc(ScopeAlloc alloc) {
+static void ScopeAlloc._release(ScopeAlloc alloc) {
   ScopeMetadata *meta = $scope.alloc_meta(alloc);
   void (*drop)(void *) = meta.drop;
   _record_free(meta.requested_size);
@@ -545,7 +546,7 @@ meta native void Scope.retain(void) {
   _require_running();
   Scope scope = _new_scope(NULL);
   ScopeThreadState state = _thread();
-  _record_retain(scope, state.active);
+  scope._record_retain(state.active);
   if (*state.active) {
     scope.down = *state.active;
     (*state.active).up = scope;
@@ -583,18 +584,18 @@ meta native void Scope.release(void) {
   _require_running();
   ScopeThreadState state = _thread();
   with state.active as active {
-    if (!*active || !_forget_retain(*active, active)) raise %(bad-state);
+    if (!*active || !(*active)._forget_retain(active)) raise %(bad-state);
     Scope top = *active;
     /* Restore and detach the surviving lower region before destruction, so
        the active slot never names freed storage and `_destroy_chain` cannot
        follow `down` into the surrounding lifetime. */
     if ((*active = top.down)) (*active).up = NULL;
     top.down = NULL;
-    _destroy_chain(top);
+    top._destroy_chain();
   }
 }
 
-static void _record_retain(Scope scope, Scope *slot) {
+static void Scope._record_retain(Scope scope, Scope *slot) {
   ScopeThreadState state = _thread();
   state.retains = _raw_grow(
     state.retains, state.retain_count, state.retain_capacity,
@@ -603,7 +604,7 @@ static void _record_retain(Scope scope, Scope *slot) {
     (ScopeRetain) { .scope = scope, .slot = slot };
 }
 
-static int _forget_retain(Scope scope, Scope *slot) {
+static int Scope._forget_retain(Scope scope, Scope *slot) {
   ScopeThreadState state = _thread();
   for (int i = state.retain_count - 1; i >= 0; i--) {
     if (state.retains[i].scope != scope ||
@@ -616,16 +617,16 @@ static int _forget_retain(Scope scope, Scope *slot) {
 
 /* Popping the head keeps the list valid while a finalizer runs, so scratch
    it allocates into the dying scope is reclaimed by the same loop. */
-static void _destroy_chain(Scope scope) {
+static void Scope._destroy_chain(Scope scope) {
   while (scope) {
     Scope down = scope.down;
     ScopeAlloc alloc;
     while ((alloc = scope.first)) {
       scope.first = alloc.next;
       if (scope.first) scope.first.prev = $scope.tag_pointer(scope);
-      _release_alloc(alloc);
+      alloc._release();
     }
-    _unregister_name(scope);
+    scope._unregister_name();
     atomic_fetch_add(&scope_destructions, 1);
     free(scope);
     scope = down;
@@ -680,7 +681,7 @@ meta native Scope Scope.new_named(const char *name) {
 */
 const char *Scope.name(Scope scope) {
   _require_running();
-  ScopeName node = _find_name(scope);
+  ScopeName node = scope._find_name();
   return node ? node.name : NULL;
 }
 
@@ -709,8 +710,8 @@ meta native void Scope.destroy(Scope scope) {
   for (int i = 0; i < state.stack_size; i++)
     if (scope == *state.stack[i]) raise %(bad-state);
   if (scope.up) raise %(bad-state);
-  _forget_chain_retains(scope);
-  _destroy_chain(scope);
+  scope._forget_retains();
+  scope._destroy_chain();
 }
 
 /** Ends the owned lifetime when a managed local leaves its block. */
@@ -720,12 +721,12 @@ static Scope _new_scope(const char *name) {
   Scope scope = _data_malloc(sizeof(struct Scope));
   scope.up = scope.down = NULL;
   scope.first = NULL;
-  _register_name(scope, name);
+  scope._register_name(name);
   atomic_fetch_add(&scope_creations, 1);
   return scope;
 }
 
-static void _forget_chain_retains(Scope scope) {
+static void Scope._forget_retains(Scope scope) {
   ScopeThreadState state = _thread();
   for (Scope cur = scope; cur; cur = cur.down)
     for (int i = state.retain_count - 1; i >= 0; i--)
@@ -744,7 +745,7 @@ static ScopeName scope_names;
 static pthread_mutex_t scope_metadata_mutex =
   (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 
-static void _register_name(Scope scope, const char *name) {
+static void Scope._register_name(Scope scope, const char *name) {
   if (!name) return;
   size_t length = strlen(name);
   if (length == SIZE_MAX) raise %(size-limit);
@@ -759,7 +760,7 @@ static void _register_name(Scope scope, const char *name) {
   _metadata_unlock();
 }
 
-static ScopeName _find_name(Scope scope) {
+static ScopeName Scope._find_name(Scope scope) {
   _metadata_lock();
   ScopeName node = scope_names;
   while (node && node.scope != scope) node = node.next;
@@ -767,7 +768,7 @@ static ScopeName _find_name(Scope scope) {
   return node;
 }
 
-static void _unregister_name(Scope scope) {
+static void Scope._unregister_name(Scope scope) {
   _metadata_lock();
   ScopeName *link = &scope_names;
   while (*link && (*link).scope != scope) link = &(*link).next;
@@ -1025,7 +1026,7 @@ static void _run_hooks(void) {
 */
 void x2c_scope_thread_release(void) {
   ScopeThreadState state = &scope_thread;
-  if (state.root) _destroy_chain(state.root);
+  if (state.root) state.root._destroy_chain();
   state.root = NULL;
   _raw_free(state.stack);
   state.stack = NULL;
@@ -1047,7 +1048,7 @@ static void _report_leaks(void) {
   for (ScopeName node = scope_names; node; node = node.next)
     fprintf(
       stderr, "\tscope \"%s\": %zu allocations\n", node.name,
-      _allocation_count(node.scope));
+      node.scope._allocation_count());
   size_t raw_allocs = atomic_load(&raw_alloc_count);
   size_t raw_frees = atomic_load(&raw_free_count);
   if (raw_allocs != raw_frees)
@@ -1055,7 +1056,7 @@ static void _report_leaks(void) {
       stderr, "\tlive_backing_allocations: %zu\n", raw_allocs - raw_frees);
 }
 
-static size_t _allocation_count(Scope scope) {
+static size_t Scope._allocation_count(Scope scope) {
   size_t count = 0;
   for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
        alloc = alloc.next)
