@@ -1,8 +1,10 @@
 # x2c Source Organization
 
-> Status: active. Gary approved the plan on 2026-09-30, written against
-> `dev` 2685655f. Phases 1-5c are delivered or being published; Phase 6
-> (commands and packages) and Phase 7 (closing measure) remain.
+> Status: done, 2026-09-30. Phases 1-7 delivered on `dev` (Phase 1 at
+> 86d29e4a, defects and owners at accff2db, splits at 5e7dbd70, reading
+> order, simplify, and graph sweep at f6886c1c, commands, packages, and the
+> closing measure in the final batch). The items under "Outside this plan"
+> remain as backlog.
 
 ## Result
 
@@ -20,7 +22,7 @@ drive this plan.
 ## Why the waves left this
 
 The original campaign stated the file rule. Rule 18 of
-[x2c-beautification.md](archive/x2c-beautification.md) says "A file with two
+[x2c-beautification.md](x2c-beautification.md) says "A file with two
 subjects splits into new units when the parts have distinct owners", and its
 baseline table lists the file-level defect of each large compiler file. The
 wave tables then measured only lines, functions, longest function, functions
@@ -423,6 +425,16 @@ similar shape. Hand-authored `.x` lines in `src/` and `lib/`: 80,430 at
 Validation: `agent-pr-check`, `make commands-check`, and each touched
 package's check.
 
+Phase 6 result: the graph command's call-target facts have one owner in
+`commands/graph/targets.x`, nine report entry points share one unit
+lifetime, and its build prints no warnings (graph -75 lines). Moving the
+facts fixed a wrong-edge defect: same-unit calls were matched on the binding
+number alone, which repeats inside a unit, so `Tokenizer_free` was reported
+as calling `Tokenizer_str`; `commands/graph/tests/run.sh` now pins it.
+BLIS's `copy_from`, `add`, and `sub` share one compatibility check, and
+libuv's TCP and Pipe stream rules live on `UvStream` (-52 lines); both
+packages' own checks give the baseline results.
+
 ### Phase 7: closing measure
 
 Rerun the baseline analyzer on the final tree with the same file
@@ -430,6 +442,26 @@ selection and report the table above, the remaining files over 1,500 lines
 with their stated subjects, and every section over 400 lines. Report
 lines added and deleted in `.x` source. Update this plan's status and the
 plans index.
+
+Result, same analyzer and file selection, 2685655f against the final tree:
+
+| Measure | Start | Final |
+| --- | --- | --- |
+| Hand-authored `.x` lines in `src/` and `lib/` | 80,430 | 80,262 |
+| Files | 95 | 108 |
+| Files over 1,500 lines | 9 (32,839 lines) | 8 (21,755 lines) |
+| Largest file | `macros.x` 5,539 | `expressions.x` 3,927 |
+| Sections over 400 lines | 16 | 0 |
+| Functions over 40 lines | 11 | 9 |
+| Functions with 7 or more parameters | 8 | 5 |
+| Names of 25 or more characters | 170 | 131 |
+
+The files still over 1,500 lines are `expressions.x`, `macros.x`,
+`parse.x`, `protocol.x`, `compiler.x`, `lisp.x`, `transform.x`, and
+`callables.x`; each failed the split test, names one subject in its header,
+and keeps its sections under 400 lines. Translating four unchanged test and
+example sources retires about 16% fewer instructions than at the start,
+with byte-identical C.
 
 ## Done when
 
@@ -482,6 +514,9 @@ plans index.
   intermittently on the unchanged tree (27-28 of 29), and `release-checks`
   output order varies between runs. Found during Phase 6; neither involves
   the stream code it changed.
+- `x2c graph certify` prints a different call path with each obstacle on
+  each run of the same binary; the obstacles themselves are stable. Found
+  during Phase 6.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.

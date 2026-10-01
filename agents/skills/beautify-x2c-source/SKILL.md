@@ -6,11 +6,9 @@ description: >-
   and data structures: split long functions into named steps, make each
   dispatch arm one line, group shared context into records, call existing
   owners instead of repeating their work, give incidental work one place,
-  rename with the glossary, and put the file in reading order. Use for the
-  source organization campaign in plans/x2c-source-organization.md or any
+  rename with the glossary, and put the file in reading order. Use for any
   request to make a src/ or lib/ file readable at the function and file
-  level. Use
-  clean-x2c-source for comment and spelling cleanup alone, and
+  level. Use clean-x2c-source for comment and spelling cleanup alone, and
   simplify-x2c-source for removing machinery across files.
 ---
 
@@ -23,8 +21,8 @@ the [Shape chapter](../../x2c-coding-style-guide.md#shape), the
 [reading order](../../x2c-coding-style-guide.md#reading-order), and the
 naming glossary under
 [Names expose ownership](../../x2c-coding-style-guide.md#names-expose-ownership).
-The [source organization plan](../../../plans/x2c-source-organization.md)
-records the current campaign and its baseline.
+The [source organization plan](../../../plans/archive/x2c-source-organization.md)
+records the last campaign, its rules, and its measurements.
 
 ## Settle the file boundary first
 

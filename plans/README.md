@@ -44,9 +44,6 @@ execution.
 
 ### Current work
 
-- [Source organization](x2c-source-organization.md): module ownership,
-  reading order, record ownership, duplicate owners, and seven reproduced
-  defects left after the beautification waves. Approved 2026-09-30.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.
@@ -71,6 +68,7 @@ execution.
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
 | [Lifetime proof follow-up](lifetime-proof-followup.md) | Results from the shipped selected-root audit and an optional path to model indexed borrows, container values, native handles, and iterator callbacks. |
+| [Source organization follow-ups](archive/x2c-source-organization.md#outside-this-plan) | Defects and costs found during the campaign: lambda cell rewrite cost, file-init inlining, private-include header types, region cast false positive, `try return` warning, struct-tag method lookup, flaky libuv watch tests, nondeterministic certify paths, and two unexercised open-template paths. |
 | [Consolidation catalog C13](archive/consolidation-catalog-f28fc36.md#c13-larger-lifetime-sharing-locate-overlap-without-pretending-equivalence) | Shared lifetime summary and flow production; design and measurement before any rewrite. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
@@ -78,9 +76,13 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Source organization](archive/x2c-source-organization.md): done
+  2026-09-30; one subject per file, one owner per fact, reading order, and
+  record ownership across `src/` and `lib/`, with 14 new units and every
+  section under 400 lines.
 - [Beautification](archive/x2c-beautification.md): done; Waves 0-5
   delivered through 0bccd679. Its deferred file-level work continues in
-  [source organization](x2c-source-organization.md).
+  [source organization](archive/x2c-source-organization.md).
 - [Next compiler/library beautification](archive/compiler-library-beautification-next.md)
   and its [coverage record](archive/compiler-library-review-coverage.md):
   done 2026-09-30 as PR #72.

@@ -2,7 +2,7 @@
 
 > Status: done; Waves 0-5 delivered through 0bccd679. The file-level work it
 > deferred, and its closing audit, continue in
-> [x2c-source-organization.md](../x2c-source-organization.md). Archived
+> [x2c-source-organization.md](x2c-source-organization.md). Archived
 > 2026-09-30.
 >
 > Earlier status: Waves 0 through 5 are delivered on `dev`. Wave 5's eight file
