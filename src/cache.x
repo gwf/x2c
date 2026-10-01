@@ -18,6 +18,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
+$(import "../src/error-reports.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "type.x"
 #include "var.x"
@@ -649,9 +650,7 @@ static void StaticQueue.report_cycle(StaticQueue &q) {
     Token tokens = c.tokenizer.tokens;
     token = tokens + token_index.integer();
   }
-  c.report_error(
-    <cache>, "file-static x2c initializer dependency cycle", token,
-    notes.list_free());
+  $report(c, "cache.init.cycle", token, notes.list_free());
 }
 
 // cache slots and values
