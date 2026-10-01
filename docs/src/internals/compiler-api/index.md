@@ -43,6 +43,7 @@ Functions and types exposed by each compiler module.
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
 | [`src/stage.x`](stage.md) | the values crossing between meta code and the program. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
+| [`src/symbols.x`](symbols.md) | the compiler's semantic symbol table. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |
 | [`src/type-ledger.x`](type-ledger.md) | the compiler's Var tag tables, projected from the ledger. |

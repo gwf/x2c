@@ -6,11 +6,11 @@
     symbol table, and declaration state. Collection parses the unit
     shallowly, skipping function bodies; the full parse produces its AST.
     The related compilers of one unit share its package registries,
-    generated names, and binding numbers.
+    generated names, and binding numbers. The symbol table is `Sym`, in
+    `symbols.x`.
 
-    `Symbol` lookup walks the scope stack from inner to outer. Diagnostics may
-    exit immediately or raise `<malformed>` while a recovery boundary is
-    active.
+    Diagnostics may exit immediately or raise `<malformed>` while a recovery
+    boundary is active.
 */
 #pragma once
 $(import "../lib/private-keywords.xmacro")
@@ -249,7 +249,7 @@ static Compiler _new(Compiler owner) {
   c._init_tables();
   if (owner) c._share_unit(owner);
   else c._own_unit();
-  c.sym = _new_sym(c);
+  c.sym = Sym.new(c);
   c._init_queues();
   c.collect_protocols = 1;
   c.diagnostics = Diagnostics.new(
@@ -1953,7 +1953,7 @@ static void _prepare_shadow(
   shadow.macro_lisp = owner.macro_lisp;
   shadow.borrowed_lisp = shadow.macro_lisp != NULL;
   shadow.share_meta_group(owner);
-  shadow.sym._reset_overlay(symbols, {});
+  shadow.sym.reset_overlay(symbols, {});
   shadow.rebuild_protocols(symbols);
   shadow.conforms = {};
   shadow.shallow = 1;
@@ -2205,7 +2205,7 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   if (c.macros == NULL || !c.macros.len()) _start_macros(c);
-  c.sym._reset_overlay(base, overlay);
+  c.sym.reset_overlay(base, overlay);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
   // Only linkage groups remain open; a later segment of the file closes them.

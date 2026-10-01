@@ -266,10 +266,10 @@ and `src/stage.x` carries values across that boundary. The built-in source macro
 in `src/macros.x`, `etc/builtin-macros.xmacro`, and the algorithms in
 `src/builtins.x` expand `foreach` during this pass. `src/type.x`
 owns the `List`-backed `Type` representation those modules consult; `src/ast.x`
-owns sequence placement and binding helpers; `src/compiler.x` itself owns
-lexical scopes, symbol lookup from inner to outer, generated names, and the
-filtered `<malformed>` recovery boundary used to synchronize after a parse
-diagnostic; `src/diagnostics.x` collects positioned diagnostics in order.
+owns sequence placement and binding helpers; `src/symbols.x` owns lexical
+scopes and symbol lookup from inner to outer; `src/compiler.x` itself owns
+generated names and the filtered `<malformed>` recovery boundary used to
+synchronize after a parse diagnostic; `src/diagnostics.x` collects positioned diagnostics in order.
 
 Macro definitions use that same recursive-descent parser in macro mode. Each
 semantic entry point accepts a typed parameter or compile-time Lisp slot and
@@ -487,8 +487,10 @@ The modules under `src/` divide ownership as follows:
 - `src/script.x` -- `x2c script`: the per-user executable cache, its lock,
   and executing a current or freshly built script;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
-- `src/compiler.x` -- shared compiler state, token navigation, scopes, symbol
-  lookup, generated names, phase entry points, and phase recovery;
+- `src/compiler.x` -- shared compiler state, token navigation, generated
+  names, phase entry points, and phase recovery;
+- `src/symbols.x` -- the symbol table: scopes, bindings, lookup, typedef
+  resolution, and semantic transactions;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,

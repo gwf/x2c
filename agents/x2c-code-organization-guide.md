@@ -73,8 +73,8 @@ real public operation.
 The compiler is consolidated by phase rather than filename prefixes:
 
 - entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`,
-  `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`, `deps.x`,
-  `utils.x`;
+  `symbols.x`, `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`,
+  `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `parse.x`, `expressions.x`, `initializers.x`, `statements.x`,
   `literals.x`, `macros.x`, `grammar.xmacro`, `ast-rewrite.xmacro`, `ast.x`;

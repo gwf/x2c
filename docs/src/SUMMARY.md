@@ -122,6 +122,7 @@
   - [src/sourceview.x](internals/compiler-api/sourceview.md)
   - [src/stage.x](internals/compiler-api/stage.md)
   - [src/statements.x](internals/compiler-api/statements.md)
+  - [src/symbols.x](internals/compiler-api/symbols.md)
   - [src/toolchain.x](internals/compiler-api/toolchain.md)
   - [src/transform.x](internals/compiler-api/transform.md)
   - [src/type-ledger.x](internals/compiler-api/type-ledger.md)

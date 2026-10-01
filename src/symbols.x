@@ -1,27 +1,17 @@
+/*  symbols.x -- the compiler's semantic symbol table
+
+    Copyright (c) 2025 Gary William Flake.
+
+    `Sym` holds one compiler's declarations as a stack of scopes searched
+    from inner to outer; its lowest scopes hold file-scope declarations.
+    It issues the binding identity of each declared name, resolves typedef
+    chains and aggregate fields, and records which file-scope names are
+    private. A `SymTxn` stages the rows a macro binds, so a failed expansion
+    leaves the table as it was.
+*/
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/grammar.xmacro")
-
-#include "protocol.x"
-
-/* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
-   hold file-scope declarations. */
-typedef struct Sym {
-  Block scopes, Map globals, statics, binding_facts;
-  int base_scopes, local_macro_names;
-  // Owning compiler, so type resolution can report its own diagnostics.
-  Compiler compiler;
-} *Sym;
-
-Sym _new_sym(Compiler c) {
-  Sym s = Scope.calloc(1, sizeof(struct Sym));
-  s.compiler = c;
-  s.binding_facts = {};
-  s.scopes = Block.new(sizeof(SymScope));
-  s.statics = {};
-  return s;
-}
 
 // symbol scopes
 
@@ -71,6 +61,26 @@ Sym _new_sym(Compiler c) {
       symbol table entries: one for an anonymous struct definition, and the
       other for x, which references the named anonymous struct definition.
 */
+
+/* A compiler's symbol table: a stack of scopes whose lowest `base_scopes`
+   hold file-scope declarations. */
+typedef struct Sym {
+  Block scopes, Map globals, statics, binding_facts;
+  int base_scopes, local_macro_names;
+  // Owning compiler, so type resolution can report its own diagnostics.
+  Compiler compiler;
+} *Sym;
+
+/** Creates the empty symbol table that compiler `c` owns. */
+Sym Sym.new(Compiler c) {
+  Sym s = Scope.calloc(1, sizeof(struct Sym));
+  s.compiler = c;
+  s.binding_facts = {};
+  s.scopes = Block.new(sizeof(SymScope));
+  s.statics = {};
+  return s;
+}
+
 static SymScope *_scope_at(Sym s, int index) {
   int count = s.scopes.len();
   if (index < 0) index += count;
@@ -88,8 +98,11 @@ void Sym.reset(Sym s, Map globals) {
   _push_symbols(s, s.globals);
 }
 
-/* An overlay reads `base` below the writable scope `overlay`. */
-void Sym._reset_overlay(Sym s, Map base, Map overlay) {
+/** Resets symbol state to read `base` below the writable scope `overlay`.
+
+    Later definitions mutate `overlay`; `base` is only read.
+*/
+void Sym.reset_overlay(Sym s, Map base, Map overlay) {
   _clear_symbols(s, overlay, 2);
   _push_symbols(s, base != NULL ? base : {});
   _push_symbols(s, s.globals);
@@ -341,6 +354,12 @@ int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
       if (List.equal(candidate, binding)) return 1;
   return 0;
 }
+
+/** Returns the current borrowed semantic-facts map indexed by binding.
+
+    A semantic transaction may replace this map, so reacquire it afterwards.
+*/
+Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
 // lookup
 
@@ -611,6 +630,55 @@ Var Compiler.aggregate_name(
   return binding;
 }
 
+// declaration visibility
+
+/** Records the visibility of one parsed top-level declaration.
+    Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
+    retained for placing generated protocol declarations at the same boundary.
+*/
+void Compiler.record_declaration_visibility(Compiler c, List declaration) {
+  int private = c.source_private > 0;
+  match (declaration) {
+    case %(seq *rows):
+      foreach (List row, rows) c.record_declaration_visibility(row);
+    case %(function ?type (bind ?identity *) *): {
+      if (!private && !type.type().is_static()) return;
+      String name = binding_identity_spelling(identity);
+      if (name) c.sym.mark_static(%($name));
+    }
+    case %(
+      (!set ?kind (!or typedef declare)) ?type (bindings *rows)
+    ): {
+      int mark = private || type.type().is_static();
+      _record_rows_visibility(c, declaration, kind, private, mark, rows);
+    }
+  }
+}
+
+static void _record_rows_visibility(
+  Compiler compiler, List declaration, Symbol kind, int private, int mark,
+  List rows) {
+  foreach (List row, rows) match (row) {
+    case %(bind ?identity *):
+      _record_declaration_binding_visibility(
+        compiler, declaration, kind, private, mark, identity);
+    case %(op = (bind ?identity *) ?):
+      _record_declaration_binding_visibility(
+        compiler, declaration, kind, private, mark, identity);
+  }
+}
+
+static void _record_declaration_binding_visibility(
+  Compiler compiler, List declaration, Symbol kind, int private, int mark,
+  List identity) {
+  String name = binding_identity_spelling(identity);
+  if (kind == <typedef> && name)
+    compiler.protocol_helpers[%(
+      "source-typedef" $name
+    )] = %($declaration $private);
+  if (mark && name) compiler.sym.mark_static(%($name));
+}
+
 // package names
 
 /** Returns a name in the current package namespace, preserving prefixes.
@@ -756,217 +824,6 @@ List Sym.lookup_macro(Sym s, Atom name) {
 Map Compiler.macro_definition_locals(Compiler c) {
   Var stored = c.macro_holes[%(locals)];
   return stored is <map> ? stored : NULL;
-}
-
-/* semantic transactions
-
-   Binding a macro's syntax stages its rows in a transaction, so a failed
-   expansion leaves the symbol table as it was. */
-
-typedef struct SymTxn {
-  Compiler compiler;
-  int scope_index, next_binding, active, String initializer_name;
-  String shutdown_name, Map counters;
-  int local_macro_names;
-  SymScope scope;
-  Map statics, binding_facts;
-  Map source_definitions;
-  int source_occurrences;
-  /* A macro value application extends coverage to the effects its
-     producers request: adapters, base-scope bindings, early declarations,
-     initializers, origins, and exception support. */
-  int extended, Map adapters, Array base_bindings;
-  int early_count, init_count, origin_count, origin, needs_exception;
-} *SymTxn;
-
-/** Begins a reversible transaction over the current semantic scope.
-
-    The transaction stages the current scope maps, file-static and binding
-    facts, compile-time struct layouts, binding and generated-name
-    counters, and initializer names. It does not snapshot parser position or
-    other compiler state.
-*/
-SymTxn Compiler.begin_semantic_transaction(Compiler c) {
-  SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
-  transaction.compiler = c;
-  transaction.scope_index = c.sym.scopes.len() - 1;
-  SymScope *scope = _scope_at(c.sym, transaction.scope_index);
-  transaction._save(*scope);
-  if (transaction.extended) transaction._save_effects();
-  if (c.source_facts && c.source_primary) transaction._save_sources();
-  transaction._stage(scope);
-  transaction.active = 1;
-  return transaction;
-}
-
-static void SymTxn._save(SymTxn s, SymScope scope) {
-  Compiler c = s.compiler;
-  s.scope = scope;
-  s.counters = c.names.counters;
-  s.statics = c.sym.statics;
-  s.binding_facts = c.semantic_binding_facts();
-  s.next_binding = c.names.next_binding;
-  s.local_macro_names = c.sym.local_macro_names;
-  s.initializer_name = c.init_fn;
-  s.shutdown_name = c.fini_fn;
-  s.extended = c.macro_application > 0;
-}
-
-/* The base scopes other than the active one get fresh binding maps; the
-   transaction keeps the originals. */
-static void SymTxn._save_effects(SymTxn s) {
-  Compiler c = s.compiler;
-  s.adapters = c.names.adapters;
-  s.base_bindings = [];
-  s.early_count = c.early_decls.len();
-  s.init_count = c.inits.len();
-  s.origin_count = c.origins.len();
-  s.origin = c.origin;
-  s.needs_exception = c.needs_exception;
-  c.names.adapters = c.names.adapters.copy();
-  for (int i = 0; i < c.sym.base_scopes; i++) {
-    if (i == s.scope_index) continue;
-    SymScope *base = _scope_at(c.sym, i);
-    s.base_bindings.push(%($i ${base.bindings}));
-    base.bindings = base.bindings.copy();
-  }
-}
-
-static void SymTxn._save_sources(SymTxn s) {
-  s.source_definitions = s.compiler.source_definitions.copy();
-  s.source_occurrences = s.compiler.source_occurrences.len();
-}
-
-/* Macro binding is incremental. Copy only the maps that construction
-   mutates so failure can discard its rows while reads still reach the
-   unchanged outer scopes. */
-static void SymTxn._stage(SymTxn s, SymScope *scope) {
-  Compiler c = s.compiler;
-  scope.symbols = s.scope.symbols.copy();
-  c.merge_source_declarations(scope.symbols, s.scope.symbols);
-  scope.bindings = s.scope.bindings.copy();
-  scope.enumerators = s.scope.enumerators.copy();
-  scope.macros = s.scope.macros != NULL ? s.scope.macros.copy() : NULL;
-  c.sym.statics = c.sym.statics.copy();
-  c.sym.binding_facts = c.semantic_binding_facts().copy();
-  c.names.counters = c.names.counters.copy();
-}
-
-/** Returns whether the transaction's active scope changed its macro map. */
-int SymTxn.local_macros_changed(SymTxn s) {
-  SymScope *scope = _scope_at(s.compiler.sym, s.scope_index);
-  Map before = s.scope.macros, after = scope.macros;
-  if (before == NULL || after == NULL)
-    return (void *) before != (void *) after;
-  return !before.equal(after);
-}
-
-// commit and rollback
-
-/** Publishes an active semantic transaction and makes rollback a no-op. */
-void SymTxn.commit(SymTxn s) {
-  if (!s || !s.active) return;
-  Compiler c = s.compiler;
-  SymScope *scope = _scope_at(c.sym, s.scope_index);
-  SymScope staged = *scope;
-  /* Restore the original map identities before merging staged rows. Code
-     holding a borrowed scope map must observe a committed expansion. */
-  *scope = s.scope;
-  _merge_scope(c, scope, staged);
-  if (s.extended) s._commit_effects();
-  s.active = 0;
-}
-
-static void _merge_scope(Compiler c, SymScope *scope, SymScope staged) {
-  scope.symbols.merge(staged.symbols);
-  c.merge_source_declarations(scope.symbols, staged.symbols);
-  scope.bindings.merge(staged.bindings);
-  scope.enumerators.merge(staged.enumerators);
-  if (staged.macros == NULL) return;
-  if (scope.macros == NULL) scope.macros = {};
-  scope.macros.merge(staged.macros);
-}
-
-static void SymTxn._commit_effects(SymTxn s) {
-  Compiler c = s.compiler;
-  Map adapters = c.names.adapters;
-  c.names.adapters = s.adapters;
-  s.adapters.merge(adapters);
-  foreach (List row, s.base_bindings.list()) {
-    SymScope *base = _scope_at(c.sym, row.car());
-    Map staged = base.bindings, original = row.cadr();
-    base.bindings = original;
-    original.merge(staged);
-  }
-}
-
-/** Commits an active transaction, retaining the original semantic-map owners.
-    The caller may then release the transaction's construction scope.
-    Source-fact collection must be disabled: its records retain staged maps.
-    Parsing and evaluation must allocate outside that temporary scope.
-*/
-void SymTxn.commit_transient(SymTxn s) {
-  Compiler c = s.compiler;
-  Map statics = c.sym.statics, facts = c.semantic_binding_facts();
-  Map counters = c.names.counters;
-  s.commit();
-  c.sym.statics = s.statics;
-  c.sym.binding_facts = s.binding_facts;
-  c.names.counters = s.counters;
-  _replace_map(s.statics, statics);
-  _replace_map(s.binding_facts, facts);
-  _replace_map(s.counters, counters);
-}
-
-/* Copy the staged state back without retaining its container. Deletions
-   matter: a declaration can remove an earlier file-static designation. */
-static void _replace_map(Map original, Map staged) {
-  Array keys = $auto(original.keys());
-  foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
-  original.merge(staged);
-}
-
-/** Restores every semantic value captured by an active transaction. */
-void SymTxn.rollback(SymTxn s) {
-  if (!s || !s.active) return;
-  Compiler c = s.compiler;
-  s._restore();
-  if (s.extended) s._restore_effects();
-  if (c.source_facts && c.source_primary) s._restore_sources();
-  s.active = 0;
-}
-
-static void SymTxn._restore(SymTxn s) {
-  Compiler c = s.compiler;
-  SymScope *scope = _scope_at(c.sym, s.scope_index);
-  *scope = s.scope;
-  c.sym.statics = s.statics;
-  c.sym.binding_facts = s.binding_facts;
-  c.names.next_binding = s.next_binding;
-  c.sym.local_macro_names = s.local_macro_names;
-  c.names.counters = s.counters;
-  c.init_fn = s.initializer_name;
-  c.fini_fn = s.shutdown_name;
-}
-
-static void SymTxn._restore_effects(SymTxn s) {
-  Compiler c = s.compiler;
-  c.names.adapters = s.adapters;
-  foreach (List row, s.base_bindings.list())
-    _scope_at(c.sym, row.car()).bindings = row.cadr();
-  c.early_decls.resize(s.early_count);
-  c.inits.resize(s.init_count);
-  c.origins.resize(s.origin_count);
-  c.origin = s.origin;
-  c.needs_exception = s.needs_exception;
-}
-
-static void SymTxn._restore_sources(SymTxn s) {
-  Compiler c = s.compiler;
-  c.source_occurrences.resize(s.source_occurrences);
-  foreach (Var key, c.source_definitions.keys().list())
-    c.source_definitions.del(key);
-  c.source_definitions.merge(s.source_definitions);
 }
 
 // typedef resolution
@@ -1298,63 +1155,213 @@ Type Sym.delegate_aggregate(Sym s, Type type) {
   return type && type.is_aggregate_tag() ? type : NULL;
 }
 
-/** Returns the current borrowed semantic-facts map indexed by binding.
+/* semantic transactions
 
-    A semantic transaction may replace this map, so reacquire it afterwards.
+   Binding a macro's syntax stages its rows in a transaction, so a failed
+   expansion leaves the symbol table as it was. */
+
+typedef struct SymTxn {
+  Compiler compiler;
+  int scope_index, next_binding, active, String initializer_name;
+  String shutdown_name, Map counters;
+  int local_macro_names;
+  SymScope scope;
+  Map statics, binding_facts;
+  Map source_definitions;
+  int source_occurrences;
+  /* A macro value application extends coverage to the effects its
+     producers request: adapters, base-scope bindings, early declarations,
+     initializers, origins, and exception support. */
+  int extended, Map adapters, Array base_bindings;
+  int early_count, init_count, origin_count, origin, needs_exception;
+} *SymTxn;
+
+/** Begins a reversible transaction over the current semantic scope.
+
+    The transaction stages the current scope maps, file-static and binding
+    facts, compile-time struct layouts, binding and generated-name
+    counters, and initializer names. It does not snapshot parser position or
+    other compiler state.
 */
-Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
-
-static void _mark_private(
-  Compiler compiler, Symbol kind, String name) {
-  (void) kind;
-  compiler.sym.mark_static(%($name));
+SymTxn Compiler.begin_semantic_transaction(Compiler c) {
+  SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
+  transaction.compiler = c;
+  transaction.scope_index = c.sym.scopes.len() - 1;
+  SymScope *scope = _scope_at(c.sym, transaction.scope_index);
+  transaction._save(*scope);
+  if (transaction.extended) transaction._save_effects();
+  if (c.source_facts && c.source_primary) transaction._save_sources();
+  transaction._stage(scope);
+  transaction.active = 1;
+  return transaction;
 }
 
-static void _record_declaration_binding_visibility(
-  Compiler compiler, List declaration, Symbol kind, int private, int mark,
-  List identity) {
-  String name = binding_identity_spelling(identity);
-  if (kind == <typedef> && name)
-    compiler.protocol_helpers[%(
-      "source-typedef" $name
-    )] = %($declaration $private);
-  if (mark && name)
-    _mark_private(
-      compiler, kind == <typedef> ? <type> : <binding>, name);
+static void SymTxn._save(SymTxn s, SymScope scope) {
+  Compiler c = s.compiler;
+  s.scope = scope;
+  s.counters = c.names.counters;
+  s.statics = c.sym.statics;
+  s.binding_facts = c.semantic_binding_facts();
+  s.next_binding = c.names.next_binding;
+  s.local_macro_names = c.sym.local_macro_names;
+  s.initializer_name = c.init_fn;
+  s.shutdown_name = c.fini_fn;
+  s.extended = c.macro_application > 0;
 }
 
-static void _record_rows_visibility(
-  Compiler compiler, List declaration, Symbol kind, int private, int mark,
-  List rows) {
-  foreach (List row, rows) match (row) {
-    case %(bind ?identity *):
-      _record_declaration_binding_visibility(
-        compiler, declaration, kind, private, mark, identity);
-    case %(op = (bind ?identity *) ?):
-      _record_declaration_binding_visibility(
-        compiler, declaration, kind, private, mark, identity);
+/* The base scopes other than the active one get fresh binding maps; the
+   transaction keeps the originals. */
+static void SymTxn._save_effects(SymTxn s) {
+  Compiler c = s.compiler;
+  s.adapters = c.names.adapters;
+  s.base_bindings = [];
+  s.early_count = c.early_decls.len();
+  s.init_count = c.inits.len();
+  s.origin_count = c.origins.len();
+  s.origin = c.origin;
+  s.needs_exception = c.needs_exception;
+  c.names.adapters = c.names.adapters.copy();
+  for (int i = 0; i < c.sym.base_scopes; i++) {
+    if (i == s.scope_index) continue;
+    SymScope *base = _scope_at(c.sym, i);
+    s.base_bindings.push(%($i ${base.bindings}));
+    base.bindings = base.bindings.copy();
   }
 }
 
-/** Records the visibility of one parsed top-level declaration.
-    Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
-    retained for placing generated protocol declarations at the same boundary.
-*/
-void Compiler.record_declaration_visibility(Compiler c, List declaration) {
-  int private = _lexically_private(c);
-  match (declaration) {
-    case %(seq *rows):
-      foreach (List row, rows) c.record_declaration_visibility(row);
-    case %(function ?type (bind ?identity *) *): {
-      if (!private && !type.type().is_static()) return;
-      String name = binding_identity_spelling(identity);
-      if (name) _mark_private(c, <binding>, name);
-    }
-    case %(
-      (!set ?kind (!or typedef declare)) ?type (bindings *rows)
-    ): {
-      int mark = private || type.type().is_static();
-      _record_rows_visibility(c, declaration, kind, private, mark, rows);
-    }
+static void SymTxn._save_sources(SymTxn s) {
+  s.source_definitions = s.compiler.source_definitions.copy();
+  s.source_occurrences = s.compiler.source_occurrences.len();
+}
+
+/* Macro binding is incremental. Copy only the maps that construction
+   mutates so failure can discard its rows while reads still reach the
+   unchanged outer scopes. */
+static void SymTxn._stage(SymTxn s, SymScope *scope) {
+  Compiler c = s.compiler;
+  scope.symbols = s.scope.symbols.copy();
+  c.merge_source_declarations(scope.symbols, s.scope.symbols);
+  scope.bindings = s.scope.bindings.copy();
+  scope.enumerators = s.scope.enumerators.copy();
+  scope.macros = s.scope.macros != NULL ? s.scope.macros.copy() : NULL;
+  c.sym.statics = c.sym.statics.copy();
+  c.sym.binding_facts = c.semantic_binding_facts().copy();
+  c.names.counters = c.names.counters.copy();
+}
+
+/** Returns whether the transaction's active scope changed its macro map. */
+int SymTxn.local_macros_changed(SymTxn s) {
+  SymScope *scope = _scope_at(s.compiler.sym, s.scope_index);
+  Map before = s.scope.macros, after = scope.macros;
+  if (before == NULL || after == NULL)
+    return (void *) before != (void *) after;
+  return !before.equal(after);
+}
+
+// commit and rollback
+
+/** Publishes an active semantic transaction and makes rollback a no-op. */
+void SymTxn.commit(SymTxn s) {
+  if (!s || !s.active) return;
+  Compiler c = s.compiler;
+  SymScope *scope = _scope_at(c.sym, s.scope_index);
+  SymScope staged = *scope;
+  /* Restore the original map identities before merging staged rows. Code
+     holding a borrowed scope map must observe a committed expansion. */
+  *scope = s.scope;
+  _merge_scope(c, scope, staged);
+  if (s.extended) s._commit_effects();
+  s.active = 0;
+}
+
+static void _merge_scope(Compiler c, SymScope *scope, SymScope staged) {
+  scope.symbols.merge(staged.symbols);
+  c.merge_source_declarations(scope.symbols, staged.symbols);
+  scope.bindings.merge(staged.bindings);
+  scope.enumerators.merge(staged.enumerators);
+  if (staged.macros == NULL) return;
+  if (scope.macros == NULL) scope.macros = {};
+  scope.macros.merge(staged.macros);
+}
+
+static void SymTxn._commit_effects(SymTxn s) {
+  Compiler c = s.compiler;
+  Map adapters = c.names.adapters;
+  c.names.adapters = s.adapters;
+  s.adapters.merge(adapters);
+  foreach (List row, s.base_bindings.list()) {
+    SymScope *base = _scope_at(c.sym, row.car());
+    Map staged = base.bindings, original = row.cadr();
+    base.bindings = original;
+    original.merge(staged);
   }
+}
+
+/** Commits an active transaction, retaining the original semantic-map owners.
+    The caller may then release the transaction's construction scope.
+    Source-fact collection must be disabled: its records retain staged maps.
+    Parsing and evaluation must allocate outside that temporary scope.
+*/
+void SymTxn.commit_transient(SymTxn s) {
+  Compiler c = s.compiler;
+  Map statics = c.sym.statics, facts = c.semantic_binding_facts();
+  Map counters = c.names.counters;
+  s.commit();
+  c.sym.statics = s.statics;
+  c.sym.binding_facts = s.binding_facts;
+  c.names.counters = s.counters;
+  _replace_map(s.statics, statics);
+  _replace_map(s.binding_facts, facts);
+  _replace_map(s.counters, counters);
+}
+
+/* Copy the staged state back without retaining its container. Deletions
+   matter: a declaration can remove an earlier file-static designation. */
+static void _replace_map(Map original, Map staged) {
+  Array keys = $auto(original.keys());
+  foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
+  original.merge(staged);
+}
+
+/** Restores every semantic value captured by an active transaction. */
+void SymTxn.rollback(SymTxn s) {
+  if (!s || !s.active) return;
+  Compiler c = s.compiler;
+  s._restore();
+  if (s.extended) s._restore_effects();
+  if (c.source_facts && c.source_primary) s._restore_sources();
+  s.active = 0;
+}
+
+static void SymTxn._restore(SymTxn s) {
+  Compiler c = s.compiler;
+  SymScope *scope = _scope_at(c.sym, s.scope_index);
+  *scope = s.scope;
+  c.sym.statics = s.statics;
+  c.sym.binding_facts = s.binding_facts;
+  c.names.next_binding = s.next_binding;
+  c.sym.local_macro_names = s.local_macro_names;
+  c.names.counters = s.counters;
+  c.init_fn = s.initializer_name;
+  c.fini_fn = s.shutdown_name;
+}
+
+static void SymTxn._restore_effects(SymTxn s) {
+  Compiler c = s.compiler;
+  c.names.adapters = s.adapters;
+  foreach (List row, s.base_bindings.list())
+    _scope_at(c.sym, row.car()).bindings = row.cadr();
+  c.early_decls.resize(s.early_count);
+  c.inits.resize(s.init_count);
+  c.origins.resize(s.origin_count);
+  c.origin = s.origin;
+  c.needs_exception = s.needs_exception;
+}
+
+static void SymTxn._restore_sources(SymTxn s) {
+  Compiler c = s.compiler;
+  c.source_occurrences.resize(s.source_occurrences);
+  foreach (Var key, c.source_definitions.keys().list())
+    c.source_definitions.del(key);
+  c.source_definitions.merge(s.source_definitions);
 }

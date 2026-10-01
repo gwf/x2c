@@ -50,14 +50,8 @@ static String _path(Compiler compiler) {
   return result;
 }
 
-int _lexically_private(Compiler compiler) =>
-  compiler.source_private > 0;
-
-static int _declaration_is_private(
-  Compiler compiler, Symbol kind, String name) {
-  (void) kind;
-  return %($name) in compiler.sym.file_statics();
-}
+static int _declaration_is_private(Compiler compiler, String name) =>
+  %($name) in compiler.sym.file_statics();
 
 /* Protocol occurrences retain the declaration record with its linkage and
    source location. Adoption rows use base, participant, and, for static rows,
@@ -314,9 +308,7 @@ static void AdoptionDraft.install(AdoptionDraft *a) {
 static int _has_private_native(Compiler compiler, List templates) {
   foreach (List template, templates) {
     String binding = template.caddr();
-    if (binding && _declaration_is_private(
-      compiler, <binding>, binding))
-      return 1;
+    if (binding && _declaration_is_private(compiler, binding)) return 1;
   }
   return 0;
 }
@@ -428,12 +420,12 @@ static Symbol _published_storage(
   Var occurrence_value;
   List occurrence = c.protocols.try_get(base, occurrence_value)
     ? occurrence_value : NULL;
-  int private = _lexically_private(c) ||
+  int private = c.source_private > 0 ||
     (occurrence && _occurrence_storage(occurrence) == <static>) ||
-    _declaration_is_private(c, <type>, spelling) ||
-    (forward && _declaration_is_private(c, <binding>, forward)) ||
-    (reverse && _declaration_is_private(c, <binding>, reverse)) ||
-    (alternate && _declaration_is_private(c, <binding>, alternate)) ||
+    _declaration_is_private(c, spelling) ||
+    (forward && _declaration_is_private(c, forward)) ||
+    (reverse && _declaration_is_private(c, reverse)) ||
+    (alternate && _declaration_is_private(c, alternate)) ||
     private_native;
   return private ? <static> : storage;
 }

@@ -127,7 +127,7 @@ is listed under [compiler options](../reference/cli.md).
 ### Package imports and `with` names
 
 - Parse: `src/parse.x`
-- Package name collection and resolution: `src/compiler.x`, `src/collect.x`
+- Package name collection and resolution: `src/symbols.x`, `src/collect.x`
 - Manifest and native build ownership: `src/project.x`, `src/build.x`, and
   `src/toolchain.x`
 - Tests: import/package compiler fixtures and the import-greet example
@@ -163,7 +163,7 @@ inline-lisp example
 ### Var boxing, conversion, operations, and dispatch
 
 - Type selection: `src/type.x`
-- Typedef identity and scopes: `src/compiler.x`, `src/statements.x`
+- Typedef identity and scopes: `src/symbols.x`, `src/statements.x`
 - Conversion lowering: `src/expressions.x`
 - Operator and truthiness lowering: `src/transform.x`, `src/emit.x`
 - Sentinel literal parsing and C spelling: `src/literals.x`, `src/emit.x`;
@@ -312,8 +312,8 @@ source and splicing quote-includes in preprocessor order, replays the
 runtime prelude from the runtime `x2c.xi` interface, and writes each unit's
 interface beside its generated C as Lisp data.
 
-`src/compiler.x` owns compiler state and symbol scopes. `src/diagnostics.x`
-owns structured errors. `src/utils.x` owns host-environment and process
+`src/compiler.x` owns compiler state and `src/symbols.x` its symbol
+scopes. `src/diagnostics.x` owns structured errors. `src/utils.x` owns host-environment and process
 helpers, including the C preprocessor process boundary. `src/frontend.x`
 shares configured source stages and sequential unit lifetimes with internal
 tools. `src/main.x` owns the translation loop, inspection output, and exit
