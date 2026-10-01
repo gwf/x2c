@@ -591,6 +591,11 @@ static void _abandon_watch(UvTimer timer, Var value) {
   timer.loop().stop();
 }
 
+/*  On macOS a directory watch is an FSEvents stream. libuv starts it on
+    another thread after UvLoop.watch returns, and fseventsd can deliver
+    seconds late on a busy machine. The child therefore keeps touching the
+    entry until the watch names it, and the timeout only guards a hang.
+*/
 static void watch_reports_an_entry_a_child_creates(void) {
   String work = _scratch("same-name");
   UvLoop loop = $auto(UvLoop.new());
@@ -599,15 +604,16 @@ static void watch_reports_an_entry_a_child_creates(void) {
   Array seen = [];
   UvWatch watch = loop.watch(work, seen, _record_entry);
   EXPECT_NULL(watch.entry());
-  UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
+  UvTimer timeout = loop.timer(60000, 0, seen, _abandon_watch);
 
-  UvProcess touch = $auto(
-    loop.command(%("/usr/bin/touch" "x2c-libuv-same-name"))
-      .directory(work).start());
+  UvProcess touch = $auto(loop.command(%(
+    "/bin/sh" "-c" "while :; do touch x2c-libuv-same-name; sleep 0.1; done"
+  )).directory(work).start());
   touch.close_stdin();
   loop.run(UV_RUN_DEFAULT);
   timeout.stop();
   watch.stop();
+  touch.kill(SIGTERM);
   loop.run(UV_RUN_DEFAULT);
 
   EXPECT_TRUE(seen.len() > 0);
@@ -758,11 +764,15 @@ static void _write_watched_file(UvTimer timer, Var value) {
   file.close();
 }
 
+/*  Watching the file rather than its directory keeps this test on kqueue
+    on macOS, so the callback does not wait for fseventsd.
+*/
 static void a_failed_watch_callback_reaches_the_caller(void) {
   String work = _scratch("failed-watch");
   String path = %"$work/watched.txt";
+  _write_watched_file(NULL, path);
   UvLoop loop = $auto(UvLoop.new());
-  loop.watch(work, void, _raise_inside_a_watch);
+  loop.watch(path, void, _raise_inside_a_watch);
   UvTimer writer = loop.timer(1, 10, path, _write_watched_file);
   UvTimer timeout = loop.timer(5000, 0, void, _abandon_watch);
 
