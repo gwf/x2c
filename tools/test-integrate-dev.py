@@ -481,13 +481,27 @@ class IntegrationProbe(unittest.TestCase):
         candidate=self.checkout(result)
         self.assertTrue((candidate/'src/surprise.x').exists())
 
-    def test_interrupted_before_push_reuses_unchanged_gate_proof(self):
+    def test_completed_gate_recovery_runs_no_make_work(self):
         self.pr(1); batch=self.prepare(); self.cli('land',batch)
         record=self.record(batch)
+        self.assertEqual(record['state'],'gated')
+        candidate=self.checkout(record)
+        helper_review=candidate/'debug'/'land-dev-review.json'
+        self.assertTrue(helper_review.is_file())
+        reviewed_artifacts=helper_review.read_text()
+        before=self.state()
         path=Path(record.pop('_path'))
         record['state']='gating'; record.pop('gated',None)
         path.write_text(json.dumps(record))
-        self.land(batch)
+        recovered=json.loads(self.cli('land',batch).stdout)
+        self.assertEqual(recovered['state'],'gated')
+        self.assertEqual(len(recovered['attempts']),len(record['attempts']))
+        self.assertEqual(helper_review.read_text(),reviewed_artifacts)
+        after=self.state()
+        self.assertEqual(after['makes'],before['makes'])
+        self.assertEqual(after['gates'],before['gates'])
+        self.assertEqual(self.tip(),self.base)
+        self.cli('land',batch,'--publish')
         self.assertEqual(len(self.state()['gates']),1)
 
     def test_provider_neutral_push_guard(self):
