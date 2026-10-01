@@ -1101,7 +1101,8 @@ static List Preserve._declaration(Preserve &p, List declaration, Map escaped) {
   foreach (List binding, bindings.cdr())
     match (binding) {
       case %(op = ?bind ?value):
-        preserved.push(%(op = ${p._binding(bind, escaped)} $value));
+        preserved.push(%(op = ${p._binding(bind, escaped)}
+          ${p.rewrite(value)}));
       case %(bind * ): preserved.push(p._binding(binding, escaped));
     }
   return %($head $type (bindings @{preserved.list_free()}));

@@ -35,6 +35,17 @@ static int caught(void) {
   });
 }
 
+/* An initializer visits the statement expression's declarations too. */
+static int caught_initializer(void) {
+  int value = ({
+    int seen = 0;
+    try { seen = 5; raise %(probe); }
+    catch %(probe): seen++;
+    seen;
+  });
+  return value;
+}
+
 int main(void) {
   int t = 1;
   int area = ({ int width = 6; width * 7; });
@@ -52,6 +63,7 @@ int main(void) {
   printf("%d %d %s %d %d\n", $plus_one(41), t, lisp.repr(), map.len(),
          brace);
   int kept = early(0), left = early(1);
-  printf("%d %d %d %d\n", kept, left, loop_total(), caught());
-  return 0;
+  int initialized = caught_initializer();
+  printf("%d %d %d %d %d\n", kept, left, loop_total(), caught(), initialized);
+  return initialized != 6;
 }
