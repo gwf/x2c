@@ -19,24 +19,18 @@
 #include <string.h>
 #include <sys/stat.h>
 
-static void _increment(Map counts, List key, int amount) {
-  Var prior;
-  int count = counts.try_get(key, prior) ? prior.int() : 0;
-  counts[key] = count + amount;
-}
-
 static void _record_call(
   Compiler compiler, Map definitions, List callee, Map calls) {
   List binding;
   Symbol kind = project_callee(compiler, callee, binding);
   if (kind == <direct>)
-    _increment(
+    project_count(
       calls,
       %(direct ${project_binding_target(compiler, definitions, binding)}),
       1);
   else if (kind == <automatic>)
-    _increment(calls, %(indirect ${binding_identity_spelling(binding)}), 1);
-  else _increment(calls, %(indirect "computed"), 1);
+    project_count(calls, %(indirect ${binding_identity_spelling(binding)}), 1);
+  else project_count(calls, %(indirect "computed"), 1);
 }
 
 static void _collect_calls(
@@ -233,7 +227,7 @@ static void _collect_tail_calls(
            (args *)): {
       if (List.equal(callee, self)) {
         Symbol kind = tail ? <tail> : <non-tail>;
-        _increment(counts, %(kind $kind), 1);
+        project_count(counts, %(kind $kind), 1);
         sites.push(
           %(site $kind ${project_location(compiler, path, origin)}));
       }
@@ -243,11 +237,6 @@ static void _collect_tail_calls(
     _collect_tail_calls(
       compiler, child, self, path, origin, 0,
       counts, blockers, sites);
-}
-
-static int _kind_count(Map counts, Symbol kind) {
-  Var count;
-  return counts.try_get(%(kind $kind), count) ? count.int() : 0;
 }
 
 static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
@@ -262,8 +251,8 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         _collect_tail_calls(
           compiler, body, binding, path, 0, 0,
           counts, blockers, sites);
-        int tail = _kind_count(counts, <tail>);
-        int non_tail = _kind_count(counts, <non-tail>);
+        int tail = counts.getdefault(%(kind tail), 0).int();
+        int non_tail = counts.getdefault(%(kind non-tail), 0).int();
         if (!tail) continue;
         Array blocker_rows = [];
         foreach (Var (blocker, present), blockers)
@@ -880,7 +869,7 @@ static void _collect_sites(
           summaries.push(
             _site_argument_summary(
               compiler, argument, parameters, prior_writes));
-        _increment(
+        project_count(
           sites,
           %(
             call $path $caller $visibility
@@ -978,7 +967,7 @@ static void _collect_field_sites(
       detail = %(access replace (value $type $summary));
     }
     else detail = %(access $access);
-    _increment(
+    project_count(
       sites,
       %(
         site $path $caller $visibility
@@ -1123,8 +1112,8 @@ static List _field_functions_from_sites(List sites) {
         if (caller != "<top-level>") {
           List key = %(function $caller $visibility);
           match (access) {
-            case %(access read): _increment(reads, key, count.integer());
-            case %(access *): _increment(lvalues, key, count.integer());
+            case %(access read): project_count(reads, key, count.integer());
+            case %(access *): project_count(lvalues, key, count.integer());
           }
         }
   Map functions = {};
@@ -1328,11 +1317,11 @@ static void _index_public_functions(List units, Map public_functions) {
 static void _resolve_call(List raw, Map publics, Map resolved) {
   match (raw) {
     case %(call indirect ?name ?count):
-      _increment(resolved, %(indirect $name), count);
+      project_count(resolved, %(indirect $name), count);
     case %(call direct ?callee ?count): {
       List target = resolve_project_target(callee, publics);
-      if (target) _increment(resolved, %(direct @{target.cdr()}), count);
-      else _increment(resolved, %(external ${callee.list().cadr()}), count);
+      if (target) project_count(resolved, %(direct @{target.cdr()}), count);
+      else project_count(resolved, %(external ${callee.list().cadr()}), count);
     }
   }
 }
@@ -1466,7 +1455,7 @@ static List _digest(List graph) {
                       case %(call direct ?target ? ?count): {
                         direct_count += count;
                         if (target == path) internal_count += count;
-                        else _increment(
+                        else project_count(
                           dependencies, %(unit $target), count);
                       }
                       case %(call external ? ?count):
@@ -1549,23 +1538,23 @@ static void _architecture_call_counts(
                       case %(call direct ?target ?callee ?count): {
                         List key = %($target $callee);
                         if (!definitions.contains(key)) continue;
-                        _increment(calls, key, count);
+                        project_count(calls, key, count);
                         List unit_key = %($target $callee $path);
                         if (!seen_units.contains(unit_key)) {
                           seen_units[unit_key] = 1;
-                          _increment(units, key, 1);
+                          project_count(units, key, 1);
                         }
                         if (target != path &&
                             !seen_cross_units.contains(unit_key)) {
                           seen_cross_units[unit_key] = 1;
-                          _increment(cross_units, key, 1);
+                          project_count(cross_units, key, 1);
                         }
                         List function_key = %(
                           $target $callee $path $name
                         );
                         if (!seen_functions.contains(function_key)) {
                           seen_functions[function_key] = 1;
-                          _increment(functions, key, 1);
+                          project_count(functions, key, 1);
                         }
                       }
     }
@@ -1579,12 +1568,11 @@ static List _architecture_choke_points(List graph) {
   Array ranked = [];
   foreach (Var (raw_key, raw_visibility), definitions) {
     List key = raw_key;
-    Var value;
-    int cross = cross_units.try_get(key, value) ? value.int() : 0;
+    int cross = cross_units.getdefault(key, 0).int();
     if (!cross) continue;
-    int unit_count = units.try_get(key, value) ? value.int() : 0;
-    int function_count = functions.try_get(key, value) ? value.int() : 0;
-    int call_count = calls.try_get(key, value) ? value.int() : 0;
+    int unit_count = units.getdefault(key, 0).int();
+    int function_count = functions.getdefault(key, 0).int();
+    int call_count = calls.getdefault(key, 0).int();
     (String path, String name) = key;
     Symbol visibility = raw_visibility;
     List record = %(
@@ -1621,7 +1609,7 @@ static Map _unit_edges(List graph) {
                     match (call)
                       case %(call direct ?target ? ?count):
                         if (target != path)
-                          _increment(edges, %($path $target), count);
+                          project_count(edges, %($path $target), count);
   return edges;
 }
 
@@ -1655,17 +1643,12 @@ static List _architecture_reciprocal(List graph) {
     }, ARCHITECTURE_LIMIT);
 }
 
-static int _architecture_count(Map counts, List key) {
-  Var value;
-  return counts.try_get(key, value) ? value.int() : 0;
-}
-
 static void _record_boundary_function(
   Map seen, Map counts, List direction, String name) {
   List key = %(@direction $name);
   if (seen.contains(key)) return;
   seen[key] = 1;
-  _increment(counts, direction, 1);
+  project_count(counts, direction, 1);
 }
 
 static void _record_boundary_participant(
@@ -1673,7 +1656,7 @@ static void _record_boundary_participant(
   List key = %($left $right $path $name);
   if (seen.contains(key)) return;
   seen[key] = 1;
-  _increment(counts, %($left $right $path), 1);
+  project_count(counts, %($left $right $path), 1);
 }
 
 static List _boundary_direction(
@@ -1682,10 +1665,10 @@ static List _boundary_direction(
   return %(
     direction $from $to
     (functions
-      (callers ${_architecture_count(callers, direction)})
-      (callees ${_architecture_count(callees, direction)}))
-    (edges ${_architecture_count(edges, direction)})
-    (calls ${_architecture_count(calls, direction)})
+      (callers ${callers.getdefault(direction, 0).int()})
+      (callees ${callees.getdefault(direction, 0).int()}))
+    (edges ${edges.getdefault(direction, 0).int()})
+    (calls ${calls.getdefault(direction, 0).int()})
   );
 }
 
@@ -1714,8 +1697,8 @@ static List _architecture_dependency_width(List graph) {
                           List pair = %($left $right);
                           List direction = %($source_path $target_path);
                           pairs[pair] = 1;
-                          _increment(edges, direction, 1);
-                          _increment(calls, direction, count);
+                          project_count(edges, direction, 1);
+                          project_count(calls, direction, count);
                           _record_boundary_function(
                             seen_callers, callers, direction, caller_name);
                           _record_boundary_function(
@@ -1732,10 +1715,10 @@ static List _architecture_dependency_width(List graph) {
     (void) raw_value;
     List pair = raw_pair;
     (String left, String right) = pair;
-    int left_width = _architecture_count(
-      participants, %($left $right $left));
-    int right_width = _architecture_count(
-      participants, %($left $right $right));
+    int left_width =
+      participants.getdefault(%($left $right $left), 0).int();
+    int right_width =
+      participants.getdefault(%($left $right $right), 0).int();
     int lesser = left_width < right_width ? left_width : right_width;
     if (lesser < ARCHITECTURE_BOUNDARY_FUNCTIONS) continue;
     List forward = _boundary_direction(
