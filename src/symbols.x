@@ -15,10 +15,7 @@
 
 // symbol scopes
 
-/*  Symbol table implemented as stack of maps (scopes). Each map represents
-    a scope level. Symbol lookup searches from top to bottom of stack.
-
-    Type grammar:
+/*  Type grammar:
       TYPE-LIST : ( TYPE+ )
       TYPE      : ( MOD* SPEC )
       MOD       : (array SIZE?) | * | & | FUNCTION
@@ -124,9 +121,7 @@ static void Sym._push_symbols(Sym s, Map symbols) {
 void Sym.push_new_scope(Sym s) => s._push_symbols({});
 
 /** Pushes a caller-supplied lexical scope while retaining its map objects. */
-void Sym.push_scope(Sym s, SymScope scope) {
-  s.scopes.push(&scope);
-}
+void Sym.push_scope(Sym s, SymScope scope) => s.scopes.push(&scope);
 
 /** Pops the innermost scope, or returns an empty scope when none exists. */
 SymScope Sym.pop_scope(Sym s) {
@@ -180,9 +175,7 @@ Map Sym.unit_symbols(Sym s) {
 Map Sym.file_statics(Sym s) => s.statics;
 
 /** Marks a declaration key as file-static. */
-void Sym.mark_static(Sym s, List key) {
-  s.statics[key] = 1;
-}
+void Sym.mark_static(Sym s, List key) => s.statics[key] = 1;
 
 /** Returns the visible one-part source names and their semantic types.
     Inner scopes win. The result is a fresh List; types remain borrowed. */
@@ -218,8 +211,7 @@ static Symbol _macro_kind(Var definition) {
 
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym s, List key, List type) {
-  SymScope *current = s._scope_at(-1);
-  Map scope = current.symbols;
+  Map scope = s._scope_at(-1).symbols;
   if (log_should_log(<debug>, <symtab>))
     log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
   scope[key] = type;
@@ -249,12 +241,10 @@ static void _seed_var_tag(List key, List type) {
    translation unit rather than the process-lifetime builtin table. */
 static String _var_converter_owner(List key, List type) {
   match (type)
-    case %((func ((?(String named)))) "Var"): {
-      String owner = named, converter = %"${owner}_var";
+    case %((func ((?(String named)))) "Var"):
       match (key)
         case %(?(String spelling)):
-          return spelling == converter ? owner : NULL;
-    }
+          return spelling == %"${named}_var" ? named : NULL;
   return NULL;
 }
 
@@ -530,9 +520,8 @@ static void Compiler._check_spelling(Compiler c, String spelling) {
 // Checked once per declaration, with no prepass over the token stream.
 static int _is_reserved_spelling(String s) {
   if (!s) return 0;
-  if (s.startswith("_x2c_")) return 1;
-  if (s == "_init_guard_") return 1;
-  if (s == "_file_init_") return 1;
+  if (s.startswith("_x2c_") || s == "_init_guard_" || s == "_file_init_")
+    return 1;
   if (s.len() < 2 || s[0] != '_') return 0;
   for (int i = 1; i < s.len(); i++) if (s[i] < '0' || s[i] > '9') return 0;
   return 1;
@@ -634,8 +623,7 @@ Var Compiler.aggregate_name(
   if (!definition && s.get_exact(type)) return s.local_type(type).cadr();
   if (!definition && c.shallow) return name;
   List binding = s.current_binding(type);
-  if (!binding) binding = s.declare(NULL, type, type);
-  return binding;
+  return binding ? binding : s.declare(NULL, type, type);
 }
 
 // declaration visibility
@@ -901,10 +889,7 @@ static Type Sym._typedef_target(Sym s, Type key) {
     into the same diagnostic as full-chain resolution.
 */
 Type Sym.next_typedef(Sym s, Type type, int &hops) {
-  if (++hops > RESOLVE_KEY_MAX_HOPS) {
-    s._typedef_budget_error(type);
-    return NULL;
-  }
+  if (++hops > RESOLVE_KEY_MAX_HOPS) s._typedef_budget_error(type);
   return type.is_typedef_name() || type.is_typedef()
        ? s._typedef_target(type) : s.get(type);
 }
@@ -1050,10 +1035,6 @@ static Type _builtin_typedef_scalar(Type key) {
     `Var` tag is registered. A null input stores `NULL` and returns zero.
 */
 Symbol Sym.var_tag_for_type(Sym s, Type type, Type &?resolved) {
-  if (!type) {
-    if (resolved) resolved = NULL;
-    return 0;
-  }
   Type origin = type.canonicalize();
   return s._var_tag_chain(origin, origin, resolved, 0);
 }
@@ -1326,8 +1307,9 @@ void SymTxn.commit_transient(SymTxn s) {
   _replace_map(s.counters, counters);
 }
 
-/* Copy the staged state back without retaining its container. Deletions
-   matter: a declaration can remove an earlier file-static designation. */
+/* Gives `original` exactly the rows of `staged` and keeps its identity.
+   Deletions matter: a declaration can remove an earlier file-static
+   designation. */
 static void _replace_map(Map original, Map staged) {
   Array keys = $auto(original.keys());
   foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
@@ -1372,7 +1354,5 @@ static void SymTxn._restore_effects(SymTxn s) {
 static void SymTxn._restore_sources(SymTxn s) {
   Compiler c = s.c;
   c.source_occurrences.resize(s.source_occurrences);
-  foreach (Var key, c.source_definitions.keys().list())
-    c.source_definitions.del(key);
-  c.source_definitions.merge(s.source_definitions);
+  _replace_map(c.source_definitions, s.source_definitions);
 }
