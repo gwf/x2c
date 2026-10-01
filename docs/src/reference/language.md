@@ -2995,7 +2995,9 @@ receives a `<p48>` pointer to the bytes to copy, and a struct result arrives
 as a `<p48>` pointer to a copy of its bytes in the active `Scope`. Native code
 passes such an address as a `void *`, because a struct pointer has no lossless
 `Var` conversion of its own. A direct function or noncapturing
-lambda has one file-static `Func` handle that every conversion reuses. A
+lambda has one file-static `Func` handle that every conversion reuses. The
+handle lives for the program: `Func.move`, and operations such as
+`Lisp.bind` that take ownership through it, leave it in place. A
 function-pointer expression is evaluated once and its exact pointer is copied
 into a new `Func`; later assignment to the source pointer does not retarget it.
 A null function pointer instead produces null `Func` without allocating a

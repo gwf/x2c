@@ -27,9 +27,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_76696E0D_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _9)))
+_x2c_initializer_choice_76696E0D_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _9)))
 static long identity(long value){
   return value;
 }

@@ -28,9 +28,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _17)))
+_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _17)))
 typedef struct _x2c_func_pointer_context_0{
   Var(* _x2c_func_pointer_0)(Var);
 }
@@ -56,7 +56,7 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _29)))
+_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _29)))
 Var int_var(int);
 
 List cons(Var, List);

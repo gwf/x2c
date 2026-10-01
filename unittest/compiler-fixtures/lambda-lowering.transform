@@ -114,7 +114,7 @@
   (op = (bind (binding 5 "_x2c_func_handle_0") ()) 
    (expr ("Func") 
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
-           (ident (binding 20 "Func_new"))) 
+           (ident (binding 20 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 15 "_x2c_func_adapt_0"))) 
       (expr ("List") (expr ("List") (cache 24)))))))))
 
@@ -159,6 +159,6 @@
   (op = (bind (binding 8 "_x2c_func_handle_1") ()) 
    (expr ("Func") 
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
-           (ident (binding 20 "Func_new"))) 
+           (ident (binding 20 "x2c_func_shared"))) 
      (args (expr ("FuncAdapter") (ident (binding 24 "_x2c_func_adapt_1"))) 
       (expr ("List") (expr ("List") (cache 24)))))))))

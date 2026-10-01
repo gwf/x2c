@@ -34,19 +34,19 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_DC10D477_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
+_x2c_initializer_choice_DC10D477_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_DC10D477_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _13)))
+_x2c_initializer_choice_DC10D477_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _13)))
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _19)))
+_x2c_initializer_choice_DC10D477_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _19)))
 Var Symbol_var(Symbol);
 
 Var String_var(String);

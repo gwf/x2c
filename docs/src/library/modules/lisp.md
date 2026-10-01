@@ -153,10 +153,12 @@ Invalid arguments raise `<bad-arg>` without transferring ownership. Once
 validation succeeds, the `Func` moves before the global insertion. The
 caller relinquishes ownership even if name canonicalization or `Map`
 growth then raises `<alloc-fail>`, `<size-limit>`, or `<bad-enc>`, but
-may borrow the pointer while the session lives. Values inside the
-`Func`, including its signature graph, retain their existing owners.
+may borrow the pointer while the session lives. A direct function or
+noncapturing lambda converts to a shared handle that lives for the
+program; the session only borrows it. Values inside the `Func`,
+including its signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:1904`
+Source: `lib/lisp.x:1906`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -575,7 +577,7 @@ Source: `lib/lisp.x:1324`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp.x:1924`
+Source: `lib/lisp.x:1926`
 
 #### lisp_str
 
@@ -662,7 +664,7 @@ Source: `lib/lisp.x:1375`
 
 Borrows the session executing the current native Lisp callback.
 
-Source: `lib/lisp.x:1913`
+Source: `lib/lisp.x:1915`
 
 <a id="Lisp.automatic_storage"></a>
 #### Lisp.automatic_storage
@@ -671,7 +673,7 @@ Source: `lib/lisp.x:1913`
 
 Borrows the current lowered source activation's automatic storage.
 
-Source: `lib/lisp.x:1917`
+Source: `lib/lisp.x:1919`
 
 <a id="Lisp.result_storage"></a>
 #### Lisp.result_storage
@@ -680,7 +682,7 @@ Source: `lib/lisp.x:1917`
 
 Borrows the caller's storage for a lowered record result.
 
-Source: `lib/lisp.x:1920`
+Source: `lib/lisp.x:1922`
 
 <a id="Lisp.storage"></a>
 #### Lisp.storage
@@ -689,7 +691,7 @@ Source: `lib/lisp.x:1920`
 
 Borrows the storage owner for callback state retained by this session.
 
-Source: `lib/lisp.x:1915`
+Source: `lib/lisp.x:1917`
 
 ## Public types
 

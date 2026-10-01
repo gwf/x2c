@@ -233,9 +233,11 @@ signature. Construction, binding, conversion, and application failures raise
 their cause through `Error`; none of those causes return to the call. A fixed
 nonvariadic function or function-pointer value with a supported signature
 converts implicitly where a `Func` is expected. Direct conversions reuse a
-file-static binding; pointer conversions snapshot the pointer in a binding held
-by the current `Scope`. Call C functions directly when the compiler already
-knows which function you mean.
+file-static binding that lives for the program, so an operation that takes
+ownership of a `Func`, such as `Lisp.bind`, leaves it in place. Pointer
+conversions snapshot the pointer in a binding held by the current `Scope`.
+Call C functions directly when the compiler already knows which function you
+mean.
 
 ## Log structured events
 

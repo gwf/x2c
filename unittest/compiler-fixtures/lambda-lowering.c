@@ -26,16 +26,16 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_6E559A01_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _24)))
+_x2c_initializer_choice_6E559A01_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _24)))
 static Var _x2c_lambda_1(Var value);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_6E559A01_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _24)))
+_x2c_initializer_choice_6E559A01_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _24)))
 Var int_var(int);
 
 List cons(Var, List);
