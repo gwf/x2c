@@ -59,9 +59,13 @@ Func Func_new_rest(FuncAdapter adapter, List signature);
 
 Func Func_new_context(FuncAdapter adapter, List signature, const void * context, size_t context_size);
 
+Func x2c_func_shared(FuncAdapter adapter, List signature);
+
 List Func_signature(Func function);
 
 const void * Func_context(Func function);
+
+void Func_move(Func function, Scope * slot);
 
 Var Func_var(Func function);
 
