@@ -3,12 +3,10 @@
     Copyright (c) 2025 Gary William Flake.
 
     Preprocessor lines stay in the token stream and become `preproc` nodes,
-    so generated C keeps them where they were written. This module reads
-    them: it classifies one directive line, hides the conditional arms C
-    never takes and marks layout attributes when a unit is tokenized,
-    applies the directives before a form to source visibility and the
-    unit's `#define` names, and reopens conditional groups around the items
-    that generation and emission place elsewhere.
+    so generated C keeps them where they were written. This module owns
+    what x2c reads from those lines without running a preprocessor: which
+    conditional arms C can reach, and what the directives before each form
+    say about visibility, layout, and the unit's `#define` names.
 */
 #pragma once
 #include "compiler.x"
@@ -174,7 +172,7 @@ static void ArmScan.directive(ArmScan *s, Token token, size_t i) {
     s.stack[-1] = %($id ${arm.integer() + 1} ${preproc_branch_state(state)});
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
-  else if (!s.hidden) _note_layout_macro(token.text, s.layout, s.stack.len());
+  else if (!s.hidden) s._note_layout_macro(token.text);
   if (!conditional) return;
   s.c.arm_stacks[(long) i] = s.stack.list();
   s.hidden = _hidden_group(s.stack);
@@ -193,30 +191,31 @@ static size_t ArmScan.code(ArmScan *s, Token token, size_t i) {
   if (s.hidden && token.type != <space> && token.type != <error>)
     token.type = <comment>;
   else if (token.type == <ident> && token.text == "__attribute__")
-    return _note_attribute(s.c, i);
+    return s._note_attribute(i);
   else if (token.type == <ident> && token.text in s.layout)
-    _mark_layout(s.c, i, s.layout[token.text] == 2);
+    s._mark_layout(i, s.layout[token.text] == 2);
   return i;
 }
 
 /* Records a pair of layout marks at the `__attribute__ ((...))` starting at
    token `index` when it can change a struct's layout. Returns the index of
    the attribute's last token. */
-static size_t _note_attribute(Compiler c, size_t index) {
-  Token base = c.tokenizer.tokens;
+static size_t ArmScan._note_attribute(ArmScan *s, size_t index) {
+  Token base = s.c.tokenizer.tokens;
   Token open = Token.skip_trivia(base + index + 1);
   if (open.type != <(>) return index;
   Token inner = Token.skip_trivia(open + 1), last = open.group_close();
   if (last.type == <eof>) return index;
   int packed = 0;
   if (inner.type == <(> && _layout_attribute(inner, packed))
-    _mark_layout(c, index, packed);
+    s._mark_layout(index, packed);
   return last - base;
 }
 
 /* A layout mark pair brackets the token at `index`, and a packing
    attribute adds a packed pair. */
-static void _mark_layout(Compiler c, size_t index, int packed) {
+static void ArmScan._mark_layout(ArmScan *s, size_t index, int packed) {
+  Compiler c = s.c;
   c.layout_marks.push((long) index);
   c.layout_marks.push((long) index + 1);
   if (!packed) return;
@@ -249,13 +248,14 @@ static int _layout_attribute(Token open, int &packed) {
    change a struct's layout, written out or through another such macro. A
    use of one is marked as the attribute it expands to would be. As with
    layout, a macro that any arm defines with such an attribute stays in
-   `layout`; only an `#undef` or definition outside every conditional group,
-   `conditional` false, removes it. */
-static void _note_layout_macro(String content, Map layout, int conditional) {
+   `layout`; only an `#undef` or definition outside every conditional group
+   removes it. */
+static void ArmScan._note_layout_macro(ArmScan *s, String content) {
   int undefined;
   Token name = _macro_directive(content, undefined);
   if (!name) return;
-  if (!conditional) layout.del(name.text);
+  Map layout = s.layout;
+  if (!s.stack.len()) layout.del(name.text);
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
@@ -338,19 +338,20 @@ void Compiler.note_object_macro(Compiler c, String content) {
   Token body = token + 1;
   if (undefined) c.object_macros.del(name);
   // A parameter list touching the name makes the macro function-like.
-  else if (body.type == <(>) _note_function_macro(c, name, body);
-  else _note_prefix_macro(c, name, body.skip_trivia());
+  else if (body.type == <(>) c._note_function_macro(name, body);
+  else c._note_prefix_macro(name, body.skip_trivia());
 }
 
 /* A function-like macro whose body is empty or an attribute is an
    `<annotation>`, and one that wraps its parameter is a `<wrapper>`; any
    other function-like macro is skipped. */
-static void _note_function_macro(Compiler c, String name, Token params) {
+static void Compiler._note_function_macro(
+  Compiler c, String name, Token params) {
   Token after = params.after_group(), String param = NULL;
   Token first = Token.skip_trivia(params + 1);
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
-  Var kind = _macro_prefix(c, after, param);
+  Var kind = c._macro_prefix(after, param);
   if (kind.equal(%())) c.object_macros[name] = <annotation>;
   else if (kind.equal(<wrapper>)) c.object_macros[name] = <wrapper>;
 }
@@ -358,8 +359,8 @@ static void _note_function_macro(Compiler c, String name, Token params) {
 /* An object-like body is classified by `_macro_prefix`. A name another arm
    defines to anything but a string literal is no string literal:
    `Var v = SEP;` must not make a String of the other arm's number. */
-static void _note_prefix_macro(Compiler c, String name, Token body) {
-  Var definition = _macro_prefix(c, body, NULL), existing;
+static void Compiler._note_prefix_macro(Compiler c, String name, Token body) {
+  Var definition = c._macro_prefix(body, NULL), existing;
   if (!c.object_macros.try_get(name, existing) ||
       _prefix_rank(definition) > _prefix_rank(existing) ||
       (existing.equal(<string>) && !definition.equal(<string>)))
@@ -372,7 +373,7 @@ static void _note_prefix_macro(Compiler c, String name, Token body) {
    prefix macros, amid attributes that contribute nothing; `<wrapper>` when
    a function-like body is its parameter `param` amid prefixes; `<string>`
    for a string literal; and 1 for any other text. */
-static Var _macro_prefix(Compiler c, Token token, String param) {
+static Var Compiler._macro_prefix(Compiler c, Token token, String param) {
   if (token.type == <lit-char*>) return <string>;
   Array words = [], int wrapped = 0;
   while (token.type != <eof>) {
@@ -382,7 +383,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     if (_is_specifier(type)) words.push(type);
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
     else if (type != <ident>) return 1;
-    else if (_is_annotation(c, word)) {
+    else if (c._is_annotation(word)) {
       if (next.type != <(>) return 1;
       next = next.after_group();
     }
@@ -400,7 +401,7 @@ static int _is_specifier(Symbol type) =>
   type.is_storage_class() || type.is_inline() || type.is_type_qualifier() ||
   type.is_builtin_type();
 
-static int _is_annotation(Compiler c, String word) {
+static int Compiler._is_annotation(Compiler c, String word) {
   Var definition;
   return word == "__attribute__" || word == "__declspec" ||
          (c.object_macros.try_get(word, definition) &&
