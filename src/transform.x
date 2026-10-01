@@ -397,8 +397,9 @@ macro open Expression $empty_var_map() => Map.new();
 List transform_array_literal(Compiler c, List ast) {
   Array values = [], orders = $auto([]);
   foreach (List elem, ast.cdr()) {
-    orders.push(c._part_order(elem));
-    values.push(c._literal_element(elem));
+    List value = c._literal_element(elem);
+    values.push(value);
+    orders.push(c._part_order(value));
   }
   List declarations = c._ordered_parts(values, orders);
   List literal = c._var_array_literal(values.list_free());
@@ -411,8 +412,9 @@ List transform_map_literal(Compiler c, List ast) {
   Array values = [], orders = $auto([]);
   foreach (List entry, ast.cdr())
     foreach (List part, entry.cdr()) {
-      orders.push(c._part_order(part));
-      values.push(c._literal_element(part));
+      List value = c._literal_element(part);
+      values.push(value);
+      orders.push(c._part_order(value));
     }
   List declarations = c._ordered_parts(values, orders);
   List literal = c._var_map_literal(values.list_free());
@@ -453,19 +455,9 @@ static List Compiler._literal_element(Compiler c, List element) {
 }
 
 // Normalize cons nodes so head and tail carry expected runtime types.
-static List Compiler._cons(Compiler c, List ast) {
-  List ordered = c._ordered_list(ast);
-  if (ordered) return ordered;
-  List (head, tail) = ast.cdr();
-  return %(cons ${c._to_var(head)} ${c._to_list(tail)});
-}
+static List Compiler._cons(Compiler c, List ast) => c._ordered_list(ast);
 
-static List Compiler._append(Compiler c, List ast) {
-  List ordered = c._ordered_list(ast);
-  if (ordered) return ordered;
-  List (lhs, rhs) = ast.cdr();
-  return %(append ${c._spliced(lhs)} $rhs);
-}
+static List Compiler._append(Compiler c, List ast) => c._ordered_list(ast);
 
 static List Compiler._to_list(Compiler c, List expr) =>
   c.convert_expression(expr, %("List"));
@@ -483,8 +475,8 @@ static List Compiler._spliced(Compiler c, List expr) {
    parts read state, each part that reads state, through the last one that
    may change state, moves into a temporary. A part's order is 0 when it is
    constant, 1 when it only reads state, and 2 when it may change state. A
-   converter reads what its argument reads, and a nested literal what its
-   parts read. */
+   builtin boxer or scalar formatter reads what its argument reads. Custom
+   converters and uncached nested literal construction may change state. */
 static int Compiler._part_order(Compiler c, Var part) {
   if (part is not <list>) return 0;
   List node = part;
@@ -492,22 +484,14 @@ static int Compiler._part_order(Compiler c, Var part) {
     case %(!or (cache ?) (literal *) (nil) (segraw ?)): return 0;
     case $source_identifier_content(%(?)): return 1;
     case %(expr ? (call ? (args ?argument))):
-      return c.is_converter_call(node) ? c._part_order(argument) : 2;
+      return c.is_builtin_converter_call(node)
+        ? c._part_order(argument) : 2;
     case %(!or (expr ? ?inner) (cast ? ?inner) ((!or segvar segexp) ?inner)
         ${$source_content_pattern($grouped, %(?inner))}):
       return c._part_order(inner);
     case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
       int order = c._part_order(inner);
       return order > 1 ? order : 1;
-    }
-    case %((!or cons append splice array varray map vmap map-entry segments)
-        *parts): {
-      int order = 0;
-      foreach (Var nested, parts) {
-        int nested_order = c._part_order(nested);
-        if (nested_order > order) order = nested_order;
-      }
-      return order;
     }
   }
   return 2;
@@ -542,33 +526,29 @@ static List _ordered(List declarations, Type type, List content) =>
                : content;
 
 /* A List chain's parts are its cons heads and spliced Lists in source
-   order, then its final tail. The first cell of a chain that needs
-   temporaries converts every part; otherwise each cell converts its own. */
+   order, then its final tail. Convert before classifying each part, so an
+   implicit custom converter participates in the same ordering as a call. */
 static List Compiler._ordered_list(Compiler c, List chain) {
   Array kinds = $auto([]), values = $auto([]), orders = $auto([]);
   List node = chain;
   for (List cell = _list_cell(node); cell; cell = _list_cell(node)) {
     (Symbol kind, List part, List rest) = cell;
+    List value = kind == <cons> ? c._to_var(part)
+      : _passed_as(c._spliced(part), %("List"));
     kinds.push(kind);
-    values.push(part);
-    orders.push(c._part_order(part));
+    values.push(value);
+    orders.push(c._part_order(value));
     node = rest;
   }
+  node = _passed_as(c._to_list(node), %("List"));
   kinds.push(<nil>);
   values.push(node);
   orders.push(c._part_order(node));
-  if (!_ordered_count(orders)) return NULL;
-  for (int i = 0; i < values.len(); i++) {
-    Symbol kind = kinds[i];
-    List value = values[i];
-    values[i] = kind == <cons> ? c._to_var(value) : _passed_as(
-      kind == <append> ? c._spliced(value) : c._to_list(value), %("List"));
-  }
   List declarations = c._ordered_parts(values, orders);
   List rebuilt = values.take_last();
   for (int i = (int) values.len() - 1; i >= 0; i--)
     rebuilt = %(expr ("List") (${kinds[i]} ${values[i]} $rebuilt));
-  return _statement_expression(declarations, rebuilt);
+  return _ordered(declarations, %("List"), rebuilt.caddr());
 }
 
 static List _list_cell(List node) {
@@ -662,8 +642,9 @@ static List Compiler._string_segments(Compiler c, List ast) {
   }
   Array values = [], orders = $auto([]);
   foreach (List seg, ast.cdr()) {
-    orders.push(c._part_order(seg));
-    values.push(c._segment_value(seg));
+    List value = c._segment_value(seg);
+    values.push(value);
+    orders.push(c._part_order(value));
   }
   List declarations = c._ordered_parts(values, orders);
   int segment_count = values.len();

@@ -3754,28 +3754,25 @@ static String _converter_name(Type owner, Type target) {
     : %"$prefix${typename}_${targetedname.lower()}";
 }
 
-/** Returns whether `expr` calls the converter that its one argument's type
-    names for the call's type, as `converter_call` or a declared `Var`
-    converter builds it. */
-int Compiler.is_converter_call(Compiler c, List expr) {
+/** The global builtin boxers and scalar formatters only observe their
+    arguments. A custom converter or a shadowed callee may change state. */
+int Compiler.is_builtin_converter_call(Compiler c, List expr) {
   match (expr)
-    case %(expr ?result (call ?callee (args ?argument))): {
+    case %(expr ?result (call
+        (expr ? ${$source_identifier_content(%(?binding))})
+        (args ?argument))): {
       Type target = result, source = argument.cadr();
       if (!source || !source.match(%(?)) || !target.match(%(?))) return 0;
-      String spelled = _callee_spelling(callee);
-      return spelled && (spelled == _converter_name(source, target) ||
-        (c.sym.is_var_type(target) && spelled == source.var_converter()));
+      if (!source.fixed_var_tag() ||
+          !(target == %("Var") ||
+            (source.scalar_tag() && target == %("String"))))
+        return 0;
+      String spelling = binding_identity_spelling(binding);
+      Type declared = NULL;
+      return spelling == _converter_name(source, target) &&
+        binding == c.sym.resolve_global(%($spelling), declared);
     }
   return 0;
-}
-
-static String _callee_spelling(Var callee) {
-  if (callee is <string>) return callee.str();
-  List function = callee;
-  match (function)
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding_identity_spelling(binding);
-  return NULL;
 }
 
 /* A converter's result exists only for the operator that asked for it.
