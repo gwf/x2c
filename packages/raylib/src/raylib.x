@@ -145,74 +145,74 @@ $x2c.foreign.alias(ImageFromChannel)
 inline Image Image.channel(Image image, int selected);
 
 $x2c.foreign.alias(ImageFormat)
-inline void Image.format(Image *image, int new_format);
+inline void Image.format(Image &image, int new_format);
 
 $x2c.foreign.alias(ImageToPOT)
-inline void Image.to_power_of_two(Image *image, Color fill);
+inline void Image.to_power_of_two(Image &image, Color fill);
 
 $x2c.foreign.alias(ImageCrop)
-inline void Image.crop(Image *image, Rectangle rectangle);
+inline void Image.crop(Image &image, Rectangle rectangle);
 
 $x2c.foreign.alias(ImageAlphaCrop)
-inline void Image.alpha_crop(Image *image, float threshold);
+inline void Image.alpha_crop(Image &image, float threshold);
 
 $x2c.foreign.alias(ImageAlphaClear)
-inline void Image.alpha_clear(Image *image, Color color, float threshold);
+inline void Image.alpha_clear(Image &image, Color color, float threshold);
 
 $x2c.foreign.alias(ImageAlphaMask)
-inline void Image.alpha_mask(Image *image, Image mask);
+inline void Image.alpha_mask(Image &image, Image mask);
 
 $x2c.foreign.alias(ImageAlphaPremultiply)
-inline void Image.alpha_premultiply(Image *image);
+inline void Image.alpha_premultiply(Image &image);
 
 $x2c.foreign.alias(ImageBlurGaussian)
-inline void Image.blur_gaussian(Image *image, int size);
+inline void Image.blur_gaussian(Image &image, int size);
 
 $x2c.foreign.alias(ImageResize)
-inline void Image.resize(Image *image, int width, int height);
+inline void Image.resize(Image &image, int width, int height);
 
 $x2c.foreign.alias(ImageResizeNN)
-inline void Image.resize_nearest(Image *image, int width, int height);
+inline void Image.resize_nearest(Image &image, int width, int height);
 
 $x2c.foreign.alias(ImageResizeCanvas)
 inline void Image.resize_canvas(
-  Image *image, int width, int height, int offset_x, int offset_y, Color fill);
+  Image &image, int width, int height, int offset_x, int offset_y, Color fill);
 
 $x2c.foreign.alias(ImageMipmaps)
-inline void Image.mipmaps(Image *image);
+inline void Image.mipmaps(Image &image);
 
 $x2c.foreign.alias(ImageFlipVertical)
-inline void Image.flip_vertical(Image *image);
+inline void Image.flip_vertical(Image &image);
 
 $x2c.foreign.alias(ImageFlipHorizontal)
-inline void Image.flip_horizontal(Image *image);
+inline void Image.flip_horizontal(Image &image);
 
 $x2c.foreign.alias(ImageRotate)
-inline void Image.rotate(Image *image, int degrees);
+inline void Image.rotate(Image &image, int degrees);
 
 $x2c.foreign.alias(ImageRotateCW)
-inline void Image.rotate_clockwise(Image *image);
+inline void Image.rotate_clockwise(Image &image);
 
 $x2c.foreign.alias(ImageRotateCCW)
-inline void Image.rotate_counterclockwise(Image *image);
+inline void Image.rotate_counterclockwise(Image &image);
 
 $x2c.foreign.alias(ImageColorTint)
-inline void Image.tint(Image *image, Color color);
+inline void Image.tint(Image &image, Color color);
 
 $x2c.foreign.alias(ImageColorInvert)
-inline void Image.invert(Image *image);
+inline void Image.invert(Image &image);
 
 $x2c.foreign.alias(ImageColorGrayscale)
-inline void Image.grayscale(Image *image);
+inline void Image.grayscale(Image &image);
 
 $x2c.foreign.alias(ImageColorContrast)
-inline void Image.contrast(Image *image, float contrast);
+inline void Image.contrast(Image &image, float contrast);
 
 $x2c.foreign.alias(ImageColorBrightness)
-inline void Image.brightness(Image *image, int brightness);
+inline void Image.brightness(Image &image, int brightness);
 
 $x2c.foreign.alias(ImageColorReplace)
-inline void Image.replace_color(Image *image, Color color, Color replacement);
+inline void Image.replace_color(Image &image, Color color, Color replacement);
 
 $x2c.foreign.alias(GetImageAlphaBorder)
 inline Rectangle Image.alpha_border(Image image, float threshold);

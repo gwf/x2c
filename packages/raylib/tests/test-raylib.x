@@ -248,7 +248,7 @@ static void raylib_image_mutators_update_the_owned_image(void) {
   image.alpha_mask(mask);
   image.alpha_premultiply();
   image.blur_gaussian(1);
-  image.resize(6, 4);
+  Image.resize(image, 6, 4);
   image.resize_nearest(8, 4);
   image.mipmaps();
   image.flip_vertical();

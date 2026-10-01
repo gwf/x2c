@@ -43,7 +43,7 @@ explicit dereference. Copying the record creates a separate Counter. Pass a
 small record by value when reading a copy is the intended contract.
 
 `class` adds constructors, boxing, and other methods to the declared
-representation. Use an ordinary value typedef for a private context that
+representation. Use an ordinary value typedef for a context that
 does not need that bundle. In either case, pass its mutable state through
 `T &` helpers instead of introducing a pointer typedef and a second local
 whose only purpose is taking the context's address.
@@ -61,6 +61,14 @@ borrows one live caller object for a call; it does not own or extend its
 lifetime. Record copies are shallow: a copied Array, Buffer, or pointer field
 still reaches the same backing object. Keep cleanup with the owner of those
 resources, including when the record itself is a value.
+
+An active transaction or builder has one owner even when its record is a
+value. Copying it shares the saved maps or backing arrays; the copy is not a
+second transaction or an independently owned builder. Borrow the original
+through reference methods. `SymTxn` and `MachineBuilder` use this pattern;
+their zero values are inactive or empty. A `Job` keeps a shared handle because
+its recorded run and Scope finalizer must reach the same job, while its
+launch options live directly inside that job.
 
 ## Borrow required and optional outputs
 

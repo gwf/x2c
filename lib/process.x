@@ -14,13 +14,25 @@
 #pragma once
 #include "x2c.x"
 
+/** The launch options embedded in a Job.
+    Set these through `Job.options` before the job starts. The record has
+    the job's lifetime. Everything a child needs is prepared before `fork`,
+    so the child only duplicates descriptors, changes directory, and calls
+    `execvp`.
+*/
+typedef struct _Launch {
+  String dir, input, stdout_path, stderr_path;
+  int has_input, capture_output, capture_errors, errors_to_output;
+  char **environment;
+} Launch;
+
 /** A command or pipeline and the record of its one run.
     A job that is still running when its Scope ends, or when its `$auto`
     block exits, is terminated and reaped.
 */
-class Job struct {
+class Job {
   List stages;
-  struct _Launch *launch;
+  Launch launch;
   long *pids;
   int *statuses;
   int count, started, finished, status, nul_output, nul_errors;
@@ -50,14 +62,6 @@ typedef enum Env {
 #include <unistd.h>
 
 extern char **environ;
-
-/* Everything a child needs is prepared before `fork`, so the child only
-   duplicates descriptors, changes directory, and calls `execvp`. */
-typedef struct _Launch {
-  String dir, input, stdout_path, stderr_path;
-  int has_input, capture_output, capture_errors, errors_to_output;
-  char **environment;
-} Launch;
 
 /* The descriptors a stage reads and writes as its standard streams. -1
    leaves a stream inherited from the parent. */
@@ -112,12 +116,13 @@ static void Job._close_streams(Job job, Stdio stdio) {
    stream, and every stage writes the `stderr` stream. Each descriptor
    reaches `stdio` as it opens, so the launch closes it on every exit. */
 static void Job._open_streams(Job job, Stdio &stdio) {
-  Launch *launch = job.launch;
-  if (launch.has_input) stdio.input = _input(launch.input);
+  if (job.launch.has_input) stdio.input = _input(job.launch.input);
   stdio.output =
-    _stream(job.output_file, launch.capture_output, launch.stdout_path);
+    _stream(job.output_file, job.launch.capture_output,
+            job.launch.stdout_path);
   stdio.errors =
-    _stream(job.errors_file, launch.capture_errors, launch.stderr_path);
+    _stream(job.errors_file, job.launch.capture_errors,
+            job.launch.stderr_path);
 }
 
 /* The first stage reads a copy of the descriptor of a capture file that
@@ -193,7 +198,7 @@ static char **_argv(List stage) {
 
 /* The report pipe is close-on-exec: a successful `execvp` closes it without
    writing, and a failed step writes which step failed and its errno. */
-static void _child(char **argv, Launch *launch, Stdio stdio, int report) {
+static void _child(char **argv, Launch &launch, Stdio stdio, int report) {
   stdio.input = _above_stdio(stdio.input);
   stdio.output = _above_stdio(stdio.output);
   stdio.errors = _above_stdio(stdio.errors);
@@ -358,7 +363,6 @@ static Job Job.new(List command) {
   Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
   memset(job, 0, sizeof(struct Job));
   job.stages = _stages(command);
-  job.launch = Scope.calloc(1, sizeof(Launch));
   job.launch.capture_output = 1;
   return job;
 }
@@ -414,17 +418,17 @@ static Job Job._unstarted(Job job, String operation) {
     Raises: `<bad-arg>` for an unknown key or a job that has started.
 */
 Job Job.options(Job job, Map options) {
-  Launch *launch = job._unstarted("Job.options").launch;
+  job._unstarted("Job.options");
   foreach (Var (key, value), options) {
     if (key is not Symbol)
       raise %(bad-arg (operation "Job.options")
               (why "option keys are atoms"));
-    launch.set(key, value);
+    job.launch.set(key, value);
   }
   return job;
 }
 
-static void Launch.set(Launch *l, Symbol name, Var value) {
+static void Launch.set(Launch &l, Symbol name, Var value) {
   switch (name) {
     case <dir>:    l.dir = value; break;
     case <env>:    l.environment = _environment(value); break;
@@ -435,12 +439,12 @@ static void Launch.set(Launch *l, Symbol name, Var value) {
   }
 }
 
-static void Launch.route_output(Launch *l, Var value) {
+static void Launch.route_output(Launch &l, Var value) {
   l.capture_output = _is(value, <capture>);
   l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
 }
 
-static void Launch.route_errors(Launch *l, Var value) {
+static void Launch.route_errors(Launch &l, Var value) {
   l.capture_errors = _is(value, <capture>);
   l.errors_to_output = _is(value, <stdout>);
   l.stderr_path = l.capture_errors || l.errors_to_output ||
