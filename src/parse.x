@@ -99,7 +99,7 @@ int Compiler.skip_linkage_brace(Compiler c) {
     // The group opened before an include, in an earlier segment.
     if (!c.open_linkage) return 0;
     c.open_linkage--;
-    c.token = c.skip_trivia_from(c.token + 1);
+    c.token = Token.skip_trivia(c.token + 1);
     return 1;
   }
   c.next();
@@ -215,14 +215,14 @@ List Compiler.parse_submission(Compiler c, int end_position) {
     passes read the same tokens, so they agree before either parses.
 */
 int Compiler.defines_main(Compiler c) {
-  for (Token token = c.skip_trivia_from(c.tokenizer.tokens);
+  for (Token token = Token.skip_trivia(c.tokenizer.tokens);
        token.type != <eof>; token = token.after_group()) {
-    Token open = c.skip_trivia_from(token + 1);
+    Token open = Token.skip_trivia(token + 1);
     if (token.type != <ident> || token.text != "main" || open.type != <(>)
       continue;
     Token body = open.after_group();
     if (body.type == <"{"> || (body.type == <=> &&
-        c.skip_trivia_from(body + 1).type == <">">))
+        Token.skip_trivia(body + 1).type == <">">))
       return 1;
   }
   return 0;
@@ -262,7 +262,7 @@ static int Compiler._declaration_stays(Compiler c) {
     if (token.type == <;>) return previous == <(>;
     if (token.type == <"{">) return 1;
     if (token.type == <=>)
-      return c.skip_trivia_from(token + 1).type == <">">;
+      return Token.skip_trivia(token + 1).type == <">">;
   }
   return 0;
 }
@@ -759,9 +759,9 @@ static int Compiler._group_comma(Compiler c) {
 static int Compiler._destructure_starts(Compiler c) {
   Token token = c.token;
   if (token.type != <(>) return 0;
-  token = c.skip_trivia_from(token + 1);
+  token = Token.skip_trivia(token + 1);
   if (token.type != <ident>) return 0;
-  token = c.skip_trivia_from(token + 1);
+  token = Token.skip_trivia(token + 1);
   return token.type == <,>;
 }
 
@@ -961,7 +961,7 @@ static List Compiler._storage_class(Compiler c) {
 
 static String Compiler._attribute(Compiler c) {
   if (!c._attribute_starts()) return NULL;
-  Token first = c.token, last = c.skip_trivia_from(first + 1).group_close();
+  Token first = c.token, last = Token.skip_trivia(first + 1).group_close();
   c.token = last.after_group();
   return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
 }
@@ -994,7 +994,7 @@ static int Compiler._prefix_macro_words(Compiler c, int rank, Array words) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
        type and declarator between them parse as written. */
-    Token close = c.skip_trivia_from(c.token + 1).group_close();
+    Token close = Token.skip_trivia(c.token + 1).group_close();
     if (close.type != <eof>) close.type = <comment>;
     c.next();
     c.next();
@@ -2154,7 +2154,7 @@ String Compiler.package_alias_spelling(Compiler c) {
   String alias = c.token.text;
   Var package = c.package_aliases[alias];
   if (package is void || c.sym.get_exact(%($alias))) return NULL;
-  Token member = c.skip_trivia_from(c.skip_trivia_from(c.token + 1) + 1);
+  Token member = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
   return member.text.is_identifier()
        ? %"${package}__${member.text}" : NULL;
 }

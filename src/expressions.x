@@ -836,7 +836,7 @@ static int Compiler._bracket_designates(Compiler c) {
 static int Compiler._test_dot_init(Compiler c) {
   Token token = c.token;
   return token.type == <.> &&
-    c.skip_trivia_from(token + 1).type == <ident>;
+    Token.skip_trivia(token + 1).type == <ident>;
 }
 
 static List Compiler._parse_designated_init(Compiler c) {

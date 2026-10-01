@@ -1740,10 +1740,6 @@ static Token _skip_backward(Token token, Token origin) {
   return origin;
 }
 
-/** Returns the first non-trivia token at or after `token`. */
-Token Compiler.skip_trivia_from(Compiler c, Token token) =>
-  token.skip_trivia();
-
 /** Raises `<incomplete>` when a required grammar item reaches the supplied
     input boundary. The caller sets a token in the current token stream after
     tokenizing; tokenization clears it. Semantic failures do not call this.
