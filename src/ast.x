@@ -107,6 +107,32 @@ void ast_collect_binding_references(Var node, Map referenced) {
     ast_collect_binding_references(child, referenced);
 }
 
+// source anchors
+
+/** Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped
+    in. Every block statement carries one so that a transform-phase
+    diagnostic can name its line; a pass that dispatches on a statement tag
+    has to see the statement, not the anchor.
+*/
+Ast Ast.without_origin(Ast ast) {
+  while (ast) {
+    match (ast) {
+      case %(at ? ?inner): ast = inner;
+      default: return ast;
+    }
+  }
+  return ast;
+}
+
+/** Returns `replacement` under the anchors of `original`, the statement it
+    replaces, so a rewrite does not lose the node's source position. */
+Ast Ast.rewrap_origin(Ast original, Ast replacement) {
+  match (original)
+    case %(at ?origin ?inner):
+      return %(at $origin ${Ast.rewrap_origin(inner, replacement)});
+  return replacement;
+}
+
 // code that never returns
 
 /** Returns whether control cannot flow out the bottom of `ast`.

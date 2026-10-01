@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 38
+- Compiler modules: 39
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -22,7 +22,8 @@ Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
 `binding_identity_spelling`, `Ast.rewrite_children`, `ast_contains_head`,
-`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
+`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.never_returns`,
+`Symbol.compound_operator`, `Symbol.compound_assignment`,
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`, `preproc_conditional_kind`, `preproc_directive`,
 `preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`
@@ -69,6 +70,17 @@ Public functions:
 `Compiler.lift_func_expression`, `Compiler.capture_environment`,
 `Compiler.prepare_lambda_cells`, `Compiler.check_lambda_captures`,
 `Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
+
+### [src/cleanup.x](../src/cleanup.x)
+
+cleanup regions and the transfers that leave them.
+
+Public functions:
+
+`Compiler.lower_cleanup`, `Compiler.static_value_is_runtime`,
+`builtin_try_catch_site`, `builtin_catch_patterns`, `builtin_try_landing`,
+`builtin_catch_cases`, `builtin_defer_record`, `builtin_defer_captures`,
+`Compiler.rewrite_defer_list`, `Compiler.lower_defer_region`
 
 ### [src/cli.x](../src/cli.x)
 
@@ -507,10 +519,8 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.static_value_is_runtime`, `builtin_try_catch_site`,
-`builtin_catch_patterns`, `builtin_try_landing`, `builtin_catch_cases`,
-`builtin_defer_record`, `builtin_defer_captures`, `transform_array_literal`,
-`transform_map_literal`, `Compiler.normalize`, `Compiler.transform`
+`Compiler.transform`, `Compiler.normalize`, `transform_array_literal`,
+`transform_map_literal`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 

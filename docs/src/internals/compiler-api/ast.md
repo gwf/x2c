@@ -13,15 +13,21 @@ Shared helpers for x2c compiler AST nodes.
 | Function | Summary |
 | --- | --- |
 | [`ast_changes_left_operand`](#ast_changes_left_operand) | Returns whether `op` writes its left operand. |
-| [`ast_collect_binding_references`](#ast_collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`ast_contains_head`](#ast_contains_head) | Returns whether any list under `value` has `kind` as its head. |
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
+| [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
+| [`preproc_directive`](#preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
+| [`preproc_include_target`](#preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
+| [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
+| [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
+| [`Ast.rewrap_origin`](#Ast.rewrap_origin) | Returns `replacement` under the anchors of `original`, the statement it replaces, so a rewrite does not lose the node's source position. |
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
+| [`Ast.without_origin`](#Ast.without_origin) | Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped in. |
 | [`Symbol.compound_assignment`](#Symbol.compound_assignment) | Returns the compound assignment for a binary operator, or zero. |
 | [`Symbol.compound_operator`](#Symbol.compound_operator) | Returns the binary operator computed by a compound assignment, or zero. |
 | [`Symbol.is_assignment_op`](#Symbol.is_assignment_op) | Returns whether `op` is plain or compound assignment. |
@@ -34,15 +40,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:206`
-
-#### ast_collect_binding_references
-
-`void ast_collect_binding_references(Var node, Map referenced)`
-
-Records in `referenced` the identity of every binding `node` names.
-
-Source: `src/ast.x:97`
+Source: `src/ast.x:218`
 
 #### ast_contains_head
 
@@ -80,6 +78,55 @@ zero without changing either output.
 
 Source: `src/ast.x:50`
 
+#### preproc_conditional_kind
+
+`Symbol preproc_conditional_kind(String text)`
+
+Classifies the preprocessor line `text` as a conditional directive:
+`<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
+and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
+
+Source: `src/ast.x:274`
+
+#### preproc_directive
+
+`String preproc_directive(String text)`
+
+Returns the preprocessor line `text` without its `#` and the blanks
+around the directive.
+
+Source: `src/ast.x:284`
+
+#### preproc_include_target
+
+`String preproc_include_target(String text, int &angle)`
+
+Returns the file named by the `#include` line `text`, or `NULL` for any
+other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
+the name, such as a comment, is ignored.
+
+Source: `src/ast.x:291`
+
+#### preproc_track_arms
+
+`List preproc_track_arms(List arms, String text)`
+
+Follows the conditional groups open after the preprocessor line `text`.
+`arms` holds one entry per open group, innermost first, listing the
+`preproc` nodes that select that group's current arm.
+
+Source: `src/ast.x:306`
+
+#### preproc_within_arms
+
+`List preproc_within_arms(List arms, List items)`
+
+Returns `items` inside the conditional arms `arms` tracked by
+`preproc_track_arms`: the directives that reopen each group, outermost
+first, then `items`, then one `#endif` per group.
+
+Source: `src/ast.x:319`
+
 ### `Ast`
 
 <a id="Ast.initializer_cases"></a>
@@ -89,7 +136,7 @@ Source: `src/ast.x:50`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:212`
+Source: `src/ast.x:224`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -100,7 +147,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:226`
+Source: `src/ast.x:238`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -113,7 +160,17 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:118`
+Source: `src/ast.x:130`
+
+<a id="Ast.rewrap_origin"></a>
+#### Ast.rewrap_origin
+
+`Ast Ast.rewrap_origin(Ast original, Ast replacement)`
+
+Returns `replacement` under the anchors of `original`, the statement it
+replaces, so a rewrite does not lose the node's source position.
+
+Source: `src/ast.x:115`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -127,6 +184,18 @@ fixed-point transform driver can compare unchanged-node identity.
 
 Source: `src/ast.x:75`
 
+<a id="Ast.without_origin"></a>
+#### Ast.without_origin
+
+`Ast Ast.without_origin(Ast ast)`
+
+Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped
+in. Every block statement carries one so that a transform-phase
+diagnostic can name its line; a pass that dispatches on a statement tag
+has to see the statement, not the anchor.
+
+Source: `src/ast.x:103`
+
 ### `Symbol`
 
 <a id="Symbol.compound_assignment"></a>
@@ -136,7 +205,7 @@ Source: `src/ast.x:75`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:196`
+Source: `src/ast.x:208`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -145,7 +214,7 @@ Source: `src/ast.x:196`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:190`
+Source: `src/ast.x:202`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -154,7 +223,7 @@ Source: `src/ast.x:190`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:202`
+Source: `src/ast.x:214`
 
 ## Public types
 

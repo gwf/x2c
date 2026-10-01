@@ -20,6 +20,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "var.x"
 #include "string.x"
 #include "transform.x"
+#include "cleanup.x"
 #include "expressions.x"
 #include "logger.x"
 #include <stdio.h>

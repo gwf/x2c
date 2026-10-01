@@ -18,7 +18,7 @@
 #include "var.x"
 #include "ast.x"
 #include "format.x"
-#include "transform.x"
+#include "cleanup.x"
 
 // Per-emission state.
 typedef struct Emitter {

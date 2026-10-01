@@ -105,6 +105,7 @@
 - [src/builtins.x](https://x2c-lang.dev/docs/internals/compiler-api/builtins.html)
 - [src/cache.x](https://x2c-lang.dev/docs/internals/compiler-api/cache.html)
 - [src/callables.x](https://x2c-lang.dev/docs/internals/compiler-api/callables.html)
+- [src/cleanup.x](https://x2c-lang.dev/docs/internals/compiler-api/cleanup.html)
 - [src/cli.x](https://x2c-lang.dev/docs/internals/compiler-api/cli.html)
 - [src/collect.x](https://x2c-lang.dev/docs/internals/compiler-api/collect.html)
 - [src/compiler.x](https://x2c-lang.dev/docs/internals/compiler-api/compiler.html)

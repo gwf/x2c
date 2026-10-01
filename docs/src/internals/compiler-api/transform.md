@@ -12,75 +12,12 @@ X2c AST transformation pipeline.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`; `$catch_landing` calls this in a slot. |
-| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns one `$catch_pattern` for each of `items`, prepared into the catch site's `patterns`; `$catch_site` calls this in a slot. |
-| [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
-| [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
-| [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
-| [`builtin_try_landing`](#builtin_try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `cleanup` and no return; the `$compiler_try` template calls this in a slot. |
 | [`transform_array_literal`](#transform_array_literal) | Converts an array literal to source-ordered Var arguments for its counted constructor. |
 | [`transform_map_literal`](#transform_map_literal) | Converts a map literal to alternating Var key/value arguments for its counted constructor. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
-| [`Compiler.static_value_is_runtime`](#Compiler.static_value_is_runtime) | Reports whether the static initializer `value` has to run at runtime, because it calls, allocates, or reads an object other than a function name. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
 ### Functions
-
-#### builtin_catch_cases
-
-`List builtin_catch_cases(List selected, List arms)`
-
-Returns one `$catch_case` for each lowered arm of `arms`, numbered in
-order and tested against `selected`; `$catch_landing` calls this in a
-slot.
-
-Source: `src/transform.x:923`
-
-#### builtin_catch_patterns
-
-`List builtin_catch_patterns(List patterns, List items)`
-
-Returns one `$catch_pattern` for each of `items`, prepared into the
-catch site's `patterns`; `$catch_site` calls this in a slot.
-
-Source: `src/transform.x:899`
-
-#### builtin_defer_captures
-
-`List builtin_defer_captures(List environment, List records)`
-
-Writes captured addresses in the order capture selection established.
-
-Source: `src/transform.x:1028`
-
-#### builtin_defer_record
-
-`List builtin_defer_record( List record, List callback, List environment, List records)`
-
-Selects the record shape; captured records keep the environment beside
-the record in the region's scope.
-
-Source: `src/transform.x:1019`
-
-#### builtin_try_catch_site
-
-`List builtin_try_catch_site(List frame, List clause)`
-
-Returns the catch site `frame` pushes for the clause `clause`
-describes, or nothing for a try without one; the `$compiler_try`
-template calls this in a slot.
-
-Source: `src/transform.x:884`
-
-#### builtin_try_landing
-
-`List builtin_try_landing(List frame, List clause, List cleanup)`
-
-Returns what runs when `frame` lands: the catch arm the clause's
-handler selected, or `cleanup` and no return; the `$compiler_try`
-template calls this in a slot.
-
-Source: `src/transform.x:911`
 
 #### transform_array_literal
 
@@ -89,7 +26,7 @@ Source: `src/transform.x:911`
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:2339`
+Source: `src/transform.x:397`
 
 #### transform_map_literal
 
@@ -98,7 +35,7 @@ Source: `src/transform.x:2339`
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:2348`
+Source: `src/transform.x:406`
 
 ### `Compiler`
 
@@ -111,19 +48,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:3151`
-
-<a id="Compiler.static_value_is_runtime"></a>
-#### Compiler.static_value_is_runtime
-
-`int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime)`
-
-Reports whether the static initializer `value` has to run at runtime,
-because it calls, allocates, or reads an object other than a function
-name. `runtime` holds the function-local statics already known to run
-that way, or is `NULL` at file scope.
-
-Source: `src/transform.x:413`
+Source: `src/transform.x:70`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -137,14 +62,13 @@ blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
 may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:3162`
+Source: `src/transform.x:49`
 
 ## Design notes
 
-Lowers typed expressions, literals, and control flow into the AST forms
-consumed by C emission.
-
-One recursive normalizer owns expressions and cleanup; `callables.x`
-lowers the lambdas and `Func` conversions it meets. Newly constructed
-nodes normalize locally; complete functions receive their transfer
-cleanup before emission. The active Compiler reports errors.
+Lowers typed expressions, literals, and statements into the AST forms
+consumed by C emission. One recursive normalizer rewrites each node
+where it is produced, and children enter the same operation, so a unit
+is walked once. `callables.x` lowers the lambdas and `Func` conversions
+it meets, and `cleanup.x` lowers each completed function's cleanup
+regions. The active Compiler reports errors.

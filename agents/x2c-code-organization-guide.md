@@ -82,8 +82,8 @@ The compiler is consolidated by phase rather than filename prefixes:
 - compile-time code: `stage.x`, `builtins.x`, `linked-meta.x`,
   `meta-group.x`, `meta-project.x`, `meta-helper-client.x`;
 - semantic representation and lowering: `type.x`, `type-ledger.x`,
-  `protocol.x`, `transform.x`, `callables.x`, `adapter-memo.xmacro`,
-  `regions.x`;
+  `protocol.x`, `transform.x`, `callables.x`, `cleanup.x`,
+  `adapter-memo.xmacro`, `regions.x`;
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,
   `install.x`, `script.x`, `editor.x`.
