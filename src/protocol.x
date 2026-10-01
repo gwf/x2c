@@ -948,17 +948,6 @@ static String Compiler._definition_location(Compiler c, Type base) {
 
 // native conformance
 
-static int _is_native(List templates) {
-  foreach (List template, templates)
-    if (template.caddr().str()) return 1;
-  return 0;
-}
-
-static int _native_rows(List rows) {
-  match (rows) case %((? native *) *): return 1;
-  return 0;
-}
-
 typedef struct NativeResolution {
   Type base, participant, definition;
   String binder;
@@ -1084,6 +1073,17 @@ static void Compiler._install_native_bindings(
         if (!c.sym.get(%($generated)))
           c.sym.define_global(%($generated), signature);
       }
+}
+
+static int _is_native(List templates) {
+  foreach (List template, templates)
+    if (template.caddr().str()) return 1;
+  return 0;
+}
+
+static int _native_rows(List rows) {
+  match (rows) case %((? native *) *): return 1;
+  return 0;
 }
 
 // ordinary conformance
@@ -1483,8 +1483,8 @@ static Type _substitute_signature(
   Type signature, Map variables, Map bindings) {
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
-  List parameter_types = parameters.map(%!(Var parameter) =>
-    _substitute(parameter, variables, bindings));
+  List parameter_types = parameters.map(
+    %!(Var parameter) => _substitute(parameter, variables, bindings));
   Type result_type = _substitute(result, variables, bindings);
   return %((func $parameter_types) @result_type);
 }
@@ -1550,7 +1550,8 @@ static void Compiler._install_imports(Compiler c) {
 }
 
 static List Compiler._ancestry(Compiler c, Type participant) =>
-  c._proto_cached(%("protocol-ancestry" $participant), %!(Compiler &c) => {
+  c._proto_cached(
+    %("protocol-ancestry" $participant), %!(Compiler &c) => {
     Array ancestry = [], Type current = participant;
     for (int distance = 0; current && distance <= 128; distance++) {
       ancestry.push(current);
@@ -1573,7 +1574,8 @@ static List Compiler._proto_cached(Compiler c, Var key, Func compute) {
 }
 
 static List Compiler._ordered_occurrences(Compiler c) =>
-  c._proto_cached(<proto-ordr>, %!(Compiler &c) => {
+  c._proto_cached(
+    <proto-ordr>, %!(Compiler &c) => {
     Array ordered = [];
     foreach (Var (base, occurrence), c.protocols)
       ordered.push(%($base $occurrence));
@@ -1780,7 +1782,8 @@ List Compiler.resolve_protocol_member(
 static List Compiler._resolve_member(
   Compiler c, Type participant, String member_name) {
   List cache_key = %("protocol-member" $participant $member_name);
-  return c._proto_cached(cache_key, %!(Compiler &c) => {
+  return c._proto_cached(
+    cache_key, %!(Compiler &c) => {
     List protocols = c._ordered_occurrences();
     List ancestry = c._ancestry(participant);
     /* A generated member is selected before a direct base alias. */
@@ -1877,7 +1880,8 @@ typedef struct GeneratedOwners {
 static List Compiler._generated_owner(
   Compiler c, Type participant, String member_name) {
   List cache_key = %("protocol-generated-owner" $participant $member_name);
-  return c._proto_cached(cache_key, %!(Compiler &c) => {
+  return c._proto_cached(
+    cache_key, %!(Compiler &c) => {
     GeneratedOwners owners = {
       .participant = participant, .member = member_name, .candidates = []};
     c._each_adopted_row(
@@ -2630,7 +2634,7 @@ static List _string_literal(String value) {
   return %(expr ("String") (call "String_new" (args $chars)));
 }
 
-// native aliases
+// alias insertion
 
 static List Compiler._native_aliases(
   Compiler c, List ast, Type base, Type participant, List rows) {
