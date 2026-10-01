@@ -81,8 +81,10 @@ static void Compiler._install_stub(Compiler c, String name, Token marker) {
 static Var _meta_stub(Func function, const FuncArg *argv) {
   Array values = _stub_arguments(function, argv);
   String name = String.new((const char *) Func.context(function));
-  Token site;
-  Compiler c = _stub_compiler(name, site);
+  Compiler c = Compiler.expanding();
+  if (!c) MetaContext.reject(%"$name used outside compilation", NULL);
+  Token site = MetaContext.current().site;
+  if (!site) site = c.token;
   List rows = c._subject_rows(values);
   Var previous = Macro.subject();
   Macro.use_subject(rows);
@@ -101,15 +103,6 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   Array values = [];
   for (int i = 0; i < parameters.len(); i++) values.push(argv[i].data.value);
   return values;
-}
-
-/* The compiler that runs a stub's call, and where the call stands. */
-static Compiler _stub_compiler(String name, Token &site) {
-  Compiler c = Compiler.expanding();
-  if (!c) MetaContext.reject(%"$name used outside compilation", NULL);
-  site = MetaContext.current().site;
-  if (!site) site = c.token;
-  return c;
 }
 
 /* The caller's global bindings and source-name projections for bindings in
@@ -229,8 +222,7 @@ static String meta_call_form = NULL;
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
     case %(expr ? (meta-call ?(List target) (args *arguments))): {
-      List call_target = target;
-      match (call_target)
+      match (target)
         case %(expr ?callee ${$source_identifier_content(
             %((binding ? ?name)))}): {
           if (name is not <string>) break;
@@ -291,14 +283,12 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
     without repeating the marker in every translation unit. */
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
+  if (!declaration.type_from_ast().is_function()) return;
   String path = home_portable_path(Path.absolute(c.filename));
-  List key = %("source-node" (declaration $path ${marker.pos}));
-  if (declaration.type_from_ast().is_function()) {
-    Type type = declaration.type_from_ast().canonicalize();
-    String name = c._native_meta_name(declaration, marker);
-    List signature = c.func_signature(type);
-    c.sym.set(key, %(native-meta $name $signature));
-  }
+  Type type = declaration.type_from_ast().canonicalize();
+  String name = c._native_meta_name(declaration, marker);
+  c.sym.set(%("source-node" (declaration $path ${marker.pos})),
+            %(native-meta $name ${c.func_signature(type)}));
 }
 
 static String Compiler._native_meta_name(
@@ -316,22 +306,15 @@ static String Compiler._native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  String unit = Path.absolute(c.filename);
+  List unit = %(${Path.absolute(c.filename)});
   foreach (Var (key, value), globs) {
-    if (_local_effect(unit, key)) continue;
+    if (_declared_in(key, unit)) continue;
     foreach (List row, c._native_meta_rows(value)) {
       (String name, List signature) = row;
       c.native_meta[name] = signature;
       c._certify_native_meta(name, signature, NULL);
     }
   }
-}
-
-static int _local_effect(String unit, Var key) {
-  match (key)
-    case %("source-node" (declaration ?(String path) ?)):
-      return home_absolute_path(path).equal(unit);
-  return 0;
 }
 
 /** Binds an included native `meta` function the first time compile-time
@@ -422,18 +405,16 @@ static Var NativeBinding.module_target(NativeBinding *n) {
    declaration must match the target it binds. */
 static void NativeBinding.check(NativeBinding *n, Var function) {
   Compiler c = n.c;
-  String name = n.name;
   List suppliers = n.suppliers;
-  if (suppliers.cdr() &&
-      function.equal(((Map) native_modules[suppliers.car()])[n.target]))
+  if (suppliers.cdr() && function.equal(n.module_target()))
     c.report_warning(
       <native>, "more than one native module defines this function",
-      n.marker, %("name: $name" "supplied by: ${suppliers.car()}"
+      n.marker, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
                   "also defined by: ${", ".join(suppliers.cdr())}"));
   if (!c.native_meta_accepts(function, n.signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
-      n.marker, %("name: $name" "signature: ${n.signature.repr()}"));
+      n.marker, %("name: ${n.name}" "signature: ${n.signature.repr()}"));
 }
 
 /* An iterator operation binds through a call that allocates the
@@ -895,10 +876,12 @@ static int _stamp_in(char *data, size_t size, String expected) {
 }
 
 /* Opens the module at absolute `path`, whose stamp was checked, and records
-   its targets. A module is never unloaded, because its Funcs borrow its
+   its targets. Its constructors allocate its Funcs and literals in the
+   module Scope, and it is never unloaded, because its Funcs borrow its
    code. */
 static void _open_native_module(String path) {
-  void *handle = _module_handle(path);
+  void *handle = NULL;
+  $scope(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
     driver_error(
       %"cannot load native module '$path': ${String.new(dlerror())}");
@@ -907,34 +890,24 @@ static void _open_native_module(String path) {
   Compiler.add_native_module(path, entry);
 }
 
-/* The module's constructors allocate its Funcs and literals, which last
-   as long as its code. */
-static void *_module_handle(String path) {
-  $scope(&native_module_scope) return dlopen(path, RTLD_NOW | RTLD_LOCAL);
-}
-
 /** Records the name-to-`Func` Map that the entry of the native module loaded
     from absolute `path` returns. The Funcs, names, signatures, and path last
     for the process.
 */
 void Compiler.add_native_module(String path, Map (*entry)(void)) {
-  Map targets = _module_targets(path, entry);
-  path.try_own();
-  foreach (Var (name, target), targets) {
-    name.string().try_own();
-    ((Func) target.pointer()).signature().try_own();
-  }
-}
-
-static Map _module_targets(String path, Map (*entry)(void)) {
+  Map targets = NULL;
   $scope(&native_module_scope) {
     if (!(void *) native_modules) {
       Scope.shutdown_hook(_native_module_shutdown);
       native_modules = {};
     }
-    Map targets = entry();
+    targets = entry();
     native_modules[path] = targets;
-    return targets;
+  }
+  path.try_own();
+  foreach (Var (name, target), targets) {
+    name.string().try_own();
+    ((Func) target.pointer()).signature().try_own();
   }
 }
 
