@@ -274,6 +274,10 @@ class Queue:
                 selected.extend(group)
             except ValueError as error:
                 errors.append({"number": number, "reason": str(error)})
+        if explicit and errors:
+            raise ValueError("explicit batch cannot be assembled: " +
+                             "; ".join(f"#{e['number']}: {e['reason']}"
+                                       for e in errors))
         if selected and not args.flush and not explicit:
             oldest = dt.datetime.fromisoformat(
                 min(e["ready_at"] for e in selected).replace("Z", "+00:00"))
@@ -417,10 +421,36 @@ class Queue:
                 return "agent-pr-check"
         return "doc-check"
 
+    def recover_gate(self, record):
+        if record["state"] != "gating":
+            return False
+        tree = Path(record["worktree"])
+        try:
+            review = json.loads((tree / "debug" / "land-dev-review.json").read_text())
+        except FileNotFoundError:
+            return False
+        head = git(tree, "rev-parse", "HEAD")
+        if (review.get("candidate") != head or
+                review.get("upstream") != record["base"] or
+                review.get("gate") != record["gate"] or
+                git(tree, "status", "--porcelain")):
+            return False
+        proof = command([str(tree / "tools" / "gate-state.py"), "check",
+                         record["gate"]], tree, check=False)
+        if proof.returncode:
+            return False
+        record.update(state="gated", gated=head,
+                      reason="completed gate recovered; review generated artifacts")
+        self.save(record)
+        return True
+
     def land(self, args):
         self.integrator()
         record = self.read(args.batch)
         upstream = self.fetch_dev()
+        if self.recover_gate(record):
+            output(record)
+            return
         if self.reconcile(record, upstream):
             output(record)
             return
