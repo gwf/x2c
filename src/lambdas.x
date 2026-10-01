@@ -205,7 +205,10 @@ List Compiler.bind_lambda_expression(
   foreach (List row, supplied) c._prescribe(row, prescribed, aliases);
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  c._bind_aliases(aliases);
+  foreach (List alias, aliases) {
+    (List binding, Type annotation) = alias;
+    c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
+  }
   $let(c.lambda_scopes, c.lambda_scopes) {
     c.begin_lambda_captures(NULL, prescribed.list_free());
     c.sym.push_new_scope();
@@ -217,11 +220,10 @@ List Compiler.bind_lambda_expression(
     List captures = c.end_lambda_captures();
     c.check_lambda_captures(body);
     List params = entries.list_free();
-    type = c._bound_type(type, supplied, params);
     if (captures)
       return c.rebuild_expression(
         %("Func"), _lambda_node(body, captures, params));
-    return c._plain_lambda(type, params, body);
+    return c._plain_lambda(type, supplied, params, body);
   }
 }
 
@@ -253,14 +255,6 @@ static String _alias_spelling(Var target, List binding) {
     case %("x2c.ident" ?(String name)): spelling = name;
   }
   return spelling;
-}
-
-static void Compiler._bind_aliases(Compiler c, Array aliases) {
-  foreach (List alias, aliases)
-    match (alias) case %(?binding ?captured_type): {
-      Type annotation = captured_type;
-      c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
-    }
 }
 
 /* A `param` keeps its base and declarator; a bare binding declares a Var. */
@@ -295,26 +289,18 @@ static List Compiler._bind_body(Compiler c, List body) {
 }
 
 /* An open type is a Func when rows were supplied, and otherwise the
-   native function type of the parameters. */
-static Type Compiler._bound_type(
-  Compiler c, Type type, List supplied, List params) {
+   native function type of the parameters. A meta body keeps a Func lambda
+   for meta lowering to adapt; the transform lifts it for native code. */
+static List Compiler._plain_lambda(
+  Compiler c, Type type, List supplied, List params, List body) {
+  List node = _lambda_node(body, NULL, params);
   if (type === %(<macro-expr>))
     type = supplied ? %("Func")
          : %((func ${c.lambda_param_types(params)}) "Var");
-  return type;
-}
-
-/* A meta body keeps the lambda for meta lowering to adapt; the transform
-   lifts it for native code. */
-static List Compiler._plain_lambda(
-  Compiler c, Type type, List params, List body) {
-  Macro lambda = $lambda_expression;
-  if (type === %("Func") && !c.meta_body) {
-    Type signature = %((func ${c.lambda_param_types(params)}) "Var");
-    return c.lift_func_expression(
-      c.rebuild_expression(signature, lambda(body, params)));
-  }
-  return c.rebuild_expression(type, lambda(body, params));
+  if (type !== %("Func") || c.meta_body)
+    return c.rebuild_expression(type, node);
+  Type signature = %((func ${c.lambda_param_types(params)}) "Var");
+  return c.lift_func_expression(c.rebuild_expression(signature, node));
 }
 
 /* lambda captures
@@ -339,26 +325,19 @@ void Compiler.begin_lambda_captures(
 
 /** Finishes the active lambda's captures in first-use order. */
 List Compiler.end_lambda_captures(Compiler c) {
-  List rows = NULL;
-  match (c.lambda_scopes.car())
-    case %(lambda-scope ?scope ? ? ?): {
-      Var stored;
-      Map facts = c.semantic_binding_facts();
-      if (facts.try_get(%(lambda-order $scope), stored)) rows = stored;
-    }
+  List scope = c.lambda_scopes.car().cadr();
   c.lambda_scopes = c.lambda_scopes.cdr();
+  List rows = c.semantic_binding_facts().getdefault(
+    %(lambda-order $scope), %());
   return rows.reverse();
 }
 
 /** Reports whether the active lambda still needs to capture a binding. */
 int Compiler.lambda_capture_required(Compiler c, List binding) {
   match (c.lambda_scopes)
-    case %((lambda-scope ? ?depth ? ?supplied) *): {
-      foreach (List row, supplied.list())
-        match (row) case %(capture ?target ? ?):
-          if (target == binding) return 1;
-      return c._declared_outside(binding, depth);
-    }
+    case %((lambda-scope ? ?depth ? ?supplied) *):
+      return _prescribed_row(supplied, binding, binding) ||
+             c._declared_outside(binding, depth);
   return 0;
 }
 
@@ -486,10 +465,8 @@ static List Capture.record(
   facts[%(lambda-depth $captured)] = k.depth;
   if (reference) facts[%(reference-param $captured)] = 1;
   else facts[%(lambda-snapshot $captured)] = 1;
-  Var scope = k.scope, stored;
-  List order = NULL;
-  if (facts.try_get(%(lambda-order $scope), stored)) order = stored;
-  facts[%(lambda-order $scope)] = cons(row, order);
+  List order = %(lambda-order ${k.scope});
+  facts[order] = cons(row, facts.getdefault(order, %()));
   return row;
 }
 
