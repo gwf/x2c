@@ -38,7 +38,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:787`
+Source: `src/meta-group.x:778`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -69,7 +69,7 @@ Source: `src/meta-group.x:122`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:680`
+Source: `src/meta-group.x:671`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -132,7 +132,7 @@ Source: `src/meta-group.x:140`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:699`
+Source: `src/meta-group.x:690`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -143,7 +143,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:707`
+Source: `src/meta-group.x:698`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -162,7 +162,7 @@ Source: `src/meta-group.x:116`
 Directs the group of each unit the project meta build parses into
 `directory`, or stops that when it is NULL.
 
-Source: `src/meta-group.x:751`
+Source: `src/meta-group.x:742`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -185,7 +185,7 @@ directory as `group-K.c` and `group-K.h`, K being its table, with the
 x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. A unit without `meta` functions writes nothing.
 
-Source: `src/meta-group.x:759`
+Source: `src/meta-group.x:750`
 
 ## Design notes
 

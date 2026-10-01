@@ -144,7 +144,7 @@ nonempty `List`.
 
 Any cause raised by `pred` or its result's truth operation propagates.
 
-Source: `lib/list.x:681`
+Source: `lib/list.x:672`
 
 <a id="List.any"></a>
 #### List.any
@@ -157,7 +157,7 @@ false.
 
 Any cause raised by `pred` or its result's truth operation propagates.
 
-Source: `lib/list.x:669`
+Source: `lib/list.x:661`
 
 <a id="List.append"></a>
 #### List.append
@@ -238,7 +238,7 @@ Returns the first element `pred` accepts by ordinary `Var` truthiness, or
 Any cause raised by `pred` or its result's truth operation propagates. A
 null `pred` returns `void`.
 
-Source: `lib/list.x:657`
+Source: `lib/list.x:650`
 
 <a id="List.foldl"></a>
 #### List.foldl
@@ -386,7 +386,7 @@ Maps `fn` over aligned pairs from `a` and `b`.
 A null callback returns `nil` without examining either `List`; otherwise
 this has the length, order, ownership, and failures of `List.zip_with`.
 
-Source: `lib/list.x:708`
+Source: `lib/list.x:697`
 
 <a id="List.reverse"></a>
 #### List.reverse
@@ -414,7 +414,7 @@ fewer than two cells is returned as it stands.
 **Raises:** whatever element comparison raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:732`
+Source: `lib/list.x:721`
 
 <a id="List.sort_by"></a>
 #### List.sort_by
@@ -426,7 +426,7 @@ The key runs once per element in input order; an empty List invokes none.
 The input List is unchanged. Raises: allocation and the key's ordinary
 causes, including failure to compare the resulting keys.
 
-Source: `lib/list.x:755`
+Source: `lib/list.x:744`
 
 <a id="List.sort_with"></a>
 #### List.sort_with
@@ -437,7 +437,7 @@ Returns a stable sorted copy using `Array.sort_with`'s callback contract.
 The input List is unchanged. Fewer than two cells return unchanged without
 a callback. Raises: allocation and the comparator's ordinary causes.
 
-Source: `lib/list.x:743`
+Source: `lib/list.x:732`
 
 <a id="List.tail"></a>
 #### List.tail
@@ -479,7 +479,7 @@ of fewer than two cells is returned as it stands.
 **Raises:** causes from `Map` hashing or equality, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:770`
+Source: `lib/list.x:759`
 
 <a id="List.unpack_n"></a>
 #### List.unpack_n
@@ -495,7 +495,7 @@ skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:850`
+Source: `lib/list.x:839`
 
 <a id="List.unpack_vars_n"></a>
 #### List.unpack_vars_n
@@ -510,7 +510,7 @@ is skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:865`
+Source: `lib/list.x:854`
 
 <a id="List.write_str"></a>
 #### List.write_str
@@ -523,7 +523,7 @@ inside each parenthesis, as in `( a b )`, including when nested in another
 container. This method temporarily sets the destination `Buffer`'s padding
 to one and restores it afterward.
 
-Source: `lib/list.x:927`
+Source: `lib/list.x:916`
 
 <a id="List.zip_with"></a>
 #### List.zip_with
@@ -537,7 +537,7 @@ callback receives the left and right values and is invoked front to back.
 
 **Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
-Source: `lib/list.x:694`
+Source: `lib/list.x:683`
 
 ### `Map`
 
@@ -719,7 +719,7 @@ identity, and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:785`
+Source: `lib/list.x:774`
 
 <a id="List.flatten_all"></a>
 #### List.flatten_all
@@ -731,7 +731,7 @@ Nested `nil` contributes no element and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:802`
+Source: `lib/list.x:791`
 
 <a id="List.hash"></a>
 #### List.hash
@@ -797,7 +797,7 @@ released.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:942`
+Source: `lib/list.x:931`
 
 <a id="List.str"></a>
 #### List.str
@@ -814,7 +814,7 @@ ancestor, and remains live until its owning pool is released. Use
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:915`
+Source: `lib/list.x:904`
 
 <a id="List.sublis"></a>
 #### List.sublis
@@ -829,7 +829,7 @@ rebuilt canonically, and `nil` returns `nil`.
 **Raises:** a cause from key equality, or `<alloc-fail>` or `<size-limit>`
 while constructing the result.
 
-Source: `lib/list.x:823`
+Source: `lib/list.x:812`
 
 <a id="List.subseq"></a>
 #### List.subseq
@@ -851,7 +851,7 @@ Source: `lib/list.x:558`
 
 Appends the readable representation of `List` to a `Buffer`.
 
-Source: `lib/list.x:949`
+Source: `lib/list.x:938`
 
 ### `Var`
 
