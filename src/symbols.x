@@ -904,6 +904,20 @@ Type Sym.resolve_base_type(Sym s, Type key) {
   return type;
 }
 
+/** Returns the name of the one file-scope typedef declared directly as
+    `type`, or NULL when no typedef or several typedefs are. */
+Type Sym.sole_typedef(Sym s, Type type) {
+  String found = NULL;
+  for (int i = 0; i < s.base_scopes; i++)
+    foreach (Var (key, target), s._scope_at(i).symbols)
+      match (key) case %(typedef ?(String name)):
+        if (target == type) {
+          if (found && found != name) return NULL;
+          found = name;
+        }
+  return found ? %($found) : NULL;
+}
+
 /** Resolves typedef bases while retaining every declarator qualifier. */
 Type Sym.normalize_declared_type(Sym s, Type type) =>
   type ? s._normalize_chain(type, type, 0) : NULL;

@@ -1723,14 +1723,15 @@ static Type _qualified(Type type, Type named) {
 }
 
 /* A receiver spelled `struct T` or `union T` reaches the methods of the
-   typedef `T` when that typedef names the same aggregate, as the usual
-   `typedef struct T {...} T;` does. */
+   typedef that names the same aggregate: `T` itself, as the usual
+   `typedef struct T {...} T;` declares, or else the only typedef declared
+   directly as that aggregate. */
 static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
-  match (aggregate) case %(?kind ?(String tag)): {
+  match (aggregate) case %(? ?(String tag)): {
     Type name = %($tag);
     if (c.sym.resolve_key(name) == aggregate) return name;
   }
-  return NULL;
+  return c.sym.sole_typedef(aggregate);
 }
 
 static List Compiler._method_member(
