@@ -389,6 +389,14 @@ plans index.
   private include puts its prototype in the generated header without that
   type's header, so any unit including the header fails in clang. Found
   during defect 1; it needs its own `fix-x2c-bug` pass.
+- `try return f(); catch ...: return g();` generates C that clang flags
+  with `-Wreturn-type` (seen in `tools/check-doc-examples` `_stdout`); every
+  path returns at run time. Found during defect 6.
+- Defect 6 ends a timed-out sample's own process, not its process group:
+  Job runs children in the caller's group, and a per-job group would be a
+  new `process.x` option that also stops Ctrl-C reaching samples.
+  `preprocess-missing-include` keeps its status-only check, because its
+  stderr carries the host C compiler's own message.
 - The region check treats a pointer cast to `int` and returned as a
   returned address (`return (int) value;`). Found during defect 5; it
   needs its own `fix-x2c-bug` pass.
