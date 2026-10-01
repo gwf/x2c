@@ -475,7 +475,6 @@ static List Capture.record(
 */
 void Compiler.check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   Array pending = $auto([]);
   pending.push(ast);
   while (pending.len()) {
@@ -483,8 +482,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     match (node) {
-      case lambda(?body, *params): continue;
-      case captured(?body, *captures, *params): continue;
+      case $source_any_lambda(): continue;
       case $source_operator_content(%(& ?target)):
         c._require_capture_lvalue(target);
       case $source_operator_content(%(?operator ?target *)):
