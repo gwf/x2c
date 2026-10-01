@@ -322,8 +322,8 @@ static void _record(const X2CErrorSite * site, Symbol code, List detail){
     .region = _region_new()
   }
   ;
-  detail = Var_list(ErrorRegion__copy_value(& record.region, List_var(detail)));
-  record.entry = ErrorRegion__entry(& record.region, site, code, detail);
+  detail = Var_list(ErrorRegion__copy_value(&(record.region), List_var(detail)));
+  record.entry = ErrorRegion__entry(&(record.region), site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;
 }
@@ -336,8 +336,8 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
     .region = _region_new()
   }
   ;
-  List detail = ErrorRegion__counted_detail(& record.region, code, pair_count, args);
-  record.entry = ErrorRegion__entry(& record.region, site, code, detail);
+  List detail = ErrorRegion__counted_detail(&(record.region), code, pair_count, args);
+  record.entry = ErrorRegion__entry(&(record.region), site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;
 }
@@ -422,7 +422,7 @@ static void _truncate(int mark){
   if(! Error_ready() || mark < 0) return;
   while(Error_count() > mark){
     ErrorRecord * record = _record_at(Error_count() - 1);
-    ErrorRegion__destroy(& record -> region);
+    ErrorRegion__destroy(&(record -> region));
     Block_pop(_thread() -> stack);
   }
 
@@ -601,7 +601,7 @@ static Symbol ErrorThreadState__observe(ErrorThreadState e, ErrorHandler h){
     {
       e -> floor_only ++;
       h -> view = _region_new();
-      List slice = ErrorRegion__view_since(& h -> view, h -> watermark);
+      List slice = ErrorRegion__view_since(&(h -> view), h -> watermark);
       e -> floor_only --;
       {
         Symbol _x2c_return_value_0 = h -> fn(slice, h -> data);
@@ -672,7 +672,7 @@ static Symbol ErrorHandler__catch_match(ErrorHandler h){
   List detail = Var_list(List_cadr(Var_list(List_cadr(record -> entry))));
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List projection = ErrorRegion__cons(& record -> region, Symbol_var(code), detail);
+  List projection = ErrorRegion__cons(&(record -> region), Symbol_var(code), detail);
   Pool_open_named("Error catch bindings");
   int selected = ErrorHandler__catch_select(h, record, projection);
   Pool_close();
@@ -732,7 +732,7 @@ static void ErrorHandler__commit_captures(ErrorHandler handle, ErrorRecord * rec
   Var * values = handle -> capture_values -> bytes;
   for(int i = 0;  i < layout -> binder_count;  i ++){
     values[i] =((void) 0, Void);
-    if(MatchCaptureBuffer_has(captures, i)) values[i] = ErrorRegion__copy_value(& record -> region, captures -> values[i]);
+    if(MatchCaptureBuffer_has(captures, i)) values[i] = ErrorRegion__copy_value(&(record -> region), captures -> values[i]);
   }
   if(pushed) Scope_pop();
 }
@@ -752,7 +752,7 @@ static void ErrorHandler__catch_retain(ErrorHandler handle){
 static void _retained_destroy(Block retained){
   if(retained == NULL) return;
   ErrorRecord * records = retained -> bytes;
-  for(size_t i = 0;  i < retained -> length;  i ++) ErrorRegion__destroy(& records[i].region);
+  for(size_t i = 0;  i < retained -> length;  i ++) ErrorRegion__destroy(&(records[i].region));
   Block_free(retained);
 }
 
@@ -768,12 +768,12 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 647};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 646};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 650};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 649};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -826,7 +826,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 718};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 717};
     x2c_error_raise_n(& _x2c_error_site_2, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
@@ -912,7 +912,7 @@ static void ErrorHandler__free(ErrorHandler handle){
   _plans_free(handle -> plans);
   if(handle -> capture_values != NULL) Block_free(handle -> capture_values);
   _retained_destroy(handle -> retained);
-  ErrorRegion__destroy(& handle -> view);
+  ErrorRegion__destroy(&(handle -> view));
   Scope_free(handle);
 }
 
@@ -976,7 +976,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     ErrorHandler__free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 927};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 926};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -1360,7 +1360,7 @@ int Error_ready(void){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  ErrorRegion__destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
+  ErrorRegion__destroy(&((*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
