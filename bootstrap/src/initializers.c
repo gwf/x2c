@@ -1809,7 +1809,7 @@ DiagnosticsHold Diagnostics_hold(Diagnostics);
 int x2c_error_catch_site_pending(ErrorCatchSite *);
 ErrorHandler x2c_error_catch_site_push(void *, ErrorCatchSite *, Var *);
 void x2c_exception_push(ExceptionFrame *);
-void SymTxn_commit(SymTxn);
+void SymTxn_commit(SymTxn *);
 void x2c_exception_landed(ExceptionFrame *);
 int x2c_exception_is_error_target(ExceptionFrame *);
 int x2c_error_catch_selected(ErrorHandler);
@@ -1818,7 +1818,7 @@ void x2c_exception_mark_handled(ExceptionFrame *);
 void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
 static List Compiler__speculate(Compiler c, List value, Type type, List condition, List target, int * native_used){
-  SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
+  SymTxn transaction = Compiler_begin_semantic_transaction(c);  x2c_exception_escaped = & transaction;  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
     {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
@@ -1835,7 +1835,7 @@ static List Compiler__speculate(Compiler c, List value, Type type, List conditio
             _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL)));
           }
           volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
-            result = List_truth(({ static MatchCaptureSite _x2c_match_site_11;  x2c_match_site_match(& _x2c_match_site_11, value, List_var(_71)); })) ? Compiler__convert_composite(c, value, Type_canonicalize(type), target, condition, native_used) : Compiler_convert_expression(c, value, type);  SymTxn_commit(transaction);  completed = 1;
+            result = List_truth(({ static MatchCaptureSite _x2c_match_site_11;  x2c_match_site_match(& _x2c_match_site_11, value, List_var(_71)); })) ? Compiler__convert_composite(c, value, Type_canonicalize(type), target, condition, native_used) : Compiler_convert_expression(c, value, type);  SymTxn_commit(&(transaction));  completed = 1;
           }
           else{
             x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
@@ -2215,13 +2215,13 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 void Array_resize(Array, size_t);
-void SymTxn_rollback(SymTxn);
+void SymTxn_rollback(SymTxn *);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; {
     (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> recovery_depth =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2);  Diagnostics_release((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> diagnostics, (*(DiagnosticsHold *) _x2c_defer_data_1->_x2c_defer_capture_3), !(*(int *) _x2c_defer_data_1->_x2c_defer_capture_4));  if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_5)){
       (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> key_ids =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> names -> adapters =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7);  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> id_keys, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_8));  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> early_decls, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_9));
     }
-    SymTxn_rollback((*(SymTxn *) _x2c_defer_data_1->_x2c_defer_capture_10));
+    SymTxn_rollback(&((*(SymTxn *) _x2c_defer_data_1->_x2c_defer_capture_10)));
   }
 
 }

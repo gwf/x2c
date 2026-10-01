@@ -6,36 +6,21 @@
 
 #include "exception.h"
 
-static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 #include <string.h>
-#include "scope.h"
 #include "exception.h"
-static int MachineBuilder__grow_code(MachineBuilder b);
+static int MachineBuilder__grow_code(MachineBuilder * b);
 
-static int MachineBuilder__grow_consts(MachineBuilder b);
+static int MachineBuilder__grow_consts(MachineBuilder * b);
 
-static int MachineBuilder__fail(MachineBuilder b, const char * reason);
+static int MachineBuilder__fail(MachineBuilder * b, const char * reason);
 
 static size_t _program_bytes(int length, int const_count, int binder_count);
-
-static inline String _x2c_proto_machinebuilder_str_0(Var a0);
-
-static inline String _x2c_proto_machinebuilder_repr_0(Var a0);
-
-static inline Buffer _x2c_proto_machinebuilder_write_str_0(Var a0, Buffer a1);
-
-static inline Buffer _x2c_proto_machinebuilder_write_repr_0(Var a0, Buffer a1);
-
-static inline unsigned _x2c_proto_machinebuilder_hash_0(Var a0);
-
-static inline int _x2c_proto_machinebuilder_equal_0(Var a0, Var a1);
-
-static VarMethods _x2c__x2c_protocol_methods_0;
 
 static inline String _x2c_proto_machineprogram_str_0(Var a0);
 
@@ -49,7 +34,7 @@ static inline unsigned _x2c_proto_machineprogram_hash_0(Var a0);
 
 static inline int _x2c_proto_machineprogram_equal_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_1;
+static VarMethods _x2c__x2c_protocol_methods_0;
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -72,41 +57,15 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
-}
-_x2c_defer_env_3;
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_4;
-}
-_x2c_defer_env_4;
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
-typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_5;
-}
-_x2c_defer_env_5;
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_machinebuilder_str_0, .repr = _x2c_proto_machinebuilder_repr_0, .write_str = _x2c_proto_machinebuilder_write_str_0, .write_repr = _x2c_proto_machinebuilder_write_repr_0, .hash = _x2c_proto_machinebuilder_hash_0, .equal = _x2c_proto_machinebuilder_equal_0
-  }
-  ;
-  x2c_register_tagged_descriptor(254542554242, String_new("MachineBuilder"), _x2c__x2c_protocol_methods_0);
-  _x2c__x2c_protocol_methods_1 =(VarMethods){
     .str = _x2c_proto_machineprogram_str_0, .repr = _x2c_proto_machineprogram_repr_0, .write_str = _x2c_proto_machineprogram_write_str_0, .write_repr = _x2c_proto_machineprogram_write_repr_0, .hash = _x2c_proto_machineprogram_hash_0, .equal = _x2c_proto_machineprogram_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_1);
+  x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_0);
   _0 = String_new("<MachineProgram: 0x%012lX>");
   _1 = String_new("MachineProgram { ");
   _2 = String_new("length: ");
@@ -115,16 +74,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _5 = String_new("binder_count: ");
   _6 = String_new("root: ");
   _7 = String_new(" }");
-  _8 = String_new("<MachineBuilder: 0x%012lX>");
-  _9 = String_new("MachineBuilder { ");
-  _10 = String_new("code: ");
-  _11 = String_new("<opaque: 0x%012lX>");
-  _12 = String_new("consts: ");
-  _13 = String_new("binders: ");
-  _14 = String_new("code_capacity: ");
-  _15 = String_new("const_capacity: ");
-  _16 = String_new("status: ");
-  _17 = String_new("reason: ");
 }
 
 void * Scope_memdup(const void *, size_t);
@@ -305,267 +254,99 @@ String MachineProgram_repr(MachineProgram value){
 
 }
 
-MachineBuilder MachineBuilder_new(){
-  MachineBuilder value = MachineBuilder_alloc();
-  MachineBuilder_init(value);
-  return value;
-}
-
-MachineBuilder MachineBuilder_alloc(){
-  MachineBuilder value = Scope_calloc(1, sizeof(* value));
-  return value;
-}
-
-void MachineBuilder_free(MachineBuilder value){
-  if(value) MachineBuilder_drop(value);
-  Scope_free(value);
-}
-
-void MachineBuilder_cleanup(MachineBuilder value){
-  MachineBuilder_free(value);
-}
-
-Var MachineBuilder_var(MachineBuilder value){
-  return Var_new(254542554242, value);
-}
-
-MachineBuilder Var_machinebuilder(Var value){
-  return(MachineBuilder) Var_pointer(value);
-}
-
-int MachineBuilder_equal(MachineBuilder left, MachineBuilder right){
-  return(void *) left ==(void *) right;
-}
-
-unsigned MachineBuilder_hash(MachineBuilder value){
-  return x2c_hash_word((unsigned long) value);
-}
-
-Buffer MachineBuilder_write_str(MachineBuilder value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _8, (long) value);
-}
-
-String MachineBuilder_str(MachineBuilder value){
-  if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
-  {
-    _x2c_defer_env_3 _x2c_macro_environment_3 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
-    {
-      MachineBuilder_write_str(value, out);
-      {
-        String _x2c_return_value_3 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_3;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
-  }
-
-}
-
-Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _8, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _8, (long) value);
-  {
-    _x2c_defer_env_4 _x2c_macro_environment_4 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_4._x2c_defer_capture_4 =(const void *) & path;
-    X2CCleanup _x2c_defer_record_4 ={
-      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_4);
-    {
-      Buffer_write(out, _9);
-      Buffer_write(out, _10);
-      Buffer_printf(out, _11, (long) value -> code);
-      Buffer_write(out, _3);
-      Buffer_write(out, _12);
-      Buffer_printf(out, _11, (long) value -> consts);
-      Buffer_write(out, _3);
-      Buffer_write(out, _13);
-      Buffer_printf(out, _11, (long) value -> binders);
-      Buffer_write(out, _3);
-      Buffer_write(out, _2);
-      Var_write_repr(int_var(value -> length), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _14);
-      Var_write_repr(int_var(value -> code_capacity), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _4);
-      Var_write_repr(int_var(value -> const_count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _15);
-      Var_write_repr(int_var(value -> const_capacity), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _5);
-      Var_write_repr(int_var(value -> binder_count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _6);
-      Var_write_repr(int_var(value -> root), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _16);
-      Var_write_repr(Var_new(3453797, value -> status), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _17);
-      Buffer_printf(out, _11, (long) value -> reason);
-      {
-        Buffer _x2c_return_value_4 = Buffer_write(out, _7);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_4);
-          return _x2c_return_value_4;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_4);
-  }
-
-}
-
-String MachineBuilder_repr(MachineBuilder value){
-  if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
-  {
-    _x2c_defer_env_5 _x2c_macro_environment_5 ={
-      0
-    }
-    ;
-    _x2c_macro_environment_5._x2c_defer_capture_5 =(const void *) & out;
-    X2CCleanup _x2c_defer_record_5 ={
-      .fn = _x2c_defer_cleanup_5, .env = & _x2c_macro_environment_5
-    }
-    ;
-    x2c_cleanup_push(& _x2c_defer_record_5);
-    {
-      MachineBuilder_write_repr(value, out);
-      {
-        String _x2c_return_value_5 = Buffer_str(out);
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_5);
-          return _x2c_return_value_5;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_defer_record_5);
-  }
-
-}
-
-int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target){
-  if(b -> status != MACHINE_PREPARED || MachineBuilder__grow_code(b) < 0) return - 1;
-  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "instruction-range");
-  b -> code[b -> length] =(MachineWord){
+int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c, int d, int target){
+  if((* b).status != MACHINE_PREPARED || MachineBuilder__grow_code(&((* b))) < 0) return - 1;
+  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(&((* b)), "instruction-range");
+  (* b).code[(* b).length] =(MachineWord){
     .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target
   }
   ;
-  return b -> length ++;
+  return(* b).length ++;
 }
 
 void * Scope_realloc(void *, size_t);
 
-static int MachineBuilder__grow_code(MachineBuilder b){
-  if(b -> length < b -> code_capacity) return 0;
-  if(b -> code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "code-capacity");
-  int capacity = b -> code_capacity ? b -> code_capacity * 2 : 64;
+static int MachineBuilder__grow_code(MachineBuilder * b){
+  if((* b).length <(* b).code_capacity) return 0;
+  if((* b).code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(&((* b)), "code-capacity");
+  int capacity =(* b).code_capacity ?(* b).code_capacity * 2 : 64;
   if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord * grown = Scope_realloc(b -> code, sizeof(MachineWord) * capacity);
-  b -> code = grown;
-  b -> code_capacity = capacity;
+  MachineWord * grown = Scope_realloc((* b).code, sizeof(MachineWord) * capacity);
+  (* b).code = grown;
+  (* b).code_capacity = capacity;
   return 0;
 }
 
-int MachineBuilder_constant(MachineBuilder b, Var value){
-  if(b -> status != MACHINE_PREPARED) return - 1;
-  for(int i = 0;  i < b -> const_count;  i ++) if(b -> consts[i].u64 == value.u64) return i;
-  if(MachineBuilder__grow_consts(b) < 0) return - 1;
-  b -> consts[b -> const_count] = value;
-  return b -> const_count ++;
+int MachineBuilder_constant(MachineBuilder * b, Var value){
+  if((* b).status != MACHINE_PREPARED) return - 1;
+  for(int i = 0;  i <(* b).const_count;  i ++) if((* b).consts[i].u64 == value.u64) return i;
+  if(MachineBuilder__grow_consts(&((* b))) < 0) return - 1;
+  (* b).consts[(* b).const_count] = value;
+  return(* b).const_count ++;
 }
 
-static int MachineBuilder__grow_consts(MachineBuilder b){
-  if(b -> const_count < b -> const_capacity) return 0;
-  if(b -> const_capacity >= MACHINE_CONST_MAX) return MachineBuilder__fail(b, "constant-capacity");
-  int capacity = b -> const_capacity ? b -> const_capacity * 2 : 16;
+static int MachineBuilder__grow_consts(MachineBuilder * b){
+  if((* b).const_count <(* b).const_capacity) return 0;
+  if((* b).const_capacity >= MACHINE_CONST_MAX) return MachineBuilder__fail(&((* b)), "constant-capacity");
+  int capacity =(* b).const_capacity ?(* b).const_capacity * 2 : 16;
   if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-  Var * grown = Scope_realloc(b -> consts, sizeof(Var) * capacity);
-  b -> consts = grown;
-  b -> const_capacity = capacity;
+  Var * grown = Scope_realloc((* b).consts, sizeof(Var) * capacity);
+  (* b).consts = grown;
+  (* b).const_capacity = capacity;
   return 0;
 }
 
-int MachineBuilder_binder(MachineBuilder b, Atom binder){
-  if(b -> status != MACHINE_PREPARED) return - 1;
-  for(int i = 0;  i < b -> binder_count;  i ++) if(b -> binders[i].u64 == binder.u64) return i;
-  if(b -> binder_count >= MACHINE_BINDER_MAX) return MachineBuilder__fail(b, "binder-capacity");
-  b -> binders[b -> binder_count] = binder;
-  return b -> binder_count ++;
+int MachineBuilder_binder(MachineBuilder * b, Atom binder){
+  if((* b).status != MACHINE_PREPARED) return - 1;
+  for(int i = 0;  i <(* b).binder_count;  i ++) if((* b).binders[i].u64 == binder.u64) return i;
+  if((* b).binder_count >= MACHINE_BINDER_MAX) return MachineBuilder__fail(&((* b)), "binder-capacity");
+  (* b).binders[(* b).binder_count] = binder;
+  return(* b).binder_count ++;
 }
 
 Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-void MachineBuilder_set_target(MachineBuilder b, int site, int target){
-  if(target == b -> length && b -> length == MACHINE_CODE_MAX) MachineBuilder__fail(b, "code-capacity");
+void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
+  if(target ==(* b).length &&(* b).length == MACHINE_CODE_MAX) MachineBuilder__fail(&((* b)), "code-capacity");
   else if(target < 0 || target >= MACHINE_CODE_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 388};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 390};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL))), Symbol_var(1345468776), int_var(target));
     __builtin_unreachable();
   }
-  else if(site >= 0) b -> code[site].target = target;
+  else if(site >= 0)(* b).code[site].target = target;
 }
 
-void MachineBuilder_patch(MachineBuilder b, int * sites, int count, int target){
-  if(target < 0 || target >= MACHINE_CODE_MAX) MachineBuilder_set_target(b, - 1, target);
-  for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(b, sites[i], target);
+void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target){
+  if(target < 0 || target >= MACHINE_CODE_MAX) MachineBuilder_set_target(&((* b)), - 1, target);
+  for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(&((* b)), sites[i], target);
 }
 
-static int MachineBuilder__fail(MachineBuilder b, const char * reason){
-  if(b -> status == MACHINE_PREPARED){
-    b -> status = MACHINE_INELIGIBLE;
-    b -> reason = reason;
+static int MachineBuilder__fail(MachineBuilder * b, const char * reason){
+  if((* b).status == MACHINE_PREPARED){
+    (* b).status = MACHINE_INELIGIBLE;
+    (* b).reason = reason;
   }
   return - 1;
 }
 
 void * Scope_malloc(size_t);
 
-MachineProgram MachineBuilder_freeze(MachineBuilder b){
-  if(b -> status != MACHINE_PREPARED || b -> root < 0) return NULL;
-  size_t bytes = _program_bytes(b -> length, b -> const_count, b -> binder_count);
+MachineProgram MachineBuilder_freeze(MachineBuilder * b){
+  if((* b).status != MACHINE_PREPARED ||(* b).root < 0) return NULL;
+  size_t bytes = _program_bytes((* b).length, (* b).const_count, (* b).binder_count);
   MachineProgram program = Scope_malloc(bytes);
   * program =(struct MachineProgram){
-    .length = b -> length, .const_count = b -> const_count, .binder_count = b -> binder_count, .root = b -> root
+    .length =(* b).length, .const_count =(* b).const_count, .binder_count =(* b).binder_count, .root =(* b).root
   }
   ;
   MachineWord * code =(MachineWord *)(program + 1);
-  Var * consts =(Var *)(code + b -> length);
-  Atom * binders =(Atom *)(consts + b -> const_count);
-  if(b -> length) memcpy(code, b -> code, sizeof(MachineWord) * b -> length);
-  if(b -> const_count) memcpy(consts, b -> consts, sizeof(Var) * b -> const_count);
-  if(b -> binder_count) memcpy(binders, b -> binders, sizeof(Atom) * b -> binder_count);
+  Var * consts =(Var *)(code +(* b).length);
+  Atom * binders =(Atom *)(consts +(* b).const_count);
+  if((* b).length) memcpy(code, (* b).code, sizeof(MachineWord) *(* b).length);
+  if((* b).const_count) memcpy(consts, (* b).consts, sizeof(Var) *(* b).const_count);
+  if((* b).binder_count) memcpy(binders, (* b).binders, sizeof(Atom) *(* b).binder_count);
   return program;
 }
 
@@ -588,39 +369,26 @@ size_t MachineProgram_bytes(MachineProgram program){
   return _program_bytes(program -> length, program -> const_count, program -> binder_count);
 }
 
-void MachineBuilder_init(MachineBuilder b){
-  b -> status = MACHINE_PREPARED;
-  b -> reason = "prepared";
-  b -> root = - 1;
+MachineBuilder MachineBuilder_new(void){
+  MachineBuilder b;
+  MachineBuilder_init(&(b));
+  return b;
 }
 
-void MachineBuilder_drop(MachineBuilder b){
-  Scope_free(b -> code);
-  Scope_free(b -> consts);
+void MachineBuilder_init(MachineBuilder * b){
+  (* b) =(MachineBuilder){
+    .root = - 1, .status = MACHINE_PREPARED, .reason = "prepared"
+  }
+  ;
 }
 
-static inline String _x2c_proto_machinebuilder_str_0(Var a0){
-  return MachineBuilder_str(Var_machinebuilder(a0));
+void MachineBuilder_drop(MachineBuilder * b){
+  Scope_free((* b).code);
+  Scope_free((* b).consts);
 }
 
-static inline String _x2c_proto_machinebuilder_repr_0(Var a0){
-  return MachineBuilder_repr(Var_machinebuilder(a0));
-}
-
-static inline Buffer _x2c_proto_machinebuilder_write_str_0(Var a0, Buffer a1){
-  return MachineBuilder_write_str(Var_machinebuilder(a0), a1);
-}
-
-static inline Buffer _x2c_proto_machinebuilder_write_repr_0(Var a0, Buffer a1){
-  return MachineBuilder_write_repr(Var_machinebuilder(a0), a1);
-}
-
-static inline unsigned _x2c_proto_machinebuilder_hash_0(Var a0){
-  return MachineBuilder_hash(Var_machinebuilder(a0));
-}
-
-static inline int _x2c_proto_machinebuilder_equal_0(Var a0, Var a1){
-  return MachineBuilder_equal(Var_machinebuilder(a0), Var_machinebuilder(a1));
+void MachineBuilder_free(MachineBuilder * b){
+  MachineBuilder_drop(&((* b)));
 }
 
 static inline String _x2c_proto_machineprogram_str_0(Var a0){
@@ -664,20 +432,5 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
   Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
-}
-
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  Buffer_free((*(Buffer *) _x2c_defer_data_3->_x2c_defer_capture_3));
-}
-
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_4->_x2c_defer_capture_4)));
-}
-
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Buffer_free((*(Buffer *) _x2c_defer_data_5->_x2c_defer_capture_5));
 }
 

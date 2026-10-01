@@ -143,33 +143,15 @@ void Sym_declare_delegate_field(Sym s, Type aggregate, String name);
 
 Type Sym_delegate_aggregate(Sym s, Type type);
 
-typedef struct SymTxn{
-  Compiler c;
-  int scope_index, next_binding, active;
-  String initializer_name;
-  String shutdown_name;
-  Map counters;
-  int local_macro_names;
-  SymScope scope;
-  Map statics, binding_facts;
-  Map source_definitions;
-  int source_occurrences;
-  int extended;
-  Map adapters;
-  Array base_bindings;
-  int early_count, init_count, origin_count, origin, needs_exception;
-}
-* SymTxn;
-
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
-int SymTxn_local_macros_changed(SymTxn s);
+int SymTxn_local_macros_changed(SymTxn * s);
 
-void SymTxn_commit(SymTxn s);
+void SymTxn_commit(SymTxn * s);
 
-void SymTxn_commit_transient(SymTxn s);
+void SymTxn_commit_transient(SymTxn * s);
 
-void SymTxn_rollback(SymTxn s);
+void SymTxn_rollback(SymTxn * s);
 
 
 #endif /* __GUARD_0x23009D1A__ */

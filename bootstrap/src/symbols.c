@@ -90,25 +90,25 @@ static Symbol Sym__var_tag_chain(Sym s, Type type, Type origin, Type * resolved,
 
 static List Sym__field_row(Sym s, Type type, List declaration, List declarator);
 
-static void SymTxn__save(SymTxn s, SymScope scope);
+static void SymTxn__save(SymTxn * s, SymScope scope);
 
-static void SymTxn__save_effects(SymTxn s);
+static void SymTxn__save_effects(SymTxn * s);
 
-static void SymTxn__save_sources(SymTxn s);
+static void SymTxn__save_sources(SymTxn * s);
 
-static void SymTxn__stage(SymTxn s, SymScope * scope);
+static void SymTxn__stage(SymTxn * s, SymScope * scope);
 
 static void Compiler__merge_scope(Compiler c, SymScope * scope, SymScope staged);
 
-static void SymTxn__commit_effects(SymTxn s);
+static void SymTxn__commit_effects(SymTxn * s);
 
 static void _replace_map(Map original, Map staged);
 
-static void SymTxn__restore(SymTxn s);
+static void SymTxn__restore(SymTxn * s);
 
-static void SymTxn__restore_effects(SymTxn s);
+static void SymTxn__restore_effects(SymTxn * s);
 
-static void SymTxn__restore_sources(SymTxn s);
+static void SymTxn__restore_sources(SymTxn * s);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1103,37 +1103,40 @@ Type Sym_delegate_aggregate(Sym s, Type type){
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c){
-  SymTxn transaction = Scope_calloc(1, sizeof(struct SymTxn));  transaction -> c = c;  transaction -> scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = Sym__scope_at(c -> sym, transaction -> scope_index);  SymTxn__save(transaction, * scope);  if(transaction -> extended) SymTxn__save_effects(transaction);  if(c -> source_facts && c -> source_primary) SymTxn__save_sources(transaction);  SymTxn__stage(transaction, &(* scope));  transaction -> active = 1;  return transaction;
+  SymTxn transaction ={
+    .c = c
+  }
+  ;  transaction.scope_index = Block_len(c -> sym -> scopes) - 1;  SymScope * scope = Sym__scope_at(c -> sym, transaction.scope_index);  SymTxn__save(&(transaction), * scope);  if(transaction.extended) SymTxn__save_effects(&(transaction));  if(c -> source_facts && c -> source_primary) SymTxn__save_sources(&(transaction));  SymTxn__stage(&(transaction), &(* scope));  transaction.active = 1;  return transaction;
 }
 
-static void SymTxn__save(SymTxn s, SymScope scope){
-  Compiler c = s -> c;  s -> scope = scope;  s -> counters = c -> names -> counters;  s -> statics = c -> sym -> statics;  s -> binding_facts = Compiler_semantic_binding_facts(c);  s -> next_binding = c -> names -> next_binding;  s -> local_macro_names = c -> sym -> local_macro_names;  s -> initializer_name = c -> init_fn;  s -> shutdown_name = c -> fini_fn;  s -> extended = c -> macro_application > 0;
+static void SymTxn__save(SymTxn * s, SymScope scope){
+  Compiler c =(* s).c; (* s).scope = scope; (* s).counters = c -> names -> counters; (* s).statics = c -> sym -> statics; (* s).binding_facts = Compiler_semantic_binding_facts(c); (* s).next_binding = c -> names -> next_binding; (* s).local_macro_names = c -> sym -> local_macro_names; (* s).initializer_name = c -> init_fn; (* s).shutdown_name = c -> fini_fn; (* s).extended = c -> macro_application > 0;
 }
 
 Map Map_copy(Map);
-static void SymTxn__save_effects(SymTxn s){
-  Compiler c = s -> c;  s -> adapters = c -> names -> adapters;  s -> base_bindings = Array_new();  s -> early_count = Array_len(c -> early_decls);  s -> init_count = Array_len(c -> inits);  s -> origin_count = Array_len(c -> origins);  s -> origin = c -> origin;  s -> needs_exception = c -> needs_exception;  c -> names -> adapters = Map_copy(c -> names -> adapters);  for(int i = 0;  i < c -> sym -> base_scopes;  i ++){
-    if(i == s -> scope_index) continue;  SymScope * base = Sym__scope_at(c -> sym, i);  Array_push(s -> base_bindings, List_var(cons(int_var(i), cons(Map_var(base -> bindings), NULL))));  base -> bindings = Map_copy(base -> bindings);
+static void SymTxn__save_effects(SymTxn * s){
+  Compiler c =(* s).c; (* s).adapters = c -> names -> adapters; (* s).base_bindings = Array_new(); (* s).early_count = Array_len(c -> early_decls); (* s).init_count = Array_len(c -> inits); (* s).origin_count = Array_len(c -> origins); (* s).origin = c -> origin; (* s).needs_exception = c -> needs_exception;  c -> names -> adapters = Map_copy(c -> names -> adapters);  for(int i = 0;  i < c -> sym -> base_scopes;  i ++){
+    if(i ==(* s).scope_index) continue;  SymScope * base = Sym__scope_at(c -> sym, i);  Array_push((* s).base_bindings, List_var(cons(int_var(i), cons(Map_var(base -> bindings), NULL))));  base -> bindings = Map_copy(base -> bindings);
   }
 
 }
 
-static void SymTxn__save_sources(SymTxn s){
-  s -> source_definitions = Map_copy(s -> c -> source_definitions);  s -> source_occurrences = Array_len(s -> c -> source_occurrences);
+static void SymTxn__save_sources(SymTxn * s){
+  (* s).source_definitions = Map_copy((* s).c -> source_definitions); (* s).source_occurrences = Array_len((* s).c -> source_occurrences);
 }
 
 void Compiler_merge_source_declarations(Compiler, Map, Map);
-static void SymTxn__stage(SymTxn s, SymScope * scope){
-  Compiler c = s -> c; (* scope).symbols = Map_copy(s -> scope.symbols);  Compiler_merge_source_declarations(c, (* scope).symbols, s -> scope.symbols); (* scope).bindings = Map_copy(s -> scope.bindings); (* scope).enumerators = Map_copy(s -> scope.enumerators); (* scope).macros = s -> scope.macros != NULL ? Map_copy(s -> scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);
+static void SymTxn__stage(SymTxn * s, SymScope * scope){
+  Compiler c =(* s).c; (* scope).symbols = Map_copy((* s).scope.symbols);  Compiler_merge_source_declarations(c, (* scope).symbols, (* s).scope.symbols); (* scope).bindings = Map_copy((* s).scope.bindings); (* scope).enumerators = Map_copy((* s).scope.enumerators); (* scope).macros =(* s).scope.macros != NULL ? Map_copy((* s).scope.macros) : NULL;  c -> sym -> statics = Map_copy(c -> sym -> statics);  c -> sym -> binding_facts = Map_copy(Compiler_semantic_binding_facts(c));  c -> names -> counters = Map_copy(c -> names -> counters);
 }
 
 int Map_equal(Map, Map);
-int SymTxn_local_macros_changed(SymTxn s){
-  SymScope * scope = Sym__scope_at(s -> c -> sym, s -> scope_index);  Map before = s -> scope.macros, after = scope -> macros;  if(before == NULL || after == NULL) return(void *) before !=(void *) after;  return ! Map_equal(before, after);
+int SymTxn_local_macros_changed(SymTxn * s){
+  SymScope * scope = Sym__scope_at((* s).c -> sym, (* s).scope_index);  Map before =(* s).scope.macros, after = scope -> macros;  if(before == NULL || after == NULL) return(void *) before !=(void *) after;  return ! Map_equal(before, after);
 }
 
-void SymTxn_commit(SymTxn s){
-  if(! s || ! s -> active) return;  Compiler c = s -> c;  SymScope * scope = Sym__scope_at(c -> sym, s -> scope_index);  SymScope staged = * scope;  * scope = s -> scope;  Compiler__merge_scope(c, &(* scope), staged);  if(s -> extended) SymTxn__commit_effects(s);  s -> active = 0;
+void SymTxn_commit(SymTxn * s){
+  if(! s) return;  if(!(* s).active) return;  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  SymScope staged = * scope;  * scope =(* s).scope;  Compiler__merge_scope(c, &(* scope), staged);  if((* s).extended) SymTxn__commit_effects(&((* s))); (* s).active = 0;
 }
 
 static void Compiler__merge_scope(Compiler c, SymScope * scope, SymScope staged){
@@ -1141,9 +1144,9 @@ static void Compiler__merge_scope(Compiler c, SymScope * scope, SymScope staged)
 }
 
 List Array_list(Array);
-static void SymTxn__commit_effects(SymTxn s){
-  Compiler c = s -> c;  Map adapters = c -> names -> adapters;  c -> names -> adapters = s -> adapters;  Map_merge(s -> adapters, adapters); {
-    List row;  List _x2c_macro_object_13 = Array_list(s -> base_bindings);  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
+static void SymTxn__commit_effects(SymTxn * s){
+  Compiler c =(* s).c;  Map adapters = c -> names -> adapters;  c -> names -> adapters =(* s).adapters;  Map_merge((* s).adapters, adapters); {
+    List row;  List _x2c_macro_object_13 = Array_list((* s).base_bindings);  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
       row = Var_list(_x2c_macro_cursor_output_20); {
         SymScope * base = Sym__scope_at(c -> sym, Var_int(Var_convert(List_car(row), 3453797)));  Map staged = base -> bindings, original = Var_map(List_cadr(row));  base -> bindings = original;  Map_merge(original, staged);
       }
@@ -1154,8 +1157,8 @@ static void SymTxn__commit_effects(SymTxn s){
 
 }
 
-void SymTxn_commit_transient(SymTxn s){
-  Compiler c = s -> c;  Map statics = c -> sym -> statics, facts = Compiler_semantic_binding_facts(c);  Map counters = c -> names -> counters;  SymTxn_commit(s);  c -> sym -> statics = s -> statics;  c -> sym -> binding_facts = s -> binding_facts;  c -> names -> counters = s -> counters;  _replace_map(s -> statics, statics);  _replace_map(s -> binding_facts, facts);  _replace_map(s -> counters, counters);
+void SymTxn_commit_transient(SymTxn * s){
+  Compiler c =(* s).c;  Map statics = c -> sym -> statics, facts = Compiler_semantic_binding_facts(c);  Map counters = c -> names -> counters;  SymTxn_commit(&((* s)));  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> counters =(* s).counters;  _replace_map((* s).statics, statics);  _replace_map((* s).binding_facts, facts);  _replace_map((* s).counters, counters);
 }
 
 Array Iter_array(Iter);
@@ -1188,27 +1191,27 @@ static void _replace_map(Map original, Map staged){
 
 }
 
-void SymTxn_rollback(SymTxn s){
-  if(! s || ! s -> active) return;  Compiler c = s -> c;  SymTxn__restore(s);  if(s -> extended) SymTxn__restore_effects(s);  if(c -> source_facts && c -> source_primary) SymTxn__restore_sources(s);  s -> active = 0;
+void SymTxn_rollback(SymTxn * s){
+  if(! s) return;  if(!(* s).active) return;  Compiler c =(* s).c;  SymTxn__restore(&((* s)));  if((* s).extended) SymTxn__restore_effects(&((* s)));  if(c -> source_facts && c -> source_primary) SymTxn__restore_sources(&((* s))); (* s).active = 0;
 }
 
-static void SymTxn__restore(SymTxn s){
-  Compiler c = s -> c;  SymScope * scope = Sym__scope_at(c -> sym, s -> scope_index);  * scope = s -> scope;  c -> sym -> statics = s -> statics;  c -> sym -> binding_facts = s -> binding_facts;  c -> names -> next_binding = s -> next_binding;  c -> sym -> local_macro_names = s -> local_macro_names;  c -> names -> counters = s -> counters;  c -> init_fn = s -> initializer_name;  c -> fini_fn = s -> shutdown_name;
+static void SymTxn__restore(SymTxn * s){
+  Compiler c =(* s).c;  SymScope * scope = Sym__scope_at(c -> sym, (* s).scope_index);  * scope =(* s).scope;  c -> sym -> statics =(* s).statics;  c -> sym -> binding_facts =(* s).binding_facts;  c -> names -> next_binding =(* s).next_binding;  c -> sym -> local_macro_names =(* s).local_macro_names;  c -> names -> counters =(* s).counters;  c -> init_fn =(* s).initializer_name;  c -> fini_fn =(* s).shutdown_name;
 }
 
 void Array_resize(Array, size_t);
-static void SymTxn__restore_effects(SymTxn s){
-  Compiler c = s -> c;  c -> names -> adapters = s -> adapters; {
-    List row;  List _x2c_macro_object_15 = Array_list(s -> base_bindings);  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_22;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_22))){
+static void SymTxn__restore_effects(SymTxn * s){
+  Compiler c =(* s).c;  c -> names -> adapters =(* s).adapters; {
+    List row;  List _x2c_macro_object_15 = Array_list((* s).base_bindings);  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_22;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_22))){
       row = Var_list(_x2c_macro_cursor_output_22);  Sym__scope_at(c -> sym, Var_int(Var_convert(List_car(row), 3453797))) -> bindings = Var_map(List_cadr(row));
     }
 
   }
-  Array_resize(c -> early_decls, s -> early_count);  Array_resize(c -> inits, s -> init_count);  Array_resize(c -> origins, s -> origin_count);  c -> origin = s -> origin;  c -> needs_exception = s -> needs_exception;
+  Array_resize(c -> early_decls, (* s).early_count);  Array_resize(c -> inits, (* s).init_count);  Array_resize(c -> origins, (* s).origin_count);  c -> origin =(* s).origin;  c -> needs_exception =(* s).needs_exception;
 }
 
-static void SymTxn__restore_sources(SymTxn s){
-  Compiler c = s -> c;  Array_resize(c -> source_occurrences, s -> source_occurrences);  _replace_map(c -> source_definitions, s -> source_definitions);
+static void SymTxn__restore_sources(SymTxn * s){
+  Compiler c =(* s).c;  Array_resize(c -> source_occurrences, (* s).source_occurrences);  _replace_map(c -> source_definitions, (* s).source_definitions);
 }
 
 void Array_cleanup(Array);

@@ -119,11 +119,11 @@ static int MatchCaptureLayout__buffer_valid(MatchCaptureLayout layout, MatchCapt
 
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
-static int _run_capture(MachineView view, MatchMachine m, Var input, MatchCaptureBuffer * captures);
+static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures);
 
-static int _commit(MachineView view, MatchMachine m, MatchCaptureBuffer * captures);
+static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures);
 
-static int MatchPlan__run(MatchPlan mm, MatchMachine m, Var input, List * out);
+static int MatchPlan__run(MatchPlan mm, MatchMachine * m, Var input, List * out);
 
 static List MatchCaptureLayout__publish(MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
@@ -131,7 +131,7 @@ typedef struct MatchWalk{
   MatchPlan plan;
   MachineView view;
   MatchCaptureBuffer * captures;
-  MatchMachine m;
+  MatchMachine * m;
   Block spine;
   Var found, template;
   List bindings, results;
@@ -667,53 +667,52 @@ int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captu
   return MatchPlan_execute_capture(plan, List_var(input), captures, NULL);
 }
 
-void MatchMachine_open(MatchMachine);
+void MatchMachine_open(MatchMachine *);
 
 MachineView MachineProgram_view(MachineProgram);
 
-void MatchMachine_dispose(MatchMachine);
+void MatchMachine_dispose(MatchMachine *);
 
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
-  struct MatchMachine _x2c_macro_storage_0;
-  MatchMachine machine = & _x2c_macro_storage_0;
-  MatchMachine_open(machine);
-  machine -> stats = stats;
-  int result = _run_capture(MachineProgram_view(m -> program), machine, input, captures);
-  MatchMachine_dispose(machine);
+  MatchMachine machine;
+  MatchMachine_open(&(machine));
+  machine.stats = stats;
+  int result = _run_capture(MachineProgram_view(m -> program), &(machine), input, captures);
+  MatchMachine_dispose(&(machine));
   return result;
 }
 
-void MatchMachine_begin(MatchMachine, MachineView, Var);
+void MatchMachine_begin(MatchMachine *, MachineView, Var);
 
-void MatchMachine_run(MatchMachine);
+void MatchMachine_run(MatchMachine *);
 
-void MatchMachine_finish(MatchMachine);
+void MatchMachine_finish(MatchMachine *);
 
-static int _run_capture(MachineView view, MatchMachine m, Var input, MatchCaptureBuffer * captures){
+static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures){
   if(! captures || captures -> capacity < view.binder_count ||(view.binder_count && ! captures -> values)) return - 1;
-  MatchMachine_begin(m, view, input);
-  MatchMachine_run(m);
+  MatchMachine_begin(&((* m)), view, input);
+  MatchMachine_run(&((* m)));
   int result = - 1;
-  if(m -> status == 982) result = _commit(view, m, captures);
-  else if(m -> status == 395864) result = 0;
-  MatchMachine_finish(m);
+  if((* m).status == 982) result = _commit(view, &((* m)), captures);
+  else if((* m).status == 395864) result = 0;
+  MatchMachine_finish(&((* m)));
   return result;
 }
 
-List MatchMachine_materialize_span(MatchMachine, MachineSpan);
+List MatchMachine_materialize_span(MatchMachine *, MachineSpan);
 
-static int _commit(MachineView view, MatchMachine m, MatchCaptureBuffer * captures){
+static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures){
   Var values[MACHINE_BINDER_MAX];
   unsigned long present = 0;
   for(int i = 0;  i < view.binder_count;  i ++){
-    MachineSlot * slot = & m -> slots[i];
+    MachineSlot * slot = &(* m).slots[i];
     if(slot -> kind == MACHINE_SLOT_INVALID) continue;
     values[i] = slot -> value;
-    if(slot -> kind == MACHINE_SLOT_SPAN) values[i] = List_var(MatchMachine_materialize_span(m, slot -> span));
-    if(m -> status == 11703268) break;
+    if(slot -> kind == MACHINE_SLOT_SPAN) values[i] = List_var(MatchMachine_materialize_span(&((* m)), slot -> span));
+    if((* m).status == 11703268) break;
     present |= 1UL << i;
   }
-  if(m -> status != 982) return - 1;
+  if((* m).status != 982) return - 1;
   captures -> present = present;
   for(int i = 0;  i < view.binder_count;  i ++) if(_capture_bit(present, i)) captures -> values[i] = values[i];
   return 1;
@@ -723,13 +722,12 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   if(! _init_guard_) _file_init_();
   if(! MatchPlan__prepared(plan, "MatchPlan.execute")) return - 1;
   if(! out_bindings) return - 1;
-  struct MatchMachine _x2c_macro_storage_1;
-  MatchMachine machine = & _x2c_macro_storage_1;
-  MatchMachine_open(machine);
-  machine -> stats = stats;
+  MatchMachine machine;
+  MatchMachine_open(&(machine));
+  machine.stats = stats;
   List bindings;
-  int result = MatchPlan__run(plan, machine, input, &(bindings));
-  MatchMachine_dispose(machine);
+  int result = MatchPlan__run(plan, &(machine), input, &(bindings));
+  MatchMachine_dispose(&(machine));
   if(result == 1)(* out_bindings) = bindings;
   return result;
 }
@@ -739,13 +737,13 @@ int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
   return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
 }
 
-static int MatchPlan__run(MatchPlan mm, MatchMachine m, Var input, List * out){
+static int MatchPlan__run(MatchPlan mm, MatchMachine * m, Var input, List * out){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
     values, 0, MACHINE_BINDER_MAX
   }
   ;
-  int result = _run_capture(MachineProgram_view(mm -> program), m, input, & captures);
+  int result = _run_capture(MachineProgram_view(mm -> program), &((* m)), input, & captures);
   if(result == 1)(* out) = MatchCaptureLayout__publish(mm -> layout, & captures);
   return result;
 }
@@ -769,22 +767,21 @@ int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out
 void Block_free(Block);
 
 static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
-  struct MatchMachine _x2c_macro_storage_2;
-  MatchMachine machine = & _x2c_macro_storage_2;
-  MatchMachine_open(machine);
-  machine -> stats = NULL;
+  MatchMachine machine;
+  MatchMachine_open(&(machine));
+  machine.stats = NULL;
   Var _x2c_macro_values_0[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_0 ={
     _x2c_macro_values_0, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine, Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, &(machine), Block_new(sizeof(Var))
   }
   ;
   int result = MatchWalk__first(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(machine);
+  MatchMachine_dispose(&(machine));
   if(result == 1){
     * out_match = walk.found;
     * out_bindings = walk.bindings;
@@ -799,22 +796,21 @@ int MatchPlan_search(MatchPlan plan, List input, List * out_results){
 }
 
 static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
-  struct MatchMachine _x2c_macro_storage_3;
-  MatchMachine machine = & _x2c_macro_storage_3;
-  MatchMachine_open(machine);
-  machine -> stats = NULL;
+  MatchMachine machine;
+  MatchMachine_open(&(machine));
+  machine.stats = NULL;
   Var _x2c_macro_values_1[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_1 ={
     _x2c_macro_values_1, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine, Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, &(machine), Block_new(sizeof(Var))
   }
   ;
   int status = MatchWalk__all(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(machine);
+  MatchMachine_dispose(&(machine));
   if(status < 0) return - 1;
   (* out_results) = walk.results;
   return 1;
@@ -827,30 +823,29 @@ int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * ou
 }
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out){
-  struct MatchMachine _x2c_macro_storage_4;
-  MatchMachine machine = & _x2c_macro_storage_4;
-  MatchMachine_open(machine);
-  machine -> stats = NULL;
+  MatchMachine machine;
+  MatchMachine_open(&(machine));
+  machine.stats = NULL;
   Var _x2c_macro_values_2[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_2 ={
     _x2c_macro_values_2, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine, Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, &(machine), Block_new(sizeof(Var))
   }
   ;
   walk.template = template;
   Var result = MatchWalk__rewrite(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(machine);
+  MatchMachine_dispose(&(machine));
   if(walk.error) return - 1;
   * out = Var_list(result);
   return 1;
 }
 
 static int MatchWalk__test(MatchWalk * walk, Var node){
-  return _run_capture((* walk).view, (* walk).m, node, (* walk).captures);
+  return _run_capture((* walk).view, &(*(* walk).m), node, (* walk).captures);
 }
 
 static List MatchWalk__hit(MatchWalk * walk, Var node){

@@ -3548,8 +3548,8 @@ static void Compiler__check_position(Compiler c, List definition, Token invocati
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
-int SymTxn_local_macros_changed(SymTxn);
-void SymTxn_commit(SymTxn);
+int SymTxn_local_macros_changed(SymTxn *);
+void SymTxn_commit(SymTxn *);
 static List Compiler__invoke_definition(Compiler c, List definition, Token invocation, AstPos position){
   int deferred = ! ! Map_truth(c -> macro_holes);  SymTxn transaction = Compiler_begin_semantic_transaction(c); {
     _x2c_defer_env_11 _x2c_macro_environment_11 ={
@@ -3559,7 +3559,7 @@ static List Compiler__invoke_definition(Compiler c, List definition, Token invoc
       .fn = _x2c_defer_cleanup_11, .env = & _x2c_macro_environment_11
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_11); {
-      List input = Compiler__invocation_arguments(c, definition, invocation);  if(_position(position) -> semicolon) Compiler_expect(c, 119);  List node = Compiler__invocation_node(c, definition, input, invocation);  List result = deferred ? cons(_202, cons(List_var(node), NULL)) : Compiler_bind_syntax(c, List_var(node), position, List_type(c -> return_type));  if(! Var_equal(List_car(result), Symbol_var(39266)) || List_len(result) != 1 || SymTxn_local_macros_changed(transaction)) SymTxn_commit(transaction); {
+      List input = Compiler__invocation_arguments(c, definition, invocation);  if(_position(position) -> semicolon) Compiler_expect(c, 119);  List node = Compiler__invocation_node(c, definition, input, invocation);  List result = deferred ? cons(_202, cons(List_var(node), NULL)) : Compiler_bind_syntax(c, List_var(node), position, List_type(c -> return_type));  if(! Var_equal(List_car(result), Symbol_var(39266)) || List_len(result) != 1 || SymTxn_local_macros_changed(&(transaction))) SymTxn_commit(&(transaction)); {
         List _x2c_return_value_3 = result; {
           x2c_cleanup_leave(& _x2c_defer_record_11);  return _x2c_return_value_3;
         }
@@ -3604,7 +3604,7 @@ static List Compiler__decorate(Compiler c, List definition, Token invocation, As
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_13); {
           List node = Decoration_node(&(d), Decoration_arguments(&(d), block_scope));  if(deferred){
-            SymTxn_commit(transaction); {
+            SymTxn_commit(&(transaction)); {
               List _x2c_return_value_4 = cons(_202, cons(List_var(node), NULL)); {
                 x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_12);  return _x2c_return_value_4;
               }
@@ -3622,7 +3622,7 @@ static List Compiler__decorate(Compiler c, List definition, Token invocation, As
               }
               ;  x2c_cleanup_push(& _x2c_defer_record_14); {
                 * _x2c_macro_address_7 = invocation; {
-                  SymTxn_commit(transaction);
+                  SymTxn_commit(&(transaction));
                 }
 
               }
@@ -5346,9 +5346,9 @@ static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
 
 }
 
-void SymTxn_rollback(SymTxn);
+void SymTxn_rollback(SymTxn *);
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
-  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_11;  SymTxn_rollback((*(SymTxn *) _x2c_defer_data_11->_x2c_defer_capture_20));
+  _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_11;  SymTxn_rollback(&((*(SymTxn *) _x2c_defer_data_11->_x2c_defer_capture_20)));
 }
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
@@ -5356,7 +5356,7 @@ static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
 }
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
-  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;  SymTxn_rollback((*(SymTxn *) _x2c_defer_data_13->_x2c_defer_capture_23));
+  _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_13;  SymTxn_rollback(&((*(SymTxn *) _x2c_defer_data_13->_x2c_defer_capture_23)));
 }
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){

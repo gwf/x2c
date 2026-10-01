@@ -759,7 +759,7 @@ int List_truth(List);
 String List_repr(List);
 void x2c_error_catch_close(ErrorHandler);
 void x2c_exception_leave(ExceptionFrame *);
-void SymTxn_rollback(SymTxn);
+void SymTxn_rollback(SymTxn *);
 static List Compiler__emit(Compiler c, String stamp, String stem, String suffix, String * failure){
   Array units = Compiler__units(c);  struct Compiler saved = * c;  struct GenNames names = * c -> names;  SymTxn transaction = Compiler_begin_semantic_transaction(c);  Compiler__isolate(c, &(saved), &(names), stem);  List volatile code = NULL; {
     ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_macro_arms_0[1];  Var _x2c_macro_patterns_0[1];  static ErrorCatchSite _x2c_macro_site_0 ={
@@ -788,7 +788,7 @@ static List Compiler__emit(Compiler c, String stamp, String stem, String suffix,
     }
     x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  * c = saved;  * c -> names = names;  SymTxn_rollback(transaction);  return code;
+  * c = saved;  * c -> names = names;  SymTxn_rollback(&(transaction));  return code;
 }
 
 Map Map_copy(Map);

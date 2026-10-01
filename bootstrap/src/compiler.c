@@ -1362,8 +1362,8 @@ int Compiler_collect_unit_macro(Compiler c){
 }
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
-void SymTxn_commit(SymTxn);
-void SymTxn_rollback(SymTxn);
+void SymTxn_commit(SymTxn *);
+void SymTxn_rollback(SymTxn *);
 static int Compiler__try_unit_macro(Compiler c){
   Token first = c -> token;  int volatile failed = 0;  SymTxn transaction = Compiler_begin_semantic_transaction(c);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics); {
     int * _x2c_macro_address_2 = & c -> recovery_depth;  int _x2c_macro_previous_2 = * _x2c_macro_address_2; {
@@ -1407,8 +1407,8 @@ static int Compiler__try_unit_macro(Compiler c){
     }
 
   }
-  Diagnostics_release(c -> diagnostics, hold, 0);  if(! failed) SymTxn_commit(transaction);  else{
-    SymTxn_rollback(transaction);  c -> token = first;
+  Diagnostics_release(c -> diagnostics, hold, 0);  if(! failed) SymTxn_commit(&(transaction));  else{
+    SymTxn_rollback(&(transaction));  c -> token = first;
   }
   return ! failed;
 }
@@ -1416,7 +1416,7 @@ static int Compiler__try_unit_macro(Compiler c){
 Map Map_copy(Map);
 List Compiler_parse_top_level(Compiler);
 static void Compiler__expand_unit_macro(Compiler c){
-  Map counters = c -> names -> counters;  c -> names -> counters = Map_copy(counters);  SymTxn transaction = Compiler_begin_semantic_transaction(c);  Token first = c -> token;  List syntax = Compiler_parse_top_level(c);  int retained = Compiler__retain_bundle(c, syntax, first, c -> token);  SymTxn_commit(transaction);  if(! retained) c -> names -> counters = counters;
+  Map counters = c -> names -> counters;  c -> names -> counters = Map_copy(counters);  SymTxn transaction = Compiler_begin_semantic_transaction(c);  Token first = c -> token;  List syntax = Compiler_parse_top_level(c);  int retained = Compiler__retain_bundle(c, syntax, first, c -> token);  SymTxn_commit(&(transaction));  if(! retained) c -> names -> counters = counters;
 }
 
 static int Compiler__retain_bundle(Compiler c, List syntax, Token first, Token after){
@@ -2737,7 +2737,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1709};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1728};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2772,7 +2772,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1750};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1769};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -2842,7 +2842,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1874};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1893};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
