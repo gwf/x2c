@@ -18,26 +18,6 @@ $(import "integer-ops.xmacro")
 // `meta` functions in it call the compiler surface `meta.x` declares.
 $(import "varops.xmacro")
 
-// declared here because shallow symbol collection does not expand macros
-char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs);
-signed char x2c_var_update_schar(
-  volatile signed char *lhs, Symbol op, Var rhs);
-uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs);
-short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs);
-ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs);
-int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs);
-uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs);
-long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs);
-ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs);
-long long x2c_var_update_long_long(
-  volatile long long *lhs, Symbol op, Var rhs);
-unsigned long long x2c_var_update_ulong_long(
-  volatile unsigned long long *lhs, Symbol op, Var rhs);
-float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs);
-double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs);
-long double x2c_var_update_long_double(
-  volatile long double *lhs, Symbol op, Var rhs);
-
 /* Each row supplies the storage boxer and decoder for its type, and
    `_native_update` performs the operation and the conversion back. Keeping
    both here makes compiler-lowered native lvalues and direct Var compound
