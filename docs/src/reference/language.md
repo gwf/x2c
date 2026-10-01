@@ -1468,8 +1468,9 @@ struct Handler handler = {1};
 struct Frame frame = {2};
 ```
 
-Most generated declarations need no directive: writing `int temporary` in a
-body makes both that declaration and its literal references hygienic. When
+Most generated declarations need no directive: writing `int temporary` or a
+destructuring `Var (key, value)` in a body makes both that declaration and its
+literal references hygienic. When
 compile-time Lisp or a nested macro needs a private name before an ordinary
 declaration can introduce it, place `using $name, $other;` at the start of the
 braced body. Each name is a compiler-allocated singular `Name` hole. Every
