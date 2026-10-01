@@ -325,13 +325,8 @@ meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
 static int _map_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   if (!source.try_next(*out)) return 0;
-  if (iter.aux) *out = _apply1(iter.aux, *out);
+  if (iter.aux) *out = iter.aux.apply_value(*out);
   return 1;
-}
-
-static Var _apply1(Func fn, Var value) {
-  FuncArg arguments[1] = { FuncArg.value(value) };
-  return fn.apply(1, arguments);
 }
 
 /** Returns a lazy iterator over elements accepted by `func`'s `Var`
@@ -358,7 +353,7 @@ static int _filter_next(Iter iter, Var *out) {
   Func func = iter.aux;
   if (!source || !func) return 0;
   foreach (Var value, source) {
-    if (_apply1(func, value)) {
+    if (func.apply_value(value)) {
       *out = value;
       return 1;
     }
@@ -406,16 +401,9 @@ static int _scan_next(Iter iter, Var *out) {
   if (!source || !iter.aux) return 0;
   Var item;
   if (!source.try_next(item)) return 0;
-  iter.state = _apply2(iter.aux, iter.state, item);
+  iter.state = iter.aux.apply_values(iter.state, item);
   *out = iter.state;
   return 1;
-}
-
-static Var _apply2(Func fn, Var left, Var right) {
-  FuncArg arguments[2] = {
-    FuncArg.value(left), FuncArg.value(right)
-  };
-  return fn.apply(2, arguments);
 }
 
 /** Returns a lazy iterator over the running numeric sum of `iter`.
@@ -486,7 +474,7 @@ static int _zip_with_next(Iter iter, Var *out) {
   if (!left_iter || !right_iter) return 0;
   Var left, right;
   if (!left_iter.try_next(left) || !right_iter.try_next(right)) return 0;
-  if (iter.aux) *out = _apply2(iter.aux, left, right);
+  if (iter.aux) *out = iter.aux.apply_values(left, right);
   else *out = %($left $right);
   return 1;
 }
@@ -755,7 +743,7 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
     return acc;
   }
   while (has_item) {
-    acc = _apply2(fn, acc, item);
+    acc = fn.apply_values(acc, item);
     has_item = iter.try_next(item);
   }
   return acc;
@@ -771,7 +759,7 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 */
 int Iter.any(Iter iter, Func pred) {
   if (!pred) return 0;
-  foreach (Var item, iter) if (_apply1(pred, item)) return 1;
+  foreach (Var item, iter) if (pred.apply_value(item)) return 1;
   return 0;
 }
 
@@ -788,7 +776,7 @@ int Iter.all(Iter iter, Func pred) {
   if (!iter.try_next(item)) return 1;
   if (!pred) return 0;
   do
-    if (!_apply1(pred, item)) return 0;
+    if (!pred.apply_value(item)) return 0;
   while (iter.try_next(item));
   return 1;
 }
@@ -802,7 +790,7 @@ int Iter.all(Iter iter, Func pred) {
 */
 Var Iter.find(Iter iter, Func pred) {
   if (!pred) return void;
-  foreach (Var item, iter) if (_apply1(pred, item)) return item;
+  foreach (Var item, iter) if (pred.apply_value(item)) return item;
   return void;
 }
 

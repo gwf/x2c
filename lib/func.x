@@ -143,6 +143,25 @@ inline FuncArg FuncArg.value(Var value) => (FuncArg) { .data.value = value };
 inline FuncArg FuncArg.reference(const void *reference, List type) =>
   (FuncArg) { .data.reference = reference, .reference_type = type };
 
+/** Applies `fn` to one argument passed by value.
+    `value` travels as `FuncArg.value` carries it, so a callback with a
+    reference parameter raises `<bad-types>`. Returns, owns, and raises as
+    `Func.apply` does.
+*/
+inline Var Func.apply_value(Func fn, Var value) {
+  FuncArg arguments[1] = { FuncArg.value(value) };
+  return fn.apply(1, arguments);
+}
+
+/** Applies `fn` to two arguments passed by value, `left` then `right`.
+    Each travels as `Func.apply_value` carries its argument. Returns, owns,
+    and raises as `Func.apply` does.
+*/
+inline Var Func.apply_values(Func fn, Var left, Var right) {
+  FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
+  return fn.apply(2, arguments);
+}
+
 /* adapter arguments
 
    Dynamic-call lowering evaluates the Func expression once, queries every

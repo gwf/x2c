@@ -609,7 +609,7 @@ static int _is_active_canonical(List list) =>
 List List.map(List lst, Func fn) {
   if (!lst) return NULL;
   Array values = $auto([]);
-  foreach (Var value, lst) values.push(_apply1(fn, value));
+  foreach (Var value, lst) values.push(fn.apply_value(value));
   return values;
 }
 
@@ -623,7 +623,7 @@ List List.map(List lst, Func fn) {
 Self List.filter(Self lst, Func pred) {
   if (!lst) return NULL;
   Array values = $auto([]);
-  foreach (Var value, lst) if (_apply1(pred, value)) values.push(value);
+  foreach (Var value, lst) if (pred.apply_value(value)) values.push(value);
   return values;
 }
 
@@ -695,7 +695,7 @@ List List.zip_with(List a, List b, Func fn) {
   Array values = $auto([]);
   for (; a && b; a = a.cdr(), b = b.cdr()) {
     Var left = a.car, right = b.car;
-    if (fn) values.push(_apply2(fn, left, right));
+    if (fn) values.push(fn.apply_values(left, right));
     else values.push(%($left $right));
   }
   return values;
@@ -710,15 +710,10 @@ List List.map2(List a, List b, Func fn) {
   return a.zip_with(b, fn);
 }
 
-static Var _apply1(Func fn, Var arg) {
-  FuncArg args[1] = { FuncArg.value(arg) };
-  return fn.apply(1, args);
-}
+static Var _apply1(Func fn, Var arg) => fn.apply_value(arg);
 
-static Var _apply2(Func fn, Var left, Var right) {
-  FuncArg args[2] = { FuncArg.value(left), FuncArg.value(right) };
-  return fn.apply(2, args);
-}
+static Var _apply2(Func fn, Var left, Var right) =>
+  fn.apply_values(left, right);
 
 // reshaping
 

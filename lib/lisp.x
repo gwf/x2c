@@ -1459,12 +1459,8 @@ static LispCallback *_callback_context(Func fn, String operation) {
   return context;
 }
 
-static int _iter_next(Iter iter, Var *out) {
-  FuncArg args[2] = {
-    FuncArg.value(iter), FuncArg.value(Var.new(<var*>, out))
-  };
-  return iter.aux.apply(2, args).int();
-}
+static int _iter_next(Iter iter, Var *out) =>
+  iter.aux.apply_values(iter, Var.new(<var*>, out)).int();
 
 // callback targets
 

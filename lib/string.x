@@ -1123,12 +1123,7 @@ macro Statement $string.select(
 */
 String String.filter(String str, Func fn) {
   if (!str || !fn || !*str) return str;
-  $string.select(str, i, _apply(fn, str[i]));
-}
-
-static Var _apply(Func fn, char value) {
-  FuncArg arguments[1] = { FuncArg.value(value) };
-  return fn.apply(1, arguments);
+  $string.select(str, i, fn.apply_value((char) str[i]));
 }
 
 /** Returns `str` with `fn` applied to every byte.
@@ -1150,7 +1145,7 @@ String String.map(String str, Func fn) {
   defer if (!done) string.free();
   char *out = string, const char *src = str;
   for (int i = 0; i < n; i++) {
-    char ch = (char) _apply(fn, src[i]);
+    char ch = (char) fn.apply_value(src[i]);
     if (!ch) raise %(bad-result (owner "String.map") (index $i));
     out[i] = ch;
   }
