@@ -1,0 +1,67 @@
+/* Var numeric conversion error conditions.
+   Reports expand at their existing owners. */
+
+meta static Map _convert_error_rows(void) => {
+
+  "encoding.bad" :
+  macro Statement(Expr $bits) {
+    raise %(bad-enc (value ${$bits}));
+  },
+
+  "convert.void" :
+  macro Statement() {
+    raise %(void-op (owner "Var.convert"));
+  },
+
+  "target.invalid" :
+  macro Statement(Expr $target) {
+    raise %(bad-target (target ${$target}));
+  },
+
+  "source.numeric" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    using $lower;
+    {
+      List $lower = %(bad-types (source ${$source_tag}));
+      raise %(no-convert (target ${$target}) (cause ${$lower}));
+    }
+  },
+
+  "target.numeric" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    raise %(no-convert (source ${$source_tag}) (target ${$target}));
+  },
+
+  "decode.output" :
+  macro Statement() {
+    raise %(bad-arg (owner "Var.numeric_decode"));
+  },
+
+  "decode.void" :
+  macro Statement() {
+    raise %(void-op (owner "Var.numeric_decode"));
+  },
+
+  "decode.type" :
+  macro Statement(Expr $tag) {
+    raise %(bad-types (source ${$tag}));
+  },
+
+  "convert.range" :
+  macro Statement(Expr $source_tag, Expr $target) {
+    raise %(conv-range (source ${$source_tag}) (target ${$target}));
+  }
+};
+
+meta static List _convert_error_expand(String key, List arguments) {
+  Map rows = _convert_error_rows();
+  Var row = rows[key];
+  if (row == void)
+    x2c_diagnostic_fail(%"unknown convert error '$key'", %());
+  Macro selected = row;
+  return %(${Macro_apply(selected, arguments)});
+}
+
+macro Statement $convert.error(Literal $key, Expr $arguments...) {
+  $(_convert_error_expand (x2c.literal.value $key) $arguments)...
+}

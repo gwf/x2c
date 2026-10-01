@@ -46,6 +46,7 @@ typedef struct TargetKind {
 } TargetKind;
 
 #pragma private
+$(import "../src/cli-errors.xmacro")
 
 $(import "../lib/system-macros.xmacro")
 
@@ -365,7 +366,7 @@ CliRequest cli_parse(int argc, char **argv) {
   _read_arguments(args, argc, argv);
   if (!args.len()) _help_exit(0, 2);
   String first = args[0];
-  if (!first) driver_error("expected a command, found an empty argument");
+  if (!first) $cli.error("command.empty");
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args, *command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
@@ -378,7 +379,7 @@ CliRequest cli_parse(int argc, char **argv) {
   String spelling = _two_dash(first);
   if (spelling) _one_dash_removed(first, %"x2c translate $spelling ...");
   if (first[0] != '-') _expected_command(first);
-  driver_error(%"unknown command or global option '$first'");
+  $cli.error("command.unknown", first);
 }
 
 /* A script's arguments are its own, so `script` expands response files
@@ -461,32 +462,32 @@ static void Parse.finish(Parse &p) {
 static void CliRequest._check(CliRequest r, int mask) {
   Symbol name = r.command, List inputs = r.inputs;
   if (mask == CLI_TRANSLATE && !inputs)
-    driver_error("translate requires at least one input");
+    $cli.error("translate.inputs");
   if (inputs.cdr() && (r.dep_file || r.dep_target))
-    driver_error("--dep-file and --dep-target require exactly one input");
+    $cli.error("deps.inputs");
   if (r.no_deps && (r.dep_file || r.dep_target || r.no_phony_deps))
-    driver_error("--no-deps conflicts with dependency output options");
+    $cli.error("deps.disabled");
   if (r.compile_only && r.kind != <executable>)
-    driver_error("--compile-only conflicts with a library target kind");
+    $cli.error("compile.kind");
   if (mask == CLI_ENV && inputs.cdr())
-    driver_error("env accepts at most one name");
+    $cli.error("env.operands");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!inputs || inputs.cdr()))
-    driver_error(%"${name} requires exactly one operand");
+    $cli.error("operand.one", name);
   if (mask == CLI_LIST && inputs)
-    driver_error(%"${name} accepts no operands");
+    $cli.error("operand.none", name);
   if (mask == CLI_SCRIPT && !inputs)
-    driver_error("script requires a script file");
+    $cli.error("script.input");
 }
 
 static void _help_command(Array args) {
   if (args.len() == 1) _help_exit(0, 0);
-  if (args.len() > 2) driver_error("help accepts at most one command");
+  if (args.len() > 2) $cli.error("help.operands");
   String name = args[1];
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
   CliCommand *asked = name ? _command_row(name) : NULL;
-  if (!asked) driver_error(%"unknown help command '$name'");
+  if (!asked) $cli.error("help.unknown", name);
   _help_exit(asked.name, 0);
 }
 
@@ -517,7 +518,7 @@ static void Parse.option(Parse &p, String arg, int &i) {
 static void CliRequest._save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
   r.temps_dir = arg.remove_prefix("--save-temps=");
-  if (!r.temps_dir) driver_error("--save-temps= requires a directory");
+  if (!r.temps_dir) $cli.error("temps.dir");
 }
 
 /* Reads the option at `i` for `mask`, advancing `i` past a separate value.
@@ -534,11 +535,11 @@ static Given _take_option(Array args, int &i, int mask) {
   Given given = {_find_option(written, mask, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
-    driver_error(%"option takes no value '$arg'");
+    $cli.error("option.no-value", arg);
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if (given.option.value && !given.value && equals <= 2) {
-    if (++i == args.len()) driver_error(%"option requires a value '$arg'");
+    if (++i == args.len()) $cli.error("option.needs-value", arg);
     given.value = args[i];
   }
   return given;
@@ -600,18 +601,18 @@ static void Parse.apply(Parse &p, Given given) {
 }
 
 static Symbol _color_mode(String value) {
-  if (!value) driver_error("--color requires auto, always, or never");
+  if (!value) $cli.error("color.missing");
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
-  driver_error(%"invalid color mode '$value'");
+  $cli.error("color.unknown", value);
 }
 
 static Symbol _target_kind(String value) {
   String refusal = NULL;
   Symbol kind = TargetKind.named(value, refusal);
-  if (refusal) driver_error(refusal);
-  if (!kind) driver_error(%"unknown target kind '$value'");
+  if (refusal) $cli.error("kind.shared", refusal);
+  if (!kind) $cli.error("kind.unknown", value);
   return kind;
 }
 
@@ -648,7 +649,7 @@ static int _count(String value, int minimum, String noun) {
   errno = 0;
   long count = value ? strtol(value, &end, 10) : 0;
   if (!value || errno || *end || count < minimum || count > INT_MAX)
-    driver_error(%"invalid $noun '$value'");
+    $cli.error("count.invalid", noun, value);
   return (int) count;
 }
 
@@ -673,7 +674,7 @@ static void _push_pair(Array out, String option, String value) {
 /* The driver owns C dependency output, so `-Xcc` cannot pass it. */
 static String _xcc_argument(String value) {
   if (cli_dependency_pass_through(value))
-    driver_error(%"C dependency option is driver-owned '$value'");
+    $cli.error("cflag.deps", value);
   return value;
 }
 
@@ -730,14 +731,14 @@ CliRequest cli_package_options(String path, String package) {
    carry. */
 static void Parse.native(Parse &p, int &i) {
   String arg = p.args[i];
-  if (!arg) driver_error("empty package native argument");
+  if (!arg) $cli.error("native.empty");
   if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
     p.ld_args.push(arg);
     return;
   }
   Given given = _take_option(p.args, i, p.mask);
   if (!given.option || !given.option.package_native)
-    driver_error(%"unsupported package native argument '$arg'");
+    $cli.error("native.unsupported", arg);
   p.apply(given);
 }
 
@@ -755,10 +756,10 @@ static void _expand_argument(Array out, String arg, List stack) {
     out.push(arg[1:]);
     return;
   }
-  if (arg.len() == 1) driver_error("empty response-file reference '@'");
+  if (arg.len() == 1) $cli.error("response.empty");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
-    _fail(%"recursive response-file inclusion: $path", NULL);
+    $cli.error("response.cycle", path);
   List nested = cons(identity, stack);
   foreach (String word, cli_response_arguments(path))
     _expand_argument(out, word, nested);
@@ -784,11 +785,11 @@ static char *_read_response_file(String path, size_t &length) {
   size_t got = fread(text, 1, (size_t) end, file), int failed = ferror(file);
   fclose(file);
   if (failed || got != (size_t) end)
-    _response_error(path, 1, "could not read complete file");
+    $cli.error("response.read", path);
   text[got] = 0;
-  if (memchr(text, 0, got)) _response_error(path, 1, "embedded NUL byte");
+  if (memchr(text, 0, got)) $cli.error("response.nul", path);
   if (!_valid_utf8((unsigned char *) text))
-    _response_error(path, 1, "input is not valid UTF-8");
+    $cli.error("response.utf8", path);
   length = got;
   return text;
 }
@@ -898,8 +899,8 @@ static void Words.flush(Words &w) {
 /* The text may end in a comment, but not in quotes or after a backslash. */
 static void Words.finish(Words &w) {
   if (w.comment) return;
-  if (w.escaped) _response_error(w.path, w.line, "trailing backslash");
-  if (w.quote) _response_error(w.path, w.line, "unterminated quote");
+  if (w.escaped) $cli.error("response.escape", w.path, w.line);
+  if (w.quote) $cli.error("response.quote", w.path, w.line);
   w.flush();
 }
 
@@ -1088,7 +1089,7 @@ static HelpPage help_pages[] = {
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
-  driver_error(%"unknown help command '${command}'");
+  $cli.error("help.unknown", command);
 }
 
 static void _print_page(HelpPage &page) {
@@ -1166,22 +1167,18 @@ static void _fail(String message, String note) {
 }
 
 static void _removed_output(void) {
-  _fail(
-    "option '-o' was removed",
-    "use '--out-dir' with translate or '--output' with build and run");
+  $cli.error("option.output.removed");
 }
 
 static void _expected_command(String arg) {
-  _fail(
-    %"expected a command before '$arg'",
-    %"use 'x2c translate --out-dir <dir> $arg'");
+  $cli.error("command.expected", arg);
 }
 
 /* translate corrects a one-dash long option. */
 static void _unknown_option(String arg, int mask) {
   String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
   if (spelling) _one_dash_removed(arg, spelling);
-  driver_error(%"unknown option '$arg'");
+  $cli.error("option.unknown", arg);
 }
 
 /* The two-dash translate option that a one-dash spelling such as
@@ -1193,7 +1190,7 @@ static String _two_dash(String arg) {
 }
 
 static void _one_dash_removed(String arg, String use) {
-  _fail(%"one-dash long option '$arg' was removed", %"use '$use'");
+  $cli.error("option.dash.removed", arg, use);
 }
 
 static void _response_error(String path, int line, const char *message) {

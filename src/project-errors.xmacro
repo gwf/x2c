@@ -1,0 +1,240 @@
+/* project condition templates. Keys are private to this owner. */
+
+/* The first Expr hole names the sink, bound at the invocation site. */
+meta static Map _project_error_rows(void) => {
+
+  "manifest.missing" :
+  macro Statement(Expr $_error) {
+    $_error(NULL, 0, "no explicit inputs and no x2c.toml found");
+  },
+
+  "manifest.read" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "cannot read manifest");
+  },
+
+  "target.select" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "select --target or set project.default-target");
+  },
+
+  "target.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "unknown target", $name);
+  },
+
+  "target.run" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "run requires an executable target");
+  },
+
+  "array.open" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unterminated array");
+  },
+
+  "target.none" :
+  macro Statement(Expr $_error, Expr $p) {
+    $_error($p, 0, "manifest defines no targets");
+  },
+
+  "section.header" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "malformed section header");
+  },
+
+  "section.project" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate project section");
+  },
+
+  "section.deps" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate dependencies section");
+  },
+
+  "section.unknown" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unknown manifest section");
+  },
+
+  "section.target" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $name) {
+    $_error_name($p, $line, "duplicate target section", $name);
+  },
+
+  "section.profile" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $name) {
+    $_error_name($p, $line, "duplicate profile section", $name);
+  },
+
+  "field.section" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "field appears before a section");
+  },
+
+  "field.equals" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected key = value");
+  },
+
+  "field.name" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "invalid field name");
+  },
+
+  "field.duplicate" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "duplicate manifest field");
+  },
+
+  "field.project" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown project field", $key);
+  },
+
+  "field.target" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown target field", $key);
+  },
+
+  "kind.shared" :
+  macro Statement(Expr $_error, Expr $p, Expr $line, Expr $refusal) {
+    $_error($p, $line, $refusal);
+  },
+
+  "kind.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $kind) {
+    $_error_name($p, $line, "unknown target kind", $kind);
+  },
+
+  "field.profile" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $line, Expr $key) {
+    $_error_name($p, $line, "unknown profile field", $key);
+  },
+
+  "string.tail" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unexpected text after string");
+  },
+
+  "array.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected an array of quoted strings");
+  },
+
+  "array.separator" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected ',' or ']' in array");
+  },
+
+  "array.tail" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unexpected text after array");
+  },
+
+  "string.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected a quoted string");
+  },
+
+  "string.open" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unterminated quoted string");
+  },
+
+  "string.escape" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "unsupported string escape");
+  },
+
+  "bool.expected" :
+  macro Statement(Expr $_error, Expr $p, Expr $line) {
+    $_error($p, $line, "expected true or false");
+  },
+
+  "target.cycle" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target dependency cycle reaches", $name);
+  },
+
+  "target.dep" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "unknown target dependency", $name);
+  },
+
+  "profile.unknown" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target has no profile", $name);
+  },
+
+  "target.static.deps" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name(
+      $p, 0, "static-library target cannot contain target dependencies",
+      $name);
+  },
+
+  "target.dep.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "dependency target is not a static library", $name);
+  },
+
+  "target.module.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "native module target is not a meta-module", $name);
+  },
+
+  "source.none" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $name) {
+    $_error_name($p, 0, "target has no sources", $name);
+  },
+
+  "source.kind" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $path) {
+    $_error_name($p, 0, "manifest source is not .x or .c", $path);
+  },
+
+  "pattern.unmatched" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $owner, Expr $pattern) {
+    $_error_name($p, 0, %"unmatched ${$owner} pattern", $pattern);
+  },
+
+  "cflag.deps" :
+  macro Statement(Expr $_error_name, Expr $p, Expr $value) {
+    $_error_name($p, 0, "C dependency option is driver-owned", $value);
+  },
+
+  "new.empty" :
+  macro Statement(Expr $driver_error) {
+    $driver_error("new: the directory operand is empty");
+  },
+
+  "new.name" :
+  macro Statement(Expr $driver_error, Expr $n) {
+    $driver_error(
+      %"new: '${$n}' is not a target name; use letters, digits, '_', and '-'");
+  },
+
+  "new.occupied" :
+  macro Statement(Expr $driver_error, Expr $dir) {
+    $driver_error(%"new: ${$dir} exists and is not an empty directory");
+  },
+};
+
+meta static List _project_error_expand(String key, List arguments) {
+  Map rows = _project_error_rows();
+  Var row = rows[key];
+  if (row is void)
+    x2c_diagnostic_fail(%"unknown project error '$key'", %());
+  Macro selected = row;
+  List parameters = selected.assoc(<parameters>);
+  List parameter = parameters.car();
+  String sink = parameter.assoc(<binder>).str()[1:];
+  List callee = %(ident $sink);
+  return %(${Macro_apply(selected, %($callee @arguments))});
+}
+
+macro Statement $project.error(Literal $key, Expr $arguments...) {
+  $(_project_error_expand (x2c.literal.value $key) $arguments)...
+}

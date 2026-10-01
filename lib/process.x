@@ -52,6 +52,9 @@ typedef enum Env {
 
 #pragma private
 
+#include "meta.x"
+$(import "job-errors.xmacro")
+
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -99,7 +102,7 @@ static void Job._start(Job j) {
 static void Job._open_table(Job job) {
   int count = job.stages.len();
   job.pids = calloc(count + 1, sizeof(long) + sizeof(int));
-  if (!job.pids) raise %(alloc-fail);
+  if (!job.pids) $job.error("start.alloc");
   job.statuses = (int *) (job.pids + count + 1);
   job.count = count;
   for (int i = 0; i < job.count; i++) job.statuses[i] = 127;
@@ -185,7 +188,7 @@ static void Job._spawn(Job job, int index, List stage, Stdio stdio) {
 }
 
 static char **_argv(List stage) {
-  if (!stage) raise %(bad-arg (operation "Job.start") (why "empty command"));
+  if (!stage) $job.error("start.empty");
   char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
   int index = 0;
   // An empty word is a NULL String, which would end the vector early.
@@ -241,9 +244,8 @@ static void _child_failed(Failure failure, String dir, char **argv) {
   if (failure.step == _STEP_DIR) File.path_error("Job.start", dir, error);
   String program = argv[0];
   if (error == ENOENT)
-    raise %(not-found (operation "Job.start") (program $program)
-            (errno $error));
-  raise %(io-fail (operation "Job.start") (program $program) (errno $error));
+    $job.error("start.missing", program, error);
+  $job.error("start.program", program, error);
 }
 
 // descriptors
@@ -263,7 +265,7 @@ static int _open_output(String path) {
   int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd < 0) {
     int error = errno;
-    raise %(io-fail (operation "Job.start") (path $path) (errno $error));
+    $job.error("start.path", path, error);
   }
   _close_on_exec(fd);
   return fd;
@@ -280,7 +282,7 @@ static void _close(int fd) {
 }
 
 static void _io_fail(int error) {
-  raise %(io-fail (operation "Job.start") (errno $error));
+  $job.error("start.io", error);
 }
 
 // waiting
@@ -393,7 +395,7 @@ Job Job.pipe(Job job, List command) {
 
 static Job Job._unstarted(Job job, String operation) {
   if (job.started)
-    raise %(bad-arg (operation $operation) (why "the job has started"));
+    $job.error("job.started", operation);
   return job;
 }
 
@@ -421,8 +423,7 @@ Job Job.options(Job job, Map options) {
   job._unstarted("Job.options");
   foreach (Var (key, value), options) {
     if (key is not Symbol)
-      raise %(bad-arg (operation "Job.options")
-              (why "option keys are atoms"));
+      $job.error("options.key");
     job.launch.set(key, value);
   }
   return job;
@@ -435,7 +436,7 @@ static void Launch.set(Launch &l, Symbol name, Var value) {
     case <input>:  l.input = value; l.has_input = 1; break;
     case <stdout>: l.route_output(value); break;
     case <stderr>: l.route_errors(value); break;
-    default: raise %(bad-arg (operation "Job.options") (option $name));
+    default: $job.error("options.unknown", name);
   }
 }
 
@@ -498,13 +499,12 @@ Job Job.check(Job job) {
   int captured = job.launch.capture_output;
   int logged = job.launch.capture_errors;
   if (captured && logged)
-    raise %(cmd-fail (command $command) (status $status) (output $output)
-            (errors $errors));
+    $job.error("check.both", command, status, output, errors);
   if (captured)
-    raise %(cmd-fail (command $command) (status $status) (output $output));
+    $job.error("check.output", command, status, output);
   if (logged)
-    raise %(cmd-fail (command $command) (status $status) (errors $errors));
-  raise %(cmd-fail (command $command) (status $status));
+    $job.error("check.errors", command, status, errors);
+  $job.error("check.status", command, status);
 }
 
 /** Passes standard output through, waits for `job`, and raises when its
@@ -526,7 +526,7 @@ String Job.output(Job job) {
 }
 
 static String _text(String text, int nul, String operation) {
-  if (nul) raise %(bad-arg (operation $operation) (why "embedded NUL"));
+  if (nul) $job.error("text.nul", operation);
   return text;
 }
 
@@ -579,8 +579,7 @@ void Job.cleanup(Job job) {
 Job Job.wait_any(Array jobs) {
   foreach (Job job, jobs)
     if (!job.started)
-      raise %(bad-arg (operation "Job.wait_any")
-              (why "a job has not started"));
+      $job.error("wait.unstarted");
   while (jobs.len()) {
     for (int i = 0; i < jobs.len(); i++) {
       Job job = jobs[i];
