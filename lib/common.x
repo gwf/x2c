@@ -1,16 +1,14 @@
-/*  common.x -- the shared `Var` union and operations used by every module
+/*  common.x -- the `Var` encoding every runtime module shares
 
     Copyright (c) 2025 Gary William Flake
 
-    Every runtime module includes this one. It defines the eight-byte `Var`
-    union itself, the compile-time assertions that pin the native type
-    sizes the encoding depends on, the `Symbol` outcome names that
-    status returning APIs share, and the declarations that let modules
-    name each other without an include cycle. It also defines immediate
-    scalar boxing, runtime startup, and shared index normalization.
-    Pointer-shaped `Var` extractors are ABI crossings whose callers establish
-    the advertised source kind; scalar readers instead convert nonmatching
-    numeric tags through `Var.convert`.  */
+    Every runtime module includes this one, so it owns what all of them
+    share: the eight-byte `Var` encoding and its immediate boxing, and the
+    declarations through which modules name each other's types and
+    operations without an include cycle. Pointer-shaped `Var` extractors are
+    ABI crossings whose callers establish the source kind; scalar readers
+    convert other numeric tags through `Var.convert`.
+*/
 
 #pragma once
 
@@ -109,7 +107,9 @@ typedef char *String;
 typedef FILE *File;
 /** Mutable traversal state whose sources must outlive its iteration. */
 typedef struct Iter *Iter;
+
 // native aliases
+
 /** Unsigned native character type. */
 typedef unsigned char uchar;
 /** Unsigned native short type. */
@@ -272,7 +272,7 @@ extern List nil;
 int Var.is(Var v, Symbol tag);
 Symbol Var.kind(Var v);
 
-// Var conversions
+// operations other modules define
 
 void *Var.pointer(Var var);
 long Var.integer(Var v);
@@ -411,6 +411,8 @@ Var Var.update(Var &?lhs, Symbol op, Var rhs);
 Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs);
 Var Var.postfix(Var &?lhs, Symbol op);
 Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op);
+
+// truth and hashing
 
 /** Returns nonzero when `iter` is not null. */
 inline int Iter.truth(Iter iter) => iter != NULL;
