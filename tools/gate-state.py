@@ -35,6 +35,8 @@ import subprocess
 import sys
 import uuid
 
+from agent_context import publication_blocked
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STATE = ROOT / "debug" / "gate-state.json"
 GATES = {"agent-pr-check", "doc-check"}
@@ -374,13 +376,12 @@ def main() -> int:
     args = parser.parse_args()
     # Extra makefiles named here would be read by every Make in the gate.
     os.environ.pop("MAKEFILES", None)
-    # Subagent workers get worktrees named agent-*; the orchestrator gates.
-    if args.command == "ensure" and ROOT.name.startswith("agent-"):
-        print("gate-state: worker worktrees do not run the gate; the "
-              "orchestrator integrates and gates once per batch",
-              file=sys.stderr)
-        return 1
     try:
+        if args.command == "ensure" and publication_blocked(ROOT):
+            print("gate-state: this worktree submits private or PR work; "
+                  "its integration owner runs the publication gate",
+                  file=sys.stderr)
+            return 1
         if args.command == "check":
             return cmd_check(args.gate)
         return cmd_ensure(args.gate)
