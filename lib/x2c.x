@@ -20,6 +20,7 @@
 #include "logger.x"
 #include "machine.x"
 #include "map.x"
+#include "match-cache.x"
 #include "match-machine.x"
 #include "match-plan.x"
 #include "match.x"
