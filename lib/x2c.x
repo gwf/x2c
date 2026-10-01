@@ -32,6 +32,7 @@
 #include "split.x"
 #include "static-init.x"
 #include "string-classify.x"
+#include "string-format.x"
 #include "string-number.x"
 #include "string.x"
 #include "symbol.x"
