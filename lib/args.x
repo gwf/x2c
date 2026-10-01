@@ -25,12 +25,14 @@ typedef enum Args {
 /* One spec row after its properties are read. An option is named by its
    first long spelling, or else its short one, without the dashes; `value`
    is the placeholder of an option that takes one, and `spellings` joins
-   every spelling for the usage text. */
+   every spelling for the usage text. `owner` is the first row with the
+   same name, and its `collected` holds that name's repeated values. */
 typedef struct _Option {
   String spelling, spellings, name, value, help;
   Var fallback;
   Array collected;
-  int operand, defaulted, required, repeated, given, shared_name;
+  struct _Option *owner;
+  int operand, defaulted, required, repeated, given;
 } _Option;
 
 typedef struct _Spec {
@@ -123,10 +125,8 @@ static _Spec _read_spec(List spec) {
     _Option *option = &result.options[position];
     _read_row(option, row, result.index, position);
     Var earlier;
-    if (result.index.try_get(option.name, earlier)) {
-      result.options[earlier.integer()].shared_name = 1;
-      option.shared_name = 1;
-    }
+    option.owner = result.index.try_get(option.name, earlier)
+      ? result.options[earlier.integer()].owner : option;
     result.index[option.name] = position;
     position++;
   }
@@ -141,17 +141,18 @@ static _Option *_find(_Spec *spec, String spelling) {
   return &spec.options[position.integer()];
 }
 
-/* A repeated row collects every value in order, replacing its default at
-   the first occurrence; a flag counts its occurrences; any other value
-   replaces an earlier one. */
+/* A repeated row collects every value in order, starting afresh at its
+   first occurrence or after another row replaced the value; a flag counts
+   its occurrences; any other value replaces an earlier one. */
 static void _store(_Option *option, Map result, Var value) {
-  if (option.repeated && option.shared_name) {
-    List earlier = option.given ? result[option.name] : NULL;
-    result[option.name] = earlier.append(%($value));
+  _Option *owner = option.owner;
+  if (!option.repeated || !option.given) {
+    owner.collected.free();
+    owner.collected = NULL;
   }
-  else if (option.repeated) {
-    if (!option.given) option.collected = [];
-    option.collected.push(value);
+  if (option.repeated) {
+    if (!owner.collected) owner.collected = [];
+    owner.collected.push(value);
   }
   else if (option.value || option.operand) result[option.name] = value;
   else result[option.name] = option.given + 1;
@@ -271,7 +272,7 @@ Map Args.parse(List args, List spec) {
   _assign_operands(&parsed, result, remaining);
   for (int i = 0; i < parsed.count; i++) {
     _Option *option = &parsed.options[i];
-    if (option.repeated && option.given && !option.shared_name) {
+    if (option.collected) {
       List collected = option.collected;
       result[option.name] = collected;
     }

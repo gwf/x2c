@@ -172,9 +172,20 @@ static void args_duplicate_names_keep_store_order(void) {
     (-a --same repeated (value x)) (-b --same repeated (value x)));
   EXPECT_LIST_EQ(Args.parse(%(-a 1 -b 2 -a 3), repeated)["same"].list(),
                  %("2" "3"));
+  EXPECT_LIST_EQ(Args.parse(%(-b 1 -a 2 -b 3 -a 4), repeated)["same"].list(),
+                 %("2" "3" "4"));
+  List defaulted = %(
+    (-a --same repeated (value x) (default (first)))
+    (-b --same repeated (value x) (default (second))));
+  EXPECT_LIST_EQ(Args.parse(NULL, defaulted)["same"].list(), %(second));
+  EXPECT_LIST_EQ(Args.parse(%(-a 1), defaulted)["same"].list(), %("1"));
   List mixed = %(
     (-a --same repeated (value x)) (-b --same (value x)));
   EXPECT_TRUE(Args.parse(%(-a 1 -a 2 -b 3), mixed)["same"] == "3");
+  EXPECT_LIST_EQ(Args.parse(%(-b 3 -a 1 -a 2), mixed)["same"].list(),
+                 %("1" "2"));
+  EXPECT_LIST_EQ(Args.parse(%(-a 1 -b 3 -a 2), mixed)["same"].list(),
+                 %("2"));
 }
 
 void args_suite(void) {
