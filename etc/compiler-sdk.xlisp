@@ -1,10 +1,4 @@
 // x2c compile-time Lisp SDK
-(defun x2c.invocation.file ()
-  (cadr (assoc 'file (_x2c.invocation.location))))
-(defun x2c.invocation.line ()
-  (cadr (assoc 'line (_x2c.invocation.location))))
-(defun x2c.invocation.column ()
-  (cadr (assoc 'column (_x2c.invocation.location))))
 (defun _x2c.fail (message value) (x2c.diagnostic.fail
   message (list (string-append "value: " (repr value)))))
 
@@ -21,6 +15,3 @@
 
 // The x2c spelling takes its arguments as one List; the Lisp one spreads them.
 (defun x2c.expr.call (callee . arguments) (x2c_expr_call callee arguments))
-
-(defun x2c.source.text (syntax) (_x2c.source.text syntax))
-(defun x2c.embed.text (path) (_x2c.embed.text path))

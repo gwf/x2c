@@ -3577,10 +3577,10 @@ int Compiler.shares_meta_definition(Compiler c, String name) {
    marker. */
 
 macro Expression $_embed_lisp_binding_macros() =>
-  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"));
+  $(x2c.literal.string (x2c.embed.text "../etc/lisp-bindings.xmacro"));
 
 macro Expression $_embed_builtin_macros() =>
-  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"));
+  $(x2c.literal.string (x2c.embed.text "../etc/builtin-macros.xmacro"));
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
 static String lisp_bindings_marker = NULL;

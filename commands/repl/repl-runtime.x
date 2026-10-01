@@ -3,9 +3,9 @@
 #include "lisp.x"
 
 macro Expression $repl._values() =>
-  $(x2c.literal.string (_x2c.embed.text "../../etc/lisp-values.xlisp"));
+  $(x2c.literal.string (x2c.embed.text "../../etc/lisp-values.xlisp"));
 macro Expression $repl._runtime() =>
-  $(x2c.literal.string (_x2c.embed.text "repl-runtime.xlisp"));
+  $(x2c.literal.string (x2c.embed.text "repl-runtime.xlisp"));
 
 /* Raw evaluation slots transport terminal values without storing them in
    ordinary collections. Bindings use separately allocated cells because a
