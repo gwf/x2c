@@ -725,6 +725,17 @@ Var Type.numeric_literal_value(Type type, String text) {
   return value.convert(tag);
 }
 
+/** Reads an integer literal of `type` spelled in digits, with any suffix,
+    into `value`. Returns 0 for any other literal. */
+int Type.integer_literal_magnitude(
+  Type type, String text, unsigned long long &value) {
+  if (!type.is_integral() || !text || text[0] < '0' || text[0] > '9')
+    return 0;
+  int decimal;
+  return _literal_magnitude(
+    text, _integer_literal_end(text), value, decimal);
+}
+
 static int _integer_literal_end(String text) {
   int end = text.len();
   while (end > 0) {
