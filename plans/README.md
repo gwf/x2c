@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [Source organization](x2c-source-organization.md): module ownership,
+  reading order, record ownership, duplicate owners, and seven reproduced
+  defects left after the beautification waves; written 2026-09-30 and
+  awaiting Gary's scoping.
 - [Next compiler/library beautification](compiler-library-beautification-next.md):
   independent 111-file review and ranked plan complete on verified dev;
   larger source implementation is separately scoped and not started.

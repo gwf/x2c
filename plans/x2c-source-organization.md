@@ -1,0 +1,373 @@
+# x2c Source Organization
+
+> Status: needs author scoping. Written 2026-09-30 against `dev`
+> 2685655f. Two independent reviews found that the beautification waves
+> met the function bands but left module ownership, reading order, and
+> several duplicate owners unaddressed. Nothing here is implemented.
+
+## Result
+
+Every hand-authored file in `src/` and `lib/` has one subject, stated in
+its header, and reads top to bottom in the order the style guide gives.
+Each fact has one owner. Each context record owns the operations that use
+it. Files split where a part has its own owner, a one-way dependency, and
+its own tests, and nowhere else. Six reproduced defects are fixed first.
+Behavior, public names, and generated-code contracts stay the same, except
+where a defect fix restores documented behavior.
+
+The function-level work from Waves 0-5 stays. Function height does not
+drive this plan.
+
+## Why the waves left this
+
+The original campaign stated the file rule. Rule 18 of
+[x2c-beautification.md](x2c-beautification.md) says "A file with two
+subjects splits into new units when the parts have distinct owners", and its
+baseline table lists the file-level defect of each large compiler file. The
+wave tables then measured only lines, functions, longest function, functions
+over 40, and parameters. No column tracked owners or subjects, every file
+split went to a "Candidates left for later" list, and Track H was retired
+with nothing in its place. The guides now disagree: the style guide calls a
+file over 1,500 lines with several owners "too much", and the organization
+guide forbids a split "solely to shorten". The beautify skill has no
+file-level step.
+
+Baseline at 2685655f, over 94 hand-authored `.x` files (excluding
+`lib/x2c.x` and `src/linked-meta.x`):
+
+| Measure | f6606dbf | 2685655f |
+| --- | --- | --- |
+| Lines | 71,648 | 77,447 |
+| Functions over 40 lines | 190 | 11 |
+| Functions with 7 or more parameters | 41 | 8 |
+| Files over 1,500 lines | 9 (29,833 lines) | 9 (32,839 lines) |
+| Sections over 400 lines | - | 11 |
+| Private records | 97 | 172 |
+
+Files over 1,500 lines: `src/macros.x` 5,538, `src/transform.x` 4,965,
+`src/expressions.x` 4,952, `src/compiler.x` 4,335, `src/parse.x` 3,337,
+`src/protocol.x` 2,861, `lib/match.x` 2,815, `lib/lisp.x` 2,185,
+`lib/string.x` 1,842.
+
+## Settled choices
+
+### The file rule
+
+A file over 1,500 lines is a review trigger, not a split order. The review
+lists the file's subjects and measures each candidate boundary by the
+private helpers that would cross it in each direction. A part splits into
+its own unit when it has a distinct owner, depends on the rest in one
+direction, and has its own tests. A file with no such boundary keeps its
+size; its header names its one subject and its sections follow reading
+order, each under 400 lines. A helper that crosses a new boundary becomes a
+method of the owner that establishes its fact. It never becomes a new
+`x2c_*` export.
+
+Phase 1 writes this rule into the organization guide, points the style
+guide's File row at it, and adds a file-level first step to the
+beautify skill.
+
+### The record rule
+
+A private record that carries the state of one operation owns that
+operation: its steps are `Record._step(Record *r, ...)` methods. A record
+whose fields are copied into locals on entry is a parameter list and goes
+back to parameters (six or fewer) or becomes a receiver. A record's
+Compiler field is `c`. A private record has a bare PascalCase name; the
+leading underscore marks private functions only. One concept has one
+record: `CallbackBuild`, `LambdaAdapter`, and `TypedAdapter` in
+`transform.x` become one.
+
+Phase 1 writes this rule into the style guide under "Names expose
+ownership" and adds it to the beautify skill's review card.
+
+### Splits
+
+Each row passed the split test above. Coupling is static helpers crossing
+the boundary, out/in.
+
+| From | New unit | Contents | Lines | Coupling |
+| --- | --- | --- | --- | --- |
+| src/compiler.x | src/symbols.x | `Sym`, `SymTxn`: scopes, definitions, bindings, transactions, typedefs (`struct Sym` at 234; 1211-2486) | ~1,280 | 0/1 |
+| src/compiler.x, src/ast.x | src/preprocess.x | directives, conditional arms, leading directives (840-1210) and the `preproc_*` family from ast.x 242-300 | ~430 | 1/2 |
+| src/transform.x | src/callables.x | tadapt, Func adapters, lambda cells, capture environments (40-1915) | ~1,870 | 1/0 |
+| src/transform.x | src/cleanup.x | cleanup regions, try, defer, goto, landing frames (1915-2970, 4238-4624) | ~1,440 | 0/1 |
+| src/literals.x | src/lambdas.x | lambda parsing and binding (931-1386), plus `check_lambda_captures` and `lambda_param_types` moved from transform.x | ~550 | 0/0 |
+| src/macros.x | src/meta-sdk.x | the compiler's answers to `lib/meta.x` operations (4814-5444) | ~630 | 2/8 |
+| src/macros.x | src/meta-native.x | meta functions, explicit meta calls, native lifetimes, target inventory, linked definitions, native modules, linked extensions (3813-4814) | ~1,000 | ~10 |
+| src/expressions.x | src/initializers.x | initializer paths, rows, and native layout (3440-4544) | ~1,100 | 1/1 |
+| lib/match.x | lib/match-plan.x | lowering to a prepared plan (456-1285) | ~830 | 0/0 |
+| lib/match.x | lib/match-cache.x | `MatchCache`, `MatchLease`, default caches (1867-2429) | ~560 | 2/1 |
+| lib/string.x | lib/string-format.x | `String.format`, `_Spec`, `_Format` (1246-1552) | ~310 | 0/0 |
+| lib/string.x | lib/string-escape.x | escapes and C-literal spelling (1553-1796) | ~245 | 0/2 |
+| lib/meta.x | lib/macro-value.x | macro values called from generated code (384-1040) | ~660 | 0/0 |
+| lib/lisp.x | lib/lisp-targets.x (grown) | primitives and native targets (1120-1383, 1568-1887) | ~590 | via `_native_target` |
+
+`macros.x` coupling to `meta-sdk.x` falls to zero when `_sdk_guard`,
+`_sdk_reject`, and the context statics move with it. `meta-native.x`
+crosses about ten helpers (`Definition.signature`, `_ensure_lisp`, and
+others); each becomes a method of its owner. `string-escape.x` replaces its
+two private crossings (`_finish`, `_free_unchecked`) with the public
+`String.malloc` and `intern_free`, measured on the hot emission path in
+Phase 4. `string-format.x`, `string-escape.x`, `match-plan.x`,
+`match-cache.x`, and `macro-value.x` join the prelude because the
+operations in them are prelude operations today or are called from
+generated code; `docs/library-manifest.txt` gets a row for each.
+`lib/meta.x` keeps the compile-time surface and leaves the prelude.
+`MatchMachine.open` and `dispose` move from `lib/match.x:2789-2815` to
+`lib/match-machine.x`, which `match.x` already includes.
+
+These stay whole, with section repairs only: `src/parse.x` (constructed
+syntax reuses its private declaration operations, 11/14 crossings),
+`src/protocol.x` (one feature owner from parse to adapters; adapter
+generation uses 23 of its helpers), the remaining `src/macros.x`
+definitions-to-expansion core (8/11), the `_parse_*`/`_resolve_*` families
+of `src/expressions.x` (12-18), `lib/error.x` (the catch ABI needs its
+private records), `lib/var.x`, and `src/utils.x` (six small subjects; a
+file per subject would be "a file for one helper").
+
+After the splits, these files remain over 1,500 lines with one stated
+subject each: `macros.x` (~3,900), `expressions.x` (~3,850), `parse.x`,
+`compiler.x` (~2,690), `protocol.x`, `transform.x` (~1,650), and `lisp.x`
+(~1,600). Their sections are repaired in Phase 5.
+
+### Defects
+
+Each was reproduced at 2685655f.
+
+1. Private includes leak. A unit that includes another sees the types of
+   that unit's private includes; x2c accepts the program and clang fails
+   with `unknown type name`. `docs/src/reference/language.md:28-34` makes
+   naming a private type of an included file an error. Reproduced with a
+   three-file program and through the prelude (`Regex`, `Job`, `ArrayInt`,
+   from `lib/lisp.x:84-87`). Fix the visibility in the compiler so the
+   documented error is reported. No working program can depend on the leak,
+   because each case fails in clang. If the fix finds that the replay of
+   private includes serves a deliberate behavior, stop and report it; the
+   fallback moves those four includes into `lib/lisp-targets.x`, the way
+   Json, Diff, and Path are kept out today.
+2. `varops.x:14` includes `meta.x` above `#pragma private` so that
+   `varops.xmacro` can run `meta` functions. That places the whole meta
+   surface in every program, against `meta.x`'s header and its manifest
+   row. Move the include below the pragma.
+3. Lisp standard operations lost their argument check. `cbb357f8`
+   (2026-09-26) moved them to `lib/lisp-init.x`, which calls typed
+   operations directly instead of through the Func adapter.
+   `(string-append "a" 1)` returns `"a"`; `(search-replace 5 'a 'z)`
+   returns `()`. Both raised `bad-types` before, and the `lisp-init.x`
+   header promises each operation follows the definition it replaced.
+   Conversion of a wrong tag to `String` or `List` yields NULL by design
+   (`docs/src/guide/values.md:132-134`), and a typed `foreach` binder does
+   the same, so the check belongs in `lisp-init.x`: one private reader per
+   object tag that raises the same `bad-types` detail as
+   `x2c_func_value_argument`, as list walks already do through `lisp_car`.
+   Audit all 31 operations against `cbb357f8^:etc/init.xlisp` with one
+   wrong-type case each, and add the failing cases to `test-lisp.x`.
+4. A local assigned inside `try` is emitted `volatile`; passed to a `&`
+   parameter it becomes `&(status)` at an `int *` parameter, which drops
+   the qualifier (C11 6.7.3p6). Seen live in
+   `commands/graph/x2c-graph.x:3176-3185`. The fix emits no
+   qualifier-discarding conversion, and a value the callee writes before
+   a raise is still visible in the catch. A copy-in/copy-out temporary
+   fails the second condition.
+5. The region check warns on `bind_ref(Env &local, ...)` and not on the
+   same body written with `Env *local`. Both forms must give the same
+   result. This is why `x2c lint` suggests `LispEnv &local` at
+   `lib/lisp.x:716`, a change that then fails `--fatal-warnings`; after
+   the fix that suggestion either compiles or is not made.
+6. `tools/check-doc-examples:74-77` limits CPU time only; a sample that
+   sleeps blocks `Job.wait_any` with no wall deadline and can stall
+   `doc-outputs`. Add a wall deadline through the existing Job lifecycle.
+7. `self-annotation-mismatch` reports its error at `int main` (line 11)
+   instead of the definition (line 7). Its fixture checks only the compile
+   status. Fix the location and pin it with a `.diagnostics` file.
+
+### Duplicate owners
+
+| Fact | Copies | Owner after |
+| --- | --- | --- |
+| SymbolSet perfect hash | encoder `src/literals.x:651-671`, decoder `lib/symbolset.x:54-91` | `lib/symbolset.x`; the encoder moves there and the compiler calls it |
+| Self-relative method signature | Sym spelling store and binding facts (`parse.x:896-898`, `compiler.x:1467-1472`); two different `_receiver_relative_signature` | binding facts; delete the Sym store and one helper |
+| FNV offset basis | `build.x:1161`, `utils.x:286`, `meta-group.x:77` (last digit dropped), `parse.x:273` | one constant beside `x2c_fnv_bytes`; `meta_cc_identity` calls `x2c_file_identity` |
+| Exit status decoding | `src/utils.x:406`, `src/meta-helper-client.x:237` | `utils.x`; `lib/process.x:300` keeps its own because the runtime cannot call the compiler |
+| Hex digit | `lib/json.x:186`, `lib/string.x:1679`, `src/type.x:767` | `lib/scan.x`, by making `_ascii_hex` a public `scan_ascii_hex` beside `scan_ascii_digit` (scan.x is internal) |
+| Contextual keyword test | 13 copies in 5 files; static `_test_contextual` at `parse.x:397` | `Compiler.at_word` (non-consuming) and `Compiler.take_word` in compiler.x token navigation |
+| Realpath or keep | `compiler.x:455`, `collect.x:483`, `protocol.x:34` | `Compiler.canonical_path` |
+| Emitter recognition | `Emitter._emit` head switch plus six `_emit_*` groups that match again and return `matched` (`src/emit.x:1194-1399`, b796f4e1) | one `match` in `_emit` with one-line arms; delete the groups and the flag |
+| Args repeated values | shared-name rows still append prefixes (`lib/args.x:147-150`); 200 values make 19,910 allocations against 201 | one accumulator per result name, keeping first-occurrence reset, defaults, mixed-row overwrite, and store order |
+
+Kept on purpose, with the reason: the one-argument FuncArg stanza and the
+fprintf/abort stanza are two lines each, under the style guide's three-line
+threshold; the `_apply1`/`_apply2` pair in list.x and iter.x,
+`_register_shutdown`, `_mutex_initialize`, and thread/mutex `_error` would
+each need a new exported helper that widens the surface more than it saves;
+UTF-8 validation in `src/cli.x` and `lib/json.x` has no existing public
+owner, and adding one is a library change outside this plan.
+
+### Surface
+
+- `x2c_numeric_f32/f64/ldouble` (`lib/varconvert.x:34-36, 280-302`) and
+  `x2c_mutex_recursive_*` serve ordinary x2c callers only and are not on
+  `main`. Make them methods of `X2CVarNumeric` and `Mutex`. No released
+  name changes.
+- About 19 compiler-internal `x2c_*` functions in `src/utils.x` have no
+  caller outside the compiler. Drop the prefix. Keep `x2c_set_root`,
+  `x2c_get_root`, `x2c_get_executable`, and `x2c_initialize_*`, which
+  commands call.
+- `src/editor.x:12-20` and `src/main.x:10-17` move their private includes
+  below `#pragma private`.
+- Wrong-phase helpers: `record_declaration_visibility` and its helpers
+  (`protocol.x:32-113`) move to `symbols.x`; `ast_collect_binding_references`
+  moves from compiler.x to ast.x; the `meta-group.x:17-18` forward
+  declarations of `Compiler.transform` and `generate_code_text` go away once
+  `meta-native.x` owns the calls that need them, or the plan records why the
+  cycle remains.
+- Released test-only entries (`x2c_error_raise`, `x2c_register_type`,
+  `x2c_error_catch_push`) stay; they shipped in 0.14.0.
+
+## Phases
+
+Each phase is one batch delivered to `dev`. Workers within a batch follow
+`orchestrate-x2c-work`; the orchestrator integrates and gates once.
+
+### Phase 1: rules and records (documentation only)
+
+- Write the file rule and the record rule into
+  `agents/x2c-code-organization-guide.md`, `agents/x2c-coding-style-guide.md`,
+  and `agents/skills/beautify-x2c-source/SKILL.md`.
+- Correct the organization guide's module lists (missing `clibc`, `cmath`,
+  `match-machine`, `static-init`, `adapter-memo.xmacro`,
+  `ast-rewrite.xmacro`), its `OPTIONAL_SOURCES` sentence, its
+  `#pragma once` sentence, and "scope stacks use Arrays" (`Sym.scopes` is a
+  Block). Fix `BUILD_LDFLAGS` in the development guide, `Var.box_i64` in
+  `adapters-macros-decorators.md:478`, `Emitter._var_collection` in the
+  Match guide, `unittest/STATUS.md:18-22`, the graph README test path, and
+  the hash-table benchmark README target names.
+- Archive the finished plans with their outcomes:
+  `compiler-library-beautification-next.md`,
+  `compiler-library-review-coverage.md`, `native-meta-execution.md`,
+  `meta-integration-mitigation.md`, `macro-capture-role-consolidation.md`,
+  `bug-findings-f28fc36.md`, `evaluator-and-source-consolidation.md`.
+  Move `consolidation-catalog-f28fc36.md` item C13 to the backlog table and
+  archive the rest. Mark `x2c-beautification.md` done with a pointer here.
+  Refresh the index in `plans/README.md`.
+- Delete the orphan
+  `unittest/compiler-fixtures/comptime-declines-meta.compile-status`.
+- Validation: `tools/gate-state.py ensure doc-check`.
+
+### Phase 2: defects
+
+One commit per defect, using `fix-x2c-bug`. Defect 1 lands before Phase 4
+because the `lisp.x` and `meta.x` splits depend on correct private
+visibility. Strengthen the fixtures that accept any failure where the
+expected diagnostic is now known: `self-annotation-mismatch` (defect 7),
+`macro-body-type-hole-ambiguous-pointer`, `meta-header-packed`,
+`preprocess-missing-include`, and the three that accept any abort
+(`block-growth-failure`, `buffer-embedded-nul`,
+`raise-in-finally-unhandled`). Validation: `agent-pr-check`.
+
+### Phase 3: one owner per fact and surface
+
+The duplicate-owner table, the Args accumulator, and the Surface list.
+One commit per row or connected group. The emitter routing change keeps
+exact arities, the C-shaped fallback, and `_emit_leaf`; the deep operator
+chain fixtures pin the native stack budget the `_operand` comment
+describes, and they must pass unchanged. Validation: `agent-pr-check`.
+
+### Phase 4: splits
+
+Compiler splits first, then runtime splits. Each split is a move commit
+with no edits inside the moved text, followed by a commit that turns
+crossing helpers into owner methods and writes the new unit's header and
+section order. New `src/*.x` units need no build edit (`etc/x2c.mk:27`
+takes `$(SOURCE)/*.x`); new `lib/` units need `lib/Makefile` and
+manifest rows. Run the performance checkpoint once for the batch: the build
+cost score within its 4-point noise, and the bench lanes for String and
+Match within noise. Validation: `agent-pr-check`.
+
+### Phase 5: reading order and record ownership
+
+For every file over 1,000 lines after Phase 4, and every new unit:
+
+- The header names one subject. The central operation comes first, then
+  the concepts in the order it uses them, incidental work, and lifecycle.
+  `transform.x` starts with `Compiler.transform`, `_node`, and `_step`.
+- Every section has a plain label and stays under 400 lines. `protocol.x`
+  and `emit.x` get labels; `expressions.x` splits its 1,345-line section;
+  decorated rulers (`/* --- try ---` and the four files the review listed)
+  become plain labels.
+- Records follow the record rule. The ~19 records that are unpacked on
+  entry become parameters or receivers. `CaptureBuild`, `TypedAdapter`,
+  the cleanup `Walk`, and the merged callable-adapter record own their
+  steps. `Definition` keeps its receiver steps; its fields shrink to the
+  state its steps share, and `publish` runs once.
+- Private Compiler helpers become `Compiler._helper` methods where the
+  Compiler is their dominant receiver, as the organization guide says.
+- The subject parameter and record field are `c`; private records lose the
+  leading underscore.
+
+Validation: `agent-pr-check`.
+
+### Phase 6: closing measure
+
+Rerun the baseline analyzer on the final tree with the same file
+selection and report the table above, the remaining files over 1,500 lines
+with their stated subjects, and every section over 400 lines. Report
+lines added and deleted in `.x` source. Update this plan's status and the
+plans index.
+
+## Done when
+
+- No file over 1,500 lines has two subjects; each one's header names its
+  subject, and the plan records why no boundary qualifies.
+- No section exceeds 400 lines. Every large file opens with its central
+  operation.
+- Every row of the duplicate-owner table has one owner.
+- No record is unpacked into locals on entry; one record convention holds
+  across `src/` and `lib/`.
+- The seven defects are fixed and pinned.
+- Function bands hold: no more functions over 40 lines than the 11 today.
+- Every phase passed its gate, and Phase 4 its performance checkpoint.
+
+## Outside this plan
+
+- Wiring the unwired tests (`unittest/probes/run-meta-transport.sh`,
+  `run-meta-source-kinds.sh`, `bound-template-expression.c`,
+  `source-call-projection.x`, `commands/graph/tests/certify.sh`,
+  `tools/test-examples.py`, `tools/test-performance-snapshot.py`). They
+  take seconds, but the Process ceiling in `AGENTS.md` requires Gary's
+  approval to add them to a recurring target.
+- Command builds use no `-Werror`; defect 4 removes the one C warning.
+- The release: `origin/main` has three commits `dev` lacks (f28fc36f,
+  45e5b445, 247b7fbe), so the release ancestry check fails; the version is
+  still 0.14.0. Release work follows `agents/releasing.md`.
+
+## Plan review
+
+- Established facts and rechecks: private visibility is established by the
+  includee's header; defect 1 restores that rule at the compiler's lookup
+  and adds no second check. Lisp argument tags are established by the Func
+  adapter for bound operations; defect 3 adds the same check only where
+  `lisp-init.x` bypasses that adapter, matching what `lisp_car` already
+  does. No other phase adds a check.
+- Deletion and reuse: the emitter's six group dispatchers and `matched`
+  flag, the Sym signature store and one `_receiver_relative_signature`, the
+  compiler's SymbolSet encoder copy, three FNV constants, one exit-status
+  decoder, two hex readers, twelve contextual-keyword tests, two realpath
+  helpers, the shared-name prefix append in Args, the parameter-bag
+  records, two of three callable-adapter records, and four Lisp binding
+  mechanisms reduced to one. New units hold moved code; the only new
+  operations are `scan_ascii_hex`, `Compiler.at_word`, and
+  `Compiler.take_word`, each replacing existing copies.
+- Idiom: the result uses existing x2c units, receivers, `match`
+  dispatchers, and the prelude. It adds no registry, framework, or
+  generated layer.
+- Validators and fixtures: defect 1's error is the documented
+  `language.md` behavior; it prevents a C compile failure from reaching the
+  user as raw clang output. Defect 3's `bad-types` restores the documented
+  contract of `lisp-init.x` and prevents wrong values. Defect 4 prevents an
+  unsafe native crossing. The new `.diagnostics` expectations pin existing
+  diagnostics; they add no diagnostic.
+
+Each phase ends implementation with a review of the completed authored
+diff for the same points, fixed before the publication proof.
