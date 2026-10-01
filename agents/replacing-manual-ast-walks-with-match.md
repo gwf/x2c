@@ -346,6 +346,13 @@ recursive-descent or semantic work should receive narrower arguments.
 Review the connected function family so that repeated decoding across callers
 and callees is visible.
 
+A dispatcher `match` lowers to a `switch` on each case's constant head
+symbol. A case whose head is not one constant, such as `(!or params
+bindings)` or `(!set ?head ...)`, runs with every later case one by one in
+the `switch` default. On a hot dispatcher, give each head its own case; the
+type conversion in `src/type.x` lost 0.85% of translation instructions
+until its two `!or` heads were split.
+
 ### Use template replacements for pure AST projections
 
 The macro SDK function helpers express these projections:

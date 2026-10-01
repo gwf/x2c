@@ -376,7 +376,7 @@ macro open Expression $compiler_cell_value(Name $cell) => (*$cell);
    declaration order, and the cell each shared binding moves to. */
 typedef struct CellRegion {
   Compiler c;
-  Map owned, cells;
+  Map owned, cells, values;
   Array order;
 } CellRegion;
 
@@ -404,7 +404,8 @@ static List Compiler._prepare_lambda_region(
   Compiler c, List entries, List body) {
   if (!ast_contains_head(body, <lambda>)) return body;
   body = c._prepare_nested_regions(body);
-  CellRegion r = {.c = c, .owned = {}, .cells = {}, .order = []};
+  CellRegion r = {
+    .c = c, .owned = {}, .cells = {}, .values = {}, .order = []};
   foreach (List entry, entries) r.own(_entry_binding(entry));
   r.collect(body);
   Map candidates = {};
@@ -538,8 +539,7 @@ static List CellRegion.rewrite(CellRegion *r, List ast) {
       if (r._lookup(binding, cell, type)) {
         if (source_type.car() == <&>)
           return %(expr $source_type (ident $cell));
-        Macro shape = $compiler_cell_value;
-        return r.c.bind_syntax(shape(cell), AST_EXPRESSION, NULL);
+        return r._value(binding, cell);
       }
       return ast;
     }
@@ -578,6 +578,19 @@ static List CellRegion._declaration(
     sequence.push(%(declare $target (bindings ${r.rewrite(item)})));
   }
   return %(seq @{sequence.list_free()});
+}
+
+/* Every read of one cell binds the same `(*cell)`, so the region binds it
+   once and keeps it in the cell's row. Binding opens a semantic
+   transaction that copies the unit's maps; doing that per read made
+   translation quadratic in the number of captured reads. */
+static List CellRegion._value(CellRegion *r, List binding, List cell) {
+  Var cached;
+  if (r.values.try_get(binding, cached)) return cached;
+  Macro shape = $compiler_cell_value;
+  List value = r.c.bind_syntax(shape(cell), AST_EXPRESSION, NULL);
+  r.values[binding] = value;
+  return value;
 }
 
 static int CellRegion._lookup(

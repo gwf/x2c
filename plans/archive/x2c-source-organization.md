@@ -490,11 +490,11 @@ with byte-identical C.
   new `process.x` option that also stops Ctrl-C reaching samples.
   `preprocess-missing-include` keeps its status-only check, because its
   stderr carries the host C compiler's own message.
-- Lambda cell rewriting calls `bind_syntax` once per cell reference, and
-  each call opens a semantic transaction that copies and merges the binding
-  facts (`_rewrite_lambda_cells`, `Compiler_begin_semantic_transaction`).
-  40 functions with lambdas nested 10 deep take 16-39 seconds and 9.1 GB to
-  translate. Found during Phase 3; it needs its own performance fix.
+- Fixed 2026-10-01: lambda cell rewriting bound `(*cell)` once per read,
+  and each binding opened a semantic transaction that copied the unit's
+  maps. `CellRegion` now binds each cell's read once. 40 functions with
+  lambdas nested 10 deep went from 167G instructions and 7.9 GB to 50G and
+  1.5 GB, with byte-identical C. Transactions still copy per expansion.
 - Generated C guards every public entry with
   `if(!_init_guard_) _file_init_();`. When a unit's `_file_init_` is small,
   clang inlines it into each entry; the `match.x` split made that happen in

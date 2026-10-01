@@ -107,8 +107,6 @@ static void _write_integer(Buffer out, Var value);
 
 static void _write_double(Buffer out, double number);
 
-static int _utf8_length(const unsigned char * s);
-
 static void _write_code_point(Buffer out, long point);
 
 static inline String _x2c_proto_jsonbool_str_0(Var a0);
@@ -376,6 +374,8 @@ String Buffer_str(Buffer);
 
 Buffer Buffer_new(size_t);
 
+int scan_utf8_length(const unsigned char *);
+
 static String Reader__string(Reader r){
   int run = ++ r -> at;
   Buffer decoded = NULL;
@@ -423,7 +423,7 @@ static String Reader__string(Reader r){
         else if(! byte) Reader__fail(r, _7);
         else if(byte < 0x20) Reader__fail(r, _8);
         else{
-          int length = _utf8_length((const unsigned char *) r -> text + r -> at);
+          int length = scan_utf8_length((const unsigned char *) r -> text + r -> at);
           if(length < 0) Reader__fail(r, _9);
           r -> at += length;
         }
@@ -847,7 +847,7 @@ static void _write_string(Buffer out, String text){
       case '\t' : escape = "\\t";
       break;
     }
-    int sequence = escape || byte < 0x20 ? - 1 : _utf8_length(bytes + at);
+    int sequence = escape || byte < 0x20 ? - 1 : scan_utf8_length(bytes + at);
     if(sequence > 0){
       at += sequence;
       continue;
@@ -897,27 +897,6 @@ static void _write_double(Buffer out, double number){
   }
   Buffer_write(out, text);
   if(! strpbrk(text, ".e")) Buffer_write(out, ".0");
-}
-
-static int _utf8_length(const unsigned char * s){
-  int length, low = 0x80, high = 0xBF;
-  if(s[0] < 0x80) return 1;
-  if(s[0] < 0xC2) return - 1;
-  if(s[0] < 0xE0) length = 2;
-  else if(s[0] < 0xF0){
-    length = 3;
-    if(s[0] == 0xE0) low = 0xA0;
-    if(s[0] == 0xED) high = 0x9F;
-  }
-  else if(s[0] < 0xF5){
-    length = 4;
-    if(s[0] == 0xF0) low = 0x90;
-    if(s[0] == 0xF4) high = 0x8F;
-  }
-  else return - 1;
-  if(s[1] < low || s[1] > high) return - 1;
-  for(int i = 2;  i < length;  i ++) if(s[i] < 0x80 || s[i] > 0xBF) return - i;
-  return length;
 }
 
 static void _write_code_point(Buffer out, long point){

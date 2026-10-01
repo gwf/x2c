@@ -83,6 +83,11 @@ void project_add_public(Map publics, List target) {
         target, publics.contains(name) ? publics[name].list() : NULL);
 }
 
+/** Adds `amount` to the count stored under `key`, reading absence as zero. */
+void project_count(Map counts, List key, int amount) {
+  counts[key] = counts.getdefault(key, 0).int() + amount;
+}
+
 List resolve_project_target(List target, Map publics) {
   match (target) {
     case %(target ? ?): return target;
