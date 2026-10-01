@@ -139,8 +139,7 @@ static List Compiler._parse_binary_ops(Compiler c) =>
 
 static List Compiler._parse_binary_level(Compiler c, int level) {
   if (level > 10) return c._parse_cast();
-  return c._parse_binary_level_tail(
-    level, c._parse_binary_level(level + 1));
+  return c._parse_binary_level_tail(level, c._parse_binary_level(level + 1));
 }
 
 static List Compiler._parse_binary_level_tail(
@@ -1455,8 +1454,7 @@ static List CallSite._finish(
   Type applied = callee_type.apply();
   if (!applied && callee_type)
     applied = k.c.sym.resolve_key(callee_type).apply();
-  List arguments = k.c._resolve_call_arguments(
-    receiver, k.supplied, k.origin);
+  List arguments = k.c._resolve_call_arguments(receiver, k.supplied, k.origin);
   if (_deferred_call(callee, receiver, arguments))
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
@@ -1575,8 +1573,7 @@ static List CallSite._method(CallSite *k, List receiver, List field) {
   }
   match (resolution) {
     case %(ambiguous *packages):
-      k.c._report_method_ambiguity(
-        k.type, k.method, packages, NULL, k.origin);
+      k.c._report_method_ambiguity(k.type, k.method, packages, NULL, k.origin);
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
       return k._bound(binding, signature, declared, parameters, returns);
@@ -1734,8 +1731,7 @@ static List Compiler._imported_method(
   String spelling = %"${packages.car()}__$method";
   Type signature = c.sym.get_exact(%($spelling));
   List binding = c.sym.reference(%($spelling), NULL);
-  signature = c._receiver_relative_signature(
-    binding, signature, receiver);
+  signature = c._receiver_relative_signature(binding, signature, receiver);
   return %(method $binding $signature);
 }
 
@@ -2610,21 +2606,18 @@ static Type Compiler._converted_participant(
   List &lhs, List &rhs) {
   if (c.sym.is_var_type(lhs_type) ||
       c.sym.is_var_type(rhs_type)) return NULL;
-  Type shared = c._shared_participant(
-    lhs_type, rhs_type, member);
+  Type shared = c._shared_participant(lhs_type, rhs_type, member);
   if (shared) return shared;
   int lhs_member = !!c.resolve_protocol_member(lhs_type, member) &&
     c._converts_operands(lhs_type);
   int rhs_member = !!c.resolve_protocol_member(rhs_type, member) &&
     c._converts_operands(rhs_type);
   if (lhs_member && !rhs_member) {
-    List converted = c._converter_call(
-      rhs, rhs_type, lhs_type);
+    List converted = c._converter_call(rhs, rhs_type, lhs_type);
     if (converted) { rhs = converted; return lhs_type; }
   }
   else if (rhs_member && !lhs_member) {
-    List converted = c._converter_call(
-      lhs, lhs_type, rhs_type);
+    List converted = c._converter_call(lhs, lhs_type, rhs_type);
     if (converted) { lhs = converted; return rhs_type; }
   }
   return NULL;
@@ -3113,8 +3106,7 @@ static void Compiler._check_converter_args(
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
     if (index++ >= first && car(a) is <list>)
-      c._check_noted_converter(
-        car(n), car(a), car(a).list().cadr(), 2);
+      c._check_noted_converter(car(n), car(a), car(a).list().cadr(), 2);
 }
 
 static void Compiler._check_noted_converter(
@@ -3672,8 +3664,7 @@ static List Compiler._converter_call(
   foreach (Type owner, owners) {
     if (owner == target) return NULL;
     int declared = 0;
-    List converted = c._converter_owned_call(
-      expr, owner, target, declared);
+    List converted = c._converter_owned_call(expr, owner, target, declared);
     if (converted || declared) return converted;
   }
   return NULL;

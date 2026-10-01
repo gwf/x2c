@@ -192,8 +192,7 @@ static List Compiler._row_value(
   Compiler c, Type root, List &original, List &states) {
   List value = original;
   if (original.car() == <dotinit> || original.car() == <indexinit>) {
-    List path = c._initializer_designated(
-      root, original, value, original);
+    List path = c._initializer_designated(root, original, value, original);
     states = %((() $path 1));
   }
   return value;
@@ -844,8 +843,7 @@ static List Compiler._convert_mixed_row(
     captured.free();
     return original;
   }
-  return c._materialize_mixed_row(
-    original, source, converted, captured);
+  return c._materialize_mixed_row(original, source, converted, captured);
 }
 
 static List Compiler._initializer_capture_leaves(
@@ -905,8 +903,7 @@ static List Compiler._materialize_mixed_row(
   String formal = c.fresh_name("initializer_value");
   List placeholder = %(expr ${source.cadr()} $formal);
   List values = converted.list_free();
-  List adapted = c._initializer_adapters(
-    source, values, placeholder);
+  List adapted = c._initializer_adapters(source, values, placeholder);
   if (adapted) values = adapted;
   Array replaced = [];
   List inputs = captured.list_free();
