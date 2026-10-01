@@ -1156,8 +1156,6 @@ static void lisp_deep_recursion_survives_stack(void) {
   Lisp lisp = _boot_session();
   _ev(lisp, "(def down (lambda (k) (if (= k 0) 0 (down (- k 1)))))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(down 1000)")), 0);
-  // Rest parameters make a lambda AUTO-ineligible, so this arm runs on the
-  // evaluator rather than the prepared machine.
   _ev(lisp, "(def slow (lambda (k . rest) (if (= k 0) 0 (slow (- k 1)))))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(slow 1000)")), 0);
   _ev2(lisp, "(def build (lambda (k acc)",
