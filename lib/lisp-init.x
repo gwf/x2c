@@ -163,10 +163,7 @@ Var lisp_binder_lets(Var bindings, Var binders) {
   List reversed = NULL;
   for (; !_nil(binders); binders = lisp_cdr(binders)) {
     Var name = lisp_car(binders);
-    List quoted = cons(Atom.intern("quote"), cons(name, NULL));
-    List bound =
-      cons(Atom.intern("bound"), cons(bindings, cons(quoted, NULL)));
-    reversed = cons(cons(name, cons(bound, NULL)), reversed);
+    reversed = cons(%($name (bound $bindings (quote $name))), reversed);
   }
   return reversed.reverse();
 }

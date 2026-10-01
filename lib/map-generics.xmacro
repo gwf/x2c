@@ -459,10 +459,7 @@ macro Unit $map.typed.operations(Type $map, Type $key, Type $value, Name $update
       invalidation and failure behavior.
   */
   $value $map.setindex($map map, $key key, $value val) {
-    if ((void *) map == 0) (void) $bad_arg($owner);
-    if ($boxed && ((Var) key is void || (Var) val is void))
-      raise %(void-op);
-    map._core_set(&key, &val);
+    map.set(key, val);
     return val;
   }
 
