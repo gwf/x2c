@@ -94,6 +94,21 @@ Reproduced with `builds/0/x2c` on 2026-10-01; not yet fixed.
 | Two-name `foreach (Var (key, val), ...)` in a template: the body keeps `val` after the declaration is renamed | Template hygiene for literal names |
 | A template passing literal `k` and `k * 2` to an inner macro: the loop variable is renamed, the expression is not | Template hygiene for literal names |
 
+Status of these: `$let` is fixed by L1; `({1})` and the destructuring
+`foreach` are fixed in the L1/L3 batch. The forward-name case (`$repeat(k,
+3, k * 2, total)`) is held: the worker's fix let an undeclared free name
+in a closed template bind a local at the expansion site (a probe printed
+the caller's `x`), which contradicts "free identifiers written literally
+in a body resolve where the macro was defined". It needs Gary's choice
+between that rule, a narrower rule that binds only declarations the same
+expansion introduces, and a diagnostic.
+
+Also found, not yet fixed: a brace with no destination type, such as a
+variadic argument (`printf("%d\n", {10})`), emits invalid C; and with
+`int k = 0; $outer(k);` the nested macro's public loop variable `k`
+captures the caller's `k` (prints 0), through the stale-local branch of
+`_shadow_identifier`.
+
 ## Wave 1: direct substitutions
 
 Equivalence is obvious or by construction. Focused fixtures per item.
