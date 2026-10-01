@@ -1,8 +1,8 @@
 # x2c Source Organization
 
 > Status: active. Gary approved the plan on 2026-09-30, written against
-> `dev` 2685655f. Phases 1-3 are delivered or settled, and every Phase 4
-> split is integrated; the batch is being published. Phase 5 is next.
+> `dev` 2685655f. Phases 1-5c are delivered or being published; Phase 6
+> (commands and packages) and Phase 7 (closing measure) remain.
 
 ## Result
 
@@ -389,6 +389,18 @@ whole-tree walks. Confirm each in source before acting: a missing caller
 can be a callback, table row, or macro target, and a shared path does not
 establish equivalence. Fix the confirmed connected removals in the same
 batch as Phase 5 and record the rejected signals with their reasons.
+
+Phase 5, 5b, and 5c result: every file over 1,000 lines and every new unit
+has a one-subject header, reading order, and sections under 400 lines;
+about 900 private helpers became receiver methods; records follow the
+record rule (for example `Callback` replaced three adapter records,
+`Definition` fell from 26 fields to 18, `CaptureBuild` from 20 to 10). The
+simplify pass removed about 450 lines from the new units, and the graph
+sweep (6,285 functions, 23,265 edges, 107 units) found four more small
+removals and no duplicates created by the splits; its rejected signals are
+shared macro output, public runtime boundaries, or different operations of
+similar shape. Hand-authored `.x` lines in `src/` and `lib/`: 80,430 at
+2685655f, 80,262 after Phase 5c.
 
 ### Phase 6: commands and packages
 
