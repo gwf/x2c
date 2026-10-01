@@ -375,6 +375,21 @@ code contracts stay the same; each change is proven by stage-1 byte
 equality and the suites that exercise moved runtime code. Report `.x` lines
 deleted and added per unit.
 
+### Phase 5c: graph sweep of the restructured tree
+
+Gary asked for a fresh `x2c graph` pass once the splits, moves, and renames
+of Phases 4-5b are integrated, because duplicates that used to sit in one
+file now sit in separate units. On the integrated tree, after `make
+commands`, run `clones`, `walks`, `architecture`, and `datasets` over the
+hand-authored `src/` and `lib/` units (excluding `lib/x2c.x` and
+`src/linked-meta.x`), and compare with the 2026-09-30 review's census.
+Look for repeated subtrees across the new unit boundaries, functions with no
+resolved caller, helpers that forward without owning work, and repeated
+whole-tree walks. Confirm each in source before acting: a missing caller
+can be a callback, table row, or macro target, and a shared path does not
+establish equivalence. Fix the confirmed connected removals in the same
+batch as Phase 5 and record the rejected signals with their reasons.
+
 ### Phase 6: commands and packages
 
 - `commands/graph`: target classification, emitted names, and unique
