@@ -893,19 +893,15 @@ static int Compiler._legacy_expression_body(Compiler c) {
    selects the canonical form. */
 static int _extends_expression(Token token) {
   Symbol type = token.type;
-  if (type.is_assignment_op()) return 1;
-  switch (type) {
-    case <[>: case <(>: case <"{">: case <"->">: case <.>:
-    case <++>: case <-->:
-    case <||>: case <&&>: case <|>: case <^>: case <&>:
-    case <==>: case <!=>: case <===>: case <!==>:
-    case <"<">: case <">">: case <in>: case <"<=">: case <">=">:
-    case <"<<">: case <">>">: case <+>: case <->: case <*>: case </>:
-    case <%>: case <@>: case <?>: case <,>:
-      return 1;
-  }
-  return type == <ident> && (token.text == "is" || token.text == "in");
+  return type.binary_precedence() || type.is_assignment_op() ||
+         operand_continuations.contains(type) ||
+         (type == <ident> && (token.text == "is" || token.text == "in"));
 }
+
+/* After a complete operand, a postfix operator, a brace initializer, the
+   conditional, or a comma continues the expression. */
+static const SymbolSet operand_continuations =
+  %<<"[" "(" "{" "->" "." "++" "--" "?" ",">>;
 
 /* template holes
 

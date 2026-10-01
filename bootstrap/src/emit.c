@@ -87,12 +87,12 @@ static List Emitter__capture_children(Emitter * e, List node, Array inputs, Arra
 
 static int _source_type_definition(List value);
 
-static int _operator_precedence(Symbol operator);
-
 enum{
-  EMIT_CONDITIONAL = 3, EMIT_UNARY = 14, EMIT_POSTFIX = 15, EMIT_PRIMARY = 16
+  EMIT_ASSIGNMENT = 2, EMIT_CONDITIONAL = 3, EMIT_UNARY = 14, EMIT_POSTFIX = 15, EMIT_PRIMARY = 16
 }
 ;
+
+static int _operator_precedence(Symbol operator);
 
 static int _emitted_precedence(Var node);
 
@@ -1792,11 +1792,9 @@ x2c_cleanup_leave(& _x2c_defer_record_2);
 }
 
 int Symbol_is_assignment_op(Symbol);
+int Symbol_binary_precedence(Symbol);
 static int _operator_precedence(Symbol operator){
-  switch(operator){
-    case 93 : case 11645 : return 15;  case 54 : case 95 : case 75 : return 13;  case 56 : case 62 : return 12;  case 15481 : case 15997 : return 11;  case 121 : case 125 : case 15483 : case 15995 : return 10;  case 15739 : case 8571 : return 9;  case 77 : return 8;  case 189 : return 7;  case 249 : return 6;  case 9805 : return 5;  case 31993 : return 4;
-  }
-  return Symbol_is_assignment_op(operator) ? 2 : 0;
+  if(operator == 93 || operator == 11645) return EMIT_POSTFIX;  if(Symbol_is_assignment_op(operator)) return EMIT_ASSIGNMENT;  int level = Symbol_binary_precedence(operator);  return level ? EMIT_CONDITIONAL + level : 0;
 }
 
 static int _emitted_precedence(Var node){

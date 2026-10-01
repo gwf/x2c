@@ -41,10 +41,6 @@ static List _collect_subseq(List list, int start, int step, int span);
 
 static int _is_active_canonical(List list);
 
-static Var _apply1(Func fn, Var arg);
-
-static Var _apply2(Func fn, Var left, Var right);
-
 static void _flatten_into(Array values, List lst);
 
 static Var _sublis_node(List alist, Var node);
@@ -963,6 +959,8 @@ static int _is_active_canonical(List list){
   return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
+Var Func_apply_value(Func, Var);
+
 List List_map(List lst, Func fn){
   if(! List_truth(lst)) return NULL;
   Array values = Array_new();
@@ -985,7 +983,7 @@ List List_map(List lst, Func fn){
         Var _x2c_macro_cursor_output_5;
         while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
           value = _x2c_macro_cursor_output_5;
-          Array_push(values, _apply1(fn, value));
+          Array_push(values, Func_apply_value(fn, value));
         }
 
       }
@@ -1028,7 +1026,7 @@ List List_filter(List lst, Func pred){
         Var _x2c_macro_cursor_output_6;
         while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
           value = _x2c_macro_cursor_output_6;
-          if(Var_truth(_apply1(pred, value))) Array_push(values, value);
+          if(Var_truth(Func_apply_value(pred, value))) Array_push(values, value);
         }
 
       }
@@ -1076,6 +1074,8 @@ int List_all(List lst, Func pred){
   return Iter_all(List_iter(lst, & storage), pred);
 }
 
+Var Func_apply_values(Func, Var, Var);
+
 List List_zip_with(List a, List b, Func fn){
   Array values = Array_new();
   {
@@ -1092,7 +1092,7 @@ List List_zip_with(List a, List b, Func fn){
     {
       for(;  List_truth(a) && List_truth(b);  a = List_cdr(a), b = List_cdr(b)){
         Var left = a -> car, right = b -> car;
-        if(fn) Array_push(values, _apply2(fn, left, right));
+        if(fn) Array_push(values, Func_apply_values(fn, left, right));
         else Array_push(values, List_var(cons(left, cons(right, NULL))));
       }
       {
@@ -1113,26 +1113,6 @@ List List_zip_with(List a, List b, Func fn){
 List List_map2(List a, List b, Func fn){
   if(! fn) return NULL;
   return List_zip_with(a, b, fn);
-}
-
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-static Var _apply1(Func fn, Var arg){
-  FuncArg args[1] ={
-    FuncArg_value(arg)
-  }
-  ;
-  return Func_apply(fn, 1, args);
-}
-
-static Var _apply2(Func fn, Var left, Var right){
-  FuncArg args[2] ={
-    FuncArg_value(left), FuncArg_value(right)
-  }
-  ;
-  return Func_apply(fn, 2, args);
 }
 
 Array Array_sort(Array);
@@ -1453,7 +1433,7 @@ int List_unpack_vars_n(List src, unsigned destination_count, ...){
 
 static int _unpack_va(List src, unsigned n, va_list ap, int lists){
   if(n > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 866};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_va",.line = 856};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(n));
     __builtin_unreachable();
   }

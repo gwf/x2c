@@ -257,7 +257,7 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1234`
+Source: `lib/string.x:1229`
 
 <a id="String.join"></a>
 #### String.join
@@ -288,7 +288,7 @@ Returns a canonical `String` containing only bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1166`
+Source: `lib/string.x:1161`
 
 <a id="String.len"></a>
 #### String.len
@@ -351,7 +351,7 @@ not retained. Each result must convert to a non-NUL byte.
 `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
 the result cannot be allocated.
 
-Source: `lib/string.x:1146`
+Source: `lib/string.x:1141`
 
 <a id="String.new"></a>
 #### String.new
@@ -439,7 +439,7 @@ Returns a canonical `String` after removing bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1177`
+Source: `lib/string.x:1172`
 
 <a id="String.remove_prefix"></a>
 #### String.remove_prefix
@@ -572,7 +572,7 @@ Bytes outside `chars` are preserved even when repeated. `Null` or empty
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1187`
+Source: `lib/string.x:1182`
 
 <a id="String.startswith"></a>
 #### String.startswith
@@ -617,7 +617,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
 loop.
 
-Source: `lib/string.x:1255`
+Source: `lib/string.x:1250`
 
 <a id="String.upper"></a>
 #### String.upper
@@ -669,7 +669,7 @@ borrowed `out` is returned and not retained.
 
 **Raises:** any cause from `Buffer.write`.
 
-Source: `lib/string.x:1206`
+Source: `lib/string.x:1201`
 
 ## Advanced and interop API
 
@@ -909,7 +909,7 @@ Source: `lib/string.x:380`
 Returns `str` itself as its display `String` without copying or retaining
 it.
 
-Source: `lib/string.x:1198`
+Source: `lib/string.x:1193`
 
 <a id="String.symbol"></a>
 #### String.symbol
@@ -921,7 +921,7 @@ Returns the compact `Symbol` encoded from `str`, or zero for empty input.
 use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
-Source: `lib/string.x:1213`
+Source: `lib/string.x:1208`
 
 ## Runtime-internal callables
 

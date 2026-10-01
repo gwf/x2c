@@ -68,10 +68,6 @@ static int _int_length(Array array);
 
 static int _compare_var(Var a, Var b);
 
-static Buffer _array_new_buffer(void);
-
-static String _array_finish_buffer(Buffer out);
-
 static int Array__core_compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5);
 
 static Buffer Array__core_write(Array _x2c_macro_array_39, Buffer _x2c_macro_out_10, Symbol _x2c_macro_mode_0);
@@ -676,9 +672,7 @@ Var Array_postfixindex(Array array, int index, Symbol op){
   return Var_postfix(&(arr[index]), op);
 }
 
-FuncArg FuncArg_value(Var);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
+Var Func_apply_value(Func, Var);
 
 Array Array_map(Array array, Func func){
   Array output = Array_new(), result = NULL;
@@ -702,14 +696,7 @@ Array Array_map(Array array, Func func){
         Var _x2c_macro_cursor_output_0;
         while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_0))){
           item = _x2c_macro_cursor_output_0;
-          {
-            FuncArg arguments[1] ={
-              FuncArg_value(item)
-            }
-            ;
-            Array_push(output, Func_apply(func, 1, arguments));
-          }
-
+          Array_push(output, Func_apply_value(func, item));
         }
 
       }
@@ -728,6 +715,8 @@ Array Array_map(Array array, Func func){
 
 }
 
+Var Func_apply_values(Func, Var, Var);
+
 Array Array_map2(Array a, Array b, Func func){
   Array output = Array_new(), result = NULL;
   {
@@ -744,13 +733,7 @@ Array Array_map2(Array a, Array b, Func func){
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
       size_t an = Array_len(a), bn = Array_len(b), n =(an < bn) ? an : bn;
-      for(size_t i = 0;  i < n;  i ++){
-        FuncArg arguments[2] ={
-          FuncArg_value(Array_getindex(a, i)), FuncArg_value(Array_getindex(b, i))
-        }
-        ;
-        Array_push(output, Func_apply(func, 2, arguments));
-      }
+      for(size_t i = 0;  i < n;  i ++) Array_push(output, Func_apply_values(func, Array_getindex(a, i), Array_getindex(b, i)));
       {
         Array _x2c_return_value_1 = result = output;
         {
@@ -773,13 +756,7 @@ Var Array_foldl(Array array, Var seed, Func fn){
     if(n == 0) return((void) 0, Void);
     acc = Array_getindex(array, i ++);
   }
-  for(;  i < n;  i ++){
-    FuncArg arguments[2] ={
-      FuncArg_value(acc), FuncArg_value(Array_getindex(array, i))
-    }
-    ;
-    acc = Func_apply(fn, 2, arguments);
-  }
+  for(;  i < n;  i ++) acc = Func_apply_values(fn, acc, Array_getindex(array, i));
   return acc;
 }
 
@@ -787,18 +764,6 @@ int Var_compare(Var, Var);
 
 static int _compare_var(Var a, Var b){
   return Var_compare(a, b);
-}
-
-Buffer Buffer_new(size_t);
-
-static Buffer _array_new_buffer(void){
-  return Buffer_new(0);
-}
-
-String Buffer_str_free(Buffer);
-
-static String _array_finish_buffer(Buffer out){
-  return Buffer_str_free(out);
 }
 
 static int Array__core_compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5){
@@ -878,16 +843,20 @@ Buffer Array_write_str(Array _x2c_macro_array_36, Buffer _x2c_macro_out_7){
   return Array__core_write(_x2c_macro_array_36, _x2c_macro_out_7, 40228);
 }
 
+Buffer Buffer_new(size_t);
+
+String Buffer_str_free(Buffer);
+
 String Array_str(Array _x2c_macro_array_37){
-  Buffer _x2c_macro_out_8 = _array_new_buffer();
+  Buffer _x2c_macro_out_8 = Buffer_new(0);
   Array_write_str(_x2c_macro_array_37, _x2c_macro_out_8);
-  return _array_finish_buffer(_x2c_macro_out_8);
+  return Buffer_str_free(_x2c_macro_out_8);
 }
 
 String Array_repr(Array _x2c_macro_array_38){
-  Buffer _x2c_macro_out_9 = _array_new_buffer();
+  Buffer _x2c_macro_out_9 = Buffer_new(0);
   Array_write_repr(_x2c_macro_array_38, _x2c_macro_out_9);
-  return _array_finish_buffer(_x2c_macro_out_9);
+  return Buffer_str_free(_x2c_macro_out_9);
 }
 
 Array Var_array(Var);
@@ -925,11 +894,7 @@ Array Array_sort(Array array){
 }
 
 static int _sort_order(Func compare, Var left, Var right){
-  FuncArg arguments[2] ={
-    FuncArg_value(left), FuncArg_value(right)
-  }
-  ;
-  return Var_int(Var_convert(Func_apply(compare, 2, arguments), 3453797));
+  return Var_int(Var_convert(Func_apply_values(compare, left, right), 3453797));
 }
 
 Array Array_sort_with(Array array, Func compare){
@@ -1024,11 +989,7 @@ Array Array_sort_by(Array array, Func key){
     {
       for(size_t index = 0;  index < count;  index ++){
         Var value = Array_getindex(array, index);
-        FuncArg arguments[1] ={
-          FuncArg_value(value)
-        }
-        ;
-        entries[index].key = Func_apply(key, 1, arguments);
+        entries[index].key = Func_apply_value(key, value);
         entries[index].value = value;
         entries[index].index = index;
       }

@@ -57,24 +57,10 @@ $(import "map-generics.xmacro")
    shallow copies; insertion never adopts storage reachable through them. */
 struct MapRecord {  Var key, val; };
 
-static void _reinsert_error(unsigned capacity, int probe) {
-  raise %(invariant (owner "Map.reinsert") (capacity $capacity)
-          (probe $probe));
-}
-
-static void _insert_error(unsigned capacity) {
-  raise %(invariant (owner "Map.insert") (capacity $capacity));
-}
-
-static Var *_record_key(Map map, unsigned index) {
-  struct MapRecord *records = map.entries;
-  return &records[index].key;
-}
-
-static Var *_record_value(Map map, unsigned index) {
-  struct MapRecord *records = map.entries;
-  return &records[index].val;
-}
+$map.scaffold(
+  Map, struct MapRecord, Var, Var,
+  _record_key, _record_value, _reinsert_error, _insert_error,
+  "Map.reinsert", "Map.insert");
 
 $map.var.family(
   _map_key_hash, _map_key_equal, _map_value_equal, _map_value_valid);

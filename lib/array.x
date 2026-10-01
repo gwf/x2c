@@ -171,10 +171,7 @@ Var Array.postfixindex(Array array, int index, Symbol op) {
 Array Array.map(Array array, Func func) {
   Array output = [], result = NULL;
   defer if (result == NULL) output.free();
-  foreach (Var item, array) {
-    FuncArg arguments[1] = { FuncArg.value(item) };
-    output.push(func.apply(1, arguments));
-  }
+  foreach (Var item, array) output.push(func.apply_value(item));
   return result = output;
 }
 
@@ -189,12 +186,7 @@ Array Array.map2(Array a, Array b, Func func) {
   Array output = [], result = NULL;
   defer if (result == NULL) output.free();
   size_t an = a.len(), bn = b.len(), n = (an < bn) ? an : bn;
-  for (size_t i = 0; i < n; i++) {
-    FuncArg arguments[2] = {
-      FuncArg.value(a[i]), FuncArg.value(b[i])
-    };
-    output.push(func.apply(2, arguments));
-  }
+  for (size_t i = 0; i < n; i++) output.push(func.apply_values(a[i], b[i]));
   return result = output;
 }
 
@@ -214,21 +206,12 @@ Var Array.foldl(Array array, Var seed, Func fn) {
     if (n == 0) return void;
     acc = array[i++];
   }
-  for (; i < n; i++) {
-    FuncArg arguments[2] = {
-      FuncArg.value(acc), FuncArg.value(array[i])
-    };
-    acc = fn.apply(2, arguments);
-  }
+  for (; i < n; i++) acc = fn.apply_values(acc, array[i]);
   return acc;
 }
 
 static int _compare_var(Var a, Var b) => a.compare(b);
-static Buffer _array_new_buffer(void) => Buffer.new(0);
-static String _array_finish_buffer(Buffer out) => out.str_free();
-$array.typed.observe(
-  Array, Var, "Array", _compare_var, _array_new_buffer,
-  _array_finish_buffer);
+$array.typed.observe(Array, Var, _compare_var);
 $array.typed.iterate(Array, Var, array);
 
 static int _sort_compare(const void *ap, const void *bp) {
@@ -256,10 +239,8 @@ meta native Self Array.sort(Self array) {
   return array;
 }
 
-static int _sort_order(Func compare, Var left, Var right) {
-  FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
-  return compare.apply(2, arguments);
-}
+static int _sort_order(Func compare, Var left, Var right) =>
+  compare.apply_values(left, right);
 
 /** Stably sorts `array` with a borrowed synchronous comparator and returns it.
     The callback receives two values; its result converts to `int`, with a
@@ -324,8 +305,7 @@ Self Array.sort_by(Self array, Func key) {
   defer Scope.free(entries);
   for (size_t index = 0; index < count; index++) {
     Var value = array[index];
-    FuncArg arguments[1] = { FuncArg.value(value) };
-    entries[index].key = key.apply(1, arguments);
+    entries[index].key = key.apply_value(value);
     entries[index].value = value;
     entries[index].index = index;
   }

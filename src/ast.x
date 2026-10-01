@@ -65,26 +65,48 @@ String binding_identity_spelling(List binding) {
   return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
 }
 
+/** Returns the innermost node `value` designates, past the forms that still
+    name the same object: an `expr` wrapper, parentheses, a member, and an
+    index into an array. What remains is a name, a designation through a
+    pointer, or another expression; a non-list designates nothing.
+*/
+List Ast.designated(Var value) {
+  while (value is <list>) {
+    List node = value;
+    match (node) {
+      case %(expr ? ?inner): value = inner;
+      case $source_pattern($grouped, %(?inner)): value = inner;
+      case $source_pattern_with($indexed, %(?receiver ?selector),
+          %((?receiver (!set ?base (expr ((dim *) *) ?))) (?selector ?))):
+        value = base;
+      case $source_operator_content(%(. ?base *)): value = base;
+      default: return node;
+    }
+  }
+  return NULL;
+}
+
 /** Returns the binding whose stored object the lvalue `ast` names, or
     `NULL`. Pointer dereferences and pointer indexes name another object; an
     array field remains part of its containing aggregate.
 */
 List Ast.lvalue_binding(Ast ast) {
-  if (!ast) return NULL;
-  match (ast) {
-    case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding;
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
-      return Ast.lvalue_binding(inner);
-    case $source_content_pattern($grouped, %(?inner)):
-      return Ast.lvalue_binding(inner);
-    case %(expr ? ${$source_operator_content(%(. ?base *))}):
-      return Ast.lvalue_binding(base);
-    case $source_operator_content(%(. ?base *)):
-      return Ast.lvalue_binding(base);
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (expr ((dim *) *) ?base)) (?selector ?))):
-      return Ast.lvalue_binding(base);
+  List designated = Ast.designated(ast);
+  match (designated)
+    case $source_identifier_content(%(?binding)): return binding;
+  return NULL;
+}
+
+/** Returns the operand a write `node` changes: the left operand of an
+    assignment or prefix update, or the operand of a postfix update; `NULL`
+    when `node` writes no operand.
+*/
+List Ast.written_operand(Ast node) {
+  match (node) {
+    case $source_operator_content(%(?operator ?target *)):
+      if (operator is <symbol> && ast_changes_left_operand(operator))
+        return target;
+    case $source_postfix_content(%(? ?target)): return target;
   }
   return NULL;
 }
@@ -246,6 +268,31 @@ Symbol Symbol.compound_operator(Symbol op) {
 Symbol Symbol.compound_assignment(Symbol op) {
   int index = compound_binaries.index(op);
   return index < 0 ? 0 : compound_assignments.getindex(index);
+}
+
+/** Returns a binary operator's precedence level, or zero for any other
+    `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
+    operators, so a larger level binds more tightly. `===` and `!==` share
+    the equality level, `in` the relational level, and `@` the
+    multiplicative level.
+*/
+int Symbol.binary_precedence(Symbol op) {
+  switch (op) {
+    case <||>:                 return 1;   // logical OR
+    case <&&>:                 return 2;   // logical AND
+    case <|>:                  return 3;   // bitwise OR
+    case <^>:                  return 4;   // bitwise XOR
+    case <&>:                  return 5;   // bitwise AND
+    case <==>:   case <!=>:
+    case <===>:  case <!==>:   return 6;   // equality
+    case <"<">:  case <">">:   case <in>:
+    case <"<=">: case <">=">:  return 7;   // relational
+    case <"<<">: case <">>">:  return 8;   // shift
+    case <+>:    case <->:     return 9;   // additive
+    case <*>:    case </>:
+    case <%>:    case <@>:     return 10;  // multiplicative
+  }
+  return 0;
 }
 
 /** Returns whether `op` is plain or compound assignment. */

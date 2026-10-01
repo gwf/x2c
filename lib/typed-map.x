@@ -81,49 +81,23 @@ struct MapStringIntRecord { String key; int val; };
 
 // storage errors and entry slots
 
-/* `$typed.storage` generates one family's storage errors, owned by
-   "<map>.reinsert" and "<map>.insert", and its record slot accessors. */
-$(defun _storage_owner (map operation)
-  (x2c.literal.string (string-append (str (car map)) operation)))
-
-macro Unit $typed.storage(
-  Type $map, Type $record, Type $key, Type $value,
-  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
-) {
-  static void $reinsert_error(unsigned capacity, int probe) {
-    raise %(invariant (owner ${$(_storage_owner $map ".reinsert")})
-            (capacity $capacity) (probe $probe));
-  }
-
-  static void $insert_error(unsigned capacity) {
-    raise %(invariant (owner ${$(_storage_owner $map ".insert")})
-            (capacity $capacity));
-  }
-
-  static $key *$key_at($map map, unsigned index) {
-    $record *records = map.entries;
-    return &records[index].key;
-  }
-
-  static $value *$value_at($map map, unsigned index) {
-    $record *records = map.entries;
-    return &records[index].val;
-  }
-}
-
-$typed.storage(
+$map.scaffold(
   MapIntInt, struct MapIntIntRecord, int, int,
-  _int_key, _int_value, _int_reinsert_error, _int_insert_error);
-$typed.storage(
+  _int_key, _int_value, _int_reinsert_error, _int_insert_error,
+  "MapIntInt.reinsert", "MapIntInt.insert");
+$map.scaffold(
   MapLongDouble, struct MapLongDoubleRecord, long, double,
-  _long_key, _double_value, _long_reinsert_error, _long_insert_error);
-$typed.storage(
+  _long_key, _double_value, _long_reinsert_error, _long_insert_error,
+  "MapLongDouble.reinsert", "MapLongDouble.insert");
+$map.scaffold(
   MapStringString, struct MapStringStringRecord, String, String,
-  _string_key, _string_value, _string_reinsert_error, _string_insert_error);
-$typed.storage(
+  _string_key, _string_value, _string_reinsert_error, _string_insert_error,
+  "MapStringString.reinsert", "MapStringString.insert");
+$map.scaffold(
   MapStringInt, struct MapStringIntRecord, String, int,
   _string_int_key, _string_int_value,
-  _string_int_reinsert_error, _string_int_insert_error);
+  _string_int_reinsert_error, _string_int_insert_error,
+  "MapStringInt.reinsert", "MapStringInt.insert");
 
 /* The three iterators each yield one boxed key or value, so a family needs a
    plain function per stored type. */

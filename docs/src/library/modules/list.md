@@ -414,7 +414,7 @@ fewer than two cells is returned as it stands.
 **Raises:** whatever element comparison raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:722`
+Source: `lib/list.x:712`
 
 <a id="List.sort_by"></a>
 #### List.sort_by
@@ -426,7 +426,7 @@ The key runs once per element in input order; an empty List invokes none.
 The input List is unchanged. Raises: allocation and the key's ordinary
 causes, including failure to compare the resulting keys.
 
-Source: `lib/list.x:745`
+Source: `lib/list.x:735`
 
 <a id="List.sort_with"></a>
 #### List.sort_with
@@ -437,7 +437,7 @@ Returns a stable sorted copy using `Array.sort_with`'s callback contract.
 The input List is unchanged. Fewer than two cells return unchanged without
 a callback. Raises: allocation and the comparator's ordinary causes.
 
-Source: `lib/list.x:733`
+Source: `lib/list.x:723`
 
 <a id="List.tail"></a>
 #### List.tail
@@ -479,7 +479,7 @@ of fewer than two cells is returned as it stands.
 **Raises:** causes from `Map` hashing or equality, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:760`
+Source: `lib/list.x:750`
 
 <a id="List.unpack_n"></a>
 #### List.unpack_n
@@ -495,7 +495,7 @@ skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:840`
+Source: `lib/list.x:830`
 
 <a id="List.unpack_vars_n"></a>
 #### List.unpack_vars_n
@@ -510,7 +510,7 @@ is skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:855`
+Source: `lib/list.x:845`
 
 <a id="List.write_str"></a>
 #### List.write_str
@@ -523,7 +523,7 @@ inside each parenthesis, as in `( a b )`, including when nested in another
 container. This method temporarily sets the destination `Buffer`'s padding
 to one and restores it afterward.
 
-Source: `lib/list.x:917`
+Source: `lib/list.x:907`
 
 <a id="List.zip_with"></a>
 #### List.zip_with
@@ -719,7 +719,7 @@ identity, and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:775`
+Source: `lib/list.x:765`
 
 <a id="List.flatten_all"></a>
 #### List.flatten_all
@@ -731,7 +731,7 @@ Nested `nil` contributes no element and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:792`
+Source: `lib/list.x:782`
 
 <a id="List.hash"></a>
 #### List.hash
@@ -797,7 +797,7 @@ released.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:932`
+Source: `lib/list.x:922`
 
 <a id="List.str"></a>
 #### List.str
@@ -814,7 +814,7 @@ ancestor, and remains live until its owning pool is released. Use
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:905`
+Source: `lib/list.x:895`
 
 <a id="List.sublis"></a>
 #### List.sublis
@@ -829,7 +829,7 @@ rebuilt canonically, and `nil` returns `nil`.
 **Raises:** a cause from key equality, or `<alloc-fail>` or `<size-limit>`
 while constructing the result.
 
-Source: `lib/list.x:813`
+Source: `lib/list.x:803`
 
 <a id="List.subseq"></a>
 #### List.subseq
@@ -851,7 +851,7 @@ Source: `lib/list.x:558`
 
 Appends the readable representation of `List` to a `Buffer`.
 
-Source: `lib/list.x:939`
+Source: `lib/list.x:929`
 
 ### `Var`
 

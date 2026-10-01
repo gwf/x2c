@@ -74,8 +74,6 @@ static String _pad(String str, int width, char fill, int side);
 
 static int _newline_width(String str);
 
-static Var _apply(Func fn, char value);
-
 static int _next(Iter iter, Var * out);
 
 typedef struct _x2c_defer_env_0{
@@ -830,6 +828,10 @@ void x2c_cleanup_push(X2CCleanup *);
 
 int Var_truth(Var);
 
+Var Func_apply_value(Func, Var);
+
+Var char_var(char);
+
 void x2c_cleanup_leave(X2CCleanup *);
 
 String String_filter(String str, Func fn){
@@ -851,7 +853,7 @@ String String_filter(String str, Func fn){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       char * _x2c_macro_dst_0 = _x2c_macro_string_3;
-      for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(_apply(fn, String_getindex(str, i)))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);
+      for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(Func_apply_value(fn, char_var((char) String_getindex(str, i))))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);
       String _x2c_macro_result_0 = _finish(_x2c_macro_string_3, (int)(_x2c_macro_dst_0 - _x2c_macro_string_3));
       _x2c_macro_done_0 = 1;
       {
@@ -867,20 +869,6 @@ String String_filter(String str, Func fn){
     x2c_cleanup_leave(& _x2c_defer_record_0);
   }
 
-}
-
-FuncArg FuncArg_value(Var);
-
-Var char_var(char);
-
-Var Func_apply(Func, unsigned, const FuncArg *);
-
-static Var _apply(Func fn, char value){
-  FuncArg arguments[1] ={
-    FuncArg_value(char_var(value))
-  }
-  ;
-  return Func_apply(fn, 1, arguments);
 }
 
 String String_map(String str, Func fn){
@@ -903,9 +891,9 @@ String String_map(String str, Func fn){
       char * out = string;
       const char * src = str;
       for(int i = 0;  i < n;  i ++){
-        char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
+        char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));
         if(! ch){
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1154};
+          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1149};
           x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }

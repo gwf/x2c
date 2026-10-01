@@ -244,6 +244,8 @@ static int Compiler__legacy_expression_body(Compiler c);
 
 static int _extends_expression(Token token);
 
+static const SymbolSet operand_continuations =(SymbolSet) "\001\000\000\000\011\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\004\000\000\000\010\001\000\000\000\010\002\000\000\006\000\003\000\000\000\014\000\005\000\000\267\000\000\000\000\000\000\000\121\000\000\000\000\000\000\000\367\000\000\000\000\000\000\000\175\055\000\000\000\000\000\000\135\000\000\000\000\000\000\000\070\007\000\000\000\000\000\000\376\007\000\000\000\000\000\000\072\000\000\000\000\000\000\000\131\000\000\000\000\000\000\000";
+
 static List Compiler__meta_call_slot(Compiler c, Symbol role);
 
 static List Compiler__lisp_slot(Compiler c, Symbol role);
@@ -2650,12 +2652,10 @@ static int Compiler__legacy_expression_body(Compiler c){
   if(Compiler_peek(c, 0) != 81) return 0;  Token after = Token_after_group(c -> token);  return after -> type != 119 && ! _extends_expression(after);
 }
 
+int Symbol_binary_precedence(Symbol);
 int Symbol_is_assignment_op(Symbol);
 static int _extends_expression(Token token){
-  Symbol type = token -> type;  if(Symbol_is_assignment_op(type)) return 1;  switch(type){
-    case 183 : case 81 : case 247 : case 11645 : case 93 : case 1848 : case 2046 : case 31993 : case 9805 : case 249 : case 189 : case 77 : case 15739 : case 8571 : case 2014587 : case 1097083 : case 121 : case 125 : case 604 : case 15483 : case 15995 : case 15481 : case 15997 : case 56 : case 62 : case 54 : case 95 : case 75 : case 129 : case 58 : case 89 : return 1;
-  }
-  return type == 19147688 &&(String_equal(token -> text, _30410) || String_equal(token -> text, _30411));
+  Symbol type = token -> type;  return Symbol_binary_precedence(type) || Symbol_is_assignment_op(type) || SymbolSet_contains(operand_continuations, type) ||(type == 19147688 &&(String_equal(token -> text, _30410) || String_equal(token -> text, _30411)));
 }
 
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role){
@@ -4712,7 +4712,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 2918};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 2914};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -4840,7 +4840,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3053};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3049};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

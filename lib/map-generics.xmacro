@@ -37,6 +37,35 @@ macro Unit $map.var.family(
     if (value[0] is void) raise %(void-op);
   }
 }
+
+/* `$map.scaffold` generates one family's record slot accessors and its
+   storage invariant errors, owned by `$reinsert_owner` and `$insert_owner`.
+   `$map.core.family` takes the four generated names. */
+macro Unit $map.scaffold(
+  Type $map, Type $record, Type $key, Type $value,
+  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error,
+  Literal $reinsert_owner, Literal $insert_owner
+) {
+  static void $reinsert_error(unsigned capacity, int probe) {
+    raise %(invariant (owner ${$reinsert_owner}) (capacity $capacity)
+            (probe $probe));
+  }
+
+  static void $insert_error(unsigned capacity) {
+    raise %(invariant (owner ${$insert_owner}) (capacity $capacity));
+  }
+
+  static $key *$key_at($map map, unsigned index) {
+    $record *records = map.entries;
+    return &records[index].key;
+  }
+
+  static $value *$value_at($map map, unsigned index) {
+    $record *records = map.entries;
+    return &records[index].val;
+  }
+}
+
 macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   Type $hash_cell,
   Type $entry,

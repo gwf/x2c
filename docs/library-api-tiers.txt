@@ -57,7 +57,8 @@ lib/file.x|advanced|File.setlinebuf,File.stat,File.str,File.string
 lib/file.x|advanced|File.string_close,File.ungetc,File.write,File.write_repr
 lib/file.x|compatibility|File.readblock,File.readline
 lib/file.x|internal|File.initialize
-lib/func.x|advanced|Func.apply,Func.context,Func.new,Func.new_context
+lib/func.x|advanced|Func.apply,Func.apply_value,Func.apply_values,Func.context
+lib/func.x|advanced|Func.new,Func.new_context
 lib/func.x|advanced|Func.new_rest,Func.var,FuncArg.reference,FuncArg.value
 lib/func.x|advanced|x2c_func_reference_argument,x2c_func_value_argument
 lib/func.x|advanced|Var.func,x2c_func_pointer_argument,x2c_func_record_result

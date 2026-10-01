@@ -179,20 +179,27 @@ static Array Query.diagnostics(Query &q) {
   return diagnostics;
 }
 
-/* A diagnostic without a file is in the unit's file, and a missing
-   position or length counts as 0. */
 static Map Query.diagnostic(Query &q, List entry) {
-  List location = entry.assoc(<location>);
-  Var file = location.assoc(<file>), position = location.assoc(<position>);
-  Var width = location.assoc(<length>);
-  String path = file is <string> ? file : q.compiler.filename;
-  int start = position is void ? 0 : position;
-  int length = width is void ? 0 : width;
-  Map diagnostic = q.location(Path.absolute(path), start, start + length);
-  diagnostic[<message>] = entry.assoc(<message>);
-  diagnostic[<code>] = entry.assoc(<code>);
-  diagnostic[<severity>] = entry.assoc(<severity>);
-  return diagnostic;
+  match (entry)
+    case %((code ?code) (severity ?severity) (message ?message)
+           (location ?location) ?): {
+      Map diagnostic = q.diagnostic_range(location);
+      diagnostic[<message>] = message;
+      diagnostic[<code>] = code;
+      diagnostic[<severity>] = severity;
+      return diagnostic;
+    }
+  __builtin_unreachable();
+}
+
+/* A diagnostic without a location is at the start of the unit's file. */
+static Map Query.diagnostic_range(Query &q, List location) {
+  match (location)
+    case %((file ?file) ? ? (length ?length) (position ?position)): {
+      int start = position, width = length;
+      return q.location(Path.absolute(file), start, start + width);
+    }
+  return q.location(Path.absolute(q.compiler.filename), 0, 0);
 }
 
 /* A location in the reply. Its file joins `needed`, so the reply carries

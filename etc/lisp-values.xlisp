@@ -11,6 +11,19 @@
 // `car`, `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`,
 // `lower`, `str`, and `repr` are unchanged and reach the same code.
 
+// Each `Owner.member` named here binds the library operation
+// `Owner_member`; the few that bind another native are defined by hand.
+// A Lisp macro expands again at each call, so the generators below call
+// `cond` and native operations rather than `if`, `let`, or `map`.
+(def _list_map (bind "List_map" nil))
+(def _string_replace (bind "String_replace" nil))
+(defmacro _natives (. names)
+  (cons 'begin
+        (_list_map
+          names
+          (lambda (name)
+            `(def ,name (bind ,(_string_replace (str name) "." "_") nil))))))
+
 // An iterator operation takes its destination last. A call that omits it
 // gets a fresh Iter, allocated in the current Scope; a call with explicit
 // storage passes it. The compile-time runtime binds lowered iterator calls
@@ -25,135 +38,77 @@
 
 // List
 
-(def List.getindex (bind "List_getindex" nil))
-(def List.last     (bind "List_last" nil))
-(def List.index    (bind "List_index" nil))
-(def List.contains (bind "List_contains" nil))
-(def List.assoc    (bind "List_assoc" nil))
-(def List.get      (bind "List_get" nil))
-(def List.array    (bind "List_array" nil))
-(def List.sort     (bind "List_sort" nil))
-(def List.map      (bind "List_map" nil))
-(def List.filter   (bind "Lisp_List_filter" nil))
-(def List.any      (bind "Lisp_List_any" nil))
-(def List.all      (bind "Lisp_List_all" nil))
-(def List.map2     (bind "List_map2" nil))
-(def List.sort_by  (bind "List_sort_by" nil))
-(def List.sort_with (bind "List_sort_with" nil))
-(def List.zip_with (bind "List_zip_with" nil))
-(def List.foldl   (bind "List_foldl" nil))
-(def List.find    (bind "Lisp_List_find" nil))
-(def List.iter     (C.iterator.call (bind "List_iter_into" nil) 1))
+(_natives List.getindex List.last List.index List.contains List.assoc List.get
+  List.array List.sort List.map List.map2 List.sort_by List.sort_with
+  List.zip_with List.foldl List.unique List.sublis List.flatten
+  List.flatten_all List.nth_cdr List.tail List.head List.subseq List.getslice
+  List.hash List.compare List.replace List.match_replace List.truth
+  List.listchar List.listshort List.listint List.listfloat List.listdbl
+  List.liststring List.listsymbol List.cdddr List.cddddr)
+(def List.filter (bind "Lisp_List_filter" nil))
+(def List.any    (bind "Lisp_List_any" nil))
+(def List.all    (bind "Lisp_List_all" nil))
+(def List.find   (bind "Lisp_List_find" nil))
+(def List.iter   (C.iterator.call (bind "List_iter_into" nil) 1))
 
 // Array
 
-(def Array.new       (bind "Array_new" nil))
-(def Array.len       (bind "Array_len" nil))
-(def Array.push      (bind "Array_push" nil))
-(def Array.getindex  (bind "Array_getindex" nil))
-(def Array.setindex  (bind "Array_setindex" nil))
-(def Array.take_last (bind "Array_take_last" nil))
-(def Array.shift     (bind "Array_shift" nil))
-(def Array.unshift   (bind "Array_unshift" nil))
-(def Array.insert    (bind "Array_insert" nil))
-(def Array.remove    (bind "Array_remove" nil))
-(def Array.find      (bind "Array_find" nil))
-(def Array.contains  (bind "Array_contains" nil))
-(def Array.count     (bind "Array_count" nil))
-(def Array.join      (bind "Array_join" nil))
-(def Array.list      (bind "Array_list" nil))
-(def Array.map       (bind "Array_map" nil))
-(def Array.map2      (bind "Array_map2" nil))
-(def Array.sort_by   (bind "Array_sort_by" nil))
-(def Array.sort_with (bind "Array_sort_with" nil))
-(def Array.foldl    (bind "Array_foldl" nil))
-(def Array.iter      (C.iterator.call (bind "Array_iter_into" nil) 1))
+(_natives Array.new Array.len Array.push Array.getindex Array.setindex
+  Array.take_last Array.shift Array.unshift Array.insert Array.remove
+  Array.find Array.contains Array.count Array.join Array.list Array.map
+  Array.map2 Array.sort_by Array.sort_with Array.foldl Array.copy
+  Array.getslice Array.concat Array.reverse Array.compare Array.sort
+  Array.equal Array.indexof Array.truth Array.capacity Array.remslice
+  Array.setslice Array.splice Array.updateindex Array.postfixindex
+  Array.clear Array.heap_push Array.heapify Array.heap_pop Array.pop
+  Array.resize Array.truncate)
+(def Array.iter (C.iterator.call (bind "Array_iter_into" nil) 1))
 
 // Map
 
-(def Map.new        (bind "Map_new" nil))
-(def Map.len        (bind "Map_len" nil))
-(def Map.get        (bind "Map_get" nil))
-(def Map.getindex   (bind "Map_getindex" nil))
-(def Map.setindex   (bind "Map_setindex" nil))
-(def Map.contains   (bind "Map_contains" nil))
-(def Map.del        (bind "Map_del" nil))
-(def Map.getdefault (bind "Map_getdefault" nil))
-(def Map.setdefault (bind "Map_setdefault" nil))
-(def Map.list       (bind "Map_list" nil))
-(def Map.iter       (C.iterator.call (bind "Map_iter_into" nil) 1))
-(def Map.keys       (C.iterator.call (bind "Map_keys_into" nil) 1))
-(def Map.enumerate  (C.iterator.call (bind "Map_enumerate_into" nil) 1))
+(_natives Map.new Map.len Map.get Map.getindex Map.setindex Map.contains
+  Map.del Map.getdefault Map.setdefault Map.list Map.copy Map.merge
+  Map.compare Map.equal Map.truth Map.new_capacity Map.updateindex
+  Map.postfixindex Map.set Map.get_hashed)
+(def Map.iter      (C.iterator.call (bind "Map_iter_into" nil) 1))
+(def Map.keys      (C.iterator.call (bind "Map_keys_into" nil) 1))
+(def Map.enumerate (C.iterator.call (bind "Map_enumerate_into" nil) 1))
 
 // String
 
-(def String.len           (bind "String_len" nil))
-(def String.format        (bind "String_format" nil))
+(_natives String.len String.format String.find String.rfind String.count
+  String.contains String.startswith String.endswith String.getindex
+  String.getslice String.add String.lower String.upper String.capitalize
+  String.repeat String.replace String.join String.split String.split_lines
+  String.partition String.rpartition String.find_all String.remove_prefix
+  String.remove_suffix String.escape String.unescape String.contains_digit
+  String.is_alpha String.is_alpha_under String.is_digit String.is_alnum
+  String.is_alnum_under String.is_identifier String.is_space String.is_lower
+  String.is_lower_under String.is_upper String.is_upper_under String.compare
+  String.hash String.symbol String.dedent String.keep String.reject
+  String.squeeze String.pad_left String.pad_right String.pad_center
+  String.new_fill String.find_within String.replace_n String.split_n
+  String.map String.intern String.parse String.parse_char String.withindex
+  String.truth String.sha256)
 (def String_format String.format)
-(def String.find          (bind "String_find" nil))
-(def String.rfind         (bind "String_rfind" nil))
-(def String.count         (bind "String_count" nil))
-(def String.contains      (bind "String_contains" nil))
-(def String.startswith    (bind "String_startswith" nil))
-(def String.endswith      (bind "String_endswith" nil))
-(def String.getindex      (bind "String_getindex" nil))
-(def String.getslice      (bind "String_getslice" nil))
-(def String.add           (bind "String_add" nil))
-(def String.lower         (bind "String_lower" nil))
-(def String.strip (bind "lisp_string_strip" nil))
-(def String.upper         (bind "String_upper" nil))
-(def String.capitalize    (bind "String_capitalize" nil))
-(def String.repeat        (bind "String_repeat" nil))
-(def String.replace       (bind "String_replace" nil))
-(def String.join          (bind "String_join" nil))
-(def String.split         (bind "String_split" nil))
-(def String.split_lines   (bind "String_split_lines" nil))
-(def String.partition     (bind "String_partition" nil))
-(def String.rpartition    (bind "String_rpartition" nil))
-(def String.find_all      (bind "String_find_all" nil))
-(def String.remove_prefix (bind "String_remove_prefix" nil))
-(def String.remove_suffix (bind "String_remove_suffix" nil))
-(def String.escape        (bind "String_escape" nil))
-(def String.unescape      (bind "String_unescape" nil))
-
-(def String.contains_digit (bind "String_contains_digit" nil))
-(def String.is_alpha (bind "String_is_alpha" nil))
-(def String.is_alpha_under (bind "String_is_alpha_under" nil))
-(def String.is_digit (bind "String_is_digit" nil))
-(def String.is_alnum (bind "String_is_alnum" nil))
-(def String.is_alnum_under (bind "String_is_alnum_under" nil))
-(def String.is_identifier (bind "String_is_identifier" nil))
-(def String.is_space (bind "String_is_space" nil))
-(def String.is_lower (bind "String_is_lower" nil))
-(def String.is_lower_under (bind "String_is_lower_under" nil))
-(def String.is_upper (bind "String_is_upper" nil))
-(def String.is_upper_under (bind "String_is_upper_under" nil))
-(def String.compare (bind "String_compare" nil))
-(def String.hash (bind "String_hash" nil))
-(def String.symbol (bind "String_symbol" nil))
-(def String.dedent (bind "String_dedent" nil))
-(def String.keep (bind "String_keep" nil))
-(def String.reject (bind "String_reject" nil))
-(def String.squeeze (bind "String_squeeze" nil))
-(def String.pad_left (bind "String_pad_left" nil))
-(def String.pad_right (bind "String_pad_right" nil))
-(def String.pad_center (bind "String_pad_center" nil))
-(def String.new_fill (bind "String_new_fill" nil))
-(def String.find_within (bind "String_find_within" nil))
-(def String.replace_n (bind "String_replace_n" nil))
-(def String.split_n (bind "String_split_n" nil))
-(def String.lstrip (bind "lisp_string_lstrip" nil))
-(def String.rstrip (bind "lisp_string_rstrip" nil))
-(def String.map (bind "String_map" nil))
-(def String.filter (bind "Lisp_String_filter" nil))
-(def String.iter (C.iterator.call (bind "String_iter_into" nil) 1))
+(def String.strip   (bind "lisp_string_strip" nil))
+(def String.lstrip  (bind "lisp_string_lstrip" nil))
+(def String.rstrip  (bind "lisp_string_rstrip" nil))
+(def String.filter  (bind "Lisp_String_filter" nil))
+(def String.new_len (bind "_lisp_string_new_len" nil))
+(def String.iter    (C.iterator.call (bind "String_iter_into" nil) 1))
 
 // Iter
 
+(_natives Iter.foldl Iter.next Iter.min Iter.max Iter.list Iter.array
+  Iter.count Iter.sum Iter.product)
+(def Iter.filter (bind "Lisp_Iter_filter" nil))
+(def Iter.any    (bind "Lisp_Iter_any" nil))
+(def Iter.all    (bind "Lisp_Iter_all" nil))
+(def Iter.find   (bind "Lisp_Iter_find" nil))
 (def Var.iter (C.iterator.call (bind "Var_iter_into" nil) 1))
 (def range (C.iterator.call (bind "range_into" nil) 3))
 (def Iter.map (C.iterator.call (bind "Iter_map_into" nil) 2))
-(def Iter.filter (bind "Lisp_Iter_filter" nil))
 (def Iter.zip (C.iterator.call (bind "Iter_zip_into" nil) 2))
 (def Iter.zip_with (C.iterator.call (bind "Iter_zip_with_into" nil) 3))
 (def Iter.map2 (C.iterator.call (bind "Iter_map2_into" nil) 3))
@@ -164,290 +119,57 @@
 (def Iter.accumulate (C.iterator.call (bind "Iter_accumulate_into" nil) 2))
 (def Iter.scan (C.iterator.call (bind "Iter_scan_into" nil) 3))
 (def Iter.unique (C.iterator.call (bind "Iter_unique_into" nil) 1))
-(def Iter.any (bind "Lisp_Iter_any" nil))
-(def Iter.all (bind "Lisp_Iter_all" nil))
-(def Iter.foldl (bind "Iter_foldl" nil))
-(def Iter.find (bind "Lisp_Iter_find" nil))
-(def Iter.next (bind "Iter_next" nil))
-(def Iter.min (bind "Iter_min" nil))
-(def Iter.max (bind "Iter_max" nil))
-(def Iter.list (bind "Iter_list" nil))
-(def Iter.array (bind "Iter_array" nil))
-(def Iter.count (bind "Iter_count" nil))
-(def Iter.sum (bind "Iter_sum" nil))
-(def Iter.product (bind "Iter_product" nil))
 
 // Var and Symbol
 
-(def Var.tag      (bind "Var_tag" nil))
-(def Var.kind     (bind "Var_kind" nil))
-(def Var.is       (bind "Var_is" nil))
-(def Var.parse    (bind "Var_parse" nil))
-(def Var.convert  (bind "Var_convert" nil))
-(def Var.integer  (bind "Var_integer" nil))
-(def Var.floating (bind "Var_floating" nil))
-(def Var.is_null  (bind "Var_is_null" nil))
-(def Var.is_void  (bind "Var_is_void" nil))
+(_natives Var.tag Var.kind Var.is Var.parse Var.convert Var.integer
+  Var.floating Var.is_null Var.is_void Var.list Var.array Var.map Var.string
+  Var.symbol Var.char Var.short Var.int Var.long Var.long_long Var.unsigned
+  Var.ushort Var.uchar Var.uint Var.ulong Var.ulong_long Var.float Var.double
+  Var.long_double Var.long_value Var.ulong_value Var.long_long_value
+  Var.ulong_long_value Var.long_double_value Var.compare Var.contains
+  Var.hash Var.same Var.is_atom Var.is_atom_binder Var.is_binder
+  Var.is_list_binder Var.is_match_op Var.is_floating Var.is_integer
+  Var.is_pointer Var.is_reference Var.is_object Var.is_wide Var.is_nil
+  Var.add Var.sub Var.mul Var.div Var.mod Var.neg Var.truth Var.setindex
+  Var.updateindex Var.postfixindex Var.listchar Var.listshort Var.listint
+  Var.listfloat Var.listdbl Var.liststring Var.listsymbol Var.cdddr
+  Var.cddddr Var.json Var.pretty_json Var.clone_wide Var.getindex Var.null)
+(_natives Symbol.len Symbol.str Symbol.compare Symbol.first Symbol.last)
+(def Symbol.new_len (bind "_lisp_symbol_new_len" nil))
+(def Symbol.parse   (bind "_lisp_symbol_parse" nil))
 
-// Compound selectors use raw slots so exhaustion keeps `void` distinct from
-// `nil`. The source declarations remain in the optional list-selectors module.
+// A compound selector `List.cxxr` or `Var.cxxr` applies the car and cdr
+// steps its name spells, right to left. The steps read raw slots so
+// exhaustion keeps `void` distinct from `nil`. The source declarations
+// remain in the optional list-selectors module.
 (defun _selector_car (value)
   (if (= (Var.is_void value) 1) value (car value)))
 (defun _selector_cdr (value)
   (if (= (Var.is_void value) 1) nil (cdr value)))
-(defun _selector_caaaar (value)
-  (_selector_car
-    (_selector_car (_selector_car (_selector_car value)))))
-(defun _selector_caaadr (value)
-  (_selector_car
-    (_selector_car (_selector_car (_selector_cdr value)))))
-(defun _selector_caaar (value)
-  (_selector_car
-    (_selector_car (_selector_car value))))
-(defun _selector_caadar (value)
-  (_selector_car
-    (_selector_car (_selector_cdr (_selector_car value)))))
-(defun _selector_caaddr (value)
-  (_selector_car
-    (_selector_car (_selector_cdr (_selector_cdr value)))))
-(defun _selector_caadr (value)
-  (_selector_car
-    (_selector_car (_selector_cdr value))))
-(defun _selector_cadaar (value)
-  (_selector_car
-    (_selector_cdr (_selector_car (_selector_car value)))))
-(defun _selector_cadadr (value)
-  (_selector_car
-    (_selector_cdr (_selector_car (_selector_cdr value)))))
-(defun _selector_cadar (value)
-  (_selector_car
-    (_selector_cdr (_selector_car value))))
-(defun _selector_caddar (value)
-  (_selector_car
-    (_selector_cdr (_selector_cdr (_selector_car value)))))
-(defun _selector_cadddr (value)
-  (_selector_car
-    (_selector_cdr (_selector_cdr (_selector_cdr value)))))
-(defun _selector_cdaaar (value)
-  (_selector_cdr
-    (_selector_car (_selector_car (_selector_car value)))))
-(defun _selector_cdaadr (value)
-  (_selector_cdr
-    (_selector_car (_selector_car (_selector_cdr value)))))
-(defun _selector_cdaar (value)
-  (_selector_cdr
-    (_selector_car (_selector_car value))))
-(defun _selector_cdadar (value)
-  (_selector_cdr
-    (_selector_car (_selector_cdr (_selector_car value)))))
-(defun _selector_cdaddr (value)
-  (_selector_cdr
-    (_selector_car (_selector_cdr (_selector_cdr value)))))
-(defun _selector_cdadr (value)
-  (_selector_cdr
-    (_selector_car (_selector_cdr value))))
-(defun _selector_cdar (value)
-  (_selector_cdr
-    (_selector_car value)))
-(defun _selector_cddaar (value)
-  (_selector_cdr
-    (_selector_cdr (_selector_car (_selector_car value)))))
-(defun _selector_cddadr (value)
-  (_selector_cdr
-    (_selector_cdr (_selector_car (_selector_cdr value)))))
-(defun _selector_cddar (value)
-  (_selector_cdr
-    (_selector_cdr (_selector_car value))))
-(defun _selector_cdddar (value)
-  (_selector_cdr
-    (_selector_cdr (_selector_cdr (_selector_car value)))))
-(def List.caaaar _selector_caaaar)
-(def List.caaadr _selector_caaadr)
-(def List.caaar _selector_caaar)
-(def List.caadar _selector_caadar)
-(def List.caaddr _selector_caaddr)
-(def List.caadr _selector_caadr)
-(def List.cadaar _selector_cadaar)
-(def List.cadadr _selector_cadadr)
-(def List.cadar _selector_cadar)
-(def List.caddar _selector_caddar)
-(def List.cadddr _selector_cadddr)
-(def List.cdaaar _selector_cdaaar)
-(def List.cdaadr _selector_cdaadr)
-(def List.cdaar _selector_cdaar)
-(def List.cdadar _selector_cdadar)
-(def List.cdaddr _selector_cdaddr)
-(def List.cdadr _selector_cdadr)
-(def List.cdar _selector_cdar)
-(def List.cddaar _selector_cddaar)
-(def List.cddadr _selector_cddadr)
-(def List.cddar _selector_cddar)
-(def List.cdddar _selector_cdddar)
-(def Var.caaaar _selector_caaaar)
-(def Var.caaadr _selector_caaadr)
-(def Var.caaar _selector_caaar)
-(def Var.caadar _selector_caadar)
-(def Var.caaddr _selector_caaddr)
-(def Var.caadr _selector_caadr)
-(def Var.cadaar _selector_cadaar)
-(def Var.cadadr _selector_cadadr)
-(def Var.cadar _selector_cadar)
-(def Var.caddar _selector_caddar)
-(def Var.cadddr _selector_cadddr)
-(def Var.cdaaar _selector_cdaaar)
-(def Var.cdaadr _selector_cdaadr)
-(def Var.cdaar _selector_cdaar)
-(def Var.cdadar _selector_cdadar)
-(def Var.cdaddr _selector_cdaddr)
-(def Var.cdadr _selector_cdadr)
-(def Var.cdar _selector_cdar)
-(def Var.cddaar _selector_cddaar)
-(def Var.cddadr _selector_cddadr)
-(def Var.cddar _selector_cddar)
-(def Var.cdddar _selector_cdddar)
-
-(def Symbol.len     (bind "Symbol_len" nil))
-(def Symbol.str     (bind "Symbol_str" nil))
-(def Symbol.compare (bind "Symbol_compare" nil))
-
-// Collection composition and ordering
-
-(def List.unique (bind "List_unique" nil))
-(def List.sublis (bind "List_sublis" nil))
-(def List.flatten (bind "List_flatten" nil))
-(def List.flatten_all (bind "List_flatten_all" nil))
-(def List.nth_cdr (bind "List_nth_cdr" nil))
-(def List.tail (bind "List_tail" nil))
-(def List.head (bind "List_head" nil))
-(def List.subseq (bind "List_subseq" nil))
-(def List.getslice (bind "List_getslice" nil))
-(def List.hash (bind "List_hash" nil))
-(def List.compare (bind "List_compare" nil))
-(def List.replace (bind "List_replace" nil))
-(def List.match_replace (bind "List_match_replace" nil))
-(def Array.copy (bind "Array_copy" nil))
-(def Array.getslice (bind "Array_getslice" nil))
-(def Array.concat (bind "Array_concat" nil))
-(def Array.reverse (bind "Array_reverse" nil))
-(def Array.compare (bind "Array_compare" nil))
-(def Array.sort (bind "Array_sort" nil))
-(def Array.equal (bind "Array_equal" nil))
-(def Array.indexof (bind "Array_indexof" nil))
-(def Array.truth (bind "Array_truth" nil))
-(def Map.copy (bind "Map_copy" nil))
-(def Map.merge (bind "Map_merge" nil))
-(def Map.compare (bind "Map_compare" nil))
-(def Map.equal (bind "Map_equal" nil))
-(def Map.truth (bind "Map_truth" nil))
-
-// Core value conversion, predicates and mutation
-
-(def String.intern (bind "String_intern" nil))
-(def String.parse (bind "String_parse" nil))
-(def String.parse_char (bind "String_parse_char" nil))
-(def String.withindex (bind "String_withindex" nil))
-(def String.truth (bind "String_truth" nil))
-(def Symbol.first (bind "Symbol_first" nil))
-(def Symbol.last (bind "Symbol_last" nil))
-(def Array.capacity (bind "Array_capacity" nil))
-(def Array.remslice (bind "Array_remslice" nil))
-(def Array.setslice (bind "Array_setslice" nil))
-(def Array.splice (bind "Array_splice" nil))
-(def Array.updateindex (bind "Array_updateindex" nil))
-(def Array.postfixindex (bind "Array_postfixindex" nil))
-(def Array.clear (bind "Array_clear" nil))
-(def Array.heap_push (bind "Array_heap_push" nil))
-(def Array.heapify (bind "Array_heapify" nil))
-(def Array.heap_pop (bind "Array_heap_pop" nil))
-(def Array.pop (bind "Array_pop" nil))
-(def Array.resize (bind "Array_resize" nil))
-(def Array.truncate (bind "Array_truncate" nil))
-(def Map.new_capacity (bind "Map_new_capacity" nil))
-(def Map.updateindex (bind "Map_updateindex" nil))
-(def Map.postfixindex (bind "Map_postfixindex" nil))
-(def Map.set (bind "Map_set" nil))
-(def Map.get_hashed (bind "Map_get_hashed" nil))
-(def Var.list (bind "Var_list" nil))
-(def Var.array (bind "Var_array" nil))
-(def Var.map (bind "Var_map" nil))
-(def Var.string (bind "Var_string" nil))
-(def Var.symbol (bind "Var_symbol" nil))
-(def Var.char (bind "Var_char" nil))
-(def Var.short (bind "Var_short" nil))
-(def Var.int (bind "Var_int" nil))
-(def Var.long (bind "Var_long" nil))
-(def Var.long_long (bind "Var_long_long" nil))
-(def Var.unsigned (bind "Var_unsigned" nil))
-(def Var.ushort (bind "Var_ushort" nil))
-(def Var.uchar (bind "Var_uchar" nil))
-(def Var.uint (bind "Var_uint" nil))
-(def Var.ulong (bind "Var_ulong" nil))
-(def Var.ulong_long (bind "Var_ulong_long" nil))
-(def Var.float (bind "Var_float" nil))
-(def Var.double (bind "Var_double" nil))
-(def Var.long_double (bind "Var_long_double" nil))
-(def Var.long_value (bind "Var_long_value" nil))
-(def Var.ulong_value (bind "Var_ulong_value" nil))
-(def Var.long_long_value (bind "Var_long_long_value" nil))
-(def Var.ulong_long_value (bind "Var_ulong_long_value" nil))
-(def Var.long_double_value (bind "Var_long_double_value" nil))
-(def Var.compare (bind "Var_compare" nil))
-(def Var.contains (bind "Var_contains" nil))
-(def Var.hash (bind "Var_hash" nil))
-(def Var.same (bind "Var_same" nil))
-(def Var.is_atom (bind "Var_is_atom" nil))
-(def Var.is_atom_binder (bind "Var_is_atom_binder" nil))
-(def Var.is_binder (bind "Var_is_binder" nil))
-(def Var.is_list_binder (bind "Var_is_list_binder" nil))
-(def Var.is_match_op (bind "Var_is_match_op" nil))
-(def Var.is_floating (bind "Var_is_floating" nil))
-(def Var.is_integer (bind "Var_is_integer" nil))
-(def Var.is_pointer (bind "Var_is_pointer" nil))
-(def Var.is_reference (bind "Var_is_reference" nil))
-(def Var.is_object (bind "Var_is_object" nil))
-(def Var.is_wide (bind "Var_is_wide" nil))
-(def Var.is_nil (bind "Var_is_nil" nil))
-(def Var.add (bind "Var_add" nil))
-(def Var.sub (bind "Var_sub" nil))
-(def Var.mul (bind "Var_mul" nil))
-(def Var.div (bind "Var_div" nil))
-(def Var.mod (bind "Var_mod" nil))
-(def Var.neg (bind "Var_neg" nil))
-(def Var.truth (bind "Var_truth" nil))
-(def Var.setindex (bind "Var_setindex" nil))
-(def Var.updateindex (bind "Var_updateindex" nil))
-(def Var.postfixindex (bind "Var_postfixindex" nil))
-(def List.truth (bind "List_truth" nil))
-
-// Canonical typed Lists and pure optional runtime operations
-
-(def List.listchar (bind "List_listchar" nil))
-(def List.listshort (bind "List_listshort" nil))
-(def List.listint (bind "List_listint" nil))
-(def List.listfloat (bind "List_listfloat" nil))
-(def List.listdbl (bind "List_listdbl" nil))
-(def List.liststring (bind "List_liststring" nil))
-(def List.listsymbol (bind "List_listsymbol" nil))
-(def List.cdddr (bind "List_cdddr" nil))
-(def List.cddddr (bind "List_cddddr" nil))
-(def Var.listchar (bind "Var_listchar" nil))
-(def Var.listshort (bind "Var_listshort" nil))
-(def Var.listint (bind "Var_listint" nil))
-(def Var.listfloat (bind "Var_listfloat" nil))
-(def Var.listdbl (bind "Var_listdbl" nil))
-(def Var.liststring (bind "Var_liststring" nil))
-(def Var.listsymbol (bind "Var_listsymbol" nil))
-(def Var.cdddr (bind "Var_cdddr" nil))
-(def Var.cddddr (bind "Var_cddddr" nil))
-(def Var.json (bind "Var_json" nil))
-(def Var.pretty_json (bind "Var_pretty_json" nil))
-(def String.sha256 (bind "String_sha256" nil))
-(def String.new_len (bind "_lisp_string_new_len" nil))
-(def Symbol.new_len (bind "_lisp_symbol_new_len" nil))
-(def Symbol.parse (bind "_lisp_symbol_parse" nil))
-
-// Non-dispatch value helpers
-
-(def Var.clone_wide (bind "Var_clone_wide" nil))
-(def Var.getindex (bind "Var_getindex" nil))
-(def Var.null (bind "Var_null" nil))
+(defun _selector_steps (spelling index last)
+  (cond ((= index last) 'value)
+        (true
+          (cons (cond ((equal? (substring spelling index (+ index 1)) "a")
+                       '_selector_car)
+                      (true '_selector_cdr))
+                (cons (_selector_steps spelling (+ index 1) last) nil)))))
+(defmacro _selectors (. names)
+  (cons 'begin
+        (_list_map
+          names
+          (lambda (name)
+            `(def ,name
+               (lambda (value)
+                 ,(_selector_steps
+                    (str name)
+                    (+ (String.find (str name) ".") 2)
+                    (- (string-length (str name)) 1))))))))
+(_selectors List.caaaar List.caaadr List.caaar List.caadar List.caaddr
+  List.caadr List.cadaar List.cadadr List.cadar List.caddar List.cadddr
+  List.cdaaar List.cdaadr List.cdaar List.cdadar List.cdaddr List.cdadr
+  List.cdar List.cddaar List.cddadr List.cddar List.cdddar)
+(_selectors Var.caaaar Var.caaadr Var.caaar Var.caadar Var.caaddr Var.caadr
+  Var.cadaar Var.cadadr Var.cadar Var.caddar Var.cadddr Var.cdaaar
+  Var.cdaadr Var.cdaar Var.cdadar Var.cdaddr Var.cdadr Var.cdar Var.cddaar
+  Var.cddadr Var.cddar Var.cdddar)

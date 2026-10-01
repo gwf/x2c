@@ -1,9 +1,9 @@
 # x2c Self-Expression
 
 > Status: active, 2026-10-01. Phase 0 landed at ff9946c8; L1, L3, and the
-> first template fixes at 63576dd1; L2, L4, and forward-name hygiene
-> (decision 11) as PR #78. Wave 1 is submitted to the shared integrator.
-> Waves 2 and 3 and the prototypes are not started.
+> first template fixes at 63576dd1; L2, L4, and forward-name hygiene as
+> PR #78; Wave 1 as PR #92. Wave 2 is submitted to the shared integrator.
+> Wave 3 and the prototypes are not started.
 
 ## Result
 
@@ -195,6 +195,26 @@ Wave 1 results (submitted as one PR; authored src/lib/commands/etc diff
 - H11 One `_settle_reference` narrowing helper for parsed and bound `if`.
 - H13 Diagnostic entries and locations read by one pattern each
   (diagnostics.x, editor.x, `_thaw_origin`).
+
+Wave 2 results (submitted as one PR; authored src/lib/etc/commands diff
++426/-825):
+
+- Done: H2 (`Ast.designated` and `Ast.written_operand`; a defer that writes
+  `s.arr[i]` in a captured struct now counts as writing `s`), H3 (one
+  `Symbol.binary_precedence`; parser -0.14% instructions), H5
+  (lisp-values.xlisp 453 -> 175 lines; +0.4 ms per Lisp session load),
+  H8 (`$map.scaffold`, `$array.typed.observe` inline buffers, `$scalar`
+  through immediate boxers: 4.8x fewer instructions boxing scalars), H10
+  (`Func.apply_value`/`apply_values`), H11 (`Compiler.settle_reference`),
+  H13 (diagnostic records read by pattern; output byte-identical).
+- Not done: `_expression_is_addressable` keeps its own rule (the shared walk
+  would reject `read(make().arr[1])`); `$native.update` through ordinary
+  conversion is 5.7% slower on compound updates, so it waits for a cheaper
+  decoder path for an already-converted tag.
+- Signals: a method name from a hole does not parse (`Var.$box(...)`);
+  `Buffer.new(0)` fails in a macro body when the importing unit includes
+  buffer.x after the import. Pre-existing: the editor extension test "a kept
+  macro declaration retains its included source definition" fails on dev.
 
 ## Wave 3: packages
 

@@ -523,111 +523,111 @@ static inline Var Iter_var(Iter x){
 }
 
 static inline Var char_var(char x){
-  return Var_new(26993, x);
+  return Var_box_i8(x);
 }
 
 static inline String char_str(char x){
-  return Var_str(Var_new(26993, x));
+  return Var_str(Var_box_i8(x));
 }
 
 static inline String char_repr(char x){
-  return Var_repr(Var_new(26993, x));
+  return Var_repr(Var_box_i8(x));
 }
 
 static inline Var uchar_var(uchar x){
-  return Var_new(30065, x);
+  return Var_box_u8(x);
 }
 
 static inline String uchar_str(uchar x){
-  return Var_str(Var_new(30065, x));
+  return Var_str(Var_box_u8(x));
 }
 
 static inline String uchar_repr(uchar x){
-  return Var_repr(Var_new(30065, x));
+  return Var_repr(Var_box_u8(x));
 }
 
 static inline Var short_var(short x){
-  return Var_new(3453293, x);
+  return Var_box_i16(x);
 }
 
 static inline String short_str(short x){
-  return Var_str(Var_new(3453293, x));
+  return Var_str(Var_box_i16(x));
 }
 
 static inline String short_repr(short x){
-  return Var_repr(Var_new(3453293, x));
+  return Var_repr(Var_box_i16(x));
 }
 
 static inline Var ushort_var(ushort x){
-  return Var_new(3846509, x);
+  return Var_box_u16(x);
 }
 
 static inline String ushort_str(ushort x){
-  return Var_str(Var_new(3846509, x));
+  return Var_str(Var_box_u16(x));
 }
 
 static inline String ushort_repr(ushort x){
-  return Var_repr(Var_new(3846509, x));
+  return Var_repr(Var_box_u16(x));
 }
 
 static inline Var int_var(int x){
-  return Var_new(3453797, x);
+  return Var_box_i32_bits(x);
 }
 
 static inline String int_str(int x){
-  return Var_str(Var_new(3453797, x));
+  return Var_str(Var_box_i32_bits(x));
 }
 
 static inline String int_repr(int x){
-  return Var_repr(Var_new(3453797, x));
+  return Var_repr(Var_box_i32_bits(x));
 }
 
 static inline Var uint_var(uint x){
-  return Var_new(3847013, x);
+  return Var_box_u32(x);
 }
 
 static inline String uint_str(uint x){
-  return Var_str(Var_new(3847013, x));
+  return Var_str(Var_box_u32(x));
 }
 
 static inline String uint_repr(uint x){
-  return Var_repr(Var_new(3847013, x));
+  return Var_repr(Var_box_u32(x));
 }
 
 static inline Var unsigned_var(unsigned x){
-  return Var_new(3847013, x);
+  return Var_box_u32(x);
 }
 
 static inline String unsigned_str(unsigned x){
-  return Var_str(Var_new(3847013, x));
+  return Var_str(Var_box_u32(x));
 }
 
 static inline String unsigned_repr(unsigned x){
-  return Var_repr(Var_new(3847013, x));
+  return Var_repr(Var_box_u32(x));
 }
 
 static inline Var float_var(float x){
-  return Var_new(3355493, x);
+  return Var_box_f32(x);
 }
 
 static inline String float_str(float x){
-  return Var_str(Var_new(3355493, x));
+  return Var_str(Var_box_f32(x));
 }
 
 static inline String float_repr(float x){
-  return Var_repr(Var_new(3355493, x));
+  return Var_repr(Var_box_f32(x));
 }
 
 static inline Var double_var(double x){
-  return Var_new(3356265, x);
+  return Var_box_f64(x);
 }
 
 static inline String double_str(double x){
-  return Var_str(Var_new(3356265, x));
+  return Var_str(Var_box_f64(x));
 }
 
 static inline String double_repr(double x){
-  return Var_repr(Var_new(3356265, x));
+  return Var_repr(Var_box_f64(x));
 }
 
 static inline Var long_var(long x){
