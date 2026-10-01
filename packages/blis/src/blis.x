@@ -228,6 +228,16 @@ static int _blis_vector(BlisObject object, String operation) {
   );
 }
 
+static num_t _blis_same_precision(
+  BlisObject destination, BlisObject source, String operation) {
+  num_t storage = bli_obj_dt(&destination.native);
+  num_t source_storage = bli_obj_dt(&source.native);
+  if (storage != source_storage) {
+    _blis_precision_mismatch(operation, storage, source_storage);
+  }
+  return storage;
+}
+
 static void _blis_same_vector_shape(
   BlisObject destination, BlisObject source, String operation) {
   _blis_vector(destination, operation);
@@ -238,11 +248,32 @@ static void _blis_same_vector_shape(
       source.rows(), source.columns()
     );
   }
-  num_t destination_storage = bli_obj_dt(&destination.native);
-  num_t source_storage = bli_obj_dt(&source.native);
-  if (destination_storage != source_storage) {
-    _blis_precision_mismatch(operation, destination_storage, source_storage);
+  _blis_same_precision(destination, source, operation);
+}
+
+/*  Admits two live objects with one shape and one storage precision for
+    copy_from, add, and sub.
+*/
+static void _blis_same_shape(
+  BlisObject destination, BlisObject source, String operation) {
+  _blis_live(destination, operation);
+  _blis_live(source, operation);
+  if (destination.rows() != source.rows() ||
+      destination.columns() != source.columns()) {
+    _blis_bad_shape(
+      operation, destination.rows(), destination.columns(),
+      source.rows(), source.columns()
+    );
   }
+  _blis_same_precision(destination, source, operation);
+}
+
+static BlisObject _blis_fresh_copy(BlisObject object, String operation) {
+  BlisObject result = _blis_scoped(
+    bli_obj_dt(&object.native), object.rows(), object.columns(), operation
+  );
+  bli_copym(&object.native, &result.native);
+  return result;
 }
 
 void Blis.initialize(void) {
@@ -523,20 +554,7 @@ BlisObject BlisObject.fill(BlisObject object, double value) {
 }
 
 BlisObject BlisObject.copy_from(BlisObject destination, BlisObject source) {
-  _blis_live(destination, "copy_from");
-  _blis_live(source, "copy_from");
-  if (destination.rows() != source.rows() ||
-      destination.columns() != source.columns()) {
-    _blis_bad_shape(
-      "copy_from", destination.rows(), destination.columns(),
-      source.rows(), source.columns()
-    );
-  }
-  num_t storage = bli_obj_dt(&destination.native);
-  num_t source_storage = bli_obj_dt(&source.native);
-  if (storage != source_storage) {
-    _blis_precision_mismatch("copy_from", storage, source_storage);
-  }
+  _blis_same_shape(destination, source, "copy_from");
   bli_copym(&source.native, &destination.native);
   return destination;
 }
@@ -622,45 +640,15 @@ BlisObject BlisObject.gemm(
 }
 
 BlisObject BlisObject.add(BlisObject left, BlisObject right) {
-  _blis_live(left, "add");
-  _blis_live(right, "add");
-  if (left.rows() != right.rows() || left.columns() != right.columns()) {
-    _blis_bad_shape(
-      "add", left.rows(), left.columns(),
-      right.rows(), right.columns()
-    );
-  }
-  num_t storage = bli_obj_dt(&left.native);
-  num_t right_storage = bli_obj_dt(&right.native);
-  if (storage != right_storage) {
-    _blis_precision_mismatch("add", storage, right_storage);
-  }
-  BlisObject result = _blis_scoped(
-    storage, left.rows(), left.columns(), "add"
-  );
-  bli_copym(&left.native, &result.native);
+  _blis_same_shape(left, right, "add");
+  BlisObject result = _blis_fresh_copy(left, "add");
   bli_addm(&right.native, &result.native);
   return result;
 }
 
 BlisObject BlisObject.sub(BlisObject left, BlisObject right) {
-  _blis_live(left, "sub");
-  _blis_live(right, "sub");
-  if (left.rows() != right.rows() || left.columns() != right.columns()) {
-    _blis_bad_shape(
-      "sub", left.rows(), left.columns(),
-      right.rows(), right.columns()
-    );
-  }
-  num_t storage = bli_obj_dt(&left.native);
-  num_t right_storage = bli_obj_dt(&right.native);
-  if (storage != right_storage) {
-    _blis_precision_mismatch("sub", storage, right_storage);
-  }
-  BlisObject result = _blis_scoped(
-    storage, left.rows(), left.columns(), "sub"
-  );
-  bli_copym(&left.native, &result.native);
+  _blis_same_shape(left, right, "sub");
+  BlisObject result = _blis_fresh_copy(left, "sub");
   bli_subm(&right.native, &result.native);
   return result;
 }
@@ -668,10 +656,7 @@ BlisObject BlisObject.sub(BlisObject left, BlisObject right) {
 BlisObject BlisObject.scale(BlisObject object, double alpha) {
   _blis_live(object, "scale");
   num_t storage = bli_obj_dt(&object.native);
-  BlisObject result = _blis_scoped(
-    storage, object.rows(), object.columns(), "scale"
-  );
-  bli_copym(&object.native, &result.native);
+  BlisObject result = _blis_fresh_copy(object, "scale");
   float single = 0.0f;
   double wide = 0.0;
   obj_t scalar;
@@ -691,11 +676,7 @@ BlisObject BlisObject.matmul(BlisObject left, BlisObject right) {
       right.rows(), right.columns()
     );
   }
-  num_t storage = bli_obj_dt(&left.native);
-  num_t right_storage = bli_obj_dt(&right.native);
-  if (storage != right_storage) {
-    _blis_precision_mismatch("matmul", storage, right_storage);
-  }
+  num_t storage = _blis_same_precision(left, right, "matmul");
   BlisObject result = _blis_scoped(
     storage, left.rows(), right.columns(), "matmul"
   );
