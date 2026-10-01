@@ -359,11 +359,7 @@ static void _uv_raise(String operation, int status) {
 static void _uv_callback_failed(UvLoop loop, Symbol cause, List detail) {
   if (!loop || loop.callback_cause) return;
   loop.callback_cause = cause;
-  try loop.callback_detail = Error.snapshot(detail);
-  catch %(?snapcause *): {
-    loop.callback_cause = snapcause;
-    loop.callback_detail = NULL;
-  }
+  loop.callback_detail = Error.snapshot(detail);
   if (loop.initialized) uv_stop(&loop.loop);
 }
 
@@ -2363,11 +2359,7 @@ static void _uv_fs_whole_callback(uv_fs_t *request) {
     catch %(?cause *detail): {
       fs.failure_cause = cause;
       fs.result = UV_ENOMEM;
-      try fs.failure_detail = Error.snapshot(detail);
-      catch %(?snapcause *): {
-        fs.failure_cause = snapcause;
-        fs.failure_detail = NULL;
-      }
+      fs.failure_detail = Error.snapshot(detail);
       _uv_fs_whole_close(fs);
       return;
     }
