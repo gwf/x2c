@@ -51,14 +51,14 @@ $(import "../src/ast-rewrite.xmacro")
 
 /* One definition while it is read. `nested` marks a definition inside a
    template, which stays syntax until the template's expansion binds it.
-   `locals` holds the template's own declarations and `recorded` a local
-   macro's captured names, each newest first under `<order>`. */
+   `locals` holds the template's own declarations, newest first under
+   `<order>`, and `captures` the outer names a local macro's body reads. */
 typedef struct Definition {
   Compiler c, Token start;
-  Atom name, Symbol kind, target_kind;
-  List target, parameters, fresh, captures, pattern, template, origin, names;
-  String file, Map locals, recorded, Array params, using;
-  int open, anonymous, local, nested, imported, builtin, expression, legacy;
+  Atom name, Symbol kind;
+  List target, parameters, template, fresh, captures, pattern, origin;
+  String file, Map locals, Array using;
+  int open, anonymous, local, nested;
 } Definition;
 
 /** Parses the macro definition at the current token into a `macrodef` `List`.
@@ -75,7 +75,6 @@ List Compiler.parse_macro_definition(Compiler c) {
   $let(c.macro_holes, {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
-    d.params = [];
     d.using = [];
     d.signature();
     d.arrow();
@@ -137,11 +136,13 @@ static void Definition.naming(Definition *d) {
    parameter is its target. */
 static void Definition.signature(Definition *d) {
   Compiler c = d.c;
+  Array params = [];
   c.expect(<(>);
   if (!c.test(<)>)) {
-    do d.parameter(_signature_hole(c)); while (c.test(<,>));
+    do d.parameter(params, _signature_hole(c)); while (c.test(<,>));
     c.expect(<)>);
   }
+  d.parameters = params.list_free();
   d.check_signature();
   if (c.take_word("using")) _using_holes(c, d.using);
   if (c.peek(0) == <:>)
@@ -151,10 +152,10 @@ static void Definition.signature(Definition *d) {
       c.token, NULL);
 }
 
-static void Definition.parameter(Definition *d, List hole) {
+static void Definition.parameter(Definition *d, Array params, List hole) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target) d.take_target(hole);
-  else d.params.push(hole);
+  else params.push(hole);
   if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
     c.report_error(
       <parse>, "sequence macro hole must be the final argument",
@@ -213,14 +214,10 @@ static void Definition.check_signature(Definition *d) {
    body. Every other result has a braced body after an optional `=>`. */
 static void Definition.arrow(Definition *d) {
   Compiler c = d.c;
-  if (d.target) d.target_kind = d.target.assoc(<kind>);
-  d.expression = d.kind == <expression> ||
-    (d.kind == <decorator> && d.target_kind == <expr>);
-  if (d.expression) {
+  if (d.has_expression_body()) {
     if (c.peek(0) == <"{">) _braced_body_error(c);
     c.expect(<=>);
     c.expect(<">">);
-    d.legacy = _legacy_expression_body(c);
     return;
   }
   if (c.peek(0) == <=>) {
@@ -235,6 +232,15 @@ static void Definition.arrow(Definition *d) {
   if (c.peek(0) != <"{">) _braced_body_error(c);
 }
 
+static int Definition.has_expression_body(Definition *d) =>
+  d.kind == <expression> ||
+  (d.kind == <decorator> && d.target_kind() == <expr>);
+
+static Symbol Definition.target_kind(Definition *d) {
+  if (!d.target) return 0;
+  return d.target.assoc(<kind>);
+}
+
 static void _braced_body_error(Compiler c) {
   c.report_error(
     <parse>,
@@ -243,33 +249,29 @@ static void _braced_body_error(Compiler c) {
     c.token, NULL);
 }
 
-/* Records where the definition stands and publishes its signature, so an
+/* Records where the definition stands and shows its signature, so an
    invocation inside the body names this macro. */
 static void Definition.announce(Definition *d) {
   Compiler c = d.c;
-  d.parameters = d.params.list_free();
   (void) c.record_origin(d.start);
   d.origin = c.token_location(d.start);
   d.file = home_portable_path(c.source_path(c.filename));
-  d.imported = c.import_src != NULL;
-  d.builtin = c.builtin_defs;
-  d.publish();
+  d.show(d.node());
 }
 
-/* Reads the body in its own scope. A local macro records the outer names
-   its body captures. */
+/* Reads the body in its own scope, with the kinds it infers for the holes.
+   A local macro records the outer names its body captures. */
 static void Definition.body(Definition *d) {
   Compiler c = d.c;
   $let(c.local_macro_captures, d.local ? {} : NULL)
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
-    d.recorded = c.local_macro_captures;
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
-    d.template = d.expression
+    d.template = d.has_expression_body()
                ? d.expression_body()
                : _parse_body(c, d.body_kind(), d.using);
     d.parameters = _parameter_rows(c, d.parameters);
-    d.names = _recorded(d.locals);
+    d.captures = _recorded(c.local_macro_captures);
   }
 }
 
@@ -277,7 +279,7 @@ static void Definition.body(Definition *d) {
    an anonymous macro omits. */
 static List Definition.expression_body(Definition *d) {
   Compiler c = d.c;
-  if (d.legacy) {
+  if (_legacy_expression_body(c)) {
     c.expect(<(>);
     List replacement = c.parse_expression();
     c.expect(<)>);
@@ -292,7 +294,7 @@ static List Definition.expression_body(Definition *d) {
    Block target's body is block items. */
 static Symbol Definition.body_kind(Definition *d) {
   if (d.kind != <decorator>) return d.kind;
-  Symbol target = d.target_kind;
+  Symbol target = d.target_kind();
   return target == <function> || target == <block> ? <block-item> : target;
 }
 
@@ -309,13 +311,11 @@ static List _recorded(Map m) {
 static void Definition.finish(Definition *d) {
   d.template = _slot_binders(d.wrap());
   Map bindings = {};
-  if (d.target && d.target.assoc(<kind>) == <unit>)
-    d.constructed_names(bindings);
+  if (d.target_kind() == <unit>) d.constructed_names(bindings);
   Array locals = d.local_binders(bindings);
   d.template = _replace_bindings(d.template, bindings);
   d.check_kinds();
   d.fresh = d.fresh_rows(locals);
-  d.captures = _recorded(d.recorded);
   d.pattern = d.invocation_pattern();
 }
 
@@ -325,9 +325,9 @@ static void Definition.finish(Definition *d) {
 static List Definition.wrap(Definition *d) {
   List replacement = d.template;
   if (d.kind != <decorator>) return replacement;
-  if (d.target_kind == <expr>)
-    return %(expr (<macro-expr>) (parens $replacement));
-  if (d.target_kind != <function>) return replacement;
+  Symbol target = d.target_kind();
+  if (target == <expr>) return %(expr (<macro-expr>) (parens $replacement));
+  if (target != <function>) return replacement;
   Var return_binder = _hole_key(d.target, "return");
   Var declarator_binder = _hole_key(d.target, "declarator");
   match (replacement)
@@ -372,7 +372,7 @@ static void Definition.constructed_names(Definition *d, Map bindings) {
    spelling. */
 static Array Definition.local_binders(Definition *d, Map bindings) {
   Array fresh = [];
-  foreach (Var identity, d.names) {
+  foreach (Var identity, _recorded(d.locals)) {
     if (%(provisional $identity) in d.locals) {
       bindings[identity] = d.locals[identity];
       continue;
@@ -409,21 +409,27 @@ static List Definition.fresh_rows(Definition *d, Array locals) {
   return fresh.list_free();
 }
 
-/* Makes the definition visible: a named local macro in its scope, and a
-   global one unless a template holds it. */
+/* Makes the finished definition visible in place of its signature. */
 static List Definition.publish(Definition *d) {
   List node = d.node();
-  if (d.local && !d.anonymous) d.c.sym.define_macro(d.name, node);
-  else if (!d.local && !d.nested) d.c.publish_macro_definition_node(node);
+  d.show(node);
   return node;
 }
 
+/* A named local macro is visible in its scope, and a global one unless a
+   template holds it. */
+static void Definition.show(Definition *d, List node) {
+  if (d.local && !d.anonymous) d.c.sym.define_macro(d.name, node);
+  else if (!d.local && !d.nested) d.c.publish_macro_definition_node(node);
+}
+
 static List Definition.node(Definition *d) {
+  Compiler c = d.c;
   List definition = %(
     macrodef
     (name ${d.name})
     (kind ${d.kind})
-    (target ${d.target_kind})
+    (target ${d.target_kind()})
     (targetp ${d.target})
     (parameters ${d.parameters})
     (fresh ${d.fresh})
@@ -432,8 +438,8 @@ static List Definition.node(Definition *d) {
     (template ${d.template})
     (origin ${d.origin})
     (file ${d.file})
-    (imported ${d.imported})
-    (builtin ${d.builtin})
+    (imported ${c.import_src != NULL})
+    (builtin ${c.builtin_defs})
     (local ${d.local})
   );
   return d.open ? definition.append(%((open 1))) : definition;
