@@ -4477,6 +4477,15 @@ static List _convert_composite_row(
     parent_condition, native_used);
 }
 
+/* An unevaluated `*(native *) 0` typed as `viewed`, from which initializer
+   rows name their slots. */
+static List _zero_pointer_target(Type viewed, Type native) {
+  Type pointer = cons(<*>, native);
+  List zero = %(expr (int) (literal (int) "0"));
+  return %(expr $viewed (parens (expr $viewed
+    (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
+}
+
 static List _convert_composite(
   Compiler compiler, List expr, Type target, List native_target,
   List parent_condition, int &?native_used) {
@@ -4484,12 +4493,7 @@ static List _convert_composite(
     List fresh = _empty_collection(compiler, target);
     if (fresh) return fresh;
   }
-  if (!native_target) {
-    Type pointer = cons(<*>, target);
-    List zero = %(expr (int) (literal (int) "0"));
-    native_target = %(expr $target (parens (expr $target
-      (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
-  }
+  if (!native_target) native_target = _zero_pointer_target(target, target);
   Array elements = [];
   List items = expr.caddr().cadr().cdr();
   int discarded = 0;
@@ -4531,10 +4535,7 @@ List Compiler.convert_initializer(
 List Compiler.convert_compound_literal(
   Compiler c, List value, Type type, Type native_type) {
   (Type definition, Type reference) = c.initializer_native_types(native_type);
-  Type pointer = cons(<*>, reference);
-  List zero = %(expr (int) (literal (int) "0"));
-  List target = %(expr $type (parens (expr $type
-    (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
+  List target = _zero_pointer_target(type, reference);
   int native_used = 0;
   List converted = _convert_initializer(c, value, type, target, native_used);
   if (!native_used) definition = native_type;
