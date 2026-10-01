@@ -58,6 +58,7 @@
     - [lib/list.x](library/modules/list.md)
     - [lib/logger.x](library/modules/logger.md)
     - [lib/map.x](library/modules/map.md)
+    - [lib/match-plan.x](library/modules/match-plan.md)
     - [lib/match.x](library/modules/match.md)
     - [lib/meta.x](library/modules/meta.md)
     - [lib/mutex.x](library/modules/mutex.md)

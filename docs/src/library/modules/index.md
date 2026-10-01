@@ -36,6 +36,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/list.x`](list.md) | linked list with `Var` elements. |
 | [`lib/logger.x`](logger.md) | owned structured event delivery. |
 | [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
+| [`lib/match-plan.x`](match-plan.md) | lowering Match patterns to prepared plans. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |

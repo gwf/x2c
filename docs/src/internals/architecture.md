@@ -575,9 +575,9 @@ divisions:
 - `lib/block.x`, `lib/buffer.x`, `lib/array.x`, and `lib/map.x` own mutable
   storage;
 - `lib/iter.x` owns status-bearing traversal;
-- `lib/match.x` owns list-pattern matching and plan compilation;
-  `lib/match-machine.x` executes those plans over the wordcode and state
-  definitions in `lib/machine.x`;
+- `lib/match.x` owns list-pattern matching; `lib/match-plan.x` compiles
+  patterns to plans, and `lib/match-machine.x` executes those plans over the
+  wordcode and state definitions in `lib/machine.x`;
 - `lib/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
   compiler uses it to read `.xi` interfaces and to run compile-time macros;
 - `lib/func.x` owns generic native calls through generated adapters;

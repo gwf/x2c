@@ -1,3 +1,13 @@
+/*  match-plan.x -- lowering Match patterns to prepared plans
+
+    Copyright (c) 2026 Gary William Flake.
+
+    A MatchPlan is the prepared form of one pattern: its capture layout and
+    a program in the wordcode of `machine.x`. A plan owns both and borrows
+    the canonical values in its pattern. Preparation records why a pattern
+    has no program and raises for none of them; `match.x` runs the plan.
+*/
+
 #pragma once
 
 #include "match.x"

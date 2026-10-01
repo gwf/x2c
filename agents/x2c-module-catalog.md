@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 58
+- Runtime modules: 59
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -940,6 +940,14 @@ Public functions:
 `MatchMachine.run`, `MatchMachine.step`, `MatchMachine.materialize_span`,
 `MatchMachine.begin`, `MatchMachine.finish`, `MatchMachine.clean`
 
+### [lib/match-plan.x](../lib/match-plan.x)
+
+lowering Match patterns to prepared plans.
+
+Public functions:
+
+`MatchPlan.prepare`, `MatchPlan.free`
+
 ### [lib/match.x](../lib/match.x)
 
 pattern matching and transformation utilities for lists.
@@ -949,11 +957,11 @@ Public functions:
 `Var.is_atom_binder`, `Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
 `MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
 `MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`, `MatchPlan.prepare`,
-`MatchPlan.free`, `MatchPlan.execute_capture`, `MatchPlan.try_capture`,
-`MatchPlan.execute`, `MatchPlan.try_match`, `MatchPlan.try_search`,
-`MatchPlan.search`, `MatchPlan.search_replace`, `MatchPlan.try_match_replace`,
-`List.replace`, `MatchCache.acquire`, `MatchCache.new`, `MatchCache.dispose`,
+`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
+`MatchPlan.execute_capture`, `MatchPlan.try_capture`, `MatchPlan.execute`,
+`MatchPlan.try_match`, `MatchPlan.try_search`, `MatchPlan.search`,
+`MatchPlan.search_replace`, `MatchPlan.try_match_replace`, `List.replace`,
+`MatchCache.acquire`, `MatchCache.new`, `MatchCache.dispose`,
 `MatchLease.release`, `MatchCache.try_capture`, `MatchCache.try_match`,
 `MatchCache.try_search`, `MatchCache.search`, `MatchCache.try_match_replace`,
 `MatchCache.search_replace`, `MatchCache.flush_default`,

@@ -248,10 +248,10 @@ inline-lisp example
 - Parse: `src/statements.x`
 - Lower/generate: `src/transform.x`, `src/emit.x`; emitted code calls
   `List.match`
-- Runtime: `lib/match.x` owns pattern semantics and plan compilation;
-  `lib/match-machine.x` executes plans over wordcode and state definitions
-  from `lib/machine.x`; patterns and binding sets are ordinary `List`s from
-  `lib/list.x`
+- Runtime: `lib/match.x` owns pattern semantics; `lib/match-plan.x`
+  compiles patterns to plans, and `lib/match-machine.x` executes plans over
+  wordcode and state definitions from `lib/machine.x`; patterns and binding
+  sets are ordinary `List`s from `lib/list.x`
 - Tests: match suites and checked nested example
 - See also: [pattern matching](../guide/match.md)
 

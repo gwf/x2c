@@ -2,9 +2,8 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    A MatchPlan is the prepared form of one pattern: its capture layout and
-    a program in the wordcode of `machine.x`. A plan owns both and borrows the
-    canonical values in its pattern. Core matching runs only prepared plans;
+    Match owns the pattern vocabulary, capture layouts, and the execution of
+    plans `match-plan.x` prepares. Core matching runs only prepared plans;
     `unittest/match-recursive.x` is the reference matcher of the differential
     tests. An invocation commits captures to caller-owned storage only after
     the whole match succeeds.

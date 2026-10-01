@@ -123,8 +123,8 @@ string, string-classify,      canonical immutable values, string
 string-number, split,         classification, numeric parsing, splitting,
 symbol, symbolset, atom, list and closed vocabularies
 block, buffer, array, map     mutable storage and builders
-iter, match, machine,         traversal, pattern matching, and the Match
-match-machine                 wordcode machine
+iter, match, match-plan,      traversal, pattern matching, plan lowering,
+machine, match-machine        and the Match wordcode machine
 error, error_init, exception  ambient errors and structured control flow
 file, logger                  system boundaries
 context, thread, thread-state bounded runtime state, native workers, and
