@@ -117,10 +117,8 @@ static List Compiler._helper_body(Compiler c, List body, List setup) {
    fallthrough. Nested lambdas normalize their own returns when lowered. */
 static List _block_returns(List ast) {
   if (!ast) return ast;
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (ast) {
-    case lambda(?body, *params): return ast;
-    case captured(?body, *captures, *params): return ast;
+    case $source_any_lambda(): return ast;
     case $source_return_content(%()): return _no_value_return();
   }
   return Ast.rewrite_children(ast, _block_returns);
@@ -464,12 +462,10 @@ static void CellRegion.own(CellRegion &r, List binding) {
 static void CellRegion.collect(CellRegion &r, List ast) {
   if (!ast) return;
   Array resume = $auto([]);
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   for (;;) {
     int pruned = 0;
     match (ast) {
-      case lambda(?body, *params): pruned = 1;
-      case captured(?body, *captures, *params): pruned = 1;
+      case $source_any_lambda(): pruned = 1;
       case %(bind ?binding *): {
         r.own(binding);
         pruned = 1;
