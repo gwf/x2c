@@ -1056,9 +1056,9 @@ static void _report_leaks(void) {
       stderr, "\tlive_backing_allocations: %zu\n", raw_allocs - raw_frees);
 }
 
-static size_t Scope._allocation_count(Scope scope) {
+static size_t Scope._allocation_count(Scope s) {
   size_t count = 0;
-  for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
+  for (ScopeAlloc alloc = s ? s.first : NULL; alloc;
        alloc = alloc.next)
     count++;
   return count;

@@ -285,14 +285,13 @@ static List ErrorRegion._entry(
   return entry;
 }
 
-static List ErrorRegion._location(
-  ErrorRegion *region, const X2CErrorSite *site) {
+static List ErrorRegion._location(ErrorRegion *e, const X2CErrorSite *site) {
   if (!site) return NULL;
-  String file = region._site_text(site.file);
-  String function = region._site_text(site.function);
-  List location = region._field(<function>, function, NULL);
-  location = region._field(<line>, site.line, location);
-  return region._field(<file>, file, location);
+  String file = e._site_text(site.file);
+  String function = e._site_text(site.function);
+  List location = e._field(<function>, function, NULL);
+  location = e._field(<line>, site.line, location);
+  return e._field(<file>, file, location);
 }
 
 static String ErrorRegion._site_text(ErrorRegion *region, const char *text) {
@@ -444,13 +443,13 @@ static Symbol ErrorRaise._dispatch(ErrorRaise r) {
    that handler's slice and stops the search; `<declined>` continues outward
    and leaves the errors accumulated. */
 static Symbol ErrorThreadState._offer(
-  ErrorThreadState state, ErrorHandler h, Symbol code) {
+  ErrorThreadState e, ErrorHandler h, Symbol code) {
   for (; h; h = h.prev) {
-    state.dispatch_running = h;
-    state.handler_top = h.prev;
-    Symbol disposition = h.site ? h._catch_match() : state._observe(h);
+    e.dispatch_running = h;
+    e.handler_top = h.prev;
+    Symbol disposition = h.site ? h._catch_match() : e._observe(h);
     if (disposition == <unwind> || disposition == <fatal>)
-      state._transfer(h, code, disposition);
+      e._transfer(h, code, disposition);
     if (disposition == <handled>) {
       _truncate(h.watermark);
       return <handled>;
@@ -461,13 +460,12 @@ static Symbol ErrorThreadState._offer(
 
 /* The view belongs to the handler, not to this frame: `exit()` from the
    callback abandons the frame, and shutdown reclaims the handler. */
-static Symbol ErrorThreadState._observe(
-  ErrorThreadState state, ErrorHandler h) {
+static Symbol ErrorThreadState._observe(ErrorThreadState e, ErrorHandler h) {
   defer ErrorRegion._destroy(&h.view);
-  state.floor_only++;
+  e.floor_only++;
   h.view = _region_new();
   List slice = ErrorRegion._view_since(&h.view, h.watermark);
-  state.floor_only--;
+  e.floor_only--;
   return h.fn(slice, h.data);
 }
 
@@ -487,12 +485,11 @@ static void ErrorThreadState._transfer(
 
 /* `<log>` reports an error unless Logger rendered it, and both `<log>` and
    `<ignore>` drop the records the raise added; `<collect>` keeps them. */
-static void ErrorThreadState._apply_policy(
-  ErrorThreadState state, ErrorRaise r) {
+static void ErrorThreadState._apply_policy(ErrorThreadState e, ErrorRaise r) {
   Symbol policy = Error.policy_get(r.code);
   if (policy == <abort>) _floor(r.code, "unhandled and policy is abort");
   if (policy == <log>) {
-    if (!state.rendered[r.depth]) _report(r.code);
+    if (!e.rendered[r.depth]) _report(r.code);
     _truncate(r.raised_at);
   }
   else if (policy == <ignore>) _truncate(r.raised_at);
@@ -939,8 +936,7 @@ ErrorHandler x2c_error_catch_site_push(
 static const char *ErrorHandler._prepare_arms(
   ErrorHandler h, Var *patterns, int &arm) {
   ErrorCatchSite *site = h.site;
-  if (site._state() == ERROR_CATCH_PENDING)
-    site._bind(patterns);
+  if (site._state() == ERROR_CATCH_PENDING) site._bind(patterns);
   if (site._state() == ERROR_CATCH_TRANSIENT)
     return h._prepare_plans(patterns, arm);
   if (site.fenced_arm < 0) return NULL;

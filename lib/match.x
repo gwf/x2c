@@ -306,58 +306,56 @@ static MatchCaptureLayout MatchLayoutBuilder._layout(
    its guard, as `_normalize_pattern` reads it. */
 
 static MatchSlots MatchCaptureLayout._slots(
-  MatchCaptureLayout layout, Var pattern) {
-  if (_named_binder(pattern)) return layout._binder_slot(pattern);
+  MatchCaptureLayout m, Var pattern) {
+  if (_named_binder(pattern)) return m._binder_slot(pattern);
   if (pattern is not <list> || pattern.is_nil()) return (MatchSlots) {0, 0};
   List list = pattern;
   Var head = list.car();
   List args = list.cdr();
   if (head == <!quote>) return (MatchSlots) {0, 0};
   if (head == <x2c-dyn>)
-    return (MatchSlots) {0, layout._sequence_slots(args).possible};
-  if (!head.is_match_op()) return layout._sequence_slots(list);
-  return layout._guard_slots(head, args);
+    return (MatchSlots) {0, m._sequence_slots(args).possible};
+  if (!head.is_match_op()) return m._sequence_slots(list);
+  return m._guard_slots(head, args);
 }
 
 /* `(!set BINDER PAT)` is the one-operand capture form, and a negation
    binds nothing on every match. */
 static MatchSlots MatchCaptureLayout._guard_slots(
-  MatchCaptureLayout layout, Var op, List args) {
+  MatchCaptureLayout m, Var op, List args) {
   MatchSlots slots = {0, 0};
   if (args && args.cdr() && _named_binder(args.car())) {
-    slots = layout._binder_slot(args.car());
+    slots = m._binder_slot(args.car());
     args = args.cdr();
   }
-  if (op == <!and>) return _union(slots, layout._sequence_slots(args));
+  if (op == <!and>) return _union(slots, m._sequence_slots(args));
   if (op == <!not>) {
-    MatchSlots operands = layout._sequence_slots(args);
+    MatchSlots operands = m._sequence_slots(args);
     return (MatchSlots) {0, slots.possible | operands.possible};
   }
   if (op == <!set> && args.len() == 1)
-    return _union(slots, layout._sequence_slots(args));
-  if (op == <!or> || op == <!set>)
-    return _union(slots, layout._choice_slots(args));
+    return _union(slots, m._sequence_slots(args));
+  if (op == <!or> || op == <!set>) return _union(slots, m._choice_slots(args));
   return slots;
 }
 
 /* Every element of a sequence matches, so each one's definite slots are
    definite. */
 static MatchSlots MatchCaptureLayout._sequence_slots(
-  MatchCaptureLayout layout, List patterns) {
+  MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
-  foreach (Var pattern, patterns)
-    slots = _union(slots, layout._slots(pattern));
+  foreach (Var pattern, patterns) slots = _union(slots, m._slots(pattern));
   return slots;
 }
 
 /* One alternative matches, so only the slots every one binds are
    definite. */
 static MatchSlots MatchCaptureLayout._choice_slots(
-  MatchCaptureLayout layout, List patterns) {
+  MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
   int first = 1;
   foreach (Var pattern, patterns) {
-    MatchSlots part = layout._slots(pattern);
+    MatchSlots part = m._slots(pattern);
     slots.possible |= part.possible;
     slots.definite = first ? part.definite : slots.definite & part.definite;
     first = 0;
@@ -366,8 +364,8 @@ static MatchSlots MatchCaptureLayout._choice_slots(
 }
 
 static MatchSlots MatchCaptureLayout._binder_slot(
-  MatchCaptureLayout layout, Var binder) {
-  int index = layout._find(binder);
+  MatchCaptureLayout m, Var binder) {
+  int index = m._find(binder);
   assert(index >= 0);
   unsigned long bit = 1UL << index;
   return (MatchSlots) {bit, bit};
@@ -1074,13 +1072,12 @@ static MatchPlan MatchCaptureSite._published(
 
 /* Prepares one site once, under the lock that also guards the site
    registry. Every later call sees the published plan and skips this. */
-static MatchPlan MatchCaptureSite._publish(
-  MatchCaptureSite *site, Var pattern) {
+static MatchPlan MatchCaptureSite._publish(MatchCaptureSite *m, Var pattern) {
   _site_lock();
   // preparation allocates, and an allocation failure never returns here
   defer _site_unlock();
-  if (!site.plan) site._prepare(pattern);
-  return site.plan;
+  if (!m.plan) m._prepare(pattern);
+  return m.plan;
 }
 
 static void MatchCaptureSite._prepare(MatchCaptureSite *site, Var pattern) {
