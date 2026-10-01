@@ -102,8 +102,7 @@ static int MatchLower._compile_binder(MatchLower l, Var binder) {
     return l._stopped() ? -1 : entry;
   }
   int base = l.site_count;
-  if (!l._emit_binder(binder)) return -1;
-  return l._finish(base) ? entry : -1;
+  return l._emit_binder(binder) ? l._finish(entry, base) : -1;
 }
 
 /* Binds a fresh slot to the current value, or compares a bound one. */
@@ -124,16 +123,8 @@ static int MatchLower._emit_binder(MatchLower l, Var binder) {
 }
 
 static int MatchLower._compile_literal(MatchLower l, Var pattern) {
-  MachineBuilder b = l.b;
-  int constant = b.constant(pattern);
-  if (constant < 0) return -1;
-  int mode = _compare_mode(pattern), entry = b.length;
-  int miss = b.emit(MW_EQ_VALUE_CONST, constant, 0, 0, mode, -1);
-  b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int failure = b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if (failure < 0) return -1;
-  b.set_target(miss, failure);
-  return entry;
+  int entry = l.b.length, base = l.site_count;
+  return l._emit_literal(pattern) ? l._finish(entry, base) : -1;
 }
 
 /* The comparison a word applies to the constant `value`. */
@@ -169,10 +160,14 @@ static int _bits_unique(Var value) {
    word. Failure sites are recorded for the enclosing block to patch. */
 static int MatchLower._emit_leaf_value(MatchLower l, Var pattern) {
   if (pattern.is_atom_binder()) return l._emit_binder(pattern);
+  return l._emit_literal(pattern);
+}
+
+/* Compares the current value with the constant `pattern`. */
+static int MatchLower._emit_literal(MatchLower l, Var pattern) {
   int constant = l.b.constant(pattern);
-  if (constant < 0) return 0;
-  int mode = _compare_mode(pattern);
-  return l._fail_site(MW_EQ_VALUE_CONST, constant, 0, 0, mode);
+  return constant >= 0 &&
+    l._fail_site(MW_EQ_VALUE_CONST, constant, 0, 0, _compare_mode(pattern));
 }
 
 /* A List with no binder and no guard at any depth. */
@@ -241,16 +236,18 @@ static void MatchLower._patch_sites(MatchLower l, int base, int target) {
   l.site_count = base;
 }
 
-static int MatchLower._finish(MatchLower l, int base) {
+/* Ends the block at `entry` with its success and failure returns and
+   returns `entry`, or -1. */
+static int MatchLower._finish(MatchLower l, int entry, int base) {
   l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  return l._finish_failure(base);
+  return l._finish_failure(entry, base);
 }
 
-static int MatchLower._finish_failure(MatchLower l, int base) {
+static int MatchLower._finish_failure(MatchLower l, int entry, int base) {
   int failure = l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if (failure < 0) return 0;
+  if (failure < 0) return -1;
   l._patch_sites(base, failure);
-  return 1;
+  return entry;
 }
 
 static int MatchLower._emit_call(MatchLower l, int child, int mode, int reg) {
@@ -310,10 +307,15 @@ static int MatchLower._guard_parts(
   return 1;
 }
 
-/* Tests operand `i` on the current value, inline for an atom. */
-static int MatchLower._emit_operand(MatchLower l, MatchParts &parts, int i) {
-  if (parts.entries[i] < 0) return l._emit_leaf_value(parts.elements[i]);
-  return l._emit_call(parts.entries[i], MACHINE_CALL_CURRENT, 0);
+static int MatchLower._emit_operand(
+  MatchLower l, MatchParts &parts, int i) =>
+  l._emit_test(parts.elements[i], parts.entries[i]);
+
+/* Tests the current value: an atom `test` inline when `child` is negative,
+   or else by calling its child block. */
+static int MatchLower._emit_test(MatchLower l, Var test, int child) {
+  if (child < 0) return l._emit_leaf_value(test);
+  return l._emit_call(child, MACHINE_CALL_CURRENT, 0);
 }
 
 /* Ordered alternatives are static call, branch, and return templates: every
@@ -329,10 +331,7 @@ static int MatchLower._compile_or(MatchLower l, List args) {
     if (!l._emit_operand(operands, i)) return -1;
     if (b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return -1;
   }
-  int failure = b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
-  if (failure < 0) return -1;
-  l._patch_sites(base, failure);
-  return entry;
+  return l._finish_failure(entry, base);
 }
 
 /* Negation uses one frame-local mark and rolls the journal back on both
@@ -361,34 +360,17 @@ static int MatchLower._compile_not(MatchLower l, List args) {
   return entry;
 }
 
-/* `(!set BINDER TEST)` binds and tests in one block; any other set is a
-   list of ordered alternatives. */
+/* `(!set BINDER TEST)` binds and tests in one block, calling a List TEST
+   as a child block; any other set is a list of ordered alternatives. */
 static int MatchLower._compile_set(MatchLower l, List args) {
   if (!args || !args.cdr() || args.cddr() || !args.car().is_atom_binder())
     return l._compile_or(args);
   Var (binder, test) = args;
-  if (test is not <list>) return l._compile_bind_and_leaf(binder, test);
-  int child = l._compile_child(test);
-  if (child < 0) return -1;
-  return l._compile_bind_and(binder, child);
-}
-
-static int MatchLower._compile_bind_and(MatchLower l, Var binder, int child) {
-  MachineBuilder b = l.b;
-  int entry = b.length, base = l.site_count;
-  if (!l._emit_binder(binder) || !l._emit_call(child, MACHINE_CALL_CURRENT, 0))
-    return -1;
-  return l._finish(base) ? entry : -1;
-}
-
-/* Bind-and-test whose test is an atom pattern needs no call frame:
-   the binder triple and the inline leaf test share one block. */
-static int MatchLower._compile_bind_and_leaf(
-  MatchLower l, Var binder, Var leaf) {
-  MachineBuilder b = l.b;
-  int entry = b.length, base = l.site_count;
-  if (!l._emit_binder(binder) || !l._emit_leaf_value(leaf)) return -1;
-  return l._finish(base) ? entry : -1;
+  int child = test is <list> ? l._compile_child(test) : -1;
+  if (test is <list> && child < 0) return -1;
+  int entry = l.b.length, base = l.site_count;
+  return l._emit_binder(binder) && l._emit_test(test, child)
+       ? l._finish(entry, base) : -1;
 }
 
 /* Every operand must match the current value, in order. */
@@ -398,7 +380,7 @@ static int MatchLower._compile_and(MatchLower l, List args) {
   int entry = l.b.length, base = l.site_count;
   for (int i = 0; i < operands.count; i++)
     if (!l._emit_operand(operands, i)) return -1;
-  return l._finish(base) ? entry : -1;
+  return l._finish(entry, base);
 }
 
 /* The runtime compares only one quoted operand. */
@@ -433,8 +415,8 @@ static int _match_kind(List args) {
 
 static int MatchLower._is_kind(MatchLower l, int kind) {
   int entry = l.b.length, base = l.site_count;
-  if (!l._fail_site(MW_MATCH_KIND, 0, kind, 0, 0)) return -1;
-  return l._finish(base) ? entry : -1;
+  return l._fail_site(MW_MATCH_KIND, 0, kind, 0, 0)
+       ? l._finish(entry, base) : -1;
 }
 
 /* `(atom)` holds for any value whose tag is not `list`. */
@@ -460,8 +442,8 @@ static int MatchLower._is_type(MatchLower l, Var type) {
   Symbol tag = _canonical_type_tag(type is <symbol> ? type.symbol() : 0);
   if (!tag) return l._never();
   int entry = l.b.length, base = l.site_count, constant = l.b.constant(tag);
-  if (constant < 0 || !l._fail_site(MW_TAG, constant, 0, 0, 0)) return -1;
-  return l._finish(base) ? entry : -1;
+  return constant >= 0 && l._fail_site(MW_TAG, constant, 0, 0, 0)
+       ? l._finish(entry, base) : -1;
 }
 
 static inline Symbol _canonical_type_tag(Symbol tag) {
@@ -509,14 +491,13 @@ typedef struct MatchSegment {
 
 static int MatchLower._compile_segment(MatchLower l, List pattern) {
   MatchSegment s;
-  s.nested.count = 0;
-  s.nested.used = 0;
+  s.nested.count = s.nested.used = 0;
   if (!l._segment_prefix(s, pattern) || !l._segment_star(s.star)) return -1;
   int entry = l.b.length, base = l.site_count;
   if (!l._fail_site(MW_INPUT_LIST, 0, 0, 0, 0) || !l._emit_prefix(s) ||
       !l._segment_end(s.star))
     return -1;
-  return l._finish_failure(base) ? entry : -1;
+  return l._finish_failure(entry, base);
 }
 
 /* Compiles the children of the prefix, which runs up to the first star.
@@ -554,10 +535,9 @@ static int MatchLower._segment_prefix(
    guards and quoted forms keep call frames, and literal lists keep the
    canonical-identity path. */
 static int _inline_descend_ok(List child, int reg) {
-  if (reg + 1 >= MACHINE_CURSOR_REGS) return 0;
-  if (!child) return 0;
-  if (child.car().is_match_op()) return 0;
-  if (_is_list_literal(child)) return 0;
+  if (reg + 1 >= MACHINE_CURSOR_REGS || !child ||
+      child.car().is_match_op() || _is_list_literal(child))
+    return 0;
   foreach (Var part, child) if (part.is_list_binder()) return 0;
   return 1;
 }
@@ -652,8 +632,6 @@ static int MatchLower._emit_prefix(MatchLower l, MatchSegment &s) {
   return 1;
 }
 
-/* An atom tests the cursor head, an inline sublist descends through
-   register 1, and a child block is called on the head. */
 static int MatchLower._emit_part(MatchLower l, MatchSegment &s, int i) {
   int entry = s.prefix.entries[i];
   if (entry == -1) return l._emit_head_leaf(s.prefix.elements[i], 0);
