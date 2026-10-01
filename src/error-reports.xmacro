@@ -105,10 +105,12 @@ meta static Map _error_report_rows(void) => {
 
   "emit.file.write" :
   macro Statement(Expr $c, Expr $failure) {
-    String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
-    $c.report_error(
-      <emit>, "failed to write generated file",
-      $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+    {
+      String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
+      $c.report_error(
+        <emit>, "failed to write generated file",
+        $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+    }
   },
 
   "emit.interface.write" :
@@ -120,11 +122,14 @@ meta static Map _error_report_rows(void) => {
   },
 
   "emit.static.switch" :
-  macro Statement(Expr $c, Expr $note) {
-    $c.report_error(
-      <emit>,
-      "switch cannot bypass dynamic static initialization",
-      NULL, %(${$note}));
+  macro Statement(Expr $c) {
+    {
+      String note = "place the declaration before the switch "
+                  + "or within one case block";
+      $c.report_error(
+        <emit>, "switch cannot bypass dynamic static initialization",
+        NULL, %($note));
+    }
   },
 
   "macro.adapter.pointer" :
@@ -867,10 +872,12 @@ meta static Map _error_report_rows(void) => {
 
   "parse.member.ident" :
   macro Statement(Expr $c, Expr $op, Expr $lhs) {
-    List notes = %("token:" ${$c.token.text});
-    if ($lhs) notes = cons(%("lhs expr:" ${$lhs.str()}), notes);
-    String msg = %"expected identifier after '${$op}'";
-    $c.report_error(<parse>, msg, $c.token, notes);
+    {
+      List notes = %("token:" ${$c.token.text});
+      if ($lhs) notes = cons(%("lhs expr:" ${$lhs.str()}), notes);
+      String msg = %"expected identifier after '${$op}'";
+      $c.report_error(<parse>, msg, $c.token, notes);
+    }
   },
 
   "parse.meta.constructed" :
@@ -1187,12 +1194,14 @@ meta static Map _error_report_rows(void) => {
   "protocol.adoption.conflict" :
   macro Statement(
     Expr $c, Expr $adoption, Expr $first_location) {
-    String first = %"first: ${_location_string($first_location)}";
-    String second = %"second: ${_location_string($adoption.location)}";
-    $c.report_error(
-      <protocol>,
-      %"conflicting adoption declarations for ${$adoption.spelling()}",
-      $c.token, %($first $second));
+    {
+      String first = %"first: ${_location_string($first_location)}";
+      String second = %"second: ${_location_string($adoption.location)}";
+      $c.report_error(
+        <protocol>,
+        %"conflicting adoption declarations for ${$adoption.spelling()}",
+        $c.token, %($first $second));
+    }
   },
 
   "protocol.as.var" :
@@ -1218,11 +1227,13 @@ meta static Map _error_report_rows(void) => {
   "protocol.decl.conflict" :
   macro Statement(
     Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
-    String first = %"first: ${$first_location}";
-    String second = %"second: ${$second_location}";
-    $c.report_error(
-      <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
-      $c.token, %($first $second));
+    {
+      String first = %"first: ${$first_location}";
+      String second = %"second: ${$second_location}";
+      $c.report_error(
+        <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
+        $c.token, %($first $second));
+    }
   },
 
   "protocol.managed.cleanup" :
@@ -1440,11 +1451,13 @@ meta static Map _error_report_rows(void) => {
 
   "type.func.callback" :
   macro Statement(Expr $c) {
-    String message = "cannot convert Func to a context-free callback";
-    List hint = %(
-      "call Func directly, or use a noncapturing lambda as the C callback"
-    );
-    $c.report_error(<type>, message, NULL, hint);
+    {
+      String message = "cannot convert Func to a context-free callback";
+      List hint = %(
+        "call Func directly, or use a noncapturing lambda as the C callback"
+      );
+      $c.report_error(<type>, message, NULL, hint);
+    }
   },
 
   "type.function.private" :
@@ -1489,11 +1502,13 @@ meta static Map _error_report_rows(void) => {
   },
   "type.is.enum" :
   macro Statement(Expr $c, Expr $target, Expr $origin) {
-    String note =
-      "enum values box as the shared i32 family and retain no enum identity";
-    $c.report_error(
-      <type>, %"enum type ${$target.repr()} cannot be tested with 'is'",
-      $origin, %($note));
+    {
+      String note =
+        "enum values box as the shared i32 family and retain no enum identity";
+      $c.report_error(
+        <type>, %"enum type ${$target.repr()} cannot be tested with 'is'",
+        $origin, %($note));
+    }
   },
   "type.is.function" :
   macro Statement(Expr $c, Expr $origin) {
@@ -1635,32 +1650,38 @@ meta static Map _error_report_rows(void) => {
   "type.pointer.integer" :
   macro Statement(
     Expr $c, Expr $integer, Expr $target) {
-    String message =
-      %"cannot convert the integer ${$integer} to pointer type ${$target.repr()}";
-    List hint =
-      %( "only a zero integer constant expression converts to a pointer" );
-    $c.report_error(<type>, message, NULL, hint);
+    {
+      String message =
+        %"cannot convert the integer ${$integer} to pointer type ${$target.repr()}";
+      List hint =
+        %( "only a zero integer constant expression converts to a pointer" );
+      $c.report_error(<type>, message, NULL, hint);
+    }
   },
   "type.pointer.unrelated" :
   macro Statement(
     Expr $c, Expr $source, Expr $target) {
-    String message =
-      %"cannot convert ${$source.repr()} to ${$target.repr()}";
-    $c.report_error(
-      <type>, message,
-      NULL,
-      %("the pointer types are unrelated: cast the expression to say so on purpose"));
+    {
+      String message =
+        %"cannot convert ${$source.repr()} to ${$target.repr()}";
+      $c.report_error(
+        <type>, message,
+        NULL,
+        %("the pointer types are unrelated: cast the expression to say so on purpose"));
+    }
   },
 
   "type.qualifier.dropped" :
   macro Statement(
     Expr $c, Expr $source, Expr $destination) {
-    String message =
-      %"cannot convert ${$source.repr()} to ${$destination.repr()}";
-    $c.report_error(
-      <type>, message,
-      NULL,
-      %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
+    {
+      String message =
+        %"cannot convert ${$source.repr()} to ${$destination.repr()}";
+      $c.report_error(
+        <type>, message,
+        NULL,
+        %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
+    }
   },
 
   "type.receiver.address" :
@@ -1720,12 +1741,14 @@ meta static Map _error_report_rows(void) => {
   "type.typedef.crossing" :
   macro Statement(
     Expr $c, Expr $source, Expr $target) {
-    String message =
-      %"cannot convert ${$source.repr()} to ${$target.repr()}";
-    $c.report_error(
-      <type>, message,
-      NULL,
-      %("the names share one C type but not one meaning: declare the converter ${$source.car()}_${$target.car().str().lower()}, or cast the expression to say so on purpose"));
+    {
+      String message =
+        %"cannot convert ${$source.repr()} to ${$target.repr()}";
+      $c.report_error(
+        <type>, message,
+        NULL,
+        %("the names share one C type but not one meaning: declare the converter ${$source.car()}_${$target.car().str().lower()}, or cast the expression to say so on purpose"));
+    }
   },
   "type.typedef.depth" :
   macro Statement(Expr $c, Expr $origin) {
@@ -1744,20 +1767,26 @@ meta static Map _error_report_rows(void) => {
   },
   "type.var.convert" :
   macro Statement(Expr $c, Expr $target) {
-    String message = %"cannot convert Var to type ${$target.repr()}";
-    $c.report_error(<type>, message, NULL, NULL);
+    {
+      String message = %"cannot convert Var to type ${$target.repr()}";
+      $c.report_error(<type>, message, NULL, NULL);
+    }
   },
   "type.var.loss" :
   macro Statement(Expr $c, Expr $type) {
-    String message = %"cannot convert ${$type.repr()} to Var without loss";
-    $c.report_error(<type>, message, NULL, NULL);
+    {
+      String message = %"cannot convert ${$type.repr()} to Var without loss";
+      $c.report_error(<type>, message, NULL, NULL);
+    }
   },
   "type.var.unresolved" :
   macro Statement(Expr $c) {
-    String message = "cannot convert an unresolved expression to Var";
-    $c.report_error(
-      <type>, message,
-      NULL, %("give the expression a declared x2c type before boxing it"));
+    {
+      String message = "cannot convert an unresolved expression to Var";
+      $c.report_error(
+        <type>, message,
+        NULL, %("give the expression a declared x2c type before boxing it"));
+    }
   },
 
   "xform.compound.bitfield" :
@@ -1774,28 +1803,34 @@ meta static Map _error_report_rows(void) => {
   },
   "xform.compound.lvalue" :
   macro Statement(Expr $c, Expr $lhs_type) {
-    String details = %"left type: ${$lhs_type.repr()}";
-    $c.report_error(
-      <xform>, "dynamic compound assignment requires a numeric lvalue",
-      NULL, %($details));
+    {
+      String details = %"left type: ${$lhs_type.repr()}";
+      $c.report_error(
+        <xform>, "dynamic compound assignment requires a numeric lvalue",
+        NULL, %($details));
+    }
   },
   "xform.compound.operand" :
   macro Statement(
     Expr $c, Expr $op, Expr $rhs_type) {
-    String details = %"right type: ${$rhs_type.repr()}";
-    $c.report_error(
-      <xform>, $op == <+>
-        ? "dynamic += requires a numeric, Var, or String operand"
-        : "dynamic compound assignment requires a numeric or Var operand",
-      NULL, %($details));
+    {
+      String details = %"right type: ${$rhs_type.repr()}";
+      $c.report_error(
+        <xform>, $op == <+>
+          ? "dynamic += requires a numeric, Var, or String operand"
+          : "dynamic compound assignment requires a numeric or Var operand",
+        NULL, %($details));
+    }
   },
 
   "xform.container.compound" :
   macro Statement(Expr $c, Expr $lhs_type) {
-    String type = $lhs_type.repr();
-    $c.report_error(
-      <xform>, %"container type $type does not support compound assignment",
-      NULL, %("update an indexed element instead"));
+    {
+      String type = $lhs_type.repr();
+      $c.report_error(
+        <xform>, %"container type $type does not support compound assignment",
+        NULL, %("update an indexed element instead"));
+    }
   },
 
   "xform.index.assignment" :
@@ -1812,11 +1847,13 @@ meta static Map _error_report_rows(void) => {
   },
   "xform.index.operand" :
   macro Statement(Expr $c, Expr $op, Expr $rhs_type) {
-    String details = %"right type: ${$rhs_type.repr()}";
-    String message = $op == <+>
-      ? "indexed += requires a numeric, Var, or String operand"
-      : "indexed compound assignment requires a numeric or Var operand";
-    $c.report_error(<xform>, message, NULL, %($details));
+    {
+      String details = %"right type: ${$rhs_type.repr()}";
+      String message = $op == <+>
+        ? "indexed += requires a numeric, Var, or String operand"
+        : "indexed compound assignment requires a numeric or Var operand";
+      $c.report_error(<xform>, message, NULL, %($details));
+    }
   },
   "xform.index.unsupported" :
   macro Statement(Expr $c, Expr $type) {
@@ -1827,22 +1864,26 @@ meta static Map _error_report_rows(void) => {
   "xform.index.update" :
   macro Statement(
     Expr $c, Expr $base_type, Expr $postfix) {
-    String type = $base_type.repr();
-    String message = $postfix
-      ? %"type $type does not support indexed increment or decrement"
-      : %"type $type does not support indexed compound assignment";
-    $c.report_error(<xform>, message, NULL, NULL);
+    {
+      String type = $base_type.repr();
+      String message = $postfix
+        ? %"type $type does not support indexed increment or decrement"
+        : %"type $type does not support indexed compound assignment";
+      $c.report_error(<xform>, message, NULL, NULL);
+    }
   },
 
   "xform.numeric.operands" :
   macro Statement(
     Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
-    String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
-    String details =
-      %"operator: ${$op} left type: $left_type right type: $right_type";
-    $c.report_error(
-      <xform>, "dynamic numeric operators require numeric operands",
-      NULL, %($details));
+    {
+      String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
+      String details =
+        %"operator: ${$op} left type: $left_type right type: $right_type";
+      $c.report_error(
+        <xform>, "dynamic numeric operators require numeric operands",
+        NULL, %($details));
+    }
   },
 
   "xform.slice.assignment" :
@@ -1861,12 +1902,14 @@ meta static Map _error_report_rows(void) => {
 
   "xform.string.assignment" :
   macro Statement(Expr $c) {
-    String note = "String is immutable: use the copy-producing " +
-                  "String.withindex, or bind a char * to write a " +
-                  "transient String.malloc buffer";
-    $c.report_error(
-      <xform>, "String does not support bracket assignment",
-      NULL, %($note));
+    {
+      String note = "String is immutable: use the copy-producing " +
+                    "String.withindex, or bind a char * to write a " +
+                    "transient String.malloc buffer";
+      $c.report_error(
+        <xform>, "String does not support bracket assignment",
+        NULL, %($note));
+    }
   },
   "xform.string.compound" :
   macro Statement(Expr $c) {
