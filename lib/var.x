@@ -2,48 +2,11 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    `Var` encodes dynamic values in one 64-bit word. Its layout uses the IEEE
-    754 double-precision ranges:
-
-    0000:0000:0000:0000 - 7FEF:FFFF:FFFF:FFFF : [+0.0, MAX_DOUBLE]
-    7FF0:0000:0000:0000 - 7FFF:FFFF:FFFF:FFFF : [+Inf, +NaNs]
-    8000:0000:0000:0000 - FFEF:FFFF:FFFF:FFFF : [-0.0, MIN_DOUBLE]
-    FFF0:0000:0000:0000 - FFFF:FFFF:FFFF:FFFF : [-Inf, -NaNs]
-
-    Special-value ranges carry custom tags and payloads. An f64 is shifted by
-    (1 << 52); shifted -DBL_MAX has a reserved encoding because all-one bits
-    mean `void`. Native pointers retain their raw lower 48 address bits.
-
-    The 64-bit `Var` layout is structured as follows:
-
-    Tag : Payload         Tag : Payload        bits  Use
-    -------------------   -------------------  ----  -------------------------
-    0000:0000:0000:0000 - 0000:FFFF:FFFF:FFFF  48+0  `void`*
-    0001:0000:0000:0000 - 0001:FFFF:FFFF:FFFF  48+0  u8*
-    0002:0000:0000:0000 - 0002:FFFF:FFFF:FFFF  48+0  i8*
-    0003:0000:0000:0000 - 0003:FFFF:FFFF:FFFF  47+1  u16*,i16*
-    0004:0000:0000:0000 - 0004:FFFF:FFFF:FFFF  46+2  u32*,i32*,f32*,ulong*
-    0005:0000:0000:0000 - 0005:FFFF:FFFF:FFFF  45+3  long*,f64*,ldouble*,
-                                                      llong*,ullong*,long,
-                                                      ulong,llong
-    0006:0000:0000:0000 - 0007:FFFF:FFFF:FFFF  45+3  builtin pointer families,
-                                                      ullong,ldouble
-    0008:0000:0000:0000 - 000B:FFFF:FFFF:FFFF  45+3  builtin (Class) x 32
-    000C:0000:0000:0000 - 000F:FFFF:FFFF:FFFF  45+3  builtin (Class *) x 32
-    0010:0000:0000:0000 - 7FFF:FFFF:FFFF:FFFF  64+0  f64 > 0 + (52<<1)
-    8000:0000:0000:0000 - 8000:FFFF:FFFF:FFFF  48+0  u48
-    8001:0000:0000:0000 - 8001:FFFF:FFFF:FFFF  48+0  i48
-    8002:0000:0000:0000 - 8002:FFFF:FFFF:FFFF  32+16 32-bit vals, 16-bit tag
-    8003:0000:0000:0000 - 8003:FFFF:FFFF:FFFF  32+16 Special values
-    8004:0000:0000:0000 - 800B:FFFF:FFFF:FFFF  50+1  `Symbol`s
-    800C:0000:0000:0000 - 800F:FFFF:FFFF:FFFF  45+3  user (Class)* 30,
-                                                      overflow cell,
-                                                      overflow record
-    8010:0000:0000:0000 - FFFF:FFFF:FFFF:FFFF  64+0  f64 < 0 + (52<<1)
-    -------------------   -------------------  ----  -------------------------
-
-    A `Var` preserves its runtime kind. `void` is excluded from value-bearing
-    protocols.
+    Var owns the one-word encoding of dynamic values. Doubles keep their IEEE
+    754 bits, and the special-value ranges carry tagged payloads, native
+    pointers, `Symbol`s, and boxes for wide scalars and custom classes. A
+    `Var` preserves its runtime kind, and `void` is excluded from
+    value-bearing protocols.
 */
 
 #pragma once
@@ -108,7 +71,44 @@ int Var.known_tag(Symbol tag) =>
 #include "string-number.x"
 #include "symbolset.x"
 
-// encoding fields
+/* encoding fields
+
+   The layout uses the IEEE 754 double-precision ranges:
+
+   0000:0000:0000:0000 - 7FEF:FFFF:FFFF:FFFF : [+0.0, MAX_DOUBLE]
+   7FF0:0000:0000:0000 - 7FFF:FFFF:FFFF:FFFF : [+Inf, +NaNs]
+   8000:0000:0000:0000 - FFEF:FFFF:FFFF:FFFF : [-0.0, MIN_DOUBLE]
+   FFF0:0000:0000:0000 - FFFF:FFFF:FFFF:FFFF : [-Inf, -NaNs]
+
+   Special-value ranges carry custom tags and payloads. An f64 is shifted by
+   (1 << 52); shifted -DBL_MAX has a reserved encoding because all-one bits
+   mean `void`. Native pointers retain their raw lower 48 address bits.
+
+   Tag : Payload         Tag : Payload        bits  Use
+
+   0000:0000:0000:0000 - 0000:FFFF:FFFF:FFFF  48+0  `void`*
+   0001:0000:0000:0000 - 0001:FFFF:FFFF:FFFF  48+0  u8*
+   0002:0000:0000:0000 - 0002:FFFF:FFFF:FFFF  48+0  i8*
+   0003:0000:0000:0000 - 0003:FFFF:FFFF:FFFF  47+1  u16*,i16*
+   0004:0000:0000:0000 - 0004:FFFF:FFFF:FFFF  46+2  u32*,i32*,f32*,ulong*
+   0005:0000:0000:0000 - 0005:FFFF:FFFF:FFFF  45+3  long*,f64*,ldouble*,
+                                                     llong*,ullong*,long,
+                                                     ulong,llong
+   0006:0000:0000:0000 - 0007:FFFF:FFFF:FFFF  45+3  builtin pointer families,
+                                                     ullong,ldouble
+   0008:0000:0000:0000 - 000B:FFFF:FFFF:FFFF  45+3  builtin (Class) x 32
+   000C:0000:0000:0000 - 000F:FFFF:FFFF:FFFF  45+3  builtin (Class *) x 32
+   0010:0000:0000:0000 - 7FFF:FFFF:FFFF:FFFF  64+0  f64 > 0 + (52<<1)
+   8000:0000:0000:0000 - 8000:FFFF:FFFF:FFFF  48+0  u48
+   8001:0000:0000:0000 - 8001:FFFF:FFFF:FFFF  48+0  i48
+   8002:0000:0000:0000 - 8002:FFFF:FFFF:FFFF  32+16 32-bit vals, 16-bit tag
+   8003:0000:0000:0000 - 8003:FFFF:FFFF:FFFF  32+16 Special values
+   8004:0000:0000:0000 - 800B:FFFF:FFFF:FFFF  50+1  `Symbol`s
+   800C:0000:0000:0000 - 800F:FFFF:FFFF:FFFF  45+3  user (Class)* 30,
+                                                     overflow cell,
+                                                     overflow record
+   8010:0000:0000:0000 - FFFF:FFFF:FFFF:FFFF  64+0  f64 < 0 + (52<<1)
+*/
 
 /* `lib/var-ledger.x` projects the tag tables and the decoder's group table
    from the ledger in `var-tags.xmacro`. */
@@ -145,8 +145,6 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
     raise %(bad-target (owner "Var.tag_bottom") (target $tag));
   return x2c_var_taginfo[id].bottom;
 }
-
-// wide boxes
 
 typedef union VarWideValue {
   long long_value;
@@ -301,7 +299,7 @@ static int _wide_encoding_valid(Var value, Symbol tag) {
 /** Returns the `Symbol` naming the exact family of `v`'s payload.
     The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
     registered custom object tag. Built-in families have one row in the
-    encoding table at the top of this file. Use `Var.kind` for a group of
+    encoding table in this file. Use `Var.kind` for a group of
     families and `Var.is` to test one family.
 
     Raw `Null`, the all-zero `Var` written `(Var) { .u64 = 0 }`, is a native
@@ -637,6 +635,54 @@ static int _integer_fits(TagId id, long value, unsigned bits) {
 static Var _new_symbol(unsigned long u) {
   if (u >= (1ul << 51)) raise %(conv-range (owner "Var.new") (target symbol));
   return (Var) { .u64 = u + VAR_SYMBOL_OFFSET };
+}
+
+/** Parses `str` as source text of kind `kind` and returns the boxed value.
+    The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
+    `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
+    delimiters are removed; unquoted input is also accepted, and either form
+    is unescaped. `<char>` expects `'a'` complete with its quotes and produces
+    an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
+    path here to `<f32>`.
+
+    Integer and floating kinds require the whole input to parse, apart from
+    surrounding whitespace. Malformed input, trailing text, a value outside
+    the native reader's range, or an `<int>` outside `int` range returns
+    `void`, so a parsed numeric zero remains distinguishable from failure.
+
+    `<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
+    trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
+    kind this function does not handle returns `void`, and a bad character
+    literal gives `<i32>` -1.
+
+    ```x2c
+    ~Var count = Var.parse("42", <int>);
+    ~Var broken = Var.parse("abc", <int>);
+    ~Var refused = Var.parse("3", <u8>);
+    printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
+           broken.tag().str(), broken, refused is void);
+    ```
+    Raises: `<alloc-fail>` while constructing `String` or quoted-`Symbol`
+    output.
+*/
+meta native Var Var.parse(String str, Symbol kind) {
+  switch (kind) {
+    case <int>: {
+      long value;
+      if (!str.try_long(&value) || value < INT_MIN || value > INT_MAX)
+        return void;
+      return (int) value;
+    }
+    case <float>: case <double>: {
+      double value;
+      if (!str.try_double(&value)) return void;
+      return value;
+    }
+    case <string>:    return str.parse();
+    case <symbol>:    return Symbol.parse(str);
+    case <char>:      return str.parse_char();
+    default:          return void;
+  }
 }
 
 // custom objects
@@ -1190,56 +1236,6 @@ int Var.wide_compare(Var a, Var b) {
     &_wide_box(a).value.long_double_value,
     &_wide_box(b).value.long_double_value, sizeof(av));
   return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
-}
-
-// parsing
-
-/** Parses `str` as source text of kind `kind` and returns the boxed value.
-    The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
-    `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
-    delimiters are removed; unquoted input is also accepted, and either form
-    is unescaped. `<char>` expects `'a'` complete with its quotes and produces
-    an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
-    path here to `<f32>`.
-
-    Integer and floating kinds require the whole input to parse, apart from
-    surrounding whitespace. Malformed input, trailing text, a value outside
-    the native reader's range, or an `<int>` outside `int` range returns
-    `void`, so a parsed numeric zero remains distinguishable from failure.
-
-    `<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
-    trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
-    kind this function does not handle returns `void`, and a bad character
-    literal gives `<i32>` -1.
-
-    ```x2c
-    ~Var count = Var.parse("42", <int>);
-    ~Var broken = Var.parse("abc", <int>);
-    ~Var refused = Var.parse("3", <u8>);
-    printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
-           broken.tag().str(), broken, refused is void);
-    ```
-    Raises: `<alloc-fail>` while constructing `String` or quoted-`Symbol`
-    output.
-*/
-meta native Var Var.parse(String str, Symbol kind) {
-  switch (kind) {
-    case <int>: {
-      long value;
-      if (!str.try_long(&value) || value < INT_MIN || value > INT_MAX)
-        return void;
-      return (int) value;
-    }
-    case <float>: case <double>: {
-      double value;
-      if (!str.try_double(&value)) return void;
-      return value;
-    }
-    case <string>:    return str.parse();
-    case <symbol>:    return Symbol.parse(str);
-    case <char>:      return str.parse_char();
-    default:          return void;
-  }
 }
 
 // class registration
