@@ -1,13 +1,9 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-01. Phase 0 (five reproduced defects) is on
-> `dev` at ff9946c8; the `x2c_func_shared` emission change needed the usual
-> second bootstrap round. L1-L4 are decided (5-10 below). L1, L3, the
-> `({1})` fix, and template destructuring hygiene landed together; L2, L4, and
-> forward-name hygiene (decision 11) are submitted together to the shared
-> integrator. Five further defects found while scoping L1-L4 are
-> listed below. Waves 1-3 are decided and not started. L1-L4 are scoped;
-> Gary's decisions are pending.
+> Status: active, 2026-10-01. Phase 0 landed at ff9946c8; L1, L3, and the
+> first template fixes at 63576dd1; L2, L4, and forward-name hygiene
+> (decision 11) as PR #78. Wave 1 is submitted to the shared integrator.
+> Waves 2 and 3 and the prototypes are not started.
 
 ## Result
 
@@ -152,6 +148,29 @@ Equivalence is obvious or by construction. Focused fixtures per item.
   `source_pattern_with`; `Type.is_reference` replaces 13 copies of
   `car() == <&> || car() == <opt-ref>`.
 - H19 `lisp_binder_lets` (lib/lisp-init.x:162) returns a `%()` template.
+
+Wave 1 results (submitted as one PR; authored src/lib/commands/etc diff
++372/-551):
+
+- Done: H1 (one `_replace` over a `ReplacementSource` record; a Unit macro
+  could not take the lookup as an expression), H6, H7, H12 (shared shapes
+  live in cache.x because macros are unit-private), H14, H17 (target kinds
+  add 26 lines for one owner of spellings and the shared-library refusal),
+  H18, H19, and from H9 `Iter.accumulate`, `Map.setindex`, and the List
+  reductions (List reductions cost 3.3% more instructions through the
+  iterator).
+- Not done: `Iter.zip` already delegated on dev; `Var.fallback_str` (would
+  raise on a zero byte), `Array.foldl` (different null-callback policy),
+  and the `Var.fallback_repr` delegation (3x slower for pointer values)
+  stay; the typed-array update would put a private helper in a public
+  header; `source_pattern` delegation is blocked by the staging defect
+  below.
+- Found: a meta function in a compiler-owned `.xmacro` cannot be added or
+  edited through an older seed (`_compiler_owns` keeps lib/src/etc out of
+  the project helper, and translate does not stage in process), so a new
+  grammar helper must reach the seed before its callers; `.len` on an
+  opaque `Buffer` emits uncompilable C; `Func.new(fn)` with one argument
+  passes x2c but fails in the C compiler.
 
 ## Wave 2: needs tests or measurement
 
