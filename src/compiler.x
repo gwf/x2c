@@ -62,8 +62,6 @@ typedef struct SymScope {
 
 /** Names the scope-owned semantic table belonging to one compiler. */
 typedef struct Sym *Sym;
-/** Names a scope-owned, one-use semantic transaction. */
-typedef struct SymTxn *SymTxn;
 
 /** Holds mutable state for one source translation.
 
@@ -203,6 +201,27 @@ typedef struct Compiler {
   Array source_occurrences;
   Map source_definitions, source_declarations, source_texts;
 } *Compiler;
+
+/** Holds one reversible semantic transaction in caller storage.
+    The zero value is inactive. Keep an active transaction in one object;
+    copying it does not copy the staged maps or coordinate completion.
+    Borrowed compiler maps keep their owners; staged maps and snapshots live
+    in the Scope used to begin the transaction.
+*/
+typedef struct SymTxn {
+  Compiler c;
+  int scope_index, next_binding, active, String initializer_name;
+  String shutdown_name, Map counters;
+  int local_macro_names;
+  SymScope scope;
+  Map statics, binding_facts;
+  Map source_definitions;
+  int source_occurrences;
+  /* A macro value application also stages producer effects: adapters,
+     base bindings, early declarations, initializers, origins and errors. */
+  int extended, Map adapters, Array base_bindings;
+  int early_count, init_count, origin_count, origin, needs_exception;
+} SymTxn;
 
 #include "diagnostics.x"
 #include "symbols.x"

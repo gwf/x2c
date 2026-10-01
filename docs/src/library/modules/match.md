@@ -472,7 +472,7 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:550`
+Source: `lib/match.x:549`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
@@ -488,7 +488,7 @@ the indicated values; all other results leave the buffer unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures.
 
-Source: `lib/match.x:478`
+Source: `lib/match.x:477`
 
 <a id="MatchPlan.raise_ineligible"></a>
 #### MatchPlan.raise_ineligible
@@ -547,7 +547,7 @@ Executes a prepared `List` match into caller-owned positional storage.
 This is `MatchPlan.execute_capture` without statistics and has the same
 results, atomicity, and failures.
 
-Source: `lib/match.x:491`
+Source: `lib/match.x:490`
 
 <a id="MatchPlan.try_match"></a>
 #### MatchPlan.try_match
@@ -558,7 +558,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match.x:565`
+Source: `lib/match.x:564`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace

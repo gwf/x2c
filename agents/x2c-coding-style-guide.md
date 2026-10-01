@@ -1191,6 +1191,12 @@ an explicit release at the end of a block with `$auto` also runs cleanup on
 error exits, which is a behavior change to decide rather than a cleanup to
 apply.
 
+The current `Cleanup(T)` contract takes a value receiver. A value record that
+owns backing resources can provide a small inline cleanup adapter while its
+ordinary `free` and `drop` methods take references. Keep one active owner and
+avoid passing an entire scratch record by reference from that value adapter,
+which can force a large temporary copy.
+
 ### Separate storage ownership from typed crossings
 
 A record may stay in caller-owned native storage while its pointer crosses a

@@ -47,8 +47,9 @@ and the same shape covers `format`, `crop`, `alpha_crop`, `alpha_clear`,
 `resize_canvas`, `mipmaps`, `to_power_of_two`, `flip_vertical`,
 `flip_horizontal`, `rotate`, `rotate_clockwise`,
 `rotate_counterclockwise`, `tint`, `invert`, `grayscale`, `contrast`,
-`brightness`, and `replace_color`. Each has a pointer receiver, so an
-addressable `Image` is updated in place without copying its owned pointer.
+`brightness`, and `replace_color`. Each takes an `Image &` receiver and
+updates the caller's addressable image in place. The reference borrows the
+record while the native operation updates its pixel allocation.
 
 Drawing methods (`clear`, `draw_pixel`, `draw_line`, `draw_circle`,
 `draw_rectangle`, `draw_triangle`, `draw_polygon`, `draw_text`, `draw`)

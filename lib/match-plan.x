@@ -30,8 +30,8 @@
 #define MATCH_SEGMENT_MAX 128
 #define MATCH_INLINE_MAX   64
 
-/* The builder, the failure sites the enclosing block has yet to patch, and
-   the call-frame depth of the block under construction. */
+/* Owns the builder and failure sites the enclosing block has yet to patch,
+   with the call-frame depth of the block under construction. */
 typedef struct MatchLower {
   MachineBuilder b;
   int *sites, site_count, site_capacity, depth;
@@ -59,17 +59,16 @@ MatchPlan MatchPlan.prepare(Var pattern) {
    caller's scope. The builder interns the layout's binders first, so its
    slots are the layout's. */
 static void MatchPlan._lower(MatchPlan plan, Var pattern) {
-  MachineBuilder b = MachineBuilder.new();
-  MatchLower l = {.b = b, .depth = 1};
+  MatchLower l = {.b = MachineBuilder.new(), .depth = 1};
+  defer l.b.free();
   for (int i = 0; i < plan.layout.binder_count; i++)
-    if (b.binder(plan.layout.binders[i]) != i) break;
-  b.root = b.status == MACHINE_PREPARED ? l._compile_value(pattern) : -1;
-  if (b.root < 0) l._fail("lowering");
-  plan.status = b.status;
-  plan.reason = b.reason;
-  if (plan.status == MACHINE_PREPARED) plan.program = b.freeze();
+    if (l.b.binder(plan.layout.binders[i]) != i) break;
+  l.b.root = l.b.status == MACHINE_PREPARED ? l._compile_value(pattern) : -1;
+  if (l.b.root < 0) l._fail("lowering");
+  plan.status = l.b.status;
+  plan.reason = l.b.reason;
+  if (plan.status == MACHINE_PREPARED) plan.program = l.b.freeze();
   if (l.sites) Scope.free(l.sites);
-  b.free();
 }
 
 /** Releases resources owned by `plan`.
@@ -107,17 +106,16 @@ static int MatchLower._compile_binder(MatchLower &l, Var binder) {
 /* Binds a fresh slot to the current value, or compares a bound one. */
 static int MatchLower._emit_binder(MatchLower &l, Var binder) {
   if (binder == <?>) return 1;
-  MachineBuilder b = l.b;
-  int slot = b.binder(binder);
+  int slot = l.b.binder(binder);
   if (slot < 0) return 0;
-  int valid = b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
-  b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int done = b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+  int valid = l.b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
+  l.b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int done = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
   if (valid < 0 || done < 0) return 0;
-  int compare = b.length;
+  int compare = l.b.length;
   if (!l._fail_site(MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  b.set_target(valid, compare);
-  b.set_target(done, b.length);
+  l.b.set_target(valid, compare);
+  l.b.set_target(done, l.b.length);
   return 1;
 }
 
@@ -183,14 +181,14 @@ static int _is_list_literal(List pat) {
    interned-list fast path without collapsing boxed-equal elements into a
    bit comparison. */
 static int MatchLower._compile_literal_list(MatchLower &l, List pattern) {
-  MachineBuilder b = l.b;
-  int constant = b.constant(pattern);
+  int constant = l.b.constant(pattern);
   if (constant < 0) return -1;
-  int entry = b.length, miss = b.emit(MW_EQ_VALUE_BITS, constant, 0, 0, 0, -1);
-  b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int entry = l.b.length;
+  int miss = l.b.emit(MW_EQ_VALUE_BITS, constant, 0, 0, 0, -1);
+  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   int segment = l._compile_segment(pattern);
   if (segment < 0) return -1;
-  b.set_target(miss, segment);
+  l.b.set_target(miss, segment);
   return entry;
 }
 
@@ -231,7 +229,8 @@ static int MatchLower._fail_site(
 /* Patches every site recorded since `base` to `target` and releases them.
    Block compilers leave the site stack at their entry base. */
 static void MatchLower._patch_sites(MatchLower &l, int base, int target) {
-  for (int i = base; i < l.site_count; i++) l.b.set_target(l.sites[i], target);
+  for (int i = base; i < l.site_count; i++)
+    l.b.set_target(l.sites[i], target);
   l.site_count = base;
 }
 
@@ -256,15 +255,15 @@ static int MatchLower._emit_call(MatchLower &l, int child, int mode, int reg) {
 
 /* Records the first ineligibility reason and returns the failed entry. */
 static int MatchLower._fail(MatchLower &l, const char *reason) {
-  MachineBuilder b = l.b;
-  if (b.status == MACHINE_PREPARED) {
-    b.status = MACHINE_INELIGIBLE;
-    b.reason = reason;
+  if (l.b.status == MACHINE_PREPARED) {
+    l.b.status = MACHINE_INELIGIBLE;
+    l.b.reason = reason;
   }
   return -1;
 }
 
-static int MatchLower._stopped(MatchLower &l) => l.b.status != MACHINE_PREPARED;
+static int MatchLower._stopped(MatchLower &l) =>
+  l.b.status != MACHINE_PREPARED;
 
 /* guards
 
@@ -321,14 +320,13 @@ static int MatchLower._emit_test(MatchLower &l, Var test, int child) {
    failed arm returns through its paired undo and order call-entry mark, and
    the first successful arm returns immediately as the local cut. */
 static int MatchLower._compile_or(MatchLower &l, List args) {
-  MachineBuilder b = l.b;
   MatchParts operands;
   if (!l._guard_parts(args, operands)) return -1;
-  int entry = b.length, base = l.site_count;
+  int entry = l.b.length, base = l.site_count;
   for (int i = 0; i < operands.count; i++) {
-    l._patch_sites(base, b.length);
+    l._patch_sites(base, l.b.length);
     if (!l._emit_operand(operands, i)) return -1;
-    if (b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return -1;
+    if (l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return -1;
   }
   return l._finish_failure(entry, base);
 }
@@ -336,26 +334,25 @@ static int MatchLower._compile_or(MatchLower &l, List args) {
 /* Negation uses one frame-local mark and rolls the journal back on both
    inverted outcomes, so no child binding can leak. */
 static int MatchLower._compile_not(MatchLower &l, List args) {
-  MachineBuilder b = l.b;
   MatchParts operands;
   if (!l._guard_parts(args, operands)) return -1;
-  int entry = b.length, base = l.site_count;
-  b.emit(MW_MARK, 0, 0, 0, 0, 0);
+  int entry = l.b.length, base = l.site_count;
+  l.b.emit(MW_MARK, 0, 0, 0, 0, 0);
   int successes[MATCH_SEGMENT_MAX];
   for (int i = 0; i < operands.count; i++) {
-    l._patch_sites(base, b.length);
+    l._patch_sites(base, l.b.length);
     if (!l._emit_operand(operands, i)) return -1;
-    successes[i] = b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+    successes[i] = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
     if (successes[i] < 0) return -1;
   }
-  int all_failed = b.length;
+  int all_failed = l.b.length;
   l._patch_sites(base, all_failed);
-  b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
-  b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int rejected = b.length;
-  b.patch(successes, operands.count, rejected);
-  b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
-  if (b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return -1;
+  l.b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int rejected = l.b.length;
+  l.b.patch(successes, operands.count, rejected);
+  l.b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RESTORE, 0, 0, 0);
+  if (l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0) < 0) return -1;
   return entry;
 }
 
@@ -420,18 +417,17 @@ static int MatchLower._is_kind(MatchLower &l, int kind) {
 
 /* `(atom)` holds for any value whose tag is not `list`. */
 static int MatchLower._is_atom(MatchLower &l) {
-  MachineBuilder b = l.b;
-  int entry = b.length, constant = b.constant(<list>);
+  int entry = l.b.length, constant = l.b.constant(<list>);
   if (constant < 0) return -1;
-  int hit = b.emit(MW_TAG, constant, 0, 0, 0, -1);
-  int is_list = b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+  int hit = l.b.emit(MW_TAG, constant, 0, 0, 0, -1);
+  int is_list = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
   if (hit < 0 || is_list < 0) return -1;
-  int success = b.length;
-  b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-  int failure = b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
+  int success = l.b.length;
+  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  int failure = l.b.emit(MW_RET_FAILURE, 0, 0, 0, 0, 0);
   if (failure < 0) return -1;
-  b.set_target(hit, success);
-  b.set_target(is_list, failure);
+  l.b.set_target(hit, success);
+  l.b.set_target(is_list, failure);
   return entry;
 }
 
@@ -640,14 +636,13 @@ static int MatchLower._emit_part(MatchLower &l, MatchSegment &s, int i) {
 /* Tests the element at the cursor head of `reg`: `?` skips it, an atom
    binder binds or compares it, and a literal compares it. */
 static int MatchLower._emit_head_leaf(MatchLower &l, Var part, int reg) {
-  MachineBuilder b = l.b;
   if (part == <?>) return l._fail_site(MW_SKIP_HEAD, 0, reg, 0, 0);
   if (part.is_atom_binder()) {
-    int slot = b.binder(part);
+    int slot = l.b.binder(part);
     if (slot < 0) return 0;
     return l._fail_site(MW_BIND_HEAD, slot, reg, 0, 0);
   }
-  int constant = b.constant(part);
+  int constant = l.b.constant(part);
   if (constant < 0) return 0;
   int mode = _compare_mode(part);
   return l._fail_site(MW_EQ_HEAD_CONST, constant, reg, 0, mode);
@@ -707,33 +702,32 @@ static int MatchLower._segment_end(MatchLower &l, MatchStar &star) {
    native suffix directly, and a repeated binder keeps production's shallow
    List identity rule and memoizes a proven span as its suffix VALUE. */
 static int MatchLower._final_star(MatchLower &l, int slot) {
-  MachineBuilder b = l.b;
-  if (slot < 0) return b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) >= 0;
+  if (slot < 0) return l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) >= 0;
 
-  int valid = b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
-  b.emit(MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
-  b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
-  int fresh = b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+  int valid = l.b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
+  l.b.emit(MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  l.b.emit(MW_SLOT_SET_VALUE, slot, 0, 0, 0, 0);
+  int fresh = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
   if (valid < 0 || fresh < 0) return 0;
 
-  int existing = b.length;
-  int is_span = b.emit(MW_SLOT_IS_SPAN, slot, 0, 0, 0, -1);
-  b.emit(MW_CURSOR_VALUE, 0, 0, 0, 0, 0);
+  int existing = l.b.length;
+  int is_span = l.b.emit(MW_SLOT_IS_SPAN, slot, 0, 0, 0, -1);
+  l.b.emit(MW_CURSOR_VALUE, 0, 0, 0, 0, 0);
   if (!l._fail_site(MW_SLOT_EQ_VALUE, slot, 0, 0, 0)) return 0;
-  int value_done = b.emit(MW_JUMP, 0, 0, 0, 0, -1);
+  int value_done = l.b.emit(MW_JUMP, 0, 0, 0, 0, -1);
   if (is_span < 0 || value_done < 0) return 0;
 
-  int compare_span = b.length;
+  int compare_span = l.b.length;
   if (!l._fail_site(MW_SLOT_EQ_FINAL_IDENTITY, slot, 0, 1, 0)) return 0;
-  b.emit(MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
-  b.emit(MW_SLOT_SET_VALUE, slot, 1, 0, 0, 0);
+  l.b.emit(MW_CURSOR_VALUE, 0, 1, 0, 0, 0);
+  l.b.emit(MW_SLOT_SET_VALUE, slot, 1, 0, 0, 0);
 
-  int success = b.length;
-  if (b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return 0;
-  b.set_target(valid, existing);
-  b.set_target(is_span, compare_span);
-  b.set_target(fresh, success);
-  b.set_target(value_done, success);
+  int success = l.b.length;
+  if (l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0) < 0) return 0;
+  l.b.set_target(valid, existing);
+  l.b.set_target(is_span, compare_span);
+  l.b.set_target(fresh, success);
+  l.b.set_target(value_done, success);
   return 1;
 }
 
@@ -743,49 +737,47 @@ static int MatchLower._final_star(MatchLower &l, int slot) {
    defers its span until the tail succeeds, and a repeated binder compares
    the candidate range in place. */
 static int MatchLower._search_star(MatchLower &l, MatchStar &star) {
-  MachineBuilder b = l.b;
   int slot = star.slot, loop = l._star_loop(star);
   if (loop < 0) return 0;
   int valid = -1;
-  if (slot >= 0) valid = b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
+  if (slot >= 0) valid = l.b.emit(MW_SLOT_VALID, slot, 0, 0, 0, -1);
   int fresh_failed = l._star_fresh(star);
   if (fresh_failed < 0) return 0;
 
   int mismatch = -1, existing_failed = -1;
   if (slot >= 0) {
-    int compare = b.length;
-    mismatch = b.emit(MW_SLOT_EQ_PREFIX, slot, 0, 1, 0, -1);
+    int compare = l.b.length;
+    mismatch = l.b.emit(MW_SLOT_EQ_PREFIX, slot, 0, 1, 0, -1);
     existing_failed = l._star_tail(star);
     if (mismatch < 0 || existing_failed < 0) return 0;
-    b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
-    b.set_target(valid, compare);
+    l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+    l.b.set_target(valid, compare);
   }
 
-  int retry = b.length;
-  b.set_target(mismatch, retry);
-  b.set_target(fresh_failed, retry);
-  b.set_target(existing_failed, retry);
+  int retry = l.b.length;
+  l.b.set_target(mismatch, retry);
+  l.b.set_target(fresh_failed, retry);
+  l.b.set_target(existing_failed, retry);
   return l._star_retry(star, loop);
 }
 
 /* Starts the split cursors and emits the loop head, which fails the
    segment once no split remains. Returns the head's site, or -1. */
 static int MatchLower._star_loop(MatchLower &l, MatchStar &star) {
-  MachineBuilder b = l.b;
   int anchored = star.anchored;
-  int constant = anchored ? b.constant(star.anchor) : -1;
+  int constant = anchored ? l.b.constant(star.anchor) : -1;
   if (anchored && constant < 0) return -1;
   int mode = anchored ? _compare_mode(star.anchor) : MACHINE_COMPARE_BITS;
-  b.emit(MW_MARK, 0, 0, 0, 0, 0);
-  b.emit(MW_MOVE, 1, 0, 0, 0, 0);
+  l.b.emit(MW_MARK, 0, 0, 0, 0, 0);
+  l.b.emit(MW_MOVE, 1, 0, 0, 0, 0);
   if (anchored) {
-    b.emit(MW_MOVE, 2, 1, 0, 0, 0);
-    b.emit(MW_OFFSET, 2, star.offset, 0, 0, 0);
+    l.b.emit(MW_MOVE, 2, 1, 0, 0, 0);
+    l.b.emit(MW_OFFSET, 2, star.offset, 0, 0, 0);
   }
   else
-    b.emit(MW_SET_ACTIVE, 0, 1, 0, 0, 0);
+    l.b.emit(MW_SET_ACTIVE, 0, 1, 0, 0, 0);
 
-  int loop = b.length;
+  int loop = l.b.length;
   int emitted = anchored
     ? l._fail_site(MW_SCAN, 1, 2, constant, mode)
     : l._fail_site(MW_REQUIRE_ACTIVE, 0, 0, 0, 0);
@@ -795,13 +787,14 @@ static int MatchLower._star_loop(MatchLower &l, MatchStar &star) {
 /* A fresh binder takes the split's span before the tail runs or, when
    delayed, after it succeeds. Returns the tail's failure branch, or -1. */
 static int MatchLower._star_fresh(MatchLower &l, MatchStar &star) {
-  MachineBuilder b = l.b;
   int slot = star.slot;
-  if (slot >= 0 && !star.delayed) b.emit(MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  if (slot >= 0 && !star.delayed)
+    l.b.emit(MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
   int failed = l._star_tail(star);
   if (failed < 0) return -1;
-  if (slot >= 0 && star.delayed) b.emit(MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
-  b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
+  if (slot >= 0 && star.delayed)
+    l.b.emit(MW_SLOT_SET_SPAN, slot, 0, 1, 0, 0);
+  l.b.emit(MW_RET_SUCCESS, 0, 0, 0, 0, 0);
   return failed;
 }
 
@@ -813,13 +806,12 @@ static int MatchLower._star_tail(MatchLower &l, MatchStar &star) {
 
 /* Undoes the failed split's bindings and moves to the next split. */
 static int MatchLower._star_retry(MatchLower &l, MatchStar &star, int loop) {
-  MachineBuilder b = l.b;
-  b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
+  l.b.emit(MW_ROLLBACK, 0, MACHINE_ROLLBACK_RETRY, 0, 0, 0);
   if (star.anchored) {
-    b.emit(MW_ADVANCE, 1, 0, 0, 0, 0);
-    b.emit(MW_ADVANCE, 2, 0, 0, 0, 0);
+    l.b.emit(MW_ADVANCE, 1, 0, 0, 0, 0);
+    l.b.emit(MW_ADVANCE, 2, 0, 0, 0, 0);
   }
   else
-    b.emit(MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
-  return b.emit(MW_JUMP, 0, 0, 0, 0, loop) >= 0 && !l._stopped();
+    l.b.emit(MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
+  return l.b.emit(MW_JUMP, 0, 0, 0, 0, loop) >= 0 && !l._stopped();
 }

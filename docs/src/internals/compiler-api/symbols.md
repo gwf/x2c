@@ -108,7 +108,7 @@ facts, compile-time struct layouts, binding and generated-name
 counters, and initializer names. It does not snapshot parser position or
 other compiler state.
 
-Source: `src/symbols.x:1179`
+Source: `src/symbols.x:1163`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -759,41 +759,43 @@ Source: `src/symbols.x:183`
 <a id="SymTxn.commit"></a>
 #### SymTxn.commit
 
-`void SymTxn.commit(SymTxn s)`
+`void SymTxn.commit(SymTxn &?s)`
 
 Publishes an active semantic transaction and makes rollback a no-op.
+An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1257`
+Source: `src/symbols.x:1242`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
 
-`void SymTxn.commit_transient(SymTxn s)`
+`void SymTxn.commit_transient(SymTxn &s)`
 
 Commits an active transaction, retaining the original semantic-map owners.
 The caller may then release the transaction's construction scope.
 Source-fact collection must be disabled: its records retain staged maps.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1299`
+Source: `src/symbols.x:1285`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
 
-`int SymTxn.local_macros_changed(SymTxn s)`
+`int SymTxn.local_macros_changed(SymTxn &s)`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1246`
+Source: `src/symbols.x:1229`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
 
-`void SymTxn.rollback(SymTxn s)`
+`void SymTxn.rollback(SymTxn &?s)`
 
 Restores every semantic value captured by an active transaction.
+An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1322`
+Source: `src/symbols.x:1310`
 
 ## Design notes
 

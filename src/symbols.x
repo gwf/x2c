@@ -1153,22 +1153,6 @@ Type Sym.delegate_aggregate(Sym s, Type type) {
    Binding a macro's syntax stages its rows in a transaction, so a failed
    expansion leaves the symbol table as it was. */
 
-typedef struct SymTxn {
-  Compiler c;
-  int scope_index, next_binding, active, String initializer_name;
-  String shutdown_name, Map counters;
-  int local_macro_names;
-  SymScope scope;
-  Map statics, binding_facts;
-  Map source_definitions;
-  int source_occurrences;
-  /* A macro value application extends coverage to the effects its
-     producers request: adapters, base-scope bindings, early declarations,
-     initializers, origins, and exception support. */
-  int extended, Map adapters, Array base_bindings;
-  int early_count, init_count, origin_count, origin, needs_exception;
-} *SymTxn;
-
 /** Begins a reversible transaction over the current semantic scope.
 
     The transaction stages the current scope maps, file-static and binding
@@ -1177,8 +1161,7 @@ typedef struct SymTxn {
     other compiler state.
 */
 SymTxn Compiler.begin_semantic_transaction(Compiler c) {
-  SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
-  transaction.c = c;
+  SymTxn transaction = { .c = c };
   transaction.scope_index = c.sym.scopes.len() - 1;
   SymScope *scope = c.sym._scope_at(transaction.scope_index);
   transaction._save(*scope);
@@ -1189,7 +1172,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   return transaction;
 }
 
-static void SymTxn._save(SymTxn s, SymScope scope) {
+static void SymTxn._save(SymTxn &s, SymScope scope) {
   Compiler c = s.c;
   s.scope = scope;
   s.counters = c.names.counters;
@@ -1204,7 +1187,7 @@ static void SymTxn._save(SymTxn s, SymScope scope) {
 
 /* The base scopes other than the active one get fresh binding maps; the
    transaction keeps the originals. */
-static void SymTxn._save_effects(SymTxn s) {
+static void SymTxn._save_effects(SymTxn &s) {
   Compiler c = s.c;
   s.adapters = c.names.adapters;
   s.base_bindings = [];
@@ -1222,7 +1205,7 @@ static void SymTxn._save_effects(SymTxn s) {
   }
 }
 
-static void SymTxn._save_sources(SymTxn s) {
+static void SymTxn._save_sources(SymTxn &s) {
   s.source_definitions = s.c.source_definitions.copy();
   s.source_occurrences = s.c.source_occurrences.len();
 }
@@ -1230,7 +1213,7 @@ static void SymTxn._save_sources(SymTxn s) {
 /* Macro binding is incremental. Copy only the maps that construction
    mutates so failure can discard its rows while reads still reach the
    unchanged outer scopes. */
-static void SymTxn._stage(SymTxn s, SymScope &scope) {
+static void SymTxn._stage(SymTxn &s, SymScope &scope) {
   Compiler c = s.c;
   scope.symbols = s.scope.symbols.copy();
   c.merge_source_declarations(scope.symbols, s.scope.symbols);
@@ -1243,7 +1226,7 @@ static void SymTxn._stage(SymTxn s, SymScope &scope) {
 }
 
 /** Returns whether the transaction's active scope changed its macro map. */
-int SymTxn.local_macros_changed(SymTxn s) {
+int SymTxn.local_macros_changed(SymTxn &s) {
   SymScope *scope = s.c.sym._scope_at(s.scope_index);
   Map before = s.scope.macros, after = scope.macros;
   if (before == NULL || after == NULL)
@@ -1253,9 +1236,12 @@ int SymTxn.local_macros_changed(SymTxn s) {
 
 // commit and rollback
 
-/** Publishes an active semantic transaction and makes rollback a no-op. */
-void SymTxn.commit(SymTxn s) {
-  if (!s || !s.active) return;
+/** Publishes an active semantic transaction and makes rollback a no-op.
+    An absent or inactive transaction has no effect.
+*/
+void SymTxn.commit(SymTxn &?s) {
+  if (!s) return;
+  if (!s.active) return;
   Compiler c = s.c;
   SymScope *scope = c.sym._scope_at(s.scope_index);
   SymScope staged = *scope;
@@ -1278,7 +1264,7 @@ static void Compiler._merge_scope(
   scope.macros.merge(staged.macros);
 }
 
-static void SymTxn._commit_effects(SymTxn s) {
+static void SymTxn._commit_effects(SymTxn &s) {
   Compiler c = s.c;
   Map adapters = c.names.adapters;
   c.names.adapters = s.adapters;
@@ -1296,7 +1282,7 @@ static void SymTxn._commit_effects(SymTxn s) {
     Source-fact collection must be disabled: its records retain staged maps.
     Parsing and evaluation must allocate outside that temporary scope.
 */
-void SymTxn.commit_transient(SymTxn s) {
+void SymTxn.commit_transient(SymTxn &s) {
   Compiler c = s.c;
   Map statics = c.sym.statics, facts = c.semantic_binding_facts();
   Map counters = c.names.counters;
@@ -1318,9 +1304,12 @@ static void _replace_map(Map original, Map staged) {
   original.merge(staged);
 }
 
-/** Restores every semantic value captured by an active transaction. */
-void SymTxn.rollback(SymTxn s) {
-  if (!s || !s.active) return;
+/** Restores every semantic value captured by an active transaction.
+    An absent or inactive transaction has no effect.
+*/
+void SymTxn.rollback(SymTxn &?s) {
+  if (!s) return;
+  if (!s.active) return;
   Compiler c = s.c;
   s._restore();
   if (s.extended) s._restore_effects();
@@ -1328,7 +1317,7 @@ void SymTxn.rollback(SymTxn s) {
   s.active = 0;
 }
 
-static void SymTxn._restore(SymTxn s) {
+static void SymTxn._restore(SymTxn &s) {
   Compiler c = s.c;
   SymScope *scope = c.sym._scope_at(s.scope_index);
   *scope = s.scope;
@@ -1341,7 +1330,7 @@ static void SymTxn._restore(SymTxn s) {
   c.fini_fn = s.shutdown_name;
 }
 
-static void SymTxn._restore_effects(SymTxn s) {
+static void SymTxn._restore_effects(SymTxn &s) {
   Compiler c = s.c;
   c.names.adapters = s.adapters;
   foreach (List row, s.base_bindings.list())
@@ -1353,7 +1342,7 @@ static void SymTxn._restore_effects(SymTxn s) {
   c.needs_exception = s.needs_exception;
 }
 
-static void SymTxn._restore_sources(SymTxn s) {
+static void SymTxn._restore_sources(SymTxn &s) {
   Compiler c = s.c;
   c.source_occurrences.resize(s.source_occurrences);
   _replace_map(c.source_definitions, s.source_definitions);

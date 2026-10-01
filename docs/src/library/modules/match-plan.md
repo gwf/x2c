@@ -26,7 +26,7 @@ Releases resources owned by `plan`.
 A null plan is ignored; the plan, layout, program, and all aliases to them
 are invalid afterward. Borrowed pattern constants are not released.
 
-Source: `lib/match-plan.x:79`
+Source: `lib/match-plan.x:78`
 
 <a id="MatchPlan.prepare"></a>
 #### MatchPlan.prepare
