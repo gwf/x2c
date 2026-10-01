@@ -35,7 +35,7 @@ required sequence.
 | `make verify` | Unit suites, compiler fixtures, and focused probes. |
 | `make stage-3` | Build through the third self-hosted stage. |
 | `make stage-diff-all` | Compare generated C/H file sets and bytes across stages. |
-| `make proof-cold-collection` | Compare stage 2 with a translation that reads no `.xi` interfaces. |
+| `make proof-cold-collection` | Compare stage 1 with a translation that reads no `.xi` interfaces. |
 | `make check` | Standalone extended non-mutating checks. |
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
@@ -66,7 +66,7 @@ unchanged. The B4/B5 section of
 
 Stages 1 and up translate `lib/` and `src/` with the hidden
 `--fatal-warnings` option and compile the generated C with `-Werror`, so an
-x2c warning, a region finding, or a C compiler warning fails `make stage-2`
+x2c warning, a region finding, or a C compiler warning fails `make stage-1`
 and the gates built on it. Stage 0 stays lenient: the checked-in bootstrap
 translates it, and source installs compile it with the host C compiler.
 The option stays out of user builds and `unittest/`, whose suites provoke
@@ -80,12 +80,13 @@ not a required local sequence or a reason to publish the feature separately.
 
 `make precommit` is a publication-readiness target, not a Git commit prerequisite.
 It refreshes bootstrap, rebuilds stage 0 safely, builds through
-stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it,
+stage 1, and compares stages 0 and 1. `agent-pr-check` runs it,
 `doc-check`, `proof-cold-collection`, and the remaining extended checks.
-The full `proof-raw-symbols` sweep remains an explicit optional command. Stage 2
-establishes self-host convergence; the fourth build is available on demand.
-`proof-cold-collection` retranslates `lib/` and `src/` with stage 1 and the
-hidden `--no-interfaces` option, then requires stage 2's C, headers, and
+The full `proof-raw-symbols` sweep remains an explicit optional command.
+`stage-diff-0` establishes self-host convergence, and stage 1 adds the
+warning-free build; later stages run on demand and in the nightly snapshot.
+`proof-cold-collection` retranslates `lib/` and `src/` with stage 0 and the
+hidden `--no-interfaces` option, then requires stage 1's C, headers, and
 interfaces byte for byte, so warm interface replay cannot drift from a cold
 walk.
 

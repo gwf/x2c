@@ -182,17 +182,17 @@ check-after-precommit:
 #	$(MAKE) examples
 	time $(MAKE) doc-outputs
 
-# Stage 2 is where the compiler has reached its fixed point: stage 1 is built
-# by the refreshed bootstrap and stage 2 by stage 1, so `stage-diff-2` proves
-# the compiler reproduces its own output. `make stage-3` and `stage-diff-all`
-# still run the fourth round on demand.
+# `stage-diff-0` requires the refreshed bootstrap to reproduce stage 0, so the
+# compiler is at its fixed point. Stage 1 adds the build with fatal warnings
+# and `-Werror`; a further stage would compile the same C with the same flags.
+# `make stage-3` and `stage-diff-all` run the later rounds on demand, and the
+# nightly snapshot runs them every day.
 precommit: build					## Prepare the final tree for commit
 	$(MAKE) bootstrap-refresh
 	$(MAKE) build-safe
-	$(MAKE) stage-2
+	$(MAKE) stage-1
 	$(MAKE) stage-diff-0
 	$(MAKE) stage-diff-1
-	$(MAKE) stage-diff-2
 
 agent-pr-check:					## Run complete agent PR proof once
 	time $(MAKE) precommit
@@ -261,7 +261,7 @@ build-recovery: build					## Check incremental build recovery
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh
 
-proof-cold-collection: stage-2				## Check stage 2 against a cold translation
+proof-cold-collection: stage-1				## Check stage 1 against a cold translation
 	./tools/check-cold-collection.sh
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes

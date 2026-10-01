@@ -234,7 +234,7 @@ this compiler wrote; an empty value means the compiler walks the source of
 `lib/x2c.x`, which costs about a quarter of a second per process. Replay must
 match the walk it replaces: `make proof-cold-collection` retranslates `lib/`
 and `src/` with the hidden `--no-interfaces` option, which reads no
-interface, and requires the stage 2 C, headers, and interfaces byte for
+interface, and requires the stage 1 C, headers, and interfaces byte for
 byte.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
