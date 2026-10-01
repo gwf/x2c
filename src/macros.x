@@ -1,15 +1,12 @@
 /*  macros.x -- source macros and the compile-time Lisp they run
 
-    Expansion fills a definition's template from an invocation's captures
-    and binds the result through the operations that bind parsed source. A
-    definition is a compiler-only `macrodef` List: its holes, a Match
-    pattern over an invocation's capture rows, and a template of the
-    binders that pattern captures.
-
+    This module owns macro expansion. Expansion fills a definition's
+    template from an invocation's captures and binds the result through the
+    operations that bind parsed source. A definition is a compiler-only
+    `macrodef` List: its holes, a Match pattern over an invocation's
+    capture rows, and a template of the binders that pattern captures.
     Template slots and `$(...)` forms run in the unit's compile-time Lisp
-    session, whose parent is the shared library session, under the
-    `MetaContext` each evaluation installs. `meta-sdk.x` answers the
-    operations they call, and `meta-native.x` runs `meta` functions.
+    session, a child of the shared library session filled once per target.
 */
 
 #pragma once
@@ -43,11 +40,367 @@ $(import "../src/ast-rewrite.xmacro")
 #include <string.h>
 #include <sys/stat.h>
 
+/* expansion
+
+   Expanding an invocation node matches its capture rows against the
+   definition's pattern, adds a binding for each fresh name and member
+   hole, fills the template, and binds the result at the invocation's
+   position with the invocation as its origin. */
+
+/* One expansion. `direct` holds the bindings that fresh names and member
+   holes add to the pattern's captures. */
+typedef struct Expansion {
+  Compiler c, List definition, input, template, direct, Token invocation;
+} Expansion;
+
+/** Expands canonical macro capture rows and binds the result at `position`.
+    `stored` is a `macrodef` or visible macro name. The active expansion stack
+    supplies Lisp bindings, source location, and recursion checks; the
+    definition's fresh rows allocate invocation-local names. This method does
+    not begin a semantic transaction.
+*/
+List Compiler.expand_macro_invocation_node(
+  Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
+  Expansion x = {
+    .c = c, .definition = c._stored_definition(stored, invocation),
+    .input = arguments, .invocation = invocation};
+  int block_scope = x.definition.assoc(<kind>) == <decorator> &&
+                    x.definition.assoc(<target>) == <block>;
+  if (block_scope) c.sym.push_new_scope();
+  defer if (block_scope) c.sym.pop_scope();
+  $let(c.token, invocation) {
+    x.check();
+    c.macro_count++;
+    List result = NULL;
+    $let(c.macro_stack, c.macro_stack) {
+      result = x.bind(position);
+    }
+    return result;
+  }
+}
+
+/* The definition a node names: a visible macro, a local macro, or a Macro
+   value whose references bind in this unit. */
+static List Compiler._stored_definition(
+  Compiler c, Var stored, Token invocation) {
+  List definition = NULL;
+  if (stored.is_atom())
+    definition = c._lookup(Atom.intern(stored.str()), invocation);
+  else match (stored)
+    case %(local-macro (!is ?name type atom)):
+      definition = c.sym.lookup_macro(name);
+  if (!definition) definition = c._macro_value_bindings(stored);
+  return definition;
+}
+
+/* An identical recursive expansion, nesting deeper than 64, or more than
+   10000 expansions stops the compile. */
+static void Expansion.check(Expansion *x) {
+  Compiler c = x.c;
+  foreach (List active, c.macro_stack) {
+    (List prior, List prior_input, Var bindings, Var site) = active;
+    (void) bindings, (void) site;
+    if (prior.equal(x.definition) && prior_input.equal(x.input)) x.recursion();
+  }
+  if (c.macro_stack.len() >= 64) x.too_deep();
+  if (c.macro_count >= 10000)
+    c.report_error(
+      <macro>, "macro expansion count exceeds 10000",
+      x.invocation, NULL);
+}
+
+static void Expansion.recursion(Expansion *x) {
+  Atom name = x.definition.assoc(<name>);
+  String spelling = name.str();
+  List captured = x.input.search_replace(
+    %(capture (source ?syntax) *), <?syntax>);
+  Var shown = _source_unwrap(captured);
+  x.c.report_error(
+    <macro>, %"identical recursive expansion of '$spelling'",
+    x.invocation,
+    %(${_definition_note(x.definition)} "input: ${shown.repr()}"));
+}
+
+static void Expansion.too_deep(Expansion *x) {
+  /* Compiler-generated applications can have no invocation token. */
+  List first = x.c.macro_stack.last().list().car();
+  String first_note = %"first expansion: ${_definition_note(first)}";
+  x.c.report_error(
+    <macro>, "macro expansion depth exceeds 64", x.invocation,
+    %(${_definition_note(x.definition)} $first_note));
+}
+
+/* Pushes this expansion's frame on the macro stack, fills the template,
+   and binds the result. A failed match binds nothing. */
+static List Expansion.bind(Expansion *x, AstPos position) {
+  Compiler c = x.c;
+  List old_stack = c.macro_stack;
+  x.template = c._template(x.definition);
+  List fresh_input = x.fresh_names(old_stack);
+  List match_input = fresh_input
+    ? x.input.append(%((fresh @fresh_input))) : x.input;
+  List replacement_bindings = match_input.match(
+    x.definition.assoc(<pattern>));
+  int matched = !!replacement_bindings;
+  replacement_bindings = replacement_bindings.append(x.direct);
+  List lisp_bindings = _lisp_bindings(replacement_bindings);
+  c.macro_stack = %(
+    (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
+  );
+  int expansion_origin = c.record_origin(x.invocation);
+  Ast constructed = matched ? x.construct(replacement_bindings) : NULL;
+  List result = NULL;
+  $let(c.origin, expansion_origin) {
+    result = c.bind_syntax(
+      matched ? constructed : void,
+      position, c.return_type);
+  }
+  return result;
+}
+
+static List Compiler._template(Compiler c, List definition) {
+  List template = definition.assoc(<template>);
+  if (definition.assoc(<open>) is void) return template;
+  Map replacements = {}, natives = {};
+  c._open_references(template, replacements, natives);
+  return c._open_template(template, replacements, natives);
+}
+
+/* An open definition binds its free references in the unit that applies
+   it. A value resolves to the unit's global declaration; a callee the unit
+   does not declare becomes a native call with the result type recorded
+   where the macro was defined; a typedef base resolves in the base scope.
+   Hole binders and introduced locals are not references. */
+static void Compiler._open_references(
+  Compiler c, Var value, Map replacements, Map natives) {
+  if (value is not <list> || value.is_nil()) return;
+  match (value)
+    case %(expr ?(List type) ${$source_identifier_content(%(?binding))}): {
+      String spelling = NULL;
+      if (!binding_identity_try_parts(binding, NULL, spelling)) return;
+      List target = c.sym.resolve_global(%($spelling), NULL);
+      if (target) replacements[binding] = target;
+      else if (type && type.type().is_function())
+        natives[binding] =
+          %($spelling ${type.type().apply().canonicalize()});
+      else replacements[binding] = c.sym.reference_global(%($spelling));
+      return;
+    }
+  foreach (Var child, value.list())
+    c._open_references(child, replacements, natives);
+}
+
+/* Rebuilds the template once with what `_open_references` found and
+   without origin markers. A replaced reference is not revisited, and a
+   callee finds its native under its replacement. */
+static Var Compiler._open_template(
+  Compiler c, Var value, Map replacements, Map natives) {
+  Var found;
+  if (value is not <list> || value.is_nil()) return value;
+  if (replacements.try_get(value, found)) return found;
+  Macro called = $called;
+  match (value) {
+    case %(at m-origin ?node):
+      return c._open_template(node, replacements, natives);
+    case called(?callee, *arguments):
+      if (value.list().car() == <expr>)
+        match (callee) case %(expr ?
+            ${$source_identifier_content(%(?binding))}): {
+          Var bound = replacements.getdefault(binding, binding);
+          if (natives.try_get(bound, found)) {
+            Var (spelling, result) = found;
+            List args = c._open_template(arguments, replacements, natives);
+            return %(expr $result (call $spelling (args @args)));
+          }
+        }
+    case %(decl ?base ?declarators): {
+      Type resolved = base is <list> && base.type().is_bare_typedef_name()
+        ? c.sym.resolve_base_type(base) : NULL;
+      if (resolved)
+        return %(decl $resolved
+                 ${c._open_template(declarators, replacements, natives)});
+    }
+  }
+  Var child;
+  $ast.rewrite_children(
+    value, child, c._open_template(child, replacements, natives));
+}
+
+/* Allocates each fresh name of the definition. A name compile-time Lisp
+   reads joins the match input as a Name capture row; the others, with the
+   member holes, bind directly. Returns the Name rows. */
+static List Expansion.fresh_names(Expansion *x, List old_stack) {
+  Compiler c = x.c;
+  Map file_locals = {};
+  // The outermost active row's fourth field is its invocation token.
+  Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
+  if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
+  Array fresh_values = [];
+  foreach (List fresh, x.definition.assoc(<fresh>).list()) {
+    Var (binder, spelling, lisp) = fresh;
+    List binding = c._introduced_binding(
+      spelling.str(), binder in file_locals ? root : NULL);
+    if (lisp.int()) {
+      List hole = _hole(binder, <name>, 0);
+      fresh_values.push(c._capture_row(hole, %($binding)));
+    }
+    else {
+      c.semantic_binding_facts()[%(source-spelling $binding)] =
+        spelling.str();
+      x.direct = cons(%($binder $binding), x.direct);
+    }
+  }
+  List members = c._member_bindings(x.definition.assoc(<parameters>), x.input);
+  x.direct = x.direct.append(members);
+  return fresh_values.list_free();
+}
+
+/* A Name hole in a member position supplies the captured spelling, so a
+   template local passed there keeps the spelling its source wrote. */
+static List Compiler._member_bindings(
+  Compiler c, List parameters, List input) {
+  List captures = NULL, bindings = NULL;
+  match (input) {
+    case %(args *rows): captures = rows;
+    case %(target (args *rows) ?): captures = rows;
+  }
+  foreach (List parameter, parameters) {
+    List capture = captures.car();
+    captures = captures.cdr();
+    if (parameter.assoc(<kind>) != <name> ||
+        parameter.assoc(<sequence>).int())
+      continue;
+    Var value = capture.assoc(<value>), spelling;
+    if (value is <list> &&
+        c.semantic_binding_facts().try_get(
+          %(source-spelling $value), spelling))
+      value = spelling;
+    Var member = _hole_key(parameter, "member");
+    bindings = cons(%($member $value), bindings);
+  }
+  return bindings;
+}
+
+/* The bindings compile-time Lisp sees: the author's binders, without the
+   `__macro_` binders the compiler makes. */
+static List _lisp_bindings(List bindings) {
+  Array result = [];
+  foreach (List pair, bindings) {
+    Var binder = pair.car();
+    if (binder.is_binder() &&
+        !binder.str().startswith("?__macro_") &&
+        !binder.str().startswith("*__macro_"))
+      result.push(pair);
+  }
+  return result.list_free();
+}
+
+/* The filled template. A Declaration result, or a NamedType decorator's,
+   becomes one declaration bundle. */
+static Ast Expansion.construct(Expansion *x, List replacement_bindings) {
+  List definition = x.definition;
+  Ast constructed = x.template.replace(replacement_bindings);
+  if (constructed &&
+      (definition.assoc(<kind>) == <decl-unit> ||
+       definition.assoc(<target>) == <named-type>)) {
+    List rows = constructed.car() == <seq>
+              ? constructed.cdr() : %($constructed);
+    constructed = %(declaration-bundle (rows @rows));
+  }
+  return constructed;
+}
+
+/** Resolves a stored macro invocation marker to its source token.
+    Nested template markers use the active expansion's invocation; unresolved
+    markers return NULL.
+*/
+Token Compiler.macro_invocation_site(Compiler c, Var site) {
+  if (site is <token>) return site;
+  if (site != <m-invoke> || !c.macro_stack) return NULL;
+  List active = c.macro_stack.car();
+  (Var definition, Var input, Var bindings, Token invocation) = active;
+  (void) definition, (void) input, (void) bindings;
+  return invocation;
+}
+
+/* expansion names
+
+   A fresh name gets a private spelling. At file scope a declaration with
+   external or no linkage can reach another unit through a header or an
+   interface, so its spelling is stable: collection and full parsing expand
+   the same invocation to the same spelling. */
+
+static List Compiler._introduced_binding(
+  Compiler c, String source, Token root) =>
+  c.sym.introduce(
+    root ? c._file_scope_name(root, source)
+         : c.fresh_name(%"macro_$source"));
+
+/* The spelling names the owning unit and the root invocation's offset, and
+   counts repeats of the same name there. */
+static String Compiler._file_scope_name(
+  Compiler c, Token root, String source) {
+  String key = %"macro:${c._scope_owner()}:${root.pos}:$source";
+  Var stored;
+  int count = c.names.counters.try_get(key, stored) ? stored : 0;
+  c.names.counters[key] = count + 1;
+  String digest = "%08x".printf(%"$key:$count".hash());
+  return %"_x2c_macro_${source}_$digest";
+}
+
+/* The unit's owner spelling, cached per file and package. */
+static String Compiler._scope_owner(Compiler c) {
+  List owner_key = %(${c.filename} ${c.package});
+  Var cached;
+  if (c.names.file_scope_owners.try_get(owner_key, cached)) return cached;
+  String owner = c.filename ? c._owner_spelling() : "";
+  c.names.file_scope_owners[owner_key] = owner;
+  return owner;
+}
+
+/* Home and package paths stay portable; other paths use their canonical
+   absolute identity. */
+static String Compiler._owner_spelling(Compiler c) {
+  String path = c.canonical_path(Path.absolute(c.filename));
+  String owner = home_portable_path(path);
+  Var package_root = c.package ? c.package_roots[c.package] : void;
+  if (package_root is not <string>) return owner;
+  String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
+  if (!path.startswith(prefix)) return owner;
+  return %"package:${c.package}/${path[prefix.len():]}";
+}
+
+/* Collects the template locals that a file-scope row declares with external
+   linkage or none: objects, functions, typedefs, tags, and enumerators. */
+static void _file_scope_locals(List rows, Map locals) {
+  foreach (Var row, rows) match (row) {
+    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
+    case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
+    case %(seq *inner): _file_scope_locals(inner, locals);
+    case %(function ?type (bind ?binder ?) ?):
+      if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
+    case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
+      match (type) case %(* (!or struct union enum) ?tag *):
+        if (tag.is_binder()) locals[tag] = 1;
+      match (type) case %(* enum ? (*members) *):
+        _file_scope_declarators(members, locals);
+      if (kind == <typedef> || !type.type().is_static())
+        _file_scope_declarators(rows, locals);
+    }
+  }
+}
+
+static void _file_scope_declarators(List declarators, Map locals) {
+  foreach (Var declarator, declarators) match (declarator)
+    case %(!or (bind ?binder ?) (op = (bind ?binder ?) ?)):
+      if (binder.is_binder()) locals[binder] = 1;
+}
+
 /* macro definitions
 
    Reading a definition takes its result kind, name, signature holes, and
-   body. The body becomes a template of binders, and the definition keeps
-   the Match pattern whose captures fill them. */
+   body. Its signature is visible before the body is read, so the body can
+   invoke the macro it defines. */
 
 /* One definition while it is read. `nested` marks a definition inside a
    template, which stays syntax until the template's expansion binds it.
@@ -106,6 +459,21 @@ static void Definition.head(Definition *d) {
   c.next();
   d.kind = c._result_kind_token(token);
 }
+
+static Symbol Compiler._result_kind_token(Compiler c, Token token) {
+  String spelling = token.text, Symbol kind = Symbol.new(spelling);
+  if (spelling.lower() == "declaration") return <decl-unit>;
+  if (kind == <statement> || kind == <block>) return <block-item>;
+  if (kind == <entry>) return <map-entry>;
+  if (kind == <decorator>) return kind;
+  if (kind in direct_result_kinds) return kind;
+  c.report_error(
+    <parse>, %"unknown macro result kind '$spelling'",
+    token, NULL);
+}
+
+static const SymbolSet direct_result_kinds =
+  %<<expression field enumerator map-entry unit>>;
 
 static void Definition.naming(Definition *d) {
   Compiler c = d.c;
@@ -304,6 +672,11 @@ static List _recorded(Map m) {
   return order is <list> ? order.list().reverse() : NULL;
 }
 
+/* definition templates
+
+   Finishing a definition turns its body into the stored template, derives
+   the rows an invocation needs, and makes the `macrodef` visible. */
+
 /* Turns the body into the stored template, then derives the fresh rows,
    captures, and pattern an invocation needs. Parsed literal names carry
    definition-only identities, so the template stores binders instead and
@@ -444,21 +817,6 @@ static List Definition.node(Definition *d) {
   );
   return d.open ? definition.append(%((open 1))) : definition;
 }
-
-static Symbol Compiler._result_kind_token(Compiler c, Token token) {
-  String spelling = token.text, Symbol kind = Symbol.new(spelling);
-  if (spelling.lower() == "declaration") return <decl-unit>;
-  if (kind == <statement> || kind == <block>) return <block-item>;
-  if (kind == <entry>) return <map-entry>;
-  if (kind == <decorator>) return kind;
-  if (kind in direct_result_kinds) return kind;
-  c.report_error(
-    <parse>, %"unknown macro result kind '$spelling'",
-    token, NULL);
-}
-
-static const SymbolSet direct_result_kinds =
-  %<<expression field enumerator map-entry unit>>;
 
 /* signature holes
 
@@ -2094,362 +2452,6 @@ static List Compiler._expression_decorator(
   );
   List node = c._invocation_node(definition, input, invocation);
   return %(expr (<macro-expr>) $node);
-}
-
-/* expansion
-
-   Expanding an invocation node matches its capture rows against the
-   definition's pattern, adds a binding for each fresh name and member
-   hole, fills the template, and binds the result at the invocation's
-   position with the invocation as its origin. */
-
-/* One expansion. `direct` holds the bindings that fresh names and member
-   holes add to the pattern's captures. */
-typedef struct Expansion {
-  Compiler c, List definition, input, template, direct, Token invocation;
-} Expansion;
-
-/** Expands canonical macro capture rows and binds the result at `position`.
-    `stored` is a `macrodef` or visible macro name. The active expansion stack
-    supplies Lisp bindings, source location, and recursion checks; the
-    definition's fresh rows allocate invocation-local names. This method does
-    not begin a semantic transaction.
-*/
-List Compiler.expand_macro_invocation_node(
-  Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
-  Expansion x = {
-    .c = c, .definition = c._stored_definition(stored, invocation),
-    .input = arguments, .invocation = invocation};
-  int block_scope = x.definition.assoc(<kind>) == <decorator> &&
-                    x.definition.assoc(<target>) == <block>;
-  if (block_scope) c.sym.push_new_scope();
-  defer if (block_scope) c.sym.pop_scope();
-  $let(c.token, invocation) {
-    x.check();
-    c.macro_count++;
-    List result = NULL;
-    $let(c.macro_stack, c.macro_stack) {
-      result = x.bind(position);
-    }
-    return result;
-  }
-}
-
-/* The definition a node names: a visible macro, a local macro, or a Macro
-   value whose references bind in this unit. */
-static List Compiler._stored_definition(
-  Compiler c, Var stored, Token invocation) {
-  List definition = NULL;
-  if (stored.is_atom())
-    definition = c._lookup(Atom.intern(stored.str()), invocation);
-  else match (stored)
-    case %(local-macro (!is ?name type atom)):
-      definition = c.sym.lookup_macro(name);
-  if (!definition) definition = c._macro_value_bindings(stored);
-  return definition;
-}
-
-/* An identical recursive expansion, nesting deeper than 64, or more than
-   10000 expansions stops the compile. */
-static void Expansion.check(Expansion *x) {
-  Compiler c = x.c;
-  foreach (List active, c.macro_stack) {
-    (List prior, List prior_input, Var bindings, Var site) = active;
-    (void) bindings, (void) site;
-    if (prior.equal(x.definition) && prior_input.equal(x.input)) x.recursion();
-  }
-  if (c.macro_stack.len() >= 64) x.too_deep();
-  if (c.macro_count >= 10000)
-    c.report_error(
-      <macro>, "macro expansion count exceeds 10000",
-      x.invocation, NULL);
-}
-
-static void Expansion.recursion(Expansion *x) {
-  Atom name = x.definition.assoc(<name>);
-  String spelling = name.str();
-  List captured = x.input.search_replace(
-    %(capture (source ?syntax) *), <?syntax>);
-  Var shown = _source_unwrap(captured);
-  x.c.report_error(
-    <macro>, %"identical recursive expansion of '$spelling'",
-    x.invocation,
-    %(${_definition_note(x.definition)} "input: ${shown.repr()}"));
-}
-
-static void Expansion.too_deep(Expansion *x) {
-  /* Compiler-generated applications can have no invocation token. */
-  List first = x.c.macro_stack.last().list().car();
-  String first_note = %"first expansion: ${_definition_note(first)}";
-  x.c.report_error(
-    <macro>, "macro expansion depth exceeds 64", x.invocation,
-    %(${_definition_note(x.definition)} $first_note));
-}
-
-/* Pushes this expansion's frame on the macro stack, fills the template,
-   and binds the result. A failed match binds nothing. */
-static List Expansion.bind(Expansion *x, AstPos position) {
-  Compiler c = x.c;
-  List old_stack = c.macro_stack;
-  x.template = c._template(x.definition);
-  List fresh_input = x.fresh_names(old_stack);
-  List match_input = fresh_input
-    ? x.input.append(%((fresh @fresh_input))) : x.input;
-  List replacement_bindings = match_input.match(
-    x.definition.assoc(<pattern>));
-  int matched = !!replacement_bindings;
-  replacement_bindings = replacement_bindings.append(x.direct);
-  List lisp_bindings = _lisp_bindings(replacement_bindings);
-  c.macro_stack = %(
-    (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
-  );
-  int expansion_origin = c.record_origin(x.invocation);
-  Ast constructed = matched ? x.construct(replacement_bindings) : NULL;
-  List result = NULL;
-  $let(c.origin, expansion_origin) {
-    result = c.bind_syntax(
-      matched ? constructed : void,
-      position, c.return_type);
-  }
-  return result;
-}
-
-/* Allocates each fresh name of the definition. A name compile-time Lisp
-   reads joins the match input as a Name capture row; the others, with the
-   member holes, bind directly. Returns the Name rows. */
-static List Expansion.fresh_names(Expansion *x, List old_stack) {
-  Compiler c = x.c;
-  Map file_locals = {};
-  // The outermost active row's fourth field is its invocation token.
-  Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
-  if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
-  Array fresh_values = [];
-  foreach (List fresh, x.definition.assoc(<fresh>).list()) {
-    Var (binder, spelling, lisp) = fresh;
-    List binding = c._introduced_binding(
-      spelling.str(), binder in file_locals ? root : NULL);
-    if (lisp.int()) {
-      List hole = _hole(binder, <name>, 0);
-      fresh_values.push(c._capture_row(hole, %($binding)));
-    }
-    else {
-      c.semantic_binding_facts()[%(source-spelling $binding)] =
-        spelling.str();
-      x.direct = cons(%($binder $binding), x.direct);
-    }
-  }
-  List members = c._member_bindings(x.definition.assoc(<parameters>), x.input);
-  x.direct = x.direct.append(members);
-  return fresh_values.list_free();
-}
-
-/* The filled template. A Declaration result, or a NamedType decorator's,
-   becomes one declaration bundle. */
-static Ast Expansion.construct(Expansion *x, List replacement_bindings) {
-  List definition = x.definition;
-  Ast constructed = x.template.replace(replacement_bindings);
-  if (constructed &&
-      (definition.assoc(<kind>) == <decl-unit> ||
-       definition.assoc(<target>) == <named-type>)) {
-    List rows = constructed.car() == <seq>
-              ? constructed.cdr() : %($constructed);
-    constructed = %(declaration-bundle (rows @rows));
-  }
-  return constructed;
-}
-
-static List Compiler._template(Compiler c, List definition) {
-  List template = definition.assoc(<template>);
-  if (definition.assoc(<open>) is void) return template;
-  Map replacements = {}, natives = {};
-  c._open_references(template, replacements, natives);
-  return c._open_template(template, replacements, natives);
-}
-
-/* An open definition binds its free references in the unit that applies
-   it. A value resolves to the unit's global declaration; a callee the unit
-   does not declare becomes a native call with the result type recorded
-   where the macro was defined; a typedef base resolves in the base scope.
-   Hole binders and introduced locals are not references. */
-static void Compiler._open_references(
-  Compiler c, Var value, Map replacements, Map natives) {
-  if (value is not <list> || value.is_nil()) return;
-  match (value)
-    case %(expr ?(List type) ${$source_identifier_content(%(?binding))}): {
-      String spelling = NULL;
-      if (!binding_identity_try_parts(binding, NULL, spelling)) return;
-      List target = c.sym.resolve_global(%($spelling), NULL);
-      if (target) replacements[binding] = target;
-      else if (type && type.type().is_function())
-        natives[binding] =
-          %($spelling ${type.type().apply().canonicalize()});
-      else replacements[binding] = c.sym.reference_global(%($spelling));
-      return;
-    }
-  foreach (Var child, value.list())
-    c._open_references(child, replacements, natives);
-}
-
-/* Rebuilds the template once with what `_open_references` found and
-   without origin markers. A replaced reference is not revisited, and a
-   callee finds its native under its replacement. */
-static Var Compiler._open_template(
-  Compiler c, Var value, Map replacements, Map natives) {
-  Var found;
-  if (value is not <list> || value.is_nil()) return value;
-  if (replacements.try_get(value, found)) return found;
-  Macro called = $called;
-  match (value) {
-    case %(at m-origin ?node):
-      return c._open_template(node, replacements, natives);
-    case called(?callee, *arguments):
-      if (value.list().car() == <expr>)
-        match (callee) case %(expr ?
-            ${$source_identifier_content(%(?binding))}): {
-          Var bound = replacements.getdefault(binding, binding);
-          if (natives.try_get(bound, found)) {
-            Var (spelling, result) = found;
-            List args = c._open_template(arguments, replacements, natives);
-            return %(expr $result (call $spelling (args @args)));
-          }
-        }
-    case %(decl ?base ?declarators): {
-      Type resolved = base is <list> && base.type().is_bare_typedef_name()
-        ? c.sym.resolve_base_type(base) : NULL;
-      if (resolved)
-        return %(decl $resolved
-                 ${c._open_template(declarators, replacements, natives)});
-    }
-  }
-  Var child;
-  $ast.rewrite_children(
-    value, child, c._open_template(child, replacements, natives));
-}
-
-/* A Name hole in a member position supplies the captured spelling, so a
-   template local passed there keeps the spelling its source wrote. */
-static List Compiler._member_bindings(
-  Compiler c, List parameters, List input) {
-  List captures = NULL, bindings = NULL;
-  match (input) {
-    case %(args *rows): captures = rows;
-    case %(target (args *rows) ?): captures = rows;
-  }
-  foreach (List parameter, parameters) {
-    List capture = captures.car();
-    captures = captures.cdr();
-    if (parameter.assoc(<kind>) != <name> ||
-        parameter.assoc(<sequence>).int())
-      continue;
-    Var value = capture.assoc(<value>), spelling;
-    if (value is <list> &&
-        c.semantic_binding_facts().try_get(
-          %(source-spelling $value), spelling))
-      value = spelling;
-    Var member = _hole_key(parameter, "member");
-    bindings = cons(%($member $value), bindings);
-  }
-  return bindings;
-}
-
-/* The bindings compile-time Lisp sees: the author's binders, without the
-   `__macro_` binders the compiler makes. */
-static List _lisp_bindings(List bindings) {
-  Array result = [];
-  foreach (List pair, bindings) {
-    Var binder = pair.car();
-    if (binder.is_binder() &&
-        !binder.str().startswith("?__macro_") &&
-        !binder.str().startswith("*__macro_"))
-      result.push(pair);
-  }
-  return result.list_free();
-}
-
-/** Resolves a stored macro invocation marker to its source token.
-    Nested template markers use the active expansion's invocation; unresolved
-    markers return NULL.
-*/
-Token Compiler.macro_invocation_site(Compiler c, Var site) {
-  if (site is <token>) return site;
-  if (site != <m-invoke> || !c.macro_stack) return NULL;
-  List active = c.macro_stack.car();
-  (Var definition, Var input, Var bindings, Token invocation) = active;
-  (void) definition, (void) input, (void) bindings;
-  return invocation;
-}
-
-/* expansion names
-
-   A fresh name gets a private spelling. At file scope a declaration with
-   external or no linkage can reach another unit through a header or an
-   interface, so its spelling is stable: collection and full parsing expand
-   the same invocation to the same spelling. */
-
-static List Compiler._introduced_binding(
-  Compiler c, String source, Token root) =>
-  c.sym.introduce(
-    root ? c._file_scope_name(root, source)
-         : c.fresh_name(%"macro_$source"));
-
-/* The spelling names the owning unit and the root invocation's offset, and
-   counts repeats of the same name there. */
-static String Compiler._file_scope_name(
-  Compiler c, Token root, String source) {
-  String key = %"macro:${c._scope_owner()}:${root.pos}:$source";
-  Var stored;
-  int count = c.names.counters.try_get(key, stored) ? stored : 0;
-  c.names.counters[key] = count + 1;
-  String digest = "%08x".printf(%"$key:$count".hash());
-  return %"_x2c_macro_${source}_$digest";
-}
-
-/* The unit's owner spelling, cached per file and package. */
-static String Compiler._scope_owner(Compiler c) {
-  List owner_key = %(${c.filename} ${c.package});
-  Var cached;
-  if (c.names.file_scope_owners.try_get(owner_key, cached)) return cached;
-  String owner = c.filename ? c._owner_spelling() : "";
-  c.names.file_scope_owners[owner_key] = owner;
-  return owner;
-}
-
-/* Home and package paths stay portable; other paths use their canonical
-   absolute identity. */
-static String Compiler._owner_spelling(Compiler c) {
-  String path = c.canonical_path(Path.absolute(c.filename));
-  String owner = home_portable_path(path);
-  Var package_root = c.package ? c.package_roots[c.package] : void;
-  if (package_root is not <string>) return owner;
-  String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
-  if (!path.startswith(prefix)) return owner;
-  return %"package:${c.package}/${path[prefix.len():]}";
-}
-
-/* Collects the template locals that a file-scope row declares with external
-   linkage or none: objects, functions, typedefs, tags, and enumerators. */
-static void _file_scope_locals(List rows, Map locals) {
-  foreach (Var row, rows) match (row) {
-    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
-    case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
-    case %(seq *inner): _file_scope_locals(inner, locals);
-    case %(function ?type (bind ?binder ?) ?):
-      if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
-    case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
-      match (type) case %(* (!or struct union enum) ?tag *):
-        if (tag.is_binder()) locals[tag] = 1;
-      match (type) case %(* enum ? (*members) *):
-        _file_scope_declarators(members, locals);
-      if (kind == <typedef> || !type.type().is_static())
-        _file_scope_declarators(rows, locals);
-    }
-  }
-}
-
-static void _file_scope_declarators(List declarators, Map locals) {
-  foreach (Var declarator, declarators) match (declarator)
-    case %(!or (bind ?binder ?) (op = (bind ?binder ?) ?)):
-      if (binder.is_binder()) locals[binder] = 1;
 }
 
 /* template slots
