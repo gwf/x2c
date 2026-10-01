@@ -14,11 +14,15 @@
     `--outputs` checks only those samples in the book.
 */
 #include "doc-samples.x"
+#include <time.h>
 #include <unistd.h>
 
 static Path root, compiler
 static List build_flags
-static Array samples, results, failures, running, attempts
+static Array samples, results, failures, attempts
+
+/* The wall-clock seconds one build or run may take. */
+enum { _DEADLINE = 120 }
 
 /* The site's prose and carousel slides live under src/content so that Astro
    does not route each one as a page; they carry samples like the book. */
@@ -71,14 +75,26 @@ static String _stdout(Job job):
   try return job.output()
   catch %(cmd-fail *detail): return %"${detail.assoc(<output>)}"
 
-/* Each command runs with empty input under a CPU limit, so a sample that
-   spins or waits for input fails instead of stalling the check. */
+/* Each command runs with empty input under a CPU limit, and `_finished`
+   ends it at a wall-clock deadline, so a sample that spins, sleeps, or
+   waits for input fails instead of stalling the check. */
 static Job _limited(List command):
   return %(sh -c "ulimit -t 60; exec \"\x24@\"" sample @command)
 
 static void _launch(Job job, List attempt):
-  running.push(job.start())
-  attempts.push(%($job @attempt))
+  long deadline = time(NULL) + _DEADLINE
+  attempts.push(%(${job.start()} @attempt $deadline))
+
+/* Removes and returns an attempt whose job finished or passed its
+   deadline, waiting until one does. */
+static List _finished(void):
+  while 1:
+    for (int at = 0; at < attempts.len(); at++):
+      List attempt = attempts[at]
+      (Job job, int index, int candidate, Path work, Symbol phase,
+       long deadline) = attempt
+      if job.ready() || time(NULL) >= deadline: return attempts.remove(at)
+    usleep(1000)
 
 /* Builds candidate `candidate` of sample `index` in a fresh directory.
    A sample without expected output is compiled without linking. */
@@ -109,11 +125,18 @@ static void _failed(int index, int candidate, String detail):
     "it `x2c,ignore` with an <!-- ignore: reason --> comment above the " +
     "fence\n" + String.join("\n", reasons)
 
-/* Advances the attempt whose job finished. */
+/* Advances the attempt whose job finished, or fails the sample whose job
+   passed its deadline after ending that job. */
 static void _advance(List attempt):
   (Job job, int index, int candidate, Path work, Symbol phase) = attempt
   (String where, String code, String expected, int runs, int status) =
     samples[index].list()
+  if !job.ready():
+    job.cleanup()
+    work.remove_tree()
+    results[index] = %"$where: x2c sample timed out: its $phase did not " +
+      %"finish within $_DEADLINE seconds"
+    return
   int exit = job.status()
   String output = _stdout(job), errors = job.errors()
   if phase == <build> && !exit && runs:
@@ -164,24 +187,16 @@ foreach String source in _sources(outputs_only):
 
 results = []
 failures = []
-running = []
 attempts = []
 for (int index = 0; index < samples.len(); index++):
   results.push(NULL)
   failures.push([])
 int next = 0
-while next < samples.len() || running.len():
-  if next < samples.len() && running.len() < limit:
+while next < samples.len() || attempts.len():
+  if next < samples.len() && attempts.len() < limit:
     _begin(next++, 0)
     continue
-  Job done = Job.wait_any(running)
-  for (int at = 0; at < attempts.len(); at++):
-    List attempt = attempts[at]
-    Job owner = attempt.car()
-    if owner == done:
-      attempts.remove(at)
-      _advance(attempt)
-      break
+  _advance(_finished())
 
 foreach Var result in results:
   if result: errors.push(result)
