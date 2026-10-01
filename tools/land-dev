@@ -7,7 +7,9 @@
 # the agent-pr-check gate once, commits refreshed bootstrap/ and etc/ output,
 # confirms the gate, and
 # pushes to dev only when the tree is clean. A rejected push retries from the
-# merge. A failed gate preserves the tree and stops. Each invocation keeps
+# merge. A change to emitted C leaves bootstrap one round behind and fails
+# stage-diff-0; that gate has already refreshed bootstrap, so land-dev runs
+# it once more. Any other failed gate preserves the tree and stops. Each invocation keeps
 # its logs under debug/land-dev-*, with debug/land-dev-latest pointing to it.
 # Only shared publication takes this lock; private commits and builds do not.
 set -u
@@ -46,8 +48,16 @@ for attempt in 1 2 3 4; do
     git add -A docs agents site && git commit -qm "refresh generated docs"
   fi
   if ! tools/gate-state.py ensure agent-pr-check >"$logs/gate.log" 2>&1; then
-    echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
-    exit 1
+    grep -q '\[stage-diff-0\] Error' "$logs/gate.log" || {
+      echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
+      exit 1
+    }
+    echo "land-dev: bootstrap needs a second round; running the gate again"
+    mv "$logs/gate.log" "$logs/gate-first-round.log"
+    tools/gate-state.py ensure agent-pr-check >"$logs/gate.log" 2>&1 || {
+      echo "land-dev: gate failed; tree preserved; see $logs/gate.log"
+      exit 1
+    }
   fi
   if [ -n "$(git status --short)" ]; then
     git add bootstrap etc && git commit -qm "$message" &&
