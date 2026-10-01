@@ -95,13 +95,13 @@ static void Compiler._publish(Compiler c, List outputs) {
 // header and source
 
 /* One unit's split into header and source. `private` is the visibility at
-   the current node; `pending` holds each private typedef as `(names node
-   promoted)`, `opened` the visibility each conditional group opened at,
-   `open` the groups still open, and `forwarded` the struct and union tags
-   the header declares. */
+   the current node; `pending` holds each private typedef or x2c include as
+   `(names node promoted)`, `opened` the visibility each conditional group
+   opened at, `open` the groups still open, `forwarded` the struct and union
+   tags the header declares, and `included` the files its includes reach. */
 typedef struct Partition {
   Compiler c, Array header, source, pending, opened, open;
-  Map forwarded, int private;
+  Map forwarded, included, int private;
 } Partition;
 
 /* Partition a normalized unit without changing source order. Non-inline
@@ -112,7 +112,7 @@ typedef struct Partition {
 static List Compiler._header_and_source(Compiler c, List ast) {
   Partition p = {
     .c = c, .header = [], .source = [], .pending = [], .opened = [],
-    .open = [], .forwarded = {}};
+    .open = [], .forwarded = {}, .included = {}};
   foreach (Ast node, ast) p.add(node);
   return p.finish();
 }
@@ -166,12 +166,17 @@ static List Partition.finish(Partition *p) {
    A typedef that follows a function definition is source-private unless a
    later header item names it and no earlier header typedef already declares
    that name; a public prototype must be able to spell its parameter types,
-   while an opaque forward typedef keeps a private body private. */
+   while an opaque forward typedef keeps a private body private. A private
+   include of x2c source follows the same rule for the typedefs it
+   declares. */
 
-/* A private typedef waits as a `pending` marker in both files until the
-   whole unit has been partitioned. */
-static void Partition.add_typedef(Partition *p, List node) {
-  List names = p.private ? _typedef_names(node) : NULL;
+static void Partition.add_typedef(Partition *p, List node) =>
+  p.hold(p.private ? _typedef_names(node) : NULL, node);
+
+/* A private node declaring `names` waits as a `pending` marker in both
+   files until the whole unit has been partitioned. A node without names
+   takes the current side. */
+static void Partition.hold(Partition *p, List names, List node) {
   if (!names) {
     p.side().push(node);
     return;
@@ -462,7 +467,20 @@ static void Partition.place_directive(
   if (_is_pragma_once(content)) return;
   int visibility = preproc_visibility(content);
   if (visibility >= 0) p.private = visibility;
-  else p.side().push(node);
+  else p.hold(p.include_names(content), node);
+}
+
+/* An include of x2c source below `#pragma private` waits, as a private
+   typedef does, under the typedef names of the files it reaches that no
+   earlier header include reaches. Any other directive names nothing. */
+static List Partition.include_names(Partition *p, String content) {
+  int angle = 0;
+  String target = preproc_include_target(content, angle);
+  if (!target) return NULL;
+  if (p.private)
+    return p.c.include_typedef_names(target, angle, p.included.copy());
+  p.c.include_typedef_names(target, angle, p.included);
+  return NULL;
 }
 
 static int _is_pragma_once(String content) =>
