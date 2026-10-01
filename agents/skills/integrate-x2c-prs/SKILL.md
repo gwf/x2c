@@ -63,7 +63,10 @@ Repeat this loop without routine user approval:
    queue operation itself adds no new performance or correctness requirement.
 5. Run `tools/integrate-dev.py land <batch-id>`. It checks eligibility and
    upstream identity, invokes the existing publication helper and gate, and
-   stops before push for generated artifact review. A doc-only batch uses
+   stops before push for generated artifact review. Inspect the returned state:
+   `review` after upstream advanced means no gate started; review the combined
+   diff and run `land` again. `gated` means validation finished. Poll logs only
+   while the command is actually running. A doc-only batch uses
    `doc-check`; code or unknown paths use `agent-pr-check`. Prepare stage 0 in
    a fresh candidate with normal `make build-safe` when needed. Do not run
    broad gate components separately or replace the existing gate receipt.
@@ -101,7 +104,13 @@ reproduction and diagnosis and run `tools/integrate-dev.py park <batch-id>`.
 Report that failure and any decision needed, then continue independent ready
 work. Parked revisions and their dependents stay held until superseded by a
 new submission or explicitly retried after diagnosis with
-`prepare --retry <batch-id>`. Never reinterpret a newer PR head as validated.
+`prepare --retry <batch-id>`. Retry resumes the retained candidate and its
+frozen PR heads, preserving local repairs; finish or park any other active
+batch first. Never reinterpret a newer PR head as validated.
+
+When waiting for a delegated repair, check the worker's status. Resume an
+interrupted or idle worker explicitly. For Codex subagents, `followup_task`
+starts a turn; `send_message` only queues text. Verify the handoff before use.
 
 For an interrupted gate or push, inspect Git history, the durable record, and
 gate-state evidence through coordinator recovery. A recorded running state is

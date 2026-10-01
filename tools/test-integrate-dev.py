@@ -472,6 +472,66 @@ class IntegrationProbe(unittest.TestCase):
         first=self.state()['pulls']['1']['head']['sha']
         self.assertNotEqual(self.git('merge-base','--is-ancestor',first,'HEAD',cwd=candidate,ok=False).returncode,0)
 
+    def test_retry_preserves_candidate_repairs_and_frozen_prs(self):
+        self.pr(1); batch=self.prepare()
+        original=self.record(batch); candidate=self.checkout(original)
+        self.write(candidate/'src/repair.x','candidate-local repair\n')
+        self.git('add','.',cwd=candidate)
+        self.git('commit','-qm','fixture integration repair',cwd=candidate)
+        repaired=self.git('rev-parse','HEAD',cwd=candidate).stdout.strip()
+        self.cli('park',batch)
+        self.pr(2)
+        retried=self.prepare('--retry',batch)
+        record=self.record(retried)
+        self.assertEqual(retried,batch)
+        self.assertEqual(record['worktree'],original['worktree'])
+        self.assertEqual(record['prs'],original['prs'])
+        self.assertEqual(record['candidate'],repaired)
+        self.assertEqual(record['attempts'],original['attempts'])
+        self.assertEqual(len(list((self.root/'debug'/'integration').glob(
+            '*/batch.json'))),1)
+        self.cli('park',batch)
+        status=json.loads(self.cli('status').stdout)
+        self.assertEqual([p['number'] for p in status['ready']],[2])
+        self.assertEqual([p['number'] for p in status['pending']],[1])
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_retry_does_not_release_holds_with_another_active_batch(self):
+        self.pr(1); parked=self.prepare(); self.cli('park',parked)
+        self.pr(2); active=self.prepare()
+        before=self.record(parked)
+        result=self.cli('prepare','--retry',parked,ok=False)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('active batch',result.stderr)
+        self.assertEqual(self.record(parked),before)
+        status=json.loads(self.cli('status').stdout)
+        self.assertEqual(status['active']['id'],active)
+        self.assertIn(1,[p['number'] for p in status['pending']])
+
+    def test_retry_rejects_changed_or_withdrawn_pr_atomically(self):
+        self.pr(1); batch=self.prepare(); self.cli('park',batch)
+        before=self.record(batch); original=self.state()
+        for change in ('head','label'):
+            with self.subTest(change=change):
+                state=json.loads(json.dumps(original))
+                if change=='head': state['pulls']['1']['head']['sha']='0'*40
+                else: state['pulls']['1']['labels']=[]
+                self.state_path.write_text(json.dumps(state))
+                result=self.cli('prepare','--retry',batch,ok=False)
+                self.assertNotEqual(result.returncode,0)
+                self.assertEqual(self.record(batch),before)
+        self.assertEqual(self.tip(),self.base)
+        self.assertEqual(self.state().get('gates',[]),[])
+
+    def test_retry_rejects_different_explicit_selection(self):
+        self.pr(1); batch=self.prepare(); self.cli('park',batch)
+        self.pr(2); before=self.record(batch)
+        result=self.cli('prepare','--retry',batch,'--prs','1','2',ok=False)
+        self.assertNotEqual(result.returncode,0)
+        self.assertEqual(self.record(batch),before)
+        self.assertEqual(self.prepare('--retry',batch,'--prs','1'),batch)
+
     def test_upstream_advancement_requires_new_review(self):
         self.pr(1); batch=self.prepare()
         self.git('checkout','-q','-B','external',self.base)

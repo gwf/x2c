@@ -256,7 +256,7 @@ class Queue:
     def ready(self):
         pulls = self.api("pulls?state=open&base=dev&per_page=100", pages=True)
         held = {(pr["number"], pr["head"]) for record in self.records()
-                if record["state"] == "parked" and not record.get("retry")
+                if record["state"] == "parked"
                 for pr in record["prs"]}
         ready, pending = [], []
         self.observed_pending = pending
@@ -374,8 +374,19 @@ class Queue:
             record = self.read(args.retry)
             if record["state"] != "parked":
                 raise ValueError("only a parked batch can be retried")
-            record["retry"] = True
+            if self.active():
+                raise ValueError("finish or park the active batch before retrying")
+            if args.prs and set(args.prs) != {
+                    entry["number"] for entry in record["prs"]}:
+                raise ValueError("retry retains the batch's frozen PR selection")
+            for entry in record["prs"]:
+                current = self.entry(self.pull(entry["number"]))
+                if current["head"] != entry["head"]:
+                    raise ValueError("PR revision changed; prepare a new batch")
+            record.pop("retry", None)
+            record["state"] = "preparing"
             self.save(record)
+            return self.assemble(record)
         record = self.active()
         if record:
             return self.assemble(record)
@@ -603,7 +614,8 @@ def main():
         operation.add_argument("--flush", action="store_true")
         if name == "prepare":
             operation.add_argument("--prs", type=int, nargs="+")
-            operation.add_argument("--retry")
+            operation.add_argument("--retry", help="resume a parked candidate "
+                                   "with its original pinned PRs and repairs")
         else:
             operation.add_argument(
                 "--timeout", type=float, default=60,
