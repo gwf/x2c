@@ -1,8 +1,8 @@
 > Status: implemented
 > The private-context batch merged into dev in PR #76.
-> Public follow-ups are implemented on `codex/value-reference-public`, based on
-> dev `da1b8767`. Delivery is another PR targeting `dev`; integration belongs
-> to the integration agent.
+> Public follow-ups are implemented on `codex/value-reference-public`, including
+> dev's published build repair `943a5e50`. Delivery is another PR targeting
+> `dev`; integration belongs to the integration agent.
 
 # Value declarations and reference parameters
 
@@ -133,13 +133,17 @@ pinned foreign C interfaces do not change.
 Workers use isolated worktrees rooted at the same checkpoint. Each builds a
 fresh compiler and exercises its changed contexts with focused checks. The
 orchestrator reviews and combines authored patches, compiles the new book
-samples, runs command integration checks and the existing final
-`tools/gate-state.py ensure agent-pr-check`, and reviews generated artifacts.
+samples, runs command integration checks, and reviews generated artifacts.
+The complete authored tree passed `agent-pr-check` before incorporating dev's
+build repair. The repaired tree builds from its bootstrap; its submission
+includes that evidence and focused performance measurements. The shared
+integrator owns final combined-tree regeneration and publication validation.
 No recurring check or gate is added by this campaign.
 
-Publish the validated branch and open a draft PR targeting `dev`, as Gary
-authorized. Integration belongs to the integration agent, not this campaign
-worker.
+Push the work branch and submit a ready PR targeting `dev` with its recorded
+starting revision and focused evidence. Keep it open for the integration agent.
+Its separate pause remains in effect until Gary resumes it; this campaign does
+not publish `dev` or merge the PR.
 
 ## Plan review
 
