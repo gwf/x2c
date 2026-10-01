@@ -288,12 +288,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       %(dstrdecl (params @parameters) $source), origin);
   }
 
-  List expression = c.parse_expression();
-  c.expect(<)>);
-  match (expression)
-    case %(expr ?type ?):
-      expression = %(expr $type (parens $expression));
-  return c._finish_paren_statement(expression, 1);
+  return c._finish_paren_statement(c._parse_group_rest(), 1);
 }
 
 static List Compiler._finish_paren_statement(
@@ -784,12 +779,70 @@ static int Compiler._string_word_follows(Compiler c) {
 
 static List Compiler._parse_parens(Compiler c) {
   c.expect(<(>);
+  return c._parse_group_rest();
+}
+
+/* Parses a group after its `(` through the closing `)`. */
+static List Compiler._parse_group_rest(Compiler c) {
+  if (c._statement_expression_follows()) {
+    Token origin = c.token;
+    c.expect(<"{">);
+    List block = c.parse_compound_statement();
+    c.expect(<)>);
+    return c._statement_expression(block, origin);
+  }
   List expr = c.parse_expression();
   c.expect(<)>);
   // C has no parenthesized brace; the brace converts at its destination.
   match (expr) case %(expr ? (composite ?)): return expr;
   List type = expr.cadr();
   return %(expr $type (parens $expr));
+}
+
+/* A brace after `(` opens a statement expression when a `;` stands at its
+   top level; any other brace is a composite or Map literal. */
+static int Compiler._statement_expression_follows(Compiler c) {
+  if (c.peek(0) != <"{">) return 0;
+  Token token = Token.skip_trivia(c.token + 1);
+  for (;; token = token.after_group())
+    switch (token.type) {
+      case <;>: return 1;
+      case <eof>: case <"}">: return 0;
+    }
+}
+
+/* A statement expression has the value and type of its final expression
+   statement, and is void otherwise. A defer directly inside would wrap that
+   statement in a cleanup region, and C would lose the value. A template
+   binds its statement expression where it expands. */
+static List Compiler._statement_expression(
+  Compiler c, List block, Token origin) {
+  List items = Ast.without_origin(block).cdr();
+  if (_defers_directly(items))
+    c.report_error(
+      <parse>,
+      "a statement expression cannot directly contain a defer or managed "
+      "declaration", origin, %("move it into a nested block"));
+  Type type = c.macro_holes ? %(<macro-expr>) : _final_value_type(items);
+  return %(expr $type (parens $block));
+}
+
+static int _defers_directly(List items) {
+  foreach (List item, items)
+    match (Ast.without_origin(item)) {
+      case %(defer ?): return 1;
+      case %(seq *rows): if (_defers_directly(rows)) return 1;
+    }
+  return 0;
+}
+
+/* A reference names a value C reads out of the statement expression. */
+static Type _final_value_type(List items) {
+  List last = items ? Ast.without_origin(items.last()) : NULL;
+  match (last)
+    case %(stmnt (expr ?(Type type) ?)):
+      return type.car() == <&> || type.car() == <opt-ref> ? type.cdr() : type;
+  return %(void);
 }
 
 static List Compiler._parse_composite(Compiler c) {
@@ -960,8 +1013,8 @@ static int Compiler._needs_resolution(Compiler c, Var value) {
     if (current is not <list>) continue;
     List syntax = current;
     match (syntax) {
-      case %(expr (? *) (parens (block *))): continue;
       case %(expr (!or () (<macro-expr>)) ?): return 1;
+      case %(expr ? (parens (block *))): continue;
       case captured(?body, *captures, *params): {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
@@ -3032,6 +3085,9 @@ static List Compiler._resolve_initializer(
 
 static List Compiler._resolve_parens(
   Compiler c, List inner, Token origin) {
+  if (Ast.without_origin(inner).car() == <block>)
+    return c._statement_expression(
+      c.bind_syntax(inner, AST_STATEMENT, c.return_type), origin);
   inner = c.resolve_expression(inner, origin);
   Type type = inner.cadr();
   return %(expr $type (parens $inner));
@@ -3349,10 +3405,12 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
       return %(expr ("String") ${c.cache(%(string $value))});
     }
     case %(expr (!or (* char) ((dim *) char))
-        ${$source_content_pattern($grouped, %(?inner))}): {
-      List converted = c._raw_string_to_string(inner);
-      return %(expr ("String") (parens $converted));
-    }
+        ${$source_content_pattern($grouped, %(?inner))}):
+      // A statement expression's block converts as one dynamic value.
+      match (inner) case %(expr *): {
+        List converted = c._raw_string_to_string(inner);
+        return %(expr ("String") (parens $converted));
+      }
     case %(expr (!or (* char) ((dim *) char))
         ${$source_operator_content(
           %(? ?condition ?ontrue ?onfalse))}): {

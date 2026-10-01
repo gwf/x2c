@@ -396,6 +396,45 @@ An expression is required; `=>;` is invalid. The rules for writing `return` in
 a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
+### Statement expressions
+
+x2c accepts the GNU statement expression, which generated C already requires
+a GNU-compatible compiler to compile. `(` followed by `{` begins one when a
+`;` stands at the top level of the braces, outside any nested parentheses,
+brackets, or braces; otherwise the brace keeps its meaning as a braced
+initializer or a Map literal, so `({})`, `({1})`, and `({a: 1})` are
+unchanged:
+
+```x2c
+int main(void) {
+  int area = ({ int width = 6; width * 7; });
+  String name = ({ String first = "Ada"; first + " Lovelace"; });
+  printf("%d %s\n", area, name);
+  return 0;
+}
+```
+
+```text
+42 Ada Lovelace
+```
+
+Its value and type are those of its final expression statement; a statement
+expression that ends any other way is `void`. Declarations inside it belong
+to its block. A template may contain one, and its locals are renamed like any
+other template local:
+
+```x2c
+macro Expression $plus_one(Expr $value) => ({ int t = $value; t + 1; });
+```
+
+A `defer`, or a managed declaration, directly inside a statement expression
+is an error: its cleanup region would enclose the final statement, and C
+would lose the value. Either may stand in a block nested inside the
+statement expression. A `return`, `break`, `continue`, or `goto` that leaves
+a statement expression runs the cleanup of each region it leaves, as it does
+from any other statement. `sizeof` takes its own parentheses, so a statement
+expression operand needs a second pair: `sizeof(({ ...; }))`.
+
 ### Reference parameters
 
 A function parameter declared `T &name` aliases an addressable `T` supplied by

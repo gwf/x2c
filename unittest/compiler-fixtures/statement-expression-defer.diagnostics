@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/statement-expression-defer.x:5:12: parse: a statement expression cannot directly contain a defer or managed declaration
+    int n = ({ defer printf("done\n"); 3; });
+             ^
+  note: move it into a nested block
+
