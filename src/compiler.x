@@ -491,9 +491,9 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
   _report_malformed_token(c);
-  _scan_conditionals(c);
+  c.scan_conditionals();
   _retag_keywords(c.tokenizer);
-  c.token = _skip_forward(c.tokenizer.tokens);
+  c.token = Token.skip_trivia(c.tokenizer.tokens);
   c.braces.clear();
 }
 
@@ -527,14 +527,14 @@ static void _report_malformed_token(Compiler c) {
 static void _retag_keywords(Tokenizer tokenizer) {
   Token prev = NULL;
   for (Token token = tokenizer.tokens; token.type != <eof>;
-       token = _skip_forward(token + 1)) {
+       token = Token.skip_trivia(token + 1)) {
     if (token.type == <in>) {
-      Token next = _skip_forward(token + 1);
+      Token next = Token.skip_trivia(token + 1);
       if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))
         token.type = <ident>;
     }
     else if (token.type == <match>) {
-      Token next = _skip_forward(token + 1);
+      Token next = Token.skip_trivia(token + 1);
       if (next.type == <(>) next = next.after_group();
       if (next.type != <case> && next.type != <"{">) token.type = <ident>;
     }
@@ -575,7 +575,7 @@ Symbol Compiler.peek(Compiler c, int steps) {
     raise %(replcomp (kind <names>) (rows $rows) (keywords ()));
   }
   while (steps > 0) {
-    token = _skip_forward(token + 1);
+    token = Token.skip_trivia(token + 1);
     steps--;
   }
   while (steps < 0) {
@@ -585,7 +585,10 @@ Symbol Compiler.peek(Compiler c, int steps) {
   return token.type;
 }
 
-Token _skip_forward(Token token) {
+/** Returns the first token at or after `token` that is not a space,
+    comment, or preprocessor line. The stream must end in `eof`.
+*/
+Token Token.skip_trivia(Token token) {
   if (token.type == <eof>) return token;
   loop {
     switch (token.type) {
@@ -607,7 +610,7 @@ static Token _skip_backward(Token token, Token origin) {
 
 /** Returns the first non-trivia token at or after `token`. */
 Token Compiler.skip_trivia_from(Compiler c, Token token) =>
-  _skip_forward(token);
+  token.skip_trivia();
 
 /** Raises `<incomplete>` when a required grammar item reaches the supplied
     input boundary. The caller sets a token in the current token stream after
@@ -639,7 +642,7 @@ Symbol Compiler.expect(Compiler c, Symbol type) {
 void Compiler.next(Compiler c) {
   Token consumed = c.token;
   if (consumed.type == <eof>) return;
-  c.token = _skip_forward(consumed + 1);
+  c.token = Token.skip_trivia(consumed + 1);
   _update_brace_stack(c, consumed);
 }
 
@@ -714,7 +717,7 @@ Token Token.group_close(Token t) {
 */
 Token Token.after_group(Token t) {
   t = t.group_close();
-  return t.type == <eof> ? t : _skip_forward(t + 1);
+  return t.type == <eof> ? t : Token.skip_trivia(t + 1);
 }
 
 // completion
@@ -1864,7 +1867,7 @@ static void _shallow_parse_loop(Compiler c) {
   /* Definitions after the last declaration, as before an include, still
      define macros for the segments that follow. */
   foreach (List directive, c.leading_preproc())
-    _note_object_macro(c, directive.cadr());
+    c.note_object_macro(directive.cadr());
   c.shallow = 0;
 }
 
@@ -2289,7 +2292,7 @@ static void _append_script_main(Compiler c, Array statements) {
   }
   stream = stream.append(eof, 1);
   c.tokenizer.tokens = stream;
-  c.token = _skip_forward((Token) stream + kept);
+  c.token = Token.skip_trivia((Token) stream + kept);
 }
 
 static Bytes _append_runs(Bytes stream, Token tokens, Array statements) {

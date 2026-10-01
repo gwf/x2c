@@ -147,6 +147,8 @@ Consumes source text, produces a positioned token array.
 character recognizers in `lib/scan.x`. Whitespace, comments, and preprocessor
 lines all become tokens. Later phases can therefore report positions in the
 original file, and directives can be re-emitted where they were written.
+`src/preprocess.x` classifies those directive tokens and turns the tokens of
+a conditional arm that C never takes into comments.
 
 ```sh
 ./builds/0/x2c translate --dump-tokens greet.x
@@ -491,6 +493,8 @@ The modules under `src/` divide ownership as follows:
   names, phase entry points, and phase recovery;
 - `src/symbols.x` -- the symbol table: scopes, bindings, lookup, typedef
   resolution, and semantic transactions;
+- `src/preprocess.x` -- preprocessor directive lines, conditional arms, and
+  the directives before each form;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
 - `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,

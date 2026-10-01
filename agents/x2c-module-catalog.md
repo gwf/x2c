@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 38
+- Compiler modules: 39
 - Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -24,8 +24,7 @@ Public functions:
 `binding_identity_spelling`, `Ast.rewrite_children`, `ast_contains_head`,
 `Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
-`Ast.initializer_functions`, `preproc_conditional_kind`, `preproc_directive`,
-`preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`
+`Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
 
@@ -94,16 +93,14 @@ Public functions:
 `Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.tokenize`,
-`Compiler.peek`, `Compiler.skip_trivia_from`, `Compiler.require_input`,
-`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.at_word`,
-`Compiler.take_word`, `Symbol.group_step`, `Token.group_close`,
-`Token.after_group`, `Compiler.mark_completion`, `Compiler.at_completion`,
-`Compiler.__complete_here`, `Compiler.record_origin`, `Compiler.anchor_origin`,
-`Compiler.record_source_declaration`, `Compiler.record_source_reference`,
-`Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
-`preproc_never_active_arm`, `preproc_open_state`, `preproc_branch_state`,
-`preproc_visibility`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.emitted_binding_name`,
+`Compiler.peek`, `Token.skip_trivia`, `Compiler.skip_trivia_from`,
+`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
+`Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
+`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
+`Compiler.at_completion`, `Compiler.__complete_here`, `Compiler.record_origin`,
+`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
+`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
+`Compiler.merge_source_declarations`, `Compiler.emitted_binding_name`,
 `Compiler.present_references`, `Compiler.mark_reference_present`,
 `Compiler.restore_reference_presence`, `Compiler.optional_reference_test`,
 `reference_guard_exits`, `Compiler.fresh_name`, `Compiler.gensym`,
@@ -368,6 +365,18 @@ Public functions:
 `Compiler.parse_function_target`, `Compiler.finish_managed_declaration`,
 `Compiler.bind_syntax`, `Compiler.bind_callable_body`,
 `Compiler.finish_foreign_alias`
+
+### [src/preprocess.x](../src/preprocess.x)
+
+C preprocessor directives in x2c source.
+
+Public functions:
+
+`preproc_directive`, `preproc_conditional_kind`, `preproc_never_active_arm`,
+`preproc_open_state`, `preproc_branch_state`, `preproc_visibility`,
+`preproc_include_target`, `Compiler.scan_conditionals`,
+`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
+`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 

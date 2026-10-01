@@ -17,11 +17,6 @@ Shared helpers for x2c compiler AST nodes.
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
-| [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
-| [`preproc_directive`](#preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
-| [`preproc_include_target`](#preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
-| [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
-| [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
@@ -75,55 +70,6 @@ Returns one on success and writes only non-`NULL` outputs; failure returns
 zero without changing either output.
 
 Source: `src/ast.x:50`
-
-#### preproc_conditional_kind
-
-`Symbol preproc_conditional_kind(String text)`
-
-Classifies the preprocessor line `text` as a conditional directive:
-`<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
-and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
-
-Source: `src/ast.x:248`
-
-#### preproc_directive
-
-`String preproc_directive(String text)`
-
-Returns the preprocessor line `text` without its `#` and the blanks
-around the directive.
-
-Source: `src/ast.x:258`
-
-#### preproc_include_target
-
-`String preproc_include_target(String text, int &angle)`
-
-Returns the file named by the `#include` line `text`, or `NULL` for any
-other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
-the name, such as a comment, is ignored.
-
-Source: `src/ast.x:265`
-
-#### preproc_track_arms
-
-`List preproc_track_arms(List arms, String text)`
-
-Follows the conditional groups open after the preprocessor line `text`.
-`arms` holds one entry per open group, innermost first, listing the
-`preproc` nodes that select that group's current arm.
-
-Source: `src/ast.x:280`
-
-#### preproc_within_arms
-
-`List preproc_within_arms(List arms, List items)`
-
-Returns `items` inside the conditional arms `arms` tracked by
-`preproc_track_arms`: the directives that reopen each group, outermost
-first, then `items`, then one `#endif` per group.
-
-Source: `src/ast.x:293`
 
 ### `Ast`
 

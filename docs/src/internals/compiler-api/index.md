@@ -35,6 +35,7 @@ Functions and types exposed by each compiler module.
 | [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |
+| [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |
 | [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |

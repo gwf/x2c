@@ -1,12 +1,40 @@
+/*  preprocess.x -- C preprocessor directives in x2c source
+
+    Copyright (c) 2025 Gary William Flake.
+
+    Preprocessor lines stay in the token stream and become `preproc` nodes,
+    so generated C keeps them where they were written. This module reads
+    them: it classifies one directive line, hides the conditional arms C
+    never takes and marks layout attributes when a unit is tokenized,
+    applies the directives before a form to source visibility and the
+    unit's `#define` names, and reopens conditional groups around the items
+    that generation and emission place elsewhere.
+*/
 #pragma once
 #include "compiler.x"
 #pragma private
 
-/* preprocessor directives
+/* directive lines
 
-   Each operation classifies one directive line. The tokenizer's
-   conditional scan, collection, and generation read directives through
-   them. */
+   Each operation classifies one directive line. The conditional scan,
+   collection, and generation read directives through them. */
+
+/** Returns the preprocessor line `text` without its `#` and the blanks
+    around the directive. */
+String preproc_directive(String text) =>
+  text.strip(" \t").remove_prefix("#").strip(" \t");
+
+/** Classifies the preprocessor line `text` as a conditional directive:
+    `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
+    and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
+*/
+Symbol preproc_conditional_kind(String text) {
+  String directive = preproc_directive(text);
+  if (directive.startswith("if")) return <open>;
+  if (directive.startswith("el")) return <branch>;
+  if (directive.startswith("endif")) return <close>;
+  return 0;
+}
 
 /** Classifies an opening conditional directive by which of its arms C can
     never reach: `<first>` when the condition requires a never-defined name
@@ -16,8 +44,8 @@ Symbol preproc_never_active_arm(String s) {
   Tokenizer scanned = Tokenizer.new(preproc_directive(s), <x2c>);
   scanned.scan();
   Array words = [];
-  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
-       t = _skip_forward(t + 1))
+  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
+       t = Token.skip_trivia(t + 1))
     words.push(_never_defined(t.text) ? "<never>" : t.text);
   String line = " ".join(words.list_free()).replace(
     "defined ( <never> )", "defined <never>");
@@ -63,12 +91,27 @@ int preproc_visibility(String text) {
   Tokenizer scanned = Tokenizer.new(directive, <x2c>);
   scanned.scan();
   Array words = [];
-  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
-       t = _skip_forward(t + 1))
+  for (Token t = Token.skip_trivia(scanned.tokens); t.type != <eof>;
+       t = Token.skip_trivia(t + 1))
     words.push(t.text);
   String line = " ".join(words.list_free());
   if (line == "pragma private") return 1;
   return line == "pragma public" ? 0 : -1;
+}
+
+/** Returns the file named by the `#include` line `text`, or `NULL` for any
+    other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
+    the name, such as a comment, is ignored.
+*/
+String preproc_include_target(String text, int &angle) {
+  angle = 0;
+  String body = preproc_directive(text);
+  if (!body.startswith("include")) return NULL;
+  body = body.remove_prefix("include").lstrip(" \t");
+  if (!body.len() || (body[0] != '"' && body[0] != '<')) return NULL;
+  angle = body[0] == '<';
+  String rest = body[1:], int close = rest.find(angle ? ">" : "\"");
+  return close > 0 ? rest[:close] : NULL;
 }
 
 /* Returns the name token of the `#define` or `#undef` directive `content`,
@@ -81,7 +124,7 @@ static Token _macro_directive(String content, int &undefined) {
   Tokenizer scanned = Tokenizer.new(
     directive.remove_prefix(undefined ? "undef" : "define"), <x2c>);
   scanned.scan();
-  Token token = _skip_forward(scanned.tokens);
+  Token token = Token.skip_trivia(scanned.tokens);
   return token.type == <ident> ? token : NULL;
 }
 
@@ -102,9 +145,11 @@ typedef struct ArmScan {
   int hidden, serial;
 } ArmScan;
 
-/* Records the open groups after each conditional directive, and marks
-   layout attributes where written or where a macro expands to one. */
-void _scan_conditionals(Compiler c) {
+/** Records the open groups after each conditional directive of the
+    tokenized unit, and marks layout attributes where written or where a
+    macro expands to one.
+*/
+void Compiler.scan_conditionals(Compiler c) {
   Array stack = $auto([]);
   Map layout = $auto({});
   ArmScan scan = {.c = c, .stack = stack, .layout = layout};
@@ -159,9 +204,9 @@ static size_t ArmScan.code(ArmScan *s, Token token, size_t i) {
    the attribute's last token. */
 static size_t _note_attribute(Compiler c, size_t index) {
   Token base = c.tokenizer.tokens;
-  Token open = _skip_forward(base + index + 1);
+  Token open = Token.skip_trivia(base + index + 1);
   if (open.type != <(>) return index;
-  Token inner = _skip_forward(open + 1), last = open.group_close();
+  Token inner = Token.skip_trivia(open + 1), last = open.group_close();
   if (last.type == <eof>) return index;
   int packed = 0;
   if (inner.type == <(> && _layout_attribute(inner, packed))
@@ -215,7 +260,7 @@ static void _note_layout_macro(String content, Map layout, int conditional) {
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
   int value = 0;
-  for (; token.type != <eof>; token = _skip_forward(token + 1)) {
+  for (; token.type != <eof>; token = Token.skip_trivia(token + 1)) {
     if (token.type != <ident>) continue;
     int level = _word_layout(token, layout);
     if (level > value) value = level;
@@ -235,8 +280,8 @@ static int _word_layout(Token token, Map layout) {
 /* 2 for a packing `__attribute__` at `token`, 1 for another attribute that
    can change a struct's layout, and 0 otherwise. */
 static int _attribute_layout(Token token) {
-  Token open = _skip_forward(token + 1);
-  Token inner = open.type == <(> ? _skip_forward(open + 1) : open;
+  Token open = Token.skip_trivia(token + 1);
+  Token inner = open.type == <(> ? Token.skip_trivia(open + 1) : open;
   int packed = 0;
   if (inner.type != <(> || !_layout_attribute(inner, packed)) return 0;
   return packed ? 2 : 1;
@@ -271,7 +316,7 @@ List Compiler.leading_preproc(Compiler c) {
     stream; macro names are recorded regardless.
 */
 void Compiler.update_source_visibility(Compiler c, List directives) {
-  foreach (List directive, directives) _note_object_macro(c, directive.cadr());
+  foreach (List directive, directives) c.note_object_macro(directive.cadr());
   if (c.source_private < 0) return;
   foreach (List directive, directives) {
     int visibility = preproc_visibility(directive.cadr());
@@ -279,11 +324,13 @@ void Compiler.update_source_visibility(Compiler c, List directives) {
   }
 }
 
-/* Records the name of each `#define` so a bare atom spelled the same way
-   inside a literal can be flagged and a declaration prefix can be read.
-   The directive after `#define` is scanned as x2c tokens. An `#undef`
-   drops the name, so later source reads it as an ordinary identifier. */
-void _note_object_macro(Compiler c, String content) {
+/** Records the name of the `#define` line `content` so a bare atom spelled
+    the same way inside a literal can be flagged and a declaration prefix
+    can be read. The directive after `#define` is scanned as x2c tokens. An
+    `#undef` drops the name, so later source reads it as an ordinary
+    identifier.
+*/
+void Compiler.note_object_macro(Compiler c, String content) {
   int undefined;
   Token token = _macro_directive(content, undefined);
   if (!token) return;
@@ -292,7 +339,7 @@ void _note_object_macro(Compiler c, String content) {
   if (undefined) c.object_macros.del(name);
   // A parameter list touching the name makes the macro function-like.
   else if (body.type == <(>) _note_function_macro(c, name, body);
-  else _note_prefix_macro(c, name, _skip_forward(body));
+  else _note_prefix_macro(c, name, body.skip_trivia());
 }
 
 /* A function-like macro whose body is empty or an attribute is an
@@ -300,8 +347,8 @@ void _note_object_macro(Compiler c, String content) {
    other function-like macro is skipped. */
 static void _note_function_macro(Compiler c, String name, Token params) {
   Token after = params.after_group(), String param = NULL;
-  Token first = _skip_forward(params + 1);
-  if (first.type == <ident> && _skip_forward(first + 1).type == <)>)
+  Token first = Token.skip_trivia(params + 1);
+  if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
   Var kind = _macro_prefix(c, after, param);
   if (kind.equal(%())) c.object_macros[name] = <annotation>;
@@ -331,7 +378,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
   while (token.type != <eof>) {
     Symbol type = token.type, String word = token.text;
     Var definition;
-    Token next = _skip_forward(token + 1);
+    Token next = Token.skip_trivia(token + 1);
     if (_is_specifier(type)) words.push(type);
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
     else if (type != <ident>) return 1;
@@ -373,39 +420,11 @@ static int _prefix_rank(Var v) {
   return v.list() ? 3 : 2;
 }
 
-// preprocessor lines
+/* conditional groups around placed items
 
-/** Classifies the preprocessor line `text` as a conditional directive:
-    `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
-    and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
-*/
-Symbol preproc_conditional_kind(String text) {
-  String directive = preproc_directive(text);
-  if (directive.startswith("if")) return <open>;
-  if (directive.startswith("el")) return <branch>;
-  if (directive.startswith("endif")) return <close>;
-  return 0;
-}
-
-/** Returns the preprocessor line `text` without its `#` and the blanks
-    around the directive. */
-String preproc_directive(String text) =>
-  text.strip(" \t").remove_prefix("#").strip(" \t");
-
-/** Returns the file named by the `#include` line `text`, or `NULL` for any
-    other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
-    the name, such as a comment, is ignored.
-*/
-String preproc_include_target(String text, int &angle) {
-  angle = 0;
-  String body = preproc_directive(text);
-  if (!body.startswith("include")) return NULL;
-  body = body.remove_prefix("include").lstrip(" \t");
-  if (!body.len() || (body[0] != '"' && body[0] != '<')) return NULL;
-  angle = body[0] == '<';
-  String rest = body[1:], int close = rest.find(angle ? ">" : "\"");
-  return close > 0 ? rest[:close] : NULL;
-}
+   Generation and emission place some items away from the directives that
+   guard them. They record the groups open at each item and reopen them
+   around it. */
 
 /** Follows the conditional groups open after the preprocessor line `text`.
     `arms` holds one entry per open group, innermost first, listing the

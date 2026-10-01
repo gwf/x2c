@@ -114,6 +114,7 @@
   - [src/meta-helper-client.x](internals/compiler-api/meta-helper-client.md)
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/parse.x](internals/compiler-api/parse.md)
+  - [src/preprocess.x](internals/compiler-api/preprocess.md)
   - [src/project.x](internals/compiler-api/project.md)
   - [src/protocol.x](internals/compiler-api/protocol.md)
   - [src/regions.x](internals/compiler-api/regions.md)
