@@ -3183,8 +3183,9 @@ exits the `match`; `continue` targets an enclosing loop.
 Runtime-built patterns may interpolate an interned `Match` operator in head
 position and retain the literal operator's semantics. Source `match` arms
 require literal operators so the compiler can prove binder availability. Named
-binders under `!not` are not definitely assigned; binders under `!or` or
-membership-style `!set` must occur in every alternative; `!quote` is opaque.
+binders inside `!not` operands are not definitely assigned; binders under
+`!or` or membership-style `!set` must occur in every alternative; `!quote` is
+opaque.
 Arm binders are semantic `Var` or `List` locals and support method syntax.
 
 `?(Type name)` declares a native typed capture. Its exact `Var` tag must
