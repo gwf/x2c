@@ -78,6 +78,8 @@ header-cache-probes:
 meta-helper-probes:
 	./probes/run-meta-helper.sh
 	./probes/run-meta-cache-key.sh
+	./probes/run-meta-transport.sh
+	./probes/run-meta-source-kinds.sh
 
 protocol-probes:
 	./probes/run-protocol-boundaries.sh

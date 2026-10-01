@@ -115,7 +115,7 @@ for unit in lib/*.x; do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph clones --min-size 100 "$@"
-python3 tests/test-clones.py  # optional focused experiment checks
+python3 commands/graph/tests/test-clones.py  # optional experiment checks
 ```
 
 The [initial experiment results](clones-experiment.md) include measured

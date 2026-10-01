@@ -969,3 +969,5 @@ if $tool sites site_target "$fixtures/missing.x" \
 fi
 test ! -s "$tmp/sites-missing.out"
 grep -q 'cannot read input file' "$tmp/sites-missing.err"
+
+sh commands/graph/tests/certify.sh
