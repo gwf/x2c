@@ -812,9 +812,8 @@ static List Compiler._convert_composite_row(
     return c._convert_homogeneous_row(
       original, selected, native_target, row_condition,
       native_used);
-  return c._mixed_initializer_row(
-    row, selected.value, native_target, row_condition,
-    parent_condition, native_used);
+  return c._convert_mixed_row(
+    row, native_target, row_condition, parent_condition, native_used);
 }
 
 static RowSelection _select_row(List cases) {
@@ -892,26 +891,25 @@ static List Compiler._initializer_conversion(
     case %(expr ?stored (call "__builtin_choose_expr"
                              (args ?when ?yes ?no))):
       if (stored === type && when === condition) return value;
-  int rejected = 0;
-  List result = c._speculative_initializer_conversion(
-    value, type, condition, target, native_used, rejected);
+  List result = c._speculate(value, type, condition, target, native_used);
   List zero = _initializer_zero(type, target);
-  return rejected ? _rejected_initializer(type, condition, zero)
+  return !result ? _rejected_initializer(type, condition, zero)
     : _accepted_initializer(result, type, target, condition, zero);
 }
 
-/* The transaction owns binding and name rollback while conversion may also
-   append literal and adapter data. */
-static List Compiler._speculative_initializer_conversion(
+/* The conversion of a native-dependent alternative, or NULL when it reports
+   a type error. The transaction owns binding and name rollback while
+   conversion may also append literal and adapter data. */
+static List Compiler._speculate(
   Compiler c, List value, Type type, List condition, List target,
-  int &?native_used, int &rejected) {
+  int &?native_used) {
   SymTxn transaction = c.begin_semantic_transaction();
   Map keys = c.key_ids, adapters = c.names.adapters;
   int key_count = c.id_keys.len(), declarations = c.early_decls.len();
   c.key_ids = keys.copy();
   c.names.adapters = adapters.copy();
   DiagnosticsHold hold = c.diagnostics.hold();
-  int depth = c.recovery_depth, completed = 0;
+  int depth = c.recovery_depth, completed = 0, rejected = 0;
   List result = NULL;
   {
     defer {
@@ -970,10 +968,11 @@ static List _accepted_initializer(
 
 // mixed rows
 
-static List Compiler._mixed_initializer_row(
-  Compiler c, List row, List source, List native_target,
-  List row_condition, List parent_condition, int &?native_used) {
+static List Compiler._convert_mixed_row(
+  Compiler c, List row, List native_target, List row_condition,
+  List parent_condition, int &?native_used) {
   (List original, List cases) = row;
+  List source = _select_row(cases).value;
   Array converted = [], captured = [];
   List prepared = source;
   if (source.match(%(expr ? (composite *))))
