@@ -112,7 +112,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3572`
+Source: `src/expressions.x:3571`
 
 <a id="Compiler.converter_call"></a>
 #### Compiler.converter_call
@@ -123,7 +123,7 @@ The call to the converter that `type`, or the first of its typedef names
 that declares one, provides for `target`, applied to `expr`, or NULL
 when none declares one.
 
-Source: `src/expressions.x:3707`
+Source: `src/expressions.x:3706`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts
@@ -147,7 +147,7 @@ Source: `src/expressions.x:2200`
 The global builtin boxers and scalar formatters only observe their
 arguments. A custom converter or a shadowed callee may change state.
 
-Source: `src/expressions.x:3759`
+Source: `src/expressions.x:3758`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
