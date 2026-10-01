@@ -1,10 +1,11 @@
-/*  generate.x -- generate C headers and source files
+/*  generate.x -- the generated header and source of one unit
 
-    Turns a normalized AST into formatted header and source files. It splits
-    the header from the source without changing source order, adds once-only
-    translation-unit initialization, static prototypes, and include guards,
-    and publishes the files together. Filesystem failures retain their
-    target and host error as compiler diagnostic notes.
+    This module owns a unit's generated files: it splits the lowered AST into
+    header and source without changing source order, gives the source its
+    once-only initialization and static prototypes, wraps the header in its
+    guard, and publishes both with the unit's interface. The definition rows
+    the interface lists, and `--dump-definitions` prints, come from the same
+    lowered AST.
 */
 #pragma once
 #include "compiler.x"
@@ -36,32 +37,32 @@
 void generate_code(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
-  List outputs = _generated_code(c, ast, basename);
+  List outputs = c._generated_code(ast, basename);
   String interface = c.source_facts ? NULL : interface_text(
     c, _public_rows(c.definition_rows(ast)));
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
-  _publish(c, outputs);
+  c._publish(outputs);
 }
 
 /** Returns the generated header and source of the lowered `ast` as `(hfile
     htext cfile ctext)`, named from `basename`, without writing them. It
     affects the compiler as `generate_code` does. */
 List generate_code_text(Compiler c, List ast, String basename) =>
-  _generated_code(c, _without_trivia(ast), basename);
+  c._generated_code(_without_trivia(ast), basename);
 
 static List _without_trivia(List ast) =>
   ast.filter(%!(node) => !node.list().match(%((!or space comment empty) *)));
 
 /* The header and source of `ast` as `(hfile htext cfile ctext)`, named from
    `basename`. */
-static List _generated_code(Compiler c, List ast, String basename) {
-  List (header, source) = _header_and_source(c, ast);
+static List Compiler._generated_code(Compiler c, List ast, String basename) {
+  List (header, source) = c._header_and_source(ast);
   String hash = filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
     %"_x2c_hcache_init_$hash");
-  List hcode = _emit_header(c, header);
-  List ccode = _emit_source(c, source, header);
+  List hcode = c._emit_header(header);
+  List ccode = c._emit_source(source, header);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
     $hfile ${c.code_pretty_string(hcode, hfile)}
@@ -69,18 +70,18 @@ static List _generated_code(Compiler c, List ast, String basename) {
   );
 }
 
-static List _emit_header(Compiler c, List header) =>
-  c.emit(_include_guard(c, _vertical_spacing(header)));
+static List Compiler._emit_header(Compiler c, List header) =>
+  c.emit(c._include_guard(_vertical_spacing(header)));
 
 /* Static prototypes see the header's declarations as already declared. */
-static List _emit_source(Compiler c, List source, List header) {
-  source = _static_prototypes(c, _file_init(c, source), header);
-  source = _primary_include(c, _vertical_spacing(source));
-  return c.emit(_patch_main(c, source));
+static List Compiler._emit_source(Compiler c, List source, List header) {
+  source = c._static_prototypes(c._file_init(source), header);
+  source = c._primary_include(_vertical_spacing(source));
+  return c.emit(c._patch_main(source));
 }
 
 /* A failed write reports its file and the host error. */
-static void _publish(Compiler c, List outputs) {
+static void Compiler._publish(Compiler c, List outputs) {
   List failure = NULL;
   try file_publish(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
@@ -99,7 +100,7 @@ static void _publish(Compiler c, List outputs) {
    `open` the groups still open, and `forwarded` the struct and union tags
    the header declares. */
 typedef struct Partition {
-  Compiler compiler, Array header, source, pending, opened, open;
+  Compiler c, Array header, source, pending, opened, open;
   Map forwarded, int private;
 } Partition;
 
@@ -108,9 +109,9 @@ typedef struct Partition {
    source; public inline definitions remain header-only. A function
    definition, static declaration, or foreign alias begins source-private
    output until an explicit public pragma changes visibility. */
-static List _header_and_source(Compiler c, List ast) {
+static List Compiler._header_and_source(Compiler c, List ast) {
   Partition p = {
-    .compiler = c, .header = [], .source = [], .pending = [], .opened = [],
+    .c = c, .header = [], .source = [], .pending = [], .opened = [],
     .open = [], .forwarded = {}};
   foreach (Ast node, ast) p.add(node);
   return p.finish();
@@ -266,7 +267,7 @@ static void Partition.add_function(
   Partition *p, List type, List declarator, Ast body) {
   int generated = 0;
   match (declarator) case %(bind ?binding *): {
-    Map facts = p.compiler.semantic_binding_facts();
+    Map facts = p.c.semantic_binding_facts();
     type = _with_attributes(facts, type, binding);
     String name = binding_identity_spelling(binding);
     generated = %(declaration-default $name) in facts;
@@ -341,7 +342,7 @@ static void Partition.add_declaration(
   Partition *p, List decl, Type type, List bindings) {
   match (bindings)
     case %(bindings (bind (!set ?binding (*)) ?))
-      if (_completed_prototype(p.compiler, binding)): return;
+      if (p.c._completed_prototype(binding)): return;
   if (type.is_static()) p.private = 1;
   if (p.private) {
     p.source.push(decl);
@@ -356,7 +357,7 @@ static void Partition.add_declaration(
 
 /* A positioned prototype remains visible to symbol collection, but the
    completed definition is what reaches generated C and H output. */
-static int _completed_prototype(Compiler c, List binding) {
+static int Compiler._completed_prototype(Compiler c, List binding) {
   Var stored;
   if (!c.semantic_binding_facts().try_get(%(completion $binding), stored))
     return 0;
@@ -577,14 +578,14 @@ static void _add_names(Map available, List node) {
    function a patched entry calls. `reachable` holds the entries a
    cache-only file patches, or is NULL when every public entry is patched. */
 typedef struct Init {
-  Compiler compiler, String initializer, entry, List guard, shutdown;
+  Compiler c, String initializer, entry, List guard, shutdown;
   List synthetic, Map reachable;
 } Init;
 
 /* Consume the initialization state completed by cache setup. */
-static List _file_init(Compiler c, List source) {
+static List Compiler._file_init(Compiler c, List source) {
   if (!c.inits.len() && !c.fini_fn && !c.init_fn) return source;
-  Init init = {.compiler = c, .initializer = c.init_fn};
+  Init init = {.c = c, .initializer = c.init_fn};
   init.prepare(source);
   int prelude = _prelude_position(source), position = 0;
   List out = NULL;
@@ -605,14 +606,14 @@ static List _file_init(Compiler c, List source) {
 /* A file without a type initializer, or with one that conditional groups
    may compile out, gets a synthetic initializer. */
 static void Init.prepare(Init *init, List source) {
-  Compiler c = init.compiler;
-  String initializer = init.initializer;
+  Compiler c = init.c;
   init.guard = c.sym.reference(%("_init_guard_"), NULL);
-  init.shutdown = _shutdown_registration(c, source);
-  List arms = initializer ? _definition_arms(source, initializer) : NULL;
-  if (!initializer || arms) init.synthetic = init.synthesize(arms);
-  init.entry = init.synthetic ? "_file_init_" : initializer;
-  if (_cache_only(c)) init.reachable = _cache_reachable(source);
+  init.shutdown = c._shutdown_registration(source);
+  List arms = init.initializer
+    ? _definition_arms(source, init.initializer) : NULL;
+  if (!init.initializer || arms) init.synthetic = init.synthesize(arms);
+  init.entry = init.synthetic ? "_file_init_" : init.initializer;
+  if (c._cache_only()) init.reachable = _cache_reachable(source);
 }
 
 /* The position of the first function definition in `source`, or of the
@@ -652,14 +653,12 @@ static List Init.patch(Init *init, List item) {
            (block *body)): {
       String name = spelling;
       if (name == "x2c_initialize_protocols")
-        return _protocol_initializer(init.compiler, item, body);
+        return init.c._protocol_initializer(item, body);
       if (init.initializer && name == init.initializer)
-        return _replace_initializer_body(
-          init.compiler, item, init.statements(NULL, body));
+        return init.c._replace_body(item, init.statements(NULL, body));
       if (init.patches(type, spelling)) {
-        List entry = init.compiler.sym.reference(%(${init.entry}), NULL);
-        return _patch_initialized_entry(
-          init.compiler, item, body, init.guard, entry);
+        List entry = init.c.sym.reference(%(${init.entry}), NULL);
+        return _patch_initialized_entry(init.c, item, body, init.guard, entry);
       }
     }
   return item;
@@ -702,7 +701,7 @@ macro Statement $initializer_run_once(Expr $guard) {
    so the synthetic initializer calls it under the arms that compile it,
    which sets the guard, and otherwise runs the file's own initialization. */
 static List Init.synthesize(Init *init, List arms) {
-  List binding = init.compiler.sym.introduce("_file_init_");
+  List binding = init.c.sym.introduce("_file_init_");
   List type = %(("__attribute__((constructor))") static void);
   String entry = "x2c_initialize_protocols";
   if (init.initializer) {
@@ -712,8 +711,7 @@ static List Init.synthesize(Init *init, List arms) {
   List call = %((stmnt (expr (void) (call $entry (args)))));
   List statements = init.statements(_within_definitions(arms, call), NULL);
   Macro shape = $file_initializer_function;
-  return init.compiler.rebuild_unit_function(
-    shape(type, binding, statements));
+  return init.c.rebuild_unit_function(shape(type, binding, statements));
 }
 
 /* An initializer runs `entry`, returns when its guard is set and sets it
@@ -722,36 +720,36 @@ static List Init.synthesize(Init *init, List arms) {
    initializer's own String/List canonicalizer are queued late; all other
    cache and static setup keeps its pre-body order. */
 static List Init.statements(Init *init, List entry, List body) {
-  Compiler c = init.compiler;
-  return List.concat_n(7, entry, _run_once(c, init.guard),
+  Compiler c = init.c;
+  return List.concat_n(7, entry, c._run_once(init.guard),
     c.init_statements(<early>), c.init_statements(<mid>), body,
     c.init_statements(<late>), init.shutdown);
 }
 
-static List _replace_initializer_body(
+static List Compiler._replace_body(
   Compiler c, List function, List statements) {
   Macro shape = $initializer_body;
   return c.rebuild_function(function, shape(statements));
 }
 
-static List _run_once(Compiler c, List guard) {
+static List Compiler._run_once(Compiler c, List guard) {
   Macro shape = $initializer_run_once;
   return c.rebuild_statement(shape(%(expr (int) (ident $guard)))).cdr();
 }
 
 /* Install generated built-in protocol methods before any ordinary file
    constructor can create a String- or List-backed cache. */
-static List _protocol_initializer(
+static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   List statements = List.concat_n(4, %(${_initialization_guard(guard)}),
-    _run_once(c, guard), c.init_statements(<protocol>), body);
-  return _replace_initializer_body(c, function, statements);
+    c._run_once(guard), c.init_statements(<protocol>), body);
+  return c._replace_body(function, statements);
 }
 
 /* The registration of the unit's shutdown function, under the arms that
    compile its definition. */
-static List _shutdown_registration(Compiler c, List source) {
+static List Compiler._shutdown_registration(Compiler c, List source) {
   String shutdown = c.fini_fn;
   if (!shutdown) return NULL;
   List binding = c.sym.reference(%($shutdown), NULL);
@@ -793,9 +791,9 @@ static List _within_definitions(List found, List statements) {
 }
 
 /** Returns the statements queued for `phase`, in the order they were added. */
-List Compiler.init_statements(Compiler compiler, Symbol phase) {
+List Compiler.init_statements(Compiler c, Symbol phase) {
   Array selected = [];
-  foreach (List entry, compiler.inits)
+  foreach (List entry, c.inits)
     if (entry.car() == phase) selected.push(entry.cadr());
   return selected.list_free();
 }
@@ -807,7 +805,7 @@ List Compiler.init_statements(Compiler compiler, Symbol phase) {
    already runs the initializers, and unrelated foundational calls then
    cannot recursively materialize literals during String/List pool setup. */
 
-static int _cache_only(Compiler c) =>
+static int Compiler._cache_only(Compiler c) =>
   !c.init_fn && c.init_statements(<early>) &&
   !c.init_statements(<mid>) && !c.init_statements(<late>);
 
@@ -856,10 +854,10 @@ static int _record_calls(Var value, Var caller, Map callers) {
 
 /* Each static function's prototype takes its definition's place, and each
    node follows the forward declarations it needs. */
-static List _static_prototypes(Compiler c, List source, List header) {
+static List Compiler._static_prototypes(Compiler c, List source, List header) {
   source = _move_bodies(source);
   Forward f = {
-    .compiler = c, .available = {}, .statics = {}, .seen = {}, .out = []};
+    .c = c, .available = {}, .statics = {}, .seen = {}, .out = []};
   _collect_declared(header, f.available);
   _static_declarations(source, f.statics);
   foreach (List node, source) {
@@ -1021,7 +1019,7 @@ static void _set_static(Map statics, List node, List declarator) {
    declaration by binding and spelling, `seen` what is already forwarded,
    and `out` the ordered source. */
 typedef struct Forward {
-  Compiler compiler, Map available, statics, seen, Array out;
+  Compiler c, Map available, statics, seen, Array out;
 } Forward;
 
 /* Pending sibling suffixes stay off the C stack. Only declaration
@@ -1074,7 +1072,7 @@ static void Forward.binding(Forward *f, Var binding) {
    spells some of those as function-like macros, so a prototype of the alias
    would not even parse. */
 static void Forward.global(Forward *f, Var binding, String spelling) {
-  Compiler c = f.compiler;
+  Compiler c = f.c;
   Type type = NULL;
   List global = spelling ? c.sym.resolve_global(%($spelling), type) : NULL;
   if (!global || !global.equal(binding) || !type.is_function()) return;
@@ -1120,7 +1118,7 @@ static List _vertical_spacing(List code) {
 }
 
 /* A unit that uses the runtime includes it inside the header's guard. */
-static List _include_guard(Compiler c, List content) {
+static List Compiler._include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
   String guard = filename_hash(c.filename);
@@ -1160,7 +1158,7 @@ static List _header_guard(List content, String guard) => %(
 /* The source includes its own header, then `error.h` when it raises. A
    cleanup region spells `X2CCleanup` and its push and leave calls, which
    `exception.x` declares. */
-static List _primary_include(Compiler c, List content) {
+static List Compiler._primary_include(Compiler c, List content) {
   List own = _include_directive(%"${Path.stem(c.filename)}.h");
   List error =
     ast_contains_head(content, <raise>) ? _include_directive("error.h") : NULL;
@@ -1173,7 +1171,7 @@ static List _include_directive(String fname) =>
   %((preproc "#include \"$fname\"") (space "\n") (space "\n"));
 
 /* `main` calls the runtime initializer before anything else. */
-static List _patch_main(Compiler c, List source) {
+static List Compiler._patch_main(Compiler c, List source) {
   List initializer = c.sym.reference(%("x2c_initialize"), NULL);
   List setup = %((stmnt (expr (void) (call
     (expr ((func ((void))) void) (ident $initializer))
@@ -1182,7 +1180,7 @@ static List _patch_main(Compiler c, List source) {
     match (node)
       case %(function ? (bind (!set ?binding (*)) ?) (block *body)):
         if (binding_identity_spelling(binding) == "main")
-          return _replace_initializer_body(c, node, setup.append(body));
+          return c._replace_body(node, setup.append(body));
     return node;
   });
 }
@@ -1204,12 +1202,12 @@ List Compiler.definition_rows(Compiler c, List ast) {
   // Prototypes and imported units have no local function node.
   foreach (List node, ast) match (node) {
     case %(function ?type (bind ?binding ?modifiers) ?): {
-      List row = _function_row(c, type, binding, modifiers, 0);
+      List row = c._function_row(type, binding, modifiers, 0);
       if (row) rows.push(row);
     }
     case %(falias
            (declare ?type (bindings (bind ?binding ?modifiers))) ?): {
-      List row = _function_row(c, type, binding, modifiers, 1);
+      List row = c._function_row(type, binding, modifiers, 1);
       if (row) rows.push(row);
     }
     case %(typedef ?base (bindings *declarators)):
@@ -1217,20 +1215,20 @@ List Compiler.definition_rows(Compiler c, List ast) {
         case %(bind ?binding ?modifiers):
           rows.push(
             %(typedef ${binding_identity_spelling(binding)} $base $modifiers
-              ${_span(c, node)}));
+              ${c._span(node)}));
   }
   return rows.list_free();
 }
 
 /* The row of a function or foreign alias, or NULL when its binding has no
    spelling. */
-static List _function_row(
+static List Compiler._function_row(
   Compiler c, List type, List binding, List modifiers, int alias) {
   String name = binding_identity_spelling(binding);
   if (!name) return NULL;
   Type signature =
     %(declare $type (bindings (bind $binding $modifiers))).type_from_ast();
-  int line = 1, Var doc = "", List declarator = NULL, span = _span(c, binding);
+  int line = 1, Var doc = "", List declarator = NULL, span = c._span(binding);
   match (c.semantic_binding_facts()[%(api-definition $binding)])
     case %(?(int recorded) ?text ?range): {
       line = recorded;
@@ -1248,36 +1246,36 @@ static List _function_row(
     }
   Symbol origin = declarator ? <source> : <macro>;
   if (alias) origin = <alias>;
-  return %(function $name ${_display(c, binding, name)} $signature
-           ${_parameter_names(c, modifiers)} $line $doc
+  return %(function $name ${c._display(binding, name)} $signature
+           ${c._parameter_names(modifiers)} $line $doc
            ${type.type().is_static()} $origin $declarator $span);
 }
 
 /* A method displays as `Owner.member`. */
-static String _display(Compiler c, List binding, String name) {
+static String Compiler._display(Compiler c, List binding, String name) {
   match (c.semantic_binding_facts()[%(method $binding)])
     case %(?(String owner) ?(String member)): return %"$owner.$member";
   return name;
 }
 
-static List _span(Compiler c, List key) {
+static List Compiler._span(Compiler c, List key) {
   Var span = NULL;
   c.semantic_binding_facts().try_get(%(definition-span $key), span);
   return span;
 }
 
-static List _parameter_names(Compiler c, List modifiers) {
+static List Compiler._parameter_names(Compiler c, List modifiers) {
   Array names = [];
   match (modifiers)
     case %((fnmod (params *parameters)) *):
       foreach (List parameter, parameters) match (parameter)
         case %(param ? (bind ?binding ?)):
-          names.push(_parameter_name(c, binding));
+          names.push(c._parameter_name(binding));
   return names.list_free();
 }
 
 /* A parameter's source spelling, or "" for an unnamed parameter. */
-static String _parameter_name(Compiler c, List binding) {
+static String Compiler._parameter_name(Compiler c, List binding) {
   String name = binding_identity_spelling(binding);
   Var spelling;
   Map facts = c.semantic_binding_facts();
@@ -1309,7 +1307,7 @@ void Compiler.dump_definitions(Compiler c, List ast) {
   if (first.type == <comment>) printf("%s\n", %(module ${first.text}).repr());
   foreach (List row, c.definition_rows(ast)) match (row) {
     case %(function *): _print_function(tokens, row);
-    case %(typedef *): _print_type(c, tokens, row);
+    case %(typedef *): c._print_type(tokens, row);
   }
 }
 
@@ -1332,7 +1330,7 @@ static void _print_function(Token tokens, List row) {
 
 /* A typedef with a source span prints its text without the closing `;`,
    its kind, its doc, and its privacy. */
-static void _print_type(Compiler c, Token tokens, List row) {
+static void Compiler._print_type(Compiler c, Token tokens, List row) {
   match (row)
     case %(typedef ?name ?base ?modifiers ?span): {
       Var doc = "", text = "", kind = <alias>;
