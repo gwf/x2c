@@ -1479,9 +1479,7 @@ macro open Expression $bump(Expr $value) => target((Width) $value);
 
 A caller's local of the same spelling does not capture them. A free type
 name resolves through the base scopes to its target type, so the generated C
-spells the target type rather than the typedef name. A free callee that the
-applying unit does not declare is emitted as a native call with the result
-type recorded where the macro was defined.
+spells the target type rather than the typedef name.
 
 ### Hygiene and generated names
 

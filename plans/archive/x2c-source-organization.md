@@ -504,11 +504,15 @@ with byte-identical C.
   `noinline, cold`, so clang no longer inlines it into every guarded entry.
   The Match capture benchmark retires 1.4% fewer instructions than before
   the fix, and translation 0.6% fewer.
-- No current source, fixture, or unit test fills the open-template
-  natives map or changes a tree by value replacement in `_template`
-  (`src/macros.x`); only origin removal and one typedef base ever change a
-  template. The native-call and replacement paths are candidates for an
-  `investigate-x2c-overengineering` pass before anything is deleted.
+- Fixed 2026-10-01: `_template` (`src/macros.x`) no longer rebinds an
+  open template's free values or turns undeclared callees into native
+  calls. A file-scope definition already binds them in the global scope,
+  and an applied Macro value or replayed import rebinds them there, so the
+  natives map was never filled and every full-parse replacement returned
+  the same binding. The only changed binding came from collection, for an
+  open macro applied after an `#include` in its file, and closed macros
+  show that one is not needed; translated C stayed byte-identical. Origin
+  removal and typedef base resolution remain.
 - A method cannot be called on a field whose type is spelled `struct X`
   (for example `record.region` in `lib/error.x`): the typedef's methods are
   not found, so callers write `ErrorRegion._m(&record.region, ...)`. Found
