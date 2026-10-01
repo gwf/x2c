@@ -6,7 +6,7 @@
 
 # `src/generate.x`
 
-Generate C headers and source files.
+The generated header and source of one unit.
 
 ## Functions
 
@@ -35,7 +35,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:36`
+Source: `src/generate.x:37`
 
 #### generate_code_text
 
@@ -45,7 +45,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `generate_code` does.
 
-Source: `src/generate.x:49`
+Source: `src/generate.x:50`
 
 ### `Compiler`
 
@@ -64,7 +64,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1202`
+Source: `src/generate.x:1200`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -76,21 +76,22 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1305`
+Source: `src/generate.x:1303`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
 
-`List Compiler.init_statements(Compiler compiler, Symbol phase)`
+`List Compiler.init_statements(Compiler c, Symbol phase)`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:796`
+Source: `src/generate.x:794`
 
 ## Design notes
 
-Turns a normalized AST into formatted header and source files. It splits
-the header from the source without changing source order, adds once-only
-translation-unit initialization, static prototypes, and include guards,
-and publishes the files together. Filesystem failures retain their
-target and host error as compiler diagnostic notes.
+This module owns a unit's generated files: it splits the lowered AST into
+header and source without changing source order, gives the source its
+once-only initialization and static prototypes, wraps the header in its
+guard, and publishes both with the unit's interface. The definition rows
+the interface lists, and `--dump-definitions` prints, come from the same
+lowered AST.

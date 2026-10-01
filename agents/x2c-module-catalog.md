@@ -52,12 +52,12 @@ Public functions:
 
 ### [src/cache.x](../src/cache.x)
 
-constant caching for x2c code generation.
+cached literal slots and deferred file-static initializers.
 
 Public functions:
 
-`_initialization_guard`, `_patch_initialized_entry`,
-`Compiler.setup_cache_init`
+`Compiler.setup_cache_init`, `_initialization_guard`,
+`_patch_initialized_entry`
 
 ### [src/callables.x](../src/callables.x)
 
@@ -178,7 +178,7 @@ Public functions:
 
 ### [src/emit.x](../src/emit.x)
 
-emit C tokens from x2c ASTs.
+C tokens from normalized x2c ASTs.
 
 Public functions:
 
@@ -223,7 +223,7 @@ Public functions:
 
 ### [src/generate.x](../src/generate.x)
 
-generate C headers and source files.
+the generated header and source of one unit.
 
 Public functions:
 
@@ -445,19 +445,19 @@ Public functions:
 
 ### [src/protocol.x](../src/protocol.x)
 
-Protocol collection and per-unit semantic registry.
+protocols from declaration to generated adapters.
 
 Public functions:
 
-`Compiler.rebuild_protocols`, `Compiler.reverse_converter_spelling`,
+`Compiler.reverse_converter_spelling`, `Compiler.parse_protocol_declaration`,
 `Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
-`Compiler.install_generated_protocol_symbols`, `Compiler.protocol_members_for`,
-`Compiler.protocol_rejects_direct_member`, `Compiler.operator_member`,
-`Compiler.dump_conformance`, `Compiler.derived_member`,
-`Compiler.protocol_member_names`, `Compiler.wrapper_function`,
-`Compiler.resolve_protocol_member`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
+`Compiler.protocol_members_for`, `Compiler.protocol_member_names`,
+`Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
+`Compiler.operator_member`, `Compiler.derived_member`,
+`Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.install_generated_protocol_symbols`, `Compiler.rebuild_protocols`
 
 ### [src/regions.x](../src/regions.x)
 
@@ -465,9 +465,9 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.check_regions`,
-`Compiler.check_meta_regions`, `Compiler.audit_regions`,
-`Compiler.has_region_row`
+`Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.has_region_row`,
+`Compiler.check_regions`, `Compiler.check_meta_regions`,
+`Compiler.audit_regions`
 
 ### [src/report.x](../src/report.x)
 

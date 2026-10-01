@@ -6,7 +6,7 @@
 
 # `src/cache.x`
 
-Constant caching for x2c code generation.
+Cached literal slots and deferred file-static initializers.
 
 ## Functions
 
@@ -31,16 +31,19 @@ to the compiler's early, middle, and late initialization phases; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
 
-Source: `src/cache.x:788`
+Source: `src/cache.x:45`
 
 ## Design notes
 
-Discovers and materializes cached literals between lowering and C
-emission. Immutable values share generated storage; mutable collections
-are copied at use sites, so caching does not change identity.
+This module materializes a unit's cached literals between lowering and C
+emission: it declares their static slots, initializes them in the unit's
+initialization phases, and moves file-static initializers C cannot
+evaluate into generated helpers. Immutable values share generated
+storage; mutable collections are copied at use sites, so caching does not
+change identity.
 
-`Compiler.cache` decides cache-key equality and assigns `(cache id)` nodes
-whose ids index `Compiler.id_keys`. Generation trusts that mapping. Header
-and source regions may materialize the same immutable value in separate
-static slots; `String` and `List` canonicalization preserves value identity
-across them.
+`Compiler.cache` in compiler.x decides cache-key equality and assigns the
+`(cache id)` nodes whose ids index `Compiler.id_keys`; this module trusts
+that mapping. Header and source regions may materialize the same
+immutable value in separate static slots; `String` and `List`
+canonicalization preserves value identity across them.

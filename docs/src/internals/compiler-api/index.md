@@ -11,22 +11,22 @@ Functions and types exposed by each compiler module.
 | Module | Description |
 | --- | --- |
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
-| [`src/build.x`](build.md) | the native build of one target. |
+| [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
-| [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
+| [`src/cache.x`](cache.md) | cached literal slots and deferred file-static initializers. |
 | [`src/callables.x`](callables.md) | lambdas and Func conversions lowered to C helpers. |
 | [`src/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
-| [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
+| [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
-| [`src/emit.x`](emit.md) | emit C tokens from x2c ASTs. |
-| [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
+| [`src/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
+| [`src/expressions.x`](expressions.md) | expression syntax, resolution, and conversion. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
-| [`src/generate.x`](generate.md) | generate C headers and source files. |
+| [`src/generate.x`](generate.md) | the generated header and source of one unit. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/install.x`](install.md) | Package installation into the x2c home. |
 | [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
@@ -39,10 +39,10 @@ Functions and types exposed by each compiler module.
 | [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
 | [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
-| [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
+| [`src/parse.x`](parse.md) | x2c top-level forms, declarations, and constructed syntax. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/project.x`](project.md) | x2c project manifests. |
-| [`src/protocol.x`](protocol.md) | Protocol collection and per-unit semantic registry. |
+| [`src/protocol.x`](protocol.md) | protocols from declaration to generated adapters. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |

@@ -6,7 +6,7 @@
 
 # `src/emit.x`
 
-Emit C tokens from x2c ASTs.
+C tokens from normalized x2c ASTs.
 
 ## Functions
 
@@ -19,11 +19,11 @@ Emit C tokens from x2c ASTs.
 <a id="Compiler.emit"></a>
 #### Compiler.emit
 
-`List Compiler.emit(Compiler compiler, List ast)`
+`List Compiler.emit(Compiler c, List ast)`
 
 Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
 Source mapping adds `src-at`/ID pairs consumed by the formatter.
-`compiler` must own the AST's binding facts and origins, and continue the
+The compiler must own the AST's binding facts and origins, and continue the
 translation session's shared generated-name state. This operation does not
 bind, transform, or choose header and source placement; generation supplies
 any added scaffolding in the same normalized grammar. It preserves the
@@ -32,13 +32,13 @@ temporaries. Returned canonical `List`s and `String`s are owned by pools
 active during emission; promote them before releasing those pools if the
 tokens must survive.
 
-Source: `src/emit.x:1346`
+Source: `src/emit.x:46`
 
 ## Design notes
 
-Translates normalized ASTs into token `List`s for downstream flattening and
-formatting. One stack-local Emitter holds the current function's name,
-static objects, and native aliases, so emission is reentrant and a failed
-translation cannot contaminate later units. `transform.x` has already
-placed
-each cleanup region's statements on the exits that leave it.
+This module owns emission: it turns a bound, typed, transform-normalized
+AST into the token `List`s that formatting prints as C. One stack-local
+Emitter holds the current function's name, static objects, and native
+aliases, so emission is reentrant and a failed translation cannot
+contaminate later units. `transform.x` has already placed each cleanup
+region's statements on the exits that leave it.

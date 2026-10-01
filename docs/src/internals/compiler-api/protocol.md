@@ -6,7 +6,7 @@
 
 # `src/protocol.x`
 
-Protocol collection and per-unit semantic registry.
+Protocols from declaration to generated adapters.
 
 ## Functions
 
@@ -36,13 +36,13 @@ Protocol collection and per-unit semantic registry.
 <a id="Compiler.derived_member"></a>
 #### Compiler.derived_member
 
-`Symbol Compiler.derived_member(Compiler compiler, Symbol op)`
+`Symbol Compiler.derived_member(Compiler c, Symbol op)`
 
 Returns the protocol member that derives a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/protocol.x:1526`
+Source: `src/protocol.x:1759`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -57,19 +57,19 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:2051`
+Source: `src/protocol.x:2153`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
 
-`void Compiler.dump_conformance(Compiler compiler, Map globs)`
+`void Compiler.dump_conformance(Compiler c, Map globs)`
 
 Prints stable conformance rows for typedefs in `globs`.
 Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, so prelude and live symbol modes can be
 compared.
 
-Source: `src/protocol.x:1496`
+Source: `src/protocol.x:1670`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -81,7 +81,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2521`
+Source: `src/protocol.x:2240`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -91,17 +91,17 @@ Source: `src/protocol.x:2521`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:1176`
+Source: `src/protocol.x:2267`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
 
-`Symbol Compiler.operator_member(Compiler compiler, Symbol op)`
+`Symbol Compiler.operator_member(Compiler c, Symbol op)`
 
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/protocol.x:1457`
+Source: `src/protocol.x:1750`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -115,7 +115,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol.x:2794`
+Source: `src/protocol.x:232`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -124,17 +124,17 @@ Source: `src/protocol.x:2794`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:2075`
+Source: `src/protocol.x:2177`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
 
-`List Compiler.protocol_member_names(Compiler compiler, Type participant)`
+`List Compiler.protocol_member_names(Compiler c, Type participant)`
 
 Returns unique member spellings from the participant's visible adopted
 conformances. Resolution remains responsible for selecting a binding.
 
-Source: `src/protocol.x:1583`
+Source: `src/protocol.x:1588`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -146,18 +146,18 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1377`
+Source: `src/protocol.x:1508`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
 
-`int Compiler.protocol_rejects_direct_member( Compiler compiler, Type participant, String member)`
+`int Compiler.protocol_rejects_direct_member( Compiler c, Type participant, String member)`
 
 Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1412`
+Source: `src/protocol.x:1614`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -170,7 +170,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1934`
+Source: `src/protocol.x:2044`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -184,24 +184,24 @@ decisions and returns the canonical published node. Generated contexts may
 also retain that node in `Sym` for replay. A `(meta-protocol ADOPTION)`
 node publishes its adoption and marks it for compile-time code.
 
-Source: `src/protocol.x:554`
+Source: `src/protocol.x:479`
 
 <a id="Compiler.rebuild_protocols"></a>
 #### Compiler.rebuild_protocols
 
-`void Compiler.rebuild_protocols(Compiler compiler, Map symbols)`
+`void Compiler.rebuild_protocols(Compiler c, Map symbols)`
 
 Rebuilds the per-unit protocol and adoption registries from `symbols`.
 Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:256`
+Source: `src/protocol.x:2711`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
 
-`List Compiler.resolve_protocol_member( Compiler compiler, Type participant, String member_name)`
+`List Compiler.resolve_protocol_member( Compiler c, Type participant, String member_name)`
 
 Resolves a protocol member for `participant`.
 Returns a `(binding signature)` pair for the selected implementation or
@@ -209,18 +209,18 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1853`
+Source: `src/protocol.x:1772`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
 
-`void Compiler.resolve_protocols(Compiler compiler)`
+`void Compiler.resolve_protocols(Compiler c)`
 
 Resolves every visible adoption into the current conformance registry.
 Resolution starts from an empty registry; diagnostics are located only for
 adoptions owned by the current translation unit.
 
-Source: `src/protocol.x:1148`
+Source: `src/protocol.x:791`
 
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
@@ -234,7 +234,7 @@ the package prefix sits at the front of the derived binding instead of
 inside it. The split is keyed on a known package because a foreign
 header may spell `__` in a type name.
 
-Source: `src/protocol.x:322`
+Source: `src/protocol.x:189`
 
 <a id="Compiler.wrapper_function"></a>
 #### Compiler.wrapper_function
@@ -245,11 +245,13 @@ Returns the function `result name(params) { body }` bound in this
 unit. `result` is the storage class and result type, `params` the
 parameter declarations, and `body` its lowered statements.
 
-Source: `src/protocol.x:1746`
+Source: `src/protocol.x:1996`
 
 ## Design notes
 
-This module carries protocol and adoption rows from parsing through
-resolved conformance and generated adapters. Registries are rebuilt per
-translation unit; static rows are visible only when their canonical
-source path is the current unit.
+This module owns the protocol feature: it parses protocol and adoption
+declarations, keeps their rows in per-unit registries, resolves each
+adoption into a conformance, answers member and operator lookups, and
+generates the adapters a conformance needs. Registries are rebuilt per
+translation unit; a static row is visible only when its canonical source
+path is the current unit.
