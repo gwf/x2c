@@ -19,7 +19,7 @@
 #include "format.x"
 #include "cleanup.x"
 
-// emitter state
+// emission
 
 /* `native_macros` holds the `#define` rows initializer choices need, and
    `static_support` records that a runtime static was emitted, so the unit
@@ -31,8 +31,6 @@ typedef struct Emitter {
   Map static_objects;
   int static_support;
 } *Emitter;
-
-// emission
 
 /** Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
     Source mapping adds `src-at`/ID pairs consumed by the formatter.
