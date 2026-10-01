@@ -37,7 +37,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:596`
+Source: `lib/process.x:600`
 
 ### `Job`
 
@@ -51,7 +51,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:488`
+Source: `lib/process.x:492`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -61,7 +61,7 @@ Source: `lib/process.x:488`
 Terminates and reaps a job that is still running: `SIGTERM`, then
 `SIGKILL` to any stage still running a second later.
 
-Source: `lib/process.x:565`
+Source: `lib/process.x:569`
 
 <a id="Job.errors"></a>
 #### Job.errors
@@ -74,7 +74,7 @@ needed, or NULL when standard error was not captured or was empty.
 **Raises:** the start causes of `Job.start`, or `<bad-arg>` when the captured
 text contains a NUL byte.
 
-Source: `lib/process.x:540`
+Source: `lib/process.x:544`
 
 <a id="Job.kill"></a>
 #### Job.kill
@@ -83,7 +83,7 @@ Source: `lib/process.x:540`
 
 Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:557`
+Source: `lib/process.x:561`
 
 <a id="Job.lines"></a>
 #### Job.lines
@@ -95,7 +95,7 @@ endings.
 
 **Raises:** the causes of `Job.output`.
 
-Source: `lib/process.x:533`
+Source: `lib/process.x:537`
 
 <a id="Job.live"></a>
 #### Job.live
@@ -107,7 +107,7 @@ same as `options({stdout: <inherit>})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:457`
+Source: `lib/process.x:461`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -132,7 +132,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:416`
+Source: `lib/process.x:420`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -145,7 +145,7 @@ as needed. A live job, or one whose output was empty, returns NULL.
 **Raises:** the causes of `Job.check`, or `<bad-arg>` when the output
 contains a NUL byte.
 
-Source: `lib/process.x:519`
+Source: `lib/process.x:523`
 
 <a id="Job.pipe"></a>
 #### Job.pipe
@@ -158,7 +158,7 @@ stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:384`
+Source: `lib/process.x:388`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -168,7 +168,7 @@ Source: `lib/process.x:384`
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
 
-Source: `lib/process.x:548`
+Source: `lib/process.x:552`
 
 <a id="Job.run"></a>
 #### Job.run
@@ -180,7 +180,7 @@ status is not zero: `live()` followed by `check()`.
 
 **Raises:** the causes of `Job.live` and `Job.check`.
 
-Source: `lib/process.x:510`
+Source: `lib/process.x:514`
 
 <a id="Job.start"></a>
 #### Job.start
@@ -194,7 +194,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:467`
+Source: `lib/process.x:471`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -207,7 +207,7 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:477`
+Source: `lib/process.x:481`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -219,7 +219,7 @@ until one does. An empty `jobs` returns NULL.
 
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
-Source: `lib/process.x:575`
+Source: `lib/process.x:579`
 
 ### `List`
 
@@ -241,7 +241,7 @@ Job job = %(printf "a\nb\n");
 ~}
 ```
 
-Source: `lib/process.x:355`
+Source: `lib/process.x:360`
 
 ## Public types
 
@@ -249,6 +249,7 @@ Source: `lib/process.x:355`
 | --- | --- | --- |
 | [`Env`](#Env) | enum | The receiverless owner of `Env.get`. |
 | [`Job`](#Job) | class | A command or pipeline and the record of its one run. |
+| [`Launch`](#Launch) | struct | The launch options embedded in a Job. |
 
 <a id="Env"></a>
 ### Env
@@ -257,18 +258,31 @@ Source: `lib/process.x:355`
 
 The receiverless owner of `Env.get`.
 
-Source: `lib/process.x:37`
+Source: `lib/process.x:49`
 
 <a id="Job"></a>
 ### Job
 
-`class Job struct { List stages; struct _Launch *launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
+`class Job { List stages; Launch launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
 
 A command or pipeline and the record of its one run.
 A job that is still running when its Scope ends, or when its `$auto`
 block exits, is terminated and reaped.
 
-Source: `lib/process.x:21`
+Source: `lib/process.x:33`
+
+<a id="Launch"></a>
+### Launch
+
+`typedef struct _Launch { String dir, input, stdout_path, stderr_path; int has_input, capture_output, capture_errors, errors_to_output; char **environment; } Launch`
+
+The launch options embedded in a Job.
+Set these through `Job.options` before the job starts. The record has
+the job's lifetime. Everything a child needs is prepared before `fork`,
+so the child only duplicates descriptors, changes directory, and calls
+`execvp`.
+
+Source: `lib/process.x:23`
 
 ## Design notes
 
