@@ -555,7 +555,7 @@ static List CellRegion._declaration(
   CellRegion &r, List target, List bindings) {
   int has_cell = 0;
   foreach (List item, bindings)
-    match (item) case $source_declarator_row(%(?binding *)):
+    match (item) case %(!or (bind ?binding *) (op = (bind ?binding *) ?)):
       has_cell |= binding && binding in r.cells;
   if (!has_cell) return NULL;
 

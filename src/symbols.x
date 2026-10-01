@@ -13,7 +13,6 @@
 #include "compiler.x"
 #pragma private
 $(import "../src/error-reports.xmacro")
-$(import "../src/grammar.xmacro")
 
 // symbol scopes
 
@@ -653,10 +652,14 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
 static void Compiler._record_rows_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List rows) {
-  foreach (List row, rows)
-    match (row) case $source_declarator_row(%(?identity *)):
+  foreach (List row, rows) match (row) {
+    case %(bind ?identity *):
       _record_declaration_binding_visibility(
         c, declaration, kind, private, mark, identity);
+    case %(op = (bind ?identity *) ?):
+      _record_declaration_binding_visibility(
+        c, declaration, kind, private, mark, identity);
+  }
 }
 
 static void _record_declaration_binding_visibility(
