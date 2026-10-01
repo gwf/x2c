@@ -1583,7 +1583,7 @@ static List CallSite._method(CallSite *k, List receiver, List field) {
     case %(delegate ?binding (!set ?signature
            ((func (!set ?parameters (?declared *))) *returns))
            ?path): {
-      k.receiver = _materialize_delegate_receiver(k.receiver, path);
+      k.receiver = _delegate_receiver(k.receiver, path);
       k.type = k.receiver.cadr();
       return k._bound(binding, signature, declared, parameters, returns);
     }
@@ -1885,7 +1885,7 @@ static String _delegate_type_name(Type type) {
   return base.is_aggregate_tag() ? name.str() : head.str();
 }
 
-static List _materialize_delegate_receiver(List receiver, List path) {
+static List _delegate_receiver(List receiver, List path) {
   foreach (List step, path.cdr()) {
     (Symbol access, String name, Type type) = step.cdr();
     receiver = %(
@@ -1943,26 +1943,31 @@ static void Compiler._completion_methods(
   while (type) {
     if (type.is_typedef_name() || type.is_builtin()) {
       String owner = type.base_type().car();
-      String prefix = %"${owner}_";
-      foreach (List row, c.sym.visible_symbols()) {
-        (String spelling, Var raw) = row;
-        if (raw is not <list>) continue;
-        Type signature = raw;
-        if (signature.is_function() && spelling.startswith(prefix))
-          _completion_add(seen, names, spelling.remove_prefix(prefix));
-        foreach (Var (raw_package, _), c.package_roots) {
-          String package = raw_package;
-          String imported = %"${package}__$prefix";
-          if (signature.is_function() && spelling.startswith(imported))
-            _completion_add(
-              seen, names, spelling.remove_prefix(imported));
-        }
-      }
+      c._completion_owner_methods(%"${owner}_", seen, names);
       foreach (String name, c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
     if (type.is_pointer() || type.is_aggregate()) type = NULL;
     else type = c.sym.next_typedef(type, hops);
+  }
+}
+
+/* Functions named `Owner_name`, or `package__Owner_name` for an imported
+   package, among the visible symbols. */
+static void Compiler._completion_owner_methods(
+  Compiler c, String prefix, Map seen, Array names) {
+  foreach (List row, c.sym.visible_symbols()) {
+    (String spelling, Var raw) = row;
+    if (raw is not <list>) continue;
+    Type signature = raw;
+    if (signature.is_function() && spelling.startswith(prefix))
+      _completion_add(seen, names, spelling.remove_prefix(prefix));
+    foreach (Var (raw_package, _), c.package_roots) {
+      String package = raw_package;
+      String imported = %"${package}__$prefix";
+      if (signature.is_function() && spelling.startswith(imported))
+        _completion_add(seen, names, spelling.remove_prefix(imported));
+    }
   }
 }
 
@@ -2102,8 +2107,7 @@ static List Compiler._resolve_func_call(
     type, which is `(expr ("List") (ident reference))` for a null argument
     that takes the callee's own type. */
 List Compiler.func_call_parts(Compiler c, Var content) {
-  Macro call = $func_call, apply = $func_apply, prepare = $func_argument,
-        absent = $func_null_argument, boxed = $func_value;
+  Macro call = $func_call, apply = $func_apply;
   match (%(expr () $content)) case apply(?callee): return %($callee);
   List block = NULL;
   match (content) case $source_content_pattern($grouped, %(?inner)):
@@ -2113,27 +2117,36 @@ List Compiler.func_call_parts(Compiler c, Var content) {
     case call(?callee, ?count, *arguments): {
       Array parts = $auto([callee]);
       foreach (List argument, _slot_statements(arguments)) {
-        Var value = %(no-value), address = NULL, source = NULL;
-        match (argument) {
-          case prepare(
-            ?function, ?storage, ?count, ?index, ?pointer,
-            ?type, ?alternative): {
-            match (alternative) case boxed(?boxed_value): value = boxed_value;
-            address = pointer;
-            source = type;
-          }
-          case absent(?function, ?storage, ?count, ?index, ?alternative): {
-            match (alternative) case boxed(?boxed_value): value = boxed_value;
-            address = x2c_literal_int(0);
-            source = %(expr ("List") (ident reference));
-          }
-          default: return NULL;
-        }
-        parts.push(%(func-arg $value $address $source));
+        List part = _func_arg_part(argument);
+        if (!part) return NULL;
+        parts.push(part);
       }
       return parts;
     }
   return NULL;
+}
+
+/* One prepared argument as `(func-arg value address source)`, or NULL for
+   any other statement. */
+static List _func_arg_part(List argument) {
+  Macro prepare = $func_argument, absent = $func_null_argument,
+        boxed = $func_value;
+  Var value = %(no-value), address = NULL, source = NULL;
+  match (argument) {
+    case prepare(
+      ?function, ?storage, ?count, ?index, ?pointer, ?type, ?alternative): {
+      match (alternative) case boxed(?boxed_value): value = boxed_value;
+      address = pointer;
+      source = type;
+    }
+    case absent(?function, ?storage, ?count, ?index, ?alternative): {
+      match (alternative) case boxed(?boxed_value): value = boxed_value;
+      address = x2c_literal_int(0);
+      source = %(expr ("List") (ident reference));
+    }
+    default: return NULL;
+  }
+  return %(func-arg $value $address $source);
 }
 
 /* Open statement groups in a slot. */
