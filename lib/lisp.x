@@ -1898,12 +1898,14 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     validation succeeds, the `Func` moves before the global insertion. The
     caller relinquishes ownership even if name canonicalization or `Map`
     growth then raises `<alloc-fail>`, `<size-limit>`, or `<bad-enc>`, but
-    may borrow the pointer while the session lives. Values inside the
-    `Func`, including its signature graph, retain their existing owners.
+    may borrow the pointer while the session lives. A direct function or
+    noncapturing lambda converts to a shared handle that lives for the
+    program; the session only borrows it. Values inside the `Func`,
+    including its signature graph, retain their existing owners.
 */
 void Lisp.bind(Lisp lisp, String name, Func function) {
   if (!lisp || !name || !function) raise %(bad-arg (operation "Lisp.bind"));
-  Scope.move(function, &lisp.scope);
+  function.move(&lisp.scope);
   lisp.set_global(name, function);
 }
 

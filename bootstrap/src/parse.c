@@ -23,7 +23,7 @@ static Var _2178, _2175, _2173, _2171, _2149, _2146, _2145, _2142, _2140, _2135,
 #include "utils.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void Compiler__leading_directives(Compiler c, int skip_body);
 
@@ -385,9 +385,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_46021D32_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _2179)))
+_x2c_initializer_choice_46021D32_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2179)))
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_6;
   const void * _x2c_defer_capture_7;
@@ -588,7 +588,7 @@ Var List_var(List);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

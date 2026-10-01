@@ -97,7 +97,7 @@ Expansion;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List Compiler__stored_definition(Compiler c, Var stored, Token invocation);
 
@@ -956,7 +956,7 @@ Var String_var(String);
 
 String String_add(String, String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

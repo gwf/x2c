@@ -18,7 +18,7 @@ static Var _27, _25, _22, _20, _18, _16, _13, _11, _9, _7, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var increment(Var value);
 
@@ -28,9 +28,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _17)))
+_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _17)))
 typedef struct _x2c_func_pointer_context_0{
   Var(* _x2c_func_pointer_0)(Var);
 }
@@ -56,7 +56,7 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _29)))
+_x2c_initializer_choice_EC4193E6_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _29)))
 Var int_var(int);
 
 List cons(Var, List);
@@ -67,7 +67,7 @@ Var String_var(String);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

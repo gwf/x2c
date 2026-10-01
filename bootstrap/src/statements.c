@@ -16,7 +16,7 @@ static Var _179, _169, _167, _165, _163, _161, _159, _157, _155, _153, _151, _14
 #include "macros.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _statement_keywords(void);
 
@@ -213,7 +213,7 @@ Var Symbol_var(Symbol);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

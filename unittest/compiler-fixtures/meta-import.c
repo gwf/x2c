@@ -10,7 +10,7 @@ static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String mi_dashed(String path);
 
@@ -27,7 +27,7 @@ static int mi_count;
 _x2c_initializer_choice_7A40B867_0((mi_count = 0))
 static int mi_next(void);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

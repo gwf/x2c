@@ -6,7 +6,7 @@ static String _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 struct _x2c_macro_Node_4f65fd50{
   int value;
@@ -20,7 +20,7 @@ enum _x2c_macro_Choice_b798c844{
 
 typedef int _x2c_macro_Scalar_0e265834;
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

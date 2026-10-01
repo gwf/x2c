@@ -12,22 +12,22 @@ static Var _10, _7, _5, _3, _2, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_842CEF8E_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _11)))
+_x2c_initializer_choice_842CEF8E_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _11)))
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

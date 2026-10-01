@@ -41,7 +41,7 @@ List x2c_param_make(List type, Var name);
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _scope_expand(List body, List destinations);
 
@@ -224,37 +224,37 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_2CF70D65_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _1390)))
+_x2c_initializer_choice_2CF70D65_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _1390)))
 static Var _x2c_lambda_1(Var type);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_2CF70D65_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _1390)))
+_x2c_initializer_choice_2CF70D65_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _1390)))
 static Var _x2c_lambda_2(List record);
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_2CF70D65_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _1391)))
+_x2c_initializer_choice_2CF70D65_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _1391)))
 static Var _x2c_lambda_3(List value);
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
 
 static Func _x2c_func_handle_3;
 
-_x2c_initializer_choice_2CF70D65_3((_x2c_func_handle_3 = Func_new(_x2c_func_adapt_3, _1391)))
+_x2c_initializer_choice_2CF70D65_3((_x2c_func_handle_3 = x2c_func_shared(_x2c_func_adapt_3, _1391)))
 static Var _x2c_lambda_4(List record);
 
 static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
 
 static Func _x2c_func_handle_4;
 
-_x2c_initializer_choice_2CF70D65_4((_x2c_func_handle_4 = Func_new(_x2c_func_adapt_4, _1391)))
+_x2c_initializer_choice_2CF70D65_4((_x2c_func_handle_4 = x2c_func_shared(_x2c_func_adapt_4, _1391)))
 static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6);
@@ -381,7 +381,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
@@ -2776,6 +2776,7 @@ x2c_diagnostic_fail(_1442, NULL);  return NULL;
 Map Map_new(void);
 Var Map_setindex(Map, Var, Var);
 Var Func_var(Func);
+Func Func_new(FuncAdapter, List);
 Map builtin_targets(void){
   if(! _init_guard_) _file_init_();  Map rows = Map_new();  Map_setindex(rows, String_var(_1443), Func_var(Func_new(_x2c_func_adapt_5, _1222)));  Map_setindex(rows, String_var(_1444), Func_var(Func_new(_x2c_func_adapt_6, _1228)));  Map_setindex(rows, String_var(_1445), Func_var(Func_new(_x2c_func_adapt_7, _1234)));  Map_setindex(rows, String_var(_1446), Func_var(Func_new(_x2c_func_adapt_8, _1222)));  Map_setindex(rows, String_var(_1447), Func_var(Func_new(_x2c_func_adapt_9, _1222)));  Map_setindex(rows, String_var(_1448), Func_var(Func_new(_x2c_func_adapt_10, _1228)));  Map_setindex(rows, String_var(_1449), Func_var(Func_new(_x2c_func_adapt_11, _1222)));  Map_setindex(rows, String_var(_1450), Func_var(Func_new(_x2c_func_adapt_12, _1222)));  Map_setindex(rows, String_var(_1451), Func_var(Func_new(_x2c_func_adapt_13, _1240)));  Map_setindex(rows, String_var(_1452), Func_var(Func_new(_x2c_func_adapt_14, _1241)));  Map_setindex(rows, String_var(_1453), Func_var(Func_new(_x2c_func_adapt_15, _1247)));  Map_setindex(rows, String_var(_1454), Func_var(Func_new(_x2c_func_adapt_16, _1252)));  Map_setindex(rows, String_var(_1455), Func_var(Func_new(_x2c_func_adapt_17, _1259)));  Map_setindex(rows, String_var(_1456), Func_var(Func_new(_x2c_func_adapt_18, _1222)));  Map_setindex(rows, String_var(_1457), Func_var(Func_new(_x2c_func_adapt_19, _1260)));  Map_setindex(rows, String_var(_1458), Func_var(Func_new(_x2c_func_adapt_20, _1252)));  Map_setindex(rows, String_var(_1459), Func_var(Func_new(_x2c_func_adapt_21, _1222)));  Map_setindex(rows, String_var(_1460), Func_var(Func_new(_x2c_func_adapt_22, _1266)));  Map_setindex(rows, String_var(_1461), Func_var(Func_new(_x2c_func_adapt_23, _1222)));  Map_setindex(rows, String_var(_1462), Func_var(Func_new(_x2c_func_adapt_24, _1278)));  Map_setindex(rows, String_var(_1463), Func_var(Func_new(_x2c_func_adapt_25, _1285)));  Map_setindex(rows, String_var(_1464), Func_var(Func_new(_x2c_func_adapt_26, _1295)));  Map_setindex(rows, String_var(_1465), Func_var(Func_new(_x2c_func_adapt_27, _1301)));  Map_setindex(rows, String_var(_1466), Func_var(Func_new(_x2c_func_adapt_28, _1307)));  Map_setindex(rows, String_var(_1467), Func_var(Func_new(_x2c_func_adapt_29, _1252)));  Map_setindex(rows, String_var(_1468), Func_var(Func_new(_x2c_func_adapt_30, _1313)));  Map_setindex(rows, String_var(_1469), Func_var(Func_new(_x2c_func_adapt_31, _1319)));  Map_setindex(rows, String_var(_1470), Func_var(Func_new(_x2c_func_adapt_32, _1252)));  Map_setindex(rows, String_var(_1471), Func_var(Func_new(_x2c_func_adapt_33, _1222)));  Map_setindex(rows, String_var(_1472), Func_var(Func_new(_x2c_func_adapt_34, _1252)));  Map_setindex(rows, String_var(_1473), Func_var(Func_new(_x2c_func_adapt_35, _1252)));  Map_setindex(rows, String_var(_1474), Func_var(Func_new(_x2c_func_adapt_36, _1325)));  Map_setindex(rows, String_var(_1475), Func_var(Func_new(_x2c_func_adapt_37, _1335)));  Map_setindex(rows, String_var(_1476), Func_var(Func_new(_x2c_func_adapt_38, _1341)));  Map_setindex(rows, String_var(_1477), Func_var(Func_new(_x2c_func_adapt_39, _1348)));  Map_setindex(rows, String_var(_1478), Func_var(Func_new(_x2c_func_adapt_40, _1301)));  Map_setindex(rows, String_var(_1479), Func_var(Func_new(_x2c_func_adapt_41, _1252)));  Map_setindex(rows, String_var(_1480), Func_var(Func_new(_x2c_func_adapt_42, _1301)));  Map_setindex(rows, String_var(_1481), Func_var(Func_new(_x2c_func_adapt_43, _1355)));  Map_setindex(rows, String_var(_1482), Func_var(Func_new(_x2c_func_adapt_44, _1361)));  Map_setindex(rows, String_var(_1483), Func_var(Func_new(_x2c_func_adapt_45, _1367)));  Map_setindex(rows, String_var(_1484), Func_var(Func_new(_x2c_func_adapt_46, _1367)));  Map_setindex(rows, String_var(_1485), Func_var(Func_new(_x2c_func_adapt_47, _1361)));  Map_setindex(rows, String_var(_1486), Func_var(Func_new(_x2c_func_adapt_48, _1252)));  Map_setindex(rows, String_var(_1487), Func_var(Func_new(_x2c_func_adapt_49, _1252)));  Map_setindex(rows, String_var(_1488), Func_var(Func_new(_x2c_func_adapt_50, _1260)));  Map_setindex(rows, String_var(_1489), Func_var(Func_new(_x2c_func_adapt_51, _1341)));  Map_setindex(rows, String_var(_1490), Func_var(Func_new(_x2c_func_adapt_52, _1301)));  Map_setindex(rows, String_var(_1491), Func_var(Func_new(_x2c_func_adapt_53, _1285)));  Map_setindex(rows, String_var(_1492), Func_var(Func_new(_x2c_func_adapt_54, _1368)));  Map_setindex(rows, String_var(_1493), Func_var(Func_new(_x2c_func_adapt_55, _1301)));  Map_setindex(rows, String_var(_1494), Func_var(Func_new(_x2c_func_adapt_56, _1375)));  Map_setindex(rows, String_var(_1495), Func_var(Func_new(_x2c_func_adapt_57, _1222)));  Map_setindex(rows, String_var(_1496), Func_var(Func_new(_x2c_func_adapt_58, _1301)));  Map_setindex(rows, String_var(_1497), Func_var(Func_new(_x2c_func_adapt_59, _1222)));  Map_setindex(rows, String_var(_1498), Func_var(Func_new(_x2c_func_adapt_60, _1381)));  Map_setindex(rows, String_var(_1499), Func_var(Func_new(_x2c_func_adapt_61, _1252)));  Map_setindex(rows, String_var(_1500), Func_var(Func_new(_x2c_func_adapt_62, _1252)));  return rows;
 }

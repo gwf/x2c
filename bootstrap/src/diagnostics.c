@@ -30,7 +30,7 @@ static int diagnostics_json;
 _x2c_initializer_choice_B8F5462B_0((diagnostics_json = - 1))
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _emit_entry(Diagnostics diag, List entry);
 
@@ -64,9 +64,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _77)))
+_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _77)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -84,7 +84,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

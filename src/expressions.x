@@ -365,7 +365,6 @@ static int _cast_operand_follows(Symbol s) {
     case <lit-symbol>:
     case <void>:
     case <sizeof>:
-    case <offsetof>:
     case <++>:
     case <-->:
     case <!>:
@@ -439,12 +438,11 @@ static List Compiler._parse_unary_op(Compiler c) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return c._parse_sizeof();
-  if (op == <offsetof>) return c._parse_offsetof();
   if (op != <++> && op != <--> && op != <~> && op != <*> &&
       op != <&> && op != <-> && op != <+> && op != <!>)
     return c._parse_postfix();
   c.next();
-  List operand = op == <++> || op == <--> || op == <~>
+  List operand = op == <++> || op == <-->
                ? c._parse_unary_op() : c._parse_cast();
   return c.resolve_expression(
     source_operator_expression(NULL, %($op $operand)), origin);
@@ -472,14 +470,25 @@ static List Compiler._parse_sizeof(Compiler c) {
   return %(expr (unsigned) (sizeof $arg));
 }
 
+/* `offsetof` names its member with a C member designator: a field, then
+   any `.field` and `[index]` selections, kept as their C spelling. */
 static List Compiler._parse_offsetof(Compiler c) {
-  c.expect(<offsetof>);
+  c.next();
   c.expect(<(>);
-  List type = c.parse_simple_declaration();
+  Type type = c.parse_type_name();
   c.expect(<,>);
-  List field = c.parse_basic_identifier();
+  List member = c.parse_basic_identifier();
+  for (;;) {
+    if (c.test(<.>))
+      member = %(@member "." @{c.parse_basic_identifier()});
+    else if (c.test(<[>)) {
+      member = %(@member "[" ${c.parse_expression()} "]");
+      c.expect(<]>);
+    }
+    else break;
+  }
   c.expect(<)>);
-  return %(expr (unsigned) (offsetof $type $field));
+  return %(expr (unsigned) (offsetof $type $member));
 }
 
 // postfix operators
@@ -701,6 +710,7 @@ static List Compiler._parse_ident_primary(Compiler c) {
   if (keyword) return keyword;
   if (c.token.text == "va_arg") return c._parse_va_arg();
   if (c.token.text == "_Generic") return c._parse_generic();
+  if (c.token.text == "offsetof") return c._parse_offsetof();
   return c.parse_variable();
 }
 

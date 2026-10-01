@@ -1067,6 +1067,17 @@ static void lisp_binding_storage_belongs_to_session(void) {
   EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
 }
 
+/* Every conversion of a direct function shares one handle, so each session
+   borrows it rather than freeing it on destroy. */
+static void lisp_direct_function_binds_in_successive_sessions(void) {
+  for (int i = 0; i < 2; i++) {
+    Lisp lisp = Lisp.new();
+    Lisp.bind(lisp, "greet", _lisp_bound_greet);
+    EXPECT_STR_EQ(Var.string(lisp.eval(%(greet "Ada"))), "hello Ada");
+    lisp.destroy();
+  }
+}
+
 static void lisp_eval_file_runs_forms(void) {
   Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
@@ -1852,6 +1863,7 @@ void lisp_suite(void) {
   $test.run(lisp_group_installs_into_separate_sessions);
   $test.run(lisp_inferred_binding_transfers_native_error);
   $test.run(lisp_binding_storage_belongs_to_session);
+  $test.run(lisp_direct_function_binds_in_successive_sessions);
   $test.run(lisp_eval_file_runs_forms);
   $test.run(lisp_eval_file_transfers_read_failure);
   $test.run(lisp_eval_file_rejects_embedded_nul);

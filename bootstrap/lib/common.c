@@ -6,7 +6,7 @@
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static inline Block Array_block(Array);
 
@@ -187,7 +187,7 @@ static inline int _x2c_proto_symbol_compare_0(Var a0, Var a1);
 
 static VarMethods _x2c__x2c_protocol_methods_9;
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

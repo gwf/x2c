@@ -10,7 +10,7 @@ static Var _58, _53, _52, _49, _45, _43, _42, _37, _32, _27, _26, _21, _20, _19,
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int classify(List form);
 
@@ -24,7 +24,7 @@ Var String_var(String);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -15,7 +15,7 @@ static Var _615, _613, _610, _565, _501, _498, _497, _496, _494, _489, _483, _48
 #include "expressions.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List Compiler__parse_params(Compiler c);
 
@@ -139,7 +139,7 @@ Var List_var(List);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -10,7 +10,7 @@ static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 #include <errno.h>
 #include <fcntl.h>
@@ -172,7 +172,7 @@ _x2c_defer_env_5;
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

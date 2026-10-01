@@ -36,7 +36,7 @@ static Var _2229, _2226, _2224, _2222, _2192, _2189, _2187, _2185, _2180, _2177,
 #include "lambdas.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _params_to_decl_params(List names);
 
@@ -247,14 +247,14 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_B4B5E4BA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _2195)))
+_x2c_initializer_choice_B4B5E4BA_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2195)))
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_B4B5E4BA_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _2195)))
+_x2c_initializer_choice_B4B5E4BA_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_1, _2195)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -275,14 +275,14 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_B4B5E4BA_2((_x2c_func_handle_2 = Func_new(_x2c_func_adapt_2, _2230)))
+_x2c_initializer_choice_B4B5E4BA_2((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_2, _2230)))
 static Var _x2c_lambda_2(Type type, List name);
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
 
 static Func _x2c_func_handle_3;
 
-_x2c_initializer_choice_B4B5E4BA_3((_x2c_func_handle_3 = Func_new(_x2c_func_adapt_3, _2230)))
+_x2c_initializer_choice_B4B5E4BA_3((_x2c_func_handle_3 = x2c_func_shared(_x2c_func_adapt_3, _2230)))
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
   const void * _x2c_defer_capture_3;
@@ -301,7 +301,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
@@ -2123,11 +2123,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1855 = cons(_1854, NULL);
   _1856 = cons(_194, _1855);
   _1857 = List_var(_1856);
-  _1858 = int_var(1014);
+  _1858 = int_var(1015);
   _1859 = cons(_1858, NULL);
   _1860 = cons(_219, _1859);
   _1861 = List_var(_1860);
-  _1862 = int_var(37894);
+  _1862 = int_var(37915);
   _1863 = cons(_1862, NULL);
   _1864 = cons(_232, _1863);
   _1865 = List_var(_1864);
@@ -2228,11 +2228,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _1960 = cons(_1959, NULL);
   _1961 = cons(_194, _1960);
   _1962 = List_var(_1961);
-  _1963 = int_var(1017);
+  _1963 = int_var(1018);
   _1964 = cons(_1963, NULL);
   _1965 = cons(_219, _1964);
   _1966 = List_var(_1965);
-  _1967 = int_var(38036);
+  _1967 = int_var(38057);
   _1968 = cons(_1967, NULL);
   _1969 = cons(_232, _1968);
   _1970 = List_var(_1969);
@@ -2471,8 +2471,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _2203 = String_new("Func_new_context");
   _2204 = String_new("lambda_cell");
   _2205 = String_new("func_get");
-  _2206 = String_new("Func_new");
-  _2207 = String_new("function conversion needs Func.new from lib/func.x");
+  _2206 = String_new("x2c_func_shared");
+  _2207 = String_new("function conversion needs x2c_func_shared from lib/func.x");
   _2208 = String_new("func_handle");
   _2209 = String_new("func_from_pointer");
   _2210 = String_new("func_pointer");

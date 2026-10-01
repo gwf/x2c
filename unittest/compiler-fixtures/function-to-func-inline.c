@@ -18,7 +18,7 @@ static Var _18, _16, _13, _11, _8, _5, _3, _2;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static long add(long left, long right);
 
@@ -26,9 +26,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_EB5855FF_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
+_x2c_initializer_choice_EB5855FF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
 typedef struct _x2c_func_pointer_context_0{
   long(* _x2c_func_pointer_1)(long, long);
 }
@@ -42,7 +42,7 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_EB5855FF_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_2, _20)))
+_x2c_initializer_choice_EB5855FF_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _20)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -58,7 +58,7 @@ Var List_var(List);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

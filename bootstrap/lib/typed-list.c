@@ -8,13 +8,13 @@ static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 _Noreturn static void _no_convert(String owner, int index, Symbol tag);
 
 static int _typed_list_holds(Var value, Symbol tag);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

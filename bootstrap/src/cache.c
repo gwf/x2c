@@ -26,7 +26,7 @@ static Var _869, _866, _863, _861, _859, _856, _852, _851, _850, _848, _845, _84
 #include <assert.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Array Compiler__cache_ids(Compiler c, List code);
 
@@ -130,9 +130,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_9578BA41_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _870)))
+_x2c_initializer_choice_9578BA41_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _870)))
 Var Symbol_var(Symbol);
 
 List cons(Var, List);
@@ -143,7 +143,7 @@ Var int_var(int);
 
 Var String_var(String);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

@@ -8,7 +8,7 @@
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 typedef enum DirectKind{
   DIRECT_KIND = 3
@@ -46,7 +46,7 @@ GeneratedUnion;
 static int generated_global;
 
 _x2c_initializer_choice_052F45D8_0((generated_global = 4))
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

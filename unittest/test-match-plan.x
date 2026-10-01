@@ -762,6 +762,21 @@ static void capture_layout_owns_canonical_order(void) {
   plan.free();
 }
 
+/* A leading binder captures its guard's slice in either spelling, even
+   under `!not`. */
+static void capture_layout_leading_binder_captures_its_guard(void) {
+  List patterns[] = {
+    %((!not ?x foo)), %((!set ?x (!not foo))),
+    %(!not ?x (!or (a ?y) (b ?y))), %(!set ?x (!not (!or (a ?y) (b ?y)))),
+  };
+  for (int i = 0; i < 4; i++) {
+    MatchCaptureLayout layout = MatchCaptureLayout.analyze(patterns[i]);
+    EXPECT_TRUE(layout.definite_list() == %(?x));
+    EXPECT_TRUE(layout.possible_list() == (i < 2 ? %(?x) : %(?x ?y)));
+    layout.free();
+  }
+}
+
 static void prepared_capture_is_atomic_and_positional(void) {
   MatchPlan plan = MatchPlan.prepare(
     %(!or (ok ?value) (err ?message *rest))
@@ -1076,6 +1091,7 @@ void match_plan_suite(void) {
   $test.run(plan_replace_parity);
   $test.run(unbound_alternative_binder_template_is_retained);
   $test.run(capture_layout_owns_canonical_order);
+  $test.run(capture_layout_leading_binder_captures_its_guard);
   $test.run(prepared_capture_is_atomic_and_positional);
   $test.run(capture_layout_refuses_past_the_binder_limit);
   $test.run(capture_layout_normalization_keeps_unchanged_cells);

@@ -24,7 +24,7 @@ static Var _64, _62, _59, _57, _55, _53, _39, _37, _35, _33, _29, _24, _22, _17,
 #include "utils.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context context, String source);
 
@@ -101,9 +101,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _66)))
+_x2c_initializer_choice_1A2A7247_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _66)))
 Var String_var(String);
 
 List cons(Var, List);
@@ -112,7 +112,7 @@ Var Symbol_var(Symbol);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

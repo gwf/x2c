@@ -845,8 +845,8 @@ Public functions:
 `x2c_func_value_argument`, `x2c_func_pointer_argument`,
 `x2c_func_unrepresentable_argument`, `x2c_func_record_result`,
 `x2c_func_reference_argument`, `x2c_func_declared_reference_argument`,
-`Func.new`, `Func.new_rest`, `Func.new_context`, `Func.signature`,
-`Func.context`, `Func.var`, `Var.func`
+`Func.new`, `Func.new_rest`, `Func.new_context`, `x2c_func_shared`,
+`Func.signature`, `Func.context`, `Func.move`, `Func.var`, `Var.func`
 
 ### [lib/iter.x](../lib/iter.x)
 

@@ -94,7 +94,7 @@ static Var _257, _254, _252, _250, _246, _243, _240, _237, _234, _231, _227, _22
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Var _x2c_macro_load_0(const void * _x2c_macro_bytes_0, Scope * _x2c_macro_owner_0);
 
@@ -847,7 +847,7 @@ _x2c_defer_env_19;
 static void _x2c_defer_cleanup_27(void * _x2c_defer_opaque_27);
 static void _x2c_defer_cleanup_28(void * _x2c_defer_opaque_28);
 List cons(Var, List);
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
@@ -3892,14 +3892,16 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 
 }
 
+void Func_move(Func, Scope *);
+
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1905};
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1907};
     x2c_error_raise_n(& _x2c_error_site_48, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
-  Scope_move(function, & lisp -> scope);
+  Func_move(function, & lisp -> scope);
   Lisp_set_global(lisp, name, Func_var(function));
 }
 
@@ -3926,7 +3928,7 @@ Scope * Lisp_result_storage(Lisp lisp){
 Var lisp_source_function(Var callable){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(callable, 9, 7, 3)){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1925};
+    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1927};
     x2c_error_raise_n(& _x2c_error_site_49, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }

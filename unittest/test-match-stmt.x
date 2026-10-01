@@ -334,6 +334,18 @@ static void match_and_pattern_handles_nested_guard_binders(void) {
   EXPECT_TRUE(captured == input.cadr());
 }
 
+static void match_not_pattern_binds_leading_binder(void) {
+  $test.scoped();
+  Var captured = void;
+  foreach (Var color, %(red blue)) {
+    List input = %( seq $color );
+    match (input) {
+      case %( seq (!not ?other blue) ): captured = other;
+    }
+  }
+  EXPECT_TRUE(captured == <red>);
+}
+
 /* The approved activation correction: a raw leading list wildcard in a
    guard is the explicit MALFORMED form and never matches, in both the
    source match statement and the runtime matcher.  (Before activation
@@ -558,6 +570,7 @@ void match_stmt_suite(void) {
   $test.run(match_set_pattern_binds_value);
   $test.run(match_set_pattern_compiles_binder_case);
   $test.run(match_and_pattern_handles_nested_guard_binders);
+  $test.run(match_not_pattern_binds_leading_binder);
   $test.run(match_guard_list_binder_matches_runtime);
   $test.run(match_long_atom_binders_compile);
   $test.run(match_dynamic_patterns_do_not_retain_one_value);

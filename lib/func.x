@@ -66,11 +66,13 @@ typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
    max_align_t-aligned context bytes. `sig`, `params`, and `adapter` are stored
    without retaining their canonical Lists or callback code, so they must
    outlive the binding. A `rest` binding conses value arguments into the one
-   List its adapter expects. */
+   List its adapter expects. A `shared` binding is the file-static handle
+   that every conversion of one direct function reuses; it lives for the
+   program, so `Func.move` leaves it in place. */
 struct Func {
   List sig, params, FuncAdapter adapter;
   unsigned nparams;
-  int rest;
+  int rest, shared;
   size_t context_size;
   unsigned char data[];
 };
@@ -360,6 +362,18 @@ Func Func.new_context(
   const void *context, size_t context_size) =>
     _new(adapter, signature, 0, context, context_size);
 
+/** Builds the shared handle for a direct function or noncapturing lambda.
+    The compiler stores the result in a file-static `Func` that every
+    conversion of that function reuses, so the binding lives for the program
+    and `Func.move` never transfers it.
+    Raises: the causes of `Func.new`.
+*/
+Func x2c_func_shared(FuncAdapter adapter, List signature) {
+  Func fn = _new(adapter, signature, 0, NULL, 0);
+  fn.shared = 1;
+  return fn;
+}
+
 /* Constructors accept canonical `((func (ptype ...)) rtype ...)` Lists. The
    pattern checks only that outer shape; compiler-generated adapters
    interpret the parameters and result. */
@@ -411,6 +425,16 @@ List Func.signature(Func function) {
 const void *Func.context(Func function) {
   if (!function) raise %(bad-arg (operation "Func.context"));
   return function.context_size ? function._context() : NULL;
+}
+
+/** Transfers `function`'s storage to the `Scope` held by `slot`.
+    The shared handle of a direct function or noncapturing lambda lives for
+    the program and stays where it is, so a caller may hand any `Func` to an
+    operation that takes ownership. A NULL `function` does nothing.
+    Raises: the causes of `Scope.move`, which leave ownership unchanged.
+*/
+void Func.move(Func function, Scope *slot) {
+  if (function && !function.shared) Scope.move(function, slot);
 }
 
 /** Boxes `function` without copying or retaining the `Func`.

@@ -240,8 +240,9 @@ match (%(node (a b))) {
 ```
 
 Named binders must also be definitely assigned whenever their arm matches.
-Binders under `!not` are never available, and a binder under `!or` or
-membership-style `!set` must occur in every alternative. `!quote` is opaque
+Binders inside the operands of `!not` are never available, though its
+leading binder is, and a binder under `!or` or membership-style `!set` must
+occur in every alternative. `!quote` is opaque
 literal data. The compiler diagnoses a maybe-bound name at the pattern.
 
 ## Lists, Var, and nil

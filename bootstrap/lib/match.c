@@ -52,7 +52,7 @@ static Var _2, _1, _0;
 #include "scan.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int _binder_kind(Var atom);
 
@@ -96,6 +96,8 @@ static MatchCaptureLayout MatchLayoutBuilder__layout(MatchLayoutBuilder * b, Var
 static MatchSlots MatchCaptureLayout__slots(MatchCaptureLayout m, Var pattern);
 
 static MatchSlots MatchCaptureLayout__guard_slots(MatchCaptureLayout m, Var op, List args);
+
+static int _set_capture(List args);
 
 static MatchSlots MatchCaptureLayout__sequence_slots(MatchCaptureLayout m, List patterns);
 
@@ -244,7 +246,7 @@ Var List_var(List);
 
 List cons(Var, List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
@@ -415,7 +417,7 @@ MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
   MatchCaptureLayout layout = MatchLayoutBuilder__layout(&(builder), normalized, malformed);
   if(! malformed && builder.count){
-    MatchSlots slots = MatchCaptureLayout__slots(layout, pattern);
+    MatchSlots slots = MatchCaptureLayout__slots(layout, normalized);
     layout -> definite = slots.definite;
     layout -> possible = slots.possible;
   }
@@ -502,28 +504,23 @@ static MatchSlots MatchCaptureLayout__slots(MatchCaptureLayout m, Var pattern){
   return MatchCaptureLayout__guard_slots(m, head, args);
 }
 
-int List_len(List);
-
 static MatchSlots MatchCaptureLayout__guard_slots(MatchCaptureLayout m, Var op, List args){
-  MatchSlots slots ={
+  if(Var_equal(op, Symbol_var(1969032)) ||(Var_equal(op, Symbol_var(2005352)) && _set_capture(args))) return MatchCaptureLayout__sequence_slots(m, args);
+  if(Var_equal(op, Symbol_var(62436)) || Var_equal(op, Symbol_var(2005352))) return MatchCaptureLayout__choice_slots(m, args);
+  if(Var_equal(op, Symbol_var(1995752))) return(MatchSlots){
+    0, MatchCaptureLayout__sequence_slots(m, args).possible
+  }
+  ;
+  return(MatchSlots){
     0, 0
   }
   ;
-  if(List_truth(args) && List_truth(List_cdr(args)) && _named_binder(List_car(args))){
-    slots = MatchCaptureLayout__binder_slot(m, List_car(args));
-    args = List_cdr(args);
-  }
-  if(Var_equal(op, Symbol_var(1969032))) return _union(slots, MatchCaptureLayout__sequence_slots(m, args));
-  if(Var_equal(op, Symbol_var(1995752))){
-    MatchSlots operands = MatchCaptureLayout__sequence_slots(m, args);
-    return(MatchSlots){
-      0, slots.possible | operands.possible
-    }
-    ;
-  }
-  if(Var_equal(op, Symbol_var(2005352)) && List_len(args) == 1) return _union(slots, MatchCaptureLayout__sequence_slots(m, args));
-  if(Var_equal(op, Symbol_var(62436)) || Var_equal(op, Symbol_var(2005352))) return _union(slots, MatchCaptureLayout__choice_slots(m, args));
-  return slots;
+}
+
+List List_cddr(List);
+
+static int _set_capture(List args){
+  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
 }
 
 int List_try_next(List, List *, Var *);
@@ -641,7 +638,7 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 450};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 444};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }

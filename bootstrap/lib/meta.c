@@ -10,7 +10,7 @@ static Var _102, _99, _97, _94, _92, _88, _87, _73, _69, _65, _61, _60, _58, _54
 
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 String x2c_source_text(Var syntax);
 
@@ -82,7 +82,7 @@ List cons(Var, List);
 
 Var List_var(List);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

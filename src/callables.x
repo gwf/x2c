@@ -764,10 +764,11 @@ static List Compiler._direct_func_handle(
       %("Func"), source_binding, source_type);
     List signature = c._func_signature_literal(source_type);
     Type constructor_type = NULL;
-    List constructor = c._adapter_helper("Func_new", constructor_type);
+    List constructor = c._adapter_helper(
+      "x2c_func_shared", constructor_type);
     if (!constructor || !constructor_type)
       c._adapter_error(
-        "function conversion needs Func.new from lib/func.x",
+        "function conversion needs x2c_func_shared from lib/func.x",
         %("Func"), source_type, NULL);
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = c._func_call(

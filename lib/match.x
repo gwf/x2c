@@ -226,7 +226,7 @@ MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
   MatchCaptureLayout layout = builder._layout(normalized, malformed);
   // a binder-free pattern has nothing to report as definite or possible
   if (!malformed && builder.count) {
-    MatchSlots slots = layout._slots(pattern);
+    MatchSlots slots = layout._slots(normalized);
     layout.definite = slots.definite;
     layout.possible = slots.possible;
   }
@@ -302,8 +302,8 @@ static MatchCaptureLayout MatchLayoutBuilder._layout(
 /* definite and possible slots
 
    A pattern binds its definite slots on every match and its possible slots
-   on some match. Analysis reads the raw pattern: a leading binder captures
-   its guard, as `_normalize_pattern` reads it. */
+   on some match. Analysis reads the normalized pattern, where a leading
+   binder survives only as the `!set` capture form. */
 
 static MatchSlots MatchCaptureLayout._slots(
   MatchCaptureLayout m, Var pattern) {
@@ -319,25 +319,19 @@ static MatchSlots MatchCaptureLayout._slots(
   return m._guard_slots(head, args);
 }
 
-/* `(!set BINDER PAT)` is the one-operand capture form, and a negation
-   binds nothing on every match. */
+/* `(!set BINDER TEST)` binds and tests, as the matcher runs it; any other
+   set is a choice. A negation binds nothing on every match. */
 static MatchSlots MatchCaptureLayout._guard_slots(
   MatchCaptureLayout m, Var op, List args) {
-  MatchSlots slots = {0, 0};
-  if (args && args.cdr() && _named_binder(args.car())) {
-    slots = m._binder_slot(args.car());
-    args = args.cdr();
-  }
-  if (op == <!and>) return _union(slots, m._sequence_slots(args));
-  if (op == <!not>) {
-    MatchSlots operands = m._sequence_slots(args);
-    return (MatchSlots) {0, slots.possible | operands.possible};
-  }
-  if (op == <!set> && args.len() == 1)
-    return _union(slots, m._sequence_slots(args));
-  if (op == <!or> || op == <!set>) return _union(slots, m._choice_slots(args));
-  return slots;
+  if (op == <!and> || (op == <!set> && _set_capture(args)))
+    return m._sequence_slots(args);
+  if (op == <!or> || op == <!set>) return m._choice_slots(args);
+  if (op == <!not>) return (MatchSlots) {0, m._sequence_slots(args).possible};
+  return (MatchSlots) {0, 0};
 }
+
+static int _set_capture(List args) =>
+  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
 
 /* Every element of a sequence matches, so each one's definite slots are
    definite. */

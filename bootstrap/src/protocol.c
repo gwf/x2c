@@ -23,7 +23,7 @@ static Var _2621, _2618, _2614, _2613, _2611, _2608, _2605, _2603, _2600, _2597,
 #include "meta.h"
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static List _occurrence(List record, Symbol storage, List location);
 
@@ -479,9 +479,9 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_0;
 
-Func Func_new(FuncAdapter, List);
+Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_D9CA694D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _2609)))
+_x2c_initializer_choice_D9CA694D_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _2609)))
 typedef struct _x2c_lambda_context_4{
   Var _x2c_lambda_capture_3;
   List * _x2c_lambda_capture_4;
@@ -525,7 +525,7 @@ Var String_var(String);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;

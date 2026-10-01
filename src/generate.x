@@ -696,13 +696,17 @@ macro Statement $initializer_run_once(Expr $guard) {
    allocation bracket, and the lazy entry guards remain as the portable
    fallback. A type initializer in conditional groups may be compiled out,
    so the synthetic initializer calls it under the arms that compile it,
-   which sets the guard, and otherwise runs the file's own initialization. */
+   which sets the guard, and otherwise runs the file's own initialization.
+   Every public entry checks the guard before calling it, so it stays out
+   of line and cold: a small initializer inlined into each entry costs
+   every call its frame setup. */
 static List Init.synthesize(Init *i, List arms) {
   List binding = i.c.sym.introduce("_file_init_");
-  List type = %(("__attribute__((constructor))") static void);
+  List type =
+    %(("__attribute__((constructor, noinline, cold))") static void);
   String entry = "x2c_initialize_protocols";
   if (i.initializer) {
-    type = %(static void);
+    type = %(("__attribute__((noinline, cold))") static void);
     entry = i.initializer;
   }
   List call = %((stmnt (expr (void) (call $entry (args)))));

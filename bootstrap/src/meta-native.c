@@ -57,7 +57,7 @@ static Var _478, _475, _470, _467, _460, _457, _455, _452, _450, _447, _443, _44
 #include <string.h>
 static int _init_guard_ = 0;
 
-__attribute__((constructor)) static void _file_init_(void);
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void Compiler__install_stub(Compiler c, String name, Token marker);
 
@@ -259,7 +259,7 @@ Var String_var(String);
 
 Var int_var(int);
 
-__attribute__((constructor)) static void _file_init_(void){
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
