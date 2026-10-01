@@ -62,6 +62,46 @@ List Compiler.setup_cache_init(
   return %($header $source);
 }
 
+static Array Compiler._cache_ids(Compiler c, List code) {
+  List seen[4096] = { 0 };
+  Array ids = [];
+  ids.resize(c.id_keys.len());
+  if (!c._collect_ids(code, seen, ids)) {
+    ids.free();
+    return NULL;
+  }
+  return ids;
+}
+
+/* Collect direct cache references and the immutable graph they depend on.
+   Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
+   identity memo avoids repeatedly walking shared subgraphs. A collision only
+   replaces one memo entry and may cause harmless extra work. */
+static int Compiler._collect_ids(
+  Compiler c, Var value, List *seen, Array ids) {
+  Array pending = $auto([value]);
+  int count = 0;
+  while (pending) {
+    Var current = pending.take_last();
+    if (current is not <list>) continue;
+    List node = current;
+    unsigned slot = ((uintptr_t) node >> 4) & 4095;
+    if (seen[slot] == node) continue;
+    seen[slot] = node;
+    match (node)
+      case %(cache ?captured_id): {
+        int id = captured_id;
+        if (!ids[id].is_null()) continue;
+        ids[id] = 1;
+        count++;
+        pending.push(c.id_keys[id]);
+        continue;
+      }
+    foreach (Var child, node) if (child is <list>) pending.push(child);
+  }
+  return count;
+}
+
 /* file-static rewrites
 
    C does not allow a non-constant static initializer, and after lowering
@@ -358,74 +398,6 @@ static List Compiler._array_input(
   return %($declaration @code);
 }
 
-// cache residency
-
-static Array Compiler._cache_ids(Compiler c, List code) {
-  List seen[4096] = { 0 };
-  Array ids = [];
-  ids.resize(c.id_keys.len());
-  if (!c._collect_ids(code, seen, ids)) {
-    ids.free();
-    return NULL;
-  }
-  return ids;
-}
-
-/* Collect direct cache references and the immutable graph they depend on.
-   Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
-   identity memo avoids repeatedly walking shared subgraphs. A collision only
-   replaces one memo entry and may cause harmless extra work. */
-static int Compiler._collect_ids(
-  Compiler c, Var value, List *seen, Array ids) {
-  Array pending = $auto([value]);
-  int count = 0;
-  while (pending) {
-    Var current = pending.take_last();
-    if (current is not <list>) continue;
-    List node = current;
-    unsigned slot = ((uintptr_t) node >> 4) & 4095;
-    if (seen[slot] == node) continue;
-    seen[slot] = node;
-    match (node)
-      case %(cache ?captured_id): {
-        int id = captured_id;
-        if (!ids[id].is_null()) continue;
-        ids[id] = 1;
-        count++;
-        pending.push(c.id_keys[id]);
-        continue;
-      }
-    foreach (Var child, node) if (child is <list>) pending.push(child);
-  }
-  return count;
-}
-
-/* Split the masked cache ids by declaration type. Each list keeps the
-   descending id order the emitted declarations rely on. */
-static List _split_ids(Array keys, Array ids) {
-  List list_ids = %(), string_ids = %(), var_ids = %();
-  for (int i = 0, n = keys.len(); i < n; i++) {
-    if (ids[i].is_null()) continue;
-    List key = keys[i];
-    match (key) {
-      case %(cons *): {
-        list_ids = cons(i, list_ids);
-        continue;
-      }
-      case %(string ?): {
-        string_ids = cons(i, string_ids);
-        continue;
-      }
-      case %(var ?): {
-        var_ids = cons(i, var_ids);
-        continue;
-      }
-    }
-    __builtin_unreachable();
-  }
-  return %($list_ids $string_ids $var_ids);
-}
-
 // header caches
 
 /* One translation-unit-local immutable cache in a generated header. The
@@ -702,6 +674,32 @@ static List Compiler._slot_declarations(Compiler c, Array ids, String prefix) {
   declaration = c._declare_slots(var_ids, "Var", prefix);
   if (declaration) declarations.push(declaration);
   return declarations.list_free();
+}
+
+/* Split the masked cache ids by declaration type. Each list keeps the
+   descending id order the emitted declarations rely on. */
+static List _split_ids(Array keys, Array ids) {
+  List list_ids = %(), string_ids = %(), var_ids = %();
+  for (int i = 0, n = keys.len(); i < n; i++) {
+    if (ids[i].is_null()) continue;
+    List key = keys[i];
+    match (key) {
+      case %(cons *): {
+        list_ids = cons(i, list_ids);
+        continue;
+      }
+      case %(string ?): {
+        string_ids = cons(i, string_ids);
+        continue;
+      }
+      case %(var ?): {
+        var_ids = cons(i, var_ids);
+        continue;
+      }
+    }
+    __builtin_unreachable();
+  }
+  return %($list_ids $string_ids $var_ids);
 }
 
 static List Compiler._declare_slots(
