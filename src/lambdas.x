@@ -493,6 +493,8 @@ static List Capture.record(
   return row;
 }
 
+// capture checks
+
 /** Rejects writes and reference access to read-only snapshot bindings.
     The body has already resolved identifiers and call arguments. Templates
     defer this check until expansion; nested lambdas check their own bodies.
@@ -519,16 +521,8 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
       case %(dstrasgn (targets *targets) ?):
         foreach (List target, targets) c._require_capture_lvalue(target);
       case $source_call_content($called,
-          %(expr ?callee_type ?), %(*arguments)): {
-        List parameters = NULL;
-        if (Type.function_parts(callee_type, parameters, NULL))
-          for (; parameters && arguments;
-               parameters = parameters.cdr(), arguments = arguments.cdr()) {
-            Type parameter = parameters.car();
-            if (parameter.car() == <&> || parameter.car() == <opt-ref>)
-              c._require_capture_lvalue(arguments.car());
-          }
-      }
+          %(expr ?callee_type ?), %(*arguments)):
+        c._require_reference_arguments(callee_type, arguments);
     }
     foreach (Var child, node) pending.push(child);
   }
@@ -541,4 +535,17 @@ static void Compiler._require_capture_lvalue(Compiler c, List target) {
     c.report_error(
       <type>, "captured value requires 'using &name' for reference access",
       c.token, %("binding: ${binding_identity_spelling(binding)}"));
+}
+
+/* An argument bound to a reference parameter is reference access. */
+static void Compiler._require_reference_arguments(
+  Compiler c, Type callee_type, List arguments) {
+  List parameters = NULL;
+  if (!Type.function_parts(callee_type, parameters, NULL)) return;
+  for (; parameters && arguments;
+       parameters = parameters.cdr(), arguments = arguments.cdr()) {
+    Type parameter = parameters.car();
+    if (parameter.car() == <&> || parameter.car() == <opt-ref>)
+      c._require_capture_lvalue(arguments.car());
+  }
 }
