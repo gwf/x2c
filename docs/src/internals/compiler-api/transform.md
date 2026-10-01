@@ -21,21 +21,21 @@ X2c AST transformation pipeline.
 
 #### transform_array_literal
 
-`List transform_array_literal(Compiler compiler, List ast)`
+`List transform_array_literal(Compiler c, List ast)`
 
 Converts an array literal to source-ordered Var arguments for its
 counted constructor.
 
-Source: `src/transform.x:397`
+Source: `src/transform.x:402`
 
 #### transform_map_literal
 
-`List transform_map_literal(Compiler compiler, List ast)`
+`List transform_map_literal(Compiler c, List ast)`
 
 Converts a map literal to alternating Var key/value arguments for its
 counted constructor.
 
-Source: `src/transform.x:406`
+Source: `src/transform.x:410`
 
 ### `Compiler`
 
@@ -53,14 +53,14 @@ Source: `src/transform.x:70`
 <a id="Compiler.transform"></a>
 #### Compiler.transform
 
-`List Compiler.transform(Compiler compiler, List ast)`
+`List Compiler.transform(Compiler c, List ast)`
 
 Lowers a bound and typed top-level AST to the normalized form consumed by
-emission. `compiler` must own the AST's bindings, origins, and conversion
+emission. `c` must own the AST's bindings, origins, and conversion
 state. Current-node rewrites finish before child traversal; containing
 blocks absorb cleanup markers produced by declaration rewrites. Early
 declarations are lowered and appended after the input units. The call
-may add generated origins or diagnostics to `compiler`.
+may add generated origins or diagnostics to `c`.
 
 Source: `src/transform.x:49`
 

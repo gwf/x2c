@@ -6,7 +6,7 @@
 
 # `src/callables.x`
 
-Lambdas and Func conversions lowered to C helpers.
+Callable values lowered to C helpers.
 
 ## Functions
 
@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1720`
+Source: `src/callables.x:1511`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -49,16 +49,16 @@ Binds the file-static context type `name` with the field rows `fields`,
 for captured lambdas and callable defers. The complete typedef is bound
 at once, so each field keeps its member type.
 
-Source: `src/callables.x:970`
+Source: `src/callables.x:189`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
 
-`List Compiler.func_signature(Compiler compiler, Type type)`
+`List Compiler.func_signature(Compiler c, Type type)`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:443`
+Source: `src/callables.x:1304`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -73,7 +73,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:537`
+Source: `src/callables.x:687`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -90,7 +90,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/callables.x:42`
+Source: `src/callables.x:54`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -104,7 +104,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1515`
+Source: `src/callables.x:1382`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -118,7 +118,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:161`
+Source: `src/callables.x:1042`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -133,14 +133,14 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/callables.x:1228`
+Source: `src/callables.x:414`
 
 ## Design notes
 
-Lowers lambdas, typed callback adapters, and conversions to `Func` into
-static helpers queued with `Compiler.add_early`. Every `Func` helper
-shares one `FuncAdapter` ABI: arguments are read in index order from
-the argument vector, and the result is boxed into a `Var`. A capturing
-lambda copies its snapshots and reference addresses into a file-static
-context, and the bindings it shares by reference move into Scope cells
-before the enclosing function body is normalized.
+A callable value that C cannot spell directly becomes a static helper
+queued with `Compiler.add_early`. Every `Func` helper shares one
+`FuncAdapter` ABI: arguments are read in index order from the argument
+vector, and the result is boxed into a `Var`. A capturing lambda copies
+its snapshots and reference addresses into a file-static context, and
+the bindings it shares by reference move into Scope cells before the
+enclosing function body is normalized.

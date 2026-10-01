@@ -61,13 +61,13 @@ Public functions:
 
 ### [src/callables.x](../src/callables.x)
 
-lambdas and Func conversions lowered to C helpers.
+callable values lowered to C helpers.
 
 Public functions:
 
-`Compiler.lower_lambda_expr`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.func_signature`, `Compiler.lift_func_expression`,
-`Compiler.capture_environment`, `Compiler.prepare_lambda_cells`,
+`Compiler.lower_lambda_expr`, `Compiler.capture_environment`,
+`Compiler.prepare_lambda_cells`, `Compiler.lift_func_expression`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.func_signature`,
 `Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
