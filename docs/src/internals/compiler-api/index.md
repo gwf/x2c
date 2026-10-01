@@ -14,6 +14,7 @@ Functions and types exposed by each compiler module.
 | [`src/build.x`](build.md) | Typed native build request and artifact graph. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | constant caching for x2c code generation. |
+| [`src/callables.x`](callables.md) | lambdas and Func conversions lowered to C helpers. |
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |

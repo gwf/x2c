@@ -3,9 +3,10 @@
     Lowers typed expressions, literals, and control flow into the AST forms
     consumed by C emission.
 
-    One recursive normalizer owns expressions, lambda synthesis, and cleanup.
-    Newly constructed nodes normalize locally; complete functions receive
-    their transfer cleanup before emission. The active Compiler reports errors.
+    One recursive normalizer owns expressions and cleanup; `callables.x`
+    lowers the lambdas and `Func` conversions it meets. Newly constructed
+    nodes normalize locally; complete functions receive their transfer
+    cleanup before emission. The active Compiler reports errors.
 */
 
 #pragma once
@@ -2599,9 +2600,7 @@ static List _defer_environment_unit(
     List field = record.caddr();
     fields.push(%(declare (const void) (bindings (bind $field (*)))));
   }
-  Macro environment = $capture_environment;
-  return c.bind_syntax(
-    environment(env_binding, fields.list_free()), AST_UNIT, NULL);
+  return c.capture_environment(env_binding, fields.list_free());
 }
 
 /* Preserve the lowered finalizer while binding the new function entry. */
@@ -2842,7 +2841,7 @@ static List _match_records(Compiler compiler, List records) {
     match (record) {
       case %(preproc ?): transformed.push(record);
       case %(*prefix ?body):
-        transformed.push(%(@prefix ${_node(compiler, body)}));
+        transformed.push(%(@prefix ${compiler.normalize(body)}));
     }
   return transformed.list_free();
 }
@@ -2855,7 +2854,7 @@ static Ast _sequence(Compiler compiler, Ast ast) {
   foreach (List value, ast) {
     List source = _without_origin(value);
     List lowered = source.match(%(defer ?))
-      ? value : _node(compiler, value);
+      ? value : compiler.normalize(value);
     if (!compiler.fn_name) lowered = _cleanup_unit(compiler, lowered);
     transformed.push(lowered);
   }
@@ -2888,7 +2887,7 @@ static Ast _sequence(Compiler compiler, Ast ast) {
 
 static Ast _children(Compiler compiler, Ast ast) {
   List child;
-  $ast.rewrite_children(ast, child, _node(compiler, child));
+  $ast.rewrite_children(ast, child, compiler.normalize(child));
 }
 
 /* Normalize synthesized sequences before their containing block absorbs
@@ -2898,7 +2897,7 @@ static Ast _finish(Compiler compiler, Ast ast) {
     case %(seq *items):
       return %(seq @{_sequence(compiler, items)});
     case %(matchcases ?subject ?records): {
-      List new_subject = _node(compiler, subject);
+      List new_subject = compiler.normalize(subject);
       List new_records = _match_records(compiler, records);
       return %(matchcases $new_subject $new_records);
     }
@@ -2944,11 +2943,11 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
       break;
     }
     Var type = ast.cadr();
-    if (type is <list>) type = _node(compiler, type);
+    if (type is <list>) type = compiler.normalize(type);
     List opnode = ast.caddr();
     List rewritten = _operator(compiler, opnode);
     if (rewritten != opnode) {
-      rebuilt = %(expr $type ${_node(compiler, rewritten)});
+      rebuilt = %(expr $type ${compiler.normalize(rewritten)});
       break;
     }
     types.push(type);
@@ -2960,11 +2959,11 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
     match (levels[i].caddr())
       case $source_operator_content(%(?operator ? *rest)): {
         Array parts = [];
-        if (operator is <list>) parts.push(_node(compiler, operator));
+        if (operator is <list>) parts.push(compiler.normalize(operator));
         else parts.push(operator);
         parts.push(rebuilt);
         foreach (Var operand, rest) {
-          if (operand is <list>) parts.push(_node(compiler, operand));
+          if (operand is <list>) parts.push(compiler.normalize(operand));
           else parts.push(operand);
         }
         rebuilt = source_operator_expression(types[i], parts.list_free());
@@ -2989,11 +2988,11 @@ static Ast _function_node(
   Type function_type = return_type;
   c.inline_header = function_type.is_inline() &&
                     !function_type.is_static();
-  List new_return = _node(c, return_type);
-  List new_decl = _node(c, declarator);
+  List new_return = c.normalize(return_type);
+  List new_decl = c.normalize(declarator);
   List prepared_body = _lower_lambda_destructuring(c, body);
   prepared_body = c.prepare_lambda_cells(declarator, prepared_body);
-  List new_body = _node(c, prepared_body);
+  List new_body = c.normalize(prepared_body);
   List transformed = %(function $new_return $new_decl $new_body);
   c.fn_name = previous;
   c.inline_header = previous_inline;
@@ -3007,8 +3006,8 @@ static Ast _getindex_node(
   if (!resolved)
     c.report_error(
       <xform>, %"type $type does not support bracket indexing", NULL, NULL);
-  return _node(
-    c, _indexed_call_expr(c, resolved, %($expression $index)).caddr());
+  return c.normalize(
+    _indexed_call_expr(c, resolved, %($expression $index)).caddr());
 }
 
 static Ast _setindex_node(
@@ -3018,10 +3017,10 @@ static Ast _setindex_node(
     c.report_error(
       <xform>, %"type $type does not support bracket assignment", NULL, NULL);
   if (!_indexed_builtin_helper(c, type))
-    return _node(
-      c, _sequenced_protocol_call(c, resolved, %($expression $index $value)));
-  return _node(
-    c, _indexed_call_expr(
+    return c.normalize(
+      _sequenced_protocol_call(c, resolved, %($expression $index $value)));
+  return c.normalize(
+    _indexed_call_expr(
       c, resolved, %($expression $index $value)).caddr());
 }
 
@@ -3041,7 +3040,7 @@ static Ast _slice_node(
   start = start ? start : %(literal (int) $none);
   stop = stop ? stop : %(literal (int) $none);
   step = step ? step : %(literal (int) "1");
-  return _node(c, %(call "$fnname" (args $expression $start $stop $step)));
+  return c.normalize(%(call "$fnname" (args $expression $start $stop $step)));
 }
 
 static Ast _defer_node(Compiler c, Ast ast) {
@@ -3084,7 +3083,7 @@ static Ast _step(Compiler c, Ast ast) {
       int occurrence = origin;
       List transformed = NULL;
       $let(c.origin, occurrence) {
-        transformed = _node(c, inner);
+        transformed = c.normalize(inner);
       }
       if (transformed == inner) return ast;
       c.origins.push(%(generated $occurrence xform));
@@ -3115,7 +3114,7 @@ static Ast _step(Compiler c, Ast ast) {
       Ast expression = c.lower_typed_adapter_expr(ast);
       expression = c.lower_lambda_expr(expression);
       if (_op_chain_first(expression)) return _op_chain(c, expression);
-      if (expression != ast) return _node(c, expression);
+      if (expression != ast) return c.normalize(expression);
       return _finish(c, expression);
     }
     case <array>: case <varray>: next = transform_array_literal(c, ast); break;
@@ -3141,13 +3140,15 @@ static Ast _step(Compiler c, Ast ast) {
     case <op>: next = _operator(c, ast); break;
     case <postfix>: next = _postfix(c, ast); break;
   }
-  if (next != ast) return _node(c, next);
+  if (next != ast) return c.normalize(next);
   return _finish(c, ast);
 }
 
-/* Normalize newly constructed syntax where it is produced. Children enter
-   the same operation, so completed units do not require another unit walk. */
-static Ast _node(Compiler c, Ast ast) {
+/** Normalizes one bound and typed node. Newly constructed syntax is
+    normalized where it is produced; children enter the same operation, so
+    completed units do not require another unit walk.
+*/
+Ast Compiler.normalize(Compiler c, Ast ast) {
   return _step(c, ast);
 }
 

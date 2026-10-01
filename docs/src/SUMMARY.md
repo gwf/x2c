@@ -98,6 +98,7 @@
   - [src/build.x](internals/compiler-api/build.md)
   - [src/builtins.x](internals/compiler-api/builtins.md)
   - [src/cache.x](internals/compiler-api/cache.md)
+  - [src/callables.x](internals/compiler-api/callables.md)
   - [src/cli.x](internals/compiler-api/cli.md)
   - [src/collect.x](internals/compiler-api/collect.md)
   - [src/compiler.x](internals/compiler-api/compiler.md)

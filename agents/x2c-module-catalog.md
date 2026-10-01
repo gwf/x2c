@@ -8,8 +8,8 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 37
-- Runtime modules: 61
+- Compiler modules: 38
+- Runtime modules: 58
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -57,6 +57,18 @@ Public functions:
 
 `_initialization_guard`, `_patch_initialized_entry`,
 `Compiler.setup_cache_init`
+
+### [src/callables.x](../src/callables.x)
+
+lambdas and Func conversions lowered to C helpers.
+
+Public functions:
+
+`Compiler.lower_lambda_expr`, `Compiler.lambda_param_types`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.func_signature`,
+`Compiler.lift_func_expression`, `Compiler.capture_environment`,
+`Compiler.prepare_lambda_cells`, `Compiler.check_lambda_captures`,
+`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
 
 ### [src/cli.x](../src/cli.x)
 
@@ -495,14 +507,10 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
-`Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
-`Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
-`Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
-`Compiler.lower_lambda_expr`, `Compiler.static_value_is_runtime`,
-`builtin_try_catch_site`, `builtin_catch_patterns`, `builtin_try_landing`,
-`builtin_catch_cases`, `builtin_defer_record`, `builtin_defer_captures`,
-`transform_array_literal`, `transform_map_literal`, `Compiler.transform`
+`Compiler.static_value_is_runtime`, `builtin_try_catch_site`,
+`builtin_catch_patterns`, `builtin_try_landing`, `builtin_catch_cases`,
+`builtin_defer_record`, `builtin_defer_captures`, `transform_array_literal`,
+`transform_map_literal`, `Compiler.normalize`, `Compiler.transform`
 
 ### [src/type-ledger.x](../src/type-ledger.x)
 
@@ -917,15 +925,6 @@ Public functions:
 `MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.init`,
 `MachineBuilder.drop`
 
-### [lib/macro-value.x](../lib/macro-value.x)
-
-macros as values that build and recognize code.
-
-Public functions:
-
-`Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
-`Macro_pattern`, `Macro_case_pattern`, `Macro_case_capture_at`
-
 ### [lib/map.x](../lib/map.x)
 
 hash table mapping `Var` keys to `Var` values.
@@ -986,7 +985,9 @@ Public functions:
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
 `x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`
+`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`,
+`Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
+`Macro_pattern`, `Macro_case_pattern`, `Macro_case_capture_at`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -1124,23 +1125,6 @@ Public functions:
 `String.is_identifier`, `String.is_space`, `String.is_lower`,
 `String.is_lower_under`, `String.is_upper`, `String.is_upper_under`
 
-### [lib/string-escape.x](../lib/string-escape.x)
-
-escaped spelling of canonical strings.
-
-Public functions:
-
-`String.escape`, `String.repr`, `String.write_repr`, `String.unescape`,
-`String.parse_char`, `String.parse`
-
-### [lib/string-format.x](../lib/string-format.x)
-
-checked formatting of `Var` values into a `String`.
-
-Public functions:
-
-`String.format`
-
 ### [lib/string-number.x](../lib/string-number.x)
 
 numeric parsing from canonical byte strings.
@@ -1167,8 +1151,10 @@ Public functions:
 `String.dedent`, `String.remove_prefix`, `String.remove_suffix`,
 `String.partition`, `String.rpartition`, `String.lower`, `String.upper`,
 `String.capitalize`, `String.filter`, `String.map`, `String.keep`,
-`String.reject`, `String.squeeze`, `String.printf`, `String.str`,
-`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
+`String.reject`, `String.squeeze`, `String.printf`, `String.format`,
+`String.escape`, `String.unescape`, `String.parse_char`, `String.parse`,
+`String.str`, `String.repr`, `String.write_str`, `String.write_repr`,
+`String.symbol`, `String.iter`, `String.try_next`
 
 ### [lib/symbol.x](../lib/symbol.x)
 
