@@ -970,4 +970,9 @@ fi
 test ! -s "$tmp/sites-missing.out"
 grep -q 'cannot read input file' "$tmp/sites-missing.err"
 
+# A generated adapter's binding number repeats inside its unit, so a
+# same-unit call must match the whole binding, not the number alone.
+$tool focus Tokenizer_free lib/tokenizer.x >"$tmp/binding-number"
+grep -q 'external "Scope_free"' "$tmp/binding-number"
+
 sh commands/graph/tests/certify.sh
