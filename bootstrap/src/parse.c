@@ -4995,7 +4995,7 @@ static List Compiler__bind_statement(Compiler c, Var stmt){
 Token Compiler_macro_invocation_site(Compiler, Var);
 List Compiler_expand_macro_invocation_node(Compiler, Var, List, Token, AstPos);
 SymTxn Compiler_begin_semantic_transaction(Compiler);
-void SymTxn_commit(SymTxn);
+void SymTxn_commit(SymTxn *);
 static List Compiler__bind_invocation(Compiler c, Var definition, Var arguments, Var invocation, AstPos context, int pending){
   Token site = Compiler_macro_invocation_site(c, invocation);  if(! Var_equal(invocation, Symbol_var(960560003786))) return Compiler_expand_macro_invocation_node(c, definition, Var_list(arguments), site, context); {
     int * _x2c_macro_address_3 = & c -> macro_application;  int _x2c_macro_previous_3 = * _x2c_macro_address_3; {
@@ -5015,7 +5015,7 @@ static List Compiler__bind_invocation(Compiler c, Var definition, Var arguments,
               .fn = _x2c_defer_cleanup_16, .env = & _x2c_macro_environment_15
             }
             ;  x2c_cleanup_push(& _x2c_defer_record_16); {
-              List bound = Compiler_expand_macro_invocation_node(c, definition, Var_list(arguments), site, context);  SymTxn_commit(transaction);  if(pending &&(context == AST_BLOCK || context == AST_STATEMENT || context == AST_UNIT))
+              List bound = Compiler_expand_macro_invocation_node(c, definition, Var_list(arguments), site, context);  SymTxn_commit(&(transaction));  if(pending &&(context == AST_BLOCK || context == AST_STATEMENT || context == AST_UNIT))
   {
     List _x2c_match_expr = bound;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -6058,9 +6058,9 @@ static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){
   _x2c_defer_env_15 * _x2c_defer_data_15 =(_x2c_defer_env_15 *) _x2c_defer_opaque_15;  *(*(int * *) _x2c_defer_data_15->_x2c_defer_capture_29) =(*(int *) _x2c_defer_data_15->_x2c_defer_capture_30);
 }
 
-void SymTxn_rollback(SymTxn);
+void SymTxn_rollback(SymTxn *);
 static void _x2c_defer_cleanup_16(void * _x2c_defer_opaque_16){
-  _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_16;  SymTxn_rollback((*(SymTxn *) _x2c_defer_data_16->_x2c_defer_capture_31));
+  _x2c_defer_env_16 * _x2c_defer_data_16 =(_x2c_defer_env_16 *) _x2c_defer_opaque_16;  SymTxn_rollback(&((*(SymTxn *) _x2c_defer_data_16->_x2c_defer_capture_31)));
 }
 
 static void _x2c_defer_cleanup_17(void * _x2c_defer_opaque_17){

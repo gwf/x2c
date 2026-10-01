@@ -10,6 +10,7 @@
 #include "list.h"
 #include "symbol.h"
 #include "func.h"
+#include "scope.h"
 #define MACHINE_CODE_MAX     4096
 #define MACHINE_CONST_MAX     256
 #define MACHINE_BINDER_MAX     64
@@ -103,31 +104,7 @@ typedef struct MachineBuilder{
   MachinePrepare status;
   const char * reason;
 }
-* MachineBuilder;
-
-MachineBuilder MachineBuilder_new();
-
-MachineBuilder MachineBuilder_alloc();
-
-void MachineBuilder_free(MachineBuilder value);
-
-void MachineBuilder_cleanup(MachineBuilder value);
-
-Var MachineBuilder_var(MachineBuilder value);
-
-MachineBuilder Var_machinebuilder(Var value);
-
-int MachineBuilder_equal(MachineBuilder left, MachineBuilder right);
-
-unsigned MachineBuilder_hash(MachineBuilder value);
-
-Buffer MachineBuilder_write_str(MachineBuilder value, Buffer out);
-
-String MachineBuilder_str(MachineBuilder value);
-
-Buffer MachineBuilder_write_repr(MachineBuilder value, Buffer out);
-
-String MachineBuilder_repr(MachineBuilder value);
+MachineBuilder;
 
 typedef struct MachineSpan{
   List begin, end;
@@ -194,7 +171,7 @@ typedef struct MatchMachine{
   MachineSlot slots[MACHINE_BINDER_MAX];
   MachineUndo undo[MACHINE_UNDO_MAX];
 }
-* MatchMachine;
+MatchMachine;
 
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
@@ -239,25 +216,34 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
   return length == slot -> span.length && List_equal(expected, slot -> span.end) && ! List_truth(candidate);
 }
 
-int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target);
+int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c, int d, int target);
 
-int MachineBuilder_constant(MachineBuilder b, Var value);
+int MachineBuilder_constant(MachineBuilder * b, Var value);
 
-int MachineBuilder_binder(MachineBuilder b, Atom binder);
+int MachineBuilder_binder(MachineBuilder * b, Atom binder);
 
-void MachineBuilder_set_target(MachineBuilder b, int site, int target);
+void MachineBuilder_set_target(MachineBuilder * b, int site, int target);
 
-void MachineBuilder_patch(MachineBuilder b, int * sites, int count, int target);
+void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target);
 
-MachineProgram MachineBuilder_freeze(MachineBuilder b);
+MachineProgram MachineBuilder_freeze(MachineBuilder * b);
 
 MachineView MachineProgram_view(MachineProgram program);
 
 size_t MachineProgram_bytes(MachineProgram program);
 
-void MachineBuilder_init(MachineBuilder b);
+MachineBuilder MachineBuilder_new(void);
 
-void MachineBuilder_drop(MachineBuilder b);
+void MachineBuilder_init(MachineBuilder * b);
+
+void MachineBuilder_drop(MachineBuilder * b);
+
+void MachineBuilder_free(MachineBuilder * b);
+
+static inline void MachineBuilder_cleanup(MachineBuilder b){
+  Scope_free(b.code);
+  Scope_free(b.consts);
+}
 
 
 #endif /* __GUARD_0x857C07E7__ */

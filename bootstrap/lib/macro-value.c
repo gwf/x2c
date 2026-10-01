@@ -89,7 +89,7 @@ static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan);
 
 static int _macro_case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured);
 
-static int _macro_take_slots(MatchMachine machine, MatchCaptureBuffer * captured);
+static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captured);
 
 static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy);
 
@@ -97,7 +97,7 @@ static int _macro_has_slot(const int * slots, int count, int slot);
 
 static String _macro_source_spelling(Var value);
 
-static int _macro_held_elsewhere(MatchMachine machine, MacroFixedSlots * policy, int slot, Var value);
+static int _macro_held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value);
 
 static Var _macro_unwrap(Var value);
 
@@ -815,31 +815,31 @@ static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan){
 }
 
 int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
-void MatchMachine_open(MatchMachine);
-void MatchMachine_begin(MatchMachine, MachineView, Var);
+void MatchMachine_open(MatchMachine *);
+void MatchMachine_begin(MatchMachine *, MachineView, Var);
 MachineView MachineProgram_view(MachineProgram);
-void MatchMachine_run(MatchMachine);
-void MatchMachine_finish(MatchMachine);
-void MatchMachine_dispose(MatchMachine);
+void MatchMachine_run(MatchMachine *);
+void MatchMachine_finish(MatchMachine *);
+void MatchMachine_dispose(MatchMachine *);
 static int _macro_case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
-  if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;  struct MatchMachine storage;  MatchMachine machine = & storage;  MatchMachine_open(machine);  machine -> relation = _macro_identity_equal;  machine -> relation_context = policy;  machine -> view = _macro_unwrap;  MatchMachine_begin(machine, MachineProgram_view(plan -> program), List_var(code));  MatchMachine_run(machine);  int matched = machine -> status == 982 && _macro_take_slots(machine, captured);  MatchMachine_finish(machine);  MatchMachine_dispose(machine);  return matched;
+  if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;  MatchMachine machine;  MatchMachine_open(&(machine));  machine.relation = _macro_identity_equal;  machine.relation_context = policy;  machine.view = _macro_unwrap;  MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));  MatchMachine_run(&(machine));  int matched = machine.status == 982 && _macro_take_slots(&(machine), captured);  MatchMachine_finish(&(machine));  MatchMachine_dispose(&(machine));  return matched;
 }
 
-List MatchMachine_materialize_span(MatchMachine, MachineSpan);
-static int _macro_take_slots(MatchMachine machine, MatchCaptureBuffer * captured){
-  for(int i = 0;  i < machine -> slot_count;  i ++){
-    MachineSlot * slot = & machine -> slots[i];  if(slot -> kind == MACHINE_SLOT_INVALID) continue;  captured -> values[i] = slot -> kind == MACHINE_SLOT_SPAN ? List_var(MatchMachine_materialize_span(machine, slot -> span)) : slot -> value;  captured -> present |= 1UL << i;
+List MatchMachine_materialize_span(MatchMachine *, MachineSpan);
+static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captured){
+  for(int i = 0;  i <(* machine).slot_count;  i ++){
+    MachineSlot * slot = &(* machine).slots[i];  if(slot -> kind == MACHINE_SLOT_INVALID) continue;  captured -> values[i] = slot -> kind == MACHINE_SLOT_SPAN ? List_var(MatchMachine_materialize_span(&((* machine)), slot -> span)) : slot -> value;  captured -> present |= 1UL << i;
   }
-  return machine -> status == 982;
+  return(* machine).status == 982;
 }
 
 int String_truth(String);
 int Var_equal(Var, Var);
 static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy){
-  MatchMachine machine = raw_machine;  MacroFixedSlots * policy = raw_policy;  left = _macro_unwrap(left);  right = _macro_unwrap(right);  if(_macro_has_slot(policy -> name_slots, policy -> names, slot)){
+  MatchMachine * machine = raw_machine;  MacroFixedSlots * policy = raw_policy;  left = _macro_unwrap(left);  right = _macro_unwrap(right);  if(_macro_has_slot(policy -> name_slots, policy -> names, slot)){
     String spelling = NULL;  if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = _macro_source_spelling(right);  else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = _macro_source_spelling(left);  if(String_truth(spelling)) return Var_equal(String_var(spelling), (Var_is_row(left, 11, 7, 1) ? left : right));
   }
-  if(! Var_equal(left, right)) return 0;  if(! _macro_has_slot(policy -> slots, policy -> count, slot)) return 1;  return ! _macro_held_elsewhere(machine, policy, slot, right);
+  if(! Var_equal(left, right)) return 0;  if(! _macro_has_slot(policy -> slots, policy -> count, slot)) return 1;  return ! _macro_held_elsewhere(&(* machine), policy, slot, right);
 }
 
 static int _macro_has_slot(const int * slots, int count, int slot){
@@ -887,9 +887,9 @@ default: break;
 return NULL;
 }
 
-static int _macro_held_elsewhere(MatchMachine machine, MacroFixedSlots * policy, int slot, Var value){
+static int _macro_held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value){
   for(int i = 0;  i < policy -> count;  i ++){
-    int other = policy -> slots[i];  if(other != slot && machine -> slots[other].kind == MACHINE_SLOT_VALUE && Var_equal(machine -> slots[other].value, value)) return 1;
+    int other = policy -> slots[i];  if(other != slot &&(* machine).slots[other].kind == MACHINE_SLOT_VALUE && Var_equal((* machine).slots[other].value, value)) return 1;
   }
   return 0;
 }
