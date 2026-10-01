@@ -26,6 +26,7 @@ $(import "../src/grammar.xmacro")
 #include "transform.x"
 #include "stage.x"
 #include "initializers.x"
+#include "macros.x"
 
 /* postfix calls, indexing, and member lookup */
 
@@ -102,8 +103,6 @@ List Compiler.complete_iter_chain(Compiler c, List expression) {
           expression, callee, arguments, parameters, binding);
   return expression;
 }
-
-#include "macros.x"
 
 // True when a receiver's type must wait for macro substitution.
 static int _deferred_receiver(List expr) {
@@ -493,7 +492,7 @@ static List Compiler._delegate_step(Compiler c, Type receiver, String name) {
 }
 
 typedef struct DelegateSearch {
-  Compiler compiler;
+  Compiler c;
   String member;
   Type outer;
   Token origin;
@@ -503,7 +502,7 @@ typedef struct DelegateSearch {
 
 static void DelegateSearch._find(
   DelegateSearch *d, Type receiver, List reverse_path, List seen) {
-  Type aggregate = d.compiler.sym.delegate_aggregate(receiver);
+  Type aggregate = d.c.sym.delegate_aggregate(receiver);
   if (!aggregate) return;
   if (aggregate in seen) {
     if (!d.first_cycle)
@@ -511,15 +510,15 @@ static void DelegateSearch._find(
     return;
   }
   seen = cons(aggregate, seen);
-  List order = d.compiler.sym.field_order(aggregate);
+  List order = d.c.sym.field_order(aggregate);
   foreach (List row, order ? order.cdr() : NULL) {
     String name = row.car();
     if (!name) continue;
-    if (!d.compiler.sym.get(%(@aggregate delegate $name))) continue;
-    List step = d.compiler._delegate_step(receiver, name);
+    if (!d.c.sym.get(%(@aggregate delegate $name))) continue;
+    List step = d.c._delegate_step(receiver, name);
     Type field_type = step.cddr().cadr();
     List next_path = cons(step, reverse_path);
-    List resolution = d.compiler.resolve_postfix_member(
+    List resolution = d.c.resolve_postfix_member(
       field_type, %(${d.member}), <.>, 1);
     if (resolution && resolution.car() == <method>) {
       List binding = resolution.cadr(), Type signature = resolution.caddr();
@@ -529,9 +528,8 @@ static void DelegateSearch._find(
     else if (resolution && resolution.car() == <ambiguous>) {
       String path = _delegate_path_string(
         d.outer, cons(<path>, next_path.reverse()), NULL);
-      d.compiler._report_method_ambiguity(
-        field_type, d.member,
-        resolution.cdr(), path, d.origin);
+      d.c._report_method_ambiguity(
+        field_type, d.member, resolution.cdr(), path, d.origin);
     }
     else if (!resolution)
       d._find(field_type, next_path, seen);
@@ -541,33 +539,37 @@ static void DelegateSearch._find(
 static List Compiler._resolve_delegate_method(
   Compiler c, Type receiver, String member, Token origin) {
   DelegateSearch search = {
-    .compiler = c, .member = member, .outer = receiver,
+    .c = c, .member = member, .outer = receiver,
     .origin = origin, .candidates = []};
   search._find(receiver, NULL, NULL);
   List candidates = search.candidates.list_free();
-  if (candidates && candidates.cdr()) {
-    List notes = NULL;
-    foreach (List candidate, candidates) {
-      List path = candidate.cddr().cadr();
-      String spelling = binding_identity_spelling(candidate.cadr());
-      String description = _delegate_path_string(receiver, path, member);
-      notes = cons(%"delegate path: $description -> $spelling", notes);
-    }
-    String type = _delegate_type_name(receiver);
-    c.report_error(
-      <type>, %"method '$type.$member' has multiple delegate paths",
-      origin, notes.reverse());
-  }
+  if (candidates && candidates.cdr()) search._report_paths(candidates);
   if (candidates) return candidates.car();
-  if (search.first_cycle) {
-    String type = _delegate_type_name(receiver);
-    String path = _delegate_path_string(
-      receiver, search.first_cycle, NULL);
-    c.report_error(
-      <type>, %"delegation cycle resolving $type.$member", origin,
-      %("delegate path: $path"));
-  }
+  if (search.first_cycle) search._report_cycle();
   return NULL;
+}
+
+static void DelegateSearch._report_paths(
+  DelegateSearch *d, List candidates) {
+  List notes = NULL;
+  foreach (List candidate, candidates) {
+    List path = candidate.cddr().cadr();
+    String spelling = binding_identity_spelling(candidate.cadr());
+    String description = _delegate_path_string(d.outer, path, d.member);
+    notes = cons(%"delegate path: $description -> $spelling", notes);
+  }
+  String type = _delegate_type_name(d.outer), member = d.member;
+  d.c.report_error(
+    <type>, %"method '$type.$member' has multiple delegate paths",
+    d.origin, notes.reverse());
+}
+
+static void DelegateSearch._report_cycle(DelegateSearch *d) {
+  String type = _delegate_type_name(d.outer), member = d.member;
+  String path = _delegate_path_string(d.outer, d.first_cycle, NULL);
+  d.c.report_error(
+    <type>, %"delegation cycle resolving $type.$member", d.origin,
+    %("delegate path: $path"));
 }
 
 static void _completion_add(Map seen, Array names, String name) {
@@ -1670,44 +1672,6 @@ static List Compiler._discarding_callee(
   return %(expr $signature (ident $helper_binding));
 }
 
-static List Compiler._finish_call(
-  Compiler c, Type result_type, List callee, Type callee_type,
-  List receiver, List supplied, Token origin) {
-  if (result_type === %(<macro-expr>)) result_type = NULL;
-  Type applied = callee_type.apply();
-  if (!applied && callee_type)
-    applied = c.sym.resolve_key(callee_type).apply();
-  List arguments = c._resolve_call_arguments(
-    receiver, supplied, origin);
-  if (_deferred_receiver(callee) ||
-      (receiver && _deferred_receiver(receiver)))
-    result_type = %(<macro-expr>);
-  foreach (Var argument, arguments)
-    if (argument is <list> && !argument.is_nil()) {
-      List syntax = argument;
-      if (_deferred_receiver(syntax) ||
-          syntax.car() == <macro-bind> || syntax.car() == <macro-slot>)
-        result_type = %(<macro-expr>);
-    }
-  if (!result_type) result_type = applied;
-  if (receiver && result_type !== %(<macro-expr>))
-    match (callee_type)
-      case %((func (!set ?parameters (*))) *):
-        if (!_parameters_variadic(parameters) &&
-            arguments.len() > List.len(parameters))
-          c.report_error(
-            <type>,
-            %"method takes ${List.len(parameters) - 1} argument${
-              List.len(parameters) == 2 ? "" : "s"}, not ${
-              arguments.len() - 1}",
-            origin, NULL);
-  c.check_meta_call(callee, origin);
-  callee = c._discarding_callee(callee, callee_type, arguments);
-  Macro called = $called;
-  return c.rebuild_expression(
-    result_type, called(callee, arguments));
-}
-
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
 macro open Statement $func_argument(Expr $function, Expr $storage,
@@ -1935,106 +1899,144 @@ static void Compiler._check_noted_converter(
     location, %($hint));
 }
 
-typedef struct MemberCall {
-  Compiler compiler;
+/* One call being resolved: its expected result type, the arguments it
+   supplies, and its origin. A method call adds the receiver, its type, and
+   the member it selects. */
+typedef struct CallSite {
+  Compiler c;
   Type result_type, type;
   List receiver, field, supplied;
   Token origin;
   String method;
-} MemberCall;
+} CallSite;
 
-static List MemberCall._lookup(MemberCall *m) {
-  m.receiver = m.compiler.resolve_expression(m.receiver, m.origin);
-  m.type = m.receiver.cadr();
-  m.method = m.field.car().str();
-  List resolution = m.compiler.resolve_postfix_member(
-    m.type, m.field, <.>, 1);
-  if (!resolution && _expr_is_raw_string_literal(m.receiver)) {
-    m.receiver = m.compiler.promote_string_literal(m.receiver);
-    m.type = m.receiver.cadr();
-    resolution = m.compiler.resolve_postfix_member(
-      m.type, m.field, <.>, 1);
-  }
-  return resolution ? resolution : m.compiler._resolve_delegate_method(
-    m.type, m.method, m.origin);
+static List Compiler._resolve_call(
+  Compiler c, Type result_type, List function, List supplied,
+  Token origin) {
+  CallSite site = {
+    .c = c, .result_type = result_type, .supplied = supplied,
+    .origin = origin};
+  match (function)
+    case %(expr ? ${$source_operator_content(
+        %(. ?receiver (!set ?field (?name))))}):
+      return site._method(receiver, field);
+  return site._function(function);
 }
 
-static List MemberCall._bound(
-  MemberCall *m, List binding, Type signature, List declared,
-  List parameters, List returns) {
-  m.receiver = m.compiler._method_bind(
-    m.receiver, m.type, declared, m.origin);
-  List callee = %(expr ((func $parameters) $returns) (ident $binding));
-  return m.compiler._finish_call(
-    signature.apply(), callee,
-    signature, m.receiver, m.supplied, m.origin);
+static List CallSite._function(CallSite *k, List function) {
+  List resolved = k.c.resolve_expression(function, k.origin);
+  Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
+  if (type && k.c.sym.resolve_key(type).equal(func_type))
+    return k.c._resolve_func_call(resolved, k.supplied, k.origin);
+  return k._finish(k.result_type, resolved, type, NULL);
 }
 
-static List MemberCall._invoke(MemberCall *m) {
-  List resolution = m._lookup();
-  if (!resolution && _deferred_receiver(m.receiver)) {
-    List callee = %(expr (<macro-expr>) (op . ${m.receiver} ${m.field}));
-    return m.compiler._finish_call(
-      m.result_type, callee, NULL,
-      NULL, m.supplied, m.origin);
+static List CallSite._method(CallSite *k, List receiver, List field) {
+  k.receiver = receiver;
+  k.field = field;
+  List resolution = k._lookup();
+  if (!resolution && _deferred_receiver(k.receiver)) {
+    List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
+    return k._finish(k.result_type, callee, NULL, NULL);
   }
   if (!resolution) {
-    Var name = m.field.car();
-    m.compiler.report_error(
-      <type>, %"type ${m.type.repr()} has no method $name",
-      m.origin, NULL);
+    Var name = k.field.car();
+    k.c.report_error(
+      <type>, %"type ${k.type.repr()} has no method $name", k.origin, NULL);
   }
   match (resolution) {
     case %(ambiguous *packages):
-      m.compiler._report_method_ambiguity(
-        m.type, m.method, packages,
-        NULL, m.origin);
+      k.c._report_method_ambiguity(
+        k.type, k.method, packages, NULL, k.origin);
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
-      return m._bound(binding, signature, declared, parameters, returns);
+      return k._bound(binding, signature, declared, parameters, returns);
     case %(delegate ?binding (!set ?signature
            ((func (!set ?parameters (?declared *))) *returns))
            ?path): {
-      m.receiver = _materialize_delegate_receiver(m.receiver, path);
-      m.type = m.receiver.cadr();
-      return m._bound(binding, signature, declared, parameters, returns);
+      k.receiver = _materialize_delegate_receiver(k.receiver, path);
+      k.type = k.receiver.cadr();
+      return k._bound(binding, signature, declared, parameters, returns);
     }
     case %(field ?access ?field_type): {
       List callee = %(expr $field_type
-        (op $access ${m.receiver} ${m.field}));
-      return m.compiler._finish_call(
-        m.result_type, callee,
-        field_type, NULL, m.supplied, m.origin);
+        (op $access ${k.receiver} ${k.field}));
+      return k._finish(k.result_type, callee, field_type, NULL);
     }
   }
   return NULL;
 }
 
-static List Compiler._resolve_member_call(
-  Compiler c, Type result_type, List receiver, List field,
-  List supplied, Token origin) {
-  MemberCall call = {
-    .compiler = c, .result_type = result_type,
-    .receiver = receiver, .field = field, .supplied = supplied,
-    .origin = origin};
-  return call._invoke();
+static List CallSite._lookup(CallSite *k) {
+  k.receiver = k.c.resolve_expression(k.receiver, k.origin);
+  k.type = k.receiver.cadr();
+  k.method = k.field.car().str();
+  List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+  if (!resolution && _expr_is_raw_string_literal(k.receiver)) {
+    k.receiver = k.c.promote_string_literal(k.receiver);
+    k.type = k.receiver.cadr();
+    resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
+  }
+  return resolution ? resolution
+    : k.c._resolve_delegate_method(k.type, k.method, k.origin);
 }
 
-static List Compiler._resolve_call(
-  Compiler c, Type result_type, List function, List supplied,
-  Token origin) {
-  match (function)
-    case %(expr ? ${$source_operator_content(
-        %(. ?receiver (!set ?field (?name))))}):
-      return c._resolve_member_call(
-        result_type, receiver, field, supplied, origin);
-  List resolved = c.resolve_expression(function, origin);
-  Type type = resolved.cadr();
-  Type func_type = c.sym.resolve_key(%("Func"));
-  if (type && c.sym.resolve_key(type).equal(func_type))
-    return c._resolve_func_call(resolved, supplied, origin);
-  return c._finish_call(
-    result_type, resolved, type, NULL, supplied, origin);
+static List CallSite._bound(
+  CallSite *k, List binding, Type signature, List declared,
+  List parameters, List returns) {
+  k.receiver = k.c._method_bind(k.receiver, k.type, declared, k.origin);
+  List callee = %(expr ((func $parameters) $returns) (ident $binding));
+  return k._finish(signature.apply(), callee, signature, k.receiver);
+}
+
+static List CallSite._finish(
+  CallSite *k, Type result_type, List callee, Type callee_type,
+  List receiver) {
+  if (result_type === %(<macro-expr>)) result_type = NULL;
+  Type applied = callee_type.apply();
+  if (!applied && callee_type)
+    applied = k.c.sym.resolve_key(callee_type).apply();
+  List arguments = k.c._resolve_call_arguments(
+    receiver, k.supplied, k.origin);
+  if (_deferred_call(callee, receiver, arguments))
+    result_type = %(<macro-expr>);
+  if (!result_type) result_type = applied;
+  if (receiver && result_type !== %(<macro-expr>))
+    k._check_arity(callee_type, arguments);
+  k.c.check_meta_call(callee, k.origin);
+  callee = k.c._discarding_callee(callee, callee_type, arguments);
+  Macro called = $called;
+  return k.c.rebuild_expression(result_type, called(callee, arguments));
+}
+
+/* A call waits for macro substitution when its callee, its receiver, or
+   one of its arguments does. */
+static int _deferred_call(List callee, List receiver, List arguments) {
+  if (_deferred_receiver(callee) ||
+      (receiver && _deferred_receiver(receiver)))
+    return 1;
+  foreach (Var argument, arguments)
+    if (argument is <list> && !argument.is_nil()) {
+      List syntax = argument;
+      if (_deferred_receiver(syntax) ||
+          syntax.car() == <macro-bind> || syntax.car() == <macro-slot>)
+        return 1;
+    }
+  return 0;
+}
+
+static void CallSite._check_arity(
+  CallSite *k, Type callee_type, List arguments) {
+  match (callee_type)
+    case %((func (!set ?parameters (*))) *):
+      if (!_parameters_variadic(parameters) &&
+          arguments.len() > List.len(parameters))
+        k.c.report_error(
+          <type>,
+          %"method takes ${List.len(parameters) - 1} argument${
+            List.len(parameters) == 2 ? "" : "s"}, not ${
+            arguments.len() - 1}",
+          k.origin, NULL);
 }
 
 /** Returns the exact Var tag for a type test, rejecting types without one.
@@ -2131,11 +2133,10 @@ static void Compiler._check_matmul(
 
 /* Operands have been resolved in the caller's current semantic scope. */
 static List Compiler._native_binary_expression(
-  Compiler c, Symbol operator, List lhs, List rhs,
-  Type lhs_type, Type rhs_type, Token origin) {
+  Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Type type = c._binary_op_type(operator, lhs, rhs);
   List operation = source_operator_content(%($operator $lhs $rhs));
-  if (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type))
+  if (c.sym.is_var_type(lhs.cadr()) || c.sym.is_var_type(rhs.cadr()))
     operation = c.anchor_origin(operation, origin);
   return %(expr $type $operation);
 }
@@ -2175,8 +2176,7 @@ static List Compiler._binary_expression(
       operator, lhs_type ? lhs_type : rhs_type,
       lhs_type ? rhs : lhs, origin);
   c._check_matmul(operator, lhs_type, rhs_type, origin);
-  return c._native_binary_expression(
-    operator, lhs, rhs, lhs_type, rhs_type, origin);
+  return c._native_binary_expression(operator, lhs, rhs, origin);
 }
 
 /* A statically known tag whose encoding row the decoder discriminates on
@@ -2334,8 +2334,8 @@ static List Compiler._resolve_append(
 }
 
 static List Compiler._resolve_slice(
-  Compiler c, Type input_type, List receiver, List start, List stop,
-  List step, Token origin) {
+  Compiler c, Type input_type, List slice, Token origin) {
+  (List receiver, List start, List stop, List step) = slice.cdr();
   receiver = c.resolve_expression(receiver, origin);
   if (start) start = c.resolve_expression(start, origin);
   if (stop) stop = c.resolve_expression(stop, origin);
@@ -2611,8 +2611,6 @@ static List Compiler._resolve_parens(
 static List Compiler._resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
-  Macro grouped_sizeof = $sizeof_grouped,
-        expression_sizeof = $sizeof_expression;
   match (input) {
     case captured(?body, *captures, *params):
       return c._resolve_lambda(input, input_type, body, captures, params);
@@ -2620,8 +2618,7 @@ static List Compiler._resolve_content(
       return c._resolve_lambda(input, input_type, body, NULL, params);
   }
   // Source-form cases examine input through origin and source wrappers.
-  if (content &&
-      (content.car() == <at> || content.car() == <src>))
+  if (content && (content.car() == <at> || content.car() == <src>))
     return c._resolve_source(input, input_type, content);
   if (content && content.car() == <expr>)
     match (content) case %(!set ?inner (expr ? ?)):
@@ -2644,10 +2641,8 @@ static List Compiler._resolve_content(
         return c._resolve_identifier(binding, input_type, origin);
     case $source_literal_content(%(*)): return input;
     case %(tpl-call *): return input;
-    case %(meta-call ?callee (args *arguments)): {
-      if (c.meta_body || c.macro_holes) return input;
-      return c.evaluate_meta_expression(input, origin);
-    }
+    case %(meta-call ?callee (args *arguments)):
+      return c._resolve_meta_call(input, origin);
     case %(meta-cap *): return input;
     case %(macro-invoke ?definition ?arguments ?invocation):
       return c._resolve_invocation(input, definition, arguments, invocation);
@@ -2659,39 +2654,24 @@ static List Compiler._resolve_content(
       return c._resolve_cons(input_type, head, tail, origin);
     case %(append ?head ?tail):
       return c._resolve_append(input_type, head, tail, origin);
-    case $source_slice_content(%(?receiver ?start ?stop ?step)):
-      return c._resolve_slice(
-        input_type, receiver, start, stop, step, origin);
+    case $source_slice_content(%(? ? ? ?)):
+      return c._resolve_slice(input_type, content, origin);
     case %(getindex ?receiver ?selector):
-      return %(expr $input_type
-               (getindex ${c.resolve_expression(receiver, origin)}
-                         ${c.resolve_expression(selector, origin)}));
+      return c._resolve_getindex(input_type, receiver, selector, origin);
     case %(dstrasgn (targets *targets) ?source):
       return c._resolve_destructure(targets, source, origin);
     case $source_content_pattern($sizeof_grouped, %(?argument)):
-      if (argument is <list>) {
-        List source_argument = argument;
-        return c.rebuild_expression(input_type, grouped_sizeof(
-          c.resolve_expression(source_argument, origin)));
-      }
+      return c._resolve_sizeof(input, $sizeof_grouped, argument, origin);
     case $source_content_pattern($sizeof_expression, %(?argument)):
-      if (argument is <list>) {
-        List source_argument = argument;
-        return c.rebuild_expression(input_type, expression_sizeof(
-          c.resolve_expression(source_argument, origin)));
-      }
+      return c._resolve_sizeof(input, $sizeof_expression, argument, origin);
     case $source_generic_content(%(?control *associations)):
       return c._resolve_generic(control, associations, origin);
     case $source_va_arg_content(%(?argument ?declaration)):
-      return %(expr $input_type
-               ${source_va_arg_content(%(
-                 ${c.resolve_expression(argument, origin)}
-                 ${c.resolve_expression(declaration, origin)}))});
+      return c._resolve_va_arg(input_type, argument, declaration, origin);
     case $source_commas_content(%(*expressions)):
       return c._resolve_commas(input_type, expressions, origin);
     case %(splice ?expression):
-      return %(expr $input_type
-               (splice ${c.resolve_expression(expression, origin)}));
+      return c._resolve_splice(input_type, expression, origin);
     case %((!or offsetof nil cache macro-bind) *): return input;
     case $source_content_pattern($grouped, %(?inner)):
       return c._resolve_parens(inner, origin);
@@ -2725,26 +2705,73 @@ static List Compiler._resolve_content(
     case %(tadapt ?target ?source):
       return c._resolve_tadapt(target, source, origin);
   }
-  if (content && content.car() == <array>) {
-    Macro array_value = $array_value;
-    match (input) case array_value(*elements): {
-      Array resolved = [];
-      foreach (List element, elements)
-        resolved.push(c.resolve_expression(element, origin));
-      return c.rebuild_expression(
-        input_type, array_value(resolved.list_free()));
-    }
+  if (content && content.car() == <array>)
+    return c._resolve_array_value(input, input_type, origin);
+  if (content && content.car() == <map>)
+    return c._resolve_map_value(input, input_type, origin);
+  return input;
+}
+
+static List Compiler._resolve_meta_call(
+  Compiler c, List input, Token origin) {
+  if (c.meta_body || c.macro_holes) return input;
+  return c.evaluate_meta_expression(input, origin);
+}
+
+static List Compiler._resolve_getindex(
+  Compiler c, Type input_type, List receiver, List selector,
+  Token origin) {
+  return %(expr $input_type
+           (getindex ${c.resolve_expression(receiver, origin)}
+                     ${c.resolve_expression(selector, origin)}));
+}
+
+/* A `sizeof` keeps its grouped or bare form around the resolved operand;
+   an operand that is not syntax stays as written. */
+static List Compiler._resolve_sizeof(
+  Compiler c, List input, Macro form, Var argument, Token origin) {
+  if (argument is not <list>) return input;
+  List operand = argument;
+  return c.rebuild_expression(
+    input.cadr(), form(c.resolve_expression(operand, origin)));
+}
+
+static List Compiler._resolve_va_arg(
+  Compiler c, Type input_type, List argument, List declaration,
+  Token origin) {
+  return %(expr $input_type
+           ${source_va_arg_content(%(
+             ${c.resolve_expression(argument, origin)}
+             ${c.resolve_expression(declaration, origin)}))});
+}
+
+static List Compiler._resolve_splice(
+  Compiler c, Type input_type, List expression, Token origin) =>
+  %(expr $input_type (splice ${c.resolve_expression(expression, origin)}));
+
+static List Compiler._resolve_array_value(
+  Compiler c, List input, Type input_type, Token origin) {
+  Macro array_value = $array_value;
+  match (input) case array_value(*elements): {
+    Array resolved = [];
+    foreach (List element, elements)
+      resolved.push(c.resolve_expression(element, origin));
+    return c.rebuild_expression(
+      input_type, array_value(resolved.list_free()));
   }
-  if (content && content.car() == <map>) {
-    Macro map_value = $map_value;
-    match (input) case map_value(*entries): {
-      Array resolved = [];
-      foreach (Var entry, entries)
-        foreach (Var row, c.evaluate_macro_rows(entry))
-          resolved.push(c.resolve_map_entry(row, origin));
-      return c.rebuild_expression(
-        input_type, map_value(resolved.list_free()));
-    }
+  return input;
+}
+
+static List Compiler._resolve_map_value(
+  Compiler c, List input, Type input_type, Token origin) {
+  Macro map_value = $map_value;
+  match (input) case map_value(*entries): {
+    Array resolved = [];
+    foreach (Var entry, entries)
+      foreach (Var row, c.evaluate_macro_rows(entry))
+        resolved.push(c.resolve_map_entry(row, origin));
+    return c.rebuild_expression(
+      input_type, map_value(resolved.list_free()));
   }
   return input;
 }
@@ -3276,16 +3303,6 @@ static String Compiler._not_null_pointer_constant(Compiler c, List expr) {
   return spelling;
 }
 
-// Build the T_str / T_<target> converter call for a type pair, or return
-// NULL when no such converter is declared.  When name is given it receives
-// the name that was looked for, which the caller reports on failure.
-//
-// Both sides of the comparison are spelled the way the collector recorded
-// them, so this matches for a typedef name -- "Symbol" against
-// Symbol_str's collected ("Symbol") parameter -- and never for a builtin,
-// whose collected parameter is the symbol int rather than the string
-// "int".  That asymmetry is why the speculative callers below have to ask
-// this function rather than guess from the type.
 /* The exact reader for a built-in Var payload is `Var.<target>`: it checks the
    tag and yields NULL for any other kind. `Var.pointer` checks nothing, so
    trying it first let a List-valued Var read as a String. Only a raw native
@@ -3373,6 +3390,8 @@ static List Compiler._converter_owned_call(
   return NULL;
 }
 
+/* The call to the converter that `type`, or the first of its typedef names
+   that declares one, provides for `target`, or NULL. */
 static List Compiler._converter_call(
   Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
