@@ -3307,7 +3307,7 @@ static void Import.lisp(Import *in) {
   Compiler c = in.c;
   String text = c._read_source(
     in.path, "cannot open compile-time Lisp import", in.invocation);
-  if (_inherited_import(in.path)) return;
+  if (Compiler.inherits_import(in.path)) return;
   if (c.collect_protocols) c._eval_string(text, in.invocation);
   else c.queue_declaration_effect(text, in.invocation, in.invocation);
 }
@@ -3355,7 +3355,7 @@ static void Import.borrow(Import *in, Compiler child) {
   child.unit_nodes = c.unit_nodes;
   child.borrowed_lisp = 1;
   child.import_src = in.path;
-  child.inherited_lisp = _inherited_import(in.path);
+  child.inherited_lisp = Compiler.inherits_import(in.path);
   child.imports = c.imports;
   child.import_stack = c.import_stack;
   child.declaration_effects = c.declaration_effects;
@@ -3586,7 +3586,7 @@ static void Compiler._eval_library(
   String path = %"${c.root_dir}/$relative";
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
-  if (loaded || _inherited_import(path)) return;
+  if (loaded || Compiler.inherits_import(path)) return;
   String text = c._source_text(path, message, c.token, %("path:" $path));
   c._eval_string(text, c.token);
 }
@@ -3609,16 +3609,14 @@ void Compiler.publish_macro_library(Compiler c, Lisp shared) {
   library_session = shared;
 }
 
-static int _inherited_import(String path) {
+/** Whether the shared session evaluated the file at `path`. A unit that is
+    that file, as when a library is linted, inherits its Lisp forms.
+*/
+int Compiler.inherits_import(String path) {
   /* An empty `Map` is false, so the test is for the allocation. */
   return !library_filling && library_imports != NULL &&
          path in library_imports;
 }
-
-/** Whether the shared session evaluated the file at `path`. A unit that is
-    that file, as when a library is linted, inherits its Lisp forms.
-*/
-int Compiler.inherits_import(String path) => _inherited_import(path);
 
 /** Records that `name` is compile-time only in `c`, and in the shared
     session when it is being filled. */
