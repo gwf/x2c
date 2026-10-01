@@ -13,15 +13,11 @@ Shared helpers for x2c compiler AST nodes.
 | Function | Summary |
 | --- | --- |
 | [`ast_changes_left_operand`](#ast_changes_left_operand) | Returns whether `op` writes its left operand. |
+| [`ast_collect_binding_references`](#ast_collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`ast_contains_head`](#ast_contains_head) | Returns whether any list under `value` has `kind` as its head. |
 | [`binding_identity_new`](#binding_identity_new) | Constructs a `(binding identity spelling)` node. |
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
-| [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
-| [`preproc_directive`](#preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
-| [`preproc_include_target`](#preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
-| [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
-| [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.lvalue_binding`](#Ast.lvalue_binding) | Returns the binding whose stored object the lvalue `ast` names, or `NULL`. |
@@ -41,7 +37,15 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:242`
+Source: `src/ast.x:256`
+
+#### ast_collect_binding_references
+
+`void ast_collect_binding_references(Var node, Map referenced)`
+
+Records in `referenced` the identity of every binding `node` names.
+
+Source: `src/ast.x:121`
 
 #### ast_contains_head
 
@@ -79,55 +83,6 @@ zero without changing either output.
 
 Source: `src/ast.x:50`
 
-#### preproc_conditional_kind
-
-`Symbol preproc_conditional_kind(String text)`
-
-Classifies the preprocessor line `text` as a conditional directive:
-`<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
-and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
-
-Source: `src/ast.x:298`
-
-#### preproc_directive
-
-`String preproc_directive(String text)`
-
-Returns the preprocessor line `text` without its `#` and the blanks
-around the directive.
-
-Source: `src/ast.x:308`
-
-#### preproc_include_target
-
-`String preproc_include_target(String text, int &angle)`
-
-Returns the file named by the `#include` line `text`, or `NULL` for any
-other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
-the name, such as a comment, is ignored.
-
-Source: `src/ast.x:315`
-
-#### preproc_track_arms
-
-`List preproc_track_arms(List arms, String text)`
-
-Follows the conditional groups open after the preprocessor line `text`.
-`arms` holds one entry per open group, innermost first, listing the
-`preproc` nodes that select that group's current arm.
-
-Source: `src/ast.x:330`
-
-#### preproc_within_arms
-
-`List preproc_within_arms(List arms, List items)`
-
-Returns `items` inside the conditional arms `arms` tracked by
-`preproc_track_arms`: the directives that reopen each group, outermost
-first, then `items`, then one `#endif` per group.
-
-Source: `src/ast.x:343`
-
 ### `Ast`
 
 <a id="Ast.initializer_cases"></a>
@@ -137,7 +92,7 @@ Source: `src/ast.x:343`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:248`
+Source: `src/ast.x:262`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -148,7 +103,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:262`
+Source: `src/ast.x:276`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -172,7 +127,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:154`
+Source: `src/ast.x:168`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -182,7 +137,7 @@ Source: `src/ast.x:154`
 Returns `replacement` under the anchors of `original`, the statement it
 replaces, so a rewrite does not lose the node's source position.
 
-Source: `src/ast.x:139`
+Source: `src/ast.x:153`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -206,7 +161,7 @@ in. Every block statement carries one so that a transform-phase
 diagnostic can name its line; a pass that dispatches on a statement tag
 has to see the statement, not the anchor.
 
-Source: `src/ast.x:127`
+Source: `src/ast.x:141`
 
 ### `Symbol`
 
@@ -217,7 +172,7 @@ Source: `src/ast.x:127`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:232`
+Source: `src/ast.x:246`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -226,7 +181,7 @@ Source: `src/ast.x:232`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:226`
+Source: `src/ast.x:240`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -235,7 +190,7 @@ Source: `src/ast.x:226`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:238`
+Source: `src/ast.x:252`
 
 ## Public types
 
