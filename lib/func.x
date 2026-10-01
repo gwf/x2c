@@ -2,10 +2,10 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    `Func` binds a synchronous native call. It stores a typed signature and
-    adapter, checks boxed value and typed-reference arguments, and boxes the
-    adapter result. A bound context is copied into the same `Scope` allocation
-    as the `Func`.
+    `Func` owns the binding of one synchronous native call: a canonical
+    signature, an adapter, and optional context bytes copied into the same
+    `Scope` allocation. Arguments reach native code only through the checked
+    value and reference readers that generated adapters call.
 */
 
 #pragma once
@@ -82,7 +82,7 @@ static size_t _context_offset(void) {
                    : sizeof(struct Func);
 }
 
-static void *_context(Func fn) => (unsigned char *) fn + _context_offset();
+static void *Func._context(Func f) => (unsigned char *) f + _context_offset();
 
 // calls
 
@@ -163,11 +163,11 @@ List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
     unsigned expected = fn.nparams;
     raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
   }
-  List parameter = _parameter(fn, index);
+  List parameter = fn._parameter(index);
   return _is_reference(parameter) ? parameter.cdr() : NULL;
 }
 
-static List _parameter(Func fn, unsigned index) {
+static List Func._parameter(Func fn, unsigned index) {
   if (!fn || index >= fn.nparams) return NULL;
   List params = fn.params;
   while (params && index--) params = params.cdr();
@@ -186,9 +186,9 @@ static int _is_reference(List parameter) =>
     `Symbol` argument does not carry `want` or the carrier holds a reference,
     and `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
     `<no-convert>` from a numeric conversion. The result has tag `want`.
-    A detail names the argument's tag rather than the argument: any tag may
-    arrive here, and an identity-bearing detail value terminates at the error
-    floor instead of reaching the handler that would report it.
+    A detail names the argument's tag, since any tag may arrive here and an
+    identity-bearing detail value terminates at the error floor before it
+    reaches the handler that would report it.
 */
 Var x2c_func_value_argument(
   Func fn, const FuncArg *argv, unsigned i, Symbol want) {
@@ -257,14 +257,14 @@ Var x2c_func_record_result(const void *bytes, size_t size) =>
     Raises: `<bad-types>` on the same mismatches as the shared checker. */
 void *x2c_func_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List want) =>
-  _reference_argument(fn, argv, i, want, want);
+  fn._reference_argument(argv, i, want, want);
 
 /** Checks a generated adapter's declared pointee against the stored signature
     and its resolved `want` against the source address before casting.
     Raises: `<bad-types>` on either mismatch. */
 void *x2c_func_declared_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) =>
-  _reference_argument(fn, argv, i, declared_target, want);
+  fn._reference_argument(argv, i, declared_target, want);
 
 /* Returns reference argument `i` after checking its declared source type.
     The adapter supplies the pointee type it will cast to.
@@ -275,9 +275,9 @@ void *x2c_func_declared_reference_argument(
     differs, or conversion would discard a qualifier. It does not return on
     failure.
 */
-static void *_reference_argument(
+static void *Func._reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) {
-  List declared = _parameter(fn, i), source = argv[i].reference_type;
+  List declared = fn._parameter(i), source = argv[i].reference_type;
   int signature_reference = _is_reference(declared);
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source ||
@@ -379,7 +379,8 @@ static Func _new(
   size_t context_offset = _context_offset();
   if (context_size > SIZE_MAX - context_offset)
     raise %(size-limit (operation "Func.new_context") (size $context_size));
-  int void_params = params.len() == 1 && params.car() is <list> &&
+  int n = params.len();
+  int void_params = n == 1 && params.car() is <list> &&
                     params.car() == %(void);
   Func fn = Scope.calloc(1, context_offset + context_size);
   fn.sig = signature;
@@ -387,8 +388,8 @@ static Func _new(
   fn.adapter = adapter;
   fn.rest = rest;
   fn.context_size = context_size;
-  fn.nparams = void_params ? 0 : params.len();
-  if (context_size) memcpy(_context(fn), context, context_size);
+  fn.nparams = void_params ? 0 : n;
+  if (context_size) memcpy(fn._context(), context, context_size);
   return fn;
 }
 
@@ -409,7 +410,7 @@ List Func.signature(Func function) {
 */
 const void *Func.context(Func function) {
   if (!function) raise %(bad-arg (operation "Func.context"));
-  return function.context_size ? _context(function) : NULL;
+  return function.context_size ? function._context() : NULL;
 }
 
 /** Boxes `function` without copying or retaining the `Func`.
