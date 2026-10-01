@@ -1631,6 +1631,11 @@ static List Compiler._method_bind(
   Compiler c, List receiver, Type type, Type declared, Token origin) {
   if (!declared || !type) return receiver;
   Type target = declared.canonicalize(), source = type.canonicalize();
+  Type named = source.is_aggregate() ? c._tag_typedef(source) : NULL;
+  if (named) {
+    type = _qualified(type, named);
+    source = named;
+  }
   if (_receiver_points_to(source, target))
     c.report_error(
       <type>,
@@ -1685,6 +1690,7 @@ List Compiler.resolve_postfix_member(
     Type field_type = c.sym.lookup_field(object_type, field);
     return field_type ? %(field -> $field_type) : NULL;
   }
+  int tagged = 0;
   while (type) {
     int is_method_type = type.is_typedef_name() || type.is_builtin();
     if (call_context && is_method_type) {
@@ -1700,9 +1706,29 @@ List Compiler.resolve_postfix_member(
     else if (type.is_aggregate()) {
       Type field_type = c.sym.lookup_field(type, field);
       if (field_type) return %(field . $field_type);
-      type = NULL;
+      type = call_context && !tagged++ ? c._tag_typedef(type) : NULL;
     }
     else type = c.sym.next_typedef(type, hops);
+  }
+  return NULL;
+}
+
+/* The qualifiers of `type` applied to the typedef `named`. */
+static Type _qualified(Type type, Type named) {
+  Array out = [];
+  foreach (Var item, type)
+    if (item is <symbol> && item.symbol().is_type_qualifier()) out.push(item);
+  foreach (Var item, named) out.push(item);
+  return out.list_free();
+}
+
+/* A receiver spelled `struct T` or `union T` reaches the methods of the
+   typedef `T` when that typedef names the same aggregate, as the usual
+   `typedef struct T {...} T;` does. */
+static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
+  match (aggregate) case %(?kind ?(String tag)): {
+    Type name = %($tag);
+    if (c.sym.resolve_key(name) == aggregate) return name;
   }
   return NULL;
 }
