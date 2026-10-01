@@ -101,6 +101,7 @@ static List Emitter._emit(Emitter e, List ast) {
       return e._emit_generic(control, associations);
     case %(va-arg ?expression ?declaration):
       return e._emit_va_arg(expression, declaration);
+    case %(offsetof ?type ?member): return e._emit_offsetof(type, member);
     case %(call ?function ?arguments):
       return e._emit_call(function, arguments);
     case %(index ?array ?index): return e._emit_index(array, index);
@@ -727,6 +728,12 @@ static List Emitter._emit_va_arg(Emitter e, Var expression, Var declaration) {
   List c_expr = e._emit(%($expression));
   List c_decl = e._emit(%($declaration));
   return %("va_arg(" @c_expr ", " @c_decl ")");
+}
+
+static List Emitter._emit_offsetof(Emitter e, Type type, List member) {
+  List c_type = e._semantic_type(type);
+  List c_member = e._emit(member);
+  return %("offsetof(" @c_type ", " @c_member ")");
 }
 
 static List Emitter._emit_index(Emitter e, Var array, Var index) {
