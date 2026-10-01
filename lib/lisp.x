@@ -12,7 +12,10 @@
     Identifiers use canonical `Atom`s: compact x2c `Symbol`s when their
     spelling round-trips exactly, with direct canonical-`String` `<lsym>`
     `Var`s as the arbitrary-length, case-sensitive fallback. The reader
-    converts shared Tokenizer output into `Var` and `List` forms.
+    converts shared Tokenizer output into `Var` and `List` forms. `bind`
+    resolves a native operation through the callback adapters here, which
+    run interpreted callables, and then through the table `lisp-targets.x`
+    builds outside the implicit prelude.
 
     The session `Scope` owns the Lisp record, `Map`s, Lambdas, and bound
     `Func` storage. `Map`s, Lambda bodies, and captures retain `Var`s by
@@ -1560,10 +1563,71 @@ static int _lisp_Lisp_Iter_all(Iter iter, Var callable) =>
 static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
   iter.find(_predicate_callback(callable));
 
+/* native targets
+
+   `bind` resolves a name through the callback targets above, then through
+   the table `lisp-targets.x` builds. That unit includes the optional modules
+   the evaluator binds, which the implicit prelude must not carry, so this
+   C-only declaration reaches its table without entering the x2c interface. */
+
+macro Unit $lisp.native.declarations() {
+  $(quote ((preproc "extern Map lisp_native_targets(void);")))...
+}
+
+$lisp.native.declarations();
+
+$x2c.foreign.alias(lisp_native_targets)
+static Map _library_targets(void);
+
+$(import "../etc/lisp-bindings.xlisp")
+macro Expression $lisp.callback.target.map() => $(lisp.native.targets '(
+  (_lisp_List_map (as List_map))
+  (_lisp_List_filter (as List_filter))
+  (_lisp_List_any (as List_any))
+  (_lisp_List_all (as List_all))
+  (_lisp_List_map2 (as List_map2))
+  (_lisp_List_sort_by (as List_sort_by))
+  (_lisp_List_sort_with (as List_sort_with))
+  (_lisp_List_zip_with (as List_zip_with))
+  (_lisp_List_foldl (as List_foldl))
+  (_lisp_List_find (as List_find))
+  (_lisp_Array_map (as Array_map))
+  (_lisp_Array_map2 (as Array_map2))
+  (_lisp_Array_sort_by (as Array_sort_by))
+  (_lisp_Array_sort_with (as Array_sort_with))
+  (_lisp_Array_foldl (as Array_foldl))
+  (_lisp_String_map (as String_map))
+  (_lisp_String_filter (as String_filter))
+  // Iterator operations are declared `meta` in iter.x and adopted with
+  // `meta protocol` in protocols.x, which generates their `_into` targets.
+  // One that takes a callback binds here through its adapter.
+  (_lisp_Iter_init (as Iter_init))
+  (_lisp_Iter_map_into (as Iter_map_into))
+  (_lisp_Iter_filter_into (as Iter_filter_into))
+  (_lisp_Iter_zip_with_into (as Iter_zip_with_into))
+  (_lisp_Iter_map2_into (as Iter_map2_into))
+  (_lisp_Iter_scan_into (as Iter_scan_into))
+  (_lisp_Iter_any (as Iter_any))
+  (_lisp_Iter_all (as Iter_all))
+  (_lisp_Iter_foldl (as Iter_foldl))
+  (_lisp_Iter_find (as Iter_find))
+  (_lisp_Lisp_List_filter (as Lisp_List_filter))
+  (_lisp_Lisp_List_any (as Lisp_List_any))
+  (_lisp_Lisp_List_all (as Lisp_List_all))
+  (_lisp_Lisp_List_find (as Lisp_List_find))
+  (_lisp_Lisp_String_filter (as Lisp_String_filter))
+  (_lisp_Lisp_Iter_filter (as Lisp_Iter_filter))
+  (_lisp_Lisp_Iter_any (as Lisp_Iter_any))
+  (_lisp_Lisp_Iter_all (as Lisp_Iter_all))
+  (_lisp_Lisp_Iter_find (as Lisp_Iter_find))
+));
+
+static Map callback_targets = $lisp.callback.target.map();
+
 static Func _native_target(String name) {
   Var target;
-  if (!lisp_native_targets.try_get(name, target) &&
-      !_lisp_optional_targets().try_get(name, target)) return NULL;
+  if (!callback_targets.try_get(name, target) &&
+      !_library_targets().try_get(name, target)) return NULL;
   return (Func) target.pointer();
 }
 

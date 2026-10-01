@@ -192,9 +192,10 @@ macros: direct aligns,
 offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only xmacro adds a file boundary without sharing an
 implementation;
-`lib/lisp.x` therefore declares its native target rows directly. Its local
-expression macro remains necessary because `x2c.ident` is valid only during
-macro expansion; a direct top-level Lisp splice fails before translation.
+`lib/lisp-targets.x` therefore declares its native target rows directly. Its
+local expression macro remains necessary because `x2c.ident` is valid only
+during macro expansion; a direct top-level Lisp splice fails before
+translation.
 
 Do not create a ledger merely because several cases share a noun. Match's six
 guard operators, for example, have different normalization, capture, layout,
@@ -326,9 +327,9 @@ must not use it because shared causes never return to the raise.
 `src/build.x` reaches the runtime's own
 `Path.make_dirs` and `Path.remove_tree` rather than keeping compiler-local
 filesystem helpers. The Lisp evaluator's local target
-rows in `lib/lisp.x` produce the native-target Map. Use macros, compile-time
-Lisp, or ordinary helpers according to which form leaves the facts easiest
-to inspect.
+rows in `lib/lisp-targets.x` produce the native-target Map. Use macros,
+compile-time Lisp, or ordinary helpers according to which form leaves the
+facts easiest to inspect.
 
 ### Whole-test retained Scope
 

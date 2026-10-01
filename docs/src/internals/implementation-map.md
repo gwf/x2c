@@ -118,7 +118,8 @@ is listed under [compiler options](../reference/cli.md).
   `src/meta-project.x` builds it, `src/meta-helper-client.x` calls it, and
   `etc/meta-helper.x` answers
 - Embedded native bindings: `etc/lisp-bindings.xmacro`,
-  `etc/lisp-bindings.xlisp`, `lib/lisp.x`, and `lib/func.x`
+  `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp.x`, and
+  `lib/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding
   compiler fixtures; Lisp and `Func` suites; compile-time-macros, decorators,
   and inline-lisp examples

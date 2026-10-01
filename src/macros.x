@@ -4394,13 +4394,13 @@ static int _native_owned(Compiler c, List type) {
 
 /* native target inventory
 
-   The native functions interface rows advertise, as `lib/lisp.x`
+   The native functions interface rows advertise, as `lib/lisp-targets.x`
    generates its target inventory from them. */
 
 /* Returns the declared native targets advertised by `meta` interface rows,
-   in the row form `lib/lisp.x` generates its target inventory from, or only
-   those declared in the files `paths` names when it is not empty. Sorting
-   makes that inventory independent of Map order. */
+   in the row form `lib/lisp-targets.x` generates its target inventory
+   from, or only those declared in the files `paths` names when it is not
+   empty. Sorting makes that inventory independent of Map order. */
 static List _native_meta_targets(List paths) {
   Compiler compiler = Compiler.expanding();
   if (!compiler) return %();
