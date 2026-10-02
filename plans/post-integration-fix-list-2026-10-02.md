@@ -292,7 +292,7 @@ Test the filled argument against its direct expression equivalent, including
 conversion and effect order. Coordinate F10's delayed binding analysis rather
 than adding a validator that rejects legal constructed syntax.
 
-### F17. P2, partly decide contract - Preserve reference and const meaning
+### F17. P2 - Preserve reference and const meaning
 
 **B03, B09; Rerun/generated C.** A local `T &name = lvalue` becomes a pointer
 instead of an alias; the book specifies references for parameters. Aggregate
@@ -301,8 +301,10 @@ method with a native discarded-qualifier warning. The optimized probe did not
 establish reliable runtime mutation and must not be cited as doing so.
 
 Owner: declaration placement and member/receiver qualifier propagation in
-`src/expressions.x`. Decide whether local references are supported aliases or
-an unsupported declaration placement. Carry aggregate qualifiers through the
+`src/expressions.x`. The reference chapter explicitly limits transparent
+references to parameters; locals, globals, and return types are unsupported.
+Reject unsupported placements instead of emitting a pointer as an alias.
+Carry aggregate qualifiers through the
 existing checks. Verify parameter references, const/volatile fields and
 delegates, and deliberate mutable access. Coordinate F11.
 
@@ -777,7 +779,9 @@ Progress and private handoffs live in `.context/post-integration-campaign/`;
 landed results and any explicit deferrals are recorded here as batches finish.
 
 Private integration currently includes F01, F07, F13, F14, F22-F27, F29,
-F39, F41, and F42.
+F31, F33-F37, F39, F41, and F42. F33's corrected CPU metric still needs
+quiet-window calibration. The runtime batch has identical generated C/H
+across stages 0, 1, and 2, in addition to its focused checks.
 Their focused checks passed in worker or parent checkouts. F08's initial repair
 also passed its focused checks, but the combined `make build-safe` failed:
 some standard helpers fell back to native staging before the runtime archive
