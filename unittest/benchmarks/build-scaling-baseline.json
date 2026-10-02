@@ -1,4 +1,28 @@
 {
-  "commit": "b8d9c4526b426be89af8bfd2568db1633e7ad88e",
-  "cycles_per_line": 464833.1140705317
+  "authored_source_lines": 82904,
+  "baseline_id": "child-cpu-seconds-per-authored-line/v1:639c9cad5943",
+  "commit": "2c8ddfb3ed070d45d4d1fd28d62d0dae00e93109",
+  "cpu_seconds": 59.480467,
+  "cpu_seconds_per_authored_line": 0.0007174619680594423,
+  "generated_source_lines": 4066,
+  "legacy": {
+    "baseline_id": "legacy-driver-cycles:b8d9c4526b426be89af8bfd2568db1633e7ad88e",
+    "commit": "b8d9c4526b426be89af8bfd2568db1633e7ad88e",
+    "cycles_per_line": 464833.1140705317,
+    "metric_id": "driver-cycles-per-source-line/v0"
+  },
+  "metric_id": "child-cpu-seconds-per-authored-line/v1",
+  "provenance": {
+    "build_lto": "0",
+    "build_mode": "optimize",
+    "cc": "cc",
+    "cc_version": "Apple clang version 17.0.0 (clang-1700.6.3.2)",
+    "environment": {},
+    "machine": "arm64",
+    "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+    "translator": "/Users/gary/.codex/worktrees/e176/x2c/.context/post-integration-campaign/metrics/baseline-x2c",
+    "translator_sha256": "5fe497f9b6612923f2958e81c31927a1650954969490d5f116cb1aff57f3b642"
+  },
+  "total_source_lines": 86970,
+  "tree": "683c3aa823692ac8a4be239c0cf7f1f9376d0125"
 }
