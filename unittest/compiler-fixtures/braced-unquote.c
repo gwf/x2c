@@ -4,9 +4,9 @@
 
 static List _31, _28, _26, _25, _24, _23, _22, _21, _18, _17, _14, _12, _7, _3, _2;
 
-static String _29, _19, _15, _10;
+static String _29, _20, _15, _10;
 
-static Var _30, _27, _20, _16, _13, _11, _9, _8, _6, _5, _4, _1, _0;
+static Var _30, _27, _19, _16, _13, _11, _9, _8, _6, _5, _4, _1, _0;
 
 static int calls;
 
@@ -47,13 +47,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _16 = int_var(42);
   _17 = cons(_16, NULL);
   _18 = cons(_9, _17);
-  _19 = String_new("answer=42");
-  _20 = List_var(_18);
+  _19 = List_var(_18);
+  _20 = String_new("answer=42");
   _21 = cons(_4, _17);
   _22 = cons(_1, _7);
   _23 = cons(_0, _22);
   _24 = cons(_5, _23);
-  _25 = cons(_20, NULL);
+  _25 = cons(_19, NULL);
   _26 = cons(_8, _25);
   _27 = int_var(40);
   _28 = cons(_27, _14);
@@ -124,22 +124,22 @@ int main(void){
   List index = cons(int_var(Var_int(Array_getindex(array, 0))), NULL);
   List ternary = cons(int_var(base == 40 ? 42 : 0), NULL);
   List literals =({
-    Var _x2c_literal_part_0 = Array_var(Array_update_n(Array_new(), 1, int_var(42)));  Var _x2c_literal_part_1 = Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42)));  cons(_20, cons(String_var(_19), cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+    Var _x2c_literal_part_0 = Array_var(Array_update_n(Array_new(), 1, int_var(42)));  Var _x2c_literal_part_1 = Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42)));  cons(_19, cons(String_var(_20), cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
   }
   );
   if(! List_equal(insert, _21) || ! List_equal(splice, _24)) return 1;
   if(! List_equal(short_splice, splice)) return 2;
   if(! List_equal(nested, _26)) return 3;
-  if(! String_equal(Var_string(List_getindex(nested_string, 0)), _19)) return 4;
+  if(! String_equal(Var_string(List_getindex(nested_string, 0)), _20)) return 4;
   if(! List_equal(short_then_list, _28)) return 5;
   if(compile_time != 42 || ! List_equal(nested_compile_time, _17)) return 6;
-  if(! String_equal(text, _19)) return 7;
+  if(! String_equal(text, _20)) return 7;
   if(! String_equal(short_then_text, _29)) return 8;
   if(Var_int(Array_getindex(array, 0)) != 42 || Var_int(Map_getindex(map, Symbol_var(97761636))) != 42) return 9;
   if(macro_value != 42 || calls != 1) return 10;
   if(! List_equal(comma_value, _31) || comma != 1) return 11;
   if(! List_equal(index, _17) || ! List_equal(ternary, _17)) return 12;
-  if(! List_equal(Var_list(List_getindex(literals, 0)), _18) || ! String_equal(Var_string(List_getindex(literals, 1)), _19) || Var_int(Array_getindex(Var_array(List_getindex(literals, 2)), 0)) != 42 || Var_int(Map_getindex(Var_map(List_getindex(literals, 3)), Symbol_var(97761636))) != 42) return 13;
+  if(! List_equal(Var_list(List_getindex(literals, 0)), _18) || ! String_equal(Var_string(List_getindex(literals, 1)), _20) || Var_int(Array_getindex(Var_array(List_getindex(literals, 2)), 0)) != 42 || Var_int(Map_getindex(Var_map(List_getindex(literals, 3)), Symbol_var(97761636))) != 42) return 13;
   printf("braced unquote ok\n");
   return 0;
 }

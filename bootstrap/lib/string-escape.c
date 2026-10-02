@@ -32,8 +32,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("\"%s\"");
-  _1 = String_new("\"\"");
+  _0 = String_new("\"\"");
+  _1 = String_new("\"%s\"");
   _2 = String_new("\\");
 }
 
@@ -99,8 +99,8 @@ String String_printf(String, ...);
 
 String String_repr(String str){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(str) || ! * str) return _1;
-  return String_printf(_0, String_escape(str));
+  if(! String_truth(str) || ! * str) return _0;
+  return String_printf(_1, String_escape(str));
 }
 
 Buffer Buffer_write_char(Buffer, char);

@@ -2,11 +2,11 @@
 
 #include "lisp-bind-inferred.h"
 
-static List _20, _18, _17, _15, _13, _10, _8, _7, _5, _3;
+static List _22, _20, _19, _17, _15, _10, _8, _7, _5, _3;
 
-static String _22, _21, _11, _1;
+static String _13, _12, _11, _1;
 
-static Var _19, _16, _14, _12, _9, _6, _4, _2, _0;
+static Var _21, _18, _16, _14, _9, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -43,18 +43,18 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _8 = cons(_0, _7);
   _9 = List_var(_8);
   _10 = cons(_9, _3);
-  _11 = String_new("Text");
-  _12 = String_var(_11);
-  _13 = cons(_12, NULL);
-  _14 = List_var(_13);
+  _11 = String_new("increment");
+  _12 = String_new("echo");
+  _13 = String_new("Text");
+  _14 = String_var(_13);
   _15 = cons(_14, NULL);
   _16 = List_var(_15);
   _17 = cons(_16, NULL);
-  _18 = cons(_0, _17);
-  _19 = List_var(_18);
-  _20 = cons(_19, _13);
-  _21 = String_new("increment");
-  _22 = String_new("echo");
+  _18 = List_var(_17);
+  _19 = cons(_18, NULL);
+  _20 = cons(_0, _19);
+  _21 = List_var(_20);
+  _22 = cons(_21, _15);
 }
 
 static Byte increment(Byte value){
@@ -72,8 +72,8 @@ void Lisp_bind(Lisp, String, Func);
 void install_bindings(Lisp lisp){
   if(! _init_guard_) _file_init_();
   Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _10);
-  Lisp_bind(lisp, _21, _x2c_macro_callable_0);
-  Lisp_bind(lisp, _22, Func_new(_x2c_func_adapt_1, _20));
+  Lisp_bind(lisp, _11, _x2c_macro_callable_0);
+  Lisp_bind(lisp, _12, Func_new(_x2c_func_adapt_1, _22));
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

@@ -8,9 +8,9 @@
 
 static List _1;
 
-static String _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _5, _3, _2;
+static String _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _9, _7, _6, _5, _4, _3, _2;
 
-static Var _6, _4, _0;
+static Var _10, _8, _0;
 
 static String trail;
 
@@ -36,17 +36,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = Symbol_var(48);
   _1 = cons(_0, NULL);
   _2 = String_new("");
-  _3 = String_new("w");
-  _4 = String_var(_3);
-  _5 = String_new("e");
-  _6 = String_var(_5);
-  _7 = String_new("-");
-  _8 = String_new("a");
-  _9 = String_new("b");
-  _10 = String_new("c");
-  _11 = String_new("d");
-  _12 = String_new("e");
-  _13 = String_new("f");
+  _3 = String_new("a");
+  _4 = String_new("b");
+  _5 = String_new("c");
+  _6 = String_new("d");
+  _7 = String_new("w");
+  _8 = String_var(_7);
+  _9 = String_new("e");
+  _10 = String_var(_9);
+  _11 = String_new("e");
+  _12 = String_new("f");
+  _13 = String_new("-");
   _14 = String_new("g");
   _15 = String_new("h");
   _16 = String_new("i");
@@ -99,15 +99,15 @@ int main(void){
   if(! _init_guard_) _file_init_();
   trail = _2;
   List inserted =({
-    Var _x2c_literal_part_0 = int_var(note(_8));  Var _x2c_literal_part_1 = int_var(note(_9));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+    Var _x2c_literal_part_0 = int_var(note(_3));  Var _x2c_literal_part_1 = int_var(note(_4));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
   }
   );
   List spliced =({
-    List _x2c_literal_part_2 = items(_10);  List _x2c_literal_part_3 = items(_11);  cons(_4, List_append(_x2c_literal_part_2, cons(_6, List_append(_x2c_literal_part_3, NULL))));
+    List _x2c_literal_part_2 = items(_5);  List _x2c_literal_part_3 = items(_6);  cons(_8, List_append(_x2c_literal_part_2, cons(_10, List_append(_x2c_literal_part_3, NULL))));
   }
   );
   String joined =({
-    Var _x2c_literal_part_4 = String_var(int_str(note(_12)));  Var _x2c_literal_part_5 = String_var(int_str(note(_13)));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_7), cons(_x2c_literal_part_5, NULL))));
+    Var _x2c_literal_part_4 = String_var(int_str(note(_11)));  Var _x2c_literal_part_5 = String_var(int_str(note(_12)));  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_13), cons(_x2c_literal_part_5, NULL))));
   }
   );
   Array quoted =({

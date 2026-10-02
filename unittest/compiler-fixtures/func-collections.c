@@ -10,11 +10,11 @@
 
 #include "func-collections.h"
 
-static List _29, _28, _26, _24, _23, _21, _19, _17, _15, _14, _12, _10, _5, _4, _3;
+static List _29, _28, _26, _24, _23, _21, _19, _16, _14, _13, _11, _9, _5, _4, _3;
 
-static String _8, _6;
+static String _17, _7;
 
-static Var _27, _25, _22, _20, _18, _16, _13, _11, _9, _7, _2, _1, _0;
+static Var _27, _25, _22, _20, _18, _15, _12, _10, _8, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -30,7 +30,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _17)))
+_x2c_initializer_choice_EC4193E6_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _16)))
 typedef struct _x2c_func_pointer_context_0{
   Var(* _x2c_func_pointer_0)(Var);
 }
@@ -77,27 +77,27 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _3 = cons(_2, NULL);
   _4 = cons(_1, _3);
   _5 = cons(_0, _4);
-  _6 = String_new("ab");
-  _7 = Symbol_var(437126);
-  _8 = String_new("Var");
-  _9 = String_var(_8);
-  _10 = cons(_9, NULL);
-  _11 = List_var(_10);
-  _12 = cons(_11, NULL);
-  _13 = List_var(_12);
-  _14 = cons(_13, NULL);
-  _15 = cons(_7, _14);
-  _16 = List_var(_15);
-  _17 = cons(_16, _10);
+  _6 = Symbol_var(437126);
+  _7 = String_new("Var");
+  _8 = String_var(_7);
+  _9 = cons(_8, NULL);
+  _10 = List_var(_9);
+  _11 = cons(_10, NULL);
+  _12 = List_var(_11);
+  _13 = cons(_12, NULL);
+  _14 = cons(_6, _13);
+  _15 = List_var(_14);
+  _16 = cons(_15, _9);
+  _17 = String_new("ab");
   _18 = Symbol_var(213092);
   _19 = cons(_18, NULL);
   _20 = List_var(_19);
   _21 = cons(_20, NULL);
   _22 = List_var(_21);
   _23 = cons(_22, NULL);
-  _24 = cons(_7, _23);
+  _24 = cons(_6, _23);
   _25 = List_var(_24);
-  _26 = cons(_25, _10);
+  _26 = cons(_25, _9);
   _27 = Symbol_var(19368);
   _28 = cons(_27, NULL);
   _29 = cons(_25, _28);
@@ -139,7 +139,7 @@ int main(void){
     _x2c_func_pointer_context_0 _x2c_func_pointer_context_2 ={
       pointer
     }
-    ;  _x2c_func_pointer_context_2._x2c_func_pointer_0 ? Func_new_context(_x2c_func_adapt_1, _17, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
+    ;  _x2c_func_pointer_context_2._x2c_func_pointer_0 ? Func_new_context(_x2c_func_adapt_1, _16, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
   }
   ));
   int bias = 2;
@@ -147,17 +147,17 @@ int main(void){
     Var _x2c_lambda_capture_value_0 = int_var(bias);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _17, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_0, _16, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
-  String text = String_map(_6, ({
+  String text = String_map(_17, ({
     Var _x2c_lambda_capture_value_1 = int_var(bias);  _x2c_lambda_context_2 _x2c_lambda_context_3 ={
       _x2c_lambda_capture_value_1
     }
     ;  Func_new_context(_x2c_lambda_1, _26, & _x2c_lambda_context_3, sizeof _x2c_lambda_context_3);
   }
   ));
-  String mapped = String_map(_6, _x2c_func_handle_1);
+  String mapped = String_map(_17, _x2c_func_handle_1);
   printf("%s %s %s %s %s\n", List_repr(direct), Array_repr(dynamic), List_repr(captured), text, mapped);
   return 0;
 }

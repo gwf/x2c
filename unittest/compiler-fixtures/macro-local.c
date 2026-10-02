@@ -77,10 +77,10 @@ static int local_macros(int base){
       LOCAL_READY = 3, LOCAL_DONE
     }
     state = LOCAL_DONE;
-    Map entries = Map_update_n(Map_new(), 1, String_var(_1), int_var(42));
+    Map entries = Map_update_n(Map_new(), 1, String_var(_0), int_var(42));
     field_value = local.value;
     enum_value = state;
-    entry_value = Var_int(Map_getindex(entries, String_var(_0)));
+    entry_value = Var_int(Map_getindex(entries, String_var(_1)));
     decorated =(local.kept != 0);
   }
   int after = fixture_select(2);

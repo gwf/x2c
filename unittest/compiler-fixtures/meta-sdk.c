@@ -16,10 +16,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("-");
-  _1 = String_new("x, y, z");
-  _2 = String_new("p.y + 1");
-  _3 = String_new("row");
+  _0 = String_new("x, y, z");
+  _1 = String_new("p.y + 1");
+  _2 = String_new("row");
+  _3 = String_new("-");
 }
 
 static int ms_total(int a, int b, int c){
@@ -37,12 +37,12 @@ int main(void){
     p.x, p.y, p.z
   }
   ;
-  printf("names    %s\n", _1);
+  printf("names    %s\n", _0);
   printf("count    %d\n", 3);
   printf("reads    %d %d %d\n", reads[0], reads[1], reads[2]);
   printf("total    %d\n", ms_total(p.x, p.y, p.z));
-  printf("spelling %s\n", _2);
-  printf("label    %s\n", ms_label(_3, 7));
+  printf("spelling %s\n", _1);
+  printf("label    %s\n", ms_label(_2, 7));
   return 0;
 }
 
@@ -51,6 +51,6 @@ Var String_var(String);
 String int_str(int);
 
 static String ms_label(String name, int n){
-  return String_join(NULL, cons(String_var(name), cons(String_var(_0), cons(String_var(int_str(n)), NULL))));
+  return String_join(NULL, cons(String_var(name), cons(String_var(_3), cons(String_var(int_str(n)), NULL))));
 }
 

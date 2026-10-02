@@ -26,11 +26,11 @@
 
 #include "file-scope-objects.h"
 
-static List _3, _2;
+static List _6, _5;
 
-static String _7, _6, _5, _4;
+static String _7, _2, _1, _0;
 
-static Var _1, _0;
+static Var _4, _3;
 
 int file_object_counter = 0;
 
@@ -45,16 +45,16 @@ Map Map_new(void);
 _x2c_initializer_choice_EB67B464_0((file_object_registry = Map_new()))
 static String file_object_name;
 
-_x2c_initializer_choice_EB67B464_1((file_object_name = _4))
+_x2c_initializer_choice_EB67B464_1((file_object_name = _0))
 static String file_object_words[] ={
   0, 0
 }
 ;
 
-_x2c_initializer_choice_EB67B464_2((0 < sizeof(file_object_words) / sizeof(file_object_words[0])), (file_object_words[0] = _5), (1ULL < sizeof(file_object_words) / sizeof(file_object_words[1ULL])), (file_object_words[1ULL] = _6))
+_x2c_initializer_choice_EB67B464_2((0 < sizeof(file_object_words) / sizeof(file_object_words[0])), (file_object_words[0] = _1), (1ULL < sizeof(file_object_words) / sizeof(file_object_words[1ULL])), (file_object_words[1ULL] = _2))
 static List file_object_items;
 
-_x2c_initializer_choice_EB67B464_3((file_object_items = _3))
+_x2c_initializer_choice_EB67B464_3((file_object_items = _6))
 static char * file_object_text;
 
 String String_new(const char *);
@@ -72,13 +72,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = int_var(1);
-  _1 = int_var(2);
-  _2 = cons(_1, NULL);
-  _3 = cons(_0, _2);
-  _4 = String_new("hi");
-  _5 = String_new("a");
-  _6 = String_new("b");
+  _0 = String_new("hi");
+  _1 = String_new("a");
+  _2 = String_new("b");
+  _3 = int_var(1);
+  _4 = int_var(2);
+  _5 = cons(_4, NULL);
+  _6 = cons(_3, _5);
   _7 = String_new("k");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();

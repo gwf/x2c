@@ -10,11 +10,11 @@
 
 #include "function-to-func-inline.h"
 
-static List _20, _19, _15, _14, _12, _10, _9, _7, _6, _4;
+static List _18, _17, _13, _12, _10, _8, _7, _5, _4, _2;
 
-static String _17;
+static String _15;
 
-static Var _18, _16, _13, _11, _8, _5, _3, _2;
+static Var _16, _14, _11, _9, _6, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -28,7 +28,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_EB5855FF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _12)))
+_x2c_initializer_choice_EB5855FF_0((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _10)))
 typedef struct _x2c_func_pointer_context_0{
   long(* _x2c_func_pointer_1)(long, long);
 }
@@ -42,7 +42,7 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_EB5855FF_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _20)))
+_x2c_initializer_choice_EB5855FF_1((_x2c_func_handle_1 = x2c_func_shared(_x2c_func_adapt_2, _18)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -62,25 +62,25 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _2 = Symbol_var(437126);
-  _3 = Symbol_var(818062);
+  _0 = Symbol_var(437126);
+  _1 = Symbol_var(818062);
+  _2 = cons(_1, NULL);
+  _3 = List_var(_2);
   _4 = cons(_3, NULL);
-  _5 = List_var(_4);
-  _6 = cons(_5, NULL);
-  _7 = cons(_5, _6);
-  _8 = List_var(_7);
-  _9 = cons(_8, NULL);
-  _10 = cons(_2, _9);
-  _11 = List_var(_10);
-  _12 = cons(_11, _4);
-  _13 = List_var(_6);
-  _14 = cons(_13, NULL);
-  _15 = cons(_2, _14);
-  _16 = List_var(_15);
-  _17 = String_new("Var");
-  _18 = String_var(_17);
-  _19 = cons(_18, NULL);
-  _20 = cons(_16, _19);
+  _5 = cons(_3, _4);
+  _6 = List_var(_5);
+  _7 = cons(_6, NULL);
+  _8 = cons(_0, _7);
+  _9 = List_var(_8);
+  _10 = cons(_9, _2);
+  _11 = List_var(_4);
+  _12 = cons(_11, NULL);
+  _13 = cons(_0, _12);
+  _14 = List_var(_13);
+  _15 = String_new("Var");
+  _16 = String_var(_15);
+  _17 = cons(_16, NULL);
+  _18 = cons(_14, _17);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -160,7 +160,7 @@ Func _x2c_func_from_pointer_e915dee0_0(long(* _x2c_func_pointer_0)(long, long)){
     _x2c_func_pointer_context_0 _x2c_func_pointer_context_2 ={
       _x2c_func_pointer_0
     }
-    ;  _x2c_func_pointer_context_2._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_1, _12, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
+    ;  _x2c_func_pointer_context_2._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_1, _10, & _x2c_func_pointer_context_2, sizeof _x2c_func_pointer_context_2) : NULL;
   }
   );
 }
@@ -194,7 +194,7 @@ Func _x2c_func_from_capture_e915dee0_0(Var _x2c_lambda_capture_1){
     _x2c_lambda_capture_1
   }
   ;
-  return Func_new_context(_x2c_lambda_1, _20, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+  return Func_new_context(_x2c_lambda_1, _18, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
 }
 
 #undef _x2c_initializer_choice_EB5855FF_0_expanded

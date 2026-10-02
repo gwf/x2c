@@ -38,9 +38,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("b");
   _2 = String_new("s");
   _3 = String_new("x");
-  _4 = String_new("z");
-  _5 = String_new("native");
-  _6 = String_new("y");
+  _4 = String_new("y");
+  _5 = String_new("z");
+  _6 = String_new("native");
   _7 = String_new("!");
 }
 
@@ -112,9 +112,9 @@ int main(void){
   Var direct_prefix = x2c_var_update_volatile(&(counter), 56, int_var(1));
   Var direct_postfix = x2c_var_postfix_volatile(&(counter), 2046);
   Var dynamic = Var_new(1318210446, _3);
-  Var sum = Var_binary(dynamic, 56, String_var(_6));
-  x2c_var_update_volatile(&(dynamic), 56, String_var(_4));
-  Text text = _5;
+  Var sum = Var_binary(dynamic, 56, String_var(_4));
+  x2c_var_update_volatile(&(dynamic), 56, String_var(_5));
+  Text text = _6;
   _x2c_proto_string_add_update(&(text), 56, _7);
   int native[2] ={
     1, 2

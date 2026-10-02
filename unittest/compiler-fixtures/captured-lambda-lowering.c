@@ -6,11 +6,11 @@
 
 #include "captured-lambda-lowering.h"
 
-static List _21, _19, _18, _16, _14, _12, _11, _7, _6, _4, _1;
+static List _21, _19, _18, _16, _14, _12, _11, _7, _6, _4, _2;
 
 static String _9;
 
-static Var _20, _17, _15, _13, _10, _8, _5, _3, _2, _0;
+static Var _20, _17, _15, _13, _10, _8, _5, _3, _1, _0;
 
 static int live;
 
@@ -90,14 +90,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(19368);
-  _1 = cons(_0, NULL);
-  _2 = Symbol_var(437126);
-  _3 = List_var(_1);
+  _0 = Symbol_var(437126);
+  _1 = Symbol_var(19368);
+  _2 = cons(_1, NULL);
+  _3 = List_var(_2);
   _4 = cons(_3, NULL);
   _5 = List_var(_4);
   _6 = cons(_5, NULL);
-  _7 = cons(_2, _6);
+  _7 = cons(_0, _6);
   _8 = List_var(_7);
   _9 = String_new("Var");
   _10 = String_var(_9);
@@ -109,7 +109,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _16 = cons(_15, NULL);
   _17 = List_var(_16);
   _18 = cons(_17, NULL);
-  _19 = cons(_2, _18);
+  _19 = cons(_0, _18);
   _20 = List_var(_19);
   _21 = cons(_20, _11);
   _x2c_static_initialize_0();

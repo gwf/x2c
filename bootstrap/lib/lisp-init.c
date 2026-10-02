@@ -4,9 +4,9 @@
 
 #include "error.h"
 
-static String _4, _3, _2;
+static String _4, _1, _0;
 
-static Var _1, _0;
+static Var _3, _2;
 
 static int _init_guard_ = 0;
 
@@ -28,10 +28,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(5221256);
-  _1 = Symbol_var(37059850);
-  _2 = String_new("append");
-  _3 = String_new("search-replace");
+  _0 = String_new("append");
+  _1 = String_new("search-replace");
+  _2 = Symbol_var(37059850);
+  _3 = Symbol_var(5221256);
   _4 = String_new("string-append");
 }
 
@@ -125,7 +125,7 @@ static Var _append2(Var left, Var right){
   List items = NULL;
   for(;  ! _nil(left);  left = lisp_cdr(left)) items = cons(lisp_car(left), items);
   if(! List_truth(items)) return right;
-  List tail = _list(right, _2);
+  List tail = _list(right, _0);
   {
     Var value;
     List _x2c_macro_object_0 = items;
@@ -257,7 +257,7 @@ Var lisp_match_replace(List, Var, Var);
 
 Var lisp_search_replace(Var input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
-  List list = _list(input, _3);
+  List list = _list(input, _1);
   if(_nil(lisp_match(input, pat))) return List_var(List_search_replace(list, pat, template));
   return lisp_match_replace(list, pat, template);
 }
@@ -309,7 +309,7 @@ Var lisp_binder_lets(Var bindings, Var binders){
     Var name = lisp_car(binders);
     reversed = cons(List_var(({
       Var _x2c_literal_part_6 = name;  Var _x2c_literal_part_7 = List_var(({
-        Var _x2c_literal_part_4 = bindings;  Var _x2c_literal_part_5 = List_var(cons(_1, cons(name, NULL)));  cons(_0, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+        Var _x2c_literal_part_4 = bindings;  Var _x2c_literal_part_5 = List_var(cons(_2, cons(name, NULL)));  cons(_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
       }
       ));  cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL));
     }

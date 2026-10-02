@@ -2,11 +2,11 @@
 
 #include "typedef-inherited-converter.h"
 
-static List _7, _6, _3, _2;
+static List _9, _8, _5, _4;
 
-static String _9, _8;
+static String _1, _0;
 
-static Var _5, _4, _1, _0;
+static Var _7, _6, _3, _2;
 
 static int _init_guard_ = 0;
 
@@ -20,16 +20,16 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(31626);
-  _1 = Symbol_var(42462);
-  _2 = cons(_1, NULL);
-  _3 = cons(_0, _2);
-  _4 = Symbol_var(42504522);
-  _5 = Symbol_var(425316);
-  _6 = cons(_5, NULL);
-  _7 = cons(_4, _6);
-  _8 = String_new("override");
-  _9 = String_new("empty");
+  _0 = String_new("override");
+  _1 = String_new("empty");
+  _2 = Symbol_var(31626);
+  _3 = Symbol_var(42462);
+  _4 = cons(_3, NULL);
+  _5 = cons(_2, _4);
+  _6 = Symbol_var(42504522);
+  _7 = Symbol_var(425316);
+  _8 = cons(_7, NULL);
+  _9 = cons(_6, _8);
 }
 
 int List_len(List);
@@ -42,7 +42,7 @@ int List_truth(List);
 
 String converter_inherit_Override_str(converter_inherit_Override values){
   if(! _init_guard_) _file_init_();
-  return List_truth(values) ? _8 : _9;
+  return List_truth(values) ? _0 : _1;
 }
 
 String List_str(List);
@@ -52,8 +52,8 @@ Var String_var(String);
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  converter_inherit_Leaf values = _3;
-  converter_inherit_Override overridden = _7;
+  converter_inherit_Leaf values = _5;
+  converter_inherit_Override overridden = _9;
   String assigned = List_str(values);
   String interpolated = String_join(NULL, cons(String_var(List_str(values)), NULL));
   converter_inherit_Count count = converter_inherit_Base_converter_inherit_count(values);

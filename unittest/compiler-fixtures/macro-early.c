@@ -2,11 +2,11 @@
 
 #include "macro-early.h"
 
-static List _25, _20, _15, _6;
+static List _22, _17, _13, _4;
 
-static String _279, _13, _1;
+static String _25, _11, _0;
 
-static Var _24, _23, _22, _21, _19, _18, _17, _16, _14, _12, _11, _10, _9, _8, _7, _5, _4, _3, _2, _0;
+static Var _26, _24, _23, _21, _20, _19, _18, _16, _15, _14, _12, _10, _9, _8, _7, _6, _5, _3, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -22,43 +22,43 @@ static int _x2c_tally_2;
 
 Var Symbol_var(Symbol);
 
-Var String_var(String);
-
 List cons(Var, List);
 
 Var List_var(List);
+
+Var String_var(String);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(244379323295050);
-  _1 = String_new("source");
-  _2 = String_var(_1);
-  _3 = Symbol_var(41184168);
-  _4 = Symbol_var(377892);
-  _5 = Symbol_var(19368);
-  _6 = cons(_5, NULL);
-  _7 = List_var(_6);
+  _0 = String_new("?__early_tally");
+  _1 = Symbol_var(41184168);
+  _2 = Symbol_var(377892);
+  _3 = Symbol_var(19368);
+  _4 = cons(_3, NULL);
+  _5 = List_var(_4);
+  _6 = Symbol_var(19147688);
+  _7 = Symbol_var(26416091224);
   _8 = Symbol_var(992);
   _9 = Symbol_var(11131);
-  _10 = Symbol_var(19147688);
-  _11 = Symbol_var(26416091224);
-  _12 = Symbol_var(974419528522);
-  _13 = String_new("tally");
-  _14 = String_var(_13);
-  _15 = cons(_14, NULL);
-  _16 = Symbol_var(10588978);
-  _17 = Symbol_var(42033970);
-  _18 = Symbol_var(8932560010);
-  _19 = Symbol_var(1317118534);
-  _20 = cons(_19, _6);
-  _21 = List_var(_20);
-  _22 = Symbol_var(157714837990);
-  _23 = Symbol_var(150408);
-  _24 = List_var(NULL);
-  _25 = cons(_24, NULL);
-  _279 = String_new("?__early_tally");
+  _10 = Symbol_var(974419528522);
+  _11 = String_new("tally");
+  _12 = String_var(_11);
+  _13 = cons(_12, NULL);
+  _14 = Symbol_var(42033970);
+  _15 = Symbol_var(8932560010);
+  _16 = Symbol_var(1317118534);
+  _17 = cons(_16, _4);
+  _18 = List_var(_17);
+  _19 = Symbol_var(157714837990);
+  _20 = Symbol_var(150408);
+  _21 = List_var(NULL);
+  _22 = cons(_21, NULL);
+  _23 = Symbol_var(10588978);
+  _24 = Symbol_var(244379323295050);
+  _25 = String_new("source");
+  _26 = String_var(_25);
 }
 
 Atom Atom_intern(String);
@@ -66,19 +66,19 @@ Atom Atom_intern(String);
 String int_str(int);
 
 static List tally(String key, int amount){
-  Atom token = Atom_intern(_279);
+  Atom token = Atom_intern(_0);
   String digits = String_join(NULL, cons(String_var(int_str(amount)), NULL));
   return({
-    Var _x2c_literal_part_7 = List_var(cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-      Var _x2c_literal_part_0 = List_var(cons(_4, cons(_7, cons(List_var(cons(_10, cons(token, NULL))), NULL))));  Var _x2c_literal_part_1 = List_var(cons(_4, cons(_7, cons(List_var(cons(_11, cons(_7, cons(String_var(digits), NULL)))), NULL))));  cons(_8, cons(_9, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+    Var _x2c_literal_part_7 = List_var(cons(_1, cons(List_var(cons(_2, cons(_5, cons(List_var(({
+      Var _x2c_literal_part_0 = List_var(cons(_2, cons(_5, cons(List_var(cons(_6, cons(token, NULL))), NULL))));  Var _x2c_literal_part_1 = List_var(cons(_2, cons(_5, cons(List_var(cons(_7, cons(_5, cons(String_var(digits), NULL)))), NULL))));  cons(_8, cons(_9, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
     }
     )), NULL)))), NULL)));  Var _x2c_literal_part_8 = List_var(({
-      Var _x2c_literal_part_5 = List_var(cons(_12, cons(token, _15)));  Var _x2c_literal_part_6 = List_var(({
-        Var _x2c_literal_part_2 = List_var(cons(_17, cons(String_var(key), NULL)));  Atom _x2c_literal_part_3 = token;  Var _x2c_literal_part_4 = List_var(cons(_18, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_23, cons(token, _25))), NULL))), NULL))));  cons(_16, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL))));
+      Var _x2c_literal_part_5 = List_var(cons(_10, cons(token, _13)));  Var _x2c_literal_part_6 = List_var(({
+        Var _x2c_literal_part_2 = List_var(cons(_14, cons(String_var(key), NULL)));  Atom _x2c_literal_part_3 = token;  Var _x2c_literal_part_4 = List_var(cons(_15, cons(_18, cons(List_var(cons(_19, cons(List_var(cons(_20, cons(token, _22))), NULL))), NULL))));  cons(_23, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL))));
       }
       ));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
     }
-    ));  cons(_0, cons(_2, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
+    ));  cons(_24, cons(_26, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
   }
   );
 }

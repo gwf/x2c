@@ -492,9 +492,9 @@ Type Var_type(Var);
 List Type_list(Type);
 List Type_declaration_ast(Type, List);
 char * Compiler_code_pretty_string(Compiler, List, String);
-List Compiler_emit(Compiler, List);
+List Compiler_emit(Compiler, List, Map);
 static void Query_hover(Query * q, List row){
-  Type type = Var_type(List_getindex(row, 4));  if(! List_truth(Type_list(type))) return;  Compiler c =(* q).compiler;  List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));  Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL)), NULL))));  Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
+  Type type = Var_type(List_getindex(row, 4));  if(! List_truth(Type_list(type))) return;  Compiler c =(* q).compiler;  List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));  Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL), NULL), NULL))));  Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
 }
 
 int Map_try_get(Map, Var, Var *);
