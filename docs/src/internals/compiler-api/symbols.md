@@ -108,7 +108,7 @@ facts, compile-time struct layouts, binding and generated-name
 counters, and initializer names. It does not snapshot parser position or
 other compiler state.
 
-Source: `src/symbols.x:1197`
+Source: `src/symbols.x:1198`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -301,7 +301,7 @@ Source: `src/symbols.x:456`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/symbols.x:1167`
+Source: `src/symbols.x:1168`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -322,7 +322,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/symbols.x:1142`
+Source: `src/symbols.x:1143`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -367,7 +367,7 @@ Source: `src/symbols.x:811`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/symbols.x:1172`
+Source: `src/symbols.x:1173`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -385,7 +385,7 @@ Source: `src/symbols.x:334`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/symbols.x:1164`
+Source: `src/symbols.x:1165`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -764,7 +764,7 @@ Source: `src/symbols.x:183`
 Publishes an active semantic transaction and makes rollback a no-op.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1276`
+Source: `src/symbols.x:1277`
 
 <a id="SymTxn.commit_transient"></a>
 #### SymTxn.commit_transient
@@ -776,7 +776,7 @@ The caller may then release the transaction's construction scope.
 Source-fact collection must be disabled: its records retain staged maps.
 Parsing and evaluation must allocate outside that temporary scope.
 
-Source: `src/symbols.x:1319`
+Source: `src/symbols.x:1320`
 
 <a id="SymTxn.local_macros_changed"></a>
 #### SymTxn.local_macros_changed
@@ -785,7 +785,7 @@ Source: `src/symbols.x:1319`
 
 Returns whether the transaction's active scope changed its macro map.
 
-Source: `src/symbols.x:1263`
+Source: `src/symbols.x:1264`
 
 <a id="SymTxn.rollback"></a>
 #### SymTxn.rollback
@@ -795,7 +795,7 @@ Source: `src/symbols.x:1263`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symbols.x:1344`
+Source: `src/symbols.x:1345`
 
 ## Design notes
 
