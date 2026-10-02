@@ -206,12 +206,14 @@ cause false free-name errors; nested forward declarations remain untyped for
 methods and other typed forms. A Name argument can instead bind to a macro's
 own forward local and silently lose the caller's assignment.
 
-Owner: macro expansion binding and call-site Name identity. Preserve identity
+Owner: macro expansion binding and call-site Name identity. Gary decided on
+2026-10-02 that a Name argument referring to an existing caller variable keeps
+that binding. Assignments through the hole must reach the caller's variable
+even when a nested macro declares the same spelling. Preserve that identity
 through nested declarations; defer typed operations until their binding is
 available. Check methods, foreach, $let, literals, local macros, repeated
-expansions, and same/absent caller spellings. B02's intended Name semantics
-are already an open design decision; resolve that contract before changing
-it. Coordinate F16 without treating all failures as one reproduction.
+expansions, and same/absent caller spellings. Coordinate F16 without treating
+all failures as one reproduction.
 
 ### F11. P2 - Use one actual type identity for tag methods and their display
 
@@ -806,9 +808,9 @@ The proposed scopes favor canonical ASTs, actual binding identities, existing
 cleanup/reference/conversion owners, and deletion of work whose inputs already
 prove it unnecessary. They do not add origin authentication, a second semantic
 validator, or generic caching/transaction machinery merely to unify appearances.
-The JobLaunch rename is authorized. Local-reference semantics, Name binding,
-REPL support, and catalogue arity retain explicit decisions rather than an
-invented answer.
+The JobLaunch rename and preservation of caller bindings through Name holes
+are authorized. Local-reference semantics, REPL support, and catalogue arity
+retain explicit decisions rather than an invented answer.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
 Its source-workaround bug, duplicate rows, and untested runtime/validation
