@@ -12,7 +12,7 @@ Shipped `meta` code compiled into the compiler.
 
 | Function | Summary |
 | --- | --- |
-| [`linked_meta_hashes`](#linked_meta_hashes) | Returns the hash of each linked copy's definition text by name. |
+| [`linked_meta_hashes`](#linked_meta_hashes) | Returns each linked definition's hash and referenced names. |
 | [`linked_meta_targets`](#linked_meta_targets) | Returns the linked copies, and the runtime builders, by name. |
 | [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
@@ -26,9 +26,9 @@ Shipped `meta` code compiled into the compiler.
 
 `Map linked_meta_hashes(void)`
 
-Returns the hash of each linked copy's definition text by name.
+Returns each linked definition's hash and referenced names.
 
-Source: `src/linked-meta.x:4019`
+Source: `src/linked-meta.x:4021`
 
 #### linked_meta_targets
 

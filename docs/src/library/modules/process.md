@@ -249,7 +249,7 @@ Source: `lib/process.x:362`
 | --- | --- | --- |
 | [`Env`](#Env) | enum | The receiverless owner of `Env.get`. |
 | [`Job`](#Job) | class | A command or pipeline and the record of its one run. |
-| [`Launch`](#Launch) | struct | The launch options embedded in a Job. |
+| [`JobLaunch`](#JobLaunch) | struct | The launch options embedded in a Job. |
 
 <a id="Env"></a>
 ### Env
@@ -263,7 +263,7 @@ Source: `lib/process.x:49`
 <a id="Job"></a>
 ### Job
 
-`class Job { List stages; Launch launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
+`class Job { List stages; JobLaunch launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
 
 A command or pipeline and the record of its one run.
 A job that is still running when its Scope ends, or when its `$auto`
@@ -271,10 +271,10 @@ block exits, is terminated and reaped.
 
 Source: `lib/process.x:33`
 
-<a id="Launch"></a>
-### Launch
+<a id="JobLaunch"></a>
+### JobLaunch
 
-`typedef struct _Launch { String dir, input, stdout_path, stderr_path; int has_input, capture_output, capture_errors, errors_to_output; char **environment; } Launch`
+`typedef struct _JobLaunch { String dir, input, stdout_path, stderr_path; int has_input, capture_output, capture_errors, errors_to_output; char **environment; } JobLaunch`
 
 The launch options embedded in a Job.
 Set these through `Job.options` before the job starts. The record has

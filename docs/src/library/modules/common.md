@@ -660,7 +660,7 @@ Source: `lib/common.x:683`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:590`
 
 <a id="char.str"></a>
 #### char.str
@@ -669,7 +669,7 @@ Source: `lib/common.x:591`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:590`
 
 <a id="char.var"></a>
 #### char.var
@@ -678,7 +678,7 @@ Source: `lib/common.x:591`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:591`
+Source: `lib/common.x:590`
 
 ### `double`
 
@@ -747,7 +747,7 @@ Source: `lib/common.x:598`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:594`
 
 <a id="int.str"></a>
 #### int.str
@@ -756,7 +756,7 @@ Source: `lib/common.x:595`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:594`
 
 <a id="int.var"></a>
 #### int.var
@@ -765,7 +765,7 @@ Source: `lib/common.x:595`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:595`
+Source: `lib/common.x:594`
 
 ### `long`
 
@@ -805,7 +805,7 @@ Source: `lib/common.x:604`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:592`
 
 <a id="short.str"></a>
 #### short.str
@@ -814,7 +814,7 @@ Source: `lib/common.x:593`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:592`
 
 <a id="short.var"></a>
 #### short.var
@@ -823,7 +823,7 @@ Source: `lib/common.x:593`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:593`
+Source: `lib/common.x:592`
 
 ### `uchar`
 
@@ -834,7 +834,7 @@ Source: `lib/common.x:593`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:591`
 
 <a id="uchar.str"></a>
 #### uchar.str
@@ -843,7 +843,7 @@ Source: `lib/common.x:592`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:591`
 
 <a id="uchar.var"></a>
 #### uchar.var
@@ -852,7 +852,7 @@ Source: `lib/common.x:592`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:592`
+Source: `lib/common.x:591`
 
 ### `uint`
 
@@ -863,7 +863,7 @@ Source: `lib/common.x:592`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:596`
+Source: `lib/common.x:595`
 
 <a id="uint.str"></a>
 #### uint.str
@@ -872,7 +872,7 @@ Source: `lib/common.x:596`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:596`
+Source: `lib/common.x:595`
 
 <a id="uint.var"></a>
 #### uint.var
@@ -881,7 +881,7 @@ Source: `lib/common.x:596`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:596`
+Source: `lib/common.x:595`
 
 ### `ulong`
 
@@ -903,7 +903,7 @@ Source: `lib/common.x:606`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:596`
 
 <a id="unsigned.str"></a>
 #### unsigned.str
@@ -912,7 +912,7 @@ Source: `lib/common.x:597`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:596`
 
 <a id="unsigned.var"></a>
 #### unsigned.var
@@ -921,7 +921,7 @@ Source: `lib/common.x:597`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:597`
+Source: `lib/common.x:596`
 
 ### `ushort`
 
@@ -932,7 +932,7 @@ Source: `lib/common.x:597`
 
 Returns the readable representation of `$type`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:593`
 
 <a id="ushort.str"></a>
 #### ushort.str
@@ -941,7 +941,7 @@ Source: `lib/common.x:594`
 
 Returns the display `String` of `$type`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:593`
 
 <a id="ushort.var"></a>
 #### ushort.var
@@ -950,7 +950,7 @@ Source: `lib/common.x:594`
 
 Boxes a native `$type` value as `Var`.
 
-Source: `lib/common.x:594`
+Source: `lib/common.x:593`
 
 ## Runtime-internal callables
 

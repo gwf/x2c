@@ -196,14 +196,15 @@ Public functions:
 `Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
 `Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
 `Compiler.parse_variable`, `Compiler.resolve_expression`,
-`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
-`x2c_func_call_arguments`, `Compiler.func_call_parts`,
-`Compiler.complete_iter_chain`, `Compiler.require_var_tag`,
-`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
-`Compiler.check_explicit_converter`, `List.printf_family`,
-`Compiler.printf_static_format`, `Compiler.promote_string_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+`Compiler.needs_resolution`, `Compiler.resolve_postfix_member`,
+`Compiler.postfix_completions`, `x2c_func_call_arguments`,
+`Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
+`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.resolve_map_entry`, `Compiler.check_explicit_converter`,
+`List.printf_family`, `Compiler.printf_static_format`,
+`Compiler.promote_string_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`, `Compiler.converter_call`,
+`Compiler.is_builtin_converter_call`
 
 ### [src/format.x](../src/format.x)
 
@@ -717,18 +718,18 @@ Public functions:
 `Var.decode_f64`, `Var.box_i8`, `Var.box_u8`, `Var.box_i16`, `Var.box_u16`,
 `Var.box_i32_bits`, `Var.box_u32`, `Var.box_f32`, `Var.box_f64`, `Array.var`,
 `Block.var`, `Buffer.var`, `Bytes.var`, `List.var`, `File.var`, `Map.var`,
-`String.var`, `Symbol.var`, `Iter.var`, `_box_float`, `char.var`, `char.str`,
-`char.repr`, `uchar.var`, `uchar.str`, `uchar.repr`, `short.var`, `short.str`,
-`short.repr`, `ushort.var`, `ushort.str`, `ushort.repr`, `int.var`, `int.str`,
-`int.repr`, `uint.var`, `uint.str`, `uint.repr`, `unsigned.var`,
-`unsigned.str`, `unsigned.repr`, `float.var`, `float.str`, `float.repr`,
-`double.var`, `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`,
-`long.repr`, `Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`,
-`Var.file`, `Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`,
-`Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
-`Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
-`Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize_protocols`,
-`x2c_initialize`, `x2c_normalize_index`, `x2c_normalize_slice`
+`String.var`, `Symbol.var`, `Iter.var`, `char.var`, `char.str`, `char.repr`,
+`uchar.var`, `uchar.str`, `uchar.repr`, `short.var`, `short.str`, `short.repr`,
+`ushort.var`, `ushort.str`, `ushort.repr`, `int.var`, `int.str`, `int.repr`,
+`uint.var`, `uint.str`, `uint.repr`, `unsigned.var`, `unsigned.str`,
+`unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
+`double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
+`Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
+`Var.as_iter`, `Var.list`, `Var.map`, `Var.string`, `Var.symbol`, `Var.char`,
+`Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`, `Var.unsigned`,
+`Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`, `Var.long_double`,
+`Var.float`, `Var.double`, `x2c_initialize_protocols`, `x2c_initialize`,
+`x2c_normalize_index`, `x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)
 
