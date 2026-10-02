@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-ident-non-identifier.x:9:13: type: identifier has an unknown binding identity
+  int value = $call();
+              ^
+  note: binding: (% "abs")
+
