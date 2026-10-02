@@ -29,6 +29,7 @@ START = "<!-- x2c-integration:start -->"
 END = "<!-- x2c-integration:end -->"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 FINAL = {"landed", "parked"}
+GENERATED_DOCS = {"site/public/llms.txt", "site/public/llms-full.txt"}
 
 
 class WaitExpired(Exception):
@@ -445,6 +446,7 @@ class Queue:
         gated = record.get("gated")
         if gated and self.ancestor(gated, base):
             record.update(state="landed", landed=gated, landed_at=now())
+            record.pop("reason", None)
             self.save(record)
             for entry in record["prs"]:
                 pull = self.pull(entry["number"])
@@ -463,7 +465,8 @@ class Queue:
             before, after = modes[0][1:], modes[1]
             if not (before in {"000000", "100644"} and
                     after in {"000000", "100644"} and
-                    (path in {"AGENTS.md", "README.md"} or
+                    (path in GENERATED_DOCS or
+                     path in {"AGENTS.md", "README.md"} or
                      (path.endswith(".md") and
                       path.startswith(("agents/", "docs/", "plans/"))))):
                 return "agent-pr-check"
@@ -487,8 +490,8 @@ class Queue:
                          record["gate"]], tree, check=False)
         if proof.returncode:
             return False
-        record.update(state="gated", gated=head,
-                      reason="completed gate recovered; review generated artifacts")
+        record.update(state="gated", gated=head)
+        record.pop("reason", None)
         self.save(record)
         return True
 
@@ -556,6 +559,7 @@ class Queue:
             self.reconcile(record, self.fetch_dev())
         else:
             record.update(state="gated", gated=git(tree, "rev-parse", "HEAD"))
+            record.pop("reason", None)
         self.save(record)
         output(record)
 

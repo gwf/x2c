@@ -155,8 +155,6 @@ static List Compiler__parse_va_arg(Compiler c);
 
 static List Compiler__parse_generic(Compiler c);
 
-static int Compiler__needs_resolution(Compiler c, Var value);
-
 static int Compiler__identifier_needs_resolution(Compiler c, List binding);
 
 static int _deferred_receiver(List expr);
@@ -2452,11 +2450,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _31919 = cons(_31918, NULL);
   _31920 = cons(_225, _31919);
   _31921 = List_var(_31920);
-  _31922 = int_var(2052);
+  _31922 = int_var(2053);
   _31923 = cons(_31922, NULL);
   _31924 = cons(_231, _31923);
   _31925 = List_var(_31924);
-  _31926 = int_var(77050);
+  _31926 = int_var(77122);
   _31927 = cons(_31926, NULL);
   _31928 = cons(_246, _31927);
   _31929 = List_var(_31928);
@@ -2583,11 +2581,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _32050 = cons(_32049, NULL);
   _32051 = cons(_139, _32050);
   _32052 = List_var(_32051);
-  _32053 = int_var(2060);
+  _32053 = int_var(2061);
   _32054 = cons(_32053, NULL);
   _32055 = cons(_231, _32054);
   _32056 = List_var(_32055);
-  _32057 = int_var(77415);
+  _32057 = int_var(77487);
   _32058 = cons(_32057, NULL);
   _32059 = cons(_246, _32058);
   _32060 = List_var(_32059);
@@ -2684,11 +2682,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32148 = cons(_32147, NULL);
   _32149 = cons(_139, _32148);
   _32150 = List_var(_32149);
-  _32151 = int_var(2071);
+  _32151 = int_var(2072);
   _32152 = cons(_32151, NULL);
   _32153 = cons(_231, _32152);
   _32154 = List_var(_32153);
-  _32155 = int_var(77830);
+  _32155 = int_var(77902);
   _32156 = cons(_32155, NULL);
   _32157 = cons(_246, _32156);
   _32158 = List_var(_32157);
@@ -2764,11 +2762,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32228 = cons(_32227, NULL);
   _32229 = cons(_139, _32228);
   _32230 = List_var(_32229);
-  _32231 = int_var(2073);
+  _32231 = int_var(2074);
   _32232 = cons(_32231, NULL);
   _32233 = cons(_231, _32232);
   _32234 = List_var(_32233);
-  _32235 = int_var(77910);
+  _32235 = int_var(77982);
   _32236 = cons(_32235, NULL);
   _32237 = cons(_246, _32236);
   _32238 = List_var(_32237);
@@ -2846,11 +2844,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32310 = cons(_32309, NULL);
   _32311 = cons(_139, _32310);
   _32312 = List_var(_32311);
-  _32313 = int_var(2077);
+  _32313 = int_var(2078);
   _32314 = cons(_32313, NULL);
   _32315 = cons(_231, _32314);
   _32316 = List_var(_32315);
-  _32317 = int_var(78115);
+  _32317 = int_var(78187);
   _32318 = cons(_32317, NULL);
   _32319 = cons(_246, _32318);
   _32320 = List_var(_32319);
@@ -3037,11 +3035,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32501 = cons(_32500, NULL);
   _32502 = cons(_139, _32501);
   _32503 = List_var(_32502);
-  _32504 = int_var(2126);
+  _32504 = int_var(2127);
   _32505 = cons(_32504, NULL);
   _32506 = cons(_231, _32505);
   _32507 = List_var(_32506);
-  _32508 = int_var(80242);
+  _32508 = int_var(80314);
   _32509 = cons(_32508, NULL);
   _32510 = cons(_246, _32509);
   _32511 = List_var(_32510);
@@ -4377,7 +4375,7 @@ if(Compiler_take_code_value(c, carrier, &(staged), &(retained))) return Var_list
 case 377892: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];  Var content = _x2c_match_values[1]; {
   Var _x2c_match_value_2 = content; {
     List content = Var_list(_x2c_match_value_2); {
-      if(Var_truth(type) && ! Compiler__needs_resolution(c, List_var(input))) return input;  return Compiler__resolve_content(c, input, Var_type(type), content, origin);
+      if(Var_truth(type) && ! Compiler_needs_resolution(c, List_var(input))) return input;  return Compiler__resolve_content(c, input, Var_type(type), content, origin);
     }
 
   }
@@ -4398,8 +4396,8 @@ void x2c_cleanup_leave(X2CCleanup *);
 List Macro_case_pattern(Macro, List);
 int Map_contains(Map, Var);
 List Type_declaration_parts(Type);
-static int Compiler__needs_resolution(Compiler c, Var value){
-  Macro lambda = _31072, captured = _31152;  List syntax;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value); {
+int Compiler_needs_resolution(Compiler c, Var value){
+  if(! _init_guard_) _file_init_();  Macro lambda = _31072, captured = _31152;  List syntax;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }

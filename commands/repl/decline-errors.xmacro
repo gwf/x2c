@@ -103,6 +103,10 @@ meta static Map _repl_decline_rows(void) => {
   (macro Expression(Expr $l) =>
     _lower_decline($l, "not an expression")),
 
+  "expression.statement" :
+  (macro Expression(Expr $l) =>
+    _lower_decline($l, "a statement expression")),
+
   "expression.unsupported" :
   (macro Expression(Expr $l) =>
     _lower_decline($l, "unsupported expression")),

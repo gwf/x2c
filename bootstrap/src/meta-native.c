@@ -840,7 +840,8 @@ static Array _stub_arguments(Func function, const FuncArg * argv){
   List parameters = Var_list(List_cadr(Var_list(List_car(Func_signature(function)))));
   if(List_equal(parameters, _30305)) parameters = NULL;
   Array values = Array_new();
-  for(int i = 0;  i < List_len(parameters);  i ++) Array_push(values, argv[i].data.value);
+  int count = List_len(parameters);
+  for(int i = 0;  i < count;  i ++) Array_push(values, argv[i].data.value);
   return values;
 }
 
@@ -1027,7 +1028,7 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
         }
         if(_x2c_macro_selected_1 == 1){
           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 194};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 195};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
           }
 
         }
@@ -1116,7 +1117,7 @@ return values;
 
 static Var Compiler__meta_function(Compiler c, String name, Token site){
   Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 257};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 258};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _30615, site, cons(String_var(String_join(NULL, cons(String_var(String_new("no binding for ")), cons(String_var(name), NULL)))), NULL));  return function;
 }
@@ -1655,10 +1656,10 @@ static int Compiler__linked_copy(Compiler c, String name, Map linked){
 }
 
 static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map reached){
-  Var hash, own, names;  if(Map_contains(reached, String_var(name)) || ! Map_try_get(c -> meta_hashes, String_var(name), &(own))) return 1;  Map_setindex(reached, String_var(name), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
-    if(! Var_equal(hash, own)) return 0;
+  Var hash, own, names =((void) 0, Void);  if(Map_contains(reached, String_var(name)) || ! Map_try_get(c -> meta_hashes, String_var(name), &(own))) return 1;  Map_setindex(reached, String_var(name), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
+    List row = Var_list(hash);  hash = List_car(row);  names = List_cadr(row);  if(! Var_equal(hash, own)) return 0;
   }
-  else if(!(Map_contains(linked, String_var(name)))) return 0;  if(Map_try_get(c -> meta_calls, String_var(name), &(names))){
+  else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 9, 7, 4)){
     String callee;  List _x2c_macro_object_15 = Var_list(names);  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_19))){
       callee = Var_string(_x2c_macro_cursor_output_19);  if(! Compiler__linked_texts_match(c, callee, linked, reached)) return 0;
     }

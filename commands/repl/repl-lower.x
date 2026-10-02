@@ -670,10 +670,8 @@ static List _lower_args(
     match (argument) case %(expr (void) ()): continue;
     Type parameter = _lower_param_type(p);
     if (parameter.is_reference()) {
-      Var place = parameter.car() == <opt-ref> &&
-                  _lower_null_constant(argument)
-                ? 0 : argument.cadr().car() == <opt-ref>
-                    ? _lower_expr(l, argument) : _lower_place(l, argument);
+      List converted = l.compiler.convert_expression(argument, parameter);
+      Var place = _lower_expr(l, converted);
       if (place is void) {
         (void) $repl.decline(l, "argument.storage");
         return NULL;
@@ -750,7 +748,11 @@ static Var _lower_native_call(
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
-  if (!parts) return $repl.decline(l, "func.dynamic");
+  if (!parts) {
+    if (List.match(content, %(parens (block *))))
+      return $repl.decline(l, "expression.statement");
+    return $repl.decline(l, "func.dynamic");
+  }
   Var callee = _lower_expr(l, parts.car());
   if (_lower_failed(l, callee)) return void;
   Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
@@ -2572,6 +2574,7 @@ List ReplLower.lower(ReplLower self, List fn) {
   self.layouts.cleanup();
   self.layouts = {};
   Scope scratch = $auto(Scope.new());
+  Array definitions = $auto([]);
   Lowering l = {
     .compiler = self.compiler, .owner = self, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
@@ -2580,7 +2583,7 @@ List ReplLower.lower(ReplLower self, List fn) {
     .records = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
     .cursors = _lower_scratch_map(scratch),
-    .definitions = []
+    .definitions = definitions
   };
   self.reason = NULL;
   self.missing = NULL;
@@ -2600,10 +2603,7 @@ List ReplLower.lower(ReplLower self, List fn) {
         else if (l.uncallable)
           l.owner.reason = $repl.reason("scan.binding", l.owner.missing);
       }
-      if (l.declined || l.rejected || l.uncallable) {
-        l.definitions.free();
-        return NULL;
-      }
+      if (l.declined || l.rejected || l.uncallable) return NULL;
       Array slots = $auto([]);
       Array boxes = $auto([]);
       Array boxed_values = $auto([]);
@@ -2623,20 +2623,16 @@ List ReplLower.lower(ReplLower self, List fn) {
           }
       }
       Var body = _lower_block(l, items, %(end));
-      if (_lower_failed(l, body)) {
-        l.definitions.free();
-        return NULL;
-      }
+      if (_lower_failed(l, body)) return NULL;
       if (boxes.len())
         body = %((lambda ${boxes.list()} $body) @{boxed_values.list()});
       Var definition = %(def ${Atom.intern(name)}
                              (lambda ${slots.list()} $body));
       l.definitions.push(
         l.automatic ? %(C.source-function $definition) : definition);
-      return l.definitions.list_free();
+      return l.definitions;
     }
   }
-  l.definitions.free();
   return NULL;
 }
 

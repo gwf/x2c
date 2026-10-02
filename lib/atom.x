@@ -104,11 +104,10 @@ String Atom.str(Atom atom) {
   return NULL;
 }
 
-/** Returns the first byte of `atom`'s exact spelling, or NUL when invalid.
-    Raises: the same causes as `Atom.str`.
-*/
+/** Returns the first byte of `atom`'s exact spelling, or NUL when invalid. */
 char Atom.first(Atom atom) {
-  String spelling = atom.str();
+  if (atom is <symbol>) return Symbol.first(atom);
+  String spelling = atom is <lsym> ? (String) atom.pointer() : NULL;
   return spelling ? spelling[0] : '\0';
 }
 

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/protocol-postfix-origin.x:11:3: type: cannot convert the integer 1 to pointer type ("Value")
+    value++;
+    ^^^^^
+  note: only a zero integer constant expression converts to a pointer
+

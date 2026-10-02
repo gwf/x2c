@@ -386,6 +386,38 @@ static void iter_unzip_bounds_consumed_buffers(void) {
   EXPECT_TRUE(shared.buffers[1].len() < 256);
 }
 
+static void iter_unzip_compacts_after_half_the_backlog(void) {
+  $test.scoped();
+  int count = 1024;
+  struct Iter left_storage, right_storage, zip_storage, columns_storage;
+  UnzipShared shared;
+  Iter left = range(0, count - 1, 1, &left_storage);
+  Iter right = range(count, 2 * count - 1, 1, &right_storage);
+  Iter columns = left.zip(right, &zip_storage).unzip(&shared, &columns_storage);
+  Var first_var = columns.next(), second_var = columns.next();
+  struct Iter first_storage, second_storage;
+  Iter first = first_var.iter(&first_storage);
+  Iter second = second_var.iter(&second_storage);
+  for (int i = 0; i < count; i++) EXPECT_INT_EQ(first.next().int(), i);
+  EXPECT_TRUE(first.next() is void);
+  for (int i = 0; i < count; i++) {
+    EXPECT_INT_EQ(second.next().int(), count + i);
+    if (i == 255) {
+      EXPECT_INT_EQ(shared.heads[1], 256);
+      EXPECT_INT_EQ(shared.buffers[1].len(), count);
+    }
+    if (i == 511) {
+      EXPECT_INT_EQ(shared.heads[1], 0);
+      EXPECT_INT_EQ(shared.buffers[1].len(), count / 2);
+    }
+    int consumed = shared.heads[1];
+    int unread = shared.buffers[1].len() - consumed;
+    EXPECT_TRUE(consumed < 256 || consumed < unread);
+  }
+  EXPECT_TRUE(second.next() is void);
+  EXPECT_TRUE(shared.buffers[1].len() < 256);
+}
+
 
 static void iter_rejects_invalid_ranges_and_unzip_rows(void) {
   $test.scoped();
@@ -787,6 +819,7 @@ void iter_suite(void) {
   $test.run(iter_immediate_fluent_chains);
   $test.run(iter_zip_and_unzip);
   $test.run(iter_unzip_bounds_consumed_buffers);
+  $test.run(iter_unzip_compacts_after_half_the_backlog);
   $test.run(iter_rejects_invalid_ranges_and_unzip_rows);
   $test.run(iter_chain_unique);
   $test.run(iter_enumerate_repeat_head);

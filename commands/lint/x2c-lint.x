@@ -12,7 +12,9 @@
     compiler for the declaration and member-arrow rules. The compiler's
     diagnostics go to standard error; a file that does not parse gets the
     token rules only and makes the exit status 1. Findings alone leave the
-    exit status 0.
+    exit status 0. An unreadable input reports its path on standard error,
+    makes the exit status 1, and leaves other readable inputs available.
+    `-` names an ordinary file in both lint and formatting modes.
 
     `--fix` rewrites each file with the proposed fixes of the selected
     rules that leave its generated C and header byte-identical, and prints
@@ -51,6 +53,19 @@ static void _usage(void):
 static void _preprocessor_errors(String text):
   fputs(text, stderr)
 
+static void _input_error(List detail):
+  Var path = detail.assoc(<path>), error = detail.assoc(<errno>)
+  fprintf(stderr, "x2c-lint: %s: %s\n",
+          path is <string> ? path.string() : "compiler support files",
+          error.is_integer() ? strerror(error.int()) : "cannot read input")
+
+static int _read(Path path, String &text):
+  try text = path.read_text()
+  catch %((!or not-found io-fail) *detail):
+    _input_error(detail)
+    return 0
+  return 1
+
 /* Parses `path` and runs the rules that read its parse. Returns 0 and
    prints the compiler's diagnostics when the unit does not parse. */
 static int _parse(Lint l, Frontend frontend, String path):
@@ -58,6 +73,7 @@ static int _parse(Lint l, Frontend frontend, String path):
   if !frontend.open_reporting(path, parsed): return 0
   l.declaration_rules(parsed.compiler, parsed.ast)
   l.member_arrows(parsed.compiler, parsed.ast)
+  l.validation_rules(parsed.compiler, parsed.ast)
   foreach List finding in l.findings: finding.promote()
   foreach List edit in l.edits: edit.promote()
   foreach List function in l.functions: function.promote()
@@ -68,8 +84,11 @@ static int _parse(Lint l, Frontend frontend, String path):
 static int _format_check(Array inputs, int diff):
   int status = 0, total = 0
   foreach String path in inputs:
-    Path file = path
-    Lint l = Lint.new(path, file.read_text(), {})
+    String source
+    if !_read(path, source):
+      status = 1
+      continue
+    Lint l = Lint.new(path, source, {})
     int changed = l.format_changes()
     String text = diff && changed > 0 ? l.formatted() : NULL
     if text: fputs(Diff.unified(l.text, text, path, path), stdout)
@@ -107,7 +126,7 @@ int main(int argc, char **argv):
       fprintf(stderr, "x2c-lint: unknown rule '%s'\n", code)
       return 2
     selected[code] = 1
-  Array inputs = options["inputs"].list().array()
+  Array inputs = options["inputs"].list()
   if !inputs.len():
     _usage()
     return 2
@@ -120,27 +139,32 @@ int main(int argc, char **argv):
   int fix = options["fix"].int()
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest))
   request.command = <translate>
-  request.include_dirs = options["I"].list()
+  request.include_dirs = options["I"]
   Frontend frontend = Frontend.new(request)
   frontend.preprocessor_errors = _preprocessor_errors
   if !frontend.preload_macro_libraries(): return 1
-  frontend.prepare_meta(inputs.list())
+  try frontend.prepare_meta(inputs)
+  catch %((!or not-found io-fail) *detail):
+    _input_error(detail)
+    return 1
   Path x2c = Path.dirname(Path.dirname(x2c_get_executable())).join("x2c")
   Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
   foreach String dir in request.include_dirs:
     translate.push("-I")
     translate.push(dir)
   Path work = fix ? Path.temp_dir() : NULL
-  int status = 0, count = inputs.len()
-  Lint *lints = Scope.calloc(count + 1, sizeof(Lint))
-  for (int at = 0; at < count; at++):
-    Path file = inputs[at]
-    Lint l = lints[at] = Lint.new(file, file.read_text(), selected)
+  int status = 0, count = 0
+  Lint *lints = Scope.calloc(inputs.len() + 1, sizeof(Lint))
+  foreach Path file in inputs:
+    String source
+    if !_read(file, source):
+      status = 1
+      continue
+    Lint l = lints[count++] = Lint.new(file, source, selected)
     l.token_rules()
     l.idiom_rules()
     l.comment_rules()
     if !_parse(l, frontend, file): status = 1
-    l.validation_rules()
     l.structure_rules()
   lint_corpus_rules(lints, count)
   for (int at = 0; at < count; at++):

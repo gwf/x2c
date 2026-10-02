@@ -560,6 +560,30 @@ static void match_rejects_malformed_binder_names(void) {
   plan.free();
 }
 
+static void match_binder_bytes_keep_identifier_rules(void) {
+  String names[] = {
+    "?", "*", "?name", "*rest", "?_", "*_a1",
+    "?LongIdentifierName", "*LongIdentifierName",
+    "foo", "", "?1", "*bad-name", "?\xC3\xA9"
+  };
+  int kinds[] = {'?', '*', '?', '*', '?', '*', '?', '*', 0, 0, -1, -1, -1};
+  for (int i = 0; i < sizeof kinds / sizeof kinds[0]; i++) {
+    Atom atom = names[i] ? Atom.intern(names[i]) : (Symbol) 0;
+    EXPECT_INT_EQ(atom.is_atom_binder(), kinds[i] == '?');
+    EXPECT_INT_EQ(atom.is_list_binder(), kinds[i] == '*');
+    EXPECT_INT_EQ(atom.is_binder(), kinds[i] > 0);
+    MatchCaptureLayout layout = MatchCaptureLayout.analyze(atom);
+    EXPECT_INT_EQ(layout.status,
+                  kinds[i] < 0 ? MACHINE_MALFORMED : MACHINE_PREPARED);
+    if (kinds[i] < 0) EXPECT_STR_EQ(String.new(layout.reason), "binder-name");
+    layout.free();
+    layout = MatchCaptureLayout.analyze(%(!quote $atom));
+    EXPECT_INT_EQ(layout.status, MACHINE_PREPARED);
+    EXPECT_INT_EQ(layout.binder_count, 0);
+    layout.free();
+  }
+}
+
 
 $(import "test-macros.xmacro")
 
@@ -605,4 +629,5 @@ void match_suite(void) {
   $test.run(match_is_type_accepts_var_tags);
   $test.run(match_long_atom_binders_across_consumers);
   $test.run(match_rejects_malformed_binder_names);
+  $test.run(match_binder_bytes_keep_identifier_rules);
 }

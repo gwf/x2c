@@ -6,16 +6,16 @@
 #define __GUARD_0x9A49F80F__
 
 #include "x2c.h"
-typedef struct _Launch{
+typedef struct _JobLaunch{
   String dir, input, stdout_path, stderr_path;
   int has_input, capture_output, capture_errors, errors_to_output;
   char * * environment;
 }
-Launch;
+JobLaunch;
 
 typedef struct Job{
   List stages;
-  Launch launch;
+  JobLaunch launch;
   long * pids;
   int * statuses;
   int count, started, finished, status, nul_output, nul_errors;

@@ -1054,6 +1054,8 @@ static void FileWalk_parse(FileWalk * w, String segment, Map overlay){
 
 }
 
+int String_equal(String, String);
+
 void Compiler_take_unit_state(Compiler, Compiler);
 
 void Compiler_tokenize(Compiler, char *);
@@ -1063,6 +1065,7 @@ Path Path_absolute(Path);
 static void FileWalk_prepare(FileWalk * w, Compiler shadow, String segment){
   if(!(* w).unit || ! Compiler__package_owns((* w).c, (* w).path)) shadow -> package = NULL;
   shadow -> filename =(* w).path;
+  if(String_equal((* w).path, _canonical_path((* w).c -> filename))) shadow -> meta_hashes =(* w).c -> meta_hashes;
   shadow -> layout =(* w).c -> layout;
   shadow -> source_private =(* w).private;
   shadow -> open_linkage =(* w).linkage;
@@ -1252,7 +1255,6 @@ static void Compiler__walk_apart(Compiler c, String path, String text, Map globs
 }
 
 int SourceView_exists(SourceView, String);
-int String_equal(String, String);
 static String _resolve_include(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   (* covered) = 0;  if(String_startswith(target, _30397)) return SourceView_exists(sources, target) ? target : NULL;  Array dirs = _include_dirs(extra_dirs, angle ? NULL : includer_dir); {
     _x2c_defer_env_7 _x2c_macro_environment_7 ={

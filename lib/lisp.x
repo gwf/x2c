@@ -89,9 +89,9 @@ enum LispSpecial {
   LISP_APPLY, LISP_SPECIAL_COUNT
 };
 
-/* Environment records are activation-local. An ordinary activation's
-   `bindings` is a temporary frame-owned Map, while the captured pseudo-frame
-   aliases its Lambda's session-owned capture Map. Parameter names, captured
+/* Environment records are activation-local. A rest activation's `bindings`
+   is a temporary frame-owned Map, while the captured pseudo-frame aliases
+   its Lambda's session-owned capture Map. Parameter names, captured
    Vars, argument arrays, and parent records are borrowed for the activation,
    and the environment records stay on the C stack until the call returns. */
 typedef struct LispEnv {
@@ -493,8 +493,10 @@ static Var Lisp._make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   defer if (result is void) Scope.free(lambda);
   (List params, Var body) = args;
   *lambda = (struct Lambda) {.params = params, .body = body, .macro = macro};
-  $scope(&lisp.scope) lambda.captures = {};
-  lisp._capture(env, lambda);
+  if (env) {
+    $scope(&lisp.scope) lambda.captures = {};
+    lisp._capture(env, lambda);
+  }
   return result = lambda;
 }
 
@@ -637,15 +639,16 @@ static Var Lisp._call_lambda_slots(
    call after this frame is gone. */
 static Var Lisp._run_frame(
   Lisp lisp, Lambda lambda, const Var *values, int count) {
-  Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
-  $scope(&frame) { bindings = {}; }
+  Scope frame = $auto((Scope) NULL);
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding
      cannot change what the body reads. */
   LispEnv captured = {.bindings = lambda.captures, .parent = NULL};
-  LispEnv local = {.bindings = bindings, .parent = &captured};
-  if (Atom.intern(".") in lambda.params)
-    _bind_params(&frame, lambda, _value_list(values, count), bindings);
+  LispEnv local = {.parent = &captured};
+  if (Atom.intern(".") in lambda.params) {
+    $scope(&frame) { local.bindings = {}; }
+    _bind_params(&frame, lambda, _value_list(values, count), local.bindings);
+  }
   else local._bind_values(lambda, values, count);
   if (lambda.source_function)
     return lisp._run_source(lambda.body, &local, &frame);

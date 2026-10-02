@@ -100,7 +100,8 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
   if (parameters.equal(%((void)))) parameters = NULL;
   Array values = [];
-  for (int i = 0; i < parameters.len(); i++) values.push(argv[i].data.value);
+  int count = parameters.len();
+  for (int i = 0; i < count; i++) values.push(argv[i].data.value);
   return values;
 }
 
@@ -687,15 +688,19 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
    runtime builder without a hash is the runtime's own definition. */
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
-  Var hash, own, names;
+  Var hash, own, names = void;
   if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
   reached[name] = 1;
   if (linked_hashes.try_get(name, hash)) {
+    List row = hash;
+    hash = row.car();
+    names = row.cadr();
     if (!hash.equal(own)) return 0;
   }
-  else if (!(name in linked)) return 0;
-  if (c.meta_calls.try_get(name, names))
-    foreach (String callee, (List) names)
+  else if (!(name in linked) && !(name in c.native_meta)) return 0;
+  c.meta_calls.try_get(name, names);
+  if (names is <list>)
+    foreach (String callee, names.list())
       if (!c._linked_texts_match(callee, linked, reached)) return 0;
   return 1;
 }

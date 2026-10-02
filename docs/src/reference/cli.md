@@ -638,6 +638,11 @@ program, including arguments beginning with `@`. The external command owns
 its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
+`x2c lint` reports an unreadable input's path and system error on standard
+error and exits `1`, while checking the other readable inputs. This also
+applies to `--fmt-check` and `--fmt-diff`. The lint command treats `-` as an
+ordinary file name in both modes.
+
 ## Compiler diagnostics
 
 Translation reports each diagnostic on standard error as

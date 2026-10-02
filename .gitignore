@@ -15,6 +15,7 @@ scratch/**
 bin/x2c
 bin/x2c-*
 debug/
+.context/
 logs/
 unittest/*
 !unittest/*.md

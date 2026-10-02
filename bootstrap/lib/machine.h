@@ -241,8 +241,7 @@ void MachineBuilder_drop(MachineBuilder * b);
 void MachineBuilder_free(MachineBuilder * b);
 
 static inline void MachineBuilder_cleanup(MachineBuilder b){
-  Scope_free(b.code);
-  Scope_free(b.consts);
+  MachineBuilder_drop(&(b));
 }
 
 

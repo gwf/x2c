@@ -158,7 +158,9 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   Token first = c.token;
   List decl = c.parse_declaration_row();
   if (skip_body) {
+    int body = c.peek(0) == <"{"> || c._at_function_arrow();
     c.finish_collected_declaration(decl, meta, native);
+    c._record_meta_hash(decl, first, body);
     return NULL;
   }
   if (native && !decl.type_from_ast().is_function())
@@ -385,7 +387,7 @@ static List Compiler._import_members(Compiler c, String name) {
    callable at run time. */
 static List Compiler._declared(
   Compiler c, List decl, Token meta, Token first) {
-  c._record_meta_hash(decl, first, meta != NULL);
+  c._record_meta_hash(decl, first, 0);
   if (meta && decl.type_from_ast().is_function())
     c.install_native_meta_function(decl, meta);
   else if (meta) c.install_meta_declaration(decl, meta);
@@ -414,7 +416,7 @@ static List Compiler._defined(
   if (staged) c._reject_expanded_meta(decl, meta);
   if (native) c.install_native_meta_function(decl, meta);
   $let(c.meta_body, staged != NULL) function = c._finish_function(decl, NULL);
-  c._record_meta_hash(function, first, meta != NULL);
+  c._record_meta_hash(function, first, 0);
   c._publish_definition(decl, function, meta, staged);
   if (staged && c.meta_is_comptime_only(function)) return NULL;
   if (c.macro_holes)
@@ -435,10 +437,24 @@ static void Compiler._reject_expanded_meta(Compiler c, List decl, Token meta) {
 }
 
 /* Hashes functions and initialized file-static values, and records the
-   names a `meta` definition references. A linked copy answers only when
+   names their parsed bodies reference. A linked copy answers only when
    its text and the definitions it reaches agree with the source. */
 static void Compiler._record_meta_hash(
-  Compiler c, List definition, Token first, int meta) {
+  Compiler c, List definition, Token first, int collected_body) {
+  match (definition) {
+    case %(seq *rows): {
+      foreach (List row, rows)
+        c._record_meta_hash(row, first, collected_body);
+      return;
+    }
+    case %(declare ?spec (bindings ?one *more)):
+      if (more) {
+        foreach (Var bind, definition.caddr().list().cdr())
+          c._record_meta_hash(%(declare $spec (bindings $bind)),
+            first, collected_body);
+        return;
+      }
+  }
   String name = NULL;
   Var body = void;
   match (definition) {
@@ -453,6 +469,13 @@ static void Compiler._record_meta_hash(
       name = own;
       body = initializer;
     }
+    case %(declare ?spec
+             (bindings (bind (!set ?binding (binding ? ?(String own))) *))): {
+      if (!c.shallow || (!collected_body &&
+          (!spec.type().is_static() || !(binding in c.init_tokens))))
+        return;
+      name = own;
+    }
   }
   if (!name) return;
   uint64_t hash = FNV_OFFSET_BASIS;
@@ -461,7 +484,7 @@ static void Compiler._record_meta_hash(
       hash = fnv_bytes(
         fnv_bytes(hash, token.text, token.text.len()), " ", 1);
   c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
-  if (!meta) return;
+  if (body is void) return;
   Array names = [];
   _referenced_names(body, {}, names);
   c.meta_calls[name] = names.list_free();
@@ -1587,18 +1610,18 @@ static List Compiler._declarator_init(
    first token, not the token where expression parsing finishes. */
 static List Compiler._initialized(
   Compiler c, List type, List bind, Token origin) {
+  List binding = bind.cadr();
+  if (binding_identity_try_parts(binding, NULL, NULL)) {
+    Token tokens = c.tokenizer.tokens;
+    c.init_tokens[binding] = (int) (origin - tokens);
+  }
   if (c.shallow) {
     c._skip_shallow_expression(1);
     return bind;
   }
-  List init = c.parse_assignment(), binding = bind.cadr();
+  List init = c.parse_assignment();
   c.check_explicit_converter(
     init, %(declare $type (bindings $bind)).type_from_ast(), 0);
-  if (binding_identity_try_parts(binding, NULL, NULL)) {
-    Token tokens = c.tokenizer.tokens;
-    int token_index = origin - tokens;
-    c.init_tokens[binding] = token_index;
-  }
   return %( op = $bind $init );
 }
 
@@ -1891,6 +1914,11 @@ static Var Compiler._method_spelling(
       String owner_name =
         owner is <symbol> ? owner.symbol() : owner.str();
       name = %"${owner_name}_$member";
+      if (c.package) {
+        String prefix = %"${c.package}__";
+        if (owner_name.startswith(prefix))
+          owner_name = owner_name[prefix.len():];
+      }
       method = %($owner_name $member);
     }
     case %((!or

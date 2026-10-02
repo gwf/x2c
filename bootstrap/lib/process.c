@@ -56,7 +56,7 @@ static void Job__spawn(Job job, int index, List stage, Stdio stdio);
 
 static char * * _argv(List stage);
 
-_Noreturn static void _child(char * * argv, Launch * launch, Stdio stdio, int report);
+_Noreturn static void _child(char * * argv, JobLaunch * launch, Stdio stdio, int report);
 
 static int _above_stdio(int fd);
 
@@ -96,11 +96,11 @@ static List _stages(List command);
 
 static Job Job__unstarted(Job job, String operation);
 
-static void Launch_set(Launch * l, Symbol name, Var value);
+static void JobLaunch_set(JobLaunch * l, Symbol name, Var value);
 
-static void Launch_route_output(Launch * l, Var value);
+static void JobLaunch_route_output(JobLaunch * l, Var value);
 
-static void Launch_route_errors(Launch * l, Var value);
+static void JobLaunch_route_errors(JobLaunch * l, Var value);
 
 static int _is(Var value, Symbol name);
 
@@ -648,7 +648,7 @@ static char * * _argv(List stage){
   return argv;
 }
 
-_Noreturn static void _child(char * * argv, Launch * launch, Stdio stdio, int report){
+_Noreturn static void _child(char * * argv, JobLaunch * launch, Stdio stdio, int report){
   stdio.input = _above_stdio(stdio.input);
   stdio.output = _above_stdio(stdio.output);
   stdio.errors = _above_stdio(stdio.errors);
@@ -931,7 +931,7 @@ Job Job_options(Job job, Map options){
           x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("option keys are atoms")), NULL))));
           __builtin_unreachable();
         }
-        Launch_set(&(job -> launch), Var_symbol(key), value);
+        JobLaunch_set(&(job -> launch), Var_symbol(key), value);
       }
 
     }
@@ -944,7 +944,7 @@ String Var_string(Var);
 
 Map Var_map(Var);
 
-static void Launch_set(Launch * l, Symbol name, Var value){
+static void JobLaunch_set(JobLaunch * l, Symbol name, Var value){
   switch(name){
     case 8804 :(* l).dir = Var_string(value);
     break;
@@ -953,12 +953,12 @@ static void Launch_set(Launch * l, Symbol name, Var value){
     case 19826024 :(* l).input = Var_string(value);
     (* l).has_input = 1;
     break;
-    case 1317305704 : Launch_route_output(&((* l)), value);
+    case 1317305704 : JobLaunch_route_output(&((* l)), value);
     break;
-    case 1317285028 : Launch_route_errors(&((* l)), value);
+    case 1317285028 : JobLaunch_route_errors(&((* l)), value);
     break;
     default:{
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/process.x",.function = "Launch_set",.line = 439};
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/process.x",.function = "JobLaunch_set",.line = 439};
       x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(1041517532), Symbol_var(name));
       __builtin_unreachable();
     }
@@ -967,12 +967,12 @@ static void Launch_set(Launch * l, Symbol name, Var value){
 
 }
 
-static void Launch_route_output(Launch * l, Var value){
+static void JobLaunch_route_output(JobLaunch * l, Var value){
   (* l).capture_output = _is(value, 6544469130);
   (* l).stdout_path =(* l).capture_output || _is(value, 20284019304) ? NULL : Var_string(value);
 }
 
-static void Launch_route_errors(Launch * l, Var value){
+static void JobLaunch_route_errors(JobLaunch * l, Var value){
   (* l).capture_errors = _is(value, 6544469130);
   (* l).errors_to_output = _is(value, 1317305704);
   (* l).stderr_path =(* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? NULL : Var_string(value);

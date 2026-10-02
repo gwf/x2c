@@ -2,8 +2,9 @@
 
 > Status: active, 2026-10-02. Phase 0, L1-L4, and Waves 1-3 are on dev
 > (Phase 0 ff9946c8; L1/L3 63576dd1; #78, #92, #94, #95). The kept
-> prototypes are submitted to the shared integrator. Remaining work is the
-> follow-ups and signals recorded below.
+> prototypes landed through `9483437e`; qualifier and identifier repairs
+> landed through `80bde80f`. Remaining work is the follow-ups and signals
+> below, including those tracked in the post-integration fix list.
 
 ## Result
 
@@ -88,7 +89,8 @@ fixed by P7, and template splice order (L2) waits on its design decision.
 ### Defects found while scoping L1-L4
 
 Each is accepted by x2c and emits C that the C compiler rejects.
-Reproduced with `builds/0/x2c` on 2026-10-01; not yet fixed.
+Reproduced with `builds/0/x2c` on 2026-10-01. The subsequent disposition is
+recorded after the table.
 
 | Defect | Cause |
 | --- | --- |
@@ -99,11 +101,11 @@ Reproduced with `builds/0/x2c` on 2026-10-01; not yet fixed.
 | A template passing literal `k` and `k * 2` to an inner macro: the loop variable is renamed, the expression is not | Template hygiene for literal names |
 
 Status of these: `$let` is fixed by L1; `({1})` and the destructuring
-`foreach` are fixed in the L1/L3 batch. The forward-name case (`$repeat(k,
-3, k * 2, total)`) is held: the worker's fix let an undeclared free name
+`foreach` are fixed in the L1/L3 batch. The first forward-name proposal
+(`$repeat(k, 3, k * 2, total)`) was held: the worker's fix let an undeclared free name
 in a closed template bind a local at the expansion site (a probe printed
 the caller's `x`), which contradicts "free identifiers written literally
-in a body resolve where the macro was defined". It needs Gary's choice
+in a body resolve where the macro was defined". It needed Gary's choice
 between that rule, a narrower rule that binds only declarations the same
 expansion introduces, and a diagnostic.
 
@@ -207,6 +209,10 @@ Wave 2 results (submitted as one PR; authored src/lib/etc/commands diff
   through immediate boxers: 4.8x fewer instructions boxing scalars), H10
   (`Func.apply_value`/`apply_values`), H11 (`Compiler.settle_reference`),
   H13 (diagnostic records read by pattern; output byte-identical).
+- Correction after Wave 2: `933ec664` restored float promotion through
+  `Var.new(<f32>, x)`, which quiets signaling NaNs. Direct `Var.box_f32`
+  preserves raw bits and is not equivalent for that input. The new helper's
+  name collision is tracked as F13 in the post-integration fix list.
 - Not done: `_expression_is_addressable` keeps its own rule (the shared walk
   would reject `read(make().arr[1])`); `$native.update` through ordinary
   conversion is 5.7% slower on compound updates, so it waits for a cheaper

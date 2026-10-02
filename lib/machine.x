@@ -483,7 +483,4 @@ void MachineBuilder.drop(MachineBuilder &b) {
 void MachineBuilder.free(MachineBuilder &b) => b.drop();
 
 /* Cleanup's value receiver releases the same shallow backing arrays. */
-inline void MachineBuilder.cleanup(MachineBuilder b) {
-  Scope.free(b.code);
-  Scope.free(b.consts);
-}
+inline void MachineBuilder.cleanup(MachineBuilder b) => b.drop();

@@ -2929,7 +2929,7 @@ int main(int argc, char **argv) {
   inputs.sort();
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
-  request.include_dirs = options["I"].list();
+  request.include_dirs = options["I"];
   if (libraries)
     request.include_dirs =
       %(@{request.include_dirs} @{libraries["I"].list()});
@@ -2946,7 +2946,7 @@ int main(int argc, char **argv) {
       Map contracts = certify_contracts(options["contracts"], valid);
       if (!valid) status = 2;
       else result = certify_result(
-        frontend, inputs, options["root"].list().array(), contracts, status
+        frontend, inputs, options["root"].list(), contracts, status
       );
     }
     else if (verb == "clones")

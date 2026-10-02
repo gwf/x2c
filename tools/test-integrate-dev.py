@@ -137,6 +137,10 @@ from pathlib import Path
 p=Path(os.environ['PROBE_STATE']); s=json.loads(p.read_text())
 s.setdefault('makes',[]).append({'args':sys.argv[1:],'root':str(Path.cwd())})
 p.write_text(json.dumps(s))
+if 'doc-generate' in sys.argv:
+    for name in ('llms.txt','llms-full.txt'):
+        path=Path('site/public')/name; path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text('generated documentation\n')
 if 'build-safe' in sys.argv or 'build' in sys.argv:
     binary=Path('builds/0/x2c'); binary.parent.mkdir(parents=True,exist_ok=True)
     binary.write_text('#!/bin/sh\nexit 0\n'); binary.chmod(0o755)
@@ -184,7 +188,7 @@ class IntegrationProbe(unittest.TestCase):
             dest.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(source,dest)
         self.write(self.root/'tools'/'gate-state.py',GATE,executable=True)
-        self.write(self.root/'.gitignore','debug/\nbuilds/\n__pycache__/\n')
+        shutil.copy2(TOOL_ROOT/'.gitignore',self.root/'.gitignore')
         self.write(self.root/'src'/'baseline.x','baseline\n')
         self.write(self.root/'bootstrap'/'src'/'compiled.c','seed\n')
         self.write(self.root/'docs'/'guide.md','old guide\n')
@@ -285,6 +289,41 @@ class IntegrationProbe(unittest.TestCase):
         self.assertEqual(self.git('config','--get','core.hooksPath').stdout.strip(),
                          'custom-hooks')
 
+    def test_context_accepts_shared_hook_and_uses_pushing_worktree_policy(self):
+        shared=self.directory/'common-hooks'
+        shared.mkdir()
+        hook=shared/'pre-push'
+        shutil.copy2(self.root/'tools'/'hooks'/'pre-push',hook)
+        self.git('config','core.hooksPath',str(shared))
+        self.cli('context','--role','worker','--delivery','private')
+        self.assertEqual(self.git('config','--get','core.hooksPath').stdout.strip(),
+                         str(shared))
+        result=self.command([str(hook)],input=(
+            f'refs/heads/work {self.base} refs/heads/dev {self.base}\n'),ok=False)
+        self.assertEqual(result.returncode,1,result.stderr)
+        self.cli('context','--role','orchestrator','--delivery','direct')
+        result=self.command([str(hook)],input=(
+            f'refs/heads/work {self.base} refs/heads/dev {self.base}\n'))
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_context_refuses_changed_or_nonexecutable_shared_hook(self):
+        shared=self.directory/'common-hooks'
+        shared.mkdir()
+        hook=shared/'pre-push'
+        original=(self.root/'tools'/'hooks'/'pre-push').read_text()
+        self.git('config','core.hooksPath',str(shared))
+        for body,mode in [(original+'exit 0\n',0o755),(original,0o644)]:
+            with self.subTest(mode=mode):
+                hook.write_text(body)
+                hook.chmod(mode)
+                result=self.cli('context','--role','worker','--delivery','private',
+                                ok=False)
+                self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+                self.assertIn('conflicting core.hooksPath',result.stderr)
+                self.assertEqual(
+                    self.git('config','--get','core.hooksPath').stdout.strip(),
+                    str(shared))
+
     def test_submit_preserves_prose_and_refreshes_readiness(self):
         head=self.pr(1)
         self.git('checkout','-q','work-1')
@@ -303,6 +342,19 @@ class IntegrationProbe(unittest.TestCase):
         add=max(i for i,c in enumerate(calls) if 'POST' in c)
         self.assertLess(delete,patch); self.assertLess(patch,add)
         self.assertEqual(state.get('gates',[]),[])
+
+    def test_submission_notes_are_ignored_but_authored_files_are_not(self):
+        self.pr(1)
+        self.git('checkout','-q','work-1')
+        self.cli('context','--role','individual','--delivery','pr')
+        evidence=self.root/'.context'/'submission'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'focused check','result':'pass'}]))
+        self.cli('submit','--pr','1','--base',self.base,'--evidence-file',evidence)
+        self.write(self.root/'src'/'unreviewed.x','new source\n')
+        result=self.cli('submit','--pr','1','--base',self.base,
+                        '--evidence-file',evidence,ok=False)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('commit the authored changes',result.stderr)
 
     def test_submission_during_gate_keeps_integration_owner_lock(self):
         head=self.pr(1,ready=False)
@@ -433,6 +485,91 @@ class IntegrationProbe(unittest.TestCase):
         batch=self.prepare(); self.land(batch)
         self.assert_ancestor(head)
         self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_generated_llms_text_uses_doc_generation_and_doc_gate(self):
+        self.pr(1,'site/public/llms.txt','stale generated documentation\n')
+        batch=self.prepare(); self.land(batch)
+        state=self.state()
+        self.assertEqual([g['target'] for g in state['gates']],['doc-check'])
+        self.assertTrue(any('doc-generate' in call['args']
+                            for call in state['makes']))
+        generated=self.git('--git-dir',str(self.remote),
+                           'show','dev:site/public/llms.txt').stdout
+        self.assertEqual(generated,'generated documentation\n')
+
+    def test_success_clears_failure_reason_and_keeps_attempt_history(self):
+        self.pr(1); self.state(gate_failure='ordinary')
+        batch=self.prepare()
+        failed=self.cli('land',batch,ok=False)
+        failure=json.loads(failed.stdout)
+        self.assertEqual(failure['state'],'needs-attention')
+        old_reason=failure['reason']
+        candidate=Path(failure['worktree'])
+        self.git('checkout','--','bootstrap/src/compiled.c',cwd=candidate)
+        self.state(gate_failure=None)
+        gated=json.loads(self.cli('land',batch).stdout)
+        self.assertEqual(gated['state'],'gated')
+        self.assertNotIn('reason',gated)
+        self.assertTrue(old_reason)
+        self.assertEqual([attempt['returncode'] for attempt in gated['attempts']],
+                         [1,0])
+        candidate=Path(gated['worktree'])
+        self.git('push','-q','origin','HEAD:refs/heads/dev',cwd=candidate)
+        landed=json.loads(self.cli('land',batch,'--publish').stdout)
+        self.assertEqual(landed['state'],'landed')
+        self.assertNotIn('reason',landed)
+        self.assertEqual(len(landed['attempts']),2)
+
+    def test_publication_lock_rejects_legacy_directory_without_removing_it(self):
+        common=self.directory/'legacy-git-common'
+        lock=common/'land-dev.lock'; lock.mkdir(parents=True)
+        pid=lock/'pid'; pid.write_text('99999999\n')
+        script=TOOL_ROOT/'tools'/'land-dev'
+        import importlib.machinery, importlib.util
+        sys.path.insert(0,str(TOOL_ROOT/'tools'))
+        loader=importlib.machinery.SourceFileLoader('land_dev_probe',str(script))
+        spec=importlib.util.spec_from_loader('land_dev_probe',loader)
+        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        module.git=lambda *args: str(common)
+        with self.assertRaisesRegex(ValueError,'legacy publication lock'):
+            module.acquire_lock()
+        self.assertEqual(pid.read_text(),'99999999\n')
+
+    def test_publication_lock_excludes_a_second_process_and_releases_on_exit(self):
+        common=self.directory/'lock-git-common'; common.mkdir()
+        script=TOOL_ROOT/'tools'/'land-dev'
+        child=r'''import importlib.machinery, importlib.util, sys, time
+from pathlib import Path
+sys.path.insert(0,str(Path(sys.argv[1]).parent))
+loader=importlib.machinery.SourceFileLoader('land_dev_probe',sys.argv[1])
+spec=importlib.util.spec_from_loader('land_dev_probe',loader)
+module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+module.git=lambda *args: sys.argv[2]
+lock=module.acquire_lock()
+print('acquired',flush=True)
+time.sleep(float(sys.argv[3]))
+if hasattr(lock,'close'): lock.close()
+'''
+        holder=subprocess.Popen([sys.executable,'-c',child,str(script),
+                                 str(common),'30'],stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,text=True)
+        self.addCleanup(lambda: holder.poll() is None and holder.terminate())
+        try:
+            self.assertEqual(holder.stdout.readline().strip(),'acquired')
+            started=time.monotonic()
+            waiter=subprocess.run([sys.executable,'-c',child,str(script),
+                                   str(common),'0'],capture_output=True,text=True,
+                                  timeout=2)
+            self.assertLess(time.monotonic()-started,2)
+            self.assertNotEqual(waiter.returncode,0,waiter.stdout+waiter.stderr)
+            self.assertIn('another publisher is active',waiter.stderr)
+        finally:
+            holder.terminate(); holder.wait(timeout=5)
+            holder.stdout.close(); holder.stderr.close()
+        released=subprocess.run([sys.executable,'-c',child,str(script),
+                                 str(common),'0'],capture_output=True,text=True,
+                                timeout=2)
+        self.assertEqual(released.returncode,0,released.stdout+released.stderr)
 
     def test_gate_failure_never_pushes(self):
         self.pr(1); self.state(gate_failure='ordinary')
@@ -608,6 +745,7 @@ class IntegrationProbe(unittest.TestCase):
         path.write_text(json.dumps(record))
         recovered=json.loads(self.cli('land',batch).stdout)
         self.assertEqual(recovered['state'],'gated')
+        self.assertNotIn('reason',recovered)
         self.assertEqual(len(recovered['attempts']),len(record['attempts']))
         self.assertEqual(helper_review.read_text(),reviewed_artifacts)
         after=self.state()

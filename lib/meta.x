@@ -323,11 +323,11 @@ meta void x2c_diagnostic_warn(String message, List notes);
 
 // definition hashes
 
-/** Returns a `Map` from the name of each function the unit has defined so
-    far to the hash of its definition text, from the first token after any
-    `meta` marker to the end of its body. The compiler links copies of
-    shipped `meta` code and binds a definition to its copy only when these
-    hashes agree. */
+/** Returns a `Map` from each function or initialized file-static value the
+    unit has defined so far to its definition's String hash, from the first
+    token after any `meta` marker to the end of its body or initializer.
+    The compiler links copies of shipped `meta` code and binds a definition
+    to its copy only when these hashes agree. */
 meta Map x2c_meta_definition_hashes(void);
 
 /* declaration parts

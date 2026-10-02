@@ -304,7 +304,16 @@ Var builtin_foreach_unique(String stem) {
 /** Answers `x2c.meta.definition.hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {
   _sdk_guard("x2c.meta.definition.hashes");
-  return active.expander.meta_hashes;
+  Compiler c = active.expander;
+  Map hashes = {};
+  foreach (String name, c.meta_calls.keys()) hashes[name] = c.meta_hashes[name];
+  return hashes;
+}
+
+// Linked generation needs references from the same fully parsed definitions.
+static Map _sdk_definition_calls(void) {
+  _sdk_guard("_x2c.meta.definition.calls");
+  return active.expander.meta_calls;
 }
 
 /** Answers `x2c.function.name`, declared in `lib/meta.x`. */
@@ -643,6 +652,7 @@ static void _sdk_reject_value(String message, Var value) {
 /** Binds the internal primitives the compile-time SDK library wraps into
     `lisp`, under their `_x2c.` names. */
 void Compiler.bind_sdk_primitives(Lisp lisp) {
+  $lisp.bind(lisp, "_x2c.meta.definition.calls", _sdk_definition_calls);
   $lisp.bind(lisp, "_x2c.function.reference", builtin_foreach_reference);
   $lisp.bind(lisp, "_x2c.function.native-type", binding_native_type);
   $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);

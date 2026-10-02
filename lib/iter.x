@@ -618,8 +618,9 @@ static int _unique_next(Iter iter, Var *out) {
     The columns are independent, and only the lag between them is buffered.
     Draining one column holds every element the other has not reached yet, so
     interleaving the two costs little and front-loading one costs memory
-    proportional to the source. `shared` owns those buffers and must outlive
-    both columns.
+    proportional to the source. Each column retains fewer consumed slots than
+    the larger of 256 and its unread backlog. Compaction leaves its capacity
+    unchanged. `shared` owns those buffers and must outlive both columns.
 
     ```x2c
     ~int main(void) {
@@ -712,6 +713,7 @@ static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
 static void _unzip_compact(UnzipShared *shared, int column) {
   int consumed = shared.heads[column];
   if (consumed < UNZIP_COMPACT_THRESHOLD) return;
+  if (consumed < shared.buffers[column].len() - consumed) return;
   shared.buffers[column].setslice(0, consumed, NULL);
   shared.heads[column] = 0;
 }

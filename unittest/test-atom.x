@@ -21,12 +21,17 @@ static void atom_compact_and_long_representations(void) {
   EXPECT_TRUE(compact.is_atom());
   EXPECT_TRUE(compact is <symbol>);
   EXPECT_STR_EQ(compact.str(), "alpha");
+  EXPECT_TRUE(compact.first() == 'a');
   EXPECT_TRUE(compact_exact is <symbol>);
   EXPECT_STR_EQ(compact_exact.str(), "va_arg");
+  EXPECT_TRUE(compact_exact.first() == 'v');
   EXPECT_TRUE(long_name.is_atom());
   EXPECT_TRUE(long_name is <lsym>);
   EXPECT_STR_EQ(long_name.str(), "VeryLongIdentifierName");
   EXPECT_TRUE(long_name.first() == 'V');
+  Atom empty = (Symbol) 0, invalid = 42;
+  EXPECT_TRUE(empty.first() == '\0');
+  EXPECT_TRUE(invalid.first() == '\0');
 }
 
 

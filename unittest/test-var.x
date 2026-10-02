@@ -128,6 +128,26 @@ static void var_floating_construction(void) {
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
 }
 
+static void var_float_promotion_quiets_signaling_nan(void) {
+  $test.scoped();
+  uint32_t patterns[] = {0x3fa00000, 0x7fc00001, 0x7f800001};
+  for (int i = 0; i < 3; i++) {
+    float value;
+    memcpy(&value, &patterns[i], sizeof value);
+    Var expected = Var.new(<f32>, value);
+    Var explicit = value.var(), implicit = value;
+    EXPECT_TRUE(explicit is <f32> && implicit is <f32>);
+    EXPECT_TRUE(explicit === expected && implicit === expected);
+    EXPECT_STR_EQ(value.str(), expected.str());
+    EXPECT_STR_EQ(value.repr(), expected.repr());
+    if (i == 2) {
+      EXPECT_TRUE((expected.u64 & 0x00400000) != 0);
+      EXPECT_TRUE((explicit.u64 & 0x00400000) != 0);
+      EXPECT_TRUE((implicit.u64 & 0x00400000) != 0);
+    }
+  }
+}
+
 /* A custom class may be named after a C floating type; it is still an
    object, so the floating payload reader answers 0.0. */
 static void var_floating_ignores_custom_float_names(void) {
@@ -1461,6 +1481,7 @@ void var_suite(void) {
   $test.run(var_symbol_atom_stream_without_allocating);
   $test.run(var_integer_construction);
   $test.run(var_floating_construction);
+  $test.run(var_float_promotion_quiets_signaling_nan);
   $test.run(var_floating_ignores_custom_float_names);
   $test.run(var_terminal_and_f64_escape);
   $test.run(var_construction_and_void_dispatch_transfer);

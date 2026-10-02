@@ -47,9 +47,56 @@ typedef struct Preserve {
   int expression_tries;
 } Preserve;
 
-/* A statement expression is the one expression that holds a block. */
-static int _holds_statements(List expression) =>
-  ast_contains_head(expression, <block>);
+/* Expressions may nest one level per operator. Visit their blocks without
+   recursing through the expression spine; each block keeps its cleanup owner. */
+static Array _expression_blocks(List expression) {
+  Array blocks = [];
+  List node;
+  $ast.walk(expression, node) if (node.car() == <block>) {
+    blocks.push(node);
+    continue;
+  }
+  return blocks;
+}
+
+/* Rebuild only the ancestors of changed blocks, from the leaves upward.
+   Keys are node addresses: structural hashing would revisit the same spine. */
+static List _rewrite_expression(List expression, Func rewrite) {
+  Array levels = $auto([]), blocks = $auto([]);
+  Map changed = $auto({});
+  List node;
+  $ast.walk(expression, node) {
+    if (node.car() == <block>) {
+      blocks.push(node);
+      continue;
+    }
+    levels.push(node);
+  }
+  // The worklist visits siblings last first; initializers run in source order.
+  while (blocks.len()) {
+    node = blocks.take_last();
+    List replacement = rewrite(node);
+    if (replacement != node) changed[(void *)node] = replacement;
+  }
+  if (!changed.len()) return expression;
+  while (levels.len()) {
+    node = levels.take_last();
+    List replacement = _expression_children(node, changed);
+    if (replacement != node) changed[(void *)node] = replacement;
+  }
+  return _expression_child(expression, changed);
+}
+
+static List _expression_child(List child, Map changed) {
+  Var replacement;
+  return changed.try_get((void *)child, replacement) ? replacement.list()
+                                                   : child;
+}
+
+static List _expression_children(List node, Map changed) {
+  Var child;
+  $ast.rewrite_children(node, child, _expression_child(child, changed));
+}
 
 /* Whether a statement expression in `body`, before its regions lower,
    holds a `try`. */
@@ -116,10 +163,12 @@ static List Compiler._lower_function(Compiler c, List node) {
    syntax use the same object reference. */
 static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   match (ast) {
-    case %(expr *): if (!_holds_statements(ast)) return ast;
+    case %(expr *):
+      return _rewrite_expression(
+        ast, %!(List block) => c._static_regions(block, runtime));
     case %((!or function localinit typedef) *): return ast;
     case %(declare ?type ?bindings):
-      return %(declare $type ${c._static_regions(bindings, runtime)});
+      return c._static_initializers(type, bindings, runtime);
     case $source_block_content(%(*statements)): {
       Array before = [];
       for (List rest = statements; rest; rest = rest.cdr()) {
@@ -138,6 +187,27 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   }
   Var child;
   $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
+}
+
+/* The pending initializer and the emitter share one cleanup record. Its
+   region ends before the initialized object protects the rest of the block. */
+static List Compiler._static_initializers(
+  Compiler c, Type type, List bindings, Map runtime) {
+  Array output = [];
+  foreach (List binding, bindings.cdr()) {
+    match (binding)
+      case %(op = ?declaration ?value): {
+        List initial = c._static_regions(value, runtime);
+        if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
+          List record = c._region_binding("static_cleanup");
+          initial = %(staticinit $record $initial);
+        }
+        output.push(%(op = $declaration $initial));
+        continue;
+      }
+    output.push(binding);
+  }
+  return %(declare $type (bindings @{output.list_free()}));
 }
 
 static int Compiler._runtime_static_declaration(
@@ -285,9 +355,11 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
-    // A label is a statement, and an expression nests as deeply as it is
-    // long, so the walk stops at one that holds no statements.
-    case %(expr *): if (!_holds_statements(node)) return;
+    case %(expr *): {
+      Array blocks = $auto(_expression_blocks(node));
+      foreach (List block, blocks) w.collect_labels(block, path);
+      return;
+    }
     case %(label ?name *rest): {
       String spelling = _label_spelling(name);
       if (spelling) w.labels[spelling] = path;
@@ -318,6 +390,10 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
       w.collect_labels(body, cons(node, path));
       return;
     }
+    case %(staticinit ? ?initial): {
+      w.collect_labels(initial, cons(node, path));
+      return;
+    }
   }
   foreach (Var child, node) w.collect_labels(child, path);
 }
@@ -346,7 +422,9 @@ static String _label_spelling(Var label) {
 static Var Walk.rewrite(Walk &w, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
-  match (node) case %(expr *): if (!_holds_statements(node)) return value;
+  match (node) case %(expr *):
+    return _rewrite_expression(
+      node, %!(List block) using &w => w.rewrite(block));
   Macro caught = $caught, tried = $tried;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro switched = $switched;
@@ -360,6 +438,8 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._lower_try(node, body, NULL, finalizer);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
+    case %(staticinit ?record ?initial):
+      return w._rewrite_staticinit(node, record, initial);
     case $source_return_content(%()): return w._transfer(0, node);
     case $source_return_content(%((!set ?expression (expr ? ?)))):
       return w._lower_return(node, expression);
@@ -422,6 +502,11 @@ static List Walk._return_value(Walk &w, List expression, List cleanup) {
 static List Walk._rewrite_localinit(
   Walk &w, List node, List guard, List body) =>
   %(localinit ${w.rewrite(guard)} ${w._inside(NULL, node, body)});
+
+static List Walk._rewrite_staticinit(
+  Walk &w, List node, List record, List initial) =>
+  %(staticinit $record
+    ${w._inside(w.c._defer_cleanup(record), node, initial)});
 
 static List Walk._rewrite_while(Walk &w, List condition, List body) =>
   %(while ${w.rewrite(condition)} ${w._bounded(body, 1)});
@@ -678,7 +763,6 @@ static Var _finalizer_label(Var value, int origin, int &at) {
     List node = current;
     match (node) {
       case %(function *): continue;
-      case %(expr *): if (!_holds_statements(node)) continue;
       case %(at ?(int inner) ?wrapped): {
         pending.push(wrapped);
         origins.push(inner);
@@ -1008,7 +1092,9 @@ static Var Preserve.rewrite(Preserve &p, Var value) {
   // expression's own locals follow any `try` around it, so they need one
   // only when a statement expression in the function holds a `try`.
   match (node) case %(expr *):
-    if (!p.expression_tries || !_holds_statements(node)) return value;
+    return p.expression_tries
+      ? _rewrite_expression(node, %!(List block) using &p => p.rewrite(block))
+      : node;
   match (node) {
     case %(param ?type ?bind):
       return %(param $type ${p._binding(bind, p.escaped)});

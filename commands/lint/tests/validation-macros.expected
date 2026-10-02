@@ -1,0 +1,12 @@
+commands/lint/tests/src/validation-macros.x:12: violation return-after-raise: return follows a non-returning shared Error cause in direct_raise
+commands/lint/tests/src/validation-macros.x:17: violation return-after-raise: return follows a non-returning shared Error cause in catalogue_raise
+commands/lint/tests/src/validation-macros.x:22: violation fallback-shared-cause: fallback wraps a non-returning shared Error cause in direct_fallback
+commands/lint/tests/src/validation-macros.x:26: violation fallback-shared-cause: fallback wraps a non-returning shared Error cause in catalogue_fallback
+commands/lint/tests/src/validation-macros.x:44: violation return-after-report-error: return follows non-returning report_error in direct_report
+commands/lint/tests/src/validation-macros.x:49: violation return-after-report-error: return follows non-returning report_error in catalogue_report
+commands/lint/tests/src/validation-macros.x:59: candidate shape-diagnostics: diagnostics are built around manual List or AST shape checks in direct_validate
+commands/lint/tests/src/validation-macros.x:59: candidate validator-diagnostics: validator-like helper emits diagnostics in direct_validate
+commands/lint/tests/src/validation-macros.x:67: candidate shape-diagnostics: diagnostics are built around manual List or AST shape checks in catalogue_validate
+commands/lint/tests/src/validation-macros.x:67: candidate validator-diagnostics: validator-like helper emits diagnostics in catalogue_validate
+commands/lint/tests/src/validation-macros.x:74: violation fallback-shared-cause: fallback wraps a non-returning shared Error cause in conditional_direct_fallback
+commands/lint/tests/src/validation-macros.x:79: violation fallback-shared-cause: fallback wraps a non-returning shared Error cause in conditional_catalogue_fallback

@@ -408,7 +408,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   defer transaction.rollback();
   Array added = [], ids = [];
   defer { added.free(); ids.free(); }
-  List fn = NULL;
+  List fn = NULL, forms = NULL;
   String function_name = NULL;
   int execute = 0, prints = 0, end = source.len();
   try {
@@ -494,6 +494,9 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         execute = 1;
       }
     }
+    result.syntax = fn;
+    $let(c.recovery_depth, c.recovery_depth + 1)
+      forms = session.lowering.lower(fn);
     result.diagnostics = c.diagnostics();
   }
   catch %(incomplete *): {
@@ -509,8 +512,6 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.message = why;
     return result;
   }
-  result.syntax = fn;
-  List forms = session.lowering.lower(fn);
   if (!forms) {
     result.message = "unsupported: " + session.lowering.declined();
     return result;

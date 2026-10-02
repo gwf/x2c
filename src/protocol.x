@@ -1499,10 +1499,7 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
    one below, each cost more than the feature. */
 static void Compiler._install_imports(Compiler c) {
   c.import_protocols = 0;
-  Map symbols = c.sym.base_symbols();
-  Map current = c.sym.current_symbols();
-  if (current) symbols.merge(current);
-  c.rebuild_protocols(symbols);
+  c.rebuild_protocols(c.sym.unit_symbols());
 }
 
 static List Compiler._ancestry(Compiler c, Type participant) {
@@ -2025,9 +2022,14 @@ String Compiler.protocol_update_helper(
   List helper = c.sym.introduce(name);
   List callee = %(expr $source_type (ident $source_binding));
   Macro update = $protocol_update, saved = $protocol_postfix;
-  c.add_early(c._generated_function(
+  List function = c._generated_function(
     helper, postfix ? saved(participant, helper, callee)
-                    : update(participant, rhs_type, helper, callee)));
+                    : update(participant, rhs_type, helper, callee));
+  match (function)
+    case %(function ?result ?declarator (block *body)):
+      function = %(function $result $declarator
+                    (block (at ${c.origin} (seq @body))));
+  c.add_early(function);
   c.protocol_helpers[key] = name;
   return name;
 }
