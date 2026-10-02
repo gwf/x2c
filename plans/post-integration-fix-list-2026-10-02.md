@@ -774,7 +774,8 @@ batches. This is an ordering of all 42 scopes, not a reduction in scope.
 Progress and private handoffs live in `.context/post-integration-campaign/`;
 landed results and any explicit deferrals are recorded here as batches finish.
 
-Private integration currently includes F01, F07, F22, F24, F39, F41, and F42.
+Private integration currently includes F01, F07, F13, F14, F22-F27, F29,
+F39, F41, and F42.
 Their focused checks passed in worker or parent checkouts. F08's initial repair
 also passed its focused checks, but the combined `make build-safe` failed:
 some standard helpers fell back to native staging before the runtime archive

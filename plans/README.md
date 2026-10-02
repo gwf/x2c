@@ -44,9 +44,9 @@ execution.
 
 ### Current work
 
-- [x2c self-expression](x2c-self-expression.md): reproduced defects, then
-  three waves that express each relationship at the largest ordinary x2c
-  form that owns it, prototypes, and four language-design questions.
+- [x2c self-expression](x2c-self-expression.md): Phase 0, language work,
+  three waves, and the retained prototypes are on dev. The recorded
+  follow-ups and unresolved language questions remain active.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.
