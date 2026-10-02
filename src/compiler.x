@@ -147,7 +147,8 @@ typedef struct Compiler {
      the lifetime check of a later `meta` function reads at its calls.
      `meta_hashes` maps each function definition to the hash of its text,
      which a `meta` definition and its copy linked into the compiler must
-     share. `meta_calls` lists the names each `meta` definition references. */
+     share. Collection hashes this unit's bodies before they are parsed;
+     `meta_calls` lists each parsed definition's referenced names. */
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro

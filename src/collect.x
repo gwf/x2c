@@ -286,6 +286,9 @@ static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
 static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
   if (!w.unit || !w.c._package_owns(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
+  // Included bodies belong to their own units; only this unit hashes ahead.
+  if (w.path == _canonical_path(w.c.filename))
+    shadow.meta_hashes = w.c.meta_hashes;
   shadow.layout = w.c.layout;
   shadow.source_private = w.private;
   shadow.open_linkage = w.linkage;

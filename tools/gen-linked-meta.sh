@@ -156,8 +156,16 @@ END {
   print "  return rows;"
   print "}"
   print ""
-  print "/** Returns the hash of each linked copy\047s definition text by name. */"
-  print "Map linked_meta_hashes(void) => $x2c_meta_definition_hashes();"
+  print "macro Expression $linked.calls() => $(_x2c.meta.definition.calls);"
+  print ""
+  print "/** Returns each linked definition\047s hash and referenced names. */"
+  print "Map linked_meta_hashes(void) {"
+  print "  Map hashes = $x2c_meta_definition_hashes();"
+  print "  Map calls = $linked.calls();"
+  print "  foreach (Var (name, hash), hashes)"
+  print "    hashes[name] = %($hash ${calls[name]});"
+  print "  return hashes;"
+  print "}"
 }
 ' $sources > "$tmp"
 if [ -e "$out" ] && cmp -s "$tmp" "$out"; then

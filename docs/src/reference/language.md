@@ -2005,10 +2005,11 @@ the compiler itself, which generates its table of them from those
 declarations.
 
 `x2c_meta_definition_hashes()` returns a `Map` from the name of each
-function the unit has defined so far to a hash of its definition's code
-tokens, from the first token after any `meta` marker to the end of its
-body. The compiler carries native copies of the `meta` functions in the
-`.xmacro` files it ships (`src/linked-meta.x`, generated from them) and
+function or initialized file-static value the unit has defined so far to a
+String hash of its definition's code tokens, from the first token after any
+`meta` marker to the end of its body or initializer. The compiler carries
+native copies of the `meta` functions in the `.xmacro` files it ships
+(`src/linked-meta.x`, generated from them) and
 records their hashes with it. An imported `meta` definition runs as its
 copy when its hash, and the hash of every definition of the unit that it
 reaches through references, matches the copy's; an edited one, or one

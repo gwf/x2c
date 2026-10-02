@@ -202,6 +202,19 @@ unresolved angle includes are system headers the generated C re-includes
 anyway; unresolved quote includes are driver errors. Each file is spliced once
 by real path, so include cycles terminate.
 
+Collection also hashes this unit's function bodies and initialized
+file-static values while it skips them. Full parsing records each
+definition's referenced names in the same definition metadata. Linked-meta
+generation pairs those names with the hashes. An unchanged forward
+definition can therefore use its shipped reference list to check later
+dependencies before their bodies are parsed. Included source bodies belong
+to their own units and do not enter this unit's hash map.
+
+The public `x2c_meta_definition_hashes()` query still returns String hashes
+for definitions parsed so far. The private Lisp query
+`_x2c.meta.definition.calls` reads their existing reference lists for linked
+generation; it adds no public library callable or separate stored inventory.
+
 A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
 identity of the compiler that wrote it, the ordered declaration maps,
