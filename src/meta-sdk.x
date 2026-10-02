@@ -38,7 +38,6 @@ $(import "../src/grammar.xmacro")
 #include <limits.h>
 #include <stdint.h>
 #include <sys/stat.h>
-$(import "../src/sdk-errors.xmacro")
 
 // the running call
 
@@ -103,7 +102,8 @@ List x2c_protocol_member(List participant, List base, String member) {
 List x2c_method_resolve(List type_value, String name) {
   _sdk_guard("x2c.method.resolve");
   if (!name.is_identifier())
-    $sdk.error("method.name", name);
+    _sdk_reject_value(
+      "x2c.method.resolve requires an identifier String", name);
   Type type = type_value;
   List resolution = active.expander.resolve_postfix_member(
     type, %($name), <.>, 1);
@@ -112,7 +112,9 @@ List x2c_method_resolve(List type_value, String name) {
       Array notes = [];
       foreach (String package, packages) notes.push(%"package: '$package'");
       String owner = type.base_type().car().str();
-      $sdk.error("method.ambiguous", owner, name, notes);
+      MetaContext.reject(
+        %"method '$owner.$name' is provided by multiple imported packages",
+        notes.list_free());
     }
     case %(method ?binding ?signature):
       return %(expr $signature (ident $binding));
@@ -151,7 +153,7 @@ List builtin_foreach_bindings(List declaration) {
     one outside a macro expansion. */
 List builtin_foreach_reference(String name) {
   Compiler c = active.evaluator;
-  if (!c) $sdk.error("reference.inactive");
+  if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
   List binding = c.sym.lookup(%($name), type);
   if (!binding || !type || !type.is_function()) return %();
@@ -235,10 +237,12 @@ List x2c_type_fields(List value) {
   Type type = value;
   Type resolved = active.expander.sym.resolve_key(type.canonicalize());
   if (!resolved || !resolved.is_aggregate_tag())
-    $sdk.error("fields.type", value);
+    _sdk_reject_value(
+      "x2c.type.fields requires a struct or union Type", value);
   List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)
-    $sdk.error("fields.incomplete", value);
+    _sdk_reject_value(
+      "x2c.type.fields requires a complete struct or union Type", value);
   Array named = [];
   foreach (List row, metadata.cdr()) if (row.car().truth()) named.push(row);
   return named.list_free();
@@ -252,10 +256,11 @@ String x2c_binding_spelling(Var syntax) {
   if (syntax is <string>) {
     String spelling = syntax;
     if (spelling.is_identifier()) return spelling;
-    $sdk.error("binding.spelling", syntax);
+    _sdk_reject_value(
+      "x2c.binding.spelling requires an identifier spelling", syntax);
   }
   if (syntax is not <list> || syntax.is_nil())
-    $sdk.error("binding.syntax", syntax);
+    _sdk_reject_value("x2c.binding.spelling requires binding syntax", syntax);
   List value = syntax;
   match (value)
     case %(expr ? (? *)): value = value.caddr();
@@ -274,13 +279,18 @@ static String _binding_spelling(List value, Var syntax) {
   match (value)
     case %(binding ?id (!is ? type string)):
       if (!id.is_integer() || id.integer() > INT_MAX)
-        $sdk.error("binding.unknown", value);
+        MetaContext.reject(
+          "x2c.binding.spelling requires a known binding",
+          %("binding: ${value.repr()}"));
   if (!binding_identity_try_parts(value, identity, spelling))
-    $sdk.error("binding.identifier", syntax);
+    _sdk_reject_value(
+      "x2c.binding.spelling requires an identifier or binding", syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];
   if (registered is not <string> || !registered.string().equal(spelling))
-    $sdk.error("binding.unknown", value);
+    MetaContext.reject(
+      "x2c.binding.spelling requires a known binding",
+      %("binding: ${value.repr()}"));
   return spelling;
 }
 
@@ -288,7 +298,7 @@ static String _binding_spelling(List value, Var syntax) {
 List x2c_ident(String spelling) {
   _sdk_guard("x2c.ident");
   if (!spelling.is_identifier())
-    $sdk.error("ident.spelling", spelling);
+    _sdk_reject_value("x2c.ident requires an identifier spelling", spelling);
   return %("x2c.ident" $spelling);
 }
 
@@ -296,7 +306,7 @@ List x2c_ident(String spelling) {
 Var builtin_foreach_unique(String stem) {
   _sdk_guard("_x2c.name.unique");
   if (!stem.is_identifier())
-    $sdk.error("name.stem", stem);
+    _sdk_reject_value("_x2c.name.unique requires an identifier stem", stem);
   String spelling = active.expander.fresh_name(%"macro_$stem");
   return active.expander.sym.introduce(spelling);
 }
@@ -336,7 +346,9 @@ List x2c_function_parameter(List function, String wanted) {
         }
     }
   }
-  $sdk.error("param.missing", wanted, function);
+  MetaContext.reject(
+    %"x2c.function.parameter cannot find '$wanted'",
+    %("function: ${x2c_function_name(function).repr()}"));
 }
 
 /** Returns the `Func` signature of the function syntax `syntax`. A native
@@ -358,11 +370,14 @@ static Var _sdk_symbol_set(List values) {
   _sdk_guard("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
-      $sdk.error("symbols.type", value);
+      MetaContext.reject(
+        "_x2c.symbol-set requires Symbols", %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = active.expander.symbol_set_expression(values, duplicate);
   if (duplicate >= 0)
-    $sdk.error("symbols.duplicate", values, duplicate);
+    MetaContext.reject(
+      "_x2c.symbol-set requires distinct Symbols",
+      %("symbol:" ${values.getindex(duplicate).repr()}));
   return expression;
 }
 
@@ -373,7 +388,9 @@ static List _sdk_meta_targets(void) => Compiler.native_meta_targets(NULL);
 static List _sdk_meta_declared(List paths) {
   List rows = Compiler.native_meta_targets(paths);
   if (!rows)
-    $sdk.error("module.empty");
+    MetaContext.reject(
+      "native module sources declare no meta function",
+      %("declare each exported function with a bodyless meta prototype"));
   return rows;
 }
 
@@ -386,7 +403,9 @@ String x2c_source_text(Var value) {
   Var stored = void;
   if (!active.captures ||
       !active.captures.try_get(((ulong) value.u64), stored))
-    $sdk.error("source.capture", active.has_bindings, value);
+    MetaContext.reject(
+      "x2c.source.text requires complete captured syntax",
+      active.has_bindings ? NULL : %("value: ${value.repr()}"));
   List source = stored;
   int begin = source.caddr(), end = source.last();
   return String.new_len(active.expander.text + begin, end - begin);
@@ -400,7 +419,7 @@ String x2c_embed_text(Var requested) {
   if (requested is <string>) requested_path = requested;
   else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
-    $sdk.error("embed.empty");
+    MetaContext.reject("x2c.embed.text requires a non-empty path", NULL);
   String path = c._embed_path(source_file, requested_path);
   String text = c.sources ? c._embed_source(path) : c._embed_file(path);
   c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));
@@ -425,7 +444,9 @@ static String _embed_literal(Var requested, String &source_file) {
     active.captures.try_get(((ulong) requested.u64), stored);
   String requested_path = NULL;
   if (stored is void || !_literal_string(syntax, requested_path))
-    $sdk.error("embed.literal", requested);
+    _sdk_reject_value(
+      "x2c.embed.text requires a String or captured String literal",
+      requested);
   List source = stored;
   source_file = source.cadr();
   return requested_path;
@@ -434,7 +455,7 @@ static String _embed_literal(Var requested, String &source_file) {
 static String Compiler._embed_source(Compiler c, String path) {
   String text;
   if (!c.read_source(path, text))
-    $sdk.error("embed.read", c, path);
+    c._embed_reject("cannot read embedded text", path);
   return text;
 }
 
@@ -442,29 +463,29 @@ static String Compiler._embed_file(Compiler c, String path) {
   File file = c._open_embed_file(path);
   String text = NULL;
   try text = file.string_close();
-  catch %(io-fail *): $sdk.error("embed.read", c, path);
+  catch %(io-fail *): c._embed_reject("cannot read embedded text", path);
   catch %(bad-arg *):
-    $sdk.error("embed.nul", c, path);
+    c._embed_reject("embedded text contains an embedded NUL", path);
   catch %(size-limit *):
-    $sdk.error("embed.limit", c, path);
+    c._embed_reject("embedded text exceeds the String size limit", path);
   return text;
 }
 
 static File Compiler._open_embed_file(Compiler c, String path) {
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
-    $sdk.error("embed.file", c, path);
+    c._embed_reject("embedded text is not a regular file", path);
   File file = NULL;
   try file = path.open("r");
   catch %((!or not-found io-fail) *):
-    $sdk.error("embed.open", c, path);
+    c._embed_reject("cannot open embedded text", path);
   if (file.stat(&info) || !S_ISREG(info.st_mode)) {
     file.close();
-    $sdk.error("embed.file", c, path);
+    c._embed_reject("embedded text is not a regular file", path);
   }
   if ((uintmax_t) info.st_size >= INT_MAX) {
     file.close();
-    $sdk.error("embed.limit", c, path);
+    c._embed_reject("embedded text exceeds the String size limit", path);
   }
   return file;
 }
@@ -511,7 +532,9 @@ Var x2c_literal_value(Var syntax) {
     Symbol found = tag;
     return found;
   }
-  $sdk.error("literal.type", syntax);
+  MetaContext.reject(
+    "x2c.literal.value requires a String, int, or Symbol literal",
+    %("value: ${syntax.repr()}"));
 }
 
 // invocations and diagnostics
@@ -519,7 +542,8 @@ Var x2c_literal_value(Var syntax) {
 /** Returns the location of the active macro invocation. */
 List builtin_class_location(void) {
   if (!active.expander || !active.site)
-    $sdk.error("location.inactive");
+    MetaContext.reject(
+      "x2c invocation location used outside macro expansion", NULL);
   return active.expander.token_location(active.site);
 }
 
@@ -553,7 +577,7 @@ static void _sdk_check_notes(String operation, List notes) {
   _sdk_guard(operation);
   foreach (Var note, notes)
     if (note is not <string>)
-      $sdk.error("notes.type", operation, note);
+      _sdk_reject_value(%"$operation notes must be Strings", note);
 }
 
 // meta parameter descriptions
@@ -634,13 +658,13 @@ List builtin_foreach_collection(List expression) {
 void MetaContext.reject(String message, List notes) {
   Compiler c = active.evaluator;
   if (c) c.report_error(<macro>, message, active.site, notes);
-  $sdk.error("reject.inactive", message);
+  raise %(bad-state (operation "x2c SDK rejection") (why $message));
 }
 
 // SDK operations reject use outside an active expansion.
 static void _sdk_guard(String operation) {
   if (!active.expander)
-    $sdk.error("expansion.inactive", operation);
+    MetaContext.reject(%"$operation used outside macro expansion", NULL);
 }
 
 static void _sdk_reject_value(String message, Var value) {
