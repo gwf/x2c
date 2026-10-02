@@ -944,14 +944,15 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
     case %(expr ?type ?(List content)): {
-      if (type && !c._needs_resolution(input)) return input;
+      if (type && !c.needs_resolution(input)) return input;
       return c._resolve_content(input, type, content, origin);
     }
   }
   return input;
 }
 
-static int Compiler._needs_resolution(Compiler c, Var value) {
+/** True when syntax still depends on ordinary binding or macro substitution. */
+int Compiler.needs_resolution(Compiler c, Var value) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   List syntax;
   $ast.walk(value, syntax)

@@ -106,7 +106,7 @@ static List Compiler._cache_if_stable(Compiler c, List elem) {
      literal node ending in the Symbol <ident>. */
   if (elem.try_search($source_identifier_content(%((*))),
       matched, bindings)) return elem;
-  if (c.runtime_literals) return elem;
+  if (c.runtime_literals || c.needs_resolution(elem)) return elem;
   /* Each evaluation builds a fresh Array or Map, so a List that holds one,
      at any depth, is built at runtime too. */
   if (elem.match(%(expr (!or ("Array") ("Map")) *)) ||
