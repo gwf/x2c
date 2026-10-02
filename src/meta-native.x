@@ -688,7 +688,9 @@ static int Compiler._linked_copy(Compiler c, String name, Map linked) {
 static int Compiler._linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names;
-  if (name in reached || !c.meta_hashes.try_get(name, own)) return 1;
+  if (name in reached) return 1;
+  // A later shipped definition has not established equivalence yet.
+  if (!c.meta_hashes.try_get(name, own)) return !(name in linked_hashes);
   reached[name] = 1;
   if (linked_hashes.try_get(name, hash)) {
     if (!hash.equal(own)) return 0;
