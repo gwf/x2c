@@ -490,8 +490,7 @@ class Queue:
                          record["gate"]], tree, check=False)
         if proof.returncode:
             return False
-        record.update(state="gated", gated=head,
-                      reason="completed gate recovered; review generated artifacts")
+        record.update(state="gated", gated=head)
         record.pop("reason", None)
         self.save(record)
         return True
