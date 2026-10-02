@@ -33,7 +33,7 @@ macro Expression $list_value(Expr $value) => %(${$value});
 macro Expression $array_value(Expr $value) => %[${$increment($value)}, 2];
 macro Expression $lambda_value(Expr $value) => %!() => $increment($value);
 macro Expression $parenthesized($value) => ($value);
-macro Expression $absolute(Expr $value) => abs($value);
+macro Expression $absolute(Expr $value) using abs => abs($value);
 
 macro Decorator $drop(Unit $target) {
 }

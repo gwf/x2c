@@ -5,13 +5,13 @@
 /* Each application takes the previous pending application as its last
    argument, so the chain nests twelve levels deep. Expanding it costs time
    proportional to its size. */
-macro open Statement $pick(Expr $c, Statement $a, Statement $rest) {
+macro Statement $pick(Expr $c, Statement $a, Statement $rest) {
   if ($c) $a
   else $rest
 }
-macro open Statement $none(Expr $r) { $r = -2; }
-macro open Expression $is(Expr $x, Expr $v) => $x == $v;
-macro open Statement $set(Expr $r, Expr $v) { $r = $v; }
+macro Statement $none(Expr $r) { $r = -2; }
+macro Expression $is(Expr $x, Expr $v) => $x == $v;
+macro Statement $set(Expr $r, Expr $v) { $r = $v; }
 
 meta static List chain(List x, List r, int n) {
   Macro pick = $pick, none = $none, is = $is, set = $set;

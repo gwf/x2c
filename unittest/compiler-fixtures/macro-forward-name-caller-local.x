@@ -1,7 +1,7 @@
 #include "x2c.x"
 
-/* Nothing declares `x` where `$use_x` is defined, and the caller's local
-   `x` does not supply it. */
+/* Nothing declares `x` where `$use_x` is defined, so the name resolves where
+   the expansion lands, and the caller's local `x` supplies it. */
 macro Statement $use_x(Name $out) {
   $out = x;
 }

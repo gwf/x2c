@@ -13,15 +13,15 @@ static void add(int * value, int amount){
 static int exercise(int * value){
   int captured = 0, inner = 0;
   {
-    int _x2c_binding_shadow_0 = 100;
-    captured =(* value);
-    (* value) = 8;
-    (* value) ++;
-    (* value) += 4;
-    add(&((* value)), 3);
-    inner = _x2c_binding_shadow_0;
+    int value = 100;
+    captured = value;
+    value = 8;
+    value ++;
+    value += 4;
+    add(&(value), 3);
+    inner = value;
   }
-  return captured == 4 && inner == 100 ?(* value) : - 1;
+  return captured == 100 && inner == 16 ?(* value) : - 1;
 }
 
 int main(void){
@@ -29,6 +29,6 @@ int main(void){
   int value = 4;
   int result = exercise(&(value));
   printf("%d\n", result);
-  return value != 16 || result != 16;
+  return value != 4 || result != 4;
 }
 

@@ -157,6 +157,11 @@ static List Expansion.bind(Expansion &x, AstPos position) {
   Compiler c = x.c;
   List old_stack = c.macro_stack;
   x.template = x.definition.assoc(<template>);
+  /* An application compiler code makes has no invocation token. What it
+     authors belongs to the source being lowered, so it carries no anchors
+     of its own. */
+  if (!x.invocation)
+    x.template = x.template.search_replace(%(at m-origin ?node), <?node>);
   List fresh_input = x.fresh_names(old_stack);
   List match_input = fresh_input
     ? x.input.append(%((fresh @fresh_input))) : x.input;
@@ -510,7 +515,7 @@ static void Definition.signature(Definition &d) {
   }
   d.parameters = params.list_free();
   d.check_signature();
-  if (c.take_word("using")) c._using_holes(d.using);
+  if (c.take_word("using")) c._using_clause(d.using);
   if (c.peek(0) == <:>)
     $report.parse_macro_kind_order(c);
 }
@@ -996,27 +1001,24 @@ static void Compiler._parse_body_using(Compiler c, Array binders) {
   while (c.at_word("using") &&
          (c.peek(1) == <$> || c.peek(1) == <ident>)) {
     c.next();
-    if (c.peek(0) == <$>) c._using_holes(binders);
-    else c._using_names();
+    c._using_clause(binders);
     c.expect(<;>);
   }
 }
 
-macro Statement $report.macro_using_name(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <macro>,
-    %"'${$spelling}' in 'using' does not name a file-scope declaration",
-    $origin, NULL);
+/* One `using` list: fresh names, or file-scope names. An Expression
+   macro, which has no braced body, writes it after its signature. */
+static void Compiler._using_clause(Compiler c, Array binders) {
+  if (c.peek(0) == <$>) c._using_holes(binders);
+  else c._using_names();
 }
 
 static void Compiler._using_names(Compiler c) {
   do {
-    Token origin = c.token;
+    String spelling = c.token.text;
     c.expect(<ident>);
-    String spelling = origin.text;
-    List binding = c.sym.resolve_global(%($spelling), NULL);
-    if (!binding) $report.macro_using_name(c, spelling, origin);
+    /* A name no x2c declaration supplies is a native name left to C. */
+    List binding = c.sym.reference_global(%($spelling));
     c.macro_holes[%(using ${binding_identity_spelling(binding)})] = binding;
   } while (c.test(<,>));
 }
@@ -1383,6 +1385,10 @@ List Compiler.macro_tag_name(
   if (!definition) {
     List visible = c.sym.lookup(key, NULL);
     if (visible && visible in locals) return visible;
+    /* A name the body passed to a nested macro's Name hole is the body's
+       own in every namespace, including the tag that macro declares. */
+    List named = c.sym.lookup(%($name), NULL);
+    if (named && %(name-argument $named) in locals) return named;
     if (c.sym.get_exact(%($kind $name))) return NULL;
   }
   List local = c._definition_local(name, 1);
@@ -1968,6 +1974,7 @@ static Var Compiler._name_argument(Compiler c) {
   if (visible && visible in c.macro_definition_locals()) return visible;
   List local = c.macro_introduced_name(spelling);
   c.bind_template_local(local, NULL, NULL);
+  c.macro_definition_locals()[%(name-argument $local)] = 1;
   return local;
 }
 

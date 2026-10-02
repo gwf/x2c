@@ -385,7 +385,7 @@
                          (ident (binding 3 "_x2c_exception_frame_0"))))))))) 
         (stmnt 
          (expr () 
-          (call (expr () (ident (binding 32 "__builtin_unreachable"))) 
+          (call (expr () (ident (binding 33 "__builtin_unreachable"))) 
            (args (expr (void) ()))))))))) 
     (if (expr (int) 
          (call (expr ((func ((* "ExceptionFrame"))) int) 

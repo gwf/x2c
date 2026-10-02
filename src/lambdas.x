@@ -126,7 +126,8 @@ static void Compiler._parse_using(
   } while (c.test(<,>));
 }
 
-/* A template's `&$name` leaves the binding to expansion, while `&name`
+/* A template's `&$name`, or `&name` for a name the template does not
+   declare, leaves the binding to expansion; `&name` for a template local
    resolves it now. */
 static List Compiler._template_capture(Compiler c) {
   List name = NULL, value = NULL;
@@ -139,6 +140,12 @@ static List Compiler._template_capture(Compiler c) {
     Token origin = c.token;
     name = c.parse_basic_identifier();
     value = c.resolve_expression(%(expr () (ident $name)), origin);
+    /* A free name is captured where the expansion lands, like the body
+       that reads it. */
+    match (value)
+      case %(expr ? (ident (binding-name ?(String spelling)))):
+        return %(capture $spelling $reference
+                  (expr $reference (op & $value)));
     name = c.sym.lookup(name, NULL);
     reference = cons(<&>, value.cadr());
   }

@@ -14,6 +14,7 @@ void Reporter.report_error(Reporter reporter, Symbol code, String message,
 }
 static char *alternate(int error) { (void) error; shadow_calls++; return "shadow"; }
 macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
+  using strerror;
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
@@ -28,6 +29,6 @@ int main(void) {
   String reason = "caller";
   List failure = %((errno ${(int) ENOENT}) (path "probe"));
   $report.emit_file_write(reporter, failure);
-  printf("named reports retain definition bindings and caller locals\n");
+  printf("named reports keep using names and caller locals\n");
   return reports != 1 || shadow_calls != 0 || reason != %"caller";
 }

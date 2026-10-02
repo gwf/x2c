@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/macro-forward-name-caller-local.x:11:3: macro: 'x' in macro 'use_x' is not declared where the macro is defined
-    $use_x(result);
-    ^
-  note: declare it before the macro, or pass it through a Name hole
-

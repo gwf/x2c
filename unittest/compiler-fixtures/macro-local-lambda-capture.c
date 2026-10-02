@@ -15,12 +15,12 @@ int main(void){
   Var typed =(_x2c_lambda_0)(10);
   Var bare =(_x2c_lambda_1)(int_var(20));
   printf("%ld %ld\n", Var_integer(typed), Var_integer(bare));
-  return Var_integer(typed) != 13 || Var_integer(bare) != 24;
+  return Var_integer(typed) != 103 || Var_integer(bare) != 104;
 }
 
 static Var _x2c_lambda_0(int base){
   {
-    int _x2c_binding_shadow_0 = 100;
+    int base = 100;
     return int_var(base + 3);
   }
   return((void) 0, Void);
@@ -28,8 +28,8 @@ static Var _x2c_lambda_0(int base){
 
 static Var _x2c_lambda_1(Var base){
   {
-    int _x2c_binding_shadow_1 = 100;
-    return Var_binary(base, 56, int_var(4));
+    int base = 100;
+    return int_var(base + 4);
   }
   return((void) 0, Void);
 }

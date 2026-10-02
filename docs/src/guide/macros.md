@@ -95,10 +95,10 @@ return scaled(value);
 
 The definition is visible from that point to the end of the block and through
 nested blocks. An inner definition of `scaled` temporarily shadows it; a later
-definition in the same block replaces it for following calls. Literal
-references such as `scale` retain the exact parameter or preceding local they
-named at the definition, even if an inner block later declares the same
-spelling. Hole arguments still retain their caller bindings.
+definition in the same block replaces it for following calls. A name the
+body reads without declaring, such as `scale`, resolves where the macro is
+invoked, like every macro's free names. Arguments are bound where the
+invocation is written.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
 ordinary function. A use without parentheses is an ordinary identifier, and
@@ -290,12 +290,13 @@ macro Statement $project.swap(
 The helper returns a type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
-Each invocation receives a compiler-private binding for `temporary`.
-Definition-local literal names resolve where the macro was defined, captured
-names keep their caller bindings, and generated names cannot collide with
-caller source. A local macro's literal references to parameters and preceding
-locals also keep those exact bindings when an inner declaration uses the same
-spelling.
+Each invocation receives a compiler-private binding for `temporary`, so
+generated names cannot collide with caller source. A macro captures no
+bindings: a name its body reads without declaring resolves where the
+expansion lands, and arguments are bound where the invocation is written. A
+body that must reach a file-scope declaration that a caller's local could
+hide lists it with `using name;`, as the
+[reference](../reference/language.md#hygiene-and-generated-names) shows.
 
 Use a leading body directive only when compile-time Lisp or a nested macro
 needs a private `Name` hole before an ordinary declaration can introduce it:

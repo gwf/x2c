@@ -918,13 +918,12 @@ explicit ordinary call, while `$name(arguments)` selects only the global or
 imported macro namespace. A local and global definition may therefore share a
 name without ambiguity.
 
-Literal references to function parameters and preceding local declarations
-retain their definition-site binding identities. A later same-spelled inner
-declaration is emitted under a private shadow name when necessary, so the
-template still reaches the captured declaration. Hole arguments retain their
-call-site identities. Declarations written in the body and names declared by
-a leading body `using` directive retain the ordinary hygiene rules described
-below.
+A local definition follows the [hygiene](#hygiene-and-generated-names) rule
+of every macro: a name its body reads without declaring resolves where the
+macro is invoked. `scale` above reads the parameter because `scaled(value)`
+is invoked inside `scaled_sum`; a declaration of `scale` in an inner block
+would supply an invocation inside that block instead. Declarations written in
+the body are private to each expansion.
 
 Local `Expression`, `Statement` or `Block`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
@@ -932,7 +931,7 @@ whose invocation position is reachable before the defining block ends. A local
 `Unit` result and a local decorator targeting `Function` or `Unit` syntax are
 rejected. Their invocation positions are outside that lifetime. A
 macro-generated local definition is published at block position with the same
-visibility, capture, and shadowing behavior as a direct one.
+visibility and shadowing behavior as a direct one.
 
 Compile-time Lisp remains one translation-unit session. A local definition may
 read or change that session, but Lisp definitions, imports, globals, and other
@@ -1476,48 +1475,34 @@ hole the slot was given, one element per statement, so each element can
 be recognized with a `case` on the macro that built it. The pattern a
 literal macro value derives is prepared once per process.
 
-### Open definitions
-
-A definition is closed by default. Free identifiers in its body resolve where
-the macro was defined, as described under
-[hygiene](#hygiene-and-generated-names).
-`macro open` instead binds free values in the applying unit's global scope:
-
-```x2c
-macro open Expression $bump(Expr $value) => target((Width) $value);
-```
-
-A caller's local of the same spelling does not capture them. A free type
-name resolves through the base scopes to its target type, so the generated C
-spells the target type rather than the typedef name.
-
 ### Hygiene and generated names
 
-Captured syntax retains its call-site binding identity. Free identifiers
-written literally in a body resolve where the macro was defined, including
-parameters and preceding declarations captured by a local macro. A declaration
-written in a body receives a fresh binding identity and a private generated C
-spelling for each expansion. The spelling of a file-scope declaration with
-external or no linkage also names its unit's file name and the outermost
-invocation, so units that include one another can expand the same macro. A field keeps its spelling, because C scopes it to its
-aggregate, and an anonymous aggregate is a distinct type in each expansion. A
-visible body local passed to a nested macro's `Name` hole is that expansion's
-binding, so the nested macro can read and assign it. A `Name` argument that
-names an existing caller variable retains that identity. An assignment through
-the hole reaches the caller variable even if the expansion declares another
-variable with the same spelling.
+A macro captures no bindings. An expansion means what the same code would
+mean if it were written where the expansion lands, except that the names its
+body writes are private to that expansion.
 
-A free name that nothing declares where the macro is defined binds a
-declaration that the same expansion introduces. This includes a declaration
-that a nested macro makes from a literal `Name` written in the body. Without
-one, the name binds a global, including a global declared after the
-definition. A caller's local never captures a free name. When only a caller's
-declaration of that spelling is in view, x2c reports the name and the macro
-instead of emitting C. A name that nothing declares anywhere is left to C,
-as a native macro such as `errno` is. An untyped name in a call position also
-retains its native spelling when a caller local has that spelling. This lets
-native-header functions and function-like macros remain callable; the caller
-local receives a separate generated C spelling.
+Arguments are parsed and bound where the invocation is written. A `Name`
+argument is a spelling, and it resolves where the expansion places it, so a
+`Name` hole can declare a new caller-visible variable or refer to an
+existing one.
+
+A declaration written in a body receives a fresh binding identity and a
+private generated C spelling for each expansion. The spelling of a
+file-scope declaration with external or no linkage also names its unit's file
+name and the outermost invocation, so units that include one another can
+expand the same macro. A field keeps its spelling, because C scopes it to its
+aggregate, and an anonymous aggregate is a distinct type in each expansion.
+
+A literal name that a body passes to a nested macro's `Name` hole is also
+the body's own name. A declaration the nested macro makes from it belongs to
+this expansion, and the body's other references to that spelling reach it.
+A reference that no such declaration reaches resolves where the expansion
+lands.
+
+A name the body reads without declaring resolves where the expansion lands,
+like any name written there. A caller's declaration of that spelling
+supplies it, including a local. A name that nothing declares anywhere is left
+to C, as a native macro such as `errno` is.
 
 ```x2c
 macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
@@ -1530,19 +1515,58 @@ macro Statement $print_doubles() {
   printf("%d\n", total);
 }
 
+macro Statement $add_tens(Name $target) {
+  $repeat(k, 3, 10, $target);
+}
+
 int main(void) {
   int k = 100;
   $print_doubles();
-  return k != 100;
+  $add_tens(k);
+  printf("%d\n", k);
+  return 0;
 }
 ```
 
 ```text
 6
+130
 ```
 
 In `$print_doubles`, `k * 2` reads the loop variable that `$repeat` declares
-from the literal `k`. The caller's `k` is not involved.
+from the body's literal `k`. In `$add_tens`, the caller's `k` arrives through
+`$target`; the loop variable comes from `$add_tens`'s own literal `k`, so the
+assignment reaches the caller's variable.
+
+To keep a file-scope declaration that a caller's local could otherwise
+supply, list it with `using` at the start of the braced body, or after the
+signature of an `Expression` macro:
+
+```x2c
+static int scale = 3;
+
+macro Expression $scaled(Expr $value) using scale => $value * scale;
+
+int main(void) {
+  int scale = 10;
+  printf("%d %d\n", $scaled(2), scale);
+  return 0;
+}
+```
+
+```text
+6 10
+```
+
+Each listed name must name a function, object, or enumerator declared at
+file scope where the macro is written. A caller's local of the same spelling
+receives a separate generated C spelling, so the expansion still reaches the
+file-scope declaration. A `using` name resolves to that declaration in every
+unit that applies the macro, including through a `Macro` value.
+
+An anonymous macro keeps one kind of value from where it is written: a
+`Macro` value that its body applies. Templates compose by value, so a later
+application applies the same children.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
@@ -1567,13 +1591,13 @@ struct Frame frame = {2};
 Most generated declarations need no directive: writing `int temporary` or a
 destructuring `Var (key, value)` in a body makes both that declaration and its
 literal references hygienic. When
-compile-time Lisp or a nested macro needs a private name before an ordinary
-declaration can introduce it, place `using $name, $other;` at the start of the
-braced body. Each name is a compiler-allocated singular `Name` hole. Every
-occurrence within one expansion receives the same binding, while different
-expansions receive different bindings. A generated name may not duplicate an
-argument hole or another generated name and takes no kind annotation or
-`...`. The directives must precede all other body items.
+compile-time Lisp needs a private name before an ordinary declaration can
+introduce it, place `using $name, $other;` at the start of the braced body.
+Each name is a compiler-allocated singular `Name` hole. Every occurrence
+within one expansion receives the same binding, while different expansions
+receive different bindings. A generated name may not duplicate an argument
+hole or another generated name and takes no kind annotation or `...`. The
+directives must precede all other body items.
 
 Compile-time Lisp uses `x2c.ident` to mark an exact public spelling. In a
 declarator slot that spelling creates a declaration and is normally rejected if

@@ -5,12 +5,14 @@
 #include <stdio.h>
 #include <ctype.h>
 
-macro Expression $now() => time(NULL) > 0;
-macro Expression $size(Expr $text) => ((strlen))($text);
-macro Statement $dispose(Expr $pointer) { free($pointer); }
-macro Statement $write(Expr $text) { fputs($text, stdout); }
-macro Statement $quit() { exit(0); }
-macro Expression $letter(Expr $ch) => isalpha($ch) != 0;
+/* Each macro keeps the native function with `using`, so a caller's local of
+   the same spelling does not supply it. */
+macro Expression $now() using time => time(NULL) > 0;
+macro Expression $size(Expr $text) using strlen => ((strlen))($text);
+macro Statement $dispose(Expr $pointer) { using free; free($pointer); }
+macro Statement $write(Expr $text) { using fputs; fputs($text, stdout); }
+macro Statement $quit() { using exit; exit(0); }
+macro Expression $letter(Expr $ch) using isalpha => isalpha($ch) != 0;
 
 static int absent(void) { return $now() && $size("abc") == 3; }
 
