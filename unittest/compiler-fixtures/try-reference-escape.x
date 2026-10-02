@@ -2,12 +2,18 @@
 
 /* A local a `try` body passes by reference keeps its type, so the call
    discards no qualifier, and its address escapes at its declaration, so the
-   catch sees what the callee wrote before it raised. */
+   catch sees what the callee wrote before it raised. A pointer to const
+   escapes the same way. */
 
 static void bump(int &n) { n = n + 1; }
 
 static void set_and_raise(int &n, int value) {
   n = value;
+  raise %(bad-arg);
+}
+
+static void advance(const char **cursor) {
+  *cursor = *cursor + 1;
   raise %(bad-arg);
 }
 
@@ -32,6 +38,9 @@ int main(void) {
   try set_and_raise(written, 3);
   catch %(bad-arg *): printf("written %d\n", written);
   parameter(0);
+  const char *tail = "abc";
+  try advance(&tail);
+  catch %(bad-arg *): printf("tail %s\n", tail);
   for (int i = 0; i < 1; i++)
     try set_and_raise(i, 5);
     catch %(bad-arg *): printf("loop %d\n", i);

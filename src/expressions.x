@@ -1163,6 +1163,7 @@ static List Compiler._resolve_identifier(
     (value is <list> && !value.is_nil() &&
      value.car() == <macro-bind>);
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
+  if (!binding) $report(c, "type.binding.unknown", value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);

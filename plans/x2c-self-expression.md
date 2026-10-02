@@ -243,6 +243,11 @@ Wave 3 results (submitted as one PR):
   libuv.
 - Correction: torch's `catch %(?snapcause *)` arm is reachable. It also
   covers `context.export`, which can raise, so it stays.
+- Fixed after Wave 3: the SQLite translation failure (a false qualifier
+  error past a `void` pointee in `Type.discards_qualifiers`, exposed by
+  06778dc7) and the `(ident (% ...))` hang (the resolver now reports an
+  unresolvable identifier operand). The wrong `1:1` location of an error
+  raised inside an inserted escape statement remains.
 - Found: SQLite fails to translate on dev ("cannot convert (* * const char)
   to (volatile * const volatile void)", `&tail` in `Database.prepare` with
   defers); a meta helper writing `%(%"...")` produces an `(ident (% ...))`

@@ -450,7 +450,8 @@ static int _omit_specifier(Symbol first, int keep_qualifiers) =>
     silently drop a qualifier the target does not keep. The leading
     qualifiers of each type describe the copied value, not what it points
     at, so only the deeper levels are compared. Callers use this where the
-    two types are otherwise the same; a conversion through a converter
+    two types are otherwise the same, or where one points at `void`, which
+    has no deeper levels to compare; a conversion through a converter
     function copies instead of aliasing.
 */
 int Type.discards_qualifiers(Type source, Type target) {
@@ -461,6 +462,7 @@ int Type.discards_qualifiers(Type source, Type target) {
     target = target.cdr();
     unsigned wanted = _qualifiers(source), offered = _qualifiers(target);
     if (wanted & ~offered) return 1;
+    if (target === %(void)) return 0;
   }
   return 0;
 }
