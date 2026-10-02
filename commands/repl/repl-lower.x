@@ -254,33 +254,15 @@ static void _lower_scan_cursor_block(Lowering &l, List parts) {
    iteration path and even when its value comes from a call: the binding it
    needs is an immediately applied lambda, and the lowering puts one of those
    in the frame's own slots. */
-static void _lower_scan_op(Lowering &l, List form) {
-  match (form) {
-    case %(op & (parens ?inner)):
-      _lower_scan_op(l, %(op & $inner));
-    case %(op & (expr ? (parens ?inner))):
-      _lower_scan_op(l, %(op & $inner));
-    case %(op & (expr ? (ident (binding ?(int id) ?)))): {
+static void _lower_scan_address(Lowering &l, Var operand) {
+  match (operand) {
+    case %(parens ?inner): _lower_scan_address(l, inner);
+    case %(expr ? (parens ?inner)): _lower_scan_address(l, inner);
+    case %(expr ? (ident (binding ?(int id) ?))):
       if (!l.cursors.contains(id)) {
         Var layout;
         l.cells[id] = l.locals.try_get(id, layout) ? layout : 1;
       }
-      return;
-    }
-  }
-}
-
-static void _lower_scan_bind(Lowering &l, List form) {
-  match (form) {
-    /* A local C array's slot holds its native element storage. */
-    case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
-      l.locals[id] = 1;
-      l.cells[id] = 1;
-      l.arrays[id] = size;
-      return;
-    }
-    case %(bind (binding ?(int id) ?) *):
-      if (!l.locals.contains(id)) l.locals[id] = 1;
   }
 }
 
@@ -310,22 +292,16 @@ static void _lower_scan_storage_binding(
     }
 }
 
-static void _lower_scan_storage_declaration(Lowering &l, List form) {
-  match (form) {
-    case %(declare ?type (bindings *declarators)):
-      foreach (Var declarator, declarators)
-        _lower_scan_storage_binding(l, type, declarator);
-    case %(param ?type ?declarator):
+/* Only the first reason is kept, so the storage declines come before the
+   refusal of a union, or a struct with no compile-time layout, which stops
+   the scan rather than reporting what the refused statement calls. */
+static int _lower_scan_declaration(Lowering &l, Var type, List rest) {
+  match (rest) case %((bindings *declarators)):
+    foreach (Var declarator, declarators)
       _lower_scan_storage_binding(l, type, declarator);
-  }
-}
-
-/* A destructuring declaration names its targets directly rather than through
-   `bind`, so this is where they join the locals. Without them a later write
-   would read as file-scope state. */
-static void _lower_scan_targets(Lowering &l, List targets) {
-  foreach (List target, targets)
-    match (target) case %(binding ?(int id) ?): l.locals[id] = 1;
+  if (!((Type) type).is_aggregate() || _lower_record_type(l, type)) return 0;
+  (void) $repl.decline(l, "layout.unsupported");
+  return 1;
 }
 
 /* Resolve calls only against this interpreter's environment. */
@@ -346,49 +322,22 @@ static void _lower_scan_callee(Lowering &l, String name) {
   }
 }
 
-/* A function named where a value is wanted rather than called: `Func f = g;`
-   or `g` handed to an operation that calls it. The scan sees no `call`, so
-   this is where that callee is established, and it carries the same reach as
-   a call to it would. A local of function-pointer type holds a value rather
-   than naming a definition. */
-static void _lower_scan_function_value(Lowering &l, List form) {
-  match (form)
-    case %(expr ((func *) *) (ident (binding ?(int id) ?(String name)))): {
-      if (!l.locals.contains(id)) _lower_scan_callee(l, name);
+/* A reference parameter takes its argument's address, and the callee needs
+   a compile-time binding. */
+static void _lower_scan_call(Lowering &l, Var callee, List arguments) {
+  match (callee) case %(expr ((func ?params) *) ?):
+    for (List p = params, a = arguments; p && a; p = p.cdr(), a = a.cdr()) {
+      Type type = _lower_param_type(p);
+      if (type.is_reference() && !_lower_null_constant(a.car()))
+        _lower_scan_address(l, a.car());
     }
-}
-
-static void _lower_scan_call(Lowering &l, List form) {
-  match (form)
-    case %(call (expr ((func ?params) *) ?) (args *args)):
-      for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
-        Type type = _lower_param_type(p);
-        if (type.is_reference() && !_lower_null_constant(a.car()))
-          _lower_scan_op(l, %(op & ${a.car()}));
-      }
-  match (form) {
-    case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
+  match (callee) {
+    case %(expr ? (ident (binding ? ?(String name)))):
       _lower_scan_callee(l, name);
-      return;
-    }
-    case %(call ?(String name) ?): {
-      _lower_scan_callee(l, name);
-      return;
-    }
+    default:
+      if (callee is <string>) _lower_scan_callee(l, callee);
+      else l.uncallable = 1;
   }
-  l.uncallable = 1;
-}
-
-/* A union, or a struct with no compile-time layout, is refused here, where
-   the reason is still plain. */
-static int _lower_scan_aggregate(Lowering &l, List items) {
-  match (items) {
-    case %(declare (union *) *): return 1;
-    case %(declare ?type *):
-      if (((Type) type).is_aggregate() && !_lower_record_type(l, type))
-        return 1;
-  }
-  return 0;
 }
 
 /* Everything the lowering needs before it starts, in one pass: which locals
@@ -411,29 +360,42 @@ static void _lower_scan(Lowering &l, Var form) {
       }
     return;
   }
-  Var head = items.car();
-  match (items) case %(repl-init ? ? ?initializer): {
-    _lower_scan(l, initializer);
-    return;
+  match (items) {
+    case %(repl-init ? ? ?initializer): {
+      _lower_scan(l, initializer);
+      return;
+    }
+    case %(declare ?type *rest):
+      if (_lower_scan_declaration(l, type, rest)) return;
+    case %(param ?type ?declarator):
+      _lower_scan_storage_binding(l, type, declarator);
+    case %(block *parts): _lower_scan_cursor_block(l, parts);
+    /* A local C array's slot holds its native element storage. */
+    case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
+      l.locals[id] = 1;
+      l.cells[id] = 1;
+      l.arrays[id] = size;
+    }
+    case %(bind (binding ?(int id) ?) *):
+      if (!l.locals.contains(id)) l.locals[id] = 1;
+    /* A destructuring declaration names its targets directly rather than
+       through `bind`, so this is where they join the locals. Without them a
+       later write would read as file-scope state. */
+    case %(targets *targets):
+      foreach (List target, targets)
+        match (target) case %(binding ?(int id) ?): l.locals[id] = 1;
+    case %(op & ?operand): _lower_scan_address(l, operand);
+    case %(call ?callee (args *arguments)):
+      _lower_scan_call(l, callee, arguments);
+    /* A function named where a value is wanted rather than called: `Func f
+       = g;` or `g` handed to an operation that calls it. The scan sees no
+       `call`, so this is where that callee is established, and it carries
+       the same reach as a call to it would. A local of function-pointer
+       type holds a value rather than naming a definition. */
+    case %(expr ((func *) *) (ident (binding ?(int id) ?(String name)))):
+      if (!l.locals.contains(id)) _lower_scan_callee(l, name);
+    case %(goto *): l.rejected = 1;
   }
-  _lower_scan_storage_declaration(l, items);
-  /* This refuses the function outright, so the scan stops rather than
-     reporting what the refused statement happens to call. */
-  if (_lower_scan_aggregate(l, items)) {
-    (void) $repl.decline(l, "layout.unsupported");
-    return;
-  }
-  if (head == <block>) _lower_scan_cursor_block(l, items.cdr());
-  if (head == <while> || head == <for> || head == <do>) {
-    _lower_scan_each(l, items);
-    return;
-  }
-  if (head == <bind>) _lower_scan_bind(l, items);
-  else if (head == <targets>) _lower_scan_targets(l, items.cdr());
-  else if (head == <op>) _lower_scan_op(l, items);
-  else if (head == <call>) _lower_scan_call(l, items);
-  else if (head == <expr>) _lower_scan_function_value(l, items);
-  else if (head == <goto>) l.rejected = 1;
   _lower_scan_each(l, items);
 }
 

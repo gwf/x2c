@@ -219,8 +219,8 @@ configured compiler sessions and sequential source units.
 
 Public functions:
 
-`Frontend.open`, `Frontend.open_session`, `Frontend.start`,
-`ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
+`Frontend.open`, `Frontend.open_reporting`, `Frontend.open_session`,
+`Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
 `Frontend.preload_macro_libraries`, `Frontend.load_support`, `Frontend.new`
 
 ### [src/generate.x](../src/generate.x)
@@ -411,18 +411,18 @@ Public functions:
 `Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
 `Compiler.parse_import_declaration`, `Compiler.definition_doc`,
 `Compiler.parse_declaration_row`, `Compiler.parse_simple_declaration`,
-`Compiler.parse_declaration_argument`, `Compiler.test_static_assert`,
-`Compiler.parse_static_assert`, `Compiler.test_declaration`,
-`Compiler.parse_type_name`, `Compiler.parse_fields`, `Compiler.parse_field`,
-`Compiler.parse_named_type`, `Compiler.parse_enumerators`,
-`Compiler.parse_enumerator`, `Compiler.parse_declarator_argument`,
-`Compiler.bind_template_local`, `Compiler.parse_parameter_list`,
-`Compiler.parse_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
-`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
-`Compiler.parse_function_target`, `Compiler.finish_managed_declaration`,
-`Compiler.bind_syntax`, `Compiler.bind_callable_body`,
-`Compiler.finish_foreign_alias`
+`Compiler.parse_type_operand`, `Compiler.parse_declaration_argument`,
+`Compiler.test_static_assert`, `Compiler.parse_static_assert`,
+`Compiler.test_declaration`, `Compiler.parse_type_name`,
+`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
+`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
+`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
+`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
+`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
+`Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
+`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
+`Compiler.finish_managed_declaration`, `Compiler.bind_syntax`,
+`Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
 
@@ -456,8 +456,9 @@ Public functions:
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
 `Compiler.operator_member`, `Compiler.derived_member`,
 `Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
-`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
-`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.forward_parameters`, `Compiler.protocol_update_helper`,
+`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
+`Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
 `Compiler.record_source_typedef`, `Compiler.rebuild_protocols`
 
@@ -604,8 +605,9 @@ Public functions:
 `Type.scalar`, `Type.scalar_tag`, `Type.var_numeric_extractor`,
 `Type.var_numeric_update_helper`, `Type.promote`, `Type.widest`,
 `Type.numeric_literal`, `Type.numeric_literal_value`,
-`ast_addressed_identifier`, `ast_direct_identifier`, `ast_indirect_identifier`,
-`Type.var_tag`, `Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
+`Type.integer_literal_magnitude`, `ast_addressed_identifier`,
+`ast_direct_identifier`, `ast_indirect_identifier`, `Type.var_tag`,
+`Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
 `Type.register_var_tag`, `Type.register_var_adoption`, `Type.begin_unit`,
 `Type.end_unit`
 
@@ -997,7 +999,7 @@ macros as values that build and recognize code.
 Public functions:
 
 `Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
-`Macro_pattern`, `Macro_case_pattern`, `Macro_case_capture_at`
+`Macro_pattern`, `Macro.binder`, `Macro_case_pattern`, `Macro_case_capture_at`
 
 ### [lib/map.x](../lib/map.x)
 

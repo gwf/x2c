@@ -175,6 +175,37 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
   return Frontend_start(f, filename, &((* unit))) && ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)));
 }
 
+void Compiler_own_diagnostics(Compiler);
+
+List Compiler_diagnostics(Compiler);
+
+int List_try_next(List, List *, Var *);
+
+void Compiler_print_diagnostic(Compiler, List);
+
+List Var_list(Var);
+
+int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit){
+  if(! _init_guard_) _file_init_();
+  if(Frontend_start(f, filename, &((* unit)))){
+    Compiler_own_diagnostics((* unit).compiler);
+    if(ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)))) return 1;
+  }
+  else{
+    Var entry;
+    List _x2c_macro_object_0 = Compiler_diagnostics((* unit).compiler);
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      entry = _x2c_macro_cursor_output_0;
+      Compiler_print_diagnostic((* unit).compiler, Var_list(entry));
+    }
+
+  }
+  ParsedUnit_close(&((* unit)));
+  return 0;
+}
+
 void Compiler_stage_meta_in_process(void);
 
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
@@ -717,8 +748,6 @@ String int_str(int);
 
 List translation_depfile_parse(String);
 
-int List_try_next(List, List *, Var *);
-
 void Compiler_add_translation_dependency(Compiler, String);
 
 static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
@@ -737,11 +766,11 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   ));
   {
     String dependency;
-    List _x2c_macro_object_0 = translation_depfile_parse(dependency_text);
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      dependency = Var_string(_x2c_macro_cursor_output_0);
+    List _x2c_macro_object_1 = translation_depfile_parse(dependency_text);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      dependency = Var_string(_x2c_macro_cursor_output_1);
       Compiler_add_translation_dependency(c, dependency);
     }
 
@@ -790,12 +819,6 @@ int Frontend_preload_macro_libraries(Frontend frontend){
 
 Context Context_open_named(const char *);
 
-List Compiler_diagnostics(Compiler);
-
-List Var_list(Var);
-
-void Compiler_print_diagnostic(Compiler, List);
-
 Iter Map_keys(Map, Iter);
 
 Var int_var(int);
@@ -835,11 +858,11 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
       if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
         {
           List diagnostic;
-          List _x2c_macro_object_1 = Compiler_diagnostics(c);
-          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-          Var _x2c_macro_cursor_output_1;
-          while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-            diagnostic = Var_list(_x2c_macro_cursor_output_1);
+          List _x2c_macro_object_2 = Compiler_diagnostics(c);
+          List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+          Var _x2c_macro_cursor_output_2;
+          while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+            diagnostic = Var_list(_x2c_macro_cursor_output_2);
             Compiler_print_diagnostic(c, diagnostic);
           }
 
@@ -856,13 +879,13 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
       }
       {
         String name;
-        Iter _x2c_macro_iterator_2 = Map_keys(c -> meta_hashes, &(struct Iter){
+        Iter _x2c_macro_iterator_3 = Map_keys(c -> meta_hashes, &(struct Iter){
           int_var(0)
         }
         );
-        Var _x2c_macro_item_2;
-        while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
-          name = Var_string(_x2c_macro_item_2);
+        Var _x2c_macro_item_3;
+        while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
+          name = Var_string(_x2c_macro_item_3);
           {
             Var function;
             if(String_startswith(name, _30239) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
@@ -892,11 +915,11 @@ static void _declare_builders(Compiler c, Lisp shared){
   List names = _30230;
   {
     String name;
-    List _x2c_macro_object_3 = names;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_2))){
-      name = Var_string(_x2c_macro_cursor_output_2);
+    List _x2c_macro_object_4 = names;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_3))){
+      name = Var_string(_x2c_macro_cursor_output_3);
       {
         Lisp_set_global(shared, name, List_var(NULL));
         Map_setindex(c -> meta_comptime, String_var(name), int_var(1));

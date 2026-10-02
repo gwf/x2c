@@ -36,6 +36,7 @@ X2c semantic types.
 | [`Type.end_unit`](#Type.end_unit) | Ends the source-declared `Var`-row lifetime before the unit `Scope` is released. |
 | [`Type.fixed_var_tag`](#Type.fixed_var_tag) | Returns the process-lifetime `Var` tag fixed for `type`, or zero. |
 | [`Type.function_parts`](#Type.function_parts) | Splits a direct or pointer function `type` into its fixed `params`, which are `NULL` for `(void)`, and its `return_type` when one is asked for. |
+| [`Type.integer_literal_magnitude`](#Type.integer_literal_magnitude) | Reads an integer literal of `type` spelled in digits, with any suffix, into `value`. |
 | [`Type.is_aggregate`](#Type.is_aggregate) | Returns whether `type` is any struct or union shape. |
 | [`Type.is_aggregate_tag`](#Type.is_aggregate_tag) | Returns whether `t` is a body-free struct or union tag reference. |
 | [`Type.is_aggregate_tag_body`](#Type.is_aggregate_tag_body) | Returns whether `type` is a tagged struct or union definition. |
@@ -84,7 +85,7 @@ X2c semantic types.
 
 Returns the name whose address an expression takes, or `NULL`.
 
-Source: `src/type.x:803`
+Source: `src/type.x:814`
 
 #### ast_direct_identifier
 
@@ -96,7 +97,7 @@ a dereference - or `NULL` when the expression designates no single name.
 A declaration qualifier that must reach one object, such as the `volatile`
 an error transfer requires, applies to this name.
 
-Source: `src/type.x:822`
+Source: `src/type.x:833`
 
 #### ast_indirect_identifier
 
@@ -107,7 +108,7 @@ Returns the name of the pointer an expression designates through, or
 `pointer[index]`, and `pointer->member` all change the object the pointer
 holds, which `ast_direct_identifier` reports as no name at all.
 
-Source: `src/type.x:840`
+Source: `src/type.x:851`
 
 #### ast_prototype_declarator
 
@@ -221,7 +222,7 @@ Source: `src/type.x:418`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:940`
+Source: `src/type.x:951`
 
 <a id="Type.body"></a>
 #### Type.body
@@ -306,7 +307,7 @@ Source: `src/type.x:456`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:947`
+Source: `src/type.x:958`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -315,7 +316,7 @@ Source: `src/type.x:947`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:879`
+Source: `src/type.x:890`
 
 <a id="Type.function_parts"></a>
 #### Type.function_parts
@@ -327,6 +328,16 @@ which are `NULL` for `(void)`, and its `return_type` when one is asked
 for. Returns 0 and leaves both unchanged when `type` is not a function.
 
 Source: `src/type.x:378`
+
+<a id="Type.integer_literal_magnitude"></a>
+#### Type.integer_literal_magnitude
+
+`int Type.integer_literal_magnitude( Type type, String text, unsigned long long &value)`
+
+Reads an integer literal of `type` spelled in digits, with any suffix,
+into `value`. Returns 0 for any other literal.
+
+Source: `src/type.x:730`
 
 <a id="Type.is_aggregate"></a>
 #### Type.is_aggregate
@@ -588,7 +599,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:928`
+Source: `src/type.x:939`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -599,7 +610,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:916`
+Source: `src/type.x:927`
 
 <a id="Type.scalar"></a>
 #### Type.scalar
@@ -640,7 +651,7 @@ Source: `src/type.x:309`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:890`
+Source: `src/type.x:901`
 
 <a id="Type.var_numeric_extractor"></a>
 #### Type.var_numeric_extractor
@@ -670,7 +681,7 @@ Source: `src/type.x:624`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:869`
+Source: `src/type.x:880`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -681,7 +692,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:901`
+Source: `src/type.x:912`
 
 <a id="Type.widest"></a>
 #### Type.widest

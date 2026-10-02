@@ -41,6 +41,8 @@ void Macro_use_subject(Var rows);
 
 List Macro_pattern(Macro t, List names);
 
+Atom Macro_binder(Var binder, String projection, int sequence);
+
 List Macro_case_pattern(Macro t, List names);
 
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);

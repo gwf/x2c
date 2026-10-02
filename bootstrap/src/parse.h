@@ -36,6 +36,8 @@ List Compiler_parse_declaration_row(Compiler c);
 
 List Compiler_parse_simple_declaration(Compiler c);
 
+List Compiler_parse_type_operand(Compiler c, Type * type);
+
 List Compiler_parse_declaration_argument(Compiler c);
 
 int Compiler_test_static_assert(Compiler c);

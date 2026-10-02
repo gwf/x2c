@@ -547,6 +547,8 @@ static char * _string_charset(Var chars);
 typedef struct LispCallback{
   Lisp lisp;
   Var callable;
+  String operation;
+  unsigned arity;
 }
 LispCallback;
 
@@ -564,17 +566,13 @@ static Func _predicate_callback(Var callable);
 
 static Func _iter_callback(Var callable);
 
-static Func _callback(Var callable, FuncAdapter adapter, List signature, String operation);
+static Func _callback(Var callable, FuncAdapter adapter, unsigned arity, String operation);
 
-static Var _unary_call(Func fn, const FuncArg * args);
-
-static Var _binary_call(Func fn, const FuncArg * args);
+static Var _call(Func fn, const FuncArg * args);
 
 static Var _predicate_call(Func fn, const FuncArg * args);
 
-static Var _iter_next_call(Func fn, const FuncArg * args);
-
-static LispCallback * _callback_context(Func fn, String operation);
+static LispCallback * _callback_context(Func fn);
 
 static int _iter_next(Iter iter, Var * out);
 
@@ -3122,76 +3120,64 @@ Var lisp_write_file(String path, String text){
 }
 
 static Func _unary_callback(Var callable){
-  return _callback(callable, _unary_call, unary_signature, _3156);
+  return _callback(callable, _call, 1, _3156);
 }
 
 static Func _binary_callback(Var callable){
-  return _callback(callable, _binary_call, binary_signature, _3156);
+  return _callback(callable, _call, 2, _3156);
 }
 
 static Func _predicate_callback(Var callable){
-  return _callback(callable, _predicate_call, unary_signature, _3156);
+  return _callback(callable, _predicate_call, 1, _3156);
 }
 
 void Scope_move(void *, Scope *);
 
 static Func _iter_callback(Var callable){
-  Func fn = _callback(callable, _iter_next_call, binary_signature, _3157);
+  Func fn = _callback(callable, _call, 2, _3157);
   if(fn) Scope_move(fn, & lisp_active -> scope);
   return fn;
 }
 
 Func Func_new_context(FuncAdapter, List, const void *, size_t);
 
-static Func _callback(Var callable, FuncAdapter adapter, List signature, String operation){
+static Func _callback(Var callable, FuncAdapter adapter, unsigned arity, String operation){
   if(Var_is_nil(callable)) return NULL;
   if(! lisp_active){
-    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1414};
+    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1418};
     x2c_error_raise_n(& _x2c_error_site_39, 4477477457162, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
     __builtin_unreachable();
   }
   LispCallback context ={
-    lisp_active, callable
+    lisp_active, callable, operation, arity
   }
   ;
+  List signature = arity == 1 ? unary_signature : binary_signature;
   return Func_new_context(adapter, signature, & context, sizeof context);
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);
 
-static Var _unary_call(Func fn, const FuncArg * args){
-  LispCallback * context = _callback_context(fn, _3156);
-  Var value = x2c_func_value_argument(fn, args, 0, 45156);
-  return Lisp__apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL);
-}
-
-static Var _binary_call(Func fn, const FuncArg * args){
-  LispCallback * context = _callback_context(fn, _3156);
-  Var left = x2c_func_value_argument(fn, args, 0, 45156);
-  Var right = x2c_func_value_argument(fn, args, 1, 45156);
-  return Lisp__apply_values(context -> lisp, context -> callable, cons(left, cons(right, NULL)), NULL);
+static Var _call(Func fn, const FuncArg * args){
+  LispCallback * context = _callback_context(fn);
+  List values = NULL;
+  for(unsigned i = context -> arity;  i --; ) values = cons(x2c_func_value_argument(fn, args, i, 45156), values);
+  return Lisp__apply_values(context -> lisp, context -> callable, values, NULL);
 }
 
 static Var _predicate_call(Func fn, const FuncArg * args){
-  LispCallback * context = _callback_context(fn, _3156);
+  LispCallback * context = _callback_context(fn);
   Var value = x2c_func_value_argument(fn, args, 0, 45156);
   return lisp_truth(Lisp__apply_values(context -> lisp, context -> callable, cons(value, NULL), NULL));
 }
 
-static Var _iter_next_call(Func fn, const FuncArg * args){
-  LispCallback * context = _callback_context(fn, _3157);
-  Var iter = x2c_func_value_argument(fn, args, 0, 45156);
-  Var out = x2c_func_value_argument(fn, args, 1, 45156);
-  return Lisp__apply_values(context -> lisp, context -> callable, cons(iter, cons(out, NULL)), NULL);
-}
-
 const void * Func_context(Func);
 
-static LispCallback * _callback_context(Func fn, String operation){
+static LispCallback * _callback_context(Func fn){
   LispCallback * context =(void *) Func_context(fn);
   if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1454};
-    x2c_error_raise_n(& _x2c_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
+    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1444};
+    x2c_error_raise_n(& _x2c_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), String_var(context -> operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
     __builtin_unreachable();
   }
   return context;
@@ -3571,7 +3557,7 @@ void Lisp_freeze(Lisp lisp){
 
 _Noreturn static Var _bad_session(String operation){
   {
-    static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 1731};
+    static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/lisp.x",.function = "_bad_session",.line = 1721};
     x2c_error_raise_n(& _x2c_error_site_41, 4372499598, 1, Symbol_var(34096809266140), String_var(operation));
     __builtin_unreachable();
   }
@@ -3793,7 +3779,7 @@ FileReadStatus File_read_into(File, Block);
 Var Lisp_eval_file(Lisp l, File source){
   if(! _init_guard_) _file_init_();
   if(! source){
-    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1837};
+    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1827};
     x2c_error_raise_n(& _x2c_error_site_42, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))));
     __builtin_unreachable();
   }
@@ -3822,14 +3808,14 @@ Var Lisp_eval_file(Lisp l, File source){
         size_t size = content -> length;
         int limit = INT_MAX;
         {
-          static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1842};
+          static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1832};
           x2c_error_raise_n(& _x2c_error_site_43, 1358596898646632, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(1265290), Var_box_ulong(size), Symbol_var(25782888), int_var(limit));
           __builtin_unreachable();
         }
 
       }
       if(memchr(content -> bytes, '\0', content -> length)){
-        static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1845};
+        static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1835};
         x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
         __builtin_unreachable();
       }
@@ -3857,12 +3843,12 @@ int Lisp_try_get(Lisp lisp, String name, Var * out){
 void Lisp_set_global(Lisp lisp, String name, Var value){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name)){
-    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1873};
+    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1863};
     x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))));
     __builtin_unreachable();
   }
   if(lisp -> frozen){
-    static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1874};
+    static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1864};
     x2c_error_raise_n(& _x2c_error_site_46, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL))));
     __builtin_unreachable();
   }
@@ -3879,7 +3865,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
           {
             Var interned = Atom_intern(name);
             if(Lisp__inherited(lisp, interned)){
-              static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1878};
+              static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1868};
               x2c_error_raise_n(& _x2c_error_site_47, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL))), Symbol_var(920394), interned);
               __builtin_unreachable();
             }
@@ -3902,7 +3888,7 @@ void Func_move(Func, Scope *);
 void Lisp_bind(Lisp lisp, String name, Func function){
   if(! _init_guard_) _file_init_();
   if(! lisp || ! String_truth(name) || ! function){
-    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1896};
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/lisp.x",.function = "Lisp_bind",.line = 1886};
     x2c_error_raise_n(& _x2c_error_site_48, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.bind")), NULL))));
     __builtin_unreachable();
   }
@@ -3933,7 +3919,7 @@ Scope * Lisp_result_storage(Lisp lisp){
 Var lisp_source_function(Var callable){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(callable, 9, 7, 3)){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1916};
+    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1906};
     x2c_error_raise_n(& _x2c_error_site_49, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));
     __builtin_unreachable();
   }

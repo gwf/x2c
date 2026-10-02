@@ -98,6 +98,7 @@ lib/logger.x|advanced|Logger.warn,log_debug,log_error,log_event,log_fatal
 lib/logger.x|advanced|log_get_global_logger,log_info,log_set_global_logger
 lib/logger.x|advanced|log_should_log,log_trace,log_warn
 lib/logger.x|internal|Logger.error_handler
+lib/macro-value.x|internal|Macro.binder
 lib/map.x|advanced|Map.compare,Map.equal,Map.repr,Map.str,Map.update_n
 lib/map.x|advanced|Map.write_repr
 lib/map.x|compatibility|Map.del,Map.get,Map.getindex

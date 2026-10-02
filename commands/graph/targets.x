@@ -46,18 +46,24 @@ List project_binding_target(
   return %(public ${compiler.emitted_binding_name(binding)});
 }
 
+/** The node beneath expression, parenthesis, and location shells. */
+Var project_peel(Var value) {
+  while (1) {
+    match (value) {
+      case %((!or expr at) ? ?inner): value = inner;
+      case %(parens ?inner): value = inner;
+      default: return value;
+    }
+  }
+}
+
 List project_call_target(
   Compiler compiler, Map definitions, Var value, String &name,
   List &?arguments) {
   name = NULL;
   if (arguments) arguments = NULL;
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %((!or expr at) ? ?inner):
-      return project_call_target(
-        compiler, definitions, inner, name, arguments);
-    case %((!or stmnt parens) ?inner):
+  match (project_peel(value)) {
+    case %(stmnt ?inner):
       return project_call_target(
         compiler, definitions, inner, name, arguments);
     case %(call ?callee (!set ?call_arguments (args *))): {
@@ -114,14 +120,8 @@ List project_location(Compiler compiler, String path, int origin) {
 /** The binding a direct identifier names beneath expression, parenthesis,
     and location wrappers, or NULL. */
 List project_direct_binding(Var value) {
-  if (value is not <list>) return NULL;
-  List node = value;
-  match (node) {
-    case %(expr ? ?inner): return project_direct_binding(inner);
-    case %(parens ?inner): return project_direct_binding(inner);
-    case %(at ? ?inner): return project_direct_binding(inner);
+  match (project_peel(value))
     case %(ident (!set ?binding (binding ? ?))): return binding;
-  }
   return NULL;
 }
 

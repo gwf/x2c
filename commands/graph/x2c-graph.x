@@ -11,6 +11,7 @@
 #include "loop-allocations.x"
 #include "targets.x"
 #include "clones.x"
+#include "args.x"
 
 #include <errno.h>
 #include <limits.h>
@@ -719,19 +720,11 @@ static void _site_add_prior_write(
 
 static List _site_value_summary(
   Compiler compiler, Var value, Map parameters, Map prior_writes) {
-  if (value is not <list>) return %(form);
-  List node = value;
+  Var peeled = project_peel(value);
+  if (peeled is not <list>) return %(form);
+  List node = peeled;
   if (!node) return %(form);
   match (node) {
-    case %(expr ? ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
-    case %(parens ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
-    case %(at ? ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       if (parameters.contains(binding)) return %(parameter $spelling);
       if (prior_writes.contains(binding)) {
@@ -914,18 +907,9 @@ static List _analyze_sites_unit(
 
 static int _field_whole_target(
   Var value, String receiver_name, String field_name) {
-  if (value is not <list>) return 0;
-  List node = value;
-  if (_field_access_matches(node, receiver_name, field_name)) return 1;
-  match (node) {
-    case %(expr ? ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-    case %(parens ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-    case %(at ? ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-  }
-  return 0;
+  Var node = project_peel(value);
+  return node is <list> &&
+         _field_access_matches(node, receiver_name, field_name);
 }
 
 static void _collect_field_sites(
@@ -1132,20 +1116,6 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
-  int ok = frontend.start(filename, unit);
-  if (ok) {
-    unit.compiler.own_diagnostics();
-    ok = unit.collect(frontend) && unit.parse();
-  }
-  if (ok) return 1;
-  if (!unit.compiler.diagnostics.printer)
-    foreach (Var entry, unit.compiler.diagnostics())
-      unit.compiler.print_diagnostic(entry);
-  unit.close();
-  return 0;
-}
-
 /* Parses each input, keeps the records analyze returns for it past the
    unit's context, closes the unit, and sorts the records. analyze receives
    the parsed unit, its input, and its display path, and returns a List of
@@ -1155,7 +1125,7 @@ static int _analyze_inputs(
   Array found = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return 0;
+    if (!frontend.open_reporting(input, parsed)) return 0;
     String path = parsed.compiler.display_path(input);
     List unit_records = parsed.context.export(
       analyze((void *) &parsed, input, path));
@@ -2258,11 +2228,11 @@ static int _certify_file_effect(Var value) {
   return 0;
 }
 
+/* Certify reopens each input on every pass, so it prints diagnostics only
+   for a unit that fails. */
 static int _certify_open(Frontend frontend, String input,
                          ParsedUnit &parsed) {
-  int ok = frontend.start(input, parsed);
-  if (ok) ok = parsed.collect(frontend) && parsed.parse();
-  if (ok) return 1;
+  if (frontend.open(input, parsed)) return 1;
   foreach (Var diagnostic, parsed.compiler.diagnostics())
     parsed.compiler.print_diagnostic(diagnostic);
   parsed.close();
@@ -2866,6 +2836,49 @@ static void _usage(String program) {
     program);
 }
 
+/* Each command's operand and option rows, ahead of the shared `-I DIR`
+   and input rows; NULL for an unknown command. `datasets` and `compare`
+   split their words at `--` first. */
+static List _command_rows(String command) {
+  foreach (List entry, %(
+      ("graph") ("digest") ("architecture") ("walks") ("tail-calls")
+      ("lifetime-escapes") ("clones" (--min-size (value N)))
+      ("loop-allocations" (--all))
+      ("certify" (--root (value NAME) repeated required)
+        (--contracts (value FILE)))
+      ("structure" (NAME)) ("focus" (NAME)) ("sites" (NAME))
+      ("allocation-returns" (NAME)) ("datasets" (NAME))
+      ("between" (LEFT) (RIGHT)) ("field" (LEFT) (RIGHT))
+      ("field-sites" (LEFT) (RIGHT)) ("flows" (LEFT) (RIGHT))
+      ("compare" (LEFT) (RIGHT) (TARGET repeated required))))
+    if (entry.car().str() == command) return entry;
+  return NULL;
+}
+
+/* Adds each input once under its subtree. Returns 0 when one input is
+   given under both subtrees. */
+static int _add_inputs(
+  Array inputs, Map subtrees, List words, Symbol subtree) {
+  foreach (String word, words) {
+    String input = _canonical_input(word);
+    Var known;
+    if (!subtrees.try_get(input, known)) {
+      subtrees[input] = subtree;
+      inputs.push(input);
+    }
+    else if (known.symbol() != subtree) return 0;
+  }
+  return 1;
+}
+
+/* A clone size in [1, INT_MAX], or 0 for anything else. */
+static int _clone_minimum(String text) {
+  char *end;
+  errno = 0;
+  long value = strtol(text, &end, 10);
+  return errno || *end || value < 1 || value > INT_MAX ? 0 : value;
+}
+
 String x2c_embedded_identity(void);
 
 int main(int argc, char **argv) {
@@ -2875,155 +2888,51 @@ int main(int argc, char **argv) {
     _usage(argv[0]);
     return 0;
   }
-  int clones = argc > 1 && !strcmp(argv[1], "clones");
+  String verb = argc > 1 ? String.new(argv[1]) : "";
+  int datasets = verb == "datasets", compare = verb == "compare";
+  List rows = _command_rows(verb), words = Args.from_argv(argc, argv).cdr();
+  List after = NULL;
+  if (datasets || compare) {
+    Array before = [];
+    for (; words && words.car().str() != "--"; words = words.cdr())
+      before.push(words.car());
+    after = words ? words.cdr() : NULL;
+    words = before.list_free();
+  }
+  List common = %((-I (value DIR) repeated));
+  List files = %(@common (inputs repeated required));
+  Map options = NULL, libraries = NULL;
   int clone_minimum = 24;
-  int datasets = argc > 1 && !strcmp(argv[1], "datasets");
-  int architecture = argc > 1 && !strcmp(argv[1], "architecture");
-  int structure = argc > 1 && !strcmp(argv[1], "structure");
-  int between = argc > 1 && !strcmp(argv[1], "between");
-  int focus = argc > 1 && !strcmp(argv[1], "focus");
-  int field = argc > 1 && !strcmp(argv[1], "field");
-  int field_sites = argc > 1 && !strcmp(argv[1], "field-sites");
-  int sites = argc > 1 && !strcmp(argv[1], "sites");
-  int walks = argc > 1 && !strcmp(argv[1], "walks");
-  int tail_calls = argc > 1 && !strcmp(argv[1], "tail-calls");
-  int loop_allocations =
-    argc > 1 && !strcmp(argv[1], "loop-allocations");
-  int loop_limit = LOOP_ALLOCATION_LIMIT;
-  int lifetime_escapes =
-    argc > 1 && !strcmp(argv[1], "lifetime-escapes");
-  int certify = argc > 1 && !strcmp(argv[1], "certify");
-  int allocation_returns =
-    argc > 1 && !strcmp(argv[1], "allocation-returns");
-  int flows = argc > 1 && !strcmp(argv[1], "flows");
-  int compare = argc > 1 && !strcmp(argv[1], "compare");
-  int separator = -1;
-  if (compare)
-    for (int i = 4; i < argc; i++)
-      if (!strcmp(argv[i], "--")) {
-        separator = i;
-        break;
-      }
-  if (datasets)
-    for (int i = 3; i < argc; i++)
-      if (!strcmp(argv[i], "--")) {
-        separator = i;
-        break;
-      }
-  int first_input = compare ? separator + 1
-                  : datasets ? 3
-                  : field || field_sites || flows ? 4
-                  : between ? 4
-                  : structure || focus || sites || allocation_returns ? 3 : 2;
-  if ((compare && separator < 5) ||
-      (datasets && (argc < 6 || separator < 4)) ||
-      argc <= first_input ||
-      (strcmp(argv[1], "graph") && strcmp(argv[1], "digest") &&
-       !clones && !datasets && !architecture && !structure && !between &&
-       !focus && !field &&
-       !field_sites && !sites && !walks &&
-       !tail_calls && !loop_allocations && !lifetime_escapes && !certify &&
-       !allocation_returns && !flows && !compare)) {
+  Array inputs = [];
+  Map subtrees = {};
+  try {
+    if (!rows || ((datasets || compare) && !after)) raise %(bad-arg);
+    options = Args.parse(words, %(@{rows.cdr()} @{compare ? common : files}));
+    if (after) libraries = Args.parse(after, files);
+    if (verb == "clones" && options["min-size"])
+      clone_minimum = _clone_minimum(options["min-size"]);
+    if (!clone_minimum ||
+        !_add_inputs(inputs, subtrees, options.getdefault("inputs", NULL),
+                     <src>) ||
+        (libraries &&
+         !_add_inputs(inputs, subtrees, libraries["inputs"],
+                      datasets ? <lib> : <src>)))
+      raise %(bad-arg);
+  }
+  catch %(bad-arg *): {
     _usage(argv[0]);
     return 2;
   }
-  Array inputs = [], include_dirs = [], compare_operations = [];
-  Array certify_roots = [];
-  String contract_path = NULL;
-  Array src_inputs = [], lib_inputs = [];
-  Map seen = {}, subtrees = {};
-  String dataset_output = datasets ? String.new(argv[2]) : NULL;
-  String wanted = structure ? _display_input(String.new(argv[2]))
-                : focus || sites || allocation_returns
-                ? String.new(argv[2]) : NULL;
-  String left = between ? _display_input(String.new(argv[2])) : NULL;
-  String right = between ? _display_input(String.new(argv[3])) : NULL;
-  String receiver_name = field || field_sites
-                       ? String.new(argv[2]) : NULL;
-  String field_name = field || field_sites
-                    ? String.new(argv[3]) : NULL;
-  String producer = flows ? String.new(argv[2]) : NULL;
-  String consumer = flows ? String.new(argv[3]) : NULL;
-  String compare_left = compare ? String.new(argv[2]) : NULL;
-  String compare_right = compare ? String.new(argv[3]) : NULL;
-  if (compare)
-    for (int i = 4; i < separator; i++)
-      compare_operations.push(String.new(argv[i]));
-  compare_operations.sort();
-  for (int i = first_input; i < argc; i++) {
-    if (certify && !strcmp(argv[i], "--root")) {
-      if (++i == argc) { _usage(argv[0]); return 2; }
-      certify_roots.push(String.new(argv[i]));
-      continue;
-    }
-    if (certify && !strcmp(argv[i], "--contracts")) {
-      if (++i == argc || contract_path) {
-        _usage(argv[0]);
-        return 2;
-      }
-      contract_path = String.new(argv[i]);
-      continue;
-    }
-    if (clones && !strcmp(argv[i], "--min-size")) {
-      if (++i == argc) { _usage(argv[0]); return 2; }
-      char *end;
-      errno = 0;
-      long value = strtol(argv[i], &end, 10);
-      if (errno || *end || value < 1 || value > INT_MAX) {
-        _usage(argv[0]);
-        return 2;
-      }
-      clone_minimum = value;
-      continue;
-    }
-    if (datasets && !strcmp(argv[i], "--")) {
-      if (i == separator) continue;
-      _usage(argv[0]);
-      return 2;
-    }
-    if (loop_allocations && !strcmp(argv[i], "--all")) {
-      loop_limit = 0;
-      continue;
-    }
-    if (!strcmp(argv[i], "-I")) {
-      if (++i == argc) {
-        _usage(argv[0]);
-        return 2;
-      }
-      include_dirs.push(String.new(argv[i]));
-      continue;
-    }
-    if (argv[i][0] == '-') {
-      _usage(argv[0]);
-      return 2;
-    }
-    String input = _canonical_input(String.new(argv[i]));
-    Symbol subtree = datasets && i > separator ? <lib> : <src>;
-    if (seen.contains(input)) {
-      if (datasets && subtrees[input].symbol() != subtree) {
-        _usage(argv[0]);
-        return 2;
-      }
-    }
-    else {
-      seen[input] = 1;
-      inputs.push(input);
-      if (datasets) {
-        subtrees[input] = subtree;
-        if (subtree == <src>) src_inputs.push(input);
-        else lib_inputs.push(input);
-      }
-    }
-  }
-  if (!inputs.len() || (certify && !certify_roots.len()) || (datasets &&
-      (!src_inputs.len() || !lib_inputs.len()))) {
-    _usage(argv[0]);
-    return 2;
-  }
+  String name = options.getdefault("NAME", NULL);
+  String left = options.getdefault("LEFT", NULL);
+  String right = options.getdefault("RIGHT", NULL);
   inputs.sort();
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
-  request.include_dirs = include_dirs.list_free();
+  request.include_dirs = options["I"].list();
+  if (libraries)
+    request.include_dirs =
+      %(@{request.include_dirs} @{libraries["I"].list()});
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
   if (!frontend.preload_macro_libraries()) return 1;
@@ -3032,53 +2941,50 @@ int main(int argc, char **argv) {
   int status = 0;
   try {
     List result = NULL;
-    if (certify) {
+    if (verb == "certify") {
       int valid = 0;
-      Map contracts = certify_contracts(contract_path, valid);
+      Map contracts = certify_contracts(options["contracts"], valid);
       if (!valid) status = 2;
       else result = certify_result(
-        frontend, inputs, certify_roots, contracts, status
+        frontend, inputs, options["root"].list().array(), contracts, status
       );
     }
-    else if (clones)
+    else if (verb == "clones")
       result = graph_clones(frontend, inputs, clone_minimum);
-    else if (field)
-      result = _parse_field_units(
-        frontend, inputs, receiver_name, field_name);
-    else if (field_sites)
-      result = _parse_field_sites(
-        frontend, inputs, receiver_name, field_name);
-    else if (sites)
-      result = _parse_sites(frontend, inputs, wanted);
-    else if (walks)
+    else if (verb == "field")
+      result = _parse_field_units(frontend, inputs, left, right);
+    else if (verb == "field-sites")
+      result = _parse_field_sites(frontend, inputs, left, right);
+    else if (verb == "sites")
+      result = _parse_sites(frontend, inputs, name);
+    else if (verb == "walks")
       result = _parse_walk_units(frontend, inputs);
-    else if (tail_calls)
+    else if (verb == "tail-calls")
       result = _parse_tail_units(frontend, inputs);
-    else if (loop_allocations)
+    else if (verb == "loop-allocations")
       result = _parse_loop_allocation_units(
-        frontend, inputs, loop_limit);
-    else if (lifetime_escapes || allocation_returns)
-      result = _parse_lifetime_units(
-        frontend, inputs, allocation_returns ? wanted : NULL);
-    else if (flows)
-      result = _parse_flow_units(frontend, inputs, producer, consumer);
+        frontend, inputs, options["all"] ? 0 : LOOP_ALLOCATION_LIMIT);
+    else if (verb == "lifetime-escapes" || verb == "allocation-returns")
+      result = _parse_lifetime_units(frontend, inputs, name);
+    else if (verb == "flows")
+      result = _parse_flow_units(frontend, inputs, left, right);
     else {
       List units = _parse_units(
         frontend, inputs, datasets ? subtrees : NULL);
       if (units) {
         Map attributes = datasets ? {} : NULL;
         List graph = _resolve_graph(units, attributes);
-        if (datasets) _write_datasets(dataset_output, graph, attributes);
-        result = datasets ? graph
-               : !strcmp(argv[1], "graph") ? graph
-               : !strcmp(argv[1], "digest") ? _digest(graph)
-               : architecture ? _architecture(graph)
-               : structure ? _structure(graph, wanted)
-               : between ? _between(graph, left, right)
+        if (datasets) _write_datasets(name, graph, attributes);
+        result = datasets || verb == "graph" ? graph
+               : verb == "digest" ? _digest(graph)
+               : verb == "architecture" ? _architecture(graph)
+               : verb == "structure"
+               ? _structure(graph, _display_input(name))
+               : verb == "between"
+               ? _between(graph, _display_input(left), _display_input(right))
                : compare ? _compare_result(
-                 graph, compare_left, compare_right,
-                 compare_operations.list_free())
-               : _focus(graph, wanted);
+                 graph, left, right, options["TARGET"].list().sort())
+               : _focus(graph, name);
       }
     }
     if (!result) status = 1;

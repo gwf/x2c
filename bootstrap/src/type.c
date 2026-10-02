@@ -1091,6 +1091,11 @@ Var Type_numeric_literal_value(Type type, String text){
   int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);  int end = _integer_literal_end(text);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, end, &(magnitude), &(decimal))) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
 }
 
+int String_truth(String);
+int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value){
+  if(! _init_guard_) _file_init_();  if(! Type_is_integral(type) || ! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;  int decimal;  return _literal_magnitude(text, _integer_literal_end(text), &((* value)), &(decimal));
+}
+
 static int _integer_literal_end(String text){
   int end = String_len(text);  while(end > 0){
     int ch = String_getindex(text, end - 1);  if(ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;  end --;
@@ -1203,7 +1208,6 @@ int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsi
   if(! _init_guard_) _file_init_();  Var row = Map_getindex(Type_var_tag_rows(), Symbol_var(tag));  if(Var_is_void(row)) return 0;  List fields = Var_list(row); (* top) = Var_ulong(Var_convert(List_car(fields), 44858254)); (* mask) = Var_ulong(Var_convert(List_cadr(fields), 44858254)); (* bottom) = Var_ulong(Var_convert(List_caddr(fields), 44858254));  return 1;
 }
 
-int String_truth(String);
 Var Map_setindex(Map, Var, Var);
 Symbol String_symbol(String);
 String String_lower(String);

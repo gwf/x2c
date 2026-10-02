@@ -128,22 +128,22 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 String DisjointSet_str(DisjointSet value){
   if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
+  Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & out;
+    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_out_0;
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      DisjointSet_write_str(value, out);
+      DisjointSet_write_str(value, _x2c_macro_out_0);
       {
-        String _x2c_return_value_0 = Buffer_str(out);
+        String _x2c_return_value_0 = Buffer_str(_x2c_macro_out_0);
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
           return _x2c_return_value_0;
@@ -211,22 +211,22 @@ Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
 
 String DisjointSet_repr(DisjointSet value){
   if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
+  Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & out;
+    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & _x2c_macro_out_1;
     X2CCleanup _x2c_defer_record_2 ={
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      DisjointSet_write_repr(value, out);
+      DisjointSet_write_repr(value, _x2c_macro_out_1);
       {
-        String _x2c_return_value_2 = Buffer_str(out);
+        String _x2c_return_value_2 = Buffer_str(_x2c_macro_out_1);
         {
           x2c_cleanup_leave(& _x2c_defer_record_2);
           return _x2c_return_value_2;

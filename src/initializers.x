@@ -17,6 +17,7 @@ $(import "../lib/private-keywords.xmacro")
 
 #pragma private
 $(import "../src/grammar.xmacro")
+$(import "../src/adapter-memo.xmacro")
 #include "ast.x"
 #include "expressions.x"
 #include "macros.x"
@@ -919,21 +920,18 @@ static List Compiler._initializer_adapter(
   Type result = c._initializer_value_type(converted.cadr());
   List formal = %(expr ${source.cadr()} "_x2c_initializer_argument");
   List body = converted.search_replace(%(!quote $source), formal);
-  List key = %(iadapt $from $result $body);
-  Var stored;
-  if (c.names.adapters.try_get(key, stored)) return stored;
-  List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
-  List input = %(expr ${source.cadr()} (ident $parameter));
-  body = body.search_replace(%(!quote $formal), input);
-  List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
-  List params = %(params ${from.parameter_ast(parameter)});
-  List function = %(function (static $result)
-    (bind $binding ((fnmod $params)))
-    (block (stmnt (return $body))));
-  Type callable = %((func ($from)) @result);
-  List adapter = %(expr $callable (ident $binding));
-  c.names.adapters[key] = adapter;
-  c.add_early(function);
+  List key = %(iadapt $from $result $body), adapter = NULL;
+  $adapter.memo(c, key, adapter) {
+    List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
+    List input = %(expr ${source.cadr()} (ident $parameter));
+    body = body.search_replace(%(!quote $formal), input);
+    List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
+    c.add_early(c.wrapper_function(
+      %(static @result), binding, %(${from.parameter_ast(parameter)}),
+      %((return $result $body))));
+    Type callable = %((func ($from)) @result);
+    adapter = %(expr $callable (ident $binding));
+  }
   return adapter;
 }
 
@@ -1011,25 +1009,16 @@ static void _initializer_position(
   offset = 0;
 }
 
-// Decode only a literal fact; native expressions are never evaluated here.
+/* Decode only a literal fact; native expressions are never evaluated here.
+   A bare spelling is the int bound a canonical array type keeps. */
 static int _initializer_integer(List expression, unsigned long long &value) {
-  String text = NULL;
   match (expression) {
-    case %(expr ? ${$source_literal_content(%(? ?spelling))}):
-      text = spelling;
-    case %(?(String spelling)): text = spelling;
+    case %(expr ? ${$source_literal_content(%(?type ?spelling))}):
+      return ((Type) type).integer_literal_magnitude(spelling, value);
+    case %(?(String spelling)):
+      return Type.integer_literal_magnitude(%(int), spelling, value);
   }
-  if (!text || text[0] < '0' || text[0] > '9') return 0;
-  char *end, *digits = text;
-  int base = 0;
-  if (text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) base = 2;
-  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O')) base = 8;
-  if (base) digits += 2;
-  unsigned long long decoded = strtoull(digits, &end, base);
-  while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
-  if (*end) return 0;
-  value = decoded;
-  return 1;
+  return 0;
 }
 
 static List _ull_literal(unsigned long long value) {

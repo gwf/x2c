@@ -1226,20 +1226,21 @@ static List Capture_record(Capture * k, Type captured_type, List expression, int
   Map facts =(* k).facts;  List captured = Sym_introduce((* k).c -> sym, binding_identity_spelling((* k).binding));  List row = cons(_71, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Map_setindex(facts, List_var((* k).key), List_var(row));  Map_setindex(facts, List_var(cons(_30288, cons(List_var(captured), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_20887, cons(List_var(captured), NULL))), List_var(captured_type));  Map_setindex(facts, List_var(cons(_30584, cons(List_var(captured), NULL))), (* k).depth);  if(reference) Map_setindex(facts, List_var(cons(_30558, cons(List_var(captured), NULL))), int_var(1));  else Map_setindex(facts, List_var(cons(_30589, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_30561, cons((* k).scope, NULL));  Map_setindex(facts, List_var(order), List_var(cons(List_var(row), Var_list(Map_getdefault(facts, List_var(order), List_var(NULL))))));  return row;
 }
 
+Array Array_update_n(Array, unsigned, ...);
 Var Array_take_last(Array);
 int Var_is_nil(Var);
 List Ast_written_operand(Ast);
 void Compiler_check_lambda_captures(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return;  Array pending = Array_new(); {
+  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return;  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, List_var(ast)); {
     _x2c_defer_env_6 _x2c_macro_environment_6 ={
       0
     }
-    ;  _x2c_macro_environment_6._x2c_defer_capture_10 =(const void *) & pending;  X2CCleanup _x2c_defer_record_6 ={
+    ;  _x2c_macro_environment_6._x2c_defer_capture_10 =(const void *) & _x2c_macro_pending_0;  X2CCleanup _x2c_defer_record_6 ={
       .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_6); {
-      Array_push(pending, List_var(ast));  while(Array_len(pending)){
-        Var current = Array_take_last(pending);  if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;  List node = Var_list(current);
+      while(Array_len(_x2c_macro_pending_0)){
+        Var _x2c_macro_current_0 = Array_take_last(_x2c_macro_pending_0);  if(! Var_is_row(_x2c_macro_current_0, 9, 7, 4) || Var_is_nil(_x2c_macro_current_0)) continue;  node = Var_list(_x2c_macro_current_0);
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -1261,12 +1262,7 @@ void Compiler_check_lambda_captures(Compiler c, List ast){
 default: ;  Compiler__require_capture_lvalue(c, Ast_written_operand(node));  break;
     }
   }
-{
-  Var child;  List _x2c_macro_object_8 = node;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-    child = _x2c_macro_cursor_output_8;  Array_push(pending, child);
-  }
-
-}
+for(List _x2c_macro_cursor_8 = node;  List_truth(_x2c_macro_cursor_8);  _x2c_macro_cursor_8 = List_cdr(_x2c_macro_cursor_8)) if(Var_is_row(List_car(_x2c_macro_cursor_8), 9, 7, 4)) Array_push(_x2c_macro_pending_0, List_car(_x2c_macro_cursor_8));
 }
 }
 x2c_cleanup_leave(& _x2c_defer_record_6);

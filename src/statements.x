@@ -226,8 +226,7 @@ static List Compiler._for_statement(Compiler c) {
 static List Compiler._for_init(Compiler c) {
   if (c.peek(0) == <;>) return NULL;
   if (!c.test_declaration()) return c.parse_expression();
-  List init = c.parse_simple_declaration();
-  return cons(<decl>, init.cdr());
+  return c.parse_type_operand(NULL);
 }
 
 static List Compiler._do_statement(Compiler c) {

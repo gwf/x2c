@@ -15,6 +15,7 @@ Configured compiler sessions and sequential source units.
 | [`Frontend.load_support`](#Frontend.load_support) | Loads process-owned collection support and the native modules `request` names before units, and selects those modules, in order, for its compile-time calls. |
 | [`Frontend.new`](#Frontend.new) | Borrows a configured request for sequential units. |
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
+| [`Frontend.open_reporting`](#Frontend.open_reporting) | Runs the source stages for a command that reports to stderr. |
 | [`Frontend.open_session`](#Frontend.open_session) | Opens an empty submission unit with the ordinary runtime prelude. |
 | [`Frontend.preload_macro_libraries`](#Frontend.preload_macro_libraries) | Evaluates the compile-time libraries and installs the compiler surface's own definitions, once for the active build or translation target. |
 | [`Frontend.start`](#Frontend.start) | Tokenizes one input into a fresh unit with its own isolated `Context`. |
@@ -33,7 +34,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:440`
+Source: `src/frontend.x:456`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -44,7 +45,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:451`
+Source: `src/frontend.x:467`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -56,6 +57,18 @@ unit.
 
 Source: `src/frontend.x:59`
 
+<a id="Frontend.open_reporting"></a>
+#### Frontend.open_reporting
+
+`int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit)`
+
+Runs the source stages for a command that reports to stderr. Collection
+and parsing print each diagnostic as it is reported; a tokenizing
+failure prints its diagnostics afterward. A failed unit is closed; the
+caller must close a successful one.
+
+Source: `src/frontend.x:67`
+
 <a id="Frontend.open_session"></a>
 #### Frontend.open_session
 
@@ -65,7 +78,7 @@ Opens an empty submission unit with the ordinary runtime prelude.
 Preload macro libraries first. The caller must close the unit on either
 result; submissions and inspection results borrow its Context.
 
-Source: `src/frontend.x:65`
+Source: `src/frontend.x:81`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -77,7 +90,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:376`
+Source: `src/frontend.x:392`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -87,7 +100,7 @@ Source: `src/frontend.x:376`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:75`
+Source: `src/frontend.x:91`
 
 ### `ParsedUnit`
 
@@ -99,7 +112,7 @@ Source: `src/frontend.x:75`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:110`
+Source: `src/frontend.x:126`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -109,7 +122,7 @@ Source: `src/frontend.x:110`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:81`
+Source: `src/frontend.x:97`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -119,7 +132,7 @@ Source: `src/frontend.x:81`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:99`
+Source: `src/frontend.x:115`
 
 ## Public types
 

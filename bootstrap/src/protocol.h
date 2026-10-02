@@ -31,6 +31,8 @@ List Compiler_resolve_protocol_member(Compiler c, Type participant, String membe
 
 List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);
 
+List Compiler_forward_parameters(Compiler c, List types);
+
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which);

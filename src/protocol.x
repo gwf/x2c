@@ -14,6 +14,7 @@
 #pragma private
 $(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
+$(import "../src/adapter-memo.xmacro")
 
 #include <limits.h>
 #include <stdlib.h>
@@ -119,20 +120,18 @@ typedef struct AdoptionDraft {
 // source locations
 
 static String Compiler._path(Compiler c) {
-  Var cached;
-  if (c.protocol_helpers.try_get(<proto-path>, cached)) return cached;
-  String result = c._normalize_file(c.filename ? c.filename : "<stdin>");
-  c.protocol_helpers[<proto-path>] = result;
+  String result = NULL;
+  $memo(c.protocol_helpers, <proto-path>, result) {
+    result = c._normalize_file(c.filename ? c.filename : "<stdin>");
+  }
   return result;
 }
 
 static String Compiler._canonical_file(Compiler c, List location) {
-  String file = _location_file(location);
-  List key = %(proto-file $file);
-  Var cached;
-  if (c.protocol_helpers.try_get(key, cached)) return cached;
-  String result = c._normalize_file(file);
-  c.protocol_helpers[key] = result;
+  String file = _location_file(location), result = NULL;
+  $memo(c.protocol_helpers, %(proto-file $file), result) {
+    result = c._normalize_file(file);
+  }
   return result;
 }
 
@@ -1506,53 +1505,57 @@ static void Compiler._install_imports(Compiler c) {
   c.rebuild_protocols(symbols);
 }
 
-static List Compiler._ancestry(Compiler c, Type participant) =>
-  c._proto_cached(
-    %("protocol-ancestry" $participant), %!(Compiler &c) => {
+static List Compiler._ancestry(Compiler c, Type participant) {
+  List result = NULL;
+  $memo(c.proto_cache, %("protocol-ancestry" $participant), result) {
     Array ancestry = [], Type current = participant;
     for (int distance = 0; current && distance <= 128; distance++) {
       ancestry.push(current);
       if (!current.is_typedef_name() && !current.is_typedef()) break;
       current = c.sym.get(current);
     }
-    return ancestry.list_free();
-  });
-
-/* The single entry point for proto_cache. A hit returns the cached List (a
-   non-list value records a null result); a miss runs compute(c) and
-   stores what it returns. */
-static List Compiler._proto_cached(Compiler c, Var key, Func compute) {
-  Var cached;
-  if (c.proto_cache.try_get(key, cached))
-    return cached is <list> ? cached : NULL;
-  List result = compute(c);
-  c.proto_cache[key] = result ? result : 0;
+    result = ancestry.list_free();
+  }
   return result;
 }
 
-static List Compiler._ordered_occurrences(Compiler c) =>
-  c._proto_cached(
-    <proto-ordr>, %!(Compiler &c) => {
+static List Compiler._ordered_occurrences(Compiler c) {
+  List result = NULL;
+  $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];
     foreach (Var (base, occurrence), c.protocols)
       ordered.push(%($base $occurrence));
     ordered.sort();
-    return ordered.list_free();
-  });
+    result = ordered.list_free();
+  }
+  return result;
+}
+
+/* Runs visit once for each conformance participant adopts, in protocols
+   order, after setting the caller's base to the protocol and rows to its
+   member rows. */
+macro Decorator $adopted_rows(Block $visit, Expr $compiler, Expr $protocols,
+    Expr $participant, Name $base, Name $rows) {
+  foreach (List entry, $protocols) {
+    $base = entry.car();
+    if (!$compiler._is_adopted($base, $participant)) continue;
+    List conformance = $compiler.protocol_members_for($participant, $base);
+    if (!conformance) continue;
+    $rows = conformance.last().list().cdr();
+    $visit;
+  }
+}
 
 /** Returns unique member spellings from the participant's visible adopted
     conformances. Resolution remains responsible for selecting a binding. */
 List Compiler.protocol_member_names(Compiler c, Type participant) {
   Map seen = {};
   Array names = [];
-  List protocols = c._ordered_occurrences();
+  List protocols = c._ordered_occurrences(), rows = NULL;
+  Type base = NULL;
   foreach (Type current, c._ancestry(participant.canonicalize()))
-    foreach (List entry, protocols) {
-      Type base = entry.car();
-      if (!c._is_adopted(base, current)) continue;
-      List conformance = c.protocol_members_for(current, base);
-      if (!conformance) continue;
-      foreach (List row, conformance.last().list().cdr()) {
+    $adopted_rows(c, protocols, current, base, rows) {
+      foreach (List row, rows) {
         String name = row.car();
         if (name && !seen.contains(name)) {
           seen[name] = 1;
@@ -1571,52 +1574,30 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
 int Compiler.protocol_rejects_direct_member(
   Compiler c, Type participant, String member) {
   Type owner = participant.canonicalize();
-  List cache_key = %("protocol-rejects" $owner $member);
-  Var cached;
-  if (c.proto_cache.try_get(cache_key, cached)) return cached;
-  List protocols = c._ordered_occurrences(), int rejects = 0;
-  foreach (Type ancestor, c._ancestry(owner)) {
-    List row = c._member_row(protocols, ancestor, member);
-    if (row) {
-      Symbol status = row.cadr();
-      rejects = status == <native> || status == <base-dflt> ||
-                status == <no-member> || status == <sig-cnflct>;
-      break;
+  int rejects = 0;
+  $memo(c.proto_cache, %("protocol-rejects" $owner $member), rejects) {
+    List protocols = c._ordered_occurrences();
+    foreach (Type ancestor, c._ancestry(owner)) {
+      List row = c._member_row(protocols, ancestor, member);
+      if (row) {
+        Symbol status = row.cadr();
+        rejects = status == <native> || status == <base-dflt> ||
+                  status == <no-member> || status == <sig-cnflct>;
+        break;
+      }
     }
   }
-  c.proto_cache[cache_key] = rejects;
   return rejects;
 }
 
 static List Compiler._member_row(
   Compiler c, List protocols, Type participant, String member) {
-  List found = NULL;
-  c._each_adopted_row(
-    protocols, participant,
-    %!(Compiler &c, Type base, List row) using &found => {
-      (void) c; (void) base;
-      if (row.car() == member) {
-        found = row;
-        return 1;
-      }
-      return 0;
-    });
-  return found;
-}
-
-/* Drive visit(c, base, row) over every member row of participant's
-   adopted conformances, in protocols order. A nonzero visit result stops the
-   iteration. */
-static void Compiler._each_adopted_row(
-  Compiler c, List protocols, Type participant, Func visit) {
-  foreach (List entry, protocols) {
-    Type base_type = entry.car();
-    if (!c._is_adopted(base_type, participant)) continue;
-    List conformance = c.protocol_members_for(participant, base_type);
-    if (!conformance) continue;
-    foreach (List row, conformance.last().list().cdr())
-      if (visit(c, base_type, row).int()) return;
+  Type base = NULL;
+  List rows = NULL;
+  $adopted_rows(c, protocols, participant, base, rows) {
+    foreach (List row, rows) if (row.car() == member) return row;
   }
+  return NULL;
 }
 
 /** Prints stable conformance rows for typedefs in `globs`.
@@ -1631,19 +1612,14 @@ void Compiler.dump_conformance(Compiler c, Map globs) {
       case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
-  List protocols = c._ordered_occurrences();
+  List protocols = c._ordered_occurrences(), rows = NULL;
+  Type base = NULL;
   foreach (Var candidate, names) {
     Type participant = %(${candidate.str()});
-    foreach (List entry, protocols) {
-      Type base_type = entry.car();
-      if (!c._is_adopted(base_type, participant)) continue;
-      List conformance = c.protocol_members_for(participant, base_type);
-      if (!conformance) continue;
+    $adopted_rows(c, protocols, participant, base, rows) {
       _dump_row(
-        "conformance",
-        c._owns_adoption(base_type, participant),
-        base_type, participant,
-        conformance.last().list().cdr());
+        "conformance", c._owns_adoption(base, participant), base,
+        participant, rows);
     }
   }
   names.free();
@@ -1738,18 +1714,18 @@ List Compiler.resolve_protocol_member(
 
 static List Compiler._resolve_member(
   Compiler c, Type participant, String member_name) {
-  List cache_key = %("protocol-member" $participant $member_name);
-  return c._proto_cached(
-    cache_key, %!(Compiler &c) => {
+  List key = %("protocol-member" $participant $member_name), selected = NULL;
+  $memo(c.proto_cache, key, selected) {
     List protocols = c._ordered_occurrences();
     List ancestry = c._ancestry(participant);
     /* A generated member is selected before a direct base alias. */
-    List selected = c._generated_member(ancestry, member_name);
-    if (selected) return selected;
-    selected = c._base_alias(protocols, participant, ancestry, member_name);
-    return selected ? selected
-      : c._adopted_member(protocols, ancestry, member_name);
-  });
+    selected = c._generated_member(ancestry, member_name);
+    if (!selected)
+      selected = c._base_alias(protocols, participant, ancestry, member_name);
+    if (!selected)
+      selected = c._adopted_member(protocols, ancestry, member_name);
+  }
+  return selected;
 }
 
 static List Compiler._generated_member(
@@ -1835,18 +1811,25 @@ typedef struct GeneratedOwners {
 
 /* Select the sole generated owner across all adopted protocols. */
 static List Compiler._generated_owner(
-  Compiler c, Type participant, String member_name) {
-  List cache_key = %("protocol-generated-owner" $participant $member_name);
-  return c._proto_cached(
-    cache_key, %!(Compiler &c) => {
-    GeneratedOwners owners = {
-      .participant = participant, .member = member_name, .candidates = []};
-    c._each_adopted_row(
-      c._ordered_occurrences(), participant,
-      %!(Compiler &c, Type base, List row)
-        using &owners => owners.consider(c, base, row));
-    return owners.decision();
-  });
+  Compiler c, Type participant, String member) {
+  List key = %("protocol-generated-owner" $participant $member), owner = NULL;
+  $memo(c.proto_cache, key, owner) {
+    owner = c._generated_decision(participant, member);
+  }
+  return owner;
+}
+
+static List Compiler._generated_decision(
+  Compiler c, Type participant, String member) {
+  GeneratedOwners owners = {
+    .participant = participant, .member = member, .candidates = []};
+  Type base = NULL;
+  List rows = NULL;
+  $adopted_rows(c, c._ordered_occurrences(), participant, base, rows) {
+    foreach (List row, rows)
+      if (owners.consider(c, base, row)) return owners.decision();
+  }
+  return owners.decision();
 }
 
 static int GeneratedOwners.consider(
@@ -1952,15 +1935,35 @@ macro open Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
     parameter declarations, and `body` its lowered statements. */
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
-  /* The template's own definition is not authored API of this unit; a
-     documented prototype the function completes keeps its prose. */
+  Macro wrapper = $compiler_wrapper;
+  return c._generated_function(
+    binding,
+    wrapper(result, binding, %(code-value "lowered" (seq @body) ()), params));
+}
+
+/** Returns `(declarations arguments)` for a helper that forwards its
+    parameters of `types`: each declaration names a fresh parameter `a0`,
+    `a1`, ..., and each argument reads it. */
+List Compiler.forward_parameters(Compiler c, List types) {
+  Array declarations = [], arguments = [];
+  int index = 0;
+  foreach (Type type, types) {
+    List binding = c.sym.introduce(%"a${index++}");
+    declarations.push(type.parameter_ast(binding));
+    arguments.push(%(expr $type (ident $binding)));
+  }
+  return %(${declarations.list_free()} ${arguments.list_free()});
+}
+
+/* Binds `syntax`, a template that defines the function `binding`. The
+   template's own definition is not authored API of this unit; a documented
+   prototype the function completes keeps its prose. */
+static List Compiler._generated_function(
+  Compiler c, List binding, List syntax) {
   List key = %(api-definition $binding);
   Var authored;
   int documented = c.semantic_binding_facts().try_get(key, authored);
-  Macro wrapper = $compiler_wrapper;
-  List function = c.bind_syntax(
-    wrapper(result, binding, %(code-value "lowered" (seq @body) ()), params),
-    AST_UNIT, NULL);
+  List function = c.bind_syntax(syntax, AST_UNIT, NULL);
   if (documented) c.semantic_binding_facts()[key] = authored;
   else c.semantic_binding_facts().del(key);
   return function;
@@ -1972,25 +1975,24 @@ static List Compiler._bound_call(
   return c.rebuild_expression(result, shape(callee, arguments));
 }
 
-macro open Statement $update_body(Expr $current, Expr $call) {
-  $current = $call;
-  return $current;
+/* A direct protocol update stores the member's result through `lhs`; the
+   `op` parameter keeps the update ABI of the dynamic path. */
+macro open Unit $protocol_update(
+    Type $type, Type $rhs_type, Name $helper, Expr $member) {
+  static $type $helper(volatile $type *lhs, Symbol op, $rhs_type rhs) {
+    lhs[0] = $member(lhs[0], rhs);
+    return lhs[0];
+  }
 }
 
-macro open Statement $postfix_body(
-    Type $type, Name $old, Expr $current, Expr $call) {
-  $type $old = $current;
-  $current = $call;
-  return $old;
+/* The postfix form adds one and returns the value it read first. */
+macro open Unit $protocol_postfix(Type $type, Name $helper, Expr $member) {
+  static $type $helper(volatile $type *lhs, Symbol op) {
+    $type old = lhs[0];
+    lhs[0] = $member(lhs[0], 1);
+    return old;
+  }
 }
-
-typedef struct ProtocolUpdate {
-  Compiler c;
-  Type participant, rhs_type, result, source_type;
-  List source_binding, helper_binding, current, call_rhs, old_binding;
-  Array declarations;
-  int postfix;
-} ProtocolUpdate;
 
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
@@ -2020,60 +2022,22 @@ String Compiler.protocol_update_helper(
   String suffix = postfix ? "postfix" : "update";
   String name =
     %"_x2c_proto_${participant.car().str().lower()}_${member}_$suffix";
-  ProtocolUpdate update = {
-    .c = c, .participant = participant, .rhs_type = rhs_type,
-    .result = result, .source_type = source_type,
-    .source_binding = source_binding, .helper_binding = c.sym.introduce(name),
-    .declarations = [], .postfix = postfix};
-  update.arguments();
-  update.emit();
+  List helper = c.sym.introduce(name);
+  List callee = %(expr $source_type (ident $source_binding));
+  Macro update = $protocol_update, saved = $protocol_postfix;
+  c.add_early(c._generated_function(
+    helper, postfix ? saved(participant, helper, callee)
+                    : update(participant, rhs_type, helper, callee)));
   c.protocol_helpers[key] = name;
   return name;
-}
-
-static void ProtocolUpdate.arguments(ProtocolUpdate &u) {
-  List lhs_binding = u.c.sym.introduce("lhs");
-  List op_binding = u.c.sym.introduce("op");
-  Type pointer = cons(<*>, cons(<volatile>, u.participant));
-  Type pointer_base = cons(<volatile>, u.participant);
-  List lhs_pointer = %(expr $pointer (ident $lhs_binding));
-  List zero = %(expr (int) (literal (int) "0"));
-  u.current = %(expr ${u.participant} (index $lhs_pointer $zero));
-  u.declarations.push(%(param $pointer_base (bind $lhs_binding (*))));
-  u.declarations.push(%(param ("Symbol") (bind $op_binding ())));
-  if (u.postfix) {
-    List one = %(expr (int) (literal (int) "1"));
-    u.call_rhs = u.c.convert_expression(one, u.rhs_type);
-    u.old_binding = u.c.sym.introduce("old");
-  }
-  else {
-    List rhs_binding = u.c.sym.introduce("rhs");
-    u.declarations.push(%(param ${u.rhs_type} (bind $rhs_binding ())));
-    u.call_rhs = %(expr ${u.rhs_type} (ident $rhs_binding));
-  }
-}
-
-static void ProtocolUpdate.emit(ProtocolUpdate &u) {
-  List call = u.c._bound_call(
-    u.result, %(expr ${u.source_type} (ident ${u.source_binding})),
-    %(${u.current} ${u.call_rhs}));
-  Macro ordinary = $update_body, saved = $postfix_body;
-  List shape = u.postfix
-    ? saved(u.participant, u.old_binding, u.current, call)
-    : ordinary(u.current, call);
-  List body = u.c.bind_syntax(shape, AST_BLOCK, u.participant);
-  List helper = u.c.wrapper_function(
-    %(static @{u.participant}), u.helper_binding,
-    u.declarations.list_free(), body.cdr());
-  u.c.add_early(helper);
 }
 
 // discard helpers
 
 macro open Expression $discard_call(
-    Name $callee, Name $arguments...) => $callee($arguments...);
+    Name $callee, Expr $arguments...) => $callee($arguments...);
 
-macro open Statement $discard_argument(Name $discard, Name $argument) {
+macro open Statement $discard_argument(Name $discard, Expr $argument) {
   $discard($argument);
 }
 
@@ -2095,7 +2059,8 @@ typedef struct DiscardCall {
   List binding, key;
   Type signature, result;
   String stem;
-  Array declarations, arguments, discards;
+  List declarations, arguments;
+  Array discards;
   int which, fresh;
 } DiscardCall;
 
@@ -2122,10 +2087,12 @@ List Compiler.discard_helper(
   if (!fresh && (resolved_result.is_pointer() ||
                  resolved_result.is_aggregate()))
     return NULL;
+  (List declarations, List arguments) =
+    c.forward_parameters(signature.car().list().cadr());
   DiscardCall call = {
     .c = c, .binding = binding, .key = key, .signature = signature,
     .result = result, .stem = stem, .which = which, .fresh = fresh,
-    .declarations = [], .arguments = [], .discards = []};
+    .declarations = declarations, .arguments = arguments, .discards = []};
   call.collect();
   return call.discards.len() ? call.emit() : NULL;
 }
@@ -2142,17 +2109,12 @@ List Compiler.protocol_discard_helper(
 
 static void DiscardCall.collect(DiscardCall &d) {
   Macro drop_shape = $discard_argument;
-  List parameters = d.signature.car().list().cadr();
   int index = 0;
-  foreach (Type parameter, parameters) {
-    List argument = d.c.sym.introduce(%"a$index");
-    d.declarations.push(parameter.parameter_ast(argument));
-    d.arguments.push(argument);
-    if (d.which & (1 << index)) {
-      List drop = d.c.resolve_protocol_member(parameter, "discard");
+  foreach (List argument, d.arguments) {
+    if (d.which & (1 << index++)) {
+      List drop = d.c.resolve_protocol_member(argument.cadr(), "discard");
       if (drop) d.discards.push(drop_shape(drop.car(), argument));
     }
-    index++;
   }
 }
 
@@ -2162,7 +2124,7 @@ static List DiscardCall.emit(DiscardCall &d) {
   List value_binding = d.c.sym.introduce("value");
   Macro call_shape = $discard_call;
   List expression = d.c.bind_syntax(
-    call_shape(d.binding, d.arguments.list_free()),
+    call_shape(d.binding, d.arguments),
     AST_EXPRESSION, d.result);
   Macro void_shape = $discard_void, value_shape = $discard_value;
   List shape = d.result.equal(%(void))
@@ -2170,8 +2132,7 @@ static List DiscardCall.emit(DiscardCall &d) {
     : value_shape(d.result, value_binding, expression, d.discards.list_free());
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
   List helper = d.c.wrapper_function(
-    %(static @{d.result}), helper_binding,
-    d.declarations.list_free(), body.cdr());
+    %(static @{d.result}), helper_binding, d.declarations, body.cdr());
   d.c.add_early(helper);
   List entry = %($helper_binding ${d.signature});
   d.c.protocol_helpers[d.key] = entry;
@@ -2406,20 +2367,17 @@ static List AdapterFunction.generate(AdapterFunction &a) {
   List source_parameters = a.signature.car().list().cadr();
   Type source_result = a.signature.cdr();
   List template_parameters = a.template.car().list().cadr();
-  Array declarations = [], arguments = [];
-  List target_at = target_parameters, template_at = template_parameters;
-  List source_at = source_parameters;
-  for (int i = 0; target_at;
-       i++, target_at = target_at.cdr(), template_at = template_at.cdr(),
-       source_at = source_at.cdr()) {
-    List binding = a.c.sym.introduce(%"a$i");
-    Type parameter = target_at.car();
-    declarations.push(parameter.parameter_ast(binding));
-    List argument = %(expr $parameter (ident $binding));
+  (List declarations, List forwarded) =
+    a.c.forward_parameters(target_parameters);
+  Array arguments = [];
+  List template_at = template_parameters, source_at = source_parameters;
+  foreach (List argument, forwarded) {
     if (_variable_is(template_at.car(), a.variables, a.binder))
       argument = %(expr ${source_at.car()}
         (call ${a.reverse} (args $argument)));
     arguments.push(argument);
+    template_at = template_at.cdr();
+    source_at = source_at.cdr();
   }
   List source_binding = a.c.sym.reference(%(${a.source}), NULL);
   List call = a.c._bound_call(
@@ -2430,8 +2388,7 @@ static List AdapterFunction.generate(AdapterFunction &a) {
   List storage = a.make_static
     ? %(static inline @target_result) : target_result;
   return a.c.wrapper_function(
-    storage, a.binding, declarations.list_free(),
-    %((return $target_result $call)));
+    storage, a.binding, declarations, %((return $target_result $call)));
 }
 
 macro Decorator $guard_value_rendering(

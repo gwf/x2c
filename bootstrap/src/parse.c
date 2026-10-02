@@ -1269,11 +1269,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _30822 = cons(_30821, NULL);
   _30823 = cons(_225, _30822);
   _30824 = List_var(_30823);
-  _30825 = int_var(2323);
+  _30825 = int_var(2333);
   _30826 = cons(_30825, NULL);
   _30827 = cons(_231, _30826);
   _30828 = List_var(_30827);
-  _30829 = int_var(85709);
+  _30829 = int_var(86123);
   _30830 = cons(_30829, NULL);
   _30831 = cons(_246, _30830);
   _30832 = List_var(_30831);
@@ -3302,6 +3302,10 @@ static List Compiler__declaration_rows(Compiler c){
 
 List Compiler_parse_simple_declaration(Compiler c){
   if(! _init_guard_) _file_init_();  return Compiler__declaration_group(c, 0);
+}
+
+List Compiler_parse_type_operand(Compiler c, Type * type){
+  if(! _init_guard_) _file_init_();  List declaration = Compiler_parse_simple_declaration(c);  if(type) * type = List_type_from_ast(declaration);  return cons(_2531, List_append(List_cdr(declaration), NULL));
 }
 
 Var List_getindex(List, int);
