@@ -47,6 +47,23 @@ static const List trust_boundaries = %(
    command is built. */
 static const SymbolSet shared_causes = $error.nonreturning.causes()
 
+/* Bare conditional bodies have no inner anchor. Scoring counts their actual
+   report_error calls, even when a macro supplied the call's source spelling. */
+static void _function_reports(Compiler c, List ast, List report, Map facts):
+  if !report: return
+  foreach List function in ast:
+    match (function):
+      case %(function ? (bind ?binding ?) ?(List body)):
+        int count = 0
+        foreach List hit in body.search(%(call (expr ? (ident ?callee))
+                                           (args *))):
+          count += List.equal(hit.assoc(<?callee>), report)
+        String name = binding_identity_spelling(binding)
+        match (c.semantic_binding_facts()[%(method $binding)]):
+          case %(?(String owner) ?(String member)):
+            name = %"$owner.$member"
+        facts[%(reports $name)] = count
+
 /* Expanded statements prove macro behavior at the invocation's source token.
    Compiler.report_error's resolved binding owns its non-returning contract;
    report_warning and similarly named user macros have no such proof. */
@@ -77,19 +94,7 @@ static Map _macro_diagnostics(Lint l, Compiler c, List ast):
           if (_raise_terminal(first) && ((Ast) first).never_returns()):
         match (((Ast) last).without_origin()):
           case %(return *): diagnostics[at] = <fallback>
-  if report:
-    foreach List function in ast:
-      match (function):
-        case %(function ? (bind ?binding ?) ?(List body)):
-          int count = 0
-          foreach List hit in body.search(%(call (expr ? (ident ?callee))
-                                             (args *))):
-            count += List.equal(hit.assoc(<?callee>), report)
-          String name = binding_identity_spelling(binding)
-          match (c.semantic_binding_facts()[%(method $binding)]):
-            case %(?(String owner) ?(String member)):
-              name = %"$owner.$member"
-          diagnostics[%(reports $name)] = count
+  _function_reports(c, ast, report, diagnostics)
   return diagnostics
 
 /* The word that starts the quoted form opened at `open`. */
