@@ -1115,20 +1115,6 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static int _open_input(Frontend frontend, String filename, ParsedUnit &unit) {
-  int ok = frontend.start(filename, unit);
-  if (ok) {
-    unit.compiler.own_diagnostics();
-    ok = unit.collect(frontend) && unit.parse();
-  }
-  if (ok) return 1;
-  if (!unit.compiler.diagnostics.printer)
-    foreach (Var entry, unit.compiler.diagnostics())
-      unit.compiler.print_diagnostic(entry);
-  unit.close();
-  return 0;
-}
-
 /* Parses each input, keeps the records analyze returns for it past the
    unit's context, closes the unit, and sorts the records. analyze receives
    the parsed unit, its input, and its display path, and returns a List of
@@ -1138,7 +1124,7 @@ static int _analyze_inputs(
   Array found = [];
   foreach (String input, inputs) {
     ParsedUnit parsed;
-    if (!_open_input(frontend, input, parsed)) return 0;
+    if (!frontend.open_reporting(input, parsed)) return 0;
     String path = parsed.compiler.display_path(input);
     List unit_records = parsed.context.export(
       analyze((void *) &parsed, input, path));
@@ -2241,11 +2227,11 @@ static int _certify_file_effect(Var value) {
   return 0;
 }
 
+/* Certify reopens each input on every pass, so it prints diagnostics only
+   for a unit that fails. */
 static int _certify_open(Frontend frontend, String input,
                          ParsedUnit &parsed) {
-  int ok = frontend.start(input, parsed);
-  if (ok) ok = parsed.collect(frontend) && parsed.parse();
-  if (ok) return 1;
+  if (frontend.open(input, parsed)) return 1;
   foreach (Var diagnostic, parsed.compiler.diagnostics())
     parsed.compiler.print_diagnostic(diagnostic);
   parsed.close();

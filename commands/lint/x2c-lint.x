@@ -54,21 +54,14 @@ static void _preprocessor_errors(String text):
    prints the compiler's diagnostics when the unit does not parse. */
 static int _parse(Lint l, Frontend frontend, String path):
   ParsedUnit parsed
-  int ok = frontend.start(path, parsed)
-  if ok:
-    parsed.compiler.own_diagnostics()
-    ok = parsed.collect(frontend) && parsed.parse()
-  if ok:
-    l.declaration_rules(parsed.compiler, parsed.ast)
-    l.member_arrows(parsed.compiler, parsed.ast)
-    foreach List finding in l.findings: finding.promote()
-    foreach List edit in l.edits: edit.promote()
-    foreach List function in l.functions: function.promote()
-  else if !parsed.compiler.diagnostics.printer:
-    foreach Var entry in parsed.compiler.diagnostics():
-      parsed.compiler.print_diagnostic(entry)
+  if !frontend.open_reporting(path, parsed): return 0
+  l.declaration_rules(parsed.compiler, parsed.ast)
+  l.member_arrows(parsed.compiler, parsed.ast)
+  foreach List finding in l.findings: finding.promote()
+  foreach List edit in l.edits: edit.promote()
+  foreach List function in l.functions: function.promote()
   parsed.close()
-  return ok
+  return 1
 
 /* Reports the files of `inputs` whose spacing formatting would change. */
 static int _format_check(Array inputs, int diff):

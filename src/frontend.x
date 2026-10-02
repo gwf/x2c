@@ -59,6 +59,22 @@ $(import "../src/error-reports.xmacro")
 int Frontend.open(Frontend f, String filename, ParsedUnit &unit) =>
   f.start(filename, unit) && unit.collect(f) && unit.parse();
 
+/** Runs the source stages for a command that reports to stderr. Collection
+    and parsing print each diagnostic as it is reported; a tokenizing
+    failure prints its diagnostics afterward. A failed unit is closed; the
+    caller must close a successful one.
+*/
+int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit) {
+  if (f.start(filename, unit)) {
+    unit.compiler.own_diagnostics();
+    if (unit.collect(f) && unit.parse()) return 1;
+  }
+  else foreach (Var entry, unit.compiler.diagnostics())
+    unit.compiler.print_diagnostic(entry);
+  unit.close();
+  return 0;
+}
+
 /** Opens an empty submission unit with the ordinary runtime prelude.
     Preload macro libraries first. The caller must close the unit on either
     result; submissions and inspection results borrow its Context. */
