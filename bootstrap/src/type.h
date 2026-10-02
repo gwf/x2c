@@ -120,6 +120,8 @@ Type Type_numeric_literal(String text, int floating);
 
 Var Type_numeric_literal_value(Type type, String text);
 
+int Type_integer_literal_magnitude(Type type, String text, unsigned long long * value);
+
 String ast_addressed_identifier(Var value);
 
 String ast_direct_identifier(Var value);

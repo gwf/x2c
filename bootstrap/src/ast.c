@@ -368,27 +368,28 @@ Ast Ast_rewrite_children(Ast ast, Func per_child){
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
+Array Array_update_n(Array, unsigned, ...);
 void x2c_cleanup_push(X2CCleanup *);
 Var Array_take_last(Array);
 int Var_is_nil(Var);
 void x2c_cleanup_leave(X2CCleanup *);
 int ast_contains_head(Var value, Symbol kind){
-  Array pending = Array_new(); {
+  List node;  Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value); {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
     }
-    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & pending;  X2CCleanup _x2c_defer_record_0 ={
+    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_pending_0;  X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
-      Array_push(pending, value);  while(Array_len(pending)){
-        Var current = Array_take_last(pending);  if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;  List node = Var_list(current);  if(Var_same(List_car(node), Symbol_var(kind))){
+      while(Array_len(_x2c_macro_pending_0)){
+        Var _x2c_macro_current_0 = Array_take_last(_x2c_macro_pending_0);  if(! Var_is_row(_x2c_macro_current_0, 9, 7, 4) || Var_is_nil(_x2c_macro_current_0)) continue;  node = Var_list(_x2c_macro_current_0);  if(Var_same(List_car(node), Symbol_var(kind))){
           int _x2c_return_value_0 = 1; {
             x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
           }
 
         }
-        for(List cursor = node;  List_truth(cursor);  cursor = cursor -> cdr) if(Var_is_row(cursor -> car, 9, 7, 4)) Array_push(pending, cursor -> car);
+        for(List _x2c_macro_cursor_1 = node;  List_truth(_x2c_macro_cursor_1);  _x2c_macro_cursor_1 = List_cdr(_x2c_macro_cursor_1)) if(Var_is_row(List_car(_x2c_macro_cursor_1), 9, 7, 4)) Array_push(_x2c_macro_pending_0, List_car(_x2c_macro_cursor_1));
       }
       {
         int _x2c_return_value_1 = 0; {
@@ -420,7 +421,7 @@ default: break;
     }
   }
 {
-  Var child;  List _x2c_macro_object_0 = syntax;  List _x2c_macro_cursor_1 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_0))){
+  Var child;  List _x2c_macro_object_0 = syntax;  List _x2c_macro_cursor_2 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_0))){
     child = _x2c_macro_cursor_output_0;  ast_collect_binding_references(child, referenced);
   }
 
@@ -596,7 +597,7 @@ List Ast_initializer_functions(Ast ast, List * source){
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_1); {
       {
-        List choice;  List _x2c_macro_object_2 = cases;  List _x2c_macro_cursor_3 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_1))){
+        List choice;  List _x2c_macro_object_2 = cases;  List _x2c_macro_cursor_4 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_1))){
           choice = Var_list(_x2c_macro_cursor_output_1); {
             List function = _arm_function(choice, argument);  if(! List_truth(function)){
               List _x2c_return_value_2 = NULL; {

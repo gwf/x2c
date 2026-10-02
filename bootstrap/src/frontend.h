@@ -31,6 +31,8 @@ ParsedUnit;
 
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
 
+int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit);
+
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);

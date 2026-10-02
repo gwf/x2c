@@ -627,10 +627,9 @@ static List Compiler__for_statement(Compiler c){
 }
 
 int Compiler_test_declaration(Compiler);
-List Compiler_parse_simple_declaration(Compiler);
-List List_cdr(List);
+List Compiler_parse_type_operand(Compiler, Type *);
 static List Compiler__for_init(Compiler c){
-  if(Compiler_peek(c, 0) == 119) return NULL;  if(! Compiler_test_declaration(c)) return Compiler_parse_expression(c);  List init = Compiler_parse_simple_declaration(c);  return cons(Symbol_var(272600), List_cdr(init));
+  if(Compiler_peek(c, 0) == 119) return NULL;  if(! Compiler_test_declaration(c)) return Compiler_parse_expression(c);  return Compiler_parse_type_operand(c, NULL);
 }
 
 static List Compiler__do_statement(Compiler c){
@@ -1171,6 +1170,7 @@ static List Compiler__block_items(Compiler c, int anchor_items){
 
 Var List_car(List);
 List Compiler_anchor_origin(Compiler, List, Token);
+List List_cdr(List);
 static void Compiler__push_item(Compiler c, Array block, int anchor_items){
   Token origin = c -> token;  int expansion = Compiler__expands(c);  List stmt = Compiler_parse_block_item(c);  if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
     Array_push(block, List_var(stmt));  return;
