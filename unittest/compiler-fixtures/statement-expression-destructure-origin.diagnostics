@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/statement-expression-destructure-origin.x:6:5: type: destructuring requires a List source
+      (first, second) = 12;
+      ^
+

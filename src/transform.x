@@ -142,6 +142,8 @@ static Ast Compiler._finish(Compiler c, Ast ast) {
       List new_records = c._match_records(records);
       return %(matchcases $new_subject $new_records);
     }
+    case %(parens (at ?origin ?inner)):
+      return c._step(%(at $origin (parens $inner)));
     case %(parens (block *body)):
       return %(parens ${c._block_node(body, 1)});
     case $source_block_content(%(*body)): return c._block_node(body, 0);
@@ -159,8 +161,11 @@ static Ast Compiler._sequence(Compiler c, Ast ast, int value_tail) {
     List source = Ast.without_origin(value);
     List lowered;
     match (source) {
-      case %(stmnt ?expression) if (value_tail && !cursor.cdr()):
-        lowered = Ast.rewrap_origin(value, %(stmnt ${c._step(expression)}));
+      case %(stmnt ?expression) if (value_tail && !cursor.cdr()): {
+        List result = c._step(Ast.rewrap_origin(value, expression));
+        lowered = Ast.rewrap_origin(
+          result, %(stmnt ${Ast.without_origin(result)}));
+      }
       case %(defer ?): lowered = value;
       default: lowered = c._step(value);
     }
