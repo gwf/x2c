@@ -21,6 +21,7 @@ typedef struct PrintfFn {
 } PrintfFn;
 
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 $(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
@@ -246,12 +247,12 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
     List parameters = c.parse_parameter_list();
     c.expect(<)>);
     match (parameters)
-      case %((param ?type
-                    (!set ?binding (bind () ?)))): {
-        List declaration = %(decl $type (bindings $binding));
-        List operand = c._parse_cast();
-        List expression = %(expr $type (cast $declaration $operand));
-        return c._finish_paren_statement(expression, 0);
+      case %((!set ?(List parameter)
+                (param ?base (!set ?binding (bind () ?))))): {
+        List decl = %(decl $base (bindings $binding));
+        List cast = c._finish_cast(
+          decl, parameter.type_from_ast(), c._parse_cast(), origin);
+        return c._finish_paren_statement(cast, 0);
       }
     c.expect(<=>);
     List source = c.parse_assignment();
@@ -281,19 +282,26 @@ static List Compiler._parse_cast(Compiler c) {
   if (c._cast_operand_after_parens() && c.test(<(>)) {
     if (c.test_declaration() ||
         c._macro_hole_starts_cast_type(head.after_group())) {
-      List decl = c.parse_simple_declaration(), type = decl.type_from_ast();
-      decl = %(decl @{decl.cdr()});
+      Type type = NULL;
+      List decl = c.parse_type_operand(&type);
       c.expect(<)>);
-      List expr = c._parse_cast();
-      if (expr.cadr() === %(<macro-expr>) ||
-          c._casts_to_template_typedef(decl))
-        type = %(<macro-expr>);
-      c._warn_unnecessary_cast(expr, type, head);
-      return %(expr $type (cast $decl $expr));
+      return c._finish_cast(decl, type, c._parse_cast(), head);
     }
   }
   c.token = head;
   return c._parse_unary_op();
+}
+
+/* Types the cast of `operand` to `decl`, which declares `type`, and warns
+   when the cast changes nothing. A template typedef or an operand typed at
+   expansion leaves the cast typed at expansion too. */
+static List Compiler._finish_cast(
+  Compiler c, List decl, Type type, List operand, Token origin) {
+  if (operand.cadr() === %(<macro-expr>) ||
+      c._casts_to_template_typedef(decl))
+    type = %(<macro-expr>);
+  c._warn_unnecessary_cast(operand, type, origin);
+  return %(expr $type ${source_cast_content(%($decl $operand))});
 }
 
 /** Parses one macro target through the cast-expression grammar.
@@ -405,10 +413,7 @@ static List Compiler._parse_sizeof(Compiler c) {
   int parens = c.test(<(>);
   Token head = c.token;
   List arg = NULL;
-  if (c.test_declaration()) {
-    arg = c.parse_simple_declaration();
-    arg = cons(<decl>, arg.cdr());
-  }
+  if (c.test_declaration()) arg = c.parse_type_operand(NULL);
   // `sizeof(x + 1)` measures any expression; only `sizeof x` is unary.
   else if (parens) arg = c.parse_expression();
   else {
@@ -887,8 +892,8 @@ static List Compiler._parse_va_arg(Compiler c) {
   c.expect(<(>);
   List expr = c.parse_assignment();
   c.expect(<,>);
-  List decl = c.parse_simple_declaration(), type = decl.type_from_ast();
-  decl = %( decl @{ decl.cdr() } );
+  Type type = NULL;
+  List decl = c.parse_type_operand(&type);
   c.expect(<)>);
   expr = source_va_arg_content(%($expr $decl));
   return %( expr $type $expr );
@@ -947,15 +952,9 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
 }
 
 static int Compiler._needs_resolution(Compiler c, Var value) {
-  // The scan is an any-search; a worklist keeps deep operator chains from
-  // costing one C frame per nesting level.
-  Array pending = $auto([]);
   Macro lambda = $lambda_expression, captured = $lambda_captured;
-  pending.push(value);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list>) continue;
-    List syntax = current;
+  List syntax;
+  $ast.walk(value, syntax)
     match (syntax) {
       case %(expr (!or () (<macro-expr>)) ?): return 1;
       case %(expr ? (parens (block *))): continue;
@@ -980,9 +979,6 @@ static int Compiler._needs_resolution(Compiler c, Var value) {
       case %(decl ?(List base) *):
         if (base.type().declaration_parts().cadr()) return 1;
     }
-    foreach (Var child, syntax)
-      if (child is <list>) pending.push(child);
-  }
   return 0;
 }
 

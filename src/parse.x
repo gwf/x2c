@@ -549,6 +549,16 @@ static List Compiler._declaration_rows(Compiler c) {
 */
 List Compiler.parse_simple_declaration(Compiler c) => c._declaration_group(0);
 
+/** Parses a declaration that sits inside an expression or a `for` header,
+    such as a cast's type name, and returns it as one `(decl ...)` node.
+    When `type` is not null, it receives the declared `Type`.
+*/
+List Compiler.parse_type_operand(Compiler c, Type *type) {
+  List declaration = c.parse_simple_declaration();
+  if (type) *type = declaration.type_from_ast();
+  return %(decl @{declaration.cdr()});
+}
+
 static List Compiler._declaration_group(Compiler c, int row) {
   List storage = c._storage_class();
   if (storage === %(typedef)) return c._typedef(storage, row);

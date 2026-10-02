@@ -489,23 +489,16 @@ static void CellRegion.collect(CellRegion &r, List ast) {
 }
 
 static void _collect_reference_captures(List ast, Map owned, Map candidates) {
-  Array pending = $auto([]);
-  pending.push(ast);
-  while (pending.len()) {
-    Var current = pending.take_last();
-    if (current is not <list> || current.is_nil()) continue;
-    List node = current;
-    match (node)
-      case %(capture ? (& *) (expr ? (op & ?target))): {
-        List binding = Ast.lvalue_binding(target);
-        Var stored;
-        if (binding && owned.try_get(binding, stored)) {
-          Type type = stored;
-          if (type.car() != <&>) candidates[binding] = type;
-        }
+  List node;
+  $ast.walk(ast, node)
+    match (node) case %(capture ? (& *) (expr ? (op & ?target))): {
+      List binding = Ast.lvalue_binding(target);
+      Var stored;
+      if (binding && owned.try_get(binding, stored)) {
+        Type type = stored;
+        if (type.car() != <&>) candidates[binding] = type;
       }
-    foreach (Var child, node) pending.push(child);
-  }
+    }
 }
 
 /* Each candidate binding gets a cell, in declaration order. */
