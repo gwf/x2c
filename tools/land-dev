@@ -193,21 +193,31 @@ def acquire_lock():
         common = Path.cwd() / common
     lock = common / "land-dev.lock"
     if lock.is_dir():
-        raise ValueError("legacy publication lock directory exists; verify no "
-                         "publisher is using it before removing it: " + str(lock))
+        raise ValueError("legacy publication lock directory exists; "
+                         "check for an active publisher before removing: " +
+                         str(lock))
     stream = lock.open("a+")
     try:
         fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError as error:
-        stream.seek(0)
-        holder = stream.read().strip() or "unknown"
-        stream.close()
+        try:
+            stream.seek(0)
+            holder = stream.read().strip() or "unknown"
+        finally:
+            stream.close()
         raise ValueError("another publisher is active (pid " + holder + ")") \
             from error
-    stream.seek(0)
-    stream.truncate()
-    stream.write(str(os.getpid()) + "\n")
-    stream.flush()
+    except BaseException:
+        stream.close()
+        raise
+    try:
+        stream.seek(0)
+        stream.truncate()
+        stream.write(str(os.getpid()) + "\n")
+        stream.flush()
+    except BaseException:
+        stream.close()
+        raise
     return stream
 
 
