@@ -9,8 +9,6 @@
 #include "compiler.h"
 List Compiler_parse_list_literal(Compiler c);
 
-List Compiler_parse_macro_pattern_arguments(Compiler c);
-
 List Compiler_typed_match_pattern(Compiler c, List pattern, List types);
 
 List Compiler_parse_raise_literal(Compiler c);

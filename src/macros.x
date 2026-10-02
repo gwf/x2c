@@ -3087,6 +3087,23 @@ static List Compiler._pattern_labels(Compiler c) {
   return names.list_free();
 }
 
+/** Returns the `(` after a visible macro's `$NAME` at `at`, storing its
+    spelling and definition, or NULL. The cursor does not move.
+*/
+Token Compiler.macro_pattern_at(
+  Compiler c, Token at, String &spelling, Var &stored) {
+  if (at.type != <$>) return NULL;
+  Token saved = c.token;
+  c.token = at;
+  Token end = c._scan_name(spelling);
+  c.token = saved;
+  if (!spelling || end.type != <(> ||
+      !c._try_definition(Atom.intern(spelling), 1, stored) ||
+      stored is not <list> || stored.list().car() != <macrodef>)
+    return NULL;
+  return end;
+}
+
 /* Whether the parenthesized labels at the cursor are all `?name` or
    `*name` binders. */
 static int Compiler._simple_labels(Compiler c) {
@@ -3119,12 +3136,10 @@ macro Statement $report.parse_macro_pattern_arity(
 */
 List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
   Token start = c.token;
-  if (c.peek(0) != <$>) return NULL;
   String spelling = NULL;
-  Token end = c._scan_name(spelling);
   Var stored;
-  if (!spelling || end.type != <(> ||
-      !c._try_definition(Atom.intern(spelling), 1, stored)) return NULL;
+  Token end = c.macro_pattern_at(start, spelling, stored);
+  if (!end) return NULL;
   c.token = end;
   Macro shape = _macro_value_names(stored);
   List patterns = c.parse_macro_pattern_arguments();

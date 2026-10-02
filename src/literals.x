@@ -180,15 +180,13 @@ static Var Compiler._macro_pattern_argument(Compiler c) {
 
 /* A pattern's `${$NAME(...)}` where NAME is a macro: its derived pattern. */
 static List Compiler._macro_subpattern_insertion(Compiler c, int content) {
-  if (!c.in_pattern || c.peek(0) != <"${"> || c.token.len != 2 ||
-      c.peek(1) != <$>) return NULL;
-  Token saved = c.token;
+  if (!c.in_pattern || c.peek(0) != <"${"> || c.token.len != 2) return NULL;
+  String spelling = NULL;
+  Var stored;
+  if (!c.macro_pattern_at(Token.skip_trivia(c.token + 1), spelling, stored))
+    return NULL;
   c.next();
   List derived = c.try_parse_macro_subpattern(content);
-  if (!derived) {
-    c.token = saved;
-    return NULL;
-  }
   c.expect(<"}">);
   return derived;
 }

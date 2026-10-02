@@ -71,8 +71,6 @@ List Compiler_macro_value_literal(Compiler c, List value);
 
 List Compiler_try_parse_macro_pattern(Compiler c);
 
-List Compiler_try_parse_macro_subpattern(Compiler c, int content);
-
 List Compiler_capture_macro_value(Compiler c, List definition);
 
 int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained);
