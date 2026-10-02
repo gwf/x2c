@@ -379,6 +379,43 @@ static void _completion_does_not_publish_meta(ReplSession session) {
   }
 }
 
+static void _reference_arguments(ReplSession s) {
+  _expect(s, "typedef struct RefValue { int n; } RefValue;",
+          <defined>, void);
+  _expect(s, "int RefValue.bump(RefValue &v) { v.n++; return v.n; }",
+          <defined>, void);
+  _expect(s, "int bad_ref(void) { RefValue v={4}; RefValue *p=&v; "
+             "return p.bump(); }", <rejected>, void);
+  _completion(s, "bad_ref", NULL, "bad_ref");
+  _expect(s, "int good_ref(void) { RefValue v={4}; RefValue *p=&v; "
+             "int n=(*p).bump(); return n*10+v.n; }", <defined>, void);
+  _expect(s, "good_ref();", <value>, 55);
+  _expect(s, "int direct_ref(void) { RefValue v={4}; "
+             "int n=v.bump(); return n*10+v.n; }", <defined>, void);
+  _expect(s, "direct_ref();", <value>, 55);
+  _expect(s, "int ref_bump(int &v) { v++; return v; }", <defined>, void);
+  _expect(s, "ref_bump(0);", <rejected>, void);
+  _expect(s, "ref_bump(4);", <rejected>, void);
+  _expect(s, "int ref_forward(int &v) { return ref_bump(v); }",
+          <defined>, void);
+  _expect(s, "int ref_value(void) { int v=4; "
+             "int n=ref_forward(v); return n*10+v; }", <defined>, void);
+  _expect(s, "ref_value();", <value>, 55);
+  _expect(s, "int ref_maybe(int &?v) { if (!v) return 7; "
+             "return ref_bump(v); }", <defined>, void);
+  _expect(s, "ref_maybe(0);", <value>, 7);
+  _expect(s, "int ref_present(void) { int v=4; "
+             "int n=ref_maybe(v); return n*10+v; }", <defined>, void);
+  _expect(s, "ref_present();", <value>, 55);
+  ReplResult statement = s.submit("({ int local=3; local+4; });");
+  if (statement.status != <rejected> ||
+      statement.message != "unsupported: a statement expression") {
+    fputs("statement expression refusal described a different form\n", stderr);
+    failures++;
+  }
+  _expect(s, "1+2;", <value>, 3);
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
@@ -407,6 +444,7 @@ int main(int argc, char **argv) {
         _retained_results(session);
         _meta_records(session);
         _interpreter_ownership(session);
+        _reference_arguments(session);
         _completion_does_not_publish_meta(session);
         session.close();
       }

@@ -164,6 +164,10 @@ prototype is accepted: it makes a function the compiler links, or one from a
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
 Function-local `static`, `extern`, and `threaded` storage are also rejected:
 the evaluator cannot provide their native lifetime or linkage semantics.
+Statement expressions such as `({ int n=3; n+4; })` are declined.
+Reference parameters use the ordinary compiler conversion: pass an
+addressable value, or write `*p` to pass a pointer's object. A pointer itself
+cannot substitute for the referenced object.
 Records, typedefs, addressed locals and pointer reads/writes use native
 storage with layouts derived from compiler types. Record assignment copies
 into existing storage, preserving pointers to its fields. A session
