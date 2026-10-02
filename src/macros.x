@@ -3047,6 +3047,10 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     c.token = saved;
     return NULL;
   }
+  if (saved.type == <$> && !c._simple_labels()) {
+    c.token = saved;
+    return c.try_parse_macro_subpattern(0);
+  }
   List labels = c.cache_literal_list(c._pattern_labels());
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_case_pattern")), saved);
@@ -3081,6 +3085,80 @@ static List Compiler._pattern_labels(Compiler c) {
   }
   c.expect(<)>);
   return names.list_free();
+}
+
+/* Whether the parenthesized labels at the cursor are all `?name` or
+   `*name` binders. */
+static int Compiler._simple_labels(Compiler c) {
+  int at = 1;
+  if (c.peek(at) == <)>) return 1;
+  loop {
+    if ((c.peek(at) != <?> && c.peek(at) != <*>) ||
+        c.peek(at + 1) != <ident>)
+      return 0;
+    if (c.peek(at + 2) == <)>) return 1;
+    if (c.peek(at + 2) != <,>) return 0;
+    at += 3;
+  }
+}
+
+macro Statement $report.parse_macro_pattern_arity(
+  Expr $c, Expr $name, Expr $expected, Expr $origin) {
+  $c.report_error(
+    <parse>,
+    %"macro pattern '${$name}' takes ${$expected} argument patterns",
+    $origin, NULL);
+}
+
+/** Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern,
+    into the pattern for code NAME builds with each argument pattern in its
+    hole. It matches the shelled expression or its bare content; `content`
+    selects the content alone, for a position whose pattern already writes
+    the `(expr TYPE ...)` shell. Returns NULL without consuming tokens when
+    no macro NAME is visible.
+*/
+List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
+  Token start = c.token;
+  if (c.peek(0) != <$>) return NULL;
+  String spelling = NULL;
+  Token end = c._scan_name(spelling);
+  Var stored;
+  if (!spelling || end.type != <(> ||
+      !c._try_definition(Atom.intern(spelling), 1, stored)) return NULL;
+  c.token = end;
+  Macro shape = _macro_value_names(stored);
+  List patterns = c.parse_macro_pattern_arguments();
+  int expected = shape.assoc(<parameters>).list().len();
+  if (patterns.len() != expected)
+    $report.parse_macro_pattern_arity(c, spelling, expected, start);
+  return c.cache_literal_list(_macro_subpattern(shape, patterns, content));
+}
+
+/* `shape`'s pattern with each argument pattern in its hole. A binder
+   stands in its hole directly; any other pattern replaces a private binder
+   there, spliced for a sequence or Type hole. */
+static List _macro_subpattern(Macro shape, List patterns, int content) {
+  Array names = [], replacements = [];
+  int index = 0;
+  foreach (List hole, shape.assoc(<parameters>).list()) {
+    Var pattern = patterns.car();
+    patterns = patterns.cdr();
+    if (pattern.is_binder()) {
+      names.push(pattern);
+      continue;
+    }
+    Symbol kind = hole.assoc(<kind>);
+    int list = hole.assoc(<sequence>).int() || kind == <type> ||
+               kind == <captures>;
+    Atom binder = Atom.intern(%"${list ? "*" : "?"}__pattern_${index++}");
+    names.push(binder);
+    replacements.push(%($binder $pattern));
+  }
+  List pattern = shape.pattern(names.list_free());
+  if (replacements.len()) pattern = pattern.replace(replacements.list_free());
+  match (pattern)
+    case %(expr ? ?body): return content ? body : %(!or $pattern $body);
+  return pattern;
 }
 
 /** Returns an anonymous macro definition as a `Macro` value. Macro values

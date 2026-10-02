@@ -38,8 +38,10 @@ List Compiler.parse_list_literal(Compiler c) {
     // A `%(` literal that holds only a reader form is that form.
     List reader_form = percent ? c._parse_reader_prefix() : NULL;
     if (reader_form && c.test(<)>)) return reader_form;
+    int shell = c.in_pattern && !reader_form && c.peek(0) == <ident> &&
+                c.token.text == "expr";
     List head = reader_form ? reader_form : c._parse_list_head();
-    List tail = c._parse_list_tail();
+    List tail = shell ? c._parse_shell_tail() : c._parse_list_tail();
     c.expect(<)>);
     return %(expr ("List") ${c._cons_cell(head, tail)});
   }
@@ -120,6 +122,77 @@ static List Compiler._parse_list_tail(Compiler c) {
   return c._cons_cell(head, tail);
 }
 
+/* The elements after a pattern's `expr` head. A macro pattern in the
+   content position stands for the content, since the pattern writes the
+   shell itself. */
+static List Compiler._parse_shell_tail(Compiler c) {
+  if (c.peek(0) == <)>) return %(nil);
+  List type = c._parse_list_head();
+  if (c.peek(0) == <)>) return c._cons_cell(type, %(nil));
+  List content = c._macro_subpattern_insertion(1);
+  if (!content) content = c._parse_list_head();
+  return c._cons_cell(type, c._cons_cell(content, c._parse_list_tail()));
+}
+
+macro Statement $report.parse_macro_pattern_static(Expr $c, Expr $origin) {
+  $c.report_error(
+    <parse>,
+    "a macro pattern's arguments are binders, macro patterns, or %(...)",
+    $origin, NULL);
+}
+
+/** Parses a macro pattern's parenthesized arguments and returns the static
+    pattern of each: a binder or wildcard, a nested macro pattern, or a
+    `%(...)` List pattern.
+*/
+List Compiler.parse_macro_pattern_arguments(Compiler c) {
+  c.expect(<(>);
+  Array patterns = [];
+  if (c.peek(0) != <)>) loop {
+    patterns.push(c._macro_pattern_argument());
+    if (!c.test(<,>)) break;
+  }
+  c.expect(<)>);
+  return patterns.list_free();
+}
+
+static Var Compiler._macro_pattern_argument(Compiler c) {
+  Token origin = c.token;
+  if (c.peek(0) == <?> || c.peek(0) == <*>) {
+    String binder = origin.text;
+    c.next();
+    if (c.peek(0) == <ident>) {
+      binder = binder + c.token.text;
+      c.next();
+    }
+    return Atom.intern(binder);
+  }
+  List element = c.try_parse_macro_subpattern(0);
+  if (!element) {
+    if (c.peek(0) != <"%(">) $report.parse_macro_pattern_static(c, origin);
+    element = c.parse_list_literal();
+  }
+  Var value = c.match_pattern_value(element);
+  if (!match_value_is_static(value))
+    $report.parse_macro_pattern_static(c, origin);
+  return value;
+}
+
+/* A pattern's `${$NAME(...)}` where NAME is a macro: its derived pattern. */
+static List Compiler._macro_subpattern_insertion(Compiler c, int content) {
+  if (!c.in_pattern || c.peek(0) != <"${"> || c.token.len != 2 ||
+      c.peek(1) != <$>) return NULL;
+  Token saved = c.token;
+  c.next();
+  List derived = c.try_parse_macro_subpattern(content);
+  if (!derived) {
+    c.token = saved;
+    return NULL;
+  }
+  c.expect(<"}">);
+  return derived;
+}
+
 /* list elements
 
    `$` inserts one value and `@` splices a List, each followed by a name or
@@ -139,6 +212,8 @@ static List Compiler._parse_splice(Compiler c) {
 static List Compiler._parse_insertion(Compiler c) {
   if (c.peek(0) == <$>)
     return c._parse_named_reference(<$>);
+  List derived = c._macro_subpattern_insertion(0);
+  if (derived) return derived;
   if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
   c.next();
   List expr = c.parse_expression();
