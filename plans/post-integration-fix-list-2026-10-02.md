@@ -778,15 +778,16 @@ batches. This is an ordering of all 42 scopes, not a reduction in scope.
 Progress and private handoffs live in `.context/post-integration-campaign/`;
 landed results and any explicit deferrals are recorded here as batches finish.
 
-Private integration currently includes F01, F07, F13, F14, F22-F27, F29,
+Private integration currently includes F01, F07-F08, F13, F14, F22-F27, F29,
 F31, F33-F37, F39, F41, and F42. F33's corrected CPU metric still needs
 quiet-window calibration. The runtime batch has identical generated C/H
 across stages 0, 1, and 2, in addition to its focused checks.
-Their focused checks passed in worker or parent checkouts. F08's initial repair
-also passed its focused checks, but the combined `make build-safe` failed:
-some standard helpers fell back to native staging before the runtime archive
-existed. F08 is reopened. The failed generated sources and complete log are
-preserved; F32 adoption waits for a corrected, successful bootstrap.
+Their focused checks passed in worker or parent checkouts. F08's first repair
+caused standard helpers to stage before the runtime archive existed. Its
+correction collects own-unit hashes before parsing and uses shipped dependency
+names for unchanged forward bodies. The combined tree now passes bootstrap
+refresh and a fresh, unassisted `make build-safe`. Logs retain the original
+failure and successful recovery. F32 now waits for the literal owners to finish.
 
 Reuse existing suites and the focused cases above. First reproduce imported
 claims on the implementation baseline. For performance proposals and claimed
@@ -802,9 +803,10 @@ package checks. Those are compatibility evidence, not proof the defects above
 are absent. This reconciliation did not rerun a broad gate, a full runtime
 benchmark set, O2/sanitizer statement-expression probes, all package/host
 variants, or an equally deep audit of threading, I/O, every compiler pass,
-and graph lifetime/target logic. This session did not implement or benchmark
-a replacement; the independently authored catalogue spike and its incomplete
-validation are explicitly incorporated above.
+and graph lifetime/target logic. The earlier review did not implement or
+benchmark a replacement; the independently authored catalogue spike and its
+incomplete validation are explicitly incorporated above. Current private
+implementation results are recorded separately in the progress paragraph.
 
 ## Design review
 
