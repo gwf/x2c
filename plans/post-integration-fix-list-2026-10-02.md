@@ -813,9 +813,25 @@ build times. Legacy measurements retain their separate identities, and a
 focused regression preserves nightly precedence over legacy replay rows.
 The final campaign still needs a comparable integrated-candidate measurement.
 
-The remaining implementation scopes are F09-F11 and F16-F18. The shared
-integrator owns batch validation and any integration corrections. Submitted
-scopes are not claimed merged until publication is confirmed.
+Batch 3 contains F09-F11, F16-F17, and calibrated F33, based on the submitted
+PR #100 head. F09/F10/F16 pass 21 focused fixtures and independent parameter
+scope and nested Name controls. Native callees retain their identities,
+Name holes preserve caller bindings, and Func argument conversion waits for
+resolved argument types. These correctness repairs add 82 compiler lines.
+
+F11/F17 use actual receiver type identity and preserve const/volatile through
+fields, anonymous aggregates, and arrays. Other modules can define methods
+for a type; no author or module restriction is introduced. References remain
+parameter-only, as the book specifies. The initial 27 focused fixtures and
+the qualifier follow-up's 23 fixtures and eight controls pass. Together these
+changes add 20 compiler lines. F33 adds 80 tool lines plus focused tests and
+baseline data; it corrects measurement and does not claim a speedup.
+
+F18 warning sequencing is the only implementation scope awaiting a public
+contract decision. The shared integrator owns batch validation and any
+integration corrections. Submitted scopes are not claimed merged until
+publication is confirmed. Final generated LOC and comparable campaign build
+timing remain to be measured after integration.
 
 F08's initial repair caused standard helpers to stage before the runtime
 archive existed. Its correction collects own-unit hashes before parsing and
@@ -862,7 +878,7 @@ benchmark a replacement; the independently authored catalogue spike and its
 incomplete validation are explicitly incorporated above. Current private
 implementation results are recorded separately in the progress paragraph.
 
-### Additional review finding outside the 42 scopes
+### Additional review findings outside the 42 scopes
 
 A private typedef chain used by a meta Type helper can emit an alias before
 its dependency. A source function before `typedef struct Chain {...}
@@ -874,6 +890,16 @@ The source placement owners are `generate._promote_typedefs` and
 `generate._place_typedefs`. This new finding is recorded but not implemented
 as part of the method/reference repair; the established independent method,
 alias, and Type-inspection controls remain its acceptance evidence.
+
+An imported Statement macro containing a List literal can reuse an unrelated
+caller's literal cache identifier. With `List name = %("abc" "de")` in the
+imported helper and `%("untouched")` in its caller, generated C refers to
+undeclared `_5`. The seed, repaired macro compiler, and unchanged F02 compiler
+all reproduce the failure. The parent independently reproduced it using the
+unchanged F02 compiler. Evidence is in
+`.context/post-integration-campaign/macro-binding/implementation/import-literal-control/`.
+No cache repair is included in the Name-binding change. Its imported helper
+control uses runtime List construction, while own-unit literal controls remain.
 
 
 ## Design review
