@@ -168,15 +168,20 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern) {
   return rows;
 }
 
-/* The key of one projection of a hole. A splice is always a sequence
-   binder, and a member never is. */
-static Atom _macro_key(List hole, String projection) {
-  String name = hole.assoc(<binder>).str()[1:];
-  int sequence = hole.assoc(<sequence>);
-  if (projection == "splice") sequence = 1;
-  else if (projection == "member") sequence = 0;
-  return Atom.intern(%"${sequence ? "*" : "?"}__macro_${projection}_$name");
+/** Returns the binder that captures one projection of the template hole
+    whose binder is `binder`. Splice and construction projections are
+    always sequences; return, declarator, and member projections never
+    are; source, value, and expression follow the hole's `sequence`. */
+Atom Macro.binder(Var binder, String projection, int sequence) {
+  if (projection == "splice" || projection == "construction") sequence = 1;
+  else if (projection == "return" || projection == "declarator" ||
+           projection == "member") sequence = 0;
+  String prefix = sequence ? "*" : "?", name = binder.str();
+  return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
 }
+
+static Atom _macro_key(List hole, String projection) =>
+  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
 
 /* The second slot of a Name's declaration and reference projection keeps
    exact binding identity when a member label reaches the first slot first. */

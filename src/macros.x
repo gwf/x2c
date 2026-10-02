@@ -656,7 +656,7 @@ static void Definition.constructed_names(Definition &d, Map bindings) {
   Var required = _hole_key(d.target, "construction");
   foreach (List parameter, d.parameters)
     if (parameter.assoc(<kind>) == <name>) {
-      Var name = _replacement_binder(parameter.assoc(<binder>), "value", 0);
+      Var name = Macro.binder(parameter.assoc(<binder>), "value", 0);
       bindings[name] = %($required $name);
     }
 }
@@ -1146,20 +1146,8 @@ static void Compiler._unit_construction(
    each declaration a template makes has a binder numbered in the order the
    template declares it. */
 
-/* Splice and construction projections are always Lists; return, declarator,
-   and member projections are always scalar; source, value, and expression
-   follow the hole's own cardinality. */
-static Atom _replacement_binder(Var binder, String projection, int seq) {
-  if (projection == "splice" || projection == "construction") seq = 1;
-  else if (projection == "return" || projection == "declarator" ||
-           projection == "member") seq = 0;
-  String prefix = seq ? "*" : "?", name = binder.str();
-  return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
-}
-
 static Atom _hole_key(List hole, String projection) =>
-  _replacement_binder(
-    hole.assoc(<binder>), projection, hole.assoc(<sequence>));
+  Macro.binder(hole.assoc(<binder>), projection, hole.assoc(<sequence>));
 
 /* A template binder names one lexical declaration, including its namespace.
    Its ordinal keeps same-spelled declarations distinct within a template. */
@@ -1891,14 +1879,14 @@ static String _forwarded_prefix(String spelling) {
 }
 
 /* Forwarding recognizes the projection binders _capture_pattern creates, so
-   the accepted prefixes come from _replacement_binder; <?> supplies its
+   the accepted prefixes come from Macro.binder; <?> supplies its
    empty author name. */
 static List _forwarded_prefix_list(void) {
   Array prefixes = [];
   Map seen = {};
   foreach (String projection, %("expression" "value" "source" "splice"))
     for (int sequence = 0; sequence <= 1; sequence++) {
-      String prefix = _replacement_binder(<?>, projection, sequence).str();
+      String prefix = Macro.binder(<?>, projection, sequence).str();
       if (prefix in seen) continue;
       seen[prefix] = 1;
       prefixes.push(prefix);
@@ -2271,7 +2259,7 @@ static List Compiler._meta_argument(Compiler c) {
     ? %(expr (<macro-expr>) ${c._parse_hole(kind ? kind : <argument>)})
     : c.parse_assignment();
   if (hole && argument.match(%(expr ? (macro-bind ?)))) {
-    Atom projection = _replacement_binder(hole.assoc(<binder>), "value", 0);
+    Atom projection = Macro.binder(hole.assoc(<binder>), "value", 0);
     argument = %(expr ("List") (meta-cap $projection));
   }
   return argument;
