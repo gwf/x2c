@@ -1387,8 +1387,8 @@ List Compiler.macro_tag_name(
     if (visible && visible in locals) return visible;
     /* A name the body passed to a nested macro's Name hole is the body's
        own in every namespace, including the tag that macro declares. */
-    List named = c.sym.lookup(%($name), NULL);
-    if (named && %(name-argument $named) in locals) return named;
+    Var named = locals[%(name-argument $name)];
+    if (named is <list>) return named;
     if (c.sym.get_exact(%($kind $name))) return NULL;
   }
   List local = c._definition_local(name, 1);
@@ -1974,7 +1974,7 @@ static Var Compiler._name_argument(Compiler c) {
   if (visible && visible in c.macro_definition_locals()) return visible;
   List local = c.macro_introduced_name(spelling);
   c.bind_template_local(local, NULL, NULL);
-  c.macro_definition_locals()[%(name-argument $local)] = 1;
+  c.macro_definition_locals()[%(name-argument $spelling)] = local;
   return local;
 }
 
