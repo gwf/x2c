@@ -1462,13 +1462,9 @@ static List Compiler._resolve_indexed(
 
 static List Compiler._postfix_index_expression(
   Compiler c, List expr, List index) {
-  Type type = expr.cadr();
-  // `T *const p` indexes like `T *p`.
-  while (type && type.car() is <symbol> &&
-         Symbol.is_type_qualifier(type.car()))
-    type = cdr(type);
-  if (type.is_pointer() || type.is_array())
-    return %(expr ${type.dereference()} (index $expr $index));
+  Type type = expr.cadr(), element = type.dereference();
+  if (element) return %(expr $element (index $expr $index));
+  type = type.canonicalize();
   if (!type.is_typedef_name()) return NULL;
   return c._typedef_index(expr, index, type);
 }
@@ -1504,15 +1500,16 @@ static List Compiler._typedef_index(
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
-  Type native = c.sym.resolve_key(type);
+  Type native = c.sym.normalize_declared_type(expr.cadr());
+  Type shape = native.canonicalize();
   // A boxable handle to a record has no C array reading.
-  if (native.is_pointer() && native.dereference().is_aggregate() &&
+  if (shape.is_pointer() && shape.dereference().is_aggregate() &&
       type.var_tag())
     $report.type_index_missing(c, type);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
-  if (native.is_array() ||
-      (native.is_pointer() && !c.sym.is_string_type(type)))
+  if (shape.is_array() ||
+      (shape.is_pointer() && !c.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
 }
@@ -1777,7 +1774,7 @@ static List Compiler._method_bind(
   Type target = declared.canonicalize(), source = type.canonicalize();
   Type named = source.is_aggregate() ? c._tag_typedef(source) : NULL;
   if (named) {
-    type = _qualified(type, named);
+    type = named.qualify(type);
     source = named;
     receiver = %(expr $type ${receiver.caddr()});
   }
@@ -1857,24 +1854,10 @@ static Type Compiler._next_method_type(
 /* A field inherits its containing object's qualifiers, not its pointer's. */
 static List Compiler._field_member(
   Compiler c, Type receiver, List field, Symbol access) {
-  Type object = c.sym.normalize_declared_type(receiver);
-  if (access == <"->">)
-    object = c.sym.normalize_declared_type(object.dereference());
+  Type object = access == <"->">
+    ? c.sym.normalize_declared_type(receiver).dereference() : receiver;
   Type declared = c.sym.lookup_field(object, field);
-  return declared ? %(field $access ${_qualified(object, declared)}) : NULL;
-}
-
-/* The outer qualifiers of `type` applied to `named`. */
-static Type _qualified(Type type, Type named) {
-  if (type.car() is not <symbol> ||
-      !type.car().symbol().is_type_qualifier()) return named;
-  Array out = [];
-  foreach (Var item, type) {
-    if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
-    out.push(item);
-  }
-  foreach (Var item, named) out.push(item);
-  return out.list_free();
+  return declared ? %(field $access $declared) : NULL;
 }
 
 /* A receiver spelled `struct T` or `union T` reaches the methods of the

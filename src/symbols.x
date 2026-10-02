@@ -1121,15 +1121,16 @@ int Sym.is_named_value_type(Sym s, Type type, String name) {
     initializer already reaches them.
 */
 Type Sym.lookup_field(Sym s, Type type, List field) {
-  type = s.resolve_key(type);
+  Type object = s.normalize_declared_type(type);
+  type = s.resolve_key(object);
   if (!type || !type.is_aggregate_tag()) return NULL;
   Type found = s.get(%( @type @field ));
-  if (found) return found;
+  if (found) return found.qualify(object);
   foreach (List row, s.field_order(type).cdr()) {
     Type member = row.cadr();
     if (row.car().truth() || !s.resolve_key(member).is_aggregate()) continue;
     found = s.lookup_field(member, field);
-    if (found) return found;
+    if (found) return found.qualify(object);
   }
   return NULL;
 }
