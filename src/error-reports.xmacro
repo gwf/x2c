@@ -2,7 +2,7 @@
    prefer ref, expr, decl, sig, param, init, and ctor to long spellings.
    Captures are runtime expressions. Categories remain diagnostic codes. */
 
-meta static Map _error_report_rows(void) => {
+meta static Map _error_report_rows = {
 
   "cache.init.cycle" :
   macro Statement(Expr $c, Expr $origin, Expr $notes) {
@@ -1928,7 +1928,7 @@ meta static Map _error_report_rows(void) => {
 
 meta static List _error_report_expand(
   List compiler, String key, List arguments) {
-  Map rows = _error_report_rows();
+  Map rows = _error_report_rows;
   Var value = rows[key];
   if (value is void)
     x2c_diagnostic_fail(%"unknown error report '$key'", %());

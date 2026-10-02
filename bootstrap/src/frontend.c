@@ -8,11 +8,11 @@
 
 #include "exception.h"
 
-static List _30230, _30229, _30228, _30227, _391, _389, _388, _386, _384, _379;
+static List _30228, _30227, _30226, _30225, _391, _389, _388, _386, _384, _379;
 
-static String _30239, _30238, _30237, _30236, _30235, _30234, _30233, _30232, _30231, _30225, _30223, _30221, _30219, _30218, _30217, _30216, _30215, _30214, _30213, _30212, _2335, _2304, _2049, _1140, _1071, _902, _871, _840, _409, _382, _377;
+static String _30237, _30236, _30235, _30234, _30233, _30232, _30231, _30230, _30229, _30223, _30221, _30219, _30217, _30216, _30215, _30214, _30213, _30212, _30211, _30210, _2335, _2304, _2049, _1140, _1071, _902, _871, _840, _409, _382, _377;
 
-static Var _30226, _30224, _30222, _30220, _390, _387, _385, _383, _381, _378;
+static Var _30224, _30222, _30220, _30218, _390, _387, _385, _383, _381, _378;
 
 #include <limits.h>
 #include <stdio.h>
@@ -139,34 +139,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2049 = String_new("/");
   _2304 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
   _2335 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
-  _30212 = String_new("<repl>");
-  _30213 = String_new("/lib");
-  _30214 = String_new("/x2c.x");
-  _30215 = String_new("#include \"scripting.x\"");
-  _30216 = String_new("");
-  _30217 = String_new("/lib/x2c.x");
-  _30218 = String_new("/lib/meta.x");
-  _30219 = String_new("x2c_expr_ident");
+  _30210 = String_new("<repl>");
+  _30211 = String_new("/lib");
+  _30212 = String_new("/x2c.x");
+  _30213 = String_new("#include \"scripting.x\"");
+  _30214 = String_new("");
+  _30215 = String_new("/lib/x2c.x");
+  _30216 = String_new("/lib/meta.x");
+  _30217 = String_new("x2c_expr_ident");
+  _30218 = String_var(_30217);
+  _30219 = String_new("x2c_expr_index");
   _30220 = String_var(_30219);
-  _30221 = String_new("x2c_expr_index");
+  _30221 = String_new("x2c_expr_call");
   _30222 = String_var(_30221);
-  _30223 = String_new("x2c_expr_call");
+  _30223 = String_new("x2c_expr_cast");
   _30224 = String_var(_30223);
-  _30225 = String_new("x2c_expr_cast");
-  _30226 = String_var(_30225);
-  _30227 = cons(_30226, NULL);
-  _30228 = cons(_30224, _30227);
-  _30229 = cons(_30222, _30228);
-  _30230 = cons(_30220, _30229);
-  _30231 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
-  _30232 = String_new("#!");
-  _30233 = String_new("/");
-  _30234 = String_new("cannot read input file");
-  _30235 = String_new("\n");
-  _30236 = String_new("indented units use the default symbol collection");
-  _30237 = String_new("script units use the default symbol collection");
-  _30238 = String_new("failed to run C preprocessor");
-  _30239 = String_new("x2c_");
+  _30225 = cons(_30224, NULL);
+  _30226 = cons(_30222, _30225);
+  _30227 = cons(_30220, _30226);
+  _30228 = cons(_30218, _30227);
+  _30229 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
+  _30230 = String_new("#!");
+  _30231 = String_new("/");
+  _30232 = String_new("cannot read input file");
+  _30233 = String_new("\n");
+  _30234 = String_new("indented units use the default symbol collection");
+  _30235 = String_new("script units use the default symbol collection");
+  _30236 = String_new("failed to run C preprocessor");
+  _30237 = String_new("x2c_");
   _x2c_static_initialize_0();
 }
 
@@ -210,7 +210,7 @@ void Compiler_stage_meta_in_process(void);
 
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return(Compiler_stage_meta_in_process(), 1) && _start(frontend, NULL, &((* unit)), _unit_context(), _30231) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
+  return(Compiler_stage_meta_in_process(), 1) && _start(frontend, NULL, &((* unit)), _unit_context(), _30229) && ParsedUnit_collect(&((* unit)), frontend) && ParsedUnit_parse(&((* unit)));
 }
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
@@ -496,7 +496,7 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
 void Compiler_tokenize(Compiler, char *);
 
 static void _tokenize_session(Frontend frontend, Compiler c, String source){
-  c -> filename = _30212;
+  c -> filename = _30210;
   c -> prelude = c -> runtime_inc = 1;
   c -> include_dirs = frontend -> include_dirs;
   Compiler_tokenize(c, String_truth(source) ? source : "$(begin)");
@@ -535,7 +535,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   int resolved = realpath(c -> filename, source) != NULL;
   _runtime_roles(c, resolved ? source : NULL);
   String text = _read_input(c);
-  if(String_truth(text) && String_startswith(text, _30232)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
+  if(String_truth(text) && String_startswith(text, _30230)) text = _script(c, text, resolved ? String_new(source) : c -> filename);
   c -> include_dirs = frontend -> include_dirs;
   (* unit).source_lines = _source_lines(text);
   Compiler_tokenize(c, text);
@@ -551,7 +551,7 @@ int String_equal(String, String);
 String home_portable_path(String);
 
 static String _input_name(Compiler c, String filename){
-  if(! String_startswith(filename, _30233)) return filename;
+  if(! String_startswith(filename, _30231)) return filename;
   String canonical =({
     Var _x2c_literal_part_0 = String_var(Compiler_canonical_path(c, Path_dirname(filename)));  Var _x2c_literal_part_1 = String_var(Path_basename(filename));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_2049), cons(_x2c_literal_part_1, NULL))));
   }
@@ -565,8 +565,8 @@ int strcmp(const char *, const char *);
 
 static void _runtime_roles(Compiler c, const char * source){
   char runtime[PATH_MAX], lib[PATH_MAX];
-  String dir = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30213), NULL)));
-  c -> prelude = !(source && realpath(String_join(NULL, cons(String_var(dir), cons(String_var(_30214), NULL))), runtime) && ! strcmp(source, runtime));
+  String dir = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30211), NULL)));
+  c -> prelude = !(source && realpath(String_join(NULL, cons(String_var(dir), cons(String_var(_30212), NULL))), runtime) && ! strcmp(source, runtime));
   c -> runtime_inc = !(source && realpath(dir, lib) && _inside(source, lib));
 }
 
@@ -584,7 +584,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 static String _read_input(Compiler c){
   String filename = c -> filename, text = NULL;
   if(Compiler_read_source(c, filename, &(text))) return text;
-  Compiler_report_error(c, 306819428, _30234, NULL, ({
+  Compiler_report_error(c, 306819428, _30232, NULL, ({
     Var _x2c_literal_part_2 = String_var(_1071);  Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("file: ")), cons(String_var(filename), NULL))));  Var _x2c_literal_part_4 = String_var(_1140);  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
   }
   ));
@@ -595,12 +595,12 @@ int String_find(String, String);
 void * Scope_calloc(size_t, size_t);
 
 static String _script(Compiler c, String text, String path){
-  int end = String_find(text, _30235);
+  int end = String_find(text, _30233);
   ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
   script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
   c -> unit_script = script;
-  return String_join(NULL, cons(String_var(_30215), cons(String_var(end < 0 ? _30216 : String_getslice(text, end, -2147483648, 1)), NULL)));
+  return String_join(NULL, cons(String_var(_30213), cons(String_var(end < 0 ? _30214 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
 int String_getindex(String, int);
@@ -725,11 +725,11 @@ static void _enter_package(Frontend frontend, Compiler c){
 }
 
 static void _check_cpp_unit(Compiler c){
-  if(c -> layout) Compiler_report_error(c, 306819428, _30236, _first_directive(c), ({
+  if(c -> layout) Compiler_report_error(c, 306819428, _30234, _first_directive(c), ({
     Var _x2c_literal_part_5 = String_var(_840);  Var _x2c_literal_part_6 = String_var(_871);  Var _x2c_literal_part_7 = String_var(_902);  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
   }
   ));
-  if(c -> script) Compiler_report_error(c, 306819428, _30237, _first_directive(c), ({
+  if(c -> script) Compiler_report_error(c, 306819428, _30235, _first_directive(c), ({
     Var _x2c_literal_part_8 = String_var(_2304);  Var _x2c_literal_part_9 = String_var(_2335);  cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL));
   }
   ));
@@ -755,12 +755,12 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor = cpp;
   cpp -> filename = c -> filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30217), NULL))) : NULL;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30215), NULL))) : NULL;
   int status = Toolchain_preprocess(frontend -> toolchain, c -> filename, c -> include_dirs, runtime, &(text), &(errors), &(dependency_text));
   (* unit).preprocessor_output = text;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
-  if(status) Compiler_report_error(c, 306819428, _30238, _first_directive(c), ({
+  if(status) Compiler_report_error(c, 306819428, _30236, _first_directive(c), ({
     Var _x2c_literal_part_10 = String_var(_409);  Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("status: ")), cons(String_var(int_str(status)), NULL))));  cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL));
   }
   ));
@@ -836,7 +836,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   struct Frontend session = * frontend;
   session.request = & request;
   ParsedUnit unit;
-  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30218), NULL)));
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_30216), NULL)));
   Context context = Context_open_named("shared translation unit");
   int started = _start(& session, path, &(unit), context, NULL);
   Compiler c = unit.compiler;
@@ -888,7 +888,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
           name = Var_string(_x2c_macro_item_3);
           {
             Var function;
-            if(String_startswith(name, _30239) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
+            if(String_startswith(name, _30237) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
           }
 
         }
@@ -912,7 +912,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 void Lisp_set_global(Lisp, String, Var);
 
 static void _declare_builders(Compiler c, Lisp shared){
-  List names = _30230;
+  List names = _30228;
   {
     String name;
     List _x2c_macro_object_4 = names;
