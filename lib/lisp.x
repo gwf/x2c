@@ -493,8 +493,10 @@ static Var Lisp._make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   defer if (result is void) Scope.free(lambda);
   (List params, Var body) = args;
   *lambda = (struct Lambda) {.params = params, .body = body, .macro = macro};
-  $scope(&lisp.scope) lambda.captures = {};
-  lisp._capture(env, lambda);
+  if (env) {
+    $scope(&lisp.scope) lambda.captures = {};
+    lisp._capture(env, lambda);
+  }
   return result = lambda;
 }
 
