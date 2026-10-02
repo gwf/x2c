@@ -2456,11 +2456,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _2016 = cons(_2015, NULL);
   _2017 = cons(_186, _2016);
   _2018 = List_var(_2017);
-  _2019 = int_var(2238);
+  _2019 = int_var(2247);
   _2020 = cons(_2019, NULL);
   _2021 = cons(_192, _2020);
   _2022 = List_var(_2021);
-  _2023 = int_var(83629);
+  _2023 = int_var(83908);
   _2024 = cons(_2023, NULL);
   _2025 = cons(_207, _2024);
   _2026 = List_var(_2025);
@@ -2610,11 +2610,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _2170 = cons(_2169, NULL);
   _2171 = cons(_168, _2170);
   _2172 = List_var(_2171);
-  _2173 = int_var(2246);
+  _2173 = int_var(2255);
   _2174 = cons(_2173, NULL);
   _2175 = cons(_192, _2174);
   _2176 = List_var(_2175);
-  _2177 = int_var(83994);
+  _2177 = int_var(84273);
   _2178 = cons(_2177, NULL);
   _2179 = cons(_207, _2178);
   _2180 = List_var(_2179);
@@ -2712,11 +2712,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2269 = cons(_2268, NULL);
   _2270 = cons(_168, _2269);
   _2271 = List_var(_2270);
-  _2272 = int_var(2257);
+  _2272 = int_var(2266);
   _2273 = cons(_2272, NULL);
   _2274 = cons(_192, _2273);
   _2275 = List_var(_2274);
-  _2276 = int_var(84409);
+  _2276 = int_var(84688);
   _2277 = cons(_2276, NULL);
   _2278 = cons(_207, _2277);
   _2279 = List_var(_2278);
@@ -2794,11 +2794,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2351 = cons(_2350, NULL);
   _2352 = cons(_168, _2351);
   _2353 = List_var(_2352);
-  _2354 = int_var(2259);
+  _2354 = int_var(2268);
   _2355 = cons(_2354, NULL);
   _2356 = cons(_192, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(84489);
+  _2358 = int_var(84768);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_207, _2359);
   _2361 = List_var(_2360);
@@ -2877,11 +2877,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2434 = cons(_2433, NULL);
   _2435 = cons(_168, _2434);
   _2436 = List_var(_2435);
-  _2437 = int_var(2263);
+  _2437 = int_var(2272);
   _2438 = cons(_2437, NULL);
   _2439 = cons(_192, _2438);
   _2440 = List_var(_2439);
-  _2441 = int_var(84694);
+  _2441 = int_var(84973);
   _2442 = cons(_2441, NULL);
   _2443 = cons(_207, _2442);
   _2444 = List_var(_2443);
@@ -3079,11 +3079,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2636 = cons(_2635, NULL);
   _2637 = cons(_168, _2636);
   _2638 = List_var(_2637);
-  _2639 = int_var(2312);
+  _2639 = int_var(2321);
   _2640 = cons(_2639, NULL);
   _2641 = cons(_192, _2640);
   _2642 = List_var(_2641);
-  _2643 = int_var(86821);
+  _2643 = int_var(87100);
   _2644 = cons(_2643, NULL);
   _2645 = cons(_207, _2644);
   _2646 = List_var(_2645);
@@ -4996,7 +4996,10 @@ int Sym_is_array_type(Sym, Type);
 int Sym_is_map_type(Sym, Type);
 Var Var_cadr(Var);
 int Type_is_integral(Type);
-Type Sym_normalize_declared_type(Sym, Type);
+int Type_is_bare_typedef_name(Type);
+int Type_is_typedef(Type);
+Type Sym_next_typedef(Sym, Type, int *);
+Type Type_qualify(Type, Type);
 int Type_is_aggregate(Type);
 Symbol Type_var_tag(Type);
 int Sym_is_string_type(Sym, Type);
@@ -5023,7 +5026,10 @@ static List Compiler__typedef_index(Compiler c, List expr, List index, Type type
 
     }
   }
-Type native = Sym_normalize_declared_type(c -> sym, Var_type(List_cadr(expr)));  Type shape = Type_canonicalize(native);  if(Type_is_pointer(shape) && Type_is_aggregate(Type_dereference(shape)) && Type_var_tag(type)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(type)))), cons(String_var(_1571), NULL))), c -> token, NULL);  if(Type_is_array(shape) ||(Type_is_pointer(shape) && ! Sym_is_string_type(c -> sym, type))) return({
+Type native = Var_type(List_cadr(expr));  int hops = 0;  while(1){
+  Type key = Type_canonicalize(native);  if(! Type_is_bare_typedef_name(key) && ! Type_is_typedef(key)) break;  Type next = Sym_next_typedef(c -> sym, key, &(hops));  if(! List_truth(Type_list(next))) break;  native = Type_qualify(next, native);
+}
+Type shape = Type_canonicalize(native);  if(Type_is_pointer(shape) && Type_is_aggregate(Type_dereference(shape)) && Type_var_tag(type)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(Var_str(List_car(Type_list(type)))), cons(String_var(_1571), NULL))), c -> token, NULL);  if(Type_is_array(shape) ||(Type_is_pointer(shape) && ! Sym_is_string_type(c -> sym, type))) return({
   Var _x2c_literal_part_47 = List_var(Type_dereference(native));  Var _x2c_literal_part_48 = List_var(cons(_694, cons(List_var(expr), cons(List_var(index), NULL))));  cons(_32, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL)));
 }
 );  return NULL;
@@ -5270,7 +5276,6 @@ static List CallSite__bound(CallSite * k, List binding, Type signature, List dec
   );  return CallSite__finish(&((* k)), Type_apply(signature), callee, signature, (* k).receiver);
 }
 
-Type Type_qualify(Type, Type);
 Type Type_reference(Type);
 static List Compiler__method_bind(Compiler c, List receiver, Type type, Type declared, Token origin){
   if(! List_truth(Type_list(declared)) || ! List_truth(Type_list(type))) return receiver;  Type target = Type_canonicalize(declared), source = Type_canonicalize(type);  Type named = Type_is_aggregate(source) ? Compiler__tag_typedef(c, source) : NULL;  if(List_truth(Type_list(named))){
@@ -5313,11 +5318,11 @@ static int _method_owner(Type type){
   return ! Type_is_aggregate(type) &&(Type_is_typedef_name(type) || Type_is_builtin(type));
 }
 
-Type Sym_next_typedef(Sym, Type, int *);
 static Type Compiler__next_method_type(Compiler c, Type type, int * hops, int * tagged){
   if(Type_is_pointer(type)) return NULL;  if(Type_is_aggregate(type)) return !(* tagged) ++ ? Compiler__tag_typedef(c, type) : NULL;  return Type_canonicalize(Sym_next_typedef(c -> sym, type, &((* hops))));
 }
 
+Type Sym_normalize_declared_type(Sym, Type);
 Type Sym_lookup_field(Sym, Type, List);
 static List Compiler__field_member(Compiler c, Type receiver, List field, Symbol access){
   Type object = access == 11645 ? Type_dereference(Sym_normalize_declared_type(c -> sym, receiver)) : receiver;  Type declared = Sym_lookup_field(c -> sym, object, field);  return List_truth(Type_list(declared)) ? cons(_1676, cons(Symbol_var(access), cons(List_var(declared), NULL))) : NULL;
@@ -6013,7 +6018,6 @@ static Type Compiler__converted_participant(Compiler c, Symbol member, Type lhs_
   return NULL;
 }
 
-int Type_is_bare_typedef_name(Type);
 int Array_contains(Array, Var);
 static Type Compiler__shared_participant(Compiler c, Type lhs_type, Type rhs_type, Symbol member){
   if(! Type_is_bare_typedef_name(lhs_type) || ! Type_is_bare_typedef_name(rhs_type)) return NULL;  Array lhs_names = Compiler__typedef_names(c, lhs_type); {
@@ -6025,7 +6029,6 @@ static Type Compiler__shared_participant(Compiler c, Type lhs_type, Type rhs_typ
   return NULL;
 }
 
-int Type_is_typedef(Type);
 static Array Compiler__typedef_names(Compiler c, Type type){
   Array names = Array_new();  int hops = 0;  for(;  List_truth(Type_list(type)) &&(Type_is_bare_typedef_name(type) || Type_is_typedef(type));  type = Sym_next_typedef(c -> sym, type, &(hops))) if(Type_is_bare_typedef_name(type)) Array_push(names, List_var(type));  return names;
 }
