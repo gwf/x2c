@@ -38,6 +38,7 @@
 #include "fix.x"
 #include "format.x"
 #include "diff.x"
+#include "args.x"
 #include <stdio.h>
 #include <string.h>
 
@@ -86,42 +87,40 @@ String x2c_embedded_identity(void)
 
 int main(int argc, char **argv):
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity())
+  Map options = NULL
+  try options = Args.parse(Args.from_argv(argc, argv), %(
+    (-h --help) (--rules) (--fmt-check) (--fmt-diff) (--fix) (--all)
+    (--rule (value CODE) repeated) (-I (value DIR) repeated)
+    (inputs repeated)))
+  catch %(bad-arg *):
+    _usage()
+    return 2
+  if options["rules"]:
+    Rule.print_table()
+    return 0
+  if options["help"]:
+    _usage()
+    return 0
   Map selected = {}
-  Array inputs = [], include_dirs = []
-  int fix = 0, format = 0, diff = 0
-  for (int at = 1; at < argc; at++):
-    String arg = argv[at]
-    if arg == "--rules":
-      Rule.print_table()
-      return 0
-    if arg == "-h" || arg == "--help":
-      _usage()
-      return 0
-    if arg == "--fmt-check": format = 1
-    else if arg == "--fmt-diff": format = diff = 1
-    else if arg == "--fix": fix = 1
-    else if arg == "--all":
-      Rule.select_family(selected, <language>)
-      Rule.select_family(selected, <style>)
-    else if (arg == "--rule" || arg == "-I") && at + 1 < argc:
-      String value = argv[++at]
-      if arg == "-I": include_dirs.push(value)
-      else if Rule.find(value): selected[value] = 1
-      else:
-        fprintf(stderr, "x2c-lint: unknown rule '%s'\n", value)
-        return 2
-    else if arg[0] == '-':
-      _usage()
+  foreach String code in options["rule"].list():
+    if !Rule.find(code):
+      fprintf(stderr, "x2c-lint: unknown rule '%s'\n", code)
       return 2
-    else: inputs.push(arg)
+    selected[code] = 1
+  Array inputs = options["inputs"].list().array()
   if !inputs.len():
     _usage()
     return 2
-  if format: return _format_check(inputs, diff)
+  if options["fmt-check"] || options["fmt-diff"]:
+    return _format_check(inputs, options["fmt-diff"].int())
+  if options["all"]:
+    Rule.select_family(selected, <language>)
+    Rule.select_family(selected, <style>)
   if !selected.len(): Rule.select_family(selected, <language>)
+  int fix = options["fix"].int()
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest))
   request.command = <translate>
-  request.include_dirs = include_dirs.list_free()
+  request.include_dirs = options["I"].list()
   Frontend frontend = Frontend.new(request)
   frontend.preprocessor_errors = _preprocessor_errors
   if !frontend.preload_macro_libraries(): return 1
