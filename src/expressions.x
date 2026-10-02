@@ -1031,10 +1031,12 @@ static int Compiler._identifier_needs_resolution(
   int retained_parameter = %(lambda-param $binding) in facts;
   int retained_capture = %(lambda-depth $binding) in facts;
   if (c.lambda_capture_required(binding)) return 1;
-  if (retained_parameter &&
-      (c.local_macro_captures != NULL ||
-       %(local-macro-capture $binding) in facts))
-    return 1;
+  if ((retained_parameter && c.local_macro_captures != NULL) ||
+      %(local-macro-capture $binding) in facts) return 1;
+  Var type;
+  if (%(automatic $binding) in facts &&
+      facts.try_get(%(type $binding), type) && type is <list> &&
+      type.list() !== %(<macro-expr>)) return 0;
   return !spelling ||
     (c.sym.lookup(%($spelling), NULL) != binding &&
      !retained_parameter && !retained_capture);
@@ -1208,7 +1210,11 @@ macro Statement $report.type_binding_unknown(Expr $c, Expr $name, Expr $origin) 
 }
 
 static List Compiler._resolve_identifier(
-  Compiler c, Var value, Type type, Token origin) {
+  Compiler c, Var value, Type type, Token origin) =>
+  c._identifier(value, type, origin, 0);
+
+static List Compiler._identifier(
+  Compiler c, Var value, Type type, Token origin, int native_callee) {
   if (type === %(<macro-expr>)) type = NULL;
   int read_reference = !type;
   int require_type = 0;
@@ -1220,10 +1226,13 @@ static List Compiler._resolve_identifier(
   if (!binding) $report.type_binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
+  native_callee &= !type &&
+    !binding_facts.contains(%(type $binding));
   c._capture_identifier(binding);
-  c._shadow_identifier(binding, type, spelling, binding_facts, origin);
+  c._shadow_identifier(
+    binding, type, spelling, binding_facts, origin, native_callee);
   if (!type) type = c._identifier_type(
-    binding, spelling, binding_facts, origin);
+    binding, spelling, binding_facts, origin, native_callee);
   if (!type && require_type)
     $report.type_ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
@@ -1290,7 +1299,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
 
 static void Compiler._shadow_identifier(
   Compiler c, List &binding, Type type, String spelling,
-  Map binding_facts, Token origin) {
+  Map binding_facts, Token origin, int native_callee) {
   if (!spelling) return;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
@@ -1302,7 +1311,9 @@ static void Compiler._shadow_identifier(
   else if (c.sym.binding_is_local(binding) &&
            !binding_facts.contains(%(lambda-depth $binding)))
     binding = visible;
-  else if (!c._free_name(binding, spelling, visible, visible_type, origin) &&
+  else if (!c._free_name(
+             binding, spelling, visible, visible_type, origin,
+             native_callee) &&
            visible != binding && visible_type &&
            (!type || c.sym.resolve_global(%($spelling), NULL)) &&
            !binding_facts.contains(%(emitted $visible)))
@@ -1316,7 +1327,7 @@ static void Compiler._shadow_identifier(
    does. */
 static int Compiler._free_name(
   Compiler c, List &binding, String spelling, List visible,
-  Type visible_type, Token origin) {
+  Type visible_type, Token origin, int native_callee) {
   if (!c.macro_stack ||
       %(lambda-depth $binding) in c.semantic_binding_facts()) return 0;
   Type global_type = NULL;
@@ -1326,6 +1337,7 @@ static int Compiler._free_name(
     binding = visible;
     return 1;
   }
+  if (native_callee && !global_type) return 0;
   if (global_type) binding = global;
   else if (visible_type) c._report_free_name(binding, spelling, origin);
   return 0;
@@ -1361,11 +1373,17 @@ static void Compiler._report_free_name(
 }
 
 static Type Compiler._identifier_type(
-  Compiler c, List binding, String spelling, Map facts, Token origin) {
+  Compiler c, List binding, String spelling, Map facts, Token origin,
+  int native_callee) {
   Var stored;
   if (facts.try_get(%(type $binding), stored) && stored is <list>)
     return stored;
   if (!spelling) return NULL;
+  if (native_callee) {
+    Type global_type = NULL;
+    c.sym.resolve_global(%($spelling), global_type);
+    return global_type;
+  }
   Type type = c.sym.get(%($spelling));
   if (!type) c._check_unit_static(spelling, origin);
   return type;
@@ -1568,8 +1586,34 @@ static List Compiler._resolve_call(
   return site._function(function);
 }
 
+/* A native-header identifier has no x2c type. Its call position keeps the
+   issued binding while ordinary shadow handling renames caller locals. */
+static List Compiler._resolve_callee(Compiler c, List function, Token origin) {
+  if (function.car() == <expr> && function.cadr() &&
+      !c.needs_resolution(function)) return function;
+  match (function) {
+    case %(expr ?type (ident ?value)):
+      return c._identifier(value, type, origin, 1);
+    case %(expr ? (parens ?inner)): {
+      List resolved = c._resolve_callee(inner, origin);
+      return %(expr ${resolved.cadr()} (parens $resolved));
+    }
+    case %(expr ?type
+           ((!set ?wrapper (!or at src)) ?source ?content)): {
+      List inner = c._resolve_callee(%(expr $type $content), origin);
+      List result = %(
+        expr ${inner.cadr()} ($wrapper $source ${inner.caddr()})
+      );
+      return c._resolve_source(result, inner.cadr(), result.caddr());
+    }
+    case %((!set ?wrapper (!or at src)) ?source ?inner):
+      return %($wrapper $source ${c._resolve_callee(inner, origin)});
+  }
+  return c.resolve_expression(function, origin);
+}
+
 static List CallSite._function(CallSite &k, List function) {
-  List resolved = k.c.resolve_expression(function, k.origin);
+  List resolved = k.c._resolve_callee(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type).equal(func_type))
     return k.c._resolve_func_call(resolved, k.supplied, k.origin);
@@ -2274,6 +2318,10 @@ macro open Expression $func_call(Expr $callee, Expr $count,
 static List Compiler._resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
   List arguments = c._resolve_call_arguments(NULL, supplied, origin);
+  if (_deferred_call(callee, NULL, arguments)) {
+    Macro called = $called;
+    return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
+  }
   match (arguments)
     case %((expr (void) ())): arguments = NULL;
   if (!arguments) {

@@ -213,7 +213,8 @@ static List Expansion.fresh_names(Expansion &x, List old_stack) {
   Map file_locals = {};
   // The outermost active row's fourth field is its invocation token.
   Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
-  if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
+  if (c.sym.at_file_scope())
+    _template_declarations(%(${x.template}), file_locals, 1);
   Array fresh_values = [];
   foreach (List fresh, x.definition.assoc(<fresh>).list()) {
     Var (binder, spelling, lisp) = fresh;
@@ -250,10 +251,14 @@ static List Compiler._member_bindings(
         parameter.assoc(<sequence>).int())
       continue;
     Var value = capture.assoc(<value>), spelling;
-    if (value is <list> &&
-        c.semantic_binding_facts().try_get(
-          %(source-spelling $value), spelling))
-      value = spelling;
+    if (value is <list>) {
+      if (c.semantic_binding_facts().try_get(
+          %(source-spelling $value), spelling)) value = spelling;
+      else {
+        String name = binding_identity_spelling(value);
+        if (name) value = name;
+      }
+    }
     Var member = _hole_key(parameter, "member");
     bindings = cons(%($member $value), bindings);
   }
@@ -348,21 +353,35 @@ static String Compiler._owner_spelling(Compiler c) {
   return %"package:${c.package}/${path[prefix.len():]}";
 }
 
-/* Collects the template locals that a file-scope row declares with external
-   linkage or none: objects, functions, typedefs, tags, and enumerators. */
-static void _file_scope_locals(List rows, Map locals) {
+/* Collects declaration binders in the rows' scope. File-scope names with
+   external linkage or none need stable spellings across translation units. */
+static void _template_declarations(List rows, Map locals, int file_scope) {
   foreach (Var row, rows) match (row) {
-    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
-    case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
-    case %(seq *inner): _file_scope_locals(inner, locals);
+    case %((!or at src) ? ?inner):
+      _template_declarations(%($inner), locals, file_scope);
+    case %(api-source ? ? ?inner):
+      _template_declarations(%($inner), locals, file_scope);
+    case %(seq *inner): _template_declarations(inner, locals, file_scope);
+    case %(macro-invoke ((!quote !quote) ?(List definition)) ?(List input) ?): {
+      Map declared = {};
+      _template_declarations(
+        %(${definition.assoc(<template>)}), declared, file_scope);
+      List bindings = input.match(definition.assoc(<pattern>));
+      foreach (List pair, bindings)
+        if (pair.car() in declared && pair.cadr().is_binder())
+          locals[pair.cadr()] = 1;
+    }
     case %(function ?type (bind ?binder ?) ?):
-      if (binder.is_binder() && !type.type().is_static()) locals[binder] = 1;
+      if (binder.is_binder() &&
+          (!file_scope || !type.type().is_static())) locals[binder] = 1;
     case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
-      match (type) case %(* (!or struct union enum) ?tag *):
-        if (tag.is_binder()) locals[tag] = 1;
-      match (type) case %(* enum ? (*members) *):
-        _file_scope_declarators(members, locals);
-      if (kind == <typedef> || !type.type().is_static())
+      if (file_scope) {
+        match (type) case %(* (!or struct union enum) ?tag *):
+          if (tag.is_binder()) locals[tag] = 1;
+        match (type) case %(* enum ? (*members) *):
+          _file_scope_declarators(members, locals);
+      }
+      if (!file_scope || kind == <typedef> || !type.type().is_static())
         _file_scope_declarators(rows, locals);
     }
   }
@@ -1861,7 +1880,7 @@ static List Compiler._invocation_arguments(
       c.sym.push_new_scope();
       parameter_scope = 1;
     }
-    arguments.push(c._argument_row(hole, kind));
+    arguments.push(c._argument_row(hole, kind, definition));
     if (nodes.cdr() && c.peek(0) != <)>) c._argument_separator(kind);
   }
   if (c.peek(0) != <)>) {
@@ -1880,7 +1899,8 @@ macro Statement $report.parse_macro_missing_args(Expr $c) {
 
 /* The arguments one hole captures: one, or a comma-separated sequence. A
    MatchRow hole also takes the directives around its rows. */
-static List Compiler._argument_row(Compiler c, List hole, Symbol kind) {
+static List Compiler._argument_row(
+  Compiler c, List hole, Symbol kind, List definition) {
   int sequence = hole.assoc(<sequence>);
   Array captured = [];
   if (c.peek(0) == <)> && !sequence)
@@ -1888,7 +1908,9 @@ static List Compiler._argument_row(Compiler c, List hole, Symbol kind) {
   if (c.peek(0) != <)>) loop {
     c._row_directives(kind, captured);
     Token first = c.token;
-    Var argument = c._parse_argument(kind);
+    Var argument = kind == <name>
+      ? c._name_argument(c.macro_holes && _declares_name(definition, hole))
+      : c._parse_argument(kind);
     if (kind != <name>) argument = c._capture_source(argument, first, c.token);
     captured.push(argument);
     if (!sequence || !c.test(<,>)) break;
@@ -1932,7 +1954,7 @@ static Var Compiler._parse_argument(Compiler c, Symbol kind) {
     case <map-entry>:  return c.parse_map_entry();
     case <match-row>:  return c.parse_match_row_argument();
     case <unit>:       return c.parse_top_level();
-    case <name>:       return c._name_argument();
+    case <name>:       return c._name_argument(0);
     case <literal>:    return c._literal_argument();
   }
   $report.macro_argument_contract(c);
@@ -1944,18 +1966,26 @@ macro Statement $report.parse_name_identifier(Expr $c) {
     $c.token, NULL);
 }
 
-static Var Compiler._name_argument(Compiler c) {
+static int _declares_name(List definition, List hole) {
+  Map declared = {};
+  _template_declarations(%(${definition.assoc(<template>)}), declared, 0);
+  return _hole_key(hole, "value") in declared;
+}
+
+static Var Compiler._name_argument(Compiler c, int declaration) {
   if (c.macro_holes && c.peek(0) == <$>) return c._parse_hole(<name>);
   if (c.peek(0) != <ident>)
     $report.parse_name_identifier(c);
   String spelling = c.token.text;
   c.next();
-  // A visible template local passes its identity, which each expansion
-  // renames.
+  if (c.macro_holes && declaration) {
+    List local = c.macro_introduced_name(spelling);
+    c.bind_template_local(local, NULL, NULL);
+    return local;
+  }
+  List local = c.sym.lookup(%($spelling), NULL);
   Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
-  List local = locals != NULL
-             ? c.sym.lookup(%($spelling), NULL) : NULL;
-  return local && local in locals ? local : spelling;
+  return local && (!locals || local in locals) ? local : spelling;
 }
 
 static Var Compiler._literal_argument(Compiler c) {
@@ -1997,7 +2027,11 @@ static void Compiler._bind_name_arguments(
       Var names = captures.car().list().assoc(<value>);
       List values = parameter.assoc(<sequence>).int()
                   ? names : %($names);
-      foreach (String name, values) c.sym.reference(%($name), NULL);
+      foreach (Var value, values) {
+        String name = value is <list>
+          ? binding_identity_spelling(value) : value;
+        c.sym.reference(%($name), NULL);
+      }
     }
     parameters = parameters.cdr();
     captures = captures.cdr();
