@@ -17,6 +17,7 @@ $(import "../lib/private-keywords.xmacro")
 
 #pragma private
 $(import "../src/grammar.xmacro")
+$(import "../src/adapter-memo.xmacro")
 #include "ast.x"
 #include "expressions.x"
 #include "macros.x"
@@ -919,21 +920,19 @@ static List Compiler._initializer_adapter(
   Type result = c._initializer_value_type(converted.cadr());
   List formal = %(expr ${source.cadr()} "_x2c_initializer_argument");
   List body = converted.search_replace(%(!quote $source), formal);
-  List key = %(iadapt $from $result $body);
-  Var stored;
-  if (c.names.adapters.try_get(key, stored)) return stored;
-  List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
-  List input = %(expr ${source.cadr()} (ident $parameter));
-  body = body.search_replace(%(!quote $formal), input);
-  List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
-  List params = %(params ${from.parameter_ast(parameter)});
-  List function = %(function (static $result)
-    (bind $binding ((fnmod $params)))
-    (block (stmnt (return $body))));
-  Type callable = %((func ($from)) @result);
-  List adapter = %(expr $callable (ident $binding));
-  c.names.adapters[key] = adapter;
-  c.add_early(function);
+  List key = %(iadapt $from $result $body), adapter = NULL;
+  $adapter.memo(c, key, adapter) {
+    List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
+    List input = %(expr ${source.cadr()} (ident $parameter));
+    body = body.search_replace(%(!quote $formal), input);
+    List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
+    List params = %(params ${from.parameter_ast(parameter)});
+    c.add_early(%(function (static $result)
+      (bind $binding ((fnmod $params)))
+      (block (stmnt (return $body)))));
+    Type callable = %((func ($from)) @result);
+    adapter = %(expr $callable (ident $binding));
+  }
   return adapter;
 }
 

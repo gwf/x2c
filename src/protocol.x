@@ -14,6 +14,7 @@
 #pragma private
 $(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
+$(import "../src/adapter-memo.xmacro")
 
 #include <limits.h>
 #include <stdlib.h>
@@ -119,20 +120,18 @@ typedef struct AdoptionDraft {
 // source locations
 
 static String Compiler._path(Compiler c) {
-  Var cached;
-  if (c.protocol_helpers.try_get(<proto-path>, cached)) return cached;
-  String result = c._normalize_file(c.filename ? c.filename : "<stdin>");
-  c.protocol_helpers[<proto-path>] = result;
+  String result = NULL;
+  $memo(c.protocol_helpers, <proto-path>, result) {
+    result = c._normalize_file(c.filename ? c.filename : "<stdin>");
+  }
   return result;
 }
 
 static String Compiler._canonical_file(Compiler c, List location) {
-  String file = _location_file(location);
-  List key = %(proto-file $file);
-  Var cached;
-  if (c.protocol_helpers.try_get(key, cached)) return cached;
-  String result = c._normalize_file(file);
-  c.protocol_helpers[key] = result;
+  String file = _location_file(location), result = NULL;
+  $memo(c.protocol_helpers, %(proto-file $file), result) {
+    result = c._normalize_file(file);
+  }
   return result;
 }
 
@@ -1506,53 +1505,57 @@ static void Compiler._install_imports(Compiler c) {
   c.rebuild_protocols(symbols);
 }
 
-static List Compiler._ancestry(Compiler c, Type participant) =>
-  c._proto_cached(
-    %("protocol-ancestry" $participant), %!(Compiler &c) => {
+static List Compiler._ancestry(Compiler c, Type participant) {
+  List result = NULL;
+  $memo(c.proto_cache, %("protocol-ancestry" $participant), result) {
     Array ancestry = [], Type current = participant;
     for (int distance = 0; current && distance <= 128; distance++) {
       ancestry.push(current);
       if (!current.is_typedef_name() && !current.is_typedef()) break;
       current = c.sym.get(current);
     }
-    return ancestry.list_free();
-  });
-
-/* The single entry point for proto_cache. A hit returns the cached List (a
-   non-list value records a null result); a miss runs compute(c) and
-   stores what it returns. */
-static List Compiler._proto_cached(Compiler c, Var key, Func compute) {
-  Var cached;
-  if (c.proto_cache.try_get(key, cached))
-    return cached is <list> ? cached : NULL;
-  List result = compute(c);
-  c.proto_cache[key] = result ? result : 0;
+    result = ancestry.list_free();
+  }
   return result;
 }
 
-static List Compiler._ordered_occurrences(Compiler c) =>
-  c._proto_cached(
-    <proto-ordr>, %!(Compiler &c) => {
+static List Compiler._ordered_occurrences(Compiler c) {
+  List result = NULL;
+  $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];
     foreach (Var (base, occurrence), c.protocols)
       ordered.push(%($base $occurrence));
     ordered.sort();
-    return ordered.list_free();
-  });
+    result = ordered.list_free();
+  }
+  return result;
+}
+
+/* Runs visit once for each conformance participant adopts, in protocols
+   order, after setting the caller's base to the protocol and rows to its
+   member rows. */
+macro Decorator $adopted_rows(Block $visit, Expr $compiler, Expr $protocols,
+    Expr $participant, Name $base, Name $rows) {
+  foreach (List entry, $protocols) {
+    $base = entry.car();
+    if (!$compiler._is_adopted($base, $participant)) continue;
+    List conformance = $compiler.protocol_members_for($participant, $base);
+    if (!conformance) continue;
+    $rows = conformance.last().list().cdr();
+    $visit;
+  }
+}
 
 /** Returns unique member spellings from the participant's visible adopted
     conformances. Resolution remains responsible for selecting a binding. */
 List Compiler.protocol_member_names(Compiler c, Type participant) {
   Map seen = {};
   Array names = [];
-  List protocols = c._ordered_occurrences();
+  List protocols = c._ordered_occurrences(), rows = NULL;
+  Type base = NULL;
   foreach (Type current, c._ancestry(participant.canonicalize()))
-    foreach (List entry, protocols) {
-      Type base = entry.car();
-      if (!c._is_adopted(base, current)) continue;
-      List conformance = c.protocol_members_for(current, base);
-      if (!conformance) continue;
-      foreach (List row, conformance.last().list().cdr()) {
+    $adopted_rows(c, protocols, current, base, rows) {
+      foreach (List row, rows) {
         String name = row.car();
         if (name && !seen.contains(name)) {
           seen[name] = 1;
@@ -1571,52 +1574,30 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
 int Compiler.protocol_rejects_direct_member(
   Compiler c, Type participant, String member) {
   Type owner = participant.canonicalize();
-  List cache_key = %("protocol-rejects" $owner $member);
-  Var cached;
-  if (c.proto_cache.try_get(cache_key, cached)) return cached;
-  List protocols = c._ordered_occurrences(), int rejects = 0;
-  foreach (Type ancestor, c._ancestry(owner)) {
-    List row = c._member_row(protocols, ancestor, member);
-    if (row) {
-      Symbol status = row.cadr();
-      rejects = status == <native> || status == <base-dflt> ||
-                status == <no-member> || status == <sig-cnflct>;
-      break;
+  int rejects = 0;
+  $memo(c.proto_cache, %("protocol-rejects" $owner $member), rejects) {
+    List protocols = c._ordered_occurrences();
+    foreach (Type ancestor, c._ancestry(owner)) {
+      List row = c._member_row(protocols, ancestor, member);
+      if (row) {
+        Symbol status = row.cadr();
+        rejects = status == <native> || status == <base-dflt> ||
+                  status == <no-member> || status == <sig-cnflct>;
+        break;
+      }
     }
   }
-  c.proto_cache[cache_key] = rejects;
   return rejects;
 }
 
 static List Compiler._member_row(
   Compiler c, List protocols, Type participant, String member) {
-  List found = NULL;
-  c._each_adopted_row(
-    protocols, participant,
-    %!(Compiler &c, Type base, List row) using &found => {
-      (void) c; (void) base;
-      if (row.car() == member) {
-        found = row;
-        return 1;
-      }
-      return 0;
-    });
-  return found;
-}
-
-/* Drive visit(c, base, row) over every member row of participant's
-   adopted conformances, in protocols order. A nonzero visit result stops the
-   iteration. */
-static void Compiler._each_adopted_row(
-  Compiler c, List protocols, Type participant, Func visit) {
-  foreach (List entry, protocols) {
-    Type base_type = entry.car();
-    if (!c._is_adopted(base_type, participant)) continue;
-    List conformance = c.protocol_members_for(participant, base_type);
-    if (!conformance) continue;
-    foreach (List row, conformance.last().list().cdr())
-      if (visit(c, base_type, row).int()) return;
+  Type base = NULL;
+  List rows = NULL;
+  $adopted_rows(c, protocols, participant, base, rows) {
+    foreach (List row, rows) if (row.car() == member) return row;
   }
+  return NULL;
 }
 
 /** Prints stable conformance rows for typedefs in `globs`.
@@ -1631,19 +1612,14 @@ void Compiler.dump_conformance(Compiler c, Map globs) {
       case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
-  List protocols = c._ordered_occurrences();
+  List protocols = c._ordered_occurrences(), rows = NULL;
+  Type base = NULL;
   foreach (Var candidate, names) {
     Type participant = %(${candidate.str()});
-    foreach (List entry, protocols) {
-      Type base_type = entry.car();
-      if (!c._is_adopted(base_type, participant)) continue;
-      List conformance = c.protocol_members_for(participant, base_type);
-      if (!conformance) continue;
+    $adopted_rows(c, protocols, participant, base, rows) {
       _dump_row(
-        "conformance",
-        c._owns_adoption(base_type, participant),
-        base_type, participant,
-        conformance.last().list().cdr());
+        "conformance", c._owns_adoption(base, participant), base,
+        participant, rows);
     }
   }
   names.free();
@@ -1738,18 +1714,18 @@ List Compiler.resolve_protocol_member(
 
 static List Compiler._resolve_member(
   Compiler c, Type participant, String member_name) {
-  List cache_key = %("protocol-member" $participant $member_name);
-  return c._proto_cached(
-    cache_key, %!(Compiler &c) => {
+  List key = %("protocol-member" $participant $member_name), selected = NULL;
+  $memo(c.proto_cache, key, selected) {
     List protocols = c._ordered_occurrences();
     List ancestry = c._ancestry(participant);
     /* A generated member is selected before a direct base alias. */
-    List selected = c._generated_member(ancestry, member_name);
-    if (selected) return selected;
-    selected = c._base_alias(protocols, participant, ancestry, member_name);
-    return selected ? selected
-      : c._adopted_member(protocols, ancestry, member_name);
-  });
+    selected = c._generated_member(ancestry, member_name);
+    if (!selected)
+      selected = c._base_alias(protocols, participant, ancestry, member_name);
+    if (!selected)
+      selected = c._adopted_member(protocols, ancestry, member_name);
+  }
+  return selected;
 }
 
 static List Compiler._generated_member(
@@ -1835,18 +1811,25 @@ typedef struct GeneratedOwners {
 
 /* Select the sole generated owner across all adopted protocols. */
 static List Compiler._generated_owner(
-  Compiler c, Type participant, String member_name) {
-  List cache_key = %("protocol-generated-owner" $participant $member_name);
-  return c._proto_cached(
-    cache_key, %!(Compiler &c) => {
-    GeneratedOwners owners = {
-      .participant = participant, .member = member_name, .candidates = []};
-    c._each_adopted_row(
-      c._ordered_occurrences(), participant,
-      %!(Compiler &c, Type base, List row)
-        using &owners => owners.consider(c, base, row));
-    return owners.decision();
-  });
+  Compiler c, Type participant, String member) {
+  List key = %("protocol-generated-owner" $participant $member), owner = NULL;
+  $memo(c.proto_cache, key, owner) {
+    owner = c._generated_decision(participant, member);
+  }
+  return owner;
+}
+
+static List Compiler._generated_decision(
+  Compiler c, Type participant, String member) {
+  GeneratedOwners owners = {
+    .participant = participant, .member = member, .candidates = []};
+  Type base = NULL;
+  List rows = NULL;
+  $adopted_rows(c, c._ordered_occurrences(), participant, base, rows) {
+    foreach (List row, rows)
+      if (owners.consider(c, base, row)) return owners.decision();
+  }
+  return owners.decision();
 }
 
 static int GeneratedOwners.consider(

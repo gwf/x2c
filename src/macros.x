@@ -16,6 +16,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
 $(import "../src/error-reports.xmacro")
+$(import "../src/adapter-memo.xmacro")
 #include "expressions.x"
 #include "builtins.x"
 #include "linked-meta.x"
@@ -305,11 +306,10 @@ static String Compiler._file_scope_name(
 
 /* The unit's owner spelling, cached per file and package. */
 static String Compiler._scope_owner(Compiler c) {
-  List owner_key = %(${c.filename} ${c.package});
-  Var cached;
-  if (c.names.file_scope_owners.try_get(owner_key, cached)) return cached;
-  String owner = c.filename ? c._owner_spelling() : "";
-  c.names.file_scope_owners[owner_key] = owner;
+  String owner = NULL;
+  $memo(c.names.file_scope_owners, %(${c.filename} ${c.package}), owner) {
+    owner = c.filename ? c._owner_spelling() : "";
+  }
   return owner;
 }
 
@@ -2845,12 +2845,8 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
         c.needs_exception = 1;
       }
       case %(early ?key ?binding ?declaration): {
-        Var cached;
-        if (c.names.adapters.try_get(key, cached))
-          replacements[binding] = cached;
-        else {
+        $adapter.memo(c, key, replacements[binding]) {
           c.add_early(_replace_bindings(declaration, replacements));
-          c.names.adapters[key] = replacements[binding];
         }
       }
     }
