@@ -731,6 +731,11 @@ static List Emitter._emit_binary(
 }
 
 static List Emitter._emit_ident(Emitter &e, Var binding) {
+  /* A template's free name in a declared type, such as an array size,
+     keeps the spelling it lands with. */
+  match (binding)
+    case %((!or binding-name binding-global) ?(String spelling)):
+      return %($spelling);
   Var pointer;
   if (e.static_objects && e.static_objects.try_get(binding, pointer))
     return %("(*" $pointer ")");
