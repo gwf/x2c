@@ -4015,5 +4015,13 @@ Map linked_meta_targets(void) {
   return rows;
 }
 
-/** Returns the hash of each linked copy's definition text by name. */
-Map linked_meta_hashes(void) => $x2c_meta_definition_hashes();
+macro Expression $linked.calls() => $(_x2c.meta.definition.calls);
+
+/** Returns each linked definition's hash and referenced names. */
+Map linked_meta_hashes(void) {
+  Map hashes = $x2c_meta_definition_hashes();
+  Map calls = $linked.calls();
+  foreach (Var (name, hash), hashes)
+    hashes[name] = %($hash ${calls[name]});
+  return hashes;
+}

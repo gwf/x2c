@@ -595,13 +595,15 @@ static List Compiler__parse_list_head(Compiler c){
 
 int List_try_search(List, Var, Var *, List *);
 
+int Compiler_needs_resolution(Compiler, Var);
+
 List List_match(List, Var);
 
 static List Compiler__cache_if_stable(Compiler c, List elem){
   Var matched;
   List bindings;
   if(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_try_search(& _x2c_match_site_0, elem, List_var(_30285), &(matched), &(bindings)); })) return elem;
-  if(c -> runtime_literals) return elem;
+  if(c -> runtime_literals || Compiler_needs_resolution(c, List_var(elem))) return elem;
   if(List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, elem, List_var(_30295)); })) || List_truth(({ static MatchCaptureSite _x2c_match_site_2;  x2c_match_site_match(& _x2c_match_site_2, elem, List_var(_30304)); }))) return elem;
   return Compiler_cache(c, cons(_30282, cons(List_var(elem), NULL)));
 }

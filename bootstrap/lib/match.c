@@ -60,8 +60,6 @@ static int _named_binder(Var value);
 
 static int _reserved_predicate(Var atom);
 
-static int _malformed_binder(Var atom);
-
 static List _normalize_pattern(List pattern);
 
 typedef struct NormalizedCell{
@@ -270,7 +268,7 @@ int Var_is_list_binder(Var atom){
 
 int Var_is_binder(Var atom){
   if(! _init_guard_) _file_init_();
-  return _binder_kind(atom) != 0;
+  return _binder_kind(atom) > 0;
 }
 
 int Var_is(Var, Symbol);
@@ -285,31 +283,32 @@ int Var_is_match_op(Var atom){
   return 0;
 }
 
-int Var_is_atom(Var);
+char Atom_first(Atom);
 
-String Var_str(Var);
+void Symbol_decode(Symbol, char *);
 
-int String_len(String);
-
-int String_getindex(String, int);
+void * Var_pointer(Var);
 
 int scan_ascii_alpha(int);
 
 int scan_ascii_digit(int);
 
 static int _binder_kind(Var atom){
-  if(! Var_is_atom(atom)) return 0;
-  String spelling = Var_str(atom);
-  int length = String_len(spelling);
-  if(! length) return 0;
-  char sigil = String_getindex(spelling, 0);
+  char sigil = Atom_first(atom);
   if(sigil != '?' && sigil != '*') return 0;
-  if(length == 1) return sigil;
-  unsigned char first =(unsigned char) String_getindex(spelling, 1);
-  if(! scan_ascii_alpha(first) && first != '_') return 0;
-  for(int i = 2;  i < length;  i ++){
-    unsigned char ch =(unsigned char) String_getindex(spelling, i);
-    if(! scan_ascii_alpha(ch) && ! scan_ascii_digit(ch) && ch != '_') return 0;
+  char decoded[SYMBOL_MAX_5BIT + 1];
+  const char * spelling;
+  if(Var_is(atom, 1328354264)){
+    Symbol_decode(Var_symbol(atom), decoded);
+    spelling = decoded;
+  }
+  else spelling = Var_pointer(atom);
+  if(! spelling[1]) return sigil;
+  unsigned char first =(unsigned char) spelling[1];
+  if(! scan_ascii_alpha(first) && first != '_') return - 1;
+  for(int i = 2;  spelling[i];  i ++){
+    unsigned char ch =(unsigned char) spelling[i];
+    if(! scan_ascii_alpha(ch) && ! scan_ascii_digit(ch) && ch != '_') return - 1;
   }
   return sigil;
 }
@@ -320,12 +319,6 @@ static int _named_binder(Var value){
 
 static int _reserved_predicate(Var atom){
   return Var_is(atom, 1328354264) &&(Var_equal(atom, Symbol_var(1997793406138)) || Var_equal(atom, Symbol_var(1860354452666)) || Var_equal(atom, Symbol_var(1997882)));
-}
-
-char Atom_first(Atom);
-
-static int _malformed_binder(Var atom){
-  return Var_is_atom(atom) &&(Atom_first(atom) == '?' || Atom_first(atom) == '*') && ! Var_is_binder(atom);
 }
 
 int List_truth(List);
@@ -454,8 +447,9 @@ static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
 }
 
 static void MatchLayoutBuilder__atom(MatchLayoutBuilder * b, Var atom){
-  if(_malformed_binder(atom))(* b).malformed_binder = 1;
-  else if(_named_binder(atom) && MatchLayoutBuilder__add(&((* b)), atom) < 0)(* b).past_capacity = 1;
+  int kind = _binder_kind(atom);
+  if(kind < 0)(* b).malformed_binder = 1;
+  else if(kind && ! Var_equal(atom, Symbol_var(58)) && ! Var_equal(atom, Symbol_var(54)) && MatchLayoutBuilder__add(&((* b)), atom) < 0)(* b).past_capacity = 1;
 }
 
 static int MatchLayoutBuilder__add(MatchLayoutBuilder * b, Atom binder){
@@ -641,7 +635,7 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 444};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 440};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -1096,8 +1090,6 @@ static int _pattern_borrowable(Var value, int depth, int permanent_lists){
 }
 
 int String_is_permanent(String);
-
-void * Var_pointer(Var);
 
 String Var_string(Var);
 

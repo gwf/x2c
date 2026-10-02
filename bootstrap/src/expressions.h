@@ -30,6 +30,8 @@ List Compiler_parse_variable(Compiler c);
 
 List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
+int Compiler_needs_resolution(Compiler c, Var value);
+
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);

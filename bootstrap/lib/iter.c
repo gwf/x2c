@@ -485,13 +485,13 @@ Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 700};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 701};
     x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
   List list = Var_list(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 704};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 705};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
     __builtin_unreachable();
   }
@@ -508,6 +508,7 @@ Array Array_setslice(Array, int, int, Array);
 static void _unzip_compact(UnzipShared * shared, int column){
   int consumed = shared -> heads[column];
   if(consumed < UNZIP_COMPACT_THRESHOLD) return;
+  if(consumed < Array_len(shared -> buffers[column]) - consumed) return;
   Array_setslice(shared -> buffers[column], 0, consumed, NULL);
   shared -> heads[column] = 0;
 }
