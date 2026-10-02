@@ -444,17 +444,11 @@ macro Statement $report.parse_macro_unknown_kind(
 }
 
 static Symbol Compiler._result_kind_token(Compiler c, Token token) {
-  String spelling = token.text, Symbol kind = Symbol.new(spelling);
-  if (spelling.lower() == "declaration") return <decl-unit>;
-  if (kind == <statement> || kind == <block>) return <block-item>;
-  if (kind == <entry>) return <map-entry>;
-  if (kind == <decorator>) return kind;
-  if (kind in direct_result_kinds) return kind;
-  $report.parse_macro_unknown_kind(c, spelling, token);
+  const MacroCategory *category = _category(token.text);
+  if (!category || !category.result)
+    $report.parse_macro_unknown_kind(c, token.text, token);
+  return category.result;
 }
-
-static const SymbolSet direct_result_kinds =
-  %<<expression field enumerator map-entry unit>>;
 
 macro Statement $report.macro_import_collision(
   Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) {
@@ -551,7 +545,7 @@ macro Statement $report.parse_decorator_kind(Expr $c, Expr $origin) {
    template slots find the target hole under `(target)`. */
 static void Definition.take_target(Definition &d, List hole) {
   Compiler c = d.c;
-  if (!decorator_target_kinds.contains(hole.assoc(<kind>)))
+  if (!_decorator_target(hole.assoc(<kind>)))
     $report.parse_decorator_kind(c, d.start);
   if (hole.assoc(<sequence>).int())
     $report.parse_decorator_singular(c, d.start);
@@ -561,8 +555,6 @@ static void Definition.take_target(Definition &d, List hole) {
   c.macro_holes[%(target)] = hole;
 }
 
-static const SymbolSet decorator_target_kinds =
-  %<<expr function block field unit named-type>>;
 
 macro Statement $report.macro_local_target(Expr $c, Expr $target, Expr $origin) {
   $c.report_error(
@@ -875,7 +867,8 @@ macro Statement $report.parse_hole_unknown_kind(Expr $c, Expr $spelling) {
 }
 
 static Symbol Compiler._hole_kind(Compiler c) {
-  Symbol kind = _author_kind(c.token.text);
+  const MacroCategory *category = _category(c.token.text);
+  Symbol kind = category ? category.hole : 0;
   if (!kind) {
     String spelling = c.token.text;
     $report.parse_hole_unknown_kind(c, spelling);
@@ -951,27 +944,70 @@ static Atom _hole_name(List hole) {
   return Atom.intern(binder[1:]);
 }
 
-static const SymbolSet author_kinds =
-  %<<expr type decl function name literal param block field enumerator
-     map-entry unit named-type catch captures match-row decl-row>>;
+/* macro categories
 
-static Symbol _author_kind(String spelling) {
-  if (spelling.lower() == "declaratorrow") return <decl-row>;
-  Symbol kind = Symbol.new(spelling);
-  if (kind == <statement>) return <block>;
-  if (kind == <entry>) return <map-entry>;
-  if (kind == <namedtype>) return <named-type>;
-  if (kind == <matchrow>) return <match-row>;
-  return kind in author_kinds ? kind : 0;
+   Every syntactic category a definition names, as a hole kind, a result
+   kind, or a decorator target, with the kinds each spelling selects.
+   Spellings match without regard to case. `named` marks the row whose
+   spelling names its hole or result kind in diagnostics. */
+
+enum { CATEGORY_HOLE_NAME = 1, CATEGORY_RESULT_NAME = 2 };
+
+typedef struct MacroCategory {
+  const char *spelling;
+  Symbol hole, result;
+  int target, named;
+} MacroCategory;
+
+static const MacroCategory macro_categories[] = {
+  { "Expr",          <expr>,       <expression>, 1, 1 },
+  { "Expression",    <expr>,       <expression>, 1, 2 },
+  { "Block",         <block>,      <block-item>, 1, 1 },
+  { "Statement",     <block>,      <block-item>, 1, 2 },
+  { "Field",         <field>,      <field>,      1, 3 },
+  { "Entry",         <map-entry>,  <map-entry>,  0, 3 },
+  { "Enumerator",    <enumerator>, <enumerator>, 0, 3 },
+  { "Unit",          <unit>,       <unit>,       1, 3 },
+  { "Declaration",   0,            <decl-unit>,  0, 2 },
+  { "Decorator",     0,            <decorator>,  0, 2 },
+  { "Function",      <function>,   0,            1, 1 },
+  { "NamedType",     <named-type>, 0,            1, 1 },
+  { "Type",          <type>,       0,            0, 1 },
+  { "Decl",          <decl>,       0,            0, 1 },
+  { "DeclaratorRow", <decl-row>,   0,            0, 1 },
+  { "Name",          <name>,       0,            0, 1 },
+  { "Literal",       <literal>,    0,            0, 1 },
+  { "Param",         <param>,      0,            0, 1 },
+  { "Catch",         <catch>,      0,            0, 1 },
+  { "Captures",      <captures>,   0,            0, 1 },
+  { "MatchRow",      <match-row>,  0,            0, 1 }
+};
+
+#define MACRO_CATEGORY_COUNT \
+  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]))
+
+static const MacroCategory *_category(String spelling) {
+  String key = spelling.lower();
+  for (int i = 0; i < MACRO_CATEGORY_COUNT; i++)
+    if (key == String.new(macro_categories[i].spelling).lower())
+      return &macro_categories[i];
+  return NULL;
 }
 
+static int _decorator_target(Symbol hole) {
+  for (int i = 0; i < MACRO_CATEGORY_COUNT; i++)
+    if (macro_categories[i].hole == hole) return macro_categories[i].target;
+  return 0;
+}
+
+/* The spelling that names a hole or result kind. */
 static String _kind_spelling(Symbol kind) {
-  if (kind == <block-item>) return "Statement";
-  if (kind == <decl-row>) return "DeclaratorRow";
-  if (kind == <map-entry>) return "Entry";
-  if (kind == <match-row>) return "MatchRow";
-  if (kind == <named-type>) return "NamedType";
-  if (kind == <decl-unit>) return "Declaration";
+  for (int i = 0; i < MACRO_CATEGORY_COUNT; i++) {
+    const MacroCategory *category = &macro_categories[i];
+    if ((category.hole == kind && category.named & CATEGORY_HOLE_NAME) ||
+        (category.result == kind && category.named & CATEGORY_RESULT_NAME))
+      return category.spelling;
+  }
   return kind.str().capitalize();
 }
 

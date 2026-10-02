@@ -945,11 +945,15 @@ expression, a cast needs a type, and a declarator needs a name. If those uses
 do not imply exactly one kind, including when a hole appears only inside
 compile-time Lisp, the definition must annotate it in the invocation pattern.
 
-These are the complete hole-kind annotations:
+Hole kinds, result kinds, and decorator targets are one vocabulary of
+syntactic categories. Each name below selects the same category wherever it
+appears, spellings match without regard to case, and `Expression` and
+`Expr`, and `Statement` and `Block`, are synonyms. These are the complete
+hole-kind annotations:
 
 | Annotation | Bound syntax | Example argument |
 | --- | --- | --- |
-| `Expr` | expression | `count + 1` |
+| `Expr` or `Expression` | expression | `count + 1` |
 | `Type` | type | `FILE *` |
 | `NamedType` | name followed by a complete type definition | `Point { int x; int y; };` |
 | `Decl` | non-function declaration | `static int value` |
@@ -963,6 +967,15 @@ These are the complete hole-kind annotations:
 | `Entry` | `Map` row | `key: value` |
 | `Enumerator` | enum member | `ready = 1` |
 | `Unit` | top-level C declaration or definition | `int value;` |
+| `Catch` | one `try` catch arm: pattern and body | supplied by compile-time code |
+| `Captures` | a lambda's complete capture clause | supplied by compile-time code |
+| `MatchRow` | one `match` arm or `default` | `case 1: return one;` |
+
+A `Catch $arms...` hole fills the catch arms of a `try` template, as in
+`try $body catch $arms... finally $cleanup`. `Captures` and `MatchRow` are
+described below with the templates that use them. Compile-time code supplies
+`Catch` and `Captures` rows by applying the macro as a value; a source
+invocation has no argument syntax for them.
 
 Because the definition is already known, an invocation parses each argument
 according to its hole kind. A type such as `FILE *` therefore works as an
@@ -1109,10 +1122,10 @@ A macro has one result kind as well as argument kinds:
 | `Declaration` | braced declarations with retained public signatures | file scope |
 
 The result kind is required between `macro` and the `$` name. `Statement` is
-the canonical spelling for block-item results; `Block` remains a synonym in
-result and hole positions. Arrow-expression bodies require `Expression`;
-braced bodies require `Statement`, `Block`, `Field`, `Entry`, `Enumerator`,
-`Unit`, or `Declaration`.
+the canonical spelling for block-item results and `Expression` for expression
+results; `Block` and `Expr` are synonyms. Arrow-expression bodies require
+`Expression`; braced bodies require `Statement`, `Field`, `Entry`,
+`Enumerator`, `Unit`, or `Declaration`.
 Inside a compound statement, a `Statement` or `Block` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
