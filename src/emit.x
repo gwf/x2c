@@ -91,7 +91,8 @@ static List Emitter._emit(Emitter &e, List ast) {
                @{e._emit(%($message))} ");");
     case %(initcode ?input ?body):
       return %(@{e._initializer_macro(input, body)} ";");
-    case %(localinit ? ?): return e._local_static(ast);
+    case %(localinit ?declaration (block *body)):
+      return e._local_static(declaration, body);
     case %(sourceinit ?function):
       return e._source_initializer(function);
     case %(initval *): return e._initializer_value(ast);
@@ -314,8 +315,8 @@ static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
 
 // local statics
 
-static List Emitter._local_static(Emitter &e, List ast) {
-  List declaration = ast.cadr(), body = ast.caddr();
+static List Emitter._local_static(
+  Emitter &e, List declaration, List body) {
   while (declaration.car() == <at>) {
     e.origin = declaration.cadr();
     declaration = declaration.caddr();
@@ -334,6 +335,8 @@ static List Emitter._local_static(Emitter &e, List ast) {
                                               : "static";
   foreach (List binding, bindings.cdr())
     e._static_binding(binding, declared_base, base_name, storage, output);
+  // The region shares its source block, including a statement expression's
+  // final value; another C block here would turn that value into void.
   output.push(e._emit(body));
   return output.list_free();
 }
@@ -436,7 +439,7 @@ static void StaticRuntime.emit(StaticRuntime &r) {
       "x2c_static_commit(&" ${r.guard} ");"
       "x2c_cleanup_leave(&" ${r.cleanup} ");"
     "}"
-    ${r.pointer} "=" ${r.guard} ".payload;"
+    "(void)(" ${r.pointer} "=" ${r.guard} ".payload);"
   );
   if (r.inferred) {
     List operand = %(expr ${r.type} (cast ${r.type} ${r.initial}));

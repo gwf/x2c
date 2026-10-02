@@ -117,15 +117,18 @@ static List Compiler._lower_function(Compiler c, List node) {
 static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   match (ast) {
     case %(expr *): if (!_holds_statements(ast)) return ast;
-    case %((!or function localinit declare typedef) *): return ast;
+    case %((!or function localinit typedef) *): return ast;
+    case %(declare ?type ?bindings):
+      return %(declare $type ${c._static_regions(bindings, runtime)});
     case $source_block_content(%(*statements)): {
       Array before = [];
       for (List rest = statements; rest; rest = rest.cdr()) {
         List statement = rest.car();
         if (c._runtime_static_declaration(statement, runtime)) {
+          List guard = c._static_regions(statement, runtime);
           List body = c._static_regions(
             source_block_content(rest.cdr()), runtime);
-          before.push(%(localinit $statement $body));
+          before.push(%(localinit $guard $body));
           break;
         }
         before.push(c._static_regions(statement, runtime));
