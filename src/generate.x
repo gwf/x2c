@@ -1107,11 +1107,14 @@ static void Forward.declaration(Forward &f, Var key) {
   f.out.push(declaration);
 }
 
-static void Forward.types(Forward &f, List type) {
-  foreach (Var part, type) {
-    if (part is <string>) f.declaration(part);
-    else if (part is <list>) f.types(part);
-  }
+/* Source parameters and fields are visited as declarations. Only semantic
+   function modifiers nest Types; tags and array bounds are not type names. */
+static void Forward.types(Forward &f, Type type) {
+  Type base = type.base_type();
+  if (base.is_bare_typedef_name()) f.declaration(base.car());
+  foreach (Var modifier, type)
+    match (modifier) case %(func (*parameters)):
+      foreach (Type parameter, parameters) f.types(parameter);
 }
 
 /* file text
