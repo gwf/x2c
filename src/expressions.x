@@ -283,6 +283,8 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
           decl, parameter.type_from_ast(), c._parse_cast(), origin);
         return c._finish_paren_statement(cast, 0);
       }
+    foreach (List parameter, parameters)
+      c.check_reference_placement(parameter.type_from_ast());
     c.expect(<=>);
     List source = c.parse_assignment();
     c.expect(<;>);

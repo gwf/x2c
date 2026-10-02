@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/reference-typed-destructure.x:6:27: type: transparent references are only supported on parameters
+    (Ref first, Ref second) = %(1 2);
+                            ^
+

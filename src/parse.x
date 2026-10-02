@@ -879,6 +879,7 @@ macro Statement $report.parse_destructure_init(Expr $c) {
 
 static List Compiler._destructure_declaration(
   Compiler c, List type, List binding_type, int allow_uninitialized) {
+  c.check_reference_placement(binding_type);
   Token origin_token = c.token;
   List bindings = c._destructure_targets(binding_type);
   /* A foreach destructures each element rather than an initializer, so the
@@ -931,6 +932,16 @@ static List _destructure_binds(List targets) {
 
 // finishing a declaration
 
+/** Rejects transparent references in object and function-result types.
+    References inside a function's parameter list remain supported. */
+void Compiler.check_reference_placement(Compiler c, Type type) {
+  type = c.sym.normalize_declared_type(type);
+  if (<&> in type || <opt-ref> in type)
+    c.report_error(<type>,
+      "transparent references are only supported on parameters",
+      NULL, NULL);
+}
+
 static List Compiler._finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
@@ -945,11 +956,7 @@ static List Compiler._finish_declaration(
   if (tag == <declare> || tag == <decl>)
     foreach (List declarator, declarators) {
       Type type = %(declare $base (bindings $declarator)).type_from_ast();
-      type = c.sym.normalize_declared_type(type);
-      if (<&> in type || <opt-ref> in type)
-        c.report_error(<type>,
-          "transparent references are only supported on parameters",
-          NULL, NULL);
+      c.check_reference_placement(type);
     }
   List declaration = %($tag $base (bindings @declarators));
   return tag == <declare> && !preserved_self
