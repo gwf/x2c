@@ -1796,9 +1796,9 @@ carrying its base, suffix, and character quotes, and otherwise the
 initializer's expression node, which a generator can splice or walk. Test it
 with `string?` when both kinds can occur. A non-enum `Type` is rejected.
 
-`x2c.diagnostic.warn` reports a macro warning at the invocation with `String`
-notes and returns, so expansion continues. `x2c.diagnostic.fail` does not
-return.
+The Lisp operation `x2c.diagnostic.warn` reports a macro warning at the
+invocation with `String` notes and returns `nil`, so expansion continues.
+`x2c.diagnostic.fail` does not return.
 
 The statement and declaration constructors build one node each from operands
 that are themselves nodes, as the `x2c.expr.*` family does. `x2c.block.make`
