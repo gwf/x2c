@@ -231,8 +231,11 @@ preserve direct/delegate precedence and ambiguity behavior, then reuse it
 for display. Check struct/union, renamed typedefs, local/global tags,
 by-value/pointer/reference first parameters on tag lvalues, and unrelated
 same-spelling variables. Pointer-receiver lookup remains a separate decision.
-Settle the generic `struct_` namespace behavior explicitly; coordinate F17's
-qualifiers and document the resulting rule without expanding unrelated APIs.
+Gary decided that generic `struct_` and `union_` free functions do not
+participate in method lookup. Methods resolve through the actual receiver
+type identity. Other modules may define methods for that type; this adds no
+author or module ownership restriction. Preserve imported-extension lookup
+and ambiguity behavior. Coordinate F17's qualifiers and document the rule.
 
 ### F12. P1/P2 - Restore REPL reference parity and truthful syntax handling
 
@@ -839,8 +842,8 @@ prove it unnecessary. They do not add origin authentication, a second semantic
 validator, or generic caching/transaction machinery merely to unify appearances.
 The JobLaunch rename and preservation of caller bindings through Name holes
 are authorized. F17 follows the book's parameter-only reference contract.
-F12 preserves the REPL capability boundary with accurate diagnostics. F18
-warning sequencing and F11 generic tag-method behavior remain open decisions.
+F12 preserves the REPL capability boundary with accurate diagnostics. F11 uses actual receiver type identity while preserving methods defined by
+other modules. F18 warning sequencing remains an open decision.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
 Its source-workaround bug, duplicate rows, and untested runtime/validation
