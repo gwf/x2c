@@ -255,14 +255,16 @@ ordinary/quiet controls; establish that it catches the rejected direct-boxer
 substitution. Do not invent a new cross-platform NaN payload ABI. The stale
 plan claim belongs to F27.
 
-### F14. P2, decide compatibility - Resolve the public Launch collision
+### F14. P2 - Rename the runtime launch record to JobLaunch
 
 **X06; Rerun.** Importing `lib/process.x`, including through scripts, conflicts
 with a user's `Launch` type. This export was deliberate for Job embedding.
-Trace public consumers and choose an owner-qualified representation/API before
-renaming it. Check process/Job/script behavior, layout, and user collision
-programs. Removing an exported type merely because internal callers are few
-would create another compatibility regression.
+Gary selected `JobLaunch` on 2026-10-02, preserving the embedded layout and
+restoring user-defined Launch names. Do not retain a Launch alias, which would
+preserve the collision. Update source consumers and docs and check process,
+Job/script behavior, layout, and collision programs. Callers explicitly naming
+the newly exposed runtime type must use JobLaunch; this compatibility choice
+is authorized.
 
 ### F15. P2 - Normalize constructed strings before concatenation caching
 
@@ -780,8 +782,9 @@ The proposed scopes favor canonical ASTs, actual binding identities, existing
 cleanup/reference/conversion owners, and deletion of work whose inputs already
 prove it unnecessary. They do not add origin authentication, a second semantic
 validator, or generic caching/transaction machinery merely to unify appearances.
-Launch compatibility, local-reference semantics, Name binding, REPL support,
-and catalogue arity retain explicit decisions rather than an invented answer.
+The JobLaunch rename is authorized. Local-reference semantics, Name binding,
+REPL support, and catalogue arity retain explicit decisions rather than an
+invented answer.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
 Its source-workaround bug, duplicate rows, and untested runtime/validation
