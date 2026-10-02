@@ -121,7 +121,7 @@ static int _inspect_transformed(Compiler c, List ast, Symbol dump) {
   switch (dump) {
     case <transforms>: _print_ast(ast); break;
     case <dump-defs>:  c.dump_definitions(ast); break;
-    case <dump-code>:  puts(c.code_pretty_string(c.emit(ast), NULL)); break;
+    case <dump-code>:  puts(c.code_pretty_string(c.emit(ast, NULL), NULL)); break;
     default:           return 0;
   }
   return 1;

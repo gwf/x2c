@@ -59,11 +59,13 @@ static List _without_trivia(List ast) =>
 static List Compiler._generated_code(Compiler c, List ast, String basename) {
   List (header, source) = c._header_and_source(ast);
   String hash = filename_hash(c.filename);
-  (header, source) = c.setup_cache_init(
+  Map bindings;
+  (header, source, bindings) = c.setup_cache_init(
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
     %"_x2c_hcache_init_$hash");
+  defer bindings.cleanup();
   List hcode = c._emit_header(header);
-  List ccode = c._emit_source(source, header);
+  List ccode = c._emit_source(source, header, bindings);
   String hfile = %"$basename.h", cfile = %"$basename.c";
   return %(
     $hfile ${c.code_pretty_string(hcode, hfile)}
@@ -72,13 +74,14 @@ static List Compiler._generated_code(Compiler c, List ast, String basename) {
 }
 
 static List Compiler._emit_header(Compiler c, List header) =>
-  c.emit(c._include_guard(_vertical_spacing(header)));
+  c.emit(c._include_guard(_vertical_spacing(header)), NULL);
 
 /* Static prototypes see the header's declarations as already declared. */
-static List Compiler._emit_source(Compiler c, List source, List header) {
+static List Compiler._emit_source(
+  Compiler c, List source, List header, Map bindings) {
   source = c._static_prototypes(c._file_init(source), header);
   source = c._primary_include(_vertical_spacing(source));
-  return c.emit(c._patch_main(source));
+  return c.emit(c._patch_main(source), bindings);
 }
 
 macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
