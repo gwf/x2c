@@ -15,7 +15,6 @@ $(import "../src/grammar.xmacro")
 #include "lisp.x"
 #include "macros.x"
 #include "transform.x"
-$(import "../src/builtin-errors.xmacro")
 
 /* The `lib/meta.x` builders that reach the compiler run here as the copies
    `src/linked-meta.x` links. */
@@ -38,7 +37,7 @@ macro Statement $builtin_scope(Expr $enter, Expr $leave, Block $body) {
 
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
-    $builtin.error("scope.arity");
+    x2c_diagnostic_fail("$scope accepts zero or one destination", %());
   String enter = destinations ? "Scope_push" : "Scope_retain";
   String leave = destinations ? "Scope_pop" : "Scope_release";
   Macro shape = $builtin_scope;
@@ -78,10 +77,14 @@ static List _foreach_expand(
   List converter = direct ? %() : _converter(type);
   List spec = direct ? %() : _cursor_spec(type);
   if (targets.len() != 1 && targets.len() != 2)
-    $builtin.error("foreach.bindings");
+    x2c_diagnostic_fail(
+      "foreach requires one binding or a two-name destructuring declaration",
+      %());
   if (!direct && !converter) {
     Var printable = type;
-    $builtin.error("foreach.type", printable);
+    x2c_diagnostic_fail(
+      "type " + printable.repr() + " is not iterable",
+      %("declare an Iter protocol adoption or iterate an Iter directly"));
   }
   Foreach f = {
     .declaration = declaration, .collection = collection, .body = body,
@@ -257,7 +260,10 @@ static List _class_expand(List capture) {
   List type = capture[2];
   if (!type) return %($capture);
   if (!x2c_type_is_pointer(type) && type.car() == <enum>)
-    $builtin.error("class.enum", owner);
+    x2c_diagnostic_fail(
+      %"class $owner cannot take an enum value " +
+      "representation: Var has no fixed tag for an enum",
+      %("give the enum a typedef and name that typedef instead"));
   return %($capture (declaration-recipe class.defaults
     ($owner $type ${builtin_class_location()})));
 }
@@ -335,7 +341,8 @@ static List Shape.constructor(Shape &s) {
     extras = declared.cdr();
   }
   if (s.heap && !s.aggregate && !x2c_type_is_value(s.pointee))
-    $builtin.error("class.ctor", owner);
+    x2c_diagnostic_fail(
+      %"class $owner requires an explicit constructor", %());
   List constructor = _new(
     owner, s.representation, s.heap, s.named,
     s.positional && !initialize, extras);
@@ -420,7 +427,9 @@ static List Shape.comparison(Shape &s) {
              ${_hash(owner, s.heap, s.named)});
   if (!x2c_method_resolve(%($owner), "equal") ||
       !x2c_method_resolve(%($owner), "hash"))
-    $builtin.error("class.comparison", owner);
+    x2c_diagnostic_fail(
+      %"value class $owner requires compatible equal " +
+      "and hash methods", %());
   return %();
 }
 
@@ -540,7 +549,8 @@ static List _class_initializer(String owner, Var heap_value) {
     }
   }
   String suffix = heap ? ")" : " &)";
-  $builtin.error("class.init", owner, suffix);
+  x2c_diagnostic_fail(
+    %"class $owner requires void $owner.init($owner$suffix", %());
   return %();
 }
 
@@ -827,17 +837,23 @@ static List _binding_record(
   List rows = _binding_rows_for(group_name, all_rows);
   foreach (Var installed, sealed)
     if (installed.equal(group_name))
-      $builtin.error("binding.sealed", group_name);
+      x2c_diagnostic_fail(
+        "native Lisp binding appears after its group was installed",
+        %("group: $group_name"));
   foreach (List row, rows)
     if (row[1].equal(lisp_name))
-      $builtin.error("binding.duplicate", group_name, lisp_name);
+      x2c_diagnostic_fail(
+        "duplicate native Lisp binding name",
+        %("group: $group_name" "name: $lisp_name"));
   return %(($group_name $lisp_name $function_name $type) @all_rows);
 }
 
 static String _binding_name(Var node) {
   Var value = x2c_literal_value(node);
   if (value is <string>) return value.str();
-  $builtin.error("binding.name", node);
+  x2c_diagnostic_fail(
+    "native Lisp binding name requires a String literal",
+    %("value: ${node.repr()}"));
   return NULL;
 }
 
@@ -850,7 +866,8 @@ static List _binding_rows_for(String group, List rows) {
 static List _binding_install_rows(String group, List all_rows) {
   List rows = _binding_rows_for(group, all_rows).reverse();
   if (!rows)
-    $builtin.error("binding.group", group);
+    x2c_diagnostic_fail(
+      "unknown native Lisp binding group", %("group: $group"));
   return rows;
 }
 
@@ -926,7 +943,7 @@ List builtin_try_cleanup_placement(Var cleanup) {
   match (cleanup)
     case %(code-value ? ?statements ?):
       return %(code-value "lowered" $token ((cleanup $token $statements)));
-  $builtin.error("try.cleanup");
+  x2c_diagnostic_fail("try cleanup must be lowered statements", %());
   return NULL;
 }
 
