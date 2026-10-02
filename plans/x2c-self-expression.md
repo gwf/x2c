@@ -1,9 +1,9 @@
 # x2c Self-Expression
 
-> Status: active, 2026-10-01. Phase 0 landed at ff9946c8; L1, L3, and the
-> first template fixes at 63576dd1; L2, L4, and forward-name hygiene as
-> PR #78; Wave 1 as #92; Wave 2 as #94. Wave 3 is submitted to the shared
-> integrator. Prototypes are in progress.
+> Status: active, 2026-10-02. Phase 0, L1-L4, and Waves 1-3 are on dev
+> (Phase 0 ff9946c8; L1/L3 63576dd1; #78, #92, #94, #95). The kept
+> prototypes are submitted to the shared integrator. Remaining work is the
+> follow-ups and signals recorded below.
 
 ## Result
 
@@ -282,6 +282,39 @@ before adoption.
   the third copy of lib/meta.x builders in etc/meta-helper.x; the Lisp
   callback bridge through a rest `Func`; SymTxn slot ledger; manifest
   field ledger.
+
+Prototype results (kept ones submitted as one PR; authored src/lib/commands
+diff +661/-940):
+
+- Kept: P1 `$ast.walk` for seven worklists (-29); P2 `$memo` and
+  `$adopted_rows` (removes all 221,856 closures built translating src and
+  lib, but translation is only -0.16%, within noise; kept for simpler
+  source); P4 captured operand types and one `_change` (-25); P5 protocol
+  update and forwarding helpers as whole templates (-39); P6 REPL scanner as
+  one match (-38); P7 one type-operand and cast owner (+13, fixes the
+  statement-cast warning and its type); P9 graph peel helper (-38); P11
+  class rendering template (-7); P12 graph and lint arguments through
+  `Args.parse` (graph -94; accepts conventional `--opt=value` and
+  interleaved operands); P13 `Frontend.open_reporting` (fixes the clones
+  double print; certify keeps its quiet open); P14 items 1, 3, 5 (one
+  integer-literal decoder, one macro projection binder owner classified
+  internal, one Lisp callback adapter).
+- Rejected with evidence (patches in the session scratchpad): P3 (one match
+  in `_step` is 1.4% slower because the match emitter labels only
+  single-symbol heads); P8 (deriving the method name in both build modes
+  needs a hand-written Lisp string search per package); P10 (a typedef
+  bound inside a function gets function-local scope, but the adapter is
+  cached across functions); P14 items 2, 6, 7 (larger than the code they
+  replace).
+- Follow-up: P14 item 4 (one copy of the lib/meta.x builders, -49) needs a
+  bootstrap round between capability and adoption.
+- Signals and defects found: the match emitter could label `(!or sym sym)`
+  heads; an SDK reader for a function's bare method name would make P8
+  trivial; `foreach` still fails inside a Decorator body under the seed;
+  a guarded `$source_pattern` case with a `!set` capture emits C using an
+  undeclared variable; `x2c-lint missing.x` aborts with status 134;
+  instruction counts shift about 1-2% with the checkout path length, so
+  compare trees at equal-length paths.
 
 ## Language design
 
