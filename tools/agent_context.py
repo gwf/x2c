@@ -68,7 +68,8 @@ def _check_hook(root: Path) -> None:
     hook = Path(effective.stdout.strip())
     if not hook.is_absolute():
         hook = root / hook
-    if hook.resolve() != expected.resolve():
+    if (not hook.is_file() or not os.access(hook, os.X_OK) or
+            hook.read_bytes() != expected.read_bytes()):
         raise ValueError("conflicting core.hooksPath; preserve it and arrange "
                          f"the common hook explicitly (effective hook: {hook})")
 

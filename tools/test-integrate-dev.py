@@ -184,7 +184,7 @@ class IntegrationProbe(unittest.TestCase):
             dest.parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(source,dest)
         self.write(self.root/'tools'/'gate-state.py',GATE,executable=True)
-        self.write(self.root/'.gitignore','debug/\nbuilds/\n__pycache__/\n')
+        shutil.copy2(TOOL_ROOT/'.gitignore',self.root/'.gitignore')
         self.write(self.root/'src'/'baseline.x','baseline\n')
         self.write(self.root/'bootstrap'/'src'/'compiled.c','seed\n')
         self.write(self.root/'docs'/'guide.md','old guide\n')
@@ -285,6 +285,41 @@ class IntegrationProbe(unittest.TestCase):
         self.assertEqual(self.git('config','--get','core.hooksPath').stdout.strip(),
                          'custom-hooks')
 
+    def test_context_accepts_shared_hook_and_uses_pushing_worktree_policy(self):
+        shared=self.directory/'common-hooks'
+        shared.mkdir()
+        hook=shared/'pre-push'
+        shutil.copy2(self.root/'tools'/'hooks'/'pre-push',hook)
+        self.git('config','core.hooksPath',str(shared))
+        self.cli('context','--role','worker','--delivery','private')
+        self.assertEqual(self.git('config','--get','core.hooksPath').stdout.strip(),
+                         str(shared))
+        result=self.command([str(hook)],input=(
+            f'refs/heads/work {self.base} refs/heads/dev {self.base}\n'),ok=False)
+        self.assertEqual(result.returncode,1,result.stderr)
+        self.cli('context','--role','orchestrator','--delivery','direct')
+        result=self.command([str(hook)],input=(
+            f'refs/heads/work {self.base} refs/heads/dev {self.base}\n'))
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_context_refuses_changed_or_nonexecutable_shared_hook(self):
+        shared=self.directory/'common-hooks'
+        shared.mkdir()
+        hook=shared/'pre-push'
+        original=(self.root/'tools'/'hooks'/'pre-push').read_text()
+        self.git('config','core.hooksPath',str(shared))
+        for body,mode in [(original+'exit 0\n',0o755),(original,0o644)]:
+            with self.subTest(mode=mode):
+                hook.write_text(body)
+                hook.chmod(mode)
+                result=self.cli('context','--role','worker','--delivery','private',
+                                ok=False)
+                self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+                self.assertIn('conflicting core.hooksPath',result.stderr)
+                self.assertEqual(
+                    self.git('config','--get','core.hooksPath').stdout.strip(),
+                    str(shared))
+
     def test_submit_preserves_prose_and_refreshes_readiness(self):
         head=self.pr(1)
         self.git('checkout','-q','work-1')
@@ -303,6 +338,19 @@ class IntegrationProbe(unittest.TestCase):
         add=max(i for i,c in enumerate(calls) if 'POST' in c)
         self.assertLess(delete,patch); self.assertLess(patch,add)
         self.assertEqual(state.get('gates',[]),[])
+
+    def test_submission_notes_are_ignored_but_authored_files_are_not(self):
+        self.pr(1)
+        self.git('checkout','-q','work-1')
+        self.cli('context','--role','individual','--delivery','pr')
+        evidence=self.root/'.context'/'submission'/'evidence.json'
+        self.write(evidence,json.dumps([{'command':'focused check','result':'pass'}]))
+        self.cli('submit','--pr','1','--base',self.base,'--evidence-file',evidence)
+        self.write(self.root/'src'/'unreviewed.x','new source\n')
+        result=self.cli('submit','--pr','1','--base',self.base,
+                        '--evidence-file',evidence,ok=False)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('commit the authored changes',result.stderr)
 
     def test_submission_during_gate_keeps_integration_owner_lock(self):
         head=self.pr(1,ready=False)
