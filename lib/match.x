@@ -91,20 +91,14 @@ typedef struct MatchCaptureSite {
    binds one element and `*` a sequence. A guard operator is one of the
    compact Symbols `!is`, `!set`, `!or`, `!and`, `!not`, and `!quote`. */
 
-/** Reports whether `atom` is a valid named or anonymous `?` binder.
-    Raises: `<alloc-fail>` while decoding a compact `Atom`.
-*/
+/** Reports whether `atom` is a valid named or anonymous `?` binder. */
 meta native int Var.is_atom_binder(Var atom) => _binder_kind(atom) == '?';
 
-/** Reports whether `atom` is a valid named or anonymous `*` binder.
-    Raises: `<alloc-fail>` while decoding a compact `Atom`.
-*/
+/** Reports whether `atom` is a valid named or anonymous `*` binder. */
 meta native int Var.is_list_binder(Var atom) => _binder_kind(atom) == '*';
 
-/** Reports whether `atom` is either valid `Match` binder form.
-    Raises: `<alloc-fail>` while decoding a compact `Atom`.
-*/
-meta native int Var.is_binder(Var atom) => _binder_kind(atom) != 0;
+/** Reports whether `atom` is either valid `Match` binder form. */
+meta native int Var.is_binder(Var atom) => _binder_kind(atom) > 0;
 
 /** Reports whether `atom` is a compact built-in `Match` guard operator. */
 meta native int Var.is_match_op(Var atom) {
@@ -118,19 +112,24 @@ meta native int Var.is_match_op(Var atom) {
   return 0;
 }
 
-/* The binder's sigil, or 0 when `atom` spells no binder. */
+/* The valid binder's sigil, -1 for a malformed sigil-leading Atom, or 0
+   for other values. Compact bytes use stack storage; long bytes are borrowed. */
 static int _binder_kind(Var atom) {
-  if (!atom.is_atom()) return 0;
-  String spelling = atom.str(), int length = spelling.len();
-  if (!length) return 0;
-  char sigil = spelling[0];
+  char sigil = Atom.first(atom);
   if (sigil != '?' && sigil != '*') return 0;
-  if (length == 1) return sigil;
+  char decoded[SYMBOL_MAX_5BIT + 1];
+  const char *spelling;
+  if (atom is <symbol>) {
+    Symbol.decode(atom, decoded);
+    spelling = decoded;
+  }
+  else spelling = atom.pointer();
+  if (!spelling[1]) return sigil;
   unsigned char first = (unsigned char) spelling[1];
-  if (!scan_ascii_alpha(first) && first != '_') return 0;
-  for (int i = 2; i < length; i++) {
+  if (!scan_ascii_alpha(first) && first != '_') return -1;
+  for (int i = 2; spelling[i]; i++) {
     unsigned char ch = (unsigned char) spelling[i];
-    if (!scan_ascii_alpha(ch) && !scan_ascii_digit(ch) && ch != '_') return 0;
+    if (!scan_ascii_alpha(ch) && !scan_ascii_digit(ch) && ch != '_') return -1;
   }
   return sigil;
 }
@@ -143,11 +142,6 @@ static int _named_binder(Var value) =>
 static int _reserved_predicate(Var atom) =>
   atom is <symbol> &&
   (atom == <?binder?> || atom == <*binder?> || atom == <!op?>);
-
-/* A sigil-leading `Atom` that spells no binder. */
-static int _malformed_binder(Var atom) =>
-  atom.is_atom() && (Atom.first(atom) == '?' || Atom.first(atom) == '*') &&
-  !atom.is_binder();
 
 /* pattern normalization
 
@@ -263,8 +257,10 @@ static void MatchLayoutBuilder._collect(MatchLayoutBuilder &b, Var pattern) {
 
 /* A sigil-leading `Atom` must spell a binder; a named binder takes a slot. */
 static void MatchLayoutBuilder._atom(MatchLayoutBuilder &b, Var atom) {
-  if (_malformed_binder(atom)) b.malformed_binder = 1;
-  else if (_named_binder(atom) && b._add(atom) < 0) b.past_capacity = 1;
+  int kind = _binder_kind(atom);
+  if (kind < 0) b.malformed_binder = 1;
+  else if (kind && atom != <?> && atom != <*> && b._add(atom) < 0)
+    b.past_capacity = 1;
 }
 
 /* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
