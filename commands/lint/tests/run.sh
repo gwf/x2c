@@ -66,6 +66,52 @@ diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
 test ! -s "$work/validation-macros.errors"
 diff -u "$tests/validation-macros.expected" "$work/validation-macros"
 
+read_failure() {
+  path=$1
+  shift
+  status=0
+  "$tool" "$@" >"$work/read.out" 2>"$work/read.err" || status=$?
+  test "$status" = 1
+  grep -F -- "$path" "$work/read.err" >/dev/null
+  ! grep -q 'error floor' "$work/read.err"
+}
+
+# Input failures stay ordinary in both modes; readable files still run.
+cp "$tests/src/clean.x" "$work/denied.x"
+chmod 000 "$work/denied.x"
+for mode in normal format; do
+  set --
+  if test "$mode" = format; then set -- --fmt-check --fmt-diff; fi
+  read_failure "$work/missing.x" "$@" "$work/missing.x"
+  read_failure "$work/denied.x" "$@" "$work/denied.x"
+  read_failure "$work" "$@" "$work"
+  (cd "$work" && read_failure '-' "$@" -- -)
+done
+chmod 600 "$work/denied.x"
+read_failure '-' -
+for missing_first in yes no; do
+  if test "$missing_first" = yes; then
+    set -- "$work/missing.x" "$tests/src/review.x"
+  else set -- "$tests/src/review.x" "$work/missing.x"; fi
+  read_failure "$work/missing.x" --rule return-after-raise "$@"
+  grep -q 'return-after-raise' "$work/read.out"
+done
+read_failure "$work/missing.x" --fmt-check \
+  "$work/missing.x" "$work/spacing.x"
+grep -q 'lines to format' "$work/read.out"
+# An empty file and a file literally named '-' are readable inputs.
+: >"$work/empty.x"
+cp "$tests/src/clean.x" "$work/-"
+"$tool" "$work/empty.x" >/dev/null
+(cd "$work" && "$tool" -- - >/dev/null && "$tool" --fmt-check -- -)
+
+# A support-file failure during meta preparation has the same boundary.
+printf 'not a directory\n' >"$work/cache-file"
+printf '%s\n' 'meta int input_value(int n) { return n + 1; }' \
+  'int value(void) { return $input_value(1); }' >"$work/meta.x"
+X2C_CACHE_DIR="$work/cache-file" read_failure "$work/cache-file" \
+  "$work/meta.x"
+
 # The driver must run the same executable with unchanged arguments.
 builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
 "$tool" --all "$tests/src/style.x" >"$work/direct"
