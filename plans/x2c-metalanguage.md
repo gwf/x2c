@@ -151,14 +151,17 @@ The rule:
    A caller's local can therefore supply a free name in a macro body. This
    is the accepted cost of the rule.
 6. The one exception is a leading body directive, `using name, other;`
-   without `$`. It binds each listed spelling to the file-scope entity
-   (function, global, type, or enum constant) that it names where the
-   macro is written. The definition is rejected if a listed name resolves
-   to a local or to nothing. When a caller's local shadows such a name, the
-   compiler gives the caller's local a different C spelling, so the
-   generated C still reaches the file-scope entity. A file-scope entity has
-   one identity for the whole unit, so this works as a qualified name and
-   does not make the macro a closure.
+   without `$`, or `using name` after an `Expression` macro's signature. It
+   binds each listed spelling to the file-scope function, object, or
+   enumerator that it names where the macro is written, or to the native
+   name C supplies when no x2c declaration does. Locals are never reached.
+   When a caller's local shadows such a name, the compiler gives the
+   caller's local a different C spelling, so the generated C still reaches
+   the file-scope name. A file-scope name has one identity for the whole
+   unit, so this works as a qualified name and does not make the macro a
+   closure. Type names are not listed: implemented as identifiers only,
+   because type spellings already resolve where the expansion lands and no
+   case needed them.
 
 `using $name;` keeps its current meaning, a fresh private name for each
 expansion. Rule 1 makes most uses unnecessary, because a literal name in

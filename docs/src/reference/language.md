@@ -1558,11 +1558,13 @@ int main(void) {
 6 10
 ```
 
-Each listed name must name a function, object, or enumerator declared at
-file scope where the macro is written. A caller's local of the same spelling
-receives a separate generated C spelling, so the expansion still reaches the
-file-scope declaration. A `using` name resolves to that declaration in every
-unit that applies the macro, including through a `Macro` value.
+Each listed name is a function, object, or enumerator declared at file
+scope where the macro is written, or a native name such as a C library
+function that no x2c declaration supplies. A caller's local of the same
+spelling receives a separate generated C spelling, so the expansion still
+reaches the file-scope name. A `using` name resolves to that name in every
+unit that applies the macro, including through a `Macro` value. Type names
+are not listed; they resolve where the expansion lands.
 
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later

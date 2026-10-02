@@ -214,10 +214,13 @@ cause false free-name errors; nested forward declarations remain untyped for
 methods and other typed forms. A Name argument can instead bind to a macro's
 own forward local and silently lose the caller's assignment.
 
-Owner: macro expansion binding and call-site Name identity. Gary decided on
-2026-10-02 that a Name argument referring to an existing caller variable keeps
-that binding. Assignments through the hole must reach the caller's variable
-even when a nested macro declares the same spelling. Preserve that identity
+Owner: macro expansion binding and call-site Name identity. Superseded
+later on 2026-10-02: the earlier record that a Name argument keeps the
+caller's binding misstated Gary's intent. Macros capture no bindings; a Name
+argument is a spelling, and names a macro body writes are private to its
+expansion. See M1 in [x2c as its own metalanguage](x2c-metalanguage.md),
+which makes assignments through the hole reach the caller's variable even
+when a nested macro declares the same spelling. Preserve that identity
 through nested declarations; defer typed operations until their binding is
 available. Check methods, foreach, $let, literals, local macros, repeated
 expansions, and same/absent caller spellings. Coordinate F16 without treating
