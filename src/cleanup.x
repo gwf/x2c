@@ -197,6 +197,7 @@ static List Compiler._static_initializers(
   foreach (List binding, bindings.cdr()) {
     match (binding)
       case %(op = ?declaration ?value): {
+        declaration = c._static_regions(declaration, runtime);
         List initial = c._static_regions(value, runtime);
         if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
           List record = c._region_binding("static_cleanup");
@@ -205,7 +206,7 @@ static List Compiler._static_initializers(
         output.push(%(op = $declaration $initial));
         continue;
       }
-    output.push(binding);
+    output.push(c._static_regions(binding, runtime));
   }
   return %(declare $type (bindings @{output.list_free()}));
 }
