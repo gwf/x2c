@@ -80,7 +80,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
 | [`Compiler.skip_script_statement`](#Compiler.skip_script_statement) | Moves past one run of a script unit's statement tokens, through a `;` or a closing `}` outside every bracket. |
 | [`Compiler.take_diagnostics`](#Compiler.take_diagnostics) | Moves collected child reports into the caller's store without re-emitting. |
-| [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, import, keyword, and Lisp state for one segment of a collected file. |
+| [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, import, keyword, literal cache, and Lisp state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
 | [`Compiler.test`](#Compiler.test) | Consumes `type` when current and reports whether it matched. |
 | [`Compiler.thaw_declaration_syntax`](#Compiler.thaw_declaration_syntax) | Restores a retained declaration recipe in the current parsing lifetime. |
@@ -101,7 +101,7 @@ One x2c unit's translation state and its two parses.
 
 Returns the absolute path that a `home_portable_path` spelling names.
 
-Source: `src/compiler.x:2658`
+Source: `src/compiler.x:2660`
 
 #### home_portable_path
 
@@ -112,7 +112,7 @@ home, otherwise `path`. Interfaces, macro definitions, retained
 declarations, and generated identities spell paths this way, so they do
 not depend on where the home is installed.
 
-Source: `src/compiler.x:2652`
+Source: `src/compiler.x:2654`
 
 #### match_value_flat_head
 
@@ -203,7 +203,7 @@ Source: `src/compiler.x:2239`
 
 Records a path dependency not embedded in generated C.
 
-Source: `src/compiler.x:2670`
+Source: `src/compiler.x:2672`
 
 <a id="Compiler.anchor_origin"></a>
 #### Compiler.anchor_origin
@@ -317,7 +317,7 @@ source view it is the absolute path, because an unsaved file need not
 exist on disk; otherwise it is the real path, or `path` itself when that
 does not resolve.
 
-Source: `src/compiler.x:2641`
+Source: `src/compiler.x:2643`
 
 <a id="Compiler.catch_binder_declarations"></a>
 #### Compiler.catch_binder_declarations
@@ -433,7 +433,7 @@ it clears the diagnostic store and the compiler must not be reused.
 At process exit, root Scope cleanup follows shutdown hooks and canonical
 pool cleanup. Close explicitly while any native session dependencies live.
 
-Source: `src/compiler.x:2787`
+Source: `src/compiler.x:2789`
 
 <a id="Compiler.freeze_declaration_syntax"></a>
 #### Compiler.freeze_declaration_syntax
@@ -559,7 +559,7 @@ Source: `src/compiler.x:2076`
 
 Merges another translation's dependency rows into this compiler.
 
-Source: `src/compiler.x:2675`
+Source: `src/compiler.x:2677`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -568,7 +568,7 @@ Source: `src/compiler.x:2675`
 
 Creates a compiler with independent package and generated-name state.
 
-Source: `src/compiler.x:2683`
+Source: `src/compiler.x:2685`
 
 <a id="Compiler.new_shared"></a>
 #### Compiler.new_shared
@@ -577,7 +577,7 @@ Source: `src/compiler.x:2683`
 
 Creates a compiler sharing its owner's package and generated-name state.
 
-Source: `src/compiler.x:2686`
+Source: `src/compiler.x:2688`
 
 <a id="Compiler.next"></a>
 #### Compiler.next
@@ -653,7 +653,7 @@ Source: `src/compiler.x:433`
 Reads a source through the request view and retains exact response
 bytes.
 
-Source: `src/compiler.x:2630`
+Source: `src/compiler.x:2632`
 
 <a id="Compiler.record_origin"></a>
 #### Compiler.record_origin
@@ -716,7 +716,7 @@ Returns that state to `owner`, so the next segment starts where this one
 finished and any Lisp environment this segment created stays alive after
 the shadow is released.
 
-Source: `src/compiler.x:2613`
+Source: `src/compiler.x:2615`
 
 <a id="Compiler.run_declaration_effects"></a>
 #### Compiler.run_declaration_effects
@@ -818,10 +818,10 @@ Source: `src/compiler.x:2541`
 
 `void Compiler.take_unit_state(Compiler c, Compiler owner)`
 
-Takes over `owner`'s macro, object-like `#define`, import, keyword, and
-Lisp state for one segment of a collected file. Segments are one
-translation unit, so a shadow uses the unit's Lisp environment rather
-than its own.
+Takes over `owner`'s macro, object-like `#define`, import, keyword,
+literal cache, and Lisp state for one segment of a collected file.
+Segments are one translation unit, so retained macro bodies index the
+unit's literal cache and use its Lisp environment.
 
 Source: `src/compiler.x:2597`
 
@@ -883,7 +883,7 @@ Source: `src/compiler.x:235`
 
 Merges one translation dependency, preserving an existing content hash.
 
-Source: `src/compiler.x:2662`
+Source: `src/compiler.x:2664`
 
 ### `Symbol`
 

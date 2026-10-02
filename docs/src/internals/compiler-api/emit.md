@@ -19,20 +19,22 @@ C tokens from normalized x2c ASTs.
 <a id="Compiler.emit"></a>
 #### Compiler.emit
 
-`List Compiler.emit(Compiler c, List ast)`
+`List Compiler.emit(Compiler c, List ast, Map cache_bindings)`
 
 Emits a bound, typed, transform-normalized AST sequence as flat C tokens.
 Source mapping adds `src-at`/ID pairs consumed by the formatter.
 The compiler must own the AST's binding facts and origins, and continue the
 translation session's shared generated-name state. This operation does not
 bind, transform, or choose header and source placement; generation supplies
-any added scaffolding in the same normalized grammar. It preserves the
-top-level AST sequence and advances generated-name counters as it allocates
-temporaries. Returned canonical `List`s and `String`s are owned by pools
+any added scaffolding in the same normalized grammar. `cache_bindings`
+maps semantic cache ids to generated slots; NULL keeps raw ids for
+inspection. It preserves the top-level AST sequence and advances
+generated-name counters as it allocates temporaries. Returned canonical
+`List`s and `String`s are owned by pools
 active during emission; promote them before releasing those pools if the
 tokens must survive.
 
-Source: `src/emit.x:46`
+Source: `src/emit.x:48`
 
 ## Design notes
 
