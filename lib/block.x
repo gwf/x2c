@@ -17,6 +17,7 @@
 
 #pragma once
 $(import "error-macros.xmacro")
+$(import "cleanup.xmacro")
 #include "common.x"
 
 #include <stdint.h>
@@ -33,8 +34,8 @@ typedef struct Block {
   Bytes bytes, size_t width, length, cap;
 } *Block;
 
-protocol Cleanup(Block);
-protocol Cleanup(Bytes);
+$cleanup.by(Block, free);
+$cleanup.by(Bytes, free);
 
 #pragma private
 
@@ -323,9 +324,3 @@ void Block.move_to(Block block, Scope *scope) {
   if (block.bytes != NULL) Scope.move(_allocation(block), scope);
   Scope.move(block, scope);
 }
-
-/** Ends the owned lifetime when a managed local leaves its block. */
-void Block.cleanup(Block value) { value.free(); }
-
-/** Releases the Block backing a managed Bytes view. */
-void Bytes.cleanup(Bytes value) { value.free(); }

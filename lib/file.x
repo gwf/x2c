@@ -20,6 +20,7 @@
 #include "common.x"
 
 $(import "error-macros.xmacro")
+$(import "cleanup.xmacro")
 
 /** Names a native stdio stream handle.
     A successful open returns an owned stream. `Stdin`, `Stdout`, and `Stderr`
@@ -67,7 +68,7 @@ typedef enum FileReadStatus {
   FILE_READ_DATA = 1
 } FileReadStatus;
 
-protocol Cleanup(File);
+$cleanup.by(File, close);
 
 #pragma private
 
@@ -591,6 +592,3 @@ void File.initialize(void) {
   Stdout = stdout;
   Stderr = stderr;
 }
-
-/** Ends the owned lifetime when a managed local leaves its block. */
-void File.cleanup(File value) { (void) value.close(); }

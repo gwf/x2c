@@ -97,36 +97,6 @@ typedef struct TorchCallbackError {
 
 static threaded TorchCallbackError *callback_error;
 
-static void _tensor_drop(void *ptr) {
-  Tensor tensor = ptr;
-  if (tensor.native) xt_tensor_free(tensor.native);
-  tensor.native = NULL;
-}
-
-static void _module_drop(void *ptr) {
-  Module module = ptr;
-  if (module.native) xt_module_free(module.native);
-  module.native = NULL;
-}
-
-static void _optimizer_drop(void *ptr) {
-  Optimizer optimizer = ptr;
-  if (optimizer.native) xt_optim_free(optimizer.native);
-  optimizer.native = NULL;
-}
-
-static void _scheduler_drop(void *ptr) {
-  Scheduler scheduler = ptr;
-  if (scheduler.native) xt_scheduler_free(scheduler.native);
-  scheduler.native = NULL;
-}
-
-static void _jit_drop(void *ptr) {
-  JitModule module = ptr;
-  if (module.native) xt_jit_free(module.native);
-  module.native = NULL;
-}
-
 /* A finalizer must not raise, so these two report nothing: an empty guard
    stack is impossible while the record exists. */
 static void _no_grad_drop(void *ptr) {
@@ -147,43 +117,49 @@ static void _torch_failed(String operation) {
           (reason $reason));
 }
 
-static Tensor _wrap(xt_tensor native, String operation) {
-  if (!native) _torch_failed(operation);
-  Tensor tensor = Scope.malloc_finalized(sizeof(struct Tensor), _tensor_drop);
-  tensor.native = native;
-  return tensor;
+/* Each handle record owns one libtorch handle. `drop` releases it once,
+   so the Scope finalizer and an early `free` share it; `wrap` adopts the
+   handle a raw call returned, raising `<bad-state>` for NULL. */
+macro Unit $torch.handle(Type $T, Type $native, Name $free, Literal $tag,
+                         Name $drop, Name $wrap, Name $unbox) {
+  static void $drop(void *ptr) {
+    $T handle = ptr;
+    if (handle.native) $free(handle.native);
+    handle.native = NULL;
+  }
+
+  static $T $wrap($native native, String operation) {
+    if (!native) _torch_failed(operation);
+    $T handle = Scope.malloc_finalized(sizeof(*handle), $drop);
+    handle.native = native;
+    return handle;
+  }
+
+  /** The raw handle, for the C ABI in torch-2.10.h. */
+  $native $T.native($T handle) => handle.native;
+
+  /** Releases the libtorch handle now; the record's finalizer then does
+      nothing. Returns NULL for the adjacent-defer form. */
+  $T $T.free($T handle) {
+    $drop(handle);
+    return NULL;
+  }
+
+  Var $T.var($T handle) => Var.new($tag, handle);
+  $T Var.$unbox(Var value) => ($T) value.pointer();
+  protocol Var($T);
 }
 
-static Module _wrap_module(xt_module native, String operation) {
-  if (!native) _torch_failed(operation);
-  Module module = Scope.malloc_finalized(sizeof(struct Module), _module_drop);
-  module.native = native;
-  return module;
-}
-
-static Optimizer _wrap_optimizer(xt_optim native, String operation) {
-  if (!native) _torch_failed(operation);
-  Optimizer optimizer =
-    Scope.malloc_finalized(sizeof(struct Optimizer), _optimizer_drop);
-  optimizer.native = native;
-  return optimizer;
-}
-
-static Scheduler _wrap_scheduler(xt_scheduler native, String operation) {
-  if (!native) _torch_failed(operation);
-  Scheduler scheduler =
-    Scope.malloc_finalized(sizeof(struct Scheduler), _scheduler_drop);
-  scheduler.native = native;
-  return scheduler;
-}
-
-static JitModule _wrap_jit(xt_jit_module native, String operation) {
-  if (!native) _torch_failed(operation);
-  JitModule module =
-    Scope.malloc_finalized(sizeof(struct JitModule), _jit_drop);
-  module.native = native;
-  return module;
-}
+$torch.handle(Tensor, xt_tensor, xt_tensor_free, <torch--ten>,
+              _tensor_drop, _wrap, tensor);
+$torch.handle(Module, xt_module, xt_module_free, <torch--mod>,
+              _module_drop, _wrap_module, module);
+$torch.handle(Optimizer, xt_optim, xt_optim_free, <torch--opt>,
+              _optimizer_drop, _wrap_optimizer, optimizer);
+$torch.handle(Scheduler, xt_scheduler, xt_scheduler_free, <torch--sch>,
+              _scheduler_drop, _wrap_scheduler, scheduler);
+$torch.handle(JitModule, xt_jit_module, xt_jit_free, <torch--jit>,
+              _jit_drop, _wrap_jit, jit_module);
 
 static void _check(int status, String operation) {
   if (status) _torch_failed(operation);
@@ -461,9 +437,6 @@ Array Tensor.to_values(Tensor t) {
 /** libtorch's own printed form. */
 String Tensor.str(Tensor t) => _text(xt_str(t.native), "str");
 
-/** The raw handle, for the C ABI in torch-2.10.h. */
-xt_tensor Tensor.native(Tensor t) => t.native;
-
 /** Takes ownership of a handle a raw call just produced, so the result is
     released with the scope that created it. A NULL `native` means the call
     failed and raises `<bad-state>` naming `operation`. The generated
@@ -675,13 +648,6 @@ int Torch.grad_enabled(void) {
     `a * b + c`, right after that operator has used it, so a chain of
     operators keeps only its inputs and its result alive. */
 void Tensor.discard(Tensor a) { _tensor_drop(a); }
-
-/** Releases the libtorch handle now; the record's finalizer then does
-    nothing. Returns NULL for the adjacent-defer form. */
-Tensor Tensor.free(Tensor a) {
-  _tensor_drop(a);
-  return NULL;
-}
 
 /* Modules.
 
@@ -985,13 +951,6 @@ void Module.load_archive(Module m, String path) {
   _check(xt_module_load_archive(m.native, path), "load_archive");
 }
 
-xt_module Module.native(Module m) => m.native;
-
-Module Module.free(Module m) {
-  _module_drop(m);
-  return NULL;
-}
-
 /* Optimizers.
 
    An optimizer refers to the parameter tensors it was built over, so the
@@ -1077,13 +1036,6 @@ void Optimizer.save_python(Optimizer optimizer, String path) {
     The caller supplies the same parameter order as the saved optimizer. */
 void Optimizer.load_python(Optimizer optimizer, String path) {
   _check(xt_optim_load_python(optimizer.native, path), "load_python");
-}
-
-xt_optim Optimizer.native(Optimizer o) => o.native;
-
-Optimizer Optimizer.free(Optimizer o) {
-  _optimizer_drop(o);
-  return NULL;
 }
 
 /* Custom functions borrow Funcs; the native graph owns saved tensor
@@ -1315,13 +1267,6 @@ void Scheduler.step_metric(Scheduler s, double metric) {
 /** The number of `step` calls an x2c schedule has taken. */
 long Scheduler.steps(Scheduler s) => s.steps;
 
-xt_scheduler Scheduler.native(Scheduler s) => s.native;
-
-Scheduler Scheduler.free(Scheduler s) {
-  _scheduler_drop(s);
-  return NULL;
-}
-
 /* Checkpoints.
 
    The package format is one pickled dict of name to tensor, the same file
@@ -1419,34 +1364,7 @@ void JitModule.eval(JitModule m) {
   _check(xt_jit_train(m.native, 0), "jit eval");
 }
 
-xt_jit_module JitModule.native(JitModule m) => m.native;
-
-JitModule JitModule.free(JitModule m) {
-  _jit_drop(m);
-  return NULL;
-}
-
-Var Tensor.var(Tensor t) => Var.new(<torch--ten>, t);
-Tensor Var.tensor(Var value) => (Tensor) value.pointer();
-
-Var Module.var(Module m) => Var.new(<torch--mod>, m);
-Module Var.module(Var value) => (Module) value.pointer();
-
-Var Optimizer.var(Optimizer o) => Var.new(<torch--opt>, o);
-Optimizer Var.optimizer(Var value) => (Optimizer) value.pointer();
-
-Var Scheduler.var(Scheduler s) => Var.new(<torch--sch>, s);
-Scheduler Var.scheduler(Var value) => (Scheduler) value.pointer();
-
-Var JitModule.var(JitModule m) => Var.new(<torch--jit>, m);
-JitModule Var.jit_module(Var value) => (JitModule) value.pointer();
-
 protocol Torch(Tensor);
-protocol Var(Tensor);
-protocol Var(Module);
-protocol Var(Optimizer);
-protocol Var(Scheduler);
-protocol Var(JitModule);
 
 /* Lisp calls allocate in the existing session Scope. Releasing a native
    handle early leaves its wrapper until session destruction. */

@@ -97,6 +97,7 @@ _Static_assert(_Generic(& rewind, void(*)(File) : 1, default: 0), "native alias 
 _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "native alias File_setbuf does not match setbuf");
 #endif
 #define File_setbuf setbuf
+void File_cleanup(File _x2c_macro_value_0);
 String File_string(File file);
 String File_readline(File file);
 String File_readblock(File file, long size);
@@ -164,6 +165,5 @@ File File_fdopen(int fildes, const char * mode);
 File File_popen(const char * cmd, const char * mode);
 File File_reopen(File file, const char * path, const char * mode);
 void File_initialize(void);
-void File_cleanup(File value);
 
 #endif /* __GUARD_0xC65C88F0__ */

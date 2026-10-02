@@ -8,6 +8,8 @@
 #include "common.h"
 typedef struct Mutex * Mutex;
 
+void Mutex_cleanup(Mutex _x2c_macro_value_0);
+
 void Mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure);
 
 void Mutex_recursive_lock(pthread_mutex_t * mutex, pthread_once_t * once, void(* initialize)(void), const char * failure);
@@ -23,8 +25,6 @@ int Mutex_try_lock(Mutex mutex);
 void Mutex_unlock(Mutex mutex);
 
 void Mutex_free(Mutex mutex);
-
-void Mutex_cleanup(Mutex value);
 
 
 #endif /* __GUARD_0x8C6C249F__ */

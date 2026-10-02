@@ -5,6 +5,7 @@
 */
 
 #include "blis-21.h"
+$(import "cleanup.xmacro")
 
 typedef enum Blis {
   BLIS_NAMESPACE
@@ -21,8 +22,7 @@ protocol Blis(T) {
 
 protocol Blis(BlisObject);
 
-void BlisObject.cleanup(BlisObject);
-protocol Cleanup(BlisObject);
+$cleanup.by(BlisObject, free);
 
 #pragma private
 
@@ -335,10 +335,6 @@ BlisObject BlisObject.free(BlisObject object) {
   memset(&object.native, 0, sizeof(object.native));
   object.released = 1;
   return NULL;
-}
-
-void BlisObject.cleanup(BlisObject blis_object) {
-  blis_object.free();
 }
 
 int BlisObject.rows(BlisObject object) {

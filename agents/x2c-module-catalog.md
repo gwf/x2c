@@ -667,12 +667,12 @@ checked dynamic storage for fixed-width elements.
 
 Public functions:
 
-`Bytes.block`, `Block.append`, `Bytes.append`, `Block.append_fill`,
-`Bytes.append_fill`, `Block.push`, `Bytes.push`, `Block.reserve`,
-`Bytes.reserve`, `Block.len`, `Block.capacity`, `Block.truth`,
-`Block.truncate`, `Block.clear`, `Block.try_pop`, `Bytes.try_pop`, `Block.pop`,
-`Block.new`, `Bytes.new`, `Block.free`, `Block.move_to`, `Block.cleanup`,
-`Bytes.cleanup`
+`Block.cleanup`, `Bytes.cleanup`, `Bytes.block`, `Block.append`,
+`Bytes.append`, `Block.append_fill`, `Bytes.append_fill`, `Block.push`,
+`Bytes.push`, `Block.reserve`, `Bytes.reserve`, `Block.len`, `Block.capacity`,
+`Block.truth`, `Block.truncate`, `Block.clear`, `Block.try_pop`,
+`Bytes.try_pop`, `Block.pop`, `Block.new`, `Bytes.new`, `Block.free`,
+`Block.move_to`
 
 ### [lib/buffer.x](../lib/buffer.x)
 
@@ -680,13 +680,13 @@ growable text buffer with indentation support.
 
 Public functions:
 
-`Buffer.write_len`, `Buffer.write`, `Buffer.printf`, `Buffer.write_char`,
-`Buffer.write_repeat`, `Buffer.unwrite`, `Buffer.pad`, `Buffer.newline`,
-`Buffer.indent`, `Buffer.newline_indent`, `Buffer.push`, `Buffer.pop`,
-`Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`, `Buffer.getindex`,
-`Buffer.len`, `Buffer.str`, `Buffer.str_free`, `Buffer.repr`, `Buffer.truth`,
-`Buffer.new`, `Buffer.reserve`, `Buffer.clear`, `Buffer.move_to`,
-`Buffer.free`, `Buffer.cleanup`
+`Buffer.cleanup`, `Buffer.write_len`, `Buffer.write`, `Buffer.printf`,
+`Buffer.write_char`, `Buffer.write_repeat`, `Buffer.unwrite`, `Buffer.pad`,
+`Buffer.newline`, `Buffer.indent`, `Buffer.newline_indent`, `Buffer.push`,
+`Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`,
+`Buffer.getindex`, `Buffer.len`, `Buffer.str`, `Buffer.str_free`,
+`Buffer.repr`, `Buffer.truth`, `Buffer.new`, `Buffer.reserve`, `Buffer.clear`,
+`Buffer.move_to`, `Buffer.free`
 
 ### [lib/clibc.x](../lib/clibc.x)
 
@@ -828,14 +828,14 @@ Public functions:
 
 Public functions:
 
-`File.string`, `File.readline`, `File.readblock`, `File.string_close`,
-`File.readline_into`, `File.read_into`, `File.write_all`, `File.copy_to`,
-`File.iter`, `File.gets`, `File.putc`, `File.puts`, `File.putw`, `File.getw`,
-`File.setlinebuf`, `File.ungetc`, `File.read`, `File.write`, `File.setbuffer`,
-`File.stat`, `File.printf`, `File.scanf`, `File.hash`, `File.equal`,
-`File.repr`, `File.str`, `File.write_repr`, `File.path_error`, `String.open`,
-`File.open`, `File.fdopen`, `File.popen`, `File.reopen`, `File.initialize`,
-`File.cleanup`
+`File.cleanup`, `File.string`, `File.readline`, `File.readblock`,
+`File.string_close`, `File.readline_into`, `File.read_into`, `File.write_all`,
+`File.copy_to`, `File.iter`, `File.gets`, `File.putc`, `File.puts`,
+`File.putw`, `File.getw`, `File.setlinebuf`, `File.ungetc`, `File.read`,
+`File.write`, `File.setbuffer`, `File.stat`, `File.printf`, `File.scanf`,
+`File.hash`, `File.equal`, `File.repr`, `File.str`, `File.write_repr`,
+`File.path_error`, `String.open`, `File.open`, `File.fdopen`, `File.popen`,
+`File.reopen`, `File.initialize`
 
 ### [lib/func.x](../lib/func.x)
 
@@ -910,17 +910,17 @@ the Lisp runtime: reader, session, and evaluator.
 
 Public functions:
 
-`native_scalar_access`, `Lisp.call_budget`, `Lisp.set_interrupted`,
-`lisp_truth`, `lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`,
-`lisp_list`, `lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`,
-`lisp_type`, `lisp_compare`, `lisp_add`, `lisp_plus`, `lisp_minus`,
-`lisp_times`, `lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`,
-`lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
-`lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
+`native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
+`Lisp.set_interrupted`, `lisp_truth`, `lisp_atom`, `lisp_car`, `lisp_cdr`,
+`lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
+`lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`, `lisp_add`,
+`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
+`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
+`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.kernel`,
-`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.cleanup`,
-`Lisp.read`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`,
+`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.read`,
+`Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`,
 `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
 `Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_source_function`
 
@@ -1083,9 +1083,9 @@ shared mutable-state coordination.
 
 Public functions:
 
-`Mutex.recursive_initialize`, `Mutex.recursive_lock`, `Mutex.recursive_unlock`,
-`Mutex.new`, `Mutex.lock`, `Mutex.try_lock`, `Mutex.unlock`, `Mutex.free`,
-`Mutex.cleanup`
+`Mutex.cleanup`, `Mutex.recursive_initialize`, `Mutex.recursive_lock`,
+`Mutex.recursive_unlock`, `Mutex.new`, `Mutex.lock`, `Mutex.try_lock`,
+`Mutex.unlock`, `Mutex.free`
 
 ### [lib/path.x](../lib/path.x)
 

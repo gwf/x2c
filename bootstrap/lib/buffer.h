@@ -14,6 +14,8 @@ typedef struct Buffer{
 }
 * Buffer;
 
+void Buffer_cleanup(Buffer _x2c_macro_value_0);
+
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 
 Buffer Buffer_write(Buffer buf, const char * text);
@@ -65,8 +67,6 @@ Buffer Buffer_clear(Buffer buf);
 void Buffer_move_to(Buffer buf, Scope * scope);
 
 void Buffer_free(Buffer buf);
-
-void Buffer_cleanup(Buffer value);
 
 
 #endif /* __GUARD_0x728E1434__ */

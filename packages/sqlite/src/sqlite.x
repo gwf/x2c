@@ -1,6 +1,7 @@
 /*  sqlite.x -- SQLite connections, prepared statements, and copied rows */
 
 #include "sqlite-3.h"
+$(import "cleanup.xmacro")
 
 typedef struct Database *Database;
 typedef struct Statement *Statement;
@@ -10,11 +11,8 @@ protocol Var(Database);
 protocol Var(Statement);
 protocol Iter(Statement);
 
-void Database.cleanup(Database);
-protocol Cleanup(Database);
-
-void Statement.cleanup(Statement);
-protocol Cleanup(Statement);
+$cleanup.by(Database, close);
+$cleanup.by(Statement, free);
 
 #pragma private
 
@@ -108,10 +106,6 @@ Database Database.close(Database database) {
   return NULL;
 }
 
-void Database.cleanup(Database database) {
-  database.close();
-}
-
 /** Borrows the same native connection until close. */
 sqlite3 *Database.native(Database database) {
   _database_live(database, "native");
@@ -182,10 +176,6 @@ Statement Statement.free(Statement statement) {
     statement.handle = NULL;
   }
   return NULL;
-}
-
-void Statement.cleanup(Statement statement) {
-  statement.free();
 }
 
 /** Borrows the native statement until free; reset before wrapper reuse. */

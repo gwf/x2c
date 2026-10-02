@@ -11,6 +11,7 @@
 */
 
 #include "uv-152.h"
+$(import "cleanup.xmacro")
 
 typedef struct UvLoop *UvLoop;
 typedef struct UvProcess *UvProcess;
@@ -30,11 +31,8 @@ typedef struct UvTimer *UvTimer;
 typedef struct UvSignal *UvSignal;
 typedef struct UvWatch *UvWatch;
 
-void UvLoop.cleanup(UvLoop);
-protocol Cleanup(UvLoop);
-
-void UvProcess.cleanup(UvProcess);
-protocol Cleanup(UvProcess);
+$cleanup.by(UvLoop, free);
+$cleanup.by(UvProcess, free);
 
 #pragma private
 
@@ -50,16 +48,7 @@ $(import "errors.xmacro")
 
 typedef void (*UvTimerFn)(UvTimer, Var);
 typedef void (*UvAsyncFn)(UvAsync, Var);
-typedef void (*UvIdleFn)(UvIdle, Var);
-typedef void (*UvPrepareFn)(UvPrepare, Var);
-typedef void (*UvCheckFn)(UvCheck, Var);
 typedef void (*UvLookupFn)(UvLookup, Var);
-typedef void (*UvTcpConnectFn)(UvTcp, Var);
-typedef void (*UvTcpListenFn)(UvTcp, UvTcp, Var);
-typedef void (*UvTcpReadFn)(UvTcp, Bytes, Var);
-typedef void (*UvPipeConnectFn)(UvPipe, Var);
-typedef void (*UvPipeListenFn)(UvPipe, UvPipe, Var);
-typedef void (*UvPipeReadFn)(UvPipe, Bytes, Var);
 typedef void (*UvUdpReceiveFn)(UvUdp, Bytes, UvAddress, unsigned, Var);
 typedef void (*UvFsFn)(UvFs, Var);
 typedef void (*UvSignalFn)(UvSignal, Var);
@@ -165,28 +154,6 @@ struct UvStreamWrite {
   char *bytes;
 };
 
-struct UvTcp {
-  uv_tcp_t tcp;
-  struct UvStream stream;
-  Var connect_value;
-  Var listen_value;
-  Var read_value;
-  UvTcpConnectFn connect_handler;
-  UvTcpListenFn listen_handler;
-  UvTcpReadFn read_handler;
-};
-
-struct UvPipe {
-  uv_pipe_t pipe;
-  struct UvStream stream;
-  Var connect_value;
-  Var listen_value;
-  Var read_value;
-  UvPipeConnectFn connect_handler;
-  UvPipeListenFn listen_handler;
-  UvPipeReadFn read_handler;
-};
-
 struct UvUdp {
   uv_udp_t udp;
   UvLoop loop;
@@ -272,30 +239,6 @@ struct UvAsync {
   int stopped;
 };
 
-struct UvIdle {
-  uv_idle_t idle;
-  UvLoop loop;
-  Var value;
-  UvIdleFn handler;
-  int stopped;
-};
-
-struct UvPrepare {
-  uv_prepare_t prepare;
-  UvLoop loop;
-  Var value;
-  UvPrepareFn handler;
-  int stopped;
-};
-
-struct UvCheck {
-  uv_check_t check;
-  UvLoop loop;
-  Var value;
-  UvCheckFn handler;
-  int stopped;
-};
-
 struct UvTimer {
   uv_timer_t timer;
   UvLoop loop;
@@ -359,11 +302,7 @@ static void _uv_raise(String operation, int status) {
 static void _uv_callback_failed(UvLoop loop, Symbol cause, List detail) {
   if (!loop || loop.callback_cause) return;
   loop.callback_cause = cause;
-  try loop.callback_detail = Error.snapshot(detail);
-  catch %(?snapcause *): {
-    loop.callback_cause = snapcause;
-    loop.callback_detail = NULL;
-  }
+  loop.callback_detail = Error.snapshot(detail);
   if (loop.initialized) uv_stop(&loop.loop);
 }
 
@@ -655,81 +594,6 @@ static void _uv_async_callback(uv_async_t *handle) {
   }
 }
 
-static void _uv_idle_release(UvIdle idle) {
-  if (!idle || idle.stopped) return;
-  idle.stopped = 1;
-  uv_idle_stop(&idle.idle);
-  _uv_close_handle((uv_handle_t *) &idle.idle);
-}
-
-static void _uv_idle_event(uv_idle_t *handle) {
-  UvIdle idle = handle ? handle->data : NULL;
-  if (!idle) return;
-  UvIdleFn handler = idle.handler;
-  handler(idle, idle.value);
-}
-
-static void _uv_idle_callback(uv_idle_t *handle) {
-  try _uv_idle_event(handle);
-  catch %(?cause *detail): {
-    UvIdle idle = handle ? handle->data : NULL;
-    if (idle) {
-      _uv_callback_failed(idle.loop, cause, detail);
-      _uv_idle_release(idle);
-    }
-  }
-}
-
-static void _uv_prepare_release(UvPrepare prepare) {
-  if (!prepare || prepare.stopped) return;
-  prepare.stopped = 1;
-  uv_prepare_stop(&prepare.prepare);
-  _uv_close_handle((uv_handle_t *) &prepare.prepare);
-}
-
-static void _uv_prepare_event(uv_prepare_t *handle) {
-  UvPrepare prepare = handle ? handle->data : NULL;
-  if (!prepare) return;
-  UvPrepareFn handler = prepare.handler;
-  handler(prepare, prepare.value);
-}
-
-static void _uv_prepare_callback(uv_prepare_t *handle) {
-  try _uv_prepare_event(handle);
-  catch %(?cause *detail): {
-    UvPrepare prepare = handle ? handle->data : NULL;
-    if (prepare) {
-      _uv_callback_failed(prepare.loop, cause, detail);
-      _uv_prepare_release(prepare);
-    }
-  }
-}
-
-static void _uv_check_release(UvCheck check) {
-  if (!check || check.stopped) return;
-  check.stopped = 1;
-  uv_check_stop(&check.check);
-  _uv_close_handle((uv_handle_t *) &check.check);
-}
-
-static void _uv_check_event(uv_check_t *handle) {
-  UvCheck check = handle ? handle->data : NULL;
-  if (!check) return;
-  UvCheckFn handler = check.handler;
-  handler(check, check.value);
-}
-
-static void _uv_check_callback(uv_check_t *handle) {
-  try _uv_check_event(handle);
-  catch %(?cause *detail): {
-    UvCheck check = handle ? handle->data : NULL;
-    if (check) {
-      _uv_callback_failed(check.loop, cause, detail);
-      _uv_check_release(check);
-    }
-  }
-}
-
 static void _uv_timer_release(UvTimer timer) {
   if (!timer) return;
   uv_timer_stop(&timer.timer);
@@ -838,32 +702,6 @@ static void _uv_stream_initialize(
   stream.shutdown_request.data = stream;
 }
 
-static UvTcp _uv_tcp_new(UvLoop loop) {
-  UvTcp tcp = Scope.calloc(1, sizeof(struct UvTcp));
-  int status = uv_tcp_init(&loop.loop, &tcp.tcp);
-  if (status < 0) {
-    Scope.free(tcp);
-    _uv_raise("tcp_init", status);
-  }
-  _uv_stream_initialize(
-    &tcp.stream, loop, (uv_stream_t *) &tcp.tcp, tcp, "TCP"
-  );
-  return tcp;
-}
-
-static UvPipe _uv_pipe_new(UvLoop loop) {
-  UvPipe pipe = Scope.calloc(1, sizeof(struct UvPipe));
-  int status = uv_pipe_init(&loop.loop, &pipe.pipe, 0);
-  if (status < 0) {
-    Scope.free(pipe);
-    _uv_raise("pipe_init", status);
-  }
-  _uv_stream_initialize(
-    &pipe.stream, loop, (uv_stream_t *) &pipe.pipe, pipe, "pipe"
-  );
-  return pipe;
-}
-
 static void _uv_stream_close_callback(uv_handle_t *handle) {
   UvStream stream = handle ? handle->data : NULL;
   if (!stream) return;
@@ -890,66 +728,6 @@ static void _uv_stream_fail(UvStream stream, String operation, int status) {
   catch %(?cause *detail): {
     _uv_callback_failed(stream.loop, cause, detail);
   }
-}
-
-static UvStream _uv_tcp_accept(UvStream listener) {
-  UvTcp tcp = _uv_tcp_new(listener.loop);
-  int status = uv_accept(listener.native, tcp.stream.native);
-  if (status < 0) {
-    _uv_stream_close(&tcp.stream);
-    _uv_raise("accept", status);
-  }
-  tcp.stream.connected = 1;
-  return &tcp.stream;
-}
-
-static void _uv_tcp_connected(UvStream stream) {
-  UvTcp tcp = stream.owner;
-  UvTcpConnectFn handler = tcp.connect_handler;
-  handler(tcp, tcp.connect_value);
-}
-
-static void _uv_tcp_listen(UvStream listener, UvStream accepted) {
-  UvTcp tcp = listener.owner;
-  UvTcp peer = accepted.owner;
-  UvTcpListenFn handler = tcp.listen_handler;
-  handler(tcp, peer, tcp.listen_value);
-}
-
-static void _uv_tcp_read(UvStream stream, Bytes chunk) {
-  UvTcp tcp = stream.owner;
-  UvTcpReadFn handler = tcp.read_handler;
-  handler(tcp, chunk, tcp.read_value);
-}
-
-static UvStream _uv_pipe_accept(UvStream listener) {
-  UvPipe pipe = _uv_pipe_new(listener.loop);
-  int status = uv_accept(listener.native, pipe.stream.native);
-  if (status < 0) {
-    _uv_stream_close(&pipe.stream);
-    _uv_raise("accept", status);
-  }
-  pipe.stream.connected = 1;
-  return &pipe.stream;
-}
-
-static void _uv_pipe_connected(UvStream stream) {
-  UvPipe pipe = stream.owner;
-  UvPipeConnectFn handler = pipe.connect_handler;
-  handler(pipe, pipe.connect_value);
-}
-
-static void _uv_pipe_listen(UvStream listener, UvStream accepted) {
-  UvPipe pipe = listener.owner;
-  UvPipe peer = accepted.owner;
-  UvPipeListenFn handler = pipe.listen_handler;
-  handler(pipe, peer, pipe.listen_value);
-}
-
-static void _uv_pipe_read(UvStream stream, Bytes chunk) {
-  UvPipe pipe = stream.owner;
-  UvPipeReadFn handler = pipe.read_handler;
-  handler(pipe, chunk, pipe.read_value);
 }
 
 static void _uv_stream_connect_callback(uv_connect_t *request, int status) {
@@ -1180,10 +958,6 @@ UvLoop UvLoop.free(UvLoop loop) {
   return NULL;
 }
 
-void UvLoop.cleanup(UvLoop uv_loop) {
-  uv_loop.free();
-}
-
 /*  The native loop, for anything uv-152.h offers and this client does not.
     struct UvLoop is private and its layout is not a contract; this is the
     only supported way to reach uv_loop_t.
@@ -1396,22 +1170,178 @@ UvLoop UvLookup.loop(UvLookup lookup) => lookup ? lookup.loop : NULL;
 uv_getaddrinfo_t *UvLookup.native(UvLookup lookup) =>
   lookup ? &lookup.request : NULL;
 
-static UvStream _uv_tcp_ready(UvTcp tcp, String operation) {
-  if (!tcp) {
-    $uv.error("tcp.required", operation);
+/*  A TCP or named-pipe handle keeps its connection state in a UvStream and
+    shares every operation except binding, connecting, and naming its ends.
+    `loop.<method>()` creates one handle; accepted connections use the same
+    constructor, then uv_accept attaches the incoming stream to it. `listen`
+    accepts each pending connection before invoking `fn`, and the accepted
+    handle belongs to the caller, independent of the listener.
+*/
+macro Unit $uv.stream(
+  Type $endpoint, Type $native, Name $method, Name $ready,
+  Literal $operation, Literal $label, Literal $required,
+  Literal $init_operation, Expr $init, Expr $init_arguments...
+) {
+  /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
+  struct $(x2c.ident (str (car $endpoint))) {
+    $native handle;
+    struct UvStream stream;
+    Var connect_value;
+    Var listen_value;
+    Var read_value;
+    void (*connect_handler)($endpoint, Var);
+    void (*listen_handler)($endpoint, $endpoint, Var);
+    void (*read_handler)($endpoint, Bytes, Var);
+  };
+
+  static $endpoint _new(UvLoop loop) {
+    $endpoint endpoint = Scope.calloc(1, sizeof(*endpoint));
+    int status = $init(&loop.loop, &endpoint.handle, $init_arguments...);
+    if (status < 0) {
+      Scope.free(endpoint);
+      _uv_raise($init_operation, status);
+    }
+    _uv_stream_initialize(
+      &endpoint.stream, loop, (uv_stream_t *) &endpoint.handle, endpoint,
+      $label
+    );
+    return endpoint;
   }
-  return _uv_stream_live(&tcp.stream, operation);
+
+  static UvStream $ready($endpoint endpoint, String operation) {
+    if (!endpoint) {
+      $uv.error("stream.required", operation, $required);
+    }
+    return _uv_stream_live(&endpoint.stream, operation);
+  }
+
+  static UvStream _accept(UvStream listener) {
+    $endpoint endpoint = _new(listener.loop);
+    int status = uv_accept(listener.native, endpoint.stream.native);
+    if (status < 0) {
+      _uv_stream_close(&endpoint.stream);
+      _uv_raise("accept", status);
+    }
+    endpoint.stream.connected = 1;
+    return &endpoint.stream;
+  }
+
+  static void $endpoint._connected(UvStream stream) {
+    $endpoint endpoint = stream.owner;
+    endpoint.connect_handler(endpoint, endpoint.connect_value);
+  }
+
+  static void _listen(UvStream listener, UvStream accepted) {
+    $endpoint endpoint = listener.owner;
+    $endpoint peer = accepted.owner;
+    endpoint.listen_handler(endpoint, peer, endpoint.listen_value);
+  }
+
+  static void _read(UvStream stream, Bytes chunk) {
+    $endpoint endpoint = stream.owner;
+    endpoint.read_handler(endpoint, chunk, endpoint.read_value);
+  }
+
+  $endpoint UvLoop.$method(UvLoop loop) {
+    if (!loop || !loop.initialized) {
+      $uv.error("stream.args", $operation);
+    }
+    return _new(loop);
+  }
+
+  $endpoint $endpoint.listen(
+    $endpoint endpoint, int backlog, Var value,
+    void (*fn)($endpoint, $endpoint, Var)) {
+    UvStream stream = $ready(endpoint, "listen");
+    if (!fn || backlog < 1) {
+      $uv.error("stream.listen.args");
+    }
+    _uv_stream_unused(stream, "listen");
+    endpoint.listen_value = value;
+    endpoint.listen_handler = fn;
+    stream.accept = _accept;
+    stream.listen_fn = _listen;
+    int status = uv_listen(
+      stream.native, backlog, _uv_stream_listen_callback
+    );
+    if (status < 0) {
+      endpoint.listen_handler = NULL;
+      stream.listen_fn = NULL;
+      _uv_raise("listen", status);
+    }
+    stream.listening = 1;
+    return endpoint;
+  }
+
+  $endpoint $endpoint.read(
+    $endpoint endpoint, Var value, void (*fn)($endpoint, Bytes, Var)) {
+    UvStream stream = $ready(endpoint, "read_start");
+    if (!fn) {
+      $uv.error("stream.read.args");
+    }
+    _uv_stream_readable(stream);
+    endpoint.read_value = value;
+    endpoint.read_handler = fn;
+    stream.read_fn = _read;
+    _uv_stream_start_read(stream);
+    return endpoint;
+  }
+
+  $endpoint $endpoint.stop_read($endpoint endpoint) {
+    _uv_stream_stop_read($ready(endpoint, "read_stop"));
+    return endpoint;
+  }
+
+  static $endpoint _write(
+    $endpoint endpoint, const void *bytes, size_t length) {
+    _uv_stream_submit_write($ready(endpoint, "write"), bytes, length);
+    return endpoint;
+  }
+
+  $endpoint $endpoint.write($endpoint endpoint, String text) {
+    if (!text) {
+      $uv.error("stream.write.text");
+    }
+    return _write(endpoint, text, (size_t) text.len());
+  }
+
+  $endpoint $endpoint.write_bytes($endpoint endpoint, Bytes bytes) {
+    if (!bytes) {
+      $uv.error("stream.write.bytes");
+    }
+    Block block = bytes;
+    if (block.length && block.width > SIZE_MAX / block.length)
+      $uv.error("stream.write.limit");
+    return _write(endpoint, bytes, block.width * block.length);
+  }
+
+  $endpoint $endpoint.shutdown_write($endpoint endpoint) {
+    _uv_stream_submit_shutdown($ready(endpoint, "shutdown"));
+    return endpoint;
+  }
+
+  $endpoint $endpoint.close($endpoint endpoint) {
+    if (!endpoint) return NULL;
+    _uv_stream_close(&endpoint.stream);
+    return NULL;
+  }
+
+  size_t $endpoint.write_queue_size($endpoint endpoint) {
+    UvStream stream = $ready(endpoint, "write_queue_size");
+    return uv_stream_get_write_queue_size(stream.native);
+  }
+
+  UvLoop $endpoint.loop($endpoint endpoint) =>
+    endpoint ? endpoint.stream.loop : NULL;
+
+  $native *$endpoint.native($endpoint endpoint) =>
+    endpoint ? &endpoint.handle : NULL;
 }
 
-/*  Creates one TCP handle. Accepted connections use the same constructor,
-    then uv_accept attaches the incoming stream to it.
-*/
-UvTcp UvLoop.tcp(UvLoop loop) {
-  if (!loop || !loop.initialized) {
-    $uv.error("tcp.args");
-  }
-  return _uv_tcp_new(loop);
-}
+$uv.stream(
+  UvTcp, uv_tcp_t, tcp, _uv_tcp_ready, "tcp", "TCP",
+  "a TCP handle is required", "tcp_init", uv_tcp_init
+);
 
 UvTcp UvTcp.bind(UvTcp tcp, UvAddress address, unsigned flags) {
   _uv_tcp_ready(tcp, "tcp_bind");
@@ -1419,7 +1349,7 @@ UvTcp UvTcp.bind(UvTcp tcp, UvAddress address, unsigned flags) {
                    address.family() != AF_INET6)) {
     $uv.error("tcp.bind.args");
   }
-  int status = uv_tcp_bind(&tcp.tcp, address.native(), flags);
+  int status = uv_tcp_bind(&tcp.handle, address.native(), flags);
   if (status < 0) _uv_raise("tcp_bind", status);
   return tcp;
 }
@@ -1433,10 +1363,10 @@ UvTcp UvTcp.connect(
   _uv_stream_unused(stream, "tcp_connect");
   tcp.connect_value = value;
   tcp.connect_handler = fn;
-  stream.connected_fn = _uv_tcp_connected;
+  stream.connected_fn = UvTcp._connected;
   stream.connect_operation = "tcp_connect";
   int status = uv_tcp_connect(
-    &stream.connect_request, &tcp.tcp, address.native(),
+    &stream.connect_request, &tcp.handle, address.native(),
     _uv_stream_connect_callback
   );
   if (status < 0) {
@@ -1449,96 +1379,16 @@ UvTcp UvTcp.connect(
   return tcp;
 }
 
-/*  Accepts each pending connection before invoking `fn`. The accepted
-    UvTcp belongs to the caller and remains independent of the listener.
-*/
-UvTcp UvTcp.listen(
-  UvTcp tcp, int backlog, Var value, void (*fn)(UvTcp, UvTcp, Var)) {
-  UvStream stream = _uv_tcp_ready(tcp, "listen");
-  if (!fn || backlog < 1) {
-    $uv.error("stream.listen.args");
-  }
-  _uv_stream_unused(stream, "listen");
-  tcp.listen_value = value;
-  tcp.listen_handler = fn;
-  stream.accept = _uv_tcp_accept;
-  stream.listen_fn = _uv_tcp_listen;
-  int status = uv_listen(
-    stream.native, backlog, _uv_stream_listen_callback
-  );
-  if (status < 0) {
-    tcp.listen_handler = NULL;
-    stream.listen_fn = NULL;
-    _uv_raise("listen", status);
-  }
-  stream.listening = 1;
-  return tcp;
-}
-
-UvTcp UvTcp.read(UvTcp tcp, Var value, void (*fn)(UvTcp, Bytes, Var)) {
-  UvStream stream = _uv_tcp_ready(tcp, "read_start");
-  if (!fn) {
-    $uv.error("stream.read.args");
-  }
-  _uv_stream_readable(stream);
-  tcp.read_value = value;
-  tcp.read_handler = fn;
-  stream.read_fn = _uv_tcp_read;
-  _uv_stream_start_read(stream);
-  return tcp;
-}
-
-UvTcp UvTcp.stop_read(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, "read_stop");
-  _uv_stream_stop_read(stream);
-  return tcp;
-}
-
-static UvTcp _uv_tcp_write(UvTcp tcp, const void *bytes, size_t length) {
-  _uv_stream_submit_write(_uv_tcp_ready(tcp, "write"), bytes, length);
-  return tcp;
-}
-
-UvTcp UvTcp.write(UvTcp tcp, String text) {
-  if (!text) {
-    $uv.error("stream.write.text");
-  }
-  return _uv_tcp_write(tcp, text, (size_t) text.len());
-}
-
-UvTcp UvTcp.write_bytes(UvTcp tcp, Bytes bytes) {
-  if (!bytes) {
-    $uv.error("stream.write.bytes");
-  }
-  Block block = bytes;
-  if (block.length && block.width > SIZE_MAX / block.length)
-    $uv.error("stream.write.limit");
-  return _uv_tcp_write(tcp, bytes, block.width * block.length);
-}
-
-UvTcp UvTcp.shutdown_write(UvTcp tcp) {
-  _uv_stream_submit_shutdown(_uv_tcp_ready(tcp, "shutdown"));
-  return tcp;
-}
-
-UvTcp UvTcp.close(UvTcp tcp) {
-  if (!tcp) return NULL;
-  _uv_stream_close(&tcp.stream);
-  return NULL;
-}
-
 static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
-  UvStream stream = _uv_tcp_ready(
-    tcp, peer ? "tcp_getpeername" : "tcp_getsockname"
-  );
+  _uv_tcp_ready(tcp, peer ? "tcp_getpeername" : "tcp_getsockname");
   UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
   int length = sizeof(address.address);
   int status = peer
     ? uv_tcp_getpeername(
-        &tcp.tcp, (struct sockaddr *) &address.address, &length
+        &tcp.handle, (struct sockaddr *) &address.address, &length
       )
     : uv_tcp_getsockname(
-        &tcp.tcp, (struct sockaddr *) &address.address, &length
+        &tcp.handle, (struct sockaddr *) &address.address, &length
       );
   if (status < 0) {
     Scope.free(address);
@@ -1548,7 +1398,6 @@ static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
   address.socket_type = SOCK_STREAM;
   address.protocol = IPPROTO_TCP;
   _uv_address_name(address, Pool.current());
-  (void) stream;
   return address;
 }
 
@@ -1556,21 +1405,10 @@ UvAddress UvTcp.local_address(UvTcp tcp) => _uv_tcp_address(tcp, 0);
 
 UvAddress UvTcp.peer_address(UvTcp tcp) => _uv_tcp_address(tcp, 1);
 
-size_t UvTcp.write_queue_size(UvTcp tcp) {
-  UvStream stream = _uv_tcp_ready(tcp, "write_queue_size");
-  return uv_stream_get_write_queue_size(stream.native);
-}
-
-UvLoop UvTcp.loop(UvTcp tcp) => tcp ? tcp.stream.loop : NULL;
-
-uv_tcp_t *UvTcp.native(UvTcp tcp) => tcp ? &tcp.tcp : NULL;
-
-static UvStream _uv_pipe_ready(UvPipe pipe, String operation) {
-  if (!pipe) {
-    $uv.error("pipe.required", operation);
-  }
-  return _uv_stream_live(&pipe.stream, operation);
-}
+$uv.stream(
+  UvPipe, uv_pipe_t, pipe, _uv_pipe_ready, "pipe", "pipe",
+  "a pipe handle is required", "pipe_init", uv_pipe_init, 0
+);
 
 static void _uv_pipe_path(String name, String operation) {
   if (!name || !name.len() || memchr(name, '\0', name.len())) {
@@ -1578,17 +1416,10 @@ static void _uv_pipe_path(String name, String operation) {
   }
 }
 
-UvPipe UvLoop.pipe(UvLoop loop) {
-  if (!loop || !loop.initialized) {
-    $uv.error("pipe.args");
-  }
-  return _uv_pipe_new(loop);
-}
-
 UvPipe UvPipe.bind(UvPipe pipe, String name) {
   _uv_pipe_ready(pipe, "pipe_bind");
   _uv_pipe_path(name, "pipe_bind");
-  int status = uv_pipe_bind(&pipe.pipe, name);
+  int status = uv_pipe_bind(&pipe.handle, name);
   if (status < 0) _uv_raise("pipe_bind", status);
   return pipe;
 }
@@ -1603,102 +1434,25 @@ UvPipe UvPipe.connect(
   _uv_stream_unused(stream, "pipe_connect");
   pipe.connect_value = value;
   pipe.connect_handler = fn;
-  stream.connected_fn = _uv_pipe_connected;
+  stream.connected_fn = UvPipe._connected;
   stream.connect_operation = "pipe_connect";
   stream.connect_pending = 1;
   stream.loop.pending_requests++;
   uv_pipe_connect(
-    &stream.connect_request, &pipe.pipe, name,
+    &stream.connect_request, &pipe.handle, name,
     _uv_stream_connect_callback
   );
   return pipe;
 }
 
-UvPipe UvPipe.listen(
-  UvPipe pipe, int backlog, Var value, void (*fn)(UvPipe, UvPipe, Var)) {
-  UvStream stream = _uv_pipe_ready(pipe, "listen");
-  if (!fn || backlog < 1) {
-    $uv.error("stream.listen.args");
-  }
-  _uv_stream_unused(stream, "listen");
-  pipe.listen_value = value;
-  pipe.listen_handler = fn;
-  stream.accept = _uv_pipe_accept;
-  stream.listen_fn = _uv_pipe_listen;
-  int status = uv_listen(
-    stream.native, backlog, _uv_stream_listen_callback
-  );
-  if (status < 0) {
-    pipe.listen_handler = NULL;
-    stream.listen_fn = NULL;
-    _uv_raise("listen", status);
-  }
-  stream.listening = 1;
-  return pipe;
-}
-
-UvPipe UvPipe.read(UvPipe pipe, Var value, void (*fn)(UvPipe, Bytes, Var)) {
-  UvStream stream = _uv_pipe_ready(pipe, "read_start");
-  if (!fn) {
-    $uv.error("stream.read.args");
-  }
-  _uv_stream_readable(stream);
-  pipe.read_value = value;
-  pipe.read_handler = fn;
-  stream.read_fn = _uv_pipe_read;
-  _uv_stream_start_read(stream);
-  return pipe;
-}
-
-UvPipe UvPipe.stop_read(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, "read_stop");
-  _uv_stream_stop_read(stream);
-  return pipe;
-}
-
-static UvPipe _uv_pipe_write(UvPipe pipe, const void *bytes, size_t length) {
-  _uv_stream_submit_write(_uv_pipe_ready(pipe, "write"), bytes, length);
-  return pipe;
-}
-
-UvPipe UvPipe.write(UvPipe pipe, String text) {
-  if (!text) {
-    $uv.error("stream.write.text");
-  }
-  return _uv_pipe_write(pipe, text, (size_t) text.len());
-}
-
-UvPipe UvPipe.write_bytes(UvPipe pipe, Bytes bytes) {
-  if (!bytes) {
-    $uv.error("stream.write.bytes");
-  }
-  Block block = bytes;
-  if (block.length && block.width > SIZE_MAX / block.length)
-    $uv.error("stream.write.limit");
-  return _uv_pipe_write(pipe, bytes, block.width * block.length);
-}
-
-UvPipe UvPipe.shutdown_write(UvPipe pipe) {
-  _uv_stream_submit_shutdown(_uv_pipe_ready(pipe, "shutdown"));
-  return pipe;
-}
-
-UvPipe UvPipe.close(UvPipe pipe) {
-  if (!pipe) return NULL;
-  _uv_stream_close(&pipe.stream);
-  return NULL;
-}
-
 static String _uv_pipe_name(UvPipe pipe, int peer) {
-  _uv_pipe_ready(
-    pipe, peer ? "pipe_getpeername" : "pipe_getsockname"
-  );
+  _uv_pipe_ready(pipe, peer ? "pipe_getpeername" : "pipe_getsockname");
   char byte = 0;
   char *buffer = &byte;
   size_t length = 1;
   int status = peer
-    ? uv_pipe_getpeername(&pipe.pipe, buffer, &length)
-    : uv_pipe_getsockname(&pipe.pipe, buffer, &length);
+    ? uv_pipe_getpeername(&pipe.handle, buffer, &length)
+    : uv_pipe_getsockname(&pipe.handle, buffer, &length);
   int allocated = 0;
   if (status == UV_ENOBUFS) {
     if (!length || length > INT_MAX) {
@@ -1707,8 +1461,8 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
     buffer = Scope.malloc(length);
     allocated = 1;
     status = peer
-      ? uv_pipe_getpeername(&pipe.pipe, buffer, &length)
-      : uv_pipe_getsockname(&pipe.pipe, buffer, &length);
+      ? uv_pipe_getpeername(&pipe.handle, buffer, &length)
+      : uv_pipe_getsockname(&pipe.handle, buffer, &length);
   }
   if (status < 0) {
     if (allocated) Scope.free(buffer);
@@ -1726,15 +1480,6 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
 String UvPipe.local_name(UvPipe pipe) => _uv_pipe_name(pipe, 0);
 
 String UvPipe.peer_name(UvPipe pipe) => _uv_pipe_name(pipe, 1);
-
-size_t UvPipe.write_queue_size(UvPipe pipe) {
-  UvStream stream = _uv_pipe_ready(pipe, "write_queue_size");
-  return uv_stream_get_write_queue_size(stream.native);
-}
-
-UvLoop UvPipe.loop(UvPipe pipe) => pipe ? pipe.stream.loop : NULL;
-
-uv_pipe_t *UvPipe.native(UvPipe pipe) => pipe ? &pipe.pipe : NULL;
 
 static UvUdp _uv_udp_ready(UvUdp udp, String operation) {
   if (!udp) {
@@ -2363,11 +2108,7 @@ static void _uv_fs_whole_callback(uv_fs_t *request) {
     catch %(?cause *detail): {
       fs.failure_cause = cause;
       fs.result = UV_ENOMEM;
-      try fs.failure_detail = Error.snapshot(detail);
-      catch %(?snapcause *): {
-        fs.failure_cause = snapcause;
-        fs.failure_detail = NULL;
-      }
+      fs.failure_detail = Error.snapshot(detail);
       _uv_fs_whole_close(fs);
       return;
     }
@@ -2758,105 +2499,92 @@ UvLoop UvAsync.loop(UvAsync async) => async ? async.loop : NULL;
 
 uv_async_t *UvAsync.native(UvAsync async) => async ? &async.async : NULL;
 
+/*  An idle, prepare, or check handle calls `fn(handle, value)` once in every
+    loop turn, at its phase, until UvLoop.free or `handle.stop()`, which is
+    idempotent. A failed start closes the handle. A callback that raises
+    stops only its own handle, and UvLoop.run reports the error.
+*/
+macro Unit $uv.phase(
+  Type $phase, Type $native, Name $method, Expr $init, Expr $start,
+  Expr $stop, Literal $operation, Literal $init_operation,
+  Literal $start_operation
+) {
+  /* A Type hole cannot spell a struct tag, so the tag comes from its name. */
+  struct $(x2c.ident (str (car $phase))) {
+    $native handle;
+    UvLoop loop;
+    Var value;
+    void (*handler)($phase, Var);
+  };
+
+  static void _release($phase phase) {
+    if (!phase) return;
+    $stop(&phase.handle);
+    _uv_close_handle((uv_handle_t *) &phase.handle);
+  }
+
+  static void _callback($native *handle) {
+    $phase phase = handle ? handle->data : NULL;
+    if (!phase) return;
+    try phase.handler(phase, phase.value);
+    catch %(?cause *detail): {
+      _uv_callback_failed(phase.loop, cause, detail);
+      _release(phase);
+    }
+  }
+
+  $phase UvLoop.$method(UvLoop loop, Var value, void (*fn)($phase, Var)) {
+    if (!loop || !loop.initialized || !fn) {
+      $uv.error("phase.args", $operation);
+    }
+    $phase phase = Scope.calloc(1, sizeof(*phase));
+    phase.loop = loop;
+    phase.value = value;
+    phase.handler = fn;
+    int status = $init(&loop.loop, &phase.handle);
+    if (status < 0) {
+      Scope.free(phase);
+      _uv_raise($init_operation, status);
+    }
+    phase.handle.data = phase;
+    status = $start(&phase.handle, _callback);
+    if (status < 0) {
+      _release(phase);
+      _uv_raise($start_operation, status);
+    }
+    return phase;
+  }
+
+  $phase $phase.stop($phase phase) {
+    _release(phase);
+    return NULL;
+  }
+
+  UvLoop $phase.loop($phase phase) => phase ? phase.loop : NULL;
+
+  $native *$phase.native($phase phase) => phase ? &phase.handle : NULL;
+}
+
 /*  Runs once per loop turn before prepare and polling. An active idle handle
     forces a zero-timeout poll; it is a deliberate busy-loop mechanism, not a
     notification that the loop has nothing else to do.
 */
-UvIdle UvLoop.idle(UvLoop loop, Var value, void (*fn)(UvIdle, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("idle.args");
-  }
-  UvIdle idle = Scope.calloc(1, sizeof(struct UvIdle));
-  idle.loop = loop;
-  idle.value = value;
-  idle.handler = fn;
-  int status = uv_idle_init(&loop.loop, &idle.idle);
-  if (status < 0) {
-    Scope.free(idle);
-    _uv_raise("idle_init", status);
-  }
-  idle.idle.data = idle;
-  status = uv_idle_start(&idle.idle, _uv_idle_callback);
-  if (status < 0) {
-    _uv_idle_release(idle);
-    _uv_raise("idle_start", status);
-  }
-  return idle;
-}
-
-UvIdle UvIdle.stop(UvIdle idle) {
-  _uv_idle_release(idle);
-  return NULL;
-}
-
-UvLoop UvIdle.loop(UvIdle idle) => idle ? idle.loop : NULL;
-
-uv_idle_t *UvIdle.native(UvIdle idle) => idle ? &idle.idle : NULL;
+$uv.phase(
+  UvIdle, uv_idle_t, idle, uv_idle_init, uv_idle_start, uv_idle_stop,
+  "idle", "idle_init", "idle_start"
+);
 
 /*  Runs once per loop turn immediately before libuv polls for I/O. */
-UvPrepare UvLoop.prepare(UvLoop loop, Var value, void (*fn)(UvPrepare, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("prepare.args");
-  }
-  UvPrepare prepare = Scope.calloc(1, sizeof(struct UvPrepare));
-  prepare.loop = loop;
-  prepare.value = value;
-  prepare.handler = fn;
-  int status = uv_prepare_init(&loop.loop, &prepare.prepare);
-  if (status < 0) {
-    Scope.free(prepare);
-    _uv_raise("prepare_init", status);
-  }
-  prepare.prepare.data = prepare;
-  status = uv_prepare_start(&prepare.prepare, _uv_prepare_callback);
-  if (status < 0) {
-    _uv_prepare_release(prepare);
-    _uv_raise("prepare_start", status);
-  }
-  return prepare;
-}
-
-UvPrepare UvPrepare.stop(UvPrepare prepare) {
-  _uv_prepare_release(prepare);
-  return NULL;
-}
-
-UvLoop UvPrepare.loop(UvPrepare prepare) => prepare ? prepare.loop : NULL;
-
-uv_prepare_t *UvPrepare.native(UvPrepare prepare) =>
-  prepare ? &prepare.prepare : NULL;
+$uv.phase(
+  UvPrepare, uv_prepare_t, prepare, uv_prepare_init, uv_prepare_start,
+  uv_prepare_stop, "prepare", "prepare_init", "prepare_start"
+);
 
 /*  Runs once per loop turn immediately after libuv polls for I/O. */
-UvCheck UvLoop.check(UvLoop loop, Var value, void (*fn)(UvCheck, Var)) {
-  if (!loop || !loop.initialized || !fn) {
-    $uv.error("check.args");
-  }
-  UvCheck check = Scope.calloc(1, sizeof(struct UvCheck));
-  check.loop = loop;
-  check.value = value;
-  check.handler = fn;
-  int status = uv_check_init(&loop.loop, &check.check);
-  if (status < 0) {
-    Scope.free(check);
-    _uv_raise("check_init", status);
-  }
-  check.check.data = check;
-  status = uv_check_start(&check.check, _uv_check_callback);
-  if (status < 0) {
-    _uv_check_release(check);
-    _uv_raise("check_start", status);
-  }
-  return check;
-}
-
-UvCheck UvCheck.stop(UvCheck check) {
-  _uv_check_release(check);
-  return NULL;
-}
-
-UvLoop UvCheck.loop(UvCheck check) => check ? check.loop : NULL;
-
-uv_check_t *UvCheck.native(UvCheck check) => check ? &check.check : NULL;
+$uv.phase(
+  UvCheck, uv_check_t, check, uv_check_init, uv_check_start, uv_check_stop,
+  "check", "check_init", "check_start"
+);
 
 /*  Calls `fn(timer, value)` after `delay` milliseconds, and every `repeat`
     milliseconds after that when `repeat` is positive. A repeating timer
@@ -3397,8 +3125,4 @@ UvProcess UvProcess.free(UvProcess process) {
   process.error.bytes = NULL;
   process.released = 1;
   return NULL;
-}
-
-void UvProcess.cleanup(UvProcess uv_process) {
-  uv_process.free();
 }

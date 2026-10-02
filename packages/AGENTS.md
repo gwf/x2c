@@ -107,7 +107,9 @@ Choose existing x2c facilities according to their documented meaning:
   lifetime and exhaustion behavior.
 - `protocol Cleanup(T)` on every handle wrapper that owns native storage, so a
   client writes `T handle = $auto(T.open(...))` instead of a release at each
-  call site; `defer` beside a native acquisition the wrapper does not own.
+  call site; `$cleanup.by(T, release)` from `cleanup.xmacro` adopts it when
+  one method releases the handle. Use `defer` beside a native acquisition
+  the wrapper does not own.
   Scope for x2c allocations, with the native release function still
   responsible for native resources.
 - Error for failures; ordinary results for expected absence, kept distinct
