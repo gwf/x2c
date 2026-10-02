@@ -768,14 +768,22 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(! _init_guard_) _file_init_();
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 646};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 646};
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(302607262917214), Symbol_var(disposition));
+      __builtin_unreachable();
+    }
+
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 649};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 649};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
+      __builtin_unreachable();
+    }
+
   }
   ErrorThreadState state = _thread();
   state -> floor_only ++;
@@ -976,9 +984,13 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     ErrorHandler__free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 926};
-      x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
-      __builtin_unreachable();
+      Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 926};
+        x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 3, Symbol_var(32993636), _x2c_literal_part_2, Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
+        __builtin_unreachable();
+      }
+
     }
 
   }

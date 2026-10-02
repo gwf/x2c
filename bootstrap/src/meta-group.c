@@ -1302,10 +1302,10 @@ static Var Compiler__template_calls(Compiler c, Var node, List callee){
 
     }
     List template = Var_is_row(stored, 9, 7, 4) ? Compiler_convert_expression(c, Compiler_cache_literal_list(c, Var_list(stored)), List_type(_379)) : cons(_28, cons(_380, cons(List_var(Compiler_cache_literal_var(c, String_var(Var_str(stored)))), NULL)));  return List_var(({
-      Var _x2c_literal_part_15 = type;  Var _x2c_literal_part_16 = List_var(({
-        Var _x2c_literal_part_17 = List_var(callee);  Var _x2c_literal_part_18 = List_var(cons(_70, cons(List_var(template), cons(List_var(values), NULL))));  cons(_145, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
+      Var _x2c_literal_part_17 = type;  Var _x2c_literal_part_18 = List_var(({
+        Var _x2c_literal_part_15 = List_var(callee);  Var _x2c_literal_part_16 = List_var(cons(_70, cons(List_var(template), cons(List_var(values), NULL))));  cons(_145, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)));
       }
-      ));  cons(_28, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)));
+      ));  cons(_28, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
     }
     ));
   }
@@ -1402,10 +1402,10 @@ Type Type_reference(Type);
 List x2c_literal_string(String);
 static List Compiler__native_symbol(Compiler c, Type type, String name, List lookup){
   if(! Type_is_function(type) || !(Map_contains(c -> native_meta, String_var(name)))) return NULL;  String module = Compiler_native_meta_module(c, name, &(type));  if(! String_truth(module)) return NULL;  Compiler_add_translation_dependency(c, module);  Type pointer = Type_reference(type);  List target = cons(_28, cons(_30622, cons(List_var(({
-    Var _x2c_literal_part_21 = List_var(lookup);  Var _x2c_literal_part_22 = List_var(({
-      Var _x2c_literal_part_23 = List_var(x2c_literal_string(module));  Var _x2c_literal_part_24 = List_var(x2c_literal_string(name));  cons(_70, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL)));
+    Var _x2c_literal_part_23 = List_var(lookup);  Var _x2c_literal_part_24 = List_var(({
+      Var _x2c_literal_part_21 = List_var(x2c_literal_string(module));  Var _x2c_literal_part_22 = List_var(x2c_literal_string(name));  cons(_70, cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, NULL)));
     }
-    ));  cons(_145, cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, NULL)));
+    ));  cons(_145, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL)));
   }
   )), NULL)));  return({
     Var _x2c_literal_part_25 = List_var(pointer);  Var _x2c_literal_part_26 = List_var(cons(_2530, cons(List_var(pointer), cons(List_var(target), NULL))));  cons(_28, cons(_x2c_literal_part_25, cons(_x2c_literal_part_26, NULL)));
@@ -1430,13 +1430,13 @@ static Map Compiler__initial_copies(Compiler c, Array units){
           Var _x2c_literal_part_27 = spec;  Var _x2c_literal_part_28 = List_var(cons(_2489, cons(bound, NULL)));  cons(_2488, cons(_x2c_literal_part_27, cons(_x2c_literal_part_28, NULL)));
         }
         )));  if(List_contains(Type_list(type), Symbol_var(7304424)) || Type_is_array(type) || ! _braced(initializer)) continue;  List copy = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(Var_str(List_last(Var_list(binding)))), cons(String_var(_30653), NULL))));  for(int i = 0;  i <(int) Array_len(units);  i ++) if(Var_equal(Array_getindex(units, i), declaration)) Array_setindex(units, i, List_var(({
-          Var _x2c_literal_part_29 = spec;  Var _x2c_literal_part_30 = List_var(({
-            Var _x2c_literal_part_31 = List_var(cons(_146, cons(_2490, cons(bound, cons(initializer, NULL)))));  Var _x2c_literal_part_32 = List_var(({
-              Var _x2c_literal_part_33 = List_var(cons(_2491, cons(List_var(copy), cons(mods, NULL))));  cons(_146, cons(_2490, cons(_x2c_literal_part_33, cons(initializer, NULL))));
+          Var _x2c_literal_part_32 = spec;  Var _x2c_literal_part_33 = List_var(({
+            Var _x2c_literal_part_30 = List_var(cons(_146, cons(_2490, cons(bound, cons(initializer, NULL)))));  Var _x2c_literal_part_31 = List_var(({
+              Var _x2c_literal_part_29 = List_var(cons(_2491, cons(List_var(copy), cons(mods, NULL))));  cons(_146, cons(_2490, cons(_x2c_literal_part_29, cons(initializer, NULL))));
             }
-            ));  cons(_2489, cons(_x2c_literal_part_31, cons(_x2c_literal_part_32, NULL)));
+            ));  cons(_2489, cons(_x2c_literal_part_30, cons(_x2c_literal_part_31, NULL)));
           }
-          ));  cons(_2488, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, NULL)));
+          ));  cons(_2488, cons(_x2c_literal_part_32, cons(_x2c_literal_part_33, NULL)));
         }
         )));  Map_setindex(copies, binding, List_var(({
           Var _x2c_literal_part_34 = List_var(type);  Var _x2c_literal_part_35 = List_var(cons(_393, cons(List_var(copy), NULL)));  cons(_28, cons(_x2c_literal_part_34, cons(_x2c_literal_part_35, NULL)));
@@ -1466,10 +1466,10 @@ static int _braced(Var node){
 
 static List Compiler__entry(Compiler c, String stamp, Map initials, String suffix){
   List resets = Compiler__resets(c, initials);  List reset = Compiler__entry_function(c, _3161, String_join(NULL, cons(String_var(_30654), cons(String_var(suffix), NULL))), cons(_2485, List_append(resets, NULL)));  List table = Compiler__targets(c, Compiler__named(c, reset));  List stamp_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_30655), cons(String_var(suffix), NULL))));  String literal = String_join(NULL, cons(String_var(_30372), cons(String_var(stamp), cons(String_var(_30372), NULL))));  return({
-    Var _x2c_literal_part_36 = List_var(cons(_2488, cons(_30656, cons(List_var(cons(_2489, cons(List_var(({
-      Var _x2c_literal_part_39 = List_var(cons(_2491, cons(List_var(stamp_binding), _30662)));  Var _x2c_literal_part_40 = List_var(cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(literal), NULL)))), NULL))));  cons(_146, cons(_2490, cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL))));
+    Var _x2c_literal_part_38 = List_var(cons(_2488, cons(_30656, cons(List_var(cons(_2489, cons(List_var(({
+      Var _x2c_literal_part_36 = List_var(cons(_2491, cons(List_var(stamp_binding), _30662)));  Var _x2c_literal_part_37 = List_var(cons(_28, cons(_184, cons(List_var(cons(_168, cons(_184, cons(String_var(literal), NULL)))), NULL))));  cons(_146, cons(_2490, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL))));
     }
-    )), NULL))), NULL))));  Var _x2c_literal_part_37 = List_var(reset);  Var _x2c_literal_part_38 = List_var(Compiler__entry_function(c, _30665, String_join(NULL, cons(String_var(_30666), cons(String_var(suffix), NULL))), cons(_2485, cons(List_var(cons(_30210, cons(_30667, cons(List_var(table), NULL)))), NULL))));  cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, cons(_x2c_literal_part_38, NULL)));
+    )), NULL))), NULL))));  Var _x2c_literal_part_39 = List_var(reset);  Var _x2c_literal_part_40 = List_var(Compiler__entry_function(c, _30665, String_join(NULL, cons(String_var(_30666), cons(String_var(suffix), NULL))), cons(_2485, cons(List_var(cons(_30210, cons(_30667, cons(List_var(table), NULL)))), NULL))));  cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL)));
   }
   );
 }
@@ -1488,13 +1488,13 @@ static List Compiler__resets(Compiler c, Map initials){
           Var _x2c_literal_part_41 = spec;  Var _x2c_literal_part_42 = List_var(cons(_2489, cons(bound, NULL)));  cons(_2488, cons(_x2c_literal_part_41, cons(_x2c_literal_part_42, NULL)));
         }
         )));  if(List_contains(Type_list(type), Symbol_var(7304424)) || Type_is_array(type)) continue;  Var initial;  if(Map_try_get(initials, binding, &(initial))) initializer = initial;  Array_push(resets, List_var(cons(_141, cons(List_var(({
-          Var _x2c_literal_part_43 = List_var(type);  Var _x2c_literal_part_44 = List_var(({
+          Var _x2c_literal_part_46 = List_var(type);  Var _x2c_literal_part_47 = List_var(({
             Var _x2c_literal_part_45 = List_var(({
-              Var _x2c_literal_part_46 = List_var(type);  Var _x2c_literal_part_47 = List_var(cons(_393, cons(binding, NULL)));  cons(_28, cons(_x2c_literal_part_46, cons(_x2c_literal_part_47, NULL)));
+              Var _x2c_literal_part_43 = List_var(type);  Var _x2c_literal_part_44 = List_var(cons(_393, cons(binding, NULL)));  cons(_28, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
             }
             ));  cons(_146, cons(_2490, cons(_x2c_literal_part_45, cons(initializer, NULL))));
           }
-          ));  cons(_28, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
+          ));  cons(_28, cons(_x2c_literal_part_46, cons(_x2c_literal_part_47, NULL)));
         }
         )), NULL))));
       }

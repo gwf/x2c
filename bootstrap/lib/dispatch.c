@@ -743,9 +743,13 @@ static void _valid_member_operand(Var value, String side){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 630};
-      x2c_error_raise_n(& _x2c_error_site_11, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(side));
-      __builtin_unreachable();
+      Var _x2c_literal_part_0 = Var_box_ulong(bits);
+      {
+        static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 630};
+        x2c_error_raise_n(& _x2c_error_site_11, 4372507526, 2, Symbol_var(46228810), _x2c_literal_part_0, Symbol_var(1263882), String_var(side));
+        __builtin_unreachable();
+      }
+
     }
 
   }
@@ -973,9 +977,13 @@ int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods metho
 void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods){
   if(! _init_guard_) _file_init_();
   if(! x2c_try_register_tagged_descriptor(tag, name, methods)){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 823};
-    x2c_error_raise_n(& _x2c_error_site_18, 4477477457162, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_register_tagged_descriptor")), NULL))), Symbol_var(41038), Symbol_var(tag), Symbol_var(920394), String_var(name));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("x2c_register_tagged_descriptor")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "x2c_register_tagged_descriptor",.line = 823};
+      x2c_error_raise_n(& _x2c_error_site_18, 4477477457162, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(41038), Symbol_var(tag), Symbol_var(920394), String_var(name));
+      __builtin_unreachable();
+    }
+
   }
 
 }

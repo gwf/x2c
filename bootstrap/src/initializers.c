@@ -1142,16 +1142,16 @@ static List _zero_pointer_target(Type viewed, Type native){
   Type pointer = List_type(cons(Symbol_var(54), Type_list(native)));
   List zero = _343;
   return({
-    Var _x2c_literal_part_2 = List_var(viewed);  Var _x2c_literal_part_3 = List_var(cons(_51, cons(List_var(({
-      Var _x2c_literal_part_4 = List_var(viewed);  Var _x2c_literal_part_5 = List_var(cons(_45, cons(_29, cons(List_var(({
-        Var _x2c_literal_part_6 = List_var(pointer);  Var _x2c_literal_part_7 = List_var(cons(_51, cons(List_var(({
-          Var _x2c_literal_part_8 = List_var(pointer);  Var _x2c_literal_part_9 = List_var(cons(_59, cons(List_var(pointer), cons(List_var(zero), NULL))));  cons(_32, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
+    Var _x2c_literal_part_8 = List_var(viewed);  Var _x2c_literal_part_9 = List_var(cons(_51, cons(List_var(({
+      Var _x2c_literal_part_6 = List_var(viewed);  Var _x2c_literal_part_7 = List_var(cons(_45, cons(_29, cons(List_var(({
+        Var _x2c_literal_part_4 = List_var(pointer);  Var _x2c_literal_part_5 = List_var(cons(_51, cons(List_var(({
+          Var _x2c_literal_part_2 = List_var(pointer);  Var _x2c_literal_part_3 = List_var(cons(_59, cons(List_var(pointer), cons(List_var(zero), NULL))));  cons(_32, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
         }
-        )), NULL)));  cons(_32, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+        )), NULL)));  cons(_32, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
       }
-      )), NULL))));  cons(_32, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+      )), NULL))));  cons(_32, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
     }
-    )), NULL)));  cons(_32, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+    )), NULL)));  cons(_32, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
   }
   );
 }
@@ -1208,13 +1208,13 @@ static List _composite_excess_check(List parent_condition){
   List size = cons(_32, cons(_333, cons(List_var(cons(_45, cons(_2, cons(List_var(parent_condition), cons(List_var(zero), cons(List_var(one), NULL)))))), NULL)));
   Type array = List_type(cons(List_var(cons(_353, cons(List_var(size), NULL))), _355));
   List probe =({
-    Var _x2c_literal_part_10 = List_var(array);  Var _x2c_literal_part_11 = List_var(({
+    Var _x2c_literal_part_14 = List_var(array);  Var _x2c_literal_part_15 = List_var(({
       Var _x2c_literal_part_12 = List_var(array);  Var _x2c_literal_part_13 = List_var(({
-        Var _x2c_literal_part_14 = List_var(array);  Var _x2c_literal_part_15 = List_var(cons(_39, cons(List_var(cons(_81, cons(List_var(zero), NULL))), NULL)));  cons(_32, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
+        Var _x2c_literal_part_10 = List_var(array);  Var _x2c_literal_part_11 = List_var(cons(_39, cons(List_var(cons(_81, cons(List_var(zero), NULL))), NULL)));  cons(_32, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
       }
       ));  cons(_59, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
     }
-    ));  cons(_32, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+    ));  cons(_32, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
   }
   );
   List count = cons(_32, cons(_358, cons(List_var(cons(_359, cons(List_var(cons(_51, cons(List_var(probe), NULL))), NULL))), NULL)));
@@ -1455,10 +1455,10 @@ Type type = Var_type(List_cadr(index));  List binding = Sym_introduce(c -> sym, 
   Var _x2c_literal_part_20 = List_var(type);  Var _x2c_literal_part_21 = List_var(cons(_400, cons(List_var(binding), NULL)));  cons(_32, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)));
 }
 );  return({
-  Var _x2c_literal_part_22 = List_var(type);  Var _x2c_literal_part_23 = List_var(({
-    Var _x2c_literal_part_24 = List_var(native);  Var _x2c_literal_part_25 = List_var((* reference));  cons(_59, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, NULL)));
+  Var _x2c_literal_part_24 = List_var(type);  Var _x2c_literal_part_25 = List_var(({
+    Var _x2c_literal_part_22 = List_var(native);  Var _x2c_literal_part_23 = List_var((* reference));  cons(_59, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL)));
   }
-  ));  cons(_32, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL)));
+  ));  cons(_32, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, NULL)));
 }
 );
 }
@@ -1650,10 +1650,10 @@ List Compiler_initializer_slot(Compiler c, List target, List path){
         }
         );
         else if(Var_truth(selector)) target =({
-          Var _x2c_literal_part_45 = List_var(selected);  Var _x2c_literal_part_46 = List_var(({
-            Var _x2c_literal_part_47 = List_var(target);  Var _x2c_literal_part_48 = List_var(cons(selector, NULL));  cons(_45, cons(_449, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL))));
+          Var _x2c_literal_part_47 = List_var(selected);  Var _x2c_literal_part_48 = List_var(({
+            Var _x2c_literal_part_45 = List_var(target);  Var _x2c_literal_part_46 = List_var(cons(selector, NULL));  cons(_45, cons(_449, cons(_x2c_literal_part_45, cons(_x2c_literal_part_46, NULL))));
           }
-          ));  cons(_32, cons(_x2c_literal_part_45, cons(_x2c_literal_part_46, NULL)));
+          ));  cons(_32, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL)));
         }
         );
       }
@@ -1750,10 +1750,10 @@ static List Compiler__array_layout(Compiler c, Type type, Type owner, List targe
     Var _x2c_literal_part_55 = List_var(cons(_32, cons(_443, cons(List_var(cons(_359, cons(List_var(cons(_51, cons(List_var(target), NULL))), NULL))), NULL))));  Var _x2c_literal_part_56 = List_var(cons(_32, cons(_443, cons(List_var(cons(_51, cons(List_var(divisor), NULL))), NULL))));  cons(_45, cons(_447, cons(_x2c_literal_part_55, cons(_x2c_literal_part_56, NULL))));
   }
   )), NULL)));  List units = Var_list(List_cadr(child));  if(units != one) count = _ull_op(54, count, units);  return({
-    Var _x2c_literal_part_57 = List_var(type);  Var _x2c_literal_part_58 = List_var(count);  Var _x2c_literal_part_59 = List_var(cons(List_var(({
-      Var _x2c_literal_part_60 = List_car(path);  cons(_x2c_literal_part_60, cons(List_var(child), NULL));
+    Var _x2c_literal_part_58 = List_var(type);  Var _x2c_literal_part_59 = List_var(count);  Var _x2c_literal_part_60 = List_var(cons(List_var(({
+      Var _x2c_literal_part_57 = List_car(path);  cons(_x2c_literal_part_57, cons(List_var(child), NULL));
     }
-    )), NULL));  cons(_x2c_literal_part_57, cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, NULL)));
+    )), NULL));  cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
   }
   );
 }
@@ -1978,20 +1978,20 @@ static List Compiler__speculate(Compiler c, List value, Type type, List conditio
 Type Type_base_type(Type);
 static List _initializer_zero(Type type, List target){
   Type native = Type_is_bitfield(type) ? Type_base_type(type) : List_truth(target) ? List_type(cons(_493, cons(List_var(cons(_51, cons(List_var(target), NULL))), NULL))) : type;  return({
-    Var _x2c_literal_part_72 = List_var(type);  Var _x2c_literal_part_73 = List_var(({
-      Var _x2c_literal_part_74 = List_var(native);  Var _x2c_literal_part_75 = List_var(cons(_32, cons(List_var(type), _499)));  cons(_59, cons(_x2c_literal_part_74, cons(_x2c_literal_part_75, NULL)));
+    Var _x2c_literal_part_74 = List_var(type);  Var _x2c_literal_part_75 = List_var(({
+      Var _x2c_literal_part_72 = List_var(native);  Var _x2c_literal_part_73 = List_var(cons(_32, cons(List_var(type), _499)));  cons(_59, cons(_x2c_literal_part_72, cons(_x2c_literal_part_73, NULL)));
     }
-    ));  cons(_32, cons(_x2c_literal_part_72, cons(_x2c_literal_part_73, NULL)));
+    ));  cons(_32, cons(_x2c_literal_part_74, cons(_x2c_literal_part_75, NULL)));
   }
   );
 }
 
 static List _rejected_initializer(Type type, List condition, List zero){
   List size = cons(_32, cons(_333, cons(List_var(cons(_45, cons(_2, cons(List_var(condition), _512)))), NULL)));  List check = cons(_32, cons(_358, cons(List_var(cons(_359, cons(List_var(cons(_514, cons(_516, cons(List_var(size), _522)))), NULL))), NULL)));  Symbol comma = 89;  check = cons(_32, cons(_525, cons(List_var(cons(_59, cons(_525, cons(List_var(check), NULL)))), NULL)));  return({
-    Var _x2c_literal_part_76 = List_var(type);  Var _x2c_literal_part_77 = List_var(cons(_51, cons(List_var(({
-      Var _x2c_literal_part_78 = List_var(type);  Var _x2c_literal_part_79 = List_var(cons(_45, cons(Symbol_var(comma), cons(List_var(check), cons(List_var(zero), NULL)))));  cons(_32, cons(_x2c_literal_part_78, cons(_x2c_literal_part_79, NULL)));
+    Var _x2c_literal_part_78 = List_var(type);  Var _x2c_literal_part_79 = List_var(cons(_51, cons(List_var(({
+      Var _x2c_literal_part_76 = List_var(type);  Var _x2c_literal_part_77 = List_var(cons(_45, cons(Symbol_var(comma), cons(List_var(check), cons(List_var(zero), NULL)))));  cons(_32, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
     }
-    )), NULL)));  cons(_32, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
+    )), NULL)));  cons(_32, cons(_x2c_literal_part_78, cons(_x2c_literal_part_79, NULL)));
   }
   );
 }

@@ -1996,10 +1996,10 @@ static List _class_expand(List capture){
   if(! List_truth(type)) return cons(List_var(capture), NULL);
   if(! x2c_type_is_pointer(type) && Var_equal(List_car(type), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(String_new("class ")), cons(String_var(owner), cons(String_var(String_new(" cannot take an enum value ")), NULL)))), _1983), cons(String_var(_664), NULL));
   return({
-    Var _x2c_literal_part_23 = List_var(capture);  Var _x2c_literal_part_24 = List_var(cons(_1984, cons(_1985, cons(List_var(({
-      Var _x2c_literal_part_25 = String_var(owner);  Var _x2c_literal_part_26 = List_var(type);  Var _x2c_literal_part_27 = List_var(builtin_class_location());  cons(_x2c_literal_part_25, cons(_x2c_literal_part_26, cons(_x2c_literal_part_27, NULL)));
+    Var _x2c_literal_part_26 = List_var(capture);  Var _x2c_literal_part_27 = List_var(cons(_1984, cons(_1985, cons(List_var(({
+      Var _x2c_literal_part_23 = String_var(owner);  Var _x2c_literal_part_24 = List_var(type);  Var _x2c_literal_part_25 = List_var(builtin_class_location());  cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, cons(_x2c_literal_part_25, NULL)));
     }
-    )), NULL))));  cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL));
+    )), NULL))));  cons(_x2c_literal_part_26, cons(_x2c_literal_part_27, NULL));
   }
   );
 }
@@ -2136,10 +2136,10 @@ static List Shape_cleanup(Shape * s, List release){
   List free_method = _default(owner, _2827, _117, cons(List_var(parameter), NULL), release);
   List cleanup_method = _default(owner, _2828, _117, cons(List_var(parameter), NULL), cons(List_var(x2c_stmnt_make(_method((* s).value, _2827, NULL))), NULL));
   return({
-    Var _x2c_literal_part_35 = List_var(free_method);  Var _x2c_literal_part_36 = List_var(cleanup_method);  Var _x2c_literal_part_37 = List_var(({
-      Var _x2c_literal_part_38 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_39 = List_var((* s).location);  cons(_2095, cons(_2099, cons(_x2c_literal_part_38, cons(_2100, cons(_x2c_literal_part_39, NULL)))));
+    Var _x2c_literal_part_37 = List_var(free_method);  Var _x2c_literal_part_38 = List_var(cleanup_method);  Var _x2c_literal_part_39 = List_var(({
+      Var _x2c_literal_part_35 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_36 = List_var((* s).location);  cons(_2095, cons(_2099, cons(_x2c_literal_part_35, cons(_2100, cons(_x2c_literal_part_36, NULL)))));
     }
-    ));  cons(_x2c_literal_part_35, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL)));
+    ));  cons(_x2c_literal_part_37, cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, NULL)));
   }
   );
 }
@@ -2210,10 +2210,10 @@ static List Shape_scalar(Shape * s){
   List unboxed = x2c_expr_cast(cons(String_var(owner), NULL), x2c_expr_cast(representation, value));
   List var_method = _default(owner, _2830, _454, cons(List_var((* s).parameter), NULL), cons(List_var(x2c_stmnt_return(boxed)), NULL));
   return({
-    Var _x2c_literal_part_47 = List_var(var_method);  Var _x2c_literal_part_48 = List_var(_unbox(owner, unboxed));  Var _x2c_literal_part_49 = List_var(({
-      Var _x2c_literal_part_50 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_51 = List_var(representation);  Var _x2c_literal_part_52 = List_var((* s).location);  cons(_2095, cons(_455, cons(_x2c_literal_part_50, cons(_2100, cons(_x2c_literal_part_51, cons(_x2c_literal_part_52, NULL))))));
+    Var _x2c_literal_part_50 = List_var(var_method);  Var _x2c_literal_part_51 = List_var(_unbox(owner, unboxed));  Var _x2c_literal_part_52 = List_var(({
+      Var _x2c_literal_part_47 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_48 = List_var(representation);  Var _x2c_literal_part_49 = List_var((* s).location);  cons(_2095, cons(_455, cons(_x2c_literal_part_47, cons(_2100, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL))))));
     }
-    ));  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
+    ));  cons(_x2c_literal_part_50, cons(_x2c_literal_part_51, cons(_x2c_literal_part_52, NULL)));
   }
   );
 }
@@ -2615,13 +2615,13 @@ static List _size(List expression){
 List x2c_type_parts(List);
 static List _function(String name, List result, List parameters, List body){
   List parts = x2c_type_parts(result);  return({
-    Var _x2c_literal_part_75 = List_getindex(parts, 0);  Var _x2c_literal_part_76 = List_var(({
-      Var _x2c_literal_part_78 = List_var(cons(String_var(name), NULL));  Var _x2c_literal_part_79 = List_var(({
-        Var _x2c_literal_part_80 = List_var(cons(_2714, cons(List_var(cons(_2715, List_append(parameters, NULL))), NULL)));  List _x2c_literal_part_81 = Var_list(List_getindex(parts, 1));  cons(_x2c_literal_part_80, List_append(_x2c_literal_part_81, NULL));
+    Var _x2c_literal_part_79 = List_getindex(parts, 0);  Var _x2c_literal_part_80 = List_var(({
+      Var _x2c_literal_part_77 = List_var(cons(String_var(name), NULL));  Var _x2c_literal_part_78 = List_var(({
+        Var _x2c_literal_part_75 = List_var(cons(_2714, cons(List_var(cons(_2715, List_append(parameters, NULL))), NULL)));  List _x2c_literal_part_76 = Var_list(List_getindex(parts, 1));  cons(_x2c_literal_part_75, List_append(_x2c_literal_part_76, NULL));
       }
-      ));  cons(_44, cons(_x2c_literal_part_78, cons(_x2c_literal_part_79, NULL)));
+      ));  cons(_44, cons(_x2c_literal_part_77, cons(_x2c_literal_part_78, NULL)));
     }
-    ));  Var _x2c_literal_part_77 = List_var(cons(_1658, List_append(body, NULL)));  cons(_2713, cons(_x2c_literal_part_75, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL))));
+    ));  Var _x2c_literal_part_81 = List_var(cons(_1658, List_append(body, NULL)));  cons(_2713, cons(_x2c_literal_part_79, cons(_x2c_literal_part_80, cons(_x2c_literal_part_81, NULL))));
   }
   );
 }

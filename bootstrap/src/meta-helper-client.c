@@ -633,16 +633,13 @@ String String_printf(String, ...);
 
 static void Call_overdue(Call * call){
   _helper_stop(SIGKILL);
-  Compiler_report_error((* call).compiler, 27335838, String_printf(String_new("%s%g s"), "this meta call ran longer than ", (* call).limit), (* call).site, ({
-    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("function: ")), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_4 = String_var(_5544);  cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
-  }
-  ));
+  Compiler_report_error((* call).compiler, 27335838, String_printf(String_new("%s%g s"), "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(String_new("function: ")), cons(String_var((* call).name), NULL)))), cons(String_var(_5544), NULL)));
 }
 
 static void Call_stopped(Call * call, String reason){
   Compiler_report_error((* call).compiler, 27335838, _30274, (* call).site, ({
-    Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("function: ")), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("reason: ")), cons(String_var(reason), NULL))));
-    cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("function: ")), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("reason: ")), cons(String_var(reason), NULL))));
+    cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
   }
   ));
 }

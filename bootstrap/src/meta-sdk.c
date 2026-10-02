@@ -884,17 +884,11 @@ Var List_getindex(List, int);
 static Var _sdk_symbol_set(List values){
   _sdk_guard(_3510); {
     Var value;  List _x2c_macro_object_7 = values;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_6))){
-      value = _x2c_macro_cursor_output_6;  if(! Var_is(value, 1328354264)) MetaContext_reject(_3511, ({
-        Var _x2c_literal_part_16 = String_var(_1508);  Var _x2c_literal_part_17 = String_var(Var_repr(value));  cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, NULL));
-      }
-      ));
+      value = _x2c_macro_cursor_output_6;  if(! Var_is(value, 1328354264)) MetaContext_reject(_3511, cons(String_var(_1508), cons(String_var(Var_repr(value)), NULL)));
     }
 
   }
-  int duplicate = - 1;  List expression = Compiler_symbol_set_expression(active.expander, values, &(duplicate));  if(duplicate >= 0) MetaContext_reject(_3512, ({
-    Var _x2c_literal_part_18 = String_var(_1672);  Var _x2c_literal_part_19 = String_var(Var_repr(List_getindex(values, duplicate)));  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, NULL));
-  }
-  ));  return List_var(expression);
+  int duplicate = - 1;  List expression = Compiler_symbol_set_expression(active.expander, values, &(duplicate));  if(duplicate >= 0) MetaContext_reject(_3512, cons(String_var(_1672), cons(String_var(Var_repr(List_getindex(values, duplicate))), NULL)));  return List_var(expression);
 }
 
 List Compiler_native_meta_targets(List);
@@ -1220,7 +1214,7 @@ if(Var_equal(kind, Symbol_var(1318234344)) || Var_equal(kind, Symbol_var(4497711
 }
 }
 return({
-  Var _x2c_literal_part_20 = List_var(cons(_77, cons(String_var(name), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_82, cons(kind, NULL)));  Var _x2c_literal_part_22 = List_var(cons(_3250, cons(List_var(type), NULL)));  Var _x2c_literal_part_23 = List_var(cons(_3472, cons(List_var(fields), NULL)));  Var _x2c_literal_part_24 = List_var(cons(_3473, cons(List_var(Array_list_free(methods)), NULL)));  cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, cons(_x2c_literal_part_24, NULL)))));
+  Var _x2c_literal_part_16 = List_var(cons(_77, cons(String_var(name), NULL)));  Var _x2c_literal_part_17 = List_var(cons(_82, cons(kind, NULL)));  Var _x2c_literal_part_18 = List_var(cons(_3250, cons(List_var(type), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_3472, cons(List_var(fields), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_3473, cons(List_var(Array_list_free(methods)), NULL)));  cons(_x2c_literal_part_16, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)))));
 }
 );
 }
@@ -1237,7 +1231,7 @@ static int _symbol_words(List type){
 
 List meta_source_description(Var value){
   if(! _init_guard_) _file_init_();  String text = x2c_source_text(value);  List source = Var_list(Map_getindex(active.captures, ulong_var(((ulong) value.u64))));  return({
-    Var _x2c_literal_part_25 = List_var(cons(_3383, cons(String_var(text), NULL)));  Var _x2c_literal_part_26 = List_var(cons(_244, cons(List_cadr(source), NULL)));  Var _x2c_literal_part_27 = List_var(cons(_3391, cons(value, NULL)));  cons(_x2c_literal_part_25, cons(_x2c_literal_part_26, cons(_x2c_literal_part_27, NULL)));
+    Var _x2c_literal_part_21 = List_var(cons(_3383, cons(String_var(text), NULL)));  Var _x2c_literal_part_22 = List_var(cons(_244, cons(List_cadr(source), NULL)));  Var _x2c_literal_part_23 = List_var(cons(_3391, cons(value, NULL)));  cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL)));
   }
   );
 }
@@ -1255,7 +1249,10 @@ List builtin_foreach_collection(List expression){
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 _Noreturn void MetaContext_reject(String message, List notes){
   Compiler c = active.evaluator;  if(c) Compiler_report_error(c, 27335838, message, active.site, notes); {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 637};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))), Symbol_var(47666), String_var(message));  __builtin_unreachable();
+    Var _x2c_literal_part_24 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))); {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 637};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_24, Symbol_var(47666), String_var(message));  __builtin_unreachable();
+    }
+
   }
 
 }

@@ -676,10 +676,10 @@ static List _string_literal(Compiler c, Type declared, Type type, Var value){
 Type Type_scalar(Type);
 static List _number_literal(Compiler c, Type declared, Type type, Var value){
   type = Sym_resolve_numeric_type(c -> sym, type);  Symbol tag = List_truth(Type_list(type)) ? Type_scalar_tag(type) : 0;  if(! tag) return NULL;  value = Var_convert(value, tag);  Type result = List_truth(Type_list(declared)) ? declared : type;  if(Type_scalar(type) == _2533) return _int_literal(result, value);  List literal = _bits_literal(value);  return({
-    Var _x2c_literal_part_4 = List_var(result);  Var _x2c_literal_part_5 = List_var(cons(_30250, cons(List_var(({
-      Var _x2c_literal_part_6 = List_var(result);  Var _x2c_literal_part_7 = List_var(cons(_2530, cons(List_var(type), cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+    Var _x2c_literal_part_6 = List_var(result);  Var _x2c_literal_part_7 = List_var(cons(_30250, cons(List_var(({
+      Var _x2c_literal_part_4 = List_var(result);  Var _x2c_literal_part_5 = List_var(cons(_2530, cons(List_var(type), cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
     }
-    )), NULL)));  cons(_28, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+    )), NULL)));  cons(_28, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
   }
   );
 }
@@ -690,10 +690,10 @@ static List _int_literal(Type result, Var value){
     Var _x2c_literal_part_8 = List_var(result);  Var _x2c_literal_part_9 = List_var(cons(_168, cons(_2534, cons(String_var(Var_str(value)), NULL))));  cons(_28, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL)));
   }
   );  if(n == INT_MIN) return({
-    Var _x2c_literal_part_10 = List_var(result);  Var _x2c_literal_part_11 = List_var(cons(_30250, cons(List_var(({
-      Var _x2c_literal_part_12 = List_var(result);  Var _x2c_literal_part_13 = List_var(cons(_2530, cons(_2534, cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+    Var _x2c_literal_part_12 = List_var(result);  Var _x2c_literal_part_13 = List_var(cons(_30250, cons(List_var(({
+      Var _x2c_literal_part_10 = List_var(result);  Var _x2c_literal_part_11 = List_var(cons(_2530, cons(_2534, cons(List_var(literal), NULL))));  cons(_28, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
     }
-    )), NULL)));  cons(_28, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+    )), NULL)));  cons(_28, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
   }
   );  return n < 0 ?({
     Var _x2c_literal_part_14 = List_var(result);  Var _x2c_literal_part_15 = List_var(cons(_30250, cons(List_var(literal), NULL)));  cons(_28, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL)));
@@ -874,10 +874,7 @@ void Compiler_check_meta_call(Compiler c, List callee, Token origin){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x2c_match_site_20, _x2c_match_expr, List_var(_30643), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  if(Var_is_row(name, 11, 7, 1) && Map_contains(c -> meta_comptime, name)){
-    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(String_new("\'")), cons(String_var(Var_str(name)), cons(String_var(String_new("\' can only be called at compile time")), NULL)))), origin, ({
-      Var _x2c_literal_part_18 = String_var(_4946);  Var _x2c_literal_part_19 = String_var(_4977);  Var _x2c_literal_part_20 = String_var(_5008);  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
-    }
-    ));  break;
+    Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(String_new("\'")), cons(String_var(Var_str(name)), cons(String_var(String_new("\' can only be called at compile time")), NULL)))), origin, cons(String_var(_4946), cons(String_var(_4977), cons(String_var(_5008), NULL))));  break;
   }
 
 }

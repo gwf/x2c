@@ -26,25 +26,28 @@ findings; a shared owner does not make their acceptance cases interchangeable.
 
 ## Evidence and provenance
 
+Private evidence remains in the originating review checkouts. The paths below
+identify those records.
+
 - External review, identified below as **X01-X35**, and its pre-existing list
   in order, **B01-B13**:
-  [review and probe index](/Users/gary/Git/x2c/.claude/worktrees/awesome-zhukovsky-fd5a3f/.context/post-integration-review-2026-10-02/README.md).
+  `.context/post-integration-review-2026-10-02/README.md`.
   Its paired baseline is `00536cc8`, original review tip `cd9544f1`, with
   updates on `1b71a410` and PR #98's head `8f95ec33`.
   The later attachment described as an architectural review is byte-for-byte
   identical to this source; it adds no separate findings or evidence.
 - This workspace's review, **D01-D09** as mapped at the end:
-  [report](../.context/deep-review/report.md),
-  [runtime evidence](../.context/deep-review/runtime.md), and
-  [compiler evidence](../.context/deep-review/compiler-waste.md).
+  `.context/deep-review/report.md`,
+  `.context/deep-review/runtime.md`, and
+  `.context/deep-review/compiler-waste.md`.
   Its original baseline is `cd9544f1`; its delivered repair tree is `1b71a410`.
 - Reconciliation evidence:
-  [compiler mapping](../.context/deep-review/reconcile-compiler.md),
-  [tooling mapping](../.context/deep-review/reconcile-tooling.md), and
-  [four probes on merged dev](../.context/deep-review/integrated-fix-list-probes.json).
+  `.context/deep-review/reconcile-compiler.md`,
+  `.context/deep-review/reconcile-tooling.md`, and
+  `.context/deep-review/integrated-fix-list-probes.json`.
 - Named-macro catalogue spike, **S01-S03** below:
-  [spike record and scripts](/Users/gary/Git/x2c/.claude/worktrees/awesome-zhukovsky-fd5a3f/.context/post-integration-review-2026-10-02/spike/README.md)
-  and [our reconciliation](../.context/deep-review/spike-review.md).
+  `.context/post-integration-review-2026-10-02/spike/README.md`
+  and `.context/deep-review/spike-review.md`.
   This is unpublished scratch work based on `1b71a410`, before PR #98.
   Saved build logs and source counts were inspected; timings were not rerun.
 
@@ -631,7 +634,7 @@ are evidence of a compiler gap, not the intended catalogue source style.
 The same gap affects named Expression macros and nested Lists. Explicit
 insertion, ordinary bound-variable interpolation, truly constant List strings,
 and named String expressions outside Lists pass the focused controls.
-The [probe record](../.context/deep-review/spike-reconcile-language/README.md)
+The private `.context/deep-review/spike-reconcile-language/README.md` record
 preserves eight source cases and their sixteen outcomes across the two compilers.
 
 Owner: `src/literals.x` `_cache_if_stable` recognizes bound identifiers but

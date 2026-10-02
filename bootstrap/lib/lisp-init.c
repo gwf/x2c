@@ -56,9 +56,14 @@ String Var_string(Var);
 
 static String _string(Var value, String operation){
   if(! Var_is_row(value, 11, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 27};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(1318210446));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(operation);
+    Var _x2c_literal_part_1 = Symbol_var(Var_tag(value));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 27};
+      x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(74754136), _x2c_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
+      __builtin_unreachable();
+    }
+
   }
   return Var_string(value);
 }
@@ -67,9 +72,14 @@ List Var_list(Var);
 
 static List _list(Var value, String operation){
   if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 34};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(806120));
-    __builtin_unreachable();
+    Var _x2c_literal_part_2 = String_var(operation);
+    Var _x2c_literal_part_3 = Symbol_var(Var_tag(value));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 34};
+      x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(74754136), _x2c_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
+      __builtin_unreachable();
+    }
+
   }
   return Var_list(value);
 }
@@ -298,10 +308,10 @@ Var lisp_binder_lets(Var bindings, Var binders){
   for(;  ! _nil(binders);  binders = lisp_cdr(binders)){
     Var name = lisp_car(binders);
     reversed = cons(List_var(({
-      Var _x2c_literal_part_0 = name;  Var _x2c_literal_part_1 = List_var(({
-        Var _x2c_literal_part_2 = bindings;  Var _x2c_literal_part_3 = List_var(cons(_1, cons(name, NULL)));  cons(_0, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+      Var _x2c_literal_part_6 = name;  Var _x2c_literal_part_7 = List_var(({
+        Var _x2c_literal_part_4 = bindings;  Var _x2c_literal_part_5 = List_var(cons(_1, cons(name, NULL)));  cons(_0, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
       }
-      ));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+      ));  cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL));
     }
     )), reversed);
   }

@@ -5319,10 +5319,10 @@ List Type_declaration_parts(Type);
 Var List_getindex(List, int);
 static List Walk__return_value(Walk * w, List expression, List cleanup){
   List binding = Compiler__region_binding((* w).c, _4435);  Type type =(* w).return_type;  List base, mods;  List _x2c_destructure_0 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  mods = Var_list(List_getindex(_x2c_destructure_0, 1));  List declaration =({
-    Var _x2c_literal_part_6 = List_var(base);  Var _x2c_literal_part_7 = List_var(cons(_94, cons(List_var(({
-      Var _x2c_literal_part_8 = List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_45, cons(_46, cons(_x2c_literal_part_8, cons(List_var(expression), NULL))));
+    Var _x2c_literal_part_7 = List_var(base);  Var _x2c_literal_part_8 = List_var(cons(_94, cons(List_var(({
+      Var _x2c_literal_part_6 = List_var(cons(_44, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_45, cons(_46, cons(_x2c_literal_part_6, cons(List_var(expression), NULL))));
     }
-    )), NULL)));  cons(_93, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+    )), NULL)));  cons(_93, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
   }
   );  List returned = source_return_content(cons(List_var(({
     Var _x2c_literal_part_9 = List_var(type);  Var _x2c_literal_part_10 = List_var(cons(_163, cons(List_var(binding), NULL)));  cons(_32, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
@@ -5469,10 +5469,10 @@ static List Compiler__region_binding(Compiler c, String role){
 Type Type_reference(Type);
 static List _address_of(String spelling, List binding){
   Type type = List_type(cons(List_var(cons(String_var(spelling), NULL)), NULL));  return({
-    Var _x2c_literal_part_28 = List_var(Type_reference(type));  Var _x2c_literal_part_29 = List_var(cons(_45, cons(_169, cons(List_var(({
-      Var _x2c_literal_part_30 = List_var(type);  Var _x2c_literal_part_31 = List_var(cons(_163, cons(List_var(binding), NULL)));  cons(_32, cons(_x2c_literal_part_30, cons(_x2c_literal_part_31, NULL)));
+    Var _x2c_literal_part_30 = List_var(Type_reference(type));  Var _x2c_literal_part_31 = List_var(cons(_45, cons(_169, cons(List_var(({
+      Var _x2c_literal_part_28 = List_var(type);  Var _x2c_literal_part_29 = List_var(cons(_163, cons(List_var(binding), NULL)));  cons(_32, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
     }
-    )), NULL))));  cons(_32, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
+    )), NULL))));  cons(_32, cons(_x2c_literal_part_30, cons(_x2c_literal_part_31, NULL)));
   }
   );
 }

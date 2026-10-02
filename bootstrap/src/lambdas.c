@@ -787,10 +787,10 @@ static List Compiler__template_capture(Compiler c){
     Token origin = c -> token;  name = Compiler_parse_basic_identifier(c);  value = Compiler_resolve_expression(c, cons(_28, cons(_30293, cons(List_var(cons(_393, cons(List_var(name), NULL))), NULL))), origin);  name = Sym_lookup(c -> sym, name, NULL);  reference = List_type(cons(Symbol_var(77), Var_list(List_cadr(value))));
   }
   return({
-    Var _x2c_literal_part_0 = List_var(name);  Var _x2c_literal_part_1 = List_var(reference);  Var _x2c_literal_part_2 = List_var(({
-      Var _x2c_literal_part_3 = List_var(reference);  Var _x2c_literal_part_4 = List_var(cons(_146, cons(_30288, cons(List_var(value), NULL))));  cons(_28, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
+    Var _x2c_literal_part_2 = List_var(name);  Var _x2c_literal_part_3 = List_var(reference);  Var _x2c_literal_part_4 = List_var(({
+      Var _x2c_literal_part_0 = List_var(reference);  Var _x2c_literal_part_1 = List_var(cons(_146, cons(_30288, cons(List_var(value), NULL))));  cons(_28, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
     }
-    ));  cons(_71, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+    ));  cons(_71, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL))));
   }
   );
 }

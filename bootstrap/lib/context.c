@@ -177,9 +177,13 @@ static Var Context__export_value(Context c, Var v){
   if(Var_try_export_context(v, c, &(custom))) return custom;
   Symbol tag = Var_tag(v);
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context__export_value",.line = 119};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))), Symbol_var(41038), Symbol_var(tag));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context__export_value",.line = 119};
+      x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(41038), Symbol_var(tag));
+      __builtin_unreachable();
+    }
+
   }
 
 }

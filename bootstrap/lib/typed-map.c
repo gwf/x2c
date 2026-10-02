@@ -731,9 +731,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _4 = String_new("MapStringInt");
 }
 
-Var Symbol_var(Symbol);
-
 Var String_var(String);
+
+Var Symbol_var(Symbol);
 
 Var unsigned_var(unsigned);
 
@@ -741,18 +741,26 @@ Var int_var(int);
 
 _Noreturn static void _int_reinsert_error(unsigned _x2c_macro_capacity_0, int _x2c_macro_probe_0){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-map.x",.function = "_int_reinsert_error",.line = 84};
-    x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 3, Symbol_var(32993636), String_var(String_new("MapIntInt.reinsert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_macro_probe_0));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_new("MapIntInt.reinsert"));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/typed-map.x",.function = "_int_reinsert_error",.line = 84};
+      x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 3, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_macro_probe_0));
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 _Noreturn static void _int_insert_error(unsigned _x2c_macro_capacity_1){
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/typed-map.x",.function = "_int_insert_error",.line = 84};
-    x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 2, Symbol_var(32993636), String_var(String_new("MapIntInt.insert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_1));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_new("MapIntInt.insert"));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/typed-map.x",.function = "_int_insert_error",.line = 84};
+      x2c_error_raise_n(& _x2c_error_site_1, 20800632064936, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_1));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -769,18 +777,26 @@ static int * _int_value(MapIntInt _x2c_macro_map_1, unsigned _x2c_macro_index_1)
 
 _Noreturn static void _long_reinsert_error(unsigned _x2c_macro_capacity_2, int _x2c_macro_probe_1){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/typed-map.x",.function = "_long_reinsert_error",.line = 88};
-    x2c_error_raise_n(& _x2c_error_site_2, 20800632064936, 3, Symbol_var(32993636), String_var(String_new("MapLongDouble.reinsert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_2), Symbol_var(34764938), int_var(_x2c_macro_probe_1));
-    __builtin_unreachable();
+    Var _x2c_literal_part_2 = String_var(String_new("MapLongDouble.reinsert"));
+    {
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/typed-map.x",.function = "_long_reinsert_error",.line = 88};
+      x2c_error_raise_n(& _x2c_error_site_2, 20800632064936, 3, Symbol_var(32993636), _x2c_literal_part_2, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_2), Symbol_var(34764938), int_var(_x2c_macro_probe_1));
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 _Noreturn static void _long_insert_error(unsigned _x2c_macro_capacity_3){
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/typed-map.x",.function = "_long_insert_error",.line = 88};
-    x2c_error_raise_n(& _x2c_error_site_3, 20800632064936, 2, Symbol_var(32993636), String_var(String_new("MapLongDouble.insert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_3));
-    __builtin_unreachable();
+    Var _x2c_literal_part_3 = String_var(String_new("MapLongDouble.insert"));
+    {
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/typed-map.x",.function = "_long_insert_error",.line = 88};
+      x2c_error_raise_n(& _x2c_error_site_3, 20800632064936, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_3));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -797,18 +813,26 @@ static double * _double_value(MapLongDouble _x2c_macro_map_3, unsigned _x2c_macr
 
 _Noreturn static void _string_reinsert_error(unsigned _x2c_macro_capacity_4, int _x2c_macro_probe_2){
   {
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/typed-map.x",.function = "_string_reinsert_error",.line = 92};
-    x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 3, Symbol_var(32993636), String_var(String_new("MapStringString.reinsert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_4), Symbol_var(34764938), int_var(_x2c_macro_probe_2));
-    __builtin_unreachable();
+    Var _x2c_literal_part_4 = String_var(String_new("MapStringString.reinsert"));
+    {
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/typed-map.x",.function = "_string_reinsert_error",.line = 92};
+      x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 3, Symbol_var(32993636), _x2c_literal_part_4, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_4), Symbol_var(34764938), int_var(_x2c_macro_probe_2));
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 _Noreturn static void _string_insert_error(unsigned _x2c_macro_capacity_5){
   {
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/typed-map.x",.function = "_string_insert_error",.line = 92};
-    x2c_error_raise_n(& _x2c_error_site_5, 20800632064936, 2, Symbol_var(32993636), String_var(String_new("MapStringString.insert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_5));
-    __builtin_unreachable();
+    Var _x2c_literal_part_5 = String_var(String_new("MapStringString.insert"));
+    {
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/typed-map.x",.function = "_string_insert_error",.line = 92};
+      x2c_error_raise_n(& _x2c_error_site_5, 20800632064936, 2, Symbol_var(32993636), _x2c_literal_part_5, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_5));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -825,18 +849,26 @@ static String * _string_value(MapStringString _x2c_macro_map_5, unsigned _x2c_ma
 
 _Noreturn static void _string_int_reinsert_error(unsigned _x2c_macro_capacity_6, int _x2c_macro_probe_3){
   {
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/typed-map.x",.function = "_string_int_reinsert_error",.line = 96};
-    x2c_error_raise_n(& _x2c_error_site_6, 20800632064936, 3, Symbol_var(32993636), String_var(String_new("MapStringInt.reinsert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_6), Symbol_var(34764938), int_var(_x2c_macro_probe_3));
-    __builtin_unreachable();
+    Var _x2c_literal_part_6 = String_var(String_new("MapStringInt.reinsert"));
+    {
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/typed-map.x",.function = "_string_int_reinsert_error",.line = 96};
+      x2c_error_raise_n(& _x2c_error_site_6, 20800632064936, 3, Symbol_var(32993636), _x2c_literal_part_6, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_6), Symbol_var(34764938), int_var(_x2c_macro_probe_3));
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 _Noreturn static void _string_int_insert_error(unsigned _x2c_macro_capacity_7){
   {
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/typed-map.x",.function = "_string_int_insert_error",.line = 96};
-    x2c_error_raise_n(& _x2c_error_site_7, 20800632064936, 2, Symbol_var(32993636), String_var(String_new("MapStringInt.insert")), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_7));
-    __builtin_unreachable();
+    Var _x2c_literal_part_7 = String_var(String_new("MapStringInt.insert"));
+    {
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/typed-map.x",.function = "_string_int_insert_error",.line = 96};
+      x2c_error_raise_n(& _x2c_error_site_7, 20800632064936, 2, Symbol_var(32993636), _x2c_literal_part_7, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_7));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -1425,9 +1457,13 @@ MapIntInt MapIntInt_new_capacity(unsigned _x2c_macro_capacity_10){
   if(! _init_guard_) _file_init_();
   if(! _capacity_valid(_x2c_macro_capacity_10)){
     if(0){
-      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_new_capacity",.line = 232};
-      x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL))), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_10));
-      __builtin_unreachable();
+      Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_new_capacity",.line = 232};
+        x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_8, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_10));
+        __builtin_unreachable();
+      }
+
     }
     (void) _bad_arg(_0);
   }
@@ -2328,9 +2364,13 @@ MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_macro_capacity_13){
   if(! _init_guard_) _file_init_();
   if(! _capacity_valid(_x2c_macro_capacity_13)){
     if(0){
-      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 252};
-      x2c_error_raise_n(& _x2c_error_site_23, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL))), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_13));
-      __builtin_unreachable();
+      Var _x2c_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 252};
+        x2c_error_raise_n(& _x2c_error_site_23, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_9, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_13));
+        __builtin_unreachable();
+      }
+
     }
     (void) _bad_arg(_1);
   }
@@ -3181,9 +3221,13 @@ MapStringString MapStringString_new_capacity(unsigned _x2c_macro_capacity_16){
   if(! _init_guard_) _file_init_();
   if(! _capacity_valid(_x2c_macro_capacity_16)){
     if(0){
-      static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 273};
-      x2c_error_raise_n(& _x2c_error_site_32, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL))), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_16));
-      __builtin_unreachable();
+      Var _x2c_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 273};
+        x2c_error_raise_n(& _x2c_error_site_32, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_10, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_16));
+        __builtin_unreachable();
+      }
+
     }
     (void) _bad_arg(_2);
   }
@@ -4087,9 +4131,13 @@ MapStringInt MapStringInt_new_capacity(unsigned _x2c_macro_capacity_19){
   if(! _init_guard_) _file_init_();
   if(! _capacity_valid(_x2c_macro_capacity_19)){
     if(0){
-      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 311};
-      x2c_error_raise_n(& _x2c_error_site_41, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL))), Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_19));
-      __builtin_unreachable();
+      Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 311};
+        x2c_error_raise_n(& _x2c_error_site_41, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_11, Symbol_var(209381969202), unsigned_var(_x2c_macro_capacity_19));
+        __builtin_unreachable();
+      }
+
     }
     (void) _bad_arg(_4);
   }

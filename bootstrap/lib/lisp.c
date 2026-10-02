@@ -238,16 +238,16 @@ _x2c_initializer_choice_D09CF48E_13((_native_scalar_access_long_double =(struct 
 ))
 static Map native_scalars;
 
-Var List_var(List);
-
-Var Symbol_var(Symbol);
-
 Map Map_update_n(Map, unsigned, ...);
 
 Map Map_new(void);
 
+Var List_var(List);
+
+Var Symbol_var(Symbol);
+
 _x2c_initializer_choice_D09CF48E_14((native_scalars =({
-  Var _x2c_literal_part_0 = List_var(cons(Symbol_var(213092), NULL));  Var _x2c_literal_part_1 = Var_new(3683441, (void *) & _native_scalar_access_char);  Var _x2c_literal_part_2 = List_var(cons(Symbol_var(301273866), NULL));  Var _x2c_literal_part_3 = Var_new(3683441, (void *) & _native_scalar_access_double);  Var _x2c_literal_part_4 = List_var(cons(Symbol_var(13400168), NULL));  Var _x2c_literal_part_5 = Var_new(3683441, (void *) & _native_scalar_access_float);  Var _x2c_literal_part_6 = List_var(cons(Symbol_var(19368), NULL));  Var _x2c_literal_part_7 = Var_new(3683441, (void *) & _native_scalar_access_int);  Var _x2c_literal_part_8 = List_var(cons(Symbol_var(818062), NULL));  Var _x2c_literal_part_9 = Var_new(3683441, (void *) & _native_scalar_access_long);  Var _x2c_literal_part_10 = List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), NULL)));  Var _x2c_literal_part_11 = Var_new(3683441, (void *) & _native_scalar_access_long_double);  Var _x2c_literal_part_12 = List_var(cons(Symbol_var(818062), cons(Symbol_var(818062), NULL)));  Var _x2c_literal_part_13 = Var_new(3683441, (void *) & _native_scalar_access_long_long);  Var _x2c_literal_part_14 = List_var(cons(Symbol_var(40402088), NULL));  Var _x2c_literal_part_15 = Var_new(3683441, (void *) & _native_scalar_access_short);  Var _x2c_literal_part_16 = List_var(cons(Symbol_var(1294430536), cons(Symbol_var(213092), NULL)));  Var _x2c_literal_part_17 = Var_new(3683441, (void *) & _native_scalar_access_signed_char);  Var _x2c_literal_part_18 = List_var(cons(Symbol_var(1474468213064), NULL));  Var _x2c_literal_part_19 = Var_new(3683441, (void *) & _native_scalar_access_unsigned);  Var _x2c_literal_part_20 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(213092), NULL)));  Var _x2c_literal_part_21 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_char);  Var _x2c_literal_part_22 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), NULL)));  Var _x2c_literal_part_23 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long);  Var _x2c_literal_part_24 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), cons(Symbol_var(818062), NULL))));  Var _x2c_literal_part_25 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long_long);  Var _x2c_literal_part_26 = List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(40402088), NULL)));  Var _x2c_literal_part_27 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_short);  Map_update_n(Map_new(), 14, _x2c_literal_part_0, _x2c_literal_part_1, _x2c_literal_part_2, _x2c_literal_part_3, _x2c_literal_part_4, _x2c_literal_part_5, _x2c_literal_part_6, _x2c_literal_part_7, _x2c_literal_part_8, _x2c_literal_part_9, _x2c_literal_part_10, _x2c_literal_part_11, _x2c_literal_part_12, _x2c_literal_part_13, _x2c_literal_part_14, _x2c_literal_part_15, _x2c_literal_part_16, _x2c_literal_part_17, _x2c_literal_part_18, _x2c_literal_part_19, _x2c_literal_part_20, _x2c_literal_part_21, _x2c_literal_part_22, _x2c_literal_part_23, _x2c_literal_part_24, _x2c_literal_part_25, _x2c_literal_part_26, _x2c_literal_part_27);
+  Var _x2c_literal_part_0 = Var_new(3683441, (void *) & _native_scalar_access_char);  Var _x2c_literal_part_1 = Var_new(3683441, (void *) & _native_scalar_access_double);  Var _x2c_literal_part_2 = Var_new(3683441, (void *) & _native_scalar_access_float);  Var _x2c_literal_part_3 = Var_new(3683441, (void *) & _native_scalar_access_int);  Var _x2c_literal_part_4 = Var_new(3683441, (void *) & _native_scalar_access_long);  Var _x2c_literal_part_5 = Var_new(3683441, (void *) & _native_scalar_access_long_double);  Var _x2c_literal_part_6 = Var_new(3683441, (void *) & _native_scalar_access_long_long);  Var _x2c_literal_part_7 = Var_new(3683441, (void *) & _native_scalar_access_short);  Var _x2c_literal_part_8 = Var_new(3683441, (void *) & _native_scalar_access_signed_char);  Var _x2c_literal_part_9 = Var_new(3683441, (void *) & _native_scalar_access_unsigned);  Var _x2c_literal_part_10 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_char);  Var _x2c_literal_part_11 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long);  Var _x2c_literal_part_12 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_long_long);  Var _x2c_literal_part_13 = Var_new(3683441, (void *) & _native_scalar_access_unsigned_short);  Map_update_n(Map_new(), 14, List_var(cons(Symbol_var(213092), NULL)), _x2c_literal_part_0, List_var(cons(Symbol_var(301273866), NULL)), _x2c_literal_part_1, List_var(cons(Symbol_var(13400168), NULL)), _x2c_literal_part_2, List_var(cons(Symbol_var(19368), NULL)), _x2c_literal_part_3, List_var(cons(Symbol_var(818062), NULL)), _x2c_literal_part_4, List_var(cons(Symbol_var(818062), cons(Symbol_var(301273866), NULL))), _x2c_literal_part_5, List_var(cons(Symbol_var(818062), cons(Symbol_var(818062), NULL))), _x2c_literal_part_6, List_var(cons(Symbol_var(40402088), NULL)), _x2c_literal_part_7, List_var(cons(Symbol_var(1294430536), cons(Symbol_var(213092), NULL))), _x2c_literal_part_8, List_var(cons(Symbol_var(1474468213064), NULL)), _x2c_literal_part_9, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(213092), NULL))), _x2c_literal_part_10, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), NULL))), _x2c_literal_part_11, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(818062), cons(Symbol_var(818062), NULL)))), _x2c_literal_part_12, List_var(cons(Symbol_var(1474468213064), cons(Symbol_var(40402088), NULL))), _x2c_literal_part_13);
 }
 )))
 #include "meta.h"
@@ -1538,26 +1538,44 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
   if(List_len(args) != 2 || ! Var_is_atom(name)){
     int actual = List_len(args);
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 336};
-      x2c_error_raise_n(& _x2c_error_site_4, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
-      __builtin_unreachable();
+      Var _x2c_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 336};
+        x2c_error_raise_n(& _x2c_error_site_4, 4477439593778, 4, Symbol_var(34096809266140), _x2c_literal_part_14, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), List_var(args));
+        __builtin_unreachable();
+      }
+
     }
 
   }
   if(lisp -> protect_x2c && String_startswith(Var_str(name), _3145)){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 338};
-    x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(920394), name);
-    __builtin_unreachable();
+    Var _x2c_literal_part_15 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 338};
+      x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_15, Symbol_var(920394), name);
+      __builtin_unreachable();
+    }
+
   }
   if(Lisp__inherited(lisp, name)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 340};
-    x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL))), Symbol_var(920394), name);
-    __builtin_unreachable();
+    Var _x2c_literal_part_16 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
+    Var _x2c_literal_part_17 = String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 340};
+      x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_16, Symbol_var(47666), _x2c_literal_part_17, Symbol_var(920394), name);
+      __builtin_unreachable();
+    }
+
   }
   if(lisp -> frozen){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 345};
-    x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("def")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL))), Symbol_var(920394), name);
-    __builtin_unreachable();
+    Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
+    Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 345};
+      x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_18, Symbol_var(47666), _x2c_literal_part_19, Symbol_var(920394), name);
+      __builtin_unreachable();
+    }
+
   }
   Var value = Lisp__eval(lisp, form, env);
   _binding_set(& lisp -> scope, lisp -> globals, name, value);
@@ -1603,17 +1621,27 @@ static Var Lisp__cond_select(Lisp lisp, List args, LispEnv * env){
 
 static List _cond_clause(Var clause){
   if(! Var_is_row(clause, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 372};
-    x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL))), Symbol_var(46228810), clause, Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(String_new("cond")), NULL)));
+    Var _x2c_literal_part_21 = clause;
+    Var _x2c_literal_part_22 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 372};
+      x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_20, Symbol_var(46228810), _x2c_literal_part_21, Symbol_var(1510312), _x2c_literal_part_22);
+      __builtin_unreachable();
+    }
+
   }
   List pair = Var_list(clause);
   if(List_len(pair) != 2){
     int actual = List_len(pair);
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 377};
-      x2c_error_raise_n(& _x2c_error_site_10, 4477439593778, 4, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL))), Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
-      __builtin_unreachable();
+      Var _x2c_literal_part_23 = String_var(String_join(NULL, cons(String_var(String_new("cond-clause")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/lisp.x",.function = "_cond_clause",.line = 377};
+        x2c_error_raise_n(& _x2c_error_site_10, 4477439593778, 4, Symbol_var(34096809266140), _x2c_literal_part_23, Symbol_var(396221456712), int_var(2), Symbol_var(74754136), int_var(actual), Symbol_var(46228810), clause);
+        __builtin_unreachable();
+      }
+
     }
 
   }
@@ -1642,9 +1670,13 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
   Var signature = Lisp__eval(lisp, signature_form, env);
   _string_argument(name, _3148);
   if(! Var_is_row(signature, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 401};
-    x2c_error_raise_n(& _x2c_error_site_11, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL))), Symbol_var(46228810), signature);
-    __builtin_unreachable();
+    Var _x2c_literal_part_24 = String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 401};
+      x2c_error_raise_n(& _x2c_error_site_11, 4372535886, 2, Symbol_var(34096809266140), _x2c_literal_part_24, Symbol_var(46228810), signature);
+      __builtin_unreachable();
+    }
+
   }
   String native_name = Var_string(name);
   List native_signature = Var_list(signature);
@@ -1719,16 +1751,25 @@ static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
   if(Var_equal(head, lsym_quasiquote)) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth + 1)));
   if(! Var_equal(head, lsym_unquote) && ! Var_equal(head, lsym_splicing)) return List_var(Lisp__qq_elements(l, form, env, depth));
   if(List_len(form) != 2){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 446};
-    x2c_error_raise_n(& _x2c_error_site_13, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(46228810), expr);
-    __builtin_unreachable();
+    Var _x2c_literal_part_25 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 446};
+      x2c_error_raise_n(& _x2c_error_site_13, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_25, Symbol_var(46228810), expr);
+      __builtin_unreachable();
+    }
+
   }
   if(depth > 0) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth - 1)));
   Var value = Lisp__eval(l, List_cadr(form), env);
   if(Var_equal(head, lsym_splicing)){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 450};
-    x2c_error_raise_n(& _x2c_error_site_14, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(expr)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_26 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
+    Var _x2c_literal_part_27 = Symbol_var(Var_kind(expr));
+    {
+      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/lisp.x",.function = "Lisp__qq",.line = 450};
+      x2c_error_raise_n(& _x2c_error_site_14, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_26, Symbol_var(74754136), _x2c_literal_part_27);
+      __builtin_unreachable();
+    }
+
   }
   return value;
 }
@@ -1802,15 +1843,24 @@ static int _is_splice(Var expr){
 static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
   List form = Var_list(expr);
   if(List_len(form) != 2){
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 471};
-    x2c_error_raise_n(& _x2c_error_site_15, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL))), Symbol_var(46228810), expr);
-    __builtin_unreachable();
+    Var _x2c_literal_part_28 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 471};
+      x2c_error_raise_n(& _x2c_error_site_15, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_28, Symbol_var(46228810), expr);
+      __builtin_unreachable();
+    }
+
   }
   Var value = Lisp__eval(lisp, List_cadr(form), env);
   if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 474};
-    x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(value)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_29 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote-splice")), NULL)));
+    Var _x2c_literal_part_30 = Symbol_var(Var_kind(value));
+    {
+      static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/lisp.x",.function = "Lisp__splice",.line = 474};
+      x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_29, Symbol_var(74754136), _x2c_literal_part_30);
+      __builtin_unreachable();
+    }
+
   }
   return Var_list(value);
 }
@@ -2235,9 +2285,13 @@ static List _value_list(const Var * values, int count){
   List args = NULL;
   for(int i = count - 1;  i >= 0;  i --){
     if(Var_is_void(values[i])){
-      static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_value_list",.line = 662};
-      x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(19800432), int_var(i));
-      __builtin_unreachable();
+      Var _x2c_literal_part_31 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/lisp.x",.function = "_value_list",.line = 662};
+        x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 2, Symbol_var(34096809266140), _x2c_literal_part_31, Symbol_var(19800432), int_var(i));
+        __builtin_unreachable();
+      }
+
     }
     args = cons(values[i], args);
   }
@@ -2252,34 +2306,50 @@ static void _bind_params(Scope * frame, Lambda lambda, List args, Map bindings){
     Var name = List_car(p);
     if(Var_is_atom(name) && String_equal(Var_str(name), _3024)){
       if(! List_truth(List_cdr(p))){
-        static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 676};
-        x2c_error_raise_n(& _x2c_error_site_19, 4372535886, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), body);
-        __builtin_unreachable();
+        Var _x2c_literal_part_32 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+        {
+          static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 676};
+          x2c_error_raise_n(& _x2c_error_site_19, 4372535886, 2, Symbol_var(34096809266140), _x2c_literal_part_32, Symbol_var(46228810), body);
+          __builtin_unreachable();
+        }
+
       }
       _binding_set(frame, bindings, List_cadr(p), List_var(args));
       return;
     }
     if(! List_truth(args)){
-      static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 680};
-      x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), body);
-      __builtin_unreachable();
+      Var _x2c_literal_part_33 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 680};
+        x2c_error_raise_n(& _x2c_error_site_20, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_33, Symbol_var(46228810), body);
+        __builtin_unreachable();
+      }
+
     }
     _binding_set(frame, bindings, name, List_car(args));
     args = List_cdr(args);
   }
   if(List_truth(args)){
-    static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 684};
-    x2c_error_raise_n(& _x2c_error_site_21, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), body);
-    __builtin_unreachable();
+    Var _x2c_literal_part_34 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/lisp.x",.function = "_bind_params",.line = 684};
+      x2c_error_raise_n(& _x2c_error_site_21, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_34, Symbol_var(46228810), body);
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 static void LispEnv__bind_values(LispEnv * local, Lambda lambda, const Var * values, int count){
   if(count != List_len(lambda -> params)){
-    static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "LispEnv__bind_values",.line = 689};
-    x2c_error_raise_n(& _x2c_error_site_22, 4477439593778, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
-    __builtin_unreachable();
+    Var _x2c_literal_part_35 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/lisp.x",.function = "LispEnv__bind_values",.line = 689};
+      x2c_error_raise_n(& _x2c_error_site_22, 4477439593778, 2, Symbol_var(34096809266140), _x2c_literal_part_35, Symbol_var(46228810), lambda -> body);
+      __builtin_unreachable();
+    }
+
   }
   local -> params = lambda -> params;
   local -> values = values;
@@ -2462,9 +2532,14 @@ static void Lisp__spend_call(Lisp lisp){
     }
     lisp -> call_exhausted = 1;
     {
-      static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 851};
-      x2c_error_raise_n(& _x2c_error_site_24, 214157780846806, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("steps")), NULL))));
-      __builtin_unreachable();
+      Var _x2c_literal_part_36 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+      Var _x2c_literal_part_37 = String_var(String_join(NULL, cons(String_var(String_new("steps")), NULL)));
+      {
+        static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/lisp.x",.function = "Lisp__spend_call",.line = 851};
+        x2c_error_raise_n(& _x2c_error_site_24, 214157780846806, 2, Symbol_var(34096809266140), _x2c_literal_part_36, Symbol_var(47666), _x2c_literal_part_37);
+        __builtin_unreachable();
+      }
+
     }
 
   }
@@ -2478,9 +2553,13 @@ static void Lisp__check_stack(Lisp lisp, Lambda lambda, unsigned long at){
   }
   unsigned long used = lisp -> stack_base > at ? lisp -> stack_base - at : at - lisp -> stack_base;
   if(used > lisp -> stack_allowance){
-    static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "Lisp__check_stack",.line = 864};
-    x2c_error_raise_n(& _x2c_error_site_25, 214157780846806, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(46228810), lambda -> body);
-    __builtin_unreachable();
+    Var _x2c_literal_part_38 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/lisp.x",.function = "Lisp__check_stack",.line = 864};
+      x2c_error_raise_n(& _x2c_error_site_25, 214157780846806, 2, Symbol_var(34096809266140), _x2c_literal_part_38, Symbol_var(46228810), lambda -> body);
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -2534,27 +2613,44 @@ static void _arity(List args, int expected, String operation){
 
 static void _string_argument(Var value, String operation){
   if(! Var_is_row(value, 11, 7, 1)){
-    static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_string_argument",.line = 952};
-    x2c_error_raise_n(& _x2c_error_site_27, 4477479911782, 3, Symbol_var(34096809266140), String_var(operation), Symbol_var(74754136), Symbol_var(Var_kind(value)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_39 = String_var(operation);
+    Var _x2c_literal_part_40 = Symbol_var(Var_kind(value));
+    Var _x2c_literal_part_41 = String_var(String_join(NULL, cons(String_var(String_new("String")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/lisp.x",.function = "_string_argument",.line = 952};
+      x2c_error_raise_n(& _x2c_error_site_27, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_39, Symbol_var(74754136), _x2c_literal_part_40, Symbol_var(1510312), _x2c_literal_part_41);
+      __builtin_unreachable();
+    }
+
   }
 
 }
 
 static List _list_argument(Var values){
   if(! Var_is_row(values, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_list_argument",.line = 958};
-    x2c_error_raise_n(& _x2c_error_site_28, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(values)), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("List")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_42 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+    Var _x2c_literal_part_43 = Symbol_var(Var_kind(values));
+    Var _x2c_literal_part_44 = String_var(String_join(NULL, cons(String_var(String_new("List")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/lisp.x",.function = "_list_argument",.line = 958};
+      x2c_error_raise_n(& _x2c_error_site_28, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_42, Symbol_var(74754136), _x2c_literal_part_43, Symbol_var(1510312), _x2c_literal_part_44);
+      __builtin_unreachable();
+    }
+
   }
   return Var_list(values);
 }
 
 _Noreturn static void _not_procedure(Var callable){
   {
-    static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_not_procedure",.line = 964};
-    x2c_error_raise_n(& _x2c_error_site_29, 995692317464, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_45 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
+    Var _x2c_literal_part_46 = Symbol_var(Var_kind(callable));
+    {
+      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/lisp.x",.function = "_not_procedure",.line = 964};
+      x2c_error_raise_n(& _x2c_error_site_29, 995692317464, 2, Symbol_var(34096809266140), _x2c_literal_part_45, Symbol_var(74754136), _x2c_literal_part_46);
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -2614,9 +2710,13 @@ static Var LispReader_prefixed(LispReader * r, Var prefix, int depth){
 
 static Var LispReader_list(LispReader * r, int depth){
   if(depth >= LISP_READ_DEPTH_MAX){
-    static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "LispReader_list",.line = 1036};
-    x2c_error_raise_n(& _x2c_error_site_30, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL))), Symbol_var(8750352), int_var(depth));
-    __builtin_unreachable();
+    Var _x2c_literal_part_47 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.read")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/lisp.x",.function = "LispReader_list",.line = 1036};
+      x2c_error_raise_n(& _x2c_error_site_30, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_47, Symbol_var(8750352), int_var(depth));
+      __builtin_unreachable();
+    }
+
   }
   Array elements = Array_new();
   {
@@ -2785,9 +2885,14 @@ Var lisp_atom(Var value){
 Var lisp_car(Var value){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 1138};
-    x2c_error_raise_n(& _x2c_error_site_33, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("car")), NULL))), Symbol_var(740232), Symbol_var(Var_kind(value)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_48 = String_var(String_join(NULL, cons(String_var(String_new("car")), NULL)));
+    Var _x2c_literal_part_49 = Symbol_var(Var_kind(value));
+    {
+      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/lisp.x",.function = "lisp_car",.line = 1138};
+      x2c_error_raise_n(& _x2c_error_site_33, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_48, Symbol_var(740232), _x2c_literal_part_49);
+      __builtin_unreachable();
+    }
+
   }
   return Var_car(value);
 }
@@ -2797,9 +2902,14 @@ List Var_cdr(Var);
 Var lisp_cdr(Var value){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(value, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 1147};
-    x2c_error_raise_n(& _x2c_error_site_34, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("cdr")), NULL))), Symbol_var(740232), Symbol_var(Var_kind(value)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_50 = String_var(String_join(NULL, cons(String_var(String_new("cdr")), NULL)));
+    Var _x2c_literal_part_51 = Symbol_var(Var_kind(value));
+    {
+      static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/lisp.x",.function = "lisp_cdr",.line = 1147};
+      x2c_error_raise_n(& _x2c_error_site_34, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_50, Symbol_var(740232), _x2c_literal_part_51);
+      __builtin_unreachable();
+    }
+
   }
   return List_var(Var_cdr(value));
 }
@@ -2883,9 +2993,15 @@ static int _number_compare(Var a, Var b){
 Var lisp_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(! _is_lisp_number(a) || ! _is_lisp_number(b)){
-    static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 1217};
-    x2c_error_raise_n(& _x2c_error_site_35, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_compare")), NULL))), Symbol_var(26746169281416), Symbol_var(Var_kind(a)), Symbol_var(1286928228633480), Symbol_var(Var_kind(b)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_52 = String_var(String_join(NULL, cons(String_var(String_new("lisp_compare")), NULL)));
+    Var _x2c_literal_part_53 = Symbol_var(Var_kind(a));
+    Var _x2c_literal_part_54 = Symbol_var(Var_kind(b));
+    {
+      static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/lisp.x",.function = "lisp_compare",.line = 1217};
+      x2c_error_raise_n(& _x2c_error_site_35, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_52, Symbol_var(26746169281416), _x2c_literal_part_53, Symbol_var(1286928228633480), _x2c_literal_part_54);
+      __builtin_unreachable();
+    }
+
   }
   return int_var(_number_compare(a, b));
 }
@@ -2895,7 +3011,7 @@ Var Var_binary(Var, Symbol, Var);
 Var lisp_add(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(Var_is_row(a, 11, 7, 1) || Var_is_row(b, 11, 7, 1)) return String_var(({
-    Var _x2c_literal_part_28 = String_var(Var_str(a));  Var _x2c_literal_part_29 = String_var(Var_str(b));  String_join(NULL, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
+    Var _x2c_literal_part_55 = String_var(Var_str(a));  Var _x2c_literal_part_56 = String_var(Var_str(b));  String_join(NULL, cons(_x2c_literal_part_55, cons(_x2c_literal_part_56, NULL)));
   }
   ));
   return Var_binary(a, 56, b);
@@ -3145,9 +3261,14 @@ Func Func_new_context(FuncAdapter, List, const void *, size_t);
 static Func _callback(Var callable, FuncAdapter adapter, unsigned arity, String operation){
   if(Var_is_nil(callable)) return NULL;
   if(! lisp_active){
-    static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1421};
-    x2c_error_raise_n(& _x2c_error_site_39, 4477477457162, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_57 = String_var(operation);
+    Var _x2c_literal_part_58 = String_var(String_join(NULL, cons(String_var(String_new("no session")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/lisp.x",.function = "_callback",.line = 1421};
+      x2c_error_raise_n(& _x2c_error_site_39, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_57, Symbol_var(47666), _x2c_literal_part_58);
+      __builtin_unreachable();
+    }
+
   }
   LispCallback context ={
     lisp_active, callable, operation, arity
@@ -3177,9 +3298,14 @@ const void * Func_context(Func);
 static LispCallback * _callback_context(Func fn){
   LispCallback * context =(void *) Func_context(fn);
   if(! lisp_active || lisp_active != context -> lisp){
-    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1447};
-    x2c_error_raise_n(& _x2c_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), String_var(context -> operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_59 = String_var(context -> operation);
+    Var _x2c_literal_part_60 = String_var(String_join(NULL, cons(String_var(String_new("wrong session")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/lisp.x",.function = "_callback_context",.line = 1447};
+      x2c_error_raise_n(& _x2c_error_site_40, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_59, Symbol_var(47666), _x2c_literal_part_60);
+      __builtin_unreachable();
+    }
+
   }
   return context;
 }
@@ -3811,16 +3937,26 @@ Var Lisp_eval_file(Lisp l, File source){
         size_t size = content -> length;
         int limit = INT_MAX;
         {
-          static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1835};
-          x2c_error_raise_n(& _x2c_error_site_43, 1358596898646632, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(1265290), Var_box_ulong(size), Symbol_var(25782888), int_var(limit));
-          __builtin_unreachable();
+          Var _x2c_literal_part_61 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
+          Var _x2c_literal_part_62 = Var_box_ulong(size);
+          {
+            static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1835};
+            x2c_error_raise_n(& _x2c_error_site_43, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_literal_part_61, Symbol_var(1265290), _x2c_literal_part_62, Symbol_var(25782888), int_var(limit));
+            __builtin_unreachable();
+          }
+
         }
 
       }
       if(memchr(content -> bytes, '\0', content -> length)){
-        static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1838};
-        x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL))));
-        __builtin_unreachable();
+        Var _x2c_literal_part_63 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.eval_file")), NULL)));
+        Var _x2c_literal_part_64 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL)));
+        {
+          static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/lisp.x",.function = "Lisp_eval_file",.line = 1838};
+          x2c_error_raise_n(& _x2c_error_site_44, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_63, Symbol_var(47666), _x2c_literal_part_64);
+          __builtin_unreachable();
+        }
+
       }
       String text = String_new_len(content -> bytes, (int) content -> length);
       {
@@ -3851,9 +3987,14 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
     __builtin_unreachable();
   }
   if(lisp -> frozen){
-    static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1867};
-    x2c_error_raise_n(& _x2c_error_site_46, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL))));
-    __builtin_unreachable();
+    Var _x2c_literal_part_65 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL)));
+    Var _x2c_literal_part_66 = String_var(String_join(NULL, cons(String_var(String_new("frozen")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1867};
+      x2c_error_raise_n(& _x2c_error_site_46, 4477477457162, 2, Symbol_var(34096809266140), _x2c_literal_part_65, Symbol_var(47666), _x2c_literal_part_66);
+      __builtin_unreachable();
+    }
+
   }
   {
     Scope_push(& lisp -> scope);
@@ -3868,9 +4009,14 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
           {
             Var interned = Atom_intern(name);
             if(Lisp__inherited(lisp, interned)){
-              static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1871};
-              x2c_error_raise_n(& _x2c_error_site_47, 4477477457162, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL))), Symbol_var(920394), interned);
-              __builtin_unreachable();
+              Var _x2c_literal_part_67 = String_var(String_join(NULL, cons(String_var(String_new("Lisp.set_global")), NULL)));
+              Var _x2c_literal_part_68 = String_var(String_join(NULL, cons(String_var(String_new("inherited")), NULL)));
+              {
+                static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/lisp.x",.function = "Lisp_set_global",.line = 1871};
+                x2c_error_raise_n(& _x2c_error_site_47, 4477477457162, 3, Symbol_var(34096809266140), _x2c_literal_part_67, Symbol_var(47666), _x2c_literal_part_68, Symbol_var(920394), interned);
+                __builtin_unreachable();
+              }
+
             }
             _binding_set(& lisp -> scope, lisp -> globals, interned, value);
             if(String_startswith(name, _3145)) lisp -> protect_x2c = 1;
@@ -3922,9 +4068,15 @@ Scope * Lisp_result_storage(Lisp lisp){
 Var lisp_source_function(Var callable){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(callable, 9, 7, 3)){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1909};
-    x2c_error_raise_n(& _x2c_error_site_49, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL))), Symbol_var(74754136), Symbol_var(Var_kind(callable)));
-    __builtin_unreachable();
+    Var _x2c_literal_part_69 = String_var(String_join(NULL, cons(String_var(String_new("lisp_source_function")), NULL)));
+    Var _x2c_literal_part_70 = String_var(String_join(NULL, cons(String_var(String_new("Lambda")), NULL)));
+    Var _x2c_literal_part_71 = Symbol_var(Var_kind(callable));
+    {
+      static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/lisp.x",.function = "lisp_source_function",.line = 1909};
+      x2c_error_raise_n(& _x2c_error_site_49, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_69, Symbol_var(1510312), _x2c_literal_part_70, Symbol_var(74754136), _x2c_literal_part_71);
+      __builtin_unreachable();
+    }
+
   }
   (Var_lambda(callable)) -> source_function = 1;
   return callable;

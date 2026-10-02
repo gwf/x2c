@@ -74,9 +74,14 @@ static void _append_growing(Block b, const void * source, size_t count){
   if(count > SIZE_MAX - b -> length || count > SIZE_MAX / b -> width){
     size_t width = b -> width;
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 109};
-      x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(48833808), Var_box_ulong(width), Symbol_var(7318440), Var_box_ulong(count));
-      __builtin_unreachable();
+      Var _x2c_literal_part_0 = Var_box_ulong(width);
+      Var _x2c_literal_part_1 = Var_box_ulong(count);
+      {
+        static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 109};
+        x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(48833808), _x2c_literal_part_0, Symbol_var(7318440), _x2c_literal_part_1);
+        __builtin_unreachable();
+      }
+
     }
 
   }
@@ -151,9 +156,14 @@ void Block_reserve(Block block, size_t minimum){
   if(! size){
     size_t width = block -> width;
     {
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 214};
-      x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(48833808), Var_box_ulong(width), Symbol_var(6240), Var_box_ulong(cap));
-      __builtin_unreachable();
+      Var _x2c_literal_part_2 = Var_box_ulong(width);
+      Var _x2c_literal_part_3 = Var_box_ulong(cap);
+      {
+        static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 214};
+        x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(48833808), _x2c_literal_part_2, Symbol_var(6240), _x2c_literal_part_3);
+        __builtin_unreachable();
+      }
+
     }
 
   }

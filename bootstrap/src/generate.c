@@ -2901,10 +2901,10 @@ static List _location(Token tokens, List range){
     Var _x2c_match_value_17 = start;  Var _x2c_match_value_18 = end; {
       int start = Var_int(Var_convert(_x2c_match_value_17, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_18, 3453797)); {
         Token first = tokens + start, last = tokens + end - 1;  return({
-          Var _x2c_literal_part_54 = List_var(cons(_231, cons(int_var(first -> line), NULL)));  Var _x2c_literal_part_55 = List_var(({
-            Var _x2c_literal_part_56 = int_var(first -> pos);  Var _x2c_literal_part_57 = int_var(last -> pos + last -> len);  cons(_31011, cons(_x2c_literal_part_56, cons(_x2c_literal_part_57, NULL)));
+          Var _x2c_literal_part_56 = List_var(cons(_231, cons(int_var(first -> line), NULL)));  Var _x2c_literal_part_57 = List_var(({
+            Var _x2c_literal_part_54 = int_var(first -> pos);  Var _x2c_literal_part_55 = int_var(last -> pos + last -> len);  cons(_31011, cons(_x2c_literal_part_54, cons(_x2c_literal_part_55, NULL)));
           }
-          ));  cons(_x2c_literal_part_54, cons(_x2c_literal_part_55, NULL));
+          ));  cons(_x2c_literal_part_56, cons(_x2c_literal_part_57, NULL));
         }
         );
       }

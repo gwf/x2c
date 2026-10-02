@@ -1362,13 +1362,13 @@ return 0;
 
 static List _assignment(List binding, List type, List rhs){
   return cons(_141, cons(List_var(({
-    Var _x2c_literal_part_10 = List_var(type);  Var _x2c_literal_part_11 = List_var(({
+    Var _x2c_literal_part_13 = List_var(type);  Var _x2c_literal_part_14 = List_var(({
       Var _x2c_literal_part_12 = List_var(({
-        Var _x2c_literal_part_13 = List_var(type);  Var _x2c_literal_part_14 = List_var(cons(_393, cons(List_var(binding), NULL)));  cons(_28, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL)));
+        Var _x2c_literal_part_10 = List_var(type);  Var _x2c_literal_part_11 = List_var(cons(_393, cons(List_var(binding), NULL)));  cons(_28, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
       }
       ));  cons(_146, cons(_2490, cons(_x2c_literal_part_12, cons(List_var(rhs), NULL))));
     }
-    ));  cons(_28, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+    ));  cons(_28, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL)));
   }
   )), NULL));
 }
@@ -1518,10 +1518,10 @@ static List _array_slot(List target, List path, List * tests){
           )), NULL))); (* tests) = cons(List_var(cons(_28, cons(_2534, cons(List_var(cons(_146, cons(_5995, cons(selector, cons(List_var(length), NULL))))), NULL)))), (* tests));
         }
         else if(Var_truth(selector)) slot =({
-          Var _x2c_literal_part_29 = List_var(selected);  Var _x2c_literal_part_30 = List_var(({
-            Var _x2c_literal_part_31 = List_var(parent);  Var _x2c_literal_part_32 = List_var(cons(selector, NULL));  cons(_146, cons(_147, cons(_x2c_literal_part_31, cons(_x2c_literal_part_32, NULL))));
+          Var _x2c_literal_part_31 = List_var(selected);  Var _x2c_literal_part_32 = List_var(({
+            Var _x2c_literal_part_29 = List_var(parent);  Var _x2c_literal_part_30 = List_var(cons(selector, NULL));  cons(_146, cons(_147, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, NULL))));
           }
-          ));  cons(_28, cons(_x2c_literal_part_29, cons(_x2c_literal_part_30, NULL)));
+          ));  cons(_28, cons(_x2c_literal_part_31, cons(_x2c_literal_part_32, NULL)));
         }
         );
       }
@@ -1574,10 +1574,10 @@ static List Compiler__array_input(Compiler c, List code, List header, List sourc
     );
   }
   List declaration =({
-    Var _x2c_literal_part_43 = List_var(type);  Var _x2c_literal_part_44 = List_var(cons(_2489, cons(List_var(({
-      Var _x2c_literal_part_45 = List_var(cons(_2491, cons(List_var(binding), _30560)));  cons(_146, cons(_2490, cons(_x2c_literal_part_45, cons(List_var(initial), NULL))));
+    Var _x2c_literal_part_44 = List_var(type);  Var _x2c_literal_part_45 = List_var(cons(_2489, cons(List_var(({
+      Var _x2c_literal_part_43 = List_var(cons(_2491, cons(List_var(binding), _30560)));  cons(_146, cons(_2490, cons(_x2c_literal_part_43, cons(List_var(initial), NULL))));
     }
-    )), NULL)));  cons(_2488, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
+    )), NULL)));  cons(_2488, cons(_x2c_literal_part_44, cons(_x2c_literal_part_45, NULL)));
   }
   );  return cons(List_var(declaration), List_append(code, NULL));
 }

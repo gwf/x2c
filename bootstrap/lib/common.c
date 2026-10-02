@@ -362,9 +362,13 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();
   if(length < 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 833};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))), Symbol_var(816725264), int_var(length));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 833};
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(816725264), int_var(length));
+      __builtin_unreachable();
+    }
+
   }
   if(index < 0) index += length;
   if(index < 0 || index >= length) return - 1;

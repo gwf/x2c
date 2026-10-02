@@ -77,9 +77,9 @@ static int _cycle(X2CStatic * guard, StaticThread * self){
   return 0;
 }
 
-Var Symbol_var(Symbol);
-
 Var String_var(String);
+
+Var Symbol_var(Symbol);
 
 int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per_thread){
   if(! _init_guard_) _file_init_();
@@ -90,9 +90,14 @@ int x2c_static_acquire(X2CStatic * guard, size_t size, size_t alignment, int per
     if(_cycle(guard, self)){
       _unlock();
       {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 71};
-        x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("static initialization")), NULL))), Symbol_var(1218550748), String_var(String_join(NULL, cons(String_var(String_new("recursive or cyclic initialization")), NULL))));
-        __builtin_unreachable();
+        Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("static initialization")), NULL)));
+        Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("recursive or cyclic initialization")), NULL)));
+        {
+          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/static-init.x",.function = "x2c_static_acquire",.line = 71};
+          x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1218550748), _x2c_literal_part_1);
+          __builtin_unreachable();
+        }
+
       }
 
     }

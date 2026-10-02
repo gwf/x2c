@@ -584,10 +584,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 static String _read_input(Compiler c){
   String filename = c -> filename, text = NULL;
   if(Compiler_read_source(c, filename, &(text))) return text;
-  Compiler_report_error(c, 306819428, _30232, NULL, ({
-    Var _x2c_literal_part_2 = String_var(_1071);  Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("file: ")), cons(String_var(filename), NULL))));  Var _x2c_literal_part_4 = String_var(_1140);  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
-  }
-  ));
+  Compiler_report_error(c, 306819428, _30232, NULL, cons(String_var(_1071), cons(String_var(String_join(NULL, cons(String_var(String_new("file: ")), cons(String_var(filename), NULL)))), cons(String_var(_1140), NULL))));
 }
 
 int String_find(String, String);
@@ -725,14 +722,8 @@ static void _enter_package(Frontend frontend, Compiler c){
 }
 
 static void _check_cpp_unit(Compiler c){
-  if(c -> layout) Compiler_report_error(c, 306819428, _30234, _first_directive(c), ({
-    Var _x2c_literal_part_5 = String_var(_840);  Var _x2c_literal_part_6 = String_var(_871);  Var _x2c_literal_part_7 = String_var(_902);  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
-  }
-  ));
-  if(c -> script) Compiler_report_error(c, 306819428, _30235, _first_directive(c), ({
-    Var _x2c_literal_part_8 = String_var(_2304);  Var _x2c_literal_part_9 = String_var(_2335);  cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL));
-  }
-  ));
+  if(c -> layout) Compiler_report_error(c, 306819428, _30234, _first_directive(c), cons(String_var(_840), cons(String_var(_871), cons(String_var(_902), NULL))));
+  if(c -> script) Compiler_report_error(c, 306819428, _30235, _first_directive(c), cons(String_var(_2304), cons(String_var(_2335), NULL)));
 }
 
 static Token _first_directive(Compiler c){
@@ -760,10 +751,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   (* unit).preprocessor_output = text;
   (* unit).preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
-  if(status) Compiler_report_error(c, 306819428, _30236, _first_directive(c), ({
-    Var _x2c_literal_part_10 = String_var(_409);  Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("status: ")), cons(String_var(int_str(status)), NULL))));  cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL));
-  }
-  ));
+  if(status) Compiler_report_error(c, 306819428, _30236, _first_directive(c), cons(String_var(_409), cons(String_var(String_join(NULL, cons(String_var(String_new("status: ")), cons(String_var(int_str(status)), NULL)))), NULL)));
   {
     String dependency;
     List _x2c_macro_object_1 = translation_depfile_parse(dependency_text);

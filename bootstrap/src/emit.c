@@ -1646,10 +1646,10 @@ static void StaticRuntime_emit(StaticRuntime * r){
   }
   );  if((* r).inferred){
     List operand =({
-      Var _x2c_literal_part_76 = List_var((* r).type);  Var _x2c_literal_part_77 = List_var(({
-        Var _x2c_literal_part_78 = List_var((* r).type);  Var _x2c_literal_part_79 = List_var((* r).initial);  cons(_2530, cons(_x2c_literal_part_78, cons(_x2c_literal_part_79, NULL)));
+      Var _x2c_literal_part_78 = List_var((* r).type);  Var _x2c_literal_part_79 = List_var(({
+        Var _x2c_literal_part_76 = List_var((* r).type);  Var _x2c_literal_part_77 = List_var((* r).initial);  cons(_2530, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
       }
-      ));  cons(_28, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL)));
+      ));  cons(_28, cons(_x2c_literal_part_78, cons(_x2c_literal_part_79, NULL)));
     }
     );  acquisition = Emitter__initializer_macro(&((*(* r).e)), cons(_30539, cons(List_var(({
       Var _x2c_literal_part_80 = String_var((* r).formal);  cons(_x2c_literal_part_80, cons(List_var(operand), NULL));

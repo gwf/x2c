@@ -498,9 +498,13 @@ Var Symbol_var(Symbol);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 687};
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));
+      __builtin_unreachable();
+    }
+
   }
   int n = String_len(str);
   if(index < 0) index += n;
@@ -558,9 +562,13 @@ String String_new_fill(char fill, int count){
     __builtin_unreachable();
   }
   if(count == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 762};
-    x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))), Symbol_var(7318440), int_var(count));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 762};
+      x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(7318440), int_var(count));
+      __builtin_unreachable();
+    }
+
   }
   String string = String_malloc(count + 1);
   memset(string, fill, count);
@@ -654,9 +662,13 @@ static String _pad(String str, int width, char fill, int side){
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 852};
-    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
-    __builtin_unreachable();
+    Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 852};
+      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_2, Symbol_var(48833808), int_var(width));
+      __builtin_unreachable();
+    }
+
   }
   int padding = width - length, left = side ? padding : 0;
   if(side < 0) left = padding / 2;
@@ -893,9 +905,13 @@ String String_map(String str, Func fn){
       for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));
         if(! ch){
-          static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1149};
-          x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
-          __builtin_unreachable();
+          Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL)));
+          {
+            static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1149};
+            x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(19800432), int_var(i));
+            __builtin_unreachable();
+          }
+
         }
         out[i] = ch;
       }

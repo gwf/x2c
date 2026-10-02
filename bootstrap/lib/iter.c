@@ -145,9 +145,13 @@ Var int_var(int);
 Iter range(int start, int end, int step, Iter iter){
   if(! Iter_truth(iter)) return NULL;
   if(! step){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "range",.line = 228};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("range")), NULL))), Symbol_var(1286496), int_var(step));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("range")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "range",.line = 228};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1286496), int_var(step));
+      __builtin_unreachable();
+    }
+
   }
   if(step == 1) return Iter_init(iter, _range_raw_int(end), _range_up_next, _range_raw_int(start));
   if(step == - 1) return Iter_init(iter, _range_raw_int(end), _range_down_next, _range_raw_int(start));
@@ -485,15 +489,25 @@ Var Array_push(Array, Var);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 701};
-    x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
+    Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 701};
+      x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(1510312), _x2c_literal_part_2, Symbol_var(46228810), pair);
+      __builtin_unreachable();
+    }
+
   }
   List list = Var_list(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 705};
-    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL))), Symbol_var(46228810), pair);
-    __builtin_unreachable();
+    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
+    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 705};
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_3, Symbol_var(1510312), _x2c_literal_part_4, Symbol_var(46228810), pair);
+      __builtin_unreachable();
+    }
+
   }
   Var first, second;
   List _x2c_destructure_0 = list;

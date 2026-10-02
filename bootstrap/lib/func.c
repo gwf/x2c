@@ -164,9 +164,13 @@ List List_cdr(List);
 
 List x2c_func_reference_type(Func fn, unsigned argc, unsigned index){
   if(! fn || index >= argc){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_reference_type",.line = 182};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.apply")), NULL))), Symbol_var(19800432), unsigned_var(index));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Func.apply")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_reference_type",.line = 182};
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), unsigned_var(index));
+      __builtin_unreachable();
+    }
+
   }
   if(fn -> rest) return NULL;
   if(argc != fn -> nparams){
@@ -277,8 +281,12 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
             {
               List lower = cons(code, cause);
               {
-                static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 234};
-                x2c_error_raise_n(& _x2c_error_site_8, Var_symbol(code), 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+                Symbol _x2c_literal_part_1 = Var_symbol(code);
+                {
+                  static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 234};
+                  x2c_error_raise_n(& _x2c_error_site_8, _x2c_literal_part_1, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
+                }
+
               }
 
             }
@@ -301,9 +309,15 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     return converted;
   }
   if(! Var_is(value, want) && !(want == 806120 && Var_is_null(value))){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 239};
-    x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(want));
-    __builtin_unreachable();
+    Var _x2c_literal_part_2 = List_var(sig);
+    Var _x2c_literal_part_3 = unsigned_var(i);
+    Var _x2c_literal_part_4 = Symbol_var(Var_tag(value));
+    {
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 239};
+      x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 4, Symbol_var(39502), _x2c_literal_part_2, Symbol_var(19800432), _x2c_literal_part_3, Symbol_var(74754136), _x2c_literal_part_4, Symbol_var(1510312), Symbol_var(want));
+      __builtin_unreachable();
+    }
+
   }
   return value;
 }
@@ -318,9 +332,15 @@ void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i){
   if(List_truth(argv[i].reference_type) ||(kind != 35386204516 && kind != 39939274535114 && ! Var_is_row(value, 11, 7, 1))){
     List sig = fn ? fn -> sig : NULL;
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/func.x",.function = "x2c_func_pointer_argument",.line = 257};
-      x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(74754136), Symbol_var(Var_tag(value)), Symbol_var(1510312), Symbol_var(35386204516));
-      __builtin_unreachable();
+      Var _x2c_literal_part_5 = List_var(sig);
+      Var _x2c_literal_part_6 = unsigned_var(i);
+      Var _x2c_literal_part_7 = Symbol_var(Var_tag(value));
+      {
+        static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/func.x",.function = "x2c_func_pointer_argument",.line = 257};
+        x2c_error_raise_n(& _x2c_error_site_10, 4477479911782, 4, Symbol_var(39502), _x2c_literal_part_5, Symbol_var(19800432), _x2c_literal_part_6, Symbol_var(74754136), _x2c_literal_part_7, Symbol_var(1510312), Symbol_var(35386204516));
+        __builtin_unreachable();
+      }
+
     }
 
   }
@@ -454,7 +474,10 @@ if(context_size && ! context){
   static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/func.x",.function = "_new",.line = 411};  x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))));  __builtin_unreachable();
 }
 size_t context_offset = _context_offset();  if(context_size > SIZE_MAX - context_offset){
-  static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 414};  x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL))), Symbol_var(1265290), Var_box_ulong(context_size));  __builtin_unreachable();
+  Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Func.new_context")), NULL)));  Var _x2c_literal_part_9 = Var_box_ulong(context_size); {
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/func.x",.function = "_new",.line = 414};  x2c_error_raise_n(& _x2c_error_site_17, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(1265290), _x2c_literal_part_9);  __builtin_unreachable();
+  }
+
 }
 int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && Var_equal(List_car(params), List_var(_1577));  Func fn = Scope_calloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(Func__context(fn), context, context_size);  return fn;
 }

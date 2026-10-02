@@ -298,9 +298,13 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 272};
-      x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
-      __builtin_unreachable();
+      Var _x2c_literal_part_0 = Var_box_ulong(length);
+      {
+        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 272};
+        x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(1265290), _x2c_literal_part_0, Symbol_var(25782888), int_var(limit));
+        __builtin_unreachable();
+      }
+
     }
 
   }

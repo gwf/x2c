@@ -377,9 +377,13 @@ Var String_var(String);
 _Noreturn static void _bad_operation(String owner, Symbol operation){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_bad_operation",.line = 61};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL))), Symbol_var(34096809266140), Symbol_var(operation));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_bad_operation",.line = 61};
+      x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(34096809266140), Symbol_var(operation));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -389,9 +393,15 @@ Var int_var(int);
 _Noreturn static void _bad_index(String owner, int index, size_t size){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_bad_index",.line = 65};
-    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL))), Symbol_var(19800432), int_var(index), Symbol_var(1265290), Var_box_ulong(size));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL)));
+    Var _x2c_literal_part_2 = int_var(index);
+    Var _x2c_literal_part_3 = Var_box_ulong(size);
+    {
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_bad_index",.line = 65};
+      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(19800432), _x2c_literal_part_2, Symbol_var(1265290), _x2c_literal_part_3);
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -399,9 +409,13 @@ _Noreturn static void _bad_index(String owner, int index, size_t size){
 _Noreturn static void _bad_step(String owner, int step){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "_bad_step",.line = 69};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL))), Symbol_var(1286496), int_var(step));
-    __builtin_unreachable();
+    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "_bad_step",.line = 69};
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_4, Symbol_var(1286496), int_var(step));
+      __builtin_unreachable();
+    }
+
   }
 
 }
@@ -640,14 +654,22 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 136};
-    x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
-    __builtin_unreachable();
+    Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 136};
+      x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_5, Symbol_var(19800432), int_var(requested));
+      __builtin_unreachable();
+    }
+
   }
   if(Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 138};
-    x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
-    __builtin_unreachable();
+    Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 138};
+      x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 2, Symbol_var(32993636), _x2c_literal_part_6, Symbol_var(19800432), int_var(requested));
+      __builtin_unreachable();
+    }
+
   }
   Var * arr =(Var *) array -> bytes;
   return Var_update(&(arr[index]), op, rhs);
@@ -664,9 +686,13 @@ Var Array_postfixindex(Array array, int index, Symbol op){
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 156};
-    x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))), Symbol_var(19800432), int_var(requested));
-    __builtin_unreachable();
+    Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 156};
+      x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_7, Symbol_var(19800432), int_var(requested));
+      __builtin_unreachable();
+    }
+
   }
   Var * arr =(Var *) array -> bytes;
   return Var_postfix(&(arr[index]), op);

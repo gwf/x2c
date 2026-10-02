@@ -304,16 +304,20 @@ int MachineBuilder_binder(MachineBuilder * b, Atom binder){
   return(* b).binder_count ++;
 }
 
-Var Symbol_var(Symbol);
-
 Var String_var(String);
+
+Var Symbol_var(Symbol);
 
 void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
   if(target ==(* b).length &&(* b).length == MACHINE_CODE_MAX) MachineBuilder__fail(&((* b)), "code-capacity");
   else if(target < 0 || target >= MACHINE_CODE_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 390};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL))), Symbol_var(1345468776), int_var(target));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 390};
+      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(1345468776), int_var(target));
+      __builtin_unreachable();
+    }
+
   }
   else if(site >= 0)(* b).code[site].target = target;
 }

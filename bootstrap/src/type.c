@@ -725,10 +725,10 @@ static List _prototype_params(List parameters, int * changed){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_287), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var name = _x2c_match_values[1];  List rest = Var_list(_x2c_match_values[2]); {
           parameter =({
-            Var _x2c_literal_part_10 = type;  Var _x2c_literal_part_11 = List_var(({
-              Var _x2c_literal_part_12 = name;  Var _x2c_literal_part_13 = List_var(List_append(rest, NULL));  cons(_44, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+            Var _x2c_literal_part_12 = type;  Var _x2c_literal_part_13 = List_var(({
+              Var _x2c_literal_part_10 = name;  Var _x2c_literal_part_11 = List_var(List_append(rest, NULL));  cons(_44, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
             }
-            ));  cons(_246, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+            ));  cons(_246, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
           }
           ); (* changed) = 1;
         }

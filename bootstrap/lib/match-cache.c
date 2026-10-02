@@ -647,14 +647,22 @@ void Scope_pop(void);
 
 MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 544};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
-    __builtin_unreachable();
+    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 544};
+      x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(209381969202), int_var(capacity));
+      __builtin_unreachable();
+    }
+
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 546};
-    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
-    __builtin_unreachable();
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 546};
+      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(209381969202), int_var(capacity));
+      __builtin_unreachable();
+    }
+
   }
   Scope owner = Scope_new_named("Match plan cache");
   Scope_push(& owner);
