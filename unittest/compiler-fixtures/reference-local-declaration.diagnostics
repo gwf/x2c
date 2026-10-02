@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/reference-local-declaration.x:4:21: type: transparent references are only supported on parameters
+    int &alias = value;
+                      ^
+

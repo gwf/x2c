@@ -942,6 +942,15 @@ static List Compiler._finish_declaration(
       bound.push(_append_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
+  if (tag == <declare> || tag == <decl>)
+    foreach (List declarator, declarators) {
+      Type type = %(declare $base (bindings $declarator)).type_from_ast();
+      type = c.sym.normalize_declared_type(type);
+      if (<&> in type || <opt-ref> in type)
+        c.report_error(<type>,
+          "transparent references are only supported on parameters",
+          NULL, NULL);
+    }
   List declaration = %($tag $base (bindings @declarators));
   return tag == <declare> && !preserved_self
     ? c._lower_self_declaration(declaration)

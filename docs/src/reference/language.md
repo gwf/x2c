@@ -343,6 +343,15 @@ and operators the type has, so a `const String` answers `len()` and `+` the
 way an unqualified one does. Method syntax does not make every value
 dynamically dispatchable; only registered callbacks define custom behavior.
 
+A receiver spelled `struct T` or `union T` uses the methods of the typedef
+that names the same aggregate. A same-named typedef takes precedence;
+otherwise the aggregate must have one direct typedef. An unrelated variable
+with the tag's spelling does not supply a method owner. Generic functions
+named `struct_method` or `union_method` do not participate in method lookup.
+Another module may define methods for the type; this rule selects the
+receiver's type and does not restrict who can define its methods. Type
+inspection and member completion follow the same lookup.
+
 A method may use `Self` in its result and parameter types when it promises to
 preserve the receiver's static typedef:
 
@@ -487,7 +496,8 @@ time.
 Generated C uses a pointer parameter and explicit address-taking and
 dereferencing. Reference parameters add no runtime representation or ownership
 behavior. The transparent `&` form is supported only on parameters; reference
-locals, globals, and return types are not language features.
+locals, globals, and return types are not language features. Declarations in
+those positions are compile errors.
 
 ### Delegate fields
 
@@ -1492,7 +1502,10 @@ external or no linkage also names its unit's file name and the outermost
 invocation, so units that include one another can expand the same macro. A field keeps its spelling, because C scopes it to its
 aggregate, and an anonymous aggregate is a distinct type in each expansion. A
 visible body local passed to a nested macro's `Name` hole is that expansion's
-binding, so the nested macro can read and assign it.
+binding, so the nested macro can read and assign it. A `Name` argument that
+names an existing caller variable retains that identity. An assignment through
+the hole reaches the caller variable even if the expansion declares another
+variable with the same spelling.
 
 A free name that nothing declares where the macro is defined binds a
 declaration that the same expansion introduces. This includes a declaration
@@ -1501,7 +1514,10 @@ one, the name binds a global, including a global declared after the
 definition. A caller's local never captures a free name. When only a caller's
 declaration of that spelling is in view, x2c reports the name and the macro
 instead of emitting C. A name that nothing declares anywhere is left to C,
-as a native macro such as `errno` is.
+as a native macro such as `errno` is. An untyped name in a call position also
+retains its native spelling when a caller local has that spelling. This lets
+native-header functions and function-like macros remain callable; the caller
+local receives a separate generated C spelling.
 
 ```x2c
 macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {

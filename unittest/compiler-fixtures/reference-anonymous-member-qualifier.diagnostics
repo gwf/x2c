@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/reference-anonymous-member-qualifier.x:7:3: type: cannot convert (const "Value") to (& "Value")
+    bump(h.value);
+    ^^^^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+

@@ -351,9 +351,24 @@ static Symbol _declarator_kind(Type type) {
 
 /** Removes one outer pointer-like or array modifier, or returns `NULL`. */
 Type Type.dereference(Type type) {
+  Type declared = type;
   _qualifiers(type);
-  if (type.is_pointer() || type.is_array()) return cdr(type);
+  if (type.is_array()) return cdr(type).type().qualify(declared);
+  if (type.is_pointer()) return cdr(type);
   return NULL;
+}
+
+/** Applies `source`'s outer qualifiers to `type`. */
+Type Type.qualify(Type type, Type source) {
+  if (source.car() is not <symbol> ||
+      !source.car().symbol().is_type_qualifier()) return type;
+  Array out = [];
+  foreach (Var item, source) {
+    if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+    out.push(item);
+  }
+  foreach (Var item, type) out.push(item);
+  return out.list_free();
 }
 
 /** Returns the pointer `Type` formed by prefixing `type` with `*`. */

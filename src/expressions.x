@@ -1031,10 +1031,12 @@ static int Compiler._identifier_needs_resolution(
   int retained_parameter = %(lambda-param $binding) in facts;
   int retained_capture = %(lambda-depth $binding) in facts;
   if (c.lambda_capture_required(binding)) return 1;
-  if (retained_parameter &&
-      (c.local_macro_captures != NULL ||
-       %(local-macro-capture $binding) in facts))
-    return 1;
+  if ((retained_parameter && c.local_macro_captures != NULL) ||
+      %(local-macro-capture $binding) in facts) return 1;
+  Var type;
+  if (%(automatic $binding) in facts &&
+      facts.try_get(%(type $binding), type) && type is <list> &&
+      type.list() !== %(<macro-expr>)) return 0;
   return !spelling ||
     (c.sym.lookup(%($spelling), NULL) != binding &&
      !retained_parameter && !retained_capture);
@@ -1208,7 +1210,11 @@ macro Statement $report.type_binding_unknown(Expr $c, Expr $name, Expr $origin) 
 }
 
 static List Compiler._resolve_identifier(
-  Compiler c, Var value, Type type, Token origin) {
+  Compiler c, Var value, Type type, Token origin) =>
+  c._identifier(value, type, origin, 0);
+
+static List Compiler._identifier(
+  Compiler c, Var value, Type type, Token origin, int native_callee) {
   if (type === %(<macro-expr>)) type = NULL;
   int read_reference = !type;
   int require_type = 0;
@@ -1220,10 +1226,13 @@ static List Compiler._resolve_identifier(
   if (!binding) $report.type_binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
+  native_callee &= !type &&
+    !binding_facts.contains(%(type $binding));
   c._capture_identifier(binding);
-  c._shadow_identifier(binding, type, spelling, binding_facts, origin);
+  c._shadow_identifier(
+    binding, type, spelling, binding_facts, origin, native_callee);
   if (!type) type = c._identifier_type(
-    binding, spelling, binding_facts, origin);
+    binding, spelling, binding_facts, origin, native_callee);
   if (!type && require_type)
     $report.type_ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
@@ -1290,7 +1299,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
 
 static void Compiler._shadow_identifier(
   Compiler c, List &binding, Type type, String spelling,
-  Map binding_facts, Token origin) {
+  Map binding_facts, Token origin, int native_callee) {
   if (!spelling) return;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
@@ -1302,7 +1311,9 @@ static void Compiler._shadow_identifier(
   else if (c.sym.binding_is_local(binding) &&
            !binding_facts.contains(%(lambda-depth $binding)))
     binding = visible;
-  else if (!c._free_name(binding, spelling, visible, visible_type, origin) &&
+  else if (!c._free_name(
+             binding, spelling, visible, visible_type, origin,
+             native_callee) &&
            visible != binding && visible_type &&
            (!type || c.sym.resolve_global(%($spelling), NULL)) &&
            !binding_facts.contains(%(emitted $visible)))
@@ -1316,7 +1327,7 @@ static void Compiler._shadow_identifier(
    does. */
 static int Compiler._free_name(
   Compiler c, List &binding, String spelling, List visible,
-  Type visible_type, Token origin) {
+  Type visible_type, Token origin, int native_callee) {
   if (!c.macro_stack ||
       %(lambda-depth $binding) in c.semantic_binding_facts()) return 0;
   Type global_type = NULL;
@@ -1326,6 +1337,7 @@ static int Compiler._free_name(
     binding = visible;
     return 1;
   }
+  if (native_callee && !global_type) return 0;
   if (global_type) binding = global;
   else if (visible_type) c._report_free_name(binding, spelling, origin);
   return 0;
@@ -1361,11 +1373,17 @@ static void Compiler._report_free_name(
 }
 
 static Type Compiler._identifier_type(
-  Compiler c, List binding, String spelling, Map facts, Token origin) {
+  Compiler c, List binding, String spelling, Map facts, Token origin,
+  int native_callee) {
   Var stored;
   if (facts.try_get(%(type $binding), stored) && stored is <list>)
     return stored;
   if (!spelling) return NULL;
+  if (native_callee) {
+    Type global_type = NULL;
+    c.sym.resolve_global(%($spelling), global_type);
+    return global_type;
+  }
   Type type = c.sym.get(%($spelling));
   if (!type) c._check_unit_static(spelling, origin);
   return type;
@@ -1462,13 +1480,9 @@ static List Compiler._resolve_indexed(
 
 static List Compiler._postfix_index_expression(
   Compiler c, List expr, List index) {
-  Type type = expr.cadr();
-  // `T *const p` indexes like `T *p`.
-  while (type && type.car() is <symbol> &&
-         Symbol.is_type_qualifier(type.car()))
-    type = cdr(type);
-  if (type.is_pointer() || type.is_array())
-    return %(expr ${type.dereference()} (index $expr $index));
+  Type type = expr.cadr(), element = type.dereference();
+  if (element) return %(expr $element (index $expr $index));
+  type = type.canonicalize();
   if (!type.is_typedef_name()) return NULL;
   return c._typedef_index(expr, index, type);
 }
@@ -1504,15 +1518,16 @@ static List Compiler._typedef_index(
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
-  Type native = c.sym.resolve_key(type);
+  Type native = c.sym.normalize_declared_type(expr.cadr());
+  Type shape = native.canonicalize();
   // A boxable handle to a record has no C array reading.
-  if (native.is_pointer() && native.dereference().is_aggregate() &&
+  if (shape.is_pointer() && shape.dereference().is_aggregate() &&
       type.var_tag())
     $report.type_index_missing(c, type);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
-  if (native.is_array() ||
-      (native.is_pointer() && !c.sym.is_string_type(type)))
+  if (shape.is_array() ||
+      (shape.is_pointer() && !c.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
 }
@@ -1571,8 +1586,34 @@ static List Compiler._resolve_call(
   return site._function(function);
 }
 
+/* A native-header identifier has no x2c type. Its call position keeps the
+   issued binding while ordinary shadow handling renames caller locals. */
+static List Compiler._resolve_callee(Compiler c, List function, Token origin) {
+  if (function.car() == <expr> && function.cadr() &&
+      !c.needs_resolution(function)) return function;
+  match (function) {
+    case %(expr ?type (ident ?value)):
+      return c._identifier(value, type, origin, 1);
+    case %(expr ? (parens ?inner)): {
+      List resolved = c._resolve_callee(inner, origin);
+      return %(expr ${resolved.cadr()} (parens $resolved));
+    }
+    case %(expr ?type
+           ((!set ?wrapper (!or at src)) ?source ?content)): {
+      List inner = c._resolve_callee(%(expr $type $content), origin);
+      List result = %(
+        expr ${inner.cadr()} ($wrapper $source ${inner.caddr()})
+      );
+      return c._resolve_source(result, inner.cadr(), result.caddr());
+    }
+    case %((!set ?wrapper (!or at src)) ?source ?inner):
+      return %($wrapper $source ${c._resolve_callee(inner, origin)});
+  }
+  return c.resolve_expression(function, origin);
+}
+
 static List CallSite._function(CallSite &k, List function) {
-  List resolved = k.c.resolve_expression(function, k.origin);
+  List resolved = k.c._resolve_callee(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type).equal(func_type))
     return k.c._resolve_func_call(resolved, k.supplied, k.origin);
@@ -1777,8 +1818,9 @@ static List Compiler._method_bind(
   Type target = declared.canonicalize(), source = type.canonicalize();
   Type named = source.is_aggregate() ? c._tag_typedef(source) : NULL;
   if (named) {
-    type = _qualified(type, named);
+    type = named.qualify(type);
     source = named;
+    receiver = %(expr $type ${receiver.caddr()});
   }
   if (_receiver_points_to(source, target))
     $report.type_receiver_pointer(c, type, declared, origin);
@@ -1822,46 +1864,44 @@ List Compiler.resolve_postfix_member(
   int call_context) {
   if (receiver_type.car() == <opt-ref>)
     $report.type_optional_ref_access(c);
-  // The receiver type is a lookup key here. A const or volatile receiver
-  // names the same aggregate, fields, and methods.
   Type type = receiver_type.canonicalize();
-  int hops = 0;
-  if (access == <"->">) {
-    Type object_type = c.sym.resolve_key(type);
-    object_type = object_type.dereference();
-    Type field_type = c.sym.lookup_field(object_type, field);
-    return field_type ? %(field -> $field_type) : NULL;
-  }
-  int tagged = 0;
+  if (access == <"->">)
+    return c._field_member(receiver_type, field, <"->">);
+  int hops = 0, tagged = 0;
   while (type) {
-    int is_method_type = type.is_typedef_name() || type.is_builtin();
-    if (call_context && is_method_type) {
+    if (call_context && _method_owner(type)) {
       List method = c._method_member(receiver_type, type, field);
       if (method) return method;
     }
-    if (type.is_pointer()) {
-      Type object_type = type.dereference();
-      Type field_type = c.sym.lookup_field(object_type, field);
-      if (field_type) return %(field -> $field_type);
-      type = NULL;
+    if (type.is_pointer())
+      return c._field_member(receiver_type, field, <"->">);
+    if (type.is_aggregate()) {
+      List member = c._field_member(receiver_type, field, <.>);
+      if (member || !call_context) return member;
     }
-    else if (type.is_aggregate()) {
-      Type field_type = c.sym.lookup_field(type, field);
-      if (field_type) return %(field . $field_type);
-      type = call_context && !tagged++ ? c._tag_typedef(type) : NULL;
-    }
-    else type = c.sym.next_typedef(type, hops);
+    type = c._next_method_type(type, hops, tagged);
   }
   return NULL;
 }
 
-/* The qualifiers of `type` applied to the typedef `named`. */
-static Type _qualified(Type type, Type named) {
-  Array out = [];
-  foreach (Var item, type)
-    if (item is <symbol> && item.symbol().is_type_qualifier()) out.push(item);
-  foreach (Var item, named) out.push(item);
-  return out.list_free();
+static int _method_owner(Type type) =>
+  !type.is_aggregate() && (type.is_typedef_name() || type.is_builtin());
+
+/* Lookup and completion follow the same typedef owner from an aggregate. */
+static Type Compiler._next_method_type(
+  Compiler c, Type type, int &hops, int &tagged) {
+  if (type.is_pointer()) return NULL;
+  if (type.is_aggregate()) return !tagged++ ? c._tag_typedef(type) : NULL;
+  return c.sym.next_typedef(type, hops).canonicalize();
+}
+
+/* A field inherits its containing object's qualifiers, not its pointer's. */
+static List Compiler._field_member(
+  Compiler c, Type receiver, List field, Symbol access) {
+  Type object = access == <"->">
+    ? c.sym.normalize_declared_type(receiver).dereference() : receiver;
+  Type declared = c.sym.lookup_field(object, field);
+  return declared ? %(field $access $declared) : NULL;
 }
 
 /* A receiver spelled `struct T` or `union T` reaches the methods of the
@@ -1870,8 +1910,8 @@ static Type _qualified(Type type, Type named) {
    directly as that aggregate. */
 static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
   match (aggregate) case %(? ?(String tag)): {
-    Type name = %($tag);
-    if (c.sym.resolve_key(name) == aggregate) return name;
+    Type name = %($tag), declared = c.sym.get(%(typedef $tag));
+    if (declared && c.sym.resolve_key(declared) == aggregate) return name;
   }
   return c.sym.sole_typedef(aggregate);
 }
@@ -2132,16 +2172,15 @@ static void Compiler._completion_fields(
 static void Compiler._completion_methods(
   Compiler c, Type receiver, Map seen, Array names) {
   Type type = receiver.canonicalize();
-  int hops = 0;
+  int hops = 0, tagged = 0;
   while (type) {
-    if (type.is_typedef_name() || type.is_builtin()) {
+    if (_method_owner(type)) {
       String owner = type.base_type().car();
       c._completion_owner_methods(%"${owner}_", seen, names);
       foreach (String name, c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
-    if (type.is_pointer() || type.is_aggregate()) type = NULL;
-    else type = c.sym.next_typedef(type, hops);
+    type = c._next_method_type(type, hops, tagged);
   }
 }
 
@@ -2279,6 +2318,10 @@ macro open Expression $func_call(Expr $callee, Expr $count,
 static List Compiler._resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
   List arguments = c._resolve_call_arguments(NULL, supplied, origin);
+  if (_deferred_call(callee, NULL, arguments)) {
+    Macro called = $called;
+    return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
+  }
   match (arguments)
     case %((expr (void) ())): arguments = NULL;
   if (!arguments) {

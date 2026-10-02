@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/reference-array-member-qualifier.x:7:3: type: cannot convert (const int) to (& int)
+    increment(rows.values[0]);
+    ^^^^^^^^^
+  note: the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value
+
