@@ -230,18 +230,9 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
   foreach (String input, inputs) {
     ParsedUnit parsed;
     clock_t start = clock();
-    int ok = frontend.start(input, parsed);
-    if (ok) {
-      parsed.compiler.own_diagnostics();
-      ok = parsed.collect(frontend) && parsed.parse();
-    }
+    int ok = frontend.open_reporting(input, parsed);
     parse_seconds += (double) (clock() - start) / CLOCKS_PER_SEC;
-    if (!ok) {
-      foreach (Var entry, parsed.compiler.diagnostics())
-        parsed.compiler.print_diagnostic(entry);
-      parsed.close();
-      return NULL;
-    }
+    if (!ok) return NULL;
     start = clock();
     index.parsed = &parsed;
     index.sequence = 0;

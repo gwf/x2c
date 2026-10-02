@@ -21,15 +21,8 @@ static Map _flow_tainted_returns;
 
 static List _flow_summary(
   Compiler compiler, Var value, Map parameters, Map locals) {
-  if (value is not <list>) return %(value);
-  List node = value;
+  Var node = project_peel(value);
   match (node) {
-    case %(expr ? ?inner):
-      return _flow_summary(compiler, inner, parameters, locals);
-    case %(parens ?inner):
-      return _flow_summary(compiler, inner, parameters, locals);
-    case %(at ? ?inner):
-      return _flow_summary(compiler, inner, parameters, locals);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
       if (parameters.try_get(binding, position)) return position;

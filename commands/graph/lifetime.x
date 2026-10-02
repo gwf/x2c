@@ -92,19 +92,12 @@ Symbol Lifetime.loop_allocation_kind(
 
 static Symbol _lifetime_region_allocation_kind(
   Lifetime &lifetime, Var value, String &operation) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(expr ? ?inner):
-      return _lifetime_region_allocation_kind(lifetime, inner, operation);
-    case %(parens ?inner):
-      return _lifetime_region_allocation_kind(lifetime, inner, operation);
-    case %(at ? ?inner):
-      return _lifetime_region_allocation_kind(lifetime, inner, operation);
-    case %(segments *): {
-      operation = "String interpolation";
-      return <pooled>;
-    }
+  Var peeled = project_peel(value);
+  if (peeled is not <list>) return 0;
+  List node = peeled;
+  match (node) case %(segments *): {
+    operation = "String interpolation";
+    return <pooled>;
   }
   Symbol kind = Lifetime.loop_allocation_kind(
     lifetime.compiler, node, operation);
@@ -181,17 +174,10 @@ static List _lifetime_summary_fact(Lifetime &lifetime, Var value) {
   if (binding)
     return lifetime.return_bindings.contains(binding)
          ? lifetime.return_bindings[binding].list() : %(other);
-  if (value is not <list>) return %(other);
-  List node = value, arguments;
-  match (node) {
-    case %(expr ? ?inner):
-      return _lifetime_summary_fact(lifetime, inner);
-    case %(parens ?inner):
-      return _lifetime_summary_fact(lifetime, inner);
-    case %(at ? ?inner):
-      return _lifetime_summary_fact(lifetime, inner);
-    case %(cast *): return %(unresolved);
-  }
+  Var peeled = project_peel(value);
+  if (peeled is not <list>) return %(other);
+  List node = peeled, arguments;
+  match (node) case %(cast *): return %(unresolved);
   String operation = NULL;
   Symbol kind = _lifetime_region_allocation_kind(lifetime, node, operation);
   if (kind) return %(kind $kind);
