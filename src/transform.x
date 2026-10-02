@@ -1333,8 +1333,8 @@ static List Compiler._operator(Compiler c, List ast) {
   if (truthy != ast) return truthy;
   match (ast) {
     case $source_operator_content(%(?operator
-             (!set ?lhs (expr ? ?)) (!set ?rhs (expr ? ?)))):
-      return c._binary_operator(ast, operator, lhs, rhs);
+             (!set ?lhs (expr ?lhs_type ?)) (!set ?rhs (expr ?rhs_type ?)))):
+      return c._binary_operator(ast, operator, lhs, lhs_type, rhs, rhs_type);
     case $source_operator_content(%(
              (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?)))): {
@@ -1345,7 +1345,7 @@ static List Compiler._operator(Compiler c, List ast) {
     case $source_operator_content(%(
              (!set ?operator (!or ++ --))
              (!set ?argument (expr ?argument_type ?)))):
-      return c._unary_change(ast, operator, argument, argument_type);
+      return c._change(ast, operator, argument, argument_type, 0);
   }
   return ast;
 }
@@ -1353,25 +1353,30 @@ static List Compiler._operator(Compiler c, List ast) {
 static List Compiler._postfix(Compiler c, List ast) {
   match (ast)
     case $source_postfix_content(%(?operator
-           (!set ?argument (expr ?argument_type ?)))): {
-      Symbol op = operator, List arg = argument;
-      Type type = argument_type;
-      List indexed = c._indexed_change(arg, op, NULL);
-      if (indexed) return indexed;
-      if (!c.sym.is_var_type(type)) {
-        Symbol binary = op == <++> ? <+> : <->;
-        List updated =
-          c._protocol_update(type, binary, arg, NULL, op);
-        if (updated) return updated;
-      }
-      if (c.sym.is_var_type(type)) {
-        List address = %(expr (* "Var") (op & (parens $arg)));
-        return %(call "x2c_var_postfix_volatile"
-                      (args $address ${_symbol_expression(op)}));
-      }
-      return ast;
-    }
+           (!set ?argument (expr ?argument_type ?)))):
+      return c._change(ast, operator, argument, argument_type, 1);
   return ast;
+}
+
+/* `++` and `--` through a bracket, a protocol member, or a Var. A postfix
+   change has no right operand and yields the value before the change. */
+static List Compiler._change(
+  Compiler c, List ast, Symbol op, List arg, Type type, int postfix) {
+  Symbol binary = op == <++> ? <+> : <->;
+  Symbol spelled = postfix ? op : binary;
+  List one = postfix ? NULL : %(expr (int) (literal (int) "1"));
+  List indexed = c._indexed_change(arg, spelled, one);
+  if (indexed) return indexed;
+  if (!c.sym.is_var_type(type)) {
+    List updated = postfix
+      ? c._protocol_update(type, binary, arg, NULL, op)
+      : c._protocol_update(type, binary, arg, one, binary);
+    return updated ? updated : ast;
+  }
+  if (one) one = c.convert_expression(one, %("Var"));
+  return _update_call(
+    arg, _symbol_expression(spelled), one,
+    postfix ? "x2c_var_postfix_volatile" : "x2c_var_update_volatile");
 }
 
 static List Compiler._truthy(Compiler c, List ast) {
@@ -1463,10 +1468,8 @@ static int _resolved_index_parts(
 }
 
 static List Compiler._comparison(
-  Compiler c, List ast, Symbol op, List lhs, List rhs) {
-  (Var lhs_tag, Type lhs_type) = lhs;
-  (Var rhs_tag, Type rhs_type) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
+  Type rhs_type) {
   if (!c.sym.is_var_type(lhs_type) &&
       !c.sym.is_var_type(rhs_type)) {
     if (op == <===>) return %(op == $lhs $rhs);
@@ -1489,40 +1492,22 @@ static List Compiler._comparison(
 }
 
 static List Compiler._binary_operator(
-  Compiler c, List ast, Symbol operator, List lhs, List rhs) {
+  Compiler c, List ast, Symbol operator, List lhs, Type lhs_type, List rhs,
+  Type rhs_type) {
   Symbol compound = Symbol.compound_operator(operator);
   if (compound) {
     List indexed = c._indexed_change(lhs, compound, rhs);
     if (indexed) return indexed;
-    return c._dynamic_compound(ast, compound, lhs, rhs);
+    return c._dynamic_compound(ast, compound, lhs, lhs_type, rhs, rhs_type);
   }
   switch (operator) {
     case <=>: return c._assignment(operator, lhs, rhs);
     case <==>:  case <!=>:  case <===>: case <!==>:
     case <"<">: case <"<=">: case <">">:  case <">=">:
-      return c._comparison(ast, operator, lhs, rhs);
+      return c._comparison(ast, operator, lhs, lhs_type, rhs, rhs_type);
   }
   if (_dynamic_binary_operator(operator))
-    return c._dynamic_binary(ast, operator, lhs, rhs);
-  return ast;
-}
-
-static List Compiler._unary_change(
-  Compiler c, List ast, Symbol operator, List argument, Type type) {
-  Symbol binary = operator == <++> ? <+> : <->;
-  List one = %(expr (int) (literal (int) "1"));
-  List indexed = c._indexed_change(argument, binary, one);
-  if (indexed) return indexed;
-  if (!c.sym.is_var_type(type)) {
-    List updated = c._protocol_update(type, binary, argument, one, binary);
-    if (updated) return updated;
-  }
-  if (c.sym.is_var_type(type)) {
-    one = c.convert_expression(one, %("Var"));
-    return _update_call(
-      argument, _symbol_expression(binary), one,
-      "x2c_var_update_volatile");
-  }
+    return c._dynamic_binary(ast, operator, lhs, lhs_type, rhs, rhs_type);
   return ast;
 }
 
@@ -1532,10 +1517,8 @@ static int _dynamic_binary_operator(Symbol op) =>
   op.compound_assignment() != 0;
 
 static List Compiler._dynamic_binary(
-  Compiler c, List ast, Symbol op, List lhs, List rhs) {
-  (Var lhs_tag, Type lhs_type) = lhs;
-  (Var rhs_tag, Type rhs_type) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
+  Type rhs_type) {
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   int rhs_is_var = c.sym.is_var_type(rhs_type);
   if (!lhs_is_var && !rhs_is_var) return ast;
@@ -1553,10 +1536,8 @@ static List Compiler._dynamic_binary(
 }
 
 static List Compiler._dynamic_compound(
-  Compiler c, List ast, Symbol op, List lhs, List rhs) {
-  (Var lhs_tag, Type lhs_type) = lhs;
-  (Var rhs_tag, Type rhs_type) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
+  Type rhs_type) {
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   int rhs_is_var = c.sym.is_var_type(rhs_type);
   if (c._indexed_builtin_helper(lhs_type)) {
@@ -1576,7 +1557,7 @@ static List Compiler._dynamic_compound(
   if (!lhs_is_var) {
     List updated = c._protocol_update(member_type, op, lhs, rhs, op);
     if (updated) return updated;
-    (rhs_tag, rhs_type) = rhs;
+    rhs_type = rhs.cadr();
   }
   if (!lhs_is_var && !rhs_is_var) return ast;
   c._dynamic_rhs(op, lhs_type, rhs_type, rhs_is_var);
@@ -1592,12 +1573,14 @@ static void Compiler._dynamic_rhs(
   Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
   if (lhs_type.is_bitfield())
     $report(c, "xform.compound.bitfield");
-  int rhs_allowed = rhs_is_var || c.sym.resolve_numeric_type(rhs_type) ||
-                    (op == <+> && c._string_operand(rhs_type));
-  if (!rhs_allowed) {
+  if (!rhs_is_var && !c._scalar_operand(op, rhs_type)) {
     $report(c, "xform.compound.operand", op, rhs_type);
   }
 }
+
+/* A number, or text added to text, updates a Var or container element. */
+static int Compiler._scalar_operand(Compiler c, Symbol op, Type type) =>
+  c.sym.resolve_numeric_type(type) || (op == <+> && c._string_operand(type));
 
 static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   Type scalar = c.sym.resolve_numeric_type(lhs_type);
@@ -1623,11 +1606,10 @@ static int Compiler._string_operand(Compiler c, Type type) =>
 
 static List Compiler._indexed_change(
   Compiler c, List target, Symbol op, List rhs) {
-  Symbol owner, List base, selector;
-  if (!c._indexed_parts(target, owner, base, selector)) return NULL;
+  Symbol owner, List base, selector, Type base_type;
+  if (!c._indexed_parts(target, owner, base, base_type, selector))
+    return NULL;
   int postfix = !rhs;
-  (Var base_tag, Type base_type) = base;
-  (void) base_tag;
   List resolved = c._indexed_resolution(base_type, owner, op, rhs);
 
   List operation = _symbol_expression(op);
@@ -1656,18 +1638,18 @@ static List Compiler._indexed_resolution(
   if (!resolved) {
     $report(c, "xform.index.update", base_type, postfix);
   }
-  if (owner && !postfix && !c._indexed_rhs_allowed(op, rhs)) {
-    (Var rhs_tag, Type rhs_type) = rhs;
-    (void) rhs_tag;
-    $report(c, "xform.index.operand", op, rhs_type);
+  if (owner && !postfix) {
+    Type rhs_type = rhs.cadr();
+    if (!c.sym.is_var_type(rhs_type) && !c._scalar_operand(op, rhs_type))
+      $report(c, "xform.index.operand", op, rhs_type);
   }
   return resolved;
 }
 
 // Helper-backed indexes bypass getindex lowering.
 static int Compiler._indexed_parts(
-  Compiler c, List expr, Symbol &owner, List &base, List &selector) {
-  Type base_type;
+  Compiler c, List expr, Symbol &owner, List &base, Type &base_type,
+  List &selector) {
   if (!_resolved_index_parts(expr, base, base_type, selector)) return 0;
   owner = c._indexed_builtin_helper(base_type);
   return 1;
@@ -1683,13 +1665,6 @@ static void Compiler._convert_indexed_parts(
     base = c.convert_expression(base, %("Map"));
     selector = c.convert_expression(selector, %("Var"));
   }
-}
-
-static int Compiler._indexed_rhs_allowed(Compiler c, Symbol op, List rhs) {
-  Type type = rhs.cadr();
-  if (c.sym.is_var_type(type)) return 1;
-  if (c.sym.resolve_numeric_type(type)) return 1;
-  return op == <+> && c._string_operand(type);
 }
 
 // Identify only the built-in helper family. Protocol resolution still
