@@ -2452,11 +2452,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _31921 = cons(_31920, NULL);
   _31922 = cons(_225, _31921);
   _31923 = List_var(_31922);
-  _31924 = int_var(2051);
+  _31924 = int_var(2052);
   _31925 = cons(_31924, NULL);
   _31926 = cons(_231, _31925);
   _31927 = List_var(_31926);
-  _31928 = int_var(76983);
+  _31928 = int_var(77050);
   _31929 = cons(_31928, NULL);
   _31930 = cons(_246, _31929);
   _31931 = List_var(_31930);
@@ -2583,11 +2583,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _32052 = cons(_32051, NULL);
   _32053 = cons(_139, _32052);
   _32054 = List_var(_32053);
-  _32055 = int_var(2059);
+  _32055 = int_var(2060);
   _32056 = cons(_32055, NULL);
   _32057 = cons(_231, _32056);
   _32058 = List_var(_32057);
-  _32059 = int_var(77348);
+  _32059 = int_var(77415);
   _32060 = cons(_32059, NULL);
   _32061 = cons(_246, _32060);
   _32062 = List_var(_32061);
@@ -2684,11 +2684,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32150 = cons(_32149, NULL);
   _32151 = cons(_139, _32150);
   _32152 = List_var(_32151);
-  _32153 = int_var(2070);
+  _32153 = int_var(2071);
   _32154 = cons(_32153, NULL);
   _32155 = cons(_231, _32154);
   _32156 = List_var(_32155);
-  _32157 = int_var(77763);
+  _32157 = int_var(77830);
   _32158 = cons(_32157, NULL);
   _32159 = cons(_246, _32158);
   _32160 = List_var(_32159);
@@ -2764,11 +2764,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32230 = cons(_32229, NULL);
   _32231 = cons(_139, _32230);
   _32232 = List_var(_32231);
-  _32233 = int_var(2072);
+  _32233 = int_var(2073);
   _32234 = cons(_32233, NULL);
   _32235 = cons(_231, _32234);
   _32236 = List_var(_32235);
-  _32237 = int_var(77843);
+  _32237 = int_var(77910);
   _32238 = cons(_32237, NULL);
   _32239 = cons(_246, _32238);
   _32240 = List_var(_32239);
@@ -2846,11 +2846,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32312 = cons(_32311, NULL);
   _32313 = cons(_139, _32312);
   _32314 = List_var(_32313);
-  _32315 = int_var(2076);
+  _32315 = int_var(2077);
   _32316 = cons(_32315, NULL);
   _32317 = cons(_231, _32316);
   _32318 = List_var(_32317);
-  _32319 = int_var(78048);
+  _32319 = int_var(78115);
   _32320 = cons(_32319, NULL);
   _32321 = cons(_246, _32320);
   _32322 = List_var(_32321);
@@ -3037,11 +3037,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _32503 = cons(_32502, NULL);
   _32504 = cons(_139, _32503);
   _32505 = List_var(_32504);
-  _32506 = int_var(2125);
+  _32506 = int_var(2126);
   _32507 = cons(_32506, NULL);
   _32508 = cons(_231, _32507);
   _32509 = List_var(_32508);
-  _32510 = int_var(80175);
+  _32510 = int_var(80242);
   _32511 = cons(_32510, NULL);
   _32512 = cons(_246, _32511);
   _32513 = List_var(_32512);
@@ -4707,7 +4707,7 @@ int Var_is_binder(Var);
 String Var_repr(Var);
 List Compiler_capture_lambda_identifier(Compiler, List, Type);
 static List Compiler__resolve_identifier(Compiler c, Var value, Type type, Token origin){
-  if(type == _30613) type = NULL;  int read_reference = ! List_truth(Type_list(type));  int require_type = 0;  List binding = Compiler__identifier_binding(c, value, &(type), origin, &(require_type));  int macro_binder = Var_is_binder(value) ||(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && Var_equal(Var_car(value), Symbol_var(917238582496136)));  if(! List_truth(binding) && macro_binder) return cons(_28, cons(_30894, cons(List_var(cons(_393, cons(value, NULL))), NULL)));  Map binding_facts = Compiler_semantic_binding_facts(c);  String spelling = binding_identity_spelling(binding);  Compiler__capture_identifier(c, binding);  Compiler__shadow_identifier(c, &(binding), type, spelling, binding_facts, origin);  if(! List_truth(Type_list(type))) type = Compiler__identifier_type(c, binding, spelling, binding_facts, origin);  if(! List_truth(Type_list(type)) && require_type) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(String_new("identifier ")), cons(String_var(Var_repr(value)), cons(String_var(String_new(" has no semantic type")), NULL)))), origin, NULL);  List result =({
+  if(type == _30613) type = NULL;  int read_reference = ! List_truth(Type_list(type));  int require_type = 0;  List binding = Compiler__identifier_binding(c, value, &(type), origin, &(require_type));  int macro_binder = Var_is_binder(value) ||(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && Var_equal(Var_car(value), Symbol_var(917238582496136)));  if(! List_truth(binding) && macro_binder) return cons(_28, cons(_30894, cons(List_var(cons(_393, cons(value, NULL))), NULL)));  if(! List_truth(binding)) Compiler_report_error(c, 1362954, _33003, origin, cons(String_var(String_join(NULL, cons(String_var(String_new("binding: ")), cons(String_var(Var_repr(value)), NULL)))), NULL));  Map binding_facts = Compiler_semantic_binding_facts(c);  String spelling = binding_identity_spelling(binding);  Compiler__capture_identifier(c, binding);  Compiler__shadow_identifier(c, &(binding), type, spelling, binding_facts, origin);  if(! List_truth(Type_list(type))) type = Compiler__identifier_type(c, binding, spelling, binding_facts, origin);  if(! List_truth(Type_list(type)) && require_type) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(String_new("identifier ")), cons(String_var(Var_repr(value)), cons(String_var(String_new(" has no semantic type")), NULL)))), origin, NULL);  List result =({
     Var _x2c_literal_part_40 = List_var(type);  Var _x2c_literal_part_41 = List_var(cons(_393, cons(List_var(binding), NULL)));  cons(_28, cons(_x2c_literal_part_40, cons(_x2c_literal_part_41, NULL)));
   }
   );  if(List_truth(c -> lambda_scopes) && ! Map_truth(c -> macro_holes)){
