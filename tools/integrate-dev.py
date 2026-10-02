@@ -446,6 +446,7 @@ class Queue:
         gated = record.get("gated")
         if gated and self.ancestor(gated, base):
             record.update(state="landed", landed=gated, landed_at=now())
+            record.pop("reason", None)
             self.save(record)
             for entry in record["prs"]:
                 pull = self.pull(entry["number"])
@@ -491,6 +492,7 @@ class Queue:
             return False
         record.update(state="gated", gated=head,
                       reason="completed gate recovered; review generated artifacts")
+        record.pop("reason", None)
         self.save(record)
         return True
 
@@ -558,6 +560,7 @@ class Queue:
             self.reconcile(record, self.fetch_dev())
         else:
             record.update(state="gated", gated=git(tree, "rev-parse", "HEAD"))
+            record.pop("reason", None)
         self.save(record)
         output(record)
 

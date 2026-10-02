@@ -497,6 +497,29 @@ class IntegrationProbe(unittest.TestCase):
                            'show','dev:site/public/llms.txt').stdout
         self.assertEqual(generated,'generated documentation\n')
 
+    def test_success_clears_failure_reason_and_keeps_attempt_history(self):
+        self.pr(1); self.state(gate_failure='ordinary')
+        batch=self.prepare()
+        failed=self.cli('land',batch,ok=False)
+        failure=json.loads(failed.stdout)
+        self.assertEqual(failure['state'],'needs-attention')
+        old_reason=failure['reason']
+        candidate=Path(failure['worktree'])
+        self.git('checkout','--','bootstrap/src/compiled.c',cwd=candidate)
+        self.state(gate_failure=None)
+        gated=json.loads(self.cli('land',batch).stdout)
+        self.assertEqual(gated['state'],'gated')
+        self.assertNotIn('reason',gated)
+        self.assertTrue(old_reason)
+        self.assertEqual([attempt['returncode'] for attempt in gated['attempts']],
+                         [1,0])
+        candidate=Path(gated['worktree'])
+        self.git('push','-q','origin','HEAD:refs/heads/dev',cwd=candidate)
+        landed=json.loads(self.cli('land',batch,'--publish').stdout)
+        self.assertEqual(landed['state'],'landed')
+        self.assertNotIn('reason',landed)
+        self.assertEqual(len(landed['attempts']),2)
+
     def test_gate_failure_never_pushes(self):
         self.pr(1); self.state(gate_failure='ordinary')
         batch=self.prepare()
