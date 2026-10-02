@@ -28,7 +28,7 @@ static Var next_key(String value);
 
 static Var next_rhs(int value);
 
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -130,8 +130,8 @@ int main(void){
 
 String String_add(String, String);
 
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
-  lhs[0] = String_add(lhs[0], rhs);
-  return lhs[0];
+static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0){
+  _x2c_macro_lhs_0[0] = String_add(_x2c_macro_lhs_0[0], _x2c_macro_rhs_0);
+  return _x2c_macro_lhs_0[0];
 }
 

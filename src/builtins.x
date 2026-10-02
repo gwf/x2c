@@ -730,26 +730,19 @@ static List _field_write(List field) {
 }
 
 /* `str` or `repr` renders `write_str` or `write_repr` into a Buffer. */
-macro open Statement $class_string_body(
-    Decl $declaration, Expr $free, Expr $write, Expr $result) {
-  $declaration
-  defer $free;
-  $write;
-  return $result;
+macro open Statement $class_string_body(Expr $value, Name $writer) {
+  Buffer out = Buffer.new(0);
+  defer out.free();
+  $value.$writer(out);
+  return out.str();
 }
 
 static List _string_method(String owner, String member) {
-  List out = _ref("out");
-  List write = _method(_ref("value"), %"write_${member}", %($out));
-  List declaration = x2c_decl_make(
-    %("Buffer"), "out", _call("Buffer_new", %(${x2c_literal_int(0)})));
-  List free = _method(out, "free", %());
-  List result = _method(out, "str", %());
   Macro shape = $class_string_body;
   return _default(
     owner, member, %("String"),
     %(${x2c_param_make(%($owner), "value")}),
-    %(${shape(declaration, free, write, result)}));
+    %(${shape(_ref("value"), %"write_${member}")}));
 }
 
 static List _pointer_output(String owner, List value, List out) =>
