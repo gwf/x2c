@@ -2,8 +2,8 @@
 
 > Status: active, 2026-10-01. Phase 0 landed at ff9946c8; L1, L3, and the
 > first template fixes at 63576dd1; L2, L4, and forward-name hygiene as
-> PR #78; Wave 1 as PR #92. Wave 2 is submitted to the shared integrator.
-> Wave 3 and the prototypes are not started.
+> PR #78; Wave 1 as #92; Wave 2 as #94. Wave 3 is submitted to the shared
+> integrator. Prototypes are in progress.
 
 ## Result
 
@@ -229,6 +229,32 @@ package's own tests.
   public methods reach the package interface (see L3).
 - H16 One `$json.reader` template for yyjson's immutable and mutable trees,
   projecting API names through a meta `x2c_ident` helper.
+
+Wave 3 results (submitted as one PR):
+
+- Done: libuv `$uv.phase` and `$uv.stream` (libuv.x 3404 -> 3138, its
+  errors.xmacro 562 -> 542; the phase handles drop a redundant `stopped`
+  flag, since libuv's stop is a no-op on an inactive handle); `$torch.handle`
+  (torch.x 1607 -> 1525; public symbols unchanged); `$curl.setopt` (26
+  sites; it takes the option's source text because CURLOPT_* have no x2c
+  type); `$cleanup.by` in a new lib/cleanup.xmacro (13 package and 6 lib
+  forwards; -70 net); `$json.reader` for yyjson (-16 net, helper in a
+  package .xmacro); the unreachable snapshot catch arms in libcurl and
+  libuv.
+- Correction: torch's `catch %(?snapcause *)` arm is reachable. It also
+  covers `context.export`, which can raise, so it stays.
+- Found: SQLite fails to translate on dev ("cannot convert (* * const char)
+  to (volatile * const volatile void)", `&tail` in `Database.prepare` with
+  defers); a meta helper writing `%(%"...")` produces an `(ident (% ...))`
+  callee that hangs `Emitter._emit_call`; a meta helper imported from an
+  .xmacro is emitted into runtime C although only compile-time code calls
+  it, contrary to the meta-functions guide. Template limits met: a Name
+  hole cannot be a type; `struct $T` does not take a Type hole; a Name
+  hole naming an unparsed native symbol has no semantic type; a forwarded
+  Literal arrives wrapped; `x2c_literal_value` is unavailable to project
+  meta code; a meta-built type works in no type position; `&x` is not a
+  meta-call argument; the project meta build lacks package include
+  directories.
 
 ## Prototypes
 
