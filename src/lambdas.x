@@ -25,7 +25,7 @@ $(import "../src/grammar.xmacro")
    for expansion. */
 
 /** Parses a `%!(...) => ...` literal and returns its typed lambda expression.
-    Parameter bindings are in a new `Sym` scope, block bodies use `Var` as the
+    Parameter bindings are in a new `Sym` scope, bodies use `Var` as the
     active return type, and capture rows come from `semantic_binding_facts`.
     Capturing lambdas have type `Func`; noncapturing lambdas retain a native
     function type.
@@ -164,8 +164,10 @@ static List Compiler._shared_binding(Compiler c) {
 }
 
 static List Compiler._parse_lambda_body(Compiler c) {
-  if (!c.test(<"{">)) return c.parse_assignment();
-  $let(c.return_type, %("Var")) return c.parse_callable_body();
+  $let(c.return_type, %("Var")) {
+    if (!c.test(<"{">)) return c.parse_assignment();
+    return c.parse_callable_body();
+  }
 }
 
 /** The parameter types of a lambda's function signature, keeping typed
@@ -297,7 +299,7 @@ static void Compiler._add_param(Compiler c, Array entries, List declaration) {
 static List Compiler._bind_body(Compiler c, List body) {
   match (body) case $source_block_content(%(*)):
     return c.bind_callable_body(body, %("Var"));
-  return c.resolve_expression(body, c.token);
+  $let(c.return_type, %("Var")) return c.resolve_expression(body, c.token);
 }
 
 /* An open type is a Func when rows were supplied, and otherwise the

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/statement-expression-optional-unchecked.x:3:34: type: check optional reference before using its value
+  static Var boxed(int &?value) => ({ value; });
+                                   ^
+

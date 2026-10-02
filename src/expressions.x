@@ -827,12 +827,11 @@ static int _defers_directly(List items) {
   return 0;
 }
 
-/* A reference names a value C reads out of the statement expression. */
+/* Reference reads are already resolved; keep the final expression's type. */
 static Type _final_value_type(List items) {
   List last = items ? Ast.without_origin(items.last()) : NULL;
   match (last)
-    case %(stmnt (expr ?(Type type) ?)):
-      return type.car() == <&> || type.car() == <opt-ref> ? type.cdr() : type;
+    case %(stmnt (expr ?(Type type) ?)): return type;
   return %(void);
 }
 

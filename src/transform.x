@@ -50,13 +50,13 @@ List Compiler.transform(Compiler c, List ast) {
   /* Regions are read before lowering, while `$scope`, `$auto`, and the
      `defer` beside each region are still the forms the parser produced. */
   c.check_regions(ast);
-  List newast = c._sequence(ast);
+  List newast = c._sequence(ast, 0);
   // Merge and lower synthesized lambda siblings.
   Array generated = [];
   while (c.early_decls.len()) {
     List items = c.early_decls;
     c.early_decls.clear();
-    List lowered = c._sequence(items);
+    List lowered = c._sequence(items, 0);
     foreach (Var sibling, lowered) generated.push(sibling);
   }
   if (generated.len()) newast = newast.append(generated.list_free());
@@ -119,7 +119,6 @@ static Ast Compiler._step(Compiler c, Ast ast) {
     case <dstrasgn>: next = c._destructure_value(ast); break;
     case <match>: next = c._match_cases(ast); break;
     case <defer>: next = c._defer_node(ast); break;
-    case <block>: next = c._block_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
     case <if>: case <while>: case <do>: case <for>:
@@ -137,18 +136,15 @@ static Ast Compiler._step(Compiler c, Ast ast) {
 static Ast Compiler._finish(Compiler c, Ast ast) {
   match (ast) {
     case %(seq *items):
-      return %(seq @{c._sequence(items)});
+      return %(seq @{c._sequence(items, 0)});
     case %(matchcases ?subject ?records): {
       List new_subject = c._step(subject);
       List new_records = c._match_records(records);
       return %(matchcases $new_subject $new_records);
     }
-    case $source_block_content(%(*body)): {
-      List lowered = c._sequence(body);
-      List deferred = c.rewrite_defer_list(lowered);
-      if (deferred != lowered) lowered = c._sequence(deferred);
-      return source_block_content(lowered);
-    }
+    case %(parens (block *body)):
+      return %(parens ${c._block_node(body, 1)});
+    case $source_block_content(%(*body)): return c._block_node(body, 0);
   }
   return c._children(ast);
 }
@@ -156,12 +152,18 @@ static Ast Compiler._finish(Compiler c, Ast ast) {
 /* Only top-level and block sequences absorb `(seq ...)` replacements.
    Children transform left to right, then reverse assembly preserves source
    order while allocating generated splice origins from right to left. */
-static Ast Compiler._sequence(Compiler c, Ast ast) {
+static Ast Compiler._sequence(Compiler c, Ast ast, int value_tail) {
   Array transformed = $auto([]);
-  foreach (List value, ast) {
+  for (List cursor = ast; cursor; cursor = cursor.cdr()) {
+    List value = cursor.car();
     List source = Ast.without_origin(value);
-    List lowered = source.match(%(defer ?))
-      ? value : c._step(value);
+    List lowered;
+    match (source) {
+      case %(stmnt ?expression) if (value_tail && !cursor.cdr()):
+        lowered = Ast.rewrap_origin(value, %(stmnt ${c._step(expression)}));
+      case %(defer ?): lowered = value;
+      default: lowered = c._step(value);
+    }
     if (!c.fn_name) lowered = c.lower_cleanup(lowered);
     transformed.push(lowered);
   }
@@ -386,10 +388,15 @@ static Ast Compiler._defer_node(Compiler c, Ast ast) {
   return ast;
 }
 
-static Ast Compiler._block_node(Compiler c, Ast ast) {
-  List statements = ast.cdr();
+/* A value block lowers its final expression as a value, including an
+   assignment whose ordinary statement form discards its result. */
+static Ast Compiler._block_node(
+  Compiler c, List statements, int value_tail) {
   List body = c.rewrite_defer_list(statements);
-  return body !== statements ? source_block_content(body) : ast;
+  List lowered = c._sequence(body, value_tail);
+  List deferred = c.rewrite_defer_list(lowered);
+  if (deferred != lowered) lowered = c._sequence(deferred, value_tail);
+  return source_block_content(lowered);
 }
 
 static Ast Compiler._raise_node(Compiler c, Ast ast) {
