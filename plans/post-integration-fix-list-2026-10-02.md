@@ -63,7 +63,9 @@ The campaign integrated dev `2c8ddfb3` locally before starting the workers.
 Current main `247b7fbe` is an ancestor of that baseline. Campaign batch 1
 delivered 31 scopes through PR #99, merged at `fea429d4`, with integration
 corrections and final generated updates published through `561d08b2`.
-PR #100 submits four further scopes; its publication remains pending.
+PR #100 delivered four further scopes at merge `d0ca6b3c`, with expression
+origin repairs, linked-static coverage, and generated updates through
+`149b8a8e`. The integrator reports the combined publication gate passed.
 
 Some external headings overstate historical regression: X14-X16 already
 emitted the same C at the paired base, but violate the new sequencing promise;
