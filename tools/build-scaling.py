@@ -122,7 +122,7 @@ def main() -> int:
     "baseline_id": baseline.get("baseline_id", "legacy-driver-cycles"),
     "commit": baseline.get("commit"),
     "cycles_per_line": baseline["cycles_per_line"],
-  } if "cycles_per_line" in baseline else None)
+  } if "cycles_per_line" in baseline else baseline.get("legacy"))
   if not args.rebaseline and baseline.get("metric_id") != METRIC_ID:
     old = baseline.get("metric_id", "legacy-driver-cycles/v0")
     raise ValueError(

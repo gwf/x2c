@@ -55,13 +55,12 @@ measurement correction, rebaseline in a quiet window with a fixed translator:
 tools/build-scaling.py --rebaseline --ref COMMIT --compiler /path/to/x2c
 ```
 
-The first lines of `latest.md` show the score and its change since the
-previous snapshot. A rise means the commits in between made each line more
-expensive to build. Repeat scores of one tree span about 4 points under
-heavy host load, so smaller changes are noise. Replayed over the August
-2026 Pool.promote regression, the score rose from 128 to 176 at #230 and
-fell from 186 to 140 at the #265 fix. Instruction counts are steadier but missed the fix, because
-that slowdown was memory stalls.
+The first lines of `latest.md` show the score and its change since a
+comparable previous snapshot. A rise means the commits in between made
+each authored line more expensive to build. Repeat the same tree to establish
+the CPU score's measurement noise before interpreting small changes. Earlier
+driver-cycle measurements used a different workload boundary and denominator;
+their noise estimates and historical scores do not describe this metric.
 
 `tools/build-scaling-history.py` prints saved metrics as CSV without building.
 It keeps rows with different metric or baseline IDs separate. Explicit
