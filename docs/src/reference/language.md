@@ -1475,6 +1475,49 @@ hole the slot was given, one element per statement, so each element can
 be recognized with a `case` on the macro that built it. The pattern a
 literal macro value derives is prepared once per process.
 
+A macro's pattern is also a pattern wherever patterns go. In a `case`,
+`${$name(P, ...)}` is the pattern of code `$name` builds with each argument
+pattern in its hole, derived while the compiler reads the `case`. Each
+argument is a binder or wildcard, another `$name(...)` pattern, or a
+`%(...)` List pattern; a sequence or `Type` hole splices its List pattern's
+elements. The pattern matches the typed expression or its bare content.
+Inside a `%(...)` pattern the same form is an element, and in the content
+position of an `(expr TYPE ...)` shell it is the content alone, so the shell
+captures the expression's type:
+
+```x2c
+#include "meta.x"
+macro Expression $neg(Expr $value) => -$value;
+macro Expression $add(Expr $left, Expr $right) => $left + $right;
+
+meta static List classify(List code) {
+  match (code) {
+    case $add(?left, $neg(?right)): return x2c_literal_int(1);
+    case %(expr ?type ${$add(?left, ?right)}):
+      return x2c_literal_int(type.repr() == "(int)" ? 2 : 3);
+  }
+  return x2c_literal_int(0);
+}
+macro Expression $kind(Expr $code) => $classify($code);
+
+int main(void) {
+  int x = 1, y = 2;
+  double z = 1.5;
+  printf("%d %d %d %d\n", $kind(x + -y), $kind(x + y), $kind(z + y),
+         $kind(x * y));
+  return 0;
+}
+```
+
+```text
+1 2 3 0
+```
+
+A named `case` whose arguments are all binders, such as `case $add(?left,
+?right):`, keeps the recognition described above, including pending
+invocations. One with a nested pattern among its arguments, such as
+`case $add(?left, $neg(?right)):`, uses the derived pattern.
+
 ### Hygiene and generated names
 
 A macro captures no bindings. An expansion means what the same code would

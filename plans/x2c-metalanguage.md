@@ -3,7 +3,8 @@
 > Status: active, 2026-10-02. Gary approved the plan and its
 > recommendations as one campaign on branch `gwf/macro-metalanguage`,
 > started from dev d84f3c26. The branch is pushed freely; the finished
-> campaign is submitted as one PR to the shared integrator.
+> campaign is submitted as one PR to the shared integrator. M1 and M2 are
+> implemented on the branch (results under each); M3 and M4 remain.
 
 ## Question
 
@@ -219,6 +220,26 @@ Implementation checks:
 Estimated: a medium change in `src/macros.x`, `src/expressions.x`, and
 `src/symbols.x`. Net source and book prose should shrink.
 
+M1 results:
+
+- Both capture probes give 15 and 30; a named local macro reads the `k` at
+  its invocation (PR #103's five local-macro fixtures pass with their
+  checked-in C); a global macro reads a caller's `scale` unless it lists
+  it with `using`.
+- Fixtures that asserted definition-site resolution were rewritten to the
+  new rule or to `using`: `macro-expression-contracts`,
+  `macro-forward-name-*`, `macro-import-projection`,
+  `macro-construction-regressions`, `macro-native-callee-shadow`,
+  `report-named-binding`; `macro-open` became `macro-using-name`.
+- `using name;` also keeps a native name C supplies, such as `time`; type
+  names are not listed.
+- An application compiler code makes has no invocation token; its
+  template's authored-origin anchors are stripped, as open templates were,
+  so diagnostics point at the source being lowered.
+- The compiler's self-translation of `src/` and `lib/` is unchanged except
+  in the edited files; all 992 fixtures, 939 unit tests, and 94 book
+  samples with outputs pass.
+
 ### M2. Macro patterns compose and see types
 
 A macro pattern is accepted wherever a pattern is. Its argument positions
@@ -245,6 +266,21 @@ and `source_call_content`), the 21 nested `match` statements collapse, and
 the raw `%(expr ...)` cases in the lowering files can be written as source
 forms. This is the change that makes "the compiler recognizes x2c" read
 like x2c.
+
+M2 results:
+
+- `${$m(P, ...)}` is accepted inside `%(...)` patterns and as a whole
+  `case` pattern; a named `case $m(...)` with a nested argument pattern
+  derives the same way. Derivation happens while the compiler reads the
+  `case`, from the macro's stored definition.
+- 58 uses converted with byte-identical self-translation;
+  `source_pattern` and `source_pattern_with` are deleted. Eleven
+  bare-content dispatch arms keep `source_content_pattern` and one keeps
+  `source_call_content`: as shelled-or-bare patterns they would lose the
+  fixed head that lets the match emitter label the arm.
+- Converting the remaining raw `%(expr ...)` cases and collapsing nested
+  `match` statements is follow-up adoption; it needs no further language
+  change.
 
 ### M3. One category vocabulary, usable as types
 
