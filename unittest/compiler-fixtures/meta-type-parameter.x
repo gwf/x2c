@@ -6,6 +6,7 @@
 #include "meta.x"
 
 typedef struct Response { int code; String label; } Response;
+static int Response.len(Response response) => response.code;
 struct Pair { int a; double b; };
 union Number { int i; float f; };
 enum Color { RED, GREEN };
@@ -13,7 +14,7 @@ enum Color { RED, GREEN };
 $(import "meta-type-parameter.xmacro")
 
 int main(void) {
-  Response response = { 1, "x" };
+  struct Response response = { 1, "x" };
   struct Pair pair = { 1, 2 };
   union Number number = { 1 };
   enum Color color = RED;

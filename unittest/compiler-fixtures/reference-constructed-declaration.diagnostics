@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/reference-constructed-declaration.x:10:1: type: transparent references are only supported on parameters
+  $construct();
+  ^
+

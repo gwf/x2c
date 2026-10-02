@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/reference-return-declaration.x:4:25: type: transparent references are only supported on parameters
+  static int &alias(void) { return value; }
+                          ^
+

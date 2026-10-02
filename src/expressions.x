@@ -1779,6 +1779,7 @@ static List Compiler._method_bind(
   if (named) {
     type = _qualified(type, named);
     source = named;
+    receiver = %(expr $type ${receiver.caddr()});
   }
   if (_receiver_points_to(source, target))
     $report.type_receiver_pointer(c, type, declared, origin);
@@ -1822,44 +1823,56 @@ List Compiler.resolve_postfix_member(
   int call_context) {
   if (receiver_type.car() == <opt-ref>)
     $report.type_optional_ref_access(c);
-  // The receiver type is a lookup key here. A const or volatile receiver
-  // names the same aggregate, fields, and methods.
   Type type = receiver_type.canonicalize();
-  int hops = 0;
-  if (access == <"->">) {
-    Type object_type = c.sym.resolve_key(type);
-    object_type = object_type.dereference();
-    Type field_type = c.sym.lookup_field(object_type, field);
-    return field_type ? %(field -> $field_type) : NULL;
-  }
-  int tagged = 0;
+  if (access == <"->">)
+    return c._field_member(receiver_type, field, <"->">);
+  int hops = 0, tagged = 0;
   while (type) {
-    int is_method_type = type.is_typedef_name() || type.is_builtin();
-    if (call_context && is_method_type) {
+    if (call_context && _method_owner(type)) {
       List method = c._method_member(receiver_type, type, field);
       if (method) return method;
     }
-    if (type.is_pointer()) {
-      Type object_type = type.dereference();
-      Type field_type = c.sym.lookup_field(object_type, field);
-      if (field_type) return %(field -> $field_type);
-      type = NULL;
+    if (type.is_pointer())
+      return c._field_member(receiver_type, field, <"->">);
+    if (type.is_aggregate()) {
+      List member = c._field_member(receiver_type, field, <.>);
+      if (member || !call_context) return member;
     }
-    else if (type.is_aggregate()) {
-      Type field_type = c.sym.lookup_field(type, field);
-      if (field_type) return %(field . $field_type);
-      type = call_context && !tagged++ ? c._tag_typedef(type) : NULL;
-    }
-    else type = c.sym.next_typedef(type, hops);
+    type = c._next_method_type(type, hops, tagged);
   }
   return NULL;
 }
 
-/* The qualifiers of `type` applied to the typedef `named`. */
+static int _method_owner(Type type) =>
+  !type.is_aggregate() && (type.is_typedef_name() || type.is_builtin());
+
+/* Lookup and completion follow the same typedef owner from an aggregate. */
+static Type Compiler._next_method_type(
+  Compiler c, Type type, int &hops, int &tagged) {
+  if (type.is_pointer()) return NULL;
+  if (type.is_aggregate()) return !tagged++ ? c._tag_typedef(type) : NULL;
+  return c.sym.next_typedef(type, hops).canonicalize();
+}
+
+/* A field inherits its containing object's qualifiers, not its pointer's. */
+static List Compiler._field_member(
+  Compiler c, Type receiver, List field, Symbol access) {
+  Type object = c.sym.normalize_declared_type(receiver);
+  if (access == <"->">)
+    object = c.sym.normalize_declared_type(object.dereference());
+  Type declared = c.sym.lookup_field(object, field);
+  return declared ? %(field $access ${_qualified(object, declared)}) : NULL;
+}
+
+/* The outer qualifiers of `type` applied to `named`. */
 static Type _qualified(Type type, Type named) {
+  if (type.car() is not <symbol> ||
+      !type.car().symbol().is_type_qualifier()) return named;
   Array out = [];
-  foreach (Var item, type)
-    if (item is <symbol> && item.symbol().is_type_qualifier()) out.push(item);
+  foreach (Var item, type) {
+    if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
+    out.push(item);
+  }
   foreach (Var item, named) out.push(item);
   return out.list_free();
 }
@@ -1870,8 +1883,8 @@ static Type _qualified(Type type, Type named) {
    directly as that aggregate. */
 static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
   match (aggregate) case %(? ?(String tag)): {
-    Type name = %($tag);
-    if (c.sym.resolve_key(name) == aggregate) return name;
+    Type name = %($tag), declared = c.sym.get(%(typedef $tag));
+    if (declared && c.sym.resolve_key(declared) == aggregate) return name;
   }
   return c.sym.sole_typedef(aggregate);
 }
@@ -2132,16 +2145,15 @@ static void Compiler._completion_fields(
 static void Compiler._completion_methods(
   Compiler c, Type receiver, Map seen, Array names) {
   Type type = receiver.canonicalize();
-  int hops = 0;
+  int hops = 0, tagged = 0;
   while (type) {
-    if (type.is_typedef_name() || type.is_builtin()) {
+    if (_method_owner(type)) {
       String owner = type.base_type().car();
       c._completion_owner_methods(%"${owner}_", seen, names);
       foreach (String name, c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
-    if (type.is_pointer() || type.is_aggregate()) type = NULL;
-    else type = c.sym.next_typedef(type, hops);
+    type = c._next_method_type(type, hops, tagged);
   }
 }
 

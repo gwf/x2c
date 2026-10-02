@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/tag-variable-method-owner.x:9:21: type: type (struct "Point") has no method value
+    return point.value();
+                      ^
+
