@@ -39,7 +39,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:331`
+Source: `lib/macro-value.x:336`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -49,7 +49,7 @@ Source: `lib/macro-value.x:331`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:324`
+Source: `lib/macro-value.x:329`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -95,6 +95,29 @@ any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
 Source: `lib/macro-value.x:109`
+
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`Macro.binder`](#Macro.binder) | Returns the binder that captures one projection of the template hole whose binder is `binder`. |
+
+### `Macro`
+
+<a id="Macro.binder"></a>
+#### Macro.binder
+
+`Atom Macro.binder(Var binder, String projection, int sequence)`
+
+Returns the binder that captures one projection of the template hole
+whose binder is `binder`. Splice and construction projections are
+always sequences; return, declarator, and member projections never
+are; source, value, and expression follow the hole's `sequence`.
+
+Source: `lib/macro-value.x:175`
 
 ## Public types
 

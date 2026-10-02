@@ -40,7 +40,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:303`
+Source: `src/ast.x:294`
 
 #### ast_collect_binding_references
 
@@ -48,16 +48,15 @@ Source: `src/ast.x:303`
 
 Records in `referenced` the identity of every binding `node` names.
 
-Source: `src/ast.x:143`
+Source: `src/ast.x:134`
 
 #### ast_contains_head
 
 `int ast_contains_head(Var value, Symbol kind)`
 
-Returns whether any list under `value` has `kind` as its head. The
-worklist keeps deeply nested operator chains off the C stack.
+Returns whether any list under `value` has `kind` as its head.
 
-Source: `src/ast.x:128`
+Source: `src/ast.x:127`
 
 #### binding_identity_new
 
@@ -107,7 +106,7 @@ Source: `src/ast.x:73`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:309`
+Source: `src/ast.x:300`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -118,7 +117,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:323`
+Source: `src/ast.x:314`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -142,7 +141,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:190`
+Source: `src/ast.x:181`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -152,7 +151,7 @@ Source: `src/ast.x:190`
 Returns `replacement` under the anchors of `original`, the statement it
 replaces, so a rewrite does not lose the node's source position.
 
-Source: `src/ast.x:175`
+Source: `src/ast.x:166`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -176,7 +175,7 @@ in. Every block statement carries one so that a transform-phase
 diagnostic can name its line; a pass that dispatches on a statement tag
 has to see the statement, not the anchor.
 
-Source: `src/ast.x:163`
+Source: `src/ast.x:154`
 
 <a id="Ast.written_operand"></a>
 #### Ast.written_operand
@@ -202,7 +201,7 @@ operators, so a larger level binds more tightly. `===` and `!==` share
 the equality level, `in` the relational level, and `@` the
 multiplicative level.
 
-Source: `src/ast.x:279`
+Source: `src/ast.x:270`
 
 <a id="Symbol.compound_assignment"></a>
 #### Symbol.compound_assignment
@@ -211,7 +210,7 @@ Source: `src/ast.x:279`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:268`
+Source: `src/ast.x:259`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -220,7 +219,7 @@ Source: `src/ast.x:268`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:262`
+Source: `src/ast.x:253`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -229,7 +228,7 @@ Source: `src/ast.x:262`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:299`
+Source: `src/ast.x:290`
 
 ## Public types
 
