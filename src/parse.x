@@ -163,7 +163,7 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
   }
   if (native && !decl.type_from_ast().is_function())
     $report(c, "parse.meta.function", meta);
-  if (c.test(<;>)) return c._declared(decl, meta);
+  if (c.test(<;>)) return c._declared(decl, meta, first);
   if (c.peek(0) == <"{"> || c._at_function_arrow())
     return c._defined(decl, meta, native, first);
   c.require_input();
@@ -383,7 +383,9 @@ static List Compiler._import_members(Compiler c, String name) {
 /* A declaration ends at `;`. A `meta` one installs its compile-time form
    and publishes its prose; an ordinary function prototype keeps its name
    callable at run time. */
-static List Compiler._declared(Compiler c, List decl, Token meta) {
+static List Compiler._declared(
+  Compiler c, List decl, Token meta, Token first) {
+  c._record_meta_hash(decl, first, meta != NULL);
   if (meta && decl.type_from_ast().is_function())
     c.install_native_meta_function(decl, meta);
   else if (meta) c.install_meta_declaration(decl, meta);
@@ -432,26 +434,37 @@ static void Compiler._reject_expanded_meta(Compiler c, List decl, Token meta) {
   $report(c, "parse.meta.constructed", name, meta);
 }
 
-/* Records the hash of a function definition's code tokens, from its first
-   token after any `meta` marker to the end of its body, and the names the
-   body of a `meta` definition references. A copy linked into the compiler
-   answers for a `meta` definition only when the hashes of it and of every
-   definition it reaches agree. */
+/* Hashes functions and initialized file-static values, and records the
+   names a `meta` definition references. A linked copy answers only when
+   its text and the definitions it reaches agree with the source. */
 static void Compiler._record_meta_hash(
-  Compiler c, List function, Token first, int meta) {
+  Compiler c, List definition, Token first, int meta) {
+  String name = NULL;
+  Var body = void;
+  match (definition) {
+    case %(function ? (bind (binding ? ?(String own)) *) ?content): {
+      name = own;
+      body = content;
+    }
+    case %(declare ?spec
+             (bindings (op = (bind (binding ? ?(String own)) *)
+                             ?initializer))): {
+      if (!spec.type().is_static()) return;
+      name = own;
+      body = initializer;
+    }
+  }
+  if (!name) return;
   uint64_t hash = FNV_OFFSET_BASIS;
   for (Token token = first; token < c.token; token++)
     if (token.type != <space> && token.type != <comment> && token.len)
       hash = fnv_bytes(
         fnv_bytes(hash, token.text, token.text.len()), " ", 1);
-  match (function)
-    case %(function ? (bind (binding ? ?(String name)) *) ?body): {
-      c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
-      if (!meta) return;
-      Array names = [];
-      _referenced_names(body, {}, names);
-      c.meta_calls[name] = names.list_free();
-    }
+  c.meta_hashes[name] = "%016llx".printf((unsigned long long) hash);
+  if (!meta) return;
+  Array names = [];
+  _referenced_names(body, {}, names);
+  c.meta_calls[name] = names.list_free();
 }
 
 /* Adds each name `node` references to `names`, once, in source order. */
