@@ -3722,7 +3722,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
         return 0;
       List binding = NULL;
       String spelling = NULL;
-      if (callee is <string>) spelling = callee.string();
+      if (callee is <string>) spelling = callee;
       else match (callee)
         case %(expr ? ${$source_identifier_content(%(?bound))}): {
           binding = bound;

@@ -403,12 +403,9 @@ Map Sym_current_symbols(Sym s){
   return scope ? scope -> symbols : NULL;
 }
 
-int Map_truth(Map);
-
 Map Sym_unit_symbols(Sym s){
   Map symbols = Sym_base_symbols(s);
-  Map current = Sym_current_symbols(s);
-  if(Map_truth(current)) Map_merge(symbols, current);
+  if(! Sym_at_file_scope(s)) Map_merge(symbols, Sym_current_symbols(s));
   return symbols;
 }
 
@@ -560,6 +557,7 @@ break;
 return NULL;
 }
 
+int Map_truth(Map);
 void Sym_seed_var_tags(Sym s, Map symbols){
   if(! _init_guard_) _file_init_();  if(! Map_truth(symbols)) return; {
     Var key, type;  Map _x2c_macro_object_2 = symbols;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
