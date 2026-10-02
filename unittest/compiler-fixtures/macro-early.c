@@ -69,16 +69,16 @@ static List tally(String key, int amount){
   Atom token = Atom_intern(_279);
   String digits = String_join(NULL, cons(String_var(int_str(amount)), NULL));
   return({
-    Var _x2c_literal_part_0 = List_var(cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-      Var _x2c_literal_part_2 = List_var(cons(_4, cons(_7, cons(List_var(cons(_10, cons(token, NULL))), NULL))));  Var _x2c_literal_part_3 = List_var(cons(_4, cons(_7, cons(List_var(cons(_11, cons(_7, cons(String_var(digits), NULL)))), NULL))));  cons(_8, cons(_9, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL))));
+    Var _x2c_literal_part_7 = List_var(cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
+      Var _x2c_literal_part_0 = List_var(cons(_4, cons(_7, cons(List_var(cons(_10, cons(token, NULL))), NULL))));  Var _x2c_literal_part_1 = List_var(cons(_4, cons(_7, cons(List_var(cons(_11, cons(_7, cons(String_var(digits), NULL)))), NULL))));  cons(_8, cons(_9, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
     }
-    )), NULL)))), NULL)));  Var _x2c_literal_part_1 = List_var(({
-      Var _x2c_literal_part_4 = List_var(cons(_12, cons(token, _15)));  Var _x2c_literal_part_5 = List_var(({
-        Var _x2c_literal_part_6 = List_var(cons(_17, cons(String_var(key), NULL)));  Atom _x2c_literal_part_7 = token;  Var _x2c_literal_part_8 = List_var(cons(_18, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_23, cons(token, _25))), NULL))), NULL))));  cons(_16, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
+    )), NULL)))), NULL)));  Var _x2c_literal_part_8 = List_var(({
+      Var _x2c_literal_part_5 = List_var(cons(_12, cons(token, _15)));  Var _x2c_literal_part_6 = List_var(({
+        Var _x2c_literal_part_2 = List_var(cons(_17, cons(String_var(key), NULL)));  Atom _x2c_literal_part_3 = token;  Var _x2c_literal_part_4 = List_var(cons(_18, cons(_21, cons(List_var(cons(_22, cons(List_var(cons(_23, cons(token, _25))), NULL))), NULL))));  cons(_16, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL))));
       }
-      ));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
+      ));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
     }
-    ));  cons(_0, cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+    ));  cons(_0, cons(_2, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
   }
   );
 }

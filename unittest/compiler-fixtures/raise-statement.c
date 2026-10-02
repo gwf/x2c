@@ -28,11 +28,11 @@ void Error_policy_set(Symbol, Symbol);
 
 int Error_mark(void);
 
-Var Symbol_var(Symbol);
-
 Var int_var(int);
 
 Var String_var(String);
+
+Var Symbol_var(Symbol);
 
 List Var_list(Var);
 
@@ -63,8 +63,13 @@ int main(void){
   Error_policy_set(1269496097575876, 7475046632);
   int bytes = 64, mark = Error_mark();
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
-    x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), int_var(bytes), Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL))));
+    Var _x2c_literal_part_0 = int_var(bytes);
+    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL)));
+    {
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
+      x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), _x2c_literal_part_0, Symbol_var(32993636), _x2c_literal_part_1);
+    }
+
   }
   List entry = Var_list(List_car(Error_since(mark)));
   List detail = Var_list(List_assoc(entry, Symbol_var(280234584)));

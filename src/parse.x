@@ -490,21 +490,33 @@ static void Compiler._record_meta_hash(
   c.meta_calls[name] = names.list_free();
 }
 
-/* Adds each name `node` references to `names`, once, in source order. */
+/* Adds referenced names in source order. Deferred sibling cursors keep deep
+   expression chains off the C stack without reversing their children. */
 static void _referenced_names(Var node, Map seen, Array names) {
-  if (node is not <list>) return;
-  List syntax = node;
-  match (syntax)
-    case $source_identifier_content(%((binding ? ?name))): {
-      if (name is not <string>) break;
-      String spelling = name;
-      if (!(spelling in seen)) {
-        seen[spelling] = 1;
-        names.push(spelling);
-      }
-      return;
+  Array pending = $auto([]);
+  List rest = %($node);
+  while (rest || pending.len()) {
+    if (!rest) {
+      rest = pending.take_last();
+      continue;
     }
-  foreach (Var child, syntax) _referenced_names(child, seen, names);
+    Var current = rest.car();
+    rest = rest.cdr();
+    if (current is not <list>) continue;
+    List syntax = current;
+    match (syntax)
+      case $source_identifier_content(%((binding ? ?name))): {
+        if (name is not <string>) break;
+        String spelling = name;
+        if (!(spelling in seen)) {
+          seen[spelling] = 1;
+          names.push(spelling);
+        }
+        continue;
+      }
+    if (rest) pending.push(rest);
+    rest = syntax;
+  }
 }
 
 /* A staged `meta` definition installs its compile-time form unless the

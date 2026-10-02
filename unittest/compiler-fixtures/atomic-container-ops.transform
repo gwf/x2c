@@ -537,22 +537,24 @@
      (param ("Symbol") (bind (binding 53 "_x2c_macro_op_0") ())) 
      (param ("String") (bind (binding 54 "_x2c_macro_rhs_0") ())))))) 
  (block 
-  (stmnt 
-   (expr (volatile "String") 
-    (op = (expr (volatile "String") 
-           (index 
-            (expr (* volatile "String") (ident (binding 52 "_x2c_macro_lhs_0"))) 
-            (expr (int) (literal (int) "0")))) 
-     (expr ("String") 
-      (call (expr ((func (("String") ("String"))) "String") 
-             (ident (binding 55 "String_add"))) 
-       (args (expr (volatile "String") 
-              (index 
-               (expr (* volatile "String") 
-                (ident (binding 52 "_x2c_macro_lhs_0"))) 
-               (expr (int) (literal (int) "0")))) 
-        (expr ("String") (ident (binding 54 "_x2c_macro_rhs_0"))))))))) 
-  (return 
-   (expr (volatile "String") 
-    (index (expr (* volatile "String") (ident (binding 52 "_x2c_macro_lhs_0"))) 
-     (expr (int) (literal (int) "0")))))))
+  (at 70 
+   (stmnt 
+    (expr (volatile "String") 
+     (op = (expr (volatile "String") 
+            (index 
+             (expr (* volatile "String") (ident (binding 52 "_x2c_macro_lhs_0"))) 
+             (expr (int) (literal (int) "0")))) 
+      (expr ("String") 
+       (call (expr ((func (("String") ("String"))) "String") 
+              (ident (binding 55 "String_add"))) 
+        (args (expr (volatile "String") 
+               (index 
+                (expr (* volatile "String") 
+                 (ident (binding 52 "_x2c_macro_lhs_0"))) 
+                (expr (int) (literal (int) "0")))) 
+         (expr ("String") (ident (binding 54 "_x2c_macro_rhs_0")))))))))) 
+  (at 71 
+   (return 
+    (expr (volatile "String") 
+     (index (expr (* volatile "String") (ident (binding 52 "_x2c_macro_lhs_0"))) 
+      (expr (int) (literal (int) "0"))))))))
