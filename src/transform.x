@@ -104,8 +104,7 @@ static Ast Compiler._step(Compiler c, Ast ast) {
     case <map>: case <vmap>: next = transform_map_literal(c, ast); break;
     case <cast>: next = c._cast(ast); break;
     case <index>: next = c._index(ast); break;
-    case <cons>: next = c._cons(ast); break;
-    case <append>: next = c._append(ast); break;
+    case <cons>: case <append>: return c._ordered_list(ast);
     case <var>: next = c._to_var(ast.cadr()); break;
     case <segments>: next = c._string_segments(ast); break;
     case <declare>: case <decl>: next = c._declaration(ast); break;
@@ -197,8 +196,10 @@ static List Compiler._match_records(Compiler c, List records) {
   foreach (List record, records)
     match (record) {
       case %(preproc ?): transformed.push(record);
-      case %(*prefix ?body):
-        transformed.push(%(@prefix ${c._step(body)}));
+      case %(?binders ?pattern ?body): {
+        List lowered = c._step(pattern);
+        transformed.push(%($binders $lowered ${c._step(body)}));
+      }
     }
   return transformed.list_free();
 }
@@ -374,6 +375,9 @@ static Ast Compiler._raise_node(Compiler c, Ast ast) {
     case %(raise ?cause (args *arguments)):
       ast = c._raise(ast, cause, arguments);
   ast = c._children(ast);
+  match (ast)
+    case %(raise ?cause (args *arguments)):
+      ast = c._ordered_raise(cause, arguments);
   c.runtime_literals = old_runtime;
   return ast;
 }
@@ -451,13 +455,8 @@ static List Compiler._var_map_literal(Compiler c, List entries) {
 static List Compiler._literal_element(Compiler c, List element) {
   if (element.match(%(expr ? (composite (commas)))))
     element = %(expr ("Map") (map));
-  return c.convert_expression(element, %("Var"));
+  return c._step(c.convert_expression(element, %("Var")));
 }
-
-// Normalize cons nodes so head and tail carry expected runtime types.
-static List Compiler._cons(Compiler c, List ast) => c._ordered_list(ast);
-
-static List Compiler._append(Compiler c, List ast) => c._ordered_list(ast);
 
 static List Compiler._to_list(Compiler c, List expr) =>
   c.convert_expression(expr, %("List"));
@@ -476,13 +475,16 @@ static List Compiler._spliced(Compiler c, List expr) {
    may change state, moves into a temporary. A part's order is 0 when it is
    constant, 1 when it only reads state, and 2 when it may change state. A
    builtin boxer or scalar formatter reads what its argument reads. Custom
-   converters and uncached nested literal construction may change state. */
+   converters and dynamic nested literal construction may change state. */
 static int Compiler._part_order(Compiler c, Var part) {
   if (part is not <list>) return 0;
   List node = part;
   match (node) {
     case %(!or (cache ?) (literal *) (nil) (segraw ?)): return 0;
+    case %(expr () (ident ?)): return 2;
     case $source_identifier_content(%(?)): return 1;
+    case %(cons ?head ?tail):
+      return c._part_order(head) || c._part_order(tail) ? 2 : 0;
     case %(expr ? (call ? (args ?argument))):
       return c.is_builtin_converter_call(node)
         ? c._part_order(argument) : 2;
@@ -535,12 +537,13 @@ static List Compiler._ordered_list(Compiler c, List chain) {
     (Symbol kind, List part, List rest) = cell;
     List value = kind == <cons> ? c._to_var(part)
       : _passed_as(c._spliced(part), %("List"));
+    value = c._step(value);
     kinds.push(kind);
     values.push(value);
     orders.push(c._part_order(value));
     node = rest;
   }
-  node = _passed_as(c._to_list(node), %("List"));
+  node = c._step(_passed_as(c._to_list(node), %("List")));
   kinds.push(<nil>);
   values.push(node);
   orders.push(c._part_order(node));
@@ -642,7 +645,7 @@ static List Compiler._string_segments(Compiler c, List ast) {
   }
   Array values = [], orders = $auto([]);
   foreach (List seg, ast.cdr()) {
-    List value = c._segment_value(seg);
+    List value = c._step(c._segment_value(seg));
     values.push(value);
     orders.push(c._part_order(value));
   }
@@ -951,6 +954,19 @@ static List Compiler._return(Compiler c, List ast) {
 }
 
 // raise details
+
+static List Compiler._ordered_raise(
+  Compiler c, List cause, List arguments) {
+  Array values = [cause], orders = $auto([c._part_order(cause)]);
+  foreach (List argument, arguments) {
+    values.push(argument);
+    orders.push(c._part_order(argument));
+  }
+  List declarations = c._ordered_parts(values, orders);
+  List parts = values.list_free();
+  List raised = %(raise ${parts.car()} (args @{parts.cdr()}));
+  return declarations ? %(block @declarations $raised) : raised;
+}
 
 static List Compiler._raise(Compiler c, List ast, Var cause, List arguments) {
   Array values = [], int index = 0;

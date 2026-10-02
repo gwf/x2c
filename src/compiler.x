@@ -2257,7 +2257,12 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   if (!ast) return %();
   Var (head, second, third) = ast;
   if (head == <cache>) return c.match_pattern_value(c.id_keys[second]);
-  if (head == <expr>) return c.match_pattern_value(ast.last());
+  if (head == <expr>) {
+    match (ast) case %(expr ("Var") (call ? (args ?argument))):
+      if (c.is_builtin_converter_call(ast))
+        return c.match_pattern_value(argument);
+    return c.match_pattern_value(ast.last());
+  }
   if (head == <var>) return c.match_pattern_value(second);
   if (head == <string>) return c.match_pattern_value(second);
   if (head == <call>) return c._call_value(second, third);
@@ -2267,13 +2272,10 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   return <x2c-dyn>;
 }
 
-/* A converter call has the value it converts, and a case pattern matches
-   what its labels match. Any other call is computed. */
+/* A case pattern matches what its labels match. Other untyped calls are
+   computed; typed builtin boxers were recognized with their expression. */
 static Var Compiler._call_value(Compiler c, Var callee, Var args) {
   String converter = _converter_name(callee);
-  if (converter == "List_var" || converter == "Symbol_var")
-    match (args) case %(args ?argument):
-      return c.match_pattern_value(argument);
   if (converter == "Macro_case_pattern")
     match (args) case %(args ? ?names): {
       List labels = c.match_pattern_value(names);

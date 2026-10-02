@@ -80,7 +80,7 @@ static void _relabel_nested_pattern(void){
     static MatchCaptureSite _x2c_macro_arms_0[1];
     Var _x2c_macro_patterns_0[1];
     static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_TRANSIENT, - 1
+      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
     if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){

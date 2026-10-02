@@ -279,13 +279,12 @@ static List Compiler._typed_pattern(Compiler c, List node, Map tags) {
 /* A pattern hides under typed, cached, and boxed wrappers. */
 static List Compiler._pattern_content(Compiler c, List node) {
   match (node) {
+    case %(expr ("Var") (call ? (args ?value))):
+      return c.is_builtin_converter_call(node)
+        ? c._pattern_content(value) : node;
     case %(expr ? ?value): return c._pattern_content(value);
     case %(cache ?id): return c._pattern_content(c.id_keys[id]);
     case %(var ?value): return c._pattern_content(value);
-    case %(call (expr ? ${$source_identifier_content(%(?binding))})
-        (args ?value)):
-      if (binding_identity_spelling(binding) == "List_var")
-        return c._pattern_content(value);
   }
   return node;
 }

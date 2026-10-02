@@ -2385,7 +2385,7 @@ static List Compiler._binary_expression(
   List lowered = c._protocol_operator_expression(operator, lhs, rhs);
   if (lowered) {
     if (!constant_string || c.runtime_literals) return lowered;
-    List cached = c.cache(%(string $lowered));
+    List cached = c.cache(%(string ${c.normalize(lowered)}));
     return %(expr ("String") $cached);
   }
   if (operator == <in>)
@@ -2421,6 +2421,7 @@ static int Compiler._convert_string_addition(
   List bindings;
   /* Bare `%(ident *)` also matches literal data ending in <ident>. */
   int constant =
+    !c.needs_resolution(lhs) && !c.needs_resolution(rhs) &&
     !lhs.try_search($source_identifier_content(%((*))),
       matched, bindings) &&
     !rhs.try_search($source_identifier_content(%((*))),
@@ -3712,18 +3713,24 @@ static String _converter_name(Type owner, Type target) {
     arguments. A custom converter or a shadowed callee may change state. */
 int Compiler.is_builtin_converter_call(Compiler c, List expr) {
   match (expr)
-    case %(expr ?result (call
-        (expr ? ${$source_identifier_content(%(?binding))})
-        (args ?argument))): {
+    case %(expr ?result (call ?callee (args ?argument))): {
       Type target = result, source = argument.cadr();
       if (!source || !source.match(%(?)) || !target.match(%(?))) return 0;
       if (!source.fixed_var_tag() ||
           !(target == %("Var") ||
             (source.scalar_tag() && target == %("String"))))
         return 0;
-      String spelling = binding_identity_spelling(binding);
+      List binding = NULL;
+      String spelling = NULL;
+      if (callee is <string>) spelling = callee.string();
+      else match (callee)
+        case %(expr ? ${$source_identifier_content(%(?bound))}): {
+          binding = bound;
+          spelling = binding_identity_spelling(binding);
+        }
+      if (spelling != _converter_name(source, target)) return 0;
       Type declared = NULL;
-      return spelling == _converter_name(source, target) &&
+      return !binding ||
         binding == c.sym.resolve_global(%($spelling), declared);
     }
   return 0;
