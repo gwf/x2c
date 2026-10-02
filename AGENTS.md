@@ -191,21 +191,10 @@ test requirement, planning step, or commit step. Proposals must identify
 existing work of comparable cost to remove or consolidate. Keep optional
 checks optional.
 
-## Communicate the result
+## Report delivery state
 
-Answer the actual question in the first sentence. Use ordinary verbs for
-mistakes, uncertainty, changed behavior, and failed tests. Name the subject,
-cause, consequence, and next action when needed to make the answer clear.
-Use existing project names and plain language; when an explanation confuses
-Gary, restart from the concrete result.
-
-Default to brief prose, with enough detail for the requested explanation.
-Use lists, tables, or headings when they help. Report current results and
-remaining work rather than session chronology; supporting detail can live in
-the plan, PR, or `.context/`, but the answer must stand on its own. Identify
-project rules by their current file or distinguish your own recommendation.
-
-At completion, state what was delivered, what was verified, and any remaining
-work. Check worktree and remote state before saying a workspace is safe to
-delete. If blocked, name the exact failing command, missing decision, or
-external change needed to continue.
+Follow Clear communication in the user's global `AGENTS.md` for conversational
+style. Check worktree and remote state before saying a workspace is safe to
+delete. Identify repository requirements by their current file and distinguish
+recommendations from requirements. Supporting evidence can live in the plan,
+PR, or `.context/`.
