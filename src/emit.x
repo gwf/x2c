@@ -11,7 +11,6 @@
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 #include <stdlib.h>
 #include <stdio.h>
 #include "string.x"
@@ -315,6 +314,16 @@ static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
 
 // local statics
 
+macro Statement $report.emit_static_switch(Expr $c) {
+  {
+    String note = "place the declaration before the switch "
+                + "or within one case block";
+    $c.report_error(
+      <emit>, "switch cannot bypass dynamic static initialization",
+      NULL, %($note));
+  }
+}
+
 static List Emitter._local_static(
   Emitter &e, List declaration, List body) {
   while (declaration.car() == <at>) {
@@ -323,7 +332,7 @@ static List Emitter._local_static(
   }
   if (_static_case_entry(body)) {
     e.c.origin = e.origin;
-    $report(e, "emit.static.switch");
+    $report.emit_static_switch(e);
   }
   List (base, bindings) = declaration.cdr();
   Type declared_base = base;

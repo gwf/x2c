@@ -11,7 +11,7 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
+$(import "../src/parse-report-macros.xmacro")
 #include "parse.x"
 #include "expressions.x"
 #include "literals.x"
@@ -98,6 +98,18 @@ static List Compiler._label_statement(Compiler c) {
 
 // with statements
 
+macro Statement $report.parse_with_body(Expr $c) {
+  $c.report_error(
+    <parse>, "with requires a braced body",
+    $c.token, NULL);
+}
+
+macro Statement $report.parse_with_expr(Expr $c) {
+  $c.report_error(
+    <parse>, "with requires an expression",
+    $c.token, NULL);
+}
+
 /* A `with` alias stands for its source expression. Its `Sym` scope and
    semantic rows exist only while the body parses, so every use substitutes
    the expression and an unused alias does not evaluate it. */
@@ -105,11 +117,11 @@ static List Compiler._with_statement(Compiler c) {
   c.next();
   if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
       c.peek(0) == <;> || c.peek(0) == <eof>)
-    $report(c, "parse.with.expr");
+    $report.parse_with_expr(c);
   List expression = c.parse_expression();
   String alias = c._with_alias();
   if (c.peek(0) != <"{">)
-    $report(c, "parse.with.body");
+    $report.parse_with_body(c);
   return c._with_body(expression, alias);
 }
 
@@ -117,7 +129,7 @@ static List Compiler._with_statement(Compiler c) {
 static String Compiler._with_alias(Compiler c) {
   if (!c.take_word("as")) return "_";
   if (c.peek(0) != <ident>)
-    $report(c, "parse.alias.name");
+    $report.parse_alias_name(c);
   String alias = c.token.text;
   c.next();
   return alias;
@@ -287,10 +299,16 @@ static List Compiler._goto_statement(Compiler c) {
   return %(goto $label);
 }
 
+macro Statement $report.parse_raise_payload(Expr $c) {
+  $c.report_error(
+    <parse>, "raise requires a %() payload literal",
+    $c.token, %("use raise %(code (key value)...);"));
+}
+
 static List Compiler._raise_statement(Compiler c) {
   c.expect(<raise>);
   if (c.peek(0) != <"%(">)
-    $report(c, "parse.raise.payload");
+    $report.parse_raise_payload(c);
   List stmt = c.parse_raise_literal();
   c.expect(<;>);
   return stmt;
@@ -330,6 +348,12 @@ static List Compiler._match_statement(Compiler c) {
   return %(match ${c.resolve_expression(expr, c.token)} $cases);
 }
 
+macro Statement $report.parse_match_default(Expr $c) {
+  $c.report_error(
+    <parse>, "match default arm must be last",
+    $c.token, %("move default after every case arm"));
+}
+
 static List Compiler._match_cases(Compiler c) {
   Array cases = [], groups = $auto([]);
   Symbol peek = c.peek(0), int saw_default = 0;
@@ -343,7 +367,7 @@ static List Compiler._match_cases(Compiler c) {
     }
     if (peek != <case> && peek != <default>) break;
     if (saw_default)
-      $report(c, "parse.match.default");
+      $report.parse_match_default(c);
     if (peek == <default>) saw_default = 1;
     cases.push(c._match_case());
     peek = c.peek(0);
@@ -385,13 +409,19 @@ List Compiler.parse_match_row_argument(Compiler c) => c._match_case();
 
 // match arms
 
+macro Statement $report.parse_match_arm(Expr $c) {
+  $c.report_error(
+    <parse>, "expected 'case' or 'default' in match statement",
+    $c.token, %( "token:" ${$c.token.text} ));
+}
+
 static List Compiler._match_case(Compiler c) {
   Symbol peek = c.peek(0), Token start = c.token;
   List pattern = NULL, types = NULL;
   if (c.test(<case>)) pattern = c._case_pattern(start, types);
   else if (c.test(<default>)) pattern = %(*);
   else
-    $report(c, "parse.match.arm");
+    $report.parse_match_arm(c);
   c.begin_match_arm(pattern, start, peek == <case>);
   List body = c._case_body(types);
   return %($pattern $body);
@@ -419,11 +449,18 @@ static List Compiler._parse_pattern(Compiler c, List &types) {
   return pattern;
 }
 
+macro Statement $report.parse_match_pattern(
+  Expr $c, Expr $origin, Expr $pattern) {
+  $c.report_error(
+    <parse>, "match case pattern must be a %() list literal",
+    $origin, %( "pattern:" ${$pattern.repr()} ));
+}
+
 static void Compiler._require_list_literal(
   Compiler c, List pattern, Token start) {
   match (pattern)
     case %(!not (expr ("List") *)):
-      $report(c, "parse.match.pattern", start, pattern);
+      $report.parse_match_pattern(c, start, pattern);
 }
 
 /** Opens a `Sym` scope for one match arm and optionally defines its definite
@@ -438,6 +475,21 @@ void Compiler.begin_match_arm(
   c.define_match_binders(pattern);
 }
 
+macro Statement $report.type_binder_conflict(
+  Expr $c, Expr $role, Expr $origin, Expr $name) {
+  $c.report_error(
+    <type>, %"${$role} binder has conflicting capture kinds",
+    $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
+}
+
+macro Statement $report.type_binder_unassigned(
+  Expr $c, Expr $role, Expr $origin, Expr $binder) {
+  $c.report_error(
+    <type>, %"${$role} binder is not definitely assigned",
+    $origin, %( "binder:" ${$binder.str()}
+                "bind it in every alternative and never under !not"));
+}
+
 /* Rejects the two ways a match or catch pattern can name a binder it does
    not reliably bind. `role` is the keyword the diagnostics name. */
 static void Compiler._check_binders(
@@ -446,11 +498,11 @@ static void Compiler._check_binders(
   List definite = c.match_pattern_binders(pattern, possible);
   foreach (Var binder, possible) {
     if (!definite.contains(binder))
-      $report(c, "type.binder.unassigned", role, start, binder);
+      $report.type_binder_unassigned(c, role, start, binder);
     String name = binder.str()[1:];
     foreach (Var other, possible) {
       if (other == binder || other.str()[1:] != name) continue;
-      $report(c, "type.binder.conflict", role, start, name);
+      $report.type_binder_conflict(c, role, start, name);
     }
   }
 }
@@ -527,6 +579,12 @@ static List Compiler._capture_locals(Compiler c, Array locals) {
 
 // try statements
 
+macro Statement $report.parse_try_handler(Expr $c) {
+  $c.report_error(
+    <parse>, "expected 'catch' or 'finally' after try block",
+    $c.token, NULL);
+}
+
 static List Compiler._try_statement(Compiler c) {
   c.expect(<try>);
   List body = c._continued(c.parse_governed(AST_STATEMENT)), catches = NULL;
@@ -535,7 +593,13 @@ static List Compiler._try_statement(Compiler c) {
   c.__complete_here(<continue>, %("finally"));
   List cleanup = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
   if (catches || cleanup) return %(try $body $catches $cleanup);
-  $report(c, "parse.try.handler");
+  $report.parse_try_handler(c);
+}
+
+macro Statement $report.parse_catch_default(Expr $c) {
+  $c.report_error(
+    <parse>, "catch default arm must be last",
+    $c.token, %("move catch: after every filtered arm"));
 }
 
 static List Compiler._catch_cases(Compiler c) {
@@ -554,7 +618,7 @@ static List Compiler._catch_cases(Compiler c) {
     if (is_default) saw_default = 1;
     if (!c.test(<catch>)) break;
     if (saw_default)
-      $report(c, "parse.catch.default");
+      $report.parse_catch_default(c);
   }
   return %(catchcases ${arms.list_free()} $handle);
 }
@@ -579,9 +643,15 @@ static List Compiler._catch_arm(Compiler c, int &is_default, List handle) {
     @{c.catch_binder_declarations(bindings, handle)} $body));
 }
 
+macro Statement $report.parse_catch_pattern(Expr $c) {
+  $c.report_error(
+    <parse>, "catch filter requires a %() pattern literal",
+    $c.token, %("use catch %(code (key pattern)...):"));
+}
+
 static List Compiler._catch_filter(Compiler c) {
   if (c.peek(0) != <"%(">)
-    $report(c, "parse.catch.pattern");
+    $report.parse_catch_pattern(c);
   List pattern = c.parse_catch_pattern_literal();
   c.expect(<:>);
   return pattern;

@@ -12,7 +12,6 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
@@ -26,7 +25,7 @@ $(import "../src/grammar.xmacro")
    for expansion. */
 
 /** Parses a `%!(...) => ...` literal and returns its typed lambda expression.
-    Parameter bindings are in a new `Sym` scope, block bodies use `Var` as the
+    Parameter bindings are in a new `Sym` scope, bodies use `Var` as the
     active return type, and capture rows come from `semantic_binding_facts`.
     Capturing lambdas have type `Func`; noncapturing lambdas retain a native
     function type.
@@ -91,10 +90,16 @@ static List Compiler._parse_bare_params(Compiler c) {
   return names.list_free();
 }
 
+macro Statement $report.parse_param_ident(Expr $c) {
+  $c.report_error(
+    <parse>, "expected identifier in parameter list",
+    $c.token, NULL);
+}
+
 /* A bare parameter is an automatic Var. */
 static List Compiler._parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
-    $report(c, "parse.param.ident");
+    $report.parse_param_ident(c);
   String name = c.token.text;
   List binding = c.sym.define(%($name), %("Var"));
   Map facts = c.semantic_binding_facts();
@@ -140,6 +145,13 @@ static List Compiler._template_capture(Compiler c) {
   return %(capture $name $reference (expr $reference (op & $value)));
 }
 
+macro Statement $report.type_ident_untyped(
+  Expr $c, Expr $spelling, Expr $origin) {
+  $c.report_error(
+    <type>, %"identifier '${$spelling}' has no semantic type",
+    $origin, NULL);
+}
+
 static List Compiler._shared_binding(Compiler c) {
   Token origin = c.token;
   String spelling = c.token.text;
@@ -147,13 +159,15 @@ static List Compiler._shared_binding(Compiler c) {
   Type type = NULL;
   List binding = c.sym.lookup(%($spelling), type);
   if (!type)
-    $report(c, "type.ident.untyped", spelling, origin);
+    $report.type_ident_untyped(c, spelling, origin);
   return binding;
 }
 
 static List Compiler._parse_lambda_body(Compiler c) {
-  if (!c.test(<"{">)) return c.parse_assignment();
-  $let(c.return_type, %("Var")) return c.parse_callable_body();
+  $let(c.return_type, %("Var")) {
+    if (!c.test(<"{">)) return c.parse_assignment();
+    return c.parse_callable_body();
+  }
 }
 
 /** The parameter types of a lambda's function signature, keeping typed
@@ -285,7 +299,7 @@ static void Compiler._add_param(Compiler c, Array entries, List declaration) {
 static List Compiler._bind_body(Compiler c, List body) {
   match (body) case $source_block_content(%(*)):
     return c.bind_callable_body(body, %("Var"));
-  return c.resolve_expression(body, c.token);
+  $let(c.return_type, %("Var")) return c.resolve_expression(body, c.token);
 }
 
 /* An open type is a Func when rows were supplied, and otherwise the
@@ -415,6 +429,12 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
          c.sym.binding_is_local_before(binding, depth);
 }
 
+macro Statement $report.type_capture_enclosing(Expr $c, Expr $original) {
+  $c.report_error(
+    <type>, "reference capture requires an enclosing reference capture",
+    $c.token, %("binding: ${binding_identity_spelling($original)}"));
+}
+
 /* A supplied row fixes the captured type and value. Otherwise a binding
    listed after `using` captures by reference, and a snapshot of a
    reference parameter copies its referent. */
@@ -438,7 +458,7 @@ static List Capture.add(Capture &k) {
   else if (type.car() == <&>)
     expression = %(expr $captured_type (op * $expression));
   if (reference && %(lambda-snapshot $binding) in k.facts)
-    $report(k.c, "type.capture.enclosing", k.original);
+    $report.type_capture_enclosing(k.c, k.original);
   return k.record(captured_type, expression, reference);
 }
 
@@ -491,11 +511,17 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     }
 }
 
+macro Statement $report.type_capture_ref(Expr $c, Expr $binding) {
+  $c.report_error(
+    <type>, "captured value requires 'using &name' for reference access",
+    $c.token, %("binding: ${binding_identity_spelling($binding)}"));
+}
+
 static void Compiler._require_capture_lvalue(Compiler c, List target) {
   List binding = Ast.lvalue_binding(target);
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
-    $report(c, "type.capture.ref", binding);
+    $report.type_capture_ref(c, binding);
 }
 
 /* An argument bound to a reference parameter is reference access. */

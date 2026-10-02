@@ -19,7 +19,6 @@
 
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 
 $(import "../src/ast-rewrite.xmacro")
 #include "meta.x"
@@ -51,13 +50,13 @@ List Compiler.transform(Compiler c, List ast) {
   /* Regions are read before lowering, while `$scope`, `$auto`, and the
      `defer` beside each region are still the forms the parser produced. */
   c.check_regions(ast);
-  List newast = c._sequence(ast);
+  List newast = c._sequence(ast, 0);
   // Merge and lower synthesized lambda siblings.
   Array generated = [];
   while (c.early_decls.len()) {
     List items = c.early_decls;
     c.early_decls.clear();
-    List lowered = c._sequence(items);
+    List lowered = c._sequence(items, 0);
     foreach (Var sibling, lowered) generated.push(sibling);
   }
   if (generated.len()) newast = newast.append(generated.list_free());
@@ -70,11 +69,18 @@ List Compiler.transform(Compiler c, List ast) {
 */
 Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
+macro Statement $report.parse_init_incomplete(Expr $c) {
+  $c.report_error(
+    <parse>,
+    "managed initializer requires a complete block-local initializer",
+    NULL, NULL);
+}
+
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
   match (ast)
     case %(managed-init ?):
-      $report(c, "parse.init.incomplete");
+      $report.parse_init_incomplete(c);
   Var head = ast.car();
   if (head is not <symbol>) return c._children(ast);
   match (ast) {
@@ -113,7 +119,6 @@ static Ast Compiler._step(Compiler c, Ast ast) {
     case <dstrasgn>: next = c._destructure_value(ast); break;
     case <match>: next = c._match_cases(ast); break;
     case <defer>: next = c._defer_node(ast); break;
-    case <block>: next = c._block_node(ast); break;
     case <return>: next = c._return(ast); break;
     case <raise>: return c._raise_node(ast);
     case <if>: case <while>: case <do>: case <for>:
@@ -131,18 +136,15 @@ static Ast Compiler._step(Compiler c, Ast ast) {
 static Ast Compiler._finish(Compiler c, Ast ast) {
   match (ast) {
     case %(seq *items):
-      return %(seq @{c._sequence(items)});
+      return %(seq @{c._sequence(items, 0)});
     case %(matchcases ?subject ?records): {
       List new_subject = c._step(subject);
       List new_records = c._match_records(records);
       return %(matchcases $new_subject $new_records);
     }
-    case $source_block_content(%(*body)): {
-      List lowered = c._sequence(body);
-      List deferred = c.rewrite_defer_list(lowered);
-      if (deferred != lowered) lowered = c._sequence(deferred);
-      return source_block_content(lowered);
-    }
+    case %(parens (block *body)):
+      return %(parens ${c._block_node(body, 1)});
+    case $source_block_content(%(*body)): return c._block_node(body, 0);
   }
   return c._children(ast);
 }
@@ -150,12 +152,18 @@ static Ast Compiler._finish(Compiler c, Ast ast) {
 /* Only top-level and block sequences absorb `(seq ...)` replacements.
    Children transform left to right, then reverse assembly preserves source
    order while allocating generated splice origins from right to left. */
-static Ast Compiler._sequence(Compiler c, Ast ast) {
+static Ast Compiler._sequence(Compiler c, Ast ast, int value_tail) {
   Array transformed = $auto([]);
-  foreach (List value, ast) {
+  for (List cursor = ast; cursor; cursor = cursor.cdr()) {
+    List value = cursor.car();
     List source = Ast.without_origin(value);
-    List lowered = source.match(%(defer ?))
-      ? value : c._step(value);
+    List lowered;
+    match (source) {
+      case %(stmnt ?expression) if (value_tail && !cursor.cdr()):
+        lowered = Ast.rewrap_origin(value, %(stmnt ${c._step(expression)}));
+      case %(defer ?): lowered = value;
+      default: lowered = c._step(value);
+    }
     if (!c.fn_name) lowered = c.lower_cleanup(lowered);
     transformed.push(lowered);
   }
@@ -247,26 +255,45 @@ static Ast Compiler._function_node(
   return transformed;
 }
 
+macro Statement $report.xform_index_unsupported(Expr $c, Expr $type) {
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket indexing",
+    NULL, NULL);
+}
+
 static Ast Compiler._getindex_node(
   Compiler c, List expression, Type type, List index) {
   List resolved = c._nominal_getindex(type);
   if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
   if (!resolved)
-    $report(c, "xform.index.unsupported", type);
+    $report.xform_index_unsupported(c, type);
   return c._step(
     c._indexed_call_expr(resolved, %($expression $index)).caddr());
+}
+
+macro Statement $report.xform_index_assignment(Expr $c, Expr $type) {
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, NULL);
 }
 
 static Ast Compiler._setindex_node(
   Compiler c, List expression, Type type, List index, List value) {
   List resolved = c.resolve_protocol_member(type, "setindex");
   if (!resolved)
-    $report(c, "xform.index.assignment", type);
+    $report.xform_index_assignment(c, type);
   if (!c._indexed_builtin_helper(type))
     return c._step(
       c._sequenced_protocol_call(resolved, %($expression $index $value)));
   return c._step(
     c._indexed_call_expr(resolved, %($expression $index $value)).caddr());
+}
+
+macro Statement $report.xform_slice_unsupported(
+  Expr $c, Expr $type, Expr $notes) {
+  $c.report_error(
+    <xform>, %"type ${$type} does not support slicing",
+    NULL, $notes);
 }
 
 static Ast Compiler._slice_node(
@@ -275,10 +302,10 @@ static Ast Compiler._slice_node(
   match (type)
     case %(?(String name)): nominal = name;
   if (!nominal)
-    $report(c, "xform.slice.unsupported", type, NULL);
+    $report.xform_slice_unsupported(c, type, NULL);
   String fnname = %"${nominal}_getslice";
   if (!c.sym.get(%($fnname)))
-    $report(c, "xform.slice.unsupported", type, %());
+    $report.xform_slice_unsupported(c, type, %());
   String none = "-2147483648";
   start = start ? start : %(literal (int) $none);
   stop = stop ? stop : %(literal (int) $none);
@@ -361,10 +388,15 @@ static Ast Compiler._defer_node(Compiler c, Ast ast) {
   return ast;
 }
 
-static Ast Compiler._block_node(Compiler c, Ast ast) {
-  List statements = ast.cdr();
+/* A value block lowers its final expression as a value, including an
+   assignment whose ordinary statement form discards its result. */
+static Ast Compiler._block_node(
+  Compiler c, List statements, int value_tail) {
   List body = c.rewrite_defer_list(statements);
-  return body !== statements ? source_block_content(body) : ast;
+  List lowered = c._sequence(body, value_tail);
+  List deferred = c.rewrite_defer_list(lowered);
+  if (deferred != lowered) lowered = c._sequence(deferred, value_tail);
+  return source_block_content(lowered);
 }
 
 static Ast Compiler._raise_node(Compiler c, Ast ast) {
@@ -882,6 +914,12 @@ static List Compiler._typed_destructure(
   return c.rebuild_statement(sequence(cons(temp, declarations.list_free())));
 }
 
+macro Statement $report.type_destructure_list(Expr $c, Expr $source_type) {
+  $c.report_error(
+    <type>, "destructuring requires a List source",
+    NULL, %(("source type" ${$source_type})));
+}
+
 static List Compiler._destructure_source(
   Compiler c, List source, Type source_type) {
   // An integer, floating, or enumeration source cannot destructure. Reject
@@ -889,13 +927,13 @@ static List Compiler._destructure_source(
   // convert_expression would instead diagnose an integer reaching a
   // pointer.
   if (c.sym.resolve_numeric_type(source_type.canonicalize()))
-    $report(c, "type.destructure.list", source_type);
+    $report.type_destructure_list(c, source_type);
   List converted = c.convert_expression(source, %("List"));
   Type converted_type = NULL;
   match (converted)
     case %(expr ?type ?): converted_type = type;
   if (!c.sym.is_named_value_type(converted_type, "List"))
-    $report(c, "type.destructure.list", source_type);
+    $report.type_destructure_list(c, source_type);
   return %(code-value "bound" $converted ());
 }
 
@@ -1344,6 +1382,12 @@ static Type _printf_integer_type(PrintfLength length, int is_unsigned) {
 
 // operators
 
+macro Statement $report.xform_unary_dynamic(Expr $c) {
+  $c.report_error(
+    <xform>, "dynamic unary numeric operators are not supported",
+    NULL, %("use Var.binary with an explicit numeric operand"));
+}
+
 static List Compiler._operator(Compiler c, List ast) {
   List truthy = c._truthy(ast);
   if (truthy != ast) return truthy;
@@ -1355,7 +1399,7 @@ static List Compiler._operator(Compiler c, List ast) {
              (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?)))): {
       if (c.sym.is_var_type(argument_type))
-        $report(c, "xform.unary.dynamic");
+        $report.xform_unary_dynamic(c);
       return ast;
     }
     case $source_operator_content(%(
@@ -1446,10 +1490,33 @@ static List Compiler._to_var(Compiler c, List expr) =>
 static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "${(unsigned long) value}");
 
+macro Statement $report.xform_index_copy(Expr $c, Expr $type) {
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, %("use an explicit copy-producing method where available"));
+}
+
+macro Statement $report.xform_string_assignment(Expr $c) {
+  {
+    String note = "String is immutable: use the copy-producing " +
+                  "String.withindex, or bind a char * to write a " +
+                  "transient String.malloc buffer";
+    $c.report_error(
+      <xform>, "String does not support bracket assignment",
+      NULL, %($note));
+  }
+}
+
+macro Statement $report.xform_slice_assignment(Expr $c) {
+  $c.report_error(
+    <xform>, "slice expressions are not assignable",
+    NULL, %("call the collection's setslice method explicitly"));
+}
+
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
   if (lhs.match(%(expr ? (slice *))))
-    $report(c, "xform.slice.assignment");
+    $report.xform_slice_assignment(c);
   List base, index;
   Type base_type;
   if (_resolved_index_parts(lhs, base, base_type, index)) {
@@ -1458,10 +1525,10 @@ static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
        stale. A raw write bypasses that invariant, while generic
        setindex returns a copy that this assignment would discard. */
     if (c.sym.is_string_type(base_type)) {
-      $report(c, "xform.string.assignment");
+      $report.xform_string_assignment(c);
     }
     if (!c.resolve_protocol_member(base_type, "setindex"))
-      $report(c, "xform.index.copy", base_type);
+      $report.xform_index_copy(c, base_type);
     return %(setindex $base $index $rhs);
   }
   rhs = c.convert_expression(rhs, lhs.cadr());
@@ -1532,6 +1599,18 @@ static List Compiler._binary_operator(
 static int _dynamic_binary_operator(Symbol op) =>
   op.compound_assignment() != 0;
 
+macro Statement $report.xform_numeric_operands(
+  Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
+  {
+    String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
+    String details =
+      %"operator: ${$op} left type: $left_type right type: $right_type";
+    $c.report_error(
+      <xform>, "dynamic numeric operators require numeric operands",
+      NULL, %($details));
+  }
+}
+
 static List Compiler._dynamic_binary(
   Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
   Type rhs_type) {
@@ -1544,11 +1623,26 @@ static List Compiler._dynamic_binary(
   if (!string_plus &&
       ((!lhs_is_var && !c.sym.resolve_numeric_type(lhs_type)) ||
        (!rhs_is_var && !c.sym.resolve_numeric_type(rhs_type)))) {
-    $report(c, "xform.numeric.operands", op, lhs_type, rhs_type);
+    $report.xform_numeric_operands(c, op, lhs_type, rhs_type);
   }
   lhs = c.convert_expression(lhs, %("Var"));
   rhs = c.convert_expression(rhs, %("Var"));
   return %(call "Var_binary" (args $lhs ${_symbol_expression(op)} $rhs));
+}
+
+macro Statement $report.xform_string_compound(Expr $c) {
+  $c.report_error(
+    <xform>, "String compound assignment supports only String +=",
+    NULL, NULL);
+}
+
+macro Statement $report.xform_container_compound(Expr $c, Expr $lhs_type) {
+  {
+    String type = $lhs_type.repr();
+    $c.report_error(
+      <xform>, %"container type $type does not support compound assignment",
+      NULL, %("update an indexed element instead"));
+  }
 }
 
 static List Compiler._dynamic_compound(
@@ -1557,7 +1651,7 @@ static List Compiler._dynamic_compound(
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   int rhs_is_var = c.sym.is_var_type(rhs_type);
   if (c._indexed_builtin_helper(lhs_type)) {
-    $report(c, "xform.container.compound", lhs_type);
+    $report.xform_container_compound(c, lhs_type);
   }
   /* Without this rejection a nonmatching String compound falls through to
      native pointer arithmetic on an interned String. Concatenation itself
@@ -1567,7 +1661,7 @@ static List Compiler._dynamic_compound(
   Type member_type = lhs_type;
   if (c.sym.is_string_type(lhs_type)) {
     if (op != <+> || !c._string_operand(rhs_type))
-      $report(c, "xform.string.compound");
+      $report.xform_string_compound(c);
     member_type = %("String");
   }
   if (!lhs_is_var) {
@@ -1585,12 +1679,30 @@ static List Compiler._dynamic_compound(
   return _update_call(lhs, _symbol_expression(op), rhs, helper);
 }
 
+macro Statement $report.xform_compound_operand(
+  Expr $c, Expr $op, Expr $rhs_type) {
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    $c.report_error(
+      <xform>, $op == <+>
+        ? "dynamic += requires a numeric, Var, or String operand"
+        : "dynamic compound assignment requires a numeric or Var operand",
+      NULL, %($details));
+  }
+}
+
+macro Statement $report.xform_compound_bitfield(Expr $c) {
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target a bitfield",
+    NULL, NULL);
+}
+
 static void Compiler._dynamic_rhs(
   Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
   if (lhs_type.is_bitfield())
-    $report(c, "xform.compound.bitfield");
+    $report.xform_compound_bitfield(c);
   if (!rhs_is_var && !c._scalar_operand(op, rhs_type)) {
-    $report(c, "xform.compound.operand", op, rhs_type);
+    $report.xform_compound_operand(c, op, rhs_type);
   }
 }
 
@@ -1598,13 +1710,28 @@ static void Compiler._dynamic_rhs(
 static int Compiler._scalar_operand(Compiler c, Symbol op, Type type) =>
   c.sym.resolve_numeric_type(type) || (op == <+> && c._string_operand(type));
 
+macro Statement $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
+  {
+    String details = %"left type: ${$lhs_type.repr()}";
+    $c.report_error(
+      <xform>, "dynamic compound assignment requires a numeric lvalue",
+      NULL, %($details));
+  }
+}
+
+macro Statement $report.xform_compound_enum(Expr $c) {
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target an enum",
+    NULL, NULL);
+}
+
 static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   Type scalar = c.sym.resolve_numeric_type(lhs_type);
   if (scalar && scalar.is_enum())
-    $report(c, "xform.compound.enum");
+    $report.xform_compound_enum(c);
   String helper = scalar ? scalar.var_numeric_update_helper() : NULL;
   if (!helper) {
-    $report(c, "xform.compound.lvalue", lhs_type);
+    $report.xform_compound_lvalue(c, lhs_type);
   }
   return helper;
 }
@@ -1644,6 +1771,27 @@ static List Compiler._indexed_change(
   return %(call $helper (args @arguments));
 }
 
+macro Statement $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    String message = $op == <+>
+      ? "indexed += requires a numeric, Var, or String operand"
+      : "indexed compound assignment requires a numeric or Var operand";
+    $c.report_error(<xform>, message, NULL, %($details));
+  }
+}
+
+macro Statement $report.xform_index_update(
+  Expr $c, Expr $base_type, Expr $postfix) {
+  {
+    String type = $base_type.repr();
+    String message = $postfix
+      ? %"type $type does not support indexed increment or decrement"
+      : %"type $type does not support indexed compound assignment";
+    $c.report_error(<xform>, message, NULL, NULL);
+  }
+}
+
 /* Compound, prefix and postfix brackets share the same resolved element,
    protocol lookup, and built-in conversion. A missing rhs means postfix. */
 static List Compiler._indexed_resolution(
@@ -1652,12 +1800,12 @@ static List Compiler._indexed_resolution(
   List resolved = c.resolve_protocol_member(
     base_type, postfix ? "postfixindex" : "updateindex");
   if (!resolved) {
-    $report(c, "xform.index.update", base_type, postfix);
+    $report.xform_index_update(c, base_type, postfix);
   }
   if (owner && !postfix) {
     Type rhs_type = rhs.cadr();
     if (!c.sym.is_var_type(rhs_type) && !c._scalar_operand(op, rhs_type))
-      $report(c, "xform.index.operand", op, rhs_type);
+      $report.xform_index_operand(c, op, rhs_type);
   }
   return resolved;
 }

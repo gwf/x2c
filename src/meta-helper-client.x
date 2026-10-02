@@ -11,7 +11,6 @@
 #include "compiler.x"
 
 #pragma private
-$(import "../src/error-reports.xmacro")
 #include "meta-group.x"
 #include "datum.x"
 #include <errno.h>
@@ -335,17 +334,33 @@ static int _read_input(double deadline) {
 static void Call.refuse(Call &call, String why) =>
   call.compiler.refuse_meta_call(call.name, call.site, why);
 
+macro Statement $report.macro_helper_timeout(
+  Expr $c, Expr $site, Expr $limit, Expr $name) {
+  $c.report_error(
+    <macro>,
+    "%s%g s".printf("this meta call ran longer than ", $limit),
+    $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+}
+
 /* Kills the helper, which passed the call's deadline, and reports the
    call. */
 static void Call.overdue(Call &call) {
   _helper_stop(SIGKILL);
-  $report(
-    call.compiler, "macro.helper.timeout",
+  $report.macro_helper_timeout(
+    call.compiler,
     call.site, call.limit, call.name);
 }
 
+macro Statement $report.macro_helper_stopped(
+  Expr $c, Expr $site, Expr $name, Expr $reason) {
+  $c.report_error(
+    <macro>,
+    "this meta call stopped the compile-time helper",
+    $site, %("function: ${$name}" "reason: ${$reason}"));
+}
+
 static void Call.stopped(Call &call, String reason) {
-  $report(call.compiler, "macro.helper.stopped", call.site, call.name, reason);
+  $report.macro_helper_stopped(call.compiler, call.site, call.name, reason);
 }
 
 // lifecycle

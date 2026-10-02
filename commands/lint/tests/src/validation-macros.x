@@ -2,7 +2,6 @@
 #include "diagnostics.x"
 $(import "../../../../lib/error-macros.xmacro")
 $(import "../../../../lib/func-errors.xmacro")
-$(import "../../../../src/error-reports.xmacro")
 
 macro Statement $user.error() { printf("returning\n"); }
 macro Statement $user.warning(Expr $c) {
@@ -46,8 +45,14 @@ int direct_report(Compiler c) {
   return 0;
 }
 
-int catalogue_report(Compiler c) {
-  $report(c, "parse.raise.payload");
+macro Statement $report.parse_raise_payload(Expr $c) {
+  $c.report_error(
+    <parse>, "raise requires a %() payload literal",
+    $c.token, %("use raise %(code (key value)...);"));
+}
+
+int named_report(Compiler c) {
+  $report.parse_raise_payload(c);
   return 0;
 }
 
@@ -64,10 +69,10 @@ int direct_validate(Compiler c, List node) {
   return 1;
 }
 
-int catalogue_validate(Compiler c, List node) {
-  if (node.car() != <item>) $report(c, "parse.raise.payload");
+int named_validate(Compiler c, List node) {
+  if (node.car() != <item>) $report.parse_raise_payload(c);
   if (node.cdr().len() != 2 || node.cadr() is not <list>)
-    $report(c, "parse.raise.payload");
+    $report.parse_raise_payload(c);
   return 1;
 }
 

@@ -22,7 +22,6 @@ typedef struct PrintfFn {
 
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "literals.x"
@@ -70,12 +69,18 @@ static List Compiler._parse_comma_list(Compiler c) {
 List Compiler.parse_assignment(Compiler c) =>
   c._parse_assignment_tail(c.parse_conditional());
 
+macro Statement $report.type_optional_ref_assign(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "check optional reference before assigning its value",
+    $origin, NULL);
+}
+
 static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (!op.is_assignment_op()) return lhs;
   if (lhs.cadr().car() == <opt-ref>)
-    $report(c, "type.optional-ref.assign", origin);
+    $report.type_optional_ref_assign(c, origin);
   List targets = op == <=> ? c._destructure_targets(lhs) : NULL;
   c.next();
   List rhs = c.parse_assignment();
@@ -86,6 +91,12 @@ static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
     source_operator_expression(NULL, %($op $lhs $rhs)), origin);
 }
 
+macro Statement $report.parse_destructure_target(Expr $c) {
+  $c.report_error(
+    <parse>, "unsupported destructuring assignment target",
+    $c.token, %("destructuring targets must be simple identifiers"));
+}
+
 static List Compiler._destructure_targets(Compiler c, List lhs) {
   match (lhs)
     case %(expr ? ${$source_content_pattern($grouped, %(?target))}): {
@@ -94,7 +105,7 @@ static List Compiler._destructure_targets(Compiler c, List lhs) {
         case %(expr ? ${$source_commas_content(%(*targets))}): {
           foreach (List entry, targets) {
             if (_destructure_identifier(entry)) continue;
-            $report(c, "parse.destructure.target");
+            $report.parse_destructure_target(c);
           }
           return %(targets @targets);
         }
@@ -217,17 +228,35 @@ static int Compiler._is_type_selector_start(Compiler c) {
   return !c.sym.get(%($spelling));
 }
 
+macro Statement $report.parse_is_pointer(Expr $c, Expr $origin) {
+  $c.report_error(
+    <parse>, "pointer type after 'is' must be parenthesized",
+    $origin, %("write value is (T *)"));
+}
+
+macro Statement $report.type_is_function(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "function type cannot be used after operator 'is'",
+    $origin, %("function types have no supported Var tag"));
+}
+
+macro Statement $report.type_is_array(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "array type cannot be used after operator 'is'",
+    $origin, %("array types have no supported Var tag"));
+}
+
 static Type Compiler._parse_is_type(Compiler c, Token origin) {
   int parenthesized = c.test(<(>), Type type = c.parse_type_name();
   if (parenthesized) {
     if (c.peek(0) == <[>)
-      $report(c, "type.is.array", origin);
+      $report.type_is_array(c, origin);
     if (c.peek(0) == <(>)
-      $report(c, "type.is.function", origin);
+      $report.type_is_function(c, origin);
     c.expect(<)>);
   }
   else if (type.is_pointer())
-    $report(c, "parse.is.pointer", origin);
+    $report.parse_is_pointer(c, origin);
   return type;
 }
 
@@ -493,6 +522,10 @@ static List Compiler._parse_postfix_index(Compiler c, List expr) {
   return c.resolve_expression(%(expr () (index $expr $index)), c.token);
 }
 
+macro Statement $report.parse_slice_zero(Expr $c) {
+  $c.report_error(<parse>, "slice step cannot be zero", $c.token, %());
+}
+
 /* Called after the optional start index and first `:` of
    `expr[start:end:step]`. */
 static List Compiler._parse_slice(Compiler c, List expr, List start) {
@@ -506,7 +539,7 @@ static List Compiler._parse_slice(Compiler c, List expr, List start) {
   }
   if (step && step.match(%(expr ?
       ${$source_literal_content(%(? "0"))})))
-    $report(c, "parse.slice.zero");
+    $report.parse_slice_zero(c);
   c.expect(<]>);
   return %(expr $type ${source_slice_content(
     %($expr $start $stop $step))});
@@ -590,6 +623,15 @@ static List Compiler._parse_postfix_dot(Compiler c, List expr) {
   return result;
 }
 
+macro Statement $report.parse_member_ident(Expr $c, Expr $op, Expr $lhs) {
+  {
+    List notes = %("token:" ${$c.token.text});
+    if ($lhs) notes = cons(%("lhs expr:" ${$lhs.str()}), notes);
+    String msg = %"expected identifier after '${$op}'";
+    $c.report_error(<parse>, msg, $c.token, notes);
+  }
+}
+
 static List Compiler._parse_field_name(
   Compiler c, Symbol op_sym, List lhs_opt) {
   c.require_input();
@@ -597,7 +639,7 @@ static List Compiler._parse_field_name(
   if (slot) return %($slot);
   String field_name = c.token.text;
   if (!field_name || !field_name.is_identifier()) {
-    $report(c, "parse.member.ident", op_sym, lhs_opt);
+    $report.parse_member_ident(c, op_sym, lhs_opt);
   }
   List field = %( $field_name );
   c.next();
@@ -785,12 +827,11 @@ static int _defers_directly(List items) {
   return 0;
 }
 
-/* A reference names a value C reads out of the statement expression. */
+/* Reference reads are already resolved; keep the final expression's type. */
 static Type _final_value_type(List items) {
   List last = items ? Ast.without_origin(items.last()) : NULL;
   match (last)
-    case %(stmnt (expr ?(Type type) ?)):
-      return type.car() == <&> || type.car() == <opt-ref> ? type.cdr() : type;
+    case %(stmnt (expr ?(Type type) ?)): return type;
   return %(void);
 }
 
@@ -1154,6 +1195,18 @@ static List Compiler._resolve_macro_slot(
 
 // identifiers
 
+macro Statement $report.type_ident_semantic(Expr $c, Expr $value, Expr $origin) {
+  $c.report_error(
+    <type>, %"identifier ${$value.repr()} has no semantic type",
+    $origin, NULL);
+}
+
+macro Statement $report.type_binding_unknown(Expr $c, Expr $name, Expr $origin) {
+  $c.report_error(
+    <type>, "identifier has an unknown binding identity",
+    $origin, %("binding: ${$name.repr()}"));
+}
+
 static List Compiler._resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
   if (type === %(<macro-expr>)) type = NULL;
@@ -1164,7 +1217,7 @@ static List Compiler._resolve_identifier(
     (value is <list> && !value.is_nil() &&
      value.car() == <macro-bind>);
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
-  if (!binding) $report(c, "type.binding.unknown", value, origin);
+  if (!binding) $report.type_binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);
@@ -1172,7 +1225,7 @@ static List Compiler._resolve_identifier(
   if (!type) type = c._identifier_type(
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
-    $report(c, "type.ident.semantic", value, origin);
+    $report.type_ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
   if (c.lambda_scopes && !c.macro_holes) {
     result = c.capture_lambda_identifier(binding, type);
@@ -1210,7 +1263,7 @@ static List Compiler._identifier_binding(
     if (!c.semantic_binding_facts().try_get(
       %(known $identity), issued) ||
         issued is not <string> || !issued.string().equal(spelling))
-      $report(c, "type.binding.unknown", name, origin);
+      $report.type_binding_unknown(c, name, origin);
     return name;
   }
   match (name) {
@@ -1318,6 +1371,14 @@ static Type Compiler._identifier_type(
   return type;
 }
 
+macro Statement $report.type_function_private(
+  Expr $c, Expr $spelling, Expr $file, Expr $origin) {
+  $c.report_error(
+    <type>, %"'${$spelling}' is a static function private to its unit",
+    $origin, %("it is defined in '${$file}';"
+    "remove 'static' so other units can call it"));
+}
+
 /* A `static` function belongs to the file that defines it, so an including
    unit replays a marker row naming that file instead of a declaration.
    Reporting the reference here names the function and its file, where C
@@ -1330,7 +1391,7 @@ static void Compiler._check_unit_static(
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
   String file = c.display_path(home_absolute_path(owner.car()));
-  $report(c, "type.function.private", spelling, file, origin);
+  $report.type_function_private(c, spelling, file, origin);
 }
 
 static List Compiler._read_bound_reference(
@@ -1365,12 +1426,27 @@ static int Compiler._expression_is_addressable(Compiler c, List expression) {
 
 // indexing and slices
 
+macro Statement $report.parse_index_unsupported(
+  Expr $c, Expr $receiver_type, Expr $origin) {
+  $c.report_error(
+    <parse>, $receiver_type.is_typedef_name()
+    ? %"type ${$receiver_type} does not support getindex"
+    : %"type ${$receiver_type} does not support indexing",
+    $origin, %());
+}
+
+macro Statement $report.type_optional_ref_index(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "check optional reference before indexing its value",
+    $origin, NULL);
+}
+
 static List Compiler._resolve_indexed(
   Compiler c, List receiver, List selector, Token origin) {
   receiver = c.resolve_expression(receiver, origin);
   selector = c.resolve_expression(selector, origin);
   if (receiver.cadr().car() == <opt-ref>)
-    $report(c, "type.optional-ref.index", origin);
+    $report.type_optional_ref_index(c, origin);
   if (_deferred_receiver(receiver) || _deferred_receiver(selector))
     return %(expr (<macro-expr>) (index $receiver $selector));
   List resolved = c._postfix_index_expression(receiver, selector);
@@ -1381,7 +1457,7 @@ static List Compiler._resolve_indexed(
       List.match(receiver, %(expr () ${$source_operator_content(
         %((!or . ->) * *))})))
     return %(expr () (index $receiver $selector));
-  $report(c, "parse.index.unsupported", receiver_type, origin);
+  $report.parse_index_unsupported(c, receiver_type, origin);
 }
 
 static List Compiler._postfix_index_expression(
@@ -1395,6 +1471,16 @@ static List Compiler._postfix_index_expression(
     return %(expr ${type.dereference()} (index $expr $index));
   if (!type.is_typedef_name()) return NULL;
   return c._typedef_index(expr, index, type);
+}
+
+macro Statement $report.type_index_missing(Expr $c, Expr $type) {
+  $c.report_error(<type>, %"${$type.car()} has no getindex", $c.token, NULL);
+}
+
+macro Statement $report.type_index_symbol(Expr $c) {
+  $c.report_error(
+    <type>, "Symbol cannot be used as an integer bracket index",
+    $c.token, NULL);
 }
 
 static List Compiler._typedef_index(
@@ -1414,7 +1500,7 @@ static List Compiler._typedef_index(
     case %((func (!set ?params ($receiver ?))) ?rtype): {
       Type key = params.cadr(), supplied = index.cadr();
       if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
-        $report(c, "type.index.symbol");
+        $report.type_index_symbol(c);
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
@@ -1422,7 +1508,7 @@ static List Compiler._typedef_index(
   // A boxable handle to a record has no C array reading.
   if (native.is_pointer() && native.dereference().is_aggregate() &&
       type.var_tag())
-    $report(c, "type.index.missing", type);
+    $report.type_index_missing(c, type);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
   if (native.is_array() ||
@@ -1528,13 +1614,22 @@ static int _deferred_call(List callee, List receiver, List arguments) {
   return 0;
 }
 
+macro Statement $report.type_method_arity(
+  Expr $c, Expr $parameters, Expr $arguments, Expr $origin) {
+  $c.report_error(
+    <type>, %"method takes ${List.len($parameters) - 1} argument${
+            List.len($parameters) == 2 ? "" : "s"}, not ${
+            $arguments.len() - 1}",
+    $origin, NULL);
+}
+
 static void CallSite._check_arity(
   CallSite &k, Type callee_type, List arguments) {
   match (callee_type)
     case %((func (!set ?parameters (*))) *):
       if (!_parameters_variadic(parameters) &&
           arguments.len() > List.len(parameters))
-        $report(k.c, "type.method.arity", parameters, arguments, k.origin);
+        $report.type_method_arity(k.c, parameters, arguments, k.origin);
 }
 
 static int _parameters_variadic(List parameters) {
@@ -1599,6 +1694,13 @@ static List Compiler._discarding_callee(
 
 // method calls
 
+macro Statement $report.type_method_missing(
+  Expr $c, Expr $type, Expr $name, Expr $origin) {
+  $c.report_error(
+    <type>, %"type ${$type.repr()} has no method ${$name}",
+    $origin, NULL);
+}
+
 static List CallSite._method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
   k.field = field;
@@ -1609,7 +1711,7 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
   }
   if (!resolution) {
     Var name = k.field.car();
-    $report(k.c, "type.method.missing", k.type, name, k.origin);
+    $report.type_method_missing(k.c, k.type, name, k.origin);
   }
   match (resolution) {
     case %(ambiguous *packages):
@@ -1655,6 +1757,20 @@ static List CallSite._bound(
   return k._finish(signature.apply(), callee, signature, k.receiver);
 }
 
+macro Statement $report.type_receiver_address(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "method pointer receiver requires an addressable value",
+    $origin, %("bind the value to an object before calling the method"));
+}
+
+macro Statement $report.type_receiver_pointer(
+  Expr $c, Expr $type, Expr $declared, Expr $origin) {
+  $c.report_error(
+    <type>,
+    %"method receiver ${$type.repr()} is a pointer to ${$declared.repr()}",
+    $origin, %("'.' reaches one pointer level; write (*receiver).method()"));
+}
+
 static List Compiler._method_bind(
   Compiler c, List receiver, Type type, Type declared, Token origin) {
   if (!declared || !type) return receiver;
@@ -1665,11 +1781,11 @@ static List Compiler._method_bind(
     source = named;
   }
   if (_receiver_points_to(source, target))
-    $report(c, "type.receiver.pointer", type, declared, origin);
+    $report.type_receiver_pointer(c, type, declared, origin);
   if (target.car() != <*> || cdr(target) !== source)
     return receiver;
   if (!c._expression_is_addressable(receiver))
-    $report(c, "type.receiver.address", origin);
+    $report.type_receiver_address(c, origin);
   List address = %(expr ${type.reference()} (op & (parens $receiver)));
   return c.convert_expression(address, declared);
 }
@@ -1688,6 +1804,12 @@ static int _receiver_points_to(Type source, Type declared) {
 
 // member lookup
 
+macro Statement $report.type_optional_ref_access(Expr $c) {
+  $c.report_error(
+    <type>, "check optional reference before accessing its value",
+    $c.token, NULL);
+}
+
 /** Resolves one field or method selection without consuming parser tokens.
     `field` is a single-name `List` and `access` is `.` or
     `->`. The result is a
@@ -1699,7 +1821,7 @@ List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
   int call_context) {
   if (receiver_type.car() == <opt-ref>)
-    $report(c, "type.optional-ref.access");
+    $report.type_optional_ref_access(c);
   // The receiver type is a lookup key here. A const or volatile receiver
   // names the same aggregate, fields, and methods.
   Type type = receiver_type.canonicalize();
@@ -1889,6 +2011,13 @@ static List Compiler._delegate_step(Compiler c, Type receiver, String name) {
   return %(step $access $name $field_type);
 }
 
+macro Statement $report.type_delegate_ambiguous(
+  Expr $c, Expr $type, Expr $member, Expr $origin, Expr $notes) {
+  $c.report_error(
+    <type>, %"method '${$type}.${$member}' has multiple delegate paths",
+    $origin, $notes);
+}
+
 static void DelegateSearch._report_paths(
   DelegateSearch &d, List candidates) {
   List notes = NULL;
@@ -1899,14 +2028,29 @@ static void DelegateSearch._report_paths(
     notes = cons(%"delegate path: $description -> $spelling", notes);
   }
   String type = _delegate_type_name(d.outer), member = d.member;
-  $report(d.c, "type.delegate.ambiguous", type, member, d.origin,
+  $report.type_delegate_ambiguous(d.c, type, member, d.origin,
     notes.reverse());
+}
+
+macro Statement $report.type_delegate_cycle(
+  Expr $c, Expr $type, Expr $member, Expr $origin, Expr $path) {
+  $c.report_error(
+    <type>, %"delegation cycle resolving ${$type}.${$member}",
+    $origin, %("delegate path: ${$path}"));
 }
 
 static void DelegateSearch._report_cycle(DelegateSearch &d) {
   String type = _delegate_type_name(d.outer), member = d.member;
   String path = _delegate_path_string(d.outer, d.first_cycle, NULL);
-  $report(d.c, "type.delegate.cycle", type, member, d.origin, path);
+  $report.type_delegate_cycle(d.c, type, member, d.origin, path);
+}
+
+macro Statement $report.type_method_packages(
+  Expr $c, Expr $type, Expr $member, Expr $origin, Expr $notes) {
+  $c.report_error(
+    <type>,
+    %"method '${$type}.${$member}' is provided by multiple imported packages",
+    $origin, $notes);
 }
 
 static void Compiler._report_method_ambiguity(
@@ -1917,7 +2061,7 @@ static void Compiler._report_method_ambiguity(
   foreach (String package, packages)
     notes = cons(%"package: '$package'", notes);
   String type = _delegate_type_name(receiver);
-  $report(c, "type.method.packages", type, member, origin, notes.reverse());
+  $report.type_method_packages(c, type, member, origin, notes.reverse());
 }
 
 static String _delegate_path_string(Type receiver, List path, String member) {
@@ -2274,12 +2418,24 @@ static List _iter_destination(void) {
 
 // operators
 
+macro Statement $report.type_neg_unsupported(Expr $c, Expr $type, Expr $origin) {
+  $c.report_error(
+    <type>, "unary '-' requires a numeric type or implemented neg",
+    $origin, %("operand type: ${$type.repr()}"));
+}
+
+macro Statement $report.type_optional_ref_unchecked(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "check optional reference before using its value",
+    $origin, NULL);
+}
+
 static List Compiler._resolve_unary(
   Compiler c, Var operator, List operand, Token origin) {
   List lhs = c.resolve_expression(operand, origin);
   Type lhs_type = lhs.cadr();
   if (lhs_type.car() == <opt-ref> && operator != <!>)
-    $report(c, "type.optional-ref.unchecked", origin);
+    $report.type_optional_ref_unchecked(c, origin);
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
   if (lhs_type === %(<macro-expr>))
@@ -2300,7 +2456,7 @@ static List Compiler._resolve_unary(
       type = c.sym.resolve_numeric_type(type);
       if (type && type.is_integral()) type = type.promote();
       if (!type && lhs_type && operator == <->)
-        $report(c, "type.neg.unsupported", lhs_type, origin);
+        $report.type_neg_unsupported(c, lhs_type, origin);
       if (!type) type = lhs_type;
       break;
     }
@@ -2313,7 +2469,7 @@ static List Compiler._resolve_postfix_op(
   operand = c.resolve_expression(operand, origin);
   Type operand_type = operand.cadr();
   if (operand_type.car() == <opt-ref>)
-    $report(c, "type.optional-ref.unchecked", origin);
+    $report.type_optional_ref_unchecked(c, origin);
   if (operand_type === %(<macro-expr>))
     return source_postfix_expression(
       %(<macro-expr>), %($operator $operand));
@@ -2364,6 +2520,13 @@ static List Compiler._resolve_binary(
   return c._binary_expression(operator, lhs, rhs, origin);
 }
 
+macro Statement $report.type_contains_missing(
+  Expr $c, Expr $type, Expr $origin) {
+  $c.report_error(
+    <type>, "operator 'in' requires an implemented contains member",
+    $origin, %("receiver type: ${$type.repr()}"));
+}
+
 static List Compiler._binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
@@ -2389,7 +2552,7 @@ static List Compiler._binary_expression(
     return %(expr ("String") $cached);
   }
   if (operator == <in>)
-    $report(c, "type.contains.missing", rhs_type, origin);
+    $report.type_contains_missing(c, rhs_type, origin);
   /* An untyped preprocessor name beside a converting protocol participant
      would reach the C compiler with no usable conversion. */
   if ((lhs_type != NULL) != (rhs_type != NULL))
@@ -2431,6 +2594,13 @@ static int Compiler._convert_string_addition(
   return constant;
 }
 
+macro Statement $report.type_operand_untyped(Expr $c, Expr $origin) {
+  $c.report_error(
+    <type>, "operand has no x2c type beside a protocol participant",
+    $origin,
+    %("a preprocessor macro has no type here: cast it, or bind its value to a local"));
+}
+
 static void Compiler._check_untyped_operand(
   Compiler c, Symbol operator, Type participant, List other,
   Token origin) {
@@ -2439,7 +2609,15 @@ static void Compiler._check_untyped_operand(
   if (c._converts_operands(participant) &&
       c.resolve_protocol_member(participant, member) &&
       other.match(%(expr ? ${$source_identifier_content(%(?))})))
-    $report(c, "type.operand.untyped", origin);
+    $report.type_operand_untyped(c, origin);
+}
+
+macro Statement $report.type_matmul_missing(
+  Expr $c, Expr $lhs_type, Expr $rhs_type, Expr $origin) {
+  $c.report_error(
+    <type>, "operator '@' requires an implemented matmul member",
+    $origin,
+    %("left type: ${$lhs_type.repr()} right type: ${$rhs_type.repr()}"));
 }
 
 static void Compiler._check_matmul(
@@ -2447,7 +2625,7 @@ static void Compiler._check_matmul(
   Token origin) {
   if (operator == <@> && !c.sym.is_var_type(lhs_type) &&
       !c.sym.is_var_type(rhs_type))
-    $report(c, "type.matmul.missing", lhs_type, rhs_type, origin);
+    $report.type_matmul_missing(c, lhs_type, rhs_type, origin);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
@@ -2501,7 +2679,7 @@ static void Compiler._check_optional_operands(
   int null_test = _null_literal(lhs) || _null_literal(rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)
-    $report(c, "type.optional-ref.unchecked", c.token);
+    $report.type_optional_ref_unchecked(c, c.token);
 }
 
 static Type Compiler._shift_type(Compiler c, Type lhs) {
@@ -2716,6 +2894,12 @@ static int Compiler._is_operator_temporary(Compiler c, List expression) {
 
 // type tests and casts
 
+macro Statement $report.type_is_var(Expr $c, Expr $type, Expr $origin) {
+  $c.report_error(
+    <type>, "operator 'is' requires Var on the left",
+    $origin, %("operand type: ${$type.repr()}"));
+}
+
 static List Compiler._resolve_is_type(
   Compiler c, List operand, Type target, Token origin) {
   List lhs = c.resolve_expression(operand, origin);
@@ -2725,7 +2909,7 @@ static List Compiler._resolve_is_type(
     return c.rebuild_expression(%(<macro-expr>), has_type(lhs, target));
   }
   if (!c.sym.is_var_type(lhs_type))
-    $report(c, "type.is.var", lhs_type, origin);
+    $report.type_is_var(c, lhs_type, origin);
   Macro called = $called;
   if (target === %(void) || target === %("Void")) {
     List callee = c._resolve_identifier("Var_is_void", NULL, origin);
@@ -2740,6 +2924,12 @@ static List Compiler._resolve_is_type(
     %(int), called(callee, %($lhs (expr ("Symbol") $tagsym))));
 }
 
+macro Statement $report.type_is_selector(Expr $c, Expr $type, Expr $origin) {
+  $c.report_error(
+    <type>, "operator 'is' requires a type or Symbol on the right",
+    $origin, %("operand type: ${$type.repr()}"));
+}
+
 static List Compiler._resolve_is_symbol(
   Compiler c, List operand, List selector, Token origin) {
   List lhs = c.resolve_expression(operand, origin);
@@ -2751,9 +2941,9 @@ static List Compiler._resolve_is_symbol(
       %(<macro-expr>), has_symbol(lhs, selector));
   }
   if (!c.sym.is_var_type(lhs_type))
-    $report(c, "type.is.var", lhs_type, origin);
+    $report.type_is_var(c, lhs_type, origin);
   if (!c.sym.is_named_value_type(selector_type, "Symbol"))
-    $report(c, "type.is.selector", selector_type, origin);
+    $report.type_is_selector(c, selector_type, origin);
   match (selector)
     case %(expr ("Symbol") ${$source_literal_content(
         %(("Symbol") ? ?tag_value))}): {
@@ -2786,6 +2976,23 @@ static List Compiler._constant_row_test(
   return c.rebuild_expression(%(int), called(callee, arguments));
 }
 
+macro Statement $report.type_is_tag(Expr $c, Expr $target, Expr $origin) {
+  $c.report_error(
+    <type>,
+    %"type ${$target.repr()} has no supported Var tag for operator 'is'",
+    $origin, NULL);
+}
+
+macro Statement $report.type_is_enum(Expr $c, Expr $target, Expr $origin) {
+  {
+    String note =
+      "enum values box as the shared i32 family and retain no enum identity";
+    $c.report_error(
+      <type>, %"enum type ${$target.repr()} cannot be tested with 'is'",
+      $origin, %($note));
+  }
+}
+
 /** Returns the exact Var tag for a type test, rejecting types without one.
     Enums retain no identity after boxing and cannot be tested this way.
 */
@@ -2794,10 +3001,10 @@ Symbol Compiler.require_var_tag(
   Type resolved = NULL;
   Symbol vartag = c.sym.var_tag_for_type(target, resolved);
   if (resolved && resolved.is_enum()) {
-    $report(c, "type.is.enum", target, origin);
+    $report.type_is_enum(c, target, origin);
   }
   if (!vartag)
-    $report(c, "type.is.tag", target, origin);
+    $report.type_is_tag(c, target, origin);
   return vartag;
 }
 
@@ -2828,6 +3035,19 @@ static List Compiler._resolve_cast(
   return %(expr $type (cast $declaration $operand));
 }
 
+macro Statement $report.macro_adapter_typedef(Expr $c, Expr $origin) {
+  $c.report_error(
+    <macro>, "typed callback adapter target must be a typedef name",
+    $origin, NULL);
+}
+
+macro Statement $report.macro_adapter_pointer(
+  Expr $c, Expr $type, Expr $origin) {
+  $c.report_error(
+    <macro>, "typed callback adapter target must name a function pointer",
+    $origin, $type ? %("target type: ${$type.repr()}") : NULL);
+}
+
 static List Compiler._resolve_tadapt(
   Compiler c, List target, List source, Token origin) {
   target = c.resolve_expression(target, origin);
@@ -2837,10 +3057,10 @@ static List Compiler._resolve_tadapt(
       Type type = c.sym.resolve_key(syntax);
       if (!type || !type.is_pointer() ||
           !type.dereference().is_function())
-        $report(c, "macro.adapter.pointer", type, origin);
+        $report.macro_adapter_pointer(c, type, origin);
       return %(expr ($target_type) (tadapt ${c.origin} $source));
     }
-  $report(c, "macro.adapter.typedef", origin);
+  $report.macro_adapter_typedef(c, origin);
 }
 
 // collection literals
@@ -2920,6 +3140,10 @@ static List Compiler._resolve_map_value(
   return input;
 }
 
+macro Statement $report.parse_map_entry(Expr $c, Expr $origin) {
+  $c.report_error(<parse>, "expected one Map entry", $origin, NULL);
+}
+
 /** Resolves the key and value of one `(map-entry key value)` AST row.
     Any other shape is reported at `origin` as a parse error.
 */
@@ -2929,7 +3153,7 @@ List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
       return %(map-entry
         ${c.resolve_expression(key, origin)}
         ${c.resolve_expression(value, origin)});
-  $report(c, "parse.map.entry", origin);
+  $report.parse_map_entry(c, origin);
 }
 
 static List Compiler._resolve_initval(
@@ -3380,6 +3604,16 @@ static List Compiler._adapt_lambda_value(
     lowered, c.sym.resolve_key(target.type_from_ast()));
 }
 
+macro Statement $report.type_func_callback(Expr $c) {
+  {
+    String message = "cannot convert Func to a context-free callback";
+    List hint = %(
+      "call Func directly, or use a noncapturing lambda as the C callback"
+    );
+    $c.report_error(<type>, message, NULL, hint);
+  }
+}
+
 static List Compiler._lift_func_value(
   Compiler c, List expr, Type type, Type target) {
   Type func_type = c.sym.resolve_key(%("Func"));
@@ -3389,9 +3623,15 @@ static List Compiler._lift_func_value(
   }
   if (type && c.sym.resolve_key(type).equal(func_type) &&
       target.is_pointer() && target.dereference().is_function()) {
-    $report(c, "type.func.callback");
+    $report.type_func_callback(c);
   }
   return NULL;
+}
+
+macro Statement $report.type_brace_anonymous(Expr $c) {
+  $c.report_error(
+    <type>, "a brace outside an initializer needs a named destination type",
+    NULL, %("declare the destination with a struct tag or typedef"));
 }
 
 /* A brace that stays a native initializer outside a declaration becomes a
@@ -3404,7 +3644,7 @@ static List Compiler._compound_literal(
   match (converted)
     case %(expr ?type (composite *)): {
       if (Type.tag(type).match(%((gensym *))))
-        $report(c, "type.brace.anonymous");
+        $report.type_brace_anonymous(c);
       return %(expr $type (cast $type $converted));
     }
   return converted;
@@ -3454,6 +3694,15 @@ static List Compiler._convert_generic_arms(
   return NULL;
 }
 
+macro Statement $report.type_var_unresolved(Expr $c) {
+  {
+    String message = "cannot convert an unresolved expression to Var";
+    $c.report_error(
+      <type>, message,
+      NULL, %("give the expression a declared x2c type before boxing it"));
+  }
+}
+
 static List Compiler._convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
   List generic = c._convert_generic_arms(expr, declared_target);
@@ -3463,7 +3712,7 @@ static List Compiler._convert_untyped(
     List binding = expr.caddr().cadr();
     if (binding_identity_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
-    $report(c, "type.var.unresolved");
+    $report.type_var_unresolved(c);
   }
   return expr;
 }
@@ -3494,12 +3743,18 @@ static List Compiler._convert_known_value(
   return NULL;
 }
 
+macro Statement $report.type_ref_address(Expr $c) {
+  $c.report_error(
+    <type>, "reference argument must name an addressable object",
+    NULL, NULL);
+}
+
 static List Compiler._convert_reference(
   Compiler c, List expr, Type type, Type target) {
   // T -> &T: pass the address of an addressable value.
   if (type === cdr(target) && target.is_reference()) {
     if (!c._expression_is_addressable(expr))
-      $report(c, "type.ref.address");
+      $report.type_ref_address(c);
     return %(expr $target (op & (parens $expr)));
   }
   if (type.car() == <&> && target.car() == <opt-ref> &&
@@ -3538,6 +3793,20 @@ List Compiler.convert_segment_to_string(Compiler c, List expr) {
 
 // Var crossings
 
+macro Statement $report.type_var_convert(Expr $c, Expr $target) {
+  {
+    String message = %"cannot convert Var to type ${$target.repr()}";
+    $c.report_error(<type>, message, NULL, NULL);
+  }
+}
+
+macro Statement $report.type_var_address(Expr $c, Expr $target) {
+  $c.report_error(
+    <type>, %"cannot convert Var to ${$target.repr()}",
+    NULL,
+    %("write &value for its address, or value.pointer() to unbox a stored pointer"));
+}
+
 static List Compiler._read_var(
   Compiler c, List expr, Type type, Type target) {
   if (target === %("Symbol"))
@@ -3559,7 +3828,7 @@ static List Compiler._read_var(
   /* A Var reaching `Var *` almost always meant its address; unboxing a
      stored Var pointer must be spelled. */
   if (target.is_pointer() && c.sym.is_var_type(target.dereference()))
-    $report(c, "type.var.address", target);
+    $report.type_var_address(c, target);
   if (target.is_pointer())
     return %(expr $target (call "Var_pointer" (args $expr)));
   if (target.is_typedef_name()) {
@@ -3567,7 +3836,7 @@ static List Compiler._read_var(
     Type resolved = c.sym.resolve_key(target);
     if (resolved.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
-    $report(c, "type.var.convert", target);
+    $report.type_var_convert(c, target);
   }
   return NULL;
 }
@@ -3610,6 +3879,13 @@ static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
   return c.rebuild_expression(target, called(callee, %($expr)));
 }
 
+macro Statement $report.type_var_loss(Expr $c, Expr $type) {
+  {
+    String message = %"cannot convert ${$type.repr()} to Var without loss";
+    $c.report_error(<type>, message, NULL, NULL);
+  }
+}
+
 /* A declared T.var converter owns custom boxing before tag based boxing. */
 static List Compiler._declared_var_converter(
   Compiler c, List expr, Type type) {
@@ -3629,7 +3905,7 @@ static List Compiler._declared_var_converter(
     Macro called = $called;
     return c.rebuild_expression(%("Var"), called(callee, %($argument)));
   }
-  $report(c, "type.var.loss", type);
+  $report.type_var_loss(c, type);
 }
 
 static List Compiler._box_var(Compiler c, List expr, Type type) {
@@ -3651,7 +3927,7 @@ static List Compiler._box_var(Compiler c, List expr, Type type) {
                 (expr ("Symbol") $tagsymnumstr) $expr)));
   }
   // Conversion runs after parsing; a NULL token anchors the statement.
-  $report(c, "type.var.loss", type);
+  $report.type_var_loss(c, type);
 }
 
 // converter calls
@@ -3754,6 +4030,13 @@ static List Compiler._converted_temporary(
 
 // conversion checks
 
+macro Statement $report.type_ref_null(Expr $c, Expr $target) {
+  $c.report_error(
+    <type>,
+    %"cannot pass a null pointer where ${$target.repr()} is expected",
+    NULL, %("a reference argument must name an object"));
+}
+
 static void Compiler._check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
@@ -3761,7 +4044,19 @@ static void Compiler._check_null_reference(
       (expr.match(%(expr () ${$source_identifier_content(
         %((binding ? ?)))})) &&
        binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
-    $report(c, "type.ref.null", target);
+    $report.type_ref_null(c, target);
+}
+
+macro Statement $report.type_qualifier_dropped(
+  Expr $c, Expr $source, Expr $destination) {
+  {
+    String message =
+      %"cannot convert ${$source.repr()} to ${$destination.repr()}";
+    $c.report_error(
+      <type>, message,
+      NULL,
+      %("the target drops a type qualifier the source declares: spell the qualifier in the target, or copy the value"));
+  }
 }
 
 /* Same-address conversions must keep qualifiers, including void pointers. */
@@ -3774,8 +4069,16 @@ static void Compiler._check_qualifiers(
         (destination.base_type() === %(void) ||
          source.base_type() === %(void)))) &&
       qualified.discards_qualifiers(destination)) {
-    $report(c, "type.qualifier.dropped", source, destination);
+    $report.type_qualifier_dropped(c, source, destination);
   }
+}
+
+macro Statement $report.type_ref_lvalue(Expr $c, Expr $type, Expr $target) {
+  $c.report_error(
+    <type>,
+    %"cannot pass ${$type.repr()} where ${$target.repr()} is expected",
+    NULL,
+    %("pass an lvalue of the referenced type; write *p for a pointer"));
 }
 
 static void Compiler._check_reference_value(
@@ -3783,11 +4086,18 @@ static void Compiler._check_reference_value(
   /* An optional reference forwards only to another address type. */
   if (type.car() == <opt-ref> && !target.is_reference() &&
       !c.sym.resolve_key(target).is_pointer())
-    $report(c, "type.optional-ref.unchecked", NULL);
+    $report.type_optional_ref_unchecked(c, NULL);
   /* A reference takes an lvalue of its referenced type. */
   if (target.is_reference() && !type.is_reference() &&
       type !== cdr(target))
-    $report(c, "type.ref.lvalue", type, target);
+    $report.type_ref_lvalue(c, type, target);
+}
+
+macro Statement $report.type_pointer_address(Expr $c, Expr $type, Expr $target) {
+  $c.report_error(
+    <type>,
+    %"cannot pass ${$type.repr()} where ${$target.repr()} is expected",
+    NULL, %("write &value to pass its address"));
 }
 
 static void Compiler._check_object_pointer(
@@ -3796,7 +4106,42 @@ static void Compiler._check_object_pointer(
   Type source = c.sym.resolve_key(type);
   if (source && !source.is_pointer() && !source.is_array() &&
       !source.is_function())
-    $report(c, "type.pointer.address", type, target);
+    $report.type_pointer_address(c, type, target);
+}
+
+macro Statement $report.type_typedef_crossing(
+  Expr $c, Expr $source, Expr $target) {
+  {
+    String message =
+      %"cannot convert ${$source.repr()} to ${$target.repr()}";
+    $c.report_error(
+      <type>, message,
+      NULL,
+      %("the names share one C type but not one meaning: declare the converter ${$source.car()}_${$target.car().str().lower()}, or cast the expression to say so on purpose"));
+  }
+}
+
+macro Statement $report.type_pointer_unrelated(
+  Expr $c, Expr $source, Expr $target) {
+  {
+    String message =
+      %"cannot convert ${$source.repr()} to ${$target.repr()}";
+    $c.report_error(
+      <type>, message,
+      NULL,
+      %("the pointer types are unrelated: cast the expression to say so on purpose"));
+  }
+}
+
+macro Statement $report.type_pointer_integer(
+  Expr $c, Expr $integer, Expr $target) {
+  {
+    String message =
+      %"cannot convert the integer ${$integer} to pointer type ${$target.repr()}";
+    List hint =
+      %( "only a zero integer constant expression converts to a pointer" );
+    $c.report_error(<type>, message, NULL, hint);
+  }
 }
 
 /* C accepts null pointer constants, pointer decay, and opaque system types.
@@ -3807,10 +4152,10 @@ static void Compiler._check_native_crossing(
   Type declared_source, Type declared_target) {
   String integer = c._not_null_pointer_constant(expr);
   if (integer && c.sym.resolve_key(target).is_pointer()) {
-    $report(c, "type.pointer.integer", integer, target);
+    $report.type_pointer_integer(c, integer, target);
   }
   if (c._unrelated_pointers(type, target)) {
-    $report(c, "type.pointer.unrelated", declared_source, declared_target);
+    $report.type_pointer_unrelated(c, declared_source, declared_target);
   }
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
@@ -3819,7 +4164,7 @@ static void Compiler._check_native_crossing(
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
       !c._typedef_names(declared_source).contains(declared_target) &&
       !c._typedef_names(declared_target).contains(declared_source)) {
-    $report(c, "type.typedef.crossing", declared_source, declared_target);
+    $report.type_typedef_crossing(c, declared_source, declared_target);
   }
 }
 

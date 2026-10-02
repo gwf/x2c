@@ -234,8 +234,11 @@ preserve direct/delegate precedence and ambiguity behavior, then reuse it
 for display. Check struct/union, renamed typedefs, local/global tags,
 by-value/pointer/reference first parameters on tag lvalues, and unrelated
 same-spelling variables. Pointer-receiver lookup remains a separate decision.
-Settle the generic `struct_` namespace behavior explicitly; coordinate F17's
-qualifiers and document the resulting rule without expanding unrelated APIs.
+Gary decided that generic `struct_` and `union_` free functions do not
+participate in method lookup. Methods resolve through the actual receiver
+type identity. Other modules may define methods for that type; this adds no
+author or module ownership restriction. Preserve imported-extension lookup
+and ambiguity behavior. Coordinate F17's qualifiers and document the rule.
 
 ### F12. P1/P2 - Restore REPL reference parity and truthful syntax handling
 
@@ -786,8 +789,27 @@ landed results and any explicit deferrals are recorded here as batches finish.
 Batch 1 contains F01, F03-F08, F12-F15, F19-F27, F29-F31, F34-F39,
 and F41-F42: 31 of the 42 scopes. These have authored fixes and focused
 verification in worker or parent checkouts. F33's new CPU metric is retained
-privately until calibration and is excluded from this batch. The remaining
-scopes are F02, F09-F11, F16-F18, F28, F32-F33, and F40.
+privately until calibration and is excluded from this batch.
+
+Batch 2 contains F02, F28, F32, and F40, with a pinned dependency on PR #99.
+F32 replaces 254 catalogue rows and 269 compiler calls with ordinary named
+macros. Token-aware verification preserves every row body and call operand.
+The compiler source loses 160 lines; local generated linked-meta loses 1,939.
+No current-campaign build-time comparison is available yet. F28 uses ordinary
+macro arity; no current sibling-call mismatch justifies extra validators.
+
+F02 adds eight production lines to preserve statement-expression types,
+destructuring values, and lambda return conversion. Eight focused fixtures
+pass without native warnings. The discarded destructuring path remains because
+its deletion adds an unused-expression warning; its optimized control assembly
+is unchanged. F40 removes two lines and one redundant collection transaction.
+Twelve controls preserve output and diagnostics; ordinary required Unit
+collection drops from 13 Map copies and six merges to seven copies and three
+merges. These counts are not elapsed-time measurements.
+
+The remaining implementation scopes are F09-F11, F16-F18, and F33. The shared
+integrator owns batch validation and any integration corrections. Submitted
+scopes are not claimed merged until publication is confirmed.
 
 F08's initial repair caused standard helpers to stage before the runtime
 archive existed. Its correction collects own-unit hashes before parsing and
@@ -842,12 +864,13 @@ prove it unnecessary. They do not add origin authentication, a second semantic
 validator, or generic caching/transaction machinery merely to unify appearances.
 The JobLaunch rename and preservation of caller bindings through Name holes
 are authorized. F17 follows the book's parameter-only reference contract.
-F12 preserves the REPL capability boundary with accurate diagnostics. F18
-warning sequencing and F11 generic tag-method behavior remain open decisions.
+F12 preserves the REPL capability boundary with accurate diagnostics. F11 uses actual receiver type identity while preserving methods defined by
+other modules. F18 warning sequencing remains an open decision.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
-Its source-workaround bug, duplicate rows, and untested runtime/validation
-boundaries remain acceptance work rather than an assertion of four-metric parity.
+F41 removes the interpolation workaround, and the conversion shares the two
+multi-owner rows without duplicating their definitions. Focused compatibility
+checks pass; final integration and comparable timing remain outstanding.
 
 Do not revive disproven shortcuts: blanket `_meta_apply` -> Lisp.apply breaks
 legal same-session macro rebinding; subject rows preserve distinct identity/
