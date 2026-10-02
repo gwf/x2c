@@ -520,6 +520,57 @@ class IntegrationProbe(unittest.TestCase):
         self.assertNotIn('reason',landed)
         self.assertEqual(len(landed['attempts']),2)
 
+    def test_publication_lock_rejects_legacy_directory_without_removing_it(self):
+        common=self.directory/'legacy-git-common'
+        lock=common/'land-dev.lock'; lock.mkdir(parents=True)
+        pid=lock/'pid'; pid.write_text('99999999\n')
+        script=TOOL_ROOT/'tools'/'land-dev'
+        import importlib.machinery, importlib.util
+        sys.path.insert(0,str(TOOL_ROOT/'tools'))
+        loader=importlib.machinery.SourceFileLoader('land_dev_probe',str(script))
+        spec=importlib.util.spec_from_loader('land_dev_probe',loader)
+        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        module.git=lambda *args: str(common)
+        with self.assertRaisesRegex(ValueError,'legacy publication lock'):
+            module.acquire_lock()
+        self.assertEqual(pid.read_text(),'99999999\n')
+
+    def test_publication_lock_excludes_a_second_process_and_releases_on_exit(self):
+        common=self.directory/'lock-git-common'; common.mkdir()
+        script=TOOL_ROOT/'tools'/'land-dev'
+        child=r'''import importlib.machinery, importlib.util, sys, time
+from pathlib import Path
+sys.path.insert(0,str(Path(sys.argv[1]).parent))
+loader=importlib.machinery.SourceFileLoader('land_dev_probe',sys.argv[1])
+spec=importlib.util.spec_from_loader('land_dev_probe',loader)
+module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+module.git=lambda *args: sys.argv[2]
+lock=module.acquire_lock()
+print('acquired',flush=True)
+time.sleep(float(sys.argv[3]))
+if hasattr(lock,'close'): lock.close()
+'''
+        holder=subprocess.Popen([sys.executable,'-c',child,str(script),
+                                 str(common),'30'],stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,text=True)
+        self.addCleanup(lambda: holder.poll() is None and holder.terminate())
+        try:
+            self.assertEqual(holder.stdout.readline().strip(),'acquired')
+            started=time.monotonic()
+            waiter=subprocess.run([sys.executable,'-c',child,str(script),
+                                   str(common),'0'],capture_output=True,text=True,
+                                  timeout=2)
+            self.assertLess(time.monotonic()-started,2)
+            self.assertNotEqual(waiter.returncode,0,waiter.stdout+waiter.stderr)
+            self.assertIn('another publisher is active',waiter.stderr)
+        finally:
+            holder.terminate(); holder.wait(timeout=5)
+            holder.stdout.close(); holder.stderr.close()
+        released=subprocess.run([sys.executable,'-c',child,str(script),
+                                 str(common),'0'],capture_output=True,text=True,
+                                timeout=2)
+        self.assertEqual(released.returncode,0,released.stdout+released.stderr)
+
     def test_gate_failure_never_pushes(self):
         self.pr(1); self.state(gate_failure='ordinary')
         batch=self.prepare()

@@ -9,15 +9,14 @@ Queued publication pins --expected-dev and uses --review-stop, followed by
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
-import time
 
 from agent_context import publication_blocked
 
@@ -188,32 +187,28 @@ def prepare(args: argparse.Namespace, run: Path) -> None:
     raise ValueError("gave up after four rejected pushes")
 
 
-def acquire_lock() -> Path:
-    lock = Path(git("rev-parse", "--git-common-dir").strip()) / "land-dev.lock"
-    waiting = None
-    while True:
-        try:
-            lock.mkdir()
-            (lock / "pid").write_text(str(os.getpid()) + "\n")
-            return lock
-        except FileExistsError:
-            try:
-                holder = int((lock / "pid").read_text())
-            except (OSError, ValueError):
-                holder = None
-            if holder:
-                try:
-                    os.kill(holder, 0)
-                except ProcessLookupError:
-                    shutil.rmtree(lock)
-                    continue
-                except PermissionError:
-                    pass
-            if waiting != (holder or "unknown"):
-                print("land-dev: waiting for publication lock "
-                      f"(pid {holder or 'unknown'})", flush=True)
-                waiting = holder or "unknown"
-            time.sleep(10)
+def acquire_lock():
+    common = Path(git("rev-parse", "--git-common-dir").strip())
+    if not common.is_absolute():
+        common = Path.cwd() / common
+    lock = common / "land-dev.lock"
+    if lock.is_dir():
+        raise ValueError("legacy publication lock directory exists; verify no "
+                         "publisher is using it before removing it: " + str(lock))
+    stream = lock.open("a+")
+    try:
+        fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as error:
+        stream.seek(0)
+        holder = stream.read().strip() or "unknown"
+        stream.close()
+        raise ValueError("another publisher is active (pid " + holder + ")") \
+            from error
+    stream.seek(0)
+    stream.truncate()
+    stream.write(str(os.getpid()) + "\n")
+    stream.flush()
+    return stream
 
 
 def sha(value: str) -> str:
@@ -260,7 +255,7 @@ def main() -> int:
         return 1
     finally:
         if lock is not None:
-            shutil.rmtree(lock)
+            lock.close()
 
 
 if __name__ == "__main__":
