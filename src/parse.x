@@ -1914,6 +1914,11 @@ static Var Compiler._method_spelling(
       String owner_name =
         owner is <symbol> ? owner.symbol() : owner.str();
       name = %"${owner_name}_$member";
+      if (c.package) {
+        String prefix = %"${c.package}__";
+        if (owner_name.startswith(prefix))
+          owner_name = owner_name[prefix.len():];
+      }
       method = %($owner_name $member);
     }
     case %((!or
