@@ -3,7 +3,8 @@
 > the named-macro catalogue spike reviewed against its `1b71a410` base.
 > Implementation authorized 2026-10-02 through orchestrate-x2c-work.
 > Sol 6.1 workers provide private handoffs; this session integrates and delivers
-> coherent batches directly to dev. Three prior repairs are already delivered.
+> coherent batches directly to main, per Gary's replacement instructions.
+> Three prior repairs are already delivered.
 > Open items retain their evidence limits and unresolved compatibility choices.
 
 # Integrated post-integration fix list
@@ -18,7 +19,7 @@ changes remain promising independent reductions.
 
 This list accounts for all 35 numbered findings and all 13 pre-existing
 findings in the supplied review, plus this workspace's deeper waste review.
-There are 41 open scopes below, including investigations and unresolved
+There are 42 campaign scopes below, including investigations and unresolved
 contracts, and three completed repairs. One scope can cover several source
 findings; a shared owner does not make their acceptance cases interchangeable.
 
@@ -56,8 +57,10 @@ earlier operation counts or measurements, not a new performance benchmark.
 
 PR #98 merged as `fcfaff40`, with generated updates through `2c8ddfb3`.
 The four Current probes used that integration checkout's built compiler with
-temporary outputs. This workspace remains on `1b71a410`; the consolidation
-does not claim a local rebase or a new full gate.
+temporary outputs. Those reconciliation results precede implementation.
+The campaign integrated dev `2c8ddfb3` locally before starting the workers.
+Current main `247b7fbe` is an ancestor of that baseline. No campaign batch has
+passed publication validation or reached a remote branch yet.
 
 Some external headings overstate historical regression: X14-X16 already
 emitted the same C at the paired base, but violate the new sequencing promise;
@@ -637,6 +640,19 @@ evaluation order and canonical syntax constructed by Lisp. F15 has a related
 constructed-string addition path, but neither reproduction substitutes for
 the other. Fix this before adopting F32 so the catalogue rows move unchanged.
 
+### F42. P2 - Count grouped brace tokens during meta discovery
+
+**Campaign discovery; reproduced before and after F41.** The file-scope scanner
+counted only token text `{` as an opener. Interpolation, insertion, splice,
+and Map literals use other brace-opening tokens but the same closing token.
+Depth became negative, hiding later meta definitions and imports. Brace text
+inside String segments also changed the depth incorrectly.
+
+Owner: `src/meta-project.x`. Count the tokenizer's existing brace token kinds,
+and preserve function-scope exclusion. The private repair passes the new
+fixture, seven existing controls, and separate declaration/import probes.
+No additional parser or syntax validator is needed.
+
 ## Expected metric effects of the main waste revisions
 
 These describe the intended replacement, not demonstrated gains. Total LOC
@@ -754,9 +770,16 @@ Initial assignments are F41 literal cache admission, F01/F07 initializer
 cleanup and traversal, and F08/F39 linked-meta correctness and argument traversal.
 F32 follows the F41 capability. Runtime, tooling, macro/type correctness,
 documentation and the bounded investigations follow in owner-compatible
-batches. This is an ordering of all 41 scopes, not a reduction in scope.
+batches. This is an ordering of all 42 scopes, not a reduction in scope.
 Progress and private handoffs live in `.context/post-integration-campaign/`;
 landed results and any explicit deferrals are recorded here as batches finish.
+
+Private integration currently includes F01, F07, F22, F24, F39, F41, and F42.
+Their focused checks passed in worker or parent checkouts. F08's initial repair
+also passed its focused checks, but the combined `make build-safe` failed:
+some standard helpers fell back to native staging before the runtime archive
+existed. F08 is reopened. The failed generated sources and complete log are
+preserved; F32 adoption waits for a corrected, successful bootstrap.
 
 Reuse existing suites and the focused cases above. First reproduce imported
 claims on the implementation baseline. For performance proposals and claimed
