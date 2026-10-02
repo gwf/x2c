@@ -37,8 +37,6 @@ static List Compiler__parse_shell_tail(Compiler c);
 
 static Var Compiler__macro_pattern_argument(Compiler c);
 
-static List Compiler__macro_subpattern_insertion(Compiler c, int content);
-
 static List Compiler__parse_splice(Compiler c);
 
 static List Compiler__parse_insertion(Compiler c);
@@ -638,7 +636,7 @@ static List Compiler__parse_shell_tail(Compiler c){
   if(Compiler_peek(c, 0) == 83) return _81;
   List type = Compiler__parse_list_head(c);
   if(Compiler_peek(c, 0) == 83) return Compiler__cons_cell(c, type, _81);
-  List content = Compiler__macro_subpattern_insertion(c, 1);
+  List content = Compiler_try_parse_macro_pattern_insertion(c, 1);
   if(! List_truth(content)) content = Compiler__parse_list_head(c);
   return Compiler__cons_cell(c, type, Compiler__cons_cell(c, content, Compiler__parse_list_tail(c)));
 }
@@ -692,16 +690,20 @@ static Var Compiler__macro_pattern_argument(Compiler c){
   return value;
 }
 
-Token Compiler_macro_pattern_at(Compiler, Token, String *, Var *);
-
 Token Token_skip_trivia(Token);
 
-static List Compiler__macro_subpattern_insertion(Compiler c, int content){
-  if(! c -> in_pattern || Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return NULL;
+Token Compiler_macro_pattern_at(Compiler, Token, String *, Var *);
+
+List Compiler_try_parse_macro_pattern_insertion(Compiler c, int content){
+  int joined = Compiler_peek(c, 0) == 9463 && c -> token -> len == 2;
+  if(! c -> in_pattern ||(! joined &&(Compiler_peek(c, 0) != 73 || Compiler_peek(c, 1) != 247))) return NULL;
+  Token name = Token_skip_trivia(c -> token + 1);
+  if(! joined) name = Token_skip_trivia(name + 1);
   String spelling = NULL;
   Var stored;
-  if(! Compiler_macro_pattern_at(c, Token_skip_trivia(c -> token + 1), &(spelling), &(stored))) return NULL;
+  if(! Compiler_macro_pattern_at(c, name, &(spelling), &(stored))) return NULL;
   Compiler_next(c);
+  if(! joined) Compiler_next(c);
   List derived = Compiler_try_parse_macro_subpattern(c, content);
   Compiler_expect(c, 251);
   return derived;
@@ -726,7 +728,7 @@ Type List_type(List);
 
 static List Compiler__parse_insertion(Compiler c){
   if(Compiler_peek(c, 0) == 73) return Compiler__parse_named_reference(c, 73);
-  List derived = Compiler__macro_subpattern_insertion(c, 0);
+  List derived = Compiler_try_parse_macro_pattern_insertion(c, 0);
   if(List_truth(derived)) return derived;
   if(Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return NULL;
   Compiler_next(c);

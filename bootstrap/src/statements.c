@@ -787,6 +787,7 @@ static List Compiler__case_pattern(Compiler c, Token start, List * types){
 }
 
 List Compiler_try_parse_macro_pattern(Compiler);
+List Compiler_try_parse_macro_pattern_insertion(Compiler, int);
 List Array_list(Array);
 static List Compiler__parse_pattern(Compiler c, List * types){
   Array captures = Array_new(); {
@@ -816,7 +817,7 @@ static List Compiler__parse_pattern(Compiler c, List * types){
                 }
                 ;  x2c_cleanup_push(& _x2c_defer_record_5); {
                   * _x2c_macro_address_0 = captures; {
-                    pattern = Compiler_try_parse_macro_pattern(c);  if(! List_truth(pattern)) pattern = Compiler_parse_expression(c); (* types) = Array_list(captures);
+                    pattern = Compiler_try_parse_macro_pattern(c);  if(! List_truth(pattern)) pattern = Compiler_try_parse_macro_pattern_insertion(c, 0);  if(! List_truth(pattern)) pattern = Compiler_parse_expression(c); (* types) = Array_list(captures);
                   }
 
                 }

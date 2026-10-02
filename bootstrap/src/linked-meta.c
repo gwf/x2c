@@ -9516,7 +9516,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _8945 = cons(_8944, _8938);
   _8946 = List_var(_8945);
   _8947 = Symbol_var(19147688);
-  _8948 = Atom_intern(String_new("binding-name"));
+  _8948 = Atom_intern(String_new("binding-global"));
   _8949 = String_new("Symbol_var");
   _8950 = String_var(_8949);
   _8951 = cons(_8950, NULL);
