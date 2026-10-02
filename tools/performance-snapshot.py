@@ -319,14 +319,24 @@ def percent_change(current: float, previous: float) -> str:
   return f"{100 * (current - previous) / previous:+.2f}%"
 
 
+def build_scaling_key(value: dict[str, object]) -> str | None:
+  metric = value.get("metric_id")
+  baseline = value.get("baseline_id")
+  score = value.get("score")
+  if metric and baseline and isinstance(score, (int, float)):
+    return f"build cost score [{metric} @ {baseline}]"
+  return None
+
+
 def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   metrics = {}
   stage = row.get("stage_3_seconds")
   if isinstance(stage, (int, float)):
     metrics["stage-3 seconds"] = float(stage)
-  score = (row.get("build_scaling") or {}).get("score")
-  if isinstance(score, (int, float)):
-    metrics["build cost score"] = float(score)
+  build_scaling = row.get("build_scaling") or {}
+  key = build_scaling_key(build_scaling)
+  if key:
+    metrics[key] = float(build_scaling["score"])
   for key, value in (row.get("compiler_median_seconds") or {}).items():
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
@@ -352,11 +362,13 @@ def render_report(
   if current["status"] != "success":
     lines.extend(["", f"Failure: {current.get('failure', 'unknown failure')}"])
     return "\n".join(lines) + "\n"
-  score = comparable_metrics(current).get("build cost score")
+  build_scaling = current.get("build_scaling") or {}
+  score_key = build_scaling_key(build_scaling)
+  score = comparable_metrics(current).get(score_key) if score_key else None
   if score is not None:
-    before = comparable_metrics(previous or {}).get("build cost score")
+    before = comparable_metrics(previous or {}).get(score_key)
     change = "" if before is None else f" ({score - before:+.1f})"
-    lines.append(f"- Build cost score: {score:.1f}{change}")
+    lines.append(f"- {score_key}: {score:.1f}{change}")
   if previous is None:
     lines.extend(["", "This is the first successful retained snapshot."])
     return "\n".join(lines) + "\n"

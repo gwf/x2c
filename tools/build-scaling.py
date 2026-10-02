@@ -1,29 +1,20 @@
 #!/usr/bin/env python3
-"""Score the stage build's cost per line of source against a baseline.
+"""Score sequential stage-build CPU seconds per authored source line.
 
-One stage build translates lib/ and src/ and compiles the generated C. The
-tool counts the CPU cycles that work takes in a copy of HEAD, divides by
-the number of source lines, and reports a score: 100 is the recorded baseline, and 110
-means each line of x2c costs 10% more to build. A larger code base leaves
-the score unchanged; a slower translator, a slower C compile, or more
-generated C per line raises it.
-
-  tools/build-scaling.py                # score HEAD
-  tools/build-scaling.py --rebaseline   # make HEAD's cost the new 100
-
-Cycles, from macOS `/usr/bin/time -l`, include memory stalls and ignore
-time spent waiting for other work on the host. The median of three builds
-varies by about 4% under heavy load, where wall time varies by 20%. A new C
-compiler changes the count, so rebaseline after a toolchain upgrade.
-The last output line is one JSON object for tools/performance-snapshot.py.
+Three sequential stage builds are timed through their waited `make` process
+trees, then the median CPU time is divided by authored source lines. The JSON
+record on the final output line is consumed by tools/performance-snapshot.py.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
+import platform
+import resource
 import statistics
 import subprocess
 import tempfile
@@ -31,16 +22,12 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 BASELINE = ROOT / "unittest/benchmarks/build-scaling-baseline.json"
+METRIC_ID = "child-cpu-seconds-per-authored-line/v1"
+GENERATED = {Path("src/linked-meta.x"), Path("lib/x2c.x")}
 SOURCE_SUFFIXES = {".x", ".xmacro", ".xlisp"}
-# `time` counts only its own child, so each translator and C compiler
-# process is counted separately. The build runs silently; the count files
-# also receive the tools' diagnostics.
-COUNTED = """#!/bin/sh
-exec /usr/bin/time -l "$@" 2>"$(mktemp "$COUNT_DIR/count.XXXXXX")"
-"""
 
 
-def extract(work: Path, commit: str = "HEAD") -> Path:
+def extract(work: Path, commit: str) -> Path:
   archive = subprocess.run(
     ["git", "archive", commit], cwd=ROOT, check=True, stdout=subprocess.PIPE,
   ).stdout
@@ -48,85 +35,134 @@ def extract(work: Path, commit: str = "HEAD") -> Path:
   return work
 
 
-def source_lines(tree: Path) -> int:
-  return sum(
-    path.read_bytes().count(b"\n")
-    for directory in ("src", "lib")
-    for path in (tree / directory).iterdir()
-    if path.suffix in SOURCE_SUFFIXES and path.name != "x2c.x"
+def source_lines(tree: Path) -> dict[str, int]:
+  counts = {"authored_source_lines": 0, "generated_source_lines": 0}
+  for directory in ("src", "lib"):
+    for path in (tree / directory).iterdir():
+      if path.suffix not in SOURCE_SUFFIXES:
+        continue
+      kind = (
+        "generated_source_lines"
+        if path.relative_to(tree) in GENERATED else "authored_source_lines"
+      )
+      counts[kind] += path.read_bytes().count(b"\n")
+  counts["total_source_lines"] = sum(counts.values())
+  return counts
+
+
+def run_make(
+  command: list[str], tree: Path, environment: dict[str, str],
+) -> float:
+  before = resource.getrusage(resource.RUSAGE_CHILDREN)
+  subprocess.run(
+    command, cwd=tree, env=environment, check=True,
+    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
   )
+  after = resource.getrusage(resource.RUSAGE_CHILDREN)
+  return after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime
 
 
-def build_cycles(tree: Path, compiler: Path, sample: int) -> int:
-  stage = tree / "builds" / str(10 + sample)
-  counts = stage / "counts"
-  counts.mkdir(parents=True)
-  wrapper = tree / "counted"
-  wrapper.write_text(COUNTED, encoding="utf-8")
-  wrapper.chmod(0o755)
+def measure(tree: Path, compiler: Path) -> tuple[dict[str, int], float]:
   environment = os.environ.copy()
   for name in ("MAKEFLAGS", "MAKELEVEL", "MFLAGS"):
     environment.pop(name, None)
-  environment.update(X2C_HOME=str(tree), COUNT_DIR=str(counts))
-  subprocess.run(
-    ["make", "-s", "-j1", "-f", "../stage.mk", "-C", str(stage),
-     f"X2C_COMPILER={wrapper} {compiler}",
-     f"CC={wrapper} {environment.get('CC', 'cc')}"],
-    env=environment, check=True,
-    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-  )
-  return sum(
-    int(line.split()[0])
-    for path in counts.iterdir()
-    for line in path.read_text(encoding="utf-8").splitlines()
-    if line.endswith("cycles elapsed")
-  )
+  environment["X2C_HOME"] = str(tree)
+  seconds = []
+  for sample in range(3):
+    stage = tree / "builds" / str(10 + sample)
+    stage.mkdir(parents=True)
+    seconds.append(run_make([
+      "make", "-s", "-j1", "-f", "../stage.mk", "-C", str(stage),
+      f"X2C_COMPILER={compiler}", f"CC={environment.get('CC', 'cc')}",
+    ], tree, environment))
+  return source_lines(tree), statistics.median(seconds)
 
 
-def measure(tree: Path, compiler: Path) -> tuple[int, float]:
-  """Returns the tree's source lines and median cycles of three builds."""
-  cycles = statistics.median(
-    build_cycles(tree, compiler, sample) for sample in range(3)
+def provenance(compiler: Path, commit: str) -> dict[str, object]:
+  digest = hashlib.sha256(compiler.read_bytes()).hexdigest()
+  cc = os.environ.get("CC", "cc")
+  version = subprocess.run(
+    [*cc.split(), "--version"], capture_output=True, text=True, check=False,
   )
-  return source_lines(tree), cycles
+  return {
+    "translator": str(compiler), "translator_sha256": digest,
+    "cc": cc, "cc_version": (version.stdout or version.stderr).splitlines()[0]
+    if version.returncode == 0 and (version.stdout or version.stderr)
+    else None,
+    "platform": platform.platform(), "machine": platform.machine(),
+    "build_mode": os.environ.get("BUILD_MODE") or subprocess.run(
+      ["git", "show", f"{commit}:etc/build-mode"], cwd=ROOT,
+      check=True, stdout=subprocess.PIPE, text=True,
+    ).stdout.strip(),
+    "build_lto": os.environ.get("BUILD_LTO", "0"),
+    "environment": {name: os.environ[name] for name in (
+      "BUILD_CFLAGS", "BUILD_LDFLAGS", "EXTRA_CFLAGS", "X2C_FLAGS", "X2C_CC",
+    ) if name in os.environ},
+  }
 
 
 def main() -> int:
   parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-  parser.add_argument(
-    "--compiler", type=Path, default=ROOT / "builds/2/x2c",
-    help="translator to measure (default: builds/2/x2c)",
-  )
-  parser.add_argument(
-    "--rebaseline", action="store_true",
-    help="record HEAD's cost as score 100",
-  )
+  parser.add_argument("--compiler", type=Path, default=ROOT / "builds/2/x2c")
+  parser.add_argument("--ref", default="HEAD", metavar="COMMIT")
+  parser.add_argument("--rebaseline", action="store_true")
   args = parser.parse_args()
-  compiler = args.compiler.resolve()
-
-  # Outside the checkout, the compiler cannot find this repository's
-  # runtime in place of the tree's own.
-  with tempfile.TemporaryDirectory(prefix="x2c-build-scaling-") as work:
-    lines, cycles = measure(extract(Path(work)), compiler)
-  per_line = cycles / lines
+  compiler = args.compiler.expanduser().resolve()
   commit = subprocess.run(
-    ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
-    stdout=subprocess.PIPE, text=True,
+    ["git", "rev-parse", f"{args.ref}^{{commit}}"], cwd=ROOT,
+    check=True, stdout=subprocess.PIPE, text=True,
   ).stdout.strip()
-  if args.rebaseline:
-    BASELINE.write_text(json.dumps(
-      {"commit": commit, "cycles_per_line": per_line}, indent=2,
-    ) + "\n", encoding="utf-8")
+  tree_id = subprocess.run(
+    ["git", "rev-parse", f"{commit}^{{tree}}"], cwd=ROOT,
+    check=True, stdout=subprocess.PIPE, text=True,
+  ).stdout.strip()
   baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+  legacy = ({
+    "metric_id": baseline.get("metric_id", "driver-cycles-per-source-line/v0"),
+    "baseline_id": baseline.get("baseline_id", "legacy-driver-cycles"),
+    "commit": baseline.get("commit"),
+    "cycles_per_line": baseline["cycles_per_line"],
+  } if "cycles_per_line" in baseline else None)
+  if not args.rebaseline and baseline.get("metric_id") != METRIC_ID:
+    old = baseline.get("metric_id", "legacy-driver-cycles/v0")
+    raise ValueError(
+      f"baseline uses {old}; explicitly rebaseline for {METRIC_ID}",
+    )
+
+  with tempfile.TemporaryDirectory(prefix="x2c-build-scaling-") as work:
+    counts, seconds = measure(extract(Path(work), commit), compiler)
+  authored = counts["authored_source_lines"]
+  per_line = seconds / authored
+  baseline_id = baseline.get("baseline_id") or (
+    f"legacy-driver-cycles:{baseline['commit']}"
+  )
+  if args.rebaseline:
+    calibration = (
+      f"{METRIC_ID}:{commit}:{tree_id}:{per_line:.12g}"
+    ).encode("utf-8")
+    baseline_id = f"{METRIC_ID}:{hashlib.sha256(calibration).hexdigest()[:12]}"
+    baseline = {
+      "metric_id": METRIC_ID, "baseline_id": baseline_id,
+      "commit": commit, "tree": tree_id, **counts,
+      "cpu_seconds": seconds,
+      "cpu_seconds_per_authored_line": per_line,
+      "provenance": provenance(compiler, commit),
+    }
+    if legacy:
+      baseline["legacy"] = legacy
+    BASELINE.write_text(json.dumps(baseline, indent=2, sort_keys=True) + "\n",
+                        encoding="utf-8")
   record = {
-    "score": 100 * per_line / baseline["cycles_per_line"],
-    "cycles_per_line": per_line,
-    "cycles": cycles,
-    "source_lines": lines,
-    "baseline_commit": baseline["commit"],
+    "metric_id": METRIC_ID, "baseline_id": baseline_id,
+    "score": 100 * per_line / baseline["cpu_seconds_per_authored_line"],
+    "cpu_seconds": seconds, "cpu_seconds_per_authored_line": per_line,
+    **counts, "baseline_commit": baseline["commit"],
+    "provenance": provenance(compiler, commit),
   }
-  print(f"build cost score: {record['score']:.1f} "
-        f"(100 = {baseline['commit'][:8]})")
+  print(
+    f"build cost score: {record['score']:.1f} "
+    f"(100 = {baseline['commit'][:8]})",
+  )
   print(json.dumps(record, sort_keys=True))
   return 0
 

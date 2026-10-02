@@ -39,10 +39,21 @@ attempt.
 The stage 3 time grows when the compiler gets slower and when there is more
 code to compile. The build cost score removes the second cause. Each snapshot
 builds one stage from HEAD three times with `make bm-build-scaling`, takes
-the median CPU cycles of its translator and C compiler processes, and
-divides by the source lines in `src/` and `lib/`. The score is that cost per
-line as a percentage of the baseline in
+the median child-inclusive CPU seconds around the waited `make`, and divides
+by authored source lines. Generated `src/linked-meta.x` and `lib/x2c.x`
+lines are reported separately, with the total. The score is that cost per
+authored line as a percentage of the baseline in
 `unittest/benchmarks/build-scaling-baseline.json`.
+
+Scores carry metric and baseline IDs. Snapshot reports compare build-cost
+scores only when both IDs match; the old driver-cycle baseline and history
+remain identifiable as legacy data. The baseline records the calibration
+source tree and informational compiler/toolchain provenance. After the
+measurement correction, rebaseline in a quiet window with a fixed translator:
+
+```sh
+tools/build-scaling.py --rebaseline --ref COMMIT --compiler /path/to/x2c
+```
 
 The first lines of `latest.md` show the score and its change since the
 previous snapshot. A rise means the commits in between made each line more
@@ -52,14 +63,10 @@ heavy host load, so smaller changes are noise. Replayed over the August
 fell from 186 to 140 at the #265 fix. Instruction counts are steadier but missed the fix, because
 that slowdown was memory stalls.
 
-`tools/build-scaling-history.py` prints the saved score history as CSV,
-oldest first with the newest commit at 100, and builds nothing. It joins the
-nightly rows in `history.jsonl` with `replay.csv` in the same directory. To
-add a commit that has no saved score, pass `--replay COMMIT...`; each new
-commit takes a few minutes to build and is saved, so it is never rebuilt.
-The score assumes build cost grows in proportion to source lines. A new C
-compiler changes cycle counts; after a toolchain upgrade, run
-`tools/build-scaling.py --rebaseline` and commit the new baseline.
+`tools/build-scaling-history.py` prints saved metrics as CSV without building.
+It keeps rows with different metric or baseline IDs separate. Explicit
+`--replay COMMIT...` builds only the requested commits and saves CPU rows in
+`replay-child-cpu-v1.csv`; it leaves legacy `replay.csv` intact.
 
 ## Authored changes
 
