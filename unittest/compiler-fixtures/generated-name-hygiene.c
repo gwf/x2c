@@ -211,7 +211,6 @@ static Var _x2c_lambda_0(Var value){
 
 static int _x2c_lambda_adapt_0(int a0){
   return Var_int(Var_convert(_x2c_lambda_0(int_var(a0)), 3453797));
-  ;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

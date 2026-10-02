@@ -926,10 +926,9 @@ static List Compiler._initializer_adapter(
   List input = %(expr ${source.cadr()} (ident $parameter));
   body = body.search_replace(%(!quote $formal), input);
   List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
-  List params = %(params ${from.parameter_ast(parameter)});
-  List function = %(function (static $result)
-    (bind $binding ((fnmod $params)))
-    (block (stmnt (return $body))));
+  List function = c.wrapper_function(
+    %(static @result), binding, %(${from.parameter_ast(parameter)}),
+    %((return $result $body)));
   Type callable = %((func ($from)) @result);
   List adapter = %(expr $callable (ident $binding));
   c.names.adapters[key] = adapter;

@@ -1437,26 +1437,14 @@ static List Callback.publish_typed(Callback &cb, Type spelling) {
    parameter, and the source result converts to the callback result. */
 static List Callback.function(Callback &cb, List binding) {
   Compiler c = cb.c;
-  List params = cb.params, source_params = cb.source_params;
-  List names = c._auto_names(params.len());
-  List declaration_params = _named_decl_params(params, names);
-  Array arguments = [];
-  for (; params;
-       params = params.cdr(), source_params = source_params.cdr(),
-       names = names.cdr()) {
-    List argument = %(expr ${params.car()} (ident ${names.car()}));
-    arguments.push(c.convert_expression(argument, source_params.car()));
-  }
+  (List declarations, List arguments) = c.forward_parameters(cb.params);
   List source = %(expr ${cb.source} (ident ${cb.source_binding}));
   List call = c._func_call(
-    cb.source.apply().canonicalize(), source, arguments.list_free());
-  Macro returned = $return_value;
-  List statement = cb.result === %(void) ? call
-    : c.rebuild_statement(
-      returned(c.convert_expression(call, cb.result))).cadr();
+    cb.source.apply().canonicalize(), source, arguments);
+  List body = cb.result === %(void) ? %((stmnt $call))
+    : %((return ${cb.result} ${c.convert_expression(call, cb.result)}));
   return c.wrapper_function(
-    %(static @{cb.result}), binding, declaration_params.cdr(),
-    %((stmnt $statement)));
+    %(static @{cb.result}), binding, declarations, body);
 }
 
 /** Adapts a lowered noncapturing lambda helper to a typed callback.
