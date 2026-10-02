@@ -477,9 +477,10 @@ static Var Compiler._template_calls(Compiler c, Var node, List callee) {
 static Var Compiler._native_targets(Compiler c, Var node, List lookup) {
   if (node is not <list>) return node;
   match (node) {
-    case %(expr ?(Type result) ${$source_call_content($called,
-        %(!set ?callee (expr ? ${$source_identifier_content(
-            %((binding ? ?name)))})), %(*arguments))}): {
+    case %(expr ?(Type result) ${$called(
+        %(!set ?callee
+          (expr ? ${$source_identifier_content(%((binding ? ?name)))})),
+        %(*arguments))}): {
       if (name is not <string>) break;
       String spelling = name;
       List call = c._native_call(callee, spelling, arguments, lookup);

@@ -242,20 +242,6 @@ static List source_literal_content(List fields) =>
 static List source_declarator_row(List fields) =>
   %(!or (bind @fields) (op = (bind @fields) ?));
 
-static List source_pattern_with(
-    Macro shape, List names, List replacements) {
-  List pattern = shape.pattern(names);
-  if (replacements) pattern = pattern.replace(replacements);
-  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
-  return pattern;
-}
-
-static List source_pattern(Macro shape, List names) {
-  List pattern = shape.pattern(names);
-  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
-  return pattern;
-}
-
 static Var source_expression(Var value) {
   while (1) {
     match (value) {
@@ -1319,8 +1305,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_identifier_content", source_identifier_content);
   $linked.row(rows, "source_literal_content", source_literal_content);
   $linked.row(rows, "source_declarator_row", source_declarator_row);
-  $linked.row(rows, "source_pattern_with", source_pattern_with);
-  $linked.row(rows, "source_pattern", source_pattern);
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);

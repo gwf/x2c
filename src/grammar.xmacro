@@ -153,12 +153,14 @@ meta static List source_postfix_content(List parts) => cons(<postfix>, parts);
 meta static List source_postfix_expression(List type, List parts) =>
   %(expr $type ${source_postfix_content(parts)});
 
-/* The exact content of an expression source form, without its typed shell. */
+/* The exact content of an expression source form, without its typed shell,
+   for a bare-content dispatch arm whose fixed head the match emitter labels.
+   Inside a shell, write `%(expr ? ${$shape(...)})` instead. */
 meta static List source_content_pattern(Macro shape, List names) =>
   shape.pattern(names).caddr();
 
-/* Derive bare $called content, then insert the consumer's callee and
-   argument patterns without normalizing their constraints. */
+/* Bare $called content with the consumer's callee and argument patterns,
+   for the same kind of dispatch arm. */
 meta static List source_call_content(
   Macro call, List callee, List arguments) {
   List pattern = call.pattern(%(?callee *arguments));
@@ -184,23 +186,6 @@ meta static List source_literal_content(List fields) =>
 /* A declarator row, bare or with its initializer. */
 meta static List source_declarator_row(List fields) =>
   %(!or (bind @fields) (op = (bind @fields) ?));
-
-/* Derive a source grammar case for a typed expression or its bare content.
-   Only the outer expression shell is optional; captured children retain
-   their bindings and types, and semantic markers remain distinct. */
-meta static List source_pattern_with(
-    Macro shape, List names, List replacements) {
-  List pattern = shape.pattern(names);
-  if (replacements) pattern = pattern.replace(replacements);
-  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
-  return pattern;
-}
-
-meta static List source_pattern(Macro shape, List names) {
-  List pattern = shape.pattern(names);
-  match (pattern) case %(expr ? ?body): return %(!or $pattern $body);
-  return pattern;
-}
 
 /* The source expression beneath casts and parentheses, retaining its type. */
 meta static Var source_expression(Var value) {

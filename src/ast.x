@@ -75,9 +75,8 @@ List Ast.designated(Var value) {
     List node = value;
     match (node) {
       case %(expr ? ?inner): value = inner;
-      case $source_pattern($grouped, %(?inner)): value = inner;
-      case $source_pattern_with($indexed, %(?receiver ?selector),
-          %((?receiver (!set ?base (expr ((dim *) *) ?))) (?selector ?))):
+      case ${$grouped(?inner)}: value = inner;
+      case ${$indexed(%(!set ?base (expr ((dim *) *) ?)), ?)}:
         value = base;
       case $source_operator_content(%(. ?base *)): value = base;
       default: return node;
@@ -220,8 +219,7 @@ static int _raise_never_returns(Ast node) {
 
 static int _call_never_returns(Ast node) {
   match (node)
-    case %(stmnt (expr ? ${$source_call_content($called,
-        %(expr () (ident ?binding)), %(*))})): {
+    case %(stmnt (expr ? ${$called(%(expr () (ident ?binding)), %(*))})): {
       String name = binding_identity_spelling(binding);
       return name == "abort" || name == "exit" || name == "_Exit" ||
              name == "_exit" || name == "quick_exit";
@@ -333,7 +331,7 @@ List Ast.initializer_functions(Ast ast, List &source) {
 static List _arm_function(List choice, List argument) {
   (List condition, List path, List destination, List expression) = choice;
   match (expression)
-    case %(expr ? ${$source_call_content($called,
+    case %(expr ? ${$called(
         %(!set ?callee (expr ?callee_type ?)), %(?actual))}): {
       if (actual !== argument) return NULL;
       return %($condition $path $callee_type $callee);

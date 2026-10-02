@@ -929,8 +929,7 @@ static Fact Walk.base(Walk &w, Var place, int &through) {
       return w.base(base, through);
     case $source_operator_content(%((!quote *) ?base)):
       return w.fact_of(base, NULL);
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-           %((?receiver (!set ?base (expr ?type ?))) (?selector ?))):
+    case ${$indexed(%(!set ?base (expr ?type ?)), ?)}:
       return w.indexed_base(base, type, through);
     case %(getindex (!set ?base (expr ?type ?)) ?):
       return w.indexed_base(base, type, through);
@@ -986,7 +985,7 @@ static List _root(Var place) {
       case $source_identifier_content(
           %((!set ?binding (binding ? ?)))): return binding;
       case $source_operator_content(%(? ?base *)): place = base;
-      case $source_pattern($indexed, %(?base ?selector)): place = base;
+      case ${$indexed(?base, ?selector)}: place = base;
       case %(getindex ?base ?): place = base;
       default: return NULL;
     }
@@ -1034,9 +1033,9 @@ static Region Walk.birth(
   }
   match (_unwrap(value)) {
     case %(cons *): return w.pooled(born);
-    case $source_pattern($array_value, %(*items)):
+    case ${$array_value(*items)}:
       return w.active();
-    case $source_pattern($map_value, %(*rows)):
+    case ${$map_value(*rows)}:
       return w.active();
     case %(composite *)
       if (w.value_class(type ? type : _expression_type(value)) == <container>):
@@ -1265,7 +1264,7 @@ static String Walk.subject(Walk &w, Var value, List named, Fact fact) {
 /* The parser's empty argument marker represents no arguments. */
 static List _source_call(Var value) {
   match (value)
-    case $source_pattern($called, %(?callee *rows)): {
+    case ${$called(?callee, *rows)}: {
       match (rows) case %((expr ? ())): rows = NULL;
       return %($callee $rows);
     }
@@ -1275,7 +1274,7 @@ static List _source_call(Var value) {
 /* A declarator initializer shares the operator but is not an assignment. */
 static List _source_assignment(Var value) {
   match (value)
-    case $source_pattern($assigned, %(?target ?stored)): {
+    case ${$assigned(?target, ?stored)}: {
       match (target) case %(bind *): return NULL;
       return %($target $stored);
     }

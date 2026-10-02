@@ -99,7 +99,7 @@ macro Statement $report.parse_destructure_target(Expr $c) {
 
 static List Compiler._destructure_targets(Compiler c, List lhs) {
   match (lhs)
-    case %(expr ? ${$source_content_pattern($grouped, %(?target))}): {
+    case %(expr ? ${$grouped(?target)}): {
       if (_destructure_identifier(target)) return %(targets $target);
       match (target)
         case %(expr ? ${$source_commas_content(%(*targets))}): {
@@ -116,10 +116,9 @@ static List Compiler._destructure_targets(Compiler c, List lhs) {
 static int _destructure_identifier(List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?))}): return 1;
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       match (inner)
-        case %(expr ? ${$source_content_pattern(
-          $dereferenced, %(?address))}):
+        case %(expr ? ${$dereferenced(?address)}):
           match (address) case %(expr (& *) ${$source_identifier_content(
               %(?))}): return 1;
   }
@@ -407,13 +406,11 @@ static void Compiler._warn_unnecessary_cast(
    differently. */
 static int Compiler._c_type_known(Compiler c, List operand) {
   match (operand) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return c._c_type_known(inner);
     case %(expr ? ${$source_literal_content(%((char) *))}): return 0;
-    case %(expr ? ${$source_content_pattern(
-        $sizeof_grouped, %(?operand))}): return 0;
-    case %(expr ? ${$source_content_pattern(
-        $sizeof_expression, %(?operand))}): return 0;
+    case %(expr ? ${$sizeof_grouped(?operand)}): return 0;
+    case %(expr ? ${$sizeof_expression(?operand)}): return 0;
     case %(expr ? (offsetof *)): return 0;
     case %(expr ? ${$source_operator_content(
         %(- (expr ?left *) (expr ?right *)))}): {
@@ -1381,13 +1378,12 @@ static int Compiler._expression_is_addressable(Compiler c, List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?binding))}):
       return !c.semantic_binding_facts().contains(%(lambda-snapshot $binding));
-    case %(expr ? ${$source_content_pattern(
-        $indexed, %(?receiver ?selector))}): return 1;
+    case %(expr ? ${$indexed(?receiver, ?selector)}): return 1;
     case %(expr ? ${$source_operator_content(
         %((!quote *) ?operand))}): return 1;
     case %(expr ? ${$source_operator_content(
         %((!quote ->) ?receiver ?field))}): return 1;
-    case %(expr ? ${$source_content_pattern($grouped, %(?base))}):
+    case %(expr ? ${$grouped(?base)}):
       return c._expression_is_addressable(base);
     case %(expr ? ${$source_operator_content(%(. ?base ?))}):
       return c._expression_is_addressable(base);
@@ -2859,7 +2855,7 @@ static void Compiler._note_fresh_callee(Compiler c, List binding) {
 
 static int Compiler._is_operator_temporary(Compiler c, List expression) {
   match (expression) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return c._is_operator_temporary(inner);
   }
   Macro called = $called;
@@ -3456,7 +3452,7 @@ String Compiler.printf_static_format(
 
 static int _expr_is_raw_string_literal(List expr) {
   match (expr) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return _expr_is_raw_string_literal(inner);
     case %(expr ? ${$source_literal_content(%(?type ?))}):
       return _type_is_char_pointer_like(type);
@@ -3503,7 +3499,7 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
       return %(expr ("String") ${c.cache(%(string $value))});
     }
     case %(expr (!or (* char) ((dim *) char))
-        ${$source_content_pattern($grouped, %(?inner))}):
+        ${$grouped(?inner)}):
       // A statement expression's block converts as one dynamic value.
       match (inner) case %(expr *): {
         List converted = c._raw_string_to_string(inner);
@@ -4180,15 +4176,13 @@ static int _known_pointee(Type type) {
    only syntactically decidable forms. A wrong guess would reject legal C. */
 static String Compiler._not_null_pointer_constant(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return c._not_null_pointer_constant(inner);
     // sizeof is an integer constant expression, but never a zero-valued
     // one: no type in C has size zero.
-    case %(expr ? ${$source_content_pattern(
-        $sizeof_grouped, %(?operand))}):
+    case %(expr ? ${$sizeof_grouped(?operand)}):
       return "sizeof";
-    case %(expr ? ${$source_content_pattern(
-        $sizeof_expression, %(?operand))}):
+    case %(expr ? ${$sizeof_expression(?operand)}):
       return "sizeof";
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
@@ -4230,7 +4224,7 @@ static String Compiler._not_null_pointer_constant(Compiler c, List expr) {
    when it cannot decide. */
 static Symbol _integer_literal_kind(List expr, String &?out_text) {
   match (expr) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return _integer_literal_kind(inner, out_text);
     case %(expr ? ${$source_literal_content(%(?ltype ?text))}): {
       String spelling = text, Type type = ltype;

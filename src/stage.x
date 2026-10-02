@@ -57,7 +57,7 @@ Var Compiler.meta_argument(
   match (node) {
     case %(expr ? (meta-cap ?captured)):
       value = _captured_value(c, captured, want);
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return c.meta_argument(inner, want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
     /* Negation multiplies, so a negated zero keeps its sign. */
@@ -147,7 +147,7 @@ static Var _cached_constant(Compiler c, List key) {
    time. */
 static Var _constant_leaf(Compiler c, List expr) {
   match (expr) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return _constant_leaf(c, inner);
     case %(expr ?type ${$source_cast_content(%(? ?inner))}):
       return _cast_constant(c, type, inner);
@@ -157,13 +157,13 @@ static Var _constant_leaf(Compiler c, List expr) {
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
     case %(expr ? ${$source_literal_content(%(? ? ?symbol))}): return symbol;
-    case %(expr ("String") ${$source_call_content($called,
+    case %(expr ("String") ${$called(
         %(expr ? ${$source_identifier_content(%((binding ? "String_add")))}),
         %(?left ?right))}):
       return _joined_constant(c, left, right);
     case %(expr ("String") (call "String_new" (args ?inner))):
       return _constant_leaf(c, inner);
-    case %(expr ("Var") ${$source_call_content($called,
+    case %(expr ("Var") ${$called(
         %(expr ? ${$source_identifier_content(%((binding ? "int_var")))}),
         %(?inner))}):
       return _constant_leaf(c, inner);

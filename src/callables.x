@@ -57,7 +57,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
       expression, %!(List child) => c.lower_lambda_expr(child));
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (expression) {
-    case %(expr ?type ${$source_content_pattern($grouped, %(?inner))}): {
+    case %(expr ?type ${$grouped(?inner)}): {
       List lowered = c.lower_lambda_expr(inner);
       if (lowered == inner) return expression;
       Macro grouped = $grouped;
@@ -1453,7 +1453,7 @@ static List Callback.function(Callback &cb, List binding) {
 List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   Callback cb = {.c = c, .target = expected_type};
   match (argument) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}): {
+    case %(expr ? ${$grouped(?inner)}): {
       List adapted = c.adapt_lambda_arg(inner, expected_type);
       if (adapted == inner) return argument;
       Macro grouped = $grouped;

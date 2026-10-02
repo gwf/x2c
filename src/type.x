@@ -833,9 +833,9 @@ String ast_addressed_identifier(Var value) {
   List ast = value;
   match (ast) {
     case %(expr ? ?inner): return ast_addressed_identifier(inner);
-    case $source_pattern($grouped, %(?inner)):
+    case ${$grouped(?inner)}:
       return ast_addressed_identifier(inner);
-    case $source_pattern($addressed, %(?inner)):
+    case ${$addressed(?inner)}:
       return ast_direct_identifier(inner);
   }
   return NULL;
@@ -854,7 +854,7 @@ String ast_direct_identifier(Var value) {
       return binding_identity_spelling(binding);
     case $source_operator_content(%((!quote ->) ?base *)):
       return ast_addressed_identifier(base);
-    case $source_pattern($dereferenced, %(?base)):
+    case ${$dereferenced(?base)}:
       return ast_addressed_identifier(base);
   }
   return NULL;
@@ -868,12 +868,11 @@ String ast_direct_identifier(Var value) {
 String ast_indirect_identifier(Var value) {
   List designated = Ast.designated(value);
   match (designated) {
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (!set ?base (expr ? ?))) (?selector ?))):
+    case ${$indexed(%(!set ?base (expr ? ?)), ?)}:
       return ast_direct_identifier(base);
     case $source_operator_content(%((!quote ->) ?base *)):
       return ast_direct_identifier(base);
-    case $source_pattern($dereferenced, %(?base)):
+    case ${$dereferenced(?base)}:
       return ast_direct_identifier(base);
   }
   return NULL;

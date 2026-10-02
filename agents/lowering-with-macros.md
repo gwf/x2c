@@ -272,11 +272,16 @@ owns the `segments` envelope while preserving cache, `segvar`, `segexp`, and
 constructed `segraw` rows. Its callers retain conversion and resolution
 order. This needs no new Segment parameter kind.
 
-Derive a source pattern with simple named holes before inserting a consumer's
-exact constraints. `source_pattern_with` does this for indexed designation;
-passing a nested wildcard through ordinary hole projection instead quoted it
-and lost the `volatile` designation. Preserve the original root and wrapper
-dispatch: a macro case can look through origins that a raw case did not.
+Recognize a source form with its macro inside a pattern: `${$indexed(?r,
+?s)}` matches the typed expression or its bare content, and inside an
+`(expr TYPE ...)` shell it is the content, so the shell captures the type. A
+hole's argument may itself be a pattern, such as
+`${$indexed(%(!set ?base (expr ?type ?)), ?index)}`; the macro's pattern is
+derived with a binder in that hole first, so the argument keeps its exact
+constraints. A bare-content dispatch arm keeps `source_content_pattern`,
+whose fixed head lets the match emitter label the arm. Preserve the original
+root and wrapper dispatch: a macro case can look through origins that a raw
+case did not.
 
 New native metafunctions must be available in the seed before their pattern
 callers are compiled. Introduce the helper, regenerate linked meta, build a

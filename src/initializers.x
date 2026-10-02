@@ -828,7 +828,7 @@ static List Compiler._initializer_capture_leaves(
     case %(expr ?type (!or ${$source_identifier_content(%(*))}
                            ${$source_operator_content(%(*))}
                            ${$source_cast_content(%(*))}
-                           ${$source_content_pattern($grouped, %(?))}
+                           ${$grouped(?)}
                            (call *))):
       return c._capture_initializer_value(value, type, inputs);
   }
@@ -849,7 +849,7 @@ static List Compiler._capture_initializer_value(
 static int _initializer_literal(List value) {
   match (value) {
     case %(expr ? ${$source_literal_content(%(*))}): return 1;
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return _initializer_literal(inner);
     case %(expr ? ${$source_cast_content(%(? ?inner))}):
       return _initializer_literal(inner);
@@ -958,8 +958,8 @@ static List _initializer_and(List first, List second) {
   if (!second) return first;
   match (second)
     case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
-            (expr ? ${$source_content_pattern($grouped, %(?bound))})))}): {
+        %(< (expr ? ${$grouped(?index)})
+            (expr ? ${$grouped(?bound)})))}): {
       unsigned long long at;
       List base;
       _initializer_position(index, base, at);
@@ -973,14 +973,14 @@ static List _initializer_drop_bound(
   List condition, List bound, List base, unsigned long long minimum) {
   match (condition) {
     case %(expr ? ${$source_operator_content(
-        %(&& (expr ? ${$source_content_pattern($grouped, %(?left))})
-             (expr ? ${$source_content_pattern($grouped, %(?right))})))}):
+        %(&& (expr ? ${$grouped(?left)})
+             (expr ? ${$grouped(?right)})))}):
       return _initializer_and(
         _initializer_drop_bound(left, bound, base, minimum),
         _initializer_drop_bound(right, bound, base, minimum));
     case %(expr ? ${$source_operator_content(
-        %(< (expr ? ${$source_content_pattern($grouped, %(?index))})
-            (expr ? ${$source_content_pattern($grouped, %(?length))})))}): {
+        %(< (expr ? ${$grouped(?index)})
+            (expr ? ${$grouped(?length)})))}): {
       unsigned long long at;
       List origin;
       _initializer_position(index, origin, at);
@@ -999,8 +999,7 @@ static void _initializer_position(
   if (_initializer_integer(index, offset)) return;
   match (index)
     case %(expr ? ${$source_operator_content(
-        %(+ (expr ? ${$source_content_pattern(
-          $grouped, %(?origin))}) ?amount))}):
+        %(+ (expr ? ${$grouped(?origin)}) ?amount))}):
       if (_initializer_integer(amount, offset)) {
         base = origin;
         return;
@@ -1080,8 +1079,7 @@ static Var Compiler._native_modifier(Compiler c, Var modifier, Var &reused) {
       unsigned long long count;
       if (!bound || _initializer_integer(bound, count)) return modifier;
       match (bound)
-        case %(expr ? ${$source_content_pattern(
-          $sizeof_grouped, %(?argument))}):
+        case %(expr ? ${$sizeof_grouped(?argument)}):
           match (argument)
             case %(struct ?tag (fields
               (declare (char) (bindings (bind ? ((dim ?))))))): {

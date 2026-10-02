@@ -278,13 +278,13 @@ static int RuntimeScan._value(RuntimeScan &s, List node) {
     case %(expr ? ${$source_operator_content(%(& ?inner))}):
       return s._push(inner, 1);
     case %(expr ?type (!set ?content
-        ${$source_content_pattern($indexed, %(?receiver ?selector))})): {
+        ${$indexed(?receiver, ?selector)})): {
       Type native = type;
       if (native.is_array()) return s._push(content, 1);
       if (native.is_pointer() || !native.contains(<const>)) return 1;
       break;
     }
-    case %(expr ? ${$source_content_pattern($sizeof_expression, %(?operand))}):
+    case %(expr ? ${$sizeof_expression(?operand)}):
       return s._sizeof_dimensions(operand);
   }
   return -1;
@@ -302,13 +302,11 @@ static int RuntimeScan._identifier(RuntimeScan &s, Type type, List binding) {
 static int RuntimeScan._address(RuntimeScan &s, List node) {
   match (node) {
     case %(!or (expr ? ?inner)
-        ${$source_content_pattern($grouped, %(?inner))}
+        ${$grouped(?inner)}
         ${$source_operator_content(%(. ?inner ?))}):
       return s._push(inner, 1);
     case $source_identifier_content(%(?binding)): return s._input(binding);
-    case $source_pattern_with($indexed, %(?receiver ?selector),
-        %((?receiver (!set ?base (expr ?type ?)))
-          (?selector ?index))): {
+    case ${$indexed(%(!set ?base (expr ?type ?)), ?index)}: {
       s._push(index, 0);
       return s._push(base, type.list().type().is_array());
     }
@@ -451,8 +449,7 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._rewrite_while(condition, body);
     case do_loop(?body, ?condition):
       return w._rewrite_do(body, condition);
-    case $source_pattern($for_loop,
-        %(?initial ?condition ?increment ?body)):
+    case ${$for_loop(?initial, ?condition, ?increment, ?body)}:
       return w._rewrite_for(initial, condition, increment, body);
     case switched(?subject, ?body):
       return w._rewrite_switch(subject, body);

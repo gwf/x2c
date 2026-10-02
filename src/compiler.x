@@ -2132,7 +2132,7 @@ void Compiler.restore_reference_presence(Compiler c, List before) {
 List Compiler.optional_reference_test(
   Compiler c, List condition, int &truth) {
   match (condition) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return c.optional_reference_test(inner, truth);
     case %(expr ? ?content): {
       match (content) {
@@ -2168,7 +2168,7 @@ static List Compiler._null_comparison(
 
 static int _null_literal(List expr) {
   match (expr) {
-    case %(expr ? ${$source_content_pattern($grouped, %(?inner))}):
+    case %(expr ? ${$grouped(?inner)}):
       return _null_literal(inner);
     case %(expr ? ${$source_identifier_content(
         %((binding ? "NULL")))}): return 1;

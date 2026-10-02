@@ -526,7 +526,7 @@ static int Compiler._part_order(Compiler c, Var part) {
       return c.is_builtin_converter_call(node)
         ? c._part_order(argument) : 2;
     case %(!or (expr ? ?inner) (cast ? ?inner) ((!or segvar segexp) ?inner)
-        ${$source_content_pattern($grouped, %(?inner))}):
+        ${$grouped(?inner)}):
       return c._part_order(inner);
     case $source_operator_content(%((!or . (!quote ->)) ?inner ?)): {
       int order = c._part_order(inner);
@@ -655,7 +655,7 @@ static List Compiler._nominal_getindex(Compiler c, Type type) {
 static List Compiler._index(Compiler c, List ast) {
   Macro indexed = $indexed;
   match (ast)
-    case $source_pattern($indexed, %(?base ?selector)):
+    case ${$indexed(?base, ?selector)}:
       match (selector)
         case %(expr ?type ?)
           if (c.sym.is_var_type(type)): {
@@ -1091,7 +1091,7 @@ static Type Compiler._raise_nested_invalid_type(Compiler c, Var node) {
 static List Compiler._call(Compiler c, List ast) {
   ast = c._lower_printf_vars(ast);
   match (ast)
-    case $source_pattern($called, %(?callee *arguments)):
+    case ${$called(?callee, *arguments)}:
       match (callee.cadr()) {
         case %((func ?parameters) *):
           return c._typed_call(callee, parameters, arguments);

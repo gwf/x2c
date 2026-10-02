@@ -86,8 +86,7 @@ static Map _macro_diagnostics(Lint l, Compiler c, List ast):
     if _raise_terminal(statement) && statement.never_returns():
       diagnostics[at] = <raise>
     match (statement.without_origin()):
-      case %(stmnt (expr ? ${$source_call_content($called,
-          %(expr ? (ident ?binding)), %(*))}))
+      case %(stmnt (expr ? ${$called(%(expr ? (ident ?binding)), %(*))}))
           if (report && List.equal(binding, report)):
         diagnostics[at] = <report>
       case %(block ?first (!is ?last type list))
