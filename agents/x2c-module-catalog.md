@@ -419,12 +419,12 @@ Public functions:
 `Compiler.parse_named_type`, `Compiler.parse_enumerators`,
 `Compiler.parse_enumerator`, `Compiler.parse_declarator_argument`,
 `Compiler.bind_template_local`, `Compiler.parse_parameter_list`,
-`Compiler.parse_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
-`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
-`Compiler.parse_function_target`, `Compiler.finish_managed_declaration`,
-`Compiler.bind_syntax`, `Compiler.bind_callable_body`,
-`Compiler.finish_foreign_alias`
+`Compiler.parse_parameter`, `Compiler.bind_parameter`,
+`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
+`Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
+`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
+`Compiler.finish_managed_declaration`, `Compiler.bind_syntax`,
+`Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
 
