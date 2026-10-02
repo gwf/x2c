@@ -850,19 +850,19 @@ static List Compiler._destructure_value(Compiler c, List ast) {
       List result_expr = %(expr $type (ident $result));
       List converted = c._destructure_source(result_expr, type);
       List assignments = c._destructure_assignments(targets, temporary);
-      Macro shape = macro Statement(
+      Macro shape = macro Expression(
         Type $type, Name $result, Expr $source, Name $temporary,
-        Expr $converted) {
+        Expr $converted, Statement $assignments...) => ({
         $type $result = $source;
         List $temporary = $converted;
-      };
-      List bindings = c.bind_syntax(
+        $assignments...
+        $result;
+      });
+      List bound = c.bind_syntax(
         shape(type, result, %(code-value "bound" $source ()),
-          temporary, converted),
-        AST_BLOCK, c.return_type);
-      List last = c._as_statement(result_expr);
-      // x2c has no source spelling for this native statement expression.
-      return %(parens (block @{bindings.cdr()} @assignments $last));
+          temporary, converted, assignments),
+        AST_EXPRESSION, NULL);
+      return bound.caddr();
     }
   }
   return ast;
