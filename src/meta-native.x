@@ -100,7 +100,8 @@ static Array _stub_arguments(Func function, const FuncArg *argv) {
   List parameters = Func.signature(function).car().list().cadr();
   if (parameters.equal(%((void)))) parameters = NULL;
   Array values = [];
-  for (int i = 0; i < parameters.len(); i++) values.push(argv[i].data.value);
+  int count = parameters.len();
+  for (int i = 0; i < count; i++) values.push(argv[i].data.value);
   return values;
 }
 
