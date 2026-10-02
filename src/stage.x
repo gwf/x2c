@@ -93,11 +93,11 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 }
 
 macro Statement $report.macro_argument_constant(Expr $c, Expr $site) {
-    $c.report_error(
-      <macro>,
-      "explicit meta call cannot be resolved",
-      $site, %("an argument must be a constant, captured syntax, or a meta call"));
-  }
+  $c.report_error(
+    <macro>,
+    "explicit meta call cannot be resolved",
+    $site, %("an argument must be a constant, captured syntax, or a meta call"));
+}
 
 /* A name that is not a constant, such as a template's own local, passes as
    its syntax. Anything else is reported at `site`. */
@@ -422,13 +422,13 @@ static List _map_form(Compiler c, Var value) {
 // compile-time-only functions
 
 macro Statement $report.macro_function_only(Expr $c, Expr $site, Expr $name) {
-    $c.report_error(
-      <macro>,
-      %"'${$name}' can only be called at compile time",
-      $site, %("reason: it reaches a compiler operation, so no unit emits a"
-      "definition for it; call it from a macro or another meta"
-      "function"));
-  }
+  $c.report_error(
+    <macro>,
+    %"'${$name}' can only be called at compile time",
+    $site, %("reason: it reaches a compiler operation, so no unit emits a"
+    "definition for it; call it from a macro or another meta"
+    "function"));
+}
 
 /** Refuses a run-time call to a `meta` function this compiler derived
     compile-time only.

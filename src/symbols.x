@@ -503,19 +503,20 @@ static String _declared_spelling(List key) {
   return NULL;
 }
 
-macro Statement $report.parse_name_package(Expr $c, Expr $spelling, Expr $owner) {
-    $c.report_error(
-      <parse>,
-      %"'${$spelling}' is reserved for imported package '${$owner}'",
-      $c.token, NULL);
-  }
+macro Statement $report.parse_name_package(
+  Expr $c, Expr $spelling, Expr $owner) {
+  $c.report_error(
+    <parse>,
+    %"'${$spelling}' is reserved for imported package '${$owner}'",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_name_reserved(Expr $c, Expr $spelling) {
-    $c.report_error(
-      <parse>,
-      %"'${$spelling}' is reserved for compiler-generated names",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>,
+    %"'${$spelling}' is reserved for compiler-generated names",
+    $c.token, NULL);
+}
 
 /* A source declaration may not take a compiler-generated spelling or one
    in an imported package's space. A shallow parse reads emitted C, whose
@@ -729,19 +730,19 @@ void Compiler.register_package_member(
 
 macro Statement $report.parse_package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
-    $c.report_error(
-      <parse>,
-      %"package ${$kind} '${$local}' collides with a declared name",
-      $site, NULL);
-  }
+  $c.report_error(
+    <parse>,
+    %"package ${$kind} '${$local}' collides with a declared name",
+    $site, NULL);
+}
 
 macro Statement $report.parse_package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
-    $c.report_error(
-      <parse>,
-      %"package ${$kind} '${$local}' is already bound",
-      $site, %( "bound to: ${$bound}" ));
-  }
+  $c.report_error(
+    <parse>,
+    %"package ${$kind} '${$local}' is already bound",
+    $site, %( "bound to: ${$bound}" ));
+}
 
 /* An alias and a `with` name each claim one local spelling. Rebinding that
    spelling, or taking one a declaration already uses, is the same conflict.
@@ -879,11 +880,11 @@ static Type Sym._resolve_chain(
 }
 
 macro Statement $report.type_typedef_depth(Expr $c, Expr $origin) {
-    $c.report_error(
-      <type>,
-      %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <type>,
+    %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
+    NULL, NULL);
+}
 
 /* The resolver cannot tell a true cycle from an absurdly long chain, so the
    diagnostic states only what it can determine. `typedef Color Color;` is

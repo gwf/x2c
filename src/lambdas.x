@@ -91,10 +91,10 @@ static List Compiler._parse_bare_params(Compiler c) {
 }
 
 macro Statement $report.parse_param_ident(Expr $c) {
-    $c.report_error(
-      <parse>, "expected identifier in parameter list",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected identifier in parameter list",
+    $c.token, NULL);
+}
 
 /* A bare parameter is an automatic Var. */
 static List Compiler._parse_bare_param(Compiler c) {
@@ -147,10 +147,10 @@ static List Compiler._template_capture(Compiler c) {
 
 macro Statement $report.type_ident_untyped(
   Expr $c, Expr $spelling, Expr $origin) {
-    $c.report_error(
-      <type>, %"identifier '${$spelling}' has no semantic type",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <type>, %"identifier '${$spelling}' has no semantic type",
+    $origin, NULL);
+}
 
 static List Compiler._shared_binding(Compiler c) {
   Token origin = c.token;
@@ -428,10 +428,10 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
 }
 
 macro Statement $report.type_capture_enclosing(Expr $c, Expr $original) {
-    $c.report_error(
-      <type>, "reference capture requires an enclosing reference capture",
-      $c.token, %("binding: ${binding_identity_spelling($original)}"));
-  }
+  $c.report_error(
+    <type>, "reference capture requires an enclosing reference capture",
+    $c.token, %("binding: ${binding_identity_spelling($original)}"));
+}
 
 /* A supplied row fixes the captured type and value. Otherwise a binding
    listed after `using` captures by reference, and a snapshot of a
@@ -510,10 +510,10 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
 }
 
 macro Statement $report.type_capture_ref(Expr $c, Expr $binding) {
-    $c.report_error(
-      <type>, "captured value requires 'using &name' for reference access",
-      $c.token, %("binding: ${binding_identity_spelling($binding)}"));
-  }
+  $c.report_error(
+    <type>, "captured value requires 'using &name' for reference access",
+    $c.token, %("binding: ${binding_identity_spelling($binding)}"));
+}
 
 static void Compiler._require_capture_lvalue(Compiler c, List target) {
   List binding = Ast.lvalue_binding(target);

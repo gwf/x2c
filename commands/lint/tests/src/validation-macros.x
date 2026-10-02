@@ -46,10 +46,10 @@ int direct_report(Compiler c) {
 }
 
 macro Statement $report.parse_raise_payload(Expr $c) {
-    $c.report_error(
-      <parse>, "raise requires a %() payload literal",
-      $c.token, %("use raise %(code (key value)...);"));
-  }
+  $c.report_error(
+    <parse>, "raise requires a %() payload literal",
+    $c.token, %("use raise %(code (key value)...);"));
+}
 
 int catalogue_report(Compiler c) {
   $report.parse_raise_payload(c);

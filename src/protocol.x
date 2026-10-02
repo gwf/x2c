@@ -259,22 +259,22 @@ static void ProtocolSyntax.head(ProtocolSyntax &p) {
 }
 
 macro Statement $report.protocol_tag_var(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "'tag' applies only to a Var adoption",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>, "'tag' applies only to a Var adoption",
+    $origin, NULL);
+}
 
 macro Statement $report.protocol_modifier_conflict(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
+    $origin, NULL);
+}
 
 macro Statement $report.protocol_as_var(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "'as' applies only to a Var adoption",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>, "'as' applies only to a Var adoption",
+    $origin, NULL);
+}
 
 static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
   Compiler c = p.c;
@@ -319,31 +319,31 @@ static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
 }
 
 macro Statement $report.protocol_static_adoption(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "'static' applies only to a concrete protocol adoption",
-      $origin, %("remove 'static' from the reusable protocol body"));
-  }
+  $c.report_error(
+    <protocol>, "'static' applies only to a concrete protocol adoption",
+    $origin, %("remove 'static' from the reusable protocol body"));
+}
 
 macro Statement $report.protocol_participant_expected(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "expected protocol participant name",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>, "expected protocol participant name",
+    $origin, NULL);
+}
 
 macro Statement $report.protocol_modifier_adoption(
   Expr $c, Expr $representation, Expr $origin) {
-    $c.report_error(
-      <protocol>, $representation
-        ? "'as' applies only to a concrete protocol adoption"
-        : "'tag' applies only to a concrete protocol adoption",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>, $representation
+      ? "'as' applies only to a concrete protocol adoption"
+      : "'tag' applies only to a concrete protocol adoption",
+    $origin, NULL);
+}
 
 macro Statement $report.protocol_meta_adoption(Expr $c, Expr $origin) {
-    $c.report_error(
-      <protocol>, "'meta' applies only to a concrete protocol adoption",
-      $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
-  }
+  $c.report_error(
+    <protocol>, "'meta' applies only to a concrete protocol adoption",
+    $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
+}
 
 static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
   Compiler c = p.c;
@@ -377,10 +377,10 @@ static void ProtocolSyntax.warn_shadowed(ProtocolSyntax &p) {
 }
 
 macro Statement $report.protocol_assoc_order(Expr $c) {
-    $c.report_error(
-      <protocol>, "associated types must precede protocol members",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, "associated types must precede protocol members",
+    $c.token, NULL);
+}
 
 static List ProtocolSyntax.body(ProtocolSyntax &p) {
   Compiler c = p.c;
@@ -416,16 +416,16 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
 }
 
 macro Statement $report.protocol_type_duplicate(Expr $c, Expr $name) {
-    $c.report_error(
-      <protocol>, %"duplicate protocol type variable '${$name}'",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, %"duplicate protocol type variable '${$name}'",
+    $c.token, NULL);
+}
 
 macro Statement $report.protocol_assoc_expected(Expr $c) {
-    $c.report_error(
-      <protocol>, "expected associated type name",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, "expected associated type name",
+    $c.token, NULL);
+}
 
 static List Compiler._parse_associated(Compiler c, Map names) {
   c.expect(<associated>);
@@ -444,28 +444,28 @@ static List Compiler._parse_associated(Compiler c, Map names) {
 }
 
 macro Statement $report.protocol_member_duplicate(Expr $c, Expr $name) {
-    $c.report_error(
-      <protocol>, %"duplicate protocol member '${$name}'",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, %"duplicate protocol member '${$name}'",
+    $c.token, NULL);
+}
 
 macro Statement $report.protocol_member_function(Expr $c, Expr $name) {
-    $c.report_error(
-      <protocol>, "protocol member must be a function",
-      $c.token, %("member:" ${$name}));
-  }
+  $c.report_error(
+    <protocol>, "protocol member must be a function",
+    $c.token, %("member:" ${$name}));
+}
 
 macro Statement $report.protocol_member_owner(Expr $c, Expr $participant) {
-    $c.report_error(
-      <protocol>, "protocol member must be owned by its participant",
-      $c.token, %("expected receiver:" ${$participant}));
-  }
+  $c.report_error(
+    <protocol>, "protocol member must be owned by its participant",
+    $c.token, %("expected receiver:" ${$participant}));
+}
 
 macro Statement $report.protocol_member_single(Expr $c) {
-    $c.report_error(
-      <protocol>, "protocol member must declare one function",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, "protocol member must declare one function",
+    $c.token, NULL);
+}
 
 static List Compiler._parse_member(
   Compiler c, String participant, Map members) {
@@ -510,10 +510,10 @@ static String _member_name(List identity, String participant) {
 }
 
 macro Statement $report.protocol_native_ident(Expr $c) {
-    $c.report_error(
-      <protocol>, "native protocol member requires an identifier",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <protocol>, "native protocol member requires an identifier",
+    $c.token, NULL);
+}
 
 static String Compiler._native_member(Compiler c) {
   if (!c.test(<=>)) return NULL;
@@ -575,10 +575,10 @@ static List Compiler._publish_adoption(
 }
 
 macro Statement $report.macro_protocol_invalid(Expr $c) {
-    $c.report_error(
-      <macro>, "constructed protocol syntax is invalid",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <macro>, "constructed protocol syntax is invalid",
+    $c.token, NULL);
+}
 
 static List Compiler._publish_var_adoption(
   Compiler c, List node, Token participant_token, Token modifier_token) {
@@ -653,14 +653,14 @@ static List Compiler._source_key(Compiler c, List location) {
 
 macro Statement $report.protocol_decl_conflict(
   Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
-    {
-      String first = %"first: ${$first_location}";
-      String second = %"second: ${$second_location}";
-      $c.report_error(
-        <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
-        $c.token, %($first $second));
-    }
+  {
+    String first = %"first: ${$first_location}";
+    String second = %"second: ${$second_location}";
+    $c.report_error(
+      <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
+      $c.token, %($first $second));
   }
+}
 
 static void Compiler._install_occurrence(
   Compiler c, Type base, List record, Symbol storage, List location) {
@@ -693,11 +693,11 @@ static void Compiler._install_occurrence(
 
 macro Statement $report.protocol_type_undeclared(
   Expr $c, Expr $spelling, Expr $origin) {
-    $c.report_error(
-      <protocol>,
-      %"adoption participant '${$spelling}' does not name a declared type",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <protocol>,
+    %"adoption participant '${$spelling}' does not name a declared type",
+    $origin, NULL);
+}
 
 static List AdoptionDraft.publish(AdoptionDraft &a) {
   Compiler c = a.c;
@@ -827,15 +827,15 @@ static void AdoptionDraft.check_previous(AdoptionDraft &a) {
 
 macro Statement $report.protocol_adoption_conflict(
   Expr $c, Expr $adoption, Expr $first_location) {
-    {
-      String first = %"first: ${_location_string($first_location)}";
-      String second = %"second: ${_location_string($adoption.location)}";
-      $c.report_error(
-        <protocol>,
-        %"conflicting adoption declarations for ${$adoption.spelling()}",
-        $c.token, %($first $second));
-    }
+  {
+    String first = %"first: ${_location_string($first_location)}";
+    String second = %"second: ${_location_string($adoption.location)}";
+    $c.report_error(
+      <protocol>,
+      %"conflicting adoption declarations for ${$adoption.spelling()}",
+      $c.token, %($first $second));
   }
+}
 
 static void AdoptionDraft.install(AdoptionDraft &a) {
   Compiler c = a.c;

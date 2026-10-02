@@ -151,11 +151,11 @@ static List Compiler._prelude_entry(
 }
 
 macro Statement $report.driver_runtime_read(Expr $c, Expr $runtime) {
-    $c.report_error(
-      <driver>,
-      "cannot read runtime source",
-      $c.token, %("path: ${$runtime}"));
-  }
+  $c.report_error(
+    <driver>,
+    "cannot read runtime source",
+    $c.token, %("path: ${$runtime}"));
+}
 
 static String Compiler._runtime_text(Compiler c, String runtime) {
   String text = NULL;
@@ -418,11 +418,11 @@ static String Compiler._walked_hash(
 }
 
 macro Statement $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
-    $c.report_error(
-      <driver>,
-      "cannot read include",
-      $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
-  }
+  $c.report_error(
+    <driver>,
+    "cannot read include",
+    $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
+}
 
 /* Read an include's text, reporting an unreadable target as a driver error. */
 static String Compiler._include_text(Compiler c, String target, String path) {
@@ -724,11 +724,11 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 }
 
 macro Statement $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
-    $c.report_error(
-      <driver>,
-      %"unknown package '${$name}'",
-      $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
-  }
+  $c.report_error(
+    <driver>,
+    %"unknown package '${$name}'",
+    $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
+}
 
 static String Compiler._find_package(
   Compiler c, String name, String &root, Token token) {
@@ -739,11 +739,11 @@ static String Compiler._find_package(
 
 macro Statement $report.driver_package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
-    $c.report_error(
-      <driver>,
-      %"cannot read package '${$package.package}'",
-      $site, %( "path: ${$entry}" ));
-  }
+  $c.report_error(
+    <driver>,
+    %"cannot read package '${$package.package}'",
+    $site, %( "path: ${$entry}" ));
+}
 
 /* The package's files enter the cache from their entries, or from one cold
    walk in package mode. */
@@ -813,11 +813,11 @@ static void Surface.take(Surface &s, Map rows, List key, Var value) {
 
 macro Statement $report.driver_package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
-    $c.report_error(
-      <driver>,
-      %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
-      $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
-  }
+  $c.report_error(
+    <driver>,
+    %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
+    $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
+}
 
 static void Surface.reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
@@ -1166,11 +1166,11 @@ String interface_prelude(void) {
 // writing interfaces
 
 macro Statement $report.emit_interface_write(Expr $c) {
-    $c.report_error(
-      <emit>,
-      "failed to write interface file",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <emit>,
+    "failed to write interface file",
+    NULL, NULL);
+}
 
 /** Returns the compiler's own collected contribution as interface text, or
     NULL when the unit has not collected its symbols or the compiler's

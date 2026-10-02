@@ -146,26 +146,26 @@ static List Compiler._top_level_lisp(Compiler c, int skip_body) {
 }
 
 macro Statement $report.parse_decorator_top(Expr $c) {
-    $c.report_error(
-      <parse>, "top-level decorators are not supported",
-      $c.token, %( "module initialization: void TYPE.initialize(void)" ));
-  }
+  $c.report_error(
+    <parse>, "top-level decorators are not supported",
+    $c.token, %( "module initialization: void TYPE.initialize(void)" ));
+}
 
 static List Compiler._top_level_decorator(Compiler c) {
   $report.parse_decorator_top(c);
 }
 
 macro Statement $report.parse_body_expected(Expr $c, Expr $unexpected) {
-    $c.report_error(
-      <parse>, "expected ';', '{', or '=>'",
-      $c.token, %("token:" ${$c.token.text} "symbol:" ${$unexpected.str()}));
-  }
+  $c.report_error(
+    <parse>, "expected ';', '{', or '=>'",
+    $c.token, %("token:" ${$c.token.text} "symbol:" ${$unexpected.str()}));
+}
 
 macro Statement $report.parse_meta_function(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "a native meta declaration must be a function",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "a native meta declaration must be a function",
+    $origin, NULL);
+}
 
 /* A declaration row after any `meta` marker. Collection records it; the
    full parse completes a declaration at `;` or a definition at its body. */
@@ -195,10 +195,10 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
 List Compiler.parse_top_level(Compiler c) => c.parse_top_level_mode(0);
 
 macro Statement $report.parse_unit_single(Expr $c) {
-    $c.report_error(
-      <parse>, "submit one top-level item at a time",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "submit one top-level item at a time",
+    $c.token, NULL);
+}
 
 /** Parses one submission from the current token stream. `end_position` is
     the byte offset after supplied input, before any synthetic closing text.
@@ -357,16 +357,16 @@ List Compiler.parse_import_declaration(Compiler c) {
 }
 
 macro Statement $report.parse_package_identifier(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "package name must be a C identifier",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "package name must be a C identifier",
+    $origin, NULL);
+}
 
 macro Statement $report.parse_import_name(Expr $c) {
-    $c.report_error(
-      <parse>, "expected a quoted package name after 'import'",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected a quoted package name after 'import'",
+    $c.token, NULL);
+}
 
 // Rejects unquoted package names before parsing their identifier.
 static String Compiler._package_name(Compiler c) {
@@ -391,16 +391,16 @@ static String Compiler._import_alias(Compiler c, String name) {
 }
 
 macro Statement $report.parse_import_local(Expr $c) {
-    $c.report_error(
-      <parse>, "expected a local name after 'as'",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected a local name after 'as'",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_import_member(Expr $c) {
-    $c.report_error(
-      <parse>, "expected a package member name after 'with'",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected a package member name after 'with'",
+    $c.token, NULL);
+}
 
 /* with Name [as Local] {, Name [as Local]}
    Each name binds a bare local spelling to one already-built package member.
@@ -450,10 +450,10 @@ static List Compiler._declared(
 }
 
 macro Statement $report.parse_function_row(Expr $c) {
-    $c.report_error(
-      <parse>, "a function definition cannot share a declaration row",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "a function definition cannot share a declaration row",
+    $c.token, NULL);
+}
 
 /* A definition's body follows its declarator. A staged `meta` body parses
    as compile-time code, and a `meta` function that reaches a `Meta`
@@ -481,10 +481,10 @@ static List Compiler._defined(
 
 macro Statement $report.parse_meta_constructed(
   Expr $c, Expr $name, Expr $origin) {
-    $c.report_error(
-      <parse>, %"meta function '${$name}' cannot be produced by a macro",
-      $origin, %( "move it to a source file and call it from the macro" ));
-  }
+  $c.report_error(
+    <parse>, %"meta function '${$name}' cannot be produced by a macro",
+    $origin, %( "move it to a source file and call it from the macro" ));
+}
 
 /* A macro expansion cannot produce a bodied `meta` function: the project
    meta build extracts meta code from source files, not from expansions. */
@@ -716,16 +716,16 @@ static List Compiler._declaration_types(Compiler c, List storage) {
 }
 
 macro Statement $report.parse_decl_function(Expr $c) {
-    $c.report_error(
-      <parse>, "Decl macro argument cannot be a function declaration",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "Decl macro argument cannot be a function declaration",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_decl_typedef(Expr $c) {
-    $c.report_error(
-      <parse>, "Decl macro argument cannot be a typedef",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "Decl macro argument cannot be a typedef",
+    $c.token, NULL);
+}
 
 /** Parses one non-function, non-typedef `Decl` macro argument.
     Returns a single declaration without consuming the invocation delimiter;
@@ -860,10 +860,10 @@ static int Compiler._destructure_starts(Compiler c) {
 }
 
 macro Statement $report.parse_destructure_init(Expr $c) {
-    $c.report_error(
-      <parse>, "destructuring declaration requires an initializer",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "destructuring declaration requires an initializer",
+    $c.token, NULL);
+}
 
 static List Compiler._destructure_declaration(
   Compiler c, List type, List binding_type, int allow_uninitialized) {
@@ -883,10 +883,10 @@ static List Compiler._destructure_declaration(
 }
 
 macro Statement $report.parse_destructure_name(Expr $c) {
-    $c.report_error(
-      <parse>, "expected identifier in destructuring declaration",
-      $c.token, %("destructuring targets must be simple identifiers"));
-  }
+  $c.report_error(
+    <parse>, "expected identifier in destructuring declaration",
+    $c.token, %("destructuring targets must be simple identifiers"));
+}
 
 // ( ident, ident, ... ), each declared with the destructured type.
 static List Compiler._destructure_targets(Compiler c, List binding_type) {
@@ -1186,12 +1186,13 @@ static List Compiler._type_specifier(Compiler c) {
   return syntax;
 }
 
-macro Statement $report.type_scalar_invalid(Expr $c, Expr $source, Expr $origin) {
-    $c.report_error(
-      <type>, $source ? %"invalid scalar type ${$source}"
-                   : "expected scalar type",
-      $origin, NULL);
-  }
+macro Statement $report.type_scalar_invalid(
+  Expr $c, Expr $source, Expr $origin) {
+  $c.report_error(
+    <type>, $source ? %"invalid scalar type ${$source}"
+                 : "expected scalar type",
+    $origin, NULL);
+}
 
 static List Compiler._primitive_type(Compiler c) {
   Token start = c.token;
@@ -1299,10 +1300,10 @@ static List Compiler._package_aggregate_name(
 }
 
 macro Statement $report.parse_attribute_packed(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "packed attributes are unsupported",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "packed attributes are unsupported",
+    $origin, NULL);
+}
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
    aggregate passes the current token, so its attributes are in its form. An
@@ -1404,10 +1405,10 @@ static List Compiler._field(Compiler c, List context, int delegated) {
 }
 
 macro Statement $report.parse_delegate_name(Expr $c) {
-    $c.report_error(
-      <parse>, "delegate field requires a name",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "delegate field requires a name",
+    $c.token, NULL);
+}
 
 // Each declarator of a delegate field must name the field.
 static void Compiler._declare_delegates(Compiler c, List context, List rows) {
@@ -1486,10 +1487,10 @@ static List Compiler._record_body(Compiler c, String name, Token start) {
 }
 
 macro Statement $report.parse_named_type_abstract(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "named type requires an abstract type after its name",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "named type requires an abstract type after its name",
+    $origin, NULL);
+}
 
 /* Completes a named type from the abstract declarator after its base. The
    type keeps an aggregate's body in place of its tag. */
@@ -1560,10 +1561,10 @@ static void _push_items(Array out, List node) {
 }
 
 macro Statement $report.parse_enum_name(Expr $c) {
-    $c.report_error(
-      <parse>, "expected enumerator identifier",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected enumerator identifier",
+    $c.token, NULL);
+}
 
 /** Parses one enumerator for enum type `context` and returns its AST.
     Outside macro-template parsing, its binding is published immediately so
@@ -1613,16 +1614,16 @@ static List Compiler._enumerator_name(Compiler c, Type context) {
 }
 
 macro Statement $report.parse_enum_bound(Expr $c, Expr $spelling, Expr $origin) {
-    $c.report_error(
-      <parse>, %"enumerator '${$spelling}' is already bound in this scope",
-      $origin, %("prior binding: '${$spelling}'"));
-  }
+  $c.report_error(
+    <parse>, %"enumerator '${$spelling}' is already bound in this scope",
+    $origin, %("prior binding: '${$spelling}'"));
+}
 
 macro Statement $report.parse_syntax_position(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "syntax cannot be constructed at this position",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "syntax cannot be constructed at this position",
+    $origin, NULL);
+}
 
 static List Compiler._publish_enumerator(
   Compiler c, List input, Type context, Token origin) {
@@ -1813,16 +1814,16 @@ static List Compiler._direct_declarator(
 }
 
 macro Statement $report.parse_paren_unclosed(Expr $c) {
-    $c.report_error(
-      <parse>, "missing closing parenthesis",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "missing closing parenthesis",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_type_unknown(Expr $c, Expr $first) {
-    $c.report_error(
-      <parse>, %"unknown type name '${$first.text}'",
-      $first, %("name an imported package type through its alias"));
-  }
+  $c.report_error(
+    <parse>, %"unknown type name '${$first.text}'",
+    $first, %("name an imported package type through its alias"));
+}
 
 // Carries the source span across a nested declarator.
 static List Compiler._parenthesized(
@@ -1872,10 +1873,10 @@ static List Compiler._declarator_suffix(Compiler c) {
 
 macro Statement $report.parse_dimension_close(
   Expr $c, Expr $expr, Expr $unexpected) {
-    $c.report_error(
-      <parse>, "expected ']'",
-      $c.token, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
-  }
+  $c.report_error(
+    <parse>, "expected ']'",
+    $c.token, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
+}
 
 static List Compiler._array_suffix(Compiler c) {
   c.next();
@@ -1937,10 +1938,10 @@ static List Compiler._template_declarator(Compiler c, int member) {
 }
 
 macro Statement $report.parse_method_name(Expr $c) {
-    $c.report_error(
-      <parse>, "expected method name",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected method name",
+    $c.token, NULL);
+}
 
 // `Type.member`, where the member may be a Name hole.
 static List Compiler._literal_method(Compiler c) {
@@ -1969,10 +1970,10 @@ static List Compiler._literal_method(Compiler c) {
 }
 
 macro Statement $report.parse_macro_member(Expr $c) {
-    $c.report_error(
-      <parse>, "macro method declaration requires a member name",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "macro method declaration requires a member name",
+    $c.token, NULL);
+}
 
 // `$T.member`, where `$T` is a type hole.
 static List Compiler._hole_method(Compiler c) {
@@ -2061,10 +2062,10 @@ static Var Compiler._declared_name(Compiler c, Var name, int &exact_name) {
 }
 
 macro Statement $report.type_method_owner(Expr $c) {
-    $c.report_error(
-      <type>, "method name has no concrete owner",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <type>, "method name has no concrete owner",
+    $c.token, NULL);
+}
 
 /* Folds a literal owner and its member into the C spelling and records
    the method. A constructed source owner is no concrete owner, so only a
@@ -2103,10 +2104,10 @@ static Var Compiler._method_spelling(
 }
 
 macro Statement $report.parse_decl_bound(Expr $c, Expr $exact) {
-    $c.report_error(
-      <parse>, %"declaration '${$exact}' is already bound",
-      $c.token, %("prior binding: '${$exact}'"));
-  }
+  $c.report_error(
+    <parse>, %"declaration '${$exact}' is already bound",
+    $c.token, %("prior binding: '${$exact}'"));
+}
 
 /* An exact spelling, or a name a parameter holds, may be declared again only
    as another prototype of a function. */
@@ -2149,17 +2150,17 @@ static void Compiler._method_facts(
 
 macro Statement $report.parse_params_close(
   Expr $c, Expr $params, Expr $unexpected) {
-    $c.report_error(
-      <parse>, "expected ')'",
-      $c.token, %("parameters:" ${$params.str()}
-        "symbol:" ${$unexpected.str()}));
-  }
+  $c.report_error(
+    <parse>, "expected ')'",
+    $c.token, %("parameters:" ${$params.str()}
+      "symbol:" ${$unexpected.str()}));
+}
 
 macro Statement $report.parse_params_empty(Expr $c) {
-    $c.report_error(
-      <parse>, "empty parameter list; use (void)",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "empty parameter list; use (void)",
+    $c.token, NULL);
+}
 
 /* Parameter declarations bind into a temporary scope. The declarator cannot
    yet know whether a body follows, so keep that scope in `params`; finishing
@@ -2282,10 +2283,10 @@ static List Compiler._complex_identifier(
 }
 
 macro Statement $report.parse_method_member(Expr $c, Expr $owner) {
-    $c.report_error(
-      <parse>, "expected method name after dot",
-      $c.token, %( "typedef:" ${$owner} "token:" ${$c.token.text}  ));
-  }
+  $c.report_error(
+    <parse>, "expected method name after dot",
+    $c.token, %( "typedef:" ${$owner} "token:" ${$c.token.text}  ));
+}
 
 /* The member after `TYPE.` spells a method, which a declarator records as
    its owner and member. Elsewhere an imported package may have declared
@@ -2363,10 +2364,10 @@ static String _syntax_exact_name(Var value) {
 // function definitions
 
 macro Statement $report.parse_function_body(Expr $c) {
-    $c.report_error(
-      <parse>, "Function macro argument requires a function body",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "Function macro argument requires a function body",
+    $c.token, NULL);
+}
 
 /** Parses one function declaration and its required compound body.
     The parameter bindings are active while the body is parsed, and the first
@@ -2457,16 +2458,16 @@ static List Compiler._function_body(
 }
 
 macro Statement $report.parse_shutdown_duplicate(Expr $c, Expr $name) {
-    $c.report_error(
-      <parse>, "translation unit has more than one type shutdown",
-      $c.token, %( "shutdown:" ${$name} ));
-  }
+  $c.report_error(
+    <parse>, "translation unit has more than one type shutdown",
+    $c.token, %( "shutdown:" ${$name} ));
+}
 
 macro Statement $report.parse_init_duplicate(Expr $c, Expr $name) {
-    $c.report_error(
-      <parse>, "translation unit has more than one type initializer",
-      $c.token, %( "initializer:" ${$name} ));
-  }
+  $c.report_error(
+    <parse>, "translation unit has more than one type initializer",
+    $c.token, %( "initializer:" ${$name} ));
+}
 
 static String Compiler._prepare_lifecycle(
   Compiler c, List declaration, List binding, String &initializer_owner,
@@ -2503,13 +2504,13 @@ static String Compiler._lifecycle_owner(
 
 macro Statement $report.parse_lifecycle_signature(
   Expr $c, Expr $role, Expr $name) {
-    {
-      String message = $role == "initializer"
-        ? "type initializer must have signature void TYPE.initialize(void)"
-        : "type shutdown must have signature void TYPE.shutdown(void)";
-      $c.report_error(<parse>, message, $c.token, %("${$role}: ${$name}"));
-    }
+  {
+    String message = $role == "initializer"
+      ? "type initializer must have signature void TYPE.initialize(void)"
+      : "type shutdown must have signature void TYPE.shutdown(void)";
+    $c.report_error(<parse>, message, $c.token, %("${$role}: ${$name}"));
   }
+}
 
 static void Compiler._require_signature(
   Compiler c, List decl, String name, String role) {
@@ -2644,16 +2645,16 @@ static void Compiler._append_managed_rows(
 
 macro Statement $report.protocol_managed_cleanup(
   Expr $c, Expr $origin, Expr $type) {
-    $c.report_error(
-      <protocol>, "managed initializer requires Cleanup participation",
-      $origin, %("type: ${$type.repr()}"));
-  }
+  $c.report_error(
+    <protocol>, "managed initializer requires Cleanup participation",
+    $origin, %("type: ${$type.repr()}"));
+}
 
 macro Statement $report.parse_managed_storage(Expr $c, Expr $origin) {
-    $c.report_error(
-      <parse>, "managed initializer requires automatic local storage",
-      $origin, NULL);
-  }
+  $c.report_error(
+    <parse>, "managed initializer requires automatic local storage",
+    $origin, NULL);
+}
 
 static void Compiler._require_cleanup(
   Compiler c, Var base, Type type, Token origin) {
@@ -2673,10 +2674,10 @@ static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
 // constructed syntax
 
 macro Statement $report.parse_syntax_expected(Expr $c) {
-    $c.report_error(
-      <parse>, "expected syntax",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected syntax",
+    $c.token, NULL);
+}
 
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
     The input must evaluate to a nonempty AST `List` valid for the requested
@@ -3079,10 +3080,10 @@ static List Compiler._collected_function(
 // constructed declarations and expressions
 
 macro Statement $report.parse_statement_single(Expr $c) {
-    $c.report_error(
-      <parse>, "expected one statement",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "expected one statement",
+    $c.token, NULL);
+}
 
 /* A statement position admits a sequence of one statement. Elsewhere the
    items bind in order, and a nested sequence contributes its items. */
@@ -3471,16 +3472,16 @@ static List Compiler._finish_prototype(Compiler c, List parameters) {
 // foreign aliases
 
 macro Statement $report.parse_alias_target(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias target must be one direct function declaration",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "foreign alias target must be one direct function declaration",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_alias_body(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias declaration cannot have a body",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "foreign alias declaration cannot have a body",
+    $c.token, NULL);
+}
 
 /** Constructs a foreign alias from one direct function declaration and target.
     `native_syntax` must resolve to a different direct identifier and, when
@@ -3507,10 +3508,10 @@ List Compiler.finish_foreign_alias(
 }
 
 macro Statement $report.parse_alias_storage(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias has invalid storage class",
-      $c.token, %("allowed storage: static or inline"));
-  }
+  $c.report_error(
+    <parse>, "foreign alias has invalid storage class",
+    $c.token, %("allowed storage: static or inline"));
+}
 
 static void Compiler._alias_storage(Compiler c, Var base) {
   foreach (Var part, base) {
@@ -3522,10 +3523,10 @@ static void Compiler._alias_storage(Compiler c, Var base) {
 }
 
 macro Statement $report.parse_alias_variadic(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias cannot be variadic",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "foreign alias cannot be variadic",
+    $c.token, NULL);
+}
 
 static void Compiler._alias_parameters(Compiler c, List parameters) {
   foreach (Var parameter, parameters)
@@ -3534,22 +3535,22 @@ static void Compiler._alias_parameters(Compiler c, List parameters) {
 }
 
 macro Statement $report.parse_alias_identifier(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias native target must be a direct identifier",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "foreign alias native target must be a direct identifier",
+    $c.token, NULL);
+}
 
 macro Statement $report.parse_alias_self(Expr $c) {
-    $c.report_error(
-      <parse>, "foreign alias cannot name itself",
-      $c.token, NULL);
-  }
+  $c.report_error(
+    <parse>, "foreign alias cannot name itself",
+    $c.token, NULL);
+}
 
 macro Statement $report.type_alias_function(Expr $c, Expr $native_type) {
-    $c.report_error(
-      <type>, "foreign alias native target is not a function",
-      $c.token, %("type: ${$native_type.repr()}"));
-  }
+  $c.report_error(
+    <type>, "foreign alias native target is not a function",
+    $c.token, %("type: ${$native_type.repr()}"));
+}
 
 static List Compiler._alias_target(
   Compiler c, List declaration, Var binding, List native_syntax) {

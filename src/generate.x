@@ -82,13 +82,13 @@ static List Compiler._emit_source(Compiler c, List source, List header) {
 }
 
 macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
-    {
-      String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
-      $c.report_error(
-        <emit>, "failed to write generated file",
-        $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
-    }
+  {
+    String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
+    $c.report_error(
+      <emit>, "failed to write generated file",
+      $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
   }
+}
 
 /* A failed write reports its file and the host error. */
 static void Compiler._publish(Compiler c, List outputs) {

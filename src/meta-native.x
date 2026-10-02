@@ -58,12 +58,13 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     }
 }
 
-macro Statement $report.macro_function_install(Expr $c, Expr $site, Expr $cause) {
-    $c.report_error(
-      <macro>,
-      "this meta function could not be installed",
-      $site, %("reason: ${$cause.repr()}"));
-  }
+macro Statement $report.macro_function_install(
+  Expr $c, Expr $site, Expr $cause) {
+  $c.report_error(
+    <macro>,
+    "this meta function could not be installed",
+    $site, %("reason: ${$cause.repr()}"));
+}
 
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
@@ -148,18 +149,18 @@ static Var Compiler._meta_apply(Compiler c, Var function, List arguments) {
 }
 
 macro Statement $report.parse_meta_decl(Expr $c, Expr $site) {
-    $c.report_error(
-      <parse>,
-      "meta requires a function or one initialized static value",
-      $site, NULL);
-  }
+  $c.report_error(
+    <parse>,
+    "meta requires a function or one initialized static value",
+    $site, NULL);
+}
 
 macro Statement $report.parse_meta_storage(Expr $c, Expr $site, Expr $name) {
-    $c.report_error(
-      <parse>,
-      "a meta value must have file-static storage",
-      $site, %("declaration: '${$name}'"));
-  }
+  $c.report_error(
+    <parse>,
+    "a meta value must have file-static storage",
+    $site, %("declaration: '${$name}'"));
+}
 
 /** Applies a contextual `meta` marker to one initialized file-static value.
     The unit's staged `meta` group holds the compile-time instance, which
@@ -206,18 +207,18 @@ List Compiler.evaluate_meta_expression(
 }
 
 macro Statement $report.macro_call_depth(Expr $c, Expr $site) {
-    $c.report_error(
-      <macro>,
-      "explicit meta call was stopped",
-      $site, %("reason: its compile-time form nested too deep"));
-  }
+  $c.report_error(
+    <macro>,
+    "explicit meta call was stopped",
+    $site, %("reason: its compile-time form nested too deep"));
+}
 
 macro Statement $report.macro_call_deferred(Expr $c, Expr $site) {
-    $c.report_error(
-      <macro>,
-      "this meta call is left for the translation",
-      $site, NULL);
-  }
+  $c.report_error(
+    <macro>,
+    "this meta call is left for the translation",
+    $site, NULL);
+}
 
 /** Runs the explicit meta call `expression` at `site`. The project meta
     build's own parse leaves a project function's call for the translation:
@@ -245,11 +246,11 @@ Var Compiler.run_meta_call(
 static String meta_call_form = NULL;
 
 macro Statement $report.macro_call_target(Expr $c, Expr $site) {
-    $c.report_error(
-      <macro>,
-      "explicit meta call cannot be resolved",
-      $site, %("only a call to a meta function runs at compile time"));
-  }
+  $c.report_error(
+    <macro>,
+    "explicit meta call cannot be resolved",
+    $site, %("only a call to a meta function runs at compile time"));
+}
 
 /* Calls a `meta` function named at a code boundary with its evaluated
    arguments. */
@@ -290,11 +291,11 @@ static Array Compiler._meta_values(
 }
 
 macro Statement $report.macro_call_binding(Expr $c, Expr $site, Expr $name) {
-    $c.report_error(
-      <macro>,
-      "explicit meta call cannot be resolved",
-      $site, %("no binding for ${$name}"));
-  }
+  $c.report_error(
+    <macro>,
+    "explicit meta call cannot be resolved",
+    $site, %("no binding for ${$name}"));
+}
 
 /* The session's binding of `name`, binding an included native function on
    first use. The project meta build's own parse has no helper yet, so a
@@ -329,11 +330,11 @@ void Compiler.record_native_meta_effect(
 }
 
 macro Statement $report.parse_meta_name(Expr $c, Expr $site) {
-    $c.report_error(
-      <parse>,
-      "native meta function requires one direct name",
-      $site, NULL);
-  }
+  $c.report_error(
+    <parse>,
+    "native meta function requires one direct name",
+    $site, NULL);
+}
 
 static String Compiler._native_meta_name(
   Compiler c, List declaration, Token marker) {
@@ -445,11 +446,11 @@ static Var NativeBinding.module_target(NativeBinding &n) {
 }
 
 macro Statement $report.type_meta_signature(Expr $c, Expr $site, Expr $n) {
-    $c.report_error(
-      <type>,
-      "native meta function declaration does not match its target",
-      $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
-  }
+  $c.report_error(
+    <type>,
+    "native meta function declaration does not match its target",
+    $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
+}
 
 /* A second module that defines the function is reported, and the
    declaration must match the target it binds. */
@@ -543,12 +544,12 @@ static List _native_module_suppliers(String name) =>
 
 macro Statement $report.type_meta_lifetime(
   Expr $c, Expr $site, Expr $name, Expr $signature) {
-    $c.report_error(
-      <type>,
-      "unproved native meta lifetime",
-      $site, %("name: ${$name}" "signature: ${$signature.repr()}"
-      "it might return or keep its argument; ownership cannot be inferred"));
-  }
+  $c.report_error(
+    <type>,
+    "unproved native meta lifetime",
+    $site, %("name: ${$name}" "signature: ${$signature.repr()}"
+    "it might return or keep its argument; ownership cannot be inferred"));
+}
 
 /* A declaration whose signature implies no summary is rejected at its
    `marker`; an advertisement read from an interface records nothing. */
@@ -834,11 +835,11 @@ void Compiler.select_native_modules(List paths) {
 
 macro Statement $report.driver_module_platform(
   Expr $c, Expr $site, Expr $name, Expr $module) {
-    $c.report_error(
-      <driver>,
-      "native modules are not supported on this platform",
-      $site, %("package: ${$name}" "module: ${$module}"));
-  }
+  $c.report_error(
+    <driver>,
+    "native modules are not supported on this platform",
+    $site, %("package: ${$name}" "module: ${$module}"));
+}
 
 /** Selects package `name`'s native module, when it has one, after the
     modules already selected, and records it as a prerequisite of the unit.
@@ -864,11 +865,11 @@ void Compiler.select_package_module(
 
 macro Statement $report.driver_module_compiler(
   Expr $c, Expr $site, Expr $name, Expr $module) {
-    $c.report_error(
-      <driver>,
-      %"package '${$name}' was built by another compiler; rebuild it",
-      $site, %("module: ${$module}"));
-  }
+  $c.report_error(
+    <driver>,
+    %"package '${$name}' was built by another compiler; rebuild it",
+    $site, %("module: ${$module}"));
+}
 
 static void Compiler._load_package_module(
   Compiler c, String name, String module, Token token) {

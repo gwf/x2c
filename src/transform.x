@@ -70,11 +70,11 @@ List Compiler.transform(Compiler c, List ast) {
 Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
 macro Statement $report.parse_init_incomplete(Expr $c) {
-    $c.report_error(
-      <parse>,
-      "managed initializer requires a complete block-local initializer",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <parse>,
+    "managed initializer requires a complete block-local initializer",
+    NULL, NULL);
+}
 
 static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
@@ -254,10 +254,10 @@ static Ast Compiler._function_node(
 }
 
 macro Statement $report.xform_index_unsupported(Expr $c, Expr $type) {
-    $c.report_error(
-      <xform>, %"type ${$type} does not support bracket indexing",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket indexing",
+    NULL, NULL);
+}
 
 static Ast Compiler._getindex_node(
   Compiler c, List expression, Type type, List index) {
@@ -270,10 +270,10 @@ static Ast Compiler._getindex_node(
 }
 
 macro Statement $report.xform_index_assignment(Expr $c, Expr $type) {
-    $c.report_error(
-      <xform>, %"type ${$type} does not support bracket assignment",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, NULL);
+}
 
 static Ast Compiler._setindex_node(
   Compiler c, List expression, Type type, List index, List value) {
@@ -289,10 +289,10 @@ static Ast Compiler._setindex_node(
 
 macro Statement $report.xform_slice_unsupported(
   Expr $c, Expr $type, Expr $notes) {
-    $c.report_error(
-      <xform>, %"type ${$type} does not support slicing",
-      NULL, $notes);
-  }
+  $c.report_error(
+    <xform>, %"type ${$type} does not support slicing",
+    NULL, $notes);
+}
 
 static Ast Compiler._slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
@@ -908,10 +908,10 @@ static List Compiler._typed_destructure(
 }
 
 macro Statement $report.type_destructure_list(Expr $c, Expr $source_type) {
-    $c.report_error(
-      <type>, "destructuring requires a List source",
-      NULL, %(("source type" ${$source_type})));
-  }
+  $c.report_error(
+    <type>, "destructuring requires a List source",
+    NULL, %(("source type" ${$source_type})));
+}
 
 static List Compiler._destructure_source(
   Compiler c, List source, Type source_type) {
@@ -1376,10 +1376,10 @@ static Type _printf_integer_type(PrintfLength length, int is_unsigned) {
 // operators
 
 macro Statement $report.xform_unary_dynamic(Expr $c) {
-    $c.report_error(
-      <xform>, "dynamic unary numeric operators are not supported",
-      NULL, %("use Var.binary with an explicit numeric operand"));
-  }
+  $c.report_error(
+    <xform>, "dynamic unary numeric operators are not supported",
+    NULL, %("use Var.binary with an explicit numeric operand"));
+}
 
 static List Compiler._operator(Compiler c, List ast) {
   List truthy = c._truthy(ast);
@@ -1484,27 +1484,27 @@ static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "${(unsigned long) value}");
 
 macro Statement $report.xform_index_copy(Expr $c, Expr $type) {
-    $c.report_error(
-      <xform>, %"type ${$type} does not support bracket assignment",
-      NULL, %("use an explicit copy-producing method where available"));
-  }
+  $c.report_error(
+    <xform>, %"type ${$type} does not support bracket assignment",
+    NULL, %("use an explicit copy-producing method where available"));
+}
 
 macro Statement $report.xform_string_assignment(Expr $c) {
-    {
-      String note = "String is immutable: use the copy-producing " +
-                    "String.withindex, or bind a char * to write a " +
-                    "transient String.malloc buffer";
-      $c.report_error(
-        <xform>, "String does not support bracket assignment",
-        NULL, %($note));
-    }
+  {
+    String note = "String is immutable: use the copy-producing " +
+                  "String.withindex, or bind a char * to write a " +
+                  "transient String.malloc buffer";
+    $c.report_error(
+      <xform>, "String does not support bracket assignment",
+      NULL, %($note));
   }
+}
 
 macro Statement $report.xform_slice_assignment(Expr $c) {
-    $c.report_error(
-      <xform>, "slice expressions are not assignable",
-      NULL, %("call the collection's setslice method explicitly"));
-  }
+  $c.report_error(
+    <xform>, "slice expressions are not assignable",
+    NULL, %("call the collection's setslice method explicitly"));
+}
 
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
@@ -1594,15 +1594,15 @@ static int _dynamic_binary_operator(Symbol op) =>
 
 macro Statement $report.xform_numeric_operands(
   Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
-    {
-      String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
-      String details =
-        %"operator: ${$op} left type: $left_type right type: $right_type";
-      $c.report_error(
-        <xform>, "dynamic numeric operators require numeric operands",
-        NULL, %($details));
-    }
+  {
+    String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
+    String details =
+      %"operator: ${$op} left type: $left_type right type: $right_type";
+    $c.report_error(
+      <xform>, "dynamic numeric operators require numeric operands",
+      NULL, %($details));
   }
+}
 
 static List Compiler._dynamic_binary(
   Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
@@ -1624,19 +1624,19 @@ static List Compiler._dynamic_binary(
 }
 
 macro Statement $report.xform_string_compound(Expr $c) {
-    $c.report_error(
-      <xform>, "String compound assignment supports only String +=",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <xform>, "String compound assignment supports only String +=",
+    NULL, NULL);
+}
 
 macro Statement $report.xform_container_compound(Expr $c, Expr $lhs_type) {
-    {
-      String type = $lhs_type.repr();
-      $c.report_error(
-        <xform>, %"container type $type does not support compound assignment",
-        NULL, %("update an indexed element instead"));
-    }
+  {
+    String type = $lhs_type.repr();
+    $c.report_error(
+      <xform>, %"container type $type does not support compound assignment",
+      NULL, %("update an indexed element instead"));
   }
+}
 
 static List Compiler._dynamic_compound(
   Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
@@ -1674,21 +1674,21 @@ static List Compiler._dynamic_compound(
 
 macro Statement $report.xform_compound_operand(
   Expr $c, Expr $op, Expr $rhs_type) {
-    {
-      String details = %"right type: ${$rhs_type.repr()}";
-      $c.report_error(
-        <xform>, $op == <+>
-          ? "dynamic += requires a numeric, Var, or String operand"
-          : "dynamic compound assignment requires a numeric or Var operand",
-        NULL, %($details));
-    }
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    $c.report_error(
+      <xform>, $op == <+>
+        ? "dynamic += requires a numeric, Var, or String operand"
+        : "dynamic compound assignment requires a numeric or Var operand",
+      NULL, %($details));
   }
+}
 
 macro Statement $report.xform_compound_bitfield(Expr $c) {
-    $c.report_error(
-      <xform>, "dynamic compound assignment cannot target a bitfield",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target a bitfield",
+    NULL, NULL);
+}
 
 static void Compiler._dynamic_rhs(
   Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
@@ -1704,19 +1704,19 @@ static int Compiler._scalar_operand(Compiler c, Symbol op, Type type) =>
   c.sym.resolve_numeric_type(type) || (op == <+> && c._string_operand(type));
 
 macro Statement $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
-    {
-      String details = %"left type: ${$lhs_type.repr()}";
-      $c.report_error(
-        <xform>, "dynamic compound assignment requires a numeric lvalue",
-        NULL, %($details));
-    }
+  {
+    String details = %"left type: ${$lhs_type.repr()}";
+    $c.report_error(
+      <xform>, "dynamic compound assignment requires a numeric lvalue",
+      NULL, %($details));
   }
+}
 
 macro Statement $report.xform_compound_enum(Expr $c) {
-    $c.report_error(
-      <xform>, "dynamic compound assignment cannot target an enum",
-      NULL, NULL);
-  }
+  $c.report_error(
+    <xform>, "dynamic compound assignment cannot target an enum",
+    NULL, NULL);
+}
 
 static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   Type scalar = c.sym.resolve_numeric_type(lhs_type);
@@ -1765,25 +1765,25 @@ static List Compiler._indexed_change(
 }
 
 macro Statement $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
-    {
-      String details = %"right type: ${$rhs_type.repr()}";
-      String message = $op == <+>
-        ? "indexed += requires a numeric, Var, or String operand"
-        : "indexed compound assignment requires a numeric or Var operand";
-      $c.report_error(<xform>, message, NULL, %($details));
-    }
+  {
+    String details = %"right type: ${$rhs_type.repr()}";
+    String message = $op == <+>
+      ? "indexed += requires a numeric, Var, or String operand"
+      : "indexed compound assignment requires a numeric or Var operand";
+    $c.report_error(<xform>, message, NULL, %($details));
   }
+}
 
 macro Statement $report.xform_index_update(
   Expr $c, Expr $base_type, Expr $postfix) {
-    {
-      String type = $base_type.repr();
-      String message = $postfix
-        ? %"type $type does not support indexed increment or decrement"
-        : %"type $type does not support indexed compound assignment";
-      $c.report_error(<xform>, message, NULL, NULL);
-    }
+  {
+    String type = $base_type.repr();
+    String message = $postfix
+      ? %"type $type does not support indexed increment or decrement"
+      : %"type $type does not support indexed compound assignment";
+    $c.report_error(<xform>, message, NULL, NULL);
   }
+}
 
 /* Compound, prefix and postfix brackets share the same resolved element,
    protocol lookup, and built-in conversion. A missing rhs means postfix. */

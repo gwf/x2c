@@ -671,10 +671,10 @@ static void StaticQueue.add_calls(
 }
 
 macro Statement $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
-    $c.report_error(
-      <cache>, "file-static x2c initializer dependency cycle",
-      $origin, $notes);
-  }
+  $c.report_error(
+    <cache>, "file-static x2c initializer dependency cycle",
+    $origin, $notes);
+}
 
 static void StaticQueue.report_cycle(StaticQueue &q) {
   Compiler c = q.c;

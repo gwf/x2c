@@ -686,11 +686,11 @@ String Compiler.meta_call_missing(Compiler c, String name) {
 
 macro Statement $report.macro_function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
-    $c.report_error(
-      <macro>,
-      "this function cannot run at compile time",
-      $site, %("function: ${$name}" "reason: ${$why}"));
-  }
+  $c.report_error(
+    <macro>,
+    "this function cannot run at compile time",
+    $site, %("function: ${$name}" "reason: ${$why}"));
+}
 
 /** Reports at `site` that the `meta` function `name` cannot run at compile
     time, and `why`. */

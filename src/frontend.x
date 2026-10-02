@@ -253,11 +253,11 @@ static int _inside(const char *path, const char *dir) {
 }
 
 macro Statement $report.driver_input_read(Expr $c, Expr $filename) {
-    $c.report_error(
-      <driver>,
-      "cannot read input file",
-      NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
-  }
+  $c.report_error(
+    <driver>,
+    "cannot read input file",
+    NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
+}
 
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
@@ -335,21 +335,21 @@ static void _enter_package(Frontend frontend, Compiler c) {
 }
 
 macro Statement $report.driver_script_symbols(Expr $c, Expr $site) {
-    $c.report_error(
-      <driver>,
-      "script units use the default symbol collection",
-      $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
-      "--live-symbols, and the --dump-cpp modes cannot read a script"));
-  }
+  $c.report_error(
+    <driver>,
+    "script units use the default symbol collection",
+    $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
+    "--live-symbols, and the --dump-cpp modes cannot read a script"));
+}
 
 macro Statement $report.driver_indent_symbols(Expr $c, Expr $site) {
-    $c.report_error(
-      <driver>,
-      "indented units use the default symbol collection",
-      $site, %("the host preprocessor does not keep the indentation, so"
-      "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
-      "an indented unit"));
-  }
+  $c.report_error(
+    <driver>,
+    "indented units use the default symbol collection",
+    $site, %("the host preprocessor does not keep the indentation, so"
+    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
+    "an indented unit"));
+}
 
 /* The host preprocessor keeps neither a unit's indentation nor its `#!`
    line. */
@@ -367,11 +367,11 @@ static Token _first_directive(Compiler c) {
 }
 
 macro Statement $report.driver_cpp_failed(Expr $c, Expr $site, Expr $status) {
-    $c.report_error(
-      <driver>,
-      "failed to run C preprocessor",
-      $site, %("stage: preprocess" "status: ${$status}"));
-  }
+  $c.report_error(
+    <driver>,
+    "failed to run C preprocessor",
+    $site, %("stage: preprocess" "status: ${$status}"));
+}
 
 /* Runs the host preprocessor for a child compiler that shares the unit's
    package and name state. The unit keeps the output and the errors, which
