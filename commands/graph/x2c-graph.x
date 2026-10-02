@@ -719,19 +719,11 @@ static void _site_add_prior_write(
 
 static List _site_value_summary(
   Compiler compiler, Var value, Map parameters, Map prior_writes) {
-  if (value is not <list>) return %(form);
-  List node = value;
+  Var peeled = project_peel(value);
+  if (peeled is not <list>) return %(form);
+  List node = peeled;
   if (!node) return %(form);
   match (node) {
-    case %(expr ? ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
-    case %(parens ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
-    case %(at ? ?inner):
-      return _site_value_summary(
-        compiler, inner, parameters, prior_writes);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       if (parameters.contains(binding)) return %(parameter $spelling);
       if (prior_writes.contains(binding)) {
@@ -914,18 +906,9 @@ static List _analyze_sites_unit(
 
 static int _field_whole_target(
   Var value, String receiver_name, String field_name) {
-  if (value is not <list>) return 0;
-  List node = value;
-  if (_field_access_matches(node, receiver_name, field_name)) return 1;
-  match (node) {
-    case %(expr ? ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-    case %(parens ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-    case %(at ? ?inner):
-      return _field_whole_target(inner, receiver_name, field_name);
-  }
-  return 0;
+  Var node = project_peel(value);
+  return node is <list> &&
+         _field_access_matches(node, receiver_name, field_name);
 }
 
 static void _collect_field_sites(
