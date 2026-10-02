@@ -68,6 +68,7 @@ execution.
 
 | Record | What remains |
 | --- | --- |
+| [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 41 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
