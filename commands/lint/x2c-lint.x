@@ -107,7 +107,7 @@ int main(int argc, char **argv):
       fprintf(stderr, "x2c-lint: unknown rule '%s'\n", code)
       return 2
     selected[code] = 1
-  Array inputs = options["inputs"].list().array()
+  Array inputs = options["inputs"].list()
   if !inputs.len():
     _usage()
     return 2
@@ -120,11 +120,11 @@ int main(int argc, char **argv):
   int fix = options["fix"].int()
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest))
   request.command = <translate>
-  request.include_dirs = options["I"].list()
+  request.include_dirs = options["I"]
   Frontend frontend = Frontend.new(request)
   frontend.preprocessor_errors = _preprocessor_errors
   if !frontend.preload_macro_libraries(): return 1
-  frontend.prepare_meta(inputs.list())
+  frontend.prepare_meta(inputs)
   Path x2c = Path.dirname(Path.dirname(x2c_get_executable())).join("x2c")
   Array translate = [x2c, "translate", "--no-deps", "-q", "--plain"]
   foreach String dir in request.include_dirs:
