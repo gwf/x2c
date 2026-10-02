@@ -1054,6 +1054,59 @@ static void lisp_inferred_binding_transfers_native_error(void) {
   lisp.destroy();
 }
 
+static int source_storage_drops;
+
+static void _source_storage_drop(void *storage) {
+  (void) storage;
+  source_storage_drops++;
+}
+
+static Var _source_storage_result(int value) {
+  Lisp lisp = Lisp.active();
+  int *local = Scope.malloc_finalized_in(
+    lisp.automatic_storage(), sizeof(int), _source_storage_drop);
+  *local = value;
+  if (value < 0) raise %(format);
+  int *result = Scope.malloc_in(lisp.result_storage(), sizeof(int));
+  *result = *local;
+  return (void *) result;
+}
+
+static int _source_storage_read(Var value) => *(int *) value.pointer();
+
+static int _source_storage_fail(Lisp lisp, List failure) {
+  int caught = 0;
+  try lisp.eval(failure);
+  catch %(format *): caught = 1;
+  return caught;
+}
+
+static void lisp_source_frames_own_automatic_and_result_storage(void) {
+  Lisp lisp = Lisp.kernel();
+  $lisp.bind(lisp, "owned-result", _source_storage_result);
+  $lisp.bind(lisp, "read-result", _source_storage_read);
+  lisp.set_global(<owned>, lisp_source_function(
+    _ev(lisp, "(lambda (x) (owned-result x))")));
+  lisp.set_global(<read-owned>, lisp_source_function(
+    _ev(lisp, "(lambda (x) (read-result (owned x)))")));
+  List failure = %(owned -1);
+  EXPECT_TRUE(_source_storage_fail(lisp, failure));
+  source_storage_drops = 0;
+  Var result = _ev(lisp, "(owned 17)");
+  EXPECT_INT_EQ(source_storage_drops, 1);
+  EXPECT_INT_EQ(_source_storage_read(result), 17);
+  EXPECT_INT_EQ(_ev(lisp, "(read-owned 23)").int(), 23);
+  EXPECT_INT_EQ(source_storage_drops, 2);
+  ScopeStats before = Scope.stats();
+  EXPECT_TRUE(_source_storage_fail(lisp, failure));
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(source_storage_drops, 3);
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
+  EXPECT_INT_EQ(_source_storage_read(result), 17);
+  lisp.destroy();
+}
+
 static void lisp_binding_storage_belongs_to_session(void) {
   Lisp warm = Lisp.new();
   $lisp.bind(warm, "greet", _lisp_bound_greet);
@@ -1862,6 +1915,7 @@ void lisp_suite(void) {
   $test.run(lisp_group_install_and_typed_result);
   $test.run(lisp_group_installs_into_separate_sessions);
   $test.run(lisp_inferred_binding_transfers_native_error);
+  $test.run(lisp_source_frames_own_automatic_and_result_storage);
   $test.run(lisp_binding_storage_belongs_to_session);
   $test.run(lisp_direct_function_binds_in_successive_sessions);
   $test.run(lisp_eval_file_runs_forms);
