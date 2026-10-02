@@ -322,11 +322,12 @@ delegates, and deliberate mutable access. Coordinate F11.
 ### F18. P2 - Let warnings compose with compile-time begin sequencing
 
 **B11; Rerun.** `(begin (x2c.diagnostic.warn ...) form)` emits the warning,
-then fails with void-op; analogous let/cond composition works. Owners:
-`src/meta-sdk.x`, `etc/init.xlisp`, Lisp sequencing/value transport. Settle
-whether warning returns an ordinary nil value or begin accepts discarded
-void results, using the existing contract. Preserve final form, diagnostic
-origin/text, and intentional void rejection where an actual value is needed.
+then fails with void-op; analogous let/cond composition works. Gary approved
+returning nil from the dotted Lisp warning on 2026-10-02. Use the existing
+`etc/compiler-sdk.xlisp` wrapper layer to call the native warning once and
+return nil. Preserve native warning void, begin/apply behavior, the final
+form, diagnostic origin/text/notes, and intentional void rejection for other
+native procedures at collection boundaries.
 
 ## Diagnostics, commands, and delivery
 
@@ -818,8 +819,8 @@ build times. Legacy measurements retain their separate identities, and a
 focused regression preserves nightly precedence over legacy replay rows.
 The final campaign still needs a comparable integrated-candidate measurement.
 
-Batch 3 contains F09-F11, F16-F17, and calibrated F33, based on the submitted
-PR #100 head. F09/F10/F16 pass 21 focused fixtures and independent parameter
+Batch 3, PR #101, contains F09-F11, F16-F17, and calibrated F33, based on the
+submitted PR #100 head. F09/F10/F16 pass 21 focused fixtures and independent parameter
 scope and nested Name controls. Native callees retain their identities,
 Name holes preserve caller bindings, and Func argument conversion waits for
 resolved argument types. These correctness repairs add 82 compiler lines.
@@ -832,11 +833,18 @@ the qualifier follow-up's 23 fixtures and eight controls pass. Together these
 changes add 20 compiler lines. F33 adds 80 tool lines plus focused tests and
 baseline data; it corrects measurement and does not claim a speedup.
 
-F18 warning sequencing is the only implementation scope awaiting a public
-contract decision. The shared integrator owns batch validation and any
-integration corrections. Submitted scopes are not claimed merged until
-publication is confirmed. Final generated LOC and comparable campaign build
-timing remain to be measured after integration.
+Gary approved the F18 warning return on 2026-10-02. Batch 4 adds a three-line
+SDK wrapper: the dotted Lisp warning returns nil after its native warning.
+The new fixture reproduces the prior void-op and now prints `7 1 1 11`, with
+warning text, notes, invocation origins, and order preserved. The existing
+void-sentinel fixture passes; the native underscore warning remains void.
+No begin, evaluator, native ABI, or collection changes are needed.
+
+All 42 scopes now have authored repairs or recorded adjudications and focused
+evidence. The shared integrator owns batch validation and any integration
+corrections. Submitted scopes are not claimed merged until publication is
+confirmed. Final generated LOC and comparable campaign build timing remain
+to be measured after integration.
 
 F08's initial repair caused standard helpers to stage before the runtime
 archive existed. Its correction collects own-unit hashes before parsing and
@@ -916,7 +924,7 @@ validator, or generic caching/transaction machinery merely to unify appearances.
 The JobLaunch rename and preservation of caller bindings through Name holes
 are authorized. F17 follows the book's parameter-only reference contract.
 F12 preserves the REPL capability boundary with accurate diagnostics. F11 uses actual receiver type identity while preserving methods defined by
-other modules. F18 warning sequencing remains an open decision.
+other modules. F18 uses the approved nil-returning Lisp SDK wrapper.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
 F41 removes the interpolation workaround, and the conversion shares the two

@@ -2,6 +2,9 @@
 (defun _x2c.fail (message value) (x2c.diagnostic.fail
   message (list (string-append "value: " (repr value)))))
 
+(defun x2c.diagnostic.warn (message notes)
+  (let ((discarded (x2c_diagnostic_warn message notes))) nil))
+
 // The Lisp boundary retains its argument checks around the shared bodies.
 (defun x2c.literal.string (value) (if (string? value)
   (x2c_literal_string value)

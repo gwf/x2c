@@ -1,0 +1,23 @@
+unittest/compiler-fixtures/meta-warning-nil.x:20:27: macro: sequence warning
+    printf("%d %d %d %d\n", $sequenced(), $nil_value(), $final_warning(),
+                            ^
+  note: sequence note
+
+unittest/compiler-fixtures/meta-warning-nil.x:20:41: macro: nil warning
+    printf("%d %d %d %d\n", $sequenced(), $nil_value(), $final_warning(),
+                                          ^
+
+unittest/compiler-fixtures/meta-warning-nil.x:20:55: macro: final warning
+    printf("%d %d %d %d\n", $sequenced(), $nil_value(), $final_warning(),
+                                                        ^
+
+unittest/compiler-fixtures/meta-warning-nil.x:21:10: macro: first warning
+           $two());
+           ^
+  note: first note
+
+unittest/compiler-fixtures/meta-warning-nil.x:21:10: macro: second warning
+           $two());
+           ^
+  note: second note
+
