@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/report-named-arity-missing.x:4:69: parse: macro invocation has too few arguments
+  void misuse(void) { $report.parse_package_member(NULL, NULL, "probe"); }
+                                                                      ^
+

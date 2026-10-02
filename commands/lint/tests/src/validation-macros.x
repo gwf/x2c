@@ -51,7 +51,7 @@ macro Statement $report.parse_raise_payload(Expr $c) {
     $c.token, %("use raise %(code (key value)...);"));
 }
 
-int catalogue_report(Compiler c) {
+int named_report(Compiler c) {
   $report.parse_raise_payload(c);
   return 0;
 }
@@ -69,7 +69,7 @@ int direct_validate(Compiler c, List node) {
   return 1;
 }
 
-int catalogue_validate(Compiler c, List node) {
+int named_validate(Compiler c, List node) {
   if (node.car() != <item>) $report.parse_raise_payload(c);
   if (node.cdr().len() != 2 || node.cadr() is not <list>)
     $report.parse_raise_payload(c);

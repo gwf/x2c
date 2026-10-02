@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/report-named-arity-extra.x:4:52: parse: macro invocation has too many arguments
+  void misuse(void) { $report.parse_alias_name(NULL, 1); }
+                                                     ^
+
