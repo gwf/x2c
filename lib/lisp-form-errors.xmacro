@@ -60,7 +60,8 @@ macro Statement $_lisp_form_error_splice_type(Expr $value) {
           (actual ${$value.kind()}));
 }
 
-macro Statement $_lisp_form_error_lambda_signature(Expr $operation, Expr $args) {
+macro Statement $_lisp_form_error_lambda_signature(
+  Expr $operation, Expr $args) {
   raise %(bad-sig (operation ${$operation}) (value ${$args}));
 }
 
@@ -88,7 +89,8 @@ macro Statement $_lisp_form_error_apply_stack(Expr $body) {
   raise %(call-stack (operation "apply") (value ${$body}));
 }
 
-macro Statement $_lisp_form_error_form_arity(Expr $operation, Expr $expected, Expr $actual) {
+macro Statement $_lisp_form_error_form_arity(
+  Expr $operation, Expr $expected, Expr $actual) {
   raise %(bad-arity (operation ${$operation}) (expected ${$expected})
           (actual ${$actual}));
 }
