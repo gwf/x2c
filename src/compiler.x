@@ -2589,12 +2589,14 @@ void Compiler.share_meta_group(Compiler c, Compiler owner) {
   c.meta_defs = owner.meta_defs;
 }
 
-/** Takes over `owner`'s macro, object-like `#define`, import, keyword, and
-    Lisp state for one segment of a collected file. Segments are one
-    translation unit, so a shadow uses the unit's Lisp environment rather
-    than its own.
+/** Takes over `owner`'s macro, object-like `#define`, import, keyword,
+    literal cache, and Lisp state for one segment of a collected file.
+    Segments are one translation unit, so retained macro bodies index the
+    unit's literal cache and use its Lisp environment.
 */
 void Compiler.take_unit_state(Compiler c, Compiler owner) {
+  c.id_keys = owner.id_keys;
+  c.key_ids = owner.key_ids;
   c.macros = owner.macros;
   c.object_macros = owner.object_macros;
   c.imports = owner.imports;

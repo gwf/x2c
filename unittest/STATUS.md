@@ -173,6 +173,13 @@ captures, expression and block bodies, and typed parameter sequences.
 
 ## Outstanding Items
 
+Adding `List cached = %("stack-check"); (void) cached;` at the start of
+`static-local-flat-chain`'s `main` makes translation of its 4,000 additions
+crash with a 256 KiB stack limit. The same augmented source fails before
+and after the literal-slot ordering repair; the unchanged fixture passes.
+This reduced-stack case remains separate from that repair and does not
+establish a failure at the default stack limit.
+
 Brace initialization through a qualified array typedef can omit element
 conversion. For `typedef String Words[2]; typedef const Words Names;`,
 `Names names = {"one", "two"};` emits native C literals instead of interned

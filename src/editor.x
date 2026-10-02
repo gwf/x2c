@@ -248,7 +248,7 @@ static void Query.hover(Query &q, List row) {
   List declaration = type.declaration_ast(row[3]);
   Map hover = q.location(row[0], row[1], row[2]);
   hover[<text>] =
-    String.new(c.code_pretty_string(c.emit(%($declaration)), NULL));
+    String.new(c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
   q.reply[<hover>] = hover;
 }
 
