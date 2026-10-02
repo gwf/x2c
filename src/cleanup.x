@@ -119,7 +119,7 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
     case %(expr *): if (!_holds_statements(ast)) return ast;
     case %((!or function localinit typedef) *): return ast;
     case %(declare ?type ?bindings):
-      return %(declare $type ${c._static_regions(bindings, runtime)});
+      return c._static_initializers(type, bindings, runtime);
     case $source_block_content(%(*statements)): {
       Array before = [];
       for (List rest = statements; rest; rest = rest.cdr()) {
@@ -138,6 +138,27 @@ static List Compiler._static_regions(Compiler c, List ast, Map runtime) {
   }
   Var child;
   $ast.rewrite_children(ast, child, c._static_regions(child, runtime));
+}
+
+/* The pending initializer and the emitter share one cleanup record. Its
+   region ends before the initialized object protects the rest of the block. */
+static List Compiler._static_initializers(
+  Compiler c, Type type, List bindings, Map runtime) {
+  Array output = [];
+  foreach (List binding, bindings.cdr()) {
+    match (binding)
+      case %(op = ?declaration ?value): {
+        List initial = c._static_regions(value, runtime);
+        if (type.is_static() && c.static_value_is_runtime(value, runtime)) {
+          List record = c._region_binding("static_cleanup");
+          initial = %(staticinit $record $initial);
+        }
+        output.push(%(op = $declaration $initial));
+        continue;
+      }
+    output.push(binding);
+  }
+  return %(declare $type (bindings @{output.list_free()}));
 }
 
 static int Compiler._runtime_static_declaration(
@@ -318,6 +339,10 @@ static void Walk.collect_labels(Walk &w, Var value, List path) {
       w.collect_labels(body, cons(node, path));
       return;
     }
+    case %(staticinit ? ?initial): {
+      w.collect_labels(initial, cons(node, path));
+      return;
+    }
   }
   foreach (Var child, node) w.collect_labels(child, path);
 }
@@ -360,6 +385,8 @@ static Var Walk.rewrite(Walk &w, Var value) {
       return w._lower_try(node, body, NULL, finalizer);
     case %(localinit ?guard ?body):
       return w._rewrite_localinit(node, guard, body);
+    case %(staticinit ?record ?initial):
+      return w._rewrite_staticinit(node, record, initial);
     case $source_return_content(%()): return w._transfer(0, node);
     case $source_return_content(%((!set ?expression (expr ? ?)))):
       return w._lower_return(node, expression);
@@ -422,6 +449,11 @@ static List Walk._return_value(Walk &w, List expression, List cleanup) {
 static List Walk._rewrite_localinit(
   Walk &w, List node, List guard, List body) =>
   %(localinit ${w.rewrite(guard)} ${w._inside(NULL, node, body)});
+
+static List Walk._rewrite_staticinit(
+  Walk &w, List node, List record, List initial) =>
+  %(staticinit $record
+    ${w._inside(w.c._defer_cleanup(record), node, initial)});
 
 static List Walk._rewrite_while(Walk &w, List condition, List body) =>
   %(while ${w.rewrite(condition)} ${w._bounded(body, 1)});

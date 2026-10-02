@@ -375,6 +375,11 @@ static void Emitter._static_binding(
   }
   Type type = mods.append(%($base_name));
   String spelling = e.emitted_binding_name(name);
+  List record = NULL;
+  match (initial) case %(staticinit ?cleanup ?value): {
+    record = cleanup;
+    initial = value;
+  }
   if (!initial ||
       !e.c.static_value_is_runtime(initial, e.static_objects)) {
     List native = e._semantic_name(type, spelling);
@@ -390,7 +395,7 @@ static void Emitter._static_binding(
   runtime.alias = e.fresh_name("static_object_type");
   runtime.pointer = e.fresh_name("static_object");
   runtime.guard = e.fresh_name("static_guard");
-  runtime.cleanup = e.fresh_name("static_cleanup");
+  runtime.cleanup = e.emitted_binding_name(record);
   runtime.temporary = e.fresh_name("static_initial");
   runtime.prepare();
   runtime.emit();
