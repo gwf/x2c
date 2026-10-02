@@ -58,6 +58,14 @@ run() {
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
 
+# Expanded catalogues and direct diagnostics use the same existing rules.
+"$tool" -I src --rule return-after-raise --rule return-after-report-error \
+  --rule fallback-shared-cause --rule shape-diagnostics \
+  --rule validator-diagnostics "$tests/src/validation-macros.x" \
+  >"$work/validation-macros" 2>"$work/validation-macros.errors"
+test ! -s "$work/validation-macros.errors"
+diff -u "$tests/validation-macros.expected" "$work/validation-macros"
+
 # The driver must run the same executable with unchanged arguments.
 builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
 "$tool" --all "$tests/src/style.x" >"$work/direct"

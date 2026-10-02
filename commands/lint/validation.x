@@ -13,12 +13,25 @@
     reports a shape test that quietly skips or substitutes a value.
 */
 #include "lint.x"
+#include "ast.x"
 #include <ctype.h>
 #include <string.h>
 
 #pragma private
 
 $(import "../../lib/error-macros.xmacro")
+$(import "../../src/grammar.xmacro")
+
+static Ast _raise_terminal(Ast statement):
+  for (;;):
+    statement = statement.without_origin()
+    match (statement):
+      case %(raise *): return statement
+      case %(block *children):
+        Var last = children.last()
+        if last is not <list>: return NULL
+        statement = last
+      default: return NULL
 
 static const List validator_words = %(
   "check" "compatible" "require" "valid" "validate" "validator" "verify"
@@ -33,6 +46,51 @@ static const List trust_boundaries = %(
 /* The causes `lib/error-macros.xmacro` lists as never returning when this
    command is built. */
 static const SymbolSet shared_causes = $error.nonreturning.causes()
+
+/* Expanded statements prove macro behavior at the invocation's source token.
+   Compiler.report_error's resolved binding owns its non-returning contract;
+   report_warning and similarly named user macros have no such proof. */
+static Map _macro_diagnostics(Lint l, Compiler c, List ast):
+  Map positions = {}, diagnostics = {}
+  for (int at = 0; at < l.count; at++):
+    if l.token_is(at, "$"): positions[l.tokens[at].pos] = at
+  List report = c.sym.lookup(%("Compiler_report_error"), NULL)
+  foreach List hit in ast.search(%(at ? ?)):
+    List anchor = hit.assoc(<*>)
+    (Var marker, Var origin, Var expanded) = anchor
+    if !origin.is_integer() || expanded is not <list>: continue
+    Ast statement = expanded
+    List location = c.origin_location(origin.int())
+    Var at
+    if !location ||
+       location.assoc(<file>).string() != c.display_path(c.filename) ||
+       !positions.try_get(location.assoc(<position>), at):
+      continue
+    if _raise_terminal(statement) && statement.never_returns():
+      diagnostics[at] = <raise>
+    match (statement.without_origin()):
+      case %(stmnt (expr ? ${$source_call_content($called,
+          %(expr ? (ident ?binding)), %(*))}))
+          if (report && List.equal(binding, report)):
+        diagnostics[at] = <report>
+      case %(block ?first (!is ?last type list))
+          if (_raise_terminal(first) && ((Ast) first).never_returns()):
+        match (((Ast) last).without_origin()):
+          case %(return *): diagnostics[at] = <fallback>
+  if report:
+    foreach List function in ast:
+      match (function):
+        case %(function ? (bind ?binding ?) ?(List body)):
+          int count = 0
+          foreach List hit in body.search(%(call (expr ? (ident ?callee))
+                                             (args *))):
+            count += List.equal(hit.assoc(<?callee>), report)
+          String name = binding_identity_spelling(binding)
+          match (c.semantic_binding_facts()[%(method $binding)]):
+            case %(?(String owner) ?(String member)):
+              name = %"$owner.$member"
+          diagnostics[%(reports $name)] = count
+  return diagnostics
 
 /* The word that starts the quoted form opened at `open`. */
 static String _cause(Lint l, int open):
@@ -53,7 +111,8 @@ static int _then_return(Lint l, int at, int end):
   return semi < end && l.token_is(l.next(semi), "return")
 
 /* Whether a `raise` at `at` names a shared cause. */
-static int _raised(Lint l, int at):
+static int _raised(Lint l, int at, Map diagnostics):
+  if diagnostics[at] == <raise>: return 1
   int open = l.next(at)
   Symbol cause
   return l.token_is(at, "raise") && l.token_is(open, "%(") &&
@@ -95,7 +154,8 @@ static int _tag_check(Lint l, int at):
 
 /* Whether the word at `at` calls a name that holds `fail` or `error` after
    its first letter. */
-static int _report(Lint l, int at):
+static int _report(Lint l, int at, Map diagnostics):
+  if diagnostics[at] == <report>: return 1
   Token t = l.at(at)
   if !lint_word(t) || !l.token_is(l.next(at), "("): return 0
   char *rest = t.text
@@ -193,7 +253,7 @@ static int _statement_start(Lint l, int at):
 
 /* The reasons one function earns, with the score of each, as
    `(SCORE CODE MESSAGE)` rows. */
-static List _reasons(Lint l, List function):
+static List _reasons(Lint l, List function, Map diagnostics):
   Var (key, start, body, end) = function
   String name = lint_name(function)
   int from = start.int(), to = end.int()
@@ -203,7 +263,7 @@ static List _reasons(Lint l, List function):
   for (int at = from; at < to; at = l.next(at)):
     Token t = l.at(at)
     shapes += _shape(l, at)
-    reports += _report(l, at)
+    reports += _report(l, at, diagnostics)
     if t.text == "if" && l.token_is(l.next(at), "("): branches++
     if t.text == "report_error" && l.token_is(at - 1, ".") &&
        l.token_is(l.next(at), "("):
@@ -213,13 +273,18 @@ static List _reasons(Lint l, List function):
       int semi = _semicolon(l, at, to)
       report_return |= l.token_is(l.prev(semi), ")") &&
         l.token_is(l.next(semi), "return") && _statement_start(l, receiver)
-    if _raised(l, at) && _then_return(l, at, to) && _statement_start(l, at):
+    if diagnostics[at] == <report> && _then_return(l, at, to) &&
+       _statement_start(l, at):
+      report_return = 1
+    if _raised(l, at, diagnostics) && _then_return(l, at, to) &&
+       _statement_start(l, at):
       raise_return = 1
+    if diagnostics[at] == <fallback>: fallback = 1
     if t.text == "fallback" && l.token_is(at - 1, ".") &&
        l.token_is(at - 2, "error"):
       int open = l.next(at)
       if l.token_is(open, "(") && l.partner[open] > 0 &&
-         _raised(l, l.next(l.partner[open])):
+         _raised(l, l.next(l.partner[open]), diagnostics):
         fallback = 1
   if report_return:
     rows.push(%(7 "return-after-report-error"
@@ -236,6 +301,10 @@ static List _reasons(Lint l, List function):
   if _growth_check(l, from, to):
     rows.push(%(7 "growth-check"
                 "checks whether a non-returning growth operation succeeded"))
+  Var expanded_reports
+  if diagnostics.try_get(%(reports $name), expanded_reports) &&
+     expanded_reports.int() > reports:
+    reports = expanded_reports.int()
   int validator = _validator_name(name)
   if reports && shapes >= 3 && branches >= 2:
     String why = "diagnostics are built around manual List or AST shape "
@@ -308,7 +377,7 @@ static void _frameworks(Lint l, Map reasons):
           %"$lines lines of connected validators: ${group.join(", ")}")
 
 /* The action a silent guard's consequence takes, or NULL. */
-static String _action(Lint l, int from, int to):
+static String _action(Lint l, int from, int to, Map diagnostics):
   for (int at = from; at < to; at = l.next(at)):
     if l.token_is(at, "continue") && l.token_is(l.next(at), ";"):
       return "continue"
@@ -323,7 +392,8 @@ static String _action(Lint l, int from, int to):
     if !l.token_is(at, "return") || semi >= to || value == semi: continue
     // A returned failure report is not silent.
     int reports = 0
-    for (int k = value; k < semi; k = l.next(k)): reports |= _report(l, k)
+    for (int k = value; k < semi; k = l.next(k)):
+      reports |= _report(l, k, diagnostics)
     if reports: continue
     if l.next(value) == semi && lint_word(l.at(value)):
       return %"return ${l.tokens[value].text}"
@@ -349,7 +419,7 @@ static int _partial(Lint l, int from, int to):
 
 /* Shape guards whose consequence continues, returns a fallback, or uses a
    default, outside the functions that trust external input. */
-static void _silent_guards(Lint l, List function):
+static void _silent_guards(Lint l, List function, Map diagnostics):
   Var (key, start, body, end) = function
   String name = lint_name(function)
   String text = name
@@ -366,7 +436,7 @@ static void _silent_guards(Lint l, List function):
     if !shape: continue
     int first = l.next(close), last = _semicolon(l, first, to) + 1
     if l.token_is(first, "{"): last = l.partner[first]
-    String action = _action(l, first, last < 0 ? to : last)
+    String action = _action(l, first, last < 0 ? to : last, diagnostics)
     if !action: continue
     if action == "continue" && _partial(l, start.int(), to):
       action = "continue with partial state"
@@ -416,12 +486,13 @@ static void _static_match_captures(Lint l, List function):
           %"$reads local assoc read(s) unpack static List.match bindings")
 
 /** Runs the validation rules over the functions of `l`. */
-void Lint.validation_rules(Lint l):
+void Lint.validation_rules(Lint l, Compiler c, List ast):
+  Map diagnostics = _macro_diagnostics(l, c, ast)
   Map reasons = {}
   foreach List function in l.functions:
     String name = lint_name(function)
     Var start = function.cadr()
-    List rows = _reasons(l, function)
+    List rows = _reasons(l, function, diagnostics)
     reasons[name] = rows
     int score = 0
     foreach List row in rows:
@@ -430,6 +501,6 @@ void Lint.validation_rules(Lint l):
       foreach List row in rows:
         Var (score, code, message) = row
         l.add(code, l.at(start).line, %"$message in $name")
-    _silent_guards(l, function)
+    _silent_guards(l, function, diagnostics)
     _static_match_captures(l, function)
   _frameworks(l, reasons)

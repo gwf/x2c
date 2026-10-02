@@ -58,6 +58,7 @@ static int _parse(Lint l, Frontend frontend, String path):
   if !frontend.open_reporting(path, parsed): return 0
   l.declaration_rules(parsed.compiler, parsed.ast)
   l.member_arrows(parsed.compiler, parsed.ast)
+  l.validation_rules(parsed.compiler, parsed.ast)
   foreach List finding in l.findings: finding.promote()
   foreach List edit in l.edits: edit.promote()
   foreach List function in l.functions: function.promote()
@@ -140,7 +141,6 @@ int main(int argc, char **argv):
     l.idiom_rules()
     l.comment_rules()
     if !_parse(l, frontend, file): status = 1
-    l.validation_rules()
     l.structure_rules()
   lint_corpus_rules(lints, count)
   for (int at = 0; at < count; at++):
