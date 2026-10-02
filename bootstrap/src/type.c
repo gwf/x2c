@@ -843,7 +843,34 @@ static Symbol _declarator_kind(Type type){
 }
 
 Type Type_dereference(Type type){
-  if(! _init_guard_) _file_init_();  _qualifiers(&(type));  if(Type_is_pointer(type) || Type_is_array(type)) return List_type(cdr(Type_list(type)));  return NULL;
+  if(! _init_guard_) _file_init_();  Type declared = type;  _qualifiers(&(type));  if(Type_is_array(type)) return Type_qualify(List_type(cdr(Type_list(type))), declared);  if(Type_is_pointer(type)) return List_type(cdr(Type_list(type)));  return NULL;
+}
+
+Symbol Var_symbol(Var);
+Iter List_iter(List, Iter);
+Type Type_qualify(Type type, Type source){
+  if(! _init_guard_) _file_init_();  if(! Var_is(List_car(Type_list(source)), 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(source))))) return type;  Array out = Array_new(); {
+    Var item;  Iter _x2c_macro_iterator_5 = List_iter(Type_list(source), &(struct Iter){
+      int_var(0)
+    }
+    );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_6))){
+      item = _x2c_macro_item_6; {
+        if(! Var_is(item, 1328354264) || ! Symbol_is_type_qualifier(Var_symbol(item))) break;  Array_push(out, item);
+      }
+
+    }
+
+  }
+  {
+    Var item;  Iter _x2c_macro_iterator_6 = List_iter(Type_list(type), &(struct Iter){
+      int_var(0)
+    }
+    );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_7))){
+      item = _x2c_macro_item_7;  Array_push(out, item);
+    }
+
+  }
+  return List_type(Array_list_free(out));
 }
 
 Type Type_reference(Type type){
@@ -923,14 +950,13 @@ Type Type_declared(Type type){
   if(! _init_guard_) _file_init_();  return _canonical(type, 1);
 }
 
-Iter List_iter(List, Iter);
 static Type _canonical(Type type, int keep_qualifiers){
   List rest = Type_list(type);  while(List_truth(rest) && _kept(List_car(rest), keep_qualifiers)) rest = List_cdr(rest);  if(! List_truth(rest)) return type;  Array out = Array_new(); {
-    Var item;  Iter _x2c_macro_iterator_5 = List_iter(Type_list(type), &(struct Iter){
+    Var item;  Iter _x2c_macro_iterator_7 = List_iter(Type_list(type), &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_6))){
-      item = _x2c_macro_item_6;  if(_kept(item, keep_qualifiers)) Array_push(out, item);
+    );  Var _x2c_macro_item_8;  while(Iter_try_next(_x2c_macro_iterator_7, &(_x2c_macro_item_8))){
+      item = _x2c_macro_item_8;  if(_kept(item, keep_qualifiers)) Array_push(out, item);
     }
 
   }
@@ -992,11 +1018,11 @@ Type Type_scalar(Type t){
     0
   }
   ; {
-    Var item;  Iter _x2c_macro_iterator_6 = List_iter(Type_list(t), &(struct Iter){
+    Var item;  Iter _x2c_macro_iterator_8 = List_iter(Type_list(t), &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_7))){
-      item = _x2c_macro_item_7;  if(! Var_is(item, 1328354264) || ! Specifiers_add(&(s), Var_symbol(item))) return NULL;
+    );  Var _x2c_macro_item_9;  while(Iter_try_next(_x2c_macro_iterator_8, &(_x2c_macro_item_9))){
+      item = _x2c_macro_item_9;  if(! Var_is(item, 1328354264) || ! Specifiers_add(&(s), Var_symbol(item))) return NULL;
     }
 
   }

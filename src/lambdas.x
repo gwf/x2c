@@ -252,8 +252,20 @@ static void Compiler._prescribe(
       Type source = NULL, target_type = captured_type;
       List binding = target is <string>
                    ? c.sym.lookup(%($target), source) : target;
-      if (<macro-expr> in target_type)
+      if (<macro-expr> in target_type) {
+        Var stored;
+        if (!source) {
+          if (c.semantic_binding_facts().try_get(%(type $binding), stored))
+            source = stored;
+          else {
+            Type global_type = NULL;
+            List global = c.sym.resolve_global(
+              %(${binding_identity_spelling(binding)}), global_type);
+            if (global == binding) source = global_type;
+          }
+        }
         target_type = source.car() == <&> ? source : cons(<&>, source);
+      }
       if (!binding_identity_spelling(binding)) {
         binding = c.sym.introduce(_alias_spelling(target, binding));
         aliases.push(%($binding $target_type));
@@ -275,24 +287,18 @@ static String _alias_spelling(Var target, List binding) {
 static List Compiler._declare_param(Compiler c, List entry) {
   match (entry) {
     case %(param ?base ?binding):
-      return c.bind_syntax(
-        %(declare $base (bindings $binding)), AST_BLOCK, %("Var"));
+      return c.bind_parameter(base, binding);
     case %(binding ? ?):
-      return c.bind_syntax(
-        %(declare ("Var") (bindings (bind $entry ()))), AST_BLOCK, %("Var"));
+      return c.bind_parameter(%("Var"), %(bind $entry ()));
   }
   return NULL;
 }
 
-static void Compiler._add_param(Compiler c, Array entries, List declaration) {
-  match (declaration)
-    case %(declare ?base (bindings (!set ?declarator (bind ?binding ?)))): {
-      Map facts = c.semantic_binding_facts();
-      facts[%(parameter $binding)] = 1;
-      facts[%(lambda-param $binding)] = 1;
-      if (declaration.type_from_ast().car() == <&>)
-        facts[%(reference-param $binding)] = 1;
-      entries.push(%(param $base $declarator));
+static void Compiler._add_param(Compiler c, Array entries, List parameter) {
+  match (parameter)
+    case %(param ? (bind ?binding ?)): {
+      c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
+      entries.push(parameter);
     }
 }
 

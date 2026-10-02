@@ -1073,16 +1073,17 @@ int Sym_is_named_value_type(Sym s, Type type, String name){
   if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type)) || ! String_truth(name)) return 0;  Type wanted = List_type(cons(String_var(name), NULL)), origin = Type_canonicalize(type);  type = Sym__resolve_chain(s, origin, wanted, origin, 0);  return List_equal(Type_list(type), Type_list(wanted));
 }
 
+Type Type_qualify(Type, Type);
 int Var_truth(Var);
 int Type_is_aggregate(Type);
 Type Sym_lookup_field(Sym s, Type type, List field){
-  if(! _init_guard_) _file_init_();  type = Sym_resolve_key(s, type);  if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;  Type found = List_type(Sym_get(s, ({
+  if(! _init_guard_) _file_init_();  Type object = Sym_normalize_declared_type(s, type);  type = Sym_resolve_key(s, object);  if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;  Type found = List_type(Sym_get(s, ({
     List _x2c_literal_part_9 = Type_list(type);  List_append(_x2c_literal_part_9, List_append(field, NULL));
   }
-  )));  if(List_truth(Type_list(found))) return found; {
+  )));  if(List_truth(Type_list(found))) return Type_qualify(found, object); {
     List row;  List _x2c_macro_object_10 = List_cdr(Sym_field_order(s, type));  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_17))){
       row = Var_list(_x2c_macro_cursor_output_17); {
-        Type member = Var_type(List_cadr(row));  if(Var_truth(List_car(row)) || ! Type_is_aggregate(Sym_resolve_key(s, member))) continue;  found = Sym_lookup_field(s, member, field);  if(List_truth(Type_list(found))) return found;
+        Type member = Var_type(List_cadr(row));  if(Var_truth(List_car(row)) || ! Type_is_aggregate(Sym_resolve_key(s, member))) continue;  found = Sym_lookup_field(s, member, field);  if(List_truth(Type_list(found))) return Type_qualify(found, object);
       }
 
     }

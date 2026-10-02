@@ -46,6 +46,8 @@ List Compiler_parse_static_assert(Compiler c);
 
 int Compiler_test_declaration(Compiler c);
 
+void Compiler_check_reference_placement(Compiler c, Type type);
+
 Type Compiler_parse_type_name(Compiler c);
 
 List Compiler_parse_fields(Compiler c, List context);

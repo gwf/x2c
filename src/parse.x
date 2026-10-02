@@ -2250,6 +2250,11 @@ List Compiler.parse_parameter(Compiler c) {
   return c._finish_parameter(type, declarator, method, first, after);
 }
 
+/** Binds one constructed parameter in the current scope, including nested
+    function modifiers and reference parameter facts. */
+List Compiler.bind_parameter(Compiler c, List base, List declarator) =>
+  c._finish_parameter(base, c._finish_fnmods(declarator), NULL, NULL, NULL);
+
 static List Compiler._finish_parameter(
   Compiler c, List base, List declarator, List method_identity,
   Token source_first, Token source_after) {
@@ -3488,9 +3493,7 @@ static List Compiler._finish_prototype(Compiler c, List parameters) {
     defer c.sym.pop_scope();
     foreach (List parameter, parameters) match (parameter) {
       case %(param ?base ?declarator):
-        params.push(
-          c._finish_parameter(
-            base, c._finish_fnmods(declarator), NULL, NULL, NULL));
+        params.push(c.bind_parameter(base, declarator));
       default: params.push(parameter);
     }
   }

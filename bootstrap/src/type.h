@@ -70,6 +70,8 @@ int Type_is_bitfield(Type type);
 
 Type Type_dereference(Type type);
 
+Type Type_qualify(Type type, Type source);
+
 Type Type_reference(Type type);
 
 Type Type_apply(Type type);
