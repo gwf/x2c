@@ -173,6 +173,13 @@ captures, expression and block bodies, and typed parameter sequences.
 
 ## Outstanding Items
 
+Brace initialization through a qualified array typedef can omit element
+conversion. For `typedef String Words[2]; typedef const Words Names;`,
+`Names names = {"one", "two"};` emits native C literals instead of interned
+Strings. This reproduces on the landed compiler before PR101 and its
+integration candidate. Explicit `String.new` elements preserve the expected
+representation. The initializer typedef walk needs a focused follow-up.
+
 Aggregate-contained local pointers, native callees that retain an address,
 and exact-once resource finalization remain outside the current meta
 ownership proof. Direct local-pointer tag parity does not establish those
