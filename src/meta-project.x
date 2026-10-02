@@ -160,10 +160,14 @@ static int Scan.file_scope(Scan &s, Tokenizer tokens, String directory) {
   for (Token token = tokens.next(); token.type != <eof>;
        token = tokens.next()) {
     String word = token.text;
-    if (word == "{") depth++;
-    else if (word == "}") depth--;
-    else if (depth) continue;
-    else if (word == "meta") meta |= _marker(tokens);
+    switch (token.type) {
+      case <"{">: case <"%{">: case <"${">: case <"@{">:
+        depth++;
+        continue;
+      case <"}">: depth--; continue;
+    }
+    if (depth) continue;
+    if (word == "meta") meta |= _marker(tokens);
     else if (word == "$(") s.macro_import(tokens, directory);
     else if (word == "import") s.package(tokens);
     else if (token.type == <preproc>) s.include(word, directory);
