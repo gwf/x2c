@@ -1499,10 +1499,7 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
    one below, each cost more than the feature. */
 static void Compiler._install_imports(Compiler c) {
   c.import_protocols = 0;
-  Map symbols = c.sym.base_symbols();
-  Map current = c.sym.current_symbols();
-  if (current) symbols.merge(current);
-  c.rebuild_protocols(symbols);
+  c.rebuild_protocols(c.sym.unit_symbols());
 }
 
 static List Compiler._ancestry(Compiler c, Type participant) {

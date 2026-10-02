@@ -165,8 +165,7 @@ Map Sym.current_symbols(Sym s) {
     merged in. */
 Map Sym.unit_symbols(Sym s) {
   Map symbols = s.base_symbols();
-  Map current = s.current_symbols();
-  if (current) symbols.merge(current);
+  if (!s.at_file_scope()) symbols.merge(s.current_symbols());
   return symbols;
 }
 
