@@ -68,6 +68,8 @@ List Compiler_parse_parameter_list(Compiler c);
 
 List Compiler_parse_parameter(Compiler c);
 
+List Compiler_bind_parameter(Compiler c, List base, List declarator);
+
 List Compiler_parse_complex_identifier(Compiler c);
 
 String Compiler_package_alias_spelling(Compiler c);

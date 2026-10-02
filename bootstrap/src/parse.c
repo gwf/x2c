@@ -1316,11 +1316,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _855 = cons(_854, NULL);
   _856 = cons(_686, _855);
   _857 = List_var(_856);
-  _858 = int_var(2622);
+  _858 = int_var(2627);
   _859 = cons(_858, NULL);
   _860 = cons(_692, _859);
   _861 = List_var(_860);
-  _862 = int_var(94641);
+  _862 = int_var(94923);
   _863 = cons(_862, NULL);
   _864 = cons(_707, _863);
   _865 = List_var(_864);
@@ -4594,6 +4594,10 @@ List Compiler_parse_parameter(Compiler c){
   if(! _init_guard_) _file_init_();  if(Compiler_test(c, 1519197)) return _517;  List qual = Compiler__type_qualifiers(c);  List spec = Compiler__type_specifier(c), type = List_append(qual, List_append(spec, NULL));  List method = NULL;  Token first = NULL, after = NULL;  List declarator = Compiler__declarator(c, type, NULL, &(method), &(first), &(after));  return Compiler__finish_parameter(c, type, declarator, method, first, after);
 }
 
+List Compiler_bind_parameter(Compiler c, List base, List declarator){
+  if(! _init_guard_) _file_init_();  return Compiler__finish_parameter(c, base, Compiler__finish_fnmods(c, declarator), NULL, NULL, NULL);
+}
+
 static List Compiler__finish_parameter(Compiler c, List base, List declarator, List method_identity, Token source_first, Token source_after){
   base = Compiler__finish_type(c, base);  int preserved_self = 0;  declarator = Compiler__install_declarator(c, base, NULL, declarator, method_identity, &(preserved_self));  Compiler_record_source_declaration(c, Var_list(List_cadr(declarator)), source_first, source_after);  List modifiers = NULL;  base = _declaration_base(List_type(base), &(modifiers));  declarator = _append_modifiers(declarator, modifiers);  List parameter = cons(_518, cons(List_var(base), cons(List_var(declarator), NULL)));
   {
@@ -6038,7 +6042,7 @@ static List Compiler__finish_prototype(Compiler c, List parameters){
     List _x2c_match_expr = parameter;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 33656922: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936795275354ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var base = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Array_push(params, List_var(Compiler__finish_parameter(c, Var_list(base), Compiler__finish_fnmods(c, Var_list(declarator)), NULL, NULL, NULL)));  break; } } default: ;  Array_push(params, List_var(parameter));  break;
+      case 33656922: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936795275354ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var base = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Array_push(params, List_var(Compiler_bind_parameter(c, Var_list(base), Var_list(declarator))));  break; } } default: ;  Array_push(params, List_var(parameter));  break;
     }
   }
           }
