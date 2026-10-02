@@ -60,9 +60,10 @@ PR #98 merged as `fcfaff40`, with generated updates through `2c8ddfb3`.
 The four Current probes used that integration checkout's built compiler with
 temporary outputs. Those reconciliation results precede implementation.
 The campaign integrated dev `2c8ddfb3` locally before starting the workers.
-Current main `247b7fbe` is an ancestor of that baseline. Campaign batch 1 contains 31 completed scopes for shared integration.
-Submission and remote publication are separate states; this plan does not
-claim that the integrator has completed validation or merged the batch.
+Current main `247b7fbe` is an ancestor of that baseline. Campaign batch 1
+delivered 31 scopes through PR #99, merged at `fea429d4`, with integration
+corrections and final generated updates published through `561d08b2`.
+PR #100 submits four further scopes; its publication remains pending.
 
 Some external headings overstate historical regression: X14-X16 already
 emitted the same C at the paired base, but violate the new sequencing promise;
@@ -788,7 +789,8 @@ and F41-F42: 31 of the 42 scopes. These have authored fixes and focused
 verification in worker or parent checkouts. F33's new CPU metric is retained
 privately until calibration and is excluded from this batch.
 
-Batch 2 contains F02, F28, F32, and F40, with a pinned dependency on PR #99.
+Batch 2, PR #100, contains F02, F28, F32, and F40, with a pinned dependency
+on PR #99.
 F32 replaces 254 catalogue rows and 269 compiler calls with ordinary named
 macros. Token-aware verification preserves every row body and call operand.
 The compiler source loses 160 lines; local generated linked-meta loses 1,939.
@@ -804,7 +806,14 @@ Twelve controls preserve output and diagnostics; ordinary required Unit
 collection drops from 13 Map copies and six merges to seven copies and three
 merges. These counts are not elapsed-time measurements.
 
-The remaining implementation scopes are F09-F11, F16-F18, and F33. The shared
+F33 is now calibrated privately. Three clean sequential baseline builds used
+59.82, 59.48, and 58.64 CPU seconds; the median is 59.48 CPU seconds for
+82,904 authored lines. These are child-inclusive CPU measurements, not elapsed
+build times. Legacy measurements retain their separate identities, and a
+focused regression preserves nightly precedence over legacy replay rows.
+The final campaign still needs a comparable integrated-candidate measurement.
+
+The remaining implementation scopes are F09-F11 and F16-F18. The shared
 integrator owns batch validation and any integration corrections. Submitted
 scopes are not claimed merged until publication is confirmed.
 
@@ -852,6 +861,20 @@ and graph lifetime/target logic. The earlier review did not implement or
 benchmark a replacement; the independently authored catalogue spike and its
 incomplete validation are explicitly incorporated above. Current private
 implementation results are recorded separately in the progress paragraph.
+
+### Additional review finding outside the 42 scopes
+
+A private typedef chain used by a meta Type helper can emit an alias before
+its dependency. A source function before `typedef struct Chain {...}
+ChainBase; typedef ChainBase Chain;` makes these declarations private; generated
+helper C then reports unknown type `ChainBase`. The unchanged F02 compiler
+and the F11/F17 candidate both reproduce the failure. Parent reproduction is
+in `.context/post-integration-campaign/methods/private-typedef-order/`.
+The source placement owners are `generate._promote_typedefs` and
+`generate._place_typedefs`. This new finding is recorded but not implemented
+as part of the method/reference repair; the established independent method,
+alias, and Type-inspection controls remain its acceptance evidence.
+
 
 ## Design review
 
