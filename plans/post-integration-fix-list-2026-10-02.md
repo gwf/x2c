@@ -3,7 +3,8 @@
 > the named-macro catalogue spike reviewed against its `1b71a410` base.
 > Implementation authorized 2026-10-02 through orchestrate-x2c-work.
 > Sol 6.1 workers provide private handoffs; this session integrates and delivers
-> coherent batches directly to main, per Gary's replacement instructions.
+> coherent PR batches to dev through the shared integrator, as selected by
+> Gary on 2026-10-02. The integrator owns combined validation and publication.
 > Three prior repairs are already delivered.
 > Open items retain their evidence limits and unresolved compatibility choices.
 
@@ -59,8 +60,9 @@ PR #98 merged as `fcfaff40`, with generated updates through `2c8ddfb3`.
 The four Current probes used that integration checkout's built compiler with
 temporary outputs. Those reconciliation results precede implementation.
 The campaign integrated dev `2c8ddfb3` locally before starting the workers.
-Current main `247b7fbe` is an ancestor of that baseline. No campaign batch has
-passed publication validation or reached a remote branch yet.
+Current main `247b7fbe` is an ancestor of that baseline. Campaign batch 1 contains 31 completed scopes for shared integration.
+Submission and remote publication are separate states; this plan does not
+claim that the integrator has completed validation or merged the batch.
 
 Some external headings overstate historical regression: X14-X16 already
 emitted the same C at the paired base, but violate the new sequencing promise;
@@ -778,16 +780,37 @@ batches. This is an ordering of all 42 scopes, not a reduction in scope.
 Progress and private handoffs live in `.context/post-integration-campaign/`;
 landed results and any explicit deferrals are recorded here as batches finish.
 
-Private integration currently includes F01, F07-F08, F13, F14, F22-F27, F29,
-F31, F33-F37, F39, F41, and F42. F33's corrected CPU metric still needs
-quiet-window calibration. The runtime batch has identical generated C/H
-across stages 0, 1, and 2, in addition to its focused checks.
-Their focused checks passed in worker or parent checkouts. F08's first repair
-caused standard helpers to stage before the runtime archive existed. Its
-correction collects own-unit hashes before parsing and uses shipped dependency
-names for unchanged forward bodies. The combined tree now passes bootstrap
-refresh and a fresh, unassisted `make build-safe`. Logs retain the original
-failure and successful recovery. F32 now waits for the literal owners to finish.
+Batch 1 contains F01, F03-F08, F12-F15, F19-F27, F29-F31, F34-F39,
+and F41-F42: 31 of the 42 scopes. These have authored fixes and focused
+verification in worker or parent checkouts. F33's new CPU metric is retained
+privately until calibration and is excluded from this batch. The remaining
+scopes are F02, F09-F11, F16-F18, F28, F32-F33, and F40.
+
+F08's initial repair caused standard helpers to stage before the runtime
+archive existed. Its correction collects own-unit hashes before parsing and
+uses shipped dependency names for unchanged forward bodies. A capability
+bootstrap refresh and fresh unassisted build-safe passed; that generated
+checkpoint is included. The integrator must refresh the final combined tree.
+
+F03-F06/F15 pass six focused fixtures and 27 existing controls; their selected
+unit suites pass 267 tests and 6,933 assertions. Ordered List visits change
+from n(n+1)/2 to n. Four fixed plus two dynamic catch registrations prepare
+three MatchPlans instead of six. A shadowed catch converter binding remains
+an explicit F10 acceptance case, not a repaired claim in F05.
+
+F12 repairs reference conversion in the REPL and accurately declines unsupported
+statement expressions. F19 preserves the triggering origin in generated update
+helper bodies. F20 recognizes expanded diagnostics through resolved bindings;
+F21 reports unreadable lint inputs without aborting and continues readable
+inputs. F30 fixes package method source owners without changing emitted names.
+F38 removes duplicate symbol merges while retaining local overlays.
+
+Before shared submission was selected, the runtime batch passed stage equality,
+and the parent F19/F38 tree produced identical C/H across stages 0, 1, and 2.
+These are historical checks on those trees, not a final batch gate. From this
+point, workers run focused reproductions and relevant controls; the integrator
+owns combined review, final regeneration, full validation, and the dev merge.
+No duplicate end-to-end readiness sequence is required in the submitting tree.
 
 Reuse existing suites and the focused cases above. First reproduce imported
 claims on the implementation baseline. For performance proposals and claimed
@@ -815,8 +838,9 @@ cleanup/reference/conversion owners, and deletion of work whose inputs already
 prove it unnecessary. They do not add origin authentication, a second semantic
 validator, or generic caching/transaction machinery merely to unify appearances.
 The JobLaunch rename and preservation of caller bindings through Name holes
-are authorized. Local-reference semantics, REPL support, and catalogue arity
-retain explicit decisions rather than an invented answer.
+are authorized. F17 follows the book's parameter-only reference contract.
+F12 preserves the REPL capability boundary with accurate diagnostics. F18
+warning sequencing and F11 generic tag-method behavior remain open decisions.
 The spike favors ordinary named macros over a new catalogue caching mechanism:
 it removes dispatch and serialized definitions with measured build gains.
 Its source-workaround bug, duplicate rows, and untested runtime/validation

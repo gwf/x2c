@@ -105,9 +105,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     previous = {
       "run_id": "old", "commit": "a", "status": "success",
       "stage_3_seconds": 10.0,
-      "build_scaling": {
-        "score": 100.0, "metric_id": "cpu/v1", "baseline_id": "base-a",
-      },
+      "build_scaling": {"score": 100.0},
       "compiler_median_seconds": {"stage-0/default": 2.0},
       "runtime_medians": [{
         "target": "bm-list", "mode": None, "metric": "get",
@@ -117,9 +115,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     current = {
       "run_id": "new", "commit": "b", "status": "success",
       "stage_3_seconds": 11.0,
-      "build_scaling": {
-        "score": 106.0, "metric_id": "cpu/v1", "baseline_id": "base-a",
-      },
+      "build_scaling": {"score": 106.0},
       "compiler_median_seconds": {"stage-0/default": 1.0},
       "runtime_medians": [{
         "target": "bm-list", "mode": None, "metric": "get",
@@ -128,35 +124,12 @@ class PerformanceSnapshotTests(unittest.TestCase):
     }
     report = snapshot.render_report(current, previous)
     self.assertIn("stage-3 seconds | 10 | 11 | +10.00%", report)
+    self.assertIn("build cost score | 100 | 106 | +6.00%", report)
     self.assertIn(
-      "build cost score [cpu/v1 @ base-a] | 100 | 106 | +6.00%", report,
-    )
-    self.assertIn(
-      "- build cost score [cpu/v1 @ base-a]: 106.0 (+6.0)\n", report,
+      "- Build cost score: 106.0 (+6.0)\n", report,
     )
     self.assertIn("compiler stage-0/default seconds | 2 | 1 | -50.00%", report)
     self.assertIn("runtime bm-list/get | 4 | 5 | +25.00%", report)
-
-  def test_build_cost_scores_with_different_identities_are_not_compared(self):
-    previous = {
-      "run_id": "old", "commit": "a", "status": "success",
-      "build_scaling": {
-        "score": 100.0, "metric_id": "cycles/v0", "baseline_id": "base-a",
-      },
-    }
-    current = {
-      "run_id": "new", "commit": "b", "status": "success",
-      "build_scaling": {
-        "score": 100.0, "metric_id": "cpu/v1", "baseline_id": "base-b",
-      },
-    }
-    report = snapshot.render_report(current, previous)
-    self.assertIn("build cost score [cpu/v1 @ base-b]: 100.0", report)
-    self.assertNotIn("(+0.0)", report)
-
-  def test_legacy_build_cost_without_identity_is_not_compared(self):
-    row = {"build_scaling": {"score": 100.0}}
-    self.assertEqual(snapshot.comparable_metrics(row), {})
 
   def test_failed_logged_command_retains_output_and_status(self):
     with tempfile.TemporaryDirectory() as directory:
