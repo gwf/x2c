@@ -1,7 +1,11 @@
-> Status: active
-> The complete compiler rewrite is being prepared on a branch from `dev`.
-> Gary will review the draft PR before it is merged; other work may advance
-> `dev` while this branch is under review.
+> Status: done
+> The catalogue and callers landed on dev through `c08f1d84` and `bef9923d`
+> on 2026-10-01. The once-only table initialization repair landed through
+> `fcfaff40` and `2c8ddfb3` on 2026-10-02. The replacement and remaining
+> integration repairs are tracked in the active post-integration fix list.
+
+The instructions below record the original design and review authorization.
+They do not impose a new review stop on the current campaign.
 
 # Compiler error catalogue
 

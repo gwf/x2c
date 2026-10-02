@@ -1,8 +1,11 @@
-> Status: implemented
-> The private-context batch merged into dev in PR #76.
-> Public follow-ups are implemented on `codex/value-reference-public`, including
-> dev's published build repair `943a5e50`. Delivery is another PR targeting
-> `dev`; integration belongs to the integration agent.
+> Status: done
+> The private-context batch merged into dev in PR #76. The public follow-up
+> landed through `cbecd92e` and its generated refresh `a373970c` on 2026-10-01.
+> JobLaunch naming and MachineBuilder release consolidation are follow-ups
+> F14 and F29 in the active post-integration fix list.
+
+The delivery instructions below record the original submission and pause.
+They do not impose a new review stop on the current campaign.
 
 # Value declarations and reference parameters
 

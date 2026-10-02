@@ -64,6 +64,8 @@ dynamic operation, resource or external operation, API contract, then
 | `<no-symbol>` | a native symbol cannot be resolved | `<abort>` |
 | `<bad-result>` | a native result cannot be represented | `<abort>` |
 | `<not-call>` | a value cannot be called | `<abort>` |
+| `<call-stack>` | evaluation exceeds its call budget or stack depth | `<abort>` |
+| `<interrupt>` | the evaluation session has been interrupted | `<abort>` |
 | `<unbound>` | a program name has no binding | `<abort>` |
 | `<malformed>` | external syntax or serialized input is invalid | `<abort>` |
 | `<incomplete>` | external input needs more data | `<abort>` |

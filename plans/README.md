@@ -47,9 +47,6 @@ execution.
 - [x2c self-expression](x2c-self-expression.md): reproduced defects, then
   three waves that express each relationship at the largest ordinary x2c
   form that owns it, prototypes, and four language-design questions.
-- [Value declarations and reference style](value-reference-style.md): private
-  context conversions, reference class initializers, and style/book guidance.
-  Delivery is a draft PR off dev; integration belongs to the integration agent.
 - [Source consolidation research](source-consolidation-research.md): working
   typed-family, lowering, runtime, transaction, and package prototypes, with
   all original proposals tracked separately. Publication is held for review.
@@ -68,7 +65,7 @@ execution.
 
 | Record | What remains |
 | --- | --- |
-| [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 41 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
+| [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 42 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
@@ -83,6 +80,13 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Compiler error catalogue](archive/compiler-error-catalogue.md): done;
+  catalogue and callers landed through `c08f1d84` and `bef9923d`, with
+  once-only table initialization through `fcfaff40` and `2c8ddfb3`.
+  The active post-integration campaign owns its named-macro replacement.
+- [Value declarations and reference style](archive/value-reference-style.md):
+  done; private contexts landed in PR #76, and public contexts through
+  `cbecd92e` and `a373970c`. F14 and F29 track the runtime follow-ups.
 - [Batched dev integration](archive/batched-dev-integration.md): done
   2026-10-01 at `0e2c03a93195`; all three delivery modes are live, the shared
   tools work in both native worktree types, and PRs #74, #75, and #76 landed
