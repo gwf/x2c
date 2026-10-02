@@ -129,7 +129,7 @@ static List Compiler._parse_shell_tail(Compiler c) {
   if (c.peek(0) == <)>) return %(nil);
   List type = c._parse_list_head();
   if (c.peek(0) == <)>) return c._cons_cell(type, %(nil));
-  List content = c._macro_subpattern_insertion(1);
+  List content = c.try_parse_macro_pattern_insertion(1);
   if (!content) content = c._parse_list_head();
   return c._cons_cell(type, c._cons_cell(content, c._parse_list_tail()));
 }
@@ -178,14 +178,23 @@ static Var Compiler._macro_pattern_argument(Compiler c) {
   return value;
 }
 
-/* A pattern's `${$NAME(...)}` where NAME is a macro: its derived pattern. */
-static List Compiler._macro_subpattern_insertion(Compiler c, int content) {
-  if (!c.in_pattern || c.peek(0) != <"${"> || c.token.len != 2) return NULL;
+/** Parses a pattern's `${$NAME(...)}`, where NAME is a macro, into its
+    derived pattern, or returns NULL without consuming tokens. `content`
+    selects the bare content, for the content position of an
+    `(expr TYPE ...)` shell.
+*/
+List Compiler.try_parse_macro_pattern_insertion(Compiler c, int content) {
+  /* `%(...)` scans `${` as one token; a whole `case` pattern has two. */
+  int joined = c.peek(0) == <"${"> && c.token.len == 2;
+  if (!c.in_pattern || (!joined && (c.peek(0) != <$> || c.peek(1) != <"{">)))
+    return NULL;
+  Token name = Token.skip_trivia(c.token + 1);
+  if (!joined) name = Token.skip_trivia(name + 1);
   String spelling = NULL;
   Var stored;
-  if (!c.macro_pattern_at(Token.skip_trivia(c.token + 1), spelling, stored))
-    return NULL;
+  if (!c.macro_pattern_at(name, spelling, stored)) return NULL;
   c.next();
+  if (!joined) c.next();
   List derived = c.try_parse_macro_subpattern(content);
   c.expect(<"}">);
   return derived;
@@ -210,7 +219,7 @@ static List Compiler._parse_splice(Compiler c) {
 static List Compiler._parse_insertion(Compiler c) {
   if (c.peek(0) == <$>)
     return c._parse_named_reference(<$>);
-  List derived = c._macro_subpattern_insertion(0);
+  List derived = c.try_parse_macro_pattern_insertion(0);
   if (derived) return derived;
   if (c.peek(0) != <"${"> || c.token.len != 2) return NULL;
   c.next();

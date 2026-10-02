@@ -443,6 +443,7 @@ static List Compiler._parse_pattern(Compiler c, List &types) {
   $let(c.in_pattern, 1)
   $let(c.match_types, captures) {
     pattern = c.try_parse_macro_pattern();
+    if (!pattern) pattern = c.try_parse_macro_pattern_insertion(0);
     if (!pattern) pattern = c.parse_expression();
     types = captures;
   }

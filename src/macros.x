@@ -3041,6 +3041,7 @@ static List Compiler._macro_value(Compiler c, Atom name) {
     macro builds. Returns NULL without consuming tokens for any other case.
 */
 List Compiler.try_parse_macro_pattern(Compiler c) {
+  if (c.peek(0) == <$> && c.peek(1) == <"{">) return NULL;
   Token saved = c.token;
   List expression = c._pattern_macro();
   if (!expression || c.peek(0) != <(>) {
