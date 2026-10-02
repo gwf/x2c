@@ -20,11 +20,11 @@
     so the child only duplicates descriptors, changes directory, and calls
     `execvp`.
 */
-typedef struct _Launch {
+typedef struct _JobLaunch {
   String dir, input, stdout_path, stderr_path;
   int has_input, capture_output, capture_errors, errors_to_output;
   char **environment;
-} Launch;
+} JobLaunch;
 
 /** A command or pipeline and the record of its one run.
     A job that is still running when its Scope ends, or when its `$auto`
@@ -32,7 +32,7 @@ typedef struct _Launch {
 */
 class Job {
   List stages;
-  Launch launch;
+  JobLaunch launch;
   long *pids;
   int *statuses;
   int count, started, finished, status, nul_output, nul_errors;
@@ -201,7 +201,7 @@ static char **_argv(List stage) {
 
 /* The report pipe is close-on-exec: a successful `execvp` closes it without
    writing, and a failed step writes which step failed and its errno. */
-static void _child(char **argv, Launch &launch, Stdio stdio, int report) {
+static void _child(char **argv, JobLaunch &launch, Stdio stdio, int report) {
   stdio.input = _above_stdio(stdio.input);
   stdio.output = _above_stdio(stdio.output);
   stdio.errors = _above_stdio(stdio.errors);
@@ -429,7 +429,7 @@ Job Job.options(Job job, Map options) {
   return job;
 }
 
-static void Launch.set(Launch &l, Symbol name, Var value) {
+static void JobLaunch.set(JobLaunch &l, Symbol name, Var value) {
   switch (name) {
     case <dir>:    l.dir = value; break;
     case <env>:    l.environment = _environment(value); break;
@@ -440,12 +440,12 @@ static void Launch.set(Launch &l, Symbol name, Var value) {
   }
 }
 
-static void Launch.route_output(Launch &l, Var value) {
+static void JobLaunch.route_output(JobLaunch &l, Var value) {
   l.capture_output = _is(value, <capture>);
   l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
 }
 
-static void Launch.route_errors(Launch &l, Var value) {
+static void JobLaunch.route_errors(JobLaunch &l, Var value) {
   l.capture_errors = _is(value, <capture>);
   l.errors_to_output = _is(value, <stdout>);
   l.stderr_path = l.capture_errors || l.errors_to_output ||
