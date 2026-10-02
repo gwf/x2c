@@ -423,15 +423,15 @@ static Ast Compiler._raise_node(Compiler c, Ast ast) {
 
 /* The converted Var values enter the native counted constructors unchanged.
    Empty literals need only allocate their container. */
-macro open Expression $var_array(Expr $count, Expr $values...) =>
+macro Expression $var_array(Expr $count, Expr $values...) =>
   Array.update_n(Array.new(), $count, $values...);
 
-macro open Expression $empty_var_array() => Array.new();
+macro Expression $empty_var_array() => Array.new();
 
-macro open Expression $var_map(Expr $count, Expr $entries...) =>
+macro Expression $var_map(Expr $count, Expr $entries...) =>
   Map.update_n(Map.new(), $count, $entries...);
 
-macro open Expression $empty_var_map() => Map.new();
+macro Expression $empty_var_map() => Map.new();
 
 /** Converts an array literal to source-ordered Var arguments for its
     counted constructor. */
@@ -735,23 +735,23 @@ static List Compiler._process_raw_segment(Compiler c, List seg) {
 
 // declarations and statements
 
-macro open Expression $destructure_write(
+macro Expression $destructure_write(
     Expr $target, Expr $value) => $target = $value;
 
-macro open Statement $destructure_targets(Type $type, DeclaratorRow $rows...) {
+macro Statement $destructure_targets(Type $type, DeclaratorRow $rows...) {
   $type $rows...;
 }
 
-macro open Statement $destructure_typed_target(
+macro Statement $destructure_typed_target(
     Type $type, DeclaratorRow $row, Expr $value) {
   $type $row = $value;
 }
 
-macro open Statement $destructure_sequence(Statement $items...) {
+macro Statement $destructure_sequence(Statement $items...) {
   $items...
 }
 
-macro open Statement $destructure_statement(Name $temporary, Expr $source,
+macro Statement $destructure_statement(Name $temporary, Expr $source,
     Statement $assignments...) {
   {
     List $temporary = $source;
@@ -759,7 +759,7 @@ macro open Statement $destructure_statement(Name $temporary, Expr $source,
   }
 }
 
-macro open Statement $destructure_declarations(
+macro Statement $destructure_declarations(
     Name $temporary, Expr $source, Statement $assignments...) {
   List $temporary = $source;
   $assignments...

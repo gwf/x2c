@@ -637,7 +637,7 @@ List builtin_catch_cases(List selected, List arms);
 List builtin_try_cleanup_placement(Var cleanup);
 
 /* A try region pushes its frame and lands on it when something raises. */
-macro open Statement $compiler_try(Name $frame, Expr $clause,
+macro Statement $compiler_try(Name $frame, Expr $clause,
     Statement $body, Statement $cleanup) {
   {
     ExceptionFrame $frame;
@@ -652,7 +652,7 @@ macro open Statement $compiler_try(Name $frame, Expr $clause,
   }
 }
 
-macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
+macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
@@ -665,13 +665,13 @@ macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* One arm's pattern, prepared into its slot. */
-macro open Statement $catch_pattern(Expr $patterns, Expr $index,
+macro Statement $catch_pattern(Expr $patterns, Expr $index,
     Expr $pattern) {
   $patterns[$index] = $pattern;
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro open Statement $catch_landing(Name $frame, Name $handle,
+macro Statement $catch_landing(Name $frame, Name $handle,
     Statement $unhandled, Statement $arms...) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
@@ -685,7 +685,7 @@ macro open Statement $catch_landing(Name $frame, Name $handle,
 /* One catch arm, chosen by its index. Each arm is its own statement, so a
    `break` or `continue` in it still reaches the enclosing loop, and only
    one test holds because `selected` does not change. */
-macro open Statement $catch_case(Expr $selected, Expr $index,
+macro Statement $catch_case(Expr $selected, Expr $index,
     Statement $arm) {
   if ($selected == $index) $arm
 }
@@ -693,28 +693,28 @@ macro open Statement $catch_case(Expr $selected, Expr $index,
 /* A landing that reaches the arms always selected one. When every arm
    returns or raises, control cannot leave them, and this tells C so that a
    function ending in such a `try` needs no return after it. */
-macro open Statement $catch_none() {
+macro Statement $catch_none() {
   __builtin_unreachable();
 }
 
 /* A landing no catch arm handles: the region's exits run, and control does
    not come back. */
-macro open Statement $try_unhandled(Statement $cleanup) {
+macro Statement $try_unhandled(Statement $cleanup) {
   { $cleanup __builtin_unreachable(); }
 }
 
-macro open Statement $try_close_handler(Expr $handle) {
+macro Statement $try_close_handler(Expr $handle) {
   x2c_error_catch_close($handle);
   $handle = NULL;
 }
 
-macro open Statement $try_leave_cleanup(Expr $frame,
+macro Statement $try_leave_cleanup(Expr $frame,
     Statement $before...) {
   $before...
   x2c_exception_leave($frame);
 }
 
-macro open Statement $try_finish_cleanup(Expr $frame,
+macro Statement $try_finish_cleanup(Expr $frame,
     Statement $finalizer, Statement $before...) {
   if (x2c_exception_claim($frame)) {
     $before...
@@ -895,7 +895,7 @@ List builtin_defer_record(
   List record, List callback, List environment, List records);
 List builtin_defer_captures(List environment, List records);
 
-macro open Statement $compiler_defer(Name $record, Expr $callback,
+macro Statement $compiler_defer(Name $record, Expr $callback,
     Expr $environment, Expr $records, Statement $body, Statement $cleanup) {
   {
     $builtin_defer_record($record, $callback, $environment, $records)...
@@ -905,24 +905,24 @@ macro open Statement $compiler_defer(Name $record, Expr $callback,
   }
 }
 
-macro open Statement $defer_plain(Name $record, Expr $callback) {
+macro Statement $defer_plain(Name $record, Expr $callback) {
   X2CCleanup $record = {.fn = $callback, .env = 0};
 }
 
-macro open Statement $defer_captured(Name $record, Expr $callback,
+macro Statement $defer_captured(Name $record, Expr $callback,
     Type $type, Expr $records) {
   $type environment = {0};
   $builtin_defer_captures(environment, $records)...
   X2CCleanup $record = {.fn = $callback, .env = &environment};
 }
 
-macro open Statement $defer_capture(Expr $environment, Name $field,
+macro Statement $defer_capture(Expr $environment, Name $field,
     Expr $source) {
   $environment.$field = (const void *)&$source;
 }
 
 /* The runtime unlinks this record and calls its thunk. */
-macro open Statement $defer_cleanup_call(Expr $record) {
+macro Statement $defer_cleanup_call(Expr $record) {
   x2c_cleanup_leave($record);
 }
 
@@ -1082,7 +1082,7 @@ static void Preserve._aliased(Preserve &p, List body) {
 
 /* Once the runtime holds a local's address, C must assume every later call,
    `sigsetjmp` and the raise included, reads and writes the local. */
-macro open Statement $escape_local(Expr $local) {
+macro Statement $escape_local(Expr $local) {
   x2c_exception_escaped = &$local;
 }
 
@@ -1291,12 +1291,12 @@ typedef struct DeferCaptures {
 
 /* The body is already lowered; these templates supply its generated entry
    and the captured variant's environment pointer. */
-macro open Unit $defer_callback(Name $callback, Name $opaque,
+macro Unit $defer_callback(Name $callback, Name $opaque,
     Statement $body) {
   static void $callback(void *$opaque) { $body }
 }
 
-macro open Unit $defer_captured_callback(Type $type, Name $callback,
+macro Unit $defer_captured_callback(Type $type, Name $callback,
     Name $opaque, Name $local, Statement $body) {
   static void $callback(void *$opaque) {
     $type *$local = ($type *)$opaque;

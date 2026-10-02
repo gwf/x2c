@@ -692,11 +692,7 @@ List Compiler.parse_primary(Compiler c) {
 static List Compiler._parse_ident_primary(Compiler c) {
   if (c.token.text == "macro" && c.peek(1) == <ident> &&
       c.peek(2) == <(>) {
-    List definition = c.parse_macro_definition();
-    foreach (Var captured, definition.assoc(<captures>).list())
-      c.semantic_binding_facts()[
-        %(local-macro-capture $captured)] = 1;
-    return c.capture_macro_value(definition);
+    return c.capture_macro_value(c.parse_macro_definition());
   }
   List binding = c.with_binding();
   Var stored;
@@ -1033,8 +1029,7 @@ static int Compiler._identifier_needs_resolution(
   int retained_parameter = %(lambda-param $binding) in facts;
   int retained_capture = %(lambda-depth $binding) in facts;
   if (c.lambda_capture_required(binding)) return 1;
-  if ((retained_parameter && c.local_macro_captures != NULL) ||
-      %(local-macro-capture $binding) in facts) return 1;
+  if (retained_parameter && c.local_macro_captures != NULL) return 1;
   Var type;
   if (%(automatic $binding) in facts &&
       facts.try_get(%(type $binding), type) && type is <list> &&
@@ -1212,15 +1207,18 @@ macro Statement $report.type_binding_unknown(Expr $c, Expr $name, Expr $origin) 
 }
 
 static List Compiler._resolve_identifier(
-  Compiler c, Var value, Type type, Token origin) =>
-  c._identifier(value, type, origin, 0);
-
-static List Compiler._identifier(
-  Compiler c, Var value, Type type, Token origin, int native_callee) {
+  Compiler c, Var value, Type type, Token origin) {
   if (type === %(<macro-expr>)) type = NULL;
   int read_reference = !type;
   int require_type = 0;
   List binding = c._identifier_binding(value, type, origin, require_type);
+  if (c.macro_holes && binding) {
+    String name = binding_identity_spelling(binding);
+    Var pinned = c.macro_holes[%(using $name)];
+    if (pinned is <list>) binding = pinned;
+    else if (c._template_free_name(binding))
+      return %(expr (<macro-expr>) (ident (binding-name $name)));
+  }
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
      value.car() == <macro-bind>);
@@ -1228,13 +1226,10 @@ static List Compiler._identifier(
   if (!binding) $report.type_binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
-  native_callee &= !type &&
-    !binding_facts.contains(%(type $binding));
   c._capture_identifier(binding);
-  c._shadow_identifier(
-    binding, type, spelling, binding_facts, origin, native_callee);
+  c._shadow_identifier(binding, type, spelling, binding_facts);
   if (!type) type = c._identifier_type(
-    binding, spelling, binding_facts, origin, native_callee);
+    binding, spelling, binding_facts, origin);
   if (!type && require_type)
     $report.type_ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
@@ -1270,11 +1265,16 @@ static List Compiler._identifier_binding(
   int identity = 0;
   String spelling = NULL;
   if (binding_identity_try_parts(name, identity, spelling)) {
-    Var issued;
-    if (!c.semantic_binding_facts().try_get(
-      %(known $identity), issued) ||
+    Map facts = c.semantic_binding_facts();
+    Var issued, source;
+    if (!facts.try_get(%(known $identity), issued) ||
         issued is not <string> || !issued.string().equal(spelling))
       $report.type_binding_unknown(c, name, origin);
+    /* A template's private name that no declaration in scope reaches
+       reads its source spelling where the expansion lands. */
+    if (facts.try_get(%(source-spelling $name), source) &&
+        c.sym.lookup(%($spelling), NULL) != name)
+      return c.sym.reference(%($source), type);
     return name;
   }
   match (name) {
@@ -1282,10 +1282,24 @@ static List Compiler._identifier_binding(
       require_type = 1;
       return c.sym.reference(%($spelling), type);
     }
+    case %(binding-name ?(String spelling)):
+      return c.sym.reference(%($spelling), type);
+    case %(binding-global ?(String spelling)):
+      return c.sym.reference_global(%($spelling));
     case %((!is ? type string)):
       return c.sym.reference(name, type);
   }
   return NULL;
+}
+
+/* A name a template reads without declaring it binds where the expansion
+   lands. A `Macro` local is a compile-time template the body composes, so
+   an anonymous macro captures its value where it is written. */
+static int Compiler._template_free_name(Compiler c, List binding) {
+  Map locals = c.macro_definition_locals();
+  if (!binding || (locals != NULL && binding in locals)) return 0;
+  Var type = c.semantic_binding_facts()[%(type $binding)];
+  return !(type is <list> && c.sym.is_named_value_type(type, "Macro"));
 }
 
 static void Compiler._capture_identifier(Compiler c, List binding) {
@@ -1299,93 +1313,30 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
   c.local_macro_captures[binding] = 1;
 }
 
+/* A visible local replaces a stale local identity. A file-scope identity
+   that a visible declaration of its spelling hides, such as a name a
+   template's `using` keeps, gives that declaration an emitted alias. */
 static void Compiler._shadow_identifier(
-  Compiler c, List &binding, Type type, String spelling,
-  Map binding_facts, Token origin, int native_callee) {
+  Compiler c, List &binding, Type type, String spelling, Map binding_facts) {
   if (!spelling) return;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
   if (!visible || visible == binding) return;
-  if (%(local-macro-capture $binding) in binding_facts) {
-    if (!binding_facts.contains(%(emitted $visible)))
-      binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
-  }
-  else if (c.sym.binding_is_local(binding) &&
-           !binding_facts.contains(%(lambda-depth $binding)))
+  if (c.sym.binding_is_local(binding) &&
+      !binding_facts.contains(%(lambda-depth $binding)))
     binding = visible;
-  else if (!c._free_name(
-             binding, spelling, visible, visible_type, origin,
-             native_callee) &&
-           visible != binding && visible_type &&
+  else if (visible_type &&
            (!type || c.sym.resolve_global(%($spelling), NULL)) &&
            !binding_facts.contains(%(emitted $visible)))
     binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
 }
 
-/* Inside an expansion, a free name that no declared global supplies binds
-   the visible declaration when the expansion introduced it, and otherwise
-   a global declared since the definition. A declaration outside the
-   expansion never supplies it. Returns 1 when the visible declaration
-   does. */
-static int Compiler._free_name(
-  Compiler c, List &binding, String spelling, List visible,
-  Type visible_type, Token origin, int native_callee) {
-  if (!c.macro_stack ||
-      %(lambda-depth $binding) in c.semantic_binding_facts()) return 0;
-  Type global_type = NULL;
-  List global = c.sym.resolve_global(%($spelling), global_type);
-  if (binding == global && global_type) return 0;
-  if (visible_type && c._expansion_introduced(visible)) {
-    binding = visible;
-    return 1;
-  }
-  if (native_callee && !global_type) return 0;
-  if (global_type) binding = global;
-  else if (visible_type) c._report_free_name(binding, spelling, origin);
-  return 0;
-}
-
-/* An active expansion issued `binding` after it began. */
-static int Compiler._expansion_introduced(Compiler c, List binding) {
-  int identity = 0;
-  return binding_identity_try_parts(binding, identity, NULL) &&
-         identity > c.expansion_floor;
-}
-
-/* A free name that nothing declared where its macro was defined, with only
-   a declaration outside the expansion in view. The macro is the innermost
-   active one whose template reads the name. */
-static void Compiler._report_free_name(
-  Compiler c, List binding, String spelling, Token origin) {
-  List owner = c.macro_stack.car().list().car();
-  foreach (List active, c.macro_stack) {
-    List definition = active.car(), template = definition.assoc(<template>);
-    if (template.search(%(ident $binding))) {
-      owner = definition;
-      break;
-    }
-  }
-  Atom name = owner.assoc(<name>);
-  String macro = name.str();
-  c.report_error(
-    <macro>,
-    %"'$spelling' in macro '$macro' is not declared " +
-    "where the macro is defined",
-    origin, %("declare it before the macro, or pass it through a Name hole"));
-}
-
 static Type Compiler._identifier_type(
-  Compiler c, List binding, String spelling, Map facts, Token origin,
-  int native_callee) {
+  Compiler c, List binding, String spelling, Map facts, Token origin) {
   Var stored;
   if (facts.try_get(%(type $binding), stored) && stored is <list>)
     return stored;
   if (!spelling) return NULL;
-  if (native_callee) {
-    Type global_type = NULL;
-    c.sym.resolve_global(%($spelling), global_type);
-    return global_type;
-  }
   Type type = c.sym.get(%($spelling));
   if (!type) c._check_unit_static(spelling, origin);
   return type;
@@ -1597,34 +1548,8 @@ static List Compiler._resolve_call(
   return site._function(function);
 }
 
-/* A native-header identifier has no x2c type. Its call position keeps the
-   issued binding while ordinary shadow handling renames caller locals. */
-static List Compiler._resolve_callee(Compiler c, List function, Token origin) {
-  if (function.car() == <expr> && function.cadr() &&
-      !c.needs_resolution(function)) return function;
-  match (function) {
-    case %(expr ?type (ident ?value)):
-      return c._identifier(value, type, origin, 1);
-    case %(expr ? (parens ?inner)): {
-      List resolved = c._resolve_callee(inner, origin);
-      return %(expr ${resolved.cadr()} (parens $resolved));
-    }
-    case %(expr ?type
-           ((!set ?wrapper (!or at src)) ?source ?content)): {
-      List inner = c._resolve_callee(%(expr $type $content), origin);
-      List result = %(
-        expr ${inner.cadr()} ($wrapper $source ${inner.caddr()})
-      );
-      return c._resolve_source(result, inner.cadr(), result.caddr());
-    }
-    case %((!set ?wrapper (!or at src)) ?source ?inner):
-      return %($wrapper $source ${c._resolve_callee(inner, origin)});
-  }
-  return c.resolve_expression(function, origin);
-}
-
 static List CallSite._function(CallSite &k, List function) {
-  List resolved = k.c._resolve_callee(function, k.origin);
+  List resolved = k.c.resolve_expression(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type).equal(func_type))
     return k.c._resolve_func_call(resolved, k.supplied, k.origin);
@@ -2244,7 +2169,7 @@ static void _completion_add(Map seen, Array names, String name) {
 
 /* One argument, taken by reference when the callee's signature asks for a
    reference and by value otherwise. */
-macro open Statement $func_argument(Expr $function, Expr $storage,
+macro Statement $func_argument(Expr $function, Expr $storage,
     Expr $count, Expr $index, Expr $address, Expr $type, Expr $value) {
   if (x2c_func_reference_type($function, $count, $index))
     $storage[$index] = FuncArg_reference($address, $type);
@@ -2252,7 +2177,7 @@ macro open Statement $func_argument(Expr $function, Expr $storage,
 }
 
 /* A null argument: a reference takes it with the callee's own type. */
-macro open Statement $func_null_argument(Expr $function, Expr $storage,
+macro Statement $func_null_argument(Expr $function, Expr $storage,
     Expr $count, Expr $index, Expr $value) {
   {
     List reference = x2c_func_reference_type($function, $count, $index);
@@ -2263,13 +2188,13 @@ macro open Statement $func_null_argument(Expr $function, Expr $storage,
 
 /* The by-value alternative: the argument boxed, or the diagnostic call for
    a type with no Var form. */
-macro open Expression $func_value(Expr $argument) => FuncArg_value($argument);
+macro Expression $func_value(Expr $argument) => FuncArg_value($argument);
 
-macro open Expression $func_opaque(Expr $function, Expr $index,
+macro Expression $func_opaque(Expr $function, Expr $index,
     Expr $type) => x2c_func_unrepresentable_argument($function, $index, $type);
 
 /* A call with no arguments applies the callee directly. */
-macro open Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
+macro Expression $func_apply(Expr $callee) => Func_apply($callee, 0, 0);
 
 static int _null_literal(List expr) =>
   _integer_literal_kind(expr, NULL) == <zero> ||
@@ -2318,7 +2243,7 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
    an array from left to right, and applies the callee. Func_apply validates
    arity and dispatches; the selected adapter checks carrier, type and
    conversion. */
-macro open Expression $func_call(Expr $callee, Expr $count,
+macro Expression $func_call(Expr $callee, Expr $count,
     Expr $arguments...) => ({
   Func function = $callee;
   FuncArg storage[$count];

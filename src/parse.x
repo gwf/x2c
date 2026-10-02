@@ -2624,7 +2624,7 @@ static List _managed_initializer(List syntax) {
   return NULL;
 }
 
-macro open Statement $managed_cleanup(Expr $receiver) {
+macro Statement $managed_cleanup(Expr $receiver) {
   defer $receiver.cleanup();
 }
 

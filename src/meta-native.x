@@ -259,7 +259,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
     case %(expr ? (meta-call ?(List target) (args *arguments))): {
       match (target)
         case %(expr ?callee ${$source_identifier_content(
-            %((binding ? ?name)))}): {
+            %((!or (binding ? ?name) (binding-name ?name))))}): {
           if (name is not <string>) break;
           String spelling = name;
           Array values = c._meta_values(callee, arguments, site);

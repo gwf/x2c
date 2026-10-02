@@ -218,14 +218,16 @@ Estimated: a medium change in `src/macros.x`, `src/expressions.x`, and
 
 ### M2. Macro patterns compose and see types
 
-In a `case`, a macro pattern's argument positions accept any pattern,
-including another macro pattern and a raw `%()` pattern. One form binds or
-constrains the typed shell of an `Expression` pattern.
+A macro pattern is accepted wherever a pattern is. Its argument positions
+accept any pattern, including another macro pattern and a raw `%()`
+pattern. Inside a `%()` pattern, `${$macro(?a, ...)}` stands for that
+macro's pattern and matches the shelled expression or its bare content, so
+the canonical `(expr TYPE CONTENT)` shell captures the type (S5).
 
 ```x2c
 case $add(?a, $neg(?b)):                          /* nested */
 case $indexed(%(!set ?base (expr ?type ?)), ?index):
-case ?(Type type) $indexed(?receiver, ?selector):  /* spelling: D2 */
+case %(expr ?type ${$indexed(?receiver, ?selector)}):  /* typed */
 ```
 
 `source_pattern_with` already does this by hand: it derives the macro's
@@ -263,8 +265,8 @@ readability).
 
 ### M4. Syntax quotation in meta code
 
-Allow `macro Kind { ... }` without a parameter list inside a meta body.
-Its `$name` refers to an enclosing meta local of a matching category, and
+Add the quotation `$!( expression )`, `$!{ block items }`, or
+`$!Kind{ ... }` inside a meta body (S6). Its `$name` refers to an enclosing meta local of a matching category, and
 `$name...` splices a `List`. It is an anonymous macro applied at once:
 each `$name` inserts the local's current compile-time value, a piece of
 syntax or a scalar, and nothing is retained afterward. The quote captures
@@ -288,7 +290,7 @@ List builtin_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0;
   foreach (List arm, arms)
-    cases.push(macro Statement { if ($selected == $index) $arm });
+    cases.push($!{ if ($selected == $index) $arm });
   return cases.list_free();
 }
 ```
@@ -351,10 +353,19 @@ Settled by Gary on 2026-10-02:
 
 Settled by Gary on 2026-10-02, approving the recommendations:
 
-- **S5.** M2's typed shell uses a leading typed binder:
-  `case ?(Type type) $indexed(?receiver, ?selector):`.
-- **S6.** M4 spells a quotation `macro Kind { ... }`, with no parameter
-  list.
+- **S5.** M2 adds no typed-shell syntax. A macro pattern is accepted
+  wherever a pattern is: in a macro pattern's argument positions, and
+  inside `%(...)` as `${$macro(?a, ...)}`. The type is captured with the
+  canonical shell, `case %(expr ?type ${$indexed(?receiver, ?selector)}):`.
+  The first recommendation, `case ?(Type type) $indexed(...)`, was
+  withdrawn: after `case` it reads as C's conditional operator and a cast,
+  and `?(Type name)` inside `%(...)` already means a `Var` tag test.
+- **S6.** M4 spells a quotation `$!( expression )` for an `Expression`
+  and `$!{ block items }` for a `Statement`, mirroring `%!` for a runtime
+  lambda. Another category names itself before the delimiter, as in
+  `$!Unit{ ... }`. Using `$!( ... )` as an anonymous `case` pattern is left
+  for later, because `?a` binders inside x2c expression syntax collide
+  with the conditional operator.
 - **S7.** One campaign in the order M1, M2, M3, M4. M1 replaces PR #103
   rather than building on it.
 

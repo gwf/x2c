@@ -31,13 +31,13 @@ $(import "../src/grammar.xmacro")
 /* Helper syntax shared by every lowering below. A declarator row reuses an
    issued binding without binding it again. */
 
-macro open Statement $func_local(Type $type, DeclaratorRow $row) {
+macro Statement $func_local(Type $type, DeclaratorRow $row) {
   $type $row;
 }
 
-macro open Expression $func_address(Expr $value) => &$value;
+macro Expression $func_address(Expr $value) => &$value;
 
-macro open Expression $func_size(Expr $value) => sizeof $value;
+macro Expression $func_size(Expr $value) => sizeof $value;
 
 // lambda lowering
 
@@ -130,11 +130,11 @@ static List _no_value_return(void) => %(
 
 // captured lambdas
 
-macro open Unit $capture_environment(Name $name, Field $fields...) {
+macro Unit $capture_environment(Name $name, Field $fields...) {
   typedef struct $name { $fields... } $name;
 }
 
-macro open Statement $capture_factory(Statement $storage, Expr $value) {
+macro Statement $capture_factory(Statement $storage, Expr $value) {
   $storage
   return $value;
 }
@@ -347,7 +347,7 @@ static List CaptureBuild._construct(CaptureBuild &b, List context) {
 }
 
 /* A value computed after its setup statements. */
-macro open Expression $statement_value(Expr $value, Statement $setup...) =>
+macro Expression $statement_value(Expr $value, Statement $setup...) =>
   ({ $setup... $value; });
 
 static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
@@ -361,15 +361,15 @@ static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
 
 /* A shared lambda cell: Scope storage for one automatic binding, copied
    from its initializer or left for a later assignment. */
-macro open Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
+macro Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
   $type *$cell = Scope_memdup((const void *)&($type)$value, sizeof($type));
 }
 
-macro open Statement $compiler_empty_cell(Type $type, Name $cell) {
+macro Statement $compiler_empty_cell(Type $type, Name $cell) {
   $type *$cell = Scope_malloc(sizeof($type));
 }
 
-macro open Expression $compiler_cell_value(Name $cell) => (*$cell);
+macro Expression $compiler_cell_value(Name $cell) => (*$cell);
 
 /* One callable region's cells: the automatic bindings the region owns, in
    declaration order, and the cell each shared binding moves to. */
@@ -631,18 +631,18 @@ static List Compiler._prepend_setup(Compiler c, List body, List setup) {
 
 // Func values
 
-macro open Statement $func_static_handle(Name $handle, Expr $value) {
+macro Statement $func_static_handle(Name $handle, Expr $value) {
   static Func $handle = $value;
 }
 
 /* A call through a bridge function the unit declares where it calls. */
-macro open Expression $func_bridge_call(
+macro Expression $func_bridge_call(
     Name $bridge, Expr $call, Param $parameters...) =>
   ({ extern Func $bridge($parameters...); $call; });
 
-macro open Expression $func_aggregate(Expr $value) => { $value };
+macro Expression $func_aggregate(Expr $value) => { $value };
 
-macro open Expression $func_present(
+macro Expression $func_present(
     Expr $pointer, Expr $value, Expr $fallback) =>
   $pointer ? $value : $fallback;
 
@@ -995,10 +995,10 @@ static List Compiler._deref_func_lift(
 
 // Func adapters
 
-macro open Expression $func_dereference(Expr $value) => *$value;
+macro Expression $func_dereference(Expr $value) => *$value;
 
 /* A record result is copied into a Var after the native call completes. */
-macro open Statement $func_record_result(
+macro Statement $func_record_result(
     Type $type, DeclaratorRow $row, Expr $boxed) {
   {
     $type $row;

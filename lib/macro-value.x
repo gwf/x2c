@@ -270,7 +270,8 @@ static Var _macro_pattern_view(Var value) {
   match (node) {
     case %(expr ?type ?body): return _macro_expr_view(type, body);
     case %(literal *): return %(!quote $node);
-    case %(binding-name ?(String name)): return _macro_free_reference(name);
+    case %((!or binding-name binding-global) ?(String name)):
+      return _macro_free_reference(name);
     case %(op ?operator *operands):
       return %(op (!quote $operator) @{_macro_pattern_views(operands)});
     case %(seq ?one): return _macro_pattern_view(one);

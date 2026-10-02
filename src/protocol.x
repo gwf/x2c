@@ -2051,7 +2051,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
 
 /* A generated function around a body its caller lowered. `result` carries
    the storage class, so static, inline and external helpers share it. */
-macro open Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
+macro Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
     Param $params...) {
   $result $name($params...) { $body }
 }
@@ -2103,7 +2103,7 @@ static List Compiler._bound_call(
 
 /* A direct protocol update stores the member's result through `lhs`; the
    `op` parameter keeps the update ABI of the dynamic path. */
-macro open Unit $protocol_update(
+macro Unit $protocol_update(
     Type $type, Type $rhs_type, Name $helper, Expr $member) {
   static $type $helper(volatile $type *lhs, Symbol op, $rhs_type rhs) {
     lhs[0] = $member(lhs[0], rhs);
@@ -2112,7 +2112,7 @@ macro open Unit $protocol_update(
 }
 
 /* The postfix form adds one and returns the value it read first. */
-macro open Unit $protocol_postfix(Type $type, Name $helper, Expr $member) {
+macro Unit $protocol_postfix(Type $type, Name $helper, Expr $member) {
   static $type $helper(volatile $type *lhs, Symbol op) {
     $type old = lhs[0];
     lhs[0] = $member(lhs[0], 1);
@@ -2165,20 +2165,20 @@ String Compiler.protocol_update_helper(
 
 // discard helpers
 
-macro open Expression $discard_call(
+macro Expression $discard_call(
     Name $callee, Expr $arguments...) => $callee($arguments...);
 
-macro open Statement $discard_argument(Name $discard, Expr $argument) {
+macro Statement $discard_argument(Name $discard, Expr $argument) {
   $discard($argument);
 }
 
-macro open Statement $discard_void(Expr $call, Statement $discards...) {
+macro Statement $discard_void(Expr $call, Statement $discards...) {
   $call;
   $discards...
   return;
 }
 
-macro open Statement $discard_value(
+macro Statement $discard_value(
     Type $type, Name $value, Expr $call, Statement $discards...) {
   $type $value = $call;
   $discards...
@@ -2586,15 +2586,15 @@ static List Compiler._signature_declaration(
 
 // descriptor registration
 
-macro open Unit $methods_table(Name $methods) {
+macro Unit $methods_table(Name $methods) {
   static VarMethods $methods;
 }
 
-macro open Statement $methods_value(Name $methods, Expr $value) {
+macro Statement $methods_value(Name $methods, Expr $value) {
   $methods = $value;
 }
 
-macro open Statement $registration_fallback(Expr $registered, Expr $fallback) {
+macro Statement $registration_fallback(Expr $registered, Expr $fallback) {
   if (!$registered) { $fallback; }
 }
 
@@ -2664,7 +2664,7 @@ static List Compiler._fallback_registration(
   return c.rebuild_statement(shape(early_call, fallback)).cadr();
 }
 
-macro open Expression $helper_call(
+macro Expression $helper_call(
     Name $callee, Expr $arguments...) => $callee($arguments...);
 
 static List Compiler._helper_call(

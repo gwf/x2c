@@ -804,19 +804,14 @@ String Compiler.imported_spelling(Compiler c, String name) {
 
 /** Defines or replaces a macro in the active lexical scope.
 
-    Captured bindings are recorded for later shadow handling. Replacing a
-    name already defined in this scope does not increase the local macro
-    count.
+    Replacing a name already defined in this scope does not increase the
+    local macro count.
 */
 void Sym.define_macro(Sym s, Atom name, List definition) {
   SymScope *scope = s._scope_at(-1);
   if (scope.macros == NULL) scope.macros = {};
   if (!scope.macros.contains(name)) s.local_macro_names++;
   scope.macros[name] = definition;
-  Var captures = definition.assoc(<captures>);
-  if (captures is <list>) foreach (Var capture, captures.list())
-    if (capture is <list>)
-      s.binding_facts[%(local-macro-capture ${capture.list()})] = 1;
 }
 
 /** Returns whether any lexical scope contains a local macro definition. */

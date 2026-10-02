@@ -563,7 +563,7 @@ static List _init_call(List method, List parameters, List object) {
   return _call(x2c_binding_spelling(method), arguments.list_free());
 }
 
-macro open Statement $class_refusal(Expr $call, Expr $value) {
+macro Statement $class_refusal(Expr $call, Expr $value) {
   if (!$call) {
     Scope_free($value);
     return 0;
@@ -684,7 +684,7 @@ static List _writer(
 
 /* A heap class writes a NULL value, or one the rendering path has already
    entered, as its address. */
-macro open Statement $class_repr_guard(
+macro Statement $class_repr_guard(
     Expr $null_test, Decl $path_declaration, Expr $entered,
     Expr $leave, Statement $fallback) {
   if ($null_test) $fallback
@@ -740,7 +740,7 @@ static List _field_write(List field) {
 }
 
 /* `str` or `repr` renders `write_str` or `write_repr` into a Buffer. */
-macro open Statement $class_string_body(Expr $value, Name $writer) {
+macro Statement $class_string_body(Expr $value, Name $writer) {
   Buffer out = Buffer.new(0);
   defer out.free();
   $value.$writer(out);

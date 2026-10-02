@@ -130,7 +130,7 @@ static List _catch_clause(
 
 ```x2c
 /* A try region pushes its frame and lands on it when something raises. */
-macro open Statement $compiler_try(Name $frame, Expr $clause,
+macro Statement $compiler_try(Name $frame, Expr $clause,
     Statement $body, Statement $cleanup) {
   {
     ExceptionFrame $frame;
@@ -147,7 +147,7 @@ macro open Statement $compiler_try(Name $frame, Expr $clause,
 
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
-macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
+macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
@@ -160,13 +160,13 @@ macro open Statement $catch_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* One arm's pattern, prepared into its slot. */
-macro open Statement $catch_pattern(Expr $patterns, Expr $index,
+macro Statement $catch_pattern(Expr $patterns, Expr $index,
     Expr $pattern) {
   $patterns[$index] = $pattern;
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro open Statement $catch_landing(Name $frame, Name $handle,
+macro Statement $catch_landing(Name $frame, Name $handle,
     Statement $unhandled, Statement $arms...) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
@@ -181,7 +181,7 @@ macro open Statement $catch_landing(Name $frame, Name $handle,
 /* One catch arm, chosen by its index. Each arm is its own statement, so a
    `break` or `continue` in it still reaches the enclosing loop, and only
    one test holds because `selected` does not change. */
-macro open Statement $catch_case(Expr $selected, Expr $index,
+macro Statement $catch_case(Expr $selected, Expr $index,
     Statement $arm) {
   if ($selected == $index) $arm
 }
@@ -189,7 +189,7 @@ macro open Statement $catch_case(Expr $selected, Expr $index,
 
 /* A landing no catch arm handles: the region's exits run, and control does
    not come back. */
-macro open Statement $try_unhandled(Statement $cleanup) {
+macro Statement $try_unhandled(Statement $cleanup) {
   { $cleanup __builtin_unreachable(); }
 }
 ```
