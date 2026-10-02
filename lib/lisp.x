@@ -1384,75 +1384,65 @@ Var lisp_write_file(String path, String text) {
 typedef struct LispCallback {
   Lisp lisp;
   Var callable;
+  String operation;
+  unsigned arity;
 } LispCallback;
 
 static List unary_signature = %((func (("Var"))) "Var");
 static List binary_signature = %((func (("Var") ("Var"))) "Var");
 
 static Func _unary_callback(Var callable) =>
-  _callback(callable, _unary_call, unary_signature, "Lisp callback");
+  _callback(callable, _call, 1, "Lisp callback");
 static Func _binary_callback(Var callable) =>
-  _callback(callable, _binary_call, binary_signature, "Lisp callback");
+  _callback(callable, _call, 2, "Lisp callback");
 static Func _predicate_callback(Var callable) =>
-  _callback(callable, _predicate_call, unary_signature, "Lisp callback");
+  _callback(callable, _predicate_call, 1, "Lisp callback");
 
 /* A Func that meta code can keep, as a value or inside a lazy Iter, lives as
    long as the session that runs it, whatever region is active when it is
-   made. A callback used only during one call stays in the active region. */
+   made. A callback used only during one call stays in the active region.
+   `Iter` keeps it in its existing auxiliary field; the native pull ABI
+   remains the library's IterNextFn, and the callback carries its iterator
+   and output-cell arguments into the interpreted source function. */
 static Func _iter_callback(Var callable) {
-  Func fn = _callback(
-    callable, _iter_next_call, binary_signature, "Lisp iterator callback");
+  Func fn = _callback(callable, _call, 2, "Lisp iterator callback");
   if (fn) Scope.move(fn, &lisp_active.scope);
   return fn;
 }
 
-/* A Func that runs `callable` in the active session, or NULL for a nil
-   callable. */
+/* A Func of `arity` value arguments that runs `callable` in the active
+   session, or NULL for a nil callable. */
 static Func _callback(
-  Var callable, FuncAdapter adapter, List signature, String operation) {
+  Var callable, FuncAdapter adapter, unsigned arity, String operation) {
   if (callable.is_nil()) return NULL;
   if (!lisp_active)
     $lisp.session.error("callback.absent", operation);
-  LispCallback context = { lisp_active, callable };
+  LispCallback context = { lisp_active, callable, operation, arity };
+  List signature = arity == 1 ? unary_signature : binary_signature;
   return Func.new_context(adapter, signature, &context, sizeof context);
 }
 
-static Var _unary_call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn, "Lisp callback");
-  Var value = x2c_func_value_argument(fn, args, 0, <var>);
-  return context.lisp._apply_values(context.callable, %($value), NULL);
+static Var _call(Func fn, const FuncArg *args) {
+  LispCallback *context = _callback_context(fn);
+  List values = NULL;
+  for (unsigned i = context.arity; i--;)
+    values = cons(x2c_func_value_argument(fn, args, i, <var>), values);
+  return context.lisp._apply_values(context.callable, values, NULL);
 }
 
-static Var _binary_call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn, "Lisp callback");
-  Var left = x2c_func_value_argument(fn, args, 0, <var>);
-  Var right = x2c_func_value_argument(fn, args, 1, <var>);
-  return context.lisp._apply_values(context.callable, %($left $right), NULL);
-}
-
-/* A call to _unary_call here would add a C frame to every nested predicate
+/* A call to _call here would add a C frame to every nested predicate
    call. */
 static Var _predicate_call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn, "Lisp callback");
+  LispCallback *context = _callback_context(fn);
   Var value = x2c_func_value_argument(fn, args, 0, <var>);
   return lisp_truth(
     context.lisp._apply_values(context.callable, %($value), NULL));
 }
 
-/* `Iter` keeps one Func context in its existing auxiliary field. The native
-   pull ABI remains the library's IterNextFn; this adapter only carries its
-   iterator and output-cell arguments into the interpreted source function. */
-static Var _iter_next_call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn, "Lisp iterator callback");
-  Var iter = x2c_func_value_argument(fn, args, 0, <var>);
-  Var out = x2c_func_value_argument(fn, args, 1, <var>);
-  return context.lisp._apply_values(context.callable, %($iter $out), NULL);
-}
-
-static LispCallback *_callback_context(Func fn, String operation) {
+static LispCallback *_callback_context(Func fn) {
   LispCallback *context = (void *) fn.context();
   if (!lisp_active || lisp_active != context.lisp)
-    $lisp.session.error("callback.wrong", operation);
+    $lisp.session.error("callback.wrong", context.operation);
   return context;
 }
 

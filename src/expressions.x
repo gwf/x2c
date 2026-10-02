@@ -3892,7 +3892,7 @@ static String Compiler._not_null_pointer_constant(Compiler c, List expr) {
 
    The tokenizer already accepted the spelling and Type.numeric_literal
    already turned its prefix and suffix into the node's own type, so what
-   remains here is whether a digit is nonzero.  A float, a name, or an enum
+   remains here is whether its value is zero.  A float, a name, or an enum
    constant answers <unknown>; the null-pointer guard below stays silent
    when it cannot decide. */
 static Symbol _integer_literal_kind(List expr, String &?out_text) {
@@ -3901,19 +3901,12 @@ static Symbol _integer_literal_kind(List expr, String &?out_text) {
       return _integer_literal_kind(inner, out_text);
     case %(expr ? ${$source_literal_content(%(?ltype ?text))}): {
       String spelling = text, Type type = ltype;
-      if (!spelling || !type.is_integral()) return <unknown>;
-      char *s = spelling;
+      unsigned long long value;
       // A character constant is integral too, but it is not spelled in
       // digits, and '\0' is a null pointer constant.
-      if (s[0] < '0' || s[0] > '9') return <unknown>;
+      if (!type.integer_literal_magnitude(spelling, value)) return <unknown>;
       if (out_text) out_text = spelling;
-      char radix = s[0] == '0' ? s[1] : 0;
-      int i = radix == 'x' || radix == 'X' || radix == 'b' ||
-              radix == 'B' || radix == 'o' || radix == 'O' ? 2 : 0;
-      for (; s[i] && s[i] != 'u' && s[i] != 'U' &&
-             s[i] != 'l' && s[i] != 'L'; i++)
-        if (s[i] != '0') return <nonzero>;
-      return <zero>;
+      return value ? <nonzero> : <zero>;
     }
   }
   return <unknown>;

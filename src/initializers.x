@@ -1010,25 +1010,16 @@ static void _initializer_position(
   offset = 0;
 }
 
-// Decode only a literal fact; native expressions are never evaluated here.
+/* Decode only a literal fact; native expressions are never evaluated here.
+   A bare spelling is the int bound a canonical array type keeps. */
 static int _initializer_integer(List expression, unsigned long long &value) {
-  String text = NULL;
   match (expression) {
-    case %(expr ? ${$source_literal_content(%(? ?spelling))}):
-      text = spelling;
-    case %(?(String spelling)): text = spelling;
+    case %(expr ? ${$source_literal_content(%(?type ?spelling))}):
+      return ((Type) type).integer_literal_magnitude(spelling, value);
+    case %(?(String spelling)):
+      return Type.integer_literal_magnitude(%(int), spelling, value);
   }
-  if (!text || text[0] < '0' || text[0] > '9') return 0;
-  char *end, *digits = text;
-  int base = 0;
-  if (text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) base = 2;
-  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O')) base = 8;
-  if (base) digits += 2;
-  unsigned long long decoded = strtoull(digits, &end, base);
-  while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
-  if (*end) return 0;
-  value = decoded;
-  return 1;
+  return 0;
 }
 
 static List _ull_literal(unsigned long long value) {
