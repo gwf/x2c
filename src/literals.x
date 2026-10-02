@@ -9,7 +9,6 @@
 $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 #include "parse.x"
 #include "type.x"
@@ -148,10 +147,20 @@ static List Compiler._parse_insertion(Compiler c) {
   return expr;
 }
 
+macro Statement $report.parse_insert_name(Expr $c, Expr $sigil) {
+    {
+      String message = %"expected identifier after '${$sigil}'";
+      String hint = $sigil == <@>
+        ? "use '@{...}' to splice an expression"
+        : "use '${...}' to insert an expression";
+      $c.report_error(<parse>, message, $c.token, %($hint));
+    }
+  }
+
 static List Compiler._parse_named_reference(Compiler c, Symbol sigil) {
   c.expect(sigil);
   if (c.peek(0) != <ident>) {
-    $report(c, "parse.insert.name", sigil);
+    $report.parse_insert_name(c, sigil);
   }
   return c.parse_variable();
 }
@@ -383,11 +392,24 @@ static void Compiler._parse_raise_detail(Compiler c, Array args) {
   args.push(value);
 }
 
+macro Statement $report.parse_symbol_bare(
+  Expr $c, Expr $owner, Expr $detail, Expr $origin) {
+    {
+      String label = $owner == <raise> ? "raise" : "catch filter";
+      String role = $detail ? "detail key" : "code";
+      String hint = $owner == <raise>
+        ? "use raise %(code (key value)...);"
+        : "use catch %(code (key pattern)...):";
+      $c.report_error(
+        <parse>, %"$label $role must be a bare Symbol", $origin, %($hint));
+    }
+  }
+
 static List Compiler._parse_bare_symbol(
   Compiler c, Symbol owner, int detail) {
   Token token = c.token;
   if (c.peek(0) != <lit-atom>)
-    $report(c, "parse.symbol.bare", owner, detail, token);
+    $report.parse_symbol_bare(c, owner, detail, token);
   String text = token.text.unescape();
   Symbol symbol = c._exact_symbol(token, text);
   c.next();
@@ -432,6 +454,12 @@ static List Compiler._parse_catch_code(Compiler c) {
   return c._parse_bare_symbol(<catch>, 0);
 }
 
+macro Statement $report.parse_catch_detail(Expr $c, Expr $origin) {
+    $c.report_error(
+      <parse>, "catch filter detail must be '*' or '(key pattern)'",
+      $origin, %("wrap keyed detail patterns in parentheses"));
+  }
+
 /* A `*` pattern stands alone, and a `(key pattern)` pair becomes a
    two-element pattern. */
 static void Compiler._parse_catch_detail(Compiler c, Array elements) {
@@ -441,7 +469,7 @@ static void Compiler._parse_catch_detail(Compiler c, Array elements) {
     return;
   }
   if (!c.test(<(>))
-    $report(c, "parse.catch.detail", origin);
+    $report.parse_catch_detail(c, origin);
   List key = c._parse_bare_symbol(<catch>, 1);
   List value = c._parse_detail_value(
     origin, "catch filter detail requires exactly one pattern",
@@ -457,6 +485,13 @@ static void Compiler._parse_catch_detail(Compiler c, Array elements) {
    `%<<...>>` builds an immutable SymbolSet, one C string that holds a
    header, a hash table, and the Symbols in source order. `SymbolSet.encode`
    in `lib/symbolset.x` builds it. */
+
+macro Statement $report.parse_symbol_duplicate(
+  Expr $c, Expr $origin, Expr $symbol) {
+    $c.report_error(
+      <parse>, "duplicate Symbol in symbol set",
+      $origin, %("symbol:" ${$symbol.repr()}));
+  }
 
 /** Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
     Entries must be literal compact `Symbol`s; source order defines dense
@@ -476,18 +511,24 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   if (duplicate >= 0) {
     Token token = tokens[duplicate];
     Symbol symbol = symbols[duplicate];
-    $report(c, "parse.symbol.duplicate", token, symbol);
+    $report.parse_symbol_duplicate(c, token, symbol);
   }
   symbols.free();
   tokens.free();
   return set;
 }
 
+macro Statement $report.parse_symbol_literal(Expr $c, Expr $origin) {
+    $c.report_error(
+      <parse>, "symbol-set entries must be literal Symbols",
+      $origin, %("use %<<foo bar>>"));
+  }
+
 static Symbol Compiler._member_symbol(Compiler c) {
   Token token = c.token;
   Symbol kind = c.peek(0);
   if (kind != <lit-atom> && kind != <lit-symbol>)
-    $report(c, "parse.symbol.literal", token);
+    $report.parse_symbol_literal(c, token);
   String spelling = kind == <lit-symbol>
     ? _angle_spelling(token.text) : _member_spelling(token.text);
   return c._exact_symbol(token, spelling);
@@ -687,13 +728,19 @@ static List Compiler._parse_string_segments(Compiler c) {
   return segments.list_free();
 }
 
+macro Statement $report.parse_string_segment(Expr $c) {
+    $c.report_error(
+      <parse>, "expected string segment",
+      $c.token, NULL);
+  }
+
 static List Compiler._parse_string_segment(Compiler c) {
   switch (c.peek(0)) {
     case <segment>: return c._parse_text_segment();
     case <$>:       return c._parse_named_segment();
     case <"${">:    return c._parse_braced_segment();
     default:
-      $report(c, "parse.string.segment");
+      $report.parse_string_segment(c);
   }
 }
 
@@ -766,6 +813,12 @@ static int _continuation(String raw, int i, int n) {
 
 // atoms and Symbols
 
+macro Statement $report.parse_atom_expected(Expr $c, Expr $kind) {
+    $c.report_error(
+      <parse>, "expected atomic expression",
+      $c.token, %( "token:" ${$c.token.text} "kind:" ${$kind.str()} ));
+  }
+
 /** Parses the current atomic token into a typed expression and advances once.
     Pattern and macro-hole state control binder validation and quoting, while
     shallow parsing permits provisional numeric types.
@@ -792,8 +845,14 @@ List Compiler.parse_atomic_literal(Compiler c) {
     return %(expr ${literal.cadr()} $literal);
   }
   Symbol kind = c.peek(0);
-  $report(c, "parse.atom.expected", kind);
+  $report.parse_atom_expected(c, kind);
 }
+
+macro Statement $report.type_number_range(Expr $c, Expr $text) {
+    $c.report_error(
+      <type>, "numeric literal is outside the supported scalar range",
+      $c.token, %( "literal:" ${$text} ));
+  }
 
 /* Shallow declaration discovery gives a number outside every supported
    scalar type a provisional type. */
@@ -801,7 +860,7 @@ static List Compiler._number_literal(Compiler c, String text, int floating) {
   Type type = Type.numeric_literal(text, floating);
   if (!type && c.shallow) type = floating ? %(double) : %(int);
   if (!type)
-    $report(c, "type.number.range", text);
+    $report.type_number_range(c, text);
   return %(literal $type $text);
 }
 
@@ -815,6 +874,12 @@ static List Compiler._atom_literal(Compiler c, String text) {
   return %(literal ("Atom") $spelling $value);
 }
 
+macro Statement $report.parse_binder_name(Expr $c, Expr $atom) {
+    $c.report_error(
+      <parse>, "invalid match binder name",
+      $c.token, %( "binder-name:" ${$atom.str()} ));
+  }
+
 /* In a pattern, a spelling that starts with `?` or `*` must be a binder
    name, except that `?binder?` and `*binder?` may end an `!is` form. */
 static void Compiler._check_binder(Compiler c, Atom atom) {
@@ -823,7 +888,7 @@ static void Compiler._check_binder(Compiler c, Atom atom) {
   if ((first != '?' && first != '*') || atom.is_binder()) return;
   int reserved = atom == <?binder?> || atom == <*binder?>;
   if (reserved && c.match_is && c.peek(1) == <)>) return;
-  $report(c, "parse.binder.name", atom);
+  $report.parse_binder_name(c, atom);
 }
 
 /* The preprocessor never sees a literal, so a macro's name here is data.
@@ -854,11 +919,19 @@ static String _angle_spelling(String text) {
   return String.new_len(text + 1, len - 2);
 }
 
+macro Statement $report.parse_symbol_truncated(
+  Expr $c, Expr $origin, Expr $spelling, Expr $lossy) {
+    $c.report_error(
+      <parse>, "Symbol literal does not round-trip",
+      $origin, %("source spelling: ${$spelling}"
+        "encoded spelling: ${$lossy}"));
+  }
+
 /* A compact Symbol literal must decode to its source spelling. */
 static Symbol Compiler._exact_symbol(
   Compiler c, Token token, String spelling) {
   Symbol symbol;
   if (Symbol.try_new(spelling, &symbol)) return symbol;
   Symbol lossy = spelling ? Symbol.new(spelling) : 0;
-  $report(c, "parse.symbol.truncated", token, spelling, lossy);
+  $report.parse_symbol_truncated(c, token, spelling, lossy);
 }

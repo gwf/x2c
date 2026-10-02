@@ -15,7 +15,6 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 $(import "../etc/lisp-bindings.xlisp")
 #include "macros.x"
@@ -59,6 +58,13 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     }
 }
 
+macro Statement $report.macro_function_install(Expr $c, Expr $site, Expr $cause) {
+    $c.report_error(
+      <macro>,
+      "this meta function could not be installed",
+      $site, %("reason: ${$cause.repr()}"));
+  }
+
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
 static void Compiler._install_stub(Compiler c, String name, Token marker) {
@@ -69,7 +75,7 @@ static void Compiler._install_stub(Compiler c, String name, Token marker) {
       _meta_stub, c.func_signature(type), (char *) name, name.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
-    $report(c, "macro.function.install", marker, cause);
+    $report.macro_function_install(c, marker, cause);
   }
 }
 
@@ -141,6 +147,20 @@ static Var Compiler._meta_apply(Compiler c, Var function, List arguments) {
   return c.macro_lisp.eval(quoted.list_free());
 }
 
+macro Statement $report.parse_meta_decl(Expr $c, Expr $site) {
+    $c.report_error(
+      <parse>,
+      "meta requires a function or one initialized static value",
+      $site, NULL);
+  }
+
+macro Statement $report.parse_meta_storage(Expr $c, Expr $site, Expr $name) {
+    $c.report_error(
+      <parse>,
+      "a meta value must have file-static storage",
+      $site, %("declaration: '${$name}'"));
+  }
+
 /** Applies a contextual `meta` marker to one initialized file-static value.
     The unit's staged `meta` group holds the compile-time instance, which
     its module initializes for each unit. */
@@ -151,12 +171,12 @@ void Compiler.install_meta_declaration(
            (bindings
              (op = (bind (binding ? ?(String name)) *) ?))): {
       if (!spec.type().is_static())
-        $report(c, "parse.meta.storage", marker, name);
+        $report.parse_meta_storage(c, marker, name);
       if (c.groups_meta()) c.meta_group.push(%(static $declaration));
       return;
     }
   }
-  $report(c, "parse.meta.decl", marker);
+  $report.parse_meta_decl(c, marker);
 }
 
 /* explicit meta calls
@@ -185,6 +205,20 @@ List Compiler.evaluate_meta_expression(
   return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 
+macro Statement $report.macro_call_depth(Expr $c, Expr $site) {
+    $c.report_error(
+      <macro>,
+      "explicit meta call was stopped",
+      $site, %("reason: its compile-time form nested too deep"));
+  }
+
+macro Statement $report.macro_call_deferred(Expr $c, Expr $site) {
+    $c.report_error(
+      <macro>,
+      "this meta call is left for the translation",
+      $site, NULL);
+  }
+
 /** Runs the explicit meta call `expression` at `site`. The project meta
     build's own parse leaves a project function's call for the translation:
     an expression takes a placeholder, and a template `slot`, which has
@@ -196,12 +230,12 @@ Var Compiler.run_meta_call(
   catch %(meta-later *): {
     value = void;
     if (slot)
-      $report(c, "macro.call.deferred", site);
+      $report.macro_call_deferred(c, site);
   }
   catch %(malformed (category ?category)):
     raise %(malformed (category $category));
   catch %(call-stack *):
-    $report(c, "macro.call.depth", site);
+    $report.macro_call_depth(c, site);
   catch %(?code *detail):
     c.report_lisp_failure(site, cons(code, detail), meta_call_form);
   return value;
@@ -209,6 +243,13 @@ Var Compiler.run_meta_call(
 
 /* The last call a `$` expression made, as a failure reports it. */
 static String meta_call_form = NULL;
+
+macro Statement $report.macro_call_target(Expr $c, Expr $site) {
+    $c.report_error(
+      <macro>,
+      "explicit meta call cannot be resolved",
+      $site, %("only a call to a meta function runs at compile time"));
+  }
 
 /* Calls a `meta` function named at a code boundary with its evaluated
    arguments. */
@@ -228,7 +269,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
           return c._meta_apply(function, applied);
         }
     }
-  $report(c, "macro.call.target", site);
+  $report.macro_call_target(c, site);
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
@@ -248,6 +289,13 @@ static Array Compiler._meta_values(
   return values;
 }
 
+macro Statement $report.macro_call_binding(Expr $c, Expr $site, Expr $name) {
+    $c.report_error(
+      <macro>,
+      "explicit meta call cannot be resolved",
+      $site, %("no binding for ${$name}"));
+  }
+
 /* The session's binding of `name`, binding an included native function on
    first use. The project meta build's own parse has no helper yet, so a
    call to a project function there is left for the translation. */
@@ -257,7 +305,7 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
     c.macro_lisp.try_get(name, function);
   if (function is void && c.meta_build) raise %(meta-later (name $name));
   if (function is void)
-    $report(c, "macro.call.binding", site, name);
+    $report.macro_call_binding(c, site, name);
   return function;
 }
 
@@ -280,6 +328,13 @@ void Compiler.record_native_meta_effect(
             %(native-meta $name ${c.func_signature(type)}));
 }
 
+macro Statement $report.parse_meta_name(Expr $c, Expr $site) {
+    $c.report_error(
+      <parse>,
+      "native meta function requires one direct name",
+      $site, NULL);
+  }
+
 static String Compiler._native_meta_name(
   Compiler c, List declaration, Token marker) {
   String name = NULL;
@@ -287,7 +342,7 @@ static String Compiler._native_meta_name(
     case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
       name = spelling;
   if (!name)
-    $report(c, "parse.meta.name", marker);
+    $report.parse_meta_name(c, marker);
   return name;
 }
 
@@ -389,6 +444,13 @@ static Var NativeBinding.module_target(NativeBinding &n) {
   return ((Map) native_modules[first])[n.target];
 }
 
+macro Statement $report.type_meta_signature(Expr $c, Expr $site, Expr $n) {
+    $c.report_error(
+      <type>,
+      "native meta function declaration does not match its target",
+      $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
+  }
+
 /* A second module that defines the function is reported, and the
    declaration must match the target it binds. */
 static void NativeBinding.check(NativeBinding &n, Var function) {
@@ -400,7 +462,7 @@ static void NativeBinding.check(NativeBinding &n, Var function) {
       n.marker, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
                   "also defined by: ${", ".join(suppliers.cdr())}"));
   if (!c.native_meta_accepts(function, n.signature))
-    $report(c, "type.meta.signature", n.marker, n);
+    $report.type_meta_signature(c, n.marker, n);
 }
 
 /* An iterator operation binds through a call that allocates the
@@ -479,6 +541,15 @@ static List _native_module_suppliers(String name) =>
    result owns. A function without a runtime row takes the summary its
    signature implies, or is rejected where it is declared. */
 
+macro Statement $report.type_meta_lifetime(
+  Expr $c, Expr $site, Expr $name, Expr $signature) {
+    $c.report_error(
+      <type>,
+      "unproved native meta lifetime",
+      $site, %("name: ${$name}" "signature: ${$signature.repr()}"
+      "it might return or keep its argument; ownership cannot be inferred"));
+  }
+
 /* A declaration whose signature implies no summary is rejected at its
    `marker`; an advertisement read from an interface records nothing. */
 static void Compiler._certify_native_meta(
@@ -490,7 +561,7 @@ static void Compiler._certify_native_meta(
     return;
   }
   if (marker)
-    $report(c, "type.meta.lifetime", marker, name, signature);
+    $report.type_meta_lifetime(c, marker, name, signature);
 }
 
 /* The region summary of a native function without a runtime row, from its
@@ -761,6 +832,14 @@ void Compiler.select_native_modules(List paths) {
   native_module_order = paths;
 }
 
+macro Statement $report.driver_module_platform(
+  Expr $c, Expr $site, Expr $name, Expr $module) {
+    $c.report_error(
+      <driver>,
+      "native modules are not supported on this platform",
+      $site, %("package: ${$name}" "module: ${$module}"));
+  }
+
 /** Selects package `name`'s native module, when it has one, after the
     modules already selected, and records it as a prerequisite of the unit.
     The module is `<root>/builds/<name>.module`; a worker loads it itself
@@ -772,7 +851,7 @@ void Compiler.select_package_module(
   String module = %"$root/builds/$name.module";
   if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
-    $report(c, "driver.module.platform", token, name, module);
+    $report.driver_module_platform(c, token, name, module);
   c.add_translation_dependency(module);
   if (!Compiler.native_module_loaded(module))
     c._load_package_module(name, module, token);
@@ -783,10 +862,18 @@ void Compiler.select_package_module(
   }
 }
 
+macro Statement $report.driver_module_compiler(
+  Expr $c, Expr $site, Expr $name, Expr $module) {
+    $c.report_error(
+      <driver>,
+      %"package '${$name}' was built by another compiler; rebuild it",
+      $site, %("module: ${$module}"));
+  }
+
 static void Compiler._load_package_module(
   Compiler c, String name, String module, Token token) {
   if (_module_stamp(module) != 1)
-    $report(c, "driver.module.compiler", token, name, module);
+    $report.driver_module_compiler(c, token, name, module);
   _open_native_module(module);
 }
 

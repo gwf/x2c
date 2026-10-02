@@ -10,7 +10,6 @@
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
 $(import "../src/grammar.xmacro")
 
 #include <stdio.h>
@@ -82,13 +81,22 @@ static List Compiler._emit_source(Compiler c, List source, List header) {
   return c.emit(c._patch_main(source));
 }
 
+macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
+    {
+      String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
+      $c.report_error(
+        <emit>, "failed to write generated file",
+        $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+    }
+  }
+
 /* A failed write reports its file and the host error. */
 static void Compiler._publish(Compiler c, List outputs) {
   List failure = NULL;
   try file_publish(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
-  $report(c, "emit.file.write", failure);
+  $report.emit_file_write(c, failure);
 }
 
 // header and source

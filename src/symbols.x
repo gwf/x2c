@@ -12,7 +12,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
-$(import "../src/error-reports.xmacro")
+$(import "../src/parse-report-macros.xmacro")
 $(import "../src/grammar.xmacro")
 
 // symbol scopes
@@ -503,16 +503,30 @@ static String _declared_spelling(List key) {
   return NULL;
 }
 
+macro Statement $report.parse_name_package(Expr $c, Expr $spelling, Expr $owner) {
+    $c.report_error(
+      <parse>,
+      %"'${$spelling}' is reserved for imported package '${$owner}'",
+      $c.token, NULL);
+  }
+
+macro Statement $report.parse_name_reserved(Expr $c, Expr $spelling) {
+    $c.report_error(
+      <parse>,
+      %"'${$spelling}' is reserved for compiler-generated names",
+      $c.token, NULL);
+  }
+
 /* A source declaration may not take a compiler-generated spelling or one
    in an imported package's space. A shallow parse reads emitted C, whose
    generated spellings are the compiler's own output. */
 static void Compiler._check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling)) {
-    $report(c, "parse.name.reserved", spelling);
+    $report.parse_name_reserved(c, spelling);
   }
   String owner = c._package_reserved_owner(spelling);
   if (owner)
-    $report(c, "parse.name.package", spelling, owner);
+    $report.parse_name_package(c, spelling, owner);
 }
 
 // Checked once per declaration, with no prepass over the token stream.
@@ -708,10 +722,26 @@ void Compiler.register_package_member(
   if (bound is not void && bound.list() === binding) return;
   String spelling = %"${name}__$member";
   if (!c.sym.get_exact(%($spelling)))
-    $report(c, "parse.package.member", member_token, name, member);
+    $report.parse_package_member(c, member_token, name, member);
   c._check_package_binding("name", local, local_token);
   c.package_members[local] = binding;
 }
+
+macro Statement $report.parse_package_collision(
+  Expr $c, Expr $site, Expr $kind, Expr $local) {
+    $c.report_error(
+      <parse>,
+      %"package ${$kind} '${$local}' collides with a declared name",
+      $site, NULL);
+  }
+
+macro Statement $report.parse_package_bound(
+  Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
+    $c.report_error(
+      <parse>,
+      %"package ${$kind} '${$local}' is already bound",
+      $site, %( "bound to: ${$bound}" ));
+  }
 
 /* An alias and a `with` name each claim one local spelling. Rebinding that
    spelling, or taking one a declaration already uses, is the same conflict.
@@ -727,9 +757,9 @@ static void Compiler._check_package_binding(
     bound = %"$package.$member_name";
   }
   if (bound)
-    $report(c, "parse.package.bound", token, kind, local, bound);
+    $report.parse_package_bound(c, token, kind, local, bound);
   if (c.sym.get_exact(%($local)))
-    $report(c, "parse.package.collision", token, kind, local);
+    $report.parse_package_collision(c, token, kind, local);
 }
 
 /** Returns a visible `with` name's package-prefixed spelling, or `NULL`.
@@ -848,12 +878,19 @@ static Type Sym._resolve_chain(
   return key;
 }
 
+macro Statement $report.type_typedef_depth(Expr $c, Expr $origin) {
+    $c.report_error(
+      <type>,
+      %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
+      NULL, NULL);
+  }
+
 /* The resolver cannot tell a true cycle from an absurdly long chain, so the
    diagnostic states only what it can determine. `typedef Color Color;` is
    legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
    real. */
 static void Sym._typedef_budget_error(Sym s, Type origin) {
-  $report(s.c, "type.typedef.depth", origin);
+  $report.type_typedef_depth(s.c, origin);
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling
