@@ -29,6 +29,7 @@ START = "<!-- x2c-integration:start -->"
 END = "<!-- x2c-integration:end -->"
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 FINAL = {"landed", "parked"}
+GENERATED_DOCS = {"site/public/llms.txt", "site/public/llms-full.txt"}
 
 
 class WaitExpired(Exception):
@@ -463,7 +464,8 @@ class Queue:
             before, after = modes[0][1:], modes[1]
             if not (before in {"000000", "100644"} and
                     after in {"000000", "100644"} and
-                    (path in {"AGENTS.md", "README.md"} or
+                    (path in GENERATED_DOCS or
+                     path in {"AGENTS.md", "README.md"} or
                      (path.endswith(".md") and
                       path.startswith(("agents/", "docs/", "plans/"))))):
                 return "agent-pr-check"

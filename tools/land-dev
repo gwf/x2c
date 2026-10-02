@@ -155,6 +155,7 @@ def prepare(args: argparse.Namespace, run: Path) -> None:
         if args.gate == "doc-check":
             if not os.access("builds/0/x2c", os.X_OK):
                 require_command(["make", "build-safe"], logs / "build.log")
+            require_command(["make", "doc-generate"], logs / "docgen.log")
         else:
             require_command(["make", "build"], logs / "build.log")
             require_command(["make", "doc-generate"], logs / "docgen.log")

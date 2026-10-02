@@ -137,6 +137,10 @@ from pathlib import Path
 p=Path(os.environ['PROBE_STATE']); s=json.loads(p.read_text())
 s.setdefault('makes',[]).append({'args':sys.argv[1:],'root':str(Path.cwd())})
 p.write_text(json.dumps(s))
+if 'doc-generate' in sys.argv:
+    for name in ('llms.txt','llms-full.txt'):
+        path=Path('site/public')/name; path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text('generated documentation\n')
 if 'build-safe' in sys.argv or 'build' in sys.argv:
     binary=Path('builds/0/x2c'); binary.parent.mkdir(parents=True,exist_ok=True)
     binary.write_text('#!/bin/sh\nexit 0\n'); binary.chmod(0o755)
@@ -481,6 +485,17 @@ class IntegrationProbe(unittest.TestCase):
         batch=self.prepare(); self.land(batch)
         self.assert_ancestor(head)
         self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_generated_llms_text_uses_doc_generation_and_doc_gate(self):
+        self.pr(1,'site/public/llms.txt','stale generated documentation\n')
+        batch=self.prepare(); self.land(batch)
+        state=self.state()
+        self.assertEqual([g['target'] for g in state['gates']],['doc-check'])
+        self.assertTrue(any('doc-generate' in call['args']
+                            for call in state['makes']))
+        generated=self.git('--git-dir',str(self.remote),
+                           'show','dev:site/public/llms.txt').stdout
+        self.assertEqual(generated,'generated documentation\n')
 
     def test_gate_failure_never_pushes(self):
         self.pr(1); self.state(gate_failure='ordinary')
