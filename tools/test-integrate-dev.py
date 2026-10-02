@@ -276,6 +276,15 @@ class IntegrationProbe(unittest.TestCase):
         result=self.cli('land',batch,'--publish')
         self.assertEqual(json.loads(result.stdout)['state'],'landed',result.stdout)
 
+    def test_context_preserves_conflicting_hooks_path(self):
+        self.git('config','core.hooksPath','custom-hooks')
+        result=self.cli('context','--role','individual','--delivery','direct',
+                        ok=False)
+        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
+        self.assertIn('conflicting core.hooksPath',result.stderr)
+        self.assertEqual(self.git('config','--get','core.hooksPath').stdout.strip(),
+                         'custom-hooks')
+
     def test_submit_preserves_prose_and_refreshes_readiness(self):
         head=self.pr(1)
         self.git('checkout','-q','work-1')
