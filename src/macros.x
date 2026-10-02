@@ -687,10 +687,11 @@ static void Definition.announce(Definition &d) {
 }
 
 /* Reads the body in its own scope, with the kinds it infers for the holes.
-   A local macro records the outer names its body captures. */
+   Anonymous macro values record the outer names their bodies capture. */
 static void Definition.body(Definition &d) {
   Compiler c = d.c;
   $let(c.runtime_literals, c.runtime_literals || d.anonymous)
+  $let(c.named_local_macro_body, d.local && !d.anonymous)
   $let(c.local_macro_captures, d.local ? {} : NULL)
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
     c.sym.push_new_scope();

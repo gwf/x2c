@@ -2172,12 +2172,13 @@ imported macro namespace. A local and global definition may therefore share a
 name without ambiguity.
 
 Literal references to function parameters and preceding local declarations
-retain their definition-site binding identities. A later same-spelled inner
-declaration is emitted under a private shadow name when necessary, so the
-template still reaches the captured declaration. Hole arguments retain their
+in a named local macro resolve where the macro is invoked. An inner
+same-spelled declaration supplies that reference; the compiler does not rename
+that declaration to preserve the outer binding. Hole arguments retain their
 call-site identities. Declarations written in the body and names declared by
 a leading body `using` directive retain the ordinary hygiene rules described
-below.
+below. This rule does not change anonymous macro values, global macros, or
+runtime lambda capture semantics.
 
 Local `Expression`, `Statement` or `Block`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
@@ -2731,8 +2732,8 @@ literal macro value derives is prepared once per process.
 
 ### Open definitions
 
-A definition is closed by default. Free identifiers in its body resolve where
-the macro was defined, as described under
+A global definition or anonymous macro value is closed by default. Free
+identifiers in its body resolve where the macro was defined, as described under
 [hygiene](https://x2c-lang.dev/docs/reference/language.html#hygiene-and-generated-names).
 `macro open` instead binds free values in the applying unit's global scope:
 
@@ -2747,9 +2748,10 @@ spells the target type rather than the typedef name.
 ### Hygiene and generated names
 
 Captured syntax retains its call-site binding identity. Free identifiers
-written literally in a body resolve where the macro was defined, including
-parameters and preceding declarations captured by a local macro. A declaration
-written in a body receives a fresh binding identity and a private generated C
+written literally in a global macro or anonymous macro value resolve where
+the macro was defined. Named local macros resolve literal local references at
+the invocation. A declaration written in a body receives a fresh binding
+identity and a private generated C
 spelling for each expansion. The spelling of a file-scope declaration with
 external or no linkage also names its unit's file name and the outermost
 invocation, so units that include one another can expand the same macro. A field keeps its spelling, because C scopes it to its

@@ -49,9 +49,9 @@ static int local_macros(int base){
     explicit_global = 2000 + 4;
     explicit_call =(fixture_select)(5);
     {
-      int _x2c_binding_shadow_0 = 100;
-      call_site = base + offset + _x2c_binding_shadow_0 + 1;
-      nested = base + _x2c_binding_shadow_0 + 6;
+      int offset = 100;
+      call_site = base + offset + offset + 1;
+      nested = base + offset + 6;
     }
     restored = base + offset + 7 + 1;
     replaced = base + 9;
@@ -85,7 +85,7 @@ static int local_macros(int base){
   }
   int after = fixture_select(2);
   printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", before, first, explicit_global, explicit_call, call_site, nested, restored, replaced, assigned, assigned_again, generated_value, generated_inline, repeated, field_value, enum_value, entry_value, decorated, after);
-  return before != 1001 || first != 16 || explicit_global != 2004 || explicit_call != 1005 || call_site != 113 || nested != 116 || restored != 20 || replaced != 19 || assigned != 18 || assigned_again != 19 || generated_value != 22 || generated_inline != 23 || repeated != 2 || field_value != 7 || enum_value != 4 || entry_value != 42 || decorated != 1 || after != 1002;
+  return before != 1001 || first != 16 || explicit_global != 2004 || explicit_call != 1005 || call_site != 211 || nested != 116 || restored != 20 || replaced != 19 || assigned != 18 || assigned_again != 19 || generated_value != 22 || generated_inline != 23 || repeated != 2 || field_value != 7 || enum_value != 4 || entry_value != 42 || decorated != 1 || after != 1002;
 }
 
 int main(void){

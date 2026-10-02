@@ -125,6 +125,7 @@ typedef struct Compiler {
   Map adoptions;
   Map macro_holes;
   Map local_macro_captures;
+  int named_local_macro_body;
   // Depth of macro value applications being bound; their transactions
   // also cover effects and code-value carriers are consumed.
   int macro_application;

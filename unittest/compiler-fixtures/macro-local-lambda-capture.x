@@ -16,5 +16,5 @@ int main(void) {
     }
   })(20);
   printf("%ld %ld\n", typed.integer(), bare.integer());
-  return typed.integer() != 13 || bare.integer() != 24;
+  return typed.integer() != 103 || bare.integer() != 104;
 }

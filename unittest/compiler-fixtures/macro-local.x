@@ -111,7 +111,7 @@ static int local_macros(int base) {
     decorated, after
   );
   return before != 1001 || first != 16 || explicit_global != 2004 ||
-         explicit_call != 1005 || call_site != 113 || nested != 116 ||
+         explicit_call != 1005 || call_site != 211 || nested != 116 ||
          restored != 20 || replaced != 19 || assigned != 18 ||
          assigned_again != 19 || generated_value != 22 ||
          generated_inline != 23 || repeated != 2 ||

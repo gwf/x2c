@@ -56,7 +56,7 @@ int main(void) {
     shadow_snapshot = snapshot();
     shadow_bump = writer();
     shadow_read = reader();
-    if (value != 100) return 1;
+    if (value != 101) return 1;
   }
   value = 9;
   int first_snapshot = snapshot2();
@@ -88,7 +88,7 @@ int main(void) {
          parameter_snapshot_value != 11 || parameter_read_value != 20 ||
          parameter_bump_value != 21 || parameter != 21 ||
          first_snapshot != 2 || second_snapshot != 7 || first_bump != 3 ||
-         first_read != 3 || shadow_snapshot != 7 || shadow_bump != 8 ||
-         shadow_read != 8 || final_read != 9 || final_bump != 10 ||
+         first_read != 3 || shadow_snapshot != 100 || shadow_bump != 101 ||
+         shadow_read != 101 || final_read != 9 || final_bump != 10 ||
          value != 10 || unused_result != 41;
 }

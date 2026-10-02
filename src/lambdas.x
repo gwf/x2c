@@ -126,8 +126,8 @@ static void Compiler._parse_using(
   } while (c.test(<,>));
 }
 
-/* A template's `&$name` leaves the binding to expansion, while `&name`
-   resolves it now. */
+/* A template's `&$name` leaves the binding to expansion. Literal local names
+   in named local macros also wait; other `&name` references resolve now. */
 static List Compiler._template_capture(Compiler c) {
   List name = NULL, value = NULL;
   Type reference = %(& <macro-expr>);
@@ -139,6 +139,10 @@ static List Compiler._template_capture(Compiler c) {
     Token origin = c.token;
     name = c.parse_basic_identifier();
     value = c.resolve_expression(%(expr () (ident $name)), origin);
+    match (value)
+      case %(expr (<macro-expr>) (ident ?(String spelling))):
+        return %(capture $spelling $reference
+          (expr $reference (op & $value)));
     name = c.sym.lookup(name, NULL);
     reference = cons(<&>, value.cadr());
   }

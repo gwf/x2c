@@ -1228,6 +1228,10 @@ static List Compiler._identifier(
   if (!binding) $report.type_binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
+  // Binding and conversion must both wait for the invocation's local type.
+  if (c.named_local_macro_body && c.macro_holes &&
+      c.sym.binding_is_local_before(binding, c.local_macro_capture_scopes))
+    return %(expr (<macro-expr>) (ident $spelling));
   native_callee &= !type &&
     !binding_facts.contains(%(type $binding));
   c._capture_identifier(binding);

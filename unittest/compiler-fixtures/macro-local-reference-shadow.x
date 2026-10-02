@@ -28,12 +28,12 @@ static int exercise(int &value) {
     inner = value;
   }
 
-  return captured == 4 && inner == 100 ? value : -1;
+  return captured == 100 && inner == 16 ? value : -1;
 }
 
 int main(void) {
   int value = 4;
   int result = exercise(value);
   printf("%d\n", result);
-  return value != 16 || result != 16;
+  return value != 4 || result != 4;
 }
