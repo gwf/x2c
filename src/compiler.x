@@ -504,11 +504,9 @@ static int Compiler._try_unit_macro(Compiler c) {
 static void Compiler._expand_unit_macro(Compiler c) {
   Map counters = c.names.counters;
   c.names.counters = counters.copy();
-  SymTxn transaction = c.begin_semantic_transaction();
   Token first = c.token;
   List syntax = c.parse_top_level();
   int retained = c._retain_bundle(syntax, first, c.token);
-  transaction.commit();
   /* The full parse expands this unit again. Keep the declarations needed
      by later shallow invocations, but do not count its generated names
      twice. */
