@@ -107,6 +107,8 @@ List Sym_lookup_macro(Sym s, Atom name);
 
 Map Compiler_macro_definition_locals(Compiler c);
 
+int Compiler_macro_template_local(Compiler c, List binding);
+
 Type Sym_resolve_key(Sym s, Type key);
 
 Type Sym_next_typedef(Sym s, Type type, int * hops);

@@ -31,7 +31,7 @@ typedef struct Emitter{
   String fn_name;
   List native_aliases;
   Array native_macros;
-  Map static_objects;
+  Map static_objects, cache_bindings;
   int static_support;
 }
 Emitter;
@@ -1102,10 +1102,10 @@ Var List_getindex(List, int);
 
 List List_append(List, List);
 
-List Compiler_emit(Compiler c, List ast){
+List Compiler_emit(Compiler c, List ast, Map cache_bindings){
   if(! _init_guard_) _file_init_();
   Emitter e ={
-    .c = c, .origin = 0, .native_macros = Array_new()
+    .c = c, .origin = 0, .native_macros = Array_new(), .cache_bindings = cache_bindings
   }
   ;
   List code = List_flatten_all(Emitter__emit(&(e), ast));
@@ -1151,6 +1151,10 @@ int Symbol_is_type_qualifier(Symbol);
 int Symbol_is_inline(Symbol);
 
 Type Var_type(Var);
+
+int Map_truth(Map);
+
+Var Map_getindex(Map, Var);
 
 static List Emitter__emit(Emitter * e, List ast){
   if(! List_truth(ast)) return ast;
@@ -1224,7 +1228,7 @@ return({
 break; } } case 6363658: ;
 { List _x2c_match_cursor;
 if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936767982090ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var id = _x2c_match_values[0];
-return cons(String_var(String_join(NULL, cons(String_var(_88), cons(String_var(Var_str(id)), NULL)))), NULL);
+return Map_truth((* e).cache_bindings) ? Emitter__emit_ident(&((* e)), Map_getindex((* e).cache_bindings, id)) : cons(String_var(String_join(NULL, cons(String_var(_88), cons(String_var(Var_str(id)), NULL)))), NULL);
 break; } } case 377892: ;
 static MatchCaptureSite _x2c_match_site_2;
 if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_94), &_x2c_match_capture)) {Var content = _x2c_match_values[0];  return Emitter__emit(&((* e)), cons(content, NULL));  break;
@@ -1986,7 +1990,6 @@ static List Emitter__emit_binary(Emitter * e, Symbol operator, Var left, Var rig
   );
 }
 
-int Map_truth(Map);
 int Map_try_get(Map, Var, Var *);
 static List Emitter__emit_ident(Emitter * e, Var binding){
 

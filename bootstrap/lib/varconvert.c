@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+static Var _1, _0;
+
 #include "meta.h"
 #include "var.h"
 #include "error.h"
@@ -18,6 +20,10 @@ extern const SymbolSet x2c_var_numeric_tags;
 
 extern const X2CVarNumericInfo x2c_var_numerics[];
 
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out);
 
 static Var _convert_to_integer(X2CVarNumeric * source, Symbol target, int unsigned_target, int bits);
@@ -28,9 +34,17 @@ static long double _integer_limit(int bits);
 
 static Var _convert_to_float(X2CVarNumeric * source, Symbol target);
 
-int Var_encoding_valid(Var);
-
 Var Symbol_var(Symbol);
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(4477479911782);
+  _1 = Symbol_var(1307939018);
+}
+
+int Var_encoding_valid(Var);
 
 int Var_is_void(Var);
 
@@ -43,6 +57,7 @@ Symbol Var_tag(Var);
 Var List_var(List);
 
 Var Var_convert(Var value, Symbol target){
+  if(! _init_guard_) _file_init_();
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
@@ -68,7 +83,7 @@ Var Var_convert(Var value, Symbol target){
   X2CVarNumericInfo info;
   if(! Var_numeric_info(source_tag, &(info))){
     {
-      List _x2c_macro_lower_0 = cons(Symbol_var(4477479911782), cons(List_var(cons(Symbol_var(1307939018), cons(Symbol_var(source_tag), NULL))), NULL));
+      List _x2c_macro_lower_0 = cons(_0, cons(List_var(cons(_1, cons(Symbol_var(source_tag), NULL))), NULL));
       {
         static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 93};
         x2c_error_raise_n(& _x2c_error_site_3, 1020285550996648, 2, Symbol_var(1345468776), Symbol_var(target), Symbol_var(6401226), List_var(_x2c_macro_lower_0));

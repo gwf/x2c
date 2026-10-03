@@ -405,7 +405,7 @@ void Compiler_dump_definitions(Compiler, List);
 
 char * Compiler_code_pretty_string(Compiler, List, String);
 
-List Compiler_emit(Compiler, List);
+List Compiler_emit(Compiler, List, Map);
 
 static int _inspect_transformed(Compiler c, List ast, Symbol dump){
   switch(dump){
@@ -413,7 +413,7 @@ static int _inspect_transformed(Compiler c, List ast, Symbol dump){
     break;
     case 10268258347430 : Compiler_dump_definitions(c, ast);
     break;
-    case 10268258302218 : puts(Compiler_code_pretty_string(c, Compiler_emit(c, ast), NULL));
+    case 10268258302218 : puts(Compiler_code_pretty_string(c, Compiler_emit(c, ast, NULL), NULL));
     break;
     default: return 0;
   }
