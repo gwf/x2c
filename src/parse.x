@@ -2669,8 +2669,9 @@ static List Compiler._bind_statement(Compiler c, Var stmt) =>
   c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
 
 /* A macro invocation expands at the position that holds it. A Macro value
-   applied directly owns the transaction that covers the effects its
-   producers request, and stands for one statement or unit item. */
+   applied directly stands for one statement or unit item. Inside a
+   recovery boundary it owns the transaction that covers the effects its
+   producers request; outside one, an error exits and nothing rolls back. */
 static List Compiler._bind_invocation(
   Compiler c, Var definition, Var arguments, Var invocation, AstPos context,
   int pending) {
@@ -2679,7 +2680,9 @@ static List Compiler._bind_invocation(
     return c.expand_macro_invocation_node(
       definition, arguments, site, context);
   $let(c.macro_application, c.macro_application + 1) {
-    SymTxn transaction = c.begin_semantic_transaction();
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
     List bound = c.expand_macro_invocation_node(
       definition, arguments, site, context);
