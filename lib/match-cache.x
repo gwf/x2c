@@ -525,6 +525,7 @@ void MatchCache.context_close(void *token) {
     Raises: `<bad-state>` when a lease remains active.
 */
 void x2c_match_thread_release(void) {
+  MatchMachine.release_spares();
   if (!match_thread.plan_cache) return;
   match_thread.plan_cache.dispose();
   match_thread.plan_cache = NULL;

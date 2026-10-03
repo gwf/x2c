@@ -989,6 +989,10 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
   match (input) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
+    /* A quotation or macro value application that hand-built syntax holds
+       expands where it is resolved, like one the binder meets directly. */
+    case %((!or "x2c.template" macro-invoke) *):
+      return c.bind_syntax(input, AST_EXPRESSION, c.return_type);
     case %(expr ?type ?(List content)): {
       if (type && !c.needs_resolution(input)) return input;
       return c._resolve_content(input, type, content, origin);
@@ -1281,8 +1285,11 @@ static List Compiler._identifier_binding(
         issued is not <string> || !issued.string().equal(spelling))
       $report.type_binding_unknown(c, name, origin);
     /* A template's private name that no declaration in scope reaches
-       reads its source spelling where the expansion lands. */
+       reads its source spelling where the expansion lands. A declared one
+       keeps its identity, as when lowering binds code outside the scope
+       that declared it. */
     if (facts.try_get(%(source-spelling $name), source) &&
+        !(%(type $name) in facts) &&
         c.sym.lookup(%($spelling), NULL) != name)
       return c._landed_name(source, type);
     return name;

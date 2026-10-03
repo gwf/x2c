@@ -455,11 +455,9 @@ static int MatchCaptureLayout._buffer_valid(
   return !layout.binder_count || captures.values != NULL;
 }
 
-/* Declares `$instance`, an open machine in stack storage. */
+/* Declares `$instance`, an open machine of this thread. */
 macro Stmt $match.machine(Name $instance, Expr $stats) {
-  MatchMachine $instance;
-  $instance.open();
-  $instance.stats = $stats;
+  MatchMachine *$instance = MatchMachine.acquire($stats);
 }
 
 /** Executes a prepared plan into caller-owned positional storage.
@@ -490,8 +488,8 @@ int MatchPlan.try_capture(
 static int MatchPlan._capture(
   MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
   $match.machine(machine, stats);
-  int result = _run_capture(m.program.view(), machine, input, captures);
-  machine.dispose();
+  int result = _run_capture(m.program.view(), *machine, input, captures);
+  machine.release();
   return result;
 }
 
@@ -547,8 +545,8 @@ int MatchPlan.execute(
   if (!plan._prepared("MatchPlan.execute")) return -1;
   if (!out_bindings) return -1;
   $match.machine(machine, stats);
-  List bindings, int result = plan._run(machine, input, bindings);
-  machine.dispose();
+  List bindings, int result = plan._run(*machine, input, bindings);
+  machine.release();
   if (result == 1) out_bindings = bindings;
   return result;
 }
@@ -612,7 +610,7 @@ macro Stmt $match.walk(Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   MatchWalk $walk = {
-    $plan, ($plan).program.view(), &captures, &($machine),
+    $plan, ($plan).program.view(), &captures, $machine,
     Block.new(sizeof(Var))
   };
 }
@@ -638,7 +636,7 @@ static int MatchPlan._first(
   $match.walk(plan, machine, walk);
   int result = walk._first(input, 1);
   walk.spine.free();
-  machine.dispose();
+  machine.release();
   if (result == 1) {
     *out_match = walk.found;
     *out_bindings = walk.bindings;
@@ -665,7 +663,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
   $match.walk(plan, machine, walk);
   int status = walk._all(input, 1);
   walk.spine.free();
-  machine.dispose();
+  machine.release();
   if (status < 0) return -1;
   out_results = walk.results;
   return 1;
@@ -692,7 +690,7 @@ static int MatchPlan._replace_all(
   walk.template = template;
   Var result = walk._rewrite(input, 1);
   walk.spine.free();
-  machine.dispose();
+  machine.release();
   if (walk.error) return -1;
   *out = result;
   return 1;
