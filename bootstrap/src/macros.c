@@ -58,11 +58,11 @@
 
 #include "exception.h"
 
-static List _722, _721, _715, _709, _707, _706, _704, _703, _700, _698, _696, _695, _693, _691, _687, _685, _684, _682, _680, _677, _675, _674, _672, _670, _666, _665, _664, _662, _661, _658, _657, _642, _641, _640, _639, _637, _636, _630, _629, _623, _622, _616, _615, _607, _606, _605, _603, _602, _599, _598, _596, _595, _593, _592, _591, _589, _588, _585, _584, _583, _581, _580, _570, _569, _568, _567, _566, _564, _563, _562, _561, _544, _542, _541, _540, _539, _538, _537, _536, _535, _534, _533, _532, _528, _527, _526, _523, _522, _521, _519, _518, _515, _514, _513, _512, _508, _507, _505, _503, _502, _501, _499, _498, _494, _486, _485, _484, _482, _481, _477, _473, _472, _471, _469, _468, _463, _461, _460, _455, _453, _452, _451, _450, _448, _447, _446, _438, _437, _436, _435, _434, _432, _431, _429, _428, _427, _426, _418, _417, _416, _413, _412, _409, _407, _406, _405, _402, _401, _399, _398, _397, _396, _393, _392, _389, _388, _387, _386, _375, _374, _373, _372, _371, _370, _367, _366, _365, _362, _361, _360, _359, _357, _356, _354, _353, _352, _351, _350, _349, _348, _345, _344, _341, _340, _333, _332, _331, _330, _328, _325, _313, _312, _311, _301, _293, _292, _291, _278, _277, _275, _271, _266, _265, _264, _262, _259, _256, _248, _247, _246, _223, _221, _219, _210, _209, _207, _206, _205, _203, _202, _199, _198, _192, _180, _178, _177, _165, _155, _151, _149, _147, _146, _145, _143, _142, _139, _138, _137, _136, _134, _132, _131, _130, _127, _126, _125, _124, _120, _119, _118, _116, _113, _112, _111, _109, _108, _107, _102, _101, _100, _98, _97, _92, _91, _90, _88, _87, _84, _83, _81, _80, _79, _78, _72, _71, _68, _67, _64, _63, _61, _60, _59, _56, _55, _54, _37, _36, _35, _31, _30, _25, _24, _23, _14, _13, _12, _9, _8, _3, _2;
+static List _722, _721, _715, _709, _707, _706, _704, _703, _700, _698, _696, _695, _693, _691, _687, _685, _684, _682, _680, _677, _675, _674, _672, _670, _666, _665, _664, _662, _661, _658, _657, _642, _641, _640, _639, _637, _636, _630, _629, _623, _622, _616, _615, _607, _606, _605, _603, _602, _599, _598, _596, _595, _593, _592, _591, _589, _588, _585, _584, _583, _581, _580, _570, _569, _568, _567, _566, _564, _563, _562, _561, _544, _542, _541, _540, _539, _538, _537, _536, _535, _534, _533, _532, _528, _527, _526, _523, _522, _521, _519, _518, _515, _514, _513, _512, _508, _507, _505, _503, _502, _501, _499, _498, _494, _486, _485, _484, _482, _481, _477, _473, _472, _471, _469, _468, _463, _461, _460, _455, _453, _452, _451, _450, _448, _447, _446, _438, _437, _436, _435, _434, _432, _431, _429, _428, _427, _426, _418, _417, _416, _413, _412, _409, _407, _406, _405, _402, _401, _399, _398, _397, _396, _393, _392, _389, _388, _387, _386, _375, _374, _373, _372, _371, _370, _367, _366, _365, _362, _361, _360, _359, _357, _356, _354, _353, _352, _351, _350, _349, _348, _345, _344, _341, _340, _333, _332, _331, _330, _328, _325, _313, _312, _311, _301, _293, _292, _291, _279, _278, _276, _271, _266, _265, _264, _262, _259, _256, _248, _247, _246, _223, _221, _219, _210, _209, _207, _206, _205, _203, _202, _199, _198, _192, _180, _178, _177, _165, _155, _151, _149, _147, _146, _145, _143, _142, _139, _138, _137, _136, _134, _132, _131, _130, _127, _126, _125, _124, _120, _119, _118, _116, _113, _112, _111, _109, _108, _107, _102, _101, _100, _98, _97, _92, _91, _90, _88, _87, _84, _83, _81, _80, _79, _78, _72, _71, _68, _67, _64, _63, _61, _60, _59, _56, _55, _54, _37, _36, _35, _31, _30, _25, _24, _23, _14, _13, _12, _9, _8, _3, _2;
 
-static String _734, _733, _732, _731, _730, _729, _728, _727, _726, _725, _724, _723, _713, _712, _711, _710, _701, _699, _689, _688, _678, _668, _667, _653, _652, _651, _650, _649, _648, _647, _646, _645, _643, _634, _632, _627, _625, _620, _618, _613, _611, _610, _609, _608, _586, _579, _578, _577, _576, _575, _574, _573, _572, _571, _554, _553, _550, _549, _548, _547, _546, _545, _496, _495, _493, _492, _491, _490, _489, _488, _479, _475, _464, _456, _443, _442, _441, _440, _439, _422, _421, _420, _384, _383, _382, _381, _380, _379, _378, _377, _376, _363, _338, _337, _336, _335, _334, _323, _322, _321, _320, _319, _318, _317, _316, _315, _314, _309, _307, _305, _297, _296, _295, _294, _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _273, _269, _268, _257, _254, _253, _251, _250, _241, _240, _239, _238, _237, _217, _216, _215, _212, _211, _196, _195, _189, _188, _187, _186, _185, _184, _183, _182, _181, _179, _175, _173, _172, _171, _170, _169, _168, _167, _166, _163, _162, _161, _160, _159, _158, _157, _156, _153, _152, _51, _50, _49, _48, _47, _46, _45, _44, _43, _40, _39, _38, _19, _18, _17, _16, _15, _4;
+static String _734, _733, _732, _731, _730, _729, _728, _727, _726, _725, _724, _723, _713, _712, _711, _710, _701, _699, _689, _688, _678, _668, _667, _653, _652, _651, _650, _649, _648, _647, _646, _645, _643, _634, _632, _627, _625, _620, _618, _613, _611, _610, _609, _608, _586, _579, _578, _577, _576, _575, _574, _573, _572, _571, _554, _553, _550, _549, _548, _547, _546, _545, _496, _495, _493, _492, _491, _490, _489, _488, _479, _475, _464, _456, _443, _442, _441, _440, _439, _422, _421, _420, _384, _383, _382, _381, _380, _379, _378, _377, _376, _363, _338, _337, _336, _335, _334, _323, _322, _321, _320, _319, _318, _317, _316, _315, _314, _309, _307, _305, _297, _296, _295, _294, _288, _287, _286, _285, _284, _283, _282, _281, _280, _274, _273, _269, _268, _257, _254, _253, _251, _250, _241, _240, _239, _238, _237, _217, _216, _215, _212, _211, _196, _195, _189, _188, _187, _186, _185, _184, _183, _182, _181, _179, _175, _173, _172, _171, _170, _169, _168, _167, _166, _163, _162, _161, _160, _159, _158, _157, _156, _153, _152, _51, _50, _49, _48, _47, _46, _45, _44, _43, _40, _39, _38, _19, _18, _17, _16, _15, _4;
 
-static Var _720, _719, _718, _717, _716, _714, _708, _705, _702, _697, _694, _692, _690, _686, _683, _681, _679, _676, _673, _671, _669, _663, _660, _659, _656, _655, _654, _644, _638, _635, _633, _631, _628, _626, _624, _621, _619, _617, _614, _612, _604, _601, _600, _597, _594, _590, _587, _582, _565, _560, _559, _558, _557, _556, _555, _552, _551, _543, _531, _530, _529, _525, _524, _520, _517, _516, _511, _510, _509, _506, _504, _500, _497, _487, _483, _480, _478, _476, _474, _470, _467, _466, _465, _462, _459, _458, _457, _454, _449, _445, _444, _433, _430, _425, _424, _423, _419, _415, _414, _411, _410, _408, _404, _403, _400, _395, _394, _391, _390, _385, _369, _368, _364, _358, _355, _347, _346, _343, _342, _339, _329, _327, _326, _324, _310, _308, _306, _304, _303, _302, _300, _299, _298, _290, _289, _276, _274, _272, _270, _267, _263, _261, _260, _258, _255, _252, _249, _245, _244, _243, _242, _236, _235, _234, _233, _232, _231, _230, _229, _228, _227, _226, _225, _224, _222, _220, _218, _214, _213, _208, _204, _201, _200, _197, _194, _193, _191, _190, _176, _174, _164, _154, _150, _148, _144, _141, _140, _135, _133, _129, _128, _123, _122, _121, _117, _115, _114, _110, _106, _105, _104, _103, _99, _96, _95, _94, _93, _89, _86, _85, _82, _77, _76, _75, _74, _73, _70, _69, _66, _65, _62, _58, _57, _53, _52, _42, _41, _34, _33, _32, _29, _28, _27, _26, _22, _21, _20, _11, _10, _7, _6, _5, _1, _0;
+static Var _720, _719, _718, _717, _716, _714, _708, _705, _702, _697, _694, _692, _690, _686, _683, _681, _679, _676, _673, _671, _669, _663, _660, _659, _656, _655, _654, _644, _638, _635, _633, _631, _628, _626, _624, _621, _619, _617, _614, _612, _604, _601, _600, _597, _594, _590, _587, _582, _565, _560, _559, _558, _557, _556, _555, _552, _551, _543, _531, _530, _529, _525, _524, _520, _517, _516, _511, _510, _509, _506, _504, _500, _497, _487, _483, _480, _478, _476, _474, _470, _467, _466, _465, _462, _459, _458, _457, _454, _449, _445, _444, _433, _430, _425, _424, _423, _419, _415, _414, _411, _410, _408, _404, _403, _400, _395, _394, _391, _390, _385, _369, _368, _364, _358, _355, _347, _346, _343, _342, _339, _329, _327, _326, _324, _310, _308, _306, _304, _303, _302, _300, _299, _298, _290, _289, _277, _275, _272, _270, _267, _263, _261, _260, _258, _255, _252, _249, _245, _244, _243, _242, _236, _235, _234, _233, _232, _231, _230, _229, _228, _227, _226, _225, _224, _222, _220, _218, _214, _213, _208, _204, _201, _200, _197, _194, _193, _191, _190, _176, _174, _164, _154, _150, _148, _144, _141, _140, _135, _133, _129, _128, _123, _122, _121, _117, _115, _114, _110, _106, _105, _104, _103, _99, _96, _95, _94, _93, _89, _86, _85, _82, _77, _76, _75, _74, _73, _70, _69, _66, _65, _62, _58, _57, _53, _52, _42, _41, _34, _33, _32, _29, _28, _27, _26, _22, _21, _20, _11, _10, _7, _6, _5, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -1385,15 +1385,15 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _271 = cons(_270, NULL);
   _272 = Symbol_var(228262);
   _273 = String_new("Type");
-  _274 = Symbol_var(1185915208);
-  _275 = cons(_274, NULL);
-  _276 = Symbol_var(1980910564);
-  _277 = cons(_276, NULL);
-  _278 = cons(_225, _277);
-  _279 = String_new("\' has ambiguous kind");
-  _280 = String_new("first: ");
-  _281 = String_new("also: ");
-  _282 = String_new("...");
+  _274 = String_new("...");
+  _275 = Symbol_var(1185915208);
+  _276 = cons(_275, NULL);
+  _277 = Symbol_var(1980910564);
+  _278 = cons(_277, NULL);
+  _279 = cons(_225, _278);
+  _280 = String_new("\' has ambiguous kind");
+  _281 = String_new("first: ");
+  _282 = String_new("also: ");
   _283 = String_new("singular macro hole \'");
   _284 = String_new("\' cannot be spliced");
   _285 = String_new("sequence macro hole \'");
@@ -2911,20 +2911,20 @@ List Sym_lookup(Sym, List, Type *);
 int Sym_binding_is_local(Sym, List);
 int Sym_is_named_value_type(Sym, Type, String);
 static List Compiler__quoted_hole(Compiler c, Token name){
-  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_256)))) return NULL;  String spelling = name -> text;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _273) ? 1362954 : 0;  Token after = Token_skip_trivia(name + 1);  List hole = Compiler__declare_hole(c, name, kind, after -> type == 1519197);  Var quoted = Map_getindex(c -> macro_holes, List_var(_275));  Map_setindex(c -> macro_holes, List_var(_275), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));  return hole;
+  if(! Map_truth(c -> macro_holes) || !(Map_contains(c -> macro_holes, List_var(_256)))) return NULL;  String spelling = name -> text;  Type type = NULL;  List local = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(type));  if(! List_truth(local) || ! Sym_binding_is_local(c -> sym, local)) return NULL;  Symbol kind = Sym_is_named_value_type(c -> sym, type, _273) ? 1362954 : 0;  Token after = Token_skip_trivia(name + 1);  int sequence = after -> type == 1519197 ||(after -> type == 845368370138 && String_equal(after -> text, _274));  List hole = Compiler__declare_hole(c, name, kind, sequence);  Var quoted = Map_getindex(c -> macro_holes, List_var(_276));  Map_setindex(c -> macro_holes, List_var(_276), List_var(cons(List_var(hole), Var_is_row(quoted, 9, 7, 4) ? Var_list(quoted) : NULL)));  return hole;
 }
 
 static List _quoted_holes(Compiler c){
-  Var quoted = Map_getindex(c -> macro_holes, List_var(_275));  return Var_is_row(quoted, 9, 7, 4) ? List_reverse(Var_list(quoted)) : NULL;
+  Var quoted = Map_getindex(c -> macro_holes, List_var(_276));  return Var_is_row(quoted, 9, 7, 4) ? List_reverse(Var_list(quoted)) : NULL;
 }
 
 static List Compiler__parse_hole(Compiler c, Symbol role){
   Token token = c -> token;  Token spelling = Compiler__hole_name_token(c);  Atom name = Atom_intern(spelling -> text);  List hole = Compiler__hole_record(c, name);  if(! List_truth(hole)) hole = Compiler__quoted_hole(c, spelling);  if(! List_truth(hole)) Compiler__unbound(c, Atom_str(name), token);  int sequence = Compiler__hole_splice(c, role);  if(sequence != Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler__cardinality_error(c, Atom_str(name), sequence, token);  Symbol inferred = _role_kind(role), kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind){
-    hole =({ static MatchCaptureSite _x2c_match_site_17;  x2c_match_site_search_replace(& _x2c_match_site_17, hole, List_var(_278), List_var(cons(_225, cons(Symbol_var(inferred), NULL)))); });  Map_setindex(c -> macro_holes, name, List_var(hole));
+    hole =({ static MatchCaptureSite _x2c_match_site_17;  x2c_match_site_search_replace(& _x2c_match_site_17, hole, List_var(_279), List_var(cons(_225, cons(Symbol_var(inferred), NULL)))); });  Map_setindex(c -> macro_holes, name, List_var(hole));
   }
   else if(! _kind_accepts_role(kind, role)){
-    String spelling = Atom_str(name);  Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_215), cons(String_var(spelling), cons(String_var(_279), NULL)))), token, ({
-      Var _x2c_literal_part_35 = String_var(String_join(NULL, cons(String_var(_280), cons(String_var(_kind_spelling(kind)), NULL))));  Var _x2c_literal_part_36 = String_var(String_join(NULL, cons(String_var(_281), cons(String_var(_kind_spelling(inferred)), NULL))));  cons(_x2c_literal_part_35, cons(_x2c_literal_part_36, NULL));
+    String spelling = Atom_str(name);  Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_215), cons(String_var(spelling), cons(String_var(_280), NULL)))), token, ({
+      Var _x2c_literal_part_35 = String_var(String_join(NULL, cons(String_var(_281), cons(String_var(_kind_spelling(kind)), NULL))));  Var _x2c_literal_part_36 = String_var(String_join(NULL, cons(String_var(_282), cons(String_var(_kind_spelling(inferred)), NULL))));  cons(_x2c_literal_part_35, cons(_x2c_literal_part_36, NULL));
     }
     ));
   }
@@ -2932,7 +2932,7 @@ static List Compiler__parse_hole(Compiler c, Symbol role){
 }
 
 static int Compiler__hole_splice(Compiler c, Symbol role){
-  if(Compiler_test(c, 1519197)) return 1;  if(role != 107888847784 || Compiler_peek(c, 0) != 845368370138 || ! String_equal(c -> token -> text, _282)) return 0;  Compiler_next(c);  return 1;
+  if(Compiler_test(c, 1519197)) return 1;  if(role != 107888847784 || Compiler_peek(c, 0) != 845368370138 || ! String_equal(c -> token -> text, _274)) return 0;  Compiler_next(c);  return 1;
 }
 
 static void Compiler__cardinality_error(Compiler c, String spelling, int sequence, Token token){
@@ -4842,7 +4842,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3465};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3468};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -4967,7 +4967,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3612};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3615};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
