@@ -34,7 +34,7 @@ generated-name counters as it allocates temporaries. Returned canonical
 active during emission; promote them before releasing those pools if the
 tokens must survive.
 
-Source: `src/emit.x:60`
+Source: `src/emit.x:61`
 
 ## Design notes
 
