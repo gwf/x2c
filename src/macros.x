@@ -92,8 +92,7 @@ static List Compiler._stored_definition(
   else match (stored)
     case %(local-macro ?name):
       definition = c.sym.lookup_macro(Atom.intern(name.str()));
-  if (!definition) definition = c._macro_value_bindings(stored);
-  return definition;
+  return definition ? definition : stored;
 }
 
 macro Statement $report.macro_expansion_count(Expr $c, Expr $origin) {
@@ -3146,20 +3145,6 @@ static Var _macro_value_names(Var value) {
     return %(binding-name $spelling);
   List child;
   $ast.rewrite_children(value.list(), child, _macro_value_names(child));
-}
-
-/* An applied Macro value binds each `using` name in the applying unit's
-   global scope, as a cached import does; its free names bind where the
-   expansion lands. Child template calls keep their names, which match the
-   value's captured children. */
-static Var Compiler._macro_value_bindings(Compiler c, Var value) {
-  if (value is not <list>) return value;
-  match (value) {
-    case %(binding-free ?(String spelling)): return %(binding-name $spelling);
-    case %(tpl-call *): return value;
-  }
-  List child;
-  $ast.rewrite_children(value.list(), child, c._macro_value_bindings(child));
 }
 
 /* NULL for a template's hole of that name or for an unknown macro. */
