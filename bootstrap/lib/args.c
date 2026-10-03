@@ -128,27 +128,27 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("--");
-  _1 = String_new("missing operand");
-  _2 = String_new("missing option");
-  _3 = String_new("-");
-  _4 = String_new(", ");
-  _5 = String_new("required");
-  _6 = String_new("repeated");
-  _7 = String_new("unknown spec word");
-  _8 = String_new("unknown spec property");
-  _9 = String_new("=");
-  _10 = String_new("unexpected value");
-  _11 = String_new("-");
-  _12 = String_new("unknown option");
-  _13 = String_new("missing value");
-  _14 = String_new("unexpected operand");
-  _15 = String_new("<");
-  _16 = String_new(">");
-  _17 = String_new("...");
-  _18 = String_new("[");
-  _19 = String_new("]");
-  _20 = String_new(" <");
-  _21 = String_new("    ");
+  _1 = String_new(", ");
+  _2 = String_new("required");
+  _3 = String_new("repeated");
+  _4 = String_new("-");
+  _5 = String_new("<");
+  _6 = String_new(">");
+  _7 = String_new("...");
+  _8 = String_new("[");
+  _9 = String_new("]");
+  _10 = String_new(" <");
+  _11 = String_new("    ");
+  _12 = String_new("missing operand");
+  _13 = String_new("missing option");
+  _14 = String_new("-");
+  _15 = String_new("unknown spec word");
+  _16 = String_new("unknown spec property");
+  _17 = String_new("=");
+  _18 = String_new("unexpected value");
+  _19 = String_new("unknown option");
+  _20 = String_new("missing value");
+  _21 = String_new("unexpected operand");
 }
 
 void x2c_cleanup_push(X2CCleanup *);
@@ -244,8 +244,8 @@ Map Args_parse(List args, List spec){
                 }
                 if(! option -> required || option -> given) continue;
                 String name = option -> name, spelling = option -> spelling;
-                if(option -> operand) _bad_operand(_1, name);
-                _bad_option(_2, spelling);
+                if(option -> operand) _bad_operand(_12, name);
+                _bad_option(_13, spelling);
               }
               {
                 Map _x2c_return_value_0 = complete = result;
@@ -350,7 +350,7 @@ int String_truth(String);
 
 static void Option__read_row(Option * o, List row, Map index, int position){
   String first = Var_str(List_car(row));
-  (* o).operand = ! String_startswith(first, _3);
+  (* o).operand = ! String_startswith(first, _14);
   {
     Var word;
     List _x2c_macro_object_1 = row;
@@ -364,17 +364,17 @@ static void Option__read_row(Option * o, List row, Map index, int position){
           continue;
         }
         String text = Var_str(word);
-        if(String_startswith(text, _3)){
+        if(String_startswith(text, _14)){
           if(! String_truth((* o).spelling) ||(String_startswith(text, _0) && ! String_startswith((* o).spelling, _0)))(* o).spelling = text;
           (* o).spellings = String_truth((* o).spellings) ?({
-            Var _x2c_literal_part_0 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_4), cons(String_var(text), NULL))));
+            Var _x2c_literal_part_0 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_1), cons(String_var(text), NULL))));
           }
           ) : text;
           Map_setindex(index, String_var(text), int_var(position));
         }
-        else if(String_equal(text, _5))(* o).required = 1;
-        else if(String_equal(text, _6))(* o).repeated = 1;
-        else if(! String_equal(text, first)) _bad_spec(_7, String_var(text));
+        else if(String_equal(text, _2))(* o).required = 1;
+        else if(String_equal(text, _3))(* o).repeated = 1;
+        else if(! String_equal(text, first)) _bad_spec(_15, String_var(text));
       }
 
     }
@@ -406,7 +406,7 @@ static void Option__read_property(Option * o, List property){
     break;
     case 535328 :(* o).help = Var_str(List_cadr(property));
     break;
-    default: _bad_spec(_8, List_var(property));
+    default: _bad_spec(_16, List_var(property));
   }
 
 }
@@ -424,11 +424,11 @@ static void Spec__free(Spec * s){
 int String_find(String, String);
 
 static void Spec__parse_long(Spec * s, Map result, List * rest, String word){
-  int equals = String_find(word, _9);
+  int equals = String_find(word, _17);
   String spelling = equals < 0 ? word : String_getslice(word, -2147483648, equals, 1);
   Option * option = Spec__find(&((* s)), spelling);
   if(! String_truth(option -> value)){
-    if(equals >= 0) _bad_option(_10, spelling);
+    if(equals >= 0) _bad_option(_18, spelling);
     Option__store(&((* option)), result, int_var(1));
   }
   else if(equals >= 0) Option__store(&((* option)), result, String_var(String_getslice(word, equals + 1, -2147483648, 1)));
@@ -437,7 +437,7 @@ static void Spec__parse_long(Spec * s, Map result, List * rest, String word){
 
 static void Spec__parse_short(Spec * s, Map result, List * rest, String word){
   for(int at = 1;  at < String_len(word);  at ++){
-    String spelling = String_join(NULL, cons(String_var(_11), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
+    String spelling = String_join(NULL, cons(String_var(_4), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
     Option * option = Spec__find(&((* s)), spelling);
     if(! String_truth(option -> value)){
       Option__store(&((* option)), result, int_var(1));
@@ -452,12 +452,12 @@ static void Spec__parse_short(Spec * s, Map result, List * rest, String word){
 
 static Option * Spec__find(Spec * s, String spelling){
   Var position;
-  if(! Map_try_get((* s).index, String_var(spelling), &(position))) _bad_option(_12, spelling);
+  if(! Map_try_get((* s).index, String_var(spelling), &(position))) _bad_option(_19, spelling);
   return &(* s).options[Var_integer(position)];
 }
 
 static String _next_value(List * rest, String spelling){
-  if(! List_truth(List_cdr((* rest)))) _bad_option(_13, spelling);
+  if(! List_truth(List_cdr((* rest)))) _bad_option(_20, spelling);
   (* rest) = List_cdr((* rest));
   return Var_str(List_car((* rest)));
 }
@@ -488,7 +488,7 @@ static void Spec__assign_operands(Spec * s, Map result, List operands){
     }
 
   }
-  if(List_truth(operands)) _bad_operand(_14, Var_str(List_car(operands)));
+  if(List_truth(operands)) _bad_operand(_21, Var_str(List_car(operands)));
 }
 
 Var Symbol_var(Symbol);
@@ -657,16 +657,16 @@ String Args_usage(String program, List spec){
 
 static String Option__label(Option * o){
   if((* o).operand){
-    String label = String_join(NULL, cons(String_var(_15), cons(String_var((* o).name), cons(String_var(_16), NULL))));
-    if((* o).repeated) label = String_join(NULL, cons(String_var(label), cons(String_var(_17), NULL)));
-    return(* o).required ? label : String_join(NULL, cons(String_var(_18), cons(String_var(label), cons(String_var(_19), NULL))));
+    String label = String_join(NULL, cons(String_var(_5), cons(String_var((* o).name), cons(String_var(_6), NULL))));
+    if((* o).repeated) label = String_join(NULL, cons(String_var(label), cons(String_var(_7), NULL)));
+    return(* o).required ? label : String_join(NULL, cons(String_var(_8), cons(String_var(label), cons(String_var(_9), NULL))));
   }
   String label =(* o).spellings;
   if(String_truth((* o).value)) label =({
-    Var _x2c_literal_part_4 = String_var(label);  Var _x2c_literal_part_5 = String_var((* o).value);  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_20), cons(_x2c_literal_part_5, cons(String_var(_16), NULL)))));
+    Var _x2c_literal_part_4 = String_var(label);  Var _x2c_literal_part_5 = String_var((* o).value);  String_join(NULL, cons(_x2c_literal_part_4, cons(String_var(_10), cons(_x2c_literal_part_5, cons(String_var(_6), NULL)))));
   }
   );
-  return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_21), cons(String_var(label), NULL))) : label;
+  return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_11), cons(String_var(label), NULL))) : label;
 }
 
 static void _write_row(Buffer out, String label, String help){

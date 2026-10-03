@@ -6,7 +6,7 @@
 
 #include "exception.h"
 
-static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _20, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _0;
 
 #include <limits.h>
 #include <stdio.h>
@@ -131,25 +131,25 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("excess values");
-  _1 = String_new("missing value");
-  _2 = String_new("incomplete conversion");
-  _3 = String_new("width exceeds int range");
-  _4 = String_new("width");
-  _5 = String_new("missing star value");
-  _6 = String_new("precision");
-  _7 = String_new(" exceeds int range");
-  _8 = String_new("unsupported length modifier");
-  _9 = String_new("positional formats are unsupported");
-  _10 = String_new("unsupported conversion");
-  _11 = String_new("unsupported integer length");
-  _12 = String_new("unsupported floating length");
-  _13 = String_new("wide strings and characters are unsupported");
-  _14 = String_new("unsupported flag for conversion");
-  _15 = String_new("unsupported precision for %c");
-  _16 = String_new("%c cannot produce an embedded NUL");
-  _17 = String_new("string conversion failed");
-  _18 = String_new("value conversion failed");
+  _0 = String_new(" exceeds int range");
+  _2 = String_new("excess values");
+  _3 = String_new("missing value");
+  _4 = String_new("incomplete conversion");
+  _5 = String_new("width exceeds int range");
+  _6 = String_new("width");
+  _7 = String_new("missing star value");
+  _8 = String_new("precision");
+  _9 = String_new("unsupported length modifier");
+  _10 = String_new("positional formats are unsupported");
+  _11 = String_new("unsupported conversion");
+  _12 = String_new("unsupported integer length");
+  _13 = String_new("unsupported floating length");
+  _14 = String_new("wide strings and characters are unsupported");
+  _15 = String_new("unsupported flag for conversion");
+  _16 = String_new("unsupported precision for %c");
+  _17 = String_new("%c cannot produce an embedded NUL");
+  _18 = String_new("string conversion failed");
+  _20 = String_new("value conversion failed");
 }
 
 Buffer Buffer_new(size_t);
@@ -186,7 +186,7 @@ String String_format(String fmt, List values){
       while(f.cursor < f.length) if(Format_byte(&(f)) == '%') Format_conversion(&(f));
       else f.cursor ++;
       Format_write_literal(&(f));
-      if(List_truth(f.args)) _format_error(f.length, _0);
+      if(List_truth(f.args)) _format_error(f.length, _2);
       {
         String _x2c_return_value_0 = Buffer_str(out);
         {
@@ -214,7 +214,7 @@ static void Format_conversion(Format * f){
   }
   else{
     Spec spec = Format_spec(&((* f)));
-    Format_print(&((* f)), spec, Format_take(&((* f)), _1));
+    Format_print(&((* f)), spec, Format_take(&((* f)), _3));
   }
   (* f).literal =(* f).cursor;
 }
@@ -226,7 +226,7 @@ static void Format_write_literal(Format * f){
 }
 
 static void Format_need_byte(Format * f){
-  if((* f).cursor ==(* f).length) Format_fail(&((* f)), _2);
+  if((* f).cursor ==(* f).length) Format_fail(&((* f)), _4);
 }
 
 int String_getindex(String, int);
@@ -261,18 +261,18 @@ int abs(int);
 static void Format_width(Format * f, Spec * spec){
   if(Format_byte(&((* f))) == '*'){
     int width = Format_star(&((* f)));
-    if(width == INT_MIN) Format_fail(&((* f)), _3);
+    if(width == INT_MIN) Format_fail(&((* f)), _5);
     if(width < 0)(* spec).flags |= FORMAT_LEFT;
     (* spec).width = abs(width);
     (* f).cursor ++;
   }
-  else(* spec).width = Format_decimal(&((* f)), _4);
+  else(* spec).width = Format_decimal(&((* f)), _6);
 }
 
 long Var_integer(Var);
 
 static int Format_star(Format * f){
-  return(int) Var_integer(Format_number(&((* f)), Format_take(&((* f)), _5), 3453797));
+  return(int) Var_integer(Format_number(&((* f)), Format_take(&((* f)), _7), 3453797));
 }
 
 static void Format_precision(Format * f, Spec * spec){
@@ -283,7 +283,7 @@ static void Format_precision(Format * f, Spec * spec){
     (* spec).precision = Format_star(&((* f)));
     (* f).cursor ++;
   }
-  else(* spec).precision = Format_decimal(&((* f)), _6);
+  else(* spec).precision = Format_decimal(&((* f)), _8);
 }
 
 Var String_var(String);
@@ -292,7 +292,7 @@ static int Format_decimal(Format * f, String label){
   int number = 0, start =(* f).cursor;
   while(Format_digit(&((* f)))){
     int digit = Format_byte(&((* f))) - '0';
-    if(number >(INT_MAX - digit) / 10) _format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_7), NULL))));
+    if(number >(INT_MAX - digit) / 10) _format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_0), NULL))));
     number = number * 10 + digit;
     (* f).cursor ++;
   }
@@ -313,7 +313,7 @@ static int Format_modifier(Format * f){
     case 'l' : return Format_doubled(&((* f)), 'l', FORMAT_L, FORMAT_LL);
     case 'L' :(* f).cursor ++;
     return FORMAT_CAP_L;
-    case 'j' : case 'z' : case 't' : Format_fail(&((* f)), _8);
+    case 'j' : case 'z' : case 't' : Format_fail(&((* f)), _9);
   }
   return 0;
 }
@@ -329,13 +329,13 @@ static void Format_check(Format * f, Spec spec){
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if(ch == '$') Format_fail(&((* f)), _9);
-  if(! integer && ! floating && ! text) Format_fail(&((* f)), _10);
-  if(integer && spec.modifier == FORMAT_CAP_L) Format_fail(&((* f)), _11);
-  if(floating && spec.modifier && spec.modifier != FORMAT_L && spec.modifier != FORMAT_CAP_L) Format_fail(&((* f)), _12);
-  if(text && spec.modifier) Format_fail(&((* f)), _13);
-  if(text &&(spec.flags & ~ FORMAT_LEFT)) Format_fail(&((* f)), _14);
-  if(ch == 'c' && spec.precision >= 0) Format_fail(&((* f)), _15);
+  if(ch == '$') Format_fail(&((* f)), _10);
+  if(! integer && ! floating && ! text) Format_fail(&((* f)), _11);
+  if(integer && spec.modifier == FORMAT_CAP_L) Format_fail(&((* f)), _12);
+  if(floating && spec.modifier && spec.modifier != FORMAT_L && spec.modifier != FORMAT_CAP_L) Format_fail(&((* f)), _13);
+  if(text && spec.modifier) Format_fail(&((* f)), _14);
+  if(text &&(spec.flags & ~ FORMAT_LEFT)) Format_fail(&((* f)), _15);
+  if(ch == 'c' && spec.precision >= 0) Format_fail(&((* f)), _16);
 }
 
 Var List_car(List);
@@ -396,7 +396,7 @@ static Buffer Format_floating(Format * f, const char * text, int modifier, Var a
 
 static Buffer Format_character(Format * f, const char * text, Var arg){
   int byte =(int) Var_integer(Format_number(&((* f)), arg, 3453797));
-  if(!(unsigned char) byte) Format_fail(&((* f)), _16);
+  if(!(unsigned char) byte) Format_fail(&((* f)), _17);
   return Buffer_printf((* f).out, text, byte);
 }
 
@@ -455,7 +455,7 @@ static Buffer Format_string(Format * f, const char * text, Var arg){
           code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
           List volatile details;
           details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
-          Format_nested(&((* f)), _17, code, details);
+          Format_nested(&((* f)), _18, code, details);
         }
 
       }
@@ -503,7 +503,7 @@ static Var Format_number(Format * f, Var arg, Symbol target){
           code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
           List volatile details;
           details = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
-          Format_nested(&((* f)), _18, code, details);
+          Format_nested(&((* f)), _20, code, details);
         }
 
       }

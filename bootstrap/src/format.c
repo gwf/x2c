@@ -52,12 +52,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("<generated>");
-  _1 = String_new("$$");
-  _2 = String_new("$");
-  _3 = String_new("#line ");
-  _4 = String_new(" \"");
-  _5 = String_new("\"");
-  _6 = String_new("\n");
+  _1 = String_new("#line ");
+  _2 = String_new(" \"");
+  _3 = String_new("\"");
+  _4 = String_new("\n");
+  _5 = String_new("$$");
+  _6 = String_new("$");
 }
 
 Buffer Buffer_new(size_t);
@@ -142,8 +142,8 @@ static void Pretty_source_marker(Pretty * p, Var value){
   if(! String_truth(file)) file = _0;
   int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797));
   (* p).source_line = List_truth(location) ? line : 0;
-  String escaped = String_replace(String_escape(file), _1, _2);
-  Buffer_write((* p).buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(line)), cons(String_var(_4), cons(String_var(escaped), cons(String_var(_5), NULL)))))));
+  String escaped = String_replace(String_escape(file), _5, _6);
+  Buffer_write((* p).buff, String_join(NULL, cons(String_var(_1), cons(String_var(int_str(line)), cons(String_var(_2), cons(String_var(escaped), cons(String_var(_3), NULL)))))));
   _write_newline((* p).buff);
   if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);
   (* p).directive_break = 1;
@@ -258,7 +258,7 @@ static void _write_newline(Buffer buff){
 
 static void _write_mapped_newline(Buffer buff, int source_line){
   _write_newline(buff);
-  if(source_line) Buffer_write(buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(source_line)), cons(String_var(_6), NULL)))));
+  if(source_line) Buffer_write(buff, String_join(NULL, cons(String_var(_1), cons(String_var(int_str(source_line)), cons(String_var(_4), NULL)))));
 }
 
 static void _write_token(Buffer buff, String token, int source_line){

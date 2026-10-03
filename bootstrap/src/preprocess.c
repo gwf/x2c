@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _45, _44, _41, _40, _39;
+static List _30, _29, _26, _25, _24;
 
-static String _42, _36, _34, _33, _32, _31, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _27, _21, _19, _18, _17, _16, _15, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _43, _38, _37, _35, _29;
+static Var _28, _23, _22, _20, _14;
 
 static int _init_guard_ = 0;
 
@@ -82,52 +82,52 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("#");
-  _1 = String_new("if");
-  _2 = String_new("el");
-  _3 = String_new("endif");
-  _4 = String_new("defined ( <never> )");
-  _5 = String_new("defined <never>");
-  _6 = String_new("ifdef <never>");
-  _7 = String_new("if 0");
-  _8 = String_new("if ( 0 )");
-  _9 = String_new("if defined <never>");
-  _10 = String_new("if defined <never> && ");
-  _11 = String_new(" || ");
-  _12 = String_new("ifndef <never>");
-  _13 = String_new("if ! defined <never>");
-  _14 = String_new("<never>");
-  _15 = String_new(" ");
-  _16 = String_new("__cplusplus");
-  _17 = String_new("_MSC_VER");
-  _18 = String_new("_WIN32");
-  _19 = String_new("_WIN64");
-  _20 = String_new("__CYGWIN__");
-  _21 = String_new("pragma");
-  _22 = String_new("pragma private");
-  _23 = String_new("pragma public");
-  _24 = String_new("include");
-  _25 = String_new(">");
-  _26 = String_new("\"");
-  _27 = String_new("undef");
-  _28 = String_new("define");
-  _29 = int_var(0);
-  _30 = String_new("__attribute__");
-  _31 = String_new("packed");
-  _32 = String_new("aligned");
-  _33 = String_new("mode");
-  _34 = String_new("vector_size");
-  _35 = Symbol_var(35579270086);
-  _36 = String_new("__declspec");
-  _37 = Symbol_var(54);
-  _38 = Symbol_var(1317118534);
-  _39 = cons(_37, NULL);
-  _40 = cons(_38, _39);
-  _41 = cons(_37, _40);
-  _42 = String_new("#endif");
-  _43 = String_var(_42);
-  _44 = cons(_43, NULL);
-  _45 = cons(_35, _44);
+  _0 = String_new("ifdef <never>");
+  _1 = String_new("if 0");
+  _2 = String_new("if ( 0 )");
+  _3 = String_new("if defined <never>");
+  _4 = String_new("ifndef <never>");
+  _5 = String_new("if ! defined <never>");
+  _6 = String_new(" ");
+  _7 = String_new("__cplusplus");
+  _8 = String_new("_MSC_VER");
+  _9 = String_new("_WIN32");
+  _10 = String_new("_WIN64");
+  _11 = String_new("__CYGWIN__");
+  _12 = String_new("pragma private");
+  _13 = String_new("pragma public");
+  _14 = int_var(0);
+  _15 = String_new("__attribute__");
+  _16 = String_new("packed");
+  _17 = String_new("aligned");
+  _18 = String_new("mode");
+  _19 = String_new("vector_size");
+  _20 = Symbol_var(35579270086);
+  _21 = String_new("__declspec");
+  _22 = Symbol_var(54);
+  _23 = Symbol_var(1317118534);
+  _24 = cons(_22, NULL);
+  _25 = cons(_23, _24);
+  _26 = cons(_22, _25);
+  _27 = String_new("#endif");
+  _28 = String_var(_27);
+  _29 = cons(_28, NULL);
+  _30 = cons(_20, _29);
+  _31 = String_new("#");
+  _32 = String_new("if");
+  _33 = String_new("el");
+  _34 = String_new("endif");
+  _35 = String_new("defined ( <never> )");
+  _36 = String_new("defined <never>");
+  _37 = String_new("if defined <never> && ");
+  _38 = String_new(" || ");
+  _39 = String_new("<never>");
+  _40 = String_new("pragma");
+  _41 = String_new("include");
+  _42 = String_new(">");
+  _43 = String_new("\"");
+  _44 = String_new("undef");
+  _45 = String_new("define");
 }
 
 String String_strip(String, char *);
@@ -136,7 +136,7 @@ String String_remove_prefix(String, String);
 
 String preproc_directive(String text){
   if(! _init_guard_) _file_init_();
-  return String_strip(String_remove_prefix(String_strip(text, " \t"), _0), " \t");
+  return String_strip(String_remove_prefix(String_strip(text, " \t"), _31), " \t");
 }
 
 int String_startswith(String, String);
@@ -144,9 +144,9 @@ int String_startswith(String, String);
 Symbol preproc_conditional_kind(String text){
   if(! _init_guard_) _file_init_();
   String directive = preproc_directive(text);
-  if(String_startswith(directive, _1)) return 1016156;
-  if(String_startswith(directive, _2)) return 172060880;
-  if(String_startswith(directive, _3)) return 7109834;
+  if(String_startswith(directive, _32)) return 1016156;
+  if(String_startswith(directive, _33)) return 172060880;
+  if(String_startswith(directive, _34)) return 7109834;
   return 0;
 }
 
@@ -158,9 +158,9 @@ int String_contains(String, String);
 
 int preproc_open_state(String text){
   if(! _init_guard_) _file_init_();
-  String line = String_replace(_directive_line(preproc_directive(text)), _4, _5);
-  if(String_equal(line, _6) || String_equal(line, _7) || String_equal(line, _8) || String_equal(line, _9) ||(String_startswith(line, _10) && ! String_contains(line, _11))) return 2;
-  return String_equal(line, _12) || String_equal(line, _13);
+  String line = String_replace(_directive_line(preproc_directive(text)), _35, _36);
+  if(String_equal(line, _0) || String_equal(line, _1) || String_equal(line, _2) || String_equal(line, _3) ||(String_startswith(line, _37) && ! String_contains(line, _38))) return 2;
+  return String_equal(line, _4) || String_equal(line, _5);
 }
 
 Tokenizer Tokenizer_new(char *, Symbol);
@@ -181,16 +181,16 @@ static String _directive_line(String directive){
   Tokenizer scanned = Tokenizer_new(directive, 3945159);
   Tokenizer_scan(scanned);
   Array words = Array_new();
-  for(Token t = Token_skip_trivia(scanned -> tokens);  t -> type != 11212;  t = Token_skip_trivia(t + 1)) Array_push(words, _never_defined(t -> text) ? String_var(_14) : String_var(t -> text));
-  return String_join(_15, Array_list_free(words));
+  for(Token t = Token_skip_trivia(scanned -> tokens);  t -> type != 11212;  t = Token_skip_trivia(t + 1)) Array_push(words, _never_defined(t -> text) ? String_var(_39) : String_var(t -> text));
+  return String_join(_6, Array_list_free(words));
 }
 
 static int _never_defined(String name){
-  if(String_equal(name, _16) || String_equal(name, _17)) return 1;
+  if(String_equal(name, _7) || String_equal(name, _8)) return 1;
 #if defined(_WIN32) || defined(__CYGWIN__)
   return 0;
 #else
-  return String_equal(name, _18) || String_equal(name, _19) || String_equal(name, _20);
+  return String_equal(name, _9) || String_equal(name, _10) || String_equal(name, _11);
 #endif
 
 }
@@ -202,10 +202,10 @@ int preproc_branch_state(int state){
 int preproc_visibility(String text){
   if(! _init_guard_) _file_init_();
   String directive = preproc_directive(text);
-  if(! String_startswith(directive, _21)) return - 1;
+  if(! String_startswith(directive, _40)) return - 1;
   String line = _directive_line(directive);
-  if(String_equal(line, _22)) return 1;
-  return String_equal(line, _23) ? 0 : - 1;
+  if(String_equal(line, _12)) return 1;
+  return String_equal(line, _13) ? 0 : - 1;
 }
 
 String String_lstrip(String, char *);
@@ -220,20 +220,20 @@ String preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
   (* angle) = 0;
   String body = preproc_directive(text);
-  if(! String_startswith(body, _24)) return NULL;
-  body = String_lstrip(String_remove_prefix(body, _24), " \t");
+  if(! String_startswith(body, _41)) return NULL;
+  body = String_lstrip(String_remove_prefix(body, _41), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
   (* angle) = String_getindex(body, 0) == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, (* angle) ? _25 : _26);
+  int close = String_find(rest, (* angle) ? _42 : _43);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
 static Token _macro_directive(String content, int * undefined){
   String directive = preproc_directive(content);
-  (* undefined) = String_startswith(directive, _27);
-  if(!(* undefined) && ! String_startswith(directive, _28)) return NULL;
-  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _27 : _28), 3945159);
+  (* undefined) = String_startswith(directive, _44);
+  if(!(* undefined) && ! String_startswith(directive, _45)) return NULL;
+  Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _44 : _45), 3945159);
   Tokenizer_scan(scanned);
   Token token = Token_skip_trivia(scanned -> tokens);
   return token -> type == 19147688 ? token : NULL;
@@ -321,7 +321,7 @@ static void ArmScan_directive(ArmScan * s, Token token, size_t i){
   Symbol kind = preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
   if(kind == 1016156) Array_push((* s).stack, List_var(({
-    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_29, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_14, cons(_x2c_literal_part_1, NULL)));
   }
   )));
   else if(kind == 172060880 && Array_len((* s).stack)){
@@ -367,7 +367,7 @@ Var Map_getindex(Map, Var);
 
 static size_t ArmScan_code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _30)) return ArmScan__note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && String_equal(token -> text, _15)) return ArmScan__note_attribute(&((* s)), i);
   else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, Var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
@@ -403,11 +403,11 @@ static int _layout_attribute(Token open, int * packed){
     depth += Symbol_group_step(t -> type);
     if(depth != 1 || t -> type != 19147688) continue;
     String word = String_strip(t -> text, "_");
-    if(String_equal(word, _31)){
+    if(String_equal(word, _16)){
       layout = 1;
       (* packed) = 1;
     }
-    else if(String_equal(word, _32) || String_equal(word, _33) || String_equal(word, _34)) layout = 1;
+    else if(String_equal(word, _17) || String_equal(word, _18) || String_equal(word, _19)) layout = 1;
   }
   return layout;
 }
@@ -428,7 +428,7 @@ static void ArmScan__note_layout_macro(ArmScan * s, String content){
   int value = 0;
   for(;  token -> type != 11212;  token = Token_skip_trivia(token + 1)){
     if(token -> type != 19147688) continue;
-    int level = Var_int(Var_convert(String_equal(token -> text, _30) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
+    int level = Var_int(Var_convert(String_equal(token -> text, _15) ? int_var(_attribute_layout(token)) : Map_contains(layout, String_var(token -> text)) ? Map_getindex(layout, String_var(token -> text)) : int_var(0), 3453797));
     if(level > value) value = level;
   }
   if(value &&(! Map_contains(layout, String_var(name -> text)) || Var_compare(Map_getindex(layout, String_var(name -> text)), int_var(value)) < 0)) Map_setindex(layout, String_var(name -> text), int_var(value));
@@ -447,7 +447,7 @@ List Compiler_leading_preproc(Compiler c){
   List noncode = NULL;
   Token base = c -> tokenizer -> tokens, token = c -> token;
   while(-- token >= base){
-    if(token -> type == 35579270086) noncode = cons(List_var(cons(_35, cons(String_var(token -> text), NULL))), noncode);
+    if(token -> type == 35579270086) noncode = cons(List_var(cons(_20, cons(String_var(token -> text), NULL))), noncode);
     else if(token -> type != 40896714 && token -> type != 7477210024) break;
   }
   return noncode;
@@ -569,7 +569,7 @@ static int _is_specifier(Symbol type){
 
 static int Compiler__is_annotation(Compiler c, String word){
   Var definition;
-  return String_equal(word, _30) || String_equal(word, _36) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && Var_equal(definition, Symbol_var(102150700288988)));
+  return String_equal(word, _15) || String_equal(word, _21) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && Var_equal(definition, Symbol_var(102150700288988)));
 }
 
 int List_truth(List);
@@ -578,7 +578,7 @@ List List_match(List, Var);
 
 static int _prefix_rank(Var v){
   if(! Var_is_row(v, 9, 7, 4)) return 0;
-  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list(v), List_var(_41)); }))) return 4;
+  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list(v), List_var(_26)); }))) return 4;
   {
     Symbol word;
     Iter _x2c_macro_iterator_3 = Var_iter(v, &(struct Iter){
@@ -602,10 +602,10 @@ List List_cdr(List);
 List preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
   Symbol kind = preproc_conditional_kind(text);
-  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_35, cons(String_var(text), NULL))), NULL)), arms);
+  if(kind == 1016156) return cons(List_var(cons(List_var(cons(_20, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_35, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_20, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -651,7 +651,7 @@ List preproc_within_arms(List arms, List items){
     }
 
   }
-  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_45));
+  for(unsigned i = List_len(arms);  i;  i --) Array_push(out, List_var(_30));
   return Array_list_free(out);
 }
 
