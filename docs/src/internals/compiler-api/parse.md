@@ -64,7 +64,7 @@ X2c declarations, parsed from source or constructed.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3379`
+Source: `src/parse.x:3375`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -87,7 +87,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2721`
+Source: `src/parse.x:2717`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -144,7 +144,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:3522`
+Source: `src/parse.x:3518`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
