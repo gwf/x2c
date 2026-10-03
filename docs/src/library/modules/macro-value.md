@@ -39,7 +39,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:337`
+Source: `lib/macro-value.x:339`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -49,7 +49,7 @@ Source: `lib/macro-value.x:337`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:330`
+Source: `lib/macro-value.x:332`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -69,7 +69,7 @@ Source: `lib/macro-value.x:65`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:129`
+Source: `lib/macro-value.x:131`
 
 ### `Macro`
 
@@ -117,7 +117,7 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macro-value.x:175`
+Source: `lib/macro-value.x:177`
 
 ## Public types
 

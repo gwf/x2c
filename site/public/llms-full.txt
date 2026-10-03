@@ -2799,10 +2799,14 @@ A macro captures no bindings. An expansion means what the same code would
 mean if it were written where the expansion lands, except that the names its
 body writes are private to that expansion.
 
-Arguments are parsed and bound where the invocation is written. A `Name`
-argument is a spelling, and it resolves where the expansion places it, so a
-`Name` hole can declare a new caller-visible variable or refer to an
-existing one.
+Arguments are parsed and typed where the invocation is written, and the
+names a caller writes in them also resolve where the expansion lands. A
+`Name` argument is a spelling, so a `Name` hole can declare a new
+caller-visible variable or refer to an existing one; a declaration the
+expansion makes from the caller's own `Name` supplies the caller's other
+uses of that spelling, as `$repeat(k, 3, k * 2, total)` shows below when the
+caller writes it. A name the body writes is private, so it never supplies a
+caller's name.
 
 A declaration written in a body receives a fresh binding identity and a
 private generated C spelling for each expansion. The spelling of a
@@ -2815,7 +2819,9 @@ A literal name that a body passes to a nested macro's `Name` hole is also
 the body's own name. A declaration the nested macro makes from it belongs to
 this expansion, and the body's other references to that spelling reach it.
 A reference that no such declaration reaches resolves where the expansion
-lands.
+lands. A local macro or an anonymous macro written inside a body shares the
+body's names the same way: its literal reference reaches a private
+declaration of the enclosing body.
 
 A name the body reads without declaring resolves where the expansion lands,
 like any name written there. A caller's declaration of that spelling
@@ -2887,6 +2893,10 @@ are not listed; they resolve where the expansion lands.
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
+
+A `case` on a macro recognizes a free name by its spelling, since the code
+the macro builds binds that name where it lands, and a `using` name only by
+its file-scope declaration.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
