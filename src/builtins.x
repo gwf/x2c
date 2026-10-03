@@ -354,18 +354,13 @@ static List Shape.constructor(Shape &s) {
 
 /* What `free` runs: the class's own `drop` on a set value, then the
    release of the value's storage. */
-macro Statement $class_drop(Expr $value, Expr $call) {
-  if ($value) $call;
-}
-
 static List Shape.release(Shape &s) {
   List value = s.value;
   List drop = _own_method(s.owner, "drop");
   List release = %(${x2c_stmnt_make(_call("Scope_free", %($value)))});
   if (!drop) return release;
   List dropped = _call(x2c_binding_spelling(drop), %($value));
-  Macro shape = $class_drop;
-  return cons(shape(value, dropped), release);
+  return cons($!{ if ($value) $dropped; }, release);
 }
 
 /* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
@@ -563,17 +558,8 @@ static List _init_call(List method, List parameters, List object) {
   return _call(x2c_binding_spelling(method), arguments.list_free());
 }
 
-macro Statement $class_refusal(Expr $call, Expr $value) {
-  if (!$call) {
-    Scope_free($value);
-    return 0;
-  }
-}
-
-static List _refusal(List call, List value) {
-  Macro shape = $class_refusal;
-  return shape(call, value);
-}
+static List _refusal(List call, List value) =>
+  $!{ if (!$call) { Scope_free($value); return 0; } };
 
 static List _allocate_copy(List value) =>
   _call("Scope_memdup", %(${_op(<&>, %($value))} ${_size(value)}));

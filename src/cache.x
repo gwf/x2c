@@ -134,15 +134,10 @@ List _initializer_function(Compiler c, List type, List name, List body) {
   return c.rebuild_unit_function(shape(type, name, body));
 }
 
-macro Statement $initializer_run_once(Expr $guard) {
-  if ($guard) return;
-  $guard = 1;
-}
-
 /* Returns when `guard` is set and sets it otherwise. */
 List _run_once(Compiler c, List guard) {
-  Macro shape = $initializer_run_once;
-  return c.rebuild_statement(shape(%(expr (int) (ident $guard)))).cdr();
+  List flag = %(expr (int) (ident $guard));
+  return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
 }
 
 /* The statement calling the `void (void)` function `entry`. */

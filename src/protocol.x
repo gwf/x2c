@@ -2592,10 +2592,6 @@ macro Statement $methods_value(Name $methods, Expr $value) {
   $methods = $value;
 }
 
-macro Statement $registration_fallback(Expr $registered, Expr $fallback) {
-  if (!$registered) { $fallback; }
-}
-
 static void Compiler._register_descriptor(
   Compiler c, Type participant, String name, Symbol explicit_tag,
   List thunks, int central_initializer) {
@@ -2658,8 +2654,7 @@ static List Compiler._fallback_registration(
   List table = %(expr ("VarMethods") (ident $methods));
   List fallback = c._helper_call(
     %(void), "x2c_register_descriptor", %(${_string_literal(name)} $table));
-  Macro shape = $registration_fallback;
-  return c.rebuild_statement(shape(early_call, fallback)).cadr();
+  return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
 }
 
 macro Expression $helper_call(

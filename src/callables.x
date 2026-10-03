@@ -134,11 +134,6 @@ macro Unit $capture_environment(Name $name, Field $fields...) {
   typedef struct $name { $fields... } $name;
 }
 
-macro Statement $capture_factory(Statement $storage, Expr $value) {
-  $storage
-  return $value;
-}
-
 /* One captured lambda: its context type, the adapter that reads a copy of
    it, and the locals that evaluate each capture. Capture rows arrive
    resolved and in first-use order from `lambdas.x`. Their locals run
@@ -307,9 +302,8 @@ static List CaptureBuild.bridged(CaptureBuild &b) {
   }
   List context = c.sym.introduce(c.fresh_name("lambda_context"));
   List storage = b._storage(context, factory_values.list_free());
-  Macro factory = $capture_factory;
-  List factory_body = c.rebuild_statement(
-    factory(storage, b._construct(context)));
+  List value = b._construct(context);
+  List factory_body = c.rebuild_statement($!{ $storage return $value; });
   List declaration_params = %(params @{parameters.list_free()});
   c.add_early(
     c.wrapper_function(
@@ -631,20 +625,12 @@ static List Compiler._prepend_setup(Compiler c, List body, List setup) {
 
 // Func values
 
-macro Statement $func_static_handle(Name $handle, Expr $value) {
-  static Func $handle = $value;
-}
-
 /* A call through a bridge function the unit declares where it calls. */
 macro Expression $func_bridge_call(
     Name $bridge, Expr $call, Param $parameters...) =>
   ({ extern Func $bridge($parameters...); $call; });
 
 macro Expression $func_aggregate(Expr $value) => { $value };
-
-macro Expression $func_present(
-    Expr $pointer, Expr $value, Expr $fallback) =>
-  $pointer ? $value : $fallback;
 
 /** Converts a resolved function-like expression to `Func` when supported.
     Existing `Func` values pass through. Direct fixed functions reuse a
@@ -762,8 +748,8 @@ static List Compiler._direct_func_handle(
     List value = c._func_call(
       %("Func"), _func_bound(constructor_type, constructor),
       %(${_func_bound(%("FuncAdapter"), adapter)} $signature));
-    Macro shape = $func_static_handle;
-    c.add_early(c.rebuild_statement(shape(handle, value)).cadr());
+    c.add_early(
+      c.rebuild_statement($!{ static Func $handle = $value; }).cadr());
   }
   return _func_bound(%("Func"), handle);
 }
@@ -953,12 +939,10 @@ static List Compiler._func_context_call(
 static List Compiler._func_present_statement(
   Compiler c, List pointer, List constructed) {
   List null_binding = c.sym.reference(%("NULL"), NULL);
-  Macro present_shape = $func_present;
+  List fallback = _func_bound(%("Func"), null_binding);
   List result = c.rebuild_expression(
-    %("Func"),
-    present_shape(pointer, constructed, _func_bound(%("Func"), null_binding)));
-  Macro statement_shape = $expression_statement;
-  return c.rebuild_statement(statement_shape(result)).cadr();
+    %("Func"), $!( $pointer ? $constructed : $fallback ));
+  return c.rebuild_statement($!{ $result; }).cadr();
 }
 
 /* A dereferenced function pointer reaches the lift untyped or typed as a
@@ -994,8 +978,6 @@ static List Compiler._deref_func_lift(
 }
 
 // Func adapters
-
-macro Expression $func_dereference(Expr $value) => *$value;
 
 /* A record result is copied into a Var after the native call completes. */
 macro Statement $func_record_result(
@@ -1196,8 +1178,7 @@ static List FuncReaders._pointer(
     return c.convert_expression(picked, parameter_type);
   Type record_pointer = parameter_type.reference();
   List pointer = %(expr $record_pointer (cast $record_pointer $picked));
-  Macro dereference = $func_dereference;
-  return c.rebuild_expression(parameter_type, dereference(pointer));
+  return c.rebuild_expression(parameter_type, $!( *$pointer ));
 }
 
 static List FuncReaders._value(

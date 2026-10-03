@@ -492,6 +492,26 @@ Fixtures: `macro-binding-landing` (new), `macro-values` (the integrator's
 expanded recognition fixture), and additions to `macro-pattern-nested` and
 `macro-quotation`.
 
+## Adoption
+
+Follow-up adoption after the campaign landed:
+
+- PR #109 collapses nested `match` statements whose inner match only
+  takes apart a captured argument into one macro pattern, in nine files.
+  `_op_chain_first` keeps its nested matches: as one pattern it raised the
+  translator's peak stack past `var-chain-stack`'s 256 KB limit. The same
+  PR fixes a bare `*` argument in a macro pattern, which derivation quoted.
+- PR #110 writes 22 single-use templates as quotations. Templates with
+  `Type`, `Decl`, `Param`, `Field`, or `Function` holes stay templates,
+  because a quotation takes holes only from expression, statement, name,
+  and sequence positions. The PR also keeps a macro body's `return` from
+  recording the enclosing function's return type, which a retained rebuild
+  preserved.
+- The remaining raw `%(expr ...)` cases take apart the typed shell or a
+  resolved form such as `getindex`; no source-form macro describes them.
+- Neither PR changes translation cost: converged trees measure within
+  1.3% of dev in instructions retired, with `lib/` output identical.
+
 ## Validation
 
 Each change keeps checked-in expectations and adds fixtures beside the

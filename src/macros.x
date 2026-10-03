@@ -653,9 +653,12 @@ static void Definition.announce(Definition &d) {
 }
 
 /* Reads the body in its own scope, with the kinds it infers for the holes.
-   A local macro records the outer names its body captures. */
+   A local macro records the outer names its body captures. A `return` in
+   the body is typed where the expansion lands, as at file scope; a
+   retained rebuild keeps the type a `return` records. */
 static void Definition.body(Definition &d) {
   Compiler c = d.c;
+  $let(c.return_type, NULL)
   $let(c.runtime_literals, c.runtime_literals || d.anonymous)
   $let(c.local_macro_captures, d.local ? {} : NULL)
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {

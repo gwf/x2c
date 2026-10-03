@@ -2624,10 +2624,6 @@ static List _managed_initializer(List syntax) {
   return NULL;
 }
 
-macro Statement $managed_cleanup(Expr $receiver) {
-  defer $receiver.cleanup();
-}
-
 static void Compiler._append_managed(
   Compiler c, List declaration, Array output, Token origin) {
   match (declaration) {
@@ -2700,8 +2696,8 @@ static void Compiler._require_cleanup(
 
 static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
   List receiver = %(expr $type (ident $binding));
-  Macro cleanup = $managed_cleanup;
-  return c.bind_syntax(cleanup(receiver), AST_STATEMENT, c.return_type);
+  return c.bind_syntax(
+    $!{ defer $receiver.cleanup(); }, AST_STATEMENT, c.return_type);
 }
 
 // constructed syntax
