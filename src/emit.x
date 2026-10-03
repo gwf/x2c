@@ -282,9 +282,10 @@ static List Emitter._initializer_macro(Emitter &e, List input, List body) {
     replacement = formatted.rstrip("\n").replace("\n", "\\\n");
   }
   String expanded = %"${name}_expanded";
-  String definition = %"#define $expanded($formal) $replacement";
+  String definition = $emit.initializer.expanded(expanded, formal, replacement);
   e.native_macros.push(%($expanded $definition));
-  e.native_macros.push(%($name "#define $name($formal) $expanded($formal)"));
+  String forwarding = $emit.initializer.forwarding(name, formal, expanded);
+  e.native_macros.push(%($name $forwarding));
   Array arguments = [];
   foreach (List argument, input.cdr()) {
     List emitted = e._emit(argument.cadr());
@@ -934,15 +935,8 @@ static List Emitter._foreign_alias(Emitter &e, List ast) {
   String target_name = e.emitted_binding_name(target);
   String native_name = e.emitted_binding_name(native_binding);
   String message = %"native alias $target_name does not match $native_name";
-  String define = %"#define $target_name $native_name";
-  return %(
-    "#ifndef X2CCPP"
-    "_Static_assert("
-    "_Generic(&" @native ", " @pointer ": 1, default: 0), "
-    "\"$message\");"
-    "#endif"
-    $define
-  );
+  String define = $emit.alias.definition(target_name, native_name);
+  return $emit.alias.checked(native, pointer, message, define);
 }
 
 static List Emitter._typedef(Emitter &e, List ast) {
@@ -1220,23 +1214,16 @@ static List _flat_match_condition(Symbol head, List tags) {
   Var literal = head;
   unsigned long long bits = literal.u64;
   Array condition = [];
-  condition.push(
-    "_x2c_match_expr && "
-    + %"_x2c_match_expr->car.u64 == ${bits}ULL && "
-    + "(_x2c_match_cursor = _x2c_match_expr->cdr, 1)");
+  condition.push($emit.match.head_condition(bits));
   int index = 0;
   foreach (Var tag, tags) {
-    condition.push("&& _x2c_match_cursor ");
+    condition.push($emit.match.cursor_present());
     if (tag is <symbol>)
-      condition.push(
-        "&& Var_is(_x2c_match_cursor->car, "
-        + %"${(unsigned long) tag.symbol()}) ");
-    condition.push(
-      %"&& (_x2c_match_values[$index] = _x2c_match_cursor->car, "
-      + "_x2c_match_cursor = _x2c_match_cursor->cdr, 1)");
+      condition.push($emit.match.cursor_tag((unsigned long) tag.symbol()));
+    condition.push($emit.match.capture_value(index));
     index++;
   }
-  condition.push("&& !_x2c_match_cursor");
+  condition.push($emit.match.cursor_empty());
   return condition.list_free();
 }
 
@@ -1262,11 +1249,11 @@ static List _make_local_binders(List binders, String values_name) {
   foreach (Var binder, binders) {
     if (binder != <?> && binder != <*>) {
       String bvar = String.new(binder.str() + 1);
-      String rhs = %"$values_name[$index]";
+      String rhs = $emit.match.value_at(values_name, index);
       values.push(
         binder.is_list_binder()
-          ? %"List $bvar = Var_list($rhs);"
-          : %"Var $bvar = $rhs;");
+          ? $emit.match.list_binder(bvar, rhs)
+          : $emit.match.value_binder(bvar, rhs));
     }
     index++;
   }
