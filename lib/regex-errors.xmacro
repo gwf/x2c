@@ -1,0 +1,46 @@
+/* regex diagnostic messages. Payload owners retain failure policy. */
+
+macro Expression $regex.reason.unmatched_close() =>
+  "unmatched closing parenthesis";
+
+macro Expression $regex.reason.no_repeat() =>
+  "nothing to repeat";
+
+macro Expression $regex.reason.repeat_count() =>
+  "repetition count too large";
+
+macro Expression $regex.reason.repeat_range() =>
+  "repetition range out of order";
+
+macro Expression $regex.reason.missing_close() =>
+  "missing closing parenthesis";
+
+macro Expression $regex.reason.group_syntax() =>
+  "unknown group syntax";
+
+macro Expression $regex.reason.group_name() =>
+  "malformed group name";
+
+macro Expression $regex.reason.unterminated_class() =>
+  "unterminated character class";
+
+macro Expression $regex.reason.character_range() =>
+  "character range out of order";
+
+macro Expression $regex.reason.trailing_backslash() =>
+  "pattern ends in a backslash";
+
+macro Expression $regex.reason.unknown_escape() =>
+  "unknown escape";
+
+macro Stmt $regex.error.compile(
+  Expr $why, Expr $pattern, Expr $offset) {
+  raise %(bad-arg (operation "Regex.compile") (why ${$why})
+          (pattern ${$pattern}) (offset ${$offset}));
+}
+
+macro Stmt $regex.error.depth(Expr $pattern, Expr $limit) {
+  raise %(size-limit (operation "Regex.match") (pattern ${$pattern})
+          (why "a group repeated more times than one match allows")
+          (limit ${$limit}));
+}

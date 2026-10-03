@@ -24,6 +24,8 @@
 #include "buffer.x"
 #include "exception.x"
 
+$(import "string-format-errors.xmacro")
+
 // representation
 
 /* One conversion specification: the flag bits, the width or zero for
@@ -78,7 +80,7 @@ String String.format(String fmt, List values) {
     if (f.byte() == '%') f.conversion();
     else f.cursor++;
   f.write_literal();
-  if (f.args) _format_error(f.length, "excess values");
+  if (f.args) _format_error(f.length, $format.reason.excess_values());
   return out;
 }
 
@@ -94,7 +96,7 @@ static void Format.conversion(Format &f) {
   }
   else {
     Spec spec = f.spec();
-    f.print(spec, f.take("missing value"));
+    f.print(spec, f.take($format.reason.missing_value()));
   }
   f.literal = f.cursor;
 }
@@ -105,7 +107,7 @@ static void Format.write_literal(Format &f) {
 
 /* A conversion that reaches the end of the format is incomplete. */
 static void Format.need_byte(Format &f) {
-  if (f.cursor == f.length) f.fail("incomplete conversion");
+  if (f.cursor == f.length) f.fail($format.reason.incomplete());
 }
 
 // conversion specifications
@@ -138,7 +140,7 @@ static int Format.flags(Format &f) {
 static void Format.width(Format &f, Spec &spec) {
   if (f.byte() == '*') {
     int width = f.star();
-    if (width == INT_MIN) f.fail("width exceeds int range");
+    if (width == INT_MIN) f.fail($format.reason.width_range());
     if (width < 0) spec.flags |= FORMAT_LEFT;
     spec.width = abs(width);
     f.cursor++;
@@ -148,7 +150,7 @@ static void Format.width(Format &f, Spec &spec) {
 
 /* A `*` width or precision is the next value as an int. */
 static int Format.star(Format &f) =>
-  (int) f.number(f.take("missing star value"), <i32>).integer();
+  (int) f.number(f.take($format.reason.missing_star()), <i32>).integer();
 
 /* A `*` precision takes the next value, and a negative one means none. */
 static void Format.precision(Format &f, Spec &spec) {
@@ -169,7 +171,7 @@ static int Format.decimal(Format &f, String label) {
   while (f.digit()) {
     int digit = f.byte() - '0';
     if (number > (INT_MAX - digit) / 10)
-      _format_error(start, %"$label exceeds int range");
+      _format_error(start, $format.reason.range(label));
     number = number * 10 + digit;
     f.cursor++;
   }
@@ -185,7 +187,7 @@ static int Format.modifier(Format &f) {
     case 'h': return f.doubled('h', FORMAT_H, FORMAT_HH);
     case 'l': return f.doubled('l', FORMAT_L, FORMAT_LL);
     case 'L': f.cursor++; return FORMAT_CAP_L;
-    case 'j': case 'z': case 't': f.fail("unsupported length modifier");
+    case 'j': case 'z': case 't': f.fail($format.reason.length());
   }
   return 0;
 }
@@ -204,18 +206,19 @@ static void Format.check(Format &f, Spec spec) {
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if (ch == '$') f.fail("positional formats are unsupported");
-  if (!integer && !floating && !text) f.fail("unsupported conversion");
+  if (ch == '$') f.fail($format.reason.positional());
+  if (!integer && !floating && !text) f.fail($format.reason.conversion());
   if (integer && spec.modifier == FORMAT_CAP_L)
-    f.fail("unsupported integer length");
+    f.fail($format.reason.integer_length());
   if (floating && spec.modifier && spec.modifier != FORMAT_L &&
       spec.modifier != FORMAT_CAP_L)
-    f.fail("unsupported floating length");
+    f.fail($format.reason.floating_length());
   if (text && spec.modifier)
-    f.fail("wide strings and characters are unsupported");
+    f.fail($format.reason.wide_text());
   if (text && (spec.flags & ~FORMAT_LEFT))
-    f.fail("unsupported flag for conversion");
-  if (ch == 'c' && spec.precision >= 0) f.fail("unsupported precision for %c");
+    f.fail($format.reason.flag());
+  if (ch == 'c' && spec.precision >= 0)
+    f.fail($format.reason.character_precision());
 }
 
 // conversion arguments
@@ -280,7 +283,7 @@ static Buffer Format.floating(
 
 static Buffer Format.character(Format &f, const char *text, Var arg) {
   int byte = (int) f.number(arg, <i32>).integer();
-  if (!(unsigned char) byte) f.fail("%c cannot produce an embedded NUL");
+  if (!(unsigned char) byte) f.fail($format.reason.character_nul());
   return f.out.printf(text, byte);
 }
 
@@ -288,7 +291,8 @@ static Buffer Format.character(Format &f, const char *text, Var arg) {
 static Buffer Format.string(Format &f, const char *text, Var arg) {
   String string = NULL;
   try string = arg.str();
-  catch %(?code *details): f.nested("string conversion failed", code, details);
+  catch %(?code *details):
+    f.nested($format.reason.string(), code, details);
   return f.out.printf(text, string ? string : "");
 }
 
@@ -296,7 +300,8 @@ static Buffer Format.string(Format &f, const char *text, Var arg) {
 static Var Format.number(Format &f, Var arg, Symbol target) {
   Var converted = void;
   try converted = arg.convert(target);
-  catch %(?code *details): f.nested("value conversion failed", code, details);
+  catch %(?code *details):
+    f.nested($format.reason.value(), code, details);
   return converted;
 }
 
