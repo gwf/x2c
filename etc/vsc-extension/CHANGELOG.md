@@ -5,6 +5,9 @@ first.
 
 ## Unreleased
 
+- Highlight the current macro categories: `Stmt` replaces `Statement`,
+  `Block` is gone, and `Expr`, `Declaration`, `DeclaratorRow`,
+  `NamedType`, `Catch`, `Captures`, and `MatchRow` are recognized.
 - Highlight contextual `meta native` function definitions and distinguish
   always available `$auto`, `$scope`, `$let`, and `$lock` calls.
 - Associate `.xp` and `.xpmacro` indentation syntax files with x2c.

@@ -278,7 +278,7 @@ static int local_macro_grammar(void) {
 //      ^^^^^^^^^^ storage.type.macro.result.x2c
 //                 ^^^^^^^^^^^ entity.name.function.macro.x2c
 }
-macro Statement $holes(
+macro Stmt $holes(
   Expr $a, Type $b, Decl $c, Function $d, Name $e, Literal $f,
 //^^^^ storage.type.macro.hole.x2c
 //         ^^^^ storage.type.macro.hole.x2c
@@ -286,13 +286,12 @@ macro Statement $holes(
 //                           ^^^^^^^^ storage.type.macro.hole.x2c
 //                                        ^^^^ storage.type.macro.hole.x2c
 //                                                 ^^^^^^^ storage.type.macro.hole.x2c
-  Param $g, Statement $h, Block $i, Field $j, Entry $row,
+  Param $g, Stmt $h, Catch $i, Field $j, Entry $row,
 //^^^^^ storage.type.macro.hole.x2c
-//          ^^^^^^^^^ storage.type.macro.hole.x2c
-//                        ^^^^^ storage.type.macro.hole.x2c
-//                                  ^^^^^ storage.type.macro.hole.x2c
-//                                            ^^^^^ storage.type.macro.hole.x2c
-//                        ^^^^^ - support.type.prelude.x2c
+//          ^^^^ storage.type.macro.hole.x2c
+//                   ^^^^^ storage.type.macro.hole.x2c
+//                             ^^^^^ storage.type.macro.hole.x2c
+//                                       ^^^^^ storage.type.macro.hole.x2c
   Enumerator $enum, Unit $k...
 //^^^^^^^^^^ storage.type.macro.hole.x2c
 //                  ^^^^ storage.type.macro.hole.x2c
@@ -307,9 +306,8 @@ macro Statement $holes(
 //  ^^^ punctuation.definition.macro.splice.x2c
 }
 
-macro Block $block() {}
-//    ^^^^^ storage.type.macro.result.x2c
-//    ^^^^^ - support.type.prelude.x2c
+macro Stmt $stmt() {}
+//    ^^^^ storage.type.macro.result.x2c
 macro Field $field() {}
 //    ^^^^^ storage.type.macro.result.x2c
 macro Entry $entry() {}
@@ -321,11 +319,11 @@ macro Unit $unit() {}
 macro Decorator $decorator(Expr $target) => $target;
 //    ^^^^^^^^^ storage.type.macro.result.x2c
 
-macro Statement $legacy_using() using $temporary => {}
-//                              ^^^^^ keyword.other.macro.using.x2c
-//                                    ^ punctuation.definition.macro.sigil.x2c
-//                                     ^^^^^^^^^ variable.other.macro.hole.x2c
-//                                               ^^ keyword.operator.arrow.x2c
+macro Stmt $legacy_using() using $temporary => {}
+//                         ^^^^^ keyword.other.macro.using.x2c
+//                               ^ punctuation.definition.macro.sigil.x2c
+//                                ^^^^^^^^^ variable.other.macro.hole.x2c
+//                                          ^^ keyword.operator.arrow.x2c
 macro Expression $legacy_expression(Expr $value) => ($value)
 //                                               ^^ keyword.operator.arrow.x2c
 
