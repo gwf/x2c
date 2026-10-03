@@ -25,8 +25,10 @@ meta static List field_names(TypeInfo type) {
 // The same argument arrives twice: as syntax to read from, and as a type.
 meta static List field_reads(List receiver, TypeInfo type) {
   Array reads = [];
-  foreach (List field, fields_of(type))
-    reads.push(x2c_expr_field(receiver, field.car()));
+  foreach (List field, fields_of(type)) {
+    String member = field.car();
+    reads.push($!( $receiver.$member ));
+  }
   return x2c_expr_composite(reads);
 }
 

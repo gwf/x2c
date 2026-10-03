@@ -221,11 +221,10 @@ meta static List _tag_bits_expr(List row) {
   Var bits = _tag_bits(row);
   /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
      no compile-time meaning, so the tag is read directly. */
-  if (bits.tag() == <list>)
-    return %(expr () (op *
-      (expr (unsigned)
-        (sizeof (parens (decl $bits (bindings (bind () ()))))))
-      ${x2c_expr_ident(%("CHAR_BIT"))}));
+  if (bits.tag() == <list>) {
+    Type type = bits;
+    return $!( sizeof($type) * CHAR_BIT );
+  }
   return x2c_literal_int(bits);
 }
 
@@ -357,12 +356,11 @@ meta static List _tag_decode_groups(void) {
 meta static List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
-  List message = %(expr (* char)
-    (literal (* char) "\"TagId matches the var tag ledger\""));
   foreach (List row, _tag_rows()) {
     List id = x2c_expr_ident(x2c_ident(_tag_id(row)));
-    List same = %(expr () (op == $id ${x2c_literal_int(index)}));
-    checks.push(%(c-assert $same $message));
+    checks.push($!Unit{
+      _Static_assert($id == $index, "TagId matches the var tag ledger");
+    });
     index++;
   }
   return checks;

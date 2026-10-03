@@ -62,18 +62,19 @@ meta static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
 
 /* The destination's current value, boxed in the family the row names. */
 meta static List _update_box(List id, List lhs) {
-  List value = x2c_expr_index(x2c_expr_ident(lhs), x2c_literal_int(0));
-  List into = _update_cast_in(id);
-  if (into) value = x2c_expr_cast(into, value);
-  return x2c_expr_call(
-    x2c_expr_ident(x2c_ident(_update_boxer(id))), %($value));
+  List target = x2c_expr_ident(lhs);
+  List value = $!( $target[0] );
+  Type into = _update_cast_in(id);
+  if (into) value = $!( ($into)$value );
+  List boxer = x2c_expr_ident(x2c_ident(_update_boxer(id)));
+  return $!( $boxer($value) );
 }
 
 /* The converted result read back as the storage type. */
 meta static List _update_decode(List id, List value) {
-  List decoded = x2c_expr_call(
-    x2c_expr_ident(x2c_ident(_update_decoder(id))), %($value));
-  List back = _update_cast_out(id);
-  if (back) return x2c_expr_cast(back, decoded);
+  List decoder = x2c_expr_ident(x2c_ident(_update_decoder(id)));
+  List decoded = $!( $decoder($value) );
+  Type back = _update_cast_out(id);
+  if (back) return $!( ($back)$decoded );
   return decoded;
 }

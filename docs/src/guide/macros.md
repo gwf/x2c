@@ -551,15 +551,17 @@ specifies them.
 
 A `meta` parameter declared `TypeInfo` receives a description of the
 argument's type, including a struct or union's fields in declaration
-order. Pass the hole twice to receive both its code and its type, and pair
-the field names with `x2c_expr_field` to build typed field reads:
+order. Pass the hole twice to receive both its code and its type. A quotation
+uses each field name to build a member read:
 
 ```x2c
 #include "meta.x"
 meta static List project_fields(List receiver, TypeInfo type) {
   Array reads = [];
-  foreach (List field, type.assoc(<fields>))
-    reads.push(x2c_expr_field(receiver, field.car()));
+  foreach (List field, type.assoc(<fields>)) {
+    String member = field.car();
+    reads.push($!( $receiver.$member ));
+  }
   return x2c_expr_composite(reads);
 }
 macro Expression $project.fields(Expr $value) =>
@@ -581,7 +583,7 @@ resolves as it would the same call in source:
 meta static List project_write(TypeInfo type, List receiver, List value) {
   List methods = type.assoc(<methods>);
   if (!methods.contains("write")) return %();
-  return x2c_expr_call(x2c_expr_field(receiver, "write"), %($value));
+  return $!( $receiver.write($value) );
 }
 ```
 

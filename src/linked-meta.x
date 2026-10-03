@@ -453,11 +453,10 @@ static List _tag_bits_expr(List row) {
   Var bits = _tag_bits(row);
   /* `bits is <list>` would compile to the `Var.is_row` fast path, which has
      no compile-time meaning, so the tag is read directly. */
-  if (bits.tag() == <list>)
-    return %(expr () (op *
-      (expr (unsigned)
-        (sizeof (parens (decl $bits (bindings (bind () ()))))))
-      ${x2c_expr_ident(%("CHAR_BIT"))}));
+  if (bits.tag() == <list>) {
+    Type type = bits;
+    return $!( sizeof($type) * CHAR_BIT );
+  }
   return x2c_literal_int(bits);
 }
 
@@ -563,12 +562,11 @@ static List _tag_decode_groups(void) {
 static List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
-  List message = %(expr (* char)
-    (literal (* char) "\"TagId matches the var tag ledger\""));
   foreach (List row, _tag_rows()) {
     List id = x2c_expr_ident(x2c_ident(_tag_id(row)));
-    List same = %(expr () (op == $id ${x2c_literal_int(index)}));
-    checks.push(%(c-assert $same $message));
+    checks.push($!Unit{
+      _Static_assert($id == $index, "TagId matches the var tag ledger");
+    });
     index++;
   }
   return checks;
@@ -649,18 +647,19 @@ static List _update_cast_in(List id)  => _update_row(id)[4].car();
 static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
 
 static List _update_box(List id, List lhs) {
-  List value = x2c_expr_index(x2c_expr_ident(lhs), x2c_literal_int(0));
-  List into = _update_cast_in(id);
-  if (into) value = x2c_expr_cast(into, value);
-  return x2c_expr_call(
-    x2c_expr_ident(x2c_ident(_update_boxer(id))), %($value));
+  List target = x2c_expr_ident(lhs);
+  List value = $!( $target[0] );
+  Type into = _update_cast_in(id);
+  if (into) value = $!( ($into)$value );
+  List boxer = x2c_expr_ident(x2c_ident(_update_boxer(id)));
+  return $!( $boxer($value) );
 }
 
 static List _update_decode(List id, List value) {
-  List decoded = x2c_expr_call(
-    x2c_expr_ident(x2c_ident(_update_decoder(id))), %($value));
-  List back = _update_cast_out(id);
-  if (back) return x2c_expr_cast(back, decoded);
+  List decoder = x2c_expr_ident(x2c_ident(_update_decoder(id)));
+  List decoded = $!( $decoder($value) );
+  Type back = _update_cast_out(id);
+  if (back) return $!( ($back)$decoded );
   return decoded;
 }
 
