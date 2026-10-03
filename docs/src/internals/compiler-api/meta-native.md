@@ -47,7 +47,7 @@ Registers package `name`'s compile-time part, linked into the compiler,
 whose `targets` returns its name-to-`Func` Map. The registration unit
 `x2c build --extension` generates calls it from a constructor.
 
-Source: `src/meta-native.x:939`
+Source: `src/meta-native.x:935`
 
 ### `Compiler`
 
@@ -60,7 +60,7 @@ Records the name-to-`Func` Map that the entry of the native module loaded
 from absolute `path` returns. The Funcs, names, signatures, and path last
 for the process.
 
-Source: `src/meta-native.x:880`
+Source: `src/meta-native.x:876`
 
 <a id="Compiler.bind_linked_meta"></a>
 #### Compiler.bind_linked_meta
@@ -117,7 +117,7 @@ Returns the archive of the linked packages' objects that the build of
 this compiler kept beside it, named by the compiler's identity, or NULL
 when the compiler links none. Project meta code links it.
 
-Source: `src/meta-native.x:957`
+Source: `src/meta-native.x:953`
 
 <a id="Compiler.install_meta_declaration"></a>
 #### Compiler.install_meta_declaration
@@ -173,7 +173,7 @@ Source: `src/meta-native.x:326`
 Reports whether package `name`'s compile-time part is linked into the
 compiler, so its import loads no module.
 
-Source: `src/meta-native.x:948`
+Source: `src/meta-native.x:944`
 
 <a id="Compiler.load_native_module"></a>
 #### Compiler.load_native_module
@@ -228,7 +228,7 @@ Source: `src/meta-native.x:554`
 
 Reports whether the native module at absolute `path` is loaded.
 
-Source: `src/meta-native.x:905`
+Source: `src/meta-native.x:901`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets
@@ -238,7 +238,7 @@ Source: `src/meta-native.x:905`
 Returns the name-to-`Func` Map of the loaded native module at absolute
 `path`.
 
-Source: `src/meta-native.x:910`
+Source: `src/meta-native.x:906`
 
 <a id="Compiler.preload_native_module"></a>
 #### Compiler.preload_native_module
@@ -250,7 +250,7 @@ and the platform loads modules. A process that loads a module before it
 forks translation workers lets them inherit it; anything else is left
 for the import to report.
 
-Source: `src/meta-native.x:818`
+Source: `src/meta-native.x:817`
 
 <a id="Compiler.record_native_meta_effect"></a>
 #### Compiler.record_native_meta_effect
@@ -308,7 +308,7 @@ Reports whether the compiler itself supplies the native function `name`.
 Such a function exists only inside a compiler, so a `meta` function that
 reaches it has no runtime form.
 
-Source: `src/meta-native.x:916`
+Source: `src/meta-native.x:912`
 
 ## Design notes
 

@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:1405`
+Source: `src/callables.x:1394`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -49,7 +49,7 @@ Binds the file-static context type `name` with the field rows `fields`,
 for captured lambdas and callable defers. The complete typedef is bound
 at once, so each field keeps its member type.
 
-Source: `src/callables.x:182`
+Source: `src/callables.x:178`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -58,7 +58,7 @@ Source: `src/callables.x:182`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:1222`
+Source: `src/callables.x:1211`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -73,7 +73,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:641`
+Source: `src/callables.x:630`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -104,7 +104,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:1294`
+Source: `src/callables.x:1283`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -118,7 +118,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:996`
+Source: `src/callables.x:985`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -133,7 +133,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/callables.x:382`
+Source: `src/callables.x:378`
 
 ## Design notes
 

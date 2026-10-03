@@ -44,7 +44,7 @@ Returns the protocol member that derives a comparison operator.
 Inequality derives from `equal`, ordered comparisons derive from `compare`,
 and unsupported operators return zero.
 
-Source: `src/protocol.x:1683`
+Source: `src/protocol.x:1667`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -59,7 +59,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:2071`
+Source: `src/protocol.x:2019`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -71,7 +71,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, so prelude and live symbol modes can be
 compared.
 
-Source: `src/protocol.x:1599`
+Source: `src/protocol.x:1583`
 
 <a id="Compiler.forward_parameters"></a>
 #### Compiler.forward_parameters
@@ -82,7 +82,7 @@ Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it.
 
-Source: `src/protocol.x:1938`
+Source: `src/protocol.x:1910`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -94,7 +94,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2154`
+Source: `src/protocol.x:2104`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -104,7 +104,7 @@ Source: `src/protocol.x:2154`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:2181`
+Source: `src/protocol.x:2131`
 
 <a id="Compiler.operator_member"></a>
 #### Compiler.operator_member
@@ -114,7 +114,7 @@ Source: `src/protocol.x:2181`
 Returns the protocol member corresponding to a direct binary operator.
 Returns zero when the operator has no direct protocol mapping.
 
-Source: `src/protocol.x:1674`
+Source: `src/protocol.x:1658`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -137,7 +137,7 @@ Source: `src/protocol.x:233`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:2097`
+Source: `src/protocol.x:2045`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -147,7 +147,7 @@ Source: `src/protocol.x:2097`
 Returns unique member spellings from the participant's visible adopted
 conformances. Resolution remains responsible for selecting a binding.
 
-Source: `src/protocol.x:1542`
+Source: `src/protocol.x:1526`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -159,7 +159,7 @@ Lookup canonicalizes the participant and may use the nearest adopted
 typedef ancestor. Native conformances install their generated bindings
 before the cached conformance row is returned.
 
-Source: `src/protocol.x:1458`
+Source: `src/protocol.x:1442`
 
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
@@ -170,7 +170,7 @@ Reports whether conformance supersedes an ambient direct member.
 The answer is cached for the canonical participant and includes the first
 visible adopted ancestor that declares the member.
 
-Source: `src/protocol.x:1565`
+Source: `src/protocol.x:1549`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -183,7 +183,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1994`
+Source: `src/protocol.x:1947`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -209,7 +209,7 @@ Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:2611`
+Source: `src/protocol.x:2561`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -219,7 +219,7 @@ Source: `src/protocol.x:2611`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2534`
+Source: `src/protocol.x:2484`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -232,7 +232,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1696`
+Source: `src/protocol.x:1680`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
@@ -265,10 +265,11 @@ Source: `src/protocol.x:190`
 `List Compiler.wrapper_function( Compiler c, Type result, List binding, List params, List body)`
 
 Returns the function `result name(params) { body }` bound in this
-unit. `result` is the storage class and result type, `params` the
-parameter declarations, and `body` its lowered statements.
+unit. `result` is the storage class and result type, so static, inline
+and external helpers share it; `params` are the parameter declarations,
+and `body` its lowered statements.
 
-Source: `src/protocol.x:1927`
+Source: `src/protocol.x:1900`
 
 ## Design notes
 
