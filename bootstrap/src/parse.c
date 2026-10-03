@@ -5966,7 +5966,7 @@ if(tag != 357722) name = Compiler_aggregate_name(c, tag, name, 1);  List type = 
           List member;  List _x2c_macro_object_42 = members;  List _x2c_macro_cursor_42 = _x2c_macro_object_42;  Var _x2c_macro_cursor_output_39;  while(List_try_next(_x2c_macro_object_42, &(_x2c_macro_cursor_42), &(_x2c_macro_cursor_output_39))){
             member = Var_list(_x2c_macro_cursor_output_39); {
               Var row;  List _x2c_macro_object_41 = Compiler_evaluate_macro_rows(c, List_var(member));  List _x2c_macro_cursor_41 = _x2c_macro_object_41;  Var _x2c_macro_cursor_output_38;  while(List_try_next(_x2c_macro_object_41, &(_x2c_macro_cursor_41), &(_x2c_macro_cursor_output_38))){
-                row = _x2c_macro_cursor_output_38;  Array_push(bound, List_var(Compiler_bind_syntax(c, row, position, List_type(c -> return_type))));
+                row = _x2c_macro_cursor_output_38;  _push_items(bound, Compiler_bind_syntax(c, row, position, List_type(c -> return_type)));
               }
 
             }
