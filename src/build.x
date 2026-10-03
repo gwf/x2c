@@ -48,6 +48,31 @@ typedef struct Build {
 
 $(import "build-reports.xmacro")
 
+// source templates
+
+macro Expression $source.build.module(Expr $stamp) =>
+  %"const char x2c_module_stamp[] = \"${$stamp}\";
+Map x2c_module_targets(void) => \$module.targets();
+";
+
+macro Expression $source.build.extension(Expr $name) =>
+  %"void x2c_register_extension(const char *, Map (*)(void));
+static Map _targets(void) => \$module.targets();
+__attribute__((constructor)) static void _register(void) {
+  x2c_register_extension(\"${$name}\", _targets);
+}
+";
+
+macro Expression $source.build.include(Expr $includes, Expr $source) =>
+  %"${$includes}#include \"x2c-root${$source}\"\n";
+
+macro Expression $source.build.entry(
+  Expr $includes, Expr $root, Expr $declared, Expr $exports) =>
+  %"${$includes}\$(import \"${$root}/etc/lisp-bindings.xlisp\")
+macro Expression \$module.targets() =>
+  \$(lisp.native.targets (_x2c.native-meta.declared '${$declared}));
+${$exports}";
+
 // artifact paths
 
 /* Artifact directories and object, dependency, and state paths all use this
@@ -394,10 +419,7 @@ CliRequest Build.module_entry(Build b) {
   String stamp = build_module_stamp();
   if (!stamp) driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
-  _write_entry(
-    entry, b.units, %"const char x2c_module_stamp[] = \"$stamp\";
-Map x2c_module_targets(void) => \$module.targets();
-");
+  _write_entry(entry, b.units, $source.build.module(stamp));
   return b._entry_request(%($entry));
 }
 
@@ -415,12 +437,7 @@ CliRequest Build.extension_entries(Build b) {
     Path entry = %"${b.work_dir}/extension/$name/x2c_extension_$name.x";
     _write_entry(
       entry, Path.glob(%"$root/src/*.x"),
-      %"void x2c_register_extension(const char *, Map (*)(void));
-static Map _targets(void) => \$module.targets();
-__attribute__((constructor)) static void _register(void) {
-  x2c_register_extension(\"$name\", _targets);
-}
-");
+      $source.build.extension(name));
     entries.push(entry);
     packages[Path.absolute(entry)] = root;
   }
@@ -448,7 +465,7 @@ static void _write_entry(Path entry, List units, String exports) {
   String includes = "", Array sources = [];
   foreach (String unit, units) {
     String source = Path.absolute(unit);
-    includes = %"$includes#include \"x2c-root$source\"\n";
+    includes = $source.build.include(includes, source);
     sources.push(source);
   }
   String declared = sources.list_free().repr(), root = x2c_get_root();
@@ -457,10 +474,7 @@ static void _write_entry(Path entry, List units, String exports) {
     entry.dirname().make_dirs();
     if (!Path.exists(link)) link.symlink_to("/");
     entry.write_text(
-      %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
-macro Expression \$module.targets() =>
-  \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
-$exports");
+      $source.build.entry(includes, root, declared, exports));
   }
   catch %(io-fail *detail): host_error(detail);
 }

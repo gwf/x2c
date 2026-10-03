@@ -32,6 +32,28 @@ typedef struct ProjectBuild {
 #include "buffer.x"
 #include "install.x"
 
+// source templates
+
+macro Expression $source.project.manifest(Expr $name) =>
+  %"[target.${$name}]
+sources = [\"src/*.x\"]
+";
+
+macro Expression $source.project.main() =>
+  %"/*  main.x -- greet the name given on the command line */
+
+#include <stdio.h>
+
+int main(int argc, char **argv) {
+  String name = argc > 1 ? argv[1] : \"world\";
+  puts(%\"Hello, \$name!\");
+  return 0;
+}
+";
+
+macro Expression $source.project.ignore() =>
+  ".x2c-build/\n";
+
 // command reports
 
 macro Stmt $report.project_source_excluded(Expr $path, Expr $target) {
@@ -897,20 +919,7 @@ static void _write_starter(Path dir, String name) {
   if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
     $report.project_directory_occupied(dir);
   dir.join("src").make_dirs();
-  dir.join("x2c.toml").write_text(
-    %"[target.$name]
-sources = [\"src/*.x\"]
-");
-  dir.join("src/main.x").write_text(
-    %"/*  main.x -- greet the name given on the command line */
-
-#include <stdio.h>
-
-int main(int argc, char **argv) {
-  String name = argc > 1 ? argv[1] : \"world\";
-  puts(%\"Hello, \$name!\");
-  return 0;
-}
-");
-  dir.join(".gitignore").write_text(".x2c-build/\n");
+  dir.join("x2c.toml").write_text($source.project.manifest(name));
+  dir.join("src/main.x").write_text($source.project.main());
+  dir.join(".gitignore").write_text($source.project.ignore());
 }
