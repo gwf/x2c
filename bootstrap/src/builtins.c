@@ -746,7 +746,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _409 = cons(_408, NULL);
   _410 = cons(_207, _409);
   _411 = List_var(_410);
-  _412 = int_var(1894);
+  _412 = int_var(1898);
   _413 = cons(_412, NULL);
   _414 = cons(_222, _413);
   _415 = List_var(_414);
@@ -895,7 +895,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _555 = List_var(_554);
   _556 = cons(_217, _214);
   _557 = List_var(_556);
-  _558 = int_var(14113);
+  _558 = int_var(14117);
   _559 = cons(_558, NULL);
   _560 = cons(_222, _559);
   _561 = List_var(_560);
@@ -1089,7 +1089,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _749 = cons(_748, NULL);
   _750 = cons(_212, _749);
   _751 = List_var(_750);
-  _752 = int_var(21873);
+  _752 = int_var(21877);
   _753 = cons(_752, NULL);
   _754 = cons(_222, _753);
   _755 = List_var(_754);
@@ -1280,7 +1280,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _940 = cons(_939, NULL);
   _941 = cons(_207, _940);
   _942 = List_var(_941);
-  _943 = int_var(25824);
+  _943 = int_var(25828);
   _944 = cons(_943, NULL);
   _945 = cons(_222, _944);
   _946 = List_var(_945);
@@ -1505,7 +1505,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1162 = cons(_1161, NULL);
   _1163 = cons(_207, _1162);
   _1164 = List_var(_1163);
-  _1165 = int_var(28037);
+  _1165 = int_var(28041);
   _1166 = cons(_1165, NULL);
   _1167 = cons(_222, _1166);
   _1168 = List_var(_1167);

@@ -13,7 +13,7 @@
 #include "string.h"
 #include "symbol.h"
 #include "symbolset.h"
-typedef List Type;
+typedef List TypeInfo;
 
 typedef List Source;
 

@@ -120,7 +120,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _7 = cons(_6, NULL);
   _8 = cons(_1, _7);
   _9 = cons(_0, _8);
-  _10 = String_new("Type");
+  _10 = String_new("TypeInfo");
   _11 = String_new("Source");
   _12 = Symbol_var(62436);
   _13 = Symbol_var(1077029798);
