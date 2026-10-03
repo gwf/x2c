@@ -1233,20 +1233,6 @@ typedef struct DeferCaptures {
   int unsupported;
 } DeferCaptures;
 
-/* The body is already lowered; these templates supply its generated entry
-   and the captured variant's environment pointer. */
-macro Unit $defer_callback(Name $callback, Name $opaque,
-    Stmt $body) {
-  static void $callback(void *$opaque) { $body }
-}
-
-macro Unit $defer_captured_callback(Type $type, Name $callback,
-    Name $opaque, Name $local, Stmt $body) {
-  static void $callback(void *$opaque) {
-    $type *$local = ($type *)$opaque;
-    $body
-  }
-}
 
 /** Returns `stmts` with each `defer` statement and the statements after
     it replaced by one region; a list without `defer` returns unchanged. */
@@ -1412,18 +1398,21 @@ static List Compiler._defer_environment(
   return c.capture_environment(env_binding, fields.list_free());
 }
 
-/* Preserve the lowered finalizer while binding the new function entry. */
+/* Preserve the lowered finalizer while binding the new function entry;
+   the captured variant also points its local at the environment. */
 static List Compiler._defer_callback(
   Compiler c, List callback, List opaque, List env_binding,
   List env_local, List rewritten) {
   List body = %(code-value "lowered" (seq $rewritten) ());
   if (env_binding) {
-    Type env_type = %(${binding_identity_spelling(env_binding)});
-    Macro captured = $defer_captured_callback;
-    return c.bind_syntax(
-      captured(env_type, callback, opaque, env_local, body),
-      AST_UNIT, NULL);
+    Type type = %(${binding_identity_spelling(env_binding)});
+    return c.bind_syntax($!Unit{
+      static void $callback(void *$opaque) {
+        $type *$env_local = ($type *)$opaque;
+        $body
+      }
+    }, AST_UNIT, NULL);
   }
-  Macro plain = $defer_callback;
-  return c.bind_syntax(plain(callback, opaque, body), AST_UNIT, NULL);
+  return c.bind_syntax(
+    $!Unit{ static void $callback(void *$opaque) { $body } }, AST_UNIT, NULL);
 }

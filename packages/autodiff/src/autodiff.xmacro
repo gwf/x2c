@@ -613,10 +613,11 @@ meta static List ad_forward(List fn) {
       List params_doubles = ad_param_doubles(params);
       List body_doubles = ad_declared_doubles(body);
       List names = %(@params_doubles @body_doubles);
-      List one = %(function $spec
-                    (bind (${ad_dot(name)})
-                      ((fnmod (params @{ad_fwd_params(params)}))))
-                    ${ad_fwd_body(body, names)});
+      Type result = spec;
+      String dot = ad_dot(name);
+      List tangents = ad_fwd_params(params);
+      List items = ad_fwd_body(body, names).cdr();
+      List one = $!Unit{ $result $dot($tangents...) { $items... } };
       return %($one);
     }
   }
