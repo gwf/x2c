@@ -3209,7 +3209,7 @@ static List Compiler._finish_aggregate_type(
   $let(c.aggregate_type, type) {
     foreach (List member, members)
       foreach (Var row, c.evaluate_macro_rows(member))
-        bound.push(c.bind_syntax(row, position, c.return_type));
+        _push_items(bound, c.bind_syntax(row, position, c.return_type));
   }
   return c._publish_aggregate_type(tag, name, bound.list_free(), c.token);
 }
