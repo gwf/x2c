@@ -6,7 +6,7 @@
 
 #include "promoted-string-cache.h"
 
-static String _11, _7, _5;
+static String _2, _1, _0;
 
 static int dynamic_calls;
 
@@ -23,9 +23,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _5 = String_new("assigned");
-  _7 = String_new("dual");
-  _11 = String_new("argument");
+  _0 = String_new("dual");
+  _1 = String_new("assigned");
+  _2 = String_new("argument");
   _x2c_static_initialize_0();
 }
 
@@ -36,7 +36,7 @@ char * dynamic_raw(void){
 }
 
 static String source_dual(void){
-  return _7;
+  return _0;
 }
 
 static String take_string(String value){
@@ -67,8 +67,8 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   String assigned;
-  assigned = _5;
-  String direct = take_string(_11);
+  assigned = _1;
+  String direct = take_string(_2);
   String escaped = header_conditional(1);
   String dynamic = header_conditional(0);
   String before_string = header_direct();

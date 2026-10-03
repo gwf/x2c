@@ -86,11 +86,11 @@
 
 #include "exception.h"
 
-static List _3142, _3140, _3139, _3137, _3136, _3135, _3134, _3132, _3131, _3129, _3128, _3126, _3125, _3123, _3122, _3120, _3119, _3117, _3116, _3115, _3113, _3112, _3110, _3109, _3107, _3106, _3104, _3103, _3102, _3101, _3099, _3098, _3096, _3095, _3093, _3090, _3088, _3087, _3085, _3084, _3082, _3081, _3079, _3078, _3076, _3075, _3073, _3072, _3070, _3069, _3067, _3065, _3062, _3061, _3059, _3058, _3056, _3055, _3053, _3052, _3050, _3049, _3048, _3046, _3045, _3043, _3041, _3039, _3038, _3036, _3035, _3033, _3032, _3030, _3028, _1154, _519, _202, _47;
+static List _182, _180, _179, _177, _175, _169, _162, _160, _158, _157, _155, _152, _150, _149, _147, _145, _143, _142, _140, _139, _136, _134, _133, _131, _128, _126, _125, _123, _122, _121, _119, _117, _116, _114, _113, _111, _106, _104, _103, _101, _99, _95, _93, _92, _90, _86, _84, _83, _81, _79, _77, _76, _74, _72, _68, _66, _64, _63, _61, _56, _54, _53, _51, _48, _47, _43, _41, _40, _38, _36, _30, _28, _27, _25, _24, _22, _21, _19, _17;
 
-static String _3197, _3196, _3195, _3194, _3193, _3192, _3191, _3190, _3189, _3188, _3187, _3186, _3185, _3184, _3183, _3182, _3181, _3180, _3179, _3178, _3177, _3176, _3175, _3174, _3173, _3172, _3171, _3170, _3169, _3168, _3167, _3166, _3165, _3164, _3163, _3162, _3161, _3160, _3159, _3158, _3157, _3156, _3155, _3154, _3153, _3152, _3151, _3150, _3149, _3148, _3147, _3146, _3145, _3144, _3143, _3091, _3063, _3026, _3024, _1152, _200;
+static String _185, _184, _183, _173, _172, _171, _170, _168, _167, _166, _165, _164, _163, _161, _154, _153, _146, _138, _137, _130, _129, _120, _109, _108, _107, _97, _96, _89, _88, _87, _80, _70, _69, _67, _60, _59, _58, _57, _50, _49, _45, _44, _34, _33, _32, _31, _15, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _3141, _3138, _3133, _3130, _3127, _3124, _3121, _3118, _3114, _3111, _3108, _3105, _3100, _3097, _3094, _3092, _3089, _3086, _3083, _3080, _3077, _3074, _3071, _3068, _3066, _3064, _3060, _3057, _3054, _3051, _3047, _3044, _3042, _3040, _3037, _3034, _3031, _3029, _3027, _3025, _1153, _520, _518, _203, _201, _46;
+static Var _181, _178, _176, _174, _159, _156, _151, _148, _144, _141, _135, _132, _127, _124, _118, _115, _112, _110, _105, _102, _100, _98, _94, _91, _85, _82, _78, _75, _73, _71, _65, _62, _55, _52, _46, _42, _39, _37, _35, _29, _26, _23, _20, _18, _16, _14;
 
 static int _init_guard_ = 0;
 
@@ -554,10 +554,10 @@ LispCallback;
 
 static List unary_signature;
 
-_x2c_initializer_choice_D09CF48E_16((unary_signature = _3035))
+_x2c_initializer_choice_D09CF48E_16((unary_signature = _24))
 static List binary_signature;
 
-_x2c_initializer_choice_D09CF48E_17((binary_signature = _3041))
+_x2c_initializer_choice_D09CF48E_17((binary_signature = _30))
 static Func _unary_callback(Var callable);
 
 static Func _binary_callback(Var callable);
@@ -694,10 +694,10 @@ static Var _x2c_func_adapt_32(Func _x2c_func_binding_32, const FuncArg * _x2c_fu
 static Var _x2c_func_adapt_33(Func _x2c_func_binding_33, const FuncArg * _x2c_func_argv_33);
 static Var _x2c_func_adapt_34(Func _x2c_func_binding_34, const FuncArg * _x2c_func_argv_34);
 static Var _x2c_func_adapt_35(Func _x2c_func_binding_35, const FuncArg * _x2c_func_argv_35);
-_x2c_initializer_choice_D09CF48E_18((callback_targets = Map_update_n(Map_new(), 36, String_var(_3158), Func_var(Func_new(_x2c_func_adapt_0, _3048)), String_var(_3159), Func_var(Func_new(_x2c_func_adapt_1, _3048)), String_var(_3160), Func_var(Func_new(_x2c_func_adapt_2, _3049)), String_var(_3161), Func_var(Func_new(_x2c_func_adapt_3, _3049)), String_var(_3162), Func_var(Func_new(_x2c_func_adapt_4, _3055)), String_var(_3163), Func_var(Func_new(_x2c_func_adapt_5, _3048)), String_var(_3164), Func_var(Func_new(_x2c_func_adapt_6, _3048)), String_var(_3165), Func_var(Func_new(_x2c_func_adapt_7, _3055)), String_var(_3166), Func_var(Func_new(_x2c_func_adapt_8, _3061)), String_var(_3167), Func_var(Func_new(_x2c_func_adapt_9, _3062)), String_var(_3168), Func_var(Func_new(_x2c_func_adapt_10, _3072)), String_var(_3169), Func_var(Func_new(_x2c_func_adapt_11, _3078)), String_var(_3170), Func_var(Func_new(_x2c_func_adapt_12, _3072)), String_var(_3171), Func_var(Func_new(_x2c_func_adapt_13, _3072)), String_var(_3172), Func_var(Func_new(_x2c_func_adapt_14, _3084)), String_var(_3173), Func_var(Func_new(_x2c_func_adapt_15, _3090)), String_var(_3174), Func_var(Func_new(_x2c_func_adapt_16, _3090)), String_var(_3175), Func_var(Func_new(_x2c_func_adapt_17, _3101)), String_var(_3176), Func_var(Func_new(_x2c_func_adapt_18, _3109)), String_var(_3177), Func_var(Func_new(_x2c_func_adapt_19, _3109)), String_var(_3178), Func_var(Func_new(_x2c_func_adapt_20, _3115)), String_var(_3179), Func_var(Func_new(_x2c_func_adapt_21, _3115)), String_var(_3180), Func_var(Func_new(_x2c_func_adapt_22, _3122)), String_var(_3181), Func_var(Func_new(_x2c_func_adapt_23, _3128)), String_var(_3182), Func_var(Func_new(_x2c_func_adapt_24, _3128)), String_var(_3183), Func_var(Func_new(_x2c_func_adapt_25, _3134)), String_var(_3184), Func_var(Func_new(_x2c_func_adapt_26, _3135)), String_var(_3185), Func_var(Func_new(_x2c_func_adapt_27, _3048)), String_var(_3186), Func_var(Func_new(_x2c_func_adapt_28, _3049)), String_var(_3187), Func_var(Func_new(_x2c_func_adapt_29, _3049)), String_var(_3188), Func_var(Func_new(_x2c_func_adapt_30, _3062)), String_var(_3189), Func_var(Func_new(_x2c_func_adapt_31, _3090)), String_var(_3190), Func_var(Func_new(_x2c_func_adapt_32, _3136)), String_var(_3191), Func_var(Func_new(_x2c_func_adapt_33, _3128)), String_var(_3192), Func_var(Func_new(_x2c_func_adapt_34, _3128)), String_var(_3193), Func_var(Func_new(_x2c_func_adapt_35, _3135)))))
+_x2c_initializer_choice_D09CF48E_18((callback_targets = Map_update_n(Map_new(), 36, String_var(_33), Func_var(Func_new(_x2c_func_adapt_0, _43)), String_var(_44), Func_var(Func_new(_x2c_func_adapt_1, _43)), String_var(_45), Func_var(Func_new(_x2c_func_adapt_2, _48)), String_var(_49), Func_var(Func_new(_x2c_func_adapt_3, _48)), String_var(_50), Func_var(Func_new(_x2c_func_adapt_4, _56)), String_var(_57), Func_var(Func_new(_x2c_func_adapt_5, _43)), String_var(_58), Func_var(Func_new(_x2c_func_adapt_6, _43)), String_var(_59), Func_var(Func_new(_x2c_func_adapt_7, _56)), String_var(_60), Func_var(Func_new(_x2c_func_adapt_8, _66)), String_var(_67), Func_var(Func_new(_x2c_func_adapt_9, _68)), String_var(_69), Func_var(Func_new(_x2c_func_adapt_10, _79)), String_var(_80), Func_var(Func_new(_x2c_func_adapt_11, _86)), String_var(_87), Func_var(Func_new(_x2c_func_adapt_12, _79)), String_var(_88), Func_var(Func_new(_x2c_func_adapt_13, _79)), String_var(_89), Func_var(Func_new(_x2c_func_adapt_14, _95)), String_var(_96), Func_var(Func_new(_x2c_func_adapt_15, _106)), String_var(_107), Func_var(Func_new(_x2c_func_adapt_16, _106)), String_var(_108), Func_var(Func_new(_x2c_func_adapt_17, _119)), String_var(_120), Func_var(Func_new(_x2c_func_adapt_18, _128)), String_var(_129), Func_var(Func_new(_x2c_func_adapt_19, _128)), String_var(_130), Func_var(Func_new(_x2c_func_adapt_20, _136)), String_var(_137), Func_var(Func_new(_x2c_func_adapt_21, _136)), String_var(_138), Func_var(Func_new(_x2c_func_adapt_22, _145)), String_var(_146), Func_var(Func_new(_x2c_func_adapt_23, _152)), String_var(_153), Func_var(Func_new(_x2c_func_adapt_24, _152)), String_var(_154), Func_var(Func_new(_x2c_func_adapt_25, _160)), String_var(_161), Func_var(Func_new(_x2c_func_adapt_26, _162)), String_var(_163), Func_var(Func_new(_x2c_func_adapt_27, _43)), String_var(_164), Func_var(Func_new(_x2c_func_adapt_28, _48)), String_var(_165), Func_var(Func_new(_x2c_func_adapt_29, _48)), String_var(_166), Func_var(Func_new(_x2c_func_adapt_30, _68)), String_var(_167), Func_var(Func_new(_x2c_func_adapt_31, _106)), String_var(_168), Func_var(Func_new(_x2c_func_adapt_32, _169)), String_var(_170), Func_var(Func_new(_x2c_func_adapt_33, _152)), String_var(_171), Func_var(Func_new(_x2c_func_adapt_34, _152)), String_var(_172), Func_var(Func_new(_x2c_func_adapt_35, _162)))))
 static Func _native_target(String name);
 static String lisp_standard_source;
-_x2c_initializer_choice_D09CF48E_19((lisp_standard_source = _3194))
+_x2c_initializer_choice_D09CF48E_19((lisp_standard_source = _173))
 static void Lisp__install_specials(Lisp lisp);
 static Var _special_stub(void);
 _Noreturn static Var _bad_session(String operation);
@@ -856,192 +856,192 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(! x2c_register_builtin_descriptor(808259842, _x2c__x2c_protocol_methods_0)){
     x2c_register_descriptor(String_new("lambda"), _x2c__x2c_protocol_methods_0);
   }
+  _0 = String_new("apply");
+  _1 = String_new("quote");
+  _2 = String_new("x2c.");
+  _3 = String_new("quasiquote");
+  _4 = String_new("eval");
+  _5 = String_new("bind");
+  _6 = String_new("import");
+  _7 = String_new("_x2c.import-hook");
+  _8 = String_new(".");
+  _9 = String_new("=");
+  _10 = String_new("<");
+  _11 = String_new("<=");
+  _12 = String_new(">");
+  _13 = String_new(">=");
+  _14 = Symbol_var(437126);
+  _15 = String_new("Var");
+  _16 = String_var(_15);
+  _17 = cons(_16, NULL);
+  _18 = List_var(_17);
+  _19 = cons(_18, NULL);
+  _20 = List_var(_19);
+  _21 = cons(_20, NULL);
+  _22 = cons(_14, _21);
+  _23 = List_var(_22);
+  _24 = cons(_23, _17);
+  _25 = cons(_18, _19);
+  _26 = List_var(_25);
+  _27 = cons(_26, NULL);
+  _28 = cons(_14, _27);
+  _29 = List_var(_28);
+  _30 = cons(_29, _17);
+  _31 = String_new("Lisp callback");
+  _32 = String_new("Lisp iterator callback");
+  _33 = String_new("List_map");
+  _34 = String_new("List");
+  _35 = String_var(_34);
+  _36 = cons(_35, NULL);
+  _37 = List_var(_36);
+  _38 = cons(_37, _19);
+  _39 = List_var(_38);
+  _40 = cons(_39, NULL);
+  _41 = cons(_14, _40);
+  _42 = List_var(_41);
+  _43 = cons(_42, _36);
+  _44 = String_new("List_filter");
+  _45 = String_new("List_any");
   _46 = Symbol_var(19368);
   _47 = cons(_46, NULL);
-  _200 = String_new("String");
-  _201 = String_var(_200);
-  _202 = cons(_201, NULL);
-  _203 = List_var(_202);
-  _518 = Symbol_var(1473096);
-  _519 = cons(_518, NULL);
-  _520 = List_var(_519);
-  _1152 = String_new("List");
-  _1153 = String_var(_1152);
-  _1154 = cons(_1153, NULL);
-  _3024 = String_new(".");
-  _3025 = Symbol_var(437126);
-  _3026 = String_new("Var");
-  _3027 = String_var(_3026);
-  _3028 = cons(_3027, NULL);
-  _3029 = List_var(_3028);
-  _3030 = cons(_3029, NULL);
-  _3031 = List_var(_3030);
-  _3032 = cons(_3031, NULL);
-  _3033 = cons(_3025, _3032);
-  _3034 = List_var(_3033);
-  _3035 = cons(_3034, _3028);
-  _3036 = cons(_3029, _3030);
-  _3037 = List_var(_3036);
-  _3038 = cons(_3037, NULL);
-  _3039 = cons(_3025, _3038);
-  _3040 = List_var(_3039);
-  _3041 = cons(_3040, _3028);
-  _3042 = List_var(_1154);
-  _3043 = cons(_3042, _3030);
-  _3044 = List_var(_3043);
-  _3045 = cons(_3044, NULL);
-  _3046 = cons(_3025, _3045);
-  _3047 = List_var(_3046);
-  _3048 = cons(_3047, _1154);
-  _3049 = cons(_3047, _47);
-  _3050 = cons(_3042, _3043);
-  _3051 = List_var(_3050);
-  _3052 = cons(_3051, NULL);
-  _3053 = cons(_3025, _3052);
-  _3054 = List_var(_3053);
-  _3055 = cons(_3054, _1154);
-  _3056 = cons(_3042, _3036);
-  _3057 = List_var(_3056);
-  _3058 = cons(_3057, NULL);
-  _3059 = cons(_3025, _3058);
-  _3060 = List_var(_3059);
-  _3061 = cons(_3060, _3028);
-  _3062 = cons(_3047, _3028);
-  _3063 = String_new("Array");
-  _3064 = String_var(_3063);
-  _3065 = cons(_3064, NULL);
-  _3066 = List_var(_3065);
-  _3067 = cons(_3066, _3030);
-  _3068 = List_var(_3067);
-  _3069 = cons(_3068, NULL);
-  _3070 = cons(_3025, _3069);
-  _3071 = List_var(_3070);
-  _3072 = cons(_3071, _3065);
-  _3073 = cons(_3066, _3067);
-  _3074 = List_var(_3073);
-  _3075 = cons(_3074, NULL);
-  _3076 = cons(_3025, _3075);
-  _3077 = List_var(_3076);
-  _3078 = cons(_3077, _3065);
-  _3079 = cons(_3066, _3036);
-  _3080 = List_var(_3079);
-  _3081 = cons(_3080, NULL);
-  _3082 = cons(_3025, _3081);
-  _3083 = List_var(_3082);
-  _3084 = cons(_3083, _3028);
-  _3085 = cons(_203, _3030);
-  _3086 = List_var(_3085);
-  _3087 = cons(_3086, NULL);
-  _3088 = cons(_3025, _3087);
-  _3089 = List_var(_3088);
-  _3090 = cons(_3089, _202);
-  _3091 = String_new("Iter");
-  _3092 = String_var(_3091);
-  _3093 = cons(_3092, NULL);
-  _3094 = List_var(_3093);
-  _3095 = cons(_3029, _3036);
-  _3096 = cons(_3094, _3095);
-  _3097 = List_var(_3096);
-  _3098 = cons(_3097, NULL);
-  _3099 = cons(_3025, _3098);
-  _3100 = List_var(_3099);
-  _3101 = cons(_3100, _3093);
-  _3102 = cons(_3094, NULL);
-  _3103 = cons(_3029, _3102);
-  _3104 = cons(_3094, _3103);
-  _3105 = List_var(_3104);
-  _3106 = cons(_3105, NULL);
-  _3107 = cons(_3025, _3106);
-  _3108 = List_var(_3107);
-  _3109 = cons(_3108, _3093);
-  _3110 = cons(_3094, _3104);
-  _3111 = List_var(_3110);
-  _3112 = cons(_3111, NULL);
-  _3113 = cons(_3025, _3112);
-  _3114 = List_var(_3113);
-  _3115 = cons(_3114, _3093);
-  _3116 = cons(_3029, _3103);
-  _3117 = cons(_3094, _3116);
-  _3118 = List_var(_3117);
-  _3119 = cons(_3118, NULL);
-  _3120 = cons(_3025, _3119);
-  _3121 = List_var(_3120);
-  _3122 = cons(_3121, _3093);
-  _3123 = cons(_3094, _3030);
-  _3124 = List_var(_3123);
-  _3125 = cons(_3124, NULL);
-  _3126 = cons(_3025, _3125);
-  _3127 = List_var(_3126);
-  _3128 = cons(_3127, _47);
-  _3129 = cons(_3094, _3036);
-  _3130 = List_var(_3129);
-  _3131 = cons(_3130, NULL);
-  _3132 = cons(_3025, _3131);
-  _3133 = List_var(_3132);
-  _3134 = cons(_3133, _3028);
-  _3135 = cons(_3127, _3028);
-  _3136 = cons(_3127, _3093);
-  _3137 = cons(_520, NULL);
-  _3138 = List_var(_3137);
-  _3139 = cons(_3138, NULL);
-  _3140 = cons(_3025, _3139);
-  _3141 = List_var(_3140);
-  _3142 = cons(_3141, _3028);
-  _3143 = String_new("apply");
-  _3144 = String_new("quote");
-  _3145 = String_new("x2c.");
-  _3146 = String_new("quasiquote");
-  _3147 = String_new("eval");
-  _3148 = String_new("bind");
-  _3149 = String_new("import");
-  _3150 = String_new("_x2c.import-hook");
-  _3151 = String_new("=");
-  _3152 = String_new("<");
-  _3153 = String_new("<=");
-  _3154 = String_new(">");
-  _3155 = String_new(">=");
-  _3156 = String_new("Lisp callback");
-  _3157 = String_new("Lisp iterator callback");
-  _3158 = String_new("List_map");
-  _3159 = String_new("List_filter");
-  _3160 = String_new("List_any");
-  _3161 = String_new("List_all");
-  _3162 = String_new("List_map2");
-  _3163 = String_new("List_sort_by");
-  _3164 = String_new("List_sort_with");
-  _3165 = String_new("List_zip_with");
-  _3166 = String_new("List_foldl");
-  _3167 = String_new("List_find");
-  _3168 = String_new("Array_map");
-  _3169 = String_new("Array_map2");
-  _3170 = String_new("Array_sort_by");
-  _3171 = String_new("Array_sort_with");
-  _3172 = String_new("Array_foldl");
-  _3173 = String_new("String_map");
-  _3174 = String_new("String_filter");
-  _3175 = String_new("Iter_init");
-  _3176 = String_new("Iter_map_into");
-  _3177 = String_new("Iter_filter_into");
-  _3178 = String_new("Iter_zip_with_into");
-  _3179 = String_new("Iter_map2_into");
-  _3180 = String_new("Iter_scan_into");
-  _3181 = String_new("Iter_any");
-  _3182 = String_new("Iter_all");
-  _3183 = String_new("Iter_foldl");
-  _3184 = String_new("Iter_find");
-  _3185 = String_new("Lisp_List_filter");
-  _3186 = String_new("Lisp_List_any");
-  _3187 = String_new("Lisp_List_all");
-  _3188 = String_new("Lisp_List_find");
-  _3189 = String_new("Lisp_String_filter");
-  _3190 = String_new("Lisp_Iter_filter");
-  _3191 = String_new("Lisp_Iter_any");
-  _3192 = String_new("Lisp_Iter_all");
-  _3193 = String_new("Lisp_Iter_find");
-  _3194 = String_new("// x2c Lisp standard environment\n\n(def nil ())\n(def true \'true)\n(def false nil)\n\n// Native value and list boundary\n\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n\n// Native number and text boundary\n\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n\n// Definition and control vocabulary\n\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n\n(defun list (. values) values)\n(def equal? eq?)\n\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n\n(def begin (bind \"lisp_begin\" nil))\n(def append (bind \"lisp_append\" nil))\n\n// These nine are variadic, and a variadic lambda cannot be prepared, so\n// written in Lisp they would pull every arithmetic call in a compiled\n// body back onto the evaluator.\n\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n\n(def string-append (bind \"lisp_string_append_all\" nil))\n\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n\n// Tries each clause\'s pattern against subject in order and evaluates the\n// first body whose pattern matches, with that pattern\'s binders in scope.\n// A final (else body) clause runs when nothing matched.\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n\n// Short aliases for common operations\n\n(def add _add)\n(def len length)\n(def lower string-downcase)\n\n// Standard algorithms from lib/lisp-init.x.\n\n(def last (bind \"lisp_last\" nil))\n(def member (bind \"lisp_member\" nil))\n(def assoc (bind \"lisp_assoc\" nil))\n(def not (bind \"lisp_not\" nil))\n(def null? (bind \"lisp_null\" nil))\n(def sub (bind \"lisp_sub\" nil))\n(def mul (bind \"lisp_mul\" nil))\n(def div (bind \"lisp_div\" nil))\n(def mod (bind \"lisp_mod\" nil))\n(def % mod)\n(def caar (bind \"lisp_caar\" nil))\n(def cadr (bind \"lisp_cadr\" nil))\n(def cdar (bind \"lisp_cdar\" nil))\n(def cddr (bind \"lisp_cddr\" nil))\n(def caaar (bind \"lisp_caaar\" nil))\n(def caadr (bind \"lisp_caadr\" nil))\n(def cadar (bind \"lisp_cadar\" nil))\n(def caddr (bind \"lisp_caddr\" nil))\n(def cdaar (bind \"lisp_cdaar\" nil))\n(def cdadr (bind \"lisp_cdadr\" nil))\n(def cddar (bind \"lisp_cddar\" nil))\n(def cdddr (bind \"lisp_cdddr\" nil))\n(def match (bind \"lisp_match\" nil))\n(def bound (bind \"lisp_bound\" nil))\n(def search-replace (bind \"lisp_search_replace\" nil))\n(def binder? (bind \"lisp_binder\" nil))\n(def _binders (bind \"lisp_binders\" nil))\n(def _binder-lets (bind \"lisp_binder_lets\" nil))\n\n// These callbacks run before the Func runtime is installed. They read\n// through private names so a session that redefines car, cdr, or cons\n// keeps them working.\n(def List_car car)\n(def List_cdr cdr)\n(def Var_cons cons)\n(def List_reverse reverse)\n(defun _filter-onto (keep values kept)\n  (if (equal? values nil) (List_reverse kept)\n      (_filter-onto keep (List_cdr values)\n                    (if (equal? (keep (List_car values)) nil) kept\n                        (Var_cons (List_car values) kept)))))\n(defun filter (keep values) (_filter-onto keep values nil))\n(defun _map-onto (procedure values mapped)\n  (if (equal? values nil) (List_reverse mapped)\n      (_map-onto procedure (List_cdr values)\n                 (Var_cons (procedure (List_car values)) mapped))))\n(defun map (procedure values) (_map-onto procedure values nil))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n(def reduce foldl)\n");
-  _3195 = String_new("Lisp.eval");
-  _3196 = String_new("Lisp.apply");
-  _3197 = String_new("Lisp.eval_string");
+  _48 = cons(_42, _47);
+  _49 = String_new("List_all");
+  _50 = String_new("List_map2");
+  _51 = cons(_37, _38);
+  _52 = List_var(_51);
+  _53 = cons(_52, NULL);
+  _54 = cons(_14, _53);
+  _55 = List_var(_54);
+  _56 = cons(_55, _36);
+  _57 = String_new("List_sort_by");
+  _58 = String_new("List_sort_with");
+  _59 = String_new("List_zip_with");
+  _60 = String_new("List_foldl");
+  _61 = cons(_37, _25);
+  _62 = List_var(_61);
+  _63 = cons(_62, NULL);
+  _64 = cons(_14, _63);
+  _65 = List_var(_64);
+  _66 = cons(_65, _17);
+  _67 = String_new("List_find");
+  _68 = cons(_42, _17);
+  _69 = String_new("Array_map");
+  _70 = String_new("Array");
+  _71 = String_var(_70);
+  _72 = cons(_71, NULL);
+  _73 = List_var(_72);
+  _74 = cons(_73, _19);
+  _75 = List_var(_74);
+  _76 = cons(_75, NULL);
+  _77 = cons(_14, _76);
+  _78 = List_var(_77);
+  _79 = cons(_78, _72);
+  _80 = String_new("Array_map2");
+  _81 = cons(_73, _74);
+  _82 = List_var(_81);
+  _83 = cons(_82, NULL);
+  _84 = cons(_14, _83);
+  _85 = List_var(_84);
+  _86 = cons(_85, _72);
+  _87 = String_new("Array_sort_by");
+  _88 = String_new("Array_sort_with");
+  _89 = String_new("Array_foldl");
+  _90 = cons(_73, _25);
+  _91 = List_var(_90);
+  _92 = cons(_91, NULL);
+  _93 = cons(_14, _92);
+  _94 = List_var(_93);
+  _95 = cons(_94, _17);
+  _96 = String_new("String_map");
+  _97 = String_new("String");
+  _98 = String_var(_97);
+  _99 = cons(_98, NULL);
+  _100 = List_var(_99);
+  _101 = cons(_100, _19);
+  _102 = List_var(_101);
+  _103 = cons(_102, NULL);
+  _104 = cons(_14, _103);
+  _105 = List_var(_104);
+  _106 = cons(_105, _99);
+  _107 = String_new("String_filter");
+  _108 = String_new("Iter_init");
+  _109 = String_new("Iter");
+  _110 = String_var(_109);
+  _111 = cons(_110, NULL);
+  _112 = List_var(_111);
+  _113 = cons(_18, _25);
+  _114 = cons(_112, _113);
+  _115 = List_var(_114);
+  _116 = cons(_115, NULL);
+  _117 = cons(_14, _116);
+  _118 = List_var(_117);
+  _119 = cons(_118, _111);
+  _120 = String_new("Iter_map_into");
+  _121 = cons(_112, NULL);
+  _122 = cons(_18, _121);
+  _123 = cons(_112, _122);
+  _124 = List_var(_123);
+  _125 = cons(_124, NULL);
+  _126 = cons(_14, _125);
+  _127 = List_var(_126);
+  _128 = cons(_127, _111);
+  _129 = String_new("Iter_filter_into");
+  _130 = String_new("Iter_zip_with_into");
+  _131 = cons(_112, _123);
+  _132 = List_var(_131);
+  _133 = cons(_132, NULL);
+  _134 = cons(_14, _133);
+  _135 = List_var(_134);
+  _136 = cons(_135, _111);
+  _137 = String_new("Iter_map2_into");
+  _138 = String_new("Iter_scan_into");
+  _139 = cons(_18, _122);
+  _140 = cons(_112, _139);
+  _141 = List_var(_140);
+  _142 = cons(_141, NULL);
+  _143 = cons(_14, _142);
+  _144 = List_var(_143);
+  _145 = cons(_144, _111);
+  _146 = String_new("Iter_any");
+  _147 = cons(_112, _19);
+  _148 = List_var(_147);
+  _149 = cons(_148, NULL);
+  _150 = cons(_14, _149);
+  _151 = List_var(_150);
+  _152 = cons(_151, _47);
+  _153 = String_new("Iter_all");
+  _154 = String_new("Iter_foldl");
+  _155 = cons(_112, _25);
+  _156 = List_var(_155);
+  _157 = cons(_156, NULL);
+  _158 = cons(_14, _157);
+  _159 = List_var(_158);
+  _160 = cons(_159, _17);
+  _161 = String_new("Iter_find");
+  _162 = cons(_151, _17);
+  _163 = String_new("Lisp_List_filter");
+  _164 = String_new("Lisp_List_any");
+  _165 = String_new("Lisp_List_all");
+  _166 = String_new("Lisp_List_find");
+  _167 = String_new("Lisp_String_filter");
+  _168 = String_new("Lisp_Iter_filter");
+  _169 = cons(_151, _111);
+  _170 = String_new("Lisp_Iter_any");
+  _171 = String_new("Lisp_Iter_all");
+  _172 = String_new("Lisp_Iter_find");
+  _173 = String_new("// x2c Lisp standard environment\n\n(def nil ())\n(def true \'true)\n(def false nil)\n\n// Native value and list boundary\n\n(def car (bind \"Var_car\" nil))\n(def cdr (bind \"Var_cdr\" nil))\n(def cons (bind \"Var_cons\" nil))\n(def atom? (bind \"lisp_atom\" nil))\n(def pair? (bind \"lisp_pair\" nil))\n(def list? (bind \"lisp_list\" nil))\n(def eq? (bind \"lisp_eq\" nil))\n(def type (bind \"lisp_type\" nil))\n(def number? (bind \"lisp_number\" nil))\n(def string? (bind \"lisp_string\" nil))\n(def symbol? (bind \"lisp_symbol\" nil))\n(def procedure? (bind \"lisp_procedure\" nil))\n(def reverse (bind \"List_reverse\" nil))\n(def length (bind \"List_len\" nil))\n(def _match (bind \"List_match\" nil))\n(def match-replace (bind \"lisp_match_replace\" nil))\n(def search (bind \"List_search\" nil))\n(def _search-replace (bind \"List_search_replace\" nil))\n\n// Native number and text boundary\n\n(def _add (bind \"lisp_add\" nil))\n(def _binary (bind \"Var_binary\" nil))\n(def _compare (bind \"lisp_compare\" nil))\n(def str (bind \"lisp_str\" nil))\n(def repr (bind \"lisp_repr\" nil))\n(def string-length (bind \"String_len\" nil))\n(def _string-append (bind \"lisp_string_append\" nil))\n(def substring (bind \"lisp_substring\" nil))\n(def string-downcase (bind \"lisp_string_downcase\" nil))\n\n// Definition and control vocabulary\n\n(def defmacro\n  (macro (name params body)\n    `(def ,name (macro ,params ,body))))\n\n(defmacro defun (name params body)\n  `(def ,name (lambda ,params ,body)))\n\n(defmacro if (test ontrue onfalse)\n  `(cond (,test ,ontrue) (true ,onfalse)))\n\n(defun list (. values) values)\n(def equal? eq?)\n\n(defmacro and (. forms)\n  (if (null? forms)\n      true\n      (if (null? (cdr forms))\n          (car forms)\n          `(if ,(car forms) (and ,@(cdr forms)) false))))\n\n(defmacro or (. forms)\n  (if (null? forms)\n      false\n      (if (null? (cdr forms))\n          (car forms)\n          `((lambda (_or_value)\n              (if _or_value _or_value (or ,@(cdr forms))))\n            ,(car forms)))))\n\n(def begin (bind \"lisp_begin\" nil))\n(def append (bind \"lisp_append\" nil))\n\n// These nine are variadic, and a variadic lambda cannot be prepared, so\n// written in Lisp they would pull every arithmetic call in a compiled\n// body back onto the evaluator.\n\n(def + (bind \"lisp_plus\" nil))\n(def - (bind \"lisp_minus\" nil))\n(def * (bind \"lisp_times\" nil))\n(def / (bind \"lisp_divide\" nil))\n\n(def = (bind \"lisp_eq_chain\" nil))\n(def < (bind \"lisp_lt_chain\" nil))\n(def <= (bind \"lisp_le_chain\" nil))\n(def > (bind \"lisp_gt_chain\" nil))\n(def >= (bind \"lisp_ge_chain\" nil))\n\n(def string-append (bind \"lisp_string_append_all\" nil))\n\n(defmacro let (bindings body)\n  `((lambda ,(map car bindings) ,body) ,@(map cadr bindings)))\n\n(defmacro let* (bindings body)\n  (if (null? bindings)\n      body\n      `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))\n\n// Tries each clause\'s pattern against subject in order and evaluates the\n// first body whose pattern matches, with that pattern\'s binders in scope.\n// A final (else body) clause runs when nothing matched.\n(defmacro match-case (subject . clauses)\n  (foldl\n    (lambda (rest clause)\n      (if (equal? (car clause) \'else) (cadr clause)\n        `(let ((_match-case-subject ,subject))\n           (let ((_match-case-bindings\n                   (match _match-case-subject \',(car clause))))\n             (cond (_match-case-bindings\n                     (let ,(_binder-lets \'_match-case-bindings\n                                         (_binders (car clause)))\n                       ,(cadr clause)))\n                   (true ,rest))))))\n    nil\n    (reverse clauses)))\n\n// Short aliases for common operations\n\n(def add _add)\n(def len length)\n(def lower string-downcase)\n\n// Standard algorithms from lib/lisp-init.x.\n\n(def last (bind \"lisp_last\" nil))\n(def member (bind \"lisp_member\" nil))\n(def assoc (bind \"lisp_assoc\" nil))\n(def not (bind \"lisp_not\" nil))\n(def null? (bind \"lisp_null\" nil))\n(def sub (bind \"lisp_sub\" nil))\n(def mul (bind \"lisp_mul\" nil))\n(def div (bind \"lisp_div\" nil))\n(def mod (bind \"lisp_mod\" nil))\n(def % mod)\n(def caar (bind \"lisp_caar\" nil))\n(def cadr (bind \"lisp_cadr\" nil))\n(def cdar (bind \"lisp_cdar\" nil))\n(def cddr (bind \"lisp_cddr\" nil))\n(def caaar (bind \"lisp_caaar\" nil))\n(def caadr (bind \"lisp_caadr\" nil))\n(def cadar (bind \"lisp_cadar\" nil))\n(def caddr (bind \"lisp_caddr\" nil))\n(def cdaar (bind \"lisp_cdaar\" nil))\n(def cdadr (bind \"lisp_cdadr\" nil))\n(def cddar (bind \"lisp_cddar\" nil))\n(def cdddr (bind \"lisp_cdddr\" nil))\n(def match (bind \"lisp_match\" nil))\n(def bound (bind \"lisp_bound\" nil))\n(def search-replace (bind \"lisp_search_replace\" nil))\n(def binder? (bind \"lisp_binder\" nil))\n(def _binders (bind \"lisp_binders\" nil))\n(def _binder-lets (bind \"lisp_binder_lets\" nil))\n\n// These callbacks run before the Func runtime is installed. They read\n// through private names so a session that redefines car, cdr, or cons\n// keeps them working.\n(def List_car car)\n(def List_cdr cdr)\n(def Var_cons cons)\n(def List_reverse reverse)\n(defun _filter-onto (keep values kept)\n  (if (equal? values nil) (List_reverse kept)\n      (_filter-onto keep (List_cdr values)\n                    (if (equal? (keep (List_car values)) nil) kept\n                        (Var_cons (List_car values) kept)))))\n(defun filter (keep values) (_filter-onto keep values nil))\n(defun _map-onto (procedure values mapped)\n  (if (equal? values nil) (List_reverse mapped)\n      (_map-onto procedure (List_cdr values)\n                 (Var_cons (procedure (List_car values)) mapped))))\n(defun map (procedure values) (_map-onto procedure values nil))\n(defun foldl (procedure initial values)\n  (if (equal? values nil) initial\n      (foldl procedure (procedure initial (List_car values))\n             (List_cdr values))))\n(def reduce foldl)\n");
+  _174 = Symbol_var(1473096);
+  _175 = cons(_174, NULL);
+  _176 = List_var(_175);
+  _177 = cons(_176, NULL);
+  _178 = List_var(_177);
+  _179 = cons(_178, NULL);
+  _180 = cons(_14, _179);
+  _181 = List_var(_180);
+  _182 = cons(_181, _17);
+  _183 = String_new("Lisp.eval");
+  _184 = String_new("Lisp.apply");
+  _185 = String_new("Lisp.eval_string");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -1447,7 +1447,7 @@ static Var Lisp__apply_values(Lisp lisp, Var callable, List values, LispEnv * en
   int special = Lisp__special_id(lisp, fn);
   if(special < 0) return Lisp__call_native(lisp, fn, values);
   if(special != LISP_APPLY) _not_procedure(callable);
-  _arity(values, 2, _3143);
+  _arity(values, 2, _0);
   List rest = _list_argument(List_cadr(values));
   return Lisp__apply_values(lisp, List_car(values), rest, env);
 }
@@ -1522,7 +1522,7 @@ static Var Lisp__apply_special(Lisp lisp, int id, List args, LispEnv * env){
 }
 
 static Var _special_quote(List args){
-  _arity(args, 1, _3144);
+  _arity(args, 1, _1);
   return List_car(args);
 }
 
@@ -1548,7 +1548,7 @@ static Var Lisp__special_def(Lisp lisp, List args, LispEnv * env){
     }
 
   }
-  if(lisp -> protect_x2c && String_startswith(Var_str(name), _3145)){
+  if(lisp -> protect_x2c && String_startswith(Var_str(name), _2)){
     Var _x2c_literal_part_15 = String_var(String_join(NULL, cons(String_var(String_new("def")), NULL)));
     {
       static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/lisp.x",.function = "Lisp__special_def",.line = 338};
@@ -1649,26 +1649,26 @@ static List _cond_clause(Var clause){
 }
 
 static Var Lisp__special_quasiquote(Lisp lisp, List args, LispEnv * env){
-  _arity(args, 1, _3146);
+  _arity(args, 1, _3);
   return Lisp__qq(lisp, List_car(args), env, 0);
 }
 
 static Var Lisp__special_eval(Lisp lisp, List args, LispEnv * env){
-  _arity(args, 1, _3147);
+  _arity(args, 1, _4);
   return Lisp__eval(lisp, Lisp__eval(lisp, List_car(args), env), NULL);
 }
 
 String Var_string(Var);
 
 static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
-  _arity(args, 2, _3148);
+  _arity(args, 2, _5);
   Var name_form, signature_form;
   List _x2c_destructure_2 = args;
   name_form = List_getindex(_x2c_destructure_2, 0);
   signature_form = List_getindex(_x2c_destructure_2, 1);
   Var name = Lisp__eval(lisp, name_form, env);
   Var signature = Lisp__eval(lisp, signature_form, env);
-  _string_argument(name, _3148);
+  _string_argument(name, _5);
   if(! Var_is_row(signature, 9, 7, 4)){
     Var _x2c_literal_part_24 = String_var(String_join(NULL, cons(String_var(String_new("bind")), NULL)));
     {
@@ -1690,7 +1690,7 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
 }
 
 static Var Lisp__special_apply(Lisp lisp, List args, LispEnv * env){
-  _arity(args, 2, _3143);
+  _arity(args, 2, _0);
   Var callable_form, values_form;
   List _x2c_destructure_3 = args;
   callable_form = List_getindex(_x2c_destructure_3, 0);
@@ -1707,11 +1707,11 @@ void x2c_cleanup_push(X2CCleanup *);
 void x2c_cleanup_leave(X2CCleanup *);
 
 static Var Lisp__special_import(Lisp lisp, List args, LispEnv * env){
-  _arity(args, 1, _3149);
+  _arity(args, 1, _6);
   Var path = Lisp__eval(lisp, List_car(args), env);
-  _string_argument(path, _3149);
+  _string_argument(path, _6);
   Var hook;
-  if(Lisp__global_lookup(lisp, Atom_intern(_3150), &(hook))) return Lisp_apply(lisp, hook, cons(path, NULL));
+  if(Lisp__global_lookup(lisp, Atom_intern(_7), &(hook))) return Lisp_apply(lisp, hook, cons(path, NULL));
   File source = File_open(Var_pointer(path), "r");
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -2233,7 +2233,7 @@ static Var Lisp__run_frame(Lisp lisp, Lambda lambda, const Var * values, int cou
         .parent = & captured
       }
       ;
-      if(List_contains(lambda -> params, Atom_intern(_3024))){
+      if(List_contains(lambda -> params, Atom_intern(_8))){
         {
           Scope_push(& frame);
           {
@@ -2304,7 +2304,7 @@ static void _bind_params(Scope * frame, Lambda lambda, List args, Map bindings){
   Var body = lambda -> body;
   for(List p = lambda -> params;  List_truth(p);  p = List_cdr(p)){
     Var name = List_car(p);
-    if(Var_is_atom(name) && String_equal(Var_str(name), _3024)){
+    if(Var_is_atom(name) && String_equal(Var_str(name), _8)){
       if(! List_truth(List_cdr(p))){
         Var _x2c_literal_part_32 = String_var(String_join(NULL, cons(String_var(String_new("apply")), NULL)));
         {
@@ -3124,27 +3124,27 @@ static Var _chain(List values, String operation, int want, int expect){
 
 Var lisp_eq_chain(List values){
   if(! _init_guard_) _file_init_();
-  return _chain(values, _3151, 0, 1);
+  return _chain(values, _9, 0, 1);
 }
 
 Var lisp_lt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return _chain(values, _3152, - 1, 1);
+  return _chain(values, _10, - 1, 1);
 }
 
 Var lisp_le_chain(List values){
   if(! _init_guard_) _file_init_();
-  return _chain(values, _3153, 1, 0);
+  return _chain(values, _11, 1, 0);
 }
 
 Var lisp_gt_chain(List values){
   if(! _init_guard_) _file_init_();
-  return _chain(values, _3154, 1, 1);
+  return _chain(values, _12, 1, 1);
 }
 
 Var lisp_ge_chain(List values){
   if(! _init_guard_) _file_init_();
-  return _chain(values, _3155, - 1, 0);
+  return _chain(values, _13, - 1, 0);
 }
 
 Var lisp_str(Var value){
@@ -3237,21 +3237,21 @@ Var lisp_write_file(String path, String text){
 }
 
 static Func _unary_callback(Var callable){
-  return _callback(callable, _call, 1, _3156);
+  return _callback(callable, _call, 1, _31);
 }
 
 static Func _binary_callback(Var callable){
-  return _callback(callable, _call, 2, _3156);
+  return _callback(callable, _call, 2, _31);
 }
 
 static Func _predicate_callback(Var callable){
-  return _callback(callable, _predicate_call, 1, _3156);
+  return _callback(callable, _predicate_call, 1, _31);
 }
 
 void Scope_move(void *, Scope *);
 
 static Func _iter_callback(Var callable){
-  Func fn = _callback(callable, _call, 2, _3157);
+  Func fn = _callback(callable, _call, 2, _32);
   if(fn) Scope_move(fn, & lisp_active -> scope);
   return fn;
 }
@@ -3625,7 +3625,7 @@ Lisp Lisp_kernel(void){
 static void Lisp__install_specials(Lisp lisp){
   for(int i = 0;  i < LISP_SPECIAL_COUNT;  i ++){
     const LispCanonicalName * info = _special_name(i);
-    lisp -> specials[i] = Func_new(_x2c_func_adapt_36, _3142);
+    lisp -> specials[i] = Func_new(_x2c_func_adapt_36, _182);
     Atom name = Atom_intern(String_new(info -> spelling));
     Map_setindex(lisp -> reserved, name, Func_var(lisp -> specials[i]));
   }
@@ -3730,7 +3730,7 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out){
 
 Var Lisp_eval(Lisp lisp, Var expression){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_3195);
+  if(! lisp) return _bad_session(_183);
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_20 ={
@@ -3776,7 +3776,7 @@ Var Lisp_eval(Lisp lisp, Var expression){
 
 Var Lisp_apply(Lisp lisp, Var callable, List values){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_3196);
+  if(! lisp) return _bad_session(_184);
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_22 ={
@@ -3822,7 +3822,7 @@ Var Lisp_apply(Lisp lisp, Var callable, List values){
 
 Var Lisp_eval_string(Lisp lisp, String source){
   if(! _init_guard_) _file_init_();
-  if(! lisp) return _bad_session(_3197);
+  if(! lisp) return _bad_session(_185);
   Scope_push(& lisp -> user);
   {
     X2CCleanup _x2c_defer_record_24 ={
@@ -4019,7 +4019,7 @@ void Lisp_set_global(Lisp lisp, String name, Var value){
 
             }
             _binding_set(& lisp -> scope, lisp -> globals, interned, value);
-            if(String_startswith(name, _3145)) lisp -> protect_x2c = 1;
+            if(String_startswith(name, _2)) lisp -> protect_x2c = 1;
           }
 
         }

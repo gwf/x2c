@@ -6,7 +6,7 @@
 
 #include "meta-import.h"
 
-static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _0;
+static String _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -31,37 +31,37 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("get_");
-  _3 = String_new("NET_HTTP_IDLE");
-  _4 = String_new("net.http.idle");
-  _5 = String_new("get_net_http");
-  _6 = String_new("Net.Http");
-  _7 = String_new("a.b.c");
-  _8 = String_new("net-http-idle");
-  _9 = String_new("<net/http/idle>");
-  _10 = String_new(".");
-  _11 = String_new("-");
-  _12 = String_new("_");
+  _0 = String_new("NET_HTTP_IDLE");
+  _1 = String_new("net.http.idle");
+  _2 = String_new("get_net_http");
+  _3 = String_new("Net.Http");
+  _4 = String_new("a.b.c");
+  _5 = String_new("net-http-idle");
+  _6 = String_new("<net/http/idle>");
+  _7 = String_new(".");
+  _8 = String_new("-");
+  _9 = String_new("_");
+  _10 = String_new("get_");
   _x2c_static_initialize_0();
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("constant %s %s\n", _3, mi_constant(_4));
-  printf("accessor %s %s\n", _5, mi_accessor(_6));
-  printf("depth    %d %d\n", 3, mi_depth(_7));
-  printf("score    %d %d\n", 11, mi_score(_4));
-  printf("dashed   %s %s\n", _8, mi_dashed(_4));
+  printf("constant %s %s\n", _0, mi_constant(_1));
+  printf("accessor %s %s\n", _2, mi_accessor(_3));
+  printf("depth    %d %d\n", 3, mi_depth(_4));
+  printf("score    %d %d\n", 11, mi_score(_1));
+  printf("dashed   %s %s\n", _5, mi_dashed(_1));
   printf("next     %d %d %d\n", 1, 2, mi_next());
-  printf("tag      %s\n", _9);
+  printf("tag      %s\n", _6);
   return 0;
 }
 
 String String_replace(String, String, String);
 
 static String mi_dashed(String path){
-  return String_replace(path, _10, _11);
+  return String_replace(path, _7, _8);
 }
 
 String String_join(String, List);
@@ -70,13 +70,13 @@ List String_split(String, String);
 
 String mi_flatten(String path, String sep){
   if(! _init_guard_) _file_init_();
-  return String_join(sep, String_split(path, _10));
+  return String_join(sep, String_split(path, _7));
 }
 
 String String_upper(String);
 
 static String mi_constant(String path){
-  return String_upper(mi_flatten(path, _12));
+  return String_upper(mi_flatten(path, _9));
 }
 
 Var String_var(String);
@@ -84,13 +84,13 @@ Var String_var(String);
 String String_lower(String);
 
 static String mi_accessor(String path){
-  return String_join(NULL, cons(String_var(_0), cons(String_var(String_lower(mi_flatten(path, _12))), NULL)));
+  return String_join(NULL, cons(String_var(_10), cons(String_var(String_lower(mi_flatten(path, _9))), NULL)));
 }
 
 int List_len(List);
 
 static int mi_depth(String path){
-  return List_len(String_split(path, _10));
+  return List_len(String_split(path, _7));
 }
 
 int List_try_next(List, List *, Var *);
@@ -103,7 +103,7 @@ static int mi_score(String path){
   int score = 0;
   {
     Var part;
-    List _x2c_mmacro_object_1 = String_split(path, _10);
+    List _x2c_mmacro_object_1 = String_split(path, _7);
     List _x2c_mmacro_cursor_1 = _x2c_mmacro_object_1;
     Var _x2c_mmacro_cursor_output_1;
     while(List_try_next(_x2c_mmacro_object_1, &(_x2c_mmacro_cursor_1), &(_x2c_mmacro_cursor_output_1))){

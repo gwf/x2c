@@ -2,7 +2,7 @@
 
 #include "meta-import-second.h"
 
-static String _8, _7, _6, _5, _4, _3;
+static String _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -16,20 +16,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _3 = String_new("a.b.c.d");
-  _4 = String_new("one-two");
-  _5 = String_new("one.two");
-  _6 = String_new("<net/http>");
-  _7 = String_new(".");
-  _8 = String_new("-");
+  _0 = String_new("a.b.c.d");
+  _1 = String_new("one-two");
+  _2 = String_new("one.two");
+  _3 = String_new("<net/http>");
+  _4 = String_new(".");
+  _5 = String_new("-");
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("depth  %d %d\n", 4, mi_depth(_3));
-  printf("dashed %s %s\n", _4, mi_dashed(_5));
-  printf("tag    %s\n", _6);
+  printf("depth  %d %d\n", 4, mi_depth(_0));
+  printf("dashed %s %s\n", _1, mi_dashed(_2));
+  printf("tag    %s\n", _3);
   printf("next   %d\n", 1);
   return 0;
 }
@@ -37,7 +37,7 @@ int main(void){
 String String_replace(String, String, String);
 
 static String mi_dashed(String path){
-  return String_replace(path, _7, _8);
+  return String_replace(path, _4, _5);
 }
 
 int List_len(List);
@@ -45,6 +45,6 @@ int List_len(List);
 List String_split(String, String);
 
 static int mi_depth(String path){
-  return List_len(String_split(path, _7));
+  return List_len(String_split(path, _4));
 }
 

@@ -62,32 +62,32 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("dumb");
-  _1 = String_new("  ");
-  _2 = String_new(" ");
-  _3 = String_new(" in ");
-  _4 = String_new(", ");
-  _5 = String_new(" cached");
-  _6 = String_new("  Generated ");
-  _7 = String_new(" and ");
-  _8 = String_new(" (");
-  _9 = String_new(")");
-  _10 = String_new("%lu us");
-  _11 = String_new("%.0f ms");
-  _12 = String_new("%.2f s");
-  _13 = String_new("%llu B");
-  _14 = String_new("%.1f KiB");
-  _15 = String_new("%.1f MiB");
-  _16 = String_new("TERM");
-  _17 = String_new("COLUMNS");
-  _18 = String_new("NO_COLOR");
-  _19 = String_new("MAKELEVEL");
-  _20 = String_new(" (up to date)");
-  _21 = String_new("");
-  _22 = String_new("C file");
-  _23 = String_new("C files");
-  _24 = String_new("header");
-  _25 = String_new("headers");
+  _0 = String_new("TERM");
+  _1 = String_new("dumb");
+  _2 = String_new("COLUMNS");
+  _3 = String_new("NO_COLOR");
+  _4 = String_new("MAKELEVEL");
+  _5 = String_new("  ");
+  _6 = String_new(" ");
+  _7 = String_new(" in ");
+  _8 = String_new(" (up to date)");
+  _9 = String_new(", ");
+  _10 = String_new(" cached");
+  _11 = String_new("");
+  _12 = String_new("C file");
+  _13 = String_new("C files");
+  _14 = String_new("header");
+  _15 = String_new("headers");
+  _16 = String_new("  Generated ");
+  _17 = String_new(" and ");
+  _18 = String_new(" (");
+  _19 = String_new(")");
+  _20 = String_new("%lu us");
+  _21 = String_new("%.0f ms");
+  _22 = String_new("%.2f s");
+  _23 = String_new("%llu B");
+  _24 = String_new("%.1f KiB");
+  _25 = String_new("%.1f MiB");
 }
 
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
@@ -110,7 +110,7 @@ int String_equal(String, String);
 String Env_get(String);
 
 static int _terminal(void){
-  return isatty(fileno(stderr)) && ! String_equal(Env_get(_16), _0);
+  return isatty(fileno(stderr)) && ! String_equal(Env_get(_0), _1);
 }
 
 int String_is_digit(String);
@@ -120,7 +120,7 @@ int atoi(const char *);
 static int _columns(void){
   struct winsize size;
   if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
-  String columns = Env_get(_17);
+  String columns = Env_get(_2);
   int parsed = String_is_digit(columns) ? atoi(columns) : 0;
   return parsed >= 20 && parsed <= 1000 ? parsed : 80;
 }
@@ -130,7 +130,7 @@ int String_truth(String);
 static int _use_color(int plain, Symbol mode, int terminal){
   if(plain || mode == 29733220) return 0;
   if(mode == 93785702) return 1;
-  return terminal && ! String_truth(Env_get(_18));
+  return terminal && ! String_truth(Env_get(_3));
 }
 
 int report_receipts(void){
@@ -141,7 +141,7 @@ long atol(const char *);
 
 int report_make_owned(void){
   if(! _init_guard_) _file_init_();
-  String level = Env_get(_19);
+  String level = Env_get(_4);
   return String_is_digit(level) && atol(level) > 0;
 }
 
@@ -223,20 +223,20 @@ void report_phase(Symbol phase, int count, String noun, int cached, unsigned lon
   String cache = _cache_note(count, cached);
   String name = String_capitalize(Symbol_str(phase));
   String duration = report_duration(microseconds);
-  report_line(28680520, String_join(NULL, cons(String_var(_1), cons(String_var(name), cons(String_var(_2), cons(String_var(int_str(count)), cons(String_var(_2), cons(String_var(noun), cons(String_var(_3), cons(String_var(duration), cons(String_var(cache), NULL)))))))))));
+  report_line(28680520, String_join(NULL, cons(String_var(_5), cons(String_var(name), cons(String_var(_6), cons(String_var(int_str(count)), cons(String_var(_6), cons(String_var(noun), cons(String_var(_7), cons(String_var(duration), cons(String_var(cache), NULL)))))))))));
 }
 
 static String _cache_note(int count, int cached){
-  if(cached == count && count) return _20;
-  return cached ? String_join(NULL, cons(String_var(_4), cons(String_var(int_str(cached)), cons(String_var(_5), NULL)))) : _21;
+  if(cached == count && count) return _8;
+  return cached ? String_join(NULL, cons(String_var(_9), cons(String_var(int_str(cached)), cons(String_var(_10), NULL)))) : _11;
 }
 
 void report_generated(int n, unsigned long long bytes){
   if(! _init_guard_) _file_init_();
   String size = report_size(bytes);
-  String c_noun = n == 1 ? _22 : _23;
-  String h_noun = n == 1 ? _24 : _25;
-  report_line(28680520, String_join(NULL, cons(String_var(_6), cons(String_var(int_str(n)), cons(String_var(_2), cons(String_var(c_noun), cons(String_var(_7), cons(String_var(int_str(n)), cons(String_var(_2), cons(String_var(h_noun), cons(String_var(_8), cons(String_var(size), cons(String_var(_9), NULL)))))))))))));
+  String c_noun = n == 1 ? _12 : _13;
+  String h_noun = n == 1 ? _14 : _15;
+  report_line(28680520, String_join(NULL, cons(String_var(_16), cons(String_var(int_str(n)), cons(String_var(_6), cons(String_var(c_noun), cons(String_var(_17), cons(String_var(int_str(n)), cons(String_var(_6), cons(String_var(h_noun), cons(String_var(_18), cons(String_var(size), cons(String_var(_19), NULL)))))))))))));
 }
 
 static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline){
@@ -288,15 +288,15 @@ String String_printf(String, ...);
 
 String report_duration(unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  if(microseconds < 1000) return String_printf(_10, microseconds);
-  if(microseconds < 1000000) return String_printf(_11, microseconds / 1000.0);
-  return String_printf(_12, microseconds / 1000000.0);
+  if(microseconds < 1000) return String_printf(_20, microseconds);
+  if(microseconds < 1000000) return String_printf(_21, microseconds / 1000.0);
+  return String_printf(_22, microseconds / 1000000.0);
 }
 
 String report_size(unsigned long long bytes){
   if(! _init_guard_) _file_init_();
-  if(bytes < 1024) return String_printf(_13, bytes);
-  if(bytes < 1024ull * 1024ull) return String_printf(_14, bytes / 1024.0);
-  return String_printf(_15, bytes /(1024.0 * 1024.0));
+  if(bytes < 1024) return String_printf(_23, bytes);
+  if(bytes < 1024ull * 1024ull) return String_printf(_24, bytes / 1024.0);
+  return String_printf(_25, bytes /(1024.0 * 1024.0));
 }
 

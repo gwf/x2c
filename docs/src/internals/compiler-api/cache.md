@@ -26,12 +26,13 @@ Materializes cached literals and deferred file-static initialization.
 compiler. Every `(cache id)` must index `c.id_keys`, and file-static
 dependency state from the full parse must be complete. `prefix`,
 `guard_name`, and `initializer_name` name the header's private slots,
-guard, and initializer. Returns `(header source)` and appends source work
+guard, and initializer. Returns `(header source bindings)`; `bindings`
+maps source cache ids to emitted slots. Appends initialization work
 to the compiler's early, middle, and late initialization phases; the
 operation is not idempotent. Header cache storage remains private to each
 C translation unit that includes it.
 
-Source: `src/cache.x:45`
+Source: `src/cache.x:46`
 
 ## Design notes
 

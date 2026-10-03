@@ -133,18 +133,18 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("%c");
-  _1 = String_new("%d");
-  _2 = String_new("%ld");
-  _3 = String_new("%lld");
-  _4 = String_new("%u");
-  _5 = String_new("%lu");
-  _6 = String_new("%llu");
-  _7 = String_new("%lf");
-  _8 = String_new("%Lf");
-  _9 = String_new("<0x%012lX>");
-  _10 = String_new("<%s: 0x%012lX>");
-  _11 = String_new("void");
+  _0 = String_new("void");
+  _1 = String_new("%c");
+  _2 = String_new("%d");
+  _3 = String_new("%ld");
+  _4 = String_new("%lld");
+  _5 = String_new("%u");
+  _6 = String_new("%lu");
+  _7 = String_new("%llu");
+  _8 = String_new("%lf");
+  _9 = String_new("%Lf");
+  _10 = String_new("<0x%012lX>");
+  _11 = String_new("<%s: 0x%012lX>");
   _12 = String_new("f");
   _13 = String_new("l");
   _14 = String_new("receiver");
@@ -183,7 +183,7 @@ String Var_fallback_str(Var v){
   switch(Var_kind(v)){
     case 439096724366 : case 20309162340 : return _primitive_str(v, tag);
     case 35386204516 : case 39939274535114 : return Var_pointer_string(v);
-    case 1473096 : return _11;
+    case 1473096 : return _0;
   }
   return Var_pointer_string(v);
 }
@@ -196,15 +196,15 @@ String Symbol_str(Symbol);
 
 static String _primitive_str(Var v, Symbol tag){
   switch(tag){
-    case 26993 : case 30065 : return String_printf(_0, Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return String_printf(_1, Var_int(Var_convert(v, 3453797)));
-    case 3454065 : case 818062 : return String_printf(_2, Var_long(Var_convert(v, 818062)));
-    case 25983886 : return String_printf(_3, Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return String_printf(_4, Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : case 44858254 : return String_printf(_5, Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return String_printf(_6, Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return String_printf(_7, Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return String_printf(_8, Var_long_double(Var_convert(v, 26071077642)));
+    case 26993 : case 30065 : return String_printf(_1, Var_int(Var_convert(v, 3453797)));
+    case 3453293 : case 3453797 : return String_printf(_2, Var_int(Var_convert(v, 3453797)));
+    case 3454065 : case 818062 : return String_printf(_3, Var_long(Var_convert(v, 818062)));
+    case 25983886 : return String_printf(_4, Var_long_long(Var_convert(v, 25983886)));
+    case 3846509 : case 3847013 : return String_printf(_5, Var_uint(Var_convert(v, 3847013)));
+    case 3847281 : case 44858254 : return String_printf(_6, Var_ulong(Var_convert(v, 44858254)));
+    case 1435270030 : return String_printf(_7, Var_ulong_long(Var_convert(v, 1435270030)));
+    case 3355493 : case 3356265 : return String_printf(_8, Var_floating(Var_convert(v, 3356265)));
+    case 26071077642 : return String_printf(_9, Var_long_double(Var_convert(v, 26071077642)));
     case 28764 : case 1854348 : case 2050956 : return String_join(NULL, cons(String_var(Symbol_str(tag)), NULL));
   }
   return Var_pointer_string(v);
@@ -215,8 +215,8 @@ void * Var_pointer(Var);
 String Var_pointer_string(Var v){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
-  if(tag == 3683441) return String_printf(_9, (long) Var_pointer(v));
-  return String_printf(_10, Symbol_str(tag), (long) Var_pointer(v));
+  if(tag == 3683441) return String_printf(_10, (long) Var_pointer(v));
+  return String_printf(_11, Symbol_str(tag), (long) Var_pointer(v));
 }
 
 Buffer Var_write_str(Var v, Buffer out){
@@ -279,7 +279,7 @@ String Var_fallback_repr(Var v){
   switch(Var_kind(v)){
     case 439096724366 : case 20309162340 : return _primitive_repr(v, tag);
     case 35386204516 : case 39939274535114 : return Var_pointer_string(v);
-    case 1473096 : return _11;
+    case 1473096 : return _0;
   }
   return Var_pointer_string(v);
 }

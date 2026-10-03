@@ -6,11 +6,11 @@
 
 #include "typedef-method-inheritance.h"
 
-static List _26, _24, _23, _21, _19, _8, _7, _4, _3;
+static List _26, _24, _23, _21, _19, _15, _14, _11, _10;
 
-static String _17, _15, _14, _13, _12, _11, _10, _9, _0;
+static String _17, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _25, _22, _20, _18, _16, _6, _5, _2, _1;
+static Var _25, _22, _20, _18, _16, _13, _12, _9, _8;
 
 static int _init_guard_ = 0;
 
@@ -37,22 +37,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("mapped");
-  _1 = Symbol_var(31626);
-  _2 = Symbol_var(42462);
-  _3 = cons(_2, NULL);
-  _4 = cons(_1, _3);
-  _5 = Symbol_var(42504522);
-  _6 = Symbol_var(425316);
-  _7 = cons(_6, NULL);
-  _8 = cons(_5, _7);
-  _9 = String_new("base-root");
-  _10 = String_new("bad");
-  _11 = String_new("base-shadow");
-  _12 = String_new("typedef-shadow");
-  _13 = String_new("mid-level");
-  _14 = String_new("leaf-own");
-  _15 = String_new("override-level");
+  _0 = String_new("base-root");
+  _1 = String_new("bad");
+  _2 = String_new("base-shadow");
+  _3 = String_new("typedef-shadow");
+  _4 = String_new("mid-level");
+  _5 = String_new("leaf-own");
+  _6 = String_new("override-level");
+  _7 = String_new("mapped");
+  _8 = Symbol_var(31626);
+  _9 = Symbol_var(42462);
+  _10 = cons(_9, NULL);
+  _11 = cons(_8, _10);
+  _12 = Symbol_var(42504522);
+  _13 = Symbol_var(425316);
+  _14 = cons(_13, NULL);
+  _15 = cons(_12, _14);
   _16 = Symbol_var(437126);
   _17 = String_new("Var");
   _18 = String_var(_17);
@@ -95,32 +95,32 @@ int List_truth(List);
 
 String method_inherit_Base_root(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _9 : _10;
+  return List_truth(value) ? _0 : _1;
 }
 
 String method_inherit_Base_shadow(method_inherit_Base value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _11 : _10;
+  return List_truth(value) ? _2 : _1;
 }
 
 String typedef_shadow(method_inherit_Leaf value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _12 : _10;
+  return List_truth(value) ? _3 : _1;
 }
 
 String method_inherit_Mid_level(method_inherit_Mid value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _13 : _10;
+  return List_truth(value) ? _4 : _1;
 }
 
 String method_inherit_Leaf_own(method_inherit_Leaf value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _14 : _10;
+  return List_truth(value) ? _5 : _1;
 }
 
 String method_inherit_Override_level(method_inherit_Override value){
   if(! _init_guard_) _file_init_();
-  return List_truth(value) ? _15 : _10;
+  return List_truth(value) ? _6 : _1;
 }
 
 method_inherit_Mid method_inherit_Override_rest(method_inherit_Override value){
@@ -130,7 +130,7 @@ method_inherit_Mid method_inherit_Override_rest(method_inherit_Override value){
 
 static Var _mapped_string(Var value){
   (void) value;
-  return String_var(_0);
+  return String_var(_7);
 }
 
 List List_map(List, Func);
@@ -144,8 +144,8 @@ Var List_car(List);
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  method_inherit_Leaf leaf = _4;
-  method_inherit_Override override = _8;
+  method_inherit_Leaf leaf = _11;
+  method_inherit_Override override = _15;
   method_inherit_Leaf tail = method_inherit_Base_rest(leaf);
   method_inherit_Leaf merged = method_inherit_Base_merge(leaf, tail);
   method_inherit_Leaf decorated = method_inherit_Base_decorated(leaf);

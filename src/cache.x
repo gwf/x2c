@@ -37,7 +37,8 @@ $(import "../src/ast-rewrite.xmacro")
     compiler. Every `(cache id)` must index `c.id_keys`, and file-static
     dependency state from the full parse must be complete. `prefix`,
     `guard_name`, and `initializer_name` name the header's private slots,
-    guard, and initializer. Returns `(header source)` and appends source work
+    guard, and initializer. Returns `(header source bindings)`; `bindings`
+    maps source cache ids to emitted slots. Appends initialization work
     to the compiler's early, middle, and late initialization phases; the
     operation is not idempotent. Header cache storage remains private to each
     C translation unit that includes it.
@@ -53,36 +54,51 @@ List Compiler.setup_cache_init(
   Array scan = [];
   scan.push(source);
   foreach (Var initializer, initializers) scan.push(initializer);
+  foreach (Var initializer, c.inits) scan.push(initializer);
   Array source_ids = c._cache_ids(scan.list_free());
   if (header_ids)
     header = c._header_cache(
       header, header_ids, prefix, guard_name, initializer_name);
-  source = c._source_cache(source, source_ids, initializers);
+  Map bindings = c._cache_bindings(source_ids, NULL);
+  source = c._source_cache(source, source_ids, bindings, initializers);
   initializers.free();
-  return %($header $source);
+  return %($header $source $bindings);
 }
 
 static Array Compiler._cache_ids(Compiler c, List code) {
   List seen[4096] = { 0 };
   Array ids = [];
-  ids.resize(c.id_keys.len());
-  if (!c._collect_ids(code, seen, ids)) {
+  c._collect_ids(code, seen, ids);
+  if (!ids) {
     ids.free();
     return NULL;
   }
   return ids;
 }
 
-/* Collect direct cache references and the immutable graph they depend on.
+/* Collect dependencies before their users, in first-use source order.
+   Cold collection can allocate keys that interface replay never needs; only
+   this reachable order chooses emitted slots, leaving semantic ids intact.
    Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
    identity memo avoids repeatedly walking shared subgraphs. A collision only
    replaces one memo entry and may cause harmless extra work. */
-static int Compiler._collect_ids(
+static void Compiler._collect_ids(
   Compiler c, Var value, List *seen, Array ids) {
-  Array pending = $auto([value]);
-  int count = 0;
+  Array pending = $auto([%($value)]), marked = $auto([]);
+  marked.resize(c.id_keys.len());
   while (pending) {
-    Var current = pending.take_last();
+    Var frame = pending[-1];
+    if (frame.is_integer()) {
+      ids.push(pending.take_last());
+      continue;
+    }
+    List cursor = frame;
+    if (!cursor) {
+      pending.take_last();
+      continue;
+    }
+    pending[-1] = cursor.cdr();
+    Var current = cursor.car();
     if (current is not <list>) continue;
     List node = current;
     unsigned slot = ((uintptr_t) node >> 4) & 4095;
@@ -91,15 +107,14 @@ static int Compiler._collect_ids(
     match (node)
       case %(cache ?captured_id): {
         int id = captured_id;
-        if (!ids[id].is_null()) continue;
-        ids[id] = 1;
-        count++;
-        pending.push(c.id_keys[id]);
+        if (!marked[id].is_null()) continue;
+        marked[id] = 1;
+        pending.push(id);
+        pending.push(%(${c.id_keys[id]}));
         continue;
       }
-    foreach (Var child, node) if (child is <list>) pending.push(child);
+    pending.push(node);
   }
-  return count;
 }
 
 /* file-static rewrites
@@ -425,29 +440,30 @@ typedef struct HeaderCache {
   Compiler c;
   String prefix;
   List guard, initializer;
+  Map bindings;
 } HeaderCache;
 
 static List Compiler._header_cache(
   Compiler c, List header, Array ids, String prefix, String guard_name,
   String initializer_name) {
   if (!ids) return header;
+  Map bindings = $auto(c._cache_bindings(ids, prefix));
   HeaderCache cache = {
     c, prefix, c.sym.reference(%($guard_name), NULL),
-    c.sym.reference(%($initializer_name), NULL)};
+    c.sym.reference(%($initializer_name), NULL), bindings};
   return cache.entries(header, cache.prelude(ids));
 }
 
 static List HeaderCache.prelude(HeaderCache &h, Array ids) {
   Compiler c = h.c;
   Array declarations = [];
-  foreach (List declaration, c._slot_declarations(ids, h.prefix))
+  foreach (List declaration, c._slot_declarations(ids, h.bindings))
     declarations.push(declaration);
   declarations.push(_initialization_guard(h.guard));
   Array statements = [];
-  for (int i = 0, n = c.id_keys.len(); i < n; i++) {
-    if (ids[i].is_null()) continue;
-    List statement = c._cache_initializer(i, h.prefix);
-    statements.push(c._header_refs(statement, h.prefix, NULL));
+  foreach (int id, ids) {
+    List statement = c._cache_initializer(id, h.bindings, 1);
+    statements.push(_cache_refs(statement, h.bindings, NULL));
   }
   List body = c._cache_batches(statements, declarations, h.prefix);
   declarations.push(
@@ -462,7 +478,7 @@ static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
   int inserted = 0;
   foreach (List node, header) {
     int replaced = 0;
-    node = c._header_refs(node, h.prefix, replaced);
+    node = _cache_refs(node, h.bindings, replaced);
     int captured = node.car() == <sourceinit>;
     List function = node;
     if (captured) function = node.cadr();
@@ -482,19 +498,17 @@ static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
   return output.list_free();
 }
 
-// Replace cache nodes with the TU-local identifiers used by a header region.
-static List Compiler._header_refs(
-  Compiler c, List node, String prefix, int &?replaced) {
+// Header regions replace references before their private guard is installed.
+static List _cache_refs(List node, Map bindings, int &?replaced) {
   if (!node) return node;
   match (node)
     case %(cache ?id): {
       if (replaced) replaced = 1;
-      String ident = _slot_name(id, prefix);
-      List binding = c.sym.reference(%($ident), NULL);
+      List binding = bindings[id];
       return %(ident $binding);
     }
   List child;
-  $ast.rewrite_children(node, child, c._header_refs(child, prefix, replaced));
+  $ast.rewrite_children(node, child, _cache_refs(child, bindings, replaced));
 }
 
 static List Compiler._header_initializer(
@@ -533,7 +547,7 @@ List _patch_initialized_entry(
    requires that same canonicalizer runs late, after the initializer body;
    dependent file-static assignments move late with it. */
 static List Compiler._source_cache(
-  Compiler c, List source, Array ids, Array initializers) {
+  Compiler c, List source, Array ids, Map bindings, Array initializers) {
   source = c._rewrite_statics(source, initializers);
   Symbol deferred_kind = 0;
   if (c.init_fn == "String_initialize") deferred_kind = <string>;
@@ -543,13 +557,12 @@ static List Compiler._source_cache(
     return source;
   }
   Array early = [], late = [], declarations = [];
-  foreach (List declaration, c._slot_declarations(ids, NULL))
+  foreach (List declaration, c._slot_declarations(ids, bindings))
     declarations.push(declaration);
-  for (int i = 0, n = c.id_keys.len(); i < n; i++) {
-    if (ids[i].is_null()) continue;
-    List stmt = c._cache_initializer(i, NULL);
+  foreach (int id, ids) {
+    List stmt = c._cache_initializer(id, bindings, 0);
     int deferred =
-      deferred_kind && c._reaches_kind(%(cache $i), deferred_kind);
+      deferred_kind && c._reaches_kind(%(cache $id), deferred_kind);
     (deferred ? late : early).push(stmt);
   }
   foreach (List stmt, c._cache_batches(early, declarations, NULL))
@@ -589,10 +602,9 @@ static List Compiler._cache_batches(
 static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
   Array dependencies = c._cache_ids(code);
   if (!dependencies) return 0;
-  Array keys = c.id_keys;
   int found = 0;
-  for (int i = 0; i < keys.len() && !found; i++)
-    found = !dependencies[i].is_null() && keys[i].car() == kind;
+  foreach (int id, dependencies)
+    if (c.id_keys[id].car() == kind) { found = 1; break; }
   dependencies.free();
   return found;
 }
@@ -699,44 +711,50 @@ static void StaticQueue.report_cycle(StaticQueue &q) {
 
 // cache slots and values
 
-/* Cache ids keep the identity assigned by `Compiler.cache`. Source slots use
-   compact `_id` names; the generated-header prefix qualifies private slots
-   with the source filename hash. */
-static inline String _slot_name(Var id, String prefix) =>
-  prefix ? %"$prefix$id" : %"_$id";
+/* Slot names belong to this region's reachable order. Semantic cache ids
+   continue to index the unit's retained literal graph. */
+static Map Compiler._cache_bindings(Compiler c, Array ids, String prefix) {
+  Map bindings = {};
+  int slot = 0;
+  foreach (Var id, ids) {
+    String name = prefix ? %"$prefix$slot" : %"_$slot";
+    bindings[id] = c.sym.reference(%($name), NULL);
+    slot++;
+  }
+  return bindings;
+}
 
 /* The static List, String, and Var slot declarations for `ids`, in that
-   order, each in the descending id order `_split_ids` keeps. */
-static List Compiler._slot_declarations(Compiler c, Array ids, String prefix) {
+   order, each in the descending slot order `_split_ids` keeps. */
+static List Compiler._slot_declarations(Compiler c, Array ids, Map bindings) {
   List (list_ids, string_ids, var_ids) = _split_ids(c.id_keys, ids);
   Array declarations = [];
-  List declaration = c._declare_slots(list_ids, "List", prefix);
+  List declaration = _declare_slots(list_ids, "List", bindings);
   if (declaration) declarations.push(declaration);
-  declaration = c._declare_slots(string_ids, "String", prefix);
+  declaration = _declare_slots(string_ids, "String", bindings);
   if (declaration) declarations.push(declaration);
-  declaration = c._declare_slots(var_ids, "Var", prefix);
+  declaration = _declare_slots(var_ids, "Var", bindings);
   if (declaration) declarations.push(declaration);
   return declarations.list_free();
 }
 
-/* Split the masked cache ids by declaration type. Each list keeps the
-   descending id order the emitted declarations rely on. */
+/* Split the ordered cache ids by declaration type. Each list keeps the
+   descending slot order the emitted declarations use. */
 static List _split_ids(Array keys, Array ids) {
   List list_ids = %(), string_ids = %(), var_ids = %();
-  for (int i = 0, n = keys.len(); i < n; i++) {
-    if (ids[i].is_null()) continue;
-    List key = keys[i];
+  foreach (int id, ids) {
+    List key = keys[id];
     match (key) {
       case %(cons *): {
-        list_ids = cons(i, list_ids);
+        list_ids = cons(id, list_ids);
         continue;
       }
       case %(string ?): {
-        string_ids = cons(i, string_ids);
+        string_ids = cons(id, string_ids);
         continue;
       }
       case %(var ?): {
-        var_ids = cons(i, var_ids);
+        var_ids = cons(id, var_ids);
         continue;
       }
     }
@@ -745,43 +763,44 @@ static List _split_ids(Array keys, Array ids) {
   return %($list_ids $string_ids $var_ids);
 }
 
-static List Compiler._declare_slots(
-  Compiler c, List ids, String type, String prefix) {
+static List _declare_slots(List ids, String type, Map bindings) {
   if (!ids) return NULL;
   Array values = [];
   foreach (Var id, ids) {
-    List binding = c.sym.reference(%(${_slot_name(id, prefix)}), NULL);
+    List binding = bindings[id];
     values.push(%(bind $binding ()));
   }
   List binds = values.list_free();
   return %(declare (static $type) (bindings @binds));
 }
 
-static List Compiler._cache_initializer(Compiler c, int id, String prefix) {
+static List Compiler._cache_initializer(
+  Compiler c, int id, Map bindings, int header) {
   match (c.id_keys[id]) {
     case %(string ?value):
-      return c._cache_assignment(id, value, %("String"), prefix);
+      return c._cache_assignment(id, value, %("String"), bindings, header);
     case %(var ?value):
-      return c._cache_assignment(id, value, %("Var"), prefix);
+      return c._cache_assignment(id, value, %("Var"), bindings, header);
     case %(!set ?value (cons *)):
-      return c._cache_assignment(id, value, %("List"), prefix);
+      return c._cache_assignment(id, value, %("List"), bindings, header);
   }
   __builtin_unreachable();
 }
 
 static List Compiler._cache_assignment(
-  Compiler c, int id, List value, List type, String prefix) {
-  List binding = c.sym.reference(%(${_slot_name(id, prefix)}), NULL);
-  List rhs = c.convert_expression(c._cache_value(value, prefix), type);
+  Compiler c, int id, List value, List type, Map bindings, int header) {
+  List binding = bindings[id];
+  List rhs = c.convert_expression(
+    c._cache_value(value, header ? bindings : NULL), type);
   return _assignment(binding, type, rhs);
 }
 
-static List Compiler._cache_value(Compiler c, List expr, String prefix) {
+static List Compiler._cache_value(Compiler c, List expr, Map bindings) {
   if (!expr) return NULL;
   match (expr) {
     case %(cons ?captured_head ?captured_tail): {
-      List head = c._cache_value(captured_head, prefix);
-      List tail = c._cache_value(captured_tail, prefix);
+      List head = c._cache_value(captured_head, bindings);
+      List tail = c._cache_value(captured_tail, bindings);
       List cons_binding = c.sym.reference(%("cons"), NULL);
       return %(expr ("List")
         (call (expr ((func (("Var") ("List")) "List")) (ident $cons_binding))
@@ -797,9 +816,8 @@ static List Compiler._cache_value(Compiler c, List expr, String prefix) {
       return expr;
     case %(cache ?id): {
       List val = c.id_keys[id], reference = expr;
-      if (prefix) {
-        String ident = _slot_name(id, prefix);
-        List binding = c.sym.reference(%($ident), NULL);
+      if (bindings) {
+        List binding = bindings[id];
         reference = %(ident $binding);
       }
       match (val) {

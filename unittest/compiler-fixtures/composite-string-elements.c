@@ -30,22 +30,22 @@
 
 #include "composite-string-elements.h"
 
-static List _2;
+static List _8;
 
-static String _9, _8, _7, _6, _5, _4, _3, _0;
+static String _9, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _1;
+static Var _7;
 
 static Row designated;
 
 _x2c_initializer_choice_F58507E7_0((designated =(Row){
-  .name = _3
+  .name = _0
 }
 ))
 static Row positional;
 
 _x2c_initializer_choice_F58507E7_1((positional =(Row){
-  _4, 1
+  _1, 1
 }
 ))
 static String words[2] ={
@@ -53,7 +53,7 @@ static String words[2] ={
 }
 ;
 
-_x2c_initializer_choice_F58507E7_2((0 < sizeof(words) / sizeof(words[0])), (words[0] = _5), (1ULL < sizeof(words) / sizeof(words[1ULL])), (words[1ULL] = _6))
+_x2c_initializer_choice_F58507E7_2((0 < sizeof(words) / sizeof(words[0])), (words[0] = _2), (1ULL < sizeof(words) / sizeof(words[1ULL])), (words[1ULL] = _3))
 static Row rows[2] ={
   {
     .name = 0
@@ -66,15 +66,15 @@ static Row rows[2] ={
 ;
 
 _x2c_initializer_choice_F58507E7_3((0 < sizeof(rows) / sizeof(rows[0])), (rows[0] =(Row){
-  .name = _7
+  .name = _4
 }
 ), (1ULL < sizeof(rows) / sizeof(rows[1ULL])), (rows[1ULL] =(Row){
-  _8, 2
+  _5, 2
 }
 ))
 List public_list;
 
-_x2c_initializer_choice_F58507E7_4((public_list = _2))
+_x2c_initializer_choice_F58507E7_4((public_list = _8))
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -89,15 +89,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("alpha");
-  _1 = String_var(_0);
-  _2 = cons(_1, NULL);
-  _3 = String_new("two");
-  _4 = String_new("three");
-  _5 = String_new("four");
-  _6 = String_new("five");
-  _7 = String_new("six");
-  _8 = String_new("seven");
+  _0 = String_new("two");
+  _1 = String_new("three");
+  _2 = String_new("four");
+  _3 = String_new("five");
+  _4 = String_new("six");
+  _5 = String_new("seven");
+  _6 = String_new("alpha");
+  _7 = String_var(_6);
+  _8 = cons(_7, NULL);
   _9 = String_new("eight");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();

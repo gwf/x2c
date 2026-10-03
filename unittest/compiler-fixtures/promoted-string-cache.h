@@ -8,11 +8,11 @@
 #include "x2c.h"
 char * dynamic_raw(void);
 
-static List _x2c_hcache_ADB89CC9_4, _x2c_hcache_ADB89CC9_3;
+static List _x2c_hcache_ADB89CC9_9, _x2c_hcache_ADB89CC9_8;
 
-static String _x2c_hcache_ADB89CC9_10, _x2c_hcache_ADB89CC9_9, _x2c_hcache_ADB89CC9_8, _x2c_hcache_ADB89CC9_7, _x2c_hcache_ADB89CC9_6, _x2c_hcache_ADB89CC9_1;
+static String _x2c_hcache_ADB89CC9_6, _x2c_hcache_ADB89CC9_4, _x2c_hcache_ADB89CC9_3, _x2c_hcache_ADB89CC9_2, _x2c_hcache_ADB89CC9_1, _x2c_hcache_ADB89CC9_0;
 
-static Var _x2c_hcache_ADB89CC9_2, _x2c_hcache_ADB89CC9_0;
+static Var _x2c_hcache_ADB89CC9_7, _x2c_hcache_ADB89CC9_5;
 
 static int _x2c_hcache_guard_ADB89CC9 = 0;
 
@@ -20,51 +20,51 @@ __attribute__((constructor)) static void _x2c_hcache_init_ADB89CC9(void){
   x2c_initialize_protocols();
   if(_x2c_hcache_guard_ADB89CC9) return;
   _x2c_hcache_guard_ADB89CC9 = 1;
-  _x2c_hcache_ADB89CC9_0 = Symbol_var(547430756);
-  _x2c_hcache_ADB89CC9_1 = String_new("nested");
-  _x2c_hcache_ADB89CC9_2 = String_var(_x2c_hcache_ADB89CC9_1);
-  _x2c_hcache_ADB89CC9_3 = cons(_x2c_hcache_ADB89CC9_2, NULL);
-  _x2c_hcache_ADB89CC9_4 = cons(_x2c_hcache_ADB89CC9_0, _x2c_hcache_ADB89CC9_3);
-  _x2c_hcache_ADB89CC9_6 = String_new("shared");
-  _x2c_hcache_ADB89CC9_7 = String_new("dual");
-  _x2c_hcache_ADB89CC9_8 = String_new("paren");
-  _x2c_hcache_ADB89CC9_9 = String_new("\x41\u00A9\"C\0tail");
-  _x2c_hcache_ADB89CC9_10 = String_new("boxed");
+  _x2c_hcache_ADB89CC9_0 = String_new("shared");
+  _x2c_hcache_ADB89CC9_1 = String_new("dual");
+  _x2c_hcache_ADB89CC9_2 = String_new("paren");
+  _x2c_hcache_ADB89CC9_3 = String_new("\x41\u00A9\"C\0tail");
+  _x2c_hcache_ADB89CC9_4 = String_new("boxed");
+  _x2c_hcache_ADB89CC9_5 = Symbol_var(547430756);
+  _x2c_hcache_ADB89CC9_6 = String_new("nested");
+  _x2c_hcache_ADB89CC9_7 = String_var(_x2c_hcache_ADB89CC9_6);
+  _x2c_hcache_ADB89CC9_8 = cons(_x2c_hcache_ADB89CC9_7, NULL);
+  _x2c_hcache_ADB89CC9_9 = cons(_x2c_hcache_ADB89CC9_5, _x2c_hcache_ADB89CC9_8);
 }
 
 static inline String header_direct(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return _x2c_hcache_ADB89CC9_6;
+  return _x2c_hcache_ADB89CC9_0;
 }
 
 static inline String header_same(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return _x2c_hcache_ADB89CC9_6;
+  return _x2c_hcache_ADB89CC9_0;
 }
 
 static inline String header_dual(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return _x2c_hcache_ADB89CC9_7;
+  return _x2c_hcache_ADB89CC9_1;
 }
 
 static inline String header_parens(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return(_x2c_hcache_ADB89CC9_8);
+  return(_x2c_hcache_ADB89CC9_2);
 }
 
 static inline String header_conditional(int literal){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return literal ? _x2c_hcache_ADB89CC9_9 : String_new(dynamic_raw());
+  return literal ? _x2c_hcache_ADB89CC9_3 : String_new(dynamic_raw());
 }
 
 static inline Var header_boxed(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return String_var(_x2c_hcache_ADB89CC9_10);
+  return String_var(_x2c_hcache_ADB89CC9_4);
 }
 
 static inline List header_list(void){
   if(! _x2c_hcache_guard_ADB89CC9) _x2c_hcache_init_ADB89CC9();
-  return _x2c_hcache_ADB89CC9_4;
+  return _x2c_hcache_ADB89CC9_9;
 }
 
 int main(void);

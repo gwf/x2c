@@ -52,11 +52,11 @@
 
 #include "exception.h"
 
-static List _73, _64, _60, _59, _57, _56, _52, _50, _49, _47, _45, _44, _43, _42, _33, _30, _28, _27, _24, _23, _21, _19, _18, _17, _16, _14, _12, _11, _9;
+static List _66, _57, _50, _49, _47, _46, _42, _40, _39, _38, _36, _35, _32, _31, _28, _26, _24, _23, _20, _19, _18, _16, _15, _14, _13, _9, _8, _7, _6;
 
-static String _80, _78, _77, _76, _75, _74, _71, _70, _69, _68, _67, _66, _65;
+static String _68, _67, _64, _63, _62, _61, _60, _59, _58, _55, _52, _51, _0;
 
-static Var _72, _63, _62, _61, _58, _55, _54, _53, _51, _48, _46, _37, _35, _34, _31, _29, _26, _25, _22, _20, _15, _13, _10, _8, _3, _1, _0;
+static Var _65, _56, _54, _53, _48, _45, _44, _43, _41, _37, _34, _33, _30, _29, _27, _25, _22, _21, _17, _12, _11, _10, _5, _4, _3, _2, _1;
 
 #include "meta-group.h"
 #include "datum.h"
@@ -168,75 +168,75 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = Symbol_var(49497918350);
-  _1 = Symbol_var(2021158750666);
-  _3 = Symbol_var(1976541542);
-  _8 = Symbol_var(1318210446);
-  _9 = cons(_8, NULL);
-  _10 = Symbol_var(1362954);
-  _11 = cons(_10, _9);
-  _12 = cons(_1, _11);
-  _13 = Symbol_var(62054);
-  _14 = cons(_13, _12);
-  _15 = Symbol_var(806120);
-  _16 = cons(_15, NULL);
-  _17 = cons(_10, _16);
-  _18 = cons(_3, _17);
-  _19 = cons(_13, _18);
-  _20 = List_var(_19);
-  _21 = cons(_20, NULL);
-  _22 = List_var(_14);
-  _23 = cons(_22, _21);
-  _24 = cons(_0, _23);
-  _25 = Symbol_var(46228810);
-  _26 = Symbol_var(1992385866);
-  _27 = cons(_26, NULL);
-  _28 = cons(_25, _27);
-  _29 = Symbol_var(1473096);
-  _30 = cons(_29, NULL);
-  _31 = Symbol_var(11703268);
-  _33 = cons(_31, _23);
-  _34 = Symbol_var(293581290303730);
-  _35 = Symbol_var(61869328);
-  _37 = Symbol_var(61344976);
-  _42 = cons(_35, _11);
-  _43 = cons(_13, _42);
-  _44 = cons(_37, _11);
-  _45 = cons(_13, _44);
-  _46 = List_var(_45);
-  _47 = cons(_46, NULL);
-  _48 = List_var(_43);
-  _49 = cons(_48, _47);
-  _50 = cons(_34, _49);
-  _51 = Symbol_var(28562377614);
-  _52 = cons(_51, NULL);
-  _53 = Symbol_var(12971715722);
-  _54 = Symbol_var(61045002);
-  _55 = Symbol_var(58262293080);
-  _56 = cons(_55, NULL);
-  _57 = cons(_54, _56);
-  _58 = List_var(_57);
-  _59 = cons(_58, NULL);
-  _60 = cons(_53, _59);
-  _61 = Symbol_var(38115688);
-  _62 = Symbol_var(199448);
-  _63 = Symbol_var(1157736);
-  _64 = cons(_63, NULL);
-  _65 = String_new("the body exited with status ");
-  _66 = String_new("the body crashed or overflowed the stack (signal ");
-  _67 = String_new(": ");
-  _68 = String_new(")");
-  _69 = String_new("%s%g s");
-  _70 = String_new("function: ");
-  _71 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _72 = String_var(_71);
-  _73 = cons(_72, NULL);
-  _74 = String_new("reason: ");
-  _75 = String_new("the compile-time helper did not start");
-  _76 = String_new("the helper sent an unknown reply");
-  _77 = String_new("the project meta module was not built");
-  _78 = String_new("X2C_META_TIMEOUT");
-  _80 = String_new("this meta call stopped the compile-time helper");
+  _0 = String_new("the compile-time helper did not start");
+  _1 = Symbol_var(49497918350);
+  _2 = Symbol_var(62054);
+  _3 = Symbol_var(2021158750666);
+  _4 = Symbol_var(1362954);
+  _5 = Symbol_var(1318210446);
+  _6 = cons(_5, NULL);
+  _7 = cons(_4, _6);
+  _8 = cons(_3, _7);
+  _9 = cons(_2, _8);
+  _10 = List_var(_9);
+  _11 = Symbol_var(1976541542);
+  _12 = Symbol_var(806120);
+  _13 = cons(_12, NULL);
+  _14 = cons(_4, _13);
+  _15 = cons(_11, _14);
+  _16 = cons(_2, _15);
+  _17 = List_var(_16);
+  _18 = cons(_17, NULL);
+  _19 = cons(_10, _18);
+  _20 = cons(_1, _19);
+  _21 = Symbol_var(46228810);
+  _22 = Symbol_var(1992385866);
+  _23 = cons(_22, NULL);
+  _24 = cons(_21, _23);
+  _25 = Symbol_var(1473096);
+  _26 = cons(_25, NULL);
+  _27 = Symbol_var(11703268);
+  _28 = cons(_27, _19);
+  _29 = Symbol_var(293581290303730);
+  _30 = Symbol_var(61869328);
+  _31 = cons(_30, _7);
+  _32 = cons(_2, _31);
+  _33 = List_var(_32);
+  _34 = Symbol_var(61344976);
+  _35 = cons(_34, _7);
+  _36 = cons(_2, _35);
+  _37 = List_var(_36);
+  _38 = cons(_37, NULL);
+  _39 = cons(_33, _38);
+  _40 = cons(_29, _39);
+  _41 = Symbol_var(28562377614);
+  _42 = cons(_41, NULL);
+  _43 = Symbol_var(12971715722);
+  _44 = Symbol_var(61045002);
+  _45 = Symbol_var(58262293080);
+  _46 = cons(_45, NULL);
+  _47 = cons(_44, _46);
+  _48 = List_var(_47);
+  _49 = cons(_48, NULL);
+  _50 = cons(_43, _49);
+  _51 = String_new("the helper sent an unknown reply");
+  _52 = String_new("the project meta module was not built");
+  _53 = Symbol_var(38115688);
+  _54 = Symbol_var(199448);
+  _55 = String_new("X2C_META_TIMEOUT");
+  _56 = Symbol_var(1157736);
+  _57 = cons(_56, NULL);
+  _58 = String_new("the body exited with status ");
+  _59 = String_new("the body crashed or overflowed the stack (signal ");
+  _60 = String_new(": ");
+  _61 = String_new(")");
+  _62 = String_new("%s%g s");
+  _63 = String_new("function: ");
+  _64 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
+  _65 = String_var(_64);
+  _66 = cons(_65, NULL);
+  _67 = String_new("this meta call stopped the compile-time helper");
+  _68 = String_new("reason: ");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -273,7 +273,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
   ;
   Call_check(&(call));
   Call_set_deadline(&(call));
-  if(! _helper_start()) Call_refuse(&(call), _75);
+  if(! _helper_start()) Call_refuse(&(call), _0);
   Call_send(&(call), arguments);
   for(; ; ){
     Var reply = Call_next_reply(&(call));
@@ -338,9 +338,9 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
     break; } } case 12971715722: ;
     static MatchCaptureSite _x2c_match_site_0;
-    if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_60), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
+    if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_50), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  List detail = Var_list(_x2c_match_values[1]);  Error_raise(Var_symbol(code), detail);  break;
   }
-  default: ;  Call_stopped(&(call), _76);  break;
+  default: ;  Call_stopped(&(call), _51);  break;
     }
   }
 }
@@ -352,16 +352,16 @@ int Map_try_get(Map, Var, Var *);
 Var int_var(int);
 void Compiler_refuse_record_meta_call(Compiler, String, Token);
 static void Call_check(Call * call){
-  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _77);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
+  Var failure;  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));  if(! String_truth(helper_path)) Call_refuse(&((* call)), _52);  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(helper_table), &(failure))) Call_refuse(&((* call)), Var_string(failure));  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 
 Var Macro_subject(void);
 static void Call_send(Call * call, List arguments){
   if(helper_reset){
-    Call_send_frame(&((* call)), cons(_61, cons(int_var(helper_table), NULL)));  helper_reset = 0;
+    Call_send_frame(&((* call)), cons(_53, cons(int_var(helper_table), NULL)));  helper_reset = 0;
   }
   Call_send_frame(&((* call)), ({
-    Var _x2c_literal_part_0 = String_var((* call).name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_62, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+    Var _x2c_literal_part_0 = String_var((* call).name);  Var _x2c_literal_part_1 = List_var(arguments);  Var _x2c_literal_part_2 = Macro_subject();  cons(_54, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
   }
   ));
 }
@@ -373,7 +373,7 @@ static void Call_send_frame(Call * call, List message){
 String Env_get(String);
 double atof(const char *);
 static void Call_set_deadline(Call * call){
-  String text = Env_get(_78); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
+  String text = Env_get(_55); (* call).limit = String_truth(text) ? atof(text) : 60.0; (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
 }
 
 static double _now(void){
@@ -416,7 +416,7 @@ static int _helper_reaped(void){
 
 static int _helper_stop(int signal){
   int status = 0;  if(_helper_running()){
-    if(signal) killpg(helper_pid, signal);  else _helper_send(_64, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
+    if(signal) killpg(helper_pid, signal);  else _helper_send(_57, 0);  close(helper_to);  close(helper_from);  if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);  killpg(helper_pid, SIGKILL);  status = helper_status;
   }
   helper_pid = 0;  helper_status = - 1;  helper_to = helper_from = - 1;  if(Buffer_truth(helper_input)) Buffer_clear(helper_input);  return status;
 }
@@ -425,7 +425,7 @@ int shell_status(int, int *);
 String int_str(int);
 String String_new(const char *);
 static String _helper_ending(void){
-  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_65), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_66), cons(String_var(int_str(signal)), cons(String_var(_67), cons(String_var(name), cons(String_var(_68), NULL))))));
+  int signal, code = shell_status(_helper_stop(0), &(signal));  if(! signal) return String_join(NULL, cons(String_var(_58), cons(String_var(int_str(code)), NULL)));  String name = String_new(strsignal(signal));  return String_join(NULL, cons(String_var(_59), cons(String_var(int_str(signal)), cons(String_var(_60), cons(String_var(name), cons(String_var(_61), NULL))))));
 }
 
 Buffer Buffer_new(size_t);
@@ -638,12 +638,12 @@ String String_printf(String, ...);
 
 static void Call_overdue(Call * call){
   _helper_stop(SIGKILL);
-  Compiler_report_error((* call).compiler, 27335838, String_printf(_69, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_70), cons(String_var((* call).name), NULL)))), _73));
+  Compiler_report_error((* call).compiler, 27335838, String_printf(_62, "this meta call ran longer than ", (* call).limit), (* call).site, cons(String_var(String_join(NULL, cons(String_var(_63), cons(String_var((* call).name), NULL)))), _66));
 }
 
 static void Call_stopped(Call * call, String reason){
-  Compiler_report_error((* call).compiler, 27335838, _80, (* call).site, ({
-    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(_70), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_74), cons(String_var(reason), NULL))));
+  Compiler_report_error((* call).compiler, 27335838, _67, (* call).site, ({
+    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(_63), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_68), cons(String_var(reason), NULL))));
     cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
   }
   ));

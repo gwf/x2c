@@ -28,7 +28,7 @@ typedef struct Emitter {
   delegate Compiler c;
   int origin, String fn_name, List native_aliases;
   Array native_macros;
-  Map static_objects;
+  Map static_objects, cache_bindings;
   int static_support;
 } Emitter;
 
@@ -37,14 +37,18 @@ typedef struct Emitter {
     The compiler must own the AST's binding facts and origins, and continue the
     translation session's shared generated-name state. This operation does not
     bind, transform, or choose header and source placement; generation supplies
-    any added scaffolding in the same normalized grammar. It preserves the
-    top-level AST sequence and advances generated-name counters as it allocates
-    temporaries. Returned canonical `List`s and `String`s are owned by pools
+    any added scaffolding in the same normalized grammar. `cache_bindings`
+    maps semantic cache ids to generated slots; NULL keeps raw ids for
+    inspection. It preserves the top-level AST sequence and advances
+    generated-name counters as it allocates temporaries. Returned canonical
+    `List`s and `String`s are owned by pools
     active during emission; promote them before releasing those pools if the
     tokens must survive.
 */
-List Compiler.emit(Compiler c, List ast) {
-  Emitter e = {.c = c, .origin = 0, .native_macros = []};
+List Compiler.emit(Compiler c, List ast, Map cache_bindings) {
+  Emitter e = {
+    .c = c, .origin = 0, .native_macros = [],
+    .cache_bindings = cache_bindings};
   // flatten_all leaves no list element behind, so one pass is the fixed
   // point and a second call would only re-cons the whole unit to prove it.
   List code = e._emit(ast).flatten_all();
@@ -100,7 +104,9 @@ static List Emitter._emit(Emitter &e, List ast) {
     case %(cast ?type ?expression):
       return %("(" @{e._semantic_type(type)} ")"
                @{e._operand(expression, EMIT_UNARY)});
-    case %(cache ?id): return %("_$id");
+    case %(cache ?id):
+      return e.cache_bindings ? e._emit_ident(e.cache_bindings[id])
+                              : %("_$id");
     case %(expr ? ?content): return e._emit(%($content));
     case %(postfix ?operator ?argument):
       return e._emit_postfix(operator, argument);

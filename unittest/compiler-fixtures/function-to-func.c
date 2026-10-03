@@ -26,11 +26,11 @@
 
 #include "function-to-func.h"
 
-static List _29, _27, _26, _24, _22, _20, _19, _15, _14, _12, _10, _8, _7, _5, _4, _1;
+static List _29, _27, _26, _24, _23, _19, _18, _16, _14, _13, _10, _8, _7, _5, _4, _1;
 
-static String _17;
+static String _21;
 
-static Var _28, _25, _23, _21, _18, _16, _13, _11, _9, _6, _3, _2, _0;
+static Var _28, _25, _22, _20, _17, _15, _12, _11, _9, _6, _3, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -86,21 +86,21 @@ static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func
 
 static Func _x2c_func_handle_2;
 
-_x2c_initializer_choice_1179287B_3((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_3, _20)))
+_x2c_initializer_choice_1179287B_3((_x2c_func_handle_2 = x2c_func_shared(_x2c_func_adapt_3, _29)))
 static Var _x2c_lambda_1(long value);
 
 static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
 
 static Func _x2c_func_handle_3;
 
-_x2c_initializer_choice_1179287B_4((_x2c_func_handle_3 = x2c_func_shared(_x2c_func_adapt_4, _20)))
+_x2c_initializer_choice_1179287B_4((_x2c_func_handle_3 = x2c_func_shared(_x2c_func_adapt_4, _29)))
 static Var _x2c_lambda_2(long value);
 
 static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
 
 static Func _x2c_func_handle_4;
 
-_x2c_initializer_choice_1179287B_5((_x2c_func_handle_4 = x2c_func_shared(_x2c_func_adapt_5, _20)))
+_x2c_initializer_choice_1179287B_5((_x2c_func_handle_4 = x2c_func_shared(_x2c_func_adapt_5, _29)))
 typedef struct _x2c_func_pointer_context_14{
   Var(* _x2c_func_pointer_1)(int *);
 }
@@ -138,25 +138,25 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _8 = cons(_2, _7);
   _9 = List_var(_8);
   _10 = cons(_9, _1);
-  _11 = Symbol_var(19368);
-  _12 = cons(_11, NULL);
-  _13 = List_var(_4);
-  _14 = cons(_13, NULL);
-  _15 = cons(_2, _14);
-  _16 = List_var(_15);
-  _17 = String_new("Var");
-  _18 = String_var(_17);
-  _19 = cons(_18, NULL);
-  _20 = cons(_16, _19);
-  _21 = Symbol_var(77);
-  _22 = cons(_21, _12);
-  _23 = List_var(_22);
-  _24 = cons(_23, NULL);
-  _25 = List_var(_24);
+  _11 = Symbol_var(77);
+  _12 = Symbol_var(19368);
+  _13 = cons(_12, NULL);
+  _14 = cons(_11, _13);
+  _15 = List_var(_14);
+  _16 = cons(_15, NULL);
+  _17 = List_var(_16);
+  _18 = cons(_17, NULL);
+  _19 = cons(_2, _18);
+  _20 = List_var(_19);
+  _21 = String_new("Var");
+  _22 = String_var(_21);
+  _23 = cons(_22, NULL);
+  _24 = cons(_20, _23);
+  _25 = List_var(_4);
   _26 = cons(_25, NULL);
   _27 = cons(_2, _26);
   _28 = List_var(_27);
-  _29 = cons(_28, _19);
+  _29 = cons(_28, _23);
   _x2c_static_initialize_2();
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
@@ -402,12 +402,12 @@ int main(void){
     _x2c_func_pointer_context_14 _x2c_func_pointer_context_16 ={
       reference_pointer
     }
-    ;  _x2c_func_pointer_context_16._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_6, _29, & _x2c_func_pointer_context_16, sizeof _x2c_func_pointer_context_16) : NULL;
+    ;  _x2c_func_pointer_context_16._x2c_func_pointer_1 ? Func_new_context(_x2c_func_adapt_6, _24, & _x2c_func_pointer_context_16, sizeof _x2c_func_pointer_context_16) : NULL;
   }
   );
   int value = 40;
   if(Var_integer(({
-    Func _x2c_macro_function_15 = reference;  FuncArg _x2c_macro_storage_15[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_15, 1, 0))) _x2c_macro_storage_15[0] = FuncArg_reference(&(value), _12);  else _x2c_macro_storage_15[0] = FuncArg_value(int_var(value));  Func_apply(_x2c_macro_function_15, 1, _x2c_macro_storage_15);
+    Func _x2c_macro_function_15 = reference;  FuncArg _x2c_macro_storage_15[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_15, 1, 0))) _x2c_macro_storage_15[0] = FuncArg_reference(&(value), _13);  else _x2c_macro_storage_15[0] = FuncArg_value(int_var(value));  Func_apply(_x2c_macro_function_15, 1, _x2c_macro_storage_15);
   }
   )) != 41 || value != 41) return 20;
   int bias = 2;
@@ -415,7 +415,7 @@ int main(void){
     Var _x2c_lambda_capture_value_0 = int_var(bias);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_3, _20, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_3, _29, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   );
   if(passthrough(captured) != captured) return 21;
@@ -490,7 +490,7 @@ void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, Lis
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
   const _x2c_func_pointer_context_14 * _x2c_func_pointer_context_15 =(const _x2c_func_pointer_context_14 *) Func_context(_x2c_func_binding_6);
-  int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, _12, _12);
+  int * a0 = x2c_func_declared_reference_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, _13, _13);
   return _x2c_func_pointer_context_15 -> _x2c_func_pointer_1(a0);
   ;
 }
