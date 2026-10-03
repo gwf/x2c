@@ -79,6 +79,20 @@ meta static List bracketed(List values) =>
   $!{ { printf("begin\n"); $each_print($values)... printf("end\n"); } };
 macro Stmt $print_all(Expr $values...) { $bracketed($values)... }
 
+/* A sequence hole splices Array and Map elements and braced initializer
+   elements, in templates and quotations alike. */
+meta static List array_of(List items) => $!( %[$items...] );
+macro Expression $quoted_array(Expr $items...) => $array_of($items);
+meta static List map_of(List rows) => $!( %{${$rows...}} );
+macro Expression $quoted_map(Entry $rows...) => $map_of($rows);
+typedef struct { int a, b, c; } Triple;
+macro Expression $triple(Expr $first, Expr $rest...) => (Triple){ $first, $rest... };
+meta static List triple_of(List items) => $!( (Triple){ $items... } );
+macro Expression $quoted_triple(Expr $items...) => $triple_of($items);
+macro Stmt $declare_triple(Name $name, Expr $items...) {
+  Triple $name = { $items... };
+}
+
 int main(void) {
   int pick = 1;
   $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
@@ -92,5 +106,9 @@ int main(void) {
   (void)$report_next(41);
   $show_twice(21);
   $print_all(1, 2);
+  printf("%s %s\n", $quoted_array(1, 2).repr(), $quoted_map("k": 3).repr());
+  $declare_triple(spliced, 7, 8, 9);
+  printf("%d %d %d\n", $triple(1, 2, 3).c, $quoted_triple(4, 5, 6).c,
+         spliced.c);
   return 0;
 }
