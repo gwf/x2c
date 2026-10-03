@@ -45,14 +45,14 @@ int direct_report(Compiler c) {
   return 0;
 }
 
-macro Stmt $report.parse_raise_payload(Expr $c) {
+macro Stmt $report.parse.raise_payload(Expr $c) {
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
     $c.token, %("use raise %(code (key value)...);"));
 }
 
 int named_report(Compiler c) {
-  $report.parse_raise_payload(c);
+  $report.parse.raise_payload(c);
   return 0;
 }
 
@@ -70,9 +70,9 @@ int direct_validate(Compiler c, List node) {
 }
 
 int named_validate(Compiler c, List node) {
-  if (node.car() != <item>) $report.parse_raise_payload(c);
+  if (node.car() != <item>) $report.parse.raise_payload(c);
   if (node.cdr().len() != 2 || node.cadr() is not <list>)
-    $report.parse_raise_payload(c);
+    $report.parse.raise_payload(c);
   return 1;
 }
 

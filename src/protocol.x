@@ -267,17 +267,17 @@ static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
     c.next();
     p.representation = c.parse_type_name().canonicalize();
     if (!p.generated_base && p.base !== %("Var"))
-      $report.protocol.as_var(c, p.modifier_token);
+      $report.protocols.as_var(c, p.modifier_token);
   }
   if (c.at_word("tag")) {
     p.modifier_token = c.token;
     c.next();
     if (p.representation)
-      $report.protocol.modifier_conflict(c, p.modifier_token);
+      $report.protocols.modifier_conflict(c, p.modifier_token);
     p.tag = c.try_parse_macro_slot(<expression>);
     if (!p.tag) p.tag = c.parse_atomic_literal();
     if (!p.generated_base && p.base !== %("Var"))
-      $report.protocol.tag_var(c, p.modifier_token);
+      $report.protocols.tag_var(c, p.modifier_token);
   }
 }
 
@@ -305,16 +305,16 @@ static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
 static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (p.meta)
-    $report.protocol.meta_adoption(c, p.meta);
+    $report.protocols.meta_adoption(c, p.meta);
 
   if (p.representation || p.tag)
-    $report.protocol.modifier_adoption(c, p.representation, p.start);
+    $report.protocols.modifier_adoption(c, p.representation, p.start);
 
   if (!p.participant)
-    $report.protocol.participant_expected(c, p.participant_token);
+    $report.protocols.participant_expected(c, p.participant_token);
 
   if (p.storage == <static>)
-    $report.protocol.static_adoption(c, p.start);
+    $report.protocols.static_adoption(c, p.start);
   c.expect(<"{">);
 }
 
@@ -340,7 +340,7 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
   while (c.peek(0) != <"}"> && c.peek(0) != <eof>) {
     if (c.peek(0) == <associated>) {
       if (saw_member)
-        $report.protocol.assoc_order(c);
+        $report.protocols.assoc_order(c);
       associations.push(c._parse_associated(type_names));
       continue;
     }
@@ -364,11 +364,11 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
 static List Compiler._parse_associated(Compiler c, Map names) {
   c.expect(<associated>);
   if (c.peek(0) != <ident>)
-    $report.protocol.assoc_expected(c);
+    $report.protocols.assoc_expected(c);
   String name = c.token.text;
   c.next();
   if (name in names)
-    $report.protocol.type_duplicate(c, name);
+    $report.protocols.type_duplicate(c, name);
   c.expect(<=>);
   Type type = c.parse_type_name().canonicalize();
   c.expect(<;>);
@@ -390,15 +390,15 @@ static List Compiler._parse_member(
       identity = name;
     }
   if (!binding)
-    $report.protocol.member_single(c);
+    $report.protocols.member_single(c);
   String name = _member_name(identity, participant);
   if (!name)
-    $report.protocol.member_owner(c, participant);
+    $report.protocols.member_owner(c, participant);
   Type signature = declaration.type_from_ast().canonicalize();
   if (!signature.is_function())
-    $report.protocol.member_function(c, name);
+    $report.protocols.member_function(c, name);
   if (name in members)
-    $report.protocol.member_duplicate(c, name);
+    $report.protocols.member_duplicate(c, name);
   String native = c._native_member();
   c.expect(<;>);
   members[name] = 1;
@@ -422,7 +422,7 @@ static String _member_name(List identity, String participant) {
 static String Compiler._native_member(Compiler c) {
   if (!c.test(<=>)) return NULL;
   if (c.peek(0) != <ident>)
-    $report.protocol.native_ident(c);
+    $report.protocols.native_ident(c);
   String native = c.token.text;
   c.next();
   return native;
@@ -573,7 +573,7 @@ static void Compiler._install_occurrence(
     first_location = second_location;
     second_location = swap;
   }
-  $report.protocol.decl_conflict(c, base, first_location, second_location);
+  $report.protocols.decl_conflict(c, base, first_location, second_location);
 }
 
 // adoption drafts
@@ -584,7 +584,7 @@ static List AdoptionDraft.publish(AdoptionDraft &a) {
   String spelling = a.participant.car().str();
   List declared = c.sym.get(%($spelling));
   if ((!declared || !declared.type().is_typedef()) && !c.shallow)
-    $report.protocol.type_undeclared(c, spelling,
+    $report.protocols.type_undeclared(c, spelling,
       a.participant_token);
   a.tag = a.check_modifiers();
   a.storage = a.published_storage(spelling);
@@ -720,7 +720,7 @@ static void AdoptionDraft.install(AdoptionDraft &a) {
   if (existing == row) return;
   List first_location = _adoption_location(existing);
   if (c._canonical_file(first_location) == path) return;
-  $report.protocol.adoption_conflict(c, a, first_location);
+  $report.protocols.adoption_conflict(c, a, first_location);
 }
 
 // resolution

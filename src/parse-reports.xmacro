@@ -220,7 +220,7 @@ macro Stmt $report.parse.lifecycle_signature(
   }
 }
 
-macro Stmt $report.protocol.managed_cleanup(
+macro Stmt $report.protocols.managed_cleanup(
   Expr $c, Expr $origin, Expr $type) {
   $c.report_error(
     <protocol>, "managed initializer requires Cleanup participation",

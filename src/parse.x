@@ -2458,7 +2458,7 @@ static void Compiler._require_cleanup(
     case %(* (!or static extern threaded) *):
       $report.parse.managed_storage(c, origin);
   if (!c.protocol_members_for(type, %("Cleanup")))
-    $report.protocol.managed_cleanup(c, origin, type);
+    $report.protocols.managed_cleanup(c, origin, type);
 }
 
 static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
