@@ -3,8 +3,9 @@
 > Status: active, 2026-10-02. Gary approved the plan and its
 > recommendations as one campaign on branch `gwf/macro-metalanguage`,
 > started from dev d84f3c26. The branch is pushed freely; the finished
-> campaign is submitted as one PR to the shared integrator. M1 and M2 are
-> implemented on the branch (results under each); M3 and M4 remain.
+> campaign is submitted as one PR to the shared integrator. M1-M4 are
+> implemented on the branch; results and the parts of M3 not done are
+> recorded under each.
 
 ## Question
 
@@ -302,6 +303,22 @@ return. An `Operator` category removes the `source_operator_content` and
 `source_postfix_content` builders (about 10-15 lines; the gain is
 readability).
 
+M3 results:
+
+- One `macro_categories` table in `src/macros.x` replaces the hole-kind,
+  result-kind, and decorator-target vocabularies and the spelling
+  function; every name is accepted case-insensitively, so `Expr` is now
+  also a result kind and `Expression` a hole kind. The book's hole-kind
+  table now lists `Catch`, `Captures`, and `MatchRow`.
+- Not done, with evidence: category names as `meta` parameter types.
+  `Block` is already a runtime type in `lib/`, `Statement` a sqlite package
+  type, and `Entry` an example type; and unlike `Type` and `Source`, an
+  alias would deliver the same `List`, adding no fact or check.
+- Not done, with evidence: an `Operator` hole kind. A template such as
+  `$a $op $b * $c` cannot be parsed at definition, because the operator's
+  precedence is unknown until expansion; the measured saving was 10-15
+  lines.
+
 ### M4. Syntax quotation in meta code
 
 Add the quotation `$!( expression )`, `$!{ block items }`, or
@@ -339,6 +356,20 @@ single-use template macros. M4 matters more for users: it is the form in
 which a meta function reads like a Lisp macro. Rule 2 of
 `agents/lowering-with-macros.md` (loops in slot functions) becomes a
 choice instead of a requirement.
+
+M4 results:
+
+- `$!( ... )`, `$!{ ... }`, and `$!Kind{ ... }` parse anywhere an
+  expression does; the body's `$name` declares a hole for the visible local
+  on first use. A quoted hole takes its kind from its position: an
+  expression, a name, a `...` sequence, or a statement where it stands
+  alone (not followed by `;` or an operator).
+- Adopted in the `try` lowering: `builtin_catch_patterns` and
+  `builtin_catch_cases` use quotations, and the `$catch_pattern`,
+  `$catch_case`, and `$catch_none` templates are deleted (cleanup.x +16/-32).
+  The compiler's self-translation is unchanged outside cleanup.c.
+- Inside a `%(...)` List, `$` inserts a value, so a quotation there is bound
+  to a local first.
 
 ### Not proposed
 
