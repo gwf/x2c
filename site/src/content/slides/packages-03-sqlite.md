@@ -12,10 +12,10 @@ links:
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
 ```x2c,ignore
-import "sqlite" with Database, Statement;
+import "sqlite" with Database, Prepared;
 
 // The database and table are already open.
-Statement insert = db.prepare(
+Prepared insert = db.prepare(
   "INSERT INTO observation VALUES (?, ?, ?)"
 );
 defer insert.free();
@@ -25,7 +25,7 @@ foreach(List reading, %(
   ("/source" 200 3100000)
 )) insert.bind(reading).execute();
 
-Statement report = db.prepare(
+Prepared report = db.prepare(
   "SELECT url, status, us FROM observation "
   "WHERE status >= 400 OR us > ? ORDER BY us DESC"
 );

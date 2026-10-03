@@ -1,13 +1,13 @@
 #include "x2c.x"
 
-macro Statement $keep_block(Block $items...) {
+macro Statement $keep_block(Statement $items...) {
   $items...
 }
 
-macro Statement $discard_block(Block $items...) {
+macro Statement $discard_block(Statement $items...) {
 }
 
-macro Statement $unless(Expr $condition, Block $body) {
+macro Statement $unless(Expr $condition, Statement $body) {
   if (!($condition)) $body
 }
 

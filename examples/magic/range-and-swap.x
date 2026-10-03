@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 macro Decorator $control.range(
-  Block $body,
+  Statement $body,
   Name $index,
   Expr $start,
   Expr $stop

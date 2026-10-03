@@ -151,7 +151,7 @@ Source: `lib/meta.x:120`
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Source`](#Source) | alias | A `meta` parameter declared `Source` receives, at a `$` call, captured syntax with the source text it came from: `((text T) (file F) (syntax S))`. |
-| [`Type`](#Type) | alias | A `meta` parameter declared `Type` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F) (methods M))`. |
+| [`TypeInfo`](#TypeInfo) | alias | A `meta` parameter declared `TypeInfo` receives, at a `$` call, the description of its argument's type: `((name N) (kind K) (type T) (fields F) (methods M))`. |
 
 <a id="Source"></a>
 ### Source
@@ -164,12 +164,12 @@ S))`. `x2c_source_text` and `x2c_embed_text` read it directly.
 
 Source: `lib/meta.x:47`
 
-<a id="Type"></a>
-### Type
+<a id="TypeInfo"></a>
+### TypeInfo
 
-`typedef List Type`
+`typedef List TypeInfo`
 
-A `meta` parameter declared `Type` receives, at a `$` call, the
+A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
 description of its argument's type: `((name N) (kind K) (type T)
 (fields F) (methods M))`. Read a part with `List.assoc`.
 

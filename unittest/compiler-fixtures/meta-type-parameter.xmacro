@@ -2,7 +2,7 @@
 
 /* One line per part, so no part wraps. Methods, which String has many of,
    print as whether `len` is one. */
-meta static List describe(Type type) {
+meta static List describe(TypeInfo type) {
   Array parts = [];
   foreach (List part, type) {
     List methods = part.cadr();

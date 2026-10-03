@@ -4,15 +4,15 @@
 $(import "cleanup.xmacro")
 
 typedef struct Database *Database;
-typedef struct Statement *Statement;
+typedef struct Prepared *Prepared;
 typedef enum SqliteLisp { SQLITE_LISP_NAMESPACE } SqliteLisp;
 
 protocol Var(Database);
-protocol Var(Statement);
-protocol Iter(Statement);
+protocol Var(Prepared);
+protocol Iter(Prepared);
 
 $cleanup.by(Database, close);
-$cleanup.by(Statement, free);
+$cleanup.by(Prepared, free);
 
 #pragma private
 
@@ -25,7 +25,7 @@ struct Database {
   sqlite3 *handle;
 };
 
-struct Statement {
+struct Prepared {
   Database database;
   sqlite3_stmt *handle;
   int result;
@@ -38,10 +38,10 @@ Var Database.var(Database database) => Var.new(<sqlite--da>, database);
 Database Var.database(Var value) => (Database)value.pointer();
 
 /** Boxes a borrowed statement wrapper without extending its lifetime. */
-Var Statement.var(Statement statement) => Var.new(<sqlite--st>, statement);
+Var Prepared.var(Prepared statement) => Var.new(<sqlite--pr>, statement);
 
 /** Reads a statement wrapper from its registered Var representation. */
-Statement Var.statement(Var value) => (Statement)value.pointer();
+Prepared Var.prepared(Var value) => (Prepared)value.pointer();
 
 static void _sqlite_error(Database database, String operation, int code) {
   String message = String.new(database && database.handle
@@ -65,10 +65,10 @@ static void _database_live(Database database, String operation) {
           (reason "closed or null Database"));
 }
 
-static void _statement_live(Statement statement, String operation) {
+static void _statement_live(Prepared statement, String operation) {
   if (!statement || !statement.handle)
     raise %(bad-state (library "SQLite") (operation $operation)
-            (reason "freed or null Statement"));
+            (reason "freed or null prepared statement"));
   _database_live(statement.database, operation);
 }
 
@@ -143,9 +143,9 @@ sqlite3_int64 Database.last_insert_rowid(Database database) {
 /** Prepares exactly one statement. SQLite parses trailing whitespace/comments.
     The Scope-owned wrapper borrows database; free releases its native handle.
 */
-Statement Database.prepare(Database database, String sql) {
+Prepared Database.prepare(Database database, String sql) {
   _database_live(database, "sqlite3_prepare_v2");
-  Statement statement = Scope.calloc(1, sizeof(struct Statement));
+  Prepared statement = Scope.calloc(1, sizeof(struct Prepared));
   statement.database = database;
   int ready = 0;
   defer if (!ready && statement.handle) sqlite3_finalize(statement.handle);
@@ -170,7 +170,7 @@ Statement Database.prepare(Database database, String sql) {
 }
 
 /** Releases the native statement once, without repeating its step error. */
-Statement Statement.free(Statement statement) {
+Prepared Prepared.free(Prepared statement) {
   if (statement && statement.handle) {
     sqlite3_finalize(statement.handle);
     statement.handle = NULL;
@@ -179,7 +179,7 @@ Statement Statement.free(Statement statement) {
 }
 
 /** Borrows the native statement until free; reset before wrapper reuse. */
-sqlite3_stmt *Statement.native(Statement statement) {
+sqlite3_stmt *Prepared.native(Prepared statement) {
   _statement_live(statement, "native");
   return statement.handle;
 }
@@ -187,7 +187,7 @@ sqlite3_stmt *Statement.native(Statement statement) {
 /** Restarts execution while retaining bindings. A previously reported step
     error is not raised twice; a new deferred reset error still propagates.
 */
-Statement Statement.reset(Statement statement) {
+Prepared Prepared.reset(Prepared statement) {
   _statement_live(statement, "sqlite3_reset");
   int previous = statement.result;
   int code = sqlite3_reset(statement.handle);
@@ -197,7 +197,7 @@ Statement Statement.reset(Statement statement) {
   return statement;
 }
 
-static void _statement_bind(Statement statement, int index, Var value) {
+static void _statement_bind(Prepared statement, int index, Var value) {
   sqlite3_stmt *native = statement.handle;
   int code;
   String operation;
@@ -247,14 +247,14 @@ static void _statement_bind(Statement statement, int index, Var value) {
   _sqlite_check(statement.database, operation, code);
 }
 
-static void _statement_clear(Statement statement) {
+static void _statement_clear(Prepared statement) {
   statement.reset();
   _sqlite_check(statement.database, "sqlite3_clear_bindings",
     sqlite3_clear_bindings(statement.handle));
 }
 
 /** Resets and replaces all bindings in SQLite's one-based parameter order. */
-Statement Statement.bind(Statement statement, List values) {
+Prepared Prepared.bind(Prepared statement, List values) {
   _statement_live(statement, "bind");
   int count = sqlite3_bind_parameter_count(statement.handle);
   if (values.len() != count)
@@ -269,7 +269,7 @@ Statement Statement.bind(Statement statement, List values) {
 /** Resets and replaces all named bindings. Keys are exact SQLite parameter
     names including their :, @, or $ prefix; unnamed/gapped slots are rejected.
 */
-Statement Statement.bind_named(Statement statement, Map values) {
+Prepared Prepared.bind_named(Prepared statement, Map values) {
   _statement_live(statement, "bind_named");
   int count = sqlite3_bind_parameter_count(statement.handle);
   if (values.len() != count)
@@ -289,7 +289,7 @@ Statement Statement.bind_named(Statement statement, Map values) {
 }
 
 /** Copies column names in result order, preserving duplicate names. */
-List Statement.columns(Statement statement) {
+List Prepared.columns(Prepared statement) {
   _statement_live(statement, "sqlite3_column_name");
   Array names = [];
   int count = sqlite3_column_count(statement.handle);
@@ -302,7 +302,7 @@ List Statement.columns(Statement statement) {
   return names.list_free();
 }
 
-static Var _statement_column(Statement statement, int index) {
+static Var _statement_column(Prepared statement, int index) {
   sqlite3_stmt *native = statement.handle;
   int type = sqlite3_column_type(native, index);
   switch (type) {
@@ -329,7 +329,7 @@ static Var _statement_column(Statement statement, int index) {
   return Bytes.new(1).append(data, length);
 }
 
-static int _statement_step(Statement statement) {
+static int _statement_step(Prepared statement) {
   _statement_live(statement, "sqlite3_step");
   if (statement.result == SQLITE_DONE) return SQLITE_DONE;
   if (statement.result != SQLITE_OK && statement.result != SQLITE_ROW)
@@ -345,7 +345,7 @@ static int _statement_step(Statement statement) {
     Text with embedded NUL and BLOBs are Scope-owned Bytes. Other text is
     String. Rows survive stepping/reset/free, within their x2c value lifetimes.
 */
-List Statement.next(Statement statement) {
+List Prepared.next(Prepared statement) {
   if (_statement_step(statement) == SQLITE_DONE) return NULL;
   Array row = [];
   int count = sqlite3_column_count(statement.handle);
@@ -355,13 +355,13 @@ List Statement.next(Statement statement) {
 }
 
 /** Executes to completion, discarding rows. Bind or reset before reusing. */
-Statement Statement.execute(Statement statement) {
+Prepared Prepared.execute(Prepared statement) {
   while (_statement_step(statement) == SQLITE_ROW) {}
   return statement;
 }
 
 static int _statement_next(Iter iterator, Var *out) {
-  Statement statement = (Statement)iterator.obj.pointer();
+  Prepared statement = (Prepared)iterator.obj.pointer();
   List row = statement.next();
   if (!row) return 0;
   *out = row;
@@ -369,7 +369,7 @@ static int _statement_next(Iter iterator, Var *out) {
 }
 
 /** Borrows the statement at its current position. No overlapping traversal. */
-Iter Statement.iter(Statement statement, Iter dest) {
+Iter Prepared.iter(Prepared statement, Iter dest) {
   _statement_live(statement, "iter");
   return dest.init((void *)statement, _statement_next, 0);
 }
@@ -400,7 +400,7 @@ Var Database.transaction(Database database, Func callback) {
 $lisp.binding(sqlite_lisp, "sqlite-query")
 static List _lisp_sqlite_query(String path, String sql, List parameters) {
   Database db = $auto(Database.open(path));
-  Statement statement = $auto(db.prepare(sql));
+  Prepared statement = $auto(db.prepare(sql));
   statement.bind(parameters);
   List rows = NULL;
   foreach (List row, statement) rows = cons(row, rows);
@@ -411,7 +411,7 @@ $lisp.binding(sqlite_lisp, "sqlite-execute")
 static long long _lisp_sqlite_execute(
   String path, String sql, List parameters) {
   Database db = $auto(Database.open(path));
-  Statement statement = $auto(db.prepare(sql));
+  Prepared statement = $auto(db.prepare(sql));
   statement.bind(parameters);
   statement.execute();
   return db.changes();

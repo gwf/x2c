@@ -13,7 +13,7 @@ macro Statement $set(Type $type, name $target) {
   $target = value;
 }
 
-macro Decorator $bump(Block $target, name $counter) {
+macro Decorator $bump(Statement $target, name $counter) {
   $target
   $counter = $counter + 1;
 }

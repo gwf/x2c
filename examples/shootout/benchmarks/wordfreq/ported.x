@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct { const char *word; size_t len; int count; } Entry;
+typedef struct { const char *word; size_t len; int count; } WordCount;
 
 static int _random_state = 42;
 
@@ -36,7 +36,7 @@ static char *_make_text(int word_count) {
 /* FNV-1a and the linear probe, folded into one function: the C splits them
    only because the hash needed a name to be called twice. */
 static void _add_word(
-  Entry *table, size_t mask, const char *word, size_t len) {
+  WordCount *table, size_t mask, const char *word, size_t len) {
   uint64_t hash = 1469598103934665603ULL;
   for (size_t i = 0; i < len; i++)
     hash = (hash ^ (unsigned char) word[i]) * 1099511628211ULL;
@@ -58,7 +58,7 @@ static uint64_t _count_words(const char *text, int word_count) {
   Scope.retain();
   size_t size = 1;
   while (size < (size_t) word_count * 2) size *= 2;
-  Entry *table = Scope.calloc(size, sizeof(Entry));
+  WordCount *table = Scope.calloc(size, sizeof(WordCount));
 
   const char *start = text;
   for (const char *cursor = text;; cursor++) {

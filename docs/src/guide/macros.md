@@ -129,7 +129,7 @@ Every hole has a syntax kind:
 | `Param` | a function parameter |
 | `Function` | a complete function definition |
 | `Decl` | one declaration without its trailing semicolon |
-| `Statement` or `Block` | one block item |
+| `Statement` | one block item |
 | `Field` | one struct or union field |
 | `Entry` | one `Map` `key: value` row |
 | `Enumerator` | one enum member |
@@ -268,7 +268,7 @@ expansion:
 ```x2c
 ~
 #include "meta.x"
-meta static List project_type(Type type) => type.assoc(<type>);
+meta static List project_type(TypeInfo type) => type.assoc(<type>);
 
 macro Statement $project.swap(
   Expr $left,
@@ -418,7 +418,7 @@ look like a new control construct without adding a new parser for its header:
 
 ```x2c
 macro Decorator $control.range(
-  Block $body,
+  Statement $body,
   Name $index,
   Expr $start,
   Expr $stop
@@ -450,7 +450,7 @@ mandatory, even when they take no arguments:
 
 ```x2c
 #include "meta.x"
-meta static List project_type(Type type) => type.assoc(<type>);
+meta static List project_type(TypeInfo type) => type.assoc(<type>);
 
 macro Statement $control.swap(
   Expr $left,
@@ -549,14 +549,14 @@ The [meta-function guide](meta-functions.md) introduces these operations;
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 specifies them.
 
-A `meta` parameter declared `Type` receives a description of the
+A `meta` parameter declared `TypeInfo` receives a description of the
 argument's type, including a struct or union's fields in declaration
 order. Pass the hole twice to receive both its code and its type, and pair
 the field names with `x2c_expr_field` to build typed field reads:
 
 ```x2c
 #include "meta.x"
-meta static List project_fields(List receiver, Type type) {
+meta static List project_fields(List receiver, TypeInfo type) {
   Array reads = [];
   foreach (List field, type.assoc(<fields>))
     reads.push(x2c_expr_field(receiver, field.car()));
@@ -572,13 +572,13 @@ macro Expression $project.fields(Expr $value) =>
 ~}
 ```
 
-A `Type` parameter's `methods` part names the type's direct dotted methods.
+A `TypeInfo` parameter's `methods` part names the type's direct dotted methods.
 A generator can test for one and build the dotted call, which the compiler
 resolves as it would the same call in source:
 
 ```x2c
 #include "meta.x"
-meta static List project_write(Type type, List receiver, List value) {
+meta static List project_write(TypeInfo type, List receiver, List value) {
   List methods = type.assoc(<methods>);
   if (!methods.contains("write")) return %();
   return x2c_expr_call(x2c_expr_field(receiver, "write"), %($value));

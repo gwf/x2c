@@ -8,13 +8,13 @@ The interface is accepted and verified on macOS.
 ## Start with an observation report
 
 ```x2c
-import "sqlite" with Database, Statement;
+import "sqlite" with Database, Prepared;
 
 int main(void) {
   Database db = Database.open(":memory:");
   defer db.close();
   db.execute("CREATE TABLE observation(url TEXT, status INTEGER, us INTEGER)");
-  Statement insert = db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
+  Prepared insert = db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
   defer insert.free();
   foreach (List reading, %(
     ("/guide" 200 12000)
@@ -22,7 +22,7 @@ int main(void) {
     ("/source" 200 3100000)
   )) insert.bind(reading).execute();
 
-  Statement report = db.prepare(
+  Prepared report = db.prepare(
     "SELECT url, status, us FROM observation "
     "WHERE status >= 400 OR us > ? ORDER BY us DESC"
   );
@@ -116,7 +116,7 @@ Native failures preserve the SQLite result code, message, and operation in
 structured Error details, with a native SQL error offset when available.
 Null, closed, or freed wrappers are rejected
 before use.
-`Statement.free()` and `Database.close()` are idempotent while their wrapper
+`Prepared.free()` and `Database.close()` are idempotent while their wrapper
 storage remains alive. Cleanup does not re-raise a statement's already reported
 execution error. Drive `execute` or iteration to completion, or call `reset`,
 to observe deferred execution failures before cleanup; freeing a partially
@@ -148,7 +148,7 @@ linkage, and license information. The package is initially verified on macOS.
 The public `sqlite-3.h` shim includes the complete pinned `sqlite3.h`; raw
 functions, constants, callbacks, and handles retain their SQLite spelling.
 Virtual tables, custom collations, native extension loading, backups, and
-other advanced operations use that interface. `Statement.native()` exposes
+other advanced operations use that interface. `Prepared.native()` exposes
 the same prepared statement. Native handle users retain SQLite's lifetime,
 threading, and callback obligations.
 

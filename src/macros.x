@@ -540,8 +540,8 @@ macro Statement $report.parse_decorator_singular(Expr $c, Expr $origin) {
 macro Statement $report.parse_decorator_kind(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "decorator first parameter has invalid target kind",
-    $origin, %("expected Expression, Function, Statement, Block, Field,"
-      "Unit, or NamedType"));
+    $origin, %("expected Expression, Function, Statement, Field, Unit,"
+      "or NamedType"));
 }
 
 /* A Unit target's source stays visible to compile-time Lisp, whose
@@ -633,7 +633,7 @@ static Symbol Definition.target_kind(Definition &d) {
 
 macro Statement $report.parse_macro_braced_body(Expr $c) {
   $c.report_error(
-    <parse>, "braced macro body requires Statement, Block, Field, Entry, " +
+    <parse>, "braced macro body requires Statement, Field, Entry, " +
   "Enumerator, Unit, or non-Expression Decorator result",
     $c.token, NULL);
 }
@@ -969,8 +969,7 @@ typedef struct MacroCategory {
 static const MacroCategory macro_categories[] = {
   { "Expr",          <expr>,       <expression>, 1, 1 },
   { "Expression",    <expr>,       <expression>, 1, 2 },
-  { "Block",         <block>,      <block-item>, 1, 1 },
-  { "Statement",     <block>,      <block-item>, 1, 2 },
+  { "Statement",     <block>,      <block-item>, 1, 3 },
   { "Field",         <field>,      <field>,      1, 3 },
   { "Entry",         <map-entry>,  <map-entry>,  0, 3 },
   { "Enumerator",    <enumerator>, <enumerator>, 0, 3 },

@@ -355,17 +355,17 @@ The SQLite package keeps SQL visible while accepting ordinary x2c values.
 `Database.open` creates a file-backed or `":memory:"` connection. Prepare a
 statement once, bind a positional List or a Map of exact parameter names,
 and iterate copied row Lists. Rows preserve column order and duplicate names;
-`Statement.columns` returns the names separately. Free statements before
+`Prepared.columns` returns the names separately. Free statements before
 closing their connection, with `defer` beside each acquisition.
 
 <!-- ignore: an import needs a registered --package-dir root. -->
 ```x2c,ignore
-import "sqlite" with Database, Statement;
+import "sqlite" with Database, Prepared;
 
 void show_readings(String filename) {
   Database db = Database.open(filename);
   defer db.close();
-  Statement query = db.prepare(
+  Prepared query = db.prepare(
     "SELECT url, status FROM observation WHERE status >= ? ORDER BY url"
   );
   defer query.free();

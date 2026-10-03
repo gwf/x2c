@@ -1,6 +1,6 @@
 /* Reads `value` from `table` at `key`, or runs `create` to set it and stores
    the result. A null result is stored too, so a miss is computed once. */
-macro Decorator $memo(Block $create, Expr $table, Expr $key, Expr $value) {
+macro Decorator $memo(Statement $create, Expr $table, Expr $key, Expr $value) {
   Var cached;
   if ($table.try_get($key, cached)) $value = cached;
   else {
@@ -10,6 +10,6 @@ macro Decorator $memo(Block $create, Expr $table, Expr $key, Expr $value) {
 }
 
 macro Decorator $adapter.memo(
-  Block $create, Expr $compiler, Expr $key, Expr $value) {
+  Statement $create, Expr $compiler, Expr $key, Expr $value) {
   $memo($compiler.names.adapters, $key, $value) $create
 }

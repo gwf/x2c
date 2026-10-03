@@ -71,7 +71,7 @@ Returns the value the argument expression `node` of a `$` call passes to
 a parameter of type `want`, or of no declared type when `want` is NULL:
 a constant, captured syntax, or the result of another `$` call, which
 `call` evaluates. Captured literal syntax reaches a parameter that is not
-syntax as the literal's value, a `Type` parameter as the description
+syntax as the literal's value, a `TypeInfo` parameter as the description
 of its type, and a `Source` parameter with its source text. Anything
 else is reported at `site`.
 

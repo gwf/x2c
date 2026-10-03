@@ -12,10 +12,10 @@ typedef struct Response {
 // A parameter declared `Type` receives the description of its argument's
 // type, computed by the compiler at the `$` call. Its `fields` part lists
 // the named fields of a struct in declaration order.
-meta static List fields_of(Type type) => type.assoc(<fields>);
+meta static List fields_of(TypeInfo type) => type.assoc(<fields>);
 
 // The field names as one comma-joined String literal.
-meta static List field_names(Type type) {
+meta static List field_names(TypeInfo type) {
   Array names = [];
   foreach (List field, fields_of(type)) names.push(field.car());
   return x2c_literal_string(String.join(", ", names));
@@ -23,7 +23,7 @@ meta static List field_names(Type type) {
 
 // `{ r.code, r.label }`, built from the fields rather than written out.
 // The same argument arrives twice: as syntax to read from, and as a type.
-meta static List field_reads(List receiver, Type type) {
+meta static List field_reads(List receiver, TypeInfo type) {
   Array reads = [];
   foreach (List field, fields_of(type))
     reads.push(x2c_expr_field(receiver, field.car()));

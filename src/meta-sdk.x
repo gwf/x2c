@@ -579,8 +579,9 @@ static void _sdk_check_notes(String operation, List notes) {
 
 // meta parameter descriptions
 
-/** Returns what a `meta` parameter declared `Type` receives for the captured
-    syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`.
+/** Returns what a `meta` parameter declared `TypeInfo` receives for the
+    captured syntax `value`: `((name N) (kind K) (type T) (fields F)
+    (methods M))`.
     `T` is the canonical type of `value` and `N` its name, or "" when it has
     none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
     `F` lists the `(name type)` rows of a struct or union's named fields,

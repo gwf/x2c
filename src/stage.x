@@ -40,7 +40,7 @@ static const SymbolSet meta_comparisons = %<<"<" ">" "<=" ">=" "==" "!=">>;
     a parameter of type `want`, or of no declared type when `want` is NULL:
     a constant, captured syntax, or the result of another `$` call, which
     `call` evaluates. Captured literal syntax reaches a parameter that is not
-    syntax as the literal's value, a `Type` parameter as the description
+    syntax as the literal's value, a `TypeInfo` parameter as the description
     of its type, and a `Source` parameter with its source text. Anything
     else is reported at `site`. */
 Var Compiler.meta_argument(
@@ -49,7 +49,7 @@ Var Compiler.meta_argument(
   if (want)
     match (node)
       case %(expr ? (meta-cap ?captured)): {
-        if (c.sym.is_named_value_type(want, "Type"))
+        if (c.sym.is_named_value_type(want, "TypeInfo"))
           return meta_type_description(captured);
         if (c.sym.is_named_value_type(want, "Source"))
           return meta_source_description(captured);
