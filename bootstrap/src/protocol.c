@@ -3011,7 +3011,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2509 = List_var(_2508);
   _2510 = cons(_720, _553);
   _2511 = List_var(_2510);
-  _2512 = int_var(97082);
+  _2512 = int_var(97048);
   _2513 = cons(_2512, NULL);
   _2514 = cons(_725, _2513);
   _2515 = List_var(_2514);
@@ -3049,7 +3049,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2547 = cons(_2546, NULL);
   _2548 = cons(_712, _2547);
   _2549 = List_var(_2548);
-  _2550 = int_var(97133);
+  _2550 = int_var(97099);
   _2551 = cons(_2550, NULL);
   _2552 = cons(_725, _2551);
   _2553 = List_var(_2552);
@@ -5488,26 +5488,24 @@ static List Compiler__builtin_registration(Compiler c, List methods, String name
   List symbol = cons(_225, cons(_235, cons(List_var(cons(_236, cons(_235, cons(String_var(name), cons(Symbol_var(tag), NULL))))), NULL)));  List table = cons(_225, cons(_2374, cons(List_var(cons(_774, cons(List_var(methods), NULL))), NULL)));  return Compiler__helper_call(c, List_type(_1101), _2430, cons(List_var(symbol), cons(List_var(table), NULL)));
 }
 
+List x2c_literal_symbol(Symbol);
 static List Compiler__tagged_registration(Compiler c, List methods, String name, Symbol tag){
-  List symbol = cons(_225, cons(_235, cons(List_var(({
-    Var _x2c_literal_part_120 = String_var(Symbol_str(tag));  cons(_236, cons(_235, cons(_x2c_literal_part_120, cons(Symbol_var(tag), NULL))));
-  }
-  )), NULL)));  List table = cons(_225, cons(_2374, cons(List_var(cons(_774, cons(List_var(methods), NULL))), NULL)));  return Compiler__helper_call(c, List_type(_1747), _2431, ({
-    Var _x2c_literal_part_121 = List_var(symbol);  Var _x2c_literal_part_122 = List_var(_string_literal(name));  cons(_x2c_literal_part_121, cons(_x2c_literal_part_122, cons(List_var(table), NULL)));
+  List symbol = x2c_literal_symbol(tag);  List table = cons(_225, cons(_2374, cons(List_var(cons(_774, cons(List_var(methods), NULL))), NULL)));  return Compiler__helper_call(c, List_type(_1747), _2431, ({
+    Var _x2c_literal_part_120 = List_var(symbol);  Var _x2c_literal_part_121 = List_var(_string_literal(name));  cons(_x2c_literal_part_120, cons(_x2c_literal_part_121, cons(List_var(table), NULL)));
   }
   ));
 }
 
 static List Compiler__fallback_registration(Compiler c, List methods, String name, List early_call){
   List table = cons(_225, cons(_2374, cons(List_var(cons(_774, cons(List_var(methods), NULL))), NULL)));  List fallback = Compiler__helper_call(c, List_type(_1747), _2432, ({
-    Var _x2c_literal_part_123 = List_var(_string_literal(name));  cons(_x2c_literal_part_123, cons(List_var(table), NULL));
+    Var _x2c_literal_part_122 = List_var(_string_literal(name));  cons(_x2c_literal_part_122, cons(List_var(table), NULL));
   }
   ));  return Var_list(List_cadr(Compiler_rebuild_statement(c, cons(String_var(_2433), cons(List_var(_2541), cons(List_var(cons(List_var(early_call), cons(List_var(fallback), NULL))), NULL))))));
 }
 
 static List Compiler__helper_call(Compiler c, Type result, String callee, List arguments){
   Macro shape = _2573;  return Compiler_rebuild_expression(c, result, Macro_apply(shape, ({
-    Var _x2c_literal_part_124 = List_var(cons(String_var(callee), NULL));  cons(_x2c_literal_part_124, cons(List_var(arguments), NULL));
+    Var _x2c_literal_part_123 = List_var(cons(String_var(callee), NULL));  cons(_x2c_literal_part_123, cons(List_var(arguments), NULL));
   }
   )));
 }
@@ -5551,7 +5549,7 @@ return _insert_at_boundary(ast, source, private, Array_list_free(aliases), make_
 List Compiler_finish_foreign_alias(Compiler, List, List);
 static List Compiler__native_alias(Compiler c, Type participant, String member, String source, Type signature, int make_static){
   String target = _member_spelling(participant, member);  List declaration = Compiler__signature_declaration(c, target, signature, make_static);  if(! make_static) Compiler_record_generated_symbol(c, target, signature);  List native_binding = Sym_reference(c -> sym, cons(String_var(source), NULL), NULL);  return Compiler_finish_foreign_alias(c, declaration, ({
-    Var _x2c_literal_part_125 = List_var(signature);  Var _x2c_literal_part_126 = List_var(cons(_774, cons(List_var(native_binding), NULL)));  cons(_225, cons(_x2c_literal_part_125, cons(_x2c_literal_part_126, NULL)));
+    Var _x2c_literal_part_124 = List_var(signature);  Var _x2c_literal_part_125 = List_var(cons(_774, cons(List_var(native_binding), NULL)));  cons(_225, cons(_x2c_literal_part_124, cons(_x2c_literal_part_125, NULL)));
   }
   ));
 }

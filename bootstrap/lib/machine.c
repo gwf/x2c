@@ -6,8 +6,6 @@
 
 #include "exception.h"
 
-static String _7, _6, _5, _4, _3, _2, _1, _0;
-
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -66,14 +64,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("<MachineProgram: 0x%012lX>");
-  _1 = String_new("MachineProgram { ");
-  _2 = String_new("length: ");
-  _3 = String_new(", ");
-  _4 = String_new("const_count: ");
-  _5 = String_new("binder_count: ");
-  _6 = String_new("root: ");
-  _7 = String_new(" }");
 }
 
 void * Scope_memdup(const void *, size_t);
@@ -89,8 +79,8 @@ MachineProgram MachineProgram_new(int field_length, int field_const_count, int f
 void * Scope_calloc(size_t, size_t);
 
 MachineProgram MachineProgram_alloc(){
-  MachineProgram value = Scope_calloc(1, sizeof(* value));
-  return value;
+  MachineProgram _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
+  return _x2c_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -128,8 +118,7 @@ unsigned MachineProgram_hash(MachineProgram value){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer MachineProgram_write_str(MachineProgram value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _0, (long) value);
+  return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -141,7 +130,6 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String MachineProgram_str(MachineProgram value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -180,36 +168,35 @@ Buffer Var_write_repr(Var, Buffer);
 Var int_var(int);
 
 Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & path;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer_write(out, _1);
-      Buffer_write(out, _2);
-      Var_write_repr(int_var(value -> length), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _4);
-      Var_write_repr(int_var(value -> const_count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _5);
-      Var_write_repr(int_var(value -> binder_count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _6);
-      Var_write_repr(int_var(value -> root), out);
+      Buffer_write(out, "MachineProgram { ");
+      Buffer_write(out, "length: ");
+      Var_write_repr((int_var(value -> length)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "const_count: ");
+      Var_write_repr((int_var(value -> const_count)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "binder_count: ");
+      Var_write_repr((int_var(value -> binder_count)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "root: ");
+      Var_write_repr((int_var(value -> root)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _7);
+        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -224,7 +211,6 @@ Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
 }
 
 String MachineProgram_repr(MachineProgram value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={

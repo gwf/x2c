@@ -6,11 +6,11 @@
 
 #include "exception.h"
 
-static List _29, _28, _27;
+static List _17, _16, _15;
 
-static String _30, _25, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _18, _13, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _26, _24, _23;
+static Var _14, _12, _11;
 
 static int _init_guard_ = 0;
 
@@ -242,44 +242,32 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(241046191814, String_new("Regex"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("<Regex: 0x%012lX>");
-  _1 = String_new("Regex { ");
-  _2 = String_new("pattern: ");
-  _3 = String_new(", ");
-  _4 = String_new("program: ");
-  _5 = String_new("<opaque: 0x%012lX>");
-  _6 = String_new("capture_count: ");
-  _7 = String_new("capture_names: ");
-  _8 = String_new("caseless: ");
-  _9 = String_new("multiline: ");
-  _10 = String_new("dotall: ");
-  _11 = String_new(" }");
-  _12 = String_new("unmatched closing parenthesis");
-  _13 = String_new("nothing to repeat");
-  _14 = String_new("repetition count too large");
-  _15 = String_new("repetition range out of order");
-  _16 = String_new("missing closing parenthesis");
-  _17 = String_new("unknown group syntax");
-  _18 = String_new("malformed group name");
-  _19 = String_new("unterminated character class");
-  _20 = String_new("character range out of order");
-  _21 = String_new("pattern ends in a backslash");
-  _22 = String_new("unknown escape");
-  _23 = Symbol_var(54);
-  _24 = Symbol_var(1318234344);
-  _25 = String_new("List");
-  _26 = String_var(_25);
-  _27 = cons(_26, NULL);
-  _28 = cons(_24, _27);
-  _29 = cons(_23, _28);
-  _30 = String_new("}");
+  _0 = String_new("unmatched closing parenthesis");
+  _1 = String_new("nothing to repeat");
+  _2 = String_new("repetition count too large");
+  _3 = String_new("repetition range out of order");
+  _4 = String_new("missing closing parenthesis");
+  _5 = String_new("unknown group syntax");
+  _6 = String_new("malformed group name");
+  _7 = String_new("unterminated character class");
+  _8 = String_new("character range out of order");
+  _9 = String_new("pattern ends in a backslash");
+  _10 = String_new("unknown escape");
+  _11 = Symbol_var(54);
+  _12 = Symbol_var(1318234344);
+  _13 = String_new("List");
+  _14 = String_var(_13);
+  _15 = cons(_14, NULL);
+  _16 = cons(_12, _15);
+  _17 = cons(_11, _16);
+  _18 = String_new("}");
 }
 
 void * Scope_calloc(size_t, size_t);
 
 Regex Regex_alloc(){
-  Regex value = Scope_calloc(1, sizeof(* value));
-  return value;
+  Regex _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
+  return _x2c_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -317,8 +305,7 @@ unsigned Regex_hash(Regex value){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer Regex_write_str(Regex value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _0, (long) value);
+  return Buffer_printf(out, "<Regex: 0x%012lX>", (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -330,7 +317,6 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String Regex_str(Regex value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -373,45 +359,44 @@ Var int_var(int);
 Buffer List_write_repr(List, Buffer);
 
 Buffer Regex_write_repr(Regex value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, "<Regex: 0x%012lX>", (long) value);
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<Regex: 0x%012lX>", (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & path;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer_write(out, _1);
-      Buffer_write(out, _2);
+      Buffer_write(out, "Regex { ");
+      Buffer_write(out, "pattern: ");
       String_write_repr(value -> pattern, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _4);
-      Buffer_printf(out, _5, (long) value -> program);
-      Buffer_write(out, _3);
-      Buffer_write(out, _6);
-      Var_write_repr(int_var(value -> capture_count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _7);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "program: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) value -> program);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "capture_count: ");
+      Var_write_repr((int_var(value -> capture_count)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "capture_names: ");
       List_write_repr(value -> capture_names, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _8);
-      Var_write_repr(int_var(value -> caseless), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _9);
-      Var_write_repr(int_var(value -> multiline), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _10);
-      Var_write_repr(int_var(value -> dotall), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "caseless: ");
+      Var_write_repr((int_var(value -> caseless)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "multiline: ");
+      Var_write_repr((int_var(value -> multiline)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "dotall: ");
+      Var_write_repr((int_var(value -> dotall)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _11);
+        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -426,7 +411,6 @@ Buffer Regex_write_repr(Regex value, Buffer out){
 }
 
 String Regex_repr(Regex value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
@@ -529,7 +513,7 @@ static Regex Regex_new(String pattern){
   ;
   Parser_flags(&(p));
   regex -> program = Parser_alternation(&(p));
-  if(p.pos < p.len) Parser_fail(&(p), _12);
+  if(p.pos < p.len) Parser_fail(&(p), _0);
   return regex;
 }
 
@@ -581,7 +565,7 @@ static _RegexNode Parser_sequence(Parser * p){
 static _RegexNode Parser_quantified(Parser * p, _RegexNode atom){
   int min, max;
   if(! Parser_bounds(&((* p)), &(min), &(max))) return atom;
-  if(atom -> kind == 5080 || atom -> kind == 11224 || atom -> kind == 49254660 || atom -> kind == 988778756) Parser_fail(&((* p)), _13);
+  if(atom -> kind == 5080 || atom -> kind == 11224 || atom -> kind == 49254660 || atom -> kind == 988778756) Parser_fail(&((* p)), _1);
   (* p).pos ++;
   _RegexNode node = _node(1219504232);
   node -> min = min;
@@ -589,7 +573,7 @@ static _RegexNode Parser_quantified(Parser * p, _RegexNode atom){
   node -> greedy = Parser_peek(&((* p))) != '?';
   node -> child = atom;
   if(! node -> greedy)(* p).pos ++;
-  if(_is_quantifier(Parser_peek(&((* p))))) Parser_fail(&((* p)), _13);
+  if(_is_quantifier(Parser_peek(&((* p))))) Parser_fail(&((* p)), _1);
   return node;
 }
 
@@ -627,11 +611,11 @@ static int Parser_braces(Parser * p, int * min, int * max){
   }
   if(low > INT_MAX || high > INT_MAX){
     (* p).pos ++;
-    Parser_fail(&((* p)), _14);
+    Parser_fail(&((* p)), _2);
   }
   if(high >= 0 && high < low){
     (* p).pos ++;
-    Parser_fail(&((* p)), _15);
+    Parser_fail(&((* p)), _3);
   }
   (* min) =(int) low;
   (* max) =(int) high;
@@ -672,7 +656,7 @@ _Noreturn static void Parser_fail(Parser * p, String why){
 
 static _RegexNode Parser_atom(Parser * p){
   int byte =(unsigned char)(* p).text[(* p).pos];
-  if(_is_quantifier(byte)) Parser_fail(&((* p)), _13);
+  if(_is_quantifier(byte)) Parser_fail(&((* p)), _1);
   (* p).pos ++;
   switch(byte){
     case '.' : return _node(2994);
@@ -703,7 +687,7 @@ static _RegexNode Parser_literal(Parser * p, int byte){
 static _RegexNode Parser_group(Parser * p){
   int index = Parser_peek(&((* p))) == '?' ? Parser_group_syntax(&((* p))) : Parser_add_capture(&((* p)), NULL);
   _RegexNode body = Parser_alternation(&((* p)));
-  if(Parser_peek(&((* p))) != ')') Parser_fail(&((* p)), _16);
+  if(Parser_peek(&((* p))) != ')') Parser_fail(&((* p)), _4);
   (* p).pos ++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
@@ -717,7 +701,7 @@ static int Parser_group_syntax(Parser * p){
   }
   if(marker != '<'){
     (* p).pos --;
-    Parser_fail(&((* p)), _17);
+    Parser_fail(&((* p)), _5);
   }
   (* p).pos ++;
   return Parser_add_capture(&((* p)), Parser_name(&((* p))));
@@ -728,7 +712,7 @@ static String Parser_name(Parser * p){
   while(_is_word(Parser_peek(&((* p)))))(* p).pos ++;
   if((* p).pos == start || scan_ascii_digit((* p).text[start]) || Parser_peek(&((* p))) != '>'){
     (* p).pos = start;
-    Parser_fail(&((* p)), _18);
+    Parser_fail(&((* p)), _6);
   }
   String name = String_getslice((* p).regex -> pattern, start, (* p).pos, 1);
   (* p).pos ++;
@@ -759,7 +743,7 @@ static _RegexNode Parser_set(Parser * p){
   if(negate)(* p).pos ++;
   int first =(* p).pos;
   while((* p).pos == first || Parser_peek(&((* p))) != ']'){
-    if((* p).pos >=(* p).len) Parser_fail(&((* p)), _19);
+    if((* p).pos >=(* p).len) Parser_fail(&((* p)), _7);
     Parser_member(&((* p)), node);
   }
   (* p).pos ++;
@@ -780,12 +764,12 @@ static int Parser_range_end(Parser * p, int low){
   (* p).pos ++;
   int high =(unsigned char)(* p).text[(* p).pos ++];
   if(high == '\\') high = Parser_escape(&((* p)));
-  if(high < low) Parser_fail(&((* p)), _20);
+  if(high < low) Parser_fail(&((* p)), _8);
   return high;
 }
 
 static int Parser_escape(Parser * p){
-  if((* p).pos >=(* p).len) Parser_fail(&((* p)), _21);
+  if((* p).pos >=(* p).len) Parser_fail(&((* p)), _9);
   int byte =(unsigned char)(* p).text[(* p).pos ++];
   switch(byte){
     case 't' : return '\t';
@@ -798,7 +782,7 @@ static int Parser_escape(Parser * p){
   }
   if(! _is_word(byte) && byte < 128) return byte;
   (* p).pos --;
-  Parser_fail(&((* p)), _22);
+  Parser_fail(&((* p)), _10);
 }
 
 static RegexMatch _search(Regex regex, String subject, int offset){
@@ -1052,7 +1036,7 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
       for(RegexMatch found = _search(r, subject, 0);  List_truth(found);  found = all ? _next(r, subject, found) : NULL){
         String_write_str(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1), out);
         if(fn) String_write_str(Var_str(({
-          Func _x2c_macro_function_0 = fn;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(found), _29);  else _x2c_macro_storage_0[0] = FuncArg_value(List_var(found));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
+          Func _x2c_macro_function_0 = fn;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(found), _17);  else _x2c_macro_storage_0[0] = FuncArg_value(List_var(found));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
         }
         )), out);
         else _expand(out, found, replacement);
@@ -1100,7 +1084,7 @@ static int _reference(Buffer out, RegexMatch found, String text, int i){
     String_write_str(RegexMatch_getindex(found, int_var(next - '0')), out);
     return i + 1;
   }
-  int close = next == '{' ? String_find_within(text, _30, i + 2, - 1) : - 1;
+  int close = next == '{' ? String_find_within(text, _18, i + 2, - 1) : - 1;
   if(close < 0){
     Buffer_write_char(out, '$');
     return i;

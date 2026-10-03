@@ -6,7 +6,7 @@
 
 #include "exception.h"
 
-static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -175,39 +175,20 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(244620705480, String_new("Job"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("<Job: 0x%012lX>");
-  _1 = String_new("Job { ");
-  _2 = String_new("stages: ");
-  _3 = String_new(", ");
-  _4 = String_new("launch: ");
-  _5 = String_new("<opaque: 0x%012lX>");
-  _6 = String_new("pids: ");
-  _7 = String_new("statuses: ");
-  _8 = String_new("count: ");
-  _9 = String_new("started: ");
-  _10 = String_new("finished: ");
-  _11 = String_new("status: ");
-  _12 = String_new("nul_output: ");
-  _13 = String_new("nul_errors: ");
-  _14 = String_new("output_file: ");
-  _15 = String_new("errors_file: ");
-  _16 = String_new("output_text: ");
-  _17 = String_new("errors_text: ");
-  _18 = String_new(" }");
-  _19 = String_new("Job.start");
-  _20 = String_new("Job.pipe");
-  _21 = String_new("Job.options");
-  _22 = String_new("Job.output");
-  _23 = String_new("Job.errors");
-  _24 = String_new("=");
-  _25 = String_new("=");
+  _0 = String_new("Job.start");
+  _1 = String_new("Job.pipe");
+  _2 = String_new("Job.options");
+  _3 = String_new("Job.output");
+  _4 = String_new("Job.errors");
+  _5 = String_new("=");
+  _6 = String_new("=");
 }
 
 void * Scope_calloc(size_t, size_t);
 
 Job Job_alloc(){
-  Job value = Scope_calloc(1, sizeof(* value));
-  return value;
+  Job _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
+  return _x2c_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -241,8 +222,7 @@ unsigned Job_hash(Job value){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer Job_write_str(Job value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _0, (long) value);
+  return Buffer_printf(out, "<Job: 0x%012lX>", (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -254,7 +234,6 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String Job_str(Job value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -299,66 +278,65 @@ Buffer File_write_repr(File, Buffer);
 Buffer String_write_repr(String, Buffer);
 
 Buffer Job_write_repr(Job value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, "<Job: 0x%012lX>", (long) value);
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<Job: 0x%012lX>", (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & path;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer_write(out, _1);
-      Buffer_write(out, _2);
+      Buffer_write(out, "Job { ");
+      Buffer_write(out, "stages: ");
       List_write_repr(value -> stages, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _4);
-      Buffer_printf(out, _5, (long) & value -> launch);
-      Buffer_write(out, _3);
-      Buffer_write(out, _6);
-      Buffer_printf(out, _5, (long) value -> pids);
-      Buffer_write(out, _3);
-      Buffer_write(out, _7);
-      Buffer_printf(out, _5, (long) value -> statuses);
-      Buffer_write(out, _3);
-      Buffer_write(out, _8);
-      Var_write_repr(int_var(value -> count), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _9);
-      Var_write_repr(int_var(value -> started), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _10);
-      Var_write_repr(int_var(value -> finished), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _11);
-      Var_write_repr(int_var(value -> status), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _12);
-      Var_write_repr(int_var(value -> nul_output), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _13);
-      Var_write_repr(int_var(value -> nul_errors), out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _14);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "launch: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) & value -> launch);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "pids: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) value -> pids);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "statuses: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) value -> statuses);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "count: ");
+      Var_write_repr((int_var(value -> count)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "started: ");
+      Var_write_repr((int_var(value -> started)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "finished: ");
+      Var_write_repr((int_var(value -> finished)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "status: ");
+      Var_write_repr((int_var(value -> status)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "nul_output: ");
+      Var_write_repr((int_var(value -> nul_output)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "nul_errors: ");
+      Var_write_repr((int_var(value -> nul_errors)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "output_file: ");
       File_write_repr(value -> output_file, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _15);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "errors_file: ");
       File_write_repr(value -> errors_file, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _16);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "output_text: ");
       String_write_repr(value -> output_text, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _17);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "errors_text: ");
       String_write_repr(value -> errors_text, out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _18);
+        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -373,7 +351,6 @@ Buffer Job_write_repr(Job value, Buffer out){
 }
 
 String Job_repr(Job value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
@@ -700,7 +677,7 @@ void File_path_error(Var, String, int);
 
 _Noreturn static void _child_failed(Failure failure, String dir, char * * argv){
   int error = failure.error;
-  if(failure.step == _STEP_DIR) File_path_error(String_var(_19), dir, error);
+  if(failure.step == _STEP_DIR) File_path_error(String_var(_0), dir, error);
   String program = String_new(argv[0]);
   if(error == ENOENT){
     Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
@@ -916,7 +893,7 @@ List List_append(List, List);
 
 Job Job_pipe(Job job, List command){
   if(! _init_guard_) _file_init_();
-  Job__unstarted(job, _20);
+  Job__unstarted(job, _1);
   job -> stages = List_append(job -> stages, _stages(command));
   return job;
 }
@@ -941,7 +918,7 @@ int Var_is(Var, Symbol);
 
 Job Job_options(Job job, Map options){
   if(! _init_guard_) _file_init_();
-  Job__unstarted(job, _21);
+  Job__unstarted(job, _2);
   {
     Var key, value;
     Map _x2c_macro_object_2 = options;
@@ -1082,7 +1059,7 @@ void Job_run(Job job){
 String Job_output(Job job){
   if(! _init_guard_) _file_init_();
   Job_check(job);
-  return _text(job -> output_text, job -> nul_output, _22);
+  return _text(job -> output_text, job -> nul_output, _3);
 }
 
 static String _text(String text, int nul, String operation){
@@ -1109,7 +1086,7 @@ List Job_lines(Job job){
 String Job_errors(Job job){
   if(! _init_guard_) _file_init_();
   Job_status(job);
-  return _text(job -> errors_text, job -> nul_errors, _23);
+  return _text(job -> errors_text, job -> nul_errors, _4);
 }
 
 int Job_ready(Job job){
@@ -1207,7 +1184,7 @@ static char * * _environment(Map env){
   Array entries = Array_new();
   for(char * * entry = environ;  * entry;  entry ++){
     String text = String_new(* entry);
-    int equals = String_find(text, _24);
+    int equals = String_find(text, _5);
     if(! Map_contains(names, String_var(equals < 0 ? text : String_getslice(text, -2147483648, equals, 1)))) Array_push(entries, String_var(text));
   }
   {
@@ -1220,7 +1197,7 @@ static char * * _environment(Map env){
       name = _x2c_macro_cursor_output_5;
       value = _x2c_macro_cursor_output_6;
       Array_push(entries, String_var(({
-        Var _x2c_literal_part_15 = String_var(Var_str(name));  Var _x2c_literal_part_16 = String_var(Var_str(value));  String_join(NULL, cons(_x2c_literal_part_15, cons(String_var(_25), cons(_x2c_literal_part_16, NULL))));
+        Var _x2c_literal_part_15 = String_var(Var_str(name));  Var _x2c_literal_part_16 = String_var(Var_str(value));  String_join(NULL, cons(_x2c_literal_part_15, cons(String_var(_6), cons(_x2c_literal_part_16, NULL))));
       }
       )));
     }

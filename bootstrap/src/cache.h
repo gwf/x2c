@@ -15,7 +15,7 @@ List _run_once(Compiler c, List guard);
 
 List _entry_call(String entry);
 
-List _initialization_guard(List guard);
+List Compiler_initialization_guard(Compiler c, List guard);
 
 List _patch_initialized_entry(Compiler c, List function, List body, List guard, List entry);
 

@@ -4,8 +4,6 @@
 
 #include "exception.h"
 
-static String _5, _4, _3, _2, _1, _0;
-
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -59,12 +57,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(261698358342, String_new("SourceView"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("<SourceView: 0x%012lX>");
-  _1 = String_new("SourceView { ");
-  _2 = String_new("overlays: ");
-  _3 = String_new(", ");
-  _4 = String_new("dirty_paths: ");
-  _5 = String_new(" }");
 }
 
 SourceView SourceView_new(){
@@ -76,8 +68,8 @@ SourceView SourceView_new(){
 void * Scope_calloc(size_t, size_t);
 
 SourceView SourceView_alloc(){
-  SourceView value = Scope_calloc(1, sizeof(* value));
-  return value;
+  SourceView _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
+  return _x2c_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -115,8 +107,7 @@ unsigned SourceView_hash(SourceView value){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer SourceView_write_str(SourceView value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _0, (long) value);
+  return Buffer_printf(out, "<SourceView: 0x%012lX>", (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -128,7 +119,6 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String SourceView_str(SourceView value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -165,30 +155,29 @@ Buffer Buffer_write(Buffer, const char *);
 Buffer Map_write_repr(Map, Buffer);
 
 Buffer SourceView_write_repr(SourceView value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, "<SourceView: 0x%012lX>", (long) value);
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<SourceView: 0x%012lX>", (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & path;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer_write(out, _1);
-      Buffer_write(out, _2);
+      Buffer_write(out, "SourceView { ");
+      Buffer_write(out, "overlays: ");
       Map_write_repr(value -> overlays, out);
-      Buffer_write(out, _3);
-      Buffer_write(out, _4);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "dirty_paths: ");
       Map_write_repr(value -> dirty_paths, out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _5);
+        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -203,7 +192,6 @@ Buffer SourceView_write_repr(SourceView value, Buffer out){
 }
 
 String SourceView_repr(SourceView value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={

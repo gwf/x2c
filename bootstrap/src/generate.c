@@ -798,7 +798,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _462 = cons(_459, _461);
   _463 = List_var(_462);
   _464 = Symbol_var(1133019155420);
-  _465 = int_var(27151);
+  _465 = int_var(27154);
   _466 = cons(_465, NULL);
   _467 = cons(_464, _466);
   _468 = List_var(_467);
@@ -2040,9 +2040,9 @@ position ++;
 return - 1;
 }
 
-List _initialization_guard(List);
+List Compiler_initialization_guard(Compiler, List);
 static List Init_prelude(Init * i, List out){
-  out = cons(List_var(_initialization_guard((* i).guard)), out);  return List_truth((* i).synthetic) ? cons(List_var((* i).synthetic), out) : out;
+  out = cons(List_var(Compiler_initialization_guard((* i).c, (* i).guard)), out);  return List_truth((* i).synthetic) ? cons(List_var((* i).synthetic), out) : out;
 }
 
 List _patch_initialized_entry(Compiler, List, List, List, List);
@@ -2097,7 +2097,7 @@ static List Compiler__replace_body(Compiler c, List function, List statements){
 }
 
 static List Compiler__protocol_initializer(Compiler c, List function, List body){
-  List guard = Sym_introduce(c -> sym, _507);  List statements = List_concat_n(4, cons(List_var(_initialization_guard(guard)), NULL), _run_once(c, guard), Compiler_init_statements(c, 1139215899608), body);  return Compiler__replace_body(c, function, statements);
+  List guard = Sym_introduce(c -> sym, _507);  List statements = List_concat_n(4, cons(List_var(Compiler_initialization_guard(c, guard)), NULL), _run_once(c, guard), Compiler_init_statements(c, 1139215899608), body);  return Compiler__replace_body(c, function, statements);
 }
 
 static List Compiler__shutdown_registration(Compiler c, List source){

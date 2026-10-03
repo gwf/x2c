@@ -4,8 +4,6 @@
 
 #include "exception.h"
 
-static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
-
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -54,15 +52,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   }
   ;
   x2c_register_tagged_descriptor(222658595144, String_new("DisjointSet"), _x2c__x2c_protocol_methods_0);
-  _0 = String_new("<DisjointSet: 0x%012lX>");
-  _1 = String_new("DisjointSet { ");
-  _2 = String_new("parent: ");
-  _3 = String_new("<opaque: 0x%012lX>");
-  _4 = String_new(", ");
-  _5 = String_new("size: ");
-  _6 = String_new("length: ");
-  _7 = String_new("ncmpnts: ");
-  _8 = String_new(" }");
 }
 
 DisjointSet DisjointSet_new(int argument_0){
@@ -74,8 +63,8 @@ DisjointSet DisjointSet_new(int argument_0){
 void * Scope_calloc(size_t, size_t);
 
 DisjointSet DisjointSet_alloc(){
-  DisjointSet value = Scope_calloc(1, sizeof(* value));
-  return value;
+  DisjointSet _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
+  return _x2c_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -114,8 +103,7 @@ unsigned DisjointSet_hash(DisjointSet value){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 Buffer DisjointSet_write_str(DisjointSet value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  return Buffer_printf(out, _0, (long) value);
+  return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
 }
 
 Buffer Buffer_new(size_t);
@@ -127,7 +115,6 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String DisjointSet_str(DisjointSet value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_0 = Buffer_new(0);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
@@ -166,36 +153,35 @@ Buffer Var_write_repr(Var, Buffer);
 Var int_var(int);
 
 Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
-  if(! _init_guard_) _file_init_();
-  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
-  RenderPath path;
-  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  if((void *) value ==(void *) 0) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
+  RenderPath _x2c_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & path;
+    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
     X2CCleanup _x2c_defer_record_1 ={
       .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
     }
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Buffer_write(out, _1);
-      Buffer_write(out, _2);
-      Buffer_printf(out, _3, (long) value -> parent);
-      Buffer_write(out, _4);
-      Buffer_write(out, _5);
-      Buffer_printf(out, _3, (long) value -> size);
-      Buffer_write(out, _4);
-      Buffer_write(out, _6);
-      Var_write_repr(int_var(value -> length), out);
-      Buffer_write(out, _4);
-      Buffer_write(out, _7);
-      Var_write_repr(int_var(value -> ncmpnts), out);
+      Buffer_write(out, "DisjointSet { ");
+      Buffer_write(out, "parent: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) value -> parent);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "size: ");
+      Buffer_printf(out, "<opaque: 0x%012lX>", (long) value -> size);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "length: ");
+      Var_write_repr((int_var(value -> length)), out);
+      Buffer_write(out, ", ");
+      Buffer_write(out, "ncmpnts: ");
+      Var_write_repr((int_var(value -> ncmpnts)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, _8);
+        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_1;
@@ -210,7 +196,6 @@ Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
 }
 
 String DisjointSet_repr(DisjointSet value){
-  if(! _init_guard_) _file_init_();
   Buffer _x2c_macro_out_1 = Buffer_new(0);
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={

@@ -4790,7 +4790,7 @@ void Compiler_ensure_macro_lisp(Compiler c){
       int_var(0)
     }
     );  Var _x2c_macro_item_42;  while(Iter_try_next(_x2c_macro_iterator_39, &(_x2c_macro_item_42))){
-      List _x2c_macro_pair_39;  _x2c_macro_pair_39 = Var_list(_x2c_macro_item_42);  relative = List_getindex(_x2c_macro_pair_39, 0);  message = List_getindex(_x2c_macro_pair_39, 1);  Compiler__eval_library(c, ready, Var_string(relative), Var_string(message));
+      List _x2c_macro_pair_39 = Var_list(_x2c_macro_item_42);  relative = List_getindex(_x2c_macro_pair_39, 0);  message = List_getindex(_x2c_macro_pair_39, 1);  Compiler__eval_library(c, ready, Var_string(relative), Var_string(message));
     }
 
   }
@@ -5334,7 +5334,7 @@ static Lisp Compiler__fill_library(Compiler c, Lisp shared){
           int_var(0)
         }
         );  Var _x2c_macro_item_52;  x2c_exception_escaped = & _x2c_macro_item_52;  while(Iter_try_next(_x2c_macro_iterator_49, &(_x2c_macro_item_52))){
-          List volatile _x2c_macro_pair_49;  _x2c_macro_pair_49 = Var_list(_x2c_macro_item_52);  relative = List_getindex(_x2c_macro_pair_49, 0);  message = List_getindex(_x2c_macro_pair_49, 1);  Compiler__eval_library(c, 0, Var_string(relative), Var_string(message));
+          List _x2c_macro_pair_49 = Var_list(_x2c_macro_item_52);  relative = List_getindex(_x2c_macro_pair_49, 0);  message = List_getindex(_x2c_macro_pair_49, 1);  Compiler__eval_library(c, 0, Var_string(relative), Var_string(message));
         }
 
       }

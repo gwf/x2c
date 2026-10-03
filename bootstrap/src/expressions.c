@@ -2489,11 +2489,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1905 = cons(_1904, NULL);
   _1906 = cons(_219, _1905);
   _1907 = List_var(_1906);
-  _1908 = int_var(2200);
+  _1908 = int_var(2199);
   _1909 = cons(_1908, NULL);
   _1910 = cons(_225, _1909);
   _1911 = List_var(_1910);
-  _1912 = int_var(82376);
+  _1912 = int_var(82360);
   _1913 = cons(_1912, NULL);
   _1914 = cons(_240, _1913);
   _1915 = List_var(_1914);
@@ -2640,11 +2640,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2053 = cons(_2052, NULL);
   _2054 = cons(_198, _2053);
   _2055 = List_var(_2054);
-  _2056 = int_var(2208);
+  _2056 = int_var(2207);
   _2057 = cons(_2056, NULL);
   _2058 = cons(_225, _2057);
   _2059 = List_var(_2058);
-  _2060 = int_var(82736);
+  _2060 = int_var(82720);
   _2061 = cons(_2060, NULL);
   _2062 = cons(_240, _2061);
   _2063 = List_var(_2062);
@@ -2731,11 +2731,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2144 = cons(_2143, NULL);
   _2145 = cons(_198, _2144);
   _2146 = List_var(_2145);
-  _2147 = int_var(2219);
+  _2147 = int_var(2218);
   _2148 = cons(_2147, NULL);
   _2149 = cons(_225, _2148);
   _2150 = List_var(_2149);
-  _2151 = int_var(83146);
+  _2151 = int_var(83130);
   _2152 = cons(_2151, NULL);
   _2153 = cons(_240, _2152);
   _2154 = List_var(_2153);
@@ -2805,11 +2805,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2218 = cons(_2217, NULL);
   _2219 = cons(_198, _2218);
   _2220 = List_var(_2219);
-  _2221 = int_var(2221);
+  _2221 = int_var(2220);
   _2222 = cons(_2221, NULL);
   _2223 = cons(_225, _2222);
   _2224 = List_var(_2223);
-  _2225 = int_var(83221);
+  _2225 = int_var(83205);
   _2226 = cons(_2225, NULL);
   _2227 = cons(_240, _2226);
   _2228 = List_var(_2227);
@@ -2876,11 +2876,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2289 = cons(_2288, NULL);
   _2290 = cons(_198, _2289);
   _2291 = List_var(_2290);
-  _2292 = int_var(2225);
+  _2292 = int_var(2224);
   _2293 = cons(_2292, NULL);
   _2294 = cons(_225, _2293);
   _2295 = List_var(_2294);
-  _2296 = int_var(83421);
+  _2296 = int_var(83405);
   _2297 = cons(_2296, NULL);
   _2298 = cons(_240, _2297);
   _2299 = List_var(_2298);
@@ -3083,11 +3083,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2496 = cons(_2495, NULL);
   _2497 = cons(_198, _2496);
   _2498 = List_var(_2497);
-  _2499 = int_var(2274);
+  _2499 = int_var(2273);
   _2500 = cons(_2499, NULL);
   _2501 = cons(_225, _2500);
   _2502 = List_var(_2501);
-  _2503 = int_var(85543);
+  _2503 = int_var(85527);
   _2504 = cons(_2503, NULL);
   _2505 = cons(_240, _2504);
   _2506 = List_var(_2505);
@@ -4388,7 +4388,7 @@ static List Compiler__parse_composite(Compiler c){
   Compiler_expect(c, 247);  if(Compiler__brace_starts_map(c)){
     List entries = Compiler_parse_map_entries(c);  Compiler_expect(c, 251);  return cons(_0, cons(_756, cons(List_var(cons(_757, List_append(entries, NULL))), NULL)));
   }
-  List elems = Compiler__parse_composite_elements(c);  elems = cons(_25, List_append(elems, NULL));  Compiler_expect(c, 251);  return cons(_0, cons(_359, cons(List_var(cons(_729, cons(List_var(elems), NULL))), NULL)));
+  List elems = Compiler__parse_composite_elements(c);  Compiler_expect(c, 251);  return cons(_0, cons(_359, cons(List_var(source_composite_content(elems)), NULL)));
 }
 
 int Compiler_macro_starts_target_at(Compiler, AstPos);
@@ -5789,7 +5789,7 @@ static int _exact_iter_type(Var value){
 }
 
 static List _iter_destination(void){
-  List values = source_commas_content(_2276);  return cons(_0, cons(_2582, cons(List_var(cons(_43, cons(_49, cons(List_var(cons(_0, cons(_2583, cons(List_var(cons(_1329, cons(_2593, cons(List_var(cons(_0, cons(_359, cons(List_var(cons(_729, cons(List_var(values), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));
+  List values = source_commas_content(cons(List_var(x2c_literal_int(0)), NULL));  return cons(_0, cons(_2582, cons(List_var(cons(_43, cons(_49, cons(List_var(cons(_0, cons(_2583, cons(List_var(cons(_1329, cons(_2593, cons(List_var(cons(_0, cons(_359, cons(List_var(cons(_729, cons(List_var(values), NULL))), NULL)))), NULL)))), NULL)))), NULL)))), NULL)));
 }
 
 Symbol Var_symbol(Var);
@@ -5926,7 +5926,7 @@ static List Compiler__protocol_operator_expression(Compiler c, Symbol op, List l
   Macro called = _646;  List callee =({
     Var _x2c_literal_part_97 = List_var(signature);  Var _x2c_literal_part_98 = List_var(cons(_37, cons(List_var(binding), NULL)));  cons(_0, cons(_x2c_literal_part_97, cons(_x2c_literal_part_98, NULL)));
   }
-  );  List call = Compiler_rebuild_expression(c, result, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));  if(! derived) return call;  if(derived == 11642968) return cons(_0, cons(_2006, cons(List_var(cons(_43, cons(_360, cons(List_var(call), NULL)))), NULL)));  List zero = _2012;  return cons(_0, cons(_2006, cons(List_var(cons(_43, cons(Symbol_var(op), cons(List_var(call), cons(List_var(zero), NULL))))), NULL)));
+  );  List call = Compiler_rebuild_expression(c, result, Macro_apply(called, cons(List_var(callee), cons(List_var(arguments), NULL))));  if(! derived) return call;  if(derived == 11642968) return cons(_0, cons(_2006, cons(List_var(cons(_43, cons(_360, cons(List_var(call), NULL)))), NULL)));  List zero = x2c_literal_int(0);  return cons(_0, cons(_2006, cons(List_var(cons(_43, cons(Symbol_var(op), cons(List_var(call), cons(List_var(zero), NULL))))), NULL)));
 }
 
 static List Compiler__resolve_protocol_operator(Compiler c, Symbol op, List * lhs, List * rhs, Symbol * derived){
