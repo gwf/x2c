@@ -1282,8 +1282,11 @@ static List Compiler._quoted_hole(Compiler c, Token name) {
   List local = c.sym.lookup(%($spelling), type);
   if (!local || !c.sym.binding_is_local(local)) return NULL;
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
+  /* Inside `%[...]`, the splice scans as the atom `...`. */
   Token after = Token.skip_trivia(name + 1);
-  List hole = c._declare_hole(name, kind, after.type == <...>);
+  int sequence = after.type == <...> ||
+                 (after.type == <lit-atom> && after.text == "...");
+  List hole = c._declare_hole(name, kind, sequence);
   Var quoted = c.macro_holes[%(quoted)];
   c.macro_holes[%(quoted)] =
     cons(hole, quoted is <list> ? quoted.list() : NULL);

@@ -871,14 +871,18 @@ static int Compiler._brace_starts_map(Compiler c) {
   }
 }
 
+/* A sequence hole splices initializer elements, as it splices call
+   arguments. */
 static List Compiler._parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
-    List element =
-      c._test_dot_init() ||
-      (c.peek(0) == <[> && c._bracket_designates())
-        ? c._parse_designated_init()
-        : c.parse_assignment();
+    List element = c.try_parse_macro_slot(<argument>);
+    if (!element)
+      element =
+        c._test_dot_init() ||
+        (c.peek(0) == <[> && c._bracket_designates())
+          ? c._parse_designated_init()
+          : c.parse_assignment();
     elements.push(element);
     if (!c.test(<,>)) break;
   }
