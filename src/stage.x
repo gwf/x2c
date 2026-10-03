@@ -59,6 +59,9 @@ Var Compiler.meta_argument(
       value = _captured_value(c, captured, want);
     case %(expr ? ${$grouped(?inner)}):
       return c.meta_argument(inner, want, site, call);
+    case %(expr ? (macro-value ?definition)):
+      return c.meta_argument(
+        c.capture_macro_value(definition), want, site, call);
     case %(expr ? (meta-call *)): value = call(c, node, site);
     /* Negation multiplies, so a negated zero keeps its sign. */
     case %(expr ?type ${$source_operator_content(%(- ?operand))}):

@@ -19,10 +19,28 @@ meta static List classify(List e) {
 }
 macro Expression $kind(Expr $e) => $classify($e);
 
+/* A nested pattern keeps the macro's operator, and the compiler's private
+   binders do not collide with an argument binder of the same spelling. */
+macro Expression $mul(Expr $a, Expr $b) => $a * $b;
+static int literal_product(List e) {
+  match (e) case $mul(?a, %(expr ? (literal *))): return 1;
+  return 0;
+}
+static int literal_sum(List e) {
+  match (e) case $add(?__pattern_0, %(expr ? (literal *))): return 1;
+  return 0;
+}
+
 int main(void) {
   int x = 1, y = 2;
   double z = 1.5;
   printf("%d %d %d %d %d\n", $kind(x + -y), $kind(x + y), $kind(z + y),
          $kind(-7), $kind(x * y));
+  List plus = %(expr (int) (op + (expr (int) (ident "x"))
+                               (expr (int) (literal (int) "7"))));
+  List times = %(expr (int) (op * (expr (int) (ident "x"))
+                                (expr (int) (literal (int) "7"))));
+  printf("%d %d %d\n", literal_product(plus), literal_product(times),
+         literal_sum(plus));
   return 0;
 }

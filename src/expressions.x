@@ -692,7 +692,11 @@ List Compiler.parse_primary(Compiler c) {
 static List Compiler._parse_ident_primary(Compiler c) {
   if (c.token.text == "macro" && c.peek(1) == <ident> &&
       c.peek(2) == <(>) {
-    return c.capture_macro_value(c.parse_macro_definition());
+    List definition = c.parse_macro_definition();
+    /* Inside a template the value is made where the template expands, once
+       the names its body shares with the template are that expansion's. */
+    if (c.macro_holes) return %(expr ("Macro") (macro-value $definition));
+    return c.capture_macro_value(definition);
   }
   List binding = c.with_binding();
   Var stored;
@@ -1008,7 +1012,8 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case lambda(?body, *params): return 1;
       case %(at m-origin ?):
         if (c.source_map && !c.macro_holes) return 1;
-      case %((!or macro-bind macro-invoke macro-slot meta-call) *): return 1;
+      case %((!or macro-bind macro-invoke macro-slot meta-call macro-value) *):
+        return 1;
       case $source_identifier_content(%(?name)):
         if (name is <list>) {
           List binding = name;
@@ -1078,6 +1083,7 @@ static List Compiler._resolve_content(
         return c._resolve_identifier(binding, input_type, origin);
     case $source_literal_content(%(*)): return input;
     case %(tpl-call *): return input;
+    case %(macro-value ?definition): return c.capture_macro_value(definition);
     case %(meta-call ?callee (args *arguments)):
       return c._resolve_meta_call(input, origin);
     case %(meta-cap *): return input;
@@ -1216,14 +1222,8 @@ static List Compiler._resolve_identifier(
     String name = binding_identity_spelling(binding);
     if (c.macro_holes[%(using $name)] is <list>)
       return %(expr (<macro-expr>) (ident (binding-global $name)));
-    if (c._template_free_name(binding)) {
-      /* A file-scope declaration keeps its identity and type: where the
-         expansion lands sees the same declaration unless a local hides
-         it, and then the identifier binds that local instead. */
-      if (c.sym.resolve_global(%($name), NULL) != binding)
-        return %(expr (<macro-expr>) (ident (binding-name $name)));
-      c.semantic_binding_facts()[%(template-free $binding)] = 1;
-    }
+    if (c._template_free_name(binding))
+      return %(expr (<macro-expr>) (ident (binding-name $name)));
   }
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
@@ -1304,8 +1304,7 @@ static List Compiler._identifier_binding(
    lands. A `Macro` local is a compile-time template the body composes, so
    an anonymous macro captures its value where it is written. */
 static int Compiler._template_free_name(Compiler c, List binding) {
-  Map locals = c.macro_definition_locals();
-  if (!binding || (locals != NULL && binding in locals)) return 0;
+  if (!binding || c.macro_template_local(binding)) return 0;
   Var type = c.semantic_binding_facts()[%(type $binding)];
   return !(type is <list> && c.sym.is_named_value_type(type, "Macro"));
 }
@@ -1329,12 +1328,13 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
   c.local_macro_captures[binding] = 1;
 }
 
-/* A visible local replaces a stale local identity, and a declaration that
-   hides a template's free file-scope name supplies it where the expansion
-   lands; both return 1, since the identifier's type is the new binding's.
-   Another file-scope identity that a visible declaration hides, such as a
-   name a template's `using` keeps, gives that declaration an emitted
-   alias. */
+/* A visible local replaces a stale local identity. A declaration the
+   active expansion introduced, such as one a caller's `Name` argument
+   spells, supplies a file-scope name written in the caller's arguments,
+   as it would where the expansion lands. Both return 1, since the
+   identifier's type is the new binding's. Any other file-scope identity
+   that a visible declaration hides, such as a name a template's `using`
+   keeps, gives that declaration an emitted alias. */
 static int Compiler._shadow_identifier(
   Compiler c, List &binding, Type type, String spelling, Map binding_facts,
   int kept) {
@@ -1344,8 +1344,7 @@ static int Compiler._shadow_identifier(
   if (!visible || visible == binding) return 0;
   if ((c.sym.binding_is_local(binding) &&
        !binding_facts.contains(%(lambda-depth $binding))) ||
-      (!kept && %(template-free $binding) in binding_facts &&
-       visible_type)) {
+      (!kept && visible_type && c._expansion_introduced(visible))) {
     binding = visible;
     return 1;
   }
@@ -1354,6 +1353,14 @@ static int Compiler._shadow_identifier(
       !binding_facts.contains(%(emitted $visible)))
     binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
   return 0;
+}
+
+/* An active expansion issued `binding` after it began. */
+static int Compiler._expansion_introduced(Compiler c, List binding) {
+  int identity = 0;
+  return c.macro_stack &&
+         binding_identity_try_parts(binding, identity, NULL) &&
+         identity > c.expansion_floor;
 }
 
 static Type Compiler._identifier_type(

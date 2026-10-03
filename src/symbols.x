@@ -834,6 +834,20 @@ Map Compiler.macro_definition_locals(Compiler c) {
   return stored is <map> ? stored : NULL;
 }
 
+/** Reports whether `binding` is a local of the active macro definition or
+    of a template that encloses it; a nested definition's literal names
+    share the enclosing template's names. */
+int Compiler.macro_template_local(Compiler c, List binding) {
+  Var holes = c.macro_holes;
+  while (holes is <map>) {
+    Map current = holes;
+    Var locals = current[%(locals)];
+    if (locals is <map> && binding in (Map) locals) return 1;
+    holes = current[%(enclosing)];
+  }
+  return 0;
+}
+
 // typedef resolution
 
 /* Longest typedef chain any legitimate source may hand to the resolver:

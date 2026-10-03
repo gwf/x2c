@@ -66,8 +66,8 @@ meta static List increment(List code) {
 }
 macro Expression $inc_operand(Expr $code) => $increment_operand($code);
 
-/* A local that shadows the callee is a different binding, so its call is
-   not what the value builds. */
+/* A free callee resolves where its expansion lands. Recognition accepts
+   that same local, while an explicit `using` callee keeps the global. */
 static int decrement(int value) { return value - 1; }
 meta static List increment_hit(List code) {
   match (code) {
@@ -77,6 +77,20 @@ meta static List increment_hit(List code) {
 }
 macro Expression $is_inc(Expr $code) => $increment_hit($code);
 macro Expression $inc_again(Expr $code) => $increment($code);
+macro Expression $global_inc(Expr $value) using bump => bump($value);
+meta static List global_increment_hit(List code) {
+  match (code) case $global_inc(?value): return x2c_literal_int(1);
+  return x2c_literal_int(0);
+}
+macro Expression $is_global_inc(Expr $code) => $global_increment_hit($code);
+
+/* This private callee has a different mark from the independent $inc. */
+macro Statement $private_callee_check(Expr $value) {
+  int (*bump)(int) = decrement;
+  printf("%d %d %d %d %d\n", $inc($value), $is_inc($inc($value)),
+         $is_inc(bump($value)), $is_global_inc(bump($value)),
+         $is_global_inc($global_inc($value)));
+}
 
 int main(void) {
   int price = 19, tax = 23;
@@ -85,10 +99,17 @@ int main(void) {
   printf("%d\n", $twice(tax));
   printf("%d %d\n", $inc_operand($inc(price)), $inc_again(price));
   int global_hit = $is_inc(bump(price)), local_hit;
+  int built_value, built_hit, kept_hit, kept_miss;
   {
     int (*bump)(int) = decrement;
     local_hit = $is_inc(bump(price));
+    built_value = $inc(price);
+    built_hit = $is_inc($inc(price));
+    kept_hit = $is_global_inc($global_inc(price));
+    kept_miss = $is_global_inc(bump(price));
   }
-  printf("%d %d\n", global_hit, local_hit);
+  printf("%d %d %d %d %d %d\n", global_hit, local_hit, built_value,
+         built_hit, kept_hit, kept_miss);
+  $private_callee_check(price);
   return 0;
 }

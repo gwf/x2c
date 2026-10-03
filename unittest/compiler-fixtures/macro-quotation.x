@@ -37,10 +37,16 @@ macro Unit $define_getter(Name $name, Literal $value) {
 
 $define_getter(answer, 42);
 
+/* Each local fills its own hole, a sequence before a scalar included. */
+meta static List tail(List items, int value) =>
+  $!{ $items... printf("%d\n", $value); };
+macro Statement $show(Statement $items...) { $tail($items, 7)... }
+
 int main(void) {
   int pick = 1;
   $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
   $around(printf("a\n");, printf("b\n"););
   printf("%d %d\n", $twice(21), answer());
+  $show(printf("start\n"););
   return 0;
 }

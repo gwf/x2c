@@ -73,6 +73,8 @@ List Compiler.expand_macro_invocation_node(
     x.check();
     c.macro_count++;
     List result = NULL;
+    $let(c.expansion_floor,
+         c.macro_stack ? c.expansion_floor : c.names.next_binding)
     $let(c.macro_stack, c.macro_stack) {
       result = x.bind(position);
     }
@@ -88,8 +90,8 @@ static List Compiler._stored_definition(
   if (stored.is_atom())
     definition = c._lookup(Atom.intern(stored.str()), invocation);
   else match (stored)
-    case %(local-macro (!is ?name type atom)):
-      definition = c.sym.lookup_macro(name);
+    case %(local-macro ?name):
+      definition = c.sym.lookup_macro(Atom.intern(name.str()));
   if (!definition) definition = c._macro_value_bindings(stored);
   return definition;
 }
@@ -394,10 +396,12 @@ List Compiler.parse_macro_definition(Compiler c) {
   d.head();
   d.naming();
   d.nested = !!c.macro_holes;
+  Map enclosing = c.macro_holes;
   // A rejected signature must not leave later declarations as templates.
   $let(c.macro_holes, {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
+    if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
     d.using = [];
     d.signature();
     d.arrow();
@@ -1224,24 +1228,36 @@ List Compiler.parse_macro_quotation(Compiler c) {
     .quotation = 1};
   d.naming();
   d.nested = !!c.macro_holes;
+  Map enclosing = c.macro_holes;
   $let(c.macro_holes, {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
+    if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
     c.macro_holes[%(quotation)] = 1;
     d.using = [];
     d.announce();
     d.body();
   }
   d.finish();
-  List supplied = NULL;
+  /* Each local supplies one hole, a sequence included, so the quotation
+     builds its pending invocation with the values already grouped. */
+  List values = %(expr ("List") (nil));
   foreach (List hole, d.parameters.reverse())
-    supplied = cons(%(expr () (ident ${_hole_name(hole).str()})), supplied);
-  List arguments = NULL;
-  foreach (List argument, supplied)
-    arguments = cons(c.resolve_expression(argument, start), arguments);
-  return c.apply_macro_value(
-    c.capture_macro_value(d.publish()),
-    arguments ? arguments.reverse() : %((expr (void) ())), start);
+    values = c._quoted_cons(
+      %(expr () (ident ${_hole_name(hole).str()})), values, start);
+  List definition = c.capture_macro_value(d.publish());
+  List empty = %(expr ("List") (nil));
+  return c._quoted_cons(x2c_literal_string("x2c.template"),
+    c._quoted_cons(definition, c._quoted_cons(values, empty, start), start),
+    start);
+}
+
+/* `head` consed onto the List expression `tail`. */
+static List Compiler._quoted_cons(
+  Compiler c, List head, List tail, Token origin) {
+  List value = c.convert_expression(
+    c.resolve_expression(head, origin), %("Var"));
+  return %(expr ("List") (cons $value $tail));
 }
 
 /* A quotation's hole takes its kind from a name position, or from a
@@ -2377,17 +2393,20 @@ static List Compiler._invocation_node(
   Var stored = definition;
   Var site = invocation;
   if (c.macro_holes) {
-    stored = _stored_reference(definition);
+    stored = c._stored_reference(definition);
     site = <m-invoke>;
   }
   return %(macro-invoke $stored $input $site);
 }
 
-static Var _stored_reference(List definition) {
+/* A template names a visible local macro, so its expansion applies the
+   definition published where it lands, with that expansion's names. */
+static Var Compiler._stored_reference(Compiler c, List definition) {
+  Atom name = definition.assoc(<name>);
+  if (definition.assoc(<local>).int() && c.sym.lookup_macro(name) == definition)
+    return %(local-macro $name);
   if (definition.assoc(<template>)) return %(!quote $definition);
-  if (definition.assoc(<local>).int())
-    return %(local-macro ${definition.assoc(<name>)});
-  return definition.assoc(<name>);
+  return name;
 }
 
 /* decorators
@@ -3118,13 +3137,13 @@ List Compiler.macro_value_literal(Compiler c, List value) =>
   c.cache_literal_list(_macro_value_names(value));
 
 /* A Macro value names its references by spelling, so its literal does not
-   depend on how this translation numbered bindings. An identity left in a
-   template is a free file-scope name. */
+   depend on how this translation numbered bindings; each resolves where the
+   value's expansion lands. */
 static Var _macro_value_names(Var value) {
   if (value is not <list>) return value;
   String spelling = NULL;
   if (binding_identity_try_parts(value, NULL, spelling))
-    return %(binding-free $spelling);
+    return %(binding-name $spelling);
   List child;
   $ast.rewrite_children(value.list(), child, _macro_value_names(child));
 }
@@ -3136,11 +3155,7 @@ static Var _macro_value_names(Var value) {
 static Var Compiler._macro_value_bindings(Compiler c, Var value) {
   if (value is not <list>) return value;
   match (value) {
-    case %(binding-free ?(String spelling)): {
-      List binding = c.sym.reference_global(%($spelling));
-      c.semantic_binding_facts()[%(template-free $binding)] = 1;
-      return binding;
-    }
+    case %(binding-free ?(String spelling)): return %(binding-name $spelling);
     case %(tpl-call *): return value;
   }
   List child;
@@ -3274,7 +3289,9 @@ List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
    stands in its hole directly; any other pattern replaces a private binder
    there, spliced for a sequence or Type hole. */
 static List _macro_subpattern(Macro shape, List patterns, int content) {
-  Array names = [], replacements = [];
+  Array names = [];
+  Map replacements = {};
+  List spelled = patterns.flatten_all();
   int index = 0;
   foreach (List hole, shape.assoc(<parameters>).list()) {
     Var pattern = patterns.car();
@@ -3286,15 +3303,42 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
     Symbol kind = hole.assoc(<kind>);
     int list = hole.assoc(<sequence>).int() || kind == <type> ||
                kind == <captures>;
-    Atom binder = Atom.intern(%"${list ? "*" : "?"}__pattern_${index++}");
+    Atom binder = _unused_binder(list ? "*" : "?", spelled, index);
     names.push(binder);
-    replacements.push(%($binder $pattern));
+    replacements[binder] = pattern;
   }
-  List pattern = shape.pattern(names.list_free());
-  if (replacements.len()) pattern = pattern.replace(replacements.list_free());
+  List pattern = _substitute_binders(
+    shape.pattern(names.list_free()), replacements).list();
   match (pattern)
     case %(expr ? ?body): return content ? body : %(!or $pattern $body);
   return pattern;
+}
+
+/* A private binder that no argument pattern spells with either sigil. */
+static Atom _unused_binder(String sigil, List spelled, int &index) {
+  loop {
+    String name = %"__pattern_${index++}";
+    if (!(Atom.intern("?" + name) in spelled) &&
+        !(Atom.intern("*" + name) in spelled))
+      return Atom.intern(sigil + name);
+  }
+}
+
+/* Replaces each private binder with its argument pattern, splicing a List
+   binder's elements, without interpreting the pattern's guards. */
+static Var _substitute_binders(Var value, Map replacements) {
+  if (value is not <list> || value.is_nil()) return value;
+  Array items = [];
+  foreach (Var child, value.list()) {
+    Var replacement;
+    if (child.is_binder() && replacements.try_get(child, replacement)) {
+      if (child.str().startswith("*") && replacement is <list>)
+        foreach (Var item, replacement.list()) items.push(item);
+      else items.push(replacement);
+    }
+    else items.push(_substitute_binders(child, replacements));
+  }
+  return items.list_free().var();
 }
 
 /** Returns an anonymous macro definition as a `Macro` value. Macro values
@@ -3836,11 +3880,8 @@ static void Compiler._reference_bindings(
   match (syntax)
     case %(expr ? ${$source_identifier_content(%(?binding))}): {
       String spelling = NULL;
-      if (binding_identity_try_parts(binding, NULL, spelling)) {
-        List global = c.sym.reference_global(%($spelling));
-        c.semantic_binding_facts()[%(template-free $global)] = 1;
-        replacements[binding] = global;
-      }
+      if (binding_identity_try_parts(binding, NULL, spelling))
+        replacements[binding] = c.sym.reference_global(%($spelling));
       return;
     }
   foreach (Var child, syntax)

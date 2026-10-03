@@ -108,8 +108,10 @@ Var Macro.subject(void) => macro_subject;
     `meta` call and carries them through the helper. */
 void Macro.use_subject(Var rows) { macro_subject = rows; }
 
-/* The pattern for a free reference to `spelling`: any binding of it, or
-   only the subject's binding while a call sets a subject. */
+/* The pattern for a `using` reference to `spelling`: any binding of it, or
+   only the subject's file-scope binding while a call sets a subject. A free
+   reference matches any binding of its spelling, since it binds where its
+   expansion lands. */
 static Var _macro_free_reference(String spelling) {
   if (macro_subject is void) return %(binding ? $spelling);
   macro_subject_used = 1;
@@ -270,8 +272,9 @@ static Var _macro_pattern_view(Var value) {
   match (node) {
     case %(expr ?type ?body): return _macro_expr_view(type, body);
     case %(literal *): return %(!quote $node);
-    case %((!or binding-name binding-global binding-free) ?(String name)):
-      return _macro_free_reference(name);
+    case %((!or binding-name binding-free) ?(String name)):
+      return %(binding ? $name);
+    case %(binding-global ?(String name)): return _macro_free_reference(name);
     case %(op ?operator *operands):
       return %(op (!quote $operator) @{_macro_pattern_views(operands)});
     case %(seq ?one): return _macro_pattern_view(one);
@@ -355,7 +358,8 @@ static int _macro_pending_parts(Macro t, List code, List &grouped) {
       grouped = arguments;
       return 1;
     }
-    case %(macro-invoke ?descriptor (args *rows) ?): {
+    case %(!or (macro-invoke ?descriptor (args *rows) ?)
+               (expr ? (macro-invoke ?descriptor (args *rows) ?))): {
       if (!_macro_same(t, descriptor)) return 0;
       grouped = _macro_invoke_values(t, rows);
       return 1;
@@ -364,8 +368,18 @@ static int _macro_pending_parts(Macro t, List code, List &grouped) {
   return 0;
 }
 
-static int _macro_same(Macro t, Var descriptor) =>
-  descriptor is <list> && List.compare(descriptor, t) == 0;
+/* A retained invocation may name its macro, carry its stored definition,
+   or carry this value; a definition is identified by its name and the
+   place it was written. */
+static int _macro_same(Macro t, Var descriptor) {
+  if (descriptor.is_atom()) return descriptor.str() == t.assoc(<name>).str();
+  if (descriptor is not <list>) return 0;
+  List stored = descriptor;
+  return List.compare(stored, t) == 0 ||
+    (stored.car() == <macrodef> &&
+     stored.assoc(<name>).str() == t.assoc(<name>).str() &&
+     List.compare(stored.assoc(<origin>), t.assoc(<origin>)) == 0);
+}
 
 /* The arguments a `macro-invoke` recorded, one per parameter: the bound
    expression of an expression parameter, the value of any other, and the
