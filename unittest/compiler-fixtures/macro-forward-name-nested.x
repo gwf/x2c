@@ -3,19 +3,19 @@
 /* A name nothing declares where `$outer` is defined binds the declaration
    its expansion introduces, here the loop variable `$repeat` makes from the
    literal Name `k`. */
-macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
   for (int $i = 0; $i < $count; $i++) $sum += $value;
 }
 
-macro Statement $outer(Name $sum) {
+macro Stmt $outer(Name $sum) {
   $repeat(k, 3, k * 2, $sum);
 }
 
-macro Statement $declare(Name $name) {
+macro Stmt $declare(Name $name) {
   int $name = 2;
 }
 
-macro Statement $scaled(Name $result) {
+macro Stmt $scaled(Name $result) {
   {
     $declare(k);
     $result = k * 3;

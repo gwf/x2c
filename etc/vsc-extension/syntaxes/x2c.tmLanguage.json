@@ -3879,7 +3879,7 @@
 			"name": "support.type.prelude.x2c"
 		},
 		"x2c_macro_definition": {
-			"match": "\\b(macro)(\\s+)((?i:expression|statement|block|field|entry|enumerator|unit|decorator))(\\s+)(?:(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)|([A-Za-z_][A-Za-z0-9_]*))(?=\\s*\\()",
+			"match": "\\b(macro)(\\s+)((?i:expression|expr|stmt|field|entry|enumerator|unit|declaration|decorator))(\\s+)(?:(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)|([A-Za-z_][A-Za-z0-9_]*))(?=\\s*\\()",
 			"captures": {
 				"1": { "name": "keyword.declaration.macro.x2c" },
 				"3": { "name": "storage.type.macro.result.x2c" },
@@ -3908,7 +3908,7 @@
 		"x2c_macro_context": {
 			"patterns": [
 				{
-					"match": "\\b((?i:expr|type|decl|function|name|literal|param|statement|block|field|entry|enumerator|unit))(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*)(\\.\\.\\.)?",
+					"match": "\\b((?i:expression|expr|stmt|type|declaratorrow|decl|function|namedtype|name|literal|param|field|entry|enumerator|unit|catch|captures|matchrow))(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*)(\\.\\.\\.)?",
 					"captures": {
 						"1": { "name": "storage.type.macro.hole.x2c" },
 						"3": { "name": "punctuation.definition.macro.sigil.x2c" },

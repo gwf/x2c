@@ -124,7 +124,7 @@ static void Compiler._collect_ids(
    declaration and moves its assignment into a generated helper. */
 
 macro Unit $initializer_function(Type $type, Name $name,
-    Statement $body...) {
+    Stmt $body...) {
   $type $name(void) { $body... }
 }
 
@@ -520,7 +520,7 @@ List Compiler.initialization_guard(Compiler c, List guard) =>
   c.rebuild_statement($!{ static int $guard = 0; }).cadr();
 
 macro Decorator $initialized_entry(
-  Function $function, Expr $guard, Expr $entry, Statement $body...) {
+  Function $function, Expr $guard, Expr $entry, Stmt $body...) {
   if (!$guard) $entry();
   $body...
 }
@@ -678,7 +678,7 @@ static void StaticQueue.add_calls(
   }
 }
 
-macro Statement $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
+macro Stmt $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
   $c.report_error(
     <cache>, "file-static x2c initializer dependency cycle",
     $origin, $notes);

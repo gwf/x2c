@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $local_alias(Expr $result) {
+macro Stmt $local_alias(Expr $result) {
   typedef Var Value;
   Value value = (Value) 3;
   if (sizeof(Value) != sizeof(Var)) return 3;

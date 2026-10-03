@@ -634,8 +634,8 @@ List builtin_catch_cases(List selected, List arms);
 List builtin_try_cleanup_placement(Var cleanup);
 
 /* A try region pushes its frame and lands on it when something raises. */
-macro Statement $compiler_try(Name $frame, Expr $clause,
-    Statement $body, Statement $cleanup) {
+macro Stmt $compiler_try(Name $frame, Expr $clause,
+    Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
     $builtin_try_catch_site($frame, $clause)...
@@ -649,7 +649,7 @@ macro Statement $compiler_try(Name $frame, Expr $clause,
   }
 }
 
-macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
+macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
@@ -662,8 +662,8 @@ macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro Statement $catch_landing(Name $frame, Name $handle,
-    Statement $unhandled, Statement $arms...) {
+macro Stmt $catch_landing(Name $frame, Name $handle,
+    Stmt $unhandled, Stmt $arms...) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
@@ -860,8 +860,8 @@ List builtin_defer_record(
   List record, List callback, List environment, List records);
 List builtin_defer_captures(List environment, List records);
 
-macro Statement $compiler_defer(Name $record, Expr $callback,
-    Expr $environment, Expr $records, Statement $body, Statement $cleanup) {
+macro Stmt $compiler_defer(Name $record, Expr $callback,
+    Expr $environment, Expr $records, Stmt $body, Stmt $cleanup) {
   {
     $builtin_defer_record($record, $callback, $environment, $records)...
     x2c_cleanup_push(&$record);
@@ -870,7 +870,7 @@ macro Statement $compiler_defer(Name $record, Expr $callback,
   }
 }
 
-macro Statement $defer_captured(Name $record, Expr $callback,
+macro Stmt $defer_captured(Name $record, Expr $callback,
     Type $type, Expr $records) {
   $type environment = {0};
   $builtin_defer_captures(environment, $records)...
@@ -1241,12 +1241,12 @@ typedef struct DeferCaptures {
 /* The body is already lowered; these templates supply its generated entry
    and the captured variant's environment pointer. */
 macro Unit $defer_callback(Name $callback, Name $opaque,
-    Statement $body) {
+    Stmt $body) {
   static void $callback(void *$opaque) { $body }
 }
 
 macro Unit $defer_captured_callback(Type $type, Name $callback,
-    Name $opaque, Name $local, Statement $body) {
+    Name $opaque, Name $local, Stmt $body) {
   static void $callback(void *$opaque) {
     $type *$local = ($type *)$opaque;
     $body

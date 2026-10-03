@@ -13,7 +13,7 @@ macro Unit $same_use(Expr $values...) {
   }
 }
 
-macro Statement $swap(Expr $left, Expr $right) {
+macro Stmt $swap(Expr $left, Expr $right) {
   $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
   $right = temporary;

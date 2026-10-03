@@ -76,15 +76,15 @@ Counts are from `src/` and `lib/` on dev c70a008c.
    spelling. Both probes reproduce on dev c70a008c:
 
    ```x2c
-   macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+   macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
      for (int $i = 0; $i < $count; $i++) $sum += $value;
    }
-   macro Statement $read(Expr $x) {
+   macro Stmt $read(Expr $x) {
      int total = 0;
      $repeat(k, 3, $x, total);
      printf("%d\n", total);
    }
-   macro Statement $write(Name $acc) { $repeat(k, 3, 10, $acc); }
+   macro Stmt $write(Name $acc) { $repeat(k, 3, 10, $acc); }
 
    int main(void) {
      int k = 5;
@@ -111,7 +111,7 @@ Counts are from `src/` and `lib/` on dev c70a008c.
    three special cases), decorator targets (6), slot roles (three
    SymbolSets), and invocation positions (`macro_position_info`, 7) are
    separate lists with different spellings: `Expr`/`Expression`,
-   `Statement`/`Block`/`block-item`, `Entry`/`map-entry`. The book's
+   `Stmt`/`Block`/`block-item`, `Entry`/`map-entry`. The book's
    "complete" hole-kind table omits `Catch`, `Captures`, and `MatchRow`.
    Meta functions see all syntax as `List`; only `Type` and `Source`
    parameters say what they carry.
@@ -299,7 +299,7 @@ M2 results:
 
 ### M3. One category vocabulary, usable as types
 
-Define the syntactic categories once: `Expr`, `Statement`, `Type`, `Name`,
+Define the syntactic categories once: `Expr`, `Stmt`, `Type`, `Name`,
 `Literal`, `Decl`, `DeclaratorRow`, `Param`, `Function`, `Field`, `Entry`,
 `Enumerator`, `Unit`, `NamedType`, `Catch`, `Captures`, `MatchRow`, and an
 `Operator` category for operator tokens. Each name is accepted as a hole
@@ -325,7 +325,7 @@ M3 results:
   also a result kind and `Expression` a hole kind. The book's hole-kind
   table now lists `Catch`, `Captures`, and `MatchRow`.
 - Not done, with evidence: category names as `meta` parameter types.
-  `Block` is already a runtime type in `lib/`, `Statement` a sqlite package
+  `Block` is already a runtime type in `lib/`, `Stmt` a sqlite package
   type, and `Entry` an example type; and unlike `Type` and `Source`, an
   alias would deliver the same `List`, adding no fact or check.
 - Not done, with evidence: an `Operator` hole kind. A template such as
@@ -445,7 +445,7 @@ Settled by Gary on 2026-10-02, approving the recommendations:
   withdrawn: after `case` it reads as C's conditional operator and a cast,
   and `?(Type name)` inside `%(...)` already means a `Var` tag test.
 - **S6.** M4 spells a quotation `$!( expression )` for an `Expression`
-  and `$!{ block items }` for a `Statement`, mirroring `%!` for a runtime
+  and `$!{ block items }` for a `Stmt`, mirroring `%!` for a runtime
   lambda. Another category names itself before the delimiter, as in
   `$!Unit{ ... }`. Using `$!( ... )` as an anonymous `case` pattern is left
   for later, because `?a` binders inside x2c expression syntax collide

@@ -330,7 +330,7 @@ static void managed_local_cleans_before_failed_later_acquisition(void) {
 
 macro Expression $managed_nested(Expr $value) => $auto($value);
 
-macro Statement $managed_declaration(Name $name, Expr $value) {
+macro Stmt $managed_declaration(Name $name, Expr $value) {
   ManagedResource $name = $auto($value);
 }
 

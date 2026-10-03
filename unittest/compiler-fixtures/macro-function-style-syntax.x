@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $assign(Expr $target, Expr $value) {
+macro Stmt $assign(Expr $target, Expr $value) {
   using $temporary;
   int $temporary = $value;
   $target = $temporary;
@@ -16,7 +16,7 @@ macro Unit $define_generated(Name $name) {
   int $name(void) => 7;
 }
 
-macro Statement $legacy_assign(Expr $target, Expr $value)
+macro Stmt $legacy_assign(Expr $target, Expr $value)
   using $temporary => {
   int $temporary = $value;
   $target = $temporary;

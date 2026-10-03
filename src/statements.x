@@ -98,13 +98,13 @@ static List Compiler._label_statement(Compiler c) {
 
 // with statements
 
-macro Statement $report.parse_with_body(Expr $c) {
+macro Stmt $report.parse_with_body(Expr $c) {
   $c.report_error(
     <parse>, "with requires a braced body",
     $c.token, NULL);
 }
 
-macro Statement $report.parse_with_expr(Expr $c) {
+macro Stmt $report.parse_with_expr(Expr $c) {
   $c.report_error(
     <parse>, "with requires an expression",
     $c.token, NULL);
@@ -299,7 +299,7 @@ static List Compiler._goto_statement(Compiler c) {
   return %(goto $label);
 }
 
-macro Statement $report.parse_raise_payload(Expr $c) {
+macro Stmt $report.parse_raise_payload(Expr $c) {
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
     $c.token, %("use raise %(code (key value)...);"));
@@ -348,7 +348,7 @@ static List Compiler._match_statement(Compiler c) {
   return %(match ${c.resolve_expression(expr, c.token)} $cases);
 }
 
-macro Statement $report.parse_match_default(Expr $c) {
+macro Stmt $report.parse_match_default(Expr $c) {
   $c.report_error(
     <parse>, "match default arm must be last",
     $c.token, %("move default after every case arm"));
@@ -409,7 +409,7 @@ List Compiler.parse_match_row_argument(Compiler c) => c._match_case();
 
 // match arms
 
-macro Statement $report.parse_match_arm(Expr $c) {
+macro Stmt $report.parse_match_arm(Expr $c) {
   $c.report_error(
     <parse>, "expected 'case' or 'default' in match statement",
     $c.token, %( "token:" ${$c.token.text} ));
@@ -450,7 +450,7 @@ static List Compiler._parse_pattern(Compiler c, List &types) {
   return pattern;
 }
 
-macro Statement $report.parse_match_pattern(
+macro Stmt $report.parse_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) {
   $c.report_error(
     <parse>, "match case pattern must be a %() list literal",
@@ -476,14 +476,14 @@ void Compiler.begin_match_arm(
   c.define_match_binders(pattern);
 }
 
-macro Statement $report.type_binder_conflict(
+macro Stmt $report.type_binder_conflict(
   Expr $c, Expr $role, Expr $origin, Expr $name) {
   $c.report_error(
     <type>, %"${$role} binder has conflicting capture kinds",
     $origin, %( "binder:" ${$name} "use either '?' or '*' consistently"));
 }
 
-macro Statement $report.type_binder_unassigned(
+macro Stmt $report.type_binder_unassigned(
   Expr $c, Expr $role, Expr $origin, Expr $binder) {
   $c.report_error(
     <type>, %"${$role} binder is not definitely assigned",
@@ -580,7 +580,7 @@ static List Compiler._capture_locals(Compiler c, Array locals) {
 
 // try statements
 
-macro Statement $report.parse_try_handler(Expr $c) {
+macro Stmt $report.parse_try_handler(Expr $c) {
   $c.report_error(
     <parse>, "expected 'catch' or 'finally' after try block",
     $c.token, NULL);
@@ -597,7 +597,7 @@ static List Compiler._try_statement(Compiler c) {
   $report.parse_try_handler(c);
 }
 
-macro Statement $report.parse_catch_default(Expr $c) {
+macro Stmt $report.parse_catch_default(Expr $c) {
   $c.report_error(
     <parse>, "catch default arm must be last",
     $c.token, %("move catch: after every filtered arm"));
@@ -644,7 +644,7 @@ static List Compiler._catch_arm(Compiler c, int &is_default, List handle) {
     @{c.catch_binder_declarations(bindings, handle)} $body));
 }
 
-macro Statement $report.parse_catch_pattern(Expr $c) {
+macro Stmt $report.parse_catch_pattern(Expr $c) {
   $c.report_error(
     <parse>, "catch filter requires a %() pattern literal",
     $c.token, %("use catch %(code (key pattern)...):"));

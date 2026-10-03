@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-using-conflict.x:3:47: parse: duplicate macro hole 'value'
-  macro Statement $conflict(Expr $value) using $value => {
-                                                ^^^^^
+unittest/compiler-fixtures/macro-using-conflict.x:3:42: parse: duplicate macro hole 'value'
+  macro Stmt $conflict(Expr $value) using $value => {
+                                           ^^^^^
 

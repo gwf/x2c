@@ -1,5 +1,5 @@
 #include "x2c.x"
 
-macro Statement $conflict(Expr $value) using $value => {
+macro Stmt $conflict(Expr $value) using $value => {
   $value;
 }

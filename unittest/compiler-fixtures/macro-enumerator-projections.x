@@ -49,7 +49,7 @@ macro Enumerator $fixture.forward(Enumerator $row) {
 macro Expression $fixture.initializer() =>
   $(fixture.initializer fixture.row);
 
-macro Statement $fixture.cases() {
+macro Stmt $fixture.cases() {
   $(fixture.case-row fixture.row)...
 }
 

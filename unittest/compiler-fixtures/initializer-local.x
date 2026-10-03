@@ -109,7 +109,7 @@ static int file_forward_shadow(void) {
   return after.integer == 13;
 }
 
-macro Statement $loop_scope() {
+macro Stmt $loop_scope() {
   for (struct Record { String text; } value = {"macro"}; 0;)
     (void)value;
 }

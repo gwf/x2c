@@ -5,14 +5,14 @@
    passes a List as the whole sequence, and a case on the macro captures
    the slot's output under that hole, element by element. */
 static int total;
-macro Statement $add(Expr $x) { total += $x; }
+macro Stmt $add(Expr $x) { total += $x; }
 meta static List parts(List xs) {
   Array rows = [];
   Macro add = $add;
   foreach (List x, xs) rows.push(add(x));
   return rows.list_free();
 }
-macro Statement $outer(Expr $head, Expr $xs...) {
+macro Stmt $outer(Expr $head, Expr $xs...) {
   {
     total = $head;
     $parts($xs)...
@@ -31,8 +31,8 @@ meta static List summary(List code) {
   }
   return x2c_literal_int(n);
 }
-macro Statement $built(Expr $h, Expr $a, Expr $b) { $build($h, $a, $b)... }
-macro Expression $count_adds(Statement $s) => $summary($s);
+macro Stmt $built(Expr $h, Expr $a, Expr $b) { $build($h, $a, $b)... }
+macro Expression $count_adds(Stmt $s) => $summary($s);
 int main(void) {
   $built(1, 2, 3);
   int n = $count_adds({ total = 5; total += 6; total += 7; });

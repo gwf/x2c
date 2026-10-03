@@ -173,7 +173,7 @@ Verified duplicate shape owners:
 An illustrative common template is:
 
 ```x2c
-macro Statement $ensure_initialized(Expr $guard, Expr $initialize) {
+macro Stmt $ensure_initialized(Expr $guard, Expr $initialize) {
   if (!$guard) $initialize();
 }
 ```

@@ -84,7 +84,7 @@ static List Compiler._emit_source(
   return c.emit(c._patch_main(source), bindings);
 }
 
-macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
+macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
@@ -705,7 +705,7 @@ static int _protocol_bootstrap(String name) =>
 // initializers
 
 macro Decorator $initializer_body(Function $function,
-    Statement $body...) {
+    Stmt $body...) {
   $body...
 }
 

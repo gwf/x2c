@@ -129,7 +129,7 @@ Every hole has a syntax kind:
 | `Param` | a function parameter |
 | `Function` | a complete function definition |
 | `Decl` | one declaration without its trailing semicolon |
-| `Statement` | one block item |
+| `Stmt` | one block item |
 | `Field` | one struct or union field |
 | `Entry` | one `Map` `key: value` row |
 | `Enumerator` | one enum member |
@@ -160,7 +160,7 @@ field keys. A sequence hole between field pairs supplies alternating key and
 value expressions, in source order:
 
 ```x2c
-macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {
+macro Stmt $fail(Expr $cause, Expr $op, Expr $fields...) {
   raise %($cause (operation ${$op}) $fields...);
 }
 ```
@@ -215,7 +215,7 @@ The declared result kind determines where an invocation may appear:
 | Result kind | Invocation position |
 | --- | --- |
 | `Expression` | expression |
-| `Statement` | statement |
+| `Stmt` | statement |
 | `Field` | struct or union body |
 | `Entry` | `Map` literal row |
 | `Enumerator` | enum body |
@@ -242,11 +242,11 @@ int main(void) {
 }
 ```
 
-`Statement` macros are useful for a small, repeated control-flow shape:
+`Stmt` macros are useful for a small, repeated control-flow shape:
 
 ```x2c
 ~
-macro Statement $project.guard(Expr $condition) {
+macro Stmt $project.guard(Expr $condition) {
   if (!$condition) return 0;
 }
 ~
@@ -270,7 +270,7 @@ expansion:
 #include "meta.x"
 meta static List project_type(TypeInfo type) => type.assoc(<type>);
 
-macro Statement $project.swap(
+macro Stmt $project.swap(
   Expr $left,
   Expr $right
 ) {
@@ -418,7 +418,7 @@ look like a new control construct without adding a new parser for its header:
 
 ```x2c
 macro Decorator $control.range(
-  Statement $body,
+  Stmt $body,
   Name $index,
   Expr $start,
   Expr $stop
@@ -452,7 +452,7 @@ mandatory, even when they take no arguments:
 #include "meta.x"
 meta static List project_type(TypeInfo type) => type.assoc(<type>);
 
-macro Statement $control.swap(
+macro Stmt $control.swap(
   Expr $left,
   Expr $right
 ) {

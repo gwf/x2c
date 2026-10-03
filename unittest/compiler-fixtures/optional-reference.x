@@ -2,7 +2,7 @@
 
 typedef struct Node *Node;
 
-macro Statement $require(Expr $value) {
+macro Stmt $require(Expr $value) {
   if (!$value) return;
 }
 

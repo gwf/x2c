@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include "x2c.x"
 
-macro Statement $probe(Expr $root, Name $n) {
+macro Stmt $probe(Expr $root, Name $n) {
   List items = $root;
   Map m = {"a": 1, "b": 2};
   foreach (Var (key, val), {"a": 1, "b": 2}) $n += (int) val;
 }
 
-macro Statement $pairs(Name $n) {
+macro Stmt $pairs(Name $n) {
   foreach (Var (key, val), {"a": 1, "b": 2}) $n += (int) val;
 }
 
-macro Statement $assign(Name $n) {
+macro Stmt $assign(Name $n) {
   Var (left, right) = %(4 5);
   $n += (int) left + (int) right;
 }

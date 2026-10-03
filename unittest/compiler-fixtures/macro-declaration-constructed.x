@@ -20,7 +20,7 @@ macro Unit $install_declaration() {
       (local 0)))...
 }
 $install_declaration();
-macro Statement $outer_built(Name $out) {
+macro Stmt $outer_built(Name $out) {
   $built_declare(v, 4);
   $out = v;
 }

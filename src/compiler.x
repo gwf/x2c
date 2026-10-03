@@ -403,7 +403,7 @@ void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
   }
 }
 
-macro Statement $report.parse_token_eof(Expr $c) {
+macro Stmt $report.parse_token_eof(Expr $c) {
   $c.report_error(
     <parse>,
     "unexpected end of file",
@@ -863,7 +863,7 @@ static List Compiler._bind_default(Compiler c, List syntax) {
   return c.bind_syntax(syntax, AST_UNIT, NULL);
 }
 
-macro Statement $report.type_ctor_parent(Expr $c) {
+macro Stmt $report.type_ctor_parent(Expr $c) {
   $c.report_error(
     <type>,
     "a forwarded class constructor has no completed parent constructor",
@@ -934,7 +934,7 @@ static List Defaults._forwarded(
   return c._bind_default(c._forwarder(name, child, binding, signature));
 }
 
-macro Statement $report.type_ctor_variadic(Expr $c, Expr $name) {
+macro Stmt $report.type_ctor_variadic(Expr $c, Expr $name) {
   $c.report_error(
     <type>,
     %"'${$name}' requires an explicit variadic constructor",
@@ -1220,7 +1220,7 @@ static void Compiler._reject_statement(Compiler c) {
     c._report_script_statement();
 }
 
-macro Statement $report.parse_script_main(Expr $c) {
+macro Stmt $report.parse_script_main(Expr $c) {
   $c.report_error(
     <parse>,
     "a script that defines main cannot have top-level statements",
@@ -1344,7 +1344,7 @@ static Map _script_locals(List ast) {
   return locals;
 }
 
-macro Statement $report.type_script_local(Expr $c, Expr $name) {
+macro Stmt $report.type_script_local(Expr $c, Expr $name) {
   $c.report_error(
     <type>,
     %"'${$name}' is declared among the script's statements",
@@ -1403,7 +1403,7 @@ static void Compiler._record_objects(Compiler c, List bindings, Token site) {
     }
 }
 
-macro Statement $report.type_decl_duplicate(
+macro Stmt $report.type_decl_duplicate(
   Expr $c, Expr $site, Expr $kind, Expr $spelling) {
   $c.report_error(
     <type>,
@@ -1509,7 +1509,7 @@ static void Compiler._record_definition(
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }
 
-macro Statement $report.type_decl_prototype(
+macro Stmt $report.type_decl_prototype(
   Expr $c, Expr $site, Expr $spelling, Expr $prior_contract, Expr $contract) {
   $c.report_error(
     <type>,
@@ -1621,7 +1621,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
   foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-macro Statement $report.parse_static_dependency(
+macro Stmt $report.parse_static_dependency(
   Expr $c, Expr $site, Expr $name, Expr $target) {
   $c.report_error(
     <parse>,
@@ -1723,7 +1723,7 @@ static int Compiler._is_script_file(Compiler c) =>
   (c.filename == c.unit_script.path ||
    Path.absolute(c.filename) == c.unit_script.path);
 
-macro Statement $report.parse_token_malformed(
+macro Stmt $report.parse_token_malformed(
   Expr $c, Expr $site, Expr $status) {
   $c.report_error(
     <parse>,
@@ -1841,7 +1841,7 @@ void Compiler.require_input(Compiler c) {
   if (c.input_boundary && c.token >= c.input_boundary) raise %(incomplete);
 }
 
-macro Statement $report.parse_token_expected(Expr $c, Expr $type) {
+macro Stmt $report.parse_token_expected(Expr $c, Expr $type) {
   $c.report_error(
     <parse>,
     %"expected '${$type}'",
@@ -1874,7 +1874,7 @@ void Compiler.next(Compiler c) {
   c._update_brace_stack(consumed);
 }
 
-macro Statement $report.parse_brace_unexpected(Expr $c, Expr $site) {
+macro Stmt $report.parse_brace_unexpected(Expr $c, Expr $site) {
   $c.report_error(
     <parse>,
     "unexpected '}'",
@@ -1917,7 +1917,7 @@ int Compiler.take_word(Compiler c, String word) {
   return 1;
 }
 
-macro Statement $report.parse_brace_missing(Expr $c, Expr $site) {
+macro Stmt $report.parse_brace_missing(Expr $c, Expr $site) {
   $c.report_error(
     <parse>,
     "missing '}'",

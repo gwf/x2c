@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $fixture.assign(Expr $target, Expr $value) {
+macro Stmt $fixture.assign(Expr $target, Expr $value) {
   $target = $value;
 }
 

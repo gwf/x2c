@@ -436,6 +436,13 @@ other template local:
 macro Expression $plus_one(Expr $value) => ({ int t = $value; t + 1; });
 ```
 
+In a macro body or quotation, a statement hole stands without a `;` of its
+own, so a hole at the top level of the braces also begins a statement
+expression unless a comma there makes the braces data. `({ $first $second })`
+and `({ $only })` are code; data with one element states its type, as in
+`(Point){ $x }`, or omits the parentheses where its destination gives the
+type.
+
 A `defer`, or a managed declaration, directly inside a statement expression
 is an error: its cleanup region would enclose the final statement, and C
 would lose the value. Either may stand in a block nested inside the
@@ -870,7 +877,7 @@ braced form and a complete parenthesized expression body written as
 `=> (expression)` without a semicolon. New code should use the forms above.
 
 ```x2c
-macro Statement $legacy.guard(Expr $condition) => {
+macro Stmt $legacy.guard(Expr $condition) => {
   if (!$condition) return 0;
 }
 macro Expression $legacy.twice(Expr $value) => ($value * 2)
@@ -925,7 +932,7 @@ is invoked inside `scaled_sum`; a declaration of `scale` in an inner block
 would supply an invocation inside that block instead. Declarations written in
 the body are private to each expansion.
 
-Local `Expression`, `Statement`, `Field`, `Entry`, and `Enumerator`
+Local `Expression`, `Stmt`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
 whose invocation position is reachable before the defining block ends. A local
 `Unit` result and a local decorator targeting `Function` or `Unit` syntax are
@@ -962,7 +969,7 @@ hole-kind annotations:
 | `Name` | identifier | `checksum` |
 | `Literal` | one literal | `42` or `<char>` |
 | `Param` | parameter declaration | `const char *name` |
-| `Statement` | block item | `return value;` |
+| `Stmt` | block item | `return value;` |
 | `Field` | field declaration | `unsigned ready : 1;` |
 | `Entry` | `Map` row | `key: value` |
 | `Enumerator` | enum member | `ready = 1` |
@@ -998,7 +1005,7 @@ declaration template supplies the shared type, and a trailing
 `DeclaratorRow $rows...` hole forwards comma-separated declarators in order:
 
 ```x2c
-macro Statement $group(Type $type, DeclaratorRow $rows...) {
+macro Stmt $group(Type $type, DeclaratorRow $rows...) {
   $type $rows...;
 }
 
@@ -1099,7 +1106,7 @@ sequence. Apply this template as a macro value with the captured rows;
 recognition binds those rows with `*captures`. Like `Catch` rows, capture
 rows retain their canonical structure when supplied by compile-time code.
 
-`MatchRow $rows...` carries complete `match` arms in a `Statement` template:
+`MatchRow $rows...` carries complete `match` arms in a `Stmt` template:
 `match ($subject) { $rows... }`. Each captured row retains its pattern,
 guarded body, typed captures, and position; preprocessor directive rows stay
 interleaved with the arms. A `default` arm is one row. Source macro calls may
@@ -1114,19 +1121,19 @@ A macro has one result kind as well as argument kinds:
 | Annotation | Body | Legal invocation position |
 | --- | --- | --- |
 | `Expression` | `=>` expression `;` | expression |
-| `Statement` | braced block items | statement |
+| `Stmt` | braced block items | statement |
 | `Field` | braced field declarations | struct or union body |
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
 | `Enumerator` | braced, comma-separated enumerators | enum body |
 | `Unit` | braced declarations and definitions | file scope |
 | `Declaration` | braced declarations with retained public signatures | file scope |
 
-The result kind is required between `macro` and the `$` name. `Statement` is
+The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
 results; `Expr` is a synonym. Arrow-expression bodies require
-`Expression`; braced bodies require `Statement`, `Field`, `Entry`,
+`Expression`; braced bodies require `Stmt`, `Field`, `Entry`,
 `Enumerator`, `Unit`, or `Declaration`.
-Inside a compound statement, a `Statement` macro may produce zero or
+Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
 explicit `{ ... }` or `do { ... } while (0)` in the production satisfies that
@@ -1137,7 +1144,7 @@ matching position:
 #include "meta.x"
 meta static List swap_type(TypeInfo type) => type.assoc(<type>);
 
-macro Statement $swap(Expr $left, Expr $right) {
+macro Stmt $swap(Expr $left, Expr $right) {
   $swap_type($left) temporary = $left;
   $left = $right;
   $right = temporary;
@@ -1247,7 +1254,7 @@ singular, explicitly annotated, and one of:
 | --- | --- | --- |
 | `Expr` | one cast expression | one expression |
 | `Function` | file-scope function definition | block items replacing its body |
-| `Statement` | one statement or local declaration | zero or more block items |
+| `Stmt` | one statement or local declaration | zero or more block items |
 | `Field` | one struct or union field | zero or more fields |
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
@@ -1263,7 +1270,7 @@ appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
 plus any additional block items without requiring braces at the invocation.
 
-A `Statement` decorator standing before a file-scope function
+A `Stmt` decorator standing before a file-scope function
 definition decorates that function's body. The body is parsed as usual, the
 decorator's production replaces it, and the same function is rebuilt around
 the result, so parameters resolve inside the produced items and a `return`
@@ -1331,7 +1338,7 @@ parentheses distinguish the argument list from a parenthesized target.
 
 Aliases do not add a second argument grammar. Arguments remain comma-separated
 and are parsed by the macro's existing `Expr`, `Type`, `Decl`,
-`DeclaratorRow`, `Function`, `Name`, `Literal`, `Param`, `Statement`,
+`DeclaratorRow`, `Function`, `Name`, `Literal`, `Param`, `Stmt`,
 `Field`, `Entry`, `Enumerator`, or `Unit` parameters.
 An alias cannot introduce a semicolon-separated control header or capture
 arbitrary tokens.
@@ -1342,7 +1349,7 @@ declaration for the same alias replaces it only for following source.
 
 Registration and use are source ordered. Expression, statement, field,
 entry, enumerator, and unit macro aliases retain their result positions.
-`Decorator` aliases retain their captured `Expr`, `Function`, `Statement` or
+`Decorator` aliases retain their captured `Expr`, `Function`, `Stmt` or
 `Block`, `Field`, or `Unit` target. An invocation in the wrong position
 receives the same result or target diagnostic as its direct spelling.
 
@@ -1581,17 +1588,17 @@ supplies it, including a local. A name that nothing declares anywhere is left
 to C, as a native macro such as `errno` is.
 
 ```x2c
-macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
   for (int $i = 0; $i < $count; $i++) $sum += $value;
 }
 
-macro Statement $print_doubles() {
+macro Stmt $print_doubles() {
   int total = 0;
   $repeat(k, 3, k * 2, total);
   printf("%d\n", total);
 }
 
-macro Statement $add_tens(Name $target) {
+macro Stmt $add_tens(Name $target) {
   $repeat(k, 3, 10, $target);
 }
 
@@ -2044,7 +2051,7 @@ Inside a macro template, an explicit call can supply a type, generated name
 or syntax sequence as well as an expression; the ordinary slot binder checks
 the returned value for that position.
 
-Inside meta bodies, Unit and Statement source macros used in expression
+Inside meta bodies, Unit and Stmt source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
 binding expands them when inserted into a program. Existing Expression macros
 still expand normally. See [source templates](../guide/meta-functions.md#source-templates-from-meta-functions).

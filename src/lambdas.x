@@ -90,7 +90,7 @@ static List Compiler._parse_bare_params(Compiler c) {
   return names.list_free();
 }
 
-macro Statement $report.parse_param_ident(Expr $c) {
+macro Stmt $report.parse_param_ident(Expr $c) {
   $c.report_error(
     <parse>, "expected identifier in parameter list",
     $c.token, NULL);
@@ -152,7 +152,7 @@ static List Compiler._template_capture(Compiler c) {
   return %(capture $name $reference (expr $reference (op & $value)));
 }
 
-macro Statement $report.type_ident_untyped(
+macro Stmt $report.type_ident_untyped(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <type>, %"identifier '${$spelling}' has no semantic type",
@@ -442,7 +442,7 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
          c.sym.binding_is_local_before(binding, depth);
 }
 
-macro Statement $report.type_capture_enclosing(Expr $c, Expr $original) {
+macro Stmt $report.type_capture_enclosing(Expr $c, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
     $c.token, %("binding: ${binding_identity_spelling($original)}"));
@@ -524,7 +524,7 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     }
 }
 
-macro Statement $report.type_capture_ref(Expr $c, Expr $binding) {
+macro Stmt $report.type_capture_ref(Expr $c, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
     $c.token, %("binding: ${binding_identity_spelling($binding)}"));

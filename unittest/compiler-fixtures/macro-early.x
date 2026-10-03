@@ -14,12 +14,12 @@ meta static List tally(String key, int amount) {
      (early (tally $key) $token
        (declare (static int) (bindings (bind $token ()))))));
 }
-macro Statement $add_one() { $tally("a", 1)... }
-macro Statement $add_ten() { $tally("b", 10)... }
+macro Stmt $add_one() { $tally("a", 1)... }
+macro Stmt $add_ten() { $tally("b", 10)... }
 
 meta static List run_macro(Macro m) { return m(); }
-macro Statement $one() { $run_macro($add_one)... }
-macro Statement $ten() { $run_macro($add_ten)... }
+macro Stmt $one() { $run_macro($add_one)... }
+macro Stmt $ten() { $run_macro($add_ten)... }
 
 int main(void) {
   $one();

@@ -8,62 +8,62 @@
     source form writes, such as a handler the parser introduced.
 */
 /* A try whose only exit work is its finalizer. */
-macro Statement $tried(Statement $body, Statement $finalizer) {
+macro Stmt $tried(Stmt $body, Stmt $finalizer) {
   try $body finally $finalizer
 }
 
 /* A try with catch arms, each a pattern and a body, and a finalizer. */
-macro Statement $caught(Statement $body, Statement $finalizer,
+macro Stmt $caught(Stmt $body, Stmt $finalizer,
     Catch $arms...) {
   try $body catch $arms... finally $finalizer
 }
 
 /* A match with its complete source-ordered arm and directive rows. */
-macro Statement $matched(Expr $subject, MatchRow $rows...) {
+macro Stmt $matched(Expr $subject, MatchRow $rows...) {
   match ($subject) { $rows... }
 }
 
 /* A cleanup statement owned by the rest of its enclosing block. */
-macro Statement $deferred(Statement $body) {
+macro Stmt $deferred(Stmt $body) {
   defer $body
 }
 
 /* A conditional with one branch. */
-macro Statement $if_then(Expr $condition, Statement $yes) {
+macro Stmt $if_then(Expr $condition, Stmt $yes) {
   if ($condition) $yes
 }
 
 /* A conditional with both branches. */
-macro Statement $if_else(Expr $condition, Statement $yes,
-    Statement $no) {
+macro Stmt $if_else(Expr $condition, Stmt $yes,
+    Stmt $no) {
   if ($condition) $yes else $no
 }
 
 /* A loop that tests before its body. */
-macro Statement $while_loop(Expr $condition, Statement $body) {
+macro Stmt $while_loop(Expr $condition, Stmt $body) {
   while ($condition) $body
 }
 
 /* A loop that tests after its body. */
-macro Statement $do_loop(Statement $body, Expr $condition) {
+macro Stmt $do_loop(Stmt $body, Expr $condition) {
   do $body while ($condition)
 }
 
 /* Optional header clauses retain the parser's absent fields; the first
    clause can also be a declaration in its own for scope. */
-macro Statement $for_loop(Expr $init, Expr $condition, Expr $advance,
-    Statement $body) {
+macro Stmt $for_loop(Expr $init, Expr $condition, Expr $advance,
+    Stmt $body) {
   for ($init; $condition; $advance) $body
 }
 
 /* A switch whose body owns its cases. */
-macro Statement $switched(Expr $subject, Statement $body) {
+macro Stmt $switched(Expr $subject, Stmt $body) {
   switch ($subject) $body
 }
 
 /* Return's result type is binder context, not source syntax. */
-macro Statement $return_empty() { return; }
-macro Statement $return_value(Expr $value) { return $value; }
+macro Stmt $return_empty() { return; }
+macro Stmt $return_value(Expr $value) { return $value; }
 
 /* A return's target type is supplied by its binder, not its source form. */
 meta static List source_return_type(List node) {
@@ -77,7 +77,7 @@ meta static List source_conditional_statement(void) =>
   %((!or if while do for switch try match with foreach finally) *);
 
 /* One expression used as a statement, retaining its bound expression. */
-macro Statement $expression_statement(Expr $value) { $value; }
+macro Stmt $expression_statement(Expr $value) { $value; }
 
 /* A lambda of either form, with or without capture rows. */
 meta static List source_any_lambda(void) => %(expr ? (lambda *));

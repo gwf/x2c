@@ -13,7 +13,7 @@ Make macro bodies follow the two function body forms while preserving macro
 result kinds, holes, hygiene, expansion, and canonical AST:
 
 ```x2c
-macro Statement $guard(Expr $condition) {
+macro Stmt $guard(Expr $condition) {
   if (!$condition) return 0;
 }
 
@@ -38,7 +38,7 @@ per expansion. For example, the canonical swap needs no explicit generated
 name declaration:
 
 ```x2c
-macro Statement $swap(Expr $left, Expr $right) {
+macro Stmt $swap(Expr $left, Expr $right) {
   $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
   $right = temporary;

@@ -285,7 +285,7 @@ The original nine items follow, for the record.
 4. **`class Color;` produces no registration and no diagnostic.** It is the
    documented forward form, so silence may be intended. If it is not, the
    decorator in `etc/builtin-macros.xmacro` should say so.
-5. **A `Statement` decorator on a function body silently drops its trailing
+5. **A `Stmt` decorator on a function body silently drops its trailing
    work.** `$time("work") static int work(int n) { return n * 2; }` compiles
    and runs, and the timing line never prints, because the body's `return`
    leaves before the stop clock. The book at `language.md:975` describes the

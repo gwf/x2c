@@ -456,7 +456,7 @@ static int MatchCaptureLayout._buffer_valid(
 }
 
 /* Declares `$instance`, an open machine in stack storage. */
-macro Statement $match.machine(Name $instance, Expr $stats) {
+macro Stmt $match.machine(Name $instance, Expr $stats) {
   MatchMachine $instance;
   $instance.open();
   $instance.stats = $stats;
@@ -608,7 +608,7 @@ typedef struct MatchWalk {
 
 /* Declares `$walk` over `$plan` and `$machine` with its own capture buffer
    and an empty cell stack. */
-macro Statement $match.walk(Expr $plan, Expr $machine, Name $walk) {
+macro Stmt $match.walk(Expr $plan, Expr $machine, Name $walk) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   MatchWalk $walk = {

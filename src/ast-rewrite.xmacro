@@ -1,4 +1,4 @@
-macro Statement $ast.rewrite_children(
+macro Stmt $ast.rewrite_children(
   Expr $input, Name $child, Expr $replacement) {
   List original = $input;
   Array rewritten = NULL;
@@ -23,7 +23,7 @@ macro Statement $ast.rewrite_children(
    skips that node's children and `return` leaves the caller. The worklist
    keeps deep operator chains off the C stack, and the inline body costs no
    call per node. */
-macro Decorator $ast.walk(Statement $body, Expr $root, Name $node) {
+macro Decorator $ast.walk(Stmt $body, Expr $root, Name $node) {
   Array pending = $auto([$root]);
   while (pending.len()) {
     Var current = pending.take_last();

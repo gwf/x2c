@@ -813,7 +813,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _238 = cons(_235, _237);
   _239 = List_var(_238);
   _240 = Symbol_var(1133019155420);
-  _241 = int_var(4509);
+  _241 = int_var(4384);
   _242 = cons(_241, NULL);
   _243 = cons(_240, _242);
   _244 = List_var(_243);
@@ -907,7 +907,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _332 = cons(_331, NULL);
   _333 = cons(_225, _332);
   _334 = List_var(_333);
-  _335 = int_var(4585);
+  _335 = int_var(4460);
   _336 = cons(_335, NULL);
   _337 = cons(_240, _336);
   _338 = List_var(_337);
@@ -1198,7 +1198,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _620 = cons(_619, NULL);
   _621 = cons(_225, _620);
   _622 = List_var(_621);
-  _623 = int_var(3491);
+  _623 = int_var(3366);
   _624 = cons(_623, NULL);
   _625 = cons(_240, _624);
   _626 = List_var(_625);
@@ -1434,7 +1434,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _856 = cons(_855, NULL);
   _857 = cons(_225, _856);
   _858 = List_var(_857);
-  _859 = int_var(2973);
+  _859 = int_var(2848);
   _860 = cons(_859, NULL);
   _861 = cons(_240, _860);
   _862 = List_var(_861);
@@ -1518,7 +1518,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _940 = cons(_939, NULL);
   _941 = cons(_225, _940);
   _942 = List_var(_941);
-  _943 = int_var(3140);
+  _943 = int_var(3015);
   _944 = cons(_943, NULL);
   _945 = cons(_240, _944);
   _946 = List_var(_945);
@@ -1678,7 +1678,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1097 = cons(_1096, NULL);
   _1098 = cons(_225, _1097);
   _1099 = List_var(_1098);
-  _1100 = int_var(3340);
+  _1100 = int_var(3215);
   _1101 = cons(_1100, NULL);
   _1102 = cons(_240, _1101);
   _1103 = List_var(_1102);
@@ -1806,7 +1806,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1225 = cons(_1224, NULL);
   _1226 = cons(_225, _1225);
   _1227 = List_var(_1226);
-  _1228 = int_var(4373);
+  _1228 = int_var(4248);
   _1229 = cons(_1228, NULL);
   _1230 = cons(_240, _1229);
   _1231 = List_var(_1230);
@@ -1848,7 +1848,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1267 = cons(_1266, NULL);
   _1268 = cons(_225, _1267);
   _1269 = List_var(_1268);
-  _1270 = int_var(4306);
+  _1270 = int_var(4181);
   _1271 = cons(_1270, NULL);
   _1272 = cons(_240, _1271);
   _1273 = List_var(_1272);
@@ -2489,11 +2489,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1905 = cons(_1904, NULL);
   _1906 = cons(_219, _1905);
   _1907 = List_var(_1906);
-  _1908 = int_var(2199);
+  _1908 = int_var(2205);
   _1909 = cons(_1908, NULL);
   _1910 = cons(_225, _1909);
   _1911 = List_var(_1910);
-  _1912 = int_var(82360);
+  _1912 = int_var(82599);
   _1913 = cons(_1912, NULL);
   _1914 = cons(_240, _1913);
   _1915 = List_var(_1914);
@@ -2640,11 +2640,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2053 = cons(_2052, NULL);
   _2054 = cons(_198, _2053);
   _2055 = List_var(_2054);
-  _2056 = int_var(2207);
+  _2056 = int_var(2213);
   _2057 = cons(_2056, NULL);
   _2058 = cons(_225, _2057);
   _2059 = List_var(_2058);
-  _2060 = int_var(82720);
+  _2060 = int_var(82954);
   _2061 = cons(_2060, NULL);
   _2062 = cons(_240, _2061);
   _2063 = List_var(_2062);
@@ -2731,11 +2731,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2144 = cons(_2143, NULL);
   _2145 = cons(_198, _2144);
   _2146 = List_var(_2145);
-  _2147 = int_var(2218);
+  _2147 = int_var(2224);
   _2148 = cons(_2147, NULL);
   _2149 = cons(_225, _2148);
   _2150 = List_var(_2149);
-  _2151 = int_var(83130);
+  _2151 = int_var(83359);
   _2152 = cons(_2151, NULL);
   _2153 = cons(_240, _2152);
   _2154 = List_var(_2153);
@@ -2805,11 +2805,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2218 = cons(_2217, NULL);
   _2219 = cons(_198, _2218);
   _2220 = List_var(_2219);
-  _2221 = int_var(2220);
+  _2221 = int_var(2226);
   _2222 = cons(_2221, NULL);
   _2223 = cons(_225, _2222);
   _2224 = List_var(_2223);
-  _2225 = int_var(83205);
+  _2225 = int_var(83434);
   _2226 = cons(_2225, NULL);
   _2227 = cons(_240, _2226);
   _2228 = List_var(_2227);
@@ -2876,11 +2876,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2289 = cons(_2288, NULL);
   _2290 = cons(_198, _2289);
   _2291 = List_var(_2290);
-  _2292 = int_var(2224);
+  _2292 = int_var(2230);
   _2293 = cons(_2292, NULL);
   _2294 = cons(_225, _2293);
   _2295 = List_var(_2294);
-  _2296 = int_var(83405);
+  _2296 = int_var(83634);
   _2297 = cons(_2296, NULL);
   _2298 = cons(_240, _2297);
   _2299 = List_var(_2298);
@@ -3083,11 +3083,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2496 = cons(_2495, NULL);
   _2497 = cons(_198, _2496);
   _2498 = List_var(_2497);
-  _2499 = int_var(2273);
+  _2499 = int_var(2279);
   _2500 = cons(_2499, NULL);
   _2501 = cons(_225, _2500);
   _2502 = List_var(_2501);
-  _2503 = int_var(85527);
+  _2503 = int_var(85756);
   _2504 = cons(_2503, NULL);
   _2505 = cons(_240, _2504);
   _2506 = List_var(_2505);
@@ -3329,7 +3329,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2739 = cons(_2738, NULL);
   _2740 = cons(_225, _2739);
   _2741 = List_var(_2740);
-  _2742 = int_var(3658);
+  _2742 = int_var(3533);
   _2743 = cons(_2742, NULL);
   _2744 = cons(_240, _2743);
   _2745 = List_var(_2744);
@@ -3409,7 +3409,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2819 = cons(_2818, NULL);
   _2820 = cons(_225, _2819);
   _2821 = List_var(_2820);
-  _2822 = int_var(3721);
+  _2822 = int_var(3596);
   _2823 = cons(_2822, NULL);
   _2824 = cons(_240, _2823);
   _2825 = List_var(_2824);
@@ -4328,8 +4328,8 @@ List type = Var_list(List_cadr(expr));  return({
 
 Token Token_skip_trivia(Token);
 static int Compiler__statement_expression_follows(Compiler c){
-  if(Compiler_peek(c, 0) != 247) return 0;  Token token = Token_skip_trivia(c -> token + 1);  for(; ;  token = Token_after_group(token)) switch(token -> type){
-    case 119 : return 1;  case 11212 : case 251 : return 0;
+  if(Compiler_peek(c, 0) != 247) return 0;  int hole = 0, comma = 0;  for(Token token = Token_skip_trivia(c -> token + 1); ;  token = Token_after_group(token)){
+    Symbol type = token -> type;  if(type == 119) return 1;  if(type == 11212 || type == 251) return hole && ! comma;  if(type == 89) comma = 1;  if(type == 73 && Map_truth(c -> macro_holes)) hole = 1;
   }
 
 }

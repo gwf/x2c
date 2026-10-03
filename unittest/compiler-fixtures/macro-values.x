@@ -85,7 +85,7 @@ meta static List global_increment_hit(List code) {
 macro Expression $is_global_inc(Expr $code) => $global_increment_hit($code);
 
 /* This private callee has a different mark from the independent $inc. */
-macro Statement $private_callee_check(Expr $value) {
+macro Stmt $private_callee_check(Expr $value) {
   int (*bump)(int) = decrement;
   printf("%d %d %d %d %d\n", $inc($value), $is_inc($inc($value)),
          $is_inc(bump($value)), $is_global_inc(bump($value)),

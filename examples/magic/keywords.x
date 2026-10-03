@@ -1,5 +1,5 @@
 #include <assert.h>
-macro Decorator $control.with_lock(Statement $body, Expr $lock) { {
+macro Decorator $control.with_lock(Stmt $body, Expr $lock) { {
     Mutex held = $lock;
     held.lock();
     defer held.unlock();

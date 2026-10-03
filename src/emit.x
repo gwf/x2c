@@ -320,7 +320,7 @@ static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
 
 // local statics
 
-macro Statement $report.emit_static_switch(Expr $c) {
+macro Stmt $report.emit_static_switch(Expr $c) {
   {
     String note = "place the declaration before the switch "
                 + "or within one case block";

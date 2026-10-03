@@ -17,7 +17,7 @@ static int identity(int value) {
 macro Expression $fixture.call(Expr $callee, Expr $arguments...) =>
   $callee($arguments...);
 
-macro Statement $fixture.swap(Expr $left, Expr $right) {
+macro Stmt $fixture.swap(Expr $left, Expr $right) {
   $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
   $right = temporary;
@@ -38,7 +38,7 @@ macro Unit $fixture.define(Name $name, Literal $value) {
 }
 
 macro Decorator $fixture.range(
-  Statement $body,
+  Stmt $body,
   Name $index,
   Expr $start,
   Expr $stop

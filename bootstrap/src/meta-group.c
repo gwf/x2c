@@ -622,7 +622,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _464 = cons(_461, _463);
   _465 = List_var(_464);
   _466 = Symbol_var(1133019155420);
-  _467 = int_var(3721);
+  _467 = int_var(3596);
   _468 = cons(_467, NULL);
   _469 = cons(_466, _468);
   _470 = List_var(_469);

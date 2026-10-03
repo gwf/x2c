@@ -238,7 +238,7 @@ static const MacroCategory macro_categories[] ={
     "Expression", 377892, 405758822009820, 1, 2
   }
   , {
-    "Statement", 5011670, 168163805864282, 1, 3
+    "Stmt", 5011670, 168163805864282, 1, 3
   }
   , {
     "Field", 13183752, 13183752, 1, 3
@@ -1284,7 +1284,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _170 = String_new("macro result kind belongs after 'macro', before the '$' name");
   _171 = String_new("sequence macro hole must be the final argument");
   _172 = String_new("decorator first parameter has invalid target kind");
-  _173 = String_new("expected Expression, Function, Statement, Field, Unit,");
+  _173 = String_new("expected Expression, Function, Stmt, Field, Unit,");
   _174 = String_var(_173);
   _175 = String_new("or NamedType");
   _176 = String_var(_175);
@@ -1298,7 +1298,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _184 = String_new("local decorators cannot target ");
   _185 = String_new(" syntax");
   _186 = String_new("parenthesized macro body requires Expression result or target");
-  _187 = String_new("braced macro body requires Statement, Field, Entry, ");
+  _187 = String_new("braced macro body requires Stmt, Field, Entry, ");
   _188 = String_new("Enumerator, Unit, or non-Expression Decorator result");
   _189 = String_add(_187, _188);
   _190 = Symbol_var(377892);
@@ -1760,8 +1760,8 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _643 = String_new("path:");
   _644 = String_var(_643);
   _645 = String_new("#");
-  _646 = String_new("macro Statement $lisp.bind(\n  Expr $lisp, Expr $name, Expr $function\n) {\n  Func callable = Func.new(\n    $function,\n    $(_x2c.literal.list (_x2c.function.native-type $function))\n  );\n  Lisp.bind($lisp, $name, callable);\n}\n\nmacro Decorator $lisp.binding(\n  Function $function, Name $group, Literal $name\n) {\n  $(lisp.binding.record $group $name $function)...\n  $(x2c.function.body $function)...\n}\n\nmacro Statement $lisp.install(Expr $lisp, Name $group) {\n  $(lisp.binding.install $lisp $group)...\n}\n");
-  _647 = String_new("macro Decorator $x2c.foreign.alias(\n  Unit $declaration,\n  Expr $native\n) {\n  $(list (list \'falias $declaration $native))...\n}\n\nmacro Expression $x2c.callback.adapt(\n  Expr $target,\n  Expr $source\n) =>\n  $(list \'expr nil (list \'tadapt $target $source));\n\nmacro Decorator $x2c.foreach(\n  Statement $body,\n  Decl $declaration,\n  Expr $collection\n) {\n  using $iterator, $item, $pair, $object, $cursor;\n  $(foreach.expand\n    $declaration $collection $body\n    $iterator $item $pair $object $cursor)...\n}\n\nkeyword foreach $x2c.foreach;\n\nmacro Decorator $scope(Statement $body, Expr $destination...) {\n  $(scope.expand $body $destination)...\n}\n\nmacro Decorator $let(Statement $body, Expr $place, Expr $value) {\n  {\n    $(x2c.syntax.type $place) *address = &$place;\n    $(x2c.syntax.type $place) previous = *address;\n    defer *address = previous;\n    *address = $value;\n    $body\n  }\n}\n\nmacro Decorator $lock(Statement $body, Expr $mutex) {\n  {\n    $(list \"Mutex\") held = $mutex;\n    held.lock();\n    defer held.unlock();\n    $body\n  }\n}\n\nmacro Expression $auto(Expr $value) =>\n  $(list \'managed-init $value);\n\nmacro Decorator $class(NamedType $definition) {\n  $(class.expand $definition)...\n}\n\nkeyword class $class;\n");
+  _646 = String_new("macro Stmt $lisp.bind(\n  Expr $lisp, Expr $name, Expr $function\n) {\n  Func callable = Func.new(\n    $function,\n    $(_x2c.literal.list (_x2c.function.native-type $function))\n  );\n  Lisp.bind($lisp, $name, callable);\n}\n\nmacro Decorator $lisp.binding(\n  Function $function, Name $group, Literal $name\n) {\n  $(lisp.binding.record $group $name $function)...\n  $(x2c.function.body $function)...\n}\n\nmacro Stmt $lisp.install(Expr $lisp, Name $group) {\n  $(lisp.binding.install $lisp $group)...\n}\n");
+  _647 = String_new("macro Decorator $x2c.foreign.alias(\n  Unit $declaration,\n  Expr $native\n) {\n  $(list (list \'falias $declaration $native))...\n}\n\nmacro Expression $x2c.callback.adapt(\n  Expr $target,\n  Expr $source\n) =>\n  $(list \'expr nil (list \'tadapt $target $source));\n\nmacro Decorator $x2c.foreach(\n  Stmt $body,\n  Decl $declaration,\n  Expr $collection\n) {\n  using $iterator, $item, $pair, $object, $cursor;\n  $(foreach.expand\n    $declaration $collection $body\n    $iterator $item $pair $object $cursor)...\n}\n\nkeyword foreach $x2c.foreach;\n\nmacro Decorator $scope(Stmt $body, Expr $destination...) {\n  $(scope.expand $body $destination)...\n}\n\nmacro Decorator $let(Stmt $body, Expr $place, Expr $value) {\n  {\n    $(x2c.syntax.type $place) *address = &$place;\n    $(x2c.syntax.type $place) previous = *address;\n    defer *address = previous;\n    *address = $value;\n    $body\n  }\n}\n\nmacro Decorator $lock(Stmt $body, Expr $mutex) {\n  {\n    $(list \"Mutex\") held = $mutex;\n    held.lock();\n    defer held.unlock();\n    $body\n  }\n}\n\nmacro Expression $auto(Expr $value) =>\n  $(list \'managed-init $value);\n\nmacro Decorator $class(NamedType $definition) {\n  $(class.expand $definition)...\n}\n\nkeyword class $class;\n");
   _648 = String_new("_x2c.builtin.macros");
   _649 = String_new("<builtin:macros>");
   _650 = String_new("unexpected form in built-in macro source");

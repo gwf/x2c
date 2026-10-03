@@ -341,7 +341,7 @@ static MatchCacheEntry *MatchLease._entry(MatchLease *lease) {
 
 /* Declares `$plan`, the program `$cache` prepared for `$pattern`, leased
    until the scope exits, or NULL when acquisition prepared none. */
-macro Statement $match.plan(
+macro Stmt $match.plan(
   Name $plan, Expr $cache, Expr $pattern, Expr $owner) {
   MatchLease storage;
   MatchLease *lease = &storage;

@@ -12,7 +12,7 @@ const x2cMarkdown = [
   "",
   "```x2c,ignore",
   "~Array hidden = %[1, 2, 3];",
-  "macro Statement $show(Expr $value) {",
+  "macro Stmt $show(Expr $value) {",
   "  using $temporary;",
   "  List shown = %($value);",
   "}",

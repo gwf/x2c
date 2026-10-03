@@ -544,8 +544,8 @@ The intended try template uses meta producers for semantic pieces and effects.
 For example, this is an interface sketch, not a probe that already works:
 
 ```x2c
-macro open Statement $try_region(Name $frame, Statement $declarations,
-  Statement $body, Statement $landing, Statement $cleanup) {
+macro open Statement $try_region(Name $frame, Stmt $declarations,
+  Stmt $body, Stmt $landing, Stmt $cleanup) {
   {
     $frame_declaration($frame)...
     $declarations
@@ -1342,7 +1342,7 @@ the lowering computed; each writes its C through its own macro.
 
 ```x2c
 macro open Statement $compiler_try(Name $frame, Expr $clause,
-    Statement $body, Statement $cleanup) {
+    Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
     $builtin_try_catch_site($frame, $clause)...
@@ -1358,7 +1358,7 @@ macro open Statement $compiler_try(Name $frame, Expr $clause,
 
 /* One catch arm of several, chosen by its index. */
 macro open Statement $catch_arm(Name $selected, Expr $index,
-    Statement $arm, Statement $rest) {
+    Stmt $arm, Stmt $rest) {
   if ($selected == $index) $arm else $rest
 }
 ```
@@ -1370,7 +1370,7 @@ slot functions that apply them:
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
 macro open Statement $catch_site(Name $frame, Name $handle, Name $patterns,
-    Expr $count, Expr $fallback, Expr $state, Statement $preparation...) {
+    Expr $count, Expr $fallback, Expr $state, Stmt $preparation...) {
   static MatchCaptureSite arms[$count];
   Var $patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
@@ -1387,13 +1387,13 @@ macro open Statement $catch_pattern(Name $patterns, Expr $index,
 
 /* A landing no catch arm handles: the region's exits run, and control does
    not come back. */
-macro open Statement $try_unhandled(Statement $cleanup) {
+macro open Statement $try_unhandled(Stmt $cleanup) {
   { $cleanup __builtin_unreachable(); }
 }
 
 /* A landing that hands a raised error to its catch arms. */
 macro open Statement $catch_landing(Name $frame, Name $handle,
-    Statement $unhandled, Statement $choice, Statement $selection...) {
+    Stmt $unhandled, Stmt $choice, Stmt $selection...) {
   if (x2c_exception_is_error_target(&$frame)) {
     $selection...
     x2c_error_catch_detach($handle);
@@ -1610,7 +1610,7 @@ uses the grammar-owned unary form; the extended lowered record remains an
 internal producer form:
 
 ```x2c
-macro Statement $deferred(Statement $body) { defer $body }
+macro Stmt $deferred(Stmt $body) { defer $body }
 Macro deferred = $deferred;
 match (head) case deferred(?final_stmt): { /* lower this region */ }
 ```
@@ -1629,7 +1629,7 @@ Target C shape:
 
 ```x2c
 macro open Statement $compiler_defer(Name $record, Expr $callback,
-    Expr $environment, Expr $records, Statement $body, Statement $cleanup) {
+    Expr $environment, Expr $records, Stmt $body, Stmt $cleanup) {
   {
     $builtin_defer_record($record, $callback, $environment, $records)...
     x2c_cleanup_push(&$record);
@@ -1774,13 +1774,13 @@ macro open Statement $try_close_handler(Expr $handle) {
 }
 
 macro open Statement $try_leave_cleanup(Expr $frame,
-    Statement $before...) {
+    Stmt $before...) {
   $before...
   x2c_exception_leave($frame);
 }
 
 macro open Statement $try_finish_cleanup(Expr $frame,
-    Statement $finalizer, Statement $before...) {
+    Stmt $finalizer, Stmt $before...) {
   if (x2c_exception_claim($frame)) {
     $before...
     $finalizer
@@ -1815,7 +1815,7 @@ its producer passes the body as a `code-value "lowered"` carrier:
 
 ```x2c
 macro open Unit $compiler_wrapper(Type $result, Name $name,
-    Statement $body, Param $params...) {
+    Stmt $body, Param $params...) {
   $result $name($params...) { $body }
 }
 ```
@@ -1900,7 +1900,7 @@ retains the body as lowered code:
 
 ```x2c
 macro open Unit $compiler_wrapper(Type $result, Name $name,
-    Statement $body, Param $params...) {
+    Stmt $body, Param $params...) {
   $result $name($params...) { $body }
 }
 ```
@@ -2009,7 +2009,7 @@ target from its index in order. The statement has its own block scope.
 
 ```x2c
 macro open Statement $destructure_statement(Name $temporary, Expr $source,
-    Statement $assignments...) {
+    Stmt $assignments...) {
   {
     List $temporary = $source;
     $assignments...
@@ -2097,8 +2097,8 @@ once-only guard:
 
 ```x2c
 macro open Unit $file_initializer(Type $result, Name $name, Name $guard,
-    Statement $entry..., Statement $early..., Statement $mid...,
-    Statement $late..., Statement $shutdown...) {
+    Stmt $entry..., Stmt $early..., Stmt $mid...,
+    Stmt $late..., Stmt $shutdown...) {
   $result $name(void) {
     $entry...
     if ($guard) return;
@@ -2322,12 +2322,12 @@ branch scope, and termination promotion. The shared grammar names its two
 parsed source forms:
 
 ```x2c
-macro Statement $if_then(Expr $condition, Statement $yes) {
+macro Stmt $if_then(Expr $condition, Stmt $yes) {
   if ($condition) $yes
 }
 
-macro Statement $if_else(Expr $condition, Statement $yes,
-    Statement $no) {
+macro Stmt $if_else(Expr $condition, Stmt $yes,
+    Stmt $no) {
   if ($condition) $yes else $no
 }
 ```
@@ -2381,11 +2381,11 @@ position, condition resolution, body binding, loop control, and diagnostics.
 The source forms in the shared grammar are:
 
 ```x2c
-macro Statement $while_loop(Expr $condition, Statement $body) {
+macro Stmt $while_loop(Expr $condition, Stmt $body) {
   while ($condition) $body
 }
 
-macro Statement $do_loop(Statement $body, Expr $condition) {
+macro Stmt $do_loop(Stmt $body, Expr $condition) {
   do $body while ($condition)
 }
 ```
@@ -2426,8 +2426,8 @@ expression, checks its conversion, and writes the active `return_type` into
 the bound node. An empty return has no type child. The source forms are:
 
 ```x2c
-macro Statement $return_empty() { return; }
-macro Statement $return_value(Expr $value) { return $value; }
+macro Stmt $return_empty() { return; }
+macro Stmt $return_value(Expr $value) { return $value; }
 ```
 
 A return expression parsed inside a function already carries its current
@@ -2459,7 +2459,7 @@ conversion, and rejection diagnostics.
 The shared grammar already writes the source form used by transform:
 
 ```x2c
-macro Statement $deferred(Statement $body) {
+macro Stmt $deferred(Stmt $body) {
   defer $body
 }
 ```
@@ -2496,7 +2496,7 @@ producer's already typed calls and member-specific fallback:
 
 ```x2c
 macro open Statement $render_guard(Name $path, Expr $enter,
-    Expr $fallback, Statement $leave, Statement $body) {
+    Expr $fallback, Stmt $leave, Stmt $body) {
   RenderPath $path;
   if (!$enter) return $fallback;
   defer $leave
@@ -2732,7 +2732,7 @@ existing assignment inspection and `_target_place` still decide whether
 the store restores a place.
 
 ```x2c
-macro Statement $expression_statement(Expr $value) { $value; }
+macro Stmt $expression_statement(Expr $value) { $value; }
 
 static int _note_restored(Walk w, Var body) {
   Macro statement = $expression_statement;
@@ -2812,7 +2812,7 @@ the same two-child `(switch subject body)` shape with a resolved subject.
 The shared source form is:
 
 ```x2c
-macro Statement $switched(Expr $subject, Statement $body) {
+macro Stmt $switched(Expr $subject, Stmt $body) {
   switch ($subject) $body
 }
 ```
@@ -2842,7 +2842,7 @@ and the main region walker. The E27 source matcher supplies the same bound
 expression from each `(stmnt EXPRESSION)` node:
 
 ```x2c
-macro Statement $expression_statement(Expr $value) { $value; }
+macro Stmt $expression_statement(Expr $value) { $value; }
 
 static void _walk_defer(Walk w, Var body) {
   List arguments = NULL;
@@ -3022,7 +3022,7 @@ defaults; `match-typed-guards` adds typed capture declarations. Recognize only
 the outer source form:
 
 ```x2c
-macro Statement $matched(Expr $subject, MatchRow $rows...) {
+macro Stmt $matched(Expr $subject, MatchRow $rows...) {
   match ($subject) { $rows... }
 }
 
@@ -3150,7 +3150,7 @@ macro open Statement $destructure_typed_target(
     Type $type, DeclaratorRow $row, Expr $value) {
   $type $row = $value;
 }
-macro open Statement $destructure_sequence(Statement $items...) {
+macro open Statement $destructure_sequence(Stmt $items...) {
   $items...
 }
 
@@ -4200,7 +4200,7 @@ The `MatchRow` argument kind has sequence spelling
 `MatchRow $rows...`. Its sole template slot is a match arm list:
 
 ```x2c
-macro Statement $matched(Expr $subject, MatchRow $rows...) {
+macro Stmt $matched(Expr $subject, MatchRow $rows...) {
   match ($subject) { $rows... }
 }
 
@@ -4246,7 +4246,7 @@ Before binder adoption, repeat exact row and binding comparison in that
 client, and stop if it needs reconstruction, a second binder, or fallback
 recognition.
 
-Design review: a `Statement` body hole loses the arm pattern and guard, while
+Design review: a `Stmt` body hole loses the arm pattern and guard, while
 an `Expr` pattern plus fixed body can cover only a fixed arm layout. One
 opaque row sequence uses the existing parse/bind owners and avoids parallel
 semantics. Its cost is a new grammar slot and capture kind, so adopt it only

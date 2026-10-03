@@ -6,20 +6,20 @@ static void bump(int *value, int amount) {
   *value += amount;
 }
 
-macro Statement $add_two(Expr $value) {
+macro Stmt $add_two(Expr $value) {
   {
     bump(&$value, 2);
   }
 }
 
-macro Statement $add_three(Expr $value) {
+macro Stmt $add_three(Expr $value) {
   do {
     bump(&$value, 3);
   } while (0)
 }
 
 macro Decorator $around(
-  Statement $target, Expr $value
+  Stmt $target, Expr $value
 ) {
   {
     bump(&$value, 5);
@@ -29,7 +29,7 @@ macro Decorator $around(
 }
 
 macro Decorator $do_around(
-  Statement $target, Expr $value
+  Stmt $target, Expr $value
 ) {
   do {
     bump(&$value, 13);
@@ -38,7 +38,7 @@ macro Decorator $do_around(
   } while (0)
 }
 
-macro Decorator $outer(Statement $target) {
+macro Decorator $outer(Stmt $target) {
   {
     $target
   }

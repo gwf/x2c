@@ -5,7 +5,7 @@ macro Expression $indent.answer(Expr $base) =>
   $base + $(indent-offset)
 
 macro Decorator $indent.range(
-  Statement $body,
+  Stmt $body,
   Name $index,
   Expr $start,
   Expr $stop
@@ -14,12 +14,12 @@ macro Decorator $indent.range(
     int begin = $start, end = $stop
     for (int $index = begin; $index < end; $index++): $body
 
-macro Statement $indent.swap(Expr $left, Expr $right):
+macro Stmt $indent.swap(Expr $left, Expr $right):
   $(x2c.syntax.type $left) temporary = $left
   $left = $right
   $right = temporary
 
-macro Decorator $indent.fallback(Statement $target, Expr $fallback):
+macro Decorator $indent.fallback(Stmt $target, Expr $fallback):
   do:
     $target
     return $fallback

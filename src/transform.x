@@ -69,7 +69,7 @@ List Compiler.transform(Compiler c, List ast) {
 */
 Ast Compiler.normalize(Compiler c, Ast ast) => c._step(ast);
 
-macro Statement $report.parse_init_incomplete(Expr $c) {
+macro Stmt $report.parse_init_incomplete(Expr $c) {
   $c.report_error(
     <parse>,
     "managed initializer requires a complete block-local initializer",
@@ -260,7 +260,7 @@ static Ast Compiler._function_node(
   return transformed;
 }
 
-macro Statement $report.xform_index_unsupported(Expr $c, Expr $type) {
+macro Stmt $report.xform_index_unsupported(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket indexing",
     NULL, NULL);
@@ -276,7 +276,7 @@ static Ast Compiler._getindex_node(
     c._indexed_call_expr(resolved, %($expression $index)).caddr());
 }
 
-macro Statement $report.xform_index_assignment(Expr $c, Expr $type) {
+macro Stmt $report.xform_index_assignment(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket assignment",
     NULL, NULL);
@@ -294,7 +294,7 @@ static Ast Compiler._setindex_node(
     c._indexed_call_expr(resolved, %($expression $index $value)).caddr());
 }
 
-macro Statement $report.xform_slice_unsupported(
+macro Stmt $report.xform_slice_unsupported(
   Expr $c, Expr $type, Expr $notes) {
   $c.report_error(
     <xform>, %"type ${$type} does not support slicing",
@@ -717,29 +717,29 @@ static List Compiler._process_raw_segment(Compiler c, List seg) {
 
 // declarations and statements
 
-macro Statement $destructure_targets(Type $type, DeclaratorRow $rows...) {
+macro Stmt $destructure_targets(Type $type, DeclaratorRow $rows...) {
   $type $rows...;
 }
 
-macro Statement $destructure_typed_target(
+macro Stmt $destructure_typed_target(
     Type $type, DeclaratorRow $row, Expr $value) {
   $type $row = $value;
 }
 
-macro Statement $destructure_sequence(Statement $items...) {
+macro Stmt $destructure_sequence(Stmt $items...) {
   $items...
 }
 
-macro Statement $destructure_statement(Name $temporary, Expr $source,
-    Statement $assignments...) {
+macro Stmt $destructure_statement(Name $temporary, Expr $source,
+    Stmt $assignments...) {
   {
     List $temporary = $source;
     $assignments...
   }
 }
 
-macro Statement $destructure_declarations(
-    Name $temporary, Expr $source, Statement $assignments...) {
+macro Stmt $destructure_declarations(
+    Name $temporary, Expr $source, Stmt $assignments...) {
   List $temporary = $source;
   $assignments...
 }
@@ -831,7 +831,7 @@ static List Compiler._destructure_value(Compiler c, List ast) {
       List assignments = c._destructure_assignments(targets, temporary);
       Macro shape = macro Expression(
         Type $type, Name $result, Expr $source, Name $temporary,
-        Expr $converted, Statement $assignments...) => ({
+        Expr $converted, Stmt $assignments...) => ({
         $type $result = $source;
         List $temporary = $converted;
         $assignments...
@@ -898,7 +898,7 @@ static List Compiler._typed_destructure(
   return c.rebuild_statement(sequence(cons(temp, declarations.list_free())));
 }
 
-macro Statement $report.type_destructure_list(Expr $c, Expr $source_type) {
+macro Stmt $report.type_destructure_list(Expr $c, Expr $source_type) {
   $c.report_error(
     <type>, "destructuring requires a List source",
     NULL, %(("source type" ${$source_type})));
@@ -1366,7 +1366,7 @@ static Type _printf_integer_type(PrintfLength length, int is_unsigned) {
 
 // operators
 
-macro Statement $report.xform_unary_dynamic(Expr $c) {
+macro Stmt $report.xform_unary_dynamic(Expr $c) {
   $c.report_error(
     <xform>, "dynamic unary numeric operators are not supported",
     NULL, %("use Var.binary with an explicit numeric operand"));
@@ -1474,13 +1474,13 @@ static List Compiler._to_var(Compiler c, List expr) =>
 static List _symbol_expression(Symbol value) =>
   %(expr ("Symbol") "${(unsigned long) value}");
 
-macro Statement $report.xform_index_copy(Expr $c, Expr $type) {
+macro Stmt $report.xform_index_copy(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket assignment",
     NULL, %("use an explicit copy-producing method where available"));
 }
 
-macro Statement $report.xform_string_assignment(Expr $c) {
+macro Stmt $report.xform_string_assignment(Expr $c) {
   {
     String note = "String is immutable: use the copy-producing " +
                   "String.withindex, or bind a char * to write a " +
@@ -1491,7 +1491,7 @@ macro Statement $report.xform_string_assignment(Expr $c) {
   }
 }
 
-macro Statement $report.xform_slice_assignment(Expr $c) {
+macro Stmt $report.xform_slice_assignment(Expr $c) {
   $c.report_error(
     <xform>, "slice expressions are not assignable",
     NULL, %("call the collection's setslice method explicitly"));
@@ -1583,7 +1583,7 @@ static List Compiler._binary_operator(
 static int _dynamic_binary_operator(Symbol op) =>
   op.compound_assignment() != 0;
 
-macro Statement $report.xform_numeric_operands(
+macro Stmt $report.xform_numeric_operands(
   Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
   {
     String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
@@ -1614,13 +1614,13 @@ static List Compiler._dynamic_binary(
   return %(call "Var_binary" (args $lhs ${_symbol_expression(op)} $rhs));
 }
 
-macro Statement $report.xform_string_compound(Expr $c) {
+macro Stmt $report.xform_string_compound(Expr $c) {
   $c.report_error(
     <xform>, "String compound assignment supports only String +=",
     NULL, NULL);
 }
 
-macro Statement $report.xform_container_compound(Expr $c, Expr $lhs_type) {
+macro Stmt $report.xform_container_compound(Expr $c, Expr $lhs_type) {
   {
     String type = $lhs_type.repr();
     $c.report_error(
@@ -1663,7 +1663,7 @@ static List Compiler._dynamic_compound(
   return _update_call(lhs, _symbol_expression(op), rhs, helper);
 }
 
-macro Statement $report.xform_compound_operand(
+macro Stmt $report.xform_compound_operand(
   Expr $c, Expr $op, Expr $rhs_type) {
   {
     String details = %"right type: ${$rhs_type.repr()}";
@@ -1675,7 +1675,7 @@ macro Statement $report.xform_compound_operand(
   }
 }
 
-macro Statement $report.xform_compound_bitfield(Expr $c) {
+macro Stmt $report.xform_compound_bitfield(Expr $c) {
   $c.report_error(
     <xform>, "dynamic compound assignment cannot target a bitfield",
     NULL, NULL);
@@ -1694,7 +1694,7 @@ static void Compiler._dynamic_rhs(
 static int Compiler._scalar_operand(Compiler c, Symbol op, Type type) =>
   c.sym.resolve_numeric_type(type) || (op == <+> && c._string_operand(type));
 
-macro Statement $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
+macro Stmt $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
   {
     String details = %"left type: ${$lhs_type.repr()}";
     $c.report_error(
@@ -1703,7 +1703,7 @@ macro Statement $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
   }
 }
 
-macro Statement $report.xform_compound_enum(Expr $c) {
+macro Stmt $report.xform_compound_enum(Expr $c) {
   $c.report_error(
     <xform>, "dynamic compound assignment cannot target an enum",
     NULL, NULL);
@@ -1755,7 +1755,7 @@ static List Compiler._indexed_change(
   return %(call $helper (args @arguments));
 }
 
-macro Statement $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
+macro Stmt $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
   {
     String details = %"right type: ${$rhs_type.repr()}";
     String message = $op == <+>
@@ -1765,7 +1765,7 @@ macro Statement $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
   }
 }
 
-macro Statement $report.xform_index_update(
+macro Stmt $report.xform_index_update(
   Expr $c, Expr $base_type, Expr $postfix) {
   {
     String type = $base_type.repr();

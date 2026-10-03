@@ -6,23 +6,23 @@
 #define __GUARD_0x873AC1BD__
 
 #include "x2c.h"
-typedef int _x2c_macro_S_f80d9d65;
+typedef int _x2c_macro_S_717b1515;
 
 typedef struct{
-  _x2c_macro_S_f80d9d65 value;
-  const _x2c_macro_S_f80d9d65 * next;
+  _x2c_macro_S_717b1515 value;
+  const _x2c_macro_S_717b1515 * next;
 }
-_x2c_macro_Cell_b2ede5d0;
+_x2c_macro_Cell_eab11d52;
 
 size_t int_width(void);
 
-_x2c_macro_S_f80d9d65 int_sum(_x2c_macro_S_f80d9d65 _x2c_macro_left_0, const _x2c_macro_S_f80d9d65 * _x2c_macro_right_0);
+_x2c_macro_S_717b1515 int_sum(_x2c_macro_S_717b1515 _x2c_macro_left_0, const _x2c_macro_S_717b1515 * _x2c_macro_right_0);
 
-typedef unsigned long _x2c_macro_S_6dbbaa67;
+typedef unsigned long _x2c_macro_S_087602a2;
 
 size_t wide_width(void);
 
-_x2c_macro_S_6dbbaa67 wide_sum(_x2c_macro_S_6dbbaa67 _x2c_macro_left_1, const _x2c_macro_S_6dbbaa67 * _x2c_macro_right_1);
+_x2c_macro_S_087602a2 wide_sum(_x2c_macro_S_087602a2 _x2c_macro_left_1, const _x2c_macro_S_087602a2 * _x2c_macro_right_1);
 
 int main(void);
 

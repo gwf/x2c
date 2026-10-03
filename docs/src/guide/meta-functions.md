@@ -992,7 +992,7 @@ and `x2c_literal_symbol` each return an expression holding a value.
 
 ## Source templates from meta functions
 
-A Unit or Statement macro used as an expression inside a meta function
+A Unit or Stmt macro used as an expression inside a meta function
 constructs a deferred template invocation. Its arguments are values computed
 by the meta function. The returned code expands when inserted into the
 program, using ordinary macro substitution, scope and binding rules.
@@ -1027,7 +1027,7 @@ function declaration for the helper to inspect. Name, Type, parameter and
 statement captures still follow the source macro's declared hole kinds.
 
 A decorator can make that choice from the function it captures. Here the
-`meta` helper selects one of two named Statement templates, then the decorator
+`meta` helper selects one of two named Stmt templates, then the decorator
 inserts the selected invocation into the function body:
 
 ```x2c
@@ -1036,12 +1036,12 @@ inserts the selected invocation into the function body:
 
 static int calls = 0;
 
-macro Statement $counted(Statement $body...) {
+macro Stmt $counted(Stmt $body...) {
   calls++;
   $body...
 }
 
-macro Statement $plain(Statement $body...) {
+macro Stmt $plain(Stmt $body...) {
   $body...
 }
 
@@ -1112,7 +1112,7 @@ meta static List numbered(List subject, List arms) {
   return cases.list_free();
 }
 
-macro Statement $choose(Expr $subject, Statement $arms...) {
+macro Stmt $choose(Expr $subject, Stmt $arms...) {
   $numbered($subject, $arms)...
 }
 

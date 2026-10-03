@@ -28,7 +28,7 @@ macro Expression $dedent(Expr $text) => $(_dedent_expand $text);
    includes <time.h>. The stop clock and the report run from a `defer`, so
    they still run when the decorated statement is a function body that
    returns or a body a raise transfers out of. */
-macro Decorator $time(Statement $target, Literal $label) {
+macro Decorator $time(Stmt $target, Literal $label) {
   {
     struct timespec started, stopped;
     clock_gettime(CLOCK_MONOTONIC, &started);
@@ -83,7 +83,7 @@ meta static List _cases_switch(List condition, List body) =>
 
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
-macro Decorator $switch(Statement $body, Expr $condition) {
+macro Decorator $switch(Stmt $body, Expr $condition) {
   $(_cases_switch $condition $body)...
 }
 
@@ -93,20 +93,20 @@ meta static List _macros_location(void) =>
 
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
    naming the note and the source line the macro was written on. */
-macro Statement $todo(Expr $note) {
+macro Stmt $todo(Expr $note) {
   raise %(invariant (note ${$note})
     (at ${$(_macros_location)}));
 }
 
 /* Marks a path the surrounding logic excludes. */
-macro Statement $unreachable() {
+macro Stmt $unreachable() {
   raise %(invariant (note "unreachable")
     (at ${$(_macros_location)}));
 }
 
 /* Checks an invariant and reports the failing expression as it was written.
    Unlike C `assert` this transfers to a catch and is not compiled out. */
-macro Statement $assert(Expr $check) {
+macro Stmt $assert(Expr $check) {
   {
     if (!($check)) {
       raise %(invariant

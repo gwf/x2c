@@ -15,7 +15,7 @@ macro Unit $cell(Type $type, name $width, name $sum) {
   }
 }
 
-macro Statement $widen(Type $type, name $out) {
+macro Stmt $widen(Type $type, name $out) {
   typedef $type Wide;
   Wide value = (Wide) 4;
   $out = (int) value + (int) (Wide) sizeof(Wide);

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $keep_body_target() {
+macro Stmt $keep_body_target() {
 }
 
 macro Unit $define_body_local(Type $T) {

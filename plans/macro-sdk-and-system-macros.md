@@ -186,7 +186,7 @@ Follow-ups from the original scope:
   escape and no interpolation hole; every other form emits the runtime call.
 - `$todo` and `$unreachable` - expand to a raise carrying file, line, and
   column from the existing `x2c.invocation.*`.
-- `$time` - `Statement` target decorator wrapping the target in a timing pair.
+- `$time` - `Stmt` target decorator wrapping the target in a timing pair.
 - `$assert` - raises `<invariant>` carrying the failing check as written, from
   `x2c.source.text`, and the caller's source line.
 
@@ -241,7 +241,7 @@ dispatches on `x2c.syntax.kind` rather than re-parsing.
 constructor, and the embedded AST literals in `lib/varops.xlisp`, and removes
 hand-written node shapes from `etc/builtin-macros.xlisp`. `String.dedent` reuses
 `String.startswith` and `String.replace` rather than adding a scanner. `$switch`
-reuses the existing `Statement` decorator capture and adds one reader; it
+reuses the existing `Stmt` decorator capture and adds one reader; it
 introduces no traversal, cache, or registry. The promoted operations add no
 compiler code at all. The one lasting new mechanism is the constructor family,
 which earns its keep by removing the undocumented node-shape dependency from

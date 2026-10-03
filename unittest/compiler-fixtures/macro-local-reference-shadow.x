@@ -8,14 +8,14 @@ static int exercise(int &value) {
   int captured = 0, inner = 0;
 
   macro Expression read() => value;
-  macro Statement assign(Expr $new_value) {
+  macro Stmt assign(Expr $new_value) {
     value = $new_value;
   }
-  macro Statement update() {
+  macro Stmt update() {
     value++;
     value += 4;
   }
-  macro Statement forward(Expr $amount) {
+  macro Stmt forward(Expr $amount) {
     add(value, $amount);
   }
 

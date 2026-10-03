@@ -3,11 +3,11 @@
 
 /* A Catch sequence hole writes a try's catch arms, so one macro recognizes
    a try with catches: its body, its arms and its finalizer. */
-macro Statement $caught(Statement $body, Statement $finalizer,
+macro Stmt $caught(Stmt $body, Stmt $finalizer,
     Catch $arms...) {
   try $body catch $arms... finally $finalizer
 }
-macro Statement $tried(Statement $body, Statement $finalizer) {
+macro Stmt $tried(Stmt $body, Stmt $finalizer) {
   try $body finally $finalizer
 }
 
@@ -20,7 +20,7 @@ meta static List shape_of(List code) {
   }
   return x2c_literal_int(0);
 }
-macro Expression $shape(Statement $code) => $shape_of($code);
+macro Expression $shape(Stmt $code) => $shape_of($code);
 
 int main(void) {
   int x = 0;

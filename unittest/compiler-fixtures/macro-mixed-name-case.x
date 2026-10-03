@@ -4,15 +4,15 @@
 typedef struct MixedRecord { int subtotal, total; } MixedRecord;
 static int sink;
 
-macro Statement $mixed(Name $name, Expr $record) {
+macro Stmt $mixed(Name $name, Expr $record) {
   int $name = $record.$name;
   sink += $name;
 }
-macro Statement $fresh(Expr $record) {
+macro Stmt $fresh(Expr $record) {
   int subtotal = $record.subtotal;
   sink += subtotal;
 }
-macro Statement $member_first(Name $name, Expr $record) {
+macro Stmt $member_first(Name $name, Expr $record) {
   sink += $record.$name;
   int $name = 1;
   sink += $name;
@@ -49,14 +49,14 @@ meta static List mixed_hit(List code) {
   }
   return x2c_literal_int(0);
 }
-macro Expression $is_mixed(Statement $code) => $mixed_hit($code);
+macro Expression $is_mixed(Stmt $code) => $mixed_hit($code);
 
 meta static List member_first_hit(List code) {
   Macro shape = $member_first;
   match (code) case shape(?name, ?record): return x2c_literal_int(1);
   return x2c_literal_int(0);
 }
-macro Expression $is_member_first(Statement $code) =>
+macro Expression $is_member_first(Stmt $code) =>
   $member_first_hit($code);
 
 meta static List pending_hit(Var name, List record) {
@@ -99,7 +99,7 @@ meta static List wrong_reference_case(List code, List other) {
     x2c_diagnostic_fail("wrong-reference substitution failed", %());
   return mixed_hit(changed);
 }
-macro Expression $wrong_reference(Statement $code, Statement $other) =>
+macro Expression $wrong_reference(Stmt $code, Stmt $other) =>
   $wrong_reference_case($code, $other);
 
 int main(void) {

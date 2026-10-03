@@ -837,7 +837,7 @@ static List _binding_name_signature(String name) =>
    name its callers use, as are the slot functions that the try templates
    in `src/transform.x` call. */
 
-macro Statement $builtin.row(Expr $rows, Expr $name, Expr $function) {
+macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = Func.new(
     $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
 }

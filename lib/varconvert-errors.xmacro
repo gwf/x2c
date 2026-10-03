@@ -1,19 +1,19 @@
 /* Var numeric conversion error conditions.
    Reports expand at their existing owners. */
 
-macro Statement $_convert_error_encoding_bad(Expr $bits) {
+macro Stmt $_convert_error_encoding_bad(Expr $bits) {
   raise %(bad-enc (value ${$bits}));
 }
 
-macro Statement $_convert_error_convert_void() {
+macro Stmt $_convert_error_convert_void() {
   raise %(void-op (owner "Var.convert"));
 }
 
-macro Statement $_convert_error_target_invalid(Expr $target) {
+macro Stmt $_convert_error_target_invalid(Expr $target) {
   raise %(bad-target (target ${$target}));
 }
 
-macro Statement $_convert_error_source_numeric(
+macro Stmt $_convert_error_source_numeric(
   Expr $source_tag, Expr $target) {
   using $lower;
   {
@@ -22,28 +22,28 @@ macro Statement $_convert_error_source_numeric(
   }
 }
 
-macro Statement $_convert_error_target_numeric(
+macro Stmt $_convert_error_target_numeric(
   Expr $source_tag, Expr $target) {
   raise %(no-convert (source ${$source_tag}) (target ${$target}));
 }
 
-macro Statement $_convert_error_decode_output() {
+macro Stmt $_convert_error_decode_output() {
   raise %(bad-arg (owner "Var.numeric_decode"));
 }
 
-macro Statement $_convert_error_decode_void() {
+macro Stmt $_convert_error_decode_void() {
   raise %(void-op (owner "Var.numeric_decode"));
 }
 
-macro Statement $_convert_error_decode_type(Expr $tag) {
+macro Stmt $_convert_error_decode_type(Expr $tag) {
   raise %(bad-types (source ${$tag}));
 }
 
-macro Statement $_convert_error_convert_range(Expr $source_tag, Expr $target) {
+macro Stmt $_convert_error_convert_range(Expr $source_tag, Expr $target) {
   raise %(conv-range (source ${$source_tag}) (target ${$target}));
 }
 
-macro Statement $convert.error(Literal $key, Expr $arguments...) {
+macro Stmt $convert.error(Literal $key, Expr $arguments...) {
   $(let* ((key (x2c.literal.value $key))
           (row (assoc key '(
         ("encoding.bad" _convert_error_encoding_bad)

@@ -9,7 +9,7 @@ macro Decorator $private_helper(Unit $target) {
   static int helper = 5;
 }
 
-macro Decorator $twice(Statement $target) {
+macro Decorator $twice(Stmt $target) {
   $target
   $target
 }

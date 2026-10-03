@@ -3,62 +3,62 @@
 meta static Map _repl_refusal_rows(void) => {
 
   "binding.unresolved" :
-  macro Statement(Expr $name) {
+  macro Stmt(Expr $name) {
     _refuse(%"unresolved identifier: ${$name}");
   },
 
   "storage.native" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("static, extern, and threaded storage need native execution");
   },
 
   "binding.redefined" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("redeclaration is disabled; use assignment");
   },
 
   "binding.initializer" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("top-level values need an initializer and a simple binding");
   },
 
   "form.unsupported" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("this top-level form is outside the REPL subset");
   },
 
   "input.unsupported" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("preprocessor and direct Lisp input are unsupported");
   },
 
   "qualifier.native" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("const and volatile need native checks outside the REPL");
   },
 
   "definition.unsupported" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("compiler-session definitions are outside the REPL subset");
   },
 
   "declaration.unsupported" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("type and storage declarations are outside the REPL subset");
   },
 
   "function.redefined" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("function redeclaration is disabled");
   },
 
   "function.missing" :
-  macro Statement(Expr $name) {
+  macro Stmt(Expr $name) {
     _refuse(%"no native function is available for ${$name}");
   },
 
   "type.redefined" :
-  macro Statement() {
+  macro Stmt() {
     _refuse("a type cannot be redefined; the session keeps its layout");
   }
 };
@@ -74,6 +74,6 @@ meta static List _repl_refusal_expand(String key, List arguments) {
   return %(${Macro_apply(selected, arguments)});
 }
 
-macro Statement $repl.error(Literal $key, Expr $arguments...) {
+macro Stmt $repl.error(Literal $key, Expr $arguments...) {
   $(_repl_refusal_expand (x2c.literal.value $key) $arguments)...
 }

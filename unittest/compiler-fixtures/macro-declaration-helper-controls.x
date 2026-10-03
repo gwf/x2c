@@ -1,7 +1,7 @@
 #include "x2c.x"
 $(import "macro-declaration-helper.xmacro")
 
-macro Statement $sum_lengths(Name $out) {
+macro Stmt $sum_lengths(Name $out) {
   $declare_list(items);
   foreach (String item, items) $out += item.len();
   $let(items, %("f")) {
@@ -19,8 +19,8 @@ int main(void) {
   List items = %("untouched");
   $sum_lengths(result);
   $sum_lengths(result);
-  macro Statement declare_local(Name $name) { String $name = "abc"; }
-  macro Statement measure_local(Name $out) {
+  macro Stmt declare_local(Name $name) { String $name = "abc"; }
+  macro Stmt measure_local(Name $out) {
     declare_local(text);
     $out += text.len();
   }

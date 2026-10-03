@@ -95,7 +95,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
   return literal;
 }
 
-macro Statement $report.macro_argument_constant(Expr $c, Expr $site) {
+macro Stmt $report.macro_argument_constant(Expr $c, Expr $site) {
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
@@ -424,7 +424,7 @@ static List _map_form(Compiler c, Var value) {
 
 // compile-time-only functions
 
-macro Statement $report.macro_function_only(Expr $c, Expr $site, Expr $name) {
+macro Stmt $report.macro_function_only(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <macro>,
     %"'${$name}' can only be called at compile time",

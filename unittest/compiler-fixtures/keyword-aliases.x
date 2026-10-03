@@ -8,12 +8,12 @@ macro Decorator $fixture.twice_value(Expr $target) => $target * 2;
 
 macro Decorator $fixture.frozen(Expr $target) => $target + 4;
 
-macro Decorator $fixture.repeat(Statement $target) {
+macro Decorator $fixture.repeat(Stmt $target) {
   $target
   $target
 }
 
-macro Decorator $fixture.once(Statement $target) {
+macro Decorator $fixture.once(Stmt $target) {
   {
     $target
   }

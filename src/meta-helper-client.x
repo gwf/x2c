@@ -334,7 +334,7 @@ static int _read_input(double deadline) {
 static void Call.refuse(Call &call, String why) =>
   call.compiler.refuse_meta_call(call.name, call.site, why);
 
-macro Statement $report.macro_helper_timeout(
+macro Stmt $report.macro_helper_timeout(
   Expr $c, Expr $site, Expr $limit, Expr $name) {
   $c.report_error(
     <macro>,
@@ -351,7 +351,7 @@ static void Call.overdue(Call &call) {
     call.site, call.limit, call.name);
 }
 
-macro Statement $report.macro_helper_stopped(
+macro Stmt $report.macro_helper_stopped(
   Expr $c, Expr $site, Expr $name, Expr $reason) {
   $c.report_error(
     <macro>,
