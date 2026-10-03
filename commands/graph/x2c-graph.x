@@ -13,6 +13,8 @@
 #include "clones.x"
 #include "args.x"
 
+$(import "dataset-output.xmacro")
+
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -2157,13 +2159,11 @@ static void _dataset_rows(
                       String function_id = _dataset_function_id(path, name);
                       String kind = name == "<top-level>"
                                   ? "top-level" : "function";
-                      functions.push(
-                        "%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
-                          function_id, kind, subtree.symbol().str(), path,
-                          unit_lines.int(), source_order.int(), source_name,
-                          name, visibility, external_calls.int(),
-                          indirect_calls.int())
-                      );
+                      $output.graph.function_row(
+                        functions, function_id, kind, subtree.symbol().str(),
+                        path, unit_lines.int(), source_order.int(), source_name,
+                        name, visibility, external_calls.int(),
+                        indirect_calls.int());
                       foreach (List call, calls)
                         match (call)
                           case %(
@@ -2176,7 +2176,7 @@ static void _dataset_rows(
                               attributes[callee_target];
                             String callee_id = _dataset_function_id(
                               callee_path, callee_name);
-                            String row = "%s\t%s\t%d".printf(
+                            String row = $output.graph.call_row(
                               function_id, callee_id, count.int());
                             Symbol callee_subtree;
                             match (callee_node)
@@ -2199,19 +2199,16 @@ static void _write_datasets(
   src_calls.sort();
   lib_calls.sort();
   Path.make_dirs(output);
-  String function_header = "".join(
-    %("function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
-      "source_name\temitted_name\tvisibility\texternal_calls\t"
-      "indirect_calls"));
+  String function_header = $output.graph.function_header();
   _dataset_write_rows(
     %"$output/functions.tsv",
     function_header, functions);
   _dataset_write_rows(
     %"$output/src-calls.tsv",
-    "caller_id\tcallee_id\tstatic_calls", src_calls);
+    $output.graph.call_header(), src_calls);
   _dataset_write_rows(
     %"$output/lib-calls.tsv",
-    "caller_id\tcallee_id\tstatic_calls", lib_calls);
+    $output.graph.call_header(), lib_calls);
 }
 
 /* Optional project lifetime proof from selected roots. */
