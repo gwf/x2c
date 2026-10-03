@@ -19,6 +19,18 @@
 #include "format.x"
 #include "cleanup.x"
 
+// diagnostics
+
+macro Stmt $report.emit_static_switch(Expr $c) {
+  {
+    String note = "place the declaration before the switch "
+                + "or within one case block";
+    $c.report_error(
+      <emit>, "switch cannot bypass dynamic static initialization",
+      NULL, %($note));
+  }
+}
+
 // emission
 
 /* `native_macros` holds the `#define` rows initializer choices need, and
@@ -319,16 +331,6 @@ static List Emitter._emit_dot_init(Emitter &e, Var field, List value) {
 }
 
 // local statics
-
-macro Stmt $report.emit_static_switch(Expr $c) {
-  {
-    String note = "place the declaration before the switch "
-                + "or within one case block";
-    $c.report_error(
-      <emit>, "switch cannot bypass dynamic static initialization",
-      NULL, %($note));
-  }
-}
 
 static List Emitter._local_static(
   Emitter &e, List declaration, List body) {

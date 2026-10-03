@@ -18,6 +18,8 @@ $(import "../src/grammar.xmacro")
 #include <stdint.h>
 #include <string.h>
 
+$(import "../src/literals-reports.xmacro")
+
 /* list literals
 
    `%(...)` and a nested `(...)` read quoted data into typed cons cells. In
@@ -134,13 +136,6 @@ static List Compiler._parse_shell_tail(Compiler c) {
   return c._cons_cell(type, c._cons_cell(content, c._parse_list_tail()));
 }
 
-macro Stmt $report.parse_macro_pattern_static(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>,
-    "a macro pattern's arguments are binders, macro patterns, or %(...)",
-    $origin, NULL);
-}
-
 /** Parses a macro pattern's parenthesized arguments and returns the static
     pattern of each: a binder or wildcard, a nested macro pattern, or a
     `%(...)` List pattern.
@@ -227,16 +222,6 @@ static List Compiler._parse_insertion(Compiler c) {
   c.check_explicit_converter(expr, %("Var"), 0);
   c.expect(<"}">);
   return expr;
-}
-
-macro Stmt $report.parse_insert_name(Expr $c, Expr $sigil) {
-  {
-    String message = %"expected identifier after '${$sigil}'";
-    String hint = $sigil == <@>
-      ? "use '@{...}' to splice an expression"
-      : "use '${...}' to insert an expression";
-    $c.report_error(<parse>, message, $c.token, %($hint));
-  }
 }
 
 static List Compiler._parse_named_reference(Compiler c, Symbol sigil) {
@@ -474,19 +459,6 @@ static void Compiler._parse_raise_detail(Compiler c, Array args) {
   args.push(value);
 }
 
-macro Stmt $report.parse_symbol_bare(
-  Expr $c, Expr $owner, Expr $detail, Expr $origin) {
-  {
-    String label = $owner == <raise> ? "raise" : "catch filter";
-    String role = $detail ? "detail key" : "code";
-    String hint = $owner == <raise>
-      ? "use raise %(code (key value)...);"
-      : "use catch %(code (key pattern)...):";
-    $c.report_error(
-      <parse>, %"$label $role must be a bare Symbol", $origin, %($hint));
-  }
-}
-
 static List Compiler._parse_bare_symbol(
   Compiler c, Symbol owner, int detail) {
   Token token = c.token;
@@ -536,12 +508,6 @@ static List Compiler._parse_catch_code(Compiler c) {
   return c._parse_bare_symbol(<catch>, 0);
 }
 
-macro Stmt $report.parse_catch_detail(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "catch filter detail must be '*' or '(key pattern)'",
-    $origin, %("wrap keyed detail patterns in parentheses"));
-}
-
 /* A `*` pattern stands alone, and a `(key pattern)` pair becomes a
    two-element pattern. */
 static void Compiler._parse_catch_detail(Compiler c, Array elements) {
@@ -568,13 +534,6 @@ static void Compiler._parse_catch_detail(Compiler c, Array elements) {
    header, a hash table, and the Symbols in source order. `SymbolSet.encode`
    in `lib/symbolset.x` builds it. */
 
-macro Stmt $report.parse_symbol_duplicate(
-  Expr $c, Expr $origin, Expr $symbol) {
-  $c.report_error(
-    <parse>, "duplicate Symbol in symbol set",
-    $origin, %("symbol:" ${$symbol.repr()}));
-}
-
 /** Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
     Entries must be literal compact `Symbol`s; source order defines dense
     indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
@@ -598,12 +557,6 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   symbols.free();
   tokens.free();
   return set;
-}
-
-macro Stmt $report.parse_symbol_literal(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "symbol-set entries must be literal Symbols",
-    $origin, %("use %<<foo bar>>"));
 }
 
 static Symbol Compiler._member_symbol(Compiler c) {
@@ -810,12 +763,6 @@ static List Compiler._parse_string_segments(Compiler c) {
   return segments.list_free();
 }
 
-macro Stmt $report.parse_string_segment(Expr $c) {
-  $c.report_error(
-    <parse>, "expected string segment",
-    $c.token, NULL);
-}
-
 static List Compiler._parse_string_segment(Compiler c) {
   switch (c.peek(0)) {
     case <segment>: return c._parse_text_segment();
@@ -895,12 +842,6 @@ static int _continuation(String raw, int i, int n) {
 
 // atoms and Symbols
 
-macro Stmt $report.parse_atom_expected(Expr $c, Expr $kind) {
-  $c.report_error(
-    <parse>, "expected atomic expression",
-    $c.token, %( "token:" ${$c.token.text} "kind:" ${$kind.str()} ));
-}
-
 /** Parses the current atomic token into a typed expression and advances once.
     Pattern and macro-hole state control binder validation and quoting, while
     shallow parsing permits provisional numeric types.
@@ -930,12 +871,6 @@ List Compiler.parse_atomic_literal(Compiler c) {
   $report.parse_atom_expected(c, kind);
 }
 
-macro Stmt $report.type_number_range(Expr $c, Expr $text) {
-  $c.report_error(
-    <type>, "numeric literal is outside the supported scalar range",
-    $c.token, %( "literal:" ${$text} ));
-}
-
 /* Shallow declaration discovery gives a number outside every supported
    scalar type a provisional type. */
 static List Compiler._number_literal(Compiler c, String text, int floating) {
@@ -954,12 +889,6 @@ static List Compiler._atom_literal(Compiler c, String text) {
   if (atom is <symbol>) return %(literal ("Symbol") $text ${atom.symbol()});
   Var value = c.macro_holes && atom.is_binder() ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
-}
-
-macro Stmt $report.parse_binder_name(Expr $c, Expr $atom) {
-  $c.report_error(
-    <parse>, "invalid match binder name",
-    $c.token, %( "binder-name:" ${$atom.str()} ));
 }
 
 /* In a pattern, a spelling that starts with `?` or `*` must be a binder
@@ -999,14 +928,6 @@ static String _angle_spelling(String text) {
   if (len >= 4 && text[1] == '"')
     return String.new_len(text + 2, len - 4).unescape();
   return String.new_len(text + 1, len - 2);
-}
-
-macro Stmt $report.parse_symbol_truncated(
-  Expr $c, Expr $origin, Expr $spelling, Expr $lossy) {
-  $c.report_error(
-    <parse>, "Symbol literal does not round-trip",
-    $origin, %("source spelling: ${$spelling}"
-      "encoded spelling: ${$lossy}"));
 }
 
 /* A compact Symbol literal must decode to its source spelling. */

@@ -30,6 +30,16 @@ $(import "../src/ast-rewrite.xmacro")
 #include "utils.x"
 #include <unistd.h>
 
+// diagnostics
+
+macro Stmt $report.macro_function_unavailable(
+  Expr $c, Expr $site, Expr $name, Expr $why) {
+  $c.report_error(
+    <macro>,
+    "this function cannot run at compile time",
+    $site, %("function: ${$name}" "reason: ${$why}"));
+}
+
 // the meta toolchain
 
 /* The C compiler and x2c include directory that build meta code. */
@@ -683,14 +693,6 @@ String Compiler.meta_call_missing(Compiler c, String name) {
            "from the pointed-to values";
   return "a parameter or the result has no Var form, such as C's bool; use "
          "int, a String, a Symbol, or a List";
-}
-
-macro Stmt $report.macro_function_unavailable(
-  Expr $c, Expr $site, Expr $name, Expr $why) {
-  $c.report_error(
-    <macro>,
-    "this function cannot run at compile time",
-    $site, %("function: ${$name}" "reason: ${$why}"));
 }
 
 /** Reports at `site` that the `meta` function `name` cannot run at compile

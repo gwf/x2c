@@ -1,0 +1,82 @@
+/* literals diagnostics. */
+
+macro Stmt $report.parse_macro_pattern_static(Expr $c, Expr $origin) {
+  $c.report_error(
+    <parse>,
+    "a macro pattern's arguments are binders, macro patterns, or %(...)",
+    $origin, NULL);
+}
+
+macro Stmt $report.parse_insert_name(Expr $c, Expr $sigil) {
+  {
+    String message = %"expected identifier after '${$sigil}'";
+    String hint = $sigil == <@>
+      ? "use '@{...}' to splice an expression"
+      : "use '${...}' to insert an expression";
+    $c.report_error(<parse>, message, $c.token, %($hint));
+  }
+}
+
+macro Stmt $report.parse_symbol_bare(
+  Expr $c, Expr $owner, Expr $detail, Expr $origin) {
+  {
+    String label = $owner == <raise> ? "raise" : "catch filter";
+    String role = $detail ? "detail key" : "code";
+    String hint = $owner == <raise>
+      ? "use raise %(code (key value)...);"
+      : "use catch %(code (key pattern)...):";
+    $c.report_error(
+      <parse>, %"$label $role must be a bare Symbol", $origin, %($hint));
+  }
+}
+
+macro Stmt $report.parse_catch_detail(Expr $c, Expr $origin) {
+  $c.report_error(
+    <parse>, "catch filter detail must be '*' or '(key pattern)'",
+    $origin, %("wrap keyed detail patterns in parentheses"));
+}
+
+macro Stmt $report.parse_symbol_duplicate(
+  Expr $c, Expr $origin, Expr $symbol) {
+  $c.report_error(
+    <parse>, "duplicate Symbol in symbol set",
+    $origin, %("symbol:" ${$symbol.repr()}));
+}
+
+macro Stmt $report.parse_symbol_literal(Expr $c, Expr $origin) {
+  $c.report_error(
+    <parse>, "symbol-set entries must be literal Symbols",
+    $origin, %("use %<<foo bar>>"));
+}
+
+macro Stmt $report.parse_string_segment(Expr $c) {
+  $c.report_error(
+    <parse>, "expected string segment",
+    $c.token, NULL);
+}
+
+macro Stmt $report.parse_atom_expected(Expr $c, Expr $kind) {
+  $c.report_error(
+    <parse>, "expected atomic expression",
+    $c.token, %( "token:" ${$c.token.text} "kind:" ${$kind.str()} ));
+}
+
+macro Stmt $report.type_number_range(Expr $c, Expr $text) {
+  $c.report_error(
+    <type>, "numeric literal is outside the supported scalar range",
+    $c.token, %( "literal:" ${$text} ));
+}
+
+macro Stmt $report.parse_binder_name(Expr $c, Expr $atom) {
+  $c.report_error(
+    <parse>, "invalid match binder name",
+    $c.token, %( "binder-name:" ${$atom.str()} ));
+}
+
+macro Stmt $report.parse_symbol_truncated(
+  Expr $c, Expr $origin, Expr $spelling, Expr $lossy) {
+  $c.report_error(
+    <parse>, "Symbol literal does not round-trip",
+    $origin, %("source spelling: ${$spelling}"
+      "encoded spelling: ${$lossy}"));
+}

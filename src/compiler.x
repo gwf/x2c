@@ -253,6 +253,8 @@ $(import "../src/grammar.xmacro")
 #include <stdlib.h>
 #include <string.h>
 
+$(import "../src/compiler-reports.xmacro")
+
 // shallow collection
 
 /** Collects file-scope declarations into `globals` without parsing bodies. */
@@ -311,14 +313,7 @@ static void _debug_tokens(Token start, Token end) {
   if (!log_should_log(<debug>, <tokenizer>)) return;
   for (Token tok = start; tok < end; tok++)
     if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
-      log_debug(
-        <tokenizer>, %(
-        (func "tokenize")
-        (type ${tok.type})
-        (text ${tok.text})
-        (line ${tok.line})
-        (col  ${tok.col})
-      ));
+      $report.debug_token(tok);
 }
 
 /** Collects a macro or keyword definition while deferring its diagnostics.
@@ -401,13 +396,6 @@ void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
     if (type.group_step() > 0) c.token = c.token.after_group();
     else c.next();
   }
-}
-
-macro Stmt $report.parse_token_eof(Expr $c) {
-  $c.report_error(
-    <parse>,
-    "unexpected end of file",
-    $c.token, NULL);
 }
 
 static void Compiler._shallow_block(Compiler c) {
@@ -863,13 +851,6 @@ static List Compiler._bind_default(Compiler c, List syntax) {
   return c.bind_syntax(syntax, AST_UNIT, NULL);
 }
 
-macro Stmt $report.type_ctor_parent(Expr $c) {
-  $c.report_error(
-    <type>,
-    "a forwarded class constructor has no completed parent constructor",
-    $c.token, NULL);
-}
-
 /* Forwarded constructors bind as their parents' constructors complete; a
    round that completes none leaves a parent that never will. */
 static void Defaults.forward(Defaults &d) {
@@ -932,13 +913,6 @@ static List Defaults._forwarded(
     }
   if (!signature) return NULL;
   return c._bind_default(c._forwarder(name, child, binding, signature));
-}
-
-macro Stmt $report.type_ctor_variadic(Expr $c, Expr $name) {
-  $c.report_error(
-    <type>,
-    %"'${$name}' requires an explicit variadic constructor",
-    $c.token, NULL);
 }
 
 // The forwarding constructor passes each argument on and casts the result.
@@ -1220,13 +1194,6 @@ static void Compiler._reject_statement(Compiler c) {
     c._report_script_statement();
 }
 
-macro Stmt $report.parse_script_main(Expr $c) {
-  $c.report_error(
-    <parse>,
-    "a script that defines main cannot have top-level statements",
-    $c.token, %("move the statement into main, or remove main so the statements run"));
-}
-
 static void Compiler._report_script_statement(Compiler c) {
   $report.parse_script_main(c);
 }
@@ -1344,14 +1311,6 @@ static Map _script_locals(List ast) {
   return locals;
 }
 
-macro Stmt $report.type_script_local(Expr $c, Expr $name) {
-  $c.report_error(
-    <type>,
-    %"'${$name}' is declared among the script's statements",
-    NULL, %("functions cannot see those locals;"
-    "declare it static to share it"));
-}
-
 static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
   foreach (List item, items) match (item) case %(at ?origin ?statement):
     foreach (Var name, locals.keys()) {
@@ -1401,14 +1360,6 @@ static void Compiler._record_objects(Compiler c, List bindings, Token site) {
       facts[key] = 1;
       facts[%(arms $binding)] = c.arms;
     }
-}
-
-macro Stmt $report.type_decl_duplicate(
-  Expr $c, Expr $site, Expr $kind, Expr $spelling) {
-  $c.report_error(
-    <type>,
-    %"${$kind} '${$spelling}' is already defined in this scope",
-    $site, %("prior definition: '${$spelling}'"));
 }
 
 /* Reports a second definition of one file-scope name, which C rejects,
@@ -1507,17 +1458,6 @@ static void Compiler._record_definition(
   c.semantic_binding_facts()[%(arms $binding)] = c.arms;
   String spelling = binding_identity_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
-}
-
-macro Stmt $report.type_decl_prototype(
-  Expr $c, Expr $site, Expr $spelling, Expr $prior_contract, Expr $contract) {
-  $c.report_error(
-    <type>,
-    %"definition '${$spelling}' does not match prior prototype",
-    $site, %(
-    "prototype: ${$prior_contract.repr()}"
-    "definition: ${$contract.repr()}"
-    ));
 }
 
 /* A definition completes the prior prototype whose contract it matches. A
@@ -1621,14 +1561,6 @@ static void _collect_references(Var value, Map references, Array ordered) {
   foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-macro Stmt $report.parse_static_dependency(
-  Expr $c, Expr $site, Expr $name, Expr $target) {
-  $c.report_error(
-    <parse>,
-    %"file-static x2c initializer depends on non-static '${$name}'",
-    $site, $target ? %("initializer: ${$target}") : NULL);
-}
-
 static void Compiler._check_static_inits(Compiler c) {
   Map statics = c.sym.file_statics();
   foreach (Var (key, value), c.static_init_deps) {
@@ -1722,14 +1654,6 @@ static int Compiler._is_script_file(Compiler c) =>
   c.unit_script && c.filename &&
   (c.filename == c.unit_script.path ||
    Path.absolute(c.filename) == c.unit_script.path);
-
-macro Stmt $report.parse_token_malformed(
-  Expr $c, Expr $site, Expr $status) {
-  $c.report_error(
-    <parse>,
-    $status == <indent> ? "inconsistent indentation" : "invalid token",
-    $site, NULL);
-}
 
 /* A lexical failure truncates the token stream, so the parser reaches the
    appended `<eof>` and blames the end of the file. Report the refused byte
@@ -1841,13 +1765,6 @@ void Compiler.require_input(Compiler c) {
   if (c.input_boundary && c.token >= c.input_boundary) raise %(incomplete);
 }
 
-macro Stmt $report.parse_token_expected(Expr $c, Expr $type) {
-  $c.report_error(
-    <parse>,
-    %"expected '${$type}'",
-    $c.token, NULL);
-}
-
 /** Requires and consumes the current token type.
 
     A mismatch reports a parse diagnostic. An active recovery boundary raises
@@ -1872,13 +1789,6 @@ void Compiler.next(Compiler c) {
   if (consumed.type == <eof>) return;
   c.token = Token.skip_trivia(consumed + 1);
   c._update_brace_stack(consumed);
-}
-
-macro Stmt $report.parse_brace_unexpected(Expr $c, Expr $site) {
-  $c.report_error(
-    <parse>,
-    "unexpected '}'",
-    $site, %("encountered '}' without matching '{'"));
 }
 
 static void Compiler._update_brace_stack(Compiler c, Token consumed) {
@@ -1915,13 +1825,6 @@ int Compiler.take_word(Compiler c, String word) {
   if (!c.at_word(word)) return 0;
   c.next();
   return 1;
-}
-
-macro Stmt $report.parse_brace_missing(Expr $c, Expr $site) {
-  $c.report_error(
-    <parse>,
-    "missing '}'",
-    $site, %( "'{' opened here" ));
 }
 
 static void Compiler._check_unmatched_braces(Compiler c) {

@@ -17,6 +17,33 @@ $(import "../src/grammar.xmacro")
 #include "type.x"
 #include "expressions.x"
 
+// diagnostics
+
+macro Stmt $report.parse_param_ident(Expr $c) {
+  $c.report_error(
+    <parse>, "expected identifier in parameter list",
+    $c.token, NULL);
+}
+
+macro Stmt $report.type_ident_untyped(
+  Expr $c, Expr $spelling, Expr $origin) {
+  $c.report_error(
+    <type>, %"identifier '${$spelling}' has no semantic type",
+    $origin, NULL);
+}
+
+macro Stmt $report.type_capture_enclosing(Expr $c, Expr $original) {
+  $c.report_error(
+    <type>, "reference capture requires an enclosing reference capture",
+    $c.token, %("binding: ${binding_identity_spelling($original)}"));
+}
+
+macro Stmt $report.type_capture_ref(Expr $c, Expr $binding) {
+  $c.report_error(
+    <type>, "captured value requires 'using &name' for reference access",
+    $c.token, %("binding: ${binding_identity_spelling($binding)}"));
+}
+
 /* lambda literals
 
    `%!(params) using &name, ... => body` parses its parameters in a scope
@@ -90,12 +117,6 @@ static List Compiler._parse_bare_params(Compiler c) {
   return names.list_free();
 }
 
-macro Stmt $report.parse_param_ident(Expr $c) {
-  $c.report_error(
-    <parse>, "expected identifier in parameter list",
-    $c.token, NULL);
-}
-
 /* A bare parameter is an automatic Var. */
 static List Compiler._parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
@@ -150,13 +171,6 @@ static List Compiler._template_capture(Compiler c) {
     reference = cons(<&>, value.cadr());
   }
   return %(capture $name $reference (expr $reference (op & $value)));
-}
-
-macro Stmt $report.type_ident_untyped(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <type>, %"identifier '${$spelling}' has no semantic type",
-    $origin, NULL);
 }
 
 static List Compiler._shared_binding(Compiler c) {
@@ -442,12 +456,6 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
          c.sym.binding_is_local_before(binding, depth);
 }
 
-macro Stmt $report.type_capture_enclosing(Expr $c, Expr $original) {
-  $c.report_error(
-    <type>, "reference capture requires an enclosing reference capture",
-    $c.token, %("binding: ${binding_identity_spelling($original)}"));
-}
-
 /* A supplied row fixes the captured type and value. Otherwise a binding
    listed after `using` captures by reference, and a snapshot of a
    reference parameter copies its referent. */
@@ -522,12 +530,6 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
         c._require_reference_arguments(callee_type, arguments);
       default: c._require_capture_lvalue(Ast.written_operand(node));
     }
-}
-
-macro Stmt $report.type_capture_ref(Expr $c, Expr $binding) {
-  $c.report_error(
-    <type>, "captured value requires 'using &name' for reference access",
-    $c.token, %("binding: ${binding_identity_spelling($binding)}"));
 }
 
 static void Compiler._require_capture_lvalue(Compiler c, List target) {

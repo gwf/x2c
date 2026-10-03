@@ -24,6 +24,52 @@ $(import "../src/ast-rewrite.xmacro")
 #include <string.h>
 #include <unistd.h>
 
+// diagnostics
+
+macro Stmt $report.driver_runtime_read(Expr $c, Expr $runtime) {
+  $c.report_error(
+    <driver>,
+    "cannot read runtime source",
+    $c.token, %("path: ${$runtime}"));
+}
+
+macro Stmt $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
+  $c.report_error(
+    <driver>,
+    "cannot read include",
+    $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
+}
+
+macro Stmt $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
+  $c.report_error(
+    <driver>,
+    %"unknown package '${$name}'",
+    $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
+}
+
+macro Stmt $report.driver_package_read(
+  Expr $c, Expr $site, Expr $package, Expr $entry) {
+  $c.report_error(
+    <driver>,
+    %"cannot read package '${$package.package}'",
+    $site, %( "path: ${$entry}" ));
+}
+
+macro Stmt $report.driver_package_prefix(
+  Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
+  $c.report_error(
+    <driver>,
+    %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
+    $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
+}
+
+macro Stmt $report.emit_interface_write(Expr $c) {
+  $c.report_error(
+    <emit>,
+    "failed to write interface file",
+    NULL, NULL);
+}
+
 // the process cache
 
 /* Process cache: canonical path ->
@@ -148,13 +194,6 @@ static List Compiler._prelude_entry(
   visited[canonical] = 1;
   c._walk_apart(canonical, c._runtime_text(runtime), scratch, visited);
   return _process_cache()[canonical];
-}
-
-macro Stmt $report.driver_runtime_read(Expr $c, Expr $runtime) {
-  $c.report_error(
-    <driver>,
-    "cannot read runtime source",
-    $c.token, %("path: ${$runtime}"));
 }
 
 static String Compiler._runtime_text(Compiler c, String runtime) {
@@ -415,13 +454,6 @@ static String Compiler._walked_hash(
   Var walked = _process_cache()[canonical];
   if (walked is void) return _content_hash(c._include_text(target, canonical));
   return walked.list().cadr();
-}
-
-macro Stmt $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
-  $c.report_error(
-    <driver>,
-    "cannot read include",
-    $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
 }
 
 /* Read an include's text, reporting an unreadable target as a driver error. */
@@ -723,26 +755,11 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   s.install();
 }
 
-macro Stmt $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
-  $c.report_error(
-    <driver>,
-    %"unknown package '${$name}'",
-    $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
-}
-
 static String Compiler._find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = package_entry(c.sources, c.package_dirs, name, root);
   if (entry) return entry;
   $report.driver_package_unknown(c, token, name);
-}
-
-macro Stmt $report.driver_package_read(
-  Expr $c, Expr $site, Expr $package, Expr $entry) {
-  $c.report_error(
-    <driver>,
-    %"cannot read package '${$package.package}'",
-    $site, %( "path: ${$entry}" ));
 }
 
 /* The package's files enter the cache from their entries, or from one cold
@@ -809,14 +826,6 @@ static void Surface.merge(Surface &s, String path, Map rows) {
 static void Surface.take(Surface &s, Map rows, List key, Var value) {
   s.merged[key] = value;
   s.c.copy_source_declaration(s.merged, rows, key);
-}
-
-macro Stmt $report.driver_package_prefix(
-  Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
-  $c.report_error(
-    <driver>,
-    %"package '${$name}' exposes unprefixed top-level declaration '${$spelling}'",
-    $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
 }
 
 static void Surface.reject(Surface &s, String path, String spelling) {
@@ -1164,13 +1173,6 @@ String interface_prelude(void) {
 }
 
 // writing interfaces
-
-macro Stmt $report.emit_interface_write(Expr $c) {
-  $c.report_error(
-    <emit>,
-    "failed to write interface file",
-    NULL, NULL);
-}
 
 /** Returns the compiler's own collected contribution as interface text, or
     NULL when the unit has not collected its symbols or the compiler's
