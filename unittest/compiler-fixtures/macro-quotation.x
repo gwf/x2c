@@ -53,6 +53,21 @@ macro Expression $grouped_pair(Stmt $first, Stmt $second) =>
 typedef struct { int x; } Boxed;
 macro Expression $boxed(Expr $value) => ((Boxed){ $value });
 
+/* A quotation inside syntax built by hand expands where it is resolved. */
+static void report(int value) { printf("%d\n", value); }
+meta static List reported(List v) {
+  List bumped = $!( $v + 1 );
+  return x2c_expr_call(x2c_expr_ident(x2c_ident("report")), %($bumped));
+}
+macro Expression $report_next(Expr $v) => $reported($v);
+meta static List doubled_local(List v) {
+  List twice = $!( $v * 2 );
+  List declaration = x2c_decl_make(%(int), "twice", twice);
+  List shown = $!{ report(twice); };
+  return %($declaration $shown);
+}
+macro Stmt $show_twice(Expr $v) { $doubled_local($v)... }
+
 int main(void) {
   int pick = 1;
   $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
@@ -63,5 +78,7 @@ int main(void) {
   printf("%d\n", $sequenced(total += 2;, total * 10;));
   (void)$grouped_pair(total += 3;, total += 4;);
   printf("%d %d\n", total, $boxed(5).x);
+  (void)$report_next(41);
+  $show_twice(21);
   return 0;
 }
