@@ -1,0 +1,63 @@
+/* termbox2 diagnostic cases. */
+
+macro Stmt $report.termbox.native_restore(
+  Expr $operation, Expr $code, Expr $message, Expr $restore_errno,
+  Expr $restore_message) {
+  raise %(term-error (library "termbox2")
+          (operation ${$operation}) (code ${$code}) (message ${$message})
+          (rest-errno ${$restore_errno})
+          (rest-msg ${$restore_message}));
+}
+
+macro Stmt $report.termbox.native_errno(
+  Expr $operation, Expr $code, Expr $message, Expr $error_number,
+  Expr $errno_message) {
+  raise %(term-error (library "termbox2")
+          (operation ${$operation}) (code ${$code}) (message ${$message})
+          (errno ${$error_number}) (errno-msg ${$errno_message}));
+}
+
+macro Stmt $report.termbox.native_failed(
+  Expr $operation, Expr $code, Expr $message) {
+  raise %(term-error (library "termbox2")
+          (operation ${$operation}) (code ${$code}) (message ${$message}));
+}
+
+macro Stmt $report.termbox.signal_failed(
+  Expr $operation, Expr $error_number, Expr $message) {
+  raise %(io-fail (library "termbox2") (operation ${$operation})
+          (signal "SIGWINCH") (errno ${$error_number})
+          (message ${$message}));
+}
+
+macro Stmt $report.termbox.inactive(Expr $operation) {
+  raise %(bad-state (library "termbox2") (operation ${$operation})
+          (reason "closed, null, or inactive Termbox"));
+}
+
+macro Stmt $report.termbox.owned() {
+  raise %(bad-state (library "termbox2") (operation "init")
+          (reason "the process-global terminal is already owned"));
+}
+
+macro Stmt $report.termbox.shutdown_inactive() {
+  raise %(bad-state (library "termbox2") (operation "shutdown")
+          (reason "Termbox does not own the active terminal"));
+}
+
+macro Stmt $report.termbox.fill_cluster(Expr $character) {
+  raise %(bad-arg (library "termbox2") (operation "fill")
+          (reason "want one printable grapheme cluster")
+          (character ${$character}));
+}
+
+macro Stmt $report.termbox.box_size(Expr $width, Expr $height) {
+  raise %(bad-arg (library "termbox2") (operation "box")
+          (reason "a frame needs at least two columns and two rows")
+          (width ${$width}) (height ${$height}));
+}
+
+macro Stmt $report.termbox.clock_failed(Expr $error_number, Expr $message) {
+  raise %(io-fail (library "termbox2") (operation "clock_gettime")
+          (errno ${$error_number}) (message ${$message}));
+}
