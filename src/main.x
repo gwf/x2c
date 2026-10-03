@@ -37,6 +37,8 @@
 #include "format.x"
 #include "protocol.x"
 
+$(import "main-reports.xmacro")
+
 // translating a unit
 
 /* Compile one translation unit through the pipeline. An inspection prints
@@ -186,7 +188,7 @@ static void Translation.preflight(Translation &t) {
   foreach (String input, request.inputs) {
     build_check_input(input);
     if (!is_source_file(input))
-      driver_error(%"translation input is not an .x file: $input");
+      $report.main_input_not_x(input);
     String stem = Path.stem(input);
     if (shared && stem in stems)
       _stem_collision(stem, stems[stem], input, request.out_dir);
@@ -196,19 +198,16 @@ static void Translation.preflight(Translation &t) {
 
 static void _check_out_dir(String out_dir) {
   if (!Path.exists(out_dir))
-    driver_error(%"output directory does not exist: $out_dir");
+    $report.main_directory_missing(out_dir);
   if (!Path.is_dir(out_dir))
-    driver_error(%"output is not a directory: $out_dir");
+    $report.main_directory_not_dir(out_dir);
   if (access(out_dir, W_OK | X_OK))
-    driver_error(%"output directory is not writable: $out_dir");
+    $report.main_directory_unwritable(out_dir);
 }
 
 static void _stem_collision(
   String stem, String first, String other, String out_dir) {
-  fprintf(
-    stderr, "x2c: error: inputs produce the same output stem '%s'\n"
-    "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
-    stem, first, other, out_dir, stem);
+  $report.main_stem_collision(stem, first, other, out_dir);
   exit(2);
 }
 
@@ -257,7 +256,7 @@ static void Translation.report(Translation &t, unsigned long started_at) {
   String duration = report_duration(report_now_us() - started_at);
   int n = t.total;
   String noun = n == 1 ? "file" : "files";
-  report_line(<success>, %"Translated $n x2c $noun to $out_dir in $duration");
+  $report.main_translated(n, noun, out_dir, duration);
   report_generated(n, bytes);
 }
 
@@ -366,9 +365,7 @@ static int Translation.run_workers(Translation &t, Array slices) {
   int jobs = t.request.jobs, count = slices.len(), next = 0;
   if (jobs > count) jobs = count;
   if (t.request.verbose)
-    fprintf(
-      stderr, "x2c: translate with %d workers over %d files\n", jobs,
-      t.total);
+    $report.main_workers_started(jobs, t.total);
   long *pids = Scope.calloc(jobs, sizeof(long));
   List *carried = Scope.calloc(jobs, sizeof(List));
   Workers w = {.t = &t, .pids = pids, .carried = carried};
@@ -547,7 +544,7 @@ static void _register_units(
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
-      fprintf(stderr, "x2c: translate --out-dir %s %s\n", directory, input);
+      $report.main_translation_verbose(directory, input);
       b.end_translation(input, 0);
     }
     else if (input in stale) b.record_translation(input, directory);
@@ -571,7 +568,7 @@ static int _run_env(CliRequest request) {
       return 0;
     }
   }
-  if (wanted) driver_error(%"unknown env name '$wanted'");
+  if (wanted) $report.main_env_unknown(wanted);
   return 0;
 }
 
@@ -631,8 +628,7 @@ static void _exec(String path, char **args) {
   if (identity) setenv("X2C_IDENTITY", identity, 1);
   args[0] = path;
   execv(path, args);
-  driver_error(
-    %"cannot run external command '$path': ${String.new(strerror(errno))}");
+  $report.main_external_failed(path);
 }
 
 // entry point
@@ -654,7 +650,7 @@ int main(int argc, char **argv) {
   CliRequest request = cli_parse(argc, argv);
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
-    driver_error(%"cannot open diagnostics file '$diagnostics'");
+    $report.main_diagnostics_unwritable(diagnostics);
   if (request.command == <script> && script_prepare(request)) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,

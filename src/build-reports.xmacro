@@ -1,0 +1,93 @@
+/* build command reports. */
+
+macro Stmt $report.build_input_unsupported(Expr $input) {
+  driver_error(%"unsupported build input: ${$input}");
+}
+
+macro Stmt $report.build_archive_nested(Expr $input) {
+  driver_error(%"cannot nest an archive in a static library: ${$input}");
+}
+
+macro Stmt $report.build_input_not_file(Expr $input) {
+  driver_error(%"input is not a regular file: ${$input}");
+}
+
+macro Stmt $report.build_runtime_missing(Expr $runtime) {
+  driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
+}
+
+macro Stmt $report.build_package_missing(Expr $name, Expr $path) {
+  driver_error(%"package '${$name}' is not built: ${$path}");
+}
+
+macro Stmt $report.build_database_written(Expr $path) {
+  report_line(<muted>, %"  Compilation database ${$path}");
+}
+
+macro Stmt $report.build_compiler_used(Expr $b, Expr $jobs) {
+  report_line(<muted>, %"  Compiled with ${$b.toolchain.cc} using ${$jobs}");
+}
+
+macro Stmt $report.build_intermediates(Expr $b) {
+  report_line(<muted>, %"  Intermediates ${$b.work_dir} (${$b._retention()})");
+}
+
+macro Stmt $report.build_output_size(Expr $b, Expr $size) {
+  report_line(<muted>, %"  Output ${$b.output} (${$size})");
+}
+
+macro Stmt $report.build_debug_symbols(Expr $b) {
+  report_line(<muted>, %"  Debug symbols ${$b.output}.dSYM");
+}
+
+macro Stmt $report.build_running(Expr $b) {
+  report_line(<phase>, %"Running ${$b.output}");
+}
+
+macro Stmt $report.build_input_directory(Expr $input) {
+  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
+  fputs(
+    "note: pass source files, use a shell wildcard, or define a "
+    "manifest target\n", stderr);
+}
+
+macro Stmt $report.build_input_missing(Expr $input) {
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
+}
+
+macro Stmt $report.build_translation_cached(Expr $input) {
+  fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
+}
+
+macro Stmt $report.build_database_unwritable(Expr $path) {
+  fprintf(stderr, "x2c: error: cannot write compilation database: %s\n",
+    $path);
+}
+
+macro Stmt $report.build_compilation_cached(Expr $source) {
+  fprintf(stderr, "x2c: up-to-date compile %s\n", $source);
+}
+
+macro Stmt $report.build_final_cached(Expr $phase, Expr $output) {
+  fprintf(stderr, "x2c: up-to-date %s %s\n", $phase, $output);
+}
+
+macro Stmt $report.build_link_unchanged(Expr $output) {
+  fprintf(stderr, "x2c: unchanged link %s\n", $output);
+}
+
+macro Stmt $report.build_replace_failed(Expr $output, Expr $reason) {
+  fprintf(
+    stderr, "x2c: error: cannot replace %s: %s\n",
+    $output, $reason);
+}
+
+macro Stmt $report.build_cleanup_failed(Expr $directory) {
+  fprintf(
+    stderr, "x2c: warning: cannot remove temporary build directory: %s\n",
+    $directory);
+}
+
+macro Stmt $report.build_output_ambiguous() {
+  driver_error("--output is ambiguous with multiple compile-only inputs");
+}

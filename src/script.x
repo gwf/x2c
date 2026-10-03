@@ -18,6 +18,16 @@
 #include <string.h>
 #include <unistd.h>
 
+// command reports
+
+macro Stmt $report.script_source_missing(Expr $script) {
+  driver_error(%"script does not exist: ${$script}");
+}
+
+macro Stmt $report.script_execute_failed(Expr $executable) {
+  driver_error(%"cannot run ${$executable}: ${String.new(strerror(errno))}");
+}
+
 /* cache entries
 
    A script's entry under the cache root is `scripts/STEM-HASH`. Its files
@@ -51,7 +61,7 @@ int script_prepare(CliRequest c) {
     return 1;
   }
   if (!Path.is_file(script))
-    driver_error(%"script does not exist: $script");
+    $report.script_source_missing(script);
   _configure(c, script);
   if (c.dry_run) return 0;
   _exec_current(c);
@@ -139,7 +149,7 @@ static void _exec(CliRequest c) {
   foreach (String argument, c.run_args) argv[n++] = argument ? argument : "";
   fflush(NULL);
   execv(executable, argv);
-  driver_error(%"cannot run $executable: ${String.new(strerror(errno))}");
+  $report.script_execute_failed(executable);
 }
 
 /* Prints the command that executes the script, without running it. */
