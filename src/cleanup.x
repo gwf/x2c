@@ -673,32 +673,6 @@ macro Statement $catch_landing(Name $frame, Name $handle,
   else $unhandled
 }
 
-/* A landing no catch arm handles: the region's exits run, and control does
-   not come back. */
-macro Statement $try_unhandled(Statement $cleanup) {
-  { $cleanup __builtin_unreachable(); }
-}
-
-macro Statement $try_close_handler(Expr $handle) {
-  x2c_error_catch_close($handle);
-  $handle = NULL;
-}
-
-macro Statement $try_leave_cleanup(Expr $frame,
-    Statement $before...) {
-  $before...
-  x2c_exception_leave($frame);
-}
-
-macro Statement $try_finish_cleanup(Expr $frame,
-    Statement $finalizer, Statement $before...) {
-  if (x2c_exception_claim($frame)) {
-    $before...
-    $finalizer
-  }
-  x2c_exception_leave($frame);
-}
-
 /* Lowers the parsed try `node`: its body, its catch arms, which may be
    NULL, and its finalizer, which may be NULL. */
 static List Walk._lower_try(
@@ -762,15 +736,24 @@ static Var _finalizer_label(Var value, int origin, int &at) {
    finalizer is already lowered and retains its stage through the template. */
 static List Compiler._try_cleanup(
   Compiler c, List frame, List handle, List finalizer, int has_clause) {
-  Macro close = $try_close_handler;
-  Type handler = %(($_handler_type));
-  List before = has_clause
-    ? %(${close(%(expr $handler (ident $handle)))}) : NULL;
-  List address = _address_of(_frame_type, frame);
-  Macro finish = $try_finish_cleanup, leave = $try_leave_cleanup;
-  List syntax = finalizer
-    ? finish(address, %(code-value "lowered" (seq $finalizer) ()), before)
-    : leave(address, before);
+  List before = NULL;
+  if (has_clause) {
+    List handler = %(expr (($_handler_type)) (ident $handle));
+    List close = $!{ x2c_error_catch_close($handler); $handler = NULL; };
+    before = %($close);
+  }
+  List address = _address_of(_frame_type, frame), syntax = NULL;
+  if (finalizer) {
+    List lowered = %(code-value "lowered" (seq $finalizer) ());
+    syntax = $!{
+      if (x2c_exception_claim($address)) {
+        $before...
+        $lowered
+      }
+      x2c_exception_leave($address);
+    };
+  }
+  else syntax = $!{ $before... x2c_exception_leave($address); };
   List result = c.bind_syntax(syntax, AST_BLOCK, c.return_type);
   return %(code-value "lowered" $result ());
 }
@@ -831,10 +814,11 @@ List builtin_catch_patterns(List patterns, List items) {
 
 /** Returns what runs when `frame` lands: the catch arm the clause's
     handler selected, or `cleanup` and no return; the `$compiler_try`
-    template calls this in a slot. */
+    template calls this in a slot. A landing no catch arm handles runs the
+    region's exits, and control does not come back. */
 List builtin_try_landing(List frame, List clause, List cleanup) {
-  Macro unhandled = $try_unhandled, landing = $catch_landing;
-  List otherwise = unhandled(cleanup);
+  Macro landing = $catch_landing;
+  List otherwise = $!{ { $cleanup __builtin_unreachable(); } };
   match (clause)
     case %(?handle ? ?arms *):
       return landing(frame, handle, otherwise, arms);
@@ -886,25 +870,11 @@ macro Statement $compiler_defer(Name $record, Expr $callback,
   }
 }
 
-macro Statement $defer_plain(Name $record, Expr $callback) {
-  X2CCleanup $record = {.fn = $callback, .env = 0};
-}
-
 macro Statement $defer_captured(Name $record, Expr $callback,
     Type $type, Expr $records) {
   $type environment = {0};
   $builtin_defer_captures(environment, $records)...
   X2CCleanup $record = {.fn = $callback, .env = &environment};
-}
-
-macro Statement $defer_capture(Expr $environment, Name $field,
-    Expr $source) {
-  $environment.$field = (const void *)&$source;
-}
-
-/* The runtime unlinks this record and calls its thunk. */
-macro Statement $defer_cleanup_call(Expr $record) {
-  x2c_cleanup_leave($record);
 }
 
 /* Lowers a defer: its record is pushed before the body and left on each
@@ -924,10 +894,11 @@ static List Walk._lower_defer(
     AST_BLOCK, c.return_type);
 }
 
+/* The runtime unlinks this record and calls its thunk. */
 static List Compiler._defer_cleanup(Compiler c, List record) {
-  Macro shape = $defer_cleanup_call;
+  List address = _address_of(_record_type, record);
   List call = c.bind_syntax(
-    shape(_address_of(_record_type, record)), AST_BLOCK, c.return_type);
+    $!{ x2c_cleanup_leave($address); }, AST_BLOCK, c.return_type);
   return %(code-value "lowered" (seq $call) ());
 }
 
@@ -935,20 +906,20 @@ static List Compiler._defer_cleanup(Compiler c, List record) {
     the record in the region's scope. */
 List builtin_defer_record(
   List record, List callback, List environment, List records) {
-  Macro plain = $defer_plain, captured = $defer_captured;
-  if (!environment) return plain(record, callback);
+  Macro captured = $defer_captured;
+  if (!environment)
+    return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };
   Type type = %(${binding_identity_spelling(environment)});
   return captured(record, callback, type, records);
 }
 
 /** Writes captured addresses in the order capture selection established. */
 List builtin_defer_captures(List environment, List records) {
-  Macro capture = $defer_capture;
   Array assignments = [];
   foreach (List row, records) {
     List source = %(expr ${row.cadr()} (ident ${row.car()}));
-    assignments.push(
-      capture(environment, binding_identity_spelling(row.caddr()), source));
+    String field = binding_identity_spelling(row.caddr());
+    assignments.push($!{ $environment.$field = (const void *)&$source; });
   }
   return assignments.list_free();
 }
@@ -1059,12 +1030,6 @@ static void Preserve._aliased(Preserve &p, List body) {
       p.pointers[holder] = 1;
     }
   }
-}
-
-/* Once the runtime holds a local's address, C must assume every later call,
-   `sigsetjmp` and the raise included, reads and writes the local. */
-macro Statement $escape_local(Expr $local) {
-  x2c_exception_escaped = &$local;
 }
 
 static Var Preserve.rewrite(Preserve &p, Var value) {
@@ -1227,10 +1192,11 @@ static List Preserve._escape_loop(Preserve &p, List loop) {
   return NULL;
 }
 
-/* Escape the address of each of `binds` that `escaped` names. */
+/* Escape the address of each of `binds` that `escaped` names. Once the
+   runtime holds a local's address, C must assume every later call,
+   `sigsetjmp` and the raise included, reads and writes the local. */
 static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
   Compiler c = p.c;
-  Macro escape = $escape_local;
   foreach (List bind, binds)
     match (bind)
       case $source_declarator_row(%(?name ?)): {
@@ -1238,7 +1204,9 @@ static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
         if (spelling && spelling in p.escaped) {
           Type type = c.semantic_binding_facts()[%(type $name)];
           List local = %(expr $type (ident $name));
-          output.push(c.bind_syntax(escape(local), AST_BLOCK, c.return_type));
+          output.push(c.bind_syntax(
+            $!{ x2c_exception_escaped = &$local; }, AST_BLOCK,
+            c.return_type));
         }
       }
 }

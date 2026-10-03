@@ -421,18 +421,6 @@ static Ast Compiler._raise_node(Compiler c, Ast ast) {
 
 // collection literals
 
-/* The converted Var values enter the native counted constructors unchanged.
-   Empty literals need only allocate their container. */
-macro Expression $var_array(Expr $count, Expr $values...) =>
-  Array.update_n(Array.new(), $count, $values...);
-
-macro Expression $empty_var_array() => Array.new();
-
-macro Expression $var_map(Expr $count, Expr $entries...) =>
-  Map.update_n(Map.new(), $count, $entries...);
-
-macro Expression $empty_var_map() => Map.new();
-
 /** Converts an array literal to source-ordered Var arguments for its
     counted constructor. */
 List transform_array_literal(Compiler c, List ast) {
@@ -469,23 +457,20 @@ static List Compiler._var_literal_content(Compiler c, List application) {
   __builtin_unreachable();
 }
 
+/* The converted Var values enter the native counted constructors unchanged.
+   Empty literals need only allocate their container. */
 static List Compiler._var_array_literal(Compiler c, List values) {
-  if (!values) {
-    Macro empty = $empty_var_array;
-    return c._var_literal_content(empty());
-  }
-  Macro shape = $var_array;
-  return c._var_literal_content(shape(x2c_literal_int(values.len()), values));
+  if (!values) return c._var_literal_content($!( Array.new() ));
+  List count = x2c_literal_int(values.len());
+  return c._var_literal_content(
+    $!( Array.update_n(Array.new(), $count, $values...) ));
 }
 
 static List Compiler._var_map_literal(Compiler c, List entries) {
-  if (!entries) {
-    Macro empty = $empty_var_map;
-    return c._var_literal_content(empty());
-  }
-  Macro shape = $var_map;
+  if (!entries) return c._var_literal_content($!( Map.new() ));
+  List count = x2c_literal_int(entries.len() / 2);
   return c._var_literal_content(
-    shape(x2c_literal_int(entries.len() / 2), entries));
+    $!( Map.update_n(Map.new(), $count, $entries...) ));
 }
 
 /* A literal element is a `Var`, and an empty brace there is an empty Map. */
@@ -735,9 +720,6 @@ static List Compiler._process_raw_segment(Compiler c, List seg) {
 
 // declarations and statements
 
-macro Expression $destructure_write(
-    Expr $target, Expr $value) => $target = $value;
-
 macro Statement $destructure_targets(Type $type, DeclaratorRow $rows...) {
   $type $rows...;
 }
@@ -955,13 +937,13 @@ static List _destructure_element(List temporary, int index) {
 static List Compiler._destructure_assignments(
   Compiler c, List targets, List temporary) {
   int index = 0;
-  Macro shape = $destructure_write;
   return targets.map(
     %!(List target) using &index => {
       match (target)
         case %(expr ?type ?): {
           List value = _destructure_element(temporary, index++);
-          List expression = c.rebuild_expression(type, shape(target, value));
+          List expression = c.rebuild_expression(
+            type, $!( $target = $value ));
           return c._as_statement(expression);
         }
     });
