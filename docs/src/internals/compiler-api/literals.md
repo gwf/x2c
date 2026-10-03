@@ -37,7 +37,7 @@ X2c literal parsing.
 Parses a quoted Array literal into a typed, source-ordered `(array ...)`
 node and consumes its closing `]`.
 
-Source: `src/literals.x:679`
+Source: `src/literals.x:632`
 
 <a id="Compiler.parse_atomic_literal"></a>
 #### Compiler.parse_atomic_literal
@@ -48,7 +48,7 @@ Parses the current atomic token into a typed expression and advances once.
 Pattern and macro-hole state control binder validation and quoting, while
 shallow parsing permits provisional numeric types.
 
-Source: `src/literals.x:908`
+Source: `src/literals.x:849`
 
 <a id="Compiler.parse_catch_pattern_literal"></a>
 #### Compiler.parse_catch_pattern_literal
@@ -60,7 +60,7 @@ The call consumes the closing `)`. A code `Symbol`, binder, or pattern
 may be followed by `*` patterns or `(key pattern)` pairs; pattern and
 runtime-literal state is restored on every exit.
 
-Source: `src/literals.x:519`
+Source: `src/literals.x:491`
 
 <a id="Compiler.parse_list_literal"></a>
 #### Compiler.parse_list_literal
@@ -71,7 +71,7 @@ Parses a `List` literal beginning at `(` or `%(` and returns its typed
 expression after consuming `)`. Pattern parsing sets and restores
 `match_is`; `runtime_literals` disables stable-cell caching.
 
-Source: `src/literals.x:31`
+Source: `src/literals.x:33`
 
 <a id="Compiler.parse_macro_pattern_arguments"></a>
 #### Compiler.parse_macro_pattern_arguments
@@ -82,7 +82,7 @@ Parses a macro pattern's parenthesized arguments and returns the static
 pattern of each: a binder or wildcard, a nested macro pattern, or a
 `%(...)` List pattern.
 
-Source: `src/literals.x:148`
+Source: `src/literals.x:143`
 
 <a id="Compiler.parse_map_entries"></a>
 #### Compiler.parse_map_entries
@@ -92,7 +92,7 @@ Source: `src/literals.x:148`
 Parses comma-separated `Map` entries up to but not including `}`.
 `Entry`-position macro sequences are flattened in source order.
 
-Source: `src/literals.x:754`
+Source: `src/literals.x:707`
 
 <a id="Compiler.parse_map_entry"></a>
 #### Compiler.parse_map_entry
@@ -104,7 +104,7 @@ A bare identifier key is an Atom; any other key is an expression.
 A direct row returns a resolved `(map-entry KEY VALUE)` node; an
 entry-position macro may return `(seq ...)` for its caller to splice.
 
-Source: `src/literals.x:769`
+Source: `src/literals.x:722`
 
 <a id="Compiler.parse_map_literal"></a>
 #### Compiler.parse_map_literal
@@ -114,7 +114,7 @@ Source: `src/literals.x:769`
 Parses a quoted Map literal into a typed, source-ordered `(map ...)` node
 and consumes its closing `}`.
 
-Source: `src/literals.x:705`
+Source: `src/literals.x:658`
 
 <a id="Compiler.parse_raise_literal"></a>
 #### Compiler.parse_raise_literal
@@ -126,7 +126,7 @@ node and consumes its closing `)`. The code is a bare `Symbol` or a
 `$name` reference, detail keys are bare `Symbol`s, each keyed detail has
 one value, and payload literals bypass the compiler cache.
 
-Source: `src/literals.x:440`
+Source: `src/literals.x:425`
 
 <a id="Compiler.parse_string_literal"></a>
 #### Compiler.parse_string_literal
@@ -137,7 +137,7 @@ Parses a percent `String` literal and returns its typed expression after
 the closing quote. Static segments enter the compiler cache unless
 `runtime_literals` is set; interpolated segments remain source ordered.
 
-Source: `src/literals.x:797`
+Source: `src/literals.x:750`
 
 <a id="Compiler.parse_symbol_set_literal"></a>
 #### Compiler.parse_symbol_set_literal
@@ -148,7 +148,7 @@ Parses a `%<<...>>` literal into an immutable ordered `SymbolSet`.
 Entries must be literal compact `Symbol`s; source order defines dense
 indexes and an equal encoded `Symbol` reports a duplicate diagnostic.
 
-Source: `src/literals.x:582`
+Source: `src/literals.x:541`
 
 <a id="Compiler.symbol_set_expression"></a>
 #### Compiler.symbol_set_expression
@@ -159,7 +159,7 @@ Builds a typed `SymbolSet` expression from source-ordered `Symbol` values.
 Stores the first duplicate index, or -1, through `duplicate`; a duplicate
 returns NULL.
 
-Source: `src/literals.x:630`
+Source: `src/literals.x:583`
 
 <a id="Compiler.try_parse_macro_pattern_insertion"></a>
 #### Compiler.try_parse_macro_pattern_insertion
@@ -171,7 +171,7 @@ derived pattern, or returns NULL without consuming tokens. `content`
 selects the bare content, for the content position of an
 `(expr TYPE ...)` shell.
 
-Source: `src/literals.x:186`
+Source: `src/literals.x:181`
 
 <a id="Compiler.typed_match_pattern"></a>
 #### Compiler.typed_match_pattern
@@ -180,7 +180,7 @@ Source: `src/literals.x:186`
 
 Applies each typed capture's predicate to every unquoted occurrence.
 
-Source: `src/literals.x:352`
+Source: `src/literals.x:337`
 
 ## Design notes
 
