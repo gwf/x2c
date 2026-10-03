@@ -2496,11 +2496,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1912 = cons(_1911, NULL);
   _1913 = cons(_219, _1912);
   _1914 = List_var(_1913);
-  _1915 = int_var(2218);
+  _1915 = int_var(2068);
   _1916 = cons(_1915, NULL);
   _1917 = cons(_225, _1916);
   _1918 = List_var(_1917);
-  _1919 = int_var(83322);
+  _1919 = int_var(78419);
   _1920 = cons(_1919, NULL);
   _1921 = cons(_240, _1920);
   _1922 = List_var(_1921);
@@ -2647,11 +2647,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2060 = cons(_2059, NULL);
   _2061 = cons(_198, _2060);
   _2062 = List_var(_2061);
-  _2063 = int_var(2226);
+  _2063 = int_var(2076);
   _2064 = cons(_2063, NULL);
   _2065 = cons(_225, _2064);
   _2066 = List_var(_2065);
-  _2067 = int_var(83677);
+  _2067 = int_var(78774);
   _2068 = cons(_2067, NULL);
   _2069 = cons(_240, _2068);
   _2070 = List_var(_2069);
@@ -2738,11 +2738,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2151 = cons(_2150, NULL);
   _2152 = cons(_198, _2151);
   _2153 = List_var(_2152);
-  _2154 = int_var(2237);
+  _2154 = int_var(2087);
   _2155 = cons(_2154, NULL);
   _2156 = cons(_225, _2155);
   _2157 = List_var(_2156);
-  _2158 = int_var(84082);
+  _2158 = int_var(79179);
   _2159 = cons(_2158, NULL);
   _2160 = cons(_240, _2159);
   _2161 = List_var(_2160);
@@ -2812,11 +2812,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2225 = cons(_2224, NULL);
   _2226 = cons(_198, _2225);
   _2227 = List_var(_2226);
-  _2228 = int_var(2239);
+  _2228 = int_var(2089);
   _2229 = cons(_2228, NULL);
   _2230 = cons(_225, _2229);
   _2231 = List_var(_2230);
-  _2232 = int_var(84157);
+  _2232 = int_var(79254);
   _2233 = cons(_2232, NULL);
   _2234 = cons(_240, _2233);
   _2235 = List_var(_2234);
@@ -2883,11 +2883,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2296 = cons(_2295, NULL);
   _2297 = cons(_198, _2296);
   _2298 = List_var(_2297);
-  _2299 = int_var(2243);
+  _2299 = int_var(2093);
   _2300 = cons(_2299, NULL);
   _2301 = cons(_225, _2300);
   _2302 = List_var(_2301);
-  _2303 = int_var(84357);
+  _2303 = int_var(79454);
   _2304 = cons(_2303, NULL);
   _2305 = cons(_240, _2304);
   _2306 = List_var(_2305);
@@ -3090,11 +3090,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2503 = cons(_2502, NULL);
   _2504 = cons(_198, _2503);
   _2505 = List_var(_2504);
-  _2506 = int_var(2292);
+  _2506 = int_var(2142);
   _2507 = cons(_2506, NULL);
   _2508 = cons(_225, _2507);
   _2509 = List_var(_2508);
-  _2510 = int_var(86479);
+  _2510 = int_var(81576);
   _2511 = cons(_2510, NULL);
   _2512 = cons(_240, _2511);
   _2513 = List_var(_2512);
@@ -4178,7 +4178,7 @@ int Compiler_at_completion(Compiler);
 static List Compiler__parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 599};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_arrow",.line = 564};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4188,7 +4188,7 @@ static List Compiler__parse_postfix_arrow(Compiler c, List expr){
 static List Compiler__parse_postfix_dot(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_697) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 613};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "Compiler__parse_postfix_dot",.line = 578};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -6472,10 +6472,13 @@ const PrintfFn * info = List_printf_family(callee);  int raw = 0;  if(! info || 
 
 void Compiler_report_warning_at(Compiler, Symbol, String, List, List);
 static void Compiler__check_noted_converter(Compiler c, List noted, List parsed, Type target, int context){
-  if(! List_truth(noted) || ! List_truth(parsed) || ! List_truth(Type_list(target))) return;  List _x2c_destructure_10 = noted;  List call = Var_list(List_getindex(_x2c_destructure_10, 0));  String method = Var_string(List_getindex(_x2c_destructure_10, 1));  List location = Var_list(List_getindex(_x2c_destructure_10, 2));  if(! List_equal(call, parsed)) return;  if(! List_equal(Type_list(Type_declared(target)), Type_list(Type_canonicalize(target))) || ! List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(call)))), Type_list(Sym_resolve_key(c -> sym, target)))) return;  List receiver = Var_list(Var_cadr(Var_caddr(List_caddr(call))));  Type source = Var_type(List_cadr(receiver));  if(! List_truth(Type_list(source))) return;  int source_is_var = Sym_is_var_type(c -> sym, source);  if(source_is_var &&(String_equal(method, _2869)) !=(context != 0)) return;  if(source_is_var && target != _2645 && List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, target)))) return;  if(context == 2 && ! source_is_var) return;  if(! source_is_var && ! String_equal(method, _2869) && Sym_is_string_type(c -> sym, target)) return;  int implicit = Compiler__implicit_converter(c, receiver, source, target, source_is_var);  if(! implicit || Compiler__defines_crossing(c, source, target)) return;  Map_del(c -> protocol_helpers, String_var(_513));  String hint = context == 1 ? _2880 : context == 2 ? _2881 : _2882;  Compiler_report_warning_at(c, 245101273238492, ({
-    Var _x2c_literal_part_161 = String_var(method);  Var _x2c_literal_part_162 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_2883), cons(_x2c_literal_part_161, cons(String_var(_2884), cons(_x2c_literal_part_162, cons(String_var(_2885), NULL))))));
+  if(! List_truth(noted) || ! List_truth(parsed) || ! List_truth(Type_list(target))) return;  List _x2c_destructure_10 = noted;  List call = Var_list(List_getindex(_x2c_destructure_10, 0));  String method = Var_string(List_getindex(_x2c_destructure_10, 1));  List location = Var_list(List_getindex(_x2c_destructure_10, 2));  if(! List_equal(call, parsed)) return;  if(! List_equal(Type_list(Type_declared(target)), Type_list(Type_canonicalize(target))) || ! List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(call)))), Type_list(Sym_resolve_key(c -> sym, target)))) return;  List receiver = Var_list(Var_cadr(Var_caddr(List_caddr(call))));  Type source = Var_type(List_cadr(receiver));  if(! List_truth(Type_list(source))) return;  int source_is_var = Sym_is_var_type(c -> sym, source);  if(source_is_var &&(String_equal(method, _2869)) !=(context != 0)) return;  if(source_is_var && target != _2645 && List_truth(Type_list(Sym_resolve_numeric_type(c -> sym, target)))) return;  if(context == 2 && ! source_is_var) return;  if(! source_is_var && ! String_equal(method, _2869) && Sym_is_string_type(c -> sym, target)) return;  int implicit = Compiler__implicit_converter(c, receiver, source, target, source_is_var);  if(! implicit || Compiler__defines_crossing(c, source, target)) return;  Map_del(c -> protocol_helpers, String_var(_513)); {
+    String _x2c_macro_hint_0 = context == 1 ? _2880 : context == 2 ? _2881 : _2882;  Compiler_report_warning_at(c, 245101273238492, ({
+      Var _x2c_literal_part_161 = String_var(method);  Var _x2c_literal_part_162 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_2883), cons(_x2c_literal_part_161, cons(String_var(_2884), cons(_x2c_literal_part_162, cons(String_var(_2885), NULL))))));
+    }
+    ), location, cons(String_var(_x2c_macro_hint_0), NULL));
   }
-  ), location, cons(String_var(hint), NULL));
+
 }
 
 static int Compiler__implicit_converter(Compiler c, List receiver, Type source, Type target, int source_is_var){
@@ -6641,7 +6644,7 @@ static List Compiler__lift_func_value(Compiler c, List expr, Type type, Type tar
   }
   if(List_truth(Type_list(type)) && List_equal(Type_list(Sym_resolve_key(c -> sym, type)), Type_list(func_type)) && Type_is_pointer(target) && Type_is_function(Type_dereference(target))){
     {
-      String _x2c_macro_message_0 = _2973;  List _x2c_macro_hint_0 = _2976;  Compiler_report_error(c, 1362954, _x2c_macro_message_0, NULL, _x2c_macro_hint_0);
+      String _x2c_macro_message_0 = _2973;  List _x2c_macro_hint_1 = _2976;  Compiler_report_error(c, 1362954, _x2c_macro_message_0, NULL, _x2c_macro_hint_1);
     }
 
   }
@@ -7001,7 +7004,7 @@ static void Compiler__check_native_crossing(Compiler c, List expr, Type type, Ty
       String _x2c_macro_message_6 =({
         Var _x2c_literal_part_219 = String_var(integer);  Var _x2c_literal_part_220 = String_var(List_repr(Type_list(target)));  String_join(NULL, cons(String_var(_3082), cons(_x2c_literal_part_219, cons(String_var(_3083), cons(_x2c_literal_part_220, NULL)))));
       }
-      );  List _x2c_macro_hint_1 = _3086;  Compiler_report_error(c, 1362954, _x2c_macro_message_6, NULL, _x2c_macro_hint_1);
+      );  List _x2c_macro_hint_2 = _3086;  Compiler_report_error(c, 1362954, _x2c_macro_message_6, NULL, _x2c_macro_hint_2);
     }
 
   }

@@ -2193,7 +2193,7 @@ static int Flow_check(Flow * f, Fact target, Region region, int born, int report
   }
   if(region -> kind == 26155096) return 0;  String exit = Flow_exit(&((* f)), target, region);  if(! String_truth(exit)) return 0;  if(report){
     if(region ==(* f).w -> frame){
-      String message = String_join(NULL, cons(String_var(subject), cons(String_var(_848), cons(String_var(exit), NULL))));  Walk_warn(&((*(* f).w)), 1218923484, (* f).w -> origin, message, _851);
+      String _x2c_macro_message_0 = String_join(NULL, cons(String_var(subject), cons(String_var(_848), cons(String_var(exit), NULL))));  Walk_warn(&((*(* f).w)), 1218923484, (* f).w -> origin, _x2c_macro_message_0, _851);
     }
     else Walk_warn(&((*(* f).w)), 1218923484, (* f).w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_852), cons(String_var(exit), NULL)))), Walk_opened(&((*(* f).w)), region));
   }

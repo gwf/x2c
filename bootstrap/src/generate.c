@@ -785,7 +785,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _449 = cons(_445, _448);
   _450 = List_var(_449);
   _451 = Symbol_var(805770);
-  _452 = int_var(707);
+  _452 = int_var(709);
   _453 = cons(_452, NULL);
   _454 = cons(_451, _453);
   _455 = List_var(_454);
@@ -798,7 +798,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _462 = cons(_459, _461);
   _463 = List_var(_462);
   _464 = Symbol_var(1133019155420);
-  _465 = int_var(27149);
+  _465 = int_var(27165);
   _466 = cons(_465, NULL);
   _467 = cons(_464, _466);
   _468 = List_var(_467);

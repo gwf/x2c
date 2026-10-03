@@ -1050,7 +1050,7 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
         }
         if(_x2c_macro_selected_1 == 1){
           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 230};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 196};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
           }
 
         }
@@ -1121,7 +1121,7 @@ return values;
 
 static Var Compiler__meta_function(Compiler c, String name, Token site){
   Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 307};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 259};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _132, site, cons(String_var(String_join(NULL, cons(String_var(_142), cons(String_var(name), NULL)))), NULL));  return function;
 }
