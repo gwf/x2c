@@ -885,11 +885,10 @@ static List Walk._lower_defer(
   c.needs_exception = 1;
   List record = c._region_binding("defer_record");
   List cleanup = c._defer_cleanup(record);
-  List function = %(expr ((func ((* void))) void) (ident $callback));
   Macro shape = $compiler_defer;
   return c.bind_syntax(
     shape(
-      record, function, env, records,
+      record, callback, env, records,
       w._try_region(cleanup, body), cleanup),
     AST_BLOCK, c.return_type);
 }
@@ -917,9 +916,9 @@ List builtin_defer_record(
 List builtin_defer_captures(List environment, List records) {
   Array assignments = [];
   foreach (List row, records) {
-    List source = %(expr ${row.cadr()} (ident ${row.car()}));
+    List captured = row.car();
     String field = binding_identity_spelling(row.caddr());
-    assignments.push($!{ $environment.$field = (const void *)&$source; });
+    assignments.push($!{ $environment.$field = (const void *)&$captured; });
   }
   return assignments.list_free();
 }
@@ -1202,10 +1201,8 @@ static void Preserve._escape_declared(Preserve &p, Array output, List binds) {
       case $source_declarator_row(%(?name ?)): {
         String spelling = binding_identity_spelling(name);
         if (spelling && spelling in p.escaped) {
-          Type type = c.semantic_binding_facts()[%(type $name)];
-          List local = %(expr $type (ident $name));
           output.push(c.bind_syntax(
-            $!{ x2c_exception_escaped = &$local; }, AST_BLOCK,
+            $!{ x2c_exception_escaped = &$name; }, AST_BLOCK,
             c.return_type));
         }
       }

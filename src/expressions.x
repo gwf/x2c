@@ -1281,8 +1281,11 @@ static List Compiler._identifier_binding(
         issued is not <string> || !issued.string().equal(spelling))
       $report.type_binding_unknown(c, name, origin);
     /* A template's private name that no declaration in scope reaches
-       reads its source spelling where the expansion lands. */
+       reads its source spelling where the expansion lands. A declared one
+       keeps its identity, as when lowering binds code outside the scope
+       that declared it. */
     if (facts.try_get(%(source-spelling $name), source) &&
+        !(%(type $name) in facts) &&
         c.sym.lookup(%($spelling), NULL) != name)
       return c._landed_name(source, type);
     return name;
