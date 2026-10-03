@@ -210,15 +210,16 @@ element.
 
 Converted with it: the lib/var-tags.xmacro tag, numeric, and decode tables
 (deleting `_tag_composite`; the generated tables are unchanged apart from
-`0x8000` keeping its spelling), the protocol descriptor table and its
-registration calls (deleting `$methods_table`, `$methods_value`, and
-`_string_literal`), `CaptureBuild._storage`, builtins `_positional_new`,
-and the three `x2c_expr_composite(reads)` teaching copies.
+`0x8000` keeping its spelling), the protocol descriptor table (deleting
+`$methods_table` and `$methods_value`), `CaptureBuild._storage`, builtins
+`_positional_new`, and the three `x2c_expr_composite(reads)` teaching
+copies. Generated C outside the edited compiler files is unchanged.
 
 Kept raw: hand-built `char *` literal producers in stage.x, expressions.x,
 and literals.x (they are the literal constructors), transform.x's raw
 string segments (per segment), meta-group.x's lowered module stamp, and
-stage.x's Array and Map forms (no shorter). Registration calls keep an
-explicit `String.new(...)`: bound into the protocol initializer, a string
-literal at a `String` parameter is emitted as a bare C literal, which has
-no String header; this is recorded for investigation.
+stage.x's Array and Map forms (no shorter), and the descriptor
+registration calls. Bound as quotations, those calls add the runtime
+prototypes to every unit with protocol registrations, and a string literal
+at their `String` parameter was emitted as a bare C literal, which has no
+String header; that emission is recorded for investigation.

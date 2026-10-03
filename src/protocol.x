@@ -2623,23 +2623,25 @@ static List _descriptor_fields(List thunks) {
 static List Compiler._builtin_registration(
   Compiler c, List methods, String name, Symbol tag) {
   List symbol = %(expr ("Symbol") (literal ("Symbol") $name $tag));
-  return c.bind_syntax(
-    $!( x2c_register_builtin_descriptor($symbol, $methods) ),
-    AST_EXPRESSION, NULL);
+  List table = %(expr ("VarMethods") (ident $methods));
+  return c._helper_call(
+    %(int), "x2c_register_builtin_descriptor", %($symbol $table));
 }
 
 static List Compiler._tagged_registration(
   Compiler c, List methods, String name, Symbol tag) {
-  return c.bind_syntax(
-    $!( x2c_register_tagged_descriptor($tag, String.new($name), $methods) ),
-    AST_EXPRESSION, NULL);
+  List symbol = x2c_literal_symbol(tag);
+  List table = %(expr ("VarMethods") (ident $methods));
+  return c._helper_call(
+    %(void), "x2c_register_tagged_descriptor",
+    %($symbol ${_string_literal(name)} $table));
 }
 
 static List Compiler._fallback_registration(
   Compiler c, List methods, String name, List early_call) {
-  List fallback = c.bind_syntax(
-    $!( x2c_register_descriptor(String.new($name), $methods) ),
-    AST_EXPRESSION, NULL);
+  List table = %(expr ("VarMethods") (ident $methods));
+  List fallback = c._helper_call(
+    %(void), "x2c_register_descriptor", %(${_string_literal(name)} $table));
   return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
 }
 
@@ -2650,6 +2652,12 @@ static List Compiler._helper_call(
   Compiler c, Type result, String callee, List arguments) {
   Macro shape = $helper_call;
   return c.rebuild_expression(result, shape(%($callee), arguments));
+}
+
+static List _string_literal(String value) {
+  String spelling = %"\"$value\"";
+  List chars = %(expr (* char) (literal (* char) $spelling));
+  return %(expr ("String") (call "String_new" (args $chars)));
 }
 
 // alias insertion
