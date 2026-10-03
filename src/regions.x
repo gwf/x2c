@@ -31,6 +31,7 @@
 #pragma private
 #include "meta.x"
 $(import "../src/grammar.xmacro")
+$(import "../src/region-reports.xmacro")
 
 #include "ast.x"
 #include "stage.x"
@@ -573,11 +574,7 @@ static void Walk.end(Walk &w, Var argument, String op, Symbol how) {
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
                              : w.subject(argument, named, storage);
-    w.warn(
-      <bad-free>, w.origin,
-      %"$op is given $subject, which no Scope allocator returned",
-      %("only Scope.malloc, calloc, memdup, and realloc storage can be"
-        "freed or reallocated"));
+    $report.region_bad_free(w, op, subject);
   }
   Fact fact = w.fact_of(argument, NULL);
   if (!fact || fact.depth != w.depth) return;
@@ -647,16 +644,14 @@ static void Walk.scan_ident(Walk &w, Var binding) {
   if (w.audit && ((fact.region && fact.region.closed) ||
                   (fact.other && fact.other.closed))) {
     String name = binding_identity_spelling(binding);
-    w.warn(
-      <region>, w.origin,
-      %"'$name' is read after its owning region ended", NULL);
+    $report.region_read_ended(w, name);
     return;
   }
   if (!fact.dead) return;
   String name = binding_identity_spelling(binding);
-  String ended = fact.dead == <moved> ? "Scope.realloc moved it"
-                                      : "it was freed";
-  w.warn(<after-free>, w.origin, %"'$name' is used after $ended", NULL);
+  String ended = fact.dead == <moved> ? $region.reason.moved()
+                                      : $region.reason.freed();
+  $report.region_after_free(w, name, ended);
   fact.dead = 0;
 }
 
@@ -869,10 +864,7 @@ static int Flow.check(
   String subject = (*f.w).subject(f.value, f.named, f.fact);
   if (region.closed) {
     if (report)
-      (*f.w).warn(
-        <region>, f.w.origin,
-        %"$subject is used after the region that allocated it ended",
-        (*f.w).opened(region));
+      $report.region_use_ended(f, subject, region);
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -880,37 +872,30 @@ static int Flow.check(
   if (!exit) return 0;
   if (report) {
     if (region == f.w.frame) {
-      String message =
-        %"$subject can outlive the local storage it points into when $exit";
-      (*f.w).warn(
-        <region>, f.w.origin, message,
-        %("local storage ends when the function returns"));
+      $report.region_local_escape(f, subject, exit);
     }
     else
-      (*f.w).warn(
-        <region>, f.w.origin,
-        %"$subject can outlive the region it was allocated in when $exit",
-        (*f.w).opened(region));
+      $report.region_escape(f, subject, exit, region);
   }
   return 1;
 }
 
 static String Flow.exit(Flow &f, Fact target, Region region) {
   switch (f.sink) {
-    case <return>: return "returned";
-    case <static>: return "stored into a static";
+    case <return>: return $region.reason.returned();
+    case <static>: return $region.reason.static_store();
     case <local>:
       return target.depth < region.depth
-        ? "assigned to a local declared outside the region" : NULL;
+        ? $region.reason.local() : NULL;
     default:
-      if (!target) return "stored through an unknown pointer";
-      if (target.param >= 0) return "stored through a parameter";
+      if (!target) return $region.reason.pointer();
+      if (target.param >= 0) return $region.reason.parameter();
       if (target.region == region) return NULL;
       /* Every region a function opens ends before its own storage. */
       if (target.region)
         return region == f.w.frame ? NULL
-          : "stored into an object of another region";
-      return "stored into an object of an outer region";
+          : $region.reason.other();
+      return $region.reason.outer();
   }
 }
 

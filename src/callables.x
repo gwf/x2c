@@ -19,6 +19,7 @@ $(import "../src/adapter-memo.xmacro")
 $(import "../src/ast-rewrite.xmacro")
 #include "meta.x"
 $(import "../src/grammar.xmacro")
+$(import "../src/callable-reports.xmacro")
 
 #include "ast.x"
 #include "type.x"
@@ -741,9 +742,7 @@ static List Compiler._direct_func_handle(
     List constructor = c._adapter_helper(
       "x2c_func_shared", constructor_type);
     if (!constructor || !constructor_type)
-      c._adapter_error(
-        "function conversion needs x2c_func_shared from lib/func.x",
-        %("Func"), source_type, NULL);
+      $report.callable_shared(c, source_type);
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = c._func_call(
       %("Func"), _func_bound(constructor_type, constructor),
@@ -821,9 +820,7 @@ static List Compiler._indirect_func_value(
   Type constructor_type = NULL;
   List constructor = c._adapter_helper("Func_new_context", constructor_type);
   if (!constructor || !constructor_type)
-    c._adapter_error(
-      "function pointer conversion needs Func.new_context from lib/func.x",
-      %("Func"), pointer_type, NULL);
+    $report.callable_context(c, pointer_type);
 
   List context = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List declaration = c._func_context_declaration(
@@ -862,9 +859,7 @@ static List Compiler._build_indirect_func_adapter(
   Type context_helper_type = NULL;
   if (!c._adapter_helper("Func_context", context_helper_type) ||
       !context_helper_type)
-    c._adapter_error(
-      "native binding needs Func.context from lib/func.x",
-      diagnostic_type, pointer_type, NULL);
+    $report.callable_native_context(c, diagnostic_type, pointer_type);
   List fn_binding = c.sym.introduce(c.fresh_name("func_binding"));
   List context_local = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List context_declaration = c._context_local(
@@ -1016,10 +1011,7 @@ List Compiler.maybe_adapt_func_arg(
   if (c._is_func_adapter(arg_type)) return argument;
   Type source_type = NULL, List source_binding = NULL;
   if (!_direct_func_source(arg_type, payload, 1, source_type, source_binding))
-    c._adapter_error(
-      "native binding target must be a direct function",
-      expected_type, arg_type,
-      %("supported: a free function or Type.method designator"));
+    $report.callable_direct(c, expected_type, arg_type);
   if (c._is_func_adapter_target(source_type)) return argument;
   List adapter = c._direct_func_adapter(
     expected_type, source_binding, source_type);
@@ -1063,10 +1055,7 @@ static List Compiler._build_func_adapter(
   source_type.function_parts(params, return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
-    String message = c.sym.resolve_key(diagnostic_type).equal(func_type)
-      ? "function conversion to Func cannot be variadic"
-      : "native binding target cannot be variadic";
-    c._adapter_error(message, diagnostic_type, source_type, NULL);
+    $report.callable_variadic(c, diagnostic_type, source_type, func_type);
   }
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
@@ -1101,9 +1090,7 @@ static void Compiler._require_func_readers(
     Type helper_type = NULL;
     List helper = c._adapter_helper(helper_name, helper_type);
     if (!helper || !helper_type)
-      c._adapter_error(
-        "native binding needs Func argument readers from lib/func.x",
-        diagnostic_type, source_type, NULL);
+      $report.callable_readers(c, diagnostic_type, source_type);
   }
 }
 
@@ -1183,9 +1170,7 @@ static List FuncReaders._value(
   FuncReaders &r, Type parameter_type, Symbol tag, int index,
   Type &storage_type) {
   if (!tag)
-    r.c._adapter_error(
-      "native binding parameter type has no Var representation",
-      r.diagnostic_type, parameter_type, NULL);
+    $report.callable_parameter(r.c, r.diagnostic_type, parameter_type);
   List picked = r._call(
     %("Var"), r.value, index, %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
@@ -1332,31 +1317,27 @@ static void Callback.split(Callback &cb) {
   Type source = cb.source;
   if (!cb.source_binding || !source || source.is_pointer() ||
       !source.is_function())
-    cb._fail(
-      "typed callback adapter source must be a direct function",
-      %("supported: a free function or Type.method designator"));
+    $report.callback_direct(cb);
   if (!cb.target.function_parts(cb.params, cb.result))
-    cb._fail("typed callback adapter target is incomplete", NULL);
+    $report.callback_target(cb);
   if (!source.function_parts(cb.source_params, cb.source_result))
-    cb._fail("typed callback adapter source is incomplete", NULL);
+    $report.callback_source(cb);
   if (_typed_params_variadic(cb.params) ||
       _typed_params_variadic(cb.source_params))
-    cb._fail("typed callback adapter cannot be variadic", NULL);
+    $report.callback_variadic(cb);
 }
 
 static void Callback.check_signature(Callback &cb) {
   int target_count = cb.params.len(), source_count = cb.source_params.len();
   if (target_count != source_count) {
-    String detail = "target has %d parameters; source has %d".printf(
-      target_count, source_count);
-    cb._fail("typed callback adapter arity mismatch", %($detail));
+    $report.callback_arity(cb, target_count, source_count);
   }
   cb.result = cb.result.canonicalize();
   cb.source_result = cb.source_result.canonicalize();
   if (cb.result === %(void) || cb.source_result === %(void))
-    cb._fail("typed callback adapter does not support void return", NULL);
+    $report.callback_void(cb);
   if (cb.result != cb.source_result)
-    cb._fail("typed callback adapter return type mismatch", NULL);
+    $report.callback_result(cb);
 }
 
 static void Callback.check_params(Callback &cb) {
@@ -1367,9 +1348,7 @@ static void Callback.check_params(Callback &cb) {
     Type target = targets.car();
     Type source = sources.car();
     if (cb._allows(target, source)) continue;
-    String detail = "parameter %d: %s cannot adapt to %s".printf(
-      index + 1, target.repr(), source.repr());
-    cb._fail("typed callback adapter parameter mismatch", %($detail));
+    $report.callback_parameter(cb, index, target, source);
   }
 }
 
@@ -1500,11 +1479,7 @@ static int _typed_params_variadic(List params) {
 
 static void Compiler._adapter_error(
   Compiler c, String message, Type target, Type source, List details) {
-  String target_note = target
-    ? %"target signature: ${target.repr()}"
-    : "target signature: unresolved";
-  String source_note = source
-    ? %"source signature: ${source.repr()}"
-    : "source signature: unresolved";
+  String target_note = $callable.note.target(target);
+  String source_note = $callable.note.source(source);
   c.report_error(<type>, message, NULL, %($target_note $source_note @details));
 }
