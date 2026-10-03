@@ -791,15 +791,21 @@ static List Compiler._parse_group_rest(Compiler c) {
 }
 
 /* A brace after `(` opens a statement expression when a `;` stands at its
-   top level; any other brace is a composite or Map literal. */
+   top level. In a macro body, where a hole stands for a statement with no
+   `;` of its own, a hole at the top level opens one too unless a comma
+   makes the brace data; one datum states its type, as in `(T){ $x }`. Any
+   other brace is a composite or Map literal. */
 static int Compiler._statement_expression_follows(Compiler c) {
   if (c.peek(0) != <"{">) return 0;
-  Token token = Token.skip_trivia(c.token + 1);
-  for (;; token = token.after_group())
-    switch (token.type) {
-      case <;>: return 1;
-      case <eof>: case <"}">: return 0;
-    }
+  int hole = 0, comma = 0;
+  for (Token token = Token.skip_trivia(c.token + 1);;
+       token = token.after_group()) {
+    Symbol type = token.type;
+    if (type == <;>) return 1;
+    if (type == <eof> || type == <"}">) return hole && !comma;
+    if (type == <,>) comma = 1;
+    if (type == <$> && c.macro_holes) hole = 1;
+  }
 }
 
 /* A statement expression has the value and type of its final expression

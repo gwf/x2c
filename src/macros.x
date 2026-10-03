@@ -969,7 +969,8 @@ typedef struct MacroCategory {
 static const MacroCategory macro_categories[] = {
   { "Expr",          <expr>,       <expression>, 1, 1 },
   { "Expression",    <expr>,       <expression>, 1, 2 },
-  { "Statement",     <block>,      <block-item>, 1, 3 },
+  { "Stmt",          <block>,      <block-item>, 1, 3 },
+  { "Statement",     <block>,      <block-item>, 1, 0 },
   { "Field",         <field>,      <field>,      1, 3 },
   { "Entry",         <map-entry>,  <map-entry>,  0, 3 },
   { "Enumerator",    <enumerator>, <enumerator>, 0, 3 },

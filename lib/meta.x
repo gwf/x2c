@@ -34,16 +34,17 @@
 #include "symbol.x"
 #include "symbolset.x"
 
+/** Type syntax, such as `%(double)` or `%((* char))`, the representation
+   the compiler's own types use. A quotation fills a type position from a
+   local declared `Type`. */
+typedef List Type;
+
 // meta parameter types
 
 /** A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
    description of its argument's type: `((name N) (kind K) (type T)
    (fields F) (methods M))`. Read a part with `List.assoc`. */
 typedef List TypeInfo;
-
-/** Type syntax, such as `%(double)` or `%((* char))`. A quotation fills a
-   type position from a local declared `Type`. */
-typedef List Type;
 
 /** A `meta` parameter declared `Source` receives, at a `$` call, captured
    syntax with the source text it came from: `((text T) (file F) (syntax
