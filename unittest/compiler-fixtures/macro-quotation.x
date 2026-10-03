@@ -93,6 +93,24 @@ macro Stmt $declare_triple(Name $name, Expr $items...) {
   Triple $name = { $items... };
 }
 
+/* Field and Enumerator quotations splice their rows into an aggregate. */
+meta static List quoted_fields(void) {
+  List fields = $!Field{ int a; };
+  return %($fields);
+}
+macro Unit $quoted_record(Name $name) {
+  typedef struct $name { $quoted_fields()... double b; } $name;
+}
+$quoted_record(Pair);
+meta static List quoted_enumerators(void) {
+  List enumerators = $!Enumerator{ RED, GREEN };
+  return %($enumerators);
+}
+macro Unit $quoted_enum(Name $name, Name $last) {
+  enum $name { $quoted_enumerators()..., $last };
+}
+$quoted_enum(Color, BLUE);
+
 int main(void) {
   int pick = 1;
   $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
@@ -110,5 +128,7 @@ int main(void) {
   $declare_triple(spliced, 7, 8, 9);
   printf("%d %d %d\n", $triple(1, 2, 3).c, $quoted_triple(4, 5, 6).c,
          spliced.c);
+  Pair pair = { 3, 4.5 };
+  printf("%d %.1f %d\n", pair.a, pair.b, BLUE);
   return 0;
 }
