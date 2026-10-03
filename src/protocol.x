@@ -2451,23 +2451,11 @@ static List Compiler._signature_declaration(
 
 // descriptor registration
 
-macro Unit $methods_table(Name $methods) {
-  static VarMethods $methods;
-}
-
-macro Stmt $methods_value(Name $methods, Expr $value) {
-  $methods = $value;
-}
-
 static void Compiler._register_descriptor(
   Compiler c, Type participant, String name, Symbol explicit_tag,
   List thunks, int central_initializer) {
-  Macro methods_shape = $methods_table, assign_shape = $methods_value;
   List methods = c.sym.introduce(c.fresh_name("_x2c_protocol_methods"));
   List fields = _descriptor_fields(thunks);
-  List value = %(expr ("VarMethods")
-    (cast (decl ("VarMethods") (bindings (bind () ())))
-      (expr () (composite (commas @fields)))));
   /* A participant with no thunks still needs its tag registered, and the
      file-scope table is already zero, so skip the assignment rather than
      emit an empty initializer, which C only accepts from C23 on. */
@@ -2477,17 +2465,17 @@ static void Compiler._register_descriptor(
   List explicit_call = explicit_tag
     ? c._tagged_registration(methods, name, explicit_tag) : NULL;
   Symbol queue = central_initializer ? <protocol> : <early>;
-  c.add_early(c.bind_syntax(methods_shape(methods), AST_UNIT, NULL));
+  c.add_early(
+    c.bind_syntax($!Unit{ static VarMethods $methods; }, AST_UNIT, NULL));
   if (thunks) {
     List assignment = c.bind_syntax(
-      assign_shape(methods, value), AST_BLOCK, NULL);
+      $!{ $methods = (VarMethods){ $fields... }; }, AST_BLOCK, NULL);
     c.add_init(queue, assignment);
   }
   List call = explicit_tag ? explicit_call : early_call;
-  Macro statement_shape = $expression_statement;
   c.add_init(
     queue, central_initializer || explicit_tag
-      ? c.rebuild_statement(statement_shape(call)).cadr() : registration);
+      ? c.rebuild_statement($!{ $call; }).cadr() : registration);
 }
 
 static List _descriptor_fields(List thunks) {

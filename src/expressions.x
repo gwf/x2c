@@ -824,14 +824,20 @@ static int Compiler._brace_starts_map(Compiler c) {
   }
 }
 
+/* A sequence hole splices initializer elements, as it splices call
+   arguments; a Lisp slot or meta call stays one element. */
 static List Compiler._parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
-    List element =
-      c._test_dot_init() ||
-      (c.peek(0) == <[> && c._bracket_designates())
-        ? c._parse_designated_init()
-        : c.parse_assignment();
+    List hole = c.peek_macro_hole();
+    List element = hole && hole.assoc(<sequence>).int()
+                 ? c.try_parse_macro_slot(<argument>) : NULL;
+    if (!element)
+      element =
+        c._test_dot_init() ||
+        (c.peek(0) == <[> && c._bracket_designates())
+          ? c._parse_designated_init()
+          : c.parse_assignment();
     elements.push(element);
     if (!c.test(<,>)) break;
   }

@@ -324,11 +324,8 @@ static List CaptureBuild.direct(CaptureBuild &b) {
 }
 
 static List CaptureBuild._storage(CaptureBuild &b, List context, List values) {
-  List initializer = %(expr ${b.value_type}
-    (composite (commas @values)));
-  Macro local = $func_local;
-  return b.c.rebuild_statement(
-    local(b.value_type, %(op = (bind $context ()) $initializer))).cadr();
+  Type type = b.value_type;
+  return b.c.rebuild_statement($!{ $type $context = { $values... }; }).cadr();
 }
 
 static List CaptureBuild._construct(CaptureBuild &b, List context) {

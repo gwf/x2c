@@ -1133,6 +1133,9 @@ syntax or values the locals hold, names the body declares are private to the
 expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
+A `$name...` sequence splices into call arguments, braced initializers such
+as `$!( { $items... } )` or `(T){ $first, $rest... }`, and `%[$items...]`
+Array literals; Map entries splice as `%{${$rows...}}`.
 A quotation expands where code is bound, spliced, or resolved: return it,
 pass it to a slot, or use it as another quotation's hole. A quotation inside
 hand-built expression syntax, such as a call's argument list or a declaration
@@ -1332,7 +1335,8 @@ meta static List shape_reads(List receiver, TypeInfo type) {
     String member = field.car();
     reads.push($!( $receiver.$member ));
   }
-  return x2c_expr_composite(reads);
+  List items = reads.list_free();
+  return $!( { $items... } );
 }
 
 macro Expression $shape.names(Expr $value) => $shape_names($value);
