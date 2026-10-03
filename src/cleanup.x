@@ -870,13 +870,6 @@ macro Stmt $compiler_defer(Name $record, Expr $callback,
   }
 }
 
-macro Stmt $defer_captured(Name $record, Expr $callback,
-    Type $type, Expr $records) {
-  $type environment = {0};
-  $builtin_defer_captures(environment, $records)...
-  X2CCleanup $record = {.fn = $callback, .env = &environment};
-}
-
 /* Lowers a defer: its record is pushed before the body and left on each
    of the body's exits. */
 static List Walk._lower_defer(
@@ -905,11 +898,14 @@ static List Compiler._defer_cleanup(Compiler c, List record) {
     the record in the region's scope. */
 List builtin_defer_record(
   List record, List callback, List environment, List records) {
-  Macro captured = $defer_captured;
   if (!environment)
     return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };
   Type type = %(${binding_identity_spelling(environment)});
-  return captured(record, callback, type, records);
+  return $!{
+    $type environment = {0};
+    $builtin_defer_captures(environment, $records)...
+    X2CCleanup $record = {.fn = $callback, .env = &environment};
+  };
 }
 
 /** Writes captured addresses in the order capture selection established. */
