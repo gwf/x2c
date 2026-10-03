@@ -1081,7 +1081,7 @@ chooses which one to use for each function.
 
 The reverse gradient generator in `packages/autodiff/src/autodiff.xmacro`
 uses this pattern.
-Its `ad_reverse_function` returns an invocation of the `ad.gradient` source
+Its `ad_reverse_with` returns an invocation of the `ad.gradient` source
 macro. The macro contains the generated function declaration, tape storage,
 reverse-pass label and cleanup. Meta helpers compute the parameter and
 statement sequences. The macro owns the fresh scratch names and passes those

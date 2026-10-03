@@ -222,4 +222,12 @@ stage.x's Array and Map forms (no shorter), and the descriptor
 registration calls. Bound as quotations, those calls add the runtime
 prototypes to every unit with protocol registrations, and a string literal
 at their `String` parameter was emitted as a bare C literal, which has no
-String header; that emission is recorded for investigation.
+String header. That is not a binder defect: `Compiler.add_init` statements
+are spliced after the transform, so they must already be lowered, and a
+bound `String` literal is not. add_init's documentation now says so.
+
+Measured and declined: writing builtins `_declare`, `_assign`, and the
+foreach loop bodies as quotations left generated C unchanged but cost
+about 3% of retired instructions translating src/ and lib/ (241.8 G
+against 234.0-235.3 G, converged trees), because every `foreach`
+expansion applies them. Foreach expansion is a hot path.
