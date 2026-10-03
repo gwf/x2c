@@ -340,6 +340,8 @@ static const SymbolSet quoted_roles =(SymbolSet) "\001\000\000\000\003\000\000\0
 
 static int Compiler__slot_splice(Compiler c, int allowed);
 
+static int Compiler__quoted_role(Compiler c, Symbol role);
+
 static List Compiler__quoted_hole(Compiler c, Token name);
 
 static List _quoted_holes(Compiler c);
@@ -2804,7 +2806,7 @@ static List Compiler__lisp_slot(Compiler c, Symbol role){
 
 static List Compiler__hole_slot(Compiler c, Symbol role){
   List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole) ||(role == 107888847784 && ! Var_int(List_assoc(hole, Symbol_var(1317592723658)))) ||(role == 43159332400040 && Compiler_peek(c, 2) == 81)) return NULL;  if(role == 405758822009820 && Var_int(List_assoc(hole, Symbol_var(1317592723658)))) Compiler_report_error(c, 33658058, _793, c -> token, NULL);  if(! SymbolSet_contains(untyped_roles, role)){
-    Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind && Compiler_peek(c, 2) != 1519197 && !(Map_contains(c -> macro_holes, List_var(_301)) && SymbolSet_contains(quoted_roles, role))) return NULL;  if(kind && ! _kind_accepts_role(kind, role)) return NULL;
+    Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(! kind && Compiler_peek(c, 2) != 1519197 && ! Compiler__quoted_role(c, role)) return NULL;  if(kind && ! _kind_accepts_role(kind, role)) return NULL;
   }
   List syntax = Compiler__parse_hole(c, role);  return List_truth(syntax) && role == 405758822009820 ? cons(_32, cons(_246, cons(List_var(syntax), NULL))) : syntax;
 }
@@ -2857,6 +2859,10 @@ List Compiler_parse_macro_quotation(Compiler c){
 
   }
   return Compiler_apply_macro_value(c, Compiler_capture_macro_value(c, Definition_publish(&(d))), List_truth(arguments) ? List_reverse(arguments) : _309, start);
+}
+
+static int Compiler__quoted_role(Compiler c, Symbol role){
+  if(!(Map_contains(c -> macro_holes, List_var(_301))) || !(SymbolSet_contains(quoted_roles, role))) return 0;  if(role == 920394) return 1;  Token after = Token_skip_trivia(Token_skip_trivia(c -> token + 1) + 1);  return after -> type != 119 && ! _extends_expression(after);
 }
 
 List Sym_get(Sym, List);
@@ -4798,7 +4804,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3419};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3426};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -4923,7 +4929,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3566};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3573};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
