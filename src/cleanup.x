@@ -916,7 +916,9 @@ List builtin_defer_record(
 List builtin_defer_captures(List environment, List records) {
   Array assignments = [];
   foreach (List row, records) {
-    List captured = row.car();
+    /* The capture's storage type keeps a reference parameter's own
+       address; the bare binding would read through the reference. */
+    List captured = %(expr ${row.cadr()} (ident ${row.car()}));
     String field = binding_identity_spelling(row.caddr());
     assignments.push($!{ $environment.$field = (const void *)&$captured; });
   }
