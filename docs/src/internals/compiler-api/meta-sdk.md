@@ -81,7 +81,7 @@ Source: `src/meta-sdk.x:356`
 
 Returns the location of the active macro invocation.
 
-Source: `src/meta-sdk.x:543`
+Source: `src/meta-sdk.x:540`
 
 #### builtin_foreach_bindings
 
@@ -98,7 +98,7 @@ Source: `src/meta-sdk.x:126`
 Returns the collection `foreach` iterates for `expression`, promoting a
 String literal.
 
-Source: `src/meta-sdk.x:648`
+Source: `src/meta-sdk.x:645`
 
 #### builtin_foreach_complete
 
@@ -106,7 +106,7 @@ Source: `src/meta-sdk.x:648`
 
 Returns `expression` with the iterator chain `foreach` reads completed.
 
-Source: `src/meta-sdk.x:641`
+Source: `src/meta-sdk.x:638`
 
 #### builtin_foreach_reference
 
@@ -135,7 +135,7 @@ Returns what a `meta` parameter declared `Source` receives for the
 captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
 is the text the developer wrote and `F` the file it is in.
 
-Source: `src/meta-sdk.x:632`
+Source: `src/meta-sdk.x:629`
 
 #### meta_type_description
 
@@ -148,7 +148,7 @@ none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
 `F` lists the `(name type)` rows of a struct or union's named fields,
 and `M` the names of its direct dotted methods.
 
-Source: `src/meta-sdk.x:591`
+Source: `src/meta-sdk.x:588`
 
 #### x2c_binding_spelling
 
@@ -164,7 +164,7 @@ Source: `src/meta-sdk.x:254`
 
 Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:563`
+Source: `src/meta-sdk.x:560`
 
 #### x2c_diagnostic_warn
 
@@ -173,7 +173,7 @@ Source: `src/meta-sdk.x:563`
 A warning reports where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
 
-Source: `src/meta-sdk.x:570`
+Source: `src/meta-sdk.x:567`
 
 #### x2c_embed_text
 
@@ -213,7 +213,7 @@ Source: `src/meta-sdk.x:298`
 
 Answers `x2c.invocation.column`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:559`
+Source: `src/meta-sdk.x:556`
 
 #### x2c_invocation_file
 
@@ -221,7 +221,7 @@ Source: `src/meta-sdk.x:559`
 
 Answers `x2c.invocation.file`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:551`
+Source: `src/meta-sdk.x:548`
 
 #### x2c_invocation_line
 
@@ -229,7 +229,7 @@ Source: `src/meta-sdk.x:551`
 
 Answers `x2c.invocation.line`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:555`
+Source: `src/meta-sdk.x:552`
 
 #### x2c_literal_value
 
@@ -237,7 +237,7 @@ Source: `src/meta-sdk.x:555`
 
 Answers `x2c.literal.value`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk.x:518`
+Source: `src/meta-sdk.x:515`
 
 #### x2c_meta_definition_hashes
 
@@ -385,7 +385,7 @@ Source: `src/meta-sdk.x:219`
 Binds the internal primitives the compile-time SDK library wraps into
 `lisp`, under their `_x2c.` names.
 
-Source: `src/meta-sdk.x:678`
+Source: `src/meta-sdk.x:675`
 
 <a id="Compiler.expanding"></a>
 #### Compiler.expanding
@@ -418,7 +418,7 @@ Reports `message` and `notes` at the active invocation and never
 returns, so the rejected operation's caller cannot continue with a
 missing answer. With no active invocation it is a bad state.
 
-Source: `src/meta-sdk.x:658`
+Source: `src/meta-sdk.x:655`
 
 ## Public types
 
