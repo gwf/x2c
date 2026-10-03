@@ -3118,14 +3118,13 @@ List Compiler.macro_value_literal(Compiler c, List value) =>
   c.cache_literal_list(_macro_value_names(value));
 
 /* A Macro value names its references by spelling, so its literal does not
-   depend on how this translation numbered bindings. A template's free
-   names are already spellings; an identity left in it is a name the body's
-   `using` keeps at file scope. */
+   depend on how this translation numbered bindings. An identity left in a
+   template is a free file-scope name. */
 static Var _macro_value_names(Var value) {
   if (value is not <list>) return value;
   String spelling = NULL;
   if (binding_identity_try_parts(value, NULL, spelling))
-    return %(binding-global $spelling);
+    return %(binding-free $spelling);
   List child;
   $ast.rewrite_children(value.list(), child, _macro_value_names(child));
 }
@@ -3137,8 +3136,11 @@ static Var _macro_value_names(Var value) {
 static Var Compiler._macro_value_bindings(Compiler c, Var value) {
   if (value is not <list>) return value;
   match (value) {
-    case %(binding-global ?(String spelling)):
-      return c.sym.reference_global(%($spelling));
+    case %(binding-free ?(String spelling)): {
+      List binding = c.sym.reference_global(%($spelling));
+      c.semantic_binding_facts()[%(template-free $binding)] = 1;
+      return binding;
+    }
     case %(tpl-call *): return value;
   }
   List child;
@@ -3834,8 +3836,11 @@ static void Compiler._reference_bindings(
   match (syntax)
     case %(expr ? ${$source_identifier_content(%(?binding))}): {
       String spelling = NULL;
-      if (binding_identity_try_parts(binding, NULL, spelling))
-        replacements[binding] = c.sym.reference_global(%($spelling));
+      if (binding_identity_try_parts(binding, NULL, spelling)) {
+        List global = c.sym.reference_global(%($spelling));
+        c.semantic_binding_facts()[%(template-free $global)] = 1;
+        replacements[binding] = global;
+      }
       return;
     }
   foreach (Var child, syntax)

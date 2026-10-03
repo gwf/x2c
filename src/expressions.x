@@ -1214,10 +1214,16 @@ static List Compiler._resolve_identifier(
   List binding = c._identifier_binding(value, type, origin, require_type);
   if (c.macro_holes && binding) {
     String name = binding_identity_spelling(binding);
-    Var pinned = c.macro_holes[%(using $name)];
-    if (pinned is <list>) binding = pinned;
-    else if (c._template_free_name(binding))
-      return %(expr (<macro-expr>) (ident (binding-name $name)));
+    if (c.macro_holes[%(using $name)] is <list>)
+      return %(expr (<macro-expr>) (ident (binding-global $name)));
+    if (c._template_free_name(binding)) {
+      /* A file-scope declaration keeps its identity and type: where the
+         expansion lands sees the same declaration unless a local hides
+         it, and then the identifier binds that local instead. */
+      if (c.sym.resolve_global(%($name), NULL) != binding)
+        return %(expr (<macro-expr>) (ident (binding-name $name)));
+      c.semantic_binding_facts()[%(template-free $binding)] = 1;
+    }
   }
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
@@ -1227,7 +1233,10 @@ static List Compiler._resolve_identifier(
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);
-  c._shadow_identifier(binding, type, spelling, binding_facts);
+  int kept = 0;
+  match (value) case %(binding-global *): kept = 1;
+  if (c._shadow_identifier(binding, type, spelling, binding_facts, kept))
+    type = NULL;
   if (!type) type = c._identifier_type(
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
@@ -1252,10 +1261,9 @@ static List Compiler._resolve_identifier(
    producer-issued binding identities. Semantic binding facts validate those
    identities before resolution. A visible local replaces a stale local
    identity; global shadow handling instead gives the visible declaration an
-   emitted alias so the original identity keeps its meaning. A closed macro's
-   free name that nothing declared where it was defined binds a declaration
-   its expansion introduced, else a global; a declaration outside the
-   expansion never captures it. */
+   emitted alias so the original identity keeps its meaning. A template's
+   free name arrives as `binding-name` and binds where the expansion lands;
+   a `using` name arrives as `binding-global` and binds at file scope. */
 static List Compiler._identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
@@ -1274,7 +1282,7 @@ static List Compiler._identifier_binding(
        reads its source spelling where the expansion lands. */
     if (facts.try_get(%(source-spelling $name), source) &&
         c.sym.lookup(%($spelling), NULL) != name)
-      return c.sym.reference(%($source), type);
+      return c._landed_name(source, type);
     return name;
   }
   match (name) {
@@ -1283,7 +1291,7 @@ static List Compiler._identifier_binding(
       return c.sym.reference(%($spelling), type);
     }
     case %(binding-name ?(String spelling)):
-      return c.sym.reference(%($spelling), type);
+      return c._landed_name(spelling, type);
     case %(binding-global ?(String spelling)):
       return c.sym.reference_global(%($spelling));
     case %((!is ? type string)):
@@ -1302,6 +1310,14 @@ static int Compiler._template_free_name(Compiler c, List binding) {
   return !(type is <list> && c.sym.is_named_value_type(type, "Macro"));
 }
 
+/* A template's name where its expansion lands: the visible declaration, or
+   for a name nothing declares, one file-scope forward binding that C
+   resolves. */
+static List Compiler._landed_name(Compiler c, String spelling, Type &type) {
+  List visible = c.sym.lookup(%($spelling), type);
+  return visible ? visible : c.sym.reference_global(%($spelling));
+}
+
 static void Compiler._capture_identifier(Compiler c, List binding) {
   if (c.local_macro_captures == NULL || !binding ||
       !c.sym.binding_is_local_before(
@@ -1313,22 +1329,31 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
   c.local_macro_captures[binding] = 1;
 }
 
-/* A visible local replaces a stale local identity. A file-scope identity
-   that a visible declaration of its spelling hides, such as a name a
-   template's `using` keeps, gives that declaration an emitted alias. */
-static void Compiler._shadow_identifier(
-  Compiler c, List &binding, Type type, String spelling, Map binding_facts) {
-  if (!spelling) return;
+/* A visible local replaces a stale local identity, and a declaration that
+   hides a template's free file-scope name supplies it where the expansion
+   lands; both return 1, since the identifier's type is the new binding's.
+   Another file-scope identity that a visible declaration hides, such as a
+   name a template's `using` keeps, gives that declaration an emitted
+   alias. */
+static int Compiler._shadow_identifier(
+  Compiler c, List &binding, Type type, String spelling, Map binding_facts,
+  int kept) {
+  if (!spelling) return 0;
   Type visible_type = NULL;
   List visible = c.sym.lookup(%($spelling), visible_type);
-  if (!visible || visible == binding) return;
-  if (c.sym.binding_is_local(binding) &&
-      !binding_facts.contains(%(lambda-depth $binding)))
+  if (!visible || visible == binding) return 0;
+  if ((c.sym.binding_is_local(binding) &&
+       !binding_facts.contains(%(lambda-depth $binding))) ||
+      (!kept && %(template-free $binding) in binding_facts &&
+       visible_type)) {
     binding = visible;
-  else if (visible_type &&
-           (!type || c.sym.resolve_global(%($spelling), NULL)) &&
-           !binding_facts.contains(%(emitted $visible)))
+    return 1;
+  }
+  if (visible_type &&
+      (!type || c.sym.resolve_global(%($spelling), NULL)) &&
+      !binding_facts.contains(%(emitted $visible)))
     binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+  return 0;
 }
 
 static Type Compiler._identifier_type(
