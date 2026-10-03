@@ -11,6 +11,8 @@ typedef struct ReplOptions {
 
 #pragma private
 #include "repl-session.x"
+
+$(import "repl-output.xmacro")
 #include "repl-input.x"
 #include "diagnostics.x"
 #include "lisp.x"
@@ -169,41 +171,22 @@ static void _write_stats(
   size_t block_reuses = now.pool.block_reuses - baseline.pool.block_reuses;
   size_t slot_reuses = now.pool.slot_reuses - baseline.pool.slot_reuses;
 
-  out.printf("session: definitions=%u\n", now.definitions);
-  out.printf(
-    "scope (process): live-allocation-objects=%zu "
-    "delta-since-open=%c%zu live-requested-bytes=%zu "
-    "byte-delta-since-open=%c%zu\n",
-    now.scope.live_allocations, live.sign, live.magnitude,
-    now.scope.live_requested_bytes, live_bytes.sign, live_bytes.magnitude);
-  out.printf(
-    "scope (process, since REPL open): allocation-calls=%zu "
-    "free-calls=%zu reallocation-calls=%zu requested-traffic-bytes=%zu\n",
-    allocations, frees, reallocations, requested);
-  out.printf(
-    "pool (current level, since REPL open): "
-    "interned-identities=%zu promotions=%zu\n", interned, promoted);
-  out.printf(
-    "pool (process): backing-capacity-bytes=%zu active-bytes=%zu "
-    "active-blocks=%zu depot-bytes=%zu depot-blocks=%zu\n",
-    now.pool.backing_bytes, now.pool.active_bytes, now.pool.active_blocks,
-    now.pool.depot_bytes, now.pool.depot_blocks);
-  out.printf(
-    "pool (process, since REPL open): block-allocations=%zu "
-    "block-reuses=%zu slot-reuses=%zu\n",
-    block_allocations, block_reuses, slot_reuses);
+  $output.repl.session(out, now.definitions);
+  $output.repl.scope_live(out, now.scope.live_allocations, live.sign,
+    live.magnitude, now.scope.live_requested_bytes, live_bytes.sign,
+    live_bytes.magnitude);
+  $output.repl.scope_traffic(out, allocations, frees, reallocations,
+    requested);
+  $output.repl.pool_identities(out, interned, promoted);
+  $output.repl.pool_storage(out, now.pool.backing_bytes, now.pool.active_bytes,
+    now.pool.active_blocks, now.pool.depot_bytes, now.pool.depot_blocks);
+  $output.repl.pool_reuse(out, block_allocations, block_reuses, slot_reuses);
   if (!verbose) return;
-  out.printf(
-    "scope (process, verbose): live-scopes=%zu "
-    "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu "
-    "peak-live-requested-bytes=%zu\n",
-    now.scope.live_scopes,
+  $output.repl.scope_verbose(out, now.scope.live_scopes,
     now.scope.scope_creations - baseline.scope.scope_creations,
     now.scope.scope_destructions - baseline.scope.scope_destructions,
     now.scope.largest_request, now.scope.peak_live_requested_bytes);
-  out.printf(
-    "pool (verbose): depth=%d allocation-calls=%zu free-calls=%zu "
-    "requested-traffic-bytes=%zu\n", now.pool.depth,
+  $output.repl.pool_verbose(out, now.pool.depth,
     now.pool.allocation_calls - baseline.pool.allocation_calls,
     now.pool.free_calls - baseline.pool.free_calls,
     now.pool.requested_bytes - baseline.pool.requested_bytes);

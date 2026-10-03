@@ -18,6 +18,7 @@
 #include "ast.x"
 #include "format.x"
 #include "cleanup.x"
+$(import "../src/emit-templates.xmacro")
 
 // diagnostics
 
@@ -427,7 +428,7 @@ static void StaticRuntime.prepare(StaticRuntime &r) {
     List probe_decl = (*r.e)._semantic_name(r.type.reference(), r.slot);
     r.output.push(%(@probe_decl ";"));
     r.e.static_objects[r.name] = r.slot;
-    r.prefix = %("typedef __typeof__(" ${r.formal} ")" ${r.alias} ";");
+    r.prefix = $emit.object.inferred_alias(r.formal, r.alias);
     r.source = %("&" ${r.formal});
     r.object = r.alias;
     return;
@@ -435,34 +436,15 @@ static void StaticRuntime.prepare(StaticRuntime &r) {
   List alias_decl = (*r.e)._semantic_name(r.type, r.alias);
   r.e.static_objects[r.name] = r.pointer;
   List value = (*r.e)._emit(r.initial);
-  r.prefix = %(
-    "typedef" @alias_decl ";"
-    "_Static_assert(__builtin_constant_p(sizeof(" ${r.alias} ")),"
-      "\"static object size must be constant\");"
-  );
+  r.prefix = $emit.object.fixed_alias(alias_decl, r.alias);
   r.initial_copy = %(${r.alias} ${r.temporary} "=" @value ";");
   r.source = %("&" ${r.temporary});
 }
 
 static void StaticRuntime.emit(StaticRuntime &r) {
-  List acquisition = %(
-    @{r.prefix}
-    ${r.storage} "X2CStatic" ${r.guard} "= {0};"
-    ${r.alias} "*" ${r.pointer} ";"
-    "if (x2c_static_acquire(&" ${r.guard} ", sizeof(" ${r.alias} "),"
-        "_Alignof(" ${r.alias} "),"
-        ${r.declared_base.is_threaded() ? "1" : "0"} ")) {"
-      ${r.slot} "=" ${r.guard} ".payload;"
-      "X2CCleanup" ${r.cleanup} "= { .fn = x2c_static_abort,"
-                               ".env = &" ${r.guard} "};"
-      "x2c_cleanup_push(&" ${r.cleanup} ");"
-      @{r.initial_copy}
-      @{(*r.e)._static_copy(r.alias, r.guard, r.source, r.object)}
-      "x2c_static_commit(&" ${r.guard} ");"
-      "x2c_cleanup_leave(&" ${r.cleanup} ");"
-    "}"
-    "(void)(" ${r.pointer} "=" ${r.guard} ".payload);"
-  );
+  String threaded_flag = r.declared_base.is_threaded() ? "1" : "0";
+  List copy = (*r.e)._static_copy(r.alias, r.guard, r.source, r.object);
+  List acquisition = $emit.object.acquire(r, threaded_flag, copy);
   if (r.inferred) {
     List operand = %(expr ${r.type} (cast ${r.type} ${r.initial}));
     acquisition = (*r.e)._initializer_macro(
@@ -478,17 +460,7 @@ static List Emitter._static_copy(
   Emitter &e, String alias, String guard, List source, String object) {
   String data = e.fresh_name("static_bytes");
   String index = e.fresh_name("static_byte");
-  return %(
-    "if (_Generic((" $alias "*)0, volatile" $alias "*: 1, default: 0)) {"
-      "const volatile unsigned char *" $data "="
-        "(const volatile unsigned char *)" @source ";"
-      "for (size_t" $index "= 0;" $index "< sizeof(" $object ");"
-           $index "++)"
-        "((unsigned char *)" $guard ".payload)[" $index "] ="
-          $data "[" $index "];"
-    "} else memcpy(" $guard ".payload, (const void *)" @source ","
-                   "sizeof(" $object "));"
-  );
+  return $emit.object.copy(alias, guard, source, object, data, index);
 }
 
 // source initializers
@@ -1143,31 +1115,19 @@ static List Emitter._match_cases(Emitter &e, List ast) {
   // fields it needs and Match fills in presence and order.
   List capture_declarations;
   if (max_binders) {
-    String values_decl = %"Var _x2c_match_values[$max_binders];";
-    String capture_decl =
-      "MatchCaptureBuffer _x2c_match_capture = { "
-      + %".values = _x2c_match_values, .capacity = $max_binders };";
+    String values_decl = $emit.match.values(max_binders);
+    String capture_decl = $emit.match.buffer(max_binders);
     capture_declarations = %($values_decl $capture_decl);
   }
   else
-    capture_declarations = %(
-      "MatchCaptureBuffer _x2c_match_capture = { 0 };"
-    );
+    capture_declarations = $emit.match.empty_buffer();
   int dispatched;
   List arms = e._match_if(cases, dispatched);
   // The subject's head symbol selects the first arm that can still match;
   // with no case labels every subject reaches the sole default arm.
   List selector = dispatched
     ? %("Var_symbol(car(_x2c_match_expr))") : %("0");
-  return %("
-  {
-    List _x2c_match_expr = " $expr ";
-    " @capture_declarations "
-    switch (" @selector ") {
-      " @arms "
-    }
-  }
-");
+  return $emit.match.dispatch(expr, capture_declarations, selector, arms);
 }
 
 static List Emitter._match_if(Emitter &e, List ast, int &dispatched) {
@@ -1228,15 +1188,14 @@ static List Emitter._match_arm(
   if (macro_case) {
     List declarations = _make_local_binders(binders, "_x2c_match_values");
     String site = macro_case[1];
-    return %("static MacroCaseSite" $site ";"
-      "if (" @macro_case ") {" @declarations @body @implicit_break "}");
+    return $emit.match.macro_arm(site, macro_case, declarations, body,
+      implicit_break);
   }
   if (flat_head) {
     List condition = _flat_match_condition(flat_head, flat_tags);
     List declarations = _make_local_binders(binders, "_x2c_match_values");
     String closing = implicit_break ? "break; } }" : "} }";
-    return %("{ List _x2c_match_cursor;" "if (" @condition ") {"
-      @declarations @body $closing);
+    return $emit.match.flat_arm(condition, declarations, body, closing);
   }
   return e._match_capture_arm(binders, pattern, body, implicit_break, value);
 }
@@ -1292,13 +1251,8 @@ static List Emitter._match_capture_arm(
     ? %("x2c_match_site_try_capture(&" $site_name ",")
     : %("x2c_match_try_capture(");
   List declarations = _make_local_binders(binders, "_x2c_match_values");
-  return %(
-    @site_declaration
-    "if (" @entry
-      "_x2c_match_expr, List_var(" @pattern "),"
-      "&_x2c_match_capture)) {"
-    @declarations @body @implicit_break "}"
-  );
+  return $emit.match.capture_arm(site_declaration, entry, pattern,
+    declarations, body, implicit_break);
 }
 
 /* Declare the named binders of a match case in source order. The wildcard
