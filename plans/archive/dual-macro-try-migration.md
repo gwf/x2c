@@ -30,8 +30,8 @@ branch into dev.** Author the actual change against current dev.
 ## Settled shape and client
 
 ```x2c
-macro open Statement $compiler_try_shape(Name $frame, Statement $declarations,
-    Statement $body, Statement $landing, Statement $cleanup) {
+macro open Statement $compiler_try_shape(Name $frame, Stmt $declarations,
+    Stmt $body, Stmt $landing, Stmt $cleanup) {
   {
     $frame_declaration($frame)...
     $declarations

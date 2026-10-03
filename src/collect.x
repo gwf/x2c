@@ -150,7 +150,7 @@ static List Compiler._prelude_entry(
   return _process_cache()[canonical];
 }
 
-macro Statement $report.driver_runtime_read(Expr $c, Expr $runtime) {
+macro Stmt $report.driver_runtime_read(Expr $c, Expr $runtime) {
   $c.report_error(
     <driver>,
     "cannot read runtime source",
@@ -417,7 +417,7 @@ static String Compiler._walked_hash(
   return walked.list().cadr();
 }
 
-macro Statement $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
+macro Stmt $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
   $c.report_error(
     <driver>,
     "cannot read include",
@@ -723,7 +723,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   s.install();
 }
 
-macro Statement $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
+macro Stmt $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
     %"unknown package '${$name}'",
@@ -737,7 +737,7 @@ static String Compiler._find_package(
   $report.driver_package_unknown(c, token, name);
 }
 
-macro Statement $report.driver_package_read(
+macro Stmt $report.driver_package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
   $c.report_error(
     <driver>,
@@ -811,7 +811,7 @@ static void Surface.take(Surface &s, Map rows, List key, Var value) {
   s.c.copy_source_declaration(s.merged, rows, key);
 }
 
-macro Statement $report.driver_package_prefix(
+macro Stmt $report.driver_package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
   $c.report_error(
     <driver>,
@@ -1165,7 +1165,7 @@ String interface_prelude(void) {
 
 // writing interfaces
 
-macro Statement $report.emit_interface_write(Expr $c) {
+macro Stmt $report.emit_interface_write(Expr $c) {
   $c.report_error(
     <emit>,
     "failed to write interface file",

@@ -1,64 +1,64 @@
 /* Json reading and writing error conditions.
    Reports expand at their existing owners. */
 
-macro Statement $_json_error_boolean_type(Expr $tag) {
+macro Stmt $_json_error_boolean_type(Expr $tag) {
   raise %(bad-types (operation "Json.boolean") (tag ${$tag}));
 }
 
-macro Statement $_json_error_read_file(
+macro Stmt $_json_error_read_file(
   Expr $path, Expr $why, Expr $offset, Expr $line, Expr $column) {
   raise %(bad-arg (operation "Json.read_file") (path ${$path})
           (why ${$why}) (offset ${$offset})
           (line ${$line}) (column ${$column}));
 }
 
-macro Statement $_json_error_read_text(
+macro Stmt $_json_error_read_text(
   Expr $why, Expr $offset, Expr $line, Expr $column) {
   raise %(bad-arg (operation "Json.parse") (why ${$why})
           (offset ${$offset}) (line ${$line}) (column ${$column}));
 }
 
-macro Statement $_json_error_write_depth() {
+macro Stmt $_json_error_write_depth() {
   raise %(size-limit (operation "Var.json")
           (why "nesting exceeds 512 levels"));
 }
 
-macro Statement $_json_error_write_type(Expr $tag) {
+macro Stmt $_json_error_write_type(Expr $tag) {
   raise %(bad-types (operation "Var.json") (tag ${$tag}));
 }
 
-macro Statement $_json_error_write_key(Expr $tag) {
+macro Stmt $_json_error_write_key(Expr $tag) {
   raise %(bad-types (operation "Var.json") (want "String object key")
           (tag ${$tag}));
 }
 
-macro Statement $_json_error_write_duplicate(Expr $text) {
+macro Stmt $_json_error_write_duplicate(Expr $text) {
   raise %(bad-arg (operation "Var.json") (why "duplicate object name")
           (name ${$text}));
 }
 
-macro Statement $_json_error_write_nonfinite() {
+macro Stmt $_json_error_write_nonfinite() {
   raise %(conv-range (operation "Var.json")
           (why "JSON has no NaN or infinity"));
 }
 
-macro Statement $_json_error_read_trailing(Expr $reader) {
+macro Stmt $_json_error_read_trailing(Expr $reader) {
   $reader._fail("unexpected text after the value");
 }
 
-macro Statement $_json_error_read_depth(Expr $reader) {
+macro Stmt $_json_error_read_depth(Expr $reader) {
   $reader._fail("nesting exceeds 512 levels");
 }
 
-macro Statement $_json_error_read_end(Expr $reader) {
+macro Stmt $_json_error_read_end(Expr $reader) {
   $reader._fail("unexpected end of input");
 }
 
-macro Statement $_json_error_read_char(Expr $reader) {
+macro Stmt $_json_error_read_char(Expr $reader) {
   $reader._fail("unexpected character");
 }
 
-macro Statement $_json_error_read_key(Expr $reader) {
+macro Stmt $_json_error_read_key(Expr $reader) {
   $reader._fail("expected a string key");
 }
 
@@ -68,39 +68,39 @@ macro Expression $_json_error_read_object_sep() => "expected ',' or '}'";
 
 macro Expression $_json_error_read_array_sep() => "expected ',' or ']'";
 
-macro Statement $_json_error_read_string_end(Expr $reader) {
+macro Stmt $_json_error_read_string_end(Expr $reader) {
   $reader._fail("unterminated string");
 }
 
-macro Statement $_json_error_read_control(Expr $reader) {
+macro Stmt $_json_error_read_control(Expr $reader) {
   $reader._fail("control character in string");
 }
 
-macro Statement $_json_error_read_utf8(Expr $reader) {
+macro Stmt $_json_error_read_utf8(Expr $reader) {
   $reader._fail("invalid UTF-8");
 }
 
-macro Statement $_json_error_read_escape(Expr $reader) {
+macro Stmt $_json_error_read_escape(Expr $reader) {
   $reader._fail("invalid escape");
 }
 
-macro Statement $_json_error_read_surrogate(Expr $reader) {
+macro Stmt $_json_error_read_surrogate(Expr $reader) {
   $reader._fail("unpaired surrogate");
 }
 
-macro Statement $_json_error_read_nul(Expr $reader) {
+macro Stmt $_json_error_read_nul(Expr $reader) {
   $reader._fail("U+0000 cannot appear in a String");
 }
 
-macro Statement $_json_error_read_unicode(Expr $reader) {
+macro Stmt $_json_error_read_unicode(Expr $reader) {
   $reader._fail("invalid \\u escape");
 }
 
-macro Statement $_json_error_read_number(Expr $reader) {
+macro Stmt $_json_error_read_number(Expr $reader) {
   $reader._fail("invalid number");
 }
 
-macro Statement $_json_error_read_range(Expr $reader) {
+macro Stmt $_json_error_read_range(Expr $reader) {
   $reader._fail("number out of range");
 }
 
@@ -136,7 +136,7 @@ $(defun _json.error.call (key arguments)
       (x2c.diagnostic.fail
         (string-append "unknown json error '" key "'") '()))))
 
-macro Statement $json.error(Literal $key, Expr $arguments...) {
+macro Stmt $json.error(Literal $key, Expr $arguments...) {
   $(list (_json.error.call (x2c.literal.value $key) $arguments))...
 }
 

@@ -144,7 +144,7 @@ Landed as written: 14 types across eight packages, declaration and protocol
 row above `#pragma private`, one-line body after the release definition, no
 call site touched. All nine packages pass their own `test run` and `run-lisp`,
 raylib passes `verify`, and a consumer probe confirmed `$auto` on pcre2's
-`Regexp`, sqlite's `Database` and `Statement`, and yyjson's `JsonDocument`.
+`Regexp`, sqlite's `Database` and `Stmt`, and yyjson's `JsonDocument`.
 
 The work also uncovered a regression it had to fix first: since 2d84cd5 a
 private region publishes only its functions, so blis's

@@ -45,17 +45,17 @@ static void contextual_as(Point *as) {
   }
 }
 
-macro Statement $fixture.set_x(Expr $target, Expr $value) {
+macro Stmt $fixture.set_x(Expr $target, Expr $value) {
   with $target {
     _.x = $value;
   }
 }
 
-macro Statement $fixture.assign(Expr $target, Expr $value) {
+macro Stmt $fixture.assign(Expr $target, Expr $value) {
   $target = $value;
 }
 
-macro Statement $fixture.template_shadow(Expr $target) {
+macro Stmt $fixture.template_shadow(Expr $target) {
   Point _ = { 0 };
   with $target {
     _.x += 1;

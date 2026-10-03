@@ -13,7 +13,7 @@ void Reporter.report_error(Reporter reporter, Symbol code, String message,
     reports++;
 }
 static char *alternate(int error) { (void) error; shadow_calls++; return "shadow"; }
-macro Statement $report.emit_file_write(Expr $c, Expr $failure) {
+macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
   using strerror;
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));

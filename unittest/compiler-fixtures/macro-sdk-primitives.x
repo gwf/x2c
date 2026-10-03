@@ -35,7 +35,7 @@ macro Unit $sdk_functions(Expr $value) {
 
 macro Expression $call_existing() => $(x2c.ident "sdk_existing")();
 
-macro Statement $print_value(Expr $value) {
+macro Stmt $print_value(Expr $value) {
   printf("%d\n", $value);
 }
 

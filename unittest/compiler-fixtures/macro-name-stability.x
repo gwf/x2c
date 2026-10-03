@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $stable_assign(Expr $target, Expr $value) {
+macro Stmt $stable_assign(Expr $target, Expr $value) {
   int temporary = $value;
   $target = temporary;
 }

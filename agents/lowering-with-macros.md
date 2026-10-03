@@ -52,12 +52,12 @@ holds a try's catch arms, each a pattern and a body.
 
 ```x2c
 /* A try whose only exit work is its finalizer. */
-macro Statement $tried(Statement $body, Statement $finalizer) {
+macro Stmt $tried(Stmt $body, Stmt $finalizer) {
   try $body finally $finalizer
 }
 
 /* A try with catch arms, each a pattern and a body, and a finalizer. */
-macro Statement $caught(Statement $body, Statement $finalizer,
+macro Stmt $caught(Stmt $body, Stmt $finalizer,
     Catch $arms...) {
   try $body catch $arms... finally $finalizer
 }
@@ -130,8 +130,8 @@ static List _catch_clause(
 
 ```x2c
 /* A try region pushes its frame and lands on it when something raises. */
-macro Statement $compiler_try(Name $frame, Expr $clause,
-    Statement $body, Statement $cleanup) {
+macro Stmt $compiler_try(Name $frame, Expr $clause,
+    Stmt $body, Stmt $cleanup) {
   {
     ExceptionFrame $frame;
     $builtin_try_catch_site($frame, $clause)...
@@ -147,7 +147,7 @@ macro Statement $compiler_try(Name $frame, Expr $clause,
 
 /* One catch site: its patterns prepared once, its handler pushed with
    them. */
-macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
+macro Stmt $catch_site(Name $frame, Name $handle, Expr $count,
     Expr $fallback, Expr $state, Expr $patterns...) {
   static MatchCaptureSite arms[$count];
   Var patterns[$count];
@@ -160,14 +160,14 @@ macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
 }
 
 /* One arm's pattern, prepared into its slot. */
-macro Statement $catch_pattern(Expr $patterns, Expr $index,
+macro Stmt $catch_pattern(Expr $patterns, Expr $index,
     Expr $pattern) {
   $patterns[$index] = $pattern;
 }
 
 /* A landing that hands a raised error to the arm its handler selected. */
-macro Statement $catch_landing(Name $frame, Name $handle,
-    Statement $unhandled, Statement $arms...) {
+macro Stmt $catch_landing(Name $frame, Name $handle,
+    Stmt $unhandled, Stmt $arms...) {
   if (x2c_exception_is_error_target(&$frame)) {
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
@@ -181,15 +181,15 @@ macro Statement $catch_landing(Name $frame, Name $handle,
 /* One catch arm, chosen by its index. Each arm is its own statement, so a
    `break` or `continue` in it still reaches the enclosing loop, and only
    one test holds because `selected` does not change. */
-macro Statement $catch_case(Expr $selected, Expr $index,
-    Statement $arm) {
+macro Stmt $catch_case(Expr $selected, Expr $index,
+    Stmt $arm) {
   if ($selected == $index) $arm
 }
 
 
 /* A landing no catch arm handles: the region's exits run, and control does
    not come back. */
-macro Statement $try_unhandled(Statement $cleanup) {
+macro Stmt $try_unhandled(Stmt $cleanup) {
   { $cleanup __builtin_unreachable(); }
 }
 ```

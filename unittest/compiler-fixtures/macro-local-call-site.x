@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $repeat(
+macro Stmt $repeat(
   Name $i, Expr $count, Expr $value, Name $sum
 ) {
   for (int $i = 0; $i < $count; $i++) $sum += $value;
@@ -37,7 +37,7 @@ static int repeat_replaced(void) {
 int main(void) {
   int k = 100;
   macro Expression read_k() => k;
-  macro Statement write_k() { k = 3; }
+  macro Stmt write_k() { k = 3; }
   int read = 0, written = 0;
   {
     int k = 2;

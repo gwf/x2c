@@ -2,7 +2,7 @@
 
 macro Expression $expression_result() => 10;
 
-macro Statement $block_result(Expr $target, Expr $amount) {
+macro Stmt $block_result(Expr $target, Expr $amount) {
   $target += $amount;
 }
 

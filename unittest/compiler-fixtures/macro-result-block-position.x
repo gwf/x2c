@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $block_result() {
+macro Stmt $block_result() {
 }
 
 int value = $block_result();

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $multiple(Statement $target) {
+macro Decorator $multiple(Stmt $target) {
   $target
   return 0;
 }

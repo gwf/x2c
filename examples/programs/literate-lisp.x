@@ -77,7 +77,7 @@ typedef struct Interp {                                                         
 /* $fail adds the operation name to an error's detail fields.
    The caller supplies the error code and any additional key/value pairs.
 */
-macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {                 // Expr parameters capture syntax.
+macro Stmt $fail(Expr $cause, Expr $op, Expr $fields...) {                 // Expr parameters capture syntax.
   raise %($cause (operation ${$op}) $fields...);                                // Template holes and sequence splice.
 }
 

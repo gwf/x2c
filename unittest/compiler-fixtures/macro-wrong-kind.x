@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $drop() {
+macro Stmt $drop() {
 }
 
 int value = $drop();

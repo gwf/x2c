@@ -503,7 +503,7 @@ static String _declared_spelling(List key) {
   return NULL;
 }
 
-macro Statement $report.parse_name_package(
+macro Stmt $report.parse_name_package(
   Expr $c, Expr $spelling, Expr $owner) {
   $c.report_error(
     <parse>,
@@ -511,7 +511,7 @@ macro Statement $report.parse_name_package(
     $c.token, NULL);
 }
 
-macro Statement $report.parse_name_reserved(Expr $c, Expr $spelling) {
+macro Stmt $report.parse_name_reserved(Expr $c, Expr $spelling) {
   $c.report_error(
     <parse>,
     %"'${$spelling}' is reserved for compiler-generated names",
@@ -728,7 +728,7 @@ void Compiler.register_package_member(
   c.package_members[local] = binding;
 }
 
-macro Statement $report.parse_package_collision(
+macro Stmt $report.parse_package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
   $c.report_error(
     <parse>,
@@ -736,7 +736,7 @@ macro Statement $report.parse_package_collision(
     $site, NULL);
 }
 
-macro Statement $report.parse_package_bound(
+macro Stmt $report.parse_package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
   $c.report_error(
     <parse>,
@@ -888,7 +888,7 @@ static Type Sym._resolve_chain(
   return key;
 }
 
-macro Statement $report.type_typedef_depth(Expr $c, Expr $origin) {
+macro Stmt $report.type_typedef_depth(Expr $c, Expr $origin) {
   $c.report_error(
     <type>,
     %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",

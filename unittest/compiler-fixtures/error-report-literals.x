@@ -17,7 +17,7 @@ void Reporter.report_error(
 /* Native templates carry literal syntax across translation units. */
 static List disturbance = %("different" ("nested" 42));
 
-macro Statement $report.xform_string_assignment(Expr $c) {
+macro Stmt $report.xform_string_assignment(Expr $c) {
   {
     String note = "String is immutable: use the copy-producing " +
                   "String.withindex, or bind a char * to write a " +
@@ -28,7 +28,7 @@ macro Statement $report.xform_string_assignment(Expr $c) {
   }
 }
 
-macro Statement $report.macro_helper_timeout(
+macro Stmt $report.macro_helper_timeout(
   Expr $c, Expr $site, Expr $limit, Expr $name) {
   $c.report_error(
     <macro>,
@@ -36,19 +36,19 @@ macro Statement $report.macro_helper_timeout(
     $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
-macro Statement $report.type_destructure_list(Expr $c, Expr $source_type) {
+macro Stmt $report.type_destructure_list(Expr $c, Expr $source_type) {
   $c.report_error(
     <type>, "destructuring requires a List source",
     NULL, %(("source type" ${$source_type})));
 }
 
-macro Statement $report.protocol_meta_adoption(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_meta_adoption(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'meta' applies only to a concrete protocol adoption",
     $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
 }
 
-macro Statement $report.type_ident_untyped(
+macro Stmt $report.type_ident_untyped(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <type>, %"identifier '${$spelling}' has no semantic type",

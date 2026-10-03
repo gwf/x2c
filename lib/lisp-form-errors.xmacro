@@ -1,115 +1,115 @@
 /* Lisp form error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
-macro Statement $_lisp_form_error_eval_void() {
+macro Stmt $_lisp_form_error_eval_void() {
   raise %(void-op (operation "eval"));
 }
 
-macro Statement $_lisp_form_error_eval_unbound(Expr $expr) {
+macro Stmt $_lisp_form_error_eval_unbound(Expr $expr) {
   raise %(unbound (name ${$expr}));
 }
 
-macro Statement $_lisp_form_error_call_type(Expr $callable) {
+macro Stmt $_lisp_form_error_call_type(Expr $callable) {
   raise %(not-call (actual ${$callable.kind()}));
 }
 
-macro Statement $_lisp_form_error_def_arity(Expr $actual, Expr $args) {
+macro Stmt $_lisp_form_error_def_arity(Expr $actual, Expr $args) {
   raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
           (value ${$args}));
 }
 
-macro Statement $_lisp_form_error_def_protected(Expr $name) {
+macro Stmt $_lisp_form_error_def_protected(Expr $name) {
   raise %(bad-state (operation "def") (name ${$name}));
 }
 
-macro Statement $_lisp_form_error_def_inherited(Expr $name) {
+macro Stmt $_lisp_form_error_def_inherited(Expr $name) {
   raise %(bad-state (operation "def") (why "inherited") (name ${$name}));
 }
 
-macro Statement $_lisp_form_error_def_frozen(Expr $name) {
+macro Stmt $_lisp_form_error_def_frozen(Expr $name) {
   raise %(bad-state (operation "def") (why "frozen") (name ${$name}));
 }
 
-macro Statement $_lisp_form_error_cond_empty() {
+macro Stmt $_lisp_form_error_cond_empty() {
   raise %(bad-arity (operation "cond") (expected 1) (actual 0));
 }
 
-macro Statement $_lisp_form_error_cond_type(Expr $clause) {
+macro Stmt $_lisp_form_error_cond_type(Expr $clause) {
   raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
 }
 
-macro Statement $_lisp_form_error_cond_arity(Expr $actual, Expr $clause) {
+macro Stmt $_lisp_form_error_cond_arity(Expr $actual, Expr $clause) {
   raise %(bad-arity (operation "cond-clause") (expected 2)
           (actual ${$actual}) (value ${$clause}));
 }
 
-macro Statement $_lisp_form_error_bind_signature(Expr $signature) {
+macro Stmt $_lisp_form_error_bind_signature(Expr $signature) {
   raise %(bad-sig (operation "bind") (value ${$signature}));
 }
 
-macro Statement $_lisp_form_error_bind_missing(Expr $name, Expr $sig) {
+macro Stmt $_lisp_form_error_bind_missing(Expr $name, Expr $sig) {
   raise %(no-symbol (name ${$name}) (sig ${$sig}));
 }
 
-macro Statement $_lisp_form_error_quote_shape(Expr $expr) {
+macro Stmt $_lisp_form_error_quote_shape(Expr $expr) {
   raise %(bad-arity (operation "quasiquote") (value ${$expr}));
 }
 
-macro Statement $_lisp_form_error_splice_type(Expr $value) {
+macro Stmt $_lisp_form_error_splice_type(Expr $value) {
   raise %(bad-types (operation "quasiquote-splice")
           (actual ${$value.kind()}));
 }
 
-macro Statement $_lisp_form_error_lambda_signature(
+macro Stmt $_lisp_form_error_lambda_signature(
   Expr $operation, Expr $args) {
   raise %(bad-sig (operation ${$operation}) (value ${$args}));
 }
 
-macro Statement $_lisp_form_error_apply_void(Expr $index) {
+macro Stmt $_lisp_form_error_apply_void(Expr $index) {
   raise %(void-op (operation "apply") (index ${$index}));
 }
 
-macro Statement $_lisp_form_error_apply_rest(Expr $body) {
+macro Stmt $_lisp_form_error_apply_rest(Expr $body) {
   raise %(bad-sig (operation "apply") (value ${$body}));
 }
 
-macro Statement $_lisp_form_error_apply_arity(Expr $body) {
+macro Stmt $_lisp_form_error_apply_arity(Expr $body) {
   raise %(bad-arity (operation "apply") (value ${$body}));
 }
 
-macro Statement $_lisp_form_error_apply_interrupted() {
+macro Stmt $_lisp_form_error_apply_interrupted() {
   raise %(interrupt (operation "apply"));
 }
 
-macro Statement $_lisp_form_error_apply_steps() {
+macro Stmt $_lisp_form_error_apply_steps() {
   raise %(call-stack (operation "apply") (why "steps"));
 }
 
-macro Statement $_lisp_form_error_apply_stack(Expr $body) {
+macro Stmt $_lisp_form_error_apply_stack(Expr $body) {
   raise %(call-stack (operation "apply") (value ${$body}));
 }
 
-macro Statement $_lisp_form_error_form_arity(
+macro Stmt $_lisp_form_error_form_arity(
   Expr $operation, Expr $expected, Expr $actual) {
   raise %(bad-arity (operation ${$operation}) (expected ${$expected})
           (actual ${$actual}));
 }
 
-macro Statement $_lisp_form_error_form_string(Expr $operation, Expr $value) {
+macro Stmt $_lisp_form_error_form_string(Expr $operation, Expr $value) {
   raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
           (want "String"));
 }
 
-macro Statement $_lisp_form_error_apply_list(Expr $values) {
+macro Stmt $_lisp_form_error_apply_list(Expr $values) {
   raise %(bad-types (operation "apply") (actual ${$values.kind()})
           (want "List"));
 }
 
-macro Statement $_lisp_form_error_apply_procedure(Expr $callable) {
+macro Stmt $_lisp_form_error_apply_procedure(Expr $callable) {
   raise %(not-call (operation "apply") (actual ${$callable.kind()}));
 }
 
-macro Statement $lisp.form.error(Literal $key, Expr $arguments...) {
+macro Stmt $lisp.form.error(Literal $key, Expr $arguments...) {
   $(let* ((key (x2c.literal.value $key))
           (row (assoc key '(
         ("eval.void" _lisp_form_error_eval_void)

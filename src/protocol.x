@@ -258,19 +258,19 @@ static void ProtocolSyntax.head(ProtocolSyntax &p) {
   p.modifiers();
 }
 
-macro Statement $report.protocol_tag_var(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_tag_var(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'tag' applies only to a Var adoption",
     $origin, NULL);
 }
 
-macro Statement $report.protocol_modifier_conflict(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_modifier_conflict(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
     $origin, NULL);
 }
 
-macro Statement $report.protocol_as_var(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_as_var(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'as' applies only to a Var adoption",
     $origin, NULL);
@@ -318,19 +318,19 @@ static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
   return adoption;
 }
 
-macro Statement $report.protocol_static_adoption(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_static_adoption(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'static' applies only to a concrete protocol adoption",
     $origin, %("remove 'static' from the reusable protocol body"));
 }
 
-macro Statement $report.protocol_participant_expected(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_participant_expected(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "expected protocol participant name",
     $origin, NULL);
 }
 
-macro Statement $report.protocol_modifier_adoption(
+macro Stmt $report.protocol_modifier_adoption(
   Expr $c, Expr $representation, Expr $origin) {
   $c.report_error(
     <protocol>, $representation
@@ -339,7 +339,7 @@ macro Statement $report.protocol_modifier_adoption(
     $origin, NULL);
 }
 
-macro Statement $report.protocol_meta_adoption(Expr $c, Expr $origin) {
+macro Stmt $report.protocol_meta_adoption(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'meta' applies only to a concrete protocol adoption",
     $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
@@ -376,7 +376,7 @@ static void ProtocolSyntax.warn_shadowed(ProtocolSyntax &p) {
     p.participant_token, %($hint));
 }
 
-macro Statement $report.protocol_assoc_order(Expr $c) {
+macro Stmt $report.protocol_assoc_order(Expr $c) {
   $c.report_error(
     <protocol>, "associated types must precede protocol members",
     $c.token, NULL);
@@ -415,13 +415,13 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
   return c._publish_record(record, p.base, location);
 }
 
-macro Statement $report.protocol_type_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.protocol_type_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, %"duplicate protocol type variable '${$name}'",
     $c.token, NULL);
 }
 
-macro Statement $report.protocol_assoc_expected(Expr $c) {
+macro Stmt $report.protocol_assoc_expected(Expr $c) {
   $c.report_error(
     <protocol>, "expected associated type name",
     $c.token, NULL);
@@ -443,25 +443,25 @@ static List Compiler._parse_associated(Compiler c, Map names) {
   return %($name $type);
 }
 
-macro Statement $report.protocol_member_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.protocol_member_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, %"duplicate protocol member '${$name}'",
     $c.token, NULL);
 }
 
-macro Statement $report.protocol_member_function(Expr $c, Expr $name) {
+macro Stmt $report.protocol_member_function(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, "protocol member must be a function",
     $c.token, %("member:" ${$name}));
 }
 
-macro Statement $report.protocol_member_owner(Expr $c, Expr $participant) {
+macro Stmt $report.protocol_member_owner(Expr $c, Expr $participant) {
   $c.report_error(
     <protocol>, "protocol member must be owned by its participant",
     $c.token, %("expected receiver:" ${$participant}));
 }
 
-macro Statement $report.protocol_member_single(Expr $c) {
+macro Stmt $report.protocol_member_single(Expr $c) {
   $c.report_error(
     <protocol>, "protocol member must declare one function",
     $c.token, NULL);
@@ -509,7 +509,7 @@ static String _member_name(List identity, String participant) {
     ? full_name[prefix.len():] : NULL;
 }
 
-macro Statement $report.protocol_native_ident(Expr $c) {
+macro Stmt $report.protocol_native_ident(Expr $c) {
   $c.report_error(
     <protocol>, "native protocol member requires an identifier",
     $c.token, NULL);
@@ -574,7 +574,7 @@ static List Compiler._publish_adoption(
   return c._publish_var_adoption(node, participant_token, modifier_token);
 }
 
-macro Statement $report.macro_protocol_invalid(Expr $c) {
+macro Stmt $report.macro_protocol_invalid(Expr $c) {
   $c.report_error(
     <macro>, "constructed protocol syntax is invalid",
     $c.token, NULL);
@@ -651,7 +651,7 @@ static List Compiler._source_key(Compiler c, List location) {
        : %("source-node" $location);
 }
 
-macro Statement $report.protocol_decl_conflict(
+macro Stmt $report.protocol_decl_conflict(
   Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
   {
     String first = %"first: ${$first_location}";
@@ -691,7 +691,7 @@ static void Compiler._install_occurrence(
 
 // adoption drafts
 
-macro Statement $report.protocol_type_undeclared(
+macro Stmt $report.protocol_type_undeclared(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <protocol>,
@@ -823,7 +823,7 @@ static void AdoptionDraft.check_previous(AdoptionDraft &a) {
     a.location, %($first $second));
 }
 
-macro Statement $report.protocol_adoption_conflict(
+macro Stmt $report.protocol_adoption_conflict(
   Expr $c, Expr $adoption, Expr $first_location) {
   {
     String first = %"first: ${_location_string($first_location)}";
@@ -1658,7 +1658,7 @@ static List Compiler._ordered_occurrences(Compiler c) {
 /* Runs visit once for each conformance participant adopts, in protocols
    order, after setting the caller's base to the protocol and rows to its
    member rows. */
-macro Decorator $adopted_rows(Statement $visit, Expr $compiler, Expr $protocols,
+macro Decorator $adopted_rows(Stmt $visit, Expr $compiler, Expr $protocols,
     Expr $participant, Name $base, Name $rows) {
   foreach (List entry, $protocols) {
     $base = entry.car();
@@ -2049,7 +2049,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
 
 /* A generated function around a body its caller lowered. `result` carries
    the storage class, so static, inline and external helpers share it. */
-macro Unit $compiler_wrapper(Type $result, Name $name, Statement $body,
+macro Unit $compiler_wrapper(Type $result, Name $name, Stmt $body,
     Param $params...) {
   $result $name($params...) { $body }
 }
@@ -2166,18 +2166,18 @@ String Compiler.protocol_update_helper(
 macro Expression $discard_call(
     Name $callee, Expr $arguments...) => $callee($arguments...);
 
-macro Statement $discard_argument(Name $discard, Expr $argument) {
+macro Stmt $discard_argument(Name $discard, Expr $argument) {
   $discard($argument);
 }
 
-macro Statement $discard_void(Expr $call, Statement $discards...) {
+macro Stmt $discard_void(Expr $call, Stmt $discards...) {
   $call;
   $discards...
   return;
 }
 
-macro Statement $discard_value(
-    Type $type, Name $value, Expr $call, Statement $discards...) {
+macro Stmt $discard_value(
+    Type $type, Name $value, Expr $call, Stmt $discards...) {
   $type $value = $call;
   $discards...
   return $value;
@@ -2522,7 +2522,7 @@ static List AdapterFunction.generate(AdapterFunction &a) {
 
 macro Decorator $guard_value_rendering(
   Function $function, Name $path, Expr $enter, Expr $fallback,
-  Expr $leave, Statement $body...) {
+  Expr $leave, Stmt $body...) {
   RenderPath $path;
   if (!$enter) return $fallback;
   defer $leave;
@@ -2588,7 +2588,7 @@ macro Unit $methods_table(Name $methods) {
   static VarMethods $methods;
 }
 
-macro Statement $methods_value(Name $methods, Expr $value) {
+macro Stmt $methods_value(Name $methods, Expr $value) {
   $methods = $value;
 }
 

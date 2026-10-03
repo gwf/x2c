@@ -1,4 +1,4 @@
-macro Statement $imported_literal(Name $name) {
+macro Stmt $imported_literal(Name $name) {
   List $name = %("abc" "de");
 }
 

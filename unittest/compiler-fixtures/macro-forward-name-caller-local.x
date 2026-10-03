@@ -2,7 +2,7 @@
 
 /* Nothing declares `x` where `$use_x` is defined, so the name resolves where
    the expansion lands, and the caller's local `x` supplies it. */
-macro Statement $use_x(Name $out) {
+macro Stmt $use_x(Name $out) {
   $out = x;
 }
 

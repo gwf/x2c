@@ -3,8 +3,8 @@
 $(import "../../../../lib/error-macros.xmacro")
 $(import "../../../../lib/func-errors.xmacro")
 
-macro Statement $user.error() { printf("returning\n"); }
-macro Statement $user.warning(Expr $c) {
+macro Stmt $user.error() { printf("returning\n"); }
+macro Stmt $user.warning(Expr $c) {
   $c.report_warning(<driver>, "probe", NULL, NULL);
 }
 
@@ -45,7 +45,7 @@ int direct_report(Compiler c) {
   return 0;
 }
 
-macro Statement $report.parse_raise_payload(Expr $c) {
+macro Stmt $report.parse_raise_payload(Expr $c) {
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
     $c.token, %("use raise %(code (key value)...);"));

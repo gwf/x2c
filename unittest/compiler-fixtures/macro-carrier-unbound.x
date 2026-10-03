@@ -8,13 +8,13 @@ meta static List stray(void) {
   return %(code-value "source"
     (stmnt (expr (int) (ident $token))) ());
 }
-macro Statement $stray_slot() { $stray()... }
+macro Stmt $stray_slot() { $stray()... }
 
 meta static List apply_stray(void) {
   Macro slot = $stray_slot;
   return slot();
 }
-macro Statement $use_stray() { $apply_stray()... }
+macro Stmt $use_stray() { $apply_stray()... }
 
 int main(void) {
   $use_stray();

@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 meta static void template_noop(void) { }
-macro Statement $template_void() { $template_noop(); }
+macro Stmt $template_void() { $template_noop(); }
 meta static int twice(int n) { return n * 2; }
 meta static List keep_code(List code) { return code; }
 meta static int nested(int n) { return $twice(n) + 1; }

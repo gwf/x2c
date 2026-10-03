@@ -13,7 +13,7 @@ meta static List capture_function_body(List fn) => x2c_function_body(fn);
 
 macro Expression $capture.text(Expr $value) => $capture_text($value);
 macro Expression $capture.forward($value) => $capture.text($value);
-macro Statement $capture.swap(Expr $left, Expr $right) {
+macro Stmt $capture.swap(Expr $left, Expr $right) {
   $capture_type($left) temporary = $left;
   $left = $right;
   $right = temporary;

@@ -4,7 +4,7 @@
    name resolves where the expansion lands, so a caller's local of the same
    spelling supplies it there. */
 macro Expression $read_later() => later + 1;
-macro Statement $write_later(Expr $value) {
+macro Stmt $write_later(Expr $value) {
   later = $value;
 }
 

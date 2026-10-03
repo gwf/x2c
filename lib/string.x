@@ -1050,7 +1050,7 @@ meta native List String.rpartition(String str, String sep) {
    source byte offered as `$byte` so each family member gives only its own C
    case mapping. A copy that changes nothing is released and `$subject`
    itself is returned. */
-macro Statement $string.remap(
+macro Stmt $string.remap(
   Expr $subject, Name $index, Name $byte, Expr $mapped) {
   if (!$subject || !*$subject) return $subject;
   int length = $subject.len(), changed = 0;
@@ -1100,7 +1100,7 @@ meta native String String.capitalize(String str) {
 }
 
 /* Builds a filtered copy, leaving each caller to give only its byte test. */
-macro Statement $string.select(
+macro Stmt $string.select(
   Expr $subject, Name $index, Expr $selected) {
   int length = $subject.len();
   String string = String.malloc(length + 1);

@@ -1,4 +1,4 @@
-macro Decorator $private.loop(Statement $body) {
+macro Decorator $private.loop(Stmt $body) {
   while (1) $body
 }
 

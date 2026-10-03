@@ -666,7 +666,7 @@ static List _update_decode(List id, List value) {
 
 /* --- the linked inventory ------------------------------------------------ */
 
-macro Statement $linked.row(Expr $rows, Expr $name, Expr $function) {
+macro Stmt $linked.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = Func.new(
     $function, $(_x2c.literal.list (_x2c.function.native-type $function)));
 }

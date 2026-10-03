@@ -25,7 +25,7 @@ meta static List fail_outer(Source node) {
 }
 
 macro Expression $probe.word(Expr $value) => $one_word($value);
-macro Statement $probe.check(Expr $value) {
+macro Stmt $probe.check(Expr $value) {
   $require_word($value);
 }
 macro Expression $probe.nested(Expr $value) => $fail_outer($value);

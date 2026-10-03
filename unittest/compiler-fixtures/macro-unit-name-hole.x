@@ -7,13 +7,13 @@ typedef struct { int value; } Cell;
 Cell cell = {7};
 int counter = 10;
 
-macro Statement $set(Type $type, name $target) {
+macro Stmt $set(Type $type, name $target) {
   typedef $type S;
   S value = (S) 5;
   $target = value;
 }
 
-macro Decorator $bump(Statement $target, name $counter) {
+macro Decorator $bump(Stmt $target, name $counter) {
   $target
   $counter = $counter + 1;
 }

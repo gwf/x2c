@@ -24,22 +24,22 @@ static int local_macros(int base) {
 
     macro Expression mixed(Expr $value) => offset + $value;
 
-    macro Statement assign(Expr $target, Expr $value) {
+    macro Stmt assign(Expr $target, Expr $value) {
       int temporary = base + $value;
       int generated = temporary;
       $target = generated;
     }
 
-    macro Statement define_generated() {
+    macro Stmt define_generated() {
       macro Expression generated(Expr $value) => base + $value;
     }
 
-    macro Statement define_and_use(Expr $target) {
+    macro Stmt define_and_use(Expr $target) {
       macro Expression generated_here(Expr $value) => base + $value;
       $target = generated_here(13);
     }
 
-    macro Decorator repeat(Statement $target) {
+    macro Decorator repeat(Stmt $target) {
       $target
       $target
     }

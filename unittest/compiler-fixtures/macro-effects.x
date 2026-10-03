@@ -10,7 +10,7 @@ meta static List counter_slot(void) {
     (declare (int) (bindings (op = (bind $token ()) (expr (int) (literal (int) "0")))))
     ((new-name $token "counter")));
 }
-macro Statement $counted(Statement $body) {
+macro Stmt $counted(Stmt $body) {
   $counter_slot()...
   $body
 }
@@ -19,7 +19,7 @@ meta static List count_twice(List body) {
   Macro counted = $counted;
   return counted(body);
 }
-macro Statement $twice_counted(Statement $body) { $count_twice($body)... }
+macro Stmt $twice_counted(Stmt $body) { $count_twice($body)... }
 
 int main(void) {
   int total = 0;

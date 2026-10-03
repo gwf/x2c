@@ -3,20 +3,20 @@
    where the expansion stands. */
 #include "x2c.x"
 
-macro Statement $count_local(Expr $root, Name $n) {
+macro Stmt $count_local(Expr $root, Name $n) {
   List items = $root;
   foreach (Var child, items) $n++;
 }
 
-macro Statement $count_rest(Expr $root, Name $n) {
+macro Stmt $count_rest(Expr $root, Name $n) {
   foreach (Var child, $root.cdr()) $n++;
 }
 
-macro Statement $count_cast(Expr $root, Name $n) {
+macro Stmt $count_cast(Expr $root, Name $n) {
   foreach (Var child, (List) $root) $n++;
 }
 
-macro Statement $let_local(Name $n) {
+macro Stmt $let_local(Name $n) {
   int local = 1;
   $let(local, 7) { $n += local; }
   $n += local;

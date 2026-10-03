@@ -178,15 +178,15 @@ $drop()
 int discarded_private = 2;
 #pragma public
 
-macro Statement $bare_return() {
+macro Stmt $bare_return() {
   $(quote ((return)))...
 }
 
-macro Statement $statement_item(Expr $value) {
+macro Stmt $statement_item(Expr $value) {
   statement_result = $value;
 }
 
-macro Statement $statement_outer(Name $statement_item) {
+macro Stmt $statement_outer(Name $statement_item) {
   $statement_item(13);
 }
 

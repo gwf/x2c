@@ -56,7 +56,7 @@ cat >"$BUILD/src/unit.x" <<'EOF'
 #include "anon.x"
 int cache_external(int value);
 int cache_call_external(int value) { return cache_external(value); }
-macro Statement $cache_add(Expr $target, Expr $amount) {
+macro Stmt $cache_add(Expr $target, Expr $amount) {
   int temporary = $amount;
   $target += temporary;
 }

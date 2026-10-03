@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $pick(Expr $subject, MatchRow $rows...) {
+macro Stmt $pick(Expr $subject, MatchRow $rows...) {
   match ($subject) { $rows... }
 }
 

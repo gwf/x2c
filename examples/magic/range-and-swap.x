@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 macro Decorator $control.range(
-  Statement $body,
+  Stmt $body,
   Name $index,
   Expr $start,
   Expr $stop
@@ -12,7 +12,7 @@ macro Decorator $control.range(
   }
 }
 
-macro Statement $control.swap(
+macro Stmt $control.swap(
   Expr $left,
   Expr $right
 ) {

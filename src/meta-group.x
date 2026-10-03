@@ -685,7 +685,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
          "int, a String, a Symbol, or a List";
 }
 
-macro Statement $report.macro_function_unavailable(
+macro Stmt $report.macro_function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
   $c.report_error(
     <macro>,

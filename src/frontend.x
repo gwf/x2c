@@ -252,7 +252,7 @@ static int _inside(const char *path, const char *dir) {
   return !strncmp(path, dir, n) && path[n] == '/';
 }
 
-macro Statement $report.driver_input_read(Expr $c, Expr $filename) {
+macro Stmt $report.driver_input_read(Expr $c, Expr $filename) {
   $c.report_error(
     <driver>,
     "cannot read input file",
@@ -334,7 +334,7 @@ static void _enter_package(Frontend frontend, Compiler c) {
   c.package_roots[c.package] = root;
 }
 
-macro Statement $report.driver_script_symbols(Expr $c, Expr $site) {
+macro Stmt $report.driver_script_symbols(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "script units use the default symbol collection",
@@ -342,7 +342,7 @@ macro Statement $report.driver_script_symbols(Expr $c, Expr $site) {
     "--live-symbols, and the --dump-cpp modes cannot read a script"));
 }
 
-macro Statement $report.driver_indent_symbols(Expr $c, Expr $site) {
+macro Stmt $report.driver_indent_symbols(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "indented units use the default symbol collection",
@@ -366,7 +366,7 @@ static Token _first_directive(Compiler c) {
   return c.token;
 }
 
-macro Statement $report.driver_cpp_failed(Expr $c, Expr $site, Expr $status) {
+macro Stmt $report.driver_cpp_failed(Expr $c, Expr $site, Expr $status) {
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",

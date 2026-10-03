@@ -657,7 +657,7 @@ meta static List ad_cast(List type, List e) {
   return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
 }
 
-macro Statement $ad.local(Type $type, Name $name, Expr $initial) {
+macro Stmt $ad.local(Type $type, Name $name, Expr $initial) {
   $type $name = $initial;
 }
 
@@ -1103,7 +1103,7 @@ meta static List ad_param_names(List params) {
   return names;
 }
 
-macro Statement $ad.write_slot(Name $gradient, Name $value) {
+macro Stmt $ad.write_slot(Name $gradient, Name $value) {
   *$gradient = $value;
 }
 

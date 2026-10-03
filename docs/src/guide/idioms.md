@@ -130,7 +130,7 @@ A macro should replace repeated source with a call whose meaning is obvious:
 
 ```x2c
 ~
-macro Statement $guard(Expr $condition) {
+macro Stmt $guard(Expr $condition) {
   if (!$condition) return 0;
 }
 ~

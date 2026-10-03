@@ -104,7 +104,7 @@ meta static int d_lambda(int n) {
    same call through it, so the two columns are the two forms. */
 static int runtime_zero = 0;
 
-macro Statement $row(Literal $label, Expr $translated, Expr $run) {
+macro Stmt $row(Literal $label, Expr $translated, Expr $run) {
   printf("%-9s %d %d\n", $label, $translated, $run);
 }
 

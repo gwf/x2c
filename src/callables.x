@@ -31,7 +31,7 @@ $(import "../src/grammar.xmacro")
 /* Helper syntax shared by every lowering below. A declarator row reuses an
    issued binding without binding it again. */
 
-macro Statement $func_local(Type $type, DeclaratorRow $row) {
+macro Stmt $func_local(Type $type, DeclaratorRow $row) {
   $type $row;
 }
 
@@ -341,7 +341,7 @@ static List CaptureBuild._construct(CaptureBuild &b, List context) {
 }
 
 /* A value computed after its setup statements. */
-macro Expression $statement_value(Expr $value, Statement $setup...) =>
+macro Expression $statement_value(Expr $value, Stmt $setup...) =>
   ({ $setup... $value; });
 
 static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
@@ -355,11 +355,11 @@ static List CaptureBuild._result(CaptureBuild &b, List storage, List value) {
 
 /* A shared lambda cell: Scope storage for one automatic binding, copied
    from its initializer or left for a later assignment. */
-macro Statement $compiler_cell(Type $type, Name $cell, Expr $value) {
+macro Stmt $compiler_cell(Type $type, Name $cell, Expr $value) {
   $type *$cell = Scope_memdup((const void *)&($type)$value, sizeof($type));
 }
 
-macro Statement $compiler_empty_cell(Type $type, Name $cell) {
+macro Stmt $compiler_empty_cell(Type $type, Name $cell) {
   $type *$cell = Scope_malloc(sizeof($type));
 }
 
@@ -836,7 +836,7 @@ static List Compiler._indirect_func_value(
     context_type, context, _func_bound(%("FuncAdapter"), adapter),
     signature, _func_bound(constructor_type, constructor));
   List statement = c._func_present_statement(pointer, constructed);
-  return %(expr ("Func") (parens (block $declaration $statement)));
+  return c.rebuild_expression(%("Func"), $!( ({ $declaration $statement }) ));
 }
 
 static List Compiler._indirect_func_adapter(
@@ -978,7 +978,7 @@ static List Compiler._deref_func_lift(
 // Func adapters
 
 /* A record result is copied into a Var after the native call completes. */
-macro Statement $func_record_result(
+macro Stmt $func_record_result(
     Type $type, DeclaratorRow $row, Expr $boxed) {
   {
     $type $row;

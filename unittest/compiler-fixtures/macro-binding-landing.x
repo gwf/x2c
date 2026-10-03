@@ -15,7 +15,7 @@ macro Expression $id(Expr $e) => $e;
 
 /* The caller's `k * 2` reads the loop variable declared from the caller's
    own Name `k`, as it would where the expansion lands. */
-macro Statement $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
+macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
   for (int $i = 0; $i < $count; $i++) $sum += $value;
 }
 

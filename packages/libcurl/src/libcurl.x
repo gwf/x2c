@@ -232,7 +232,7 @@ static void _curl_check(CurlEasy easy, String operation, CURLcode result) {
 }
 
 /* Sets one easy option, naming the option in a failure's operation. */
-macro Statement $curl.setopt(Expr $easy, Expr $option, Expr $value) {
+macro Stmt $curl.setopt(Expr $easy, Expr $option, Expr $value) {
   _curl_check($easy, $(x2c.literal.string (x2c.source.text $option)),
               curl_easy_setopt($easy.native, $option, $value));
 }

@@ -1,82 +1,82 @@
 /* Func binding and adapter error conditions. Captures keep their original
    payload order and types; each selected raise expands at its call site. */
 
-macro Statement $_func_error_apply_args() {
+macro Stmt $_func_error_apply_args() {
   raise %(bad-arg (operation "Func.apply"));
 }
 
-macro Statement $_func_error_apply_arity(
+macro Stmt $_func_error_apply_arity(
   Expr $sig, Expr $expected, Expr $actual) {
   raise %(bad-arity (sig ${$sig}) (expected ${$expected}) (actual ${$actual}));
 }
 
-macro Statement $_func_error_arg_value(Expr $sig, Expr $index) {
+macro Stmt $_func_error_arg_value(Expr $sig, Expr $index) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (want value));
 }
 
-macro Statement $_func_error_arg_void(Expr $sig, Expr $index) {
+macro Stmt $_func_error_arg_void(Expr $sig, Expr $index) {
   raise %(void-op (sig ${$sig}) (index ${$index}));
 }
 
-macro Statement $_func_error_apply_index(Expr $index) {
+macro Stmt $_func_error_apply_index(Expr $index) {
   raise %(bad-arg (operation "Func.apply") (index ${$index}));
 }
 
-macro Statement $_func_error_arg_convert(
+macro Stmt $_func_error_arg_convert(
   Expr $code, Expr $sig, Expr $index, Expr $want, Expr $lower) {
   raise %(${$code} (sig ${$sig}) (index ${$index}) (want ${$want})
           (cause ${$lower}));
 }
 
-macro Statement $_func_error_arg_type(
+macro Stmt $_func_error_arg_type(
   Expr $sig, Expr $index, Expr $actual, Expr $want) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
           (want ${$want}));
 }
 
-macro Statement $_func_error_arg_pointer(
+macro Stmt $_func_error_arg_pointer(
   Expr $sig, Expr $index, Expr $actual) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
           (want pointer));
 }
 
-macro Statement $_func_error_arg_unboxed(
+macro Stmt $_func_error_arg_unboxed(
   Expr $sig, Expr $index, Expr $source) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
           (want value));
 }
 
-macro Statement $_func_error_arg_ref(
+macro Stmt $_func_error_arg_ref(
   Expr $sig, Expr $index, Expr $source, Expr $want) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
           (want ${$want}));
 }
 
-macro Statement $_func_error_bind_sig(Expr $sig) {
+macro Stmt $_func_error_bind_sig(Expr $sig) {
   raise %(bad-sig (sig ${$sig}));
 }
 
-macro Statement $_func_error_context_source() {
+macro Stmt $_func_error_context_source() {
   raise %(bad-arg (operation "Func.new_context"));
 }
 
-macro Statement $_func_error_context_size(Expr $size) {
+macro Stmt $_func_error_context_size(Expr $size) {
   raise %(size-limit (operation "Func.new_context") (size ${$size}));
 }
 
-macro Statement $_func_error_signature_null() {
+macro Stmt $_func_error_signature_null() {
   raise %(bad-arg (operation "Func.signature"));
 }
 
-macro Statement $_func_error_context_null() {
+macro Stmt $_func_error_context_null() {
   raise %(bad-arg (operation "Func.context"));
 }
 
-macro Statement $_func_error_box_type(Expr $actual) {
+macro Stmt $_func_error_box_type(Expr $actual) {
   raise %(bad-types (want func) (actual ${$actual}));
 }
 
-macro Statement $func.error(Literal $key, Expr $arguments...) {
+macro Stmt $func.error(Literal $key, Expr $arguments...) {
   $(let* ((key (x2c.literal.value $key))
           (row (assoc key '(
         ("apply.args" _func_error_apply_args)

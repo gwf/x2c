@@ -20,7 +20,7 @@ meta static List apply_anonymous(List value) {
   return template(value);
 }
 
-macro Statement $show(Expr $value) {
+macro Stmt $show(Expr $value) {
   List notes = %("path: ${$value}");
   printf("%s\n", (char *) notes.repr());
 }

@@ -140,7 +140,7 @@ END {
   print ""
   print "/* --- the linked inventory " substr("--------------------------------------------------", 1, 48) " */"
   print ""
-  print "macro Statement $linked.row(Expr $rows, Expr $name, Expr $function) {"
+  print "macro Stmt $linked.row(Expr $rows, Expr $name, Expr $function) {"
   print "  $rows[$name] = Func.new("
   print "    $function, $(_x2c.literal.list (_x2c.function.native-type $function)));"
   print "}"
