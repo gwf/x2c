@@ -88,3 +88,33 @@ macro Stmt $report.driver.module_compiler(
     %"package '${$name}' was built by another compiler; rebuild it",
     $site, %("module: ${$module}"));
 }
+
+macro Stmt $report.macro.outside_compilation(Expr $name) {
+  MetaContext.reject(%"${$name} used outside compilation", NULL);
+}
+
+macro Stmt $report.native.module_platform() {
+  driver_error("native modules are not supported on this platform");
+}
+
+macro Stmt $report.native.module_invalid(Expr $path) {
+  driver_error(%"not an x2c native module: ${$path}");
+}
+
+macro Stmt $report.native.module_compiler(Expr $path) {
+  driver_error(
+    %"native module '${$path}' was built by another compiler; rebuild it");
+}
+
+macro Stmt $report.native.compiler_read(Expr $path) {
+  driver_error(
+    %"cannot read the running compiler to check native module '${$path}'");
+}
+
+macro Stmt $report.native.module_read(Expr $path, Expr $cause) {
+  driver_error(%"cannot read native module '${$path}': ${$cause}");
+}
+
+macro Stmt $report.native.module_load(Expr $path, Expr $cause) {
+  driver_error(%"cannot load native module '${$path}': ${$cause}");
+}

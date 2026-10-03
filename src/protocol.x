@@ -805,10 +805,11 @@ static String Compiler._missing_detail(
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
   String owner = %"$base_repr($participant_repr)";
-  String prefix = %"$participant_repr does not satisfy $owner: ";
+  String prefix = $report.protocols.conformance_prefix(
+    participant_repr, owner);
   if (failure) return _requirement_detail(base, participant, failure);
   if (native)
-    return %"${prefix}its typedef is not a native alias of $base_repr";
+    return $report.protocols.native_alias(prefix, base_repr);
   String base_name = _base_name(base);
   String lowered = participant.is_bare_typedef_name()
     ? participant.car().str().lower() : participant_repr;
@@ -818,9 +819,8 @@ static String Compiler._missing_detail(
     ? c._declared(%"${participant.car()}_${base_name.lower()}")
     : NULL;
   if (base_name && !_exact_conversion(forward_type, participant, base))
-    return %"${prefix}no forward conversion '$forward'";
-  return %"${prefix}no reverse conversion '$base_repr.$lowered' " +
-    %"or '$base_repr.as_$lowered'";
+    return $report.protocols.forward_conversion(prefix, forward);
+  return $report.protocols.reverse_conversion(prefix, base_repr, lowered);
 }
 
 static String _requirement_detail(Type base, Type participant, List failure) {
@@ -830,34 +830,29 @@ static String _requirement_detail(Type base, Type participant, List failure) {
   String lowered = participant.is_bare_typedef_name()
     ? participant.car().str().lower() : participant_repr;
   String owner = %"$base_repr($participant_repr)";
-  String prefix = %"$participant_repr does not satisfy $owner: ";
+  String prefix = $report.protocols.conformance_prefix(
+    participant_repr, owner);
   if (adapter == <fallback> && direction == <nested>)
-    return %"${prefix}member '$member' uses T inside a compound " +
-      %"${position} type, which protocol fallback adapters " +
-      "do not support";
+    return $report.protocols.fallback_nested(prefix, member, position);
   if (adapter == <fallback> && direction == <reverse>)
-    return %"${prefix}member '$member' returns T, so $owner needs " +
-      %"'$base_repr.$lowered' or '$base_repr.as_$lowered'";
+    return $report.protocols.fallback_reverse(
+      prefix, member, owner, base_repr, lowered);
   if (adapter == <fallback>)
-    return %"${prefix}member '$member' fallback requires forward " +
-      %"conversion '$participant_repr.${base_repr.lower()}'";
+    return $report.protocols.fallback_forward(
+      prefix, member, participant_repr, base_repr);
   if (adapter == <thunk> && direction == <nested>)
-    return %"${prefix}member '$member' uses T inside a compound " +
-      %"${position} type, which protocol descriptor thunks " +
-      "do not support";
+    return $report.protocols.thunk_nested(prefix, member, position);
   if (adapter == <thunk> && position == <parameter>)
-    return %"${prefix}member '$member' has a T parameter, so " +
-      %"$owner needs '$base_repr.$lowered' or '$base_repr.as_$lowered'";
+    return $report.protocols.thunk_parameter(
+      prefix, member, owner, base_repr, lowered);
   if (adapter == <thunk>)
-    return %"${prefix}member '$member' returns T, so $owner needs " +
-      %"'$participant_repr.${base_repr.lower()}'";
+    return $report.protocols.thunk_result(
+      prefix, member, owner, participant_repr, base_repr);
   if (position == <parameter>)
-    return %"${prefix}native member '$member' has a T parameter " +
-      %"that is not implicitly convertible to $base_repr";
+    return $report.protocols.native_parameter(prefix, member, base_repr);
   if (position == <result>)
-    return %"${prefix}native member '$member' returns T, which is " +
-      %"not implicitly convertible from $base_repr";
-  return %"${prefix}native member '$member' cannot be aliased";
+    return $report.protocols.native_result(prefix, member, base_repr);
+  return $report.protocols.native_member_alias(prefix, member);
 }
 
 static void Compiler._report_sig_conflicts(
@@ -874,20 +869,9 @@ static void Compiler._report_sig_conflicts(
         c.protocol_helpers[dedupe] = 1;
         Type actual = c._declared(binding);
         String owner = %"$base_repr($participant_repr)";
-        String protocol_note = %"protocol member '$member' declared by $owner";
-        if (declaration_site)
-          protocol_note = %"$protocol_note at $declaration_site";
-        String actual_repr = actual.repr();
-        String conflict_note =
-          %"conflicting definition '$binding': $actual_repr";
-        String expected_note = %"expected: ${expected.repr()}";
-        c.diagnostics.report(
-          <protocol>,
-          %"'$binding' has a signature incompatible " +
-            %"with $owner member '$member'",
-          location,
-          %($protocol_note $conflict_note $expected_note)
-        );
+        $report.protocols.signature_conflict(
+          c, member, owner, declaration_site, binding, actual,
+          expected, location);
       }
 }
 
@@ -1873,16 +1857,17 @@ static void Compiler._report_collision(
   String second_repr = _type_spelling(second_base);
   String participant_repr = _type_spelling(participant);
   int incompatible_signatures = !first_expected.equal(second_expected);
-  String message = %"member '$member' of '$participant_repr' ";
+  String message = $report.protocols.collision_prefix(
+    member, participant_repr);
   String owners =
     %"$first_repr($participant_repr) and $second_repr($participant_repr)";
   if (linkage_conflict)
-    message += %"has mixed static and external generated ownership in $owners";
+    message += $report.protocols.collision_linkage(owners);
   else if (incompatible_signatures)
-    message += %"has incompatible generated signatures in $owners";
+    message += $report.protocols.collision_signature(owners);
   else
-    message += %"would be generated by both $owners; implement '" +
-      %"$participant_repr.$member' to choose its semantics";
+    message += $report.protocols.collision_ambiguous(
+      owners, participant_repr, member);
 
   List notes = _collision_notes(kind, first, second);
   List row = c._visible_adoption(first_base, participant);
@@ -1897,19 +1882,13 @@ static List _collision_notes(Symbol kind, List first, List second) {
   String first_repr = _type_spelling(first_base);
   String second_repr = _type_spelling(second_base);
   if (kind == <linkage>)
-    return %(
-      "$first_repr adoption: ${first_storage}"
-      "$second_repr adoption: ${second_storage}"
-    );
+    return $report.protocols.collision_linkage_notes(
+      first_repr, second_repr, first_storage, second_storage);
   if (!first_expected.equal(second_expected))
-    return %(
-      "$first_repr signature: ${first_expected.repr()}"
-      "$second_repr signature: ${second_expected.repr()}"
-    );
-  return %(
-    "$first_repr default source: $first_source"
-    "$second_repr default source: $second_source"
-  );
+    return $report.protocols.collision_signature_notes(
+      first_repr, second_repr, first_expected, second_expected);
+  return $report.protocols.collision_source_notes(
+    first_repr, second_repr, first_source, second_source);
 }
 
 // update helpers
