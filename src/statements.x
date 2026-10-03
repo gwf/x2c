@@ -107,11 +107,11 @@ static List Compiler._with_statement(Compiler c) {
   c.next();
   if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
       c.peek(0) == <;> || c.peek(0) == <eof>)
-    $report.parse_with_expr(c);
+    $report.parse.with_expr(c);
   List expression = c.parse_expression();
   String alias = c._with_alias();
   if (c.peek(0) != <"{">)
-    $report.parse_with_body(c);
+    $report.parse.with_body(c);
   return c._with_body(expression, alias);
 }
 
@@ -119,7 +119,7 @@ static List Compiler._with_statement(Compiler c) {
 static String Compiler._with_alias(Compiler c) {
   if (!c.take_word("as")) return "_";
   if (c.peek(0) != <ident>)
-    $report.parse_alias_name(c);
+    $report.parse.alias_name(c);
   String alias = c.token.text;
   c.next();
   return alias;
@@ -292,7 +292,7 @@ static List Compiler._goto_statement(Compiler c) {
 static List Compiler._raise_statement(Compiler c) {
   c.expect(<raise>);
   if (c.peek(0) != <"%(">)
-    $report.parse_raise_payload(c);
+    $report.parse.raise_payload(c);
   List stmt = c.parse_raise_literal();
   c.expect(<;>);
   return stmt;
@@ -345,7 +345,7 @@ static List Compiler._match_cases(Compiler c) {
     }
     if (peek != <case> && peek != <default>) break;
     if (saw_default)
-      $report.parse_match_default(c);
+      $report.parse.match_default(c);
     if (peek == <default>) saw_default = 1;
     cases.push(c._match_case());
     peek = c.peek(0);
@@ -393,7 +393,7 @@ static List Compiler._match_case(Compiler c) {
   if (c.test(<case>)) pattern = c._case_pattern(start, types);
   else if (c.test(<default>)) pattern = %(*);
   else
-    $report.parse_match_arm(c);
+    $report.parse.match_arm(c);
   c.begin_match_arm(pattern, start, peek == <case>);
   List body = c._case_body(types);
   return %($pattern $body);
@@ -426,7 +426,7 @@ static void Compiler._require_list_literal(
   Compiler c, List pattern, Token start) {
   match (pattern)
     case %(!not (expr ("List") *)):
-      $report.parse_match_pattern(c, start, pattern);
+      $report.parse.match_pattern(c, start, pattern);
 }
 
 /** Opens a `Sym` scope for one match arm and optionally defines its definite
@@ -449,11 +449,11 @@ static void Compiler._check_binders(
   List definite = c.match_pattern_binders(pattern, possible);
   foreach (Var binder, possible) {
     if (!definite.contains(binder))
-      $report.type_binder_unassigned(c, role, start, binder);
+      $report.type.binder_unassigned(c, role, start, binder);
     String name = binder.str()[1:];
     foreach (Var other, possible) {
       if (other == binder || other.str()[1:] != name) continue;
-      $report.type_binder_conflict(c, role, start, name);
+      $report.type.binder_conflict(c, role, start, name);
     }
   }
 }
@@ -538,7 +538,7 @@ static List Compiler._try_statement(Compiler c) {
   c.__complete_here(<continue>, %("finally"));
   List cleanup = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
   if (catches || cleanup) return %(try $body $catches $cleanup);
-  $report.parse_try_handler(c);
+  $report.parse.try_handler(c);
 }
 
 static List Compiler._catch_cases(Compiler c) {
@@ -557,7 +557,7 @@ static List Compiler._catch_cases(Compiler c) {
     if (is_default) saw_default = 1;
     if (!c.test(<catch>)) break;
     if (saw_default)
-      $report.parse_catch_default(c);
+      $report.parse.catch_default(c);
   }
   return %(catchcases ${arms.list_free()} $handle);
 }
@@ -584,7 +584,7 @@ static List Compiler._catch_arm(Compiler c, int &is_default, List handle) {
 
 static List Compiler._catch_filter(Compiler c) {
   if (c.peek(0) != <"%(">)
-    $report.parse_catch_pattern(c);
+    $report.parse.catch_pattern(c);
   List pattern = c.parse_catch_pattern_literal();
   c.expect(<:>);
   return pattern;

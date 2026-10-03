@@ -148,7 +148,7 @@ static List Compiler._top_level_lisp(Compiler c, int skip_body) {
 }
 
 static List Compiler._top_level_decorator(Compiler c) {
-  $report.parse_decorator_top(c);
+  $report.parse.decorator_top(c);
 }
 
 /* A declaration row after any `meta` marker. Collection records it; the
@@ -166,13 +166,13 @@ static List Compiler._declaration_form(Compiler c, int skip_body) {
     return NULL;
   }
   if (native && !decl.type_from_ast().is_function())
-    $report.parse_meta_function(c, meta);
+    $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return c._declared(decl, meta, first);
   if (c.peek(0) == <"{"> || c._at_function_arrow())
     return c._defined(decl, meta, native, first);
   c.require_input();
   Symbol unexpected = c.peek(0);
-  $report.parse_body_expected(c, unexpected);
+  $report.parse.body_expected(c, unexpected);
 }
 
 /** Parses one full top-level form through the shared classifier. */
@@ -198,7 +198,7 @@ List Compiler.parse_submission(Compiler c, int end_position) {
   c.input_boundary = token;
   List result = c.parse_top_level();
   if (c.peek(0) != <eof>)
-    $report.parse_unit_single(c);
+    $report.parse.unit_single(c);
   return result;
 }
 
@@ -337,12 +337,12 @@ List Compiler.parse_import_declaration(Compiler c) {
 // Rejects unquoted package names before parsing their identifier.
 static String Compiler._package_name(Compiler c) {
   if (c.peek(0) != <lit-char*>)
-    $report.parse_import_name(c);
+    $report.parse.import_name(c);
   Token name_token = c.token;
   String name = String.new_len(
     c.token.text + 1, c.token.len - 2).unescape();
   if (!name.is_identifier())
-    $report.parse_package_identifier(c, name_token);
+    $report.parse.package_identifier(c, name_token);
   c.next();
   return name;
 }
@@ -350,7 +350,7 @@ static String Compiler._package_name(Compiler c) {
 static String Compiler._import_alias(Compiler c, String name) {
   if (!c.take_word("as")) return name;
   if (c.peek(0) != <ident>)
-    $report.parse_alias_name(c);
+    $report.parse.alias_name(c);
   String alias = c.token.text;
   c.next();
   return alias;
@@ -364,13 +364,13 @@ static List Compiler._import_members(Compiler c, String name) {
   Array members = [];
   do {
     if (c.peek(0) != <ident>)
-      $report.parse_import_member(c);
+      $report.parse.import_member(c);
     Token member_token = c.token, local_token = member_token;
     String member = c.token.text, local = member;
     c.next();
     if (c.take_word("as")) {
       if (c.peek(0) != <ident>)
-        $report.parse_import_local(c);
+        $report.parse.import_local(c);
       local_token = c.token;
       local = c.token.text;
       c.next();
@@ -409,7 +409,7 @@ static List Compiler._declared(
 static List Compiler._defined(
   Compiler c, List decl, Token meta, int native, Token first) {
   match (decl) case %(seq *):
-    $report.parse_function_row(c);
+    $report.parse.function_row(c);
   List function;
   Token tokens = c.tokenizer.tokens;
   int start = (meta ? meta : first) - tokens;
@@ -435,7 +435,7 @@ static void Compiler._reject_expanded_meta(Compiler c, List decl, Token meta) {
   match (decl)
     case %(declare ? (bindings (bind (binding ? ?(String own)) *))):
       name = own;
-  $report.parse_meta_constructed(c, name, meta);
+  $report.parse.meta_constructed(c, name, meta);
 }
 
 /* Hashes functions and initialized file-static values, and records the
@@ -675,14 +675,14 @@ static List Compiler._declaration_types(Compiler c, List storage) {
 List Compiler.parse_declaration_argument(Compiler c) {
   List storage = c._storage_class();
   if (storage === %(typedef))
-    $report.parse_decl_typedef(c);
+    $report.parse.decl_typedef(c);
   List (type, binding_type) = c._declaration_types(storage);
   if (c._destructure_starts())
     return c._destructure_declaration(type, binding_type, 1);
   List binding = c._declarator_init(binding_type, NULL);
   List declaration = c._finish_declaration(<declare>, type, %($binding), 0);
   if (declaration.type_from_ast().is_function())
-    $report.parse_decl_function(c);
+    $report.parse.decl_function(c);
   return declaration;
 }
 
@@ -812,7 +812,7 @@ static List Compiler._destructure_declaration(
   if (allow_uninitialized || c.peek(0) == <in>)
     return %(declare $type (bindings @{_destructure_binds(bindings)}));
   if (!c.test(<=>))
-    $report.parse_destructure_init(c);
+    $report.parse.destructure_init(c);
   List source = c.parse_assignment();
   List result = %(dstrdecl $type (targets @bindings) $source);
   return c.anchor_origin(result, origin_token);
@@ -824,7 +824,7 @@ static List Compiler._destructure_targets(Compiler c, List binding_type) {
   c.expect(<(>);
   loop {
     if (c.peek(0) != <ident>)
-      $report.parse_destructure_name(c);
+      $report.parse.destructure_name(c);
     List ident = c.parse_basic_identifier();
     if (c.macro_holes) {
       List local = c.macro_introduced_name(ident.car());
@@ -854,7 +854,7 @@ static List _destructure_binds(List targets) {
 void Compiler.check_reference_placement(Compiler c, Type type) {
   type = c.sym.normalize_declared_type(type);
   if (<&> in type || <opt-ref> in type)
-    $report.type_reference_placement(c);
+    $report.type.reference_placement(c);
 }
 
 static List Compiler._finish_declaration(
@@ -1141,7 +1141,7 @@ static List Compiler._primitive_type(Compiler c) {
   // The preprocessed shallow pass only contributes declarations. The full
   // pass over the original source reports source-level type diagnostics.
   if (c.shallow) return source;
-  $report.type_scalar_invalid(c, source, start);
+  $report.type.scalar_invalid(c, source, start);
 }
 
 static int _is_scalar_specifier(Symbol symbol) {
@@ -1243,7 +1243,7 @@ static List Compiler._publish_aggregate_type(
   int layout = c._layout_attribute_since(first);
   int packed = c._attribute_since(first, c.packed_marks);
   if (tag == <struct> && packed && c.source_private >= 0)
-    $report.parse_attribute_packed(c, first);
+    $report.parse.attribute_packed(c, first);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -1339,7 +1339,7 @@ static void Compiler._declare_delegates(Compiler c, List context, List rows) {
     match (declaration)
       case %(declare ? (bindings *declarators)): {
         if (!declarators)
-          $report.parse_delegate_name(c);
+          $report.parse.delegate_name(c);
         foreach (List declarator, declarators)
           match (declarator)
             case %(bind ?binding ?): c._declare_delegate(context, binding);
@@ -1349,7 +1349,7 @@ static void Compiler._declare_delegates(Compiler c, List context, List rows) {
 static void Compiler._declare_delegate(Compiler c, List context, Var binding) {
   String name = binding_identity_spelling(binding);
   if (!name)
-    $report.parse_delegate_name(c);
+    $report.parse.delegate_name(c);
   if (!c.macro_holes) c.sym.declare_delegate_field(context, name);
 }
 
@@ -1419,7 +1419,7 @@ static Type Compiler._declare_named_type(
   List modifiers = NULL;
   match (declarator) {
     case %(bind () ?captured): modifiers = captured;
-    default: $report.parse_named_type_abstract(c, start);
+    default: $report.parse.named_type_abstract(c, start);
   }
   c.expect(<;>);
   Type type = %(declare $base (bindings (bind () $modifiers)))
@@ -1488,7 +1488,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
   if (macro) return macro;
   if (c.macro_holes) return c._template_enumerator(context);
   if (c.peek(0) != <ident>)
-    $report.parse_enum_name(c);
+    $report.parse.enum_name(c);
   String spelling = c.token.text;
   Token origin = c.token;
   c.next();
@@ -1520,7 +1520,7 @@ static List Compiler._enumerator_name(Compiler c, Type context) {
       return name;
     }
     default:
-      $report.parse_enum_name(c);
+      $report.parse.enum_name(c);
   }
 }
 
@@ -1541,7 +1541,7 @@ static List Compiler._publish_enumerator(
   List binding = exact ? NULL : name is <list> ? name.list() : NULL;
   String spelling = exact ? exact : binding_identity_spelling(binding);
   if (!spelling)
-    $report.parse_syntax_position(c, origin);
+    $report.parse.syntax_position(c, origin);
   List key = %($spelling);
   Symbol prior = c.sym.enumerator_owner(key);
   if (prior && binding) {
@@ -1549,7 +1549,7 @@ static List Compiler._publish_enumerator(
     if (existing && existing.equal(binding)) return input;
   }
   if (prior)
-    $report.parse_enum_bound(c, spelling, origin);
+    $report.parse.enum_bound(c, spelling, origin);
   if (exact) binding = c.sym.declare(NULL, key, context);
   else
     c.sym.bind_identity(NULL, binding, context.declaration_ast(binding));
@@ -1726,9 +1726,9 @@ static List Compiler._parenthesized(
        this unit cannot see, such as a package type named without its
        import alias, not a parenthesized declarator. */
     if (first.type == <ident> && c.peek(0) == <ident>)
-      $report.parse_type_unknown(c, first);
+      $report.parse.type_unknown(c, first);
     else
-      $report.parse_paren_unclosed(c);
+      $report.parse.paren_unclosed(c);
   }
   c.next();
   return decl;
@@ -1768,7 +1768,7 @@ static List Compiler._array_suffix(Compiler c) {
   if (c.peek(0) != <]>) {
     c.require_input();
     Symbol unexpected = c.peek(0);
-    $report.parse_dimension_close(c, expr, unexpected);
+    $report.parse.dimension_close(c, expr, unexpected);
   }
   c.next();
   return %((dim $expr));
@@ -1836,7 +1836,7 @@ static List Compiler._literal_method(Compiler c) {
   if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
   else {
     if (!c.token.text.is_identifier())
-      $report.parse_method_name(c);
+      $report.parse.method_name(c);
     member = c.token.text;
     c.next();
   }
@@ -1858,7 +1858,7 @@ static List Compiler._hole_method(Compiler c) {
     c.next();
   }
   else
-    $report.parse_macro_member(c);
+    $report.parse.macro_member(c);
   return %(bind (($owner) $member) ());
 }
 
@@ -1958,9 +1958,9 @@ static Var Compiler._method_spelling(
         name = member;
         exact_name = 1;
       }
-      else $report.type_method_owner(c);
+      else $report.type.method_owner(c);
     case %((!is ? type list) (!is ? type string)):
-      $report.type_method_owner(c);
+      $report.type.method_owner(c);
   }
   return name;
 }
@@ -1978,7 +1978,7 @@ static void Compiler._check_rebinding(
       Type prior_type = prior;
       Type candidate = declaration.type_from_ast();
       if (!candidate.is_function() || !prior_type.is_function())
-        $report.parse_decl_bound(c, exact);
+        $report.parse.decl_bound(c, exact);
     }
   }
 }
@@ -2012,7 +2012,7 @@ static List Compiler._function_parameters(Compiler c) {
   c.next();
   c.__complete_here(<type>, _type_keywords());
   if (c.peek(0) == <)>)
-    $report.parse_params_empty(c);
+    $report.parse.params_empty(c);
   SymScope saved = c.params, parsed;
   int complete = 0;
   defer { if (!complete) c.params = saved; }
@@ -2025,7 +2025,7 @@ static List Compiler._function_parameters(Compiler c) {
   if (c.peek(0) != <)>) {
     c.require_input();
     Symbol unexpected = c.peek(0);
-    $report.parse_params_close(c, params, unexpected);
+    $report.parse.params_close(c, params, unexpected);
   }
   else c.next();
   c.params = parsed;
@@ -2137,7 +2137,7 @@ static List Compiler._member_name(
   Compiler c, String owner, List &?method_identity) {
   // a weaker test that accepts anything that looks like an identifier
   if (!c.token.text.is_identifier())
-    $report.parse_method_member(c, owner);
+    $report.parse.method_member(c, owner);
   String member = c.token.text, ident = %"${owner}_$member";
   if (method_identity) method_identity = %($owner $member);
   if (!method_identity && !c.sym.get_exact(%($ident))) {
@@ -2157,7 +2157,7 @@ static String Compiler._package_alias_member(Compiler c) {
   c.next();
   c.next();
   if (!c.sym.get_exact(%($spelling)))
-    $report.parse_package_member(c, c.token, package, c.token.text);
+    $report.parse.package_member(c, c.token, package, c.token.text);
   return spelling;
 }
 
@@ -2212,7 +2212,7 @@ List Compiler.parse_function_definition(Compiler c) {
   Token tokens = c.tokenizer.tokens, start = c.token;
   List declaration = c.parse_simple_declaration();
   if (c.peek(0) != <"{"> && !c._at_function_arrow())
-    $report.parse_function_body(c);
+    $report.parse.function_body(c);
   int first = start - tokens, body = c.token - tokens;
   List function = c._finish_function(declaration, NULL);
   if (!c.macro_holes)
@@ -2303,12 +2303,12 @@ static String Compiler._prepare_lifecycle(
   if (initializer_owner) {
     c._require_signature(declaration, name, "initializer");
     if (c.init_fn && c.init_fn != name)
-      $report.parse_init_duplicate(c, name);
+      $report.parse.init_duplicate(c, name);
   }
   if (shutdown_owner) {
     c._require_signature(declaration, name, "shutdown");
     if (c.fini_fn && c.fini_fn != name)
-      $report.parse_shutdown_duplicate(c, name);
+      $report.parse.shutdown_duplicate(c, name);
   }
   return name;
 }
@@ -2333,7 +2333,7 @@ static void Compiler._require_signature(
              (bind ?
                ((fnmod (params (param (void) (bind () ())))))))):
       return;
-  $report.parse_lifecycle_signature(c, role, name);
+  $report.parse.lifecycle_signature(c, role, name);
 }
 
 static void Compiler._publish_lifecycle(
@@ -2456,9 +2456,9 @@ static void Compiler._require_cleanup(
   Compiler c, Var base, Type type, Token origin) {
   match (base)
     case %(* (!or static extern threaded) *):
-      $report.parse_managed_storage(c, origin);
+      $report.parse.managed_storage(c, origin);
   if (!c.protocol_members_for(type, %("Cleanup")))
-    $report.protocol_managed_cleanup(c, origin, type);
+    $report.protocol.managed_cleanup(c, origin, type);
 }
 
 static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
@@ -2482,9 +2482,9 @@ List Compiler.bind_syntax(
   syntax = c.evaluate_macro_slot(syntax);
   if (c._take_staged(syntax)) return syntax;
   if (syntax is not <list>)
-    $report.parse_syntax_expected(c);
+    $report.parse.syntax_expected(c);
   List input = syntax;
-  if (!input) $report.parse_syntax_expected(c);
+  if (!input) $report.parse.syntax_expected(c);
   List enumerator =
     context == AST_ENUMERATOR ? c._bind_enumerator(input) : NULL;
   if (enumerator) return enumerator;
@@ -2659,7 +2659,7 @@ static List Compiler._bind_form(
 /* Reports a constructed form at a position that does not admit it.
    `report_error` never returns, so a caller may return this call. */
 static List Compiler._construction_error(Compiler c) {
-  $report.parse_syntax_position(c, c.token);
+  $report.parse.syntax_position(c, c.token);
 }
 
 static List Compiler._resolve(Compiler c, List expr) =>
@@ -2875,7 +2875,7 @@ static List Compiler._bind_items(Compiler c, List items, AstPos context) {
   if (context == AST_STATEMENT) {
     match (items) case %(?only):
       return c.bind_syntax(only, context, c.return_type);
-    $report.parse_statement_single(c);
+    $report.parse.statement_single(c);
   }
   Array bound = [];
   foreach (Var item, items)
@@ -3262,7 +3262,7 @@ List Compiler.finish_foreign_alias(
   Compiler c, List declaration, List native_syntax) {
   match (declaration) {
     case %(function *):
-      $report.parse_alias_body(c);
+      $report.parse.alias_body(c);
     /* A function returning a pointer puts its pointer modifiers after the
        fnmod. The trailing modifiers are the return type's pointer depth; the
        declaration is still one direct function. */
@@ -3274,7 +3274,7 @@ List Compiler.finish_foreign_alias(
       return c._alias_target(declaration, binding, native_syntax);
     }
   }
-  $report.parse_alias_target(c);
+  $report.parse.alias_target(c);
 }
 
 static void Compiler._alias_storage(Compiler c, Var base) {
@@ -3282,14 +3282,14 @@ static void Compiler._alias_storage(Compiler c, Var base) {
     if (part is not <symbol>) continue;
     Symbol specifier = part;
     if (specifier.is_storage_class() && specifier != <static>)
-      $report.parse_alias_storage(c);
+      $report.parse.alias_storage(c);
   }
 }
 
 static void Compiler._alias_parameters(Compiler c, List parameters) {
   foreach (Var parameter, parameters)
     match (parameter) case %(...):
-      $report.parse_alias_variadic(c);
+      $report.parse.alias_variadic(c);
 }
 
 static List Compiler._alias_target(
@@ -3299,10 +3299,10 @@ static List Compiler._alias_target(
     case %(expr (!set ?native_type (*)) ${$source_identifier_content(
         %(?native_binding))}): {
       if (native_type && !native_type.type().is_function())
-        $report.type_alias_function(c, native_type);
+        $report.type.alias_function(c, native_type);
       if (List.equal(binding, native_binding))
-        $report.parse_alias_self(c);
+        $report.parse.alias_self(c);
       return %(falias $declaration $native_binding);
     }
-  $report.parse_alias_identifier(c);
+  $report.parse.alias_identifier(c);
 }

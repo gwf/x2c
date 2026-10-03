@@ -27,14 +27,14 @@ $(import "../src/grammar.xmacro")
 
 // diagnostics
 
-macro Stmt $report.macro_argument_constant(Expr $c, Expr $site) {
+macro Stmt $report.macro.argument_constant(Expr $c, Expr $site) {
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
     $site, %("an argument must be a constant, captured syntax, or a meta call"));
 }
 
-macro Stmt $report.macro_function_only(Expr $c, Expr $site, Expr $name) {
+macro Stmt $report.macro.function_only(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <macro>,
     %"'${$name}' can only be called at compile time",
@@ -118,7 +118,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 static Var _name_syntax(Compiler c, List node, Token site) {
   match (node)
     case %(expr ? ${$source_identifier_content(%(?))}): return node;
-  $report.macro_argument_constant(c, site);
+  $report.macro.argument_constant(c, site);
 }
 
 /* A number passed to a numeric parameter takes the parameter's type. */
@@ -450,7 +450,7 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   match (callee)
     case %(expr ? ${$source_identifier_content(%((binding ? ?name)))})
       if (name is <string> && name in c.meta_comptime):
-        $report.macro_function_only(c, origin, name);
+        $report.macro.function_only(c, origin, name);
 }
 
 /** Returns whether `fn` is a `meta` function this compiler recorded as

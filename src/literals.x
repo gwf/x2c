@@ -164,12 +164,12 @@ static Var Compiler._macro_pattern_argument(Compiler c) {
   }
   List element = c.try_parse_macro_subpattern(0);
   if (!element) {
-    if (c.peek(0) != <"%(">) $report.parse_macro_pattern_static(c, origin);
+    if (c.peek(0) != <"%(">) $report.parse.macro_pattern_static(c, origin);
     element = c.parse_list_literal();
   }
   Var value = c.match_pattern_value(element);
   if (!match_value_is_static(value))
-    $report.parse_macro_pattern_static(c, origin);
+    $report.parse.macro_pattern_static(c, origin);
   return value;
 }
 
@@ -227,7 +227,7 @@ static List Compiler._parse_insertion(Compiler c) {
 static List Compiler._parse_named_reference(Compiler c, Symbol sigil) {
   c.expect(sigil);
   if (c.peek(0) != <ident>) {
-    $report.parse_insert_name(c, sigil);
+    $report.parse.insert_name(c, sigil);
   }
   return c.parse_variable();
 }
@@ -463,7 +463,7 @@ static List Compiler._parse_bare_symbol(
   Compiler c, Symbol owner, int detail) {
   Token token = c.token;
   if (c.peek(0) != <lit-atom>)
-    $report.parse_symbol_bare(c, owner, detail, token);
+    $report.parse.symbol_bare(c, owner, detail, token);
   String text = token.text.unescape();
   Symbol symbol = c._exact_symbol(token, text);
   c.next();
@@ -517,7 +517,7 @@ static void Compiler._parse_catch_detail(Compiler c, Array elements) {
     return;
   }
   if (!c.test(<(>))
-    $report.parse_catch_detail(c, origin);
+    $report.parse.catch_detail(c, origin);
   List key = c._parse_bare_symbol(<catch>, 1);
   List value = c._parse_detail_value(
     origin, "catch filter detail requires exactly one pattern",
@@ -552,7 +552,7 @@ List Compiler.parse_symbol_set_literal(Compiler c) {
   if (duplicate >= 0) {
     Token token = tokens[duplicate];
     Symbol symbol = symbols[duplicate];
-    $report.parse_symbol_duplicate(c, token, symbol);
+    $report.parse.symbol_duplicate(c, token, symbol);
   }
   symbols.free();
   tokens.free();
@@ -563,7 +563,7 @@ static Symbol Compiler._member_symbol(Compiler c) {
   Token token = c.token;
   Symbol kind = c.peek(0);
   if (kind != <lit-atom> && kind != <lit-symbol>)
-    $report.parse_symbol_literal(c, token);
+    $report.parse.symbol_literal(c, token);
   String spelling = kind == <lit-symbol>
     ? _angle_spelling(token.text) : _member_spelling(token.text);
   return c._exact_symbol(token, spelling);
@@ -769,7 +769,7 @@ static List Compiler._parse_string_segment(Compiler c) {
     case <$>:       return c._parse_named_segment();
     case <"${">:    return c._parse_braced_segment();
     default:
-      $report.parse_string_segment(c);
+      $report.parse.string_segment(c);
   }
 }
 
@@ -868,7 +868,7 @@ List Compiler.parse_atomic_literal(Compiler c) {
     return %(expr ${literal.cadr()} $literal);
   }
   Symbol kind = c.peek(0);
-  $report.parse_atom_expected(c, kind);
+  $report.parse.atom_expected(c, kind);
 }
 
 /* Shallow declaration discovery gives a number outside every supported
@@ -877,7 +877,7 @@ static List Compiler._number_literal(Compiler c, String text, int floating) {
   Type type = Type.numeric_literal(text, floating);
   if (!type && c.shallow) type = floating ? %(double) : %(int);
   if (!type)
-    $report.type_number_range(c, text);
+    $report.type.number_range(c, text);
   return %(literal $type $text);
 }
 
@@ -899,7 +899,7 @@ static void Compiler._check_binder(Compiler c, Atom atom) {
   if ((first != '?' && first != '*') || atom.is_binder()) return;
   int reserved = atom == <?binder?> || atom == <*binder?>;
   if (reserved && c.match_is && c.peek(1) == <)>) return;
-  $report.parse_binder_name(c, atom);
+  $report.parse.binder_name(c, atom);
 }
 
 /* The preprocessor never sees a literal, so a macro's name here is data.
@@ -936,5 +936,5 @@ static Symbol Compiler._exact_symbol(
   Symbol symbol;
   if (Symbol.try_new(spelling, &symbol)) return symbol;
   Symbol lossy = spelling ? Symbol.new(spelling) : 0;
-  $report.parse_symbol_truncated(c, token, spelling, lossy);
+  $report.parse.symbol_truncated(c, token, spelling, lossy);
 }

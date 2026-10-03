@@ -21,7 +21,7 @@
 
 // diagnostics
 
-macro Stmt $report.emit_static_switch(Expr $c) {
+macro Stmt $report.emit.static_switch(Expr $c) {
   {
     String note = "place the declaration before the switch "
                 + "or within one case block";
@@ -340,7 +340,7 @@ static List Emitter._local_static(
   }
   if (_static_case_entry(body)) {
     e.c.origin = e.origin;
-    $report.emit_static_switch(e);
+    $report.emit.static_switch(e);
   }
   List (base, bindings) = declaration.cdr();
   Type declared_base = base;

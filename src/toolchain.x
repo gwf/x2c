@@ -52,7 +52,7 @@ typedef struct ToolRun {
 
 // command reports
 
-macro Stmt $report.toolchain_tool_failed(Expr $phase, Expr $status) {
+macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {
   fprintf(
     stderr, "x2c: %s failed with status %d\n", $phase, $status);
 }
@@ -288,7 +288,7 @@ int ToolRun.wait(ToolRun execution) {
   if (output) fputs(output, stderr);
   if (errors) fputs(errors, stderr);
   if (status && action.report)
-    $report.toolchain_tool_failed(action.phase.str(), status);
+    $report.toolchain.tool_failed(action.phase.str(), status);
   return status;
 }
 

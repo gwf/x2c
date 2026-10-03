@@ -574,7 +574,7 @@ static void Walk.end(Walk &w, Var argument, String op, Symbol how) {
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
                              : w.subject(argument, named, storage);
-    $report.region_bad_free(w, op, subject);
+    $report.region.bad_free(w, op, subject);
   }
   Fact fact = w.fact_of(argument, NULL);
   if (!fact || fact.depth != w.depth) return;
@@ -644,14 +644,14 @@ static void Walk.scan_ident(Walk &w, Var binding) {
   if (w.audit && ((fact.region && fact.region.closed) ||
                   (fact.other && fact.other.closed))) {
     String name = binding_identity_spelling(binding);
-    $report.region_read_ended(w, name);
+    $report.region.read_ended(w, name);
     return;
   }
   if (!fact.dead) return;
   String name = binding_identity_spelling(binding);
   String ended = fact.dead == <moved> ? $region.reason.moved()
                                       : $region.reason.freed();
-  $report.region_after_free(w, name, ended);
+  $report.region.after_free(w, name, ended);
   fact.dead = 0;
 }
 
@@ -864,7 +864,7 @@ static int Flow.check(
   String subject = (*f.w).subject(f.value, f.named, f.fact);
   if (region.closed) {
     if (report)
-      $report.region_use_ended(f, subject, region);
+      $report.region.use_ended(f, subject, region);
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -872,10 +872,10 @@ static int Flow.check(
   if (!exit) return 0;
   if (report) {
     if (region == f.w.frame) {
-      $report.region_local_escape(f, subject, exit);
+      $report.region.local_escape(f, subject, exit);
     }
     else
-      $report.region_escape(f, subject, exit, region);
+      $report.region.escape(f, subject, exit, region);
   }
   return 1;
 }

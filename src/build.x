@@ -126,9 +126,9 @@ static void Build._add_inputs(Build b) {
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       b.native_inputs.push(input);
-    else $report.build_input_unsupported(input);
+    else $report.build.input_unsupported(input);
     if (request.kind == <static-lib> && input.endswith(".a"))
-      $report.build_archive_nested(input);
+      $report.build.archive_nested(input);
   }
 }
 
@@ -139,12 +139,12 @@ void build_check_input(String input) {
   if (!input) driver_error("input path is empty");
   if (Path.is_file(input)) return;
   if (Path.is_dir(input)) {
-    $report.build_input_directory(input);
+    $report.build.input_directory(input);
     exit(2);
   }
   if (Path.exists(input))
-    $report.build_input_not_file(input);
-  $report.build_input_missing(input);
+    $report.build.input_not_file(input);
+  $report.build.input_missing(input);
   if (strpbrk(input, "*?["))
     fputs("note: x2c does not expand wildcard operands\n", stderr);
   exit(2);
@@ -157,7 +157,7 @@ static void Build._check_compile_only(Build b) {
   if (b.native_inputs)
     driver_error("compile-only accepts only .x and .c inputs");
   if (inputs.cdr() && b.request.output)
-    $report.build_output_ambiguous();
+    $report.build.output_ambiguous();
   if (inputs.cdr() && !b.request.build_dir)
     driver_error("multiple compile-only inputs require --build-dir");
 }
@@ -215,7 +215,7 @@ static void Build._check_runtime(Build b) {
   if (b.request.compile_only || b.request.kind != <executable>) return;
   String runtime = b.toolchain.runtime_lib;
   if (access(runtime, R_OK))
-    $report.build_runtime_missing(runtime);
+    $report.build.runtime_missing(runtime);
 }
 
 // translated units
@@ -243,7 +243,7 @@ int Build.translation_current(Build b, String input, String directory) {
   uint64_t hash = b._translation_fingerprint(input, directory, ok);
   int current = ok && _state_matches(b._state_path("x", input), hash);
   if (current && b.request.verbose)
-    $report.build_translation_cached(input);
+    $report.build.translation_cached(input);
   return current;
 }
 
@@ -373,11 +373,11 @@ static void Build._link_package(Build b, String package) {
   if (b.request.kind == <static-lib>) return;
   String archive = %"$builds/lib$name.a";
   if (access(archive, R_OK))
-    $report.build_package_missing(name, archive);
+    $report.build.package_missing(name, archive);
   // The response file carries the link inputs the archive needs, so a
   // package built before it existed is the same unbuilt-package mistake
   // and is rebuilt; dropping them leaves undefined symbols at link.
-  if (!native) $report.build_package_missing(name, response);
+  if (!native) $report.build.package_missing(name, response);
   b.native_inputs.push(archive);
   b.toolchain.ld_args = b.toolchain.ld_args.append(native.ld_args);
 }
@@ -654,11 +654,11 @@ int compile_commands_write(String path, Array commands) {
   String text = %"[\n${",\n".join(commands)}\n]\n";
   try {
     file_publish(%($path $text));
-    $report.build_database_written(path);
+    $report.build.database_written(path);
     return 1;
   }
   catch %((!or not-found io-fail) *): {}
-  $report.build_database_unwritable(path);
+  $report.build.database_unwritable(path);
   return 0;
 }
 
@@ -742,7 +742,7 @@ static int Build._compile_current(Build b, CcJob &job) {
   if (access(job.object, R_OK) || access(job.depfile, R_OK)) return 0;
   if (!_state_matches(job.state_path, job.fingerprint)) return 0;
   if (b.request.verbose)
-    $report.build_compilation_cached(job.source);
+    $report.build.compilation_cached(job.source);
   b.cc_cached++;
   return 1;
 }
@@ -774,7 +774,7 @@ static int Build._archive_current(
   if (!record || access(b.output, R_OK)) return 0;
   if (!_state_matches(record, hash)) return 0;
   if (b.request.verbose)
-    $report.build_final_cached(phase.str(), b.output);
+    $report.build.final_cached(phase.str(), b.output);
   return 1;
 }
 
@@ -813,7 +813,7 @@ static int Build._publish(Build b, List inputs) {
   int status = b._replace(b._final_action(staged, inputs), staged);
   Path.remove_tree(staging);
   if (status < 0 && b.request.verbose)
-    $report.build_link_unchanged(b.output.str());
+    $report.build.link_unchanged(b.output.str());
   return status;
 }
 
@@ -825,7 +825,7 @@ static int Build._replace(Build b, ToolAction action, String staged) {
   if (b.request.kind == <module> && _same_file_bytes(staged, b.output))
     return -1;
   if (!rename(staged, b.output)) return 0;
-  $report.build_replace_failed(b.output.str(), strerror(errno));
+  $report.build.replace_failed(b.output.str(), strerror(errno));
   return 1;
 }
 
@@ -924,15 +924,15 @@ void Build.report_success(Build b) {
   if (b.cc_n) {
     int n = b.request.jobs;
     String jobs = n == 1 ? "1 job" : %"$n jobs";
-    $report.build_compiler_used(b, jobs);
+    $report.build.compiler_used(b, jobs);
   }
   if (!b.request.compile_only) report_line(<muted>, b._final_tool());
-  $report.build_intermediates(b);
+  $report.build.intermediates(b);
   if (b.request.compile_only) return;
   String size = report_size(report_file_bytes(b.output));
-  $report.build_output_size(b, size);
+  $report.build.output_size(b, size);
   if (b._mapped_debug())
-    $report.build_debug_symbols(b);
+    $report.build.debug_symbols(b);
 }
 
 static String Build._headline(Build b) {
@@ -970,7 +970,7 @@ static String Build._retention(Build b) {
     A dry run prints the action without launching the program.
 */
 int Build.run_program(Build b) {
-  $report.build_running(b);
+  $report.build.running(b);
   ToolAction action = tool_action_new(
     <run>, %(${b.output} @{b.request.run_args}), b.request.verbose,
     b.request.dry_run);
@@ -986,7 +986,7 @@ void Build.cleanup(Build b, int success) {
   if (!success || !b.temporary || b.request.dry_run) return;
   try Path.remove_tree(b.work_dir);
   catch %(io-fail *):
-    $report.build_cleanup_failed(b.work_dir);
+    $report.build.cleanup_failed(b.work_dir);
 }
 
 // scripts

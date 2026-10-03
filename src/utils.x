@@ -32,15 +32,15 @@ $(import "../lib/private-keywords.xmacro")
 
 // command reports
 
-macro Stmt $report.utils_identity_mismatch(Expr $detail) {
+macro Stmt $report.utils.identity_mismatch(Expr $detail) {
   driver_error(%"compiler identity mismatch: ${$detail}");
 }
 
-macro Stmt $report.utils_lock_failed(Expr $p) {
+macro Stmt $report.utils.lock_failed(Expr $p) {
   driver_error(%"cannot lock ${$p}");
 }
 
-macro Stmt $report.utils_host_failed(
+macro Stmt $report.utils.host_failed(
   Expr $detail, Expr $subject, Expr $error) {
   driver_error(
     %"${$detail.assoc(<operation>)} ${$subject}: ${
@@ -83,7 +83,7 @@ void x2c_initialize_command_environment(
   String supplied = Env.get("X2C_IDENTITY");
   if (supplied && supplied != embedded_identity) {
     String detail = %"command $embedded_identity, driver $supplied";
-    $report.utils_identity_mismatch(detail);
+    $report.utils.identity_mismatch(detail);
   }
   _initialize_environment(argv0, embedded_identity);
 }
@@ -350,7 +350,7 @@ String filename_hash(String filename) {
 */
 int file_lock(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) $report.utils_lock_failed(p);
+  if (lock < 0) $report.utils.lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while (flock(lock, operation)) {
     if (errno == EINTR) continue;
@@ -454,5 +454,5 @@ void host_error(List detail) {
   if (subject is void) subject = detail.assoc(<program>);
   // Quoted, the key survives a host preprocessor that expands `errno`.
   long error = detail.assoc(<"errno">);
-  $report.utils_host_failed(detail, subject, error);
+  $report.utils.host_failed(detail, subject, error);
 }

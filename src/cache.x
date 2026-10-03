@@ -32,7 +32,7 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
+macro Stmt $report.cache.init_cycle(Expr $c, Expr $origin, Expr $notes) {
   $c.report_error(
     <cache>, "file-static x2c initializer dependency cycle",
     $origin, $notes);
@@ -704,7 +704,7 @@ static void StaticQueue.report_cycle(StaticQueue &q) {
     Token tokens = c.tokenizer.tokens;
     token = tokens + token_index.integer();
   }
-  $report.cache_init_cycle(c, token, notes.list_free());
+  $report.cache.init_cycle(c, token, notes.list_free());
 }
 
 // cache slots and values

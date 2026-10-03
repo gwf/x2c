@@ -1,50 +1,50 @@
 /* transform diagnostics. */
 
-macro Stmt $report.parse_init_incomplete(Expr $c) {
+macro Stmt $report.parse.init_incomplete(Expr $c) {
   $c.report_error(
     <parse>,
     "managed initializer requires a complete block-local initializer",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_index_unsupported(Expr $c, Expr $type) {
+macro Stmt $report.xform.index_unsupported(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket indexing",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_index_assignment(Expr $c, Expr $type) {
+macro Stmt $report.xform.index_assignment(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket assignment",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_slice_unsupported(
+macro Stmt $report.xform.slice_unsupported(
   Expr $c, Expr $type, Expr $notes) {
   $c.report_error(
     <xform>, %"type ${$type} does not support slicing",
     NULL, $notes);
 }
 
-macro Stmt $report.type_destructure_list(Expr $c, Expr $source_type) {
+macro Stmt $report.type.destructure_list(Expr $c, Expr $source_type) {
   $c.report_error(
     <type>, "destructuring requires a List source",
     NULL, %(("source type" ${$source_type})));
 }
 
-macro Stmt $report.xform_unary_dynamic(Expr $c) {
+macro Stmt $report.xform.unary_dynamic(Expr $c) {
   $c.report_error(
     <xform>, "dynamic unary numeric operators are not supported",
     NULL, %("use Var.binary with an explicit numeric operand"));
 }
 
-macro Stmt $report.xform_index_copy(Expr $c, Expr $type) {
+macro Stmt $report.xform.index_copy(Expr $c, Expr $type) {
   $c.report_error(
     <xform>, %"type ${$type} does not support bracket assignment",
     NULL, %("use an explicit copy-producing method where available"));
 }
 
-macro Stmt $report.xform_string_assignment(Expr $c) {
+macro Stmt $report.xform.string_assignment(Expr $c) {
   {
     String note = "String is immutable: use the copy-producing " +
                   "String.withindex, or bind a char * to write a " +
@@ -55,13 +55,13 @@ macro Stmt $report.xform_string_assignment(Expr $c) {
   }
 }
 
-macro Stmt $report.xform_slice_assignment(Expr $c) {
+macro Stmt $report.xform.slice_assignment(Expr $c) {
   $c.report_error(
     <xform>, "slice expressions are not assignable",
     NULL, %("call the collection's setslice method explicitly"));
 }
 
-macro Stmt $report.xform_numeric_operands(
+macro Stmt $report.xform.numeric_operands(
   Expr $c, Expr $op, Expr $lhs_type, Expr $rhs_type) {
   {
     String left_type = $lhs_type.repr(), right_type = $rhs_type.repr();
@@ -73,13 +73,13 @@ macro Stmt $report.xform_numeric_operands(
   }
 }
 
-macro Stmt $report.xform_string_compound(Expr $c) {
+macro Stmt $report.xform.string_compound(Expr $c) {
   $c.report_error(
     <xform>, "String compound assignment supports only String +=",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_container_compound(Expr $c, Expr $lhs_type) {
+macro Stmt $report.xform.container_compound(Expr $c, Expr $lhs_type) {
   {
     String type = $lhs_type.repr();
     $c.report_error(
@@ -88,7 +88,7 @@ macro Stmt $report.xform_container_compound(Expr $c, Expr $lhs_type) {
   }
 }
 
-macro Stmt $report.xform_compound_operand(
+macro Stmt $report.xform.compound_operand(
   Expr $c, Expr $op, Expr $rhs_type) {
   {
     String details = %"right type: ${$rhs_type.repr()}";
@@ -100,13 +100,13 @@ macro Stmt $report.xform_compound_operand(
   }
 }
 
-macro Stmt $report.xform_compound_bitfield(Expr $c) {
+macro Stmt $report.xform.compound_bitfield(Expr $c) {
   $c.report_error(
     <xform>, "dynamic compound assignment cannot target a bitfield",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
+macro Stmt $report.xform.compound_lvalue(Expr $c, Expr $lhs_type) {
   {
     String details = %"left type: ${$lhs_type.repr()}";
     $c.report_error(
@@ -115,13 +115,13 @@ macro Stmt $report.xform_compound_lvalue(Expr $c, Expr $lhs_type) {
   }
 }
 
-macro Stmt $report.xform_compound_enum(Expr $c) {
+macro Stmt $report.xform.compound_enum(Expr $c) {
   $c.report_error(
     <xform>, "dynamic compound assignment cannot target an enum",
     NULL, NULL);
 }
 
-macro Stmt $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
+macro Stmt $report.xform.index_operand(Expr $c, Expr $op, Expr $rhs_type) {
   {
     String details = %"right type: ${$rhs_type.repr()}";
     String message = $op == <+>
@@ -131,7 +131,7 @@ macro Stmt $report.xform_index_operand(Expr $c, Expr $op, Expr $rhs_type) {
   }
 }
 
-macro Stmt $report.xform_index_update(
+macro Stmt $report.xform.index_update(
   Expr $c, Expr $base_type, Expr $postfix) {
   {
     String type = $base_type.repr();

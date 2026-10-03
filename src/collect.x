@@ -26,28 +26,28 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.driver_runtime_read(Expr $c, Expr $runtime) {
+macro Stmt $report.driver.runtime_read(Expr $c, Expr $runtime) {
   $c.report_error(
     <driver>,
     "cannot read runtime source",
     $c.token, %("path: ${$runtime}"));
 }
 
-macro Stmt $report.driver_include_read(Expr $c, Expr $target, Expr $path) {
+macro Stmt $report.driver.include_read(Expr $c, Expr $target, Expr $path) {
   $c.report_error(
     <driver>,
     "cannot read include",
     $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
 }
 
-macro Stmt $report.driver_package_unknown(Expr $c, Expr $site, Expr $name) {
+macro Stmt $report.driver.package_unknown(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
     %"unknown package '${$name}'",
     $site, %( "searched: <root>/${$name}/src/${$name}.x, <root>/${$name}/${$name}.x" ));
 }
 
-macro Stmt $report.driver_package_read(
+macro Stmt $report.driver.package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
   $c.report_error(
     <driver>,
@@ -55,7 +55,7 @@ macro Stmt $report.driver_package_read(
     $site, %( "path: ${$entry}" ));
 }
 
-macro Stmt $report.driver_package_prefix(
+macro Stmt $report.driver.package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
   $c.report_error(
     <driver>,
@@ -63,7 +63,7 @@ macro Stmt $report.driver_package_prefix(
     $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
 }
 
-macro Stmt $report.emit_interface_write(Expr $c) {
+macro Stmt $report.emit.interface_write(Expr $c) {
   $c.report_error(
     <emit>,
     "failed to write interface file",
@@ -199,7 +199,7 @@ static List Compiler._prelude_entry(
 static String Compiler._runtime_text(Compiler c, String runtime) {
   String text = NULL;
   if (c.read_source(runtime, text)) return text;
-  $report.driver_runtime_read(c, runtime);
+  $report.driver.runtime_read(c, runtime);
 }
 
 /* Rows enter the unit's symbols and its source declarations together. */
@@ -460,7 +460,7 @@ static String Compiler._walked_hash(
 static String Compiler._include_text(Compiler c, String target, String path) {
   String text = NULL;
   if (c.read_source(path, text)) return text;
-  $report.driver_include_read(c, target, path);
+  $report.driver.include_read(c, target, path);
 }
 
 /* Walk one included file cold and return its entry. The walk reads the
@@ -759,7 +759,7 @@ static String Compiler._find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = package_entry(c.sources, c.package_dirs, name, root);
   if (entry) return entry;
-  $report.driver_package_unknown(c, token, name);
+  $report.driver.package_unknown(c, token, name);
 }
 
 /* The package's files enter the cache from their entries, or from one cold
@@ -775,7 +775,7 @@ static void Compiler._walk_package(
   }
   String text = NULL;
   if (!package.read_source(entry, text))
-    $report.driver_package_read(c, token, package, entry);
+    $report.driver.package_read(c, token, package, entry);
   package._walk_apart(entry, text, globs, visited);
 }
 
@@ -831,7 +831,7 @@ static void Surface.take(Surface &s, Map rows, List key, Var value) {
 static void Surface.reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
   String fix = %"below #pragma private, or move it into '$name/src'";
-  $report.driver_package_prefix(s.c, s.token, name, spelling, unit, fix);
+  $report.driver.package_prefix(s.c, s.token, name, spelling, unit, fix);
 }
 
 /* The merged rows enter the importing unit's symbols. */
@@ -1187,7 +1187,7 @@ String interface_text(Compiler c, List selected) {
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
   if (_write_interface_entry(out, canonical, cached, selected)) return out;
-  $report.emit_interface_write(c);
+  $report.emit.interface_write(c);
 }
 
 static int _write_interface_entry(

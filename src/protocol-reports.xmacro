@@ -1,36 +1,36 @@
 /* protocol diagnostics. */
 
-macro Stmt $report.protocol_tag_var(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.tag_var(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'tag' applies only to a Var adoption",
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_modifier_conflict(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.modifier_conflict(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_as_var(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.as_var(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'as' applies only to a Var adoption",
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_static_adoption(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.static_adoption(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'static' applies only to a concrete protocol adoption",
     $origin, %("remove 'static' from the reusable protocol body"));
 }
 
-macro Stmt $report.protocol_participant_expected(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.participant_expected(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "expected protocol participant name",
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_modifier_adoption(
+macro Stmt $report.protocol.modifier_adoption(
   Expr $c, Expr $representation, Expr $origin) {
   $c.report_error(
     <protocol>, $representation
@@ -39,67 +39,67 @@ macro Stmt $report.protocol_modifier_adoption(
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_meta_adoption(Expr $c, Expr $origin) {
+macro Stmt $report.protocol.meta_adoption(Expr $c, Expr $origin) {
   $c.report_error(
     <protocol>, "'meta' applies only to a concrete protocol adoption",
     $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
 }
 
-macro Stmt $report.protocol_assoc_order(Expr $c) {
+macro Stmt $report.protocol.assoc_order(Expr $c) {
   $c.report_error(
     <protocol>, "associated types must precede protocol members",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_type_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.protocol.type_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, %"duplicate protocol type variable '${$name}'",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_assoc_expected(Expr $c) {
+macro Stmt $report.protocol.assoc_expected(Expr $c) {
   $c.report_error(
     <protocol>, "expected associated type name",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_member_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.protocol.member_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, %"duplicate protocol member '${$name}'",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_member_function(Expr $c, Expr $name) {
+macro Stmt $report.protocol.member_function(Expr $c, Expr $name) {
   $c.report_error(
     <protocol>, "protocol member must be a function",
     $c.token, %("member:" ${$name}));
 }
 
-macro Stmt $report.protocol_member_owner(Expr $c, Expr $participant) {
+macro Stmt $report.protocol.member_owner(Expr $c, Expr $participant) {
   $c.report_error(
     <protocol>, "protocol member must be owned by its participant",
     $c.token, %("expected receiver:" ${$participant}));
 }
 
-macro Stmt $report.protocol_member_single(Expr $c) {
+macro Stmt $report.protocol.member_single(Expr $c) {
   $c.report_error(
     <protocol>, "protocol member must declare one function",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_native_ident(Expr $c) {
+macro Stmt $report.protocol.native_ident(Expr $c) {
   $c.report_error(
     <protocol>, "native protocol member requires an identifier",
     $c.token, NULL);
 }
 
-macro Stmt $report.macro_protocol_invalid(Expr $c) {
+macro Stmt $report.macro.protocol_invalid(Expr $c) {
   $c.report_error(
     <macro>, "constructed protocol syntax is invalid",
     $c.token, NULL);
 }
 
-macro Stmt $report.protocol_decl_conflict(
+macro Stmt $report.protocol.decl_conflict(
   Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
   {
     String first = %"first: ${$first_location}";
@@ -110,7 +110,7 @@ macro Stmt $report.protocol_decl_conflict(
   }
 }
 
-macro Stmt $report.protocol_type_undeclared(
+macro Stmt $report.protocol.type_undeclared(
   Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <protocol>,
@@ -118,7 +118,7 @@ macro Stmt $report.protocol_type_undeclared(
     $origin, NULL);
 }
 
-macro Stmt $report.protocol_adoption_conflict(
+macro Stmt $report.protocol.adoption_conflict(
   Expr $c, Expr $adoption, Expr $first_location) {
   {
     String first = %"first: ${_location_string($first_location)}";
@@ -130,7 +130,7 @@ macro Stmt $report.protocol_adoption_conflict(
   }
 }
 
-macro Stmt $report.shadow_protocol_binder(
+macro Stmt $report.shadow.protocol_binder(
   Expr $c, Expr $participant, Expr $token) {
   {
     String hint = %"hint: a bodyless `protocol BASE(${$participant});` " +

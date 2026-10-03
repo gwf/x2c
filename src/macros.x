@@ -108,7 +108,7 @@ static void Expansion.check(Expansion &x) {
   }
   if (c.macro_stack.len() >= 64) x.too_deep();
   if (c.macro_count >= 10000)
-    $report.macro_expansion_count(c, x.invocation);
+    $report.macro.expansion_count(c, x.invocation);
 }
 
 static void Expansion.recursion(Expansion &x) {
@@ -117,7 +117,7 @@ static void Expansion.recursion(Expansion &x) {
   List captured = x.input.search_replace(
     %(capture (source ?syntax) *), <?syntax>);
   Var shown = _source_unwrap(captured);
-  $report.macro_expansion_recursive(
+  $report.macro.expansion_recursive(
     x.c,
     spelling, x.invocation, _definition_note(x.definition), shown);
 }
@@ -125,7 +125,7 @@ static void Expansion.recursion(Expansion &x) {
 static void Expansion.too_deep(Expansion &x) {
   /* Compiler-generated applications can have no invocation token. */
   List first = x.c.macro_stack.last().list().car();
-  $report.macro_expansion_depth(
+  $report.macro.expansion_depth(
     x.c,
     x.invocation, _definition_note(x.definition), _definition_note(first));
 }
@@ -394,12 +394,12 @@ List Compiler.parse_macro_definition(Compiler c) {
 static void Definition.head(Definition &d) {
   Compiler c = d.c;
   if (c.peek(0) == <$>)
-    $report.parse_macro_result(c);
+    $report.parse.macro_result(c);
   d.anonymous = c.peek(0) == <ident> && c.peek(1) == <(>;
   d.local = d.anonymous || (c.peek(0) == <ident> &&
             c.peek(1) == <ident> && c.peek(2) == <(>);
   if (c.peek(0) != <ident> || (!d.local && c.peek(1) != <$>))
-    $report.parse_macro_kind(c);
+    $report.parse.macro_kind(c);
   Token token = c.token;
   c.next();
   d.kind = c._result_kind_token(token);
@@ -408,7 +408,7 @@ static void Definition.head(Definition &d) {
 static Symbol Compiler._result_kind_token(Compiler c, Token token) {
   const MacroCategory *category = _category(token.text);
   if (!category || !category.result)
-    $report.parse_macro_unknown_kind(c, token.text, token);
+    $report.parse.macro_unknown_kind(c, token.text, token);
   return category.result;
 }
 
@@ -422,12 +422,12 @@ static void Definition.naming(Definition &d) {
   else d.name = c._name();
   String spelling = d.name.str();
   if (d.local && d.name == <with>)
-    $report.macro_name_with(c, d.start);
+    $report.macro.name_with(c, d.start);
   if (spelling.startswith("x2c.") && !c.builtin_defs)
-    $report.parse_macro_reserved(c, spelling, d.start);
+    $report.parse.macro_reserved(c, spelling, d.start);
   Var existing;
   if (c.import_src && c.macros.try_get(d.name, existing))
-    $report.macro_import_collision(
+    $report.macro.import_collision(
       c,
       spelling, d.start, _definition_note(existing));
 }
@@ -446,7 +446,7 @@ static void Definition.signature(Definition &d) {
   d.check_signature();
   if (c.take_word("using")) c._using_clause(d.using);
   if (c.peek(0) == <:>)
-    $report.parse_macro_kind_order(c);
+    $report.parse.macro_kind_order(c);
 }
 
 static void Definition.parameter(Definition &d, Array params, List hole) {
@@ -454,7 +454,7 @@ static void Definition.parameter(Definition &d, Array params, List hole) {
   if (d.kind == <decorator> && !d.target) d.take_target(hole);
   else params.push(hole);
   if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
-    $report.parse_hole_final(c);
+    $report.parse.hole_final(c);
 }
 
 /* A Unit target's source stays visible to compile-time Lisp, whose
@@ -462,9 +462,9 @@ static void Definition.parameter(Definition &d, Array params, List hole) {
 static void Definition.take_target(Definition &d, List hole) {
   Compiler c = d.c;
   if (!_decorator_target(hole.assoc(<kind>)))
-    $report.parse_decorator_kind(c, d.start);
+    $report.parse.decorator_kind(c, d.start);
   if (hole.assoc(<sequence>).int())
-    $report.parse_decorator_singular(c, d.start);
+    $report.parse.decorator_singular(c, d.start);
   d.target = hole;
   if (hole.assoc(<kind>) != <unit>) return;
   c.macro_holes[%(source ${hole.assoc(<binder>)})] = 1;
@@ -477,17 +477,17 @@ static void Definition.take_target(Definition &d, List hole) {
 static void Definition.check_signature(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target)
-    $report.parse_decorator_target(c, d.start);
+    $report.parse.decorator_target(c, d.start);
   if (!d.local) return;
   if (d.kind == <unit> || d.kind == <decl-unit>) {
     String result_spelling = _kind_spelling(d.kind);
-    $report.macro_local_result(c, result_spelling, d.start);
+    $report.macro.local_result(c, result_spelling, d.start);
   }
   if (d.kind != <decorator>) return;
   Symbol kind = d.target_kind();
   if (kind == <function> || kind == <unit> || kind == <named-type>) {
     String target = _kind_spelling(kind);
-    $report.macro_local_target(c, target, d.start);
+    $report.macro.local_target(c, target, d.start);
   }
 }
 
@@ -506,7 +506,7 @@ static void Definition.arrow(Definition &d) {
     c.expect(<">">);
   }
   if (c.peek(0) == <(>)
-    $report.parse_macro_paren_body(c);
+    $report.parse.macro_paren_body(c);
   if (c.peek(0) != <"{">) c._braced_body_error();
 }
 
@@ -520,7 +520,7 @@ static Symbol Definition.target_kind(Definition &d) {
 }
 
 static void Compiler._braced_body_error(Compiler c) {
-  $report.parse_macro_braced_body(c);
+  $report.parse.macro_braced_body(c);
 }
 
 /* Records where the definition stands and shows its signature, so an
@@ -672,7 +672,7 @@ static void Definition.check_kinds(Definition &d) {
   foreach (List hole, d.parameters)
     if (!hole.assoc(<kind>)) {
       String hole_spelling = hole.assoc(<binder>).str()[1:];
-      $report.parse_hole_untyped(d.c, hole_spelling, d.start);
+      $report.parse.hole_untyped(d.c, hole_spelling, d.start);
     }
 }
 
@@ -746,7 +746,7 @@ static Symbol Compiler._hole_kind(Compiler c) {
   Symbol kind = category ? category.hole : 0;
   if (!kind) {
     String spelling = c.token.text;
-    $report.parse_hole_unknown_kind(c, spelling);
+    $report.parse.hole_unknown_kind(c, spelling);
   }
   c.next();
   return kind;
@@ -755,7 +755,7 @@ static Symbol Compiler._hole_kind(Compiler c) {
 static Token Compiler._hole_name_token(Compiler c) {
   c.expect(<$>);
   if (c.peek(0) != <ident>)
-    $report.parse_hole_name(c);
+    $report.parse.hole_name(c);
   Token name = c.token;
   c.next();
   return name;
@@ -765,7 +765,7 @@ static List Compiler._declare_hole(
   Compiler c, Token token, Symbol kind, int sequence) {
   String spelling = token.text, Atom name = Atom.intern(spelling);
   if (c._hole_record(name))
-    $report.parse_hole_duplicate(c, spelling, token);
+    $report.parse.hole_duplicate(c, spelling, token);
   List hole = _hole(
     Atom.intern(sequence ? %"*$spelling" : %"?$spelling"),
     kind, sequence);
@@ -1010,7 +1010,7 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
       (role == <argument> && !hole.assoc(<sequence>).int()) ||
       (role == <statement> && c.peek(2) == <(>)) return NULL;
   if (role == <expression> && hole.assoc(<sequence>).int())
-    $report.parse_splice_expr(c);
+    $report.parse.splice_expr(c);
   if (!untyped_roles.contains(role)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && c.peek(2) != <...> && !c._quoted_role(role)) return NULL;
@@ -1034,7 +1034,7 @@ static const SymbolSet quoted_roles = %<<statement block name>>;
 static int Compiler._slot_splice(Compiler c, int allowed) {
   int splice = c.test(<...>);
   if (splice && !allowed)
-    $report.parse_splice_position(c);
+    $report.parse.splice_position(c);
   return splice;
 }
 
@@ -1160,7 +1160,7 @@ static List Compiler._parse_hole(Compiler c, Symbol role) {
   }
   else if (!_kind_accepts_role(kind, role)) {
     String spelling = name.str();
-    $report.parse_hole_ambiguous(
+    $report.parse.hole_ambiguous(
       c,
       spelling, token, _kind_spelling(kind), _kind_spelling(inferred));
   }
@@ -1181,7 +1181,7 @@ static int Compiler._hole_splice(Compiler c, Symbol role) {
 
 static void Compiler._cardinality_error(
   Compiler c, String spelling, int sequence, Token token) {
-  $report.parse_hole_cardinality(c, sequence, spelling, token);
+  $report.parse.hole_cardinality(c, sequence, spelling, token);
 }
 
 static Symbol _role_kind(Symbol role) {
@@ -1527,17 +1527,17 @@ void Compiler.parse_keyword_definition(Compiler c) {
   Token declaration = c.token;
   c.expect(<ident>);
   if (c.peek(0) != <ident>)
-    $report.parse_keyword_name(c);
+    $report.parse.keyword_name(c);
   Atom alias = Atom.intern(c.token.text);
   c.next();
   if (c._fixed_alias(alias))
-    $report.macro_keyword_builtin(c, declaration);
+    $report.macro.keyword_builtin(c, declaration);
   Token reference = c.token;
   List definition = c._lookup(c._name(), reference);
   Symbol kind = definition.assoc(<kind>);
   if (!alias_kinds.contains(kind)) {
     String spelling = _kind_spelling(kind);
-    $report.macro_keyword_internal(
+    $report.macro.keyword_internal(
       c,
       spelling, declaration, _definition_note(definition));
   }
@@ -1700,7 +1700,7 @@ static Atom Compiler._name(Compiler c) {
   String spelling;
   Token end = c._scan_name(spelling);
   if (!spelling)
-    $report.parse_macro_name(c, end);
+    $report.parse.macro_name(c, end);
   c.token = end;
   return Atom.intern(spelling);
 }
@@ -1709,7 +1709,7 @@ static List Compiler._lookup(Compiler c, Atom name, Token invocation) {
   Var stored;
   String spelling = name.str();
   if (!c._try_definition(name, 1, stored))
-    $report.parse_macro_unbound(c, spelling, invocation);
+    $report.parse.macro_unbound(c, spelling, invocation);
   return stored;
 }
 
@@ -1808,7 +1808,7 @@ static List Compiler._invocation_arguments(
   }
   if (c.peek(0) != <)>) {
     if (c.peek(0) == <,>) c.next();
-    $report.parse_macro_extra_args(c);
+    $report.parse.macro_extra_args(c);
   }
   c.expect(<)>);
   return %(args @{arguments.list_free()});
@@ -1820,7 +1820,7 @@ static List Compiler._argument_row(Compiler c, List hole, Symbol kind) {
   int sequence = hole.assoc(<sequence>);
   Array captured = [];
   if (c.peek(0) == <)> && !sequence)
-    $report.parse_macro_missing_args(c);
+    $report.parse.macro_missing_args(c);
   if (c.peek(0) != <)>) loop {
     c._row_directives(kind, captured);
     Token first = c.token;
@@ -1865,7 +1865,7 @@ static Var Compiler._parse_argument(Compiler c, Symbol kind) {
     case <name>:       return c._name_argument();
     case <literal>:    return c._literal_argument();
   }
-  $report.macro_argument_contract(c);
+  $report.macro.argument_contract(c);
 }
 
 /* A caller's name is a spelling, resolved where the expansion places it.
@@ -1875,7 +1875,7 @@ static Var Compiler._parse_argument(Compiler c, Symbol kind) {
 static Var Compiler._name_argument(Compiler c) {
   if (c.macro_holes && c.peek(0) == <$>) return c._parse_hole(<name>);
   if (c.peek(0) != <ident>)
-    $report.parse_name_identifier(c);
+    $report.parse.name_identifier(c);
   String spelling = c.token.text;
   c.next();
   if (!c.macro_holes) return spelling;
@@ -2126,7 +2126,7 @@ static void Compiler._check_position(
     return;
   Atom name = definition.assoc(<name>);
   String spelling = name.str(), result_kind = _kind_spelling(kind);
-  $report.macro_result_position(
+  $report.macro.result_position(
     c,
     spelling, result_kind, place.description, invocation);
 }
@@ -2220,7 +2220,7 @@ static int Decoration.on_body(Decoration &d) =>
 static void Decoration.misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
-  $report.macro_decorator_position(d.c, spelling, target, d.invocation);
+  $report.macro.decorator_position(d.c, spelling, target, d.invocation);
 }
 
 static List Decoration.arguments(Decoration &d, int block_scope) {
@@ -2229,13 +2229,13 @@ static List Decoration.arguments(Decoration &d, int block_scope) {
   List arguments = c._invocation_arguments(definition, d.invocation);
   if (block_scope) c._bind_name_arguments(definition, arguments);
   if (c.peek(0) == <;>)
-    $report.macro_decorator_semicolon(
+    $report.macro.decorator_semicolon(
       c,
       d.invocation, _definition_note(definition));
   if (c.peek(0) == <eof>) {
     Atom name = definition.assoc(<name>);
     String spelling = name.str();
-    $report.macro_decorator_target(
+    $report.macro.decorator_target(
       c,
       spelling, d.invocation, _definition_note(definition));
   }
@@ -2471,7 +2471,7 @@ static void Compiler._not_expression(
   Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   String spelling = definition.assoc(<name>).str();
-  $report.macro_result_expr(
+  $report.macro.result_expr(
     c,
     kind, spelling, invocation, _definition_note(definition));
 }
@@ -2481,7 +2481,7 @@ static List Compiler._expression_decorator(
   List arguments = c._invocation_arguments(definition, invocation);
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
     String spelling = definition.assoc(<name>).str();
-    $report.macro_decorator_expr(
+    $report.macro.decorator_expr(
       c,
       spelling, invocation, _definition_note(definition));
   }
@@ -2982,7 +2982,7 @@ List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
   List patterns = c.parse_macro_pattern_arguments();
   int expected = shape.assoc(<parameters>).list().len();
   if (patterns.len() != expected)
-    $report.parse_macro_pattern_arity(c, spelling, expected, start);
+    $report.parse.macro_pattern_arity(c, spelling, expected, start);
   return c.cache_literal_list(_macro_subpattern(shape, patterns, content));
 }
 
@@ -3184,7 +3184,7 @@ static Var Compiler._eval_string(Compiler c, String source, Token invocation) {
 static String Compiler._lisp_form(Compiler c) {
   Token start = c.token, close = start.group_close();
   if (close.type == <eof>)
-    $report.parse_lisp_unclosed(c, start);
+    $report.parse.lisp_unclosed(c, start);
   c.token = close.after_group();
   int begin = start.pos + start.len;
   return %"(${String.new_len(c.text + begin, close.pos - begin)})";
@@ -3294,7 +3294,7 @@ List Compiler.lift_macro_lisp_expression(
   if (identifier is not void) return %(expr () (ident $identifier));
   if (value is <list> && !value.is_nil())
     return c.bind_syntax(c._helper_result(value), AST_EXPRESSION, NULL);
-  $report.macro_lisp_expr(c, invocation, value);
+  $report.macro.lisp_expr(c, invocation, value);
 }
 
 static Var _sdk_identifier_result(Var value) {
@@ -3376,7 +3376,7 @@ static void Compiler._replay_import(
 }
 
 static void Compiler._import_cycle(Compiler c, String path, Token invocation) {
-  $report.macro_import_cycle(c, path, invocation);
+  $report.macro.import_cycle(c, path, invocation);
 }
 
 /* Reads the file and caches what it added: macros, dependencies, aliases,
@@ -3420,7 +3420,7 @@ static void Import.file(Import &in) {
   else if (path.endswith(".xmacro") || path.endswith(".xpmacro"))
     in.macros();
   else
-    $report.macro_import_extension(
+    $report.macro.import_extension(
       in.c, in.invocation, in.c._path_note(path));
 }
 
@@ -3491,7 +3491,7 @@ static void Import.form(Import &in, Compiler child) {
   else if (child.meta_form_is_declaration()) in.meta_declaration(child);
   else if (child.peek(0) == <"$(">) in.lisp_form(child);
   else
-    $report.macro_import_form(child);
+    $report.macro.import_form(child);
 }
 
 static void Import.meta_declaration(Import &in, Compiler child) {
@@ -3832,7 +3832,7 @@ static Map Compiler._read_definitions(Compiler c) {
     if (c.keyword_form_is_definition()) c._record_alias(aliases);
     else if (c.macro_form_is_definition()) c.parse_macro_definition();
     else
-      $report.macro_builtin_form(c);
+      $report.macro.builtin_form(c);
   }
   return aliases;
 }
@@ -3932,7 +3932,7 @@ static String _definition_note(List definition) {
     `invocation`. */
 void Compiler.report_lisp_failure(
   Compiler c, Token invocation, List error, String source) {
-  $report.macro_lisp_failed(c, invocation, source, error);
+  $report.macro.lisp_failed(c, invocation, source, error);
 }
 
 static List Compiler._path_note(Compiler c, String path) =>
@@ -3941,7 +3941,7 @@ static List Compiler._path_note(Compiler c, String path) =>
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */
 static void Compiler._unbound(Compiler c, String spelling, Token token) {
-  $report.parse_variable_unbound(c, spelling, token);
+  $report.parse.variable_unbound(c, spelling, token);
 }
 
 // lifecycle
