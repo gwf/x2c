@@ -496,20 +496,17 @@ static void Compiler._embed_reject(Compiler c, String message, String path) {
 
 static int _literal_string(Var syntax, String &value) {
   match (syntax)
-    case %(expr ? ?content): {
-      match (content)
-        case $source_literal_content(%(? ?source)): {
-          if (source is not <string>) break;
-          String text = source;
-          int quoted = text.len() >= 2 && text[0] == '"' &&
-            text[text.len() - 1] == '"';
-          int percent_quoted = text.len() >= 3 && text[0] == '%' &&
-            text[1] == '"' && text[text.len() - 1] == '"';
-          if (quoted || percent_quoted) {
-            value = text.parse();
-            return 1;
-          }
-        }
+    case %(expr ? ${$source_literal_content(%(? ?source))}): {
+      if (source is not <string>) break;
+      String text = source;
+      int quoted = text.len() >= 2 && text[0] == '"' &&
+        text[text.len() - 1] == '"';
+      int percent_quoted = text.len() >= 3 && text[0] == '%' &&
+        text[1] == '"' && text[text.len() - 1] == '"';
+      if (quoted || percent_quoted) {
+        value = text.parse();
+        return 1;
+      }
     }
   return 0;
 }

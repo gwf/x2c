@@ -1273,11 +1273,10 @@ static List _source_call(Var value) {
 
 /* A declarator initializer shares the operator but is not an assignment. */
 static List _source_assignment(Var value) {
-  match (value)
-    case ${$assigned(?target, ?stored)}: {
-      match (target) case %(bind *): return NULL;
-      return %($target $stored);
-    }
+  match (value) {
+    case ${$assigned(%(bind *), ?)}: return NULL;
+    case ${$assigned(?target, ?stored)}: return %($target $stored);
+  }
   return NULL;
 }
 

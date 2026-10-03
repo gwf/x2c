@@ -2137,22 +2137,17 @@ List Compiler.optional_reference_test(
   match (condition) {
     case %(expr ? ${$grouped(?inner)}):
       return c.optional_reference_test(inner, truth);
-    case %(expr ? ?content): {
-      match (content) {
-        case $source_operator_content(%(! ?operand)): {
-          truth = !truth;
-          return c.optional_reference_test(operand, truth);
-        }
-        case $source_operator_content(
-            %((!set ?op (!or == !=)) ?left ?right)):
-          return c._null_comparison(op, left, right, truth);
-      }
+    case %(expr ? ${$source_operator_content(%(! ?operand))}): {
+      truth = !truth;
+      return c.optional_reference_test(operand, truth);
     }
-  }
-  match (condition)
+    case %(expr ? ${$source_operator_content(
+        %((!set ?op (!or == !=)) ?left ?right))}):
+      return c._null_comparison(op, left, right, truth);
     case %(expr (opt-ref *) ${$source_identifier_content(%(?binding))}):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
+  }
   return NULL;
 }
 

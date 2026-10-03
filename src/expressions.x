@@ -116,11 +116,9 @@ static List Compiler._destructure_targets(Compiler c, List lhs) {
 static int _destructure_identifier(List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?))}): return 1;
-    case %(expr ? ${$grouped(?inner)}):
-      match (inner)
-        case %(expr ? ${$dereferenced(?address)}):
-          match (address) case %(expr (& *) ${$source_identifier_content(
-              %(?))}): return 1;
+    case %(expr ? ${$grouped($dereferenced(%(expr (& *)
+        ${$source_identifier_content(%(?))})))}):
+      return 1;
   }
   return 0;
 }
@@ -1070,8 +1068,7 @@ static List Compiler._resolve_content(
     return c._resolve_indexed(receiver, selector, origin);
   match (content) case %(call ?(String callee) (args *supplied)):
     return c._resolve_native_call(input_type, callee, supplied, origin);
-  Macro called = $called;
-  match (input) case called(?callee, *supplied):
+  match (input) case $called(?callee, *supplied):
     return c._resolve_call(input_type, callee, supplied, origin);
   match (content) {
     case %(managed-init ?initializer):
@@ -2368,13 +2365,12 @@ static List _slot_statements(List items) {
     hidden destination. Variadic calls and `Iter_unzip` are returned unchanged.
 */
 List Compiler.complete_iter_chain(Compiler c, List expression) {
-  Macro called = $called;
-  match (expression) case called(?callee, *arguments):
-    match (callee)
-      case %(expr ((func (!set ?parameters (*))) ?)
-                  (ident ?binding)):
-        return c._complete_iter_call(
-          expression, callee, arguments, parameters, binding);
+  match (expression)
+    case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
+                                      (ident ?binding))),
+                 *arguments):
+      return c._complete_iter_call(
+        expression, callee, arguments, parameters, binding);
   return expression;
 }
 
@@ -2893,10 +2889,9 @@ static int Compiler._is_operator_temporary(Compiler c, List expression) {
     case %(expr ? ${$grouped(?inner)}):
       return c._is_operator_temporary(inner);
   }
-  Macro called = $called;
-  match (expression) case called(?callee, *arguments):
-    match (callee) case %(expr ? ${$source_identifier_content(
-        %((!set ?binding (*))))}):
+  match (expression)
+    case $called(%(expr ? ${$source_identifier_content(
+        %((!set ?binding (*))))}), *arguments):
       return c.protocol_helpers.contains(
         %"fresh-callee ${(long) binding.list()}");
   return 0;
@@ -3298,8 +3293,7 @@ static void Compiler._note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
   if (!result.match(%(?))) return;
-  Macro called = $called;
-  match (call) case called(?callee, ?argument): {
+  match (call) case $called(?callee, ?argument): {
     String spelled = result.car().str().lower();
     if (method != spelled && (method != "str" || result !== %("String")))
       return;
@@ -3330,8 +3324,7 @@ void Compiler.check_explicit_converter(
 static void Compiler._check_converter_args(
   Compiler c, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
-  Macro called = $called;
-  match (result) case called(?function, *values): {
+  match (result) case $called(?function, *values): {
     callee = function;
     supplied = values;
     arguments = method ? cdr(values) : values;
@@ -4029,10 +4022,9 @@ static List Compiler._converted_temporary(
   Compiler c, List call, Type owner, Type target) {
   if (c.sym.resolve_numeric_type(owner) &&
       c.resolve_protocol_member(target, "discard")) {
-    Macro called = $called;
-    match (call) case called(?callee, *arguments):
-      match (callee) case %(expr ? ${$source_identifier_content(
-          %((!set ?binding (*))))}):
+    match (call)
+      case $called(%(expr ? ${$source_identifier_content(
+          %((!set ?binding (*))))}), *arguments):
         c._note_fresh_callee(binding);
   }
   return call;

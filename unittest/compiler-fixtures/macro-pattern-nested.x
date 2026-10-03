@@ -31,6 +31,14 @@ static int literal_sum(List e) {
   return 0;
 }
 
+/* A bare `*` in a sequence hole matches any number of arguments. */
+macro Expression $call(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
+static int any_call(List e) {
+  match (e) case $call(%(expr ? (ident "f")), *): return 1;
+  return 0;
+}
+
 int main(void) {
   int x = 1, y = 2;
   double z = 1.5;
@@ -42,5 +50,8 @@ int main(void) {
                                 (expr (int) (literal (int) "7"))));
   printf("%d %d %d\n", literal_product(plus), literal_product(times),
          literal_sum(plus));
+  List f = %(expr () (ident "f"));
+  printf("%d %d\n", any_call(%(expr (int) (call $f (args)))),
+         any_call(%(expr (int) (call $f (args $plus $times)))));
   return 0;
 }

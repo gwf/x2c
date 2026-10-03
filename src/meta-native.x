@@ -256,20 +256,19 @@ macro Statement $report.macro_call_target(Expr $c, Expr $site) {
    arguments. */
 static Var _meta_call_value(Compiler c, List expression, Token site) {
   match (expression)
-    case %(expr ? (meta-call ?(List target) (args *arguments))): {
-      match (target)
-        case %(expr ?callee ${$source_identifier_content(
-            %((!or (binding ? ?name)
-                   ((!or binding-name binding-global) ?name))))}): {
-          if (name is not <string>) break;
-          String spelling = name;
-          Array values = c._meta_values(callee, arguments, site);
-          Var function = c._meta_function(spelling, site);
-          List applied = values.list_free();
-          meta_call_form = cons(Atom.intern(spelling), applied).repr();
-          meta_call_form.try_own();
-          return c._meta_apply(function, applied);
-        }
+    case %(expr ? (meta-call
+        (expr ?callee ${$source_identifier_content(
+          %((!or (binding ? ?name)
+                 ((!or binding-name binding-global) ?name))))})
+        (args *arguments))): {
+      if (name is not <string>) break;
+      String spelling = name;
+      Array values = c._meta_values(callee, arguments, site);
+      Var function = c._meta_function(spelling, site);
+      List applied = values.list_free();
+      meta_call_form = cons(Atom.intern(spelling), applied).repr();
+      meta_call_form.try_own();
+      return c._meta_apply(function, applied);
     }
   $report.macro_call_target(c, site);
 }

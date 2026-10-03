@@ -763,10 +763,8 @@ static void AdoptionDraft.report_modifier(AdoptionDraft &a, String message) {
 
 static Symbol _tag_value(List expression) {
   match (expression)
-    case %(expr ("Symbol") ?content):
-      match (content)
-        case $source_literal_content(%(("Symbol") ? ?tag)):
-          if (tag is <symbol>) return tag;
+    case %(expr ("Symbol") ${$source_literal_content(%(("Symbol") ? ?tag))}):
+      if (tag is <symbol>) return tag;
   return 0;
 }
 
