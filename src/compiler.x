@@ -313,7 +313,7 @@ static void _debug_tokens(Token start, Token end) {
   if (!log_should_log(<debug>, <tokenizer>)) return;
   for (Token tok = start; tok < end; tok++)
     if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
-      $report.debug_token(tok);
+      $report.debug.token(tok);
 }
 
 /** Collects a macro or keyword definition while deferring its diagnostics.
@@ -402,7 +402,7 @@ static void Compiler._shallow_block(Compiler c) {
   c.next();
   for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
-      $report.parse_token_eof(c);
+      $report.parse.token_eof(c);
     if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
       c._shallow_block();
     else c.next();
@@ -864,7 +864,7 @@ static void Defaults.forward(Defaults &d) {
       d.sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
-      $report.type_ctor_parent(d.c);
+      $report.type.ctor_parent(d.c);
   }
 }
 
@@ -924,7 +924,7 @@ static List Compiler._forwarder(
   int index = 0;
   foreach (Var type, types) {
     if (type == <...>)
-      $report.type_ctor_variadic(c, name);
+      $report.type.ctor_variadic(c, name);
     if (type == %(void)) continue;
     String argument = %"argument$index";
     index++;
@@ -1195,7 +1195,7 @@ static void Compiler._reject_statement(Compiler c) {
 }
 
 static void Compiler._report_script_statement(Compiler c) {
-  $report.parse_script_main(c);
+  $report.parse.script_main(c);
 }
 
 /* A file-scope conditional directive also governs the statements it
@@ -1321,7 +1321,7 @@ static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
         found, bindings);
       if (!present) continue;
       c.origin = origin;
-      $report.type_script_local(c, name);
+      $report.type.script_local(c, name);
     }
 }
 
@@ -1374,7 +1374,7 @@ static void Compiler._report_redefinition(
       !List.equal(arms, c.arms))
     return;
   String spelling = binding_identity_spelling(binding);
-  $report.type_decl_duplicate(c, site, kind, spelling);
+  $report.type.decl_duplicate(c, site, kind, spelling);
 }
 
 /* A definition remembers the token range of the top-level form that
@@ -1471,7 +1471,7 @@ static void Compiler._complete_prototype(
         contract = prior_contract;
   if (!List.equal(prior_contract, contract)) {
     String spelling = binding_identity_spelling(binding);
-    $report.type_decl_prototype(c, site, spelling, prior_contract, contract);
+    $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
   }
   c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
   c.semantic_binding_facts()[%(arms $binding)] = c.arms;
@@ -1569,7 +1569,7 @@ static void Compiler._check_static_inits(Compiler c) {
       String name = binding_identity_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
-      $report.parse_static_dependency(c, c._init_token(binding), name, target);
+      $report.parse.static_dependency(c, c._init_token(binding), name, target);
     }
   }
 }
@@ -1664,7 +1664,7 @@ static void Compiler._report_malformed_token(Compiler c) {
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) $report.parse_token_malformed(c, token, status);
+    if (token.type == <error>) $report.parse.token_malformed(c, token, status);
   }
 }
 
@@ -1773,7 +1773,7 @@ void Compiler.require_input(Compiler c) {
 Symbol Compiler.expect(Compiler c, Symbol type) {
   if (c.token.type != type) {
     c.require_input();
-    $report.parse_token_expected(c, type);
+    $report.parse.token_expected(c, type);
   }
   c.next();
   return type;
@@ -1800,7 +1800,7 @@ static void Compiler._update_brace_stack(Compiler c, Token consumed) {
     case <"}">:
       if (c.braces.len()) c.braces.take_last();
       else {
-        $report.parse_brace_unexpected(c, consumed);
+        $report.parse.brace_unexpected(c, consumed);
       }
       break;
   }
@@ -1829,7 +1829,7 @@ int Compiler.take_word(Compiler c, String word) {
 
 static void Compiler._check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
-  $report.parse_brace_missing(c, c.braces[-1]);
+  $report.parse.brace_missing(c, c.braces[-1]);
 }
 
 /** Returns 1 for a token type that opens a delimited group, -1 for one that

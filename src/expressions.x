@@ -76,7 +76,7 @@ static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
   Token origin = c.token;
   if (!op.is_assignment_op()) return lhs;
   if (lhs.cadr().car() == <opt-ref>)
-    $report.type_optional_ref_assign(c, origin);
+    $report.type.optional_ref_assign(c, origin);
   List targets = op == <=> ? c._destructure_targets(lhs) : NULL;
   c.next();
   List rhs = c.parse_assignment();
@@ -95,7 +95,7 @@ static List Compiler._destructure_targets(Compiler c, List lhs) {
         case %(expr ? ${$source_commas_content(%(*targets))}): {
           foreach (List entry, targets) {
             if (_destructure_identifier(entry)) continue;
-            $report.parse_destructure_target(c);
+            $report.parse.destructure_target(c);
           }
           return %(targets @targets);
         }
@@ -219,13 +219,13 @@ static Type Compiler._parse_is_type(Compiler c, Token origin) {
   int parenthesized = c.test(<(>), Type type = c.parse_type_name();
   if (parenthesized) {
     if (c.peek(0) == <[>)
-      $report.type_is_array(c, origin);
+      $report.type.is_array(c, origin);
     if (c.peek(0) == <(>)
-      $report.type_is_function(c, origin);
+      $report.type.is_function(c, origin);
     c.expect(<)>);
   }
   else if (type.is_pointer())
-    $report.parse_is_pointer(c, origin);
+    $report.parse.is_pointer(c, origin);
   return type;
 }
 
@@ -363,7 +363,7 @@ static void Compiler._warn_unnecessary_cast(
   Type source = operand.cadr();
   if (!c._c_type_known(operand) || source.declared() != target.declared())
     return;
-  $report.conversion_cast_redundant(c, target, origin);
+  $report.conversion.cast_redundant(c, target, origin);
 }
 
 /* Whether C gives an operand the type x2c records. A character constant is
@@ -501,7 +501,7 @@ static List Compiler._parse_slice(Compiler c, List expr, List start) {
   }
   if (step && step.match(%(expr ?
       ${$source_literal_content(%(? "0"))})))
-    $report.parse_slice_zero(c);
+    $report.parse.slice_zero(c);
   c.expect(<]>);
   return %(expr $type ${source_slice_content(
     %($expr $start $stop $step))});
@@ -593,7 +593,7 @@ static List Compiler._parse_field_name(
   if (slot) return %($slot);
   String field_name = c.token.text;
   if (!field_name || !field_name.is_identifier()) {
-    $report.parse_member_ident(c, op_sym, lhs_opt);
+    $report.parse.member_ident(c, op_sym, lhs_opt);
   }
   List field = %( $field_name );
   c.next();
@@ -772,7 +772,7 @@ static List Compiler._statement_expression(
   Compiler c, List block, Token origin) {
   List items = Ast.without_origin(block).cdr();
   if (_defers_directly(items))
-    $report.parse_statement_defer(c, origin);
+    $report.parse.statement_defer(c, origin);
   Type type = c.macro_holes ? %(<macro-expr>) : _final_value_type(items);
   return %(expr $type (parens $block));
 }
@@ -1182,7 +1182,7 @@ static List Compiler._resolve_identifier(
     (value is <list> && !value.is_nil() &&
      value.car() == <macro-bind>);
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
-  if (!binding) $report.type_binding_unknown(c, value, origin);
+  if (!binding) $report.type.binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
   c._capture_identifier(binding);
@@ -1193,7 +1193,7 @@ static List Compiler._resolve_identifier(
   if (!type) type = c._identifier_type(
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
-    $report.type_ident_semantic(c, value, origin);
+    $report.type.ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
   if (c.lambda_scopes && !c.macro_holes) {
     result = c.capture_lambda_identifier(binding, type);
@@ -1230,7 +1230,7 @@ static List Compiler._identifier_binding(
     Var issued, source;
     if (!facts.try_get(%(known $identity), issued) ||
         issued is not <string> || !issued.string().equal(spelling))
-      $report.type_binding_unknown(c, name, origin);
+      $report.type.binding_unknown(c, name, origin);
     /* A template's private name that no declaration in scope reaches
        reads its source spelling where the expansion lands. A declared one
        keeps its identity, as when lowering binds code outside the scope
@@ -1342,7 +1342,7 @@ static void Compiler._check_unit_static(
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
   String file = c.display_path(home_absolute_path(owner.car()));
-  $report.type_function_private(c, spelling, file, origin);
+  $report.type.function_private(c, spelling, file, origin);
 }
 
 static List Compiler._read_bound_reference(
@@ -1381,7 +1381,7 @@ static List Compiler._resolve_indexed(
   receiver = c.resolve_expression(receiver, origin);
   selector = c.resolve_expression(selector, origin);
   if (receiver.cadr().car() == <opt-ref>)
-    $report.type_optional_ref_index(c, origin);
+    $report.type.optional_ref_index(c, origin);
   if (_deferred_receiver(receiver) || _deferred_receiver(selector))
     return %(expr (<macro-expr>) (index $receiver $selector));
   List resolved = c._postfix_index_expression(receiver, selector);
@@ -1392,7 +1392,7 @@ static List Compiler._resolve_indexed(
       List.match(receiver, %(expr () ${$source_operator_content(
         %((!or . ->) * *))})))
     return %(expr () (index $receiver $selector));
-  $report.parse_index_unsupported(c, receiver_type, origin);
+  $report.parse.index_unsupported(c, receiver_type, origin);
 }
 
 static List Compiler._postfix_index_expression(
@@ -1421,7 +1421,7 @@ static List Compiler._typedef_index(
     case %((func (!set ?params ($receiver ?))) ?rtype): {
       Type key = params.cadr(), supplied = index.cadr();
       if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
-        $report.type_index_symbol(c);
+        $report.type.index_symbol(c);
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
@@ -1439,7 +1439,7 @@ static List Compiler._typedef_index(
   // A boxable handle to a record has no C array reading.
   if (shape.is_pointer() && shape.dereference().is_aggregate() &&
       type.var_tag())
-    $report.type_index_missing(c, type);
+    $report.type.index_missing(c, type);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
   if (shape.is_array() ||
@@ -1551,7 +1551,7 @@ static void CallSite._check_arity(
     case %((func (!set ?parameters (*))) *):
       if (!_parameters_variadic(parameters) &&
           arguments.len() > List.len(parameters))
-        $report.type_method_arity(k.c, parameters, arguments, k.origin);
+        $report.type.method_arity(k.c, parameters, arguments, k.origin);
 }
 
 static int _parameters_variadic(List parameters) {
@@ -1626,7 +1626,7 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
   }
   if (!resolution) {
     Var name = k.field.car();
-    $report.type_method_missing(k.c, k.type, name, k.origin);
+    $report.type.method_missing(k.c, k.type, name, k.origin);
   }
   match (resolution) {
     case %(ambiguous *packages):
@@ -1683,11 +1683,11 @@ static List Compiler._method_bind(
     receiver = %(expr $type ${receiver.caddr()});
   }
   if (_receiver_points_to(source, target))
-    $report.type_receiver_pointer(c, type, declared, origin);
+    $report.type.receiver_pointer(c, type, declared, origin);
   if (target.car() != <*> || cdr(target) !== source)
     return receiver;
   if (!c._expression_is_addressable(receiver))
-    $report.type_receiver_address(c, origin);
+    $report.type.receiver_address(c, origin);
   List address = %(expr ${type.reference()} (op & (parens $receiver)));
   return c.convert_expression(address, declared);
 }
@@ -1717,7 +1717,7 @@ List Compiler.resolve_postfix_member(
   Compiler c, Type receiver_type, List field, Symbol access,
   int call_context) {
   if (receiver_type.car() == <opt-ref>)
-    $report.type_optional_ref_access(c);
+    $report.type.optional_ref_access(c);
   Type type = receiver_type.canonicalize();
   if (access == <"->">)
     return c._field_member(receiver_type, field, <"->">);
@@ -1915,14 +1915,14 @@ static void DelegateSearch._report_paths(
     notes = cons(%"delegate path: $description -> $spelling", notes);
   }
   String type = _delegate_type_name(d.outer), member = d.member;
-  $report.type_delegate_ambiguous(d.c, type, member, d.origin,
+  $report.type.delegate_ambiguous(d.c, type, member, d.origin,
     notes.reverse());
 }
 
 static void DelegateSearch._report_cycle(DelegateSearch &d) {
   String type = _delegate_type_name(d.outer), member = d.member;
   String path = _delegate_path_string(d.outer, d.first_cycle, NULL);
-  $report.type_delegate_cycle(d.c, type, member, d.origin, path);
+  $report.type.delegate_cycle(d.c, type, member, d.origin, path);
 }
 
 static void Compiler._report_method_ambiguity(
@@ -1933,7 +1933,7 @@ static void Compiler._report_method_ambiguity(
   foreach (String package, packages)
     notes = cons(%"package: '$package'", notes);
   String type = _delegate_type_name(receiver);
-  $report.type_method_packages(c, type, member, origin, notes.reverse());
+  $report.type.method_packages(c, type, member, origin, notes.reverse());
 }
 
 static String _delegate_path_string(Type receiver, List path, String member) {
@@ -2297,7 +2297,7 @@ static List Compiler._resolve_unary(
   List lhs = c.resolve_expression(operand, origin);
   Type lhs_type = lhs.cadr();
   if (lhs_type.car() == <opt-ref> && operator != <!>)
-    $report.type_optional_ref_unchecked(c, origin);
+    $report.type.optional_ref_unchecked(c, origin);
   if (operator == <*> && operand.cadr().car() == <&> &&
       lhs_type.car() != <&>) return lhs;
   if (lhs_type === %(<macro-expr>))
@@ -2318,7 +2318,7 @@ static List Compiler._resolve_unary(
       type = c.sym.resolve_numeric_type(type);
       if (type && type.is_integral()) type = type.promote();
       if (!type && lhs_type && operator == <->)
-        $report.type_neg_unsupported(c, lhs_type, origin);
+        $report.type.neg_unsupported(c, lhs_type, origin);
       if (!type) type = lhs_type;
       break;
     }
@@ -2331,7 +2331,7 @@ static List Compiler._resolve_postfix_op(
   operand = c.resolve_expression(operand, origin);
   Type operand_type = operand.cadr();
   if (operand_type.car() == <opt-ref>)
-    $report.type_optional_ref_unchecked(c, origin);
+    $report.type.optional_ref_unchecked(c, origin);
   if (operand_type === %(<macro-expr>))
     return source_postfix_expression(
       %(<macro-expr>), %($operator $operand));
@@ -2407,7 +2407,7 @@ static List Compiler._binary_expression(
     return %(expr ("String") $cached);
   }
   if (operator == <in>)
-    $report.type_contains_missing(c, rhs_type, origin);
+    $report.type.contains_missing(c, rhs_type, origin);
   /* An untyped preprocessor name beside a converting protocol participant
      would reach the C compiler with no usable conversion. */
   if ((lhs_type != NULL) != (rhs_type != NULL))
@@ -2457,7 +2457,7 @@ static void Compiler._check_untyped_operand(
   if (c._converts_operands(participant) &&
       c.resolve_protocol_member(participant, member) &&
       other.match(%(expr ? ${$source_identifier_content(%(?))})))
-    $report.type_operand_untyped(c, origin);
+    $report.type.operand_untyped(c, origin);
 }
 
 static void Compiler._check_matmul(
@@ -2465,7 +2465,7 @@ static void Compiler._check_matmul(
   Token origin) {
   if (operator == <@> && !c.sym.is_var_type(lhs_type) &&
       !c.sym.is_var_type(rhs_type))
-    $report.type_matmul_missing(c, lhs_type, rhs_type, origin);
+    $report.type.matmul_missing(c, lhs_type, rhs_type, origin);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
@@ -2519,7 +2519,7 @@ static void Compiler._check_optional_operands(
   int null_test = _null_literal(lhs) || _null_literal(rhs);
   if (!((op == <==> || op == <!=>) && null_test) &&
       op != <&&> && op != <||>)
-    $report.type_optional_ref_unchecked(c, c.token);
+    $report.type.optional_ref_unchecked(c, c.token);
 }
 
 static Type Compiler._shift_type(Compiler c, Type lhs) {
@@ -2742,7 +2742,7 @@ static List Compiler._resolve_is_type(
     return c.rebuild_expression(%(<macro-expr>), has_type(lhs, target));
   }
   if (!c.sym.is_var_type(lhs_type))
-    $report.type_is_var(c, lhs_type, origin);
+    $report.type.is_var(c, lhs_type, origin);
   Macro called = $called;
   if (target === %(void) || target === %("Void")) {
     List callee = c._resolve_identifier("Var_is_void", NULL, origin);
@@ -2768,9 +2768,9 @@ static List Compiler._resolve_is_symbol(
       %(<macro-expr>), has_symbol(lhs, selector));
   }
   if (!c.sym.is_var_type(lhs_type))
-    $report.type_is_var(c, lhs_type, origin);
+    $report.type.is_var(c, lhs_type, origin);
   if (!c.sym.is_named_value_type(selector_type, "Symbol"))
-    $report.type_is_selector(c, selector_type, origin);
+    $report.type.is_selector(c, selector_type, origin);
   match (selector)
     case %(expr ("Symbol") ${$source_literal_content(
         %(("Symbol") ? ?tag_value))}): {
@@ -2811,10 +2811,10 @@ Symbol Compiler.require_var_tag(
   Type resolved = NULL;
   Symbol vartag = c.sym.var_tag_for_type(target, resolved);
   if (resolved && resolved.is_enum()) {
-    $report.type_is_enum(c, target, origin);
+    $report.type.is_enum(c, target, origin);
   }
   if (!vartag)
-    $report.type_is_tag(c, target, origin);
+    $report.type.is_tag(c, target, origin);
   return vartag;
 }
 
@@ -2854,10 +2854,10 @@ static List Compiler._resolve_tadapt(
       Type type = c.sym.resolve_key(syntax);
       if (!type || !type.is_pointer() ||
           !type.dereference().is_function())
-        $report.macro_adapter_pointer(c, type, origin);
+        $report.macro.adapter_pointer(c, type, origin);
       return %(expr ($target_type) (tadapt ${c.origin} $source));
     }
-  $report.macro_adapter_typedef(c, origin);
+  $report.macro.adapter_typedef(c, origin);
 }
 
 // collection literals
@@ -2946,7 +2946,7 @@ List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
       return %(map-entry
         ${c.resolve_expression(key, origin)}
         ${c.resolve_expression(value, origin)});
-  $report.parse_map_entry(c, origin);
+  $report.parse.map_entry(c, origin);
 }
 
 static List Compiler._resolve_initval(
@@ -3173,7 +3173,7 @@ static void Compiler._check_noted_converter(
     receiver, source, target, source_is_var);
   if (!implicit || c._defines_crossing(source, target)) return;
   c.protocol_helpers.del("explicit-converter");
-  $report.conversion_call_redundant(c, method, target, location, context);
+  $report.conversion.call_redundant(c, method, target, location, context);
 }
 
 static int Compiler._implicit_converter(
@@ -3398,7 +3398,7 @@ static List Compiler._lift_func_value(
   }
   if (type && c.sym.resolve_key(type).equal(func_type) &&
       target.is_pointer() && target.dereference().is_function()) {
-    $report.type_func_callback(c);
+    $report.type.func_callback(c);
   }
   return NULL;
 }
@@ -3413,7 +3413,7 @@ static List Compiler._compound_literal(
   match (converted)
     case %(expr ?type (composite *)): {
       if (Type.tag(type).match(%((gensym *))))
-        $report.type_brace_anonymous(c);
+        $report.type.brace_anonymous(c);
       return %(expr $type (cast $type $converted));
     }
   return converted;
@@ -3472,7 +3472,7 @@ static List Compiler._convert_untyped(
     List binding = expr.caddr().cadr();
     if (binding_identity_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
-    $report.type_var_unresolved(c);
+    $report.type.var_unresolved(c);
   }
   return expr;
 }
@@ -3508,7 +3508,7 @@ static List Compiler._convert_reference(
   // T -> &T: pass the address of an addressable value.
   if (type === cdr(target) && target.is_reference()) {
     if (!c._expression_is_addressable(expr))
-      $report.type_ref_address(c);
+      $report.type.ref_address(c);
     return %(expr $target (op & (parens $expr)));
   }
   if (type.car() == <&> && target.car() == <opt-ref> &&
@@ -3568,7 +3568,7 @@ static List Compiler._read_var(
   /* A Var reaching `Var *` almost always meant its address; unboxing a
      stored Var pointer must be spelled. */
   if (target.is_pointer() && c.sym.is_var_type(target.dereference()))
-    $report.type_var_address(c, target);
+    $report.type.var_address(c, target);
   if (target.is_pointer())
     return %(expr $target (call "Var_pointer" (args $expr)));
   if (target.is_typedef_name()) {
@@ -3576,7 +3576,7 @@ static List Compiler._read_var(
     Type resolved = c.sym.resolve_key(target);
     if (resolved.is_pointer())
       return %(expr $target (call "Var_pointer" (args $expr)));
-    $report.type_var_convert(c, target);
+    $report.type.var_convert(c, target);
   }
   return NULL;
 }
@@ -3638,7 +3638,7 @@ static List Compiler._declared_var_converter(
     Macro called = $called;
     return c.rebuild_expression(%("Var"), called(callee, %($argument)));
   }
-  $report.type_var_loss(c, type);
+  $report.type.var_loss(c, type);
 }
 
 static List Compiler._box_var(Compiler c, List expr, Type type) {
@@ -3660,7 +3660,7 @@ static List Compiler._box_var(Compiler c, List expr, Type type) {
                 (expr ("Symbol") $tagsymnumstr) $expr)));
   }
   // Conversion runs after parsing; a NULL token anchors the statement.
-  $report.type_var_loss(c, type);
+  $report.type.var_loss(c, type);
 }
 
 // converter calls
@@ -3769,7 +3769,7 @@ static void Compiler._check_null_reference(
       (expr.match(%(expr () ${$source_identifier_content(
         %((binding ? ?)))})) &&
        binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
-    $report.type_ref_null(c, target);
+    $report.type.ref_null(c, target);
 }
 
 /* Same-address conversions must keep qualifiers, including void pointers. */
@@ -3782,7 +3782,7 @@ static void Compiler._check_qualifiers(
         (destination.base_type() === %(void) ||
          source.base_type() === %(void)))) &&
       qualified.discards_qualifiers(destination)) {
-    $report.type_qualifier_dropped(c, source, destination);
+    $report.type.qualifier_dropped(c, source, destination);
   }
 }
 
@@ -3791,11 +3791,11 @@ static void Compiler._check_reference_value(
   /* An optional reference forwards only to another address type. */
   if (type.car() == <opt-ref> && !target.is_reference() &&
       !c.sym.resolve_key(target).is_pointer())
-    $report.type_optional_ref_unchecked(c, NULL);
+    $report.type.optional_ref_unchecked(c, NULL);
   /* A reference takes an lvalue of its referenced type. */
   if (target.is_reference() && !type.is_reference() &&
       type !== cdr(target))
-    $report.type_ref_lvalue(c, type, target);
+    $report.type.ref_lvalue(c, type, target);
 }
 
 static void Compiler._check_object_pointer(
@@ -3804,7 +3804,7 @@ static void Compiler._check_object_pointer(
   Type source = c.sym.resolve_key(type);
   if (source && !source.is_pointer() && !source.is_array() &&
       !source.is_function())
-    $report.type_pointer_address(c, type, target);
+    $report.type.pointer_address(c, type, target);
 }
 
 /* C accepts null pointer constants, pointer decay, and opaque system types.
@@ -3815,10 +3815,10 @@ static void Compiler._check_native_crossing(
   Type declared_source, Type declared_target) {
   String integer = c._not_null_pointer_constant(expr);
   if (integer && c.sym.resolve_key(target).is_pointer()) {
-    $report.type_pointer_integer(c, integer, target);
+    $report.type.pointer_integer(c, integer, target);
   }
   if (c._unrelated_pointers(type, target)) {
-    $report.type_pointer_unrelated(c, declared_source, declared_target);
+    $report.type.pointer_unrelated(c, declared_source, declared_target);
   }
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
@@ -3827,7 +3827,7 @@ static void Compiler._check_native_crossing(
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
       !c._typedef_names(declared_source).contains(declared_target) &&
       !c._typedef_names(declared_target).contains(declared_source)) {
-    $report.type_typedef_crossing(c, declared_source, declared_target);
+    $report.type.typedef_crossing(c, declared_source, declared_target);
   }
 }
 

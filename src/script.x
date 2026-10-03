@@ -20,11 +20,11 @@
 
 // command reports
 
-macro Stmt $report.script_source_missing(Expr $script) {
+macro Stmt $report.script.source_missing(Expr $script) {
   driver_error(%"script does not exist: ${$script}");
 }
 
-macro Stmt $report.script_execute_failed(Expr $executable) {
+macro Stmt $report.script.execute_failed(Expr $executable) {
   driver_error(%"cannot run ${$executable}: ${String.new(strerror(errno))}");
 }
 
@@ -61,7 +61,7 @@ int script_prepare(CliRequest c) {
     return 1;
   }
   if (!Path.is_file(script))
-    $report.script_source_missing(script);
+    $report.script.source_missing(script);
   _configure(c, script);
   if (c.dry_run) return 0;
   _exec_current(c);
@@ -149,7 +149,7 @@ static void _exec(CliRequest c) {
   foreach (String argument, c.run_args) argv[n++] = argument ? argument : "";
   fflush(NULL);
   execv(executable, argv);
-  $report.script_execute_failed(executable);
+  $report.script.execute_failed(executable);
 }
 
 /* Prints the command that executes the script, without running it. */

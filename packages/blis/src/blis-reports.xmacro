@@ -1,0 +1,32 @@
+/* BLIS structured reports. Callers retain native-to-x2c conversions. */
+
+macro Stmt $report.blis.precision(
+  Expr $operation, Expr $destination_datatype, Expr $source_datatype) {
+  raise %(bad-types (library "BLIS") (operation ${$operation})
+          (reason "storage precisions differ")
+          (dest-type ${$destination_datatype})
+          (src-type ${$source_datatype}));
+}
+
+macro Stmt $report.blis.shape(
+  Expr $operation, Expr $left_rows, Expr $left_columns,
+  Expr $right_rows, Expr $right_columns) {
+  raise %(bad-arg (library "BLIS") (operation ${$operation})
+          (reason "incompatible dimensions")
+          (left-rows ${$left_rows}) (left-cols ${$left_columns})
+          (right-rows ${$right_rows}) (right-cols ${$right_columns}));
+}
+
+macro Stmt $report.blis.index(
+  Expr $operation, Expr $row, Expr $column, Expr $rows, Expr $columns) {
+  raise %(bad-arg (library "BLIS") (operation ${$operation})
+          (reason "index outside the object")
+          (row ${$row}) (column ${$column})
+          (rows ${$rows}) (columns ${$columns}));
+}
+
+macro Stmt $report.blis.computation_precision(Expr $value) {
+  raise %(bad-arg (library "BLIS")
+          (operation "set_computation_precision")
+          (precision ${$value}));
+}

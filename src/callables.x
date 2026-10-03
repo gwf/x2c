@@ -739,7 +739,7 @@ static List Compiler._direct_func_handle(
     List constructor = c._adapter_helper(
       "x2c_func_shared", constructor_type);
     if (!constructor || !constructor_type)
-      $report.callable_shared(c, source_type);
+      $report.callable.shared(c, source_type);
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = c._func_call(
       %("Func"), _func_bound(constructor_type, constructor),
@@ -817,7 +817,7 @@ static List Compiler._indirect_func_value(
   Type constructor_type = NULL;
   List constructor = c._adapter_helper("Func_new_context", constructor_type);
   if (!constructor || !constructor_type)
-    $report.callable_context(c, pointer_type);
+    $report.callable.context(c, pointer_type);
 
   List context = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List declaration = c._func_context_declaration(
@@ -856,7 +856,7 @@ static List Compiler._build_indirect_func_adapter(
   Type context_helper_type = NULL;
   if (!c._adapter_helper("Func_context", context_helper_type) ||
       !context_helper_type)
-    $report.callable_native_context(c, diagnostic_type, pointer_type);
+    $report.callable.native_context(c, diagnostic_type, pointer_type);
   List fn_binding = c.sym.introduce(c.fresh_name("func_binding"));
   List context_local = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List context_declaration = c._context_local(
@@ -1008,7 +1008,7 @@ List Compiler.maybe_adapt_func_arg(
   if (c._is_func_adapter(arg_type)) return argument;
   Type source_type = NULL, List source_binding = NULL;
   if (!_direct_func_source(arg_type, payload, 1, source_type, source_binding))
-    $report.callable_direct(c, expected_type, arg_type);
+    $report.callable.direct(c, expected_type, arg_type);
   if (c._is_func_adapter_target(source_type)) return argument;
   List adapter = c._direct_func_adapter(
     expected_type, source_binding, source_type);
@@ -1052,7 +1052,7 @@ static List Compiler._build_func_adapter(
   source_type.function_parts(params, return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
-    $report.callable_variadic(c, diagnostic_type, source_type, func_type);
+    $report.callable.variadic(c, diagnostic_type, source_type, func_type);
   }
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
@@ -1087,7 +1087,7 @@ static void Compiler._require_func_readers(
     Type helper_type = NULL;
     List helper = c._adapter_helper(helper_name, helper_type);
     if (!helper || !helper_type)
-      $report.callable_readers(c, diagnostic_type, source_type);
+      $report.callable.readers(c, diagnostic_type, source_type);
   }
 }
 
@@ -1167,7 +1167,7 @@ static List FuncReaders._value(
   FuncReaders &r, Type parameter_type, Symbol tag, int index,
   Type &storage_type) {
   if (!tag)
-    $report.callable_parameter(r.c, r.diagnostic_type, parameter_type);
+    $report.callable.parameter(r.c, r.diagnostic_type, parameter_type);
   List picked = r._call(
     %("Var"), r.value, index, %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
@@ -1314,27 +1314,27 @@ static void Callback.split(Callback &cb) {
   Type source = cb.source;
   if (!cb.source_binding || !source || source.is_pointer() ||
       !source.is_function())
-    $report.callback_direct(cb);
+    $report.callback.direct(cb);
   if (!cb.target.function_parts(cb.params, cb.result))
-    $report.callback_target(cb);
+    $report.callback.target(cb);
   if (!source.function_parts(cb.source_params, cb.source_result))
-    $report.callback_source(cb);
+    $report.callback.source(cb);
   if (_typed_params_variadic(cb.params) ||
       _typed_params_variadic(cb.source_params))
-    $report.callback_variadic(cb);
+    $report.callback.variadic(cb);
 }
 
 static void Callback.check_signature(Callback &cb) {
   int target_count = cb.params.len(), source_count = cb.source_params.len();
   if (target_count != source_count) {
-    $report.callback_arity(cb, target_count, source_count);
+    $report.callback.arity(cb, target_count, source_count);
   }
   cb.result = cb.result.canonicalize();
   cb.source_result = cb.source_result.canonicalize();
   if (cb.result === %(void) || cb.source_result === %(void))
-    $report.callback_void(cb);
+    $report.callback.void_return(cb);
   if (cb.result != cb.source_result)
-    $report.callback_result(cb);
+    $report.callback.result(cb);
 }
 
 static void Callback.check_params(Callback &cb) {
@@ -1345,7 +1345,7 @@ static void Callback.check_params(Callback &cb) {
     Type target = targets.car();
     Type source = sources.car();
     if (cb._allows(target, source)) continue;
-    $report.callback_parameter(cb, index, target, source);
+    $report.callback.parameter(cb, index, target, source);
   }
 }
 

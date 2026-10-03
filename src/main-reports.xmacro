@@ -1,6 +1,6 @@
 /* main command reports. */
 
-macro Stmt $report.main_stem_collision(
+macro Stmt $report.main.stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) {
   fprintf(
     stderr, "x2c: error: inputs produce the same output stem '%s'\n"
@@ -8,47 +8,47 @@ macro Stmt $report.main_stem_collision(
     $stem, $first, $other, $directory, $stem);
 }
 
-macro Stmt $report.main_workers_started(Expr $jobs, Expr $total) {
+macro Stmt $report.main.workers_started(Expr $jobs, Expr $total) {
   fprintf(
     stderr, "x2c: translate with %d workers over %d files\n",
     $jobs, $total);
 }
 
-macro Stmt $report.main_translation_verbose(Expr $directory, Expr $input) {
+macro Stmt $report.main.translation_verbose(Expr $directory, Expr $input) {
   fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
 }
 
-macro Stmt $report.main_input_not_x(Expr $input) {
+macro Stmt $report.main.input_not_x(Expr $input) {
   driver_error(%"translation input is not an .x file: ${$input}");
 }
 
-macro Stmt $report.main_directory_missing(Expr $out_dir) {
+macro Stmt $report.main.directory_missing(Expr $out_dir) {
   driver_error(%"output directory does not exist: ${$out_dir}");
 }
 
-macro Stmt $report.main_directory_not_dir(Expr $out_dir) {
+macro Stmt $report.main.directory_not_dir(Expr $out_dir) {
   driver_error(%"output is not a directory: ${$out_dir}");
 }
 
-macro Stmt $report.main_directory_unwritable(Expr $out_dir) {
+macro Stmt $report.main.directory_unwritable(Expr $out_dir) {
   driver_error(%"output directory is not writable: ${$out_dir}");
 }
 
-macro Stmt $report.main_translated(
+macro Stmt $report.main.translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) {
   report_line(<success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
       $duration}");
 }
 
-macro Stmt $report.main_env_unknown(Expr $wanted) {
+macro Stmt $report.main.env_unknown(Expr $wanted) {
   driver_error(%"unknown env name '${$wanted}'");
 }
 
-macro Stmt $report.main_external_failed(Expr $path) {
+macro Stmt $report.main.external_failed(Expr $path) {
   driver_error(
     %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
 }
 
-macro Stmt $report.main_diagnostics_unwritable(Expr $diagnostics) {
+macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) {
   driver_error(%"cannot open diagnostics file '${$diagnostics}'");
 }

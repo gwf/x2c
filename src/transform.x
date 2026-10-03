@@ -75,7 +75,7 @@ static Ast Compiler._step(Compiler c, Ast ast) {
   if (!ast) return NULL;
   match (ast)
     case %(managed-init ?):
-      $report.parse_init_incomplete(c);
+      $report.parse.init_incomplete(c);
   Var head = ast.car();
   if (head is not <symbol>) return c._children(ast);
   match (ast) {
@@ -260,7 +260,7 @@ static Ast Compiler._getindex_node(
   List resolved = c._nominal_getindex(type);
   if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
   if (!resolved)
-    $report.xform_index_unsupported(c, type);
+    $report.xform.index_unsupported(c, type);
   return c._step(
     c._indexed_call_expr(resolved, %($expression $index)).caddr());
 }
@@ -269,7 +269,7 @@ static Ast Compiler._setindex_node(
   Compiler c, List expression, Type type, List index, List value) {
   List resolved = c.resolve_protocol_member(type, "setindex");
   if (!resolved)
-    $report.xform_index_assignment(c, type);
+    $report.xform.index_assignment(c, type);
   if (!c._indexed_builtin_helper(type))
     return c._step(
       c._sequenced_protocol_call(resolved, %($expression $index $value)));
@@ -283,10 +283,10 @@ static Ast Compiler._slice_node(
   match (type)
     case %(?(String name)): nominal = name;
   if (!nominal)
-    $report.xform_slice_unsupported(c, type, NULL);
+    $report.xform.slice_unsupported(c, type, NULL);
   String fnname = %"${nominal}_getslice";
   if (!c.sym.get(%($fnname)))
-    $report.xform_slice_unsupported(c, type, %());
+    $report.xform.slice_unsupported(c, type, %());
   String none = "-2147483648";
   start = start ? start : %(literal (int) $none);
   stop = stop ? stop : %(literal (int) $none);
@@ -881,13 +881,13 @@ static List Compiler._destructure_source(
   // convert_expression would instead diagnose an integer reaching a
   // pointer.
   if (c.sym.resolve_numeric_type(source_type.canonicalize()))
-    $report.type_destructure_list(c, source_type);
+    $report.type.destructure_list(c, source_type);
   List converted = c.convert_expression(source, %("List"));
   Type converted_type = NULL;
   match (converted)
     case %(expr ?type ?): converted_type = type;
   if (!c.sym.is_named_value_type(converted_type, "List"))
-    $report.type_destructure_list(c, source_type);
+    $report.type.destructure_list(c, source_type);
   return %(code-value "bound" $converted ());
 }
 
@@ -1347,7 +1347,7 @@ static List Compiler._operator(Compiler c, List ast) {
              (!set ?operator (!or + - ~))
              (!set ?argument (expr ?argument_type ?)))): {
       if (c.sym.is_var_type(argument_type))
-        $report.xform_unary_dynamic(c);
+        $report.xform.unary_dynamic(c);
       return ast;
     }
     case $source_operator_content(%(
@@ -1441,7 +1441,7 @@ static List _symbol_expression(Symbol value) =>
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
   if (lhs.match(%(expr ? (slice *))))
-    $report.xform_slice_assignment(c);
+    $report.xform.slice_assignment(c);
   List base, index;
   Type base_type;
   if (_resolved_index_parts(lhs, base, base_type, index)) {
@@ -1450,10 +1450,10 @@ static List Compiler._assignment(Compiler c, Symbol op, List lhs, List rhs) {
        stale. A raw write bypasses that invariant, while generic
        setindex returns a copy that this assignment would discard. */
     if (c.sym.is_string_type(base_type)) {
-      $report.xform_string_assignment(c);
+      $report.xform.string_assignment(c);
     }
     if (!c.resolve_protocol_member(base_type, "setindex"))
-      $report.xform_index_copy(c, base_type);
+      $report.xform.index_copy(c, base_type);
     return %(setindex $base $index $rhs);
   }
   rhs = c.convert_expression(rhs, lhs.cadr());
@@ -1536,7 +1536,7 @@ static List Compiler._dynamic_binary(
   if (!string_plus &&
       ((!lhs_is_var && !c.sym.resolve_numeric_type(lhs_type)) ||
        (!rhs_is_var && !c.sym.resolve_numeric_type(rhs_type)))) {
-    $report.xform_numeric_operands(c, op, lhs_type, rhs_type);
+    $report.xform.numeric_operands(c, op, lhs_type, rhs_type);
   }
   lhs = c.convert_expression(lhs, %("Var"));
   rhs = c.convert_expression(rhs, %("Var"));
@@ -1549,7 +1549,7 @@ static List Compiler._dynamic_compound(
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   int rhs_is_var = c.sym.is_var_type(rhs_type);
   if (c._indexed_builtin_helper(lhs_type)) {
-    $report.xform_container_compound(c, lhs_type);
+    $report.xform.container_compound(c, lhs_type);
   }
   /* Without this rejection a nonmatching String compound falls through to
      native pointer arithmetic on an interned String. Concatenation itself
@@ -1559,7 +1559,7 @@ static List Compiler._dynamic_compound(
   Type member_type = lhs_type;
   if (c.sym.is_string_type(lhs_type)) {
     if (op != <+> || !c._string_operand(rhs_type))
-      $report.xform_string_compound(c);
+      $report.xform.string_compound(c);
     member_type = %("String");
   }
   if (!lhs_is_var) {
@@ -1580,9 +1580,9 @@ static List Compiler._dynamic_compound(
 static void Compiler._dynamic_rhs(
   Compiler c, Symbol op, Type lhs_type, Type rhs_type, int rhs_is_var) {
   if (lhs_type.is_bitfield())
-    $report.xform_compound_bitfield(c);
+    $report.xform.compound_bitfield(c);
   if (!rhs_is_var && !c._scalar_operand(op, rhs_type)) {
-    $report.xform_compound_operand(c, op, rhs_type);
+    $report.xform.compound_operand(c, op, rhs_type);
   }
 }
 
@@ -1593,10 +1593,10 @@ static int Compiler._scalar_operand(Compiler c, Symbol op, Type type) =>
 static String Compiler._dynamic_helper(Compiler c, Type lhs_type) {
   Type scalar = c.sym.resolve_numeric_type(lhs_type);
   if (scalar && scalar.is_enum())
-    $report.xform_compound_enum(c);
+    $report.xform.compound_enum(c);
   String helper = scalar ? scalar.var_numeric_update_helper() : NULL;
   if (!helper) {
-    $report.xform_compound_lvalue(c, lhs_type);
+    $report.xform.compound_lvalue(c, lhs_type);
   }
   return helper;
 }
@@ -1644,12 +1644,12 @@ static List Compiler._indexed_resolution(
   List resolved = c.resolve_protocol_member(
     base_type, postfix ? "postfixindex" : "updateindex");
   if (!resolved) {
-    $report.xform_index_update(c, base_type, postfix);
+    $report.xform.index_update(c, base_type, postfix);
   }
   if (owner && !postfix) {
     Type rhs_type = rhs.cadr();
     if (!c.sym.is_var_type(rhs_type) && !c._scalar_operand(op, rhs_type))
-      $report.xform_index_operand(c, op, rhs_type);
+      $report.xform.index_operand(c, op, rhs_type);
   }
   return resolved;
 }

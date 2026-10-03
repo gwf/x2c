@@ -24,7 +24,7 @@ $(import "../src/grammar.xmacro")
 
 // diagnostics
 
-macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
+macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
@@ -101,7 +101,7 @@ static void Compiler._publish(Compiler c, List outputs) {
   try file_publish(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
-  $report.emit_file_write(c, failure);
+  $report.emit.file_write(c, failure);
 }
 
 // header and source

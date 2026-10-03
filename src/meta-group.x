@@ -32,7 +32,7 @@ $(import "../src/ast-rewrite.xmacro")
 
 // diagnostics
 
-macro Stmt $report.macro_function_unavailable(
+macro Stmt $report.macro.function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
   $c.report_error(
     <macro>,
@@ -699,7 +699,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
     time, and `why`. */
 void Compiler.refuse_meta_call(
   Compiler c, String name, Token site, String why) {
-  $report.macro_function_unavailable(c, site, name, why);
+  $report.macro.function_unavailable(c, site, name, why);
 }
 
 /** Reports at `site` that the group function `name` cannot run at compile

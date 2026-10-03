@@ -1,91 +1,91 @@
 /* parse diagnostics. */
 
-macro Stmt $report.parse_decorator_top(Expr $c) {
+macro Stmt $report.parse.decorator_top(Expr $c) {
   $c.report_error(
     <parse>, "top-level decorators are not supported",
     $c.token, %( "module initialization: void TYPE.initialize(void)" ));
 }
 
-macro Stmt $report.parse_body_expected(Expr $c, Expr $unexpected) {
+macro Stmt $report.parse.body_expected(Expr $c, Expr $unexpected) {
   $c.report_error(
     <parse>, "expected ';', '{', or '=>'",
     $c.token, %("token:" ${$c.token.text} "symbol:" ${$unexpected.str()}));
 }
 
-macro Stmt $report.parse_meta_function(Expr $c, Expr $origin) {
+macro Stmt $report.parse.meta_function(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "a native meta declaration must be a function",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_unit_single(Expr $c) {
+macro Stmt $report.parse.unit_single(Expr $c) {
   $c.report_error(
     <parse>, "submit one top-level item at a time",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_package_identifier(Expr $c, Expr $origin) {
+macro Stmt $report.parse.package_identifier(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "package name must be a C identifier",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_import_name(Expr $c) {
+macro Stmt $report.parse.import_name(Expr $c) {
   $c.report_error(
     <parse>, "expected a quoted package name after 'import'",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_import_local(Expr $c) {
+macro Stmt $report.parse.import_local(Expr $c) {
   $c.report_error(
     <parse>, "expected a local name after 'as'",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_import_member(Expr $c) {
+macro Stmt $report.parse.import_member(Expr $c) {
   $c.report_error(
     <parse>, "expected a package member name after 'with'",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_function_row(Expr $c) {
+macro Stmt $report.parse.function_row(Expr $c) {
   $c.report_error(
     <parse>, "a function definition cannot share a declaration row",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_meta_constructed(
+macro Stmt $report.parse.meta_constructed(
   Expr $c, Expr $name, Expr $origin) {
   $c.report_error(
     <parse>, %"meta function '${$name}' cannot be produced by a macro",
     $origin, %( "move it to a source file and call it from the macro" ));
 }
 
-macro Stmt $report.parse_decl_function(Expr $c) {
+macro Stmt $report.parse.decl_function(Expr $c) {
   $c.report_error(
     <parse>, "Decl macro argument cannot be a function declaration",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_decl_typedef(Expr $c) {
+macro Stmt $report.parse.decl_typedef(Expr $c) {
   $c.report_error(
     <parse>, "Decl macro argument cannot be a typedef",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_destructure_init(Expr $c) {
+macro Stmt $report.parse.destructure_init(Expr $c) {
   $c.report_error(
     <parse>, "destructuring declaration requires an initializer",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_destructure_name(Expr $c) {
+macro Stmt $report.parse.destructure_name(Expr $c) {
   $c.report_error(
     <parse>, "expected identifier in destructuring declaration",
     $c.token, %("destructuring targets must be simple identifiers"));
 }
 
-macro Stmt $report.type_scalar_invalid(
+macro Stmt $report.type.scalar_invalid(
   Expr $c, Expr $source, Expr $origin) {
   $c.report_error(
     <type>, $source ? %"invalid scalar type ${$source}"
@@ -93,86 +93,86 @@ macro Stmt $report.type_scalar_invalid(
     $origin, NULL);
 }
 
-macro Stmt $report.parse_attribute_packed(Expr $c, Expr $origin) {
+macro Stmt $report.parse.attribute_packed(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "packed attributes are unsupported",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_delegate_name(Expr $c) {
+macro Stmt $report.parse.delegate_name(Expr $c) {
   $c.report_error(
     <parse>, "delegate field requires a name",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_named_type_abstract(Expr $c, Expr $origin) {
+macro Stmt $report.parse.named_type_abstract(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "named type requires an abstract type after its name",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_enum_name(Expr $c) {
+macro Stmt $report.parse.enum_name(Expr $c) {
   $c.report_error(
     <parse>, "expected enumerator identifier",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_enum_bound(Expr $c, Expr $spelling, Expr $origin) {
+macro Stmt $report.parse.enum_bound(Expr $c, Expr $spelling, Expr $origin) {
   $c.report_error(
     <parse>, %"enumerator '${$spelling}' is already bound in this scope",
     $origin, %("prior binding: '${$spelling}'"));
 }
 
-macro Stmt $report.parse_syntax_position(Expr $c, Expr $origin) {
+macro Stmt $report.parse.syntax_position(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "syntax cannot be constructed at this position",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_paren_unclosed(Expr $c) {
+macro Stmt $report.parse.paren_unclosed(Expr $c) {
   $c.report_error(
     <parse>, "missing closing parenthesis",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_type_unknown(Expr $c, Expr $first) {
+macro Stmt $report.parse.type_unknown(Expr $c, Expr $first) {
   $c.report_error(
     <parse>, %"unknown type name '${$first.text}'",
     $first, %("name an imported package type through its alias"));
 }
 
-macro Stmt $report.parse_dimension_close(
+macro Stmt $report.parse.dimension_close(
   Expr $c, Expr $expr, Expr $unexpected) {
   $c.report_error(
     <parse>, "expected ']'",
     $c.token, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
 }
 
-macro Stmt $report.parse_method_name(Expr $c) {
+macro Stmt $report.parse.method_name(Expr $c) {
   $c.report_error(
     <parse>, "expected method name",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_macro_member(Expr $c) {
+macro Stmt $report.parse.macro_member(Expr $c) {
   $c.report_error(
     <parse>, "macro method declaration requires a member name",
     $c.token, NULL);
 }
 
-macro Stmt $report.type_method_owner(Expr $c) {
+macro Stmt $report.type.method_owner(Expr $c) {
   $c.report_error(
     <type>, "method name has no concrete owner",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_decl_bound(Expr $c, Expr $exact) {
+macro Stmt $report.parse.decl_bound(Expr $c, Expr $exact) {
   $c.report_error(
     <parse>, %"declaration '${$exact}' is already bound",
     $c.token, %("prior binding: '${$exact}'"));
 }
 
-macro Stmt $report.parse_params_close(
+macro Stmt $report.parse.params_close(
   Expr $c, Expr $params, Expr $unexpected) {
   $c.report_error(
     <parse>, "expected ')'",
@@ -180,37 +180,37 @@ macro Stmt $report.parse_params_close(
       "symbol:" ${$unexpected.str()}));
 }
 
-macro Stmt $report.parse_params_empty(Expr $c) {
+macro Stmt $report.parse.params_empty(Expr $c) {
   $c.report_error(
     <parse>, "empty parameter list; use (void)",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_method_member(Expr $c, Expr $owner) {
+macro Stmt $report.parse.method_member(Expr $c, Expr $owner) {
   $c.report_error(
     <parse>, "expected method name after dot",
     $c.token, %( "typedef:" ${$owner} "token:" ${$c.token.text}  ));
 }
 
-macro Stmt $report.parse_function_body(Expr $c) {
+macro Stmt $report.parse.function_body(Expr $c) {
   $c.report_error(
     <parse>, "Function macro argument requires a function body",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_shutdown_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.parse.shutdown_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <parse>, "translation unit has more than one type shutdown",
     $c.token, %( "shutdown:" ${$name} ));
 }
 
-macro Stmt $report.parse_init_duplicate(Expr $c, Expr $name) {
+macro Stmt $report.parse.init_duplicate(Expr $c, Expr $name) {
   $c.report_error(
     <parse>, "translation unit has more than one type initializer",
     $c.token, %( "initializer:" ${$name} ));
 }
 
-macro Stmt $report.parse_lifecycle_signature(
+macro Stmt $report.parse.lifecycle_signature(
   Expr $c, Expr $role, Expr $name) {
   {
     String message = $role == "initializer"
@@ -220,74 +220,74 @@ macro Stmt $report.parse_lifecycle_signature(
   }
 }
 
-macro Stmt $report.protocol_managed_cleanup(
+macro Stmt $report.protocols.managed_cleanup(
   Expr $c, Expr $origin, Expr $type) {
   $c.report_error(
     <protocol>, "managed initializer requires Cleanup participation",
     $origin, %("type: ${$type.repr()}"));
 }
 
-macro Stmt $report.parse_managed_storage(Expr $c, Expr $origin) {
+macro Stmt $report.parse.managed_storage(Expr $c, Expr $origin) {
   $c.report_error(
     <parse>, "managed initializer requires automatic local storage",
     $origin, NULL);
 }
 
-macro Stmt $report.parse_syntax_expected(Expr $c) {
+macro Stmt $report.parse.syntax_expected(Expr $c) {
   $c.report_error(
     <parse>, "expected syntax",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_statement_single(Expr $c) {
+macro Stmt $report.parse.statement_single(Expr $c) {
   $c.report_error(
     <parse>, "expected one statement",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_alias_target(Expr $c) {
+macro Stmt $report.parse.alias_target(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias target must be one direct function declaration",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_alias_body(Expr $c) {
+macro Stmt $report.parse.alias_body(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias declaration cannot have a body",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_alias_storage(Expr $c) {
+macro Stmt $report.parse.alias_storage(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias has invalid storage class",
     $c.token, %("allowed storage: static or inline"));
 }
 
-macro Stmt $report.parse_alias_variadic(Expr $c) {
+macro Stmt $report.parse.alias_variadic(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias cannot be variadic",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_alias_identifier(Expr $c) {
+macro Stmt $report.parse.alias_identifier(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias native target must be a direct identifier",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_alias_self(Expr $c) {
+macro Stmt $report.parse.alias_self(Expr $c) {
   $c.report_error(
     <parse>, "foreign alias cannot name itself",
     $c.token, NULL);
 }
 
-macro Stmt $report.type_alias_function(Expr $c, Expr $native_type) {
+macro Stmt $report.type.alias_function(Expr $c, Expr $native_type) {
   $c.report_error(
     <type>, "foreign alias native target is not a function",
     $c.token, %("type: ${$native_type.repr()}"));
 }
 
-macro Stmt $report.type_reference_placement(Expr $c) {
+macro Stmt $report.type.reference_placement(Expr $c) {
   $c.report_error(
     <type>, "transparent references are only supported on parameters",
     NULL, NULL);

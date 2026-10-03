@@ -18,6 +18,8 @@ typedef struct ReplOptions {
 #include <stdio.h>
 #include <unistd.h>
 
+$(import "repl-reports.xmacro")
+
 struct ReplCompleteContext {
   ReplSession session;
   String pending;
@@ -251,7 +253,7 @@ static int _inspect(
   foreach (String word, command.words()) words.push(word);
   if (descriptor->dispatch == <symbols>) {
     if (words.len() != 1)
-      fprintf(stderr, "usage: %s\n", descriptor->synopsis);
+      $report.repl.usage(descriptor->synopsis);
     else {
       printf("%%%s\n", session.symbols().repr());
       return 1;
@@ -260,7 +262,7 @@ static int _inspect(
   else if (descriptor->dispatch == <ast> ||
            descriptor->dispatch == <lowered>) {
     if (words.len() != 2) {
-      fprintf(stderr, "usage: %s\n", descriptor->synopsis);
+      $report.repl.usage(descriptor->synopsis);
       return 0;
     }
     String name = words[1];
@@ -272,7 +274,7 @@ static int _inspect(
         return 1;
       }
     }
-    fprintf(stderr, "not a session function: %s\n", name);
+    $report.repl.function(name);
   }
   return 0;
 }
@@ -326,12 +328,12 @@ int repl_run(CliRequest request, ReplOptions options) {
       String operation = String.new_len(command, end);
       const struct ReplCommand *descriptor = _command(operation);
       if (!descriptor) {
-        fprintf(stderr, "unknown command: %s\n", command);
+        $report.repl.command(command);
         failed = 1;
       }
       else if (descriptor->argument == <none> &&
                command != descriptor->spelling) {
-        fprintf(stderr, "usage: %s\n", descriptor->synopsis);
+        $report.repl.usage(descriptor->synopsis);
         failed = 1;
       }
       else if (descriptor->dispatch == <quit>) { pending = ""; break; }
@@ -340,7 +342,7 @@ int repl_run(CliRequest request, ReplOptions options) {
       else if (descriptor->dispatch == <stats>) {
         int verbose;
         if (!_stats_mode(command, verbose)) {
-          fprintf(stderr, "usage: %s\n", descriptor->synopsis);
+          $report.repl.usage(descriptor->synopsis);
           failed = 1;
         }
         else _write_stats(
@@ -382,6 +384,6 @@ int repl_run(CliRequest request, ReplOptions options) {
   if (options.stats || options.verbose_stats)
     _write_stats(
       Stderr, session, stats_pool, stats_baseline, options.verbose_stats);
-  if (pending.len()) { fputs("incomplete input at EOF\n", stderr); return 1; }
+  if (pending.len()) { $report.repl.incomplete(); return 1; }
   return !interactive && failed;
 }

@@ -17,7 +17,7 @@ $(import "../src/grammar.xmacro")
 
 // diagnostics
 
-macro Stmt $report.parse_name_package(
+macro Stmt $report.parse.name_package(
   Expr $c, Expr $spelling, Expr $owner) {
   $c.report_error(
     <parse>,
@@ -25,14 +25,14 @@ macro Stmt $report.parse_name_package(
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_name_reserved(Expr $c, Expr $spelling) {
+macro Stmt $report.parse.name_reserved(Expr $c, Expr $spelling) {
   $c.report_error(
     <parse>,
     %"'${$spelling}' is reserved for compiler-generated names",
     $c.token, NULL);
 }
 
-macro Stmt $report.parse_package_collision(
+macro Stmt $report.parse.package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
   $c.report_error(
     <parse>,
@@ -40,7 +40,7 @@ macro Stmt $report.parse_package_collision(
     $site, NULL);
 }
 
-macro Stmt $report.parse_package_bound(
+macro Stmt $report.parse.package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
   $c.report_error(
     <parse>,
@@ -48,7 +48,7 @@ macro Stmt $report.parse_package_bound(
     $site, %( "bound to: ${$bound}" ));
 }
 
-macro Stmt $report.type_typedef_depth(Expr $c, Expr $origin) {
+macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
   $c.report_error(
     <type>,
     %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
@@ -548,11 +548,11 @@ static String _declared_spelling(List key) {
    generated spellings are the compiler's own output. */
 static void Compiler._check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling)) {
-    $report.parse_name_reserved(c, spelling);
+    $report.parse.name_reserved(c, spelling);
   }
   String owner = c._package_reserved_owner(spelling);
   if (owner)
-    $report.parse_name_package(c, spelling, owner);
+    $report.parse.name_package(c, spelling, owner);
 }
 
 // Checked once per declaration, with no prepass over the token stream.
@@ -748,7 +748,7 @@ void Compiler.register_package_member(
   if (bound is not void && bound.list() === binding) return;
   String spelling = %"${name}__$member";
   if (!c.sym.get_exact(%($spelling)))
-    $report.parse_package_member(c, member_token, name, member);
+    $report.parse.package_member(c, member_token, name, member);
   c._check_package_binding("name", local, local_token);
   c.package_members[local] = binding;
 }
@@ -767,9 +767,9 @@ static void Compiler._check_package_binding(
     bound = %"$package.$member_name";
   }
   if (bound)
-    $report.parse_package_bound(c, token, kind, local, bound);
+    $report.parse.package_bound(c, token, kind, local, bound);
   if (c.sym.get_exact(%($local)))
-    $report.parse_package_collision(c, token, kind, local);
+    $report.parse.package_collision(c, token, kind, local);
 }
 
 /** Returns a visible `with` name's package-prefixed spelling, or `NULL`.
@@ -902,7 +902,7 @@ static Type Sym._resolve_chain(
    legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
    real. */
 static void Sym._typedef_budget_error(Sym s, Type origin) {
-  $report.type_typedef_depth(s.c, origin);
+  $report.type.typedef_depth(s.c, origin);
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling

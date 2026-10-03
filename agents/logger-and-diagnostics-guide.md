@@ -10,7 +10,7 @@ entry through one compiler.
 Named report macros collect wording and diagnostic construction separately
 from the algorithm that selects a case. Small groups appear near the top of
 their source file; larger groups live in a sibling `*-reports.xmacro` imported
-there. Compiler and driver calls use `$report.<category>_<case>`. Runtime
+there. Compiler and driver calls use `$report.<category>.<case>`. Runtime
 formatting and Regex catalogues also provide named expression macros for
 reason strings, leaving their shared failure helpers responsible for payloads.
 

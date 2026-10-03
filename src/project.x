@@ -34,22 +34,22 @@ typedef struct ProjectBuild {
 
 // command reports
 
-macro Stmt $report.project_source_excluded(Expr $path, Expr $target) {
+macro Stmt $report.project.source_excluded(Expr $path, Expr $target) {
   fprintf(
     stderr, "x2c: excluded %s from target %s\n", $path, $target);
 }
 
-macro Stmt $report.project_created(Expr $directory) {
+macro Stmt $report.project.created(Expr $directory) {
   fprintf(stderr, "x2c: created %s\n", $directory);
 }
 
-macro Stmt $report.project_name_invalid(Expr $name) {
+macro Stmt $report.project.name_invalid(Expr $name) {
   driver_error(
     %"new: '${
       $name}' is not a target name; use letters, digits, '_', and '-'");
 }
 
-macro Stmt $report.project_directory_occupied(Expr $dir) {
+macro Stmt $report.project.directory_occupied(Expr $dir) {
   driver_error(%"new: ${$dir} exists and is not an empty directory");
 }
 
@@ -730,7 +730,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   foreach (Var path, sources) {
     if (!(path in excluded)) kept.push(path);
     else if (p.command.verbose)
-      $report.project_source_excluded(path.string(), target.name);
+      $report.project.source_excluded(path.string(), target.name);
   }
   sources.free();
   excluded.free();
@@ -878,7 +878,7 @@ int new_command(CliRequest request) {
   String name = _starter_name(dir);
   try _write_starter(dir, name);
   catch %(io-fail *detail): host_error(detail);
-  if (!request.quiet) $report.project_created(dir);
+  if (!request.quiet) $report.project.created(dir);
   return 0;
 }
 
@@ -889,13 +889,13 @@ static String _starter_name(Path dir) {
   if (name == "." || name == ".." || name == "/")
     name = Path.absolute(dir).basename();
   if (!_name_ok(name))
-    $report.project_name_invalid(name);
+    $report.project.name_invalid(name);
   return name;
 }
 
 static void _write_starter(Path dir, String name) {
   if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
-    $report.project_directory_occupied(dir);
+    $report.project.directory_occupied(dir);
   dir.join("src").make_dirs();
   dir.join("x2c.toml").write_text(
     %"[target.$name]

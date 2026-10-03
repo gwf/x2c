@@ -70,7 +70,7 @@ static void Compiler._install_stub(Compiler c, String name, Token marker) {
       _meta_stub, c.func_signature(type), (char *) name, name.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
-    $report.macro_function_install(c, marker, cause);
+    $report.macro.function_install(c, marker, cause);
   }
 }
 
@@ -152,12 +152,12 @@ void Compiler.install_meta_declaration(
            (bindings
              (op = (bind (binding ? ?(String name)) *) ?))): {
       if (!spec.type().is_static())
-        $report.parse_meta_storage(c, marker, name);
+        $report.parse.meta_storage(c, marker, name);
       if (c.groups_meta()) c.meta_group.push(%(static $declaration));
       return;
     }
   }
-  $report.parse_meta_decl(c, marker);
+  $report.parse.meta_decl(c, marker);
 }
 
 /* explicit meta calls
@@ -197,12 +197,12 @@ Var Compiler.run_meta_call(
   catch %(meta-later *): {
     value = void;
     if (slot)
-      $report.macro_call_deferred(c, site);
+      $report.macro.call_deferred(c, site);
   }
   catch %(malformed (category ?category)):
     raise %(malformed (category $category));
   catch %(call-stack *):
-    $report.macro_call_depth(c, site);
+    $report.macro.call_depth(c, site);
   catch %(?code *detail):
     c.report_lisp_failure(site, cons(code, detail), meta_call_form);
   return value;
@@ -229,7 +229,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       meta_call_form.try_own();
       return c._meta_apply(function, applied);
     }
-  $report.macro_call_target(c, site);
+  $report.macro.call_target(c, site);
 }
 
 /* Each argument evaluates as the type its parameter declares wants. */
@@ -258,7 +258,7 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
     c.macro_lisp.try_get(name, function);
   if (function is void && c.meta_build) raise %(meta-later (name $name));
   if (function is void)
-    $report.macro_call_binding(c, site, name);
+    $report.macro.call_binding(c, site, name);
   return function;
 }
 
@@ -288,7 +288,7 @@ static String Compiler._native_meta_name(
     case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
       name = spelling;
   if (!name)
-    $report.parse_meta_name(c, marker);
+    $report.parse.meta_name(c, marker);
   return name;
 }
 
@@ -401,7 +401,7 @@ static void NativeBinding.check(NativeBinding &n, Var function) {
       n.marker, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
                   "also defined by: ${", ".join(suppliers.cdr())}"));
   if (!c.native_meta_accepts(function, n.signature))
-    $report.type_meta_signature(c, n.marker, n);
+    $report.type.meta_signature(c, n.marker, n);
 }
 
 /* An iterator operation binds through a call that allocates the
@@ -491,7 +491,7 @@ static void Compiler._certify_native_meta(
     return;
   }
   if (marker)
-    $report.type_meta_lifetime(c, marker, name, signature);
+    $report.type.meta_lifetime(c, marker, name, signature);
 }
 
 /* The region summary of a native function without a runtime row, from its
@@ -773,7 +773,7 @@ void Compiler.select_package_module(
   String module = %"$root/builds/$name.module";
   if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
-    $report.driver_module_platform(c, token, name, module);
+    $report.driver.module_platform(c, token, name, module);
   c.add_translation_dependency(module);
   if (!Compiler.native_module_loaded(module))
     c._load_package_module(name, module, token);
@@ -787,7 +787,7 @@ void Compiler.select_package_module(
 static void Compiler._load_package_module(
   Compiler c, String name, String module, Token token) {
   if (_module_stamp(module) != 1)
-    $report.driver_module_compiler(c, token, name, module);
+    $report.driver.module_compiler(c, token, name, module);
   _open_native_module(module);
 }
 

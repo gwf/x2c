@@ -1,6 +1,6 @@
 /* Deferred region findings. The walk owns collection and severity. */
 
-macro Stmt $report.region_bad_free(Expr $w, Expr $op, Expr $subject) {
+macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) {
   $w.warn(
     <bad-free>, $w.origin,
     %"${$op} is given ${$subject}, which no Scope allocator returned",
@@ -8,18 +8,18 @@ macro Stmt $report.region_bad_free(Expr $w, Expr $op, Expr $subject) {
       "freed or reallocated"));
 }
 
-macro Stmt $report.region_read_ended(Expr $w, Expr $name) {
+macro Stmt $report.region.read_ended(Expr $w, Expr $name) {
   $w.warn(
     <region>, $w.origin,
     %"'${$name}' is read after its owning region ended", NULL);
 }
 
-macro Stmt $report.region_after_free(Expr $w, Expr $name, Expr $ended) {
+macro Stmt $report.region.after_free(Expr $w, Expr $name, Expr $ended) {
   $w.warn(
     <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
 }
 
-macro Stmt $report.region_use_ended(
+macro Stmt $report.region.use_ended(
   Expr $f, Expr $subject, Expr $region) {
   (*$f.w).warn(
     <region>, $f.w.origin,
@@ -27,7 +27,7 @@ macro Stmt $report.region_use_ended(
     (*$f.w).opened($region));
 }
 
-macro Stmt $report.region_local_escape(
+macro Stmt $report.region.local_escape(
   Expr $f, Expr $subject, Expr $exit) {
   String message =
     %"${$subject} can outlive the local storage it points into when ${$exit}";
@@ -36,7 +36,7 @@ macro Stmt $report.region_local_escape(
     %("local storage ends when the function returns"));
 }
 
-macro Stmt $report.region_escape(
+macro Stmt $report.region.escape(
   Expr $f, Expr $subject, Expr $exit, Expr $region) {
   (*$f.w).warn(
     <region>, $f.w.origin,

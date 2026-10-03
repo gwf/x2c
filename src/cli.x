@@ -380,7 +380,7 @@ CliRequest cli_parse(int argc, char **argv) {
   String spelling = _two_dash(first);
   if (spelling) _one_dash_removed(first, %"x2c translate $spelling ...");
   if (first[0] != '-') _expected_command(first);
-  $report.cli_command_unknown(first);
+  $report.cli.command_unknown(first);
 }
 
 /* A script's arguments are its own, so `script` expands response files
@@ -474,9 +474,9 @@ static void CliRequest._check(CliRequest r, int mask) {
     driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!inputs || inputs.cdr()))
-    $report.cli_operand_required(name);
+    $report.cli.operand_required(name);
   if (mask == CLI_LIST && inputs)
-    $report.cli_operands_forbidden(name);
+    $report.cli.operands_forbidden(name);
   if (mask == CLI_SCRIPT && !inputs)
     driver_error("script requires a script file");
 }
@@ -488,7 +488,7 @@ static void _help_command(Array args) {
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
   CliCommand *asked = name ? _command_row(name) : NULL;
-  if (!asked) $report.cli_help_unknown(name);
+  if (!asked) $report.cli.help_unknown(name);
   _help_exit(asked.name, 0);
 }
 
@@ -536,11 +536,11 @@ static Given _take_option(Array args, int &i, int mask) {
   Given given = {_find_option(written, mask, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
-    $report.cli_option_value_forbidden(arg);
+    $report.cli.option_value_forbidden(arg);
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if (given.option.value && !given.value && equals <= 2) {
-    if (++i == args.len()) $report.cli_option_value_required(arg);
+    if (++i == args.len()) $report.cli.option_value_required(arg);
     given.value = args[i];
   }
   return given;
@@ -606,14 +606,14 @@ static Symbol _color_mode(String value) {
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
-  $report.cli_color_invalid(value);
+  $report.cli.color_invalid(value);
 }
 
 static Symbol _target_kind(String value) {
   String refusal = NULL;
   Symbol kind = TargetKind.named(value, refusal);
   if (refusal) driver_error(refusal);
-  if (!kind) $report.cli_target_unknown(value);
+  if (!kind) $report.cli.target_unknown(value);
   return kind;
 }
 
@@ -650,7 +650,7 @@ static int _count(String value, int minimum, String noun) {
   errno = 0;
   long count = value ? strtol(value, &end, 10) : 0;
   if (!value || errno || *end || count < minimum || count > INT_MAX)
-    $report.cli_value_invalid(noun, value);
+    $report.cli.value_invalid(noun, value);
   return (int) count;
 }
 
@@ -675,7 +675,7 @@ static void _push_pair(Array out, String option, String value) {
 /* The driver owns C dependency output, so `-Xcc` cannot pass it. */
 static String _xcc_argument(String value) {
   if (cli_dependency_pass_through(value))
-    $report.cli_dependency_owned(value);
+    $report.cli.dependency_owned(value);
   return value;
 }
 
@@ -739,7 +739,7 @@ static void Parse.native(Parse &p, int &i) {
   }
   Given given = _take_option(p.args, i, p.mask);
   if (!given.option || !given.option.package_native)
-    $report.cli_native_unsupported(arg);
+    $report.cli.native_unsupported(arg);
   p.apply(given);
 }
 
@@ -1090,7 +1090,7 @@ static HelpPage help_pages[] = {
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
-  $report.cli_help_unknown(command);
+  $report.cli.help_unknown(command);
 }
 
 static void _print_page(HelpPage &page) {
@@ -1183,7 +1183,7 @@ static void _expected_command(String arg) {
 static void _unknown_option(String arg, int mask) {
   String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
   if (spelling) _one_dash_removed(arg, spelling);
-  $report.cli_option_unknown(arg);
+  $report.cli.option_unknown(arg);
 }
 
 /* The two-dash translate option that a one-dash spelling such as

@@ -1,95 +1,95 @@
 /* install command reports. */
 
-macro Stmt $report.install_version_pinned(
+macro Stmt $report.install.version_pinned(
   Expr $name, Expr $resolved, Expr $version) {
   _error(%"the index has ${$name} ${$resolved}, not the pinned ${$version}");
 }
 
-macro Stmt $report.install_spec_unknown(Expr $spec) {
+macro Stmt $report.install.spec_unknown(Expr $spec) {
   _error(%"unknown package spec '${$spec}'");
 }
 
-macro Stmt $report.install_name_invalid(Expr $name) {
+macro Stmt $report.install.name_invalid(Expr $name) {
   _error(%"'${$name}' is not a package name");
 }
 
-macro Stmt $report.install_target_unmanaged(Expr $target) {
+macro Stmt $report.install.target_unmanaged(Expr $target) {
   _error(%"${$target} exists and is not an installed package");
 }
 
-macro Stmt $report.install_bundle_version_missing(Expr $name) {
+macro Stmt $report.install.bundle_version_missing(Expr $name) {
   _error(%"bundle ${$name} has no readable BUNDLE.json version");
 }
 
-macro Stmt $report.install_bundle_version_wrong(
+macro Stmt $report.install.bundle_version_wrong(
   Expr $name, Expr $built, Expr $current) {
   _error(
     %"bundle ${$name} was built for '${$built}', not '${
       $current}'; use --force");
 }
 
-macro Stmt $report.install_bundle_archive_missing(Expr $name) {
+macro Stmt $report.install.bundle_archive_missing(Expr $name) {
   _error(%"bundle ${$name} has no builds/lib${$name}.a");
 }
 
-macro Stmt $report.install_entry_missing(Expr $spec, Expr $name) {
+macro Stmt $report.install.entry_missing(Expr $spec, Expr $name) {
   _error(%"${$spec} has no src/${$name}.x entry unit");
 }
 
-macro Stmt $report.install_dependencies_missing(Expr $name) {
+macro Stmt $report.install.dependencies_missing(Expr $name) {
   _error(%"${$name} needs native dependencies; install its bundle");
 }
 
-macro Stmt $report.install_index_missing(Expr $location) {
+macro Stmt $report.install.index_missing(Expr $location) {
   _error(%"no package index at ${$location}");
 }
 
-macro Stmt $report.install_package_missing(
+macro Stmt $report.install.package_missing(
   Expr $name, Expr $platform, Expr $location) {
   _error(%"no package '${$name}' for ${$platform} in ${$location}");
 }
 
-macro Stmt $report.install_home_missing(Expr $command) {
+macro Stmt $report.install.home_missing(Expr $command) {
   driver_error(
     %"${$command}: no x2c home: install the compiler or set X2C_HOME");
 }
 
-macro Stmt $report.install_tool_failed(
+macro Stmt $report.install.tool_failed(
   Expr $what, Expr $arguments, Expr $errors) {
   _error(%"${$what} failed (${$arguments.car()}): ${$errors.strip(" \n")}");
 }
 
-macro Stmt $report.install_digest_mismatch(
+macro Stmt $report.install.digest_mismatch(
   Expr $p, Expr $expected, Expr $actual) {
   _error(%"sha256 mismatch for ${$p}: expected ${$expected}, got ${$actual}");
 }
 
-macro Stmt $report.install_archive_shape(Expr $tarball) {
+macro Stmt $report.install.archive_shape(Expr $tarball) {
   _error(%"${$tarball} must contain one package directory");
 }
 
-macro Stmt $report.install_remove_missing(Expr $name) {
+macro Stmt $report.install.remove_missing(Expr $name) {
   driver_error(%"remove: no installed package '${$name}'");
 }
 
-macro Stmt $report.install_remove_unmanaged(Expr $target) {
+macro Stmt $report.install.remove_unmanaged(Expr $target) {
   driver_error(
     %"remove: ${$target} is not an installed package; remove it by hand");
 }
 
-macro Stmt $report.install_lock_waiting(Expr $packages) {
+macro Stmt $report.install.lock_waiting(Expr $packages) {
   fprintf(
     stderr, "x2c: waiting for another install or removal in %s\n", $packages);
 }
 
-macro Stmt $report.install_installed(Expr $packages, Expr $name) {
+macro Stmt $report.install.installed(Expr $packages, Expr $name) {
   fprintf(stderr, "x2c: installed %s/%s\n", $packages, $name);
 }
 
-macro Stmt $report.install_removed(Expr $target) {
+macro Stmt $report.install.removed(Expr $target) {
   fprintf(stderr, "x2c: removed %s\n", $target);
 }
 
-macro Expression $report.install_start_failed(Expr $program, Expr $error) =>
+macro Expression $report.install.start_failed(Expr $program, Expr $error) =>
   %"x2c: unable to execute ${$program}: ${
     String.new(strerror((int) $error))}\n";
