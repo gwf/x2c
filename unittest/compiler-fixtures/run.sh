@@ -7,8 +7,8 @@ if [[ "$mode" != check && "$mode" != update ]]; then
   exit 2
 fi
 
-# Public runs supervise the suite dispatcher or one complete fixture worker.
-if [[ "${2:-}" != --worker && "${2:-}" != --suite ]]; then
+# Public runs supervise complete fixture workers.
+if [[ "${2:-}" != --worker ]]; then
   exec python3 "$(dirname "$0")/supervise.py" "$@"
 fi
 
@@ -21,11 +21,6 @@ x2c=${X2C:-"$root/builds/0/x2c"}
 cc=${CC:-cc}
 read -r -a build_cflags <<< "${BUILD_CFLAGS:-}"
 
-# Start from an empty tree so no fixture can read a tally left by an earlier
-# run; the parent below treats a missing tally as a failure to report.
-if [[ "${2:-}" == --suite ]]; then
-  rm -rf "$build"
-fi
 mkdir -p "$build"
 
 failures=0
@@ -323,48 +318,5 @@ run_fixture() {
 }
 
 # The supervisor publishes staged updates only after successful completion.
-if [[ ${2:-} == --worker ]]; then
-  run_fixture "$3"
-  printf '%d %d\n' "$failures" "$artifact_count" >"$build/$3/tally"
-  exit 0
-fi
-
-names=()
-for manifest in "$fixture_dir"/*.phases; do
-  [[ -e "$manifest" ]] || continue
-  names+=("$(basename "$manifest" .phases)")
-done
-fixture_count=${#names[@]}
-
-if ((fixture_count)); then
-  printf '%s\n' "${names[@]}" | FIXTURE_TALLY_ONLY=1 \
-    xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
-      "$script_dir/run.sh" "$mode" --fixture || true
-fi
-
-for name in "${names[@]}"; do
-  tally="$build/$name/tally"
-  if [[ ! -f "$tally" ]]; then
-    echo "compiler fixture failure: $name did not report a result" >&2
-    failures=$((failures + 1))
-    continue
-  fi
-  read -r fixture_failures fixture_artifacts <"$tally"
-  artifact_count=$((artifact_count + fixture_artifacts))
-  ((fixture_failures)) || continue
-  failures=$((failures + fixture_failures))
-  cat "$build/$name/log" >&2
-done
-
-if ((failures)); then
-  printf 'Compiler fixtures: %d failure(s) across %d fixtures\n' \
-    "$failures" "$fixture_count" >&2
-  exit 1
-fi
-
-if [[ "$mode" == update ]]; then
-  printf 'Compiler fixtures: updated %d artifacts across %d fixtures\n' \
-    "$artifact_count" "$fixture_count"
-else
-  echo "Compiler fixtures: $fixture_count passed ($artifact_count artifacts)"
-fi
+run_fixture "$3"
+printf '%d %d\n' "$failures" "$artifact_count" >"$build/$3/tally"

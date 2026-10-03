@@ -61,6 +61,19 @@ Never use it merely to make a failing check pass; review each changed artifact
 as compiler behavior.
 
 Fixtures run in parallel, using `JOBS` workers (the CPU count by default).
+Check runs report each failure as its worker finishes and stop launching new
+fixtures. Already running workers finish and retain their results. The next
+suite checks previous failures first, then fixtures without a completed
+result, then previous passes. Each group finishes before the next starts.
+Every fixture must pass again in one complete run; previous results select
+order and never permit skipping checks after an edit.
+
+Retry hints live under `debug/fixture-retry/`, separately from actual outputs
+and publication proof. They survive unit-build cleanup and source edits.
+`FIXTURE_RETRY_STATE` selects another hint file for an isolated investigation.
+Direct `--fixture` checks do not change suite hints. Update runs check every
+fixture in normal order, even after a failure, and do not read or write hints.
+
 Each complete fixture has a 60-second wall-clock limit covering translation,
 native compilation, and program execution. Set `FIXTURE_TIMEOUT_SECONDS` to a
 positive number for an intentional slow-machine investigation. The same limit

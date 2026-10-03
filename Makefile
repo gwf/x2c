@@ -41,7 +41,7 @@ COMPAT_TARGETS = unittest docs bootstrap debug
 	$(BENCHMARK_TARGETS) $(SHOOTOUT_TARGETS) \
 	$(CONFIG_TARGETS) $(INSTALL_TARGETS) $(COMPAT_TARGETS) \
 	bootstrap-ready \
-	check-after-precommit
+	check-after-precommit rebuild-from-bootstrap
 # Stage-0 bootstrap artifacts we expect before incremental builds/tests.
 BOOTSTRAP_SENTINEL = bin/x2c-bootstrap
 STAGE0_X2C ?= ./builds/0/x2c
@@ -88,6 +88,9 @@ build: bootstrap-ready					## Build the runtime and compiler
 build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C bootstrap clean
 	$(MAKE) bootstrap-build
+	$(MAKE) rebuild-from-bootstrap
+
+rebuild-from-bootstrap:
 	$(MAKE) -C builds clean
 	$(MAKE) -C include all
 	$(MAKE) -C lib x2c.x
@@ -193,7 +196,8 @@ check-after-precommit:
 # nightly snapshot runs them every day.
 precommit: build					## Prepare the final tree for commit
 	$(MAKE) bootstrap-refresh
-	$(MAKE) build-safe
+# Refresh already compiles the clean bootstrap from the current C/H.
+	$(MAKE) rebuild-from-bootstrap
 	$(MAKE) stage-1
 	$(MAKE) stage-diff-0
 	$(MAKE) stage-diff-1
