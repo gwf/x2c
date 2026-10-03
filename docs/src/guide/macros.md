@@ -562,7 +562,8 @@ meta static List project_fields(List receiver, TypeInfo type) {
     String member = field.car();
     reads.push($!( $receiver.$member ));
   }
-  return x2c_expr_composite(reads);
+  List items = reads.list_free();
+  return $!( { $items... } );
 }
 macro Expression $project.fields(Expr $value) =>
   $project_fields($value, $value);

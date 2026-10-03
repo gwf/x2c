@@ -462,8 +462,9 @@ static List _positional_new(
     parameters.push(x2c_param_make(_value_type(field[1]), name));
     arguments.push(_ref(name));
   }
-  List initializer = x2c_expr_composite(arguments.list_free());
-  List declaration = x2c_decl_make(representation, "value", initializer);
+  List values = arguments.list_free();
+  List declaration = x2c_decl_make(
+    representation, "value", $!( { $values... } ));
   return _finish_new(
     owner, %($owner), parameters.list_free(), %($declaration), heap);
 }

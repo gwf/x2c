@@ -29,7 +29,8 @@ meta static List field_reads(List receiver, TypeInfo type) {
     String member = field.car();
     reads.push($!( $receiver.$member ));
   }
-  return x2c_expr_composite(reads);
+  List items = reads.list_free();
+  return $!( { $items... } );
 }
 
 macro Expression $shape.names(Expr $value) => $field_names($value);
