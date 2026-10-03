@@ -197,3 +197,28 @@ and lib/varops.x produces byte-identical C and headers before and after.
   packages/pcre2/builds/libpcre2.a. No edited sample fails.
 - git diff --check passed. No publication gate or hot-path instruction A/B
   was run; compiler hot-path rewrites were not attempted.
+
+## Follow-up: sequence splices in literals
+
+Refinement 1 is implemented. A quotation's `$name...` now splices into
+`%[...]` Array literals (inside `%[...]` the splice scans as the atom
+`...`), and Map entries splice as `%{${$rows...}}`, as in templates. A
+sequence hole also splices into braced initializers in templates and
+quotations: `(T){ $first, $rest... }`, `$!( { $items... } )`, and
+`T v = { $items... };`. A Lisp slot or meta call inside braces stays one
+element.
+
+Converted with it: the lib/var-tags.xmacro tag, numeric, and decode tables
+(deleting `_tag_composite`; the generated tables are unchanged apart from
+`0x8000` keeping its spelling), the protocol descriptor table and its
+registration calls (deleting `$methods_table`, `$methods_value`, and
+`_string_literal`), `CaptureBuild._storage`, builtins `_positional_new`,
+and the three `x2c_expr_composite(reads)` teaching copies.
+
+Kept raw: hand-built `char *` literal producers in stage.x, expressions.x,
+and literals.x (they are the literal constructors), transform.x's raw
+string segments (per segment), meta-group.x's lowered module stamp, and
+stage.x's Array and Map forms (no shorter). Registration calls keep an
+explicit `String.new(...)`: bound into the protocol initializer, a string
+literal at a `String` parameter is emitted as a bare C literal, which has
+no String header; this is recorded for investigation.
