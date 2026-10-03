@@ -15,6 +15,7 @@ $(import "../lib/private-keywords.xmacro")
 #pragma private
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
@@ -393,8 +394,17 @@ static String _platform(void) {
 
 /* Runs one host tool, or exits with what it wrote to stderr. */
 static void _run(List arguments, const char *what) {
-  String output = NULL, errors = NULL;
-  if (tool_capture(arguments, output, errors))
+  Job job = NULL;
+  String errors = NULL;
+  try job = arguments.job().options({stderr: <capture>}).start();
+  catch %((!or not-found io-fail) *detail): {
+    long error = detail.assoc(<"errno">);
+    errors = %"x2c: unable to execute ${arguments.car()}: ${
+      String.new(strerror((int) error))}\n";
+  }
+  int status = job ? job.status() : 127;
+  if (job) errors = job.errors_text;
+  if (status)
     _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
 }
 
