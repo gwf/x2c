@@ -12,9 +12,20 @@ Cached literal slots and deferred file-static initializers.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.initialization_guard`](#Compiler.initialization_guard) | Returns the declaration of the file's initialization `guard`, which starts at zero. |
 | [`Compiler.setup_cache_init`](#Compiler.setup_cache_init) | Materializes cached literals and deferred file-static initialization. |
 
 ### `Compiler`
+
+<a id="Compiler.initialization_guard"></a>
+#### Compiler.initialization_guard
+
+`List Compiler.initialization_guard(Compiler c, List guard)`
+
+Returns the declaration of the file's initialization `guard`, which
+starts at zero.
+
+Source: `src/cache.x:519`
 
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init

@@ -2729,7 +2729,12 @@ A quotation is an anonymous macro applied where it is written:
 `$!Kind{ ... }` for another category, such as `$!Unit{ ... }`. Each `$name`
 in its body names the visible local `name`; its first use declares a hole
 whose kind its position gives, and the quotation applies to the locals'
-values in that order. `$name...` is a sequence. See
+values in that order. `$name...` is a sequence. A local declared `Type`,
+which `lib/meta.x` declares as a `List` of type syntax such as
+`%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
+declares `value` with the type the local holds. A `String` local fills an
+expression hole as a string literal and an `int` local as an integer
+literal. See
 [Quoting code](https://x2c-lang.dev/docs/guide/meta-functions.html#quoting-code-with-) for an
 example.
 
