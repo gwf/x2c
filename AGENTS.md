@@ -174,6 +174,12 @@ independent gates. Shared-integrator submissions follow the exception below.
 
 ### Select integration ownership
 
+Follow intended design succession, not merge order. A change that supersedes
+an earlier design governs its scope, even if its branch predates intervening
+fixes on `dev`. Reassess those fixes and tests against the replacement design;
+preserve unaffected requirements, not obsolete assumptions. Never infer
+precedence from merge status or timestamps alone.
+
 There are three delivery modes, chosen by Gary's instruction to the session:
 
 - An individual session integrates, gates, and publishes its work to `dev`.
