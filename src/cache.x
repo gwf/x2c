@@ -347,7 +347,7 @@ static List Compiler._array_choice(
   (List condition, List path, Type type, List value) = choice;
   if (!type) return NULL;
   List tests = NULL;
-  List slot = _array_slot(target, path, tests);
+  List slot = c._array_slot(target, path, tests);
   List assignment = c._array_assignment(slot, type, value, condition);
   if (condition) tests = cons(condition, tests);
   List active = NULL;
@@ -364,21 +364,20 @@ static List Compiler._array_choice(
 /* Reuse ordinary indexed assignments, recursing only for explicit array
    braces. C can warn and ignore excess positional values, so writes use the
    native object's actual dimensions rather than the initializer count. */
-static List _array_slot(List target, List path, List &tests) {
+static List Compiler._array_slot(
+  Compiler c, List target, List path, List &tests) {
   List slot = target;
   tests = %();
   foreach (List frame, path.reverse()) {
     (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
     List parent = slot;
+    slot = c.initializer_slot(parent, %($frame));
     if (kind == <index>) {
-      slot = %(expr $selected (index $parent $selector));
       List length = %(expr (unsigned)
         (op / (expr (unsigned) (sizeof (parens $parent)))
               (expr (unsigned) (sizeof (parens $slot)))));
       tests = cons(%(expr (int) (op < $selector $length)), tests);
     }
-    else if (selector.truth())
-      slot = %(expr $selected (op . $parent ($selector)));
   }
   return slot;
 }
@@ -454,7 +453,7 @@ static List HeaderCache.prelude(HeaderCache &h, Array ids) {
   Array declarations = [];
   foreach (List declaration, c._slot_declarations(ids, h.bindings))
     declarations.push(declaration);
-  declarations.push(_initialization_guard(h.guard));
+  declarations.push(c.initialization_guard(h.guard));
   Array statements = [];
   foreach (int id, ids) {
     List statement = c._cache_initializer(id, h.bindings, 1);
@@ -515,8 +514,10 @@ static List Compiler._header_initializer(
   return _initializer_function(c, type, initializer, body);
 }
 
-List _initialization_guard(List guard) => %(declare (static int)
-    (bindings (op = (bind $guard ()) (expr (int) (literal (int) "0")))));
+/** Returns the declaration of the file's initialization `guard`, which
+    starts at zero. */
+List Compiler.initialization_guard(Compiler c, List guard) =>
+  c.rebuild_statement($!{ static int $guard = 0; }).cadr();
 
 macro Decorator $initialized_entry(
   Function $function, Expr $guard, Expr $entry, Statement $body...) {

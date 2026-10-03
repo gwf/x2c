@@ -554,8 +554,7 @@ int main(void){
     Iter _x2c_macro_iterator_20 = zipped;
     Var _x2c_macro_item_20;
     while(Iter_try_next(_x2c_macro_iterator_20, &(_x2c_macro_item_20))){
-      List _x2c_macro_pair_20;
-      _x2c_macro_pair_20 = Var_list(_x2c_macro_item_20);
+      List _x2c_macro_pair_20 = Var_list(_x2c_macro_item_20);
       text = List_getindex(_x2c_macro_pair_20, 0);
       number = List_getindex(_x2c_macro_pair_20, 1);
       zipped_total += String_len(Var_string(text)) * Var_integer(number);

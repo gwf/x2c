@@ -80,7 +80,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
         c.wrapper_function(
           %(static "Var"), lambda_binding, decl_params.cdr(),
           c._helper_body(body, NULL).cdr()));
-      return %(expr $type (ident $lambda_binding));
+      return _func_bound(type, lambda_binding);
     }
   }
   return expression;
@@ -522,7 +522,7 @@ static List CellRegion.rewrite(CellRegion &r, List ast) {
       Type type = NULL;
       if (r._lookup(binding, cell, type)) {
         if (source_type.car() == <&>)
-          return %(expr $source_type (ident $cell));
+          return _func_bound(source_type, cell);
         return r._value(binding, cell);
       }
       return ast;
@@ -606,7 +606,7 @@ static List CellRegion.setup(CellRegion &r, List entries) {
     Type type = NULL;
     if (!r._lookup(binding, cell, type)) continue;
     setup.push(
-      r.c._cell_declaration(cell, type, %(expr $type (ident $binding))));
+      r.c._cell_declaration(cell, type, _func_bound(type, binding)));
   }
   return setup.list_free();
 }
@@ -836,9 +836,7 @@ static List Compiler._indirect_func_value(
     context_type, context, _func_bound(%("FuncAdapter"), adapter),
     signature, _func_bound(constructor_type, constructor));
   List statement = c._func_present_statement(pointer, constructed);
-  return %(
-    expr ("Func") (parens (block $declaration $statement))
-  );
+  return %(expr ("Func") (parens (block $declaration $statement)));
 }
 
 static List Compiler._indirect_func_adapter(
@@ -1025,7 +1023,7 @@ List Compiler.maybe_adapt_func_arg(
   if (c._is_func_adapter_target(source_type)) return argument;
   List adapter = c._direct_func_adapter(
     expected_type, source_binding, source_type);
-  return %(expr $expected_type (ident $adapter));
+  return _func_bound(expected_type, adapter);
 }
 
 static int Compiler._is_func_adapter(Compiler c, Type type) {
@@ -1051,7 +1049,7 @@ static List Compiler._direct_func_adapter(
   List key = %(fadapt $source_binding $key_type);
   List adapter = NULL;
   $adapter.memo(c, key, adapter) {
-    List target = %(expr $source_type (ident $source_binding));
+    List target = _func_bound(source_type, source_binding);
     adapter = c._build_func_adapter(
       diagnostic_type, source_type, target, NULL, NULL);
   }
@@ -1085,7 +1083,7 @@ static List Compiler._build_func_adapter(
   List locals = c._func_argument_locals(
     diagnostic_type, params, names, fn_binding, argv_binding);
   List arguments = params.zip_with(
-    names, %!(Type type, List binding) => %(expr $type (ident $binding)));
+    names, _func_bound);
   List call = c._func_call(return_type, target, arguments);
   Type resolved_result = c.sym.resolve_key(return_type);
   if (resolved_result && resolved_result.car() == <struct>)
@@ -1200,7 +1198,7 @@ static List FuncReaders._call(
   List details) {
   List fn = %(expr ("Func") (ident ${r.fn}));
   List argv = %(expr (* const "FuncArg") (ident ${r.argv}));
-  List arguments = %($fn $argv ${_integer_expression(index)} @details);
+  List arguments = %($fn $argv ${x2c_literal_int(index)} @details);
   return r.c._func_call(result_type, target, arguments);
 }
 
@@ -1231,7 +1229,7 @@ static List Compiler._func_record_call(
   List address = c.rebuild_expression(
     return_type.reference(), address_shape(value));
   List size = c.rebuild_expression(%(unsigned long), size_shape(value));
-  List helper = %(expr $result_type (ident $result_helper));
+  List helper = _func_bound(result_type, result_helper);
   List boxed = c._func_call(%("Var"), helper, %($address $size));
   Macro record = $func_record_result;
   List row = %(op = (bind $result $mods) $call);
@@ -1258,9 +1256,6 @@ static List Compiler._type_literal(Compiler c, Type type) =>
 
 static List _adapter_symbol_literal(Symbol value) =>
   %(expr ("Symbol") "${(unsigned long) value}");
-
-static List _integer_expression(int value) =>
-  %(expr (int) (literal (int) ${%"$value"}));
 
 static List Compiler._adapter_helper(Compiler c, String name, Type &type) =>
   c.sym.resolve_global(%($name), type);
@@ -1404,7 +1399,7 @@ static List Callback.publish_typed(Callback &cb, Type spelling) {
     c.semantic_binding_facts()[%(function $binding)] = 1;
     c.add_early(function);
   }
-  return %(expr $spelling (ident $binding));
+  return _func_bound(spelling, binding);
 }
 
 /* The helper `binding` names: each argument converts to its source
@@ -1464,7 +1459,7 @@ static List Callback.publish_lambda(Callback &cb) {
   Compiler c = cb.c;
   List binding = c.sym.introduce(c.fresh_name("lambda_adapt"));
   c.add_early(cb.function(binding));
-  return %(expr ${cb.target} (ident $binding));
+  return _func_bound(cb.target, binding);
 }
 
 static int _lambda_adapter_signature(

@@ -1133,6 +1133,20 @@ syntax or values the locals hold, names the body declares are private to the
 expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
+A quotation expands where code is bound or spliced: return it, pass it to a
+slot, or use it as another quotation's hole. Placed inside a hand-built
+List such as a raw call's argument list, it stays unexpanded.
+
+A local declared `Type` fills a type position, which lets a quotation
+declare a variable whose type it computes:
+
+<!-- ignore: a meta function fragment without its includes -->
+```x2c,ignore
+meta static List counter(String name) {
+  Type type = %(unsigned);
+  return $!{ $type $name = 0; };
+}
+```
 
 ## What the compiler answers
 
