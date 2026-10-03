@@ -1133,9 +1133,10 @@ syntax or values the locals hold, names the body declares are private to the
 expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
-A quotation expands where code is bound or spliced: return it, pass it to a
-slot, or use it as another quotation's hole. Placed inside a hand-built
-List such as a raw call's argument list, it stays unexpanded.
+A quotation expands where code is bound, spliced, or resolved: return it,
+pass it to a slot, or use it as another quotation's hole. A quotation inside
+hand-built expression syntax, such as a call's argument list or a declaration
+initializer, expands when the compiler resolves that expression.
 
 A local declared `Type` fills a type position, which lets a quotation
 declare a variable whose type it computes:
@@ -1327,8 +1328,10 @@ meta static List shape_names(TypeInfo type) {
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
 meta static List shape_reads(List receiver, TypeInfo type) {
   Array reads = [];
-  foreach (List field, shape_fields(type))
-    reads.push(x2c_expr_field(receiver, field.car()));
+  foreach (List field, shape_fields(type)) {
+    String member = field.car();
+    reads.push($!( $receiver.$member ));
+  }
   return x2c_expr_composite(reads);
 }
 
