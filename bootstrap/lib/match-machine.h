@@ -22,5 +22,11 @@ int MatchMachine_clean(MatchMachine * m);
 
 void MatchMachine_dispose(MatchMachine * m);
 
+MatchMachine * MatchMachine_acquire(MachineStats * stats);
+
+void MatchMachine_release(MatchMachine * m);
+
+void MatchMachine_release_spares(void);
+
 
 #endif /* __GUARD_0x491AB95F__ */

@@ -86,6 +86,17 @@ static void MatchMachine__count_call(MatchMachine * m);
 
 static void MatchMachine__count_share(MatchMachine * m);
 
+enum{
+  MACHINE_SPARES = 8
+}
+;
+
+static _Thread_local struct{
+  MatchMachine * spares[MACHINE_SPARES];
+  int count;
+}
+machine_thread;
+
 static void MatchMachine__clear_slots(MatchMachine * m);
 
 static void MatchMachine__clear_frames(MatchMachine * m);
@@ -595,6 +606,28 @@ void MatchMachine_dispose(MatchMachine * m){
   if((* m).scratch) Scope_free((* m).scratch);
   (* m).scratch = NULL;
   (* m).scratch_capacity = 0;
+}
+
+MatchMachine * MatchMachine_acquire(MachineStats * stats){
+  MatchMachine * m = machine_thread.count ? machine_thread.spares[-- machine_thread.count] : calloc(1, sizeof(MatchMachine));
+  if(! m){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 569};
+    x2c_error_raise_n(& _x2c_error_site_1, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
+    __builtin_unreachable();
+  }
+  MatchMachine_open(&((* m)));
+  m -> stats = stats;
+  return m;
+}
+
+void MatchMachine_release(MatchMachine * m){
+  MatchMachine_dispose(&((* m)));
+  if(machine_thread.count < MACHINE_SPARES) machine_thread.spares[machine_thread.count ++] = m;
+  else free(m);
+}
+
+void MatchMachine_release_spares(void){
+  while(machine_thread.count) free(machine_thread.spares[-- machine_thread.count]);
 }
 
 static void MatchMachine__clear_slots(MatchMachine * m){

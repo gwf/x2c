@@ -664,18 +664,16 @@ int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captu
   return MatchPlan_execute_capture(plan, List_var(input), captures, NULL);
 }
 
-void MatchMachine_open(MatchMachine *);
+MatchMachine * MatchMachine_acquire(MachineStats *);
 
 MachineView MachineProgram_view(MachineProgram);
 
-void MatchMachine_dispose(MatchMachine *);
+void MatchMachine_release(MatchMachine *);
 
 static int MatchPlan__capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats){
-  MatchMachine machine;
-  MatchMachine_open(&(machine));
-  machine.stats = stats;
-  int result = _run_capture(MachineProgram_view(m -> program), &(machine), input, captures);
-  MatchMachine_dispose(&(machine));
+  MatchMachine * machine = MatchMachine_acquire(stats);
+  int result = _run_capture(MachineProgram_view(m -> program), &(* machine), input, captures);
+  MatchMachine_release(machine);
   return result;
 }
 
@@ -719,12 +717,10 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   if(! _init_guard_) _file_init_();
   if(! MatchPlan__prepared(plan, "MatchPlan.execute")) return - 1;
   if(! out_bindings) return - 1;
-  MatchMachine machine;
-  MatchMachine_open(&(machine));
-  machine.stats = stats;
+  MatchMachine * machine = MatchMachine_acquire(stats);
   List bindings;
-  int result = MatchPlan__run(plan, &(machine), input, &(bindings));
-  MatchMachine_dispose(&(machine));
+  int result = MatchPlan__run(plan, &(* machine), input, &(bindings));
+  MatchMachine_release(machine);
   if(result == 1)(* out_bindings) = bindings;
   return result;
 }
@@ -767,21 +763,19 @@ int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out
 void Block_free(Block);
 
 static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
-  MatchMachine machine;
-  MatchMachine_open(&(machine));
-  machine.stats = NULL;
+  MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_macro_values_0[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_0 ={
     _x2c_macro_values_0, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, &(machine), Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine, Block_new(sizeof(Var))
   }
   ;
   int result = MatchWalk__first(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(&(machine));
+  MatchMachine_release(machine);
   if(result == 1){
     * out_match = walk.found;
     * out_bindings = walk.bindings;
@@ -796,21 +790,19 @@ int MatchPlan_search(MatchPlan plan, List input, List * out_results){
 }
 
 static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
-  MatchMachine machine;
-  MatchMachine_open(&(machine));
-  machine.stats = NULL;
+  MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_macro_values_1[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_1 ={
     _x2c_macro_values_1, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, &(machine), Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine, Block_new(sizeof(Var))
   }
   ;
   int status = MatchWalk__all(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(&(machine));
+  MatchMachine_release(machine);
   if(status < 0) return - 1;
   (* out_results) = walk.results;
   return 1;
@@ -823,22 +815,20 @@ int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * ou
 }
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out){
-  MatchMachine machine;
-  MatchMachine_open(&(machine));
-  machine.stats = NULL;
+  MatchMachine * machine = MatchMachine_acquire(NULL);
   Var _x2c_macro_values_2[MACHINE_BINDER_MAX];
   MatchCaptureBuffer _x2c_macro_captures_2 ={
     _x2c_macro_values_2, 0, MACHINE_BINDER_MAX
   }
   ;
   MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, &(machine), Block_new(sizeof(Var))
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine, Block_new(sizeof(Var))
   }
   ;
   walk.template = template;
   Var result = MatchWalk__rewrite(&(walk), List_var(input), 1);
   Block_free(walk.spine);
-  MatchMachine_dispose(&(machine));
+  MatchMachine_release(machine);
   if(walk.error) return - 1;
   * out = Var_list(result);
   return 1;

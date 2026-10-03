@@ -631,7 +631,10 @@ void MatchCache_context_close(void * token){
   match_thread.context_top = state -> prev;
 }
 
+void MatchMachine_release_spares(void);
+
 void x2c_match_thread_release(void){
+  MatchMachine_release_spares();
   if(! match_thread.plan_cache) return;
   MatchCache_dispose(match_thread.plan_cache);
   match_thread.plan_cache = NULL;
@@ -649,7 +652,7 @@ MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 544};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 545};
       x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), _x2c_literal_part_0, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
@@ -658,7 +661,7 @@ MatchCache MatchCache_new(int capacity){
   if(capacity >(INT_MAX - 1) / 2){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 546};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 547};
       x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), _x2c_literal_part_1, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
@@ -684,7 +687,7 @@ void Scope_destroy(Scope);
 void MatchCache_dispose(MatchCache cache){
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 572};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 573};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
