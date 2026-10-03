@@ -533,9 +533,12 @@ Follow-up adoption after the campaign landed:
   as a hole value resolves again by spelling where it lands, losing an
   expansion's private name, so typed identifier leaves stay raw; a binding
   taken from `x2c_method_resolve` does not survive to a deferred default,
-  so such calls go by spelling; `$slot(...)...` splices do not parse in a
-  quotation; and transform-stage sites stay raw, because binding there
-  opens a semantic transaction per node.
+  so such calls go by spelling; and transform-stage sites stay raw,
+  because binding there opens a semantic transaction per node. A
+  `$slot(...)...` splice in a quotation first failed because a `$name`
+  naming a function became a hole; holes now name only locals, and
+  `$defer_captured` is a quotation. A deferred capture keeps its typed
+  leaf: its raw binding read through a reference parameter.
 - Not adopted: operator holes. About four cold sites would read better;
   the rest rebuild an operator node generically on hot paths.
 - Next: `({ ... })` treats braces as a statement expression only when a
