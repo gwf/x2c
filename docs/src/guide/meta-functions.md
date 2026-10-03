@@ -1088,6 +1088,52 @@ statement sequences. The macro owns the fresh scratch names and passes those
 same names to the fragment helpers, keeping all generated references in the
 intended function scope.
 
+## Quoting code with `$!`
+
+A template that a `meta` function uses once can be written where it is used.
+`$!( expression )` builds an expression, `$!{ items }` builds statements, and
+`$!Unit{ ... }`, `$!Field{ ... }`, or another category name before the braces
+builds that kind of code. A `$name` inside names the function's local
+`name` and inserts its value: syntax where the position takes syntax, and a
+number, String, or Symbol as a literal. `$name...` splices a `List` local.
+Each local's first position decides what it fills.
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+meta static List numbered(List subject, List arms) {
+  Array cases = [];
+  int index = 0;
+  foreach (List arm, arms) {
+    cases.push($!{ if ($subject == $index) $arm });
+    index++;
+  }
+  return cases.list_free();
+}
+
+macro Statement $choose(Expr $subject, Statement $arms...) {
+  $numbered($subject, $arms)...
+}
+
+int main(void) {
+  int pick = 1;
+  $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
+  return 0;
+}
+```
+
+```text
+one
+```
+
+A quotation is an anonymous macro applied at once to the locals its body
+names, so it follows the same rules as any template: arguments arrive as the
+syntax or values the locals hold, names the body declares are private to the
+expansion, and other names resolve where the code lands. It keeps nothing
+from the function once it has been applied. Inside a `%(...)` List, `$`
+inserts a value, so bind a quotation to a local first and insert the local.
+
 ## What the compiler answers
 
 `lib/meta.x` declares the compiler operations. The code builders and

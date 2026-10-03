@@ -1471,6 +1471,15 @@ as `case $sum(?left, ?right):` selects the macro directly. An anonymous
 `macro Kind(parameters) => body` or `macro Kind(parameters) { body }` is a
 value without a global name.
 
+A quotation is an anonymous macro applied where it is written:
+`$!( expression )` for an expression, `$!{ items }` for statements, and
+`$!Kind{ ... }` for another category, such as `$!Unit{ ... }`. Each `$name`
+in its body names the visible local `name`; its first use declares a hole
+whose kind its position gives, and the quotation applies to the locals'
+values in that order. `$name...` is a sequence. See
+[Quoting code](../guide/meta-functions.md#quoting-code-with-) for an
+example.
+
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
 binding and that the member has the binding's source spelling. This also

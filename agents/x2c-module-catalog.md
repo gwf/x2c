@@ -194,17 +194,17 @@ Public functions:
 
 `Compiler.parse_expression`, `Compiler.parse_assignment`,
 `Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
-`Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
-`Compiler.parse_variable`, `Compiler.resolve_expression`,
-`Compiler.needs_resolution`, `Compiler.resolve_postfix_member`,
-`Compiler.postfix_completions`, `x2c_func_call_arguments`,
-`Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.check_explicit_converter`,
-`List.printf_family`, `Compiler.printf_static_format`,
-`Compiler.promote_string_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`, `Compiler.converter_call`,
-`Compiler.is_builtin_converter_call`
+`Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
+`Compiler.parse_primary`, `Compiler.parse_variable`,
+`Compiler.resolve_expression`, `Compiler.needs_resolution`,
+`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
+`x2c_func_call_arguments`, `Compiler.func_call_parts`,
+`Compiler.complete_iter_chain`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.check_explicit_converter`, `List.printf_family`,
+`Compiler.printf_static_format`, `Compiler.promote_string_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/format.x](../src/format.x)
 
@@ -278,7 +278,8 @@ x2c literal parsing.
 
 Public functions:
 
-`Compiler.parse_list_literal`, `Compiler.typed_match_pattern`,
+`Compiler.parse_list_literal`, `Compiler.parse_macro_pattern_arguments`,
+`Compiler.try_parse_macro_pattern_insertion`, `Compiler.typed_match_pattern`,
 `Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
 `Compiler.parse_symbol_set_literal`, `Compiler.symbol_set_expression`,
 `Compiler.parse_array_literal`, `Compiler.parse_map_literal`,
@@ -293,10 +294,11 @@ Public functions:
 
 `Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
 `Compiler.parse_macro_definition`, `Compiler.try_parse_macro_slot`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.macro_introduced_name`,
-`Compiler.macro_tag_name`, `Compiler.publish_macro_definition_node`,
-`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
+`Compiler.peek_macro_hole`, `Compiler.parse_macro_quotation`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`Compiler.publish_macro_definition_node`, `Compiler.macro_form_is_definition`,
+`Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
@@ -307,6 +309,7 @@ Public functions:
 `Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
 `Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
 `Compiler.macro_value_literal`, `Compiler.try_parse_macro_pattern`,
+`Compiler.macro_pattern_at`, `Compiler.try_parse_macro_subpattern`,
 `Compiler.capture_macro_value`, `Compiler.take_code_value`,
 `Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,

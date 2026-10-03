@@ -28,7 +28,7 @@ Brace initializer conversion.
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/initializers.x:1039`
+Source: `src/initializers.x:1038`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -60,7 +60,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/initializers.x:1052`
+Source: `src/initializers.x:1051`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows

@@ -33,7 +33,7 @@ Returns one `$catch_case` for each lowered arm of `arms`, numbered in
 order and tested against `selected`, then `$catch_none` when no arm can
 fall out; `$catch_landing` calls this in a slot.
 
-Source: `src/cleanup.x:878`
+Source: `src/cleanup.x:875`
 
 #### builtin_catch_patterns
 
@@ -42,7 +42,7 @@ Source: `src/cleanup.x:878`
 Returns one `$catch_pattern` for each of `items`, prepared into the
 catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/cleanup.x:846`
+Source: `src/cleanup.x:843`
 
 #### builtin_defer_captures
 
@@ -50,7 +50,7 @@ Source: `src/cleanup.x:846`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:964`
+Source: `src/cleanup.x:961`
 
 #### builtin_defer_record
 
@@ -59,7 +59,7 @@ Source: `src/cleanup.x:964`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:955`
+Source: `src/cleanup.x:952`
 
 #### builtin_try_catch_site
 
@@ -69,7 +69,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:831`
+Source: `src/cleanup.x:828`
 
 #### builtin_try_landing
 
@@ -79,7 +79,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:858`
+Source: `src/cleanup.x:855`
 
 ### `Compiler`
 
@@ -104,7 +104,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1334`
+Source: `src/cleanup.x:1331`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -114,7 +114,7 @@ Source: `src/cleanup.x:1334`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1309`
+Source: `src/cleanup.x:1306`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime

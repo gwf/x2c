@@ -223,7 +223,7 @@ Source: `src/type.x:433`
 Starts an empty set of source-declared `Var` rows for one translation
 unit.
 
-Source: `src/type.x:968`
+Source: `src/type.x:967`
 
 <a id="Type.body"></a>
 #### Type.body
@@ -309,7 +309,7 @@ Source: `src/type.x:472`
 Ends the source-declared `Var`-row lifetime before the unit `Scope` is
 released.
 
-Source: `src/type.x:975`
+Source: `src/type.x:974`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -318,7 +318,7 @@ Source: `src/type.x:975`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:907`
+Source: `src/type.x:906`
 
 <a id="Type.function_parts"></a>
 #### Type.function_parts
@@ -610,7 +610,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:956`
+Source: `src/type.x:955`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -621,7 +621,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:944`
+Source: `src/type.x:943`
 
 <a id="Type.scalar"></a>
 #### Type.scalar
@@ -662,7 +662,7 @@ Source: `src/type.x:309`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:918`
+Source: `src/type.x:917`
 
 <a id="Type.var_numeric_extractor"></a>
 #### Type.var_numeric_extractor
@@ -692,7 +692,7 @@ Source: `src/type.x:641`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:897`
+Source: `src/type.x:896`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -703,7 +703,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:929`
+Source: `src/type.x:928`
 
 <a id="Type.widest"></a>
 #### Type.widest
