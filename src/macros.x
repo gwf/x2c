@@ -1279,7 +1279,8 @@ static List Compiler._quoted_hole(Compiler c, Token name) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   String spelling = name.text;
   Type type = NULL;
-  if (!c.sym.lookup(%($spelling), type)) return NULL;
+  List local = c.sym.lookup(%($spelling), type);
+  if (!local || !c.sym.binding_is_local(local)) return NULL;
   Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
   Token after = Token.skip_trivia(name + 1);
   List hole = c._declare_hole(name, kind, after.type == <...>);

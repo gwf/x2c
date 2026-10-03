@@ -68,6 +68,17 @@ meta static List doubled_local(List v) {
 }
 macro Stmt $show_twice(Expr $v) { $doubled_local($v)... }
 
+/* A meta call spliced in a quotation runs where the quotation expands; a
+   `$name` hole names only a local. */
+meta static List each_print(List values) {
+  Array rows = [];
+  foreach (List v, values) rows.push($!{ printf("%d\n", $v); });
+  return rows.list_free();
+}
+meta static List bracketed(List values) =>
+  $!{ { printf("begin\n"); $each_print($values)... printf("end\n"); } };
+macro Stmt $print_all(Expr $values...) { $bracketed($values)... }
+
 int main(void) {
   int pick = 1;
   $choose(pick, printf("zero\n");, printf("one\n");, printf("two\n"););
@@ -80,5 +91,6 @@ int main(void) {
   printf("%d %d\n", total, $boxed(5).x);
   (void)$report_next(41);
   $show_twice(21);
+  $print_all(1, 2);
   return 0;
 }
