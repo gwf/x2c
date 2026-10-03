@@ -3271,8 +3271,10 @@ List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
 }
 
 /* `shape`'s pattern with each argument pattern in its hole. A binder
-   stands in its hole directly; any other pattern replaces a private binder
-   there, spliced for a sequence or Type hole. */
+   stands in its hole directly; any other pattern, a bare `*` included,
+   replaces a private binder there, spliced for a sequence or Type hole.
+   Derivation quotes a `*` it finds, because a template's `*` is an
+   operator, so a bare `*` goes in after it. */
 static List _macro_subpattern(Macro shape, List patterns, int content) {
   Array names = [];
   Map replacements = {};
@@ -3281,7 +3283,7 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
   foreach (List hole, shape.assoc(<parameters>).list()) {
     Var pattern = patterns.car();
     patterns = patterns.cdr();
-    if (pattern.is_binder()) {
+    if (pattern.is_binder() && pattern.str() != "*") {
       names.push(pattern);
       continue;
     }

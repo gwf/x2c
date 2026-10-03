@@ -655,14 +655,11 @@ static List Compiler._nominal_getindex(Compiler c, Type type) {
 static List Compiler._index(Compiler c, List ast) {
   Macro indexed = $indexed;
   match (ast)
-    case ${$indexed(?base, ?selector)}:
-      match (selector)
-        case %(expr ?type ?)
-          if (c.sym.is_var_type(type)): {
-            List converted = c.convert_expression(selector, %(long));
-            return c.rebuild_expression(
-              NULL, indexed(base, converted)).caddr();
-          }
+    case ${$indexed(?base, %(!set ?selector (expr ?type ?)))}
+        if (c.sym.is_var_type(type)): {
+      List converted = c.convert_expression(selector, %(long));
+      return c.rebuild_expression(NULL, indexed(base, converted)).caddr();
+    }
   return ast;
 }
 

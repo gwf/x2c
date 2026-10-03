@@ -1079,14 +1079,12 @@ static Var Compiler._native_modifier(Compiler c, Var modifier, Var &reused) {
       unsigned long long count;
       if (!bound || _initializer_integer(bound, count)) return modifier;
       match (bound)
-        case %(expr ? ${$sizeof_grouped(?argument)}):
-          match (argument)
-            case %(struct ?tag (fields
-              (declare (char) (bindings (bind ? ((dim ?))))))): {
-              reused = %(dim (expr (unsigned long)
-                (sizeof (parens (struct $tag)))));
-              return modifier;
-            }
+        case %(expr ? ${$sizeof_grouped(%(struct ?tag (fields
+            (declare (char) (bindings (bind ? ((dim ?))))))))}): {
+          reused = %(dim (expr (unsigned long)
+            (sizeof (parens (struct $tag)))));
+          return modifier;
+        }
       String name = c.fresh_name("initializer_bound");
       Type bytes = %((dim $bound) char);
       List field = bytes.declaration_ast(%("bytes"));
