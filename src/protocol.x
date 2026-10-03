@@ -1914,22 +1914,15 @@ static List _collision_notes(Symbol kind, List first, List second) {
 
 // update helpers
 
-/* A generated function around a body its caller lowered. `result` carries
-   the storage class, so static, inline and external helpers share it. */
-macro Unit $compiler_wrapper(Type $result, Name $name, Stmt $body,
-    Param $params...) {
-  $result $name($params...) { $body }
-}
-
 /** Returns the function `result name(params) { body }` bound in this
-    unit. `result` is the storage class and result type, `params` the
-    parameter declarations, and `body` its lowered statements. */
+    unit. `result` is the storage class and result type, so static, inline
+    and external helpers share it; `params` are the parameter declarations,
+    and `body` its lowered statements. */
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
-  Macro wrapper = $compiler_wrapper;
+  List lowered = %(code-value "lowered" (seq @body) ());
   return c._generated_function(
-    binding,
-    wrapper(result, binding, %(code-value "lowered" (seq @body) ()), params));
+    binding, $!Unit{ $result $binding($params...) { $lowered } });
 }
 
 /** Returns `(declarations arguments)` for a helper that forwards its
@@ -1966,25 +1959,6 @@ static List Compiler._bound_call(
   return c.rebuild_expression(result, shape(callee, arguments));
 }
 
-/* A direct protocol update stores the member's result through `lhs`; the
-   `op` parameter keeps the update ABI of the dynamic path. */
-macro Unit $protocol_update(
-    Type $type, Type $rhs_type, Name $helper, Expr $member) {
-  static $type $helper(volatile $type *lhs, Symbol op, $rhs_type rhs) {
-    lhs[0] = $member(lhs[0], rhs);
-    return lhs[0];
-  }
-}
-
-/* The postfix form adds one and returns the value it read first. */
-macro Unit $protocol_postfix(Type $type, Name $helper, Expr $member) {
-  static $type $helper(volatile $type *lhs, Symbol op) {
-    $type old = lhs[0];
-    lhs[0] = $member(lhs[0], 1);
-    return old;
-  }
-}
-
 /** Returns a generated helper for a direct protocol-backed update.
     The resolved member must have exactly `(Participant, RHS) -> Participant`.
     A matching helper is emitted once into the compiler's early declarations;
@@ -2015,10 +1989,25 @@ String Compiler.protocol_update_helper(
     %"_x2c_proto_${participant.car().str().lower()}_${member}_$suffix";
   List helper = c.sym.introduce(name);
   List callee = %(expr $source_type (ident $source_binding));
-  Macro update = $protocol_update, saved = $protocol_postfix;
-  List function = c._generated_function(
-    helper, postfix ? saved(participant, helper, callee)
-                    : update(participant, rhs_type, helper, callee));
+  /* A direct update stores the member's result through `lhs`; the `op`
+     parameter keeps the update ABI of the dynamic path. The postfix form
+     adds one and returns the value it read first. */
+  List update = postfix
+    ? $!Unit{
+        static $participant $helper(volatile $participant *lhs, Symbol op) {
+          $participant old = lhs[0];
+          lhs[0] = $callee(lhs[0], 1);
+          return old;
+        }
+      }
+    : $!Unit{
+        static $participant $helper(
+            volatile $participant *lhs, Symbol op, $rhs_type rhs) {
+          lhs[0] = $callee(lhs[0], rhs);
+          return lhs[0];
+        }
+      };
+  List function = c._generated_function(helper, update);
   match (function)
     case %(function ?result ?declarator (block *body)):
       function = %(function $result $declarator
@@ -2029,26 +2018,6 @@ String Compiler.protocol_update_helper(
 }
 
 // discard helpers
-
-macro Expression $discard_call(
-    Name $callee, Expr $arguments...) => $callee($arguments...);
-
-macro Stmt $discard_argument(Name $discard, Expr $argument) {
-  $discard($argument);
-}
-
-macro Stmt $discard_void(Expr $call, Stmt $discards...) {
-  $call;
-  $discards...
-  return;
-}
-
-macro Stmt $discard_value(
-    Type $type, Name $value, Expr $call, Stmt $discards...) {
-  $type $value = $call;
-  $discards...
-  return $value;
-}
 
 typedef struct DiscardCall {
   Compiler c;
@@ -2104,12 +2073,14 @@ List Compiler.protocol_discard_helper(
 }
 
 static void DiscardCall.collect(DiscardCall &d) {
-  Macro drop_shape = $discard_argument;
   int index = 0;
   foreach (List argument, d.arguments) {
     if (d.which & (1 << index++)) {
       List drop = d.c.resolve_protocol_member(argument.cadr(), "discard");
-      if (drop) d.discards.push(drop_shape(drop.car(), argument));
+      if (drop) {
+        List discard = drop.car();
+        d.discards.push($!{ $discard($argument); });
+      }
     }
   }
 }
@@ -2117,15 +2088,15 @@ static void DiscardCall.collect(DiscardCall &d) {
 static List DiscardCall.emit(DiscardCall &d) {
   String name = %"_x2c_discard_${d.stem}_${d.which}";
   List helper_binding = d.c.sym.introduce(name);
-  List value_binding = d.c.sym.introduce("value");
-  Macro call_shape = $discard_call;
-  List expression = d.c.bind_syntax(
-    call_shape(d.binding, d.arguments),
-    AST_EXPRESSION, d.result);
-  Macro void_shape = $discard_void, value_shape = $discard_value;
-  List shape = d.result.equal(%(void))
-    ? void_shape(expression, d.discards.list_free())
-    : value_shape(d.result, value_binding, expression, d.discards.list_free());
+  List value = d.c.sym.introduce("value");
+  List callee = d.binding, arguments = d.arguments;
+  List call = d.c.bind_syntax(
+    $!( $callee($arguments...) ), AST_EXPRESSION, d.result);
+  Type type = d.result;
+  List drops = d.discards.list_free();
+  List shape = type.equal(%(void))
+    ? $!{ $call; $drops... return; }
+    : $!{ $type $value = $call; $drops... return $value; };
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
   List helper = d.c.wrapper_function(
     %(static @{d.result}), helper_binding, d.declarations, body.cdr());

@@ -603,8 +603,8 @@ static int _braced(Var node) {
 static List Compiler._entry(
   Compiler c, String stamp, Map initials, String suffix) {
   List resets = c._resets(initials);
-  List reset = c._entry_function(
-    %(void), %"x2c_module_reset$suffix", %(block @resets));
+  List reset = _initializer_function(
+    c, %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
   List table = c._targets(c._named(reset));
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
@@ -613,9 +613,9 @@ static List Compiler._entry(
       (bindings (op = (bind $stamp_binding ((dim)))
                      (expr (* char) (literal (* char) $literal)))))
     $reset
-    ${c._entry_function(
-      %("Map"), %"x2c_module_targets$suffix",
-      %(block (return ("Map") $table)))});
+    ${_initializer_function(
+      c, %("Map"), c.sym.introduce(%"x2c_module_targets$suffix"),
+      %((return ("Map") $table)))});
 }
 
 /* An assignment of each mutable `meta static` value's initializer, or of
@@ -665,14 +665,6 @@ static List Compiler._targets(Compiler c, List named) {
   Macro shape = $map_value;
   return c.rebuild_expression(%("Map"), shape(entries.list_free()));
 }
-
-/* A function definition with no parameters. */
-static List Compiler._entry_function(
-  Compiler c, List result, String name, List body) =>
-  %(function $result
-      (bind ${c.sym.introduce(name)}
-        ((fnmod (params (param (void) (bind () ()))))))
-      $body);
 
 // refusing a call
 

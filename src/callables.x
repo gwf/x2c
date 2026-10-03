@@ -131,10 +131,6 @@ static List _no_value_return(void) => %(
 
 // captured lambdas
 
-macro Unit $capture_environment(Name $name, Field $fields...) {
-  typedef struct $name { $fields... } $name;
-}
-
 /* One captured lambda: its context type, the adapter that reads a copy of
    it, and the locals that evaluate each capture. Capture rows arrive
    resolved and in first-use order from `lambdas.x`. Their locals run
@@ -180,8 +176,8 @@ static void CaptureBuild.declare(
     at once, so each field keeps its member type.
 */
 List Compiler.capture_environment(Compiler c, List name, List fields) {
-  Macro environment = $capture_environment;
-  return c.bind_syntax(environment(name, fields), AST_UNIT, NULL);
+  return c.bind_syntax(
+    $!Unit{ typedef struct $name { $fields... } $name; }, AST_UNIT, NULL);
 }
 
 static void CaptureBuild._field(CaptureBuild &b, Array fields, List capture) {
@@ -623,13 +619,6 @@ static List Compiler._prepend_setup(Compiler c, List body, List setup) {
 
 // Func values
 
-/* A call through a bridge function the unit declares where it calls. */
-macro Expression $func_bridge_call(
-    Name $bridge, Expr $call, Param $parameters...) =>
-  ({ extern Func $bridge($parameters...); $call; });
-
-macro Expression $func_aggregate(Expr $value) => { $value };
-
 /** Converts a resolved function-like expression to `Func` when supported.
     Existing `Func` values pass through. Direct fixed functions reuse a
     file-static handle; other function-typed and function-pointer expressions
@@ -760,9 +749,10 @@ static List Compiler._func_bridge_call(
   Type function_type, List arguments) {
   List call = c._func_call(
     %("Func"), _func_bound(function_type, bridge), arguments);
-  Macro shape = $func_bridge_call;
+  List declared = parameters.cdr();
+  /* A call through a bridge function the unit declares where it calls. */
   return c.rebuild_expression(
-    %("Func"), shape(bridge, call, parameters.cdr()));
+    %("Func"), $!( ({ extern Func $bridge($declared...); $call; }) ));
 }
 
 static Type Compiler._func_pointer_value_type(Compiler c, Type type) {
@@ -906,8 +896,7 @@ static void Compiler._func_pointer_context(
 
 static List Compiler._func_context_declaration(
   Compiler c, Type context_type, List context, List expression) {
-  Macro aggregate_shape = $func_aggregate;
-  List value = c.rebuild_expression(context_type, aggregate_shape(expression));
+  List value = c.rebuild_expression(context_type, $!( { $expression } ));
   Macro storage_shape = $func_local;
   return c.rebuild_statement(
     storage_shape(context_type, %(op = (bind $context ()) $value))).cadr();
