@@ -14,11 +14,11 @@
 
 #include "exception.h"
 
-static List _126, _124, _123, _121, _119, _112, _111, _110, _109, _107, _105, _104, _101, _99, _98, _96, _95, _94, _93, _92, _90, _89, _88, _86, _85, _84, _77, _76, _75, _74, _73, _71, _70, _69, _68, _67, _65, _64, _61, _60, _57, _56, _53, _52, _49, _48, _41, _40, _39, _38, _37, _35, _34, _30, _29, _25, _24, _20, _19, _15, _14;
+static List _130, _128, _127, _125, _123, _117, _116, _115, _114, _112, _110, _109, _106, _104, _103, _100, _99, _98, _97, _96, _94, _93, _92, _90, _89, _88, _81, _80, _79, _78, _77, _75, _74, _73, _72, _71, _69, _68, _65, _64, _61, _60, _57, _56, _53, _52, _45, _44, _43, _42, _41, _39, _38, _34, _33, _29, _28, _24, _23, _19, _18;
 
-static String _130, _129, _128, _127, _117, _115, _114, _113, _78, _46, _45, _44, _43, _42, _11, _10, _9, _8, _7, _6, _5;
+static String _121, _119, _118, _101, _82, _50, _49, _48, _47, _46, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5;
 
-static Var _125, _122, _120, _118, _116, _108, _106, _103, _102, _100, _97, _91, _87, _83, _82, _81, _80, _79, _72, _66, _63, _62, _59, _58, _55, _54, _51, _50, _47, _36, _33, _32, _31, _28, _27, _26, _23, _22, _21, _18, _17, _16, _13, _12, _4, _3, _2, _1, _0;
+static Var _129, _126, _124, _122, _120, _113, _111, _108, _107, _105, _102, _95, _91, _87, _86, _85, _84, _83, _76, _70, _67, _66, _63, _62, _59, _58, _55, _54, _51, _40, _37, _36, _35, _32, _31, _30, _27, _26, _25, _22, _21, _20, _17, _16, _4, _3, _2, _1, _0;
 
 #include "json.h"
 #include "report.h"
@@ -70,7 +70,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _126)))
+_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _130)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -97,132 +97,132 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = Symbol_var(28293925322);
   _3 = Symbol_var(857050729436);
   _4 = Symbol_var(30384486);
-  _5 = String_new(" ");
-  _6 = String_new("/");
-  _7 = String_new("{\"code\":");
-  _8 = String_new(",\"message\":");
-  _9 = String_new(",\"severity\":");
-  _10 = String_new(",\"notes\":");
-  _11 = String_new("}\n");
-  _12 = Symbol_var(412426);
-  _13 = Symbol_var(61229834);
-  _14 = cons(_13, NULL);
-  _15 = cons(_12, _14);
-  _16 = List_var(_15);
-  _17 = Symbol_var(805770);
-  _18 = Symbol_var(61623178);
-  _19 = cons(_18, NULL);
-  _20 = cons(_17, _19);
-  _21 = List_var(_20);
-  _22 = Symbol_var(233614172);
-  _23 = Symbol_var(62510639964);
-  _24 = cons(_23, NULL);
-  _25 = cons(_22, _24);
-  _26 = List_var(_25);
-  _27 = Symbol_var(816725264);
-  _28 = Symbol_var(63093751056);
-  _29 = cons(_28, NULL);
-  _30 = cons(_27, _29);
-  _31 = List_var(_30);
-  _32 = Symbol_var(1133019155420);
-  _33 = Symbol_var(64904693566428);
-  _34 = cons(_33, NULL);
-  _35 = cons(_32, _34);
-  _36 = List_var(_35);
-  _37 = cons(_36, NULL);
-  _38 = cons(_31, _37);
-  _39 = cons(_26, _38);
-  _40 = cons(_21, _39);
-  _41 = cons(_16, _40);
-  _42 = String_new(",\"file\":");
-  _43 = String_new(",\"line\":");
-  _44 = String_new(",\"column\":");
-  _45 = String_new(",\"length\":");
-  _46 = String_new(",\"position\":");
-  _47 = Symbol_var(61045002);
-  _48 = cons(_47, NULL);
-  _49 = cons(_0, _48);
-  _50 = List_var(_49);
-  _51 = Symbol_var(65089569967410);
+  _5 = String_new("too many errors, stopping");
+  _6 = String_new(" ");
+  _7 = String_new("<");
+  _8 = String_new("/");
+  _9 = String_new(".");
+  _10 = String_new("/");
+  _11 = String_new("{\"code\":");
+  _12 = String_new(",\"message\":");
+  _13 = String_new(",\"severity\":");
+  _14 = String_new(",\"notes\":");
+  _15 = String_new("}\n");
+  _16 = Symbol_var(412426);
+  _17 = Symbol_var(61229834);
+  _18 = cons(_17, NULL);
+  _19 = cons(_16, _18);
+  _20 = List_var(_19);
+  _21 = Symbol_var(805770);
+  _22 = Symbol_var(61623178);
+  _23 = cons(_22, NULL);
+  _24 = cons(_21, _23);
+  _25 = List_var(_24);
+  _26 = Symbol_var(233614172);
+  _27 = Symbol_var(62510639964);
+  _28 = cons(_27, NULL);
+  _29 = cons(_26, _28);
+  _30 = List_var(_29);
+  _31 = Symbol_var(816725264);
+  _32 = Symbol_var(63093751056);
+  _33 = cons(_32, NULL);
+  _34 = cons(_31, _33);
+  _35 = List_var(_34);
+  _36 = Symbol_var(1133019155420);
+  _37 = Symbol_var(64904693566428);
+  _38 = cons(_37, NULL);
+  _39 = cons(_36, _38);
+  _40 = List_var(_39);
+  _41 = cons(_40, NULL);
+  _42 = cons(_35, _41);
+  _43 = cons(_30, _42);
+  _44 = cons(_25, _43);
+  _45 = cons(_20, _44);
+  _46 = String_new(",\"file\":");
+  _47 = String_new(",\"line\":");
+  _48 = String_new(",\"column\":");
+  _49 = String_new(",\"length\":");
+  _50 = String_new(",\"position\":");
+  _51 = Symbol_var(61045002);
   _52 = cons(_51, NULL);
-  _53 = cons(_1, _52);
+  _53 = cons(_0, _52);
   _54 = List_var(_53);
-  _55 = Symbol_var(2021158750666);
+  _55 = Symbol_var(65089569967410);
   _56 = cons(_55, NULL);
-  _57 = cons(_2, _56);
+  _57 = cons(_1, _56);
   _58 = List_var(_57);
-  _59 = Symbol_var(64628725140444);
+  _59 = Symbol_var(2021158750666);
   _60 = cons(_59, NULL);
-  _61 = cons(_3, _60);
+  _61 = cons(_2, _60);
   _62 = List_var(_61);
-  _63 = Symbol_var(1976541542);
+  _63 = Symbol_var(64628725140444);
   _64 = cons(_63, NULL);
-  _65 = cons(_4, _64);
+  _65 = cons(_3, _64);
   _66 = List_var(_65);
-  _67 = cons(_66, NULL);
-  _68 = cons(_62, _67);
-  _69 = cons(_58, _68);
-  _70 = cons(_54, _69);
-  _71 = cons(_50, _70);
-  _72 = Symbol_var(58);
-  _73 = cons(_72, NULL);
-  _74 = cons(_31, _73);
-  _75 = cons(_26, _74);
-  _76 = cons(_21, _75);
-  _77 = cons(_16, _76);
-  _78 = String_new(":");
-  _79 = Symbol_var(15767198343496);
-  _80 = Symbol_var(63354055592);
-  _81 = Symbol_var(62436);
-  _82 = Symbol_var(1309427914);
-  _83 = Symbol_var(50756762);
-  _84 = cons(_83, NULL);
-  _85 = cons(_82, _84);
-  _86 = cons(_81, _85);
-  _87 = List_var(_86);
+  _67 = Symbol_var(1976541542);
+  _68 = cons(_67, NULL);
+  _69 = cons(_4, _68);
+  _70 = List_var(_69);
+  _71 = cons(_70, NULL);
+  _72 = cons(_66, _71);
+  _73 = cons(_62, _72);
+  _74 = cons(_58, _73);
+  _75 = cons(_54, _74);
+  _76 = Symbol_var(58);
+  _77 = cons(_76, NULL);
+  _78 = cons(_35, _77);
+  _79 = cons(_30, _78);
+  _80 = cons(_25, _79);
+  _81 = cons(_20, _80);
+  _82 = String_new(":");
+  _83 = Symbol_var(15767198343496);
+  _84 = Symbol_var(63354055592);
+  _85 = Symbol_var(62436);
+  _86 = Symbol_var(1309427914);
+  _87 = Symbol_var(50756762);
   _88 = cons(_87, NULL);
-  _89 = cons(_80, _88);
-  _90 = cons(_79, _89);
-  _91 = Symbol_var(1307939018);
-  _92 = cons(_28, _34);
-  _93 = cons(_23, _92);
-  _94 = cons(_18, _93);
-  _95 = cons(_13, _94);
-  _96 = cons(_91, _95);
-  _97 = int_var(1);
-  _98 = cons(_97, NULL);
+  _89 = cons(_86, _88);
+  _90 = cons(_85, _89);
+  _91 = List_var(_90);
+  _92 = cons(_91, NULL);
+  _93 = cons(_84, _92);
+  _94 = cons(_83, _93);
+  _95 = Symbol_var(1307939018);
+  _96 = cons(_32, _38);
+  _97 = cons(_27, _96);
+  _98 = cons(_22, _97);
   _99 = cons(_17, _98);
-  _100 = List_var(_99);
-  _101 = cons(_22, _98);
-  _102 = List_var(_101);
-  _103 = int_var(0);
-  _104 = cons(_103, NULL);
-  _105 = cons(_27, _104);
-  _106 = List_var(_105);
-  _107 = cons(_32, _104);
-  _108 = List_var(_107);
+  _100 = cons(_95, _99);
+  _101 = String_new("<stdin>");
+  _102 = int_var(1);
+  _103 = cons(_102, NULL);
+  _104 = cons(_21, _103);
+  _105 = List_var(_104);
+  _106 = cons(_26, _103);
+  _107 = List_var(_106);
+  _108 = int_var(0);
   _109 = cons(_108, NULL);
-  _110 = cons(_106, _109);
-  _111 = cons(_102, _110);
-  _112 = cons(_100, _111);
-  _113 = String_new("compiler error");
-  _114 = String_new("compiler warning");
-  _115 = String_new("too many errors, stopping");
-  _116 = Symbol_var(437126);
-  _117 = String_new("Var");
-  _118 = String_var(_117);
-  _119 = cons(_118, NULL);
-  _120 = List_var(_119);
-  _121 = cons(_120, NULL);
-  _122 = List_var(_121);
+  _110 = cons(_31, _109);
+  _111 = List_var(_110);
+  _112 = cons(_36, _109);
+  _113 = List_var(_112);
+  _114 = cons(_113, NULL);
+  _115 = cons(_111, _114);
+  _116 = cons(_107, _115);
+  _117 = cons(_105, _116);
+  _118 = String_new("compiler error");
+  _119 = String_new("compiler warning");
+  _120 = Symbol_var(437126);
+  _121 = String_new("Var");
+  _122 = String_var(_121);
   _123 = cons(_122, NULL);
-  _124 = cons(_116, _123);
-  _125 = List_var(_124);
-  _126 = cons(_125, _119);
-  _127 = String_new("<");
-  _128 = String_new("/");
-  _129 = String_new(".");
-  _130 = String_new("<stdin>");
+  _124 = List_var(_123);
+  _125 = cons(_124, NULL);
+  _126 = List_var(_125);
+  _127 = cons(_126, NULL);
+  _128 = cons(_120, _127);
+  _129 = List_var(_128);
+  _130 = cons(_129, _123);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -315,7 +315,7 @@ static int Diagnostics__publish(Diagnostics diag, List entry){
 
 static void _publish_limit_notice(Diagnostics diag){
   if(diag -> limit == 1) return;
-  String note = _115;
+  String note = _5;
   List entry = _build_entry(25782888, 949514, note, NULL, NULL);
   Array_push(diag -> entries, List_var(entry));
   _emit_entry(diag, entry);
@@ -352,7 +352,7 @@ String String_join(String, List);
 
 static String _note_line(List l){
   List strings = List_filter(l, _x2c_func_handle_0);
-  return List_truth(strings) ? String_join(_5, strings) : NULL;
+  return List_truth(strings) ? String_join(_6, strings) : NULL;
 }
 
 int diagnostics_write_json(String path){
@@ -374,10 +374,10 @@ Path Path_absolute(Path);
 String String_remove_prefix(String, String);
 
 static String Compiler__json_path(Compiler compiler, String path){
-  if(! String_truth(path) || String_startswith(path, _127)) return path;
-  if(! String_startswith(path, _128) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
+  if(! String_truth(path) || String_startswith(path, _7)) return path;
+  if(! String_startswith(path, _8) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
   path = Path_absolute(path);
-  String directory = String_join(NULL, cons(String_var(Path_absolute(_129)), cons(String_var(_6), NULL)));
+  String directory = String_join(NULL, cons(String_var(Path_absolute(_9)), cons(String_var(_10), NULL)));
   return String_startswith(path, directory) ? String_remove_prefix(path, directory) : path;
 }
 
@@ -409,11 +409,11 @@ static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, Strin
     ;
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
-      Buffer_write(out, String_join(NULL, cons(String_var(_7), cons(String_var(Var_json(Symbol_var(code))), NULL))));
-      Buffer_write(out, String_join(NULL, cons(String_var(_8), cons(String_var(Var_json(String_var(message))), NULL))));
-      Buffer_write(out, String_join(NULL, cons(String_var(_9), cons(String_var(Var_json(Symbol_var(severity))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_11), cons(String_var(Var_json(Symbol_var(code))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_12), cons(String_var(Var_json(String_var(message))), NULL))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_13), cons(String_var(Var_json(Symbol_var(severity))), NULL))));
       Compiler__write_json_location(c, out, location);
-      Buffer_write(out, String_join(NULL, cons(String_var(_10), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_11), NULL)))));
+      Buffer_write(out, String_join(NULL, cons(String_var(_14), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_15), NULL)))));
       while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
 
       }
@@ -434,12 +434,12 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
   MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
 
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_41), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3];  Var position = _x2c_match_values[4]; {
-    Buffer_write(out, String_join(NULL, cons(String_var(_42), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_string(file))))), NULL))));  Buffer_write(out, ({
-      Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_43), cons(_x2c_literal_part_5, cons(String_var(_44), cons(_x2c_literal_part_6, NULL)))));
+      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_45), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3];  Var position = _x2c_match_values[4]; {
+    Buffer_write(out, String_join(NULL, cons(String_var(_46), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_string(file))))), NULL))));  Buffer_write(out, ({
+      Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_47), cons(_x2c_literal_part_5, cons(String_var(_48), cons(_x2c_literal_part_6, NULL)))));
     }
     ));  Buffer_write(out, ({
-      Var _x2c_literal_part_7 = String_var(Var_str(length));  Var _x2c_literal_part_8 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_45), cons(_x2c_literal_part_7, cons(String_var(_46), cons(_x2c_literal_part_8, NULL)))));
+      Var _x2c_literal_part_7 = String_var(Var_str(length));  Var _x2c_literal_part_8 = String_var(Var_str(position));  String_join(NULL, cons(String_var(_49), cons(_x2c_literal_part_7, cons(String_var(_50), cons(_x2c_literal_part_8, NULL)))));
     }
     ));
     return;
@@ -462,7 +462,7 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
   MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
 
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_71), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  Var severity = _x2c_match_values[1];  Var message = _x2c_match_values[2];  Var location = _x2c_match_values[3];  Var notes = _x2c_match_values[4]; {
+      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_75), &_x2c_match_capture)) {Var code = _x2c_match_values[0];  Var severity = _x2c_match_values[1];  Var message = _x2c_match_values[2];  Var location = _x2c_match_values[3];  Var notes = _x2c_match_values[4]; {
     String note = _note_line(Var_list(notes));  if(diagnostics_json >= 0){
       Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_string(message), Var_list(location), note);  return;
     }
@@ -482,9 +482,9 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
     List _x2c_match_expr = location;
     Var _x2c_match_values[4];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_77), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3]; {
+      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_81), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3]; {
     String place =({
-      Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_78), cons(_x2c_literal_part_10, cons(String_var(_78), cons(_x2c_literal_part_11, NULL))))));
+      Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_82), cons(_x2c_literal_part_10, cons(String_var(_82), cons(_x2c_literal_part_11, NULL))))));
     }
     );  fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);  Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));  return;
   }
@@ -503,13 +503,13 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
     List _x2c_match_expr = origin;
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 15767198343496: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_90), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
+      case 15767198343496: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_94), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
       occurrence = Var_int(Var_convert(parent, 3453797));  continue;
     }
     break;
   }
   case 1307939018: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497938069557450ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[3] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[4] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3];  Var position = _x2c_match_values[4];  return({
-    Var _x2c_literal_part_12 = List_var(cons(_12, cons(file, NULL)));  Var _x2c_literal_part_13 = List_var(cons(_17, cons(line, NULL)));  Var _x2c_literal_part_14 = List_var(cons(_22, cons(column, NULL)));  Var _x2c_literal_part_15 = List_var(cons(_27, cons(length, NULL)));  Var _x2c_literal_part_16 = List_var(cons(_32, cons(position, NULL)));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)))));
+    Var _x2c_literal_part_12 = List_var(cons(_16, cons(file, NULL)));  Var _x2c_literal_part_13 = List_var(cons(_21, cons(line, NULL)));  Var _x2c_literal_part_14 = List_var(cons(_26, cons(column, NULL)));  Var _x2c_literal_part_15 = List_var(cons(_31, cons(length, NULL)));  Var _x2c_literal_part_16 = List_var(cons(_36, cons(position, NULL)));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL)))));
   }
   );  break; } } default: break;
     }
@@ -522,12 +522,12 @@ return NULL;
 int String_len(String);
 int String_getindex(String, int);
 String Compiler_display_path(Compiler compiler, String path){
-  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _127)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, -2147483648, 1);  return path;
+  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, -2147483648, 1);  return path;
 }
 
 List Compiler_token_location(Compiler compiler, Token token){
-  if(! _init_guard_) _file_init_();  String file = String_truth(compiler -> filename) ? compiler -> filename : _130;  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);  if(! token) token = compiler -> token;  if(! token) return cons(List_var(cons(_12, cons(String_var(file), NULL))), _112);  file = Compiler_display_path(compiler, file);  return({
-    Var _x2c_literal_part_17 = List_var(cons(_12, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_17, cons(int_var(token -> line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_22, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_27, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_32, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
+  if(! _init_guard_) _file_init_();  String file = String_truth(compiler -> filename) ? compiler -> filename : _101;  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);  if(! token) token = compiler -> token;  if(! token) return cons(List_var(cons(_16, cons(String_var(file), NULL))), _117);  file = Compiler_display_path(compiler, file);  return({
+    Var _x2c_literal_part_17 = List_var(cons(_16, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_21, cons(int_var(token -> line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_26, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_31, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_36, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
   }
   );
 }
@@ -542,7 +542,7 @@ static List _compiler_location(Compiler compiler, Token token){
 void report_suspend(void);
 int List_try_next(List, List *, Var *);
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _113;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
+  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _118;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 374};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
@@ -559,7 +559,7 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _114;  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
+  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _119;  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
 static void Compiler__show_source_context(Compiler compiler, int line, int column, int length){
