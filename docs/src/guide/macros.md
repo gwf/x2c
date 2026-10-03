@@ -97,8 +97,8 @@ The definition is visible from that point to the end of the block and through
 nested blocks. An inner definition of `scaled` temporarily shadows it; a later
 definition in the same block replaces it for following calls. A name the
 body reads without declaring, such as `scale`, resolves where the macro is
-invoked, like every macro's free names. Arguments are bound where the
-invocation is written.
+invoked, like every macro's free names. Names the caller writes in
+arguments resolve there too.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
 ordinary function. A use without parentheses is an ordinary identifier, and
@@ -293,7 +293,7 @@ call form also supplies expressions and generated names in their own slots.
 Each invocation receives a compiler-private binding for `temporary`, so
 generated names cannot collide with caller source. A macro captures no
 bindings: a name its body reads without declaring resolves where the
-expansion lands, and arguments are bound where the invocation is written. A
+expansion lands, as do the names a caller writes in its arguments. A
 body that must reach a file-scope declaration that a caller's local could
 hide lists it with `using name;`, as the
 [reference](../reference/language.md#hygiene-and-generated-names) shows.

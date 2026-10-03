@@ -3,9 +3,10 @@
 > Status: active, 2026-10-02. Gary approved the plan and its
 > recommendations as one campaign on branch `gwf/macro-metalanguage`,
 > started from dev d84f3c26. The branch is pushed freely; the finished
-> campaign is submitted as one PR to the shared integrator. M1-M4 are
-> implemented on the branch; results and the parts of M3 not done are
-> recorded under each.
+> campaign was submitted as PR #108; the integrator stopped on review
+> findings, and Gary handed the integration to the author on 2026-10-02.
+> The author merged dev 21b1c3d4, fixed the findings (Integration below),
+> and publishes directly after the publication gate.
 
 ## Question
 
@@ -461,6 +462,35 @@ becomes one ready PR to `dev`, submitted through
 integrator owns the final bootstrap refresh, the publication gate, and
 the merge. A milestone that needs a capability in the seed before its
 callers compile gets a local bootstrap refresh on the branch.
+
+## Integration
+
+The merge with dev 21b1c3d4 conflicted only in generated files and passed
+every fixture and unit test unchanged. The integrator's review of PR #108
+found defects in PR #108 itself, fixed on the branch:
+
+- A per-identity `template-free` fact let an unrelated free use of a name
+  rebind a `using` occurrence forwarded through another macro. Free names
+  are now per-occurrence `binding-name`, and the fast path is gone.
+- Names a caller writes in arguments now resolve where the expansion lands:
+  a file-scope name hidden by a declaration the active expansion introduced
+  (for example from the caller's own `Name`) binds that declaration. Other
+  hiding declarations keep the emitted alias, so `using` occurrences and
+  code the compiler moves keep their meaning.
+- A local macro or anonymous macro inside a template shares the template's
+  private names: invocations name a visible local macro instead of quoting
+  its definition, and a nested `Macro` value is made where the template
+  expands.
+- Recognition matches a free name by spelling and a `using` name by its
+  file-scope binding; a pending invocation is recognized inside an
+  expression shell and by its definition's name and origin.
+- Nested patterns substitute binders structurally, keeping operator guards,
+  and choose private binders no argument spells; a quotation builds its
+  pending invocation with one value per hole.
+
+Fixtures: `macro-binding-landing` (new), `macro-values` (the integrator's
+expanded recognition fixture), and additions to `macro-pattern-nested` and
+`macro-quotation`.
 
 ## Validation
 
