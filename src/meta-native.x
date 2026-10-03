@@ -82,7 +82,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   Array values = _stub_arguments(function, argv);
   String name = String.new((const char *) Func.context(function));
   Compiler c = Compiler.expanding();
-  if (!c) MetaContext.reject(%"$name used outside compilation", NULL);
+  if (!c) $report.macro.outside_compilation(name);
   Token site = MetaContext.current().site;
   if (!site) site = c.token;
   List rows = c._subject_rows(values);
@@ -798,14 +798,13 @@ static void Compiler._load_package_module(
 */
 String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
-    driver_error("native modules are not supported on this platform");
+    $report.native.module_platform();
   String absolute = Path.absolute(path);
   if (Compiler.native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
-  if (stamp < 0) driver_error(%"not an x2c native module: $path");
+  if (stamp < 0) $report.native.module_invalid(path);
   if (!stamp)
-    driver_error(
-      %"native module '$path' was built by another compiler; rebuild it");
+    $report.native.module_compiler(path);
   _open_native_module(absolute);
   return absolute;
 }
@@ -827,12 +826,10 @@ void Compiler.preload_native_module(String path) {
 static int _module_stamp(String path) {
   String expected = build_module_stamp();
   if (!expected)
-    driver_error(
-      %"cannot read the running compiler to check native module '$path'");
+    $report.native.compiler_read(path);
   File input = fopen(path, "rb");
   if (!input)
-    driver_error(
-      %"cannot read native module '$path': ${String.new(strerror(errno))}");
+    $report.native.module_read(path, String.new(strerror(errno)));
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
   rewind(input);
@@ -866,10 +863,9 @@ static void _open_native_module(String path) {
   void *handle = NULL;
   $scope(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
-    driver_error(
-      %"cannot load native module '$path': ${String.new(dlerror())}");
+    $report.native.module_load(path, String.new(dlerror()));
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
-  if (!entry) driver_error(%"not an x2c native module: $path");
+  if (!entry) $report.native.module_invalid(path);
   Compiler.add_native_module(path, entry);
 }
 
