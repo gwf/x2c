@@ -661,12 +661,6 @@ macro Statement $catch_site(Name $frame, Name $handle, Expr $count,
     x2c_error_catch_site_push(&$frame, &site, patterns);
 }
 
-/* One arm's pattern, prepared into its slot. */
-macro Statement $catch_pattern(Expr $patterns, Expr $index,
-    Expr $pattern) {
-  $patterns[$index] = $pattern;
-}
-
 /* A landing that hands a raised error to the arm its handler selected. */
 macro Statement $catch_landing(Name $frame, Name $handle,
     Statement $unhandled, Statement $arms...) {
@@ -677,21 +671,6 @@ macro Statement $catch_landing(Name $frame, Name $handle,
     $builtin_catch_cases(selected, $arms)...
   }
   else $unhandled
-}
-
-/* One catch arm, chosen by its index. Each arm is its own statement, so a
-   `break` or `continue` in it still reaches the enclosing loop, and only
-   one test holds because `selected` does not change. */
-macro Statement $catch_case(Expr $selected, Expr $index,
-    Statement $arm) {
-  if ($selected == $index) $arm
-}
-
-/* A landing that reaches the arms always selected one. When every arm
-   returns or raises, control cannot leave them, and this tells C so that a
-   function ending in such a `try` needs no return after it. */
-macro Statement $catch_none() {
-  __builtin_unreachable();
 }
 
 /* A landing no catch arm handles: the region's exits run, and control does
@@ -838,14 +817,15 @@ List builtin_try_catch_site(List frame, List clause) {
   return NULL;
 }
 
-/** Returns one `$catch_pattern` for each of `items`, prepared into the
-    catch site's `patterns`; `$catch_site` calls this in a slot. */
+/** Returns the statement that prepares each of `items` into its slot of
+    the catch site's `patterns`; `$catch_site` calls this in a slot. */
 List builtin_catch_patterns(List patterns, List items) {
-  Macro prepare = $catch_pattern;
   Array prepared = [];
   int index = 0;
-  foreach (List pattern, items)
-    prepared.push(prepare(patterns, x2c_literal_int(index++), pattern));
+  foreach (List pattern, items) {
+    prepared.push($!{ $patterns[$index] = $pattern; });
+    index++;
+  }
   return prepared.list_free();
 }
 
@@ -869,18 +849,22 @@ static int _arm_exits(List arm) {
   return 0;
 }
 
-/** Returns one `$catch_case` for each lowered arm of `arms`, numbered in
-    order and tested against `selected`, then `$catch_none` when no arm can
-    fall out; `$catch_landing` calls this in a slot. */
+/** Returns each lowered arm of `arms` chosen by its index in `selected`;
+    `$catch_landing` calls this in a slot. Each arm is its own statement, so
+    a `break` or `continue` in it still reaches the enclosing loop, and only
+    one test holds because `selected` does not change. When every arm
+    returns or raises, control cannot leave them, and a final unreachable
+    mark tells C so that a function ending in such a `try` needs no return
+    after it. */
 List builtin_catch_cases(List selected, List arms) {
-  Macro choice = $catch_case, none = $catch_none;
   Array cases = [];
   int index = 0, exits = 1;
   foreach (List arm, arms) {
-    cases.push(choice(selected, x2c_literal_int(index++), arm));
+    cases.push($!{ if ($selected == $index) $arm });
+    index++;
     exits &= _arm_exits(arm);
   }
-  if (exits) cases.push(none());
+  if (exits) cases.push($!{ __builtin_unreachable(); });
   return cases.list_free();
 }
 
