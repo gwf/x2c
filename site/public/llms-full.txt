@@ -2741,7 +2741,9 @@ which `lib/meta.x` declares as a `List` of type syntax such as
 `%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
 declares `value` with the type the local holds. A `String` local fills an
 expression hole as a string literal and an `int` local as an integer
-literal. See
+literal. A `$name` that names no local is a macro invocation or a `meta`
+call, as in a template, so `$rows($items)...` splices a `meta` function's
+result where the quotation expands. See
 [Quoting code](https://x2c-lang.dev/docs/guide/meta-functions.html#quoting-code-with-) for an
 example.
 

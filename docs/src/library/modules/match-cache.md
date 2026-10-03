@@ -125,7 +125,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match-cache.x:570`
+Source: `lib/match-cache.x:571`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default
@@ -155,7 +155,7 @@ pools. `MatchCache.dispose` is required after every lease is released.
 storage dimensions cannot be represented, and `<alloc-fail>` when cache
 storage cannot be allocated.
 
-Source: `lib/match-cache.x:543`
+Source: `lib/match-cache.x:544`
 
 <a id="MatchCache.search"></a>
 #### MatchCache.search

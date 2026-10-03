@@ -558,7 +558,7 @@ static threaded struct {
   int count;
 } machine_thread;
 
-/** Returns an open machine reporting to `stats`, one of this thread's spares
+/* Returns an open machine reporting to `stats`, one of this thread's spares
     or a new one. `MatchMachine.release` returns it.
     Raises: `<alloc-fail>` when a new machine cannot be allocated.
 */
@@ -572,7 +572,7 @@ MatchMachine *MatchMachine.acquire(MachineStats *stats) {
   return m;
 }
 
-/** Disposes `m` and keeps it as a spare of this thread, or frees it. */
+/* Disposes `m` and keeps it as a spare of this thread, or frees it. */
 void MatchMachine.release(MatchMachine *m) {
   (*m).dispose();
   if (machine_thread.count < MACHINE_SPARES)
@@ -580,7 +580,7 @@ void MatchMachine.release(MatchMachine *m) {
   else free(m);
 }
 
-/** Frees this thread's spare machines. */
+/* Frees this thread's spare machines. */
 void MatchMachine.release_spares(void) {
   while (machine_thread.count)
     free(machine_thread.spares[--machine_thread.count]);

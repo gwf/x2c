@@ -1041,7 +1041,8 @@ Public functions:
 
 `MatchMachine.run`, `MatchMachine.step`, `MatchMachine.materialize_span`,
 `MatchMachine.open`, `MatchMachine.begin`, `MatchMachine.finish`,
-`MatchMachine.clean`, `MatchMachine.dispose`
+`MatchMachine.clean`, `MatchMachine.dispose`, `MatchMachine.acquire`,
+`MatchMachine.release`, `MatchMachine.release_spares`
 
 ### [lib/match-plan.x](../lib/match-plan.x)
 

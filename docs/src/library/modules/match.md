@@ -37,7 +37,7 @@ a diagnostic and aborts the process.
 **Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
 hook.
 
-Source: `lib/match.x:1321`
+Source: `lib/match.x:1319`
 
 #### x2c_match_site_match
 
@@ -46,7 +46,7 @@ Source: `lib/match.x:1321`
 Returns bindings through one compiler-owned site, or `nil` on a miss.
 Results follow `List.match`.
 
-Source: `lib/match.x:1141`
+Source: `lib/match.x:1139`
 
 #### x2c_match_site_match_replace
 
@@ -55,7 +55,7 @@ Source: `lib/match.x:1141`
 Returns the `List` replacement through one compiler-owned site.
 Results follow `List.match_replace`.
 
-Source: `lib/match.x:1184`
+Source: `lib/match.x:1182`
 
 #### x2c_match_site_search
 
@@ -64,7 +64,7 @@ Source: `lib/match.x:1184`
 Returns every matching subtree through one compiler-owned site.
 Results follow `List.search`.
 
-Source: `lib/match.x:1162`
+Source: `lib/match.x:1160`
 
 #### x2c_match_site_search_replace
 
@@ -73,7 +73,7 @@ Source: `lib/match.x:1162`
 Replaces every match through one compiler-owned site.
 Results follow `List.search_replace`.
 
-Source: `lib/match.x:1195`
+Source: `lib/match.x:1193`
 
 #### x2c_match_site_try_match
 
@@ -82,7 +82,7 @@ Source: `lib/match.x:1195`
 Matches through one compiler-owned site, writing bindings on success.
 Results follow `List.try_match`.
 
-Source: `lib/match.x:1130`
+Source: `lib/match.x:1128`
 
 #### x2c_match_site_try_match_replace
 
@@ -91,7 +91,7 @@ Source: `lib/match.x:1130`
 `Match`-replaces through one compiler-owned site.
 Results follow `List.try_match_replace`.
 
-Source: `lib/match.x:1173`
+Source: `lib/match.x:1171`
 
 #### x2c_match_site_try_search
 
@@ -100,7 +100,7 @@ Source: `lib/match.x:1173`
 Searches through one compiler-owned site, writing the first match.
 Results follow `List.try_search`.
 
-Source: `lib/match.x:1150`
+Source: `lib/match.x:1148`
 
 ### `List`
 
@@ -118,7 +118,7 @@ above.
 
 **Raises:** `<alloc-fail>` while constructing replacement `List`s.
 
-Source: `lib/match.x:902`
+Source: `lib/match.x:900`
 
 <a id="List.search"></a>
 #### List.search
@@ -135,7 +135,7 @@ A miss, malformed pattern, or machine error returns `nil`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match.x:1279`
+Source: `lib/match.x:1277`
 
 <a id="List.search_replace"></a>
 #### List.search_replace
@@ -150,7 +150,7 @@ unchanged. New structure follows the module pool-chain lifetime above.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match.x:1303`
+Source: `lib/match.x:1301`
 
 <a id="List.try_match"></a>
 #### List.try_match
@@ -165,7 +165,7 @@ match writes `nil`. A null output pointer returns 0.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing captures, or publishing bindings.
 
-Source: `lib/match.x:1233`
+Source: `lib/match.x:1231`
 
 <a id="List.try_match_replace"></a>
 #### List.try_match_replace
@@ -182,7 +182,7 @@ for a miss, malformed pattern, invalid output, or machine error and leaves
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match.x:1255`
+Source: `lib/match.x:1253`
 
 <a id="List.try_search"></a>
 #### List.try_search
@@ -196,7 +196,7 @@ returns 0 and leaves both outputs unchanged. Either null output returns 0.
 
 **Raises:** the same causes as `List.search`.
 
-Source: `lib/match.x:1291`
+Source: `lib/match.x:1289`
 
 ## Advanced and interop API
 
@@ -223,7 +223,7 @@ Reports whether a compiler-owned site can retain `pattern`.
 A site borrows its pattern's values for the life of the process, so only a
 graph of values that outlives every call qualifies.
 
-Source: `lib/match.x:1102`
+Source: `lib/match.x:1100`
 
 #### x2c_match_site_prepare
 
@@ -236,7 +236,7 @@ the caller can name the fence.
 
 **Raises:** `<alloc-fail>` while publishing.
 
-Source: `lib/match.x:1111`
+Source: `lib/match.x:1109`
 
 #### x2c_match_site_try_capture
 
@@ -256,7 +256,7 @@ it.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 publishing or matching.
 
-Source: `lib/match.x:1020`
+Source: `lib/match.x:1018`
 
 #### x2c_match_try_capture
 
@@ -272,7 +272,7 @@ nonnull buffer is written atomically as described by
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match.x:1220`
+Source: `lib/match.x:1218`
 
 ### `List`
 
@@ -285,7 +285,7 @@ Returns bindings when `input` matches `pat`, or `nil` on a miss.
 A binder-free success returns the nonnull `%(())` sentinel
 with no associations. Binding order and failures follow `List.try_match`.
 
-Source: `lib/match.x:1240`
+Source: `lib/match.x:1238`
 
 <a id="List.match_replace"></a>
 #### List.match_replace
@@ -297,7 +297,7 @@ A miss returns `input` unchanged. A successful scalar replacement cannot
 inhabit the `List` result and returns `nil`. Matching and replacement
 failures follow `List.try_match_replace`.
 
-Source: `lib/match.x:1264`
+Source: `lib/match.x:1262`
 
 ### `Var`
 
@@ -449,7 +449,7 @@ Reports whether a plan may borrow `pattern` by its canonical identity.
 pool, as a plan kept for the life of the process does. Without it, a
 `List` that is canonical now qualifies until its pool level is released.
 
-Source: `lib/match.x:990`
+Source: `lib/match.x:988`
 
 <a id="MatchPlan.execute"></a>
 #### MatchPlan.execute
@@ -466,7 +466,7 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:545`
+Source: `lib/match.x:543`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
@@ -482,7 +482,7 @@ the indicated values; all other results leave the buffer unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures.
 
-Source: `lib/match.x:473`
+Source: `lib/match.x:471`
 
 <a id="MatchPlan.raise_ineligible"></a>
 #### MatchPlan.raise_ineligible
@@ -514,7 +514,7 @@ error.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 constructing results.
 
-Source: `lib/match.x:658`
+Source: `lib/match.x:656`
 
 <a id="MatchPlan.search_replace"></a>
 #### MatchPlan.search_replace
@@ -530,7 +530,7 @@ tested.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 traversing or replacing.
 
-Source: `lib/match.x:682`
+Source: `lib/match.x:680`
 
 <a id="MatchPlan.try_capture"></a>
 #### MatchPlan.try_capture
@@ -541,7 +541,7 @@ Executes a prepared `List` match into caller-owned positional storage.
 This is `MatchPlan.execute_capture` without statistics and has the same
 results, atomicity, and failures.
 
-Source: `lib/match.x:486`
+Source: `lib/match.x:484`
 
 <a id="MatchPlan.try_match"></a>
 #### MatchPlan.try_match
@@ -552,7 +552,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match.x:560`
+Source: `lib/match.x:558`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace
@@ -567,7 +567,7 @@ unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures or replacing.
 
-Source: `lib/match.x:853`
+Source: `lib/match.x:851`
 
 <a id="MatchPlan.try_search"></a>
 #### MatchPlan.try_search
@@ -582,7 +582,7 @@ machine error. Unless it returns 1, both outputs remain unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:627`
+Source: `lib/match.x:625`
 
 ## Public types
 
