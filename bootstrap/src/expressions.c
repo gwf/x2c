@@ -2496,11 +2496,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1912 = cons(_1911, NULL);
   _1913 = cons(_219, _1912);
   _1914 = List_var(_1913);
-  _1915 = int_var(2216);
+  _1915 = int_var(2218);
   _1916 = cons(_1915, NULL);
   _1917 = cons(_225, _1916);
   _1918 = List_var(_1917);
-  _1919 = int_var(83178);
+  _1919 = int_var(83322);
   _1920 = cons(_1919, NULL);
   _1921 = cons(_240, _1920);
   _1922 = List_var(_1921);
@@ -2647,11 +2647,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2060 = cons(_2059, NULL);
   _2061 = cons(_198, _2060);
   _2062 = List_var(_2061);
-  _2063 = int_var(2224);
+  _2063 = int_var(2226);
   _2064 = cons(_2063, NULL);
   _2065 = cons(_225, _2064);
   _2066 = List_var(_2065);
-  _2067 = int_var(83533);
+  _2067 = int_var(83677);
   _2068 = cons(_2067, NULL);
   _2069 = cons(_240, _2068);
   _2070 = List_var(_2069);
@@ -2738,11 +2738,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2151 = cons(_2150, NULL);
   _2152 = cons(_198, _2151);
   _2153 = List_var(_2152);
-  _2154 = int_var(2235);
+  _2154 = int_var(2237);
   _2155 = cons(_2154, NULL);
   _2156 = cons(_225, _2155);
   _2157 = List_var(_2156);
-  _2158 = int_var(83938);
+  _2158 = int_var(84082);
   _2159 = cons(_2158, NULL);
   _2160 = cons(_240, _2159);
   _2161 = List_var(_2160);
@@ -2812,11 +2812,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2225 = cons(_2224, NULL);
   _2226 = cons(_198, _2225);
   _2227 = List_var(_2226);
-  _2228 = int_var(2237);
+  _2228 = int_var(2239);
   _2229 = cons(_2228, NULL);
   _2230 = cons(_225, _2229);
   _2231 = List_var(_2230);
-  _2232 = int_var(84013);
+  _2232 = int_var(84157);
   _2233 = cons(_2232, NULL);
   _2234 = cons(_240, _2233);
   _2235 = List_var(_2234);
@@ -2883,11 +2883,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2296 = cons(_2295, NULL);
   _2297 = cons(_198, _2296);
   _2298 = List_var(_2297);
-  _2299 = int_var(2241);
+  _2299 = int_var(2243);
   _2300 = cons(_2299, NULL);
   _2301 = cons(_225, _2300);
   _2302 = List_var(_2301);
-  _2303 = int_var(84213);
+  _2303 = int_var(84357);
   _2304 = cons(_2303, NULL);
   _2305 = cons(_240, _2304);
   _2306 = List_var(_2305);
@@ -3090,11 +3090,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2503 = cons(_2502, NULL);
   _2504 = cons(_198, _2503);
   _2505 = List_var(_2504);
-  _2506 = int_var(2290);
+  _2506 = int_var(2292);
   _2507 = cons(_2506, NULL);
   _2508 = cons(_225, _2507);
   _2509 = List_var(_2508);
-  _2510 = int_var(86335);
+  _2510 = int_var(86479);
   _2511 = cons(_2510, NULL);
   _2512 = cons(_240, _2511);
   _2513 = List_var(_2512);
@@ -4409,9 +4409,10 @@ static int Compiler__brace_starts_map(Compiler c){
 
 }
 
+int Var_int(Var);
 static List Compiler__parse_composite_elements(Compiler c){
   Array elements = Array_new();  while(Compiler_peek(c, 0) != 251){
-    List element = Compiler_try_parse_macro_slot(c, 107888847784);  if(! List_truth(element)) element = Compiler__test_dot_init(c) ||(Compiler_peek(c, 0) == 183 && Compiler__bracket_designates(c)) ? Compiler__parse_designated_init(c) : Compiler_parse_assignment(c);  Array_push(elements, List_var(element));  if(! Compiler_test(c, 89)) break;
+    List hole = Compiler_peek_macro_hole(c);  List element = List_truth(hole) && Var_int(List_assoc(hole, Symbol_var(1317592723658))) ? Compiler_try_parse_macro_slot(c, 107888847784) : NULL;  if(! List_truth(element)) element = Compiler__test_dot_init(c) ||(Compiler_peek(c, 0) == 183 && Compiler__bracket_designates(c)) ? Compiler__parse_designated_init(c) : Compiler_parse_assignment(c);  Array_push(elements, List_var(element));  if(! Compiler_test(c, 89)) break;
   }
   return Array_list_free(elements);
 }
