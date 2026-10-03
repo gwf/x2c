@@ -3293,7 +3293,7 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
     replacements[binder] = pattern;
   }
   List pattern = _substitute_binders(
-    shape.pattern(names.list_free()), replacements).list();
+    shape.pattern(names.list_free()), replacements);
   match (pattern)
     case %(expr ? ?body): return content ? body : %(!or $pattern $body);
   return pattern;
@@ -3323,7 +3323,7 @@ static Var _substitute_binders(Var value, Map replacements) {
     }
     else items.push(_substitute_binders(child, replacements));
   }
-  return items.list_free().var();
+  return items.list_free();
 }
 
 /** Returns an anonymous macro definition as a `Macro` value. Macro values
