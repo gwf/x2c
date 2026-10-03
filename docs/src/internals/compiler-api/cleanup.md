@@ -12,8 +12,8 @@ Cleanup regions and the transfers that leave them.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_catch_cases`](#builtin_catch_cases) | Returns one `$catch_case` for each lowered arm of `arms`, numbered in order and tested against `selected`, then `$catch_none` when no arm can fall out; `$catch_landing` calls this in a slot. |
-| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns one `$catch_pattern` for each of `items`, prepared into the catch site's `patterns`; `$catch_site` calls this in a slot. |
+| [`builtin_catch_cases`](#builtin_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$catch_landing` calls this in a slot. |
+| [`builtin_catch_patterns`](#builtin_catch_patterns) | Returns the statement that prepares each of `items` into its slot of the catch site's `patterns`; `$catch_site` calls this in a slot. |
 | [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
 | [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
 | [`builtin_try_catch_site`](#builtin_try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; the `$compiler_try` template calls this in a slot. |
@@ -29,20 +29,24 @@ Cleanup regions and the transfers that leave them.
 
 `List builtin_catch_cases(List selected, List arms)`
 
-Returns one `$catch_case` for each lowered arm of `arms`, numbered in
-order and tested against `selected`, then `$catch_none` when no arm can
-fall out; `$catch_landing` calls this in a slot.
+Returns each lowered arm of `arms` chosen by its index in `selected`;
+`$catch_landing` calls this in a slot. Each arm is its own statement, so
+a `break` or `continue` in it still reaches the enclosing loop, and only
+one test holds because `selected` does not change. When every arm
+returns or raises, control cannot leave them, and a final unreachable
+mark tells C so that a function ending in such a `try` needs no return
+after it.
 
-Source: `src/cleanup.x:875`
+Source: `src/cleanup.x:859`
 
 #### builtin_catch_patterns
 
 `List builtin_catch_patterns(List patterns, List items)`
 
-Returns one `$catch_pattern` for each of `items`, prepared into the
-catch site's `patterns`; `$catch_site` calls this in a slot.
+Returns the statement that prepares each of `items` into its slot of
+the catch site's `patterns`; `$catch_site` calls this in a slot.
 
-Source: `src/cleanup.x:843`
+Source: `src/cleanup.x:822`
 
 #### builtin_defer_captures
 
@@ -50,7 +54,7 @@ Source: `src/cleanup.x:843`
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:961`
+Source: `src/cleanup.x:945`
 
 #### builtin_defer_record
 
@@ -59,7 +63,7 @@ Source: `src/cleanup.x:961`
 Selects the record shape; captured records keep the environment beside
 the record in the region's scope.
 
-Source: `src/cleanup.x:952`
+Source: `src/cleanup.x:936`
 
 #### builtin_try_catch_site
 
@@ -69,7 +73,7 @@ Returns the catch site `frame` pushes for the clause `clause`
 describes, or nothing for a try without one; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:828`
+Source: `src/cleanup.x:807`
 
 #### builtin_try_landing
 
@@ -79,7 +83,7 @@ Returns what runs when `frame` lands: the catch arm the clause's
 handler selected, or `cleanup` and no return; the `$compiler_try`
 template calls this in a slot.
 
-Source: `src/cleanup.x:855`
+Source: `src/cleanup.x:835`
 
 ### `Compiler`
 
@@ -104,7 +108,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1331`
+Source: `src/cleanup.x:1315`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -114,7 +118,7 @@ Source: `src/cleanup.x:1331`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1306`
+Source: `src/cleanup.x:1290`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
