@@ -15,6 +15,8 @@
 #include "symbolset.h"
 typedef List TypeInfo;
 
+typedef List Type;
+
 typedef List Source;
 
 List x2c_ident(String spelling);

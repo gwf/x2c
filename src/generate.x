@@ -667,7 +667,7 @@ static int _prelude_position(List source) {
    `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
 static List Init.prelude(Init &i, List out) {
-  out = cons(_initialization_guard(i.guard), out);
+  out = cons(i.c.initialization_guard(i.guard), out);
   return i.synthetic ? cons(i.synthetic, out) : out;
 }
 
@@ -758,7 +758,7 @@ static List Compiler._protocol_initializer(
   Compiler c, List function, List body) {
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   List statements = List.concat_n(
-    4, %(${_initialization_guard(guard)}), _run_once(c, guard),
+    4, %(${c.initialization_guard(guard)}), _run_once(c, guard),
     c.init_statements(<protocol>), body);
   return c._replace_body(function, statements);
 }

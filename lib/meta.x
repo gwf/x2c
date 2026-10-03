@@ -41,6 +41,10 @@
    (fields F) (methods M))`. Read a part with `List.assoc`. */
 typedef List TypeInfo;
 
+/** Type syntax, such as `%(double)` or `%((* char))`. A quotation fills a
+   type position from a local declared `Type`. */
+typedef List Type;
+
 /** A `meta` parameter declared `Source` receives, at a `$` call, captured
    syntax with the source text it came from: `((text T) (file F) (syntax
    S))`. `x2c_source_text` and `x2c_embed_text` read it directly. */

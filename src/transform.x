@@ -1408,7 +1408,7 @@ static List Compiler._change(
   Compiler c, List ast, Symbol op, List arg, Type type, int postfix) {
   Symbol binary = op == <++> ? <+> : <->;
   Symbol spelled = postfix ? op : binary;
-  List one = postfix ? NULL : %(expr (int) (literal (int) "1"));
+  List one = postfix ? NULL : x2c_literal_int(1);
   List indexed = c._indexed_change(arg, spelled, one);
   if (indexed) return indexed;
   if (!c.sym.is_var_type(type)) {
@@ -1554,7 +1554,7 @@ static List Compiler._comparison(
                           (op ! (call "Var_same" (args $lhs $rhs))));
   }
   List call = %(call "Var_compare" (args $lhs $rhs));
-  List zero = %(expr (int) (literal (int) "0"));
+  List zero = x2c_literal_int(0);
   return %(expr (int) (op $op $call $zero));
 }
 

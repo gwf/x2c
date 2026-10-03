@@ -843,9 +843,8 @@ static List Compiler._parse_composite(Compiler c) {
     return %(expr ("Map") (map @entries));
   }
   List elems = c._parse_composite_elements();
-  elems = %( commas @elems );
   c.expect(<"}">);
-  return %(expr () ( composite $elems ));
+  return %(expr () ${source_composite_content(elems)});
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
@@ -2415,7 +2414,7 @@ static int _exact_iter_type(Var value) {
 }
 
 static List _iter_destination(void) {
-  List values = source_commas_content(%((expr (int) (literal (int) "0"))));
+  List values = source_commas_content(%(${x2c_literal_int(0)}));
   return %(expr (* struct "Iter")
     (op & (expr (struct "Iter")
       (cast (decl (struct "Iter") (bindings (bind () ())))
@@ -2769,7 +2768,7 @@ static List Compiler._protocol_operator_expression(
   List call = c.rebuild_expression(result, called(callee, arguments));
   if (!derived) return call;
   if (derived == <equal>) return %(expr (int) (op ! $call));
-  List zero = %(expr (int) (literal (int) "0"));
+  List zero = x2c_literal_int(0);
   return %(expr (int) (op $op $call $zero));
 }
 

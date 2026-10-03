@@ -511,6 +511,37 @@ Follow-up adoption after the campaign landed:
   resolved form such as `getindex`; no source-form macro describes them.
 - Neither PR changes translation cost: converged trees measure within
   1.3% of dev in instructions retired, with `lib/` output identical.
+- A survey of 605 raw constructions in the lowering files found 73 that a
+  quotation could replace, 99 an already-typed rebuild could produce, 55
+  that needed type holes, and 378 that stay raw (typed identifier leaves,
+  internal nodes, bare lists, operators or callees held in variables).
+  Per-site tables are in `.context/quotation-survey/` of the surveying
+  worktree.
+- The follow-up PR adds type holes: a quotation local declared `Type`,
+  now `typedef List Type` in `lib/meta.x` as in the compiler, fills a type
+  position. `builtins.x` writes the class defaults, the Lisp binding
+  statements, `$scope`, and the foreach loop shell as quotations, deleting
+  `$builtin_scope`, `$builtin_foreach_loop`, `$class_repr_guard`, and
+  `$class_string_body` and the `_op`, `_method`, `_size`, `_same_address`,
+  `_address_hash`, `_allocate_copy`, `_refusal`, and `_write` builders.
+  It also removes duplicate builders: `_integer_expression`, nine
+  hand-written `_func_bound` shapes, a hand-built Symbol literal, hand-built
+  0 and 1 literals and composite, and `_array_slot`'s copy of
+  `initializer_slot`.
+- Rules found while converting: a quotation expands only where code is
+  bound or spliced, so it must not sit inside a raw node; a binding passed
+  as a hole value resolves again by spelling where it lands, losing an
+  expansion's private name, so typed identifier leaves stay raw; a binding
+  taken from `x2c_method_resolve` does not survive to a deferred default,
+  so such calls go by spelling; `$slot(...)...` splices do not parse in a
+  quotation; and transform-stage sites stay raw, because binding there
+  opens a semantic transaction per node.
+- Not adopted: operator holes. About four cold sites would read better;
+  the rest rebuild an operator node generically on hot paths.
+- Next: `({ ... })` treats braces as a statement expression only when a
+  `;` stands at their top level, so `({ $a $b })` fails in templates and
+  quotations alike. The `Stmt` follow-up lets hole kinds decide it and
+  gives every category an alias type that sets a quotation hole's kind.
 
 ## Validation
 

@@ -25,23 +25,13 @@ List x2c_param_make(List type, Var name);
 
 // $scope
 
-macro Statement $builtin_scope(Expr $enter, Expr $leave, Statement $body) {
-  {
-    $enter;
-    {
-      defer $leave;
-      $body
-    }
-  }
-}
-
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
-  String enter = destinations ? "Scope_push" : "Scope_retain";
-  String leave = destinations ? "Scope_pop" : "Scope_release";
-  Macro shape = $builtin_scope;
-  return shape(_call(enter, destinations), _call(leave, %()), body);
+  List enter = destinations ? _call("Scope_push", destinations)
+                            : $!( Scope_retain() );
+  List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
+  return $!{ { $enter; { defer $leave; $body } } };
 }
 
 /* foreach
@@ -56,16 +46,6 @@ typedef struct Foreach {
   List declaration, collection, body, targets, type;
   Var iterator, item, pair, object, cursor;
 } Foreach;
-
-macro Statement $builtin_foreach_loop(
-    Decl $declaration, Expr $condition, Statement $body,
-    Statement $setup...) {
-  {
-    $declaration
-    $setup...
-    while ($condition) $body
-  }
-}
 
 static List _foreach_expand(
   List declaration, List collection, List body, Var iterator, Var item,
@@ -207,8 +187,8 @@ static List Foreach.with_iter(Foreach &f, List converter) {
 
 static List Foreach.loop(
   Foreach &f, List condition, List body, List setup) {
-  Macro shape = $builtin_foreach_loop;
-  return shape(f.declaration, condition, body, setup);
+  List declaration = f.declaration;
+  return $!{ { $declaration $setup... while ($condition) $body } };
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
@@ -227,11 +207,13 @@ static List _iter_call(List function, List collection) =>
   %(expr ("Iter") (call $function (args $collection)));
 
 static List _pair_assignments(List targets, List item, Var pair) {
-  List expression = _expr(%("List"), pair);
-  return %(${_declare(%("List"), pair, %())}
-    ${_assign(expression, item)}
-    ${_assign(targets[0], x2c_expr_index(expression, x2c_literal_int(0)))}
-    ${_assign(targets[1], x2c_expr_index(expression, x2c_literal_int(1)))});
+  List first = targets[0], second = targets[1];
+  List assignments = $!{
+    List $pair = $item;
+    $first = $pair[0];
+    $second = $pair[1];
+  };
+  return %($assignments);
 }
 
 static List _expr(List type, Var binding) =>
@@ -272,11 +254,11 @@ static List _class_expand(List capture) {
    it stands. A heap class is a pointer to its `pointee`, an alias names
    one other type, an aggregate is a struct or union, and a positional
    class is a struct whose fields all have Var forms. The defaults share
-   one `value` reference, `value` parameter, and Var tag. */
+   one `value` parameter and Var tag. */
 typedef struct Shape {
   String owner, List type, location, pointee, representation, named;
   int heap, alias, aggregate, positional;
-  List value, parameter, Symbol tag;
+  List parameter, Symbol tag;
 } Shape;
 
 static List _class_defaults(String owner, List type, List location) {
@@ -307,7 +289,6 @@ static Shape _shape(String owner, List type, List location) {
     .owner = owner, .type = type, .location = location, .pointee = pointee,
     .representation = representation, .named = named, .heap = heap,
     .alias = alias, .aggregate = aggregate, .positional = positional};
-  s.value = _ref("value");
   s.parameter = x2c_param_make(%($owner), "value");
   s.tag = x2c_type_tag_name(owner);
   return s;
@@ -355,25 +336,21 @@ static List Shape.constructor(Shape &s) {
 /* What `free` runs: the class's own `drop` on a set value, then the
    release of the value's storage. */
 static List Shape.release(Shape &s) {
-  List value = s.value;
   List drop = _own_method(s.owner, "drop");
-  List release = %(${x2c_stmnt_make(_call("Scope_free", %($value)))});
-  if (!drop) return release;
-  List dropped = _call(x2c_binding_spelling(drop), %($value));
-  return cons($!{ if ($value) $dropped; }, release);
+  List dropped = drop ? _ref(x2c_binding_spelling(drop)) : %();
+  List release = drop ? $!{ if (value) $dropped(value); Scope_free(value); }
+                      : $!{ Scope_free(value); };
+  return %($release);
 }
 
 /* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
 static List Shape.alloc(Shape &s) {
-  String owner = s.owner;
-  List value = s.value;
-  List allocated = _call(
-    "Scope_calloc",
-    %(${x2c_literal_int(1)} ${_size(_op(<"*">, %($value)))}));
-  return _default(
-    owner, "alloc", %($owner), %(),
-    %(${x2c_decl_make(%($owner), "value", allocated)}
-      ${x2c_stmnt_return(value)}));
+  Type type = %(${s.owner});
+  List body = $!{
+    $type value = Scope_calloc(1, sizeof(*value));
+    return value;
+  };
+  return _default(s.owner, "alloc", type, %(), %($body));
 }
 
 /* A heap class's `free` and `cleanup`, and its Cleanup adoption. */
@@ -382,9 +359,9 @@ static List Shape.cleanup(Shape &s, List release) {
   List parameter = s.parameter;
   List free_method = _default(
     owner, "free", %(void), %($parameter), release);
+  List freed = $!{ value.free(); };
   List cleanup_method = _default(
-    owner, "cleanup", %(void), %($parameter),
-    %(${x2c_stmnt_make(_method(s.value, "free", %()))}));
+    owner, "cleanup", %(void), %($parameter), %($freed));
   return %($free_method $cleanup_method
     (adopt ("Cleanup") ($owner) external ${s.location}));
 }
@@ -404,12 +381,13 @@ static List Shape.boxed(Shape &s) {
    copy of an aggregate's boxed record. */
 static List Shape.boxing(Shape &s) {
   String owner = s.owner;
-  List pointer = _call("Var_pointer", %(${s.value}));
-  List unboxed = s.heap ? x2c_expr_cast(%($owner), pointer) :
-    _op(<"*">, %(${x2c_expr_cast(%(* $owner), pointer)}));
+  Type type = %($owner), pointer = %(* $owner);
+  List unboxed = s.heap ? $!( ($type)Var_pointer(value) )
+                        : $!( *($pointer)Var_pointer(value) );
+  List boxed = _box(s.tag, s.heap);
+  List returned = $!{ return $boxed; };
   List var_method = _default(
-    owner, "var", %("Var"), %(${s.parameter}),
-    %(${x2c_stmnt_return(_box(s.tag, s.heap))}));
+    owner, "var", %("Var"), %(${s.parameter}), %($returned));
   return %($var_method ${_unbox(owner, unboxed)});
 }
 
@@ -446,13 +424,11 @@ static List Shape.writers(Shape &s) {
 /* A scalar class boxes as its representation. */
 static List Shape.scalar(Shape &s) {
   String owner = s.owner;
-  List value = s.value, representation = s.representation;
-  List boxed = x2c_expr_cast(%("Var"), x2c_expr_cast(representation, value));
-  List unboxed = x2c_expr_cast(
-    %($owner), x2c_expr_cast(representation, value));
+  Type type = %($owner), representation = s.representation;
+  List boxed = $!{ return (Var)($representation)value; };
+  List unboxed = $!( ($type)($representation)value );
   List var_method = _default(
-    owner, "var", %("Var"), %(${s.parameter}),
-    %(${x2c_stmnt_return(boxed)}));
+    owner, "var", %("Var"), %(${s.parameter}), %($boxed));
   return %($var_method ${_unbox(owner, unboxed)}
     (adopt ("Var") ($owner) external $representation ${s.location}));
 }
@@ -513,11 +489,9 @@ static List _initialized_new(
    value in the active scope. */
 static List _finish_new(
   String owner, List type, List parameters, List body, int copy) {
-  List value = _ref("value");
-  List returned = copy ? _allocate_copy(value) : value;
-  return _default(
-    owner, "new", type, parameters,
-    body.append(%(${x2c_stmnt_return(returned)})));
+  List returned = copy ? $!{ return Scope_memdup(&value, sizeof(value)); }
+                       : $!{ return value; };
+  return _default(owner, "new", type, parameters, body.append(%($returned)));
 }
 
 /* The deferred initializer calls the class's `init` on the value and the
@@ -528,7 +502,6 @@ static List _class_initializer(String owner, Var heap_value) {
   List type = %($owner);
   List receiver = heap ? type : %(* @type);
   List method = x2c_method_resolve(type, "init");
-  List value = _ref("value");
   if (method) {
     List signature = x2c_syntax_type(method);
     List function = signature.car();
@@ -538,9 +511,12 @@ static List _class_initializer(String owner, Var heap_value) {
     List parameters = cons(receiver, declared.cdr());
     int refusable = heap && signature.equal(%((func $parameters) int));
     if (refusable || signature.equal(%((func $parameters) void))) {
-      List object = heap || reference ? value : _op(<&>, %($value));
-      List call = _init_call(method, parameters, object);
-      return refusable ? _refusal(call, value) : x2c_stmnt_make(call);
+      List init = _ref(x2c_binding_spelling(method));
+      List arguments = _init_arguments(parameters);
+      List call = heap || reference ? $!( $init(value, $arguments...) )
+                                    : $!( $init(&value, $arguments...) );
+      return refusable ? $!{ if (!$call) { Scope_free(value); return 0; } }
+                       : $!{ $call; };
     }
   }
   String suffix = heap ? ")" : " &)";
@@ -549,96 +525,69 @@ static List _class_initializer(String owner, Var heap_value) {
   return %();
 }
 
-/* The call of `method` on `object` and one argument for each of the rest
-   of its `parameters`. */
-static List _init_call(List method, List parameters, List object) {
-  Array arguments = [object];
+/* One argument for each of `parameters` after the receiver. */
+static List _init_arguments(List parameters) {
+  Array arguments = [];
   foreach (List parameter, parameters.cdr())
-    arguments.push(_ref(%"argument_${arguments.len() - 1}"));
-  return _call(x2c_binding_spelling(method), arguments.list_free());
+    arguments.push(_ref(%"argument_${arguments.len()}"));
+  return arguments.list_free();
 }
-
-static List _refusal(List call, List value) =>
-  $!{ if (!$call) { Scope_free($value); return 0; } };
-
-static List _allocate_copy(List value) =>
-  _call("Scope_memdup", %(${_op(<&>, %($value))} ${_size(value)}));
 
 // class boxing and comparison
 
 static List _box(Symbol tag, int heap) {
-  List value = _ref("value");
-  if (heap) return _call("Var_new", %(${x2c_literal_symbol(tag)} $value));
-  return _call(
-    "Var_box_record",
-    %(${x2c_literal_symbol(tag)} ${_op(<&>, %($value))} ${_size(value)}));
+  List symbol = x2c_literal_symbol(tag);
+  if (heap) return $!( Var_new($symbol, value) );
+  return $!( Var_box_record($symbol, &value, sizeof(value)) );
 }
 
-static List _unbox(String owner, List expression) =>
-  %(default ${_function(
+static List _unbox(String owner, List expression) {
+  List returned = $!{ return $expression; };
+  return %(default ${_function(
     x2c_type_reverse_name("Var", owner), %($owner),
-    %(${x2c_param_make(%("Var"), "value")}),
-    %(${x2c_stmnt_return(expression)}))});
+    %(${x2c_param_make(%("Var"), "value")}), %($returned))});
+}
 
 /* A heap class compares addresses; a value class, each named field's Var
    form. */
 static List _equal(String owner, int heap, List fields) {
-  List left = _ref("left"), right = _ref("right");
-  List body = heap ? %(${x2c_stmnt_return(_same_address(left, right))})
-                   : _fields_equal(fields, left, right);
+  List same = $!{ return (void *)left == (void *)right; };
+  List body = heap ? %($same) : _fields_equal(fields);
   return _default(
     owner, "equal", %(int),
     %(${x2c_param_make(%($owner), "left")}
       ${x2c_param_make(%($owner), "right")}), body);
 }
 
-static List _same_address(List left, List right) =>
-  _op(
-    <==>,
-    %(${x2c_expr_cast(%(* void), left)}
-      ${x2c_expr_cast(%(* void), right)}));
-
-static List _fields_equal(List fields, List left, List right) {
+static List _fields_equal(List fields) {
+  List left = _ref("left"), right = _ref("right");
   Array body = [];
   foreach (List field, fields) {
-    List equal = _call(
-      "Var_equal",
-      %(${x2c_expr_cast(%("Var"), _field_on(field, left))}
-        ${x2c_expr_cast(%("Var"), _field_on(field, right))}));
-    body.push(
-      %(if ${_op(<!>, %($equal))} ${x2c_stmnt_return(x2c_literal_int(0))}));
+    List mine = _field_on(field, left), theirs = _field_on(field, right);
+    body.push($!{ if (!Var_equal((Var)$mine, (Var)$theirs)) return 0; });
   }
-  body.push(x2c_stmnt_return(x2c_literal_int(1)));
+  body.push($!{ return 1; });
   return body.list_free();
 }
 
 /* A heap class hashes its address; a value class combines each named
    field's Var hash. */
 static List _hash(String owner, int heap, List fields) {
-  List value = _ref("value");
-  List body = heap ? _address_hash(value) : _fields_hash(fields);
+  List hashed = $!{ return x2c_hash_word((unsigned long)value); };
+  List body = heap ? %($hashed) : _fields_hash(fields);
   return _default(
     owner, "hash", %(unsigned),
     %(${x2c_param_make(%($owner), "value")}), body);
 }
 
-static List _address_hash(List value) {
-  List hashed = _call(
-    "x2c_hash_word", %(${x2c_expr_cast(%(unsigned long), value)}));
-  return %(${x2c_stmnt_return(hashed)});
-}
-
+/* `hash` is declared outside the quotations so each of them names it. */
 static List _fields_hash(List fields) {
-  List hash = _ref("hash");
   Array body = [x2c_decl_make(%(unsigned), "hash", x2c_literal_int(0))];
   foreach (List field, fields) {
-    List field_hash = _call(
-      "Var_hash", %(${x2c_expr_cast(%("Var"), _field_value(field))}));
-    List combined = _call(
-      "x2c_hash_word", %(${_op(<^>, %($hash $field_hash))}));
-    body.push(x2c_stmnt_make(_op(<=>, %($hash $combined))));
+    List member = _field_value(field);
+    body.push($!{ hash = x2c_hash_word(hash ^ Var_hash((Var)$member)); });
   }
-  body.push(x2c_stmnt_return(hash));
+  body.push($!{ return hash; });
   return body.list_free();
 }
 
@@ -649,20 +598,21 @@ static List _fields_hash(List fields) {
    and another class its repr; `repr` writes each field. */
 static List _writer(
   String owner, int heap, List fields, String member, List selected) {
-  List value = _ref("value"), out = _ref("out"), body;
+  List body;
   List parameters = %(${x2c_param_make(%($owner), "value")}
                       ${x2c_param_make(%("Buffer"), "out")});
   if (selected) {
-    List written = _method(out, "write", %(${_method(value, member, %())}));
-    body = %(${x2c_stmnt_return(written)});
+    List written = $!{ return out.write(value.$member()); };
+    body = %($written);
   }
   else if (member == "str") {
-    List shown = heap ? _pointer_output(owner, value, out)
-                      : _method(value, "write_repr", %($out));
-    body = %(${x2c_stmnt_return(shown)});
+    List address = _pointer_output(owner, $!( value ));
+    List shown = heap ? $!{ return $address; }
+                      : $!{ return value.write_repr(out); };
+    body = %($shown);
   }
   else {
-    body = heap ? _repr_guard(owner, value, out) : %();
+    body = heap ? _repr_guard(owner) : %();
     body = body.append(%((syntax-recipe class.write-fields ($owner $fields))));
   }
   return _default(owner, %"write_${member}", %("Buffer"), parameters, body);
@@ -670,82 +620,68 @@ static List _writer(
 
 /* A heap class writes a NULL value, or one the rendering path has already
    entered, as its address. */
-macro Statement $class_repr_guard(
-    Expr $null_test, Decl $path_declaration, Expr $entered,
-    Expr $leave, Statement $fallback) {
-  if ($null_test) $fallback
-  $path_declaration
-  if (!$entered) $fallback
-  defer $leave;
-}
-
-static List _repr_guard(String owner, List value, List out) {
-  List null_test = _same_address(value, x2c_literal_int(0));
-  List fallback = x2c_stmnt_return(_pointer_output(owner, value, out));
-  List path = _ref("path");
-  List entered = _method(path, "enter", %($value));
-  List declaration = x2c_decl_make(%("RenderPath"), "path", %());
-  List leave = _method(path, "leave", %());
-  Macro shape = $class_repr_guard;
-  return %(${shape(null_test, declaration, entered, leave, fallback)});
+static List _repr_guard(String owner) {
+  List address = _pointer_output(owner, $!( value ));
+  List guard = $!{
+    if ((void *)value == (void *)0) return $address;
+    RenderPath path;
+    if (!path.enter(value)) return $address;
+    defer path.leave();
+  };
+  return %($guard);
 }
 
 /* The deferred body of `write_repr`: `Owner { a: ..., b: ... }`. */
 static List _class_write_fields(String owner, List fields) {
-  List out = _ref("out");
-  Array body = [x2c_stmnt_make(_write(out, %"${owner} { "))];
+  String opening = %"${owner} { ";
+  Array body = [$!{ out.write($opening); }];
   Var final = fields.last();
   foreach (List field, fields) {
-    body.push(x2c_stmnt_make(_write(out, %"${field[0]}: ")));
+    String label = %"${field[0]}: ";
+    body.push($!{ out.write($label); });
     body.push(_field_write(field));
-    if (!field.equal(final)) body.push(x2c_stmnt_make(_write(out, ", ")));
+    if (!field.equal(final)) body.push($!{ out.write(", "); });
   }
-  body.push(x2c_stmnt_return(_write(out, " }")));
+  body.push($!{ return out.write(" }"); });
   return %(seq @{body.list_free()});
 }
-
-static List _write(List out, String text) =>
-  _method(out, "write", %(${x2c_literal_string(text)}));
 
 /* One field's repr: its type's own `write_repr`, its Var form's repr, or
    else its address. */
 static List _field_write(List field) {
-  List value = _field_value(field), type = field[1], out = _ref("out");
+  List value = _field_value(field), type = field[1];
   int array = 0;
   match (type) case %((dim *) *): array = 1;
   List writer = %();
   if (!array && !x2c_type_is_pointer(type))
     writer = x2c_method_resolve(type, "write_repr");
-  if (writer) return x2c_stmnt_make(_method(value, "write_repr", %($out)));
+  if (writer) return $!{ $value.write_repr(out); };
   if (!array && x2c_type_is_value(type))
-    return x2c_stmnt_make(
-      _method(x2c_expr_cast(%("Var"), value), "write_repr", %($out)));
+    return $!{ ((Var)$value).write_repr(out); };
   if (!array && !x2c_type_is_pointer(x2c_type_resolve(type)))
-    value = _op(<&>, %($value));
-  return x2c_stmnt_make(_pointer_output("opaque", value, out));
+    value = $!( &$value );
+  List address = _pointer_output("opaque", value);
+  return $!{ $address; };
 }
 
 /* `str` or `repr` renders `write_str` or `write_repr` into a Buffer. */
-macro Statement $class_string_body(Expr $value, Name $writer) {
-  Buffer out = Buffer.new(0);
-  defer out.free();
-  $value.$writer(out);
-  return out.str();
-}
-
 static List _string_method(String owner, String member) {
-  Macro shape = $class_string_body;
+  String writer = %"write_${member}";
+  List body = $!{
+    Buffer out = Buffer.new(0);
+    defer out.free();
+    value.$writer(out);
+    return out.str();
+  };
   return _default(
     owner, member, %("String"),
-    %(${x2c_param_make(%($owner), "value")}),
-    %(${shape(_ref("value"), %"write_${member}")}));
+    %(${x2c_param_make(%($owner), "value")}), %($body));
 }
 
-static List _pointer_output(String owner, List value, List out) =>
-  _method(
-    out, "printf",
-    %(${x2c_literal_string(%"<${owner}: 0x%012lX>")}
-      ${x2c_expr_cast(%(long), value)}));
+static List _pointer_output(String owner, List value) {
+  String format = %"<${owner}: 0x%012lX>";
+  return $!( out.printf($format, (long)$value) );
+}
 
 // class syntax
 
@@ -782,20 +718,8 @@ static List _field_value(List field) => _field_on(field, _ref("value"));
 
 static List _ref(String name) => x2c_expr_ident(%($name));
 
-static List _op(Symbol op, List operands) =>
-  source_operator_expression(NULL, %($op @operands));
-
 static List _call(String name, List arguments) =>
   x2c_expr_call(_ref(name), arguments);
-
-static List _method(List receiver, String member, List arguments) =>
-  x2c_expr_call(x2c_expr_field(receiver, member), arguments);
-
-static List _size(List expression) {
-  Macro shape = $sizeof_grouped;
-  return Compiler.expanding().rebuild_expression(
-    %(unsigned), shape(expression));
-}
 
 static List _function(String name, List result, List parameters, List body) {
   List parts = x2c_type_parts(result);
@@ -865,12 +789,10 @@ static List _binding_statements(List lisp, List rows) {
 
 static List _binding_statement(List lisp, List row) {
   match (row) case %(?group ?name ?function ?type): {
-    List func = _binding_call(
-      "Func_new",
-      %(${x2c_expr_ident(x2c_ident(function))} ${binding_literal_list(type)}));
-    List bind = _binding_call(
-      "Lisp_bind", %($lisp ${x2c_literal_string(name)} $func));
-    return x2c_stmnt_make(bind);
+    List label = x2c_literal_string(name);
+    List native = x2c_expr_ident(x2c_ident(function));
+    List types = binding_literal_list(type);
+    return $!{ Lisp_bind($lisp, $label, Func_new($native, $types)); };
   }
   return %();
 }
@@ -882,10 +804,8 @@ static List _binding_targets(List rows) {
   Array arguments = [];
   foreach (List row, rows)
     foreach (Var item, _binding_target_row(row)) arguments.push(item);
-  return _binding_call(
-    "Map_update_n",
-    %(${_binding_call("Map_new", %())} ${x2c_literal_int(rows.len())}
-      @{arguments.list_free()}));
+  List count = x2c_literal_int(rows.len()), items = arguments.list_free();
+  return $!( Map_update_n(Map_new(), $count, $items...) );
 }
 
 static List _binding_target_row(List row) {

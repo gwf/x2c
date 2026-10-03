@@ -1273,13 +1273,16 @@ static int Compiler._quoted_role(Compiler c, Symbol role) {
 }
 
 /* A `$name` in a quotation's body that names a visible local declares its
-   hole, a sequence when `...` follows. */
+   hole, a sequence when `...` follows. A local declared `Type` fills a type
+   hole, which no position can tell from a statement before a name. */
 static List Compiler._quoted_hole(Compiler c, Token name) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   String spelling = name.text;
-  if (!c.sym.get(%($spelling))) return NULL;
+  Type type = NULL;
+  if (!c.sym.lookup(%($spelling), type)) return NULL;
+  Symbol kind = c.sym.is_named_value_type(type, "Type") ? <type> : 0;
   Token after = Token.skip_trivia(name + 1);
-  List hole = c._declare_hole(name, 0, after.type == <...>);
+  List hole = c._declare_hole(name, kind, after.type == <...>);
   Var quoted = c.macro_holes[%(quoted)];
   c.macro_holes[%(quoted)] =
     cons(hole, quoted is <list> ? quoted.list() : NULL);
