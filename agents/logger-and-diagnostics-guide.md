@@ -5,6 +5,21 @@ modules. `lib/logger.x` owns general structured event delivery.
 `src/diagnostics.x` owns bounded compiler-error storage and prints each
 entry through one compiler.
 
+## Local report catalogues
+
+Named report macros collect wording and diagnostic construction separately
+from the algorithm that selects a case. Small groups appear near the top of
+their source file; larger groups live in a sibling `*-reports.xmacro` imported
+there. Compiler and driver calls use `$report.<category>_<case>`. Runtime
+formatting and Regex catalogues also provide named expression macros for
+reason strings, leaving their shared failure helpers responsible for payloads.
+
+These are compile-time expansions, not runtime message registries. Reports
+still run at their call sites through the existing reporting owners. Guards,
+severity selection, deferred collection, and cleanup remain in those owners.
+Generic renderers, native error-floor messages, and short structured raises
+retain their existing representation.
+
 ## Logger contract
 
 A `Logger` is an opaque event service. It serializes its level filter, event

@@ -23,6 +23,24 @@
 #include <time.h>
 #include <unistd.h>
 
+// diagnostics
+
+macro Stmt $report.macro_helper_timeout(
+  Expr $c, Expr $site, Expr $limit, Expr $name) {
+  $c.report_error(
+    <macro>,
+    "%s%g s".printf("this meta call ran longer than ", $limit),
+    $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+}
+
+macro Stmt $report.macro_helper_stopped(
+  Expr $c, Expr $site, Expr $name, Expr $reason) {
+  $c.report_error(
+    <macro>,
+    "this meta call stopped the compile-time helper",
+    $site, %("function: ${$name}" "reason: ${$reason}"));
+}
+
 /* The project's helper, its tables' failures by index, and the table each
    input calls, which last for the process; a forked translation worker
    inherits them. */
@@ -334,14 +352,6 @@ static int _read_input(double deadline) {
 static void Call.refuse(Call &call, String why) =>
   call.compiler.refuse_meta_call(call.name, call.site, why);
 
-macro Stmt $report.macro_helper_timeout(
-  Expr $c, Expr $site, Expr $limit, Expr $name) {
-  $c.report_error(
-    <macro>,
-    "%s%g s".printf("this meta call ran longer than ", $limit),
-    $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
-}
-
 /* Kills the helper, which passed the call's deadline, and reports the
    call. */
 static void Call.overdue(Call &call) {
@@ -349,14 +359,6 @@ static void Call.overdue(Call &call) {
   $report.macro_helper_timeout(
     call.compiler,
     call.site, call.limit, call.name);
-}
-
-macro Stmt $report.macro_helper_stopped(
-  Expr $c, Expr $site, Expr $name, Expr $reason) {
-  $c.report_error(
-    <macro>,
-    "this meta call stopped the compile-time helper",
-    $site, %("function: ${$name}" "reason: ${$reason}"));
 }
 
 static void Call.stopped(Call &call, String reason) {

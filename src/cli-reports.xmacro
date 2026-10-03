@@ -1,0 +1,49 @@
+/* cli command reports. */
+
+macro Stmt $report.cli_command_unknown(Expr $first) {
+  driver_error(%"unknown command or global option '${$first}'");
+}
+
+macro Stmt $report.cli_operand_required(Expr $name) {
+  driver_error(%"${$name} requires exactly one operand");
+}
+
+macro Stmt $report.cli_operands_forbidden(Expr $name) {
+  driver_error(%"${$name} accepts no operands");
+}
+
+macro Stmt $report.cli_help_unknown(Expr $name) {
+  driver_error(%"unknown help command '${$name}'");
+}
+
+macro Stmt $report.cli_option_value_forbidden(Expr $arg) {
+  driver_error(%"option takes no value '${$arg}'");
+}
+
+macro Stmt $report.cli_option_value_required(Expr $arg) {
+  driver_error(%"option requires a value '${$arg}'");
+}
+
+macro Stmt $report.cli_color_invalid(Expr $value) {
+  driver_error(%"invalid color mode '${$value}'");
+}
+
+macro Stmt $report.cli_target_unknown(Expr $value) {
+  driver_error(%"unknown target kind '${$value}'");
+}
+
+macro Stmt $report.cli_value_invalid(Expr $noun, Expr $value) {
+  driver_error(%"invalid ${$noun} '${$value}'");
+}
+
+macro Stmt $report.cli_dependency_owned(Expr $value) {
+  driver_error(%"C dependency option is driver-owned '${$value}'");
+}
+
+macro Stmt $report.cli_native_unsupported(Expr $arg) {
+  driver_error(%"unsupported package native argument '${$arg}'");
+}
+
+macro Stmt $report.cli_option_unknown(Expr $arg) {
+  driver_error(%"unknown option '${$arg}'");
+}

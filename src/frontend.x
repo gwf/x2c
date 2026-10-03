@@ -50,6 +50,39 @@ typedef struct ParsedUnit {
 #include "deps.x"
 #include "utils.x"
 
+// diagnostics
+
+macro Stmt $report.driver_input_read(Expr $c, Expr $filename) {
+  $c.report_error(
+    <driver>,
+    "cannot read input file",
+    NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
+}
+
+macro Stmt $report.driver_script_symbols(Expr $c, Expr $site) {
+  $c.report_error(
+    <driver>,
+    "script units use the default symbol collection",
+    $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
+    "--live-symbols, and the --dump-cpp modes cannot read a script"));
+}
+
+macro Stmt $report.driver_indent_symbols(Expr $c, Expr $site) {
+  $c.report_error(
+    <driver>,
+    "indented units use the default symbol collection",
+    $site, %("the host preprocessor does not keep the indentation, so"
+    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
+    "an indented unit"));
+}
+
+macro Stmt $report.driver_cpp_failed(Expr $c, Expr $site, Expr $status) {
+  $c.report_error(
+    <driver>,
+    "failed to run C preprocessor",
+    $site, %("stage: preprocess" "status: ${$status}"));
+}
+
 // source units
 
 /** Runs the source stages. On either result, the caller must close the
@@ -252,13 +285,6 @@ static int _inside(const char *path, const char *dir) {
   return !strncmp(path, dir, n) && path[n] == '/';
 }
 
-macro Stmt $report.driver_input_read(Expr $c, Expr $filename) {
-  $c.report_error(
-    <driver>,
-    "cannot read input file",
-    NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
-}
-
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
   if (c.read_source(filename, text)) return text;
@@ -334,23 +360,6 @@ static void _enter_package(Frontend frontend, Compiler c) {
   c.package_roots[c.package] = root;
 }
 
-macro Stmt $report.driver_script_symbols(Expr $c, Expr $site) {
-  $c.report_error(
-    <driver>,
-    "script units use the default symbol collection",
-    $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
-    "--live-symbols, and the --dump-cpp modes cannot read a script"));
-}
-
-macro Stmt $report.driver_indent_symbols(Expr $c, Expr $site) {
-  $c.report_error(
-    <driver>,
-    "indented units use the default symbol collection",
-    $site, %("the host preprocessor does not keep the indentation, so"
-    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
-    "an indented unit"));
-}
-
 /* The host preprocessor keeps neither a unit's indentation nor its `#!`
    line. */
 static void _check_cpp_unit(Compiler c) {
@@ -364,13 +373,6 @@ static Token _first_directive(Compiler c) {
   for (Token token = c.tokenizer.tokens; token.type != <eof>; token++)
     if (token.type == <preproc>) return token;
   return c.token;
-}
-
-macro Stmt $report.driver_cpp_failed(Expr $c, Expr $site, Expr $status) {
-  $c.report_error(
-    <driver>,
-    "failed to run C preprocessor",
-    $site, %("stage: preprocess" "status: ${$status}"));
 }
 
 /* Runs the host preprocessor for a child compiler that shares the unit's

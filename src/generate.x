@@ -22,6 +22,17 @@ $(import "../src/grammar.xmacro")
 #include "emit.x"
 #include "utils.x"
 
+// diagnostics
+
+macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
+  {
+    String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
+    $c.report_error(
+      <emit>, "failed to write generated file",
+      $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+  }
+}
+
 // generating a unit
 
 /** Writes the generated C header and source for one lowered translation unit.
@@ -82,15 +93,6 @@ static List Compiler._emit_source(
   source = c._static_prototypes(c._file_init(source), header);
   source = c._primary_include(_vertical_spacing(source));
   return c.emit(c._patch_main(source), bindings);
-}
-
-macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
-  {
-    String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
-    $c.report_error(
-      <emit>, "failed to write generated file",
-      $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
-  }
 }
 
 /* A failed write reports its file and the host error. */

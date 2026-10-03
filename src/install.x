@@ -22,6 +22,8 @@ $(import "../lib/private-keywords.xmacro")
 #include "digest.x"
 #include "json.x"
 
+$(import "install-reports.xmacro")
+
 // the packages lock
 
 /* The packages lock this process holds, and the staging directory it is
@@ -43,9 +45,7 @@ static String _locked_packages(String command, int quiet) {
   int held = file_lock(lock, 0);
   if (held < 0) {
     if (!quiet)
-      fprintf(
-        stderr, "x2c: waiting for another install or removal in %s\n",
-        packages);
+      $report.install_lock_waiting(packages);
     held = file_lock(lock, 1);
   }
   _packages_lock = held;
@@ -128,7 +128,7 @@ List install_require(
   List row = locked ? locked : _index_row(request, name, i.work);
   String resolved = row[1];
   if (resolved != version)
-    _error(%"the index has $name $resolved, not the pinned $version");
+    $report.install_version_pinned(name, resolved, version);
   if (_installed_version(%"${i.packages}/$name") != version) {
     i.resolve(row);
     i.run();
@@ -155,7 +155,7 @@ static void Install.locate(Install &i) {
   else if (Path.exists(spec)) i.source = spec;
   else if (spec.is_identifier())
     i.resolve(_index_row(i.request, spec, i.work));
-  else _error(%"unknown package spec '$spec'");
+  else $report.install_spec_unknown(spec);
 }
 
 /* A resolved row names the version to record and the archive to fetch. */
@@ -168,7 +168,7 @@ static void Install.resolve(Install &i, List row) {
 /* Stages, builds, and publishes one package. */
 static void Install.run(Install &i) {
   String package = i.unpacked(), name = Path.basename(package);
-  if (!name.is_identifier()) _error(%"'$name' is not a package name");
+  if (!name.is_identifier()) $report.install_name_invalid(name);
   String staged = %"${i.work}/$name";
   try Path.copy_tree(package, staged);
   catch %(io-fail *detail): _host_error(detail);
@@ -180,7 +180,7 @@ static void Install.run(Install &i) {
   }
   _publish(staged, i.packages, name);
   if (!i.request.quiet)
-    fprintf(stderr, "x2c: installed %s/%s\n", i.packages, name);
+    $report.install_installed(i.packages, name);
 }
 
 /* The package directory: `source` itself, or the tarball that `source`
@@ -219,7 +219,7 @@ static void _publish(String staged, String packages, String name) {
   Path target = %"$packages/$name";
   if (target.exists()) {
     if (!_installed_kind(target))
-      _error(%"$target exists and is not an installed package");
+      $report.install_target_unmanaged(target);
     target.move_to(%"$staged.previous");
   }
   Path.move_to(staged, target);
@@ -230,12 +230,11 @@ static void _publish(String staged, String packages, String name) {
 static void _check_bundle(CliRequest request, String package, String name) {
   String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
   String current = cli_version();
-  if (!built) _error(%"bundle $name has no readable BUNDLE.json version");
+  if (!built) $report.install_bundle_version_missing(name);
   if (built != current && !request.force)
-    _error(
-      %"bundle $name was built for '$built', not '$current'; use --force");
+    $report.install_bundle_version_wrong(name, built, current);
   if (!Path.is_file(%"$package/builds/lib$name.a"))
-    _error(%"bundle $name has no builds/lib$name.a");
+    $report.install_bundle_archive_missing(name);
 }
 
 /* A source package translates in package mode under its staged parent, so
@@ -273,7 +272,7 @@ static List _source_units(String src, String name, String spec) {
   try units = _files_with(src, ".x").append(_files_with(src, ".xp"));
   catch %(not-found *): {}
   if (!units.contains(%"$src/$name.x") && !units.contains(%"$src/$name.xp"))
-    _error(%"$spec has no src/$name.x entry unit");
+    $report.install_entry_missing(spec, name);
   return units;
 }
 
@@ -282,7 +281,7 @@ static void _refuse_native(String package, String name) {
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||
         Path.stem(manifest).startswith("dependency-"))
-      _error(%"$name needs native dependencies; install its bundle");
+      $report.install_dependencies_missing(name);
 }
 
 /* Only what this compiler builds belongs in the installed package, so a
@@ -364,7 +363,7 @@ static List _index_row(CliRequest request, String name, String work) {
     _remote(location) ? _fetch(location, work, "index.txt") : location;
   String platform = _platform(), text = NULL, List source = NULL;
   try text = Path.read_text(path);
-  catch %(not-found *): _error(%"no package index at $location");
+  catch %(not-found *): $report.install_index_missing(location);
   foreach (List row, install_rows(text)) {
     if (row.car() != name) continue;
     String kind = row[2], target = row[3];
@@ -372,7 +371,7 @@ static List _index_row(CliRequest request, String name, String work) {
     if (kind == "source") source = row;
   }
   if (source) return source;
-  _error(%"no package '$name' for $platform in $location");
+  $report.install_package_missing(name, platform, location);
   return NULL;
 }
 
@@ -381,8 +380,7 @@ static List _index_row(CliRequest request, String name, String work) {
 static String _home_packages(String command) {
   String packages = home_packages();
   if (!packages)
-    driver_error(
-      %"$command: no x2c home: install the compiler or set X2C_HOME");
+    $report.install_home_missing(command);
   return packages;
 }
 
@@ -399,13 +397,12 @@ static void _run(List arguments, const char *what) {
   try job = arguments.job().options({stderr: <capture>}).start();
   catch %((!or not-found io-fail) *detail): {
     long error = detail.assoc(<"errno">);
-    errors = %"x2c: unable to execute ${arguments.car()}: ${
-      String.new(strerror((int) error))}\n";
+    errors = $report.install_start_failed(arguments.car(), error);
   }
   int status = job ? job.status() : 127;
   if (job) errors = job.errors_text;
   if (status)
-    _error(%"$what failed (${arguments.car()}): ${errors.strip(" \n")}");
+    $report.install_tool_failed(what, arguments, errors);
 }
 
 static int _remote(String spec) =>
@@ -422,7 +419,7 @@ static void _verify(Path p, String expected) {
   File input = $auto(File.open(p, "rb"));
   String actual = input.sha256();
   if (actual != expected.lower())
-    _error(%"sha256 mismatch for $p: expected $expected, got $actual");
+    $report.install_digest_mismatch(p, expected, actual);
 }
 
 /* A tarball unpacks to exactly one top directory, the package. */
@@ -432,7 +429,7 @@ static String _unpack(String tarball, String work) {
   _run(%("tar" "-xzf" $tarball "-C" $extracted), "extract");
   List top = _entries(extracted);
   if (!top || top.cdr() || !Path.is_dir(%"$extracted/${top.car()}"))
-    _error(%"$tarball must contain one package directory");
+    $report.install_archive_shape(tarball);
   return %"$extracted/${top.car()}";
 }
 
@@ -455,7 +452,7 @@ int remove_command(CliRequest request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
   if (!name.is_identifier())
-    driver_error(%"remove: no installed package '$name'");
+    $report.install_remove_missing(name);
   // A removal with nothing to remove refuses without taking the lock, and
   // the same decision is made again under it, since another removal may
   // have taken the package while this one waited.
@@ -465,17 +462,16 @@ int remove_command(CliRequest request) {
   _check_removable(target, name);
   try Path.remove_tree(target);
   catch %(io-fail *detail): _host_error(detail);
-  if (!request.quiet) fprintf(stderr, "x2c: removed %s\n", target);
+  if (!request.quiet) $report.install_removed(target);
   return 0;
 }
 
 /* Refuses a removal that has nothing to remove, naming which case it is. */
 static void _check_removable(String target, String name) {
   if (!Path.exists(target))
-    driver_error(%"remove: no installed package '$name'");
+    $report.install_remove_missing(name);
   if (!_installed_kind(target))
-    driver_error(
-      %"remove: $target is not an installed package; remove it by hand");
+    $report.install_remove_unmanaged(target);
 }
 
 /** Lists installed packages as `name version kind` lines and returns 0. */

@@ -30,6 +30,14 @@ $(import "../src/ast-rewrite.xmacro")
 #include <stdint.h>
 #include <assert.h>
 
+// diagnostics
+
+macro Stmt $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
+  $c.report_error(
+    <cache>, "file-static x2c initializer dependency cycle",
+    $origin, $notes);
+}
+
 // cache materialization
 
 /** Materializes cached literals and deferred file-static initialization.
@@ -676,12 +684,6 @@ static void StaticQueue.add_calls(
     foreach (List statement, preproc_within_arms(arms, %($call)))
       q.c.add_init(late ? <late> : <mid>, statement);
   }
-}
-
-macro Stmt $report.cache_init_cycle(Expr $c, Expr $origin, Expr $notes) {
-  $c.report_error(
-    <cache>, "file-static x2c initializer dependency cycle",
-    $origin, $notes);
 }
 
 static void StaticQueue.report_cycle(StaticQueue &q) {

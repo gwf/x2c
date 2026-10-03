@@ -41,6 +41,8 @@ $(import "../src/adapter-memo.xmacro")
 #include <string.h>
 #include <sys/stat.h>
 
+$(import "../src/macros-reports.xmacro")
+
 /* expansion
 
    Expanding an invocation node matches its capture rows against the
@@ -95,12 +97,6 @@ static List Compiler._stored_definition(
   return definition ? definition : stored;
 }
 
-macro Stmt $report.macro_expansion_count(Expr $c, Expr $origin) {
-  $c.report_error(
-    <macro>, "macro expansion count exceeds 10000",
-    $origin, NULL);
-}
-
 /* An identical recursive expansion, nesting deeper than 64, or more than
    10000 expansions stops the compile. */
 static void Expansion.check(Expansion &x) {
@@ -115,14 +111,6 @@ static void Expansion.check(Expansion &x) {
     $report.macro_expansion_count(c, x.invocation);
 }
 
-macro Stmt $report.macro_expansion_recursive(
-  Expr $c, Expr $spelling, Expr $origin,
-  Expr $definition_note, Expr $shown) {
-  $c.report_error(
-    <macro>, %"identical recursive expansion of '${$spelling}'",
-    $origin, %(${$definition_note} "input: ${$shown.repr()}"));
-}
-
 static void Expansion.recursion(Expansion &x) {
   Atom name = x.definition.assoc(<name>);
   String spelling = name.str();
@@ -132,16 +120,6 @@ static void Expansion.recursion(Expansion &x) {
   $report.macro_expansion_recursive(
     x.c,
     spelling, x.invocation, _definition_note(x.definition), shown);
-}
-
-macro Stmt $report.macro_expansion_depth(
-  Expr $c, Expr $origin, Expr $definition_note, Expr $first_note) {
-  {
-    String first_note = %"first expansion: ${$first_note}";
-    $c.report_error(
-      <macro>, "macro expansion depth exceeds 64", $origin,
-      %(${$definition_note} $first_note));
-  }
 }
 
 static void Expansion.too_deep(Expansion &x) {
@@ -411,18 +389,6 @@ List Compiler.parse_macro_definition(Compiler c) {
   return d.publish();
 }
 
-macro Stmt $report.parse_macro_kind(Expr $c) {
-  $c.report_error(
-    <parse>, "expected macro result kind before '$'",
-    $c.token, NULL);
-}
-
-macro Stmt $report.parse_macro_result(Expr $c) {
-  $c.report_error(
-    <parse>, "macro definition requires a result kind before '$'",
-    $c.token, %("write the result kind between 'macro' and the macro name"));
-}
-
 /* Reads the result kind. A local definition names itself without `$`, and
    an anonymous one has no name to read. */
 static void Definition.head(Definition &d) {
@@ -439,39 +405,11 @@ static void Definition.head(Definition &d) {
   d.kind = c._result_kind_token(token);
 }
 
-macro Stmt $report.parse_macro_unknown_kind(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"unknown macro result kind '${$spelling}'",
-    $origin, NULL);
-}
-
 static Symbol Compiler._result_kind_token(Compiler c, Token token) {
   const MacroCategory *category = _category(token.text);
   if (!category || !category.result)
     $report.parse_macro_unknown_kind(c, token.text, token);
   return category.result;
-}
-
-macro Stmt $report.macro_import_collision(
-  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) {
-  $c.report_error(
-    <macro>, %"imported macro '${$spelling}' collides with a visible macro",
-    $origin, %(${$definition_note}
-      "import: ${$c.display_path($c.import_src)}"));
-}
-
-macro Stmt $report.parse_macro_reserved(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"macro name '${$spelling}' is reserved",
-    $origin, %("x2c.* is reserved for compiler facilities"));
-}
-
-macro Stmt $report.macro_name_with(Expr $c, Expr $origin) {
-  $c.report_error(
-    <macro>, "'with' cannot be a local macro name",
-    $origin, NULL);
 }
 
 static void Definition.naming(Definition &d) {
@@ -494,12 +432,6 @@ static void Definition.naming(Definition &d) {
       spelling, d.start, _definition_note(existing));
 }
 
-macro Stmt $report.parse_macro_kind_order(Expr $c) {
-  $c.report_error(
-    <parse>, "macro result kind belongs after 'macro', before the '$' name",
-    $c.token, NULL);
-}
-
 /* Reads the parameter holes, then a `using` clause. A decorator's first
    parameter is its target. */
 static void Definition.signature(Definition &d) {
@@ -517,31 +449,12 @@ static void Definition.signature(Definition &d) {
     $report.parse_macro_kind_order(c);
 }
 
-macro Stmt $report.parse_hole_final(Expr $c) {
-  $c.report_error(
-    <parse>, "sequence macro hole must be the final argument",
-    $c.token, NULL);
-}
-
 static void Definition.parameter(Definition &d, Array params, List hole) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target) d.take_target(hole);
   else params.push(hole);
   if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
     $report.parse_hole_final(c);
-}
-
-macro Stmt $report.parse_decorator_singular(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "decorator target parameter must be singular",
-    $origin, NULL);
-}
-
-macro Stmt $report.parse_decorator_kind(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "decorator first parameter has invalid target kind",
-    $origin, %("expected Expression, Function, Stmt, Field, Unit,"
-      "or NamedType"));
 }
 
 /* A Unit target's source stays visible to compile-time Lisp, whose
@@ -558,25 +471,6 @@ static void Definition.take_target(Definition &d, List hole) {
   c.macro_holes[%(target)] = hole;
 }
 
-
-macro Stmt $report.macro_local_target(Expr $c, Expr $target, Expr $origin) {
-  $c.report_error(
-    <macro>, %"local decorators cannot target ${$target} syntax",
-    $origin, NULL);
-}
-
-macro Stmt $report.macro_local_result(
-  Expr $c, Expr $result_spelling, Expr $origin) {
-  $c.report_error(
-    <macro>, %"local macros cannot have ${$result_spelling} results",
-    $origin, NULL);
-}
-
-macro Stmt $report.parse_decorator_target(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "decorator requires a first target parameter",
-    $origin, NULL);
-}
 
 /* A local macro produces no file-scope syntax, directly or through the
    target it decorates. */
@@ -595,12 +489,6 @@ static void Definition.check_signature(Definition &d) {
     String target = _kind_spelling(kind);
     $report.macro_local_target(c, target, d.start);
   }
-}
-
-macro Stmt $report.parse_macro_paren_body(Expr $c) {
-  $c.report_error(
-    <parse>, "parenthesized macro body requires Expression result or target",
-    $c.token, NULL);
 }
 
 /* An Expression result, or a decorator of an expression, has an `=>`
@@ -629,13 +517,6 @@ static int Definition.has_expression_body(Definition &d) =>
 static Symbol Definition.target_kind(Definition &d) {
   if (!d.target) return 0;
   return d.target.assoc(<kind>);
-}
-
-macro Stmt $report.parse_macro_braced_body(Expr $c) {
-  $c.report_error(
-    <parse>, "braced macro body requires Stmt, Field, Entry, " +
-  "Enumerator, Unit, or non-Expression Decorator result",
-    $c.token, NULL);
 }
 
 static void Compiler._braced_body_error(Compiler c) {
@@ -787,13 +668,6 @@ static Array Definition.local_binders(Definition &d, Map bindings) {
   return fresh;
 }
 
-macro Stmt $report.parse_hole_untyped(
-  Expr $c, Expr $hole_spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"macro hole '${$hole_spelling}' has no inferred kind",
-    $origin, %("annotate holes used only by compile-time Lisp"));
-}
-
 static void Definition.check_kinds(Definition &d) {
   foreach (List hole, d.parameters)
     if (!hole.assoc(<kind>)) {
@@ -867,12 +741,6 @@ static List Compiler._signature_hole(Compiler c) {
   return c._declare_hole(token, kind, c.test(<...>));
 }
 
-macro Stmt $report.parse_hole_unknown_kind(Expr $c, Expr $spelling) {
-  $c.report_error(
-    <parse>, %"unknown macro hole kind '${$spelling}'",
-    $c.token, NULL);
-}
-
 static Symbol Compiler._hole_kind(Compiler c) {
   const MacroCategory *category = _category(c.token.text);
   Symbol kind = category ? category.hole : 0;
@@ -884,12 +752,6 @@ static Symbol Compiler._hole_kind(Compiler c) {
   return kind;
 }
 
-macro Stmt $report.parse_hole_name(Expr $c) {
-  $c.report_error(
-    <parse>, "expected macro hole name after '$'",
-    $c.token, NULL);
-}
-
 static Token Compiler._hole_name_token(Compiler c) {
   c.expect(<$>);
   if (c.peek(0) != <ident>)
@@ -897,13 +759,6 @@ static Token Compiler._hole_name_token(Compiler c) {
   Token name = c.token;
   c.next();
   return name;
-}
-
-macro Stmt $report.parse_hole_duplicate(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"duplicate macro hole '${$spelling}'",
-    $origin, NULL);
 }
 
 static List Compiler._declare_hole(
@@ -1147,12 +1002,6 @@ static List Compiler._lisp_slot(Compiler c, Symbol role) {
   return c._parse_lisp_slot(role in sequence_roles, role);
 }
 
-macro Stmt $report.parse_splice_expr(Expr $c) {
-  $c.report_error(
-    <parse>, "sequence insertion is not legal in an expression slot",
-    $c.token, NULL);
-}
-
 /* A hole fills a slot whose role its kind accepts. A hole of no kind
    fills a typed role only when `...` follows it. */
 static List Compiler._hole_slot(Compiler c, Symbol role) {
@@ -1179,12 +1028,6 @@ static const SymbolSet sequence_roles =
      decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 static const SymbolSet quoted_roles = %<<statement block name>>;
-
-macro Stmt $report.parse_splice_position(Expr $c) {
-  $c.report_error(
-    <parse>, "sequence insertion is not legal in this syntax slot",
-    $c.token, NULL);
-}
 
 /* Consumes a `...` after a slot. It is legal only where the role takes a
    sequence. */
@@ -1296,14 +1139,6 @@ static List _quoted_holes(Compiler c) {
   return quoted is <list> ? quoted.list().reverse() : NULL;
 }
 
-macro Stmt $report.parse_hole_ambiguous(
-  Expr $c, Expr $spelling, Expr $origin, Expr $first, Expr $also) {
-  $c.report_error(
-    <parse>, %"macro hole '${$spelling}' has ambiguous kind",
-    $origin, %("first: ${$first}"
-      "also: ${$also}"));
-}
-
 /* Consumes a hole filling `role` and returns its projection. */
 static List Compiler._parse_hole(Compiler c, Symbol role) {
   Token token = c.token;
@@ -1339,16 +1174,6 @@ static int Compiler._hole_splice(Compiler c, Symbol role) {
     return 0;
   c.next();
   return 1;
-}
-
-macro Stmt $report.parse_hole_cardinality(
-  Expr $c, Expr $sequence, Expr $spelling, Expr $origin) {
-  {
-    String message = $sequence
-      ? %"singular macro hole '${$spelling}' cannot be spliced"
-      : %"sequence macro hole '${$spelling}' requires '...'";
-    $c.report_error(<parse>, message, $origin, NULL);
-  }
 }
 
 static void Compiler._cardinality_error(
@@ -1691,25 +1516,6 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
 int Compiler.keyword_form_is_definition(Compiler c) =>
   c.at_word("keyword") && c.peek(2) == <$>;
 
-macro Stmt $report.macro_keyword_internal(
-  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) {
-  $c.report_error(
-    <macro>, %"keyword alias cannot name internal macro kind '${$spelling}'",
-    $origin, %(${$definition_note}));
-}
-
-macro Stmt $report.macro_keyword_builtin(Expr $c, Expr $origin) {
-  $c.report_error(
-    <macro>, "built-in keyword alias cannot be replaced",
-    $origin, NULL);
-}
-
-macro Stmt $report.parse_keyword_name(Expr $c) {
-  $c.report_error(
-    <parse>, "keyword alias requires an identifier",
-    $c.token, NULL);
-}
-
 /** Parses and installs one source-local `keyword` alias.
     The named macro must already be visible; the alias captures that definition
     and consumes its terminating semicolon.
@@ -1887,14 +1693,6 @@ static List Compiler._take_invocation(Compiler c, AstPos position) {
   return c._lookup(name, invocation);
 }
 
-macro Stmt $report.parse_macro_name(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, $c.peek(1) == <ident>
-      ? "expected macro name component after '.'"
-      : "expected macro name after '$'",
-    $origin, NULL);
-}
-
 static Atom Compiler._name(Compiler c) {
   String spelling;
   Token end = c._scan_name(spelling);
@@ -1902,13 +1700,6 @@ static Atom Compiler._name(Compiler c) {
     $report.parse_macro_name(c, end);
   c.token = end;
   return Atom.intern(spelling);
-}
-
-macro Stmt $report.parse_macro_unbound(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"unknown or forward-referenced macro '${$spelling}'",
-    $origin, NULL);
 }
 
 static List Compiler._lookup(Compiler c, Atom name, Token invocation) {
@@ -1988,12 +1779,6 @@ int Compiler.macro_targets_unit(Compiler c) {
   return kind == <unit> || kind == <decl-unit>;
 }
 
-macro Stmt $report.parse_macro_extra_args(Expr $c) {
-  $c.report_error(
-    <parse>, "macro invocation has too many arguments",
-    $c.token, NULL);
-}
-
 /* invocation arguments
 
    Each parameter hole captures its arguments into one capture row, and a
@@ -2024,12 +1809,6 @@ static List Compiler._invocation_arguments(
   }
   c.expect(<)>);
   return %(args @{arguments.list_free()});
-}
-
-macro Stmt $report.parse_macro_missing_args(Expr $c) {
-  $c.report_error(
-    <parse>, "macro invocation has too few arguments",
-    $c.token, NULL);
 }
 
 /* The arguments one hole captures: one, or a comma-separated sequence. A
@@ -2064,12 +1843,6 @@ static void Compiler._argument_separator(Compiler c, Symbol kind) {
   else c.expect(<,>);
 }
 
-macro Stmt $report.macro_argument_contract(Expr $c) {
-  $c.report_error(
-    <macro>, "macro argument has no parsing contract",
-    $c.token, NULL);
-}
-
 static Var Compiler._parse_argument(Compiler c, Symbol kind) {
   if (!kind) return c.parse_assignment();
   switch (kind) {
@@ -2090,12 +1863,6 @@ static Var Compiler._parse_argument(Compiler c, Symbol kind) {
     case <literal>:    return c._literal_argument();
   }
   $report.macro_argument_contract(c);
-}
-
-macro Stmt $report.parse_name_identifier(Expr $c) {
-  $c.report_error(
-    <parse>, "Name macro argument requires an identifier",
-    $c.token, NULL);
 }
 
 /* A caller's name is a spelling, resolved where the expansion places it.
@@ -2346,17 +2113,6 @@ static List Compiler._invoke_at(
   return c._invoke_definition(definition, invocation, position);
 }
 
-macro Stmt $report.macro_result_position(
-  Expr $c, Expr $spelling, Expr $result,
-  Expr $description, Expr $origin) {
-  {
-    String message =
-      %"macro '${$spelling}' has result kind ${$result} and cannot be " +
-      %"invoked at ${$description}";
-    $c.report_error(<macro>, message, $origin, NULL);
-  }
-}
-
 /* A macro's result must fit where it is invoked; a Declaration result also
    fits at file scope. */
 static void Compiler._check_position(
@@ -2458,32 +2214,10 @@ static List Compiler._decorate(
 static int Decoration.on_body(Decoration &d) =>
   d.kind == <block> && d.position == AST_UNIT;
 
-macro Stmt $report.macro_decorator_position(
-  Expr $c, Expr $name, Expr $kind, Expr $origin) {
-  $c.report_error(
-    <macro>,
-    %"decorator '${$name}' targets ${$kind} syntax and cannot be used here",
-    $origin, NULL);
-}
-
 static void Decoration.misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
   $report.macro_decorator_position(d.c, spelling, target, d.invocation);
-}
-
-macro Stmt $report.macro_decorator_target(
-  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) {
-  $c.report_error(
-    <macro>, %"decorator '${$spelling}' requires a following target",
-    $origin, %(${$definition_note}));
-}
-
-macro Stmt $report.macro_decorator_semicolon(
-  Expr $c, Expr $origin, Expr $definition_note) {
-  $c.report_error(
-    <macro>, "decorator application must not end with ';'",
-    $origin, %(${$definition_note}));
 }
 
 static List Decoration.arguments(Decoration &d, int block_scope) {
@@ -2730,18 +2464,6 @@ static List Compiler._template_call(Compiler c, List definition) {
     (args @{arguments.list_free()})));
 }
 
-macro Stmt $report.macro_result_expr(
-  Expr $c, Expr $kind, Expr $spelling, Expr $origin, Expr $definition_note) {
-  {
-    String subject = $kind == <decorator>
-      ? %"decorator '${$spelling}'"
-      : %"macro '${$spelling}'";
-    $c.report_error(
-      <macro>, %"$subject cannot be invoked in an expression", $origin,
-      $kind == <decorator> ? %(${$definition_note}) : NULL);
-  }
-}
-
 static void Compiler._not_expression(
   Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
@@ -2749,13 +2471,6 @@ static void Compiler._not_expression(
   $report.macro_result_expr(
     c,
     kind, spelling, invocation, _definition_note(definition));
-}
-
-macro Stmt $report.macro_decorator_expr(
-  Expr $c, Expr $spelling, Expr $origin, Expr $definition_note) {
-  $c.report_error(
-    <macro>, %"decorator '${$spelling}' requires a following expression",
-    $origin, %(${$definition_note}));
 }
 
 static List Compiler._expression_decorator(
@@ -3246,14 +2961,6 @@ static int Compiler._simple_labels(Compiler c) {
   }
 }
 
-macro Stmt $report.parse_macro_pattern_arity(
-  Expr $c, Expr $name, Expr $expected, Expr $origin) {
-  $c.report_error(
-    <parse>,
-    %"macro pattern '${$name}' takes ${$expected} argument patterns",
-    $origin, NULL);
-}
-
 /** Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern,
     into the pattern for code NAME builds with each argument pattern in its
     hole. It matches the shelled expression or its bare content; `content`
@@ -3471,12 +3178,6 @@ static Var Compiler._eval_string(Compiler c, String source, Token invocation) {
   return result;
 }
 
-macro Stmt $report.parse_lisp_unclosed(Expr $c, Expr $origin) {
-  $c.report_error(
-    <parse>, "unterminated compile-time Lisp form",
-    $origin, NULL);
-}
-
 static String Compiler._lisp_form(Compiler c) {
   Token start = c.token, close = start.group_close();
   if (close.type == <eof>)
@@ -3577,12 +3278,6 @@ List Compiler.parse_macro_lisp_expression(Compiler c) {
   return c.lift_macro_lisp_expression(value, invocation);
 }
 
-macro Stmt $report.macro_lisp_expr(Expr $c, Expr $origin, Expr $value) {
-  $c.report_error(
-    <macro>, "compile-time Lisp result cannot fill an expression slot",
-    $origin, %( "value:" ${$value.repr()} ));
-}
-
 /** Converts a compile-time Lisp value into a bound expression AST.
     Scalars, immutable values, representable Array/Map roots, compiler-issued
     identifiers, and nonempty code `List`s are accepted; `invocation` locates
@@ -3677,20 +3372,6 @@ static void Compiler._replay_import(
   c.kw_seen[path] = 1;
 }
 
-macro Stmt $report.macro_import_cycle(Expr $c, Expr $path, Expr $origin) {
-  {
-    String display = $c.display_path($path);
-    Array notes = [ %"import: $display" ];
-    Array parents = $c.import_stack;
-    for (int i = 0; i < parents.len(); i++) {
-      Var parent = parents[i];
-      notes.push(%"from: ${$c.display_path(parent)}");
-    }
-    $c.report_error(
-      <macro>, "compile-time import cycle", $origin, notes.list_free());
-  }
-}
-
 static void Compiler._import_cycle(Compiler c, String path, Token invocation) {
   $report.macro_import_cycle(c, path, invocation);
 }
@@ -3728,13 +3409,6 @@ static Map _changed(Map now, Map before) {
   foreach (Var (key, value), now)
     if (before[key] != value) changed[key] = value;
   return changed;
-}
-
-macro Stmt $report.macro_import_extension(
-  Expr $c, Expr $origin, Expr $path_note) {
-  $c.report_error(
-    <macro>, "compile-time import requires .xlisp or .xmacro",
-    $origin, $path_note);
 }
 
 static void Import.file(Import &in) {
@@ -3806,12 +3480,6 @@ static void Import.borrow(Import &in, Compiler child) {
   child.imports = c.imports;
   child.import_stack = c.import_stack;
   child.declaration_effects = c.declaration_effects;
-}
-
-macro Stmt $report.macro_import_form(Expr $c) {
-  $c.report_error(
-    <macro>, "unexpected form in macro import",
-    $c.token, NULL);
 }
 
 static void Import.form(Import &in, Compiler child) {
@@ -4154,12 +3822,6 @@ static void Compiler._install_source(
   c.macros[marker] = aliases;
 }
 
-macro Stmt $report.macro_builtin_form(Expr $c) {
-  $c.report_error(
-    <macro>, "unexpected form in built-in macro source",
-    $c.token, NULL);
-}
-
 /* A shipped source holds only definitions and keyword aliases. */
 static Map Compiler._read_definitions(Compiler c) {
   Map aliases = {};
@@ -4263,17 +3925,6 @@ static String _definition_note(List definition) {
   return %"definition: $file:$line:$column";
 }
 
-macro Stmt $report.macro_lisp_failed(
-  Expr $c, Expr $origin, Expr $source, Expr $error) {
-  {
-    String form_note = %"form: ${$source}",
-      error_note = %"error: ${$error.repr()}";
-    $c.report_error(
-      <macro>, "compile-time Lisp evaluation failed", $origin,
-      %($form_note $error_note));
-  }
-}
-
 /** Reports that the compile-time Lisp `source` failed with `error` at
     `invocation`. */
 void Compiler.report_lisp_failure(
@@ -4283,13 +3934,6 @@ void Compiler.report_lisp_failure(
 
 static List Compiler._path_note(Compiler c, String path) =>
   %("path: ${c.display_path(path)}");
-
-macro Stmt $report.parse_variable_unbound(
-  Expr $c, Expr $spelling, Expr $origin) {
-  $c.report_error(
-    <parse>, %"unbound replacement variable '${$spelling}'",
-    $origin, NULL);
-}
 
 /* A template names a hole, projection, or replacement variable that it
    does not bind. */

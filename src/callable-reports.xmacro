@@ -1,0 +1,98 @@
+/* Callable conversion failures retain the shared signature-note owner. */
+
+macro Stmt $report.callable_shared(Expr $c, Expr $source) {
+  $c._adapter_error(
+    "function conversion needs x2c_func_shared from lib/func.x",
+    %("Func"), $source, NULL);
+}
+
+macro Stmt $report.callable_context(Expr $c, Expr $source) {
+  $c._adapter_error(
+    "function pointer conversion needs Func.new_context from lib/func.x",
+    %("Func"), $source, NULL);
+}
+
+macro Stmt $report.callable_native_context(
+  Expr $c, Expr $target, Expr $source) {
+  $c._adapter_error(
+    "native binding needs Func.context from lib/func.x",
+    $target, $source, NULL);
+}
+
+macro Stmt $report.callable_direct(
+  Expr $c, Expr $target, Expr $source) {
+  $c._adapter_error(
+    "native binding target must be a direct function",
+    $target, $source,
+    %("supported: a free function or Type.method designator"));
+}
+
+macro Stmt $report.callable_variadic(
+  Expr $c, Expr $target, Expr $source, Expr $func_type) {
+  String message = $c.sym.resolve_key($target).equal($func_type)
+    ? "function conversion to Func cannot be variadic"
+    : "native binding target cannot be variadic";
+  $c._adapter_error(message, $target, $source, NULL);
+}
+
+macro Stmt $report.callable_readers(
+  Expr $c, Expr $target, Expr $source) {
+  $c._adapter_error(
+    "native binding needs Func argument readers from lib/func.x",
+    $target, $source, NULL);
+}
+
+macro Stmt $report.callable_parameter(
+  Expr $c, Expr $target, Expr $source) {
+  $c._adapter_error(
+    "native binding parameter type has no Var representation",
+    $target, $source, NULL);
+}
+
+macro Stmt $report.callback_direct(Expr $cb) {
+  $cb._fail(
+    "typed callback adapter source must be a direct function",
+    %("supported: a free function or Type.method designator"));
+}
+
+macro Stmt $report.callback_target(Expr $cb) {
+  $cb._fail("typed callback adapter target is incomplete", NULL);
+}
+
+macro Stmt $report.callback_source(Expr $cb) {
+  $cb._fail("typed callback adapter source is incomplete", NULL);
+}
+
+macro Stmt $report.callback_variadic(Expr $cb) {
+  $cb._fail("typed callback adapter cannot be variadic", NULL);
+}
+
+macro Stmt $report.callback_arity(
+  Expr $cb, Expr $target_count, Expr $source_count) {
+  String detail = "target has %d parameters; source has %d".printf(
+    $target_count, $source_count);
+  $cb._fail("typed callback adapter arity mismatch", %($detail));
+}
+
+macro Stmt $report.callback_void(Expr $cb) {
+  $cb._fail("typed callback adapter does not support void return", NULL);
+}
+
+macro Stmt $report.callback_result(Expr $cb) {
+  $cb._fail("typed callback adapter return type mismatch", NULL);
+}
+
+macro Stmt $report.callback_parameter(
+  Expr $cb, Expr $index, Expr $target, Expr $source) {
+  String detail = "parameter %d: %s cannot adapt to %s".printf(
+    $index + 1, $target.repr(), $source.repr());
+  $cb._fail("typed callback adapter parameter mismatch", %($detail));
+}
+
+macro Expression $callable.note.target(Expr $target) =>
+  $target ? %"target signature: ${$target.repr()}"
+          : "target signature: unresolved";
+
+macro Expression $callable.note.source(Expr $source) =>
+  $source ? %"source signature: ${$source.repr()}"
+          : "source signature: unresolved";
