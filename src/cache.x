@@ -131,16 +131,9 @@ static void Compiler._collect_ids(
    most file-static initializers are calls. Each such binding keeps its
    declaration and moves its assignment into a generated helper. */
 
-macro Unit $initializer_function(Type $type, Name $name,
-    Stmt $body...) {
-  $type $name(void) { $body... }
-}
-
 /* The function `type name(void)` running `body`. */
-List _initializer_function(Compiler c, List type, List name, List body) {
-  Macro shape = $initializer_function;
-  return c.rebuild_unit_function(shape(type, name, body));
-}
+List _initializer_function(Compiler c, Type type, List name, List body) =>
+  c.rebuild_unit_function($!Unit{ $type $name(void) { $body... } });
 
 /* Returns when `guard` is set and sets it otherwise. */
 List _run_once(Compiler c, List guard) {

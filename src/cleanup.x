@@ -860,16 +860,6 @@ List builtin_defer_record(
   List record, List callback, List environment, List records);
 List builtin_defer_captures(List environment, List records);
 
-macro Stmt $compiler_defer(Name $record, Expr $callback,
-    Expr $environment, Expr $records, Stmt $body, Stmt $cleanup) {
-  {
-    $builtin_defer_record($record, $callback, $environment, $records)...
-    x2c_cleanup_push(&$record);
-    $body
-    $builtin_try_cleanup_placement($cleanup)...
-  }
-}
-
 /* Lowers a defer: its record is pushed before the body and left on each
    of the body's exits. */
 static List Walk._lower_defer(
@@ -878,12 +868,15 @@ static List Walk._lower_defer(
   c.needs_exception = 1;
   List record = c._region_binding("defer_record");
   List cleanup = c._defer_cleanup(record);
-  Macro shape = $compiler_defer;
-  return c.bind_syntax(
-    shape(
-      record, callback, env, records,
-      w._try_region(cleanup, body), cleanup),
-    AST_BLOCK, c.return_type);
+  List region = w._try_region(cleanup, body);
+  return c.bind_syntax($!{
+    {
+      $builtin_defer_record($record, $callback, $env, $records)...
+      x2c_cleanup_push(&$record);
+      $region
+      $builtin_try_cleanup_placement($cleanup)...
+    }
+  }, AST_BLOCK, c.return_type);
 }
 
 /* The runtime unlinks this record and calls its thunk. */

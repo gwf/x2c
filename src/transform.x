@@ -693,10 +693,6 @@ static List Compiler._process_raw_segment(Compiler c, List seg) {
 
 // declarations and statements
 
-macro Stmt $destructure_targets(Type $type, DeclaratorRow $rows...) {
-  $type $rows...;
-}
-
 macro Stmt $destructure_typed_target(
     Type $type, DeclaratorRow $row, Expr $value) {
   $type $row = $value;
@@ -704,14 +700,6 @@ macro Stmt $destructure_typed_target(
 
 macro Stmt $destructure_sequence(Stmt $items...) {
   $items...
-}
-
-macro Stmt $destructure_statement(Name $temporary, Expr $source,
-    Stmt $assignments...) {
-  {
-    List $temporary = $source;
-    $assignments...
-  }
 }
 
 macro Stmt $destructure_declarations(
@@ -783,11 +771,10 @@ static List Compiler._destructure_statement(Compiler c, List ast) {
              (dstrasgn (targets *targets)
                        (!set ?source (expr ?source_type ?))))): {
       List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      Macro shape = $destructure_statement;
+      List value = c._destructure_source(source, source_type);
+      List assignments = c._destructure_assignments(targets, temporary);
       return c.bind_syntax(
-        shape(
-          temporary, c._destructure_source(source, source_type),
-          c._destructure_assignments(targets, temporary)),
+        $!{ { List $temporary = $value; $assignments... } },
         AST_BLOCK, c.return_type);
     }
   }
@@ -840,9 +827,8 @@ static List Compiler._named_destructure(
     declarations.push(%(bind $ident ()));
     expressions.push(%(expr $type (ident $ident)));
   }
-  Macro target_shape = $destructure_targets;
-  List target_decl = c.rebuild_statement(
-    target_shape(type, declarations.list_free())).cadr();
+  List rows = declarations.list_free();
+  List target_decl = c.rebuild_statement($!{ $type $rows...; }).cadr();
   List assignments = c._destructure_assignments(
     expressions.list_free(), temporary);
   Macro shape = $destructure_declarations;

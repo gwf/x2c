@@ -312,8 +312,8 @@ outer position wrappers before rebuilding the typed expression within them.
 ## Defer registration
 
 The defer source macro recognizes the cleanup statement. `_lower_defer`
-keeps region ownership and exit placement, then makes one application of
-`$compiler_defer`. Its template visibly declares the cleanup record, pushes
+keeps region ownership and exit placement, then binds one statement
+quotation. Its template visibly declares the cleanup record, pushes
 it, runs the lowered body and leaves the region. The record slot chooses
 plain or captured storage; the capture slot applies one field-assignment
 template per captured address, in the established order. A zero-initialized
