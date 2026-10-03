@@ -1159,11 +1159,7 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
     $report.parse_splice_expr(c);
   if (!untyped_roles.contains(role)) {
     Symbol kind = hole.assoc(<kind>);
-    /* A quotation's hole takes its kind from a statement or name
-       position, which no annotation can give it. */
-    if (!kind && c.peek(2) != <...> &&
-        !(%(quotation) in c.macro_holes && role in quoted_roles))
-      return NULL;
+    if (!kind && c.peek(2) != <...> && !c._quoted_role(role)) return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
   }
   List syntax = c._parse_hole(role);
@@ -1246,6 +1242,17 @@ List Compiler.parse_macro_quotation(Compiler c) {
   return c.apply_macro_value(
     c.capture_macro_value(d.publish()),
     arguments ? arguments.reverse() : %((expr (void) ())), start);
+}
+
+/* A quotation's hole takes its kind from a name position, or from a
+   statement position where it stands alone, which no annotation can give
+   it. A hole that an operator, `;`, or a postfix form follows is an
+   expression. */
+static int Compiler._quoted_role(Compiler c, Symbol role) {
+  if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
+  if (role == <name>) return 1;
+  Token after = Token.skip_trivia(Token.skip_trivia(c.token + 1) + 1);
+  return after.type != <;> && !_extends_expression(after);
 }
 
 /* A `$name` in a quotation's body that names a visible local declares its
