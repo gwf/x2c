@@ -9,7 +9,7 @@ typedef struct Response {
   String label;
 } Response;
 
-// A parameter declared `Type` receives the description of its argument's
+// A parameter declared `TypeInfo` receives the description of its argument's
 // type, computed by the compiler at the `$` call. Its `fields` part lists
 // the named fields of a struct in declaration order.
 meta static List fields_of(TypeInfo type) => type.assoc(<fields>);

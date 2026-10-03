@@ -1,4 +1,4 @@
-/* A `meta` parameter declared `Type` receives the description of its
+/* A `meta` parameter declared `TypeInfo` receives the description of its
    argument's type, which the compiler computes at the `$` call: its name,
    kind, canonical type, and the named fields of a struct or union. */
 

@@ -6,7 +6,7 @@
     be written in compile-time Lisp, because `x2c.type.fields`,
     `x2c.expr.field` and the rest were reachable only from there.
 
-    A parameter declared `Type` receives the description of its argument's
+    A parameter declared `TypeInfo` receives the description of its argument's
     type, which the compiler computes at the `$` call, so reading the fields
     of a struct asks the compiler nothing. The consuming unit calls only
     `ms_label` at run time, so its definition is the only one in the
@@ -15,7 +15,7 @@
 
 /* The named fields of a struct-typed expression, in declaration order. The
    answer is in the symbol table, not in the syntax the macro received, so
-   the compiler sends it as the `Type` argument. */
+   the compiler sends it as the `TypeInfo` argument. */
 meta static List ms_fields(TypeInfo type) => type.assoc(<fields>);
 
 /* One field-read expression per field, through the receiver the caller
