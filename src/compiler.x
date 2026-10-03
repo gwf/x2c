@@ -2132,7 +2132,9 @@ void Compiler.add_early(Compiler c, List decl) {
 
 /** Appends a statement to file initialization order under `phase`, which is
     `<protocol>` for protocol setup, or `<early>`, `<mid>`, or `<late>` for
-    the file initializer's three stages.
+    the file initializer's three stages. Generation splices the statement
+    after the transform has run, so it must already be lowered: bound code
+    that still needs lowering, such as a `String` literal, reaches C as is.
 */
 void Compiler.add_init(Compiler c, Symbol phase, List stmt) {
   c.inits.push(%($phase $stmt));
