@@ -240,6 +240,19 @@ M1 results:
 - The compiler's self-translation of `src/` and `lib/` is unchanged except
   in the edited files; all 992 fixtures, 939 unit tests, and 94 book
   samples with outputs pass.
+- A free name that resolves at definition to a file-scope declaration keeps
+  that identity and its type in the template, marked `template-free`.
+  Where the expansion lands sees the same declaration unless a local hides
+  it, so the binder skips the subtree as before; a hiding declaration
+  rebinds the identifier and its type is recomputed. A `using` name is
+  stored as `binding-global` and never rebinds. Macro values carry free
+  file-scope names as `binding-free`.
+- Translation cost, both compilers built with `make build-safe` from a tree
+  whose `src/` matches its bootstrap: the `lib/` batch with `-j 1` retires
+  94.1-96.4 G instructions against 94.0-94.8 G on dev d84f3c26 (user time
+  6.07 s against 5.92 s). A stage 0 built from `src/` that differs from
+  `bootstrap/` preloads meta code cold and is about 0.4 s slower per
+  process; compare clean builds only.
 
 ### M2. Macro patterns compose and see types
 
