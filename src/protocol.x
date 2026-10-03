@@ -1658,7 +1658,7 @@ static List Compiler._ordered_occurrences(Compiler c) {
 /* Runs visit once for each conformance participant adopts, in protocols
    order, after setting the caller's base to the protocol and rows to its
    member rows. */
-macro Decorator $adopted_rows(Block $visit, Expr $compiler, Expr $protocols,
+macro Decorator $adopted_rows(Statement $visit, Expr $compiler, Expr $protocols,
     Expr $participant, Name $base, Name $rows) {
   foreach (List entry, $protocols) {
     $base = entry.car();

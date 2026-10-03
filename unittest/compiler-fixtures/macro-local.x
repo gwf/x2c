@@ -39,7 +39,7 @@ static int local_macros(int base) {
       $target = generated_here(13);
     }
 
-    macro Decorator repeat(Block $target) {
+    macro Decorator repeat(Statement $target) {
       $target
       $target
     }

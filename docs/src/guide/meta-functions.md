@@ -950,7 +950,7 @@ for text and location queries; constructed subtrees do not acquire it.
 
 typedef struct Point { int x, y, z; } Point;
 
-meta static List field_count(Type type) =>
+meta static List field_count(TypeInfo type) =>
   x2c_literal_int(((List) type.assoc(<fields>)).len());
 
 macro Expression $probe.count(Expr $value) => $field_count($value);
@@ -970,7 +970,7 @@ The macro body is one call and nothing else. That is the usual shape: the
 macro declares the holes and the result kind, and the `meta` function does
 the work.
 
-`field_count` declares its parameter `Type`, so it receives a description
+`field_count` declares its parameter `TypeInfo`, so it receives a description
 of the argument's type rather than its code. The compiler computes that
 description at the `$` call:
 
@@ -1036,12 +1036,12 @@ inserts the selected invocation into the function body:
 
 static int calls = 0;
 
-macro Statement $counted(Block $body...) {
+macro Statement $counted(Statement $body...) {
   calls++;
   $body...
 }
 
-macro Statement $plain(Block $body...) {
+macro Statement $plain(Statement $body...) {
   $body...
 }
 
@@ -1142,7 +1142,7 @@ inserts a value, so bind a quotation to a local first and insert the local.
 the compiler's symbol table, such as `x2c_syntax_type`,
 `x2c_type_fields` and `x2c_type_resolve`, run only in the compiler's own
 `meta` code: the `.xmacro` files and `lib/meta.x` that are linked into
-the compiler. A project `meta` function receives those answers as `Type`
+the compiler. A project `meta` function receives those answers as `TypeInfo`
 and `Source` parameters instead; calling such a query from the project
 meta module reports that it is not available to project meta code. Each
 operation is a plain function whose name is the compile-time Lisp name with `_`
@@ -1192,7 +1192,7 @@ twice 42
 ```
 
 **Asking about types and fields.** A program's `meta` function receives a
-type as a `Type` parameter, described above, and asks the compiler
+type as a `TypeInfo` parameter, described above, and asks the compiler
 nothing. The queries below answer the same questions for the compiler's
 own `meta` code in `lib/`. `x2c_syntax_type` answers the canonical `Type`
 of an expression or binding. `x2c_type_fields` answers the named fields
@@ -1290,28 +1290,28 @@ keeps both forms and is emitted normally.
 
 The queries themselves belong to the compiler's own `meta` code. A project
 `meta` function reaches the compiler only through what a call passes it:
-constants, captured syntax, a `Type`, or a `Source`.
+constants, captured syntax, a `TypeInfo`, or a `Source`.
 
 ## A complete example
 
 Two files. The first is a `.xmacro` holding the `meta` functions and the
-macros that call them. `shape_fields` reads the fields from the `Type` the
+macros that call them. `shape_fields` reads the fields from the `TypeInfo` the
 compiler sends. `shape_names` and `shape_reads` turn them into code.
 
 <!-- ignore: shape.xmacro is the external file being illustrated -->
 ```x2c,ignore
 /* The named fields of a struct-typed expression, in declaration order. */
-meta static List shape_fields(Type type) => type.assoc(<fields>);
+meta static List shape_fields(TypeInfo type) => type.assoc(<fields>);
 
 /* One `String` literal holding those field names, comma separated. */
-meta static List shape_names(Type type) {
+meta static List shape_names(TypeInfo type) {
   Array names = [];
   foreach (List field, shape_fields(type)) names.push(field.car());
   return x2c_literal_string(String.join(", ", names));
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
-meta static List shape_reads(List receiver, Type type) {
+meta static List shape_reads(List receiver, TypeInfo type) {
   Array reads = [];
   foreach (List field, shape_fields(type))
     reads.push(x2c_expr_field(receiver, field.car()));

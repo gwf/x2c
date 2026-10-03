@@ -12,7 +12,7 @@ macro Expression $x2c.callback.adapt(
   $(list 'expr nil (list 'tadapt $target $source));
 
 macro Decorator $x2c.foreach(
-  Block $body,
+  Statement $body,
   Decl $declaration,
   Expr $collection
 ) {
@@ -24,11 +24,11 @@ macro Decorator $x2c.foreach(
 
 keyword foreach $x2c.foreach;
 
-macro Decorator $scope(Block $body, Expr $destination...) {
+macro Decorator $scope(Statement $body, Expr $destination...) {
   $(scope.expand $body $destination)...
 }
 
-macro Decorator $let(Block $body, Expr $place, Expr $value) {
+macro Decorator $let(Statement $body, Expr $place, Expr $value) {
   {
     $(x2c.syntax.type $place) *address = &$place;
     $(x2c.syntax.type $place) previous = *address;
@@ -38,7 +38,7 @@ macro Decorator $let(Block $body, Expr $place, Expr $value) {
   }
 }
 
-macro Decorator $lock(Block $body, Expr $mutex) {
+macro Decorator $lock(Statement $body, Expr $mutex) {
   {
     $(list "Mutex") held = $mutex;
     held.lock();

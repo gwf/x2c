@@ -25,7 +25,7 @@ List x2c_param_make(List type, Var name);
 
 // $scope
 
-macro Statement $builtin_scope(Expr $enter, Expr $leave, Block $body) {
+macro Statement $builtin_scope(Expr $enter, Expr $leave, Statement $body) {
   {
     $enter;
     {

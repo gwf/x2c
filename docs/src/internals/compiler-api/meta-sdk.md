@@ -21,7 +21,7 @@ The compiler's answers to `lib/meta.x` operations.
 | [`builtin_foreach_reference`](#builtin_foreach_reference) | Returns the typed expression naming the function `name`, or an empty List when no function of that name is visible. |
 | [`builtin_foreach_unique`](#builtin_foreach_unique) | Returns a fresh binding whose spelling starts with `stem`. |
 | [`meta_source_description`](#meta_source_description) | Returns what a `meta` parameter declared `Source` receives for the captured syntax `value`: `((text T) (file F) (syntax value))`, where `T` is the text the developer wrote and `F` the file it is in. |
-| [`meta_type_description`](#meta_type_description) | Returns what a `meta` parameter declared `Type` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
+| [`meta_type_description`](#meta_type_description) | Returns what a `meta` parameter declared `TypeInfo` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
 | [`x2c_binding_spelling`](#x2c_binding_spelling) | Answers `x2c.binding.spelling`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_warn`](#x2c_diagnostic_warn) | A warning reports where it is raised and returns, so a macro can keep expanding. |
@@ -98,7 +98,7 @@ Source: `src/meta-sdk.x:126`
 Returns the collection `foreach` iterates for `expression`, promoting a
 String literal.
 
-Source: `src/meta-sdk.x:645`
+Source: `src/meta-sdk.x:646`
 
 #### builtin_foreach_complete
 
@@ -106,7 +106,7 @@ Source: `src/meta-sdk.x:645`
 
 Returns `expression` with the iterator chain `foreach` reads completed.
 
-Source: `src/meta-sdk.x:638`
+Source: `src/meta-sdk.x:639`
 
 #### builtin_foreach_reference
 
@@ -135,20 +135,21 @@ Returns what a `meta` parameter declared `Source` receives for the
 captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
 is the text the developer wrote and `F` the file it is in.
 
-Source: `src/meta-sdk.x:629`
+Source: `src/meta-sdk.x:630`
 
 #### meta_type_description
 
 `List meta_type_description(Var value)`
 
-Returns what a `meta` parameter declared `Type` receives for the captured
-syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`.
+Returns what a `meta` parameter declared `TypeInfo` receives for the
+captured syntax `value`: `((name N) (kind K) (type T) (fields F)
+(methods M))`.
 `T` is the canonical type of `value` and `N` its name, or "" when it has
 none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
 `F` lists the `(name type)` rows of a struct or union's named fields,
 and `M` the names of its direct dotted methods.
 
-Source: `src/meta-sdk.x:588`
+Source: `src/meta-sdk.x:589`
 
 #### x2c_binding_spelling
 
@@ -385,7 +386,7 @@ Source: `src/meta-sdk.x:219`
 Binds the internal primitives the compile-time SDK library wraps into
 `lisp`, under their `_x2c.` names.
 
-Source: `src/meta-sdk.x:675`
+Source: `src/meta-sdk.x:676`
 
 <a id="Compiler.expanding"></a>
 #### Compiler.expanding
@@ -418,7 +419,7 @@ Reports `message` and `notes` at the active invocation and never
 returns, so the rejected operation's caller cannot continue with a
 missing answer. With no active invocation it is a bad state.
 
-Source: `src/meta-sdk.x:655`
+Source: `src/meta-sdk.x:656`
 
 ## Public types
 

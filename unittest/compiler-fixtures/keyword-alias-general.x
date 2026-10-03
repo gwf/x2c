@@ -38,7 +38,7 @@ macro Unit $fixture.define(Name $name, Literal $value) {
 }
 
 macro Decorator $fixture.range(
-  Block $body,
+  Statement $body,
   Name $index,
   Expr $start,
   Expr $stop

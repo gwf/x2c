@@ -5,7 +5,7 @@ macro Expression $indent.answer(Expr $base) =>
   $base + $(indent-offset)
 
 macro Decorator $indent.range(
-  Block $body,
+  Statement $body,
   Name $index,
   Expr $start,
   Expr $stop

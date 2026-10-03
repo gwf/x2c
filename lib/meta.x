@@ -36,10 +36,10 @@
 
 // meta parameter types
 
-/** A `meta` parameter declared `Type` receives, at a `$` call, the
+/** A `meta` parameter declared `TypeInfo` receives, at a `$` call, the
    description of its argument's type: `((name N) (kind K) (type T)
    (fields F) (methods M))`. Read a part with `List.assoc`. */
-typedef List Type;
+typedef List TypeInfo;
 
 /** A `meta` parameter declared `Source` receives, at a `$` call, captured
    syntax with the source text it came from: `((text T) (file F) (syntax

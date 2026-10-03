@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Entry {
+typedef struct WordCount {
   const char *word;
   size_t len;
   int count;
-} Entry;
+} WordCount;
 
 static int random_state = 42;
 
@@ -39,7 +39,7 @@ static uint64_t hash_word(const char *word, size_t len) {
 }
 
 static void add_word(
-  Entry *table, size_t table_size, const char *word, size_t len
+  WordCount *table, size_t table_size, const char *word, size_t len
 ) {
   size_t slot = hash_word(word, len) & (table_size - 1);
   while (table[slot].word) {
@@ -50,13 +50,13 @@ static void add_word(
     }
     slot = (slot + 1) & (table_size - 1);
   }
-  table[slot] = (Entry) {word, len, 1};
+  table[slot] = (WordCount) {word, len, 1};
 }
 
 static uint64_t count_words(const char *text, int word_count) {
   size_t table_size = 1;
   while (table_size < (size_t) word_count * 2) table_size *= 2;
-  Entry *table = calloc(table_size, sizeof(*table));
+  WordCount *table = calloc(table_size, sizeof(*table));
   if (!table) abort();
 
   const char *start = text;

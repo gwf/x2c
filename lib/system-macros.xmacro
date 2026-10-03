@@ -83,7 +83,7 @@ meta static List _cases_switch(List condition, List body) =>
 
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
-macro Decorator $switch(Block $body, Expr $condition) {
+macro Decorator $switch(Statement $body, Expr $condition) {
   $(_cases_switch $condition $body)...
 }
 

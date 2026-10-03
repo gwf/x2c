@@ -5,7 +5,7 @@ typedef struct Chain { int n; } ChainBase;
 typedef struct Chain ChainOther;
 typedef ChainBase Chain;
 static int Chain.read(Chain value) => value.n;
-meta static int describe(Type type) {
+meta static int describe(TypeInfo type) {
   return type.assoc(<fields>).list().len();
 }
 macro Expression $chain.fields(Expr $value) => $describe($value);

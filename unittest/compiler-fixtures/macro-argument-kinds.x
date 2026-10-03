@@ -33,7 +33,7 @@ macro Unit $parameter_arg(Param $parameter) {
   }
 }
 
-macro Statement $block_arg(Block $item) {
+macro Statement $block_arg(Statement $item) {
   $item
 }
 

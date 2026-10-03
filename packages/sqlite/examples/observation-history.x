@@ -1,6 +1,6 @@
 /*  observation-history.x -- Persist a batch and report endpoint history. */
 
-import "sqlite" with Database, Statement;
+import "sqlite" with Database, Prepared;
 
 #include <stdlib.h>
 
@@ -9,7 +9,7 @@ static void ingest(String filename, String database) {
   Database db = $auto(Database.open(database));
   db.execute("CREATE TABLE IF NOT EXISTS observation "
              "(url TEXT, status INTEGER, us INTEGER)");
-  Statement insert =
+  Prepared insert =
     $auto(db.prepare("INSERT INTO observation VALUES (?, ?, ?)"));
 
   /* The input is a whitespace-separated URL, status, and latency per row. */
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   ingest(input, filename);
 
   Database db = $auto(Database.open(filename));
-  Statement report = $auto(db.prepare(
+  Prepared report = $auto(db.prepare(
     "SELECT url, count(*), sum(status >= 400), "
     "CAST(avg(us) AS INTEGER), max(us) "
     "FROM observation GROUP BY url ORDER BY url"

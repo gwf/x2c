@@ -2178,7 +2178,7 @@ is invoked inside `scaled_sum`; a declaration of `scale` in an inner block
 would supply an invocation inside that block instead. Declarations written in
 the body are private to each expansion.
 
-Local `Expression`, `Statement` or `Block`, `Field`, `Entry`, and `Enumerator`
+Local `Expression`, `Statement`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
 whose invocation position is reachable before the defining block ends. A local
 `Unit` result and a local decorator targeting `Function` or `Unit` syntax are
@@ -2201,7 +2201,7 @@ compile-time Lisp, the definition must annotate it in the invocation pattern.
 Hole kinds, result kinds, and decorator targets are one vocabulary of
 syntactic categories. Each name below selects the same category wherever it
 appears, spellings match without regard to case, and `Expression` and
-`Expr`, and `Statement` and `Block`, are synonyms. These are the complete
+`Expr` are synonyms. These are the complete
 hole-kind annotations:
 
 | Annotation | Bound syntax | Example argument |
@@ -2215,7 +2215,7 @@ hole-kind annotations:
 | `Name` | identifier | `checksum` |
 | `Literal` | one literal | `42` or `<char>` |
 | `Param` | parameter declaration | `const char *name` |
-| `Statement` or `Block` | block item | `return value;` |
+| `Statement` | block item | `return value;` |
 | `Field` | field declaration | `unsigned ready : 1;` |
 | `Entry` | `Map` row | `key: value` |
 | `Enumerator` | enum member | `ready = 1` |
@@ -2367,7 +2367,7 @@ A macro has one result kind as well as argument kinds:
 | Annotation | Body | Legal invocation position |
 | --- | --- | --- |
 | `Expression` | `=>` expression `;` | expression |
-| `Statement` or `Block` | braced block items | statement |
+| `Statement` | braced block items | statement |
 | `Field` | braced field declarations | struct or union body |
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
 | `Enumerator` | braced, comma-separated enumerators | enum body |
@@ -2376,10 +2376,10 @@ A macro has one result kind as well as argument kinds:
 
 The result kind is required between `macro` and the `$` name. `Statement` is
 the canonical spelling for block-item results and `Expression` for expression
-results; `Block` and `Expr` are synonyms. Arrow-expression bodies require
+results; `Expr` is a synonym. Arrow-expression bodies require
 `Expression`; braced bodies require `Statement`, `Field`, `Entry`,
 `Enumerator`, `Unit`, or `Declaration`.
-Inside a compound statement, a `Statement` or `Block` macro may produce zero or
+Inside a compound statement, a `Statement` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
 explicit `{ ... }` or `do { ... } while (0)` in the production satisfies that
@@ -2388,7 +2388,7 @@ matching position:
 
 ```x2c
 #include "meta.x"
-meta static List swap_type(Type type) => type.assoc(<type>);
+meta static List swap_type(TypeInfo type) => type.assoc(<type>);
 
 macro Statement $swap(Expr $left, Expr $right) {
   $swap_type($left) temporary = $left;
@@ -2500,7 +2500,7 @@ singular, explicitly annotated, and one of:
 | --- | --- | --- |
 | `Expr` | one cast expression | one expression |
 | `Function` | file-scope function definition | block items replacing its body |
-| `Statement` or `Block` | one statement or local declaration | zero or more block items |
+| `Statement` | one statement or local declaration | zero or more block items |
 | `Field` | one struct or union field | zero or more fields |
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
@@ -2516,7 +2516,7 @@ appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
 plus any additional block items without requiring braces at the invocation.
 
-A `Statement` or `Block` decorator standing before a file-scope function
+A `Statement` decorator standing before a file-scope function
 definition decorates that function's body. The body is parsed as usual, the
 decorator's production replaces it, and the same function is rebuilt around
 the result, so parameters resolve inside the produced items and a `return`
@@ -2585,7 +2585,7 @@ parentheses distinguish the argument list from a parenthesized target.
 Aliases do not add a second argument grammar. Arguments remain comma-separated
 and are parsed by the macro's existing `Expr`, `Type`, `Decl`,
 `DeclaratorRow`, `Function`, `Name`, `Literal`, `Param`, `Statement`,
-`Block`, `Field`, `Entry`, `Enumerator`, or `Unit` parameters.
+`Field`, `Entry`, `Enumerator`, or `Unit` parameters.
 An alias cannot introduce a semicolon-separated control header or capture
 arbitrary tokens.
 
@@ -3327,7 +3327,7 @@ lowering of `meta` bodies, with these consequences:
   error; one written in an ordinary `.x` file or an `.xmacro` file joins
   the project meta module.
 - A project `meta` body receives compiler facts as arguments, such as
-  `Type` and `Source` parameters, and does not query the compiler.
+  `TypeInfo` and `Source` parameters, and does not query the compiler.
 - A raise in a body is a diagnostic at the `$` call. A crash, exit, or
   stack overflow ends the helper and is reported at the call; the
   compiler continues. The Lisp step and depth budgets do not apply to a
@@ -3353,7 +3353,7 @@ directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 The queries that read the compiler's symbol table, such as
 `x2c_syntax_type` and `x2c_type_fields`, run only in the compiler's own
-`meta` code. A project `meta` function receives a type through a `Type`
+`meta` code. A project `meta` function receives a type through a `TypeInfo`
 parameter and source text through a `Source` parameter; see
 [What the compiler answers](https://x2c-lang.dev/docs/guide/meta-functions.html#what-the-compiler-answers).
 

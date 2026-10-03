@@ -1,12 +1,12 @@
 /*  observations.x -- Find slow or failed endpoint observations. */
 
-import "sqlite" with Database, Statement;
+import "sqlite" with Database, Prepared;
 
 int main(void) {
   Database db = $auto(Database.open(":memory:"));
   db.execute("CREATE TABLE observation(url TEXT, status INTEGER, us INTEGER)");
 
-  Statement insert =
+  Prepared insert =
     $auto(db.prepare("INSERT INTO observation VALUES (?, ?, ?)"));
   foreach(List reading, %(
     ("/guide" 200 12000)
@@ -14,7 +14,7 @@ int main(void) {
     ("/source" 200 3100000)
   )) insert.bind(reading).execute();
 
-  Statement report = $auto(db.prepare(
+  Prepared report = $auto(db.prepare(
     "SELECT url, status, us FROM observation "
     "WHERE status >= 400 OR us > ? ORDER BY us DESC"
   ));
