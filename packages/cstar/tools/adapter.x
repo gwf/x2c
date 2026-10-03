@@ -27,6 +27,8 @@ typedef struct Adapter {
 
 #include <stdlib.h>
 
+$(import "adapter-templates.xmacro")
+
 static Map _binary_operators = %{
   <"*">: BINOP_MULTIPLY, <"/">: BINOP_DIVIDE, <"%">: BINOP_MODULO,
   <"+">: BINOP_ADD, <"-">: BINOP_SUBTRACT, <"<<">: BINOP_LEFT_SHIFT,
@@ -93,7 +95,7 @@ static String _pointers(Adapter &adapter, String base, List declarator) {
   foreach (Var star, declarator) {
     if (star !== <"*">)
       return _reject(adapter, %"declarator ${declarator.repr()}");
-    base = %"make_pointer_type(${base})";
+    base = $source.cstar.pointer_type(base);
   }
   return base;
 }
@@ -153,10 +155,8 @@ static String _call(Adapter &adapter, List callee, List args, String result) {
       String returned = _ctype(adapter, returns);
       String rendered = _arguments(adapter, args);
       if (!returned || !rendered) return NULL;
-      String signature = %"make_function_type(${returned}, (ctype []) " +
-                         %"{ ${types.join(", ")} }, ${types.len()})";
-      return %"make_call_expr(make_var_expr(\"${name}\", ${signature}), " +
-             %"${rendered}, ${args.len()}, ${result})";
+      String signature = $source.cstar.function_type(returned, types);
+      return $source.cstar.call(name, signature, rendered, args.len(), result);
     }
   }
   return _reject(adapter, "indirect call");
@@ -174,22 +174,22 @@ static String _expression(Adapter &adapter, Var value) {
         case %(parens ?operand): return _expression(adapter, operand);
         case %(literal ?kind ?spelling):
           return _scalar_types.contains(kind)
-            ? %"make_const_expr(${spelling}, ${rendered})"
+            ? $source.cstar.constant(spelling, rendered)
             : _reject(adapter, %"literal of type ${kind.repr()}");
         case %(ident (binding ? ?spelling)):
-          return %"make_var_expr(\"${spelling}\", ${rendered})";
+          return $source.cstar.variable(spelling, rendered);
         case %(index ?array ?position): {
           String base = _expression(adapter, array);
           String offset = _expression(adapter, position);
           return base && offset
-            ? %"make_index_expr(${base}, ${offset}, ${rendered})" : NULL;
+            ? $source.cstar.index(base, offset, rendered) : NULL;
         }
         case %(cast (decl ?target (bindings (bind () ?declarator)))
                ?operand): {
           String into = _declared(adapter, target, declarator);
           String source = _expression(adapter, operand);
           return into && source
-            ? %"make_cast_expr(${source}, ${into})" : NULL;
+            ? $source.cstar.cast(source, into) : NULL;
         }
         case %(call ?callee (args *args)):
           return _call(adapter, callee, args, rendered);
@@ -200,20 +200,19 @@ static String _expression(Adapter &adapter, Var value) {
           String first = _expression(adapter, left);
           String second = _expression(adapter, right);
           return first && second
-            ? %"make_binary_expr(${selected}, ${first}, " +
-              %"${second}, ${rendered})" : NULL;
+            ? $source.cstar.binary(selected, first, second, rendered) : NULL;
         }
         case %(op ?operator ?operand): {
           String only = _expression(adapter, operand);
           if (!only) return NULL;
           if (operator === <"*">)
-            return %"make_deref_expr(${only}, ${rendered})";
+            return $source.cstar.dereference(only, rendered);
           if (operator === <"&">)
-            return %"make_addrof_expr(${only}, ${rendered})";
+            return $source.cstar.address(only, rendered);
           Var selected;
           if (!_unary_operators.try_get(operator, selected))
             return _reject(adapter, %"operator ${operator.repr()}");
-          return %"make_unary_expr(${selected}, ${only}, ${rendered})";
+          return $source.cstar.unary(selected, only, rendered);
         }
       }
       return _reject(adapter, %"expression ${body.car().repr()}");
@@ -248,14 +247,11 @@ static String _quoted(List texts) {
 static void _feed_annotation(Adapter &adapter, List record) {
   match (record) {
     case %(assert ? ?text ? ? ?):
-      _feed(adapter,
-        %"make_cst_assert(cstar.program_assertion(\"${text}\"), 0)");
+      _feed(adapter, $source.cstar.assertion(text));
     case %(invariant ? ?text ? ? ?):
-      _feed(adapter,
-        %"make_cst_invariant(cstar.program_assertion(\"${text}\"), 0)");
+      _feed(adapter, $source.cstar.invariant(text));
     case %(invariant_sl ? ?text ? ? ?):
-      _feed(adapter,
-        %"make_cst_invariant(cstar.assertion(\"${text}\"), 1)");
+      _feed(adapter, $source.cstar.separation_invariant(text));
     case %(proof ? ?step ?args ? ? ?): {
       adapter.arrays = 1;
       _emit(adapter, %"  cstar.${step}(${_quoted(args)});");
@@ -282,7 +278,7 @@ static void _increment(Adapter &adapter, Var operator, Var operand,
   String rendered = _expression(adapter, operand);
   String step = operator === <"++"> ? "INCREMENT" : "DECREMENT";
   if (rendered)
-    _feed(adapter, %"make_inc_dec(${rendered}, INCDEC_${step}_${position})");
+    _feed(adapter, $source.cstar.increment(rendered, step, position));
 }
 
 static void _braced(Adapter &adapter, Var value) {
@@ -291,9 +287,9 @@ static void _braced(Adapter &adapter, Var value) {
     _statement(adapter, node);
     return;
   }
-  _feed(adapter, "make_block_begin()");
+  _feed(adapter, $source.cstar.block_begin());
   _statement(adapter, node);
-  _feed(adapter, "make_block_end()");
+  _feed(adapter, $source.cstar.block_end());
 }
 
 static void _declaration(Adapter &adapter, Var type, List bindings) {
@@ -308,15 +304,14 @@ static void _declaration(Adapter &adapter, Var type, List bindings) {
         String rendered = _declared(adapter, type, declarator);
         String value = _expression(adapter, initializer);
         if (rendered && value)
-          _feed(adapter, %"make_var_def_init(\"${spelling}\", " +
-                         %"${rendered}, ${value})");
+          _feed(adapter,
+            $source.cstar.declaration_value(spelling, rendered, value));
         continue;
       }
       case %(bind (binding ? ?spelling) ?declarator): {
         String rendered = _declared(adapter, type, declarator);
         if (rendered)
-          _feed(adapter,
-            %"make_var_def(\"${spelling}\", ${rendered})");
+          _feed(adapter, $source.cstar.declaration(spelling, rendered));
         continue;
       }
     }
@@ -336,9 +331,9 @@ static void _statement(Adapter &adapter, Var value) {
   match (node) {
     case %(empty): return;
     case %(block *items): {
-      _feed(adapter, "make_block_begin()");
+      _feed(adapter, $source.cstar.block_begin());
       foreach (Var item, items) _statement(adapter, item);
-      _feed(adapter, "make_block_end()");
+      _feed(adapter, $source.cstar.block_end());
       return;
     }
     case %(declare ?type (bindings *bindings)): {
@@ -346,34 +341,34 @@ static void _statement(Adapter &adapter, Var value) {
       return;
     }
     case %(return): {
-      _feed(adapter, "make_return()");
+      _feed(adapter, $source.cstar.return_empty());
       return;
     }
     case %(return ? ?result): {
       String rendered = _expression(adapter, result);
-      if (rendered) _feed(adapter, %"make_return_expr(${rendered})");
+      if (rendered) _feed(adapter, $source.cstar.return_value(rendered));
       return;
     }
     case %(if ?condition ?consequent ?alternative): {
       String rendered = _expression(adapter, condition);
       if (!rendered) return;
-      _feed(adapter, %"make_if_condition(${rendered})");
+      _feed(adapter, $source.cstar.condition(rendered));
       _braced(adapter, consequent);
-      _feed(adapter, "make_else()");
+      _feed(adapter, $source.cstar.alternative());
       _braced(adapter, alternative);
       return;
     }
     case %(if ?condition ?consequent): {
       String rendered = _expression(adapter, condition);
       if (!rendered) return;
-      _feed(adapter, %"make_if_condition(${rendered})");
+      _feed(adapter, $source.cstar.condition(rendered));
       _braced(adapter, consequent);
       return;
     }
     case %(while ?condition ?body): {
       String rendered = _expression(adapter, condition);
       if (!rendered) return;
-      _feed(adapter, %"make_while_condition(${rendered})");
+      _feed(adapter, $source.cstar.loop_condition(rendered));
       _braced(adapter, body);
       return;
     }
@@ -389,13 +384,12 @@ static void _statement(Adapter &adapter, Var value) {
       String left = _expression(adapter, target);
       String right = _expression(adapter, source);
       if (left && right)
-        _feed(adapter,
-          %"make_assign(${left}, ${right}, ASSIGNOP_ASSIGN)");
+        _feed(adapter, $source.cstar.assignment(left, right));
       return;
     }
     case %(stmnt ?expression): {
       String rendered = _expression(adapter, expression);
-      if (rendered) _feed(adapter, %"make_compute(${rendered})");
+      if (rendered) _feed(adapter, $source.cstar.compute(rendered));
       return;
     }
   }
@@ -427,8 +421,9 @@ static void _signature(Adapter &adapter, String name, Var returns,
     ? %"(ctype []) { ${types.join(", ")} }" : "(ctype *) NULL";
   String name_list = names.len()
     ? %"(const char *[]) { ${names.join(", ")} }" : "(const char **) NULL";
-  _feed(adapter, %"make_function_start(\"${name}\", ${result}, " +
-                 %"${type_list}, ${name_list}, ${types.len()})");
+  _feed(adapter,
+    $source.cstar.function_start(name, result, type_list, name_list,
+      types.len()));
 }
 
 /** Renders one verified function: ghost parameters, contract, signature,
@@ -450,23 +445,20 @@ void Adapter.function(Adapter &adapter, List record, List definition) {
           parsed.push(%"cstar.term(\"${ghost.str().strip(NULL)}\")");
         _emit(adapter,
           %"  term ghosts[${parsed.len()}] = { ${parsed.join(", ")} };");
-        _feed(adapter,
-          %"make_cst_param((type *) NULL, 0, ghosts, ${parsed.len()})");
+        _feed(adapter, $source.cstar.ghost_parameters(parsed.len()));
       }
-      _feed(adapter,
-        %"make_cst_require(cstar.assertion(\"${pre}\"))");
-      _feed(adapter,
-        %"make_cst_ensure(cstar.assertion(\"${post}\"))");
+      _feed(adapter, $source.cstar.precondition(pre));
+      _feed(adapter, $source.cstar.postcondition(post));
       match (definition)
         case %(function ?returns
                (bind ? ((fnmod (params *parameters)))) ?):
           _signature(adapter, spelling, returns, parameters);
       List body = captured;
       if (body && body.car() === <block>) body = body.cdr();
-      _feed(adapter, "make_block_begin()");
+      _feed(adapter, $source.cstar.block_begin());
       foreach (Var item, body) _statement(adapter, item);
-      _feed(adapter, "make_block_end()");
-      _feed(adapter, "make_function_end()");
+      _feed(adapter, $source.cstar.block_end());
+      _feed(adapter, $source.cstar.function_end());
       _emit(adapter, "  cstar.complete();");
       _emit(adapter, "}\n");
       adapter.earlier[spelling] = spelling;
