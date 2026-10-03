@@ -34,6 +34,33 @@
 #include "utils.x"
 #include <unistd.h>
 
+// helper table source
+
+macro Stmt $output.helper.header(Expr $out) {
+  $out.write("#include \"x2c.h\"\n");
+}
+
+macro Stmt $output.helper.target(Expr $out, Expr $index) {
+  $out.printf("Map x2c_module_targets_%d(void);\n", $index);
+}
+
+macro Stmt $output.helper.dispatch_begin(Expr $out) {
+  $out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
+}
+
+macro Stmt $output.helper.dispatch_case(Expr $out, Expr $index) {
+  $out.printf(
+    "    case %d: return x2c_module_targets_%d();\n", $index, $index);
+}
+
+macro Stmt $output.helper.dispatch_end(Expr $out) {
+  $out.write("  }\n  return NULL;\n}\n");
+}
+
+macro Stmt $output.helper.count(Expr $out, Expr $count) {
+  $out.printf("int x2c_meta_helper_count(void) { return %d; }\n", $count);
+}
+
 // preparing the helper
 
 /* One project meta build. The Kth owner, an input that reaches meta code,
@@ -521,14 +548,14 @@ static String _temporary(String path) =>
 /* The unit that gives the helper each built table by index. */
 static String _tables(Array built, int count) {
   Buffer out = Buffer.new(0);
-  out.write("#include \"x2c.h\"\n");
+  $output.helper.header(out);
   foreach (int index, built)
-    out.printf("Map x2c_module_targets_%d(void);\n", index);
-  out.write("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
+    $output.helper.target(out, index);
+  $output.helper.dispatch_begin(out);
   foreach (int index, built)
-    out.printf("    case %d: return x2c_module_targets_%d();\n", index, index);
-  out.write("  }\n  return NULL;\n}\n");
-  out.printf("int x2c_meta_helper_count(void) { return %d; }\n", count);
+    $output.helper.dispatch_case(out, index);
+  $output.helper.dispatch_end(out);
+  $output.helper.count(out, count);
   return out;
 }
 
