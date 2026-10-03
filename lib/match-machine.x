@@ -543,6 +543,49 @@ void MatchMachine.dispose(MatchMachine &m) {
   m.scratch_capacity = 0;
 }
 
+/* spare machines
+
+   A machine holds every frame, register bank, binder slot, and undo entry
+   it may use, which is too large for the C stack of a deep recursion. Each
+   thread keeps the machines it has used: a match takes one and returns it,
+   and a match that runs another match, through a protocol method, takes a
+   second. */
+
+enum { MACHINE_SPARES = 8 };
+
+static threaded struct {
+  MatchMachine *spares[MACHINE_SPARES];
+  int count;
+} machine_thread;
+
+/** Returns an open machine reporting to `stats`, one of this thread's spares
+    or a new one. `MatchMachine.release` returns it.
+    Raises: `<alloc-fail>` when a new machine cannot be allocated.
+*/
+MatchMachine *MatchMachine.acquire(MachineStats *stats) {
+  MatchMachine *m = machine_thread.count
+    ? machine_thread.spares[--machine_thread.count]
+    : calloc(1, sizeof(MatchMachine));
+  if (!m) raise %(alloc-fail (owner "MatchMachine.acquire"));
+  (*m).open();
+  m.stats = stats;
+  return m;
+}
+
+/** Disposes `m` and keeps it as a spare of this thread, or frees it. */
+void MatchMachine.release(MatchMachine *m) {
+  (*m).dispose();
+  if (machine_thread.count < MACHINE_SPARES)
+    machine_thread.spares[machine_thread.count++] = m;
+  else free(m);
+}
+
+/** Frees this thread's spare machines. */
+void MatchMachine.release_spares(void) {
+  while (machine_thread.count)
+    free(machine_thread.spares[--machine_thread.count]);
+}
+
 static void MatchMachine._clear_slots(MatchMachine &m) {
   for (int i = 0; i < m.slot_count; i++) {
     memset(&m.slots[i], 0, sizeof(MachineSlot));
