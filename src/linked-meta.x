@@ -402,30 +402,21 @@ static int _tag_floating(List row) => _tag_kind(row) == <floating>;
 
 static int _tag_unsigned(List row) => row[0].str().startswith("u");
 
-static List _tag_composite(List items) =>
-  %(expr () (composite (commas @items)));
-
-static List _tag_info_row(List row) =>
-  _tag_composite([
-    x2c_literal_symbol(row[0]),
-    x2c_literal_symbol(_tag_kind(row)),
-    x2c_literal_int(_tag_top(row)),
-    x2c_literal_int(_tag_middle(row)),
-    x2c_literal_int(_tag_bottom(row))]);
+static List _tag_info_row(List row) {
+  Symbol tag = row[0], kind = _tag_kind(row);
+  int top = _tag_top(row), middle = _tag_middle(row);
+  int bottom = _tag_bottom(row);
+  return $!( { $tag, $kind, $top, $middle, $bottom } );
+}
 
 static List _tag_info_sentinel(void) =>
-  _tag_composite([
-    x2c_literal_int(0),
-    x2c_literal_symbol(<void>),
-    x2c_literal_int(0x8000),
-    x2c_literal_int(0),
-    x2c_literal_int(0)]);
+  $!( { 0, <void>, 0x8000, 0, 0 } );
 
 static List _tag_info(void) {
   Array cells = [];
   foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
-  cells.push(_tag_info_sentinel());
-  return _tag_composite(cells);
+  List rows = cells.list_free(), sentinel = _tag_info_sentinel();
+  return $!( { $rows..., $sentinel } );
 }
 
 static int _tag_descriptor(List row) =>
@@ -460,18 +451,19 @@ static List _tag_bits_expr(List row) {
   return x2c_literal_int(bits);
 }
 
-static List _tag_numeric_row(List row) =>
-  _tag_composite([
-    x2c_literal_symbol(row[0]),
-    x2c_literal_int(_tag_floating(row)),
-    x2c_literal_int(_tag_unsigned(row)),
-    _tag_bits_expr(row),
-    x2c_literal_int(_tag_rank(row))]);
+static List _tag_numeric_row(List row) {
+  Symbol tag = row[0];
+  int floating = _tag_floating(row), unsigned_value = _tag_unsigned(row);
+  int rank = _tag_rank(row);
+  List bits = _tag_bits_expr(row);
+  return $!( { $tag, $floating, $unsigned_value, $bits, $rank } );
+}
 
 static List _tag_numeric_table(void) {
   Array cells = [];
   foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
-  return _tag_composite(cells);
+  List rows = cells.list_free();
+  return $!( { $rows... } );
 }
 
 static int _tag_decode_row(List row) {
@@ -546,8 +538,8 @@ static List _tag_decode_group(List rows, Map counts, int top) {
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
   }
-  return _tag_composite(%(${x2c_literal_int(mask)}
-    ${x2c_literal_int(immediate)} ${_tag_composite(ids)}));
+  List slots = ids.list_free();
+  return $!( { $mask, $immediate, { $slots... } } );
 }
 
 static List _tag_decode_groups(void) {
@@ -556,7 +548,8 @@ static List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  return _tag_composite(groups);
+  List items = groups.list_free();
+  return $!( { $items... } );
 }
 
 static List _tag_id_checks(void) {
@@ -724,7 +717,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_rank", _tag_rank);
   $linked.row(rows, "_tag_floating", _tag_floating);
   $linked.row(rows, "_tag_unsigned", _tag_unsigned);
-  $linked.row(rows, "_tag_composite", _tag_composite);
   $linked.row(rows, "_tag_info_row", _tag_info_row);
   $linked.row(rows, "_tag_info_sentinel", _tag_info_sentinel);
   $linked.row(rows, "_tag_info", _tag_info);
