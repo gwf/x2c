@@ -2076,12 +2076,12 @@ static int _protocol_bootstrap(String name){
 
 List Sym_introduce(Sym, String);
 List _entry_call(String);
-List _initializer_function(Compiler, List, List, List);
+List _initializer_function(Compiler, Type, List, List);
 static List Init_synthesize(Init * i, List arms){
   List binding = Sym_introduce((* i).c -> sym, _242);  List type = _287;  String entry = _277;  if(String_truth((* i).initializer)){
     type = _292;  entry =(* i).initializer;
   }
-  List statements = Init_statements(&((* i)), _within_definitions(arms, _entry_call(entry)), NULL);  return _initializer_function((* i).c, type, binding, statements);
+  List statements = Init_statements(&((* i)), _within_definitions(arms, _entry_call(entry)), NULL);  return _initializer_function((* i).c, List_type(type), binding, statements);
 }
 
 List List_concat_n(unsigned, ...);
