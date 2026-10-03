@@ -381,7 +381,7 @@ typedef struct Definition {
   Atom name, Symbol kind;
   List target, parameters, template, fresh, captures, pattern, origin;
   String file, Map locals, Array using;
-  int anonymous, local, nested;
+  int anonymous, local, nested, quotation;
 } Definition;
 
 /** Parses the macro definition at the current token into a `macrodef` `List`.
@@ -661,6 +661,7 @@ static void Definition.body(Definition &d) {
     d.template = d.has_expression_body()
                ? d.expression_body()
                : c._parse_body(d.body_kind(), d.using);
+    if (d.quotation) d.parameters = _quoted_holes(c);
     d.parameters = c._parameter_rows(d.parameters);
     d.captures = _recorded(c.local_macro_captures);
   }
@@ -670,7 +671,7 @@ static void Definition.body(Definition &d) {
    an anonymous macro omits. */
 static List Definition.expression_body(Definition &d) {
   Compiler c = d.c;
-  if (c._legacy_expression_body()) {
+  if (d.quotation || c._legacy_expression_body()) {
     c.expect(<(>);
     List replacement = c.parse_expression();
     c.expect(<)>);
@@ -1158,7 +1159,11 @@ static List Compiler._hole_slot(Compiler c, Symbol role) {
     $report.parse_splice_expr(c);
   if (!untyped_roles.contains(role)) {
     Symbol kind = hole.assoc(<kind>);
-    if (!kind && c.peek(2) != <...>) return NULL;
+    /* A quotation's hole takes its kind from a statement or name
+       position, which no annotation can give it. */
+    if (!kind && c.peek(2) != <...> &&
+        !(%(quotation) in c.macro_holes && role in quoted_roles))
+      return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
   }
   List syntax = c._parse_hole(role);
@@ -1172,6 +1177,7 @@ static const SymbolSet sequence_roles =
   %<<argument block field enumerator map-entry param unit catch match-row
      decl-row>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
+static const SymbolSet quoted_roles = %<<statement block name>>;
 
 macro Statement $report.parse_splice_position(Expr $c) {
   $c.report_error(
@@ -1194,7 +1200,72 @@ static int Compiler._slot_splice(Compiler c, int allowed) {
 List Compiler.peek_macro_hole(Compiler c) {
   if (c.peek(0) != <$> || c.peek(1) != <ident>) return NULL;
   Token name = Token.skip_trivia(c.token + 1);
-  return c._hole_record(Atom.intern(name.text));
+  List hole = c._hole_record(Atom.intern(name.text));
+  return hole ? hole : c._quoted_hole(name);
+}
+
+/* quotations
+
+   `$!( expression )`, `$!{ items }`, and `$!Kind{ ... }` are anonymous
+   macros applied where they are written. A `$name` in the body names the
+   visible local `name`: its first use declares a hole, and the quotation
+   applies to that local's value. */
+
+/** Parses a quotation at `$!` into the code it builds from the locals its
+    body names. */
+List Compiler.parse_macro_quotation(Compiler c) {
+  Token start = c.token;
+  c.expect(<$>);
+  c.expect(<!>);
+  Symbol kind = <block-item>;
+  if (c.peek(0) == <(>) kind = <expression>;
+  else if (c.peek(0) == <ident>) {
+    kind = c._result_kind_token(c.token);
+    c.next();
+  }
+  Definition d = {
+    .c = c, .start = start, .kind = kind, .anonymous = 1, .local = 1,
+    .quotation = 1};
+  d.naming();
+  d.nested = !!c.macro_holes;
+  $let(c.macro_holes, {}) {
+    d.locals = {};
+    c.macro_holes[%(locals)] = d.locals;
+    c.macro_holes[%(quotation)] = 1;
+    d.using = [];
+    d.announce();
+    d.body();
+  }
+  d.finish();
+  List supplied = NULL;
+  foreach (List hole, d.parameters.reverse())
+    supplied = cons(%(expr () (ident ${_hole_name(hole).str()})), supplied);
+  List arguments = NULL;
+  foreach (List argument, supplied)
+    arguments = cons(c.resolve_expression(argument, start), arguments);
+  return c.apply_macro_value(
+    c.capture_macro_value(d.publish()),
+    arguments ? arguments.reverse() : %((expr (void) ())), start);
+}
+
+/* A `$name` in a quotation's body that names a visible local declares its
+   hole, a sequence when `...` follows. */
+static List Compiler._quoted_hole(Compiler c, Token name) {
+  if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
+  String spelling = name.text;
+  if (!c.sym.get(%($spelling))) return NULL;
+  Token after = Token.skip_trivia(name + 1);
+  List hole = c._declare_hole(name, 0, after.type == <...>);
+  Var quoted = c.macro_holes[%(quoted)];
+  c.macro_holes[%(quoted)] =
+    cons(hole, quoted is <list> ? quoted.list() : NULL);
+  return hole;
+}
+
+/* A quotation's holes in the order its body first names them. */
+static List _quoted_holes(Compiler c) {
+  Var quoted = c.macro_holes[%(quoted)];
+  return quoted is <list> ? quoted.list().reverse() : NULL;
 }
 
 macro Statement $report.parse_hole_ambiguous(
@@ -1208,8 +1279,10 @@ macro Statement $report.parse_hole_ambiguous(
 /* Consumes a hole filling `role` and returns its projection. */
 static List Compiler._parse_hole(Compiler c, Symbol role) {
   Token token = c.token;
-  Atom name = Atom.intern(c._hole_name_token().text);
+  Token spelling = c._hole_name_token();
+  Atom name = Atom.intern(spelling.text);
   List hole = c._hole_record(name);
+  if (!hole) hole = c._quoted_hole(spelling);
   if (!hole) c._unbound(name.str(), token);
   int sequence = c._hole_splice(role);
   if (sequence != hole.assoc(<sequence>).int())
@@ -1255,8 +1328,10 @@ static void Compiler._cardinality_error(
   $report.parse_hole_cardinality(c, sequence, spelling, token);
 }
 
-static Symbol _role_kind(Symbol role) =>
-  role == <expression> || role == <argument> ? <expr> : role;
+static Symbol _role_kind(Symbol role) {
+  if (role == <expression> || role == <argument>) return <expr>;
+  return role == <statement> ? <block> : role;
+}
 
 /* A decorator's Unit target projects its source; a sequence, a type, or
    a captures list projects its splice; other holes project their

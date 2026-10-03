@@ -558,7 +558,7 @@ static List Compiler._parse_postfix_apply(Compiler c, List expr) {
   c.expect(<)>);
   List supplied = arguments.list_free();
   if (c.sym.is_named_value_type(expr.cadr(), "Macro"))
-    return c._apply_macro_value(expr, supplied, origin);
+    return c.apply_macro_value(expr, supplied, origin);
   Macro called = $called;
   List result = c.resolve_expression(
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
@@ -572,10 +572,11 @@ static List Compiler._parse_postfix_apply(Compiler c, List expr) {
   return result;
 }
 
-/* Calling a Macro value builds code. Inside a template body the call is
-   retained so the template can capture the value it applies; elsewhere it
-   is an ordinary `Macro_apply` over the argument values. */
-static List Compiler._apply_macro_value(
+/** Applies the Macro value `expr` to `supplied` argument expressions.
+    Inside a template body the call is retained so the template can capture
+    the value it applies; elsewhere it is an ordinary `Macro_apply` over the
+    argument values. */
+List Compiler.apply_macro_value(
   Compiler c, List expr, List supplied, Token origin) {
   if (c.macro_holes)
     return %(expr (<macro-expr>) (tpl-call $expr (args @supplied)));
@@ -667,7 +668,9 @@ List Compiler.parse_primary(Compiler c) {
   switch (c.peek(0)) {
     case <"$(">: return c.parse_macro_lisp_expression();
     case <lit-char*>:  return c._parse_c_string_literals();
-    case <$>:          return c.try_parse_macro_expression();
+    case <$>:
+      return c.peek(1) == <!> ? c.parse_macro_quotation()
+                              : c.try_parse_macro_expression();
     case <ident>:      return c._parse_ident_primary();
     /* The keyword pass keeps `in` between tokens that can end and begin
        operands, as after a cast or a condition. An operand never begins
