@@ -1231,8 +1231,7 @@ List Compiler.parse_macro_quotation(Compiler c) {
 static int Compiler._typed_quotation(Compiler c) {
   if (c.token.text.is_identifier())
     return c.peek(1) == <"{"> && !_category(c.token.text);
-  Symbol after = c.token.after_group().type;
-  return c.peek(0) == <(> && (after == <"{"> || after == <(>);
+  return c.peek(0) == <(> && c.token.after_group().type == <"{">;
 }
 
 /* Declares a hidden local for each `${expression}` in the body at the
@@ -1251,9 +1250,7 @@ static List Compiler._expression_holes(Compiler c, Map holes) {
       if (next.text.is_identifier()) next = Token.skip_trivia(next + 1);
       t = next.group_close();
       Token typed = next.after_group();
-      if (next.type == <(> &&
-          (typed.type == <"{"> || typed.type == <(>))
-        t = typed.group_close();
+      if (next.type == <(> && typed.type == <"{">) t = typed.group_close();
     }
     else if (t.type == <$> && brace.type == <"{"> &&
              (last != <case> || Token.skip_trivia(brace + 1).type != <$>)) {
