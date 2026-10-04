@@ -5130,6 +5130,11 @@ online processor count, or one job under Make, as for `build` below; `-j 1`
 translates serially in one process. The inspection and dump modes stay
 serial; they write one ordered stream to standard output.
 
+Compile-time code runs once per translated unit. When several units import
+the same file, each worker runs that file's compile-time forms, including
+any side effects, for its own unit. A serial run may share one import
+between the units it translates.
+
 The depfile options control that `.d` output. They belong to `translate`:
 
 ```text
