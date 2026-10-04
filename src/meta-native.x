@@ -168,8 +168,24 @@ void Compiler.install_meta_declaration(
 /** Executes an explicit meta call and inserts its result at a code
     boundary. */
 List Compiler.evaluate_meta_expression(
-  Compiler c, List expression, Token site) {
+  Compiler c, List expression, Token site) =>
+  c._meta_result(expression, c.evaluate_meta_value(expression, site, 0), site);
+
+/** Executes an explicit meta call written as a whole statement at
+    `context`. Inside an expansion a List result is code, so the call may
+    return a statement as well as an expression. */
+List Compiler.evaluate_meta_statement(
+  Compiler c, List expression, AstPos context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
+  if (c.macro_stack && value is <list> && !value.is_nil() &&
+      !_expression_code(value))
+    return c.bind_macro_lisp_statement(value, context);
+  return %(stmnt ${c._meta_result(expression, value, site)});
+}
+
+/* The expression a meta call's `value` becomes at its call. */
+static List Compiler._meta_result(
+  Compiler c, List expression, Var value, Token site) {
   if (value is void && c.meta_build) {
     List placeholder = %(expr (int) (literal (int) "0"));
     c.meta_group.push(%(later $placeholder));

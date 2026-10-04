@@ -873,7 +873,9 @@ remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
 including the trailing semicolon. A `Stmt` macro may also use the expression
-form; its body is then the single statement `expression;`.
+form; its body is then the single statement `expression;`. When that
+expression is a `meta` call, the call may return a statement, as described
+under [Macro-visible syntax](#macro-visible-syntax).
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
@@ -2330,7 +2332,11 @@ target; arbitrary AST `List`s do not acquire source text by structural
 equality. Diagnostics retain the definition, invocation, import, and generated
 ancestry even after a macro returns a new `List`. Returned syntax must be valid
 for its expression, field, enumerator, block-item, or translation-unit
-position. Protocol declarations, macro definitions, preprocessor nodes, and
+position. Inside a macro expansion, a `meta` call written as a whole
+expression statement, such as the body of `macro Stmt $same(Stmt $code) =>
+$same_of($code);`, holds a block-item position, so it may return a statement
+as well as an expression. Outside an expansion, such a call's `List` result
+that is not expression syntax remains a runtime value. Protocol declarations, macro definitions, preprocessor nodes, and
 other compile-time-only source items are retained at translation-unit position
 and apply their source-order effect. The compiler rejects forms that are
 malformed or invalid in that position. As with other constructed ASTs, it does
