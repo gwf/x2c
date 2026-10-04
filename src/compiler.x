@@ -1628,9 +1628,21 @@ static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
   foreach (List definition, c.meta_defs)
     if (_meta_identity(definition) in reached &&
         !c.meta_is_comptime_only(definition)) {
-      c._record_top_level(definition, NULL);
-      nodes.push(definition);
+      List emitted = _linked_once(definition);
+      c._record_top_level(emitted, NULL);
+      nodes.push(emitted);
     }
+}
+
+/* Every unit that calls a public `meta` function at run time emits it, and
+   units that never include one another cannot tell which of them does, so
+   each copy is weak and the program links one. */
+static List _linked_once(List definition) {
+  match (definition)
+    case %(function ?type ?declarator ?body):
+      if (!type.type().is_static())
+        return %(function ("__attribute__((weak))" @type) $declarator $body);
+  return definition;
 }
 
 /* The binding an imported `meta` function or declaration introduces. */

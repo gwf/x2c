@@ -1584,6 +1584,8 @@ for the `meta` functions it calls at run time, and a declaration only for
 the values and prototypes its run-time code uses. The storage class says
 what it emits: `static` gives that unit its own copy, and a public name is
 the one copy the program links, exported by the reaching unit's header.
+Units that never include one another may each reach a public function, so
+each emits it as a weak definition and the linker keeps one.
 
 ## Lisp interoperability
 

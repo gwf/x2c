@@ -1219,4 +1219,25 @@ echo 'macro Expression $exported.value() => 8;' >"$exported/value.xmacro"
 grep -q 'return 8;' "$exported/warm/unit.c" ||
   fail "an edited exported import kept its stale interface"
 
+# Case 15: every unit that calls a pack's public `meta` function at run
+# time emits it: the exporting unit, a unit that includes it, and a unit
+# that imports the pack on its own. The program links one copy.
+shared="$BUILD/shared-meta"
+mkdir -p "$shared"
+echo 'meta int shared_twice(int n) => n * 2;' >"$shared/base.xmacro"
+printf '%s\n' '$(import "base.xmacro")' \
+  'meta int shared_sum(int n) => n + shared_twice(n);' >"$shared/pack.xmacro"
+printf '%s\n' '#include "x2c.x"' 'export $(import "pack.xmacro")' \
+  'int lib_value(void) => shared_sum(4);' >"$shared/lib.x"
+printf '%s\n' '#include "x2c.x"' '$(import "pack.xmacro")' \
+  'int other_value(void) => shared_sum(5);' >"$shared/other.x"
+printf '%s\n' '#include "lib.x"' 'int other_value(void);' \
+  'int main(void) {' \
+  '  printf("%d %d %d %d\n", $shared_sum(1), shared_sum(3), lib_value(),' \
+  '         other_value());' '  return 0;' '}' >"$shared/main.x"
+(cd "$shared" && "$X2C" build -q --output run main.x lib.x other.x) ||
+  fail "units that share a pack's public meta function did not link"
+[[ $("$shared/run") == '3 9 12 15' ]] ||
+  fail "a shared public meta function computed the wrong value"
+
 echo "header cache probes passed"

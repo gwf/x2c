@@ -8,7 +8,7 @@
 #include "x2c.h"
 int main(void);
 
-String mi_flatten(String path, String sep);
+__attribute__((weak)) String mi_flatten(String path, String sep);
 
 
 #endif /* __GUARD_0x7A40B867__ */
