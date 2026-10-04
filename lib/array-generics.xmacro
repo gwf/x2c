@@ -18,6 +18,27 @@
     promotions and conversions determine their results.
 */
 
+/*  Generates `postfixindex` for an element family whose `updateindex`
+    applies `+` and `-`.
+*/
+macro Unit $array.typed.postfix(Type $array, Type $element) {
+  inline $element $array.postfixindex($array, int, Symbol);
+
+  /** Applies `++` or `--` at raw `index` and returns the previous value.
+      The index has the unchecked C-pointer preconditions of bracket access.
+      Raises: `<bad-op>` for another operator. The failure does not return.
+  */
+  inline $element $array.postfixindex($array array, int index, Symbol op) {
+    $element old = array[index];
+    if (op == <++>) array.updateindex(index, <+>, 1);
+    else if (op == <-->) array.updateindex(index, <->, 1);
+    // no owner detail: a String literal here would put a lazy interning
+    // guard at the top of every increment
+    else raise %(bad-op (op $op));
+    return old;
+  }
+}
+
 /*  Generates `updateindex` and `postfixindex` for a signed integer element.
     `$unsigned` is the same-width unsigned type used to hold raw operands and
     results. The C operators still apply integer promotions, so this does not
@@ -25,10 +46,9 @@
     anything, so a failed update leaves the element as it was.
 */
 macro Unit $array.typed.update.integer(
-  Type $array, Type $element, Type $unsigned
+  Type $family, Type $element, Type $unsigned
 ) {
-  inline $element $array.updateindex($array, int, Symbol, $element);
-  inline $element $array.postfixindex($array, int, Symbol);
+  inline $element $family.updateindex($family, int, Symbol, $element);
 
   /** Applies integer `op` to raw element `index` and returns the stored value.
       The index has the unchecked C-pointer preconditions of bracket access.
@@ -37,8 +57,8 @@ macro Unit $array.typed.update.integer(
       Raises: `<div-zero>`, `<bad-shift>`, or `<bad-op>` for its corresponding
       invalid operation.
   */
-  inline $element $array.updateindex(
-    $array array, int index, Symbol op, $element rhs) {
+  inline $element $family.updateindex(
+    $family array, int index, Symbol op, $element rhs) {
     $element *slot = (($element *) array.bytes) + index;
     $element lhs = *slot;
     $unsigned a = ($unsigned) lhs, b = ($unsigned) rhs, raw;
@@ -71,36 +91,23 @@ macro Unit $array.typed.update.integer(
     return *slot = ($element) raw;
   }
 
-  /** Applies `++` or `--` at raw `index` and returns the previous value.
-      The index has the unchecked C-pointer preconditions of bracket access.
-      Raises: `<bad-op>` for another operator. The failure does not return.
-  */
-  inline $element $array.postfixindex($array array, int index, Symbol op) {
-    $element old = array[index];
-    if (op == <++>) array.updateindex(index, <+>, 1);
-    else if (op == <-->) array.updateindex(index, <->, 1);
-    // no owner detail: a String literal here would put a lazy interning
-    // guard at the top of every increment
-    else raise %(bad-op (op $op));
-    return old;
-  }
+  $array.typed.postfix($family, $element);
 }
 
 /*  Generates `updateindex` and `postfixindex` for a floating element.
     Only the four arithmetic operators are defined on a float; the rest
     raise `<bad-types>`, matching the boxed path.
 */
-macro Unit $array.typed.update.floating(Type $array, Type $element) {
-  inline $element $array.updateindex($array, int, Symbol, $element);
-  inline $element $array.postfixindex($array, int, Symbol);
+macro Unit $array.typed.update.floating(Type $family, Type $element) {
+  inline $element $family.updateindex($family, int, Symbol, $element);
 
   /** Applies a floating arithmetic `op` and returns the stored value.
       The supported operators are `+`, `-`, `*`, and `/`; the raw index has
       the unchecked C-pointer preconditions of bracket access.
       Raises: `<bad-types>` for another operator, before changing the element.
   */
-  inline $element $array.updateindex(
-    $array array, int index, Symbol op, $element rhs) {
+  inline $element $family.updateindex(
+    $family array, int index, Symbol op, $element rhs) {
     $element *slot = (($element *) array.bytes) + index;
     switch (op) {
       case <+>: return *slot += rhs;
@@ -111,17 +118,7 @@ macro Unit $array.typed.update.floating(Type $array, Type $element) {
     raise %(bad-types (op $op));
   }
 
-  /** Applies `++` or `--` at raw `index` and returns the previous value.
-      The index has the unchecked C-pointer preconditions of bracket access.
-      Raises: `<bad-op>` for another operator. The failure does not return.
-  */
-  inline $element $array.postfixindex($array array, int index, Symbol op) {
-    $element old = array[index];
-    if (op == <++>) array.updateindex(index, <+>, 1);
-    else if (op == <-->) array.updateindex(index, <->, 1);
-    else raise %(bad-op (op $op));
-    return old;
-  }
+  $array.typed.postfix($family, $element);
 }
 
 /* Generates String concatenation for compound update. Postfix update has no
