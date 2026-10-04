@@ -12,7 +12,9 @@
 */
 
 #include "x2c.x"
+#include "typed-array.x"
 #include <math.h>
+export $(import "autodiff.xmacro")
 
 /** A recording of `AdNode` operations; see the struct below.
     The [Automatic Differentiation guide](../../guide/autodiff.md) explains

@@ -1,12 +1,10 @@
 /*  test-autodiff.x -- dual-number family and derivative transformations */
 
 #include "x2c.x"
-#include "typed-array.x"
 import "autodiff" with AdTape, AdNode;
 #include <math.h>
 #include "test-support.x"
 $(import "../../../unittest/test-macros.xmacro")
-$(import "../src/autodiff.xmacro")
 
 typedef struct Dual { double value; double tangent; } Dual;
 typedef struct Dual2 { Dual value; Dual tangent; } Dual2;
