@@ -16,11 +16,8 @@ $(import "../src/grammar.xmacro")
 #include "macros.x"
 #include "transform.x"
 
-/* The `lib/meta.x` builders that reach the compiler run here as the copies
+/* The `lib/meta.x` builder that reaches the compiler runs here as the copy
    `src/linked-meta.x` links. */
-List x2c_expr_field(List receiver, String name);
-List x2c_expr_cast(List type, List expression);
-List x2c_decl_make(List type, Var name, List initializer);
 List x2c_param_make(List type, Var name);
 
 // $scope
@@ -443,22 +440,24 @@ static List _new(
   return _initialized_new(owner, heap, extras);
 }
 
-static List _scalar_new(String owner, List representation, int heap) {
+static List _scalar_new(String owner, Type representation, int heap) {
   List parameters = %(${x2c_param_make(representation, "initial")});
-  List declaration = x2c_decl_make(representation, "value", _ref("initial"));
+  List value = x2c_ident("value");
+  List declaration = $!{ $representation $value = initial; };
   return _finish_new(owner, %($owner), parameters, %($declaration), heap);
 }
 
 static List _positional_new(
-  String owner, List representation, int heap, List named) {
+  String owner, Type representation, int heap, List named) {
   Array parameters = [], arguments = [];
   foreach (List field, named) {
     String name = %"field_${field[0]}";
     parameters.push(x2c_param_make(_value_type(field[1]), name));
     arguments.push(_ref(name));
   }
-  List declaration = x2c_decl_make(
-    representation, "value", $!( { ${arguments.list_free()}... } ));
+  List value = x2c_ident("value");
+  List declaration =
+    $!{ $representation $value = { ${arguments.list_free()}... }; };
   return _finish_new(
     owner, %($owner), parameters.list_free(), %($declaration), heap);
 }
@@ -467,16 +466,18 @@ static List _positional_new(
    the deferred initializer calls its `init`. */
 static List _initialized_new(
   String owner, int heap, List extras) {
-  List type = %($owner);
+  Type type = %($owner);
   Array parameters = [];
   foreach (List extra, extras)
     parameters.push(x2c_param_make(extra, %"argument_${parameters.len()}"));
-  List initializer =
-    heap ? $!( ${_ref(%"${owner}_alloc")}() ) : $!( { 0 } );
+  List value = x2c_ident("value");
+  List declaration =
+    heap ? $!{ $type $value = ${_ref(%"${owner}_alloc")}(); }
+         : $!{ $type $value = { 0 }; };
   Var heap_value = %();
   if (heap) heap_value = <true>;
-  List body = %(${x2c_decl_make(type, "value", initializer)}
-    (syntax-recipe class.initializer ($owner $heap_value)));
+  List body =
+    %($declaration (syntax-recipe class.initializer ($owner $heap_value)));
   return _finish_new(owner, type, parameters.list_free(), body, 0);
 }
 
@@ -531,9 +532,8 @@ static List _init_arguments(List parameters) {
 // class boxing and comparison
 
 static List _box(Symbol tag, int heap) {
-  List symbol = x2c_literal_symbol(tag);
-  if (heap) return $!( Var_new($symbol, value) );
-  return $!( Var_box_record($symbol, &value, sizeof(value)) );
+  if (heap) return $!( Var_new($tag, value) );
+  return $!( Var_box_record($tag, &value, sizeof(value)) );
 }
 
 static List _unbox(String owner, List expression) {
@@ -578,14 +578,15 @@ static List _hash(String owner, int heap, List fields) {
     %(${x2c_param_make(%($owner), "value")}), body);
 }
 
-/* `hash` is declared outside the quotations so each of them names it. */
+/* `hash` is an exact name, so the separately built statements share it. */
 static List _fields_hash(List fields) {
-  Array body = [x2c_decl_make(%(unsigned), "hash", x2c_literal_int(0))];
+  List hash = x2c_ident("hash");
+  Array body = [$!{ unsigned $hash = 0; }];
   foreach (List field, fields)
     body.push($!{
-      hash = x2c_hash_word(hash ^ Var_hash((Var)${_field_value(field)}));
+      $hash = x2c_hash_word($hash ^ Var_hash((Var)${_field_value(field)}));
     });
-  body.push($!{ return hash; });
+  body.push($!{ return $hash; });
   return body.list_free();
 }
 
@@ -700,11 +701,12 @@ static List _value_type(List type) {
 
 /* The field of `receiver`, cast to its value type when it is a bitfield. */
 static List _field_on(List field, List receiver) {
-  List type = field[1];
-  List value = x2c_expr_field(receiver, field[0]);
-  match (type) case %((bitfield *) *):
-    return x2c_expr_cast(_value_type(type), value);
-  return value;
+  String name = field[0];
+  match (field[1]) case %((bitfield *) *): {
+    Type type = _value_type(field[1]);
+    return $!( ($type)$receiver.$name );
+  }
+  return $!( $receiver.$name );
 }
 
 static List _field_value(List field) => _field_on(field, _ref("value"));
@@ -778,11 +780,10 @@ static List _binding_statements(List lisp, List rows) {
 }
 
 static List _binding_statement(List lisp, List row) {
-  match (row) case %(?group ?name ?function ?type): {
+  match (row) case %(?group ?(String name) ?(String function) ?type): {
+    List signature = binding_literal_list(type);
     return $!{
-      Lisp_bind($lisp, ${x2c_literal_string(name)},
-                Func_new(${x2c_expr_ident(x2c_ident(function))},
-                         ${binding_literal_list(type)}));
+      Lisp_bind($lisp, $name, Func_new(${x2c_ident(function)}, $signature));
     };
   }
   return %();

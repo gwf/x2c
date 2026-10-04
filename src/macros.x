@@ -3323,10 +3323,8 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     return c.try_parse_macro_subpattern(0);
   }
   List labels = c.cache_literal_list(c._pattern_labels());
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_case_pattern")), saved);
   return c.resolve_expression(
-    %(expr ("List") (call $callee (args $expression $labels))), saved);
+    $!( Macro_case_pattern($expression, $labels) ), saved);
 }
 
 /* The Macro value a `$name` or a `Macro` variable at the cursor names. */

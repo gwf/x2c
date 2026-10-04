@@ -200,7 +200,7 @@ static List _dedent_expand(List node) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
       source.contains("$"))
-    return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
+    return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return x2c_literal_string(body.dedent());
 }
@@ -528,7 +528,7 @@ static List _tag_decode_group(List rows, Map counts, int top) {
   int mask = _tag_group_mask(counts.getdefault(top, 0));
   Array ids = [];
   for (int i = 0; i < 8; i++)
-    ids.push(x2c_expr_ident(x2c_ident("_invalid_")));
+    ids.push($!( _invalid_ ));
   foreach (List row, rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
@@ -551,7 +551,7 @@ static List _tag_id_checks(void) {
   int index = 0;
   foreach (List row, _tag_rows()) {
     checks.push($!Unit{
-      _Static_assert(${x2c_expr_ident(x2c_ident(_tag_id(row)))} == $index,
+      _Static_assert(${x2c_ident(_tag_id(row))} == $index,
                      "TagId matches the var tag ledger");
     });
     index++;
@@ -634,15 +634,14 @@ static List _update_cast_in(List id)  => _update_row(id)[4].car();
 static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
 
 static List _update_box(List id, List lhs) {
-  List value = $!( ${x2c_expr_ident(lhs)}[0] );
+  List value = $!( $lhs[0] );
   Type into = _update_cast_in(id);
   if (into) value = $!( ($into)$value );
-  return $!( ${x2c_expr_ident(x2c_ident(_update_boxer(id)))}($value) );
+  return $!( ${x2c_ident(_update_boxer(id))}($value) );
 }
 
 static List _update_decode(List id, List value) {
-  List decoded =
-    $!( ${x2c_expr_ident(x2c_ident(_update_decoder(id)))}($value) );
+  List decoded = $!( ${x2c_ident(_update_decoder(id))}($value) );
   Type back = _update_cast_out(id);
   if (back) return $!( ($back)$decoded );
   return decoded;

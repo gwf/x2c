@@ -13,7 +13,7 @@ meta static List _dedent_expand(List node) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
       source.contains("$"))
-    return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
+    return $!( $node.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return x2c_literal_string(body.dedent());
 }
