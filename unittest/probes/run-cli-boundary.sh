@@ -478,6 +478,20 @@ other_after=$(mtime "$BUILD/deps/make-out/other.c")
 [[ $root_after -gt $root_before ]]
 [[ $other_after == "$other_before" ]]
 
+# A recursive build adds the default job count unless the command line sets
+# a job limit. An option argument holding a j sets none, and -j1 stays serial.
+printf 'include %s/etc/make-command.mk\nshow:\n\t@echo "$(PARALLEL_MAKE)"\n' \
+  "$ROOT" >"$BUILD/jobs.mk"
+for make_program in make gmake; do
+  command -v "$make_program" >/dev/null || continue
+  jobs_make() {
+    "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
+  }
+  [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]]
+  [[ $(jobs_make -j1) != *" -j7" ]]
+  [[ $(jobs_make -j 1) != *" -j7" ]]
+done
+
 # GNU Make 4 remakes a deleted included file, and the unit that included it
 # then translates again.
 gnu_make=$(command -v gmake || command -v make)
