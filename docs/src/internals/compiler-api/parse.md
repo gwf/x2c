@@ -64,7 +64,7 @@ X2c declarations, parsed from source or constructed.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3131`
+Source: `src/parse.x:3158`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -74,7 +74,7 @@ Source: `src/parse.x:3131`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse.x:2065`
+Source: `src/parse.x:2067`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -87,7 +87,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2474`
+Source: `src/parse.x:2476`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -144,7 +144,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:3262`
+Source: `src/parse.x:3289`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -154,7 +154,7 @@ Source: `src/parse.x:3262`
 Lowers managed block declarations to declaration/defer pairs in source
 order, preserving their installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:2367`
+Source: `src/parse.x:2369`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -175,7 +175,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse.x:2164`
+Source: `src/parse.x:2166`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -184,7 +184,7 @@ Source: `src/parse.x:2164`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse.x:2177`
+Source: `src/parse.x:2179`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -195,7 +195,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse.x:2104`
+Source: `src/parse.x:2106`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -281,7 +281,7 @@ Parses one function declaration and its required compound body.
 The parameter bindings are active while the body is parsed, and the first
 token after the closing brace remains current.
 
-Source: `src/parse.x:2207`
+Source: `src/parse.x:2209`
 
 <a id="Compiler.parse_function_target"></a>
 #### Compiler.parse_function_target
@@ -292,7 +292,7 @@ Parses one function decorator target and returns its resulting AST.
 A compatible unit macro at the current token is expanded first; otherwise
 an ordinary function definition is required.
 
-Source: `src/parse.x:2223`
+Source: `src/parse.x:2225`
 
 <a id="Compiler.parse_import_declaration"></a>
 #### Compiler.parse_import_declaration
@@ -324,7 +324,7 @@ Source: `src/parse.x:1376`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse.x:2184`
+Source: `src/parse.x:2186`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -335,7 +335,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse.x:2053`
+Source: `src/parse.x:2055`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -346,7 +346,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse.x:2036`
+Source: `src/parse.x:2038`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
