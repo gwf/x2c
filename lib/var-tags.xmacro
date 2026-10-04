@@ -314,7 +314,7 @@ meta static List _tag_decode_group(List rows, Map counts, int top) {
   int mask = _tag_group_mask(counts.getdefault(top, 0));
   Array ids = [];
   for (int i = 0; i < 8; i++)
-    ids.push(x2c_expr_ident(x2c_ident("_invalid_")));
+    ids.push($!( _invalid_ ));
   foreach (List row, rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
@@ -341,7 +341,7 @@ meta static List _tag_id_checks(void) {
   int index = 0;
   foreach (List row, _tag_rows()) {
     checks.push($!Unit{
-      _Static_assert(${x2c_expr_ident(x2c_ident(_tag_id(row)))} == $index,
+      _Static_assert(${x2c_ident(_tag_id(row))} == $index,
                      "TagId matches the var tag ledger");
     });
     index++;

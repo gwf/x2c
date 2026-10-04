@@ -145,6 +145,12 @@ List _run_once(Compiler c, List guard) {
 List _entry_call(String entry) =>
   %((stmnt (expr (void) (call $entry (args)))));
 
+/* The statement calling the `void (void)` function `helper` names. */
+static List Compiler._helper_call(Compiler c, List helper) {
+  List callee = %(expr ((func ((void))) void) (ident $helper));
+  return c.rebuild_statement($!{ $callee(); }).cadr();
+}
+
 /* Apply file-scope initializer rewrites across one generated region. Both
    regions share one initializer list, so a header definition deferred into
    the source's initializer is ordered against the file statics it reads. */
@@ -354,7 +360,7 @@ static List Compiler._array_choice(
   List active = NULL;
   foreach (List test, tests) {
     active = active ? %(expr (int) (op && $active $test)) : test;
-    assignment = %(if $test $assignment);
+    assignment = c.rebuild_statement($!{ if ($test) $assignment }).cadr();
   }
   if (!active) unconditional = 1;
   else applicable = applicable
@@ -402,7 +408,7 @@ static List Compiler._array_assignment(
     rhs = %(expr $type
       (call "__builtin_choose_expr" (args $condition $rhs $zero)));
   }
-  return %(stmnt (expr $type (op = $slot $rhs)));
+  return c.rebuild_statement($!{ $slot = $rhs; }).cadr();
 }
 
 static List Compiler._array_input(
@@ -588,8 +594,7 @@ static List Compiler._cache_batches(
     List helper = c.sym.introduce(c.fresh_name(stem));
     declarations.push(
       _initializer_function(c, type, helper, batch.list_free()));
-    calls.push(%(stmnt (expr (void)
-      (call (expr ((func ((void))) void) (ident $helper)) (args)))));
+    calls.push(c._helper_call(helper));
   }
   statements.free();
   return calls.list_free();
@@ -672,8 +677,7 @@ static void StaticQueue.add_calls(
      defines no helper. */
   foreach (List initializer, definitions) {
     List helper = initializer.caddr(), arms = initializer[3];
-    List call = %(stmnt (expr (void)
-      (call (expr ((func ((void))) void) (ident $helper)) (args))));
+    List call = q.c._helper_call(helper);
     foreach (List statement, preproc_within_arms(arms, %($call)))
       q.c.add_init(late ? <late> : <mid>, statement);
   }

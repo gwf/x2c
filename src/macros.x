@@ -2261,6 +2261,7 @@ static List Compiler._scalar_row(Compiler c, List sources, int retain) {
 
 static Var _identifier_expression(Var value) {
   if (value is <string>) return %(expr () (ident $value));
+  match (value) case %("x2c.ident" ?): return %(expr () (ident $value));
   if (value is <list> && !value.is_nil() &&
       binding_identity_try_parts(value, NULL, NULL))
     return %(expr () (ident $value));
@@ -3322,10 +3323,8 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     return c.try_parse_macro_subpattern(0);
   }
   List labels = c.cache_literal_list(c._pattern_labels());
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_case_pattern")), saved);
   return c.resolve_expression(
-    %(expr ("List") (call $callee (args $expression $labels))), saved);
+    $!( Macro_case_pattern($expression, $labels) ), saved);
 }
 
 /* The Macro value a `$name` or a `Macro` variable at the cursor names. */

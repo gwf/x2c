@@ -632,9 +632,9 @@ static List Compiler._resets(Compiler c, Map initials) {
         if (<const> in type || type.is_array()) continue;
         Var initial;
         if (initials.try_get(binding, initial)) initializer = initial;
+        List target = %(expr $type (ident $binding));
         resets.push(
-          %(stmnt (expr $type
-            (op = (expr $type (ident $binding)) $initializer))));
+          c.rebuild_statement($!{ $target = $initializer; }).cadr());
       }
   return resets.list_free();
 }
