@@ -317,14 +317,14 @@ Public functions:
 `Compiler.keep_imported_meta`, `Compiler.at_import`,
 `Compiler.record_macro_export`, `Compiler.import_exported`,
 `Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.import_package_macros`,
-`Compiler.source_path`, `Compiler.open_macro_library`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`macro_library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
-`macro_library_reset`
+`Compiler.lift_macro_lisp_expression`, `Compiler.bind_macro_lisp_statement`,
+`Compiler.import_package_macros`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
+`Compiler.inherits_import`, `Compiler.record_comptime`,
+`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
+`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
+`Compiler.report_lisp_failure`, `macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
@@ -364,17 +364,18 @@ meta functions and the native code they call.
 Public functions:
 
 `Compiler.install_meta_function`, `Compiler.install_meta_declaration`,
-`Compiler.evaluate_meta_expression`, `Compiler.run_meta_call`,
-`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
-`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`Compiler.compiler_targets`, `Compiler.select_native_modules`,
-`Compiler.select_package_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.add_native_module`,
-`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
-`Compiler.supplies_native_meta`, `x2c_register_extension`,
-`Compiler.links_extension`, `Compiler.extension_archive`
+`Compiler.evaluate_meta_expression`, `Compiler.evaluate_meta_statement`,
+`Compiler.run_meta_call`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`,
+`Compiler.bind_linked_meta`, `Compiler.compiler_targets`,
+`Compiler.select_native_modules`, `Compiler.select_package_module`,
+`Compiler.load_native_module`, `Compiler.preload_native_module`,
+`Compiler.add_native_module`, `Compiler.native_module_loaded`,
+`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
+`x2c_register_extension`, `Compiler.links_extension`,
+`Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
