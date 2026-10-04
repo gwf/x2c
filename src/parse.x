@@ -2460,7 +2460,7 @@ static void Compiler._require_cleanup(
 }
 
 static List Compiler._cleanup_statement(Compiler c, Type type, List binding) {
-  List receiver = %(expr $type (ident $binding));
+  List receiver = $!($type)( $binding );
   return c.bind_syntax(
     $!{ defer $receiver.cleanup(); }, AST_STATEMENT, c.return_type);
 }

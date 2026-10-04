@@ -371,7 +371,7 @@ static void _file_scope_declarators(List declarators, Map locals) {
 typedef struct Definition {
   Compiler c, Token start;
   Atom name, Symbol kind;
-  List target, parameters, template, fresh, captures, pattern, rebuild;
+  List target, parameters, template, fresh, captures, pattern, rebuild, type;
   List origin, String file, Map locals, Array using;
   int anonymous, local, nested, quotation, leaf;
 } Definition;
@@ -1170,7 +1170,9 @@ Token Compiler.after_hole(Compiler c) {
    macros applied where they are written. A `$name` in the body names the
    visible local `name`: its first use declares a hole, and the quotation
    applies to that local's value. A `${expression}` is a hole for a hidden
-   local that the quotation declares before it builds its code. */
+   local that the quotation declares before it builds its code. A typed
+   quotation, `$!(T)( expression )`, builds its code where it is written
+   (see "typed quotations"). */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
     body names. */
@@ -1188,7 +1190,13 @@ List Compiler.parse_macro_quotation(Compiler c) {
   defer c.sym.pop_scope();
   Map holes = {};
   List locals = c.macro_holes ? NULL : c._expression_holes(holes);
-  List built = c._quotation(start, kind, holes);
+  List type = NULL;
+  if (kind == <expression> && c.token.after_group().type == <(>) {
+    if (c.macro_holes) $report.parse.typed_quotation(c, start);
+    type = c._quoted_type(holes);
+    locals = locals.append(c._expression_holes(holes));
+  }
+  List built = c._quotation(start, kind, holes, type);
   return locals
        ? %(expr ("List") (parens (block @locals (stmnt $built))))
        : built;
@@ -1209,6 +1217,8 @@ static List Compiler._expression_holes(Compiler c, Map holes) {
       next = Token.skip_trivia(next + 1);
       if (next.type == <ident>) next = Token.skip_trivia(next + 1);
       t = next.group_close();
+      Token typed = next.after_group();
+      if (next.type == <(> && typed.type == <(>) t = typed.group_close();
     }
     else if (t.type == <$> && brace.type == <"{"> &&
              (last != <case> || Token.skip_trivia(brace + 1).type != <$>)) {
@@ -1250,11 +1260,34 @@ static List Compiler._expression_hole(Compiler c, Token dollar) {
   return hole ? hole : c._quoted_hole(name, Token.after_group(dollar + 1));
 }
 
+/* The expression that computes a typed quotation's type, from the group at
+   the cursor: a type name, or a `$name` local or `${expression}` hole that
+   holds the type. */
+static List Compiler._quoted_type(Compiler c, Map holes) {
+  c.expect(<(>);
+  Token origin = c.token;
+  List type = NULL;
+  if (c.peek(0) == <$>) {
+    Var name = c.peek(1) == <"{">
+             ? holes[%(expression ${c.token.pos})]
+             : Token.skip_trivia(c.token + 1).text;
+    c.token = c.after_hole();
+    type = c.resolve_expression(%(expr () (ident ${name.str()})), origin);
+  }
+  else {
+    Type parsed = NULL;
+    c.parse_type_operand(&parsed);
+    type = c.cache_literal_list(parsed);
+  }
+  c.expect(<)>);
+  return type;
+}
+
 static List Compiler._quotation(
-  Compiler c, Token start, Symbol kind, Map holes) {
+  Compiler c, Token start, Symbol kind, Map holes, List type) {
   Definition d = {
     .c = c, .start = start, .kind = kind, .anonymous = 1, .local = 1,
-    .quotation = 1};
+    .quotation = 1, .type = type};
   d.naming();
   d.nested = !!c.macro_holes;
   Map enclosing = c.macro_holes;
@@ -1297,6 +1330,7 @@ static List Compiler._quoted_cons(
    and keeps its definition. */
 static List Definition.construction(Definition &d) {
   Compiler c = d.c;
+  if (d.type) return d.typed_construction();
   if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
     return NULL;
   Map keys = {}, file_locals = {};
@@ -1366,6 +1400,71 @@ static List Compiler._built_hole(
   foreach (Var constant, %($selected $shape "x2c.hole"))
     cells = c.literal_cell(c.cache_literal_var(constant), cells);
   return %(expr ("List") $cells);
+}
+
+/* typed quotations
+
+   `$!(T)( expression )` builds `(expr T CONTENT)` where it is written,
+   from the template a rebuild fills: constant syntax from the literal
+   cache, and each hole's value inserted as a rebuild inserts it. It binds
+   nothing, so it may declare no name and apply no template. */
+
+static List Definition.typed_construction(Definition &d) {
+  Compiler c = d.c;
+  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(c, d.start);
+  Map keys = {};
+  foreach (List hole, d.parameters)
+    foreach (Symbol projection, %(source value expression splice))
+      keys[_hole_key(hole, projection)] = %($hole $projection);
+  match (d.rebuild.car()) case %(expr ? *content):
+    return c.literal_cell(c.cache_literal_var(<expr>),
+      c.literal_cell(d.type, c._typed_cells(content, keys, d.start)));
+  /* The rebuild template of an expression that is one hole is empty; the
+     definition's template names the hole. */
+  Var binder = d.template.last();
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_typed")), d.start);
+  List value = c._typed_hole(keys[binder], d.start);
+  return c.resolve_expression(
+    %(expr ("List") (call $callee (args ${d.type} $value))), d.start);
+}
+
+/* The List cells that build `items`. A sequence or splice hole
+   contributes its items to the List that holds it. */
+static List Compiler._typed_cells(
+  Compiler c, List items, Map keys, Token start) {
+  if (!items) return %(nil);
+  List tail = c._typed_cells(items.cdr(), keys, start);
+  Var item = items.car(), row;
+  if (item is <list> && !item.is_nil())
+    return c.literal_cell(
+      %(expr ("List") ${c._typed_cells(item, keys, start)}), tail);
+  if (!item.is_binder() || !item.str()[1:].startswith("__macro_"))
+    return c.literal_cell(c.cache_literal_var(item), tail);
+  if (!keys.try_get(item, row)) $report.parse.typed_quotation(c, start);
+  (List hole, Symbol projection) = row.list();
+  List value = c._typed_hole(row, start);
+  if (projection == <splice> || hole.assoc(<sequence>).int())
+    value = %(splice $value);
+  return c.literal_cell(value, tail);
+}
+
+/* One use of a hole: its local, which `Macro.inserted` lifts in an
+   expression hole and makes an identifier where code takes an expression.
+   A sequence inserts its items as they are. */
+static List Compiler._typed_hole(Compiler c, List row, Token start) {
+  (List hole, Symbol projection) = row;
+  List local = c.resolve_expression(
+    %(expr () (ident ${_hole_name(hole).str()})), start);
+  int lifts = hole.assoc(<kind>) == <expr>;
+  int expression = projection == <expression>;
+  if (hole.assoc(<sequence>).int() || (!lifts && !expression)) return local;
+  List callee = c.resolve_expression(
+    %(expr () (ident "Macro_inserted")), start);
+  return c.resolve_expression(
+    %(expr ("Var") (call $callee (args $local ${x2c_literal_int(lifts)}
+                                       ${x2c_literal_int(expression)}))),
+    start);
 }
 
 /* A quotation's hole takes its kind from a name position, or from a

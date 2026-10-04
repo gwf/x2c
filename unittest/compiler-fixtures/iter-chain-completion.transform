@@ -7,9 +7,9 @@
    (return 
     (expr ("Var") 
      (at 36 
-      (call "Var_binary" 
+      (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
        (args (expr ("Var") (ident (binding 2 "value"))) 
-        (expr ("Symbol") "54") 
+        (expr ("Symbol") (literal ("Symbol") "*" *)) 
         (expr ("Var") 
          (call (expr ((func ((int))) "Var") (ident (binding 3 "int_var"))) 
           (args (expr (int) (literal (int) "2")))))))))))))
@@ -22,12 +22,12 @@
    (return 
     (expr (int) 
      (at 39 
-      (call "Var_equal" 
+      (call (expr (macro-expr) (ident (binding-name "Var_equal"))) 
        (args (expr ("Var") 
               (at 38 
-               (call "Var_binary" 
+               (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
                 (args (expr ("Var") (ident (binding 5 "value"))) 
-                 (expr ("Symbol") "75") 
+                 (expr ("Symbol") (literal ("Symbol") "%" %)) 
                  (expr ("Var") 
                   (call (expr ((func ((int))) "Var") 
                          (ident (binding 3 "int_var"))) 

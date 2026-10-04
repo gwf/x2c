@@ -1911,7 +1911,7 @@ List Compiler.forward_parameters(Compiler c, List types) {
   foreach (Type type, types) {
     List binding = c.sym.introduce(%"a${index++}");
     declarations.push(type.parameter_ast(binding));
-    arguments.push(%(expr $type (ident $binding)));
+    arguments.push($!($type)( $binding ));
   }
   return %(${declarations.list_free()} ${arguments.list_free()});
 }
@@ -1965,7 +1965,7 @@ String Compiler.protocol_update_helper(
   String name =
     %"_x2c_proto_${participant.car().str().lower()}_${member}_$suffix";
   List helper = c.sym.introduce(name);
-  List callee = %(expr $source_type (ident $source_binding));
+  List callee = $!($source_type)( $source_binding );
   /* A direct update stores the member's result through `lhs`; the `op`
      parameter keeps the update ABI of the dynamic path. The postfix form
      adds one and returns the value it read first. */
@@ -2320,7 +2320,7 @@ static List AdapterFunction.generate(AdapterFunction &a) {
   }
   List source_binding = a.c.sym.reference(%(${a.source}), NULL);
   List call = a.c._bound_call(
-    source_result, %(expr ${a.signature} (ident $source_binding)),
+    source_result, $!(${a.signature})( $source_binding ),
     arguments.list_free());
   a.binding = a.c.sym.reference(%(${a.name}), NULL);
   if (a.make_static) a.binding = a.c.sym.introduce(a.name);
@@ -2350,7 +2350,7 @@ static List Compiler._guard_rendering(
              (bind ? ((fnmod (params
                (param ? (bind ?boxed ?)) *remaining)) *)))
            (block *body)): {
-      List value = %(expr ("Var") (ident $boxed));
+      List value = $!(Var)( $boxed );
       List fallback = NULL;
       if (member == "str" || member == "repr")
         fallback = c._helper_call(
@@ -2359,14 +2359,14 @@ static List Compiler._guard_rendering(
         case %((param ? (bind ?output ?))):
           fallback = c._helper_call(
             %("Buffer"), "Var_write_pointer_repr",
-            %($value (expr ("Buffer") (ident $output))));
+            %($value ${$!(Buffer)( $output )}));
       List path = c.sym.introduce("render_path");
       c.set_fact(%(automatic $path), 1);
       c.set_fact(%(type $path), %("RenderPath"));
       Macro addressed = $addressed;
       List address = c.rebuild_expression(
         %(* "RenderPath"),
-        addressed(%(expr ("RenderPath") (ident $path))));
+        addressed($!(RenderPath)( $path )));
       List pointer = c._helper_call(%(* void), "Var_pointer", %($value));
       List enter = c._helper_call(
         %(int), "RenderPath_enter", %($address $pointer));
@@ -2433,7 +2433,7 @@ static List _descriptor_fields(List thunks) {
 static List Compiler._builtin_registration(
   Compiler c, List methods, String name, Symbol tag) {
   List symbol = %(expr ("Symbol") (literal ("Symbol") $name $tag));
-  List table = %(expr ("VarMethods") (ident $methods));
+  List table = $!(VarMethods)( $methods );
   return c._helper_call(
     %(int), "x2c_register_builtin_descriptor", %($symbol $table));
 }
@@ -2441,7 +2441,7 @@ static List Compiler._builtin_registration(
 static List Compiler._tagged_registration(
   Compiler c, List methods, String name, Symbol tag) {
   List symbol = x2c_literal_symbol(tag);
-  List table = %(expr ("VarMethods") (ident $methods));
+  List table = $!(VarMethods)( $methods );
   return c._helper_call(
     %(void), "x2c_register_tagged_descriptor",
     %($symbol ${_string_literal(name)} $table));
@@ -2449,7 +2449,7 @@ static List Compiler._tagged_registration(
 
 static List Compiler._fallback_registration(
   Compiler c, List methods, String name, List early_call) {
-  List table = %(expr ("VarMethods") (ident $methods));
+  List table = $!(VarMethods)( $methods );
   List fallback = c._helper_call(
     %(void), "x2c_register_descriptor", %(${_string_literal(name)} $table));
   return c.rebuild_statement($!{ if (!$early_call) { $fallback; } }).cadr();
@@ -2507,7 +2507,7 @@ static List Compiler._native_alias(
   if (!make_static) c.record_generated_symbol(target, signature);
   List native_binding = c.sym.reference(%($source), NULL);
   return c.finish_foreign_alias(
-    declaration, %(expr $signature (ident $native_binding)));
+    declaration, $!($signature)( $native_binding ));
 }
 
 static List _insert_at_boundary(

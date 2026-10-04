@@ -62,7 +62,8 @@ static List Compiler._convert_composite(
     elements.push(c._convert_composite_row(
       row, native_target, row_condition, parent_condition, native_used));
   }
-  return %(expr $target (composite (commas @{elements.list_free()})));
+  List converted = elements.list_free();
+  return $!($target)( { $converted... } );
 }
 
 /* An empty initializer for a Map or Array, or for a type that converts from
@@ -115,7 +116,7 @@ static List Compiler._composite_rows(
 static List _composite_excess_check(List parent_condition) {
   List zero = x2c_literal_int(0);
   List one = x2c_literal_int(1);
-  List size = %(expr (int) (op ? $parent_condition $zero $one));
+  List size = $!(int)( $parent_condition ? $zero : $one );
   Type array = %((dim $size) char);
   List probe = %(expr $array (cast $array
     (expr $array (composite (commas $zero)))));
@@ -272,7 +273,7 @@ static List Compiler._initializer_index(
   List binding = c.sym.introduce(c.fresh_name("initializer_index"));
   c.sym.bind_identity(NULL, binding, type.declaration_ast(binding));
   Type native = %(enum ((op = $binding $index)));
-  reference = %(expr $type (ident $binding));
+  reference = $!($type)( $binding );
   return %(expr $type (cast $native $reference));
 }
 
@@ -922,14 +923,14 @@ static List Compiler._initializer_adapter(
   List key = %(iadapt $from $result $body), adapter = NULL;
   $adapter.memo(c, key, adapter) {
     List parameter = c.sym.introduce(c.fresh_name("initializer_arg"));
-    List input = %(expr ${source.cadr()} (ident $parameter));
+    List input = $!(${source.cadr()})( $parameter );
     body = body.search_replace(%(!quote $formal), input);
     List binding = c.sym.introduce(c.fresh_name("initializer_adapt"));
     c.add_early(c.wrapper_function(
       %(static @result), binding, %(${from.parameter_ast(parameter)}),
       %((return $result $body))));
     Type callable = %((func ($from)) @result);
-    adapter = %(expr $callable (ident $binding));
+    adapter = $!($callable)( $binding );
   }
   return adapter;
 }

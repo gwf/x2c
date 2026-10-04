@@ -137,7 +137,7 @@ List _initializer_function(Compiler c, Type type, List name, List body) =>
 
 /* Returns when `guard` is set and sets it otherwise. */
 List _run_once(Compiler c, List guard) {
-  List flag = %(expr (int) (ident $guard));
+  List flag = $!(int)( $guard );
   return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
 }
 
@@ -224,7 +224,7 @@ static List Compiler._defer_binding(
         if (!c.static_value_is_runtime(value, NULL)) return bound;
         match (value)
           case %(composite (commas *items)): {
-            List target = %(expr $declared (ident $name));
+            List target = $!($declared)( $name );
             List assign = c._array_block(target, resolved, items);
             List binding = _record_deferred(name, mods, assign, initializers);
             List zero = c._zero_initializer(value);
@@ -297,7 +297,7 @@ static List Compiler._zero_initializer(Compiler c, List value) {
     case %(expr ?type ?): {
       Type resolved = c.sym.resolve_key(type);
       return resolved.is_aggregate()
-        ? %(expr $type (composite (commas $zero))) : zero;
+        ? $!($type)( { $zero } ) : zero;
     }
     case %(composite (commas *items)): {
       Array zeroed = [];
@@ -359,12 +359,12 @@ static List Compiler._array_choice(
   if (condition) tests = cons(condition, tests);
   List active = NULL;
   foreach (List test, tests) {
-    active = active ? %(expr (int) (op && $active $test)) : test;
+    active = active ? $!(int)( $active && $test ) : test;
     assignment = c.rebuild_statement($!{ if ($test) $assignment }).cadr();
   }
   if (!active) unconditional = 1;
   else applicable = applicable
-    ? %(expr (int) (op || $applicable $active)) : active;
+    ? $!(int)( $applicable || $active ) : active;
   return assignment;
 }
 
@@ -383,7 +383,7 @@ static List Compiler._array_slot(
       List length = %(expr (unsigned)
         (op / (expr (unsigned) (sizeof (parens $parent)))
               (expr (unsigned) (sizeof (parens $slot)))));
-      tests = cons(%(expr (int) (op < $selector $length)), tests);
+      tests = cons($!(int)( $selector < $length ), tests);
     }
   }
   return slot;
@@ -405,8 +405,7 @@ static List Compiler._array_assignment(
     List zero = _initializer_rhs(
       type, NULL, NULL, type,
       %(composite (commas (expr (int) (literal (int) "0")))));
-    rhs = %(expr $type
-      (call "__builtin_choose_expr" (args $condition $rhs $zero)));
+    rhs = $!($type)( __builtin_choose_expr($condition, $rhs, $zero) );
   }
   return c.rebuild_statement($!{ $slot = $rhs; }).cadr();
 }
@@ -535,7 +534,7 @@ macro Decorator $initialized_entry(
 List _patch_initialized_entry(
   Compiler c, List function, List body, List guard, List entry) {
   Macro shape = $initialized_entry;
-  List condition = %(expr (int) (ident $guard));
+  List condition = $!(int)( $guard );
   List callee = %(expr ((func ((void))) void) (ident $entry));
   return c.rebuild_function(function, shape(condition, callee, body));
 }

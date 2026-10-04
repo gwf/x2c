@@ -116,7 +116,7 @@
      (op = (bind (binding 21 "identity_eq") ()) 
       (expr (int) 
        (at 58 
-        (call "Var_same" 
+        (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") (ident (binding 16 "equal_value"))))))))))) 
   (at 61 
@@ -126,16 +126,17 @@
       (expr (int) 
        (at 60 
         (expr (int) 
-         (op ! (call "Var_same" 
-                (args (expr ("Var") (ident (binding 14 "first"))) 
-                 (expr ("Var") (ident (binding 16 "equal_value"))))))))))))) 
+         (op ! (expr (macro-expr) 
+                (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
+                 (args (expr ("Var") (ident (binding 14 "first"))) 
+                  (expr ("Var") (ident (binding 16 "equal_value")))))))))))))) 
   (at 63 
    (declare (int) 
     (bindings 
      (op = (bind (binding 23 "self_identity") ()) 
       (expr (int) 
        (at 62 
-        (call "Var_same" 
+        (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") (ident (binding 14 "first"))))))))))) 
   (at 65 
@@ -144,7 +145,7 @@
      (op = (bind (binding 24 "mixed_eq_left") ()) 
       (expr (int) 
        (at 64 
-        (call "Var_equal" 
+        (call (expr (macro-expr) (ident (binding-name "Var_equal"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") 
            (call (expr ((func ((long))) "Var") (ident (binding 15 "long_var"))) 
@@ -155,7 +156,7 @@
      (op = (bind (binding 25 "mixed_eq_right") ()) 
       (expr (int) 
        (at 66 
-        (call "Var_equal" 
+        (call (expr (macro-expr) (ident (binding-name "Var_equal"))) 
          (args (expr ("Var") 
                 (call (expr ((func ((long))) "Var") 
                        (ident (binding 15 "long_var"))) 
@@ -167,7 +168,7 @@
      (op = (bind (binding 26 "mixed_identity") ()) 
       (expr (int) 
        (at 68 
-        (call "Var_same" 
+        (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") 
            (call (expr ((func ((long))) "Var") (ident (binding 15 "long_var"))) 
@@ -179,12 +180,13 @@
       (expr (int) 
        (at 70 
         (expr (int) 
-         (op ! (call "Var_same" 
-                (args (expr ("Var") 
-                       (call (expr ((func ((long))) "Var") 
-                              (ident (binding 15 "long_var"))) 
-                        (args (expr (long) (ident (binding 13 "precise")))))) 
-                 (expr ("Var") (ident (binding 14 "first"))))))))))))) 
+         (op ! (expr (macro-expr) 
+                (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
+                 (args (expr ("Var") 
+                        (call (expr ((func ((long))) "Var") 
+                               (ident (binding 15 "long_var"))) 
+                         (args (expr (long) (ident (binding 13 "precise")))))) 
+                  (expr ("Var") (ident (binding 14 "first")))))))))))))) 
   (at 28 
    (declare (int) 
     (bindings 
@@ -331,7 +333,7 @@
      (op = (bind (binding 49 "object_same") ()) 
       (expr (int) 
        (at 79 
-        (call "Var_same" 
+        (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
          (args (expr ("Var") (ident (binding 45 "array_value"))) 
           (expr ("Var") (ident (binding 47 "copy_value"))))))))))) 
   (at 82 
@@ -340,7 +342,7 @@
      (op = (bind (binding 50 "object_mixed_same") ()) 
       (expr (int) 
        (at 81 
-        (call "Var_same" 
+        (call (expr (macro-expr) (ident (binding-name "Var_same"))) 
          (args (expr ("Var") (ident (binding 45 "array_value"))) 
           (expr ("Var") 
            (call (expr ((func (("Array"))) "Var") 

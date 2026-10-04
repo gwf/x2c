@@ -14,7 +14,9 @@ Macros as values that build and recognize code.
 | [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
 | [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
 | [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
+| [`Macro.inserted`](#Macro.inserted) | Returns what a typed quotation inserts for one use of a hole whose local holds `value`, as a rebuild inserts it. |
 | [`Macro.subject`](#Macro.subject) | Returns the table `Macro.use_subject` last set, or void. |
+| [`Macro.typed`](#Macro.typed) | Returns `expression` with the type `type`: what a typed quotation builds when its code is one hole. |
 | [`Macro.use_subject`](#Macro.use_subject) | Sets the `(SPELLING BINDING)` rows for global references and the `(source-spelling BINDING SPELLING)` rows for renamed local bindings in a compile-time call's syntax arguments. |
 
 ### Functions
@@ -39,7 +41,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:339`
+Source: `lib/macro-value.x:372`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -49,7 +51,7 @@ Source: `lib/macro-value.x:339`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:332`
+Source: `lib/macro-value.x:365`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -69,9 +71,22 @@ Source: `lib/macro-value.x:65`
 Derives the Match pattern that recognizes code this macro builds,
 capturing each parameter under the given binder.
 
-Source: `lib/macro-value.x:131`
+Source: `lib/macro-value.x:155`
 
 ### `Macro`
+
+<a id="Macro.inserted"></a>
+#### Macro.inserted
+
+`Var Macro.inserted(Var value, int lifts, int expression)`
+
+Returns what a typed quotation inserts for one use of a hole whose
+local holds `value`, as a rebuild inserts it. An expression hole
+(`lifts`) takes an `int`, String, or Symbol as its literal. Where the
+code takes an expression (`expression`), a binding, an `x2c_ident`
+spelling, or a Name hole's String becomes an identifier expression.
+
+Source: `lib/macro-value.x:97`
 
 <a id="Macro.subject"></a>
 #### Macro.subject
@@ -80,7 +95,17 @@ Source: `lib/macro-value.x:131`
 
 Returns the table `Macro.use_subject` last set, or void.
 
-Source: `lib/macro-value.x:101`
+Source: `lib/macro-value.x:125`
+
+<a id="Macro.typed"></a>
+#### Macro.typed
+
+`List Macro.typed(List type, List expression)`
+
+Returns `expression` with the type `type`: what a typed quotation
+builds when its code is one hole.
+
+Source: `lib/macro-value.x:111`
 
 <a id="Macro.use_subject"></a>
 #### Macro.use_subject
@@ -94,7 +119,7 @@ recognizes only the recorded global binding; with void it recognizes
 any binding of its spelling. The compiler sets these rows for each
 `meta` call and carries them through the helper.
 
-Source: `lib/macro-value.x:109`
+Source: `lib/macro-value.x:133`
 
 ## Runtime-internal callables
 
@@ -117,7 +142,7 @@ whose binder is `binder`. Splice and construction projections are
 always sequences; return, declarator, and member projections never
 are; source, value, and expression follow the hole's `sequence`.
 
-Source: `lib/macro-value.x:177`
+Source: `lib/macro-value.x:201`
 
 ## Public types
 

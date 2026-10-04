@@ -93,9 +93,9 @@
      (op = (bind (binding 21 "sum") ()) 
       (expr ("Var") 
        (at 86 
-        (call "Var_binary" 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") "56") 
+          (expr ("Symbol") (literal ("Symbol") "+" +)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 89 
    (declare ("Var") 
@@ -103,9 +103,9 @@
      (op = (bind (binding 22 "product") ()) 
       (expr ("Var") 
        (at 88 
-        (call "Var_binary" 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") "54") 
+          (expr ("Symbol") (literal ("Symbol") "*" *)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 91 
    (declare ("Var") 
@@ -113,9 +113,9 @@
      (op = (bind (binding 23 "shifted") ()) 
       (expr ("Var") 
        (at 90 
-        (call "Var_binary" 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") "15481") 
+          (expr ("Symbol") (literal ("Symbol") "<<" \x3C<)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 93 
    (declare ("Var") 
@@ -123,9 +123,9 @@
      (op = (bind (binding 24 "bits") ()) 
       (expr ("Var") 
        (at 92 
-        (call "Var_binary" 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") "249") 
+          (expr ("Symbol") (literal ("Symbol") "|" |)) 
           (expr ("DynamicAlias") (ident (binding 20 "b"))))))))))) 
   (at 95 
    (declare ("Var") 
@@ -133,9 +133,9 @@
      (op = (bind (binding 25 "quotient") ()) 
       (expr ("Var") 
        (at 94 
-        (call "Var_binary" 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Dynamic") (ident (binding 19 "a"))) 
-          (expr ("Symbol") "95") 
+          (expr ("Symbol") (literal ("Symbol") "/" /)) 
           (expr ("Var") 
            (call (expr ((func ((double))) "Var") 
                   (ident (binding 26 "double_var"))) 

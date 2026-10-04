@@ -194,8 +194,6 @@ static List _binding_target(String bind_name, String name, String maker);
 
 static List _binding_name_signature(String name);
 
-static List source_identifier_content(List fields);
-
 static Var _x2c_lambda_0(Var output);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
@@ -1841,9 +1839,11 @@ static List Foreach_constructor(Foreach * f, List converter){
   return List_truth(enumerate) ? enumerate : converter;
 }
 
+Var Macro_inserted(Var, int, int);
+
 static List _iter_call(List function, List collection){
   return cons(_4, cons(_181, cons(List_var(({
-    Var _x2c_literal_part_28 = List_var(function);  Var _x2c_literal_part_29 = List_var(cons(_23, cons(List_var(collection), NULL)));  cons(_8, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
+    Var _x2c_literal_part_28 = Macro_inserted(List_var(function), 1, 1);  Var _x2c_literal_part_29 = List_var(cons(_23, cons(Macro_inserted(List_var(collection), 1, 1), NULL)));  cons(_8, cons(_x2c_literal_part_28, cons(_x2c_literal_part_29, NULL)));
   }
   )), NULL)));
 }
@@ -1866,11 +1866,10 @@ static List _pair_assignments(List targets, List item, Var pair){
   return cons(List_var(assignments), NULL);
 }
 
+List Macro_typed(List, List);
+
 static List _expr(List type, Var binding){
-  return({
-    Var _x2c_literal_part_39 = List_var(type);  Var _x2c_literal_part_40 = List_var(source_identifier_content(cons(binding, NULL)));  cons(_4, cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL)));
-  }
-  );
+  return Macro_typed(type, Var_list(Macro_inserted(binding, 1, 1)));
 }
 
 static List _address(List value){
@@ -1879,20 +1878,20 @@ static List _address(List value){
 
 static List _declare(Type type, Var binding, List initializer){
   return List_truth(initializer) ? cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-    Var _x2c_literal_part_43 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_44 = List_var(cons(_187, cons(List_var(({
-      Var _x2c_literal_part_41 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(binding, NULL))))), _56)));  Var _x2c_literal_part_42 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(initializer), NULL)))));  cons(_196, cons(_197, cons(_x2c_literal_part_41, cons(_x2c_literal_part_42, NULL))));
+    Var _x2c_literal_part_41 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_42 = List_var(cons(_187, cons(List_var(({
+      Var _x2c_literal_part_39 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(binding, NULL))))), _56)));  Var _x2c_literal_part_40 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(initializer), NULL)))));  cons(_196, cons(_197, cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL))));
     }
-    )), NULL)));  cons(_182, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
+    )), NULL)));  cons(_182, cons(_x2c_literal_part_41, cons(_x2c_literal_part_42, NULL)));
   }
   )), NULL))), NULL))) : cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-    Var _x2c_literal_part_45 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_46 = List_var(cons(_187, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(binding, NULL))))), _56))), NULL)));  cons(_182, cons(_x2c_literal_part_45, cons(_x2c_literal_part_46, NULL)));
+    Var _x2c_literal_part_43 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_44 = List_var(cons(_187, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(binding, NULL))))), _56))), NULL)));  cons(_182, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
   }
   )), NULL))), NULL)));
 }
 
 static List _assign(List target, List value){
   return cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-    Var _x2c_literal_part_47 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(target), NULL)))));  Var _x2c_literal_part_48 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(value), NULL)))));  cons(_196, cons(_197, cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, NULL))));
+    Var _x2c_literal_part_45 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(target), NULL)))));  Var _x2c_literal_part_46 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(value), NULL)))));  cons(_196, cons(_197, cons(_x2c_literal_part_45, cons(_x2c_literal_part_46, NULL))));
   }
   )), NULL)))), NULL))), NULL))), NULL)));
 }
@@ -1907,10 +1906,10 @@ static List _class_expand(List capture){
   if(! List_truth(type)) return cons(List_var(capture), NULL);
   if(! x2c_type_is_pointer(type) && Var_equal(List_car(type), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_219), cons(String_var(owner), cons(String_var(_220), NULL)))), _221), _224);
   return({
-    Var _x2c_literal_part_52 = List_var(capture);  Var _x2c_literal_part_53 = List_var(cons(_225, cons(_226, cons(List_var(({
-      Var _x2c_literal_part_49 = String_var(owner);  Var _x2c_literal_part_50 = List_var(type);  Var _x2c_literal_part_51 = List_var(builtin_class_location());  cons(_x2c_literal_part_49, cons(_x2c_literal_part_50, cons(_x2c_literal_part_51, NULL)));
+    Var _x2c_literal_part_50 = List_var(capture);  Var _x2c_literal_part_51 = List_var(cons(_225, cons(_226, cons(List_var(({
+      Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(builtin_class_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
     }
-    )), NULL))));  cons(_x2c_literal_part_52, cons(_x2c_literal_part_53, NULL));
+    )), NULL))));  cons(_x2c_literal_part_50, cons(_x2c_literal_part_51, NULL));
   }
   );
 }
@@ -2007,7 +2006,7 @@ static List Shape_constructor(Shape * s){
   if((* s).heap && !(* s).aggregate && ! x2c_type_is_value((* s).pointee)) x2c_diagnostic_fail(String_join(NULL, cons(String_var(_219), cons(String_var(owner), cons(String_var(_230), NULL)))), NULL);
   List constructor = _new(owner, (* s).representation, (* s).heap, (* s).named, (* s).positional && ! List_truth(initialize), extras);
   if((* s).alias) return cons(List_var(({
-    Var _x2c_literal_part_54 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_55 = List_var((* s).type);  Var _x2c_literal_part_56 = List_getindex(constructor, 1);  cons(_231, cons(_x2c_literal_part_54, cons(_x2c_literal_part_55, cons(_233, cons(_x2c_literal_part_56, NULL)))));
+    Var _x2c_literal_part_52 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_53 = List_var((* s).type);  Var _x2c_literal_part_54 = List_getindex(constructor, 1);  cons(_231, cons(_x2c_literal_part_52, cons(_x2c_literal_part_53, cons(_233, cons(_x2c_literal_part_54, NULL)))));
   }
   )), NULL);
   return cons(List_var(constructor), NULL);
@@ -2039,10 +2038,10 @@ static List Shape_cleanup(Shape * s, List release){
   List freed = _389;
   List cleanup_method = _default(owner, _390, _54, cons(List_var(parameter), NULL), cons(List_var(freed), NULL));
   return({
-    Var _x2c_literal_part_59 = List_var(free_method);  Var _x2c_literal_part_60 = List_var(cleanup_method);  Var _x2c_literal_part_61 = List_var(({
-      Var _x2c_literal_part_57 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_58 = List_var((* s).location);  cons(_391, cons(_395, cons(_x2c_literal_part_57, cons(_396, cons(_x2c_literal_part_58, NULL)))));
+    Var _x2c_literal_part_57 = List_var(free_method);  Var _x2c_literal_part_58 = List_var(cleanup_method);  Var _x2c_literal_part_59 = List_var(({
+      Var _x2c_literal_part_55 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_56 = List_var((* s).location);  cons(_391, cons(_395, cons(_x2c_literal_part_55, cons(_396, cons(_x2c_literal_part_56, NULL)))));
     }
-    ));  cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, cons(_x2c_literal_part_61, NULL)));
+    ));  cons(_x2c_literal_part_57, cons(_x2c_literal_part_58, cons(_x2c_literal_part_59, NULL)));
   }
   );
 }
@@ -2054,7 +2053,7 @@ static List Shape_boxed(Shape * s){
   body = List_append(body, Shape_comparison(&((* s))));
   body = List_append(body, Shape_writers(&((* s))));
   return List_append(body, cons(List_var(({
-    Var _x2c_literal_part_62 = List_var(cons(String_var((* s).owner), NULL));  Var _x2c_literal_part_63 = List_var(cons(_397, cons(List_var(x2c_literal_symbol((* s).tag)), NULL)));  Var _x2c_literal_part_64 = List_var((* s).location);  cons(_391, cons(_398, cons(_x2c_literal_part_62, cons(_396, cons(_x2c_literal_part_63, cons(_x2c_literal_part_64, NULL))))));
+    Var _x2c_literal_part_60 = List_var(cons(String_var((* s).owner), NULL));  Var _x2c_literal_part_61 = List_var(cons(_397, cons(List_var(x2c_literal_symbol((* s).tag)), NULL)));  Var _x2c_literal_part_62 = List_var((* s).location);  cons(_391, cons(_398, cons(_x2c_literal_part_60, cons(_396, cons(_x2c_literal_part_61, cons(_x2c_literal_part_62, NULL))))));
   }
   )), NULL));
 }
@@ -2069,7 +2068,7 @@ static List Shape_boxing(Shape * s){
   );
   List var_method = _default(owner, _428, _151, cons(List_var((* s).parameter), NULL), cons(List_var(returned), NULL));
   return({
-    Var _x2c_literal_part_65 = List_var(var_method);  Var _x2c_literal_part_66 = List_var(_unbox(owner, unboxed));  cons(_x2c_literal_part_65, cons(_x2c_literal_part_66, NULL));
+    Var _x2c_literal_part_63 = List_var(var_method);  Var _x2c_literal_part_64 = List_var(_unbox(owner, unboxed));  cons(_x2c_literal_part_63, cons(_x2c_literal_part_64, NULL));
   }
   );
 }
@@ -2079,7 +2078,7 @@ List x2c_method_resolve(List, String);
 static List Shape_comparison(Shape * s){
   String owner =(* s).owner;
   if((* s).heap ||(* s).positional) return({
-    Var _x2c_literal_part_67 = List_var(_equal(owner, (* s).heap, (* s).named));  Var _x2c_literal_part_68 = List_var(_hash(owner, (* s).heap, (* s).named));  cons(_x2c_literal_part_67, cons(_x2c_literal_part_68, NULL));
+    Var _x2c_literal_part_65 = List_var(_equal(owner, (* s).heap, (* s).named));  Var _x2c_literal_part_66 = List_var(_hash(owner, (* s).heap, (* s).named));  cons(_x2c_literal_part_65, cons(_x2c_literal_part_66, NULL));
   }
   );
   if(! List_truth(x2c_method_resolve(cons(String_var(owner), NULL), _429)) || ! List_truth(x2c_method_resolve(cons(String_var(owner), NULL), _430))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_431), cons(String_var(owner), cons(String_var(_432), NULL)))), _433), NULL);
@@ -2115,15 +2114,15 @@ static List Shape_scalar(Shape * s){
   Type type = List_type(cons(String_var(owner), NULL)), representation = List_type((* s).representation);
   List boxed = cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_353, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL)), _407))), _248))), NULL)))), NULL)))), NULL)))), NULL)))), NULL))), NULL)));
   List unboxed = cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-    Var _x2c_literal_part_69 = List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL)), _407)));  Var _x2c_literal_part_70 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL)), _407))), _248))), NULL))));  cons(_399, cons(_x2c_literal_part_69, cons(_x2c_literal_part_70, NULL)));
+    Var _x2c_literal_part_67 = List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL)), _407)));  Var _x2c_literal_part_68 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL)), _407))), _248))), NULL))));  cons(_399, cons(_x2c_literal_part_67, cons(_x2c_literal_part_68, NULL)));
   }
   )), NULL)))), NULL)));
   List var_method = _default(owner, _428, _151, cons(List_var((* s).parameter), NULL), cons(List_var(boxed), NULL));
   return({
-    Var _x2c_literal_part_74 = List_var(var_method);  Var _x2c_literal_part_75 = List_var(_unbox(owner, unboxed));  Var _x2c_literal_part_76 = List_var(({
-      Var _x2c_literal_part_71 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_72 = List_var(representation);  Var _x2c_literal_part_73 = List_var((* s).location);  cons(_391, cons(_398, cons(_x2c_literal_part_71, cons(_396, cons(_x2c_literal_part_72, cons(_x2c_literal_part_73, NULL))))));
+    Var _x2c_literal_part_72 = List_var(var_method);  Var _x2c_literal_part_73 = List_var(_unbox(owner, unboxed));  Var _x2c_literal_part_74 = List_var(({
+      Var _x2c_literal_part_69 = List_var(cons(String_var(owner), NULL));  Var _x2c_literal_part_70 = List_var(representation);  Var _x2c_literal_part_71 = List_var((* s).location);  cons(_391, cons(_398, cons(_x2c_literal_part_69, cons(_396, cons(_x2c_literal_part_70, cons(_x2c_literal_part_71, NULL))))));
     }
-    ));  cons(_x2c_literal_part_74, cons(_x2c_literal_part_75, cons(_x2c_literal_part_76, NULL)));
+    ));  cons(_x2c_literal_part_72, cons(_x2c_literal_part_73, cons(_x2c_literal_part_74, NULL)));
   }
   );
 }
@@ -2141,7 +2140,7 @@ static List _scalar_new(String owner, Type representation, int heap){
   List parameters = cons(List_var(x2c_param_make(Type_list(representation), String_var(_444))), NULL);
   List value = x2c_ident(_227);
   List declaration = cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-    Var _x2c_literal_part_77 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL));  Var _x2c_literal_part_78 = List_var(cons(_187, cons(List_var(cons(_196, cons(_197, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56))), _457)))), NULL)));  cons(_182, cons(_x2c_literal_part_77, cons(_x2c_literal_part_78, NULL)));
+    Var _x2c_literal_part_75 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL));  Var _x2c_literal_part_76 = List_var(cons(_187, cons(List_var(cons(_196, cons(_197, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56))), _457)))), NULL)));  cons(_182, cons(_x2c_literal_part_75, cons(_x2c_literal_part_76, NULL)));
   }
   )), NULL))), NULL)));
   return _finish_new(owner, cons(String_var(owner), NULL), parameters, cons(List_var(declaration), NULL), heap);
@@ -2168,10 +2167,10 @@ static List _positional_new(String owner, Type representation, int heap, List na
   List value = x2c_ident(_227);
   List declaration =({
     List _x2c_hole_7 = Array_list_free(arguments);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-      Var _x2c_literal_part_81 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL));  Var _x2c_literal_part_82 = List_var(cons(_187, cons(List_var(({
-        Var _x2c_literal_part_79 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56)));  Var _x2c_literal_part_80 = List_var(cons(_4, cons(_3, cons(List_var(cons(_459, cons(List_var(cons(_460, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(_x2c_hole_7), NULL))))), NULL))), NULL))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_79, cons(_x2c_literal_part_80, NULL))));
+      Var _x2c_literal_part_79 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(representation), NULL))))), NULL));  Var _x2c_literal_part_80 = List_var(cons(_187, cons(List_var(({
+        Var _x2c_literal_part_77 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56)));  Var _x2c_literal_part_78 = List_var(cons(_4, cons(_3, cons(List_var(cons(_459, cons(List_var(cons(_460, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(_x2c_hole_7), NULL))))), NULL))), NULL))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_77, cons(_x2c_literal_part_78, NULL))));
       }
-      )), NULL)));  cons(_182, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL)));
+      )), NULL)));  cons(_182, cons(_x2c_literal_part_79, cons(_x2c_literal_part_80, NULL)));
     }
     )), NULL))), NULL)));
   }
@@ -2197,21 +2196,21 @@ static List _initialized_new(String owner, int heap, List extras){
   List declaration = heap ?({
     List _x2c_hole_8 = _ref(String_join(NULL, cons(String_var(owner), cons(String_var(_462), NULL))));
     cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-      Var _x2c_literal_part_85 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_86 = List_var(cons(_187, cons(List_var(({
-        Var _x2c_literal_part_83 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56)));  Var _x2c_literal_part_84 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_8), NULL))))), _63))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_83, cons(_x2c_literal_part_84, NULL))));
+      Var _x2c_literal_part_83 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_84 = List_var(cons(_187, cons(List_var(({
+        Var _x2c_literal_part_81 = List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56)));  Var _x2c_literal_part_82 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_8), NULL))))), _63))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL))));
       }
-      )), NULL)));  cons(_182, cons(_x2c_literal_part_85, cons(_x2c_literal_part_86, NULL)));
+      )), NULL)));  cons(_182, cons(_x2c_literal_part_83, cons(_x2c_literal_part_84, NULL)));
     }
     )), NULL))), NULL)));
   }
   ) : cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
-    Var _x2c_literal_part_87 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_88 = List_var(cons(_187, cons(List_var(cons(_196, cons(_197, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56))), _472)))), NULL)));  cons(_182, cons(_x2c_literal_part_87, cons(_x2c_literal_part_88, NULL)));
+    Var _x2c_literal_part_85 = List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_86 = List_var(cons(_187, cons(List_var(cons(_196, cons(_197, cons(List_var(cons(_188, cons(List_var(cons(_25, cons(_195, cons(_139, cons(List_var(value), NULL))))), _56))), _472)))), NULL)));  cons(_182, cons(_x2c_literal_part_85, cons(_x2c_literal_part_86, NULL)));
   }
   )), NULL))), NULL)));
   Var heap_value = List_var(NULL);
   if(heap) heap_value = Symbol_var(1348938);
   List body =({
-    Var _x2c_literal_part_89 = List_var(declaration);  Var _x2c_literal_part_90 = List_var(cons(_473, cons(_474, cons(List_var(cons(String_var(owner), cons(heap_value, NULL))), NULL))));  cons(_x2c_literal_part_89, cons(_x2c_literal_part_90, NULL));
+    Var _x2c_literal_part_87 = List_var(declaration);  Var _x2c_literal_part_88 = List_var(cons(_473, cons(_474, cons(List_var(cons(String_var(owner), cons(heap_value, NULL))), NULL))));  cons(_x2c_literal_part_87, cons(_x2c_literal_part_88, NULL));
   }
   );
   return _finish_new(owner, Type_list(type), Array_list_free(parameters), body, 0);
@@ -2239,10 +2238,10 @@ static List _class_initializer(String owner, Var heap_value){
       List init = _ref(x2c_binding_spelling(List_var(method)));
       List arguments = _init_arguments(parameters);
       List call = heap || reference ? cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-        Var _x2c_literal_part_91 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(init), NULL)))));  Var _x2c_literal_part_92 = List_var(cons(_23, cons(_247, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(arguments), NULL))))), NULL))));  cons(_8, cons(_x2c_literal_part_91, cons(_x2c_literal_part_92, NULL)));
+        Var _x2c_literal_part_89 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(init), NULL)))));  Var _x2c_literal_part_90 = List_var(cons(_23, cons(_247, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(arguments), NULL))))), NULL))));  cons(_8, cons(_x2c_literal_part_89, cons(_x2c_literal_part_90, NULL)));
       }
       )), NULL)))), NULL))) : cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-        Var _x2c_literal_part_93 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(init), NULL)))));  Var _x2c_literal_part_94 = List_var(cons(_23, cons(_493, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(arguments), NULL))))), NULL))));  cons(_8, cons(_x2c_literal_part_93, cons(_x2c_literal_part_94, NULL)));
+        Var _x2c_literal_part_91 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(init), NULL)))));  Var _x2c_literal_part_92 = List_var(cons(_23, cons(_493, cons(List_var(cons(_25, cons(_39, cons(_40, cons(List_var(arguments), NULL))))), NULL))));  cons(_8, cons(_x2c_literal_part_91, cons(_x2c_literal_part_92, NULL)));
       }
       )), NULL)))), NULL)));
       return refusable ? cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_235, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_196, cons(_540, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(call), NULL))))), NULL)))), NULL)))), _552))), NULL))), NULL))) : cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(call), NULL))))), NULL))), NULL))), NULL)));
@@ -2286,7 +2285,7 @@ static List _equal(String owner, int heap, List fields){
   List same = _655;
   List body = heap ? cons(List_var(same), NULL) : _fields_equal(fields);
   return _default(owner, _429, _156, ({
-    Var _x2c_literal_part_95 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_656)));  Var _x2c_literal_part_96 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_657)));  cons(_x2c_literal_part_95, cons(_x2c_literal_part_96, NULL));
+    Var _x2c_literal_part_93 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_656)));  Var _x2c_literal_part_94 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_657)));  cons(_x2c_literal_part_93, cons(_x2c_literal_part_94, NULL));
   }
   ), body);
 }
@@ -2304,7 +2303,7 @@ static List _fields_equal(List fields){
       {
         Array_push(body, List_var(({
           List _x2c_hole_9 = _field_on(field, left);  List _x2c_hole_10 = _field_on(field, right);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_235, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_196, cons(_540, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_669, cons(List_var(({
-            Var _x2c_literal_part_97 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_9), NULL))))), NULL)))), NULL))));  Var _x2c_literal_part_98 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_10), NULL))))), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_97, cons(_x2c_literal_part_98, NULL)));
+            Var _x2c_literal_part_95 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_9), NULL))))), NULL)))), NULL))));  Var _x2c_literal_part_96 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_10), NULL))))), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_95, cons(_x2c_literal_part_96, NULL)));
           }
           )), NULL)))), NULL)))), NULL)))), NULL)))), _545))), NULL))), NULL)));
         }
@@ -2338,10 +2337,10 @@ static List _fields_hash(List fields){
       field = Var_list(_x2c_macro_cursor_output_8);
       Array_push(body, List_var(({
         List _x2c_hole_11 = _field_value(field);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-          Var _x2c_literal_part_101 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(hash), NULL)))));  Var _x2c_literal_part_102 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_690, cons(List_var(cons(_23, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-            Var _x2c_literal_part_99 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(hash), NULL)))));  Var _x2c_literal_part_100 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_737, cons(List_var(cons(_23, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_11), NULL))))), NULL)))), NULL)))), NULL))), NULL)))), NULL))));  cons(_196, cons(_738, cons(_x2c_literal_part_99, cons(_x2c_literal_part_100, NULL))));
+          Var _x2c_literal_part_99 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(hash), NULL)))));  Var _x2c_literal_part_100 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_690, cons(List_var(cons(_23, cons(List_var(cons(_4, cons(_7, cons(List_var(({
+            Var _x2c_literal_part_97 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(hash), NULL)))));  Var _x2c_literal_part_98 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_737, cons(List_var(cons(_23, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_443, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_11), NULL))))), NULL)))), NULL)))), NULL))), NULL)))), NULL))));  cons(_196, cons(_738, cons(_x2c_literal_part_97, cons(_x2c_literal_part_98, NULL))));
           }
-          )), NULL)))), NULL))), NULL)))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_101, cons(_x2c_literal_part_102, NULL))));
+          )), NULL)))), NULL))), NULL)))), NULL))));  cons(_196, cons(_197, cons(_x2c_literal_part_99, cons(_x2c_literal_part_100, NULL))));
         }
         )), NULL)))), NULL))), NULL))), NULL)));
       }
@@ -2358,7 +2357,7 @@ int String_equal(String, String);
 static List _writer(String owner, int heap, List fields, String member, List selected){
   List body;
   List parameters =({
-    Var _x2c_literal_part_103 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_227)));  Var _x2c_literal_part_104 = List_var(x2c_param_make(_741, String_var(_742)));  cons(_x2c_literal_part_103, cons(_x2c_literal_part_104, NULL));
+    Var _x2c_literal_part_101 = List_var(x2c_param_make(cons(String_var(owner), NULL), String_var(_227)));  Var _x2c_literal_part_102 = List_var(x2c_param_make(_741, String_var(_742)));  cons(_x2c_literal_part_101, cons(_x2c_literal_part_102, NULL));
   }
   );
   if(List_truth(selected)){
@@ -2382,7 +2381,7 @@ static List _writer(String owner, int heap, List fields, String member, List sel
 static List _repr_guard(String owner){
   List address = _pointer_output(owner, _769);
   List guard = cons(_2, cons(_811, cons(List_var(({
-    Var _x2c_literal_part_105 = List_var(cons(_235, cons(_836, cons(List_var(cons(_353, cons(_3, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(address), NULL))))), NULL)))), NULL))));  Var _x2c_literal_part_106 = List_var(cons(_235, cons(_864, cons(List_var(cons(_353, cons(_3, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(address), NULL))))), NULL)))), NULL))));  cons(_118, cons(_x2c_literal_part_105, cons(_875, cons(_x2c_literal_part_106, _902))));
+    Var _x2c_literal_part_103 = List_var(cons(_235, cons(_836, cons(List_var(cons(_353, cons(_3, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(address), NULL))))), NULL)))), NULL))));  Var _x2c_literal_part_104 = List_var(cons(_235, cons(_864, cons(List_var(cons(_353, cons(_3, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(address), NULL))))), NULL)))), NULL))));  cons(_118, cons(_x2c_literal_part_103, cons(_875, cons(_x2c_literal_part_104, _902))));
   }
   )), NULL)));
   return cons(List_var(guard), NULL);
@@ -2444,7 +2443,7 @@ static List _string_method(String owner, String member){
 static List _pointer_output(String owner, List value){
   return({
     String _x2c_hole_16 = String_join(NULL, cons(String_var(_1066), cons(String_var(owner), cons(String_var(_1067), NULL))));  cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1080, cons(List_var(({
-      Var _x2c_literal_part_107 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(_x2c_hole_16), NULL)))));  Var _x2c_literal_part_108 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_1084, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(value), NULL))))), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_107, cons(_x2c_literal_part_108, NULL)));
+      Var _x2c_literal_part_105 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(_x2c_hole_16), NULL)))));  Var _x2c_literal_part_106 = List_var(cons(_4, cons(_7, cons(List_var(cons(_399, cons(_1084, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(value), NULL))))), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_105, cons(_x2c_literal_part_106, NULL)));
     }
     )), NULL)))), NULL)))), NULL)));
   }
@@ -2497,10 +2496,10 @@ static List _field_on(List field, List receiver){
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_1089), &_x2c_match_capture)) {{
     Type type = List_type(_value_type(Var_list(List_getindex(field, 1))));  return cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-      Var _x2c_literal_part_111 = List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL)), _407)));  Var _x2c_literal_part_112 = List_var(cons(_4, cons(_7, cons(List_var(({
-        Var _x2c_literal_part_109 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(receiver), NULL)))));  Var _x2c_literal_part_110 = List_var(cons(List_var(cons(_25, cons(_195, cons(_139, cons(String_var(name), NULL))))), NULL));  cons(_196, cons(_360, cons(_x2c_literal_part_109, cons(_x2c_literal_part_110, NULL))));
+      Var _x2c_literal_part_109 = List_var(cons(_400, cons(List_var(cons(List_var(cons(_25, cons(_218, cons(_40, cons(List_var(type), NULL))))), NULL)), _407)));  Var _x2c_literal_part_110 = List_var(cons(_4, cons(_7, cons(List_var(({
+        Var _x2c_literal_part_107 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(receiver), NULL)))));  Var _x2c_literal_part_108 = List_var(cons(List_var(cons(_25, cons(_195, cons(_139, cons(String_var(name), NULL))))), NULL));  cons(_196, cons(_360, cons(_x2c_literal_part_107, cons(_x2c_literal_part_108, NULL))));
       }
-      )), NULL))));  cons(_399, cons(_x2c_literal_part_111, cons(_x2c_literal_part_112, NULL)));
+      )), NULL))));  cons(_399, cons(_x2c_literal_part_109, cons(_x2c_literal_part_110, NULL)));
     }
     )), NULL)))), NULL)));
   }
@@ -2510,7 +2509,7 @@ static List _field_on(List field, List receiver){
     }
   }
 return cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(({
-  Var _x2c_literal_part_113 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(receiver), NULL)))));  Var _x2c_literal_part_114 = List_var(cons(List_var(cons(_25, cons(_195, cons(_139, cons(String_var(name), NULL))))), NULL));  cons(_196, cons(_360, cons(_x2c_literal_part_113, cons(_x2c_literal_part_114, NULL))));
+  Var _x2c_literal_part_111 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(receiver), NULL)))));  Var _x2c_literal_part_112 = List_var(cons(List_var(cons(_25, cons(_195, cons(_139, cons(String_var(name), NULL))))), NULL));  cons(_196, cons(_360, cons(_x2c_literal_part_111, cons(_x2c_literal_part_112, NULL))));
 }
 )), NULL)))), NULL)));
 }
@@ -2527,13 +2526,13 @@ static List _ref(String name){
 List x2c_type_parts(List);
 static List _function(String name, List result, List parameters, List body){
   List parts = x2c_type_parts(result);  return({
-    Var _x2c_literal_part_119 = List_getindex(parts, 0);  Var _x2c_literal_part_120 = List_var(({
-      Var _x2c_literal_part_117 = List_var(cons(String_var(name), NULL));  Var _x2c_literal_part_118 = List_var(({
-        Var _x2c_literal_part_115 = List_var(cons(_1090, cons(List_var(cons(_1091, List_append(parameters, NULL))), NULL)));  List _x2c_literal_part_116 = Var_list(List_getindex(parts, 1));  cons(_x2c_literal_part_115, List_append(_x2c_literal_part_116, NULL));
+    Var _x2c_literal_part_117 = List_getindex(parts, 0);  Var _x2c_literal_part_118 = List_var(({
+      Var _x2c_literal_part_115 = List_var(cons(String_var(name), NULL));  Var _x2c_literal_part_116 = List_var(({
+        Var _x2c_literal_part_113 = List_var(cons(_1090, cons(List_var(cons(_1091, List_append(parameters, NULL))), NULL)));  List _x2c_literal_part_114 = Var_list(List_getindex(parts, 1));  cons(_x2c_literal_part_113, List_append(_x2c_literal_part_114, NULL));
       }
-      ));  cons(_188, cons(_x2c_literal_part_117, cons(_x2c_literal_part_118, NULL)));
+      ));  cons(_188, cons(_x2c_literal_part_115, cons(_x2c_literal_part_116, NULL)));
     }
-    ));  Var _x2c_literal_part_121 = List_var(cons(_132, List_append(body, NULL)));  cons(_1092, cons(_x2c_literal_part_119, cons(_x2c_literal_part_120, cons(_x2c_literal_part_121, NULL))));
+    ));  Var _x2c_literal_part_119 = List_var(cons(_132, List_append(body, NULL)));  cons(_1092, cons(_x2c_literal_part_117, cons(_x2c_literal_part_118, cons(_x2c_literal_part_119, NULL))));
   }
   );
 }
@@ -2554,14 +2553,14 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
   {
     List row;  List _x2c_macro_object_12 = rows;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
       row = Var_list(_x2c_macro_cursor_output_12);  if(Var_equal(List_getindex(row, 1), String_var(lisp_name))) x2c_diagnostic_fail(_1095, ({
-        Var _x2c_literal_part_122 = String_var(String_join(NULL, cons(String_var(_1094), cons(String_var(group_name), NULL))));  Var _x2c_literal_part_123 = String_var(String_join(NULL, cons(String_var(_1096), cons(String_var(lisp_name), NULL))));  cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, NULL));
+        Var _x2c_literal_part_120 = String_var(String_join(NULL, cons(String_var(_1094), cons(String_var(group_name), NULL))));  Var _x2c_literal_part_121 = String_var(String_join(NULL, cons(String_var(_1096), cons(String_var(lisp_name), NULL))));  cons(_x2c_literal_part_120, cons(_x2c_literal_part_121, NULL));
       }
       ));
     }
 
   }
   return({
-    Var _x2c_literal_part_124 = List_var(cons(String_var(group_name), cons(String_var(lisp_name), cons(String_var(function_name), cons(List_var(type), NULL)))));  cons(_x2c_literal_part_124, List_append(all_rows, NULL));
+    Var _x2c_literal_part_122 = List_var(cons(String_var(group_name), cons(String_var(lisp_name), cons(String_var(function_name), cons(List_var(type), NULL)))));  cons(_x2c_literal_part_122, List_append(all_rows, NULL));
   }
   );
 }
@@ -2627,10 +2626,10 @@ static List _binding_statement(List lisp, List row){
       String name = Var_string(_x2c_match_value_0);  String function = Var_string(_x2c_match_value_1); {
         List signature = binding_literal_list(Var_list(type));  return({
           List _x2c_hole_17 = x2c_ident(function);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1129, cons(List_var(({
-            Var _x2c_literal_part_127 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(lisp), NULL)))));  Var _x2c_literal_part_128 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(name), NULL)))));  Var _x2c_literal_part_129 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1141, cons(List_var(({
-              Var _x2c_literal_part_125 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_17), NULL)))));  Var _x2c_literal_part_126 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(signature), NULL)))));  cons(_23, cons(_x2c_literal_part_125, cons(_x2c_literal_part_126, NULL)));
+            Var _x2c_literal_part_125 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(lisp), NULL)))));  Var _x2c_literal_part_126 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(name), NULL)))));  Var _x2c_literal_part_127 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1141, cons(List_var(({
+              Var _x2c_literal_part_123 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_17), NULL)))));  Var _x2c_literal_part_124 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(signature), NULL)))));  cons(_23, cons(_x2c_literal_part_123, cons(_x2c_literal_part_124, NULL)));
             }
-            )), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_127, cons(_x2c_literal_part_128, cons(_x2c_literal_part_129, NULL))));
+            )), NULL)))), NULL))));  cons(_23, cons(_x2c_literal_part_125, cons(_x2c_literal_part_126, cons(_x2c_literal_part_127, NULL))));
           }
           )), NULL)))), NULL)))), NULL))), NULL))), NULL)));
         }
@@ -2668,7 +2667,7 @@ static List _binding_targets(List rows){
   }
   return({
     int _x2c_hole_18 = List_len(rows);  List _x2c_hole_19 = Array_list_free(arguments);  cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1153, cons(List_var(({
-      Var _x2c_literal_part_130 = List_var(cons(_25, cons(_129, cons(_130, cons(int_var(_x2c_hole_18), NULL)))));  Var _x2c_literal_part_131 = List_var(cons(_25, cons(_39, cons(_40, cons(List_var(_x2c_hole_19), NULL)))));  cons(_23, cons(_1172, cons(_x2c_literal_part_130, cons(_x2c_literal_part_131, NULL))));
+      Var _x2c_literal_part_128 = List_var(cons(_25, cons(_129, cons(_130, cons(int_var(_x2c_hole_18), NULL)))));  Var _x2c_literal_part_129 = List_var(cons(_25, cons(_39, cons(_40, cons(List_var(_x2c_hole_19), NULL)))));  cons(_23, cons(_1172, cons(_x2c_literal_part_128, cons(_x2c_literal_part_129, NULL))));
     }
     )), NULL)))), NULL)))), NULL)));
   }
@@ -2696,10 +2695,10 @@ return NULL;
 List x2c_literal_string(String);
 static List _binding_target(String bind_name, String name, String maker){
   List func = _binding_call(maker, ({
-    Var _x2c_literal_part_132 = List_var(x2c_expr_ident(x2c_ident(name)));  Var _x2c_literal_part_133 = List_var(binding_literal_list(_binding_name_signature(name)));  cons(_x2c_literal_part_132, cons(_x2c_literal_part_133, NULL));
+    Var _x2c_literal_part_130 = List_var(x2c_expr_ident(x2c_ident(name)));  Var _x2c_literal_part_131 = List_var(binding_literal_list(_binding_name_signature(name)));  cons(_x2c_literal_part_130, cons(_x2c_literal_part_131, NULL));
   }
   ));  return({
-    Var _x2c_literal_part_134 = List_var(_binding_call(_1186, cons(List_var(x2c_literal_string(bind_name)), NULL)));  Var _x2c_literal_part_135 = List_var(_binding_call(_1187, cons(List_var(func), NULL)));  cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL));
+    Var _x2c_literal_part_132 = List_var(_binding_call(_1186, cons(List_var(x2c_literal_string(bind_name)), NULL)));  Var _x2c_literal_part_133 = List_var(_binding_call(_1187, cons(List_var(func), NULL)));  cons(_x2c_literal_part_132, cons(_x2c_literal_part_133, NULL));
   }
   );
 }
@@ -2716,7 +2715,7 @@ List builtin_try_cleanup_placement(Var cleanup){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 244379323295050: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_1195), &_x2c_match_capture)) {Var statements = _x2c_match_values[0];  return({
-    Atom _x2c_literal_part_136 = token;  Var _x2c_literal_part_137 = List_var(cons(List_var(cons(_1196, cons(token, cons(statements, NULL)))), NULL));  cons(_1189, cons(_1198, cons(_x2c_literal_part_136, cons(_x2c_literal_part_137, NULL))));
+    Atom _x2c_literal_part_134 = token;  Var _x2c_literal_part_135 = List_var(cons(List_var(cons(_1196, cons(token, cons(statements, NULL)))), NULL));  cons(_1189, cons(_1198, cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL))));
   }
   );  break;
 }
@@ -2734,10 +2733,6 @@ Map builtin_targets(void){
   if(! _init_guard_) _file_init_();  Map rows = Map_new();  Map_setindex(rows, String_var(_1200), Func_var(Func_new(_x2c_func_adapt_5, _1207)));  Map_setindex(rows, String_var(_1208), Func_var(Func_new(_x2c_func_adapt_6, _1214)));  Map_setindex(rows, String_var(_1215), Func_var(Func_new(_x2c_func_adapt_7, _1207)));  Map_setindex(rows, String_var(_1216), Func_var(Func_new(_x2c_func_adapt_8, _1207)));  Map_setindex(rows, String_var(_1217), Func_var(Func_new(_x2c_func_adapt_9, _1214)));  Map_setindex(rows, String_var(_1218), Func_var(Func_new(_x2c_func_adapt_10, _1207)));  Map_setindex(rows, String_var(_1219), Func_var(Func_new(_x2c_func_adapt_11, _1207)));  Map_setindex(rows, String_var(_1220), Func_var(Func_new(_x2c_func_adapt_12, _1226)));  Map_setindex(rows, String_var(_1227), Func_var(Func_new(_x2c_func_adapt_13, _1239)));  Map_setindex(rows, String_var(_1240), Func_var(Func_new(_x2c_func_adapt_14, _1247)));  Map_setindex(rows, String_var(_1248), Func_var(Func_new(_x2c_func_adapt_15, _1254)));  Map_setindex(rows, String_var(_1255), Func_var(Func_new(_x2c_func_adapt_16, _1260)));  Map_setindex(rows, String_var(_1261), Func_var(Func_new(_x2c_func_adapt_17, _1267)));  Map_setindex(rows, String_var(_1268), Func_var(Func_new(_x2c_func_adapt_18, _1254)));  Map_setindex(rows, String_var(_1269), Func_var(Func_new(_x2c_func_adapt_19, _1270)));  Map_setindex(rows, String_var(_1271), Func_var(Func_new(_x2c_func_adapt_20, _1254)));  Map_setindex(rows, String_var(_1272), Func_var(Func_new(_x2c_func_adapt_21, _1279)));  Map_setindex(rows, String_var(_1280), Func_var(Func_new(_x2c_func_adapt_22, _1207)));  Map_setindex(rows, String_var(_1281), Func_var(Func_new(_x2c_func_adapt_23, _1254)));  Map_setindex(rows, String_var(_1282), Func_var(Func_new(_x2c_func_adapt_24, _1207)));  Map_setindex(rows, String_var(_1283), Func_var(Func_new(_x2c_func_adapt_25, _1291)));  Map_setindex(rows, String_var(_1292), Func_var(Func_new(_x2c_func_adapt_26, _1260)));  Map_setindex(rows, String_var(_1293), Func_var(Func_new(_x2c_func_adapt_27, _1260)));  return rows;
 }
 
-static List source_identifier_content(List fields){
-  return cons(Symbol_var(19147688), fields);
-}
-
 static Var _x2c_lambda_0(Var output){
   return List_var(x2c_type_element(Var_list(output))); ;
 }
@@ -2750,7 +2745,7 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
 Var builtin_foreach_unique(String);
 static Var _x2c_lambda_1(Var type){
   return List_var(({
-    Var _x2c_literal_part_138 = type;  Var _x2c_literal_part_139 = builtin_foreach_unique(_1295);  cons(_x2c_literal_part_138, cons(_x2c_literal_part_139, NULL));
+    Var _x2c_literal_part_136 = type;  Var _x2c_literal_part_137 = builtin_foreach_unique(_1295);  cons(_x2c_literal_part_136, cons(_x2c_literal_part_137, NULL));
   }
   )); ;
 }

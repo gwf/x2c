@@ -87,6 +87,30 @@ static List _macro_group(Macro t, List values) {
   return grouped.list_free();
 }
 
+// typed quotations
+
+/** Returns what a typed quotation inserts for one use of a hole whose
+    local holds `value`, as a rebuild inserts it. An expression hole
+    (`lifts`) takes an `int`, String, or Symbol as its literal. Where the
+    code takes an expression (`expression`), a binding, an `x2c_ident`
+    spelling, or a Name hole's String becomes an identifier expression. */
+Var Macro.inserted(Var value, int lifts, int expression) {
+  if (lifts) value = _macro_expr_value(value);
+  if (!expression) return value;
+  if (value is <string>) return %(expr () (ident $value));
+  match (value) {
+    case %("x2c.ident" ?(String spelling)):
+      return %(expr () (ident $spelling));
+    case %(binding ? ?): return %(expr () (ident $value));
+  }
+  return value;
+}
+
+/** Returns `expression` with the type `type`: what a typed quotation
+    builds when its code is one hole. */
+List Macro.typed(List type, List expression) =>
+  %(expr $type @{expression.cddr()});
+
 // subject bindings
 
 /* The rows `Macro.use_subject` set, or void when no call describes its
@@ -248,10 +272,19 @@ static List _macro_value_rows(Macro t, List values) {
   return rows;
 }
 
-/* An expression parameter takes code, so an integer argument becomes the
-   literal expression that holds it. */
-static Var _macro_expr_value(Var value) =>
-  value.is_integer() ? x2c_literal_int(value.integer()) : value;
+/* An expression parameter takes code, so an `int`, String, or Symbol
+   argument becomes the literal expression that holds it, as the compiler
+   lifts a compile-time value. C reads a negative literal as a negation,
+   so it takes parentheses. */
+static Var _macro_expr_value(Var value) {
+  if (value is <string>)
+    return %(expr (* char) (literal (* char) ${value.repr()}));
+  if (value is <symbol>) return x2c_literal_symbol(value);
+  if (!value.is_integer() || value.integer() != (int) value.integer())
+    return value;
+  List literal = x2c_literal_int(value.integer());
+  return value.integer() < 0 ? %(expr (int) (parens $literal)) : literal;
+}
 
 static List _macro_expr_values(List values) {
   Array lifted = [];
