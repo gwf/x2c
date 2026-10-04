@@ -17,6 +17,8 @@ List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_peek_macro_hole(Compiler c);
 
+Token Compiler_after_hole(Compiler c);
+
 List Compiler_parse_macro_quotation(Compiler c);
 
 int Compiler_macro_lisp_starts_declaration(Compiler c);

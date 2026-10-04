@@ -503,13 +503,15 @@ static List Compiler__expression_statement(Compiler c){
 
 int Map_truth(Map);
 
+Token Compiler_after_hole(Compiler);
+
 List Compiler_parse_optional_identifier(Compiler);
 
 int Compiler_test(Compiler, Symbol);
 
 static List Compiler__label_statement(Compiler c){
   Token head = c -> token;
-  if(Compiler_peek(c, 0) == 19147688 ||(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)) && Compiler_peek(c, 2) == 117)){
+  if(Compiler_peek(c, 0) == 19147688 ||(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)) && Compiler_after_hole(c) -> type == 117)){
     List label = Compiler_try_parse_macro_slot(c, 920394);
     if(! List_truth(label)) label = Compiler_parse_optional_identifier(c);
     if(Compiler_test(c, 117)) return cons(_50, cons(List_var(label), NULL));

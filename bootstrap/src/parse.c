@@ -3681,8 +3681,9 @@ static int Compiler__test_declaration_start(Compiler c, int require_declarator){
 
 List Compiler_peek_macro_hole(Compiler);
 Var List_assoc(List, Var);
+Token Compiler_after_hole(Compiler);
 static int Compiler__hole_starts(Compiler c){
-  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) return Compiler_macro_lisp_starts_declaration(c);  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind) return kind == 1362954;  Symbol next = Compiler_peek(c, 2);  return next == 19147688 || next == 73 || next == 9297;
+  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) return Compiler_macro_lisp_starts_declaration(c);  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind) return kind == 1362954;  Symbol next = Compiler_after_hole(c) -> type;  return next == 19147688 || next == 73 || next == 9297;
 }
 
 String Compiler_package_member_spelling(Compiler, String);
@@ -4543,7 +4544,7 @@ static List Compiler__literal_method(Compiler c){
 }
 
 static List Compiler__hole_method(Compiler c){
-  List owner_hole = Compiler_peek_macro_hole(c);  if(! List_truth(owner_hole) || ! Var_equal(List_assoc(owner_hole, Symbol_var(740232)), Symbol_var(1362954)) || Compiler_peek(c, 2) != 93) return NULL;  List owner = Compiler_try_parse_macro_slot(c, 1362954);  Compiler_expect(c, 93);  Var member;  if(Compiler_peek(c, 0) == 73) member = List_var(Compiler_try_parse_macro_slot(c, 920394));  else if(String_is_identifier(c -> token -> text)){
+  List owner_hole = Compiler_peek_macro_hole(c);  if(! List_truth(owner_hole) || ! Var_equal(List_assoc(owner_hole, Symbol_var(740232)), Symbol_var(1362954)) || Compiler_after_hole(c) -> type != 93) return NULL;  List owner = Compiler_try_parse_macro_slot(c, 1362954);  Compiler_expect(c, 93);  Var member;  if(Compiler_peek(c, 0) == 73) member = List_var(Compiler_try_parse_macro_slot(c, 920394));  else if(String_is_identifier(c -> token -> text)){
     member = String_var(c -> token -> text);  Compiler_next(c);
   }
   else Compiler_report_error(c, 33658058, _330, c -> token, NULL);  return cons(_28, cons(List_var(({
