@@ -71,12 +71,12 @@
 (function (static int) 
  (bind (binding 23 "ast_phase1_zero") 
   ((fnmod (params (param (void) (bind () ())))))) 
- (block (at 34 (return (expr (int) (literal (int) "0"))))))
+ (block (at 40 (return (expr (int) (literal (int) "0"))))))
 
 (function (static int) 
  (bind (binding 24 "ast_phase1_identity") 
   ((fnmod (params (param (int) (bind (binding 25 "value") ())))))) 
- (block (at 35 (return (expr (int) (ident (binding 25 "value")))))))
+ (block (at 41 (return (expr (int) (ident (binding 25 "value")))))))
 
 (function (static int) 
  (bind (binding 26 "ast_phase1_add") 
@@ -84,7 +84,7 @@
     (params (param (int) (bind (binding 27 "lhs") ())) 
      (param (int) (bind (binding 28 "rhs") ())))))) 
  (block 
-  (at 36 
+  (at 42 
    (return 
     (expr (int) 
      (op + (expr (int) (ident (binding 27 "lhs"))) 
@@ -99,7 +99,7 @@
        (* (fnmod (params (param (int) (bind () ()))))))) 
      (param (int) (bind (binding 30 "value") ())))))) 
  (block 
-  (at 37 
+  (at 43 
    (return 
     (expr (int) 
      (call (expr (* (func ((int))) int) (ident (binding 29 "function"))) 
@@ -117,7 +117,7 @@
            (expr (int) 
             (op . (expr ("ast_phase1_Pair") (ident (binding 32 "pair"))) 
              ("value"))) (expr (int) (ident (binding 33 "delta"))))))) 
-  (at 38 
+  (at 44 
    (return 
     (expr (int) 
      (op . (expr ("ast_phase1_Pair") (ident (binding 32 "pair"))) 
@@ -126,7 +126,7 @@
 (function (int) 
  (bind (binding 34 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 39 
+  (at 45 
    (declare ("ast_phase1_Pair") 
     (bindings 
      (op = (bind (binding 35 "pair") ()) 
@@ -153,7 +153,7 @@
          (bindings 
           (op = (bind (binding 37 "callback") ()) 
            (expr ((func ((int))) int) (ident (binding 24 "ast_phase1_identity"))))))) 
-  (at 40 
+  (at 46 
    (declare ("ast_phase1_Consumer") 
     (bindings 
      (op = (bind (binding 38 "consumer") ()) 
@@ -165,16 +165,16 @@
     (bindings 
      (op = (bind (binding 40 "values") ()) 
       (expr ("List") (expr ("List") (cache 5))))))) 
-  (at 54 
+  (at 60 
    (declare ("Var") 
     (bindings (bind (binding 41 "left_value") ()) 
      (bind (binding 42 "right_value") ())))) 
-  (at 55 
+  (at 61 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 43 "_x2c_destructure_0") ()) 
       (expr ("List") (ident (binding 40 "values"))))))) 
-  (at 56 
+  (at 62 
    (stmnt 
     (expr ("Var") 
      (op = (expr ("Var") (ident (binding 41 "left_value"))) 
@@ -183,7 +183,7 @@
               (ident (binding 44 "List_getindex"))) 
         (args (expr ("List") (ident (binding 43 "_x2c_destructure_0"))) 
          (literal (int) "0")))))))) 
-  (at 57 
+  (at 63 
    (stmnt 
     (expr ("Var") 
      (op = (expr ("Var") (ident (binding 42 "right_value"))) 
@@ -192,7 +192,7 @@
               (ident (binding 44 "List_getindex"))) 
         (args (expr ("List") (ident (binding 43 "_x2c_destructure_0"))) 
          (literal (int) "1")))))))) 
-  (at 43 
+  (at 49 
    (declare (int) 
     (bindings 
      (op = (bind (binding 45 "converted") (*)) 
@@ -218,7 +218,7 @@
          (expr (int) 
           (call (expr ((func (("Var"))) (int)) (ident (binding 46 "Var_int"))) 
            (args (expr ("Var") (ident (binding 42 "right_value"))))))))))))) 
-  (at 45 
+  (at 51 
    (block (declare ("Var") (bindings (bind (binding 47 "value") (volatile)))) 
     (declare ("List") 
      (bindings 
@@ -230,7 +230,7 @@
        (expr ("List") (ident (binding 48 "_x2c_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 50 "_x2c_macro_cursor_output_0") ()))) 
-    (at 44 
+    (at 50 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -302,28 +302,28 @@
              (args (expr (* ("X2CCleanup")) 
                     (op & (expr (("X2CCleanup")) 
                            (ident (binding 53 "_x2c_defer_record_0"))))))))))))))))) 
-  (at 46 
+  (at 52 
    (matchcases (expr ("List") (ident (binding 40 "values"))) 
     (((?head *tail) (expr ("List") (expr ("List") (cache 9))) 
       (block 
-       (at 20 
+       (at 26 
         (stmnt 
          (expr ("ast_phase1_Count") 
           (op += (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
            (expr (int) (literal (int) "1")))))))) 
      (() (*) 
       (block 
-       (at 21 
+       (at 27 
         (stmnt 
          (expr ("ast_phase1_Count") 
           (op = (expr ("ast_phase1_Count") (ident (binding 36 "count"))) 
            (expr (int) (literal (int) "0"))))))))))) 
-  (at 23 
+  (at 29 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 57 "caught") (volatile)) 
       (expr ("Var") (literal ("Var") "void")))))) 
-  (at 48 
+  (at 54 
    (block 
     (declare ("ExceptionFrame") 
      (bindings (bind (binding 58 "_x2c_exception_frame_0") ()))) 
@@ -423,7 +423,7 @@
                                (ident (binding 58 "_x2c_exception_frame_0"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
      (block 
-      (at 47 
+      (at 53 
        (if (expr (int) 
             (op > (expr (int) 
                    (call (expr ("ast_phase1_UnaryPointer") 
@@ -489,7 +489,7 @@
                       (ident (binding 65 "_x2c_error_handler_0"))) 
                 (expr (int) (literal (int) "0")))))))) 
           (block 
-           (at 25 
+           (at 31 
             (stmnt 
              (expr ("Var") 
               (op = (expr ("Var") (ident (binding 57 "caught"))) 
@@ -514,7 +514,7 @@
                    (ident (binding 65 "_x2c_error_handler_0"))) 
              (expr () (ident (binding 78 "NULL")))))) 
           (block 
-           (at 26 
+           (at 32 
             (stmnt 
              (expr ("ast_phase1_Count") 
               (postfix ++ 
@@ -549,7 +549,7 @@
                (ident (binding 65 "_x2c_error_handler_0"))) 
          (expr () (ident (binding 78 "NULL")))))) 
       (block 
-       (at 26 
+       (at 32 
         (stmnt 
          (expr ("ast_phase1_Count") 
           (postfix ++ (expr ("ast_phase1_Count") (ident (binding 36 "count")))))))))) 
@@ -560,7 +560,7 @@
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 58 "_x2c_exception_frame_0"))))))))))) 
-  (at 49 
+  (at 55 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 81 "lambda_value") ()) 
@@ -573,7 +573,7 @@
                (call (expr ((func ((int))) "Var") 
                       (ident (binding 83 "int_var"))) 
                 (args (expr (int) (literal (int) "2")))))))))))) 
-  (at 29 
+  (at 35 
    (stmnt 
     (expr (int) 
      (call (expr ((func (("ast_phase1_Pair") (int))) (int)) 
@@ -582,18 +582,18 @@
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 46 "Var_int"))) 
          (args (expr ("Var") (ident (binding 57 "caught"))))))))))) 
-  (at 50 
+  (at 56 
    (stmnt 
     (expr (void) (cast (void) (expr (* int) (ident (binding 45 "converted"))))))) 
-  (at 51 
+  (at 57 
    (stmnt 
     (expr (void) 
      (cast (void) (expr ("ast_phase1_Consumer") (ident (binding 38 "consumer"))))))) 
-  (at 52 
+  (at 58 
    (stmnt 
     (expr (void) 
      (cast (void) (expr ("Var") (ident (binding 81 "lambda_value"))))))) 
-  (at 53 (return (expr (int) (literal (int) "0"))))))
+  (at 59 (return (expr (int) (literal (int) "0"))))))
 
 (typedef 
  (struct (binding 84 "_x2c_defer_env_0") 

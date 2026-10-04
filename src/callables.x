@@ -586,7 +586,7 @@ static List Compiler._cell_declaration(
   Compiler c, List cell, Type type, List initializer) {
   List compound = initializer;
   if (initializer && !initializer.match(%(expr ? (composite ?))))
-    compound = %(expr () (composite (commas $initializer)));
+    compound = $!( { $initializer } );
   Macro shape = initializer ? $compiler_cell : $compiler_empty_cell;
   return c.bind_syntax(shape(type, cell, compound), AST_BLOCK, NULL);
 }

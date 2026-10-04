@@ -28,7 +28,7 @@ List x2c_param_make(List type, Var name);
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
-  List enter = destinations ? _call("Scope_push", destinations)
+  List enter = destinations ? $!( Scope_push($destinations...) )
                             : $!( Scope_retain() );
   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
   return $!{ { $enter; { defer $leave; $body } } };
@@ -143,12 +143,12 @@ static List Foreach.with_cursor(Foreach &f, List spec) {
   List cursor_expression = _expr(cursor_type, f.cursor);
   List cursor_argument = by_reference ? cursor_expression
     : _address(cursor_expression);
-  List arguments = %($object_expression $cursor_argument @addresses);
-  List condition = x2c_expr_call(function, arguments);
+  List condition =
+    $!( $function($object_expression, $cursor_argument, $addresses...) );
   List assignments = _cursor_assignments(f.targets, values);
-  List loop_body = %(block @assignments ${f.body});
-  List initial = cursor_type.equal(f.type)
-    ? object_expression : x2c_literal_int(0);
+  List body = f.body;
+  List loop_body = $!{ { $assignments... $body } };
+  List initial = cursor_type.equal(f.type) ? object_expression : $!( 0 );
   List setup = %(
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}
@@ -174,11 +174,12 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List output = x2c_type_parameters(x2c_syntax_type(next))[1];
   List item_argument = output.car() == <*>
     ? _address(item_expression) : item_expression;
-  List condition = x2c_expr_call(next, %($iterator_expression $item_argument));
+  List condition = $!( $next($iterator_expression, $item_argument) );
   List assignments = f.targets.len() == 1
     ? %(${_assign(f.targets[0], item_expression)})
     : _pair_assignments(f.targets, item_expression, f.pair);
-  List loop_body = %(block @assignments ${f.body});
+  List body = f.body;
+  List loop_body = $!{ { $assignments... $body } };
   List setup = %(
     ${_declare(%("Iter"), f.iterator, initializer)}
     ${_declare(%("Var"), f.item, %())});
@@ -219,17 +220,12 @@ static List _pair_assignments(List targets, List item, Var pair) {
 static List _expr(List type, Var binding) =>
   %(expr $type ${source_identifier_content(%($binding))});
 
-static List _address(List value) =>
-  source_operator_expression(NULL, %(& $value));
+static List _address(List value) => $!( &$value );
 
-static List _declare(List type, Var binding, List initializer) {
-  List value = %(bind $binding ());
-  if (initializer) value = %(op = $value $initializer);
-  return %(declare $type (bindings $value));
-}
+static List _declare(Type type, Var binding, List initializer) =>
+  initializer ? $!{ $type $binding = $initializer; } : $!{ $type $binding; };
 
-static List _assign(List target, List value) =>
-  x2c_stmnt_make(source_operator_expression(NULL, %(= $target $value)));
+static List _assign(List target, List value) => $!{ $target = $value; };
 
 /* class declarations
 
@@ -477,8 +473,8 @@ static List _initialized_new(
   Array parameters = [];
   foreach (List extra, extras)
     parameters.push(x2c_param_make(extra, %"argument_${parameters.len()}"));
-  List initializer = heap ? _call(%"${owner}_alloc", %())
-                          : x2c_expr_composite(%(${x2c_literal_int(0)}));
+  List alloc = _ref(%"${owner}_alloc");
+  List initializer = heap ? $!( $alloc() ) : $!( { 0 } );
   Var heap_value = %();
   if (heap) heap_value = <true>;
   List body = %(${x2c_decl_make(type, "value", initializer)}
@@ -719,9 +715,6 @@ static List _field_value(List field) => _field_on(field, _ref("value"));
 
 static List _ref(String name) => x2c_expr_ident(%($name));
 
-static List _call(String name, List arguments) =>
-  x2c_expr_call(_ref(name), arguments);
-
 static List _function(String name, List result, List parameters, List body) {
   List parts = x2c_type_parts(result);
   return %(function ${parts[0]}
@@ -805,7 +798,8 @@ static List _binding_targets(List rows) {
   Array arguments = [];
   foreach (List row, rows)
     foreach (Var item, _binding_target_row(row)) arguments.push(item);
-  List count = x2c_literal_int(rows.len()), items = arguments.list_free();
+  int count = rows.len();
+  List items = arguments.list_free();
   return $!( Map_update_n(Map_new(), $count, $items...) );
 }
 

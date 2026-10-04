@@ -198,7 +198,7 @@
          (bindings 
           (op = (bind (binding 15 "iteration") ()) 
            (expr (int) (literal (int) "0")))))) 
-  (at 10 
+  (at 15 
    (block (declare ("Symbol") (bindings (bind (binding 16 "symbol") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -236,7 +236,7 @@
                         (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
                          (expr ("Symbol") (ident (binding 16 "symbol")))))) 
                  (expr (int) (literal (int) "1")))))))))))) 
-  (at 11 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 21 "printf"))) 
@@ -245,7 +245,7 @@
        (expr (int) (ident (binding 10 "membership"))) 
        (expr (int) (ident (binding 12 "atoms"))) 
        (expr (int) (ident (binding 15 "iteration")))))))) 
-  (at 12 
+  (at 17 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 
