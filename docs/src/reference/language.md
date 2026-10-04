@@ -1710,6 +1710,8 @@ Generated declarations become visible to following source only if expansion
 succeeds; a failed expansion leaves no provisional symbols or bindings.
 Expansion is limited to 64 nested applications and 10,000 applications per
 translation unit; an identical recursive application is rejected immediately.
+Templates without nested applications or definitions do not count toward the
+unit limit if each hole occurs at most once.
 Statements authored by a macro are attributed to the invocation site; captured
 statements retain their original source locations.
 
