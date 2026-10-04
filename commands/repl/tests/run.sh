@@ -6,7 +6,7 @@ tmp=${TMPDIR:-/tmp}/x2c-repl-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
-builds/0/x2c build --plain \
+builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --build-dir "$tmp/api-cc" --output "$tmp/api-check" \
   --x-include-dir commands/repl --x-include-dir src \
   --c-include-dir builds/0/src \
@@ -15,7 +15,7 @@ builds/0/x2c build --plain \
   builds/0/libx2c-dev.a
 "$tmp/api-check"
 
-builds/0/x2c build --plain \
+builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --build-dir "$tmp/func-cc" --output "$tmp/func-call" \
   commands/repl/tests/func-call.x
 "$tmp/func-call"
