@@ -193,6 +193,7 @@ List Compiler.evaluate_meta_expression(
 Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) {
   Var value;
+  meta_call_form = NULL;
   try value = _meta_call_value(c, expression, site);
   catch %(meta-later *): {
     value = void;
@@ -204,12 +205,13 @@ Var Compiler.run_meta_call(
   catch %(call-stack *):
     $report.macro.call_depth(c, site);
   catch %(?code *detail):
-    c.report_lisp_failure(site, cons(code, detail), meta_call_form);
+    c.report_lisp_failure(site, cons(code, detail), meta_call_form.repr());
   return value;
 }
 
-/* The last call a `$` expression made, as a failure reports it. */
-static String meta_call_form = NULL;
+/* The last call a `$` expression made, which a failure renders. A unit's
+   Pool holds it, so each `$` expression starts without one. */
+static List meta_call_form = NULL;
 
 /* Calls a `meta` function named at a code boundary with its evaluated
    arguments. */
@@ -225,8 +227,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       Array values = c._meta_values(callee, arguments, site);
       Var function = c._meta_function(spelling, site);
       List applied = values.list_free();
-      meta_call_form = cons(Atom.intern(spelling), applied).repr();
-      meta_call_form.try_own();
+      meta_call_form = cons(Atom.intern(spelling), applied);
       return c._meta_apply(function, applied);
     }
   $report.macro.call_target(c, site);
