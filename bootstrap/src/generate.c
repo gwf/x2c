@@ -105,11 +105,13 @@ static void Partition_add_declaration(Partition * p, List decl, Type type, List 
 
 static int Compiler__completed_prototype(Compiler c, List binding);
 
-static int Partition_place_tagged_object(Partition * p, Type type, List bindings);
+static int Partition_place_tagged_object(Partition * p, List decl, Type type, List bindings);
 
 static List _tag_only(Type type, Type core, Var name);
 
 static int Partition_place_object(Partition * p, List decl, Type type, List bindings);
+
+static List Partition_object_header(Partition * p, List decl, Type type, List bindings);
 
 static List _without_const(List specifiers);
 
@@ -850,7 +852,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _489 = cons(_485, _488);
   _490 = List_var(_489);
   _491 = Symbol_var(805770);
-  _492 = int_var(785);
+  _492 = int_var(791);
   _493 = cons(_492, NULL);
   _494 = cons(_491, _493);
   _495 = List_var(_494);
@@ -863,7 +865,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _502 = cons(_499, _501);
   _503 = List_var(_502);
   _504 = Symbol_var(1133019155420);
-  _505 = int_var(30247);
+  _505 = int_var(30471);
   _506 = cons(_505, NULL);
   _507 = cons(_504, _506);
   _508 = List_var(_507);
@@ -1776,7 +1778,7 @@ break;
 
     }
   }
-if(! Partition_place_tagged_object(&((* p)), type, bindings) && ! Partition_place_object(&((* p)), decl, type, bindings)) Array_push((* p).header, List_var(_header_declaration(decl, type, bindings)));
+if(! Partition_place_tagged_object(&((* p)), decl, type, bindings) && ! Partition_place_object(&((* p)), decl, type, bindings)) Array_push((* p).header, List_var(_header_declaration(decl, type, bindings)));
 }
 
 static int Compiler__completed_prototype(Compiler c, List binding){
@@ -1793,7 +1795,7 @@ default: break;
 return 0;
 }
 
-static int Partition_place_tagged_object(Partition * p, Type type, List bindings){
+static int Partition_place_tagged_object(Partition * p, List decl, Type type, List bindings){
   Type core = Type_base_type(type);  String tag = NULL;
   {
     List _x2c_match_expr = Type_list(core);
@@ -1810,7 +1812,7 @@ static int Partition_place_tagged_object(Partition * p, Type type, List bindings
 
     }
   }
-if(! String_truth(tag) || ! _declares_object(bindings)) return 0;  List tagged = _tag_only(type, core, String_var(tag));  Array_push((* p).header, List_var(cons(_53, cons(List_var(core), _152))));  Array_push((* p).header, List_var(_header_declaration(NULL, List_type(cons(_181, List_append(tagged, NULL))), bindings)));  Array_push((* p).source, List_var(cons(_53, cons(List_var(tagged), cons(List_var(bindings), NULL)))));  return 1;
+if(! String_truth(tag) || ! _declares_object(bindings)) return 0;  List tagged = _tag_only(type, core, String_var(tag));  Array_push((* p).header, List_var(cons(_53, cons(List_var(core), _152))));  Array_push((* p).header, List_var(Partition_object_header(&((* p)), decl, List_type(tagged), bindings)));  Array_push((* p).source, List_var(cons(_53, cons(List_var(tagged), cons(List_var(bindings), NULL)))));  return 1;
 }
 
 int List_len(List);
@@ -1821,12 +1823,16 @@ static List _tag_only(Type type, Type core, Var name){
   ));
 }
 
-int Compiler_static_value_is_runtime(Compiler, List, Map);
 static int Partition_place_object(Partition * p, List decl, Type type, List bindings){
-  if(Type_is_extern(type) || ! _declares_object(bindings)) return 0;  if(Compiler_static_value_is_runtime((* p).c, decl, NULL)){
+  if(Type_is_extern(type) || ! _declares_object(bindings)) return 0;  Array_push((* p).header, List_var(Partition_object_header(&((* p)), decl, type, bindings)));  Array_push((* p).source, List_var(decl));  return 1;
+}
+
+int Compiler_static_value_is_runtime(Compiler, List, Map);
+static List Partition_object_header(Partition * p, List decl, Type type, List bindings){
+  if(Compiler_static_value_is_runtime((* p).c, decl, NULL)){
     type = List_type(_without_const(Type_list(type)));  bindings = Compiler__runtime_without_const((* p).c, bindings);
   }
-  Array_push((* p).header, List_var(_header_declaration(NULL, List_type(cons(_181, List_append(Type_list(type), NULL))), bindings)));  Array_push((* p).source, List_var(decl));  return 1;
+  return _header_declaration(NULL, List_type(cons(_181, List_append(Type_list(type), NULL))), bindings);
 }
 
 static List _without_const(List specifiers){

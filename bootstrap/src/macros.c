@@ -5635,7 +5635,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
                       int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(& _x2c_exception_frame_0);  if(_x2c_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3805};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3806};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -5782,7 +5782,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3970};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3971};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
@@ -5935,7 +5935,7 @@ static void Import_macros(Import * in){
 void Compiler_borrow_diagnostics(Compiler, Compiler);
 void Compiler_borrow_unit_semantics(Compiler, Compiler);
 static void Import_borrow(Import * in, Compiler child){
-  Compiler c =(* in).c;  Compiler_borrow_diagnostics(child, c);  Compiler_borrow_unit_semantics(child, c);  child -> macros = c -> macros;  child -> kw_aliases = c -> kw_aliases;  child -> kw_seen = c -> kw_seen;  child -> macro_lisp = c -> macro_lisp;  child -> meta_group = c -> meta_group;  child -> meta_group_bound = c -> meta_group_bound;  child -> unit_nodes = c -> unit_nodes;  child -> borrowed_lisp = 1;  child -> import_src =(* in).path;  child -> inherited_lisp = Compiler_inherits_import((* in).path);  child -> imports = c -> imports;  child -> import_stack = c -> import_stack;  child -> declaration_effects = c -> declaration_effects;
+  Compiler c =(* in).c;  Compiler_borrow_diagnostics(child, c);  Compiler_borrow_unit_semantics(child, c);  child -> macros = c -> macros;  child -> kw_aliases = c -> kw_aliases;  child -> kw_seen = c -> kw_seen;  child -> macro_lisp = c -> macro_lisp;  child -> meta_group = c -> meta_group;  child -> meta_group_bound = c -> meta_group_bound;  child -> unit_nodes = c -> unit_nodes;  child -> imports = c -> imports;  child -> import_stack = c -> import_stack;  child -> declaration_effects = c -> declaration_effects;  child -> borrowed_lisp = 1;  child -> import_src =(* in).path;  child -> inherited_lisp = Compiler_inherits_import((* in).path);
 }
 
 int Compiler_meta_form_is_declaration(Compiler);
