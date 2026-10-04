@@ -316,7 +316,7 @@ static int Compiler._cast_operand_after_parens(Compiler c) =>
 
 static int Compiler._macro_hole_starts_cast_type(Compiler c, Token after) {
   if (!c.macro_holes || c.peek(0) != <$> ||
-      c.peek(2) != <)>) return 0;
+      c.after_hole().type != <)>) return 0;
   List hole = c.peek_macro_hole();
   if (!hole) return 0;
   Symbol kind = hole.assoc(<kind>);
