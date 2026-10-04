@@ -53,9 +53,16 @@ macro Expression $twice(Expr $v) => $doubled($v);
 macro Expression $typed(Expr $v) => $type_of($v);
 macro Expression $plus(Expr $v) => $plus_total($v);
 
+meta static List min_width(void) {
+  int value = INT_MIN;
+  return $!(unsigned long)( sizeof($value) );
+}
+macro Expression $minimum_width() => $min_width();
+
 int main(void) {
   built();
   int total = 40;
   printf("%g %s %d\n", $twice(1.5), (char *) $typed(1.5), $plus(2));
+  printf("%d\n", $minimum_width() == sizeof(int));
   return 0;
 }

@@ -275,7 +275,7 @@ static List _macro_value_rows(Macro t, List values) {
 /* An expression parameter takes code, so an `int`, String, or Symbol
    argument becomes the literal expression that holds it, as the compiler
    lifts a compile-time value. C reads a negative literal as a negation,
-   so it takes parentheses. */
+   so it takes parentheses; INT_MIN's magnitude needs a cast back to int. */
 static Var _macro_expr_value(Var value) {
   if (value is <string>)
     return %(expr (* char) (literal (* char) ${value.repr()}));
@@ -283,6 +283,8 @@ static Var _macro_expr_value(Var value) {
   if (!value.is_integer() || value.integer() != (int) value.integer())
     return value;
   List literal = x2c_literal_int(value.integer());
+  if (value.integer() == INT_MIN)
+    literal = %(expr (int) (cast (int) $literal));
   return value.integer() < 0 ? %(expr (int) (parens $literal)) : literal;
 }
 

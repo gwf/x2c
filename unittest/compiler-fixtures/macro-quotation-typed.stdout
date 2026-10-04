@@ -19,3 +19,4 @@
  (call (expr () (ident "g"))
   (args (expr (int) (literal (int) "1")) (expr (int) (literal (int) "2")))))
 3 (double) 42
+1
