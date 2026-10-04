@@ -105,6 +105,8 @@ List Compiler_parse_macro_lisp_expression(Compiler c);
 
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
 
+List Compiler_bind_macro_lisp_statement(Compiler c, List value, AstPos context);
+
 void Compiler_import_package_macros(Compiler c, String name, Token invocation);
 
 String Compiler_source_path(Compiler c, String file);
