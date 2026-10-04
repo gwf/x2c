@@ -207,13 +207,17 @@ if grep -Fq "workers" "$BUILD/jobs-1.stderr"; then
 fi
 
 # Parallel translation reports each failing unit's diagnostics whole and in
-# input order. The first failing unit is the slowest to fail.
+# input order, including raw bytes from meta code. The first failing unit is
+# the slowest to fail.
 failing="$BUILD/failing"
 mkdir -p "$failing/out" "$failing/serial"
 for name in a b c d e f; do
   printf 'int %s_value(void) => 1;\n' "$name" >"$failing/$name.x"
 done
-awk 'BEGIN { for (i = 0; i < 5000; i++) printf "int b%d(void) => %d;\n", i, i
+awk 'BEGIN { print "#include \"x2c.x\""
+             print "meta int noise(void) { fputc(0, stderr); return 1; }"
+             print "int marker(void) { return $noise(); }"
+             for (i = 0; i < 5000; i++) printf "int b%d(void) => %d;\n", i, i
              print "int b_value(void) { int undefined_b = ; }" }' \
   >"$failing/b.x"
 printf 'int d_value(void) { int undefined_d = ; }\n' >"$failing/d.x"

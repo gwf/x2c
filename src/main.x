@@ -266,10 +266,10 @@ static void Translation.report(Translation &t, unsigned long started_at) {
 /* The live workers of one parallel translation. Each live slot keeps its
    worker's pid, the index of the slice it carries, and the file that
    captures its standard error. `output` holds each ended slice's captured
-   text until every earlier slice has shown its own. */
+   bytes until every earlier slice has shown its own. */
 typedef struct Workers {
   Translation *t, Array slices, long *pids, int *carried, File *captures;
-  String *output;
+  Block *output;
   int live, started, shown, failed, done;
 } Workers;
 
@@ -378,7 +378,7 @@ static int Translation.run_workers(Translation &t, Array slices) {
     .t = &t, .slices = slices, .pids = Scope.calloc(jobs, sizeof(long)),
     .carried = Scope.calloc(jobs, sizeof(int)),
     .captures = Scope.calloc(jobs, sizeof(File)),
-    .output = Scope.calloc(count, sizeof(String))};
+    .output = Scope.calloc(count, sizeof(Block))};
   struct sigaction term, interrupt;
   _forward_stop_signal(SIGTERM, &term);
   _forward_stop_signal(SIGINT, &interrupt);
@@ -432,7 +432,7 @@ static void Translation.work(Translation &t, List slice) {
   worker_exit(0);
 }
 
-/* Keeps the ended worker's captured text for `show`. The last live worker
+/* Keeps the ended worker's captured bytes for `show`. The last live worker
    moves into the slot of the one that finished. */
 static void Workers.reap(Workers &w) {
   int status, slot = worker_wait_any(w.pids, w.live, status);
@@ -440,8 +440,11 @@ static void Workers.reap(Workers &w) {
   int index = w.carried[slot];
   List slice = w.slices[index];
   File capture = w.captures[slot];
+  defer capture.close();
   capture.rewind();
-  w.output[index] = capture.string_close();
+  Block output = Block.new(sizeof(char));
+  capture.read_into(output);
+  w.output[index] = output;
   if (w.t.build && !status) w.t.build.end_translation(slice.car(), 0);
   w.done += slice.len();
   sigset_t unblocked = _block_stop_signals();
@@ -458,10 +461,12 @@ static void Workers.reap(Workers &w) {
    live worker carries it. */
 static void Workers.show(Workers &w) {
   while (w.shown < w.started && !w.carries(w.shown)) {
-    String text = w.output[w.shown++];
-    if (!text) continue;
+    Block output = w.output[w.shown++];
+    if (output == NULL) continue;
+    defer output.free();
+    if (!output.length) continue;
     report_suspend();
-    fputs(text, stderr);
+    File.write_all(stderr, output.bytes, output.length);
   }
 }
 
