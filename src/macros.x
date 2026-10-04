@@ -2261,6 +2261,7 @@ static List Compiler._scalar_row(Compiler c, List sources, int retain) {
 
 static Var _identifier_expression(Var value) {
   if (value is <string>) return %(expr () (ident $value));
+  match (value) case %("x2c.ident" ?): return %(expr () (ident $value));
   if (value is <list> && !value.is_nil() &&
       binding_identity_try_parts(value, NULL, NULL))
     return %(expr () (ident $value));
