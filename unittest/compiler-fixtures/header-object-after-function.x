@@ -20,7 +20,7 @@ int sized[2];
 IntRef ref = &before;
 typedef struct Pair { int a, b; } Pair;
 Pair pair = {11, 12};
-struct Point { int x, y; } origin = {13, 14};
+const struct Point { int x, y; } origin = {square(3), 14};
 String const greeting = "hi";
 struct { int x; } anonymous = {15};
 #pragma private

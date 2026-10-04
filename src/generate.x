@@ -398,7 +398,7 @@ static void Partition.add_declaration(
   }
   match (type.base_type())
     case %((!or struct union) ?(String tag) *): p.forwarded[tag] = 1;
-  if (!p.place_tagged_object(type, bindings) &&
+  if (!p.place_tagged_object(decl, type, bindings) &&
       !p.place_object(decl, type, bindings))
     p.header.push(_header_declaration(decl, type, bindings));
 }
@@ -417,7 +417,7 @@ static int Compiler._completed_prototype(Compiler c, List binding) {
    the qualifiers of `g`, and an `extern` declaration of `g`, and defines
    `g` in the source. */
 static int Partition.place_tagged_object(
-  Partition &p, Type type, List bindings) {
+  Partition &p, List decl, Type type, List bindings) {
   Type core = type.base_type();
   String tag = NULL;
   match (core)
@@ -425,7 +425,7 @@ static int Partition.place_tagged_object(
   if (!tag || !_declares_object(bindings)) return 0;
   List tagged = _tag_only(type, core, tag);
   p.header.push(%(declare $core (bindings (bind () ()))));
-  p.header.push(_header_declaration(NULL, %(extern @tagged), bindings));
+  p.header.push(p.object_header(decl, tagged, bindings));
   p.source.push(%(declare $tagged $bindings));
   return 1;
 }
@@ -442,13 +442,19 @@ static List _tag_only(Type type, Type core, Var name) =>
 static int Partition.place_object(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
+  p.header.push(p.object_header(decl, type, bindings));
+  p.source.push(decl);
+  return 1;
+}
+
+/* Both forms of public object use the qualifiers their C definition keeps. */
+static List Partition.object_header(
+  Partition &p, List decl, Type type, List bindings) {
   if (p.c.static_value_is_runtime(decl, NULL)) {
     type = _without_const(type);
     bindings = p.c._runtime_without_const(bindings);
   }
-  p.header.push(_header_declaration(NULL, %(extern @type), bindings));
-  p.source.push(decl);
-  return 1;
+  return _header_declaration(NULL, %(extern @type), bindings);
 }
 
 static List _without_const(List specifiers) =>
