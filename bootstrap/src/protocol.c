@@ -970,7 +970,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _488 = String_var(_487);
   _489 = List_var(NULL);
   _490 = Symbol_var(106239471489226);
-  _491 = int_var(1900);
+  _491 = int_var(1902);
   _492 = String_new("");
   _493 = String_var(_492);
   _494 = String_new("x2c.hole");
@@ -1274,7 +1274,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _789 = cons(_781, _788);
   _790 = cons(_775, _789);
   _791 = List_var(_790);
-  _792 = int_var(1972);
+  _792 = int_var(1974);
   _793 = Symbol_var(1544849476362);
   _794 = List_var(_145);
   _795 = cons(_794, NULL);
@@ -1372,7 +1372,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _887 = cons(_781, _886);
   _888 = cons(_775, _887);
   _889 = List_var(_888);
-  _890 = int_var(1979);
+  _890 = int_var(1981);
   _891 = cons(_814, NULL);
   _892 = cons(_843, _880);
   _893 = cons(_595, _892);
@@ -1974,11 +1974,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1486 = cons(_1485, NULL);
   _1487 = cons(_702, _1486);
   _1488 = List_var(_1487);
-  _1489 = int_var(2331);
+  _1489 = int_var(2333);
   _1490 = cons(_1489, NULL);
   _1491 = cons(_708, _1490);
   _1492 = List_var(_1491);
-  _1493 = int_var(85517);
+  _1493 = int_var(85631);
   _1494 = cons(_1493, NULL);
   _1495 = cons(_721, _1494);
   _1496 = List_var(_1495);
@@ -2055,11 +2055,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1564 = cons(_1563, NULL);
   _1565 = cons(_672, _1564);
   _1566 = List_var(_1565);
-  _1567 = int_var(2456);
+  _1567 = int_var(2458);
   _1568 = cons(_1567, NULL);
   _1569 = cons(_708, _1568);
   _1570 = List_var(_1569);
-  _1571 = int_var(90484);
+  _1571 = int_var(90598);
   _1572 = cons(_1571, NULL);
   _1573 = cons(_721, _1572);
   _1574 = List_var(_1573);
@@ -3591,7 +3591,7 @@ static List Compiler__ancestry(Compiler c, Type participant){
 
 Array Array_sort(Array);
 static List Compiler__ordered_occurrences(Compiler c){
-  List result = NULL;  Var _x2c_macro_cached_3;  if(Map_try_get(c -> proto_cache, Symbol_var(1166557139931428), &(_x2c_macro_cached_3))) result = Var_list(_x2c_macro_cached_3);  else{
+  if(c -> import_protocols) Compiler__install_imports(c);  List result = NULL;  Var _x2c_macro_cached_3;  if(Map_try_get(c -> proto_cache, Symbol_var(1166557139931428), &(_x2c_macro_cached_3))) result = Var_list(_x2c_macro_cached_3);  else{
     {
       Array ordered = Array_new(); {
         Var base, occurrence;  Map _x2c_macro_object_16 = c -> protocols;  unsigned _x2c_macro_cursor_16 = 0;  Var _x2c_macro_cursor_output_18;  Var _x2c_macro_cursor_output_19;  while(Map_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_18), &(_x2c_macro_cursor_output_19))){
