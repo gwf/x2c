@@ -380,7 +380,7 @@ static int _keeps_system_includes(String cc) {
 static List Toolchain._cpp_arguments(
   Toolchain t, List include_dirs, String macros, String depfile,
   String source) => %(
-    ${t.cc} "-E" "-P" "-x" "c"
+    ${t.cc} "-E" "-x" "c"
     "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)="
     "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
     "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"

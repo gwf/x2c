@@ -11,6 +11,7 @@
 #pragma once
 #include "compiler.x"
 #pragma private
+#include <ctype.h>
 
 /* directive lines
 
@@ -102,6 +103,21 @@ String preproc_include_target(String text, int &angle) {
   angle = body[0] == '<';
   String rest = body[1:], int close = rest.find(angle ? ">" : "\"");
   return close > 0 ? rest[:close] : NULL;
+}
+
+/** Returns the file that the host preprocessor's line marker `text`,
+    `# N "file" flags`, names and sets `line` to N, or returns `NULL` for
+    any other line. */
+String preproc_marker_file(String text, int &line) {
+  String body = preproc_directive(text);
+  size_t digits = 0;
+  while (digits < body.len() && isdigit(body[digits])) digits++;
+  String rest = body[digits:].lstrip(" \t");
+  if (!digits || !rest.startswith("\"")) return NULL;
+  int close = rest[1:].find("\"");
+  if (close < 0) return NULL;
+  line = atoi(body);
+  return rest[1:close + 1].unescape();
 }
 
 /* Returns the name token of the `#define` or `#undef` directive `content`,

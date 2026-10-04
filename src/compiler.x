@@ -83,6 +83,9 @@ typedef struct Compiler {
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
   Token input_boundary;
   Tokenizer tokenizer;
+  /* For the host preprocessor's merged output, the file each region came
+     from, as `(position text-line file line)` rows; NULL otherwise. */
+  Array line_markers;
   List return_type, include_dirs;
   // Canonical dependency path -> content hash for compile-time text reads,
   // or 1 for dependencies whose contents are not embedded in generated C.

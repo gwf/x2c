@@ -3881,7 +3881,7 @@ void Compiler.record_macro_export(Compiler c) {
   String requested = NULL;
   c._import_path(requested);
   String source = home_portable_path(Path.absolute(c.filename));
-  String path = home_portable_path(c._canonical_path(requested));
+  String path = home_portable_path(c._canonical_path(requested, c.token));
   c.sym.set(
     %("source-node" (macro-export $source ${c.token.pos})),
     %(macro-export $path));
@@ -3993,7 +3993,7 @@ typedef struct Import {
 
 static List Compiler._import(Compiler c, String requested, Token invocation) {
   c.ensure_macro_lisp();
-  String path = c._canonical_path(requested);
+  String path = c._canonical_path(requested, invocation);
   c.add_translation_dependency(path);
   if (library_filling) library_imports[path] = 1;
   Var cached;
@@ -4227,20 +4227,21 @@ void Compiler.import_package_macros(
 
 // source files
 
-/* A relative import names a file beside the importing source, or else one
-   under the home's `lib/`. */
-static String Compiler._canonical_path(Compiler c, String path) {
+/* A relative import names a file beside the source that writes it at
+   `site`, or else one under the home's `lib/`. */
+static String Compiler._canonical_path(Compiler c, String path, Token site) {
   if (!path || path[0] == '/') return c.canonical_path(path);
-  String local = %"${c._source_dir()}/$path";
+  String local = %"${c._source_dir(site)}/$path";
   String system = %"${c.root_dir}/lib/$path";
   int use_system = !c.sources.exists(local) && c.sources.exists(system);
   return c.canonical_path(use_system ? system : local);
 }
 
-static String Compiler._source_dir(Compiler c) {
+/* The importing macro file, or the file whose lines hold `site`. */
+static String Compiler._source_dir(Compiler c, Token site) {
   String filename = c.import_stack.len()
                   ? c.import_stack[-1]
-                  : c.filename;
+                  : c.token_source(site ? site : c.token, NULL);
   return filename ? Path.dirname(filename) : ".";
 }
 
