@@ -873,9 +873,11 @@ remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
 including the trailing semicolon. A `Stmt` macro may also use the expression
-form; its body is then the single statement `expression;`. When that
-expression is a `meta` call, the call may return a statement, as described
-under [Macro-visible syntax](#macro-visible-syntax).
+form; its body is then one statement. That statement is an invocation of a
+`Stmt` macro or a statement decorator, such as `=> $other(args);`, or else
+the expression statement `expression;`. When that expression is a `meta`
+call, the call may return a statement, as described under
+[Macro-visible syntax](#macro-visible-syntax).
 
 Here `guarded` returns an `if` statement, which an expression position
 would reject:
@@ -1149,7 +1151,7 @@ A macro has one result kind as well as argument kinds:
 | Annotation | Body | Legal invocation position |
 | --- | --- | --- |
 | `Expression` | `=>` expression `;` | expression |
-| `Stmt` | braced block items | statement |
+| `Stmt` | braced block items, or `=>` one statement | statement |
 | `Field` | braced field declarations | struct or union body |
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
 | `Enumerator` | braced, comma-separated enumerators | enum body |
@@ -1158,9 +1160,9 @@ A macro has one result kind as well as argument kinds:
 
 The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
-results; `Expr` is a synonym. Arrow-expression bodies require
-`Expression`; braced bodies require `Stmt`, `Field`, `Entry`,
-`Enumerator`, `Unit`, or `Declaration`.
+results; `Expr` is a synonym. Arrow bodies require `Expression` or
+`Stmt`; braced bodies require `Stmt`, `Field`, `Entry`, `Enumerator`,
+`Unit`, or `Declaration`.
 Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
@@ -2354,11 +2356,15 @@ target; arbitrary AST `List`s do not acquire source text by structural
 equality. Diagnostics retain the definition, invocation, import, and generated
 ancestry even after a macro returns a new `List`. Returned syntax must be valid
 for its expression, field, enumerator, block-item, or translation-unit
-position. Inside a macro expansion, a `meta` call written as a whole
-expression statement, such as the body of `macro Stmt $same(Stmt $code) =>
-$same_of($code);`, holds a block-item position, so it may return a statement
-as well as an expression. Outside an expansion, such a call's `List` result
-that is not expression syntax remains a runtime value. Protocol
+position. A `meta` call written as a whole expression statement holds that
+statement's block-item or statement position, so it may return a statement
+as well as an expression. This holds in an ordinary function and in an
+expansion alike, such as the body of `macro Stmt $same(Stmt $code) =>
+$same_of($code);`. A `meta` call inside a larger expression holds an
+expression position. Inside an expansion every `List` result is code.
+Elsewhere a `List` result is code when it is an expression node, a macro
+application, a quotation, or an identifier; any other `List` remains a
+runtime value. Protocol
 declarations, macro definitions, preprocessor nodes, and other
 compile-time-only source items are retained at translation-unit position
 and apply their source-order effect. The compiler rejects forms that are

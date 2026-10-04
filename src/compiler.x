@@ -180,6 +180,9 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
+  /* Where the expression statement being parsed starts. A meta call there
+     that the statement's `;` ends is evaluated as the statement. */
+  Token meta_statement;
   /* A collection pass or macro import whose protocol registries are
      installed from the collected symbols on first use;
      `Compiler._install_imports` owns the installation. */

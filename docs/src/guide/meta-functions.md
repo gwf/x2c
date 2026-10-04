@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. Inside a macro expansion, a call written as a whole statement may also return a statement. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier; inside a macro expansion every List is code. A call written as a whole statement may also return a statement, while a call inside a larger expression must return an expression. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
@@ -1019,9 +1019,12 @@ four
 
 `repeated` receives each captured statement as code and returns a block
 that holds it twice. The second invocation passes an `if` statement, which
-an expression position could not accept. This holds only inside a macro
-expansion. In an ordinary function, a `$helper(args);` statement whose
-result is not expression code inserts that `List` as a runtime value.
+an expression position could not accept. A `$helper(args);` statement in
+an ordinary function may also return a statement. There, only an expression
+node, a macro application, a quotation, or an identifier is code. A
+`%(block ...)` such as the one `repeated` builds is data there and becomes a
+runtime `List` value. A helper for ordinary code therefore returns
+statements as a `$!{ ... }` quotation.
 
 ## Source templates from meta functions
 

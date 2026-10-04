@@ -1142,6 +1142,7 @@ static List Compiler._resolve_source(
 static List Compiler._resolve_meta_call(
   Compiler c, List input, Token origin) {
   if (c.meta_body || c.macro_holes) return input;
+  if (origin == c.meta_statement && c.peek(0) == <;>) return input;
   return c.evaluate_meta_expression(input, origin);
 }
 
