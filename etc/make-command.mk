@@ -17,9 +17,10 @@ BUILD_JOBS ?= $(shell \
 export BUILD_JOBS
 
 # An inherited jobserver or explicit -j already owns concurrency. Add the
-# detected default only at compilation-owning recursive boundaries.
+# detected default only at compilation-owning recursive boundaries. MFLAGS
+# omits command-line variables, whose values may contain a j; Make 3.81
+# records a bare -j in its leading group of single-letter flags.
 MAKE_HAS_JOBS = $(strip \
-	$(findstring --jobserver,$(MAKEFLAGS)) \
-	$(filter -j%,$(MAKEFLAGS)) \
-	$(findstring j,$(firstword $(MAKEFLAGS))))
+	$(filter -j% --jobserver%,$(MFLAGS)) \
+	$(findstring j,$(filter-out --%,$(firstword $(MFLAGS)))))
 PARALLEL_MAKE = $(MAKE) $(if $(MAKE_HAS_JOBS),,-j$(BUILD_JOBS))
