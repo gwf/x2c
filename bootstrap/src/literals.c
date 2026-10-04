@@ -47,8 +47,6 @@ static List Compiler__parse_literal_element(Compiler c);
 
 static List Compiler__parse_element(Compiler c);
 
-static List Compiler__cons_cell(Compiler c, List head, List tail);
-
 static List Compiler__append_splice(Compiler c, List head, List tail);
 
 static List Compiler__cons_list(Compiler c, Array elements, List tail);
@@ -520,7 +518,7 @@ List Compiler_parse_list_literal(Compiler c){
                 List tail = shell ? Compiler__parse_shell_tail(c) : Compiler__parse_list_tail(c);
                 Compiler_expect(c, 83);
                 {
-                  List _x2c_return_value_1 = cons(_0, cons(_4, cons(List_var(Compiler__cons_cell(c, head, tail)), NULL)));
+                  List _x2c_return_value_1 = cons(_0, cons(_4, cons(List_var(Compiler_literal_cell(c, head, tail)), NULL)));
                   {
                     x2c_cleanup_leave(& _x2c_defer_record_1);
                     x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -579,8 +577,8 @@ static List Compiler__parse_reader_prefix(Compiler c){
   }
   Compiler_next(c);
   List value = Compiler__parse_list_head(c);
-  List tail = Compiler__cons_cell(c, value, _6);
-  return Compiler__cons_cell(c, Compiler__atom_element(c, spelling), tail);
+  List tail = Compiler_literal_cell(c, value, _6);
+  return Compiler_literal_cell(c, Compiler__atom_element(c, spelling), tail);
 }
 
 Var List_cadr(List);
@@ -629,16 +627,16 @@ static List Compiler__cache_if_stable(Compiler c, List elem){
 static List Compiler__parse_list_tail(Compiler c){
   if(Compiler_peek(c, 0) == 83) return _6;
   List head = Compiler__parse_list_head(c), tail = Compiler__parse_list_tail(c);
-  return Compiler__cons_cell(c, head, tail);
+  return Compiler_literal_cell(c, head, tail);
 }
 
 static List Compiler__parse_shell_tail(Compiler c){
   if(Compiler_peek(c, 0) == 83) return _6;
   List type = Compiler__parse_list_head(c);
-  if(Compiler_peek(c, 0) == 83) return Compiler__cons_cell(c, type, _6);
+  if(Compiler_peek(c, 0) == 83) return Compiler_literal_cell(c, type, _6);
   List content = Compiler_try_parse_macro_pattern_insertion(c, 1);
   if(! List_truth(content)) content = Compiler__parse_list_head(c);
-  return Compiler__cons_cell(c, type, Compiler__cons_cell(c, content, Compiler__parse_list_tail(c)));
+  return Compiler_literal_cell(c, type, Compiler_literal_cell(c, content, Compiler__parse_list_tail(c)));
 }
 
 Array Array_new(void);
@@ -778,7 +776,8 @@ List Compiler_convert_expression(Compiler, List, Type);
 
 List Compiler_cache_cons_cell(Compiler, List, List);
 
-static List Compiler__cons_cell(Compiler c, List head, List tail){
+List Compiler_literal_cell(Compiler c, List head, List tail){
+  if(! _init_guard_) _file_init_();
 
   {
     List _x2c_match_expr = head;
@@ -802,7 +801,7 @@ static List Compiler__append_splice(Compiler c, List head, List tail){
 
 Var Array_getindex(Array, int);
 static List Compiler__cons_list(Compiler c, Array elements, List tail){
-  for(int i =(int) Array_len(elements) - 1;  i >= 0;  i --) tail = Compiler__cons_cell(c, Var_list(Array_getindex(elements, i)), tail);  return cons(_0, cons(_4, cons(List_var(tail), NULL)));
+  for(int i =(int) Array_len(elements) - 1;  i >= 0;  i --) tail = Compiler_literal_cell(c, Var_list(Array_getindex(elements, i)), tail);  return cons(_0, cons(_4, cons(List_var(tail), NULL)));
 }
 
 Type Compiler_parse_type_name(Compiler);
@@ -869,9 +868,9 @@ static List Compiler__tag_test(Compiler c, Atom binder, List tag){
 default: break;
     }
   }
-List tail = Compiler__cons_cell(c, tag, _6); {
+List tail = Compiler_literal_cell(c, tag, _6); {
   Var element;  List _x2c_macro_object_1 = List_reverse(elements);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-    element = _x2c_macro_cursor_output_1;  tail = Compiler__cons_cell(c, Compiler__atom_element(c, Var_str(element)), tail);
+    element = _x2c_macro_cursor_output_1;  tail = Compiler_literal_cell(c, Compiler__atom_element(c, Var_str(element)), tail);
   }
 
 }
@@ -986,7 +985,7 @@ return tail;
 }
 
 static List Compiler__and_tag_test(Compiler c, List pattern, List tag){
-  List tail = Compiler__cons_cell(c, pattern, _6);  tail = Compiler__cons_cell(c, Compiler__tag_test(c, ((void) 0, Void), tag), tail);  tail = Compiler__cons_cell(c, Compiler__atom_element(c, _139), tail);  return cons(_0, cons(_4, cons(List_var(tail), NULL)));
+  List tail = Compiler_literal_cell(c, pattern, _6);  tail = Compiler_literal_cell(c, Compiler__tag_test(c, ((void) 0, Void), tag), tail);  tail = Compiler_literal_cell(c, Compiler__atom_element(c, _139), tail);  return cons(_0, cons(_4, cons(List_var(tail), NULL)));
 }
 
 List Compiler_try_parse_macro_slot(Compiler, Symbol);
