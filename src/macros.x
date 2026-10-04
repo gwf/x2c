@@ -156,12 +156,14 @@ static List Expansion.bind(Expansion &x, AstPos position) {
     x.definition.assoc(<pattern>));
   int matched = !!replacement_bindings;
   replacement_bindings = replacement_bindings.append(x.direct);
-  List lisp_bindings = _lisp_bindings(replacement_bindings);
+  List template_bindings = NULL;
+  List lisp_bindings = _lisp_bindings(
+    replacement_bindings, template_bindings);
   c.macro_stack = %(
     (${x.definition} ${x.input} $lisp_bindings ${x.invocation}) @old_stack
   );
   int expansion_origin = c.record_origin(x.invocation);
-  Ast constructed = matched ? x.construct(replacement_bindings) : NULL;
+  Ast constructed = matched ? x.construct(template_bindings) : NULL;
   List result = NULL;
   $let(c.origin, expansion_origin) {
     result = c.bind_syntax(
@@ -233,25 +235,30 @@ static Var Compiler._member_spelling(Compiler c, Var value) {
   return name ? name : value;
 }
 
-/* The bindings compile-time Lisp sees: the author's binders, without the
-   `__macro_` binders the compiler makes. */
-static List _lisp_bindings(List bindings) {
-  Array result = [];
+/* The bindings compile-time Lisp sees: the author's binders. The template
+   receives the `__macro_` binders the compiler makes, so an author binder
+   spelled in a template literal, such as a catch pattern's `?cause`, stays
+   literal. */
+static List _lisp_bindings(List bindings, List &template_bindings) {
+  Array lisp = [], compiler = [];
   foreach (List pair, bindings) {
     Var binder = pair.car();
     if (binder.is_binder() &&
         !binder.str().startswith("?__macro_") &&
         !binder.str().startswith("*__macro_"))
-      result.push(pair);
+      lisp.push(pair);
+    else
+      compiler.push(pair);
   }
-  return result.list_free();
+  template_bindings = compiler.list_free();
+  return lisp.list_free();
 }
 
 /* The filled template. A Declaration result, or a NamedType decorator's,
    becomes one declaration bundle. */
-static Ast Expansion.construct(Expansion &x, List replacement_bindings) {
+static Ast Expansion.construct(Expansion &x, List bindings) {
   List definition = x.definition;
-  Ast constructed = x.template.replace(replacement_bindings);
+  Ast constructed = x.template.replace(bindings);
   if (constructed &&
       (definition.assoc(<kind>) == <decl-unit> ||
        definition.assoc(<target>) == <named-type>)) {
