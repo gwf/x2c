@@ -41,6 +41,7 @@ $(import "../src/adapter-memo.xmacro")
 #include <string.h>
 #include <sys/stat.h>
 
+$(import "../src/expressions-reports.xmacro")
 $(import "../src/macros-reports.xmacro")
 
 /* expansion
@@ -1220,10 +1221,14 @@ static List Compiler._expression_holes(Compiler c, Map holes) {
 }
 
 /* The declaration of the hidden local that `{expression}` at the cursor
-   initializes. */
+   initializes. The local takes the expression's type, and the quotation
+   boxes its value, so an expression without an x2c type reports where it
+   is written. */
 static List Compiler._hole_local(Compiler c, Map holes, int position) {
   c.expect(<"{">);
+  Token origin = c.token;
   List value = c.parse_expression();
+  if (!value.cadr()) $report.type.var_unresolved(c, origin);
   c.expect(<"}">);
   String name = c.fresh_name("hole");
   holes[%(expression $position)] = name;

@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/macro-quotation-expression-hole-unknown.x:8:28: type: cannot convert an unresolved expression to Var
+    $!( ({ int v = 1; $a + ${v}; }) );
+                             ^
+  note: give the expression a declared x2c type before boxing it
+
+unittest/compiler-fixtures/macro-quotation-expression-hole-unknown.x:12:21: type: cannot convert an unresolved expression to Var
+    return $!( $a + ${coutn} );
+                      ^^^^^
+  note: give the expression a declared x2c type before boxing it
+

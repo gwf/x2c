@@ -3475,7 +3475,7 @@ static List Compiler._convert_untyped(
     List binding = expr.caddr().cadr();
     if (binding_identity_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
-    $report.type.var_unresolved(c);
+    $report.type.var_unresolved(c, NULL);
   }
   return expr;
 }
