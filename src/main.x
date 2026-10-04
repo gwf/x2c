@@ -23,6 +23,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include "report.x"
@@ -262,12 +263,19 @@ static void Translation.report(Translation &t, unsigned long started_at) {
 
 // translation workers
 
-/* The live workers of one parallel translation. Each keeps its pid and the
-   input slice that completion reporting reads. */
+/* The live workers of one parallel translation. Each live slot keeps its
+   worker's pid, the index of the slice it carries, and the file that
+   captures its standard error. `output` holds each ended slice's captured
+   text until every earlier slice has shown its own. */
 typedef struct Workers {
-  Translation *t, long *pids, List *carried;
-  int live, failed, done;
+  Translation *t, Array slices, long *pids, int *carried, File *captures;
+  String *output;
+  int live, started, shown, failed, done;
 } Workers;
+
+/* The running parallel translation. A stop signal reaches its live
+   workers. A worker has none of its own. */
+static Workers _workers;
 
 /* Translate the inputs in forked workers. Returns the number of slices
    that failed. */
@@ -360,36 +368,61 @@ static Array _slices(List inputs, int total, int count) {
    process collection cache and keeps its slice of the input list to the
    end, so the only state workers share is the output directory, where no
    two units write the same file. The parent reports progress as workers
-   finish. */
+   finish and prints their standard error in input order. */
 static int Translation.run_workers(Translation &t, Array slices) {
-  int jobs = t.request.jobs, count = slices.len(), next = 0;
+  int jobs = t.request.jobs, count = slices.len();
   if (jobs > count) jobs = count;
   if (t.request.verbose)
     $report.main.workers_started(jobs, t.total);
-  long *pids = Scope.calloc(jobs, sizeof(long));
-  List *carried = Scope.calloc(jobs, sizeof(List));
-  Workers w = {.t = &t, .pids = pids, .carried = carried};
-  while (next < count || w.live) {
-    if (next < count && w.live < jobs) w.start(slices[next++]);
-    else w.reap();
+  _workers = (Workers) {
+    .t = &t, .slices = slices, .pids = Scope.calloc(jobs, sizeof(long)),
+    .carried = Scope.calloc(jobs, sizeof(int)),
+    .captures = Scope.calloc(jobs, sizeof(File)),
+    .output = Scope.calloc(count, sizeof(String))};
+  struct sigaction term, interrupt;
+  _forward_stop_signal(SIGTERM, &term);
+  _forward_stop_signal(SIGINT, &interrupt);
+  while (_workers.started < count || _workers.live) {
+    if (_workers.started < count && _workers.live < jobs) _workers.start();
+    else _workers.reap();
+    _workers.show();
   }
-  Scope.free(carried);
-  Scope.free(pids);
-  return w.failed;
+  sigaction(SIGTERM, &term, NULL);
+  sigaction(SIGINT, &interrupt, NULL);
+  Scope.free(_workers.output);
+  Scope.free(_workers.captures);
+  Scope.free(_workers.carried);
+  Scope.free(_workers.pids);
+  return _workers.failed;
 }
 
-// A slice that cannot fork counts as one failure.
-static void Workers.start(Workers &w, List slice) {
+/* Starts the next slice. A slice that cannot start counts as one failure.
+   Stop signals wait until the parent records the worker, so a forwarded
+   stop reaches every worker. */
+static void Workers.start(Workers &w) {
+  int index = w.started++;
+  List slice = w.slices[index];
   if (w.t.build) w.t.build.begin_translation(slice.car());
-  long pid = worker_fork();
-  if (!pid) (*w.t).work(slice);
-  if (pid < 0) {
-    report_line(<error>, "could not start a translation worker");
-    w.failed++;
-    return;
+  File capture = tmpfile();
+  sigset_t unblocked = _block_stop_signals();
+  long pid = capture ? worker_fork() : -1;
+  if (!pid) {
+    w.live = 0;
+    sigprocmask(SIG_SETMASK, &unblocked, NULL);
+    dup2(capture.fileno(), STDERR_FILENO);
+    (*w.t).work(slice);
   }
-  w.carried[w.live] = slice;
-  w.pids[w.live++] = pid;
+  if (pid > 0) {
+    w.carried[w.live] = index;
+    w.captures[w.live] = capture;
+    w.pids[w.live] = pid;
+    w.live++;
+  }
+  sigprocmask(SIG_SETMASK, &unblocked, NULL);
+  if (pid > 0) return;
+  if (capture) capture.close();
+  report_line(<error>, "could not start a translation worker");
+  w.failed++;
 }
 
 // A forked worker exits after its slice, or at the first unit that fails.
@@ -399,17 +432,72 @@ static void Translation.work(Translation &t, List slice) {
   worker_exit(0);
 }
 
-/* The last live worker moves into the slot of the one that finished. */
+/* Keeps the ended worker's captured text for `show`. The last live worker
+   moves into the slot of the one that finished. */
 static void Workers.reap(Workers &w) {
   int status, slot = worker_wait_any(w.pids, w.live, status);
   if (status) w.failed++;
-  List slice = w.carried[slot];
+  int index = w.carried[slot];
+  List slice = w.slices[index];
+  File capture = w.captures[slot];
+  capture.rewind();
+  w.output[index] = capture.string_close();
   if (w.t.build && !status) w.t.build.end_translation(slice.car(), 0);
   w.done += slice.len();
+  sigset_t unblocked = _block_stop_signals();
   w.live--;
   w.pids[slot] = w.pids[w.live];
   w.carried[slot] = w.carried[w.live];
+  w.captures[slot] = w.captures[w.live];
+  sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (!w.t.build) report_progress(<translate>, w.done, w.t.total, NULL);
+}
+
+/* Prints each ended slice's captured standard error once every earlier
+   slice has printed its own. A slice has ended when it has started and no
+   live worker carries it. */
+static void Workers.show(Workers &w) {
+  while (w.shown < w.started && !w.carries(w.shown)) {
+    String text = w.output[w.shown++];
+    if (!text) continue;
+    report_suspend();
+    fputs(text, stderr);
+  }
+}
+
+static int Workers.carries(Workers &w, int index) {
+  for (int slot = 0; slot < w.live; slot++)
+    if (w.carried[slot] == index) return 1;
+  return 0;
+}
+
+// stop signals
+
+/* Sends TERM or INT on to each live worker, then stops this process as the
+   signal's default action does. */
+static void _forward_stop(int number) {
+  for (int slot = 0; slot < _workers.live; slot++)
+    kill((pid_t) _workers.pids[slot], number);
+  signal(number, SIG_DFL);
+  kill(getpid(), number);
+}
+
+/* Routes `number` through `_forward_stop` unless this process ignores it.
+   `previous` receives the action to restore. */
+static void _forward_stop_signal(int number, struct sigaction *previous) {
+  struct sigaction forward = {.sa_handler = _forward_stop};
+  sigaction(number, NULL, previous);
+  if (previous->sa_handler != SIG_IGN) sigaction(number, &forward, NULL);
+}
+
+/* Blocks TERM and INT and returns the mask that unblocks them again. */
+static sigset_t _block_stop_signals(void) {
+  sigset_t stops, previous;
+  sigemptyset(&stops);
+  sigaddset(&stops, SIGTERM);
+  sigaddset(&stops, SIGINT);
+  sigprocmask(SIG_BLOCK, &stops, &previous);
+  return previous;
 }
 
 // builds

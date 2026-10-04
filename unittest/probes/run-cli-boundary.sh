@@ -206,6 +206,65 @@ if grep -Fq "workers" "$BUILD/jobs-1.stderr"; then
   exit 1
 fi
 
+# Parallel translation reports each failing unit's diagnostics whole and in
+# input order. The first failing unit is the slowest to fail.
+failing="$BUILD/failing"
+mkdir -p "$failing/out" "$failing/serial"
+for name in a b c d e f; do
+  printf 'int %s_value(void) => 1;\n' "$name" >"$failing/$name.x"
+done
+awk 'BEGIN { for (i = 0; i < 5000; i++) printf "int b%d(void) => %d;\n", i, i
+             print "int b_value(void) { int undefined_b = ; }" }' \
+  >"$failing/b.x"
+printf 'int d_value(void) { int undefined_d = ; }\n' >"$failing/d.x"
+printf 'int f_value(void) { int undefined_f = ; }\n' >"$failing/f.x"
+: >"$failing/expected"
+for name in b d f; do
+  "$X2C" translate -j 1 -q --out-dir "$failing/serial" "$failing/$name.x" \
+    2>>"$failing/expected" && exit 1
+done
+for command in translate build; do
+  if [[ $command == translate ]]; then
+    outputs=(--out-dir "$failing/out")
+  else
+    outputs=(--build-dir "$failing/build" --output "$failing/program")
+  fi
+  "$X2C" $command -j 6 -q "${outputs[@]}" "$failing"/[a-f].x \
+    2>"$failing/$command.stderr" && exit 1
+  diff -u "$failing/expected" "$failing/$command.stderr"
+done
+
+# A stopped parallel translation stops its workers.
+stopped="$BUILD/stopped"
+mkdir -p "$stopped/out"
+for name in first second; do
+  awk -v name="$name" 'BEGIN { for (i = 0; i < 40000; i++)
+    printf "int %s%d(void) => %d;\n", name, i, i }' >"$stopped/$name.x"
+done
+"$X2C" translate -j 2 -q --out-dir "$stopped/out" \
+  "$stopped/first.x" "$stopped/second.x" &
+parent=$!
+workers=
+for _ in $(seq 100); do
+  workers=$(pgrep -P "$parent" | tr '\n' ' ' || true)
+  [[ $(wc -w <<<"$workers") -eq 2 ]] && break
+  sleep 0.05
+done
+[[ $(wc -w <<<"$workers") -eq 2 ]]
+kill -TERM "$parent"
+stopped_status=0
+wait "$parent" || stopped_status=$?
+[[ $stopped_status == 143 ]]
+sleep 0.2
+for worker in $workers; do
+  if kill -0 "$worker" 2>/dev/null; then
+    echo "translation worker $worker outlived its stopped parent" >&2
+    kill -KILL $workers 2>/dev/null || true
+    exit 1
+  fi
+done
+[[ ! -e "$stopped/out/first.c" && ! -e "$stopped/out/second.c" ]]
+
 set +e
 "$X2C" translate --color=invalid --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/color-invalid.stdout" \
