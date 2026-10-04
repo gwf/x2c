@@ -1227,6 +1227,47 @@ computes.
 evaluate it in; it computes with a `$meta(...)` call or a `$(...)` slot,
 which run where it expands.
 
+### Code that knows its type
+
+A quotation is bound where it lands, so until then its code has no type.
+Sometimes the code a function builds must state its type at once: another
+operation reads the type before the code lands, or the code goes where
+nothing binds it again. Write the type in parentheses between `$!` and the
+expression:
+
+<!-- ignore: a meta function fragment without its includes -->
+```x2c,ignore
+meta static List doubled(List value) {
+  List twice = $!(double)( $value * 2 );
+  // x2c_syntax_type(twice) is (double) already.
+  return twice;
+}
+```
+
+`$!(T)( expression )` builds the expression where it is written and gives
+it the type `T`. It reads like a cast written in front of the code, but it
+converts nothing: `T` is the type the code has. The type is a type name, or
+a `Type` local or `${...}` hole whose value is the type, as in
+`$!($result)( $callee($arguments...) )`.
+
+The rest of the code is built the way a quotation builds it, with two
+differences:
+
+- Nothing is bound. Holes keep the syntax their locals hold, a binding
+  becomes a reference to it, and an `int`, String, or Symbol becomes a
+  literal. A name the expression reads without declaring stays a name and
+  is bound wherever the code is bound, if it is bound at all.
+- The code declares nothing. A typed quotation has no expansion to keep
+  names private to, so a name it needs comes from a hole. For the same
+  reason it applies no template; build that code first and insert it.
+
+Only the outermost expression receives `T`. Inner expressions carry no type
+until something binds them. Write `T` exactly: the compiler trusts it as it
+trusts the type a typed call already carries.
+
+A typed reference to a binding the function holds is the shortest form:
+`$!($type)( $binding )` is the expression that reads `binding` as a `type`.
+
 ## What the compiler answers
 
 `lib/meta.x` declares the compiler operations. The code builders and
