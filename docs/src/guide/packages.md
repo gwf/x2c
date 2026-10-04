@@ -225,11 +225,14 @@ meta static int ten(void) => $tally.sum4();
 ```
 
 The import loads the package's declarations, compile-time module or linked
-extension, and the macro imports its sources
-[export](../reference/language.md#exported-imports). An import without
-`export` stays private, wherever it is written. Macros keep their declared
-names; `as` changes the package alias, not macro spellings. A macro pack may
-still be imported explicitly without importing its package.
+extension, and the macro imports its entry source and public include
+surface [export](../reference/language.md#exported-imports). An include below
+`#pragma private` does not contribute the included file's exports. The
+`export` marker itself works on either side of the exporting file's private
+boundary. An import without `export` stays private, wherever it is written.
+Macros keep their declared names; `as` changes the package alias, not macro
+spellings. A macro pack may still be imported explicitly without importing
+its package.
 
 ### Expose macros through one import
 

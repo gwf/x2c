@@ -3169,7 +3169,7 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
     {
       defer c.sym.pop_scope();
       List statement = c._bind_statement(body);
-      if (!_declares_binders(body))
+      if (!_declares_binders(body, bindings))
         statement = %(block
           @{c.catch_binder_declarations(bindings, handle)} $statement);
       bound.push(%($pattern $statement));
@@ -3179,16 +3179,27 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
 }
 
 /* Whether a catch arm's `body` begins with the binder declarations that
-   `catch_binder_declarations` builds: one that reads the first capture. */
-static int _declares_binders(List body) {
-  match (body)
-    case %(block (declare *)
-           (stmnt (expr ? (op = ? (expr ? (!or
-             (call "x2c_error_catch_capture" *)
-             (call "Var_list"
-               (args (expr ? (call "x2c_error_catch_capture" *)))))))))
-           *):
-      return 1;
+   `catch_binder_declarations` builds, one pair for every definite binder. */
+static int _declares_binders(List body, List bindings) {
+  match (body) case %(block *items): {
+    foreach (List binding, bindings) {
+      match (items)
+        case %((declare ? (bindings (bind ?declared ())))
+               (stmnt (expr ? (op = (expr ? (ident ?assigned))
+                 (expr ? (!or (call "x2c_error_catch_capture" *)
+                   (call "Var_list"
+                     (args (expr ? (call "x2c_error_catch_capture" *)))))))))
+               *rest): {
+          if (declared != assigned ||
+              binding_identity_spelling(declared) !=
+              binding_identity_spelling(binding.cadr())) return 0;
+          items = rest;
+          continue;
+        }
+      return 0;
+    }
+    return !!bindings;
+  }
   return 0;
 }
 
