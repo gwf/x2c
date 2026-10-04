@@ -2820,6 +2820,7 @@ static List Compiler._bind_collected_function(
   match (declarator) case %(bind ?binding *):
     c.set_fact(
       %(declaration-default ${binding_identity_spelling(binding)}), 1);
+  c._land_collected_bindings(body);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(
       %(function $return_type $declarator $body), AST_UNIT, c.return_type);
@@ -2832,9 +2833,27 @@ static List Compiler._bind_collected_function(
 static List Compiler._bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
+  c._land_collected_bindings(declaration);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(declaration, AST_UNIT, c.return_type);
   }
+}
+
+/* A retained body or initializer names bindings by the identities that
+   collection issued, which the full parse does not know. Each reads its
+   spelling where the expansion lands, unless a declaration in scope binds
+   that identity, as one the retained syntax declares does. */
+static void Compiler._land_collected_bindings(Compiler c, Var syntax) {
+  if (syntax is not <list>) return;
+  int identity = 0;
+  String spelling = NULL;
+  if (!binding_identity_try_parts(syntax, identity, spelling)) {
+    foreach (Var child, syntax.list()) c._land_collected_bindings(child);
+    return;
+  }
+  if (!(%(known $identity) in c.semantic_binding_facts()))
+    c.set_fact(%(known $identity), spelling);
+  c.set_fact(%(source-spelling $syntax), spelling);
 }
 
 /* Binds a constructed function's parameters in a fresh prototype scope,
