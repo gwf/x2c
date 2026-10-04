@@ -478,6 +478,17 @@ other_after=$(mtime "$BUILD/deps/make-out/other.c")
 [[ $root_after -gt $root_before ]]
 [[ $other_after == "$other_before" ]]
 
+# GNU Make 4 remakes a deleted included file, and the unit that included it
+# then translates again.
+gnu_make=$(command -v gmake || command -v make)
+if [[ $("$gnu_make" --version 2>/dev/null) == "GNU Make "[4-9]* ]]; then
+  mv "$BUILD/deps/src/leaf.x" "$BUILD/deps/leaf.gone"
+  "$gnu_make" -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
+    default >"$BUILD/deps/gone.out" 2>&1 || true
+  grep -q 'translate .*root\.x' "$BUILD/deps/gone.out"
+  mv "$BUILD/deps/leaf.gone" "$BUILD/deps/src/leaf.x"
+fi
+
 mkdir -p "$BUILD/direct/a" "$BUILD/direct/b"
 printf '#include "x2c.x"\nint main(void) { puts("one"); return 0; }\n' \
   >"$BUILD/direct/one.x"

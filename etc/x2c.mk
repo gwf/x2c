@@ -73,14 +73,17 @@ $(C_FILES) $(H_FILES): $(BUILD)/.translated
 # still owns clean-build batching; this rule retranslates only a unit whose
 # discovered prerequisite is newer than its generated C. Make computes $?
 # from times read before the batch ran, so the recipe compares them again
-# and skips a unit the batch has just written.
+# and skips a unit the batch has just written. A deleted prerequisite counts
+# as changed.
 $(BUILD)/%.c: $(SOURCE)/%.x
 	$(if $(filter-out $(BUILD)/.translated,$?), \
-		@if [ -n "$$(find $(filter-out $(BUILD)/.translated,$?) \
-			-newer $@)" ]; then \
-			echo '$(X2C) translate $(X2CFLAGS) $<'; \
-			$(X2C) translate $(X2CFLAGS) $<; \
-		fi)
+		@for p in $(filter-out $(BUILD)/.translated,$?); do \
+			if [ ! -e "$$p" ] || \
+				[ -n "$$(find "$$p" -newer $@)" ]; then \
+				echo '$(X2C) translate $(X2CFLAGS) $<'; \
+				exec $(X2C) translate $(X2CFLAGS) $<; \
+			fi; \
+		done)
 
 $(BUILD)/%.h: $(BUILD)/%.c
 
