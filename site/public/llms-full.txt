@@ -2764,6 +2764,19 @@ name. See
 [Quoting code](https://x2c-lang.dev/docs/guide/meta-functions.html#quoting-code-with-) for an
 example.
 
+A quotation written `$!(T)( expression )`, where `T` is a type name, a
+`Type` local, or a `${...}` hole of type `Type`, is a typed quotation. It
+builds `(expr T CONTENT)` where it is written. It binds nothing, counts no
+expansion, and opens no transaction. Its holes take the values a rebuild
+gives them: syntax unchanged, a binding identity or `x2c.ident` spelling as
+an identifier expression, and an `int`, String, or Symbol as a literal.
+Inner nodes keep the placeholder type of unbound syntax, and free names stay
+names that bind where the code is bound. A typed quotation may not declare a
+name or apply a template. The compiler accepts `T` as the expression's type without checking it.
+A `$!( ... )` group followed directly by `(` is a typed quotation; otherwise
+it is an expression quotation. See
+[Code that knows its type](https://x2c-lang.dev/docs/guide/meta-functions.html#code-that-knows-its-type).
+
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
 binding and that the member has the binding's source spelling. This also

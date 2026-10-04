@@ -1008,8 +1008,9 @@ macros as values that build and recognize code.
 
 Public functions:
 
-`Macro_close`, `Macro_apply`, `Macro.subject`, `Macro.use_subject`,
-`Macro_pattern`, `Macro.binder`, `Macro_case_pattern`, `Macro_case_capture_at`
+`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.typed`, `Macro.subject`,
+`Macro.use_subject`, `Macro_pattern`, `Macro.binder`, `Macro_case_pattern`,
+`Macro_case_capture_at`
 
 ### [lib/map.x](../lib/map.x)
 
