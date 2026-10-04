@@ -1032,13 +1032,13 @@ Source: `src/compiler.x:59`
 <a id="SymTxn"></a>
 ### SymTxn
 
-`typedef struct SymTxn { Compiler c; int scope_index, next_binding, active, String initializer_name; String shutdown_name, Map counters; int local_macro_names; SymScope scope; Map statics, binding_facts; Map source_definitions; int source_occurrences; int extended, Map adapters, Array base_bindings; int early_count, init_count, origin_count, origin, needs_exception; } SymTxn`
+`typedef struct SymTxn { Compiler c; int scope_index, next_binding, active, String initializer_name; String shutdown_name, Map counters; int local_macro_names, mark; SymScope scope; Map statics, binding_facts; Map source_definitions; int source_occurrences; int extended, Map adapters; int early_count, init_count, origin_count, origin, needs_exception; } SymTxn`
 
 Holds one reversible semantic transaction in caller storage.
 The zero value is inactive. Keep an active transaction in one object;
-copying it does not copy the staged maps or coordinate completion.
-Borrowed compiler maps keep their owners; staged maps and snapshots live
-in the Scope used to begin the transaction.
+copying it does not coordinate completion. The symbol table's undo log
+holds the rows it may restore from `mark`; the staged generated-name
+counters and other snapshots live in the Scope used to begin it.
 
 Source: `src/compiler.x:212`
 
