@@ -1563,10 +1563,12 @@ An import exposes:
 - any header or runtime module the package's public part includes, such as a
   vendored foreign header it publishes.
 
-It also installs the macro imports that the package's sources `export`, as
-described under [exported imports](https://x2c-lang.dev/docs/reference/language.html#exported-imports). Other macros, private
-declarations, and the package's other imports are not exposed. Packages have no re-exports or hierarchy. One program
-uses one version of a package.
+It also installs the macro imports that the package's entry source and
+public include surface `export`, as described under
+[exported imports](https://x2c-lang.dev/docs/reference/language.html#exported-imports). Includes below `#pragma private` do
+not contribute exports. Other macros, private declarations, and the
+package's other imports are not exposed. Packages have no re-exports or
+hierarchy. One program uses one version of a package.
 
 A public bodyless `meta` prototype crosses the import like any function
 declaration. When the package has built its native module,
