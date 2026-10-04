@@ -4,12 +4,14 @@
 > 12a095f9728796f5138278a3082f4e3e7b5e085e. The original review used
 > fe19c15f13c22dfcad8930a7d9bf97e0d6de428a.
 > Item 1 has a local compiler prototype and a separate deep plan in worktree
-> `4c75`; neither is shipped on dev. Production adoption remains held for
-> review. Items 2-5 and the numeric policy experiment remain proposed.
+> `4c75`; neither is shipped on dev. Match preparation and prepared formatting
+> are deferred. The operator ledger from item 4 is implemented locally.
+> The other opportunities and the numeric policy experiment remain proposed.
 > This document is a campaign roadmap, not an implementation specification.
 > Updating this record does not authorize implementation or publication.
 > Follow-up: Gary approved the operator ledger implementation. It is integrated
-> locally on origin/dev a0135f6b, with publication validation in progress.
+> locally on origin/dev a0135f6b. The full publication checks pass; delivery
+> and the advisory performance checkpoint remain pending.
 
 ## Intended result
 
@@ -150,9 +152,10 @@ not from an assumption about the machine running meta code.
 
 ### 1. Precompute general static Match plans
 
-This remains the first implementation candidate. Deep planning and a local
-prototype already exist; the next work is to reassess that prototype against
-current dev, reduce its costs, and close its coverage gaps before review.
+Defer this candidate after the underwhelming first investigation. Deep planning
+and a local prototype exist, but adoption needs stronger evidence of practical
+value and lower costs. Reassess that prototype against current dev only if
+further evidence justifies reopening it.
 
 The local deep plan is
 `/Users/gary/.codex/worktrees/4c75/x2c/plans/static-match-preparation.md`.
@@ -337,8 +340,18 @@ the existing target. No build step, gate, runtime cache, or validator was added.
 The integrated native object matches the original five lookups for 35 named
 symbols and 4,096 raw Symbol values. Authored source grows by 25 lines;
 the benefit is removing separately maintained positional relationships.
-Representative translation performance and final publication checks are still
-pending. Source ownership is established; no compiler speedup is claimed.
+The existing test target now links the new implementation object. Generated
+bootstrap and API documentation follow that owner. The full
+`tools/gate-state.py ensure agent-pr-check` passes, including unchanged
+diagnostic fixtures and byte-identical bootstrap/stage-0/stage-1 C/H files.
+Source ownership is established; no compiler speedup is claimed.
+
+Integration exposed an unstable redundant `String_add` prototype in one
+constant diagnostic initializer. Adjacent literal fragments replace its two
+runtime additions and preserve the exact diagnostic. Convergence now passes;
+the general cause of that prototype difference remains unproved.
+
+Representative translation performance remains pending a quiet host window.
 
 ### 5. Extend canonical generation into packages and tools
 
@@ -364,12 +377,10 @@ lookup cost, and source clarity may favor retaining the current code.
 
 ## Continuation and delivery
 
-The next item-1 session resumes the local deep plan and prototype against
-current origin/dev. Reconcile the intervening macro, protocol, and cleanup
-changes before treating earlier prototype findings as current. Preserve the
-held production review and distinguish proven local behavior from remaining
-API, catch, initialization, concurrency, and target-constant coverage.
-Record further baseline drift and update the affected claims.
+The selected implementation is the operator ledger. Its remaining work is the
+advisory performance checkpoint and delivery under the chosen branch policy.
+Match preparation and prepared formatting remain deferred. Record further
+baseline drift before using their older prototype findings as current evidence.
 
 Later items remain proposed scopes. Their detailed designs follow the evidence
 and results of earlier work; the order does not authorize implementation or
