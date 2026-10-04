@@ -2025,7 +2025,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1693 = cons(_1692, NULL);
   _1694 = cons(_197, _1693);
   _1695 = List_var(_1694);
-  _1696 = int_var(36194);
+  _1696 = int_var(36172);
   _1697 = cons(_1696, NULL);
   _1698 = cons(_210, _1697);
   _1699 = List_var(_1698);
@@ -2945,7 +2945,7 @@ static int CellRegion__lookup(CellRegion * r, List binding, List * cell, Type * 
 }
 
 static List Compiler__cell_declaration(Compiler c, List cell, Type type, List initializer){
-  List compound = initializer;  if(List_truth(initializer) && ! List_truth(({ static MatchCaptureSite _x2c_match_site_20;  x2c_match_site_match(& _x2c_match_site_20, initializer, List_var(_1055)); }))) compound = cons(_42, cons(_482, cons(List_var(cons(_767, cons(List_var(cons(_768, cons(List_var(initializer), NULL))), NULL))), NULL)));  Macro shape = List_truth(initializer) ? _1281 : _1376;  return Compiler_bind_syntax(c, List_var(Macro_apply(shape, cons(List_var(type), cons(List_var(cell), cons(List_var(compound), NULL))))), AST_BLOCK, NULL);
+  List compound = initializer;  if(List_truth(initializer) && ! List_truth(({ static MatchCaptureSite _x2c_match_site_20;  x2c_match_site_match(& _x2c_match_site_20, initializer, List_var(_1055)); }))) compound = cons(_539, cons(_31, cons(List_var(cons(_42, cons(_31, cons(List_var(cons(_767, cons(List_var(cons(_768, cons(List_var(cons(_542, cons(_763, cons(_764, cons(List_var(initializer), NULL))))), NULL))), NULL))), NULL)))), NULL)));  Macro shape = List_truth(initializer) ? _1281 : _1376;  return Compiler_bind_syntax(c, List_var(Macro_apply(shape, cons(List_var(type), cons(List_var(cell), cons(List_var(compound), NULL))))), AST_BLOCK, NULL);
 }
 
 static List CellRegion_setup(CellRegion * r, List entries){
