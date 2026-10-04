@@ -440,22 +440,12 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
-    if (!entry) {
-      w.start_macros();
-      entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
-    }
+    if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
     w.c._replay_cached(entry, w.globs, w.visited);
   }
   _cache_dependency(
     w.dependencies, canonical, w.c._walked_hash(target, canonical));
   w.parts.push(canonical);
-}
-
-/* An include walked before the file's first segment starts the macros
-   that segment would, so the walk extends a copy of them rather than
-   starting the unit's macro and import state itself. */
-static void FileWalk.start_macros(FileWalk &w) {
-  if (!w.c.macros.len()) w.parse("", {});
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
@@ -474,16 +464,25 @@ static String Compiler._include_text(Compiler c, String target, String path) {
 }
 
 /* Walk one included file cold and return its entry. The walk reads the
-   includer's names and macros through copies, so its private rows,
-   includes, and macro definitions stay there; the includer replays the
-   entry as any later unit would. An includer whose macros have not started
-   lets the walk start them, since starting them resets its imports. */
+   includer's names through copies, so its private rows and includes stay
+   there. It runs in a compiler of its own, with the macro, import, keyword,
+   and Lisp state the file's own translation starts with, so an import that
+   the file does not export stays in it. The includer replays the entry as
+   any later unit would. */
 static List Compiler._walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = c._include_text(target, canonical);
-  Map macros = c.macros.len() ? c.macros.copy() : NULL;
-  c._walk_apart(canonical, text, globs.copy(), visited.copy());
-  if (macros != NULL) c.macros = macros;
+  Compiler file = Compiler.new_shared(c);
+  defer c.close_child(file);
+  file.filename = c.filename;
+  // Every file the shared session preloads defines its Lisp there.
+  if (macro_library_filling()) {
+    file.macro_lisp = c.macro_lisp;
+    file.borrowed_lisp = 1;
+  }
+  file._walk_apart(canonical, text, globs.copy(), visited.copy());
+  c.merge_translation_dependencies(file.deps);
+  c.declaration_produced |= file.declaration_produced;
   return _process_cache()[canonical];
 }
 
@@ -711,7 +710,7 @@ static void Compiler._replay_cached(
   foreach (Var part, entry.car()) {
     if (part is <map>) {
       c._merge_rows(globs, part);
-      c.replay_package_imports(globs, part, 0);
+      c.replay_package_imports(globs, part, NULL);
     }
     else if (part is <string>) c._replay_include(part, globs, visited);
   }
@@ -893,44 +892,55 @@ static int _package_protocol_row(List key, Var value) {
   List row = value;
   return row && row.car() in
     %(protocol adopt meta-protocol declaration-source native-meta
-      package-macro package-import);
+      macro-export package-import);
 }
 
 // import replay
 
-/** Replays the import operations retained by this declaration contribution.
-    The shadow borrows the unit's macro state and shared package registries.
+/** Replays the import operations retained by this declaration contribution:
+    its package imports and the macro imports its file exports. The shadow
+    borrows the unit's macro state and shared package registries. The full
+    parse passes `exports`, which takes the exported imports for the include
+    line, and leaves the unit's own imports at their source sites.
 */
 void Compiler.replay_package_imports(
-  Compiler c, Map globs, Map rows, int included_only) {
+  Compiler c, Map globs, Map rows, Array exports) {
   Array imports = NULL;
   defer if (imports) imports.free();
   foreach (Var (key, value), rows)
     match (key)
-      case %("source-node" (package-import ?path ?position)):
-        if (!included_only || !c._imported_here(path)) {
+      case %("source-node"
+             ((!or package-import macro-export) ?path ?position)):
+        if (exports == NULL || !c._imported_here(path)) {
           if (!imports) imports = [];
           imports.push(%($path $position $value));
         }
   if (!imports.len()) return;
   imports.sort();
-  c._import_all(globs, imports);
+  c._import_all(globs, imports, exports);
 }
 
 /* An import the unit itself wrote stays at its own source site. */
 static int Compiler._imported_here(Compiler c, String path) =>
   _canonical_path(home_absolute_path(path)) == _canonical_path(c.filename);
 
-static void Compiler._import_all(Compiler c, Map globs, Array imports) {
+/* The shadow reads the imports as a segment of the unit reads its own. */
+static void Compiler._import_all(
+  Compiler c, Map globs, Array imports, Array exports) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   shadow.take_unit_state(c);
   shadow.sym.reset(globs);
+  shadow.start_collection();
   foreach (List entry, imports)
-    match (entry)
+    match (entry) {
       case %(?(String path) ?
              (package-import ?(String name) ?(String alias) ?members)):
         shadow._import_package(path, name, alias, members);
+      case %(? ? (macro-export ?(String file))):
+        if (exports != NULL) exports.push(file);
+        else shadow.import_exported(file, NULL);
+    }
   shadow.return_unit_state(c);
   c.merge_translation_dependencies(shadow.deps);
 }
@@ -945,21 +955,65 @@ static void Compiler._import_package(
   c.import_package_macros(name, NULL);
 }
 
-/** Repeats included imports after full parsing resets macros, in the
-    cache's original include order. The unit's own imports stay at their
-    source sites.
+/** Repeats included package imports after full parsing resets macros, in
+    the cache's original include order. The unit's own imports stay at their
+    source sites. Returns the macro imports the included files export, by
+    the canonical path of each file the unit includes, for the full parse
+    to install at that include.
 */
-void Compiler.replay_included_package_imports(
-  Compiler c, Map globs, String path, Map visited) {
-  String canonical = _canonical_path(path);
-  if (canonical in visited) return;
-  visited[canonical] = 1;
-  List entry = c._entry(canonical);
+Map Compiler.replay_included_package_imports(Compiler c, Map globs) {
+  Map visited = {}, delivered = {};
+  String unit = _canonical_path(c.filename);
+  visited[unit] = 1;
+  List entry = c._entry(unit);
+  if (!entry) return delivered;
+  foreach (Var part, entry.car()) {
+    Array exports = [];
+    if (part is <map>) c.replay_package_imports(globs, part, exports);
+    else if (part is <string>) {
+      c._replay_included(globs, part, visited, exports);
+      if (exports.len()) delivered[part] = exports;
+    }
+  }
+  return delivered;
+}
+
+static void Compiler._replay_included(
+  Compiler c, Map globs, String path, Map visited, Array exports) {
+  if (path in visited) return;
+  visited[path] = 1;
+  List entry = c._entry(path);
   if (!entry) return; // An unresolved C include has no collection entry.
   foreach (Var part, entry.car()) {
-    if (part is <map>) c.replay_package_imports(globs, part, 1);
+    if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>)
-      c.replay_included_package_imports(globs, part, visited);
+      c._replay_included(globs, part, visited, exports);
+  }
+}
+
+/** Installs, at each include among the directives before the cursor, the
+    macro imports that the included file exports, as the unit's own imports
+    written there would be installed. */
+void Compiler.import_included_exports(Compiler c) {
+  Token first = c.token;
+  for (Token token = first - 1; token >= c.tokenizer.tokens; token--) {
+    if (token.type != <preproc> && token.type != <space> &&
+        token.type != <comment>) break;
+    first = token;
+  }
+  for (Token token = first; token < c.token; token++) {
+    int angle = 0;
+    String target = token.type == <preproc>
+                  ? preproc_include_target(token.text, angle) : NULL;
+    if (!target) continue;
+    String path = collect_resolve_include(
+      c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+    if (!path) continue;
+    String canonical = _canonical_path(path);
+    Var exports = c.included_exports[canonical];
+    if (exports is void) continue;
+    c.included_exports.del(canonical);
+    foreach (String file, exports) c.import_exported(file, token);
   }
 }
 
@@ -1261,20 +1315,4 @@ static List _renumber_bindings(List node, Map identities) {
 void collect_forget_preload_entries(void) {
   foreach (String path, preload_deferred) (void) _process_cache().del(path);
   preload_deferred = NULL;
-}
-
-/** Returns the canonical paths collected so far. */
-List collect_cached_paths(void) => _process_cache().keys();
-
-/** Drops the entries collected since `before` returned by
-    `collect_cached_paths`. A cached entry replays declarations, not the
-    compile-time effects of the file's imports, which the unit that walked
-    it installed in its own session. */
-void collect_forget_entries_since(List before) {
-  Map kept = {};
-  foreach (String path, before) kept[path] = 1;
-  // A deletion moves later slots, so an open key iterator would skip some.
-  List paths = _process_cache().keys();
-  foreach (String path, paths)
-    if (!(path in kept)) (void) _process_cache().del(path);
 }

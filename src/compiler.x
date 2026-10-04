@@ -132,6 +132,9 @@ typedef struct Compiler {
   Array match_types;
   // Import path -> declared alias map, or 1 when no aliases need replay.
   Map imports;
+  /* While the full parse runs, the imports each file the unit includes
+     delivers at its include line, by the file's canonical path. */
+  Map included_exports;
   Map init_tokens, static_init_deps, fn_defs;
   Array id_keys, inits;
   String init_fn, fini_fn;
@@ -267,7 +270,6 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
   c.kw_seen = {};
   c.import_stack.clear();
   c.sym.reset(globals);
-  c.install_builtin_macros();
   c._shallow_parse_loop();
   c._check_unmatched_braces();
 }
@@ -280,7 +282,6 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   if (c.macros == NULL || !c.macros.len()) c._start_macros();
   c.sym.reset_overlay(base, overlay);
-  c.install_builtin_macros();
   c._shallow_parse_loop();
   // Only linkage groups remain open; a later segment of the file closes them.
   c.open_linkage += c.braces.len();
@@ -296,10 +297,7 @@ static void Compiler._start_macros(Compiler c) {
 }
 
 static void Compiler._shallow_parse_loop(Compiler c) {
-  c.rebuild_protocols(NULL);
-  c.import_protocols = 1;
-  c.conforms = {};
-  c.shallow = 1;
+  c.start_collection();
   c.braces.clear();
   while (c.peek(0) != <eof>) {
     Token start = c.token;
@@ -311,6 +309,17 @@ static void Compiler._shallow_parse_loop(Compiler c) {
   foreach (List directive, c.leading_preproc())
     c.note_object_macro(directive.cadr());
   c.shallow = 0;
+}
+
+/** Starts a collection pass with the built-in macros. It parses no bodies,
+    and an import it reads installs the protocols visible to it when a
+    template or `meta` body first asks for one. */
+void Compiler.start_collection(Compiler c) {
+  c.install_builtin_macros();
+  c.rebuild_protocols(NULL);
+  c.import_protocols = 1;
+  c.conforms = {};
+  c.shallow = 1;
 }
 
 static void _debug_tokens(Token start, Token end) {
@@ -1010,7 +1019,7 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
-  c.replay_included_package_imports(globs, c.filename, {});
+  c.included_exports = c.replay_included_package_imports(globs);
 }
 
 static void Compiler._reset_macros(Compiler c) {
@@ -1110,10 +1119,12 @@ static long Compiler._end_index(Compiler c, Token tokens) =>
   _skip_backward(c.token - 1, tokens) + 1 - tokens;
 
 /* The directives before the cursor join the nodes in source order, after
-   they update source visibility and the unit's macro names. */
+   they update source visibility and the unit's macro names and an include
+   delivers the imports its file exports. */
 static void Compiler._append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
   c.update_source_visibility(directives);
+  if (c.included_exports.len()) c.import_included_exports();
   foreach (Var directive, directives) nodes.push(directive);
 }
 

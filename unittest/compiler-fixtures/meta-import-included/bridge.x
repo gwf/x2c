@@ -1,1 +1,1 @@
-$(import "defs.xmacro")
+export $(import "defs.xmacro")

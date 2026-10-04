@@ -3803,9 +3803,8 @@ List Compiler.parse_macro_lisp_top_level(Compiler c) {
     Declaration projection forces preceding effects exactly once; otherwise
     full parsing keeps the ordinary source-order evaluation. */
 void Compiler.parse_macro_lisp_shallow(Compiler c) {
-  String requested = NULL;
-  if (c._import_path(requested)) {
-    c._shallow_import(requested);
+  if (c._import_path(NULL)) {
+    c.keep_imported_meta(c.parse_macro_lisp_top_level());
     return;
   }
   Token first = c.token;
@@ -3816,31 +3815,37 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   c.queue_declaration_effect(form, first, c.token);
 }
 
-static void Compiler._shallow_import(Compiler c, String requested) {
-  Token first = c.token;
-  List imported = c.parse_macro_lisp_top_level();
+/** Keeps the runtime `meta` declarations that a compile-time import
+    contributed, `imported` or NULL, where the import stands. */
+void Compiler.keep_imported_meta(Compiler c, List imported) {
   if (imported)
     foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
   c.record_meta_import();
-  if (c.package && !c.source_private &&
-      requested.endswith(".xmacro"))
-    c._record_package_macro(requested, first);
 }
 
-/* A package entry records its public macro imports, which a consumer loads
-   where it imports the package. */
-static void Compiler._record_package_macro(
-  Compiler c, String requested, Token first) {
-  String name = c.package;
-  String root = c.package_roots[name];
-  String entry = c.filename;
-  if (entry != %"$root/src/$name.x" && entry != %"$root/$name.x") return;
-  String path = c._canonical_path(requested);
-  String source = home_portable_path(Path.absolute(entry));
-  if (path.startswith(%"$root/")) path = path[root.len() + 1:];
+/** Answers whether the cursor is at a compile-time import,
+    `$(import "path")`. */
+int Compiler.at_import(Compiler c) =>
+  c.peek(0) == <"$("> && c._import_path(NULL);
+
+/** Records the compile-time import at the cursor in this file's interface,
+    which every file that includes this one replays at its include, and a
+    package's consumer where it imports the package. Paths are spelled
+    home-portably, as interfaces spell them. */
+void Compiler.record_macro_export(Compiler c) {
+  String requested = NULL;
+  c._import_path(requested);
+  String source = home_portable_path(Path.absolute(c.filename));
+  String path = home_portable_path(c._canonical_path(requested));
   c.sym.set(
-    %("source-node" (package-macro $source ${first.pos})),
-    %(package-macro $name $path));
+    %("source-node" (macro-export $source ${c.token.pos})),
+    %(macro-export $path));
+}
+
+/** Installs the macro file at the home-portable `path` that an included
+    file exports, as the unit's own import of it at `invocation` would. */
+void Compiler.import_exported(Compiler c, String path, Token invocation) {
+  c.keep_imported_meta(c._import(home_absolute_path(path), invocation));
 }
 
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
@@ -4136,28 +4141,28 @@ static void Compiler._reference_bindings(
     if (child is <list>) c._reference_bindings(child, replacements);
 }
 
-/** Loads the public macro imports recorded by a package entry at this
-    consumer's import position. */
+/** Loads the macro imports that the sources of package `name` export at
+    this consumer's import position. */
 void Compiler.import_package_macros(
   Compiler c, String name, Token invocation) {
   foreach (List entry, c._package_exports(name)) {
-    String path = entry.cadr();
-    if (!path.startswith("/")) path = %"${c.package_roots[name]}/$path";
-    List imported = c._import(path, invocation);
+    List imported = c._import(home_absolute_path(entry.caddr()), invocation);
     if (imported)
       foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
   }
 }
 
-/* The macro imports package `name` recorded, in source order. */
+/* The macro imports the sources of package `name` export, in source
+   order. */
 static Array Compiler._package_exports(Compiler c, String name) {
+  String root = %"${c.canonical_path(c.package_roots[name])}/";
   Array exports = [];
   foreach (Var (key, value), c.sym.unit_symbols())
-    match (key)
-      case %("source-node" (package-macro ? ?(int position))):
-        match (value)
-          case %(package-macro ?(String package) ?(String path)):
-            if (package == name) exports.push(%($position $path));
+    match (%($key $value))
+      case %(("source-node" (macro-export ?(String source) ?position))
+             (macro-export ?path)):
+        if (home_absolute_path(source).startswith(root))
+          exports.push(%($source $position $path));
   exports.sort();
   return exports;
 }

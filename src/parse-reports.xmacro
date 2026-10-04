@@ -30,6 +30,11 @@ macro Stmt $report.parse.import_name(Expr $c) =>
     <parse>, "expected a quoted package name after 'import'",
     $c.token, NULL);
 
+macro Stmt $report.parse.export_form(Expr $c, Expr $origin) =>
+  $c.report_error(
+    <parse>, "'export' applies only to a file-scope macro import",
+    $origin, NULL);
+
 macro Stmt $report.parse.import_local(Expr $c) =>
   $c.report_error(
     <parse>, "expected a local name after 'as'",

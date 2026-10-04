@@ -53,6 +53,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List macro = skip_body ? NULL : c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
+  if (c._at_export()) return c._exported_import(skip_body);
   switch (c.peek(0)) {
     case <import>: return c.parse_import_declaration();
     case <"$(">:   return c._top_level_lisp(skip_body);
@@ -136,15 +137,28 @@ static int Compiler._skip_collected_form(Compiler c) {
 /* Top-level Lisp updates compiler state only. The `meta` declarations of a
    macro import keep their runtime forms for the unit to emit. */
 static List Compiler._top_level_lisp(Compiler c, int skip_body) {
-  if (skip_body) {
-    c.parse_macro_lisp_shallow();
+  if (skip_body) c.parse_macro_lisp_shallow();
+  else c.keep_imported_meta(c.parse_macro_lisp_top_level());
+  return NULL;
+}
+
+/* `export` marks a file-scope import, unless a declaration names a type
+   `export`. */
+static int Compiler._at_export(Compiler c) =>
+  c.at_word("export") && !c.sym.get(%("export")).type().is_typedef();
+
+/* `export $(import "...")` gives the import to every file that includes
+   this one, so collection records it in the file's interface. The full
+   parse reports `export` before any other form. */
+static List Compiler._exported_import(Compiler c, int skip_body) {
+  Token marker = c.token;
+  c.next();
+  if (!c.at_import()) {
+    if (!skip_body) $report.parse.export_form(c, marker);
     return NULL;
   }
-  List imported = c.parse_macro_lisp_top_level();
-  if (imported) foreach (Var definition, imported.cdr())
-    c.meta_defs.push(definition);
-  c.record_meta_import();
-  return NULL;
+  if (skip_body) c.record_macro_export();
+  return c._top_level_lisp(skip_body);
 }
 
 static List Compiler._top_level_decorator(Compiler c) {

@@ -164,10 +164,10 @@ echo '#define ANSWER 42' > missing/config.h
 grep -q "return 42;" missing/prog.c || fail "missing header: wrong value"
 
 # A header found through -I or spelled with spaces or tabs reaches the
-# meta code it imports.
+# meta code it exports.
 mkdir -p spell/inc
 echo 'meta int twice(int n) => n*2;' > spell/inc/defs.xmacro
-echo '$(import "defs.xmacro")' > spell/inc/bridge.x
+echo 'export $(import "defs.xmacro")' > spell/inc/bridge.x
 printf '#include "bridge.x"\nint value(void) { return $twice(4); }\n' \
   > spell/via.x
 printf '#  include\t"bridge.x"\nint value(void) { return $twice(4); }\n' \

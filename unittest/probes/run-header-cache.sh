@@ -1096,13 +1096,13 @@ mkdir -p "$root/packages/first/src" "$root/packages/last/src" \
   "$root/src" "$root/cold" "$root/warm"
 cat > "$root/packages/first/src/first.x" <<'SRC'
 int sum(int n) => n + 1;
-$(import "first.xmacro")
+export $(import "first.xmacro")
 SRC
 cat > "$root/packages/first/src/first.xmacro" <<'SRC'
 $(def package-order 1)
 SRC
 cat > "$root/packages/last/src/last.x" <<'SRC'
-$(import "last.xmacro")
+export $(import "last.xmacro")
 SRC
 cat > "$root/packages/last/src/last.xmacro" <<'SRC'
 $(def package-order 2)
@@ -1189,5 +1189,34 @@ PY_LITERAL_BOUNDS
   -Xcc -Werror -Xcc -iquote -Xcc "$ROOT/include/x2c" "$literal/out/"*.c
 [[ $("$literal/run") == '1200 1200 1200 1199 3199 5199' ]] ||
   fail "literal initialization lost dependencies across helper batches"
+
+# Case 14: an exported macro import is part of its file's interface. A unit
+# that replays the interface receives the import as a cold walk delivers
+# it, and an edit to the exported file rejects the stale interface.
+exported="$BUILD/exported"
+mkdir -p "$exported/cold" "$exported/warm"
+echo 'macro Expression $exported.value() => 7;' >"$exported/value.xmacro"
+echo 'macro Expression $exported.value() => 9;' >"$exported/other.xmacro"
+printf 'export $(import "value.xmacro")\nint lib_value(void);\n' \
+  >"$exported/lib.x"
+printf '#include "lib.x"\nint unit_value(void) => $exported.value();\n' \
+  >"$exported/unit.x"
+(cd "$exported" && "$X2C" translate -q --out-dir cold unit.x)
+(cd "$exported" && "$X2C" translate -q --out-dir warm lib.x)
+grep -q '(macro-export ' "$exported/warm/lib.xi" ||
+  fail "interface is missing the exported import"
+(cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
+cmp -s "$exported/cold/unit.c" "$exported/warm/unit.c" ||
+  fail "exported import replay diverged from cold compile"
+sed 's/value\.xmacro/other.xmacro/' "$exported/warm/lib.xi" \
+  >"$exported/lib.tampered"
+mv "$exported/lib.tampered" "$exported/warm/lib.xi"
+(cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
+grep -q 'return 9;' "$exported/warm/unit.c" ||
+  fail "a tampered exported import did not reach replay (test is vacuous)"
+echo 'macro Expression $exported.value() => 8;' >"$exported/value.xmacro"
+(cd "$exported" && "$X2C" translate -q --out-dir warm unit.x)
+grep -q 'return 8;' "$exported/warm/unit.c" ||
+  fail "an edited exported import kept its stale interface"
 
 echo "header cache probes passed"
