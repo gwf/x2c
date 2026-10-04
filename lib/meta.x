@@ -355,6 +355,23 @@ List type_base_suffix(List type) {
   return NULL;
 }
 
+/** Returns the diagnostic for a `type` that names its type with a Symbol
+    other than a C type keyword, as `%(String)` and `%(* Point)` do, or
+    `NULL`. A Symbol need not keep its spelling's case, so a type name is a
+    String, as in `%("String")` and `%(* "Point")`. */
+String type_name_error(List type) {
+  Var name = type.last();
+  if (name is not <symbol> || name == <*> || name in _base_keywords ||
+      name in _type_qualifiers)
+    return NULL;
+  Array fixed = [];
+  for (List rest = type; rest.cdr(); rest = rest.cdr())
+    fixed.push(rest.car());
+  fixed.push(name.str());
+  String wanted = fixed.list_free().repr();
+  return %"type name '${name}' must be a String: write %${wanted}";
+}
+
 /** Returns `(base modifiers)` for reconstructing a declaration of `type`.
     Function modifiers hold parameter syntax, and modifier order retains C
     declarator precedence. */

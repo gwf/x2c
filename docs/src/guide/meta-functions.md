@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. Inside a macro expansion, a call written as a whole statement may also return a statement. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier; inside a macro expansion every List is code. A call written as a whole statement may also return a statement, while a call inside a larger expression must return an expression. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
@@ -1019,9 +1019,12 @@ four
 
 `repeated` receives each captured statement as code and returns a block
 that holds it twice. The second invocation passes an `if` statement, which
-an expression position could not accept. This holds only inside a macro
-expansion. In an ordinary function, a `$helper(args);` statement whose
-result is not expression code inserts that `List` as a runtime value.
+an expression position could not accept. A `$helper(args);` statement in
+an ordinary function may also return a statement. There, only an expression
+node, a macro application, a quotation, or an identifier is code. A
+`%(block ...)` such as the one `repeated` builds is data there and becomes a
+runtime `List` value. A helper for ordinary code therefore returns
+statements as a `$!{ ... }` quotation.
 
 ## Source templates from meta functions
 
@@ -1188,6 +1191,12 @@ meta static List counter(String name) {
 }
 ```
 
+A `Type` spells C type keywords such as `unsigned` and `char`, and the `*`
+of a pointer, as Symbols. It spells every other type name as a String:
+`%("String")`, `%(* "Point")`, `%(struct "Tag")`. A Symbol does not keep
+the case of its spelling, so `%(String)` is an error where it fills a
+type.
+
 ### Holes that name an expression
 
 A `$name` hole needs a local. When the value is a field, an element, or the
@@ -1295,12 +1304,16 @@ differences:
 - Nothing is bound. Holes keep the syntax their locals hold, a binding
   becomes a reference to it, and a number, String, or Symbol becomes a
   literal. A number keeps its exact value and type, and a String is a
-  String literal when `T` is `String`. A name the expression reads without
+  String literal when `T` is `String`. A `$items...` sequence makes each
+  number, String, or Symbol it holds a literal in the same way. A name the
+  expression reads without
   declaring stays a name and is bound wherever the code is bound, if it is
   bound at all.
 - The code declares nothing. A typed quotation has no expansion to keep
-  names private to, so a name it needs comes from a hole. For the same
-  reason it applies no template; build that code first and insert it.
+  names private to, so a name it needs comes from a hole, such as a local
+  that holds `x2c_ident("total")`. For the same reason it applies no
+  template; build that code first and insert it. Inside another quotation,
+  write a typed quotation as a hole: `${$!int{ $b }}`.
 
 Only the outermost expression receives `T`. Inner expressions carry no type
 until something binds them. Write `T` exactly: the compiler trusts it as it
@@ -1571,6 +1584,8 @@ for the `meta` functions it calls at run time, and a declaration only for
 the values and prototypes its run-time code uses. The storage class says
 what it emits: `static` gives that unit its own copy, and a public name is
 the one copy the program links, exported by the reaching unit's header.
+Units that never include one another may each reach a public function, so
+each emits it as a weak definition and the linker keeps one.
 
 ## Lisp interoperability
 

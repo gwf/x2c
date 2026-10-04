@@ -26,6 +26,7 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.report_warning_at`](#Compiler.report_warning_at) | Records and emits a warning at a location built earlier by `Compiler.token_location`, for a report raised after its token has been consumed. |
 | [`Compiler.take_diagnostics`](#Compiler.take_diagnostics) | Moves collected child reports into the caller's store without re-emitting. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
+| [`Compiler.token_source`](#Compiler.token_source) | Returns the file that the line markers of a merged text give `token`, and sets `line` to the token's line in that file. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
 | [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
 | [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store that streams through `printer`. |
@@ -59,7 +60,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:506`
+Source: `src/diagnostics.x:540`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -69,7 +70,7 @@ Source: `src/diagnostics.x:506`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:338`
+Source: `src/diagnostics.x:351`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -78,7 +79,7 @@ Source: `src/diagnostics.x:338`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:542`
+Source: `src/diagnostics.x:576`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -87,7 +88,7 @@ Source: `src/diagnostics.x:542`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:537`
+Source: `src/diagnostics.x:571`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -97,7 +98,7 @@ Source: `src/diagnostics.x:537`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:527`
+Source: `src/diagnostics.x:561`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -107,7 +108,7 @@ Source: `src/diagnostics.x:527`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:500`
+Source: `src/diagnostics.x:534`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -121,7 +122,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:313`
+Source: `src/diagnostics.x:326`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -147,7 +148,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:386`
+Source: `src/diagnostics.x:420`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -159,7 +160,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:406`
+Source: `src/diagnostics.x:440`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -170,7 +171,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:415`
+Source: `src/diagnostics.x:449`
 
 <a id="Compiler.take_diagnostics"></a>
 #### Compiler.take_diagnostics
@@ -181,7 +182,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/diagnostics.x:488`
+Source: `src/diagnostics.x:522`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -197,7 +198,18 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:357`
+Source: `src/diagnostics.x:370`
+
+<a id="Compiler.token_source"></a>
+#### Compiler.token_source
+
+`String Compiler.token_source(Compiler c, Token token, int &?line)`
+
+Returns the file that the line markers of a merged text give `token`,
+and sets `line` to the token's line in that file. A token outside the
+marked regions keeps the compiler's own file and its line.
+
+Source: `src/diagnostics.x:389`
 
 ### `Diagnostics`
 

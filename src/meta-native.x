@@ -56,14 +56,32 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       c.group_meta_function(fn);
       if (c.meta_build) return;
       if (!macro_library_filling() && !c.shares_meta_definition(name))
-        c._install_stub(name, marker);
+        c._install_stub(name, ((List) c.meta_group[-1]).last(), marker);
     }
+}
+
+/** Installs the stub of the bodied `meta` definition `declaration` whose
+    body collection skips, so a file-scope constant after it can call it in
+    the project's helper. The full parse installs it again. A name the
+    session already binds, or the compiler's linked copy answers, keeps
+    that binding, and a group that stages in process waits for the full
+    parse. */
+void Compiler.install_collected_meta_function(
+  Compiler c, List declaration, Token marker) {
+  if (c.macro_holes || c.groups_meta() || macro_library_filling()) return;
+  String name = c._native_meta_name(declaration, marker);
+  Var bound;
+  if (c.shares_meta_definition(name) || name in _linked_module()) return;
+  c.ensure_macro_lisp();
+  if (c.macro_lisp.try_get(name, bound)) return;
+  c._install_stub(
+    name, declaration.type_from_ast().canonicalize(), marker);
 }
 
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
-static void Compiler._install_stub(Compiler c, String name, Token marker) {
-  Type type = ((List) c.meta_group[-1]).last();
+static void Compiler._install_stub(
+  Compiler c, String name, Type type, Token marker) {
   try c.macro_lisp.set_global(
     name,
     Func.new_context(
@@ -172,12 +190,12 @@ List Compiler.evaluate_meta_expression(
   c._meta_result(expression, c.evaluate_meta_value(expression, site, 0), site);
 
 /** Executes an explicit meta call written as a whole statement at
-    `context`. Inside an expansion a List result is code, so the call may
-    return a statement as well as an expression. */
+    `context`. A code List result binds there, so the call may return a
+    statement as well as an expression. */
 List Compiler.evaluate_meta_statement(
   Compiler c, List expression, AstPos context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
-  if (c.macro_stack && value is <list> && !value.is_nil())
+  if (c._code_result(value) && !value.is_nil())
     return c.bind_macro_lisp_statement(value, context);
   return %(stmnt ${c._meta_result(expression, value, site)});
 }
@@ -195,17 +213,19 @@ static List Compiler._meta_result(
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
-  if (value is <list> &&
-      (c.macro_stack || (!c.in_pattern && _expression_code(value))))
-    return c.lift_macro_lisp_expression(value, site);
+  if (c._code_result(value)) return c.lift_macro_lisp_expression(value, site);
   List result = c.meta_value_expression(declared, value, site);
   return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 
-/* Whether a List result is code for an expression: an expression, an
-   identifier, or a pending quotation or macro application. Other Lists,
-   and any List a pattern inserts, are data. */
-static int _expression_code(Var value) {
+/* Whether a meta call's result is code. Inside an expansion every List
+   is. Elsewhere code is an expression, an identifier, or a pending
+   quotation or macro application; other Lists, and any List a pattern
+   inserts, are data. */
+static int Compiler._code_result(Compiler c, Var value) {
+  if (value is not <list>) return 0;
+  if (c.macro_stack) return 1;
+  if (c.in_pattern) return 0;
   match (value)
     case %((!or expr macro-invoke "x2c.quoted" "x2c.template" "x2c.ident")
            *):

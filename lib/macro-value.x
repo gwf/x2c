@@ -78,15 +78,27 @@ static List _macro_group(Macro t, List values) {
   Array grouped = [];
   foreach (List hole, t.assoc(<parameters>).list()) {
     int sequence = hole.assoc(<sequence>);
-    /* One List of syntax passes the whole sequence, as `call(f, items)`. */
-    if (sequence && values && !values.cdr() && values.car() is <list>) {
-      List items = values.car();
-      if (!items || items.car() is <list>) values = items;
-    }
+    /* One List of syntax or of numbers and Strings passes the whole
+       sequence, as `call(f, items)`; the compiler lifts each scalar. */
+    if (sequence && values && !values.cdr() && values.car() is <list> &&
+        _macro_items(values.car()))
+      values = values.car();
     grouped.push(sequence ? values.var() : values.car());
     values = sequence ? NULL : values.cdr();
   }
   return grouped.list_free();
+}
+
+/* Whether `items` is a List of arguments rather than one: empty, or led by
+   syntax, a number, or a String other than an identifier's or pending
+   code's tag. A Symbol leads one syntax node. */
+static int _macro_items(List items) {
+  if (!items) return 1;
+  match (items)
+    case %((!or "x2c.ident" "x2c.quoted" "x2c.template") *): return 0;
+  Var first = items.car();
+  return first is <list> || first is <string> || first.is_integer() ||
+         first.is_floating();
 }
 
 // typed quotations
@@ -107,6 +119,19 @@ Var Macro.inserted(Var value, int lifts, int expression) {
   match (value) case %(binding ? ?): return %(expr () (ident $value));
   return value;
 }
+
+/** Returns the name a typed quotation declares with a Name hole whose local
+    holds `value`: the name form of an `x2c_ident` spelling or a String,
+    or a binding as it is. */
+Var Macro.declared(Var value) {
+  Var spelling = Macro.inserted(value, 0, 0);
+  return spelling is <string> ? %($spelling).var() : value;
+}
+
+/** Returns the items a typed quotation splices for an expression sequence
+    hole whose local holds `values`: each number, String, or Symbol becomes
+    its literal, as a spliced data List's items do. */
+List Macro.inserted_items(List values) => _macro_expr_values(values);
 
 /** Returns what a typed quotation builds when its code is one hole whose
     local holds `value`: the inserted expression with the type `type`. A

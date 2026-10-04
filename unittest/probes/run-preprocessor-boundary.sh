@@ -27,7 +27,11 @@ success_stderr="$BUILD/success.stderr"
 grep -Fq '#define PROBE_VALUE 37' "$BUILD/success.stdout"
 [[ ! -s "$success_stderr" ]]
 grep -Fxq "$SOURCE_NAME" "$args_log"
-grep -Fxq -- '-P' "$args_log"
+# The host keeps its line markers, which name each merged region's file.
+if grep -Fxq -- '-P' "$args_log"; then
+  echo "the preprocessor was asked to drop its line markers" >&2
+  exit 1
+fi
 grep -Fxq -- '-include' "$args_log"
 awk -v first="$BUILD/include first" -v second="$BUILD/include second" \
     -v xonly="$BUILD/x include" '

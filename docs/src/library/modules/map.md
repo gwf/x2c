@@ -40,7 +40,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:201`
+Source: `lib/map.x:200`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -85,7 +85,7 @@ retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/map.x:196`
+Source: `lib/map.x:195`
 
 <a id="Map.get_hashed"></a>
 #### Map.get_hashed
@@ -96,13 +96,12 @@ Returns the value stored under `key`, or `void` when absent, probing with
 the caller's precomputed `key_hash`.
 `key_hash` must be `Var.hash` of `key`; another value reports the key as
 absent. This serves a caller that probes several `Map`s with one key,
-such as `Pool.lookup` walking its chain, and is `Map.get` in every other
-respect. A null `Map` reports absence.
+and is `Map.get` in every other respect. A null `Map` reports absence.
 
 **Raises:** a cause raised by custom key equality. Hashing happens in the
 caller, so a `void` key raises there instead.
 
-Source: `lib/map.x:113`
+Source: `lib/map.x:112`
 
 <a id="Map.getdefault"></a>
 #### Map.getdefault
@@ -125,7 +124,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/map.x:196`
+Source: `lib/map.x:195`
 
 <a id="Map.keys"></a>
 #### Map.keys
@@ -146,7 +145,7 @@ not outlive that
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/map.x:196`
+Source: `lib/map.x:195`
 
 <a id="Map.len"></a>
 #### Map.len
@@ -303,7 +302,7 @@ Source: `lib/map.x:93`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 ## Advanced and interop API
 
@@ -328,7 +327,7 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Raises: `<alloc-fail>` while creating temporary storage, or any
 cause from key or value comparison.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.equal"></a>
 #### Map.equal
@@ -347,7 +346,7 @@ Source: `lib/map.x:93`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.str"></a>
 #### Map.str
@@ -356,7 +355,7 @@ Source: `lib/map.x:195`
 
 Returns the typed-Map display String.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -371,7 +370,7 @@ value does not.
 
 **Raises:** the same causes as `Map.set`.
 
-Source: `lib/map.x:126`
+Source: `lib/map.x:125`
 
 <a id="Map.write_repr"></a>
 #### Map.write_repr
@@ -380,7 +379,7 @@ Source: `lib/map.x:126`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/map.x:195`
+Source: `lib/map.x:194`
 
 ## Convenience API
 
@@ -460,7 +459,7 @@ nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
 rebuilding, or any cause from export, key hashing, or moving the rebuilt
 `Block`s.
 
-Source: `lib/map.x:154`
+Source: `lib/map.x:153`
 
 <a id="Map.new_capacity"></a>
 #### Map.new_capacity

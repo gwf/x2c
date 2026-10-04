@@ -256,8 +256,8 @@ macro Stmt $project.guard(Expr $condition) {
 ~}
 ```
 
-A `Stmt` macro whose body is one expression statement can write it after
-`=>`, like an expression macro:
+A `Stmt` macro whose body is one expression statement, or one invocation of
+another `Stmt` macro, can write it after `=>`, like an expression macro:
 
 ```x2c
 ~

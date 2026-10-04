@@ -25,7 +25,11 @@ $(import "../src/statements-reports.xmacro")
     token. On return, the cursor follows the complete statement and any
     temporary `Sym` scopes opened by the statement have been closed.
 */
-List Compiler.parse_statement(Compiler c) {
+List Compiler.parse_statement(Compiler c) => c._statement(AST_STATEMENT);
+
+/* A meta call written as the whole statement binds its result at
+   `position`. */
+static List Compiler._statement(Compiler c, AstPos position) {
   c.__complete_here(<statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
@@ -52,7 +56,7 @@ List Compiler.parse_statement(Compiler c) {
     case <(>:           return c.parse_parenthesized_statement();
     case <"{">: case <"%{">: return c._compound_statement();
   }
-  return c._expression_statement();
+  return c._expression_statement(position);
 }
 
 static List _statement_keywords(void) => %(
@@ -77,11 +81,16 @@ static List Compiler._compound_statement(Compiler c) {
   return c.parse_compound_statement();
 }
 
-static List Compiler._expression_statement(Compiler c) {
+static List Compiler._expression_statement(Compiler c, AstPos position) {
   List label = c._label_statement();
   if (label) return label;
-  List expr = c.parse_expression();
+  Token start = c.token;
+  List expr;
+  $let(c.meta_statement, start) expr = c.parse_expression();
   c.expect(<;>);
+  if (!c.macro_holes)
+    match (expr) case %(expr ? (meta-call *)):
+      return c.evaluate_meta_statement(expr, position, start);
   return %(stmnt $expr);
 }
 
@@ -710,7 +719,7 @@ List Compiler.parse_block_item(Compiler c) {
   List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
   if (c.test_declaration()) return c._declaration_item();
-  return c.parse_statement();
+  return c._statement(AST_BLOCK);
 }
 
 static List _block_keywords(void) => %(

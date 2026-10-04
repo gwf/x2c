@@ -3081,11 +3081,12 @@ static List Compiler__func_bridge_binding(Compiler c, String stem){
   String hash = String_printf(_1418, String_hash(c -> filename));  return Sym_introduce(c -> sym, Compiler_fresh_name(c, String_join(NULL, cons(String_var(stem), cons(String_var(_1419), cons(String_var(hash), NULL))))));
 }
 
+Var Macro_declared(Var);
 static List Compiler__func_bridge_call(Compiler c, List bridge, List parameters, Type function_type, List arguments){
   List call = Compiler__func_call(c, List_type(_474), _func_bound(function_type, bridge), arguments);  return({
     List _x2c_hole_3 = List_cdr(parameters);  cons(_42, cons(_1420, cons(List_var(cons(_354, cons(List_var(({
       Var _x2c_literal_part_38 = List_var(cons(_568, cons(_1423, cons(List_var(cons(_558, cons(List_var(({
-        Var _x2c_literal_part_36 = Macro_inserted(List_var(bridge), 0, 0);  Var _x2c_literal_part_37 = List_var(cons(List_var(cons(_895, cons(List_var(cons(_153, List_append(_x2c_hole_3, NULL))), NULL))), NULL));  cons(_481, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL)));
+        Var _x2c_literal_part_36 = Macro_declared(List_var(bridge));  Var _x2c_literal_part_37 = List_var(cons(List_var(cons(_895, cons(List_var(cons(_153, List_append(_x2c_hole_3, NULL))), NULL))), NULL));  cons(_481, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL)));
       }
       )), NULL))), NULL))));  Var _x2c_literal_part_39 = List_var(cons(_509, cons(Macro_inserted(List_var(call), 1, 1), NULL)));  cons(_503, cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, NULL)));
     }

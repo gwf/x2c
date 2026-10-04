@@ -139,6 +139,15 @@ macro Stmt $report.parse.typed_quotation(Expr $c, Expr $origin) =>
     <parse>, "typed quotation cannot declare a name or apply a template",
     $origin, %("a typed quotation builds its code where it is written"));
 
+macro Stmt $report.parse.typed_quotation_nested(Expr $c, Expr $origin) {
+  {
+    String note = "write ${$!T{ ... }} to insert the code it builds";
+    $c.report_error(
+      <parse>, "typed quotation inside a quotation must be written as a hole",
+      $origin, %($note));
+  }
+}
+
 macro Stmt $report.parse.hole_ambiguous(
   Expr $c, Expr $spelling, Expr $origin, Expr $first, Expr $also) =>
   $c.report_error(
@@ -269,6 +278,9 @@ macro Stmt $report.macro.lisp_expr(Expr $c, Expr $origin, Expr $value) =>
   $c.report_error(
     <macro>, "compile-time Lisp result cannot fill an expression slot",
     $origin, %( "value:" ${$value.repr()} ));
+
+macro Stmt $report.macro.type_name(Expr $c, Expr $message, Expr $origin) =>
+  $c.report_error(<macro>, $message, $origin, NULL);
 
 macro Stmt $report.macro.import_cycle(Expr $c, Expr $path, Expr $origin) {
   {

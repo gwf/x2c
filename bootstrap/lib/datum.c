@@ -228,12 +228,10 @@ void Var_numeric_decode(Var, X2CVarNumeric *);
 
 String Symbol_str(Symbol);
 
-Symbol Var_tag(Var);
-
 static void _write_number(Buffer out, Var value){
   X2CVarNumeric number;
   Var_numeric_decode(value, &(number));
-  Buffer_printf(out, "(x2c.number %s \"", (char *) Symbol_str(Var_tag(value)));
+  Buffer_printf(out, "(x2c.number %s \"", (char *) Symbol_str(number.tag));
   if(number.floating) Buffer_printf(out, "%.21Lg", number.floating_value);
   else if(number.unsigned_value) Buffer_printf(out, "%llu", number.raw);
   else Buffer_printf(out, "%lld", (long long) Var_integer(value));
@@ -463,7 +461,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 216};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 217};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

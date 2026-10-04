@@ -105,8 +105,7 @@ meta native Self Map.merge(Self, Self);
     the caller's precomputed `key_hash`.
     `key_hash` must be `Var.hash` of `key`; another value reports the key as
     absent. This serves a caller that probes several `Map`s with one key,
-    such as `Pool.lookup` walking its chain, and is `Map.get` in every other
-    respect. A null `Map` reports absence.
+    and is `Map.get` in every other respect. A null `Map` reports absence.
     Raises: a cause raised by custom key equality. Hashing happens in the
     caller, so a `void` key raises there instead.
 */

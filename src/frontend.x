@@ -387,7 +387,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   String runtime = c.prelude ? %"${x2c_get_root()}/lib/x2c.x" : NULL;
   int status = frontend.toolchain.preprocess(
     c.filename, c.include_dirs, runtime, text, errors, dependency_text);
-  unit.preprocessor_output = text;
+  unit.preprocessor_output = text ? _take_line_markers(cpp, text) : NULL;
   unit.preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)
     frontend.preprocessor_errors(errors);
@@ -396,6 +396,29 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   foreach (String dependency, translation_depfile_parse(dependency_text))
     c.add_translation_dependency(dependency);
   return cpp;
+}
+
+/* The host's line markers leave the text the compiler reads, since one can
+   fall inside a multi-line literal. Each becomes the row
+   `(position text-line file line)`: the text from byte `position`, which
+   begins its line `text-line`, came from line `line` of `file`. */
+static String _take_line_markers(Compiler cpp, String text) {
+  Array kept = [], markers = [];
+  int position = 0, text_line = 1;
+  foreach (String line, text.split("\n")) {
+    int number = 0;
+    String file = line.startswith("#")
+                ? preproc_marker_file(line, number) : NULL;
+    if (!file) {
+      kept.push(line);
+      position += line.len() + 1;
+      text_line++;
+    }
+    else if (!file.startswith("<"))
+      markers.push(%($position $text_line $file $number));
+  }
+  cpp.line_markers = markers;
+  return "\n".join(kept.list_free());
 }
 
 static void _tokenize_cpp(Compiler cpp, String text) {

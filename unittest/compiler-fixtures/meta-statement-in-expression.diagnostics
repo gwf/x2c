@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/meta-statement-in-expression.x:1:1: parse: syntax cannot be constructed at this position
+  #include "x2c.x"
+  ^
+

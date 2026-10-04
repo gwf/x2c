@@ -10,6 +10,7 @@ static String _42, _36, _34, _33, _32, _31, _30, _28, _27, _26, _25, _24, _23, _
 
 static Var _43, _38, _37, _35, _29;
 
+#include <ctype.h>
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
@@ -227,6 +228,23 @@ String preproc_include_target(String text, int * angle){
   String rest = String_getslice(body, 1, -2147483648, 1);
   int close = String_find(rest, (* angle) ? _25 : _26);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
+}
+
+int atoi(const char *);
+
+String String_unescape(String);
+
+String preproc_marker_file(String text, int * line){
+  if(! _init_guard_) _file_init_();
+  String body = preproc_directive(text);
+  size_t digits = 0;
+  while(digits < String_len(body) && isdigit(String_getindex(body, digits))) digits ++;
+  String rest = String_lstrip(String_getslice(body, digits, -2147483648, 1), " \t");
+  if(! digits || ! String_startswith(rest, _26)) return NULL;
+  int close = String_find(String_getslice(rest, 1, -2147483648, 1), _26);
+  if(close < 0) return NULL;
+  (* line) = atoi(body);
+  return String_unescape(String_getslice(rest, 1, close + 1, 1));
 }
 
 static Token _macro_directive(String content, int * undefined){

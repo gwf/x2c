@@ -202,13 +202,29 @@ static List Compiler._emit(
   }
   catch %(?kind *detail): {
     List entries = c.diagnostics.entries();
-    failure = entries ? entries.repr() : cons(kind, detail).repr();
+    failure = entries ? _diagnostic_line(entries.car())
+                      : cons(kind, detail).repr();
     code = NULL;
   }
   *c = saved;
   *c.names = names;
   transaction.rollback();
   return code;
+}
+
+/* A diagnostic the emission reported, as one line that names its place in
+   the `meta` body: `FILE:LINE:COLUMN: CODE: MESSAGE`, then its notes. */
+static String _diagnostic_line(List entry) {
+  String line = entry.repr();
+  match (entry)
+    case %((code ?code) * (message ?(String message))
+           (location ((file ?file) (line ?row) (column ?column) *))
+           (notes ?(List notes))): {
+      line = %"$file:$row:$column: $code: $message";
+      foreach (Var note, notes)
+        if (note is <string>) line = %"$line; $note";
+    }
+  return line;
 }
 
 /* Gives the emission its own copies of the state it adds to, taken from

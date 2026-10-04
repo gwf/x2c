@@ -48,6 +48,8 @@ String Compiler_display_path(Compiler compiler, String path);
 
 List Compiler_token_location(Compiler compiler, Token token);
 
+String Compiler_token_source(Compiler c, Token token, int * line);
+
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes);
 
 void Compiler_report_warning(Compiler c, Symbol code, String message, Token token, List notes);

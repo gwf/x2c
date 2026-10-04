@@ -74,7 +74,7 @@ $(C_FILES) $(H_FILES): $(BUILD)/.translated
 # discovered prerequisite is newer than its generated C. Make computes $?
 # from times read before the batch ran, so the recipe compares them again
 # and skips a unit the batch has just written. A deleted prerequisite counts
-# as changed.
+# as changed under GNU Make 4; Make 3.81 leaves it out of $?.
 $(BUILD)/%.c: $(SOURCE)/%.x
 	$(if $(filter-out $(BUILD)/.translated,$?), \
 		@for p in $(filter-out $(BUILD)/.translated,$?); do \

@@ -2,11 +2,11 @@
 
 #include "meta.h"
 
-static List _82, _81, _79, _78, _77, _76, _70, _69, _68, _67, _65, _64, _63, _61, _60, _59, _57, _56, _55, _52, _50, _49, _48, _46, _45, _44, _41, _38, _37, _34, _33, _32, _31, _29, _28, _13, _9, _3;
+static List _84, _83, _81, _80, _79, _78, _72, _69, _68, _67, _65, _64, _63, _61, _60, _59, _57, _56, _55, _52, _50, _49, _48, _46, _45, _44, _41, _38, _37, _34, _33, _32, _31, _29, _28, _13, _9, _3;
 
-static String _11, _1;
+static String _71, _70, _11, _1;
 
-static Var _83, _80, _75, _74, _73, _72, _71, _66, _62, _58, _54, _53, _51, _47, _43, _42, _40, _39, _36, _35, _30, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _12, _10, _8, _7, _6, _5, _4, _2, _0;
+static Var _85, _82, _77, _76, _75, _74, _73, _66, _62, _58, _54, _53, _51, _47, _43, _42, _40, _39, _36, _35, _30, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _12, _10, _8, _7, _6, _5, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
@@ -156,20 +156,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _67 = cons(_66, NULL);
   _68 = cons(_26, _67);
   _69 = cons(_0, _68);
-  _70 = cons(_15, NULL);
-  _71 = Symbol_var(437126);
-  _72 = Symbol_var(62054);
-  _73 = Atom_intern(String_new("?parameters"));
-  _74 = Symbol_var(1362954);
-  _75 = Symbol_var(806120);
-  _76 = cons(_75, NULL);
-  _77 = cons(_74, _76);
-  _78 = cons(_73, _77);
-  _79 = cons(_72, _78);
-  _80 = List_var(_79);
-  _81 = cons(_80, NULL);
-  _82 = cons(_71, _81);
-  _83 = Symbol_var(13528008);
+  _70 = String_new("type name \'");
+  _71 = String_new("\' must be a String: write %");
+  _72 = cons(_15, NULL);
+  _73 = Symbol_var(437126);
+  _74 = Symbol_var(62054);
+  _75 = Atom_intern(String_new("?parameters"));
+  _76 = Symbol_var(1362954);
+  _77 = Symbol_var(806120);
+  _78 = cons(_77, NULL);
+  _79 = cons(_76, _78);
+  _80 = cons(_75, _79);
+  _81 = cons(_74, _80);
+  _82 = List_var(_81);
+  _83 = cons(_82, NULL);
+  _84 = cons(_73, _83);
+  _85 = Symbol_var(13528008);
 }
 
 List x2c_literal_string(String value){
@@ -321,12 +323,22 @@ List type_base_suffix(List type){
   return NULL;
 }
 
+Var List_last(List);
 Array Array_new(void);
 Var Array_push(Array, Var);
-List List_append(List, List);
+String Var_str(Var);
+String List_repr(List);
 List Array_list_free(Array);
+String type_name_error(List type){
+  if(! _init_guard_) _file_init_();  Var name = List_last(type);  if(! Var_is(name, 1328354264) || Var_equal(name, Symbol_var(54)) || SymbolSet_contains(_base_keywords, Var_symbol(name)) || SymbolSet_contains(_type_qualifiers, Var_symbol(name))) return NULL;  Array fixed = Array_new();  for(List rest = type;  List_truth(List_cdr(rest));  rest = List_cdr(rest)) Array_push(fixed, List_car(rest));  Array_push(fixed, String_var(Var_str(name)));  String wanted = List_repr(Array_list_free(fixed));  return({
+    Var _x2c_literal_part_3 = String_var(Var_str(name));  String_join(NULL, cons(String_var(_70), cons(_x2c_literal_part_3, cons(String_var(_71), cons(String_var(wanted), NULL)))));
+  }
+  );
+}
+
+List List_append(List, List);
 List type_declaration_parts(List type){
-  if(! _init_guard_) _file_init_();  List base = type_base_suffix(type);  if(! List_truth(base)) return cons(List_var(type), _70);  List reversed = NULL, qualifiers = NULL;  for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);  while(List_truth(reversed) && Var_is(List_car(reversed), 1328354264) && SymbolSet_contains(_type_qualifiers, Var_symbol(List_car(reversed)))){
+  if(! _init_guard_) _file_init_();  List base = type_base_suffix(type);  if(! List_truth(base)) return cons(List_var(type), _72);  List reversed = NULL, qualifiers = NULL;  for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);  while(List_truth(reversed) && Var_is(List_car(reversed), 1328354264) && SymbolSet_contains(_type_qualifiers, Var_symbol(List_car(reversed)))){
     qualifiers = cons(List_car(reversed), qualifiers);  reversed = List_cdr(reversed);
   }
   Array syntax = Array_new(); {
@@ -336,7 +348,7 @@ List type_declaration_parts(List type){
 
   }
   return({
-    Var _x2c_literal_part_3 = List_var(List_append(qualifiers, base));  Var _x2c_literal_part_4 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL));
+    Var _x2c_literal_part_4 = List_var(List_append(qualifiers, base));  Var _x2c_literal_part_5 = List_var(List_append(Array_list_free(syntax), NULL));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
   );
 }
@@ -355,7 +367,7 @@ static Var _modifier_syntax(Var modifier){
           List parameter;  List _x2c_macro_object_3 = parameters;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
             parameter = Var_list(_x2c_macro_cursor_output_3); {
               List base, modifiers;  List _x2c_destructure_0 = type_declaration_parts(parameter);  base = Var_list(List_getindex(_x2c_destructure_0, 0));  modifiers = Var_list(List_getindex(_x2c_destructure_0, 1));  Array_push(params, List_var(({
-                Var _x2c_literal_part_5 = List_var(base);  Var _x2c_literal_part_6 = List_var(cons(_43, cons(_15, cons(List_var(modifiers), NULL))));  cons(_39, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
+                Var _x2c_literal_part_6 = List_var(base);  Var _x2c_literal_part_7 = List_var(cons(_43, cons(_15, cons(List_var(modifiers), NULL))));  cons(_39, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
               }
               )));
             }
@@ -363,7 +375,7 @@ static Var _modifier_syntax(Var modifier){
           }
 
         }
-        return List_var(cons(_83, cons(List_var(cons(_35, List_append(Array_list_free(params), NULL))), NULL)));
+        return List_var(cons(_85, cons(List_var(cons(_35, List_append(Array_list_free(params), NULL))), NULL)));
       }
 
     }

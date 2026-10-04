@@ -74,14 +74,18 @@ typedef struct Compiler {
   /* Package-mode unit: NULL outside. package_dirs holds the registered
      --package-dir roots, package_roots the directory of every package this
      unit has already collected, package_aliases the resolution-only
-     spelling alias -> package name, and package_members each `with` local
-     spelling -> (package member). */
+     spelling alias -> package name, package_members each `with` local
+     spelling -> (package member), and package_exports each collected
+     package's exported macro imports in its include order. */
   String package, List package_dirs;
-  Map package_roots, package_aliases, package_members;
+  Map package_roots, package_aliases, package_members, package_exports;
   Token token;
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
   Token input_boundary;
   Tokenizer tokenizer;
+  /* For the host preprocessor's merged output, the file each region came
+     from, as `(position text-line file line)` rows; NULL otherwise. */
+  Array line_markers;
   List return_type, include_dirs;
   // Canonical dependency path -> content hash for compile-time text reads,
   // or 1 for dependencies whose contents are not embedded in generated C.
@@ -180,6 +184,9 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
+  /* Where the expression statement being parsed starts. A meta call there
+     that the statement's `;` ends is evaluated as the statement. */
+  Token meta_statement;
   /* A collection pass or macro import whose protocol registries are
      installed from the collected symbols on first use;
      `Compiler._install_imports` owns the installation. */
@@ -353,9 +360,9 @@ int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
 */
 void Compiler.finish_collected_declaration(
   Compiler c, List declaration, Token meta, int native) {
-  /* Collection records the runtime function a `meta` marker precedes, and
-     the native binding a bodyless or `native` marker advertises; the
-     compile-time form is installed by the full parse. */
+  /* Collection records the runtime function a `meta` marker precedes, the
+     native binding a bodyless or `native` marker advertises, and the stub
+     of a bodied one; the full parse installs the compile-time form. */
   c.record_declaration_visibility(declaration);
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
@@ -376,6 +383,7 @@ void Compiler.finish_collected_declaration(
 static void Compiler._skip_body(
   Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
+  else if (meta) c.install_collected_meta_function(declaration, meta);
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
@@ -1624,9 +1632,21 @@ static void Compiler._append_meta_definitions(Compiler c, Array nodes) {
   foreach (List definition, c.meta_defs)
     if (_meta_identity(definition) in reached &&
         !c.meta_is_comptime_only(definition)) {
-      c._record_top_level(definition, NULL);
-      nodes.push(definition);
+      List emitted = _linked_once(definition);
+      c._record_top_level(emitted, NULL);
+      nodes.push(emitted);
     }
+}
+
+/* Every unit that calls a public `meta` function at run time emits it, and
+   units that never include one another cannot tell which of them does, so
+   each copy is weak and the program links one. */
+static List _linked_once(List definition) {
+  match (definition)
+    case %(function ?type ?declarator ?body):
+      if (!type.type().is_static())
+        return %(function ("__attribute__((weak))" @type) $declarator $body);
+  return definition;
 }
 
 /* The binding an imported `meta` function or declaration introduces. */
@@ -2688,6 +2708,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
   c.package_roots = owner.package_roots;
   c.package_aliases = owner.package_aliases;
   c.package_members = owner.package_members;
+  c.package_exports = owner.package_exports;
   c.names = owner.names;
   c.source_map = owner.source_map;
   c.recovery_depth = owner.recovery_depth;
@@ -2710,6 +2731,7 @@ static void Compiler._own_unit(Compiler c) {
   c.package_roots = {};
   c.package_aliases = {};
   c.package_members = {};
+  c.package_exports = {};
   c.names = Scope.calloc(1, sizeof(struct GenNames));
   c.names.counters = {};
   c.names.adapters = {};
