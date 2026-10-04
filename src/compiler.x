@@ -182,7 +182,7 @@ typedef struct Compiler {
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
-  int declaration_projection, declaration_produced;
+  int declaration_projection;
   // Set when a cleanup region needs the exception runtime declarations.
   int needs_exception;
   int local_macro_capture_scopes;
@@ -1011,12 +1011,14 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.replay_included_package_imports(globs, c.filename, {});
 }
 
+/* Collection parsed its imports with empty protocol registries, so the full
+   parse reads each import again, as it reads inline definitions. */
 static void Compiler._reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
   c.kw_seen = {};
   c.install_builtin_macros();
-  if (!c.declaration_produced) c.imports = {};
+  c.imports = {};
   c.import_stack.clear();
   c.macro_count = 0;
   c.macro_stack = NULL;
@@ -2509,7 +2511,6 @@ void Compiler.return_unit_state(Compiler c, Compiler owner) {
   owner.kw_seen = c.kw_seen;
   owner.macro_lisp = c.macro_lisp;
   owner.declaration_effects = c.declaration_effects;
-  owner.declaration_produced |= c.declaration_produced;
   c.borrowed_lisp = c.macro_lisp != NULL;
 }
 
@@ -2679,7 +2680,6 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
   c.source_map = owner.source_map;
   c.recovery_depth = owner.recovery_depth;
   c.sources = owner.sources;
-  c.declaration_produced = owner.declaration_produced;
   c.source_facts = owner.source_facts;
   c.source_occurrences = owner.source_occurrences;
   c.source_definitions = owner.source_definitions;

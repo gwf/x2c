@@ -2729,10 +2729,7 @@ static List Compiler._bind_named_type(Compiler c, String name, Var type) {
 /* Binds a declaration bundle's rows in order. Collection first runs the
    pending declaration effects and returns the rows as a bundle. */
 static List Compiler._bind_bundle(Compiler c, List rows) {
-  if (c.shallow) {
-    c.declaration_produced = 1;
-    c.run_declaration_effects();
-  }
+  if (c.shallow) c.run_declaration_effects();
   $let(c.declaration_projection, c.declaration_projection + 1) {
     Array projected = [];
     foreach (List row, rows) {
