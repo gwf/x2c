@@ -487,7 +487,8 @@ other_after=$(mtime "$BUILD/deps/make-out/other.c")
 [[ $other_after == "$other_before" ]]
 
 # A recursive build adds the default job count unless the command line sets
-# a job limit. An option argument holding a j sets none, and -j1 stays serial.
+# a job limit. An option argument holding a j sets none. GNU Make records
+# -j1 in MFLAGS, so it stays serial; Make 3.81 omits it.
 printf 'include %s/etc/make-command.mk\nshow:\n\t@echo "$(PARALLEL_MAKE)"\n' \
   "$ROOT" >"$BUILD/jobs.mk"
 for make_program in make gmake; do
@@ -497,6 +498,7 @@ for make_program in make gmake; do
       "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
   }
   [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]]
+  [[ $make_program == make && $(make --version) == *" 3."* ]] && continue
   [[ $(jobs_make -j1) != *" -j7" ]]
   [[ $(jobs_make -j 1) != *" -j7" ]]
 done
