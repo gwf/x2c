@@ -69,6 +69,8 @@ List Compiler_rebuild_unit_function(Compiler c, List application);
 
 List Compiler_rebuild_function(Compiler c, List target, List application);
 
+List Compiler_land_quotation(Compiler c, List fresh, Var syntax, AstPos position, Type return_type);
+
 List Compiler_macro_value_literal(Compiler c, List value);
 
 List Compiler_try_parse_macro_pattern(Compiler c);

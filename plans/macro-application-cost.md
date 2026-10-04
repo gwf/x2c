@@ -1,9 +1,8 @@
 # Macro application cost
 
-> Status: active. Phases 1 and 2, and the undo-log transaction from
-> "Outside this plan", are implemented and submitted to the integrator as
-> one PR (2026-10-03). Phase 3 is decided after their measurements reach
-> dev.
+> Status: active. Phases 1 and 2 and the undo-log transaction landed in
+> PR #129 (2026-10-03). Phase 3 is implemented and submitted to the
+> integrator.
 
 ## Result
 
@@ -202,6 +201,26 @@ The integrator reproduced and repaired two gaps before publication:
   holes therefore still reached the 10,000-expansion limit. Definition
   finishing now tests map identity, so empty templates receive rebuild and
   leaf rows too. A 12,000-application probe verifies that case.
+
+Phase 3 builds a quotation without slots where it is written, as
+`("x2c.quoted" FRESH SYNTAX)`, with `("x2c.hole" ...)` for each hole use
+and `("x2c.at" NODE)` for each origin anchor. `Compiler.land_quotation`
+names the private binders, projects each hole through the existing
+capture-row code at the landing, and binds without a transaction, an
+expansion count, or a Match. Projection stays at the landing because a
+rebuild keeps `src` wrappers that a site projection would strip; the
+projections therefore stay in `src/macros.x` and the helper needs no copy.
+
+| Probe (seconds) | Quotation before | Quotation after | Raw List |
+| --- | ---: | ---: | ---: |
+| 1,000 functions | 0.65 | 0.53 | 0.51 |
+| 2,000 functions | 1.23 | 0.99 | 0.95 |
+| 9,000 quotations in one meta call | 2.2 | 0.72 | 0.52 |
+
+Self-translation improves another 1.2% (184.6 G to 182.4 G instructions).
+The remaining gap in the 9,000-quotation probe is mostly the hole headers in
+helper reply text (270 characters against 110); a compact header would need
+one more bootstrap transition.
 
 ## Outside this plan
 - Two bootstrap-refresh rounds are needed when a change alters the

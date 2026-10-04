@@ -180,16 +180,15 @@ static List Expansion.fresh_names(Expansion &x, List old_stack) {
   Array fresh_values = [];
   foreach (List fresh, x.definition.assoc(<fresh>).list()) {
     Var (binder, spelling, lisp) = fresh;
-    List binding = c._introduced_binding(
-      spelling.str(), binder in file_locals ? root : NULL);
+    Token owner = binder in file_locals ? root : NULL;
     if (lisp.int()) {
+      List binding = c._introduced_binding(spelling.str(), owner);
       List hole = _hole(binder, <name>, 0);
       fresh_values.push(c._capture_row(hole, %($binding)));
     }
-    else {
-      c.set_fact(%(source-spelling $binding), spelling.str());
-      x.direct = cons(%($binder $binding), x.direct);
-    }
+    else
+      x.direct = cons(
+        %($binder ${c._private_name(spelling.str(), owner)}), x.direct);
   }
   List members = c._member_bindings(x.definition.assoc(<parameters>), x.input);
   x.direct = x.direct.append(members);
@@ -280,6 +279,13 @@ static List Compiler._introduced_binding(
   c.sym.introduce(
     root ? c._file_scope_name(root, source)
          : c.fresh_name(%"macro_$source"));
+
+/* A template local's name, which keeps its source spelling. */
+static List Compiler._private_name(Compiler c, String source, Token root) {
+  List binding = c._introduced_binding(source, root);
+  c.set_fact(%(source-spelling $binding), source);
+  return binding;
+}
 
 /* The spelling names the owning unit and the root invocation's offset, and
    counts repeats of the same name there. */
@@ -1170,6 +1176,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
     d.body();
   }
   d.finish();
+  List built = d.construction();
+  if (built) return built;
   /* Each local supplies one hole, a sequence included, so the quotation
      builds its pending invocation with the values already grouped. */
   List values = %(expr ("List") (nil));
@@ -1189,6 +1197,83 @@ static List Compiler._quoted_cons(
   List value = c.convert_expression(
     c.resolve_expression(head, origin), %("Var"));
   return %(expr ("List") (cons $value $tail));
+}
+
+/* A quotation whose template applies no other template builds its syntax
+   where it is written (see "quoted syntax"). Any other quotation, or one
+   whose template uses a projection only an expansion makes, returns NULL
+   and keeps its definition. */
+static List Definition.construction(Definition &d) {
+  Compiler c = d.c;
+  if (!d.rebuild || d.nested || d.kind == <decl-unit> || c.runtime_literals)
+    return NULL;
+  Map keys = {}, file_locals = {};
+  _file_scope_locals(%(${d.template}), file_locals);
+  Array fresh = [];
+  foreach (List row, d.fresh) {
+    Var binder = row.car();
+    keys[binder] = 1;
+    fresh.push(%($binder ${row.cadr()} ${binder in file_locals ? 1 : 0}));
+  }
+  foreach (List hole, d.parameters)
+    foreach (Symbol projection, %(source value expression splice))
+      keys[_hole_key(hole, projection)] = %($hole $projection);
+  List quoted = %(
+    "x2c.quoted" ${fresh.list_free()} ${_macro_value_names(d.template)}
+  );
+  List cells = c._built_cells(quoted, keys, d.start);
+  return cells ? %(expr ("List") $cells) : NULL;
+}
+
+/* The List cells that build `items`: constant syntax from the literal
+   cache, and a hole for each projection `keys` maps. NULL for a binder a
+   quotation cannot project where it is written. */
+static List Compiler._built_cells(
+  Compiler c, List items, Map keys, Token start) {
+  if (!items) return %(nil);
+  List tail = c._built_cells(items.cdr(), keys, start);
+  List head = tail ? c._built_item(items.car(), keys, start) : NULL;
+  return head ? c.literal_cell(head, tail) : NULL;
+}
+
+/* An Expr hole's expression in an expression position replaces its whole
+   shell, which a rebuild leaves out. */
+static List Compiler._built_item(
+  Compiler c, Var item, Map keys, Token start) {
+  Var row;
+  if (item.is_binder() && keys.try_get(item, row))
+    return row is <list> ? c._built_hole(row, 0, start)
+                         : c.cache_literal_var(item);
+  if (item.is_binder() && item.str()[1:].startswith("__macro_")) return NULL;
+  if (item is not <list> || item.is_nil()) return c.cache_literal_var(item);
+  match (item) {
+    case %(at m-origin ?node): item = %("x2c.at" $node);
+    case %(expr (<macro-expr>) ?binder):
+      if (keys.try_get(binder, row) && row is <list>)
+        match (row) case %((macro-param ? (kind expr) ?) expression):
+          return c._built_hole(row, 1, start);
+  }
+  List cells = c._built_cells(item, keys, start);
+  return cells ? %(expr ("List") $cells) : NULL;
+}
+
+/* `("x2c.hole" HOLE PROJECTION VALUE)`, where VALUE is the hole's local
+   and HOLE keeps only the hole's kind and cardinality. */
+static List Compiler._built_hole(
+  Compiler c, List row, int shell, Token start) {
+  (List hole, Symbol projection) = row;
+  List local = c.convert_expression(c.resolve_expression(
+    %(expr () (ident ${_hole_name(hole).str()})), start), %("Var"));
+  List cells = c.literal_cell(local, %(nil));
+  Symbol selected = shell ? <shell> : projection;
+  List shape = %(
+    macro-param
+    (kind ${hole.assoc(<kind>)})
+    (sequence ${hole.assoc(<sequence>)})
+  );
+  foreach (Var constant, %($selected $shape "x2c.hole"))
+    cells = c.literal_cell(c.cache_literal_var(constant), cells);
+  return %(expr ("List") $cells);
 }
 
 /* A quotation's hole takes its kind from a name position, or from a
@@ -2164,13 +2249,14 @@ static int _source_capture_parts(Var value, List &?source, Var &?syntax) {
   return 0;
 }
 
-/* `value` without its source wrappers. A pending invocation inside it keeps
-   its own capture rows, so nested applications unwrap each argument once. */
+/* `value` without its source wrappers. A pending invocation or quotation
+   inside it keeps its own capture rows or holes, so nested applications
+   unwrap each argument once. */
 static Var _source_unwrap(Var value) {
   if (value is not <list> || value.is_nil()) return value;
   match (value) {
     case %(src ? ?syntax): return _source_unwrap(syntax);
-    case %(macro-invoke *): return value;
+    case %((!or macro-invoke "x2c.quoted") *): return value;
   }
   List child;
   $ast.rewrite_children(value.list(), child, _source_unwrap(child));
@@ -2638,7 +2724,8 @@ static Var _constructed_identifier(Var result, Var construction) {
 static Var _slot_rows(Var result) {
   match (result) {
     case %(code-value ? ? ?): return result;
-    case %(macro-invoke ? ? ?): return %(seq $result);
+    case %(!or (macro-invoke ? ? ?) ("x2c.quoted" ? ?)):
+      return %(seq $result);
     case %(seq *): return result;
   }
   return %(seq @{result});
@@ -2840,17 +2927,21 @@ static List Compiler._template_arguments(
   int retain_syntax) {
   Array rows = [];
   List holes = definition.assoc(<parameters>);
-  for (; holes; holes = holes.cdr(), values = values.cdr()) {
-    List hole = holes.car();
-    Var value = values.car();
-    if (hole.assoc(<kind>) == <expr> &&
-        (value.is_integer() || value.is_floating() || value is <string> ||
-         value is <symbol>))
-      value = c.lift_macro_lisp_expression(value, invocation);
-    List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
-    rows.push(c._capture_row_project(hole, sources, retain_syntax));
-  }
+  for (; holes; holes = holes.cdr(), values = values.cdr())
+    rows.push(
+      c._hole_row(holes.car(), values.car(), invocation, retain_syntax));
   return %(args @{rows.list_free()});
+}
+
+/* One hole's capture row of `value`. */
+static List Compiler._hole_row(
+  Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
+  if (hole.assoc(<kind>) == <expr> &&
+      (value.is_integer() || value.is_floating() || value is <string> ||
+       value is <symbol>))
+    value = c.lift_macro_lisp_expression(value, invocation);
+  List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
+  return c._capture_row_project(hole, sources, retain_syntax);
 }
 
 /* A helper's result with each template call the helper left for the
@@ -2858,7 +2949,7 @@ static List Compiler._template_arguments(
 static Var Compiler._helper_result(Compiler c, Var value) {
   if (value is not <list> || value.is_nil()) return value;
   match (value) {
-    case %(macrodef *): return value;
+    case %((!or macrodef "x2c.quoted") *): return value;
     case $source_literal_content(%(*)): return value;
   }
   match (value) {
@@ -2911,9 +3002,13 @@ List Compiler.rebuild_function(Compiler c, List target, List application) =>
    The caller supplies complete children and a template with no free names,
    computed slots, or nested applications. The definition's rebuild row
    holds the template and, for each hole, the binders of the projections
-   it uses. */
+   it uses. Quoted syntax fills its own holes and keeps their values. */
 static List Compiler._rebuild(
   Compiler c, List application, List target) {
+  match (application) case %("x2c.quoted" ? ?syntax): {
+    Landing landing = {.c = c, .site = c.token, .retain = 1};
+    return landing.fill(syntax);
+  }
   (Var marker, List definition, List values) = application;
   (void) marker;
   List rebuild = definition.assoc(<rebuild>);
@@ -2930,14 +3025,24 @@ static List Compiler._rebuild(
   return template.replace(bindings);
 }
 
-/* `bindings` with each projection of a capture `row` that `keys` names.
-   A singular Function hole's value also supplies its return type and
-   declarator. */
+/* `bindings` with each projection of a capture `row` that `keys` names. */
 static List _row_bindings(List keys, List row, List bindings) {
-  List fields = NULL;
+  List fields = _row_fields(row);
+  foreach (Var binder, keys) {
+    if (binder != <?>) bindings = %(($binder ${fields.car()}) @bindings);
+    fields = fields.cdr();
+  }
+  return bindings;
+}
+
+/* A capture row's source, value, expression, splice, return, and
+   declarator projections. A sequence's value stands for its expression
+   and splice, and a singular Function hole's value also supplies its
+   return type and declarator. */
+static List _row_fields(List row) {
   match (row) {
     case %(capture (source *sources) (value *values)):
-      fields = %($sources $values $values $values () ());
+      return %($sources $values $values $values () ());
     case %(capture (source ?source) (value ?value) (expression ?expression)
                    (splice *splice)): {
       List result = NULL, declarator = NULL;
@@ -2945,14 +3050,128 @@ static List _row_bindings(List keys, List row, List bindings) {
         result = returned;
         declarator = declared;
       }
-      fields = %($source $value $expression $splice $result $declarator);
+      return %($source $value $expression $splice $result $declarator);
     }
   }
-  foreach (Var binder, keys) {
-    if (binder != <?>) bindings = %(($binder ${fields.car()}) @bindings);
-    fields = fields.cdr();
+  return NULL;
+}
+
+/* quoted syntax
+
+   A quotation whose template applies no other template builds that
+   template where it is written, as `("x2c.quoted" FRESH SYNTAX)`. Each
+   use of a hole is `("x2c.hole" HOLE PROJECTION VALUE)`, holding the
+   local's value, and each origin anchor is `("x2c.at" NODE)`. A FRESH
+   row is `(BINDER SPELLING FILE)`, where FILE marks a name that a
+   file-scope row declares with linkage. Landing fills the syntax as an
+   expansion fills its template: it names the private binders, projects
+   each hole as a capture row would, and keeps anchors only where an
+   invocation lands it. It opens no transaction and counts no expansion,
+   since the template applies nothing. */
+
+/* One landing of quoted syntax. `retain` keeps each hole's value as the
+   syntax it is, as a rebuild does. */
+typedef struct Landing {
+  Compiler c, Map names, Token site, int anchored, retain;
+} Landing;
+
+/** Binds quoted `syntax` with its `fresh` rows at `position`, as the
+    expansion of its quotation would. */
+List Compiler.land_quotation(
+  Compiler c, List fresh, Var syntax, AstPos position, Type return_type) {
+  Token site = c.macro_invocation_site(<m-invoke>);
+  Landing landing = {
+    .c = c, .site = site ? site : c.token, .anchored = !!site};
+  List bound = NULL;
+  $let(c.macro_application, c.macro_application + 1) {
+    landing.names = c._private_names(fresh);
+    Var filled = landing.fill(syntax);
+    $let(c.token, site)
+    $let(c.origin, c.record_origin(site))
+      bound = c.bind_syntax(filled, position, return_type);
   }
-  return bindings;
+  if (position == AST_BLOCK || position == AST_STATEMENT ||
+      position == AST_UNIT)
+    match (bound) case %(seq ?item): return item;
+  return bound;
+}
+
+/* Each fresh binder's private name. */
+static Map Compiler._private_names(Compiler c, List fresh) {
+  if (!fresh) return NULL;
+  Map names = {};
+  // The outermost active row's fourth field is its invocation token.
+  Token root = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
+  int file_scope = c.sym.at_file_scope();
+  foreach (List row, fresh) {
+    (Var binder, Var spelling, Var file) = row;
+    names[binder] = c._private_name(
+      spelling.str(), file_scope && file.int() ? root : NULL);
+  }
+  return names;
+}
+
+/* The filled syntax. A hole that is a sequence or a splice contributes
+   its items to the List that holds it. */
+static Var Landing.fill(Landing &l, Var syntax) {
+  Var name;
+  if (syntax.is_binder())
+    return (void *) l.names && l.names.try_get(syntax, name) ? name : syntax;
+  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  List node = syntax;
+  // Only the quoted forms have a String head.
+  if (node.car() is <string>)
+    match (node) {
+      case %("x2c.at" ?inner): {
+        Var filled = l.fill(inner);
+        return l.anchored ? %(at m-origin $filled).var() : filled;
+      }
+      case %("x2c.hole" ?(List hole) ?projection ?value):
+        return l.hole(hole, projection, value);
+    }
+  Array items = NULL;
+  int index = 0;
+  foreach (Var item, node) {
+    List spliced = NULL;
+    int splices = l.splices(item, spliced);
+    Var filled = splices ? void : l.fill(item);
+    if (!(void *) items && (splices || filled != item)) {
+      items = [];
+      List prior = node;
+      for (int i = 0; i < index; i++, prior = prior.cdr())
+        items.push(prior.car());
+    }
+    if (splices) foreach (Var each, spliced) items.push(each);
+    else if ((void *) items) items.push(filled);
+    index++;
+  }
+  return (void *) items ? items.list_free().var() : syntax;
+}
+
+/* Whether `item` is a sequence or splice hole, whose items it sets. */
+static int Landing.splices(Landing &l, Var item, List &spliced) {
+  if (item is not <list> || item.is_nil() || item.list().car() is not <string>)
+    return 0;
+  match (item) case %("x2c.hole" ?(List hole) ?projection ?value):
+    if (projection == <splice> || hole.assoc(<sequence>).int()) {
+      spliced = l.hole(hole, projection, value);
+      return 1;
+    }
+  return 0;
+}
+
+/* A hole's projection of its value, as an expansion's capture row holds
+   it. A shell is an Expr hole's expression in an expression position,
+   which a rebuild leaves bare. */
+static Var Landing.hole(Landing &l, List hole, Symbol projection, Var value) {
+  Compiler c = l.c;
+  if (!l.retain) value = c._helper_result(value);
+  List row = c._hole_row(hole, value, l.site, l.retain);
+  Symbol field = projection == <shell> ? <expression> : projection;
+  Var projected = _row_fields(row)[
+    %(source value expression splice).index(field)];
+  if (projection != <shell> || l.retain) return projected;
+  return %(expr (<macro-expr>) $projected);
 }
 
 /* macro values
@@ -3238,7 +3457,7 @@ static Var _carrier_binder(Var value) {
     case %(bind ?name *):
       if (name.is_binder() && name.str().len() > 1) return name;
     case $source_literal_content(%(*)): return NULL;
-    case %((!or "x2c.template" macro-invoke macrodef) *):
+    case %((!or "x2c.template" "x2c.quoted" macro-invoke macrodef) *):
       return NULL;
   }
   foreach (Var child, value.list())

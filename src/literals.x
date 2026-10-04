@@ -45,7 +45,7 @@ List Compiler.parse_list_literal(Compiler c) {
     List head = reader_form ? reader_form : c._parse_list_head();
     List tail = shell ? c._parse_shell_tail() : c._parse_list_tail();
     c.expect(<)>);
-    return %(expr ("List") ${c._cons_cell(head, tail)});
+    return %(expr ("List") ${c.literal_cell(head, tail)});
   }
 }
 
@@ -75,8 +75,8 @@ static List Compiler._parse_reader_prefix(Compiler c) {
   }
   c.next();
   List value = c._parse_list_head();
-  List tail = c._cons_cell(value, %(nil));
-  return c._cons_cell(c._atom_element(spelling), tail);
+  List tail = c.literal_cell(value, %(nil));
+  return c.literal_cell(c._atom_element(spelling), tail);
 }
 
 /* An Atom element that the parser adds, such as a reader form's name or a
@@ -121,7 +121,7 @@ static List Compiler._cache_if_stable(Compiler c, List elem) {
 static List Compiler._parse_list_tail(Compiler c) {
   if (c.peek(0) == <)>) return %(nil);
   List head = c._parse_list_head(), tail = c._parse_list_tail();
-  return c._cons_cell(head, tail);
+  return c.literal_cell(head, tail);
 }
 
 /* The elements after a pattern's `expr` head. A macro pattern in the
@@ -130,10 +130,10 @@ static List Compiler._parse_list_tail(Compiler c) {
 static List Compiler._parse_shell_tail(Compiler c) {
   if (c.peek(0) == <)>) return %(nil);
   List type = c._parse_list_head();
-  if (c.peek(0) == <)>) return c._cons_cell(type, %(nil));
+  if (c.peek(0) == <)>) return c.literal_cell(type, %(nil));
   List content = c.try_parse_macro_pattern_insertion(1);
   if (!content) content = c._parse_list_head();
-  return c._cons_cell(type, c._cons_cell(content, c._parse_list_tail()));
+  return c.literal_cell(type, c.literal_cell(content, c._parse_list_tail()));
 }
 
 /** Parses a macro pattern's parenthesized arguments and returns the static
@@ -254,7 +254,10 @@ static List Compiler._parse_element(Compiler c) {
    A cell conses one element onto the cells after it. When the element and
    the tail both have cache forms, the cell folds into the cache too. */
 
-static List Compiler._cons_cell(Compiler c, List head, List tail) {
+/** Conses the element expression `head` onto the cells `tail`, or appends
+    the List a `(splice EXPR)` head holds, and folds the cell into the
+    literal cache when both parts are constant. */
+List Compiler.literal_cell(Compiler c, List head, List tail) {
   match (head)
     case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))):
       return c._append_splice(sexpr, tail);
@@ -281,7 +284,7 @@ static List Compiler._append_splice(Compiler c, List head, List tail) {
 
 static List Compiler._cons_list(Compiler c, Array elements, List tail) {
   for (int i = (int) elements.len() - 1; i >= 0; i--)
-    tail = c._cons_cell(elements[i], tail);
+    tail = c.literal_cell(elements[i], tail);
   return %(expr ("List") $tail);
 }
 
@@ -327,9 +330,9 @@ static List Compiler._tag_test(Compiler c, Atom binder, List tag) {
   List elements = binder.is_atom_binder() ? %(!is $binder type) : %(!is type);
   match (tag)
     case %(expr ("Symbol") ?): tag = c.cache(%(var $tag));
-  List tail = c._cons_cell(tag, %(nil));
+  List tail = c.literal_cell(tag, %(nil));
   foreach (Var element, elements.reverse())
-    tail = c._cons_cell(c._atom_element(element.str()), tail);
+    tail = c.literal_cell(c._atom_element(element.str()), tail);
   return %(expr ("List") $tail);
 }
 
@@ -405,9 +408,9 @@ static List Compiler._pattern_elements(Compiler c, List tail, Array elements) {
 
 /* `(!and (!is type TAG) PATTERN)` */
 static List Compiler._and_tag_test(Compiler c, List pattern, List tag) {
-  List tail = c._cons_cell(pattern, %(nil));
-  tail = c._cons_cell(c._tag_test(void, tag), tail);
-  tail = c._cons_cell(c._atom_element("!and"), tail);
+  List tail = c.literal_cell(pattern, %(nil));
+  tail = c.literal_cell(c._tag_test(void, tag), tail);
+  tail = c.literal_cell(c._atom_element("!and"), tail);
   return %(expr ("List") $tail);
 }
 
