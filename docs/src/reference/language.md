@@ -870,7 +870,8 @@ grammar accepts a definition and a result kind and macro name follow it. It
 remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
-including the trailing semicolon.
+including the trailing semicolon. A `Stmt` macro may also use the expression
+form; its body is then the single statement `expression;`.
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as

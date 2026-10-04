@@ -511,11 +511,12 @@ static void Definition.check_signature(Definition &d) {
 }
 
 /* An Expression result, or a decorator of an expression, has an `=>`
-   body. Every other result has a braced body after an optional `=>`. */
+   body. A Stmt result has a braced body or an `=>` expression statement.
+   Every other result has a braced body after an optional `=>`. */
 static void Definition.arrow(Definition &d) {
   Compiler c = d.c;
   if (d.has_expression_body()) {
-    if (c.peek(0) == <"{">) c._braced_body_error();
+    if (c.peek(0) == <"{">) d.body_error();
     c.expect(<=>);
     c.expect(<">">);
     return;
@@ -523,10 +524,11 @@ static void Definition.arrow(Definition &d) {
   if (c.peek(0) == <=>) {
     c.expect(<=>);
     c.expect(<">">);
+    if (d.kind == <block-item>) return;
   }
   if (c.peek(0) == <(>)
     $report.parse.macro_paren_body(c);
-  if (c.peek(0) != <"{">) c._braced_body_error();
+  if (c.peek(0) != <"{">) d.body_error();
 }
 
 static int Definition.has_expression_body(Definition &d) =>
@@ -538,8 +540,12 @@ static Symbol Definition.target_kind(Definition &d) {
   return d.target.assoc(<kind>);
 }
 
-static void Compiler._braced_body_error(Compiler c) {
-  $report.parse.macro_braced_body(c);
+/* Reports the body forms the result kind accepts. */
+static void Definition.body_error(Definition &d) {
+  String form = d.has_expression_body() ? "'=> expression;'"
+              : d.kind == <block-item> ? "'{ ... }' or '=> expression;'"
+              : "'{ ... }'";
+  $report.parse.macro_body(d.c, _kind_spelling(d.kind), form);
 }
 
 /* Records where the definition stands and shows its signature, so an
@@ -566,13 +572,22 @@ static void Definition.body(Definition &d) {
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
-    d.template = d.has_expression_body()
-               ? d.expression_body()
-               : c._parse_body(d.body_kind(), d.using);
+    d.template = d.read_body();
     if (d.quotation) d.parameters = _quoted_holes(c);
     d.parameters = c._parameter_rows(d.parameters);
     d.captures = _recorded(c.local_macro_captures);
   }
+}
+
+/* A Stmt result's body after `=>` is one expression statement, whose `;`
+   an anonymous macro omits. */
+static List Definition.read_body(Definition &d) {
+  Compiler c = d.c;
+  if (d.has_expression_body()) return d.expression_body();
+  if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
+  List expression = c.parse_expression();
+  if (!d.anonymous) c.expect(<;>);
+  return %(seq (stmnt $expression));
 }
 
 /* The legacy form is parenthesized, and a quotation's body is a

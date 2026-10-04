@@ -256,6 +256,20 @@ macro Stmt $project.guard(Expr $condition) {
 ~}
 ```
 
+A `Stmt` macro whose body is one expression statement can write it after
+`=>`, like an expression macro:
+
+```x2c
+~
+macro Stmt $project.note(Expr $value) =>
+  printf("%s\n", %"value ${$value}");
+~
+~int main(void) {
+~  $project.note(42);
+~  return 0;
+~}
+```
+
 An expression macro is not a statement macro, and a unit macro cannot appear
 inside a function. The compiler diagnoses the mismatch at the invocation.
 

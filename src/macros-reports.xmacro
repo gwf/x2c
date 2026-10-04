@@ -114,11 +114,9 @@ macro Stmt $report.parse.macro_paren_body(Expr $c) {
     $c.token, NULL);
 }
 
-macro Stmt $report.parse.macro_braced_body(Expr $c) {
+macro Stmt $report.parse.macro_body(Expr $c, Expr $kind, Expr $form) {
   $c.report_error(
-    <parse>, "braced macro body requires Stmt, Field, Entry, " +
-  "Enumerator, Unit, or non-Expression Decorator result",
-    $c.token, NULL);
+    <parse>, %"${$kind} macro body requires ${$form}", $c.token, NULL);
 }
 
 macro Stmt $report.parse.hole_untyped(
