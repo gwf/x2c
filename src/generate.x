@@ -456,9 +456,12 @@ static int _declares_object(List bindings) {
    initializers, a tag body alone, or the declaration as written. */
 static List _header_declaration(List node, Type type, List bindings) {
   if (type.is_extern()) {
-    bindings = bindings.match_replace(
-      %(bindings (op = ?bind ?init)), %(bindings ?bind));
-    return %(declare $type $bindings);
+    Array declarators = [];
+    foreach (List declarator, bindings.cdr()) {
+      match (declarator) case %(op = ?bind ?): declarator = bind;
+      declarators.push(declarator);
+    }
+    return %(declare $type (bindings @{declarators.list_free()}));
   }
   if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
     return %(declare $type (bindings (bind () ())));
