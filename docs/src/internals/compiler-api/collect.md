@@ -34,7 +34,7 @@ Source-ordered shallow symbol collection and replay.
 Drops the entries collected without declaration defaults while the shared
 compile-time session was filled. Call once that session is published.
 
-Source: `src/collect.x:1315`
+Source: `src/collect.x:1316`
 
 #### collect_resolve_include
 
@@ -56,7 +56,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1042`
+Source: `src/collect.x:1043`
 
 #### interface_prelude
 
@@ -66,7 +66,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1229`
+Source: `src/collect.x:1230`
 
 #### interface_text
 
@@ -78,7 +78,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1251`
+Source: `src/collect.x:1252`
 
 ### `Compiler`
 
