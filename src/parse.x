@@ -3095,6 +3095,9 @@ static List Compiler._bind_raise(Compiler c, Var code, List details) {
 static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   List handle = handler ? handler.car().list()
     : c.sym.introduce(c.fresh_name("error_handler"));
+  /* The lowering declares the handle after its readers bind, so they keep
+     its identity rather than reading a template local's source spelling. */
+  c.set_fact(%(type $handle), %("ErrorHandler"));
   Array bound = [];
   foreach (List arm, arms.list()) {
     List pattern = arm.car();
