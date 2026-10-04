@@ -1,9 +1,9 @@
 # Macro application cost
 
-> Status: active, awaiting review.
-> Research finished 2026-10-03 on dev 9528fe2c. No implementation has
-> started. Phases 1 and 2 are independent; phase 3 is decided after their
-> measurements.
+> Status: active. Phases 1 and 2, and the undo-log transaction from
+> "Outside this plan", are implemented and submitted to the integrator as
+> one PR (2026-10-03). Phase 3 is decided after their measurements reach
+> dev.
 
 ## Result
 
@@ -161,12 +161,36 @@ workers implement them in parallel. The orchestrator combines them and
 submits one PR to the shared integrator with the measurements. Phase 3, if
 approved, is a later PR.
 
-## Outside this plan
+## Results
 
-- `_invoke_definition` copies the same maps for every source macro
-  invocation. A cheap transaction (an undo log, or staged maps that read
-  through to the originals) would fix every transaction site. It needs its
-  own design and measurement.
+Phase 1 alone did not fix the quadratic case: user source is parsed inside
+the `FullParse.form` recovery boundary, so its expansions keep their
+transaction. The undo log fixed it instead. `Sym.put` and `Sym.drop` record
+the row a write replaces while a transaction is active; begin records the
+log length, rollback restores rows back to it, and commit does nothing.
+Binding-fact writes go through `Compiler.set_fact` and `drop_fact`.
+Generated-name counters are still copied, because related compilers share
+`c.names`.
+
+Phase 2 stores `(rebuild (TEMPLATE KEYS))` and `(leaf 0|1)` rows. A leaf
+template applies no templates and uses each hole at most once, so it cannot
+recurse or multiply its arguments' applications; it is not counted. A
+template that applies other templates gets no rebuild row, so a definition
+never embeds a copy of another definition.
+
+| Workload | Before | After |
+| --- | ---: | ---: |
+| 2,000-function `foreach` unit | 37.6 s | 2.8 s |
+| 2,000-function unit using a raw-List user macro | 5.3 s | 2.3 s |
+| 12,000 quotation applications in one unit | fails | translates |
+
+Combined, on converged trees at equal-length paths (dev 5b4fda8e against
+the branch tip; mean of four alternating runs after a warm-up), translating
+`src/*.x lib/*.x` takes 12.4 s instead of 17.0 s: 184.6 G instructions
+instead of 236.3 G. The 2,000-function `foreach` unit takes 1.6 s instead
+of 18.8 s when both runs are warm.
+
+## Outside this plan
 - Two bootstrap-refresh rounds are needed when a change alters the
   compiler's own emitted C. After one round, `.xi` files carry the old
   compiler's identity, every include is walked cold (`src/collect.x`), and
