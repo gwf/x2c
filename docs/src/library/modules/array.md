@@ -18,7 +18,7 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.free`](#Array.free) | Releases the `Array` and its backing storage, invalidating every alias. |
 | [`Array.getindex`](#Array.getindex) | Reads `index` from a non-null array, counting negatives from the end. |
 | [`Array.getslice`](#Array.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`Array.indexof`](#Array.indexof) | Returns the same first-match index as `$array.find`. |
+| [`Array.indexof`](#Array.indexof) | Returns the same first-match index as `Array.find`. |
 | [`Array.insert`](#Array.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`Array.iter`](#Array.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`Array.join`](#Array.join) | Joins the elements of `array` into one `String` separated by `separator`. |
@@ -167,7 +167,7 @@ Source: `lib/array.x:72`
 
 `int Array.indexof(Array array, Var value)`
 
-Returns the same first-match index as `$array.find`.
+Returns the same first-match index as `Array.find`.
 
 Source: `lib/array.x:72`
 

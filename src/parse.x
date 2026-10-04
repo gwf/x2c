@@ -2717,8 +2717,51 @@ static List Compiler._bind_api_source(
   String invocation_doc = invocation ? c.definition_doc(invocation) : NULL;
   c._definition_source(
     bound, invocation ? invocation.line : line,
-    invocation_doc ? invocation_doc : doc, NULL);
+    invocation_doc ? invocation_doc : c._filled_doc(doc), NULL);
   return bound;
+}
+
+/* A template's doc comment writes a hole as `$name`. A hole the active
+   expansion bound reads as its argument; other text stays as written. */
+static String Compiler._filled_doc(Compiler c, String doc) {
+  if (!doc || !c.macro_stack || doc.find("$") < 0) return doc;
+  Map spellings = c._hole_spellings();
+  Buffer out = Buffer.new(0);
+  for (char *text = doc; *text;) {
+    int named = *text == '$' &&
+      (scan_ascii_alpha((unsigned char) text[1]) || text[1] == '_');
+    int length = named ? scan_identifier(text + 1) : 0;
+    Var spelling = length ? spellings[String.new_len(text + 1, length)] : void;
+    if (spelling is void) out.write_char(*text++);
+    else {
+      out.write(spelling);
+      text += length + 1;
+    }
+  }
+  return out.str_free();
+}
+
+/* The active expansion's holes as prose spells them: a name as it is, and
+   syntax as an invocation in this file wrote it. A template that passes its
+   own hole to another template passes the same syntax, so the inner hole
+   reads as the outer argument. */
+static Map Compiler._hole_spellings(Compiler c) {
+  Map written = {}, spellings = {};
+  String file = absolute_path(c.filename);
+  foreach (List frame, c.macro_stack)
+    foreach (List binding, frame[2])
+      match (binding)
+        case %(? (src (source ?(String path) ?(int begin) ?(int end))
+                      ?syntax)):
+          if (path == file)
+            written[syntax] = String.new_len(c.text + begin, end - begin);
+  foreach (List binding, c.macro_stack.car().list()[2]) {
+    (Var binder, Var value) = binding;
+    match (value) case %(src ? ?syntax): value = syntax;
+    Var spelling = value is <string> ? value : written[value];
+    if (spelling is not void) spellings[binder.str()[1:]] = spelling;
+  }
+  return spellings;
 }
 
 static List Compiler._bind_named_type(Compiler c, String name, Var type) {

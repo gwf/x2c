@@ -232,7 +232,7 @@ Source: `lib/map.x:93`
 `Var Map.setindex(Map map, Var key, Var val)`
 
 Stores `val` under `key` and returns `val`.
-This is the bracket-facing form of `$map.set`, with the same cursor
+This is the bracket-facing form of `Map.set`, with the same cursor
 invalidation and failure behavior.
 
 Source: `lib/map.x:93`
@@ -421,7 +421,7 @@ Source: `lib/map.x:93`
 `Var Map.getindex(Map map, Var key)`
 
 Returns the value selected by bracket indexing.
-This is the bracket-facing form of `$map.get`, with the same failure
+This is the bracket-facing form of `Map.get`, with the same failure
 behavior. Prefer bracket indexing in ordinary code.
 
 Source: `lib/map.x:93`

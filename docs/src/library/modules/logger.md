@@ -31,27 +31,27 @@ Source: `lib/logger.x:771`
 
 | Function | Summary |
 | --- | --- |
-| [`log_debug`](#log_debug) | Logs borrowed `fields` globally at $method level under `category`. |
-| [`log_error`](#log_error) | Logs borrowed `fields` globally at $method level under `category`. |
+| [`log_debug`](#log_debug) | Logs borrowed `fields` globally at debug level under `category`. |
+| [`log_error`](#log_error) | Logs borrowed `fields` globally at error level under `category`. |
 | [`log_event`](#log_event) | Delivers one event synchronously through the current global `Logger`. |
-| [`log_fatal`](#log_fatal) | Logs borrowed `fields` globally at $method level under `category`. |
+| [`log_fatal`](#log_fatal) | Logs borrowed `fields` globally at fatal level under `category`. |
 | [`log_get_global_logger`](#log_get_global_logger) | Returns the borrowed current global `Logger`, or NULL when none is set. |
-| [`log_info`](#log_info) | Logs borrowed `fields` globally at $method level under `category`. |
+| [`log_info`](#log_info) | Logs borrowed `fields` globally at info level under `category`. |
 | [`log_set_global_logger`](#log_set_global_logger) | Installs a borrowed global `Logger` and returns the previous borrowed value. |
 | [`log_should_log`](#log_should_log) | Reports whether the current global `Logger` would deliver this event. |
-| [`log_trace`](#log_trace) | Logs borrowed `fields` globally at $method level under `category`. |
-| [`log_warn`](#log_warn) | Logs borrowed `fields` globally at $method level under `category`. |
+| [`log_trace`](#log_trace) | Logs borrowed `fields` globally at trace level under `category`. |
+| [`log_warn`](#log_warn) | Logs borrowed `fields` globally at warn level under `category`. |
 | [`Logger.add_file_sink`](#Logger.add_file_sink) | Adds a plain-text sink for borrowed `file` and returns its handle. |
 | [`Logger.add_memory_sink`](#Logger.add_memory_sink) | Adds a sink that prepends captured events to `destination`. |
 | [`Logger.add_sink`](#Logger.add_sink) | Appends a callback sink and returns its `Logger`-owned handle. |
 | [`Logger.add_stderr_sink`](#Logger.add_stderr_sink) | Adds a text sink for borrowed `stderr` and returns its `Logger`-owned handle. |
 | [`Logger.clear_sinks`](#Logger.clear_sinks) | Removes and invalidates every sink from `logger`. |
-| [`Logger.debug`](#Logger.debug) | Logs borrowed `fields` synchronously at $method level under `category`. |
-| [`Logger.error`](#Logger.error) | Logs borrowed `fields` synchronously at $method level under `category`. |
-| [`Logger.fatal`](#Logger.fatal) | Logs borrowed `fields` synchronously at $method level under `category`. |
+| [`Logger.debug`](#Logger.debug) | Logs borrowed `fields` synchronously at debug level under `category`. |
+| [`Logger.error`](#Logger.error) | Logs borrowed `fields` synchronously at error level under `category`. |
+| [`Logger.fatal`](#Logger.fatal) | Logs borrowed `fields` synchronously at fatal level under `category`. |
 | [`Logger.flush`](#Logger.flush) | Calls configured flushers synchronously in registration order. |
 | [`Logger.free`](#Logger.free) | Flushes and retires every sink, then releases `logger` and its storage. |
-| [`Logger.info`](#Logger.info) | Logs borrowed `fields` synchronously at $method level under `category`. |
+| [`Logger.info`](#Logger.info) | Logs borrowed `fields` synchronously at info level under `category`. |
 | [`Logger.initialize`](#Logger.initialize) | Installs the process-wide info-level `Logger` and stderr sink. |
 | [`Logger.level_priority`](#Logger.level_priority) | Returns the ordering priority of a built-in level, or -1 when invalid. |
 | [`Logger.log`](#Logger.log) | Delivers one event synchronously to eligible sinks in registration order. |
@@ -61,8 +61,8 @@ Source: `lib/logger.x:771`
 | [`Logger.should_log`](#Logger.should_log) | Reports whether an event would reach at least one sink. |
 | [`Logger.shutdown`](#Logger.shutdown) | Shuts down process-wide `Logger` integration. |
 | [`Logger.sink_count`](#Logger.sink_count) | Returns the number of configured sinks, or zero for a NULL `Logger`. |
-| [`Logger.trace`](#Logger.trace) | Logs borrowed `fields` synchronously at $method level under `category`. |
-| [`Logger.warn`](#Logger.warn) | Logs borrowed `fields` synchronously at $method level under `category`. |
+| [`Logger.trace`](#Logger.trace) | Logs borrowed `fields` synchronously at trace level under `category`. |
+| [`Logger.warn`](#Logger.warn) | Logs borrowed `fields` synchronously at warn level under `category`. |
 
 ### Functions
 
@@ -70,7 +70,7 @@ Source: `lib/logger.x:771`
 
 `void log_debug(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at debug level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:756`
@@ -79,7 +79,7 @@ Source: `lib/logger.x:756`
 
 `void log_error(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at error level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:759`
@@ -98,7 +98,7 @@ Source: `lib/logger.x:696`
 
 `void log_fatal(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at fatal level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:760`
@@ -115,7 +115,7 @@ Source: `lib/logger.x:689`
 
 `void log_info(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at info level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:757`
@@ -143,7 +143,7 @@ Source: `lib/logger.x:198`
 
 `void log_trace(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at trace level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:755`
@@ -152,7 +152,7 @@ Source: `lib/logger.x:755`
 
 `void log_warn(Symbol category, List fields)`
 
-Logs borrowed `fields` globally at $method level under `category`.
+Logs borrowed `fields` globally at warn level under `category`.
 Delivery and failure behavior follow `log_event`.
 
 Source: `lib/logger.x:758`
@@ -241,7 +241,7 @@ Source: `lib/logger.x:282`
 
 `void Logger.debug(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at debug level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:740`
@@ -251,7 +251,7 @@ Source: `lib/logger.x:740`
 
 `void Logger.error(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at error level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:743`
@@ -261,7 +261,7 @@ Source: `lib/logger.x:743`
 
 `void Logger.fatal(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at fatal level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:744`
@@ -299,7 +299,7 @@ Source: `lib/logger.x:789`
 
 `void Logger.info(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at info level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:741`
@@ -422,7 +422,7 @@ Source: `lib/logger.x:296`
 
 `void Logger.trace(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at trace level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:739`
@@ -432,7 +432,7 @@ Source: `lib/logger.x:739`
 
 `void Logger.warn(Logger logger, Symbol category, List fields)`
 
-Logs borrowed `fields` synchronously at $method level under `category`.
+Logs borrowed `fields` synchronously at warn level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
 Source: `lib/logger.x:742`
