@@ -2162,7 +2162,8 @@ Ordinary global invocation is `$qualified.name(arguments)`. A local macro is
 invoked as `name(arguments)`. A source file may also give a visible global
 macro an identifier spelling through a `keyword` declaration, described under
 [Decorators](https://x2c-lang.dev/docs/reference/language.html#decorators). Macro names are separate from C identifiers and
-global names may be qualified, as in `$project.logging.trace`. The `x2c.*` and
+global names may be qualified, as in `$project.logging.trace`. A part after a
+dot may be a keyword, as in `$error.arg.void`. The `x2c.*` and
 `lisp.*` macro and Lisp namespaces are reserved for compiler-shipped
 facilities; `$lisp.bind`, `$lisp.binding`, and `$lisp.install` are the shipped
 native-binding macros.
