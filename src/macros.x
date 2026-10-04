@@ -213,19 +213,24 @@ static List Compiler._member_bindings(
     if (parameter.assoc(<kind>) != <name> ||
         parameter.assoc(<sequence>).int())
       continue;
-    Var value = capture.assoc(<value>), spelling;
-    if (value is <list>) {
-      if (c.semantic_binding_facts().try_get(
-          %(source-spelling $value), spelling)) value = spelling;
-      else {
-        String name = binding_identity_spelling(value);
-        if (name) value = name;
-      }
-    }
     Var member = _hole_key(parameter, "member");
-    bindings = cons(%($member $value), bindings);
+    bindings = cons(
+      %($member ${c._member_spelling(capture.assoc(<value>))}), bindings);
   }
   return bindings;
+}
+
+/* The spelling a Name hole's value supplies in a member position: the
+   source spelling of a renamed local or a binding, or an `x2c_ident`
+   value's own. */
+static Var Compiler._member_spelling(Compiler c, Var value) {
+  Var spelling;
+  match (value) case %("x2c.ident" (!is ?name type string)): return name;
+  if (value is not <list>) return value;
+  if (c.semantic_binding_facts().try_get(%(source-spelling $value), spelling))
+    return spelling;
+  String name = binding_identity_spelling(value);
+  return name ? name : value;
 }
 
 /* The bindings compile-time Lisp sees: the author's binders, without the
@@ -334,7 +339,8 @@ static void _file_scope_locals(List rows, Map locals) {
     case %(macro-invoke ((!quote !quote) ?(List definition)) ?(List input) ?): {
       Map declared = {};
       _file_scope_locals(%(${definition.assoc(<template>)}), declared);
-      List bindings = input.match(definition.assoc(<pattern>));
+      List bindings = NULL;
+      input.try_match(definition.assoc(<pattern>), bindings);
       foreach (List pair, bindings)
         if (pair.car() in declared && pair.cadr().is_binder())
           locals[pair.cadr()] = 1;
@@ -1342,7 +1348,7 @@ static List Definition.construction(Definition &d) {
     fresh.push(%($binder ${row.cadr()} ${binder in file_locals ? 1 : 0}));
   }
   foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice))
+    foreach (Symbol projection, %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   List quoted = %(
     "x2c.quoted" ${fresh.list_free()} ${_macro_value_names(d.template)}
@@ -1414,7 +1420,7 @@ static List Definition.typed_construction(Definition &d) {
   if (!d.rebuild || d.fresh) $report.parse.typed_quotation(c, d.start);
   Map keys = {};
   foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice))
+    foreach (Symbol projection, %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   match (d.rebuild.car()) case %(expr ? *content):
     return c.literal_cell(c.cache_literal_var(<expr>),
@@ -1601,6 +1607,8 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
 List Compiler.try_parse_macro_member(Compiler c) {
   List hole = c.peek_macro_hole();
   List slot = c.try_parse_macro_slot(<name>);
+  // A quotation's first use of a hole gives the hole its kind.
+  if (hole) hole = c._hole_record(_hole_name(hole));
   if (!slot || !hole || hole.assoc(<kind>) != <name> ||
       hole.assoc(<sequence>).int())
     return slot;
@@ -3125,16 +3133,28 @@ static List Compiler._template_arguments(
   return %(args @{rows.list_free()});
 }
 
-/* One hole's capture row of `value`. */
+/* One hole's capture row of `value`. Each scalar Lisp value an Expr hole
+   or sequence holds lifts to an expression first. */
 static List Compiler._hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
-  if (hole.assoc(<kind>) == <expr> &&
-      (value.is_integer() || value.is_floating() || value is <string> ||
-       value is <symbol>))
-    value = c.lift_macro_lisp_expression(value, invocation);
-  List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
+  int lifts = hole.assoc(<kind>) == <expr>;
+  if (!hole.assoc(<sequence>).int())
+    return c._capture_row_project(
+      hole, %(${lifts ? c._lifted(value, invocation) : value}), retain_syntax);
+  List sources = value.list();
+  if (lifts) {
+    Array lifted = [];
+    foreach (Var item, sources) lifted.push(c._lifted(item, invocation));
+    sources = lifted.list_free();
+  }
   return c._capture_row_project(hole, sources, retain_syntax);
 }
+
+/* A number, String, or Symbol becomes the literal expression that holds
+   it; other values are already syntax. */
+static Var Compiler._lifted(Compiler c, Var value, Token invocation) =>
+  value.is_integer() || value.is_floating() || value is <string> ||
+  value is <symbol> ? c.lift_macro_lisp_expression(value, invocation) : value;
 
 /* A helper's result with each template call the helper left for the
    compiler replaced by its invocation. */
@@ -3363,6 +3383,7 @@ static int Landing.splices(Landing &l, Var item, List &spliced) {
    which a rebuild leaves bare. */
 static Var Landing.hole(Landing &l, List hole, Symbol projection, Var value) {
   Compiler c = l.c;
+  if (projection == <member>) return c._member_spelling(value);
   if (!l.retain) value = c._helper_result(value);
   List row = c._hole_row(hole, value, l.site, l.retain);
   Symbol field = projection == <shell> ? <expression> : projection;

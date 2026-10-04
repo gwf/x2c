@@ -1053,8 +1053,7 @@ static List Compiler._resolve_content(
     case %(meta-call ?callee (args *arguments)):
       return c._resolve_meta_call(input, origin);
     case %(meta-cap *): return input;
-    case %(macro-invoke ?definition ?arguments ?invocation):
-      return c._resolve_invocation(input, definition, arguments, invocation);
+    case %(macro-invoke *): return c._resolve_invocation(input, content);
     case %("x2c.quoted" *):
       return c.bind_syntax(content, AST_EXPRESSION, c.return_type);
     case %(macro-slot ? ? *):
@@ -1146,13 +1145,12 @@ static List Compiler._resolve_meta_call(
   return c.evaluate_meta_expression(input, origin);
 }
 
+/* An invocation expands where it is resolved, as the binder expands one,
+   except in a template, whose expansion expands it. */
 static List Compiler._resolve_invocation(
-  Compiler c, List input, Var definition, List arguments,
-  Var invocation) {
-  Token site = c.macro_invocation_site(invocation);
-  if (!site) return input;
-  return c.expand_macro_invocation_node(
-    definition, arguments, site, AST_EXPRESSION);
+  Compiler c, List input, List content) {
+  if (c.macro_holes) return input;
+  return c.bind_syntax(content, AST_EXPRESSION, c.return_type);
 }
 
 static List Compiler._resolve_macro_slot(

@@ -180,10 +180,21 @@ List Compiler.evaluate_meta_expression(
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
-  if (c.macro_stack && value is <list>)
+  if (value is <list> && (c.macro_stack || _expression_code(value)))
     return c.lift_macro_lisp_expression(value, site);
   List result = c.meta_value_expression(declared, value, site);
   return result ? result : c.lift_macro_lisp_expression(value, site);
+}
+
+/* Whether a List result is code for an expression: an expression, an
+   identifier, or a pending quotation or macro application. Other Lists
+   are data. */
+static int _expression_code(Var value) {
+  match (value)
+    case %((!or expr macro-invoke "x2c.quoted" "x2c.template" "x2c.ident")
+           *):
+      return 1;
+  return binding_identity_try_parts(value, NULL, NULL);
 }
 
 /** Runs the explicit meta call `expression` at `site`. The project meta
