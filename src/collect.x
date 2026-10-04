@@ -734,6 +734,7 @@ static void Compiler._replay_include(
    token that locates errors. */
 typedef struct Surface {
   Compiler c, String name, root, Map merged, visited, Token token;
+  Array exports;
 } Surface;
 
 /** Collects a package once and installs its public surface in the current
@@ -761,11 +762,12 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   c.fn_defs.merge(package.fn_defs);
   Surface s = {
     .c = c, .name = name, .root = root, .merged = {}, .visited = {},
-    .token = token};
+    .token = token, .exports = []};
   s.visited[entry] = 1;
   c.add_translation_dependency(entry);
   s.gather(entry, _process_cache()[entry]);
   s.install();
+  c.package_exports[name] = s.exports.list_free();
 }
 
 static String Compiler._find_package(
@@ -826,6 +828,7 @@ static void Surface.merge(Surface &s, String path, Map rows) {
   String prefix = %"${s.name}__";
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"${s.root}/");
+  if (!foreign) s.take_exports(rows);
   foreach (Var (key, value), rows) {
     if (key is not <list> || key.is_nil()) continue;
     String spelling = _package_key_spelling(key);
@@ -834,6 +837,18 @@ static void Surface.merge(Surface &s, String path, Map rows) {
       s.take(rows, key, value);
     else if (spelling && foreign) s.reject(path, spelling);
   }
+}
+
+/* A file's exported macro imports follow the package's include walk, and
+   source order within the file. */
+static void Surface.take_exports(Surface &s, Map rows) {
+  Array found = $auto([]);
+  foreach (Var (key, value), rows)
+    match (%($key $value))
+      case %(("source-node" (macro-export ? ?position)) (macro-export ?path)):
+        found.push(%($position $path));
+  found.sort();
+  foreach (List entry, found) s.exports.push(entry.cadr());
 }
 
 static void Surface.take(Surface &s, Map rows, List key, Var value) {

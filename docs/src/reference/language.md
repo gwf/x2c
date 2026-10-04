@@ -291,10 +291,12 @@ An import exposes:
 
 It also installs the macro imports that the package's entry source and
 public include surface `export`, as described under
-[exported imports](#exported-imports). Includes below `#pragma private` do
-not contribute exports. Other macros, private declarations, and the
-package's other imports are not exposed. Packages have no re-exports or
-hierarchy. One program uses one version of a package.
+[exported imports](#exported-imports), in the order an `#include` of the
+entry source would deliver them. Includes below `#pragma private` do not
+contribute exports, and neither do the consumer's own files. Other macros,
+private declarations, and the package's other imports are not exposed.
+Packages have no re-exports or hierarchy. One program uses one version of a
+package.
 
 A public bodyless `meta` prototype crosses the import like any function
 declaration. When the package has built its native module,

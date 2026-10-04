@@ -4212,29 +4212,17 @@ static void Compiler._reference_bindings(
 }
 
 /** Loads the macro imports that the sources of package `name` export at
-    this consumer's import position. */
+    this consumer's import position, in the order the package's include walk
+    reaches them. */
 void Compiler.import_package_macros(
   Compiler c, String name, Token invocation) {
-  foreach (List entry, c._package_exports(name)) {
-    List imported = c._import(home_absolute_path(entry.caddr()), invocation);
+  Var exports = c.package_exports[name];
+  if (exports is void) return;
+  foreach (String path, exports.list()) {
+    List imported = c._import(home_absolute_path(path), invocation);
     if (imported)
       foreach (Var definition, imported.cdr()) c.meta_defs.push(definition);
   }
-}
-
-/* The macro imports the sources of package `name` export, in source
-   order. */
-static Array Compiler._package_exports(Compiler c, String name) {
-  String root = %"${c.canonical_path(c.package_roots[name])}/";
-  Array exports = [];
-  foreach (Var (key, value), c.sym.unit_symbols())
-    match (%($key $value))
-      case %(("source-node" (macro-export ?(String source) ?position))
-             (macro-export ?path)):
-        if (home_absolute_path(source).startswith(root))
-          exports.push(%($source $position $path));
-  exports.sort();
-  return exports;
 }
 
 // source files

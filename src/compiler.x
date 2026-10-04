@@ -74,10 +74,11 @@ typedef struct Compiler {
   /* Package-mode unit: NULL outside. package_dirs holds the registered
      --package-dir roots, package_roots the directory of every package this
      unit has already collected, package_aliases the resolution-only
-     spelling alias -> package name, and package_members each `with` local
-     spelling -> (package member). */
+     spelling alias -> package name, package_members each `with` local
+     spelling -> (package member), and package_exports each collected
+     package's exported macro imports in its include order. */
   String package, List package_dirs;
-  Map package_roots, package_aliases, package_members;
+  Map package_roots, package_aliases, package_members, package_exports;
   Token token;
   // Optional end of supplied input; NULL keeps ordinary file diagnostics.
   Token input_boundary;
@@ -2704,6 +2705,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
   c.package_roots = owner.package_roots;
   c.package_aliases = owner.package_aliases;
   c.package_members = owner.package_members;
+  c.package_exports = owner.package_exports;
   c.names = owner.names;
   c.source_map = owner.source_map;
   c.recovery_depth = owner.recovery_depth;
@@ -2726,6 +2728,7 @@ static void Compiler._own_unit(Compiler c) {
   c.package_roots = {};
   c.package_aliases = {};
   c.package_members = {};
+  c.package_exports = {};
   c.names = Scope.calloc(1, sizeof(struct GenNames));
   c.names.counters = {};
   c.names.adapters = {};
