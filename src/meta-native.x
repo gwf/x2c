@@ -56,14 +56,32 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       c.group_meta_function(fn);
       if (c.meta_build) return;
       if (!macro_library_filling() && !c.shares_meta_definition(name))
-        c._install_stub(name, marker);
+        c._install_stub(name, ((List) c.meta_group[-1]).last(), marker);
     }
+}
+
+/** Installs the stub of the bodied `meta` definition `declaration` whose
+    body collection skips, so a file-scope constant after it can call it in
+    the project's helper. The full parse installs it again. A name the
+    session already binds, or the compiler's linked copy answers, keeps
+    that binding, and a group that stages in process waits for the full
+    parse. */
+void Compiler.install_collected_meta_function(
+  Compiler c, List declaration, Token marker) {
+  if (c.macro_holes || c.groups_meta() || macro_library_filling()) return;
+  String name = c._native_meta_name(declaration, marker);
+  Var bound;
+  if (c.shares_meta_definition(name) || name in _linked_module()) return;
+  c.ensure_macro_lisp();
+  if (c.macro_lisp.try_get(name, bound)) return;
+  c._install_stub(
+    name, declaration.type_from_ast().canonicalize(), marker);
 }
 
 /* A session refuses to replace a name an ancestor binds, which reaches the
    developer here, at the marker. */
-static void Compiler._install_stub(Compiler c, String name, Token marker) {
-  Type type = ((List) c.meta_group[-1]).last();
+static void Compiler._install_stub(
+  Compiler c, String name, Type type, Token marker) {
   try c.macro_lisp.set_global(
     name,
     Func.new_context(

@@ -356,9 +356,9 @@ int Compiler.collect_compile_time_definition(Compiler c, int keyword) {
 */
 void Compiler.finish_collected_declaration(
   Compiler c, List declaration, Token meta, int native) {
-  /* Collection records the runtime function a `meta` marker precedes, and
-     the native binding a bodyless or `native` marker advertises; the
-     compile-time form is installed by the full parse. */
+  /* Collection records the runtime function a `meta` marker precedes, the
+     native binding a bodyless or `native` marker advertises, and the stub
+     of a bodied one; the full parse installs the compile-time form. */
   c.record_declaration_visibility(declaration);
   /* Lexical privacy also marks a name in Sym.statics, so a static function
      is marked again as `(function name)`. File collection reads that key to
@@ -379,6 +379,7 @@ void Compiler.finish_collected_declaration(
 static void Compiler._skip_body(
   Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
+  else if (meta) c.install_collected_meta_function(declaration, meta);
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
       c._note_function_body(declaration.type_from_ast(), binding);
