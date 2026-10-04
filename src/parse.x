@@ -1881,7 +1881,8 @@ void Compiler.bind_template_local(
 
    A declarator's name is an exact spelling, a constructed binding identity,
    or a method's owner and member. Installation binds it in the current
-   scope, records the method it declares, and resolves its initializer. */
+   scope, records the method it declares, and resolves its initializer
+   outside collection. */
 
 static List Compiler._install_declarator(
   Compiler c, List base, List context, List declarator,
@@ -1912,7 +1913,8 @@ static List Compiler._install_declarator(
   if (binding)
     c._method_facts(binding, method, self_signature, preserved_self);
   List bound = %(bind $binding $mods);
-  if (initializer) initializer = c.resolve_expression(initializer, c.token);
+  if (initializer && !c.shallow)
+    initializer = c.resolve_expression(initializer, c.token);
   return initializer ? %(op = $bound $initializer) : bound;
 }
 
@@ -2576,6 +2578,10 @@ static List Compiler._bind_form(
              ?body ?construction):
       if (unit) return c._bind_collected_function(
         input, return_type, declarator, body, construction);
+    case %(declaration-initialized ?declaration ?construction):
+      if (unit)
+        return c._bind_collected_initializers(
+          input, declaration, construction);
     case %(seq *items): return c._bind_items(items, context);
     case %(args *arguments):
       if (context == AST_EXPRESSION) return c._bind_args(arguments);
@@ -2820,6 +2826,17 @@ static List Compiler._bind_collected_function(
   }
 }
 
+/* Collection installs a constructed declaration's names and keeps its
+   initializers (see `_bind_declaration`). The full parse resolves them
+   under the macro stack that constructed them. */
+static List Compiler._bind_collected_initializers(
+  Compiler c, List input, Var declaration, Var construction) {
+  if (c.shallow) return input;
+  $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
+    return c.bind_syntax(declaration, AST_UNIT, c.return_type);
+  }
+}
+
 /* Binds a constructed function's parameters in a fresh prototype scope,
    which becomes its parameter scope, and then its declaration. */
 static List Compiler._bind_function(
@@ -2894,7 +2911,9 @@ static List Compiler._bind_assert(Compiler c, Var condition, Var message) =>
   %(c-assert ${c._resolve(condition)} ${c._resolve(message)});
 
 /* Completes a constructed declaration's base type, then installs each
-   declarator as the parser does. Only a field may declare a bit-field. */
+   declarator as the parser does. Only a field may declare a bit-field.
+   Collection keeps file-scope initializers for the full parse, with the
+   macro stack that constructed them. */
 static List Compiler._bind_declaration(
   Compiler c, Var tag, Var base, List declarators, AstPos context) {
   if (!_declaration_legal(tag, context)) return c._construction_error();
@@ -2914,6 +2933,8 @@ static List Compiler._bind_declaration(
   List decl = c._finish_declaration(
     tag, base, output.list_free(), preserved_self);
   if (context == AST_UNIT) c.record_declaration_visibility(decl);
+  if (c.shallow && context == AST_UNIT && _initializes(declarators))
+    return %(declaration-initialized $decl ${c.freeze_macro_stack()});
   if (context == AST_BLOCK && tag == <declare>)
     return c.finish_managed_declaration(decl, c.token);
   return decl;
@@ -2925,6 +2946,12 @@ static int _declaration_legal(Var tag, AstPos context) {
   if (tag == <typedef>) return context == AST_UNIT || context == AST_BLOCK;
   if (tag == <decl>) return context == AST_BLOCK;
   return context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;
+}
+
+static int _initializes(List declarators) {
+  foreach (List declarator, declarators)
+    match (declarator) case %(op = * *): return 1;
+  return 0;
 }
 
 static int _has_bitfield(List declarator) {
