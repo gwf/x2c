@@ -9,490 +9,490 @@ Optional compound `List` selectors.
 
 | Function | Summary |
 | --- | --- |
-| [`List.caaaar`](#List.caaaar) | Returns `car(car(car(car(value))))`. |
-| [`List.caaadr`](#List.caaadr) | Returns `car(car(car(cdr(value))))`. |
-| [`List.caaar`](#List.caaar) | Returns `car(car(car(value)))`. |
-| [`List.caadar`](#List.caadar) | Returns `car(car(cdr(car(value))))`. |
-| [`List.caaddr`](#List.caaddr) | Returns `car(car(cdr(cdr(value))))`. |
-| [`List.caadr`](#List.caadr) | Returns `car(car(cdr(value)))`. |
-| [`List.cadaar`](#List.cadaar) | Returns `car(cdr(car(car(value))))`. |
-| [`List.cadadr`](#List.cadadr) | Returns `car(cdr(car(cdr(value))))`. |
-| [`List.cadar`](#List.cadar) | Returns `car(cdr(car(value)))`. |
-| [`List.caddar`](#List.caddar) | Returns `car(cdr(cdr(car(value))))`. |
-| [`List.cadddr`](#List.cadddr) | Returns `car(cdr(cdr(cdr(value))))`. |
-| [`List.cdaaar`](#List.cdaaar) | Returns `cdr(car(car(car(value))))`. |
-| [`List.cdaadr`](#List.cdaadr) | Returns `cdr(car(car(cdr(value))))`. |
-| [`List.cdaar`](#List.cdaar) | Returns `cdr(car(car(value)))`. |
-| [`List.cdadar`](#List.cdadar) | Returns `cdr(car(cdr(car(value))))`. |
-| [`List.cdaddr`](#List.cdaddr) | Returns `cdr(car(cdr(cdr(value))))`. |
-| [`List.cdadr`](#List.cdadr) | Returns `cdr(car(cdr(value)))`. |
-| [`List.cdar`](#List.cdar) | Returns `cdr(car(value))`. |
-| [`List.cddaar`](#List.cddaar) | Returns `cdr(cdr(car(car(value))))`. |
-| [`List.cddadr`](#List.cddadr) | Returns `cdr(cdr(car(cdr(value))))`. |
-| [`List.cddar`](#List.cddar) | Returns `cdr(cdr(car(value)))`. |
-| [`List.cdddar`](#List.cdddar) | Returns `cdr(cdr(cdr(car(value))))`. |
-| [`List.cddddr`](#List.cddddr) | Returns `cdr(cdr(cdr(cdr(value))))`. |
-| [`List.cdddr`](#List.cdddr) | Returns `cdr(cdr(cdr(value)))`. |
-| [`Var.caaaar`](#Var.caaaar) | Returns `car(car(car(car(value))))` after treating `value` as a `List`. |
-| [`Var.caaadr`](#Var.caaadr) | Returns `car(car(car(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.caaar`](#Var.caaar) | Returns `car(car(car(value)))` after treating `value` as a `List`. |
-| [`Var.caadar`](#Var.caadar) | Returns `car(car(cdr(car(value))))` after treating `value` as a `List`. |
-| [`Var.caaddr`](#Var.caaddr) | Returns `car(car(cdr(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.caadr`](#Var.caadr) | Returns `car(car(cdr(value)))` after treating `value` as a `List`. |
-| [`Var.cadaar`](#Var.cadaar) | Returns `car(cdr(car(car(value))))` after treating `value` as a `List`. |
-| [`Var.cadadr`](#Var.cadadr) | Returns `car(cdr(car(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cadar`](#Var.cadar) | Returns `car(cdr(car(value)))` after treating `value` as a `List`. |
-| [`Var.caddar`](#Var.caddar) | Returns `car(cdr(cdr(car(value))))` after treating `value` as a `List`. |
-| [`Var.cadddr`](#Var.cadddr) | Returns `car(cdr(cdr(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cdaaar`](#Var.cdaaar) | Returns `cdr(car(car(car(value))))` after treating `value` as a `List`. |
-| [`Var.cdaadr`](#Var.cdaadr) | Returns `cdr(car(car(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cdaar`](#Var.cdaar) | Returns `cdr(car(car(value)))` after treating `value` as a `List`. |
-| [`Var.cdadar`](#Var.cdadar) | Returns `cdr(car(cdr(car(value))))` after treating `value` as a `List`. |
-| [`Var.cdaddr`](#Var.cdaddr) | Returns `cdr(car(cdr(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cdadr`](#Var.cdadr) | Returns `cdr(car(cdr(value)))` after treating `value` as a `List`. |
-| [`Var.cdar`](#Var.cdar) | Returns `cdr(car(value))` after treating `value` as a `List`. |
-| [`Var.cddaar`](#Var.cddaar) | Returns `cdr(cdr(car(car(value))))` after treating `value` as a `List`. |
-| [`Var.cddadr`](#Var.cddadr) | Returns `cdr(cdr(car(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cddar`](#Var.cddar) | Returns `cdr(cdr(car(value)))` after treating `value` as a `List`. |
-| [`Var.cdddar`](#Var.cdddar) | Returns `cdr(cdr(cdr(car(value))))` after treating `value` as a `List`. |
-| [`Var.cddddr`](#Var.cddddr) | Returns `cdr(cdr(cdr(cdr(value))))` after treating `value` as a `List`. |
-| [`Var.cdddr`](#Var.cdddr) | Returns `cdr(cdr(cdr(value)))` after treating `value` as a `List`. |
+| [`List.caaaar`](#List.caaaar) | Returns the element that `caaaar` selects from `value`. |
+| [`List.caaadr`](#List.caaadr) | Returns the element that `caaadr` selects from `value`. |
+| [`List.caaar`](#List.caaar) | Returns the element that `caaar` selects from `value`. |
+| [`List.caadar`](#List.caadar) | Returns the element that `caadar` selects from `value`. |
+| [`List.caaddr`](#List.caaddr) | Returns the element that `caaddr` selects from `value`. |
+| [`List.caadr`](#List.caadr) | Returns the element that `caadr` selects from `value`. |
+| [`List.cadaar`](#List.cadaar) | Returns the element that `cadaar` selects from `value`. |
+| [`List.cadadr`](#List.cadadr) | Returns the element that `cadadr` selects from `value`. |
+| [`List.cadar`](#List.cadar) | Returns the element that `cadar` selects from `value`. |
+| [`List.caddar`](#List.caddar) | Returns the element that `caddar` selects from `value`. |
+| [`List.cadddr`](#List.cadddr) | Returns the element that `cadddr` selects from `value`. |
+| [`List.cdaaar`](#List.cdaaar) | Returns the tail that `cdaaar` selects from `value`. |
+| [`List.cdaadr`](#List.cdaadr) | Returns the tail that `cdaadr` selects from `value`. |
+| [`List.cdaar`](#List.cdaar) | Returns the tail that `cdaar` selects from `value`. |
+| [`List.cdadar`](#List.cdadar) | Returns the tail that `cdadar` selects from `value`. |
+| [`List.cdaddr`](#List.cdaddr) | Returns the tail that `cdaddr` selects from `value`. |
+| [`List.cdadr`](#List.cdadr) | Returns the tail that `cdadr` selects from `value`. |
+| [`List.cdar`](#List.cdar) | Returns the tail that `cdar` selects from `value`. |
+| [`List.cddaar`](#List.cddaar) | Returns the tail that `cddaar` selects from `value`. |
+| [`List.cddadr`](#List.cddadr) | Returns the tail that `cddadr` selects from `value`. |
+| [`List.cddar`](#List.cddar) | Returns the tail that `cddar` selects from `value`. |
+| [`List.cdddar`](#List.cdddar) | Returns the tail that `cdddar` selects from `value`. |
+| [`List.cddddr`](#List.cddddr) | Returns the tail that `cddddr` selects from `value`. |
+| [`List.cdddr`](#List.cdddr) | Returns the tail that `cdddr` selects from `value`. |
+| [`Var.caaaar`](#Var.caaaar) | Returns the element that `caaaar` selects from `value` as a `List`. |
+| [`Var.caaadr`](#Var.caaadr) | Returns the element that `caaadr` selects from `value` as a `List`. |
+| [`Var.caaar`](#Var.caaar) | Returns the element that `caaar` selects from `value` as a `List`. |
+| [`Var.caadar`](#Var.caadar) | Returns the element that `caadar` selects from `value` as a `List`. |
+| [`Var.caaddr`](#Var.caaddr) | Returns the element that `caaddr` selects from `value` as a `List`. |
+| [`Var.caadr`](#Var.caadr) | Returns the element that `caadr` selects from `value` as a `List`. |
+| [`Var.cadaar`](#Var.cadaar) | Returns the element that `cadaar` selects from `value` as a `List`. |
+| [`Var.cadadr`](#Var.cadadr) | Returns the element that `cadadr` selects from `value` as a `List`. |
+| [`Var.cadar`](#Var.cadar) | Returns the element that `cadar` selects from `value` as a `List`. |
+| [`Var.caddar`](#Var.caddar) | Returns the element that `caddar` selects from `value` as a `List`. |
+| [`Var.cadddr`](#Var.cadddr) | Returns the element that `cadddr` selects from `value` as a `List`. |
+| [`Var.cdaaar`](#Var.cdaaar) | Returns the tail that `cdaaar` selects from `value` as a `List`. |
+| [`Var.cdaadr`](#Var.cdaadr) | Returns the tail that `cdaadr` selects from `value` as a `List`. |
+| [`Var.cdaar`](#Var.cdaar) | Returns the tail that `cdaar` selects from `value` as a `List`. |
+| [`Var.cdadar`](#Var.cdadar) | Returns the tail that `cdadar` selects from `value` as a `List`. |
+| [`Var.cdaddr`](#Var.cdaddr) | Returns the tail that `cdaddr` selects from `value` as a `List`. |
+| [`Var.cdadr`](#Var.cdadr) | Returns the tail that `cdadr` selects from `value` as a `List`. |
+| [`Var.cdar`](#Var.cdar) | Returns the tail that `cdar` selects from `value` as a `List`. |
+| [`Var.cddaar`](#Var.cddaar) | Returns the tail that `cddaar` selects from `value` as a `List`. |
+| [`Var.cddadr`](#Var.cddadr) | Returns the tail that `cddadr` selects from `value` as a `List`. |
+| [`Var.cddar`](#Var.cddar) | Returns the tail that `cddar` selects from `value` as a `List`. |
+| [`Var.cdddar`](#Var.cdddar) | Returns the tail that `cdddar` selects from `value` as a `List`. |
+| [`Var.cddddr`](#Var.cddddr) | Returns the tail that `cddddr` selects from `value` as a `List`. |
+| [`Var.cdddr`](#Var.cdddr) | Returns the tail that `cdddr` selects from `value` as a `List`. |
 
 ### `List`
 
 <a id="List.caaaar"></a>
 #### List.caaaar
 
-`inline Var List.caaaar(List value)`
+`Var List.caaaar(List value)`
 
-Returns `car(car(car(car(value))))`.
+Returns the element that `caaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:33`
+Source: `lib/list-selectors.x:24`
 
 <a id="List.caaadr"></a>
 #### List.caaadr
 
-`inline Var List.caaadr(List value)`
+`Var List.caaadr(List value)`
 
-Returns `car(car(car(cdr(value))))`.
+Returns the element that `caaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:35`
+Source: `lib/list-selectors.x:25`
 
 <a id="List.caaar"></a>
 #### List.caaar
 
-`inline Var List.caaar(List value)`
+`Var List.caaar(List value)`
 
-Returns `car(car(car(value)))`.
+Returns the element that `caaar` selects from `value`.
 
-Source: `lib/list-selectors.x:18`
+Source: `lib/list-selectors.x:17`
 
 <a id="List.caadar"></a>
 #### List.caadar
 
-`inline Var List.caadar(List value)`
+`Var List.caadar(List value)`
 
-Returns `car(car(cdr(car(value))))`.
+Returns the element that `caadar` selects from `value`.
 
-Source: `lib/list-selectors.x:37`
+Source: `lib/list-selectors.x:26`
 
 <a id="List.caaddr"></a>
 #### List.caaddr
 
-`inline Var List.caaddr(List value)`
+`Var List.caaddr(List value)`
 
-Returns `car(car(cdr(cdr(value))))`.
+Returns the element that `caaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:39`
+Source: `lib/list-selectors.x:27`
 
 <a id="List.caadr"></a>
 #### List.caadr
 
-`inline Var List.caadr(List value)`
+`Var List.caadr(List value)`
 
-Returns `car(car(cdr(value)))`.
+Returns the element that `caadr` selects from `value`.
 
-Source: `lib/list-selectors.x:20`
+Source: `lib/list-selectors.x:18`
 
 <a id="List.cadaar"></a>
 #### List.cadaar
 
-`inline Var List.cadaar(List value)`
+`Var List.cadaar(List value)`
 
-Returns `car(cdr(car(car(value))))`.
+Returns the element that `cadaar` selects from `value`.
 
-Source: `lib/list-selectors.x:41`
+Source: `lib/list-selectors.x:28`
 
 <a id="List.cadadr"></a>
 #### List.cadadr
 
-`inline Var List.cadadr(List value)`
+`Var List.cadadr(List value)`
 
-Returns `car(cdr(car(cdr(value))))`.
+Returns the element that `cadadr` selects from `value`.
 
-Source: `lib/list-selectors.x:43`
+Source: `lib/list-selectors.x:29`
 
 <a id="List.cadar"></a>
 #### List.cadar
 
-`inline Var List.cadar(List value)`
+`Var List.cadar(List value)`
 
-Returns `car(cdr(car(value)))`.
+Returns the element that `cadar` selects from `value`.
 
-Source: `lib/list-selectors.x:22`
+Source: `lib/list-selectors.x:19`
 
 <a id="List.caddar"></a>
 #### List.caddar
 
-`inline Var List.caddar(List value)`
+`Var List.caddar(List value)`
 
-Returns `car(cdr(cdr(car(value))))`.
+Returns the element that `caddar` selects from `value`.
 
-Source: `lib/list-selectors.x:45`
+Source: `lib/list-selectors.x:30`
 
 <a id="List.cadddr"></a>
 #### List.cadddr
 
-`inline Var List.cadddr(List value)`
+`Var List.cadddr(List value)`
 
-Returns `car(cdr(cdr(cdr(value))))`.
+Returns the element that `cadddr` selects from `value`.
 
-Source: `lib/list-selectors.x:47`
+Source: `lib/list-selectors.x:31`
 
 <a id="List.cdaaar"></a>
 #### List.cdaaar
 
-`inline Self List.cdaaar(Self value)`
+`List List.cdaaar(List value)`
 
-Returns `cdr(car(car(car(value))))`.
+Returns the tail that `cdaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:49`
+Source: `lib/list-selectors.x:32`
 
 <a id="List.cdaadr"></a>
 #### List.cdaadr
 
-`inline Self List.cdaadr(Self value)`
+`List List.cdaadr(List value)`
 
-Returns `cdr(car(car(cdr(value))))`.
+Returns the tail that `cdaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:51`
+Source: `lib/list-selectors.x:33`
 
 <a id="List.cdaar"></a>
 #### List.cdaar
 
-`inline Self List.cdaar(Self value)`
+`List List.cdaar(List value)`
 
-Returns `cdr(car(car(value)))`.
+Returns the tail that `cdaar` selects from `value`.
 
-Source: `lib/list-selectors.x:24`
+Source: `lib/list-selectors.x:20`
 
 <a id="List.cdadar"></a>
 #### List.cdadar
 
-`inline Self List.cdadar(Self value)`
+`List List.cdadar(List value)`
 
-Returns `cdr(car(cdr(car(value))))`.
+Returns the tail that `cdadar` selects from `value`.
 
-Source: `lib/list-selectors.x:53`
+Source: `lib/list-selectors.x:34`
 
 <a id="List.cdaddr"></a>
 #### List.cdaddr
 
-`inline Self List.cdaddr(Self value)`
+`List List.cdaddr(List value)`
 
-Returns `cdr(car(cdr(cdr(value))))`.
+Returns the tail that `cdaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:55`
+Source: `lib/list-selectors.x:35`
 
 <a id="List.cdadr"></a>
 #### List.cdadr
 
-`inline Self List.cdadr(Self value)`
+`List List.cdadr(List value)`
 
-Returns `cdr(car(cdr(value)))`.
+Returns the tail that `cdadr` selects from `value`.
 
-Source: `lib/list-selectors.x:26`
+Source: `lib/list-selectors.x:21`
 
 <a id="List.cdar"></a>
 #### List.cdar
 
-`inline Self List.cdar(Self value)`
+`List List.cdar(List value)`
 
-Returns `cdr(car(value))`.
+Returns the tail that `cdar` selects from `value`.
 
 Source: `lib/list-selectors.x:16`
 
 <a id="List.cddaar"></a>
 #### List.cddaar
 
-`inline Self List.cddaar(Self value)`
+`List List.cddaar(List value)`
 
-Returns `cdr(cdr(car(car(value))))`.
+Returns the tail that `cddaar` selects from `value`.
 
-Source: `lib/list-selectors.x:57`
+Source: `lib/list-selectors.x:36`
 
 <a id="List.cddadr"></a>
 #### List.cddadr
 
-`inline Self List.cddadr(Self value)`
+`List List.cddadr(List value)`
 
-Returns `cdr(cdr(car(cdr(value))))`.
+Returns the tail that `cddadr` selects from `value`.
 
-Source: `lib/list-selectors.x:59`
+Source: `lib/list-selectors.x:37`
 
 <a id="List.cddar"></a>
 #### List.cddar
 
-`inline Self List.cddar(Self value)`
+`List List.cddar(List value)`
 
-Returns `cdr(cdr(car(value)))`.
+Returns the tail that `cddar` selects from `value`.
 
-Source: `lib/list-selectors.x:28`
+Source: `lib/list-selectors.x:22`
 
 <a id="List.cdddar"></a>
 #### List.cdddar
 
-`inline Self List.cdddar(Self value)`
+`List List.cdddar(List value)`
 
-Returns `cdr(cdr(cdr(car(value))))`.
+Returns the tail that `cdddar` selects from `value`.
 
-Source: `lib/list-selectors.x:61`
+Source: `lib/list-selectors.x:38`
 
 <a id="List.cddddr"></a>
 #### List.cddddr
 
-`inline Self List.cddddr(Self value)`
+`List List.cddddr(List value)`
 
-Returns `cdr(cdr(cdr(cdr(value))))`.
+Returns the tail that `cddddr` selects from `value`.
 
-Source: `lib/list-selectors.x:63`
+Source: `lib/list-selectors.x:39`
 
 <a id="List.cdddr"></a>
 #### List.cdddr
 
-`inline Self List.cdddr(Self value)`
+`List List.cdddr(List value)`
 
-Returns `cdr(cdr(cdr(value)))`.
+Returns the tail that `cdddr` selects from `value`.
 
-Source: `lib/list-selectors.x:30`
+Source: `lib/list-selectors.x:23`
 
 ### `Var`
 
 <a id="Var.caaaar"></a>
 #### Var.caaaar
 
-`inline Var Var.caaaar(Var value)`
+`Var Var.caaaar(Var value)`
 
-Returns `car(car(car(car(value))))` after treating `value` as a `List`.
+Returns the element that `caaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:83`
+Source: `lib/list-selectors.x:24`
 
 <a id="Var.caaadr"></a>
 #### Var.caaadr
 
-`inline Var Var.caaadr(Var value)`
+`Var Var.caaadr(Var value)`
 
-Returns `car(car(car(cdr(value))))` after treating `value` as a `List`.
+Returns the element that `caaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:85`
+Source: `lib/list-selectors.x:25`
 
 <a id="Var.caaar"></a>
 #### Var.caaar
 
-`inline Var Var.caaar(Var value)`
+`Var Var.caaar(Var value)`
 
-Returns `car(car(car(value)))` after treating `value` as a `List`.
+Returns the element that `caaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:68`
+Source: `lib/list-selectors.x:17`
 
 <a id="Var.caadar"></a>
 #### Var.caadar
 
-`inline Var Var.caadar(Var value)`
+`Var Var.caadar(Var value)`
 
-Returns `car(car(cdr(car(value))))` after treating `value` as a `List`.
+Returns the element that `caadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:87`
+Source: `lib/list-selectors.x:26`
 
 <a id="Var.caaddr"></a>
 #### Var.caaddr
 
-`inline Var Var.caaddr(Var value)`
+`Var Var.caaddr(Var value)`
 
-Returns `car(car(cdr(cdr(value))))` after treating `value` as a `List`.
+Returns the element that `caaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:89`
+Source: `lib/list-selectors.x:27`
 
 <a id="Var.caadr"></a>
 #### Var.caadr
 
-`inline Var Var.caadr(Var value)`
+`Var Var.caadr(Var value)`
 
-Returns `car(car(cdr(value)))` after treating `value` as a `List`.
+Returns the element that `caadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:70`
+Source: `lib/list-selectors.x:18`
 
 <a id="Var.cadaar"></a>
 #### Var.cadaar
 
-`inline Var Var.cadaar(Var value)`
+`Var Var.cadaar(Var value)`
 
-Returns `car(cdr(car(car(value))))` after treating `value` as a `List`.
+Returns the element that `cadaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:91`
+Source: `lib/list-selectors.x:28`
 
 <a id="Var.cadadr"></a>
 #### Var.cadadr
 
-`inline Var Var.cadadr(Var value)`
+`Var Var.cadadr(Var value)`
 
-Returns `car(cdr(car(cdr(value))))` after treating `value` as a `List`.
+Returns the element that `cadadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:93`
+Source: `lib/list-selectors.x:29`
 
 <a id="Var.cadar"></a>
 #### Var.cadar
 
-`inline Var Var.cadar(Var value)`
+`Var Var.cadar(Var value)`
 
-Returns `car(cdr(car(value)))` after treating `value` as a `List`.
+Returns the element that `cadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:72`
+Source: `lib/list-selectors.x:19`
 
 <a id="Var.caddar"></a>
 #### Var.caddar
 
-`inline Var Var.caddar(Var value)`
+`Var Var.caddar(Var value)`
 
-Returns `car(cdr(cdr(car(value))))` after treating `value` as a `List`.
+Returns the element that `caddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:95`
+Source: `lib/list-selectors.x:30`
 
 <a id="Var.cadddr"></a>
 #### Var.cadddr
 
-`inline Var Var.cadddr(Var value)`
+`Var Var.cadddr(Var value)`
 
-Returns `car(cdr(cdr(cdr(value))))` after treating `value` as a `List`.
+Returns the element that `cadddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:97`
+Source: `lib/list-selectors.x:31`
 
 <a id="Var.cdaaar"></a>
 #### Var.cdaaar
 
-`inline List Var.cdaaar(Var value)`
+`List Var.cdaaar(Var value)`
 
-Returns `cdr(car(car(car(value))))` after treating `value` as a `List`.
+Returns the tail that `cdaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:99`
+Source: `lib/list-selectors.x:32`
 
 <a id="Var.cdaadr"></a>
 #### Var.cdaadr
 
-`inline List Var.cdaadr(Var value)`
+`List Var.cdaadr(Var value)`
 
-Returns `cdr(car(car(cdr(value))))` after treating `value` as a `List`.
+Returns the tail that `cdaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:101`
+Source: `lib/list-selectors.x:33`
 
 <a id="Var.cdaar"></a>
 #### Var.cdaar
 
-`inline List Var.cdaar(Var value)`
+`List Var.cdaar(Var value)`
 
-Returns `cdr(car(car(value)))` after treating `value` as a `List`.
+Returns the tail that `cdaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:74`
+Source: `lib/list-selectors.x:20`
 
 <a id="Var.cdadar"></a>
 #### Var.cdadar
 
-`inline List Var.cdadar(Var value)`
+`List Var.cdadar(Var value)`
 
-Returns `cdr(car(cdr(car(value))))` after treating `value` as a `List`.
+Returns the tail that `cdadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:103`
+Source: `lib/list-selectors.x:34`
 
 <a id="Var.cdaddr"></a>
 #### Var.cdaddr
 
-`inline List Var.cdaddr(Var value)`
+`List Var.cdaddr(Var value)`
 
-Returns `cdr(car(cdr(cdr(value))))` after treating `value` as a `List`.
+Returns the tail that `cdaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:105`
+Source: `lib/list-selectors.x:35`
 
 <a id="Var.cdadr"></a>
 #### Var.cdadr
 
-`inline List Var.cdadr(Var value)`
+`List Var.cdadr(Var value)`
 
-Returns `cdr(car(cdr(value)))` after treating `value` as a `List`.
+Returns the tail that `cdadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:76`
+Source: `lib/list-selectors.x:21`
 
 <a id="Var.cdar"></a>
 #### Var.cdar
 
-`inline List Var.cdar(Var value)`
+`List Var.cdar(Var value)`
 
-Returns `cdr(car(value))` after treating `value` as a `List`.
+Returns the tail that `cdar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:66`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cddaar"></a>
 #### Var.cddaar
 
-`inline List Var.cddaar(Var value)`
+`List Var.cddaar(Var value)`
 
-Returns `cdr(cdr(car(car(value))))` after treating `value` as a `List`.
+Returns the tail that `cddaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:107`
+Source: `lib/list-selectors.x:36`
 
 <a id="Var.cddadr"></a>
 #### Var.cddadr
 
-`inline List Var.cddadr(Var value)`
+`List Var.cddadr(Var value)`
 
-Returns `cdr(cdr(car(cdr(value))))` after treating `value` as a `List`.
+Returns the tail that `cddadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:109`
+Source: `lib/list-selectors.x:37`
 
 <a id="Var.cddar"></a>
 #### Var.cddar
 
-`inline List Var.cddar(Var value)`
+`List Var.cddar(Var value)`
 
-Returns `cdr(cdr(car(value)))` after treating `value` as a `List`.
+Returns the tail that `cddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:78`
+Source: `lib/list-selectors.x:22`
 
 <a id="Var.cdddar"></a>
 #### Var.cdddar
 
-`inline List Var.cdddar(Var value)`
+`List Var.cdddar(Var value)`
 
-Returns `cdr(cdr(cdr(car(value))))` after treating `value` as a `List`.
+Returns the tail that `cdddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:111`
+Source: `lib/list-selectors.x:38`
 
 <a id="Var.cddddr"></a>
 #### Var.cddddr
 
-`inline List Var.cddddr(Var value)`
+`List Var.cddddr(Var value)`
 
-Returns `cdr(cdr(cdr(cdr(value))))` after treating `value` as a `List`.
+Returns the tail that `cddddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:113`
+Source: `lib/list-selectors.x:39`
 
 <a id="Var.cdddr"></a>
 #### Var.cdddr
 
-`inline List Var.cdddr(Var value)`
+`List Var.cdddr(Var value)`
 
-Returns `cdr(cdr(cdr(value)))` after treating `value` as a `List`.
+Returns the tail that `cdddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:80`
+Source: `lib/list-selectors.x:23`
 
 ## Design notes
 

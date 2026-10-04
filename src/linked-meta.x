@@ -168,6 +168,14 @@ static List retain_catch_handle(List rebuilt, List handle) {
   return rebuilt.search_replace(%(!quote $marker), handle);
 }
 
+/* --- lib/list-selectors.xmacro ------------------------------------------- */
+
+static List _selector_chain(String spelling, List value) {
+  for (int i = spelling.len() - 2; i >= 1; i--)
+    value = spelling[i] == 'a' ? $!( car($value) ) : $!( cdr($value) );
+  return value;
+}
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -728,6 +736,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_expression", source_expression);
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
+  $linked.row(rows, "_selector_chain", _selector_chain);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
