@@ -1563,9 +1563,9 @@ An import exposes:
 - any header or runtime module the package's public part includes, such as a
   vendored foreign header it publishes.
 
-It also installs direct `.xmacro` imports in the public part of the package
-entry source. Other macros, private declarations, and the package's own
-imports are not exposed. Packages have no re-exports or hierarchy. One program
+It also installs the macro imports that the package's sources `export`, as
+described under [exported imports](https://x2c-lang.dev/docs/reference/language.html#exported-imports). Other macros, private
+declarations, and the package's other imports are not exposed. Packages have no re-exports or hierarchy. One program
 uses one version of a package.
 
 A public bodyless `meta` prototype crosses the import like any function
@@ -2642,14 +2642,16 @@ can overlap a declaration beginning with a same-named typedef.
 Aliases are local to the `.x` file that declares them, including when that file
 is included or is a package source. One alias map spans that file's
 include-separated segments, while a nested included `.x` file receives its
-own map. Aliases never leak into the including file.
+own map. An alias a file declares never leaks into the including file.
 
 An explicitly imported `.xmacro` file may contain macro definitions and
 `keyword` declarations. Its aliases become visible in the importing `.x` file
 at the import position. Every `.x` file that wants the spellings or the
-macros imports the pack itself; an included file's import, like a macro the
-included file defines, does not expose them to its caller, and no pack is
-loaded implicitly by `x2c.x`. Macro templates are parsed when
+macros imports the pack itself, or includes a file that
+[exports](https://x2c-lang.dev/docs/reference/language.html#exported-imports) the import. Any other import of an included
+file, like a macro the included file defines, does not expose them to its
+caller, and no pack is loaded implicitly by `x2c.x`. Macro templates are
+parsed when
 defined, so a later alias does not reinterpret an earlier template; generated
 `List`s and strings are not reparsed as alias-bearing source.
 
@@ -3296,6 +3298,40 @@ comma-separated initializer. Compose a call to an existing spelling with
 
 Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
 implementation details.
+
+### Exported imports
+
+A `.x` file can give the files that include it one of its macro imports.
+Write `export` before the import:
+
+<!-- ignore: the import names a file beside the sample. -->
+```x2c,ignore
+#include "x2c.x"
+export $(import "geometry.xmacro")
+```
+
+An exported import is part of the file's interface. Every file that includes
+this file receives the import at its `#include` line, as if it had written
+the import there. A file that reaches this one through other includes
+receives it too. Each path is imported once per unit, however many includes
+deliver it.
+
+The import delivers everything the imported file provides: its macros and
+decorators, its `keyword` aliases, its `meta` functions and `meta static`
+values, its top-level Lisp forms, and the files it imports. An exported
+`.xlisp` import delivers its Lisp definitions.
+
+`export` applies only to a file-scope `$(import ...)` in a `.x` file. A
+macro, `keyword`, `meta` function, or Lisp definition written in the `.x`
+file stays in that file. To share one, move it to an `.xmacro` file and
+export that import. An `.xmacro` file needs no `export`, because its imports
+already reach the file that imports it. An import without `export` stays in
+its file.
+
+The usual import rules apply at the include line. A delivered definition
+that collides with a visible macro is an error. A later definition in the
+including file replaces the delivered one for the source after it. `export`
+does not depend on `#pragma private`.
 
 ### `meta` functions
 

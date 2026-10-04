@@ -8,12 +8,14 @@ has no native dependency.
 
 - [src/autodiff.xmacro](src/autodiff.xmacro): `$ad.dual` dual-number
   families and the `$ad.forward`, `$ad.reverse`, `$ad.checkpoint`, and
-  `$ad.both` decorators. A unit imports it with
-  `$(import "<path>/autodiff/src/autodiff.xmacro")`; its `meta` functions
-  are staged for that unit on first use.
+  `$ad.both` decorators. Its `meta` functions are staged for the importing
+  unit on first use.
 - [src/autodiff.x](src/autodiff.x): `AdTape` and `AdNode`, a runtime tape
-  for code whose shape the decorators reject. A unit reaches it through
-  `import "autodiff" with AdTape, AdNode;`.
+  for code whose shape the decorators reject. It exports the macro import.
+
+A unit reaches both through `import "autodiff" with AdTape, AdNode;`. A unit
+that needs only the macros can import them by path, as
+`$(import "<path>/autodiff/src/autodiff.xmacro")`.
 
 Each runtime computation uses one tape, including its constants. Binary
 arithmetic operations and `backward` reject foreign nodes with `bad-arg` before changing

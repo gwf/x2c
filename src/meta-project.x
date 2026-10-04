@@ -109,12 +109,7 @@ static List Helper.manifest(Helper &h) {
   defer close(lock);
   List manifest = _current(h.directory);
   if (manifest) return manifest;
-  /* The translation collects the files the build parsed again, so their
-     imports install into the translation's own session. */
-  List collected = collect_cached_paths();
-  manifest = h.build();
-  collect_forget_entries_since(collected);
-  return manifest;
+  return h.build();
 }
 
 /* Each owner with a group calls its table, and a table or a helper that

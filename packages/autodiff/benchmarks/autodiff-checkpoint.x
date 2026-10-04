@@ -7,14 +7,13 @@
 */
 
 #include "x2c.x"
-#include "typed-array.x"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
 #include <sys/resource.h>
-$(import "../src/autodiff.xmacro")
+import "autodiff";
 
 $ad.reverse()
 static double full(double x, double y, int steps) {

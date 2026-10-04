@@ -1507,7 +1507,8 @@ function inside a macro template, or one produced by a `$` call, is
 reported where it is written.
 
 To share a `meta` function between units, put it in a `.xmacro` that each
-unit imports. A `.xmacro` file
+unit imports, or that a file each unit includes
+[exports](../reference/language.md#exported-imports). A `.xmacro` file
 may hold `meta` functions beside the macros that call them, and importing it
 installs their compile-time forms in the importing unit. The unit that imports
 the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's

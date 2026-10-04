@@ -4,10 +4,9 @@
 // through a long loop with a branch inside; $ad.checkpoint keeps the tape
 // small by replaying the loop in blocks of 64 steps.
 #include "x2c.x"
-#include "typed-array.x"
 #include <stdio.h>
 #include <math.h>
-$(import "../src/autodiff.xmacro")
+import "autodiff";
 
 // The observations come from the same model with rate 0.9 and capacity 50.
 static double observed(double t) => 50.0 / (1.0 + 49.0 * exp(-0.9 * t));

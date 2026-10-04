@@ -100,9 +100,9 @@ Public functions:
 `Compiler.collect_symbols`, `collect_resolve_include`,
 `Compiler.include_typedef_names`, `Compiler.record_generated_symbol`,
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.replay_included_package_imports`, `interface_configure`,
-`interface_prelude`, `interface_text`, `collect_forget_preload_entries`,
-`collect_cached_paths`, `collect_forget_entries_since`
+`Compiler.replay_included_package_imports`, `Compiler.import_included_exports`,
+`interface_configure`, `interface_prelude`, `interface_text`,
+`collect_forget_preload_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -111,7 +111,8 @@ one x2c unit's translation state and its two parses.
 Public functions:
 
 `Compiler.var`, `Var.compiler`, `Compiler.shallow_parse`,
-`Compiler.shallow_parse_overlay`, `Compiler.collect_compile_time_definition`,
+`Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
+`Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler._at_function_arrow`,
 `Compiler._skip_shallow_expression`, `Compiler.queue_declaration_effect`,
 `Compiler.run_declaration_effects`, `Compiler.collect_unit_macro`,
@@ -313,6 +314,8 @@ Public functions:
 `Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
 `Compiler.take_code_value`, `Compiler.ensure_macro_lisp`,
 `Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.keep_imported_meta`, `Compiler.at_import`,
+`Compiler.record_macro_export`, `Compiler.import_exported`,
 `Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.import_package_macros`,
 `Compiler.source_path`, `Compiler.open_macro_library`,

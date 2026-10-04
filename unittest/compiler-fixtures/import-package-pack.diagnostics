@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/import-package-pack.x:6:21: parse: package 'tally' has no public name 'hidden'
+  int hidden = $tally.hidden();
+                      ^^^^^^
+

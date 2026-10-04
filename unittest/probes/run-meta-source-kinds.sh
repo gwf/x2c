@@ -18,8 +18,8 @@ meta static int twice(int n):
     return -n
   return n * 2
 EOF
-printf '$(import "plain.xmacro")\n' >bridge.x
-printf '$(import "indent.xpmacro")\n' >bridge.xp
+printf 'export $(import "plain.xmacro")\n' >bridge.x
+printf 'export $(import "indent.xpmacro")\n' >bridge.xp
 
 for kind in plain indent included-plain included-indent; do
   case "$kind" in
