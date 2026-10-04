@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. Inside a macro expansion, a call written as a whole statement may also return a statement. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
@@ -989,6 +989,39 @@ and its type, as `shape_reads` does below.
 What the function returns decides what the expansion is. A `List` one of the
 compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
 and `x2c_literal_symbol` each return an expression holding a value.
+
+A `Stmt` macro can use the same arrow form. Its body is then the statement
+`$helper(args);`, and the helper may return any statement that fits where
+the macro is invoked, not only an expression:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+meta static List repeated(List code) => %(block $code $code);
+
+macro Stmt $twice(Stmt $code) => $repeated($code);
+
+int main(void) {
+  int n = 0;
+  $twice(n += 2;);
+  $twice(if (n == 4) puts("four"););
+  printf("%d\n", n);
+  return 0;
+}
+```
+
+```text
+four
+four
+4
+```
+
+`repeated` receives each captured statement as code and returns a block
+that holds it twice. The second invocation passes an `if` statement, which
+an expression position could not accept. This holds only inside a macro
+expansion. In an ordinary function, a `$helper(args);` statement whose
+result is not expression code inserts that `List` as a runtime value.
 
 ## Source templates from meta functions
 
