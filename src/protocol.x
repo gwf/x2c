@@ -1465,12 +1465,13 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
   return conformance;
 }
 
-/* A macro import parses one body during the caller's collection pass, which
-   keeps its own registries empty because it parses no bodies at all. That
-   body's `foreach` is the only reader, so the protocols and adoptions visible
-   to the import are installed the first time one is asked for. Installing
-   them for every import, or resolving every conformance here rather than the
-   one below, each cost more than the feature. */
+/* A macro import parses its templates and `meta` bodies during the caller's
+   collection pass, which keeps its own registries empty because it parses no
+   bodies at all. A template the full parse reuses keeps the operators and
+   loops resolved here, so the protocols and adoptions visible to the import
+   are installed the first time one is asked for. Installing them for every
+   import, or resolving every conformance here rather than the one asked for,
+   each cost more than the feature. */
 static void Compiler._install_imports(Compiler c) {
   c.import_protocols = 0;
   c.rebuild_protocols(c.sym.unit_symbols());
@@ -1491,6 +1492,7 @@ static List Compiler._ancestry(Compiler c, Type participant) {
 }
 
 static List Compiler._ordered_occurrences(Compiler c) {
+  if (c.import_protocols) c._install_imports();
   List result = NULL;
   $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];

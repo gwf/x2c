@@ -178,7 +178,7 @@ typedef struct Compiler {
      else. */
   int meta_body;
   /* A macro import whose protocol registries are installed on first use;
-     `Compiler.protocol_members_for` owns the installation. */
+     `Compiler._install_imports` owns the installation. */
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
