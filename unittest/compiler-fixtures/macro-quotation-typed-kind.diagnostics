@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-quotation-typed-kind.x:8:17: parse: unknown macro result kind 'Type'
+    List type = $!Type{ int };
+                  ^^^^
+

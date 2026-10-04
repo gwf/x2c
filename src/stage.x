@@ -20,7 +20,6 @@ $(import "../src/grammar.xmacro")
 #include "varconvert.x"
 #include "datum.x"
 #include <limits.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -241,7 +240,7 @@ Var literal_text_value(String spelling) {
 List Compiler.meta_value_expression(
   Compiler c, Type declared, Var value, Token site) {
   if (value is not <list>) _refuse(c, value, site);
-  Type type = declared ? declared : _value_type(value);
+  Type type = declared ? declared : Macro.number_type(value);
   if (value is <list> && c.sym.is_named_value_type(declared, "Macro")) {
     List expression = c.macro_value_literal(value);
     return %(expr ("Macro") ${expression.caddr()});
@@ -270,30 +269,6 @@ static void _refuse(Compiler c, Var value, Token site) {
   if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
 }
 
-/* Untyped Lisp numbers retain their native Var family at the code boundary. */
-static Type _value_type(Var value) {
-  switch (value.tag()) {
-    case <i8>: return %(signed char);
-    case <u8>: return %(unsigned char);
-    case <i16>: return %(short);
-    case <u16>: return %(unsigned short);
-    case <i32>: return %(int);
-    case <u32>: return %(unsigned);
-    case <long>: return %(long);
-    case <ulong>: return %(unsigned long);
-    case <llong>: return %(long long);
-    case <ullong>: return %(unsigned long long);
-    case <f32>: return %(float);
-    case <ldouble>: return %(long double);
-  }
-  if (value.is_floating()) return %(double);
-  if (value.is_integer()) {
-    long n = value.integer();
-    return n == (int) n ? %(int) : %(long long);
-  }
-  return NULL;
-}
-
 static List _string_literal(Compiler c, Type declared, Type type, Var value) {
   if (!declared || type === %(* char))
     return %(expr (* char) (literal (* char) ${value.repr()}));
@@ -310,58 +285,8 @@ static List _number_literal(Compiler c, Type declared, Type type, Var value) {
   type = c.sym.resolve_numeric_type(type);
   Symbol tag = type ? type.scalar_tag() : 0;
   if (!tag) return NULL;
-  value = value.convert(tag);
-  Type result = declared ? declared : type;
-  if (type.scalar() === %(int)) return _int_literal(result, value);
-  List literal = _bits_literal(value);
-  return %(expr $result (parens (expr $result (cast $type $literal))));
-}
-
-/* C reads a negative literal as a negation, so it takes parentheses, and
-   INT_MIN's magnitude does not fit an int, so its literal is cast back. */
-static List _int_literal(Type result, Var value) {
-  long n = value.integer();
-  List literal = %(expr $result (literal (int) ${value.str()}));
-  if (n == INT_MIN)
-    return %(expr $result (parens (expr $result (cast (int) $literal))));
-  return n < 0 ? %(expr $result (parens $literal)) : literal;
-}
-
-/* The exact bits of a number that is not an int, as a long double or an
-   unsigned long long literal that the caller casts to the number's type. */
-static List _bits_literal(Var value) {
-  X2CVarNumeric number;
-  value.numeric_decode(number);
-  Type literal_type = number.floating ? %(long double) : %(unsigned long long);
-  String text = number.floating ? _float_text(number.floating_value)
-                                : "%lluULL".printf(number.raw);
-  return %(expr $literal_type (literal $literal_type $text));
-}
-
-/* NaN and the infinities have no literal, so they spell builtin calls. */
-static String _float_text(long double n) {
-  if (isnan(n)) return "__builtin_nanl(\"\")";
-  if (isinf(n)) return n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
-  return _hex_float(n);
-}
-
-/* Spells finite `n` exactly as a normalized hex literal. Printf's %La
-   layout depends on the host's long double. */
-static String _hex_float(long double n) {
-  const char *sign = signbit(n) ? "-" : "";
-  if (n == 0) return "%s0x0p+0L".printf(sign);
-  int exponent;
-  long double fraction = frexpl(fabsl(n), &exponent) * 2 - 1;
-  char digits[32];
-  int count = 0;
-  for (; fraction != 0; count++) {
-    fraction *= 16;
-    int digit = (int) fraction;
-    fraction -= digit;
-    digits[count] = "0123456789abcdef"[digit];
-  }
-  digits[count] = 0;
-  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
+  return Macro.number_literal(
+    declared ? declared : type, type, value.convert(tag));
 }
 
 // data literals
