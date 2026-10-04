@@ -906,7 +906,7 @@ List builtin_defer_captures(List environment, List records) {
   foreach (List row, records) {
     /* The capture's storage type keeps a reference parameter's own
        address; the bare binding would read through the reference. */
-    List captured = %(expr ${row.cadr()} (ident ${row.car()}));
+    List captured = $!(${row.cadr()})( ${row.car()} );
     String field = binding_identity_spelling(row.caddr());
     assignments.push($!{ $environment.$field = (const void *)&$captured; });
   }
