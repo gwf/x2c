@@ -180,15 +180,16 @@ List Compiler.evaluate_meta_expression(
     declared = signature.cdr();
   if (declared === %(void))
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
-  if (value is <list> && (c.macro_stack || _expression_code(value)))
+  if (value is <list> &&
+      (c.macro_stack || (!c.in_pattern && _expression_code(value))))
     return c.lift_macro_lisp_expression(value, site);
   List result = c.meta_value_expression(declared, value, site);
   return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 
 /* Whether a List result is code for an expression: an expression, an
-   identifier, or a pending quotation or macro application. Other Lists
-   are data. */
+   identifier, or a pending quotation or macro application. Other Lists,
+   and any List a pattern inserts, are data. */
 static int _expression_code(Var value) {
   match (value)
     case %((!or expr macro-invoke "x2c.quoted" "x2c.template" "x2c.ident")

@@ -3141,7 +3141,7 @@ static List Compiler._hole_row(
   if (!hole.assoc(<sequence>).int())
     return c._capture_row_project(
       hole, %(${lifts ? c._lifted(value, invocation) : value}), retain_syntax);
-  List sources = value.list();
+  List sources = value;
   if (lifts) {
     Array lifted = [];
     foreach (Var item, sources) lifted.push(c._lifted(item, invocation));
