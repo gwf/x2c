@@ -16,6 +16,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
 $(import "../src/adapter-memo.xmacro")
+$(import "../src/fields.xmacro")
 #include "expressions.x"
 #include "builtins.x"
 #include "linked-meta.x"

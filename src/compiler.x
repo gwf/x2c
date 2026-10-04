@@ -260,6 +260,7 @@ $(import "../src/grammar.xmacro")
 #include <string.h>
 
 $(import "../src/compiler-reports.xmacro")
+$(import "../src/fields.xmacro")
 
 // shallow collection
 
