@@ -1,7 +1,8 @@
-> Status: reference
+> Status: active
 > Audited origin/dev 32c6e1293e72d9d99398ec005dbeaa3d5ed231bc.
-> The accompanying change adopts cold source generators and examples.
-> Language refinements and compiler hot paths remain proposals.
+> The accompanying change and refinement 1 are on dev. PRs #131, #142,
+> and #143 delivered the later follow-ups. Refinements 2 and 3 and the
+> retained autodiff review remain; see "Remaining work".
 
 # Quotation adoption audit, October 3
 
@@ -231,3 +232,37 @@ foreach loop bodies as quotations left generated C unchanged but cost
 about 3% of retired instructions translating src/ and lib/ (241.8 G
 against 234.0-235.3 G, converged trees), because every `foreach`
 expansion applies them. Foreach expansion is a hot path.
+
+## Follow-ups delivered
+
+- PR #117 (2026-10-03) delivered the accompanying change above. PR #120
+  (2026-10-03) delivered refinement 1.
+- PRs #129 and #130 made a quotation that applies no other template cost
+  about what the equal List costs; see
+  [macro application cost](archive/macro-application-cost.md).
+- PR #131 (2026-10-03) added `${expression}` holes and removed 60
+  single-use temporary locals. It also wrote `_declare`, `_assign`, the
+  foreach and class builders, and the `$switch` decorator as quotations.
+  That reverses the decline above: after #129 and #130, self-translation
+  changed by +0.04%, within noise.
+- PR #142 (2026-10-04) lifts an `x2c_ident` value in a hole to an
+  identifier, so one local serves as declarator and reference. It wrote 17
+  more sites as quotations, including `_fields_hash`. It kept two hot paths
+  as Lists after measuring them: `_assignment` in `src/cache.x` (+2.1%) and
+  the Lisp binding rows (+5.6% on `lisp-targets.x`).
+- PR #143 adds typed quotations, `$!(T)( expression )`, and writes 47 typed
+  compiler expressions with them. They include `_iter_call`, which this
+  audit retained for its explicit Iter root type.
+- [Choosing how to build syntax](../agents/lowering-with-macros.md#choosing-how-to-build-syntax)
+  records which construction new code uses.
+
+## Remaining work
+
+- Refinement 2: Param, Type, and Decl quotations. `macro_categories` in
+  `src/macros.x` still gives these categories no result kind.
+- Refinement 3: a structural rebuild for Unit, Field, and declarator
+  syntax. Meta-group helper prototypes and the capture fields in
+  `src/callables.x` and `src/cleanup.x` still build declarations as Lists.
+- The 17 retained autodiff operations still need their caller-stage and
+  cost review. `ad_is_zero` and `ad_is_one` compare code with `ad_zero()`
+  and `ad_one()`, so those two must stay inspectable syntax.

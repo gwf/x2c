@@ -66,6 +66,7 @@ execution.
 | Record | What remains |
 | --- | --- |
 | [Post-integration fix list, October 2](post-integration-fix-list-2026-10-02.md) | Active orchestrated campaign: 42 scopes, three prior delivered repairs, and every review finding accounted for. Sol workers implement private batches, including the named-macro catalogue replacement and its literal-lowering prerequisite. |
+| [Quotation adoption audit](quotation-adoption-audit-2026-10-03.md) | Param, Type, and Decl quotations; a structural rebuild for Unit, Field, and declarator syntax; and the retained autodiff review. Its other follow-ups landed through PRs #131, #142, and #143. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint, format, and compiler-backed tools](x2c-lint-and-format.md) | Active; phases 0-7 delivered. The completed linter now runs as experimental `x2c lint`; later lint, format, and source-tool phases remain. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release and gate ports remain; the compiler-backed rewrite moved to the lint plan. |
@@ -80,6 +81,10 @@ Production promotion remains separately authorized under the release workflow.
 
 ### Decisions and completed records
 
+- [Macro application cost](archive/macro-application-cost.md): done
+  2026-10-04; phases 1 and 2 and the undo log in PR #129, phase 3 in
+  PR #130, then PRs #132 and #135. Its open defer options stay under
+  "Outside this plan".
 - [Compiler error catalogue](archive/compiler-error-catalogue.md): done;
   catalogue and callers landed through `c08f1d84` and `bef9923d`, with
   once-only table initialization through `fcfaff40` and `2c8ddfb3`.
