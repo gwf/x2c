@@ -242,12 +242,12 @@ macro Stmt $report.type.brace_anonymous(Expr $c) {
     NULL, %("declare the destination with a struct tag or typedef"));
 }
 
-macro Stmt $report.type.var_unresolved(Expr $c) {
+macro Stmt $report.type.var_unresolved(Expr $c, Expr $origin) {
   {
     String message = "cannot convert an unresolved expression to Var";
     $c.report_error(
       <type>, message,
-      NULL, %("give the expression a declared x2c type before boxing it"));
+      $origin, %("give the expression a declared x2c type before boxing it"));
   }
 }
 
