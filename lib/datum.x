@@ -98,7 +98,8 @@ static int _write_atom(Buffer out, Var value, int tagged) {
 static void _write_number(Buffer out, Var value) {
   X2CVarNumeric number;
   value.numeric_decode(number);
-  out.printf("(x2c.number %s \"", (char *) value.tag().str());
+  /* The family tag: NaN and the infinities box back from `<f64>`. */
+  out.printf("(x2c.number %s \"", (char *) number.tag.str());
   if (number.floating) out.printf("%.21Lg", number.floating_value);
   else if (number.unsigned_value) out.printf("%llu", number.raw);
   else out.printf("%lld", (long long) value.integer());
