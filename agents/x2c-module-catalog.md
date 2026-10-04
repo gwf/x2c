@@ -165,7 +165,7 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.report_error`, `Compiler.report_warning`,
+`Compiler.token_source`, `Compiler.report_error`, `Compiler.report_warning`,
 `Compiler.report_warning_at`, `Compiler.take_diagnostics`,
 `Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
 `Compiler.dump_symbol_table`, `Compiler.dump_cache`
@@ -363,19 +363,19 @@ meta functions and the native code they call.
 
 Public functions:
 
-`Compiler.install_meta_function`, `Compiler.install_meta_declaration`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_meta_statement`,
-`Compiler.run_meta_call`, `Compiler.record_native_meta_effect`,
-`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
-`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
-`Compiler.native_meta_module`, `Compiler.native_meta_targets`,
-`Compiler.bind_linked_meta`, `Compiler.compiler_targets`,
-`Compiler.select_native_modules`, `Compiler.select_package_module`,
-`Compiler.load_native_module`, `Compiler.preload_native_module`,
-`Compiler.add_native_module`, `Compiler.native_module_loaded`,
-`Compiler.native_module_targets`, `Compiler.supplies_native_meta`,
-`x2c_register_extension`, `Compiler.links_extension`,
-`Compiler.extension_archive`
+`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
+`Compiler.install_meta_declaration`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
+`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
+`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
+`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
+`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
+`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.select_package_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.add_native_module`,
+`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.supplies_native_meta`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.extension_archive`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -452,9 +452,9 @@ Public functions:
 
 `preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
 `preproc_branch_state`, `preproc_visibility`, `preproc_include_target`,
-`Compiler.scan_conditionals`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.note_object_macro`,
-`preproc_track_arms`, `preproc_within_arms`
+`preproc_marker_file`, `Compiler.scan_conditionals`,
+`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
+`Compiler.note_object_macro`, `preproc_track_arms`, `preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 
@@ -1019,9 +1019,10 @@ macros as values that build and recognize code.
 
 Public functions:
 
-`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.typed`, `Macro.subject`,
-`Macro.use_subject`, `Macro_pattern`, `Macro.binder`, `Macro.number_type`,
-`Macro.number_literal`, `Macro_case_pattern`, `Macro_case_capture_at`
+`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
+`Macro.inserted_items`, `Macro.typed`, `Macro.subject`, `Macro.use_subject`,
+`Macro_pattern`, `Macro.binder`, `Macro.number_type`, `Macro.number_literal`,
+`Macro_case_pattern`, `Macro_case_capture_at`
 
 ### [lib/map.x](../lib/map.x)
 
@@ -1101,7 +1102,8 @@ Public functions:
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
 `x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `type_base_suffix`, `type_declaration_parts`
+`x2c_parameters_arguments`, `type_base_suffix`, `type_name_error`,
+`type_declaration_parts`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

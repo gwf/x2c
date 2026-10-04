@@ -34,7 +34,7 @@ Source-ordered shallow symbol collection and replay.
 Drops the entries collected without declaration defaults while the shared
 compile-time session was filled. Call once that session is published.
 
-Source: `src/collect.x:1316`
+Source: `src/collect.x:1331`
 
 #### collect_resolve_include
 
@@ -56,7 +56,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:1043`
+Source: `src/collect.x:1058`
 
 #### interface_prelude
 
@@ -66,7 +66,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:1230`
+Source: `src/collect.x:1245`
 
 #### interface_text
 
@@ -78,7 +78,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1252`
+Source: `src/collect.x:1267`
 
 ### `Compiler`
 
@@ -96,7 +96,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:748`
+Source: `src/collect.x:749`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -124,7 +124,7 @@ Installs, at each include among the directives before the cursor, the
 macro imports that the included file exports, as the unit's own imports
 written there would be installed.
 
-Source: `src/collect.x:997`
+Source: `src/collect.x:1012`
 
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
@@ -163,7 +163,7 @@ source sites. Returns the macro imports the included files export, by
 the canonical path of each file the unit includes, for the full parse
 to install at that include.
 
-Source: `src/collect.x:964`
+Source: `src/collect.x:979`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -176,7 +176,7 @@ borrows the unit's macro state and shared package registries. The full
 parse passes `exports`, which takes the exported imports for the include
 line, and leaves the unit's own imports at their source sites.
 
-Source: `src/collect.x:906`
+Source: `src/collect.x:921`
 
 ## Design notes
 
