@@ -35,6 +35,10 @@ Macro Macro_close(Macro value, List captures);
 
 List Macro_apply(Macro t, List values);
 
+Var Macro_inserted(Var value, int lifts, int expression);
+
+List Macro_typed(List type, List expression);
+
 Var Macro_subject(void);
 
 void Macro_use_subject(Var rows);
