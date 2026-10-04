@@ -3896,6 +3896,12 @@ List Compiler.lift_macro_lisp_expression(
   $report.macro.lisp_expr(c, invocation, value);
 }
 
+/** Binds a compile-time Lisp code `value` returned to a statement at
+    `context`. */
+List Compiler.bind_macro_lisp_statement(
+  Compiler c, List value, AstPos context) =>
+  c.bind_syntax(c._helper_result(value), context, c.return_type);
+
 static Var _sdk_identifier_result(Var value) {
   match (value)
     case %("x2c.ident" (!is ?spelling type string)): return spelling;

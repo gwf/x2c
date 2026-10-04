@@ -2642,7 +2642,7 @@ static List Compiler._bind_form(
     case %((!set ?tag (!or goto label)) ?name):
       if (statement) return %($tag $name);
     case expression_statement(?expression):
-      if (statement) return %(stmnt ${c._resolve(expression)});
+      if (statement) return c._bind_expression_statement(expression, context);
     case deferred(?body):
       if (statement) return %(defer ${c._bind_statement(body)});
     case do_loop(?body, ?condition):
@@ -2678,6 +2678,15 @@ static List Compiler._bind_form(
    `report_error` never returns, so a caller may return this call. */
 static List Compiler._construction_error(Compiler c) {
   $report.parse.syntax_position(c, c.token);
+}
+
+/* A meta call written as a whole statement may return a statement. */
+static List Compiler._bind_expression_statement(
+  Compiler c, List expression, AstPos context) {
+  match (expression) case %(expr ? (meta-call *)):
+    if (!c.meta_body && !c.macro_holes)
+      return c.evaluate_meta_statement(expression, context, c.token);
+  return %(stmnt ${c._resolve(expression)});
 }
 
 static List Compiler._resolve(Compiler c, List expr) =>
