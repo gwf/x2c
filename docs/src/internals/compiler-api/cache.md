@@ -25,7 +25,7 @@ Cached literal slots and deferred file-static initializers.
 Returns the declaration of the file's initialization `guard`, which
 starts at zero.
 
-Source: `src/cache.x:520`
+Source: `src/cache.x:526`
 
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init
