@@ -4,523 +4,523 @@
     payload at its invocation site.
 */
 
-macro Stmt $address_family(Expr $operation) {
+macro Stmt $error.address.family(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "an IPv4 or IPv6 address is required"));
 }
 
-macro Stmt $address_invalid() {
+macro Stmt $error.address.invalid() {
   raise %(bad-state (library "libuv") (operation "getaddrinfo")
           (reason "libuv returned an invalid socket address"));
 }
 
-macro Stmt $address_length() {
+macro Stmt $error.address.length() {
   raise %(size-limit (library "libuv"));
 }
 
-macro Stmt $address_required(Expr $operation) {
+macro Stmt $error.address.required(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "an IP address is required"));
 }
 
-macro Stmt $async_args() {
+macro Stmt $error.async.args() {
   raise %(bad-arg (library "libuv") (operation "async")
           (reason "a live loop and a callback are required"));
 }
 
-macro Stmt $async_required() {
+macro Stmt $error.async.required() {
   raise %(bad-arg (library "libuv") (operation "async_send")
           (reason "an async handle is required"));
 }
 
-macro Stmt $async_stopped() {
+macro Stmt $error.async.stopped() {
   raise %(bad-state (library "libuv") (operation "async_send")
           (reason "the async handle has stopped"));
 }
 
-macro Stmt $command_args() {
+macro Stmt $error.command.args() {
   raise %(bad-arg (library "libuv") (operation "command")
           (reason "an initialized loop and nonempty argv are required"));
 }
 
-macro Stmt $command_count(Expr $count) {
+macro Stmt $error.command.count(Expr $count) {
   raise %(size-limit (library "libuv") (operation "command")
           (arguments ${$count}));
 }
 
-macro Stmt $command_deadline() {
+macro Stmt $error.command.deadline() {
   raise %(bad-arg (library "libuv") (operation "deadline")
           (reason "a positive deadline in milliseconds is required"));
 }
 
-macro Stmt $command_directory() {
+macro Stmt $error.command.directory() {
   raise %(bad-arg (library "libuv") (operation "directory")
           (reason "a nonempty path is required"));
 }
 
-macro Stmt $command_env_types() {
+macro Stmt $error.command.env.types() {
   raise %(bad-types (library "libuv") (operation "environment")
           (reason "every name and value must be a String"));
 }
 
-macro Stmt $command_environment() {
+macro Stmt $error.command.environment() {
   raise %(bad-arg (library "libuv") (operation "environment")
           (reason "a Map of names to values is required"));
 }
 
-macro Stmt $command_limit() {
+macro Stmt $error.command.limit() {
   raise %(bad-arg (library "libuv") (operation "max_output")
           (reason "a positive limit is required"));
 }
 
-macro Stmt $command_required(Expr $operation) {
+macro Stmt $error.command.required(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a command is required"));
 }
 
-macro Stmt $command_started(Expr $operation) {
+macro Stmt $error.command.started(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "set this before starting the command"));
 }
 
-macro Stmt $command_stdio(Expr $operation) {
+macro Stmt $error.command.stdio(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "stdio must be <pipe>, <inherit>, or <ignore>"));
 }
 
-macro Stmt $command_types() {
+macro Stmt $error.command.types() {
   raise %(bad-types (library "libuv") (operation "command")
           (reason "every argv value must be a String"));
 }
 
-macro Stmt $file_closed(Expr $operation) {
+macro Stmt $error.file.closed(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "the file or its loop is closed"));
 }
 
-macro Stmt $file_pending(Expr $pending) {
+macro Stmt $error.file.pending(Expr $pending) {
   raise %(bad-state (library "libuv") (operation "fs_close")
           (reason "the file has pending operations") (pending ${$pending}));
 }
 
-macro Stmt $file_required(Expr $operation) {
+macro Stmt $error.file.required(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a file is required"));
 }
 
-macro Stmt $fs_args() {
+macro Stmt $error.fs.args() {
   raise %(bad-arg (library "libuv") (operation "fs")
           (reason "a live loop and a callback are required"));
 }
 
-macro Stmt $fs_cancel_args() {
+macro Stmt $error.fs.cancel.args() {
   raise %(bad-arg (library "libuv") (operation "fs_cancel")
           (reason "a filesystem request is required"));
 }
 
-macro Stmt $fs_entry_index(Expr $operation, Expr $index, Expr $size) {
+macro Stmt $error.fs.entry.index(Expr $operation, Expr $index, Expr $size) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (index ${$index}) (size ${$size}));
 }
 
-macro Stmt $fs_incomplete(Expr $operation) {
+macro Stmt $error.fs.incomplete(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "the filesystem request has not completed"));
 }
 
-macro Stmt $fs_open_path() {
+macro Stmt $error.fs.open.path() {
   raise %(bad-arg (library "libuv") (operation "fs_open")
           (reason "a nonempty path is required"));
 }
 
-macro Stmt $fs_path(Expr $operation_name) {
+macro Stmt $error.fs.path(Expr $operation_name) {
   raise %(bad-arg (library "libuv") (operation ${$operation_name})
           (reason "a nonempty path is required"));
 }
 
-macro Stmt $fs_read_length(Expr $length) {
+macro Stmt $error.fs.read.length(Expr $length) {
   raise %(size-limit (library "libuv") (operation "fs_read")
           (length ${$length}));
 }
 
-macro Stmt $fs_readfile_limit(Expr $limit) {
+macro Stmt $error.fs.readfile.limit(Expr $limit) {
   raise %(size-limit (library "libuv") (operation "read_file")
           (limit ${$limit}));
 }
 
-macro Stmt $fs_result(Expr $operation) {
+macro Stmt $error.fs.result(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "the request has no such result"));
 }
 
-macro Stmt $fs_scandir_count() {
+macro Stmt $error.fs.scandir.count() {
   raise %(bad-state (library "libuv") (operation "fs_scandir")
           (reason "libuv returned more entries than it reported"));
 }
 
-macro Stmt $fs_scandir_path() {
+macro Stmt $error.fs.scandir.path() {
   raise %(bad-arg (library "libuv") (operation "fs_scandir")
           (reason "a nonempty path is required"));
 }
 
-macro Stmt $fs_stat_path() {
+macro Stmt $error.fs.stat.path() {
   raise %(bad-arg (library "libuv") (operation "fs_stat")
           (reason "a nonempty path is required"));
 }
 
-macro Stmt $fs_unstarted() {
+macro Stmt $error.fs.unstarted() {
   raise %(bad-state (library "libuv") (operation "fs_cancel")
           (reason "the filesystem request has not started"));
 }
 
-macro Stmt $fs_write_bytes() {
+macro Stmt $error.fs.write.bytes() {
   raise %(bad-arg (library "libuv") (operation "fs_write")
           (reason "bytes are required"));
 }
 
-macro Stmt $fs_write_length(Expr $length) {
+macro Stmt $error.fs.write.length(Expr $length) {
   raise %(size-limit (library "libuv") (operation "fs_write")
           (length ${$length}));
 }
 
-macro Stmt $fs_write_limit() {
+macro Stmt $error.fs.write.limit() {
   raise %(size-limit (library "libuv") (operation "fs_write"));
 }
 
-macro Stmt $fs_write_text() {
+macro Stmt $error.fs.write.text() {
   raise %(bad-arg (library "libuv") (operation "fs_write")
           (reason "text is required"));
 }
 
-macro Stmt $fs_writefile_bytes() {
+macro Stmt $error.fs.writefile.bytes() {
   raise %(bad-arg (library "libuv") (operation "write_file")
           (reason "bytes are required"));
 }
 
-macro Stmt $fs_writefile_limit() {
+macro Stmt $error.fs.writefile.limit() {
   raise %(size-limit (library "libuv") (operation "write_file"));
 }
 
-macro Stmt $fs_writefile_text() {
+macro Stmt $error.fs.writefile.text() {
   raise %(bad-arg (library "libuv") (operation "write_file")
           (reason "text is required"));
 }
 
-macro Stmt $ip4_args() {
+macro Stmt $error.ip4.args() {
   raise %(bad-arg (library "libuv") (operation "ip4")
           (reason "a numeric host and a valid port are required"));
 }
 
-macro Stmt $ip6_args() {
+macro Stmt $error.ip6.args() {
   raise %(bad-arg (library "libuv") (operation "ip6")
           (reason "a numeric host and a valid port are required"));
 }
 
-macro Stmt $lookup_address_index(Expr $index, Expr $size) {
+macro Stmt $error.lookup.address.index(Expr $index, Expr $size) {
   raise %(bad-arg (library "libuv") (operation "lookup_address")
           (index ${$index}) (size ${$size}));
 }
 
-macro Stmt $lookup_args() {
+macro Stmt $error.lookup.args() {
   raise %(bad-arg (library "libuv") (operation "lookup")
           (reason "a live loop and a node or service are required"));
 }
 
-macro Stmt $lookup_cancel_args() {
+macro Stmt $error.lookup.cancel.args() {
   raise %(bad-arg (library "libuv") (operation "lookup_cancel")
           (reason "a lookup is required"));
 }
 
-macro Stmt $lookup_closed() {
+macro Stmt $error.lookup.closed() {
   raise %(bad-state (library "libuv") (operation "lookup_start")
           (reason "the lookup loop is closed"));
 }
 
-macro Stmt $lookup_hints_args() {
+macro Stmt $error.lookup.hints.args() {
   raise %(bad-arg (library "libuv") (operation "lookup_hints")
           (reason "a lookup is required"));
 }
 
-macro Stmt $lookup_hints_started() {
+macro Stmt $error.lookup.hints.started() {
   raise %(bad-state (library "libuv") (operation "lookup_hints")
           (reason "set hints before starting the lookup"));
 }
 
-macro Stmt $lookup_incomplete() {
+macro Stmt $error.lookup.incomplete() {
   raise %(bad-state (library "libuv") (operation "lookup_count")
           (reason "the lookup has not completed"));
 }
 
-macro Stmt $lookup_start_args() {
+macro Stmt $error.lookup.start.args() {
   raise %(bad-arg (library "libuv") (operation "lookup_start")
           (reason "a lookup and callback are required"));
 }
 
-macro Stmt $lookup_started() {
+macro Stmt $error.lookup.started() {
   raise %(bad-state (library "libuv") (operation "lookup_start")
           (reason "the lookup has already started"));
 }
 
-macro Stmt $lookup_unstarted() {
+macro Stmt $error.lookup.unstarted() {
   raise %(bad-state (library "libuv") (operation "lookup_cancel")
           (reason "the lookup has not started"));
 }
 
-macro Stmt $loop_pending(Expr $pending, Expr $files) {
+macro Stmt $error.loop.pending(Expr $pending, Expr $files) {
   raise %(bad-state (library "libuv") (operation "loop_free")
           (reason "the loop has pending requests or open files")
           (pending ${$pending}) (files ${$files}));
 }
 
-macro Stmt $loop_run_state() {
+macro Stmt $error.loop.run.state() {
   raise %(bad-state (library "libuv") (operation "run")
           (reason "loop is null, closed, or already running"));
 }
 
-macro Stmt $native_status(
+macro Stmt $error.native.status(
   Expr $operation, Expr $status, Expr $name, Expr $message) {
   raise %(io-fail (library "libuv") (operation ${$operation})
           (status ${$status}) (name ${$name}) (message ${$message}));
 }
 
-macro Stmt $phase_args(Expr $operation) {
+macro Stmt $error.phase.args(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a live loop and a callback are required"));
 }
 
-macro Stmt $pipe_connect_args() {
+macro Stmt $error.pipe.connect.args() {
   raise %(bad-arg (library "libuv") (operation "pipe_connect")
           (reason "a callback is required"));
 }
 
-macro Stmt $pipe_name_encoding() {
+macro Stmt $error.pipe.name.encoding() {
   raise %(bad-enc (library "libuv") (operation "pipe_name"));
 }
 
-macro Stmt $pipe_name_limit() {
+macro Stmt $error.pipe.name.limit() {
   raise %(size-limit (library "libuv") (operation "pipe_name"));
 }
 
-macro Stmt $pipe_path(Expr $operation) {
+macro Stmt $error.pipe.path(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a filesystem path without embedded NUL is required"));
 }
 
-macro Stmt $process_capture(Expr $operation) {
+macro Stmt $error.process.capture(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "the stream was not captured"));
 }
 
-macro Stmt $process_exit_pending() {
+macro Stmt $error.process.exit.pending() {
   raise %(bad-state (library "libuv") (operation "exit_status")
           (reason "the process has not exited"));
 }
 
-macro Stmt $process_exited() {
+macro Stmt $error.process.exited() {
   raise %(bad-state (library "libuv") (operation "process_kill")
           (reason "the process has already exited"));
 }
 
-macro Stmt $process_free_pending() {
+macro Stmt $error.process.free.pending() {
   raise %(bad-state (library "libuv") (operation "process_free")
           (reason "run the loop until the process and pipes finish"));
 }
 
-macro Stmt $process_output_encoding(Expr $operation) {
+macro Stmt $error.process.output.encoding(Expr $operation) {
   raise %(bad-enc (library "libuv") (operation ${$operation})
           (reason "captured bytes contain NUL; use the bytes method"));
 }
 
-macro Stmt $process_output_limit(Expr $operation, Expr $bytes) {
+macro Stmt $error.process.output.limit(Expr $operation, Expr $bytes) {
   raise %(size-limit (library "libuv") (operation ${$operation})
           (bytes ${$bytes}));
 }
 
-macro Stmt $process_released(Expr $operation) {
+macro Stmt $error.process.released(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "process has been released"));
 }
 
-macro Stmt $process_signal_pending() {
+macro Stmt $error.process.signal.pending() {
   raise %(bad-state (library "libuv") (operation "term_signal")
           (reason "the process has not exited"));
 }
 
-macro Stmt $process_stderr_args() {
+macro Stmt $error.process.stderr.args() {
   raise %(bad-arg (library "libuv") (operation "stderr"));
 }
 
-macro Stmt $process_stderr_bytes() {
+macro Stmt $error.process.stderr.bytes() {
   raise %(bad-arg (library "libuv") (operation "stderr_bytes"));
 }
 
-macro Stmt $process_stdin_closed() {
+macro Stmt $error.process.stdin.closed() {
   raise %(bad-state (library "libuv") (operation "write")
           (reason "stdin is closed or shutting down"));
 }
 
-macro Stmt $process_stdin_mode() {
+macro Stmt $error.process.stdin.mode() {
   raise %(bad-state (library "libuv") (operation "write")
           (reason "stdin was not configured as <pipe>"));
 }
 
-macro Stmt $process_stdout_args() {
+macro Stmt $error.process.stdout.args() {
   raise %(bad-arg (library "libuv") (operation "stdout"));
 }
 
-macro Stmt $process_stdout_bytes() {
+macro Stmt $error.process.stdout.bytes() {
   raise %(bad-arg (library "libuv") (operation "stdout_bytes"));
 }
 
-macro Stmt $process_unstarted(Expr $operation) {
+macro Stmt $error.process.unstarted(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "process has not been started"));
 }
 
-macro Stmt $process_write_alloc(Expr $length) {
+macro Stmt $error.process.write.alloc(Expr $length) {
   raise %(alloc-fail (library "libuv") (operation "write")
           (bytes ${$length}));
 }
 
-macro Stmt $process_write_limit(Expr $length) {
+macro Stmt $error.process.write.limit(Expr $length) {
   raise %(size-limit (library "libuv") (operation "write")
           (bytes ${$length}));
 }
 
-macro Stmt $signal_args() {
+macro Stmt $error.signal.args() {
   raise %(bad-arg (library "libuv") (operation "signal")
           (reason "a live loop, a callback, and a signal number"));
 }
 
-macro Stmt $stream_args(Expr $operation) {
+macro Stmt $error.stream.args(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a live loop is required"));
 }
 
-macro Stmt $stream_listen_args() {
+macro Stmt $error.stream.listen.args() {
   raise %(bad-arg (library "libuv") (operation "listen")
           (reason "a positive backlog and callback are required"));
 }
 
-macro Stmt $stream_read_args() {
+macro Stmt $error.stream.read.args() {
   raise %(bad-arg (library "libuv") (operation "read_start")
           (reason "a callback is required"));
 }
 
-macro Stmt $stream_reading() {
+macro Stmt $error.stream.reading() {
   raise %(bad-state (library "libuv") (operation "read_start")
           (reason "reads have already started"));
 }
 
-macro Stmt $stream_required(Expr $operation, Expr $reason) {
+macro Stmt $error.stream.required(Expr $operation, Expr $reason) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason ${$reason}));
 }
 
-macro Stmt $stream_state(Expr $operation, Expr $reason) {
+macro Stmt $error.stream.state(Expr $operation, Expr $reason) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason ${$reason}));
 }
 
-macro Stmt $stream_write_bytes() {
+macro Stmt $error.stream.write.bytes() {
   raise %(bad-arg (library "libuv") (operation "write")
           (reason "bytes are required"));
 }
 
-macro Stmt $stream_write_length(Expr $length) {
+macro Stmt $error.stream.write.length(Expr $length) {
   raise %(size-limit (library "libuv") (operation "write")
           (length ${$length}));
 }
 
-macro Stmt $stream_write_limit() {
+macro Stmt $error.stream.write.limit() {
   raise %(size-limit (library "libuv") (operation "write"));
 }
 
-macro Stmt $stream_write_text() {
+macro Stmt $error.stream.write.text() {
   raise %(bad-arg (library "libuv") (operation "write")
           (reason "text is required"));
 }
 
-macro Stmt $tcp_bind_args() {
+macro Stmt $error.tcp.bind.args() {
   raise %(bad-arg (library "libuv") (operation "tcp_bind")
           (reason "an IPv4 or IPv6 address is required"));
 }
 
-macro Stmt $tcp_connect_args() {
+macro Stmt $error.tcp.connect.args() {
   raise %(bad-arg (library "libuv") (operation "tcp_connect")
           (reason "an address and callback are required"));
 }
 
-macro Stmt $timer_args() {
+macro Stmt $error.timer.args() {
   raise %(bad-arg (library "libuv") (operation "timer")
           (reason "a live loop, a callback, and non-negative delays"));
 }
 
-macro Stmt $udp_args() {
+macro Stmt $error.udp.args() {
   raise %(bad-arg (library "libuv") (operation "udp")
           (reason "a live loop is required"));
 }
 
-macro Stmt $udp_closed(Expr $operation) {
+macro Stmt $error.udp.closed(Expr $operation) {
   raise %(bad-state (library "libuv") (operation ${$operation})
           (reason "the UDP handle or its loop is closed"));
 }
 
-macro Stmt $udp_limit_active() {
+macro Stmt $error.udp.limit.active() {
   raise %(bad-state (library "libuv") (operation "udp_max_receive")
           (reason "stop receiving before changing the limit"));
 }
 
-macro Stmt $udp_limit_args() {
+macro Stmt $error.udp.limit.args() {
   raise %(bad-arg (library "libuv") (operation "udp_max_receive")
           (reason "a positive limit is required"));
 }
 
-macro Stmt $udp_receive_args() {
+macro Stmt $error.udp.receive.args() {
   raise %(bad-arg (library "libuv") (operation "udp_receive")
           (reason "a callback is required"));
 }
 
-macro Stmt $udp_receiving() {
+macro Stmt $error.udp.receiving() {
   raise %(bad-state (library "libuv") (operation "udp_receive")
           (reason "receiving has already started"));
 }
 
-macro Stmt $udp_required(Expr $operation) {
+macro Stmt $error.udp.required(Expr $operation) {
   raise %(bad-arg (library "libuv") (operation ${$operation})
           (reason "a UDP handle is required"));
 }
 
-macro Stmt $udp_send_bytes() {
+macro Stmt $error.udp.send.bytes() {
   raise %(bad-arg (library "libuv") (operation "udp_send")
           (reason "bytes are required"));
 }
 
-macro Stmt $udp_send_length(Expr $length) {
+macro Stmt $error.udp.send.length(Expr $length) {
   raise %(size-limit (library "libuv") (operation "udp_send")
           (length ${$length}));
 }
 
-macro Stmt $udp_send_limit() {
+macro Stmt $error.udp.send.limit() {
   raise %(size-limit (library "libuv") (operation "udp_send"));
 }
 
-macro Stmt $udp_send_text() {
+macro Stmt $error.udp.send.text() {
   raise %(bad-arg (library "libuv") (operation "udp_send")
           (reason "text is required"));
 }
 
-macro Stmt $udp_source_invalid() {
+macro Stmt $error.udp.source.invalid() {
   raise %(bad-state (library "libuv") (operation "udp_receive")
           (reason "libuv returned an invalid source address"));
 }
 
-macro Stmt $watch_args() {
+macro Stmt $error.watch.args() {
   raise %(bad-arg (library "libuv") (operation "watch")
           (reason "a live loop, a callback, and a path are required"));
 }
 
-macro Stmt $watch_required() {
+macro Stmt $error.watch.required() {
   raise %(bad-arg (library "libuv") (operation "entry")
           (reason "a watch is required"));
 }

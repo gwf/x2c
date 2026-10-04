@@ -1,36 +1,36 @@
 /* Lisp session error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
-macro Stmt $callback_absent(Expr $operation) {
+macro Stmt $error.callback.absent(Expr $operation) {
   raise %(bad-state (operation ${$operation}) (why "no session"));
 }
 
-macro Stmt $callback_wrong(Expr $operation) {
+macro Stmt $error.callback.wrong(Expr $operation) {
   raise %(bad-state (operation ${$operation}) (why "wrong session"));
 }
 
-macro Stmt $entry_null(Expr $operation) {
+macro Stmt $error.entry.null(Expr $operation) {
   raise %(bad-arg (operation ${$operation}));
 }
 
-macro Stmt $global_args() {
+macro Stmt $error.global.args() {
   raise %(bad-arg (operation "Lisp.set_global"));
 }
 
-macro Stmt $global_frozen() {
+macro Stmt $error.global.frozen() {
   raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
 }
 
-macro Stmt $global_inherited(Expr $name) {
+macro Stmt $error.global.inherited(Expr $name) {
   raise %(bad-state (operation "Lisp.set_global") (why "inherited")
           (name ${$name}));
 }
 
-macro Stmt $bind_args() {
+macro Stmt $error.bind.args() {
   raise %(bad-arg (operation "Lisp.bind"));
 }
 
-macro Stmt $source_callable(Expr $callable) {
+macro Stmt $error.source.callable(Expr $callable) {
   raise %(bad-types (operation "lisp_source_function") (want "Lambda")
           (actual ${$callable.kind()}));
 }

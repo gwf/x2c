@@ -306,10 +306,10 @@ static void _tokenize(Compiler c, String source, Scope scratch) {
 static void _require_evaluable(Var syntax) {
   match (syntax) {
     case %(expr () (ident (binding ? ?name))):
-      $binding_unresolved(name);
+      $refusal.binding.unresolved(name);
     case %(declare ?spec ?):
       if (<static> in spec || <extern> in spec || <threaded> in spec)
-        $storage_native();
+        $refusal.storage.native();
   }
   if (syntax is <list>) foreach (Var child, syntax.list())
     _require_evaluable(child);
@@ -323,7 +323,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
         match (item) {
           case %(op = (bind (binding ?id ?(String name)) ?mods) ?value): {
             if (name in names || name in added || name.startswith("__repl_"))
-              $binding_redefined();
+              $refusal.binding.redefined();
             added.push(name);
             ids.push(id);
             /* Keep the declaration's declarator and initializer together.
@@ -335,12 +335,12 @@ static List _initializers(List node, Map names, Array added, Array ids) {
             continue;
           }
         }
-        $binding_initializer();
+        $refusal.binding.initializer();
       }
       return _thunk(statements);
     }
   }
-  $form_unsupported();
+  $refusal.form.unsupported();
   return NULL;
 }
 
@@ -420,9 +420,9 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     }
     for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
       if (token.type == <preproc> || token.type == <"$(">)
-        $input_unsupported();
+        $refusal.input.unsupported();
       if (token.type == <const> || token.type == <volatile>)
-        $qualifier_native();
+        $refusal.qualifier.native();
     }
     if (c.peek(0) == <eof>) {
       result.status = <executed>;
@@ -432,10 +432,10 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     if (c.peek(0) == <import> || c.protocol_form_starts() ||
         c.peek(0) == <"$("> || (c.meta_form_is_declaration() && !native) ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
-      $definition_unsupported();
+      $refusal.definition.unsupported();
     if (c.peek(0) == <union> || c.peek(0) == <enum> ||
         c.peek(0) == <extern> || c.peek(0) == <static>)
-      $declaration_unsupported();
+      $refusal.declaration.unsupported();
     int declaration = native || c.test_declaration();
     if (!declaration) {
       String prefix = "void __repl_eval(void) {\n";
@@ -449,9 +449,9 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         case %(declare ? (bindings (bind (binding ? ?(String name)) *))): {
           Var bound;
           if (name in names)
-            $function_redefined();
+            $refusal.function.redefined();
           if (!c.macro_lisp.try_get(name, bound))
-            $function_missing(name);
+            $refusal.function.missing(name);
           session.evaluator.set_global(name, bound);
           transaction.commit_transient();
           names[name] = %(native);
@@ -465,7 +465,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     if (_type_submission_names(node, added)) {
       foreach (String name, added)
         if (name in names)
-          $type_redefined();
+          $refusal.type.redefined();
       transaction.commit_transient();
       foreach (String name, added) names[name] = %(type);
       result.syntax = node;
@@ -483,7 +483,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
           Var existing;
           if (name in names || name.startswith("__repl_") ||
               session.evaluator.try_get(name, existing))
-            $function_redefined();
+            $refusal.function.redefined();
           added.push(name);
           function_name = name;
           fn = node;

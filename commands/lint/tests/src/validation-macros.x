@@ -14,7 +14,7 @@ int direct_raise(void) {
 }
 
 int catalogue_raise(void) {
-  $apply_args();
+  $error.apply.args();
   return 0;
 }
 
@@ -23,7 +23,7 @@ int direct_fallback(void) {
 }
 
 int catalogue_fallback(void) {
-  $error.fallback(0) $apply_args();
+  $error.fallback(0) $error.apply.args();
 }
 
 int user_fallback(void) {
@@ -36,7 +36,7 @@ int user_macro(void) {
 }
 
 int dynamic_cause(void) {
-  $arg_convert(<user-cause>, nil, 0, <value>, nil);
+  $error.arg.convert(<user-cause>, nil, 0, <value>, nil);
   return 0;
 }
 
@@ -82,6 +82,6 @@ int conditional_direct_fallback(int active) {
 }
 
 int conditional_catalogue_fallback(int active) {
-  if (active) $error.fallback(0) $apply_args();
+  if (active) $error.fallback(0) $error.apply.args();
   return 1;
 }

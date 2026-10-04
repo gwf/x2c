@@ -229,10 +229,10 @@ static int _initialize(void) {
    special form receives the raw forms. */
 
 static Var Lisp._eval(Lisp lisp, Var expr, LispEnv *env) {
-  if (expr is void) $eval_void();
+  if (expr is void) $error.eval.void();
   if (expr.is_atom()) {
     Var value;
-    if (!lisp._lookup(env, expr, value)) $eval_unbound(expr);
+    if (!lisp._lookup(env, expr, value)) $error.eval.unbound(expr);
     return value;
   }
   if (expr is not <list> || expr.is_nil()) return expr;
@@ -251,7 +251,7 @@ static Var Lisp._eval(Lisp lisp, Var expr, LispEnv *env) {
    nested call. */
 static Var Lisp._apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   if (callable is <lambda>) return lisp._apply_lambda(callable, raw, env);
-  if (callable is not <func>) $call_type(callable);
+  if (callable is not <func>) $error.call.type(callable);
   Func fn = (Func) callable.pointer();
   int special = lisp._special_id(fn);
   if (special >= 0) return lisp._apply_special(special, raw, env);
@@ -282,7 +282,7 @@ static Var Lisp._apply_values(
     if (lambda.macro) _not_procedure(callable);
     return lisp._call_lambda(lambda, values);
   }
-  if (callable is not <func>) $call_type(callable);
+  if (callable is not <func>) $error.call.type(callable);
   Func fn = (Func) callable.pointer();
   int special = lisp._special_id(fn);
   if (special < 0) return lisp._call_native(fn, values);
@@ -333,17 +333,17 @@ static Var Lisp._special_def(Lisp lisp, List args, LispEnv *env) {
   Var (name, form) = args;
   if (args.len() != 2 || !name.is_atom()) {
     int actual = args.len();
-    $def_arity(actual, args);
+    $error.def.arity(actual, args);
   }
   if (lisp.protect_x2c && name.str().startswith("x2c."))
-    $def_protected(name);
+    $error.def.protected(name);
   if (lisp._inherited(name))
-    $def_inherited(name);
+    $error.def.inherited(name);
   /* A frozen session is complete, and a value produced now belongs to a
      narrower Context than it does, so the binding would outlive what it
      names. A child session is where a later definition goes. */
   if (lisp.frozen)
-    $def_frozen(name);
+    $error.def.frozen(name);
   Var value = lisp._eval(form, env);
   _binding_set(&lisp.scope, lisp.globals, name, value);
   return value;
@@ -359,7 +359,7 @@ static Var Lisp._special_cond(Lisp lisp, List args, LispEnv *env) {
    when none does. A clause's form comes from a List, so it is never
    `void`. */
 static Var Lisp._cond_select(Lisp lisp, List args, LispEnv *env) {
-  if (!args) $cond_empty();
+  if (!args) $error.cond.empty();
   foreach (Var clause, args) {
     Var (test, form) = _cond_clause(clause);
     if (lisp_truth(lisp._eval(test, env))) return form;
@@ -370,11 +370,11 @@ static Var Lisp._cond_select(Lisp lisp, List args, LispEnv *env) {
 /* A clause is a List of a test and a result form. */
 static List _cond_clause(Var clause) {
   if (clause is not <list>)
-    $cond_type(clause);
+    $error.cond.type(clause);
   List pair = clause;
   if (pair.len() != 2) {
     int actual = pair.len();
-    $cond_arity(actual, clause);
+    $error.cond.arity(actual, clause);
   }
   return pair;
 }
@@ -399,10 +399,10 @@ static Var Lisp._special_bind(Lisp lisp, List args, LispEnv *env) {
   Var signature = lisp._eval(signature_form, env);
   _string_argument(name, "bind");
   if (signature is not <list>)
-    $bind_signature(signature);
+    $error.bind.signature(signature);
   String native_name = name, List native_signature = signature;
   Func fn = _native_target(native_name);
-  if (!fn) $bind_missing(native_name, native_signature);
+  if (!fn) $error.bind.missing(native_name, native_signature);
   return fn;
 }
 
@@ -444,11 +444,11 @@ static Var Lisp._qq(Lisp l, Var expr, LispEnv *env, int depth) {
   if (head != lsym_unquote && head != lsym_splicing)
     return l._qq_elements(form, env, depth);
   if (form.len() != 2)
-    $quote_shape(expr);
+    $error.quote.shape(expr);
   if (depth > 0) return head.cons(l._qq_elements(form.cdr(), env, depth - 1));
   Var value = l._eval(form.cadr(), env);
   if (head == lsym_splicing)
-    $splice_type(expr);
+    $error.splice.type(expr);
   return value;
 }
 
@@ -469,10 +469,10 @@ static int _is_splice(Var expr) =>
 static List Lisp._splice(Lisp lisp, Var expr, LispEnv *env) {
   List form = expr;
   if (form.len() != 2)
-    $quote_shape(expr);
+    $error.quote.shape(expr);
   Var value = lisp._eval(form.cadr(), env);
   if (value is not <list>)
-    $splice_type(value);
+    $error.splice.type(value);
   return value;
 }
 
@@ -486,7 +486,7 @@ static List Lisp._splice(Lisp lisp, Var expr, LispEnv *env) {
 static Var Lisp._make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   if (args.len() != 2 || args.car() is not <list>) {
     Symbol operation = macro ? <macro> : <lambda>;
-    $lambda_signature(operation, args);
+    $error.lambda.signature(operation, args);
   }
   Lambda lambda = Scope.malloc_in(&lisp.scope, sizeof(struct Lambda));
   Var result = void;
@@ -659,7 +659,7 @@ static Var Lisp._run_frame(
 static List _value_list(const Var *values, int count) {
   List args = NULL;
   for (int i = count - 1; i >= 0; i--) {
-    if (values[i] is void) $apply_void(i);
+    if (values[i] is void) $error.apply.void(i);
     args = cons(values[i], args);
   }
   return args;
@@ -673,21 +673,21 @@ static void _bind_params(
   for (List p = lambda.params; p; p = p.cdr()) {
     Var name = p.car();
     if (name.is_atom() && name.str() == ".") {
-      if (!p.cdr()) $apply_rest(body);
+      if (!p.cdr()) $error.apply.rest(body);
       _binding_set(frame, bindings, p.cadr(), args);
       return;
     }
-    if (!args) $apply_arity(body);
+    if (!args) $error.apply.arity(body);
     _binding_set(frame, bindings, name, args.car());
     args = args.cdr();
   }
-  if (args) $apply_arity(body);
+  if (args) $error.apply.arity(body);
 }
 
 static void LispEnv._bind_values(
   LispEnv *local, Lambda lambda, const Var *values, int count) {
   if (count != lambda.params.len())
-    $apply_arity(lambda.body);
+    $error.apply.arity(lambda.body);
   local.params = lambda.params;
   local.values = values;
   local.value_count = count;
@@ -846,9 +846,9 @@ static void _cell_store(Var cell, Var value) {
 
 static void Lisp._spend_call(Lisp lisp) {
   if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
-    if (lisp.interrupted) $apply_interrupted();
+    if (lisp.interrupted) $error.apply.interrupted();
     lisp.call_exhausted = 1;
-    $apply_steps();
+    $error.apply.steps();
   }
 }
 
@@ -862,7 +862,7 @@ static void Lisp._check_stack(Lisp lisp, Lambda lambda, unsigned long at) {
   unsigned long used =
     lisp.stack_base > at ? lisp.stack_base - at : at - lisp.stack_base;
   if (used > lisp.stack_allowance)
-    $apply_stack(lambda.body);
+    $error.apply.stack(lambda.body);
 }
 
 /* C stack evaluator calls may use below the outermost one. Threads get 8 MB
@@ -945,23 +945,23 @@ static void Lisp._open_call_budget(Lisp lisp) {
 static void _arity(List args, int expected, String operation) {
   int actual = args.len();
   if (actual != expected)
-    $form_arity(operation, expected, actual);
+    $error.form.arity(operation, expected, actual);
 }
 
 static void _string_argument(Var value, String operation) {
   if (value is not <string>)
-    $form_string(operation, value);
+    $error.form.string(operation, value);
 }
 
 /* `apply` takes its values as one List. */
 static List _list_argument(Var values) {
   if (values is not <list>)
-    $apply_list(values);
+    $error.apply.list(values);
   return values;
 }
 
 static void _not_procedure(Var callable) {
-  $apply_procedure(callable);
+  $error.apply.procedure(callable);
 }
 
 /* reader
@@ -1419,7 +1419,7 @@ static Func _callback(
   Var callable, FuncAdapter adapter, unsigned arity, String operation) {
   if (callable.is_nil()) return NULL;
   if (!lisp_active)
-    $callback_absent(operation);
+    $error.callback.absent(operation);
   LispCallback context = { lisp_active, callable, operation, arity };
   List signature = arity == 1 ? unary_signature : binary_signature;
   return Func.new_context(adapter, signature, &context, sizeof context);
@@ -1445,7 +1445,7 @@ static Var _predicate_call(Func fn, const FuncArg *args) {
 static LispCallback *_callback_context(Func fn) {
   LispCallback *context = (void *) fn.context();
   if (!lisp_active || lisp_active != context.lisp)
-    $callback_wrong(context.operation);
+    $error.callback.wrong(context.operation);
   return context;
 }
 
@@ -1721,7 +1721,7 @@ void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
    restores its caller's session when it returns. */
 
 static Var _bad_session(String operation) {
-  $entry_null(operation);
+  $error.entry.null(operation);
 }
 
 macro Decorator $lisp.entry(Function $function, Expr $operation) {
@@ -1863,13 +1863,13 @@ int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
     `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 */
 void Lisp.set_global(Lisp lisp, String name, Var value) {
-  if (!lisp || !name) $global_args();
+  if (!lisp || !name) $error.global.args();
   if (lisp.frozen)
-    $global_frozen();
+    $error.global.frozen();
   $scope(&lisp.scope) {
     Var interned = Atom.intern(name);
     if (lisp._inherited(interned))
-      $global_inherited(interned);
+      $error.global.inherited(interned);
     _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
@@ -1886,7 +1886,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     including its signature graph, retain their existing owners.
 */
 void Lisp.bind(Lisp lisp, String name, Func function) {
-  if (!lisp || !name || !function) $bind_args();
+  if (!lisp || !name || !function) $error.bind.args();
   function.move(&lisp.scope);
   lisp.set_global(name, function);
 }
@@ -1907,7 +1907,7 @@ Scope *Lisp.result_storage(Lisp lisp) =>
 /** Marks the actual Lambda installed for one lowered source function. */
 Var lisp_source_function(Var callable) {
   if (callable is not <lambda>)
-    $source_callable(callable);
+    $error.source.callable(callable);
   ((Lambda) callable).source_function = 1;
   return callable;
 }

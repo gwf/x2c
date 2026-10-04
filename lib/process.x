@@ -102,7 +102,7 @@ static void Job._start(Job j) {
 static void Job._open_table(Job job) {
   int count = job.stages.len();
   job.pids = calloc(count + 1, sizeof(long) + sizeof(int));
-  if (!job.pids) $start_alloc();
+  if (!job.pids) $error.start.alloc();
   job.statuses = (int *) (job.pids + count + 1);
   job.count = count;
   for (int i = 0; i < job.count; i++) job.statuses[i] = 127;
@@ -188,7 +188,7 @@ static void Job._spawn(Job job, int index, List stage, Stdio stdio) {
 }
 
 static char **_argv(List stage) {
-  if (!stage) $start_empty();
+  if (!stage) $error.start.empty();
   char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
   int index = 0;
   // An empty word is a NULL String, which would end the vector early.
@@ -244,8 +244,8 @@ static void _child_failed(Failure failure, String dir, char **argv) {
   if (failure.step == _STEP_DIR) File.path_error("Job.start", dir, error);
   String program = argv[0];
   if (error == ENOENT)
-    $start_missing(program, error);
-  $start_program(program, error);
+    $error.start.missing(program, error);
+  $error.start.program(program, error);
 }
 
 // descriptors
@@ -265,7 +265,7 @@ static int _open_output(String path) {
   int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd < 0) {
     int error = errno;
-    $start_path(path, error);
+    $error.start.path(path, error);
   }
   _close_on_exec(fd);
   return fd;
@@ -282,7 +282,7 @@ static void _close(int fd) {
 }
 
 static void _io_fail(int error) {
-  $start_io(error);
+  $error.start.io(error);
 }
 
 // waiting
@@ -395,7 +395,7 @@ Job Job.pipe(Job job, List command) {
 
 static Job Job._unstarted(Job job, String operation) {
   if (job.started)
-    $job_started(operation);
+    $error.job.started(operation);
   return job;
 }
 
@@ -423,7 +423,7 @@ Job Job.options(Job job, Map options) {
   job._unstarted("Job.options");
   foreach (Var (key, value), options) {
     if (key is not Symbol)
-      $options_key();
+      $error.options.key();
     job.launch.set(key, value);
   }
   return job;
@@ -436,7 +436,7 @@ static void JobLaunch.set(JobLaunch &l, Symbol name, Var value) {
     case <input>:  l.input = value; l.has_input = 1; break;
     case <stdout>: l.route_output(value); break;
     case <stderr>: l.route_errors(value); break;
-    default: $options_unknown(name);
+    default: $error.options.unknown(name);
   }
 }
 
@@ -499,12 +499,12 @@ Job Job.check(Job job) {
   int captured = job.launch.capture_output;
   int logged = job.launch.capture_errors;
   if (captured && logged)
-    $check_both(command, status, output, errors);
+    $error.check.both(command, status, output, errors);
   if (captured)
-    $check_output(command, status, output);
+    $error.check.output(command, status, output);
   if (logged)
-    $check_errors(command, status, errors);
-  $check_status(command, status);
+    $error.check.errors(command, status, errors);
+  $error.check.status(command, status);
 }
 
 /** Passes standard output through, waits for `job`, and raises when its
@@ -526,7 +526,7 @@ String Job.output(Job job) {
 }
 
 static String _text(String text, int nul, String operation) {
-  if (nul) $text_nul(operation);
+  if (nul) $error.text.nul(operation);
   return text;
 }
 
@@ -579,7 +579,7 @@ void Job.cleanup(Job job) {
 Job Job.wait_any(Array jobs) {
   foreach (Job job, jobs)
     if (!job.started)
-      $wait_unstarted();
+      $error.wait.unstarted();
   while (jobs.len()) {
     for (int i = 0; i < jobs.len(); i++) {
       Job job = jobs[i];

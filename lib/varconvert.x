@@ -77,12 +77,12 @@ extern const X2CVarNumericInfo x2c_var_numerics[];
 meta native Var Var.convert(Var value, Symbol target) {
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
-    $encoding_bad(bits);
+    $error.encoding.bad(bits);
   }
-  if (value is void) $convert_void();
+  if (value is void) $error.convert.void();
   if (!target || !Var.known_tag(target) || target == <void> ||
       target == <nan> || target == <-inf> || target == <+inf>)
-    $target_invalid(target);
+    $error.target.invalid(target);
   Symbol source_tag = value.tag();
   if (source_tag == target) return value;
   if ((source_tag == <nan> || source_tag == <-inf> ||
@@ -90,12 +90,12 @@ meta native Var Var.convert(Var value, Symbol target) {
     return value;
   X2CVarNumericInfo info;
   if (!Var.numeric_info(source_tag, info)) {
-    $source_numeric(source_tag, target);
+    $error.source.numeric(source_tag, target);
   }
   X2CVarNumeric source;
   _numeric_decode(value, info, source);
   if (!Var.numeric_info(target, info))
-    $target_numeric(source_tag, target);
+    $error.target.numeric(source_tag, target);
   return info.floating
        ? _convert_to_float(source, target)
        : _convert_to_integer(source, target, info.unsigned_value, info.bits);
@@ -122,15 +122,15 @@ int Var.numeric_info(Symbol tag, X2CVarNumericInfo &?out) {
     failures leave `out` unchanged.
 */
 void Var.numeric_decode(Var value, X2CVarNumeric &?out) {
-  if (!out) $decode_output();
+  if (!out) $error.decode.output();
   if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
-    $encoding_bad(bits);
+    $error.encoding.bad(bits);
   }
-  if (value is void) $decode_void();
+  if (value is void) $error.decode.void();
   X2CVarNumericInfo info;
   Symbol tag = value.tag();
-  if (!Var.numeric_info(tag, info)) $decode_type(tag);
+  if (!Var.numeric_info(tag, info)) $error.decode.type(tag);
   _numeric_decode(value, info, out);
 }
 
@@ -189,7 +189,7 @@ static Var _convert_to_integer(
 
 static void _out_of_range(X2CVarNumeric &source, Symbol target) {
   Symbol source_tag = source.tag;
-  $convert_range(source_tag, target);
+  $error.convert.range(source_tag, target);
 }
 
 static long double _integer_limit(int bits) {
@@ -207,7 +207,7 @@ static long double _integer_limit(int bits) {
 Var Var.integer_box(Symbol target, unsigned long long raw) {
   X2CVarNumericInfo info;
   if (!Var.numeric_info(target, info) || info.floating)
-    $target_invalid(target);
+    $error.target.invalid(target);
   raw &= Var.width_mask(info.bits);
   long long signed_value = Var.signed_from_bits(raw, info.bits);
   switch (target) {
@@ -224,7 +224,7 @@ Var Var.integer_box(Symbol target, unsigned long long raw) {
     case <llong>:  return Var.box_long_long(signed_value);
     case <ullong>: return Var.box_ulong_long(raw);
   }
-  $target_invalid(target);
+  $error.target.invalid(target);
 }
 
 /** Returns the integer tag selected by `rank` and signedness.
@@ -272,7 +272,7 @@ static Var _convert_to_float(X2CVarNumeric &source, Symbol target) {
     case <f32>: return Var.box_f32(source.f32());
     case <f64>: return Var.box_f64(source.f64());
     case <ldouble>: return Var.box_long_double(source.ldouble());
-    default: $target_invalid(target);
+    default: $error.target.invalid(target);
   }
 }
 

@@ -1,37 +1,37 @@
 /* Session refusals keep their existing raise and transaction boundary. */
 
-macro Stmt $binding_unresolved(Expr $name) =>
+macro Stmt $refusal.binding.unresolved(Expr $name) =>
   _refuse(%"unresolved identifier: ${$name}");
 
-macro Stmt $storage_native() =>
+macro Stmt $refusal.storage.native() =>
   _refuse("static, extern, and threaded storage need native execution");
 
-macro Stmt $binding_redefined() =>
+macro Stmt $refusal.binding.redefined() =>
   _refuse("redeclaration is disabled; use assignment");
 
-macro Stmt $binding_initializer() =>
+macro Stmt $refusal.binding.initializer() =>
   _refuse("top-level values need an initializer and a simple binding");
 
-macro Stmt $form_unsupported() =>
+macro Stmt $refusal.form.unsupported() =>
   _refuse("this top-level form is outside the REPL subset");
 
-macro Stmt $input_unsupported() =>
+macro Stmt $refusal.input.unsupported() =>
   _refuse("preprocessor and direct Lisp input are unsupported");
 
-macro Stmt $qualifier_native() =>
+macro Stmt $refusal.qualifier.native() =>
   _refuse("const and volatile need native checks outside the REPL");
 
-macro Stmt $definition_unsupported() =>
+macro Stmt $refusal.definition.unsupported() =>
   _refuse("compiler-session definitions are outside the REPL subset");
 
-macro Stmt $declaration_unsupported() =>
+macro Stmt $refusal.declaration.unsupported() =>
   _refuse("type and storage declarations are outside the REPL subset");
 
-macro Stmt $function_redefined() =>
+macro Stmt $refusal.function.redefined() =>
   _refuse("function redeclaration is disabled");
 
-macro Stmt $function_missing(Expr $name) =>
+macro Stmt $refusal.function.missing(Expr $name) =>
   _refuse(%"no native function is available for ${$name}");
 
-macro Stmt $type_redefined() =>
+macro Stmt $refusal.type.redefined() =>
   _refuse("a type cannot be redefined; the session keeps its layout");

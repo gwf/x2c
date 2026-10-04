@@ -1,108 +1,108 @@
 /* Lisp form error conditions. Runtime operands retain their original
    detail types, order and source helper ownership. */
 
-macro Stmt $eval_void() {
+macro Stmt $error.eval.void() {
   raise %(void-op (operation "eval"));
 }
 
-macro Stmt $eval_unbound(Expr $expr) {
+macro Stmt $error.eval.unbound(Expr $expr) {
   raise %(unbound (name ${$expr}));
 }
 
-macro Stmt $call_type(Expr $callable) {
+macro Stmt $error.call.type(Expr $callable) {
   raise %(not-call (actual ${$callable.kind()}));
 }
 
-macro Stmt $def_arity(Expr $actual, Expr $args) {
+macro Stmt $error.def.arity(Expr $actual, Expr $args) {
   raise %(bad-arity (operation "def") (expected 2) (actual ${$actual})
           (value ${$args}));
 }
 
-macro Stmt $def_protected(Expr $name) {
+macro Stmt $error.def.protected(Expr $name) {
   raise %(bad-state (operation "def") (name ${$name}));
 }
 
-macro Stmt $def_inherited(Expr $name) {
+macro Stmt $error.def.inherited(Expr $name) {
   raise %(bad-state (operation "def") (why "inherited") (name ${$name}));
 }
 
-macro Stmt $def_frozen(Expr $name) {
+macro Stmt $error.def.frozen(Expr $name) {
   raise %(bad-state (operation "def") (why "frozen") (name ${$name}));
 }
 
-macro Stmt $cond_empty() {
+macro Stmt $error.cond.empty() {
   raise %(bad-arity (operation "cond") (expected 1) (actual 0));
 }
 
-macro Stmt $cond_type(Expr $clause) {
+macro Stmt $error.cond.type(Expr $clause) {
   raise %(bad-types (operation "cond") (value ${$clause}) (want "List"));
 }
 
-macro Stmt $cond_arity(Expr $actual, Expr $clause) {
+macro Stmt $error.cond.arity(Expr $actual, Expr $clause) {
   raise %(bad-arity (operation "cond-clause") (expected 2)
           (actual ${$actual}) (value ${$clause}));
 }
 
-macro Stmt $bind_signature(Expr $signature) {
+macro Stmt $error.bind.signature(Expr $signature) {
   raise %(bad-sig (operation "bind") (value ${$signature}));
 }
 
-macro Stmt $bind_missing(Expr $name, Expr $sig) {
+macro Stmt $error.bind.missing(Expr $name, Expr $sig) {
   raise %(no-symbol (name ${$name}) (sig ${$sig}));
 }
 
-macro Stmt $quote_shape(Expr $expr) {
+macro Stmt $error.quote.shape(Expr $expr) {
   raise %(bad-arity (operation "quasiquote") (value ${$expr}));
 }
 
-macro Stmt $splice_type(Expr $value) {
+macro Stmt $error.splice.type(Expr $value) {
   raise %(bad-types (operation "quasiquote-splice")
           (actual ${$value.kind()}));
 }
 
-macro Stmt $lambda_signature(Expr $operation, Expr $args) {
+macro Stmt $error.lambda.signature(Expr $operation, Expr $args) {
   raise %(bad-sig (operation ${$operation}) (value ${$args}));
 }
 
-macro Stmt $apply_void(Expr $index) {
+macro Stmt $error.apply.void(Expr $index) {
   raise %(void-op (operation "apply") (index ${$index}));
 }
 
-macro Stmt $apply_rest(Expr $body) {
+macro Stmt $error.apply.rest(Expr $body) {
   raise %(bad-sig (operation "apply") (value ${$body}));
 }
 
-macro Stmt $apply_arity(Expr $body) {
+macro Stmt $error.apply.arity(Expr $body) {
   raise %(bad-arity (operation "apply") (value ${$body}));
 }
 
-macro Stmt $apply_interrupted() {
+macro Stmt $error.apply.interrupted() {
   raise %(interrupt (operation "apply"));
 }
 
-macro Stmt $apply_steps() {
+macro Stmt $error.apply.steps() {
   raise %(call-stack (operation "apply") (why "steps"));
 }
 
-macro Stmt $apply_stack(Expr $body) {
+macro Stmt $error.apply.stack(Expr $body) {
   raise %(call-stack (operation "apply") (value ${$body}));
 }
 
-macro Stmt $form_arity(Expr $operation, Expr $expected, Expr $actual) {
+macro Stmt $error.form.arity(Expr $operation, Expr $expected, Expr $actual) {
   raise %(bad-arity (operation ${$operation}) (expected ${$expected})
           (actual ${$actual}));
 }
 
-macro Stmt $form_string(Expr $operation, Expr $value) {
+macro Stmt $error.form.string(Expr $operation, Expr $value) {
   raise %(bad-types (operation ${$operation}) (actual ${$value.kind()})
           (want "String"));
 }
 
-macro Stmt $apply_list(Expr $values) {
+macro Stmt $error.apply.list(Expr $values) {
   raise %(bad-types (operation "apply") (actual ${$values.kind()})
           (want "List"));
 }
 
-macro Stmt $apply_procedure(Expr $callable) {
+macro Stmt $error.apply.procedure(Expr $callable) {
   raise %(not-call (operation "apply") (actual ${$callable.kind()}));
 }

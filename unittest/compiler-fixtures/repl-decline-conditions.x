@@ -24,13 +24,13 @@ static Var _lower_decline(DeclineState *lowering, String why) {
 
 int main(void) {
   (void) disturbance;
-  Var first = $layout_host(_state());
-  Var second = $binding_missing(_state(), _name());
+  Var first = $decline.layout.host(_state());
+  Var second = $decline.binding.missing(_state(), _name());
   if (first is not void || second is not void || state.calls != 2 ||
       receivers != 2 || operands != 1 ||
       state.reason != "a compile-time struct with no host layout") return 1;
-  String why = $scan_goto();
-  String missing = $scan_binding("native");
+  String why = $reason.scan.goto();
+  String missing = $reason.scan.binding("native");
   if (why != "a goto has no lowering" || missing != "no binding for native" ||
       state.calls != 2 || state.declined != 1) return 1;
   puts("declines return and keep the first reason; scan reasons stay text");
