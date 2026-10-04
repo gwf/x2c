@@ -46,7 +46,8 @@ make commands-check
 ```
 
 `make commands-check` builds every command and runs its smoke test;
-`agent-pr-check` runs it.
+`agent-pr-check` runs it. Builds and smoke tests run concurrently, so each
+test uses its own temporary and build paths.
 When installation behavior changes, verify an installed prefix. Follow the root
 [publication instructions](../AGENTS.md#verify-and-deliver) for the final
 tree. Do not change the framework's validation targets or packaging to add
