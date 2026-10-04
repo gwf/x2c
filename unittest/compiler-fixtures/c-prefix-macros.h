@@ -32,6 +32,8 @@ static inline int tripled(int value){
   return value * 3;
 }
 
+extern int weak_value;
+
 const char * label(void);
 
 int main(void);

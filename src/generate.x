@@ -107,20 +107,22 @@ static void Compiler._publish(Compiler c, List outputs) {
 // header and source
 
 /* One unit's split into header and source. `private` is the visibility at
-   the current node; `pending` holds each private typedef or x2c include as
+   the current node and `lexical` the one the last visibility pragma set;
+   `pending` holds each private typedef or x2c include as
    `(names node promoted)`, `opened` the visibility each conditional group
    opened at, `open` the groups still open, `forwarded` the struct and union
    tags the header declares, and `included` the files its includes reach. */
 typedef struct Partition {
   Compiler c, Array header, source, pending, opened, open;
-  Map forwarded, included, int private;
+  Map forwarded, included, int private, lexical;
 } Partition;
 
 /* Partition a normalized unit without changing source order. Non-inline
    public functions publish a header declaration and keep their body in the
    source; public inline definitions remain header-only. A function
    definition, static declaration, or foreign alias begins source-private
-   output until an explicit public pragma changes visibility. */
+   output until an explicit public pragma changes visibility; only a
+   visibility pragma hides a public object definition. */
 static List Compiler._header_and_source(Compiler c, List ast) {
   Partition p = {
     .c = c, .header = [], .source = [], .pending = [], .opened = [],
@@ -268,7 +270,8 @@ static int HeaderNeeds.spelled_after(HeaderNeeds &n, int i, String name) {
 }
 
 /* Adds each typedef name `node` spells anywhere to `names`, as a
-   single-string type atom such as `("Point")`. */
+   single-string type atom such as `("Point")`, alone or after qualifiers
+   and storage, as in `(extern "Point")`. */
 static void _spelled_types(List node, Map names) {
   if (!node) return;
   Var head = node.car();
@@ -276,7 +279,8 @@ static void _spelled_types(List node, Map names) {
     names[head] = 1;
     return;
   }
-  if (head is <symbol> && head.symbol().is_type_qualifier()) {
+  if (head is <symbol> && (head.symbol().is_type_qualifier() ||
+                           head.symbol().is_storage_class())) {
     _spelled_types(node.cdr(), names);
     return;
   }
@@ -376,16 +380,19 @@ static void Partition.forward_tags(Partition &p, List node) {
 
 // declarations
 
-/* A static declaration makes the rest of the unit private. A public struct
-   or union declaration puts its tag in the header, so no prototype forwards
-   it again. */
+/* A static declaration makes the rest of the unit private. A public object
+   definition stays public until `#pragma private`, since an including unit
+   sees it. A public struct or union declaration puts its tag in the header,
+   so no prototype forwards it again. */
 static void Partition.add_declaration(
   Partition &p, List decl, Type type, List bindings) {
   match (bindings)
     case %(bindings (bind (!set ?binding (*)) ?))
       if (p.c._completed_prototype(binding)): return;
   if (type.is_static()) p.private = 1;
-  if (p.private) {
+  int object = !type.is_static() && !type.is_extern() &&
+    !_anonymous_body(type) && _declares_object(bindings);
+  if (object ? p.lexical : p.private) {
     p.source.push(decl);
     return;
   }
@@ -406,8 +413,9 @@ static int Compiler._completed_prototype(Compiler c, List binding) {
   return 0;
 }
 
-/* `struct b { ... } g;` at public file scope publishes the body and an
-   `extern` declaration of `g`, and defines `g` in the source. */
+/* `struct b { ... } g;` at public file scope publishes the body, without
+   the qualifiers of `g`, and an `extern` declaration of `g`, and defines
+   `g` in the source. */
 static int Partition.place_tagged_object(
   Partition &p, Type type, List bindings) {
   Type core = type.base_type();
@@ -416,7 +424,7 @@ static int Partition.place_tagged_object(
     case %((!or struct union enum) ?(String found) (*)): tag = found;
   if (!tag || !_declares_object(bindings)) return 0;
   List tagged = _tag_only(type, core, tag);
-  p.header.push(%(declare $type (bindings (bind () ()))));
+  p.header.push(%(declare $core (bindings (bind () ()))));
   p.header.push(_header_declaration(NULL, %(extern @tagged), bindings));
   p.source.push(%(declare $tagged $bindings));
   return 1;
@@ -429,13 +437,35 @@ static List _tag_only(Type type, Type core, Var name) =>
 /* A public file-scope object has one definition, in the source, and an
    `extern` declaration in the header. Defining it in the header would give
    every including unit its own copy, and a runtime initializer there is not
-   a C constant expression. */
+   a C constant expression. A definition whose initializer has to run loses
+   `const` in C, so its declaration loses it too. */
 static int Partition.place_object(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_extern() || !_declares_object(bindings)) return 0;
+  if (p.c.static_value_is_runtime(decl, NULL)) {
+    type = _without_const(type);
+    bindings = p.c._runtime_without_const(bindings);
+  }
   p.header.push(_header_declaration(NULL, %(extern @type), bindings));
   p.source.push(decl);
   return 1;
+}
+
+static List _without_const(List specifiers) =>
+  specifiers.filter(%!(specifier) => specifier != <const>);
+
+/* `bindings` with `const` removed from each const declarator whose
+   initializer has to run. */
+static List Compiler._runtime_without_const(Compiler c, List bindings) {
+  Array declarators = [];
+  foreach (List declarator, bindings.cdr()) {
+    match (declarator)
+      case %(op = (bind ?name (!set ?mods (const *))) ?value)
+        if (c.static_value_is_runtime(value, NULL)):
+        declarator = %(bind $name ${_without_const(mods)});
+    declarators.push(declarator);
+  }
+  return %(bindings @{declarators.list_free()});
 }
 
 /* A binding list with a named object declarator, as opposed to a bare tag
@@ -449,6 +479,14 @@ static int _declares_object(List bindings) {
         case %(bind ?name *): if (name.truth()) return 1;
         case %(op = * *): return 1;
       }
+  return 0;
+}
+
+/* `struct { ... } name;` gives `name` a type that no other declaration can
+   repeat, so it has no `extern` declaration to publish. */
+static int _anonymous_body(Type type) {
+  match (type.base_type())
+    case %((!or struct union enum) (gensym *) (*)): return 1;
   return 0;
 }
 
@@ -505,7 +543,7 @@ static void Partition.place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int visibility = preproc_visibility(content);
-  if (visibility >= 0) p.private = visibility;
+  if (visibility >= 0) p.private = p.lexical = visibility;
   else p.hold(p.include_names(content), node);
 }
 

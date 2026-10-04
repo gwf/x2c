@@ -23,7 +23,11 @@ begins source-private output, except that a typedef after it still belongs
 to the header when a later public prototype names it. An include of x2c
 source below `#pragma private` also moves to the header when a later public
 prototype names a type it declares. Functions that a class
-or another declaration producer generates do not begin it. Every translated header
+or another declaration producer generates do not begin it. A public object
+definition gets an `extern` declaration in the header even after a function
+definition or a `static` declaration; only `#pragma private` keeps it in the
+source. An object of an anonymous `struct`, `union`, or `enum` type has no
+such declaration. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 

@@ -35,10 +35,7 @@ _x2c_initializer_choice_3B5F69A4_0((T =(struct Table){
 
 }
 ))
-const struct Named{
-  int count;
-}
-named ={
+const struct Named named ={
   9
 }
 ;
@@ -46,10 +43,7 @@ named ={
 static struct Named * pointer;
 
 _x2c_initializer_choice_3B5F69A4_1((pointer =(struct Named *) & named))
-struct Shared{
-  int level;
-}
-shared ={
+struct Shared shared ={
   4
 }
 ;
