@@ -45,16 +45,32 @@ typedef struct MatchCaptureBuffer {
   int capacity;
 } MatchCaptureBuffer;
 
+/** Describes one way an input a plan matches can begin: its first element
+    equals `head` and, when `index` is nonzero, its element at `index`
+    equals `inner`, or is a List whose first element does when `nested` is
+    set. Both values are borrowed pattern constants.
+*/
+typedef struct MatchKey {
+  Var head, inner;
+  int index, nested;
+} MatchKey;
+
+enum { MATCH_KEY_MAX = 8 };
+
 /** Holds one reusable immutable compiled `Match` pattern.
     A prepared plan owns `program` and `layout`; malformed and ineligible plans
     have no executable program and retain their categorized `status` and
-    static `reason`. Pattern constants are borrowed, so the caller must free
+    static `reason`. A prepared plan whose pattern fixes how a matching input
+    begins lists the `keys` it may begin with; `key_bits` says that raw bits
+    compare them. Pattern constants are borrowed, so the caller must free
     the plan before their canonical pools or other owners expire.
 */
 typedef struct MatchPlan {
   MachineProgram program;
   MatchCaptureLayout layout;
   MachinePrepare status, const char *reason;
+  int key_count, key_bits;
+  MatchKey keys[MATCH_KEY_MAX];
 } *MatchPlan;
 
 /** Stores the process-lifetime plan for one compiler-emitted `Match` site.
@@ -487,11 +503,49 @@ int MatchPlan.try_capture(
 
 static int MatchPlan._capture(
   MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
+  if (!m.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
   int result = _run_capture(m.program.view(), *machine, input, captures);
   machine.release();
   return result;
 }
+
+/** Reports whether `input`, seen through `view` when one is given, begins
+    as one of the keys of prepared `plan` requires. A plan without keys
+    admits every input, and a refused input is one the plan cannot match.
+*/
+int MatchPlan.admits(MatchPlan plan, Var input, Var (*view)(Var)) {
+  if (!plan.key_count) return 1;
+  List list = _seen_list(input, view);
+  if (!list) return 0;
+  for (int i = 0; i < plan.key_count; i++)
+    if (plan._key_admits(&plan.keys[i], list, view)) return 1;
+  return 0;
+}
+
+/* The nonempty List `view` shows for `value`, or NULL. */
+static List _seen_list(Var value, Var (*view)(Var)) {
+  if (view) value = view(value);
+  return value is <list> ? value.list() : NULL;
+}
+
+static int MatchPlan._key_admits(
+  MatchPlan plan, MatchKey *key, List list, Var (*view)(Var)) {
+  if (!plan._key_equal(list.car(), key.head)) return 0;
+  if (!key.index) return 1;
+  for (int i = 0; i < key.index && list; i++) list = list.cdr();
+  if (!list) return 0;
+  Var element = list.car();
+  if (key.nested) {
+    List inner = _seen_list(element, view);
+    if (!inner) return 0;
+    element = inner.car();
+  }
+  return plan._key_equal(element, key.inner);
+}
+
+static int MatchPlan._key_equal(MatchPlan plan, Var value, Var key) =>
+  plan.key_bits ? value.u64 == key.u64 : value == key;
 
 /* Runs one prepared execution and commits positional values only after the
    machine and every lazy-span materialization have succeeded. */
@@ -544,6 +598,7 @@ int MatchPlan.execute(
   MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats) {
   if (!plan._prepared("MatchPlan.execute")) return -1;
   if (!out_bindings) return -1;
+  if (!plan.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
   List bindings, int result = plan._run(*machine, input, bindings);
   machine.release();
@@ -702,7 +757,8 @@ static int MatchPlan._replace_all(
    one capture buffer, and one cell stack. */
 
 static int MatchWalk._test(MatchWalk &walk, Var node) =>
-  _run_capture(walk.view, *walk.m, node, walk.captures);
+  walk.plan.admits(node, NULL)
+    ? _run_capture(walk.view, *walk.m, node, walk.captures) : 0;
 
 /* One search result: `(* node)` followed by the node's bindings. */
 static List MatchWalk._hit(MatchWalk &walk, Var node) =>

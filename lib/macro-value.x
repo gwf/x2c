@@ -542,6 +542,7 @@ static int _macro_case_match(
   MatchCaptureBuffer *captured) {
   if (plan.status != MACHINE_PREPARED)
     return plan.execute_capture(code, *captured, NULL) == 1;
+  if (!plan.admits(code, _macro_unwrap)) return 0;
   MatchMachine machine;
   machine.open();
   machine.relation = _macro_identity_equal;
