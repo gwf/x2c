@@ -564,8 +564,8 @@ static void Compiler._add_typedef_names(
    the spelling the include search built, which keys its process-cache
    entry, and `collect_resolve_include` searches with no Compiler. */
 static String _canonical_path(String path) {
-  char buffer[PATH_MAX];
-  return realpath(path, buffer) ? buffer : path;
+  String real = real_path(path);
+  return real ? real : path;
 }
 
 /* Canonical process-wide include roots. */

@@ -275,7 +275,7 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (!declaration.type_from_ast().is_function()) return;
-  String path = home_portable_path(Path.absolute(c.filename));
+  String path = home_portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   String name = c._native_meta_name(declaration, marker);
   c.sym.set(%("source-node" (declaration $path ${marker.pos})),
@@ -296,7 +296,7 @@ static String Compiler._native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  List unit = %(${Path.absolute(c.filename)});
+  List unit = %(${absolute_path(c.filename)});
   foreach (Var (key, value), globs) {
     if (_declared_in(key, unit)) continue;
     foreach (List row, c._native_meta_rows(value)) {

@@ -430,7 +430,7 @@ void Compiler.queue_declaration_effect(
 }
 
 static List Compiler._declaration_source_key(Compiler c, Token token) {
-  String path = home_portable_path(Path.absolute(c.filename));
+  String path = home_portable_path(absolute_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 
@@ -1655,7 +1655,7 @@ void Compiler.tokenize(Compiler c, char *text) {
 static int Compiler._is_script_file(Compiler c) =>
   c.unit_script && c.filename &&
   (c.filename == c.unit_script.path ||
-   Path.absolute(c.filename) == c.unit_script.path);
+   absolute_path(c.filename) == c.unit_script.path);
 
 /* A lexical failure truncates the token stream, so the parser reaches the
    appended `<eof>` and blames the end of the file. Report the refused byte
@@ -1950,7 +1950,7 @@ static List Compiler._source_range(Compiler c, Token first, Token after) {
   while (last > first &&
          (last.type == <space> || last.type == <comment> ||
           last.type == <preproc>)) last--;
-  String path = Path.absolute(c.filename);
+  String path = absolute_path(c.filename);
   if (!c.source_texts.contains(path)) c.source_texts[path] = c.text;
   return %($path ${first.pos} ${last.pos + last.len});
 }
@@ -2531,8 +2531,51 @@ int Compiler.read_source(Compiler c, String path, String volatile &text) {
 */
 String Compiler.canonical_path(Compiler c, String path) {
   if (c.sources) return Path.absolute(path);
+  String real = real_path(path);
+  return real ? real : path;
+}
+
+/* The real paths this process has resolved, by spelling. The compiler
+   never changes its working directory, and translation workers are forked
+   processes, so a spelling keeps its answer. A spelling that does not
+   resolve is asked again, because its file may appear later. */
+static Map real_paths = NULL, static Scope real_paths_scope = NULL;
+
+/** Returns the real path of the existing file at `path`, or NULL when
+    `path` is NULL or does not resolve. Each spelling is resolved once per
+    process.
+*/
+String real_path(String path) {
+  if (!path) return NULL;
+  Var known = _real_paths()[path];
+  if (known is <string>) return known;
   char resolved[PATH_MAX];
-  return realpath(path, resolved) ? resolved : path;
+  if (!realpath(path, resolved)) return NULL;
+  String real = resolved;
+  if (path.try_own() && real.try_own()) real_paths[path] = real;
+  return real;
+}
+
+/** Returns `Path.absolute(path)`, resolving an existing file through
+    `real_path`. */
+String absolute_path(String path) {
+  String real = real_path(path);
+  return real ? real : Path.absolute(path);
+}
+
+static Map _real_paths(void) {
+  if (real_paths != NULL) return real_paths;
+  $scope(&real_paths_scope) {
+    Scope.shutdown_hook(_real_paths_shutdown);
+    real_paths = {};
+  }
+  return real_paths;
+}
+
+static void _real_paths_shutdown(void) {
+  real_paths_scope.destroy();
+  real_paths_scope = NULL;
+  real_paths = NULL;
 }
 
 /** Returns `path` relative to the canonical x2c home when it lies below the
