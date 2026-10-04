@@ -27,9 +27,6 @@ Shared helpers for x2c compiler AST nodes.
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
 | [`Ast.without_origin`](#Ast.without_origin) | Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped in. |
 | [`Ast.written_operand`](#Ast.written_operand) | Returns the operand a write `node` changes: the left operand of an assignment or prefix update, or the operand of a postfix update; `NULL` when `node` writes no operand. |
-| [`Symbol.binary_precedence`](#Symbol.binary_precedence) | Returns a binary operator's precedence level, or zero for any other `Symbol`. |
-| [`Symbol.compound_assignment`](#Symbol.compound_assignment) | Returns the compound assignment for a binary operator, or zero. |
-| [`Symbol.compound_operator`](#Symbol.compound_operator) | Returns the binary operator computed by a compound assignment, or zero. |
 | [`Symbol.is_assignment_op`](#Symbol.is_assignment_op) | Returns whether `op` is plain or compound assignment. |
 
 ### Functions
@@ -40,7 +37,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:292`
+Source: `src/ast.x:254`
 
 #### ast_collect_binding_references
 
@@ -106,7 +103,7 @@ Source: `src/ast.x:73`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:298`
+Source: `src/ast.x:260`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -117,7 +114,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:312`
+Source: `src/ast.x:274`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -190,37 +187,6 @@ Source: `src/ast.x:103`
 
 ### `Symbol`
 
-<a id="Symbol.binary_precedence"></a>
-#### Symbol.binary_precedence
-
-`int Symbol.binary_precedence(Symbol op)`
-
-Returns a binary operator's precedence level, or zero for any other
-`Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
-operators, so a larger level binds more tightly. `===` and `!==` share
-the equality level, `in` the relational level, and `@` the
-multiplicative level.
-
-Source: `src/ast.x:268`
-
-<a id="Symbol.compound_assignment"></a>
-#### Symbol.compound_assignment
-
-`Symbol Symbol.compound_assignment(Symbol op)`
-
-Returns the compound assignment for a binary operator, or zero.
-
-Source: `src/ast.x:257`
-
-<a id="Symbol.compound_operator"></a>
-#### Symbol.compound_operator
-
-`Symbol Symbol.compound_operator(Symbol op)`
-
-Returns the binary operator computed by a compound assignment, or zero.
-
-Source: `src/ast.x:251`
-
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
 
@@ -228,7 +194,7 @@ Source: `src/ast.x:251`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:288`
+Source: `src/ast.x:250`
 
 ## Public types
 

@@ -23,10 +23,6 @@ int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String
 
 void Compiler_dump_conformance(Compiler c, Map globs);
 
-Symbol Compiler_operator_member(Compiler c, Symbol op);
-
-Symbol Compiler_derived_member(Compiler c, Symbol op);
-
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
 
 List Compiler_wrapper_function(Compiler c, Type result, List binding, List params, List body);

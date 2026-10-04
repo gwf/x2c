@@ -189,6 +189,45 @@ static Map native_scalar_types(void) => {
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
 
+/* --- src/operator-ledger.xmacro ------------------------------------------ */
+
+static List _operator_rows(void) => %(
+  (<||>       1 0        0         0)
+  (<&&>       2 0        0         0)
+  (<|>        3 <|=>     0         0)
+  (<^>        4 <^=>     0         0)
+  (<&>        5 <&=>     0         0)
+  (<"==">     6 0        <equal>   0)
+  (<!=>       6 0        <equal>   1)
+  (<"===">    6 0        0         0)
+  (<!==>      6 0        0         0)
+  (<"<">      7 0        <compare> 1)
+  (<"<=">     7 0        <compare> 1)
+  (<">">      7 0        <compare> 1)
+  (<">=">     7 0        <compare> 1)
+  (<in>       7 0        0         0)
+  (<"<<">     8 <"<<=">  0         0)
+  (<">>">     8 <">>=">  0         0)
+  (<+>        9 <+=>     <add>     0)
+  (<->        9 <-=>     <sub>     0)
+  (<*>       10 <*=>     <mul>     0)
+  (</>       10 </=>     <div>     0)
+  (<%>       10 <%=>     <mod>     0)
+  (<@>       10 <@=>     <matmul>  0)
+);
+
+static List _operator_cases(int key, int value, int derived) {
+  Array cases = [];
+  foreach (List row, _operator_rows()) {
+    if (!row[key].truth() || !row[value].truth()) continue;
+    if (derived >= 0 && row[4] != derived) continue;
+    Symbol label = row[key];
+    Var result = row[value];
+    cases.push($!{ case $label: return $result; });
+  }
+  return cases.list_free();
+}
+
 /* --- lib/system-macros.xmacro -------------------------------------------- */
 
 static List _dedent_expand(List node) {
@@ -690,6 +729,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_operator_rows", _operator_rows);
+  $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_cases_label", _cases_label);
   $linked.row(rows, "_cases_transfers", _cases_transfers);

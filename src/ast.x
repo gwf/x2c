@@ -240,18 +240,10 @@ static int _contains_return(Ast node) {
 
 // operators
 
-/** Returns the binary operator computed by a compound assignment, or zero. */
 Symbol Symbol.compound_operator(Symbol op);
 
-/** Returns the compound assignment for a binary operator, or zero. */
 Symbol Symbol.compound_assignment(Symbol op);
 
-/** Returns a binary operator's precedence level, or zero for any other
-    `Symbol`. Levels run from 1 for `||` to 10 for the multiplicative
-    operators, so a larger level binds more tightly. `===` and `!==` share
-    the equality level, `in` the relational level, and `@` the
-    multiplicative level.
-*/
 int Symbol.binary_precedence(Symbol op);
 
 /** Returns whether `op` is plain or compound assignment. */

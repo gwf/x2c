@@ -12,13 +12,11 @@ Protocols from declaration to generated adapters.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.derived_member`](#Compiler.derived_member) | Returns the protocol member that derives a comparison operator. |
 | [`Compiler.discard_helper`](#Compiler.discard_helper) | Returns `(binding signature)` for a generated helper that calls the function `binding` of type `signature` and then discards the unnamed argument temporaries `which` selects (bit `n` for argument `n`). |
 | [`Compiler.dump_conformance`](#Compiler.dump_conformance) | Prints stable conformance rows for typedefs in `globs`. |
 | [`Compiler.forward_parameters`](#Compiler.forward_parameters) | Returns `(declarations arguments)` for a helper that forwards its parameters of `types`: each declaration names a fresh parameter `a0`, `a1`, ..., and each argument reads it. |
 | [`Compiler.generate_protocol_adapters`](#Compiler.generate_protocol_adapters) | Generates adapters and descriptor registration for resolved conformances. |
 | [`Compiler.install_generated_protocol_symbols`](#Compiler.install_generated_protocol_symbols) | Publishes external native alias and ordinary adapter signatures. |
-| [`Compiler.operator_member`](#Compiler.operator_member) | Returns the protocol member corresponding to a direct binary operator. |
 | [`Compiler.parse_protocol_declaration`](#Compiler.parse_protocol_declaration) | Parses a protocol body or concrete adoption at the current token. |
 | [`Compiler.protocol_discard_helper`](#Compiler.protocol_discard_helper) | The `discard_helper` for `participant`'s protocol `member`. |
 | [`Compiler.protocol_member_names`](#Compiler.protocol_member_names) | Returns unique member spellings from the participant's visible adopted conformances. |
@@ -35,17 +33,6 @@ Protocols from declaration to generated adapters.
 
 ### `Compiler`
 
-<a id="Compiler.derived_member"></a>
-#### Compiler.derived_member
-
-`Symbol Compiler.derived_member(Compiler c, Symbol op)`
-
-Returns the protocol member that derives a comparison operator.
-Inequality derives from `equal`, ordered comparisons derive from `compare`,
-and unsupported operators return zero.
-
-Source: `src/protocol.x:1665`
-
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
 
@@ -59,7 +46,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:2017`
+Source: `src/protocol.x:1983`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -82,7 +69,7 @@ Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it.
 
-Source: `src/protocol.x:1908`
+Source: `src/protocol.x:1874`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -94,7 +81,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2097`
+Source: `src/protocol.x:2063`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -104,17 +91,7 @@ Source: `src/protocol.x:2097`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:2124`
-
-<a id="Compiler.operator_member"></a>
-#### Compiler.operator_member
-
-`Symbol Compiler.operator_member(Compiler c, Symbol op)`
-
-Returns the protocol member corresponding to a direct binary operator.
-Returns zero when the operator has no direct protocol mapping.
-
-Source: `src/protocol.x:1656`
+Source: `src/protocol.x:2090`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -137,7 +114,7 @@ Source: `src/protocol.x:229`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:2043`
+Source: `src/protocol.x:2009`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -183,7 +160,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1945`
+Source: `src/protocol.x:1911`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -209,7 +186,7 @@ Existing rows, helper decisions, and lookup caches are discarded; a null
 map leaves those registries empty. Conformance reset and resolution belong
 to `resolve_protocols`.
 
-Source: `src/protocol.x:2554`
+Source: `src/protocol.x:2520`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -219,7 +196,7 @@ Source: `src/protocol.x:2554`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2477`
+Source: `src/protocol.x:2443`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -232,7 +209,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1678`
+Source: `src/protocol.x:1644`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
@@ -269,7 +246,7 @@ unit. `result` is the storage class and result type, so static, inline
 and external helpers share it; `params` are the parameter declarations,
 and `body` its lowered statements.
 
-Source: `src/protocol.x:1898`
+Source: `src/protocol.x:1864`
 
 ## Design notes
 

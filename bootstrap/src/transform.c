@@ -2446,8 +2446,6 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _2047 = cons(_1, _2046);
 }
 
-String String_add(String, String);
-
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2048 = cons(_1, _2047);
   _2049 = List_var(_2048);

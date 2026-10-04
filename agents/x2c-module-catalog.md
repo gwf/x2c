@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 45
+- Compiler modules: 46
 - Runtime modules: 63
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -24,10 +24,8 @@ Public functions:
 `binding_identity_spelling`, `Ast.designated`, `Ast.lvalue_binding`,
 `Ast.written_operand`, `Ast.rewrite_children`, `ast_contains_head`,
 `ast_collect_binding_references`, `Ast.without_origin`, `Ast.rewrap_origin`,
-`Ast.never_returns`, `Symbol.compound_operator`, `Symbol.compound_assignment`,
-`Symbol.binary_precedence`, `Symbol.is_assignment_op`,
-`ast_changes_left_operand`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`Ast.never_returns`, `Symbol.is_assignment_op`, `ast_changes_left_operand`,
+`Ast.initializer_cases`, `Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
 
@@ -405,6 +403,16 @@ Public functions:
 `builtin_foreach_collection`, `MetaContext.reject`,
 `Compiler.bind_sdk_primitives`
 
+### [src/operator-ledger.x](../src/operator-ledger.x)
+
+compiler lookups from one binary operator ledger.
+
+Public functions:
+
+`Symbol.binary_precedence`, `Symbol.compound_operator`,
+`Symbol.compound_assignment`, `Compiler.operator_member`,
+`Compiler.derived_member`
+
 ### [src/parse.x](../src/parse.x)
 
 x2c declarations, parsed from source or constructed.
@@ -462,7 +470,6 @@ Public functions:
 `Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
 `Compiler.protocol_members_for`, `Compiler.protocol_member_names`,
 `Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
-`Compiler.operator_member`, `Compiler.derived_member`,
 `Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
 `Compiler.forward_parameters`, `Compiler.protocol_update_helper`,
 `Compiler.discard_helper`, `Compiler.protocol_discard_helper`,

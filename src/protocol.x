@@ -1629,15 +1629,8 @@ static void _dump_member(
 
 // operators
 
-/** Returns the protocol member corresponding to a direct binary operator.
-    Returns zero when the operator has no direct protocol mapping.
-*/
 Symbol Compiler.operator_member(Compiler c, Symbol op);
 
-/** Returns the protocol member that derives a comparison operator.
-    Inequality derives from `equal`, ordered comparisons derive from `compare`,
-    and unsupported operators return zero.
-*/
 Symbol Compiler.derived_member(Compiler c, Symbol op);
 
 // member resolution

@@ -25,9 +25,11 @@ static int _call_never_returns(Ast node);
 
 static int _contains_return(Ast node);
 
-static const SymbolSet compound_assignments =(SymbolSet) "\001\000\000\000\013\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\012\000\003\013\000\005\007\003\000\004\000\001\000\000\000\000\000\000\000\001\011\000\000\173\053\000\000\000\000\000\000\173\055\000\000\000\000\000\000\173\052\000\000\000\000\000\000\173\057\000\000\000\000\000\000\173\045\000\000\000\000\000\000\173\046\000\000\000\000\000\000\173\136\000\000\000\000\000\000\173\174\000\000\000\000\000\000\173\074\036\000\000\000\000\000\173\076\037\000\000\000\000\000\173\100\000\000\000\000\000\000";
+Symbol Symbol_compound_operator(Symbol op);
 
-static const SymbolSet compound_binaries =(SymbolSet) "\001\000\000\000\013\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\012\007\000\012\000\000\000\000\000\003\016\000\000\000\001\016\000\000\005\000\006\003\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\137\000\000\000\000\000\000\000\113\000\000\000\000\000\000\000\115\000\000\000\000\000\000\000\275\000\000\000\000\000\000\000\371\000\000\000\000\000\000\000\171\074\000\000\000\000\000\000\175\076\000\000\000\000\000\000\201\000\000\000\000\000\000\000";
+Symbol Symbol_compound_assignment(Symbol op);
+
+int Symbol_binary_precedence(Symbol op);
 
 static List _arm_function(List choice, List argument);
 
@@ -550,23 +552,6 @@ static int _contains_return(Ast node){
       child = _x2c_macro_item_2;  if(Var_is_row(child, 9, 7, 4) && _contains_return(Var_list(child))) return 1;
     }
 
-  }
-  return 0;
-}
-
-int SymbolSet_index(SymbolSet, Symbol);
-Symbol SymbolSet_getindex(SymbolSet, int);
-Symbol Symbol_compound_operator(Symbol op){
-  int index = SymbolSet_index(compound_assignments, op);  return index < 0 ? 0 : SymbolSet_getindex(compound_binaries, index);
-}
-
-Symbol Symbol_compound_assignment(Symbol op){
-  int index = SymbolSet_index(compound_binaries, op);  return index < 0 ? 0 : SymbolSet_getindex(compound_assignments, index);
-}
-
-int Symbol_binary_precedence(Symbol op){
-  switch(op){
-    case 31993 : return 1;  case 9805 : return 2;  case 249 : return 3;  case 189 : return 4;  case 77 : return 5;  case 15739 : case 8571 : case 2014587 : case 1097083 : return 6;  case 121 : case 125 : case 604 : case 15483 : case 15995 : return 7;  case 15481 : case 15997 : return 8;  case 56 : case 62 : return 9;  case 54 : case 95 : case 75 : case 129 : return 10;
   }
   return 0;
 }

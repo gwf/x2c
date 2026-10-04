@@ -37,12 +37,6 @@ Ast Ast_rewrap_origin(Ast original, Ast replacement);
 
 int Ast_never_returns(Ast ast);
 
-Symbol Symbol_compound_operator(Symbol op);
-
-Symbol Symbol_compound_assignment(Symbol op);
-
-int Symbol_binary_precedence(Symbol op);
-
 int Symbol_is_assignment_op(Symbol op);
 
 int ast_changes_left_operand(Symbol op);
