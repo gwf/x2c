@@ -50,7 +50,8 @@ $(BUILD):
 # the runtime declarations it replays, so the compiler and the runtime
 # sources are prerequisites and either changing forces a full
 # retranslation; a missing generated .c/.h/.xi forces its source back into
-# the batch (self-healing).
+# the batch (self-healing). An outer build that exports BUILD_JOBS gives the
+# batch that many translation workers.
 ifneq ($(strip $(X_FILES)),)
 X2C_TRANSLATE_DEPS = $(X2C) $(wildcard $(REPO_ROOT)/lib/*.x)
 MISSING_GENERATED = $(filter-out \
@@ -60,7 +61,7 @@ MISSING_X = $(sort $(patsubst $(BUILD)/%,$(SOURCE)/%.x, \
 	$(basename $(MISSING_GENERATED))))
 
 $(BUILD)/.translated: $(X_FILES) $(X2C_TRANSLATE_DEPS) | $(BUILD)
-	$(X2C) translate $(X2CFLAGS) \
+	$(X2C) translate $(if $(BUILD_JOBS),-j $(BUILD_JOBS)) $(X2CFLAGS) \
 		$(if $(filter-out $(X_FILES) FORCE-TRANSLATE,$?),$(X_FILES), \
 		$(sort $(filter $(X_FILES),$?) $(MISSING_X)))
 	@touch $@

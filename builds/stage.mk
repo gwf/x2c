@@ -47,8 +47,11 @@ endif
 CFLAGS           += $(BUILD_CFLAGS) $(STRICT_CFLAGS)
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
+# A translation batch must finish before the compiles it feeds start, so it
+# uses BUILD_JOBS workers rather than the one job x2c assumes under Make.
+# A later -j in X2C_FLAGS overrides it.
 X2C_TRANSLATE    = $(STRICT_X2C_ENV) $(X2C_COMPILER) translate \
-	$(STRICT_X2C_FLAGS) $(X2C_FLAGS)
+	-j $(BUILD_JOBS) $(STRICT_X2C_FLAGS) $(X2C_FLAGS)
 # A native module binds to the compiler's own runtime, so the compiler links
 # the whole runtime archive, and a Linux executable exports its functions
 # only when asked.

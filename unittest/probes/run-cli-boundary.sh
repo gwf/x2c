@@ -185,6 +185,20 @@ if grep -Fq "Translated 1 x2c file" "$BUILD/verbose.stderr"; then
   exit 1
 fi
 
+# Several inputs translate in parallel by default; under Make, serially.
+mkdir -p "$BUILD/jobs"
+cp "$BUILD/a/item.x" "$BUILD/jobs/first.x"
+cp "$BUILD/a/item.x" "$BUILD/jobs/second.x"
+for level in 0 1; do
+  MAKELEVEL=$level "$X2C" translate --verbose --out-dir "$BUILD/jobs" \
+    "$BUILD/jobs/first.x" "$BUILD/jobs/second.x" 2>"$BUILD/jobs-$level.stderr"
+done
+grep -Fq "translate with 2 workers over 2 files" "$BUILD/jobs-0.stderr"
+if grep -Fq "workers" "$BUILD/jobs-1.stderr"; then
+  echo "translation under Make started workers" >&2
+  exit 1
+fi
+
 set +e
 "$X2C" translate --color=invalid --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/color-invalid.stdout" \
