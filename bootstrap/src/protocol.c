@@ -22,8 +22,6 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
 
 __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void);
 
-#include <limits.h>
-#include <stdlib.h>
 #include <string.h>
 #include "collect.h"
 #include "expressions.h"
@@ -972,7 +970,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _488 = String_var(_487);
   _489 = List_var(NULL);
   _490 = Symbol_var(106239471489226);
-  _491 = int_var(1904);
+  _491 = int_var(1900);
   _492 = String_new("");
   _493 = String_var(_492);
   _494 = String_new("x2c.hole");
@@ -1276,7 +1274,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _789 = cons(_781, _788);
   _790 = cons(_775, _789);
   _791 = List_var(_790);
-  _792 = int_var(1976);
+  _792 = int_var(1972);
   _793 = Symbol_var(1544849476362);
   _794 = List_var(_145);
   _795 = cons(_794, NULL);
@@ -1374,7 +1372,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _887 = cons(_781, _886);
   _888 = cons(_775, _887);
   _889 = List_var(_888);
-  _890 = int_var(1983);
+  _890 = int_var(1979);
   _891 = cons(_814, NULL);
   _892 = cons(_843, _880);
   _893 = cons(_595, _892);
@@ -1976,11 +1974,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1486 = cons(_1485, NULL);
   _1487 = cons(_702, _1486);
   _1488 = List_var(_1487);
-  _1489 = int_var(2335);
+  _1489 = int_var(2331);
   _1490 = cons(_1489, NULL);
   _1491 = cons(_708, _1490);
   _1492 = List_var(_1491);
-  _1493 = int_var(85580);
+  _1493 = int_var(85517);
   _1494 = cons(_1493, NULL);
   _1495 = cons(_721, _1494);
   _1496 = List_var(_1495);
@@ -2057,11 +2055,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1564 = cons(_1563, NULL);
   _1565 = cons(_672, _1564);
   _1566 = List_var(_1565);
-  _1567 = int_var(2460);
+  _1567 = int_var(2456);
   _1568 = cons(_1567, NULL);
   _1569 = cons(_708, _1568);
   _1570 = List_var(_1569);
-  _1571 = int_var(90547);
+  _1571 = int_var(90484);
   _1572 = cons(_1571, NULL);
   _1573 = cons(_721, _1572);
   _1574 = List_var(_1573);
@@ -2289,10 +2287,11 @@ static String Compiler__canonical_file(Compiler c, List location){
   return result;
 }
 
+String real_path(String);
 int String_getindex(String, int);
 String Compiler_display_path(Compiler, String);
 static String Compiler__normalize_file(Compiler c, String file){
-  char path[PATH_MAX];  String root = c -> root_dir;  if(realpath(file, path) ||(String_truth(root) && String_getindex(file, 0) != '/' && realpath(String_join(NULL, cons(String_var(root), cons(String_var(_28), cons(String_var(file), NULL)))), path))) file = String_new(path);  return Compiler_display_path(c, file);
+  String real = real_path(file), root = c -> root_dir;  if(! String_truth(real) && String_truth(root) && String_getindex(file, 0) != '/') real = real_path(String_join(NULL, cons(String_var(root), cons(String_var(_28), cons(String_var(file), NULL)))));  return Compiler_display_path(c, String_truth(real) ? real : file);
 }
 
 Var List_assoc(List, Var);

@@ -139,11 +139,11 @@ Public functions:
 `match_value_head`, `match_value_flat_head`, `Compiler.match_pattern_binders`,
 `Compiler.define_match_binders`, `Compiler.define_catch_binders`,
 `Compiler.catch_binder_declarations`, `Compiler.own_diagnostics`,
-`Compiler.borrow_diagnostics`, `Compiler.take_diagnostics`,
-`Compiler.close_child`, `Compiler.borrow_unit_semantics`,
-`Compiler.share_meta_group`, `Compiler.take_unit_state`,
-`Compiler.return_unit_state`, `Compiler.read_source`,
-`Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
+`Compiler.borrow_diagnostics`, `Compiler.close_child`,
+`Compiler.borrow_unit_semantics`, `Compiler.share_meta_group`,
+`Compiler.take_unit_state`, `Compiler.return_unit_state`,
+`Compiler.read_source`, `Compiler.canonical_path`, `real_path`,
+`absolute_path`, `home_portable_path`, `home_absolute_path`,
 `Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.free_lisp`
@@ -167,8 +167,9 @@ Public functions:
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
 `Compiler.report_error`, `Compiler.report_warning`,
-`Compiler.report_warning_at`, `Compiler.error_count`, `Compiler.diagnostics`,
-`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
+`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
+`Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -1067,11 +1068,12 @@ Public functions:
 `MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
 `MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
 `MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
-`MatchPlan.try_capture`, `MatchPlan.execute`, `MatchPlan.try_match`,
-`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
-`MatchPlan.try_match_replace`, `List.replace`, `MatchPlan.borrowable`,
-`x2c_match_site_try_capture`, `x2c_match_pattern_retainable`,
-`x2c_match_site_prepare`, `x2c_match_site_try_match`, `x2c_match_site_match`,
+`MatchPlan.try_capture`, `MatchPlan.admits`, `MatchPlan.execute`,
+`MatchPlan.try_match`, `MatchPlan.try_search`, `MatchPlan.search`,
+`MatchPlan.search_replace`, `MatchPlan.try_match_replace`, `List.replace`,
+`MatchPlan.borrowable`, `x2c_match_site_try_capture`,
+`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
+`x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
 `x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,

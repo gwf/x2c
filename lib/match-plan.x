@@ -51,7 +51,10 @@ MatchPlan MatchPlan.prepare(Var pattern) {
   plan.layout = MatchCaptureLayout.analyze(pattern);
   plan.status = plan.layout.status;
   plan.reason = plan.layout.reason;
-  if (plan.status == MACHINE_PREPARED) plan._lower(plan.layout.normalized);
+  plan.key_count = 0;
+  Var normalized = plan.layout.normalized;
+  if (plan.status == MACHINE_PREPARED) plan._lower(normalized);
+  if (plan.status == MACHINE_PREPARED) plan._record_keys(normalized);
   return plan;
 }
 
@@ -359,8 +362,7 @@ static int MatchLower._compile_not(MatchLower &l, List args) {
 /* `(!set BINDER TEST)` binds and tests in one block, calling a List TEST
    as a child block; any other set is a list of ordered alternatives. */
 static int MatchLower._compile_set(MatchLower &l, List args) {
-  if (!args || !args.cdr() || args.cddr() || !args.car().is_atom_binder())
-    return l._compile_or(args);
+  if (!_set_binds(args)) return l._compile_or(args);
   Var (binder, test) = args;
   int child = test is <list> ? l._compile_child(test) : -1;
   if (test is <list> && child < 0) return -1;
@@ -368,6 +370,10 @@ static int MatchLower._compile_set(MatchLower &l, List args) {
   return l._emit_binder(binder) && l._emit_test(test, child)
        ? l._finish(entry, base) : -1;
 }
+
+/* `(!set BINDER TEST)`, rather than a set of alternatives. */
+static int _set_binds(List args) =>
+  args && args.cdr() && !args.cddr() && args.car().is_atom_binder();
 
 /* Every operand must match the current value, in order. */
 static int MatchLower._compile_and(MatchLower &l, List args) {
@@ -814,4 +820,104 @@ static int MatchLower._star_retry(MatchLower &l, MatchStar &star, int loop) {
   else
     l.b.emit(MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
   return l.b.emit(MW_JUMP, 0, 0, 0, 0, loop) >= 0 && !l._stopped();
+}
+
+/* input keys
+
+   When a pattern fixes how a matching List begins, its plan records each
+   way as a key: the first element, and the first later element of the
+   fixed prefix that is a constant or a List beginning with one. `Match`
+   checks the keys before it takes a machine, so an input that begins
+   otherwise costs a few comparisons. The program tests every key itself,
+   so the check never refuses an input the plan matches. */
+
+/* What a pattern constrains: the current value itself, the first element
+   of a List, or that element with one later element. */
+enum { MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT };
+
+typedef struct MatchKeys {
+  MatchKey keys[MATCH_KEY_MAX];
+  int count;
+} MatchKeys;
+
+/* Records the keys of a normalized pattern; a pattern that fixes none, or
+   more than the plan holds, records none. */
+static void MatchPlan._record_keys(MatchPlan plan, Var pattern) {
+  MatchKeys found = {.count = 0};
+  if (!_keys(pattern, MATCH_KEY_INPUT, found)) return;
+  plan.key_bits = 1;
+  for (int i = 0; i < found.count; i++) {
+    MatchKey key = found.keys[i];
+    plan.keys[i] = key;
+    if (!_bits_unique(key.head) || (key.index && !_bits_unique(key.inner)))
+      plan.key_bits = 0;
+  }
+  plan.key_count = found.count;
+}
+
+/* Adds the keys `pattern` fixes in `mode`, or returns 0. In value and List
+   modes a key's `head` is the value, and `nested` says which mode found
+   it. Alternatives contribute their keys only when every one has some. */
+static int _keys(Var pattern, int mode, MatchKeys &keys) {
+  if (pattern is not <list>)
+    return mode == MATCH_KEY_VALUE && !pattern.is_binder() &&
+           keys._add((MatchKey) {pattern, void, 0, 0});
+  List list = pattern;
+  if (!list) return 0;
+  Var op = list.car();
+  List args = list.cdr();
+  if (!op.is_match_op())
+    return mode != MATCH_KEY_VALUE && _segment_keys(list, mode, keys);
+  if (op == <!set> && _set_binds(args)) return _keys(args.cadr(), mode, keys);
+  if (op == <!or> || op == <!set>) {
+    foreach (Var arm, args) if (!_keys(arm, mode, keys)) return 0;
+    return args != NULL;
+  }
+  if (op != <!and>) return 0;
+  int count = keys.count;
+  foreach (Var operand, args) {
+    if (_keys(operand, mode, keys)) return 1;
+    keys.count = count;
+  }
+  return 0;
+}
+
+/* A segment fixes its first element when that is a value; in input mode
+   each value pairs with every key of the first later element that has
+   some. */
+static int _segment_keys(List pattern, int mode, MatchKeys &keys) {
+  MatchKeys heads = {.count = 0}, inner = {.count = 0};
+  if (!_keys(pattern.car(), MATCH_KEY_VALUE, heads)) return 0;
+  int index = mode == MATCH_KEY_INPUT ? _inner_keys(pattern.cdr(), inner) : 0;
+  for (int i = 0; i < heads.count; i++) {
+    Var head = heads.keys[i].head;
+    if (!index && !keys._add((MatchKey) {head, void, 0, 1})) return 0;
+    for (int j = 0; j < inner.count; j++) {
+      MatchKey later = inner.keys[j];
+      if (!keys._add((MatchKey) {head, later.head, index, later.nested}))
+        return 0;
+    }
+  }
+  return 1;
+}
+
+/* Adds the keys of the first element of `rest`, before any star, that has
+   some, and returns its index after the segment's head, or 0. */
+static int _inner_keys(List rest, MatchKeys &inner) {
+  int index = 1;
+  foreach (Var part, rest) {
+    if (part.is_list_binder()) return 0;
+    if (_keys(part, MATCH_KEY_VALUE, inner)) return index;
+    inner.count = 0;
+    if (_keys(part, MATCH_KEY_LIST, inner)) return index;
+    inner.count = 0;
+    index++;
+  }
+  return 0;
+}
+
+static int MatchKeys._add(MatchKeys &keys, MatchKey key) {
+  if (keys.count >= MATCH_KEY_MAX) return 0;
+  keys.keys[keys.count++] = key;
+  return 1;
 }

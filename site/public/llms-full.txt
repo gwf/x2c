@@ -5113,8 +5113,9 @@ flat output directory and are rejected.
 `--out-dir` is only the generated-C directory. Native artifacts use
 `build --output` or `run --output`.
 
-`-j`, or `--jobs`, translates several units at once, in worker processes that
-inherit the collected declarations the parent already read:
+Several inputs translate at once, in worker processes that inherit the
+collected declarations the parent already read. `-j`, or `--jobs`, limits the
+number of workers:
 
 ```sh
 ./x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
@@ -5124,9 +5125,10 @@ Each unit is translated by exactly one worker and writes only its own files,
 so the generated `.c` and `.h` are byte-identical to a serial run. A `.d` file
 may list more prerequisites than the serial run produces, and never fewer. A
 worker that parses a header records what that parse reads, where a serial run
-replays the header from its process cache. The default is one job. The
-inspection and dump modes stay serial; they write one ordered stream to
-standard output.
+replays the header from its process cache. The default limit is the host's
+online processor count, or one job under Make, as for `build` below; `-j 1`
+translates serially in one process. The inspection and dump modes stay
+serial; they write one ordered stream to standard output.
 
 The depfile options control that `.d` output. They belong to `translate`:
 
@@ -5253,13 +5255,13 @@ input may include another through a directory, as in
 /tmp/foreach
 ```
 
-`build` and `run` default to the host's online processor count for translation
-and native compilation. Detection failure falls back to one job. Under Make
-(`MAKELEVEL` greater than zero), the automatic default is one job so the
-outer build owns concurrency. An explicit `-j N` or `--jobs N` overrides either
-default; `translate` retains its one-job default. The online count does not
-account for Linux CPU affinity, container quotas, or memory limits; use `-j`
-to choose a smaller limit in those environments.
+`translate`, `build`, and `run` default to the host's online processor count
+for translation and native compilation. Detection failure falls back to one
+job. Under Make (`MAKELEVEL` greater than zero), the automatic default is one
+job so the outer build owns concurrency. An explicit `-j N` or `--jobs N`
+overrides either default. The online count does not account for Linux CPU
+affinity, container quotas, or memory limits; use `-j` to choose a smaller
+limit in those environments.
 
 Parallel builds translate each stale unit in its own worker and generated
 directory. Units with the same basename remain separate, and each unit records

@@ -81,6 +81,8 @@ static int MatchLower__compile_not(MatchLower * l, List args);
 
 static int MatchLower__compile_set(MatchLower * l, List args);
 
+static int _set_binds(List args);
+
 static int MatchLower__compile_and(MatchLower * l, List args);
 
 static int MatchLower__compile_quote(MatchLower * l, List args);
@@ -160,6 +162,27 @@ static int MatchLower__star_tail(MatchLower * l, MatchStar * star);
 
 static int MatchLower__star_retry(MatchLower * l, MatchStar * star, int loop);
 
+enum{
+  MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT
+}
+;
+
+typedef struct MatchKeys{
+  MatchKey keys[MATCH_KEY_MAX];
+  int count;
+}
+MatchKeys;
+
+static void MatchPlan__record_keys(MatchPlan plan, Var pattern);
+
+static int _keys(Var pattern, int mode, MatchKeys * keys);
+
+static int _segment_keys(List pattern, int mode, MatchKeys * keys);
+
+static int _inner_keys(List rest, MatchKeys * inner);
+
+static int MatchKeys__add(MatchKeys * keys, MatchKey key);
+
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -198,7 +221,10 @@ MatchPlan MatchPlan_prepare(Var pattern){
   plan -> layout = MatchCaptureLayout_analyze(pattern);
   plan -> status = plan -> layout -> status;
   plan -> reason = plan -> layout -> reason;
-  if(plan -> status == MACHINE_PREPARED) MatchPlan__lower(plan, plan -> layout -> normalized);
+  plan -> key_count = 0;
+  Var normalized = plan -> layout -> normalized;
+  if(plan -> status == MACHINE_PREPARED) MatchPlan__lower(plan, normalized);
+  if(plan -> status == MACHINE_PREPARED) MatchPlan__record_keys(plan, normalized);
   return plan;
 }
 
@@ -529,12 +555,10 @@ static int MatchLower__compile_not(MatchLower * l, List args){
   return entry;
 }
 
-List List_cddr(List);
-
 Var List_getindex(List, int);
 
 static int MatchLower__compile_set(MatchLower * l, List args){
-  if(! List_truth(args) || ! List_truth(List_cdr(args)) || List_truth(List_cddr(args)) || ! Var_is_atom_binder(List_car(args))) return MatchLower__compile_or(&((* l)), args);
+  if(! _set_binds(args)) return MatchLower__compile_or(&((* l)), args);
   Var binder, test;
   List _x2c_destructure_0 = args;
   binder = List_getindex(_x2c_destructure_0, 0);
@@ -543,6 +567,12 @@ static int MatchLower__compile_set(MatchLower * l, List args){
   if(Var_is_row(test, 9, 7, 4) && child < 0) return - 1;
   int entry =(* l).b.length, base =(* l).site_count;
   return MatchLower__emit_binder(&((* l)), binder) && MatchLower__emit_test(&((* l)), test, child) ? MatchLower__finish(&((* l)), entry, base) : - 1;
+}
+
+List List_cddr(List);
+
+static int _set_binds(List args){
+  return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
 }
 
 static int MatchLower__compile_and(MatchLower * l, List args){
@@ -935,6 +965,124 @@ static int MatchLower__star_retry(MatchLower * l, MatchStar * star, int loop){
   }
   else MachineBuilder_emit(&((* l).b), MW_ADVANCE_OPTIONAL, 1, 0, 0, 0, 0);
   return MachineBuilder_emit(&((* l).b), MW_JUMP, 0, 0, 0, 0, loop) >= 0 && ! MatchLower__stopped(&((* l)));
+}
+
+static void MatchPlan__record_keys(MatchPlan plan, Var pattern){
+  MatchKeys found ={
+    .count = 0
+  }
+  ;
+  if(! _keys(pattern, MATCH_KEY_INPUT, &(found))) return;
+  plan -> key_bits = 1;
+  for(int i = 0;  i < found.count;  i ++){
+    MatchKey key = found.keys[i];
+    plan -> keys[i] = key;
+    if(! _bits_unique(key.head) ||(key.index && ! _bits_unique(key.inner))) plan -> key_bits = 0;
+  }
+  plan -> key_count = found.count;
+}
+
+static int _keys(Var pattern, int mode, MatchKeys * keys){
+  if(! Var_is_row(pattern, 9, 7, 4)) return mode == MATCH_KEY_VALUE && ! Var_is_binder(pattern) && MatchKeys__add(&((* keys)), (MatchKey){
+    pattern, ((void) 0, Void), 0, 0
+  }
+  );
+  List list = Var_list(pattern);
+  if(! List_truth(list)) return 0;
+  Var op = List_car(list);
+  List args = List_cdr(list);
+  if(! Var_is_match_op(op)) return mode != MATCH_KEY_VALUE && _segment_keys(list, mode, &((* keys)));
+  if(Var_equal(op, Symbol_var(2005352)) && _set_binds(args)) return _keys(List_cadr(args), mode, &((* keys)));
+  if(Var_equal(op, Symbol_var(62436)) || Var_equal(op, Symbol_var(2005352))){
+    {
+      Var arm;
+      List _x2c_macro_object_8 = args;
+      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+      Var _x2c_macro_cursor_output_8;
+      while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
+        arm = _x2c_macro_cursor_output_8;
+        if(! _keys(arm, mode, &((* keys)))) return 0;
+      }
+
+    }
+    return args != NULL;
+  }
+  if(! Var_equal(op, Symbol_var(1969032))) return 0;
+  int count =(* keys).count;
+  {
+    Var operand;
+    List _x2c_macro_object_9 = args;
+    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+    Var _x2c_macro_cursor_output_9;
+    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
+      operand = _x2c_macro_cursor_output_9;
+      {
+        if(_keys(operand, mode, &((* keys)))) return 1;
+        (* keys).count = count;
+      }
+
+    }
+
+  }
+  return 0;
+}
+
+static int _segment_keys(List pattern, int mode, MatchKeys * keys){
+  MatchKeys heads ={
+    .count = 0
+  }
+  , inner ={
+    .count = 0
+  }
+  ;
+  if(! _keys(List_car(pattern), MATCH_KEY_VALUE, &(heads))) return 0;
+  int index = mode == MATCH_KEY_INPUT ? _inner_keys(List_cdr(pattern), &(inner)) : 0;
+  for(int i = 0;  i < heads.count;  i ++){
+    Var head = heads.keys[i].head;
+    if(! index && ! MatchKeys__add(&((* keys)), (MatchKey){
+      head, ((void) 0, Void), 0, 1
+    }
+    )) return 0;
+    for(int j = 0;  j < inner.count;  j ++){
+      MatchKey later = inner.keys[j];
+      if(! MatchKeys__add(&((* keys)), (MatchKey){
+        head, later.head, index, later.nested
+      }
+      )) return 0;
+    }
+
+  }
+  return 1;
+}
+
+static int _inner_keys(List rest, MatchKeys * inner){
+  int index = 1;
+  {
+    Var part;
+    List _x2c_macro_object_10 = rest;
+    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
+    Var _x2c_macro_cursor_output_10;
+    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
+      part = _x2c_macro_cursor_output_10;
+      {
+        if(Var_is_list_binder(part)) return 0;
+        if(_keys(part, MATCH_KEY_VALUE, &((* inner)))) return index;
+        (* inner).count = 0;
+        if(_keys(part, MATCH_KEY_LIST, &((* inner)))) return index;
+        (* inner).count = 0;
+        index ++;
+      }
+
+    }
+
+  }
+  return 0;
+}
+
+static int MatchKeys__add(MatchKeys * keys, MatchKey key){
+  if((* keys).count >= MATCH_KEY_MAX) return 0;
+  (* keys).keys[(* keys).count ++] = key;
+  return 1;
 }
 
 void MachineBuilder_free(MachineBuilder *);

@@ -71,7 +71,7 @@ static void Compiler__subject_globals(Compiler c, Var value, Map globals, Map so
 
 static Var Compiler__meta_apply(Compiler c, Var function, List arguments);
 
-static String meta_call_form;
+static List meta_call_form;
 
 _x2c_initializer_choice_8AA1709E_0((meta_call_form = NULL))
 static Var _meta_call_value(Compiler c, List expression, Token site);
@@ -1033,7 +1033,7 @@ if(declared == _30) return _88;  if(List_truth(c -> macro_stack) && Var_is_row(v
 
 void Compiler_report_lisp_failure(Compiler, Token, List, String);
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
-  if(! _init_guard_) _file_init_();  Var volatile value; {
+  if(! _init_guard_) _file_init_();  Var volatile value;  meta_call_form = NULL; {
     ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_macro_arms_1[4];  Var _x2c_macro_patterns_1[4];  static ErrorCatchSite _x2c_macro_site_1 ={
       _x2c_macro_arms_1, -1, 4, ERROR_CATCH_PENDING, - 1
     }
@@ -1050,7 +1050,7 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
         }
         if(_x2c_macro_selected_1 == 1){
           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 196};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "Compiler_run_meta_call",.line = 197};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
           }
 
         }
@@ -1058,7 +1058,7 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
           Compiler_report_error(c, 27335838, _90, site, _93);
         }
         if(_x2c_macro_selected_1 == 3){
-          Var volatile code;  code = x2c_error_catch_capture(_x2c_error_handler_1, 0);  List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));  Compiler_report_lisp_failure(c, site, cons(code, detail), meta_call_form);
+          Var volatile code;  code = x2c_error_catch_capture(_x2c_error_handler_1, 0);  List volatile detail;  detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));  Compiler_report_lisp_failure(c, site, cons(code, detail), List_repr(meta_call_form));
         }
 
       }
@@ -1073,7 +1073,6 @@ Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
 }
 
 Atom Atom_intern(String);
-int String_try_own(String);
 static Var _meta_call_value(Compiler c, List expression, Token site){
 
   {
@@ -1081,7 +1080,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site){
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_131), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  Var name = _x2c_match_values[1];  List arguments = Var_list(_x2c_match_values[2]); {
-    if(! Var_is_row(name, 11, 7, 1)) break;  String spelling = Var_string(name);  Array values = Compiler__meta_values(c, callee, arguments, site);  Var function = Compiler__meta_function(c, spelling, site);  List applied = Array_list_free(values);  meta_call_form = List_repr(cons(Atom_intern(spelling), applied));  String_try_own(meta_call_form);  return Compiler__meta_apply(c, function, applied);
+    if(! Var_is_row(name, 11, 7, 1)) break;  String spelling = Var_string(name);  Array values = Compiler__meta_values(c, callee, arguments, site);  Var function = Compiler__meta_function(c, spelling, site);  List applied = Array_list_free(values);  meta_call_form = cons(Atom_intern(spelling), applied);  return Compiler__meta_apply(c, function, applied);
   }
   break;
 }
@@ -1121,7 +1120,7 @@ return values;
 
 static Var Compiler__meta_function(Compiler c, String name, Token site){
   Var function =((void) 0, Void);  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));  if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 259};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 260};  x2c_error_raise_n(& _x2c_error_site_1, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _132, site, cons(String_var(String_join(NULL, cons(String_var(_142), cons(String_var(name), NULL)))), NULL));  return function;
 }
@@ -1129,11 +1128,11 @@ static Var Compiler__meta_function(Compiler c, String name, Token site){
 int Type_is_function(Type);
 Type List_type_from_ast(List);
 String home_portable_path(String);
-Path Path_absolute(Path);
+String absolute_path(String);
 Type Type_canonicalize(Type);
 void Sym_set(Sym, List, List);
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker){
-  if(! _init_guard_) _file_init_();  if(! Type_is_function(List_type_from_ast(declaration))) return;  String path = home_portable_path(Path_absolute(c -> filename));  Type type = Type_canonicalize(List_type_from_ast(declaration));  String name = Compiler__native_meta_name(c, declaration, marker);  Sym_set(c -> sym, cons(_144, cons(List_var(cons(_145, cons(String_var(path), cons(int_var(marker -> pos), NULL)))), NULL)), ({
+  if(! _init_guard_) _file_init_();  if(! Type_is_function(List_type_from_ast(declaration))) return;  String path = home_portable_path(absolute_path(c -> filename));  Type type = Type_canonicalize(List_type_from_ast(declaration));  String name = Compiler__native_meta_name(c, declaration, marker);  Sym_set(c -> sym, cons(_144, cons(List_var(cons(_145, cons(String_var(path), cons(int_var(marker -> pos), NULL)))), NULL)), ({
     Var _x2c_literal_part_0 = String_var(name);  Var _x2c_literal_part_1 = List_var(Compiler_func_signature(c, type));  cons(_146, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
   }
   ));
@@ -1162,7 +1161,7 @@ if(! String_truth(name)) Compiler_report_error(c, 33658058, _164, marker, NULL);
 
 Var List_getindex(List, int);
 void Compiler_install_native_meta_effects(Compiler c, Map globs){
-  if(! _init_guard_) _file_init_();  List unit = cons(String_var(Path_absolute(c -> filename)), NULL); {
+  if(! _init_guard_) _file_init_();  List unit = cons(String_var(absolute_path(c -> filename)), NULL); {
     Var key, value;  Map _x2c_macro_object_7 = globs;  unsigned _x2c_macro_cursor_7 = 0;  Var _x2c_macro_cursor_output_9;  Var _x2c_macro_cursor_output_10;  while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
       key = _x2c_macro_cursor_output_9;  value = _x2c_macro_cursor_output_10; {
         if(_declared_in(key, unit)) continue; {
@@ -1663,6 +1662,7 @@ static Map _linked_module(void){
 
 int Map_contains(Map, Var);
 int String_equal(String, String);
+Path Path_absolute(Path);
 String x2c_get_root(void);
 static int Compiler__linked_copy(Compiler c, String name, Map linked){
   if(Map_contains(linked_hashes, String_var(name))) return Compiler__linked_texts_match(c, name, linked, Map_new());  return String_truth(c -> filename) && String_equal(Path_absolute(c -> filename), String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_313), NULL))));
@@ -1788,6 +1788,7 @@ static void _open_native_module(String path){
 
 void Scope_shutdown_hook(void(*)(void));
 Var Map_var(Map);
+int String_try_own(String);
 void Compiler_add_native_module(String path, Map(* entry)(void)){
   if(! _init_guard_) _file_init_();  Map targets = NULL; {
     Scope_push(& native_module_scope); {

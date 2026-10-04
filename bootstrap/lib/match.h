@@ -24,11 +24,24 @@ typedef struct MatchCaptureBuffer{
 }
 MatchCaptureBuffer;
 
+typedef struct MatchKey{
+  Var head, inner;
+  int index, nested;
+}
+MatchKey;
+
+enum{
+  MATCH_KEY_MAX = 8
+}
+;
+
 typedef struct MatchPlan{
   MachineProgram program;
   MatchCaptureLayout layout;
   MachinePrepare status;
   const char * reason;
+  int key_count, key_bits;
+  MatchKey keys[MATCH_KEY_MAX];
 }
 * MatchPlan;
 
@@ -63,6 +76,8 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
 int MatchPlan_execute_capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
 int MatchPlan_try_capture(MatchPlan plan, List input, MatchCaptureBuffer * captures);
+
+int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var));
 
 int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineStats * stats);
 

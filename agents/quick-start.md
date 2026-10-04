@@ -158,12 +158,11 @@ pass exact suite names, for example
 duplicates run once and unknown names return status 2. Without arguments the
 runner executes every suite, as the existing validation commands do.
 
-For optional parallel stage translation, use
-`make build X2C_FLAGS='-j 4'`. Native compilation retains its existing Make
-job limit. On the measured 16-core host this reduced clean-stage wall time
-29% with identical generated C/H and 3.8% more CPU time; the default remains
-unchanged. The B4/B5 section of
-`plans/archive/x2c-correctness-performance-tooling.md` records the full comparison.
+Stage builds translate each batch with `BUILD_JOBS` workers, the online
+processor count unless overridden, and write the same C/H as a serial run.
+`BUILD_JOBS=N` limits both translation and native compilation;
+`X2C_FLAGS='-j 1'` translates serially. On the 16-core host, a clean
+`make build-safe` took 7.1 s instead of 12.0 s with serial translation.
 
 Stages 1 and up translate `lib/` and `src/` with the hidden
 `--fatal-warnings` option and compile the generated C with `-Werror`, so an

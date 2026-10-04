@@ -1383,8 +1383,9 @@ static void Compiler__add_typedef_names(Compiler c, Array names, String path, Ma
 }
 }
 
+String real_path(String);
 static String _canonical_path(String path){
-  char buffer[PATH_MAX];  return realpath(path, buffer) ? String_new(buffer) : path;
+  String real = real_path(path);  return String_truth(real) ? real : path;
 }
 
 static String _cached_canonical(char * cache, String dir){

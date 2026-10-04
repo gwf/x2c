@@ -193,6 +193,7 @@ List Compiler.evaluate_meta_expression(
 Var Compiler.run_meta_call(
   Compiler c, List expression, Token site, int slot) {
   Var value;
+  meta_call_form = NULL;
   try value = _meta_call_value(c, expression, site);
   catch %(meta-later *): {
     value = void;
@@ -204,12 +205,13 @@ Var Compiler.run_meta_call(
   catch %(call-stack *):
     $report.macro.call_depth(c, site);
   catch %(?code *detail):
-    c.report_lisp_failure(site, cons(code, detail), meta_call_form);
+    c.report_lisp_failure(site, cons(code, detail), meta_call_form.repr());
   return value;
 }
 
-/* The last call a `$` expression made, as a failure reports it. */
-static String meta_call_form = NULL;
+/* The last call a `$` expression made, which a failure renders. A unit's
+   Pool holds it, so each `$` expression starts without one. */
+static List meta_call_form = NULL;
 
 /* Calls a `meta` function named at a code boundary with its evaluated
    arguments. */
@@ -225,8 +227,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       Array values = c._meta_values(callee, arguments, site);
       Var function = c._meta_function(spelling, site);
       List applied = values.list_free();
-      meta_call_form = cons(Atom.intern(spelling), applied).repr();
-      meta_call_form.try_own();
+      meta_call_form = cons(Atom.intern(spelling), applied);
       return c._meta_apply(function, applied);
     }
   $report.macro.call_target(c, site);
@@ -274,7 +275,7 @@ static Var Compiler._meta_function(Compiler c, String name, Token site) {
 void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (!declaration.type_from_ast().is_function()) return;
-  String path = home_portable_path(Path.absolute(c.filename));
+  String path = home_portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   String name = c._native_meta_name(declaration, marker);
   c.sym.set(%("source-node" (declaration $path ${marker.pos})),
@@ -295,7 +296,7 @@ static String Compiler._native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  List unit = %(${Path.absolute(c.filename)});
+  List unit = %(${absolute_path(c.filename)});
   foreach (Var (key, value), globs) {
     if (_declared_in(key, unit)) continue;
     foreach (List row, c._native_meta_rows(value)) {

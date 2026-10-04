@@ -211,15 +211,24 @@ static List _typedef_names(List node) {
   return NULL;
 }
 
+/* The header items the markers are decided against. `declared` maps each
+   typedef name to the first header position declaring it, and `spelled`
+   holds the type names the items from position `walked` on spell. */
+typedef struct HeaderNeeds {
+  Array header;
+  Map declared, spelled;
+  int walked;
+} HeaderNeeds;
+
 /* The markers are decided from last to first, so a promoted typedef counts
    as a later header item for the markers before it. */
 static void _promote_typedefs(Array header, Array pending) {
-  int count = header.len();
-  for (int i = count - 1; i >= 0; i--)
+  HeaderNeeds needs = {.header = header, .walked = header.len()};
+  for (int i = header.len() - 1; i >= 0; i--)
     match (header[i]) case %(pending ?index): {
       int at = index;
       (List names, List node, int promoted) = pending[at];
-      if (!promoted) promoted = _header_needs(header, i, names);
+      if (!promoted) promoted = needs.at(i, names);
       pending[at] = %($names $node $promoted);
       if (promoted) header[i] = node;
     }
@@ -227,37 +236,52 @@ static void _promote_typedefs(Array header, Array pending) {
 
 /* A header item after position `i` spells one of `names` that no header
    typedef before `i` declares. */
-static int _header_needs(Array header, int i, List names) {
+static int HeaderNeeds.at(HeaderNeeds &n, int i, List names) {
   foreach (String name, names)
-    if (!_declared_before(header, i, name) && _spelled_after(header, i, name))
-      return 1;
+    if (!n.declared_before(i, name) && n.spelled_after(i, name)) return 1;
   return 0;
 }
 
-static int _declared_before(Array header, int i, String name) {
-  for (int j = 0; j < i; j++)
-    if (header[j] is <list> && name in _typedef_names(header[j])) return 1;
-  return 0;
+/* Only positions after the marker being decided have changed, so the first
+   declarations come from the header as it is when first needed. */
+static int HeaderNeeds.declared_before(HeaderNeeds &n, int i, String name) {
+  if (!n.declared) {
+    n.declared = {};
+    int count = n.header.len();
+    for (int j = 0; j < count; j++)
+      if (n.header[j] is <list>)
+        foreach (String declared, _typedef_names(n.header[j]))
+          if (!(declared in n.declared)) n.declared[declared] = j;
+  }
+  Var first;
+  return n.declared.try_get(name, first) && first.int() < i;
 }
 
-static int _spelled_after(Array header, int i, String name) {
-  int count = header.len();
-  for (int j = i + 1; j < count; j++)
-    if (header[j] is <list> && _mentions_type(header[j], name)) return 1;
-  return 0;
+/* Every item after `i` is decided, so each is read once, as it stands. */
+static int HeaderNeeds.spelled_after(HeaderNeeds &n, int i, String name) {
+  if (!n.spelled) n.spelled = {};
+  while (n.walked > i + 1) {
+    Var item = n.header[--n.walked];
+    if (item is <list>) _spelled_types(item, n.spelled);
+  }
+  return name in n.spelled;
 }
 
-/* True when `node` spells the typedef name `name` anywhere, as a
+/* Adds each typedef name `node` spells anywhere to `names`, as a
    single-string type atom such as `("Point")`. */
-static int _mentions_type(List node, String name) {
-  if (!node) return 0;
+static void _spelled_types(List node, Map names) {
+  if (!node) return;
   Var head = node.car();
-  if (head is <string> && !node.cdr()) return head == name;
-  if (head is <symbol> && head.symbol().is_type_qualifier())
-    return _mentions_type(node.cdr(), name);
+  if (head is <string> && !node.cdr()) {
+    names[head] = 1;
+    return;
+  }
+  if (head is <symbol> && head.symbol().is_type_qualifier()) {
+    _spelled_types(node.cdr(), names);
+    return;
+  }
   foreach (Var part, node)
-    if (part is <list> && _mentions_type(part, name)) return 1;
-  return 0;
+    if (part is <list>) _spelled_types(part, names);
 }
 
 /* Each remaining marker becomes its typedef in the file the typedef settled
@@ -543,11 +567,13 @@ static List _place_groups(
 
 static List _typedef_forwards(List items, List earlier) {
   Array candidates = _forward_candidates(items), out = [];
-  Map available = {};
+  Map available = {}, first = {};
   foreach (List node, earlier) _add_names(available, node);
+  for (int i = candidates.len() - 1; i >= 0; i--)
+    first[candidates[i].car()] = i;
   foreach (List node, items) {
     match (node) case %(typedef ?base ?):
-      _add_forwards(out, candidates, available, base);
+      _add_forwards(out, candidates, first, available, base);
     out.push(node);
     _add_names(available, node);
   }
@@ -581,12 +607,21 @@ static List _typedef_forward(Type type, List bindings) {
 }
 
 /* A typedef whose base spells a candidate alias not yet declared follows
-   that alias's forward. */
+   that alias's forward, in candidate order. `first` maps each alias to its
+   first candidate; a later one for the same alias always finds it
+   declared. */
 static void _add_forwards(
-  Array out, Array candidates, Map available, Var base) {
-  foreach (List candidate, candidates) {
-    (String name, List forward) = candidate;
-    if (name in available || !_mentions_type(base, name)) continue;
+  Array out, Array candidates, Map first, Map available, Var base) {
+  Map spelled = {};
+  _spelled_types(base, spelled);
+  Array found = [];
+  foreach (Var name, spelled.keys()) {
+    Var at;
+    if (!(name in available) && first.try_get(name, at)) found.push(at);
+  }
+  foreach (int at, found.sort()) {
+    (String name, List forward) = candidates[at];
+    if (name in available) continue;
     out.push(forward);
     _add_names(available, forward);
   }

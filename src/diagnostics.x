@@ -16,6 +16,7 @@
 */
 typedef struct Diagnostics {
   Array entries;    // Stored chronologically; entries() is a snapshot
+  Map published;    // Each stored entry and its first position in entries
   Compiler printer; // Prints each published entry; NULL does not stream
   int limit;        // 0 disables limiting
   int count, limit_notified;
@@ -53,12 +54,14 @@ static void _emit_entry(Diagnostics diag, List entry) {
 Diagnostics Diagnostics.new(Compiler printer, int limit) {
   Diagnostics diag = Scope.malloc(sizeof(struct Diagnostics));
   *diag = (struct Diagnostics) {
-    .entries = [], .printer = printer, .limit = (limit < 0) ? 0 : limit};
+    .entries = [], .published = {}, .printer = printer,
+    .limit = (limit < 0) ? 0 : limit};
   return diag;
 }
 
 /** Clears stored entries and limit state while preserving configuration. */
 void Diagnostics.reset(Diagnostics diag) {
+  diag._forget(0);
   diag.entries.clear();
   diag.count = 0;
   diag.limit_notified = 0;
@@ -86,6 +89,7 @@ void Diagnostics.release(Diagnostics diag, DiagnosticsHold hold, int keep) {
       _emit_entry(diag, diag.entries[i]);
     return;
   }
+  diag._forget(hold.entries);
   diag.entries.resize(hold.entries);
   diag.count = hold.count;
   diag.limit_notified = hold.limit_notified;
@@ -137,10 +141,25 @@ static List _build_entry(
 /* Some producers derive one failure twice, so an entry equal to a stored
    one is not repeated. Reports whether the entry was published. */
 static int Diagnostics._publish(Diagnostics diag, List entry) {
-  if (entry in diag.entries) return 0;
-  diag.entries.push(entry);
+  if (entry in diag.published) return 0;
+  diag._store(entry);
   _emit_entry(diag, entry);
   return 1;
+}
+
+static void Diagnostics._store(Diagnostics diag, List entry) {
+  diag.published.setdefault(entry, diag.entries.len());
+  diag.entries.push(entry);
+}
+
+/* The entries from position `from` on leave the store, so the repeat rule
+   stops seeing those first stored there. */
+static void Diagnostics._forget(Diagnostics diag, int from) {
+  for (int i = from; i < diag.entries.len(); i++) {
+    Var first;
+    if (diag.published.try_get(diag.entries[i], first) && first.int() >= from)
+      diag.published.del(diag.entries[i]);
+  }
 }
 
 /* The limit notice follows the report that reaches the threshold. It is
@@ -149,7 +168,7 @@ static void _publish_limit_notice(Diagnostics diag) {
   if (diag.limit == 1) return;
   String note = "too many errors, stopping";
   List entry = _build_entry(<limit>, <note>, note, NULL, NULL);
-  diag.entries.push(entry);
+  diag._store(entry);
   _emit_entry(diag, entry);
 }
 
@@ -416,7 +435,6 @@ static void Compiler._show_source_context(
 /* Find the physical line, including a script's shebang at line one. */
 static int _context_line(
   Compiler c, int line, char *&line_start, char *&line_end) {
-  int current_line = 1;
   char *text = c.text;
   line_start = line_end = text;
   // A script's first line reads as an include, but the reader wrote it.
@@ -428,16 +446,23 @@ static int _context_line(
     else while (*line_end && *line_end != '\n') line_end++;
     return line == 1;
   }
-  for (char *p = text; *p; p++) {
-    if (*p != '\n') continue;
-    current_line++;
-    if (current_line != line) continue;
-    line_start = p + 1;
-    line_end = line_start;
-    while (*line_end && *line_end != '\n') line_end++;
-    return 1;
-  }
-  return 0;
+  Array starts = c._line_starts();
+  if (line > starts.len()) return 0;
+  line_start = line_end = text + starts[line - 1].int();
+  while (*line_end && *line_end != '\n') line_end++;
+  return 1;
+}
+
+/* The offset where each line of the compiler's text starts, indexed once
+   per text. */
+static Array Compiler._line_starts(Compiler c) {
+  if (c.lines_text === c.text) return c.line_starts;
+  c.lines_text = c.text;
+  c.line_starts.clear();
+  c.line_starts.push(0);
+  for (char *p = c.text; *p; p++)
+    if (*p == '\n') c.line_starts.push(p + 1 - (char *) c.text);
+  return c.line_starts;
 }
 
 /* Clamp the caret to the line while retaining tabs before the token. */
@@ -454,6 +479,19 @@ static void _context_caret(
     putc(line_start[i] == '\t' ? '\t' : ' ', stderr);
   for (int i = 0; i < width; i++) putc('^', stderr);
   fprintf(stderr, "\n");
+}
+
+/** Moves collected child reports into the caller's store without re-emitting.
+    Shared stores already contain their entries. The child's separate store
+    remains configured and empty after its reports have been transferred.
+*/
+void Compiler.take_diagnostics(Compiler c, Compiler child) {
+  Diagnostics target = c.diagnostics, source = child.diagnostics;
+  if (target == source) return;
+  foreach (List entry, source.entries) target._store(entry);
+  target.count += source.count;
+  target.limit_notified |= source.limit_notified;
+  source.reset();
 }
 
 /** Returns the number of counted diagnostics accepted since the last reset.

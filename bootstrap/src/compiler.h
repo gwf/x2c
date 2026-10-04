@@ -90,6 +90,8 @@ typedef struct Compiler{
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
+  String lines_text;
+  Array line_starts;
   ScriptUnit unit_script, script;
   Lisp macro_lisp;
   String import_src;
@@ -259,8 +261,6 @@ void Compiler_own_diagnostics(Compiler c);
 
 void Compiler_borrow_diagnostics(Compiler c, Compiler owner);
 
-void Compiler_take_diagnostics(Compiler c, Compiler child);
-
 void Compiler_close_child(Compiler c, Compiler child);
 
 void Compiler_borrow_unit_semantics(Compiler c, Compiler owner);
@@ -274,6 +274,10 @@ void Compiler_return_unit_state(Compiler c, Compiler owner);
 int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);
+
+String real_path(String path);
+
+String absolute_path(String path);
 
 String home_portable_path(String path);
 

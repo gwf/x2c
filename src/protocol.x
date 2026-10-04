@@ -15,8 +15,6 @@
 $(import "../src/grammar.xmacro")
 $(import "../src/adapter-memo.xmacro")
 
-#include <limits.h>
-#include <stdlib.h>
 #include <string.h>
 #include "collect.x"
 #include "expressions.x"
@@ -141,11 +139,9 @@ static String Compiler._canonical_file(Compiler c, List location) {
    resolves on disk itself: trying the root depends on whether the first path
    resolved, which `Compiler.canonical_path` does not report. */
 static String Compiler._normalize_file(Compiler c, String file) {
-  char path[PATH_MAX], String root = c.root_dir;
-  if (realpath(file, path) ||
-      (root && file[0] != '/' && realpath(%"$root/$file", path)))
-    file = path;
-  return c.display_path(file);
+  String real = real_path(file), root = c.root_dir;
+  if (!real && root && file[0] != '/') real = real_path(%"$root/$file");
+  return c.display_path(real ? real : file);
 }
 
 static String _location_file(List location) {

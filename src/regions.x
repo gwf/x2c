@@ -75,16 +75,19 @@ protocol Var(Fact) as void *;
    is the innermost open region, `frame` is the region of the function's
    own storage, and `restored` holds the places a `$let` or another `defer`
    puts back before its block ends. `fresh` and `sinks` accumulate the
-   current function's summary, `warnings` holds the current round's, and
-   `pending` and `freed` are the expression walk's stacks. `meta` is set
-   while a `meta` definition is walked. */
+   current function's summary, `warnings` holds the current walk's, and
+   `pending` and `freed` are the expression walk's stacks. `readers` maps a
+   function name to the positions of the functions whose walks read its
+   summary, `stale` marks the positions to walk again, and `current` is the
+   position being walked. `meta` is set while a `meta` definition is
+   walked. */
 typedef struct Walk {
   Compiler c;
-  Map summaries, facts, sinks, restored, effects;
-  Array warnings, pending, freed;
+  Map summaries, facts, sinks, restored, effects, readers;
+  Array warnings, pending, freed, stale;
   Region open, frame;
   String function;
-  int depth, origin, fresh, changed, meta, audit;
+  int depth, origin, fresh, changed, meta, audit, current;
 } Walk;
 
 // runtime effects
@@ -281,13 +284,32 @@ static void Walk.fixpoint(Walk &w, List ast) {
   foreach (List function, functions)
     if (w.summaries[function.car()] is void)
       w.summaries[function.car()] = %(0 ());
-  /* Summaries only grow, so a round that changes none walked every body
-     against final summaries, and its warnings are the unit's. */
+  /* Summaries only grow, and a walk reads no summary but its callees', so
+     walking a function again before one of those changes repeats its last
+     walk. Each round walks the functions in order, skipping those, until a
+     round changes no summary. Each function's last walk then read final
+     summaries, and its warnings are the unit's. */
+  int count = functions.len();
+  Array found = $auto([]), stale = $auto([]);
+  w.readers = {};
+  w.stale = stale;
+  for (int i = 0; i < count; i++) {
+    found.push(NULL);
+    w.stale.push(1);
+  }
   do {
     w.changed = 0;
-    w.warnings = [];
-    foreach (List function, functions) w.analyze(function);
+    for (w.current = 0; w.current < count; w.current++) {
+      if (!w.stale[w.current].int()) continue;
+      w.stale[w.current] = 0;
+      w.warnings = [];
+      w.analyze(functions[w.current]);
+      found[w.current] = w.warnings;
+    }
   } while (w.changed);
+  w.warnings = [];
+  foreach (Array warnings, found)
+    foreach (Var warning, warnings) w.warnings.push(warning);
 }
 
 /* One row per function: its C name, its parameter bindings in order, and
@@ -331,6 +353,9 @@ static void Walk.analyze(Walk &w, List function) {
   if (summary == previous) return;
   w.summaries[name] = summary;
   w.changed = 1;
+  Var readers;
+  if (w.readers.try_get(name, readers))
+    foreach (int reader, readers) w.stale[reader] = 1;
 }
 
 // statements
@@ -1083,8 +1108,22 @@ static List Walk.summary(Walk &w, String callee) {
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
     case %(summary ?owner ?sinks): return %($owner $sinks);
   }
+  w.read(callee);
   Var local = w.summaries[callee];
   return local is void ? %(0 ()) : local;
+}
+
+/* Records that the current walk reads the summary of `callee`. */
+static void Walk.read(Walk &w, String callee) {
+  Var known;
+  if (!w.readers.try_get(callee, known)) {
+    known = [];
+    w.readers[callee] = known;
+  }
+  Array readers = known;
+  int count = readers.len();
+  if (!count || readers[count - 1].int() != w.current)
+    readers.push(w.current);
 }
 
 /* The argument a callee hands back as its result, when that argument is a

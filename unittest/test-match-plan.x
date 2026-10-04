@@ -1072,6 +1072,65 @@ static void plan_long_atom_binder_layout(void) {
   plan.free();
 }
 
+// input keys - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+static int _key_count(Var pattern) {
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  int count = plan.key_count;
+  plan.free();
+  return count;
+}
+
+static Var _key_view(Var value) {
+  match (value) case %(wrap ?inner): return inner;
+  return value;
+}
+
+/* Keys come from the first element and the first later element of the
+   fixed prefix that fixes some; any other shape records none, and the
+   machine still decides every input the keys admit. */
+static void plan_keys_refuse_only_unmatchable_inputs(void) {
+  EXPECT_INT_EQ(_key_count(%(call ?name *)), 1);
+  EXPECT_INT_EQ(_key_count(%(!or (call ?f) (expr ? (call ?f)))), 2);
+  EXPECT_INT_EQ(_key_count(%((!set ?kind (!or struct union)) ?name)), 2);
+  EXPECT_INT_EQ(_key_count(%(!or (a) ?x)), 0);
+  EXPECT_INT_EQ(_key_count(%(!not (a))), 0);
+  EXPECT_INT_EQ(_key_count(%(?head a)), 0);
+  EXPECT_INT_EQ(_key_count(%(*items a)), 0);
+  EXPECT_INT_EQ(_key_count(%((!or a b c) (!or d e f) ?)), 0);
+
+  Var call = %(!or (call ?f) (expr ? (call ?f)));
+  _exact_case(%(call g), call, %((?f g)));
+  _exact_case(%(expr int (call g)), call, %((?f g)));
+  _exact_case(%(expr int (ident g)), call, NULL);
+  _exact_case(%(expr int), call, NULL);
+  _exact_case(%(expr int g), call, NULL);
+  _exact_case(%(ident g), call, NULL);
+  _exact_case(NULL, call, NULL);
+  _parity_case(%((call g)), call);
+
+  Var origin = %(at m-origin ?where);
+  _exact_case(%(at m-origin 3), origin, %((?where 3)));
+  _exact_case(%(at m-other 3), origin, NULL);
+  Var kind = %((!set ?kind (!or struct union)) (binding ? ?name));
+  _exact_case(%(union (binding 1 u)), kind, %((?name u) (?kind union)));
+  _exact_case(%(enum (binding 1 u)), kind, NULL);
+  _exact_case(%(a b), %(!and (a *) (? b)), %(()));
+  _exact_case(%(c b), %(!and (a *) (? b)), NULL);
+
+  // A key that is not a canonical identity compares by language equality.
+  String tag = String.new("x2c.template");
+  Var text = %("x2c.template" ?arguments);
+  _exact_case(%($tag 1), text, %((?arguments 1)));
+  _exact_case(%(template 1), text, NULL);
+
+  MatchPlan plan = MatchPlan.prepare(%(expr ? (call *)));
+  EXPECT_TRUE(plan.admits(%(wrap (expr int (wrap (call g)))), _key_view));
+  EXPECT_FALSE(plan.admits(%(wrap (expr int (ident g))), _key_view));
+  EXPECT_FALSE(plan.admits(%(expr int (wrap (call g))), NULL));
+  plan.free();
+}
+
 
 $(import "test-macros.xmacro")
 
@@ -1102,4 +1161,5 @@ void match_plan_suite(void) {
   $test.run(source_site_reports_a_fence_like_the_operation);
   $test.run(plan_programs_stay_immutable);
   $test.run(plan_long_atom_binder_layout);
+  $test.run(plan_keys_refuse_only_unmatchable_inputs);
 }

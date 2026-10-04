@@ -55,11 +55,11 @@ static Fact Var_fact(Var value);
 
 typedef struct Walk{
   Compiler c;
-  Map summaries, facts, sinks, restored, effects;
-  Array warnings, pending, freed;
+  Map summaries, facts, sinks, restored, effects, readers;
+  Array warnings, pending, freed, stale;
   Region open, frame;
   String function;
-  int depth, origin, fresh, changed, meta, audit;
+  int depth, origin, fresh, changed, meta, audit, current;
 }
 Walk;
 
@@ -181,6 +181,8 @@ static Region Walk_captured_birth(Walk * w, List captures, int * born, Region * 
 
 static List Walk_summary(Walk * w, String callee);
 
+static void Walk_read(Walk * w, String callee);
+
 static Fact Walk_returned_argument(Walk * w, Var value, List * named);
 
 static Fact Walk_fact_of(Walk * w, Var expression, List * named);
@@ -244,11 +246,25 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
-  const void * _x2c_defer_capture_2;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -1649,14 +1665,20 @@ int Array_try_next(Array, int *, Var *);
 int Var_is_void(Var);
 Var List_car(List);
 Var Map_setindex(Map, Var, Var);
+Var Array_push(Array, Var);
+int Var_int(Var);
+Var Array_getindex(Array, int);
+Var Array_setindex(Array, int, Var);
+Var Array_var(Array);
+Array Var_array(Var);
 void x2c_cleanup_leave(X2CCleanup *);
 static void Walk_fixpoint(Walk * w, List ast){
   (* w).frame = Scope_calloc(1, sizeof(struct Region)); (* w).frame -> kind = 13765450;  Array functions = Array_new(); {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
-    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & functions;  X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    ;  _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & functions;  X2CCleanup _x2c_defer_record_0 ={
+      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_0); {
       _collect_functions(List_var(ast), functions); {
@@ -1665,16 +1687,52 @@ static void Walk_fixpoint(Walk * w, List ast){
         }
 
       }
-      do{
-        (* w).changed = 0; (* w).warnings = Array_new(); {
-          List function;  Array _x2c_macro_object_1 = functions;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-            function = Var_list(_x2c_macro_cursor_output_1);  Walk_analyze(&((* w)), function);
+      int count = Array_len(functions);  Array found = Array_new(); {
+        _x2c_defer_env_1 _x2c_macro_environment_1 ={
+          0
+        }
+        ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & found;  X2CCleanup _x2c_defer_record_1 ={
+          .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+        }
+        ;  x2c_cleanup_push(& _x2c_defer_record_1); {
+          Array stale = Array_new(); {
+            _x2c_defer_env_0 _x2c_macro_environment_0 ={
+              0
+            }
+            ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & stale;  X2CCleanup _x2c_defer_record_2 ={
+              .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+            }
+            ;  x2c_cleanup_push(& _x2c_defer_record_2); {
+              (* w).readers = Map_new(); (* w).stale = stale;  for(int i = 0;  i < count;  i ++){
+                Array_push(found, Var_null());  Array_push((* w).stale, int_var(1));
+              }
+              do{
+                (* w).changed = 0;  for((* w).current = 0; (* w).current < count; (* w).current ++){
+                  if(! Var_int(Array_getindex((* w).stale, (* w).current))) continue;  Array_setindex((* w).stale, (* w).current, int_var(0)); (* w).warnings = Array_new();  Walk_analyze(&((* w)), Var_list(Array_getindex(functions, (* w).current)));  Array_setindex(found, (* w).current, Array_var((* w).warnings));
+                }
+
+              }
+              while((* w).changed); ; (* w).warnings = Array_new(); {
+                Array warnings;  Array _x2c_macro_object_2 = found;  int _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+                  warnings = Var_array(_x2c_macro_cursor_output_2); {
+                    Var warning;  Array _x2c_macro_object_1 = warnings;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+                      warning = _x2c_macro_cursor_output_1;  Array_push((* w).warnings, warning);
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_defer_record_2);
           }
 
         }
-
+        x2c_cleanup_leave(& _x2c_defer_record_1);
       }
-      while((* w).changed); ;
+
     }
     x2c_cleanup_leave(& _x2c_defer_record_0);
   }
@@ -1682,7 +1740,6 @@ static void Walk_fixpoint(Walk * w, List ast){
 }
 
 int List_try_next(List, List *, Var *);
-Var Array_push(Array, Var);
 List Array_list_free(Array);
 static void _collect_functions(Var node, Array found){
 
@@ -1694,8 +1751,8 @@ static void _collect_functions(Var node, Array found){
 }
 case 458361162716: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_374), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  List rows = Var_list(_x2c_match_values[1]);  Var body = _x2c_match_values[2]; {
   Array parameters = Array_new(); {
-    Var row;  List _x2c_macro_object_2 = rows;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      row = _x2c_macro_cursor_output_2;
+    Var row;  List _x2c_macro_object_3 = rows;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      row = _x2c_macro_cursor_output_3;
   {
     List _x2c_match_expr = Var_list(row);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -1716,8 +1773,8 @@ Array_push(found, List_var(({
 break;
 }
 default: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
-  Var child;  List _x2c_macro_object_3 = children;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-    child = _x2c_macro_cursor_output_3;  _collect_functions(child, found);
+  Var child;  List _x2c_macro_object_4 = children;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
+    child = _x2c_macro_cursor_output_4;  _collect_functions(child, found);
   }
 
 }
@@ -1734,32 +1791,42 @@ Iter Map_keys(Map, Iter);
 int Iter_try_next(Iter, Var *);
 Array Array_sort(Array);
 int List_equal(List, List);
+Iter Var_iter(Var, Iter);
 static void Walk_analyze(Walk * w, List function){
   List _x2c_destructure_0 = function;  String name = Var_string(List_getindex(_x2c_destructure_0, 0));  List parameters = Var_list(List_getindex(_x2c_destructure_0, 1));  Var body = List_getindex(_x2c_destructure_0, 2); (* w).function = name;  List _x2c_destructure_1 = Var_list(Map_getindex((* w).summaries, String_var(name)));  int fresh = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  List sinks = Var_list(List_getindex(_x2c_destructure_1, 1)); (* w).facts = Map_new(); (* w).sinks = Map_new(); (* w).restored = Map_new(); (* w).open = NULL; (* w).depth =(* w).origin = 0; (* w).fresh = fresh; {
-    Var row;  List _x2c_macro_object_4 = sinks;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      row = _x2c_macro_cursor_output_4;  Map_setindex((* w).sinks, row, int_var(1));
+    Var row;  List _x2c_macro_object_5 = sinks;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
+      row = _x2c_macro_cursor_output_5;  Map_setindex((* w).sinks, row, int_var(1));
     }
 
   }
   int index = 0; {
-    List parameter;  List _x2c_macro_object_5 = parameters;  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      parameter = Var_list(_x2c_macro_cursor_output_5);  Walk_new_fact(&((* w)), parameter, index ++);
+    List parameter;  List _x2c_macro_object_6 = parameters;  List _x2c_macro_cursor_6 = _x2c_macro_object_6;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
+      parameter = Var_list(_x2c_macro_cursor_output_6);  Walk_new_fact(&((* w)), parameter, index ++);
     }
 
   }
   Walk_walk(&((* w)), body);  Array rows = Array_new(); {
-    Var row;  Iter _x2c_macro_iterator_6 = Map_keys((* w).sinks, &(struct Iter){
+    Var row;  Iter _x2c_macro_iterator_7 = Map_keys((* w).sinks, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-      row = _x2c_macro_item_6;  Array_push(rows, row);
+    );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_7, &(_x2c_macro_item_7))){
+      row = _x2c_macro_item_7;  Array_push(rows, row);
     }
 
   }
   List summary =({
     Var _x2c_literal_part_2 = int_var((* w).fresh);  Var _x2c_literal_part_3 = List_var(Array_list_free(Array_sort(rows)));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
   }
-  ), previous = Var_list(Map_getindex((* w).summaries, String_var(name)));  if(List_equal(summary, previous)) return;  Map_setindex((* w).summaries, String_var(name), List_var(summary)); (* w).changed = 1;
+  ), previous = Var_list(Map_getindex((* w).summaries, String_var(name)));  if(List_equal(summary, previous)) return;  Map_setindex((* w).summaries, String_var(name), List_var(summary)); (* w).changed = 1;  Var readers;  if(Map_try_get((* w).readers, String_var(name), &(readers))){
+    int reader;  Iter _x2c_macro_iterator_8 = Var_iter(readers, &(struct Iter){
+      int_var(0)
+    }
+    );  Var _x2c_macro_item_8;  while(Iter_try_next(_x2c_macro_iterator_8, &(_x2c_macro_item_8))){
+      reader = Var_int(Var_convert(_x2c_macro_item_8, 3453797));  Array_setindex((* w).stale, reader, int_var(1));
+    }
+
+  }
+
 }
 
 List Macro_case_pattern(Macro, List);
@@ -1802,8 +1869,8 @@ static void Walk_walk_at(Walk * w, int origin, Var inner){
 
 static void Walk_walk_block(Walk * w, List statements){
   Region outer =(* w).open;  Map restored =(* w).restored; (* w).depth += 1; {
-    Var statement;  List _x2c_macro_object_7 = statements;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_6))){
-      statement = _x2c_macro_cursor_output_6;  Walk_walk(&((* w)), statement);
+    Var statement;  List _x2c_macro_object_9 = statements;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_7))){
+      statement = _x2c_macro_cursor_output_7;  Walk_walk(&((* w)), statement);
     }
 
   }
@@ -1816,8 +1883,8 @@ static void Walk_close_to(Walk * w, Region region, Region outer){
 
 static void Walk_walk_sequence(Walk * w, List statements){
   {
-    Var statement;  List _x2c_macro_object_8 = statements;  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_7))){
-      statement = _x2c_macro_cursor_output_7;  Walk_walk(&((* w)), statement);
+    Var statement;  List _x2c_macro_object_10 = statements;  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_8))){
+      statement = _x2c_macro_cursor_output_8;  Walk_walk(&((* w)), statement);
     }
 
   }
@@ -1831,11 +1898,11 @@ static void Walk_walk_return(Walk * w, Type type, Var result){
 Iter Map_iter(Map, Iter);
 static void Walk_revive(Walk * w){
   {
-    Var known;  Iter _x2c_macro_iterator_9 = Map_iter((* w).facts, &(struct Iter){
+    Var known;  Iter _x2c_macro_iterator_11 = Map_iter((* w).facts, &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_9;  while(Iter_try_next(_x2c_macro_iterator_9, &(_x2c_macro_item_9))){
-      known = _x2c_macro_item_9; {
+    );  Var _x2c_macro_item_11;  while(Iter_try_next(_x2c_macro_iterator_11, &(_x2c_macro_item_11))){
+      known = _x2c_macro_item_11; {
         Fact fact = Var_fact(known);  fact -> dead = 0;
       }
 
@@ -1877,8 +1944,8 @@ return 1;
 
 static void Walk_walk_conditional(Walk * w, List children){
   Map restored =(* w).restored; (* w).depth += 1; {
-    Var child;  List _x2c_macro_object_10 = children;  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_8;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_8))){
-      child = _x2c_macro_cursor_output_8;  Walk_walk(&((* w)), child);
+    Var child;  List _x2c_macro_object_12 = children;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_9))){
+      child = _x2c_macro_cursor_output_9;  Walk_walk(&((* w)), child);
     }
 
   }
@@ -1888,11 +1955,11 @@ static void Walk_walk_conditional(Walk * w, List children){
 List List_cdr(List);
 static void Walk_walk_rows(Walk * w, List rows){
   {
-    List row;  List _x2c_macro_object_12 = rows;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_10))){
-      row = Var_list(_x2c_macro_cursor_output_10); {
+    List row;  List _x2c_macro_object_14 = rows;  List _x2c_macro_cursor_14 = _x2c_macro_object_14;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_11))){
+      row = Var_list(_x2c_macro_cursor_output_11); {
         Walk_scan(&((* w)), List_car(row), 0); {
-          Var statement;  List _x2c_macro_object_11 = List_cdr(row);  List _x2c_macro_cursor_11 = _x2c_macro_object_11;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_9))){
-            statement = _x2c_macro_cursor_output_9;  Walk_walk(&((* w)), statement);
+          Var statement;  List _x2c_macro_object_13 = List_cdr(row);  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_10))){
+            statement = _x2c_macro_cursor_output_10;  Walk_walk(&((* w)), statement);
           }
 
         }
@@ -1988,8 +2055,8 @@ static void Walk_note_deferred_stores(Walk * w, Var node){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_384), &_x2c_match_capture)) {List children = Var_list(_x2c_match_values[0]); {
-  Var child;  List _x2c_macro_object_13 = children;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_11))){
-    child = _x2c_macro_cursor_output_11;  Walk_note_deferred_stores(&((* w)), child);
+  Var child;  List _x2c_macro_object_15 = children;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_12))){
+    child = _x2c_macro_cursor_output_12;  Walk_note_deferred_stores(&((* w)), child);
   }
 
 }
@@ -2049,15 +2116,13 @@ Fact fact = Walk_fact_of(&((* w)), argument, NULL);  if(! fact || fact -> depth 
 }
 
 int List_len(List);
-Iter Var_iter(Var, Iter);
-int Var_int(Var);
 static void Walk_scan_call(Walk * w, Var call, String callee, List arguments){
   int count = List_len(arguments);  List types = _parameter_types(call); {
-    List row;  Iter _x2c_macro_iterator_14 = Var_iter(List_cadr(Walk_summary(&((* w)), callee)), &(struct Iter){
+    List row;  Iter _x2c_macro_iterator_16 = Var_iter(List_cadr(Walk_summary(&((* w)), callee)), &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_14;  while(Iter_try_next(_x2c_macro_iterator_14, &(_x2c_macro_item_14))){
-      row = Var_list(_x2c_macro_item_14); {
+    );  Var _x2c_macro_item_16;  while(Iter_try_next(_x2c_macro_iterator_16, &(_x2c_macro_item_16))){
+      row = Var_list(_x2c_macro_item_16); {
         List _x2c_destructure_3 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_3, 0), 3453797));  Var target = List_getindex(_x2c_destructure_3, 1);  if(index >= count) continue;  Type type = NULL, holder_type = NULL;  Var argument = _passed(types, arguments, index, &(type));  if(Var_equal(target, Symbol_var(1317118534))) Walk_flow(&((* w)), argument, type, 1317118534, NULL);  else if(Var_equal(target, Symbol_var(46060699100))) Walk_flow(&((* w)), argument, type, 534624, NULL);  else if(Var_equal(target, Symbol_var(1219734312))){
           int born = 0;  Region other = NULL;  Region region = Walk_birth(&((* w)), call, NULL, &(born), &(other));  struct Fact result ={
             .param = - 1, .born = born, .region = region, .other = other
@@ -2120,12 +2185,10 @@ static void Walk_scan_cons(Walk * w, Var node, Var head, Var tail){
   ;  Walk_flow(&((* w)), head, NULL, 534624, & result);  Walk_flow(&((* w)), tail, NULL, 534624, & result);  Array_push((* w).pending, tail);  Array_push((* w).pending, head);
 }
 
-Var Array_getindex(Array, int);
-Var Array_setindex(Array, int, Var);
 static void Walk_scan_children(Walk * w, List children){
   int start = Array_len((* w).pending); {
-    Var child;  List _x2c_macro_object_15 = children;  List _x2c_macro_cursor_15 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_12))){
-      child = _x2c_macro_cursor_output_12;  Array_push((* w).pending, child);
+    Var child;  List _x2c_macro_object_17 = children;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_13))){
+      child = _x2c_macro_cursor_output_13;  Array_push((* w).pending, child);
     }
 
   }
@@ -2184,8 +2247,8 @@ Type Var_type(Var);
 static void Walk_declare(Walk * w, Var specifiers, List bindings){
   Map types = Compiler_semantic_binding_facts((* w).c);  if(Var_contains(specifiers, Symbol_var(1317118534)) || Var_contains(specifiers, Symbol_var(387198108))){
     {
-      List item;  List _x2c_macro_object_16 = bindings;  List _x2c_macro_cursor_16 = _x2c_macro_object_16;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_13))){
-        item = Var_list(_x2c_macro_cursor_output_13);
+      List item;  List _x2c_macro_object_18 = bindings;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_14))){
+        item = Var_list(_x2c_macro_cursor_output_14);
   {
     List _x2c_match_expr = item;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -2204,8 +2267,8 @@ static void Walk_declare(Walk * w, Var specifiers, List bindings){
   return;
 }
 {
-  Var item;  List _x2c_macro_object_17 = bindings;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_14))){
-    item = _x2c_macro_cursor_output_14;
+  Var item;  List _x2c_macro_object_19 = bindings;  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_15))){
+    item = _x2c_macro_cursor_output_15;
   {
     List _x2c_match_expr = Var_list(item);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
@@ -2416,8 +2479,8 @@ static Region Walk_summary_birth(Walk * w, String callee, int * born, Region * o
 
 static Region Walk_captured_birth(Walk * w, List captures, int * born, Region * other){
   {
-    Var capture;  List _x2c_macro_object_18 = captures;  List _x2c_macro_cursor_18 = _x2c_macro_object_18;  Var _x2c_macro_cursor_output_15;  while(List_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_15))){
-      capture = _x2c_macro_cursor_output_15;
+    Var capture;  List _x2c_macro_object_20 = captures;  List _x2c_macro_cursor_20 = _x2c_macro_object_20;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_16))){
+      capture = _x2c_macro_cursor_output_16;
   {
     List _x2c_match_expr = Var_list(capture);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
@@ -2452,16 +2515,23 @@ static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x
 case 1080280: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762698712ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _1165;  break; } } case 41188490: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802806922ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && !_x2c_match_cursor) {return _1178;  break; } } case 42239593650: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497979001212082ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var owner = _x2c_match_values[0];  Var sinks = _x2c_match_values[1];  return cons(owner, cons(sinks, NULL));  break; } } default: break;
     }
   }
-Var local = Map_getindex((* w).summaries, String_var(callee));  return Var_list(Var_is_void(local) ? List_var(_51) : local);
+Walk_read(&((* w)), callee);  Var local = Map_getindex((* w).summaries, String_var(callee));  return Var_list(Var_is_void(local) ? List_var(_51) : local);
+}
+
+static void Walk_read(Walk * w, String callee){
+  Var known;  if(! Map_try_get((* w).readers, String_var(callee), &(known))){
+    known = Array_var(Array_new());  Map_setindex((* w).readers, String_var(callee), known);
+  }
+  Array readers = Var_array(known);  int count = Array_len(readers);  if(! count || Var_int(Array_getindex(readers, count - 1)) !=(* w).current) Array_push(readers, int_var((* w).current));
 }
 
 static Fact Walk_returned_argument(Walk * w, Var value, List * named){
   List arguments = NULL;  String callee = _callee_of(value, &(arguments));  if(! String_truth(callee)) return NULL;  List types = _parameter_types(value); {
-    List row;  Iter _x2c_macro_iterator_19 = Var_iter(List_cadr(Walk_summary(&((* w)), callee)), &(struct Iter){
+    List row;  Iter _x2c_macro_iterator_21 = Var_iter(List_cadr(Walk_summary(&((* w)), callee)), &(struct Iter){
       int_var(0)
     }
-    );  Var _x2c_macro_item_19;  while(Iter_try_next(_x2c_macro_iterator_19, &(_x2c_macro_item_19))){
-      row = Var_list(_x2c_macro_item_19); {
+    );  Var _x2c_macro_item_21;  while(Iter_try_next(_x2c_macro_iterator_21, &(_x2c_macro_item_21))){
+      row = Var_list(_x2c_macro_item_21); {
         List _x2c_destructure_5 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_5, 0), 3453797));  Var target = List_getindex(_x2c_destructure_5, 1);  if(! Var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Type type = NULL;  Fact fact = Walk_fact_of(&((* w)), _passed(types, arguments, index, &(type)), named);  if(fact &&(fact -> param >= 0 || fact -> born || fact -> region || fact -> other)) return fact;
       }
 
@@ -2755,8 +2825,8 @@ void Compiler_check_regions(Compiler c, List ast){
     .c = c, .summaries = Map_new(), .pending = Array_new(), .freed = Array_new()
   }
   ;  Walk_fixpoint(&(w), ast);  int origin = c -> origin; {
-    List warning;  Array _x2c_macro_object_20 = w.warnings;  int _x2c_macro_cursor_20 = 0;  Var _x2c_macro_cursor_output_16;  while(Array_try_next(_x2c_macro_object_20, &(_x2c_macro_cursor_20), &(_x2c_macro_cursor_output_16))){
-      warning = Var_list(_x2c_macro_cursor_output_16); {
+    List warning;  Array _x2c_macro_object_22 = w.warnings;  int _x2c_macro_cursor_22 = 0;  Var _x2c_macro_cursor_output_17;  while(Array_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_17))){
+      warning = Var_list(_x2c_macro_cursor_output_17); {
         List _x2c_destructure_6 = warning;  Symbol code = Var_symbol(List_getindex(_x2c_destructure_6, 0));  int at = Var_int(Var_convert(List_getindex(_x2c_destructure_6, 1), 3453797));  String message = Var_string(List_getindex(_x2c_destructure_6, 2));  List notes = Var_list(List_getindex(_x2c_destructure_6, 3));  c -> origin = at;  Compiler_report_warning(c, code, message, NULL, notes);
       }
 
@@ -2792,19 +2862,19 @@ Walk w ={
 }
 ;  Walk_fixpoint(&(w), fn);  if(! Array_len(w.warnings)) return;  List _x2c_destructure_7 = Var_list(Array_getindex(w.warnings, 0));  Symbol code = Var_symbol(List_getindex(_x2c_destructure_7, 0));  int at = Var_int(Var_convert(List_getindex(_x2c_destructure_7, 1), 3453797));  String message = Var_string(List_getindex(_x2c_destructure_7, 2));  List notes = Var_list(List_getindex(_x2c_destructure_7, 3)); {
   int * _x2c_macro_address_0 = & c -> origin;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_defer_env_3 _x2c_macro_environment_3 ={
       0
     }
-    ;  _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_address_0;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & _x2c_macro_previous_0;  X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    ;  _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & _x2c_macro_address_0;  _x2c_macro_environment_3._x2c_defer_capture_4 =(const void *) & _x2c_macro_previous_0;  X2CCleanup _x2c_defer_record_3 ={
+      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_1); {
+    ;  x2c_cleanup_push(& _x2c_defer_record_3); {
       * _x2c_macro_address_0 = at; {
         Compiler_report_error(c, code, message, NULL, notes);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_defer_record_3);
   }
 
 }
@@ -2815,8 +2885,8 @@ Map Compiler_audit_regions(Compiler c, List ast, Map seed, Map effects, Array fi
     .c = c, .summaries = Map_copy(seed), .effects = effects, .pending = Array_new(), .freed = Array_new(), .audit = 1
   }
   ;  Walk_fixpoint(&(w), ast); {
-    List finding;  Array _x2c_macro_object_21 = w.warnings;  int _x2c_macro_cursor_21 = 0;  Var _x2c_macro_cursor_output_17;  while(Array_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_17))){
-      finding = Var_list(_x2c_macro_cursor_output_17);  Array_push(findings, List_var(finding));
+    List finding;  Array _x2c_macro_object_23 = w.warnings;  int _x2c_macro_cursor_23 = 0;  Var _x2c_macro_cursor_output_18;  while(Array_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_18))){
+      finding = Var_list(_x2c_macro_cursor_output_18);  Array_push(findings, List_var(finding));
     }
 
   }
@@ -2862,7 +2932,15 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  *(*(int * *) _x2c_defer_data_1->_x2c_defer_capture_1) =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2);
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_2));
+}
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  *(*(int * *) _x2c_defer_data_3->_x2c_defer_capture_3) =(*(int *) _x2c_defer_data_3->_x2c_defer_capture_4);
 }
 
 #undef _x2c_initializer_choice_3FB21E3E_0_expanded

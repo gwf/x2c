@@ -148,10 +148,22 @@ Var Pool.lookup(Pool inner, Var key) {
      raises only when a level is probed. */
   if (!inner) return void;
   unsigned key_hash = key.hash();
-  /* `Map.get_hashed` raises for any cause from custom equality, so the
-     branch mutex is released through one hoisted `defer`. A per-iteration
-     `defer` measured 4% of a translation against 3% for this form. `locked`
-     is the level whose mutex this call still holds. */
+  /* Without workers no level can be contended, so the chain is probed
+     without the locks and the `defer` that releases them. That registration
+     measured 3% of a translation's instructions. */
+  if (pool_multithreaded) return inner._lookup_locked(key, key_hash);
+  for (Pool pool = inner; pool; pool = pool.up) {
+    Var found = pool.table.get_hashed(key, key_hash);
+    if (found is not void) return found;
+  }
+  return void;
+}
+
+/* `Map.get_hashed` raises for any cause from custom equality, so the branch
+   mutex is released through one hoisted `defer`. A per-iteration `defer`
+   measured 4% of a translation against 3% for this form. `locked` is the
+   level whose mutex this call still holds. */
+static Var Pool._lookup_locked(Pool inner, Var key, unsigned key_hash) {
   Pool locked = NULL;
   defer locked._unlock();
   for (Pool pool = inner; pool; pool = pool.up) {

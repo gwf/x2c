@@ -32,7 +32,7 @@ X2c command-line parsing and presentation.
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1228`
+Source: `src/cli.x:1230`
 
 #### cli_dependency_pass_through
 
@@ -78,7 +78,7 @@ Source: `src/cli.x:365`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1210`
+Source: `src/cli.x:1212`
 
 #### cli_response_arguments
 
@@ -96,7 +96,7 @@ Source: `src/cli.x:773`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1232`
+Source: `src/cli.x:1234`
 
 ### `CliRequest`
 
@@ -107,7 +107,7 @@ Source: `src/cli.x:1232`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1235`
+Source: `src/cli.x:1237`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -120,7 +120,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1243`
+Source: `src/cli.x:1245`
 
 ### `TargetKind`
 

@@ -38,6 +38,10 @@ static List _build_entry(Symbol code, Symbol severity, String message, List loca
 
 static int Diagnostics__publish(Diagnostics diag, List entry);
 
+static void Diagnostics__store(Diagnostics diag, List entry);
+
+static void Diagnostics__forget(Diagnostics diag, int from);
+
 static void _publish_limit_notice(Diagnostics diag);
 
 static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes);
@@ -57,6 +61,8 @@ static List _compiler_location(Compiler compiler, Token token);
 static void Compiler__show_source_context(Compiler compiler, int line, int column, int length);
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end);
+
+static Array Compiler__line_starts(Compiler c);
 
 static void _context_caret(char * line_start, char * line_end, int column, int length);
 
@@ -235,11 +241,13 @@ void * Scope_malloc(size_t);
 
 Array Array_new(void);
 
+Map Map_new(void);
+
 Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
   * diag =(struct Diagnostics){
-    .entries = Array_new(), .printer = printer, .limit =(limit < 0) ? 0 : limit
+    .entries = Array_new(), .published = Map_new(), .printer = printer, .limit =(limit < 0) ? 0 : limit
   }
   ;
   return diag;
@@ -247,6 +255,7 @@ Diagnostics Diagnostics_new(Compiler printer, int limit){
 
 void Diagnostics_reset(Diagnostics diag){
   if(! _init_guard_) _file_init_();
+  Diagnostics__forget(diag, 0);
   Array_clear(diag -> entries);
   diag -> count = 0;
   diag -> limit_notified = 0;
@@ -275,6 +284,7 @@ void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep){
     for(int i = hold.entries;  i < Array_len(diag -> entries);  i ++) _emit_entry(diag, Var_list(Array_getindex(diag -> entries, i)));
     return;
   }
+  Diagnostics__forget(diag, hold.entries);
   Array_resize(diag -> entries, hold.entries);
   diag -> count = hold.count;
   diag -> limit_notified = hold.limit_notified;
@@ -302,22 +312,43 @@ static List _build_entry(Symbol code, Symbol severity, String message, List loca
   );
 }
 
-int Array_contains(Array, Var);
+int Map_contains(Map, Var);
+
+static int Diagnostics__publish(Diagnostics diag, List entry){
+  if(Map_contains(diag -> published, List_var(entry))) return 0;
+  Diagnostics__store(diag, entry);
+  _emit_entry(diag, entry);
+  return 1;
+}
+
+Var Map_setdefault(Map, Var, Var);
 
 Var Array_push(Array, Var);
 
-static int Diagnostics__publish(Diagnostics diag, List entry){
-  if(Array_contains(diag -> entries, List_var(entry))) return 0;
+static void Diagnostics__store(Diagnostics diag, List entry){
+  Map_setdefault(diag -> published, List_var(entry), Var_box_ulong(Array_len(diag -> entries)));
   Array_push(diag -> entries, List_var(entry));
-  _emit_entry(diag, entry);
-  return 1;
+}
+
+int Map_try_get(Map, Var, Var *);
+
+int Var_int(Var);
+
+Var Map_del(Map, Var);
+
+static void Diagnostics__forget(Diagnostics diag, int from){
+  for(int i = from;  i < Array_len(diag -> entries);  i ++){
+    Var first;
+    if(Map_try_get(diag -> published, Array_getindex(diag -> entries, i), &(first)) && Var_int(first) >= from) Map_del(diag -> published, Array_getindex(diag -> entries, i));
+  }
+
 }
 
 static void _publish_limit_notice(Diagnostics diag){
   if(diag -> limit == 1) return;
   String note = _5;
   List entry = _build_entry(25782888, 949514, note, NULL, NULL);
-  Array_push(diag -> entries, List_var(entry));
+  Diagnostics__store(diag, entry);
   _emit_entry(diag, entry);
 }
 
@@ -543,7 +574,7 @@ void report_suspend(void);
 int List_try_next(List, List *, Var *);
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
   if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _118;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 374};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 393};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
     Var held;  List _x2c_macro_object_0 = Diagnostics_entries(diag);  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -567,20 +598,32 @@ static void Compiler__show_source_context(Compiler compiler, int line, int colum
 }
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end){
-  int current_line = 1;  char * text = c -> text; (* line_start) =(* line_end) = text;  if(line <= 1){
+  char * text = c -> text; (* line_start) =(* line_end) = text;  if(line <= 1){
     if(c -> script){
       (* line_start) = c -> script -> shebang; (* line_end) =(* line_start) + strlen((* line_start));
     }
     else while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;  return line == 1;
   }
-  for(char * p = text;  * p;  p ++){
-    if(* p != '\n') continue;  current_line ++;  if(current_line != line) continue; (* line_start) = p + 1; (* line_end) =(* line_start);  while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;  return 1;
-  }
-  return 0;
+  Array starts = Compiler__line_starts(c);  if(line > Array_len(starts)) return 0; (* line_start) =(* line_end) = text + Var_int(Array_getindex(starts, line - 1));  while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;  return 1;
+}
+
+static Array Compiler__line_starts(Compiler c){
+  if(c -> lines_text == c -> text) return c -> line_starts;  c -> lines_text = c -> text;  Array_clear(c -> line_starts);  Array_push(c -> line_starts, int_var(0));  for(char * p = c -> text;  * p;  p ++) if(* p == '\n') Array_push(c -> line_starts, int_var(p + 1 -(char *) c -> text));  return c -> line_starts;
 }
 
 static void _context_caret(char * line_start, char * line_end, int column, int length){
   int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;  if(start > line_len) start = line_len;  int width = length > 0 ? length : 1;  if(start < line_len && width > line_len - start) width = line_len - start;  if(width < 1) width = 1;  fprintf(stderr, "  %.*s\n", line_len, line_start);  fprintf(stderr, "  ");  for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);  for(int i = 0;  i < width;  i ++) putc('^', stderr);  fprintf(stderr, "\n");
+}
+
+int Array_try_next(Array, int *, Var *);
+void Compiler_take_diagnostics(Compiler c, Compiler child){
+  if(! _init_guard_) _file_init_();  Diagnostics target = c -> diagnostics, source = child -> diagnostics;  if(target == source) return; {
+    List entry;  Array _x2c_macro_object_1 = source -> entries;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      entry = Var_list(_x2c_macro_cursor_output_1);  Diagnostics__store(target, entry);
+    }
+
+  }
+  target -> count += source -> count;  target -> limit_notified |= source -> limit_notified;  Diagnostics_reset(source);
 }
 
 int Compiler_error_count(Compiler compiler){
@@ -611,8 +654,8 @@ void Compiler_dump_tokens(Compiler compiler){
 int Map_try_next(Map, unsigned *, Var *, Var *);
 void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_1 = map;  unsigned _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  Var _x2c_macro_cursor_output_2;  while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
-      key = _x2c_macro_cursor_output_1;  value = _x2c_macro_cursor_output_2;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
+    Var key, value;  Map _x2c_macro_object_2 = map;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  Var _x2c_macro_cursor_output_3;  while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
+      key = _x2c_macro_cursor_output_2;  value = _x2c_macro_cursor_output_3;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
   }
@@ -622,8 +665,8 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
 String Var_repr(Var);
 void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_2 = compiler -> key_ids;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_3;  Var _x2c_macro_cursor_output_4;  while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
-      key = _x2c_macro_cursor_output_3;  value = _x2c_macro_cursor_output_4;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
+    Var key, value;  Map _x2c_macro_object_3 = compiler -> key_ids;  unsigned _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
+      key = _x2c_macro_cursor_output_4;  value = _x2c_macro_cursor_output_5;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
   }

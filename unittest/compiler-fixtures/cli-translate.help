@@ -59,3 +59,5 @@ The output directory defaults to the current directory and must already
 exist. Use --out-dir to select another directory.
 Shell wildcards are allowed because the shell expands them; x2c does not
 interpret wildcard characters in input operands.
+Inputs translate in parallel, one job per online processor. Under Make
+the default is one job; -j 1 translates serially.

@@ -988,7 +988,9 @@ static HelpPage help_pages[] = {
       The output directory defaults to the current directory and must already
       exist. Use --out-dir to select another directory.
       Shell wildcards are allowed because the shell expands them; x2c does not
-      interpret wildcard characters in input operands.") },
+      interpret wildcard characters in input operands.
+      Inputs translate in parallel, one job per online processor. Under Make
+      the default is one job; -j 1 translates serially.") },
   { <build>,
     $dedent(%"
       Usage:
@@ -1211,14 +1213,14 @@ CliRequest cli_request(Symbol command) {
   int mask = _command_mask(command);
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = command;
-  request.jobs = mask & CLI_NATIVE ? _default_build_jobs() : 1;
+  request.jobs = _default_jobs();
   request.max_errors = 20;
   if (mask & CLI_NATIVE) request.kind = <executable>;
   return request;
 }
 
 // An outer Make owns concurrency unless the caller explicitly supplies -j.
-static int _default_build_jobs(void) {
+static int _default_jobs(void) {
   if (report_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ? (int) count : 1;
