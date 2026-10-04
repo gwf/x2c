@@ -2695,7 +2695,7 @@ static List _recorded(Map m){
 }
 
 static void Definition_finish(Definition * d){
-  (* d).template = _slot_binders(Definition_wrap(&((* d))));  Map bindings = Map_new();  if(Definition_target_kind(&((* d))) == 1405544) Definition_constructed_names(&((* d)), bindings);  Array locals = Definition_local_binders(&((* d)), bindings); (* d).template = Var_list(_replace_bindings(List_var((* d).template), bindings));  Definition_check_kinds(&((* d))); (* d).fresh = Definition_fresh_rows(&((* d)), locals); (* d).pattern = Definition_invocation_pattern(&((* d)));  Map uses = _binder_uses((* d).template);  if(! Map_truth(uses)) return; (* d).rebuild =({
+  (* d).template = _slot_binders(Definition_wrap(&((* d))));  Map bindings = Map_new();  if(Definition_target_kind(&((* d))) == 1405544) Definition_constructed_names(&((* d)), bindings);  Array locals = Definition_local_binders(&((* d)), bindings); (* d).template = Var_list(_replace_bindings(List_var((* d).template), bindings));  Definition_check_kinds(&((* d))); (* d).fresh = Definition_fresh_rows(&((* d)), locals); (* d).pattern = Definition_invocation_pattern(&((* d)));  Map uses = _binder_uses((* d).template);  if(!(void *) uses) return; (* d).rebuild =({
     Var _x2c_literal_part_13 = List_var(Definition_rebuild_template(&((* d))));  Var _x2c_literal_part_14 = List_var(Definition_rebuild_keys(&((* d)), uses));  cons(_x2c_literal_part_13, cons(_x2c_literal_part_14, NULL));
   }
   ); (* d).leaf = !(* d).nested && Definition_uses_holes_once(&((* d)), uses);
