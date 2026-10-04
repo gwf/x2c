@@ -78,8 +78,11 @@ meta static List _cases_split(List items, int labelled) {
   return %((block @run) @{_cases_split(items, 0)});
 }
 
-meta static List _cases_switch(List condition, List body) =>
-  %((switch $condition (block @{_cases_split(body.cdr(), 0)})));
+meta static List _cases_switch(List condition, List body) {
+  List cases = _cases_split(body.cdr(), 0);
+  List selected = $!{ switch ($condition) { $cases... } };
+  return %($selected);
+}
 
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */

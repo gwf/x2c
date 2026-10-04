@@ -240,8 +240,11 @@ static List _cases_split(List items, int labelled) {
   return %((block @run) @{_cases_split(items, 0)});
 }
 
-static List _cases_switch(List condition, List body) =>
-  %((switch $condition (block @{_cases_split(body.cdr(), 0)})));
+static List _cases_switch(List condition, List body) {
+  List cases = _cases_split(body.cdr(), 0);
+  List selected = $!{ switch ($condition) { $cases... } };
+  return %($selected);
+}
 
 static List _macros_location(void) =>
   x2c_literal_string(
