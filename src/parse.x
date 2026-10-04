@@ -2477,6 +2477,8 @@ List Compiler.bind_syntax(
   if (c._take_staged(syntax)) return syntax;
   syntax = c.evaluate_macro_slot(syntax);
   if (c._take_staged(syntax)) return syntax;
+  match (syntax) case %("x2c.quoted" ?(List fresh) ?quoted):
+    return c.land_quotation(fresh, quoted, context, return_type);
   if (syntax is not <list>)
     $report.parse.syntax_expected(c);
   List input = syntax;
