@@ -27,7 +27,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.find`](#ArrayChar.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayChar.getindex`](#ArrayChar.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `ArrayChar.find`. |
+| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -62,7 +62,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `ArrayDbl.find`. |
+| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -97,7 +97,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `ArrayFloat.find`. |
+| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -132,7 +132,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.find`](#ArrayInt.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayInt.getindex`](#ArrayInt.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `ArrayInt.find`. |
+| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -167,7 +167,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.find`](#ArrayLong.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayLong.getindex`](#ArrayLong.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `ArrayLong.find`. |
+| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -202,7 +202,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.find`](#ArrayShort.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayShort.getindex`](#ArrayShort.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `ArrayShort.find`. |
+| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -237,7 +237,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.find`](#ArrayString.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayString.getindex`](#ArrayString.getindex) | Reads raw `index` with the bounds and null preconditions of a C pointer. |
 | [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `ArrayString.find`. |
+| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -490,7 +490,7 @@ Source: `lib/typed-array.x:104`
 
 `int ArrayChar.indexof(ArrayChar array, char value)`
 
-Returns the same first-match index as `ArrayChar.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:104`
 
@@ -910,7 +910,7 @@ Source: `lib/typed-array.x:149`
 
 `int ArrayDbl.indexof(ArrayDbl array, double value)`
 
-Returns the same first-match index as `ArrayDbl.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:149`
 
@@ -1328,7 +1328,7 @@ Source: `lib/typed-array.x:140`
 
 `int ArrayFloat.indexof(ArrayFloat array, float value)`
 
-Returns the same first-match index as `ArrayFloat.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:140`
 
@@ -1746,7 +1746,7 @@ Source: `lib/typed-array.x:122`
 
 `int ArrayInt.indexof(ArrayInt array, int value)`
 
-Returns the same first-match index as `ArrayInt.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:122`
 
@@ -2166,7 +2166,7 @@ Source: `lib/typed-array.x:131`
 
 `int ArrayLong.indexof(ArrayLong array, long value)`
 
-Returns the same first-match index as `ArrayLong.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:131`
 
@@ -2586,7 +2586,7 @@ Source: `lib/typed-array.x:113`
 
 `int ArrayShort.indexof(ArrayShort array, short value)`
 
-Returns the same first-match index as `ArrayShort.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:113`
 
@@ -3006,7 +3006,7 @@ Source: `lib/typed-array.x:158`
 
 `int ArrayString.indexof(ArrayString array, String value)`
 
-Returns the same first-match index as `ArrayString.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:158`
 
