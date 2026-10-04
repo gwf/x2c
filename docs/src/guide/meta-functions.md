@@ -694,8 +694,8 @@ no Scope allocator returned.
 A translation runs in two phases. Before any unit is translated, the
 compiler gathers the bodied `meta` functions the inputs reach: those of
 each `.xmacro` file an input imports, directly, through an included
-header, or through a package, and those an input defines itself. It
-emits them, with the declarations they use, as C through the ordinary
+header, or through a package, and those an input or an included `.x`
+file defines itself. It emits them, with the declarations they use, as C through the ordinary
 backend, compiles them with the host C compiler (`--meta-cc`, default
 `cc`, never the target `--cc`), and links them with the host runtime into
 one helper program, the project meta module. A group sees the headers its
@@ -704,6 +704,12 @@ The translation then
 sends each `$` call, and each compile-time Lisp call, of one of those
 functions to the helper and inserts the reply. A project whose inputs
 reach no `meta` function builds nothing extra.
+
+A call runs with the functions of the file that wrote it. An included
+`.x` file computes its file-scope constants, such as an enumerator or an
+array size, with its own `meta` functions, as its own translation does.
+Those functions stay in that file: the including unit receives the
+constants, and cannot call the functions.
 
 The helper is kept under the cache directory (`$X2C_CACHE_DIR`,
 `$XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`), named by a hash of the meta

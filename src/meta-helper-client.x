@@ -41,9 +41,9 @@ macro Stmt $report.macro.helper_stopped(
     $site, %("function: ${$name}" "reason: ${$reason}"));
 }
 
-/* The project's helper, its tables' failures by index, and the table each
-   input calls, which last for the process; a forked translation worker
-   inherits them. */
+/* The project's helper, its tables' failures by index, and the table of
+   each input and included file with one, which last for the process; a
+   forked translation worker inherits them. */
 static String helper_path = NULL;
 static Map helper_failures = NULL, helper_units = NULL;
 static Scope helper_scope = NULL;
@@ -59,11 +59,13 @@ static Buffer helper_input = NULL;
 
 // calls
 
-/* One call of a project `meta` function, whose failures are reported at
-   `site`. Starting the helper, sending the request and receiving its reply
-   take at most `limit` seconds, or any time when `deadline` is 0. */
+/* One call of a project `meta` function in helper table `table`, whose
+   failures are reported at `site`. Starting the helper, sending the request
+   and receiving its reply take at most `limit` seconds, or any time when
+   `deadline` is 0. */
 typedef struct Call {
-  Compiler compiler, String name, Token site, double limit, deadline;
+  Compiler compiler, String name, Token site, int table;
+  double limit, deadline;
 } Call;
 
 /** Calls the project `meta` function `name` in the helper with the values
@@ -71,10 +73,15 @@ typedef struct Call {
     the body makes is reported at `site` and a failure it reports is the
     call's failure. A body that crashes, exits, or passes the deadline ends
     the helper, which is reported at `site` and started again for the next
-    call. */
+    call. The call runs in the table of the file that wrote it: an included
+    file's own, which runs the constants it computes as its own translation
+    does, or else the unit's. */
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments) {
-  Call call = {.compiler = c, .name = name, .site = site};
+  String file = real_path(c.token_source(site, NULL));
+  Call call = {
+    .compiler = c, .name = name, .site = site,
+    .table = _table_of(file, helper_table)};
   call.check();
   call.set_deadline();
   if (!_helper_start()) call.refuse("the compile-time helper did not start");
@@ -97,14 +104,14 @@ Var Compiler.meta_helper_call(
   }
 }
 
-/* Refuses the call when the project's helper or the unit's table did not
+/* Refuses the call when the project's helper or the call's table did not
    build, or when the function returns a struct or union. */
 static void Call.check(Call &call) {
   Var failure;
   if (!helper_path && helper_failures && helper_failures.try_get(-1, failure))
     call.refuse(failure);
   if (!helper_path) call.refuse("the project meta module was not built");
-  if (helper_failures && helper_failures.try_get(helper_table, failure))
+  if (helper_failures && helper_failures.try_get(call.table, failure))
     call.refuse(failure);
   call.compiler.refuse_record_meta_call(call.name, call.site);
 }
@@ -112,10 +119,11 @@ static void Call.check(Call &call) {
 /* Sends the call, after the unit's reset when that is still to be sent. */
 static void Call.send(Call &call, List arguments) {
   if (helper_reset) {
-    call.send_frame(%(reset $helper_table));
+    call.send_frame(%(reset));
     helper_reset = 0;
   }
-  call.send_frame(%(call ${call.name} $arguments ${Macro.subject()}));
+  call.send_frame(
+    %(call ${call.table} ${call.name} $arguments ${Macro.subject()}));
 }
 
 static void Call.send_frame(Call &call, List message) {
@@ -369,7 +377,7 @@ static void Call.stopped(Call &call, String reason) {
 
 /** Uses the helper at `path`, or none when it is NULL, whose tables named
     in `failures` could not be built, each with why, and whose table for
-    each input path is in `units`. */
+    each input or included file path is in `units`. */
 void Compiler.use_meta_helper(String path, Map failures, Map units) {
   if (!path && !failures) return;
   if (!helper_scope) Scope.shutdown_hook(_helper_shutdown);
@@ -384,10 +392,15 @@ void Compiler.use_meta_helper(String path, Map failures, Map units) {
 /** Selects the table of the unit at `filename` for the calls that follow,
     and resets the unit's `meta static` values before the first one. */
 void Compiler.begin_meta_unit(String filename) {
-  Var table;
-  helper_table = helper_units && filename &&
-    helper_units.try_get(Path.absolute(filename), table) ? table.integer() : 0;
+  helper_table = filename ? _table_of(Path.absolute(filename), 0) : 0;
   helper_reset = 1;
+}
+
+/* The table of the file at `path`, or `otherwise`. */
+static int _table_of(String path, int otherwise) {
+  Var table;
+  return helper_units && path && helper_units.try_get(path, table)
+    ? table.integer() : otherwise;
 }
 
 /** Stops the helper this process runs, which a translation worker does

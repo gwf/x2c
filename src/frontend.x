@@ -450,11 +450,11 @@ int Frontend.preload_macro_libraries(Frontend frontend) {
   if (shared && !_preload_meta_surface(frontend, shared)) {
     shared.destroy();
     c.publish_macro_library(NULL);
-    collect_forget_preload_entries();
+    collect_forget_provisional_entries();
     return 0;
   }
   c.publish_macro_library(shared);
-  collect_forget_preload_entries();
+  collect_forget_provisional_entries();
   return 1;
 }
 
