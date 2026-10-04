@@ -950,7 +950,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
     /* A quotation or macro value application that hand-built syntax holds
        expands where it is resolved, like one the binder meets directly. */
-    case %((!or "x2c.template" macro-invoke) *):
+    case %((!or "x2c.template" "x2c.quoted" macro-invoke) *):
       return c.bind_syntax(input, AST_EXPRESSION, c.return_type);
     case %(expr ?type ?(List content)): {
       if (type && !c.needs_resolution(input)) return input;
@@ -978,7 +978,8 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case lambda(?body, *params): return 1;
       case %(at m-origin ?):
         if (c.source_map && !c.macro_holes) return 1;
-      case %((!or macro-bind macro-invoke macro-slot meta-call macro-value) *):
+      case %((!or macro-bind macro-invoke macro-slot meta-call macro-value
+                  "x2c.quoted") *):
         return 1;
       case $source_identifier_content(%(?name)):
         if (name is <list>) {
@@ -1054,6 +1055,8 @@ static List Compiler._resolve_content(
     case %(meta-cap *): return input;
     case %(macro-invoke ?definition ?arguments ?invocation):
       return c._resolve_invocation(input, definition, arguments, invocation);
+    case %("x2c.quoted" *):
+      return c.bind_syntax(content, AST_EXPRESSION, c.return_type);
     case %(macro-slot ? ? *):
       return c._resolve_macro_slot(input, content, origin);
     case $source_string_content(%(*items)):
