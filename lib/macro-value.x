@@ -324,8 +324,8 @@ List Macro.number_type(Var value) {
 }
 
 /** Returns the literal expression of type `result` that holds `value`, a
-    number of the scalar type `type`. An `int` is its decimal literal;
-    another number is its exact bits cast to `type`. */
+    number of the scalar type `type`. An `int` value is its decimal
+    literal; another number is its exact bits cast to `type`. */
 List Macro.number_literal(List result, List type, Var value) {
   if (value.tag() == <i32>) return _int_literal(result, value);
   List literal = _bits_literal(value);
