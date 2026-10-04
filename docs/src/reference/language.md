@@ -2364,13 +2364,12 @@ $same_of($code);`. A `meta` call inside a larger expression holds an
 expression position. Inside an expansion every `List` result is code.
 Elsewhere a `List` result is code when it is an expression node, a macro
 application, a quotation, or an identifier; any other `List` remains a
-runtime value. Protocol
-declarations, macro definitions, preprocessor nodes, and other
-compile-time-only source items are retained at translation-unit position
-and apply their source-order effect. The compiler rejects forms that are
-malformed or invalid in that position. As with other constructed ASTs, it does
-not recursively verify annotations or check where a handwritten `List` came
-from.
+runtime value. Protocol declarations, macro definitions, preprocessor nodes,
+and other compile-time-only source items are retained at translation-unit
+position and apply their source-order effect. The compiler rejects forms that
+are malformed or invalid in that position. As with other constructed ASTs, it
+does not recursively verify annotations or check where a handwritten `List`
+came from.
 
 ### Named types and declaration production
 
