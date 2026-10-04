@@ -279,12 +279,13 @@ x2c literal parsing.
 Public functions:
 
 `Compiler.parse_list_literal`, `Compiler.parse_macro_pattern_arguments`,
-`Compiler.try_parse_macro_pattern_insertion`, `Compiler.typed_match_pattern`,
-`Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
-`Compiler.parse_symbol_set_literal`, `Compiler.symbol_set_expression`,
-`Compiler.parse_array_literal`, `Compiler.parse_map_literal`,
-`Compiler.parse_map_entries`, `Compiler.parse_map_entry`,
-`Compiler.parse_string_literal`, `Compiler.parse_atomic_literal`
+`Compiler.try_parse_macro_pattern_insertion`, `Compiler.literal_cell`,
+`Compiler.typed_match_pattern`, `Compiler.parse_raise_literal`,
+`Compiler.parse_catch_pattern_literal`, `Compiler.parse_symbol_set_literal`,
+`Compiler.symbol_set_expression`, `Compiler.parse_array_literal`,
+`Compiler.parse_map_literal`, `Compiler.parse_map_entries`,
+`Compiler.parse_map_entry`, `Compiler.parse_string_literal`,
+`Compiler.parse_atomic_literal`
 
 ### [src/macros.x](../src/macros.x)
 
@@ -308,19 +309,20 @@ Public functions:
 `Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
 `Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
 `Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.macro_value_literal`, `Compiler.try_parse_macro_pattern`,
-`Compiler.macro_pattern_at`, `Compiler.try_parse_macro_subpattern`,
-`Compiler.capture_macro_value`, `Compiler.take_code_value`,
-`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.import_package_macros`, `Compiler.source_path`,
-`Compiler.open_macro_library`, `Compiler.publish_macro_library`,
-`Compiler.inherits_import`, `Compiler.record_comptime`,
-`Compiler.inherit_library_comptime`, `macro_library_filling`,
-`Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
-`Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.report_lisp_failure`, `macro_library_reset`
+`Compiler.land_quotation`, `Compiler.macro_value_literal`,
+`Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
+`Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
+`Compiler.take_code_value`, `Compiler.ensure_macro_lisp`,
+`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_expression`,
+`Compiler.lift_macro_lisp_expression`, `Compiler.import_package_macros`,
+`Compiler.source_path`, `Compiler.open_macro_library`,
+`Compiler.publish_macro_library`, `Compiler.inherits_import`,
+`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
+`macro_library_filling`, `Compiler.shared_definitions`,
+`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
+`Compiler.bind_meta_operation`, `Compiler.report_lisp_failure`,
+`macro_library_reset`
 
 ### [src/main.x](../src/main.x)
 
