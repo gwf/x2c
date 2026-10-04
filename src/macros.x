@@ -98,7 +98,9 @@ static List Compiler._stored_definition(
 
 /* An identical recursive expansion, nesting deeper than 64, or more than
    10000 expansions stops the compile. A leaf template's application
-   cannot recurse, so it is neither compared nor counted. */
+   cannot recurse, so it is neither compared nor counted. An application
+   compiler code makes has no invocation token. It lowers the program, so
+   it is not counted either. */
 static void Expansion.check(Expansion &x) {
   Compiler c = x.c;
   int leaf = x.definition.assoc(<leaf>) == 1;
@@ -110,7 +112,7 @@ static void Expansion.check(Expansion &x) {
         x.recursion();
     }
   if (c.macro_stack.len() >= 64) x.too_deep();
-  if (leaf) return;
+  if (leaf || !x.invocation) return;
   if (c.macro_count >= 10000)
     $report.macro.expansion_count(c, x.invocation);
   c.macro_count++;
