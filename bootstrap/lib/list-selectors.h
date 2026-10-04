@@ -22,12 +22,12 @@ static inline Var Var_caaar(Var _x2c_macro_value_3){
   return car(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_3))))));
 }
 
-static inline Var List_caadr(List _x2c_macro_value_4){
-  return car(Var_list(car(cdr(_x2c_macro_value_4))));
+static inline List List_cdaar(List _x2c_macro_value_4){
+  return cdr(Var_list(car(Var_list(car(_x2c_macro_value_4)))));
 }
 
-static inline Var Var_caadr(Var _x2c_macro_value_5){
-  return car(Var_list(car(cdr(Var_list(_x2c_macro_value_5)))));
+static inline List Var_cdaar(Var _x2c_macro_value_5){
+  return cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_5))))));
 }
 
 static inline Var List_cadar(List _x2c_macro_value_6){
@@ -38,28 +38,28 @@ static inline Var Var_cadar(Var _x2c_macro_value_7){
   return car(cdr(Var_list(car(Var_list(_x2c_macro_value_7)))));
 }
 
-static inline List List_cdaar(List _x2c_macro_value_8){
-  return cdr(Var_list(car(Var_list(car(_x2c_macro_value_8)))));
+static inline List List_cddar(List _x2c_macro_value_8){
+  return cdr(cdr(Var_list(car(_x2c_macro_value_8))));
 }
 
-static inline List Var_cdaar(Var _x2c_macro_value_9){
-  return cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_9))))));
+static inline List Var_cddar(Var _x2c_macro_value_9){
+  return cdr(cdr(Var_list(car(Var_list(_x2c_macro_value_9)))));
 }
 
-static inline List List_cdadr(List _x2c_macro_value_10){
-  return cdr(Var_list(car(cdr(_x2c_macro_value_10))));
+static inline Var List_caadr(List _x2c_macro_value_10){
+  return car(Var_list(car(cdr(_x2c_macro_value_10))));
 }
 
-static inline List Var_cdadr(Var _x2c_macro_value_11){
-  return cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_11)))));
+static inline Var Var_caadr(Var _x2c_macro_value_11){
+  return car(Var_list(car(cdr(Var_list(_x2c_macro_value_11)))));
 }
 
-static inline List List_cddar(List _x2c_macro_value_12){
-  return cdr(cdr(Var_list(car(_x2c_macro_value_12))));
+static inline List List_cdadr(List _x2c_macro_value_12){
+  return cdr(Var_list(car(cdr(_x2c_macro_value_12))));
 }
 
-static inline List Var_cddar(Var _x2c_macro_value_13){
-  return cdr(cdr(Var_list(car(Var_list(_x2c_macro_value_13)))));
+static inline List Var_cdadr(Var _x2c_macro_value_13){
+  return cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_13)))));
 }
 
 static inline List List_cdddr(List _x2c_macro_value_14){
@@ -78,44 +78,44 @@ static inline Var Var_caaaar(Var _x2c_macro_value_17){
   return car(Var_list(car(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_17))))))));
 }
 
-static inline Var List_caaadr(List _x2c_macro_value_18){
-  return car(Var_list(car(Var_list(car(cdr(_x2c_macro_value_18))))));
+static inline List List_cdaaar(List _x2c_macro_value_18){
+  return cdr(Var_list(car(Var_list(car(Var_list(car(_x2c_macro_value_18)))))));
 }
 
-static inline Var Var_caaadr(Var _x2c_macro_value_19){
-  return car(Var_list(car(Var_list(car(cdr(Var_list(_x2c_macro_value_19)))))));
+static inline List Var_cdaaar(Var _x2c_macro_value_19){
+  return cdr(Var_list(car(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_19))))))));
 }
 
-static inline Var List_caadar(List _x2c_macro_value_20){
-  return car(Var_list(car(cdr(Var_list(car(_x2c_macro_value_20))))));
+static inline Var List_cadaar(List _x2c_macro_value_20){
+  return car(cdr(Var_list(car(Var_list(car(_x2c_macro_value_20))))));
 }
 
-static inline Var Var_caadar(Var _x2c_macro_value_21){
-  return car(Var_list(car(cdr(Var_list(car(Var_list(_x2c_macro_value_21)))))));
+static inline Var Var_cadaar(Var _x2c_macro_value_21){
+  return car(cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_21)))))));
 }
 
-static inline Var List_caaddr(List _x2c_macro_value_22){
-  return car(Var_list(car(cdr(cdr(_x2c_macro_value_22)))));
+static inline List List_cddaar(List _x2c_macro_value_22){
+  return cdr(cdr(Var_list(car(Var_list(car(_x2c_macro_value_22))))));
 }
 
-static inline Var Var_caaddr(Var _x2c_macro_value_23){
-  return car(Var_list(car(cdr(cdr(Var_list(_x2c_macro_value_23))))));
+static inline List Var_cddaar(Var _x2c_macro_value_23){
+  return cdr(cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_23)))))));
 }
 
-static inline Var List_cadaar(List _x2c_macro_value_24){
-  return car(cdr(Var_list(car(Var_list(car(_x2c_macro_value_24))))));
+static inline Var List_caadar(List _x2c_macro_value_24){
+  return car(Var_list(car(cdr(Var_list(car(_x2c_macro_value_24))))));
 }
 
-static inline Var Var_cadaar(Var _x2c_macro_value_25){
-  return car(cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_25)))))));
+static inline Var Var_caadar(Var _x2c_macro_value_25){
+  return car(Var_list(car(cdr(Var_list(car(Var_list(_x2c_macro_value_25)))))));
 }
 
-static inline Var List_cadadr(List _x2c_macro_value_26){
-  return car(cdr(Var_list(car(cdr(_x2c_macro_value_26)))));
+static inline List List_cdadar(List _x2c_macro_value_26){
+  return cdr(Var_list(car(cdr(Var_list(car(_x2c_macro_value_26))))));
 }
 
-static inline Var Var_cadadr(Var _x2c_macro_value_27){
-  return car(cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_27))))));
+static inline List Var_cdadar(Var _x2c_macro_value_27){
+  return cdr(Var_list(car(cdr(Var_list(car(Var_list(_x2c_macro_value_27)))))));
 }
 
 static inline Var List_caddar(List _x2c_macro_value_28){
@@ -126,20 +126,20 @@ static inline Var Var_caddar(Var _x2c_macro_value_29){
   return car(cdr(cdr(Var_list(car(Var_list(_x2c_macro_value_29))))));
 }
 
-static inline Var List_cadddr(List _x2c_macro_value_30){
-  return car(cdr(cdr(cdr(_x2c_macro_value_30))));
+static inline List List_cdddar(List _x2c_macro_value_30){
+  return cdr(cdr(cdr(Var_list(car(_x2c_macro_value_30)))));
 }
 
-static inline Var Var_cadddr(Var _x2c_macro_value_31){
-  return car(cdr(cdr(cdr(Var_list(_x2c_macro_value_31)))));
+static inline List Var_cdddar(Var _x2c_macro_value_31){
+  return cdr(cdr(cdr(Var_list(car(Var_list(_x2c_macro_value_31))))));
 }
 
-static inline List List_cdaaar(List _x2c_macro_value_32){
-  return cdr(Var_list(car(Var_list(car(Var_list(car(_x2c_macro_value_32)))))));
+static inline Var List_caaadr(List _x2c_macro_value_32){
+  return car(Var_list(car(Var_list(car(cdr(_x2c_macro_value_32))))));
 }
 
-static inline List Var_cdaaar(Var _x2c_macro_value_33){
-  return cdr(Var_list(car(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_33))))))));
+static inline Var Var_caaadr(Var _x2c_macro_value_33){
+  return car(Var_list(car(Var_list(car(cdr(Var_list(_x2c_macro_value_33)))))));
 }
 
 static inline List List_cdaadr(List _x2c_macro_value_34){
@@ -150,44 +150,44 @@ static inline List Var_cdaadr(Var _x2c_macro_value_35){
   return cdr(Var_list(car(Var_list(car(cdr(Var_list(_x2c_macro_value_35)))))));
 }
 
-static inline List List_cdadar(List _x2c_macro_value_36){
-  return cdr(Var_list(car(cdr(Var_list(car(_x2c_macro_value_36))))));
+static inline Var List_cadadr(List _x2c_macro_value_36){
+  return car(cdr(Var_list(car(cdr(_x2c_macro_value_36)))));
 }
 
-static inline List Var_cdadar(Var _x2c_macro_value_37){
-  return cdr(Var_list(car(cdr(Var_list(car(Var_list(_x2c_macro_value_37)))))));
+static inline Var Var_cadadr(Var _x2c_macro_value_37){
+  return car(cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_37))))));
 }
 
-static inline List List_cdaddr(List _x2c_macro_value_38){
-  return cdr(Var_list(car(cdr(cdr(_x2c_macro_value_38)))));
+static inline List List_cddadr(List _x2c_macro_value_38){
+  return cdr(cdr(Var_list(car(cdr(_x2c_macro_value_38)))));
 }
 
-static inline List Var_cdaddr(Var _x2c_macro_value_39){
-  return cdr(Var_list(car(cdr(cdr(Var_list(_x2c_macro_value_39))))));
+static inline List Var_cddadr(Var _x2c_macro_value_39){
+  return cdr(cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_39))))));
 }
 
-static inline List List_cddaar(List _x2c_macro_value_40){
-  return cdr(cdr(Var_list(car(Var_list(car(_x2c_macro_value_40))))));
+static inline Var List_caaddr(List _x2c_macro_value_40){
+  return car(Var_list(car(cdr(cdr(_x2c_macro_value_40)))));
 }
 
-static inline List Var_cddaar(Var _x2c_macro_value_41){
-  return cdr(cdr(Var_list(car(Var_list(car(Var_list(_x2c_macro_value_41)))))));
+static inline Var Var_caaddr(Var _x2c_macro_value_41){
+  return car(Var_list(car(cdr(cdr(Var_list(_x2c_macro_value_41))))));
 }
 
-static inline List List_cddadr(List _x2c_macro_value_42){
-  return cdr(cdr(Var_list(car(cdr(_x2c_macro_value_42)))));
+static inline List List_cdaddr(List _x2c_macro_value_42){
+  return cdr(Var_list(car(cdr(cdr(_x2c_macro_value_42)))));
 }
 
-static inline List Var_cddadr(Var _x2c_macro_value_43){
-  return cdr(cdr(Var_list(car(cdr(Var_list(_x2c_macro_value_43))))));
+static inline List Var_cdaddr(Var _x2c_macro_value_43){
+  return cdr(Var_list(car(cdr(cdr(Var_list(_x2c_macro_value_43))))));
 }
 
-static inline List List_cdddar(List _x2c_macro_value_44){
-  return cdr(cdr(cdr(Var_list(car(_x2c_macro_value_44)))));
+static inline Var List_cadddr(List _x2c_macro_value_44){
+  return car(cdr(cdr(cdr(_x2c_macro_value_44))));
 }
 
-static inline List Var_cdddar(Var _x2c_macro_value_45){
-  return cdr(cdr(cdr(Var_list(car(Var_list(_x2c_macro_value_45))))));
+static inline Var Var_cadddr(Var _x2c_macro_value_45){
+  return car(cdr(cdr(cdr(Var_list(_x2c_macro_value_45)))));
 }
 
 static inline List List_cddddr(List _x2c_macro_value_46){
