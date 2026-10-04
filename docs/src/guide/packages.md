@@ -201,14 +201,14 @@ That compiler then calls `tally`'s `meta` functions through
 and compiles its `src/*.c` with the compiler, so only a package without a
 native dependency links in this way.
 
-A package can publish macros with its compile-time functions. Put a direct
-`.xmacro` import in the public part of its entry source:
+A package can publish macros with its compile-time functions. Export the
+`.xmacro` import from one of its sources:
 
 <!-- ignore: these are files in a package named tally. -->
 ```x2c,ignore
 // src/tally.x
 meta int tally_sum(int n);
-$(import "tally.xmacro")
+export $(import "tally.xmacro")
 #pragma private
 ```
 
@@ -225,10 +225,34 @@ meta static int ten(void) => $tally.sum4();
 ```
 
 The import loads the package's declarations, compile-time module or linked
-extension, and public macro pack. A `.xmacro` import below `#pragma private`
-or in another package source stays private. Macros keep their declared names;
-`as` changes the package alias, not macro spellings. A macro pack may still be
-imported explicitly without importing its package.
+extension, and the macro imports its sources
+[export](../reference/language.md#exported-imports). An import without
+`export` stays private, wherever it is written. Macros keep their declared
+names; `as` changes the package alias, not macro spellings. A macro pack may
+still be imported explicitly without importing its package.
+
+### Expose macros through one import
+
+Before, an autodiff consumer wrote:
+
+<!-- ignore: an import needs a registered --package-dir root. -->
+```x2c,ignore
+#include "typed-array.x"
+import "autodiff" with AdTape, AdNode;
+$(import "<path>/autodiff/src/autodiff.xmacro")
+```
+
+`src/autodiff.x` now exports its macro pack and includes what the macros
+need:
+
+<!-- ignore: this is a fragment of the package source. -->
+```x2c,ignore
+#include "typed-array.x"
+export $(import "autodiff.xmacro")
+```
+
+A consumer writes one line, `import "autodiff" with AdTape, AdNode;`. A
+source library works the same way through `#include`.
 
 ## Packages that wrap a C library
 

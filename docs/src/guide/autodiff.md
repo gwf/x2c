@@ -14,13 +14,13 @@
 All four are ordinary x2c: a macro file, a runtime unit, and the existing
 protocol and decorator machinery. Nothing in the compiler knows about
 derivatives. Both files belong to the optional `autodiff` package in
-`packages/autodiff`, which has no native dependency. A unit imports the
-macros by their path, as `$(import "../src/autodiff.xmacro")` does in the
-package's own examples; the listings below write the short name. The
+`packages/autodiff`, which has no native dependency. `import "autodiff";`
+gives a unit the macros and the runtime tape, because the package's
+`autodiff.x` exports its macro import. A unit can also import the macros
+alone by their path, as `$(import "../src/autodiff.xmacro")` does in the
+package's fixtures; the listings below write the short name. The
 package's [README](https://github.com/gwf/x2c/blob/main/packages/autodiff/README.md)
-lists its files and checks. Earlier releases shipped the macros with the
-compiler, imported as `import "autodiff";`; replace that line with the
-package path, such as `$(import "<path>/autodiff/src/autodiff.xmacro")`.
+lists its files and checks.
 For other specialized capabilities, see [Advanced Topics](../library/advanced-topics.md).
 
 ## Dual numbers
