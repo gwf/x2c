@@ -1122,6 +1122,26 @@ A name that a quotation declares is private to it, so another quotation
 cannot refer to it. An `x2c_ident` hole declares and refers to one exact
 name.
 
+When a `meta` function builds one statement, the macro can hand it the work
+in one line. Write the `Stmt` macro with an arrow body and return the
+statement itself:
+
+```x2c
+#include "meta.x"
+meta static List traced(List body) =>
+  $!{ { puts("enter"); $body puts("leave"); } };
+
+macro Stmt $trace(Stmt $body) => $traced($body);
+
+int main(void) {
+  $trace(puts("work"););
+  return 0;
+}
+```
+
+Keep the braced `{ $helper(...)... }` form for a function that returns
+several block items as a `List`.
+
 ## Choose collections by mutation and identity
 
 Use `List` for immutable sequences that share structure, `Array` for mutable
@@ -2150,6 +2170,28 @@ including the trailing semicolon. A `Stmt` macro may also use the expression
 form; its body is then the single statement `expression;`. When that
 expression is a `meta` call, the call may return a statement, as described
 under [Macro-visible syntax](https://x2c-lang.dev/docs/reference/language.html#macro-visible-syntax).
+
+Here `guarded` returns an `if` statement, which an expression position
+would reject:
+
+```x2c
+#include "meta.x"
+meta static List guarded(List condition, List body) =>
+  $!{ if ($condition) $body };
+
+macro Stmt $when(Expr $condition, Stmt $body) =>
+  $guarded($condition, $body);
+
+int main(void) {
+  int n = 3;
+  $when(n > 2, printf("%d\n", n););
+  return 0;
+}
+```
+
+```text
+3
+```
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
