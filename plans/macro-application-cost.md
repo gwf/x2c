@@ -230,6 +230,15 @@ one more bootstrap transition.
   compiler's own emitted C. After one round, `.xi` files carry the old
   compiler's identity, every include is walked cold (`src/collect.x`), and
   instruction counts read about 7.7% low.
+- Open option: a defer with captures could keep its addresses in a
+  `const void *data[N]` array instead of a typed per-defer environment
+  struct, and its thunk would read each capture through a cast. This saves
+  about 2.7 M instructions per defer with captures. It changes the
+  generated C and the expected C of four fixtures: `defer-array-field-write`,
+  `defer-only-cleanup`, `goto-cleanup-regions`, and
+  `match-arm-transfer-regions`.
+- Each defer uses 140-225 KB of translation memory. Most of that memory is
+  not yet explained.
 
 ## Plan review
 
