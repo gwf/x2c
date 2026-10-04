@@ -579,6 +579,8 @@ static List Compiler._catch_arm(Compiler c, int &is_default, List handle) {
   if (c.peek(0) == <catch> || c.peek(0) == <finally>)
     body = c._continued(body);
   c.sym.pop_scope();
+  /* A template's arm declares its binders where its expansion binds it. */
+  if (c.macro_holes) return %($pattern $body);
   return %($pattern (block
     @{c.catch_binder_declarations(bindings, handle)} $body));
 }
