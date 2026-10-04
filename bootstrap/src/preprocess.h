@@ -19,6 +19,8 @@ int preproc_visibility(String text);
 
 String preproc_include_target(String text, int * angle);
 
+String preproc_marker_file(String text, int * line);
+
 void Compiler_scan_conditionals(Compiler c);
 
 List Compiler_leading_preproc(Compiler c);

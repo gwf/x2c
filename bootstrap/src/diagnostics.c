@@ -14,11 +14,11 @@
 
 #include "exception.h"
 
-static List _130, _128, _127, _125, _123, _117, _116, _115, _114, _112, _110, _109, _106, _104, _103, _100, _99, _98, _97, _96, _94, _93, _92, _90, _89, _88, _81, _80, _79, _78, _77, _75, _74, _73, _72, _71, _69, _68, _65, _64, _61, _60, _57, _56, _53, _52, _45, _44, _43, _42, _41, _39, _38, _34, _33, _29, _28, _24, _23, _19, _18;
+static List _124, _122, _121, _119, _117, _111, _110, _109, _108, _106, _104, _103, _100, _98, _97, _94, _93, _92, _91, _90, _88, _87, _86, _84, _83, _82, _75, _74, _73, _72, _71, _69, _68, _65, _64, _61, _60, _57, _56, _53, _52, _45, _44, _43, _42, _41, _39, _38, _34, _33, _29, _28, _24, _23, _19, _18;
 
-static String _121, _119, _118, _101, _82, _50, _49, _48, _47, _46, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5;
+static String _115, _113, _112, _95, _76, _50, _49, _48, _47, _46, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5;
 
-static Var _129, _126, _124, _122, _120, _113, _111, _108, _107, _105, _102, _95, _91, _87, _86, _85, _84, _83, _76, _70, _67, _66, _63, _62, _59, _58, _55, _54, _51, _40, _37, _36, _35, _32, _31, _30, _27, _26, _25, _22, _21, _20, _17, _16, _4, _3, _2, _1, _0;
+static Var _123, _120, _118, _116, _114, _107, _105, _102, _101, _99, _96, _89, _85, _81, _80, _79, _78, _77, _70, _67, _66, _63, _62, _59, _58, _55, _54, _51, _40, _37, _36, _35, _32, _31, _30, _27, _26, _25, _22, _21, _20, _17, _16, _4, _3, _2, _1, _0;
 
 #include "json.h"
 #include "report.h"
@@ -56,6 +56,8 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
 
 static void Compiler__write_heading(Compiler c, Symbol code, String message, List location);
 
+static int Compiler__text_line(Compiler c, int position);
+
 static List _compiler_location(Compiler compiler, Token token);
 
 static void Compiler__show_source_context(Compiler compiler, int line, int column, int length);
@@ -76,7 +78,7 @@ static Func _x2c_func_handle_0;
 
 Func x2c_func_shared(FuncAdapter, List);
 
-_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _130)))
+_x2c_initializer_choice_B8F5462B_1((_x2c_func_handle_0 = x2c_func_shared(_x2c_func_adapt_0, _124)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -174,61 +176,55 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _73 = cons(_62, _72);
   _74 = cons(_58, _73);
   _75 = cons(_54, _74);
-  _76 = Symbol_var(58);
-  _77 = cons(_76, NULL);
-  _78 = cons(_35, _77);
-  _79 = cons(_30, _78);
-  _80 = cons(_25, _79);
-  _81 = cons(_20, _80);
-  _82 = String_new(":");
-  _83 = Symbol_var(15767198343496);
-  _84 = Symbol_var(63354055592);
-  _85 = Symbol_var(62436);
-  _86 = Symbol_var(1309427914);
-  _87 = Symbol_var(50756762);
-  _88 = cons(_87, NULL);
-  _89 = cons(_86, _88);
-  _90 = cons(_85, _89);
-  _91 = List_var(_90);
-  _92 = cons(_91, NULL);
-  _93 = cons(_84, _92);
-  _94 = cons(_83, _93);
-  _95 = Symbol_var(1307939018);
-  _96 = cons(_32, _38);
-  _97 = cons(_27, _96);
-  _98 = cons(_22, _97);
-  _99 = cons(_17, _98);
-  _100 = cons(_95, _99);
-  _101 = String_new("<stdin>");
-  _102 = int_var(1);
+  _76 = String_new(":");
+  _77 = Symbol_var(15767198343496);
+  _78 = Symbol_var(63354055592);
+  _79 = Symbol_var(62436);
+  _80 = Symbol_var(1309427914);
+  _81 = Symbol_var(50756762);
+  _82 = cons(_81, NULL);
+  _83 = cons(_80, _82);
+  _84 = cons(_79, _83);
+  _85 = List_var(_84);
+  _86 = cons(_85, NULL);
+  _87 = cons(_78, _86);
+  _88 = cons(_77, _87);
+  _89 = Symbol_var(1307939018);
+  _90 = cons(_32, _38);
+  _91 = cons(_27, _90);
+  _92 = cons(_22, _91);
+  _93 = cons(_17, _92);
+  _94 = cons(_89, _93);
+  _95 = String_new("<stdin>");
+  _96 = int_var(1);
+  _97 = cons(_96, NULL);
+  _98 = cons(_21, _97);
+  _99 = List_var(_98);
+  _100 = cons(_26, _97);
+  _101 = List_var(_100);
+  _102 = int_var(0);
   _103 = cons(_102, NULL);
-  _104 = cons(_21, _103);
+  _104 = cons(_31, _103);
   _105 = List_var(_104);
-  _106 = cons(_26, _103);
+  _106 = cons(_36, _103);
   _107 = List_var(_106);
-  _108 = int_var(0);
-  _109 = cons(_108, NULL);
-  _110 = cons(_31, _109);
-  _111 = List_var(_110);
-  _112 = cons(_36, _109);
-  _113 = List_var(_112);
-  _114 = cons(_113, NULL);
-  _115 = cons(_111, _114);
-  _116 = cons(_107, _115);
-  _117 = cons(_105, _116);
-  _118 = String_new("compiler error");
-  _119 = String_new("compiler warning");
-  _120 = Symbol_var(437126);
-  _121 = String_new("Var");
-  _122 = String_var(_121);
-  _123 = cons(_122, NULL);
-  _124 = List_var(_123);
-  _125 = cons(_124, NULL);
-  _126 = List_var(_125);
-  _127 = cons(_126, NULL);
-  _128 = cons(_120, _127);
-  _129 = List_var(_128);
-  _130 = cons(_129, _123);
+  _108 = cons(_107, NULL);
+  _109 = cons(_105, _108);
+  _110 = cons(_101, _109);
+  _111 = cons(_99, _110);
+  _112 = String_new("compiler error");
+  _113 = String_new("compiler warning");
+  _114 = Symbol_var(437126);
+  _115 = String_new("Var");
+  _116 = String_var(_115);
+  _117 = cons(_116, NULL);
+  _118 = List_var(_117);
+  _119 = cons(_118, NULL);
+  _120 = List_var(_119);
+  _121 = cons(_120, NULL);
+  _122 = cons(_114, _121);
+  _123 = List_var(_122);
+  _124 = cons(_123, _117);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -511,13 +507,13 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
 
   {
     List _x2c_match_expr = location;
-    Var _x2c_match_values[4];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 4 };
+    Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_81), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3]; {
+      default: ;  static MatchCaptureSite _x2c_match_site_2;  if (x2c_match_site_try_capture(& _x2c_match_site_2, _x2c_match_expr, List_var(_45), &_x2c_match_capture)) {Var file = _x2c_match_values[0];  Var line = _x2c_match_values[1];  Var column = _x2c_match_values[2];  Var length = _x2c_match_values[3];  Var position = _x2c_match_values[4]; {
     String place =({
-      Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_82), cons(_x2c_literal_part_10, cons(String_var(_82), cons(_x2c_literal_part_11, NULL))))));
+      Var _x2c_literal_part_9 = String_var(Var_str(file));  Var _x2c_literal_part_10 = String_var(Var_str(line));  Var _x2c_literal_part_11 = String_var(Var_str(column));  String_join(NULL, cons(_x2c_literal_part_9, cons(String_var(_76), cons(_x2c_literal_part_10, cons(String_var(_76), cons(_x2c_literal_part_11, NULL))))));
     }
-    );  fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);  Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));  return;
+    );  fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);  if(Array_truth(c -> line_markers)) line = int_var(Compiler__text_line(c, Var_int(Var_convert(position, 3453797))));  Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)));  return;
   }
   break;
 }
@@ -527,6 +523,20 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
 fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
 }
 
+int Array_try_next(Array, int *, Var *);
+static int Compiler__text_line(Compiler c, int position){
+  int line = 0; {
+    Var start;  Array _x2c_macro_object_0 = Compiler__line_starts(c);  int _x2c_macro_cursor_0 = 0;  Var _x2c_macro_cursor_output_0;  while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
+      start = _x2c_macro_cursor_output_0; {
+        if(Var_int(start) > position) break;  line ++;
+      }
+
+    }
+
+  }
+  return line;
+}
+
 List Compiler_origin_location(Compiler compiler, int occurrence){
   if(! _init_guard_) _file_init_();  while(occurrence > 0 && occurrence <=(int) Array_len(compiler -> origins)){
     List origin = Var_list(Array_getindex(compiler -> origins, occurrence - 1));
@@ -534,7 +544,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
     List _x2c_match_expr = origin;
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 15767198343496: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_94), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
+      case 15767198343496: ;  static MatchCaptureSite _x2c_match_site_3;  if (x2c_match_site_try_capture(& _x2c_match_site_3, _x2c_match_expr, List_var(_88), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
       occurrence = Var_int(Var_convert(parent, 3453797));  continue;
     }
     break;
@@ -557,10 +567,24 @@ String Compiler_display_path(Compiler compiler, String path){
 }
 
 List Compiler_token_location(Compiler compiler, Token token){
-  if(! _init_guard_) _file_init_();  String file = String_truth(compiler -> filename) ? compiler -> filename : _101;  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);  if(! token) token = compiler -> token;  if(! token) return cons(List_var(cons(_16, cons(String_var(file), NULL))), _117);  file = Compiler_display_path(compiler, file);  return({
-    Var _x2c_literal_part_17 = List_var(cons(_16, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_21, cons(int_var(token -> line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_26, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_31, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_36, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
+  if(! _init_guard_) _file_init_();  String file = String_truth(compiler -> filename) ? compiler -> filename : _95;  if(compiler -> source_facts) file = Compiler_display_path(compiler, file);  if(! token) token = compiler -> token;  if(! token) return cons(List_var(cons(_16, cons(String_var(file), NULL))), _111);  int line = token -> line;  if(Array_truth(compiler -> line_markers)) file = Compiler_token_source(compiler, token, &(line));  file = Compiler_display_path(compiler, file);  return({
+    Var _x2c_literal_part_17 = List_var(cons(_16, cons(String_var(file), NULL)));  Var _x2c_literal_part_18 = List_var(cons(_21, cons(int_var(line), NULL)));  Var _x2c_literal_part_19 = List_var(cons(_26, cons(int_var(token -> col), NULL)));  Var _x2c_literal_part_20 = List_var(cons(_31, cons(int_var(token -> len), NULL)));  Var _x2c_literal_part_21 = List_var(cons(_36, cons(int_var(token -> pos), NULL)));  cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, cons(_x2c_literal_part_21, NULL)))));
   }
   );
+}
+
+Var List_getindex(List, int);
+String Compiler_token_source(Compiler c, Token token, int * line){
+  if(! _init_guard_) _file_init_();  if(line)(* line) = token -> line;  if(! Array_truth(c -> line_markers)) return c -> filename;  Token base = c -> tokenizer -> tokens;  if(token < base || token >= base + Bytes_len(c -> tokenizer -> tokens)) return c -> filename;  String file = c -> filename; {
+    List row;  Array _x2c_macro_object_1 = c -> line_markers;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
+      row = Var_list(_x2c_macro_cursor_output_1); {
+        List _x2c_destructure_0 = row;  int position = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));  int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));  String marked = Var_string(List_getindex(_x2c_destructure_0, 2));  int marked_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));  if(position > token -> pos) break;  file = marked;  if(line)(* line) = marked_line + token -> line - text_line;
+      }
+
+    }
+
+  }
+  return file;
 }
 
 static List _compiler_location(Compiler compiler, Token token){
@@ -573,12 +597,12 @@ static List _compiler_location(Compiler compiler, Token token){
 void report_suspend(void);
 int List_try_next(List, List *, Var *);
 _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String message, Token token, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _118;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 393};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
+  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _112;  List loc = _compiler_location(compiler, token);  Diagnostics_report(diag, code, message, loc, notes);  if(compiler -> recovery_depth > 0){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 427};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));  __builtin_unreachable();
   }
   if(! diag -> printer){
-    Var held;  List _x2c_macro_object_0 = Diagnostics_entries(diag);  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      held = _x2c_macro_cursor_output_0;  Compiler_print_diagnostic(compiler, Var_list(held));
+    Var held;  List _x2c_macro_object_2 = Diagnostics_entries(diag);  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
+      held = _x2c_macro_cursor_output_2;  Compiler_print_diagnostic(compiler, Var_list(held));
     }
 
   }
@@ -590,7 +614,7 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
 }
 
 void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes){
-  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _119;  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
+  if(! _init_guard_) _file_init_();  report_suspend();  Diagnostics diag = compiler -> diagnostics;  message = String_truth(message) ? message : _113;  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
 static void Compiler__show_source_context(Compiler compiler, int line, int column, int length){
@@ -615,11 +639,10 @@ static void _context_caret(char * line_start, char * line_end, int column, int l
   int line_len = line_end - line_start, start = column > 0 ? column - 1 : 0;  if(start > line_len) start = line_len;  int width = length > 0 ? length : 1;  if(start < line_len && width > line_len - start) width = line_len - start;  if(width < 1) width = 1;  fprintf(stderr, "  %.*s\n", line_len, line_start);  fprintf(stderr, "  ");  for(int i = 0;  i < start;  i ++) putc(line_start[i] == '\t' ? '\t' : ' ', stderr);  for(int i = 0;  i < width;  i ++) putc('^', stderr);  fprintf(stderr, "\n");
 }
 
-int Array_try_next(Array, int *, Var *);
 void Compiler_take_diagnostics(Compiler c, Compiler child){
   if(! _init_guard_) _file_init_();  Diagnostics target = c -> diagnostics, source = child -> diagnostics;  if(target == source) return; {
-    List entry;  Array _x2c_macro_object_1 = source -> entries;  int _x2c_macro_cursor_1 = 0;  Var _x2c_macro_cursor_output_1;  while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      entry = Var_list(_x2c_macro_cursor_output_1);  Diagnostics__store(target, entry);
+    List entry;  Array _x2c_macro_object_3 = source -> entries;  int _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_3;  while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
+      entry = Var_list(_x2c_macro_cursor_output_3);  Diagnostics__store(target, entry);
     }
 
   }
@@ -654,8 +677,8 @@ void Compiler_dump_tokens(Compiler compiler){
 int Map_try_next(Map, unsigned *, Var *, Var *);
 void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_2 = map;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  Var _x2c_macro_cursor_output_3;  while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2), &(_x2c_macro_cursor_output_3))){
-      key = _x2c_macro_cursor_output_2;  value = _x2c_macro_cursor_output_3;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
+    Var key, value;  Map _x2c_macro_object_4 = map;  unsigned _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
+      key = _x2c_macro_cursor_output_4;  value = _x2c_macro_cursor_output_5;  printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
   }
@@ -665,8 +688,8 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
 String Var_repr(Var);
 void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_(); {
-    Var key, value;  Map _x2c_macro_object_3 = compiler -> key_ids;  unsigned _x2c_macro_cursor_3 = 0;  Var _x2c_macro_cursor_output_4;  Var _x2c_macro_cursor_output_5;  while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4), &(_x2c_macro_cursor_output_5))){
-      key = _x2c_macro_cursor_output_4;  value = _x2c_macro_cursor_output_5;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
+    Var key, value;  Map _x2c_macro_object_5 = compiler -> key_ids;  unsigned _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_6;  Var _x2c_macro_cursor_output_7;  while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6), &(_x2c_macro_cursor_output_7))){
+      key = _x2c_macro_cursor_output_6;  value = _x2c_macro_cursor_output_7;  printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
   }

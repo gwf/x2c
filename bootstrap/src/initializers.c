@@ -1172,6 +1172,8 @@ Var Array_push(Array, Var);
 
 List Array_list_free(Array);
 
+List Macro_inserted_items(List);
+
 static List Compiler__convert_composite(Compiler c, List expr, Type target, List native_target, List parent_condition, int * native_used){
   List items = Var_cdr(Var_cadr(List_caddr(expr)));
   if(! List_truth(items)){
@@ -1201,7 +1203,7 @@ static List Compiler__convert_composite(Compiler c, List expr, Type target, List
   }
   List converted = Array_list_free(elements);
   return({
-    Var _x2c_literal_part_0 = List_var(target);  Var _x2c_literal_part_1 = List_var(cons(_2, cons(List_var(cons(_9, List_append(converted, NULL))), NULL)));  cons(_0, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_literal_part_0 = List_var(target);  Var _x2c_literal_part_1 = List_var(cons(_2, cons(List_var(cons(_9, List_append(Macro_inserted_items(converted), NULL))), NULL)));  cons(_0, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
   }
   );
 }

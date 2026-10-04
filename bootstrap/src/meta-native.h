@@ -9,6 +9,8 @@
 #include "compiler.h"
 void Compiler_install_meta_function(Compiler c, List fn, Token marker);
 
+void Compiler_install_collected_meta_function(Compiler c, List declaration, Token marker);
+
 void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
