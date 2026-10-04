@@ -66,6 +66,7 @@ typedef struct Compiler{
   List lambda_scopes;
   Array match_types;
   Map imports;
+  Map included_exports;
   Map init_tokens, static_init_deps, fn_defs;
   Array id_keys, inits;
   String init_fn, fini_fn;
@@ -134,6 +135,8 @@ Compiler Var_compiler(Var value);
 void Compiler_shallow_parse(Compiler c, Map globals);
 
 void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay);
+
+void Compiler_start_collection(Compiler c);
 
 int Compiler_collect_compile_time_definition(Compiler c, int keyword);
 

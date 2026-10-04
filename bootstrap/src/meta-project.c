@@ -378,10 +378,6 @@ int List_truth(List);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-List collect_cached_paths(void);
-
-void collect_forget_entries_since(List);
-
 static List Helper_manifest(Helper * h){
   Path_make_dirs((* h).directory);
   int lock = file_lock(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_0), NULL))), 1);
@@ -406,11 +402,8 @@ static List Helper_manifest(Helper * h){
         }
 
       }
-      List collected = collect_cached_paths();
-      manifest = Helper_build(&((* h)));
-      collect_forget_entries_since(collected);
       {
-        List _x2c_return_value_1 = manifest;
+        List _x2c_return_value_1 = Helper_build(&((* h)));
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
           return _x2c_return_value_1;

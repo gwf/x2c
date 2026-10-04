@@ -91,6 +91,14 @@ List Compiler_parse_macro_lisp_top_level(Compiler c);
 
 void Compiler_parse_macro_lisp_shallow(Compiler c);
 
+void Compiler_keep_imported_meta(Compiler c, List imported);
+
+int Compiler_at_import(Compiler c);
+
+void Compiler_record_macro_export(Compiler c);
+
+void Compiler_import_exported(Compiler c, String path, Token invocation);
+
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
 
 List Compiler_parse_macro_lisp_expression(Compiler c);

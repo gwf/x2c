@@ -1107,8 +1107,6 @@ Map Map_new(void);
 
 void Sym_reset(Sym, Map);
 
-void Compiler_install_builtin_macros(Compiler);
-
 void Compiler_shallow_parse(Compiler c, Map globals){
   if(! _init_guard_) _file_init_();
   c -> macros = Map_new();
@@ -1116,7 +1114,6 @@ void Compiler_shallow_parse(Compiler c, Map globals){
   c -> kw_seen = Map_new();
   Array_clear(c -> import_stack);
   Sym_reset(c -> sym, globals);
-  Compiler_install_builtin_macros(c);
   Compiler__shallow_parse_loop(c);
   Compiler__check_unmatched_braces(c);
 }
@@ -1129,7 +1126,6 @@ void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay){
   if(! _init_guard_) _file_init_();
   if(c -> macros == NULL || ! Map_len(c -> macros)) Compiler__start_macros(c);
   Sym_reset_overlay(c -> sym, base, overlay);
-  Compiler_install_builtin_macros(c);
   Compiler__shallow_parse_loop(c);
   c -> open_linkage += Array_len(c -> braces);
 }
@@ -1141,8 +1137,6 @@ static void Compiler__start_macros(Compiler c){
   c -> imports = Map_new();
   Array_clear(c -> import_stack);
 }
-
-void Compiler_rebuild_protocols(Compiler, Map);
 
 List Compiler_parse_top_level_mode(Compiler, int);
 
@@ -1159,10 +1153,7 @@ String Var_string(Var);
 Var List_cadr(List);
 
 static void Compiler__shallow_parse_loop(Compiler c){
-  Compiler_rebuild_protocols(c, NULL);
-  c -> import_protocols = 1;
-  c -> conforms = Map_new();
-  c -> shallow = 1;
+  Compiler_start_collection(c);
   Array_clear(c -> braces);
   while(Compiler_peek(c, 0) != 11212){
     Token start = c -> token;
@@ -1181,6 +1172,19 @@ static void Compiler__shallow_parse_loop(Compiler c){
 
   }
   c -> shallow = 0;
+}
+
+void Compiler_install_builtin_macros(Compiler);
+
+void Compiler_rebuild_protocols(Compiler, Map);
+
+void Compiler_start_collection(Compiler c){
+  if(! _init_guard_) _file_init_();
+  Compiler_install_builtin_macros(c);
+  Compiler_rebuild_protocols(c, NULL);
+  c -> import_protocols = 1;
+  c -> conforms = Map_new();
+  c -> shallow = 1;
 }
 
 int log_should_log(Symbol, Symbol);
@@ -2246,9 +2250,9 @@ void Compiler_inherit_library_comptime(Compiler);
 void Compiler_resolve_protocols(Compiler);
 void Compiler_install_generated_protocol_symbols(Compiler);
 void Compiler_install_native_meta_effects(Compiler, Map);
-void Compiler_replay_included_package_imports(Compiler, Map, String, Map);
+Map Compiler_replay_included_package_imports(Compiler, Map);
 static void Compiler__reset_parse(Compiler c, Map globs, int generated){
-  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_library_comptime(c);  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  Compiler__reset_macros(c);  Compiler_resolve_protocols(c);  if(generated) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Compiler_replay_included_package_imports(c, globs, c -> filename, Map_new());
+  Array_clear(c -> meta_group);  c -> meta_group_bound = Map_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_library_comptime(c);  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  Compiler__reset_macros(c);  Compiler_resolve_protocols(c);  if(generated) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  c -> included_exports = Compiler_replay_included_package_imports(c, globs);
 }
 
 static void Compiler__reset_macros(Compiler c){
@@ -2343,8 +2347,9 @@ static long Compiler__end_index(Compiler c, Token tokens){
 }
 
 void Compiler_update_source_visibility(Compiler, List);
+void Compiler_import_included_exports(Compiler);
 static void Compiler__append_preproc(Compiler c, Array nodes){
-  List directives = Compiler_leading_preproc(c);  Compiler_update_source_visibility(c, directives); {
+  List directives = Compiler_leading_preproc(c);  Compiler_update_source_visibility(c, directives);  if(Map_len(c -> included_exports)) Compiler_import_included_exports(c); {
     Var directive;  List _x2c_macro_object_17 = directives;  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_17;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_17))){
       directive = _x2c_macro_cursor_output_17;  Array_push(nodes, directive);
     }
@@ -2921,7 +2926,7 @@ List Sym_visible_symbols(Sym);
 Symbol Compiler_peek(Compiler c, int steps){
   if(! _init_guard_) _file_init_();  Token token = c -> token;  if(! steps && Compiler_at_completion(c)){
     List rows = Sym_visible_symbols(c -> sym); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1728};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 1739};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2956,7 +2961,7 @@ static Token _skip_backward(Token token, Token origin){
 
 void Compiler_require_input(Compiler c){
   if(! _init_guard_) _file_init_();  if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1769};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 1780};  x2c_error_raise_n(& _x2c_error_site_1, 664344300629258, 0);  __builtin_unreachable();
   }
 
 }
@@ -3026,7 +3031,7 @@ int Compiler_at_completion(Compiler c){
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords){
   if(! _init_guard_) _file_init_();  if(! Compiler_at_completion(c)) return;  List rows = Sym_visible_symbols(c -> sym); {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1893};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 1904};  x2c_error_raise_n(& _x2c_error_site_2, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
 }
