@@ -2021,7 +2021,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1689 = cons(_1688, NULL);
   _1690 = cons(_197, _1689);
   _1691 = List_var(_1690);
-  _1692 = int_var(35934);
+  _1692 = int_var(35928);
   _1693 = cons(_1692, NULL);
   _1694 = cons(_210, _1693);
   _1695 = List_var(_1694);
