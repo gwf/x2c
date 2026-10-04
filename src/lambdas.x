@@ -106,7 +106,7 @@ static List Compiler._parse_typed_params(Compiler c) {
   foreach (List param, params)
     match (param)
       case %(param ? (bind ?binding ?)):
-        c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
+        c.set_fact(%(lambda-param $binding), 1);
   return params;
 }
 
@@ -123,11 +123,10 @@ static List Compiler._parse_bare_param(Compiler c) {
     $report.parse.param_ident(c);
   String name = c.token.text;
   List binding = c.sym.define(%($name), %("Var"));
-  Map facts = c.semantic_binding_facts();
-  facts[%(parameter $binding)] = 1;
-  facts[%(lambda-param $binding)] = 1;
-  facts[%(automatic $binding)] = 1;
-  facts[%(type $binding)] = %("Var");
+  c.set_fact(%(parameter $binding), 1);
+  c.set_fact(%(lambda-param $binding), 1);
+  c.set_fact(%(automatic $binding), 1);
+  c.set_fact(%(type $binding), %("Var"));
   c.next();
   return binding;
 }
@@ -318,7 +317,7 @@ static List Compiler._declare_param(Compiler c, List entry) {
 static void Compiler._add_param(Compiler c, Array entries, List parameter) {
   match (parameter)
     case %(param ? (bind ?binding ?)): {
-      c.semantic_binding_facts()[%(lambda-param $binding)] = 1;
+      c.set_fact(%(lambda-param $binding), 1);
       entries.push(parameter);
     }
 }
@@ -495,17 +494,17 @@ static List Compiler._resolve_outside(Compiler c, List frame, Var value) {
    a snapshot. Rows join the lambda's order newest first. */
 static List Capture.record(
   Capture &k, Type captured_type, List expression, int reference) {
-  Map facts = k.facts;
-  List captured = k.c.sym.introduce(binding_identity_spelling(k.binding));
+  Compiler c = k.c;
+  List captured = c.sym.introduce(binding_identity_spelling(k.binding));
   List row = %(capture $captured $captured_type $expression);
-  facts[k.key] = row;
-  facts[%(automatic $captured)] = 1;
-  facts[%(type $captured)] = captured_type;
-  facts[%(lambda-depth $captured)] = k.depth;
-  if (reference) facts[%(reference-param $captured)] = 1;
-  else facts[%(lambda-snapshot $captured)] = 1;
+  c.set_fact(k.key, row);
+  c.set_fact(%(automatic $captured), 1);
+  c.set_fact(%(type $captured), captured_type);
+  c.set_fact(%(lambda-depth $captured), k.depth);
+  if (reference) c.set_fact(%(reference-param $captured), 1);
+  else c.set_fact(%(lambda-snapshot $captured), 1);
   List order = %(lambda-order ${k.scope});
-  facts[order] = cons(row, facts.getdefault(order, %()));
+  c.set_fact(order, cons(row, k.facts.getdefault(order, %())));
   return row;
 }
 

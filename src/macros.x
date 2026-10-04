@@ -182,8 +182,7 @@ static List Expansion.fresh_names(Expansion &x, List old_stack) {
       fresh_values.push(c._capture_row(hole, %($binding)));
     }
     else {
-      c.semantic_binding_facts()[%(source-spelling $binding)] =
-        spelling.str();
+      c.set_fact(%(source-spelling $binding), spelling.str());
       x.direct = cons(%($binder $binding), x.direct);
     }
   }
@@ -1318,7 +1317,7 @@ static List Compiler._definition_local(Compiler c, String spelling, int tag) {
   Var order = locals[<order>];
   int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
   List introduced = binding_identity_new(identity, spelling);
-  c.semantic_binding_facts()[%(known $identity)] = spelling;
+  c.set_fact(%(known $identity), spelling);
   locals[<order>] = cons(introduced, order is <list> ? order : NULL);
   locals[introduced] = spelling;
   if (tag) locals[%(tag-local $introduced)] = 1;

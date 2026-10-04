@@ -133,15 +133,15 @@ static List Compiler._with_body(Compiler c, List expression, String alias) {
     case %(expr ?expression_type ?): type = expression_type;
   c.sym.push_new_scope();
   List binding = c.sym.define(%($alias), type);
-  c.semantic_binding_facts()[%(with $binding)] = expression;
+  c.set_fact(%(with $binding), expression);
   Var shadowed;
   int shadows = c.semantic_binding_facts().try_get(
     %(with-name $alias), shadowed);
-  c.semantic_binding_facts()[%(with-name $alias)] = binding;
+  c.set_fact(%(with-name $alias), binding);
   defer {
-    c.semantic_binding_facts().del(%(with $binding));
-    if (shadows) c.semantic_binding_facts()[%(with-name $alias)] = shadowed;
-    else c.semantic_binding_facts().del(%(with-name $alias));
+    c.drop_fact(%(with $binding));
+    if (shadows) c.set_fact(%(with-name $alias), shadowed);
+    else c.drop_fact(%(with-name $alias));
     c.sym.pop_scope();
   }
   c.next();

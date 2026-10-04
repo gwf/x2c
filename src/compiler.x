@@ -205,22 +205,22 @@ typedef struct Compiler {
 
 /** Holds one reversible semantic transaction in caller storage.
     The zero value is inactive. Keep an active transaction in one object;
-    copying it does not copy the staged maps or coordinate completion.
-    Borrowed compiler maps keep their owners; staged maps and snapshots live
-    in the Scope used to begin the transaction.
+    copying it does not coordinate completion. The symbol table's undo log
+    holds the rows it may restore from `mark`; the staged generated-name
+    counters and other snapshots live in the Scope used to begin it.
 */
 typedef struct SymTxn {
   Compiler c;
   int scope_index, next_binding, active, String initializer_name;
   String shutdown_name, Map counters;
-  int local_macro_names;
+  int local_macro_names, mark;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
   int source_occurrences;
   /* A macro value application also stages producer effects: adapters,
      base bindings, early declarations, initializers, origins and errors. */
-  int extended, Map adapters, Array base_bindings;
+  int extended, Map adapters;
   int early_count, init_count, origin_count, origin, needs_exception;
 } SymTxn;
 
@@ -1355,10 +1355,10 @@ static void Compiler._record_objects(Compiler c, List bindings, Token site) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
-      Map facts = c.semantic_binding_facts();
-      if (key in facts) c._report_redefinition("variable", binding, site);
-      facts[key] = 1;
-      facts[%(arms $binding)] = c.arms;
+      if (key in c.semantic_binding_facts())
+        c._report_redefinition("variable", binding, site);
+      c.set_fact(key, 1);
+      c.set_fact(%(arms $binding), c.arms);
     }
 }
 
@@ -1389,8 +1389,8 @@ static void Compiler._record_span(Compiler c, List node, int start, int end) {
     case %((!or typedef declare) *): key = node;
   }
   if (key)
-    c.semantic_binding_facts()[%(definition-span $key)] =
-      %($start $end ${c.source_private > 0});
+    c.set_fact(
+      %(definition-span $key), %($start $end ${c.source_private > 0}));
 }
 
 /* function completion
@@ -1421,11 +1421,11 @@ static void Compiler._record_prototype(
     Var (state_kind, prior_contract) = state;
     if (state_kind == <definition> || state_kind == <completed>) return;
     if (state_kind != <prototype> || !List.equal(prior_contract, contract)) {
-      c.semantic_binding_facts()[%(completion $binding)] = %(conflict);
+      c.set_fact(%(completion $binding), %(conflict));
       return;
     }
   }
-  c.semantic_binding_facts()[%(completion $binding)] = %(prototype $contract);
+  c.set_fact(%(completion $binding), %(prototype $contract));
 }
 
 /* A source attribute on the prototype belongs to the function; the
@@ -1437,7 +1437,7 @@ static void Compiler._record_attributes(
     if (item is <list> && car(item) is <string>)
       attributes = attributes ? %( @attributes $item ) : %($item);
   if (attributes)
-    c.semantic_binding_facts()[%(attributes $binding)] = attributes;
+    c.set_fact(%(attributes $binding), attributes);
 }
 
 static void Compiler._record_definition(
@@ -1454,8 +1454,8 @@ static void Compiler._record_definition(
     if (state_kind == <definition> || state_kind == <completed>)
       c._report_redefinition("function", binding, site);
   }
-  c.semantic_binding_facts()[%(completion $binding)] = %(definition $contract);
-  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+  c.set_fact(%(completion $binding), %(definition $contract));
+  c.set_fact(%(arms $binding), c.arms);
   String spelling = binding_identity_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }
@@ -1473,8 +1473,8 @@ static void Compiler._complete_prototype(
     String spelling = binding_identity_spelling(binding);
     $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
   }
-  c.semantic_binding_facts()[%(completion $binding)] = %(completed $contract);
-  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+  c.set_fact(%(completion $binding), %(completed $contract));
+  c.set_fact(%(arms $binding), c.arms);
 }
 
 static List Compiler._contract(Compiler c, Type type, List binding) =>
@@ -2012,7 +2012,7 @@ List Compiler.present_references(Compiler c) =>
 void Compiler.mark_reference_present(Compiler c, List binding) {
   List present = c.present_references();
   if (!(binding in present))
-    c.semantic_binding_facts()[%(present-references)] = cons(binding, present);
+    c.set_fact(%(present-references), cons(binding, present));
 }
 
 /** Marks the optional reference `binding` present after an `if` when the
@@ -2027,8 +2027,8 @@ void Compiler.settle_reference(
 /** Restores the optional-reference facts saved before a lexical path. */
 void Compiler.restore_reference_presence(Compiler c, List before) {
   if (before === c.present_references()) return;
-  if (before) c.semantic_binding_facts()[%(present-references)] = before;
-  else c.semantic_binding_facts().del(%(present-references));
+  if (before) c.set_fact(%(present-references), before);
+  else c.drop_fact(%(present-references));
 }
 
 /** Returns the optional-reference parameter tested by `condition`, or NULL.

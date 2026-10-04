@@ -1927,8 +1927,8 @@ static List Compiler._generated_function(
   Var authored;
   int documented = c.semantic_binding_facts().try_get(key, authored);
   List function = c.bind_syntax(syntax, AST_UNIT, NULL);
-  if (documented) c.semantic_binding_facts()[key] = authored;
-  else c.semantic_binding_facts().del(key);
+  if (documented) c.set_fact(key, authored);
+  else c.drop_fact(key);
   return function;
 }
 
@@ -2368,8 +2368,8 @@ static List Compiler._guard_rendering(
             %("Buffer"), "Var_write_pointer_repr",
             %($value (expr ("Buffer") (ident $output))));
       List path = c.sym.introduce("render_path");
-      c.semantic_binding_facts()[%(automatic $path)] = 1;
-      c.semantic_binding_facts()[%(type $path)] = %("RenderPath");
+      c.set_fact(%(automatic $path), 1);
+      c.set_fact(%(type $path), %("RenderPath"));
       Macro addressed = $addressed;
       List address = c.rebuild_expression(
         %(* "RenderPath"),
