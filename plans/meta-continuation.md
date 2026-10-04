@@ -10,8 +10,8 @@
 > This document is a campaign roadmap, not an implementation specification.
 > Updating this record does not authorize implementation or publication.
 > Follow-up: Gary approved the operator ledger implementation. It is integrated
-> locally on origin/dev 26a29650. The full publication checks pass, and the
-> advisory performance checkpoint is neutral. Delivery awaits the branch choice.
+> on origin/dev b5c2dde7. Implementation and verification are complete, and
+> the advisory performance checkpoint is neutral. The destination is dev.
 
 ## Intended result
 
@@ -395,9 +395,9 @@ lookup cost, and source clarity may favor retaining the current code.
 
 The selected implementation is the operator ledger. Implementation, focused
 parity, full correctness checks, and the advisory checkpoint are complete.
-Delivery remains under the chosen branch policy. The supplied session
-instructions name main; current repository instructions reserve main for
-releases and use dev. Resolve that destination before pushing.
+Deliver this change to dev under the existing final-tree publication checks.
+Gary's explicit origin/dev instruction establishes the destination. Production
+promotion to main is outside this change.
 Match preparation and prepared formatting remain deferred. Record further
 baseline drift before using their older prototype findings as current evidence.
 
