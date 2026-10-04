@@ -166,6 +166,26 @@ A name that a quotation declares is private to it, so another quotation
 cannot refer to it. An `x2c_ident` hole declares and refers to one exact
 name.
 
+When a `meta` function builds one statement, the macro can hand it the work
+in one line. Write the `Stmt` macro with an arrow body and return the
+statement itself:
+
+```x2c
+#include "meta.x"
+meta static List traced(List body) =>
+  $!{ { puts("enter"); $body puts("leave"); } };
+
+macro Stmt $trace(Stmt $body) => $traced($body);
+~
+~int main(void) {
+~  $trace(puts("work"););
+~  return 0;
+~}
+```
+
+Keep the braced `{ $helper(...)... }` form for a function that returns
+several block items as a `List`.
+
 ## Choose collections by mutation and identity
 
 Use `List` for immutable sequences that share structure, `Array` for mutable
