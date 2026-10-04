@@ -182,6 +182,8 @@ not a required local sequence or a reason to publish the feature separately.
 It refreshes bootstrap, rebuilds stage 0 safely, builds through
 stage 1, and compares stages 0 and 1. `agent-pr-check` runs it,
 `doc-check`, `proof-cold-collection`, and the remaining extended checks.
+Most checks after precommit run at once; each writes its full output to
+`debug/agent-pr-check/<target>.log`, and the gate prints which failed.
 The full `proof-raw-symbols` sweep remains an explicit optional command.
 `stage-diff-0` establishes self-host convergence, and stage 1 adds the
 warning-free build; later stages run on demand and in the nightly snapshot.

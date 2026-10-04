@@ -16,7 +16,8 @@ endif
 TEST_OBJECTS = $(patsubst $(SOURCE)/%.x,$(BUILD)/%.o,$(X_FILES))
 SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 
-.PHONY: default all test sanitizer compiler-fixtures update-compiler-fixtures \
+.PHONY: default all test sanitizer compiler-fixtures compiler-fixture-cases \
+	update-compiler-fixtures \
 	benchmark-list iter-benchmark scope-benchmark match-capture-benchmark \
 	scope-probes \
 	error-probes exception-benchmark \
@@ -87,9 +88,14 @@ protocol-probes:
 expression-bodied-function-probes:
 	./probes/run-expression-bodied-functions.sh
 
+# The probes and the fixture cases share no outputs, so under -j the cases
+# run beside the probes.
 compiler-fixtures: cli-probes package-install-probes preprocessor-probes \
 		symbol-snapshot-probes header-cache-probes protocol-probes \
-		expression-bodied-function-probes meta-helper-probes
+		expression-bodied-function-probes meta-helper-probes \
+		compiler-fixture-cases
+
+compiler-fixture-cases:
 	./compiler-fixtures/run.sh check
 
 update-compiler-fixtures:
