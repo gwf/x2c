@@ -1191,6 +1191,12 @@ meta static List counter(String name) {
 }
 ```
 
+A `Type` spells C type keywords such as `unsigned` and `char`, and the `*`
+of a pointer, as Symbols. It spells every other type name as a String:
+`%("String")`, `%(* "Point")`, `%(struct "Tag")`. A Symbol does not keep
+the case of its spelling, so `%(String)` is an error where it fills a
+type.
+
 ### Holes that name an expression
 
 A `$name` hole needs a local. When the value is a field, an element, or the
@@ -1298,12 +1304,16 @@ differences:
 - Nothing is bound. Holes keep the syntax their locals hold, a binding
   becomes a reference to it, and a number, String, or Symbol becomes a
   literal. A number keeps its exact value and type, and a String is a
-  String literal when `T` is `String`. A name the expression reads without
+  String literal when `T` is `String`. A `$items...` sequence makes each
+  number, String, or Symbol it holds a literal in the same way. A name the
+  expression reads without
   declaring stays a name and is bound wherever the code is bound, if it is
   bound at all.
 - The code declares nothing. A typed quotation has no expansion to keep
-  names private to, so a name it needs comes from a hole. For the same
-  reason it applies no template; build that code first and insert it.
+  names private to, so a name it needs comes from a hole, such as a local
+  that holds `x2c_ident("total")`. For the same reason it applies no
+  template; build that code first and insert it. Inside another quotation,
+  write a typed quotation as a hole: `${$!int{ $b }}`.
 
 Only the outermost expression receives `T`. Inner expressions carry no type
 until something binds them. Write `T` exactly: the compiler trusts it as it

@@ -1160,9 +1160,11 @@ A macro has one result kind as well as argument kinds:
 
 The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
-results; `Expr` is a synonym. Arrow bodies require `Expression` or
-`Stmt`; braced bodies require `Stmt`, `Field`, `Entry`, `Enumerator`,
-`Unit`, or `Declaration`.
+results; `Expr` is a synonym. An arrow body requires `Expression` or
+`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro invocation or
+an expression statement, and a `meta` call written there may return any
+statement that fits where the macro is invoked. Braced bodies require
+`Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or `Declaration`.
 Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
@@ -1519,7 +1521,11 @@ whose kind its position gives, and the quotation applies to the locals'
 values in that order. `$name...` is a sequence. A local declared `Type`,
 which `lib/meta.x` declares as a `List` of type syntax such as
 `%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
-declares `value` with the type the local holds. A `String` local fills an
+declares `value` with the type the local holds. Type syntax spells C type
+keywords and `*` as Symbols and every other type name as a String, as in
+`%(unsigned long)`, `%("String")`, and `%(* "Point")`. A type whose name
+is a Symbol, such as `%(String)`, is an error where it fills a type.
+A `String` local fills an
 expression hole as a string literal and an `int` local as an integer
 literal. A `$name` that names no local is a macro invocation or a `meta`
 call, as in a template, so `$rows($items)...` splices a `meta` function's
@@ -1555,12 +1561,16 @@ typed quotation builds `(expr T CONTENT)` where it is written. It binds
 nothing, counts no expansion, and opens no transaction. Its holes take the
 values a rebuild gives them: syntax unchanged, a binding identity or
 `x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
-member position as its spelling, a number as a literal of its own type with
-its exact value, and a String or Symbol as a literal. A String is a String
+member position as its spelling and in a declarator as the name it
+declares, a number as a literal of its own type with its exact value, and
+a String or Symbol as a literal. Each number, String, or Symbol item of an
+expression sequence also becomes its literal. A String is a String
 literal when the whole expression is the hole and `T` is `String`; elsewhere
 it is a C string literal. Inner nodes keep the placeholder type of unbound
 syntax, and free names stay names that bind where the code is bound. A
-typed quotation may not declare a name or apply a template. The compiler
+typed quotation may not declare a name that its own code spells or apply a
+template, and inside
+another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
 accepts `T` as the expression's type without checking it. A typed quotation
 states the type the code has; it converts nothing, so write a cast inside
 the braces when the code needs one. See
@@ -1577,7 +1587,9 @@ A template can call a `meta` function in a slot and pass it a sequence
 hole written without `...`; the function receives the captured items as
 one `List`. Applying a macro value with one `List` of syntax as the last
 argument passes that List as the whole trailing sequence, so
-`outer(head, items)` and `outer(head, a, b)` build the same code. A `case`
+`outer(head, items)` and `outer(head, a, b)` build the same code. A `List`
+of numbers or Strings, such as `%(1 2 3)`, passes the whole sequence too,
+and each item becomes its literal. A `case`
 on a macro value captures what a spliced slot built under the sequence
 hole the slot was given, one element per statement, so each element can
 be recognized with a `case` on the macro that built it. The pattern a
