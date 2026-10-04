@@ -2743,22 +2743,18 @@ static String Compiler._filled_doc(Compiler c, String doc) {
 
 /* The active expansion's holes as prose spells them: a name as it is, and
    syntax as an invocation in this file wrote it, when the file's text is
-   loaded. A template that passes its own hole to another template passes
-   the same syntax, so the inner hole reads as the outer argument. */
+   loaded. Forwarding keeps the original source wrapper, so the inner hole
+   reads as the outer argument, even when two arguments have equal syntax. */
 static Map Compiler._hole_spellings(Compiler c) {
-  Map written = {}, spellings = {};
+  Map spellings = {};
   String file = absolute_path(c.filename);
-  foreach (List frame, c.macro_stack)
-    foreach (List binding, frame[2])
-      match (binding)
-        case %(? (src (source ?(String path) ?(int begin) ?(int end))
-                      ?syntax)):
-          if (c.text && path == file)
-            written[syntax] = String.new_len(c.text + begin, end - begin);
   foreach (List binding, c.macro_stack.car().list()[2]) {
     (Var binder, Var value) = binding;
-    match (value) case %(src ? ?syntax): value = syntax;
-    Var spelling = value is <string> ? value : written[value];
+    Var spelling = value is <string> ? value : void;
+    match (value)
+      case %(src (source ?(String path) ?(int begin) ?(int end)) ?):
+        if (c.text && path == file)
+          spelling = String.new_len(c.text + begin, end - begin);
     if (spelling is not void) spellings[binder.str()[1:]] = spelling;
   }
   return spellings;
