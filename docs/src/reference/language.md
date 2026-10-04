@@ -2336,8 +2336,9 @@ position. Inside a macro expansion, a `meta` call written as a whole
 expression statement, such as the body of `macro Stmt $same(Stmt $code) =>
 $same_of($code);`, holds a block-item position, so it may return a statement
 as well as an expression. Outside an expansion, such a call's `List` result
-that is not expression syntax remains a runtime value. Protocol declarations, macro definitions, preprocessor nodes, and
-other compile-time-only source items are retained at translation-unit position
+that is not expression syntax remains a runtime value. Protocol
+declarations, macro definitions, preprocessor nodes, and other
+compile-time-only source items are retained at translation-unit position
 and apply their source-order effect. The compiler rejects forms that are
 malformed or invalid in that position. As with other constructed ASTs, it does
 not recursively verify annotations or check where a handwritten `List` came

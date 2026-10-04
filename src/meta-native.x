@@ -177,8 +177,7 @@ List Compiler.evaluate_meta_expression(
 List Compiler.evaluate_meta_statement(
   Compiler c, List expression, AstPos context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
-  if (c.macro_stack && value is <list> && !value.is_nil() &&
-      !_expression_code(value))
+  if (c.macro_stack && value is <list> && !value.is_nil())
     return c.bind_macro_lisp_statement(value, context);
   return %(stmnt ${c._meta_result(expression, value, site)});
 }

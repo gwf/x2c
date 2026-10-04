@@ -3899,8 +3899,27 @@ List Compiler.lift_macro_lisp_expression(
 /** Binds a compile-time Lisp code `value` returned to a statement at
     `context`. */
 List Compiler.bind_macro_lisp_statement(
-  Compiler c, List value, AstPos context) =>
-  c.bind_syntax(c._helper_result(value), context, c.return_type);
+  Compiler c, List value, AstPos context) {
+  value = c._helper_result(value);
+  return c._statement_expression(value)
+    ? %(stmnt ${c.lift_macro_lisp_expression(value, c.token)})
+    : c.bind_syntax(value, context, c.return_type);
+}
+
+/* The root inside a carrier determines whether the statement discards an
+   expression or binds a statement. Ordinary binding consumes the carrier. */
+static int Compiler._statement_expression(Compiler c, List value) {
+  loop match (value) {
+    case %((!or "x2c.quoted" src at) ? ?root): value = root;
+    case %("x2c.at" ?root): value = root;
+    case %(code-value ? ?root ?): value = root;
+    case %(macro-invoke ?stored ? ?site):
+      return _result_kind(c._stored_definition(
+        stored, c.macro_invocation_site(site))) == <expression>;
+    case %(expr *): return 1;
+    default: return _sdk_identifier_result(value) is not void;
+  }
+}
 
 static Var _sdk_identifier_result(Var value) {
   match (value)
