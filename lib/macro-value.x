@@ -57,6 +57,8 @@ typedef struct MacroCaseSite {
 #include "match-machine.x"
 #include "meta.x"
 #include "string.x"
+#include "varconvert.x"
+#include <math.h>
 
 // application
 
@@ -91,25 +93,30 @@ static List _macro_group(Macro t, List values) {
 
 /** Returns what a typed quotation inserts for one use of a hole whose
     local holds `value`, as a rebuild inserts it. An expression hole
-    (`lifts`) takes an `int`, String, or Symbol as its literal. Where the
+    (`lifts`) takes a number, String, or Symbol as its literal. Where the
     code takes an expression (`expression`), a binding, an `x2c_ident`
-    spelling, or a Name hole's String becomes an identifier expression. */
+    spelling, or a Name hole's String becomes an identifier expression;
+    in a Name hole's member position, an `x2c_ident` spelling is its
+    String. */
 Var Macro.inserted(Var value, int lifts, int expression) {
   if (lifts) value = _macro_expr_value(value);
-  if (!expression) return value;
-  if (value is <string>) return %(expr () (ident $value));
-  match (value) {
-    case %("x2c.ident" ?(String spelling)):
-      return %(expr () (ident $spelling));
-    case %(binding ? ?): return %(expr () (ident $value));
-  }
+  Var spelling = value;
+  match (value) case %("x2c.ident" ?(String name)): spelling = name;
+  if (!expression) return lifts ? value : spelling;
+  if (spelling is <string>) return %(expr () (ident $spelling));
+  match (value) case %(binding ? ?): return %(expr () (ident $value));
   return value;
 }
 
-/** Returns `expression` with the type `type`: what a typed quotation
-    builds when its code is one hole. */
-List Macro.typed(List type, List expression) =>
-  %(expr $type @{expression.cddr()});
+/** Returns what a typed quotation builds when its code is one hole whose
+    local holds `value`: the inserted expression with the type `type`. A
+    String typed `String` is a String literal. */
+List Macro.typed(List type, Var value) {
+  if (value is <string> && List.compare(type, %("String")) == 0)
+    value = x2c_literal_string(value);
+  List expression = Macro.inserted(value, 1, 1);
+  return %(expr $type @{expression.cddr()});
+}
 
 // subject bindings
 
@@ -272,26 +279,104 @@ static List _macro_value_rows(Macro t, List values) {
   return rows;
 }
 
-/* An expression parameter takes code, so an `int`, String, or Symbol
+/* An expression parameter takes code, so a number, String, or Symbol
    argument becomes the literal expression that holds it, as the compiler
-   lifts a compile-time value. C reads a negative literal as a negation,
-   so it takes parentheses; INT_MIN's magnitude needs a cast back to int. */
+   lifts a compile-time value. */
 static Var _macro_expr_value(Var value) {
   if (value is <string>)
     return %(expr (* char) (literal (* char) ${value.repr()}));
   if (value is <symbol>) return x2c_literal_symbol(value);
-  if (!value.is_integer() || value.integer() != (int) value.integer())
-    return value;
-  List literal = x2c_literal_int(value.integer());
-  if (value.integer() == INT_MIN)
-    literal = %(expr (int) (cast (int) $literal));
-  return value.integer() < 0 ? %(expr (int) (parens $literal)) : literal;
+  Type type = Macro.number_type(value);
+  return type ? Macro.number_literal(type, type, value) : value;
 }
 
 static List _macro_expr_values(List values) {
   Array lifted = [];
   foreach (Var item, values) lifted.push(_macro_expr_value(item));
   return lifted.list_free();
+}
+
+// number literals
+
+/** Returns the C type of a number's Var family, or NULL when `value` is not
+    a number. An untyped integer is an `int` when it fits one. */
+List Macro.number_type(Var value) {
+  switch (value.tag()) {
+    case <i8>: return %(signed char);
+    case <u8>: return %(unsigned char);
+    case <i16>: return %(short);
+    case <u16>: return %(unsigned short);
+    case <i32>: return %(int);
+    case <u32>: return %(unsigned);
+    case <long>: return %(long);
+    case <ulong>: return %(unsigned long);
+    case <llong>: return %(long long);
+    case <ullong>: return %(unsigned long long);
+    case <f32>: return %(float);
+    case <ldouble>: return %(long double);
+  }
+  if (value.is_floating()) return %(double);
+  if (value.is_integer()) {
+    long n = value.integer();
+    return n == (int) n ? %(int) : %(long long);
+  }
+  return NULL;
+}
+
+/** Returns the literal expression of type `result` that holds `value`, a
+    number of the scalar type `type`. An `int` value is its decimal
+    literal; another number is its exact bits cast to `type`. */
+List Macro.number_literal(List result, List type, Var value) {
+  if (value.tag() == <i32>) return _int_literal(result, value);
+  List literal = _bits_literal(value);
+  return %(expr $result (parens (expr $result (cast $type $literal))));
+}
+
+/* C reads a negative literal as a negation, so it takes parentheses, and
+   INT_MIN's magnitude does not fit an int, so its literal is cast back. */
+static List _int_literal(Type result, Var value) {
+  long n = value.integer();
+  List literal = %(expr $result (literal (int) ${value.str()}));
+  if (n == INT_MIN)
+    return %(expr $result (parens (expr $result (cast (int) $literal))));
+  return n < 0 ? %(expr $result (parens $literal)) : literal;
+}
+
+/* The exact bits of a number that is not an int, as a long double or an
+   unsigned long long literal that the caller casts to the number's type. */
+static List _bits_literal(Var value) {
+  X2CVarNumeric number;
+  value.numeric_decode(number);
+  Type literal_type = number.floating ? %(long double) : %(unsigned long long);
+  String text = number.floating ? _float_text(number.floating_value)
+                                : "%lluULL".printf(number.raw);
+  return %(expr $literal_type (literal $literal_type $text));
+}
+
+/* NaN and the infinities have no literal, so they spell builtin calls. */
+static String _float_text(long double n) {
+  if (isnan(n)) return "__builtin_nanl(\"\")";
+  if (isinf(n)) return n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
+  return _hex_float(n);
+}
+
+/* Spells finite `n` exactly as a normalized hex literal. Printf's %La
+   layout depends on the host's long double. */
+static String _hex_float(long double n) {
+  const char *sign = signbit(n) ? "-" : "";
+  if (n == 0) return "%s0x0p+0L".printf(sign);
+  int exponent;
+  long double fraction = frexpl(fabsl(n), &exponent) * 2 - 1;
+  char digits[32];
+  int count = 0;
+  for (; fraction != 0; count++) {
+    fraction *= 16;
+    int digit = (int) fraction;
+    fraction -= digit;
+    digits[count] = "0123456789abcdef"[digit];
+  }
+  digits[count] = 0;
+  return "%s0x1%s%sp%+dL".printf(sign, count ? "." : "", digits, exponent - 1);
 }
 
 // pattern views

@@ -64,7 +64,7 @@ X2c declarations, parsed from source or constructed.
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3158`
+Source: `src/parse.x:3177`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -144,7 +144,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:3289`
+Source: `src/parse.x:3308`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration

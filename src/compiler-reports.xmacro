@@ -1,51 +1,45 @@
 /* compiler diagnostics. */
 
-macro Stmt $report.parse.token_eof(Expr $c) {
+macro Stmt $report.parse.token_eof(Expr $c) =>
   $c.report_error(
     <parse>,
     "unexpected end of file",
     $c.token, NULL);
-}
 
-macro Stmt $report.type.ctor_parent(Expr $c) {
+macro Stmt $report.type.ctor_parent(Expr $c) =>
   $c.report_error(
     <type>,
     "a forwarded class constructor has no completed parent constructor",
     $c.token, NULL);
-}
 
-macro Stmt $report.type.ctor_variadic(Expr $c, Expr $name) {
+macro Stmt $report.type.ctor_variadic(Expr $c, Expr $name) =>
   $c.report_error(
     <type>,
     %"'${$name}' requires an explicit variadic constructor",
     $c.token, NULL);
-}
 
-macro Stmt $report.parse.script_main(Expr $c) {
+macro Stmt $report.parse.script_main(Expr $c) =>
   $c.report_error(
     <parse>,
     "a script that defines main cannot have top-level statements",
     $c.token, %("move the statement into main, or remove main so the statements run"));
-}
 
-macro Stmt $report.type.script_local(Expr $c, Expr $name) {
+macro Stmt $report.type.script_local(Expr $c, Expr $name) =>
   $c.report_error(
     <type>,
     %"'${$name}' is declared among the script's statements",
     NULL, %("functions cannot see those locals;"
     "declare it static to share it"));
-}
 
 macro Stmt $report.type.decl_duplicate(
-  Expr $c, Expr $site, Expr $kind, Expr $spelling) {
+  Expr $c, Expr $site, Expr $kind, Expr $spelling) =>
   $c.report_error(
     <type>,
     %"${$kind} '${$spelling}' is already defined in this scope",
     $site, %("prior definition: '${$spelling}'"));
-}
 
 macro Stmt $report.type.decl_prototype(
-  Expr $c, Expr $site, Expr $spelling, Expr $prior_contract, Expr $contract) {
+  Expr $c, Expr $site, Expr $spelling, Expr $prior_contract, Expr $contract) =>
   $c.report_error(
     <type>,
     %"definition '${$spelling}' does not match prior prototype",
@@ -53,46 +47,40 @@ macro Stmt $report.type.decl_prototype(
     "prototype: ${$prior_contract.repr()}"
     "definition: ${$contract.repr()}"
     ));
-}
 
 macro Stmt $report.parse.static_dependency(
-  Expr $c, Expr $site, Expr $name, Expr $target) {
+  Expr $c, Expr $site, Expr $name, Expr $target) =>
   $c.report_error(
     <parse>,
     %"file-static x2c initializer depends on non-static '${$name}'",
     $site, $target ? %("initializer: ${$target}") : NULL);
-}
 
 macro Stmt $report.parse.token_malformed(
-  Expr $c, Expr $site, Expr $status) {
+  Expr $c, Expr $site, Expr $status) =>
   $c.report_error(
     <parse>,
     $status == <indent> ? "inconsistent indentation" : "invalid token",
     $site, NULL);
-}
 
-macro Stmt $report.parse.token_expected(Expr $c, Expr $type) {
+macro Stmt $report.parse.token_expected(Expr $c, Expr $type) =>
   $c.report_error(
     <parse>,
     %"expected '${$type}'",
     $c.token, NULL);
-}
 
-macro Stmt $report.parse.brace_unexpected(Expr $c, Expr $site) {
+macro Stmt $report.parse.brace_unexpected(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "unexpected '}'",
     $site, %("encountered '}' without matching '{'"));
-}
 
-macro Stmt $report.parse.brace_missing(Expr $c, Expr $site) {
+macro Stmt $report.parse.brace_missing(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "missing '}'",
     $site, %( "'{' opened here" ));
-}
 
-macro Stmt $report.debug.token(Expr $token) {
+macro Stmt $report.debug.token(Expr $token) =>
   log_debug(
     <tokenizer>, %(
     (func "tokenize")
@@ -101,4 +89,3 @@ macro Stmt $report.debug.token(Expr $token) {
     (line ${$token.line})
     (col  ${$token.col})
   ));
-}

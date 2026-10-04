@@ -37,7 +37,7 @@ List Macro_apply(Macro t, List values);
 
 Var Macro_inserted(Var value, int lifts, int expression);
 
-List Macro_typed(List type, List expression);
+List Macro_typed(List type, Var value);
 
 Var Macro_subject(void);
 
@@ -46,6 +46,10 @@ void Macro_use_subject(Var rows);
 List Macro_pattern(Macro t, List names);
 
 Atom Macro_binder(Var binder, String projection, int sequence);
+
+List Macro_number_type(Var value);
+
+List Macro_number_literal(List result, List type, Var value);
 
 List Macro_case_pattern(Macro t, List names);
 

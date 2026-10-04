@@ -2021,7 +2021,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1689 = cons(_1688, NULL);
   _1690 = cons(_197, _1689);
   _1691 = List_var(_1690);
-  _1692 = int_var(35934);
+  _1692 = int_var(35928);
   _1693 = cons(_1692, NULL);
   _1694 = cons(_210, _1693);
   _1695 = List_var(_1694);
@@ -2613,7 +2613,7 @@ Var List_caddr(List);
 static List CaptureBuild__read(CaptureBuild * b, List ast, Type source_type, List bound){
   Var stored;  if(! Map_try_get((* b).slots, List_var(bound), &(stored))) return ast;  List _x2c_destructure_2 = Var_list(stored);  List field = Var_list(List_getindex(_x2c_destructure_2, 0));  Type storage_type = Var_type(List_getindex(_x2c_destructure_2, 1));  String field_name = binding_identity_spelling(field);  List environment = _func_bound((* b).pointer_type, (* b).environment);  List read =({
     Var _x2c_literal_part_17 = List_var(storage_type);  Var _x2c_literal_part_18 = List_var(({
-      Var _x2c_literal_part_15 = Macro_inserted(List_var(environment), 1, 1);  Var _x2c_literal_part_16 = List_var(cons(String_var(field_name), NULL));  cons(_717, cons(_744, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL))));
+      Var _x2c_literal_part_15 = Macro_inserted(List_var(environment), 1, 1);  Var _x2c_literal_part_16 = List_var(cons(Macro_inserted(String_var(field_name), 0, 0), NULL));  cons(_717, cons(_744, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL))));
     }
     ));  cons(_42, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
   }
@@ -3085,7 +3085,7 @@ static List Compiler__func_bridge_call(Compiler c, List bridge, List parameters,
   List call = Compiler__func_call(c, List_type(_474), _func_bound(function_type, bridge), arguments);  return({
     List _x2c_hole_3 = List_cdr(parameters);  cons(_42, cons(_1420, cons(List_var(cons(_354, cons(List_var(({
       Var _x2c_literal_part_38 = List_var(cons(_568, cons(_1423, cons(List_var(cons(_558, cons(List_var(({
-        Var _x2c_literal_part_36 = List_var(bridge);  Var _x2c_literal_part_37 = List_var(cons(List_var(cons(_895, cons(List_var(cons(_153, List_append(_x2c_hole_3, NULL))), NULL))), NULL));  cons(_481, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL)));
+        Var _x2c_literal_part_36 = Macro_inserted(List_var(bridge), 0, 0);  Var _x2c_literal_part_37 = List_var(cons(List_var(cons(_895, cons(List_var(cons(_153, List_append(_x2c_hole_3, NULL))), NULL))), NULL));  cons(_481, cons(_x2c_literal_part_36, cons(_x2c_literal_part_37, NULL)));
       }
       )), NULL))), NULL))));  Var _x2c_literal_part_39 = List_var(cons(_509, cons(Macro_inserted(List_var(call), 1, 1), NULL)));  cons(_503, cons(_x2c_literal_part_38, cons(_x2c_literal_part_39, NULL)));
     }
@@ -3139,7 +3139,7 @@ static List Compiler__indirect_func_adapter(Compiler c, Type diagnostic_type, Ty
 static List Compiler__build_indirect_func_adapter(Compiler c, Type diagnostic_type, Type pointer_type){
   String context_name = NULL;  List field_binding = NULL;  Compiler__func_pointer_context(c, pointer_type, &(context_name), &(field_binding));  Type context_type = List_type(cons(String_var(context_name), NULL));  Type context_pointer = List_type(cons(_108, cons(_534, cons(String_var(context_name), NULL))));  Type context_helper_type = NULL;  if(! List_truth(Compiler__adapter_helper(c, _1431, &(context_helper_type))) || ! List_truth(Type_list(context_helper_type))) Compiler__adapter_error(c, _1432, diagnostic_type, pointer_type, NULL);  List fn_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1433));  List context_local = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1428));  List context_declaration = Compiler__context_local(c, context_type, context_local, fn_binding);  String field_name = binding_identity_spelling(field_binding);  List context = _func_bound(context_pointer, context_local);  List target =({
     Var _x2c_literal_part_46 = List_var(pointer_type);  Var _x2c_literal_part_47 = List_var(({
-      Var _x2c_literal_part_44 = Macro_inserted(List_var(context), 1, 1);  Var _x2c_literal_part_45 = List_var(cons(String_var(field_name), NULL));  cons(_717, cons(_744, cons(_x2c_literal_part_44, cons(_x2c_literal_part_45, NULL))));
+      Var _x2c_literal_part_44 = Macro_inserted(List_var(context), 1, 1);  Var _x2c_literal_part_45 = List_var(cons(Macro_inserted(String_var(field_name), 0, 0), NULL));  cons(_717, cons(_744, cons(_x2c_literal_part_44, cons(_x2c_literal_part_45, NULL))));
     }
     ));  cons(_42, cons(_x2c_literal_part_46, cons(_x2c_literal_part_47, NULL)));
   }
@@ -3351,14 +3351,14 @@ static List FuncReaders__value(FuncReaders * r, Type parameter_type, Symbol tag,
   if(! tag) Compiler__adapter_error((* r).c, _1586, (* r).diagnostic_type, parameter_type, NULL);  List picked = FuncReaders__call(&((* r)), List_type(_12), (* r).value, index, cons(List_var(_adapter_symbol_literal(tag)), NULL)); (* storage_type) = parameter_type;  return Compiler_convert_expression((* r).c, picked, parameter_type);
 }
 
-List Macro_typed(List, List);
+List Macro_typed(List, Var);
 List x2c_literal_int(int);
 static List FuncReaders__call(FuncReaders * r, Type result_type, List target, int index, List details){
   List fn =({
-    List _x2c_hole_6 =(* r).fn;  Macro_typed(_474, Var_list(Macro_inserted(List_var(_x2c_hole_6), 1, 1)));
+    List _x2c_hole_6 =(* r).fn;  Macro_typed(_474, List_var(_x2c_hole_6));
   }
   );  List argv =({
-    List _x2c_hole_7 =(* r).argv;  Macro_typed(_1591, Var_list(Macro_inserted(List_var(_x2c_hole_7), 1, 1)));
+    List _x2c_hole_7 =(* r).argv;  Macro_typed(_1591, List_var(_x2c_hole_7));
   }
   );  List arguments =({
     Var _x2c_literal_part_75 = List_var(fn);  Var _x2c_literal_part_76 = List_var(argv);  Var _x2c_literal_part_77 = List_var(x2c_literal_int(index));  cons(_x2c_literal_part_75, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, List_append(details, NULL))));
@@ -3410,7 +3410,7 @@ static List Compiler__adapter_helper(Compiler c, String name, Type * type){
 }
 
 static List _func_bound(Type type, List binding){
-  return Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(binding), 1, 1)));
+  return Macro_typed(Type_list(type), List_var(binding));
 }
 
 static List Compiler__func_call(Compiler c, Type type, List callee, List arguments){
@@ -3531,7 +3531,7 @@ List Compiler_forward_parameters(Compiler, List);
 Type Type_apply(Type);
 static List Callback_function(Callback * cb, List binding){
   Compiler c =(* cb).c;  List _x2c_destructure_7 = Compiler_forward_parameters(c, (* cb).params);  List declarations = Var_list(List_getindex(_x2c_destructure_7, 0));  List arguments = Var_list(List_getindex(_x2c_destructure_7, 1));  List source =({
-    Type _x2c_hole_8 =(* cb).source;  List _x2c_hole_9 =(* cb).source_binding;  Macro_typed(Type_list(_x2c_hole_8), Var_list(Macro_inserted(List_var(_x2c_hole_9), 1, 1)));
+    Type _x2c_hole_8 =(* cb).source;  List _x2c_hole_9 =(* cb).source_binding;  Macro_typed(Type_list(_x2c_hole_8), List_var(_x2c_hole_9));
   }
   );  List call = Compiler__func_call(c, Type_canonicalize(Type_apply((* cb).source)), source, arguments);  List body =(* cb).result == _479 ? cons(List_var(cons(_509, cons(List_var(call), NULL))), NULL) : cons(List_var(({
     Var _x2c_literal_part_83 = List_var((* cb).result);  Var _x2c_literal_part_84 = List_var(Compiler_convert_expression(c, call, (* cb).result));  cons(_510, cons(_x2c_literal_part_83, cons(_x2c_literal_part_84, NULL)));

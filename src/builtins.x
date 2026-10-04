@@ -199,7 +199,7 @@ static List Foreach.constructor(Foreach &f, List converter) {
 }
 
 static List _iter_call(List function, List collection) =>
-  $!(Iter)( $function($collection) );
+  $!Iter{ $function($collection) };
 
 static List _pair_assignments(List targets, List item, Var pair) {
   List first = targets[0], second = targets[1];
@@ -211,7 +211,7 @@ static List _pair_assignments(List targets, List item, Var pair) {
   return %($assignments);
 }
 
-static List _expr(List type, Var binding) => $!($type)( $binding );
+static List _expr(List type, Var binding) => $!($type){ $binding };
 
 static List _address(List value) => $!( &$value );
 

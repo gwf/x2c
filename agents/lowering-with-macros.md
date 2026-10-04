@@ -324,17 +324,19 @@ examples are excerpts from current source.
    return $!{ { ${f.declaration} $setup... while ($condition) $body } };
    ```
 
-4. **A typed quotation.** `$!(T)( expr )` builds `(expr T ...)` at once.
-   Use it when an operation reads the type before the code lands, or when
-   nothing binds the code again. It binds nothing, types only the outermost
-   expression, declares no name, and applies no template. From
-   `src/builtins.x`:
+4. **A typed quotation.** `$!T{ expr }` builds `(expr T ...)` at once.
+   `T` is one type identifier; a type of several words, a type hole, or a
+   type spelled like a kind goes in parentheses, as `$!(T){ expr }`. Use it
+   when an operation reads the type before the code lands, or when nothing
+   binds the code again. It binds nothing, types only the outermost
+   expression, converts nothing, declares no name, and applies no template.
+   From `src/builtins.x`:
 
    ```x2c
    static List _iter_call(List function, List collection) =>
-     $!(Iter)( $function($collection) );
+     $!Iter{ $function($collection) };
 
-   static List _expr(List type, Var binding) => $!($type)( $binding );
+   static List _expr(List type, Var binding) => $!($type){ $binding };
    ```
 
 5. **A retained rebuild.** `c.rebuild_statement(application)` and
@@ -347,7 +349,7 @@ examples are excerpts from current source.
    work. `_run_once` in `src/cache.x`:
 
    ```x2c
-   List flag = $!(int)( $guard );
+   List flag = $!int{ $guard };
    return c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
    ```
 

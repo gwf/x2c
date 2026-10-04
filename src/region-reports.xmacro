@@ -1,31 +1,27 @@
 /* Deferred region findings. The walk owns collection and severity. */
 
-macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) {
+macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) =>
   $w.warn(
     <bad-free>, $w.origin,
     %"${$op} is given ${$subject}, which no Scope allocator returned",
     %("only Scope.malloc, calloc, memdup, and realloc storage can be"
       "freed or reallocated"));
-}
 
-macro Stmt $report.region.read_ended(Expr $w, Expr $name) {
+macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
   $w.warn(
     <region>, $w.origin,
     %"'${$name}' is read after its owning region ended", NULL);
-}
 
-macro Stmt $report.region.after_free(Expr $w, Expr $name, Expr $ended) {
+macro Stmt $report.region.after_free(Expr $w, Expr $name, Expr $ended) =>
   $w.warn(
     <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
-}
 
 macro Stmt $report.region.use_ended(
-  Expr $f, Expr $subject, Expr $region) {
+  Expr $f, Expr $subject, Expr $region) =>
   (*$f.w).warn(
     <region>, $f.w.origin,
     %"${$subject} is used after the region that allocated it ended",
     (*$f.w).opened($region));
-}
 
 macro Stmt $report.region.local_escape(
   Expr $f, Expr $subject, Expr $exit) {
@@ -37,12 +33,11 @@ macro Stmt $report.region.local_escape(
 }
 
 macro Stmt $report.region.escape(
-  Expr $f, Expr $subject, Expr $exit, Expr $region) {
+  Expr $f, Expr $subject, Expr $exit, Expr $region) =>
   (*$f.w).warn(
     <region>, $f.w.origin,
     %"${$subject} can outlive the region it was allocated in when ${$exit}",
     (*$f.w).opened($region));
-}
 
 macro Expression $region.reason.returned() => "returned";
 macro Expression $region.reason.static_store() => "stored into a static";

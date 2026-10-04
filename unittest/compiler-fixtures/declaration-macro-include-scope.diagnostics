@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/declaration-macro-include-scope.x:5:1: parse: unknown or forward-referenced macro 'answer'
+  $answer(includer_answer);
+  ^
+

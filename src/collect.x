@@ -440,12 +440,22 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
-    if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
+    if (!entry) {
+      w.start_macros();
+      entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
+    }
     w.c._replay_cached(entry, w.globs, w.visited);
   }
   _cache_dependency(
     w.dependencies, canonical, w.c._walked_hash(target, canonical));
   w.parts.push(canonical);
+}
+
+/* An include walked before the file's first segment starts the macros
+   that segment would, so the walk extends a copy of them rather than
+   starting the unit's macro and import state itself. */
+static void FileWalk.start_macros(FileWalk &w) {
+  if (!w.c.macros.len()) w.parse("", {});
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
@@ -464,12 +474,16 @@ static String Compiler._include_text(Compiler c, String target, String path) {
 }
 
 /* Walk one included file cold and return its entry. The walk reads the
-   includer's names through copies, so its private rows and includes stay
-   there; the includer replays the entry as any later unit would. */
+   includer's names and macros through copies, so its private rows,
+   includes, and macro definitions stay there; the includer replays the
+   entry as any later unit would. An includer whose macros have not started
+   lets the walk start them, since starting them resets its imports. */
 static List Compiler._walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = c._include_text(target, canonical);
+  Map macros = c.macros.len() ? c.macros.copy() : NULL;
   c._walk_apart(canonical, text, globs.copy(), visited.copy());
+  if (macros != NULL) c.macros = macros;
   return _process_cache()[canonical];
 }
 

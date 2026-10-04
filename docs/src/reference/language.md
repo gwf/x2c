@@ -870,7 +870,8 @@ grammar accepts a definition and a result kind and macro name follow it. It
 remains legal as an ordinary typedef, variable, parameter, field, or function
 name everywhere else. A braced definition places `{ ... }` directly after the
 signature. An expression definition places `=> expression;` after it,
-including the trailing semicolon.
+including the trailing semicolon. A `Stmt` macro may also use the expression
+form; its body is then the single statement `expression;`.
 
 For source compatibility, the compiler also accepts the former `=> { ... }`
 braced form and a complete parenthesized expression body written as
@@ -1370,9 +1371,10 @@ own map. Aliases never leak into the including file.
 
 An explicitly imported `.xmacro` file may contain macro definitions and
 `keyword` declarations. Its aliases become visible in the importing `.x` file
-at the import position. Every `.x` file that wants the spellings imports the
-pack itself; an included file's import does not expose them to its caller, and
-no pack is loaded implicitly by `x2c.x`. Macro templates are parsed when
+at the import position. Every `.x` file that wants the spellings or the
+macros imports the pack itself; an included file's import, like a macro the
+included file defines, does not expose them to its caller, and no pack is
+loaded implicitly by `x2c.x`. Macro templates are parsed when
 defined, so a later alias does not reinterpret an earlier template; generated
 `List`s and strings are not reparsed as alias-bearing source.
 
@@ -1511,17 +1513,26 @@ name. See
 [Quoting code](../guide/meta-functions.md#quoting-code-with-) for an
 example.
 
-A quotation written `$!(T)( expression )`, where `T` is a type name, a
-`Type` local, or a `${...}` hole of type `Type`, is a typed quotation. It
-builds `(expr T CONTENT)` where it is written. It binds nothing, counts no
-expansion, and opens no transaction. Its holes take the values a rebuild
-gives them: syntax unchanged, a binding identity or `x2c.ident` spelling as
-an identifier expression, and an `int`, String, or Symbol as a literal.
-Inner nodes keep the placeholder type of unbound syntax, and free names stay
-names that bind where the code is bound. A typed quotation may not declare a
-name or apply a template. The compiler accepts `T` as the expression's type without checking it.
-A `$!( ... )` group followed directly by `(` is a typed quotation; otherwise
-it is an expression quotation. See
+A typed quotation is written `$!T{ expression }`, where `T` is one
+identifier that names a type, or `$!(T){ expression }`, where `T` is any
+type, a `Type` local, or a `${...}` hole of type `Type`. An identifier
+after `$!` that spells a macro kind in any case, such as `Unit` or `Type`,
+always names that kind, so a type with that spelling uses the
+parenthesized form. A `$!( ... )` group followed directly
+by `{` is a typed quotation; otherwise it is an expression quotation. A
+typed quotation builds `(expr T CONTENT)` where it is written. It binds
+nothing, counts no expansion, and opens no transaction. Its holes take the
+values a rebuild gives them: syntax unchanged, a binding identity or
+`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
+member position as its spelling, a number as a literal of its own type with
+its exact value, and a String or Symbol as a literal. A String is a String
+literal when the whole expression is the hole and `T` is `String`; elsewhere
+it is a C string literal. Inner nodes keep the placeholder type of unbound
+syntax, and free names stay names that bind where the code is bound. A
+typed quotation may not declare a name or apply a template. The compiler
+accepts `T` as the expression's type without checking it. A typed quotation
+states the type the code has; it converts nothing, so write a cast inside
+the braces when the code needs one. See
 [Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
 
 When one `Name` hole appears in a declaration, a reference, and a member

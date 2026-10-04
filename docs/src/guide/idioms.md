@@ -158,7 +158,7 @@ explains each form with examples.
 | Code that one function builds | a quotation: `$!( expression )`, `$!{ statements }`, or `$!Unit{ ... }` |
 | Code that uses a field, an element, or a call result | a [`${expression}` hole](meta-functions.md#holes-that-name-an-expression), evaluated once where the quotation is written |
 | Code in which separate quotations share one name | `List name = x2c_ident("total");`, then `$name` in each quotation |
-| An expression whose type is read before it lands | a [typed quotation](meta-functions.md#code-that-knows-its-type), such as `$!(double)( $value * 2 )` |
+| An expression whose type is read before it lands | a [typed quotation](meta-functions.md#code-that-knows-its-type), such as `$!double{ $value * 2 }` |
 | Code the function inspects before it returns | the builders in [`lib/meta.x`](meta-functions.md#what-the-compiler-answers), such as `x2c_expr_call` |
 | A pattern, a data row, or a form with no source spelling | a `%(...)` List |
 

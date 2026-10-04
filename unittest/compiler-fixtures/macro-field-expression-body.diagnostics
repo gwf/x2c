@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-field-expression-body.x:3:25: parse: Field macro body requires '{ ... }'
+  macro Field $count() => int count;
+                          ^^^
+

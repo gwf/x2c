@@ -42,25 +42,20 @@ macro Stmt $_json_error_write_nonfinite() {
           (why "JSON has no NaN or infinity"));
 }
 
-macro Stmt $_json_error_read_trailing(Expr $reader) {
+macro Stmt $_json_error_read_trailing(Expr $reader) =>
   $reader._fail("unexpected text after the value");
-}
 
-macro Stmt $_json_error_read_depth(Expr $reader) {
+macro Stmt $_json_error_read_depth(Expr $reader) =>
   $reader._fail("nesting exceeds 512 levels");
-}
 
-macro Stmt $_json_error_read_end(Expr $reader) {
+macro Stmt $_json_error_read_end(Expr $reader) =>
   $reader._fail("unexpected end of input");
-}
 
-macro Stmt $_json_error_read_char(Expr $reader) {
+macro Stmt $_json_error_read_char(Expr $reader) =>
   $reader._fail("unexpected character");
-}
 
-macro Stmt $_json_error_read_key(Expr $reader) {
+macro Stmt $_json_error_read_key(Expr $reader) =>
   $reader._fail("expected a string key");
-}
 
 macro Expression $_json_error_read_colon() => "expected ':'";
 
@@ -68,41 +63,32 @@ macro Expression $_json_error_read_object_sep() => "expected ',' or '}'";
 
 macro Expression $_json_error_read_array_sep() => "expected ',' or ']'";
 
-macro Stmt $_json_error_read_string_end(Expr $reader) {
+macro Stmt $_json_error_read_string_end(Expr $reader) =>
   $reader._fail("unterminated string");
-}
 
-macro Stmt $_json_error_read_control(Expr $reader) {
+macro Stmt $_json_error_read_control(Expr $reader) =>
   $reader._fail("control character in string");
-}
 
-macro Stmt $_json_error_read_utf8(Expr $reader) {
+macro Stmt $_json_error_read_utf8(Expr $reader) =>
   $reader._fail("invalid UTF-8");
-}
 
-macro Stmt $_json_error_read_escape(Expr $reader) {
+macro Stmt $_json_error_read_escape(Expr $reader) =>
   $reader._fail("invalid escape");
-}
 
-macro Stmt $_json_error_read_surrogate(Expr $reader) {
+macro Stmt $_json_error_read_surrogate(Expr $reader) =>
   $reader._fail("unpaired surrogate");
-}
 
-macro Stmt $_json_error_read_nul(Expr $reader) {
+macro Stmt $_json_error_read_nul(Expr $reader) =>
   $reader._fail("U+0000 cannot appear in a String");
-}
 
-macro Stmt $_json_error_read_unicode(Expr $reader) {
+macro Stmt $_json_error_read_unicode(Expr $reader) =>
   $reader._fail("invalid \\u escape");
-}
 
-macro Stmt $_json_error_read_number(Expr $reader) {
+macro Stmt $_json_error_read_number(Expr $reader) =>
   $reader._fail("invalid number");
-}
 
-macro Stmt $_json_error_read_range(Expr $reader) {
+macro Stmt $_json_error_read_range(Expr $reader) =>
   $reader._fail("number out of range");
-}
 
 $(defun _json.error.call (key arguments)
   (let ((row (assoc key '(

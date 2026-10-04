@@ -206,6 +206,73 @@ if grep -Fq "workers" "$BUILD/jobs-1.stderr"; then
   exit 1
 fi
 
+# Parallel translation reports each failing unit's diagnostics whole and in
+# input order. The first failing unit is the slowest to fail.
+failing="$BUILD/failing"
+mkdir -p "$failing/out" "$failing/serial"
+for name in a b c d e f; do
+  printf 'int %s_value(void) => 1;\n' "$name" >"$failing/$name.x"
+done
+awk 'BEGIN { for (i = 0; i < 5000; i++) printf "int b%d(void) => %d;\n", i, i
+             print "int b_value(void) { int undefined_b = ; }" }' \
+  >"$failing/b.x"
+printf 'int d_value(void) { int undefined_d = ; }\n' >"$failing/d.x"
+printf 'int f_value(void) { int undefined_f = ; }\n' >"$failing/f.x"
+: >"$failing/expected"
+for name in b d f; do
+  "$X2C" translate -j 1 -q --out-dir "$failing/serial" "$failing/$name.x" \
+    2>>"$failing/expected" && exit 1
+done
+for command in translate build; do
+  if [[ $command == translate ]]; then
+    outputs=(--out-dir "$failing/out")
+  else
+    outputs=(--build-dir "$failing/build" --output "$failing/program")
+  fi
+  "$X2C" $command -j 6 -q "${outputs[@]}" "$failing"/[a-f].x \
+    2>"$failing/$command.stderr" && exit 1
+  diff -u "$failing/expected" "$failing/$command.stderr"
+done
+
+# ended PID... waits up to five seconds for each process to end.
+ended() {
+  for pid; do
+    for _ in $(seq 100); do
+      kill -0 "$pid" 2>/dev/null || continue 2
+      sleep 0.05
+    done
+    return 1
+  done
+}
+
+# A stopped parallel translation stops its workers.
+stopped="$BUILD/stopped"
+mkdir -p "$stopped/out"
+for name in first second; do
+  awk -v name="$name" 'BEGIN { for (i = 0; i < 40000; i++)
+    printf "int %s%d(void) => %d;\n", name, i, i }' >"$stopped/$name.x"
+done
+"$X2C" translate -j 2 -q --out-dir "$stopped/out" \
+  "$stopped/first.x" "$stopped/second.x" &
+parent=$!
+workers=
+for _ in $(seq 100); do
+  workers=$(pgrep -P "$parent" | tr '\n' ' ' || true)
+  [[ $(wc -w <<<"$workers") -eq 2 ]] && break
+  sleep 0.05
+done
+[[ $(wc -w <<<"$workers") -eq 2 ]]
+kill -TERM "$parent"
+stopped_status=0
+wait "$parent" || stopped_status=$?
+[[ $stopped_status == 143 ]]
+if ! ended $workers; then
+  echo "a translation worker outlived its stopped parent" >&2
+  kill -KILL $workers 2>/dev/null || true
+  exit 1
+fi
+[[ ! -e "$stopped/out/first.c" && ! -e "$stopped/out/second.c" ]]
+
 set +e
 "$X2C" translate --color=invalid --out-dir "$BUILD/out" \
   "$BUILD/a/item.x" >"$BUILD/color-invalid.stdout" \
@@ -418,6 +485,56 @@ root_after=$(mtime "$BUILD/deps/make-out/root.c")
 other_after=$(mtime "$BUILD/deps/make-out/other.c")
 [[ $root_after -gt $root_before ]]
 [[ $other_after == "$other_before" ]]
+
+# A recursive build adds the default job count unless the command line sets
+# a job limit. An option argument holding a j sets none. GNU Make records
+# -j1 in MFLAGS, so it stays serial; Make 3.81 omits it.
+printf 'include %s/etc/make-command.mk\nshow:\n\t@echo "$(PARALLEL_MAKE)"\n' \
+  "$ROOT" >"$BUILD/jobs.mk"
+for make_program in make gmake; do
+  command -v "$make_program" >/dev/null || continue
+  jobs_make() {
+    MAKEFLAGS= MFLAGS= MAKELEVEL= \
+      "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
+  }
+  [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]]
+  [[ $make_program == make && $(make --version) == *" 3."* ]] && continue
+  [[ $(jobs_make -j1) != *" -j7" ]]
+  [[ $(jobs_make -j 1) != *" -j7" ]]
+done
+
+# A stopped parallel run stops what its jobs started. Background jobs ignore
+# SIGINT, so their children would otherwise outlive an interrupt.
+sh -c '. "$1/commands/parallel.sh"
+  parallel_start slow sh -c "sleep 37; :"
+  parallel_wait' sh "$ROOT" >/dev/null 2>&1 &
+runner=$!
+sleeper=
+for _ in $(seq 100); do
+  job=$(pgrep -P "$runner" | paste -sd, - || true)
+  sleeper=$([[ -n $job ]] && pgrep -x -P "$job" sleep || true)
+  [[ -n $sleeper ]] && break
+  sleep 0.05
+done
+[[ -n $sleeper ]]
+kill -TERM "$runner"
+wait "$runner" || true
+if ! ended $sleeper; then
+  echo "a parallel job's child outlived its stopped run" >&2
+  kill $sleeper
+  exit 1
+fi
+
+# GNU Make 4 remakes a deleted included file, and the unit that included it
+# then translates again.
+gnu_make=$(command -v gmake || command -v make)
+if [[ $("$gnu_make" --version 2>/dev/null) == "GNU Make "[4-9]* ]]; then
+  mv "$BUILD/deps/src/leaf.x" "$BUILD/deps/leaf.gone"
+  "$gnu_make" -C "$ROOT/unittest" -f build/cli-boundary/deps/Makefile \
+    default >"$BUILD/deps/gone.out" 2>&1 || true
+  grep -q 'translate .*root\.x' "$BUILD/deps/gone.out"
+  mv "$BUILD/deps/leaf.gone" "$BUILD/deps/src/leaf.x"
+fi
 
 mkdir -p "$BUILD/direct/a" "$BUILD/direct/b"
 printf '#include "x2c.x"\nint main(void) { puts("one"); return 0; }\n' \

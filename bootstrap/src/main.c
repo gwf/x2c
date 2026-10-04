@@ -24,6 +24,7 @@ static Var _58, _56, _54, _52, _50, _48, _46, _44, _42, _40, _38, _6, _5, _2, _1
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
 #include <unistd.h>
 #include "report.h"
 #include "collect.h"
@@ -91,11 +92,16 @@ static void Translation_report(Translation * t, unsigned long started_at);
 
 typedef struct Workers{
   Translation * t;
+  Array slices;
   long * pids;
-  List * carried;
-  int live, failed, done;
+  int * carried;
+  File * captures;
+  String * output;
+  int live, started, shown, failed, done;
 }
 Workers;
+
+static Workers _workers;
 
 static int Translation_translate_parallel(Translation * t);
 
@@ -109,11 +115,21 @@ static Array _slices(List inputs, int total, int count);
 
 static int Translation_run_workers(Translation * t, Array slices);
 
-static void Workers_start(Workers * w, List slice);
+static void Workers_start(Workers * w);
 
 static void Translation_work(Translation * t, List slice);
 
 static void Workers_reap(Workers * w);
+
+static void Workers_show(Workers * w);
+
+static int Workers_carries(Workers * w, int index);
+
+static void _forward_stop(int number);
+
+static void _forward_stop_signal(int number, struct sigaction * previous);
+
+static sigset_t _block_stop_signals(void);
 
 static int _run_build(CliRequest request);
 
@@ -890,42 +906,61 @@ static Array _slices(List inputs, int total, int count){
 
 void * Scope_calloc(size_t, size_t);
 
-Var Array_getindex(Array, int);
-
 void Scope_free(void *);
 
 static int Translation_run_workers(Translation * t, Array slices){
-  int jobs =(* t).request -> jobs, count = Array_len(slices), next = 0;
+  int jobs =(* t).request -> jobs, count = Array_len(slices);
   if(jobs > count) jobs = count;
   if((* t).request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, (* t).total);
-  long * pids = Scope_calloc(jobs, sizeof(long));
-  List * carried = Scope_calloc(jobs, sizeof(List));
-  Workers w ={
-    .t = &(* t), .pids = pids, .carried = carried
+  _workers =(Workers){
+    .t = &(* t), .slices = slices, .pids = Scope_calloc(jobs, sizeof(long)), .carried = Scope_calloc(jobs, sizeof(int)), .captures = Scope_calloc(jobs, sizeof(File)), .output = Scope_calloc(count, sizeof(String))
   }
   ;
-  while(next < count || w.live){
-    if(next < count && w.live < jobs) Workers_start(&(w), Var_list(Array_getindex(slices, next ++)));
-    else Workers_reap(&(w));
+  struct sigaction term, interrupt;
+  _forward_stop_signal(SIGTERM, & term);
+  _forward_stop_signal(SIGINT, & interrupt);
+  while(_workers.started < count || _workers.live){
+    if(_workers.started < count && _workers.live < jobs) Workers_start(&(_workers));
+    else Workers_reap(&(_workers));
+    Workers_show(&(_workers));
   }
-  Scope_free(carried);
-  Scope_free(pids);
-  return w.failed;
+  sigaction(SIGTERM, & term, NULL);
+  sigaction(SIGINT, & interrupt, NULL);
+  Scope_free(_workers.output);
+  Scope_free(_workers.captures);
+  Scope_free(_workers.carried);
+  Scope_free(_workers.pids);
+  return _workers.failed;
 }
+
+Var Array_getindex(Array, int);
 
 long worker_fork(void);
 
-static void Workers_start(Workers * w, List slice){
+static void Workers_start(Workers * w){
+  int index =(* w).started ++;
+  List slice = Var_list(Array_getindex((* w).slices, index));
   if((* w).t -> build) Build_begin_translation((* w).t -> build, Var_string(List_car(slice)));
-  long pid = worker_fork();
-  if(! pid) Translation_work(&((*(* w).t)), slice);
-  if(pid < 0){
-    report_line(11703268, _32);
-    (* w).failed ++;
-    return;
+  File capture = tmpfile();
+  sigset_t unblocked = _block_stop_signals();
+  long pid = capture ? worker_fork() : - 1;
+  if(! pid){
+    (* w).live = 0;
+    sigprocmask(SIG_SETMASK, & unblocked, NULL);
+    dup2(File_fileno(capture), STDERR_FILENO);
+    Translation_work(&((*(* w).t)), slice);
   }
-  (* w).carried[(* w).live] = slice;
-  (* w).pids[(* w).live ++] = pid;
+  if(pid > 0){
+    (* w).carried[(* w).live] = index;
+    (* w).captures[(* w).live] = capture;
+    (* w).pids[(* w).live] = pid;
+    (* w).live ++;
+  }
+  sigprocmask(SIG_SETMASK, & unblocked, NULL);
+  if(pid > 0) return;
+  if(capture) File_close(capture);
+  report_line(11703268, _32);
+  (* w).failed ++;
 }
 
 void Compiler_stop_meta_helper(void);
@@ -950,16 +985,64 @@ static void Translation_work(Translation * t, List slice){
 
 int worker_wait_any(long *, int, int *);
 
+String File_string_close(File);
+
 static void Workers_reap(Workers * w){
   int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
   if(status)(* w).failed ++;
-  List slice =(* w).carried[slot];
+  int index =(* w).carried[slot];
+  List slice = Var_list(Array_getindex((* w).slices, index));
+  File capture =(* w).captures[slot];
+  File_rewind(capture);
+  (* w).output[index] = File_string_close(capture);
   if((* w).t -> build && ! status) Build_end_translation((* w).t -> build, Var_string(List_car(slice)), 0);
   (* w).done += List_len(slice);
+  sigset_t unblocked = _block_stop_signals();
   (* w).live --;
   (* w).pids[slot] =(* w).pids[(* w).live];
   (* w).carried[slot] =(* w).carried[(* w).live];
+  (* w).captures[slot] =(* w).captures[(* w).live];
+  sigprocmask(SIG_SETMASK, & unblocked, NULL);
   if(!(* w).t -> build) report_progress(45220543335690, (* w).done, (* w).t -> total, NULL);
+}
+
+static void Workers_show(Workers * w){
+  while((* w).shown <(* w).started && ! Workers_carries(&((* w)), (* w).shown)){
+    String text =(* w).output[(* w).shown ++];
+    if(! String_truth(text)) continue;
+    report_suspend();
+    fputs(text, stderr);
+  }
+
+}
+
+static int Workers_carries(Workers * w, int index){
+  for(int slot = 0;  slot <(* w).live;  slot ++) if((* w).carried[slot] == index) return 1;
+  return 0;
+}
+
+static void _forward_stop(int number){
+  for(int slot = 0;  slot < _workers.live;  slot ++) kill((pid_t) _workers.pids[slot], number);
+  signal(number, SIG_DFL);
+  kill(getpid(), number);
+}
+
+static void _forward_stop_signal(int number, struct sigaction * previous){
+  struct sigaction forward ={
+    .sa_handler = _forward_stop
+  }
+  ;
+  sigaction(number, NULL, previous);
+  if(previous -> sa_handler != SIG_IGN) sigaction(number, & forward, NULL);
+}
+
+static sigset_t _block_stop_signals(void){
+  sigset_t stops, previous;
+  sigemptyset(& stops);
+  sigaddset(& stops, SIGTERM);
+  sigaddset(& stops, SIGINT);
+  sigprocmask(SIG_BLOCK, & stops, & previous);
+  return previous;
 }
 
 int compile_commands_write(String, Array);

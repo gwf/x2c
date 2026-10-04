@@ -865,7 +865,7 @@ compiler must construct code representing that value.
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. |
 | Computed string | Inserts a quoted C string literal. |
 | `Symbol` | Inserts a Symbol literal. |
-| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing, in ordinary code and in macro bodies alike. A List is code when it is an expression node, a macro application, a quotation, or an identifier. A data List is not automatically an expression, and a result used as a `case` pattern stays data. |
 | Boxed `Var` | Insertion follows the contained value. |
 | `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
@@ -1232,31 +1232,39 @@ which run where it expands.
 A quotation is bound where it lands, so until then its code has no type.
 Sometimes the code a function builds must state its type at once: another
 operation reads the type before the code lands, or the code goes where
-nothing binds it again. Write the type in parentheses between `$!` and the
-expression:
+nothing binds it again. Write the type between `$!` and the braces that hold
+the expression:
 
 <!-- ignore: a meta function fragment without its includes -->
 ```x2c,ignore
 meta static List doubled(List value) {
-  List twice = $!(double)( $value * 2 );
+  List twice = $!double{ $value * 2 };
   // x2c_syntax_type(twice) is (double) already.
   return twice;
 }
 ```
 
-`$!(T)( expression )` builds the expression where it is written and gives
-it the type `T`. It reads like a cast written in front of the code, but it
-converts nothing: `T` is the type the code has. The type is a type name, or
-a `Type` local or `${...}` hole whose value is the type, as in
-`$!($result)( $callee($arguments...) )`.
+`$!T{ expression }` builds the expression where it is written and gives it
+the type `T`. `T` is one identifier that names a type, such as `int` or
+`String`. Put any other type in parentheses: a type of several words, as in
+`$!(unsigned long){ ... }` or `$!(char *){ ... }`, or a `Type` local or
+`${...}` hole whose value is the type, as in
+`$!($result){ $callee($arguments...) }`. A kind name such as `Unit` or
+`Type` after `$!` always names a kind, so a type spelled like one also takes
+parentheses: `$!(Type){ ... }`.
+
+A typed quotation states the type the code has. It converts nothing, so
+write a cast inside the braces when the code needs one.
 
 The rest of the code is built the way a quotation builds it, with two
 differences:
 
 - Nothing is bound. Holes keep the syntax their locals hold, a binding
-  becomes a reference to it, and an `int`, String, or Symbol becomes a
-  literal. A name the expression reads without declaring stays a name and
-  is bound wherever the code is bound, if it is bound at all.
+  becomes a reference to it, and a number, String, or Symbol becomes a
+  literal. A number keeps its exact value and type, and a String is a
+  String literal when `T` is `String`. A name the expression reads without
+  declaring stays a name and is bound wherever the code is bound, if it is
+  bound at all.
 - The code declares nothing. A typed quotation has no expansion to keep
   names private to, so a name it needs comes from a hole. For the same
   reason it applies no template; build that code first and insert it.
@@ -1266,7 +1274,7 @@ until something binds them. Write `T` exactly: the compiler trusts it as it
 trusts the type a typed call already carries.
 
 A typed reference to a binding the function holds is the shortest form:
-`$!($type)( $binding )` is the expression that reads `binding` as a `type`.
+`$!($type){ $binding }` is the expression that reads `binding` as a `type`.
 
 ## What the compiler answers
 

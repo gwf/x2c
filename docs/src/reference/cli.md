@@ -55,6 +55,14 @@ online processor count, or one job under Make, as for `build` below; `-j 1`
 translates serially in one process. The inspection and dump modes stay
 serial; they write one ordered stream to standard output.
 
+A serial translation stops at the first unit that fails. In a parallel
+translation, a worker stops at the first failing unit of its share of the
+inputs while the other workers continue. Diagnostics appear in input order,
+because the command holds each worker's standard error until the worker
+ends; one unit's diagnostics are never split by another's. A parallel
+`build` translates each unit in its own worker, so it reports every failing
+unit. Stopping the command with `SIGTERM` or `SIGINT` also stops its workers.
+
 Compile-time code runs once per translated unit. When several units import
 the same file, each worker runs that file's compile-time forms, including
 any side effects, for its own unit. A serial run may share one import

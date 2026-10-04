@@ -213,19 +213,24 @@ static List Compiler._member_bindings(
     if (parameter.assoc(<kind>) != <name> ||
         parameter.assoc(<sequence>).int())
       continue;
-    Var value = capture.assoc(<value>), spelling;
-    if (value is <list>) {
-      if (c.semantic_binding_facts().try_get(
-          %(source-spelling $value), spelling)) value = spelling;
-      else {
-        String name = binding_identity_spelling(value);
-        if (name) value = name;
-      }
-    }
     Var member = _hole_key(parameter, "member");
-    bindings = cons(%($member $value), bindings);
+    bindings = cons(
+      %($member ${c._member_spelling(capture.assoc(<value>))}), bindings);
   }
   return bindings;
+}
+
+/* The spelling a Name hole's value supplies in a member position: the
+   source spelling of a renamed local or a binding, or an `x2c_ident`
+   value's own. */
+static Var Compiler._member_spelling(Compiler c, Var value) {
+  Var spelling;
+  match (value) case %("x2c.ident" (!is ?name type string)): return name;
+  if (value is not <list>) return value;
+  if (c.semantic_binding_facts().try_get(%(source-spelling $value), spelling))
+    return spelling;
+  String name = binding_identity_spelling(value);
+  return name ? name : value;
 }
 
 /* The bindings compile-time Lisp sees: the author's binders, without the
@@ -334,7 +339,8 @@ static void _file_scope_locals(List rows, Map locals) {
     case %(macro-invoke ((!quote !quote) ?(List definition)) ?(List input) ?): {
       Map declared = {};
       _file_scope_locals(%(${definition.assoc(<template>)}), declared);
-      List bindings = input.match(definition.assoc(<pattern>));
+      List bindings = NULL;
+      input.try_match(definition.assoc(<pattern>), bindings);
       foreach (List pair, bindings)
         if (pair.car() in declared && pair.cadr().is_binder())
           locals[pair.cadr()] = 1;
@@ -505,11 +511,12 @@ static void Definition.check_signature(Definition &d) {
 }
 
 /* An Expression result, or a decorator of an expression, has an `=>`
-   body. Every other result has a braced body after an optional `=>`. */
+   body. A Stmt result has a braced body or an `=>` expression statement.
+   Every other result has a braced body after an optional `=>`. */
 static void Definition.arrow(Definition &d) {
   Compiler c = d.c;
   if (d.has_expression_body()) {
-    if (c.peek(0) == <"{">) c._braced_body_error();
+    if (c.peek(0) == <"{">) d.body_error();
     c.expect(<=>);
     c.expect(<">">);
     return;
@@ -517,10 +524,11 @@ static void Definition.arrow(Definition &d) {
   if (c.peek(0) == <=>) {
     c.expect(<=>);
     c.expect(<">">);
+    if (d.kind == <block-item>) return;
   }
   if (c.peek(0) == <(>)
     $report.parse.macro_paren_body(c);
-  if (c.peek(0) != <"{">) c._braced_body_error();
+  if (c.peek(0) != <"{">) d.body_error();
 }
 
 static int Definition.has_expression_body(Definition &d) =>
@@ -532,8 +540,12 @@ static Symbol Definition.target_kind(Definition &d) {
   return d.target.assoc(<kind>);
 }
 
-static void Compiler._braced_body_error(Compiler c) {
-  $report.parse.macro_braced_body(c);
+/* Reports the body forms the result kind accepts. */
+static void Definition.body_error(Definition &d) {
+  String form = d.has_expression_body() ? "'=> expression;'"
+              : d.kind == <block-item> ? "'{ ... }' or '=> expression;'"
+              : "'{ ... }'";
+  $report.parse.macro_body(d.c, _kind_spelling(d.kind), form);
 }
 
 /* Records where the definition stands and shows its signature, so an
@@ -560,23 +572,34 @@ static void Definition.body(Definition &d) {
   $let(c.local_macro_capture_scopes, c.sym.scope_count()) {
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
-    d.template = d.has_expression_body()
-               ? d.expression_body()
-               : c._parse_body(d.body_kind(), d.using);
+    d.template = d.read_body();
     if (d.quotation) d.parameters = _quoted_holes(c);
     d.parameters = c._parameter_rows(d.parameters);
     d.captures = _recorded(c.local_macro_captures);
   }
 }
 
-/* The legacy form is parenthesized. The canonical form ends at `;`, which
+/* A Stmt result's body after `=>` is one expression statement, whose `;`
    an anonymous macro omits. */
+static List Definition.read_body(Definition &d) {
+  Compiler c = d.c;
+  if (d.has_expression_body()) return d.expression_body();
+  if (c.peek(0) == <"{">) return c._parse_body(d.body_kind(), d.using);
+  List expression = c.parse_expression();
+  if (!d.anonymous) c.expect(<;>);
+  return %(seq (stmnt $expression));
+}
+
+/* The legacy form is parenthesized, and a quotation's body is a
+   parenthesized or braced group. The canonical form ends at `;`, which an
+   anonymous macro omits. */
 static List Definition.expression_body(Definition &d) {
   Compiler c = d.c;
   if (d.quotation || c._legacy_expression_body()) {
-    c.expect(<(>);
+    int braced = d.quotation && c.peek(0) == <"{">;
+    c.expect(braced ? <"{"> : <(>);
     List replacement = c.parse_expression();
-    c.expect(<)>);
+    c.expect(braced ? <"}"> : <)>);
     return replacement;
   }
   List replacement = c.parse_expression();
@@ -1171,8 +1194,8 @@ Token Compiler.after_hole(Compiler c) {
    visible local `name`: its first use declares a hole, and the quotation
    applies to that local's value. A `${expression}` is a hole for a hidden
    local that the quotation declares before it builds its code. A typed
-   quotation, `$!(T)( expression )`, builds its code where it is written
-   (see "typed quotations"). */
+   quotation, `$!T{ expression }` or `$!(T){ expression }`, builds its code
+   where it is written (see "typed quotations"). */
 
 /** Parses a quotation at `$!` into the code it builds from the locals its
     body names. */
@@ -1180,26 +1203,35 @@ List Compiler.parse_macro_quotation(Compiler c) {
   Token start = c.token;
   c.expect(<$>);
   c.expect(<!>);
-  Symbol kind = <block-item>;
-  if (c.peek(0) == <(>) kind = <expression>;
-  else if (c.peek(0) == <ident>) {
+  int typed = c._typed_quotation();
+  Symbol kind = typed || c.peek(0) == <(> ? <expression> : <block-item>;
+  if (!typed && c.peek(0) == <ident>) {
     kind = c._result_kind_token(c.token);
     c.next();
   }
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   Map holes = {};
-  List locals = c.macro_holes ? NULL : c._expression_holes(holes);
-  List type = NULL;
-  if (kind == <expression> && c.token.after_group().type == <(>) {
+  List locals = NULL, type = NULL;
+  if (typed) {
     if (c.macro_holes) $report.parse.typed_quotation(c, start);
+    if (c.peek(0) == <(>) locals = c._expression_holes(holes);
     type = c._quoted_type(holes);
-    locals = locals.append(c._expression_holes(holes));
   }
+  if (!c.macro_holes) locals = locals.append(c._expression_holes(holes));
   List built = c._quotation(start, kind, holes, type);
   return locals
        ? %(expr ("List") (parens (block @locals (stmnt $built))))
        : built;
+}
+
+/* Whether the quotation after `$!` states its type: `T{` where the
+   identifier `T` names no kind, or a group that a brace follows. A type
+   keyword such as `int` is an identifier here. */
+static int Compiler._typed_quotation(Compiler c) {
+  if (c.token.text.is_identifier())
+    return c.peek(1) == <"{"> && !_category(c.token.text);
+  return c.peek(0) == <(> && c.token.after_group().type == <"{">;
 }
 
 /* Declares a hidden local for each `${expression}` in the body at the
@@ -1215,10 +1247,10 @@ static List Compiler._expression_holes(Compiler c, Map holes) {
     Token brace = t + 1, next = Token.skip_trivia(brace);
     if (t.type == <$> && next.type == <!>) {
       next = Token.skip_trivia(next + 1);
-      if (next.type == <ident>) next = Token.skip_trivia(next + 1);
+      if (next.text.is_identifier()) next = Token.skip_trivia(next + 1);
       t = next.group_close();
       Token typed = next.after_group();
-      if (next.type == <(> && typed.type == <(>) t = typed.group_close();
+      if (next.type == <(> && typed.type == <"{">) t = typed.group_close();
     }
     else if (t.type == <$> && brace.type == <"{"> &&
              (last != <case> || Token.skip_trivia(brace + 1).type != <$>)) {
@@ -1260,10 +1292,11 @@ static List Compiler._expression_hole(Compiler c, Token dollar) {
   return hole ? hole : c._quoted_hole(name, Token.after_group(dollar + 1));
 }
 
-/* The expression that computes a typed quotation's type, from the group at
-   the cursor: a type name, or a `$name` local or `${expression}` hole that
-   holds the type. */
+/* The expression that computes a typed quotation's type: the identifier at
+   the cursor, or the group there, which holds a type or a `$name` local or
+   `${expression}` hole whose value is the type. */
 static List Compiler._quoted_type(Compiler c, Map holes) {
+  if (c.peek(0) != <(>) return c._quoted_type_name();
   c.expect(<(>);
   Token origin = c.token;
   List type = NULL;
@@ -1274,13 +1307,15 @@ static List Compiler._quoted_type(Compiler c, Map holes) {
     c.token = c.after_hole();
     type = c.resolve_expression(%(expr () (ident ${name.str()})), origin);
   }
-  else {
-    Type parsed = NULL;
-    c.parse_type_operand(&parsed);
-    type = c.cache_literal_list(parsed);
-  }
+  else type = c._quoted_type_name();
   c.expect(<)>);
   return type;
+}
+
+static List Compiler._quoted_type_name(Compiler c) {
+  Type parsed = NULL;
+  c.parse_type_operand(&parsed);
+  return c.cache_literal_list(parsed);
 }
 
 static List Compiler._quotation(
@@ -1342,7 +1377,7 @@ static List Definition.construction(Definition &d) {
     fresh.push(%($binder ${row.cadr()} ${binder in file_locals ? 1 : 0}));
   }
   foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice))
+    foreach (Symbol projection, %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   List quoted = %(
     "x2c.quoted" ${fresh.list_free()} ${_macro_value_names(d.template)}
@@ -1404,27 +1439,29 @@ static List Compiler._built_hole(
 
 /* typed quotations
 
-   `$!(T)( expression )` builds `(expr T CONTENT)` where it is written,
+   `$!T{ expression }`, where `T` names no kind, and
+   `$!(T){ expression }` build `(expr T CONTENT)` where they are written,
    from the template a rebuild fills: constant syntax from the literal
-   cache, and each hole's value inserted as a rebuild inserts it. It binds
-   nothing, so it may declare no name and apply no template. */
+   cache, and each hole's value inserted as a rebuild inserts it. A typed
+   quotation binds nothing, so it may declare no name and apply no
+   template. */
 
 static List Definition.typed_construction(Definition &d) {
   Compiler c = d.c;
   if (!d.rebuild || d.fresh) $report.parse.typed_quotation(c, d.start);
   Map keys = {};
   foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice))
+    foreach (Symbol projection, %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   match (d.rebuild.car()) case %(expr ? *content):
     return c.literal_cell(c.cache_literal_var(<expr>),
       c.literal_cell(d.type, c._typed_cells(content, keys, d.start)));
   /* The rebuild template of an expression that is one hole is empty; the
-     definition's template names the hole. */
-  Var binder = d.template.last();
+     definition's template names the hole, which `Macro.typed` inserts. */
+  List hole = keys[d.template.last()].list().car();
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_typed")), d.start);
-  List value = c._typed_hole(keys[binder], d.start);
+  List value = c._hole_value(hole, d.start);
   return c.resolve_expression(
     %(expr ("List") (call $callee (args ${d.type} $value))), d.start);
 }
@@ -1450,15 +1487,18 @@ static List Compiler._typed_cells(
 }
 
 /* One use of a hole: its local, which `Macro.inserted` lifts in an
-   expression hole and makes an identifier where code takes an expression.
-   A sequence inserts its items as they are. */
+   expression hole, makes an identifier where code takes an expression, and
+   makes a spelling in a Name hole's member position. A sequence and a
+   type insert their syntax as it is. */
 static List Compiler._typed_hole(Compiler c, List row, Token start) {
   (List hole, Symbol projection) = row;
-  List local = c.resolve_expression(
-    %(expr () (ident ${_hole_name(hole).str()})), start);
-  int lifts = hole.assoc(<kind>) == <expr>;
+  List local = c._hole_value(hole, start);
+  Symbol kind = hole.assoc(<kind>);
+  int lifts = kind == <expr>;
   int expression = projection == <expression>;
-  if (hole.assoc(<sequence>).int() || (!lifts && !expression)) return local;
+  if (hole.assoc(<sequence>).int() ||
+      (!lifts && !expression && kind != <name>))
+    return local;
   List callee = c.resolve_expression(
     %(expr () (ident "Macro_inserted")), start);
   return c.resolve_expression(
@@ -1466,6 +1506,10 @@ static List Compiler._typed_hole(Compiler c, List row, Token start) {
                                        ${x2c_literal_int(expression)}))),
     start);
 }
+
+/* The local that holds a quotation hole's value. */
+static List Compiler._hole_value(Compiler c, List hole, Token start) =>
+  c.resolve_expression(%(expr () (ident ${_hole_name(hole).str()})), start);
 
 /* A quotation's hole takes its kind from a name position, or from a
    statement position where it stands alone, which no annotation can give
@@ -1601,6 +1645,8 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
 List Compiler.try_parse_macro_member(Compiler c) {
   List hole = c.peek_macro_hole();
   List slot = c.try_parse_macro_slot(<name>);
+  // A quotation's first use of a hole gives the hole its kind.
+  if (hole) hole = c._hole_record(_hole_name(hole));
   if (!slot || !hole || hole.assoc(<kind>) != <name> ||
       hole.assoc(<sequence>).int())
     return slot;
@@ -3125,16 +3171,28 @@ static List Compiler._template_arguments(
   return %(args @{rows.list_free()});
 }
 
-/* One hole's capture row of `value`. */
+/* One hole's capture row of `value`. Each scalar Lisp value an Expr hole
+   or sequence holds lifts to an expression first. */
 static List Compiler._hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
-  if (hole.assoc(<kind>) == <expr> &&
-      (value.is_integer() || value.is_floating() || value is <string> ||
-       value is <symbol>))
-    value = c.lift_macro_lisp_expression(value, invocation);
-  List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
+  int lifts = hole.assoc(<kind>) == <expr>;
+  if (!hole.assoc(<sequence>).int())
+    return c._capture_row_project(
+      hole, %(${lifts ? c._lifted(value, invocation) : value}), retain_syntax);
+  List sources = value;
+  if (lifts) {
+    Array lifted = [];
+    foreach (Var item, sources) lifted.push(c._lifted(item, invocation));
+    sources = lifted.list_free();
+  }
   return c._capture_row_project(hole, sources, retain_syntax);
 }
+
+/* A number, String, or Symbol becomes the literal expression that holds
+   it; other values are already syntax. */
+static Var Compiler._lifted(Compiler c, Var value, Token invocation) =>
+  value.is_integer() || value.is_floating() || value is <string> ||
+  value is <symbol> ? c.lift_macro_lisp_expression(value, invocation) : value;
 
 /* A helper's result with each template call the helper left for the
    compiler replaced by its invocation. */
@@ -3363,6 +3421,7 @@ static int Landing.splices(Landing &l, Var item, List &spliced) {
    which a rebuild leaves bare. */
 static Var Landing.hole(Landing &l, List hole, Symbol projection, Var value) {
   Compiler c = l.c;
+  if (projection == <member>) return c._member_spelling(value);
   if (!l.retain) value = c._helper_result(value);
   List row = c._hole_row(hole, value, l.site, l.retain);
   Symbol field = projection == <shell> ? <expression> : projection;
@@ -3975,10 +4034,9 @@ static void Import.macros(Import &in) {
   defer c.close_child(child);
   child.filename = in.path;
   child.collect_protocols = c.collect_protocols;
-  /* The caller's collection pass parses no bodies and so keeps its
-     protocol registries empty. The import's templates and `meta` bodies
-     are the bodies it does parse, so the import installs the protocols
-     visible to it when one is asked for. */
+  /* As the caller's collection pass does, an import read during
+     collection installs the protocols visible to it when its templates
+     or `meta` bodies first ask for one. */
   child.import_protocols = c.shallow;
   $let(c.diagnostics.printer, c.diagnostics.printer) {
     in.borrow(child);

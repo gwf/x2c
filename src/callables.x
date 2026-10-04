@@ -272,7 +272,7 @@ static List CaptureBuild._read(
   (List field, Type storage_type) = stored;
   String field_name = binding_identity_spelling(field);
   List environment = _func_bound(b.pointer_type, b.environment);
-  List read = $!($storage_type)( $environment->$field_name );
+  List read = $!($storage_type){ $environment->$field_name };
   if (source_type.car() == <&>) return %(expr $source_type ${read.caddr()});
   List converted = b.c.convert_expression(read, source_type);
   match (converted)
@@ -748,10 +748,10 @@ static List Compiler._func_bridge_call(
   List call = c._func_call(
     %("Func"), _func_bound(function_type, bridge), arguments);
   /* A call through a bridge function the unit declares where it calls. */
-  return $!(Func)( ({
+  return $!Func{ ({
     extern Func $bridge(${parameters.cdr()}...);
     $call;
-  }) );
+  }) };
 }
 
 static Type Compiler._func_pointer_value_type(Compiler c, Type type) {
@@ -818,9 +818,9 @@ static List Compiler._indirect_func_value(
   List constructed = c._func_context_call(
     context_type, context, _func_bound(%("FuncAdapter"), adapter),
     signature, _func_bound(constructor_type, constructor));
-  return $!(Func)( ({
+  return $!Func{ ({
     $declaration ${c._func_present_statement(pointer, constructed)}
-  }) );
+  }) };
 }
 
 static List Compiler._indirect_func_adapter(
@@ -853,7 +853,7 @@ static List Compiler._build_indirect_func_adapter(
     context_type, context_local, fn_binding);
   String field_name = binding_identity_spelling(field_binding);
   List context = _func_bound(context_pointer, context_local);
-  List target = $!($pointer_type)( $context->$field_name );
+  List target = $!($pointer_type){ $context->$field_name };
   List adapter = c._build_func_adapter(
     diagnostic_type, pointer_type, target, fn_binding,
     %($context_declaration));
@@ -896,7 +896,7 @@ static void Compiler._func_pointer_context(
 
 static List Compiler._func_context_declaration(
   Compiler c, Type context_type, List context, List expression) {
-  List value = $!($context_type)( { $expression } );
+  List value = $!($context_type){ { $expression } };
   Macro storage_shape = $func_local;
   return c.rebuild_statement(
     storage_shape(context_type, %(op = (bind $context ()) $value))).cadr();
@@ -918,8 +918,8 @@ static List Compiler._func_context_call(
 static List Compiler._func_present_statement(
   Compiler c, List pointer, List constructed) {
   List null_binding = c.sym.reference(%("NULL"), NULL);
-  List result = $!(Func)(
-    $pointer ? $constructed : ${_func_bound(%("Func"), null_binding)} );
+  List result = $!Func{
+    $pointer ? $constructed : ${_func_bound(%("Func"), null_binding)} };
   return c.rebuild_statement($!{ $result; }).cadr();
 }
 
@@ -1148,7 +1148,7 @@ static List FuncReaders._pointer(
     return c.convert_expression(picked, parameter_type);
   Type record_pointer = parameter_type.reference();
   List pointer = %(expr $record_pointer (cast $record_pointer $picked));
-  return $!($parameter_type)( *$pointer );
+  return $!($parameter_type){ *$pointer };
 }
 
 static List FuncReaders._value(
@@ -1166,8 +1166,8 @@ static List FuncReaders._value(
 static List FuncReaders._call(
   FuncReaders &r, Type result_type, List target, int index,
   List details) {
-  List fn = $!(Func)( ${r.fn} );
-  List argv = $!(const FuncArg *)( ${r.argv} );
+  List fn = $!Func{ ${r.fn} };
+  List argv = $!(const FuncArg *){ ${r.argv} };
   List arguments = %($fn $argv ${x2c_literal_int(index)} @details);
   return r.c._func_call(result_type, target, arguments);
 }
@@ -1231,7 +1231,7 @@ static List Compiler._adapter_helper(Compiler c, String name, Type &type) =>
   c.sym.resolve_global(%($name), type);
 
 /* The issued identity `binding` read as a `type`. */
-static List _func_bound(Type type, List binding) => $!($type)( $binding );
+static List _func_bound(Type type, List binding) => $!($type){ $binding };
 
 static List Compiler._func_call(
   Compiler c, Type type, List callee, List arguments) {
@@ -1369,7 +1369,7 @@ static List Callback.publish_typed(Callback &cb, Type spelling) {
 static List Callback.function(Callback &cb, List binding) {
   Compiler c = cb.c;
   (List declarations, List arguments) = c.forward_parameters(cb.params);
-  List source = $!(${cb.source})( ${cb.source_binding} );
+  List source = $!(${cb.source}){ ${cb.source_binding} };
   List call = c._func_call(
     cb.source.apply().canonicalize(), source, arguments);
   List body = cb.result === %(void) ? %((stmnt $call))

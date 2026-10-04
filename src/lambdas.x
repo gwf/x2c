@@ -394,7 +394,7 @@ List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
         binding = captured;
         type = captured_type;
       }
-  return $!($type)( $binding );
+  return $!($type){ $binding };
 }
 
 /* One binding's capture through one lambda frame: the frame's fields, the
@@ -460,7 +460,7 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
    reference parameter copies its referent. */
 static List Capture.add(Capture &k) {
   Type type = k.type, captured_type = type.car() == <&> ? type.cdr() : type;
-  List binding = k.binding, expression = $!($type)( $binding );
+  List binding = k.binding, expression = $!($type){ $binding };
   int reference = k.original in k.references.list();
   if (k.prescribed) {
     match (k.prescribed)
@@ -473,10 +473,10 @@ static List Capture.add(Capture &k) {
   else if (reference) {
     captured_type = cons(<&>, captured_type);
     if (type.car() != <&>)
-      expression = $!($captured_type)( &$expression );
+      expression = $!($captured_type){ &$expression };
   }
   else if (type.car() == <&>)
-    expression = $!($captured_type)( *$expression );
+    expression = $!($captured_type){ *$expression };
   if (reference && %(lambda-snapshot $binding) in k.facts)
     $report.type.capture_enclosing(k.c, k.original);
   return k.record(captured_type, expression, reference);
