@@ -3154,7 +3154,8 @@ static List Compiler._bind_raise(Compiler c, Var code, List details) {
 }
 
 /* Binds each catch arm's pattern names in a scope of its own, with the
-   arm's binder declarations before its body. */
+   arm's binder declarations before its body. A parsed arm's body already
+   begins with them, so it binds unchanged. */
 static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   List handle = handler ? handler.car().list()
     : c.sym.introduce(c.fresh_name("error_handler"));
@@ -3163,20 +3164,32 @@ static List Compiler._bind_catchcases(Compiler c, Var arms, List handler) {
   c.set_fact(%(type $handle), %("ErrorHandler"));
   Array bound = [];
   foreach (List arm, arms.list()) {
-    List pattern = arm.car();
+    List pattern = arm.car(), body = arm.cadr();
     List bindings = c.begin_catch_arm(pattern, c.token);
     {
       defer c.sym.pop_scope();
-      bound.push(
-        %(
-          $pattern
-          (block
-            @{c.catch_binder_declarations(bindings, handle)}
-            ${c._bind_statement(arm.cadr())})
-        ));
+      List statement = c._bind_statement(body);
+      if (!_declares_binders(body))
+        statement = %(block
+          @{c.catch_binder_declarations(bindings, handle)} $statement);
+      bound.push(%($pattern $statement));
     }
   }
   return %(catchcases ${bound.list_free()} $handle);
+}
+
+/* Whether a catch arm's `body` begins with the binder declarations that
+   `catch_binder_declarations` builds: one that reads the first capture. */
+static int _declares_binders(List body) {
+  match (body)
+    case %(block (declare *)
+           (stmnt (expr ? (op = ? (expr ? (!or
+             (call "x2c_error_catch_capture" *)
+             (call "Var_list"
+               (args (expr ? (call "x2c_error_catch_capture" *)))))))))
+           *):
+      return 1;
+  return 0;
 }
 
 static List Compiler._bind_try(
