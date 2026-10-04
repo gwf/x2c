@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/macro-quotation-typed-nested.x:6:42: parse: typed quotation inside a quotation must be written as a hole
+  meta static List plus_one(List b) => $!( $!int{ $b } + 1 );
+                                           ^
+  note: write ${$!T{ ... }} to insert the code it builds
+

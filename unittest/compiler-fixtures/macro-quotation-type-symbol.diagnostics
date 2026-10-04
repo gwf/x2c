@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-quotation-type-symbol.x:13:14: macro: type name 'String' must be a String: write %("String")
+    String s = $string_of("q");
+               ^
+

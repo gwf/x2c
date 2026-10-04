@@ -1224,6 +1224,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
   Map holes = {};
   List locals = NULL, type = NULL;
   if (typed) {
+    if (c.macro_holes && %(quotation) in c.macro_holes)
+      $report.parse.typed_quotation_nested(c, start);
     if (c.macro_holes) $report.parse.typed_quotation(c, start);
     if (c.peek(0) == <(>) locals = c._expression_holes(holes);
     type = c._quoted_type(holes);
@@ -1315,11 +1317,26 @@ static List Compiler._quoted_type(Compiler c, Map holes) {
              ? holes[%(expression ${c.token.pos})]
              : Token.skip_trivia(c.token + 1).text;
     c.token = c.after_hole();
-    type = c.resolve_expression(%(expr () (ident ${name.str()})), origin);
+    type = c._checked_type(
+      c.resolve_expression(%(expr () (ident ${name.str()})), origin), origin);
   }
   else type = c._quoted_type_name();
   c.expect(<)>);
   return type;
+}
+
+/* The `Type` expression `type`, which a `meta` function checks names its
+   type with a String before a typed quotation inserts it:
+   `type_name_error(type) ? (x2c_diagnostic_fail(...), type) : type`. */
+static List Compiler._checked_type(Compiler c, List type, Token origin) {
+  if (!c.meta_body) return type;
+  List error = c._runtime_call("type_name_error", %($type), origin);
+  List fail = c._runtime_call(
+    "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
+  return c.resolve_expression(
+    %(expr () (op ? $error
+      (expr ("Type") ${source_commas_content(%($fail $type))}) $type)),
+    origin);
 }
 
 static List Compiler._quoted_type_name(Compiler c) {
@@ -1498,23 +1515,34 @@ static List Compiler._typed_cells(
 
 /* One use of a hole: its local, which `Macro.inserted` lifts in an
    expression hole, makes an identifier where code takes an expression, and
-   makes a spelling in a Name hole's member position. A sequence and a
-   type insert their syntax as it is. */
+   makes a spelling in a Name hole's member position. A Name hole that
+   declares inserts the name `Macro.declared` makes. An expression sequence
+   lifts each item as `Macro.inserted_items` does. A type inserts its
+   syntax once it is checked, and other syntax inserts as it is. */
 static List Compiler._typed_hole(Compiler c, List row, Token start) {
   (List hole, Symbol projection) = row;
   List local = c._hole_value(hole, start);
   Symbol kind = hole.assoc(<kind>);
   int lifts = kind == <expr>;
   int expression = projection == <expression>;
-  if (hole.assoc(<sequence>).int() ||
-      (!lifts && !expression && kind != <name>))
-    return local;
-  List callee = c.resolve_expression(
-    %(expr () (ident "Macro_inserted")), start);
-  return c.resolve_expression(
-    %(expr ("Var") (call $callee (args $local ${x2c_literal_int(lifts)}
-                                       ${x2c_literal_int(expression)}))),
+  if (kind == <type>) return c._checked_type(local, start);
+  if (hole.assoc(<sequence>).int())
+    return lifts ? c._runtime_call("Macro_inserted_items", %($local), start)
+                 : local;
+  if (kind == <name> && projection == <value>)
+    return c._runtime_call("Macro_declared", %($local), start);
+  if (!lifts && !expression && kind != <name>) return local;
+  return c._runtime_call("Macro_inserted",
+    %($local ${x2c_literal_int(lifts)} ${x2c_literal_int(expression)}),
     start);
+}
+
+/* The call of the runtime operation `name` with `arguments`. */
+static List Compiler._runtime_call(
+  Compiler c, String name, List arguments, Token start) {
+  List callee = c.resolve_expression(%(expr () (ident $name)), start);
+  return c.resolve_expression(
+    %(expr () (call $callee (args @arguments))), start);
 }
 
 /* The local that holds a quotation hole's value. */
@@ -3184,10 +3212,15 @@ static List Compiler._template_arguments(
 }
 
 /* One hole's capture row of `value`. Each scalar Lisp value an Expr hole
-   or sequence holds lifts to an expression first. */
+   or sequence holds lifts to an expression first. A Type hole's type names
+   its type with a String. */
 static List Compiler._hole_row(
   Compiler c, List hole, Var value, Token invocation, int retain_syntax) {
-  int lifts = hole.assoc(<kind>) == <expr>;
+  Symbol kind = hole.assoc(<kind>);
+  int lifts = kind == <expr>;
+  String error = kind == <type> && value is <list>
+               ? type_name_error(value) : NULL;
+  if (error) $report.macro.type_name(c, error, invocation);
   if (!hole.assoc(<sequence>).int())
     return c._capture_row_project(
       hole, %(${lifts ? c._lifted(value, invocation) : value}), retain_syntax);
