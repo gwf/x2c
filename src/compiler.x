@@ -189,6 +189,8 @@ typedef struct Compiler {
   // Linkage groups that earlier segments of the collected file left open.
   int open_linkage;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
+  // Where each line of `lines_text` starts, for showing diagnostic lines.
+  String lines_text, Array line_starts;
   // The unit's script record, and the same record on the compiler whose own
   // file is that script; both NULL for an ordinary unit.
   ScriptUnit unit_script, script;
@@ -2434,19 +2436,6 @@ void Compiler.borrow_diagnostics(Compiler c, Compiler owner) {
   if (c.diagnostics.printer) c.own_diagnostics();
 }
 
-/** Moves collected child reports into the caller's store without re-emitting.
-    Shared stores already contain their entries. The child's separate store
-    remains configured and empty after its reports have been transferred.
-*/
-void Compiler.take_diagnostics(Compiler c, Compiler child) {
-  Diagnostics target = c.diagnostics, source = child.diagnostics;
-  if (target == source) return;
-  foreach (Var entry, source.entries) target.entries.push(entry);
-  target.count += source.count;
-  target.limit_notified |= source.limit_notified;
-  source.reset();
-}
-
 /** Retains a child's final diagnostics and closes its owned Lisp session. */
 void Compiler.close_child(Compiler c, Compiler child) {
   c.take_diagnostics(child);
@@ -2607,6 +2596,7 @@ static Compiler _new(Compiler owner) {
     owner && owner.diagnostics.printer ? c : NULL,
     owner ? owner.diagnostics.limit : 1);
   c.braces = [];
+  c.line_starts = [];
   c.import_stack = [];
   c.origins = [];
   c.root_dir = x2c_get_root();
