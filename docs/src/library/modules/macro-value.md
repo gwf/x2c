@@ -41,7 +41,7 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:372`
+Source: `lib/macro-value.x:374`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -51,7 +51,7 @@ Source: `lib/macro-value.x:372`
 The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
-Source: `lib/macro-value.x:365`
+Source: `lib/macro-value.x:367`
 
 <a id="Macro_close"></a>
 #### Macro_close
