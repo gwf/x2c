@@ -492,6 +492,29 @@ for make_program in make gmake; do
   [[ $(jobs_make -j 1) != *" -j7" ]]
 done
 
+# A stopped parallel run stops what its jobs started. Background jobs ignore
+# SIGINT, so their children would otherwise outlive an interrupt.
+sh -c '. "$1/commands/parallel.sh"
+  parallel_start slow sh -c "sleep 37; :"
+  parallel_wait' sh "$ROOT" >/dev/null 2>&1 &
+runner=$!
+sleeper=
+for _ in $(seq 100); do
+  job=$(pgrep -P "$runner" | paste -sd, - || true)
+  sleeper=$([[ -n $job ]] && pgrep -x -P "$job" sleep || true)
+  [[ -n $sleeper ]] && break
+  sleep 0.05
+done
+[[ -n $sleeper ]]
+kill -TERM "$runner"
+wait "$runner" || true
+sleep 0.2
+if kill -0 $sleeper 2>/dev/null; then
+  echo "a parallel job's child outlived its stopped run" >&2
+  kill $sleeper
+  exit 1
+fi
+
 # GNU Make 4 remakes a deleted included file, and the unit that included it
 # then translates again.
 gnu_make=$(command -v gmake || command -v make)

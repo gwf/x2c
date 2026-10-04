@@ -6,12 +6,24 @@
 parallel_logs=$(mktemp -d "${TMPDIR:-/tmp}/x2c-parallel.XXXXXX")
 parallel_jobs=
 
-# Stops unfinished jobs when the caller is interrupted.
+# Stops unfinished jobs when the caller is interrupted. A background job of
+# a non-interactive shell ignores SIGINT, and so do its children, so each
+# job's whole process tree is listed and then stopped.
 parallel_stop() {
+  parallel_pids=
   for parallel_job in $parallel_jobs; do
-    kill "${parallel_job%%:*}" 2>/dev/null || :
+    parallel_pids="$parallel_pids $(parallel_tree "${parallel_job%%:*}")"
   done
+  kill $parallel_pids 2>/dev/null || :
   rm -rf "$parallel_logs"
+}
+
+# parallel_tree PID prints PID and the PIDs of its descendants.
+parallel_tree() {
+  echo "$1"
+  for parallel_child in $(pgrep -P "$1"); do
+    parallel_tree "$parallel_child"
+  done
 }
 trap 'parallel_stop; exit 1' HUP INT TERM
 
