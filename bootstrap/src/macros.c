@@ -3364,14 +3364,14 @@ List Compiler_parse_macro_quotation(Compiler c){
 
 int String_is_identifier(String);
 static int Compiler__typed_quotation(Compiler c){
-  if(String_is_identifier(c -> token -> text)) return Compiler_peek(c, 1) == 247 && ! _category(c -> token -> text);  Symbol after = Token_after_group(c -> token) -> type;  return Compiler_peek(c, 0) == 81 &&(after == 247 || after == 81);
+  if(String_is_identifier(c -> token -> text)) return Compiler_peek(c, 1) == 247 && ! _category(c -> token -> text);  return Compiler_peek(c, 0) == 81 && Token_after_group(c -> token) -> type == 247;
 }
 
 Token Token_group_close(Token);
 static List Compiler__expression_holes(Compiler c, Map holes){
   Token saved = c -> token, close = Token_group_close(c -> token);  Array locals = Array_new();  Symbol last = 0;  for(Token t = Token_skip_trivia(saved + 1);  t < close;  t = Token_skip_trivia(t + 1)){
     Token brace = t + 1, next = Token_skip_trivia(brace);  if(t -> type == 73 && next -> type == 60){
-      next = Token_skip_trivia(next + 1);  if(String_is_identifier(next -> text)) next = Token_skip_trivia(next + 1);  t = Token_group_close(next);  Token typed = Token_after_group(next);  if(next -> type == 81 &&(typed -> type == 247 || typed -> type == 81)) t = Token_group_close(typed);
+      next = Token_skip_trivia(next + 1);  if(String_is_identifier(next -> text)) next = Token_skip_trivia(next + 1);  t = Token_group_close(next);  Token typed = Token_after_group(next);  if(next -> type == 81 && typed -> type == 247) t = Token_group_close(typed);
     }
     else if(t -> type == 73 && brace -> type == 247 &&(last != 199882 || Token_skip_trivia(brace + 1) -> type != 73)){
       c -> token = brace;  Array_push(locals, List_var(Compiler__hole_local(c, holes, t -> pos)));  t = Token_group_close(brace);
@@ -5631,7 +5631,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3763};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3760};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -5755,7 +5755,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3898};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3895};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }
