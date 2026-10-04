@@ -790,7 +790,9 @@ for mode in default live cpp; do
     live) options+=(--live-symbols) ;;
     cpp) options+=(--cpp-symbols) ;;
   esac
-  "$X2C" translate "${options[@]}" --out-dir "$declarations/$mode" \
+  # One serial process shares the import between both units; parallel
+  # workers would each run its effects once per unit.
+  "$X2C" translate -j 1 "${options[@]}" --out-dir "$declarations/$mode" \
     "$declarations/src/provider.x" "$declarations/src/consumer.x"
   [ "$(cat "$declarations/effects")" = imxf ] ||
     fail "declaration import, producer, or field ran twice in $mode mode"
