@@ -234,6 +234,17 @@ for command in translate build; do
   diff -u "$failing/expected" "$failing/$command.stderr"
 done
 
+# ended PID... waits up to five seconds for each process to end.
+ended() {
+  for pid; do
+    for _ in $(seq 100); do
+      kill -0 "$pid" 2>/dev/null || continue 2
+      sleep 0.05
+    done
+    return 1
+  done
+}
+
 # A stopped parallel translation stops its workers.
 stopped="$BUILD/stopped"
 mkdir -p "$stopped/out"
@@ -255,14 +266,11 @@ kill -TERM "$parent"
 stopped_status=0
 wait "$parent" || stopped_status=$?
 [[ $stopped_status == 143 ]]
-sleep 0.2
-for worker in $workers; do
-  if kill -0 "$worker" 2>/dev/null; then
-    echo "translation worker $worker outlived its stopped parent" >&2
-    kill -KILL $workers 2>/dev/null || true
-    exit 1
-  fi
-done
+if ! ended $workers; then
+  echo "a translation worker outlived its stopped parent" >&2
+  kill -KILL $workers 2>/dev/null || true
+  exit 1
+fi
 [[ ! -e "$stopped/out/first.c" && ! -e "$stopped/out/second.c" ]]
 
 set +e
@@ -485,7 +493,8 @@ printf 'include %s/etc/make-command.mk\nshow:\n\t@echo "$(PARALLEL_MAKE)"\n' \
 for make_program in make gmake; do
   command -v "$make_program" >/dev/null || continue
   jobs_make() {
-    "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
+    MAKEFLAGS= MFLAGS= MAKELEVEL= \
+      "$make_program" -s -f "$BUILD/jobs.mk" "$@" show BUILD_JOBS=7
   }
   [[ $(jobs_make -I /home/jo/inc) == *" -j7" ]]
   [[ $(jobs_make -j1) != *" -j7" ]]
@@ -508,8 +517,7 @@ done
 [[ -n $sleeper ]]
 kill -TERM "$runner"
 wait "$runner" || true
-sleep 0.2
-if kill -0 $sleeper 2>/dev/null; then
+if ! ended $sleeper; then
   echo "a parallel job's child outlived its stopped run" >&2
   kill $sleeper
   exit 1
