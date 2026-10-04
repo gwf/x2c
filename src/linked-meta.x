@@ -176,6 +176,33 @@ static List _selector_chain(String spelling, List value) {
   return value;
 }
 
+static List _selector_double(List steps) {
+  if (!steps) return NULL;
+  String rest = steps.car(), a = %"a$rest", d = %"d$rest";
+  return %($a $d @{_selector_double(steps.cdr())});
+}
+
+static List _selector_middles(void) {
+  List level = %(""), middles = NULL;
+  for (int length = 1; length <= 4; length++) {
+    level = _selector_double(level);
+    if (length > 1) middles = middles.append(level);
+  }
+  return middles;
+}
+
+static List _selector_units(List middles, Macro car, Macro cdr) {
+  if (!middles) return NULL;
+  String middle = middles.car();
+  List rest = _selector_units(middles.cdr(), car, cdr);
+  if (middle in %("aa" "ad" "dd" "add")) return rest;
+  String name = %"c${middle}r";
+  return %(${middle.startswith("a") ? car(name) : cdr(name)} @rest);
+}
+
+static List _selector_definitions(Macro car, Macro cdr) =>
+  _selector_units(_selector_middles(), car, cdr);
+
 /* --- lib/native-scalar-types.xmacro -------------------------------------- */
 
 static Map native_scalar_types(void) => {
@@ -737,6 +764,10 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "catch_handle", catch_handle);
   $linked.row(rows, "retain_catch_handle", retain_catch_handle);
   $linked.row(rows, "_selector_chain", _selector_chain);
+  $linked.row(rows, "_selector_double", _selector_double);
+  $linked.row(rows, "_selector_middles", _selector_middles);
+  $linked.row(rows, "_selector_units", _selector_units);
+  $linked.row(rows, "_selector_definitions", _selector_definitions);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);

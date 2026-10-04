@@ -67,7 +67,7 @@ Optional compound `List` selectors.
 
 Returns the element that `caaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:24`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caaadr"></a>
 #### List.caaadr
@@ -76,7 +76,7 @@ Source: `lib/list-selectors.x:24`
 
 Returns the element that `caaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:25`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caaar"></a>
 #### List.caaar
@@ -85,7 +85,7 @@ Source: `lib/list-selectors.x:25`
 
 Returns the element that `caaar` selects from `value`.
 
-Source: `lib/list-selectors.x:17`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caadar"></a>
 #### List.caadar
@@ -94,7 +94,7 @@ Source: `lib/list-selectors.x:17`
 
 Returns the element that `caadar` selects from `value`.
 
-Source: `lib/list-selectors.x:26`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caaddr"></a>
 #### List.caaddr
@@ -103,7 +103,7 @@ Source: `lib/list-selectors.x:26`
 
 Returns the element that `caaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:27`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caadr"></a>
 #### List.caadr
@@ -112,7 +112,7 @@ Source: `lib/list-selectors.x:27`
 
 Returns the element that `caadr` selects from `value`.
 
-Source: `lib/list-selectors.x:18`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cadaar"></a>
 #### List.cadaar
@@ -121,7 +121,7 @@ Source: `lib/list-selectors.x:18`
 
 Returns the element that `cadaar` selects from `value`.
 
-Source: `lib/list-selectors.x:28`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cadadr"></a>
 #### List.cadadr
@@ -130,7 +130,7 @@ Source: `lib/list-selectors.x:28`
 
 Returns the element that `cadadr` selects from `value`.
 
-Source: `lib/list-selectors.x:29`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cadar"></a>
 #### List.cadar
@@ -139,7 +139,7 @@ Source: `lib/list-selectors.x:29`
 
 Returns the element that `cadar` selects from `value`.
 
-Source: `lib/list-selectors.x:19`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.caddar"></a>
 #### List.caddar
@@ -148,7 +148,7 @@ Source: `lib/list-selectors.x:19`
 
 Returns the element that `caddar` selects from `value`.
 
-Source: `lib/list-selectors.x:30`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cadddr"></a>
 #### List.cadddr
@@ -157,7 +157,7 @@ Source: `lib/list-selectors.x:30`
 
 Returns the element that `cadddr` selects from `value`.
 
-Source: `lib/list-selectors.x:31`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdaaar"></a>
 #### List.cdaaar
@@ -166,7 +166,7 @@ Source: `lib/list-selectors.x:31`
 
 Returns the tail that `cdaaar` selects from `value`.
 
-Source: `lib/list-selectors.x:32`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdaadr"></a>
 #### List.cdaadr
@@ -175,7 +175,7 @@ Source: `lib/list-selectors.x:32`
 
 Returns the tail that `cdaadr` selects from `value`.
 
-Source: `lib/list-selectors.x:33`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdaar"></a>
 #### List.cdaar
@@ -184,7 +184,7 @@ Source: `lib/list-selectors.x:33`
 
 Returns the tail that `cdaar` selects from `value`.
 
-Source: `lib/list-selectors.x:20`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdadar"></a>
 #### List.cdadar
@@ -193,7 +193,7 @@ Source: `lib/list-selectors.x:20`
 
 Returns the tail that `cdadar` selects from `value`.
 
-Source: `lib/list-selectors.x:34`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdaddr"></a>
 #### List.cdaddr
@@ -202,7 +202,7 @@ Source: `lib/list-selectors.x:34`
 
 Returns the tail that `cdaddr` selects from `value`.
 
-Source: `lib/list-selectors.x:35`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdadr"></a>
 #### List.cdadr
@@ -211,7 +211,7 @@ Source: `lib/list-selectors.x:35`
 
 Returns the tail that `cdadr` selects from `value`.
 
-Source: `lib/list-selectors.x:21`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdar"></a>
 #### List.cdar
@@ -229,7 +229,7 @@ Source: `lib/list-selectors.x:16`
 
 Returns the tail that `cddaar` selects from `value`.
 
-Source: `lib/list-selectors.x:36`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cddadr"></a>
 #### List.cddadr
@@ -238,7 +238,7 @@ Source: `lib/list-selectors.x:36`
 
 Returns the tail that `cddadr` selects from `value`.
 
-Source: `lib/list-selectors.x:37`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cddar"></a>
 #### List.cddar
@@ -247,7 +247,7 @@ Source: `lib/list-selectors.x:37`
 
 Returns the tail that `cddar` selects from `value`.
 
-Source: `lib/list-selectors.x:22`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdddar"></a>
 #### List.cdddar
@@ -256,7 +256,7 @@ Source: `lib/list-selectors.x:22`
 
 Returns the tail that `cdddar` selects from `value`.
 
-Source: `lib/list-selectors.x:38`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cddddr"></a>
 #### List.cddddr
@@ -265,7 +265,7 @@ Source: `lib/list-selectors.x:38`
 
 Returns the tail that `cddddr` selects from `value`.
 
-Source: `lib/list-selectors.x:39`
+Source: `lib/list-selectors.x:16`
 
 <a id="List.cdddr"></a>
 #### List.cdddr
@@ -274,7 +274,7 @@ Source: `lib/list-selectors.x:39`
 
 Returns the tail that `cdddr` selects from `value`.
 
-Source: `lib/list-selectors.x:23`
+Source: `lib/list-selectors.x:16`
 
 ### `Var`
 
@@ -285,7 +285,7 @@ Source: `lib/list-selectors.x:23`
 
 Returns the element that `caaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:24`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caaadr"></a>
 #### Var.caaadr
@@ -294,7 +294,7 @@ Source: `lib/list-selectors.x:24`
 
 Returns the element that `caaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:25`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caaar"></a>
 #### Var.caaar
@@ -303,7 +303,7 @@ Source: `lib/list-selectors.x:25`
 
 Returns the element that `caaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:17`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caadar"></a>
 #### Var.caadar
@@ -312,7 +312,7 @@ Source: `lib/list-selectors.x:17`
 
 Returns the element that `caadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:26`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caaddr"></a>
 #### Var.caaddr
@@ -321,7 +321,7 @@ Source: `lib/list-selectors.x:26`
 
 Returns the element that `caaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:27`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caadr"></a>
 #### Var.caadr
@@ -330,7 +330,7 @@ Source: `lib/list-selectors.x:27`
 
 Returns the element that `caadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:18`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cadaar"></a>
 #### Var.cadaar
@@ -339,7 +339,7 @@ Source: `lib/list-selectors.x:18`
 
 Returns the element that `cadaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:28`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cadadr"></a>
 #### Var.cadadr
@@ -348,7 +348,7 @@ Source: `lib/list-selectors.x:28`
 
 Returns the element that `cadadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:29`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cadar"></a>
 #### Var.cadar
@@ -357,7 +357,7 @@ Source: `lib/list-selectors.x:29`
 
 Returns the element that `cadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:19`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.caddar"></a>
 #### Var.caddar
@@ -366,7 +366,7 @@ Source: `lib/list-selectors.x:19`
 
 Returns the element that `caddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:30`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cadddr"></a>
 #### Var.cadddr
@@ -375,7 +375,7 @@ Source: `lib/list-selectors.x:30`
 
 Returns the element that `cadddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:31`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdaaar"></a>
 #### Var.cdaaar
@@ -384,7 +384,7 @@ Source: `lib/list-selectors.x:31`
 
 Returns the tail that `cdaaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:32`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdaadr"></a>
 #### Var.cdaadr
@@ -393,7 +393,7 @@ Source: `lib/list-selectors.x:32`
 
 Returns the tail that `cdaadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:33`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdaar"></a>
 #### Var.cdaar
@@ -402,7 +402,7 @@ Source: `lib/list-selectors.x:33`
 
 Returns the tail that `cdaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:20`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdadar"></a>
 #### Var.cdadar
@@ -411,7 +411,7 @@ Source: `lib/list-selectors.x:20`
 
 Returns the tail that `cdadar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:34`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdaddr"></a>
 #### Var.cdaddr
@@ -420,7 +420,7 @@ Source: `lib/list-selectors.x:34`
 
 Returns the tail that `cdaddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:35`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdadr"></a>
 #### Var.cdadr
@@ -429,7 +429,7 @@ Source: `lib/list-selectors.x:35`
 
 Returns the tail that `cdadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:21`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdar"></a>
 #### Var.cdar
@@ -447,7 +447,7 @@ Source: `lib/list-selectors.x:16`
 
 Returns the tail that `cddaar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:36`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cddadr"></a>
 #### Var.cddadr
@@ -456,7 +456,7 @@ Source: `lib/list-selectors.x:36`
 
 Returns the tail that `cddadr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:37`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cddar"></a>
 #### Var.cddar
@@ -465,7 +465,7 @@ Source: `lib/list-selectors.x:37`
 
 Returns the tail that `cddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:22`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdddar"></a>
 #### Var.cdddar
@@ -474,7 +474,7 @@ Source: `lib/list-selectors.x:22`
 
 Returns the tail that `cdddar` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:38`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cddddr"></a>
 #### Var.cddddr
@@ -483,7 +483,7 @@ Source: `lib/list-selectors.x:38`
 
 Returns the tail that `cddddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:39`
+Source: `lib/list-selectors.x:16`
 
 <a id="Var.cdddr"></a>
 #### Var.cdddr
@@ -492,7 +492,7 @@ Source: `lib/list-selectors.x:39`
 
 Returns the tail that `cdddr` selects from `value` as a `List`.
 
-Source: `lib/list-selectors.x:23`
+Source: `lib/list-selectors.x:16`
 
 ## Design notes
 

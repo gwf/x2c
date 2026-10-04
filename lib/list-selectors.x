@@ -13,27 +13,4 @@
 #include "x2c.x"
 $(import "list-selectors.xmacro")
 
-$selector.cdr(cdar);
-$selector.car(caaar);
-$selector.car(caadr);
-$selector.car(cadar);
-$selector.cdr(cdaar);
-$selector.cdr(cdadr);
-$selector.cdr(cddar);
-$selector.cdr(cdddr);
-$selector.car(caaaar);
-$selector.car(caaadr);
-$selector.car(caadar);
-$selector.car(caaddr);
-$selector.car(cadaar);
-$selector.car(cadadr);
-$selector.car(caddar);
-$selector.car(cadddr);
-$selector.cdr(cdaaar);
-$selector.cdr(cdaadr);
-$selector.cdr(cdadar);
-$selector.cdr(cdaddr);
-$selector.cdr(cddaar);
-$selector.cdr(cddadr);
-$selector.cdr(cdddar);
-$selector.cdr(cddddr);
+$selectors();
