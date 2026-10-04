@@ -2743,7 +2743,24 @@ declares `value` with the type the local holds. A `String` local fills an
 expression hole as a string literal and an `int` local as an integer
 literal. A `$name` that names no local is a macro invocation or a `meta`
 call, as in a template, so `$rows($items)...` splices a `meta` function's
-result where the quotation expands. See
+result where the quotation expands. A `${expression}`, with `{` directly
+after `$`, is a hole whose value is an expression of the function that
+contains the quotation. It means the same as a local declared just before
+the quotation and named with `$`. The function evaluates each such
+expression once, where the quotation is written, in the order the holes are
+written, before the quotation builds its code. Names in the braces resolve
+at the quotation; names the body declares are not visible there. The
+expression's declared type gives the hole its kind, as a local's type does:
+a `Type` fills a type, a `String`, `int`, or `Symbol` inserts a literal, and
+a `List` inserts its syntax. `${expression}...` splices a `List`. Each
+`${...}` is a separate hole and belongs to the innermost quotation, so
+`${$!( ... )}` inserts a quotation built first. Inside a `%(...)`,
+`%[...]`, `%{...}`, or `%"..."` literal in the body, `${...}` keeps its
+literal meaning and inserts when the built code runs; `${${expression}}`
+there inserts a value computed at the quotation. After `case`,
+`${$name(...)}` is still a macro pattern. These holes exist only in
+quotations; in a named template's code, `${` still reports a missing macro
+name. See
 [Quoting code](https://x2c-lang.dev/docs/guide/meta-functions.html#quoting-code-with-) for an
 example.
 

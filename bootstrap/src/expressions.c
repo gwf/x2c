@@ -2782,7 +2782,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2195 = cons(_2194, NULL);
   _2196 = cons(_258, _2195);
   _2197 = List_var(_2196);
-  _2198 = int_var(78555);
+  _2198 = int_var(78565);
   _2199 = cons(_2198, NULL);
   _2200 = cons(_271, _2199);
   _2201 = List_var(_2200);
@@ -2977,7 +2977,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2390 = cons(_2389, NULL);
   _2391 = cons(_258, _2390);
   _2392 = List_var(_2391);
-  _2393 = int_var(78910);
+  _2393 = int_var(78920);
   _2394 = cons(_2393, NULL);
   _2395 = cons(_271, _2394);
   _2396 = List_var(_2395);
@@ -3092,7 +3092,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2505 = cons(_2504, NULL);
   _2506 = cons(_258, _2505);
   _2507 = List_var(_2506);
-  _2508 = int_var(79315);
+  _2508 = int_var(79325);
   _2509 = cons(_2508, NULL);
   _2510 = cons(_271, _2509);
   _2511 = List_var(_2510);
@@ -3193,7 +3193,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2603 = cons(_2602, NULL);
   _2604 = cons(_258, _2603);
   _2605 = List_var(_2604);
-  _2606 = int_var(79390);
+  _2606 = int_var(79400);
   _2607 = cons(_2606, NULL);
   _2608 = cons(_271, _2607);
   _2609 = List_var(_2608);
@@ -3285,7 +3285,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2695 = cons(_2694, NULL);
   _2696 = cons(_258, _2695);
   _2697 = List_var(_2696);
-  _2698 = int_var(79590);
+  _2698 = int_var(79600);
   _2699 = cons(_2698, NULL);
   _2700 = cons(_271, _2699);
   _2701 = List_var(_2700);
@@ -3496,7 +3496,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2906 = cons(_2905, NULL);
   _2907 = cons(_258, _2906);
   _2908 = List_var(_2907);
-  _2909 = int_var(81712);
+  _2909 = int_var(81722);
   _2910 = cons(_2909, NULL);
   _2911 = cons(_271, _2910);
   _2912 = List_var(_2911);
@@ -4436,11 +4436,12 @@ static int Compiler__cast_operand_after_parens(Compiler c){
 }
 
 int Map_truth(Map);
+Token Compiler_after_hole(Compiler);
 List Compiler_peek_macro_hole(Compiler);
 Var List_assoc(List, Var);
 int String_equal(String, String);
 static int Compiler__macro_hole_starts_cast_type(Compiler c, Token after){
-  if(! Map_truth(c -> macro_holes) || Compiler_peek(c, 0) != 73 || Compiler_peek(c, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  if((after -> type == 183 || String_equal(after -> text, _79)) && kind != 1362954) return 0;  return _cast_operand_follows(after -> type);
+  if(! Map_truth(c -> macro_holes) || Compiler_peek(c, 0) != 73 || Compiler_after_hole(c) -> type != 83) return 0;  List hole = Compiler_peek_macro_hole(c);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  if((after -> type == 183 || String_equal(after -> text, _79)) && kind != 1362954) return 0;  return _cast_operand_follows(after -> type);
 }
 
 int SymbolSet_contains(SymbolSet, Symbol);

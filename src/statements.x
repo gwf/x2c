@@ -89,7 +89,8 @@ static List Compiler._expression_statement(Compiler c) {
 static List Compiler._label_statement(Compiler c) {
   Token head = c.token;
   if (c.peek(0) == <ident> ||
-      (c.macro_holes && c.peek_macro_hole() && c.peek(2) == <:>)) {
+      (c.macro_holes && c.peek_macro_hole() &&
+       c.after_hole().type == <:>)) {
     List label = c.try_parse_macro_slot(<name>);
     if (!label) label = c.parse_optional_identifier();
     if (c.test(<:>)) return %(label $label);

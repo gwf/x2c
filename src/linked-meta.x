@@ -240,8 +240,11 @@ static List _cases_split(List items, int labelled) {
   return %((block @run) @{_cases_split(items, 0)});
 }
 
-static List _cases_switch(List condition, List body) =>
-  %((switch $condition (block @{_cases_split(body.cdr(), 0)})));
+static List _cases_switch(List condition, List body) {
+  List selected =
+    $!{ switch ($condition) { ${_cases_split(body.cdr(), 0)}... } };
+  return %($selected);
+}
 
 static List _macros_location(void) =>
   x2c_literal_string(
@@ -402,12 +405,10 @@ static int _tag_floating(List row) => _tag_kind(row) == <floating>;
 
 static int _tag_unsigned(List row) => row[0].str().startswith("u");
 
-static List _tag_info_row(List row) {
-  Symbol tag = row[0], kind = _tag_kind(row);
-  int top = _tag_top(row), middle = _tag_middle(row);
-  int bottom = _tag_bottom(row);
-  return $!( { $tag, $kind, $top, $middle, $bottom } );
-}
+static List _tag_info_row(List row) => $!( {
+  ${row[0]}, ${_tag_kind(row)}, ${_tag_top(row)}, ${_tag_middle(row)},
+  ${_tag_bottom(row)}
+} );
 
 static List _tag_info_sentinel(void) =>
   $!( { 0, <void>, 0x8000, 0, 0 } );
@@ -415,8 +416,7 @@ static List _tag_info_sentinel(void) =>
 static List _tag_info(void) {
   Array cells = [];
   foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
-  List rows = cells.list_free(), sentinel = _tag_info_sentinel();
-  return $!( { $rows..., $sentinel } );
+  return $!( { ${cells.list_free()}..., ${_tag_info_sentinel()} } );
 }
 
 static int _tag_descriptor(List row) =>
@@ -451,19 +451,15 @@ static List _tag_bits_expr(List row) {
   return x2c_literal_int(bits);
 }
 
-static List _tag_numeric_row(List row) {
-  Symbol tag = row[0];
-  int floating = _tag_floating(row), unsigned_value = _tag_unsigned(row);
-  int rank = _tag_rank(row);
-  List bits = _tag_bits_expr(row);
-  return $!( { $tag, $floating, $unsigned_value, $bits, $rank } );
-}
+static List _tag_numeric_row(List row) => $!( {
+  ${row[0]}, ${_tag_floating(row)}, ${_tag_unsigned(row)},
+  ${_tag_bits_expr(row)}, ${_tag_rank(row)}
+} );
 
 static List _tag_numeric_table(void) {
   Array cells = [];
   foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
-  List rows = cells.list_free();
-  return $!( { $rows... } );
+  return $!( { ${cells.list_free()}... } );
 }
 
 static int _tag_decode_row(List row) {
@@ -538,8 +534,7 @@ static List _tag_decode_group(List rows, Map counts, int top) {
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = x2c_expr_ident(x2c_ident(_tag_id(row)));
   }
-  List slots = ids.list_free();
-  return $!( { $mask, $immediate, { $slots... } } );
+  return $!( { $mask, $immediate, { ${ids.list_free()}... } } );
 }
 
 static List _tag_decode_groups(void) {
@@ -548,17 +543,16 @@ static List _tag_decode_groups(void) {
   Array groups = [];
   for (int group = 0; group < 32; group++)
     groups.push(_tag_decode_group(rows, counts, _tag_group_top(group)));
-  List items = groups.list_free();
-  return $!( { $items... } );
+  return $!( { ${groups.list_free()}... } );
 }
 
 static List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
   foreach (List row, _tag_rows()) {
-    List id = x2c_expr_ident(x2c_ident(_tag_id(row)));
     checks.push($!Unit{
-      _Static_assert($id == $index, "TagId matches the var tag ledger");
+      _Static_assert(${x2c_expr_ident(x2c_ident(_tag_id(row)))} == $index,
+                     "TagId matches the var tag ledger");
     });
     index++;
   }
@@ -640,17 +634,15 @@ static List _update_cast_in(List id)  => _update_row(id)[4].car();
 static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
 
 static List _update_box(List id, List lhs) {
-  List target = x2c_expr_ident(lhs);
-  List value = $!( $target[0] );
+  List value = $!( ${x2c_expr_ident(lhs)}[0] );
   Type into = _update_cast_in(id);
   if (into) value = $!( ($into)$value );
-  List boxer = x2c_expr_ident(x2c_ident(_update_boxer(id)));
-  return $!( $boxer($value) );
+  return $!( ${x2c_expr_ident(x2c_ident(_update_boxer(id)))}($value) );
 }
 
 static List _update_decode(List id, List value) {
-  List decoder = x2c_expr_ident(x2c_ident(_update_decoder(id)));
-  List decoded = $!( $decoder($value) );
+  List decoded =
+    $!( ${x2c_expr_ident(x2c_ident(_update_decoder(id)))}($value) );
   Type back = _update_cast_out(id);
   if (back) return $!( ($back)$decoded );
   return decoded;

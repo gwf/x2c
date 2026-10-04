@@ -13,7 +13,7 @@
 (function (static "SymbolSet") 
  (bind (binding 2 "same_values") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 13 
+  (at 18 
    (return 
     (expr ("SymbolSet") 
      (cast ("SymbolSet") 
@@ -24,7 +24,7 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 14 
+  (at 19 
    (declare ("SymbolSet") 
     (bindings 
      (op = (bind (binding 4 "empty") ()) 
@@ -200,7 +200,7 @@
          (bindings 
           (op = (bind (binding 15 "iteration") ()) 
            (expr (int) (literal (int) "0")))))) 
-  (at 16 
+  (at 21 
    (block (declare ("Symbol") (bindings (bind (binding 16 "symbol") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -220,7 +220,7 @@
                               (ident (binding 19 "int_var"))) 
                         (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") (bindings (bind (binding 20 "_x2c_macro_item_0") ()))) 
-    (at 15 
+    (at 20 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -245,7 +245,7 @@
                    (args (expr ("SymbolSet") (ident (binding 1 "values"))) 
                     (expr ("Symbol") (ident (binding 16 "symbol")))))) 
             (expr (int) (literal (int) "1")))))))))))) 
-  (at 11 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 22 "printf"))) 
@@ -254,7 +254,7 @@
        (expr (int) (ident (binding 10 "membership"))) 
        (expr (int) (ident (binding 12 "atoms"))) 
        (expr (int) (ident (binding 15 "iteration")))))))) 
-  (at 17 
+  (at 22 
    (return 
     (expr (int) 
      (op ? (expr (int) 

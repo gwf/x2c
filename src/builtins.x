@@ -28,7 +28,7 @@ List x2c_param_make(List type, Var name);
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
     x2c_diagnostic_fail("$scope accepts zero or one destination", %());
-  List enter = destinations ? _call("Scope_push", destinations)
+  List enter = destinations ? $!( Scope_push($destinations...) )
                             : $!( Scope_retain() );
   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_release() );
   return $!{ { $enter; { defer $leave; $body } } };
@@ -143,12 +143,11 @@ static List Foreach.with_cursor(Foreach &f, List spec) {
   List cursor_expression = _expr(cursor_type, f.cursor);
   List cursor_argument = by_reference ? cursor_expression
     : _address(cursor_expression);
-  List arguments = %($object_expression $cursor_argument @addresses);
-  List condition = x2c_expr_call(function, arguments);
-  List assignments = _cursor_assignments(f.targets, values);
-  List loop_body = %(block @assignments ${f.body});
-  List initial = cursor_type.equal(f.type)
-    ? object_expression : x2c_literal_int(0);
+  List condition =
+    $!( $function($object_expression, $cursor_argument, $addresses...) );
+  List loop_body =
+    $!{ { ${_cursor_assignments(f.targets, values)}... ${f.body} } };
+  List initial = cursor_type.equal(f.type) ? object_expression : $!( 0 );
   List setup = %(
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}
@@ -166,7 +165,6 @@ static List _cursor_assignments(List targets, List outputs) {
    item's first two elements. */
 static List Foreach.with_iter(Foreach &f, List converter) {
   List constructor = f.constructor(converter);
-  List iterator_expression = _expr(%("Iter"), f.iterator);
   List item_expression = _expr(%("Var"), f.item);
   List initializer = builtin_foreach_complete(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
@@ -174,11 +172,12 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List output = x2c_type_parameters(x2c_syntax_type(next))[1];
   List item_argument = output.car() == <*>
     ? _address(item_expression) : item_expression;
-  List condition = x2c_expr_call(next, %($iterator_expression $item_argument));
+  List condition =
+    $!( $next(${_expr(%("Iter"), f.iterator)}, $item_argument) );
   List assignments = f.targets.len() == 1
     ? %(${_assign(f.targets[0], item_expression)})
     : _pair_assignments(f.targets, item_expression, f.pair);
-  List loop_body = %(block @assignments ${f.body});
+  List loop_body = $!{ { $assignments... ${f.body} } };
   List setup = %(
     ${_declare(%("Iter"), f.iterator, initializer)}
     ${_declare(%("Var"), f.item, %())});
@@ -187,8 +186,7 @@ static List Foreach.with_iter(Foreach &f, List converter) {
 
 static List Foreach.loop(
   Foreach &f, List condition, List body, List setup) {
-  List declaration = f.declaration;
-  return $!{ { $declaration $setup... while ($condition) $body } };
+  return $!{ { ${f.declaration} $setup... while ($condition) $body } };
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
@@ -219,17 +217,12 @@ static List _pair_assignments(List targets, List item, Var pair) {
 static List _expr(List type, Var binding) =>
   %(expr $type ${source_identifier_content(%($binding))});
 
-static List _address(List value) =>
-  source_operator_expression(NULL, %(& $value));
+static List _address(List value) => $!( &$value );
 
-static List _declare(List type, Var binding, List initializer) {
-  List value = %(bind $binding ());
-  if (initializer) value = %(op = $value $initializer);
-  return %(declare $type (bindings $value));
-}
+static List _declare(Type type, Var binding, List initializer) =>
+  initializer ? $!{ $type $binding = $initializer; } : $!{ $type $binding; };
 
-static List _assign(List target, List value) =>
-  x2c_stmnt_make(source_operator_expression(NULL, %(= $target $value)));
+static List _assign(List target, List value) => $!{ $target = $value; };
 
 /* class declarations
 
@@ -337,9 +330,12 @@ static List Shape.constructor(Shape &s) {
    release of the value's storage. */
 static List Shape.release(Shape &s) {
   List drop = _own_method(s.owner, "drop");
-  List dropped = drop ? _ref(x2c_binding_spelling(drop)) : %();
-  List release = drop ? $!{ if (value) $dropped(value); Scope_free(value); }
-                      : $!{ Scope_free(value); };
+  List release = drop
+    ? $!{
+        if (value) ${_ref(x2c_binding_spelling(drop))}(value);
+        Scope_free(value);
+      }
+    : $!{ Scope_free(value); };
   return %($release);
 }
 
@@ -384,8 +380,7 @@ static List Shape.boxing(Shape &s) {
   Type type = %($owner), pointer = %(* $owner);
   List unboxed = s.heap ? $!( ($type)Var_pointer(value) )
                         : $!( *($pointer)Var_pointer(value) );
-  List boxed = _box(s.tag, s.heap);
-  List returned = $!{ return $boxed; };
+  List returned = $!{ return ${_box(s.tag, s.heap)}; };
   List var_method = _default(
     owner, "var", %("Var"), %(${s.parameter}), %($returned));
   return %($var_method ${_unbox(owner, unboxed)});
@@ -462,9 +457,8 @@ static List _positional_new(
     parameters.push(x2c_param_make(_value_type(field[1]), name));
     arguments.push(_ref(name));
   }
-  List values = arguments.list_free();
   List declaration = x2c_decl_make(
-    representation, "value", $!( { $values... } ));
+    representation, "value", $!( { ${arguments.list_free()}... } ));
   return _finish_new(
     owner, %($owner), parameters.list_free(), %($declaration), heap);
 }
@@ -477,8 +471,8 @@ static List _initialized_new(
   Array parameters = [];
   foreach (List extra, extras)
     parameters.push(x2c_param_make(extra, %"argument_${parameters.len()}"));
-  List initializer = heap ? _call(%"${owner}_alloc", %())
-                          : x2c_expr_composite(%(${x2c_literal_int(0)}));
+  List initializer =
+    heap ? $!( ${_ref(%"${owner}_alloc")}() ) : $!( { 0 } );
   Var heap_value = %();
   if (heap) heap_value = <true>;
   List body = %(${x2c_decl_make(type, "value", initializer)}
@@ -564,8 +558,11 @@ static List _fields_equal(List fields) {
   List left = _ref("left"), right = _ref("right");
   Array body = [];
   foreach (List field, fields) {
-    List mine = _field_on(field, left), theirs = _field_on(field, right);
-    body.push($!{ if (!Var_equal((Var)$mine, (Var)$theirs)) return 0; });
+    body.push($!{
+      if (!Var_equal((Var)${_field_on(field, left)},
+                     (Var)${_field_on(field, right)}))
+        return 0;
+    });
   }
   body.push($!{ return 1; });
   return body.list_free();
@@ -584,10 +581,10 @@ static List _hash(String owner, int heap, List fields) {
 /* `hash` is declared outside the quotations so each of them names it. */
 static List _fields_hash(List fields) {
   Array body = [x2c_decl_make(%(unsigned), "hash", x2c_literal_int(0))];
-  foreach (List field, fields) {
-    List member = _field_value(field);
-    body.push($!{ hash = x2c_hash_word(hash ^ Var_hash((Var)$member)); });
-  }
+  foreach (List field, fields)
+    body.push($!{
+      hash = x2c_hash_word(hash ^ Var_hash((Var)${_field_value(field)}));
+    });
   body.push($!{ return hash; });
   return body.list_free();
 }
@@ -607,8 +604,7 @@ static List _writer(
     body = %($written);
   }
   else if (member == "str") {
-    List address = _pointer_output(owner, $!( value ));
-    List shown = heap ? $!{ return $address; }
+    List shown = heap ? $!{ return ${_pointer_output(owner, $!( value ))}; }
                       : $!{ return value.write_repr(out); };
     body = %($shown);
   }
@@ -634,12 +630,10 @@ static List _repr_guard(String owner) {
 
 /* The deferred body of `write_repr`: `Owner { a: ..., b: ... }`. */
 static List _class_write_fields(String owner, List fields) {
-  String opening = %"${owner} { ";
-  Array body = [$!{ out.write($opening); }];
+  Array body = [$!{ out.write(${%"${owner} { "}); }];
   Var final = fields.last();
   foreach (List field, fields) {
-    String label = %"${field[0]}: ";
-    body.push($!{ out.write($label); });
+    body.push($!{ out.write(${%"${field[0]}: "}); });
     body.push(_field_write(field));
     if (!field.equal(final)) body.push($!{ out.write(", "); });
   }
@@ -661,8 +655,7 @@ static List _field_write(List field) {
     return $!{ ((Var)$value).write_repr(out); };
   if (!array && !x2c_type_is_pointer(x2c_type_resolve(type)))
     value = $!( &$value );
-  List address = _pointer_output("opaque", value);
-  return $!{ $address; };
+  return $!{ ${_pointer_output("opaque", value)}; };
 }
 
 /* `str` or `repr` renders `write_str` or `write_repr` into a Buffer. */
@@ -680,8 +673,7 @@ static List _string_method(String owner, String member) {
 }
 
 static List _pointer_output(String owner, List value) {
-  String format = %"<${owner}: 0x%012lX>";
-  return $!( out.printf($format, (long)$value) );
+  return $!( out.printf(${%"<${owner}: 0x%012lX>"}, (long)$value) );
 }
 
 // class syntax
@@ -718,9 +710,6 @@ static List _field_on(List field, List receiver) {
 static List _field_value(List field) => _field_on(field, _ref("value"));
 
 static List _ref(String name) => x2c_expr_ident(%($name));
-
-static List _call(String name, List arguments) =>
-  x2c_expr_call(_ref(name), arguments);
 
 static List _function(String name, List result, List parameters, List body) {
   List parts = x2c_type_parts(result);
@@ -790,10 +779,11 @@ static List _binding_statements(List lisp, List rows) {
 
 static List _binding_statement(List lisp, List row) {
   match (row) case %(?group ?name ?function ?type): {
-    List label = x2c_literal_string(name);
-    List native = x2c_expr_ident(x2c_ident(function));
-    List types = binding_literal_list(type);
-    return $!{ Lisp_bind($lisp, $label, Func_new($native, $types)); };
+    return $!{
+      Lisp_bind($lisp, ${x2c_literal_string(name)},
+                Func_new(${x2c_expr_ident(x2c_ident(function))},
+                         ${binding_literal_list(type)}));
+    };
   }
   return %();
 }
@@ -805,8 +795,8 @@ static List _binding_targets(List rows) {
   Array arguments = [];
   foreach (List row, rows)
     foreach (Var item, _binding_target_row(row)) arguments.push(item);
-  List count = x2c_literal_int(rows.len()), items = arguments.list_free();
-  return $!( Map_update_n(Map_new(), $count, $items...) );
+  return $!(
+    Map_update_n(Map_new(), ${rows.len()}, ${arguments.list_free()}...) );
 }
 
 static List _binding_target_row(List row) {

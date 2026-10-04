@@ -747,7 +747,7 @@ static int Compiler._hole_starts(Compiler c) {
   if (!hole) return c.macro_lisp_starts_declaration();
   Symbol kind = hole.assoc(<kind>);
   if (kind) return kind == <type>;
-  Symbol next = c.peek(2);
+  Symbol next = c.after_hole().type;
   return next == <ident> || next == <$> || next == <"$(">;
 }
 
@@ -1843,7 +1843,7 @@ static List Compiler._literal_method(Compiler c) {
 static List Compiler._hole_method(Compiler c) {
   List owner_hole = c.peek_macro_hole();
   if (!owner_hole || owner_hole.assoc(<kind>) != <type> ||
-      c.peek(2) != <.>)
+      c.after_hole().type != <.>)
     return NULL;
   List owner = c.try_parse_macro_slot(<type>);
   c.expect(<.>);

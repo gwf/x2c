@@ -1096,7 +1096,8 @@ A template that a `meta` function uses once can be written where it is used.
 builds that kind of code. A `$name` inside names the function's local
 `name` and inserts its value: syntax where the position takes syntax, and a
 number, String, or Symbol as a literal. `$name...` splices a `List` local.
-Each local's first position decides what it fills.
+`${expression}` inserts any value; see below. Each local's first position
+decides what it fills.
 
 ```x2c
 #include "x2c.x"
@@ -1133,7 +1134,9 @@ syntax or values the locals hold, names the body declares are private to the
 expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
-A `$name...` sequence splices into call arguments, braced initializers such
+`$` inserts everywhere; code, in templates and quotations, splices with a
+trailing `...`, as C varargs do, and Lisp-shaped List literals splice with
+`@`. A `$name...` sequence splices into call arguments, braced initializers such
 as `$!( { $items... } )` or `(T){ $first, $rest... }`, and `%[$items...]`
 Array literals; Map entries splice as `%{${$rows...}}`.
 A quotation expands where code is bound, spliced, or resolved: return it,
@@ -1151,6 +1154,78 @@ meta static List counter(String name) {
   return $!{ $type $name = 0; };
 }
 ```
+
+### Holes that name an expression
+
+A `$name` hole needs a local. When the value is a field, an element, or the
+result of a call, `${expression}` inserts it without one:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+
+typedef struct Call { List callee; List arguments; Type result; } Call;
+
+meta static List scaled_call(List callee, List a, List b) {
+  Call d = {.callee = callee, .arguments = %($a $b), .result = %(int)};
+  return $!( ({
+    ${d.result} value = ${d.callee}(${d.arguments}...);
+    value * ${d.arguments.len()};
+  }) );
+}
+
+macro Expression $scaled(Expr $f, Expr $a, Expr $b) =>
+  $scaled_call($f, $a, $b);
+
+static int sum(int a, int b) => a + b;
+
+int main(void) {
+  printf("%d\n", $scaled(sum, 2, 5));
+  return 0;
+}
+```
+
+```text
+14
+```
+
+The braces hold ordinary code of the function that contains the quotation.
+The function evaluates each `${...}` once, when it evaluates the quotation,
+before the quotation builds its code. Holes are evaluated in the order they
+are written. Names in the braces resolve where the quotation is written. A
+name that the quotation's body declares is not visible in the braces,
+because the body is code for another place. A `${...}` hole therefore means
+the same as a local declared just before the quotation and named with `$`:
+
+<!-- ignore: a meta function fragment without its includes -->
+```x2c,ignore
+return $!( ${d.callee}(${d.arguments}...) );
+// means
+List callee = d.callee;
+List arguments = d.arguments;
+return $!( $callee($arguments...) );
+```
+
+The expression's declared type gives the hole its kind, as a local's type
+does. A `Type` expression fills a type position, as `${d.result}` does
+above. A `String`, `int`, or `Symbol` expression inserts a literal, so
+`${d.arguments.len()}` inserts `2`. A `List` expression inserts the syntax it
+holds. `${expression}...` splices a `List`, like `$name...`. Each `${...}` is
+a separate hole, even when two are spelled alike.
+
+A `${...}` belongs to the innermost quotation that contains it. To put one
+quotation's code inside another, write the inner quotation as a hole:
+`$!( $inner * ${$!( $a - $one )} )` builds the inner code first and inserts
+it.
+
+Inside a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in a quotation's
+body, `${...}` keeps its literal meaning: it inserts a value when the built
+code runs. Write `${${expression}}` there to insert a value that the function
+computes.
+
+`${...}` works only in quotations. A named template has no function to
+evaluate it in; it computes with a `$meta(...)` call or a `$(...)` slot,
+which run where it expands.
 
 ## What the compiler answers
 
