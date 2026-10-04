@@ -79,8 +79,8 @@ meta static List _cases_split(List items, int labelled) {
 }
 
 meta static List _cases_switch(List condition, List body) {
-  List cases = _cases_split(body.cdr(), 0);
-  List selected = $!{ switch ($condition) { $cases... } };
+  List selected =
+    $!{ switch ($condition) { ${_cases_split(body.cdr(), 0)}... } };
   return %($selected);
 }
 

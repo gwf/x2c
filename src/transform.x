@@ -437,16 +437,14 @@ static List Compiler._var_literal_content(Compiler c, List application) {
    Empty literals need only allocate their container. */
 static List Compiler._var_array_literal(Compiler c, List values) {
   if (!values) return c._var_literal_content($!( Array.new() ));
-  List count = x2c_literal_int(values.len());
   return c._var_literal_content(
-    $!( Array.update_n(Array.new(), $count, $values...) ));
+    $!( Array.update_n(Array.new(), ${values.len()}, $values...) ));
 }
 
 static List Compiler._var_map_literal(Compiler c, List entries) {
   if (!entries) return c._var_literal_content($!( Map.new() ));
-  List count = x2c_literal_int(entries.len() / 2);
   return c._var_literal_content(
-    $!( Map.update_n(Map.new(), $count, $entries...) ));
+    $!( Map.update_n(Map.new(), ${entries.len() / 2}, $entries...) ));
 }
 
 /* A literal element is a `Var`, and an empty brace there is an empty Map. */
@@ -771,11 +769,12 @@ static List Compiler._destructure_statement(Compiler c, List ast) {
              (dstrasgn (targets *targets)
                        (!set ?source (expr ?source_type ?))))): {
       List temporary = c.sym.introduce(c.fresh_name("destructure"));
-      List value = c._destructure_source(source, source_type);
-      List assignments = c._destructure_assignments(targets, temporary);
-      return c.bind_syntax(
-        $!{ { List $temporary = $value; $assignments... } },
-        AST_BLOCK, c.return_type);
+      return c.bind_syntax($!{
+        {
+          List $temporary = ${c._destructure_source(source, source_type)};
+          ${c._destructure_assignments(targets, temporary)}...
+        }
+      }, AST_BLOCK, c.return_type);
     }
   }
   return ast;
@@ -827,8 +826,8 @@ static List Compiler._named_destructure(
     declarations.push(%(bind $ident ()));
     expressions.push(%(expr $type (ident $ident)));
   }
-  List rows = declarations.list_free();
-  List target_decl = c.rebuild_statement($!{ $type $rows...; }).cadr();
+  List target_decl =
+    c.rebuild_statement($!{ $type ${declarations.list_free()}...; }).cadr();
   List assignments = c._destructure_assignments(
     expressions.list_free(), temporary);
   Macro shape = $destructure_declarations;
@@ -894,9 +893,8 @@ static List Compiler._destructure_assignments(
     %!(List target) using &index => {
       match (target)
         case %(expr ?type ?): {
-          List value = _destructure_element(temporary, index++);
           List expression = c.rebuild_expression(
-            type, $!( $target = $value ));
+            type, $!( $target = ${_destructure_element(temporary, index++)} ));
           return c._as_statement(expression);
         }
     });

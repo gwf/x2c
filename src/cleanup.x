@@ -868,12 +868,11 @@ static List Walk._lower_defer(
   c.needs_exception = 1;
   List record = c._region_binding("defer_record");
   List cleanup = c._defer_cleanup(record);
-  List region = w._try_region(cleanup, body);
   return c.bind_syntax($!{
     {
       $builtin_defer_record($record, $callback, $env, $records)...
       x2c_cleanup_push(&$record);
-      $region
+      ${w._try_region(cleanup, body)}
       $builtin_try_cleanup_placement($cleanup)...
     }
   }, AST_BLOCK, c.return_type);
@@ -881,9 +880,9 @@ static List Walk._lower_defer(
 
 /* The runtime unlinks this record and calls its thunk. */
 static List Compiler._defer_cleanup(Compiler c, List record) {
-  List address = _address_of(_record_type, record);
   List call = c.bind_syntax(
-    $!{ x2c_cleanup_leave($address); }, AST_BLOCK, c.return_type);
+    $!{ x2c_cleanup_leave(${_address_of(_record_type, record)}); },
+    AST_BLOCK, c.return_type);
   return %(code-value "lowered" (seq $call) ());
 }
 

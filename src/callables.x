@@ -298,9 +298,10 @@ static List CaptureBuild.bridged(CaptureBuild &b) {
     factory_values.push(_func_bound(field_type, parameter));
   }
   List context = c.sym.introduce(c.fresh_name("lambda_context"));
-  List storage = b._storage(context, factory_values.list_free());
-  List value = b._construct(context);
-  List factory_body = c.rebuild_statement($!{ $storage return $value; });
+  List factory_body = c.rebuild_statement($!{
+    ${b._storage(context, factory_values.list_free())}
+    return ${b._construct(context)};
+  });
   List declaration_params = %(params @{parameters.list_free()});
   c.add_early(
     c.wrapper_function(
@@ -320,8 +321,8 @@ static List CaptureBuild.direct(CaptureBuild &b) {
 }
 
 static List CaptureBuild._storage(CaptureBuild &b, List context, List values) {
-  Type type = b.value_type;
-  return b.c.rebuild_statement($!{ $type $context = { $values... }; }).cadr();
+  return b.c.rebuild_statement(
+    $!{ ${b.value_type} $context = { $values... }; }).cadr();
 }
 
 static List CaptureBuild._construct(CaptureBuild &b, List context) {
@@ -749,10 +750,11 @@ static List Compiler._func_bridge_call(
   Type function_type, List arguments) {
   List call = c._func_call(
     %("Func"), _func_bound(function_type, bridge), arguments);
-  List declared = parameters.cdr();
   /* A call through a bridge function the unit declares where it calls. */
-  return c.rebuild_expression(
-    %("Func"), $!( ({ extern Func $bridge($declared...); $call; }) ));
+  return c.rebuild_expression(%("Func"), $!( ({
+    extern Func $bridge(${parameters.cdr()}...);
+    $call;
+  }) ));
 }
 
 static Type Compiler._func_pointer_value_type(Compiler c, Type type) {
@@ -819,8 +821,9 @@ static List Compiler._indirect_func_value(
   List constructed = c._func_context_call(
     context_type, context, _func_bound(%("FuncAdapter"), adapter),
     signature, _func_bound(constructor_type, constructor));
-  List statement = c._func_present_statement(pointer, constructed);
-  return c.rebuild_expression(%("Func"), $!( ({ $declaration $statement }) ));
+  return c.rebuild_expression(%("Func"), $!( ({
+    $declaration ${c._func_present_statement(pointer, constructed)}
+  }) ));
 }
 
 static List Compiler._indirect_func_adapter(
@@ -918,9 +921,8 @@ static List Compiler._func_context_call(
 static List Compiler._func_present_statement(
   Compiler c, List pointer, List constructed) {
   List null_binding = c.sym.reference(%("NULL"), NULL);
-  List fallback = _func_bound(%("Func"), null_binding);
-  List result = c.rebuild_expression(
-    %("Func"), $!( $pointer ? $constructed : $fallback ));
+  List result = c.rebuild_expression(%("Func"), $!(
+    $pointer ? $constructed : ${_func_bound(%("Func"), null_binding)} ));
   return c.rebuild_statement($!{ $result; }).cadr();
 }
 

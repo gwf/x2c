@@ -2056,10 +2056,7 @@ static void DiscardCall.collect(DiscardCall &d) {
   foreach (List argument, d.arguments) {
     if (d.which & (1 << index++)) {
       List drop = d.c.resolve_protocol_member(argument.cadr(), "discard");
-      if (drop) {
-        List discard = drop.car();
-        d.discards.push($!{ $discard($argument); });
-      }
+      if (drop) d.discards.push($!{ ${drop.car()}($argument); });
     }
   }
 }
@@ -2068,14 +2065,12 @@ static List DiscardCall.emit(DiscardCall &d) {
   String name = %"_x2c_discard_${d.stem}_${d.which}";
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
-  List callee = d.binding, arguments = d.arguments;
   List call = d.c.bind_syntax(
-    $!( $callee($arguments...) ), AST_EXPRESSION, d.result);
-  Type type = d.result;
+    $!( ${d.binding}(${d.arguments}...) ), AST_EXPRESSION, d.result);
   List drops = d.discards.list_free();
-  List shape = type.equal(%(void))
+  List shape = d.result.equal(%(void))
     ? $!{ $call; $drops... return; }
-    : $!{ $type $value = $call; $drops... return $value; };
+    : $!{ ${d.result} $value = $call; $drops... return $value; };
   List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
   List helper = d.c.wrapper_function(
     %(static @{d.result}), helper_binding, d.declarations, body.cdr());
