@@ -177,7 +177,8 @@ typedef struct Compiler {
      what lets a call to a compile-time-only one be refused everywhere
      else. */
   int meta_body;
-  /* A macro import whose protocol registries are installed on first use;
+  /* A collection pass or macro import whose protocol registries are
+     installed from the collected symbols on first use;
      `Compiler._install_imports` owns the installation. */
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
@@ -296,6 +297,7 @@ static void Compiler._start_macros(Compiler c) {
 
 static void Compiler._shallow_parse_loop(Compiler c) {
   c.rebuild_protocols(NULL);
+  c.import_protocols = 1;
   c.conforms = {};
   c.shallow = 1;
   c.braces.clear();

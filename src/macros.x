@@ -3975,10 +3975,9 @@ static void Import.macros(Import &in) {
   defer c.close_child(child);
   child.filename = in.path;
   child.collect_protocols = c.collect_protocols;
-  /* The caller's collection pass parses no bodies and so keeps its
-     protocol registries empty. The import's templates and `meta` bodies
-     are the bodies it does parse, so the import installs the protocols
-     visible to it when one is asked for. */
+  /* As the caller's collection pass does, an import read during
+     collection installs the protocols visible to it when its templates
+     or `meta` bodies first ask for one. */
   child.import_protocols = c.shallow;
   $let(c.diagnostics.printer, c.diagnostics.printer) {
     in.borrow(child);
