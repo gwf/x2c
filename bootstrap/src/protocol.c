@@ -1976,11 +1976,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1486 = cons(_1485, NULL);
   _1487 = cons(_702, _1486);
   _1488 = List_var(_1487);
-  _1489 = int_var(2340);
+  _1489 = int_var(2335);
   _1490 = cons(_1489, NULL);
   _1491 = cons(_708, _1490);
   _1492 = List_var(_1491);
-  _1493 = int_var(85685);
+  _1493 = int_var(85580);
   _1494 = cons(_1493, NULL);
   _1495 = cons(_721, _1494);
   _1496 = List_var(_1495);
@@ -2057,11 +2057,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1564 = cons(_1563, NULL);
   _1565 = cons(_672, _1564);
   _1566 = List_var(_1565);
-  _1567 = int_var(2465);
+  _1567 = int_var(2460);
   _1568 = cons(_1567, NULL);
   _1569 = cons(_708, _1568);
   _1570 = List_var(_1569);
-  _1571 = int_var(90652);
+  _1571 = int_var(90547);
   _1572 = cons(_1571, NULL);
   _1573 = cons(_721, _1572);
   _1574 = List_var(_1573);
@@ -4123,13 +4123,13 @@ static void DiscardCall_collect(DiscardCall * d){
     List argument;  List _x2c_macro_object_34 =(* d).arguments;  List _x2c_macro_cursor_34 = _x2c_macro_object_34;  Var _x2c_macro_cursor_output_38;  while(List_try_next(_x2c_macro_object_34, &(_x2c_macro_cursor_34), &(_x2c_macro_cursor_output_38))){
       argument = Var_list(_x2c_macro_cursor_output_38); {
         if((* d).which &(1 << index ++)){
-          List drop = Compiler_resolve_protocol_member((* d).c, Var_type(List_cadr(argument)), _910);  if(List_truth(drop)){
-            List discard = Var_list(List_car(drop));  Array_push((* d).discards, List_var(cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(cons(_853, cons(List_var(cons(_225, cons(_654, cons(List_var(({
-              Var _x2c_literal_part_110 = List_var(cons(_495, cons(_855, cons(_856, cons(List_var(discard), NULL)))));  Var _x2c_literal_part_111 = List_var(cons(_595, cons(List_var(cons(_495, cons(_855, cons(_856, cons(List_var(argument), NULL))))), NULL)));  cons(_655, cons(_x2c_literal_part_110, cons(_x2c_literal_part_111, NULL)));
+          List drop = Compiler_resolve_protocol_member((* d).c, Var_type(List_cadr(argument)), _910);  if(List_truth(drop)) Array_push((* d).discards, List_var(({
+            Var _x2c_hole_0 = List_car(drop);  cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(cons(_853, cons(List_var(cons(_225, cons(_654, cons(List_var(({
+              Var _x2c_literal_part_110 = List_var(cons(_495, cons(_855, cons(_856, cons(_x2c_hole_0, NULL)))));  Var _x2c_literal_part_111 = List_var(cons(_595, cons(List_var(cons(_495, cons(_855, cons(_856, cons(List_var(argument), NULL))))), NULL)));  cons(_655, cons(_x2c_literal_part_110, cons(_x2c_literal_part_111, NULL)));
             }
-            )), NULL)))), NULL))), NULL))), NULL)))));
+            )), NULL)))), NULL))), NULL))), NULL)));
           }
-
+          )));
         }
 
       }
@@ -4144,22 +4144,28 @@ static List DiscardCall_emit(DiscardCall * d){
   String name =({
     Var _x2c_literal_part_112 = String_var((* d).stem);  Var _x2c_literal_part_113 = String_var(int_str((* d).which));  String_join(NULL, cons(String_var(_911), cons(_x2c_literal_part_112, cons(String_var(_31), cons(_x2c_literal_part_113, NULL)))));
   }
-  );  List helper_binding = Sym_introduce((* d).c -> sym, name);  List value = Sym_introduce((* d).c -> sym, _912);  List callee =(* d).binding, arguments =(* d).arguments;  List call = Compiler_bind_syntax((* d).c, List_var(cons(_488, cons(_489, cons(List_var(cons(_225, cons(_654, cons(List_var(({
-    Var _x2c_literal_part_114 = List_var(cons(_495, cons(_855, cons(_856, cons(List_var(callee), NULL)))));  Var _x2c_literal_part_115 = List_var(cons(_595, cons(List_var(cons(_495, cons(_914, cons(_510, cons(List_var(arguments), NULL))))), NULL)));  cons(_655, cons(_x2c_literal_part_114, cons(_x2c_literal_part_115, NULL)));
+  );  List helper_binding = Sym_introduce((* d).c -> sym, name);  List value = Sym_introduce((* d).c -> sym, _912);  List call = Compiler_bind_syntax((* d).c, List_var(({
+    List _x2c_hole_1 =(* d).binding;  List _x2c_hole_2 =(* d).arguments;  cons(_488, cons(_489, cons(List_var(cons(_225, cons(_654, cons(List_var(({
+      Var _x2c_literal_part_114 = List_var(cons(_495, cons(_855, cons(_856, cons(List_var(_x2c_hole_1), NULL)))));  Var _x2c_literal_part_115 = List_var(cons(_595, cons(List_var(cons(_495, cons(_914, cons(_510, cons(List_var(_x2c_hole_2), NULL))))), NULL)));  cons(_655, cons(_x2c_literal_part_114, cons(_x2c_literal_part_115, NULL)));
+    }
+    )), NULL)))), NULL)));
   }
-  )), NULL)))), NULL)))), AST_EXPRESSION, (* d).result);  Type type =(* d).result;  List drops = Array_list_free((* d).discards);  List shape = List_equal(Type_list(type), _916) ? cons(_488, cons(_489, cons(List_var(({
+  )), AST_EXPRESSION, (* d).result);  List drops = Array_list_free((* d).discards);  List shape = List_equal(Type_list((* d).result), _916) ? cons(_488, cons(_489, cons(List_var(({
     Var _x2c_literal_part_116 = List_var(cons(_853, cons(List_var(cons(_495, cons(_855, cons(_856, cons(List_var(call), NULL))))), NULL)));  Var _x2c_literal_part_117 = List_var(cons(_495, cons(_919, cons(_510, cons(List_var(drops), NULL)))));  cons(_484, cons(_x2c_literal_part_116, cons(_x2c_literal_part_117, _922)));
   }
-  )), NULL))) : cons(_488, cons(_489, cons(List_var(({
-    Var _x2c_literal_part_122 = List_var(({
-      Var _x2c_literal_part_120 = List_var(cons(List_var(cons(_495, cons(_509, cons(_510, cons(List_var(type), NULL))))), NULL));  Var _x2c_literal_part_121 = List_var(cons(_75, cons(List_var(({
-        Var _x2c_literal_part_118 = List_var(cons(_78, cons(List_var(cons(_495, cons(_517, cons(_518, cons(List_var(value), NULL))))), _558)));  Var _x2c_literal_part_119 = List_var(cons(_495, cons(_855, cons(_856, cons(List_var(call), NULL)))));  cons(_810, cons(_811, cons(_x2c_literal_part_118, cons(_x2c_literal_part_119, NULL))));
+  )), NULL))) :({
+    Type _x2c_hole_3 =(* d).result;  cons(_488, cons(_489, cons(List_var(({
+      Var _x2c_literal_part_122 = List_var(({
+        Var _x2c_literal_part_120 = List_var(cons(List_var(cons(_495, cons(_509, cons(_510, cons(List_var(_x2c_hole_3), NULL))))), NULL));  Var _x2c_literal_part_121 = List_var(cons(_75, cons(List_var(({
+          Var _x2c_literal_part_118 = List_var(cons(_78, cons(List_var(cons(_495, cons(_517, cons(_518, cons(List_var(value), NULL))))), _558)));  Var _x2c_literal_part_119 = List_var(cons(_495, cons(_855, cons(_856, cons(List_var(call), NULL)))));  cons(_810, cons(_811, cons(_x2c_literal_part_118, cons(_x2c_literal_part_119, NULL))));
+        }
+        )), NULL)));  cons(_74, cons(_x2c_literal_part_120, cons(_x2c_literal_part_121, NULL)));
       }
-      )), NULL)));  cons(_74, cons(_x2c_literal_part_120, cons(_x2c_literal_part_121, NULL)));
+      ));  Var _x2c_literal_part_123 = List_var(cons(_495, cons(_919, cons(_510, cons(List_var(drops), NULL)))));  Var _x2c_literal_part_124 = List_var(cons(_872, cons(_489, cons(List_var(cons(_225, cons(_654, cons(List_var(cons(_495, cons(_517, cons(_548, cons(List_var(value), NULL))))), NULL)))), NULL))));  cons(_484, cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, cons(_x2c_literal_part_124, NULL))));
     }
-    ));  Var _x2c_literal_part_123 = List_var(cons(_495, cons(_919, cons(_510, cons(List_var(drops), NULL)))));  Var _x2c_literal_part_124 = List_var(cons(_872, cons(_489, cons(List_var(cons(_225, cons(_654, cons(List_var(cons(_495, cons(_517, cons(_548, cons(List_var(value), NULL))))), NULL)))), NULL))));  cons(_484, cons(_x2c_literal_part_122, cons(_x2c_literal_part_123, cons(_x2c_literal_part_124, NULL))));
+    )), NULL)));
   }
-  )), NULL)));  List body = Compiler_bind_syntax((* d).c, List_var(shape), AST_BLOCK, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_174, List_append(Type_list((* d).result), NULL))), helper_binding, (* d).declarations, List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry =({
+  );  List body = Compiler_bind_syntax((* d).c, List_var(shape), AST_BLOCK, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_174, List_append(Type_list((* d).result), NULL))), helper_binding, (* d).declarations, List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry =({
     Var _x2c_literal_part_125 = List_var(helper_binding);  Var _x2c_literal_part_126 = List_var((* d).signature);  cons(_x2c_literal_part_125, cons(_x2c_literal_part_126, NULL));
   }
   );  Map_setindex((* d).c -> protocol_helpers, List_var((* d).key), List_var(entry));  long identity =(long) helper_binding;  Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_923), cons(String_var(long_str(identity)), NULL)))), int_var(1));  if((* d).fresh) Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_909), cons(String_var(long_str(identity)), NULL)))), int_var(1));  return entry;

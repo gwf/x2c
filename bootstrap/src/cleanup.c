@@ -2664,7 +2664,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2254 = cons(_2253, _597);
   _2255 = cons(_277, _2254);
   _2256 = List_var(_2255);
-  _2257 = Symbol_var(63495949276);
+  _2257 = Atom_intern(String_new("?_x2c_hole_0"));
   _2258 = cons(_2257, NULL);
   _2259 = cons(_278, _2258);
   _2260 = List_var(_2259);
@@ -2746,7 +2746,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2336 = cons(_2335, _348);
   _2337 = cons(_342, _2336);
   _2338 = List_var(_2337);
-  _2339 = Atom_intern(String_new("?__macro_value_region"));
+  _2339 = Atom_intern(String_new("?__macro_value__x2c_hole_0"));
   _2340 = cons(_2339, NULL);
   _2341 = cons(_352, _2340);
   _2342 = List_var(_2341);
@@ -2877,7 +2877,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2467 = cons(_2466, NULL);
   _2468 = cons(_413, _2467);
   _2469 = List_var(_2468);
-  _2470 = int_var(872);
+  _2470 = int_var(871);
   _2471 = cons(_2470, NULL);
   _2472 = cons(_465, _2471);
   _2473 = List_var(_2472);
@@ -2887,7 +2887,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2477 = List_var(_2476);
   _2478 = cons(_473, _309);
   _2479 = List_var(_2478);
-  _2480 = int_var(32613);
+  _2480 = int_var(32567);
   _2481 = cons(_2480, NULL);
   _2482 = cons(_478, _2481);
   _2483 = List_var(_2482);
@@ -3123,7 +3123,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2710 = cons(_2709, NULL);
   _2711 = cons(_413, _2710);
   _2712 = List_var(_2711);
-  _2713 = int_var(897);
+  _2713 = int_var(896);
   _2714 = cons(_2713, NULL);
   _2715 = cons(_465, _2714);
   _2716 = List_var(_2715);
@@ -3131,7 +3131,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2718 = cons(_2717, NULL);
   _2719 = cons(_470, _2718);
   _2720 = List_var(_2719);
-  _2721 = int_var(33515);
+  _2721 = int_var(33473);
   _2722 = cons(_2721, NULL);
   _2723 = cons(_478, _2722);
   _2724 = List_var(_2723);
@@ -3407,14 +3407,14 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2994 = cons(_3, _2750);
   _2995 = List_var(_2994);
   _2996 = Symbol_var(106239471489226);
-  _2997 = int_var(1403);
+  _2997 = int_var(1402);
   _2998 = String_new("");
   _2999 = String_var(_2998);
   _3000 = cons(_277, _2549);
   _3001 = List_var(_3000);
   _3002 = cons(_1616, _2192);
   _3003 = List_var(_3002);
-  _3004 = int_var(1410);
+  _3004 = int_var(1409);
   _3005 = cons(_67, _234);
   _3006 = cons(_231, _3005);
   _3007 = List_var(_3006);
@@ -4653,11 +4653,17 @@ List builtin_catch_cases(List selected, List arms){
 }
 
 static List Walk__lower_defer(Walk * w, List body, List env, List callback, List records){
-  Compiler c =(* w).c;  c -> needs_exception = 1;  List record = Compiler__region_binding(c, _2228);  List cleanup = Compiler__defer_cleanup(c, record);  List region = Walk__try_region(&((* w)), cleanup, body);  return Compiler_bind_syntax(c, List_var(cons(String_var(_2229), cons(List_var(_2511), cons(List_var(cons(List_var(record), cons(List_var(callback), cons(List_var(env), cons(List_var(records), cons(List_var(region), cons(List_var(cleanup), NULL))))))), NULL)))), AST_BLOCK, List_type(c -> return_type));
+  Compiler c =(* w).c;  c -> needs_exception = 1;  List record = Compiler__region_binding(c, _2228);  List cleanup = Compiler__defer_cleanup(c, record);  return Compiler_bind_syntax(c, List_var(({
+    List _x2c_hole_0 = Walk__try_region(&((* w)), cleanup, body);  cons(String_var(_2229), cons(List_var(_2511), cons(List_var(cons(List_var(record), cons(List_var(callback), cons(List_var(env), cons(List_var(records), cons(List_var(_x2c_hole_0), cons(List_var(cleanup), NULL))))))), NULL)));
+  }
+  )), AST_BLOCK, List_type(c -> return_type));
 }
 
 static List Compiler__defer_cleanup(Compiler c, List record){
-  List address = _address_of(_record_type, record);  List call = Compiler_bind_syntax(c, List_var(cons(_1390, cons(_272, cons(List_var(cons(_414, cons(List_var(cons(_1097, cons(List_var(cons(_10, cons(_633, cons(List_var(cons(_93, cons(_2523, cons(List_var(cons(_340, cons(List_var(cons(_1404, cons(_1406, cons(_1407, cons(List_var(address), NULL))))), NULL))), NULL)))), NULL)))), NULL))), NULL))), NULL)))), AST_BLOCK, List_type(c -> return_type));  return cons(_926, cons(_1422, cons(List_var(cons(_414, cons(List_var(call), NULL))), _1424)));
+  List call = Compiler_bind_syntax(c, List_var(({
+    List _x2c_hole_1 = _address_of(_record_type, record);  cons(_1390, cons(_272, cons(List_var(cons(_414, cons(List_var(cons(_1097, cons(List_var(cons(_10, cons(_633, cons(List_var(cons(_93, cons(_2523, cons(List_var(cons(_340, cons(List_var(cons(_1404, cons(_1406, cons(_1407, cons(List_var(_x2c_hole_1), NULL))))), NULL))), NULL)))), NULL)))), NULL))), NULL))), NULL)));
+  }
+  )), AST_BLOCK, List_type(c -> return_type));  return cons(_926, cons(_1422, cons(List_var(cons(_414, cons(List_var(call), NULL))), _1424)));
 }
 
 List builtin_defer_record(List record, List callback, List environment, List records){
