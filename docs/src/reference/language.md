@@ -1167,9 +1167,11 @@ A macro has one result kind as well as argument kinds:
 The result kind is required between `macro` and the `$` name. `Stmt` is
 the canonical spelling for block-item results and `Expression` for expression
 results; `Expr` is a synonym. An arrow body requires `Expression` or
-`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro invocation or
-an expression statement, and a `meta` call written there may return any
-statement that fits where the macro is invoked. Braced bodies require
+`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro or decorator
+invocation or an expression statement, and a `meta` call written there may
+return any statement that fits where the macro is invoked. An anonymous
+macro's arrow body omits that statement's final `;`, as in
+`macro Stmt(Expr $v) => $again() $hit($v)`. Braced bodies require
 `Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or `Declaration`.
 Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
