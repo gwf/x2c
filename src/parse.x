@@ -543,12 +543,11 @@ static void Compiler._definition_source(
   Compiler c, List function, int line, String doc, List declarator) {
   match (function) {
     case %(function ? (bind ?binding ?) ?):
-      c.semantic_binding_facts()[%(api-definition $binding)] =
-        %($line $doc $declarator);
+      c.set_fact(%(api-definition $binding), %($line $doc $declarator));
     case %(declare ? (bindings (bind ?binding ?))):
       if (doc && function.type_from_ast().is_function())
-        c.semantic_binding_facts()[%(api-definition $binding)] =
-          %($line $doc $declarator);
+        c.set_fact(
+          %(api-definition $binding), %($line $doc $declarator));
   }
 }
 
@@ -925,7 +924,7 @@ static List Compiler._lower_self_declaration(Compiler c, List declaration) {
   if (!owner) return declaration;
   List lowered = declaration.search_replace(<self>, owner.car());
   if (lowered == declaration) {
-    c.semantic_binding_facts().del(%(self $binding));
+    c.drop_fact(%(self $binding));
     return declaration;
   }
   Type signature = declaration.type_from_ast();
@@ -933,7 +932,7 @@ static List Compiler._lower_self_declaration(Compiler c, List declaration) {
   String spelling = binding_identity_spelling(binding);
   Type relative = signature.declared();
   Type concrete = lowered.type_from_ast().declared();
-  c.semantic_binding_facts()[%(self $binding)] = relative;
+  c.set_fact(%(self $binding), relative);
   c.sym.set(%($spelling), concrete);
   c.sym.set(%(self $spelling), relative);
   c._lower_parameter_self(owner.car());
@@ -967,12 +966,10 @@ static void Compiler._lower_parameter_self(Compiler c, Var replacement) {
     List original = value;
     List lowered = original.search_replace(<self>, replacement);
     if (lowered != original) {
-      symbols[key] = lowered;
+      c.sym.put(symbols, key, lowered);
       Var binding;
       if (c.params.bindings.try_get(key, binding))
-        c.semantic_binding_facts()[
-          %(type $binding)
-        ] = lowered;
+        c.set_fact(%(type $binding), lowered);
     }
   }
 }
@@ -1583,7 +1580,6 @@ static int _fits_int(Type value, List type) {
 /* Records how meta code computes each enumerator's value: its initializer,
    or the previous enumerator plus one, or zero for the first. */
 static void Compiler._record_enum_values(Compiler c, List members) {
-  Map facts = c.semantic_binding_facts();
   List rule = %(first);
   foreach (List member, members) {
     List binding = member;
@@ -1591,7 +1587,7 @@ static void Compiler._record_enum_values(Compiler c, List members) {
       binding = target;
       rule = %(value $value);
     }
-    facts[%(enum-value $binding)] = rule;
+    c.set_fact(%(enum-value $binding), rule);
     rule = %(next $binding);
   }
 }
@@ -1995,10 +1991,10 @@ static void Compiler._bind_identity(
    the Self signature an earlier declaration recorded. */
 static void Compiler._method_facts(
   Compiler c, List binding, List method, List self, int &preserved_self) {
-  if (method) c.semantic_binding_facts()[%(method $binding)] = method;
-  else c.semantic_binding_facts().del(%(method $binding));
+  if (method) c.set_fact(%(method $binding), method);
+  else c.drop_fact(%(method $binding));
   if (!self) return;
-  c.semantic_binding_facts()[%(self $binding)] = self;
+  c.set_fact(%(self $binding), self);
   preserved_self = 1;
 }
 
@@ -2091,12 +2087,12 @@ static List Compiler._finish_parameter(
 // Records a parameter binding and whether it is a reference, or optional.
 static void Compiler._parameter_facts(
   Compiler c, Var binding, List parameter) {
-  if (binding) c.semantic_binding_facts()[%(parameter $binding)] = 1;
+  if (binding) c.set_fact(%(parameter $binding), 1);
   Type type = parameter.type_from_ast();
   if (type.is_reference())
-    c.semantic_binding_facts()[%(reference-param $binding)] = 1;
+    c.set_fact(%(reference-param $binding), 1);
   if (type.car() == <opt-ref>)
-    c.semantic_binding_facts()[%(optional-reference-param $binding)] = 1;
+    c.set_fact(%(optional-reference-param $binding), 1);
 }
 
 // identifiers
@@ -2669,8 +2665,9 @@ static List Compiler._bind_statement(Compiler c, Var stmt) =>
   c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
 
 /* A macro invocation expands at the position that holds it. A Macro value
-   applied directly owns the transaction that covers the effects its
-   producers request, and stands for one statement or unit item. */
+   applied directly stands for one statement or unit item. Inside a
+   recovery boundary it owns the transaction that covers the effects its
+   producers request; outside one, an error exits and nothing rolls back. */
 static List Compiler._bind_invocation(
   Compiler c, Var definition, Var arguments, Var invocation, AstPos context,
   int pending) {
@@ -2679,7 +2676,9 @@ static List Compiler._bind_invocation(
     return c.expand_macro_invocation_node(
       definition, arguments, site, context);
   $let(c.macro_application, c.macro_application + 1) {
-    SymTxn transaction = c.begin_semantic_transaction();
+    SymTxn transaction = { 0 };
+    if (c.recovery_depth > 0)
+      transaction = c.begin_semantic_transaction();
     defer transaction.rollback();
     List bound = c.expand_macro_invocation_node(
       definition, arguments, site, context);
@@ -2811,8 +2810,8 @@ static List Compiler._bind_collected_function(
   Var construction) {
   if (c.shallow) return input;
   match (declarator) case %(bind ?binding *):
-    c.semantic_binding_facts()[
-      %(declaration-default ${binding_identity_spelling(binding)})] = 1;
+    c.set_fact(
+      %(declaration-default ${binding_identity_spelling(binding)}), 1);
   $let(c.macro_stack, c.thaw_declaration_syntax(construction)) {
     return c.bind_syntax(
       %(function $return_type $declarator $body), AST_UNIT, c.return_type);

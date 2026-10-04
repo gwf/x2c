@@ -157,8 +157,8 @@ static List Compiler._captured_lambda(
   b.value_type = %($name);
   b.pointer_type = %(* const $name);
   b.environment = c.sym.introduce(c.fresh_name("lambda_context_value"));
-  c.semantic_binding_facts()[%(automatic ${b.environment})] = 1;
-  c.semantic_binding_facts()[%(type ${b.environment})] = b.pointer_type;
+  c.set_fact(%(automatic ${b.environment}), 1);
+  c.set_fact(%(type ${b.environment}), b.pointer_type);
   b.declare(type_binding, captures);
   b.publish(entries, body, closure, argv);
   return c.inline_header ? b.bridged() : b.direct();
@@ -498,8 +498,8 @@ static void CellRegion.allocate(CellRegion &r, Map candidates) {
     Type type = stored_type;
     List cell = c.sym.introduce(c.fresh_name("lambda_cell"));
     r.cells[binding] = %($cell $type);
-    c.semantic_binding_facts()[%(automatic $cell)] = 1;
-    c.semantic_binding_facts()[%(type $cell)] = type.reference();
+    c.set_fact(%(automatic $cell), 1);
+    c.set_fact(%(type $cell), type.reference());
   }
 }
 
@@ -1361,7 +1361,7 @@ static List Callback.publish_typed(Callback &cb, Type spelling) {
   $adapter.memo(c, key, binding) {
     binding = c.sym.introduce(c.fresh_name("callback_adapt"));
     List function = cb.function(binding);
-    c.semantic_binding_facts()[%(function $binding)] = 1;
+    c.set_fact(%(function $binding), 1);
     c.add_early(function);
   }
   return _func_bound(spelling, binding);

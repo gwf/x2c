@@ -1307,7 +1307,7 @@ static int Compiler._shadow_identifier(
   if (visible_type &&
       (!type || c.sym.resolve_global(%($spelling), NULL)) &&
       !binding_facts.contains(%(emitted $visible)))
-    binding_facts[%(emitted $visible)] = c.fresh_name("binding_shadow");
+    c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
   return 0;
 }
 

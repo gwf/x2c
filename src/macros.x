@@ -73,7 +73,6 @@ List Compiler.expand_macro_invocation_node(
   defer if (block_scope) c.sym.pop_scope();
   $let(c.token, invocation) {
     x.check();
-    c.macro_count++;
     List result = NULL;
     $let(c.expansion_floor,
          c.macro_stack ? c.expansion_floor : c.names.next_binding)
@@ -98,17 +97,23 @@ static List Compiler._stored_definition(
 }
 
 /* An identical recursive expansion, nesting deeper than 64, or more than
-   10000 expansions stops the compile. */
+   10000 expansions stops the compile. A leaf template's application
+   cannot recurse, so it is neither compared nor counted. */
 static void Expansion.check(Expansion &x) {
   Compiler c = x.c;
-  foreach (List active, c.macro_stack) {
-    (List prior, List prior_input, Var bindings, Var site) = active;
-    (void) bindings, (void) site;
-    if (prior.equal(x.definition) && prior_input.equal(x.input)) x.recursion();
-  }
+  int leaf = x.definition.assoc(<leaf>) == 1;
+  if (!leaf)
+    foreach (List active, c.macro_stack) {
+      (List prior, List prior_input, Var bindings, Var site) = active;
+      (void) bindings, (void) site;
+      if (prior.equal(x.definition) && prior_input.equal(x.input))
+        x.recursion();
+    }
   if (c.macro_stack.len() >= 64) x.too_deep();
+  if (leaf) return;
   if (c.macro_count >= 10000)
     $report.macro.expansion_count(c, x.invocation);
+  c.macro_count++;
 }
 
 static void Expansion.recursion(Expansion &x) {
@@ -182,8 +187,7 @@ static List Expansion.fresh_names(Expansion &x, List old_stack) {
       fresh_values.push(c._capture_row(hole, %($binding)));
     }
     else {
-      c.semantic_binding_facts()[%(source-spelling $binding)] =
-        spelling.str();
+      c.set_fact(%(source-spelling $binding), spelling.str());
       x.direct = cons(%($binder $binding), x.direct);
     }
   }
@@ -358,9 +362,9 @@ static void _file_scope_declarators(List declarators, Map locals) {
 typedef struct Definition {
   Compiler c, Token start;
   Atom name, Symbol kind;
-  List target, parameters, template, fresh, captures, pattern, origin;
-  String file, Map locals, Array using;
-  int anonymous, local, nested, quotation;
+  List target, parameters, template, fresh, captures, pattern, rebuild;
+  List origin, String file, Map locals, Array using;
+  int anonymous, local, nested, quotation, leaf;
 } Definition;
 
 /** Parses the macro definition at the current token into a `macrodef` `List`.
@@ -601,6 +605,10 @@ static void Definition.finish(Definition &d) {
   d.check_kinds();
   d.fresh = d.fresh_rows(locals);
   d.pattern = d.invocation_pattern();
+  Map uses = _binder_uses(d.template);
+  if (!uses) return;
+  d.rebuild = %(${d.rebuild_template()} ${d.rebuild_keys(uses)});
+  d.leaf = !d.nested && d.uses_holes_once(uses);
 }
 
 /* A Function decorator's body becomes a function with the target's return
@@ -691,6 +699,83 @@ static List Definition.fresh_rows(Definition &d, Array locals) {
   return fresh.list_free();
 }
 
+/* The number of uses of each binder in a template, or NULL when the
+   template can apply templates: it holds a slot, a nested invocation or
+   definition, or a Macro value. Such a template has no rebuild row, so a
+   definition holds no second copy of another definition. */
+static Map _binder_uses(List template) {
+  Map uses = {};
+  List syntax;
+  $ast.walk(template, syntax) {
+    match (syntax)
+      case %((!or macro-invoke macro-slot meta-call tpl-call macro-value
+                  "x2c.template" macrodef syntax-recipe declaration-recipe)
+             *):
+        return NULL;
+    foreach (Var item, syntax)
+      if (item.is_binder()) uses[item] = uses.getdefault(item, 0) + 1;
+  }
+  return uses;
+}
+
+/* The template a rebuild fills. An Expr hole's binder stands for its whole
+   expression, without the `(expr (<macro-expr>) ...)` shell, and no
+   template-origin wrapper remains, because a rebuild opens no invocation. */
+static List Definition.rebuild_template(Definition &d) {
+  Map expressions = {};
+  foreach (List hole, d.parameters)
+    if (hole.assoc(<kind>) == <expr>)
+      expressions[_hole_key(hole, "expression")] = 1;
+  return _rebuild_syntax(d.template, expressions);
+}
+
+static Var _rebuild_syntax(Var syntax, Map expressions) {
+  if (syntax is not <list> || syntax.is_nil()) return syntax;
+  match (syntax) {
+    case %(at m-origin ?node): return _rebuild_syntax(node, expressions);
+    case %(expr (<macro-expr>) ?binder):
+      if (binder in expressions) return binder;
+  }
+  List child;
+  $ast.rewrite_children(
+    syntax.list(), child, _rebuild_syntax(child, expressions));
+}
+
+/* For each hole, the target's last, the binders of the projections the
+   template uses, in capture-row order: source, value, expression, and
+   splice, then a Function value's return type and declarator. `?` marks a
+   projection the template does not use. */
+static List Definition.rebuild_keys(Definition &d, Map uses) {
+  List holes = d.target ? d.parameters.append(%(${d.target})) : d.parameters;
+  Array keys = [];
+  foreach (List hole, holes) {
+    Array used = [];
+    foreach (String projection,
+             %("source" "value" "expression" "splice" "return" "declarator"))
+      used.push(_used(uses, hole, projection, <?>));
+    keys.push(used.list_free());
+  }
+  return keys.list_free();
+}
+
+/* Whether the template uses each hole, the target's included, at most
+   once. A leaf template applies no templates and uses each hole once, so
+   its application cannot recurse or multiply the applications its
+   arguments hold. A definition inside a template is never a leaf, because
+   its template can hold the enclosing template's holes. */
+static int Definition.uses_holes_once(Definition &d, Map uses) {
+  List holes = d.target ? cons(d.target, d.parameters) : d.parameters;
+  foreach (List hole, holes) {
+    int count = 0;
+    foreach (String projection,
+             %("source" "value" "expression" "splice" "member" "return"
+               "declarator" "construction"))
+      count += uses.getdefault(_hole_key(hole, projection), 0).int();
+    if (count > 1) return 0;
+  }
+  return 1;
+}
+
 /* Makes the finished definition visible in place of its signature. */
 static List Definition.publish(Definition &d) {
   List node = d.node();
@@ -718,6 +803,8 @@ static List Definition.node(Definition &d) {
     (captures ${d.captures})
     (pattern ${d.pattern})
     (template ${d.template})
+    (rebuild ${d.rebuild})
+    (leaf ${d.leaf})
     (origin ${d.origin})
     (file ${d.file})
     (imported ${c.import_src != NULL})
@@ -1318,7 +1405,7 @@ static List Compiler._definition_local(Compiler c, String spelling, int tag) {
   Var order = locals[<order>];
   int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
   List introduced = binding_identity_new(identity, spelling);
-  c.semantic_binding_facts()[%(known $identity)] = spelling;
+  c.set_fact(%(known $identity), spelling);
   locals[<order>] = cons(introduced, order is <list> ? order : NULL);
   locals[introduced] = spelling;
   if (tag) locals[%(tag-local $introduced)] = 1;
@@ -2822,29 +2909,50 @@ List Compiler.rebuild_function(Compiler c, List target, List application) =>
 
 /* Substitute bound syntax into a structural template without binding it.
    The caller supplies complete children and a template with no free names,
-   computed slots, or nested applications. */
+   computed slots, or nested applications. The definition's rebuild row
+   holds the template and, for each hole, the binders of the projections
+   it uses. */
 static List Compiler._rebuild(
   Compiler c, List application, List target) {
   (Var marker, List definition, List values) = application;
   (void) marker;
-  List arguments = c._template_arguments(definition, values, c.token, 1);
-  List input = arguments;
-  if (target) {
-    List target_row = c._capture_row_project(
-      definition.assoc(<targetp>), %($target), 1);
-    input = %(target $arguments $target_row);
+  List rebuild = definition.assoc(<rebuild>);
+  (List template, List keys) = rebuild;
+  List rows = c._template_arguments(definition, values, c.token, 1).cdr();
+  if (target)
+    rows = rows.append(%(${c._capture_row_project(
+      definition.assoc(<targetp>), %($target), 1)}));
+  List bindings = NULL;
+  foreach (List row, rows) {
+    bindings = _row_bindings(keys.car(), row, bindings);
+    keys = keys.cdr();
   }
-  List bindings = input.match(definition.assoc(<pattern>));
-  List template = definition.assoc(<template>);
-  foreach (List hole, definition.assoc(<parameters>).list())
-    if (hole.assoc(<kind>) == <expr>) {
-      Var binder = _hole_key(hole, "expression");
-      template = template.search_replace(
-        %(expr (<macro-expr>) (!quote $binder)), binder);
-    }
-  // This path opens no invocation, so template-origin wrappers are omitted.
-  template = template.search_replace(%(at m-origin ?node), <?node>);
   return template.replace(bindings);
+}
+
+/* `bindings` with each projection of a capture `row` that `keys` names.
+   A singular Function hole's value also supplies its return type and
+   declarator. */
+static List _row_bindings(List keys, List row, List bindings) {
+  List fields = NULL;
+  match (row) {
+    case %(capture (source *sources) (value *values)):
+      fields = %($sources $values $values $values () ());
+    case %(capture (source ?source) (value ?value) (expression ?expression)
+                   (splice *splice)): {
+      List result = NULL, declarator = NULL;
+      match (value) case %(function ?returned ?declared ?): {
+        result = returned;
+        declarator = declared;
+      }
+      fields = %($source $value $expression $splice $result $declarator);
+    }
+  }
+  foreach (Var binder, keys) {
+    if (binder != <?>) bindings = %(($binder ${fields.car()}) @bindings);
+    fields = fields.cdr();
+  }
+  return bindings;
 }
 
 /* macro values

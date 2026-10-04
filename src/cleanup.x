@@ -1297,7 +1297,7 @@ static List Compiler._callable_defer(Compiler c, List body, List finalizer) {
   c.add_early(
     c._defer_callback(callback, opaque, env_binding, env_local, rewritten));
   if (c.fn_name)
-    c.semantic_binding_facts()[%(defer-ownr $callback)] = c.fn_name;
+    c.set_fact(%(defer-ownr $callback), c.fn_name);
   return %(defer $body $env_binding $callback $records ${d.written});
 }
 
