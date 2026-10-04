@@ -76,7 +76,7 @@ int Json.is_bool(Var value) => value is <jsonbool>;
 int Json.boolean(Var value) {
   if (value is not <jsonbool>) {
     Symbol tag = value.tag();
-    $json.error("boolean.type", tag);
+    $boolean_type(tag);
   }
   return value.jsonbool().truth();
 }
@@ -124,7 +124,7 @@ static Var _parse(String source, String path) {
   Reader r = {.text = source ? source : "", .path = path};
   Var value = r._value();
   r._space();
-  if (r._peek()) $json.error("read.trailing", r);
+  if (r._peek()) $read_trailing(r);
   return value;
 }
 
@@ -132,7 +132,7 @@ static Var Reader._value(Reader &r) {
   r._space();
   switch (r._peek()) {
     case '{': case '[': {
-      if (++r.depth > JSON_MAX_DEPTH) $json.error("read.depth", r);
+      if (++r.depth > JSON_MAX_DEPTH) $read_depth(r);
       Var nested = r._peek() == '{' ? r._object() : r._array();
       r.depth--;
       return nested;
@@ -143,9 +143,9 @@ static Var Reader._value(Reader &r) {
     case 'n': r._word("null"); return (Var) { .u64 = 0 };
     case '-': case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': return r._number();
-    case '\0': $json.error("read.end", r);
+    case '\0': $read_end(r);
   }
-  $json.error("read.char", r);
+  $read_char(r);
 }
 
 static Var Reader._object(Reader &r) {
@@ -158,16 +158,16 @@ static Var Reader._object(Reader &r) {
   }
   loop {
     r._space();
-    if (r._peek() != '"') $json.error("read.key", r);
+    if (r._peek() != '"') $read_key(r);
     String name = r._string();
-    r._expect(':', $json.reason("read.colon"));
+    r._expect(':', $read_colon());
     object[name] = r._value();
     r._space();
     if (r._peek() == '}') {
       r.at++;
       return object;
     }
-    r._expect(',', $json.reason("read.object.sep"));
+    r._expect(',', $read_object_sep());
   }
 }
 
@@ -186,7 +186,7 @@ static Var Reader._array(Reader &r) {
       r.at++;
       return array;
     }
-    r._expect(',', $json.reason("read.array.sep"));
+    r._expect(',', $read_array_sep());
   }
 }
 
@@ -211,11 +211,11 @@ static String Reader._string(Reader &r) {
       r._escape(decoded);
       run = r.at;
     }
-    else if (!byte) $json.error("read.string.end", r);
-    else if (byte < 0x20) $json.error("read.control", r);
+    else if (!byte) $read_string_end(r);
+    else if (byte < 0x20) $read_control(r);
     else {
       int length = scan_utf8_length((const unsigned char *) r.text + r.at);
-      if (length < 0) $json.error("read.utf8", r);
+      if (length < 0) $read_utf8(r);
       r.at += length;
     }
   }
@@ -234,30 +234,30 @@ static void Reader._escape(Reader &r, Buffer out) {
     case 'u': break;
     default:
       r.at -= 2;
-      $json.error("read.escape", r);
+      $read_escape(r);
   }
   int start = r.at - 2;
   long point = r._hex4();
   if (point >= 0xD800 && point <= 0xDBFF) {
     if (r._peek() != '\\' || r.text[r.at + 1] != 'u') {
       r.at = start;
-      $json.error("read.surrogate", r);
+      $read_surrogate(r);
     }
     r.at += 2;
     long low = r._hex4();
     if (low < 0xDC00 || low > 0xDFFF) {
       r.at = start;
-      $json.error("read.surrogate", r);
+      $read_surrogate(r);
     }
     point = 0x10000 + ((point - 0xD800) << 10) + (low - 0xDC00);
   }
   else if (point >= 0xDC00 && point <= 0xDFFF) {
     r.at = start;
-    $json.error("read.surrogate", r);
+    $read_surrogate(r);
   }
   else if (!point) {
     r.at = start;
-    $json.error("read.nul", r);
+    $read_nul(r);
   }
   _write_code_point(out, point);
 }
@@ -266,7 +266,7 @@ static long Reader._hex4(Reader &r) {
   long unit = 0;
   for (int i = 0; i < 4; i++) {
     int digit = scan_ascii_hex_value(r._peek());
-    if (digit < 0) $json.error("read.unicode", r);
+    if (digit < 0) $read_unicode(r);
     unit = unit * 16 + digit;
     r.at++;
   }
@@ -279,20 +279,20 @@ static Var Reader._number(Reader &r) {
   int start = r.at;
   if (r._peek() == '-') r.at++;
   if (r._peek() == '0') r.at++;
-  else if (!r._digits()) $json.error("read.number", r);
+  else if (!r._digits()) $read_number(r);
   int integral = 1;
   if (r._peek() == '.') {
     integral = 0;
     r.at++;
-    if (!r._digits()) $json.error("read.number", r);
+    if (!r._digits()) $read_number(r);
   }
   if ((r._peek() | 32) == 'e') {
     integral = 0;
     r.at++;
     if (r._peek() == '+' || r._peek() == '-') r.at++;
-    if (!r._digits()) $json.error("read.number", r);
+    if (!r._digits()) $read_number(r);
   }
-  if (scan_ascii_digit(r._peek())) $json.error("read.number", r);
+  if (scan_ascii_digit(r._peek())) $read_number(r);
 
   const char *spelling = r.text + start;
   errno = 0;
@@ -311,7 +311,7 @@ static Var Reader._number(Reader &r) {
   double number = strtod(spelling, NULL);
   if (isinf(number)) {
     r.at = start;
-    $json.error("read.range", r);
+    $read_range(r);
   }
   return number;
 }
@@ -324,7 +324,7 @@ static int Reader._digits(Reader &r) {
 
 static void Reader._word(Reader &r, const char *word) {
   size_t length = strlen(word);
-  if (strncmp(r.text + r.at, word, length)) $json.error("read.char", r);
+  if (strncmp(r.text + r.at, word, length)) $read_char(r);
   r.at += length;
 }
 
@@ -350,8 +350,8 @@ static void Reader._fail(Reader &r, String why) {
   int line = 1, column = 1, offset = r.at;
   scan_next_line_col((char *) r.text, offset, &line, &column);
   if (r.path)
-    $json.error("read.file", r.path, why, offset, line, column);
-  $json.error("read.text", why, offset, line, column);
+    $read_file(r.path, why, offset, line, column);
+  $read_text(why, offset, line, column);
 }
 
 /*  writing
@@ -404,7 +404,7 @@ static String _json(Var value, int pretty) {
 
 static void Writer._value(Writer &w, Var value, int depth) {
   if (depth > JSON_MAX_DEPTH)
-    $json.error("write.depth");
+    $write_depth();
   if (value.is_null()) w.out.write("null");
   else if (value is <jsonbool>) w.out.write(value.jsonbool().str());
   else if (value is <string> || value.is_atom())
@@ -415,7 +415,7 @@ static void Writer._value(Writer &w, Var value, int depth) {
   else if (value is <map>) w._members(value, depth);
   else {
     Symbol tag = value.tag();
-    $json.error("write.type", tag);
+    $write_type(tag);
   }
 }
 
@@ -436,7 +436,7 @@ static void Writer._members(Writer &w, Map object, int depth) {
   foreach (Var (name, member), object) {
     if (name is not <string> && !name.is_atom()) {
       Symbol tag = name.tag();
-      $json.error("write.key", tag);
+      $write_key(tag);
     }
     names.push(name);
   }
@@ -448,7 +448,7 @@ static void Writer._members(Writer &w, Map object, int depth) {
     String text = name.str();
     // A String and a Symbol with the same spelling would write one name twice.
     if (count && text == previous)
-      $json.error("write.duplicate", text);
+      $write_duplicate(text);
     previous = text;
     if (count++) w.out.write_char(',');
     w._line(depth + 1);
@@ -509,7 +509,7 @@ static void _write_integer(Buffer out, Var value) {
    text reads back as a `double`. */
 static void _write_double(Buffer out, double number) {
   if (!isfinite(number))
-    $json.error("write.nonfinite");
+    $write_nonfinite();
   char text[32];
   int precision = 0;
   do snprintf(text, sizeof(text), "%.*e", precision++, number);

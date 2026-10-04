@@ -1,102 +1,72 @@
 /* Func binding and adapter error conditions. Captures keep their original
    payload order and types; each selected raise expands at its call site. */
 
-macro Stmt $_func_error_apply_args() {
+macro Stmt $apply_args() {
   raise %(bad-arg (operation "Func.apply"));
 }
 
-macro Stmt $_func_error_apply_arity(
-  Expr $sig, Expr $expected, Expr $actual) {
+macro Stmt $apply_arity(Expr $sig, Expr $expected, Expr $actual) {
   raise %(bad-arity (sig ${$sig}) (expected ${$expected}) (actual ${$actual}));
 }
 
-macro Stmt $_func_error_arg_value(Expr $sig, Expr $index) {
+macro Stmt $arg_value(Expr $sig, Expr $index) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (want value));
 }
 
-macro Stmt $_func_error_arg_void(Expr $sig, Expr $index) {
+macro Stmt $arg_void(Expr $sig, Expr $index) {
   raise %(void-op (sig ${$sig}) (index ${$index}));
 }
 
-macro Stmt $_func_error_apply_index(Expr $index) {
+macro Stmt $apply_index(Expr $index) {
   raise %(bad-arg (operation "Func.apply") (index ${$index}));
 }
 
-macro Stmt $_func_error_arg_convert(
+macro Stmt $arg_convert(
   Expr $code, Expr $sig, Expr $index, Expr $want, Expr $lower) {
   raise %(${$code} (sig ${$sig}) (index ${$index}) (want ${$want})
           (cause ${$lower}));
 }
 
-macro Stmt $_func_error_arg_type(
-  Expr $sig, Expr $index, Expr $actual, Expr $want) {
+macro Stmt $arg_type(Expr $sig, Expr $index, Expr $actual, Expr $want) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
           (want ${$want}));
 }
 
-macro Stmt $_func_error_arg_pointer(
-  Expr $sig, Expr $index, Expr $actual) {
+macro Stmt $arg_pointer(Expr $sig, Expr $index, Expr $actual) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (actual ${$actual})
           (want pointer));
 }
 
-macro Stmt $_func_error_arg_unboxed(
-  Expr $sig, Expr $index, Expr $source) {
+macro Stmt $arg_unboxed(Expr $sig, Expr $index, Expr $source) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
           (want value));
 }
 
-macro Stmt $_func_error_arg_ref(
-  Expr $sig, Expr $index, Expr $source, Expr $want) {
+macro Stmt $arg_ref(Expr $sig, Expr $index, Expr $source, Expr $want) {
   raise %(bad-types (sig ${$sig}) (index ${$index}) (source ${$source})
           (want ${$want}));
 }
 
-macro Stmt $_func_error_bind_sig(Expr $sig) {
+macro Stmt $bind_sig(Expr $sig) {
   raise %(bad-sig (sig ${$sig}));
 }
 
-macro Stmt $_func_error_context_source() {
+macro Stmt $context_source() {
   raise %(bad-arg (operation "Func.new_context"));
 }
 
-macro Stmt $_func_error_context_size(Expr $size) {
+macro Stmt $context_size(Expr $size) {
   raise %(size-limit (operation "Func.new_context") (size ${$size}));
 }
 
-macro Stmt $_func_error_signature_null() {
+macro Stmt $signature_null() {
   raise %(bad-arg (operation "Func.signature"));
 }
 
-macro Stmt $_func_error_context_null() {
+macro Stmt $context_null() {
   raise %(bad-arg (operation "Func.context"));
 }
 
-macro Stmt $_func_error_box_type(Expr $actual) {
+macro Stmt $box_type(Expr $actual) {
   raise %(bad-types (want func) (actual ${$actual}));
-}
-
-macro Stmt $func.error(Literal $key, Expr $arguments...) {
-  $(let* ((key (x2c.literal.value $key))
-          (row (assoc key '(
-        ("apply.args" _func_error_apply_args)
-        ("apply.arity" _func_error_apply_arity)
-        ("arg.value" _func_error_arg_value)
-        ("arg.void" _func_error_arg_void)
-        ("apply.index" _func_error_apply_index)
-        ("arg.convert" _func_error_arg_convert)
-        ("arg.type" _func_error_arg_type)
-        ("arg.pointer" _func_error_arg_pointer)
-        ("arg.unboxed" _func_error_arg_unboxed)
-        ("arg.ref" _func_error_arg_ref)
-        ("bind.sig" _func_error_bind_sig)
-        ("context.source" _func_error_context_source)
-        ("context.size" _func_error_context_size)
-        ("signature.null" _func_error_signature_null)
-        ("context.null" _func_error_context_null)
-        ("box.type" _func_error_box_type)))))
-    (if row
-      (list (_x2c.tpl-call (cadr row) $arguments))
-      (x2c.diagnostic.fail
-        (string-append "unknown Func error '" key "'") '())))...
 }

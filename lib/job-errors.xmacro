@@ -1,93 +1,68 @@
 /* Job launch and result error conditions.
    Reports expand at their existing owners. */
 
-macro Stmt $_job.error.start.alloc() {
+macro Stmt $start_alloc() {
   raise %(alloc-fail);
 }
 
-macro Stmt $_job.error.start.empty() {
+macro Stmt $start_empty() {
   raise %(bad-arg (operation "Job.start") (why "empty command"));
 }
 
-macro Stmt $_job.error.start.missing(Expr $program, Expr $error) {
+macro Stmt $start_missing(Expr $program, Expr $error) {
   raise %(not-found (operation "Job.start") (program ${$program})
           (errno ${$error}));
 }
 
-macro Stmt $_job.error.start.program(Expr $program, Expr $error) {
+macro Stmt $start_program(Expr $program, Expr $error) {
   raise %(io-fail (operation "Job.start") (program ${$program})
           (errno ${$error}));
 }
 
-macro Stmt $_job.error.start.path(Expr $path, Expr $error) {
+macro Stmt $start_path(Expr $path, Expr $error) {
   raise %(io-fail (operation "Job.start") (path ${$path}) (errno ${$error}));
 }
 
-macro Stmt $_job.error.start.io(Expr $error) {
+macro Stmt $start_io(Expr $error) {
   raise %(io-fail (operation "Job.start") (errno ${$error}));
 }
 
-macro Stmt $_job.error.job.started(Expr $operation) {
+macro Stmt $job_started(Expr $operation) {
   raise %(bad-arg (operation ${$operation}) (why "the job has started"));
 }
 
-macro Stmt $_job.error.options.key() {
+macro Stmt $options_key() {
   raise %(bad-arg (operation "Job.options") (why "option keys are atoms"));
 }
 
-macro Stmt $_job.error.options.unknown(Expr $name) {
+macro Stmt $options_unknown(Expr $name) {
   raise %(bad-arg (operation "Job.options") (option ${$name}));
 }
 
-macro Stmt $_job.error.check.both(
+macro Stmt $check_both(
   Expr $command, Expr $status, Expr $output, Expr $errors) {
   raise %(cmd-fail (command ${$command}) (status ${$status})
           (output ${$output}) (errors ${$errors}));
 }
 
-macro Stmt $_job.error.check.output(
-  Expr $command, Expr $status, Expr $output) {
+macro Stmt $check_output(Expr $command, Expr $status, Expr $output) {
   raise %(cmd-fail (command ${$command}) (status ${$status})
           (output ${$output}));
 }
 
-macro Stmt $_job.error.check.errors(
-  Expr $command, Expr $status, Expr $errors) {
+macro Stmt $check_errors(Expr $command, Expr $status, Expr $errors) {
   raise %(cmd-fail (command ${$command}) (status ${$status})
           (errors ${$errors}));
 }
 
-macro Stmt $_job.error.check.status(Expr $command, Expr $status) {
+macro Stmt $check_status(Expr $command, Expr $status) {
   raise %(cmd-fail (command ${$command}) (status ${$status}));
 }
 
-macro Stmt $_job.error.text.nul(Expr $operation) {
+macro Stmt $text_nul(Expr $operation) {
   raise %(bad-arg (operation ${$operation}) (why "embedded NUL"));
 }
 
-macro Stmt $_job.error.wait.unstarted() {
+macro Stmt $wait_unstarted() {
   raise %(bad-arg (operation "Job.wait_any") (why "a job has not started"));
-}
-
-macro Stmt $job.error(Literal $key, Expr $arguments...) {
-  $(let ((key (x2c.literal.value $key)))
-    (let ((row (assoc key
-      '(("start.alloc" _job.error.start.alloc)
-        ("start.empty" _job.error.start.empty)
-        ("start.missing" _job.error.start.missing)
-        ("start.program" _job.error.start.program)
-        ("start.path" _job.error.start.path)
-        ("start.io" _job.error.start.io)
-        ("job.started" _job.error.job.started)
-        ("options.key" _job.error.options.key)
-        ("options.unknown" _job.error.options.unknown)
-        ("check.both" _job.error.check.both)
-        ("check.output" _job.error.check.output)
-        ("check.errors" _job.error.check.errors)
-        ("check.status" _job.error.check.status)
-        ("text.nul" _job.error.text.nul)
-        ("wait.unstarted" _job.error.wait.unstarted)))))
-      (if row (list (_x2c.tpl-call (cadr row) $arguments))
-        (x2c.diagnostic.fail
-          (string-append "unknown job error '" key "'") '()))))...
 }

@@ -37,7 +37,7 @@ static int _direct(void) {
 }
 
 static int _catalogue(void) {
-  $uv.error("native.status", _operand(1, "write"), -1,
+  $native_status(_operand(1, "write"), -1,
     _operand(2, "UV_EPERM"), _operand(3, "not permitted"));
 }
 
@@ -73,7 +73,7 @@ static void omitted_fields_and_nonreturning_statements_remain(void) {
   try {
     ErrorHandler observer = Error.push(_observe, void);
     defer Error.pop(observer);
-    if (1) $uv.error("address.length");
+    if (1) $address_length();
     reached = 1;
   }
   catch %(size-limit (library "libuv")): {}

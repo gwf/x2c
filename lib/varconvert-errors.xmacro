@@ -1,20 +1,19 @@
 /* Var numeric conversion error conditions.
    Reports expand at their existing owners. */
 
-macro Stmt $_convert_error_encoding_bad(Expr $bits) {
+macro Stmt $encoding_bad(Expr $bits) {
   raise %(bad-enc (value ${$bits}));
 }
 
-macro Stmt $_convert_error_convert_void() {
+macro Stmt $convert_void() {
   raise %(void-op (owner "Var.convert"));
 }
 
-macro Stmt $_convert_error_target_invalid(Expr $target) {
+macro Stmt $target_invalid(Expr $target) {
   raise %(bad-target (target ${$target}));
 }
 
-macro Stmt $_convert_error_source_numeric(
-  Expr $source_tag, Expr $target) {
+macro Stmt $source_numeric(Expr $source_tag, Expr $target) {
   using $lower;
   {
     List $lower = %(bad-types (source ${$source_tag}));
@@ -22,41 +21,22 @@ macro Stmt $_convert_error_source_numeric(
   }
 }
 
-macro Stmt $_convert_error_target_numeric(
-  Expr $source_tag, Expr $target) {
+macro Stmt $target_numeric(Expr $source_tag, Expr $target) {
   raise %(no-convert (source ${$source_tag}) (target ${$target}));
 }
 
-macro Stmt $_convert_error_decode_output() {
+macro Stmt $decode_output() {
   raise %(bad-arg (owner "Var.numeric_decode"));
 }
 
-macro Stmt $_convert_error_decode_void() {
+macro Stmt $decode_void() {
   raise %(void-op (owner "Var.numeric_decode"));
 }
 
-macro Stmt $_convert_error_decode_type(Expr $tag) {
+macro Stmt $decode_type(Expr $tag) {
   raise %(bad-types (source ${$tag}));
 }
 
-macro Stmt $_convert_error_convert_range(Expr $source_tag, Expr $target) {
+macro Stmt $convert_range(Expr $source_tag, Expr $target) {
   raise %(conv-range (source ${$source_tag}) (target ${$target}));
-}
-
-macro Stmt $convert.error(Literal $key, Expr $arguments...) {
-  $(let* ((key (x2c.literal.value $key))
-          (row (assoc key '(
-        ("encoding.bad" _convert_error_encoding_bad)
-        ("convert.void" _convert_error_convert_void)
-        ("target.invalid" _convert_error_target_invalid)
-        ("source.numeric" _convert_error_source_numeric)
-        ("target.numeric" _convert_error_target_numeric)
-        ("decode.output" _convert_error_decode_output)
-        ("decode.void" _convert_error_decode_void)
-        ("decode.type" _convert_error_decode_type)
-        ("convert.range" _convert_error_convert_range)))))
-    (if row
-      (list (_x2c.tpl-call (cadr row) $arguments))
-      (x2c.diagnostic.fail
-        (string-append "unknown convert error '" key "'") '())))...
 }

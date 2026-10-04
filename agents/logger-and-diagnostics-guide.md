@@ -13,6 +13,9 @@ their source file; larger groups live in a sibling `*-reports.xmacro` imported
 there. Compiler and driver calls use `$report.<category>.<case>`. Runtime
 formatting and Regex catalogues also provide named expression macros for
 reason strings, leaving their shared failure helpers responsible for payloads.
+Runtime, package, and command `*-errors.xmacro` files define one macro per
+condition, called by name, as in `$read_end(r)`. Only the raising unit imports
+such a file, so the names need no module prefix.
 
 These are compile-time expansions, not runtime message registries. Reports
 still run at their call sites through the existing reporting owners. Guards,

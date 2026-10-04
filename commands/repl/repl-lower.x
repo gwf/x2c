@@ -276,7 +276,7 @@ static void _lower_scan_storage_binding(
   Type declared = %(declare $type (bindings $binding))
     .type_from_ast().declared();
   if (declared.is_array() && _lower_record_type(l, declared.dereference())) {
-    (void) $repl.decline(l, "array.struct");
+    (void) $array_struct(l);
     return;
   }
   Type record = _lower_record_type(l, declared);
@@ -288,7 +288,7 @@ static void _lower_scan_storage_binding(
         l.cells[id] = layout ? layout : 1;
         l.records[id] = record;
       }
-      if (type.is_static()) (void) $repl.decline(l, "local.static");
+      if (type.is_static()) (void) $local_static(l);
     }
 }
 
@@ -300,7 +300,7 @@ static int _lower_scan_declaration(Lowering &l, Var type, List rest) {
     foreach (Var declarator, declarators)
       _lower_scan_storage_binding(l, type, declarator);
   if (!((Type) type).is_aggregate() || _lower_record_type(l, type)) return 0;
-  (void) $repl.decline(l, "layout.unsupported");
+  (void) $layout_unsupported(l);
   return 1;
 }
 
@@ -419,7 +419,7 @@ static Var _lower_read(Lowering &l, int id) {
   Var form;
   if (l.env.try_get(id, form)) return form;
   if (!l.locals.contains(id)) return %(C.gread $id);
-  return $repl.decline(l, "local.unbound");
+  return $local_unbound(l);
 }
 
 /* The value a local holds. An object in bytes is read through its slot, and
@@ -440,14 +440,14 @@ static Var _lower_value(Lowering &l, int id) {
 static Var _lower_number(Lowering &l, List type, String text) {
   Var value = ((Type) type).numeric_literal_value(text);
   if (value is not void) return value;
-  return $repl.decline(l, "literal.number");
+  return $literal_number(l);
 }
 
 /* The slot holding a local's storage. */
 static Var _lower_address(Lowering &l, int id) {
   Var slot;
   if (!l.env.try_get(id, slot))
-    return $repl.decline(l, "address.unknown");
+    return $address_unknown(l);
   return slot;
 }
 
@@ -466,7 +466,7 @@ static Var _lower_typed_address(Lowering &l, List type, int id) {
     Type record = pointer && pointer.is_pointer()
                 ? _lower_record_type(l, pointer.dereference()) : NULL;
     if (!record)
-      return $repl.decline(l, "address.global");
+      return $address_global(l);
     slot = %(C.gread $id);
     layout = l.owner.type_layout(record);
   }
@@ -474,7 +474,7 @@ static Var _lower_typed_address(Lowering &l, List type, int id) {
   if (slot is void) slot = _lower_address(l, id);
   if (_lower_failed(l, slot)) return void;
   if (layout && (layout.car() != <record> || !tag)) return slot;
-  if (!tag) return $repl.decline(l, "address.tag");
+  if (!tag) return $address_tag(l);
   return %(C.address $slot (quote $tag));
 }
 
@@ -498,7 +498,7 @@ static Var _lower_segments(Lowering &l, List parts) {
 /* A folded constant used as a value. */
 static Var _lower_quoted(Lowering &l, Var node) {
   Var value = l.compiler.folded_constant(node);
-  if (value is void) return $repl.decline(l, "constant.unfolded");
+  if (value is void) return $constant_unfolded(l);
   return %(quote $value);
 }
 
@@ -560,7 +560,7 @@ static long _lower_field_offset(Lowering &l, List path, List &field_layout) {
   foreach (List frame, path.reverse()) {
     match (frame) {
       case %(? index *): {
-        (void) $repl.decline(l, "array.nested");
+        (void) $array_nested(l);
         return -1;
       }
       case %(?owner field ?name *):
@@ -571,7 +571,7 @@ static long _lower_field_offset(Lowering &l, List path, List &field_layout) {
             continue;
           }
     }
-    (void) $repl.decline(l, "layout.host");
+    (void) $layout_host(l);
     return -1;
   }
   return offset;
@@ -585,14 +585,14 @@ static Var _lower_field_place(
   if (access == <"->">) {
     Type pointer = l.compiler.sym.resolve_key(owner);
     if (!pointer || !pointer.is_pointer())
-      return $repl.decline(l, "field.pointer");
+      return $field_pointer(l);
     owner = pointer.dereference();
   }
   Type record = _lower_record_type(l, owner);
   if (!record)
-    return $repl.decline(l, "layout.compile");
+    return $layout_compile(l);
   List path = l.compiler.initializer_field_path(record, field);
-  if (!path) return $repl.decline(l, "field.unknown");
+  if (!path) return $field_unknown(l);
   List layout = NULL;
   long offset = _lower_field_offset(l, path, layout);
   if (offset < 0) return void;
@@ -615,7 +615,7 @@ static Var _lower_place(Lowering &l, Var target) {
       if (operator == <"*">) return _lower_expr(l, operand);
     case %(expr ?type (index ?receiver ?key)): {
       List layout = l.owner.type_layout(type);
-      if (!layout) return $repl.decline(l, "index.layout");
+      if (!layout) return $index_layout(l);
       Var base = _lower_expr(l, receiver), index = _lower_expr(l, key);
       if (l.declined) return void;
       (Var size) = layout.cddr();
@@ -673,7 +673,7 @@ static List _lower_args(
       List converted = l.compiler.convert_expression(argument, parameter);
       Var place = _lower_expr(l, converted);
       if (place is void) {
-        (void) $repl.decline(l, "argument.storage");
+        (void) $argument_storage(l);
         return NULL;
       }
       values.push(place);
@@ -750,8 +750,8 @@ static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
   if (!parts) {
     if (List.match(content, %(parens (block *))))
-      return $repl.decline(l, "expression.statement");
-    return $repl.decline(l, "func.dynamic");
+      return $expression_statement(l);
+    return $func_dynamic(l);
   }
   Var callee = _lower_expr(l, parts.car());
   if (_lower_failed(l, callee)) return void;
@@ -918,7 +918,7 @@ static Var _lower_operands(
     if (operator == <+>) return only;
     if (operator == <~>) return %(_binary -1 (quote <^>) $only);
     if (operator == <!>) return %(C.not $only);
-    return $repl.decline(l, "operator.unary");
+    return $operator_unary(l);
   }
   if (values.len() == 2) {
     Var left = values[0], right = values[1];
@@ -944,15 +944,15 @@ static Var _lower_operands(
     b = _lower_coerce(l, result, operands.caddr(), b);
     return %(C.ternary $test $a $b);
   }
-  return $repl.decline(l, "operator.arity");
+  return $operator_arity(l);
 }
 
 /* Captures run at construction. Record values copy into closure storage;
    addressed scalars load their value before the source frame ends. */
 static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
-  if (l.on_loop) return $repl.decline(l, "lambda.loop");
+  if (l.on_loop) return $lambda_loop(l);
   match (body) case %(block *):
-    return $repl.decline(l, "lambda.block");
+    return $lambda_block(l);
   int automatic = l.automatic;
   Map previous = l.env;
   l.env = _lower_env_copy(l);
@@ -973,7 +973,7 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
         if (_lower_record_type(l, type)) {
           List layout = l.owner.type_layout(type);
           if (!layout)
-            return $repl.decline(l, "capture.layout");
+            return $capture_layout(l);
           (Var size) = layout.cddr();
           value = %(C.session-copy $value $size);
         }
@@ -1060,7 +1060,7 @@ static Array _lower_values(Lowering &l, List items) {
     Var value = _lower_expr(l, item);
     if (_lower_failed(l, value)) {
       values.free();
-      (void) $repl.decline(l, "element.expression");
+      (void) $element_expression(l);
       return NULL;
     }
     values.push(value);
@@ -1101,7 +1101,7 @@ static Var _lower_map(Lowering &l, List entries) {
         continue;
       }
     flat.free();
-    return $repl.decline(l, "map.entry");
+    return $map_entry(l);
   }
   return %(Map_of ${cons(<list>, flat.list_free())});
 }
@@ -1128,7 +1128,7 @@ static Var _lower_getindex(
   Lowering &l, Var receiver, Var key, int is_c_array) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
-    return $repl.decline(l, "index.type");
+    return $index_type(l);
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
@@ -1150,7 +1150,7 @@ static Var _lower_sizeof(Lowering &l, Type type, List operand) {
   }
   match (measured ? l.owner.type_layout(measured) : NULL)
     case %(? ? ?size *): return _lower_to_type(l, type, size);
-  return $repl.decline(l, "sizeof.layout");
+  return $sizeof_layout(l);
 }
 
 /* One `match` over the expression grammar. The compiler turns it into a
@@ -1174,7 +1174,7 @@ static Var _lower_expr(Lowering &l, Var form) {
     case %(nil):     return %(quote ());
     case %(cache ?): return _lower_quoted(l, form);
   }
-  return $repl.decline(l, "expression.expected");
+  return $expression_expected(l);
 }
 
 static Var _lower_content(Lowering &l, List type, Var content) {
@@ -1212,7 +1212,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
           case %(next ?previous):
             return %(+ ${_lower_expr(l, %(expr $type (ident $previous)))} 1);
         }
-        return $repl.decline(l, "enum.value");
+        return $enum_value(l);
       }
       /* A name with no type has no declaration the compiler read: it is a
          preprocessor macro. The null pointer constant and `stdbool.h`'s
@@ -1220,7 +1220,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       if (!type && !l.locals.contains(id)) {
         if (name == "NULL" || name == "false") return 0;
         if (name == "true") return 1;
-        return $repl.decline(l, "name.declaration", name);
+        return $name_declaration(l, name);
       }
       return _lower_value(l, id);
     }
@@ -1251,7 +1251,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       Var place = _lower_place(l, target);
       if (l.declined) return void;
       if (place is void)
-        return $repl.decline(l, "address.storage");
+        return $address_storage(l);
       Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
       return tag ? %(C.address $place (quote $tag)) : place;
     }
@@ -1300,7 +1300,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(index ?receiver ?key):
       return _lower_getindex(l, receiver, key, 1);
     case %(postfix ? ?):
-      return $repl.decline(l, "operator.postfix");
+      return $operator_postfix(l);
     case %(lambda (params *params) (captures *held) ?body):
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
@@ -1312,7 +1312,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(nil):     return %(quote ());
     case %(cache ?): return _lower_quoted(l, content);
   }
-  return $repl.decline(l, "expression.unsupported");
+  return $expression_unsupported(l);
 }
 
 /* --- statements --------------------------------------------------------- */
@@ -1392,7 +1392,7 @@ static Var _lower_apply_k(Lowering &l, List k) {
       return values.list();
     }
   }
-  return $repl.decline(l, "continuation.unknown");
+  return $continuation_unknown(l);
 }
 
 /* The equality adapters box Lisp equality as an int. A guard needs only
@@ -1491,7 +1491,7 @@ static Var _lower_arms(
   if (!arms) return _lower_block(l, rest, k);
   List arm = arms.car();
   Var pattern = l.compiler.folded_constant(arm.car());
-  if (pattern is void) return $repl.decline(l, "case.unfolded");
+  if (pattern is void) return $case_unfolded(l);
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
@@ -1726,7 +1726,7 @@ static Var _lower_switch(
   if (_lower_failed(l, value)) return void;
   int bound = !_lower_pure(value);
   if (bound && l.on_loop)
-    return $repl.decline(l, "switch.binding");
+    return $switch_binding(l);
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
   Array arms = $auto([]);
@@ -1773,7 +1773,7 @@ static Var _lower_switch(
     List cases = arm.car();
     List statements = arm.cadr();
     if (i + 1 < count && !_lower_terminated(statements)) {
-      (void) $repl.decline(l, "switch.fallthrough");
+      (void) $switch_fallthrough(l);
       break;
     }
     Array conditions = [];
@@ -1848,7 +1848,7 @@ static Var _lower_record_zero(Lowering &l, Type type, Var into) {
       if (into is not void) return %(C.zero $into $size);
       return %(C.bytes $size);
     }
-  return $repl.decline(l, "layout.host");
+  return $layout_host(l);
 }
 
 /* Each initializer row stores one field value at its offset. */
@@ -1862,13 +1862,13 @@ static Var _lower_record_braced(
   foreach (List row, l.compiler.initializer_rows(record, items, NULL)) {
     List choices = row.cadr();
     if (!choices || choices.cdr())
-      return $repl.decline(l, "init.native");
+      return $init_native(l);
     List choice = choices.car();
     List condition = choice.car(), path = choice.cadr();
     Type destination = choice.caddr();
     List input = choice[3];
     if (condition || !destination || !path)
-      return $repl.decline(l, "init.struct");
+      return $init_struct(l);
     List layout = NULL;
     long offset = _lower_field_offset(l, path, layout);
     if (offset < 0) return void;
@@ -1889,12 +1889,12 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
     Type element = declared.is_array() ? declared.dereference() : declared;
     int size = 0;
     if (!_lower_dimension(l, id, size))
-      return $repl.decline(l, "array.dimension");
+      return $array_dimension(l);
     Array values = _lower_values(l, items);
     if (l.declined) return void;
     if (values.len() > size) {
       values.free();
-      return $repl.decline(l, "array.capacity");
+      return $array_capacity(l);
     }
     int index = 0;
     foreach (Var item, items) {
@@ -1906,7 +1906,7 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
     List layout = l.owner.type_layout(element);
     if (!layout) {
       values.free();
-      return $repl.decline(l, "array.layout");
+      return $array_layout(l);
     }
     l.automatic = 1;
     Symbol tag = _lower_pointer_tag(l, layout);
@@ -1915,12 +1915,12 @@ static Var _lower_braced(Lowering &l, List type, int id, List items) {
       (quote $tag));
   }
   if (type.equal(%("Map")) || l.compiler.sym.is_var_type(type)) {
-    if (items) return $repl.decline(l, "init.map");
+    if (items) return $init_map(l);
     return %(Map_new);
   }
   if (type.equal(%("Array"))) return _lower_array(l, items);
   if (type.equal(%("List")))  return _lower_sequence(l, items);
-  return $repl.decline(l, "init.type");
+  return $init_type(l);
 }
 
 /* A declaration, a cast, an assignment, a return and an argument each name a
@@ -1950,7 +1950,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         if (!target_record || !source_record ||
             !target_record.equal(source_record)) {
           String types = %"${want.repr()} from ${from.repr()}";
-          return $repl.decline(l, "struct.types", types);
+          return $struct_types(l, types);
         }
         return value;
       }
@@ -1998,7 +1998,7 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
         _lower_scan_callee(l, name);
         if (l.uncallable)
-          return $repl.decline(l, "binding.missing", name);
+          return $binding_missing(l, name);
         return %(${Atom.intern(name)} $value);
       }
     }
@@ -2076,7 +2076,7 @@ static Var _lower_declarator(
         l, id, _lower_boxed(l, id, initial, 1), rest, k);
     }
   }
-  return $repl.decline(l, "declarator.unsupported");
+  return $declarator_unsupported(l);
 }
 
 /* A destructuring names its targets bare when one type covers them all and
@@ -2104,14 +2104,14 @@ static Var _lower_destructure(
   source = _lower_coerce(l, %("List"), init, source);
   int hold = !_lower_pure(source);
   if (hold && l.on_loop)
-    return $repl.decline(l, "binding.loop");
+    return $binding_loop(l);
   Var held = hold ? _lower_name(l, "hold") : source;
   List wraps = %();
   int index = 0;
   foreach (List target, targets) {
     int id;
     if (!_lower_destructure_id(target, id))
-      return $repl.decline(l, "destructure.target");
+      return $destructure_target(l);
     Var element = %(List_getindex $held $index);
     index++;
     if (!l.cells.contains(id)) {
@@ -2153,9 +2153,9 @@ static Var _lower_setindex_value(
   Lowering &l, Var receiver, Var key, int is_c_array, Var value) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
-    return $repl.decline(l, "index.type");
+    return $index_type(l);
   if (container.equal("List") || container.equal("String"))
-    return $repl.decline(l, "index.immutable");
+    return $index_immutable(l);
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
@@ -2194,7 +2194,7 @@ static Var _lower_assign_expr(Lowering &l, Var target, Var rhs) {
   if (l.declined || _lower_failed(l, value)) return void;
   if (place is not void) return _lower_poke(l, type, place, value);
   if (id >= 0 && !l.locals.contains(id)) return %(C.gwrite $id $value);
-  return $repl.decline(l, "assignment.storage");
+  return $assignment_storage(l);
 }
 
 /* A compound update evaluates the place once and returns its new value. */
@@ -2203,7 +2203,7 @@ static Var _lower_update_expr(
   if (_lower_failed(l, right)) return void;
   Var place = _lower_place(l, target);
   if (l.declined || place is void)
-    return $repl.decline(l, "update.storage");
+    return $update_storage(l);
   Type want = _lower_type_of(target);
   Var slot = _lower_name(l, "place");
   Var old = _lower_name(l, "old");
@@ -2228,7 +2228,7 @@ static Var _lower_store(
   if (l.declined || _lower_failed(l, value)) return void;
   if (place is not void)
     return _lower_effect(l, _lower_poke(l, type, place, value), rest, k);
-  if (id < 0) return $repl.decline(l, "assignment.computed");
+  if (id < 0) return $assignment_computed(l);
   if (!l.locals.contains(id)) {
     match (l.owner.type_layout(type))
       case %(record ? ?size *):
@@ -2259,7 +2259,7 @@ static Var _lower_update(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
       rest, k);
   }
-  if (id < 0) return $repl.decline(l, "update.computed");
+  if (id < 0) return $update_computed(l);
   if (!l.locals.contains(id)) {
     Var combined = _lower_to_type(
       l, want, %(_binary (C.gread $id) (quote $operator) $right));
@@ -2383,7 +2383,7 @@ static Var _lower_expression_stmnt(
     case %(expr ? (op ?operator ?target ?rhs)): {
       Symbol applied = _lower_compound(operator);
       if (!applied)
-        return $repl.decline(l, "statement.effect");
+        return $statement_effect(l);
       return _lower_update(
         l, target, applied, _lower_expr(l, rhs), rest, k);
     }
@@ -2402,7 +2402,7 @@ static Var _lower_expression_stmnt(
       return _lower_effect(l, value, rest, k);
     }
   }
-  return $repl.decline(l, "statement.effect");
+  return $statement_effect(l);
 }
 
 /* A `defer` runs the rest of its block through `C.unwind`, and the
@@ -2523,11 +2523,11 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
       return _lower_switch(l, subject, items, rest, k);
     case %(break): {
       if (!l.on_break)
-        return $repl.decline(l, "break.scope");
+        return $break_scope(l);
       return _lower_apply_k(l, l.on_break);
     }
     case %(continue): {
-      if (!l.on_continue) return $repl.decline(l, "continue.scope");
+      if (!l.on_continue) return $continue_scope(l);
       return _lower_apply_k(l, l.on_continue);
     }
     /* `do BODY while (TEST)` checks the test after the body, which is the
@@ -2549,7 +2549,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
         l, guard, %($body), step ? %((stmnt $step)) : %(), rest, k);
     }
   }
-  return $repl.decline(l, "statement.unsupported");
+  return $statement_unsupported(l);
 }
 
 static List _lower_for_init(List init) {
@@ -2599,9 +2599,9 @@ List ReplLower.lower(ReplLower self, List fn) {
       /* The scan records its own wording for a construct refused by
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
-        if (l.rejected) l.owner.reason = $repl.reason("scan.goto");
+        if (l.rejected) l.owner.reason = $scan_goto();
         else if (l.uncallable)
-          l.owner.reason = $repl.reason("scan.binding", l.owner.missing);
+          l.owner.reason = $scan_binding(l.owner.missing);
       }
       if (l.declined || l.rejected || l.uncallable) return NULL;
       Array slots = $auto([]);

@@ -4461,7 +4461,6 @@ static void _bind_primitives(Lisp lisp) {
   $lisp.bind(lisp, "x2c_literal_int", x2c_literal_int);
   $lisp.bind(lisp, "x2c_literal_symbol", x2c_literal_symbol);
   $lisp.bind(lisp, "_x2c.import-hook", _lisp_import_hook);
-  $lisp.bind(lisp, "_x2c.tpl-call", _sdk_template_call);
   Compiler.bind_sdk_primitives(lisp);
 }
 
