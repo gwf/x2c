@@ -144,6 +144,7 @@ $(BUILD)/test-all.o: $(BUILD)/test-support.h
 # Compiler objects under test link through $^, not LDLIBS, so make
 # sees them as prerequisites; builds/stage.mk owns building them and
 # the top-level unittest target depends on x2c for freshness.
-COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/diagnostics.o \
+COMPILER_OBJECTS = ../builds/0/src/ast.o ../builds/0/src/operator-ledger.o \
+	../builds/0/src/diagnostics.o \
 	../builds/0/src/report.o ../builds/0/src/sourceview.o
 test-all: $(COMPILER_OBJECTS)

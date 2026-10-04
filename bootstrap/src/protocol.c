@@ -277,54 +277,9 @@ static void _dump_row(const char * kind, int owned, Type base, Type participant,
 
 static void _dump_member(String member, const char * status, String source, const char * punctuation);
 
-static const SymbolSet operator_ops =(SymbolSet) "\001\000\000\000\014\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\015\004\000\005\001\012\000\000\012\012\000\001\000\000\000\000\001\011\000\002\000\002\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\137\000\000\000\000\000\000\000\113\000\000\000\000\000\000\000\201\000\000\000\000\000\000\000\173\075\000\000\000\000\000\000\173\041\000\000\000\000\000\000\171\000\000\000\000\000\000\000\173\074\000\000\000\000\000\000\175\000\000\000\000\000\000\000\173\076\000\000\000\000\000\000";
+Symbol Compiler_operator_member(Compiler c, Symbol op);
 
-static const struct{
-  Symbol member;
-  int derived;
-}
-operator_members[] ={
-  {
-    2312, 0
-  }
-  , {
-    40260, 0
-  }
-  , {
-    27992, 0
-  }
-  , {
-    8812, 0
-  }
-  , {
-    27592, 0
-  }
-  , {
-    875851096, 0
-  }
-  , {
-    11642968, 0
-  }
-  , {
-    11642968, 1
-  }
-  , {
-    7477398666, 1
-  }
-  , {
-    7477398666, 1
-  }
-  , {
-    7477398666, 1
-  }
-  , {
-    7477398666, 1
-  }
-
-}
-;
-
-static Symbol _operator_row(Symbol op, int derived);
+Symbol Compiler_derived_member(Compiler c, Symbol op);
 
 static List Compiler__resolve_member(Compiler c, Type participant, String member_name);
 
@@ -970,7 +925,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _488 = String_var(_487);
   _489 = List_var(NULL);
   _490 = Symbol_var(106239471489226);
-  _491 = int_var(1902);
+  _491 = int_var(1868);
   _492 = String_new("");
   _493 = String_var(_492);
   _494 = String_new("x2c.hole");
@@ -1273,7 +1228,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _788 = cons(_780, _787);
   _789 = cons(_774, _788);
   _790 = List_var(_789);
-  _791 = int_var(1974);
+  _791 = int_var(1940);
   _792 = Symbol_var(1544849476362);
   _793 = List_var(_145);
   _794 = cons(_793, NULL);
@@ -1372,7 +1327,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _887 = cons(_780, _886);
   _888 = cons(_774, _887);
   _889 = List_var(_888);
-  _890 = int_var(1981);
+  _890 = int_var(1947);
   _891 = cons(_813, NULL);
   _892 = cons(_843, _880);
   _893 = cons(_594, _892);
@@ -1973,11 +1928,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1485 = cons(_1484, NULL);
   _1486 = cons(_701, _1485);
   _1487 = List_var(_1486);
-  _1488 = int_var(2333);
+  _1488 = int_var(2299);
   _1489 = cons(_1488, NULL);
   _1490 = cons(_707, _1489);
   _1491 = List_var(_1490);
-  _1492 = int_var(85604);
+  _1492 = int_var(84279);
   _1493 = cons(_1492, NULL);
   _1494 = cons(_720, _1493);
   _1495 = List_var(_1494);
@@ -2054,11 +2009,11 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1563 = cons(_1562, NULL);
   _1564 = cons(_671, _1563);
   _1565 = List_var(_1564);
-  _1566 = int_var(2458);
+  _1566 = int_var(2424);
   _1567 = cons(_1566, NULL);
   _1568 = cons(_707, _1567);
   _1569 = List_var(_1568);
-  _1570 = int_var(90485);
+  _1570 = int_var(89172);
   _1571 = cons(_1570, NULL);
   _1572 = cons(_720, _1571);
   _1573 = List_var(_1572);
@@ -3764,19 +3719,6 @@ static void _dump_member(String member, const char * status, String source, cons
   printf(" (%s %s %s %s)", member, status, String_truth(source) ? source : "-", punctuation);
 }
 
-int SymbolSet_index(SymbolSet, Symbol);
-static Symbol _operator_row(Symbol op, int derived){
-  int index = SymbolSet_index(operator_ops, op);  if(index < 0 || operator_members[index].derived != derived) return 0;  return operator_members[index].member;
-}
-
-Symbol Compiler_operator_member(Compiler c, Symbol op){
-  (void) c;  return _operator_row(op, 0);
-}
-
-Symbol Compiler_derived_member(Compiler c, Symbol op){
-  (void) c;  return _operator_row(op, 1);
-}
-
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name){
   if(! _init_guard_) _file_init_();  List resolved = Compiler__resolve_member(c, Type_canonicalize(participant), member_name);  if(! List_truth(resolved)) return NULL;  String spelling = binding_identity_spelling(Var_list(List_car(resolved)));  return String_equal(spelling, c -> fn_name) ? NULL : resolved;
 }
@@ -4009,12 +3951,13 @@ List Compiler_wrapper_function(Compiler c, Type result, List binding, List param
 List Sym_introduce(Sym, String);
 String int_str(int);
 List Type_parameter_ast(Type, List);
-List Macro_typed(List, Var);
+List Macro_typed(List, List);
+Var Macro_inserted(Var, int, int);
 List Compiler_forward_parameters(Compiler c, List types){
   if(! _init_guard_) _file_init_();  Array declarations = Array_new(), arguments = Array_new();  int index = 0; {
     Type type;  List _x2c_macro_object_33 = types;  List _x2c_macro_cursor_33 = _x2c_macro_object_33;  Var _x2c_macro_cursor_output_37;  while(List_try_next(_x2c_macro_object_33, &(_x2c_macro_cursor_33), &(_x2c_macro_cursor_output_37))){
       type = Var_type(_x2c_macro_cursor_output_37); {
-        List binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_540), cons(String_var(int_str(index ++)), NULL))));  Array_push(declarations, List_var(Type_parameter_ast(type, binding)));  Array_push(arguments, List_var(Macro_typed(Type_list(type), List_var(binding))));
+        List binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_540), cons(String_var(int_str(index ++)), NULL))));  Array_push(declarations, List_var(Type_parameter_ast(type, binding)));  Array_push(arguments, List_var(Macro_typed(Type_list(type), Var_list(Macro_inserted(List_var(binding), 1, 1)))));
       }
 
     }
@@ -4054,7 +3997,7 @@ String Compiler_protocol_update_helper(Compiler c, Type participant, String memb
 if(! List_truth(Type_list(rhs_type))) return NULL;  String suffix = postfix ? _766 : _767;  String name =({
   Var _x2c_literal_part_82 = String_var(String_lower(Var_str(List_car(Type_list(participant)))));  String_join(NULL, cons(String_var(_768), cons(_x2c_literal_part_82, cons(String_var(_31), cons(String_var(member), cons(String_var(_31), cons(String_var(suffix), NULL)))))));
 }
-);  List helper = Sym_introduce(c -> sym, name);  List callee = Macro_typed(source_type, List_var(source_binding));  List update = postfix ? cons(_488, cons(_790, cons(List_var(cons(_484, cons(List_var(cons(_490, cons(_791, cons(_493, cons(List_var(({
+);  List helper = Sym_introduce(c -> sym, name);  List callee = Macro_typed(source_type, Var_list(Macro_inserted(List_var(source_binding), 1, 1)));  List update = postfix ? cons(_488, cons(_790, cons(List_var(cons(_484, cons(List_var(cons(_490, cons(_791, cons(_493, cons(List_var(({
   Var _x2c_literal_part_88 = List_var(cons(_174, cons(List_var(cons(_495, cons(_509, cons(_510, cons(List_var(participant), NULL))))), NULL)));  Var _x2c_literal_part_89 = List_var(({
     Var _x2c_literal_part_83 = List_var(cons(_495, cons(_517, cons(_518, cons(List_var(helper), NULL)))));  Var _x2c_literal_part_84 = List_var(cons(List_var(cons(_519, cons(List_var(cons(_520, cons(List_var(cons(_521, cons(List_var(cons(_792, cons(List_var(cons(_495, cons(_509, cons(_510, cons(List_var(participant), NULL))))), NULL))), _798))), _806))), NULL))), NULL));  cons(_78, cons(_x2c_literal_part_83, cons(_x2c_literal_part_84, NULL)));
   }
@@ -4455,7 +4398,7 @@ static List AdapterFunction_generate(AdapterFunction * a){
 
   }
   List source_binding = Sym_reference((* a).c -> sym, cons(String_var((* a).source), NULL), NULL);  List call = Compiler__bound_call((* a).c, source_result, ({
-    Type _x2c_hole_4 =(* a).signature;  Macro_typed(Type_list(_x2c_hole_4), List_var(source_binding));
+    Type _x2c_hole_4 =(* a).signature;  Macro_typed(Type_list(_x2c_hole_4), Var_list(Macro_inserted(List_var(source_binding), 1, 1)));
   }
   ), Array_list_free(arguments)); (* a).binding = Sym_reference((* a).c -> sym, cons(String_var((* a).name), NULL), NULL);  if((* a).make_static)(* a).binding = Sym_introduce((* a).c -> sym, (* a).name);  List storage =(* a).make_static ? cons(_174, cons(_1012, List_append(Type_list(target_result), NULL))) : Type_list(target_result);  return Compiler_wrapper_function((* a).c, List_type(storage), (* a).binding, declarations, cons(List_var(cons(_872, cons(List_var(target_result), cons(List_var(call), NULL)))), NULL));
 }
@@ -4468,20 +4411,20 @@ static List Compiler__guard_rendering(Compiler c, List function, String member){
     Var _x2c_match_values[5];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 5 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 458361162716: ;  static MatchCaptureSite _x2c_match_site_45;  if (x2c_match_site_try_capture(& _x2c_match_site_45, _x2c_match_expr, List_var(_1041), &_x2c_match_capture)) {Var result = _x2c_match_values[0];  Var declarator = _x2c_match_values[1];  Var boxed = _x2c_match_values[2];  List remaining = Var_list(_x2c_match_values[3]);  List body = Var_list(_x2c_match_values[4]); {
-    List value = Macro_typed(_42, boxed);  List fallback = NULL;  if(String_equal(member, _1008) || String_equal(member, _1009)) fallback = Compiler__helper_call(c, List_type(_1044), _1045, cons(List_var(value), NULL));  else
+    List value = Macro_typed(_42, Var_list(Macro_inserted(boxed, 1, 1)));  List fallback = NULL;  if(String_equal(member, _1008) || String_equal(member, _1009)) fallback = Compiler__helper_call(c, List_type(_1044), _1045, cons(List_var(value), NULL));  else
   {
     List _x2c_match_expr = remaining;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_44;  if (x2c_match_site_try_capture(& _x2c_match_site_44, _x2c_match_expr, List_var(_1054), &_x2c_match_capture)) {Var output = _x2c_match_values[0];  fallback = Compiler__helper_call(c, List_type(_1057), _1058, ({
-      Var _x2c_literal_part_127 = List_var(value);  Var _x2c_literal_part_128 = List_var(Macro_typed(_1057, output));  cons(_x2c_literal_part_127, cons(_x2c_literal_part_128, NULL));
+      Var _x2c_literal_part_127 = List_var(value);  Var _x2c_literal_part_128 = List_var(Macro_typed(_1057, Var_list(Macro_inserted(output, 1, 1))));  cons(_x2c_literal_part_127, cons(_x2c_literal_part_128, NULL));
     }
     ));  break;
   }
 
     }
   }
-List path = Sym_introduce(c -> sym, _1059);  Compiler_set_fact(c, List_var(cons(_1060, cons(List_var(path), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_104, cons(List_var(path), NULL))), List_var(_1063));  Macro addressed = _1163;  List address = Compiler_rebuild_expression(c, List_type(_1164), Macro_apply(addressed, cons(List_var(Macro_typed(_1063, List_var(path))), NULL)));  List pointer = Compiler__helper_call(c, List_type(_1165), _1166, cons(List_var(value), NULL));  List enter = Compiler__helper_call(c, List_type(_824), _1167, cons(List_var(address), cons(List_var(pointer), NULL)));  List leave = Compiler__helper_call(c, List_type(_916), _1168, cons(List_var(address), NULL));  Macro shape = _1526;  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(path), cons(List_var(enter), cons(List_var(fallback), cons(List_var(leave), cons(List_var(body), NULL)))))));
+List path = Sym_introduce(c -> sym, _1059);  Compiler_set_fact(c, List_var(cons(_1060, cons(List_var(path), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_104, cons(List_var(path), NULL))), List_var(_1063));  Macro addressed = _1163;  List address = Compiler_rebuild_expression(c, List_type(_1164), Macro_apply(addressed, cons(List_var(Macro_typed(_1063, Var_list(Macro_inserted(List_var(path), 1, 1)))), NULL)));  List pointer = Compiler__helper_call(c, List_type(_1165), _1166, cons(List_var(value), NULL));  List enter = Compiler__helper_call(c, List_type(_824), _1167, cons(List_var(address), cons(List_var(pointer), NULL)));  List leave = Compiler__helper_call(c, List_type(_916), _1168, cons(List_var(address), NULL));  Macro shape = _1526;  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(path), cons(List_var(enter), cons(List_var(fallback), cons(List_var(leave), cons(List_var(body), NULL)))))));
 }
 break;
 }
@@ -4540,19 +4483,19 @@ static List _descriptor_fields(List thunks){
 }
 
 static List Compiler__builtin_registration(Compiler c, List methods, String name, Symbol tag){
-  List symbol = cons(_225, cons(_235, cons(List_var(cons(_236, cons(_235, cons(String_var(name), cons(Symbol_var(tag), NULL))))), NULL)));  List table = Macro_typed(_396, List_var(methods));  return Compiler__helper_call(c, List_type(_824), _1546, cons(List_var(symbol), cons(List_var(table), NULL)));
+  List symbol = cons(_225, cons(_235, cons(List_var(cons(_236, cons(_235, cons(String_var(name), cons(Symbol_var(tag), NULL))))), NULL)));  List table = Macro_typed(_396, Var_list(Macro_inserted(List_var(methods), 1, 1)));  return Compiler__helper_call(c, List_type(_824), _1546, cons(List_var(symbol), cons(List_var(table), NULL)));
 }
 
 List x2c_literal_symbol(Symbol);
 static List Compiler__tagged_registration(Compiler c, List methods, String name, Symbol tag){
-  List symbol = x2c_literal_symbol(tag);  List table = Macro_typed(_396, List_var(methods));  return Compiler__helper_call(c, List_type(_916), _1547, ({
+  List symbol = x2c_literal_symbol(tag);  List table = Macro_typed(_396, Var_list(Macro_inserted(List_var(methods), 1, 1)));  return Compiler__helper_call(c, List_type(_916), _1547, ({
     Var _x2c_literal_part_139 = List_var(symbol);  Var _x2c_literal_part_140 = List_var(_string_literal(name));  cons(_x2c_literal_part_139, cons(_x2c_literal_part_140, cons(List_var(table), NULL)));
   }
   ));
 }
 
 static List Compiler__fallback_registration(Compiler c, List methods, String name, List early_call){
-  List table = Macro_typed(_396, List_var(methods));  List fallback = Compiler__helper_call(c, List_type(_916), _1548, ({
+  List table = Macro_typed(_396, Var_list(Macro_inserted(List_var(methods), 1, 1)));  List fallback = Compiler__helper_call(c, List_type(_916), _1548, ({
     Var _x2c_literal_part_141 = List_var(_string_literal(name));  cons(_x2c_literal_part_141, cons(List_var(table), NULL));
   }
   ));  return Var_list(List_cadr(Compiler_rebuild_statement(c, cons(_488, cons(_489, cons(List_var(cons(_484, cons(List_var(({
@@ -4606,7 +4549,7 @@ return _insert_at_boundary(ast, source, private, Array_list_free(aliases), make_
 
 List Compiler_finish_foreign_alias(Compiler, List, List);
 static List Compiler__native_alias(Compiler c, Type participant, String member, String source, Type signature, int make_static){
-  String target = _member_spelling(participant, member);  List declaration = Compiler__signature_declaration(c, target, signature, make_static);  if(! make_static) Compiler_record_generated_symbol(c, target, signature);  List native_binding = Sym_reference(c -> sym, cons(String_var(source), NULL), NULL);  return Compiler_finish_foreign_alias(c, declaration, Macro_typed(Type_list(signature), List_var(native_binding)));
+  String target = _member_spelling(participant, member);  List declaration = Compiler__signature_declaration(c, target, signature, make_static);  if(! make_static) Compiler_record_generated_symbol(c, target, signature);  List native_binding = Sym_reference(c -> sym, cons(String_var(source), NULL), NULL);  return Compiler_finish_foreign_alias(c, declaration, Macro_typed(Type_list(signature), Var_list(Macro_inserted(List_var(native_binding), 1, 1))));
 }
 
 static List _insert_at_boundary(List ast, List declaration, int declaration_private, List additions, int make_static){

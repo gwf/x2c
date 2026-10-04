@@ -39,8 +39,8 @@ macro Stmt $report.xform.index_copy(Expr $c, Expr $type) =>
 
 macro Stmt $report.xform.string_assignment(Expr $c) {
   {
-    String note = "String is immutable: use the copy-producing " +
-                  "String.withindex, or bind a char * to write a " +
+    String note = "String is immutable: use the copy-producing "
+                  "String.withindex, or bind a char * to write a "
                   "transient String.malloc buffer";
     $c.report_error(
       <xform>, "String does not support bracket assignment",

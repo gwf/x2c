@@ -482,6 +482,8 @@ status per fixture, so a change in any phase shows up as a diff.
 
 The modules under `src/` divide ownership as follows:
 
+- `src/operator-ledger.x` -- operator precedence, compound assignment,
+  and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
   the per-file translation loop, and output/exit policy;
 - `src/frontend.x` -- configured source stages, process translation support,

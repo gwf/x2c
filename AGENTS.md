@@ -120,6 +120,7 @@ commits need not rebuild from their own bootstrap.
   `builtins` and `linked-meta`, the compile-time code compiled into the
   compiler)/
   `literals` (+ `lambdas`) -> `ast` -> `type` (+ `type-ledger`)/`protocol`
+  (+ `operator-ledger`, shared operator mappings)
   -> `transform` (+ `callables`, `cleanup`, `regions`) ->
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
