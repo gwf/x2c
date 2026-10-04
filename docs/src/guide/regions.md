@@ -110,7 +110,7 @@ aggregate copy, or unmodeled scope ending is an obstacle, not a compiler
 warning or error. A project may provide explicit native effect contracts to
 the audit; they are assumptions of its result and do not change compilation.
 The optional command and its contract format are described in the
-[source graph reference](../../../commands/graph/README.md#conditional-lifetime-proof).
+[source graph reference](https://github.com/gwf/x2c/blob/main/commands/graph/README.md#conditional-lifetime-proof).
 The proof concerns scoped ownership and lifetime. It does not establish
 general C memory safety or correctness of emitted code.
 
