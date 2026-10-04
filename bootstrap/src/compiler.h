@@ -111,14 +111,13 @@ typedef struct SymTxn{
   String initializer_name;
   String shutdown_name;
   Map counters;
-  int local_macro_names;
+  int local_macro_names, mark;
   SymScope scope;
   Map statics, binding_facts;
   Map source_definitions;
   int source_occurrences;
   int extended;
   Map adapters;
-  Array base_bindings;
   int early_count, init_count, origin_count, origin, needs_exception;
 }
 SymTxn;

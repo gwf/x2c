@@ -773,9 +773,7 @@ int List_try_next(List, List *, Var *);
 
 List Var_list(Var);
 
-Var Map_setindex(Map, Var, Var);
-
-Map Compiler_semantic_binding_facts(Compiler);
+void Compiler_set_fact(Compiler, Var, Var);
 
 static List Compiler__parse_typed_params(Compiler c){
   List params = Compiler_parse_parameter_list(c);
@@ -795,7 +793,7 @@ static List Compiler__parse_typed_params(Compiler c){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;
       static MatchCaptureSite _x2c_match_site_0;
-      if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_17), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_18, cons(binding, NULL))), int_var(1));  break;
+      if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_17), &_x2c_match_capture)) {Var binding = _x2c_match_values[0];  Compiler_set_fact(c, List_var(cons(_18, cons(binding, NULL))), int_var(1));  break;
     }
     default: break;
     }
@@ -816,7 +814,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 List Sym_define(Sym, List, List);
 void Compiler_next(Compiler);
 static List Compiler__parse_bare_param(Compiler c){
-  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _19, c -> token, NULL);  String name = c -> token -> text;  List binding = Sym_define(c -> sym, cons(String_var(name), NULL), _3);  Map facts = Compiler_semantic_binding_facts(c);  Map_setindex(facts, List_var(cons(_20, cons(List_var(binding), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_18, cons(List_var(binding), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_21, cons(List_var(binding), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_22, cons(List_var(binding), NULL))), List_var(_3));  Compiler_next(c);  return binding;
+  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _19, c -> token, NULL);  String name = c -> token -> text;  List binding = Sym_define(c -> sym, cons(String_var(name), NULL), _3);  Compiler_set_fact(c, List_var(cons(_20, cons(List_var(binding), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_18, cons(List_var(binding), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_21, cons(List_var(binding), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_22, cons(List_var(binding), NULL))), List_var(_3));  Compiler_next(c);  return binding;
 }
 
 int String_equal(String, String);
@@ -1047,6 +1045,7 @@ List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, Lis
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 int List_contains(List, Var);
 int Map_try_get(Map, Var, Var *);
+Map Compiler_semantic_binding_facts(Compiler);
 List Sym_resolve_global(Sym, List, Type *);
 String binding_identity_spelling(List);
 int List_equal(List, List);
@@ -1127,7 +1126,7 @@ static void Compiler__add_param(Compiler c, Array entries, List parameter){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 33656922: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_17), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-    Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_18, cons(binding, NULL))), int_var(1));  Array_push(entries, List_var(parameter));
+    Compiler_set_fact(c, List_var(cons(_18, cons(binding, NULL))), int_var(1));  Array_push(entries, List_var(parameter));
   }
   break;
 }
@@ -1335,7 +1334,7 @@ static List Compiler__resolve_outside(Compiler c, List frame, Var value){
 }
 
 static List Capture_record(Capture * k, Type captured_type, List expression, int reference){
-  Map facts =(* k).facts;  List captured = Sym_introduce((* k).c -> sym, binding_identity_spelling((* k).binding));  List row = cons(_51, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Map_setindex(facts, List_var((* k).key), List_var(row));  Map_setindex(facts, List_var(cons(_21, cons(List_var(captured), NULL))), int_var(1));  Map_setindex(facts, List_var(cons(_22, cons(List_var(captured), NULL))), List_var(captured_type));  Map_setindex(facts, List_var(cons(_453, cons(List_var(captured), NULL))), (* k).depth);  if(reference) Map_setindex(facts, List_var(cons(_463, cons(List_var(captured), NULL))), int_var(1));  else Map_setindex(facts, List_var(cons(_460, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_430, cons((* k).scope, NULL));  Map_setindex(facts, List_var(order), List_var(cons(List_var(row), Var_list(Map_getdefault(facts, List_var(order), List_var(NULL))))));  return row;
+  Compiler c =(* k).c;  List captured = Sym_introduce(c -> sym, binding_identity_spelling((* k).binding));  List row = cons(_51, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Compiler_set_fact(c, List_var((* k).key), List_var(row));  Compiler_set_fact(c, List_var(cons(_21, cons(List_var(captured), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_22, cons(List_var(captured), NULL))), List_var(captured_type));  Compiler_set_fact(c, List_var(cons(_453, cons(List_var(captured), NULL))), (* k).depth);  if(reference) Compiler_set_fact(c, List_var(cons(_463, cons(List_var(captured), NULL))), int_var(1));  else Compiler_set_fact(c, List_var(cons(_460, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_430, cons((* k).scope, NULL));  Compiler_set_fact(c, List_var(order), List_var(cons(List_var(row), Var_list(Map_getdefault((* k).facts, List_var(order), List_var(NULL))))));  return row;
 }
 
 Array Array_update_n(Array, unsigned, ...);

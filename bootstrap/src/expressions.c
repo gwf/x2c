@@ -2777,7 +2777,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2190 = cons(_2189, NULL);
   _2191 = cons(_258, _2190);
   _2192 = List_var(_2191);
-  _2193 = int_var(78419);
+  _2193 = int_var(78415);
   _2194 = cons(_2193, NULL);
   _2195 = cons(_271, _2194);
   _2196 = List_var(_2195);
@@ -2972,7 +2972,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2385 = cons(_2384, NULL);
   _2386 = cons(_258, _2385);
   _2387 = List_var(_2386);
-  _2388 = int_var(78774);
+  _2388 = int_var(78770);
   _2389 = cons(_2388, NULL);
   _2390 = cons(_271, _2389);
   _2391 = List_var(_2390);
@@ -3087,7 +3087,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2500 = cons(_2499, NULL);
   _2501 = cons(_258, _2500);
   _2502 = List_var(_2501);
-  _2503 = int_var(79179);
+  _2503 = int_var(79175);
   _2504 = cons(_2503, NULL);
   _2505 = cons(_271, _2504);
   _2506 = List_var(_2505);
@@ -3188,7 +3188,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2598 = cons(_2597, NULL);
   _2599 = cons(_258, _2598);
   _2600 = List_var(_2599);
-  _2601 = int_var(79254);
+  _2601 = int_var(79250);
   _2602 = cons(_2601, NULL);
   _2603 = cons(_271, _2602);
   _2604 = List_var(_2603);
@@ -3280,7 +3280,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2690 = cons(_2689, NULL);
   _2691 = cons(_258, _2690);
   _2692 = List_var(_2691);
-  _2693 = int_var(79454);
+  _2693 = int_var(79450);
   _2694 = cons(_2693, NULL);
   _2695 = cons(_271, _2694);
   _2696 = List_var(_2695);
@@ -3491,7 +3491,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2901 = cons(_2900, NULL);
   _2902 = cons(_258, _2901);
   _2903 = List_var(_2902);
-  _2904 = int_var(81576);
+  _2904 = int_var(81572);
   _2905 = cons(_2904, NULL);
   _2906 = cons(_271, _2905);
   _2907 = List_var(_2906);
@@ -5348,12 +5348,13 @@ static void Compiler__capture_identifier(Compiler c, List binding){
 
 int Sym_binding_is_local(Sym, List);
 List Sym_resolve_global(Sym, List, Type *);
+void Compiler_set_fact(Compiler, Var, Var);
 String Compiler_fresh_name(Compiler, String);
 static int Compiler__shadow_identifier(Compiler c, List * binding, Type type, String spelling, Map binding_facts, int kept){
   if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  if((Sym_binding_is_local(c -> sym, (* binding)) && ! Map_contains(binding_facts, List_var(cons(_1112, cons(List_var((* binding)), NULL))))) ||(! kept && List_truth(Type_list(visible_type)) && Compiler__expansion_introduced(c, visible))){
     (* binding) = visible;  return 1;
   }
-  if(List_truth(Type_list(visible_type)) &&(! List_truth(Type_list(type)) || List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL))) && ! Map_contains(binding_facts, List_var(cons(_1609, cons(List_var(visible), NULL))))) Map_setindex(binding_facts, List_var(cons(_1609, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1610)));  return 0;
+  if(List_truth(Type_list(visible_type)) &&(! List_truth(Type_list(type)) || List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL))) && ! Map_contains(binding_facts, List_var(cons(_1609, cons(List_var(visible), NULL))))) Compiler_set_fact(c, List_var(cons(_1609, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1610)));  return 0;
 }
 
 static int Compiler__expansion_introduced(Compiler c, List binding){

@@ -2224,9 +2224,7 @@ int Var_int(Var);
 
 Var Array_push(Array, Var);
 
-Var Map_setindex(Map, Var, Var);
-
-Map Compiler_semantic_binding_facts(Compiler);
+void Compiler_set_fact(Compiler, Var, Var);
 
 List Array_list_free(Array);
 
@@ -2255,7 +2253,7 @@ static List Expansion_fresh_names(Expansion * x, List old_stack){
           Array_push(fresh_values, List_var(Compiler__capture_row(c, hole, cons(List_var(binding), NULL))));
         }
         else{
-          Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_27, cons(List_var(binding), NULL))), String_var(Var_str(spelling)));
+          Compiler_set_fact(c, List_var(cons(_27, cons(List_var(binding), NULL))), String_var(Var_str(spelling)));
           (* x).direct = cons(List_var(cons(binder, cons(List_var(binding), NULL))), (* x).direct);
         }
 
@@ -2274,6 +2272,8 @@ List List_cdr(List);
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Map_try_get(Map, Var, Var *);
+
+Map Compiler_semantic_binding_facts(Compiler);
 
 String binding_identity_spelling(List);
 
@@ -2349,6 +2349,7 @@ static List Compiler__introduced_binding(Compiler c, String source, Token root){
 }
 
 String int_str(int);
+Var Map_setindex(Map, Var, Var);
 String String_printf(String, ...);
 unsigned String_hash(String);
 static String Compiler__file_scope_name(Compiler c, Token root, String source){
@@ -3238,7 +3239,7 @@ static Atom _local_binder(Var identity, int tag){
 Map Compiler_macro_definition_locals(Compiler);
 List binding_identity_new(int, String);
 static List Compiler__definition_local(Compiler c, String spelling, int tag){
-  Map locals = Compiler_macro_definition_locals(c);  Var order = Map_getindex(locals, Symbol_var(32645476));  int identity = INT_MAX -(Var_is_row(order, 9, 7, 4) ? List_len(Var_list(order)) : 0);  List introduced = binding_identity_new(identity, spelling);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_351, cons(int_var(identity), NULL))), String_var(spelling));  Map_setindex(locals, Symbol_var(32645476), List_var(cons(List_var(introduced), Var_is_row(order, 9, 7, 4) ? Var_list(order) : NULL)));  Map_setindex(locals, List_var(introduced), String_var(spelling));  if(tag) Map_setindex(locals, List_var(cons(_214, cons(List_var(introduced), NULL))), int_var(1));  return introduced;
+  Map locals = Compiler_macro_definition_locals(c);  Var order = Map_getindex(locals, Symbol_var(32645476));  int identity = INT_MAX -(Var_is_row(order, 9, 7, 4) ? List_len(Var_list(order)) : 0);  List introduced = binding_identity_new(identity, spelling);  Compiler_set_fact(c, List_var(cons(_351, cons(int_var(identity), NULL))), String_var(spelling));  Map_setindex(locals, Symbol_var(32645476), List_var(cons(List_var(introduced), Var_is_row(order, 9, 7, 4) ? Var_list(order) : NULL)));  Map_setindex(locals, List_var(introduced), String_var(spelling));  if(tag) Map_setindex(locals, List_var(cons(_214, cons(List_var(introduced), NULL))), int_var(1));  return introduced;
 }
 
 List Sym_current_binding(Sym, List);
@@ -4976,7 +4977,7 @@ static Var Compiler__eval_string(Compiler c, String source, Token invocation){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                           Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
                             Var volatile category;  category = x2c_error_catch_capture(_x2c_error_handler_0, 0); {
-                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3284};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                              static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "Compiler__eval_string",.line = 3283};  x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                             }
 
                           }
@@ -5101,7 +5102,7 @@ return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list(value),
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();  Compiler c = context -> evaluator;  if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3419};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 3418};  x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));  __builtin_unreachable();
   }
   Compiler__import(c, path, context -> site);  return List_var(NULL);
 }

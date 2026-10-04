@@ -1793,7 +1793,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1294 = cons(_1293, NULL);
   _1295 = cons(_754, _1294);
   _1296 = List_var(_1295);
-  _1297 = int_var(70993);
+  _1297 = int_var(70957);
   _1298 = cons(_1297, NULL);
   _1299 = cons(_762, _1298);
   _1300 = List_var(_1299);
@@ -2000,7 +2000,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1501 = cons(_1500, NULL);
   _1502 = cons(_750, _1501);
   _1503 = List_var(_1502);
-  _1504 = int_var(71200);
+  _1504 = int_var(71164);
   _1505 = cons(_1504, NULL);
   _1506 = cons(_762, _1505);
   _1507 = List_var(_1506);
@@ -2172,7 +2172,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1670 = cons(_1669, NULL);
   _1671 = cons(_754, _1670);
   _1672 = List_var(_1671);
-  _1673 = int_var(74265);
+  _1673 = int_var(74229);
   _1674 = cons(_1673, NULL);
   _1675 = cons(_762, _1674);
   _1676 = List_var(_1675);
@@ -2210,7 +2210,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1708 = List_var(_1707);
   _1709 = cons(_754, _938);
   _1710 = List_var(_1709);
-  _1711 = int_var(74595);
+  _1711 = int_var(74559);
   _1712 = cons(_1711, NULL);
   _1713 = cons(_762, _1712);
   _1714 = List_var(_1713);
@@ -2345,7 +2345,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1843 = cons(_1842, NULL);
   _1844 = cons(_750, _1843);
   _1845 = List_var(_1844);
-  _1846 = int_var(74756);
+  _1846 = int_var(74720);
   _1847 = cons(_1846, NULL);
   _1848 = cons(_762, _1847);
   _1849 = List_var(_1848);
@@ -2501,7 +2501,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1999 = cons(_1998, NULL);
   _2000 = cons(_750, _1999);
   _2001 = List_var(_2000);
-  _2002 = int_var(74793);
+  _2002 = int_var(74757);
   _2003 = cons(_2002, NULL);
   _2004 = cons(_762, _2003);
   _2005 = List_var(_2004);
@@ -3073,7 +3073,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2565 = cons(_2564, NULL);
   _2566 = cons(_750, _2565);
   _2567 = List_var(_2566);
-  _2568 = int_var(85721);
+  _2568 = int_var(85685);
   _2569 = cons(_2568, NULL);
   _2570 = cons(_762, _2569);
   _2571 = List_var(_2570);
@@ -3174,7 +3174,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2666 = cons(_2665, NULL);
   _2667 = cons(_754, _2666);
   _2668 = List_var(_2667);
-  _2669 = int_var(89076);
+  _2669 = int_var(89006);
   _2670 = cons(_2669, NULL);
   _2671 = cons(_762, _2670);
   _2672 = List_var(_2671);
@@ -3343,7 +3343,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2835 = cons(_2834, NULL);
   _2836 = cons(_750, _2835);
   _2837 = List_var(_2836);
-  _2838 = int_var(89192);
+  _2838 = int_var(89122);
   _2839 = cons(_2838, NULL);
   _2840 = cons(_762, _2839);
   _2841 = List_var(_2840);
@@ -3409,7 +3409,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2901 = cons(_2900, NULL);
   _2902 = cons(_754, _2901);
   _2903 = List_var(_2902);
-  _2904 = int_var(89441);
+  _2904 = int_var(89371);
   _2905 = cons(_2904, NULL);
   _2906 = cons(_762, _2905);
   _2907 = List_var(_2906);
@@ -3547,7 +3547,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _3039 = cons(_3038, NULL);
   _3040 = cons(_754, _3039);
   _3041 = List_var(_3040);
-  _3042 = int_var(90671);
+  _3042 = int_var(90601);
   _3043 = cons(_3042, NULL);
   _3044 = cons(_762, _3043);
   _3045 = List_var(_3044);
@@ -3597,7 +3597,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_6(void){
   _3086 = cons(_3085, NULL);
   _3087 = cons(_750, _3086);
   _3088 = List_var(_3087);
-  _3089 = int_var(90722);
+  _3089 = int_var(90652);
   _3090 = cons(_3089, NULL);
   _3091 = cons(_762, _3090);
   _3092 = List_var(_3091);
@@ -5560,8 +5560,10 @@ List Compiler_forward_parameters(Compiler c, List types){
 }
 
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
+void Compiler_set_fact(Compiler, Var, Var);
+void Compiler_drop_fact(Compiler, Var);
 static List Compiler__generated_function(Compiler c, List binding, List syntax){
-  List key = cons(_809, cons(List_var(binding), NULL));  Var authored;  int documented = Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(authored));  List function = Compiler_bind_syntax(c, List_var(syntax), AST_UNIT, NULL);  if(documented) Map_setindex(Compiler_semantic_binding_facts(c), List_var(key), authored);  else Map_del(Compiler_semantic_binding_facts(c), List_var(key));  return function;
+  List key = cons(_809, cons(List_var(binding), NULL));  Var authored;  int documented = Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(authored));  List function = Compiler_bind_syntax(c, List_var(syntax), AST_UNIT, NULL);  if(documented) Compiler_set_fact(c, List_var(key), authored);  else Compiler_drop_fact(c, List_var(key));  return function;
 }
 
 List Compiler_rebuild_expression(Compiler, Type, List);
@@ -5970,7 +5972,7 @@ static List Compiler__guard_rendering(Compiler c, List function, String member){
 
     }
   }
-List path = Sym_introduce(c -> sym, _2165);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_2166, cons(List_var(path), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_104, cons(List_var(path), NULL))), List_var(_2169));  Macro addressed = _2250;  List address = Compiler_rebuild_expression(c, List_type(_2251), Macro_apply(addressed, cons(List_var(cons(_225, cons(_2252, cons(List_var(cons(_808, cons(List_var(path), NULL))), NULL)))), NULL)));  List pointer = Compiler__helper_call(c, List_type(_2253), _2254, cons(List_var(value), NULL));  List enter = Compiler__helper_call(c, List_type(_1121), _2255, cons(List_var(address), cons(List_var(pointer), NULL)));  List leave = Compiler__helper_call(c, List_type(_1738), _2256, cons(List_var(address), NULL));  Macro shape = _2595;  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(path), cons(List_var(enter), cons(List_var(fallback), cons(List_var(leave), cons(List_var(body), NULL)))))));
+List path = Sym_introduce(c -> sym, _2165);  Compiler_set_fact(c, List_var(cons(_2166, cons(List_var(path), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_104, cons(List_var(path), NULL))), List_var(_2169));  Macro addressed = _2250;  List address = Compiler_rebuild_expression(c, List_type(_2251), Macro_apply(addressed, cons(List_var(cons(_225, cons(_2252, cons(List_var(cons(_808, cons(List_var(path), NULL))), NULL)))), NULL)));  List pointer = Compiler__helper_call(c, List_type(_2253), _2254, cons(List_var(value), NULL));  List enter = Compiler__helper_call(c, List_type(_1121), _2255, cons(List_var(address), cons(List_var(pointer), NULL)));  List leave = Compiler__helper_call(c, List_type(_1738), _2256, cons(List_var(address), NULL));  Macro shape = _2595;  return Compiler_rebuild_function(c, function, Macro_apply(shape, cons(List_var(path), cons(List_var(enter), cons(List_var(fallback), cons(List_var(leave), cons(List_var(body), NULL)))))));
 }
 break;
 }

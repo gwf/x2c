@@ -2535,6 +2535,7 @@ default: break;
 }
 
 Map Compiler_semantic_binding_facts(Compiler);
+void Compiler_set_fact(Compiler, Var, Var);
 static void Compiler__record_objects(Compiler c, List bindings, Token site){
   {
     List row;  List _x2c_macro_object_24 = bindings;  List _x2c_macro_cursor_24 = _x2c_macro_object_24;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_24, &(_x2c_macro_cursor_24), &(_x2c_macro_cursor_output_23))){
@@ -2544,7 +2545,7 @@ static void Compiler__record_objects(Compiler c, List bindings, Token site){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 992: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_387), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        List key = cons(_388, cons(binding, NULL));  Map facts = Compiler_semantic_binding_facts(c);  if(Map_contains(facts, List_var(key))) Compiler__report_redefinition(c, _389, Var_list(binding), site);  Map_setindex(facts, List_var(key), int_var(1));  Map_setindex(facts, List_var(cons(_390, cons(binding, NULL))), List_var(c -> arms));
+        List key = cons(_388, cons(binding, NULL));  if(Map_contains(Compiler_semantic_binding_facts(c), List_var(key))) Compiler__report_redefinition(c, _389, Var_list(binding), site);  Compiler_set_fact(c, List_var(key), int_var(1));  Compiler_set_fact(c, List_var(cons(_390, cons(binding, NULL))), List_var(c -> arms));
       }
       break;
     }
@@ -2576,7 +2577,7 @@ default: ;  static MatchCaptureSite _x2c_match_site_38;  if (x2c_match_site_try_
 
     }
   }
-if(List_truth(key)) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_407, cons(List_var(key), NULL))), List_var(({
+if(List_truth(key)) Compiler_set_fact(c, List_var(cons(_407, cons(List_var(key), NULL))), List_var(({
   Var _x2c_literal_part_43 = int_var(start);  Var _x2c_literal_part_44 = int_var(end);  Var _x2c_literal_part_45 = int_var(c -> source_private > 0);  cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, cons(_x2c_literal_part_45, NULL)));
 }
 )));
@@ -2608,11 +2609,11 @@ static void Compiler__record_prototypes(Compiler c, Type declared_type, List ite
 static void Compiler__record_prototype(Compiler c, List binding, Type type, List modifiers){
   Compiler__record_attributes(c, binding, modifiers);  List contract = Compiler__contract(c, type, binding);  Var stored;  if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_410, cons(List_var(binding), NULL))), &(stored))){
     List state = Var_list(stored);  Var state_kind, prior_contract;  List _x2c_destructure_5 = state;  state_kind = List_getindex(_x2c_destructure_5, 0);  prior_contract = List_getindex(_x2c_destructure_5, 1);  if(Var_equal(state_kind, Symbol_var(292902696930268)) || Var_equal(state_kind, Symbol_var(7656878481736))) return;  if(! Var_equal(state_kind, Symbol_var(36454909922314)) || ! List_equal(Var_list(prior_contract), contract)){
-      Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_410, cons(List_var(binding), NULL))), List_var(_412));  return;
+      Compiler_set_fact(c, List_var(cons(_410, cons(List_var(binding), NULL))), List_var(_412));  return;
     }
 
   }
-  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_413, cons(List_var(contract), NULL))));
+  Compiler_set_fact(c, List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_413, cons(List_var(contract), NULL))));
 }
 
 Var car(List);
@@ -2623,7 +2624,7 @@ static void Compiler__record_attributes(Compiler c, List binding, List modifiers
     }
 
   }
-  if(List_truth(attributes)) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_414, cons(List_var(binding), NULL))), List_var(attributes));
+  if(List_truth(attributes)) Compiler_set_fact(c, List_var(cons(_414, cons(List_var(binding), NULL))), List_var(attributes));
 }
 
 static void Compiler__record_definition(Compiler c, Type type, List binding, Token site){
@@ -2633,7 +2634,7 @@ static void Compiler__record_definition(Compiler c, Type type, List binding, Tok
     }
     if(Var_equal(state_kind, Symbol_var(292902696930268)) || Var_equal(state_kind, Symbol_var(7656878481736))) Compiler__report_redefinition(c, _415, binding, site);
   }
-  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_416, cons(List_var(contract), NULL))));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_390, cons(List_var(binding), NULL))), List_var(c -> arms));  String spelling = binding_identity_spelling(binding);  if(String_truth(spelling) && ! Type_is_static(type)) Map_setindex(c -> fn_defs, String_var(spelling), int_var(1));
+  Compiler_set_fact(c, List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_416, cons(List_var(contract), NULL))));  Compiler_set_fact(c, List_var(cons(_390, cons(List_var(binding), NULL))), List_var(c -> arms));  String spelling = binding_identity_spelling(binding);  if(String_truth(spelling) && ! Type_is_static(type)) Map_setindex(c -> fn_defs, String_var(spelling), int_var(1));
 }
 
 String List_repr(List);
@@ -2657,7 +2658,7 @@ if(! List_equal(prior_contract, contract)){
   }
   ));
 }
-Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_431, cons(List_var(contract), NULL))));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_390, cons(List_var(binding), NULL))), List_var(c -> arms));
+Compiler_set_fact(c, List_var(cons(_410, cons(List_var(binding), NULL))), List_var(cons(_431, cons(List_var(contract), NULL))));  Compiler_set_fact(c, List_var(cons(_390, cons(List_var(binding), NULL))), List_var(c -> arms));
 }
 
 static List Compiler__contract(Compiler c, Type type, List binding){
@@ -3066,15 +3067,16 @@ List Compiler_present_references(Compiler c){
 
 int List_contains(List, Var);
 void Compiler_mark_reference_present(Compiler c, List binding){
-  if(! _init_guard_) _file_init_();  List present = Compiler_present_references(c);  if(!(List_contains(present, List_var(binding)))) Map_setindex(Compiler_semantic_binding_facts(c), List_var(_508), List_var(cons(List_var(binding), present)));
+  if(! _init_guard_) _file_init_();  List present = Compiler_present_references(c);  if(!(List_contains(present, List_var(binding)))) Compiler_set_fact(c, List_var(_508), List_var(cons(List_var(binding), present)));
 }
 
 void Compiler_settle_reference(Compiler c, List binding, int true_is_present, List yes, List no){
   if(! _init_guard_) _file_init_();  if(List_truth(binding) && reference_guard_exits(true_is_present ? no : yes)) Compiler_mark_reference_present(c, binding);
 }
 
+void Compiler_drop_fact(Compiler, Var);
 void Compiler_restore_reference_presence(Compiler c, List before){
-  if(! _init_guard_) _file_init_();  if(before == Compiler_present_references(c)) return;  if(List_truth(before)) Map_setindex(Compiler_semantic_binding_facts(c), List_var(_508), List_var(before));  else Map_del(Compiler_semantic_binding_facts(c), List_var(_508));
+  if(! _init_guard_) _file_init_();  if(before == Compiler_present_references(c)) return;  if(List_truth(before)) Compiler_set_fact(c, List_var(_508), List_var(before));  else Compiler_drop_fact(c, List_var(_508));
 }
 
 List Compiler_optional_reference_test(Compiler c, List condition, int * truth){

@@ -5045,7 +5045,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4608 = cons(_4607, NULL);
   _4609 = cons(_470, _4608);
   _4610 = List_var(_4609);
-  _4611 = int_var(53063);
+  _4611 = int_var(53046);
   _4612 = cons(_4611, NULL);
   _4613 = cons(_478, _4612);
   _4614 = List_var(_4613);
@@ -5126,7 +5126,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4689 = cons(_4658, NULL);
   _4690 = cons(_465, _4689);
   _4691 = List_var(_4690);
-  _4692 = int_var(53240);
+  _4692 = int_var(53223);
   _4693 = cons(_4692, NULL);
   _4694 = cons(_478, _4693);
   _4695 = List_var(_4694);
@@ -6937,6 +6937,7 @@ return 0;
 }
 
 void Compiler_add_early(Compiler, List);
+void Compiler_set_fact(Compiler, Var, Var);
 static List Compiler__callable_defer(Compiler c, List body, List finalizer){
   DeferCaptures d ={
     .c = c, .declared = NULL, .written = NULL, .captures = Map_new(), .records = Array_new()
@@ -6947,7 +6948,7 @@ static List Compiler__callable_defer(Compiler c, List body, List finalizer){
   List env_binding = NULL, env_local = NULL;  List records = Array_list_free(d.records);  if(List_truth(records)){
     env_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4390));  env_local = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4391));  Compiler_add_early(c, Compiler__defer_environment(c, env_binding, records));
   }
-  List opaque = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4392));  List callback = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4393));  String env_name = List_truth(env_local) ? binding_identity_spelling(env_local) : NULL;  List rewritten = String_truth(env_name) ? DeferCaptures__rewrite(&(d), finalizer, env_name) : finalizer;  Compiler_add_early(c, Compiler__defer_callback(c, callback, opaque, env_binding, env_local, rewritten));  if(String_truth(c -> fn_name)) Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_4394, cons(List_var(callback), NULL))), String_var(c -> fn_name));  return cons(_237, cons(List_var(body), cons(List_var(env_binding), cons(List_var(callback), cons(List_var(records), cons(List_var(d.written), NULL))))));
+  List opaque = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4392));  List callback = Sym_introduce(c -> sym, Compiler_fresh_name(c, _4393));  String env_name = List_truth(env_local) ? binding_identity_spelling(env_local) : NULL;  List rewritten = String_truth(env_name) ? DeferCaptures__rewrite(&(d), finalizer, env_name) : finalizer;  Compiler_add_early(c, Compiler__defer_callback(c, callback, opaque, env_binding, env_local, rewritten));  if(String_truth(c -> fn_name)) Compiler_set_fact(c, List_var(cons(_4394, cons(List_var(callback), NULL))), String_var(c -> fn_name));  return cons(_237, cons(List_var(body), cons(List_var(env_binding), cons(List_var(callback), cons(List_var(records), cons(List_var(d.written), NULL))))));
 }
 
 List Ast_lvalue_binding(Ast);

@@ -11,11 +11,17 @@ typedef struct Sym{
   Block scopes;
   Map globals, statics, binding_facts;
   int base_scopes, local_macro_names;
+  Block undo;
+  int transactions;
   Compiler c;
 }
 * Sym;
 
 Sym Sym_new(Compiler c);
+
+void Sym_put(Sym s, Map map, Var key, Var value);
+
+void Sym_drop(Sym s, Map map, Var key);
 
 void Sym_reset(Sym s, Map globals);
 
@@ -66,6 +72,10 @@ int Sym_binding_is_local(Sym s, List binding);
 int Sym_binding_is_local_before(Sym s, List binding, int scope_count);
 
 Map Compiler_semantic_binding_facts(Compiler c);
+
+void Compiler_set_fact(Compiler c, Var key, Var value);
+
+void Compiler_drop_fact(Compiler c, Var key);
 
 List Sym_get(Sym s, List key);
 

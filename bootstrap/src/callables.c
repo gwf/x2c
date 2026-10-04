@@ -1007,7 +1007,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _672 = List_var(_671);
   _673 = cons(_205, _65);
   _674 = List_var(_673);
-  _675 = int_var(6798);
+  _675 = int_var(6764);
   _676 = cons(_675, NULL);
   _677 = cons(_210, _676);
   _678 = List_var(_677);
@@ -1303,7 +1303,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _968 = cons(_967, NULL);
   _969 = cons(_202, _968);
   _970 = List_var(_969);
-  _971 = int_var(11666);
+  _971 = int_var(11632);
   _972 = cons(_971, NULL);
   _973 = cons(_210, _972);
   _974 = List_var(_973);
@@ -1455,7 +1455,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1117 = cons(_1116, NULL);
   _1118 = cons(_202, _1117);
   _1119 = List_var(_1118);
-  _1120 = int_var(12514);
+  _1120 = int_var(12480);
   _1121 = cons(_1120, NULL);
   _1122 = cons(_210, _1121);
   _1123 = List_var(_1122);
@@ -1578,7 +1578,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1240 = cons(_1239, NULL);
   _1241 = cons(_197, _1240);
   _1242 = List_var(_1241);
-  _1243 = int_var(13035);
+  _1243 = int_var(13001);
   _1244 = cons(_1243, NULL);
   _1245 = cons(_210, _1244);
   _1246 = List_var(_1245);
@@ -1734,7 +1734,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1396 = cons(_1395, NULL);
   _1397 = cons(_197, _1396);
   _1398 = List_var(_1397);
-  _1399 = int_var(13796);
+  _1399 = int_var(13762);
   _1400 = cons(_1399, NULL);
   _1401 = cons(_210, _1400);
   _1402 = List_var(_1401);
@@ -1966,7 +1966,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1625 = cons(_1624, NULL);
   _1626 = cons(_197, _1625);
   _1627 = List_var(_1626);
-  _1628 = int_var(13545);
+  _1628 = int_var(13511);
   _1629 = cons(_1628, NULL);
   _1630 = cons(_210, _1629);
   _1631 = List_var(_1630);
@@ -2061,7 +2061,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1720 = cons(_1719, NULL);
   _1721 = cons(_197, _1720);
   _1722 = List_var(_1721);
-  _1723 = int_var(13689);
+  _1723 = int_var(13655);
   _1724 = cons(_1723, NULL);
   _1725 = cons(_210, _1724);
   _1726 = List_var(_1725);
@@ -2216,7 +2216,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_3(void){
   _1875 = cons(_1874, NULL);
   _1876 = cons(_202, _1875);
   _1877 = List_var(_1876);
-  _1878 = int_var(27504);
+  _1878 = int_var(27436);
   _1879 = cons(_1878, NULL);
   _1880 = cons(_210, _1879);
   _1881 = List_var(_1880);
@@ -2424,7 +2424,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2080 = cons(_2079, NULL);
   _2081 = cons(_202, _2080);
   _2082 = List_var(_2081);
-  _2083 = int_var(28150);
+  _2083 = int_var(28082);
   _2084 = cons(_2083, NULL);
   _2085 = cons(_210, _2084);
   _2086 = List_var(_2085);
@@ -2549,7 +2549,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2205 = cons(_2204, NULL);
   _2206 = cons(_202, _2205);
   _2207 = List_var(_2206);
-  _2208 = int_var(30893);
+  _2208 = int_var(30825);
   _2209 = cons(_2208, NULL);
   _2210 = cons(_210, _2209);
   _2211 = List_var(_2210);
@@ -2660,7 +2660,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_4(void){
   _2316 = cons(_2315, NULL);
   _2317 = cons(_202, _2316);
   _2318 = List_var(_2317);
-  _2319 = int_var(33945);
+  _2319 = int_var(33877);
   _2320 = cons(_2319, NULL);
   _2321 = cons(_210, _2320);
   _2322 = List_var(_2321);
@@ -2943,7 +2943,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2596 = cons(_2595, NULL);
   _2597 = cons(_197, _2596);
   _2598 = List_var(_2597);
-  _2599 = int_var(34975);
+  _2599 = int_var(34907);
   _2600 = cons(_2599, NULL);
   _2601 = cons(_210, _2600);
   _2602 = List_var(_2601);
@@ -3042,7 +3042,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2695 = cons(_2694, NULL);
   _2696 = cons(_202, _2695);
   _2697 = List_var(_2696);
-  _2698 = int_var(35048);
+  _2698 = int_var(34980);
   _2699 = cons(_2698, NULL);
   _2700 = cons(_210, _2699);
   _2701 = List_var(_2700);
@@ -3152,7 +3152,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2805 = cons(_2804, NULL);
   _2806 = cons(_202, _2805);
   _2807 = List_var(_2806);
-  _2808 = int_var(43812);
+  _2808 = int_var(43744);
   _2809 = cons(_2808, NULL);
   _2810 = cons(_210, _2809);
   _2811 = List_var(_2810);
@@ -3285,7 +3285,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2938 = cons(_2937, NULL);
   _2939 = cons(_197, _2938);
   _2940 = List_var(_2939);
-  _2941 = int_var(36262);
+  _2941 = int_var(36194);
   _2942 = cons(_2941, NULL);
   _2943 = cons(_210, _2942);
   _2944 = List_var(_2943);
@@ -3724,13 +3724,12 @@ static List _no_value_return(void){
 }
 
 Map Map_new(void);
-Var Map_setindex(Map, Var, Var);
-Map Compiler_semantic_binding_facts(Compiler);
+void Compiler_set_fact(Compiler, Var, Var);
 static List Compiler__captured_lambda(Compiler c, List entries, List captures, List body){
   CaptureBuild b ={
     .c = c, .slots = Map_new(), .field_types = Array_new(), .locals = Array_new(), .values = Array_new()
   }
-  ;  b.adapter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _475));  List closure = Sym_introduce(c -> sym, Compiler_fresh_name(c, _531));  List argv = Sym_introduce(c -> sym, Compiler_fresh_name(c, _532));  String name = Compiler_fresh_name(c, _533);  List type_binding = Sym_introduce(c -> sym, name);  b.value_type = List_type(cons(String_var(name), NULL));  b.pointer_type = List_type(cons(_108, cons(_534, cons(String_var(name), NULL))));  b.environment = Sym_introduce(c -> sym, Compiler_fresh_name(c, _535));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_536, cons(List_var(b.environment), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_537, cons(List_var(b.environment), NULL))), List_var(b.pointer_type));  CaptureBuild_declare(&(b), type_binding, captures);  CaptureBuild_publish(&(b), entries, body, closure, argv);  return c -> inline_header ? CaptureBuild_bridged(&(b)) : CaptureBuild_direct(&(b));
+  ;  b.adapter = Sym_introduce(c -> sym, Compiler_fresh_name(c, _475));  List closure = Sym_introduce(c -> sym, Compiler_fresh_name(c, _531));  List argv = Sym_introduce(c -> sym, Compiler_fresh_name(c, _532));  String name = Compiler_fresh_name(c, _533);  List type_binding = Sym_introduce(c -> sym, name);  b.value_type = List_type(cons(String_var(name), NULL));  b.pointer_type = List_type(cons(_108, cons(_534, cons(String_var(name), NULL))));  b.environment = Sym_introduce(c -> sym, Compiler_fresh_name(c, _535));  Compiler_set_fact(c, List_var(cons(_536, cons(List_var(b.environment), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_537, cons(List_var(b.environment), NULL))), List_var(b.pointer_type));  CaptureBuild_declare(&(b), type_binding, captures);  CaptureBuild_publish(&(b), entries, body, closure, argv);  return c -> inline_header ? CaptureBuild_bridged(&(b)) : CaptureBuild_direct(&(b));
 }
 
 static void CaptureBuild_declare(CaptureBuild * b, List type_binding, List captures){
@@ -3751,6 +3750,7 @@ List Compiler_capture_environment(Compiler c, List name, List fields){
 Type Type_reference(Type);
 List Type_declaration_parts(Type);
 Var List_getindex(List, int);
+Var Map_setindex(Map, Var, Var);
 List Compiler_rebuild_statement(Compiler, List);
 static void CaptureBuild__field(CaptureBuild * b, Array fields, List capture){
 
@@ -3989,6 +3989,7 @@ return(void *) _x2c_macro_rewritten_2 ? Array_list_free(_x2c_macro_rewritten_2) 
 }
 
 int Map_contains(Map, Var);
+Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_static(Type);
 static void CellRegion_own(CellRegion * r, List binding){
   if(! List_truth(binding) || Map_contains((* r).owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts((* r).c);  if(! Map_try_get(facts, List_var(cons(_536, cons(List_var(binding), NULL))), &(automatic)) || ! Map_try_get(facts, List_var(cons(_537, cons(List_var(binding), NULL))), &(stored_type))) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex((* r).owned, List_var(binding), List_var(type));  Array_push((* r).order, List_var(binding));
@@ -4083,7 +4084,7 @@ static void CellRegion_allocate(CellRegion * r, Map candidates){
   Compiler c =(* r).c; {
     List binding;  Array _x2c_macro_object_4 =(* r).order;  int _x2c_macro_cursor_8 = 0;  Var _x2c_macro_cursor_output_4;  while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_4))){
       binding = Var_list(_x2c_macro_cursor_output_4); {
-        Var stored_type;  if(! Map_try_get(candidates, List_var(binding), &(stored_type))) continue;  Type type = Var_type(stored_type);  List cell = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1298));  Map_setindex((* r).cells, List_var(binding), List_var(cons(List_var(cell), cons(List_var(type), NULL))));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_536, cons(List_var(cell), NULL))), int_var(1));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_537, cons(List_var(cell), NULL))), List_var(Type_reference(type)));
+        Var stored_type;  if(! Map_try_get(candidates, List_var(binding), &(stored_type))) continue;  Type type = Var_type(stored_type);  List cell = Sym_introduce(c -> sym, Compiler_fresh_name(c, _1298));  Map_setindex((* r).cells, List_var(binding), List_var(cons(List_var(cell), cons(List_var(type), NULL))));  Compiler_set_fact(c, List_var(cons(_536, cons(List_var(cell), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_537, cons(List_var(cell), NULL))), List_var(Type_reference(type)));
       }
 
     }
@@ -4728,7 +4729,7 @@ static List Callback_publish_typed(Callback * cb, Type spelling){
   }
   ), binding = NULL;  Var _x2c_macro_cached_5;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_macro_cached_5))) binding = Var_list(_x2c_macro_cached_5);  else{
     {
-      binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _3179));  List function = Callback_function(&((* cb)), binding);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_3180, cons(List_var(binding), NULL))), int_var(1));  Compiler_add_early(c, function);
+      binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _3179));  List function = Callback_function(&((* cb)), binding);  Compiler_set_fact(c, List_var(cons(_3180, cons(List_var(binding), NULL))), int_var(1));  Compiler_add_early(c, function);
     }
     ;  Map_setindex(c -> names -> adapters, List_var(key), List_var(binding));
   }

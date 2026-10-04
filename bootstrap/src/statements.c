@@ -545,11 +545,11 @@ void Sym_push_new_scope(Sym);
 
 List Sym_define(Sym, List, List);
 
-Var Map_setindex(Map, Var, Var);
-
-Map Compiler_semantic_binding_facts(Compiler);
+void Compiler_set_fact(Compiler, Var, Var);
 
 int Map_try_get(Map, Var, Var *);
+
+Map Compiler_semantic_binding_facts(Compiler);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -571,7 +571,7 @@ static List Compiler__with_body(Compiler c, List expression, String alias){
 default: break;
     }
   }
-Sym_push_new_scope(c -> sym);  List binding = Sym_define(c -> sym, cons(String_var(alias), NULL), type);  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_62, cons(List_var(binding), NULL))), List_var(expression));  Var shadowed;  int shadows = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_63, cons(String_var(alias), NULL))), &(shadowed));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_63, cons(String_var(alias), NULL))), List_var(binding)); {
+Sym_push_new_scope(c -> sym);  List binding = Sym_define(c -> sym, cons(String_var(alias), NULL), type);  Compiler_set_fact(c, List_var(cons(_62, cons(List_var(binding), NULL))), List_var(expression));  Var shadowed;  int shadows = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_63, cons(String_var(alias), NULL))), &(shadowed));  Compiler_set_fact(c, List_var(cons(_63, cons(String_var(alias), NULL))), List_var(binding)); {
   _x2c_defer_env_0 _x2c_macro_environment_0 ={
     0
   }
@@ -1197,10 +1197,10 @@ static int Compiler__expands(Compiler c){
   return(Compiler_macro_starts_target_at(c, AST_BLOCK) && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) ||(! Map_truth(c -> macro_holes) && Compiler_local_macro_form_is_definition(c));
 }
 
-Var Map_del(Map, Var);
+void Compiler_drop_fact(Compiler, Var);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0; {
-    Map_del(Compiler_semantic_binding_facts((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0)), List_var(cons(_62, cons(List_var((*(List *) _x2c_defer_data_0->_x2c_defer_capture_1)), NULL))));  if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_2)) Map_setindex(Compiler_semantic_binding_facts((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0)), List_var(cons(_63, cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_3)), NULL))), (*(Var *) _x2c_defer_data_0->_x2c_defer_capture_4));  else Map_del(Compiler_semantic_binding_facts((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0)), List_var(cons(_63, cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_3)), NULL))));  Sym_pop_scope((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> sym);
+    Compiler_drop_fact((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0), List_var(cons(_62, cons(List_var((*(List *) _x2c_defer_data_0->_x2c_defer_capture_1)), NULL))));  if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_2)) Compiler_set_fact((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0), List_var(cons(_63, cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_3)), NULL))), (*(Var *) _x2c_defer_data_0->_x2c_defer_capture_4));  else Compiler_drop_fact((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0), List_var(cons(_63, cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_3)), NULL))));  Sym_pop_scope((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> sym);
   }
 
 }
